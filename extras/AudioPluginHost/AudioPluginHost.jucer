@@ -6,54 +6,6 @@
               companyName="ROLI Ltd." displaySplashScreen="0" reportAppUsage="0"
               companyCopyright="ROLI Ltd.">
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="" rtasFolder="~/SDKs/PT_80_SDK"
-               objCExtraSuffix="M73TRi" vst3Folder="" extraCompilerFlags="-Wall -Wshadow -Wstrict-aliasing -Wconversion -Wsign-compare -Woverloaded-virtual -Wextra-semi"
-               smallIcon="c97aUr" bigIcon="c97aUr">
-      <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPluginHost"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="AudioPluginHost"/>
-      </CONFIGURATIONS>
-      <MODULEPATHS>
-        <MODULEPATH id="juce_video" path="../../modules"/>
-        <MODULEPATH id="juce_opengl" path="../../modules"/>
-        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
-        <MODULEPATH id="juce_graphics" path="../../modules"/>
-        <MODULEPATH id="juce_events" path="../../modules"/>
-        <MODULEPATH id="juce_data_structures" path="../../modules"/>
-        <MODULEPATH id="juce_cryptography" path="../../modules"/>
-        <MODULEPATH id="juce_core" path="../../modules"/>
-        <MODULEPATH id="juce_audio_utils" path="../../modules"/>
-        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
-        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
-        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
-        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
-      </MODULEPATHS>
-    </XCODE_MAC>
-    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" vstFolder="" vst3Folder=""
-                smallIcon="c97aUr" bigIcon="c97aUr">
-      <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPluginHost" libraryPath="/usr/X11R6/lib/"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="AudioPluginHost"
-                       libraryPath="/usr/X11R6/lib/"/>
-      </CONFIGURATIONS>
-      <MODULEPATHS>
-        <MODULEPATH id="juce_video" path="../../modules"/>
-        <MODULEPATH id="juce_opengl" path="../../modules"/>
-        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
-        <MODULEPATH id="juce_graphics" path="../../modules"/>
-        <MODULEPATH id="juce_events" path="../../modules"/>
-        <MODULEPATH id="juce_data_structures" path="../../modules"/>
-        <MODULEPATH id="juce_cryptography" path="../../modules"/>
-        <MODULEPATH id="juce_core" path="../../modules"/>
-        <MODULEPATH id="juce_audio_utils" path="../../modules"/>
-        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
-        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
-        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
-        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
-      </MODULEPATHS>
-    </LINUX_MAKE>
     <VS2017 targetFolder="Builds/VisualStudio2017" vst3Folder="" smallIcon="c97aUr"
             bigIcon="c97aUr" extraLinkerFlags="/NXCOMPAT:NO">
       <CONFIGURATIONS>
