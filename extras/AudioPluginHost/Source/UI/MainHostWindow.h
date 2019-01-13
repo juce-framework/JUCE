@@ -34,9 +34,9 @@
 namespace CommandIDs
 {
    #if ! (JUCE_IOS || JUCE_ANDROID)
-	static const int open					= 0x30000;
-	static const int import					= 0x30001;
-	static const int save                   = 0x30002;
+    static const int open                   = 0x30000;
+    static const int import                 = 0x30001;
+    static const int save                   = 0x30002;
     static const int saveAs                 = 0x30003;
     static const int newFile                = 0x30004;
    #endif

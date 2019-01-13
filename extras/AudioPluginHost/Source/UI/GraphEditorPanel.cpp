@@ -171,29 +171,6 @@ void GraphEditorPanel::updateComponents()
     SetPerformance(0);
 }
 
-
-void GraphEditorPanel::SetPerformance(int performanceIndex)
-{
-    auto performer = graph.GetPerformer();
-
-    auto &zones = performer->Root.Performances.Performance[performanceIndex].Zone;
-
-    for (auto i = 0U; i < zones.size(); ++i)
-    {
-        for (auto d = 0U; d < m_rackDevice.size(); d++)
-        {
-            auto rackDevice = ((RackRow*)m_rackDevice[d].get());
-            if (rackDevice->ID() == zones[i].DeviceID)
-            {
-                rackDevice->Assign(&(zones[i]));
-                break;
-            }
-        }
-    }
-
-}
-
-
 void GraphEditorPanel::showPopupMenu (Point<int> mousePos)
 {
     menu.reset (new PopupMenu);
@@ -223,7 +200,25 @@ void GraphEditorPanel::timerCallback()
     showPopupMenu (originalTouchPos);
 }
 
+void GraphEditorPanel::SetPerformance(int performanceIndex)
+{
+    auto performer = graph.GetPerformer();
 
+    auto &zones = performer->Root.Performances.Performance[performanceIndex].Zone;
+
+    for (auto i = 0U; i < zones.size(); ++i)
+    {
+        for (auto d = 0U; d < m_rackDevice.size(); d++)
+        {
+            auto rackDevice = ((RackRow*)m_rackDevice[d].get());
+            if (rackDevice->ID() == zones[i].DeviceID)
+            {
+                rackDevice->Assign(&(zones[i]));
+                break;
+            }
+        }
+    }
+}
 
 void GraphEditorPanel::SoloChange()
 {
