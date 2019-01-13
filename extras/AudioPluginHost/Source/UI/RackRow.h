@@ -21,17 +21,10 @@
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../../JuceLibraryCode/JuceHeader.h"
-
-class Parameter
-{
-public:
-    Parameter(Component *component, int offset) : m_component(component), m_offset(offset) {}
-    Component *m_component;
-    int m_offset;
-};
 class Device;
 class Zone;
 class FilterGraph;
+class GraphEditorPanel;
 //[/Headers]
 
 
@@ -58,12 +51,12 @@ public:
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
     void UpdateKeyboard();
-    void Setup(Device &device);
+    void Setup(Device &device, FilterGraph &filterGraph, GraphEditorPanel &panel);
     void Assign(Zone *zone);
     int ID() { return m_id; }
     void textEditorTextChanged(TextEditor&) override;
-
-    FilterGraph* graph;
+    void SetSoloMode(bool mode);
+    bool IsSolo() { return m_solo->getToggleState(); }
     //[/UserMethods]
 
     void paint (Graphics& g) override;
@@ -80,9 +73,11 @@ public:
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
     MidiKeyboardState *m_keyboardState;
-    //std::vector<Parameter> m_parameters;
     Zone *m_current;
     int m_id;
+    FilterGraph* graph;
+    GraphEditorPanel* panel;
+    bool m_soloMode;
     //[/UserVariables]
 
     //==============================================================================

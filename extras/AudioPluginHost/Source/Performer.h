@@ -32,7 +32,7 @@ public:
     int Program;
     string Data;
     float Volume;
-    bool Solo;
+    bool Solo; // Dont need to save this
     bool Mute;
     bool DoubleOctave;
 	bool Arpeggiator;
@@ -43,12 +43,13 @@ public:
 	template<class A>
 	void Serialize(A& ar)
 	{
+        if (ar.IsSaving() && Mute)
+            return; // dont save the muted zones
 		AR(DeviceID, XmlAttribute);
 		AR(Bank, XmlAttribute);
 		AR(Program, XmlAttribute);
 		AR(Data);
 		AR(Volume, XmlAttribute);
-		AR(Solo, XmlAttribute);
 		AR(Mute, XmlAttribute);
 		AR(DoubleOctave, XmlAttribute);
 		AR(Arpeggiator, XmlAttribute);

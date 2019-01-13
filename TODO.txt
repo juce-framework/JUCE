@@ -1,8 +1,13 @@
+Tidy
+
+Low/High keyboard entry
+
 Bring in router (changed to new classes)
 Implement volume
-Implement mute
-Implement solo (effectively mutes all else)
-Import hooked up
+
+
+Saving - Check muted zones dont save
+Import command hooked up
 Chunk saving (B3 needs sustain, M1 needs program mode, OPX Famous bank, DirectWave setup, Wavstreamer setup)
 Program/Bank setting when editing (song change should send this too, B3 requires)
 Change midi in/outs from RtMidi to JUCE plugins (can keep keylab sysex)
@@ -16,3 +21,17 @@ Menu's - Load/Save of classes
 Setlist manager
 Mono switch
 Scoops/Falls for disco strings
+TruePianos crash
+
+
+MainHostWindow
++graphholder---->GraphDocumentComponent
+                 +pluginList              
+                 +graph------------------>FilterGraph : FileBasedDocument
+                                          +m_performer
+                                          +graph------------------------------->AudioProcessorGraph  
+                                          +knownPluginList(added for auto dll)               
+                 +graphPanel------------->GraphEditorPanel
+                                          +m_rackDevice------------------------>RackRow's
+                                                                                +graph
+                                                                                +panel(added so we can notify of solo)

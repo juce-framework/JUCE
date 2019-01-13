@@ -25,6 +25,7 @@
 
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
+#include "GraphEditorPanel.h"
 #include "../Filters/FilterGraph.h"
 String FormatKey(int note);
 int ParseNote(const char *str);
@@ -35,6 +36,7 @@ RackRow::RackRow ()
 {
     //[Constructor_pre] You can add your own custom stuff here..
     m_keyboardState = new MidiKeyboardState();
+    m_soloMode = false;
     //[/Constructor_pre]
 
     m_deviceName.reset (new GroupComponent (String(),
@@ -242,30 +244,21 @@ void RackRow::resized()
 void RackRow::buttonClicked (Button* buttonThatWasClicked)
 {
     //[UserbuttonClicked_Pre]
-    /*for (int p = 0; p < m_parameters.size(); ++p)
-    {
-        auto button = (Button*)m_parameters[p].m_component;
-        if (buttonThatWasClicked == button)
-        {
-            auto b = (bool*)((uint32_t)m_current + m_parameters[p].m_offset);
-            *b = button->getToggleState();
-        }
-    }*/
     //[/UserbuttonClicked_Pre]
 
     if (buttonThatWasClicked == m_solo.get())
     {
         //[UserButtonCode_m_solo] -- add your button handler code here..
         m_current->Solo = buttonThatWasClicked->getToggleState();
+        panel->SoloChange();
         //[/UserButtonCode_m_solo]
     }
     else if (buttonThatWasClicked == m_mute.get())
     {
         //[UserButtonCode_m_mute] -- add your button handler code here..
-
-        // Deactivate plugin here
         m_current->Mute = buttonThatWasClicked->getToggleState();
-        repaint();
+        repaint(); // to change background of row
+        ((AudioProcessorGraph::Node*)m_current->Device->m_node)->setBypassed(m_current->Mute || (m_soloMode && !m_current->Solo));
         //[/UserButtonCode_m_mute]
     }
     else if (buttonThatWasClicked == m_deviceSettings.get())
@@ -433,19 +426,10 @@ void RackRow::UpdateKeyboard()
         m_keyboardState->noteOn(1, i, 1.0f);
 }
 
-void RackRow::Setup(Device &device)
+void RackRow::Setup(Device &device, FilterGraph &filterGraph, GraphEditorPanel &GraphEditorPanel)
 {
- /*   Zone dummyZone;
-    m_parameters.push_back(Parameter(m_solo.get(), (uint32_t)&dummyZone.Solo - (uint32_t)&dummyZone));
-    m_parameters.push_back(Parameter(m_mute.get(), (uint32_t)&dummyZone.Mute - (uint32_t)&dummyZone));
-    m_parameters.push_back(Parameter(m_volume.get(), (uint32_t)&dummyZone.Volume - (uint32_t)&dummyZone));
-    m_parameters.push_back(Parameter(m_bank.get(), (uint32_t)&dummyZone.Bank - (uint32_t)&dummyZone));
-    m_parameters.push_back(Parameter(m_program.get(), (uint32_t)&dummyZone.Program - (uint32_t)&dummyZone));
-    m_parameters.push_back(Parameter(m_transpose.get(), (uint32_t)&dummyZone.Transpose - (uint32_t)&dummyZone));
-    m_parameters.push_back(Parameter(m_lowKey.get(), (uint32_t)&dummyZone.LowKey - (uint32_t)&dummyZone));
-    m_parameters.push_back(Parameter(m_highKey.get(), (uint32_t)&dummyZone.HighKey - (uint32_t)&dummyZone));
-    m_parameters.push_back(Parameter(m_doubleOctave.get(), (uint32_t)&dummyZone.DoubleOctave - (uint32_t)&dummyZone));
-    m_parameters.push_back(Parameter(m_arpeggiator.get(), (uint32_t)&dummyZone.Arpeggiator - (uint32_t)&dummyZone));*/
+    graph = &filterGraph;
+    panel = &GraphEditorPanel;
 
     m_deviceName->setText(device.Name);
     auto image = ImageFileFormat::loadFrom(File::getCurrentWorkingDirectory().getFullPathName() + "\\" + String(device.Name + ".png"));
@@ -469,6 +453,12 @@ void RackRow::Assign(Zone *zone)
     m_program->setSelectedId(zone->Program);
 
     UpdateKeyboard();
+}
+
+void RackRow::SetSoloMode(bool mode)
+{
+    m_soloMode = mode;
+    ((AudioProcessorGraph::Node*)m_current->Device->m_node)->setBypassed(m_current->Mute || (m_soloMode && !m_current->Solo)); // Do this here again. Can't rely on Toggle because only works if changed
 }
 //[/MiscUserCode]
 

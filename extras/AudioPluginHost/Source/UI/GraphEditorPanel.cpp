@@ -157,8 +157,7 @@ void GraphEditorPanel::updateComponents()
     {
         m_rackDevice.push_back(std::make_unique<RackRow>());
         auto newRackRow = (RackRow*)m_rackDevice.back().get();
-        newRackRow->Setup(performer->Root.Racks.Rack[i]);
-        newRackRow->graph = &graph;
+        newRackRow->Setup(performer->Root.Racks.Rack[i], graph, *this);
         deviceWidth = newRackRow->getWidth() + 2;
         deviceHeight = newRackRow->getHeight();
         m_rackUI->addAndMakeVisible(newRackRow);
@@ -222,6 +221,18 @@ void GraphEditorPanel::timerCallback()
 
     stopTimer();
     showPopupMenu (originalTouchPos);
+}
+
+
+
+void GraphEditorPanel::SoloChange()
+{
+    bool anySolos = false;
+    for (auto i = 0U; i < m_rackDevice.size(); ++i)
+        if (((RackRow*)(m_rackDevice[i].get()))->IsSolo())
+            anySolos = true;
+    for (auto i = 0U; i < m_rackDevice.size(); ++i)
+        ((RackRow*)(m_rackDevice[i].get()))->SetSoloMode(anySolos);
 }
 
 //==============================================================================
