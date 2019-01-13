@@ -120,6 +120,7 @@ public:
     int getTrackHeaderMaximumWidth () { return trackHeadersViewPort.getMaximumWidth(); }
     int getTrackHeaderMinimumWidth () { return trackHeadersViewPort.getMinimumWidth(); }
     void setTrackHeaderWidth (int newWidth);
+    void setTrackHeaderIsResizable (bool isResizable) { trackHeadersViewPort.setIsResizable (isResizable); }
     void setTrackHeaderMaximumWidth (int newWidth) { trackHeadersViewPort.setMaximumWidth (newWidth); }
     void setTrackHeaderMinimumWidth (int newWidth) { trackHeadersViewPort.setMinimumWidth (newWidth); }
 
@@ -224,6 +225,7 @@ private:
     {
     public:
         TrackHeadersView (DocumentView& documentView);
+        void setIsResizable (bool isResizable);
         void resized() override;
     private:
         DocumentView& documentView;

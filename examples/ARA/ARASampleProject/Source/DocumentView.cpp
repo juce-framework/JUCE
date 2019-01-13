@@ -364,6 +364,11 @@ DocumentView::TrackHeadersView::TrackHeadersView (DocumentView &documentView)
     addAndMakeVisible (resizeBorder);
 }
 
+void DocumentView::TrackHeadersView::setIsResizable(bool isResizable)
+{
+    resizeBorder.setVisible (isResizable);
+}
+
 void DocumentView::TrackHeadersView::resized()
 {
     setSizeLimits (getMinimumWidth(), jmax (1, getHeight()), getMaximumWidth(), jmax (1, getHeight()));
