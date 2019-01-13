@@ -313,15 +313,6 @@ void DocumentView::didReorderRegionSequencesInDocument (ARADocument* document)
 
 void DocumentView::timerCallback()
 {
-    if (lastReportedPosition.ppqLoopStart != positionInfo.ppqLoopStart || lastReportedPosition.ppqLoopEnd != positionInfo.ppqLoopEnd     ||
-        lastReportedPosition.isLooping  != positionInfo.isLooping)
-    {
-        lastReportedPosition.ppqLoopStart = positionInfo.ppqLoopStart;
-        lastReportedPosition.ppqLoopEnd = positionInfo.ppqLoopEnd;
-        lastReportedPosition.isLooping = positionInfo.isLooping;
-        rulersView->repaint();
-    }
-
     if (lastReportedPosition.timeInSeconds != positionInfo.timeInSeconds)
     {
         lastReportedPosition.timeInSeconds = positionInfo.timeInSeconds;
