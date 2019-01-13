@@ -3,8 +3,7 @@
 
 ARASampleProjectDocumentController::ARASampleProjectDocumentController() noexcept
     : ARADocumentController(),
-      audioSourceReadingThread (String (JucePlugin_Name) + " ARA Sample Reading Thread"),
-      globalEditorSettings (Identifier (JucePlugin_Name "_GlobalEditorSettings"))
+      audioSourceReadingThread (String (JucePlugin_Name) + " ARA Sample Reading Thread")
 {
     audioSourceReadingThread.startThread();
 }

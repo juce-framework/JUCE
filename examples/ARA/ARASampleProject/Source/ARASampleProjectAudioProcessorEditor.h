@@ -10,8 +10,7 @@
 */
 class ARASampleProjectAudioProcessorEditor  : public AudioProcessorEditor,
                                               public AudioProcessorEditorARAExtension,
-                                              private DocumentView::Listener,
-                                              private ValueTree::Listener
+                                              private DocumentView::Listener
 {
 public:
     ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor&);
@@ -22,16 +21,11 @@ public:
 
     // DocumentView::Listener overrides
     void visibleTimeRangeChanged (Range<double> newVisibleTimeRange, double pixelsPerSecond) override;
+    void trackHeightChanged (int newTrackHeight) override;
 
-    // ValueTree::Listener overrides
-    void valueTreePropertyChanged (juce::ValueTree &treeWhosePropertyHasChanged, const juce::Identifier &property) override;
-    void valueTreeChildAdded (juce::ValueTree &parentTree, juce::ValueTree &childWhichHasBeenAdded) override {};
-    void valueTreeChildRemoved (juce::ValueTree &parentTree, juce::ValueTree &childWhichHasBeenRemoved, int indexFromWhichChildWasRemoved) override {};
-    void valueTreeChildOrderChanged (juce::ValueTree &parentTreeWhoseChildrenHaveMoved, int oldIndex, int newIndex) override {};
-    void valueTreeParentChanged (juce::ValueTree &treeWhoseParentHasChanged) override {};
 private:
-    ValueTree* globalSettings;
     std::unique_ptr<DocumentView> documentView;
+    void loadEditorDefaultSettings();
 
     TextButton hideTrackHeaderButton;
     TextButton followPlayheadButton;
