@@ -116,9 +116,12 @@ public:
 
     void setIsTrackHeadersVisible (bool shouldBeVisible);
     bool isTrackHeadersVisible() const { return trackHeadersViewPort.isVisible(); }
-
+    int getTrackHeaderWidth() const { return trackHeadersViewPort.getWidth(); }
+    int getTrackHeaderMaximumWidth () { return trackHeadersViewPort.getMaximumWidth(); }
+    int getTrackHeaderMinimumWidth () { return trackHeadersViewPort.getMinimumWidth(); }
     void setTrackHeaderWidth (int newWidth);
-    int getTrackHeaderWidth() const { return trackHeaderWidth; }
+    void setTrackHeaderMaximumWidth (int newWidth) { trackHeadersViewPort.setMaximumWidth (newWidth); }
+    void setTrackHeaderMinimumWidth (int newWidth) { trackHeadersViewPort.setMinimumWidth (newWidth); }
 
     void setScrollFollowsPlaybackState (bool followPlayhead) { shouldFollowPlayhead.setValue (followPlayhead); }
     bool isScrollFollowsPlaybackState() const { return shouldFollowPlayhead.getValue(); }
@@ -215,6 +218,19 @@ private:
         DocumentView& documentView;
     };
 
+    // container of TrackHeaders to support resizable capabilites
+    class TrackHeadersView : public Viewport,
+                             public ComponentBoundsConstrainer
+    {
+    public:
+        TrackHeadersView (DocumentView& documentView);
+        void resized() override;
+    private:
+        DocumentView& documentView;
+        ResizableEdgeComponent resizeBorder;
+        int minWidth, maxWidth;
+    };
+
     const AudioProcessorEditorARAExtension& araExtension;
 
     OwnedArray<RegionSequenceView> regionSequenceViews;
@@ -222,7 +238,7 @@ private:
     ScrollMasterViewPort playbackRegionsViewPort;
     Component playbackRegionsView;
     PlayheadView playheadView;
-    Viewport trackHeadersViewPort;
+    TrackHeadersView trackHeadersViewPort;
     Component trackHeadersView;
     Viewport rulersViewPort;
     std::unique_ptr<RulersView> rulersView;
@@ -237,7 +253,6 @@ private:
     double maxPixelsPerSecond, minPixelsPerSecond;
 
     int trackHeight = 80;
-    int trackHeaderWidth = 120;
 
     bool regionSequenceViewsAreInvalid = true;
     Range<double> timeRange;

@@ -13,6 +13,7 @@ DocumentView::DocumentView (const AudioProcessorEditorARAExtension& extension, c
     : araExtension (extension),
       playbackRegionsViewPort (*this),
       playheadView (*this),
+      trackHeadersViewPort (*this),
       timeRange (-kMinBorderSeconds, kMinSecondDuration + kMinBorderSeconds),
       positionInfo (posInfo)
 {
@@ -121,7 +122,7 @@ void DocumentView::setIsTrackHeadersVisible (bool shouldBeVisible)
 
 void DocumentView::setTrackHeaderWidth (int newWidth)
 {
-    trackHeaderWidth = newWidth;
+    trackHeadersViewPort.setBounds (trackHeadersViewPort.getBounds().withWidth (newWidth));
     resized();
 }
 
@@ -205,7 +206,7 @@ void DocumentView::resized()
     timeRange.setStart (timeRange.getStart() - kMinBorderSeconds);
     timeRange.setEnd (timeRange.getEnd() + kMinBorderSeconds);
 
-    const int trackHeaderWidth = trackHeadersViewPort.isVisible() ? DocumentView::trackHeaderWidth : 0;
+    const int trackHeaderWidth = trackHeadersViewPort.isVisible() ? trackHeadersViewPort.getWidth() : 0;
     const int rulersViewHeight = rulersViewPort.isVisible() ? 3*20 : 0;
 
     // max zoom 1px : 1sample (this is a naive assumption as audio can be in different sample rate)
@@ -225,10 +226,11 @@ void DocumentView::resized()
     playbackRegionsView.setBounds (0, 0, playbackRegionsWidth, jmax (getTrackHeight() * regionSequenceViews.size(), playbackRegionsViewPort.getHeight() - playbackRegionsViewPort.getScrollBarThickness()));
 
     rulersViewPort.setBounds (trackHeaderWidth, 0, playbackRegionsViewPort.getMaximumVisibleWidth(), rulersViewHeight);
-    rulersView->setBounds (0, 0, playbackRegionsWidth, rulersViewHeight);
+    if (rulersView.get())
+        rulersView->setBounds (0, 0, playbackRegionsWidth, rulersViewHeight);
 
-    trackHeadersViewPort.setBounds (0, rulersViewHeight, trackHeaderWidth, playbackRegionsViewPort.getMaximumVisibleHeight());
-    trackHeadersView.setBounds (0, 0, trackHeaderWidth, playbackRegionsView.getHeight());
+    trackHeadersViewPort.setBounds (0, rulersViewHeight, trackHeadersViewPort.getWidth(), playbackRegionsViewPort.getMaximumVisibleHeight());
+    trackHeadersView.setBounds (0, 0, trackHeadersViewPort.getWidth(), playbackRegionsView.getHeight());
 
     int y = 0;
     const int trackHeight = getTrackHeight();
@@ -350,6 +352,25 @@ void DocumentView::PlayheadView::paint (juce::Graphics &g)
     const int playheadX = documentView.getPlaybackRegionsViewsXForTime (documentView.getPlayheadTimePosition());
     g.setColour (findColour (ScrollBar::ColourIds::thumbColourId));
     g.fillRect (playheadX - kPlayheadWidth / 2, 0, kPlayheadWidth, getHeight());
+}
+
+//==============================================================================
+DocumentView::TrackHeadersView::TrackHeadersView (DocumentView &documentView)
+        : documentView (documentView)
+        , resizeBorder (this, this, ResizableEdgeComponent::Edge::rightEdge)
+{
+    setSizeLimits (20, jmax (1, getHeight()), 120, jmax (1, getHeight()));
+    setBounds (0, 0, getMaximumWidth(), getMaximumHeight());
+    addAndMakeVisible (resizeBorder);
+}
+
+void DocumentView::TrackHeadersView::resized()
+{
+    setSizeLimits (getMinimumWidth(), jmax (1, getHeight()), getMaximumWidth(), jmax (1, getHeight()));
+    resizeBorder.setBounds (getWidth() - 1, 0, 1, getHeight());
+    // recalculates RegionSequences views.
+    if (getParentComponent())
+        getParentComponent()->resized();
 }
 
 //==============================================================================
