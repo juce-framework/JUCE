@@ -99,8 +99,8 @@ public:
 
     Component& getPlaybackRegionsView() { return playbackRegionsView; }
     Component& getTrackHeadersView() { return trackHeadersView; }
-    Viewport& getTrackHeadersViewPort() { return trackHeadersViewPort; }
-    Viewport& getRulersViewPort() { return rulersViewPort; }
+    Viewport& getTrackHeadersViewport() { return trackHeadersViewport; }
+    Viewport& getRulersViewport() { return rulersViewport; }
 
     AudioFormatManager& getAudioFormatManger() { return audioFormatManger; }
 
@@ -112,17 +112,17 @@ public:
     bool isShowingOnlySelectedRegionSequences() { return showOnlySelectedRegionSequences; }
 
     void setIsRulersVisible (bool shouldBeVisible);
-    bool isRulersVisible() const { return rulersViewPort.isVisible(); }
+    bool isRulersVisible() const { return rulersViewport.isVisible(); }
 
     void setIsTrackHeadersVisible (bool shouldBeVisible);
-    bool isTrackHeadersVisible() const { return trackHeadersViewPort.isVisible(); }
-    int getTrackHeaderWidth() const { return trackHeadersViewPort.getWidth(); }
-    int getTrackHeaderMaximumWidth () { return trackHeadersViewPort.getMaximumWidth(); }
-    int getTrackHeaderMinimumWidth () { return trackHeadersViewPort.getMinimumWidth(); }
+    bool isTrackHeadersVisible() const { return trackHeadersViewport.isVisible(); }
+
+    int getTrackHeaderWidth() const { return trackHeadersViewport.getWidth(); }
+    int getTrackHeaderMaximumWidth () { return trackHeadersViewport.getMaximumWidth(); }
+    int getTrackHeaderMinimumWidth () { return trackHeadersViewport.getMinimumWidth(); }
     void setTrackHeaderWidth (int newWidth);
-    void setTrackHeaderIsResizable (bool isResizable) { trackHeadersViewPort.setIsResizable (isResizable); }
-    void setTrackHeaderMaximumWidth (int newWidth) { trackHeadersViewPort.setMaximumWidth (newWidth); }
-    void setTrackHeaderMinimumWidth (int newWidth) { trackHeadersViewPort.setMinimumWidth (newWidth); }
+    void setTrackHeaderMaximumWidth (int newWidth);
+    void setTrackHeaderMinimumWidth (int newWidth);
 
     void setScrollFollowsPlaybackState (bool followPlayhead) { shouldFollowPlayhead.setValue (followPlayhead); }
     bool isScrollFollowsPlaybackState() const { return shouldFollowPlayhead.getValue(); }
@@ -200,7 +200,7 @@ private:
 
 private:
     // simple utility class to show playhead position
-    class PlayheadView : public Component
+    class PlayheadView    : public Component
     {
     public:
         PlayheadView (DocumentView& documentView);
@@ -210,39 +210,38 @@ private:
     };
 
     // simple utility class to partially sync scroll postions of our view ports
-    class ScrollMasterViewPort : public Viewport
+    class ScrollMasterViewport    : public Viewport
     {
     public:
-        ScrollMasterViewPort (DocumentView& documentView) : documentView (documentView) {};
+        ScrollMasterViewport (DocumentView& documentView) : documentView (documentView) {};
         void visibleAreaChanged (const Rectangle<int>& newVisibleArea) override;
     private:
         DocumentView& documentView;
     };
 
-    // container of TrackHeaders to support resizable capabilites
-    class TrackHeadersView : public Viewport,
-                             public ComponentBoundsConstrainer
+    // resizable container of TrackHeaderViews
+    class TrackHeadersViewport    : public Viewport,
+                                    public ComponentBoundsConstrainer
     {
     public:
-        TrackHeadersView (DocumentView& documentView);
+        TrackHeadersViewport (DocumentView& documentView);
         void setIsResizable (bool isResizable);
         void resized() override;
     private:
         DocumentView& documentView;
         ResizableEdgeComponent resizeBorder;
-        int minWidth, maxWidth;
     };
 
     const AudioProcessorEditorARAExtension& araExtension;
 
     OwnedArray<RegionSequenceView> regionSequenceViews;
 
-    ScrollMasterViewPort playbackRegionsViewPort;
+    ScrollMasterViewport playbackRegionsViewport;
     Component playbackRegionsView;
     PlayheadView playheadView;
-    TrackHeadersView trackHeadersViewPort;
+    TrackHeadersViewport trackHeadersViewport;
     Component trackHeadersView;
-    Viewport rulersViewPort;
+    Viewport rulersViewport;
     std::unique_ptr<RulersView> rulersView;
 
     AudioFormatManager audioFormatManger;
