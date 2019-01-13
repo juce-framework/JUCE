@@ -28,7 +28,7 @@ private:
     void loadEditorDefaultSettings();
 
     TextButton hideTrackHeaderButton;
-    TextButton followPlayheadButton;
+    TextButton followPlayHeadButton;
     TextButton onlySelectedTracksButton;
     Label horizontalZoomLabel, verticalZoomLabel;
     TextButton horizontalZoomInButton, horizontalZoomOutButton;

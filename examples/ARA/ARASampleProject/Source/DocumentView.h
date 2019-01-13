@@ -104,7 +104,7 @@ public:
 
     AudioFormatManager& getAudioFormatManger() { return audioFormatManger; }
 
-    const AudioPlayHead::CurrentPositionInfo& getPlayheadPositionInfo() const { return positionInfo; }
+    const AudioPlayHead::CurrentPositionInfo& getPlayHeadPositionInfo() const { return positionInfo; }
 
     // DocumentView States
     void setShowOnlySelectedRegionSequences (bool newVal);
@@ -123,8 +123,8 @@ public:
     void setTrackHeaderMaximumWidth (int newWidth);
     void setTrackHeaderMinimumWidth (int newWidth);
 
-    void setScrollFollowsPlaybackState (bool followPlayhead) { shouldFollowPlayhead.setValue (followPlayhead); }
-    bool isScrollFollowsPlaybackState() const { return shouldFollowPlayhead.getValue(); }
+    void setScrollFollowsPlayHead (bool followPlayHead) { scrollFollowsPlayHead = followPlayHead; }
+    bool isScrollFollowingPlayHead() const { return scrollFollowsPlayHead; }
 
     void setPixelsPerSecond (double newValue);
     double getPixelsPerSecond() const { return pixelsPerSecond; }
@@ -195,14 +195,14 @@ public:
 
 private:
     void rebuildRegionSequenceViews();
-    void updatePlayheadBounds();
+    void updatePlayHeadBounds();
 
 private:
     // simple utility class to show playhead position
-    class PlayheadView    : public Component
+    class PlayHeadView    : public Component
     {
     public:
-        PlayheadView (DocumentView& documentView);
+        PlayHeadView (DocumentView& documentView);
         void paint (Graphics&) override;
     private:
         DocumentView& documentView;
@@ -237,7 +237,7 @@ private:
 
     ScrollMasterViewport playbackRegionsViewport;
     Component playbackRegionsView;
-    PlayheadView playheadView;
+    PlayHeadView playHeadView;
     TrackHeadersViewport trackHeadersViewport;
     Component trackHeadersView;
     Viewport rulersViewport;
@@ -246,7 +246,7 @@ private:
     AudioFormatManager audioFormatManger;
 
     // Component View States
-    Value shouldFollowPlayhead = Value(true);
+    bool scrollFollowsPlayHead = true;
     bool showOnlySelectedRegionSequences = false;
 
     double pixelsPerSecond;

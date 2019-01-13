@@ -11,7 +11,7 @@ static const Identifier trackHeightId = "track_height";
 static const Identifier trackHeaderWidthId = "track_header_width";
 static const Identifier trackHeadersVisibleId = "track_headers_visible";
 static const Identifier showOnlySelectedId = "show_only_selected";
-static const Identifier scrollFollowsPlaybackId = "scroll_follows_playback";
+static const Identifier scrollFollowsPlayHeadId = "scroll_follows_playhead";
 
 static ValueTree editorDefaultSettings (JucePlugin_Name "_defaultEditorSettings");
 
@@ -53,15 +53,15 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         };
         addAndMakeVisible (onlySelectedTracksButton);
 
-        followPlayheadButton.setButtonText ("Follow Playhead");
-        followPlayheadButton.setClickingTogglesState (true);
-        followPlayheadButton.setToggleState (documentView->isShowingOnlySelectedRegionSequences(), dontSendNotification);
-        followPlayheadButton.onClick = [this]
+        followPlayHeadButton.setButtonText ("Follow Play-Head");
+        followPlayHeadButton.setClickingTogglesState (true);
+        followPlayHeadButton.setToggleState (documentView->isScrollFollowingPlayHead(), dontSendNotification);
+        followPlayHeadButton.onClick = [this]
         {
-            documentView->setScrollFollowsPlaybackState (followPlayheadButton.getToggleState());
-            editorDefaultSettings.setProperty (scrollFollowsPlaybackId, followPlayheadButton.getToggleState(), nullptr);
+            documentView->setScrollFollowsPlayHead (followPlayHeadButton.getToggleState());
+            editorDefaultSettings.setProperty (scrollFollowsPlayHeadId, followPlayHeadButton.getToggleState(), nullptr);
         };
-        addAndMakeVisible (followPlayheadButton);
+        addAndMakeVisible (followPlayHeadButton);
 
         horizontalZoomLabel.setText ("H:", dontSendNotification);
         verticalZoomLabel.setText ("V:", dontSendNotification);
@@ -125,7 +125,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
         documentView->setBounds (0, 0, getWidth(), getHeight() - kStatusBarHeight);
         hideTrackHeaderButton.setBounds(0, getHeight() - kStatusBarHeight, 120, kStatusBarHeight);
         onlySelectedTracksButton.setBounds (hideTrackHeaderButton.getRight(), getHeight() - kStatusBarHeight, 120, kStatusBarHeight);
-        followPlayheadButton.setBounds (onlySelectedTracksButton.getRight(), getHeight() - kStatusBarHeight, 120, kStatusBarHeight);
+        followPlayHeadButton.setBounds (onlySelectedTracksButton.getRight(), getHeight() - kStatusBarHeight, 120, kStatusBarHeight);
         verticalZoomInButton.setBounds (getWidth() - kStatusBarHeight, getHeight() - kStatusBarHeight, kStatusBarHeight, kStatusBarHeight);
         verticalZoomOutButton.setBounds (verticalZoomInButton.getBounds().translated (-kStatusBarHeight, 0));
         verticalZoomLabel.setBounds (verticalZoomOutButton.getBounds().translated (-kStatusBarHeight, 0));
@@ -157,6 +157,6 @@ void ARASampleProjectAudioProcessorEditor::loadEditorDefaultSettings()
     documentView->setTrackHeaderWidth (editorDefaultSettings.getProperty (trackHeaderWidthId, documentView->getTrackHeaderWidth()));
     documentView->setIsTrackHeadersVisible (editorDefaultSettings.getProperty (trackHeadersVisibleId, documentView->isTrackHeadersVisible()));
     documentView->setShowOnlySelectedRegionSequences (editorDefaultSettings.getProperty (showOnlySelectedId, documentView->isShowingOnlySelectedRegionSequences()));
-    documentView->setScrollFollowsPlaybackState (editorDefaultSettings.getProperty (scrollFollowsPlaybackId, documentView->isScrollFollowsPlaybackState()));
+    documentView->setScrollFollowsPlayHead (editorDefaultSettings.getProperty (scrollFollowsPlayHeadId, documentView->isScrollFollowingPlayHead()));
     documentView->setPixelsPerSecond (editorDefaultSettings.getProperty(pixelsPerSecondId, documentView->getPixelsPerSecond()));
 }

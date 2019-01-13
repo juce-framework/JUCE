@@ -69,7 +69,7 @@ void RulersView::findMusicalContext()
 
 void RulersView::timerCallback()
 {
-    auto positionInfo = documentView.getPlayheadPositionInfo();
+    auto positionInfo = documentView.getPlayHeadPositionInfo();
     if (lastPaintedPosition.ppqLoopStart != positionInfo.ppqLoopStart ||
         lastPaintedPosition.ppqLoopEnd != positionInfo.ppqLoopEnd ||
         lastPaintedPosition.isLooping  != positionInfo.isLooping)
@@ -190,7 +190,7 @@ void RulersView::paint (juce::Graphics& g)
 
     // locators
     {
-        lastPaintedPosition = documentView.getPlayheadPositionInfo();
+        lastPaintedPosition = documentView.getPlayHeadPositionInfo();
 
         const auto startInSeconds = tempoConverter.getTimeForQuarter (lastPaintedPosition.ppqLoopStart);
         const auto endInSeconds = tempoConverter.getTimeForQuarter (lastPaintedPosition.ppqLoopEnd);

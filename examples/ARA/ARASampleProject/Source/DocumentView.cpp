@@ -12,7 +12,7 @@ constexpr double kMinBorderSeconds = 1.0;
 DocumentView::DocumentView (const AudioProcessorEditorARAExtension& extension, const AudioPlayHead::CurrentPositionInfo& posInfo)
     : araExtension (extension),
       playbackRegionsViewport (*this),
-      playheadView (*this),
+      playHeadView (*this),
       trackHeadersViewport (*this),
       timeRange (-kMinBorderSeconds, kMinSecondDuration + kMinBorderSeconds),
       positionInfo (posInfo)
@@ -26,8 +26,8 @@ DocumentView::DocumentView (const AudioProcessorEditorARAExtension& extension, c
         return;
     }
 
-    playheadView.setAlwaysOnTop (true);
-    playbackRegionsView.addAndMakeVisible (playheadView);
+    playHeadView.setAlwaysOnTop (true);
+    playbackRegionsView.addAndMakeVisible (playHeadView);
 
     playbackRegionsViewport.setScrollBarsShown (true, true, false, false);
     playbackRegionsViewport.setViewedComponent (&playbackRegionsView, false);
@@ -183,7 +183,7 @@ void DocumentView::paint (Graphics& g)
 void DocumentView::resized()
 {
     // store visible playhead postion (in main view coordinates)
-    int previousPlayheadX = getPlaybackRegionsViewsXForTime (lastReportedPosition.timeInSeconds) - playbackRegionsViewport.getViewPosition().getX();
+    int previousPlayHeadX = getPlaybackRegionsViewsXForTime (lastReportedPosition.timeInSeconds) - playbackRegionsViewport.getViewPosition().getX();
 
     // calculate maximum visible time range
     timeRange = { 0.0, 0.0 };
@@ -252,13 +252,13 @@ void DocumentView::resized()
         y += trackHeight;
     }
 
-    playheadView.setBounds (playbackRegionsView.getBounds());
+    playHeadView.setBounds (playbackRegionsView.getBounds());
 
     // keep viewport position relative to playhead
     // TODO JUCE_ARA if playhead is not visible in new position, we should rather keep the
     //               left or right border stable, depending on which side the playhead is.
     auto relativeViewportPosition = playbackRegionsViewport.getViewPosition();
-    relativeViewportPosition.setX (getPlaybackRegionsViewsXForTime (lastReportedPosition.timeInSeconds) - previousPlayheadX);
+    relativeViewportPosition.setX (getPlaybackRegionsViewsXForTime (lastReportedPosition.timeInSeconds) - previousPlayHeadX);
     playbackRegionsViewport.setViewPosition (relativeViewportPosition);
     rulersViewport.setViewPosition (relativeViewportPosition.getX(), 0);
 }
@@ -331,14 +331,14 @@ void DocumentView::timerCallback()
     {
         lastReportedPosition.timeInSeconds = positionInfo.timeInSeconds;
 
-        if (shouldFollowPlayhead.getValue())
+        if (scrollFollowsPlayHead)
         {
             const auto visibleRange = getVisibleTimeRange();
             if (lastReportedPosition.timeInSeconds < visibleRange.getStart() || lastReportedPosition.timeInSeconds > visibleRange.getEnd())
                 playbackRegionsViewport.setViewPosition (playbackRegionsViewport.getViewPosition().withX (getPlaybackRegionsViewsXForTime (lastReportedPosition.timeInSeconds)));
         };
 
-        playheadView.repaint();
+        playHeadView.repaint();
     }
 }
 
@@ -354,13 +354,13 @@ void DocumentView::removeListener (Listener* const listener)
 }
 
 //==============================================================================
-DocumentView::PlayheadView::PlayheadView (DocumentView& documentView)
+DocumentView::PlayHeadView::PlayHeadView (DocumentView& documentView)
     : documentView (documentView)
 {}
 
-void DocumentView::PlayheadView::paint (juce::Graphics &g)
+void DocumentView::PlayHeadView::paint (juce::Graphics &g)
 {
-    const int playheadX = documentView.getPlaybackRegionsViewsXForTime (documentView.getPlayheadPositionInfo().timeInSeconds);
+    const int playheadX = documentView.getPlaybackRegionsViewsXForTime (documentView.getPlayHeadPositionInfo().timeInSeconds);
     g.setColour (findColour (ScrollBar::ColourIds::thumbColourId));
     g.fillRect (playheadX, 0, 1, getHeight());
 }
