@@ -104,7 +104,6 @@ public:
 
     AudioFormatManager& getAudioFormatManger() { return audioFormatManger; }
 
-    double getPlayheadTimePosition() const { return lastReportedPosition.timeInSeconds; }
     const AudioPlayHead::CurrentPositionInfo& getPlayheadPositionInfo() const { return positionInfo; }
 
     // DocumentView States

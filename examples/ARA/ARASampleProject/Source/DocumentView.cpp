@@ -360,10 +360,9 @@ DocumentView::PlayheadView::PlayheadView (DocumentView& documentView)
 
 void DocumentView::PlayheadView::paint (juce::Graphics &g)
 {
-    static constexpr int kPlayheadWidth = 1;
-    const int playheadX = documentView.getPlaybackRegionsViewsXForTime (documentView.getPlayheadTimePosition());
+    const int playheadX = documentView.getPlaybackRegionsViewsXForTime (documentView.getPlayheadPositionInfo().timeInSeconds);
     g.setColour (findColour (ScrollBar::ColourIds::thumbColourId));
-    g.fillRect (playheadX - kPlayheadWidth / 2, 0, kPlayheadWidth, getHeight());
+    g.fillRect (playheadX, 0, 1, getHeight());
 }
 
 //==============================================================================
