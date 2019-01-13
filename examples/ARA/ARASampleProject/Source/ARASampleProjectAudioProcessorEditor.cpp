@@ -157,6 +157,6 @@ void ARASampleProjectAudioProcessorEditor::loadEditorDefaultSettings()
     documentView->setTrackHeaderWidth (editorDefaultSettings.getProperty (trackHeaderWidthId, documentView->getTrackHeaderWidth()));
     documentView->setIsTrackHeadersVisible (editorDefaultSettings.getProperty (trackHeadersVisibleId, documentView->isTrackHeadersVisible()));
     documentView->setShowOnlySelectedRegionSequences (editorDefaultSettings.getProperty (showOnlySelectedId, documentView->isShowingOnlySelectedRegionSequences()));
-    documentView->setScrollFollowsPlaybackState (editorDefaultSettings.getProperty (scrollFollowsPlaybackId, documentView->getScrollFollowPlaybackState()));
+    documentView->setScrollFollowsPlaybackState (editorDefaultSettings.getProperty (scrollFollowsPlaybackId, documentView->isScrollFollowsPlaybackState()));
     documentView->setPixelsPerSecond (editorDefaultSettings.getProperty(pixelsPerSecondId, documentView->getPixelsPerSecond()));
 }

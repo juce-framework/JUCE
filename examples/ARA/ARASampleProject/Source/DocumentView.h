@@ -121,8 +121,7 @@ public:
     int getTrackHeaderWidth() const { return trackHeaderWidth; }
 
     void setScrollFollowsPlaybackState (bool followPlayhead) { shouldFollowPlayhead.setValue (followPlayhead); }
-    bool getScrollFollowPlaybackState() const { return shouldFollowPlayhead.getValue(); }
-    juce::Value& getScrollFollowsPlaybackStateValue() { return shouldFollowPlayhead; }
+    bool isScrollFollowsPlaybackState() const { return shouldFollowPlayhead.getValue(); }
 
     void setPixelsPerSecond (double newValue);
     double getPixelsPerSecond() const { return pixelsPerSecond; }
