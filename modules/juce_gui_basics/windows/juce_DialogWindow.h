@@ -72,7 +72,7 @@ public:
     /** Destructor.
         If a content component has been set with setContentOwned(), it will be deleted.
     */
-    ~DialogWindow();
+    ~DialogWindow() override;
 
     //==============================================================================
     /** This class defines a collection of settings to be used to open a DialogWindow.

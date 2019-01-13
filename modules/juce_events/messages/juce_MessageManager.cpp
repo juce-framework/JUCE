@@ -433,7 +433,7 @@ bool MessageManagerLock::attemptLock (Thread* threadToCheck, ThreadPoolJob* jobT
     return true;
 }
 
-MessageManagerLock::~MessageManagerLock() noexcept     { mmLock.exit(); }
+MessageManagerLock::~MessageManagerLock()  { mmLock.exit(); }
 
 void MessageManagerLock::exitSignalSent()
 {

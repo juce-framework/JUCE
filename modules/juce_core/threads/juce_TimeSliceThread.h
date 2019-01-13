@@ -98,7 +98,7 @@ public:
         should always call stopThread() with a decent timeout before deleting,
         to avoid the thread being forcibly killed (which is a Bad Thing).
     */
-    ~TimeSliceThread();
+    ~TimeSliceThread() override;
 
     //==============================================================================
     /** Adds a client to the list.

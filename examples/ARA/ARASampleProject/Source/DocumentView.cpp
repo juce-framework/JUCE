@@ -260,7 +260,7 @@ void DocumentView::rebuildRegionSequenceViews()
 
     if (showOnlySelectedRegionSequences)
     {
-        for (auto selectedSequence : getARAEditorView()->getViewSelection().getRegionSequences<ARARegionSequence>())
+        for (auto selectedSequence : getARAEditorView()->getViewSelection().getEffectiveRegionSequences<ARARegionSequence>())
             regionSequenceViews.add (createViewForRegionSequence (selectedSequence));
     }
     else    // show all RegionSequences of Document...

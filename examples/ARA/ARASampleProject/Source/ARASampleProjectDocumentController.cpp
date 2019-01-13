@@ -19,4 +19,4 @@ ARA::PlugIn::PlaybackRenderer* ARASampleProjectDocumentController::doCreatePlayb
 ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController() noexcept
 {
     return new ARASampleProjectDocumentController();
-};
+}

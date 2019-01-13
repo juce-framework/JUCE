@@ -68,7 +68,7 @@ public:
                     ButtonStyle buttonStyle);
 
     /** Destructor. */
-    ~DrawableButton();
+    ~DrawableButton() override;
 
     //==============================================================================
     /** Sets up the images to draw for the various button states.

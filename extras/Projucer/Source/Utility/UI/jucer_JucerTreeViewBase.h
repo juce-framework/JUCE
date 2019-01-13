@@ -35,7 +35,7 @@ class JucerTreeViewBase   : public TreeViewItem,
 {
 public:
     JucerTreeViewBase();
-    ~JucerTreeViewBase();
+    ~JucerTreeViewBase() override;
 
     int getItemWidth() const override                   { return -1; }
     int getItemHeight() const override                  { return 25; }
@@ -134,7 +134,7 @@ public:
         tree.addMouseListener (this, true);
     }
 
-    ~TreePanelBase()
+    ~TreePanelBase() override
     {
         tree.setRootItem (nullptr);
     }

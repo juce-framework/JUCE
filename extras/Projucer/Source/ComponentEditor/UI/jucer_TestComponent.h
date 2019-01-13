@@ -37,7 +37,7 @@ public:
                    JucerDocument* const loadedDocument,
                    const bool alwaysFillBackground);
 
-    ~TestComponent();
+    ~TestComponent() override;
 
     //==============================================================================
     void setFilename (const String& fn);

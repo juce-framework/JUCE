@@ -97,7 +97,7 @@ public:
                           Component* parentComponent = nullptr);
 
     /** Destructor. */
-    ~FileChooserDialogBox();
+    ~FileChooserDialogBox() override;
 
     //==============================================================================
    #if JUCE_MODAL_LOOPS_PERMITTED

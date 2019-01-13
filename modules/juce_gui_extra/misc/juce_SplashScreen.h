@@ -106,7 +106,7 @@ public:
                   bool useDropShadow);
 
     /** Destructor. */
-    ~SplashScreen();
+    ~SplashScreen() override;
 
     /** Tells the component to auto-delete itself after a timeout period, or when the
         mouse is clicked.

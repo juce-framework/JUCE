@@ -651,7 +651,7 @@ public:
     TreeView (const String& componentName = String());
 
     /** Destructor. */
-    ~TreeView();
+    ~TreeView() override;
 
     //==============================================================================
     /** Sets the item that is displayed in the treeview.

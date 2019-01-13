@@ -171,7 +171,7 @@ uint32* BigInteger::getValues() const noexcept
     jassert (heapAllocation != nullptr || allocatedSize <= numPreallocatedInts);
 
     return heapAllocation != nullptr ? heapAllocation
-                                     : (uint32*) preallocated;
+                                     : const_cast<uint32*> (preallocated);
 }
 
 uint32* BigInteger::ensureSize (const size_t numVals)

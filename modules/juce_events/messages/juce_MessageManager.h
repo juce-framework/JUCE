@@ -452,7 +452,7 @@ public:
         Make sure this object is created and deleted by the same thread,
         otherwise there are no guarantees what will happen!
    */
-    ~MessageManagerLock() noexcept;
+    ~MessageManagerLock() override;
 
     //==============================================================================
     /** Returns true if the lock was successfully acquired.

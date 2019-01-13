@@ -28,6 +28,8 @@ class PlaybackRegionView;
        but time ranges must be adjusted for this and updated if head/tail change)
     - optionally visualize ARA selected time range
     - optionally visualize playback cycle state in rulers
+    - properly compensate for presentation latency (IAudioPresentationLatency/contextPresentationLatency)
+      when drawing play head (requires minor additons to the VST and AU wrapper)
     - replace Viewport with better mechanism to avoid integer overflow with long documents and high zoom level.
  */
 class DocumentView  : public Component,

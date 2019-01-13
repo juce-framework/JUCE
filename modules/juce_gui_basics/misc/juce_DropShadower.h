@@ -51,7 +51,7 @@ public:
     DropShadower (const DropShadow& shadowType);
 
     /** Destructor. */
-    ~DropShadower();
+    ~DropShadower() override;
 
     /** Attaches the DropShadower to the component you want to shadow. */
     void setOwner (Component* componentToFollow);

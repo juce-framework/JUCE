@@ -93,7 +93,7 @@ public:
     DropShadowEffect();
 
     /** Destructor. */
-    ~DropShadowEffect();
+    ~DropShadowEffect() override;
 
     //==============================================================================
     /** Sets up parameters affecting the shadow's appearance. */

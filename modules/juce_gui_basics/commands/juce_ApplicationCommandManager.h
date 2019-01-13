@@ -102,7 +102,7 @@ public:
         Make sure that you don't delete this if pointers to it are still being used by
         objects such as PopupMenus or Buttons.
     */
-    virtual ~ApplicationCommandManager();
+    virtual ~ApplicationCommandManager() override;
 
     //==============================================================================
     /** Clears the current list of all commands.

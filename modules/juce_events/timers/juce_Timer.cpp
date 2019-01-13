@@ -36,7 +36,7 @@ public:
         triggerAsyncUpdate();
     }
 
-    ~TimerThread() noexcept
+    ~TimerThread() override
     {
         signalThreadShouldExit();
         callbackArrived.signal();

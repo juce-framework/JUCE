@@ -95,7 +95,7 @@ public:
     LookAndFeel_V4 (ColourScheme);
 
     /** Destructor. */
-    ~LookAndFeel_V4();
+    ~LookAndFeel_V4() override;
 
     //==============================================================================
     void setColourScheme (ColourScheme);

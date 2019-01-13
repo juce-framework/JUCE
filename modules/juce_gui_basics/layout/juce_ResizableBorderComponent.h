@@ -70,7 +70,7 @@ public:
                               ComponentBoundsConstrainer* constrainer);
 
     /** Destructor. */
-    ~ResizableBorderComponent();
+    ~ResizableBorderComponent() override;
 
 
     //==============================================================================

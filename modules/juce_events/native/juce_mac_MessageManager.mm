@@ -454,7 +454,7 @@ void __attribute__ ((visibility("default"))) repostCurrentNSEvent()
     struct EventReposter  : public CallbackMessage
     {
         EventReposter() : e ([[NSApp currentEvent] retain])  {}
-        ~EventReposter()  { [e release]; }
+        ~EventReposter() override  { [e release]; }
 
         void messageCallback() override
         {

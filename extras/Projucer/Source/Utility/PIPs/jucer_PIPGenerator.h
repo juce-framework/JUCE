@@ -75,6 +75,7 @@ private:
     StringArray getPluginCharacteristics() const;
 
     String getPathForModule (const String&) const;
+    File getExamplesDirectory() const;
 
     //==============================================================================
     File pipFile, outputDirectory, juceModulesPath;

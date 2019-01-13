@@ -61,7 +61,7 @@ public:
     explicit ComboBox (const String& componentName = String());
 
     /** Destructor. */
-    virtual ~ComboBox();
+    virtual ~ComboBox() override;
 
     //==============================================================================
     /** Sets whether the text in the combo-box is editable.

@@ -47,7 +47,7 @@ protected:
 
 public:
     /** Destructor. */
-    virtual ~Drawable();
+    virtual ~Drawable() override;
 
     //==============================================================================
     /** Creates a deep copy of this Drawable object.

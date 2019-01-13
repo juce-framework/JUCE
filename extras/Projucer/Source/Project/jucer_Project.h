@@ -42,7 +42,7 @@ class Project  : public FileBasedDocument,
 public:
     //==============================================================================
     Project (const File&);
-    ~Project();
+    ~Project() override;
 
     //==============================================================================
     // FileBasedDocument stuff..

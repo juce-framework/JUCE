@@ -45,7 +45,7 @@ class PaintElement  : public Component,
 public:
     //==============================================================================
     PaintElement (PaintRoutine* owner, const String& typeName);
-    virtual ~PaintElement();
+    ~PaintElement() override;
 
     //==============================================================================
     virtual void setInitialBounds (int parentWidth, int parentHeight);

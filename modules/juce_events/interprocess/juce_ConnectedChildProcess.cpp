@@ -94,7 +94,7 @@ struct ChildProcessMaster::Connection  : public InterprocessConnection,
             startThread (4);
     }
 
-    ~Connection()
+    ~Connection() override
     {
         stopThread (10000);
     }
@@ -192,7 +192,7 @@ struct ChildProcessSlave::Connection  : public InterprocessConnection,
         startThread (4);
     }
 
-    ~Connection()
+    ~Connection() override
     {
         stopThread (10000);
     }

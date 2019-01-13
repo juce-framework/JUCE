@@ -145,6 +145,7 @@ static const unsigned char JuceWebView21ByteCode[] =
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
   METHOD (constructor,         "<init>",              "(Landroid/content/Context;)V") \
   METHOD (getSettings,         "getSettings",         "()Landroid/webkit/WebSettings;") \
+  METHOD (canGoBack,           "canGoBack",           "()Z") \
   METHOD (goBack,              "goBack",              "()V") \
   METHOD (goForward,           "goForward",           "()V") \
   METHOD (loadDataWithBaseURL, "loadDataWithBaseURL", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V") \
@@ -316,7 +317,13 @@ public:
     {
         connectionThread = nullptr;
 
-        getEnv()->CallVoidMethod ((jobject) getView(), AndroidWebView.goBack);
+        auto* env = getEnv();
+        auto view = (jobject) getView();
+
+        if (env->CallBooleanMethod (view, AndroidWebView.canGoBack))
+            env->CallVoidMethod (view, AndroidWebView.goBack);
+        else
+            owner.reloadLastURL();
     }
 
     void goForward()
@@ -624,10 +631,10 @@ void WebBrowserComponent::stop()
 
 void WebBrowserComponent::goBack()
 {
+    browser->goBack();
+
     lastURL.clear();
     blankPageShown = false;
-
-    browser->goBack();
 }
 
 void WebBrowserComponent::goForward()

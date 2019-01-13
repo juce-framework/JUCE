@@ -49,7 +49,7 @@ public:
     explicit TabbedComponent (TabbedButtonBar::Orientation orientation);
 
     /** Destructor. */
-    ~TabbedComponent();
+    ~TabbedComponent() override;
 
     //==============================================================================
     /** Changes the placement of the tabs.

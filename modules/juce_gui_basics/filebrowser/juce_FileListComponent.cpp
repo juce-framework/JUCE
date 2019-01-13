@@ -109,7 +109,7 @@ public:
     {
     }
 
-    ~ItemComponent()
+    ~ItemComponent() override
     {
         thread.removeTimeSliceClient (this);
     }

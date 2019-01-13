@@ -63,7 +63,7 @@ public:
         callback. Any ComponentListener objects that have registered with it will also have their
         ComponentListener::componentBeingDeleted() methods called.
     */
-    virtual ~Component();
+    ~Component() override;
 
     //==============================================================================
     /** Creates a component, setting its name at the same time.
