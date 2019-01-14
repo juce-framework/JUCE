@@ -1,0 +1,11 @@
+Jazz
+Rock
+Classical
+Blues
+Bright
+Cloudy
+Vanilla
+Warm
+Pop
+Ballet
+Foggy

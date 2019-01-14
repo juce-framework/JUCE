@@ -1,0 +1,37 @@
+M01 M1 Presets
+M02 M1EX Presets
+M03 Memory Card
+M04 Synth 1
+M05 Drums 1
+M06 Orchestra 1
+M07 Piano
+M08 Fretted Instruments 1
+M09 Synth 2
+M10 Percussion
+M11 Organ
+M12 Ethnic 1
+M13 Brass
+M14 Synth 3
+M15 Ethnic 2
+M16 Sound Effects
+M17 Drums 2
+M18 Environment
+M19 Akira
+M20 World Omnibus
+M21 Bunmay
+K01 Korg Legacy Collection Presets
+U01 User 1
+U02 User 2
+U03 User 3
+U04 User 4
+T01 T1 Presets
+T02 Synth
+T03 Drums
+T04 Combination 1
+T05 Combination 2
+T06 Combination 3
+T07 Fretted Instruments
+T08 Ethnic
+T09 Sound Effects
+T10 Environment
+T11 Voice

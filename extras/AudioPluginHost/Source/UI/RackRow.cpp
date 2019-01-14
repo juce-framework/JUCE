@@ -74,11 +74,9 @@ RackRow::RackRow ()
     addAndMakeVisible (m_bank.get());
     m_bank->setEditableText (false);
     m_bank->setJustificationType (Justification::centredLeft);
-    m_bank->setTextWhenNothingSelected (TRANS("None"));
-    m_bank->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
-    m_bank->addItem (TRANS("None"), 1);
-    m_bank->addItem (TRANS("Usercard 1"), 2);
-    m_bank->addItem (TRANS("Usercard 2"), 3);
+    m_bank->setTextWhenNothingSelected (String());
+    m_bank->setTextWhenNoChoicesAvailable (String());
+    m_bank->addSeparator();
     m_bank->addSeparator();
     m_bank->addListener (this);
 
@@ -88,11 +86,8 @@ RackRow::RackRow ()
     addAndMakeVisible (m_program.get());
     m_program->setEditableText (false);
     m_program->setJustificationType (Justification::centredLeft);
-    m_program->setTextWhenNothingSelected (TRANS("Piano"));
-    m_program->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
-    m_program->addItem (TRANS("Piano"), 1);
-    m_program->addItem (TRANS("Strings"), 2);
-    m_program->addSeparator();
+    m_program->setTextWhenNothingSelected (String());
+    m_program->setTextWhenNoChoicesAvailable (String());
     m_program->addListener (this);
 
     m_program->setBounds (232, 46, 150, 24);
@@ -283,6 +278,7 @@ void RackRow::buttonClicked (Button* buttonThatWasClicked)
     else if (buttonThatWasClicked == m_arpeggiator.get())
     {
         //[UserButtonCode_m_arpeggiator] -- add your button handler code here..
+        m_current->Arpeggiator = buttonThatWasClicked->getToggleState();
         //[/UserButtonCode_m_arpeggiator]
     }
 
@@ -444,6 +440,36 @@ void RackRow::Setup(Device &device, FilterGraph &filterGraph, GraphEditorPanel &
     m_deviceSettings->setImages(false, false, false, image, 1.0f, Colours::transparentBlack, image, 1.0f, Colours::transparentBlack, image, 1.0f, Colours::transparentBlack);
 
     m_id = device.ID;
+
+    auto bankFile = File::getCurrentWorkingDirectory().getFullPathName() + "\\" + String(device.PluginName + "_Banks.txt");
+    if (File(bankFile).exists())
+    {
+        StringArray lines;
+        File(bankFile).readLines(lines);
+        for (int i = 0; i < lines.size(); ++i)
+            m_bank->addItem(lines[i], i + 1);
+    }
+    else
+    {
+        m_bank->setVisible(false);
+        m_program->setBounds(m_bank->getBounds());
+    }
+
+    auto programFile = File::getCurrentWorkingDirectory().getFullPathName() + "\\" + String(device.Name + ".txt");
+    if (File(programFile).exists())
+    {
+        StringArray lines;
+        File(programFile).readLines(lines);
+        for (int i = 0; i<lines.size(); ++i)
+            m_program->addItem(lines[i], i + 1);
+    }
+    else
+    {
+        auto processor = ((AudioProcessorGraph::Node*)device.m_node)->getProcessor();
+
+        for (int i = 0; i < processor->getNumPrograms(); ++i)
+            m_program->addItem(processor->getProgramName(i), i + 1);
+    }
 }
 
 void RackRow::Assign(Zone *zone)
@@ -457,8 +483,8 @@ void RackRow::Assign(Zone *zone)
     m_lowKey->setText(FormatKey(zone->LowKey));
     m_highKey->setText(FormatKey(zone->HighKey));
     m_transpose->setText(String(zone->Transpose));
-    m_bank->setSelectedId(zone->Bank);
-    m_program->setSelectedId(zone->Program);
+    m_bank->setSelectedId(zone->Bank+1);
+    m_program->setSelectedId(zone->Program+1);
 
     UpdateKeyboard();
 }
@@ -506,11 +532,10 @@ BEGIN_JUCER_METADATA
           textBoxHeight="20" skewFactor="1.00000000000000000000" needsCallback="1"/>
   <COMBOBOX name="" id="90d63ca95a92a112" memberName="m_bank" virtualName=""
             explicitFocusOrder="0" pos="232 14 150 24" editable="0" layout="33"
-            items="None&#10;Usercard 1&#10;Usercard 2&#10;" textWhenNonSelected="None"
-            textWhenNoItems="(no choices)"/>
+            items="&#10;" textWhenNonSelected="" textWhenNoItems=""/>
   <COMBOBOX name="" id="9de3cb5469378fa1" memberName="m_program" virtualName=""
             explicitFocusOrder="0" pos="232 46 150 24" editable="0" layout="33"
-            items="Piano&#10;Strings&#10;" textWhenNonSelected="Piano" textWhenNoItems="(no choices)"/>
+            items="" textWhenNonSelected="" textWhenNoItems=""/>
   <TEXTEDITOR name="" id="b6e30577b79a003a" memberName="m_transpose" virtualName=""
               explicitFocusOrder="0" pos="648 14 32 24" initialText="" multiline="0"
               retKeyStartsLine="0" readonly="0" scrollbars="0" caret="1" popupmenu="1"/>
