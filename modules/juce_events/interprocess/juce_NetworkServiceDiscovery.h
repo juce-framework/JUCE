@@ -120,6 +120,8 @@ struct NetworkServiceDiscovery
         void handleMessage (const XmlElement&);
         void handleMessage (const Service&);
         void removeTimedOutServices();
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AvailableServiceList)
     };
 };
 
