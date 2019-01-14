@@ -21,12 +21,13 @@ public:
 
     // DocumentView::Listener overrides
     void visibleTimeRangeChanged (Range<double> newVisibleTimeRange, double pixelsPerSecond) override;
+    void trackHeightChanged (int newTrackHeight) override;
 
 private:
     std::unique_ptr<DocumentView> documentView;
 
     TextButton hideTrackHeaderButton;
-    TextButton followPlayheadButton;
+    TextButton followPlayHeadButton;
     TextButton onlySelectedTracksButton;
     Label horizontalZoomLabel, verticalZoomLabel;
     TextButton horizontalZoomInButton, horizontalZoomOutButton;

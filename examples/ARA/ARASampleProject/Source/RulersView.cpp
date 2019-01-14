@@ -12,6 +12,8 @@ RulersView::RulersView (DocumentView& documentView)
     document = documentView.getARADocumentController()->getDocument<ARADocument>();
     document->addListener (this);
     findMusicalContext();
+    lastPaintedPosition.resetToDefault();
+    startTimerHz (10);
 }
 
 RulersView::~RulersView()
@@ -61,6 +63,17 @@ void RulersView::findMusicalContext()
         musicalContext = newMusicalContext;
         musicalContext->addListener (this);
 
+        repaint();
+    }
+}
+
+void RulersView::timerCallback()
+{
+    auto positionInfo = documentView.getPlayHeadPositionInfo();
+    if (lastPaintedPosition.ppqLoopStart != positionInfo.ppqLoopStart ||
+        lastPaintedPosition.ppqLoopEnd != positionInfo.ppqLoopEnd ||
+        lastPaintedPosition.isLooping  != positionInfo.isLooping)
+    {
         repaint();
     }
 }
@@ -173,6 +186,18 @@ void RulersView::paint (juce::Graphics& g)
         }
 
         g.drawText ("chords", bounds.withTrimmedRight (2).withTrimmedBottom (beatsRulerHeight + secondsRulerHeight), Justification::bottomRight);
+    }
+
+    // locators
+    {
+        lastPaintedPosition = documentView.getPlayHeadPositionInfo();
+
+        const auto startInSeconds = tempoConverter.getTimeForQuarter (lastPaintedPosition.ppqLoopStart);
+        const auto endInSeconds = tempoConverter.getTimeForQuarter (lastPaintedPosition.ppqLoopEnd);
+        const int startX = documentView.getPlaybackRegionsViewsXForTime (startInSeconds);
+        const int endX = documentView.getPlaybackRegionsViewsXForTime (endInSeconds);
+        g.setColour (lastPaintedPosition.isLooping ? Colours::skyblue.withAlpha (0.3f) : Colours::white.withAlpha (0.3f));
+        g.fillRect (startX, bounds.getY(), endX - startX, bounds.getHeight());
     }
 
     // borders

@@ -12,7 +12,8 @@
 class RulersView  : public Component,
                     private ARAEditorView::Listener,
                     private ARADocument::Listener,
-                    private ARAMusicalContext::Listener
+                    private ARAMusicalContext::Listener,
+                    private juce::Timer
 {
 public:
     RulersView (DocumentView& documentView);
@@ -36,6 +37,9 @@ public:
     void mouseDown (const MouseEvent& event) override;
     void mouseDoubleClick (const MouseEvent& event) override;
 
+    // juce::Timer overrides
+    void timerCallback() override;
+
 private:
     void detachFromDocument();
     void detachFromMusicalContext();
@@ -45,6 +49,7 @@ private:
     DocumentView& documentView;
     ARADocument* document;
     ARAMusicalContext* musicalContext;
+    AudioPlayHead::CurrentPositionInfo lastPaintedPosition;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RulersView)
 };
