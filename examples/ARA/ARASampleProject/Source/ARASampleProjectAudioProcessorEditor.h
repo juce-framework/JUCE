@@ -25,7 +25,6 @@ public:
 
 private:
     std::unique_ptr<DocumentView> documentView;
-    void loadEditorDefaultSettings();
 
     TextButton hideTrackHeaderButton;
     TextButton followPlayHeadButton;
