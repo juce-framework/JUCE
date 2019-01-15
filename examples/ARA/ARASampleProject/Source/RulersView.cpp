@@ -93,15 +93,8 @@ void RulersView::paint (juce::Graphics& g)
     }
 
     const auto visibleRange = documentView.getVisibleTimeRange();
-
-    using TempoContentReader = ARA::PlugIn::HostContentReader<ARA::kARAContentTypeTempoEntries>;
-    using BarSignaturesContentReader = ARA::PlugIn::HostContentReader<ARA::kARAContentTypeBarSignatures>;
-    using ChordsContentReader = ARA::PlugIn::HostContentReader<ARA::kARAContentTypeSheetChords>;
-    const TempoContentReader tempoReader (musicalContext);
-    const BarSignaturesContentReader barSignaturesReader (musicalContext);
-    const ChordsContentReader chordsReader (musicalContext);
-
-    const ARA::TempoConverter<TempoContentReader> tempoConverter (tempoReader);
+    const ARA::PlugIn::HostContentReader<ARA::kARAContentTypeTempoEntries> tempoReader (musicalContext);
+    const ARA::TempoConverter<decltype (tempoReader)> tempoConverter (tempoReader);
 
     // we'll draw three rulers: seconds, beats, and chords
     constexpr int lightLineWidth = 1;
@@ -114,6 +107,7 @@ void RulersView::paint (juce::Graphics& g)
     const int secondsRulerHeight = getBounds().getHeight() - chordRulerHeight - beatsRulerHeight;
 
     // seconds ruler: one tick for each second
+    if (true)
     {
         RectangleList<int> rects;
         const int endTime = roundToInt (floor (visibleRange.getEnd()));
@@ -124,38 +118,42 @@ void RulersView::paint (juce::Graphics& g)
             const int x = documentView.getPlaybackRegionsViewsXForTime (time);
             rects.addWithoutMerging (Rectangle<int> (x - lineWidth / 2, secondsRulerY + secondsRulerHeight - lineHeight, lineWidth, lineHeight));
         }
-        g.drawText ("seconds", bounds.withTrimmedRight (2), Justification::bottomRight);
         g.fillRectList (rects);
     }
+    g.drawText ("seconds", bounds.withTrimmedRight (2), Justification::bottomRight);
 
     // beat ruler: evaluates tempo and bar signatures to draw a line for each beat
+    if (tempoReader)
     {
-        RectangleList<int> rects;
-
-        const ARA::BarSignaturesConverter<BarSignaturesContentReader> barSignaturesConverter (barSignaturesReader);
-
-        double beatStart = barSignaturesConverter.getBeatForQuarter (tempoConverter.getQuarterForTime (visibleRange.getStart()));
-        double beatEnd = barSignaturesConverter.getBeatForQuarter (tempoConverter.getQuarterForTime (visibleRange.getEnd()));
-        int endBeat = roundToInt (floor (beatEnd));
-        for (int beat = roundToInt (ceil (beatStart)); beat <= endBeat; ++beat)
+        const ARA::PlugIn::HostContentReader<ARA::kARAContentTypeBarSignatures> barSignaturesReader (musicalContext);
+        const ARA::BarSignaturesConverter<decltype (barSignaturesReader)> barSignaturesConverter (barSignaturesReader);
+        if (barSignaturesReader)
         {
-            const auto quarterPos = barSignaturesConverter.getQuarterForBeat (beat);
-            const int x = documentView.getPlaybackRegionsViewsXForTime (tempoConverter.getTimeForQuarter (quarterPos));
-            const auto barSignature = barSignaturesConverter.getBarSignatureForQuarter (quarterPos);
-            const int lineWidth = (quarterPos == barSignature.position) ? heavyLineWidth : lightLineWidth;
-            const int beatsSinceBarStart = roundToInt( barSignaturesConverter.getBeatDistanceFromBarStartForQuarter (quarterPos));
-            const int lineHeight = (beatsSinceBarStart == 0) ? beatsRulerHeight : beatsRulerHeight / 2;
-            rects.addWithoutMerging (Rectangle<int> (x - lineWidth / 2, beatsRulerY + beatsRulerHeight - lineHeight, lineWidth, lineHeight));
+            RectangleList<int> rects;
+            const double beatStart = barSignaturesConverter.getBeatForQuarter (tempoConverter.getQuarterForTime (visibleRange.getStart()));
+            const double beatEnd = barSignaturesConverter.getBeatForQuarter (tempoConverter.getQuarterForTime (visibleRange.getEnd()));
+            const int endBeat = roundToInt (floor (beatEnd));
+            for (int beat = roundToInt (ceil (beatStart)); beat <= endBeat; ++beat)
+            {
+                const auto quarterPos = barSignaturesConverter.getQuarterForBeat (beat);
+                const int x = documentView.getPlaybackRegionsViewsXForTime (tempoConverter.getTimeForQuarter (quarterPos));
+                const auto barSignature = barSignaturesConverter.getBarSignatureForQuarter (quarterPos);
+                const int lineWidth = (quarterPos == barSignature.position) ? heavyLineWidth : lightLineWidth;
+                const int beatsSinceBarStart = roundToInt( barSignaturesConverter.getBeatDistanceFromBarStartForQuarter (quarterPos));
+                const int lineHeight = (beatsSinceBarStart == 0) ? beatsRulerHeight : beatsRulerHeight / 2;
+                rects.addWithoutMerging (Rectangle<int> (x - lineWidth / 2, beatsRulerY + beatsRulerHeight - lineHeight, lineWidth, lineHeight));
+            }
+            g.fillRectList (rects);
         }
-        g.drawText ("beats", bounds.withTrimmedRight (2).withTrimmedBottom (secondsRulerHeight), Justification::bottomRight);
-        g.fillRectList (rects);
     }
+    g.drawText ("beats", bounds.withTrimmedRight (2).withTrimmedBottom (secondsRulerHeight), Justification::bottomRight);
 
     // chord ruler: one rect per chord, skipping empty "no chords"
+    if (tempoReader)
     {
         RectangleList<int> rects;
-        ARA::ChordInterpreter interpreter;
-
+        const ARA::ChordInterpreter interpreter;
+        const ARA::PlugIn::HostContentReader<ARA::kARAContentTypeSheetChords> chordsReader (musicalContext);
         for (auto itChord = chordsReader.begin(); itChord != chordsReader.end(); ++itChord)
         {
             if (interpreter.isNoChord (*itChord))
@@ -184,14 +182,12 @@ void RulersView::paint (juce::Graphics& g)
             g.drawRect (chordRect);
             g.drawText (convertARAString (interpreter.getNameForChord (*itChord).c_str()), chordRect.withTrimmedLeft (2), Justification::centredLeft);
         }
-
-        g.drawText ("chords", bounds.withTrimmedRight (2).withTrimmedBottom (beatsRulerHeight + secondsRulerHeight), Justification::bottomRight);
     }
+    g.drawText ("chords", bounds.withTrimmedRight (2).withTrimmedBottom (beatsRulerHeight + secondsRulerHeight), Justification::bottomRight);
 
     // locators
     {
         lastPaintedPosition = documentView.getPlayHeadPositionInfo();
-
         const auto startInSeconds = tempoConverter.getTimeForQuarter (lastPaintedPosition.ppqLoopStart);
         const auto endInSeconds = tempoConverter.getTimeForQuarter (lastPaintedPosition.ppqLoopEnd);
         const int startX = documentView.getPlaybackRegionsViewsXForTime (startInSeconds);
