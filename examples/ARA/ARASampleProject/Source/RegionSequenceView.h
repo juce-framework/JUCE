@@ -19,6 +19,7 @@ public:
     RegionSequenceView (DocumentView& documentView, ARARegionSequence* sequence);
     ~RegionSequenceView();
 
+    ARARegionSequence* getRegionSequence() const { return regionSequence; }     // careful: may return nullptr!
     Range<double> getTimeRange() const { return (regionSequence != nullptr) ? regionSequence->getTimeRange() : Range<double>(); }
     bool isEmpty() const { return (regionSequence == nullptr) || regionSequence->getPlaybackRegions().empty(); }
 

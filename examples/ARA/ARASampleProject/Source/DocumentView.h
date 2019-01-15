@@ -208,6 +208,16 @@ private:
         DocumentView& documentView;
     };
 
+    // simple utility class to show selected time range
+    class TimeRangeSelectionView  : public Component
+    {
+    public:
+        TimeRangeSelectionView (DocumentView& documentView);
+        void paint (Graphics&) override;
+    private:
+        DocumentView& documentView;
+    };
+
     // simple utility class to partially sync scroll postions of our view ports
     class ScrollMasterViewport    : public Viewport
     {
@@ -238,6 +248,7 @@ private:
     ScrollMasterViewport playbackRegionsViewport;
     Component playbackRegionsView;
     PlayHeadView playHeadView;
+    TimeRangeSelectionView timeRangeSelectionView;
     TrackHeadersViewport trackHeadersViewport;
     Component trackHeadersView;
     Viewport rulersViewport;
