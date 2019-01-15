@@ -3,32 +3,23 @@
 
 In addition to the sample plugin provided in the ARA SDK we've created a sample project showcasing the 
 ARA additions to the JUCE API. The sample project can be found at 
-[JUCE_ARA/examples/ARA/ARASampleProject](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARASampleProject). Below is an example
-of the plugin being hosted by Studio One. 
+[JUCE_ARA/examples/ARA/ARASampleProject](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARASampleProject). Below is an example of the plugin being hosted by Studio One. 
 
 <img src="https://i.imgur.com/gK7GZq8.png"/>
 
+As seen above, the plug-in shows the region sequences and playback regions within their musical context in a horizontally and vertically zoom- and scrollable arrangement view. Time in seconds and in musical beats and chords are drawn in rulers above the arrangement. Name and color of the arrangement objects are used if provided. Selected objects and time range are highlighted, hidden region sequences are not displayed.
 
-In addition to demonstrating ARA integration with JUCE, the sample is also a valuable tool for ARA host
-validation - playing with the project settings with the Projucer is a good way to verify a hosts ability
-to detect ARA plugin properties, and our plugin also showcases the VST3 specific 
-`Presonus::IPluginViewEmbedding` extension that enables better plugin UI integration with the host. 
+The current playback position and cycle range (as communicated through the companion API) are shown.
+By clicking or double-clicking on the rulers, the plug-in requests the host to reposition or start playback.
 
-As of now, the plugin features are as follows:
-- Pass through rendering of ARA playback regions (made a bit more interesting using ARA sample readers)
-- Host playhead control using the ARA playback controller (by clicking / double clicking on the time ruler)
-- Drawing ARA sample content with JUCE (with vertical and horizontal zooming using the +/- buttons)
-- Displaying ARA object properties like color and name 
-- Responding to host playback region and region sequence selection state (as well as a "Selected Track Only" button for hiding unselected items)
-- Visualizing ARA musical context content like chord structure and beat signature changes
+During playback, the plug-in passes through the underlying audio source samples without further modification.
 
-Some features we'd like to add in the future:
-- An editor renderer class that could be used to play metronome clicks
-- Archiving support using JUCE file I/O capabilities
-- Simple analysis capabilities
-- Better UI integration using `juce::LookAndFeel`
+In addition to demonstrating ARA integration with JUCE, the sample is also a valuable tool when implementing ARA hosts - it provides visual feedback for the model graph published by the host, and supports many view integration features as described above.
+Further, playing with the project settings with the Projucer can be a good way to verify a hosts ability
+to detect ARA plugin properties.
 
-<br>
+
+
 The sample can be broken into five important classes:
 
 
