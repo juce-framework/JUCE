@@ -9,6 +9,26 @@ of the plugin being hosted by Studio One.
 <img src="https://i.imgur.com/gK7GZq8.png"/>
 
 
+In addition to demonstrating ARA integration with JUCE, the sample is also a valuable tool for ARA host
+validation - playing with the project settings with the Projucer is a good way to verify a hosts ability
+to detect ARA plugin properties, and our plugin also showcases the VST3 specific 
+`Presonus::IPluginViewEmbedding` extension that enables better plugin UI integration with the host. 
+
+As of now, the plugin features are as follows:
+- Pass through rendering of ARA playback regions (made a bit more interesting using ARA sample readers)
+- Host playhead control using the ARA playback controller (by clicking / double clicking on the time ruler)
+- Drawing ARA sample content with JUCE (with vertical and horizontal zooming using the +/- buttons)
+- Displaying ARA object properties like color and name 
+- Responding to host playback region and region sequence selection state (as well as a "Selected Track Only" button for hiding unselected items)
+- Visualizing ARA musical context content like chord structure and beat signature changes
+
+Some features we'd like to add in the future:
+- An editor renderer class that could be used to play metronome clicks
+- Archiving support using JUCE file I/O capabilities
+- Simple analysis capabilities
+- Better UI integration using `juce::LookAndFeel`
+
+<br>
 The sample can be broken into five important classes:
 
 
