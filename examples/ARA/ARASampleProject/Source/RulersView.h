@@ -19,6 +19,9 @@ public:
     RulersView (DocumentView& documentView);
     ~RulersView();
 
+    // may return nullptr
+    ARAMusicalContext* getCurrentMusicalContext() const { return musicalContext; }
+
     void paint (Graphics&) override;
 
     // ARAEditorView::Listener overrides

@@ -86,6 +86,11 @@ Range<double> DocumentView::getVisibleTimeRange() const
     return { start, end };
 }
 
+ARAMusicalContext* DocumentView::getCurrentMusicalContext() const
+{
+    return rulersView->getCurrentMusicalContext();
+}
+
 int DocumentView::getPlaybackRegionsViewsXForTime (double time) const
 {
     return roundToInt ((time - timeRange.getStart()) / timeRange.getLength() * playbackRegionsView.getWidth());

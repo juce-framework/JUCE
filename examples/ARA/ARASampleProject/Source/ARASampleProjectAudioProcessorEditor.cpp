@@ -1,4 +1,5 @@
 #include "ARASampleProjectAudioProcessorEditor.h"
+#include "ARA_Library/Utilities/ARATimelineConversion.h"
 
 constexpr int kStatusBarHeight = 20;
 constexpr int kPositionLabelWidth = 100;
@@ -165,40 +166,42 @@ void ARASampleProjectAudioProcessorEditor::trackHeightChanged (int newTrackHeigh
 
 //==============================================================================
 
-// the string conversion code is based on AudioPluginDemo.h
-
-// quick-and-dirty function to format a timecode string
+// copied from AudioPluginDemo.h: quick-and-dirty function to format a timecode string
 String timeToTimecodeString (double seconds)
 {
     auto millisecs = roundToInt (seconds * 1000.0);
     auto absMillisecs = std::abs (millisecs);
 
-    return String::formatted ("%02d:%02d:%02d.%03d",
+    return String::formatted ("%02dh:%02dm:%02ds.%03dms",
                               millisecs / 3600000,
                               (absMillisecs / 60000) % 60,
                               (absMillisecs / 1000)  % 60,
                               absMillisecs % 1000);
 }
 
-// quick-and-dirty function to format a bars/beats string
-String quarterNotePositionToBarsBeatsString (double quarterNotes, int numerator, int denominator)
-{
-    if (numerator == 0 || denominator == 0)
-        return "1|1|000";
-
-    auto quarterNotesPerBar = (numerator * 4 / denominator);
-    auto beats  = (fmod (quarterNotes, quarterNotesPerBar) / quarterNotesPerBar) * numerator;
-
-    auto bar    = ((int) quarterNotes) / quarterNotesPerBar + 1;
-    auto beat   = ((int) beats) + 1;
-    auto ticks  = ((int) (fmod (beats, 1.0) * 960.0 + 0.5));
-
-    return String::formatted ("%d|%d|%03d", bar, beat, ticks);
-}
-
 void ARASampleProjectAudioProcessorEditor::timerCallback()
 {
-    auto positionInfo = documentView->getPlayHeadPositionInfo();
-    playheadLinearPositionLabel.setText (timeToTimecodeString (positionInfo.timeInSeconds), dontSendNotification);
-    playheadMusicalPositionLabel.setText (quarterNotePositionToBarsBeatsString (positionInfo.ppqPosition, positionInfo.timeSigNumerator, positionInfo.timeSigDenominator), dontSendNotification);
+    const auto timePosition = documentView->getPlayHeadPositionInfo().timeInSeconds;
+    playheadLinearPositionLabel.setText (timeToTimecodeString (timePosition), dontSendNotification);
+
+    String musicalPosition;
+    const auto musicalContext = documentView->getCurrentMusicalContext();
+    if (musicalContext != nullptr)
+    {
+        const ARA::PlugIn::HostContentReader<ARA::kARAContentTypeTempoEntries> tempoReader (musicalContext);
+        const ARA::PlugIn::HostContentReader<ARA::kARAContentTypeBarSignatures> barSignaturesReader (musicalContext);
+        if (tempoReader && barSignaturesReader)
+        {
+            const ARA::TempoConverter<decltype (tempoReader)> tempoConverter (tempoReader);
+            const ARA::BarSignaturesConverter<decltype (barSignaturesReader)> barSignaturesConverter (barSignaturesReader);
+            const auto quarterPosition = tempoConverter.getQuarterForTime (timePosition);
+            const auto barIndex = barSignaturesConverter.getBarIndexForQuarter (quarterPosition);
+            const auto beatDistance = barSignaturesConverter.getBeatDistanceFromBarStartForQuarter (quarterPosition);
+            const auto quartersPerBeat = 4.0 / (double) barSignaturesConverter.getBarSignatureForQuarter (quarterPosition).denominator;
+            const auto beatIndex = (int) beatDistance;
+            const auto tickIndex = roundToInt ((beatDistance - beatIndex) * quartersPerBeat * 960.0);
+            musicalPosition = String::formatted ("bar %d | beat %d | tick %03d", (barIndex >= 0) ? barIndex + 1 : barIndex, beatIndex + 1, tickIndex + 1);
+        }
+    }
+    playheadMusicalPositionLabel.setText (musicalPosition, dontSendNotification);
 }

@@ -89,6 +89,9 @@ public:
 //  playhead positon unchanged if it is visible while zooming, otherwise keeps current view centered.
 //  This will be easy to do since it is all in linear time now.
 
+    // may return nullptr
+    ARAMusicalContext* getCurrentMusicalContext() const;
+
     // convert between time and x coordinate
     int getPlaybackRegionsViewsXForTime (double time) const;
     double getPlaybackRegionsViewsTimeForX (int x) const;
