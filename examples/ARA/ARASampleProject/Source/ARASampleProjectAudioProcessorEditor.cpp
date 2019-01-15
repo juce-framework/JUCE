@@ -1,6 +1,7 @@
 #include "ARASampleProjectAudioProcessorEditor.h"
 
 constexpr int kStatusBarHeight = 20;
+constexpr int kPositionLabelWidth = 100;
 constexpr int kMinWidth = 500;
 constexpr int kWidth = 1000;
 constexpr int kMinHeight = 200;
@@ -145,8 +146,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
         horizontalZoomInButton.setBounds (verticalZoomLabel.getBounds().translated (-kStatusBarHeight, 0));
         horizontalZoomOutButton.setBounds (horizontalZoomInButton.getBounds().translated (-kStatusBarHeight, 0));
         horizontalZoomLabel.setBounds (horizontalZoomOutButton.getBounds().translated (-kStatusBarHeight, 0));
-        const int kPositionLabelWidth = 100;
-        playheadMusicalPositionLabel.setBounds (horizontalZoomLabel.getX() - kPositionLabelWidth, horizontalZoomLabel.getY(), kPositionLabelWidth, kStatusBarHeight);
+        playheadMusicalPositionLabel.setBounds ((horizontalZoomLabel.getX() + followPlayHeadButton.getRight()) / 2, horizontalZoomLabel.getY(), kPositionLabelWidth, kStatusBarHeight);
         playheadLinearPositionLabel.setBounds (playheadMusicalPositionLabel.getBounds().translated (-kPositionLabelWidth, 0));
     }
 }
