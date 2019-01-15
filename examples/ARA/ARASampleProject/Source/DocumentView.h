@@ -18,8 +18,6 @@ class PlaybackRegionView;
     Any JUCE-based ARA plug-in should be able to utilize this to ease its view implementation.
 
  TODO JUCE_ARA:
-    - add numeric readouts for playhead position in hh:mm:ss:mss and bar:beat(:division:tick?)
-      DocumentView should provide conversion to string, EditorComponent can draw these as labels.
     - provide juce::LookAndFeel mechanism so it could be customized for developer needs.
     - configuration for all sizes: track height, ruler height, track header width etc.
     - refactor RulersViews to have RulersView::RulerBase and subclasses.
