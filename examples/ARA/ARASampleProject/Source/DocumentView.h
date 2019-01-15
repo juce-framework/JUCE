@@ -105,9 +105,6 @@ public:
 
     const AudioPlayHead::CurrentPositionInfo& getPlayHeadPositionInfo() const { return positionInfo; }
 
-    String getTimecodeAsString ();
-    String getMusicalPositionAsString();
-
     // DocumentView States
     void setShowOnlySelectedRegionSequences (bool newVal);
     bool isShowingOnlySelectedRegionSequences() { return showOnlySelectedRegionSequences; }
