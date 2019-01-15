@@ -99,6 +99,13 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         addAndMakeVisible (horizontalZoomOutButton);
         addAndMakeVisible (verticalZoomInButton);
         addAndMakeVisible (verticalZoomOutButton);
+
+        // show playhead position
+        playheadLinearPositionLabel.setJustificationType (Justification::centred);
+        playheadMusicalPositionLabel.setJustificationType (Justification::centred);
+        addAndMakeVisible (playheadMusicalPositionLabel);
+        addAndMakeVisible (playheadLinearPositionLabel);
+        startTimerHz (25);
     }
 
     setSize (kWidth, kHeight);
@@ -138,6 +145,9 @@ void ARASampleProjectAudioProcessorEditor::resized()
         horizontalZoomInButton.setBounds (verticalZoomLabel.getBounds().translated (-kStatusBarHeight, 0));
         horizontalZoomOutButton.setBounds (horizontalZoomInButton.getBounds().translated (-kStatusBarHeight, 0));
         horizontalZoomLabel.setBounds (horizontalZoomOutButton.getBounds().translated (-kStatusBarHeight, 0));
+        const int kPositionLabelWidth = 100;
+        playheadMusicalPositionLabel.setBounds (horizontalZoomLabel.getX() - kPositionLabelWidth, horizontalZoomLabel.getY(), kPositionLabelWidth, kStatusBarHeight);
+        playheadLinearPositionLabel.setBounds (playheadMusicalPositionLabel.getBounds().translated (-kPositionLabelWidth, 0));
     }
 }
 
@@ -151,4 +161,11 @@ void ARASampleProjectAudioProcessorEditor::visibleTimeRangeChanged (Range<double
 void ARASampleProjectAudioProcessorEditor::trackHeightChanged (int newTrackHeight)
 {
     editorDefaultSettings.setProperty (trackHeightId, newTrackHeight, nullptr);
+}
+
+void ARASampleProjectAudioProcessorEditor::timerCallback()
+{
+    // update position from playhead
+    playheadLinearPositionLabel.setText (documentView->getTimecodeAsString(), dontSendNotification);
+    playheadMusicalPositionLabel.setText (documentView->getMusicalPositionAsString(), dontSendNotification);
 }

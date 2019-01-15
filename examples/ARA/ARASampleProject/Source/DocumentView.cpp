@@ -429,3 +429,39 @@ void DocumentView::ScrollMasterViewport::visibleAreaChanged (const Rectangle<int
     documentView.getRulersViewport().setViewPosition (newVisibleArea.getX(), 0);
     documentView.getTrackHeadersViewport().setViewPosition (0, newVisibleArea.getY());
 }
+
+//==============================================================================
+
+// this code is based on JUCE's own AudioPluginDemo.h
+
+// quick-and-dirty function to format a timecode string
+String DocumentView::getTimecodeAsString()
+{
+    auto millisecs = roundToInt (lastReportedPosition.timeInSeconds * 1000.0);
+    auto absMillisecs = std::abs (millisecs);
+
+    return String::formatted ("%02d:%02d:%02d.%03d",
+                              millisecs / 3600000,
+                              (absMillisecs / 60000) % 60,
+                              (absMillisecs / 1000)  % 60,
+                              absMillisecs % 1000);
+}
+
+// quick-and-dirty function to format a bars/beats string
+String DocumentView::getMusicalPositionAsString()
+{
+    auto& numerator    = lastReportedPosition.timeSigNumerator;
+    auto& denominator  = lastReportedPosition.timeSigDenominator;
+    auto& quarterNotes = lastReportedPosition.ppqPosition;
+
+    if (numerator == 0 || denominator == 0)
+        return "1|1|000";
+
+    auto quarterNotesPerBar = (numerator * 4 / denominator);
+    auto beats  = (fmod (quarterNotes, quarterNotesPerBar) / quarterNotesPerBar) * numerator;
+    auto bar    = ((int) quarterNotes) / quarterNotesPerBar + 1;
+    auto beat   = ((int) beats) + 1;
+    auto ticks  = ((int) (fmod (beats, 1.0) * 960.0 + 0.5));
+
+    return String::formatted ("%d|%d|%03d", bar, beat, ticks);
+}

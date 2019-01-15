@@ -10,7 +10,8 @@
 */
 class ARASampleProjectAudioProcessorEditor  : public AudioProcessorEditor,
                                               public AudioProcessorEditorARAExtension,
-                                              private DocumentView::Listener
+                                              private DocumentView::Listener,
+                                              private juce::Timer
 {
 public:
     ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor&);
@@ -23,6 +24,9 @@ public:
     void visibleTimeRangeChanged (Range<double> newVisibleTimeRange, double pixelsPerSecond) override;
     void trackHeightChanged (int newTrackHeight) override;
 
+    // juce::Timer
+    void timerCallback() override;
+
 private:
     std::unique_ptr<DocumentView> documentView;
 
@@ -30,6 +34,7 @@ private:
     TextButton followPlayHeadButton;
     TextButton onlySelectedTracksButton;
     Label horizontalZoomLabel, verticalZoomLabel;
+    Label playheadLinearPositionLabel, playheadMusicalPositionLabel;
     TextButton horizontalZoomInButton, horizontalZoomOutButton;
     TextButton verticalZoomInButton, verticalZoomOutButton;
 
