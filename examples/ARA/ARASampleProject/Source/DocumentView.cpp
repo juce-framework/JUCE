@@ -335,8 +335,7 @@ void DocumentView::timerCallback()
 {
     if (lastReportedPosition.timeInSeconds != positionInfo.timeInSeconds)
     {
-        lastReportedPosition.timeInSeconds = positionInfo.timeInSeconds;
-
+        lastReportedPosition = positionInfo;
         if (scrollFollowsPlayHead)
         {
             const auto visibleRange = getVisibleTimeRange();
