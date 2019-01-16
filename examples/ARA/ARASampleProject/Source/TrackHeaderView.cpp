@@ -44,13 +44,13 @@ void TrackHeaderView::paint (juce::Graphics& g)
     rect.reduce (1, 1);
 
     g.setColour (trackColour);
-    g.fillRect (getLocalBounds());
+    g.fillRect (rect);
 
     if (const auto& name = regionSequence->getName())
     {
         g.setColour (trackColour.contrasting (1.0f));
         g.setFont (Font (12.0f));
-        g.drawText (convertARAString (name), getLocalBounds(), Justification::centredLeft);
+        g.drawText (convertARAString (name), rect, Justification::centredLeft);
     }
 }
 
