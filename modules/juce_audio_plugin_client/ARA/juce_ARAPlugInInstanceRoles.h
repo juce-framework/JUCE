@@ -151,7 +151,7 @@ public:
         /** Called when the editor view's selection changes.
             @param currentSelection The current selection state.
         */
-        virtual void onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection) {}
+        virtual void onNewSelection (const ARA::PlugIn::ViewSelection& viewSelection) {}
         /** Called when region sequences are flagged as hidden in the host UI. 
             @param regionSequences A vector containing all hidden region sequences. 
         */

@@ -25,7 +25,7 @@ public:
     void paint (Graphics&) override;
 
     // ARAEditorView::Listener overrides
-    void onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection) override;
+    void onNewSelection (const ARA::PlugIn::ViewSelection& viewSelection) override;
 
     // ARADocument::Listener overrides
     void didEndEditing (ARADocument* document) override;

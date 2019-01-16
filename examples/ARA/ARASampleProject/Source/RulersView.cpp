@@ -225,7 +225,7 @@ void RulersView::mouseDoubleClick (const MouseEvent& /*event*/)
 
 //==============================================================================
 
-void RulersView::onNewSelection (const ARA::PlugIn::ViewSelection& /*currentSelection*/)
+void RulersView::onNewSelection (const ARA::PlugIn::ViewSelection& /*viewSelection*/)
 {
     findMusicalContext();
 }

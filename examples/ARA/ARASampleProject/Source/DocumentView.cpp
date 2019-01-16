@@ -301,7 +301,7 @@ void DocumentView::rebuildRegionSequenceViews()
 }
 
 //==============================================================================
-void DocumentView::onNewSelection (const ARA::PlugIn::ViewSelection& /*currentSelection*/)
+void DocumentView::onNewSelection (const ARA::PlugIn::ViewSelection& /*viewSelection*/)
 {
     if (showOnlySelectedRegionSequences)
         invalidateRegionSequenceViews();

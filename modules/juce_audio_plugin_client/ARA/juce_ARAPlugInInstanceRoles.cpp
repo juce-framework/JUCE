@@ -72,11 +72,11 @@ void ARAEditorRenderer::releaseResources()
 
 //==============================================================================
 
-void ARAEditorView::doNotifySelection (const ARA::PlugIn::ViewSelection* currentSelection) noexcept
+void ARAEditorView::doNotifySelection (const ARA::PlugIn::ViewSelection* viewSelection) noexcept
 {
     listeners.callExpectingUnregistration ([&] (Listener& l)
     {
-        l.onNewSelection (*currentSelection);
+        l.onNewSelection (*viewSelection);
     });
 }
 

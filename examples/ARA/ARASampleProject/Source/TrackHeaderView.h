@@ -18,7 +18,7 @@ public:
     void paint (Graphics&) override;
 
     // ARAEditorView::Listener overrides
-    void onNewSelection (const ARA::PlugIn::ViewSelection& currentSelection) override;
+    void onNewSelection (const ARA::PlugIn::ViewSelection& viewSelection) override;
 
     // ARARegionSequence::Listener overrides
     void didUpdateRegionSequenceProperties (ARARegionSequence* sequence) override;
