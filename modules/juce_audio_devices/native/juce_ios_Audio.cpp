@@ -235,6 +235,7 @@ private:
 
     SharedResourcePointer<AudioSessionHolder> sessionHolder;
 
+    JUCE_DECLARE_WEAK_REFERENCEABLE (iOSAudioIODeviceType)
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (iOSAudioIODeviceType)
 };
 
@@ -242,7 +243,7 @@ private:
 struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                                       public AsyncUpdater
 {
-    Pimpl (iOSAudioIODeviceType& ioDeviceType, iOSAudioIODevice& ioDevice)
+    Pimpl (iOSAudioIODeviceType* ioDeviceType, iOSAudioIODevice& ioDevice)
         : deviceType (ioDeviceType),
           owner (ioDevice)
     {
@@ -416,7 +417,8 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         updateAvailableSampleRates();
         updateAvailableBufferSizes();
 
-        deviceType.callDeviceChangeListeners();
+        if (deviceType != nullptr)
+            deviceType->callDeviceChangeListeners();
     }
 
     void setTargetSampleRateAndBufferSize()
@@ -1310,7 +1312,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
 
     MidiMessageCollector* messageCollector = nullptr;
 
-    iOSAudioIODeviceType& deviceType;
+    WeakReference<iOSAudioIODeviceType> deviceType;
     iOSAudioIODevice& owner;
 
     CriticalSection callbackLock;
@@ -1330,7 +1332,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
 };
 
 //==============================================================================
-iOSAudioIODevice::iOSAudioIODevice (iOSAudioIODeviceType& ioDeviceType, const String&, const String&)
+iOSAudioIODevice::iOSAudioIODevice (iOSAudioIODeviceType* ioDeviceType, const String&, const String&)
     : AudioIODevice (iOSAudioDeviceName, iOSAudioDeviceName),
       pimpl (new Pimpl (ioDeviceType, *this))
 {
@@ -1404,7 +1406,7 @@ bool iOSAudioIODeviceType::hasSeparateInputsAndOutputs() const            { retu
 
 AudioIODevice* iOSAudioIODeviceType::createDevice (const String& outputDeviceName, const String& inputDeviceName)
 {
-    return new iOSAudioIODevice (*this, outputDeviceName, inputDeviceName);
+    return new iOSAudioIODevice (this, outputDeviceName, inputDeviceName);
 }
 
 void iOSAudioIODeviceType::handleRouteChange (AVAudioSessionRouteChangeReason)

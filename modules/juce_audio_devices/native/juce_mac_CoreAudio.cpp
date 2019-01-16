@@ -887,7 +887,9 @@ private:
             case kAudioDevicePropertyDeviceHasChanged:
             case kAudioObjectPropertyOwnedObjects:
                 intern->owner.restart();
-                intern->owner.deviceType.triggerAsyncAudioDeviceListChange();
+
+                if (intern->owner.deviceType != nullptr)
+                    intern->owner.deviceType->triggerAsyncAudioDeviceListChange();
                 break;
 
             case kAudioDevicePropertyBufferSizeRange:
@@ -946,7 +948,7 @@ class CoreAudioIODevice   : public AudioIODevice,
                             private Timer
 {
 public:
-    CoreAudioIODevice (CoreAudioIODeviceType& dt,
+    CoreAudioIODevice (CoreAudioIODeviceType* dt,
                        const String& deviceName,
                        AudioDeviceID inputDeviceId, const int inputIndex_,
                        AudioDeviceID outputDeviceId, const int outputIndex_)
@@ -1109,7 +1111,8 @@ public:
 
     void audioDeviceListChanged()
     {
-        deviceType.audioDeviceListChanged();
+        if (deviceType != nullptr)
+            deviceType->audioDeviceListChanged();
     }
 
     void restart()
@@ -1146,7 +1149,7 @@ public:
         deviceWrapperRestartCallback = cb;
     }
 
-    CoreAudioIODeviceType& deviceType;
+    WeakReference<CoreAudioIODeviceType> deviceType;
     int inputIndex, outputIndex;
 
 private:
@@ -1199,7 +1202,7 @@ class AudioIODeviceCombiner    : public AudioIODevice,
                                  private Timer
 {
 public:
-    AudioIODeviceCombiner (const String& deviceName, CoreAudioIODeviceType& deviceType)
+    AudioIODeviceCombiner (const String& deviceName, CoreAudioIODeviceType* deviceType)
         : AudioIODevice (deviceName, "CoreAudio"),
           Thread (deviceName),
           owner (deviceType)
@@ -1553,7 +1556,7 @@ public:
     }
 
 private:
-    CoreAudioIODeviceType& owner;
+    WeakReference<CoreAudioIODeviceType> owner;
     CriticalSection callbackLock;
     AudioIODeviceCallback* callback = nullptr;
     AudioIODeviceCallback* previousCallback = nullptr;
@@ -1775,8 +1778,8 @@ private:
             }
         }
 
-        if (anySampleRateChanges)
-            owner.audioDeviceListChanged();
+        if (anySampleRateChanges && owner != nullptr)
+            owner->audioDeviceListChanged();
 
         if (callback != nullptr)
             callback->audioDeviceAboutToStart (device);
@@ -2160,20 +2163,20 @@ public:
                                                        : outputDeviceName;
 
         if (inputDeviceID == outputDeviceID)
-            return new CoreAudioIODevice (*this, combinedName, inputDeviceID, inputIndex, outputDeviceID, outputIndex);
+            return new CoreAudioIODevice (this, combinedName, inputDeviceID, inputIndex, outputDeviceID, outputIndex);
 
         std::unique_ptr<CoreAudioIODevice> in, out;
 
         if (inputDeviceID != 0)
-            in.reset (new CoreAudioIODevice (*this, inputDeviceName, inputDeviceID, inputIndex, 0, -1));
+            in.reset (new CoreAudioIODevice (this, inputDeviceName, inputDeviceID, inputIndex, 0, -1));
 
         if (outputDeviceID != 0)
-            out.reset (new CoreAudioIODevice (*this, outputDeviceName, 0, -1, outputDeviceID, outputIndex));
+            out.reset (new CoreAudioIODevice (this, outputDeviceName, 0, -1, outputDeviceID, outputIndex));
 
         if (in == nullptr)   return out.release();
         if (out == nullptr)  return in.release();
 
-        std::unique_ptr<AudioIODeviceCombiner> combo (new AudioIODeviceCombiner (combinedName, *this));
+        std::unique_ptr<AudioIODeviceCombiner> combo (new AudioIODeviceCombiner (combinedName, this));
         combo->addDevice (in.release(),  true, false);
         combo->addDevice (out.release(), false, true);
         return combo.release();
@@ -2235,6 +2238,7 @@ private:
         audioDeviceListChanged();
     }
 
+    JUCE_DECLARE_WEAK_REFERENCEABLE (CoreAudioIODeviceType)
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreAudioIODeviceType)
 };
 
