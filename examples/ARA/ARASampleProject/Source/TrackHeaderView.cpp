@@ -35,18 +35,18 @@ void TrackHeaderView::paint (juce::Graphics& g)
         return;
 
     Colour trackColour;
-    if (auto& colour = regionSequence->getColor())
+    if (const auto& colour = regionSequence->getColor())
         trackColour = Colour::fromFloatRGBA (colour->r, colour->g, colour->b, 1.0f);
 
-    // draw region sequence header
+    auto rect = getLocalBounds();
+    g.setColour (isSelected ? Colours::yellow : Colours::black);
+    g.drawRect (rect);
+    rect.reduce (1, 1);
+
     g.setColour (trackColour);
     g.fillRect (getLocalBounds());
 
-    // draw selection state as a yellow border around the header
-    g.setColour (isSelected ? Colours::yellow : Colours::black);
-    g.drawRect (getLocalBounds());
-
-    if (auto& name = regionSequence->getName())
+    if (const auto& name = regionSequence->getName())
     {
         g.setColour (trackColour.contrasting (1.0f));
         g.setFont (Font (12.0f));

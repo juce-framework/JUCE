@@ -35,25 +35,18 @@ PlaybackRegionView::~PlaybackRegionView()
 //==============================================================================
 void PlaybackRegionView::paint (Graphics& g)
 {
-    constexpr int lineThickness = 1;
-
     Colour regionColour;
-    const ARA::ARAColor* colour = playbackRegion->getColor();
-    if (colour == nullptr)
-        colour = playbackRegion->getRegionSequence()->getColor();
+    const auto& colour = playbackRegion->getEffectiveColor();
     if (colour != nullptr)
         regionColour = Colour::fromFloatRGBA (colour->r, colour->g, colour->b, 1.0f);
 
     auto rect = getLocalBounds();
     g.setColour (isSelected ? Colours::yellow : Colours::black);
-    g.drawRect (rect, lineThickness);
+    g.drawRect (rect);
+    rect.reduce (1, 1);
 
-    rect.reduce (lineThickness, lineThickness);
-    if (colour)
-    {
-        g.setColour (regionColour);
-        g.fillRect (rect);
-    }
+    g.setColour (regionColour);
+    g.fillRect (rect);
 
     if (playbackRegion->getAudioModification()->getAudioSource()->isSampleAccessEnabled())
     {
@@ -79,12 +72,7 @@ void PlaybackRegionView::paint (Graphics& g)
         g.drawText ("Access Disabled", getBounds(), Justification::centred);
     }
 
-    ARA::ARAUtf8String name = playbackRegion->getName();
-    if (name == nullptr)
-        name = playbackRegion->getAudioModification()->getName();
-    if (name == nullptr)
-        name = playbackRegion->getAudioModification()->getAudioSource()->getName();
-    if (name != nullptr)
+    if (const auto& name = playbackRegion->getEffectiveName())
     {
         g.setColour (regionColour.contrasting (1.0f));
         g.setFont (Font (12.0f));
