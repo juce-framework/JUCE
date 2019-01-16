@@ -87,3 +87,20 @@ void RegionSequenceView::willDestroyRegionSequence (ARARegionSequence* sequence)
 
     documentView.invalidateRegionSequenceViews();
 }
+
+void RegionSequenceView::willUpdateRegionSequenceProperties (ARARegionSequence* sequence, ARARegionSequence::PropertiesPtr newProperties)
+{
+    jassert (regionSequence == sequence);
+    if (newProperties->color != regionSequence->getColor())
+    {
+        //  repaints any PlaybackRegion that should follow RegionSequence color
+        for (auto region : playbackRegionViews)
+        {
+            if  (region->getPlaybackRegion()->getColor() == nullptr)
+            {
+                region->repaint();
+            }
+        }
+    }
+}
+
