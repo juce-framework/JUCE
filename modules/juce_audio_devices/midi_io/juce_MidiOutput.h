@@ -34,7 +34,7 @@ namespace juce
 
     @tags{Audio}
 */
-class JUCE_API  MidiOutput  : private Thread
+class JUCE_API  MidiOutput  final : private Thread
 {
 public:
     //==============================================================================
