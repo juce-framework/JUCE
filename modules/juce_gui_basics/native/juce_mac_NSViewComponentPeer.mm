@@ -123,7 +123,9 @@ public:
             if (! [window isOpaque])
                 [window setBackgroundColor: [NSColor clearColor]];
 
-            [view setAppearance: [NSAppearance appearanceNamed: NSAppearanceNameAqua]];
+            #if defined (MAC_OS_X_VERSION_10_9) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9)
+             [view setAppearance: [NSAppearance appearanceNamed: NSAppearanceNameAqua]];
+            #endif
            #endif
 
             [window setHasShadow: ((windowStyleFlags & windowHasDropShadow) != 0)];
