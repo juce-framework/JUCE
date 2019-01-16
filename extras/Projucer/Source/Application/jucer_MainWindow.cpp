@@ -832,7 +832,8 @@ void MainWindowList::reopenLastProjects()
     const ScopedValueSetter<bool> setter (isInReopenLastProjects, true);
 
     for (auto& p : getAppSettings().getLastProjects())
-        openFile (p, true);
+        if (p.existsAsFile())
+            openFile (p, true);
 }
 
 void MainWindowList::sendLookAndFeelChange()
