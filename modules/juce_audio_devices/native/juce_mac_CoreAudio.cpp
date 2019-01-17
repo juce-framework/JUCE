@@ -820,8 +820,8 @@ public:
         const int oldBufferSize = bufferSize;
 
         if (! updateDetailsFromDevice())
-            owner.stop();
-        else if (oldBufferSize != bufferSize || oldSampleRate != sampleRate)
+            owner.stopInternal();
+        else if ((oldBufferSize != bufferSize || oldSampleRate != sampleRate) && owner.shouldRestartDevice())
             owner.restart();
     }
 
@@ -955,9 +955,7 @@ public:
         : AudioIODevice (deviceName, "CoreAudio"),
           deviceType (dt),
           inputIndex (inputIndex_),
-          outputIndex (outputIndex_),
-          isOpen_ (false),
-          isStarted (false)
+          outputIndex (outputIndex_)
     {
         CoreAudioInternal* device = nullptr;
 
@@ -1084,6 +1082,8 @@ public:
 
     void stop() override
     {
+        restartDevice = false;
+
         if (isStarted)
         {
             AudioIODeviceCallback* const lastCallback = internal->callback;
@@ -1094,6 +1094,12 @@ public:
             if (lastCallback != nullptr)
                 lastCallback->audioDeviceStopped();
         }
+    }
+
+    void stopInternal()
+    {
+        stop();
+        restartDevice = true;
     }
 
     bool isPlaying() override
@@ -1131,7 +1137,7 @@ public:
                     if (internal->callback != nullptr)
                         previousCallback = internal->callback;
 
-                    stop();
+                    stopInternal();
                 }
             }
 
@@ -1149,12 +1155,14 @@ public:
         deviceWrapperRestartCallback = cb;
     }
 
+    bool shouldRestartDevice() const noexcept    { return restartDevice; }
+
     WeakReference<CoreAudioIODeviceType> deviceType;
     int inputIndex, outputIndex;
 
 private:
     std::unique_ptr<CoreAudioInternal> internal;
-    bool isOpen_, isStarted;
+    bool isOpen_ = false, isStarted = false, restartDevice = true;
     String lastError;
     AudioIODeviceCallback* previousCallback = nullptr;
     std::function<void()> deviceWrapperRestartCallback = nullptr;
@@ -1167,7 +1175,7 @@ private:
     {
         stopTimer();
 
-        stop();
+        stopInternal();
 
         internal->updateDetailsFromDevice();
 
@@ -1649,7 +1657,7 @@ private:
         }
 
         for (auto* d : devices)
-            d->device->stop();
+            d->device->stopInternal();
 
         if (lastCallback != nullptr)
         {
