@@ -841,9 +841,10 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         if (useInput)
             err = AudioUnitRender (audioUnit, flags, time, 1, numFrames, data);
 
-        const int numChannels = jmax (channelData.inputs->numHardwareChannels,
-                                      channelData.outputs->numHardwareChannels);
-        const UInt32 totalDataSize = sizeof (short) * (uint32) numChannels * numFrames;
+        const auto numChannels = (uint32) jmax (channelData.inputs ->numHardwareChannels,
+                                                channelData.outputs->numHardwareChannels);
+        const auto channelDataSize = sizeof (float) * numFrames;
+        const auto totalDataSize = channelDataSize * numChannels;
 
         const ScopedTryLock stl (callbackLock);
 
@@ -852,44 +853,36 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
             if ((int) numFrames > channelData.getFloatBufferSize())
                 channelData.setFloatBufferSize ((int) numFrames);
 
-            float** inputData  = channelData.audioData.getArrayOfWritePointers();
-            float** outputData = inputData + channelData.inputs->numActiveChannels;
+            float** const inputData = channelData.audioData.getArrayOfWritePointers();
+            float** const outputData = inputData + channelData.inputs->numActiveChannels;
 
             if (useInput)
             {
-                const auto* inputShortData = (short*) data->mBuffers[0].mData;
+                const auto* const readData = (float*) data->mBuffers[0].mData;
 
-                for (UInt32 i = 0; i < numFrames; ++i)
+                for (int c = 0; c < channelData.inputs->numActiveChannels; ++c)
                 {
-                    for (int channel = 0; channel < channelData.inputs->numActiveChannels; ++channel)
-                        inputData[channel][i] = *(inputShortData + channelData.inputs->activeChannelIndicies[channel]) * (1.0f / 32768.0f);
-
-                    inputShortData += numChannels;
+                    auto* start = readData + ((uint32) channelData.inputs->activeChannelIndicies[c] * numFrames);
+                    memcpy (inputData[c], start, channelDataSize);
                 }
             }
             else
             {
-                for (int i = 0; i < channelData.inputs->numActiveChannels; ++i)
-                    zeromem (inputData, sizeof (float) * numFrames);
+                for (int c = 0; c < channelData.inputs->numActiveChannels; ++c)
+                    zeromem (inputData[c], channelDataSize);
             }
 
             callback->audioDeviceIOCallback ((const float**) inputData,  channelData.inputs ->numActiveChannels,
                                                              outputData, channelData.outputs->numActiveChannels,
                                              (int) numFrames);
 
-            auto* outputShortData = (short*) data->mBuffers[0].mData;
+            auto* const writeData = (float*) data->mBuffers[0].mData;
+            zeromem (writeData, totalDataSize);
 
-            zeromem (outputShortData, totalDataSize);
-
-            if (channelData.outputs->numActiveChannels > 0)
+            for (int c = 0; c < channelData.outputs->numActiveChannels; ++c)
             {
-                for (UInt32 i = 0; i < numFrames; ++i)
-                {
-                    for (int channel = 0; channel < channelData.outputs->numActiveChannels; ++channel)
-                        *(outputShortData + channelData.outputs->activeChannelIndicies[channel]) = (short) (outputData[channel][i] * 32767.0f);
-
-                    outputShortData += numChannels;
-                }
+                auto* start = writeData + ((uint32) channelData.outputs->activeChannelIndicies[c] * numFrames);
+                memcpy (start, outputData[c], channelDataSize);
             }
         }
         else
@@ -1006,11 +999,11 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
             zerostruct (format);
             format.mSampleRate = sampleRate;
             format.mFormatID = kAudioFormatLinearPCM;
-            format.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked | kAudioFormatFlagsNativeEndian;
-            format.mBitsPerChannel = 8 * sizeof (short);
+            format.mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagIsNonInterleaved | kAudioFormatFlagsNativeEndian | kLinearPCMFormatFlagIsPacked;
+            format.mBitsPerChannel = 8 * sizeof (float);
             format.mFramesPerPacket = 1;
-            format.mChannelsPerFrame = (UInt32) jmax (channelData.inputs->numHardwareChannels, channelData.outputs->numHardwareChannels);
-            format.mBytesPerFrame = format.mBytesPerPacket = format.mChannelsPerFrame * sizeof (short);
+            format.mChannelsPerFrame = 1;
+            format.mBytesPerFrame = format.mBytesPerPacket = sizeof (float);
 
             AudioUnitSetProperty (audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input,  0, &format, sizeof (format));
             AudioUnitSetProperty (audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &format, sizeof (format));
