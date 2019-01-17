@@ -244,11 +244,22 @@ void DocumentView::resized()
     // enforce zoom in/out limits
     const double validPixelsPerSecond = jlimit (minPixelsPerSecond, maxPixelsPerSecond, getPixelsPerSecond());
     const int playbackRegionsWidth = roundToInt (timeRange.getLength() * validPixelsPerSecond);
-    setPixelsPerSecond (playbackRegionsWidth / timeRange.getLength());       // prevent potential rounding issues
+    const double pixPerSecond = playbackRegionsWidth / timeRange.getLength();
+    // TODO JUCE_ARA separate outsize zoom from track header resize from content zoom!
+    //               changing the zoom triggers a resized(), so we're performing it twice..
+    //               (same for track height handling below)
+    setPixelsPerSecond (pixPerSecond);          // prevent potential rounding issues
+
+    // TODO JUCE_ARA quick'n'dirty, assumes visibility of vertical scroll bar and ignores any rounding issues.
+    const int minTrackHeight = (getHeight() - rulersViewHeight - playbackRegionsViewport.getScrollBarThickness()) / (regionSequenceViews.isEmpty() ? 1 : regionSequenceViews.size());
+    if (showOnlySelectedRegionSequences)
+        setTrackHeight (minTrackHeight);
+    else
+        setTrackHeight (jmax (trackHeight, minTrackHeight));
 
     // update sizes and positions of all views
     playbackRegionsViewport.setBounds (trackHeaderWidth, rulersViewHeight, getWidth() - trackHeaderWidth, getHeight() - rulersViewHeight);
-    playbackRegionsView.setBounds (0, 0, playbackRegionsWidth, jmax (getTrackHeight() * regionSequenceViews.size(), playbackRegionsViewport.getHeight() - playbackRegionsViewport.getScrollBarThickness()));
+    playbackRegionsView.setBounds (0, 0, playbackRegionsWidth, jmax (trackHeight * regionSequenceViews.size(), playbackRegionsViewport.getHeight() - playbackRegionsViewport.getScrollBarThickness()));
 
     rulersViewport.setBounds (trackHeaderWidth, 0, playbackRegionsViewport.getMaximumVisibleWidth(), rulersViewHeight);
     rulersView->setBounds (0, 0, playbackRegionsWidth, rulersViewHeight);
@@ -257,7 +268,6 @@ void DocumentView::resized()
     trackHeadersView.setBounds (0, 0, trackHeadersViewport.getWidth(), playbackRegionsView.getHeight());
 
     int y = 0;
-    const int trackHeight = getTrackHeight();
     for (auto v : regionSequenceViews)
     {
         v->setRegionsViewBoundsByYRange (y, trackHeight);
