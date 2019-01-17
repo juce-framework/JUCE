@@ -119,13 +119,15 @@ void DocumentView::setShowOnlySelectedRegionSequences (bool newVal)
 void DocumentView::setIsRulersVisible (bool shouldBeVisible)
 {
     rulersViewport.setVisible (shouldBeVisible);
-    resized();
+    if (getParentComponent() != nullptr)
+        resized();
 }
 
 void DocumentView::setIsTrackHeadersVisible (bool shouldBeVisible)
 {
     trackHeadersViewport.setVisible (shouldBeVisible);
-    resized();
+    if (getParentComponent() != nullptr)
+        resized();
 }
 
 void DocumentView::setTrackHeaderWidth (int newWidth)
@@ -153,7 +155,8 @@ void DocumentView::setPixelsPerSecond (double newValue)
         return;
 
     pixelsPerSecond = newValue;
-    resized();  // this will constrain pixelsPerSecond range, also it might call again after rounding.
+    if (getParentComponent() != nullptr)
+        resized();  // this will constrain pixelsPerSecond range, also it might call again after rounding.
 
     listeners.callExpectingUnregistration ([&] (Listener& l)
                                            {
@@ -167,7 +170,8 @@ void DocumentView::setTrackHeight (int newHeight)
         return;
 
     trackHeight = newHeight;
-    resized();
+    if (getParentComponent() != nullptr)
+        resized();
 
     listeners.callExpectingUnregistration ([&] (Listener& l)
                                            {
