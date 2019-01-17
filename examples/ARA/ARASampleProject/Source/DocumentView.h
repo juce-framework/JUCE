@@ -258,7 +258,7 @@ private:
 
     // Component View States
     bool scrollFollowsPlayHead = true;
-    bool showOnlySelectedRegionSequences = false;
+    bool showOnlySelectedRegionSequences = true;
 
     double pixelsPerSecond;
     double maxPixelsPerSecond, minPixelsPerSecond;
