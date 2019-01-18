@@ -72,7 +72,7 @@ public:
                   double maxSampleLengthSeconds);
 
     /** Destructor. */
-    ~SamplerSound();
+    ~SamplerSound() override;
 
     //==============================================================================
     /** Returns the sample's name */
@@ -126,7 +126,7 @@ public:
     SamplerVoice();
 
     /** Destructor. */
-    ~SamplerVoice();
+    ~SamplerVoice() override;
 
     //==============================================================================
     bool canPlaySound (SynthesiserSound*) override;

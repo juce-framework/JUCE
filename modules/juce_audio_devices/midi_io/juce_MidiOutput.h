@@ -81,7 +81,7 @@ public:
 
     //==============================================================================
     /** Destructor. */
-    ~MidiOutput();
+    ~MidiOutput() override;
 
     /** Returns the name of this device. */
     const String& getName() const noexcept                      { return name; }

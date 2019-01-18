@@ -59,7 +59,7 @@ public:
         Make sure that you delete any UI components that belong to this plugin before
         deleting the plugin.
     */
-    virtual ~AudioPluginInstance() {}
+    ~AudioPluginInstance() override {}
 
     //==============================================================================
     /** Fills-in the appropriate parts of this plugin description object. */
@@ -110,10 +110,10 @@ protected:
     struct Parameter   : public AudioProcessorParameter
     {
         Parameter();
-        virtual ~Parameter();
+        ~Parameter() override;
 
-        virtual String getText (float value, int maximumStringLength) const override;
-        virtual float getValueForText (const String& text) const override;
+        String getText (float value, int maximumStringLength) const override;
+        float getValueForText (const String& text) const override;
 
         StringArray onStrings, offStrings;
     };

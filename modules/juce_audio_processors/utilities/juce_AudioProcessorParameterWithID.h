@@ -46,7 +46,7 @@ public:
                                    Category category = AudioProcessorParameter::genericParameter);
 
     /** Destructor. */
-    ~AudioProcessorParameterWithID();
+    ~AudioProcessorParameterWithID() override;
 
     /** Provides access to the parameter's ID string. */
     const String paramID;

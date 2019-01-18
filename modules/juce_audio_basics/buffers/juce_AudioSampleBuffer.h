@@ -1080,7 +1080,7 @@ private:
         allocatedBytes = (size_t) numChannels * (size_t) size * sizeof (Type) + channelListSize + 32;
         allocatedData.malloc (allocatedBytes);
         channels = reinterpret_cast<Type**> (allocatedData.get());
-        auto* chan = (Type*) (allocatedData + channelListSize);
+        auto chan = reinterpret_cast<Type*> (allocatedData + channelListSize);
 
         for (int i = 0; i < numChannels; ++i)
         {

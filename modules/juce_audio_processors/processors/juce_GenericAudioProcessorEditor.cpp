@@ -43,7 +43,7 @@ public:
         startTimer (100);
     }
 
-    virtual ~ParameterListener()
+    ~ParameterListener() override
     {
         if (LegacyAudioParameter::isLegacy (&parameter))
             processor.removeListener (this);

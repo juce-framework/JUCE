@@ -38,7 +38,7 @@ public:
     ToneGeneratorAudioSource();
 
     /** Destructor. */
-    ~ToneGeneratorAudioSource();
+    ~ToneGeneratorAudioSource() override;
 
     //==============================================================================
     /** Sets the signal's amplitude. */

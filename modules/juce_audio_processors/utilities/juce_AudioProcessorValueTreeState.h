@@ -220,7 +220,7 @@ public:
     AudioProcessorValueTreeState (AudioProcessor& processorToConnectTo, UndoManager* undoManagerToUse);
 
     /** Destructor. */
-    ~AudioProcessorValueTreeState();
+    ~AudioProcessorValueTreeState() override;
 
     //==============================================================================
     /** This function is deprecated and will be removed in a future version of JUCE!

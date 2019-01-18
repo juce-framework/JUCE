@@ -72,7 +72,7 @@ public:
     MPESynthesiser (MPEInstrument* instrument);
 
     /** Destructor. */
-    ~MPESynthesiser();
+    ~MPESynthesiser() override;
 
     //==============================================================================
     /** Deletes all voices. */

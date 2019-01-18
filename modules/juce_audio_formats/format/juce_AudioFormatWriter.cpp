@@ -222,7 +222,7 @@ public:
         timeSliceThread.addTimeSliceClient (this);
     }
 
-    ~Buffer()
+    ~Buffer() override
     {
         isRunning = false;
         timeSliceThread.removeTimeSliceClient (this);

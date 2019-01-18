@@ -66,7 +66,7 @@ public:
         The input source may be deleted depending on whether the deleteSourceWhenDeleted
         flag was set in the constructor.
     */
-    ~BufferingAudioSource();
+    ~BufferingAudioSource() override;
 
     //==============================================================================
     /** Implementation of the AudioSource method. */

@@ -1319,7 +1319,7 @@ public:
         writeHeader();
     }
 
-    ~WavAudioFormatWriter()
+    ~WavAudioFormatWriter() override
     {
         writeHeader();
     }

@@ -1949,7 +1949,7 @@ long ov_read_filter(OggVorbis_File *vf,char *buffer,int length,
             vorbis_fpu_setround(&fpu);
             for(i=0;i<channels;i++) { /* It's faster in this order */
               float *src=pcm[i];
-              short *dest=((short *)buffer)+i;
+              short *dest=(reinterpret_cast<short*> (buffer))+i;
               for(j=0;j<samples;j++) {
                 val=vorbis_ftoi(src[j]*32768.f);
                 if(val>32767)val=32767;
@@ -1965,7 +1965,7 @@ long ov_read_filter(OggVorbis_File *vf,char *buffer,int length,
             vorbis_fpu_setround(&fpu);
             for(i=0;i<channels;i++) {
               float *src=pcm[i];
-              short *dest=((short *)buffer)+i;
+              short *dest=(reinterpret_cast<short*> (buffer))+i;
               for(j=0;j<samples;j++) {
                 val=vorbis_ftoi(src[j]*32768.f);
                 if(val>32767)val=32767;

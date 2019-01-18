@@ -181,7 +181,7 @@ public:
         AudioObjectAddPropertyListener (deviceID, &pa, deviceListenerProc, this);
     }
 
-    ~CoreAudioInternal()
+    ~CoreAudioInternal() override
     {
         AudioObjectPropertyAddress pa;
         pa.mSelector = kAudioObjectPropertySelectorWildcard;
@@ -980,7 +980,7 @@ public:
         AudioObjectAddPropertyListener (kAudioObjectSystemObject, &pa, hardwareListenerProc, internal.get());
     }
 
-    ~CoreAudioIODevice()
+    ~CoreAudioIODevice() override
     {
         close();
 
@@ -1217,7 +1217,7 @@ public:
     {
     }
 
-    ~AudioIODeviceCombiner()
+    ~AudioIODeviceCombiner() override
     {
         close();
         devices.clear();
@@ -1806,7 +1806,7 @@ private:
             d->setDeviceWrapperRestartCallback ([this] { owner.restartAsync(); });
         }
 
-        ~DeviceWrapper()
+        ~DeviceWrapper() override
         {
             close();
         }
@@ -2018,7 +2018,7 @@ public:
         AudioObjectAddPropertyListener (kAudioObjectSystemObject, &pa, hardwareListenerProc, this);
     }
 
-    ~CoreAudioIODeviceType()
+    ~CoreAudioIODeviceType() override
     {
         AudioObjectPropertyAddress pa;
         pa.mSelector = kAudioHardwarePropertyDevices;
