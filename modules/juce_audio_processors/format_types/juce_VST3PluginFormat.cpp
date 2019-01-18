@@ -182,7 +182,7 @@ static void toProcessContext (Vst::ProcessContext& context, AudioPlayHead* playH
         playHead->getCurrentPosition (position);
 
         context.projectTimeSamples  = position.timeInSamples; //Must always be valid, as stated by the VST3 SDK
-        context.projectTimeMusic    = position.timeInSeconds; //Does not always need to be valid...
+        context.projectTimeMusic    = position.ppqPosition;   //Does not always need to be valid...
         context.tempo               = position.bpm;
         context.timeSigNumerator    = position.timeSigNumerator;
         context.timeSigDenominator  = position.timeSigDenominator;
