@@ -26,6 +26,7 @@
 
 #pragma once
 
+#include "jucer_ProjectExport_MSVC.h"
 
 //==============================================================================
 class CodeBlocksProjectExporter  : public ProjectExporter
@@ -396,6 +397,7 @@ private:
     StringArray getCompilerFlags (const BuildConfiguration& config, CodeBlocksTarget& target) const
     {
         StringArray flags;
+
         if (auto* codeBlocksConfig = dynamic_cast<const CodeBlocksBuildConfiguration*> (&config))
             flags.add (codeBlocksConfig->getArchitectureTypeString());
 
@@ -793,10 +795,27 @@ private:
         }
     }
 
+    bool hasResourceFile() const
+    {
+        return ! projectType.isStaticLibrary();
+    }
+
     void addCompileUnits (XmlElement& xml) const
     {
         for (int i = 0; i < getAllGroups().size(); ++i)
             addCompileUnits (getAllGroups().getReference(i), xml);
+
+        if (hasResourceFile())
+        {
+            auto iconFile = getTargetFolder().getChildFile ("icon.ico");
+            MSVCProjectExporterBase::writeIconFile (*this, iconFile);
+            auto rcFile = getTargetFolder().getChildFile ("resources.rc");
+            MSVCProjectExporterBase::createRCFile (project, iconFile, rcFile);
+
+            auto* unit = xml.createNewChildElement ("Unit");
+            unit->setAttribute ("filename", rcFile.getFileName());
+            unit->createNewChildElement ("Option")->setAttribute ("compilerVar", "WINDRES");
+        }
     }
 
     void createProject (XmlElement& xml) const
