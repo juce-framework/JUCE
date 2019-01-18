@@ -474,9 +474,8 @@ public:
                         break;
 
                     case Steinberg::Vst::Event::kPolyPressureEvent:
-                        result.addEvent (MidiMessage::aftertouchChange (createSafeChannel (e.polyPressure.channel),
-                                                                        createSafeNote (e.polyPressure.pitch),
-                                                                        denormaliseToMidiValue (e.polyPressure.pressure)),
+                        result.addEvent (MidiMessage::channelPressureChange (createSafeChannel (e.polyPressure.channel),
+                                                                             denormaliseToMidiValue (e.polyPressure.pressure)),
                                          e.sampleOffset);
                         break;
 
