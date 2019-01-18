@@ -1318,7 +1318,7 @@ private:
     {
         Expression (const CodeLocation& l, BlockPtr parent) noexcept : Statement (l, parent) {}
         virtual Type getType (CodeGenerator&) const = 0;
-        virtual ExpPtr simplify (SyntaxTreeBuilder&) override    { return this; }
+        ExpPtr simplify (SyntaxTreeBuilder&) override    { return this; }
         virtual String getIdentifier() const { location.throwError ("This operator requires an assignable variable"); return {}; }
     };
 

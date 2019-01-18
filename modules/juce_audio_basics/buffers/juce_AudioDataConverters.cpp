@@ -479,7 +479,7 @@ public:
 
         static void test (UnitTest& unitTest, bool inPlace, Random& r)
         {
-            constexpr int numSamples = 2048;
+            const int numSamples = 2048;
             int32 original[numSamples], converted[numSamples], reversed[numSamples];
 
             {

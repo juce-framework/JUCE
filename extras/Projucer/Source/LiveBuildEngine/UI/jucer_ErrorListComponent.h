@@ -234,7 +234,7 @@ private:
         bool mightContainSubItems() override             { return getNumSubItems() != 0; }
         String getUniqueName() const override            { return uniqueID; }
 
-        void paintContent (Graphics& g, const Rectangle<int>& area) override
+        void paintContent (Graphics& g, Rectangle<int> area) override
         {
             jassert (area.getWidth() >= 0);
 

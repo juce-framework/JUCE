@@ -1610,7 +1610,7 @@ public:
         {
         }
 
-        virtual float getValue() const override
+        float getValue() const override
         {
             if (pluginInstance.editController != nullptr)
             {
@@ -1622,7 +1622,7 @@ public:
             return 0.0f;
         }
 
-        virtual void setValue (float newValue) override
+        void setValue (float newValue) override
         {
             if (pluginInstance.editController != nullptr)
             {
