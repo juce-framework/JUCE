@@ -180,6 +180,14 @@ public:
         jassert (targets.size() > 0);
     }
 
+    void initialiseDependencyPathValues() override
+    {
+        auto targetOS = isWindows() ? TargetOS::windows : TargetOS::linux;
+
+        vstLegacyPathValueWrapper.init ({ settings, Ids::vstLegacyFolder, nullptr },
+                                        getAppSettings().getStoredPath (Ids::vstLegacyPath, targetOS), targetOS);
+    }
+
 private:
     ValueWithDefault targetPlatformValue;
 

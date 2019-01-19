@@ -68,7 +68,7 @@ public:
                     AudioThumbnailCache& cacheToUse);
 
     /** Destructor. */
-    ~AudioThumbnail();
+    ~AudioThumbnail() override;
 
     //==============================================================================
     /** Clears and resets the thumbnail. */

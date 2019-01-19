@@ -46,7 +46,7 @@ public:
     MenuBarModel() noexcept;
 
     /** Destructor. */
-    virtual ~MenuBarModel() override;
+    ~MenuBarModel() override;
 
     //==============================================================================
     /** Call this when some of your menu items have changed.

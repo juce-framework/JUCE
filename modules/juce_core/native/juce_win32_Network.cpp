@@ -350,7 +350,7 @@ private:
 
         int totalBytesSent = 0;
 
-        while (totalBytesSent < postData.getSize())
+        while (totalBytesSent < (int) postData.getSize())
         {
             auto bytesToSend = jmin (1024, (int) postData.getSize() - totalBytesSent);
             DWORD bytesSent = 0;

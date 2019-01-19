@@ -423,7 +423,7 @@ private:
             reset();
         }
 
-        virtual float getValue() const override
+        float getValue() const override
         {
             if (pluginInstance.plugin != nullptr)
             {
@@ -450,7 +450,7 @@ private:
             return {};
         }
 
-        virtual void setValue (float newValue) override
+        void setValue (float newValue) override
         {
             if (auto* interface = pluginInstance.plugin)
             {

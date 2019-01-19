@@ -1518,7 +1518,7 @@ private:
     class ChangeNotificationClient : public ComBaseClassHelper<IMMNotificationClient>
     {
     public:
-        ChangeNotificationClient (WASAPIAudioIODeviceType& d)
+        ChangeNotificationClient (WASAPIAudioIODeviceType* d)
             : ComBaseClassHelper<IMMNotificationClient> (0), device (d) {}
 
         HRESULT STDMETHODCALLTYPE OnDeviceAdded (LPCWSTR)                             { return notify(); }
@@ -1528,9 +1528,15 @@ private:
         HRESULT STDMETHODCALLTYPE OnPropertyValueChanged (LPCWSTR, const PROPERTYKEY) { return notify(); }
 
     private:
-        WASAPIAudioIODeviceType& device;
+        WeakReference<WASAPIAudioIODeviceType> device;
 
-        HRESULT notify()   { device.triggerAsyncDeviceChangeCallback(); return S_OK; }
+        HRESULT notify()
+        {
+            if (device != nullptr)
+            device->triggerAsyncDeviceChangeCallback();
+
+            return S_OK;
+        }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChangeNotificationClient)
     };
@@ -1571,7 +1577,7 @@ private:
             if (! check (enumerator.CoCreateInstance (__uuidof (MMDeviceEnumerator))))
                 return;
 
-            notifyClient = new ChangeNotificationClient (*this);
+            notifyClient = new ChangeNotificationClient (this);
             enumerator->RegisterEndpointNotificationCallback (notifyClient);
         }
 
@@ -1660,6 +1666,7 @@ private:
     }
 
     //==============================================================================
+    JUCE_DECLARE_WEAK_REFERENCEABLE (WASAPIAudioIODeviceType)
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIAudioIODeviceType)
 };
 

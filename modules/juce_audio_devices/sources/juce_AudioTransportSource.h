@@ -49,7 +49,7 @@ public:
     AudioTransportSource();
 
     /** Destructor. */
-    ~AudioTransportSource();
+    ~AudioTransportSource() override;
 
     //==============================================================================
     /** Sets the reader that is being used as the input source.

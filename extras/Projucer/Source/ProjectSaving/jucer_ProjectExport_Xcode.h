@@ -2327,8 +2327,8 @@ private:
            << "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" << newLine
            << "<plist version=\"1.0\">"                    << newLine
            << "<dict>"                                     << newLine
-           << "    <key>BuildSystemType</key>"             << newLine
-           << "    <string>Original</string>"              << newLine
+           << "\t" << "<key>BuildSystemType</key>"         << newLine
+           << "\t" << "<string>Original</string>"          << newLine
            << "</dict>"                                    << newLine
            << "</plist>"                                   << newLine;
 

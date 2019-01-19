@@ -63,7 +63,7 @@ public:
                            bool deleteSourceWhenDeleted);
 
     /** Destructor. */
-    ~AudioSubsectionReader();
+    ~AudioSubsectionReader() override;
 
 
     //==============================================================================

@@ -861,7 +861,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
         {
         }
 
-        virtual float getValue() const override
+        float getValue() const override
         {
             if (auto* effect = pluginInstance.vstEffect)
             {
@@ -873,7 +873,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
             return 0.0f;
         }
 
-        virtual void setValue (float newValue) override
+        void setValue (float newValue) override
         {
             if (auto* effect = pluginInstance.vstEffect)
             {

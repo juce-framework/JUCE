@@ -61,7 +61,7 @@ public:
                        std::function<int (const String& text)> intFromString = nullptr);
 
     /** Destructor. */
-    ~AudioParameterInt();
+    ~AudioParameterInt() override;
 
     /** Returns the parameter's current value as an integer. */
     int get() const noexcept                    { return roundToInt (value); }

@@ -36,6 +36,7 @@ class Project;
 class HeaderComponent    : public Component,
                            private ValueTree::Listener,
                            private ChangeListener,
+                           private Value::Listener,
                            private Timer
 {
 public:
@@ -65,6 +66,7 @@ private:
     //==========================================================================
     void lookAndFeelChanged() override;
     void changeListenerCallback (ChangeBroadcaster* source) override;
+    void valueChanged (Value&) override;
     void timerCallback() override;
 
     //==========================================================================
@@ -99,6 +101,8 @@ private:
 
     Project* project = nullptr;
     ValueTree exportersTree;
+
+    Value projectNameValue;
 
     ComboBox exporterBox;
     Label configLabel  { "Config Label", "Selected exporter" },
