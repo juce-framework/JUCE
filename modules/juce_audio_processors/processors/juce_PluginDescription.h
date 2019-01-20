@@ -101,6 +101,9 @@ public:
     /** True if the plug-in identifies itself as a synthesiser. */
     bool isInstrument;
 
+    /** True if the plug-in supports ARA. */
+    bool isARAEnabled;
+
     /** The number of inputs. */
     int numInputChannels;
 

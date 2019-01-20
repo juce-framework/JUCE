@@ -30,6 +30,7 @@ namespace juce
 PluginDescription::PluginDescription()
     : uid (0),
       isInstrument (false),
+      isARAEnabled (false),
       numInputChannels (0),
       numOutputChannels (0),
       hasSharedContainer (false)
@@ -52,6 +53,7 @@ PluginDescription::PluginDescription (const PluginDescription& other)
       lastInfoUpdateTime (other.lastInfoUpdateTime),
       uid (other.uid),
       isInstrument (other.isInstrument),
+      isARAEnabled (other.isARAEnabled),
       numInputChannels (other.numInputChannels),
       numOutputChannels (other.numOutputChannels),
       hasSharedContainer (other.hasSharedContainer)
@@ -69,6 +71,7 @@ PluginDescription& PluginDescription::operator= (const PluginDescription& other)
     fileOrIdentifier = other.fileOrIdentifier;
     uid = other.uid;
     isInstrument = other.isInstrument;
+    isARAEnabled = other.isARAEnabled;
     lastFileModTime = other.lastFileModTime;
     lastInfoUpdateTime = other.lastInfoUpdateTime;
     numInputChannels = other.numInputChannels;
@@ -114,6 +117,7 @@ XmlElement* PluginDescription::createXml() const
     e->setAttribute ("file", fileOrIdentifier);
     e->setAttribute ("uid", String::toHexString (uid));
     e->setAttribute ("isInstrument", isInstrument);
+    e->setAttribute ("isARAEnabled", isARAEnabled);
     e->setAttribute ("fileTime", String::toHexString (lastFileModTime.toMilliseconds()));
     e->setAttribute ("infoUpdateTime", String::toHexString (lastInfoUpdateTime.toMilliseconds()));
     e->setAttribute ("numInputs", numInputChannels);
@@ -136,6 +140,7 @@ bool PluginDescription::loadFromXml (const XmlElement& xml)
         fileOrIdentifier    = xml.getStringAttribute ("file");
         uid                 = xml.getStringAttribute ("uid").getHexValue32();
         isInstrument        = xml.getBoolAttribute ("isInstrument", false);
+        isARAEnabled        = xml.getBoolAttribute ("isARAEnabled", false);
         lastFileModTime     = Time (xml.getStringAttribute ("fileTime").getHexValue64());
         lastInfoUpdateTime  = Time (xml.getStringAttribute ("infoUpdateTime").getHexValue64());
         numInputChannels    = xml.getIntAttribute ("numInputs");
