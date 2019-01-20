@@ -13,6 +13,7 @@ class PlaybackRegionView    : public Component,
                               private ARAEditorView::Listener,
                               private ARADocument::Listener,
                               private ARAAudioSource::Listener,
+                              private ARAAudioModification::Listener,
                               private ARAPlaybackRegion::Listener
 {
 public:
@@ -35,6 +36,9 @@ public:
 
     // ARAAudioSource::Listener overrides
     void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) override;
+    void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARAAudioSource::PropertiesPtr newProperties) override;
+    // ARAAudioModification::Listener overrides
+    void willUpdateAudioModificationProperties (ARAAudioModification* audioModification, ARAAudioModification::PropertiesPtr newProperties) override;
 
     // ARAPlaybackRegion::Listener overrides
     void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) override;

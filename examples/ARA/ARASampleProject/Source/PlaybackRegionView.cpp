@@ -14,6 +14,7 @@ PlaybackRegionView::PlaybackRegionView (DocumentView& documentView, ARAPlaybackR
     onNewSelection (documentView.getARAEditorView()->getViewSelection());
 
     playbackRegion->getRegionSequence()->getDocument<ARADocument>()->addListener (this);
+    playbackRegion->getAudioModification<ARAAudioModification>()->addListener (this);
     playbackRegion->getAudioModification()->getAudioSource<ARAAudioSource>()->addListener (this);
     playbackRegion->addListener (this);
 
@@ -25,6 +26,7 @@ PlaybackRegionView::~PlaybackRegionView()
     documentView.getARAEditorView()->removeListener (this);
 
     playbackRegion->removeListener (this);
+    playbackRegion->getAudioModification<ARAAudioModification>()->removeListener (this);
     playbackRegion->getAudioModification()->getAudioSource<ARAAudioSource>()->removeListener (this);
     playbackRegion->getRegionSequence()->getDocument<ARADocument>()->removeListener (this);
 
@@ -115,6 +117,20 @@ void PlaybackRegionView::didEnableAudioSourceSamplesAccess (ARAAudioSource* audi
     jassert (audioSource == playbackRegion->getAudioModification()->getAudioSource());
 
     repaint();
+}
+
+void PlaybackRegionView::willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARAAudioSource::PropertiesPtr newProperties)
+{
+    jassert (audioSource == playbackRegion->getAudioModification()->getAudioSource());
+    if (playbackRegion->getName() == nullptr && playbackRegion->getAudioModification()->getName() == nullptr && newProperties->name != audioSource->getName())
+        repaint();
+}
+
+void PlaybackRegionView::willUpdateAudioModificationProperties (ARAAudioModification* audioModification, ARAAudioModification::PropertiesPtr newProperties)
+{
+    jassert (audioModification == playbackRegion->getAudioModification());
+    if (playbackRegion->getName() == nullptr && newProperties->name != audioModification->getName())
+        repaint();
 }
 
 void PlaybackRegionView::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* region, ARAPlaybackRegion::PropertiesPtr newProperties)
