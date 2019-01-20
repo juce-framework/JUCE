@@ -56,7 +56,11 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         onlySelectedTracksButton.setToggleState (documentView->isShowingOnlySelectedRegionSequences(), dontSendNotification);
         onlySelectedTracksButton.onClick = [this]
         {
-            documentView->setShowOnlySelectedRegionSequences (onlySelectedTracksButton.getToggleState());
+            const bool isOnlySelected = onlySelectedTracksButton.getToggleState();
+            documentView->setShowOnlySelectedRegionSequences (isOnlySelected);
+            verticalZoomLabel.setVisible (! isOnlySelected);
+            verticalZoomInButton.setVisible (! isOnlySelected);
+            verticalZoomOutButton.setVisible (! isOnlySelected);
             editorDefaultSettings.setProperty (showOnlySelectedId, onlySelectedTracksButton.getToggleState(), nullptr);
         };
         addAndMakeVisible (onlySelectedTracksButton);
@@ -74,7 +78,6 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         horizontalZoomLabel.setText ("H:", dontSendNotification);
         verticalZoomLabel.setText ("V:", dontSendNotification);
         addAndMakeVisible (horizontalZoomLabel);
-        addAndMakeVisible (verticalZoomLabel);
 
         horizontalZoomInButton.setButtonText("+");
         horizontalZoomOutButton.setButtonText("-");
@@ -99,8 +102,18 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         };
         addAndMakeVisible (horizontalZoomInButton);
         addAndMakeVisible (horizontalZoomOutButton);
-        addAndMakeVisible (verticalZoomInButton);
-        addAndMakeVisible (verticalZoomOutButton);
+        if (! documentView->isShowingOnlySelectedRegionSequences())
+        {
+            addAndMakeVisible (verticalZoomLabel);
+            addAndMakeVisible (verticalZoomInButton);
+            addAndMakeVisible (verticalZoomOutButton);
+        }
+        else
+        {
+            addChildComponent (verticalZoomLabel);
+            addChildComponent (verticalZoomInButton);
+            addChildComponent (verticalZoomOutButton);
+        }
 
         // show playhead position
         playheadLinearPositionLabel.setJustificationType (Justification::centred);
