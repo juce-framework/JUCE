@@ -225,13 +225,13 @@ void Project::initialiseProjectValues()
         reportAppUsageValue.setDefault (true);
     }
 
-    cppStandardValue.referTo                   (projectRoot, Ids::cppLanguageStandard, getUndoManager(), "14");
+    cppStandardValue.referTo       (projectRoot, Ids::cppLanguageStandard, getUndoManager(), "14");
 
-    headerSearchPathsValue.referTo             (projectRoot, Ids::headerPath, getUndoManager());
-    preprocessorDefsValue.referTo              (projectRoot, Ids::defines,    getUndoManager());
-    userNotesValue.referTo                     (projectRoot, Ids::userNotes,  getUndoManager());
+    headerSearchPathsValue.referTo (projectRoot, Ids::headerPath, getUndoManager());
+    preprocessorDefsValue.referTo  (projectRoot, Ids::defines,    getUndoManager());
+    userNotesValue.referTo         (projectRoot, Ids::userNotes,  getUndoManager());
 
-    maxBinaryFileSizeValue.referTo             (projectRoot, Ids::maxBinaryFileSize,         getUndoManager(), 10240 * 1024);
+    maxBinaryFileSizeValue.referTo (projectRoot, Ids::maxBinaryFileSize,         getUndoManager(), 10240 * 1024);
 
     // this is here for backwards compatibility with old projects using the incorrect id
     if (projectRoot.hasProperty ("includeBinaryInAppConfig"))
@@ -239,7 +239,9 @@ void Project::initialiseProjectValues()
     else
         includeBinaryDataInJuceHeaderValue.referTo (projectRoot, Ids::includeBinaryInJuceHeader, getUndoManager(), true);
 
-    binaryDataNamespaceValue.referTo           (projectRoot, Ids::binaryDataNamespace,       getUndoManager(), "BinaryData");
+    binaryDataNamespaceValue.referTo (projectRoot, Ids::binaryDataNamespace, getUndoManager(), "BinaryData");
+
+    compilerFlagSchemesValue.referTo (projectRoot, Ids::compilerFlagSchemes, getUndoManager(), Array<var>(), ",");
 }
 
 void Project::initialiseAudioPluginValues()
@@ -1273,6 +1275,19 @@ bool Project::Item::shouldInhibitWarnings() const           { return state [Ids:
 
 bool Project::Item::isModuleCode() const                    { return belongsToModule; }
 
+Value Project::Item::getCompilerFlagSchemeValue()           { return state.getPropertyAsValue (Ids::compilerFlagScheme, getUndoManager()); }
+String Project::Item::getCompilerFlagSchemeString() const   { return state [Ids::compilerFlagScheme]; }
+
+void Project::Item::setCompilerFlagScheme (const String& scheme)
+{
+    state.getPropertyAsValue (Ids::compilerFlagScheme, getUndoManager()).setValue (scheme);
+}
+
+void Project::Item::clearCurrentCompilerFlagScheme()
+{
+    state.removeProperty (Ids::compilerFlagScheme, getUndoManager());
+}
+
 String Project::Item::getFilePath() const
 {
     if (isFile())
@@ -1639,6 +1654,55 @@ bool Project::isConfigFlagEnabled (const String& name, bool defaultIsEnabled) co
         return defaultIsEnabled;
 
     return configValue;
+}
+
+//==============================================================================
+StringArray Project::getCompilerFlagSchemes() const
+{
+    if (compilerFlagSchemesValue.isUsingDefault())
+        return {};
+
+    StringArray schemes;
+    auto schemesVar = compilerFlagSchemesValue.get();
+
+    if (auto* arr = schemesVar.getArray())
+        schemes.addArray (arr->begin(), arr->end());
+
+    return schemes;
+}
+
+void Project::addCompilerFlagScheme (const String& schemeToAdd)
+{
+    auto schemesVar = compilerFlagSchemesValue.get();
+
+    if (auto* arr = schemesVar.getArray())
+    {
+        arr->addIfNotAlreadyThere (schemeToAdd);
+        compilerFlagSchemesValue.setValue ({ *arr }, getUndoManager());
+    }
+}
+
+void Project::removeCompilerFlagScheme (const String& schemeToRemove)
+{
+    auto schemesVar = compilerFlagSchemesValue.get();
+
+    if (auto* arr = schemesVar.getArray())
+    {
+        for (int i = 0; i < arr->size(); ++i)
+        {
+            if (arr->getUnchecked (i).toString() == schemeToRemove)
+            {
+                arr->remove (i);
+
+                if (arr->isEmpty())
+                    compilerFlagSchemesValue.resetToDefault();
+                else
+                    compilerFlagSchemesValue.setValue ({ *arr }, getUndoManager());
+
+                return;
+            }
+        }
+    }
 }
 
 //==============================================================================

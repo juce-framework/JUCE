@@ -257,6 +257,9 @@ ProjectExporter::ProjectExporter (Project& p, const ValueTree& state)
       smallIconValue          (settings, Ids::smallIcon,           getUndoManager()),
       extraPPDefsValue        (settings, Ids::extraDefs,           getUndoManager())
 {
+    projectCompilerFlagSchemesValue = project.getProjectValue (Ids::compilerFlagSchemes);
+    projectCompilerFlagSchemesValue.addListener (this);
+    updateCompilerFlagValues();
 }
 
 ProjectExporter::~ProjectExporter()
@@ -283,10 +286,18 @@ RelativePath ProjectExporter::rebaseFromProjectFolderToBuildTarget (const Relati
     return path.rebased (project.getProjectFolder(), getTargetFolder(), RelativePath::buildTargetFolder);
 }
 
-bool ProjectExporter::shouldFileBeCompiledByDefault (const RelativePath& file) const
+bool ProjectExporter::shouldFileBeCompiledByDefault (const File& file) const
 {
     return file.hasFileExtension (cOrCppFileExtensions)
         || file.hasFileExtension (asmFileExtensions);
+}
+
+void ProjectExporter::updateCompilerFlagValues()
+{
+    compilerFlagSchemesMap.clear();
+
+    for (auto& scheme : project.getCompilerFlagSchemes())
+        compilerFlagSchemesMap.set (scheme, { settings, scheme, getUndoManager() });
 }
 
 //==============================================================================
@@ -335,6 +346,10 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
         props.add (new TextPropertyComponent (extraCompilerFlagsValue, "Extra Compiler Flags", 8192, true),
                    "Extra command-line flags to be passed to the compiler. This string can contain references to preprocessor definitions in the "
                    "form ${NAME_OF_DEFINITION}, which will be replaced with their values.");
+
+        for (HashMap<String, ValueWithDefault>::Iterator i (compilerFlagSchemesMap); i.next();)
+            props.add (new TextPropertyComponent (compilerFlagSchemesMap.getReference (i.getKey()), "Compiler Flags for " + i.getKey().quoted(), 8192, false),
+                       "The exporter-specific compiler flags that will be added to files using this scheme.");
 
         props.add (new TextPropertyComponent (extraLinkerFlagsValue, "Extra Linker Flags", 8192, true),
                    "Extra command-line flags to be passed to the linker. You might want to use this for adding additional libraries. "

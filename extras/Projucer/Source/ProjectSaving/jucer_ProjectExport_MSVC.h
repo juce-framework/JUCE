@@ -767,8 +767,17 @@ public:
                         if (shouldUseStdCall (path))
                             e->createNewChildElement ("CallingConvention")->addTextElement ("StdCall");
 
-                        if (! projectItem.shouldBeCompiled())
+                        if (projectItem.shouldBeCompiled())
+                        {
+                            auto extraCompilerFlags = owner.compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get().toString();
+
+                            if (extraCompilerFlags.isNotEmpty())
+                                e->createNewChildElement ("AdditionalOptions")->addTextElement (extraCompilerFlags + " %(AdditionalOptions)");
+                        }
+                        else
+                        {
                             e->createNewChildElement ("ExcludedFromBuild")->addTextElement ("true");
+                        }
                     }
                 }
                 else if (path.hasFileExtension (headerFileExtensions))

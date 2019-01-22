@@ -787,7 +787,20 @@ private:
                 unit->createNewChildElement ("Option")->setAttribute ("target", targetName);
             }
 
-            if (! projectItem.shouldBeCompiled())
+            if (projectItem.shouldBeCompiled())
+            {
+                auto extraCompilerFlags = compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get().toString();
+
+                if (extraCompilerFlags.isNotEmpty())
+                {
+                    auto* optionElement = unit->createNewChildElement ("Option");
+
+                    optionElement->setAttribute ("compiler",     "gcc");
+                    optionElement->setAttribute ("use",          1);
+                    optionElement->setAttribute ("buildCommand", "$compiler $options " + extraCompilerFlags + " $includes -c $file  -o $object");
+                }
+            }
+            else
             {
                 unit->createNewChildElement ("Option")->setAttribute ("compile", 0);
                 unit->createNewChildElement ("Option")->setAttribute ("link", 0);

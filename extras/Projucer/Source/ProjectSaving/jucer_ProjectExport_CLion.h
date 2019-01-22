@@ -302,7 +302,7 @@ private:
     }
 
     template <class Target, class Exporter>
-    void getFileInfoList (Target& target, Exporter& exporter, const Project::Item& projectItem, std::vector<std::pair<String, bool>>& fileInfoList) const
+    void getFileInfoList (Target& target, Exporter& exporter, const Project::Item& projectItem, std::vector<std::tuple<String, bool, String>>& fileInfoList) const
     {
         auto targetType = (getProject().getProjectType().isAudioPlugin() ? target.type : Target::Type::SharedCodeTarget);
 
@@ -314,7 +314,9 @@ private:
         else if (projectItem.shouldBeAddedToTargetProject() && getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType )
         {
             auto path = RelativePath (projectItem.getFile(), exporter.getTargetFolder(), RelativePath::buildTargetFolder).toUnixStyle();
-            fileInfoList.push_back ({ path, projectItem.shouldBeCompiled() });
+
+            fileInfoList.push_back (std::make_tuple (path, projectItem.shouldBeCompiled(),
+                                                     exporter.compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get().toString()));
         }
     }
 
@@ -364,12 +366,12 @@ private:
 
             out << newLine;
 
-            std::vector<std::pair<String, bool>> fileInfoList;
+            std::vector<std::tuple<String, bool, String>> fileInfoList;
             for (auto& group : exporter.getAllGroups())
                 getFileInfoList (*target, exporter, group, fileInfoList);
 
             for (auto& fileInfo : fileInfoList)
-                out << "    " << fileInfo.first.quoted() << newLine;
+                out << "    " << std::get<0> (fileInfo).quoted() << newLine;
 
             auto isCMakeBundle = exporter.isXcode() && target->getTargetFileType() == ProjectType::Target::TargetFileType::pluginBundle;
             auto pkgInfoPath = String ("PkgInfo").quoted();
@@ -414,8 +416,19 @@ private:
                 out << "set_source_files_properties (" << xcodeIcnsFilePath << " PROPERTIES MACOSX_PACKAGE_LOCATION \"Resources\")" << newLine;
 
             for (auto& fileInfo : fileInfoList)
-                if (! fileInfo.second)
-                    out << "set_source_files_properties (" << fileInfo.first.quoted() << " PROPERTIES HEADER_FILE_ONLY TRUE)" << newLine;
+            {
+                if (std::get<1> (fileInfo))
+                {
+                    auto extraCompilerFlags = std::get<2> (fileInfo);
+
+                    if (extraCompilerFlags.isNotEmpty())
+                        out << "set_source_files_properties(" << std::get<0> (fileInfo).quoted() << " PROPERTIES COMPILE_FLAGS " << extraCompilerFlags << " )" << newLine;
+                }
+                else
+                {
+                    out << "set_source_files_properties (" << std::get<0> (fileInfo).quoted() << " PROPERTIES HEADER_FILE_ONLY TRUE)" << newLine;
+                }
+            }
 
             out << newLine;
         }

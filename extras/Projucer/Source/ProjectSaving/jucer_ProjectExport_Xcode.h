@@ -2720,7 +2720,8 @@ private:
         output << "\t};\n\trootObject = " << createID ("__root") << ";\n}\n";
     }
 
-    String addBuildFile (const String& path, const String& fileRefID, bool addToSourceBuildPhase, bool inhibitWarnings, XcodeTarget* xcodeTarget = nullptr) const
+    String addBuildFile (const String& path, const String& fileRefID, bool addToSourceBuildPhase, bool inhibitWarnings,
+                         XcodeTarget* xcodeTarget = nullptr, String compilerFlags = {}) const
     {
         auto fileID = createID (path + "buildref");
 
@@ -2737,7 +2738,10 @@ private:
         v->setProperty ("fileRef", fileRefID, nullptr);
 
         if (inhibitWarnings)
-            v->setProperty ("settings", "{ COMPILER_FLAGS = \"-w\"; }", nullptr);
+            compilerFlags += " -w";
+
+        if (compilerFlags.isNotEmpty())
+            v->setProperty ("settings", "{ COMPILER_FLAGS = \"" + compilerFlags.trim() + "\"; }", nullptr);
 
         pbxBuildFiles.add (v);
         return fileID;
@@ -2865,14 +2869,14 @@ private:
     }
 
     String addFile (const RelativePath& path, bool shouldBeCompiled, bool shouldBeAddedToBinaryResources,
-                    bool shouldBeAddedToXcodeResources, bool inhibitWarnings, XcodeTarget* xcodeTarget) const
+                    bool shouldBeAddedToXcodeResources, bool inhibitWarnings, XcodeTarget* xcodeTarget, const String& compilerFlags) const
     {
         auto pathAsString = path.toUnixStyle();
         auto refID = addFileReference (path.toUnixStyle());
 
         if (shouldBeCompiled)
         {
-            addBuildFile (pathAsString, refID, true, inhibitWarnings, xcodeTarget);
+            addBuildFile (pathAsString, refID, true, inhibitWarnings, xcodeTarget, compilerFlags);
         }
         else if (! shouldBeAddedToBinaryResources || shouldBeAddedToXcodeResources)
         {
@@ -2991,7 +2995,7 @@ private:
         overwriteFileIfDifferentOrThrow (entitlementsFile, content);
 
         RelativePath plistPath (entitlementsFile, getTargetFolder(), RelativePath::buildTargetFolder);
-        return addFile (plistPath, false, false, false, false, nullptr);
+        return addFile (plistPath, false, false, false, false, nullptr, {});
     }
 
     String addProjectItem (const Project::Item& projectItem) const
@@ -3039,7 +3043,8 @@ private:
                             projectItem.shouldBeAddedToBinaryResources(),
                             projectItem.shouldBeAddedToXcodeResources(),
                             projectItem.shouldInhibitWarnings(),
-                            xcodeTarget);
+                            xcodeTarget,
+                            compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get());
         }
 
         return {};
@@ -3508,7 +3513,7 @@ private:
     String createFileRefID (const String& path) const           { return createID ("__fileref_" + path); }
     String getIDForGroup (const Project::Item& item) const      { return createID (item.getID()); }
 
-    bool shouldFileBeCompiledByDefault (const RelativePath& file) const override
+    bool shouldFileBeCompiledByDefault (const File& file) const override
     {
         return file.hasFileExtension (sourceFileExtensions);
     }
