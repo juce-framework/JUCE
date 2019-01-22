@@ -22,7 +22,7 @@ getBlockAreaWithinLayout to handle a BlockArea instead of a Rectangle.
 Rationale
 ---------
 The juce_blocks_basics is ISC licensed and therefore cannot depend on the
-GPL/Commercial licensed juce_gui_basics module that contains Rectangle.
+GPL/Commercial licensed juce_graphics module that contains Rectangle.
 
 
 Change
