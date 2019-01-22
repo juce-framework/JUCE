@@ -130,10 +130,13 @@ public:
     /** Returns the length of one logical device unit as physical millimeters. */
     virtual float getMillimetersPerUnit() const = 0;
 
+    /** A simple struct representing the area of a block. */
+    struct BlockArea  { int x, y, width, height; };
+
     /** Returns the area that this block covers within the layout of the group as a whole.
         The coordinates are in logical block units, and are relative to the origin, which is the master block's top-left corner.
      */
-    virtual Rectangle<int> getBlockAreaWithinLayout() const = 0;
+    virtual BlockArea getBlockAreaWithinLayout() const = 0;
 
     /** Returns the rotation of this block relative to the master block in 90 degree steps clockwise. */
     virtual int getRotation() const = 0;
