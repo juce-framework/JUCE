@@ -2106,11 +2106,17 @@ namespace AAXClasses
             check (desc.AddSideChainIn (JUCEAlgorithmIDs::sideChainBuffers));
             properties->AddProperty (AAX_eProperty_SupportsSideChainInput, true);
         }
+        else
+        {
+            // AAX does not allow there to be any gaps in the fields of the algorithm context structure
+            // so just add a dummy one here if there aren't any side chains
+            check (desc.AddPrivateData (JUCEAlgorithmIDs::sideChainBuffers, sizeof (uintptr_t)));
+        }
 
         auto maxAuxBuses = jmax (0, jmin (15, fullLayout.outputBuses.size() - 1));
 
         // add the output buses
-        // This is incrdibly dumb: the output bus format must be well defined
+        // This is incredibly dumb: the output bus format must be well defined
         // for every main bus in/out format pair. This means that there cannot
         // be two configurations with different aux formats but
         // identical main bus in/out formats.
