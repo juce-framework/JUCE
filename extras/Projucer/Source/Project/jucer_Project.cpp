@@ -266,6 +266,9 @@ void Project::initialiseAudioPluginValues()
     pluginVST3CategoryValue.referTo          (projectRoot, Ids::pluginVST3Category,         getUndoManager(), getDefaultVST3Categories(), ",");
     pluginRTASCategoryValue.referTo          (projectRoot, Ids::pluginRTASCategory,         getUndoManager(), getDefaultRTASCategories(), ",");
     pluginAAXCategoryValue.referTo           (projectRoot, Ids::pluginAAXCategory,          getUndoManager(), getDefaultAAXCategories(),  ",");
+
+    pluginVSTNumMidiInputsValue.referTo      (projectRoot, Ids::pluginVSTNumMidiInputs,     getUndoManager(), 16);
+    pluginVSTNumMidiOutputsValue.referTo     (projectRoot, Ids::pluginVSTNumMidiOutputs,    getUndoManager(), 16);
 }
 
 void Project::updateOldStyleConfigList()
@@ -1088,6 +1091,25 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
     props.add (new ChoicePropertyComponent (pluginAUSandboxSafeValue, "Plugin AU is sandbox safe"),
                "Check this box if your plug-in is sandbox safe. A sand-box safe plug-in is loaded in a restricted path and can only access it's own bundle resources and "
                "the Music folder. Your plug-in must be able to deal with this. Newer versions of GarageBand require this to be enabled.");
+
+    {
+        Array<var> varChoices;
+        StringArray stringChoices;
+
+        for (int i = 1; i <= 16; ++i)
+        {
+            varChoices.add (i);
+            stringChoices.add (String (i));
+        }
+
+        props.add (new ChoicePropertyComponentWithEnablement (pluginVSTNumMidiInputsValue, pluginCharacteristicsValue, Ids::pluginWantsMidiIn,
+                                                              "Plugin VST Num MIDI Inputs",  stringChoices, varChoices),
+                   "For VST and VST3 plug-ins that accept MIDI, this allows you to configure the number of inputs.");
+
+        props.add (new ChoicePropertyComponentWithEnablement (pluginVSTNumMidiOutputsValue, pluginCharacteristicsValue, Ids::pluginProducesMidiOut,
+                                                              "Plugin VST Num MIDI Outputs", stringChoices, varChoices),
+                   "For VST and VST3 plug-ins that produce MIDI, this allows you to configure the number of outputs.");
+    }
 
     {
         Array<var> vst3CategoryVars;

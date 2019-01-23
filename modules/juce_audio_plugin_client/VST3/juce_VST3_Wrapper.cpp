@@ -2047,7 +2047,13 @@ public:
             {
                 info.mediaType = Vst::kEvent;
                 info.direction = dir;
+
+               #ifdef JucePlugin_VSTNumMidiInputs
+                info.channelCount = JucePlugin_VSTNumMidiInputs;
+               #else
                 info.channelCount = 16;
+               #endif
+
                 toString128 (info.name, TRANS("MIDI Input"));
                 info.busType = Vst::kMain;
                 return kResultTrue;
@@ -2059,7 +2065,13 @@ public:
             {
                 info.mediaType = Vst::kEvent;
                 info.direction = dir;
+
+               #ifdef JucePlugin_VSTNumMidiOutputs
+                info.channelCount = JucePlugin_VSTNumMidiOutputs;
+               #else
                 info.channelCount = 16;
+               #endif
+
                 toString128 (info.name, TRANS("MIDI Output"));
                 info.busType = Vst::kMain;
                 return kResultTrue;
