@@ -30,6 +30,12 @@ namespace juce
 extern ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component&, void* parent);
 extern bool shouldScaleGLWindow (void* hwnd);
 
+#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && (JucePlugin_Build_VST || JucePlugin_Build_VST3)
+ bool juce_shouldDoubleScaleNativeGLWindow();
+#else
+ bool juce_shouldDoubleScaleNativeGLWindow()  { return false; }
+#endif
+
 //==============================================================================
 class OpenGLContext::NativeContext
    #if JUCE_WIN_PER_MONITOR_DPI_AWARE
@@ -191,6 +197,9 @@ private:
             {
                 auto newScale = peer->getPlatformScaleFactor();
 
+                if (juce_shouldDoubleScaleNativeGLWindow())
+                    newScale *= newScale;
+
                 if (! approximatelyEqual (newScale, nativeScaleFactor))
                 {
                     nativeScaleFactor = newScale;
@@ -220,6 +229,10 @@ private:
            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
             safeComponent = Component::SafePointer<Component> (&component);
             nativeScaleFactor = peer->getPlatformScaleFactor();
+
+            if (juce_shouldDoubleScaleNativeGLWindow())
+                nativeScaleFactor *= nativeScaleFactor;
+
             startTimer (50);
            #endif
 
