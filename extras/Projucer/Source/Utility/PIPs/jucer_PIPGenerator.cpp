@@ -520,11 +520,13 @@ StringArray PIPGenerator::getPluginCharacteristics() const
     auto name = metadata[Ids::name].toString();
 
     if (name == "AudioPluginDemo")
-        return { Ids::pluginWantsMidiIn.toString(),
+        return { Ids::pluginIsSynth.toString(),
+                 Ids::pluginWantsMidiIn.toString(),
                  Ids::pluginProducesMidiOut.toString(),
                  Ids::pluginEditorRequiresKeys.toString() };
     else if (name == "AUv3SynthPlugin" || name == "MultiOutSynthPlugin")
-        return { Ids::pluginWantsMidiIn.toString(),
+        return { Ids::pluginIsSynth.toString(),
+                 Ids::pluginWantsMidiIn.toString(),
                  Ids::pluginIsSynth.toString() };
     else if (name == "ArpeggiatorPlugin")
         return { Ids::pluginWantsMidiIn.toString(),
