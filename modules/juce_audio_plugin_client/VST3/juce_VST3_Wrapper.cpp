@@ -909,8 +909,6 @@ private:
                     w = roundToInt (w / editorScaleFactor);
                     h = roundToInt (h / editorScaleFactor);
 
-                    bool needToResizeHostWindow = false;
-
                     if (getHostType().type == PluginHostType::SteinbergCubase10)
                     {
                         auto integerScaleFactor = (int) std::round (editorScaleFactor);
@@ -921,8 +919,6 @@ private:
                         {
                             w /= integerScaleFactor;
                             h /= integerScaleFactor;
-
-                            needToResizeHostWindow = true;
                         }
                     }
                    #endif
@@ -938,7 +934,7 @@ private:
                         peer->updateBounds();
 
                    #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                    if (needToResizeHostWindow)
+                    if (getHostType().type == PluginHostType::SteinbergCubase10)
                         component->resizeHostWindow();
                    #endif
                 }
