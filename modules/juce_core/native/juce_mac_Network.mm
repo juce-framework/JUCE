@@ -414,9 +414,10 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
                             String extraHeadersToUse,
                             URL::DownloadTask::Listener* listenerToUse,
                             bool shouldUsePostRequest)
-         : targetLocation (targetLocationToUse), listener (listenerToUse),
+         : listener (listenerToUse),
            uniqueIdentifier (String (urlToUse.toString (true).hashCode64()) + String (Random().nextInt64()))
     {
+        targetLocation = targetLocationToUse;
         downloaded = -1;
 
         static DelegateClass cls;
@@ -489,7 +490,6 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
     }
 
     //==============================================================================
-    File targetLocation;
     URL::DownloadTask::Listener* listener;
     NSObject<NSURLSessionDelegate>* delegate = nil;
     NSURLSession* session = nil;

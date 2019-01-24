@@ -40,8 +40,9 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
         jassert (fileStream != nullptr);
         jassert (stream != nullptr);
 
-        contentLength = stream->getTotalLength();
-        httpCode      = stream->getStatusCode();
+        targetLocation = fileStream->getFile();
+        contentLength  = stream->getTotalLength();
+        httpCode       = stream->getStatusCode();
 
         startThread();
     }
