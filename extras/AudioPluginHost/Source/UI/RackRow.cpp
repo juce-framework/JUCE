@@ -39,10 +39,11 @@ RackRow::RackRow ()
     //[Constructor_pre] You can add your own custom stuff here..
     m_keyboardState = new MidiKeyboardState();
     m_soloMode = false;
+    m_current = NULL;
     //[/Constructor_pre]
 
     m_deviceName.reset (new GroupComponent (String(),
-                                            TRANS("Korg M1")));
+                                            String()));
     addAndMakeVisible (m_deviceName.get());
 
     m_deviceName->setBounds (0, -2, 816, 80);
@@ -68,7 +69,7 @@ RackRow::RackRow ()
     m_volume->setTextBoxStyle (Slider::TextBoxBelow, false, 80, 20);
     m_volume->addListener (this);
 
-    m_volume->setBounds (96, 46, 128, 24);
+    m_volume->setBounds (96, 43, 128, 24);
 
     m_bank.reset (new ComboBox (String()));
     addAndMakeVisible (m_bank.get());
@@ -80,7 +81,7 @@ RackRow::RackRow ()
     m_bank->addSeparator();
     m_bank->addListener (this);
 
-    m_bank->setBounds (232, 14, 150, 24);
+    m_bank->setBounds (233, 43, 150, 24);
 
     m_program.reset (new ComboBox (String()));
     addAndMakeVisible (m_program.get());
@@ -90,7 +91,7 @@ RackRow::RackRow ()
     m_program->setTextWhenNoChoicesAvailable (String());
     m_program->addListener (this);
 
-    m_program->setBounds (232, 46, 150, 24);
+    m_program->setBounds (233, 16, 150, 24);
 
     m_transpose.reset (new TextEditor (String()));
     addAndMakeVisible (m_transpose.get());
@@ -153,7 +154,7 @@ RackRow::RackRow ()
     m_keyboard.reset (new MidiKeyboardComponent (*m_keyboardState, MidiKeyboardComponent::Orientation::horizontalKeyboard));
     addAndMakeVisible (m_keyboard.get());
 
-    m_keyboard->setBounds (392, 46, 416, 24);
+    m_keyboard->setBounds (392, 43, 416, 24);
 
     m_doubleOctave.reset (new ToggleButton (String()));
     addAndMakeVisible (m_doubleOctave.get());
@@ -258,6 +259,8 @@ void RackRow::buttonClicked (Button* buttonThatWasClicked)
         m_current->Mute = buttonThatWasClicked->getToggleState();
         repaint(); // to change background of row
         ((AudioProcessorGraph::Node*)m_current->Device->m_node)->setBypassed(m_current->Mute || (m_soloMode && !m_current->Solo));
+        m_program->setEnabled(!m_current->Mute);
+        m_bank->setEnabled(!m_current->Mute);
         //[/UserButtonCode_m_mute]
     }
     else if (buttonThatWasClicked == m_deviceSettings.get())
@@ -313,8 +316,10 @@ void RackRow::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
         //[UserComboBoxCode_m_bank] -- add your combo box handling code here..
         m_current->Bank = m_bank->getSelectedId() - 1;
 
-        // send bank change here
-        // update program dropdown
+        SendMIDIEvent(0xB0, 0x00, 0);
+        SendMIDIEvent(0xB0, 0x20, m_current->Bank);
+
+        // queue up program list update
 
         //[/UserComboBoxCode_m_bank]
     }
@@ -322,9 +327,7 @@ void RackRow::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
     {
         //[UserComboBoxCode_m_program] -- add your combo box handling code here..
         m_current->Program = m_program->getSelectedId() - 1;
-
-        // send program change here
-
+        SendMIDIEvent(0xC0, m_current->Program);
         //[/UserComboBoxCode_m_program]
     }
 
@@ -375,6 +378,18 @@ void RackRow::mouseUp (const MouseEvent& e)
 
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
+
+void RackRow::SendMIDIEvent(int data1, int data2, int data3)
+{
+    MidiBuffer midiMessages;
+    if (data3 >= 0)
+        midiMessages.addEvent(MidiMessage(data1,data2,data3), 0);
+    else
+        midiMessages.addEvent(MidiMessage(data1, data2), 0);
+    AudioBuffer<float> buffer(1, 1);
+    auto processor = ((AudioProcessorGraph::Node*)(m_current->Device->m_node))->getProcessor();
+    processor->processBlock(buffer, midiMessages);
+}
 
 void RackRow::textEditorTextChanged(TextEditor&te)
 {
@@ -450,10 +465,7 @@ void RackRow::Setup(Device &device, FilterGraph &filterGraph, GraphEditorPanel &
             m_bank->addItem(lines[i], i + 1);
     }
     else
-    {
         m_bank->setVisible(false);
-        m_program->setBounds(m_bank->getBounds());
-    }
 
     auto programFile = File::getCurrentWorkingDirectory().getFullPathName() + "\\" + String(device.Name + ".txt");
     if (File(programFile).exists())
@@ -463,7 +475,7 @@ void RackRow::Setup(Device &device, FilterGraph &filterGraph, GraphEditorPanel &
         for (int i = 0; i<lines.size(); ++i)
             m_program->addItem(lines[i], i + 1);
     }
-    else
+    else if (!m_bank->isVisible())
     {
         auto processor = ((AudioProcessorGraph::Node*)device.m_node)->getProcessor();
 
@@ -483,8 +495,11 @@ void RackRow::Assign(Zone *zone)
     m_lowKey->setText(FormatKey(zone->LowKey));
     m_highKey->setText(FormatKey(zone->HighKey));
     m_transpose->setText(String(zone->Transpose));
-    m_bank->setSelectedId(zone->Bank+1);
-    m_program->setSelectedId(zone->Program+1);
+    
+    if (m_bank->isVisible())
+        m_bank->setSelectedId(zone->Bank + 1);
+    else
+        m_program->setSelectedId(zone->Program + 1);
 
     UpdateKeyboard();
 }
@@ -518,7 +533,7 @@ BEGIN_JUCER_METADATA
   </METHODS>
   <BACKGROUND backgroundColour="0"/>
   <GROUPCOMPONENT name="" id="85efcbef1342dec0" memberName="m_deviceName" virtualName=""
-                  explicitFocusOrder="0" pos="0 -2 816 80" title="Korg M1"/>
+                  explicitFocusOrder="0" pos="0 -2 816 80" title=""/>
   <TOGGLEBUTTON name="" id="2b62ef4a67b701f3" memberName="m_solo" virtualName=""
                 explicitFocusOrder="0" pos="96 14 72 24" buttonText="Solo" connectedEdges="0"
                 needsCallback="1" radioGroupId="0" state="0"/>
@@ -526,15 +541,15 @@ BEGIN_JUCER_METADATA
                 explicitFocusOrder="0" pos="160 14 72 24" buttonText="Mute" connectedEdges="0"
                 needsCallback="1" radioGroupId="0" state="0"/>
   <SLIDER name="" id="a0e2bc5a61933c6d" memberName="m_volume" virtualName=""
-          explicitFocusOrder="0" pos="96 46 128 24" min="-110.00000000000000000000"
+          explicitFocusOrder="0" pos="96 43 128 24" min="-110.00000000000000000000"
           max="12.00000000000000000000" int="0.50000000000000000000" style="LinearBar"
           textBoxPos="TextBoxBelow" textBoxEditable="1" textBoxWidth="80"
           textBoxHeight="20" skewFactor="1.00000000000000000000" needsCallback="1"/>
   <COMBOBOX name="" id="90d63ca95a92a112" memberName="m_bank" virtualName=""
-            explicitFocusOrder="0" pos="232 14 150 24" editable="0" layout="33"
+            explicitFocusOrder="0" pos="233 43 150 24" editable="0" layout="33"
             items="&#10;" textWhenNonSelected="" textWhenNoItems=""/>
   <COMBOBOX name="" id="9de3cb5469378fa1" memberName="m_program" virtualName=""
-            explicitFocusOrder="0" pos="232 46 150 24" editable="0" layout="33"
+            explicitFocusOrder="0" pos="233 16 150 24" editable="0" layout="33"
             items="" textWhenNonSelected="" textWhenNoItems=""/>
   <TEXTEDITOR name="" id="b6e30577b79a003a" memberName="m_transpose" virtualName=""
               explicitFocusOrder="0" pos="648 14 32 24" initialText="" multiline="0"
@@ -557,7 +572,7 @@ BEGIN_JUCER_METADATA
                resourceOver="" opacityOver="1.00000000000000000000" colourOver="0"
                resourceDown="" opacityDown="1.00000000000000000000" colourDown="0"/>
   <GENERICCOMPONENT name="" id="3a433662794e0409" memberName="m_keyboard" virtualName="MidiKeyboardComponent"
-                    explicitFocusOrder="0" pos="392 46 416 24" class="unknown" params="*m_keyboardState, MidiKeyboardComponent::Orientation::horizontalKeyboard"/>
+                    explicitFocusOrder="0" pos="392 43 416 24" class="unknown" params="*m_keyboardState, MidiKeyboardComponent::Orientation::horizontalKeyboard"/>
   <TOGGLEBUTTON name="" id="7a9e84b485ffe060" memberName="m_doubleOctave" virtualName=""
                 explicitFocusOrder="0" pos="392 14 123 24" buttonText="Double octave"
                 connectedEdges="0" needsCallback="1" radioGroupId="0" state="0"/>

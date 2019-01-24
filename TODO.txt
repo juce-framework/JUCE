@@ -1,11 +1,13 @@
-Program/Bank setting when editing (song change should send this too, B3 requires)
-
 Bring in router (changed to new classes)
+Replace JACK with graph - Not sure how to do multiple midi outs, May require new internal plugin (midi filter and channelize)
 Change midi in/outs from RtMidi to JUCE plugins (can keep keylab sysex)
 
-Saving - Check muted zones dont save
-Import command hooked up
 Chunk saving (B3 needs sustain, M1 needs program mode, OPX Famous bank, DirectWave setup, Wavstreamer setup)
+Saving - Check muted zones dont save
+Import command hooked up - Reimport, make sure unused banks are -1
+
+Song change - Check resends Bank/Program
+
 Add octave mode
 Check sampler supports octave mode
 Change songs
