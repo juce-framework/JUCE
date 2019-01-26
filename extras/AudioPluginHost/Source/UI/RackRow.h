@@ -39,6 +39,7 @@ class GraphEditorPanel;
 */
 class RackRow  : public Component,
                  public TextEditor::Listener,
+                 public Timer,
                  public Button::Listener,
                  public Slider::Listener,
                  public ComboBox::Listener
@@ -58,6 +59,7 @@ public:
     void SetSoloMode(bool mode);
     bool IsSolo() { return m_solo->getToggleState(); }
     void SendMIDIEvent(int data1, int data2, int data3 = -1);
+    void timerCallback() override;
     //[/UserMethods]
 
     void paint (Graphics& g) override;

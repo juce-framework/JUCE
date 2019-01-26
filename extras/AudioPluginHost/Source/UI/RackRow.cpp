@@ -318,8 +318,8 @@ void RackRow::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
 
         SendMIDIEvent(0xB0, 0x00, 0);
         SendMIDIEvent(0xB0, 0x20, m_current->Bank);
-
-        // queue up program list update
+        SendMIDIEvent(0xC0, m_current->Program); // I think this is needed to trigger the bank change
+        startTimer(100);
 
         //[/UserComboBoxCode_m_bank]
     }
@@ -495,7 +495,7 @@ void RackRow::Assign(Zone *zone)
     m_lowKey->setText(FormatKey(zone->LowKey));
     m_highKey->setText(FormatKey(zone->HighKey));
     m_transpose->setText(String(zone->Transpose));
-    
+
     if (m_bank->isVisible())
         m_bank->setSelectedId(zone->Bank + 1);
     else
@@ -509,6 +509,17 @@ void RackRow::SetSoloMode(bool mode)
     m_soloMode = mode;
     ((AudioProcessorGraph::Node*)m_current->Device->m_node)->setBypassed(m_current->Mute || (m_soloMode && !m_current->Solo)); // Do this here again. Can't rely on Toggle because only works if changed
 }
+
+void RackRow::timerCallback()
+{   
+    stopTimer();
+    auto processor = ((AudioProcessorGraph::Node*)m_current->Device->m_node)->getProcessor();
+    m_program->clear();
+    for (int i = 0; i < processor->getNumPrograms(); ++i)
+        m_program->addItem(processor->getProgramName(i), i + 1);
+    m_program->setSelectedId(m_current->Program+1);
+}
+
 //[/MiscUserCode]
 
 
@@ -522,7 +533,7 @@ void RackRow::SetSoloMode(bool mode)
 BEGIN_JUCER_METADATA
 
 <JUCER_COMPONENT documentType="Component" className="RackRow" componentName=""
-                 parentClasses="public Component, public TextEditor::Listener"
+                 parentClasses="public Component, public TextEditor::Listener, public Timer"
                  constructorParams="" variableInitialisers="" snapPixels="8" snapActive="1"
                  snapShown="1" overlayOpacity="0.330" fixedSize="1" initialWidth="816"
                  initialHeight="76">

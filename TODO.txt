@@ -1,23 +1,21 @@
-Bring in router (changed to new classes)
-Replace JACK with graph - Not sure how to do multiple midi outs, May require new internal plugin (midi filter and channelize)
-Change midi in/outs from RtMidi to JUCE plugins (can keep keylab sysex)
-
-Chunk saving (B3 needs sustain, M1 needs program mode, OPX Famous bank, DirectWave setup, Wavstreamer setup)
-Saving - Check muted zones dont save
-Import command hooked up - Reimport, make sure unused banks are -1
-
-Song change - Check resends Bank/Program
-
+Timer for program list
+New internal plugin that filters MIDI (Replaces JACK stuff)
+Non standard MIDI commands
+Transition Keylab Sysex to JUCE Midi Out (Will only work on device)
+Chunk saving (M1 needs program mode - Could be a problem and mean we have to use them in combi mode with control channel 16, OPX Famous bank, DirectWave setup, Wavstreamer setup)
 Add octave mode
 Check sampler supports octave mode
-Change songs
-Menu's - Load/Save of classes
+Master volume - new plugin
+Mono switch (simply doesn't mix TruePianos)
+
+Import command hooked up - Reimport, make sure unused banks are -1
+Song change - Check resends Bank/Program
+Saving - Check muted zones dont save
 Setlist manager
-Mono switch
+
 Scoops/Falls for disco strings
 TruePianos crash
-Master volume
-
+Maybe support for M1 Combi (Show must go on)
 
 MainHostWindow
 +graphholder---->GraphDocumentComponent
