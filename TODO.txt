@@ -1,4 +1,6 @@
-Timer for program list
+WS Patches on bank change
+
+M1 Problem - Set defaults (My combi's and patches, midi channel 16), Send 
 New internal plugin that filters MIDI (Replaces JACK stuff)
 Non standard MIDI commands
 Transition Keylab Sysex to JUCE Midi Out (Will only work on device)

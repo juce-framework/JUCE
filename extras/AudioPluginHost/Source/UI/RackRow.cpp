@@ -315,19 +315,47 @@ void RackRow::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
     {
         //[UserComboBoxCode_m_bank] -- add your combo box handling code here..
         m_current->Bank = m_bank->getSelectedId() - 1;
+        m_current->Program = 0;
 
-        SendMIDIEvent(0xB0, 0x00, 0);
-        SendMIDIEvent(0xB0, 0x20, m_current->Bank);
-        SendMIDIEvent(0xC0, m_current->Program); // I think this is needed to trigger the bank change
-        startTimer(100);
+        MidiBuffer midiMessages;
+        midiMessages.addEvent(MidiMessage(0xB0, 0x00, 0), 0);
+        midiMessages.addEvent(MidiMessage(0xB0, 0x20, m_current->Bank), 0);
+        midiMessages.addEvent(MidiMessage(0xC0, m_current->Program), 0); // I think this is needed to trigger the bank change
 
+        AudioBuffer<float> buffer(1, 1);
+        auto processor = ((AudioProcessorGraph::Node*)(m_current->Device->m_node))->getProcessor();
+        processor->processBlock(buffer, midiMessages);
+
+        m_program->clear();
+
+        auto patchFile = File::getCurrentWorkingDirectory().getFullPathName() + "\\" + m_current->Device->PluginName + "_Bank" + String::formatted("%02d_Patches.txt", m_current->Bank);
+        if (File(patchFile).exists())
+        {
+            StringArray lines;
+            File(patchFile).readLines(lines);
+            if (lines[lines.size() - 1] == "")
+                lines.remove(lines.size() - 1);
+            for (int i = 0; i < lines.size(); ++i)
+                m_program->addItem(lines[i], i + 1);
+            m_program->setSelectedId(m_current->Program + 1);
+        }
+        else
+            startTimer(100);
         //[/UserComboBoxCode_m_bank]
     }
     else if (comboBoxThatHasChanged == m_program.get())
     {
         //[UserComboBoxCode_m_program] -- add your combo box handling code here..
-        m_current->Program = m_program->getSelectedId() - 1;
-        SendMIDIEvent(0xC0, m_current->Program);
+        if (m_program->getSelectedId() >= 0)
+        {
+            m_current->Program = m_program->getSelectedId() - 1;
+
+            MidiBuffer midiMessages;
+            midiMessages.addEvent(MidiMessage(0xC0, m_current->Program), 0);
+            AudioBuffer<float> buffer(1, 1);
+            auto processor = ((AudioProcessorGraph::Node*)(m_current->Device->m_node))->getProcessor();
+            processor->processBlock(buffer, midiMessages);
+        }
         //[/UserComboBoxCode_m_program]
     }
 
@@ -378,18 +406,6 @@ void RackRow::mouseUp (const MouseEvent& e)
 
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
-
-void RackRow::SendMIDIEvent(int data1, int data2, int data3)
-{
-    MidiBuffer midiMessages;
-    if (data3 >= 0)
-        midiMessages.addEvent(MidiMessage(data1,data2,data3), 0);
-    else
-        midiMessages.addEvent(MidiMessage(data1, data2), 0);
-    AudioBuffer<float> buffer(1, 1);
-    auto processor = ((AudioProcessorGraph::Node*)(m_current->Device->m_node))->getProcessor();
-    processor->processBlock(buffer, midiMessages);
-}
 
 void RackRow::textEditorTextChanged(TextEditor&te)
 {
@@ -514,7 +530,6 @@ void RackRow::timerCallback()
 {   
     stopTimer();
     auto processor = ((AudioProcessorGraph::Node*)m_current->Device->m_node)->getProcessor();
-    m_program->clear();
     for (int i = 0; i < processor->getNumPrograms(); ++i)
         m_program->addItem(processor->getProgramName(i), i + 1);
     m_program->setSelectedId(m_current->Program+1);
