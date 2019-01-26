@@ -1,0 +1,50 @@
+Piano2 Low
+Piano2High
+Piano1 Low
+Pianos 1
+Piano1High
+Pianos 2
+PianoXHigh
+Brass&Reed
+I saw wind
+Callilead
+Fragile
+5th Ave.
+Band Swell
+Angel Hair
+Rock Organ
+HunduiBell
+Roto-Bass
+AnalogHorn
+Warm+Fuzzy
+Ambient
+SweetBambu
+ReedPiano
+Trpt & Sax
+Dynner   1
+Nylon Slap
+Bali Bells
+Fret Pick
+Orch Pad
+LightAfter
+SawStrings
+SunMallet
+GlassPiano
+MutedBrass
+MagicVoice
+Flat-Top
+Soft-Bells
+BreathBass
+Super Pizz
+Night Dad
+Stringz
+ArcticWind
+GrandHpsic
+Brass Pad
+Ethereal
+PianoStack
+KillerHorn
+TyneVoices
+FolkGuitar
+BottleRing
+HammerBass

@@ -1,0 +1,20 @@
+BrassHorns
+String5Pad
+WoodWinds
+ViolinPizz
+Shaku 1
+Shaku 2
+Cello
+Timp Roll
+Orch Hit
+ArcoString
+SFZ Brass
+Clavier
+SynthPizz
+PowerSweep
+Pulsello
+Whispers
+Wire Pad
+MagicWaves
+SpaceOrch
+Anabell

@@ -1,0 +1,50 @@
+Bell Wave
+Room Hit
+Clang
+Slap Hit
+Wave PAD
+Phase#1
+MIDI Vox
+E.Bass 2
+Syn.Bass4
+Digital 6
+M.Wave
+Syn.Bass3
+S&H-WAVE
+Perc.Wave
+Syn.Bass5
+Digital 7
+Oct.Wave
+24>Guitars
+Steelish
+Squeez Me
+Busy Talk
+Nat'nlGeo.
+HawsPipe
+Fake Voice
+PolarChoir
+Slap Flute
+Clink
+Corli-Oboe
+Pizz-a
+AeroGlide
+Screamer
+PhasePerc
+Drazz
+PianoTalk
+Afterlife
+Mr.Distort
+Tumba
+PopenPipe
+BrakeDrums
+PhasePiano
+VoxMallet
+CrytalSong
+Z>Bass
+Life Magic
+TouchBrass
+PhaseFlow
+Room Kit
+Intrinsync
+A.T.Rotary
+Down River

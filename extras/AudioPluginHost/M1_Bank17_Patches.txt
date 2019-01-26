@@ -1,0 +1,50 @@
+ShinjukuC6
+Water   C6
+Horse   C6
+Autumn  C6
+IndustryC6
+A_HammerC6
+Frog    C6
+Wind 1
+Wind 2
+Wind 3
+Storm
+AutumnPad
+AutumnVO
+AutumnSt
+AutumnM.O.
+AutumnBell
+AutumnPf
+WaterPad
+WaterVibe
+WaterDrop1
+WaterDrop2
+Pour Water
+HoofedBass
+Wind Perc
+Earthquake
+Shiver
+Manta
+DragonLore
+HorseHit!1
+HorseHit!2
+Frog Hit!
+Scratch
+Caution
+Wind Flute
+His Choir
+Specter
+Weird Lore
+Pa!
+SE & Drums
+SFX 01
+SFX 02
+SFX 03
+SFX 04
+SFX 05
+SFX 06
+SFX 07
+SFX 08
+SFX 09
+SFX 10
+Piano

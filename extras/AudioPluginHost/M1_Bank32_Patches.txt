@@ -1,0 +1,20 @@
+HeavySteel
+Metal Solo
+Distr.Solo
+JazzGuitar
+NewElecGtr
+Dark Solo
+Muted 1
+Muted 2
+ConcertGtr
+New 12-Str
+Folk 1
+Picking
+Folk 2
+Bandurka
+Bandurka12
+F-Bass 1
+F-Bass 2
+New Fretl.
+FunkSlap
+Velo-Mute

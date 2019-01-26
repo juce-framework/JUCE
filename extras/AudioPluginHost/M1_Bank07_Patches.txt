@@ -1,0 +1,50 @@
+Rocklead
+CleanStrat
+Jazzguitar
+Spanishgtr
+Muted Gtr.
+Banjo
+Koto
+Santur
+Perfm.Bass
+Round Bass
+FingerBass
+Stique
+Chrs.-Clav
+Monopoly
+Condenser
+Bigband
+Rock-Organ
+Roarng.50s
+Herp'sSolo
+SteelStrng
+Strippen
+Pedalsteel
+Wire-Piano
+Syn-String
+Vari-Fuzz
+Harpsicord
+Vel.-Choir
+Cello
+Syn-Brass
+Elctr.Harp
+Low Orch.
+Mandolin
+DigiEPiano
+Squarelead
+Sitar
+Shrong
+StratChord
+Vocalizer
+Stickpiano
+Colossus
+Oblivion
+Jet-Bass
+Falsepiano
+Afterwards
+SmoothPick
+Interstlr.
+Saw-Play
+Kyrie-Seq.
+Drums #1
+Drums #2

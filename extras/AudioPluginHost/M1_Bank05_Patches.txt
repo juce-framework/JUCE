@@ -1,0 +1,50 @@
+Bassoon
+Clarinet
+Oboe
+FrenchHorn
+Strings 2
+Strings 3
+Bs/Cl/Vl
+Harp
+PipeOrgan1
+PipeOrgan2
+HeavenHarp
+GrandPiano
+Power !
+Pizzicato
+Symphony
+Room Vibes
+ReedFlute
+Chorale
+Soft Flute
+Cornet
+Men&Women
+Cross-Fade
+Strings&BS
+Clavichord
+Bassn-Oboe
+BottleTalk
+ChurchBell
+Strings 1
+Vox Land
+Echo Mute
+Piano&Str
+Big Drums
+EthnicOrch
+The Brass
+Tremolo
+Tiny Bells
+Fanfare
+KettleDrum
+TecnoBlock
+DWGS Organ
+FlugelHorn
+ConcertSax
+SmallOrgan
+ChimeOrgan
+Celesta
+Soft Horn
+SoloString
+SoftString
+Slow Brass
+PadStrings
