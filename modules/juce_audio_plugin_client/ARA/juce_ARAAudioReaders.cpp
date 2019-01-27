@@ -140,24 +140,31 @@ bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, 
 
 //==============================================================================
 
-ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* renderer, std::vector<ARAPlaybackRegion*> const& playbackRegions, bool nonRealtime)
+ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* renderer, std::vector<ARAPlaybackRegion*> const& playbackRegions, bool nonRealtime, double playbackSampleRate /*= 0.0*/, int channelCount /*= 0*/, bool use64BitSamples /*= false*/)
     : AudioFormatReader (nullptr, "ARAPlaybackRegionReader"),
-      isNonRealtime (nonRealtime),
-      playbackRenderer (renderer)
+    isNonRealtime (nonRealtime),
+    playbackRenderer (renderer)
 {
-    // TODO JUCE_ARA
-    // Make sampleRate, numChannels and use64BitSamples available as c'tor parameters instead
-    // of deducing it here. Since regions can start anywhere on the timeline, maybe also define
-    // which time range should be considered as "range to be read by this reader".
-    bitsPerSample = 32;
+    sampleRate = playbackSampleRate;
+    numChannels = channelCount;
+    bitsPerSample = use64BitSamples ? 64 : 32;
     usesFloatingPointData = true;
-    numChannels = 1;
+
+    bool deduceSampleRate = (sampleRate <= 0.0);
+    if (deduceSampleRate)
+        sampleRate = 0.0;
+
+    bool deduceNumChannels = (numChannels < 1);
+    if (deduceNumChannels)
+        numChannels = 0;
 
     if (playbackRegions.size() == 0)
     {
         startInSamples = 0;
         lengthInSamples = 0;
-        sampleRate = 44100.0;
+
+        if (deduceSampleRate)
+            sampleRate = 44100.0;
     }
     else
     {
@@ -170,10 +177,11 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* renderer,
             ARA::PlugIn::AudioModification* modification = playbackRegion->getAudioModification();
             ARA::PlugIn::AudioSource* source = modification->getAudioSource();
 
-            if (sampleRate == 0.0)
+            if (deduceSampleRate && (sampleRate == 0.0))
                 sampleRate = source->getSampleRate();
 
-            numChannels = jmax (numChannels, (unsigned int) source->getChannelCount());
+            if (deduceNumChannels)
+                numChannels = jmax (numChannels, (unsigned int)source->getChannelCount());
 
             regionsStartTime = jmin (regionsStartTime, playbackRegion->getStartInPlaybackTime() - playbackRegion->getHeadTime());
             regionsEndTime = jmax (regionsEndTime, playbackRegion->getEndInPlaybackTime() + playbackRegion->getTailTime());
@@ -278,8 +286,8 @@ void ARAPlaybackRegionReader::willDestroyPlaybackRegion (ARAPlaybackRegion* play
 
 //==============================================================================
 
-ARARegionSequenceReader::ARARegionSequenceReader (ARAPlaybackRenderer* renderer, ARARegionSequence* regionSequence, bool nonRealtime)
-    : ARAPlaybackRegionReader (renderer, regionSequence->getPlaybackRegions<ARAPlaybackRegion>(), nonRealtime),
+ARARegionSequenceReader::ARARegionSequenceReader (ARAPlaybackRenderer* renderer, ARARegionSequence* regionSequence, bool nonRealtime, double playbackSampleRate /*= 0.0*/, int channelCount /*= 0*/, bool use64BitSamples /*= false*/)
+    : ARAPlaybackRegionReader (renderer, regionSequence->getPlaybackRegions<ARAPlaybackRegion>(), nonRealtime, playbackSampleRate, channelCount, use64BitSamples),
       sequence (regionSequence)
 {
     sequence->addListener (this);
