@@ -329,7 +329,7 @@ class ARAAudioModification  : public ARA::PlugIn::AudioModification,
                               public ARAListenableModelClass<ARAAudioModification>
 {
 public:
-    ARAAudioModification (ARAAudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef);
+    ARAAudioModification (ARAAudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, ARAAudioModification* optionalModificationToClone);
 
     class Listener  : public ARAListenableModelClass<ARAAudioModification>::Listener
     {

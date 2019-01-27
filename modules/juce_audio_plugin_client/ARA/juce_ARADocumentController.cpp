@@ -190,9 +190,9 @@ ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugI
 
 //==============================================================================
 
-ARA::PlugIn::AudioModification* ARADocumentController::doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef) noexcept
+ARA::PlugIn::AudioModification* ARADocumentController::doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, ARA::PlugIn::AudioModification* optionalModificationToClone) noexcept
 {
-    return new ARAAudioModification (static_cast<ARAAudioSource*> (audioSource), hostRef);
+    return new ARAAudioModification (static_cast<ARAAudioSource*> (audioSource), hostRef, static_cast<ARAAudioModification*> (optionalModificationToClone));
 }
 
 //==============================================================================
