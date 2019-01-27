@@ -1,11 +1,11 @@
-New internal plugin that filters MIDI (Replaces JACK stuff)
-Non standard MIDI commands
+Finish MIDI filter - Appegiator timer
+
+Non standard MIDI commands (use a single MidiFilter)
 Transition Keylab Sysex to JUCE Midi Out (Will only work on device)
 M1 needs to share VST instance
 Chunk saving (M1 users presets especially Two Part, OPX Famous bank, DirectWave setup, Wavstreamer setup)
-Add octave mode
 Check sampler supports octave mode
-Master volume - new plugin
+Master volume - New gain filter at end
 Mono switch (simply doesn't mix TruePianos)
 
 Import command hooked up - Reimport, make sure unused banks are -1

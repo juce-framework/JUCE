@@ -470,6 +470,85 @@ void RackRow::UpdateKeyboard()
         m_keyboardState->noteOn(1, i, 1.0f);
 }
 
+void RackRow::Filter(MidiBuffer &midiBuffer)
+{
+    if (!midiBuffer.isEmpty())
+    {
+        MidiMessage midi_message(0xf0);
+        MidiBuffer output;
+        int sample_number;
+
+        MidiBuffer::Iterator midi_buffer_iter(midiBuffer);
+        while (midi_buffer_iter.getNextEvent(midi_message, sample_number))
+        {
+            midi_message.setChannel(m_current->Device->Channel + 1);
+            if (midi_message.isNoteOnOrOff() && midi_message.getNoteNumber() >= m_current->LowKey && midi_message.getNoteNumber() <= m_current->HighKey)
+            {
+                int note = midi_message.getNoteNumber() + m_current->Transpose;
+                if (note >= 0 && note <= 127)
+                {
+                    if (m_current->Arpeggiator)
+                    {
+                        if (!m_current->m_anyNotesDown && midi_message.isNoteOn())
+                        {
+                            m_current->m_arpeggiatorBeat = -1;
+#if !defined(WIN32) && !defined(MACOS)
+                            long int msec = 15000 / m_tempo;
+                            long int sec = (msec / 1000);
+                            long int nsec = (msec % 1000) * 1e06;
+
+                            itimerspec ts;
+                            ts.it_value.tv_sec = 0;
+                            ts.it_value.tv_nsec = 1; // one nanosecond until first event (effectively instant)
+                            ts.it_interval.tv_sec = sec;
+                            ts.it_interval.tv_nsec = nsec;
+                            timer_settime(m_appegiatorTimer, 0, &ts, NULL);
+#endif
+                        }
+
+                        m_current->m_notesDown[note] = midi_message.isNoteOn();
+
+                        if (midi_message.isNoteOff())
+                        {
+                            // recalculate this with change
+                            m_current->m_anyNotesDown = false; // see if any notes currently down (so we know whether to restart sequence)
+                            for (int n = 0; n<128; ++n)
+                            {
+                                if (m_current->m_notesDown[n])
+                                {
+                                    m_current->m_anyNotesDown = true;
+                                    break;
+                                }
+                            }
+
+                            // are we ending?
+                            if (!m_current->m_anyNotesDown)
+                            {
+#if !defined(WIN32) && !defined(MACOS)
+                                itimerspec ts;
+                                ts.it_interval.tv_sec = ts.it_value.tv_sec = ts.it_interval.tv_nsec = ts.it_value.tv_nsec = ts.it_interval.tv_nsec = 0;
+                                timer_settime(m_appegiatorTimer, 0, &ts, NULL);
+#endif
+                            }
+                        }
+                    }
+                    else
+                    {
+                        midi_message.setNoteNumber(note);
+                        output.addEvent(midi_message, sample_number);
+                        if (m_current->DoubleOctave && note < 128 - 12)
+                        {
+                            midi_message.setNoteNumber(note+12);
+                            output.addEvent(midi_message, sample_number);
+                        }
+                    }
+                }
+            }
+        }
+        midiBuffer = output;
+    }
+}
+
 void RackRow::Setup(Device &device, FilterGraph &filterGraph, GraphEditorPanel &GraphEditorPanel)
 {
     graph = &filterGraph;
@@ -478,6 +557,8 @@ void RackRow::Setup(Device &device, FilterGraph &filterGraph, GraphEditorPanel &
     m_deviceName->setText(device.Name);
     auto image = ImageFileFormat::loadFrom(File::getCurrentWorkingDirectory().getFullPathName() + "\\" + String(device.Name + ".png"));
     m_deviceSettings->setImages(false, false, false, image, 1.0f, Colours::transparentBlack, image, 1.0f, Colours::transparentBlack, image, 1.0f, Colours::transparentBlack);
+
+    InternalPluginFormat::SetFilterCallback((AudioProcessorGraph::Node*)device.m_midiFilterNode, this);
 
     m_id = device.ID;
 
@@ -536,7 +617,7 @@ void RackRow::SetSoloMode(bool mode)
 }
 
 void RackRow::timerCallback()
-{   
+{
     stopTimer();
     auto processor = ((AudioProcessorGraph::Node*)m_current->Device->m_node)->getProcessor();
     for (int i = 0; i < processor->getNumPrograms(); ++i)
@@ -557,7 +638,7 @@ void RackRow::timerCallback()
 BEGIN_JUCER_METADATA
 
 <JUCER_COMPONENT documentType="Component" className="RackRow" componentName=""
-                 parentClasses="public Component, public TextEditor::Listener, public Timer"
+                 parentClasses="public Component, public TextEditor::Listener, public Timer, public MidiFilterCallback"
                  constructorParams="" variableInitialisers="" snapPixels="8" snapActive="1"
                  snapShown="1" overlayOpacity="0.330" fixedSize="1" initialWidth="816"
                  initialHeight="76">

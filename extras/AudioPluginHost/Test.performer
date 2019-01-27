@@ -101,7 +101,7 @@
         <Rack ID="627145948" Name="Piano" PluginName="TruePianos" PluginFile="C:\Program Files (x86)\VSTPlugins\TruePianos\TruePianos.dll"/>
         <Rack ID="1024611825" Name="B3" PluginName="B4 II" PluginFile="C:\Program Files (x86)\VSTPlugins\B4 II\B4 II.dll"/>
         <Rack ID="1555279137" Name="Korg M1" PluginName="M1" PluginFile="C:\Program Files (x86)\VSTPlugins\M1.dll"/>
-        <Rack ID="1555279139" Name="Korg M1" PluginName="M1" PluginFile="C:\Program Files (x86)\VSTPlugins\M1.dll"/>
+        <Rack ID="1555279140" Name="Korg M1" PluginName="M1" PluginFile="C:\Program Files (x86)\VSTPlugins\M1.dll"/>
         <Rack ID="-1202024641" Name="Korg Wavestation" PluginName="WAVESTATION" PluginFile="C:\Program Files (x86)\VSTPlugins\WAVESTATION.dll"/>
         <Rack ID="522416168" Name="Yamaha DX7" PluginName="FM7" PluginFile="C:\Program Files (x86)\VSTPlugins\FM7\fm7.dll"/>
         <Rack ID="-841590045" Name="Roland JP8000" PluginName="SUPERWAVE P8" PluginFile="C:\Program Files (x86)\VSTPlugins\SUPERWAVEP8.dll"/>

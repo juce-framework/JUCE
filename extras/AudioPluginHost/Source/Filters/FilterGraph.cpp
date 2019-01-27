@@ -217,6 +217,8 @@ Result FilterGraph::loadDocument (const File& file)
         {
             auto node = graph.addNode(instance, (NodeID)rack.ID);
 
+            auto midi = graph.addNode(formatManager.createPluginInstance(internalFormat.midiFilterDesc, graph.getSampleRate(), graph.getBlockSize(), errorMessage));
+
             auto gain = graph.addNode(formatManager.createPluginInstance(internalFormat.gainDesc, graph.getSampleRate(), graph.getBlockSize(), errorMessage));
 
             // State stuff for later
@@ -226,8 +228,10 @@ Result FilterGraph::loadDocument (const File& file)
 
             rack.m_node = (void*)node.get();
             rack.m_gainNode = (void*)gain.get();
+            rack.m_midiFilterNode = (void*)midi.get();
 
-            graph.addConnection({ { m_midiInNode->nodeID, 4096 },{ node->nodeID, 4096 } });
+            graph.addConnection({ { m_midiInNode->nodeID, 4096 },{ midi->nodeID, 4096 } });
+            graph.addConnection({ { midi->nodeID, 4096 },{ node->nodeID, 4096 } });
 
             graph.addConnection({ { node->nodeID, 0 },{ gain->nodeID, 0 } });
             graph.addConnection({ { node->nodeID, 1 },{ gain->nodeID, 1 } });

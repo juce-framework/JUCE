@@ -341,7 +341,6 @@ private:
     Reverb reverb;
 };
 
-
 //==============================================================================
 class GainFilter : public InternalPlugin
 {
@@ -386,6 +385,48 @@ void InternalPluginFormat::SetGain(AudioProcessorGraph::Node *node, float gain)
 }
 
 //==============================================================================
+class MidiFilter : public InternalPlugin
+{
+public:
+    MidiFilter(const PluginDescription& descr) : InternalPlugin(descr), m_callback(NULL) {}
+
+    static String getIdentifier()
+    {
+        return "MidiFilter";
+    }
+
+    void prepareToPlay(double newSampleRate, int) override
+    {
+        newSampleRate;
+    }
+
+    void releaseResources() override {}
+
+    static PluginDescription getPluginDescription()
+    {
+        return InternalPlugin::getPluginDescription(getIdentifier(),true,true);
+    }
+
+    void processBlock(AudioBuffer<float>& buffer, MidiBuffer&midiBuffer) override
+    {
+        buffer;
+        if (m_callback)
+            m_callback->Filter(midiBuffer);
+    }
+
+    void SetCallback(MidiFilterCallback *callback) { m_callback = callback; }
+
+private:
+    MidiFilterCallback *m_callback;
+};
+
+void InternalPluginFormat::SetFilterCallback(AudioProcessorGraph::Node *node, MidiFilterCallback *callback)
+{
+    (static_cast<MidiFilter*>(node->getProcessor()))->SetCallback(callback);
+}
+
+
+//==============================================================================
 InternalPluginFormat::InternalPluginFormat()
 {
     {
@@ -406,6 +447,10 @@ InternalPluginFormat::InternalPluginFormat()
     {
         gainDesc = GainFilter::getPluginDescription();
     }
+
+    {
+        midiFilterDesc = MidiFilter::getPluginDescription();
+    }
 }
 
 AudioPluginInstance* InternalPluginFormat::createInstance (const String& name)
@@ -418,6 +463,7 @@ AudioPluginInstance* InternalPluginFormat::createInstance (const String& name)
     if (name == SineWaveSynth::getIdentifier()) return new SineWaveSynth (SineWaveSynth::getPluginDescription());
     if (name == ReverbFilter::getIdentifier())  return new ReverbFilter (ReverbFilter::getPluginDescription());
     if (name == GainFilter::getIdentifier())  return new GainFilter (GainFilter::getPluginDescription());
+    if (name == MidiFilter::getIdentifier())  return new MidiFilter (MidiFilter::getPluginDescription());
 
     return nullptr;
 }
@@ -446,5 +492,5 @@ void InternalPluginFormat::getAllTypes (OwnedArray<PluginDescription>& results)
     results.add (new PluginDescription (SineWaveSynth::getPluginDescription()));
     results.add (new PluginDescription (ReverbFilter::getPluginDescription()));
     results.add (new PluginDescription (GainFilter::getPluginDescription()));
-
+    results.add (new PluginDescription (MidiFilter::getPluginDescription()));
 }

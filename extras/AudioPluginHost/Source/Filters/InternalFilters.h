@@ -28,6 +28,14 @@
 
 #include "FilterGraph.h"
 
+
+class MidiFilterCallback
+{
+public:
+    virtual void Filter(MidiBuffer &midiBuffer) = 0;
+};
+
+
 //==============================================================================
 /**
     Manages the internal plugin types.
@@ -40,7 +48,7 @@ public:
     ~InternalPluginFormat() {}
 
     //==============================================================================
-    PluginDescription audioInDesc, audioOutDesc, midiInDesc, gainDesc;
+    PluginDescription audioInDesc, audioOutDesc, midiInDesc, gainDesc, midiFilterDesc;
 
     void getAllTypes (OwnedArray<PluginDescription>&);
 
@@ -54,8 +62,8 @@ public:
     String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) override      { return fileOrIdentifier; }
     bool pluginNeedsRescanning (const PluginDescription&) override                      { return false; }
     StringArray searchPathsForPlugins (const FileSearchPath&, bool, bool) override      { return {}; }
-
     static void SetGain(AudioProcessorGraph::Node *node, float gain);
+    static void SetFilterCallback(AudioProcessorGraph::Node *node, MidiFilterCallback *callback);
 
 private:
     //==============================================================================

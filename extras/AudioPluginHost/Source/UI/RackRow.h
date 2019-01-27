@@ -21,6 +21,7 @@
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../../JuceLibraryCode/JuceHeader.h"
+#include "../Filters/InternalFilters.h"
 class Device;
 class Zone;
 class FilterGraph;
@@ -40,6 +41,7 @@ class GraphEditorPanel;
 class RackRow  : public Component,
                  public TextEditor::Listener,
                  public Timer,
+                 public MidiFilterCallback,
                  public Button::Listener,
                  public Slider::Listener,
                  public ComboBox::Listener
@@ -59,6 +61,7 @@ public:
     void SetSoloMode(bool mode);
     bool IsSolo() { return m_solo->getToggleState(); }
     void timerCallback() override;
+    void Filter(MidiBuffer &midiBuffer) override;
     //[/UserMethods]
 
     void paint (Graphics& g) override;

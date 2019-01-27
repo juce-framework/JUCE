@@ -51,7 +51,7 @@ void Performer::Import(const char *fileToLoad)
 		Root.Racks.Rack.push_back(newDevice);
 		if (newDevice.Name == "Korg M1")
 		{
-			newDevice.ID+=2;
+			newDevice.ID+=3;
             newDevice.Channel++;
             Root.Racks.Rack.push_back(newDevice);
 		}
@@ -117,7 +117,7 @@ void Performer::Import(const char *fileToLoad)
 					zone.Arpeggiator = false;
 					zone.Volume = group.Gain;
 					zone.Device = NULL;
-					zone.DeviceID = group.ID + pass * 2;
+					zone.DeviceID = group.ID + pass * 3;
 
 					auto &filter = group.PluginChain.PlugIn[0].MIDIFilterSet.MIDIFilter[0];
 					if (onSetScene.ProgramChange.size() <= 1 && filter.MapChannel.size() == 2 && abs(filter.MapChannel[0].Key.Transpose - filter.MapChannel[0].Key.Transpose) == 12) // see if this is a transpose

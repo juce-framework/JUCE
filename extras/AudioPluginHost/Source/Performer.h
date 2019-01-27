@@ -15,6 +15,7 @@ public:
     int Channel; // always 1 except in rare case of M1 two part
     void *m_node;
     void *m_gainNode;
+    void *m_midiFilterNode;
 
 	template<class A>
 	void Serialize(A& ar)
@@ -42,6 +43,17 @@ public:
     int Transpose;
     int LowKey;
     int HighKey;
+
+    bool m_notesDown[128];
+    bool m_anyNotesDown;
+    int m_arpeggiatorBeat;
+
+    Zone()
+    {
+        m_arpeggiatorBeat = -1;
+        m_anyNotesDown = false;
+        memset(m_notesDown, 0, sizeof(m_notesDown));
+    }
 
 	template<class A>
 	void Serialize(A& ar)
