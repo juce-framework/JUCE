@@ -318,9 +318,10 @@ void RackRow::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
         m_current->Program = 0;
 
         MidiBuffer midiMessages;
-        midiMessages.addEvent(MidiMessage(0xB0, 0x00, 0), 0);
-        midiMessages.addEvent(MidiMessage(0xB0, 0x20, m_current->Bank), 0);
-        midiMessages.addEvent(MidiMessage(0xC0, m_current->Program), 0); // I think this is needed to trigger the bank change
+
+        midiMessages.addEvent(MidiMessage(0xB0 + m_current->Device->Channel - 1, 0x00, 0), 0);
+        midiMessages.addEvent(MidiMessage(0xB0 + m_current->Device->Channel - 1, 0x20, m_current->Bank), 0);
+        midiMessages.addEvent(MidiMessage(0xC0 + m_current->Device->Channel - 1, m_current->Program), 0); // I think this is needed to trigger the bank change
 
         AudioBuffer<float> buffer(1, 1);
         auto processor = ((AudioProcessorGraph::Node*)(m_current->Device->m_node))->getProcessor();
@@ -337,7 +338,7 @@ void RackRow::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
                 lines.remove(lines.size() - 1);
             for (int i = 0; i < lines.size(); ++i)
                 m_program->addItem(lines[i], i + 1);
-            m_program->setSelectedId(m_current->Program + 1);
+            m_program->setSelectedId(m_current->Program + 1, false);
         }
         else
             startTimer(100);
@@ -346,12 +347,20 @@ void RackRow::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
     else if (comboBoxThatHasChanged == m_program.get())
     {
         //[UserComboBoxCode_m_program] -- add your combo box handling code here..
-        if (m_program->getSelectedId() >= 0)
+        if (m_program->getSelectedId() > 0)
         {
             m_current->Program = m_program->getSelectedId() - 1;
 
             MidiBuffer midiMessages;
-            midiMessages.addEvent(MidiMessage(0xC0, m_current->Program), 0);
+
+            if (m_current->Device->PluginName == "M1" && m_current->Device->Channel == 1) // if Channel 2's then should come later
+            {
+                midiMessages.addEvent(MidiMessage(0xBF, 0x00, 0), 0);
+                midiMessages.addEvent(MidiMessage(0xBF, 0x20, 22), 0);
+                midiMessages.addEvent(MidiMessage(0xCF, 49), 0); // Use MIDI channel 16 to put into two part mode (have to use this Combi mode since no way to Sysex it to Program mode with KLC)
+            }
+
+            midiMessages.addEvent(MidiMessage(0xC0 + m_current->Device->Channel - 1, m_current->Program), 0);
             AudioBuffer<float> buffer(1, 1);
             auto processor = ((AudioProcessorGraph::Node*)(m_current->Device->m_node))->getProcessor();
             processor->processBlock(buffer, midiMessages);
@@ -532,7 +541,7 @@ void RackRow::timerCallback()
     auto processor = ((AudioProcessorGraph::Node*)m_current->Device->m_node)->getProcessor();
     for (int i = 0; i < processor->getNumPrograms(); ++i)
         m_program->addItem(processor->getProgramName(i), i + 1);
-    m_program->setSelectedId(m_current->Program+1);
+    m_program->setSelectedId(m_current->Program+1, false);
 }
 
 //[/MiscUserCode]

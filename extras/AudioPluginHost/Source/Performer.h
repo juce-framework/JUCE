@@ -12,6 +12,7 @@ public:
     int ID;
     string Name;
     string PluginName;
+    int Channel; // always 1 except in rare case of M1 two part
     void *m_node;
     void *m_gainNode;
 
@@ -21,6 +22,7 @@ public:
 		AR(ID, XmlAttribute);
         AR(Name, XmlAttribute);
         AR(PluginName, XmlAttribute);
+        AR(Channel, XmlAttribute, 1);
     }
 };
 
@@ -52,8 +54,8 @@ public:
 
 		AR(DeviceID, XmlAttribute);
 		AR(Bank, XmlAttribute);
-		AR(Program, XmlAttribute);
-		AR(Data);
+        AR(Program, XmlAttribute);
+        AR(Data);
 		AR(Volume, XmlAttribute);
         AR(Solo, XmlAttribute);
         AR(Mute, XmlAttribute);
