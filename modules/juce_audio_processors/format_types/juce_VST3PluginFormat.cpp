@@ -2309,12 +2309,16 @@ public:
         if (holder->component != nullptr && processor != nullptr)
         {
             processor->setProcessing (false);
-            //holder->component->setActive (false);
 
-			// TODO JUCE_ARA calling setActive() here is unnecessary, and kills ARA performance
-			// https://forum.juce.com/t/vst3-hosting-calling-setactive-in-reset-should-not-be-necessary-kills-performance/30723
+            // calling setActive() here is unnecessary, and kills ARA performance
+            // https://forum.juce.com/t/vst3-hosting-calling-setactive-in-reset-should-not-be-necessary-kills-performance/30723
+            // we keep it just for the non-ARA case, in order not to break old, misbehaving plug-ins
+            if (! doesComponentHaveARAEntryPoint (holder->component))
+            {
+                holder->component->setActive (false);
+                holder->component->setActive (true);
+            }
 
-            //holder->component->setActive (true);
             processor->setProcessing (true);
         }
     }
