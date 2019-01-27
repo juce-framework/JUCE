@@ -272,6 +272,9 @@ public:
         /** Called when the audio source's content changes. 
             @param audioSource The audio source with updated content
             @param scopeFlags The scope of the content update.
+
+            Note that this may be triggered internally by the plug-in, in which case it may be called
+            outside of a host edit cycle - see ARADocumentController::notifyAudioSourceContentChanged().
         */
         virtual void doUpdateAudioSourceContent (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags) {}
         /** Called before access to an audio source's samples is enabled or disabled. 
@@ -350,6 +353,9 @@ public:
         /** Called when the audio modification's content changes. 
             @param audioModification The audio modification with updated content
             @param scopeFlags The scope of the content update.
+
+            Note that this may be triggered internally by the plug-in, in which case it may be called
+            outside of a host edit cycle - see ARADocumentController::notifyAudioModificationContentChanged().
         */
         virtual void doUpdateAudioModificationContent (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags) {}
         /** Called after an audio modification is activated or deactivated when being removed / added from the host's undo history.
@@ -418,6 +424,9 @@ public:
         /** Called when the playback region's content changes.
             @param playbackRegion The playback region with updated content
             @param scopeFlags The scope of the content update.
+
+            Note that this may be triggered internally by the plug-in, in which case it may be called
+            outside of a host edit cycle - see ARADocumentController::notifyPlaybackRegionContentChanged().
         */
         virtual void didUpdatePlaybackRegionContent (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags) {}
         /** Called before the playback region is destroyed.

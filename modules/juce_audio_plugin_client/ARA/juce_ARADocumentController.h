@@ -15,18 +15,58 @@ public:
 
     //==============================================================================
     // create readers for the various model objects
+
+    /** Create an ARAAudioSourceReader instance to read \p audioSource */
     AudioFormatReader* createAudioSourceReader (ARAAudioSource* audioSource);
+    /** Create an ARAPlaybackRegionReader instance to read all regions in \p playbackRegions
+    
+        See ARAPlaybackRegionReader::ARAPlaybackRegionReader for more information - this function
+        automatically creates an ARAPlaybackRenderer instance and uses it to construct a new ARAPlaybackRegionReader. 
+    */
     ARAPlaybackRegionReader* createPlaybackRegionReader (std::vector<ARAPlaybackRegion*> playbackRegions, bool nonRealtime);
+    /** Create an ARARegionSequenceReader instance to read all of \p regionSequence's regions
+
+        See ARARegionSequenceReader::ARARegionSequenceReader for more information - this function
+        automatically creates an ARAPlaybackRenderer instance and uses it to construct a new ARARegionSequenceReader.
+    */
     ARARegionSequenceReader* createRegionSequenceReader (ARARegionSequence* regionSequence, bool nonRealtime);
 
     //==============================================================================
     // notify the host and any potential internal reader about content changes
-    // must be called by the plug-in model management code on the main thread
-    // Listeners will be notified without begin/endEditing() if this occurs outside of a host edit.
     // Note that while the ARA API allows for specifying update ranges, this feature is not yet
     // in our current plug-in implementation (many hosts do not evaluate it anyways)
+
+    /** notify the host and any listeners of \p audioSource about updates to \audioSource's content.
+        @param audioSource The ARAAudioSource with changed content
+        @param notifyAllAudioModificationsAndPlaybackRegions Whether or not to notify \p audioSource's underlying ARA audio modifications and playback regions. 
+        @param scopeFlags The scope of the changed content
+    
+        This must be called by the plug-in model management code on the message thread whenever changing relevant parts of the internal model graph.
+        A notification to the host will be enqueued, and send out the next time it polls this document controller for model updates.
+        Listeners of \p audioSource however will be notified immediately, even if the call is made outside of a host edit cycle.
+        Accordingly, listeners must be either robust regarding this, or the calling code must set up the appropriate internal states.
+    */
     void notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions = false);
+    /** notify the host and any listeners of \p audioModification about updates to \audioModification's content.
+        @param audioModification The ARAAudioModification with changed content
+        @param notifyAllPlaybackRegions Whether or not to notify \p audioModification's underlying ARA playback regions.
+        @param scopeFlags The scope of the changed content
+
+        This must be called by the plug-in model management code on the message thread whenever changing relevant parts of the internal model graph.
+        A notification to the host will be enqueued, and send out the next time it polls this document controller for model updates.
+        Listeners of \p audioSource however will be notified immediately, even if the call is made outside of a host edit cycle.
+        Accordingly, listeners must be either robust regarding this, or the calling code must set up the appropriate internal states.
+    */
     void notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags, bool notifyAllPlaybackRegions = false);
+    /** notify the host and any listeners of \p playbackRegion about updates to \playbackRegion's content.
+        @param playbackRegion The ARAPlaybackRegion whose content is changing
+        @param scopeFlags The scope of the changed content
+
+        This must be called by the plug-in model management code on the message thread whenever changing relevant parts of the internal model graph.
+        A notification to the host will be enqueued, and send out the next time it polls this document controller for model updates.
+        Listeners of \p audioSource however will be notified immediately, even if the call is made outside of a host edit cycle.
+        Accordingly, listeners must be either robust regarding this, or the calling code must set up the appropriate internal states.
+    */
     void notifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags);
 
     //==============================================================================

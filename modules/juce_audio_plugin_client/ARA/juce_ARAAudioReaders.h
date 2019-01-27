@@ -37,8 +37,8 @@ namespace juce
 /**
     Subclass of AudioFormatReader that reads samples from a single ARA audio source. 
 
-    The reader becomesi invalidated if 
-        - the audio source content is updted in a way that affects its samples
+    The reader becomes invalidated if 
+        - the audio source content is updated in a way that affects its samples
         - the audio source sample access is disabled
         - The audio source being read is destroyed
 
@@ -48,13 +48,16 @@ class ARAAudioSourceReader  : public AudioFormatReader,
                               private ARAAudioSource::Listener
 {
 public:
+    /** Use an ARAAudioSource to construct an audio source reader that reads either 32 or 64 bit samples. */
     ARAAudioSourceReader (ARAAudioSource* audioSource, bool use64BitSamples = false);
     virtual ~ARAAudioSourceReader();
 
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override;
 
+    /** Returns true as long as the reader's underlying ARAAudioSource remains accessible and its sample content is not changed. */
     bool isValid() const { return audioSourceBeingRead != nullptr; }
+    /** Invalidate the reader - the reader will call this internally if needed, but can also be invalidated from the outside. */
     void invalidate();
 
     void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARAAudioSource::PropertiesPtr newProperties) override;
@@ -91,10 +94,17 @@ class ARAPlaybackRegionReader  : public AudioFormatReader,
                                  private ARAPlaybackRegion::Listener
 {
 public:
+    /** Use a std::vector<ARAPlaybackRegion*> to construct a playback region reader. 
+        @param renderer The ARAPlaybackRenderer instance through which the region samples will be rendered
+        @param playbackRegions The vector of playback regions that can be read by the reader
+        @param nonRealtime Whether or not the samples need to be read in real time (the \p renderer will be configured appropriately)
+    */
     ARAPlaybackRegionReader (ARAPlaybackRenderer* renderer, std::vector<ARAPlaybackRegion*> const& playbackRegions, bool nonRealtime);
     virtual ~ARAPlaybackRegionReader();
 
+    /** Returns true if any of the reader's underlying playback region's have been invalidated. */
     bool isValid() const { return (playbackRenderer != nullptr); }
+    /** Invalidate the reader - this should be called if the sample content of any of the reader's ARAPlaybackRegions changes. */
     void invalidate();
 
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
@@ -104,7 +114,9 @@ public:
     void didUpdatePlaybackRegionContent (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags) override;
     void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) override;
 
+    /** The starting point of the reader in playback samples */
     int64 startInSamples = 0;
+    /** Whether or not the underlying ARAPlaybackRenderer has been configured for real-time playback */
     bool isNonRealtime = false;
 
 private:
@@ -133,6 +145,11 @@ class ARARegionSequenceReader  : public ARAPlaybackRegionReader,
 {
 public:
     ARARegionSequenceReader (ARAPlaybackRenderer* playbackRenderer, ARARegionSequence* regionSequence, bool nonRealtime);
+    /** Use an ARARegionSequence to construct a region sequence reader. 
+        @param renderer The ARAPlaybackRenderer instance through which all region sequence samples will be rendered
+        @param regionSequence The region sequence being read - all playback regions on this sequence will be read
+        @param nonRealtime Whether or not the samples need to be read in real time (the \p renderer will be configured appropriately)
+    */
     virtual ~ARARegionSequenceReader();
 
     void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) override;
