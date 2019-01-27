@@ -1146,8 +1146,8 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
 
    if (shouldEnableARA())
    {
-        props.add (new MultiChoicePropertyComponent (pluginARAContentTypeValue, "Plugin ARA Content Types", getAllARAContentTypeStrings(), getAllARAContentTypeVars()),
-                 "ARA Content Types.");
+        props.add (new MultiChoicePropertyComponent (pluginARAContentTypeValue, "Plugin ARA Analyzeable Content Types", getAllARAContentTypeStrings(), getAllARAContentTypeVars()),
+                 "ARA Analyzeable Content Types.");
 
         props.add (new MultiChoicePropertyComponent (pluginARATransformFlagsValue, "Plugin ARA Transformation Flags", getAllARATransformationFlagStrings(), getAllARATransformationFlagVars()),
                    "ARA Transformation Flags.");
