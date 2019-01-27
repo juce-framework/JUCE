@@ -62,9 +62,6 @@ const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory() noexcept
             if (JucePlugin_ARATransformationFlags & (1 << i))
                 factory->supportedPlaybackTransformationFlags |= araPlaybackTransformations[i];
         }
-
-        // TODO JUCE_ARA
-        // Any other factory fields? Algorithm selection?
     }
 
     return factory;
