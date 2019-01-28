@@ -65,7 +65,7 @@ public:
         licenseTypeLabel->setJustificationType (Justification::centred);
         licenseTypeLabel->setMinimumHorizontalScale (1.0f);
 
-        logoutButton.reset (new TextButton (isInsideWebview ? "Select different account..." : "Logout"));
+        logoutButton.reset (new TextButton (isInsideWebview ? "Select different account..." : "Sign out"));
         addAndMakeVisible (logoutButton.get());
         logoutButton->setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
 
