@@ -143,7 +143,7 @@ public:
         : channels (buffer.getArrayOfWritePointers()),
           numChannels (static_cast<ChannelCountType> (buffer.getNumChannels())),
           startSample (startSampleIndex),
-          numSamples (static_cast<size_t> (buffer.getNumSamples()))
+          numSamples (static_cast<size_t> (buffer.getNumSamples()) - startSampleIndex)
     {
         jassert (startSample < numSamples);
     }
