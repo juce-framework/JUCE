@@ -51,7 +51,7 @@ public:
     FileTreeComponent (DirectoryContentsList& listToShow);
 
     /** Destructor. */
-    ~FileTreeComponent();
+    ~FileTreeComponent() override;
 
     //==============================================================================
     /** Returns the number of files the user has got selected.

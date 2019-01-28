@@ -57,7 +57,7 @@ protected:
 
 public:
     /** Destructor. */
-    ~BubbleComponent();
+    ~BubbleComponent() override;
 
     //==============================================================================
     /** A list of permitted placements for the bubble, relative to the coordinates

@@ -217,6 +217,18 @@ void Synthesiser::processNextBlock (AudioBuffer<floatType>& outputAudio,
 template void Synthesiser::processNextBlock<float>  (AudioBuffer<float>&,  const MidiBuffer&, int, int);
 template void Synthesiser::processNextBlock<double> (AudioBuffer<double>&, const MidiBuffer&, int, int);
 
+void Synthesiser::renderNextBlock (AudioBuffer<float>& outputAudio, const MidiBuffer& inputMidi,
+                                   int startSample, int numSamples)
+{
+    processNextBlock (outputAudio, inputMidi, startSample, numSamples);
+}
+
+void Synthesiser::renderNextBlock (AudioBuffer<double>& outputAudio, const MidiBuffer& inputMidi,
+                                   int startSample, int numSamples)
+{
+    processNextBlock (outputAudio, inputMidi, startSample, numSamples);
+}
+
 void Synthesiser::renderVoices (AudioBuffer<float>& buffer, int startSample, int numSamples)
 {
     for (auto* voice : voices)

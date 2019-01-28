@@ -88,7 +88,7 @@ AudioParameterFloat::AudioParameterFloat (const String& idToUse, const String& n
 }
 
 AudioParameterFloat::AudioParameterFloat (String pid, String nm, float minValue, float maxValue, float def)
-   : AudioParameterFloat (pid, nm, { minValue, maxValue }, def)
+   : AudioParameterFloat (pid, nm, { minValue, maxValue, 0.01f }, def)
 {
 }
 

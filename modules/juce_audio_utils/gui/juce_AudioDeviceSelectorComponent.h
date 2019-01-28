@@ -73,7 +73,7 @@ public:
                                   bool hideAdvancedOptionsWithButton);
 
     /** Destructor */
-    ~AudioDeviceSelectorComponent();
+    ~AudioDeviceSelectorComponent() override;
 
     /** The device manager that this component is controlling */
     AudioDeviceManager& deviceManager;

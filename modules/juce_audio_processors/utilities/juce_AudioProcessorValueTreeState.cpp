@@ -80,7 +80,7 @@ public:
         parameter.addListener (this);
     }
 
-    ~ParameterAdapter() noexcept        { parameter.removeListener (this); }
+    ~ParameterAdapter() override        { parameter.removeListener (this); }
 
     void addListener (Listener* l)      { listeners.add (l); }
     void removeListener (Listener* l)   { listeners.remove (l); }
@@ -411,10 +411,8 @@ void AudioProcessorValueTreeState::valueTreeChildAdded (ValueTree& parent, Value
         setNewState (tree);
 }
 
-void AudioProcessorValueTreeState::valueTreeChildRemoved (ValueTree& parent, ValueTree& tree, int)
+void AudioProcessorValueTreeState::valueTreeChildRemoved (ValueTree&, ValueTree&, int)
 {
-    if (parent == state && tree.hasType (valueType))
-        setNewState (tree);
 }
 
 void AudioProcessorValueTreeState::valueTreeRedirected (ValueTree& v)
@@ -586,7 +584,7 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
         slider.addListener (this);
     }
 
-    ~Pimpl()
+    ~Pimpl() override
     {
         slider.removeListener (this);
         removeListener();
@@ -638,7 +636,7 @@ struct AudioProcessorValueTreeState::ComboBoxAttachment::Pimpl  : private Attach
         combo.addListener (this);
     }
 
-    ~Pimpl()
+    ~Pimpl() override
     {
         combo.removeListener (this);
         removeListener();
@@ -707,7 +705,7 @@ struct AudioProcessorValueTreeState::ButtonAttachment::Pimpl  : private Attached
         button.addListener (this);
     }
 
-    ~Pimpl()
+    ~Pimpl() override
     {
         button.removeListener (this);
         removeListener();

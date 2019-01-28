@@ -629,7 +629,7 @@ bool File::moveToTrash() const
 
 JUCE_API bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String&)
 {
-    URL targetURL (File::createFileWithoutCheckingPath (fileName));
+    URL targetURL (fileName);
     auto* env = getEnv();
 
     const LocalRef<jstring> action (javaString ("android.intent.action.VIEW"));

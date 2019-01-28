@@ -36,7 +36,7 @@ struct SimpleDeviceManagerInputLevelMeter  : public Component,
         inputLevelGetter = manager.getInputLevelGetter();
     }
 
-    ~SimpleDeviceManagerInputLevelMeter()
+    ~SimpleDeviceManagerInputLevelMeter() override
     {
     }
 
@@ -218,7 +218,7 @@ public:
         setup.manager->addChangeListener (this);
     }
 
-    ~AudioDeviceSettingsPanel()
+    ~AudioDeviceSettingsPanel() override
     {
         setup.manager->removeChangeListener (this);
     }

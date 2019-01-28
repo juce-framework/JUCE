@@ -118,7 +118,7 @@ Colour JucerTreeViewBase::getContentColour (bool isIcon) const
     return getOwnerView()->findColour (isIcon ? treeIconColourId : defaultTextColourId);
 }
 
-void JucerTreeViewBase::paintContent (Graphics& g, const Rectangle<int>& area)
+void JucerTreeViewBase::paintContent (Graphics& g, Rectangle<int> area)
 {
     g.setFont (getFont());
     g.setColour (getContentColour (false));

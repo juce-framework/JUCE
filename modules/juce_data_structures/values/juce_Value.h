@@ -180,7 +180,7 @@ public:
     {
     public:
         ValueSource();
-        virtual ~ValueSource();
+        ~ValueSource() override;
 
         /** Returns the current value of this object. */
         virtual var getValue() const = 0;

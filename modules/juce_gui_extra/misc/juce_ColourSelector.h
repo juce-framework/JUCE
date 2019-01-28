@@ -69,7 +69,7 @@ public:
                     int gapAroundColourSpaceComponent = 7);
 
     /** Destructor. */
-    ~ColourSelector();
+    ~ColourSelector() override;
 
     //==============================================================================
     /** Returns the colour that the user has currently selected.

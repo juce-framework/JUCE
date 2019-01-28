@@ -40,7 +40,7 @@ public:
     {
     }
 
-    ~LiveBuildCodeEditor()
+    ~LiveBuildCodeEditor() override
     {
         for (int i = getNumChildComponents(); --i >= 0;)
             if (auto* c = dynamic_cast<DiagnosticOverlayComponent*> (getChildComponent (i)))
@@ -77,7 +77,7 @@ private:
             endPosition.setPositionMaintained (true);
         }
 
-        ~OverlayComponent()
+        ~OverlayComponent() override
         {
             setEditor (nullptr);
         }
@@ -224,7 +224,7 @@ private:
             startTimer (600);
         }
 
-        ~ComponentClassList()
+        ~ComponentClassList() override
         {
             deleteOverlays();
         }
@@ -627,7 +627,7 @@ private:
             owner.getDocument().addListener (this);
         }
 
-        ~LiteralHighlightOverlay()
+        ~LiteralHighlightOverlay() override
         {
             if (auto* p = getParentComponent())
             {

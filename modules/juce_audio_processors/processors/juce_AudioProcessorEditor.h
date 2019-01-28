@@ -53,7 +53,7 @@ protected:
 
 public:
     /** Destructor. */
-    ~AudioProcessorEditor();
+    ~AudioProcessorEditor() override;
 
 
     //==============================================================================

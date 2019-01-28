@@ -38,7 +38,7 @@ class JUCE_API  LookAndFeel_V1    : public LookAndFeel_V2
 {
 public:
     LookAndFeel_V1();
-    ~LookAndFeel_V1();
+    ~LookAndFeel_V1() override;
 
     //==============================================================================
     void drawButtonBackground (Graphics&, Button&, const Colour& backgroundColour,

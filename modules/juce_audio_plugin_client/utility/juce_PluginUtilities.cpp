@@ -43,6 +43,18 @@ AudioProcessor::WrapperType PluginHostType::jucePlugInClientCurrentWrapperType =
  bool juce_isRunningInUnity()    { return PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_Unity; }
 #endif
 
+#if JUCE_MODULE_AVAILABLE_juce_opengl
+ bool juce_shouldDoubleScaleNativeGLWindow()
+ {
+     auto wrapperType = PluginHostType::getPluginLoadedAs();
+
+     if (wrapperType == AudioProcessor::wrapperType_VST || wrapperType == AudioProcessor::wrapperType_VST3)
+         return getHostType().type == PluginHostType::SteinbergCubase10;
+
+     return false;
+ }
+#endif
+
 #ifndef JUCE_VST3_CAN_REPLACE_VST2
  #define JUCE_VST3_CAN_REPLACE_VST2 1
 #endif

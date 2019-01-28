@@ -114,8 +114,6 @@ Result ResourceFile::writeHeader (MemoryOutputStream& header)
            << "namespace " << className << newLine
            << "{" << newLine;
 
-    bool containsAnyImages = false;
-
     for (int i = 0; i < files.size(); ++i)
     {
         auto& file = files.getReference(i);
@@ -131,9 +129,6 @@ Result ResourceFile::writeHeader (MemoryOutputStream& header)
 
         if (fileStream.openedOk())
         {
-            containsAnyImages = containsAnyImages
-                                 || (ImageFileFormat::findImageFormatForStream (fileStream) != nullptr);
-
             header << "    extern const char*   " << variableName << ";" << newLine;
             header << "    const int            " << variableName << "Size = " << (int) dataSize << ";" << newLine << newLine;
         }
@@ -169,8 +164,6 @@ Result ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, 
     cpp << "namespace " << className << newLine
         << "{" << newLine;
 
-    bool containsAnyImages = false;
-
     while (i < files.size())
     {
         auto& file = files.getReference(i);
@@ -180,9 +173,6 @@ Result ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, 
 
         if (fileStream.openedOk())
         {
-            containsAnyImages = containsAnyImages
-                                 || (ImageFileFormat::findImageFormatForStream (fileStream) != nullptr);
-
             auto tempVariable = "temp_binary_data_" + String (i);
 
             cpp  << newLine << "//================== " << file.getFileName() << " ==================" << newLine

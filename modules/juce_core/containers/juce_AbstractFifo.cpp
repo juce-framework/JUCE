@@ -30,8 +30,8 @@ AbstractFifo::AbstractFifo (int capacity) noexcept : bufferSize (capacity)
 
 AbstractFifo::~AbstractFifo() {}
 
-int AbstractFifo::getTotalSize() const noexcept           { return bufferSize; }
-int AbstractFifo::getFreeSpace() const noexcept           { return bufferSize - getNumReady() - 1; }
+int AbstractFifo::getTotalSize() const noexcept    { return bufferSize; }
+int AbstractFifo::getFreeSpace() const noexcept    { return bufferSize - getNumReady() - 1; }
 
 int AbstractFifo::getNumReady() const noexcept
 {
@@ -54,7 +54,8 @@ void AbstractFifo::setTotalSize (int newSize) noexcept
 }
 
 //==============================================================================
-void AbstractFifo::prepareToWrite (int numToWrite, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) const noexcept
+void AbstractFifo::prepareToWrite (int numToWrite, int& startIndex1, int& blockSize1,
+                                   int& startIndex2, int& blockSize2) const noexcept
 {
     auto vs = validStart.get();
     auto ve = validEnd.get();
@@ -91,7 +92,8 @@ void AbstractFifo::finishedWrite (int numWritten) noexcept
     validEnd = newEnd;
 }
 
-void AbstractFifo::prepareToRead (int numWanted, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) const noexcept
+void AbstractFifo::prepareToRead (int numWanted, int& startIndex1, int& blockSize1,
+                                  int& startIndex2, int& blockSize2) const noexcept
 {
     auto vs = validStart.get();
     auto ve = validEnd.get();
@@ -197,6 +199,10 @@ void AbstractFifo::ScopedReadWrite<AbstractFifo::ReadOrWrite::write>::finish (Ab
 
 template class AbstractFifo::ScopedReadWrite<AbstractFifo::ReadOrWrite::read>;
 template class AbstractFifo::ScopedReadWrite<AbstractFifo::ReadOrWrite::write>;
+
+AbstractFifo::ScopedRead  AbstractFifo::read  (int numToRead) noexcept     { return { *this, numToRead }; }
+AbstractFifo::ScopedWrite AbstractFifo::write (int numToWrite) noexcept    { return { *this, numToWrite }; }
+
 
 //==============================================================================
 #if JUCE_UNIT_TESTS

@@ -123,7 +123,8 @@ void HeaderComponent::setCurrentProject (Project* p) noexcept
     exportersTree.addListener (this);
     updateExporters();
 
-    project->addChangeListener (this);
+    projectNameValue.referTo (project->getProjectValue (Ids::name));
+    projectNameValue.addListener (this);
     updateName();
 
     isBuilding = false;
@@ -131,14 +132,12 @@ void HeaderComponent::setCurrentProject (Project* p) noexcept
     repaint();
 
     childProcess = ProjucerApplication::getApp().childProcessCache->getExisting (*project);
+
     if (childProcess != nullptr)
     {
         childProcess->activityList.addChangeListener (this);
         childProcess->errorList.addChangeListener (this);
-    }
 
-    if (childProcess != nullptr)
-    {
         runAppButton->setTooltip ({});
         runAppButton->setEnabled (true);
     }
@@ -227,20 +226,20 @@ void HeaderComponent::lookAndFeelChanged()
         userSettingsWindow->sendLookAndFeelChange();
 }
 
-void HeaderComponent::changeListenerCallback (ChangeBroadcaster* source)
+void HeaderComponent::changeListenerCallback (ChangeBroadcaster*)
 {
-    if (source == project)
-    {
-        updateName();
-        updateExporters();
-    }
-    else if (childProcess != nullptr)
+    if (childProcess != nullptr)
     {
         if (childProcess->activityList.getNumActivities() > 0)
             buildPing();
         else
             buildFinished (childProcess->errorList.getNumErrors() == 0);
     }
+}
+
+void HeaderComponent::valueChanged (Value&)
+{
+    updateName();
 }
 
 void HeaderComponent::timerCallback()

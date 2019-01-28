@@ -26,6 +26,7 @@
 
 #pragma once
 
+#include "jucer_ProjectExport_MSVC.h"
 
 //==============================================================================
 class CodeBlocksProjectExporter  : public ProjectExporter
@@ -178,6 +179,14 @@ public:
         // If you hit this assert, you tried to generate a project for an exporter
         // that does not support any of your targets!
         jassert (targets.size() > 0);
+    }
+
+    void initialiseDependencyPathValues() override
+    {
+        auto targetOS = isWindows() ? TargetOS::windows : TargetOS::linux;
+
+        vstLegacyPathValueWrapper.init ({ settings, Ids::vstLegacyFolder, nullptr },
+                                        getAppSettings().getStoredPath (Ids::vstLegacyPath, targetOS), targetOS);
     }
 
 private:
@@ -388,6 +397,7 @@ private:
     StringArray getCompilerFlags (const BuildConfiguration& config, CodeBlocksTarget& target) const
     {
         StringArray flags;
+
         if (auto* codeBlocksConfig = dynamic_cast<const CodeBlocksBuildConfiguration*> (&config))
             flags.add (codeBlocksConfig->getArchitectureTypeString());
 
@@ -777,7 +787,20 @@ private:
                 unit->createNewChildElement ("Option")->setAttribute ("target", targetName);
             }
 
-            if (! projectItem.shouldBeCompiled())
+            if (projectItem.shouldBeCompiled())
+            {
+                auto extraCompilerFlags = compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get().toString();
+
+                if (extraCompilerFlags.isNotEmpty())
+                {
+                    auto* optionElement = unit->createNewChildElement ("Option");
+
+                    optionElement->setAttribute ("compiler",     "gcc");
+                    optionElement->setAttribute ("use",          1);
+                    optionElement->setAttribute ("buildCommand", "$compiler $options " + extraCompilerFlags + " $includes -c $file  -o $object");
+                }
+            }
+            else
             {
                 unit->createNewChildElement ("Option")->setAttribute ("compile", 0);
                 unit->createNewChildElement ("Option")->setAttribute ("link", 0);
@@ -785,10 +808,27 @@ private:
         }
     }
 
+    bool hasResourceFile() const
+    {
+        return ! projectType.isStaticLibrary();
+    }
+
     void addCompileUnits (XmlElement& xml) const
     {
         for (int i = 0; i < getAllGroups().size(); ++i)
             addCompileUnits (getAllGroups().getReference(i), xml);
+
+        if (hasResourceFile())
+        {
+            auto iconFile = getTargetFolder().getChildFile ("icon.ico");
+            MSVCProjectExporterBase::writeIconFile (*this, iconFile);
+            auto rcFile = getTargetFolder().getChildFile ("resources.rc");
+            MSVCProjectExporterBase::createRCFile (project, iconFile, rcFile);
+
+            auto* unit = xml.createNewChildElement ("Unit");
+            unit->setAttribute ("filename", rcFile.getFileName());
+            unit->createNewChildElement ("Option")->setAttribute ("compilerVar", "WINDRES");
+        }
     }
 
     void createProject (XmlElement& xml) const

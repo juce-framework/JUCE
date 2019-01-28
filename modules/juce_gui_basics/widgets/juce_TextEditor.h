@@ -58,7 +58,7 @@ public:
                          juce_wchar passwordCharacter = 0);
 
     /** Destructor. */
-    ~TextEditor();
+    ~TextEditor() override;
 
     //==============================================================================
     /** Puts the editor into either multi- or single-line mode.

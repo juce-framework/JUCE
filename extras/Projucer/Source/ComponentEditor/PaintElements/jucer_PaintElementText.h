@@ -405,7 +405,7 @@ private:
             element->getDocument()->addChangeListener (this);
         }
 
-        ~TextProperty()
+        ~TextProperty() override
         {
             element->getDocument()->removeChangeListener (this);
         }

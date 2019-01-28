@@ -417,6 +417,7 @@ struct GraphEditorPanel::FilterComponent   : public Component,
 
             menu->addItem (13, "Enable DPI awareness", true, isTicked);
            #endif
+            menu->addItem (14, "Show debug log");
         }
 
         menu->addSeparator();
@@ -447,6 +448,7 @@ struct GraphEditorPanel::FilterComponent   : public Component,
                     node->properties.set ("DPIAware", ! node->properties ["DPIAware"]);
                 break;
             }
+            case 14:  showWindow (PluginWindow::Type::debug); break;
             case 20:  showWindow (PluginWindow::Type::audioIO); break;
             case 21:  testStateSaveLoad(); break;
 

@@ -849,7 +849,7 @@ namespace AAXClasses
         AAX_Result GetParameterNumberofSteps (AAX_CParamID paramID, int32_t* result) const
         {
             if (auto* param = getParameterFromID (paramID))
-                *result = param->getNumSteps();
+                *result = getSafeNumberOfParameterSteps (*param);
 
             return AAX_SUCCESS;
         }
@@ -1407,6 +1407,14 @@ namespace AAXClasses
             return false;
         }
 
+        // Some older Pro Tools control surfaces (EUCON [PT version 12.4] and
+        // Avid S6 before version 2.1) cannot cope with a large number of
+        // parameter steps.
+        static int32_t getSafeNumberOfParameterSteps (const AudioProcessorParameter& param)
+        {
+            return jmax (param.getNumSteps(), 2048);
+        }
+
         void addAudioProcessorParameters()
         {
             auto& audioProcessor = getPluginInstance();
@@ -1448,7 +1456,6 @@ namespace AAXClasses
                 aaxParamIDs.add (paramID);
                 auto aaxParamID = aaxParamIDs.getReference (parameterIndex++).getCharPointer();
 
-
                 paramMap.set (AAXClasses::getAAXParamHash (aaxParamID), juceParam);
 
                 // is this a meter?
@@ -1467,7 +1474,7 @@ namespace AAXClasses
 
                 parameter->AddShortenedName (juceParam->getName (4).toRawUTF8());
 
-                auto parameterNumSteps = juceParam->getNumSteps();
+                auto parameterNumSteps = getSafeNumberOfParameterSteps (*juceParam);
                 parameter->SetNumberOfSteps ((uint32_t) parameterNumSteps);
 
                #if JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
@@ -2099,11 +2106,17 @@ namespace AAXClasses
             check (desc.AddSideChainIn (JUCEAlgorithmIDs::sideChainBuffers));
             properties->AddProperty (AAX_eProperty_SupportsSideChainInput, true);
         }
+        else
+        {
+            // AAX does not allow there to be any gaps in the fields of the algorithm context structure
+            // so just add a dummy one here if there aren't any side chains
+            check (desc.AddPrivateData (JUCEAlgorithmIDs::sideChainBuffers, sizeof (uintptr_t)));
+        }
 
         auto maxAuxBuses = jmax (0, jmin (15, fullLayout.outputBuses.size() - 1));
 
         // add the output buses
-        // This is incrdibly dumb: the output bus format must be well defined
+        // This is incredibly dumb: the output bus format must be well defined
         // for every main bus in/out format pair. This means that there cannot
         // be two configurations with different aux formats but
         // identical main bus in/out formats.

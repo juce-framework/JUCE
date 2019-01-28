@@ -42,7 +42,7 @@ public:
         errorList.addChangeListener (this);
     }
 
-    ~BuildStatusTabComp()
+    ~BuildStatusTabComp() override
     {
         activityList.removeChangeListener (this);
         errorList.removeChangeListener (this);

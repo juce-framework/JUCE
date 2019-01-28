@@ -32,11 +32,11 @@
 class ProjectSaver;
 
 //==============================================================================
-class ProjectExporter
+class ProjectExporter  : private Value::Listener
 {
 public:
     ProjectExporter (Project&, const ValueTree& settings);
-    virtual ~ProjectExporter();
+    virtual ~ProjectExporter() override;
 
     struct ExporterTypeInfo
     {
@@ -78,7 +78,7 @@ public:
     virtual bool canLaunchProject() = 0;
     virtual bool launchProject() = 0;
     virtual void create (const OwnedArray<LibraryModule>&) const = 0; // may throw a SaveError
-    virtual bool shouldFileBeCompiledByDefault (const RelativePath& path) const;
+    virtual bool shouldFileBeCompiledByDefault (const File& path) const;
     virtual bool canCopeWithDuplicateFiles() = 0;
     virtual bool supportsUserDefinedConfigurations() const = 0; // false if exporter only supports two configs Debug and Release
     virtual void updateDeprecatedProjectSettingsInteractively();
@@ -406,6 +406,9 @@ protected:
     ValueWithDefault targetLocationValue, extraCompilerFlagsValue, extraLinkerFlagsValue, externalLibrariesValue,
                      userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue;
 
+    Value projectCompilerFlagSchemesValue;
+    HashMap<String, ValueWithDefault> compilerFlagSchemesMap;
+
     mutable Array<Project::Item> itemGroups;
     void initItemGroups() const;
     Project::Item* modulesGroup = nullptr;
@@ -454,6 +457,10 @@ protected:
     static Image rescaleImageForIcon (Drawable&, int iconSize);
 
 private:
+    //==============================================================================
+    void valueChanged (Value&) override   { updateCompilerFlagValues(); }
+    void updateCompilerFlagValues();
+
     //==============================================================================
     static String addLibPrefix (const String name)
     {

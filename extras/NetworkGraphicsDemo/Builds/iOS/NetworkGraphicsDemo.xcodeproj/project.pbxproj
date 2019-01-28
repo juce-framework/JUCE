@@ -69,6 +69,10 @@
 			isa = PBXBuildFile;
 			fileRef = 5273768FBB55D0DD57A5E70C;
 		};
+		D832165EE981EF309D4B21BF = {
+			isa = PBXBuildFile;
+			fileRef = 9D2DAC7D0C9DB77CB83E2992;
+		};
 		006DF460F8DF66EFFA80D968 = {
 			isa = PBXBuildFile;
 			fileRef = 70F1CAF3C4C561DD81E6AFC1;
@@ -389,6 +393,13 @@
 			path = "../../../../modules/juce_gui_extra";
 			sourceTree = "SOURCE_ROOT";
 		};
+		9D2DAC7D0C9DB77CB83E2992 = {
+			isa = PBXFileReference;
+			lastKnownFileType = file.storyboard;
+			name = LaunchScreen.storyboard;
+			path = LaunchScreen.storyboard;
+			sourceTree = "SOURCE_ROOT";
+		};
 		9E8129263CD42C6029FC2CAD = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
@@ -601,6 +612,7 @@
 			children = (
 				1FD6DBAC73414DD4C152E34E,
 				5273768FBB55D0DD57A5E70C,
+				9D2DAC7D0C9DB77CB83E2992,
 				70F1CAF3C4C561DD81E6AFC1,
 			);
 			name = Resources;
@@ -861,6 +873,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1282A62308CD1AC3F88A5D03,
+				D832165EE981EF309D4B21BF,
 				006DF460F8DF66EFFA80D968,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

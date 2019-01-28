@@ -70,7 +70,7 @@ public:
 
         Any items on the bar will be deleted when the toolbar is deleted.
     */
-    ~Toolbar();
+    ~Toolbar() override;
 
     //==============================================================================
     /** Changes the bar's orientation.

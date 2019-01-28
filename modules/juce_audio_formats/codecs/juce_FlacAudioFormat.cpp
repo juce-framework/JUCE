@@ -204,7 +204,7 @@ public:
         }
     }
 
-    ~FlacReader()
+    ~FlacReader() override
     {
         FlacNamespace::FLAC__stream_decoder_delete (decoder);
     }
@@ -404,7 +404,7 @@ public:
                                                this) == FlacNamespace::FLAC__STREAM_ENCODER_INIT_STATUS_OK;
     }
 
-    ~FlacWriter()
+    ~FlacWriter() override
     {
         if (ok)
         {

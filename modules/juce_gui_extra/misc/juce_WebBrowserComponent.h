@@ -56,7 +56,7 @@ public:
     explicit WebBrowserComponent (bool unloadPageWhenBrowserIsHidden = true);
 
     /** Destructor. */
-    ~WebBrowserComponent();
+    ~WebBrowserComponent() override;
 
     //==============================================================================
     /** Sends the browser to a particular URL.

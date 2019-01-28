@@ -698,7 +698,7 @@ public:
                 }
             }
 
-            if (getOwner().iconFile != File())
+            if (getOwner().iconFile.existsAsFile())
             {
                 auto* e = otherFilesGroup->createNewChildElement ("None");
                 e->setAttribute ("Include", prependDot (getOwner().iconFile.getFileName()));
@@ -767,8 +767,17 @@ public:
                         if (shouldUseStdCall (path))
                             e->createNewChildElement ("CallingConvention")->addTextElement ("StdCall");
 
-                        if (! projectItem.shouldBeCompiled())
+                        if (projectItem.shouldBeCompiled())
+                        {
+                            auto extraCompilerFlags = owner.compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get().toString();
+
+                            if (extraCompilerFlags.isNotEmpty())
+                                e->createNewChildElement ("AdditionalOptions")->addTextElement (extraCompilerFlags + " %(AdditionalOptions)");
+                        }
+                        else
+                        {
                             e->createNewChildElement ("ExcludedFromBuild")->addTextElement ("true");
+                        }
                     }
                 }
                 else if (path.hasFileExtension (headerFileExtensions))
@@ -884,7 +893,7 @@ public:
                     addFilesToFilter (group, group.getName(), *cpps, *headers, *otherFilesGroup, *groupsXml);
             }
 
-            if (getOwner().iconFile.exists())
+            if (getOwner().iconFile.existsAsFile())
             {
                 auto* e = otherFilesGroup->createNewChildElement ("None");
                 e->setAttribute ("Include", prependDot (getOwner().iconFile.getFileName()));
@@ -1434,6 +1443,94 @@ public:
         return false;
     }
 
+    static void writeIconFile (const ProjectExporter& exporter, const File& iconFile)
+    {
+        Array<Image> images;
+        int sizes[] = { 16, 32, 48, 256 };
+
+        for (int i = 0; i < numElementsInArray (sizes); ++i)
+        {
+            auto im = exporter.getBestIconForSize (sizes[i], true);
+
+            if (im.isValid())
+                images.add (im);
+        }
+
+        if (images.size() > 0)
+        {
+            MemoryOutputStream mo;
+            writeIconFile (images, mo);
+            overwriteFileIfDifferentOrThrow (iconFile, mo);
+        }
+    }
+
+    static void writeRCValue (MemoryOutputStream& mo, const String& name, const String& value)
+    {
+        if (value.isNotEmpty())
+            mo << "      VALUE \"" << name << "\",  \""
+            << CppTokeniserFunctions::addEscapeChars (value) << "\\0\"" << newLine;
+    }
+
+    static void createRCFile (const Project& project, const File& iconFile, const File& rcFile)
+    {
+        auto version = project.getVersionString();
+
+        MemoryOutputStream mo;
+
+        mo << "#ifdef JUCE_USER_DEFINED_RC_FILE" << newLine
+           << " #include JUCE_USER_DEFINED_RC_FILE" << newLine
+           << "#else" << newLine
+           << newLine
+           << "#undef  WIN32_LEAN_AND_MEAN" << newLine
+           << "#define WIN32_LEAN_AND_MEAN" << newLine
+           << "#include <windows.h>" << newLine
+           << newLine
+           << "VS_VERSION_INFO VERSIONINFO" << newLine
+           << "FILEVERSION  " << getCommaSeparatedVersionNumber (version) << newLine
+           << "BEGIN" << newLine
+           << "  BLOCK \"StringFileInfo\"" << newLine
+           << "  BEGIN" << newLine
+           << "    BLOCK \"040904E4\"" << newLine
+           << "    BEGIN" << newLine;
+
+        writeRCValue (mo, "CompanyName", project.getCompanyNameString());
+        writeRCValue (mo, "LegalCopyright", project.getCompanyCopyrightString());
+        writeRCValue (mo, "FileDescription", project.getProjectNameString());
+        writeRCValue (mo, "FileVersion", version);
+        writeRCValue (mo, "ProductName", project.getProjectNameString());
+        writeRCValue (mo, "ProductVersion", version);
+
+        mo << "    END" << newLine
+           << "  END" << newLine
+           << newLine
+           << "  BLOCK \"VarFileInfo\"" << newLine
+           << "  BEGIN" << newLine
+           << "    VALUE \"Translation\", 0x409, 1252" << newLine
+           << "  END" << newLine
+           << "END" << newLine
+           << newLine
+           << "#endif" << newLine;
+
+        if (iconFile.existsAsFile())
+            mo << newLine
+               << "IDI_ICON1 ICON DISCARDABLE " << iconFile.getFileName().quoted()
+               << newLine
+               << "IDI_ICON2 ICON DISCARDABLE " << iconFile.getFileName().quoted();
+
+        overwriteFileIfDifferentOrThrow (rcFile, mo);
+    }
+
+    static String getCommaSeparatedVersionNumber (const String& version)
+    {
+        auto versionParts = StringArray::fromTokens (version, ",.", "");
+        versionParts.trim();
+        versionParts.removeEmptyStrings();
+        while (versionParts.size() < 4)
+            versionParts.add ("0");
+
+        return versionParts.joinIntoString (",");
+    }
+
 private:
     //==============================================================================
     String createRebasedPath (const RelativePath& path) const
@@ -1722,96 +1819,11 @@ protected:
     {
         if (hasResourceFile())
         {
-            Array<Image> images;
-            int sizes[] = { 16, 32, 48, 256 };
-
-            for (int i = 0; i < numElementsInArray (sizes); ++i)
-            {
-                auto im = getBestIconForSize (sizes[i], true);
-                if (im.isValid())
-                    images.add (im);
-            }
-
-            if (images.size() > 0)
-            {
-                iconFile = getTargetFolder().getChildFile ("icon.ico");
-
-                MemoryOutputStream mo;
-                writeIconFile (images, mo);
-                overwriteFileIfDifferentOrThrow (iconFile, mo);
-            }
-
-            createRCFile();
+            iconFile = getTargetFolder().getChildFile ("icon.ico");
+            writeIconFile (*this, iconFile);
+            rcFile = getTargetFolder().getChildFile ("resources.rc");
+            createRCFile (project, iconFile, rcFile);
         }
-    }
-
-    void createRCFile() const
-    {
-        rcFile = getTargetFolder().getChildFile ("resources.rc");
-
-        auto version = project.getVersionString();
-
-        MemoryOutputStream mo;
-
-        mo << "#ifdef JUCE_USER_DEFINED_RC_FILE" << newLine
-           << " #include JUCE_USER_DEFINED_RC_FILE" << newLine
-           << "#else" << newLine
-           << newLine
-           << "#undef  WIN32_LEAN_AND_MEAN" << newLine
-           << "#define WIN32_LEAN_AND_MEAN" << newLine
-           << "#include <windows.h>" << newLine
-           << newLine
-           << "VS_VERSION_INFO VERSIONINFO" << newLine
-           << "FILEVERSION  " << getCommaSeparatedVersionNumber (version) << newLine
-           << "BEGIN" << newLine
-           << "  BLOCK \"StringFileInfo\"" << newLine
-           << "  BEGIN" << newLine
-           << "    BLOCK \"040904E4\"" << newLine
-           << "    BEGIN" << newLine;
-
-        writeRCValue (mo, "CompanyName", project.getCompanyNameString());
-        writeRCValue (mo, "LegalCopyright", project.getCompanyCopyrightString());
-        writeRCValue (mo, "FileDescription", project.getProjectNameString());
-        writeRCValue (mo, "FileVersion", version);
-        writeRCValue (mo, "ProductName", project.getProjectNameString());
-        writeRCValue (mo, "ProductVersion", version);
-
-        mo << "    END" << newLine
-           << "  END" << newLine
-           << newLine
-           << "  BLOCK \"VarFileInfo\"" << newLine
-           << "  BEGIN" << newLine
-           << "    VALUE \"Translation\", 0x409, 1252" << newLine
-           << "  END" << newLine
-           << "END" << newLine
-           << newLine
-           << "#endif" << newLine;
-
-        if (iconFile != File())
-            mo << newLine
-               << "IDI_ICON1 ICON DISCARDABLE " << iconFile.getFileName().quoted()
-               << newLine
-               << "IDI_ICON2 ICON DISCARDABLE " << iconFile.getFileName().quoted();
-
-        overwriteFileIfDifferentOrThrow (rcFile, mo);
-    }
-
-    static void writeRCValue (MemoryOutputStream& mo, const String& name, const String& value)
-    {
-        if (value.isNotEmpty())
-            mo << "      VALUE \"" << name << "\",  \""
-               << CppTokeniserFunctions::addEscapeChars (value) << "\\0\"" << newLine;
-    }
-
-    static String getCommaSeparatedVersionNumber (const String& version)
-    {
-        auto versionParts = StringArray::fromTokens (version, ",.", "");
-        versionParts.trim();
-        versionParts.removeEmptyStrings();
-        while (versionParts.size() < 4)
-            versionParts.add ("0");
-
-        return versionParts.joinIntoString (",");
     }
 
     static String prependDot (const String& filename)

@@ -142,7 +142,7 @@ private:
                 saveSchemeState();
             }
 
-            ~EditorPanel()
+            ~EditorPanel() override
             {
                 if (hasSchemeBeenModifiedSinceSave())
                     saveScheme (true);

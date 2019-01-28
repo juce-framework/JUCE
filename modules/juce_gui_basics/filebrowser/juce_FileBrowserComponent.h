@@ -88,7 +88,7 @@ public:
                           FilePreviewComponent* previewComp);
 
     /** Destructor. */
-    ~FileBrowserComponent();
+    ~FileBrowserComponent() override;
 
     //==============================================================================
     /** Returns the number of files that the user has got selected.

@@ -315,8 +315,7 @@ public:
 
 private:
     //==============================================================================
-    PixelARGB (const uint32 internalValue) noexcept
-        : internal (internalValue)
+    PixelARGB (uint32 internalValue) noexcept : internal (internalValue)
     {
     }
 
@@ -378,9 +377,9 @@ public:
     forcedinline uint32 getNativeARGB() const noexcept
     {
        #if JUCE_ANDROID
-        return (uint32) ((0xff << 24) | r | (g << 8) | (b << 16));
+        return (uint32) ((0xffu << 24) | r | ((uint32) g << 8) | ((uint32) b << 16));
        #else
-        return (uint32) ((0xff << 24) | b | (g << 8) | (r << 16));
+        return (uint32) ((0xffu << 24) | b | ((uint32) g << 8) | ((uint32) r << 16));
        #endif
     }
 
@@ -389,7 +388,7 @@ public:
     forcedinline uint32 getInARGBMaskOrder() const noexcept
     {
        #if JUCE_ANDROID
-        return (uint32) ((0xff << 24) | (r << 16) | (g << 8) | (b << 0));
+        return (uint32) ((0xffu << 24) | b | ((uint32) g << 8) | ((uint32) r << 16));
        #else
         return getNativeARGB();
        #endif

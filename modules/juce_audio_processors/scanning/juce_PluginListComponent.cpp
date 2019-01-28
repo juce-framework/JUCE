@@ -379,7 +379,7 @@ public:
         }
     }
 
-    ~Scanner()
+    ~Scanner() override
     {
         if (pool != nullptr)
         {

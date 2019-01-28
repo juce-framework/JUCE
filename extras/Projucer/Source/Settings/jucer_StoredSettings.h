@@ -34,7 +34,7 @@ class StoredSettings   : public ValueTree::Listener
 {
 public:
     StoredSettings();
-    ~StoredSettings();
+    ~StoredSettings() override;
 
     PropertiesFile& getGlobalProperties();
     PropertiesFile& getProjectProperties (const String& projectUID);
@@ -54,7 +54,7 @@ public:
     struct ColourSelectorWithSwatches   : public ColourSelector
     {
         ColourSelectorWithSwatches();
-        ~ColourSelectorWithSwatches();
+        ~ColourSelectorWithSwatches() override;
 
         int getNumSwatches() const override;
         Colour getSwatchColour (int index) const override;

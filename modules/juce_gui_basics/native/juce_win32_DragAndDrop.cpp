@@ -263,6 +263,8 @@ namespace DragAndDropHelpers
             data->Release();
             source->Release();
 
+            OleUninitialize();
+
             if (completionCallback != nullptr)
                 MessageManager::callAsync (completionCallback);
 

@@ -42,7 +42,7 @@ public:
         rotaryParams.stopAtEnd = true;
     }
 
-    ~Pimpl()
+    ~Pimpl() override
     {
         currentValue.removeListener (this);
         valueMin.removeListener (this);
@@ -828,7 +828,7 @@ public:
                 showPopupMenu();
             }
             else if (canDoubleClickToValue()
-                      && e.mods.withoutMouseButtons() == ModifierKeys (ModifierKeys::altModifier))
+                     && (singleClickModifiers != ModifierKeys() && e.mods.withoutMouseButtons() == singleClickModifiers))
             {
                 mouseDoubleClick();
             }
@@ -1277,6 +1277,8 @@ public:
     int popupHoverTimeout = 2000;
     double lastPopupDismissal = 0.0;
 
+    ModifierKeys singleClickModifiers;
+
     std::unique_ptr<Label> valueBox;
     std::unique_ptr<Button> incButton, decButton;
 
@@ -1296,7 +1298,7 @@ public:
             setLookAndFeel (&s.getLookAndFeel());
         }
 
-        ~PopupDisplayComponent()
+        ~PopupDisplayComponent() override
         {
             if (owner.pimpl != nullptr)
                 owner.pimpl->lastPopupDismissal = Time::getMillisecondCounterHiRes();
@@ -1543,10 +1545,11 @@ void Slider::setMinAndMaxValues (double newMinValue, double newMaxValue, Notific
     pimpl->setMinAndMaxValues (newMinValue, newMaxValue, notification);
 }
 
-void Slider::setDoubleClickReturnValue (bool isDoubleClickEnabled,  double valueToSetOnDoubleClick)
+void Slider::setDoubleClickReturnValue (bool isDoubleClickEnabled,  double valueToSetOnDoubleClick, ModifierKeys mods)
 {
     pimpl->doubleClickToValue = isDoubleClickEnabled;
     pimpl->doubleClickReturnValue = valueToSetOnDoubleClick;
+    pimpl->singleClickModifiers = mods;
 }
 
 double Slider::getDoubleClickReturnValue() const noexcept       { return pimpl->doubleClickReturnValue; }

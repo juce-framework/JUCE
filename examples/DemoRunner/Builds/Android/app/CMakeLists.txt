@@ -498,6 +498,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_blocks_basics/blocks/juce_Block.cpp"
     "../../../../../modules/juce_blocks_basics/blocks/juce_Block.h"
     "../../../../../modules/juce_blocks_basics/blocks/juce_BlockConfigManager.h"
+    "../../../../../modules/juce_blocks_basics/blocks/juce_BlocksVersion.cpp"
+    "../../../../../modules/juce_blocks_basics/blocks/juce_BlocksVersion.h"
     "../../../../../modules/juce_blocks_basics/blocks/juce_ControlButton.h"
     "../../../../../modules/juce_blocks_basics/blocks/juce_LEDGrid.h"
     "../../../../../modules/juce_blocks_basics/blocks/juce_LEDRow.h"
@@ -517,6 +519,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_blocks_basics/topology/internal/juce_BandwidthStatsLogger.cpp"
     "../../../../../modules/juce_blocks_basics/topology/internal/juce_BlockImplementation.cpp"
     "../../../../../modules/juce_blocks_basics/topology/internal/juce_ConnectedDeviceGroup.cpp"
+    "../../../../../modules/juce_blocks_basics/topology/internal/juce_DepreciatedVersionReader.cpp"
     "../../../../../modules/juce_blocks_basics/topology/internal/juce_Detector.cpp"
     "../../../../../modules/juce_blocks_basics/topology/internal/juce_DetectorHolder.cpp"
     "../../../../../modules/juce_blocks_basics/topology/internal/juce_DeviceInfo.cpp"
@@ -905,6 +908,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_data_structures/values/juce_ValueTree.h"
     "../../../../../modules/juce_data_structures/values/juce_ValueTreeSynchroniser.cpp"
     "../../../../../modules/juce_data_structures/values/juce_ValueTreeSynchroniser.h"
+    "../../../../../modules/juce_data_structures/values/juce_ValueWithDefault.cpp"
     "../../../../../modules/juce_data_structures/values/juce_ValueWithDefault.h"
     "../../../../../modules/juce_data_structures/juce_data_structures.cpp"
     "../../../../../modules/juce_data_structures/juce_data_structures.mm"
@@ -2083,6 +2087,8 @@ set_source_files_properties("../../../../../modules/juce_audio_utils/juce_audio_
 set_source_files_properties("../../../../../modules/juce_blocks_basics/blocks/juce_Block.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/blocks/juce_Block.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/blocks/juce_BlockConfigManager.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_blocks_basics/blocks/juce_BlocksVersion.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_blocks_basics/blocks/juce_BlocksVersion.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/blocks/juce_ControlButton.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/blocks/juce_LEDGrid.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/blocks/juce_LEDRow.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2102,6 +2108,7 @@ set_source_files_properties("../../../../../modules/juce_blocks_basics/protocol/
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_BandwidthStatsLogger.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_BlockImplementation.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_ConnectedDeviceGroup.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_DepreciatedVersionReader.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_Detector.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_DetectorHolder.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_DeviceInfo.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2490,6 +2497,7 @@ set_source_files_properties("../../../../../modules/juce_data_structures/values/
 set_source_files_properties("../../../../../modules/juce_data_structures/values/juce_ValueTree.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_data_structures/values/juce_ValueTreeSynchroniser.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_data_structures/values/juce_ValueTreeSynchroniser.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_data_structures/values/juce_ValueWithDefault.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_data_structures/values/juce_ValueWithDefault.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_data_structures/juce_data_structures.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_data_structures/juce_data_structures.mm" PROPERTIES HEADER_FILE_ONLY TRUE)

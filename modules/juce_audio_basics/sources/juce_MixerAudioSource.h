@@ -41,7 +41,7 @@ public:
     MixerAudioSource();
 
     /** Destructor. */
-    ~MixerAudioSource();
+    ~MixerAudioSource() override;
 
     //==============================================================================
     /** Adds an input source to the mixer.
