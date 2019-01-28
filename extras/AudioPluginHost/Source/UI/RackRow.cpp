@@ -40,6 +40,14 @@ RackRow::RackRow ()
     m_keyboardState = new MidiKeyboardState();
     m_soloMode = false;
     m_current = NULL;
+
+    m_lastNote = -1;
+    m_arpeggiatorBeat = -1;
+    m_anyNotesDown = false;
+    memset(m_notesDown, 0, sizeof(m_notesDown));
+
+    m_pendingProgram = false;
+    m_pendingProgramNames = 0.f;
     //[/Constructor_pre]
 
     m_deviceName.reset (new GroupComponent (String(),
@@ -317,15 +325,7 @@ void RackRow::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
         m_current->Bank = m_bank->getSelectedId() - 1;
         m_current->Program = 0;
 
-        MidiBuffer midiMessages;
-
-        midiMessages.addEvent(MidiMessage(0xB0 + m_current->Device->Channel - 1, 0x00, 0), 0);
-        midiMessages.addEvent(MidiMessage(0xB0 + m_current->Device->Channel - 1, 0x20, m_current->Bank), 0);
-        midiMessages.addEvent(MidiMessage(0xC0 + m_current->Device->Channel - 1, m_current->Program), 0); // I think this is needed to trigger the bank change
-
-        AudioBuffer<float> buffer(1, 1);
-        auto processor = ((AudioProcessorGraph::Node*)(m_current->Device->m_node))->getProcessor();
-        processor->processBlock(buffer, midiMessages);
+        m_pendingProgram = true;
 
         m_program->clear();
 
@@ -341,7 +341,10 @@ void RackRow::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
             m_program->setSelectedId(m_current->Program + 1, false);
         }
         else
+        {
+            m_pendingProgramNames = true;
             startTimer(100);
+        }
         //[/UserComboBoxCode_m_bank]
     }
     else if (comboBoxThatHasChanged == m_program.get())
@@ -350,20 +353,7 @@ void RackRow::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
         if (m_program->getSelectedId() > 0)
         {
             m_current->Program = m_program->getSelectedId() - 1;
-
-            MidiBuffer midiMessages;
-
-            if (m_current->Device->PluginName == "M1" && m_current->Device->Channel == 1) // if Channel 2's then should come later
-            {
-                midiMessages.addEvent(MidiMessage(0xBF, 0x00, 0), 0);
-                midiMessages.addEvent(MidiMessage(0xBF, 0x20, 22), 0);
-                midiMessages.addEvent(MidiMessage(0xCF, 49), 0); // Use MIDI channel 16 to put into two part mode (have to use this Combi mode since no way to Sysex it to Program mode with KLC)
-            }
-
-            midiMessages.addEvent(MidiMessage(0xC0 + m_current->Device->Channel - 1, m_current->Program), 0);
-            AudioBuffer<float> buffer(1, 1);
-            auto processor = ((AudioProcessorGraph::Node*)(m_current->Device->m_node))->getProcessor();
-            processor->processBlock(buffer, midiMessages);
+            m_pendingProgram = true;
         }
         //[/UserComboBoxCode_m_program]
     }
@@ -474,6 +464,17 @@ void RackRow::Filter(MidiBuffer &midiBuffer)
 {
     if (!midiBuffer.isEmpty())
     {
+        m_anyNotesDown = false; // see if any notes currently down (so we know whether to restart sequence)
+        for (int n = 0; n<128; ++n)
+        {
+            if (m_notesDown[n])
+            {
+                m_anyNotesDown = true;
+                break;
+            }
+        }
+
+
         MidiMessage midi_message(0xf0);
         MidiBuffer output;
         int sample_number;
@@ -487,49 +488,32 @@ void RackRow::Filter(MidiBuffer &midiBuffer)
                 int note = midi_message.getNoteNumber() + m_current->Transpose;
                 if (note >= 0 && note <= 127)
                 {
-                    if (m_current->Arpeggiator)
+                    if (m_current->Arpeggiator && m_pendingProgramNames <= 0)
                     {
-                        if (!m_current->m_anyNotesDown && midi_message.isNoteOn())
+                        if (!m_anyNotesDown && midi_message.isNoteOn())
                         {
-                            m_current->m_arpeggiatorBeat = -1;
-#if !defined(WIN32) && !defined(MACOS)
-                            long int msec = 15000 / m_tempo;
-                            long int sec = (msec / 1000);
-                            long int nsec = (msec % 1000) * 1e06;
-
-                            itimerspec ts;
-                            ts.it_value.tv_sec = 0;
-                            ts.it_value.tv_nsec = 1; // one nanosecond until first event (effectively instant)
-                            ts.it_interval.tv_sec = sec;
-                            ts.it_interval.tv_nsec = nsec;
-                            timer_settime(m_appegiatorTimer, 0, &ts, NULL);
-#endif
+                            m_arpeggiatorBeat = -1;
+                            startTimer(0);
                         }
 
-                        m_current->m_notesDown[note] = midi_message.isNoteOn();
+                        m_notesDown[note] = midi_message.isNoteOn();
 
                         if (midi_message.isNoteOff())
                         {
                             // recalculate this with change
-                            m_current->m_anyNotesDown = false; // see if any notes currently down (so we know whether to restart sequence)
+                            m_anyNotesDown = false; // see if any notes currently down (so we know whether to restart sequence)
                             for (int n = 0; n<128; ++n)
                             {
-                                if (m_current->m_notesDown[n])
+                                if (m_notesDown[n])
                                 {
-                                    m_current->m_anyNotesDown = true;
+                                    m_anyNotesDown = true;
                                     break;
                                 }
                             }
 
                             // are we ending?
-                            if (!m_current->m_anyNotesDown)
-                            {
-#if !defined(WIN32) && !defined(MACOS)
-                                itimerspec ts;
-                                ts.it_interval.tv_sec = ts.it_value.tv_sec = ts.it_interval.tv_nsec = ts.it_value.tv_nsec = ts.it_interval.tv_nsec = 0;
-                                timer_settime(m_appegiatorTimer, 0, &ts, NULL);
-#endif
-                            }
+                            if (!m_anyNotesDown)
+                                stopTimer();
                         }
                     }
                     else
@@ -546,6 +530,26 @@ void RackRow::Filter(MidiBuffer &midiBuffer)
             }
         }
         midiBuffer = output;
+    }
+
+    if (m_pendingProgram)
+    {
+        m_pendingProgram = false;
+
+        if (m_current->Device->PluginName == "M1" && m_current->Device->Channel == 1) // if Channel 2's then should come later
+        {
+            midiBuffer.addEvent(MidiMessage(0xBF, 0x00, 0), 0);
+            midiBuffer.addEvent(MidiMessage(0xBF, 0x20, 22), 0);
+            midiBuffer.addEvent(MidiMessage(0xCF, 49), 0); // Use MIDI channel 16 to put into two part mode (have to use this Combi mode since no way to Sysex it to Program mode with KLC)
+        }
+
+        if (m_bank->isVisible())
+        {
+            midiBuffer.addEvent(MidiMessage(0xB0 + m_current->Device->Channel - 1, 0x00, 0), 0);
+            midiBuffer.addEvent(MidiMessage(0xB0 + m_current->Device->Channel - 1, 0x20, m_current->Bank), 0);
+        }
+
+        midiBuffer.addEvent(MidiMessage(0xC0 + m_current->Device->Channel - 1, m_current->Program), 0); // I think this is needed to trigger the bank change too
     }
 }
 
@@ -618,11 +622,46 @@ void RackRow::SetSoloMode(bool mode)
 
 void RackRow::timerCallback()
 {
-    stopTimer();
-    auto processor = ((AudioProcessorGraph::Node*)m_current->Device->m_node)->getProcessor();
-    for (int i = 0; i < processor->getNumPrograms(); ++i)
-        m_program->addItem(processor->getProgramName(i), i + 1);
-    m_program->setSelectedId(m_current->Program+1, false);
+    if (m_pendingProgramNames)
+    {
+        m_pendingProgramNames = false;
+        stopTimer();
+        auto processor = ((AudioProcessorGraph::Node*)m_current->Device->m_node)->getProcessor();
+        for (int i = 0; i < processor->getNumPrograms(); ++i)
+            m_program->addItem(processor->getProgramName(i), i + 1);
+        m_program->setSelectedId(m_current->Program + 1, false);
+    }
+    else // appegiator
+    {
+        // cancel last note
+        /*if (m_lastNote >= 0)
+        {
+            vector<unsigned char> message;
+            message.push_back(MIDI_NOTEOFF | sceneMidi.m_channel);
+            message.push_back(sceneMidi.m_lastNote);
+            if (m_racks[ri].m_midiOut)
+                m_racks[ri].m_midiOut->sendMessage(&message);
+            sceneMidi.m_lastNote = -1;
+        }
+
+        for (int n = 0; n < 128; ++n)
+        {
+            if (m_racks[ri].m_notesDown[n]) // find lowest
+            {
+                m_racks[ri].m_arpeggiatorBeat++;
+
+                vector<unsigned char> message;
+                message.push_back(MIDI_NOTEON | sceneMidi.m_channel);
+                message.push_back(n + 12 * (m_racks[ri].m_arpeggiatorBeat % 3));
+                message.push_back(0x7f);
+                if (m_racks[ri].m_midiOut)
+                    m_racks[ri].m_midiOut->sendMessage(&message);
+
+                sceneMidi.m_lastNote = message[1];
+                break; // only do lowest
+            }
+        }*/
+    }
 }
 
 //[/MiscUserCode]

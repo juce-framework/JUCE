@@ -58,21 +58,7 @@ void MIDIRouter::ProcessMidi(double deltatime, std::vector< unsigned char > *mes
 
     lock_mutex(m_midiOutMutex);
 
-    if (!m_midiOutPassThrough)
-    {
-        for (int ri = 0; ri<(int)m_racks.size(); ++ri)
-        {
-            m_racks[ri].m_anyNotesDown = false; // see if any notes currently down (so we know whether to restart sequence)
-            for (int n = 0; n<128; ++n)
-            {
-                if (m_racks[ri].m_notesDown[n])
-                {
-                    m_racks[ri].m_anyNotesDown = true;
-                    break;
-                }
-            }
-        }
-    }
+
 
 
     int status = (*message)[0] & 0xf0;   // scraping  channel
@@ -284,56 +270,6 @@ void MIDIRouter::ArpegiatorUpdateStatic(union sigval arg)
 }
 #endif
 
-void MIDIRouter::ArpegiatorUpdate()
-{
-    if (!m_midiOutPassThrough)
-    {
-        lock_mutex(m_midiOutMutex);
-
-        // Arpeggiator
-        for (int ri = 0; ri<(int)m_racks.size(); ++ri)
-        {
-            for (int sm = 0; sm<(int)m_racks[ri].m_sceneMidi.size(); ++sm)
-            {
-                SceneMidi &sceneMidi = m_racks[ri].m_sceneMidi[sm];
-                if (sceneMidi.m_arpeggiator)
-                {
-                    // cancel last note
-                    if (sceneMidi.m_lastNote >= 0)
-                    {
-                        vector<unsigned char> message;
-                        message.push_back(MIDI_NOTEOFF | sceneMidi.m_channel);
-                        message.push_back(sceneMidi.m_lastNote);
-                        if (m_racks[ri].m_midiOut)
-                            m_racks[ri].m_midiOut->sendMessage(&message);
-                        sceneMidi.m_lastNote = -1;
-                    }
-
-                    for (int n = 0; n<128; ++n)
-                    {
-                        if (m_racks[ri].m_notesDown[n]) // find lowest
-                        {
-                            m_racks[ri].m_arpeggiatorBeat++;
-
-                            vector<unsigned char> message;
-                            message.push_back(MIDI_NOTEON | sceneMidi.m_channel);
-                            message.push_back(n + 12 * (m_racks[ri].m_arpeggiatorBeat % 3));
-                            message.push_back(0x7f);
-                            if (m_racks[ri].m_midiOut)
-                                m_racks[ri].m_midiOut->sendMessage(&message);
-
-                            sceneMidi.m_lastNote = message[1];
-                            break; // only do lowest
-                        }
-                    }
-                    break; //only do one
-                }
-            }
-        }
-        unlock_mutex(m_midiOutMutex);
-    }
-
-}
 
 void MIDIRouter::SetVolumes()
 {

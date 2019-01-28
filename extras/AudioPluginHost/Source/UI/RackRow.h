@@ -83,6 +83,13 @@ private:
     FilterGraph* graph;
     GraphEditorPanel* panel;
     bool m_soloMode;
+    bool m_pendingProgram;
+    bool m_pendingProgramNames;
+
+    bool m_notesDown[128];
+    bool m_anyNotesDown;
+    int m_arpeggiatorBeat;
+    int m_lastNote;
     //[/UserVariables]
 
     //==============================================================================

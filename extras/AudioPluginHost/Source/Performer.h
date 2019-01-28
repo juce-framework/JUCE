@@ -44,17 +44,6 @@ public:
     int LowKey;
     int HighKey;
 
-    bool m_notesDown[128];
-    bool m_anyNotesDown;
-    int m_arpeggiatorBeat;
-
-    Zone()
-    {
-        m_arpeggiatorBeat = -1;
-        m_anyNotesDown = false;
-        memset(m_notesDown, 0, sizeof(m_notesDown));
-    }
-
 	template<class A>
 	void Serialize(A& ar)
 	{
