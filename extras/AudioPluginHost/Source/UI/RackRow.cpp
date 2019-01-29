@@ -31,6 +31,7 @@
 #include "../Filters/InternalFilters.h"
 String FormatKey(int note);
 int ParseNote(const char *str);
+int RackRow::m_tempo = 120;
 //[/MiscUserDefs]
 
 //==============================================================================
@@ -40,14 +41,13 @@ RackRow::RackRow ()
     m_keyboardState = new MidiKeyboardState();
     m_soloMode = false;
     m_current = NULL;
-
     m_lastNote = -1;
     m_arpeggiatorBeat = -1;
     m_anyNotesDown = false;
     memset(m_notesDown, 0, sizeof(m_notesDown));
-
     m_pendingProgram = false;
     m_pendingProgramNames = 0.f;
+    m_arpeggiatorTimer = 0.f;
     //[/Constructor_pre]
 
     m_deviceName.reset (new GroupComponent (String(),
@@ -342,8 +342,7 @@ void RackRow::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
         }
         else
         {
-            m_pendingProgramNames = true;
-            startTimer(100);
+            m_pendingProgramNames = 0.1f;
         }
         //[/UserComboBoxCode_m_bank]
     }
@@ -460,8 +459,10 @@ void RackRow::UpdateKeyboard()
         m_keyboardState->noteOn(1, i, 1.0f);
 }
 
-void RackRow::Filter(MidiBuffer &midiBuffer)
+void RackRow::Filter(int samples, int sampleRate, MidiBuffer &midiBuffer)
 {
+    int arpeggiatorSample = 0;
+
     if (!midiBuffer.isEmpty())
     {
         m_anyNotesDown = false; // see if any notes currently down (so we know whether to restart sequence)
@@ -493,7 +494,8 @@ void RackRow::Filter(MidiBuffer &midiBuffer)
                         if (!m_anyNotesDown && midi_message.isNoteOn())
                         {
                             m_arpeggiatorBeat = -1;
-                            startTimer(0);
+                            m_arpeggiatorTimer = 0.001; // 1ms for first one 
+                            arpeggiatorSample = sample_number;
                         }
 
                         m_notesDown[note] = midi_message.isNoteOn();
@@ -513,14 +515,22 @@ void RackRow::Filter(MidiBuffer &midiBuffer)
 
                             // are we ending?
                             if (!m_anyNotesDown)
-                                stopTimer();
+                            {
+                                // cancel last note
+                                if (m_lastNote >= 0)
+                                {
+                                    output.addEvent(MidiMessage::noteOff(m_current->Device->Channel, m_lastNote), sample_number);
+                                    m_lastNote = -1;
+                                }
+                                m_arpeggiatorTimer = 0.f;
+                            }
                         }
                     }
                     else
                     {
-                        midi_message.setNoteNumber(note);
+                        midi_message.setNoteNumber(note); // transposed note
                         output.addEvent(midi_message, sample_number);
-                        if (m_current->DoubleOctave && note < 128 - 12)
+                        if (m_current->DoubleOctave && note < 128 - 12) // double octave
                         {
                             midi_message.setNoteNumber(note+12);
                             output.addEvent(midi_message, sample_number);
@@ -550,6 +560,60 @@ void RackRow::Filter(MidiBuffer &midiBuffer)
         }
 
         midiBuffer.addEvent(MidiMessage(0xC0 + m_current->Device->Channel - 1, m_current->Program), 0); // I think this is needed to trigger the bank change too
+    }
+
+    if (m_pendingProgramNames > 0)
+    {
+        m_pendingProgramNames -= samples / (float)sampleRate;
+        if (m_pendingProgramNames <= 0)
+        {
+            m_pendingProgramNames = 0;
+            auto processor = ((AudioProcessorGraph::Node*)m_current->Device->m_node)->getProcessor();
+            MessageManagerLock lock;
+            for (int i = 0; i < processor->getNumPrograms(); ++i)
+                m_program->addItem(processor->getProgramName(i), i + 1);
+            m_program->setSelectedId(m_current->Program + 1, false);
+        }
+    }
+    
+
+    if (m_arpeggiatorTimer > 0) // arpeggiator active
+    {
+        while (1)
+        {
+            auto nextarpeggiatorSample = arpeggiatorSample + m_arpeggiatorTimer * sampleRate;
+            if (nextarpeggiatorSample < samples) // beat in this block
+            {
+                arpeggiatorSample = nextarpeggiatorSample; // in case we can fit more in
+
+                m_arpeggiatorTimer = 15.f / m_tempo; // reset timer
+
+                // cancel last note
+                if (m_lastNote >= 0)
+                {
+                    midiBuffer.addEvent(MidiMessage::noteOff(m_current->Device->Channel, m_lastNote), nextarpeggiatorSample);
+                    m_lastNote = -1;
+                }
+
+                // new note
+                for (int n = 0; n < 128; ++n)
+                {
+                    if (m_notesDown[n]) // find lowest
+                    {
+                        m_arpeggiatorBeat++;
+                        m_lastNote = n + 12 * (m_arpeggiatorBeat % 3);
+                        midiBuffer.addEvent(MidiMessage::noteOn(m_current->Device->Channel, m_lastNote, 1.0f), nextarpeggiatorSample);
+                        break; // only do lowest
+                    }
+                }
+            }
+            else
+                break;
+        }
+
+        // reduce timer
+        m_arpeggiatorTimer -= (samples - arpeggiatorSample) / (float)sampleRate;
+        assert(m_arpeggiatorTimer > 0); // shouldnt be possible to get to 0 here
     }
 }
 
@@ -620,50 +684,6 @@ void RackRow::SetSoloMode(bool mode)
     ((AudioProcessorGraph::Node*)m_current->Device->m_node)->setBypassed(m_current->Mute || (m_soloMode && !m_current->Solo)); // Do this here again. Can't rely on Toggle because only works if changed
 }
 
-void RackRow::timerCallback()
-{
-    if (m_pendingProgramNames)
-    {
-        m_pendingProgramNames = false;
-        stopTimer();
-        auto processor = ((AudioProcessorGraph::Node*)m_current->Device->m_node)->getProcessor();
-        for (int i = 0; i < processor->getNumPrograms(); ++i)
-            m_program->addItem(processor->getProgramName(i), i + 1);
-        m_program->setSelectedId(m_current->Program + 1, false);
-    }
-    else // appegiator
-    {
-        // cancel last note
-        /*if (m_lastNote >= 0)
-        {
-            vector<unsigned char> message;
-            message.push_back(MIDI_NOTEOFF | sceneMidi.m_channel);
-            message.push_back(sceneMidi.m_lastNote);
-            if (m_racks[ri].m_midiOut)
-                m_racks[ri].m_midiOut->sendMessage(&message);
-            sceneMidi.m_lastNote = -1;
-        }
-
-        for (int n = 0; n < 128; ++n)
-        {
-            if (m_racks[ri].m_notesDown[n]) // find lowest
-            {
-                m_racks[ri].m_arpeggiatorBeat++;
-
-                vector<unsigned char> message;
-                message.push_back(MIDI_NOTEON | sceneMidi.m_channel);
-                message.push_back(n + 12 * (m_racks[ri].m_arpeggiatorBeat % 3));
-                message.push_back(0x7f);
-                if (m_racks[ri].m_midiOut)
-                    m_racks[ri].m_midiOut->sendMessage(&message);
-
-                sceneMidi.m_lastNote = message[1];
-                break; // only do lowest
-            }
-        }*/
-    }
-}
-
 //[/MiscUserCode]
 
 
@@ -677,7 +697,7 @@ void RackRow::timerCallback()
 BEGIN_JUCER_METADATA
 
 <JUCER_COMPONENT documentType="Component" className="RackRow" componentName=""
-                 parentClasses="public Component, public TextEditor::Listener, public Timer, public MidiFilterCallback"
+                 parentClasses="public Component, public TextEditor::Listener, public MidiFilterCallback"
                  constructorParams="" variableInitialisers="" snapPixels="8" snapActive="1"
                  snapShown="1" overlayOpacity="0.330" fixedSize="1" initialWidth="816"
                  initialHeight="76">

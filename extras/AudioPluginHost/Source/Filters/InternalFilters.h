@@ -32,7 +32,7 @@
 class MidiFilterCallback
 {
 public:
-    virtual void Filter(MidiBuffer &midiBuffer) = 0;
+    virtual void Filter(int samples, int sampleRate, MidiBuffer &midiBuffer) = 0;
 };
 
 

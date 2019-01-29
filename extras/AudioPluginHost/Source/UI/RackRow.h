@@ -40,7 +40,6 @@ class GraphEditorPanel;
 */
 class RackRow  : public Component,
                  public TextEditor::Listener,
-                 public Timer,
                  public MidiFilterCallback,
                  public Button::Listener,
                  public Slider::Listener,
@@ -60,8 +59,8 @@ public:
     void textEditorTextChanged(TextEditor&) override;
     void SetSoloMode(bool mode);
     bool IsSolo() { return m_solo->getToggleState(); }
-    void timerCallback() override;
-    void Filter(MidiBuffer &midiBuffer) override;
+    void Filter(int samples, int sampleRate, MidiBuffer &midiBuffer) override;
+    static void SetTempo(int tempo) { m_tempo = tempo; }
     //[/UserMethods]
 
     void paint (Graphics& g) override;
@@ -84,12 +83,14 @@ private:
     GraphEditorPanel* panel;
     bool m_soloMode;
     bool m_pendingProgram;
-    bool m_pendingProgramNames;
+    float m_pendingProgramNames;
 
     bool m_notesDown[128];
     bool m_anyNotesDown;
     int m_arpeggiatorBeat;
     int m_lastNote;
+    float m_arpeggiatorTimer;
+    static int m_tempo;
     //[/UserVariables]
 
     //==============================================================================

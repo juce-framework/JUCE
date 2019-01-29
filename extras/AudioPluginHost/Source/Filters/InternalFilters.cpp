@@ -409,9 +409,8 @@ public:
 
     void processBlock(AudioBuffer<float>& buffer, MidiBuffer&midiBuffer) override
     {
-        buffer;
         if (m_callback)
-            m_callback->Filter(midiBuffer);
+            m_callback->Filter(buffer.getNumSamples(), (int)getSampleRate(), midiBuffer);
     }
 
     void SetCallback(MidiFilterCallback *callback) { m_callback = callback; }

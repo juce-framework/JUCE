@@ -1,5 +1,3 @@
-Finish MIDI filter - Appegiator timer
-
 Non standard MIDI commands (use a single MidiFilter)
 Transition Keylab Sysex to JUCE Midi Out (Will only work on device)
 M1 needs to share VST instance

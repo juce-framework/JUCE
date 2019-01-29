@@ -204,7 +204,9 @@ void GraphEditorPanel::SetPerformance(int performanceIndex)
 {
     auto performer = graph.GetPerformer();
 
-    auto &zones = performer->Root.Performances.Performance[performanceIndex].Zone;
+    auto &performance = performer->Root.Performances.Performance[performanceIndex];
+    auto &zones = performance.Zone;
+    RackRow::SetTempo(performance.Tempo);
 
     for (auto i = 0U; i < zones.size(); ++i)
     {
