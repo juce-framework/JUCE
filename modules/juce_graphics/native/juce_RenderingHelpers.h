@@ -43,15 +43,10 @@ namespace RenderingHelpers
 class TranslationOrTransform
 {
 public:
-    TranslationOrTransform() noexcept {}
+    TranslationOrTransform() noexcept = default;
     TranslationOrTransform (Point<int> origin) noexcept  : offset (origin) {}
 
-    TranslationOrTransform (const TranslationOrTransform& other) noexcept
-        : complexTransform (other.complexTransform), offset (other.offset),
-          isOnlyTranslated (other.isOnlyTranslated), isRotated (other.isRotated)
-    {
-    }
-
+    TranslationOrTransform (const TranslationOrTransform& other) noexcept = default;
     AffineTransform getTransform() const noexcept
     {
         return isOnlyTranslated ? AffineTransform::translation (offset)
@@ -283,7 +278,7 @@ template <class RendererType>
 class CachedGlyphEdgeTable  : public ReferenceCountedObject
 {
 public:
-    CachedGlyphEdgeTable() {}
+    CachedGlyphEdgeTable() = default;
 
     void draw (RendererType& state, Point<float> pos) const
     {
@@ -1397,7 +1392,7 @@ namespace EdgeTableFillers
         private:
             struct BresenhamInterpolator
             {
-                BresenhamInterpolator() noexcept {}
+                BresenhamInterpolator() noexcept = default;
 
                 void set (int n1, int n2, int steps, int offsetInt) noexcept
                 {
@@ -1628,8 +1623,8 @@ struct ClipRegions
 {
     struct Base  : public SingleThreadedReferenceCountedObject
     {
-        Base() {}
-        virtual ~Base() {}
+        Base() = default;
+        virtual ~Base() = default;
 
         using Ptr = ReferenceCountedObjectPtr<Base>;
 
@@ -2528,10 +2523,7 @@ public:
     {
     }
 
-    SoftwareRendererSavedState (const SoftwareRendererSavedState& other)
-        : BaseClass (other), image (other.image), font (other.font)
-    {
-    }
+    SoftwareRendererSavedState (const SoftwareRendererSavedState& other) = default;
 
     SoftwareRendererSavedState* beginTransparencyLayer (float opacity)
     {

@@ -49,10 +49,10 @@ class JUCE_API  CallbackMessage   : public MessageManager::MessageBase
 {
 public:
     //==============================================================================
-    CallbackMessage() noexcept {}
+    CallbackMessage() noexcept = default;
 
     /** Destructor. */
-    ~CallbackMessage() {}
+    ~CallbackMessage() = default;
 
     //==============================================================================
     /** Called when the message is delivered.

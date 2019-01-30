@@ -152,7 +152,7 @@ public:
     class Master
     {
     public:
-        Master() noexcept {}
+	 Master() noexcept = default;
 
         ~Master() noexcept
         {

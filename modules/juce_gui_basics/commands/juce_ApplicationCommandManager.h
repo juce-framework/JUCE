@@ -338,7 +338,7 @@ class JUCE_API  ApplicationCommandManagerListener
 public:
     //==============================================================================
     /** Destructor. */
-    virtual ~ApplicationCommandManagerListener()  {}
+    virtual ~ApplicationCommandManagerListener() = default;
 
     /** Called when an app command is about to be invoked. */
     virtual void applicationCommandInvoked (const ApplicationCommandTarget::InvocationInfo&) = 0;

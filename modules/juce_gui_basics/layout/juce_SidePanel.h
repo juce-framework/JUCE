@@ -161,7 +161,7 @@ public:
      */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         virtual Font getSidePanelTitleFont (SidePanel&) = 0;
         virtual Justification getSidePanelTitleJustification (SidePanel&) = 0;

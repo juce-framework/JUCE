@@ -113,7 +113,7 @@ public:
     /** This abstract base class is implemented by LookAndFeel classes. */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         virtual void drawConcertinaPanelHeader (Graphics&, const Rectangle<int>& area,
                                                 bool isMouseOver, bool isMouseDown,

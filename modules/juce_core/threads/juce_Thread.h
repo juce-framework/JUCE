@@ -180,7 +180,7 @@ public:
     class JUCE_API Listener
     {
     public:
-        virtual ~Listener() {}
+	 virtual ~Listener() = default;
 
         /** Called if Thread::signalThreadShouldExit was called.
             @see Thread::threadShouldExit, Thread::addListener, Thread::removeListener

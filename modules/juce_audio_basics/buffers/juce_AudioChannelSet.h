@@ -49,7 +49,7 @@ public:
     /** Creates an empty channel set.
         You can call addChannel to add channels to the set.
     */
-    AudioChannelSet() noexcept  {}
+    AudioChannelSet() noexcept = default;
 
     /** Creates a zero-channel set which can be used to indicate that a
         bus is disabled. */

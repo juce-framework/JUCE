@@ -72,7 +72,7 @@ private:
     class LeakCounter
     {
     public:
-        LeakCounter() noexcept {}
+        LeakCounter() noexcept = default;
 
         ~LeakCounter()
         {

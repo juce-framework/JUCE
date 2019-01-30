@@ -81,7 +81,7 @@ public:
     {
     public:
         ElementBase (ElementType type);
-        virtual ~ElementBase() {}
+        virtual ~ElementBase() = default;
         virtual void addToPath (Path& path, Expression::Scope*) const = 0;
         virtual RelativePoint* getControlPoints (int& numPoints) = 0;
         virtual ElementBase* clone() const = 0;

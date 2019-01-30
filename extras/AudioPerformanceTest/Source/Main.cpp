@@ -34,7 +34,7 @@ class AudioPerformanceTestApplication  : public JUCEApplication
 {
 public:
     //==============================================================================
-    AudioPerformanceTestApplication() {}
+    AudioPerformanceTestApplication() = default;
 
     const String getApplicationName() override       { return ProjectInfo::projectName; }
     const String getApplicationVersion() override    { return ProjectInfo::versionString; }

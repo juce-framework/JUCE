@@ -558,7 +558,7 @@ public:
     public:
         //==============================================================================
         /** Destructor. */
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         //==============================================================================
         /** Called when the slider's value is changed.
@@ -890,7 +890,7 @@ public:
     */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         //==============================================================================
         virtual void drawLinearSlider (Graphics&,

@@ -32,9 +32,7 @@ namespace juce
 struct JUCE_API  AudioSourceChannelInfo
 {
     /** Creates an uninitialised AudioSourceChannelInfo. */
-    AudioSourceChannelInfo() noexcept
-    {
-    }
+    AudioSourceChannelInfo() noexcept = default;
 
     /** Creates an AudioSourceChannelInfo. */
     AudioSourceChannelInfo (AudioBuffer<float>* bufferToUse,
@@ -113,11 +111,11 @@ class JUCE_API  AudioSource
 protected:
     //==============================================================================
     /** Creates an AudioSource. */
-    AudioSource() noexcept      {}
+    AudioSource() noexcept = default;
 
 public:
     /** Destructor. */
-    virtual ~AudioSource()      {}
+    virtual ~AudioSource() = default;
 
     //==============================================================================
     /** Tells the source to prepare for playing.

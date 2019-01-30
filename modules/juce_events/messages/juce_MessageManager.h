@@ -186,8 +186,8 @@ public:
     class JUCE_API  MessageBase  : public ReferenceCountedObject
     {
     public:
-        MessageBase() noexcept {}
-        virtual ~MessageBase() {}
+        MessageBase() noexcept = default;
+        virtual ~MessageBase() = default;
 
         virtual void messageCallback() = 0;
         bool post();

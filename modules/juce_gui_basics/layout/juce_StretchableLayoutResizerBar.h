@@ -79,7 +79,7 @@ public:
     /** This abstract base class is implemented by LookAndFeel classes. */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         virtual void drawStretchableLayoutResizerBar (Graphics&, int w, int h,
                                                       bool isVerticalBar, bool isMouseOver, bool isMouseDragging) = 0;

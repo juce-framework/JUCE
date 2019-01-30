@@ -40,7 +40,7 @@ class JUCE_API  FocusChangeListener
 {
 public:
     /** Destructor. */
-    virtual ~FocusChangeListener()  {}
+    virtual ~FocusChangeListener() = default;
 
     /** Callback to indicate that the currently focused component has changed. */
     virtual void globalFocusChanged (Component* focusedComponent) = 0;

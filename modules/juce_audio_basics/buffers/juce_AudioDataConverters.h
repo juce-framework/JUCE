@@ -277,8 +277,8 @@ public:
     class NonInterleaved
     {
     public:
-        inline NonInterleaved() noexcept {}
-        inline NonInterleaved (const NonInterleaved&) noexcept {}
+        inline NonInterleaved() noexcept = default;
+        inline NonInterleaved (const NonInterleaved&) noexcept = default;
         inline NonInterleaved (const int) noexcept {}
         inline void copyFrom (const NonInterleaved&) noexcept {}
         template <class SampleFormatType> inline void advanceData (SampleFormatType& s) noexcept                    { s.advance(); }
@@ -293,7 +293,7 @@ public:
     {
     public:
         inline Interleaved() noexcept : numInterleavedChannels (1) {}
-        inline Interleaved (const Interleaved& other) noexcept : numInterleavedChannels (other.numInterleavedChannels) {}
+        inline Interleaved (const Interleaved& other) noexcept = default;
         inline Interleaved (const int numInterleavedChans) noexcept : numInterleavedChannels (numInterleavedChans) {}
         inline void copyFrom (const Interleaved& other) noexcept { numInterleavedChannels = other.numInterleavedChannels; }
         template <class SampleFormatType> inline void advanceData (SampleFormatType& s) noexcept                    { s.skip (numInterleavedChannels); }
@@ -587,7 +587,7 @@ public:
     class Converter
     {
     public:
-        virtual ~Converter() {}
+        virtual ~Converter() = default;
 
         /** Converts a sequence of samples from the converter's source format into the dest format. */
         virtual void convertSamples (void* destSamples, const void* sourceSamples, int numSamples) const = 0;

@@ -241,7 +241,7 @@ public:
     {
     public:
         /** Destructor. */
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         /** Implement this callback to be informed whenever a new expressive MIDI
             note is triggered.

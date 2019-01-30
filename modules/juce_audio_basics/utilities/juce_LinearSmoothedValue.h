@@ -35,9 +35,7 @@ class LinearSmoothedValue
 {
 public:
     /** Constructor. */
-    LinearSmoothedValue() noexcept
-    {
-    }
+    LinearSmoothedValue() noexcept = default;
 
     /** Constructor. */
     LinearSmoothedValue (FloatType initialValue) noexcept

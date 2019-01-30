@@ -65,7 +65,7 @@ public:
                               float alpha) = 0;
 
     /** Destructor. */
-    virtual ~ImageEffectFilter() {}
+    virtual ~ImageEffectFilter() = default;
 
 };
 

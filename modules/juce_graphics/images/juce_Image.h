@@ -360,9 +360,9 @@ public:
         class BitmapDataReleaser
         {
         protected:
-            BitmapDataReleaser() {}
+            BitmapDataReleaser() = default;
         public:
-            virtual ~BitmapDataReleaser() {}
+            virtual ~BitmapDataReleaser() = default;
         };
 
         std::unique_ptr<BitmapDataReleaser> dataReleaser;
@@ -475,7 +475,7 @@ public:
     /** Used to receive callbacks for image data changes */
     struct Listener
     {
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         virtual void imageDataChanged (ImagePixelData*) = 0;
         virtual void imageDataBeingDeleted (ImagePixelData*) = 0;

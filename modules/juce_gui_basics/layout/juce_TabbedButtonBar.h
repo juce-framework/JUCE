@@ -308,7 +308,7 @@ public:
     */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         virtual int getTabButtonSpaceAroundImage() = 0;
         virtual int getTabButtonOverlap (int tabDepth) = 0;

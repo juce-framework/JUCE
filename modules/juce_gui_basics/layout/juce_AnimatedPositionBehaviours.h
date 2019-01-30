@@ -46,9 +46,7 @@ namespace AnimatedPositionBehaviours
     */
     struct ContinuousWithMomentum
     {
-        ContinuousWithMomentum() noexcept
-        {
-        }
+        ContinuousWithMomentum() noexcept = default;
 
         /** Sets the friction that damps the movement of the value.
             A typical value is 0.08; higher values indicate more friction.

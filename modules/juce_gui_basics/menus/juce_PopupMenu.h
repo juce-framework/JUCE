@@ -684,7 +684,7 @@ public:
     */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         /** Fills the background of a popup menu component. */
         virtual void drawPopupMenuBackground (Graphics&, int width, int height) = 0;
