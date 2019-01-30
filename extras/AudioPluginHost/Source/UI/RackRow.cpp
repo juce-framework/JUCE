@@ -42,9 +42,8 @@ RackRow::RackRow ()
     m_soloMode = false;
     m_current = NULL;
     m_lastNote = -1;
-    m_arpeggiatorBeat = -1;
-    m_anyNotesDown = false;
-    memset(m_notesDown, 0, sizeof(m_notesDown));
+    m_arpeggiatorBeat = 0;
+    m_notesDown.reserve(128);
     m_pendingProgram = false;
     m_pendingProgramNames = 0.f;
     m_arpeggiatorTimer = 0.f;
@@ -465,17 +464,6 @@ void RackRow::Filter(int samples, int sampleRate, MidiBuffer &midiBuffer)
 
     if (!midiBuffer.isEmpty())
     {
-        m_anyNotesDown = false; // see if any notes currently down (so we know whether to restart sequence)
-        for (int n = 0; n<128; ++n)
-        {
-            if (m_notesDown[n])
-            {
-                m_anyNotesDown = true;
-                break;
-            }
-        }
-
-
         MidiMessage midi_message(0xf0);
         MidiBuffer output;
         int sample_number;
@@ -491,39 +479,52 @@ void RackRow::Filter(int samples, int sampleRate, MidiBuffer &midiBuffer)
                 {
                     if (m_current->Arpeggiator && m_pendingProgramNames <= 0)
                     {
-                        if (!m_anyNotesDown && midi_message.isNoteOn())
+                        // See if new sequence
+                        if (m_notesDown.empty() && midi_message.isNoteOn())
                         {
-                            m_arpeggiatorBeat = -1;
-                            m_arpeggiatorTimer = 0.001; // 1ms for first one 
+                            m_arpeggiatorBeat = 0;
+                            m_arpeggiatorTimer = 0.001f; // 1ms for first one 
                             arpeggiatorSample = sample_number;
                         }
 
-                        m_notesDown[note] = midi_message.isNoteOn();
-
-                        if (midi_message.isNoteOff())
+                        // Update m_notesDown with new info
+                        int found = -1;
+                        for (auto i = 0U; i < m_notesDown.size(); ++i)
+                            if (m_notesDown[i] == note)
+                                found = i;
+                        if (found == -1 && midi_message.isNoteOn())
                         {
-                            // recalculate this with change
-                            m_anyNotesDown = false; // see if any notes currently down (so we know whether to restart sequence)
-                            for (int n = 0; n<128; ++n)
+                            for (auto i = 0U; i < m_notesDown.size(); ++i)
                             {
-                                if (m_notesDown[n])
+                                if (m_notesDown[i] > note)
                                 {
-                                    m_anyNotesDown = true;
+                                    found = i;
                                     break;
                                 }
                             }
+                            if (found == -1)
+                                m_notesDown.push_back(note);
+                            else
+                                m_notesDown.insert(m_notesDown.begin() + found, note);
+                            m_arpeggiatorBeat = 0; // Any change in notes resets arpeggiator position
+                        }
+                        if (found != -1 && midi_message.isNoteOff())
+                        {
+                            swap(m_notesDown[found], m_notesDown[m_notesDown.size() - 1]);
+                            m_notesDown.pop_back();
+                            m_arpeggiatorBeat = 0; // Any change in notes resets arpeggiator position
+                        }
 
-                            // are we ending?
-                            if (!m_anyNotesDown)
+                        // are we ending?
+                        if (midi_message.isNoteOff() && m_notesDown.empty())
+                        {
+                            // cancel last note
+                            if (m_lastNote >= 0)
                             {
-                                // cancel last note
-                                if (m_lastNote >= 0)
-                                {
-                                    output.addEvent(MidiMessage::noteOff(m_current->Device->Channel, m_lastNote), sample_number);
-                                    m_lastNote = -1;
-                                }
-                                m_arpeggiatorTimer = 0.f;
+                                output.addEvent(MidiMessage::noteOff(m_current->Device->Channel, m_lastNote), sample_number);
+                                m_lastNote = -1;
                             }
+                            m_arpeggiatorBeat = 0.f;
                         }
                     }
                     else
@@ -581,7 +582,7 @@ void RackRow::Filter(int samples, int sampleRate, MidiBuffer &midiBuffer)
     {
         while (1)
         {
-            auto nextarpeggiatorSample = arpeggiatorSample + m_arpeggiatorTimer * sampleRate;
+            auto nextarpeggiatorSample = int(arpeggiatorSample + m_arpeggiatorTimer * sampleRate);
             if (nextarpeggiatorSample < samples) // beat in this block
             {
                 arpeggiatorSample = nextarpeggiatorSample; // in case we can fit more in
@@ -595,16 +596,13 @@ void RackRow::Filter(int samples, int sampleRate, MidiBuffer &midiBuffer)
                     m_lastNote = -1;
                 }
 
-                // new note
-                for (int n = 0; n < 128; ++n)
+                // need new note
+                if (!m_notesDown.empty())
                 {
-                    if (m_notesDown[n]) // find lowest
-                    {
-                        m_arpeggiatorBeat++;
-                        m_lastNote = n + 12 * (m_arpeggiatorBeat % 3);
+                    m_lastNote = m_notesDown[m_arpeggiatorBeat % m_notesDown.size()] + 12 * ((m_arpeggiatorBeat / m_notesDown.size()) % 3);
+                    if (m_lastNote < 128)
                         midiBuffer.addEvent(MidiMessage::noteOn(m_current->Device->Channel, m_lastNote, 1.0f), nextarpeggiatorSample);
-                        break; // only do lowest
-                    }
+                    m_arpeggiatorBeat++;
                 }
             }
             else

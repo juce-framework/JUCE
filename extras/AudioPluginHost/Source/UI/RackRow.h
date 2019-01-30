@@ -85,7 +85,7 @@ private:
     bool m_pendingProgram;
     float m_pendingProgramNames;
 
-    bool m_notesDown[128];
+    vector<int> m_notesDown;
     bool m_anyNotesDown;
     int m_arpeggiatorBeat;
     int m_lastNote;
