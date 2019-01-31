@@ -75,7 +75,7 @@ public:
 
     //==============================================================================
     /** Destructor. */
-    virtual ~Typeface();
+    ~Typeface() override;
 
     /** Returns true if this typeface can be used to render the specified font.
         When called, the font will already have been checked to make sure that its name and

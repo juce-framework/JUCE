@@ -186,8 +186,8 @@ public:
     class JUCE_API  ImageProvider
     {
     public:
-        ImageProvider() {}
-        virtual ~ImageProvider() {}
+        ImageProvider() = default;
+        virtual ~ImageProvider() = default;
 
         /** Retrieves the image associated with this identifier, which could be any
             kind of string, number, filename, etc.

@@ -38,10 +38,10 @@ class TouchList
 {
 public:
     /** Creates an empty touch list. */
-    TouchList() {}
+    TouchList() = default;
 
     /** Destructor. */
-    ~TouchList() {}
+    ~TouchList() = default;
 
     /** Returns the number of entries in the touch list. */
     int size() const noexcept { return touches.size(); }

@@ -37,7 +37,7 @@ class JUCE_API  InputStream
 {
 public:
     /** Destructor. */
-    virtual ~InputStream()  {}
+    virtual ~InputStream() = default;
 
     //==============================================================================
     /** Returns the total number of bytes available for reading in this stream.
@@ -253,7 +253,7 @@ public:
 
 protected:
     //==============================================================================
-    InputStream() noexcept {}
+    InputStream() = default;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputStream)

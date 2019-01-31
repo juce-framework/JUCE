@@ -133,7 +133,7 @@ public:
     {
     public:
         /** Destructor. */
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         /** Called when text has finished being entered (i.e. not per keypress) has changed. */
         virtual void textPropertyComponentChanged (TextPropertyComponent*) = 0;

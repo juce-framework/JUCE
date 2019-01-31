@@ -138,8 +138,8 @@ public:
     class JUCE_API  Listener
     {
     public:
-        Listener()          {}
-        virtual ~Listener() {}
+        Listener() = default;
+        virtual ~Listener() = default;
 
         /** Called when a Value object is changed.
 

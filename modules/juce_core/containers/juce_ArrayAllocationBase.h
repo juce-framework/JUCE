@@ -39,14 +39,10 @@ class ArrayAllocationBase  : public TypeOfCriticalSectionToUse
 public:
     //==============================================================================
     /** Creates an empty array. */
-    ArrayAllocationBase() noexcept
-    {
-    }
+    ArrayAllocationBase() = default;
 
     /** Destructor. */
-    ~ArrayAllocationBase() noexcept
-    {
-    }
+    ~ArrayAllocationBase() = default;
 
     ArrayAllocationBase (ArrayAllocationBase&& other) noexcept
         : elements (std::move (other.elements)),

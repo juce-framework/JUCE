@@ -60,7 +60,7 @@ class ScopedPointer
 public:
     //==============================================================================
     /** Creates a ScopedPointer containing a null pointer. */
-    inline ScopedPointer() noexcept {}
+    inline ScopedPointer() = default;
 
     /** Creates a ScopedPointer containing a null pointer. */
     inline ScopedPointer (decltype (nullptr)) noexcept {}

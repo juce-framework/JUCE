@@ -172,7 +172,7 @@ public:
     /** Destructor.
         This will free any memory allocated by the buffer.
     */
-    ~AudioBuffer() noexcept {}
+    ~AudioBuffer() = default;
 
     /** Move constructor */
     AudioBuffer (AudioBuffer&& other) noexcept

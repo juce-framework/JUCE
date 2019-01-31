@@ -71,7 +71,7 @@ public:
     class Listener
     {
     public:
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         /** Called when the mouse is moved or clicked for the first time
             after a period of inactivity. */

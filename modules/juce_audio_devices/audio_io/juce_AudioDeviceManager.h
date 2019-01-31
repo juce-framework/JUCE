@@ -76,7 +76,7 @@ public:
     AudioDeviceManager();
 
     /** Destructor. */
-    ~AudioDeviceManager();
+    ~AudioDeviceManager() override;
 
     //==============================================================================
     /**

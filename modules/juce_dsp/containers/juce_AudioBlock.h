@@ -62,7 +62,7 @@ public:
 
     //==============================================================================
     /** Create a zero-sized AudioBlock. */
-    forcedinline AudioBlock() noexcept {}
+    forcedinline AudioBlock() noexcept = default;
 
     /** Creates an AudioBlock from a pointer to an array of channels.
         AudioBlock does not copy nor own the memory pointed to by dataToUse.
@@ -143,7 +143,7 @@ public:
         : channels (buffer.getArrayOfWritePointers()),
           numChannels (static_cast<ChannelCountType> (buffer.getNumChannels())),
           startSample (startSampleIndex),
-          numSamples (static_cast<size_t> (buffer.getNumSamples()))
+          numSamples (static_cast<size_t> (buffer.getNumSamples()) - startSampleIndex)
     {
         jassert (startSample < numSamples);
     }

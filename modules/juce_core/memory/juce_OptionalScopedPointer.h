@@ -41,7 +41,7 @@ class OptionalScopedPointer
 public:
     //==============================================================================
     /** Creates an empty OptionalScopedPointer. */
-    OptionalScopedPointer() : shouldDelete (false) {}
+    OptionalScopedPointer() = default;
 
     /** Creates an OptionalScopedPointer to point to a given object, and specifying whether
         the OptionalScopedPointer will delete it.
@@ -177,7 +177,7 @@ public:
 private:
     //==============================================================================
     ScopedPointer<ObjectType> object;
-    bool shouldDelete;
+    bool shouldDelete = false;
 
     // This is here to avoid people accidentally taking a second owned copy of
     // a scoped pointer, which is almost certainly not what you intended to do!

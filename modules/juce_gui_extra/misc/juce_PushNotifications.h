@@ -593,7 +593,7 @@ public:
     */
     struct Listener
     {
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         /** This callback will be called after you call requestSettingsUsed() or
             requestPermissionsWithSettings().
@@ -694,7 +694,7 @@ public:
 
 private:
     PushNotifications();
-    ~PushNotifications();
+    ~PushNotifications() override;
 
     ListenerList<PushNotifications::Listener> listeners;
 

@@ -57,10 +57,10 @@ public:
     {
     public:
         /** */
-        Callback() {}
+        Callback() = default;
 
         /** Destructor. */
-        virtual ~Callback() {}
+        virtual ~Callback() = default;
 
         /** Called to indicate that a modal component has been dismissed.
 

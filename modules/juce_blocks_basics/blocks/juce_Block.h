@@ -33,7 +33,7 @@ class Block   : public juce::ReferenceCountedObject
 public:
     //==============================================================================
     /** Destructor. */
-    virtual ~Block();
+    ~Block() override;
 
     /** The different block types.
         @see Block::getType()
@@ -263,7 +263,7 @@ public:
     /** Interface for objects listening to custom program events. */
     struct ProgramEventListener
     {
-        virtual ~ProgramEventListener() {}
+        virtual ~ProgramEventListener() = default;
 
         /** Called whenever a message from a block is received. */
         virtual void handleProgramEvent (Block& source, const ProgramEventMessage&) = 0;
@@ -312,7 +312,7 @@ public:
             options
         };
 
-        ConfigMetaData() {}
+        ConfigMetaData() = default;
 
         // Constructor to work around VS2015 bugs...
         ConfigMetaData (uint32 itemIndex,
@@ -445,7 +445,7 @@ public:
     /** Interface for objects listening to input data port. */
     struct DataInputPortListener
     {
-        virtual ~DataInputPortListener() {}
+        virtual ~DataInputPortListener() = default;
 
         /** Called whenever a message from a block is received. */
         virtual void handleIncomingDataPortMessage (Block& source, const void* messageData, size_t messageSize) = 0;

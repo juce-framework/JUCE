@@ -49,22 +49,13 @@ public:
     /** Holds the parameters being used by a Reverb object. */
     struct Parameters
     {
-        Parameters() noexcept
-          : roomSize   (0.5f),
-            damping    (0.5f),
-            wetLevel   (0.33f),
-            dryLevel   (0.4f),
-            width      (1.0f),
-            freezeMode (0)
-        {}
-
-        float roomSize;     /**< Room size, 0 to 1.0, where 1.0 is big, 0 is small. */
-        float damping;      /**< Damping, 0 to 1.0, where 0 is not damped, 1.0 is fully damped. */
-        float wetLevel;     /**< Wet level, 0 to 1.0 */
-        float dryLevel;     /**< Dry level, 0 to 1.0 */
-        float width;        /**< Reverb width, 0 to 1.0, where 1.0 is very wide. */
-        float freezeMode;   /**< Freeze mode - values < 0.5 are "normal" mode, values > 0.5
-                                 put the reverb into a continuous feedback loop. */
+        float roomSize   = 0.5f;     /**< Room size, 0 to 1.0, where 1.0 is big, 0 is small. */
+        float damping    = 0.5f;     /**< Damping, 0 to 1.0, where 0 is not damped, 1.0 is fully damped. */
+        float wetLevel   = 0.33f;    /**< Wet level, 0 to 1.0 */
+        float dryLevel   = 0.4f;     /**< Dry level, 0 to 1.0 */
+        float width      = 1.0f;     /**< Reverb width, 0 to 1.0, where 1.0 is very wide. */
+        float freezeMode = 0.0f;     /**< Freeze mode - values < 0.5 are "normal" mode, values > 0.5
+                                          put the reverb into a continuous feedback loop. */
     };
 
     //==============================================================================
@@ -224,7 +215,7 @@ private:
     class CombFilter
     {
     public:
-        CombFilter() noexcept   : bufferSize (0), bufferIndex (0), last (0)  {}
+        CombFilter() noexcept {}
 
         void setSize (const int size)
         {
@@ -259,8 +250,8 @@ private:
 
     private:
         HeapBlock<float> buffer;
-        int bufferSize, bufferIndex;
-        float last;
+        int bufferSize = 0, bufferIndex = 0;
+        float last = 0.0f;
 
         JUCE_DECLARE_NON_COPYABLE (CombFilter)
     };
@@ -269,7 +260,7 @@ private:
     class AllPassFilter
     {
     public:
-        AllPassFilter() noexcept  : bufferSize (0), bufferIndex (0) {}
+        AllPassFilter() noexcept {}
 
         void setSize (const int size)
         {
@@ -300,7 +291,7 @@ private:
 
     private:
         HeapBlock<float> buffer;
-        int bufferSize, bufferIndex;
+        int bufferSize = 0, bufferIndex = 0;
 
         JUCE_DECLARE_NON_COPYABLE (AllPassFilter)
     };

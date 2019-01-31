@@ -41,8 +41,8 @@ class PluginHostType
 public:
     //==============================================================================
     PluginHostType()  : type (getHostType()) {}
-    PluginHostType (const PluginHostType& other) noexcept  : type (other.type) {}
-    PluginHostType& operator= (const PluginHostType& other) noexcept { type = other.type; return *this; }
+    PluginHostType (const PluginHostType& other) noexcept   = default;
+    PluginHostType& operator= (const PluginHostType& other) noexcept = default;
 
     //==============================================================================
     /** Represents the host type and also its version for some hosts. */

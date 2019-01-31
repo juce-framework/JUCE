@@ -40,7 +40,7 @@ class NormalisableRange
 {
 public:
     /** Creates a continuous range that performs a dummy mapping. */
-    NormalisableRange() noexcept {}
+    NormalisableRange() = default;
 
     NormalisableRange (const NormalisableRange&) = default;
     NormalisableRange& operator= (const NormalisableRange&) = default;

@@ -39,8 +39,7 @@ class Reverb
 public:
     //==============================================================================
     /** Creates an uninitialised Reverb processor. Call prepare() before first use. */
-    Reverb()
-    {}
+    Reverb() = default;
 
     //==============================================================================
     using Parameters = juce::Reverb::Parameters;

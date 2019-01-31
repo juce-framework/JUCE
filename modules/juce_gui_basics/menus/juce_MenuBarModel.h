@@ -80,7 +80,7 @@ public:
     {
     public:
         /** Destructor. */
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         //==============================================================================
         /** This callback is made when items are changed in the menu bar model. */

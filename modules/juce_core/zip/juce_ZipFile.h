@@ -243,7 +243,7 @@ private:
    #if JUCE_DEBUG
     struct OpenStreamCounter
     {
-        OpenStreamCounter() {}
+        OpenStreamCounter() = default;
         ~OpenStreamCounter();
 
         int numOpenStreams = 0;

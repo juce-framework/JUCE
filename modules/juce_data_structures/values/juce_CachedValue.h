@@ -210,7 +210,7 @@ private:
 
 //==============================================================================
 template <typename Type>
-inline CachedValue<Type>::CachedValue() {}
+inline CachedValue<Type>::CachedValue() = default;
 
 template <typename Type>
 inline CachedValue<Type>::CachedValue (ValueTree& v, const Identifier& i, UndoManager* um)

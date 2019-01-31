@@ -43,7 +43,7 @@ class LassoSource
 {
 public:
     /** Destructor. */
-    virtual ~LassoSource() {}
+    virtual ~LassoSource() = default;
 
     /** Returns the set of items that lie within a given lassoable region.
 
@@ -103,7 +103,7 @@ class LassoComponent  : public Component
 public:
     //==============================================================================
     /** Creates a Lasso component. */
-    LassoComponent() {}
+    LassoComponent() = default;
 
     //==============================================================================
     /** Call this in your mouseDown event, to initialise a drag.
