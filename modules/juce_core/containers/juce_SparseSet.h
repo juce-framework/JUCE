@@ -41,7 +41,7 @@ class SparseSet
 {
 public:
     //==============================================================================
-    SparseSet() noexcept {}
+    SparseSet() = default;
 
     SparseSet (const SparseSet&) = default;
     SparseSet& operator= (const SparseSet&) = default;

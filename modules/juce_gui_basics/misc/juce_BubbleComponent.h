@@ -150,7 +150,7 @@ public:
     */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         virtual void drawBubble (Graphics&, BubbleComponent&,
                                  const Point<float>& positionOfTip,

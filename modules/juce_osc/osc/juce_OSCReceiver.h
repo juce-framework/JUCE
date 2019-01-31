@@ -110,7 +110,7 @@ public:
     {
     public:
         /** Destructor. */
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         /** Called when the OSCReceiver receives a new OSC message.
             You must implement this function.
@@ -150,7 +150,7 @@ public:
     {
     public:
         /** Destructor. */
-        virtual ~ListenerWithOSCAddress() {}
+        virtual ~ListenerWithOSCAddress() = default;
 
         /** Called when the OSCReceiver receives an OSC message with an OSC address
             pattern that matches the OSC address with which this listener was added.

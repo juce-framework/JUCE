@@ -241,7 +241,7 @@ public:
     {
     public:
         /** Destructor. */
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         /** Implement this callback to be informed whenever a new expressive MIDI
             note is triggered.
@@ -352,8 +352,7 @@ private:
 
     struct MPEDimension
     {
-        MPEDimension() noexcept  : trackingMode (lastNotePlayedOnChannel) {}
-        TrackingMode trackingMode;
+        TrackingMode trackingMode = lastNotePlayedOnChannel;
         MPEValue lastValueReceivedOnChannel[16];
         MPEValue MPENote::* value;
         MPEValue& getValue (MPENote& note) noexcept   { return note.*(value); }

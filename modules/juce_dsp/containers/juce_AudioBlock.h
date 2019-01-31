@@ -62,7 +62,7 @@ public:
 
     //==============================================================================
     /** Create a zero-sized AudioBlock. */
-    forcedinline AudioBlock() noexcept {}
+    forcedinline AudioBlock() noexcept = default;
 
     /** Creates an AudioBlock from a pointer to an array of channels.
         AudioBlock does not copy nor own the memory pointed to by dataToUse.

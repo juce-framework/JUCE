@@ -41,7 +41,7 @@ class ValueWithDefault
 public:
     //==============================================================================
     /** Creates an unitialised ValueWithDefault. Initialise it using one of the referTo() methods. */
-    ValueWithDefault() {}
+    ValueWithDefault() = default;
 
     /** Creates an ValueWithDefault object. The default value will be an empty var. */
     ValueWithDefault (ValueTree& tree, const Identifier& propertyID, UndoManager* um)

@@ -52,7 +52,7 @@ public:
     AudioAppComponent();
     AudioAppComponent (AudioDeviceManager&);
 
-    ~AudioAppComponent();
+    ~AudioAppComponent() override;
 
     /** A subclass should call this from their constructor, to set up the audio. */
     void setAudioChannels (int numInputChannels, int numOutputChannels, const XmlElement* const storedSettings = nullptr);
@@ -84,7 +84,7 @@ public:
         @see releaseResources, getNextAudioBlock
     */
     virtual void prepareToPlay (int samplesPerBlockExpected,
-                                double sampleRate) = 0;
+                                double sampleRate) override = 0;
 
     /** Allows the source to release anything it no longer needs after playback has stopped.
 
@@ -98,7 +98,7 @@ public:
 
         @see prepareToPlay, getNextAudioBlock
     */
-    virtual void releaseResources() = 0;
+    virtual void releaseResources() override = 0;
 
     /** Called repeatedly to fetch subsequent blocks of audio data.
 
@@ -112,7 +112,7 @@ public:
 
         @see AudioSourceChannelInfo, prepareToPlay, releaseResources
     */
-    virtual void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) = 0;
+    virtual void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override = 0;
 
     /** Shuts down the audio device and clears the audio source.
 

@@ -43,14 +43,10 @@ namespace RenderingHelpers
 class TranslationOrTransform
 {
 public:
-    TranslationOrTransform() noexcept {}
+    TranslationOrTransform() = default;
     TranslationOrTransform (Point<int> origin) noexcept  : offset (origin) {}
 
-    TranslationOrTransform (const TranslationOrTransform& other) noexcept
-        : complexTransform (other.complexTransform), offset (other.offset),
-          isOnlyTranslated (other.isOnlyTranslated), isRotated (other.isRotated)
-    {
-    }
+    TranslationOrTransform (const TranslationOrTransform& other) = default;
 
     AffineTransform getTransform() const noexcept
     {
@@ -156,7 +152,7 @@ public:
         reset();
     }
 
-    ~GlyphCache()
+    ~GlyphCache() override
     {
         getSingletonPointer() = nullptr;
     }
@@ -283,7 +279,7 @@ template <class RendererType>
 class CachedGlyphEdgeTable  : public ReferenceCountedObject
 {
 public:
-    CachedGlyphEdgeTable() {}
+    CachedGlyphEdgeTable() = default;
 
     void draw (RendererType& state, Point<float> pos) const
     {
@@ -1397,7 +1393,7 @@ namespace EdgeTableFillers
         private:
             struct BresenhamInterpolator
             {
-                BresenhamInterpolator() noexcept {}
+                BresenhamInterpolator() = default;
 
                 void set (int n1, int n2, int steps, int offsetInt) noexcept
                 {
@@ -1628,8 +1624,8 @@ struct ClipRegions
 {
     struct Base  : public SingleThreadedReferenceCountedObject
     {
-        Base() {}
-        virtual ~Base() {}
+        Base() = default;
+        ~Base() override = default;
 
         using Ptr = ReferenceCountedObjectPtr<Base>;
 
@@ -2070,7 +2066,7 @@ struct ClipRegions
 
         Ptr toEdgeTable() const   { return *new EdgeTableRegion (clip); }
 
-        RectangleListRegion& operator= (const RectangleListRegion&);
+        RectangleListRegion& operator= (const RectangleListRegion&) = delete;
     };
 };
 
@@ -2528,10 +2524,7 @@ public:
     {
     }
 
-    SoftwareRendererSavedState (const SoftwareRendererSavedState& other)
-        : BaseClass (other), image (other.image), font (other.font)
-    {
-    }
+    SoftwareRendererSavedState (const SoftwareRendererSavedState& other) = default;
 
     SoftwareRendererSavedState* beginTransparencyLayer (float opacity)
     {
@@ -2668,7 +2661,7 @@ public:
     Font font;
 
 private:
-    SoftwareRendererSavedState& operator= (const SoftwareRendererSavedState&);
+    SoftwareRendererSavedState& operator= (const SoftwareRendererSavedState&) = delete;
 };
 
 //==============================================================================
@@ -2680,7 +2673,7 @@ public:
         : currentState (initialState)
     {}
 
-    SavedStateStack() noexcept {}
+    SavedStateStack() = default;
 
     void initialise (StateObjectType* state)
     {
@@ -2764,7 +2757,7 @@ public:
 
 protected:
     StackBasedLowLevelGraphicsContext (SavedStateType* initialState) : stack (initialState) {}
-    StackBasedLowLevelGraphicsContext() {}
+    StackBasedLowLevelGraphicsContext() = default;
 
     RenderingHelpers::SavedStateStack<SavedStateType> stack;
 };

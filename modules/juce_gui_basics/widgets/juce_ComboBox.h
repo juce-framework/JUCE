@@ -288,7 +288,7 @@ public:
     {
     public:
         /** Destructor. */
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         /** Called when a ComboBox has its selected item changed. */
         virtual void comboBoxChanged (ComboBox* comboBoxThatHasChanged) = 0;
@@ -365,7 +365,7 @@ public:
     */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         virtual void drawComboBox (Graphics&, int width, int height, bool isButtonDown,
                                    int buttonX, int buttonY, int buttonW, int buttonH,

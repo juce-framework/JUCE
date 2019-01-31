@@ -48,7 +48,7 @@ public:
     /** Creates an attributed string with the given text. */
     explicit AttributedString (const String& newString)  { setText (newString); }
 
-    AttributedString (const AttributedString&)            = default;
+    AttributedString (const AttributedString&) = default;
     AttributedString& operator= (const AttributedString&) = default;
 
     // VS2013 can't default move constructors and assignments
@@ -152,7 +152,7 @@ public:
     public:
         Attribute() = default;
 
-        Attribute (const Attribute&)            = default;
+        Attribute (const Attribute&) = default;
         Attribute& operator= (const Attribute&) = default;
 
         // VS2013 can't default move constructors and assignments

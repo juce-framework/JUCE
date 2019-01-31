@@ -624,7 +624,7 @@ public:
         CustomComponent (bool isTriggeredAutomatically = true);
 
         /** Destructor. */
-        ~CustomComponent();
+        ~CustomComponent() override;
 
         /** Returns a rectangle with the size that this component would like to have.
 
@@ -666,7 +666,7 @@ public:
     {
     public:
         CustomCallback();
-        ~CustomCallback();
+        ~CustomCallback() override;
 
         /** Callback to indicate this item has been triggered.
             @returns true if the itemID should be sent to the exitModalState method, or
@@ -684,7 +684,7 @@ public:
     */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         /** Fills the background of a popup menu component. */
         virtual void drawPopupMenuBackground (Graphics&, int width, int height) = 0;

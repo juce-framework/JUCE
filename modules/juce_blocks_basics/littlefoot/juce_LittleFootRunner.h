@@ -593,9 +593,9 @@ struct Runner
     */
     struct FunctionExecutionContext
     {
-        FunctionExecutionContext() noexcept     : programCounter (nullptr) {}
-        FunctionExecutionContext (const FunctionExecutionContext&) noexcept = default;
-        FunctionExecutionContext& operator= (const FunctionExecutionContext&) noexcept = default;
+        FunctionExecutionContext() = default;
+        FunctionExecutionContext (const FunctionExecutionContext&) = default;
+        FunctionExecutionContext& operator= (const FunctionExecutionContext&) = default;
 
         /** */
         FunctionExecutionContext (Runner& r, const char* functionSignature) noexcept
@@ -686,7 +686,7 @@ struct Runner
     private:
         //==============================================================================
         Runner* runner;
-        const uint8* programCounter;
+        const uint8* programCounter = nullptr;
         const uint8* programEnd;
         const uint8* programBase;
         uint8* heapStart;

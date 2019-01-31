@@ -127,7 +127,7 @@ public:
     /** @internal */
     void refresh();
     /** @internal */
-    ~Displays() {}
+    ~Displays() = default;
     // This method has been deprecated - use the findDisplayForPoint() or findDisplayForRect() methods instead
     // as they can deal with converting between logical and physical pixels
     JUCE_DEPRECATED (const Display& getDisplayContaining (Point<int> position) const noexcept);

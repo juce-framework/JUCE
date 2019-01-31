@@ -70,7 +70,7 @@ public:
                  int minimumTransactionsToKeep = 30);
 
     /** Destructor. */
-    ~UndoManager();
+    ~UndoManager() override;
 
     //==============================================================================
     /** Deletes all stored actions in the list. */

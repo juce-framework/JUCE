@@ -47,7 +47,7 @@ public:
 
     //==============================================================================
     /** Creates an empty RectangleList */
-    RectangleList() noexcept {}
+    RectangleList() = default;
 
     /** Creates a copy of another list */
     RectangleList (const RectangleList& other)  : rects (other.rects)

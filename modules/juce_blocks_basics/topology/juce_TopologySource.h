@@ -32,7 +32,7 @@ class TopologySource
 public:
     //==========================================================================
     /** Destructor. */
-    virtual ~TopologySource() {}
+    virtual ~TopologySource() = default;
 
     /** Returns the current topology that this object manages. */
     virtual BlockTopology getCurrentTopology() const = 0;
@@ -47,7 +47,7 @@ public:
     /** Used to receive callbacks for topology changes */
     struct Listener
     {
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
         virtual void topologyChanged() = 0;
     };
 
