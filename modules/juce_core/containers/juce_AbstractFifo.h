@@ -331,7 +331,7 @@ inline void AbstractFifo::ScopedReadWrite<AbstractFifo::ReadOrWrite::write>::fin
 {
     f.finishedWrite (num);
 }
-    
+
 template<>
 inline void AbstractFifo::ScopedReadWrite<AbstractFifo::ReadOrWrite::read>::prepare (AbstractFifo& f, int num) noexcept
 {
