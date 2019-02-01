@@ -326,6 +326,7 @@ namespace juce
 #include "network/juce_IPAddress.h"
 #include "network/juce_MACAddress.h"
 #include "network/juce_NamedPipe.h"
+#include "network/juce_NetworkInterface.h"
 #include "network/juce_Socket.h"
 #include "network/juce_URL.h"
 #include "network/juce_WebInputStream.h"

@@ -91,6 +91,7 @@
  #include <dlfcn.h>
  #include <ifaddrs.h>
  #include <net/if_dl.h>
+ #include <net/if_media.h>
  #include <mach/mach_time.h>
  #include <mach-o/dyld.h>
  #include <objc/runtime.h>
@@ -211,6 +212,8 @@
  #include <errno.h>
  #include <fcntl.h>
  #include <fnmatch.h>
+ #include <linux/ethtool.h>
+ #include <linux/sockios.h>
  #include <net/if.h>
  #include <netdb.h>
  #include <netinet/in.h>
