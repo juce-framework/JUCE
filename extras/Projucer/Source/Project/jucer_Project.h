@@ -234,6 +234,7 @@ public:
     bool isAUPluginHost();
     bool isVSTPluginHost();
     bool isVST3PluginHost();
+    bool isARAPluginHost();
 
     //==============================================================================
     bool shouldBuildTargetType (ProjectType::Target::Type targetType) const noexcept;

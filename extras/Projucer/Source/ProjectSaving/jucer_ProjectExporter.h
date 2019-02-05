@@ -471,6 +471,7 @@ private:
     void createDependencyPathProperties (PropertyListBuilder&);
     void createIconProperties (PropertyListBuilder&);
     void addVSTPathsIfPluginOrHost();
+    void addARAPathsIfPluginOrHost();
     void addCommonAudioPluginSettings();
     void addLegacyVSTFolderToPathIfSpecified();
     RelativePath getInternalVST3SDKPath();

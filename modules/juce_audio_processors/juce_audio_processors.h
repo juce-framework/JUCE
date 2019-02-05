@@ -93,7 +93,18 @@
  #define JUCE_PLUGINHOST_LADSPA 0
 #endif
 
-#if ! (JUCE_PLUGINHOST_AU || JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_VST3 || JUCE_PLUGINHOST_LADSPA)
+ /** Config: JUCE_PLUGINHOST_ARA
+     Enables the ARA support in the VST3 audio plugin hosting classes.
+
+     @see VSTPluginFormat, VST3PluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST, JUCE_PLUGINHOST_AU
+    
+    AudioUnit support coming soon!
+ */
+#ifndef JUCE_PLUGINHOST_ARA
+ #define JUCE_PLUGINHOST_ARA 0
+#endif
+
+#if ! (JUCE_PLUGINHOST_AU || JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_VST3 || JUCE_PLUGINHOST_LADSPA|| JUCE_PLUGINHOST_ARA)
 // #error "You need to set either the JUCE_PLUGINHOST_AU and/or JUCE_PLUGINHOST_VST and/or JUCE_PLUGINHOST_VST3 and/or JUCE_PLUGINHOST_LADSPA flags if you're using this module!"
 #endif
 
