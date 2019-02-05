@@ -95,11 +95,11 @@ class ARAPlaybackRegionReader  : public AudioFormatReader,
 {
 public:
     /** Use a std::vector<ARAPlaybackRegion*> to construct a playback region reader. 
-        @param renderer The ARAPlaybackRenderer instance through which the region samples will be rendered
+        @param playbackRenderer The ARAPlaybackRenderer instance through which the region samples will be rendered
         @param playbackRegions The vector of playback regions that can be read by the reader
-        @param nonRealtime Whether or not the samples need to be read in real time (the \p renderer will be configured appropriately)
+        @param nonRealtime Whether or not the samples need to be read in real time (the \p playbackRenderer will be configured appropriately)
     */
-    ARAPlaybackRegionReader (ARAPlaybackRenderer* renderer, std::vector<ARAPlaybackRegion*> const& playbackRegions, bool nonRealtime);
+    ARAPlaybackRegionReader (ARAPlaybackRenderer* playbackRenderer, std::vector<ARAPlaybackRegion*> const& playbackRegions, bool nonRealtime);
     virtual ~ARAPlaybackRegionReader();
 
     /** Returns true if any of the reader's underlying playback region's have been invalidated. */
@@ -144,12 +144,12 @@ class ARARegionSequenceReader  : public ARAPlaybackRegionReader,
                                  private ARARegionSequence::Listener
 {
 public:
-    ARARegionSequenceReader (ARAPlaybackRenderer* playbackRenderer, ARARegionSequence* regionSequence, bool nonRealtime);
     /** Use an ARARegionSequence to construct a region sequence reader. 
-        @param renderer The ARAPlaybackRenderer instance through which all region sequence samples will be rendered
+        @param playbackRenderer The ARAPlaybackRenderer instance through which all region sequence samples will be rendered
         @param regionSequence The region sequence being read - all playback regions on this sequence will be read
-        @param nonRealtime Whether or not the samples need to be read in real time (the \p renderer will be configured appropriately)
+        @param nonRealtime Whether or not the samples need to be read in real time (the \p playbackRenderer will be configured appropriately)
     */
+    ARARegionSequenceReader (ARAPlaybackRenderer* playbackRenderer, ARARegionSequence* regionSequence, bool nonRealtime);
     virtual ~ARARegionSequenceReader();
 
     void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) override;

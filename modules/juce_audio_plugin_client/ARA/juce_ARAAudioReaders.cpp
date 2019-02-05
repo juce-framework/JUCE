@@ -278,8 +278,8 @@ void ARAPlaybackRegionReader::willDestroyPlaybackRegion (ARAPlaybackRegion* play
 
 //==============================================================================
 
-ARARegionSequenceReader::ARARegionSequenceReader (ARAPlaybackRenderer* playbackRenderer, ARARegionSequence* regionSequence, bool nonRealtime)
-    : ARAPlaybackRegionReader (playbackRenderer, regionSequence->getPlaybackRegions<ARAPlaybackRegion>(), nonRealtime),
+ARARegionSequenceReader::ARARegionSequenceReader (ARAPlaybackRenderer* renderer, ARARegionSequence* regionSequence, bool nonRealtime)
+    : ARAPlaybackRegionReader (renderer, regionSequence->getPlaybackRegions<ARAPlaybackRegion>(), nonRealtime),
       sequence (regionSequence)
 {
     sequence->addListener (this);
