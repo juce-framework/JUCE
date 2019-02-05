@@ -77,7 +77,7 @@ namespace juce
 
 //==============================================================================
 
-AudioFormatReader* ARADocumentController::createAudioSourceReader (ARAAudioSource* audioSource)
+ARAAudioSourceReader* ARADocumentController::createAudioSourceReader (ARAAudioSource* audioSource)
 {
     return new ARAAudioSourceReader (audioSource);
 }

@@ -26,7 +26,7 @@ void ARASampleProjectPlaybackRenderer::prepareToPlay (double newSampleRate, int 
             auto audioSource = playbackRegion->getAudioModification()->getAudioSource<ARAAudioSource>();
             if (audioSourceReaders.count (audioSource) == 0)
             {
-                auto sourceReader = documentController->createAudioSourceReader (audioSource);
+                AudioFormatReader* sourceReader = documentController->createAudioSourceReader (audioSource);
 
                 if (mayBeRealtime)
                 {

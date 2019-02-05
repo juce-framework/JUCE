@@ -5,6 +5,7 @@
 namespace juce
 {
 
+class ARAAudioSourceReader;
 class ARAPlaybackRegionReader;
 class ARARegionSequenceReader;
 
@@ -17,7 +18,7 @@ public:
     // create readers for the various model objects
 
     /** Create an ARAAudioSourceReader instance to read \p audioSource */
-    AudioFormatReader* createAudioSourceReader (ARAAudioSource* audioSource);
+    ARAAudioSourceReader* createAudioSourceReader (ARAAudioSource* audioSource);
     /** Create an ARAPlaybackRegionReader instance to read all regions in \p playbackRegions
     
         See ARAPlaybackRegionReader::ARAPlaybackRegionReader for more information - this function
