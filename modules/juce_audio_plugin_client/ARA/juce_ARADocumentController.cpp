@@ -33,7 +33,6 @@ const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory() noexcept
             kARAContentTypeNotes,
             kARAContentTypeTempoEntries,
             kARAContentTypeBarSignatures,
-            kARAContentTypeSignatures,
             kARAContentTypeStaticTuning,
             kARAContentTypeDynamicTuningOffsets,
             kARAContentTypeKeySignatures,

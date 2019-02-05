@@ -2017,7 +2017,6 @@ StringArray Project::getAllARAContentTypeStrings() noexcept
         "Notes",
         "Tempo Entries",
         "Bar Signatures",
-        "Signatures",
         "Static Tuning",
         "Dynamic Tuning Offsets",
         "Key Signatures",
@@ -2031,11 +2030,10 @@ Array<var> Project::getAllARAContentTypeVars() noexcept
         /*kARAContentTypeNotes =*/                1 << 0,
         /*kARAContentTypeTempoEntries =*/         1 << 1,
         /*kARAContentTypeBarSignatures =*/        1 << 2,
-        /*kARAContentTypeSignatures =*/           1 << 3,
-        /*kARAContentTypeStaticTuning =*/         1 << 4,
-        /*kARAContentTypeDynamicTuningOffsets =*/ 1 << 5,
-        /*kARAContentTypeKeySignatures =*/        1 << 6,
-        /*kARAContentTypeSheetChords =*/          1 << 7,
+        /*kARAContentTypeStaticTuning =*/         1 << 3,
+        /*kARAContentTypeDynamicTuningOffsets =*/ 1 << 4,
+        /*kARAContentTypeKeySignatures =*/        1 << 5,
+        /*kARAContentTypeSheetChords =*/          1 << 6,
     };
     return araContentVars;
 }
