@@ -20,12 +20,26 @@ const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory() noexcept
                                                         // DocumentController factory function
                                                         ARACreateDocumentControllerWithDocumentInstance,
                                                         // Document archive IDs
-                                                        // TODO JUCE_ARA add a way to update compatible archive IDs and count if needed!
-                                                        JucePlugin_ARADocumentArchiveID, 0U, nullptr,
+                                                        JucePlugin_ARADocumentArchiveID,
+                                                        // Legacy document archive IDs - will be updated below
+                                                        0U, nullptr,
                                                         // Analyzeable content types - will be updated below
                                                         0U, nullptr,
                                                         // Playback transformation flags - will be updated below
                                                         0);
+
+        // Parse any legacy document archive IDs
+        String legacyDocumentArchiveIDString = JucePlugin_ARACompatibleArchiveIDs;
+        if (legacyDocumentArchiveIDString.isNotEmpty())
+        {
+            static StringArray legacyDocumentArchiveIDStrings = StringArray::fromLines (legacyDocumentArchiveIDString);
+            static std::vector<ARAPersistentID> legacyDocumentArchiveIDs;
+            for (auto& legacyID : legacyDocumentArchiveIDStrings)
+                legacyDocumentArchiveIDs.push_back (legacyID.toRawUTF8());
+
+            factory->compatibleDocumentArchiveIDs = legacyDocumentArchiveIDs.data();
+            factory->compatibleDocumentArchiveIDsCount = legacyDocumentArchiveIDs.size();
+        }
 
         // Update analyzeable content types
         static std::vector<ARAContentType> contentTypes;

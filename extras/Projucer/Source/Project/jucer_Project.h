@@ -111,6 +111,7 @@ public:
     String getDefaultPluginManufacturerString() const;
     String getDefaultARAFactoryIDString() const;
     String getDefaultARADocumentArchiveID() const;
+    String getDefaultARACompatibleArchiveIDs() const;
 
     String getCompanyNameString() const                  { return companyNameValue.get(); }
     String getCompanyCopyrightString() const             { return companyCopyrightValue.get(); }
@@ -143,6 +144,7 @@ public:
     String getARADocumentArchiveIDString () const { return pluginARAArchiveIDValue.get (); }
     String getPluginAUExportPrefixString() const      { return pluginAUExportPrefixValue.get(); }
     String getPluginAUMainTypeString() const          { return pluginAUMainTypeValue.get(); }
+    String getARACompatibleArchiveIDStrings () const        { return pluginARACompatibleArchiveIDsValue.get (); }
 
     //==============================================================================
     static bool checkMultiChoiceVar (const ValueWithDefault& valueToCheck, Identifier idToCheck) noexcept
@@ -435,7 +437,7 @@ private:
     ValueWithDefault pluginFormatsValue, pluginNameValue, pluginDescriptionValue, pluginManufacturerValue, pluginManufacturerCodeValue,
                      pluginCodeValue, pluginChannelConfigsValue, pluginCharacteristicsValue, pluginAUExportPrefixValue, pluginAAXIdentifierValue,
                      pluginAUMainTypeValue, pluginAUSandboxSafeValue, pluginRTASCategoryValue, pluginVSTCategoryValue, pluginVST3CategoryValue, pluginAAXCategoryValue,
-                     pluginEnableARA, pluginARAAnalyzableContentValue, pluginARAFactoryIDValue, pluginARAArchiveIDValue, pluginARATransformFlagsValue;
+                     pluginEnableARA, pluginARAAnalyzableContentValue, pluginARAFactoryIDValue, pluginARAArchiveIDValue, pluginARACompatibleArchiveIDsValue, pluginARATransformFlagsValue;
 
     //==============================================================================
     std::unique_ptr<CompileEngineSettings> compileEngineSettings;

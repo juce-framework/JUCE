@@ -104,6 +104,7 @@ void Project::updateTitleDependencies()
     pluginAAXIdentifierValue. setDefault (getDefaultAAXIdentifierString());
     pluginARAFactoryIDValue.  setDefault (getDefaultARAFactoryIDString());
     pluginARAArchiveIDValue.  setDefault (getDefaultARADocumentArchiveID());
+    pluginARACompatibleArchiveIDsValue. setDefault (getDefaultARACompatibleArchiveIDs());
 }
 
 String Project::getDocumentTitle()
@@ -271,6 +272,7 @@ void Project::initialiseAudioPluginValues()
     pluginEnableARA.referTo                  (projectRoot, Ids::enableARA,                  getUndoManager(),  shouldEnableARA(), ",");
     pluginARAAnalyzableContentValue.referTo  (projectRoot, Ids::pluginARAAnalyzableContent, getUndoManager (), getDefaultARAContentTypes(), ",");
     pluginARATransformFlagsValue.referTo     (projectRoot, Ids::pluginARATransformFlags,    getUndoManager (), getDefaultARATransformationFlags(), ",");
+    pluginARACompatibleArchiveIDsValue.referTo (projectRoot, Ids::araCompatibleArchiveIDs,    getUndoManager(), getDefaultARACompatibleArchiveIDs());
 }
 
 void Project::updateOldStyleConfigList()
@@ -1154,8 +1156,13 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
 
         props.add (new TextPropertyComponent (pluginARAFactoryIDValue, "Plugin ARA Factory ID", 256, false),
                    "ARA Factory ID.");
+
         props.add (new TextPropertyComponent (pluginARAArchiveIDValue, "Plugin ARA Document Archive ID", 256, false),
                    "ARA Document Archive ID.");
+
+        props.add (new TextPropertyComponent (pluginARACompatibleArchiveIDsValue, "Plugin ARA Compatible Document Archive IDs", 1024, true),
+            "List of compatible ARA Document Archive IDs - one per line");
+
     }
 }
 
@@ -1715,6 +1722,11 @@ String Project::getDefaultARAFactoryIDString() const
 String Project::getDefaultARADocumentArchiveID() const
 { 
     return "com.yourcompany." + CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false) + ".aradocumentarchive." + getVersionString(); 
+}
+
+String Project::getDefaultARACompatibleArchiveIDs() const
+{
+    return String();
 }
 
 String Project::getAUMainTypeString() const noexcept
