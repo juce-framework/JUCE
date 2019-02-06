@@ -174,7 +174,7 @@ public:
 
         @returns true if the operation succeeded.
     */
-    bool writeTo (OutputStream& destStream, int midiFileType = 1);
+    bool writeTo (OutputStream& destStream, int midiFileType = 1) const;
 
     /** Converts the timestamp of all the midi events from midi ticks to seconds.
 
@@ -183,14 +183,13 @@ public:
     */
     void convertTimestampTicksToSeconds();
 
-
 private:
     //==============================================================================
     OwnedArray<MidiMessageSequence> tracks;
     short timeFormat;
 
     void readNextTrack (const uint8*, int, bool);
-    bool writeTrack (OutputStream&, const MidiMessageSequence&);
+    bool writeTrack (OutputStream&, const MidiMessageSequence&) const;
 
     JUCE_LEAK_DETECTOR (MidiFile)
 };
