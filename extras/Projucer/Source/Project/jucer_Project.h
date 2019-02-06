@@ -435,7 +435,7 @@ private:
     ValueWithDefault pluginFormatsValue, pluginNameValue, pluginDescriptionValue, pluginManufacturerValue, pluginManufacturerCodeValue,
                      pluginCodeValue, pluginChannelConfigsValue, pluginCharacteristicsValue, pluginAUExportPrefixValue, pluginAAXIdentifierValue,
                      pluginAUMainTypeValue, pluginAUSandboxSafeValue, pluginRTASCategoryValue, pluginVSTCategoryValue, pluginVST3CategoryValue, pluginAAXCategoryValue,
-                     pluginEnableARA, pluginARAContentTypeValue, pluginARAFactoryIDValue, pluginARAArchiveIDValue, pluginARATransformFlagsValue;
+                     pluginEnableARA, pluginARAAnalyzableContentValue, pluginARAFactoryIDValue, pluginARAArchiveIDValue, pluginARATransformFlagsValue;
 
     //==============================================================================
     std::unique_ptr<CompileEngineSettings> compileEngineSettings;

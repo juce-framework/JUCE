@@ -268,8 +268,8 @@ void Project::initialiseAudioPluginValues()
     pluginVST3CategoryValue.referTo          (projectRoot, Ids::pluginVST3Category,         getUndoManager(),  getDefaultVST3Categories(), ",");
     pluginRTASCategoryValue.referTo          (projectRoot, Ids::pluginRTASCategory,         getUndoManager(),  getDefaultRTASCategories(), ",");
     pluginAAXCategoryValue.referTo           (projectRoot, Ids::pluginAAXCategory,          getUndoManager(),  getDefaultAAXCategories(), ",");
-    pluginARAContentTypeValue.referTo        (projectRoot, Ids::pluginARAContentType,       getUndoManager (), getDefaultARAContentTypes (), ",");
     pluginEnableARA.referTo                  (projectRoot, Ids::enableARA,                  getUndoManager(),  shouldEnableARA(), ",");
+    pluginARAAnalyzableContentValue.referTo  (projectRoot, Ids::pluginARAAnalyzableContent, getUndoManager (), getDefaultARAContentTypes(), ",");
     pluginARATransformFlagsValue.referTo     (projectRoot, Ids::pluginARATransformFlags,    getUndoManager (), getDefaultARATransformationFlags(), ",");
 }
 
@@ -438,12 +438,12 @@ void Project::updatePluginCategories()
     }
 
     {
-        auto araContentTypes = projectRoot.getProperty (Ids::pluginARAContentType, {}).toString();
+        auto araAnalyzableContent = projectRoot.getProperty (Ids::pluginARAAnalyzableContent, {}).toString();
 
-        if (getAllARAContentTypeVars().contains (araContentTypes))
-            pluginARAContentTypeValue = araContentTypes;
-        else if (getAllARAContentTypeStrings().contains (araContentTypes))
-            pluginARAContentTypeValue = Array<var> (getAllARAContentTypeVars()[getAllARAContentTypeStrings().indexOf (araContentTypes)]);
+        if (getAllARAContentTypeVars().contains (araAnalyzableContent))
+            pluginARAAnalyzableContentValue = araAnalyzableContent;
+        else if (getAllARAContentTypeStrings().contains (araAnalyzableContent))
+            pluginARAAnalyzableContentValue = Array<var> (getAllARAContentTypeVars()[getAllARAContentTypeStrings().indexOf (araAnalyzableContent)]);
     }
 
     {
@@ -768,7 +768,7 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
             pluginRTASCategoryValue.setDefault      (getDefaultRTASCategories());
             pluginAAXCategoryValue.setDefault       (getDefaultAAXCategories());
             pluginEnableARA.setDefault              (getDefaultEnableARA());
-            pluginARAContentTypeValue.setDefault    (getDefaultARAContentTypes());
+            pluginARAAnalyzableContentValue.setDefault    (getDefaultARAContentTypes());
             pluginARATransformFlagsValue.setDefault (getDefaultARATransformationFlags());
 
             if (shouldWriteLegacyPluginCharacteristicsSettings)
@@ -1146,7 +1146,7 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
 
    if (shouldEnableARA())
    {
-        props.add (new MultiChoicePropertyComponent (pluginARAContentTypeValue, "Plugin ARA Analyzeable Content Types", getAllARAContentTypeStrings(), getAllARAContentTypeVars()),
+        props.add (new MultiChoicePropertyComponent (pluginARAAnalyzableContentValue, "Plugin ARA Analyzeable Content Types", getAllARAContentTypeStrings(), getAllARAContentTypeVars()),
                  "ARA Analyzeable Content Types.");
 
         props.add (new MultiChoicePropertyComponent (pluginARATransformFlagsValue, "Plugin ARA Transformation Flags", getAllARATransformationFlagStrings(), getAllARATransformationFlagVars()),
@@ -1843,7 +1843,7 @@ int Project::getARAContentTypes() const noexcept
 {
     int res = 0;
 
-    auto v = pluginARAContentTypeValue.get();
+    auto v = pluginARAAnalyzableContentValue.get();
 
     if (auto* arr = v.getArray())
     {

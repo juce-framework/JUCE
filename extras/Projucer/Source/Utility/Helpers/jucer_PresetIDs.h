@@ -342,7 +342,7 @@ namespace Ids
     DECLARE_ID (pluginAAXCategory);
     DECLARE_ID (pluginAAXDisableBypass);
     DECLARE_ID (pluginAAXDisableMultiMono);
-    DECLARE_ID (pluginARAContentType);
+    DECLARE_ID (pluginARAAnalyzableContent);
     DECLARE_ID (pluginARATransformFlags);
     DECLARE_ID (exporters);
     DECLARE_ID (website);
