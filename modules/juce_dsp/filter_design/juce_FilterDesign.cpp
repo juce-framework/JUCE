@@ -78,7 +78,7 @@ typename FIR::Coefficients<FloatType>::Ptr
 
     if (amplitudedB < -50)
         beta = static_cast<FloatType> (0.1102 * (-amplitudedB - 8.7));
-    else if (amplitudedB <= 21)
+    else if (amplitudedB <= -21)
         beta = static_cast<FloatType> (0.5842 * std::pow (-amplitudedB - 21, 0.4) + 0.07886 * (-amplitudedB - 21));
 
     int order = amplitudedB < -21 ? roundToInt (std::ceil ((-amplitudedB - 7.95) / (2.285 * normalisedTransitionWidth * MathConstants<double>::twoPi)))
