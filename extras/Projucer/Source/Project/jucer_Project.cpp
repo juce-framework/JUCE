@@ -268,9 +268,9 @@ void Project::initialiseAudioPluginValues()
     pluginVST3CategoryValue.referTo          (projectRoot, Ids::pluginVST3Category,         getUndoManager(),  getDefaultVST3Categories(), ",");
     pluginRTASCategoryValue.referTo          (projectRoot, Ids::pluginRTASCategory,         getUndoManager(),  getDefaultRTASCategories(), ",");
     pluginAAXCategoryValue.referTo           (projectRoot, Ids::pluginAAXCategory,          getUndoManager(),  getDefaultAAXCategories(), ",");
-    pluginEnableARA.referTo                  (projectRoot, Ids::pluginARAContentType,       getUndoManager(), getDefaultARAContentTypes(), ",");
     pluginARAContentTypeValue.referTo        (projectRoot, Ids::pluginARAContentType,       getUndoManager (), getDefaultARAContentTypes (), ",");
     pluginARATransformFlagsValue.referTo     (projectRoot, Ids::pluginARATransformFlags,    getUndoManager (), getDefaultARAContentTypes (), ",");
+    pluginEnableARA.referTo                  (projectRoot, Ids::enableARA,                  getUndoManager(),  shouldEnableARA(), ",");
 }
 
 void Project::updateOldStyleConfigList()
