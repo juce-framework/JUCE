@@ -395,6 +395,10 @@ struct Convolution::Pimpl  : private Thread
         int start1, size1, start2, size2;
         abstractFifo.prepareToWrite (1, start1, size1, start2, size2);
 
+        // If you hit this assertion then you have requested more impulse response
+        // changes than the Convolution class can handle.
+        jassert (size1 + size2 > 0);
+
         if (size1 > 0)
         {
             fifoRequestsType.setUnchecked (start1, type);
@@ -415,6 +419,10 @@ struct Convolution::Pimpl  : private Thread
     {
         int start1, size1, start2, size2;
         abstractFifo.prepareToWrite (numEntries, start1, size1, start2, size2);
+
+        // If you hit this assertion then you have requested more impulse response
+        // changes than the Convolution class can handle.
+        jassert (numEntries > 0 && size1 + size2 > 0);
 
         if (size1 > 0)
         {
@@ -479,7 +487,7 @@ struct Convolution::Pimpl  : private Thread
         auto numRequests = 0;
 
         // retrieve the information from the FIFO for processing
-        while (getNumRemainingEntries() > 0)
+        while (getNumRemainingEntries() > 0 && numRequests < fifoSize)
         {
             ChangeRequest type = ChangeRequest::changeEngine;
             juce::var parameter;
@@ -701,6 +709,10 @@ struct Convolution::Pimpl  : private Thread
     {
         for (auto* e : engines)
             e->reset();
+
+        mustInterpolate = false;
+
+        processFifo();
     }
 
     /** Convolution processing handling interpolation between previous and new states
@@ -1010,7 +1022,7 @@ private:
 
 
     //==============================================================================
-    static constexpr int fifoSize = 256;            // the size of the fifo which handles all the change requests
+    static constexpr int fifoSize = 1024;           // the size of the fifo which handles all the change requests
     AbstractFifo abstractFifo;                      // the abstract fifo
 
     Array<ChangeRequest> fifoRequestsType;          // an array of ChangeRequest
