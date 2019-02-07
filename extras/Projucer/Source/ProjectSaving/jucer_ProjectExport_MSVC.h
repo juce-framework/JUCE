@@ -332,7 +332,7 @@ public:
             if (project.shouldBuildVST())
                 props.add (new TextPropertyComponentWithEnablement (vstBinaryLocation, pluginBinaryCopyStepValue, "VST (Legacy) Binary Location",
                                                                     1024, false),
-                           "The folder in which the compiled lehacy VST binary should be placed.");
+                           "The folder in which the compiled legacy VST binary should be placed.");
 
         }
 
