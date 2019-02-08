@@ -48,8 +48,8 @@ protected:
             addGCCOptimisationProperty (props);
 
             props.add (new ChoicePropertyComponent (architectureTypeValue, "Architecture",
-                                                    { "<None>",      "Native",        "32-bit (-m32)", "64-bit (-m64)", "ARM v6",       "ARM v7" },
-                                                    { { String() } , "-march=native", "-m32",          "-m64",          "-march=armv6", "-march=armv7" }),
+                                                    { "<None>", "Native",        "32-bit (-m32)", "64-bit (-m64)", "ARM v6",       "ARM v7" },
+                                                    { "none" ,  "-march=native", "-m32",          "-m64",          "-march=armv6", "-march=armv7" }),
                        "Specifies the 32/64-bit architecture to use.");
         }
 
@@ -70,7 +70,15 @@ protected:
             return "${JUCE_ARCH_LABEL}";
         }
 
-        String getArchitectureTypeString() const    { return architectureTypeValue.get(); }
+        String getArchitectureTypeString() const
+        {
+            auto archString = architectureTypeValue.get();
+
+            if (archString == "none")
+                return {};
+
+            return archString;
+        }
 
         //==============================================================================
         ValueWithDefault architectureTypeValue;
