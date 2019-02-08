@@ -697,6 +697,8 @@ void XmlElement::removeChildElement (XmlElement* const childToRemove,
 {
     if (childToRemove != nullptr)
     {
+        jassert (containsChildElement (childToRemove));
+
         firstChildElement.remove (childToRemove);
 
         if (shouldDeleteTheChild)
