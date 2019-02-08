@@ -849,9 +849,12 @@ public:
         float displayScale = 1.0f;
 
        #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
-        NSScreen* screen = [[view window] screen];
-        if ([screen respondsToSelector: @selector (backingScaleFactor)])
-            displayScale = (float) screen.backingScaleFactor;
+        if (!usingCoreGraphics)
+        {
+            NSScreen* screen = [[view window] screen];
+            if ([screen respondsToSelector: @selector (backingScaleFactor)])
+                displayScale = (float) screen.backingScaleFactor;
+        }
        #endif
 
        #if USE_COREGRAPHICS_RENDERING && JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
