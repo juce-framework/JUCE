@@ -4,7 +4,7 @@ This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
 Version 5.4.2
-  - Restructed the low-level Android native code
+  - Restructured the low-level Android native code
   - Added an ADSR envelope class
   - AudioProcessorValueTreeState performance improvements
   - Improved Xcode 10 support
