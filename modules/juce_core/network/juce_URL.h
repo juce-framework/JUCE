@@ -349,11 +349,11 @@ public:
     /** Represents a download task.
         Returned by downloadToFile to allow querying and controlling the download task.
     */
-    class DownloadTask
+    class JUCE_API  DownloadTask
     {
     public:
         /** Used to receive callbacks for download progress */
-        struct Listener
+        struct JUCE_API  Listener
         {
             virtual ~Listener();
 
