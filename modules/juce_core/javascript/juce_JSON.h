@@ -110,13 +110,14 @@ public:
     /** Writes a JSON-formatted representation of the var object to the given stream.
         If allOnOneLine is true, the result will be compacted into a single line of text
         with no carriage-returns. If false, it will be laid-out in a more human-readable format.
-        The maximumDecimalPlaces parameter determines the precision of floating point numbers.
+        The maximumDecimalPlaces parameter determines the precision of floating point numbers
+        in scientific notation.
         @see toString
     */
     static void writeToStream (OutputStream& output,
                                const var& objectToFormat,
                                bool allOnOneLine = false,
-                               int maximumDecimalPlaces = 20);
+                               int maximumDecimalPlaces = 15);
 
     /** Returns a version of a string with any extended characters escaped. */
     static String escapeString (StringRef);
