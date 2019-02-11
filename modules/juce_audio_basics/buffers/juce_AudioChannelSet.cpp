@@ -171,7 +171,7 @@ AudioChannelSet::ChannelType AudioChannelSet::getChannelTypeFromAbbreviation (co
 {
     if (abbr.length() > 0 && (abbr[0] >= '0' && abbr[0] <= '9'))
         return static_cast<AudioChannelSet::ChannelType> (static_cast<int> (discreteChannel0)
-                                                               + abbr.getIntValue() + 1);
+                                                               + abbr.getIntValue() - 1);
 
     if (abbr == "L")     return left;
     if (abbr == "R")     return right;
