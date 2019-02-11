@@ -26,7 +26,7 @@ namespace juce
 //==============================================================================
 /**
     Utility class for linearly smoothed values like volume etc. that should
-    not change abruptly but as a linear ramp, to avoid audio glitches.
+    not change abruptly but as a linear ramp to avoid audio glitches.
 
     @tags{Audio}
 */
@@ -44,43 +44,50 @@ public:
     }
 
     //==============================================================================
-    /** Reset to a new sample rate and ramp length.
-        @param sampleRate The sampling rate
-        @param rampLengthInSeconds The duration of the ramp in seconds
+    /** Set a new sample rate and ramp length in seconds.
+        @param sampleRate            The sampling rate
+        @param rampLengthInSeconds   The duration of the ramp in seconds
     */
     void reset (double sampleRate, double rampLengthInSeconds) noexcept
     {
         jassert (sampleRate > 0 && rampLengthInSeconds >= 0);
-        stepsToTarget = (int) std::floor (rampLengthInSeconds * sampleRate);
-        currentValue = target;
-        countdown = 0;
+        reset ((int) std::floor (rampLengthInSeconds * sampleRate));
     }
 
-    //==============================================================================
-    /** Set a new target value.
-
-        @param newValue     The new target value
-        @param force        If true, the value will be set immediately, bypassing the ramp
+    /** Set a new ramp length directly in samples.
+        @param numSteps     The number of samples over which the ramp should be active
     */
-    void setValue (FloatType newValue, bool force = false) noexcept
+    void reset (int numSteps) noexcept
     {
-        if (force)
+        stepsToTarget = numSteps;
+        setCurrentValueToTargetValue();
+    }
+
+    /** Set the next value to ramp towards.
+        @param newValue     The new target value
+    */
+    void setTargetValue (FloatType newValue) noexcept
+    {
+        if (target == newValue)
+            return;
+
+        target = newValue;
+
+        if (stepsToTarget <= 0)
         {
-            target = currentValue = newValue;
-            countdown = 0;
+            setCurrentValueToTargetValue();
             return;
         }
 
-        if (target != newValue)
-        {
-            target = newValue;
-            countdown = stepsToTarget;
+        countdown = stepsToTarget;
+        step = (target - currentValue) / static_cast<FloatType> (countdown);
+    }
 
-            if (countdown <= 0)
-                currentValue = target;
-            else
-                step = (target - currentValue) / (FloatType) countdown;
-        }
+    /** Sets the current value to the target value. */
+    void setCurrentValueToTargetValue() noexcept
+    {
+        currentValue = target;
+        countdown = 0;
     }
 
     //==============================================================================
@@ -89,7 +96,7 @@ public:
     */
     FloatType getNextValue() noexcept
     {
-        if (countdown <= 0)
+        if (! isSmoothing())
             return target;
 
         --countdown;
@@ -98,16 +105,13 @@ public:
     }
 
     /** Returns true if the current value is currently being interpolated. */
-    bool isSmoothing() const noexcept
-    {
-        return countdown > 0;
-    }
+    bool isSmoothing() const noexcept                 { return countdown > 0; }
+
+    /** Returns the current value of the ramp. */
+    FloatType getCurrentValue() const noexcept        { return currentValue; }
 
     /** Returns the target value towards which the smoothed value is currently moving. */
-    FloatType getTargetValue() const noexcept
-    {
-        return target;
-    }
+    FloatType getTargetValue() const noexcept         { return target; }
 
     //==============================================================================
     /** Applies a linear smoothed gain to a stream of samples
@@ -194,8 +198,7 @@ public:
     {
         if (numSamples >= countdown)
         {
-            currentValue = target;
-            countdown = 0;
+            setCurrentValueToTargetValue();
             return target;
         }
 
@@ -203,6 +206,25 @@ public:
         countdown -= numSamples;
         return currentValue;
     }
+
+    //==============================================================================
+    /** THIS FUNCTION IS DEPRECATED.
+
+        Use `setTargetValue (float)` and `setCurrentValueToTargetValue()` instead:
+
+        lsv.setValue (x, false); -> lsv.setTargetValue (x);
+        lsv.setValue (x, true);  -> lsv.setTargetValue (x); lsv.setCurrentValueToTargetValue();
+
+        @param newValue     The new target value
+        @param force        If true, the value will be set immediately, bypassing the ramp
+    */
+    JUCE_DEPRECATED_WITH_BODY (void setValue (FloatType newValue, bool force = false) noexcept,
+    {
+        setTargetValue (newValue);
+
+        if (force)
+            setCurrentValueToTargetValue();
+    })
 
 private:
     //==============================================================================

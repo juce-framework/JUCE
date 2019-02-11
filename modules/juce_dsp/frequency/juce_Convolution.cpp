@@ -1006,13 +1006,13 @@ private:
 
             for (auto i = 0; i < 2; ++i)
             {
-                changeVolumes[i].setValue (1.0f);
+                changeVolumes[i].setTargetValue (1.0f);
                 changeVolumes[i].reset (currentInfo.sampleRate, 0.05);
-                changeVolumes[i].setValue (0.0f);
+                changeVolumes[i].setTargetValue (0.0f);
 
-                changeVolumes[i + 2].setValue (0.0f);
+                changeVolumes[i + 2].setTargetValue (0.0f);
                 changeVolumes[i + 2].reset (currentInfo.sampleRate, 0.05);
-                changeVolumes[i + 2].setValue (1.0f);
+                changeVolumes[i + 2].setTargetValue (1.0f);
 
             }
 
@@ -1235,13 +1235,13 @@ void Convolution::processSamples (const AudioBlock<float>& input, AudioBlock<flo
 
             for (size_t channel = 0; channel < numChannels; ++channel)
             {
-                volumeDry[channel].setValue (isBypassed ? 0.0f : 1.0f);
+                volumeDry[channel].setTargetValue (isBypassed ? 0.0f : 1.0f);
                 volumeDry[channel].reset (sampleRate, 0.05);
-                volumeDry[channel].setValue (isBypassed ? 1.0f : 0.0f);
+                volumeDry[channel].setTargetValue (isBypassed ? 1.0f : 0.0f);
 
-                volumeWet[channel].setValue (isBypassed ? 1.0f : 0.0f);
+                volumeWet[channel].setTargetValue (isBypassed ? 1.0f : 0.0f);
                 volumeWet[channel].reset (sampleRate, 0.05);
-                volumeWet[channel].setValue (isBypassed ? 0.0f : 1.0f);
+                volumeWet[channel].setTargetValue (isBypassed ? 0.0f : 1.0f);
             }
         }
     }

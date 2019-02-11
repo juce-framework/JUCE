@@ -82,7 +82,13 @@ public:
 
     //==============================================================================
     /** Sets the frequency of the oscillator. */
-    void setFrequency (NumericType newFrequency, bool force = false) noexcept    { frequency.setValue (newFrequency, force); }
+    void setFrequency (NumericType newFrequency, bool force = false) noexcept
+    {
+        frequency.setTargetValue (newFrequency);
+
+        if (force)
+            frequency.setCurrentValueToTargetValue();
+    }
 
     /** Returns the current frequency of the oscillator. */
     NumericType getFrequency() const noexcept                    { return frequency.getTargetValue(); }
