@@ -73,7 +73,7 @@ public:
                            Orientation orientation);
 
     /** Destructor. */
-    ~MidiKeyboardComponent();
+    ~MidiKeyboardComponent() override;
 
     //==============================================================================
     /** Changes the velocity used in midi note-on messages that are triggered by clicking

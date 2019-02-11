@@ -51,7 +51,7 @@ public:
                              bool deleteReaderWhenThisIsDeleted);
 
     /** Destructor. */
-    ~AudioFormatReaderSource();
+    ~AudioFormatReaderSource() override;
 
     //==============================================================================
     /** Toggles loop-mode.

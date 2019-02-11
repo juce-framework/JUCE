@@ -51,7 +51,7 @@ public:
                              bool triggerOnMouseDown);
 
     /** Destructor. */
-    ~ButtonPropertyComponent();
+    ~ButtonPropertyComponent() override;
 
     //==============================================================================
     /** Called when the user clicks the button.

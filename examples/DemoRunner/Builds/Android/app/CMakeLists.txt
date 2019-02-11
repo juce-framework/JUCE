@@ -8,7 +8,7 @@ SET(BINARY_NAME "juce_jni")
 add_library("cpufeatures" STATIC "${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c")
 set_source_files_properties("${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c" PROPERTIES COMPILE_FLAGS "-Wno-sign-conversion -Wno-gnu-statement-expression")
 
-add_definitions("-DJUCE_ANDROID=1" "-DJUCE_ANDROID_API_VERSION=23" "-DJUCE_PUSH_NOTIFICATIONS=1" "-DJUCE_ANDROID_GL_ES_VERSION_3_0=1" "-DJUCE_DEMO_RUNNER=1" "-DJUCE_UNIT_TESTS=1" "-DJUCER_ANDROIDSTUDIO_7F0E4A25=1" "-DJUCE_APP_VERSION=5.4.1" "-DJUCE_APP_VERSION_HEX=0x50401")
+add_definitions("-DJUCE_ANDROID=1" "-DJUCE_ANDROID_API_VERSION=23" "-DJUCE_PUSH_NOTIFICATIONS=1" "-DJUCE_ANDROID_GL_ES_VERSION_3_0=1" "-DJUCE_DEMO_RUNNER=1" "-DJUCE_UNIT_TESTS=1" "-DJUCER_ANDROIDSTUDIO_7F0E4A25=1" "-DJUCE_APP_VERSION=5.4.2" "-DJUCE_APP_VERSION_HEX=0x50402")
 
 include_directories( AFTER
     "../../../JuceLibraryCode"
@@ -498,6 +498,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_blocks_basics/blocks/juce_Block.cpp"
     "../../../../../modules/juce_blocks_basics/blocks/juce_Block.h"
     "../../../../../modules/juce_blocks_basics/blocks/juce_BlockConfigManager.h"
+    "../../../../../modules/juce_blocks_basics/blocks/juce_BlocksVersion.cpp"
+    "../../../../../modules/juce_blocks_basics/blocks/juce_BlocksVersion.h"
     "../../../../../modules/juce_blocks_basics/blocks/juce_ControlButton.h"
     "../../../../../modules/juce_blocks_basics/blocks/juce_LEDGrid.h"
     "../../../../../modules/juce_blocks_basics/blocks/juce_LEDRow.h"
@@ -517,6 +519,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_blocks_basics/topology/internal/juce_BandwidthStatsLogger.cpp"
     "../../../../../modules/juce_blocks_basics/topology/internal/juce_BlockImplementation.cpp"
     "../../../../../modules/juce_blocks_basics/topology/internal/juce_ConnectedDeviceGroup.cpp"
+    "../../../../../modules/juce_blocks_basics/topology/internal/juce_DepreciatedVersionReader.cpp"
     "../../../../../modules/juce_blocks_basics/topology/internal/juce_Detector.cpp"
     "../../../../../modules/juce_blocks_basics/topology/internal/juce_DetectorHolder.cpp"
     "../../../../../modules/juce_blocks_basics/topology/internal/juce_DeviceInfo.cpp"
@@ -905,6 +908,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_data_structures/values/juce_ValueTree.h"
     "../../../../../modules/juce_data_structures/values/juce_ValueTreeSynchroniser.cpp"
     "../../../../../modules/juce_data_structures/values/juce_ValueTreeSynchroniser.h"
+    "../../../../../modules/juce_data_structures/values/juce_ValueWithDefault.cpp"
     "../../../../../modules/juce_data_structures/values/juce_ValueWithDefault.h"
     "../../../../../modules/juce_data_structures/juce_data_structures.cpp"
     "../../../../../modules/juce_data_structures/juce_data_structures.mm"
@@ -2083,6 +2087,8 @@ set_source_files_properties("../../../../../modules/juce_audio_utils/juce_audio_
 set_source_files_properties("../../../../../modules/juce_blocks_basics/blocks/juce_Block.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/blocks/juce_Block.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/blocks/juce_BlockConfigManager.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_blocks_basics/blocks/juce_BlocksVersion.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_blocks_basics/blocks/juce_BlocksVersion.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/blocks/juce_ControlButton.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/blocks/juce_LEDGrid.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/blocks/juce_LEDRow.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2102,6 +2108,7 @@ set_source_files_properties("../../../../../modules/juce_blocks_basics/protocol/
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_BandwidthStatsLogger.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_BlockImplementation.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_ConnectedDeviceGroup.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_DepreciatedVersionReader.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_Detector.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_DetectorHolder.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_DeviceInfo.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2490,6 +2497,7 @@ set_source_files_properties("../../../../../modules/juce_data_structures/values/
 set_source_files_properties("../../../../../modules/juce_data_structures/values/juce_ValueTree.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_data_structures/values/juce_ValueTreeSynchroniser.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_data_structures/values/juce_ValueTreeSynchroniser.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_data_structures/values/juce_ValueWithDefault.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_data_structures/values/juce_ValueWithDefault.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_data_structures/juce_data_structures.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_data_structures/juce_data_structures.mm" PROPERTIES HEADER_FILE_ONLY TRUE)

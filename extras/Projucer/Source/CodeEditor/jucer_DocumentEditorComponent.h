@@ -35,7 +35,7 @@ class DocumentEditorComponent  : public Component,
 public:
     //==============================================================================
     DocumentEditorComponent (OpenDocumentManager::Document* document);
-    ~DocumentEditorComponent();
+    ~DocumentEditorComponent() override;
 
     OpenDocumentManager::Document* getDocument() const              { return document; }
 

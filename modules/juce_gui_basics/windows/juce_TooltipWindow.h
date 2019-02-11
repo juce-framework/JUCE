@@ -77,7 +77,7 @@ public:
                             int millisecondsBeforeTipAppears = 700);
 
     /** Destructor. */
-    ~TooltipWindow();
+    ~TooltipWindow() override;
 
     //==============================================================================
     /** Changes the time before the tip appears.
@@ -117,7 +117,7 @@ public:
     */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         /** returns the bounds for a tooltip at the given screen coordinate, constrained within the given desktop area. */
         virtual Rectangle<int> getTooltipBounds (const String& tipText, Point<int> screenPos, Rectangle<int> parentArea) = 0;

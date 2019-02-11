@@ -49,7 +49,7 @@ public:
     /** Creates an empty channel set.
         You can call addChannel to add channels to the set.
     */
-    AudioChannelSet() noexcept  {}
+    AudioChannelSet() = default;
 
     /** Creates a zero-channel set which can be used to indicate that a
         bus is disabled. */
@@ -365,7 +365,21 @@ public:
         ambisonicZ          = ambisonicACN2, /**< Same as first-order ambisonic channel number 2. */
 
         //==============================================================================
-        discreteChannel0    = 64  /**< Non-typed individual channels are indexed upwards from this value. */
+        bottomFrontLeft     = 62, /**< Bottom Front Left (Bfl)   */
+        bottomFrontCentre   = 63, /**< Bottom Front Centre (Bfc) */
+        bottomFrontRight    = 64, /**< Bottom Front Right (Bfr)  */
+
+        proxymityLeft       = 65, /**< Proximity Left (Pl)  */
+        proximityRight      = 66, /**< Proximity Right (Pr) */
+
+        bottomSideLeft      = 67, /**< Bottom Side Left (Bsl)   */
+        bottomSideRight     = 68, /**< Bottom Side Right (Bsr)  */
+        bottomRearLeft      = 69, /**< Bottom Rear Left (Brl)  */
+        bottomRearCentre    = 70, /**< Bottom Rear Center (Brc)  */
+        bottomRearRight     = 71, /**< Bottom Rear Right (Brr)  */
+
+        //==============================================================================
+        discreteChannel0    = 128  /**< Non-typed individual channels are indexed upwards from this value. */
     };
 
     /** Returns the name of a given channel type. For example, this method may return "Surround Left". */

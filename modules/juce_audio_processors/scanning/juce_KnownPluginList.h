@@ -46,7 +46,7 @@ public:
     KnownPluginList();
 
     /** Destructor. */
-    ~KnownPluginList();
+    ~KnownPluginList() override;
 
     //==============================================================================
     /** Clears the list. */

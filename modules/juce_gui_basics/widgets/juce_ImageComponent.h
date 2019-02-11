@@ -44,7 +44,7 @@ public:
     ImageComponent (const String& componentName = String());
 
     /** Destructor. */
-    ~ImageComponent();
+    ~ImageComponent() override;
 
     //==============================================================================
     /** Sets the image that should be displayed. */

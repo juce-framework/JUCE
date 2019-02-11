@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
-              jucerVersion="5.4.1" version="5.4.1" bundleIdentifier="com.juce.theprojucer"
+              jucerVersion="5.4.2" version="5.4.2" bundleIdentifier="com.juce.theprojucer"
               defines="" splashScreenColour="Dark" displaySplashScreen="0"
               reportAppUsage="0" companyName="ROLI Ltd." companyCopyright="ROLI Ltd."
               cppLanguageStandard="11">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                documentExtensions=".jucer" objCExtraSuffix="zkVtji" bigIcon="rv1F4h"
-               extraLinkerFlags="" extraCompilerFlags="-Wall -Wno-missing-field-initializers -Wshadow-all -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Wconditional-uninitialized -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion  -Wunused-private-field -Wbool-conversion -Wextra-semi -Wno-ignored-qualifiers -Wunreachable-code -Wzero-as-null-pointer-constant"
+               extraLinkerFlags="" extraCompilerFlags="-Wall -Wno-missing-field-initializers -Wshadow-all -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Wconditional-uninitialized -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion  -Wunused-private-field -Wbool-conversion -Wextra-semi -Wno-ignored-qualifiers -Wunreachable-code -Wzero-as-null-pointer-constant -Wcast-align -Winconsistent-missing-destructor-override -Wshift-sign-overflow -Wundefined-func-template -Wnullable-to-nonnull-conversion"
                customPList="&lt;plist&gt;&#10;&lt;dict&gt;&#10;&#9;&lt;key&gt;NSAppTransportSecurity&lt;/key&gt;&#10;&#9;&lt;dict&gt;&#10;&#9;&#9;&lt;key&gt;NSAllowsArbitraryLoads&lt;/key&gt;&#10;&#9;&#9;&lt;true/&gt;&#10;&#9;&#9;&lt;key&gt;NSExceptionDomains&lt;/key&gt;&#10;&#9;&#9;&lt;dict&gt;&#10;&#9;&#9;&#9;&lt;key&gt;amazonaws.com&lt;/key&gt;&#10;&#9;&#9;&#9;&lt;dict&gt;&#10;&#9;&#9;&#9;&#9;&lt;key&gt;NSExceptionAllowsInsecureHTTPLoads&lt;/key&gt;&#10;&#9;&#9;&#9;&#9;&lt;true/&gt;&#10;&#9;&#9;&#9;&#9;&lt;key&gt;NSIncludesSubdomains&lt;/key&gt;&#10;&#9;&#9;&#9;&#9;&lt;true/&gt;&#10;&#9;&#9;&#9;&lt;/dict&gt;&#10;&#9;&#9;&lt;/dict&gt;&#10;&#9;&lt;/dict&gt;&#10;&lt;/dict&gt;&#10;&lt;/plist&gt;"
                extraFrameworks="AudioUnit; Accelerate; AVFoundation; CoreAudio; CoreAudioKit; CoreMIDI; DiscRecording; QuartzCore; AudioToolbox; OpenGL; QTKit; QuickTime">
       <CONFIGURATIONS>
@@ -720,7 +720,7 @@
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_LOG_ASSERTIONS="1" JUCE_USE_CURL="1" JUCE_ALLOW_STATIC_NULL_VARIABLES="0"
-               JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
+               JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_LOAD_CURL_SYMBOLS_LAZILY="1"/>
   <MODULES>
     <MODULE id="juce_analytics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_core" showAllCode="1"/>

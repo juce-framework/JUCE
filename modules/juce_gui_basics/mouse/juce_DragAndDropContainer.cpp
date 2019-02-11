@@ -62,7 +62,7 @@ public:
         setAlwaysOnTop (true);
     }
 
-    ~DragImageComponent()
+    ~DragImageComponent() override
     {
         owner.dragImageComponents.remove (owner.dragImageComponents.indexOf (this), false);
 

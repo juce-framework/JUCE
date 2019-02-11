@@ -53,7 +53,7 @@ struct NetworkServiceDiscovery
                     RelativeTime minTimeBetweenBroadcasts = RelativeTime::seconds (1.5));
 
         /** Destructor */
-        ~Advertiser();
+        ~Advertiser() override;
 
     private:
         XmlElement message;
@@ -101,7 +101,7 @@ struct NetworkServiceDiscovery
         AvailableServiceList (const String& serviceTypeUID, int broadcastPort);
 
         /** Destructor */
-        ~AvailableServiceList();
+        ~AvailableServiceList() override;
 
         /** A lambda that can be set to recieve a callback when the list changes */
         std::function<void()> onChange;
@@ -120,6 +120,8 @@ struct NetworkServiceDiscovery
         void handleMessage (const XmlElement&);
         void handleMessage (const Service&);
         void removeTimedOutServices();
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AvailableServiceList)
     };
 };
 

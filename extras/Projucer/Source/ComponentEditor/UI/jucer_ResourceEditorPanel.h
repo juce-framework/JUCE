@@ -35,7 +35,7 @@ class ResourceEditorPanel  : public Component,
 {
 public:
     ResourceEditorPanel (JucerDocument& document);
-    ~ResourceEditorPanel();
+    ~ResourceEditorPanel() override;
 
     void resized() override;
     void paint (Graphics& g) override;

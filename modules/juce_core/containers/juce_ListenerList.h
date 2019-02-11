@@ -70,10 +70,10 @@ class ListenerList
 public:
     //==============================================================================
     /** Creates an empty list. */
-    ListenerList() {}
+    ListenerList() = default;
 
     /** Destructor. */
-    ~ListenerList() {}
+    ~ListenerList() = default;
 
     //==============================================================================
     /** Adds a listener to the list.
@@ -194,7 +194,7 @@ public:
             : list (listToIterate), index (listToIterate.size())
         {}
 
-        ~Iterator() noexcept {}
+        ~Iterator() = default;
 
         //==============================================================================
         bool next() noexcept

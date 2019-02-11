@@ -501,18 +501,27 @@ private:
         }
 
         Array<RelativePath> excludeFromBuild;
+        Array<std::pair<RelativePath, String>> extraCompilerFlags;
 
         mo << "add_library( ${BINARY_NAME}" << newLine;
         mo << newLine;
         mo << "    " << (getProject().getProjectType().isStaticLibrary() ? "STATIC" : "SHARED") << newLine;
         mo << newLine;
-        addCompileUnits (mo, excludeFromBuild);
+        addCompileUnits (mo, excludeFromBuild, extraCompilerFlags);
         mo << ")" << newLine << newLine;
 
         if (excludeFromBuild.size() > 0)
         {
             for (auto& exclude : excludeFromBuild)
                 mo << "set_source_files_properties(\"" << exclude.toUnixStyle() << "\" PROPERTIES HEADER_FILE_ONLY TRUE)" << newLine;
+
+            mo << newLine;
+        }
+
+        if (! extraCompilerFlags.isEmpty())
+        {
+            for (auto& extra : extraCompilerFlags)
+                mo << "set_source_files_properties(\"" << extra.first.toUnixStyle() << "\" PROPERTIES COMPILE_FLAGS " << extra.second << " )" << newLine;
 
             mo << newLine;
         }
@@ -1258,32 +1267,45 @@ private:
     }
 
     //==============================================================================
-    void addCompileUnits (const Project::Item& projectItem, MemoryOutputStream& mo, Array<RelativePath>& excludeFromBuild) const
+    void addCompileUnits (const Project::Item& projectItem, MemoryOutputStream& mo,
+                          Array<RelativePath>& excludeFromBuild, Array<std::pair<RelativePath, String>>& extraCompilerFlags) const
     {
         if (projectItem.isGroup())
         {
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
-                addCompileUnits (projectItem.getChild(i), mo, excludeFromBuild);
+                addCompileUnits (projectItem.getChild(i), mo, excludeFromBuild, extraCompilerFlags);
         }
         else if (projectItem.shouldBeAddedToTargetProject())
         {
-            RelativePath file (projectItem.getFile(), getTargetFolder().getChildFile ("app"), RelativePath::buildTargetFolder);
-            auto targetType = getProject().getTargetTypeFromFilePath (projectItem.getFile(), true);
+            auto f = projectItem.getFile();
+            RelativePath file (f, getTargetFolder().getChildFile ("app"), RelativePath::buildTargetFolder);
+
+            auto targetType = getProject().getTargetTypeFromFilePath (f, true);
 
             mo << "    \"" << file.toUnixStyle() << "\"" << newLine;
 
-            if ((! projectItem.shouldBeCompiled()) || (! shouldFileBeCompiledByDefault (file))
+            if ((! projectItem.shouldBeCompiled()) || (! shouldFileBeCompiledByDefault (f))
                 || (getProject().getProjectType().isAudioPlugin()
                     && targetType != ProjectType::Target::SharedCodeTarget
                     && targetType != ProjectType::Target::StandalonePlugIn))
+            {
                 excludeFromBuild.add (file);
+            }
+            else
+            {
+                auto extraFlags = compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get().toString();
+
+                if (extraFlags.isNotEmpty())
+                    extraCompilerFlags.add ({ file, extraFlags });
+            }
         }
     }
 
-    void addCompileUnits (MemoryOutputStream& mo, Array<RelativePath>& excludeFromBuild) const
+    void addCompileUnits (MemoryOutputStream& mo, Array<RelativePath>& excludeFromBuild,
+                          Array<std::pair<RelativePath, String>>& extraCompilerFlags) const
     {
         for (int i = 0; i < getAllGroups().size(); ++i)
-            addCompileUnits (getAllGroups().getReference(i), mo, excludeFromBuild);
+            addCompileUnits (getAllGroups().getReference(i), mo, excludeFromBuild, extraCompilerFlags);
     }
 
     //==============================================================================

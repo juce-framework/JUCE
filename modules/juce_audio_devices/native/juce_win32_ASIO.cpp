@@ -770,7 +770,7 @@ private:
         if (CharPointer_UTF8::isValidString (text, length))
             return String::fromUTF8 (text, length);
 
-        WCHAR wideVersion[64] = {};
+        WCHAR wideVersion[512] = {};
         MultiByteToWideChar (CP_ACP, 0, text, length, wideVersion, numElementsInArray (wideVersion));
         return wideVersion;
     }
@@ -1113,9 +1113,11 @@ private:
     String getLastDriverError() const
     {
         jassert (asioObject != nullptr);
+
         char buffer[512] = {};
         asioObject->getErrorMessage (buffer);
-        return String (buffer, sizeof (buffer) - 1);
+
+        return convertASIOString (buffer, sizeof (buffer));
     }
 
     String initDriver()
@@ -1425,7 +1427,12 @@ public:
             TCHAR name[256] = {};
 
             while (RegEnumKey (hk, index++, name, numElementsInArray (name)) == ERROR_SUCCESS)
+            {
+                if (isBlacklistedDriver (name))
+                    continue;
+
                 addDriverInfo (name, hk);
+            }
 
             RegCloseKey (hk);
         }
@@ -1557,6 +1564,11 @@ private:
     }
 
     //==============================================================================
+    static bool isBlacklistedDriver (const String& driverName)
+    {
+        return driverName == "ASIO DirectX Full Duplex Driver" || driverName == "ASIO Multimedia Driver";
+    }
+
     void addDriverInfo (const String& keyName, HKEY hk)
     {
         HKEY subKey;

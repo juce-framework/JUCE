@@ -333,7 +333,7 @@ public:
             auValueStrings = Parameter::getAllValueStrings();
         }
 
-        virtual float getValue() const override
+        float getValue() const override
         {
             const ScopedLock sl (pluginInstance.lock);
 
@@ -348,7 +348,7 @@ public:
             return value;
         }
 
-        virtual void setValue (float newValue) override
+        void setValue (float newValue) override
         {
             const ScopedLock sl (pluginInstance.lock);
 

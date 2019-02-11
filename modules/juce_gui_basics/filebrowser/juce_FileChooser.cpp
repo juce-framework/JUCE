@@ -43,7 +43,7 @@ public:
                      browserComponent.findColour (AlertWindow::backgroundColourId), owner.parent)
     {}
 
-    ~NonNative()
+    ~NonNative() override
     {
         dialogBox.exitModalState (0);
     }

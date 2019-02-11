@@ -390,6 +390,13 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
     return isKioskModeView (self);
 }
 
+#if defined (__IPHONE_11_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_11_0
+ - (BOOL) prefersHomeIndicatorAutoHidden
+ {
+     return isKioskModeView (self);
+ }
+#endif
+
 - (UIStatusBarStyle) preferredStatusBarStyle
 {
     return UIStatusBarStyleDefault;

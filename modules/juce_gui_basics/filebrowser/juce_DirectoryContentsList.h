@@ -66,7 +66,7 @@ public:
                            TimeSliceThread& threadToUse);
 
     /** Destructor. */
-    ~DirectoryContentsList();
+    ~DirectoryContentsList() override;
 
 
     //==============================================================================

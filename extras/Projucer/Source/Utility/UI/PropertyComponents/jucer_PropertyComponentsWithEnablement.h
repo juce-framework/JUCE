@@ -45,7 +45,7 @@ public:
         setEnabled (valueWithDefault.get());
     }
 
-    ~TextPropertyComponentWithEnablement()    { value.removeListener (this); }
+    ~TextPropertyComponentWithEnablement() override    { value.removeListener (this); }
 
 private:
     ValueWithDefault valueWithDefault;
@@ -69,14 +69,52 @@ public:
           value (valueToListenTo.getPropertyAsValue())
     {
         value.addListener (this);
-        setEnabled (valueWithDefault.get());
+        valueChanged (value);
     }
 
-    ~ChoicePropertyComponentWithEnablement()    { value.removeListener (this); }
+    ChoicePropertyComponentWithEnablement (ValueWithDefault& valueToControl,
+                                           ValueWithDefault valueToListenTo,
+                                           const Identifier& multiChoiceID,
+                                           const String& propertyName,
+                                           const StringArray& choices,
+                                           const Array<var>& correspondingValues)
+        : ChoicePropertyComponentWithEnablement (valueToControl, valueToListenTo, propertyName, choices, correspondingValues)
+    {
+        jassert (valueToListenTo.get().getArray() != nullptr);
+
+        isMultiChoice = true;
+        idToCheck = multiChoiceID;
+
+        valueChanged (value);
+    }
+
+    ~ChoicePropertyComponentWithEnablement() override    { value.removeListener (this); }
 
 private:
     ValueWithDefault valueWithDefault;
     Value value;
 
-    void valueChanged (Value&) override         { setEnabled (valueWithDefault.get()); }
+    bool isMultiChoice = false;
+    Identifier idToCheck;
+
+    bool checkMultiChoiceVar() const
+    {
+        jassert (isMultiChoice);
+
+        auto v = valueWithDefault.get();
+
+        if (auto* varArray = v.getArray())
+            return varArray->contains (idToCheck.toString());
+
+        jassertfalse;
+        return false;
+    }
+
+    void valueChanged (Value&) override
+    {
+        if (isMultiChoice)
+            setEnabled (checkMultiChoiceVar());
+        else
+            setEnabled (valueWithDefault.get());
+    }
 };

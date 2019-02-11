@@ -58,10 +58,10 @@ public:
 
         @param componentName    the name to set for the component (see Component::setName())
     */
-    explicit ComboBox (const String& componentName = String());
+    explicit ComboBox (const String& componentName = {});
 
     /** Destructor. */
-    virtual ~ComboBox();
+    ~ComboBox() override;
 
     //==============================================================================
     /** Sets whether the text in the combo-box is editable.
@@ -288,7 +288,7 @@ public:
     {
     public:
         /** Destructor. */
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         /** Called when a ComboBox has its selected item changed. */
         virtual void comboBoxChanged (ComboBox* comboBoxThatHasChanged) = 0;
@@ -365,7 +365,7 @@ public:
     */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         virtual void drawComboBox (Graphics&, int width, int height, bool isButtonDown,
                                    int buttonX, int buttonY, int buttonW, int buttonH,

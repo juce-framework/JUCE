@@ -38,7 +38,7 @@ public:
         item.state.addListener (this);
     }
 
-    ~FileTreeItemBase()
+    ~FileTreeItemBase() override
     {
         item.state.removeListener (this);
     }

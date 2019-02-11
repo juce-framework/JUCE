@@ -101,7 +101,7 @@ private:
     struct Variable;
     struct BlockStatement;
     struct Function;
-    struct AllocatedObject  { virtual ~AllocatedObject() noexcept {} };
+    struct AllocatedObject  { virtual ~AllocatedObject() = default; };
     using StatementPtr = Statement*;
     using ExpPtr = Expression*;
     using BlockPtr = BlockStatement*;
@@ -143,7 +143,7 @@ private:
     struct CodeLocation
     {
         CodeLocation (const String& code, const File& srcFile) noexcept : program (code), location (program.getCharPointer()), sourceFile (srcFile) {}
-        CodeLocation (const CodeLocation& other) noexcept : program (other.program), location (other.location), sourceFile (other.sourceFile) {}
+        CodeLocation (const CodeLocation& other) = default;
 
         [[noreturn]] void throwError (const String& message) const
         {
@@ -1300,7 +1300,7 @@ private:
     {
         struct Visitor
         {
-            virtual ~Visitor() {}
+            virtual ~Visitor() = default;
             virtual void operator()(StatementPtr) = 0;
         };
 
@@ -1318,7 +1318,7 @@ private:
     {
         Expression (const CodeLocation& l, BlockPtr parent) noexcept : Statement (l, parent) {}
         virtual Type getType (CodeGenerator&) const = 0;
-        virtual ExpPtr simplify (SyntaxTreeBuilder&) override    { return this; }
+        ExpPtr simplify (SyntaxTreeBuilder&) override    { return this; }
         virtual String getIdentifier() const { location.throwError ("This operator requires an assignable variable"); return {}; }
     };
 

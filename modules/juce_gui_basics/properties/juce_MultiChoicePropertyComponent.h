@@ -82,7 +82,7 @@ public:
                                   const Array<var>& correspondingValues,
                                   int maxChoices = -1);
 
-    ~MultiChoicePropertyComponent();
+    ~MultiChoicePropertyComponent() override;
 
     //==============================================================================
     /** Returns true if the list of options is expanded. */

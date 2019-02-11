@@ -36,7 +36,7 @@ class CompileEngineChildProcess  : public ReferenceCountedObject,
 {
 public:
     CompileEngineChildProcess (Project&);
-    ~CompileEngineChildProcess();
+    ~CompileEngineChildProcess() override;
 
     //==============================================================================
     bool openedOk() const       { return process != nullptr; }

@@ -44,7 +44,7 @@ public:
                        bool deleteInputWhenDeleted);
 
     /** Destructor. */
-    ~ReverbAudioSource();
+    ~ReverbAudioSource() override;
 
     //==============================================================================
     /** Returns the parameters from the reverb. */

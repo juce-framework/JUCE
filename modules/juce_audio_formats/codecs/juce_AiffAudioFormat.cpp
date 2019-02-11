@@ -651,7 +651,7 @@ public:
         writeHeader();
     }
 
-    ~AiffAudioFormatWriter()
+    ~AiffAudioFormatWriter() override
     {
         if ((bytesWritten & 1) != 0)
             output->writeByte (0);

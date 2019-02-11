@@ -573,26 +573,26 @@ private:
                                                + getRotationForEdge (myPort.edge)
                                                - getRotationForEdge (theirPort.edge)) % 4;
 
-                        Point<int> delta;
+                        std::pair<int, int> delta;
                         const auto theirBounds = neighbour->getBlockAreaWithinLayout();
 
                         switch ((block->getRotation() + getRotationForEdge (myPort.edge)) % 4)
                         {
                             case 0: // over me
-                                delta = { myOffset - (theirBounds.getWidth() - (theirOffset + 1)), -theirBounds.getHeight() };
+                                delta = { myOffset - (theirBounds.width - (theirOffset + 1)), -theirBounds.height };
                                 break;
                             case 1: // right of me
-                                delta = { myBounds.getWidth(), myOffset - (theirBounds.getHeight() - (theirOffset + 1)) };
+                                delta = { myBounds.width, myOffset - (theirBounds.height - (theirOffset + 1)) };
                                 break;
                             case 2: // under me
-                                delta = { (myBounds.getWidth() - (myOffset + 1)) - theirOffset, myBounds.getHeight() };
+                                delta = { (myBounds.width - (myOffset + 1)) - theirOffset, myBounds.height };
                                 break;
                             case 3: // left of me
-                                delta = { -theirBounds.getWidth(), (myBounds.getHeight() - (myOffset + 1)) - theirOffset };
+                                delta = { -theirBounds.width, (myBounds.height - (myOffset + 1)) - theirOffset };
                                 break;
                         }
 
-                        neighbour->position = myBounds.getPosition() + delta;
+                        neighbour->position = { myBounds.x + delta.first, myBounds.y + delta.second };
                     }
 
                     layoutNeighbours (neighbourPtr, topology, masterUid, visited);

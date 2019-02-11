@@ -56,7 +56,7 @@ public:
                                  bool deleteSourceWhenDeleted);
 
     /** Destructor. */
-    ~ChannelRemappingAudioSource();
+    ~ChannelRemappingAudioSource() override;
 
     //==============================================================================
     /** Specifies a number of channels that this audio source must produce from its

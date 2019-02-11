@@ -128,7 +128,7 @@ public:
        #endif
     }
 
-    ~Native()
+    ~Native() override
     {
         exitModalState (0);
         removeFromDesktop();

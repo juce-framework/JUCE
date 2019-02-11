@@ -38,7 +38,7 @@ template <typename FloatType>
 class Gain
 {
 public:
-    Gain() noexcept {}
+    Gain() noexcept = default;
 
     //==============================================================================
     /** Applies a new gain as a linear value. */

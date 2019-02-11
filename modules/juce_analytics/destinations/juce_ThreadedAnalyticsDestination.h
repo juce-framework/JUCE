@@ -63,7 +63,7 @@ public:
     ThreadedAnalyticsDestination (const String& threadName = "Analytics thread");
 
     /** Destructor. */
-    virtual ~ThreadedAnalyticsDestination();
+    ~ThreadedAnalyticsDestination() override;
 
     //==============================================================================
     /**

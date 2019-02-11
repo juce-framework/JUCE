@@ -49,7 +49,7 @@ public:
     TabBarButton (const String& name, TabbedButtonBar& ownerBar);
 
     /** Destructor. */
-    ~TabBarButton();
+    ~TabBarButton() override;
 
     /** Returns the bar that contains this button. */
     TabbedButtonBar& getTabbedButtonBar() const   { return owner; }
@@ -173,7 +173,7 @@ public:
     TabbedButtonBar (Orientation orientation);
 
     /** Destructor. */
-    ~TabbedButtonBar();
+    ~TabbedButtonBar() override;
 
     //==============================================================================
     /** Changes the bar's orientation.
@@ -308,7 +308,7 @@ public:
     */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         virtual int getTabButtonSpaceAroundImage() = 0;
         virtual int getTabButtonOverlap (int tabDepth) = 0;

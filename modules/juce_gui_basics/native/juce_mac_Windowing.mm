@@ -238,10 +238,9 @@ private:
     {
         // Our view doesn't receive a mouse up when the drag ends so we need to generate one here and send it...
         if (auto* view = getNSViewForDragEvent (nullptr))
-        {
-            auto* cgEvent = CGEventCreateMouseEvent (nullptr, kCGEventLeftMouseUp, CGPointMake (p.x, p.y), kCGMouseButtonLeft);
-            [view mouseUp: [NSEvent eventWithCGEvent:cgEvent]];
-        }
+            if (auto* cgEvent = CGEventCreateMouseEvent (nullptr, kCGEventLeftMouseUp, CGPointMake (p.x, p.y), kCGMouseButtonLeft))
+                if (id e = [NSEvent eventWithCGEvent: cgEvent])
+                    [view mouseUp: e];
 
         if (auto* cb = getIvar<std::function<void()>*> (self, "callback"))
             cb->operator()();

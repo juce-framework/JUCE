@@ -112,7 +112,7 @@ public:
     }
 
     /** Subclasses should override this to paint the Block object on the screen */
-    virtual void paint (Graphics&) override = 0;
+    void paint (Graphics&) override = 0;
 
     /** Subclasses can override this to receive button down events from the Block */
     virtual void handleButtonPressed  (ControlButton::ButtonFunction, uint32) {}
@@ -446,7 +446,7 @@ private:
         {}
 
         /** Subclasses should override this to paint the button on the screen */
-        virtual void paint (Graphics&) override = 0;
+        void paint (Graphics&) override = 0;
 
         /** Sets the colour of the button */
         void setColour (Colour c)   { componentColour = c; }

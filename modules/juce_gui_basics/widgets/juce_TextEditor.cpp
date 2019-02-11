@@ -795,7 +795,7 @@ struct TextEditor::TextHolderComponent  : public Component,
         owner.getTextValue().addListener (this);
     }
 
-    ~TextHolderComponent()
+    ~TextHolderComponent() override
     {
         owner.getTextValue().removeListener (this);
     }

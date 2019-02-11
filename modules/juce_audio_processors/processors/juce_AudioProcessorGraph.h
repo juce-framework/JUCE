@@ -55,7 +55,7 @@ public:
     /** Destructor.
         Any processor objects that have been added to the graph will also be deleted.
     */
-    ~AudioProcessorGraph();
+    ~AudioProcessorGraph() override;
 
     /** Each node in the graph has a UID of this type. */
     struct NodeID
@@ -322,7 +322,7 @@ public:
 
         //==============================================================================
         AudioGraphIOProcessor (IODeviceType);
-        ~AudioGraphIOProcessor();
+        ~AudioGraphIOProcessor() override;
 
         const String getName() const override;
         void fillInPluginDescription (PluginDescription&) const override;

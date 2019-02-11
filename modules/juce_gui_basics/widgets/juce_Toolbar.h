@@ -70,7 +70,7 @@ public:
 
         Any items on the bar will be deleted when the toolbar is deleted.
     */
-    ~Toolbar();
+    ~Toolbar() override;
 
     //==============================================================================
     /** Changes the bar's orientation.
@@ -274,7 +274,7 @@ public:
     /** This abstract base class is implemented by LookAndFeel classes. */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         virtual void paintToolbarBackground (Graphics&, int width, int height, Toolbar&) = 0;
 

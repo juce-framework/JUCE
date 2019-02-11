@@ -43,7 +43,7 @@ public:
                                         int totalWidth,
                                         int totalHeight);
 
-    ~LowLevelGraphicsPostScriptRenderer();
+    ~LowLevelGraphicsPostScriptRenderer() override;
 
     //==============================================================================
     bool isVectorDevice() const override;

@@ -92,7 +92,7 @@ String String::convertToPrecomposedUnicode() const
                                       bytesNeeded, &bytesRead,
                                       &outputBufferSize, tempOut) == noErr)
         {
-            result = String (CharPointer_UTF16 ((CharPointer_UTF16::CharType*) tempOut.get()));
+            result = String (CharPointer_UTF16 (reinterpret_cast<CharPointer_UTF16::CharType*> (tempOut.get())));
         }
 
         DisposeUnicodeToTextInfo (&conversionInfo);

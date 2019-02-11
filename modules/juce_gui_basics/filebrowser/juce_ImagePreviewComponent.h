@@ -44,7 +44,7 @@ public:
     ImagePreviewComponent();
 
     /** Destructor. */
-    ~ImagePreviewComponent();
+    ~ImagePreviewComponent() override;
 
 
     //==============================================================================

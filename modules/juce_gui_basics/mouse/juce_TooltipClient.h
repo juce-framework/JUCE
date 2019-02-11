@@ -43,7 +43,7 @@ class JUCE_API  TooltipClient
 {
 public:
     /** Destructor. */
-    virtual ~TooltipClient()  {}
+    virtual ~TooltipClient() = default;
 
     /** Returns the string that this object wants to show as its tooltip. */
     virtual String getTooltip() = 0;
@@ -70,7 +70,7 @@ class JUCE_API  SettableTooltipClient   : public TooltipClient
 public:
     //==============================================================================
     /** Destructor. */
-    ~SettableTooltipClient() {}
+    ~SettableTooltipClient() override = default;
 
     //==============================================================================
     /** Assigns a new tooltip to this object. */
@@ -80,7 +80,7 @@ public:
     String getTooltip() override                                    { return tooltipString; }
 
 protected:
-    SettableTooltipClient() {}
+    SettableTooltipClient() = default;
 
 private:
     String tooltipString;

@@ -970,6 +970,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueTreeSynchroniser.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueWithDefault.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_data_structures\juce_data_structures.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>

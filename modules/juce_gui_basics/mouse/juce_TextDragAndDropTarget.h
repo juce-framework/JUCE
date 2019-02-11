@@ -39,7 +39,7 @@ class JUCE_API  TextDragAndDropTarget
 {
 public:
     /** Destructor. */
-    virtual ~TextDragAndDropTarget()  {}
+    virtual ~TextDragAndDropTarget() = default;
 
     /** Callback to check whether this target is interested in the set of text being offered.
 

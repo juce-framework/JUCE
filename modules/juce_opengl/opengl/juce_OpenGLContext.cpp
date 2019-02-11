@@ -302,8 +302,8 @@ public:
             {
                 scale = newScale;
                 viewportArea = newArea;
-                transform = AffineTransform::scale ((float) newArea.getRight()  / (float) localBounds.getRight(),
-                                                    (float) newArea.getBottom() / (float) localBounds.getBottom());
+                transform = AffineTransform::scale ((float) newArea.getWidth()  / (float) localBounds.getWidth(),
+                                                    (float) newArea.getHeight() / (float) localBounds.getHeight());
 
                 if (canTriggerUpdate)
                     invalidateAll();

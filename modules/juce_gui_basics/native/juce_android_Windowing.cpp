@@ -313,8 +313,13 @@ public:
                                                                   component.isOpaque() ? PIXEL_FORMAT_OPAQUE : PIXEL_FORMAT_TRANSPARENT));
             env->SetIntField (windowLayoutParams.get(), AndroidWindowManagerLayoutParams.gravity, GRAVITY_LEFT | GRAVITY_TOP);
             env->SetIntField (windowLayoutParams.get(), AndroidWindowManagerLayoutParams.windowAnimations, 0x01030000 /* android.R.style.Animation */);
-            viewGroup = GlobalRef (LocalRef<jobject> (env->CallObjectMethod (getCurrentActivity().get(), AndroidContext.getSystemService, javaString ("window").get())));
 
+            LocalRef<jobject> activity (getCurrentActivity());
+
+            if (activity == nullptr)
+                activity = getMainActivity();
+
+            viewGroup = GlobalRef (LocalRef<jobject> (env->CallObjectMethod (activity.get(), AndroidContext.getSystemService, javaString ("window").get())));
             env->CallVoidMethod (viewGroup.get(), AndroidViewManager.addView, view.get(), windowLayoutParams.get());
         }
 

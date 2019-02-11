@@ -57,7 +57,7 @@ public:
     VideoComponent (bool useNativeControlsIfAvailable);
 
     /** Destructor. */
-    ~VideoComponent();
+    ~VideoComponent() override;
 
     //==============================================================================
     /** Tries to load a video from a local file.

@@ -44,8 +44,7 @@ public:
     using NumericType = typename SampleTypeHelpers::ElementType<SampleType>::Type;
 
     /** Creates an uninitialised oscillator. Call initialise before first use. */
-    Oscillator()
-    {}
+    Oscillator() = default;
 
     /** Creates an oscillator with a periodic input function (-pi..pi).
 

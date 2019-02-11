@@ -44,7 +44,7 @@ public:
     explicit FileInputStream (const File& fileToRead);
 
     /** Destructor. */
-    ~FileInputStream();
+    ~FileInputStream() override;
 
     //==============================================================================
     /** Returns the file that this stream is reading from. */

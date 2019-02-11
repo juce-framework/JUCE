@@ -2230,7 +2230,11 @@ private:
     pointer_sized_int handleGetNumMidiInputChannels()
     {
        #if JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
-        return 16;
+        #ifdef JucePlugin_VSTNumMidiInputs
+         return JucePlugin_VSTNumMidiInputs;
+        #else
+         return 16;
+        #endif
        #else
         return 0;
        #endif
@@ -2239,7 +2243,11 @@ private:
     pointer_sized_int handleGetNumMidiOutputChannels()
     {
        #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
-        return 16;
+        #ifdef JucePlugin_VSTNumMidiOutputs
+         return JucePlugin_VSTNumMidiOutputs;
+        #else
+         return 16;
+        #endif
        #else
         return 0;
        #endif

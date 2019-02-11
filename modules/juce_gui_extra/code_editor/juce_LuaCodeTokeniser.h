@@ -37,7 +37,7 @@ class JUCE_API  LuaTokeniser   : public CodeTokeniser
 public:
     //==============================================================================
     LuaTokeniser();
-    ~LuaTokeniser();
+    ~LuaTokeniser() override;
 
     //==============================================================================
     int readNextToken (CodeDocument::Iterator&) override;

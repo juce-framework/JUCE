@@ -42,7 +42,7 @@ struct ProjectSettingsComponent  : public Component,
         project.addChangeListener (this);
     }
 
-    ~ProjectSettingsComponent()
+    ~ProjectSettingsComponent() override
     {
         project.removeChangeListener (this);
     }
@@ -139,7 +139,7 @@ public:
         buildConcertina();
     }
 
-    ~ProjectTab()
+    ~ProjectTab() override
     {
         getFileTreePanel()->saveOpenness();
         getModuleTreePanel()->saveOpenness();

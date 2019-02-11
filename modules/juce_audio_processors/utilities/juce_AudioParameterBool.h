@@ -56,7 +56,7 @@ public:
                         std::function<bool (const String& text)> boolFromString = nullptr);
 
     /** Destructor. */
-    ~AudioParameterBool();
+    ~AudioParameterBool() override;
 
     /** Returns the parameter's current boolean value. */
     bool get() const noexcept          { return value >= 0.5f; }

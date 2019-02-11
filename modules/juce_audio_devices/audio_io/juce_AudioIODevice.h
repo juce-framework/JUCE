@@ -43,7 +43,7 @@ class JUCE_API  AudioIODeviceCallback
 {
 public:
     /** Destructor. */
-    virtual ~AudioIODeviceCallback()  {}
+    virtual ~AudioIODeviceCallback()  = default;
 
     /** Processes a block of incoming and outgoing audio data.
 

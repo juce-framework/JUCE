@@ -65,7 +65,7 @@ private:
         struct RedirectWebBrowserComponent : public WebBrowserComponent
         {
             RedirectWebBrowserComponent (LicenseWebviewContent& controller) : WebBrowserComponent (false), owner (controller) {}
-            virtual ~RedirectWebBrowserComponent() {}
+            ~RedirectWebBrowserComponent() override  {}
 
             bool pageAboutToLoad           (const String& url) override { return owner.pageAboutToLoad (url); }
             void pageFinishedLoading       (const String& url) override { owner.pageFinishedLoading (url); }
@@ -95,7 +95,7 @@ private:
                 }
             }
 
-            virtual ~Header()
+            ~Header() override
             {
                 if (auto* licenseController = ProjucerApplication::getApp().licenseController.get())
                     licenseController->removeLicenseStatusChangedCallback (this);

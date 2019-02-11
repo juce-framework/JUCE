@@ -43,7 +43,7 @@ public:
     AiffAudioFormat();
 
     /** Destructor. */
-    ~AiffAudioFormat();
+    ~AiffAudioFormat() override;
 
     //==============================================================================
     /** Metadata property name used when reading a aiff file with a basc chunk. */

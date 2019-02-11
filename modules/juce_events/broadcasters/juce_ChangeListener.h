@@ -45,7 +45,7 @@ class JUCE_API  ChangeListener
 {
 public:
     /** Destructor. */
-    virtual ~ChangeListener()  {}
+    virtual ~ChangeListener() = default;
 
     /** Your subclass should implement this method to receive the callback.
         @param source the ChangeBroadcaster that triggered the callback.

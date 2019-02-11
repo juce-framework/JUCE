@@ -81,7 +81,7 @@ public:
     {
     public:
         ElementBase (ElementType type);
-        virtual ~ElementBase() {}
+        virtual ~ElementBase() = default;
         virtual void addToPath (Path& path, Expression::Scope*) const = 0;
         virtual RelativePoint* getControlPoints (int& numPoints) = 0;
         virtual ElementBase* clone() const = 0;
@@ -129,9 +129,9 @@ public:
     {
     public:
         LineTo (const RelativePoint& endPoint);
-        void addToPath (Path& path, Expression::Scope*) const;
-        RelativePoint* getControlPoints (int& numPoints);
-        ElementBase* clone() const;
+        void addToPath (Path& path, Expression::Scope*) const override;
+        RelativePoint* getControlPoints (int& numPoints) override;
+        ElementBase* clone() const override;
 
         RelativePoint endPoint;
 

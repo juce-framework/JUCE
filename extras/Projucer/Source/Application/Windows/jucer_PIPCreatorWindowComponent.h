@@ -85,7 +85,7 @@ public:
         pipTree.addListener (this);
     }
 
-    ~PIPCreatorWindowComponent()
+    ~PIPCreatorWindowComponent() override
     {
         setLookAndFeel (nullptr);
     }
