@@ -3516,6 +3516,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (0039FE1A254FE518518BF8B8);
+			knownRegions = (en, Base);
 		};
 	};
 	rootObject = 74EA481348A24104E6ACE009;
