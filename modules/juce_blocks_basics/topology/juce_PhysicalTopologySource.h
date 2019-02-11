@@ -37,7 +37,7 @@ public:
     PhysicalTopologySource (bool startDetached = false);
 
     /** Destructor. */
-    ~PhysicalTopologySource();
+    ~PhysicalTopologySource() override;
 
     /** Returns the current physical topology. */
     BlockTopology getCurrentTopology() const override;

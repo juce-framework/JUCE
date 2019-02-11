@@ -1,18 +1,39 @@
 JUCE breaking changes
 =====================
 
-Develop
-=======
+Version 5.4.2
+=============
 
 Change
 -----
-Allow renaming and deletion of open file handles on Windows using the 
+The return type of Block::getBlockAreaWithinLayout() has been changed from
+Rectangle to a simpler BlockArea struct.
+
+Possible Issues
+---------------
+Classes that derive from Block and implement this pure virtual method will no
+longer compile due to a change in the function signature.
+
+Workaround
+----------
+Update the method to return a BlockArea struct and update code that calls
+getBlockAreaWithinLayout to handle a BlockArea instead of a Rectangle.
+
+Rationale
+---------
+The juce_blocks_basics is ISC licensed and therefore cannot depend on the
+GPL/Commercial licensed juce_graphics module that contains Rectangle.
+
+
+Change
+-----
+Renaming and deletion of open file handles on Windows is now possible using the
 FILE_SHARE_DELETE flag.
 
 Possible Issues
 ---------------
-Previous code that relied on open files not being able to be renamed or
-deleted on Windows may fail.
+Previous code that relied on open files not being able to be renamed or deleted
+on Windows may fail.
 
 Workaround
 ----------
@@ -20,8 +41,7 @@ No workaround.
 
 Rationale
 ---------
-This unifies the behaviour across OSes as POSIX systems already allow
-this.
+This unifies the behaviour across OSes as POSIX systems already allow this.
 
 
 Change

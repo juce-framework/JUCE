@@ -38,7 +38,7 @@ public:
     /** Creates an unopened DynamicLibrary object.
         Call open() to actually open one.
     */
-    DynamicLibrary() noexcept {}
+    DynamicLibrary() = default;
 
     /**
     */

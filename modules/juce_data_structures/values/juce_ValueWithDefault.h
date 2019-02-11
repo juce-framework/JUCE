@@ -41,7 +41,7 @@ class ValueWithDefault
 public:
     //==============================================================================
     /** Creates an unitialised ValueWithDefault. Initialise it using one of the referTo() methods. */
-    ValueWithDefault() {}
+    ValueWithDefault() = default;
 
     /** Creates an ValueWithDefault object. The default value will be an empty var. */
     ValueWithDefault (ValueTree& tree, const Identifier& propertyID, UndoManager* um)
@@ -121,10 +121,10 @@ public:
         }
     }
 
-    /** Returns true if the property does not exist or is empty. */
+    /** Returns true if the property does not exist in the referenced ValueTree. */
     bool isUsingDefault() const
     {
-        return ! targetTree.hasProperty (targetProperty) || targetTree.getProperty (targetProperty).toString().isEmpty();
+        return ! targetTree.hasProperty (targetProperty);
     }
 
     /** Removes the property from the referenced ValueTree. */

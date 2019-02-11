@@ -30,9 +30,9 @@ namespace juce
 */
 struct LEDColour
 {
-    LEDColour() noexcept = default;
-    LEDColour (const LEDColour&) noexcept = default;
-    LEDColour& operator= (const LEDColour&) noexcept = default;
+    LEDColour() = default;
+    LEDColour (const LEDColour&) = default;
+    LEDColour& operator= (const LEDColour&) = default;
 
     LEDColour (uint32 argbColour) noexcept : argb (argbColour) {}
 
@@ -75,7 +75,7 @@ public:
     /** An interface to use for LEDGrid rendering. */
     struct Renderer     : public juce::ReferenceCountedObject
     {
-        virtual ~Renderer();
+        ~Renderer() override;
         virtual void renderLEDGrid (LEDGrid&) = 0;
 
         /** The Renderer class is reference-counted, so always use a Renderer::Ptr when

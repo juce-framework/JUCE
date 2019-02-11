@@ -232,7 +232,7 @@ public:
     */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         virtual void drawDocumentWindowTitleBar (DocumentWindow&,
                                                  Graphics&, int w, int h,

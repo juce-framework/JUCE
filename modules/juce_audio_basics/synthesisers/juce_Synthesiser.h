@@ -46,7 +46,7 @@ protected:
 
 public:
     /** Destructor. */
-    virtual ~SynthesiserSound();
+    ~SynthesiserSound() override;
 
     //==============================================================================
     /** Returns true if this sound should be played when a given midi note is pressed.

@@ -40,7 +40,7 @@ struct JUCE_API  ExtraLookAndFeelBaseClasses
     /** This abstract base class is implemented by LookAndFeel classes. */
     struct JUCE_API  LassoComponentMethods
     {
-        virtual ~LassoComponentMethods() {}
+        virtual ~LassoComponentMethods() = default;
 
         virtual void drawLasso (Graphics&, Component& lassoComp) = 0;
     };
@@ -49,7 +49,7 @@ struct JUCE_API  ExtraLookAndFeelBaseClasses
     /** This abstract base class is implemented by LookAndFeel classes. */
     struct JUCE_API  KeyMappingEditorComponentMethods
     {
-        virtual ~KeyMappingEditorComponentMethods() {}
+        virtual ~KeyMappingEditorComponentMethods() = default;
 
         virtual void drawKeymapChangeButton (Graphics&, int width, int height, Button&, const String& keyDescription) = 0;
     };
@@ -58,7 +58,7 @@ struct JUCE_API  ExtraLookAndFeelBaseClasses
     /** This abstract base class is implemented by LookAndFeel classes. */
     struct JUCE_API  AudioDeviceSelectorComponentMethods
     {
-        virtual ~AudioDeviceSelectorComponentMethods() {}
+        virtual ~AudioDeviceSelectorComponentMethods() = default;
 
         virtual void drawLevelMeter (Graphics&, int width, int height, float level) = 0;
     };
@@ -113,7 +113,7 @@ public:
     LookAndFeel();
 
     /** Destructor. */
-    virtual ~LookAndFeel();
+    ~LookAndFeel() override;
 
     //==============================================================================
     /** Returns the current default look-and-feel for a component to use when it

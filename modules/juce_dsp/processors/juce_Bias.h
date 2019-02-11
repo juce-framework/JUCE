@@ -44,7 +44,7 @@ template <typename FloatType>
 class Bias
 {
 public:
-    Bias() noexcept {}
+    Bias() noexcept = default;
 
     //==============================================================================
     /** Sets the DC bias

@@ -44,11 +44,11 @@ class JUCE_API  ImageFileFormat
 protected:
     //==============================================================================
     /** Creates an ImageFormat. */
-    ImageFileFormat()                   {}
+    ImageFileFormat() = default;
 
 public:
     /** Destructor. */
-    virtual ~ImageFileFormat()          {}
+    virtual ~ImageFileFormat() = default;
 
     //==============================================================================
     /** Returns a description of this file format.

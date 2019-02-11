@@ -44,7 +44,7 @@ class JUCE_API  TimeSliceClient
 {
 public:
     /** Destructor. */
-    virtual ~TimeSliceClient()   {}
+    virtual ~TimeSliceClient() = default;
 
     /** Called back by a TimeSliceThread.
 

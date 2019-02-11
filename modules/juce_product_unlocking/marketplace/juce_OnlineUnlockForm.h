@@ -61,7 +61,7 @@ public:
                       bool overlayHasCancelButton = false);
 
     /** Destructor. */
-    ~OnlineUnlockForm();
+    ~OnlineUnlockForm() override;
 
     /** This is called when the form is dismissed (either cancelled or when registration
         succeeds).

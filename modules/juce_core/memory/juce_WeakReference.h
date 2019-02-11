@@ -78,7 +78,7 @@ class WeakReference
 {
 public:
     /** Creates a null WeakReference. */
-    inline WeakReference() noexcept {}
+    inline WeakReference() = default;
 
     /** Creates a WeakReference that points at the given object. */
     WeakReference (ObjectType* object)  : holder (getRef (object)) {}
@@ -152,7 +152,7 @@ public:
     class Master
     {
     public:
-        Master() noexcept {}
+        Master() = default;
 
         ~Master() noexcept
         {

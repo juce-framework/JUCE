@@ -411,10 +411,8 @@ void AudioProcessorValueTreeState::valueTreeChildAdded (ValueTree& parent, Value
         setNewState (tree);
 }
 
-void AudioProcessorValueTreeState::valueTreeChildRemoved (ValueTree& parent, ValueTree& tree, int)
+void AudioProcessorValueTreeState::valueTreeChildRemoved (ValueTree&, ValueTree&, int)
 {
-    if (parent == state && tree.hasType (valueType))
-        setNewState (tree);
 }
 
 void AudioProcessorValueTreeState::valueTreeRedirected (ValueTree& v)

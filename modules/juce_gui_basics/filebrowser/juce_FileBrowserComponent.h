@@ -183,7 +183,7 @@ public:
     */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         // These return a pointer to an internally cached drawable - make sure you don't keep
         // a copy of this pointer anywhere, as it may become invalid in the future.

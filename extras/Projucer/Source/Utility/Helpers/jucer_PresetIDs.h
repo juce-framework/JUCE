@@ -345,6 +345,8 @@ namespace Ids
     DECLARE_ID (pluginAAXDisableMultiMono);
     DECLARE_ID (pluginARAAnalyzableContent);
     DECLARE_ID (pluginARATransformFlags);
+    DECLARE_ID (pluginVSTNumMidiInputs);
+    DECLARE_ID (pluginVSTNumMidiOutputs);
     DECLARE_ID (exporters);
     DECLARE_ID (website);
     DECLARE_ID (mainClass);
@@ -353,6 +355,8 @@ namespace Ids
     DECLARE_ID (continuousRebuildEnabled);
     DECLARE_ID (warningsEnabled);
     DECLARE_ID (projectLineFeed);
+    DECLARE_ID (compilerFlagSchemes);
+    DECLARE_ID (compilerFlagScheme);
 
     const Identifier ID ("id");
     const Identifier ID_uppercase ("ID");

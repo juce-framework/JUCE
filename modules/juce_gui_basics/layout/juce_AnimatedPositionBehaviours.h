@@ -46,9 +46,7 @@ namespace AnimatedPositionBehaviours
     */
     struct ContinuousWithMomentum
     {
-        ContinuousWithMomentum() noexcept
-        {
-        }
+        ContinuousWithMomentum() = default;
 
         /** Sets the friction that damps the movement of the value.
             A typical value is 0.08; higher values indicate more friction.
@@ -114,9 +112,7 @@ namespace AnimatedPositionBehaviours
     */
     struct SnapToPageBoundaries
     {
-        SnapToPageBoundaries() noexcept   : targetSnapPosition()
-        {
-        }
+        SnapToPageBoundaries() = default;
 
         /** Called by the AnimatedPosition class. This tells us the position and
             velocity at which the user is about to release the object.
@@ -154,7 +150,7 @@ namespace AnimatedPositionBehaviours
         }
 
     private:
-        double targetSnapPosition;
+        double targetSnapPosition = 0.0;
     };
 }
 

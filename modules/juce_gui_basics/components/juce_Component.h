@@ -2132,7 +2132,7 @@ public:
     {
     public:
         /** Creates a null SafePointer. */
-        SafePointer() noexcept {}
+        SafePointer() = default;
 
         /** Creates a SafePointer that points at the given component. */
         SafePointer (ComponentType* component)                : weakRef (component) {}
@@ -2205,7 +2205,7 @@ public:
         /** Creates a Positioner which can control the specified component. */
         explicit Positioner (Component& component) noexcept;
         /** Destructor. */
-        virtual ~Positioner() {}
+        virtual ~Positioner() = default;
 
         /** Returns the component that this positioner controls. */
         Component& getComponent() const noexcept    { return component; }

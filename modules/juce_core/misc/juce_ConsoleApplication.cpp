@@ -92,6 +92,7 @@ ArgumentList::ArgumentList (String exeName, StringArray args)
     : executableName (std::move (exeName))
 {
     args.trim();
+    args.removeEmptyStrings();
 
     for (auto& a : args)
         arguments.add ({ a });

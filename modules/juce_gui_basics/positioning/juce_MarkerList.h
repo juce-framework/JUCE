@@ -130,7 +130,7 @@ public:
     {
     public:
         /** Destructor. */
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         /** Called when something in the given marker list changes. */
         virtual void markersChanged (MarkerList* markerList) = 0;
@@ -152,7 +152,7 @@ public:
     /** A base class for objects that want to provide a MarkerList. */
     struct MarkerListHolder
     {
-        virtual ~MarkerListHolder() {}
+        virtual ~MarkerListHolder() = default;
 
         /** Objects can implement this method to provide a MarkerList. */
         virtual MarkerList* getMarkers (bool xAxis) = 0;

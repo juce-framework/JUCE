@@ -306,10 +306,10 @@ public:
     {
     public:
         //==============================================================================
-        Listener() {}
+        Listener() = default;
 
         /** Destructor. */
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         //==============================================================================
         /** This is called when some of the table's columns are added, removed, hidden,
@@ -390,7 +390,7 @@ public:
     /** This abstract base class is implemented by LookAndFeel classes. */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         virtual void drawTableHeaderBackground (Graphics&, TableHeaderComponent&) = 0;
 

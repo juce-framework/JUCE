@@ -143,6 +143,7 @@ struct CameraDevice::Pimpl
         firstPresentationTime = Time::getCurrentTime();
         file.deleteFile();
 
+        isRecording = true;
         [fileOutput startRecordingToOutputFileURL: createNSURLFromFile (file)
                                 recordingDelegate: callbackDelegate];
     }

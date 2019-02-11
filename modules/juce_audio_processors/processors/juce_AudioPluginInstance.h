@@ -59,7 +59,7 @@ public:
         Make sure that you delete any UI components that belong to this plugin before
         deleting the plugin.
     */
-    ~AudioPluginInstance() override {}
+    ~AudioPluginInstance() override = default;
 
     //==============================================================================
     /** Fills-in the appropriate parts of this plugin description object. */
@@ -118,7 +118,7 @@ protected:
         StringArray onStrings, offStrings;
     };
 
-    AudioPluginInstance() {}
+    AudioPluginInstance() = default;
     AudioPluginInstance (const BusesProperties& ioLayouts) : AudioProcessor (ioLayouts) {}
     template <int numLayouts>
     AudioPluginInstance (const short channelLayoutList[numLayouts][2]) : AudioProcessor (channelLayoutList) {}

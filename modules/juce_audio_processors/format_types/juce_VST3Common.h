@@ -163,8 +163,8 @@ static inline Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set
         case AudioChannelSet::leftCentre:        return Steinberg::Vst::kSpeakerLc;
         case AudioChannelSet::rightCentre:       return Steinberg::Vst::kSpeakerRc;
         case AudioChannelSet::centreSurround:    return Steinberg::Vst::kSpeakerCs;
-        case AudioChannelSet::leftSurroundSide:  return (1ull << 26); /* kSpeakerLcs */
-        case AudioChannelSet::rightSurroundSide: return (1ull << 27); /* kSpeakerRcs */
+        case AudioChannelSet::leftSurroundSide:  return Steinberg::Vst::kSpeakerLcs;
+        case AudioChannelSet::rightSurroundSide: return Steinberg::Vst::kSpeakerRcs;
         case AudioChannelSet::topMiddle:         return (1ull << 11); /* kSpeakerTm */
         case AudioChannelSet::topFrontLeft:      return Steinberg::Vst::kSpeakerTfl;
         case AudioChannelSet::topFrontCentre:    return Steinberg::Vst::kSpeakerTfc;
@@ -177,36 +177,35 @@ static inline Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set
         case AudioChannelSet::rightSurroundRear: return Steinberg::Vst::kSpeakerSr;
         case AudioChannelSet::wideLeft:          return Steinberg::Vst::kSpeakerPl;
         case AudioChannelSet::wideRight:         return Steinberg::Vst::kSpeakerPr;
-        case AudioChannelSet::ambisonicACN0:     return (1ull << 20); /* kSpeakerACN0 */
-        case AudioChannelSet::ambisonicACN1:     return (1ull << 21); /* kSpeakerACN1 */
-        case AudioChannelSet::ambisonicACN2:     return (1ull << 22); /* kSpeakerACN2 */
-        case AudioChannelSet::ambisonicACN3:     return (1ull << 23); /* kSpeakerACN3 */
-        case AudioChannelSet::ambisonicACN4:     return (1ull << 38); /* kSpeakerACN4 */
-        case AudioChannelSet::ambisonicACN5:     return (1ull << 39); /* kSpeakerACN5 */
-        case AudioChannelSet::ambisonicACN6:     return (1ull << 40); /* kSpeakerACN6 */
-        case AudioChannelSet::ambisonicACN7:     return (1ull << 41); /* kSpeakerACN7 */
-        case AudioChannelSet::ambisonicACN8:     return (1ull << 42); /* kSpeakerACN8 */
-        case AudioChannelSet::ambisonicACN9:     return (1ull << 43); /* kSpeakerACN9 */
-        case AudioChannelSet::ambisonicACN10:    return (1ull << 44); /* kSpeakerACN10 */
-        case AudioChannelSet::ambisonicACN11:    return (1ull << 45); /* kSpeakerACN11 */
-        case AudioChannelSet::ambisonicACN12:    return (1ull << 46); /* kSpeakerACN12 */
-        case AudioChannelSet::ambisonicACN13:    return (1ull << 47); /* kSpeakerACN13 */
-        case AudioChannelSet::ambisonicACN14:    return (1ull << 48); /* kSpeakerACN14 */
-        case AudioChannelSet::ambisonicACN15:    return (1ull << 49); /* kSpeakerACN15 */
-        case AudioChannelSet::topSideLeft:       return (1ull << 24); /* kSpeakerTsl */
-        case AudioChannelSet::topSideRight:      return (1ull << 25); /* kSpeakerTsr */
+        case AudioChannelSet::ambisonicACN0:     return Steinberg::Vst::kSpeakerACN0;
+        case AudioChannelSet::ambisonicACN1:     return Steinberg::Vst::kSpeakerACN1;
+        case AudioChannelSet::ambisonicACN2:     return Steinberg::Vst::kSpeakerACN2;
+        case AudioChannelSet::ambisonicACN3:     return Steinberg::Vst::kSpeakerACN3;
+        case AudioChannelSet::ambisonicACN4:     return Steinberg::Vst::kSpeakerACN4;
+        case AudioChannelSet::ambisonicACN5:     return Steinberg::Vst::kSpeakerACN5;
+        case AudioChannelSet::ambisonicACN6:     return Steinberg::Vst::kSpeakerACN6;
+        case AudioChannelSet::ambisonicACN7:     return Steinberg::Vst::kSpeakerACN7;
+        case AudioChannelSet::ambisonicACN8:     return Steinberg::Vst::kSpeakerACN8;
+        case AudioChannelSet::ambisonicACN9:     return Steinberg::Vst::kSpeakerACN9;
+        case AudioChannelSet::ambisonicACN10:    return Steinberg::Vst::kSpeakerACN10;
+        case AudioChannelSet::ambisonicACN11:    return Steinberg::Vst::kSpeakerACN11;
+        case AudioChannelSet::ambisonicACN12:    return Steinberg::Vst::kSpeakerACN12;
+        case AudioChannelSet::ambisonicACN13:    return Steinberg::Vst::kSpeakerACN13;
+        case AudioChannelSet::ambisonicACN14:    return Steinberg::Vst::kSpeakerACN14;
+        case AudioChannelSet::ambisonicACN15:    return Steinberg::Vst::kSpeakerACN15;
+        case AudioChannelSet::topSideLeft:       return Steinberg::Vst::kSpeakerTsl;
+        case AudioChannelSet::topSideRight:      return Steinberg::Vst::kSpeakerTsr;
+        case AudioChannelSet::bottomFrontLeft:   return Steinberg::Vst::kSpeakerBfl;
+        case AudioChannelSet::bottomFrontCentre: return Steinberg::Vst::kSpeakerBfc;
+        case AudioChannelSet::bottomFrontRight:  return Steinberg::Vst::kSpeakerBfr;
+        case AudioChannelSet::bottomSideLeft:    return Steinberg::Vst::kSpeakerBsl;
+        case AudioChannelSet::bottomSideRight:   return Steinberg::Vst::kSpeakerBsr;
+        case AudioChannelSet::bottomRearLeft:    return Steinberg::Vst::kSpeakerBrl;
+        case AudioChannelSet::bottomRearCentre:  return Steinberg::Vst::kSpeakerBrc;
+        case AudioChannelSet::bottomRearRight:   return Steinberg::Vst::kSpeakerBrr;
 
         case AudioChannelSet::discreteChannel0:  return Steinberg::Vst::kSpeakerM;
-        default:
-            break;
-    }
 
-
-    switch (static_cast<int> (type))
-    {
-        case (int) AudioChannelSet::discreteChannel0 + 3: return (1ull << 28); /* kSpeakerBfl */
-        case (int) AudioChannelSet::discreteChannel0 + 4: return (1ull << 29); /* kSpeakerBfc */
-        case (int) AudioChannelSet::discreteChannel0 + 5: return (1ull << 30); /* kSpeakerBfr */
         default:
             break;
     }
@@ -230,7 +229,7 @@ static inline AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::Speak
         case Steinberg::Vst::kSpeakerCs:    return AudioChannelSet::centreSurround;
         case Steinberg::Vst::kSpeakerSl:    return AudioChannelSet::leftSurroundRear;
         case Steinberg::Vst::kSpeakerSr:    return AudioChannelSet::rightSurroundRear;
-        case (1ull << 11):  return AudioChannelSet::topMiddle;  /* kSpeakerTm */
+        case Steinberg::Vst::kSpeakerTc:    return AudioChannelSet::topMiddle;  /* kSpeakerTm */
         case Steinberg::Vst::kSpeakerTfl:   return AudioChannelSet::topFrontLeft;
         case Steinberg::Vst::kSpeakerTfc:   return AudioChannelSet::topFrontCentre;
         case Steinberg::Vst::kSpeakerTfr:   return AudioChannelSet::topFrontRight;
@@ -238,32 +237,36 @@ static inline AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::Speak
         case Steinberg::Vst::kSpeakerTrc:   return AudioChannelSet::topRearCentre;
         case Steinberg::Vst::kSpeakerTrr:   return AudioChannelSet::topRearRight;
         case Steinberg::Vst::kSpeakerLfe2:  return AudioChannelSet::LFE2;
-        case (1ull << 19):                  return ((arr & Steinberg::Vst::kSpeakerC) != 0 ? AudioChannelSet::discreteChannel0 : AudioChannelSet::centre);
-        case (1ull << 20):                  return AudioChannelSet::ambisonicACN0;  /* kSpeakerACN0 */
-        case (1ull << 21):                  return AudioChannelSet::ambisonicACN1;  /* kSpeakerACN1 */
-        case (1ull << 22):                  return AudioChannelSet::ambisonicACN2;  /* kSpeakerACN2 */
-        case (1ull << 23):                  return AudioChannelSet::ambisonicACN3;  /* kSpeakerACN3 */
-        case (1ull << 38):                  return AudioChannelSet::ambisonicACN4;  /* kSpeakerACN4 */
-        case (1ull << 39):                  return AudioChannelSet::ambisonicACN5;  /* kSpeakerACN5 */
-        case (1ull << 40):                  return AudioChannelSet::ambisonicACN6;  /* kSpeakerACN6 */
-        case (1ull << 41):                  return AudioChannelSet::ambisonicACN7;  /* kSpeakerACN7 */
-        case (1ull << 42):                  return AudioChannelSet::ambisonicACN8;  /* kSpeakerACN8 */
-        case (1ull << 43):                  return AudioChannelSet::ambisonicACN9;  /* kSpeakerACN9 */
-        case (1ull << 44):                  return AudioChannelSet::ambisonicACN10; /* kSpeakerACN10 */
-        case (1ull << 45):                  return AudioChannelSet::ambisonicACN11; /* kSpeakerACN11 */
-        case (1ull << 46):                  return AudioChannelSet::ambisonicACN12; /* kSpeakerACN12 */
-        case (1ull << 47):                  return AudioChannelSet::ambisonicACN13; /* kSpeakerACN13 */
-        case (1ull << 48):                  return AudioChannelSet::ambisonicACN14; /* kSpeakerACN14 */
-        case (1ull << 49):                  return AudioChannelSet::ambisonicACN15; /* kSpeakerACN15 */
-        case (1ull << 24):                  return AudioChannelSet::topSideLeft;  /* kSpeakerTsl */
-        case (1ull << 25):                  return AudioChannelSet::topSideRight; /* kSpeakerTsr */
-        case (1ull << 26):                  return AudioChannelSet::leftSurroundSide;  /* kSpeakerLcs */
-        case (1ull << 27):                  return AudioChannelSet::rightSurroundSide; /* kSpeakerRcs */
-        case (1ull << 28):                  return static_cast<AudioChannelSet::ChannelType> ((int)AudioChannelSet::discreteChannel0 + 3); /* kSpeakerBfl */
-        case (1ull << 29):                  return static_cast<AudioChannelSet::ChannelType> ((int)AudioChannelSet::discreteChannel0 + 4); /* kSpeakerBfc */
-        case (1ull << 30):                  return static_cast<AudioChannelSet::ChannelType> ((int)AudioChannelSet::discreteChannel0 + 5); /* kSpeakerBfr */
+        case Steinberg::Vst::kSpeakerACN0:  return ((arr & Steinberg::Vst::kSpeakerC) != 0 ? AudioChannelSet::discreteChannel0 : AudioChannelSet::centre); /* kSpeakerACN0 */
+        case Steinberg::Vst::kSpeakerACN1:  return AudioChannelSet::ambisonicACN1;
+        case Steinberg::Vst::kSpeakerACN2:  return AudioChannelSet::ambisonicACN2;
+        case Steinberg::Vst::kSpeakerACN3:  return AudioChannelSet::ambisonicACN3;
+        case Steinberg::Vst::kSpeakerACN4:  return AudioChannelSet::ambisonicACN4;
+        case Steinberg::Vst::kSpeakerACN5:  return AudioChannelSet::ambisonicACN5;
+        case Steinberg::Vst::kSpeakerACN6:  return AudioChannelSet::ambisonicACN6;
+        case Steinberg::Vst::kSpeakerACN7:  return AudioChannelSet::ambisonicACN7;
+        case Steinberg::Vst::kSpeakerACN8:  return AudioChannelSet::ambisonicACN8;
+        case Steinberg::Vst::kSpeakerACN9:  return AudioChannelSet::ambisonicACN9;
+        case Steinberg::Vst::kSpeakerACN10: return AudioChannelSet::ambisonicACN10;
+        case Steinberg::Vst::kSpeakerACN11: return AudioChannelSet::ambisonicACN11;
+        case Steinberg::Vst::kSpeakerACN12: return AudioChannelSet::ambisonicACN12;
+        case Steinberg::Vst::kSpeakerACN13: return AudioChannelSet::ambisonicACN13;
+        case Steinberg::Vst::kSpeakerACN14: return AudioChannelSet::ambisonicACN14;
+        case Steinberg::Vst::kSpeakerACN15: return AudioChannelSet::ambisonicACN15;
+        case Steinberg::Vst::kSpeakerTsl:   return AudioChannelSet::topSideLeft;
+        case Steinberg::Vst::kSpeakerTsr:   return AudioChannelSet::topSideRight;
+        case Steinberg::Vst::kSpeakerLcs:   return AudioChannelSet::leftSurroundSide;
+        case Steinberg::Vst::kSpeakerRcs:   return AudioChannelSet::rightSurroundSide;
+        case Steinberg::Vst::kSpeakerBfl:   return AudioChannelSet::bottomFrontLeft;
+        case Steinberg::Vst::kSpeakerBfc:   return AudioChannelSet::bottomFrontCentre;
+        case Steinberg::Vst::kSpeakerBfr:   return AudioChannelSet::bottomFrontRight;
         case Steinberg::Vst::kSpeakerPl:    return AudioChannelSet::wideLeft;
         case Steinberg::Vst::kSpeakerPr:    return AudioChannelSet::wideRight;
+        case Steinberg::Vst::kSpeakerBsl:   return AudioChannelSet::bottomSideLeft;
+        case Steinberg::Vst::kSpeakerBsr:   return AudioChannelSet::bottomSideRight;
+        case Steinberg::Vst::kSpeakerBrl:   return AudioChannelSet::bottomRearLeft;
+        case Steinberg::Vst::kSpeakerBrc:   return AudioChannelSet::bottomRearCentre;
+        case Steinberg::Vst::kSpeakerBrr:   return AudioChannelSet::bottomRearRight;
         default: break;
     }
 
@@ -474,9 +477,8 @@ public:
                         break;
 
                     case Steinberg::Vst::Event::kPolyPressureEvent:
-                        result.addEvent (MidiMessage::aftertouchChange (createSafeChannel (e.polyPressure.channel),
-                                                                        createSafeNote (e.polyPressure.pitch),
-                                                                        denormaliseToMidiValue (e.polyPressure.pressure)),
+                        result.addEvent (MidiMessage::channelPressureChange (createSafeChannel (e.polyPressure.channel),
+                                                                             denormaliseToMidiValue (e.polyPressure.pressure)),
                                          e.sampleOffset);
                         break;
 

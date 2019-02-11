@@ -124,12 +124,12 @@ public:
     Block::UID getConnectedMasterUID() const override               { return masterUID; }
     int getRotation() const override                                { return rotation; }
 
-    Rectangle<int> getBlockAreaWithinLayout() const override
+    BlockArea getBlockAreaWithinLayout() const override
     {
         if (rotation % 2 == 0)
-            return { position.getX(), position.getY(), modelData.widthUnits, modelData.heightUnits };
+            return { position.first, position.second, modelData.widthUnits, modelData.heightUnits };
 
-        return { position.getX(), position.getY(), modelData.heightUnits, modelData.widthUnits };
+        return { position.first, position.second, modelData.heightUnits, modelData.widthUnits };
     }
 
     TouchSurface* getTouchSurface() const override                  { return touchSurface.get(); }
@@ -584,7 +584,7 @@ private:
     bool isMaster = false;
     Block::UID masterUID = {};
 
-    Point<int> position;
+    std::pair<int, int> position;
     int rotation = 0;
     friend Detector;
 

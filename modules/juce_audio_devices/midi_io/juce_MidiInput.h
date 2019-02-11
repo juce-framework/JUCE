@@ -41,7 +41,7 @@ class JUCE_API  MidiInputCallback
 {
 public:
     /** Destructor. */
-    virtual ~MidiInputCallback()  {}
+    virtual ~MidiInputCallback()  = default;
 
 
     /** Receives an incoming message.

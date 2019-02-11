@@ -524,6 +524,14 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
 
     currentSetup = newSetup;
 
+    if (inputChannels.isZero() && outputChannels.isZero())
+    {
+        if (treatAsChosenDevice)
+            updateXml();
+
+        return {};
+    }
+
     currentSetup.sampleRate = chooseBestSampleRate (newSetup.sampleRate);
     currentSetup.bufferSize = chooseBestBufferSize (newSetup.bufferSize);
 

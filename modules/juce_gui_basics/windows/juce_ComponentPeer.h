@@ -387,7 +387,7 @@ public:
     struct JUCE_API  ScaleFactorListener
     {
         /** Destructor. */
-        virtual ~ScaleFactorListener() {}
+        virtual ~ScaleFactorListener() = default;
 
         /** Called when the scale factor changes. */
         virtual void nativeScaleFactorChanged (double newScaleFactor) = 0;

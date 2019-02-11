@@ -263,6 +263,8 @@ namespace DragAndDropHelpers
             data->Release();
             source->Release();
 
+            OleUninitialize();
+
             if (completionCallback != nullptr)
                 MessageManager::callAsync (completionCallback);
 
@@ -290,14 +292,14 @@ namespace DragAndDropHelpers
             clearSingletonInstance();
         }
 
-        juce_DeclareSingleton_SingleThreaded (ThreadPoolHolder, true)
+        JUCE_DECLARE_SINGLETON_SINGLETHREADED (ThreadPoolHolder, false)
 
         // We need to make sure we don't do simultaneous text and file drag and drops,
         // so use a pool that can only run a single job.
         ThreadPool pool { 1 };
     };
 
-    juce_ImplementSingleton_SingleThreaded (ThreadPoolHolder)
+    JUCE_IMPLEMENT_SINGLETON (ThreadPoolHolder)
 }
 
 //==============================================================================

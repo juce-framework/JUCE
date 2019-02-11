@@ -41,7 +41,7 @@ public:
     RuleBasedTopologySource (TopologySource&);
 
     /** Destructor. */
-    ~RuleBasedTopologySource();
+    ~RuleBasedTopologySource() override;
 
     //==========================================================================
     /** Returns the currently active topology. */
@@ -50,7 +50,7 @@ public:
     /** A rule that can transform parts of a topology. */
     struct Rule
     {
-        virtual ~Rule() {}
+        virtual ~Rule() = default;
 
         /** Subclasses should implement this method and use it as their opportunity to
             examine the given topology and modify it. For example they may want to substitute

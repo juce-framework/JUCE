@@ -40,7 +40,7 @@ class JUCE_API  MouseListener
 {
 public:
     /** Destructor. */
-    virtual ~MouseListener()  {}
+    virtual ~MouseListener() = default;
 
     /** Called when the mouse moves inside a component.
 

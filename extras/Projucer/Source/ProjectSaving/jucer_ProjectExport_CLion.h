@@ -149,8 +149,8 @@ public:
                     << "Add these exporters to the project to enable CLion builds." << newLine
                     << newLine
                     << "Not all features of all the exporters are currently supported. Notable omissions are AUv3 "
-                    << "plug-ins, embedding resources and fat binaries on MacOS, and adding application icons. On "
-                    << "Windows the CLion exporter requires a GCC-based compiler like MinGW.";
+                    << "plug-ins, embedding resources and fat binaries on MacOS. On Windows the CLion exporter "
+                    << "requires a GCC-based compiler like MinGW.";
 
         return description;
     }
@@ -302,7 +302,7 @@ private:
     }
 
     template <class Target, class Exporter>
-    void getFileInfoList (Target& target, Exporter& exporter, const Project::Item& projectItem, std::vector<std::pair<String, bool>>& fileInfoList) const
+    void getFileInfoList (Target& target, Exporter& exporter, const Project::Item& projectItem, std::vector<std::tuple<String, bool, String>>& fileInfoList) const
     {
         auto targetType = (getProject().getProjectType().isAudioPlugin() ? target.type : Target::Type::SharedCodeTarget);
 
@@ -314,7 +314,9 @@ private:
         else if (projectItem.shouldBeAddedToTargetProject() && getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType )
         {
             auto path = RelativePath (projectItem.getFile(), exporter.getTargetFolder(), RelativePath::buildTargetFolder).toUnixStyle();
-            fileInfoList.push_back ({ path, projectItem.shouldBeCompiled() });
+
+            fileInfoList.push_back (std::make_tuple (path, projectItem.shouldBeCompiled(),
+                                                     exporter.compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get().toString()));
         }
     }
 
@@ -364,27 +366,69 @@ private:
 
             out << newLine;
 
-            std::vector<std::pair<String, bool>> fileInfoList;
+            std::vector<std::tuple<String, bool, String>> fileInfoList;
             for (auto& group : exporter.getAllGroups())
                 getFileInfoList (*target, exporter, group, fileInfoList);
 
             for (auto& fileInfo : fileInfoList)
-                out << "    " << fileInfo.first.quoted() << newLine;
+                out << "    " << std::get<0> (fileInfo).quoted() << newLine;
 
             auto isCMakeBundle = exporter.isXcode() && target->getTargetFileType() == ProjectType::Target::TargetFileType::pluginBundle;
-            String pkgInfoPath  = File (getTargetFolder().getChildFile ("PkgInfo")).getFullPathName().quoted();
+            auto pkgInfoPath = String ("PkgInfo").quoted();
 
             if (isCMakeBundle)
                 out << "    " << pkgInfoPath << newLine;
+
+            auto xcodeIcnsFilePath = [&] () -> String
+            {
+                if (exporter.isXcode() && target->getTargetFileType() == ProjectType::Target::TargetFileType::executable)
+                {
+                    auto xcodeIcnsFile = getTargetFolder().getParentDirectory()
+                                                          .getChildFile ("MacOSX")
+                                                          .getChildFile ("Icon.icns");
+
+                    if (xcodeIcnsFile.existsAsFile())
+                        return xcodeIcnsFile.getRelativePathFrom (getTargetFolder()).quoted();
+                }
+
+                return {};
+            }();
+
+            if (xcodeIcnsFilePath.isNotEmpty())
+                out << "    " << xcodeIcnsFilePath << newLine;
+
+            if (exporter.isCodeBlocks() && target->getTargetFileType() == ProjectType::Target::TargetFileType::executable)
+            {
+                auto windowsRcFile = getTargetFolder().getParentDirectory()
+                                                      .getChildFile ("CodeBlocksWindows")
+                                                      .getChildFile ("resources.rc");
+
+                if (windowsRcFile.existsAsFile())
+                    out << "    " << windowsRcFile.getRelativePathFrom (getTargetFolder()).quoted() << newLine;
+            }
 
             out << ")" << newLine << newLine;
 
             if (isCMakeBundle)
                 out << "set_source_files_properties (" << pkgInfoPath << " PROPERTIES MACOSX_PACKAGE_LOCATION .)" << newLine;
 
+            if (xcodeIcnsFilePath.isNotEmpty())
+                out << "set_source_files_properties (" << xcodeIcnsFilePath << " PROPERTIES MACOSX_PACKAGE_LOCATION \"Resources\")" << newLine;
+
             for (auto& fileInfo : fileInfoList)
-                if (! fileInfo.second)
-                    out << "set_source_files_properties (" << fileInfo.first.quoted() << " PROPERTIES HEADER_FILE_ONLY TRUE)" << newLine;
+            {
+                if (std::get<1> (fileInfo))
+                {
+                    auto extraCompilerFlags = std::get<2> (fileInfo);
+
+                    if (extraCompilerFlags.isNotEmpty())
+                        out << "set_source_files_properties(" << std::get<0> (fileInfo).quoted() << " PROPERTIES COMPILE_FLAGS " << extraCompilerFlags << " )" << newLine;
+                }
+                else
+                {
+                    out << "set_source_files_properties (" << std::get<0> (fileInfo).quoted() << " PROPERTIES HEADER_FILE_ONLY TRUE)" << newLine;
+                }
+            }
 
             out << newLine;
         }
@@ -643,7 +687,7 @@ private:
                     if (! isWindowsAbsolutePath (path))
                         out << "${CMAKE_CURRENT_SOURCE_DIR}/";
 
-                    out << path.replace ("\\", "/") << "\\\"\"" << newLine;
+                    out << path.replace ("\\", "/").unquoted() << "\\\"\"" << newLine;
                 }
 
                 for (auto& flag : exporter.getLinkerFlags (config, *target))
