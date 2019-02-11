@@ -273,11 +273,15 @@ public:
     */
     static AudioProcessor::WrapperType getPluginLoadedAs() noexcept    { return jucePlugInClientCurrentWrapperType; }
 
+    /** Returns true if the AudioProcessor instance is an AAX plug-in running in AudioSuite. */
+    static bool isInAAXAudioSuite (AudioProcessor&);
+
     //==============================================================================
 
    #ifndef DOXYGEN
     // @internal
     static AudioProcessor::WrapperType jucePlugInClientCurrentWrapperType;
+    static std::function<bool(AudioProcessor&)> jucePlugInIsRunningInAudioSuiteFn;
    #endif
 
 private:
