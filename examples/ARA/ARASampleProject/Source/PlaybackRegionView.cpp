@@ -165,7 +165,7 @@ void PlaybackRegionView::recreatePlaybackRegionReader()
     audioThumbCache.clear();
 
     // create a non-realtime playback region reader for our audio thumb
-    playbackRegionReader = documentView.getARADocumentController()->createPlaybackRegionReader({playbackRegion}, true);
+    playbackRegionReader = documentView.getARADocumentController()->createPlaybackRegionReader ({playbackRegion}, true);
     // see juce_AudioThumbnail.cpp line 122 - AudioThumbnail does not deal with zero length sources.
     if (playbackRegionReader->lengthInSamples <= 0)
     {

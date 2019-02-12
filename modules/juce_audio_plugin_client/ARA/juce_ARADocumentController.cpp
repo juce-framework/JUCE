@@ -95,14 +95,16 @@ ARAAudioSourceReader* ARADocumentController::createAudioSourceReader (ARAAudioSo
     return new ARAAudioSourceReader (audioSource);
 }
 
-ARAPlaybackRegionReader* ARADocumentController::createPlaybackRegionReader (std::vector<ARAPlaybackRegion*> playbackRegions, bool nonRealtime)
+ARAPlaybackRegionReader* ARADocumentController::createPlaybackRegionReader (std::vector<ARAPlaybackRegion*> const& playbackRegions, bool nonRealtime,
+                                                                            double playbackSampleRate /*= 0.0*/, int channelCount /*= 0*/, bool use64BitSamples /*= false*/)
 {
-    return new ARAPlaybackRegionReader (static_cast<ARAPlaybackRenderer*> (doCreatePlaybackRenderer()), playbackRegions, nonRealtime);
+    return new ARAPlaybackRegionReader (static_cast<ARAPlaybackRenderer*> (doCreatePlaybackRenderer()), playbackRegions, nonRealtime, playbackSampleRate, channelCount, use64BitSamples);
 }
 
-ARARegionSequenceReader* ARADocumentController::createRegionSequenceReader (ARARegionSequence* regionSequence, bool nonRealtime)
+ARARegionSequenceReader* ARADocumentController::createRegionSequenceReader (ARARegionSequence* regionSequence, bool nonRealtime,
+                                                                            double playbackSampleRate /*= 0.0*/, int channelCount /*= 0*/, bool use64BitSamples /*= false*/)
 {
-    return new ARARegionSequenceReader (static_cast<ARAPlaybackRenderer*> (doCreatePlaybackRenderer()), regionSequence, nonRealtime);
+    return new ARARegionSequenceReader (static_cast<ARAPlaybackRenderer*> (doCreatePlaybackRenderer()), regionSequence, nonRealtime, playbackSampleRate, channelCount, use64BitSamples);
 }
 
 //==============================================================================

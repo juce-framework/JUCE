@@ -20,19 +20,19 @@ public:
     /** Create an ARAAudioSourceReader instance to read \p audioSource */
     ARAAudioSourceReader* createAudioSourceReader (ARAAudioSource* audioSource);
 
-    /** Create an ARAPlaybackRegionReader instance to read all regions in \p playbackRegions
-    
-        See ARAPlaybackRegionReader::ARAPlaybackRegionReader for more information - this function
-        automatically creates an ARAPlaybackRenderer instance and uses it to construct a new ARAPlaybackRegionReader. 
-    */
-    ARAPlaybackRegionReader* createPlaybackRegionReader (std::vector<ARAPlaybackRegion*> playbackRegions, bool nonRealtime);
+    /** Create an ARAPlaybackRegionReader instance to read all \p playbackRegions
 
-    /** Create an ARARegionSequenceReader instance to read all of \p regionSequence's regions
-
-        See ARARegionSequenceReader::ARARegionSequenceReader for more information - this function
-        automatically creates an ARAPlaybackRenderer instance and uses it to construct a new ARARegionSequenceReader.
+        See ARAPlaybackRegionReader::ARAPlaybackRegionReader for more information.
     */
-    ARARegionSequenceReader* createRegionSequenceReader (ARARegionSequence* regionSequence, bool nonRealtime);
+    ARAPlaybackRegionReader* createPlaybackRegionReader (std::vector<ARAPlaybackRegion*> const& playbackRegions, bool nonRealtime,
+                                                         double playbackSampleRate = 0.0, int channelCount = 0, bool use64BitSamples = false);
+
+    /** Create an ARARegionSequenceReader instance to read all of \p regionSequence's playback regions
+
+        See ARARegionSequenceReader::ARARegionSequenceReader for more information.
+    */
+    ARARegionSequenceReader* createRegionSequenceReader (ARARegionSequence* regionSequence, bool nonRealtime,
+                                                         double playbackSampleRate = 0.0, int channelCount = 0, bool use64BitSamples = false);
 
     //==============================================================================
     // notify the host and any potential internal reader about content changes

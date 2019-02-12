@@ -142,47 +142,28 @@ bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, 
 
 ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* renderer, std::vector<ARAPlaybackRegion*> const& playbackRegions, bool nonRealtime, double playbackSampleRate /*= 0.0*/, int channelCount /*= 0*/, bool use64BitSamples /*= false*/)
     : AudioFormatReader (nullptr, "ARAPlaybackRegionReader"),
-    isNonRealtime (nonRealtime),
-    playbackRenderer (renderer)
+      isNonRealtime (nonRealtime),
+      playbackRenderer (renderer)
 {
-    sampleRate = playbackSampleRate;
-    numChannels = channelCount;
+    sampleRate = (playbackSampleRate > 0.0) ? playbackSampleRate :
+                                              playbackRegions.empty() ? 44100.0 : playbackRegions.front()->getAudioModification()->getAudioSource()->getSampleRate();
+    numChannels = (channelCount > 0) ? channelCount :
+                                              playbackRegions.empty() ? 1 : (unsigned int)playbackRegions.front()->getAudioModification()->getAudioSource()->getChannelCount();
     bitsPerSample = use64BitSamples ? 64 : 32;
     usesFloatingPointData = true;
 
-    bool deduceSampleRate = (sampleRate <= 0.0);
-    if (deduceSampleRate)
-        sampleRate = 0.0;
-
-    bool deduceNumChannels = (numChannels < 1);
-    if (deduceNumChannels)
-        numChannels = 0;
-
-    if (playbackRegions.size() == 0)
+    if (playbackRegions.empty())
     {
         startInSamples = 0;
         lengthInSamples = 0;
-
-        if (deduceSampleRate)
-            sampleRate = 44100.0;
     }
     else
     {
-        sampleRate = 0.0;
         double regionsStartTime = std::numeric_limits<double>::max();
         double regionsEndTime = std::numeric_limits<double>::lowest();
 
         for (auto playbackRegion : playbackRegions)
         {
-            ARA::PlugIn::AudioModification* modification = playbackRegion->getAudioModification();
-            ARA::PlugIn::AudioSource* source = modification->getAudioSource();
-
-            if (deduceSampleRate && (sampleRate == 0.0))
-                sampleRate = source->getSampleRate();
-
-            if (deduceNumChannels)
-                numChannels = jmax (numChannels, (unsigned int)source->getChannelCount());
-
             regionsStartTime = jmin (regionsStartTime, playbackRegion->getStartInPlaybackTime() - playbackRegion->getHeadTime());
             regionsEndTime = jmax (regionsEndTime, playbackRegion->getEndInPlaybackTime() + playbackRegion->getTailTime());
 
