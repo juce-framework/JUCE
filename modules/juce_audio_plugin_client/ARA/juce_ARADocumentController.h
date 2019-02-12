@@ -19,12 +19,14 @@ public:
 
     /** Create an ARAAudioSourceReader instance to read \p audioSource */
     ARAAudioSourceReader* createAudioSourceReader (ARAAudioSource* audioSource);
+
     /** Create an ARAPlaybackRegionReader instance to read all regions in \p playbackRegions
     
         See ARAPlaybackRegionReader::ARAPlaybackRegionReader for more information - this function
         automatically creates an ARAPlaybackRenderer instance and uses it to construct a new ARAPlaybackRegionReader. 
     */
     ARAPlaybackRegionReader* createPlaybackRegionReader (std::vector<ARAPlaybackRegion*> playbackRegions, bool nonRealtime);
+
     /** Create an ARARegionSequenceReader instance to read all of \p regionSequence's regions
 
         See ARARegionSequenceReader::ARARegionSequenceReader for more information - this function
@@ -48,6 +50,7 @@ public:
         Accordingly, listeners must be either robust regarding this, or the calling code must set up the appropriate internal states.
     */
     void notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions = false);
+
     /** notify the host and any listeners of \p audioModification about updates to \audioModification's content.
         @param audioModification The ARAAudioModification with changed content
         @param notifyAllPlaybackRegions Whether or not to notify \p audioModification's underlying ARA playback regions.
@@ -59,6 +62,7 @@ public:
         Accordingly, listeners must be either robust regarding this, or the calling code must set up the appropriate internal states.
     */
     void notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags, bool notifyAllPlaybackRegions = false);
+
     /** notify the host and any listeners of \p playbackRegion about updates to \playbackRegion's content.
         @param playbackRegion The ARAPlaybackRegion whose content is changing
         @param scopeFlags The scope of the changed content

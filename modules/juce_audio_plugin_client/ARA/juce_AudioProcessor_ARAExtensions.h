@@ -33,17 +33,21 @@ public:
     /** Return the ARAPlaybackRenderer instance, if it exists. */
     template<typename PlaybackRenderer_t = ARAPlaybackRenderer>
     PlaybackRenderer_t* getARAPlaybackRenderer() const noexcept { return araPlugInExtension ? static_cast<PlaybackRenderer_t*> (araPlugInExtension->getPlaybackRenderer()) : nullptr; }
+
     /** Return the ARAEditorRenderer instance, if it exists. */
     template<typename EditorRenderer_t = ARAEditorRenderer>
     EditorRenderer_t* getARAEditorRenderer() const noexcept { return araPlugInExtension ? static_cast<EditorRenderer_t*> (araPlugInExtension->getEditorRenderer()) : nullptr; }
+
     /** Return the ARAEditorView instance, if it exists. */
     template<typename EditorView_t = ARAEditorView>
     EditorView_t* getARAEditorView() const noexcept { return araPlugInExtension ? static_cast<EditorView_t*> (araPlugInExtension->getEditorView()) : nullptr; }
 
     /** Returns true if plugin instance fulfills the ARAPlaybackRenderer role. */
     bool isARAPlaybackRenderer() const noexcept { return getARAPlaybackRenderer() != nullptr; }
+
     /** Returns true if plugin instance fulfills the ARAEditorRenderer role. */
     bool isARAEditorRenderer() const noexcept { return getARAEditorRenderer() != nullptr; }
+
     /** Returns true if plugin instance fulfills the ARAEditorView role. */
     bool isARAEditorView() const noexcept { return getARAEditorView() != nullptr; }
 
