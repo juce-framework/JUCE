@@ -841,10 +841,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         if (useInput)
             err = AudioUnitRender (audioUnit, flags, time, 1, numFrames, data);
 
-        const auto numChannels = (uint32) jmax (channelData.inputs ->numHardwareChannels,
-                                                channelData.outputs->numHardwareChannels);
         const auto channelDataSize = sizeof (float) * numFrames;
-        const auto totalDataSize = channelDataSize * numChannels;
 
         const ScopedTryLock stl (callbackLock);
 
@@ -858,12 +855,10 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
 
             if (useInput)
             {
-                const auto* const readData = (float*) data->mBuffers[0].mData;
-
                 for (int c = 0; c < channelData.inputs->numActiveChannels; ++c)
                 {
-                    auto* start = readData + ((uint32) channelData.inputs->activeChannelIndicies[c] * numFrames);
-                    memcpy (inputData[c], start, channelDataSize);
+                    auto channelIndex = channelData.inputs->activeChannelIndicies[c];
+                    memcpy (inputData[c], (float*) data->mBuffers[channelIndex].mData, channelDataSize);
                 }
             }
             else
@@ -876,18 +871,19 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                                                              outputData, channelData.outputs->numActiveChannels,
                                              (int) numFrames);
 
-            auto* const writeData = (float*) data->mBuffers[0].mData;
-            zeromem (writeData, totalDataSize);
-
             for (int c = 0; c < channelData.outputs->numActiveChannels; ++c)
             {
-                auto* start = writeData + ((uint32) channelData.outputs->activeChannelIndicies[c] * numFrames);
-                memcpy (start, outputData[c], channelDataSize);
+                auto channelIndex = channelData.outputs->activeChannelIndicies[c];
+                memcpy (data->mBuffers[channelIndex].mData, outputData[c], channelDataSize);
             }
+
+            for (auto c : channelData.outputs->inactiveChannelIndicies)
+                zeromem (data->mBuffers[c].mData, channelDataSize);
         }
         else
         {
-            zeromem (data->mBuffers[0].mData, totalDataSize);
+            for (uint32 c = 0; c < data->mNumberBuffers; ++c)
+                zeromem (data->mBuffers[c].mData, channelDataSize);
         }
 
         return err;
@@ -1002,7 +998,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
             format.mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagIsNonInterleaved | kAudioFormatFlagsNativeEndian | kLinearPCMFormatFlagIsPacked;
             format.mBitsPerChannel = 8 * sizeof (float);
             format.mFramesPerPacket = 1;
-            format.mChannelsPerFrame = 1;
+            format.mChannelsPerFrame = (UInt32) jmax (channelData.inputs->numHardwareChannels, channelData.outputs->numHardwareChannels);
             format.mBytesPerFrame = format.mBytesPerPacket = sizeof (float);
 
             AudioUnitSetProperty (audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input,  0, &format, sizeof (format));
@@ -1170,7 +1166,8 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                   areChannelsAccessible ((! isInput) || [AVAudioSession sharedInstance].isInputAvailable),
                   activeChannels (limitRequiredChannelsToHardware (numHardwareChannels, requiredChannels)),
                   numActiveChannels (activeChannels.countNumberOfSetBits()),
-                  activeChannelIndicies (getActiveChannelIndicies (activeChannels))
+                  activeChannelIndicies (getActiveChannelIndicies (activeChannels)),
+                  inactiveChannelIndicies (getInactiveChannelIndicies (activeChannelIndicies, numHardwareChannels))
             {
                #if JUCE_IOS_AUDIO_LOGGING
                 {
@@ -1188,6 +1185,11 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                     for (auto i : activeChannelIndicies)
                         info << " " << i;
 
+                    info << ", Inactive channel indices:";
+
+                    for (auto i : inactiveChannelIndicies)
+                        info << " " << i;
+
                     JUCE_IOS_AUDIO_LOG ((isInput ? "Input" : "Output") << " channel configuration: {" << info << "}");
                 }
                #endif
@@ -1200,7 +1202,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
             const BigInteger activeChannels;
             const int numActiveChannels;
 
-            const Array<int> activeChannelIndicies;
+            const Array<int> activeChannelIndicies, inactiveChannelIndicies;
 
         private:
             static StringArray getHardwareChannelNames (const bool isInput)
@@ -1243,6 +1245,21 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                     result.add (index);
                     index = activeChannelsToIndex.findNextSetBit (++index);
                 }
+
+                return result;
+            }
+
+            static Array<int> getInactiveChannelIndicies (const Array<int>& activeIndices, int numChannels)
+            {
+                Array<int> result;
+
+                auto nextActiveChannel = activeIndices.begin();
+
+                for (int i = 0; i < numChannels; ++i)
+                    if (nextActiveChannel != activeIndices.end() && i == *nextActiveChannel)
+                        ++nextActiveChannel;
+                    else
+                        result.add (i);
 
                 return result;
             }
