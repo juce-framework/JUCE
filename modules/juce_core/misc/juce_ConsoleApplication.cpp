@@ -261,18 +261,29 @@ void ConsoleApplication::printHelp (const String& preamble, const ArgumentList& 
                                       .fromLastOccurrenceOf ("\\", false, false);
 
     StringArray namesAndArgs;
-    int maxLength = 0;
+    int descriptionIndent = 0;
 
     for (auto& c : commands)
     {
         auto nameAndArgs = exeName + " " + c.argumentDescription;
         namesAndArgs.add (nameAndArgs);
-        maxLength = std::max (maxLength, nameAndArgs.length());
+        descriptionIndent = std::max (descriptionIndent, nameAndArgs.length());
     }
 
+    descriptionIndent = std::min (descriptionIndent + 1, 40);
+
     for (size_t i = 0; i < commands.size(); ++i)
-        std::cout << " " << namesAndArgs[(int) i].paddedRight (' ', maxLength + 2)
-                  << commands[i].commandDescription << std::endl;
+    {
+        auto nameAndArgs = namesAndArgs[(int) i];
+        std::cout << ' ';
+
+        if (nameAndArgs.length() > descriptionIndent)
+            std::cout << nameAndArgs << std::endl << String::repeatedString (" ", descriptionIndent + 1);
+        else
+            std::cout << nameAndArgs.paddedRight (' ', descriptionIndent);
+
+        std::cout << commands[i].commandDescription << std::endl;
+    }
 
     std::cout << std::endl;
 }
