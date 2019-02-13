@@ -363,7 +363,7 @@ void MidiFile::convertTimestampTicksToSeconds()
 }
 
 //==============================================================================
-bool MidiFile::writeTo (OutputStream& out, int midiFileType)
+bool MidiFile::writeTo (OutputStream& out, int midiFileType) const
 {
     jassert (midiFileType >= 0 && midiFileType <= 2);
 
@@ -381,7 +381,7 @@ bool MidiFile::writeTo (OutputStream& out, int midiFileType)
     return true;
 }
 
-bool MidiFile::writeTrack (OutputStream& mainOut, const MidiMessageSequence& ms)
+bool MidiFile::writeTrack (OutputStream& mainOut, const MidiMessageSequence& ms) const
 {
     MemoryOutputStream out;
 

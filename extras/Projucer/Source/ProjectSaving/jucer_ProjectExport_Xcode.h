@@ -3187,6 +3187,9 @@ private:
 
         auto targetString = "(" + targetIDs.joinIntoString (", ") + ")";
         v->setProperty ("targets", targetString, nullptr);
+
+        v->setProperty ("knownRegions", "(en, Base)", nullptr);
+
         misc.add (v);
     }
 

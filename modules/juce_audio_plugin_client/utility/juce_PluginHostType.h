@@ -41,8 +41,8 @@ class PluginHostType
 public:
     //==============================================================================
     PluginHostType()  : type (getHostType()) {}
-    PluginHostType (const PluginHostType& other) noexcept   = default;
-    PluginHostType& operator= (const PluginHostType& other) noexcept = default;
+    PluginHostType (const PluginHostType& other) = default;
+    PluginHostType& operator= (const PluginHostType& other) = default;
 
     //==============================================================================
     /** Represents the host type and also its version for some hosts. */
@@ -273,11 +273,15 @@ public:
     */
     static AudioProcessor::WrapperType getPluginLoadedAs() noexcept    { return jucePlugInClientCurrentWrapperType; }
 
+    /** Returns true if the AudioProcessor instance is an AAX plug-in running in AudioSuite. */
+    static bool isInAAXAudioSuite (AudioProcessor&);
+
     //==============================================================================
 
    #ifndef DOXYGEN
     // @internal
     static AudioProcessor::WrapperType jucePlugInClientCurrentWrapperType;
+    static std::function<bool(AudioProcessor&)> jucePlugInIsRunningInAudioSuiteFn;
    #endif
 
 private:

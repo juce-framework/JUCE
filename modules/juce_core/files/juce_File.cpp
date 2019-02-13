@@ -63,7 +63,7 @@ File& File::operator= (File&& other) noexcept
     return *this;
 }
 
-JUCE_DECLARE_DEPRECATED_STATIC (const File File::nonexistent;)
+JUCE_DECLARE_DEPRECATED_STATIC (const File File::nonexistent{};)
 
 //==============================================================================
 static String removeEllipsis (const String& path)

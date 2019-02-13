@@ -235,8 +235,10 @@ private:
         static String quotedIfContainsSpaces (NSString* file)
         {
             String s (nsStringToJuce (file));
+            s = s.unquoted().replace ("\"", "\\\"");
+
             if (s.containsChar (' '))
-                s = s.quoted ('"');
+                s = s.quoted();
 
             return s;
         }

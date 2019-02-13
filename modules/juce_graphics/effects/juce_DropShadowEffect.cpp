@@ -134,7 +134,7 @@ void DropShadow::drawForRectangle (Graphics& g, const Rectangle<int>& targetArea
     for (float i = 0.05f; i < 1.0f; i += 0.1f)
         cg.addColour (1.0 - i, colour.withMultipliedAlpha (i * i));
 
-    const float radiusInset = (radius + 1) / 2.0f;
+    const float radiusInset = radius / 2.0f;
     const float expandedRadius = radius + radiusInset;
 
     auto area = targetArea.toFloat().reduced (radiusInset) + offset.toFloat();

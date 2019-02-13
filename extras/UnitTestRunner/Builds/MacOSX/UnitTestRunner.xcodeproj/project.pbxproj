@@ -947,6 +947,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (B0D62ED1051EE9DFD49F6321);
+			knownRegions = (en, Base);
 		};
 	};
 	rootObject = E1E93F2B4B2D17E011395520;

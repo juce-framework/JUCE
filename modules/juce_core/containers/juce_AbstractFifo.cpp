@@ -132,13 +132,6 @@ void AbstractFifo::finishedRead (int numRead) noexcept
 
 //==============================================================================
 template <AbstractFifo::ReadOrWrite mode>
-AbstractFifo::ScopedReadWrite<mode>::ScopedReadWrite (AbstractFifo& f, int num) noexcept
-    : fifo (&f)
-{
-    prepare (*fifo, num);
-}
-
-template <AbstractFifo::ReadOrWrite mode>
 AbstractFifo::ScopedReadWrite<mode>::ScopedReadWrite (ScopedReadWrite&& other) noexcept
     : startIndex1 (other.startIndex1),
       blockSize1 (other.blockSize1),
@@ -157,13 +150,6 @@ AbstractFifo::ScopedReadWrite<mode>::operator= (ScopedReadWrite&& other) noexcep
 }
 
 template <AbstractFifo::ReadOrWrite mode>
-AbstractFifo::ScopedReadWrite<mode>::~ScopedReadWrite() noexcept
-{
-    if (fifo != nullptr)
-        finish (*fifo, blockSize1 + blockSize2);
-}
-
-template <AbstractFifo::ReadOrWrite mode>
 void AbstractFifo::ScopedReadWrite<mode>::swap (ScopedReadWrite& other) noexcept
 {
     std::swap (other.fifo, fifo);
@@ -171,30 +157,6 @@ void AbstractFifo::ScopedReadWrite<mode>::swap (ScopedReadWrite& other) noexcept
     std::swap (other.blockSize1, blockSize1);
     std::swap (other.startIndex2, startIndex2);
     std::swap (other.blockSize2, blockSize2);
-}
-
-template<>
-void AbstractFifo::ScopedReadWrite<AbstractFifo::ReadOrWrite::read>::prepare (AbstractFifo& f, int num) noexcept
-{
-    f.prepareToRead (num, startIndex1, blockSize1, startIndex2, blockSize2);
-}
-
-template<>
-void AbstractFifo::ScopedReadWrite<AbstractFifo::ReadOrWrite::write>::prepare (AbstractFifo& f, int num) noexcept
-{
-    f.prepareToWrite (num, startIndex1, blockSize1, startIndex2, blockSize2);
-}
-
-template<>
-void AbstractFifo::ScopedReadWrite<AbstractFifo::ReadOrWrite::read>::finish (AbstractFifo& f, int num) noexcept
-{
-    f.finishedRead (num);
-}
-
-template<>
-void AbstractFifo::ScopedReadWrite<AbstractFifo::ReadOrWrite::write>::finish (AbstractFifo& f, int num) noexcept
-{
-    f.finishedWrite (num);
 }
 
 template class AbstractFifo::ScopedReadWrite<AbstractFifo::ReadOrWrite::read>;
