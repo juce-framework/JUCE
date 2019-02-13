@@ -71,6 +71,27 @@ public:
     //==============================================================================
     /** Reads samples from the stream.
 
+        @param destSamples          an array of float buffers into which the sample data for each
+                                    channel will be written. Channels that aren't needed can be null
+        @param numDestChannels      the number of array elements in the destChannels array
+        @param startSampleInSource  the position in the audio file or stream at which the samples
+                                    should be read, as a number of samples from the start of the
+                                    stream. It's ok for this to be beyond the start or end of the
+                                    available data - any samples that are out-of-range will be returned
+                                    as zeros.
+        @param numSamplesToRead     the number of samples to read. If this is greater than the number
+                                    of samples that the file or stream contains. the result will be padded
+                                    with zeros
+        @returns                    true if the operation succeeded, false if there was an error. Note
+                                    that reading sections of data beyond the extent of the stream isn't an
+                                    error - the reader should just return zeros for these regions
+        @see readMaxLevels
+    */
+    bool read (float* const* destChannels, int numDestChannels,
+               int64 startSampleInSource, int numSamplesToRead);
+
+    /** Reads samples from the stream.
+
         @param destSamples          an array of buffers into which the sample data for each
                                     channel will be written.
                                     If the format is fixed-point, each channel will be written
