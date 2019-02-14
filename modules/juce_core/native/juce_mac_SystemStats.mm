@@ -71,6 +71,13 @@ namespace SystemStatsHelpers
 //==============================================================================
 void CPUInformation::initialise() noexcept
 {
+   #if __FMA__
+    hasFMA3 = true;
+   #endif
+   #if __FMA4__
+    hasFMA4 = true;
+   #endif
+
    #if JUCE_INTEL && ! JUCE_NO_INLINE_ASM
     uint32 a = 0, b = 0, d = 0, c = 0;
     SystemStatsHelpers::doCPUID (a, b, c, d, 1);
