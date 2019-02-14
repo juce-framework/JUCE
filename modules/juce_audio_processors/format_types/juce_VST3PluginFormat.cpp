@@ -32,6 +32,14 @@
 #if JUCE_PLUGINHOST_ARA
 #include "ARA_API/ARAVST3.h"
 #include "ARA_Library/Dispatch/ARAHostDispatch.h"
+
+namespace ARA
+{
+    DEF_CLASS_IID (IMainFactory)
+    DEF_CLASS_IID (IPlugInEntryPoint)
+    DEF_CLASS_IID (IPlugInEntryPoint2)
+}
+
 #endif
 
 namespace juce
