@@ -60,7 +60,7 @@ public:
     void reset (int numSteps) noexcept
     {
         stepsToTarget = numSteps;
-        setCurrentValueToTargetValue();
+        setCurrentAndTargetValue (target);
     }
 
     /** Set the next value to ramp towards.
@@ -75,7 +75,7 @@ public:
 
         if (stepsToTarget <= 0)
         {
-            setCurrentValueToTargetValue();
+            setCurrentAndTargetValue (target);
             return;
         }
 
@@ -83,10 +83,12 @@ public:
         step = (target - currentValue) / static_cast<FloatType> (countdown);
     }
 
-    /** Sets the current value to the target value. */
-    void setCurrentValueToTargetValue() noexcept
+    /** Sets the current value and the target value.
+        @param newValue    the new value to take
+    */
+    void setCurrentAndTargetValue (FloatType newValue)
     {
-        currentValue = target;
+        target = currentValue = newValue;
         countdown = 0;
     }
 
@@ -198,7 +200,7 @@ public:
     {
         if (numSamples >= countdown)
         {
-            setCurrentValueToTargetValue();
+            setCurrentAndTargetValue (target);
             return target;
         }
 
@@ -210,20 +212,24 @@ public:
     //==============================================================================
     /** THIS FUNCTION IS DEPRECATED.
 
-        Use `setTargetValue (float)` and `setCurrentValueToTargetValue()` instead:
+        Use `setTargetValue (float)` and `setCurrentAndTargetValue()` instead:
 
         lsv.setValue (x, false); -> lsv.setTargetValue (x);
-        lsv.setValue (x, true);  -> lsv.setTargetValue (x); lsv.setCurrentValueToTargetValue();
+        lsv.setValue (x, true);  -> lsv.setCurrentAndTargetValue (x);
 
         @param newValue     The new target value
         @param force        If true, the value will be set immediately, bypassing the ramp
     */
     JUCE_DEPRECATED_WITH_BODY (void setValue (FloatType newValue, bool force = false) noexcept,
     {
-        setTargetValue (newValue);
-
         if (force)
-            setCurrentValueToTargetValue();
+        {
+            target = newValue;
+            setCurrentAndTargetValue (target);
+            return;
+        }
+
+        setTargetValue (newValue);
     })
 
 private:

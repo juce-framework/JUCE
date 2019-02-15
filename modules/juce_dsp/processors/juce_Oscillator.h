@@ -84,10 +84,13 @@ public:
     /** Sets the frequency of the oscillator. */
     void setFrequency (NumericType newFrequency, bool force = false) noexcept
     {
-        frequency.setTargetValue (newFrequency);
-
         if (force)
-            frequency.setCurrentValueToTargetValue();
+        {
+            frequency.setCurrentAndTargetValue (newFrequency);
+            return;
+        }
+
+        frequency.setTargetValue (newFrequency);
     }
 
     /** Returns the current frequency of the oscillator. */
