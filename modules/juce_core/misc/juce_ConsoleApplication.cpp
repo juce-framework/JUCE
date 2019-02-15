@@ -250,18 +250,26 @@ int ConsoleApplication::invokeCatchingFailures (std::function<int()>&& f)
     return returnCode;
 }
 
-int ConsoleApplication::findAndRunCommand (const ArgumentList& args, bool commandFlagMustBeFirst) const
+const ConsoleApplication::Command* ConsoleApplication::findCommand (const ArgumentList& args, bool optionMustBeFirstArg) const
 {
     for (auto& c : commands)
     {
         auto index = args.indexOfOption (c.commandOption);
 
-        if (commandFlagMustBeFirst ? (index == 0) : (index >= 0))
-            return invokeCatchingFailures ([&] { c.command (args); return 0; });
+        if (optionMustBeFirstArg ? (index == 0) : (index >= 0))
+            return &c;
     }
 
     if (commandIfNoOthersRecognised >= 0)
-        return invokeCatchingFailures ([&] { commands[(size_t) commandIfNoOthersRecognised].command (args); return 0; });
+        return &commands[(size_t) commandIfNoOthersRecognised];
+
+    return {};
+}
+
+int ConsoleApplication::findAndRunCommand (const ArgumentList& args, bool optionMustBeFirstArg) const
+{
+    if (auto c = findCommand (args, optionMustBeFirstArg))
+        return invokeCatchingFailures ([=] { c->command (args); return 0; });
 
     fail ("Unrecognised arguments");
     return 0;
@@ -277,28 +285,43 @@ void ConsoleApplication::addCommand (Command c)
     commands.emplace_back (std::move (c));
 }
 
-void ConsoleApplication::addHelpCommand (String arg, String helpMessage, bool invokeIfNoOtherCommandRecognised)
+void ConsoleApplication::addDefaultCommand (Command c)
 {
-    if (invokeIfNoOtherCommandRecognised)
-        commandIfNoOthersRecognised = (int) commands.size();
+    commandIfNoOthersRecognised = (int) commands.size();
+    addCommand (std::move (c));
+}
 
-    addCommand ({ arg, arg, "Prints this message",
-                  [this, helpMessage] (const ArgumentList& args) { printHelp (helpMessage, args); }});
+void ConsoleApplication::addHelpCommand (String arg, String helpMessage, bool makeDefaultCommand)
+{
+    Command c { arg, arg, "Prints the list of commands", {},
+                [this, helpMessage] (const ArgumentList& args)
+                {
+                    std::cout << helpMessage << std::endl;
+                    printCommandList (args);
+                }};
+
+    if (makeDefaultCommand)
+        addDefaultCommand (std::move (c));
+    else
+        addCommand (std::move (c));
 }
 
 void ConsoleApplication::addVersionCommand (String arg, String versionText)
 {
-    addCommand ({ arg, arg, "Prints the current version number",
+    addCommand ({ arg, arg, "Prints the current version number", {},
                   [versionText] (const ArgumentList&)
                   {
                       std::cout << versionText << std::endl;
                   }});
 }
 
-void ConsoleApplication::printHelp (const String& preamble, const ArgumentList& args) const
+const std::vector<ConsoleApplication::Command>& ConsoleApplication::getCommands() const
 {
-    std::cout << preamble << std::endl;
+    return commands;
+}
 
+void ConsoleApplication::printCommandList (const ArgumentList& args) const
+{
     auto exeName = args.executableName.fromLastOccurrenceOf ("/", false, false)
                                       .fromLastOccurrenceOf ("\\", false, false);
 
@@ -324,7 +347,7 @@ void ConsoleApplication::printHelp (const String& preamble, const ArgumentList& 
         else
             std::cout << nameAndArgs.paddedRight (' ', descriptionIndent);
 
-        std::cout << commands[i].commandDescription << std::endl;
+        std::cout << commands[i].shortDescription << std::endl;
     }
 
     std::cout << std::endl;

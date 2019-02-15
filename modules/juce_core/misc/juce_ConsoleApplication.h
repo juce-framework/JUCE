@@ -213,8 +213,13 @@ struct ConsoleApplication
         */
         String argumentDescription;
 
-        /** A description of the meaning of this command, for use in the help text. */
-        String commandDescription;
+        /** A short (one line) description of this command, which can be printed by
+            ConsoleApplication::printCommandList().
+        */
+        String shortDescription;
+
+        /** A longer description of this command, for use in extended help. */
+        String longDescription;
 
         /** The actual command that should be invoked to perform this action. */
         std::function<void(const ArgumentList&)> command;
@@ -224,15 +229,24 @@ struct ConsoleApplication
     /** Adds a command to the list. */
     void addCommand (Command);
 
+    /** Adds a command to the list, and marks it as one which is invoked if no other
+        command matches.
+    */
+    void addDefaultCommand (Command);
+
+    /** Adds a command that will print the given text in response to the "--version" option. */
+    void addVersionCommand (String versionArgument, String versionText);
+
     /** Adds a help command to the list.
         This command will print the user-supplied message that's passed in here as an
         argument, followed by a list of all the registered commands.
     */
-    void addHelpCommand (String helpArgument, String helpMessage,
-                         bool invokeIfNoOtherCommandRecognised);
+    void addHelpCommand (String helpArgument, String helpMessage, bool makeDefaultCommand);
 
-    /** Adds a command that will print the given text in response to the "--version" option. */
-    void addVersionCommand (String versionArgument, String versionText);
+    /** Prints out the list of commands and their short descriptions in a format that's
+        suitable for use as help.
+    */
+    void printCommandList (const ArgumentList&) const;
 
     //==============================================================================
     /** Throws a failure exception to cause a command-line app to terminate.
@@ -253,29 +267,40 @@ struct ConsoleApplication
     /** Looks for the first command in the list which matches the given arguments, and
         tries to invoke it.
 
-        If no command is found, it prints a help message listing the available commands.
+        If no command is found, and if there is no default command to run, it fails with
+        a suitable error message.
         If the command calls the fail() function, this will throw an exception that gets
         automatically caught and handled, and this method will return the error code that
         was passed into the fail() call.
 
-        If commandFlagMustBeFirst is true, then only the first argument will be looked at
+        If optionMustBeFirstArg is true, then only the first argument will be looked at
         when searching the available commands - this lets you do 'git' style commands where
         the executable name is followed by a verb.
     */
     int findAndRunCommand (const ArgumentList&,
-                           bool commandFlagMustBeFirst = false) const;
+                           bool optionMustBeFirstArg = false) const;
 
     /** Creates an ArgumentList object from the argc and argv variablrs, and invokes
         findAndRunCommand() using it.
     */
     int findAndRunCommand (int argc, char* argv[]) const;
 
+    /** Looks for the first command in the list which matches the given arguments.
+        If none is found, this returns either the default command (if one is set)
+        or nullptr.
+        If optionMustBeFirstArg is true, then only the first argument will be looked at
+        when searching the available commands - this lets you do 'git' style commands where
+        the executable name is followed by a verb.
+    */
+    const Command* findCommand (const ArgumentList&, bool optionMustBeFirstArg) const;
+
+    /** Gives read-only access to the list of registered commands. */
+    const std::vector<Command>& getCommands() const;
+
 private:
     //==============================================================================
     std::vector<Command> commands;
     int commandIfNoOthersRecognised = -1;
-
-    void printHelp (const String& preamble, const ArgumentList&) const;
 };
 
 } // namespace juce
