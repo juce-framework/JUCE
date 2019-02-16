@@ -111,7 +111,7 @@ void ColourGradient::clearColours()
     colours.clear();
 }
 
-int ColourGradient::addColour (const double proportionAlongGradient, Colour colour, Interpolation interpolation)
+int ColourGradient::addColour (const double proportionAlongGradient, Colour colour)
 {
     // must be within the two end-points
     jassert (proportionAlongGradient >= 0 && proportionAlongGradient <= 1.0);
@@ -129,7 +129,7 @@ int ColourGradient::addColour (const double proportionAlongGradient, Colour colo
         if (colours.getReference(i).position > pos)
             break;
 
-    colours.insert (i, { pos, colour, interpolation });
+    colours.insert (i, { pos, colour });
     return i;
 }
 
@@ -167,30 +167,11 @@ Colour ColourGradient::getColour (int index) const noexcept
     return {};
 }
 
-
 void ColourGradient::setColour (int index, Colour newColour) noexcept
 {
     if (isPositiveAndBelow (index, colours.size()))
         colours.getReference (index).colour = newColour;
 }
-
-
-
-ColourGradient::Interpolation ColourGradient::getInterpolation(int index) const noexcept
-{
-	if (isPositiveAndBelow(index, colours.size()))
-		return colours.getReference(index).interpolation;
-
-	return {};
-}
-
-
-void ColourGradient::setInterpolation(int index, Interpolation newInterpolation) noexcept
-{
-	if (isPositiveAndBelow(index, colours.size()))
-		colours.getReference(index).interpolation = newInterpolation;
-}
-
 
 Colour ColourGradient::getColourAtPosition (double position) const noexcept
 {
@@ -208,12 +189,9 @@ Colour ColourGradient::getColourAtPosition (double position) const noexcept
     if (i >= colours.size() - 1)
         return p1.colour;
 
-	if (p1.interpolation == NONE)
-		return p1.colour;
-
     auto& p2 = colours.getReference (i + 1);
 
-	return p1.colour.interpolatedWith(p2.colour, (float)((position - p1.position) / (p2.position - p1.position)));
+    return p1.colour.interpolatedWith (p2.colour, (float) ((position - p1.position) / (p2.position - p1.position)));
 }
 
 //==============================================================================
@@ -237,15 +215,8 @@ void ColourGradient::createLookupTable (PixelARGB* const lookupTable, const int 
         {
             jassert (index >= 0 && index < numEntries);
 
-			if (p.interpolation == LINEAR)
-			{
-				lookupTable[index] = pix1;
-				lookupTable[index].tween(pix2, (uint32)((i << 8) / numToDo));
-			} else
-			{
-				lookupTable[index] = pix2;
-			}
-            
+            lookupTable[index] = pix1;
+            lookupTable[index].tween (pix2, (uint32) ((i << 8) / numToDo));
             ++index;
         }
 
