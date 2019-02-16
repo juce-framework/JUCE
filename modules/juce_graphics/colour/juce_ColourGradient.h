@@ -50,8 +50,6 @@ public:
     ColourGradient& operator= (const ColourGradient&);
     ColourGradient& operator= (ColourGradient&&) noexcept;
 
-	enum Interpolation { LINEAR, NONE };
-
     //==============================================================================
     /** Creates a gradient object.
 
@@ -140,7 +138,7 @@ public:
         @param colour                       the colour that should be used at this point
         @returns the index at which the new point was added
     */
-    int addColour (double proportionAlongGradient, Colour colour, Interpolation interpolation = Interpolation::LINEAR);
+    int addColour (double proportionAlongGradient, Colour colour);
 
     /** Removes one of the colours from the gradient. */
     void removeColour (int index);
@@ -167,17 +165,6 @@ public:
         The index is from 0 to getNumColours() - 1.
     */
     void setColour (int index, Colour newColour) noexcept;
-
-	/** Returns the interpolation that was added with a given index.
-		The index is from 0 to getNumColours() - 1.
-	*/
-	Interpolation getInterpolation(int index) const noexcept;
-
-	/** Changes the interpolation at a given index.
-	   The index is from 0 to getNumColours() - 1.
-   */
-	void setInterpolation(int index, Interpolation newInterpolation) noexcept;
-
 
     /** Returns the an interpolated colour at any position along the gradient.
         @param position     the position along the gradient, between 0 and 1
@@ -228,7 +215,6 @@ private:
 
         double position;
         Colour colour;
-		Interpolation interpolation;
     };
 
     Array<ColourPoint> colours;
