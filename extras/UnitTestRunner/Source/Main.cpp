@@ -80,7 +80,7 @@ int main (int argc, char **argv)
         }
 
         if (args.containsOption ("--category"))
-            runner.runTestsInCategory (args.getArgumentAfterOption ("--category").text);
+            runner.runTestsInCategory (args.getValueForOption ("--category"));
     }
 
     Logger::setCurrentLogger (nullptr);

@@ -105,8 +105,9 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_basics/utilities/juce_IIRFilter.h"
     "../../../../../modules/juce_audio_basics/utilities/juce_LagrangeInterpolator.cpp"
     "../../../../../modules/juce_audio_basics/utilities/juce_LagrangeInterpolator.h"
-    "../../../../../modules/juce_audio_basics/utilities/juce_LinearSmoothedValue.h"
     "../../../../../modules/juce_audio_basics/utilities/juce_Reverb.h"
+    "../../../../../modules/juce_audio_basics/utilities/juce_SmoothedValues.cpp"
+    "../../../../../modules/juce_audio_basics/utilities/juce_SmoothedValues.h"
     "../../../../../modules/juce_audio_basics/juce_audio_basics.cpp"
     "../../../../../modules/juce_audio_basics/juce_audio_basics.mm"
     "../../../../../modules/juce_audio_basics/juce_audio_basics.h"
@@ -1460,8 +1461,9 @@ set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/
 set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_IIRFilter.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_LagrangeInterpolator.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_LagrangeInterpolator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_LinearSmoothedValue.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_Reverb.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_SmoothedValues.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_SmoothedValues.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/juce_audio_basics.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/juce_audio_basics.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/juce_audio_basics.h" PROPERTIES HEADER_FILE_ONLY TRUE)
