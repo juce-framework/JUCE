@@ -116,14 +116,14 @@ struct Oversampling2TimesEquirippleFIR  : public Oversampling<SampleType>::Overs
     using ParentType = typename Oversampling<SampleType>::OversamplingStage;
 
     Oversampling2TimesEquirippleFIR (size_t numChans,
-                                     SampleType normalizedTransitionWidthUp,
-                                     SampleType stopbandAttenuationdBUp,
-                                     SampleType normalizedTransitionWidthDown,
-                                     SampleType stopbandAttenuationdBDown)
+                                     SampleType normalisedTransitionWidthUp,
+                                     SampleType stopbandAmplitudedBUp,
+                                     SampleType normalisedTransitionWidthDown,
+                                     SampleType stopbandAmplitudedBDown)
         : ParentType (numChans, 2)
     {
-        coefficientsUp   = *dsp::FilterDesign<SampleType>::designFIRLowpassHalfBandEquirippleMethod (normalizedTransitionWidthUp,   stopbandAttenuationdBUp);
-        coefficientsDown = *dsp::FilterDesign<SampleType>::designFIRLowpassHalfBandEquirippleMethod (normalizedTransitionWidthDown, stopbandAttenuationdBDown);
+        coefficientsUp   = *dsp::FilterDesign<SampleType>::designFIRLowpassHalfBandEquirippleMethod (normalisedTransitionWidthUp,   stopbandAmplitudedBUp);
+        coefficientsDown = *dsp::FilterDesign<SampleType>::designFIRLowpassHalfBandEquirippleMethod (normalisedTransitionWidthDown, stopbandAmplitudedBDown);
 
         auto N = coefficientsUp.getFilterOrder() + 1;
         stateUp.setSize (static_cast<int> (this->numChannels), static_cast<int> (N));
@@ -268,17 +268,17 @@ struct Oversampling2TimesPolyphaseIIR  : public Oversampling<SampleType>::Oversa
     using ParentType = typename Oversampling<SampleType>::OversamplingStage;
 
     Oversampling2TimesPolyphaseIIR (size_t numChans,
-                                    SampleType normalizedTransitionWidthUp,
-                                    SampleType stopbandAttenuationdBUp,
-                                    SampleType normalizedTransitionWidthDown,
-                                    SampleType stopbandAttenuationdBDown)
+                                    SampleType normalisedTransitionWidthUp,
+                                    SampleType stopbandAmplitudedBUp,
+                                    SampleType normalisedTransitionWidthDown,
+                                    SampleType stopbandAmplitudedBDown)
         : ParentType (numChans, 2)
     {
-        auto structureUp = dsp::FilterDesign<SampleType>::designIIRLowpassHalfBandPolyphaseAllpassMethod (normalizedTransitionWidthUp, stopbandAttenuationdBUp);
+        auto structureUp = dsp::FilterDesign<SampleType>::designIIRLowpassHalfBandPolyphaseAllpassMethod (normalisedTransitionWidthUp, stopbandAmplitudedBUp);
         auto coeffsUp = getCoefficients (structureUp);
         latency = static_cast<SampleType> (-(coeffsUp.getPhaseForFrequency (0.0001, 1.0)) / (0.0001 * MathConstants<double>::twoPi));
 
-        auto structureDown = dsp::FilterDesign<SampleType>::designIIRLowpassHalfBandPolyphaseAllpassMethod (normalizedTransitionWidthDown, stopbandAttenuationdBDown);
+        auto structureDown = dsp::FilterDesign<SampleType>::designIIRLowpassHalfBandPolyphaseAllpassMethod (normalisedTransitionWidthDown, stopbandAmplitudedBDown);
         auto coeffsDown = getCoefficients (structureDown);
         latency += static_cast<SampleType> (-(coeffsDown.getPhaseForFrequency (0.0001, 1.0)) / (0.0001 * MathConstants<double>::twoPi));
 
@@ -599,22 +599,22 @@ void Oversampling<SampleType>::addDummyOversamplingStage()
 
 template <typename SampleType>
 void Oversampling<SampleType>::addOversamplingStage (FilterType type,
-                                                     float normalizedTransitionWidthUp,
-                                                     float stopbandAttenuationdBUp,
-                                                     float normalizedTransitionWidthDown,
-                                                     float stopbandAttenuationdBDown)
+                                                     float normalisedTransitionWidthUp,
+                                                     float stopbandAmplitudedBUp,
+                                                     float normalisedTransitionWidthDown,
+                                                     float stopbandAmplitudedBDown)
 {
     if (type == FilterType::filterHalfBandPolyphaseIIR)
     {
         stages.add (new Oversampling2TimesPolyphaseIIR<SampleType> (numChannels,
-                                                                    normalizedTransitionWidthUp, stopbandAttenuationdBUp,
-                                                                    normalizedTransitionWidthDown, stopbandAttenuationdBDown));
+                                                                    normalisedTransitionWidthUp,   stopbandAmplitudedBUp,
+                                                                    normalisedTransitionWidthDown, stopbandAmplitudedBDown));
     }
     else
     {
         stages.add (new Oversampling2TimesEquirippleFIR<SampleType> (numChannels,
-                                                                     normalizedTransitionWidthUp, stopbandAttenuationdBUp,
-                                                                     normalizedTransitionWidthDown, stopbandAttenuationdBDown));
+                                                                     normalisedTransitionWidthUp,   stopbandAmplitudedBUp,
+                                                                     normalisedTransitionWidthDown, stopbandAmplitudedBDown));
     }
 
     factorOversampling *= 2;
