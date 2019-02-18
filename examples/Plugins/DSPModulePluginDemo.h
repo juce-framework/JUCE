@@ -498,7 +498,7 @@ private:
     {
         ScopedNoDenormals noDenormals;
 
-        // Input volume applied with a LinearSmoothedValue
+        // Input volume applied with a SmoothedValue
         inputVolume.process (context);
 
         // Pre-highpass filtering, very useful for distortion audio effects
@@ -543,7 +543,7 @@ private:
         convolution.process (context);
         context.isBypassed = wasBypassed;
 
-        // Output volume applied with a LinearSmoothedValue
+        // Output volume applied with a SmoothedValue
         outputVolume.process (context);
     }
 

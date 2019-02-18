@@ -251,6 +251,7 @@ namespace juce
 #include "maths/juce_Polynomial.h"
 #include "maths/juce_FastMathApproximations.h"
 #include "maths/juce_LookupTable.h"
+#include "maths/juce_LogRampedValue.h"
 #include "containers/juce_AudioBlock.h"
 #include "processors/juce_ProcessContext.h"
 #include "processors/juce_ProcessorWrapper.h"

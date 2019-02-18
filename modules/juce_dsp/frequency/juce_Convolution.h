@@ -162,7 +162,7 @@ private:
     double sampleRate;
     bool currentIsBypassed = false;
     bool isActive = false;
-    LinearSmoothedValue<float> volumeDry[2], volumeWet[2];
+    SmoothedValue<float> volumeDry[2], volumeWet[2];
     AudioBlock<float> dryBuffer;
     HeapBlock<char> dryBufferStorage;
 

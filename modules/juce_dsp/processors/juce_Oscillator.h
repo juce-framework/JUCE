@@ -243,7 +243,7 @@ private:
     std::function<NumericType (NumericType)> generator;
     std::unique_ptr<LookupTableTransform<NumericType>> lookupTable;
     Array<NumericType> rampBuffer;
-    LinearSmoothedValue<NumericType> frequency { static_cast<NumericType> (440.0) };
+    SmoothedValue<NumericType> frequency { static_cast<NumericType> (440.0) };
     NumericType sampleRate = 48000.0;
     Phase<NumericType> phase;
 };

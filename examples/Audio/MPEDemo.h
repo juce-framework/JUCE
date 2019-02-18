@@ -851,7 +851,7 @@ private:
     }
 
     //==============================================================================
-    LinearSmoothedValue<double> level, timbre, frequency;
+    SmoothedValue<double> level, timbre, frequency;
 
     double phase      = 0.0;
     double phaseDelta = 0.0;

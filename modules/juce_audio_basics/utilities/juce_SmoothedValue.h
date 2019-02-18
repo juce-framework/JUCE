@@ -27,15 +27,38 @@ namespace juce
 /**
     A base class for the smoothed value classes.
 
+    This class is used to provide common functionality to the SmoothedValue and
+    dsp::LogRampedValue classes.
+
     @tags{Audio}
 */
-template <template<typename> class SmoothedValueClass, typename FloatType>
+template <typename SmoothedValueType>
 class SmoothedValueBase
 {
+private:
+    //==============================================================================
+    template <typename T> struct FloatTypeHelper;
+
+    template <template <typename> class SmoothedValueClass, typename FloatType>
+    struct FloatTypeHelper <SmoothedValueClass <FloatType>>
+    {
+        using Type = FloatType;
+    };
+
+    template <template <typename, typename> class SmoothedValueClass, typename FloatType, typename SmoothingType>
+    struct FloatTypeHelper <SmoothedValueClass <FloatType, SmoothingType>>
+    {
+        using Type = FloatType;
+    };
+
 public:
+    using FloatType = typename FloatTypeHelper<SmoothedValueType>::Type;
+
     //==============================================================================
     /** Constructor. */
     SmoothedValueBase() = default;
+
+    virtual ~SmoothedValueBase() {}
 
     //==============================================================================
     /** Returns true if the current value is currently being interpolated. */
@@ -130,48 +153,77 @@ public:
         }
     }
 
-protected:
-    //==============================================================================
-    void reset (double sampleRate, double rampLengthInSeconds) noexcept
-    {
-        jassert (sampleRate > 0 && rampLengthInSeconds >= 0);
-        auto& derived = *(static_cast<SmoothedValueClass<FloatType>*> (this));
-        derived.reset ((int) std::floor (rampLengthInSeconds * sampleRate));
-    }
-
-    //==============================================================================
-    FloatType currentValue = 0, target = 0;
-    int countdown = 0;
-
 private:
     //==============================================================================
     FloatType getNextSmoothedValue() noexcept
     {
-        return static_cast<SmoothedValueClass<FloatType>*> (this)->getNextValue();
+        return static_cast <SmoothedValueType*> (this)->getNextValue();
     }
+
+protected:
+    //==============================================================================
+    FloatType currentValue = 0;
+    FloatType target = currentValue;
+    int countdown = 0;
 };
 
 //==============================================================================
 /**
-    Utility class for linearly smoothed values like volume etc. that should
-    not change abruptly but as a linear ramp to avoid audio glitches.
+    A namespace containing a set of types used for specifying the smoothing
+    behaviour of the SmoothedValue class.
+
+    For example:
+    @code
+    SmoothedValue<float, ValueSmoothingTypes::Multiplicative> frequency (1.0f);
+    @endcode
+*/
+namespace ValueSmoothingTypes
+{
+    /** Used to indicate a linear smoothing between values. */
+    struct Linear {};
+
+    /** Used to indicate a smoothing between multiplicative values. */
+    struct Multiplicative {};
+}
+
+//==============================================================================
+/**
+    A utility class for values that need smoothing, like volume, that should not
+    change abruptly to avoid audio glitches.
+
+    To smooth values spread across an exponential range, where the increments
+    between the current and target value are multiplicative (like frequencies),
+    you should pass the multiplicative smoothing type as a template paramater:
+
+    @code
+    SmoothedValue<float, ValueSmoothingTypes::Multiplicative> yourSmoothedValue;
+    @endcode
+
+    Note that when you are using multiplicative smoothing you cannot ever reach a
+    target value of zero!
 
     @tags{Audio}
 */
-template <typename FloatType>
-class LinearSmoothedValue   : public SmoothedValueBase<LinearSmoothedValue, FloatType>
+template <typename FloatType, typename SmoothingType = ValueSmoothingTypes::Linear>
+class SmoothedValue   : public SmoothedValueBase <SmoothedValue <FloatType, SmoothingType>>
 {
 public:
     //==============================================================================
     /** Constructor. */
-    LinearSmoothedValue() = default;
+    SmoothedValue() noexcept
+        : SmoothedValue ((FloatType) (std::is_same<SmoothingType, ValueSmoothingTypes::Linear>::value ? 0 : 1))
+    {
+    }
 
     /** Constructor. */
-    LinearSmoothedValue (FloatType initialValue) noexcept
+    SmoothedValue (FloatType initialValue) noexcept
     {
+        // Multiplicative smoothed values cannot ever reach 0!
+        jassert (! (std::is_same<SmoothingType, ValueSmoothingTypes::Multiplicative>::value && initialValue == 0));
+
         // Visual Studio can't handle base class initialisation with CRTP
         this->currentValue = initialValue;
-        this->target = initialValue;
+        this->target = this->currentValue;
     }
 
     //==============================================================================
@@ -209,9 +261,13 @@ public:
             return;
         }
 
+        // Multiplicative smoothed values cannot ever reach 0!
+        jassert (! (std::is_same<SmoothingType, ValueSmoothingTypes::Multiplicative>::value && newValue == 0));
+
         this->target = newValue;
         this->countdown = stepsToTarget;
-        step = (this->target - this->currentValue) / (FloatType) this->countdown;
+
+        setStepSize();
     }
 
     //==============================================================================
@@ -225,8 +281,10 @@ public:
 
         --(this->countdown);
 
-        this->currentValue = this->isSmoothing() ? this->currentValue + step
-                                                 : this->target;
+        if (this->isSmoothing())
+            setNextValue();
+        else
+            this->currentValue = this->target;
 
         return this->currentValue;
     }
@@ -245,7 +303,8 @@ public:
             return this->target;
         }
 
-        this->currentValue += step * (FloatType) numSamples;
+        skipCurrentValue (numSamples);
+
         this->countdown -= numSamples;
         return this->currentValue;
     }
@@ -274,165 +333,57 @@ public:
 
 private:
     //==============================================================================
+    template <typename T>
+    using LinearVoid = typename std::enable_if <std::is_same <T, ValueSmoothingTypes::Linear>::value, void>::type;
+
+    template <typename T>
+    using MultiplicativeVoid = typename std::enable_if <std::is_same <T, ValueSmoothingTypes::Multiplicative>::value, void>::type;
+
+    //==============================================================================
+    template <typename T = SmoothingType>
+    LinearVoid<T> setStepSize() noexcept
+    {
+        step = (this->target - this->currentValue) / (FloatType) this->countdown;
+    }
+
+    template <typename T = SmoothingType>
+    MultiplicativeVoid<T> setStepSize()
+    {
+        step = std::exp ((std::log (std::abs (this->target)) - std::log (std::abs (this->currentValue))) / this->countdown);
+    }
+
+    //==============================================================================
+    template <typename T = SmoothingType>
+    LinearVoid<T> setNextValue() noexcept
+    {
+        this->currentValue += step;
+    }
+
+    template <typename T = SmoothingType>
+    MultiplicativeVoid<T> setNextValue() noexcept
+    {
+        this->currentValue *= step;
+    }
+
+    //==============================================================================
+    template <typename T = SmoothingType>
+    LinearVoid<T> skipCurrentValue (int numSamples) noexcept
+    {
+        this->currentValue += step * (FloatType) numSamples;
+    }
+
+    template <typename T = SmoothingType>
+    MultiplicativeVoid<T> skipCurrentValue (int numSamples)
+    {
+        this->currentValue *= (FloatType) std::pow (step, numSamples);
+    }
+
+    //==============================================================================
     FloatType step = FloatType();
     int stepsToTarget = 0;
 };
 
-//==============================================================================
-/**
-    Utility class for logarithmically smoothed values.
-
-    Logarithmically smoothed values can be more relevant than linear ones for
-    specific cases such as algorithm change smoothing, using two of them in
-    opposite directions.
-
-    @see LinearSmoothedValue
-
-    @tags{Audio}
-*/
 template <typename FloatType>
-class LogSmoothedValue   : public SmoothedValueBase<LogSmoothedValue, FloatType>
-{
-public:
-    //==============================================================================
-    /** Constructor. */
-    LogSmoothedValue() = default;
-
-    /** Constructor. */
-    LogSmoothedValue (FloatType initialValue) noexcept
-    {
-        // Visual Studio can't handle base class initialisation with CRTP
-        this->currentValue = initialValue;
-        this->target = initialValue;
-    }
-
-    //==============================================================================
-    /** Sets the behaviour of the log ramp.
-        @param midPointAmplitudedB           Sets the amplitude of the mid point in
-                                             decibels, with the target value at 0 dB
-                                             and the initial value at -inf dB
-        @param rateOfChangeShouldIncrease    If true then the ramp starts shallow
-                                             and gets progressively steeper, if false
-                                             then the ramp is initially steep and
-                                             flattens out as you approach the target
-                                             value
-    */
-    void setLogParameters (FloatType midPointAmplitudedB, bool rateOfChangeShouldIncrease) noexcept
-    {
-        jassert (midPointAmplitudedB < (FloatType) 0.0);
-        B = Decibels::decibelsToGain (midPointAmplitudedB);
-
-        increasingRateOfChange = rateOfChangeShouldIncrease;
-    }
-
-    //==============================================================================
-    /** Reset to a new sample rate and ramp length.
-        @param sampleRate           The sample rate
-        @param rampLengthInSeconds  The duration of the ramp in seconds
-    */
-    void reset (double sampleRate, double rampLengthInSeconds) noexcept
-    {
-        jassert (sampleRate > 0 && rampLengthInSeconds >= 0);
-        reset ((int) std::floor (rampLengthInSeconds * sampleRate));
-    }
-
-    /** Set a new ramp length directly in samples.
-        @param numSteps             The number of samples over which the ramp should be active
-        @param increasingRateOfChange     If the log behaviour makes the ramp increase
-                                    slowly at the beginning, rather than at the end
-    */
-    void reset (int numSteps) noexcept
-    {
-        stepsToTarget = numSteps;
-
-        this->setCurrentAndTargetValue (this->target);
-
-        updateRampParameters();
-    }
-
-    //==============================================================================
-    /** Set a new target value.
-
-        @param newValue     The new target value
-        @param force        If true, the value will be set immediately, bypassing the ramp
-    */
-    void setTargetValue (FloatType newValue) noexcept
-    {
-        if (newValue == this->target)
-            return;
-
-        if (stepsToTarget <= 0)
-        {
-            this->setCurrentAndTargetValue (newValue);
-            return;
-        }
-
-        this->target = newValue;
-        this->countdown = stepsToTarget;
-        source = this->currentValue;
-
-        updateRampParameters();
-    }
-
-    //==============================================================================
-    /** Compute the next value.
-        @returns Smoothed value
-    */
-    FloatType getNextValue() noexcept
-    {
-        if (! this->isSmoothing())
-            return this->target;
-
-        --(this->countdown);
-
-        temp *= r; temp += d;
-        this->currentValue = jmap (temp, source, this->target);
-
-        return this->currentValue;
-    }
-
-    //==============================================================================
-    /** Skip the next numSamples samples.
-
-        This is identical to calling getNextValue numSamples times.
-        @see getNextValue
-    */
-    FloatType skip (int numSamples) noexcept
-    {
-        if (numSamples >= this->countdown)
-        {
-            this->setCurrentAndTargetValue (this->target);
-            return this->target;
-        }
-
-        this->countdown -= numSamples;
-
-        auto rN = (FloatType) std::pow (r, numSamples);
-        temp *= rN;
-        temp += d * (rN - (FloatType) 1) / (r - (FloatType) 1);
-
-        this->currentValue = jmap (temp, source, this->target);
-        return this->currentValue;
-    }
-
-private:
-    //==============================================================================
-    void updateRampParameters()
-    {
-        auto D = increasingRateOfChange ? B : (FloatType) 1 - B;
-        auto base = ((FloatType) 1 / D) - (FloatType) 1;
-        r = std::pow (base, (FloatType) 2 / (FloatType) stepsToTarget);
-        auto rN = std::pow (r, (FloatType) stepsToTarget);
-        d = (r - (FloatType) 1) / (rN - (FloatType) 1);
-        temp = 0;
-    }
-
-    //==============================================================================
-    bool increasingRateOfChange = true;
-    FloatType B = Decibels::decibelsToGain ((FloatType) -40);
-
-    int stepsToTarget = 0;
-    FloatType temp = 0, source = 0, r = 0, d = 1;
-};
+using LinearSmoothedValue = SmoothedValue <FloatType, ValueSmoothingTypes::Linear>;
 
 } // namespace juce
