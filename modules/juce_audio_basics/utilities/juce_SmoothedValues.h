@@ -407,7 +407,7 @@ public:
 
         this->countdown -= numSamples;
 
-        auto rN = std::pow (r, numSamples);
+        auto rN = (FloatType) std::pow (r, numSamples);
         temp *= rN;
         temp += d * (rN - (FloatType) 1) / (r - (FloatType) 1);
 
