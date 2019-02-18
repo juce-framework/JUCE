@@ -33,7 +33,7 @@ class PIPGenerator
 {
 public:
     PIPGenerator (const File& pipFile, const File& outputDirectory = {},
-                  const File& pathToJUCEModules = {}, const Array<File>& pathsToUserModules = {});
+                  const File& pathToJUCEModules = {}, const File& pathToUserModules = {});
 
     //==============================================================================
     bool hasValidPIP() const noexcept                   { return ! metadata[Ids::name].toString().isEmpty(); }
@@ -78,9 +78,8 @@ private:
     File getExamplesDirectory() const;
 
     //==============================================================================
-    File pipFile, outputDirectory, juceModulesPath;
+    File pipFile, outputDirectory, juceModulesPath, userModulesPath;
 
-    Array<File> userModulesPaths;
     std::unique_ptr<AvailableModuleList> availableUserModules;
 
     var metadata;

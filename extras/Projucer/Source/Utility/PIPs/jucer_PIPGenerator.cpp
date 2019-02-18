@@ -99,10 +99,10 @@ static bool exporterRequiresExampleAssets (const String& exporterName, const Str
 }
 
 //==============================================================================
-PIPGenerator::PIPGenerator (const File& pip, const File& output, const File& jucePath, const Array<File>& userPaths)
+PIPGenerator::PIPGenerator (const File& pip, const File& output, const File& jucePath, const File& userPath)
     : pipFile (pip),
       juceModulesPath (jucePath),
-      userModulesPaths (userPaths),
+      userModulesPath (userPath),
       metadata (parseJUCEHeaderMetadata (pipFile))
 {
     if (output != File())
@@ -122,10 +122,10 @@ PIPGenerator::PIPGenerator (const File& pip, const File& output, const File& juc
     outputDirectory = outputDirectory.getChildFile (metadata[Ids::name].toString());
     useLocalCopy = metadata[Ids::useLocalCopy].toString().isNotEmpty() || isClipboard;
 
-    if (! userModulesPaths.isEmpty())
+    if (userModulesPath != File())
     {
         availableUserModules.reset (new AvailableModuleList());
-        availableUserModules->scanPaths (userModulesPaths);
+        availableUserModules->scanPaths ({ userModulesPath });
     }
 }
 
