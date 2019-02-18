@@ -164,8 +164,11 @@ struct HostPacketDecoder
     {
         DeviceStatus status;
 
-        for (uint32 i = 0; i < sizeof (BlockSerialNumber); ++i)
-            status.serialNumber.serial[i] = (uint8) reader.readBits (7);
+        for (uint32 i = 0; i < BlockSerialNumber::maxLength; ++i)
+        {
+            status.serialNumber.data[i] = (uint8) reader.readBits (7);
+            ++status.serialNumber.length;
+        }
 
         status.index            = (TopologyIndex) reader.readBits (topologyIndexBits);
         status.batteryLevel     = reader.read<BatteryLevel>();

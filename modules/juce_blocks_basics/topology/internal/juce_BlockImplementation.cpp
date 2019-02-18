@@ -34,19 +34,16 @@ public:
     struct LEDGridImplementation;
     struct LEDRowImplementation;
 
-    BlockImplementation (const BlocksProtocol::BlockSerialNumber& serial,
-                         Detector& detectorToUse,
-                         BlocksProtocol::VersionNumber version,
-                         BlocksProtocol::BlockName blockName,
-                         bool isMasterBlock)
-        : Block (juce::String ((const char*) serial.serial,   sizeof (serial.serial)),
-                 juce::String ((const char*) version.data, version.length),
-                 juce::String ((const char*) blockName.data,  blockName.length)),
-          modelData (serial),
+    BlockImplementation (Detector& detectorToUse, const DeviceInfo& deviceInfo)
+        : Block (deviceInfo.serial.asString(),
+                 deviceInfo.version.asString(),
+                 deviceInfo.name.asString()),
+          modelData (deviceInfo.serial),
           remoteHeap (modelData.programAndHeapSize),
-          detector (&detectorToUse),
-          isMaster (isMasterBlock)
+          detector (&detectorToUse)
     {
+        markReconnected (deviceInfo);
+
         if (modelData.hasTouchSurface)
             touchSurface.reset (new TouchSurfaceImplementation (*this));
 
@@ -77,13 +74,25 @@ public:
     {
         if (auto surface = dynamic_cast<TouchSurfaceImplementation*> (touchSurface.get()))
             surface->disableTouchSurface();
+
+        connectionTime = Time();
     }
 
     void markReconnected (const DeviceInfo& deviceInfo)
     {
-        versionNumber = asString (deviceInfo.version);
-        name = asString (deviceInfo.name);
+        if (wasPowerCycled())
+            resetPowerCycleFlag();
+
+        if (connectionTime == Time())
+            connectionTime = Time::getCurrentTime();
+
+        versionNumber = deviceInfo.version.asString();
+        name = deviceInfo.name.asString();
         isMaster = deviceInfo.isMaster;
+        masterUID = deviceInfo.masterUid;
+        batteryCharging = deviceInfo.batteryCharging;
+        batteryLevel = deviceInfo.batteryLevel;
+        topologyIndex = deviceInfo.index;
 
         setProgram (nullptr);
         remoteHeap.resetDeviceStateToUnknown();
@@ -120,6 +129,7 @@ public:
     bool isHardwareBlock() const override                           { return true; }
     juce::Array<Block::ConnectionPort> getPorts() const override    { return modelData.ports; }
     bool isConnected() const override                               { return detector && detector->isConnected (uid); }
+    juce::Time getConnectionTime() const override                   { return connectionTime; }
     bool isMasterBlock() const override                             { return isMaster; }
     Block::UID getConnectedMasterUID() const override               { return masterUID; }
     int getRotation() const override                                { return rotation; }
@@ -159,24 +169,12 @@ public:
 
     float getBatteryLevel() const override
     {
-        if (detector == nullptr)
-            return 0.0f;
-
-        if (auto status = detector->getLastStatus (uid))
-            return status->batteryLevel.toUnipolarFloat();
-
-        return 0.0f;
+        return batteryLevel.toUnipolarFloat();
     }
 
     bool isBatteryCharging() const override
     {
-        if (detector == nullptr)
-            return false;
-
-        if (auto status = detector->getLastStatus (uid))
-            return status->batteryCharging.get() != 0;
-
-        return false;
+        return batteryCharging.get() > 0;
     }
 
     bool supportsGraphics() const override
@@ -186,10 +184,7 @@ public:
 
     int getDeviceIndex() const noexcept
     {
-        if (detector == nullptr)
-            return -1;
-
-        return isConnected() ? detector->getIndexFromDeviceID (uid) : -1;
+        return isConnected() ? topologyIndex : -1;
     }
 
     template <typename PacketBuilder>
@@ -220,10 +215,15 @@ public:
         programEventListeners.call ([&] (ProgramEventListener& l) { l.handleProgramEvent (*this, m); });
     }
 
+    static BlockImplementation* getFrom (Block* b) noexcept
+    {
+        jassert (dynamic_cast<BlockImplementation*> (b) != nullptr);
+        return dynamic_cast<BlockImplementation*> (b);
+    }
+
     static BlockImplementation* getFrom (Block& b) noexcept
     {
-        jassert (dynamic_cast<BlockImplementation*> (&b) != nullptr);
-        return dynamic_cast<BlockImplementation*> (&b);
+        return getFrom (&b);
     }
 
     //==============================================================================
@@ -583,6 +583,13 @@ private:
 
     bool isMaster = false;
     Block::UID masterUID = {};
+
+    BlocksProtocol::BatteryLevel batteryLevel {};
+    BlocksProtocol::BatteryCharging batteryCharging {};
+
+    BlocksProtocol::TopologyIndex topologyIndex {};
+
+    Time connectionTime {};
 
     std::pair<int, int> position;
     int rotation = 0;

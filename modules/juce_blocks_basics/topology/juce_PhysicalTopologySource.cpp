@@ -47,17 +47,6 @@
  #include "internal/juce_BandwidthStatsLogger.cpp"
 #endif
 
-namespace
-{
-    /** Helper function to create juce::String from BlockStringData */
-    template <size_t MaxSize>
-    juce::String asString (juce::BlocksProtocol::BlockStringData<MaxSize> blockString)
-    {
-        return { reinterpret_cast<const char*> (blockString.data),
-                 juce::jmin (sizeof (blockString.data), static_cast<size_t> (blockString.length))};
-    }
-}
-
 #include "internal/juce_MidiDeviceConnection.cpp"
 #include "internal/juce_MIDIDeviceDetector.cpp"
 #include "internal/juce_DeviceInfo.cpp"

@@ -27,7 +27,7 @@ static Block::UID getBlockUIDFromSerialNumber (const uint8* serial) noexcept
 {
     Block::UID n = {};
 
-    for (int i = 0; i < (int) sizeof (BlocksProtocol::BlockSerialNumber); ++i)
+    for (int i = 0; i < int (BlocksProtocol::BlockSerialNumber::maxLength); ++i)
         n += n * 127 + serial[i];
 
     return n;
@@ -35,15 +35,15 @@ static Block::UID getBlockUIDFromSerialNumber (const uint8* serial) noexcept
 
 static Block::UID getBlockUIDFromSerialNumber (const BlocksProtocol::BlockSerialNumber& serial) noexcept
 {
-    return getBlockUIDFromSerialNumber (serial.serial);
+    return getBlockUIDFromSerialNumber (serial.data);
 }
 
 static Block::UID getBlockUIDFromSerialNumber (const juce::String& serial) noexcept
 {
-    if (serial.length() < (int) sizeof (BlocksProtocol::BlockSerialNumber))
+    if (serial.length() < int (BlocksProtocol::BlockSerialNumber::maxLength))
     {
         jassertfalse;
-        return getBlockUIDFromSerialNumber (serial.paddedRight ('0', sizeof (BlocksProtocol::BlockSerialNumber)));
+        return getBlockUIDFromSerialNumber (serial.paddedRight ('0', BlocksProtocol::BlockSerialNumber::maxLength));
     }
 
     return getBlockUIDFromSerialNumber ((const uint8*) serial.toRawUTF8());

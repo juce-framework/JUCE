@@ -107,6 +107,13 @@ public:
     /** Returns true if this block is connected and active. */
     virtual bool isConnected() const = 0;
 
+    /** Returns the time this block object was connected to the topology.
+        Only valid when isConnected == true.
+
+        @see isConnected
+     */
+    virtual Time getConnectionTime() const = 0;
+
     /** Returns true if this block is directly connected to the application,
         as opposed to only being connected to a different block via a connection port.
 
