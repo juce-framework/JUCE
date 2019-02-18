@@ -32,18 +32,18 @@ namespace
 }
 
 template <typename Detector>
-struct ConnectedDeviceGroup  : private juce::AsyncUpdater,
-                               private juce::Timer
+struct ConnectedDeviceGroup  : private AsyncUpdater,
+                               private Timer
 {
     //==============================================================================
-    ConnectedDeviceGroup (Detector& d, const juce::String& name, PhysicalTopologySource::DeviceConnection* connection)
+    ConnectedDeviceGroup (Detector& d, const String& name, PhysicalTopologySource::DeviceConnection* connection)
         : detector (d), deviceName (name), deviceConnection (connection)
     {
         if (auto midiDeviceConnection = static_cast<MIDIDeviceConnection*> (deviceConnection.get()))
         {
             depreciatedVersionReader = std::make_unique<DepreciatedVersionReader> (*midiDeviceConnection);
 
-            juce::ScopedLock lock (midiDeviceConnection->criticalSecton);
+            ScopedLock lock (midiDeviceConnection->criticalSecton);
             setMidiMessageCallback();
         }
         else
@@ -61,7 +61,7 @@ struct ConnectedDeviceGroup  : private juce::AsyncUpdater,
             detector.handleDeviceRemoved (device);
     }
 
-    bool isStillConnected (const juce::StringArray& detectedDevices) const noexcept
+    bool isStillConnected (const StringArray& detectedDevices) const noexcept
     {
         return detectedDevices.contains (deviceName) && ! failedToGetTopology();
     }
@@ -104,7 +104,7 @@ struct ConnectedDeviceGroup  : private juce::AsyncUpdater,
 
     void endTopology()
     {
-        lastTopologyReceiveTime = juce::Time::getCurrentTime();
+        lastTopologyReceiveTime = Time::getCurrentTime();
 
         if (incomingTopologyDevices.isEmpty()
             || incomingTopologyConnections.size() < incomingTopologyDevices.size() - 1)
@@ -268,9 +268,9 @@ struct ConnectedDeviceGroup  : private juce::AsyncUpdater,
         return deviceConnection.get();
     }
 
-    juce::Array<BlockDeviceConnection> getCurrentDeviceConnections()
+    Array<BlockDeviceConnection> getCurrentDeviceConnections()
     {
-        juce::Array<BlockDeviceConnection> connections;
+        Array<BlockDeviceConnection> connections;
 
         for (const auto& connection : currentDeviceConnections)
             if (isApiConnected (getDeviceIDFromIndex (connection.device1)) && isApiConnected (getDeviceIDFromIndex (connection.device2)))
@@ -280,20 +280,20 @@ struct ConnectedDeviceGroup  : private juce::AsyncUpdater,
     }
 
     Detector& detector;
-    juce::String deviceName;
+    String deviceName;
 
     static constexpr double pingTimeoutSeconds = 6.0;
 
 private:
     //==============================================================================
-    juce::Array<DeviceInfo> currentDeviceInfo;
-    juce::Array<BlocksProtocol::DeviceStatus> incomingTopologyDevices;
-    juce::Array<BlocksProtocol::DeviceConnection> incomingTopologyConnections, currentDeviceConnections;
+    Array<DeviceInfo> currentDeviceInfo;
+    Array<BlocksProtocol::DeviceStatus> incomingTopologyDevices;
+    Array<BlocksProtocol::DeviceConnection> incomingTopologyConnections, currentDeviceConnections;
 
     std::unique_ptr<PhysicalTopologySource::DeviceConnection> deviceConnection;
 
-    juce::CriticalSection incomingPacketLock;
-    juce::Array<juce::MemoryBlock> incomingPackets;
+    CriticalSection incomingPacketLock;
+    Array<MemoryBlock> incomingPackets;
 
     std::unique_ptr<DepreciatedVersionReader> depreciatedVersionReader;
 
@@ -305,10 +305,10 @@ private:
     //==============================================================================
     void timerCallback() override
     {
-        const auto now = juce::Time::getCurrentTime();
+        const auto now = Time::getCurrentTime();
 
-        if ((now > lastTopologyReceiveTime + juce::RelativeTime::seconds (30.0))
-            && now > lastTopologyRequestTime + juce::RelativeTime::seconds (1.0)
+        if ((now > lastTopologyReceiveTime + RelativeTime::seconds (30.0))
+            && now > lastTopologyRequestTime + RelativeTime::seconds (1.0)
             && numTopologyRequestsSent < 4)
             sendTopologyRequest();
 
@@ -328,10 +328,10 @@ private:
 
     void handleIncomingMessage (const void* data, size_t dataSize)
     {
-        juce::MemoryBlock mb (data, dataSize);
+        MemoryBlock mb (data, dataSize);
 
         {
-            const juce::ScopedLock sl (incomingPacketLock);
+            const ScopedLock sl (incomingPacketLock);
             incomingPackets.add (std::move (mb));
         }
 
@@ -344,11 +344,11 @@ private:
 
     void handleAsyncUpdate() override
     {
-        juce::Array<juce::MemoryBlock> packets;
+        Array<MemoryBlock> packets;
         packets.ensureStorageAllocated (32);
 
         {
-            const juce::ScopedLock sl (incomingPacketLock);
+            const ScopedLock sl (incomingPacketLock);
             incomingPackets.swapWith (packets);
         }
 
@@ -371,27 +371,27 @@ private:
     }
 
     //==============================================================================
-    juce::Time lastTopologyRequestTime, lastTopologyReceiveTime;
+    Time lastTopologyRequestTime, lastTopologyReceiveTime;
     int numTopologyRequestsSent = 0;
 
     void scheduleNewTopologyRequest()
     {
         LOG_CONNECTIVITY ("Topology Request Scheduled");
         numTopologyRequestsSent = 0;
-        lastTopologyReceiveTime = juce::Time();
-        lastTopologyRequestTime = juce::Time::getCurrentTime();
+        lastTopologyReceiveTime = Time();
+        lastTopologyRequestTime = Time::getCurrentTime();
     }
 
     void sendTopologyRequest()
     {
         ++numTopologyRequestsSent;
-        lastTopologyRequestTime = juce::Time::getCurrentTime();
+        lastTopologyRequestTime = Time::getCurrentTime();
         sendCommandMessage (0, BlocksProtocol::requestTopologyMessage);
     }
 
     bool failedToGetTopology() const noexcept
     {
-        return numTopologyRequestsSent >= 4 && lastTopologyReceiveTime == juce::Time();
+        return numTopologyRequestsSent >= 4 && lastTopologyReceiveTime == Time();
     }
 
     //==============================================================================
@@ -435,11 +435,11 @@ private:
     struct BlockPingTime
     {
         Block::UID blockUID;
-        juce::Time lastPing;
-        juce::Time connected;
+        Time lastPing;
+        Time connected;
     };
 
-    juce::Array<BlockPingTime> blockPings;
+    Array<BlockPingTime> blockPings;
 
     BlockPingTime* getPing (Block::UID uid)
     {
@@ -468,7 +468,7 @@ private:
 
     void updateApiPing (Block::UID uid)
     {
-        const auto now = juce::Time::getCurrentTime();
+        const auto now = Time::getCurrentTime();
 
         if (auto* ping = getPing (uid))
         {
@@ -503,13 +503,13 @@ private:
         scheduleNewTopologyRequest();
     }
 
-    void checkApiTimeouts (juce::Time now)
+    void checkApiTimeouts (Time now)
     {
         Array<Block::UID> toRemove;
 
         for (const auto& ping : blockPings)
         {
-            if (ping.lastPing < now - juce::RelativeTime::seconds (pingTimeoutSeconds))
+            if (ping.lastPing < now - RelativeTime::seconds (pingTimeoutSeconds))
             {
                 LOG_CONNECTIVITY ("Ping timeout: " << ping.blockUID);
                 toRemove.add (ping.blockUID);

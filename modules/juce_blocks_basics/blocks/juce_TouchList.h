@@ -144,7 +144,7 @@ private:
         return t1.index == t2.index && t1.blockUID == t2.blockUID;
     }
 
-    juce::Array<TouchEntry> touches;
+    Array<TouchEntry> touches;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TouchList)
 };

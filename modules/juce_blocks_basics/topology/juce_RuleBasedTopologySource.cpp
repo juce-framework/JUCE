@@ -24,7 +24,7 @@ namespace juce
 {
 
 struct RuleBasedTopologySource::Internal  : public TopologySource::Listener,
-                                            private juce::AsyncUpdater
+                                            private AsyncUpdater
 {
     Internal (RuleBasedTopologySource& da, TopologySource& bd)  : owner (da), detector (bd)
     {
@@ -93,7 +93,7 @@ struct RuleBasedTopologySource::Internal  : public TopologySource::Listener,
     TopologySource& detector;
 
     BlockTopology topology;
-    juce::OwnedArray<Rule> rules;
+    OwnedArray<Rule> rules;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Internal)
 };

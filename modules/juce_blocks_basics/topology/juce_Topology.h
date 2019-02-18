@@ -44,7 +44,7 @@ struct BlockDeviceConnection
 struct BlockTopology
 {
     Block::Array blocks;
-    juce::Array<BlockDeviceConnection> connections;
+    Array<BlockDeviceConnection> connections;
 
     bool operator== (const BlockTopology&) const noexcept;
     bool operator!= (const BlockTopology&) const noexcept;

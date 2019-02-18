@@ -72,7 +72,7 @@ public:
 
 protected:
     //==========================================================================
-    juce::ListenerList<Listener> listeners;
+    ListenerList<Listener> listeners;
 };
 
 } // namespace juce

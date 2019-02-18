@@ -122,14 +122,14 @@ public:
     }
 
     Type getType() const override                                   { return modelData.apiType; }
-    juce::String getDeviceDescription() const override              { return modelData.description; }
+    String getDeviceDescription() const override                    { return modelData.description; }
     int getWidth() const override                                   { return modelData.widthUnits; }
     int getHeight() const override                                  { return modelData.heightUnits; }
     float getMillimetersPerUnit() const override                    { return 47.0f; }
     bool isHardwareBlock() const override                           { return true; }
     juce::Array<Block::ConnectionPort> getPorts() const override    { return modelData.ports; }
     bool isConnected() const override                               { return detector && detector->isConnected (uid); }
-    juce::Time getConnectionTime() const override                   { return connectionTime; }
+    Time getConnectionTime() const override                         { return connectionTime; }
     bool isMasterBlock() const override                             { return isMaster; }
     Block::UID getConnectedMasterUID() const override               { return masterUID; }
     int getRotation() const override                                { return rotation; }
@@ -192,7 +192,7 @@ public:
     {
         if (detector != nullptr)
         {
-            lastMessageSendTime = juce::Time::getCurrentTime();
+            lastMessageSendTime = Time::getCurrentTime();
             return detector->sendMessageToDevice (uid, builder);
         }
 
@@ -241,12 +241,12 @@ public:
     }
 
     //==============================================================================
-    juce::Result setProgram (Program* newProgram) override
+    Result setProgram (Program* newProgram) override
     {
         if (newProgram != nullptr && program.get() == newProgram)
         {
             jassertfalse;
-            return juce::Result::ok();
+            return Result::ok();
         }
 
         stopTimer();
@@ -257,7 +257,7 @@ public:
             if (program != nullptr
                 && newProgram != nullptr
                 && program->getLittleFootProgram() == newProgram->getLittleFootProgram())
-                return juce::Result::ok();
+                return Result::ok();
 
             std::swap (program, p);
         }
@@ -268,7 +268,7 @@ public:
         if (program == nullptr)
         {
             remoteHeap.clear();
-            return juce::Result::ok();
+            return Result::ok();
         }
 
         littlefoot::Compiler compiler;
@@ -303,10 +303,10 @@ public:
 
         startTimer (20);
 
-        return juce::Result::ok();
+        return Result::ok();
     }
 
-    Program* getProgram() const override                                        { return program.get(); }
+    Program* getProgram() const override    { return program.get(); }
 
     void sendProgramEvent (const ProgramEventMessage& message) override
     {
@@ -419,7 +419,7 @@ public:
 
     void pingFromDevice()
     {
-        lastMessageReceiveTime = juce::Time::getCurrentTime();
+        lastMessageReceiveTime = Time::getCurrentTime();
     }
 
     void addDataInputPortListener (DataInputPortListener* listener) override
@@ -444,7 +444,7 @@ public:
 
         remoteHeap.sendChanges (*this, false);
 
-        if (lastMessageSendTime < juce::Time::getCurrentTime() - juce::RelativeTime::milliseconds (pingIntervalMs))
+        if (lastMessageSendTime < Time::getCurrentTime() - RelativeTime::milliseconds (pingIntervalMs))
             sendCommandMessage (BlocksProtocol::ping);
     }
 
@@ -518,7 +518,7 @@ public:
         programLoadedCallback = std::move (programLoaded);
     }
 
-    bool setName (const juce::String& newName) override
+    bool setName (const String& newName) override
     {
         return buildAndSendPacket<128> ([&newName] (BlocksProtocol::HostPacketBuilder<128>& p)
                                         { return p.addSetBlockName (newName); });
@@ -547,10 +547,10 @@ public:
 
     //==============================================================================
     std::unique_ptr<TouchSurface> touchSurface;
-    juce::OwnedArray<ControlButton> controlButtons;
+    OwnedArray<ControlButton> controlButtons;
     std::unique_ptr<LEDGridImplementation> ledGrid;
     std::unique_ptr<LEDRowImplementation> ledRow;
-    juce::OwnedArray<StatusLight> statusLights;
+    OwnedArray<StatusLight> statusLights;
 
     BlocksProtocol::BlockDataSheet modelData;
 
@@ -568,7 +568,7 @@ public:
     RemoteHeapType remoteHeap;
 
     WeakReference<Detector> detector;
-    juce::Time lastMessageSendTime, lastMessageReceiveTime;
+    Time lastMessageSendTime, lastMessageReceiveTime;
 
     BlockConfigManager config;
     std::function<void(Block&, const ConfigMetaData&, uint32)> configChangedCallback;
@@ -605,7 +605,7 @@ private:
         config.setDeviceComms (listenerToMidiConnection);
     }
 
-    const juce::MidiInput* getMidiInput() const
+    const MidiInput* getMidiInput() const
     {
         if (detector != nullptr)
             if (auto c = dynamic_cast<const MIDIDeviceConnection*> (detector->getDeviceConnectionFor (*this)))
@@ -615,12 +615,12 @@ private:
         return nullptr;
     }
 
-    juce::MidiInput* getMidiInput()
+    MidiInput* getMidiInput()
     {
-        return const_cast<juce::MidiInput*> (static_cast<const BlockImplementation&>(*this).getMidiInput());
+        return const_cast<MidiInput*> (static_cast<const BlockImplementation&>(*this).getMidiInput());
     }
 
-    const juce::MidiOutput* getMidiOutput() const
+    const MidiOutput* getMidiOutput() const
     {
         if (detector != nullptr)
             if (auto c = dynamic_cast<const MIDIDeviceConnection*> (detector->getDeviceConnectionFor (*this)))
@@ -630,12 +630,12 @@ private:
         return nullptr;
     }
 
-    juce::MidiOutput* getMidiOutput()
+    MidiOutput* getMidiOutput()
     {
-        return const_cast<juce::MidiOutput*> (static_cast<const BlockImplementation&>(*this).getMidiOutput());
+        return const_cast<MidiOutput*> (static_cast<const BlockImplementation&>(*this).getMidiOutput());
     }
 
-    void handleIncomingMidiMessage (const juce::MidiMessage& message) override
+    void handleIncomingMidiMessage (const MidiMessage& message) override
     {
         dataInputPortListeners.call ([&] (DataInputPortListener& l) { l.handleIncomingDataPortMessage (*this, message.getRawData(),
                                                                                                        (size_t) message.getRawDataSize()); });
@@ -644,7 +644,7 @@ private:
     void connectionBeingDeleted (const MIDIDeviceConnection& c) override
     {
         jassert (listenerToMidiConnection == &c);
-        juce::ignoreUnused (c);
+        ignoreUnused (c);
         listenerToMidiConnection->removeListener (this);
         listenerToMidiConnection = nullptr;
         config.setDeviceComms (nullptr);
@@ -679,7 +679,7 @@ private:
 public:
     //==============================================================================
     struct TouchSurfaceImplementation  : public TouchSurface,
-                                         private juce::Timer
+                                         private Timer
     {
         TouchSurfaceImplementation (BlockImplementation& b)  : TouchSurface (b), blockImpl (b)
         {
@@ -712,7 +712,7 @@ public:
 
             // Fake a touch end if we receive a duplicate touch-start with no preceding touch-end (ie: comms error)
             if (touchEvent.isTouchStart && status.isActive)
-                killTouch (touchEvent, status, juce::Time::getMillisecondCounter());
+                killTouch (touchEvent, status, Time::getMillisecondCounter());
 
             // Fake a touch start if we receive an unexpected event with no matching start event. (ie: comms error)
             if (! touchEvent.isTouchStart && ! status.isActive)
@@ -729,7 +729,7 @@ public:
             }
 
             // Normal handling:
-            status.lastEventTime = juce::Time::getMillisecondCounter();
+            status.lastEventTime = Time::getMillisecondCounter();
             status.isActive = ! touchEvent.isTouchEnd;
 
             if (touchEvent.isTouchStart)
@@ -746,7 +746,7 @@ public:
             for (auto& t : touches)
             {
                 auto& status = t.value;
-                auto now = juce::Time::getMillisecondCounter();
+                auto now = Time::getMillisecondCounter();
 
                 if (status.isActive && now > status.lastEventTime + touchTimeOutMs)
                     killTouch (t.touch, status, now);
@@ -781,7 +781,7 @@ public:
 
         void cancelAllActiveTouches() noexcept override
         {
-            const auto now = juce::Time::getMillisecondCounter();
+            const auto now = Time::getMillisecondCounter();
 
             for (auto& t : touches)
                 if (t.value.isActive)
@@ -808,12 +808,12 @@ public:
         {
         }
 
-        ButtonFunction getType() const override         { return buttonInfo.type; }
-        juce::String getName() const override           { return BlocksProtocol::getButtonNameForFunction (buttonInfo.type); }
-        float getPositionX() const override             { return buttonInfo.x; }
-        float getPositionY() const override             { return buttonInfo.y; }
+        ButtonFunction getType() const override    { return buttonInfo.type; }
+        String getName() const override            { return BlocksProtocol::getButtonNameForFunction (buttonInfo.type); }
+        float getPositionX() const override        { return buttonInfo.x; }
+        float getPositionY() const override        { return buttonInfo.y; }
 
-        bool hasLight() const override                  { return blockImpl.isControlBlock(); }
+        bool hasLight() const override             { return blockImpl.isControlBlock(); }
 
         bool setLightColour (LEDColour colour) override
         {
@@ -865,12 +865,12 @@ public:
         {
         }
 
-        juce::String getName() const override               { return info.name; }
+        String getName() const override               { return info.name; }
 
         bool setColour (LEDColour newColour) override
         {
             // XXX TODO!
-            juce::ignoreUnused (newColour);
+            ignoreUnused (newColour);
             return false;
         }
 
@@ -979,7 +979,7 @@ public:
         {
             DefaultLEDGridProgram (Block& b) : Block::Program (b) {}
 
-            juce::String getLittleFootProgram() override
+            String getLittleFootProgram() override
             {
                 /*  Data format:
 

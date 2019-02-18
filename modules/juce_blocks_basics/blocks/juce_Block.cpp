@@ -38,7 +38,7 @@ static Block::UID getBlockUIDFromSerialNumber (const BlocksProtocol::BlockSerial
     return getBlockUIDFromSerialNumber (serial.data);
 }
 
-static Block::UID getBlockUIDFromSerialNumber (const juce::String& serial) noexcept
+static Block::UID getBlockUIDFromSerialNumber (const String& serial) noexcept
 {
     if (serial.length() < int (BlocksProtocol::BlockSerialNumber::maxLength))
     {
@@ -49,12 +49,12 @@ static Block::UID getBlockUIDFromSerialNumber (const juce::String& serial) noexc
     return getBlockUIDFromSerialNumber ((const uint8*) serial.toRawUTF8());
 }
 
-Block::Block (const juce::String& serial)
+Block::Block (const String& serial)
    : serialNumber (serial), uid (getBlockUIDFromSerialNumber (serial))
 {
 }
 
-Block::Block (const juce::String& serial, const juce::String& version, const juce::String& blockName)
+Block::Block (const String& serial, const String& version, const String& blockName)
    : serialNumber (serial), versionNumber (version), name (blockName), uid (getBlockUIDFromSerialNumber (serial))
 {
 }

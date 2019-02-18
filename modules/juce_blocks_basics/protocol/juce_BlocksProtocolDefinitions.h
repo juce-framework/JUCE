@@ -141,9 +141,9 @@ struct BlockStringData
         return length > 0;
     }
 
-    juce::String asString() const
+    String asString() const
     {
-        return juce::String ((const char*) data, length);
+        return String ((const char*) data, length);
     }
 
     bool operator== (const BlockStringData& other) const

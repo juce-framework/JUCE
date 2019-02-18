@@ -25,9 +25,9 @@ namespace juce
 
 //==============================================================================
 /** This is the main singleton object that keeps track of connected blocks */
-struct Detector   : public juce::ReferenceCountedObject,
-                    private juce::Timer,
-                    private juce::AsyncUpdater
+struct Detector   : public ReferenceCountedObject,
+                    private Timer,
+                    private AsyncUpdater
 {
     using BlockImpl = BlockImplementation<Detector>;
 
@@ -46,7 +46,7 @@ struct Detector   : public juce::ReferenceCountedObject,
         jassert (activeTopologySources.isEmpty());
     }
 
-    using Ptr = juce::ReferenceCountedObjectPtr<Detector>;
+    using Ptr = ReferenceCountedObjectPtr<Detector>;
 
     static Detector::Ptr getDefaultDetector()
     {
@@ -370,7 +370,7 @@ struct Detector   : public juce::ReferenceCountedObject,
     std::unique_ptr<MIDIDeviceDetector> defaultDetector;
     PhysicalTopologySource::DeviceDetector& deviceDetector;
 
-    juce::Array<PhysicalTopologySource*> activeTopologySources;
+    Array<PhysicalTopologySource*> activeTopologySources;
 
     BlockTopology currentTopology;
 
@@ -387,7 +387,7 @@ private:
         handleDevicesAdded (detectedDevices);
     }
 
-    bool containsBlockWithUID (const juce::Block::Array& blocks, juce::Block::UID uid)
+    bool containsBlockWithUID (const Block::Array& blocks, Block::UID uid)
     {
         for (const auto block : blocks)
             if (block->uid == uid)
@@ -396,14 +396,14 @@ private:
         return false;
     }
 
-    void handleDevicesRemoved (const juce::StringArray& detectedDevices)
+    void handleDevicesRemoved (const StringArray& detectedDevices)
     {
         for (int i = connectedDeviceGroups.size(); --i >= 0;)
             if (! connectedDeviceGroups.getUnchecked(i)->isStillConnected (detectedDevices))
                 connectedDeviceGroups.remove (i);
     }
 
-    void handleDevicesAdded (const juce::StringArray& detectedDevices)
+    void handleDevicesAdded (const StringArray& detectedDevices)
     {
         for (const auto& devName : detectedDevices)
         {
@@ -417,7 +417,7 @@ private:
         }
     }
 
-    bool hasDeviceFor (const juce::String& devName) const
+    bool hasDeviceFor (const String& devName) const
     {
         for (auto d : connectedDeviceGroups)
             if (d->deviceName == devName)
@@ -434,7 +434,7 @@ private:
             return nullptr;
     }
 
-    juce::OwnedArray<ConnectedDeviceGroup<Detector>> connectedDeviceGroups;
+    OwnedArray<ConnectedDeviceGroup<Detector>> connectedDeviceGroups;
 
     //==============================================================================
     /** This is a friend of the BlocksImplementation that will scan and set the
@@ -447,7 +447,7 @@ private:
         static Block::Array updateBlocks (const BlockTopology& topology)
         {
             Block::Array updated;
-            juce::Array<Block::UID> visited;
+            Array<Block::UID> visited;
 
             for (auto& block : topology.blocks)
             {
@@ -513,7 +513,7 @@ private:
 
         static void layoutNeighbours (const Block::Ptr block,
                                       const BlockTopology& topology,
-                                      juce::Array<Block::UID>& visited,
+                                      Array<Block::UID>& visited,
                                       Block::Array& updated)
         {
             visited.add (block->uid);
@@ -588,7 +588,7 @@ private:
 
     //==============================================================================
    #if DUMP_TOPOLOGY
-    static juce::String idToSerialNum (const BlockTopology& topology, Block::UID uid)
+    static String idToSerialNum (const BlockTopology& topology, Block::UID uid)
     {
         for (auto* b : topology.blocks)
             if (b->uid == uid)
@@ -597,7 +597,7 @@ private:
         return "???";
     }
 
-    static juce::String portEdgeToString (Block::ConnectionPort port)
+    static String portEdgeToString (Block::ConnectionPort port)
     {
         switch (port.edge)
         {
@@ -610,9 +610,9 @@ private:
         return {};
     }
 
-    static juce::String portToString (Block::ConnectionPort port)
+    static String portToString (Block::ConnectionPort port)
     {
-        return portEdgeToString (port) + "_" + juce::String (port.index);
+        return portEdgeToString (port) + "_" + String (port.index);
     }
 
     static void dumpTopology (const BlockTopology& topology)
@@ -635,8 +635,8 @@ private:
             if (auto bi = BlockImplementation<Detector>::getFrom (*block))
                 m << "  Short address: " << (int) bi->getDeviceIndex() << newLine;
 
-            m << "  Battery level: " + juce::String (juce::roundToInt (100.0f * block->getBatteryLevel())) + "%" << newLine
-            << "  Battery charging: " + juce::String (block->isBatteryCharging() ? "y" : "n") << newLine
+            m << "  Battery level: " + String (roundToInt (100.0f * block->getBatteryLevel())) + "%" << newLine
+            << "  Battery charging: " + String (block->isBatteryCharging() ? "y" : "n") << newLine
             << "  Width: " << block->getWidth() << newLine
             << "  Height: " << block->getHeight() << newLine
             << "  Millimeters per unit: " << block->getMillimetersPerUnit() << newLine

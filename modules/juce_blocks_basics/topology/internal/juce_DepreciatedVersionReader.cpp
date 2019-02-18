@@ -70,7 +70,7 @@ private:
     static constexpr size_t numFirmwareApps = 3;
     BlocksProtocol::VersionNumber result[numFirmwareApps];
     MIDIDeviceConnection& deviceConnection;
-    juce::Atomic<size_t> currentRequest = 0;
+    Atomic<size_t> currentRequest = 0;
 
     //==============================================================================
     bool allRequestsComplete() const { return currentRequest.get() >= numFirmwareApps; }
