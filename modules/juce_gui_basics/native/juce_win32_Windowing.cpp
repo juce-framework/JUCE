@@ -1712,9 +1712,15 @@ public:
     private:
         Point<float> getMousePos (POINTL mousePos) const
         {
-            auto& comp = peer.getComponent();
-            return comp.getLocalPoint (nullptr, convertPhysicalScreenPointToLogical (pointFromPOINT ({ mousePos.x, mousePos.y }),
-                                                                                    (HWND) peer.getNativeHandle()).toFloat());
+            Point<float> screenPos;
+
+           #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+            screenPos = convertPhysicalScreenPointToLogical (pointFromPOINT ({ mousePos.x, mousePos.y }), (HWND) peer.getNativeHandle()).toFloat();
+           #else
+            screenPos = pointFromPOINT ({ mousePos.x, mousePos.y }).toFloat() / static_cast<float> (getGlobalDPI() / USER_DEFAULT_SCREEN_DPI);
+           #endif
+
+            return peer.getComponent().getLocalPoint (nullptr, screenPos);
         }
 
         template <typename CharType>
