@@ -867,8 +867,8 @@ public:
 
     /** Changes the default return value for the hitTest() method.
 
-        Setting this to false is an easy way to make a component pass its mouse-clicks
-        through to the components behind it.
+        Setting this to false is an easy way to make a component pass all its mouse events
+        (not just clicks) through to the components behind it.
 
         When a component is created, the default setting for this is true.
 
