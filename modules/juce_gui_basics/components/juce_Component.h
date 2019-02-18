@@ -2249,7 +2249,7 @@ public:
 
     /** Sets a flag to indicate whether mouse drag events on this Component should be ignored when it is inside a
         Viewport with drag-to-scroll functionality enabled. This is useful for Components such as sliders that
-        should not move their parent Viewport when dragged.
+        should not move when their parent Viewport when dragged.
     */
     void setViewportIgnoreDragFlag (bool ignoreDrag) noexcept           { flags.viewportIgnoreDragFlag = ignoreDrag; }
 
