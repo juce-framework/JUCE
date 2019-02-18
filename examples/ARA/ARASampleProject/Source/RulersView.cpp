@@ -56,7 +56,7 @@ void RulersView::findMusicalContext()
     if (musicalContext == nullptr && newMusicalContext == nullptr && ! document->getMusicalContexts().empty())
         newMusicalContext = document->getMusicalContexts<ARAMusicalContext>().front();
 
-    if (newMusicalContext != musicalContext)
+    if (newMusicalContext != nullptr && newMusicalContext != musicalContext)
     {
         detachFromMusicalContext();
 
