@@ -490,15 +490,14 @@ private:
         return getPing (uid) != nullptr;
     }
 
-    void forceApiDisconnected (Block::UID /*uid*/)
+    void forceApiDisconnected (Block::UID uid)
     {
         Array<Block::UID> toRemove;
 
-        for (const auto& ping : blockPings)
-            toRemove.add (ping.blockUID);
+        for (auto dependentUID : detector.getDnaDependentDeviceUIDs (uid))
+            removeDevice (dependentUID);
 
-        for (const auto& uid : toRemove)
-            removeDevice (uid);
+        removeDevice (uid);
 
         scheduleNewTopologyRequest();
     }
@@ -589,6 +588,8 @@ private:
     //==============================================================================
     void removeDevice (Block::UID uid)
     {
+        LOG_CONNECTIVITY ("Removing device: " << uid);
+
         if (const auto info = getDeviceInfoFromUID (uid))
             detector.handleDeviceRemoved (*info);
 

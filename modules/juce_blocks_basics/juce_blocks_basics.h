@@ -75,6 +75,7 @@ namespace juce
 #include "blocks/juce_StatusLight.h"
 #include "blocks/juce_BlocksVersion.h"
 #include "topology/juce_Topology.h"
+#include "topology/juce_BlockGraph.h"
 #include "topology/juce_TopologySource.h"
 #include "topology/juce_PhysicalTopologySource.h"
 #include "topology/juce_RuleBasedTopologySource.h"

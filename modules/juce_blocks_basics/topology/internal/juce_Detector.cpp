@@ -217,6 +217,33 @@ struct Detector   : public ReferenceCountedObject,
             group->handleBlockRestarting (deviceID);
     }
 
+    Array<Block::UID> getDnaDependentDeviceUIDs (Block::UID uid)
+    {
+        JUCE_ASSERT_MESSAGE_THREAD
+
+        Array<Block::UID> dependentDeviceUIDs;
+
+        if (auto block = getBlockImplementationWithUID (uid))
+        {
+            if (auto master = getBlockImplementationWithUID (block->masterUID))
+            {
+                auto graph = BlockGraph (currentTopology, [uid] (Block::Ptr b) { return b->uid != uid; });
+                const auto pathWithoutBlock = graph.getTraversalPathFromMaster (master);
+
+                for (const auto b : currentTopology.blocks)
+                {
+                    if (b->uid != uid && ! pathWithoutBlock.contains (b))
+                    {
+                        TOPOLOGY_LOG ( "Dependent device: " + b->name);
+                        dependentDeviceUIDs.add (b->uid);
+                    }
+                }
+            }
+        }
+
+        return dependentDeviceUIDs;
+    }
+
     void handleSharedDataACK (Block::UID deviceID, uint32 packetCounter) const
     {
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
