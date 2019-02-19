@@ -1732,10 +1732,13 @@ public:
             Point<float> screenPos;
 
            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-            screenPos = convertPhysicalScreenPointToLogical (pointFromPOINT ({ mousePos.x, mousePos.y }), (HWND) peer.getNativeHandle()).toFloat();
-           #else
-            screenPos = pointFromPOINT ({ mousePos.x, mousePos.y }).toFloat() / static_cast<float> (getGlobalDPI() / USER_DEFAULT_SCREEN_DPI);
+            auto h = (HWND) peer.getNativeHandle();
+
+            if (isPerMonitorDPIAwareWindow (h))
+                screenPos = convertPhysicalScreenPointToLogical (pointFromPOINT ({ mousePos.x, mousePos.y }), h).toFloat();
+            else
            #endif
+                screenPos = pointFromPOINT ({ mousePos.x, mousePos.y }).toFloat() / static_cast<float> (getGlobalDPI() / USER_DEFAULT_SCREEN_DPI);
 
             return peer.getComponent().getLocalPoint (nullptr, screenPos);
         }
