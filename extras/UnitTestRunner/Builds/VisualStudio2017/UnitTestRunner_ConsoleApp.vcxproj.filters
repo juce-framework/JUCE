@@ -601,7 +601,7 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_LagrangeInterpolator.cpp">
       <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_SmoothedValues.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_SmoothedValue.cpp">
       <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\juce_audio_basics.cpp">
@@ -1081,6 +1081,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\internal\juce_MIDIDeviceDetector.cpp">
       <Filter>JUCE Modules\juce_blocks_basics\topology\internal</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_BlockGraph.cpp">
+      <Filter>JUCE Modules\juce_blocks_basics\topology</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_PhysicalTopologySource.cpp">
       <Filter>JUCE Modules\juce_blocks_basics\topology</Filter>
     </ClCompile>
@@ -1488,6 +1491,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_dsp\frequency\juce_Windowing.cpp">
       <Filter>JUCE Modules\juce_dsp\frequency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\maths\juce_LogRampedValue.cpp">
+      <Filter>JUCE Modules\juce_dsp\maths</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_dsp\maths\juce_LookupTable.cpp">
       <Filter>JUCE Modules\juce_dsp\maths</Filter>
@@ -2727,7 +2733,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_Reverb.h">
       <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_SmoothedValues.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_SmoothedValue.h">
       <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\juce_audio_basics.h">
@@ -3432,6 +3438,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\protocol\juce_HostPacketDecoder.h">
       <Filter>JUCE Modules\juce_blocks_basics\protocol</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_BlockGraph.h">
+      <Filter>JUCE Modules\juce_blocks_basics\topology</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_PhysicalTopologySource.h">
       <Filter>JUCE Modules\juce_blocks_basics\topology</Filter>
     </ClInclude>
@@ -3934,6 +3943,9 @@
       <Filter>JUCE Modules\juce_dsp\frequency</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_FastMathApproximations.h">
+      <Filter>JUCE Modules\juce_dsp\maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_LogRampedValue.h">
       <Filter>JUCE Modules\juce_dsp\maths</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_LookupTable.h">

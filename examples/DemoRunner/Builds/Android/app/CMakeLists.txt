@@ -121,8 +121,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_basics/utilities/juce_LagrangeInterpolator.cpp"
     "../../../../../modules/juce_audio_basics/utilities/juce_LagrangeInterpolator.h"
     "../../../../../modules/juce_audio_basics/utilities/juce_Reverb.h"
-    "../../../../../modules/juce_audio_basics/utilities/juce_SmoothedValues.cpp"
-    "../../../../../modules/juce_audio_basics/utilities/juce_SmoothedValues.h"
+    "../../../../../modules/juce_audio_basics/utilities/juce_SmoothedValue.cpp"
+    "../../../../../modules/juce_audio_basics/utilities/juce_SmoothedValue.h"
     "../../../../../modules/juce_audio_basics/juce_audio_basics.cpp"
     "../../../../../modules/juce_audio_basics/juce_audio_basics.mm"
     "../../../../../modules/juce_audio_basics/juce_audio_basics.h"
@@ -526,6 +526,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_blocks_basics/topology/internal/juce_DeviceInfo.cpp"
     "../../../../../modules/juce_blocks_basics/topology/internal/juce_MidiDeviceConnection.cpp"
     "../../../../../modules/juce_blocks_basics/topology/internal/juce_MIDIDeviceDetector.cpp"
+    "../../../../../modules/juce_blocks_basics/topology/juce_BlockGraph.cpp"
+    "../../../../../modules/juce_blocks_basics/topology/juce_BlockGraph.h"
     "../../../../../modules/juce_blocks_basics/topology/juce_PhysicalTopologySource.cpp"
     "../../../../../modules/juce_blocks_basics/topology/juce_PhysicalTopologySource.h"
     "../../../../../modules/juce_blocks_basics/topology/juce_RuleBasedTopologySource.cpp"
@@ -928,6 +930,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_dsp/frequency/juce_Windowing.cpp"
     "../../../../../modules/juce_dsp/frequency/juce_Windowing.h"
     "../../../../../modules/juce_dsp/maths/juce_FastMathApproximations.h"
+    "../../../../../modules/juce_dsp/maths/juce_LogRampedValue.cpp"
+    "../../../../../modules/juce_dsp/maths/juce_LogRampedValue.h"
     "../../../../../modules/juce_dsp/maths/juce_LookupTable.cpp"
     "../../../../../modules/juce_dsp/maths/juce_LookupTable.h"
     "../../../../../modules/juce_dsp/maths/juce_Matrix.cpp"
@@ -1711,8 +1715,8 @@ set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/
 set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_LagrangeInterpolator.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_LagrangeInterpolator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_Reverb.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_SmoothedValues.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_SmoothedValues.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_SmoothedValue.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_SmoothedValue.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/juce_audio_basics.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/juce_audio_basics.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/juce_audio_basics.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2116,6 +2120,8 @@ set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_DeviceInfo.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_MidiDeviceConnection.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_MIDIDeviceDetector.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/juce_BlockGraph.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/juce_BlockGraph.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/juce_PhysicalTopologySource.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/juce_PhysicalTopologySource.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/juce_RuleBasedTopologySource.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2518,6 +2524,8 @@ set_source_files_properties("../../../../../modules/juce_dsp/frequency/juce_FFT_
 set_source_files_properties("../../../../../modules/juce_dsp/frequency/juce_Windowing.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/frequency/juce_Windowing.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/maths/juce_FastMathApproximations.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_dsp/maths/juce_LogRampedValue.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_dsp/maths/juce_LogRampedValue.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/maths/juce_LookupTable.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/maths/juce_LookupTable.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/maths/juce_Matrix.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
