@@ -45,7 +45,7 @@ public:
     // Note that while the ARA API allows for specifying update ranges, this feature is not yet
     // in our current plug-in implementation (many hosts do not evaluate it anyways)
 
-    /** notify the host and any listeners of \p audioSource about updates to \audioSource's content.
+    /** notify the host and any listeners of \p audioSource about updates to \p audioSource's content.
         @param audioSource The ARAAudioSource with changed content
         @param notifyAllAudioModificationsAndPlaybackRegions Whether or not to notify \p audioSource's underlying ARA audio modifications and playback regions. 
         @param scopeFlags The scope of the changed content
@@ -57,7 +57,7 @@ public:
     */
     void notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions = false);
 
-    /** notify the host and any listeners of \p audioModification about updates to \audioModification's content.
+    /** notify the host and any listeners of \p audioModification about updates to \p audioModification's content.
         @param audioModification The ARAAudioModification with changed content
         @param notifyAllPlaybackRegions Whether or not to notify \p audioModification's underlying ARA playback regions.
         @param scopeFlags The scope of the changed content
@@ -69,7 +69,7 @@ public:
     */
     void notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags, bool notifyAllPlaybackRegions = false);
 
-    /** notify the host and any listeners of \p playbackRegion about updates to \playbackRegion's content.
+    /** notify the host and any listeners of \p playbackRegion about updates to \p playbackRegion's content.
         @param playbackRegion The ARAPlaybackRegion whose content is changing
         @param scopeFlags The scope of the changed content
 

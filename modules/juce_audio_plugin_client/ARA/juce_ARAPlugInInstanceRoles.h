@@ -158,7 +158,7 @@ public:
 
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
         /** Called when the editor view's selection changes.
-            @param currentSelection The current selection state.
+            @param viewSelection The current selection state.
         */
         virtual void onNewSelection (const ARA::PlugIn::ViewSelection& viewSelection) {}
 
