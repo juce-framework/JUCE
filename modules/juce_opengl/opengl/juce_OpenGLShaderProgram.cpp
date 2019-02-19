@@ -153,7 +153,7 @@ void OpenGLShaderProgram::setUniform (const char* name, GLfloat n1) noexcept    
 void OpenGLShaderProgram::setUniform (const char* name, GLint n1) noexcept                                         { context.extensions.glUniform1i  (getUniformIDFromName (name), n1); }
 void OpenGLShaderProgram::setUniform (const char* name, GLfloat n1, GLfloat n2) noexcept                           { context.extensions.glUniform2f  (getUniformIDFromName (name), n1, n2); }
 void OpenGLShaderProgram::setUniform (const char* name, GLfloat n1, GLfloat n2, GLfloat n3) noexcept               { context.extensions.glUniform3f  (getUniformIDFromName (name), n1, n2, n3); }
-void OpenGLShaderProgram::setUniform (const char* name, GLfloat n1, GLfloat n2, GLfloat n3, float n4) noexcept     { context.extensions.glUniform4f  (getUniformIDFromName (name), n1, n2, n3, n4); }
+void OpenGLShaderProgram::setUniform (const char* name, GLfloat n1, GLfloat n2, GLfloat n3, GLfloat n4) noexcept   { context.extensions.glUniform4f  (getUniformIDFromName (name), n1, n2, n3, n4); }
 void OpenGLShaderProgram::setUniform (const char* name, GLint n1, GLint n2, GLint n3, GLint n4) noexcept           { context.extensions.glUniform4i  (getUniformIDFromName (name), n1, n2, n3, n4); }
 void OpenGLShaderProgram::setUniform (const char* name, const GLfloat* values, GLsizei numValues) noexcept         { context.extensions.glUniform1fv (getUniformIDFromName (name), numValues, values); }
 void OpenGLShaderProgram::setUniformMat2 (const char* name, const GLfloat* v, GLint num, GLboolean trns) noexcept  { context.extensions.glUniformMatrix2fv (getUniformIDFromName (name), num, trns, v); }
@@ -182,7 +182,7 @@ void OpenGLShaderProgram::Uniform::set (GLfloat n1) const noexcept              
 void OpenGLShaderProgram::Uniform::set (GLint n1) const noexcept                                      { context.extensions.glUniform1i (uniformID, n1); }
 void OpenGLShaderProgram::Uniform::set (GLfloat n1, GLfloat n2) const noexcept                        { context.extensions.glUniform2f (uniformID, n1, n2); }
 void OpenGLShaderProgram::Uniform::set (GLfloat n1, GLfloat n2, GLfloat n3) const noexcept            { context.extensions.glUniform3f (uniformID, n1, n2, n3); }
-void OpenGLShaderProgram::Uniform::set (GLfloat n1, GLfloat n2, GLfloat n3, float n4) const noexcept  { context.extensions.glUniform4f (uniformID, n1, n2, n3, n4); }
+void OpenGLShaderProgram::Uniform::set (GLfloat n1, GLfloat n2, GLfloat n3, GLfloat n4) const noexcept  { context.extensions.glUniform4f (uniformID, n1, n2, n3, n4); }
 void OpenGLShaderProgram::Uniform::set (GLint n1, GLint n2, GLint n3, GLint n4) const noexcept        { context.extensions.glUniform4i (uniformID, n1, n2, n3, n4); }
 void OpenGLShaderProgram::Uniform::set (const GLfloat* values, GLsizei numValues) const noexcept      { context.extensions.glUniform1fv (uniformID, numValues, values); }
 
