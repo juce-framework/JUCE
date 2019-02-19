@@ -28,8 +28,7 @@ namespace juce
 {
 
 DirectoryContentsList::DirectoryContentsList (const FileFilter* f, TimeSliceThread& t)
-   : fileFilter (f), thread (t),
-     fileTypeFlags (File::ignoreHiddenFiles | File::findFiles)
+   : fileFilter (f), thread (t)
 {
 }
 
@@ -54,7 +53,7 @@ void DirectoryContentsList::setDirectory (const File& directory,
                                           const bool includeDirectories,
                                           const bool includeFiles)
 {
-    jassert (includeDirectories || includeFiles); // you have to speciify at least one of these!
+    jassert (includeDirectories || includeFiles); // you have to specify at least one of these!
 
     if (directory != root)
     {
@@ -66,9 +65,13 @@ void DirectoryContentsList::setDirectory (const File& directory,
         fileTypeFlags &= ~(File::findDirectories | File::findFiles);
     }
 
-    int newFlags = fileTypeFlags;
-    if (includeDirectories) newFlags |= File::findDirectories;  else newFlags &= ~File::findDirectories;
-    if (includeFiles)       newFlags |= File::findFiles;        else newFlags &= ~File::findFiles;
+    auto newFlags = fileTypeFlags;
+
+    if (includeDirectories) newFlags |= File::findDirectories;
+    else                    newFlags &= ~File::findDirectories;
+
+    if (includeFiles)       newFlags |= File::findFiles;
+    else                    newFlags &= ~File::findFiles;
 
     setTypeFlags (newFlags);
 }
@@ -103,6 +106,7 @@ void DirectoryContentsList::clear()
 void DirectoryContentsList::refresh()
 {
     stopSearching();
+    wasEmpty = files.isEmpty();
     files.clear();
 
     if (root.isDirectory())
@@ -123,7 +127,6 @@ void DirectoryContentsList::setFileFilter (const FileFilter* newFileFilter)
 int DirectoryContentsList::getNumFiles() const noexcept
 {
     const ScopedLock sl (fileListLock);
-
     return files.size();
 }
 
@@ -174,7 +177,7 @@ void DirectoryContentsList::changed()
 //==============================================================================
 int DirectoryContentsList::useTimeSlice()
 {
-    const uint32 startTime = Time::getApproximateMillisecondCounter();
+    auto startTime = Time::getApproximateMillisecondCounter();
     bool hasChanged = false;
 
     for (int i = 100; --i >= 0;)
@@ -218,6 +221,9 @@ bool DirectoryContentsList::checkNextFile (bool& hasChanged)
         }
 
         fileFindHandle.reset();
+
+        if (! wasEmpty && files.isEmpty())
+            hasChanged = true;
     }
 
     return false;
@@ -234,14 +240,14 @@ bool DirectoryContentsList::addFile (const File& file, const bool isDir,
          || ((! isDir) && fileFilter->isFileSuitable (file))
          || (isDir && fileFilter->isDirectorySuitable (file)))
     {
-        std::unique_ptr<FileInfo> info (new FileInfo());
+        auto info = std::make_unique<FileInfo>();
 
-        info->filename = file.getFileName();
-        info->fileSize = fileSize;
+        info->filename         = file.getFileName();
+        info->fileSize         = fileSize;
         info->modificationTime = modTime;
-        info->creationTime = creationTime;
-        info->isDirectory = isDir;
-        info->isReadOnly = isReadOnly;
+        info->creationTime     = creationTime;
+        info->isDirectory      = isDir;
+        info->isReadOnly       = isReadOnly;
 
         for (int i = files.size(); --i >= 0;)
             if (files.getUnchecked(i)->filename == info->filename)
