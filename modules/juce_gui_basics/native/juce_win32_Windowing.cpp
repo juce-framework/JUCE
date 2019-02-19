@@ -1044,7 +1044,7 @@ private:
 
         const ScopedValueSetter<bool> setter (reentrant, true, false);
 
-        const bool isActive = isVisible();
+        auto isActive = isKeyboardVisible();
 
         if (isActive != shouldBeActive)
         {
@@ -1062,6 +1062,14 @@ private:
 
     bool isVisible()
     {
+        if (auto hwnd = FindWindowEx (NULL, NULL, L"ApplicationFrameWindow", NULL))
+            return FindWindowEx (hwnd, NULL, L"Windows.UI.Core.CoreWindow", L"Microsoft Text Input Application") != NULL;
+
+        return false;
+    }
+
+    bool isVisibleLegacy()
+    {
         if (auto hwnd = FindWindow (L"IPTip_Main_Window", NULL))
         {
             auto style = GetWindowLong (hwnd, GWL_STYLE);
@@ -1069,6 +1077,15 @@ private:
         }
 
         return false;
+    }
+
+    bool isKeyboardVisible()
+    {
+        if (isVisible())
+            return true;
+
+        // isVisible() may fail on Win10 versions < 1709 so try the old method too
+        return isVisibleLegacy();
     }
 
     bool shouldBeActive = false, reentrant = false;
