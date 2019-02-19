@@ -383,7 +383,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
     jassert (millisecondsToRunFor >= 0);
     jassert (isThisTheMessageThread()); // must only be called by the message thread
 
-    auto endTime = (int64) Time::currentTimeMillis() + millisecondsToRunFor;
+    auto endTime = Time::currentTimeMillis() + millisecondsToRunFor;
 
     while (quitMessagePosted.get() == 0)
     {
