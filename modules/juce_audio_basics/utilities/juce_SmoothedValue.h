@@ -193,7 +193,7 @@ namespace ValueSmoothingTypes
 
     To smooth values spread across an exponential range, where the increments
     between the current and target value are multiplicative (like frequencies),
-    you should pass the multiplicative smoothing type as a template paramater:
+    you should pass the multiplicative smoothing type as a template parameter:
 
     @code
     SmoothedValue<float, ValueSmoothingTypes::Multiplicative> yourSmoothedValue;

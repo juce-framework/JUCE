@@ -65,7 +65,7 @@ public:
         To change the style of tooltips, see the LookAndFeel class for its tooltip
         methods.
 
-        @param parentComponent  if set to 0, the TooltipWindow will appear on the desktop,
+        @param parentComponent  if set to nullptr, the TooltipWindow will appear on the desktop,
                                 otherwise the tooltip will be added to the given parent
                                 component.
         @param millisecondsBeforeTipAppears     the time for which the mouse has to stay still

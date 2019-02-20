@@ -64,7 +64,7 @@ public:
         /** Returns the parent group or nullptr if this is a top-level group. */
         AudioProcessorParameterGroup* getParent() const              { return parent; }
 
-        /** Returns a pointer to a parameter if this node contains a paramater, nullptr otherwise. */
+        /** Returns a pointer to a parameter if this node contains a parameter, nullptr otherwise. */
         AudioProcessorParameter* getParameter() const                { return parameter.get(); }
 
         /** Returns a pointer to a group if this node contains a group, nullptr otherwise. */
