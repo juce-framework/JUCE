@@ -930,8 +930,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_dsp/frequency/juce_Windowing.cpp"
     "../../../../../modules/juce_dsp/frequency/juce_Windowing.h"
     "../../../../../modules/juce_dsp/maths/juce_FastMathApproximations.h"
-    "../../../../../modules/juce_dsp/maths/juce_LogRampedValue.cpp"
     "../../../../../modules/juce_dsp/maths/juce_LogRampedValue.h"
+    "../../../../../modules/juce_dsp/maths/juce_LogRampedValue_test.cpp"
     "../../../../../modules/juce_dsp/maths/juce_LookupTable.cpp"
     "../../../../../modules/juce_dsp/maths/juce_LookupTable.h"
     "../../../../../modules/juce_dsp/maths/juce_Matrix.cpp"
@@ -2524,8 +2524,8 @@ set_source_files_properties("../../../../../modules/juce_dsp/frequency/juce_FFT_
 set_source_files_properties("../../../../../modules/juce_dsp/frequency/juce_Windowing.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/frequency/juce_Windowing.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/maths/juce_FastMathApproximations.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_dsp/maths/juce_LogRampedValue.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/maths/juce_LogRampedValue.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_dsp/maths/juce_LogRampedValue_test.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/maths/juce_LookupTable.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/maths/juce_LookupTable.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/maths/juce_Matrix.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)

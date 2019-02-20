@@ -1229,7 +1229,7 @@
     <ClCompile Include="..\..\..\..\modules\juce_dsp\frequency\juce_Windowing.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_dsp\maths\juce_LogRampedValue.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\maths\juce_LogRampedValue_test.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_dsp\maths\juce_LookupTable.cpp">
