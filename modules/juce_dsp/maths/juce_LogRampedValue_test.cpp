@@ -29,15 +29,13 @@ namespace juce
 namespace dsp
 {
 
-#if JUCE_UNIT_TESTS
+static CommonSmoothedValueTests <LogRampedValue <float>> commonLogRampedValueTests;
 
-static CommonSmoothedValueTests <LogSmoothedValue <float>> commonLogRampedValueTests;
-
-class LogSmoothedValueTests  : public UnitTest
+class LogRampedValueTests  : public UnitTest
 {
 public:
-    LogSmoothedValueTests()
-        : UnitTest ("LogSmoothedValueTests", "SmoothedValues")
+    LogRampedValueTests()
+        : UnitTest ("LogRampedValueTests", "DSP")
     {}
 
     void runTest() override
@@ -55,7 +53,7 @@ public:
 
                 for (auto range : ranges)
                 {
-                    LogSmoothedValue<double> slowStart { range.getStart() } , fastStart { range.getEnd() };
+                    LogRampedValue<double> slowStart { range.getStart() } , fastStart { range.getEnd() };
 
                     auto numSamples = 12;
                     slowStart.reset (numSamples);
@@ -93,9 +91,7 @@ public:
     }
 };
 
-static LogSmoothedValueTests logSmoothedValueTests;
-
-#endif
+static LogRampedValueTests LogRampedValueTests;
 
 } // namespace dsp
 } // namespace juce
