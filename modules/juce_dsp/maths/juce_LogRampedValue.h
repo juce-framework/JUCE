@@ -31,15 +31,18 @@ namespace dsp
 
 //==============================================================================
 /**
-    Utility class for logarithmically smoothed values.
+    Utility class for logarithmically smoothed linear values.
 
     Logarithmically smoothed values can be more relevant than linear ones for
     specific cases such as algorithm change smoothing, using two of them in
     opposite directions.
 
+    The gradient of the logarithmic/exponential slope can be configured by
+    calling LogRampedValue::setLogParameters.
+
     @see SmoothedValue
 
-    @tags{Audio}
+    @tags{DSP}
 */
 template <typename FloatType>
 class LogRampedValue   : public SmoothedValueBase <LogRampedValue <FloatType>>

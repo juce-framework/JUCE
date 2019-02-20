@@ -188,16 +188,28 @@ namespace ValueSmoothingTypes
 
 //==============================================================================
 /**
-    A utility class for values that need smoothing, like volume, that should not
-    change abruptly to avoid audio glitches.
+    A utility class for values that need smoothing to avoid audio glitches.
 
-    To smooth values spread across an exponential range, where the increments
-    between the current and target value are multiplicative (like frequencies),
-    you should pass the multiplicative smoothing type as a template parameter:
+    A ValueSmoothingTypes::Linear template parameter selects linear smoothing,
+    which increments the SmoothedValue linearly towards its target value.
+
+    @code
+    SmoothedValue<float, ValueSmoothingTypes::Linear> yourSmoothedValue;
+    @endcode
+
+    A ValueSmoothingTypes::Multiplicative template parameter selects
+    multiplicative smoothing increments towards the target value.
 
     @code
     SmoothedValue<float, ValueSmoothingTypes::Multiplicative> yourSmoothedValue;
     @endcode
+
+    Multiplicative smoothing is useful when you are dealing with
+    exponential/logarithmic values like volume in dB or frequency in Hz. For
+    example a 12 step ramp from 440.0 Hz (A4) to 880.0 Hz (A5) will increase the
+    frequency with an equal temperament tuning across the octave. A 10 step
+    smoothing from 1.0 (0 dB) to 3.16228 (10 dB) will increase the value in
+    increments of 1 dB.
 
     Note that when you are using multiplicative smoothing you cannot ever reach a
     target value of zero!
@@ -386,6 +398,9 @@ private:
 template <typename FloatType>
 using LinearSmoothedValue = SmoothedValue <FloatType, ValueSmoothingTypes::Linear>;
 
+
+//==============================================================================
+//==============================================================================
 #if JUCE_UNIT_TESTS
 
 template <class SmoothedValueType>
