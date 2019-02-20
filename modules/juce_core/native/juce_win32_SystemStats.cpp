@@ -150,6 +150,10 @@ void CPUInformation::initialise() noexcept
     hasSSE42 = (info[2] & (1 << 20)) != 0;
     has3DNow = (info[1] & (1 << 31)) != 0;
 
+    callCPUID (info, 0x80000001);
+
+    hasFMA4  = (info[2] & (1 << 16)) != 0;
+
     callCPUID (info, 7);
 
     hasAVX2            = (info[1] & (1 << 5))   != 0;
