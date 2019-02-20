@@ -238,6 +238,7 @@
  #include <sys/sysinfo.h>
  #include <sys/time.h>
  #include <sys/types.h>
+ #include <sys/utsname.h>
  #include <sys/vfs.h>
  #include <sys/wait.h>
  #include <utime.h>

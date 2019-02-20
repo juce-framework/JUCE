@@ -45,7 +45,13 @@ String SystemStats::getOperatingSystemName()
 
 bool SystemStats::isOperatingSystem64Bit()
 {
-    return (sizeof (void*) * CHAR_BIT) == 64;
+    struct utsname unameData;
+    zerostruct (unameData);
+    uname (&unameData);
+    const auto machineType = String (unameData.machine).trim();
+    return machineType.contains ("64")
+        || machineType.contains ("armv8b")
+        || machineType.contains ("armv8l");
 }
 
 //==============================================================================
