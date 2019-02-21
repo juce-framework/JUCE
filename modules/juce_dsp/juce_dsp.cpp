@@ -83,6 +83,7 @@
 
 #if JUCE_UNIT_TESTS
 #include "maths/juce_Matrix_test.cpp"
+#include "maths/juce_LogRampedValue_test.cpp"
 #if JUCE_USE_SIMD
 #include "containers/juce_SIMDRegister_test.cpp"
 #endif

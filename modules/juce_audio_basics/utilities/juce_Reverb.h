@@ -305,7 +305,7 @@ private:
     CombFilter comb [numChannels][numCombs];
     AllPassFilter allPass [numChannels][numAllPasses];
 
-    LinearSmoothedValue<float> damping, feedback, dryGain, wetGain1, wetGain2;
+    SmoothedValue<float> damping, feedback, dryGain, wetGain1, wetGain2;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Reverb)
 };

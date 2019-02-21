@@ -1490,35 +1490,22 @@ void ProjucerApplication::showSetJUCEPathAlert()
 
 }
 
-void ProjucerApplication::rescanJUCEPathModules()
+void rescanModules (AvailableModuleList& list, const Array<File>& paths, bool async)
 {
-    File jucePath (getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS()).get().toString());
-
-    if (isRunningCommandLine)
-        jucePathModuleList.scanPaths ({ jucePath });
+    if (async)
+        list.scanPathsAsync (paths);
     else
-        jucePathModuleList.scanPathsAsync ({ jucePath });
+        list.scanPaths (paths);
 }
 
-static Array<File> getSanitisedUserModulePaths()
+void ProjucerApplication::rescanJUCEPathModules()
 {
-    Array<File> paths;
-
-    for (auto p : StringArray::fromTokens (getAppSettings().getStoredPath (Ids::defaultUserModulePath, TargetOS::getThisOS()).get().toString(), ";", {}))
-    {
-        p = p.replace ("~", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
-        paths.add (File::createFileWithoutCheckingPath (p.trim()));
-    }
-
-    return paths;
+    rescanModules (jucePathModuleList, { getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS()).get().toString() }, ! isRunningCommandLine);
 }
 
 void ProjucerApplication::rescanUserPathModules()
 {
-    if (isRunningCommandLine)
-        userPathsModuleList.scanPaths (getSanitisedUserModulePaths());
-    else
-        userPathsModuleList.scanPathsAsync (getSanitisedUserModulePaths());
+    rescanModules (userPathsModuleList, { getAppSettings().getStoredPath (Ids::defaultUserModulePath, TargetOS::getThisOS()).get().toString() }, ! isRunningCommandLine);
 }
 
 void ProjucerApplication::selectEditorColourSchemeWithName (const String& schemeName)

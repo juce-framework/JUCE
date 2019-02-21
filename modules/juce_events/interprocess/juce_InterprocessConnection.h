@@ -198,6 +198,7 @@ private:
 
     struct ConnectionThread;
     std::unique_ptr<ConnectionThread> thread;
+    std::atomic<bool> threadIsRunning { false };
 
     void runThread();
     int writeData (void*, int);

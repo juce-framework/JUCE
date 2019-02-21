@@ -1046,7 +1046,7 @@ private:
     OwnedArray<ConvolutionEngine> engines;          // the 4 convolution engines being used
 
     AudioBuffer<float> interpolationBuffer;         // a buffer to do the interpolation between the convolution engines 0-1 and 2-3
-    LogSmoothedValue<float> changeVolumes[4];       // the volumes for each convolution engine during interpolation
+    LogRampedValue<float> changeVolumes[4];         // the volumes for each convolution engine during interpolation
 
     bool mustInterpolate = false;                   // tells if the convolution engines outputs must be currently interpolated
 

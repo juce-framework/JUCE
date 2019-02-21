@@ -48,7 +48,20 @@ public:
     struct Listener
     {
         virtual ~Listener() = default;
-        virtual void topologyChanged() = 0;
+
+        /** Called for any change in topology - devices changed, connections changed, etc. */
+        virtual void topologyChanged() {}
+
+        /** Called when a new block is added to the topology. */
+        virtual void blockAdded (const Block::Ptr) {}
+
+        /** Called when a block is removed from the topology. */
+        virtual void blockRemoved (const Block::Ptr) {}
+
+        /** Called when a known block is updated.
+            This could be becasue details have been reveived asyncroniously. E.g. Block name.
+         */
+        virtual void blockUpdated (const Block::Ptr) {}
     };
 
     void addListener (Listener* l)       { listeners.add (l); }
@@ -59,7 +72,7 @@ public:
 
 protected:
     //==========================================================================
-    juce::ListenerList<Listener> listeners;
+    ListenerList<Listener> listeners;
 };
 
 } // namespace juce

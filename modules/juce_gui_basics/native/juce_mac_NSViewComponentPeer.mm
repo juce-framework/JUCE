@@ -2158,6 +2158,8 @@ void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, boo
     {
         if (shouldBeEnabled && ! allowMenusAndBars)
             [NSApp setPresentationOptions: NSApplicationPresentationHideDock | NSApplicationPresentationHideMenuBar];
+        else if (! shouldBeEnabled)
+            [NSApp setPresentationOptions: NSApplicationPresentationDefault];
 
         [peer->window performSelector: @selector (toggleFullScreen:) withObject: nil];
     }

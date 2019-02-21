@@ -52,7 +52,7 @@ void BitmapLEDProgram::setLED (uint32 x, uint32 y, LEDColour colour)
     }
 }
 
-juce::String BitmapLEDProgram::getLittleFootProgram()
+String BitmapLEDProgram::getLittleFootProgram()
 {
     String program (R"littlefoot(
 
@@ -77,8 +77,8 @@ juce::String BitmapLEDProgram::getLittleFootProgram()
     )littlefoot");
 
     if (auto ledGrid = block.getLEDGrid())
-        return program.replace ("NUM_COLUMNS", juce::String (ledGrid->getNumColumns()))
-                      .replace ("NUM_ROWS",    juce::String (ledGrid->getNumRows()));
+        return program.replace ("NUM_COLUMNS", String (ledGrid->getNumColumns()))
+                      .replace ("NUM_ROWS",    String (ledGrid->getNumRows()));
 
     jassertfalse;
     return {};

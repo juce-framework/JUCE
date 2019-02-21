@@ -29,72 +29,21 @@ namespace
     {
         return static_cast<Block::Timestamp> (timestamp);
     }
-
-    template <typename V>
-    static int removeUnusedBlocksFromMap (std::map<Block::UID, V>& mapToClean, const juce::Array<DeviceInfo>& currentDevices)
-    {
-        int numRemoved = 0;
-
-        for (auto iter = mapToClean.begin(); iter != mapToClean.end();)
-        {
-            bool found = false;
-
-            for (auto& info : currentDevices)
-            {
-                if (info.uid == iter->first)
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (found)
-            {
-                ++iter;
-            }
-            else
-            {
-                mapToClean.erase (iter++);
-                ++numRemoved;
-            }
-        }
-
-        return numRemoved;
-    }
-
-    /* Returns true new element added to map or value of existing key changed */
-    template <typename V>
-    static bool insertOrAssign (std::map<Block::UID, V>& map, const Block::UID& key, const V& value)
-    {
-        const auto result = map.emplace (std::make_pair (key, value));
-
-        if (! result.second)
-        {
-            if (result.first->second == value)
-                return false;
-
-            result.first->second = value;
-        }
-
-        return true;
-    }
 }
 
 template <typename Detector>
-struct ConnectedDeviceGroup  : private juce::AsyncUpdater,
-                               private juce::Timer
+struct ConnectedDeviceGroup  : private AsyncUpdater,
+                               private Timer
 {
     //==============================================================================
-    ConnectedDeviceGroup (Detector& d, const juce::String& name, PhysicalTopologySource::DeviceConnection* connection)
+    ConnectedDeviceGroup (Detector& d, const String& name, PhysicalTopologySource::DeviceConnection* connection)
         : detector (d), deviceName (name), deviceConnection (connection)
     {
-
-
         if (auto midiDeviceConnection = static_cast<MIDIDeviceConnection*> (deviceConnection.get()))
         {
             depreciatedVersionReader = std::make_unique<DepreciatedVersionReader> (*midiDeviceConnection);
 
-            juce::ScopedLock lock (midiDeviceConnection->criticalSecton);
+            ScopedLock lock (midiDeviceConnection->criticalSecton);
             setMidiMessageCallback();
         }
         else
@@ -106,30 +55,23 @@ struct ConnectedDeviceGroup  : private juce::AsyncUpdater,
         sendTopologyRequest();
     }
 
-    bool isStillConnected (const juce::StringArray& detectedDevices) const noexcept
+    ~ConnectedDeviceGroup()
+    {
+        for (const auto& device : currentDeviceInfo)
+            detector.handleDeviceRemoved (device);
+    }
+
+    bool isStillConnected (const StringArray& detectedDevices) const noexcept
     {
         return detectedDevices.contains (deviceName) && ! failedToGetTopology();
     }
 
-    int getIndexFromDeviceID (Block::UID uid) const noexcept
+    bool contains (Block::UID uid)
     {
-        for (auto& d : currentDeviceInfo)
-            if (d.uid == uid)
-                return d.index;
-
-        return -1;
+        return getIndexFromDeviceID (uid) >= 0;
     }
 
-    const BlocksProtocol::DeviceStatus* getLastStatus (Block::UID deviceID) const noexcept
-    {
-        for (auto&& status : currentTopologyDevices)
-            if (getBlockUIDFromSerialNumber (status.serialNumber) == deviceID)
-                return &status;
-
-        return nullptr;
-    }
-
-    void notifyBlockIsRestarting (Block::UID deviceID)
+    void handleBlockRestarting (Block::UID deviceID)
     {
         forceApiDisconnected (deviceID);
     }
@@ -162,65 +104,54 @@ struct ConnectedDeviceGroup  : private juce::AsyncUpdater,
 
     void endTopology()
     {
-        lastTopologyReceiveTime = juce::Time::getCurrentTime();
+        lastTopologyReceiveTime = Time::getCurrentTime();
 
-        if (incomingTopologyDevices.isEmpty())
+        if (incomingTopologyDevices.isEmpty()
+            || incomingTopologyConnections.size() < incomingTopologyDevices.size() - 1)
         {
-            jassertfalse;
+            LOG_CONNECTIVITY ("Invalid topology or device list received.");
+            LOG_CONNECTIVITY ("Device size : " << incomingTopologyDevices.size());
+            LOG_CONNECTIVITY ("Connections size : " << incomingTopologyConnections.size());
+            scheduleNewTopologyRequest();
             return;
         }
 
-        currentTopologyDevices.swapWith (incomingTopologyDevices);
-        currentTopologyConnections.swapWith (incomingTopologyConnections);
+        LOG_CONNECTIVITY ("Valid topology received");
 
-        incomingTopologyDevices.clearQuick();
-        incomingTopologyConnections.clearQuick();
-
-        refreshCurrentDeviceInfo();
-        refreshCurrentDeviceConnections();
-
-        removeUnusedBlocksFromMap (versionNumbers, currentDeviceInfo);
-        removeUnusedBlocksFromMap (blockNames, currentDeviceInfo);
-
-        removePingForDisconnectedBlocks();
-
-        detector.handleTopologyChange();
+        updateCurrentDeviceList();
+        updateCurrentDeviceConnections();
     }
 
     void handleVersion (BlocksProtocol::DeviceVersion version)
     {
-        const auto uid = getDeviceIDFromIndex (version.index);
-
-        if (uid == Block::UID() || version.version.length <= 1)
-            return;
-
-        setVersion (uid, version.version);
+        setVersion (version.index, version.version);
     }
 
     void handleName (BlocksProtocol::DeviceName name)
     {
-        const auto uid = getDeviceIDFromIndex (name.index);
-
-        if (uid == Block::UID() || name.name.length <= 1)
+        if (name.name.length <= 1)
             return;
 
-        if (insertOrAssign (blockNames, uid, name.name))
+        if (const auto info = getDeviceInfoFromIndex (name.index))
         {
-            refreshCurrentDeviceInfo();
-            detector.handleTopologyChange();
+            if (info->name == name.name)
+                return;
+
+            info->name = name.name;
+            detector.handleDeviceUpdated (*info);
         }
     }
 
     void handleControlButtonUpDown (BlocksProtocol::TopologyIndex deviceIndex, uint32 timestamp,
                                     BlocksProtocol::ControlButtonID buttonID, bool isDown)
     {
-        if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+        if (auto deviceID = getDeviceIDFromIndex (deviceIndex))
             detector.handleButtonChange (deviceID, deviceTimestampToHost (timestamp), buttonID.get(), isDown);
     }
 
     void handleCustomMessage (BlocksProtocol::TopologyIndex deviceIndex, uint32 timestamp, const int32* data)
     {
-        if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+        if (auto deviceID = getDeviceIDFromIndex (deviceIndex))
             detector.handleCustomMessage (deviceID, deviceTimestampToHost (timestamp), data);
     }
 
@@ -231,7 +162,7 @@ struct ConnectedDeviceGroup  : private juce::AsyncUpdater,
                             BlocksProtocol::TouchVelocity velocity,
                             bool isStart, bool isEnd)
     {
-        if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+        if (auto deviceID = getDeviceIDFromIndex (deviceIndex))
         {
             TouchSurface::Touch touch;
 
@@ -267,7 +198,7 @@ struct ConnectedDeviceGroup  : private juce::AsyncUpdater,
     void handlePacketACK (BlocksProtocol::TopologyIndex deviceIndex,
                           BlocksProtocol::PacketCounter counter)
     {
-        if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+        if (auto deviceID = getDeviceIDFromIndex (deviceIndex))
         {
             detector.handleSharedDataACK (deviceID, counter);
             updateApiPing (deviceID);
@@ -278,7 +209,7 @@ struct ConnectedDeviceGroup  : private juce::AsyncUpdater,
                                   BlocksProtocol::FirmwareUpdateACKCode resultCode,
                                   BlocksProtocol::FirmwareUpdateACKDetail resultDetail)
     {
-        if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+        if (auto deviceID = getDeviceIDFromIndex (deviceIndex))
         {
             detector.handleFirmwareUpdateACK (deviceID, (uint8) resultCode.get(), (uint32) resultDetail.get());
             updateApiPing (deviceID);
@@ -288,32 +219,32 @@ struct ConnectedDeviceGroup  : private juce::AsyncUpdater,
     void handleConfigUpdateMessage (BlocksProtocol::TopologyIndex deviceIndex,
                                     int32 item, int32 value, int32 min, int32 max)
     {
-        if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+        if (auto deviceID = getDeviceIDFromIndex (deviceIndex))
             detector.handleConfigUpdateMessage (deviceID, item, value, min, max);
     }
 
     void handleConfigSetMessage (BlocksProtocol::TopologyIndex deviceIndex,
                                  int32 item, int32 value)
     {
-        if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+        if (auto deviceID = getDeviceIDFromIndex (deviceIndex))
             detector.handleConfigSetMessage (deviceID, item, value);
     }
 
     void handleConfigFactorySyncEndMessage (BlocksProtocol::TopologyIndex deviceIndex)
     {
-        if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+        if (auto deviceID = getDeviceIDFromIndex (deviceIndex))
             detector.handleConfigFactorySyncEndMessage (deviceID);
     }
 
     void handleConfigFactorySyncResetMessage (BlocksProtocol::TopologyIndex deviceIndex)
     {
-        if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+        if (auto deviceID = getDeviceIDFromIndex (deviceIndex))
             detector.handleConfigFactorySyncResetMessage (deviceID);
     }
 
     void handleLogMessage (BlocksProtocol::TopologyIndex deviceIndex, const String& message)
     {
-        if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+        if (auto deviceID = getDeviceIDFromIndex (deviceIndex))
             detector.handleLogMessage (deviceID, message);
     }
 
@@ -337,39 +268,32 @@ struct ConnectedDeviceGroup  : private juce::AsyncUpdater,
         return deviceConnection.get();
     }
 
-    juce::Array<DeviceInfo> getCurrentDeviceInfo()
+    Array<BlockDeviceConnection> getCurrentDeviceConnections()
     {
-        auto blocks = currentDeviceInfo;
-        blocks.removeIf ([this] (DeviceInfo& info) { return ! isApiConnected (info.uid); });
-        return blocks;
-    }
+        Array<BlockDeviceConnection> connections;
 
-    juce::Array<BlockDeviceConnection> getCurrentDeviceConnections()
-    {
-        auto connections = currentDeviceConnections;
-        connections.removeIf ([this] (BlockDeviceConnection& c) { return ! isApiConnected (c.device1) || ! isApiConnected (c.device2); });
+        for (const auto& connection : currentDeviceConnections)
+            if (isApiConnected (getDeviceIDFromIndex (connection.device1)) && isApiConnected (getDeviceIDFromIndex (connection.device2)))
+                connections.add (getBlockDeviceConnection (connection));
+
         return connections;
     }
 
     Detector& detector;
-    juce::String deviceName;
+    String deviceName;
 
     static constexpr double pingTimeoutSeconds = 6.0;
 
 private:
     //==============================================================================
-    juce::Array<DeviceInfo> currentDeviceInfo;
-    juce::Array<BlockDeviceConnection> currentDeviceConnections;
+    Array<DeviceInfo> currentDeviceInfo;
+    Array<BlocksProtocol::DeviceStatus> incomingTopologyDevices;
+    Array<BlocksProtocol::DeviceConnection> incomingTopologyConnections, currentDeviceConnections;
+
     std::unique_ptr<PhysicalTopologySource::DeviceConnection> deviceConnection;
 
-    juce::Array<BlocksProtocol::DeviceStatus> incomingTopologyDevices, currentTopologyDevices;
-    juce::Array<BlocksProtocol::DeviceConnection> incomingTopologyConnections, currentTopologyConnections;
-
-    juce::CriticalSection incomingPacketLock;
-    juce::Array<juce::MemoryBlock> incomingPackets;
-
-    std::map<Block::UID, BlocksProtocol::VersionNumber> versionNumbers;
-    std::map<Block::UID, BlocksProtocol::BlockName> blockNames;
+    CriticalSection incomingPacketLock;
+    Array<MemoryBlock> incomingPackets;
 
     std::unique_ptr<DepreciatedVersionReader> depreciatedVersionReader;
 
@@ -377,6 +301,21 @@ private:
     TouchList<TouchStart> touchStartPositions;
 
     Block::UID masterBlock = 0;
+
+    //==============================================================================
+    void timerCallback() override
+    {
+        const auto now = Time::getCurrentTime();
+
+        if ((now > lastTopologyReceiveTime + RelativeTime::seconds (30.0))
+            && now > lastTopologyRequestTime + RelativeTime::seconds (1.0)
+            && numTopologyRequestsSent < 4)
+            sendTopologyRequest();
+
+        checkApiTimeouts (now);
+        startApiModeOnConnectedBlocks();
+        requestMasterBlockVersionIfNeeded();
+    }
 
     //==============================================================================
     void setMidiMessageCallback()
@@ -387,41 +326,39 @@ private:
         };
     }
 
-    //==============================================================================
-    juce::Time lastTopologyRequestTime, lastTopologyReceiveTime;
-    int numTopologyRequestsSent = 0;
-
-    void scheduleNewTopologyRequest()
+    void handleIncomingMessage (const void* data, size_t dataSize)
     {
-        numTopologyRequestsSent = 0;
-        lastTopologyReceiveTime = juce::Time();
-        lastTopologyRequestTime = juce::Time::getCurrentTime();
+        MemoryBlock mb (data, dataSize);
+
+        {
+            const ScopedLock sl (incomingPacketLock);
+            incomingPackets.add (std::move (mb));
+        }
+
+        triggerAsyncUpdate();
+
+       #if DUMP_BANDWIDTH_STATS
+        registerBytesIn ((int) dataSize);
+       #endif
     }
 
-    void sendTopologyRequest()
+    void handleAsyncUpdate() override
     {
-        ++numTopologyRequestsSent;
-        lastTopologyRequestTime = juce::Time::getCurrentTime();
-        sendCommandMessage (0, BlocksProtocol::requestTopologyMessage);
-    }
+        Array<MemoryBlock> packets;
+        packets.ensureStorageAllocated (32);
 
-    void timerCallback() override
-    {
-        const auto now = juce::Time::getCurrentTime();
+        {
+            const ScopedLock sl (incomingPacketLock);
+            incomingPackets.swapWith (packets);
+        }
 
-        if ((now > lastTopologyReceiveTime + juce::RelativeTime::seconds (30.0))
-            && now > lastTopologyRequestTime + juce::RelativeTime::seconds (1.0)
-            && numTopologyRequestsSent < 4)
-            sendTopologyRequest();
+        for (auto& packet : packets)
+        {
+            auto data = static_cast<const uint8*> (packet.getData());
 
-        checkApiTimeouts (now);
-        startApiModeOnConnectedBlocks();
-        requestMasterBlockVersionIfNeeded();
-    }
-
-    bool failedToGetTopology() const noexcept
-    {
-        return numTopologyRequestsSent >= 4 && lastTopologyReceiveTime == juce::Time();
+            BlocksProtocol::HostPacketDecoder<ConnectedDeviceGroup>
+            ::processNextPacket (*this, *data, data + 1, (int) packet.getSize() - 1);
+        }
     }
 
     bool sendCommandMessage (BlocksProtocol::TopologyIndex deviceIndex, uint32 commandID) const
@@ -434,6 +371,30 @@ private:
     }
 
     //==============================================================================
+    Time lastTopologyRequestTime, lastTopologyReceiveTime;
+    int numTopologyRequestsSent = 0;
+
+    void scheduleNewTopologyRequest()
+    {
+        LOG_CONNECTIVITY ("Topology Request Scheduled");
+        numTopologyRequestsSent = 0;
+        lastTopologyReceiveTime = Time();
+        lastTopologyRequestTime = Time::getCurrentTime();
+    }
+
+    void sendTopologyRequest()
+    {
+        ++numTopologyRequestsSent;
+        lastTopologyRequestTime = Time::getCurrentTime();
+        sendCommandMessage (0, BlocksProtocol::requestTopologyMessage);
+    }
+
+    bool failedToGetTopology() const noexcept
+    {
+        return numTopologyRequestsSent >= 4 && lastTopologyReceiveTime == Time();
+    }
+
+    //==============================================================================
     void requestMasterBlockVersionIfNeeded()
     {
         if (depreciatedVersionReader == nullptr)
@@ -442,18 +403,31 @@ private:
         const auto masterVersion = depreciatedVersionReader->getVersionNumber();
 
         if (masterVersion.isNotEmpty())
-            setVersion (masterBlock, masterVersion);
+        {
+            const auto masterIndex = getIndexFromDeviceID (masterBlock);
+
+            if (masterIndex >= 0)
+                setVersion (BlocksProtocol::TopologyIndex (masterIndex), masterVersion);
+            else
+                jassertfalse;
+        }
     }
 
-    void setVersion (const Block::UID uid, const BlocksProtocol::VersionNumber versionNumber)
+    void setVersion (const BlocksProtocol::TopologyIndex index, const BlocksProtocol::VersionNumber versionNumber)
     {
-        if (uid == masterBlock)
-            depreciatedVersionReader.reset();
+        if (versionNumber.length <= 1)
+            return;
 
-        if (insertOrAssign (versionNumbers, uid, versionNumber))
+        if (const auto info = getDeviceInfoFromIndex (index))
         {
-            refreshCurrentDeviceInfo();
-            detector.handleTopologyChange();
+            if (info->version == versionNumber)
+                return;
+
+            if (info->uid == masterBlock)
+                depreciatedVersionReader.reset();
+
+            info->version = versionNumber;
+            detector.handleDeviceUpdated (*info);
         }
     }
 
@@ -461,28 +435,11 @@ private:
     struct BlockPingTime
     {
         Block::UID blockUID;
-        juce::Time lastPing;
-        juce::Time connected;
+        Time lastPing;
+        Time connected;
     };
 
-    juce::Array<BlockPingTime> blockPings;
-
-    void updateApiPing (Block::UID uid)
-    {
-        const auto now = juce::Time::getCurrentTime();
-
-        if (auto* ping = getPing (uid))
-        {
-            LOG_PING ("Ping: " << uid << " " << now.formatted ("%Mm %Ss"));
-            ping->lastPing = now;
-        }
-        else
-        {
-            LOG_CONNECTIVITY ("API Connected " << uid);
-            blockPings.add ({ uid, now, now });
-            detector.handleTopologyChange();
-        }
-    }
+    Array<BlockPingTime> blockPings;
 
     BlockPingTime* getPing (Block::UID uid)
     {
@@ -493,9 +450,39 @@ private:
         return nullptr;
     }
 
-    void removeDeviceInfo (Block::UID uid)
+    void removePing (Block::UID uid)
     {
-        currentDeviceInfo.removeIf ([uid] (DeviceInfo& info) { return uid == info.uid; });
+        const auto remove = [uid] (const BlockPingTime& ping)
+        {
+            if (uid == ping.blockUID)
+            {
+                LOG_CONNECTIVITY ("API Disconnected by topology update " << ping.blockUID);
+                return true;
+            }
+
+            return false;
+        };
+
+        blockPings.removeIf (remove);
+    }
+
+    void updateApiPing (Block::UID uid)
+    {
+        const auto now = Time::getCurrentTime();
+
+        if (auto* ping = getPing (uid))
+        {
+            LOG_PING ("Ping: " << uid << " " << now.formatted ("%Mm %Ss"));
+            ping->lastPing = now;
+        }
+        else
+        {
+            LOG_CONNECTIVITY ("API Connected " << uid);
+            blockPings.add ({ uid, now, now });
+
+            if (const auto info = getDeviceInfoFromUID (uid))
+                detector.handleDeviceAdded (*info);
+        }
     }
 
     bool isApiConnected (Block::UID uid)
@@ -505,53 +492,32 @@ private:
 
     void forceApiDisconnected (Block::UID uid)
     {
-        if (isApiConnected (uid))
-        {
-            // Clear all known API connections and broadcast an empty topology,
-            // as DNA blocks connected to the restarting block may be offline.
-            LOG_CONNECTIVITY ("API Disconnected " << uid << ", re-probing topology");
-            currentDeviceInfo.clearQuick();
-            blockPings.clearQuick();
-            blockNames.clear();
-            versionNumbers.clear();
-            detector.handleTopologyChange();
-            scheduleNewTopologyRequest();
-        }
+        Array<Block::UID> toRemove;
+
+        for (auto dependentUID : detector.getDnaDependentDeviceUIDs (uid))
+            removeDevice (dependentUID);
+
+        removeDevice (uid);
+
+        scheduleNewTopologyRequest();
     }
 
-    void checkApiTimeouts (juce::Time now)
+    void checkApiTimeouts (Time now)
     {
-        const auto timedOut = [this, now] (BlockPingTime& ping)
-        {
-            if (ping.lastPing >= now - juce::RelativeTime::seconds (pingTimeoutSeconds))
-                return false;
+        Array<Block::UID> toRemove;
 
-            LOG_CONNECTIVITY ("Ping timeout: " << ping.blockUID);
-            removeDeviceInfo (ping.blockUID);
-            return true;
-        };
-
-        if (blockPings.removeIf (timedOut) > 0)
+        for (const auto& ping : blockPings)
         {
-            scheduleNewTopologyRequest();
-            detector.handleTopologyChange();
+            if (ping.lastPing < now - RelativeTime::seconds (pingTimeoutSeconds))
+            {
+                LOG_CONNECTIVITY ("Ping timeout: " << ping.blockUID);
+                toRemove.add (ping.blockUID);
+                scheduleNewTopologyRequest();
+            }
         }
-    }
 
-    /* Returns true is ping was removed */
-    void removePingForDisconnectedBlocks()
-    {
-        const auto removed = [this] (auto& ping)
-        {
-            for (auto& info : currentDeviceInfo)
-                if (info.uid == ping.blockUID)
-                    return false;
-
-            LOG_CONNECTIVITY ("API Disconnected by topology update " << ping.blockUID);
-            return true;
-        };
-
-        blockPings.removeIf (removed);
+        for (const auto& uid : toRemove)
+            removeDevice (uid);
     }
 
     void startApiModeOnConnectedBlocks()
@@ -568,92 +534,26 @@ private:
     }
 
     //==============================================================================
-    void checkVersionNumberTimeouts()
+    Block::UID getDeviceIDFromIndex (BlocksProtocol::TopologyIndex index) noexcept
     {
         for (const auto& device : currentDeviceInfo)
-        {
-            const auto version = versionNumbers.find (device.uid);
+            if (device.index == index)
+                return device.uid;
 
-            if (version == versionNumbers.end())
-            {
-                auto* ping = getPing (device.uid);
-
-            }
-        }
-    }
-
-    //==============================================================================
-    Block::UID getDeviceIDFromIndex (BlocksProtocol::TopologyIndex index) const noexcept
-    {
-        for (auto& d : currentDeviceInfo)
-            if (d.index == index)
-                return d.uid;
-
+        scheduleNewTopologyRequest();
         return {};
     }
 
-    Block::UID getDeviceIDFromMessageIndex (BlocksProtocol::TopologyIndex index) noexcept
+    int getIndexFromDeviceID (Block::UID uid) const noexcept
     {
-        const auto uid = getDeviceIDFromIndex (index);
+        for (auto& d : currentDeviceInfo)
+            if (d.uid == uid)
+                return d.index;
 
-        // re-request topology if we get an event from an unknown block
-        if (uid == Block::UID())
-            scheduleNewTopologyRequest();
-
-        return uid;
+        return -1;
     }
 
-    //==============================================================================
-    void handleIncomingMessage (const void* data, size_t dataSize)
-    {
-        juce::MemoryBlock mb (data, dataSize);
-
-        {
-            const juce::ScopedLock sl (incomingPacketLock);
-            incomingPackets.add (std::move (mb));
-        }
-
-        triggerAsyncUpdate();
-
-       #if DUMP_BANDWIDTH_STATS
-        registerBytesIn ((int) dataSize);
-       #endif
-    }
-
-    void handleAsyncUpdate() override
-    {
-        juce::Array<juce::MemoryBlock> packets;
-        packets.ensureStorageAllocated (32);
-
-        {
-            const juce::ScopedLock sl (incomingPacketLock);
-            incomingPackets.swapWith (packets);
-        }
-
-        for (auto& packet : packets)
-        {
-            auto data = static_cast<const uint8*> (packet.getData());
-
-            BlocksProtocol::HostPacketDecoder<ConnectedDeviceGroup>
-            ::processNextPacket (*this, *data, data + 1, (int) packet.getSize() - 1);
-        }
-    }
-
-    //==============================================================================
-    BlocksProtocol::VersionNumber getVersionNumber (Block::UID uid)
-    {
-        const auto version = versionNumbers.find (uid);
-        return version == versionNumbers.end() ? BlocksProtocol::VersionNumber() : version->second;
-    }
-
-    BlocksProtocol::BlockName getName (Block::UID uid)
-    {
-        const auto name = blockNames.find (uid);
-        return name == blockNames.end() ? BlocksProtocol::BlockName() : name->second;
-    }
-
-    //==============================================================================
-    const DeviceInfo* getDeviceInfoFromUID (Block::UID uid) const noexcept
+    DeviceInfo* getDeviceInfoFromUID (Block::UID uid) const noexcept
     {
         for (auto& d : currentDeviceInfo)
             if (d.uid == uid)
@@ -662,57 +562,134 @@ private:
         return nullptr;
     }
 
+    DeviceInfo* getDeviceInfoFromIndex (BlocksProtocol::TopologyIndex index) const noexcept
+    {
+        for (auto& d : currentDeviceInfo)
+            if (d.index == index)
+                return &d;
+
+        return nullptr;
+    }
+
+    void removeDeviceInfo (Block::UID uid)
+    {
+        currentDeviceInfo.removeIf ([uid] (const DeviceInfo& info) { return info.uid == uid; });
+    }
+
+    const DeviceStatus* getIncomingDeviceStatus (BlockSerialNumber serialNumber) const
+    {
+        for (auto& device : incomingTopologyDevices)
+            if (device.serialNumber == serialNumber)
+                return &device;
+
+        return nullptr;
+    }
+
+    //==============================================================================
+    void removeDevice (Block::UID uid)
+    {
+        LOG_CONNECTIVITY ("Removing device: " << uid);
+
+        if (const auto info = getDeviceInfoFromUID (uid))
+            detector.handleDeviceRemoved (*info);
+
+        removeDeviceInfo (uid);
+        removePing (uid);
+    }
+
+    void updateCurrentDeviceList()
+    {
+        Array<Block::UID> toRemove;
+
+        //Update known devices
+        for (int i = currentDeviceInfo.size(); --i >= 0; )
+        {
+            auto& currentDevice = currentDeviceInfo.getReference (i);
+
+            if (const auto newStatus = getIncomingDeviceStatus (currentDevice.serial))
+            {
+                if (currentDevice.index != newStatus->index)
+                {
+                    currentDevice.index = newStatus->index;
+                    detector.handleIndexChanged (currentDevice.uid, currentDevice.index);
+                }
+
+                if (currentDevice.batteryCharging != newStatus->batteryCharging)
+                {
+                    currentDevice.batteryCharging = newStatus->batteryCharging;
+                    detector.handleBatteryChargingChanged (currentDevice.uid, currentDevice.batteryCharging);
+                }
+
+                if (currentDevice.batteryLevel != newStatus->batteryLevel)
+                {
+                    currentDevice.batteryLevel = newStatus->batteryLevel;
+                    detector.handleBatteryLevelChanged (currentDevice.uid, currentDevice.batteryLevel);
+                }
+            }
+            else
+            {
+                toRemove.add (currentDevice.uid);
+            }
+        }
+
+        for (const auto& uid : toRemove)
+            removeDevice (uid);
+
+        //Add new devices
+        for (const auto& device : incomingTopologyDevices)
+        {
+            const auto uid = getBlockUIDFromSerialNumber (device.serialNumber);
+
+            if (! getDeviceInfoFromUID (uid))
+            {
+                // For backwards compatibility we assume the first device we see in a group is the master and won't change
+                if (masterBlock == 0)
+                    masterBlock = uid;
+
+                currentDeviceInfo.add ({ uid,
+                                         device.index,
+                                         device.serialNumber,
+                                         BlocksProtocol::VersionNumber(),
+                                         BlocksProtocol::BlockName(),
+                                         device.batteryLevel,
+                                         device.batteryCharging,
+                                         masterBlock });
+            }
+        }
+    }
+
+    //==============================================================================
     Block::ConnectionPort convertConnectionPort (Block::UID uid, BlocksProtocol::ConnectorPort p) noexcept
     {
         if (auto* info = getDeviceInfoFromUID (uid))
             return BlocksProtocol::BlockDataSheet (info->serial).convertPortIndexToConnectorPort (p);
 
-            jassertfalse;
+        jassertfalse;
         return { Block::ConnectionPort::DeviceEdge::north, 0 };
     }
 
-    //==============================================================================
-    void refreshCurrentDeviceInfo()
+    BlockDeviceConnection getBlockDeviceConnection (const BlocksProtocol::DeviceConnection& connection)
     {
-        currentDeviceInfo.clearQuick();
+        BlockDeviceConnection dc;
 
-        for (auto& device : currentTopologyDevices)
-        {
-            const auto uid = getBlockUIDFromSerialNumber (device.serialNumber);
-            const auto version = getVersionNumber (uid);
-            const auto name = getName (uid);
+        dc.device1 = getDeviceIDFromIndex (connection.device1);
+        dc.device2 = getDeviceIDFromIndex (connection.device2);
 
-            // For backwards compatibility we assume the first device we see in a group is the master and won't change
-            if (masterBlock == 0)
-                masterBlock = uid;
+        if (dc.device1 <= 0 || dc.device2 <= 0)
+            jassertfalse;
 
-            currentDeviceInfo.add ({ uid,
-                                     device.index,
-                                     device.serialNumber,
-                                     version,
-                                     name,
-                                     masterBlock == uid });
-       }
+        dc.connectionPortOnDevice1 = convertConnectionPort (dc.device1, connection.port1);
+        dc.connectionPortOnDevice2 = convertConnectionPort (dc.device2, connection.port2);
+
+        return dc;
     }
 
-    void refreshCurrentDeviceConnections()
+    void updateCurrentDeviceConnections()
     {
         currentDeviceConnections.clearQuick();
+        currentDeviceConnections.swapWith (incomingTopologyConnections);
 
-        for (auto&& c : currentTopologyConnections)
-        {
-            BlockDeviceConnection dc;
-            dc.device1 = getDeviceIDFromIndex (c.device1);
-            dc.device2 = getDeviceIDFromIndex (c.device2);
-
-            if (dc.device1 <= 0 || dc.device2 <= 0)
-                continue;
-
-            dc.connectionPortOnDevice1 = convertConnectionPort (dc.device1, c.port1);
-            dc.connectionPortOnDevice2 = convertConnectionPort (dc.device2, c.port2);
-
-            currentDeviceConnections.add (dc);
-        }
+        detector.handleConnectionsChanged();
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConnectedDeviceGroup)

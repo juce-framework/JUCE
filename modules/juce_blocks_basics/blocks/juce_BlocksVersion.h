@@ -38,21 +38,21 @@ public:
     int patch = 0;
 
     /** The release tag for this version, such as "beta", "alpha", "rc", etc */
-    juce::String releaseType;
+    String releaseType;
 
     /** A numberical value assosiated with the release tag, such as "beta 4" */
     int releaseCount = 0;
 
     /** The assosiated git commit that generated this firmware version */
-    juce::String commit;
+    String commit;
 
     /** Identify "forced" firmware builds **/
     bool forced = false;
 
-    juce::String toString (bool extended = false) const;
+    String toString (bool extended = false) const;
 
-    /** Constructs a version number from an formatted juce::String */
-    BlocksVersion (const juce::String&);
+    /** Constructs a version number from an formatted String */
+    BlocksVersion (const String&);
 
     /** Constructs a version number from another BlocksVersion */
     BlocksVersion (const BlocksVersion& other) = default;
@@ -61,7 +61,7 @@ public:
     BlocksVersion() = default;
 
     /** Returns true if string format is valid */
-    static bool isValidVersion (const juce::String& versionString);
+    static bool isValidVersion (const String& versionString);
 
     bool operator == (const BlocksVersion&) const;
     bool operator != (const BlocksVersion&) const;
@@ -72,7 +72,7 @@ public:
 
 private:
     /** @internal */
-    bool evaluate (const juce::String& versionString);
+    bool evaluate (const String& versionString);
     bool releaseTypeGreaterThan (const BlocksVersion& otherReleaseType) const;
 
     bool isGreaterThan (const BlocksVersion& other) const;

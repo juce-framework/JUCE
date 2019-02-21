@@ -24,7 +24,7 @@ namespace juce
 {
 
 struct MIDIDeviceConnection  : public PhysicalTopologySource::DeviceConnection,
-                               public juce::MidiInputCallback
+                               public MidiInputCallback
 {
     MIDIDeviceConnection() {}
 
@@ -43,9 +43,9 @@ struct MIDIDeviceConnection  : public PhysicalTopologySource::DeviceConnection,
 
     bool lockAgainstOtherProcesses (const String& midiInName, const String& midiOutName)
     {
-        interprocessLock.reset (new juce::InterProcessLock ("blocks_sdk_"
-                                                            + File::createLegalFileName (midiInName)
-                                                            + "_" + File::createLegalFileName (midiOutName)));
+        interprocessLock.reset (new InterProcessLock ("blocks_sdk_"
+                                                      + File::createLegalFileName (midiInName)
+                                                      + "_" + File::createLegalFileName (midiOutName)));
         if (interprocessLock->enter (500))
             return true;
 
@@ -57,19 +57,19 @@ struct MIDIDeviceConnection  : public PhysicalTopologySource::DeviceConnection,
     {
         virtual ~Listener() {}
 
-        virtual void handleIncomingMidiMessage (const juce::MidiMessage& message) = 0;
+        virtual void handleIncomingMidiMessage (const MidiMessage& message) = 0;
         virtual void connectionBeingDeleted (const MIDIDeviceConnection&) = 0;
     };
 
     void addListener (Listener* l)
     {
-        juce::ScopedLock scopedLock (criticalSecton);
+        ScopedLock scopedLock (criticalSecton);
         listeners.add (l);
     }
 
     void removeListener (Listener* l)
     {
-        juce::ScopedLock scopedLock (criticalSecton);
+        ScopedLock scopedLock (criticalSecton);
         listeners.remove (l);
     }
 
@@ -83,16 +83,16 @@ struct MIDIDeviceConnection  : public PhysicalTopologySource::DeviceConnection,
 
         if (midiOutput != nullptr)
         {
-            midiOutput->sendMessageNow (juce::MidiMessage (data, (int) dataSize));
+            midiOutput->sendMessageNow (MidiMessage (data, (int) dataSize));
             return true;
         }
 
         return false;
     }
 
-    void handleIncomingMidiMessage (juce::MidiInput*, const juce::MidiMessage& message) override
+    void handleIncomingMidiMessage (MidiInput*, const MidiMessage& message) override
     {
-        juce::ScopedTryLock lock (criticalSecton);
+        ScopedTryLock lock (criticalSecton);
 
         if (lock.isLocked())
         {
@@ -108,14 +108,14 @@ struct MIDIDeviceConnection  : public PhysicalTopologySource::DeviceConnection,
         }
     }
 
-    std::unique_ptr<juce::MidiInput> midiInput;
-    std::unique_ptr<juce::MidiOutput> midiOutput;
+    std::unique_ptr<MidiInput> midiInput;
+    std::unique_ptr<MidiOutput> midiOutput;
 
-    juce::CriticalSection criticalSecton;
+    CriticalSection criticalSecton;
 
 private:
-    juce::ListenerList<Listener> listeners;
-    std::unique_ptr<juce::InterProcessLock> interprocessLock;
+    ListenerList<Listener> listeners;
+    std::unique_ptr<InterProcessLock> interprocessLock;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MIDIDeviceConnection)
 };

@@ -1,11 +1,39 @@
 JUCE breaking changes
 =====================
 
+Develop
+=======
+
+
+Version 5.4.3
+=============
+
+Change
+------
+The global user module path setting in the Projucer can now only contain a
+single path.
+
+Possible Issues
+---------------
+Projects that previously relied on using multiple global user module paths
+separated by a semicolon will fail to find these modules after re-saving.
+
+Workaround
+----------
+Replace the multiple paths with a single global user module path.
+
+Rationale
+---------
+Using multiple global user module paths did not work when saving a project
+which exported to different OSes. Only allowing a single path will prevent this
+from silently causing issues.
+
+
 Version 5.4.2
 =============
 
 Change
------
+------
 The return type of Block::getBlockAreaWithinLayout() has been changed from
 Rectangle to a simpler BlockArea struct.
 
@@ -26,7 +54,7 @@ GPL/Commercial licensed juce_graphics module that contains Rectangle.
 
 
 Change
------
+------
 Renaming and deletion of open file handles on Windows is now possible using the
 FILE_SHARE_DELETE flag.
 
@@ -45,7 +73,7 @@ This unifies the behaviour across OSes as POSIX systems already allow this.
 
 
 Change
------
+------
 Multiple changes to low-level, non-public JNI and Android APIs.
 
 Possible Issues
@@ -64,7 +92,7 @@ See the forum for further details.
 
 
 Change
------
+------
 The minimum Android version for a JUCE app is now Android 4.1
 
 Possible Issues

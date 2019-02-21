@@ -383,7 +383,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
     jassert (millisecondsToRunFor >= 0);
     jassert (isThisTheMessageThread()); // must only be called by the message thread
 
-    uint32 endTime = Time::getMillisecondCounter() + (uint32) millisecondsToRunFor;
+    auto endTime = Time::currentTimeMillis() + millisecondsToRunFor;
 
     while (quitMessagePosted.get() == 0)
     {
@@ -399,7 +399,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
             if (e != nil && (isEventBlockedByModalComps == nullptr || ! (*isEventBlockedByModalComps) (e)))
                 [NSApp sendEvent: e];
 
-            if (Time::getMillisecondCounter() >= endTime)
+            if (Time::currentTimeMillis() >= endTime)
                 break;
         }
     }

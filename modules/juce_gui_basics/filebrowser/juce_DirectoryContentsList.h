@@ -201,15 +201,17 @@ public:
 
 private:
     File root;
-    const FileFilter* fileFilter;
+    const FileFilter* fileFilter = nullptr;
     TimeSliceThread& thread;
-    int fileTypeFlags;
+    int fileTypeFlags = File::ignoreHiddenFiles | File::findFiles;
 
     CriticalSection fileListLock;
     OwnedArray<FileInfo> files;
 
     std::unique_ptr<DirectoryIterator> fileFindHandle;
     std::atomic<bool> shouldStop { true };
+
+    bool wasEmpty = true;
 
     int useTimeSlice() override;
     void stopSearching();

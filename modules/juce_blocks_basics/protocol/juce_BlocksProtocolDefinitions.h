@@ -124,36 +124,6 @@ using BatteryCharging   = IntegerWithBitSize<1>;
 using ConnectorPort = IntegerWithBitSize<5>;
 
 //==============================================================================
-/** Structure describing a block's serial number
-
-    @tags{Blocks}
-*/
-struct BlockSerialNumber
-{
-    uint8 serial[16];
-
-    bool isValid() const noexcept
-    {
-        for (auto c : serial)
-            if (c == 0)
-                return false;
-
-        return isAnyControlBlock() || isPadBlock() || isSeaboardBlock();
-    }
-
-    bool isPadBlock() const noexcept            { return hasPrefix ("LPB") || hasPrefix ("LPM"); }
-    bool isLiveBlock() const noexcept           { return hasPrefix ("LIC"); }
-    bool isLoopBlock() const noexcept           { return hasPrefix ("LOC"); }
-    bool isDevCtrlBlock() const noexcept        { return hasPrefix ("DCB"); }
-    bool isTouchBlock() const noexcept          { return hasPrefix ("TCB"); }
-    bool isSeaboardBlock() const noexcept       { return hasPrefix ("SBB"); }
-
-    bool isAnyControlBlock() const noexcept     { return isLiveBlock() || isLoopBlock() || isDevCtrlBlock() || isTouchBlock(); }
-
-    bool hasPrefix (const char* prefix) const noexcept  { return memcmp (serial, prefix, 3) == 0; }
-};
-
-//==============================================================================
 /** Structure for generic block data
 
     @tags{Blocks}
@@ -169,6 +139,11 @@ struct BlockStringData
     bool isNotEmpty() const
     {
         return length > 0;
+    }
+
+    String asString() const
+    {
+        return String ((const char*) data, length);
     }
 
     bool operator== (const BlockStringData& other) const
@@ -193,6 +168,34 @@ using VersionNumber = BlockStringData<21>;
 using BlockName = BlockStringData<33>;
 
 //==============================================================================
+/** Structure describing a block's serial number
+
+    @tags{Blocks}
+*/
+struct BlockSerialNumber : public BlockStringData<16>
+{
+    bool isValid() const noexcept
+    {
+        for (auto c : data)
+            if (c == 0)
+                return false;
+
+        return isAnyControlBlock() || isPadBlock() || isSeaboardBlock();
+    }
+
+    bool isPadBlock() const noexcept            { return hasPrefix ("LPB") || hasPrefix ("LPM"); }
+    bool isLiveBlock() const noexcept           { return hasPrefix ("LIC"); }
+    bool isLoopBlock() const noexcept           { return hasPrefix ("LOC"); }
+    bool isDevCtrlBlock() const noexcept        { return hasPrefix ("DCB"); }
+    bool isTouchBlock() const noexcept          { return hasPrefix ("TCB"); }
+    bool isSeaboardBlock() const noexcept       { return hasPrefix ("SBB"); }
+
+    bool isAnyControlBlock() const noexcept     { return isLiveBlock() || isLoopBlock() || isDevCtrlBlock() || isTouchBlock(); }
+
+    bool hasPrefix (const char* prefix) const noexcept  { return memcmp (data, prefix, 3) == 0; }
+};
+
+//==============================================================================
 /** Structure for the device status
 
     @tags{Blocks}
@@ -214,6 +217,25 @@ struct DeviceConnection
 {
     TopologyIndex device1, device2;
     ConnectorPort port1, port2;
+
+    bool operator== (const DeviceConnection& other) const
+    {
+        return isEqual (other);
+    }
+
+    bool operator!= (const DeviceConnection& other) const
+    {
+        return ! isEqual (other);
+    }
+
+private:
+    bool isEqual (const DeviceConnection& other) const
+    {
+        return device1 == other.device1
+            && device2 == other.device2
+            && port1 == other.port1
+            && port2 == other.port2;
+    }
 };
 
 //==============================================================================
@@ -445,7 +467,7 @@ static constexpr uint32 controlBlockStackSize = 800;
 enum BitSizes
 {
     topologyMessageHeader    = MessageType::bits + ProtocolVersion::bits + DeviceCount::bits + ConnectionCount::bits,
-    topologyDeviceInfo       = sizeof (BlockSerialNumber) * 7 + BatteryLevel::bits + BatteryCharging::bits,
+    topologyDeviceInfo       = BlockSerialNumber::maxLength * 7 + BatteryLevel::bits + BatteryCharging::bits,
     topologyConnectionInfo   = topologyIndexBits + ConnectorPort::bits + topologyIndexBits + ConnectorPort::bits,
 
     typeDeviceAndTime        = MessageType::bits + PacketTimestampOffset::bits,

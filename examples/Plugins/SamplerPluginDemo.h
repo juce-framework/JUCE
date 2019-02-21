@@ -446,10 +446,10 @@ private:
     }
 
     std::shared_ptr<const MPESamplerSound> samplerSound;
-    LinearSmoothedValue<double> level { 0 };
-    LinearSmoothedValue<double> frequency { 0 };
-    LinearSmoothedValue<double> loopBegin;
-    LinearSmoothedValue<double> loopEnd;
+    SmoothedValue<double> level { 0 };
+    SmoothedValue<double> frequency { 0 };
+    SmoothedValue<double> loopBegin;
+    SmoothedValue<double> loopEnd;
     double currentSamplePos { 0 };
     double tailOff { 0 };
     Direction currentDirection { Direction::forward };

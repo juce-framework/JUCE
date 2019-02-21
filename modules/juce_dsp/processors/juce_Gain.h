@@ -139,7 +139,7 @@ public:
 
 private:
     //==============================================================================
-    LinearSmoothedValue<FloatType> gain;
+    SmoothedValue<FloatType> gain;
     double sampleRate = 0, rampDurationSeconds = 0;
 };
 

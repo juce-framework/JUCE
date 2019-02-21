@@ -489,7 +489,7 @@ private:
                 return;
             }
 
-            juce::File fileToInclude = resolveIncludePath (currentValue.toString());
+            File fileToInclude = resolveIncludePath (currentValue.toString());
 
             if (fileToInclude == File())
                 return;
