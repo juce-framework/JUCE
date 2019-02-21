@@ -4,6 +4,10 @@ JUCE breaking changes
 Develop
 =======
 
+
+Version 5.4.3
+=============
+
 Change
 ------
 The global user module path setting in the Projucer can now only contain a
