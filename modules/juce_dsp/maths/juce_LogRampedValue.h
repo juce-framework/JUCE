@@ -92,8 +92,6 @@ public:
 
     /** Set a new ramp length directly in samples.
         @param numSteps                   The number of samples over which the ramp should be active
-        @param increasingRateOfChange     If the log behaviour makes the ramp increase
-                                          slowly at the beginning, rather than at the end
     */
     void reset (int numSteps) noexcept
     {
@@ -108,7 +106,6 @@ public:
     /** Set a new target value.
 
         @param newValue     The new target value
-        @param force        If true, the value will be set immediately, bypassing the ramp
     */
     void setTargetValue (FloatType newValue) noexcept
     {
