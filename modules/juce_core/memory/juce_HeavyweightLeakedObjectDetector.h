@@ -44,14 +44,14 @@ class HeavyweightLeakedObjectDetector
 {
 public:
     //==============================================================================
-    HeavyweightLeakedObjectDetector() noexcept                                           { getBacktraceMap().set (this, SystemStats::getStackBacktrace()); }
-    HeavyweightLeakedObjectDetector (const HeavyweightLeakedObjectDetector&) noexcept    { getBacktraceMap().set (this, SystemStats::getStackBacktrace()); }
+    HeavyweightLeakedObjectDetector() noexcept                                           { getBacktraceMap()[this] = SystemStats::getStackBacktrace(); }
+    HeavyweightLeakedObjectDetector (const HeavyweightLeakedObjectDetector&) noexcept    { getBacktraceMap()[this] = SystemStats::getStackBacktrace(); }
 
-    ~HeavyweightLeakedObjectDetector()                                                   { getBacktraceMap().remove (this); }
+    ~HeavyweightLeakedObjectDetector()                                                   { getBacktraceMap().erase (this); }
 
 private:
     //==============================================================================
-    typedef HashMap<HeavyweightLeakedObjectDetector<OwnerClass>*, String> BacktraceMap;
+    typedef std::map<HeavyweightLeakedObjectDetector<OwnerClass>*, String> BacktraceMap;
 
     //==============================================================================
     struct BacktraceMapHolder
@@ -82,11 +82,11 @@ private:
             String str;
 
             int counter = 1;
-            for (typename BacktraceMap::Iterator i (map); i.next();)
+            for (auto& bt : map)
             {
                 str << "\nBacktrace " << String (counter++)                                << "\n"
                     << "-----------------------------------------------------------------" << "\n"
-                    << i.getValue();
+                    << bt.second;
             }
 
             return str;
