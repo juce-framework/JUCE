@@ -50,6 +50,9 @@ namespace juce
 //==============================================================================
 static CGFloat getMainScreenHeight() noexcept
 {
+    if ([[NSScreen screens] count] == 0)
+        return 0.0f;
+
     return [[[NSScreen screens] objectAtIndex: 0] frame].size.height;
 }
 
