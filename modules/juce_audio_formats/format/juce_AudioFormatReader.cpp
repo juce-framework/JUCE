@@ -58,7 +58,7 @@ bool AudioFormatReader::read (float* const* destChannels, int numDestChannels,
     return true;
 }
 
-bool AudioFormatReader::read (int* const* destSamples,
+bool AudioFormatReader::read (int* const* destChannels,
                               int numDestChannels,
                               int64 startSampleInSource,
                               int numSamplesToRead,
@@ -74,7 +74,7 @@ bool AudioFormatReader::read (int* const* destSamples,
         auto silence = (int) jmin (-startSampleInSource, (int64) numSamplesToRead);
 
         for (int i = numDestChannels; --i >= 0;)
-            if (auto d = destSamples[i])
+            if (auto d = destChannels[i])
                 zeromem (d, sizeof (int) * (size_t) silence);
 
         startOffsetInDestBuffer += silence;
@@ -85,7 +85,7 @@ bool AudioFormatReader::read (int* const* destSamples,
     if (numSamplesToRead <= 0)
         return true;
 
-    if (! readSamples (const_cast<int**> (destSamples),
+    if (! readSamples (const_cast<int**> (destChannels),
                        jmin ((int) numChannels, numDestChannels), startOffsetInDestBuffer,
                        startSampleInSource, numSamplesToRead))
         return false;
@@ -94,26 +94,26 @@ bool AudioFormatReader::read (int* const* destSamples,
     {
         if (fillLeftoverChannelsWithCopies)
         {
-            auto lastFullChannel = destSamples[0];
+            auto lastFullChannel = destChannels[0];
 
             for (int i = (int) numChannels; --i > 0;)
             {
-                if (destSamples[i] != nullptr)
+                if (destChannels[i] != nullptr)
                 {
-                    lastFullChannel = destSamples[i];
+                    lastFullChannel = destChannels[i];
                     break;
                 }
             }
 
             if (lastFullChannel != nullptr)
                 for (int i = (int) numChannels; i < numDestChannels; ++i)
-                    if (auto d = destSamples[i])
+                    if (auto d = destChannels[i])
                         memcpy (d, lastFullChannel, sizeof (int) * originalNumSamplesToRead);
         }
         else
         {
             for (int i = (int) numChannels; i < numDestChannels; ++i)
-                if (auto d = destSamples[i])
+                if (auto d = destChannels[i])
                     zeromem (d, sizeof (int) * originalNumSamplesToRead);
         }
     }

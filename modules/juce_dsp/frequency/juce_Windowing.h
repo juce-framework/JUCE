@@ -85,7 +85,6 @@ public:
 
         @param samples      the destination buffer pointer
         @param size         the size of the destination buffer allocated in the object
-        @param type         the type of windowing method being used
         @param normalise    if the result must be normalised, creating a DC amplitude
                             response of one
         @param beta         an optional argument useful only for Kaiser's method,

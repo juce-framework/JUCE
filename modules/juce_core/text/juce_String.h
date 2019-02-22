@@ -978,6 +978,7 @@ public:
                                         decimal places, adding trailing zeros as required, and
                                         will not use exponent notation. If 0 or less, it will use
                                         exponent notation if necessary.
+        @param useScientificNotation    if the number should be formatted using scientific notation
         @see getFloatValue, getIntValue
     */
     String (double doubleValue, int numberOfDecimalPlaces, bool useScientificNotation = false);
