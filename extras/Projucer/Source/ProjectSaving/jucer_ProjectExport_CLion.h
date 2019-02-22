@@ -1157,7 +1157,7 @@ private:
                     else if (configSettings[key] == "YES_AGGRESSIVE") compilerFlags.add ("--Wconditional-uninitialized");
                     else                                              compilerFlags.add (")-Wno-uninitialized");
                 }
-                else if (key == "WARNING_CFLAGS") compilerFlags.add (configSettings[key]);
+                else if (key == "WARNING_CFLAGS") compilerFlags.add (configSettings[key].unquoted());
             }
 
             out << addToCMakeVariable ("CMAKE_CXX_FLAGS", compilerFlags.joinIntoString (" ")) << newLine
