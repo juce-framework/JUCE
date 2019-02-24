@@ -181,6 +181,30 @@ void ARADocumentController::doNotifyModelUpdates() noexcept
 
 //==============================================================================
 
+bool ARADocumentController::restoreObjectsFromStream (InputStream& input, ARA::PlugIn::RestoreObjectsFilter* filter) noexcept
+{
+    return true;
+}
+
+bool ARADocumentController::storeObjectsToStream (OutputStream& output, ARA::PlugIn::StoreObjectsFilter* filter) noexcept
+{
+    return true;
+}
+
+bool ARADocumentController::doRestoreObjectsFromArchive (ARA::PlugIn::HostArchiveReader* archiveReader, ARA::PlugIn::RestoreObjectsFilter* filter) noexcept
+{
+    ARAHostArchiveInputStream input (archiveReader);
+    return restoreObjectsFromStream (input, filter);
+}
+
+bool ARADocumentController::doStoreObjectsToArchive (ARA::PlugIn::HostArchiveWriter* archiveWriter, ARA::PlugIn::StoreObjectsFilter* filter) noexcept
+{
+    ARAHostArchiveOutputStream output (archiveWriter);
+    return storeObjectsToStream (output, filter);
+}
+
+//==============================================================================
+
 ARA::PlugIn::MusicalContext* ARADocumentController::doCreateMusicalContext (ARA::PlugIn::Document* document, ARA::ARAMusicalContextHostRef hostRef) noexcept
 {
     return new ARAMusicalContext (static_cast<ARADocument*>(document), hostRef);

@@ -83,7 +83,8 @@ public:
     //==============================================================================
     // Override document controller methods here
     // If you are subclassing ARADocumentController, make sure to call the base class
-    // implementations of any overridden function, except for any doCreate...().
+    // implementations of any overridden function, except for any doCreate...()
+    // or where specified.
 
 private:
     // some helper macros to ease repeated declaration & implementation of notification functions below:
@@ -125,6 +126,14 @@ protected:
     void willBeginEditing() noexcept override;
     void didEndEditing() noexcept override;
     void doNotifyModelUpdates() noexcept override;
+
+    // Persistency Management
+    // * Overriding these methods does not require calling the base class.
+    // * You may override either the methods with JUCE streams or with the ARA SDK's archive reader/writer.
+    virtual bool restoreObjectsFromStream (InputStream& input, ARA::PlugIn::RestoreObjectsFilter* filter) noexcept;
+    virtual bool storeObjectsToStream (OutputStream& output, ARA::PlugIn::StoreObjectsFilter* filter) noexcept;
+    bool doRestoreObjectsFromArchive (ARA::PlugIn::HostArchiveReader* archiveReader, ARA::PlugIn::RestoreObjectsFilter* filter) noexcept override;
+    bool doStoreObjectsToArchive (ARA::PlugIn::HostArchiveWriter* archiveWriter, ARA::PlugIn::StoreObjectsFilter* filter) noexcept override;
 
     // Document callbacks
     ARA::PlugIn::Document* doCreateDocument (ARA::PlugIn::DocumentController* documentController) noexcept override;
