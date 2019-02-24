@@ -118,7 +118,7 @@ private:
     std::vector<std::array<Type, numStates>> state;
     std::array<Type, numStates> A;
 
-    LinearSmoothedValue<Type> cutoffTransformSmoother, scaledResonanceSmoother;
+    SmoothedValue<Type> cutoffTransformSmoother, scaledResonanceSmoother;
     Type cutoffTransformValue, scaledResonanceValue;
 
     LookupTableTransform<Type> saturationLUT { [] (Type x) { return std::tanh (x); }, Type (-5), Type (5), 128 };

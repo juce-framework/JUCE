@@ -149,7 +149,7 @@ public:
         /** Sets a vec3 uniform. */
         void set (GLfloat n1, GLfloat n2, GLfloat n3) const noexcept;
         /** Sets a vec4 uniform. */
-        void set (GLfloat n1, GLfloat n2, GLfloat n3, float n4) const noexcept;
+        void set (GLfloat n1, GLfloat n2, GLfloat n3, GLfloat n4) const noexcept;
         /** Sets an ivec4 uniform. */
         void set (GLint n1, GLint n2, GLint n3, GLint n4) const noexcept;
         /** Sets a vector float uniform. */

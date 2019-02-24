@@ -144,7 +144,7 @@ public:
 
 private:
     //==============================================================================
-    LinearSmoothedValue<FloatType> bias;
+    SmoothedValue<FloatType> bias;
     double sampleRate = 0, rampDurationSeconds = 0;
 
     void updateRamp() noexcept

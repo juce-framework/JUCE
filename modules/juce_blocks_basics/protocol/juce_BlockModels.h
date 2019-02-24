@@ -70,14 +70,14 @@ struct BlockDataSheet
 
     struct StatusLEDInfo
     {
-        juce::String name;
+        String name;
         float x, y;
     };
 
-    juce::Array<ButtonInfo> buttons;
-    juce::Array<StatusLEDInfo> statusLEDs;
-    juce::Array<Block::ConnectionPort> ports;
-    juce::Array<const char*> dials;
+    Array<ButtonInfo> buttons;
+    Array<StatusLEDInfo> statusLEDs;
+    Array<Block::ConnectionPort> ports;
+    Array<const char*> dials;
 
 private:
     //==============================================================================

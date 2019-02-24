@@ -128,7 +128,7 @@ public:
     virtual double renderWaveShape (const double currentPhase) = 0;
 
 private:
-    LinearSmoothedValue<double> amplitude, phaseIncrement;
+    SmoothedValue<double> amplitude, phaseIncrement;
 
     double frequency = 0.0;
     double phasePos = 0.0;

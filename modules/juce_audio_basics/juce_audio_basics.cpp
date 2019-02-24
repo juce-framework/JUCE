@@ -60,7 +60,7 @@
 #include "utilities/juce_IIRFilter.cpp"
 #include "utilities/juce_LagrangeInterpolator.cpp"
 #include "utilities/juce_CatmullRomInterpolator.cpp"
-#include "utilities/juce_SmoothedValues.cpp"
+#include "utilities/juce_SmoothedValue.cpp"
 #include "midi/juce_MidiBuffer.cpp"
 #include "midi/juce_MidiFile.cpp"
 #include "midi/juce_MidiKeyboardState.cpp"

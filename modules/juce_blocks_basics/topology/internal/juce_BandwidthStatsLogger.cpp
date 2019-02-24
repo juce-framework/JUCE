@@ -42,17 +42,17 @@ namespace
             {
                 bytesPerSec = (int) (byteCount / elapsedSec);
                 byteCount = 0;
-                juce::Logger::writeToLog (getString());
+                Logger::writeToLog (getString());
             }
         }
 
-        juce::String getString() const
+        String getString() const
         {
-            return juce::String (name) + ": "
-            + "count="    + juce::String (messageCount).paddedRight (' ', 7)
-            + "rate="     + (juce::String (bytesPerSec / 1024.0f, 1) + " Kb/sec").paddedRight (' ', 11)
-            + "largest="  + (juce::String (largestMessageBytes) + " bytes").paddedRight (' ', 11)
-            + "last="     + (juce::String (lastMessageBytes) + " bytes").paddedRight (' ', 11);
+            return String (name) + ": "
+            + "count="    + String (messageCount).paddedRight (' ', 7)
+            + "rate="     + (String (bytesPerSec / 1024.0f, 1) + " Kb/sec").paddedRight (' ', 11)
+            + "largest="  + (String (largestMessageBytes) + " bytes").paddedRight (' ', 11)
+            + "last="     + (String (lastMessageBytes) + " bytes").paddedRight (' ', 11);
         }
 
         void registerMessage (int numBytes) noexcept
@@ -60,7 +60,7 @@ namespace
             byteCount += numBytes;
             ++messageCount;
             lastMessageBytes = numBytes;
-            largestMessageBytes = juce::jmax (largestMessageBytes, numBytes);
+            largestMessageBytes = jmax (largestMessageBytes, numBytes);
         }
     };
 
@@ -69,7 +69,7 @@ namespace
 
     static inline void resetOnSecondBoundary()
     {
-        auto now = juce::Time::getMillisecondCounter();
+        auto now = Time::getMillisecondCounter();
         double elapsedSec = (now - startTime) / 1000.0;
 
         if (elapsedSec >= 1.0)
@@ -93,7 +93,7 @@ namespace
     }
 }
 
-juce::String getMidiIOStats()
+String getMidiIOStats()
 {
     return inputStats.getString() + "   " + outputStats.getString();
 }

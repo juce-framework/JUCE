@@ -27,60 +27,6 @@
 namespace juce
 {
 
-#if (JUCE_IOS && defined (__IPHONE_12_0))
- #define JUCE_CORE_GRAPHICS_NEEDS_DELAYED_GARBAGE_COLLECTION 1
-#endif
-
-#if JUCE_CORE_GRAPHICS_NEEDS_DELAYED_GARBAGE_COLLECTION
-class CoreGraphicsImageGarbageCollector   : public Timer,
-                                            public DeletedAtShutdown
-{
-public:
-    CoreGraphicsImageGarbageCollector()
-    {
-        // TODO: Add an assertion here telling JUCE developers to move to the
-        // latest SDK if/when the CoreGraphics memory handling is fixed.
-    }
-
-    ~CoreGraphicsImageGarbageCollector()
-    {
-        clearSingletonInstance();
-    }
-
-    JUCE_DECLARE_SINGLETON (CoreGraphicsImageGarbageCollector, false)
-
-    void addItem (HeapBlock<uint8>&& data)
-    {
-        ScopedLock lock (queueLock);
-
-        queue.emplace_back (Time::getApproximateMillisecondCounter(), std::move (data));
-
-        if (! isTimerRunning())
-            startTimer (timeDelta);
-    }
-
-    void timerCallback() override
-    {
-        ScopedLock lock (queueLock);
-
-        auto cutoffTime = Time::getApproximateMillisecondCounter() - timeDelta;
-
-        auto it = std::find_if (queue.begin(), queue.end(),
-                                [cutoffTime](const std::pair<uint32, HeapBlock<uint8>>& x) { return x.first > cutoffTime; });
-        queue.erase (queue.begin(), it);
-
-        queue.empty() ? stopTimer() : startTimer (timeDelta);
-    }
-
-private:
-    CriticalSection queueLock;
-    std::vector<std::pair<uint32, HeapBlock<uint8>>> queue;
-    static constexpr uint32 timeDelta = 50;
-};
-
-JUCE_IMPLEMENT_SINGLETON (CoreGraphicsImageGarbageCollector)
-#endif
-
 //==============================================================================
 class CoreGraphicsImage   : public ImagePixelData
 {
@@ -100,12 +46,12 @@ public:
         numComponents += (size_t) lineStride;
        #endif
 
-        imageData.allocate (numComponents, clearImage);
+        imageDataHolder->data.allocate (numComponents, clearImage);
 
         CGColorSpaceRef colourSpace = (format == Image::SingleChannel) ? CGColorSpaceCreateDeviceGray()
                                                                        : CGColorSpaceCreateDeviceRGB();
 
-        context = CGBitmapContextCreate (imageData, (size_t) width, (size_t) height, 8, (size_t) lineStride,
+        context = CGBitmapContextCreate (imageDataHolder->data, (size_t) width, (size_t) height, 8, (size_t) lineStride,
                                          colourSpace, getCGImageFlags (format));
 
         CGColorSpaceRelease (colourSpace);
@@ -115,10 +61,6 @@ public:
     {
         freeCachedImageRef();
         CGContextRelease (context);
-
-       #if JUCE_CORE_GRAPHICS_NEEDS_DELAYED_GARBAGE_COLLECTION
-        CoreGraphicsImageGarbageCollector::getInstance()->addItem (std::move (imageData));
-       #endif
     }
 
     LowLevelGraphicsContext* createLowLevelContext() override
@@ -130,7 +72,7 @@ public:
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
     {
-        bitmap.data = imageData + x * pixelStride + y * lineStride;
+        bitmap.data = imageDataHolder->data + x * pixelStride + y * lineStride;
         bitmap.pixelFormat = pixelFormat;
         bitmap.lineStride = lineStride;
         bitmap.pixelStride = pixelStride;
@@ -145,7 +87,7 @@ public:
     ImagePixelData::Ptr clone() override
     {
         auto im = new CoreGraphicsImage (pixelFormat, width, height, false);
-        memcpy (im->imageData, imageData, (size_t) (lineStride * height));
+        memcpy (im->imageDataHolder->data, imageDataHolder->data, (size_t) (lineStride * height));
         return *im;
     }
 
@@ -165,10 +107,7 @@ public:
         CGImageRef ref = createImage (juceImage, colourSpace, false);
 
         if (cgim != nullptr)
-        {
-            CGImageRetain (ref);
-            cgim->cachedImageRef = ref;
-        }
+            cgim->cachedImageRef = CGImageRetain (ref);
 
         return ref;
     }
@@ -186,7 +125,18 @@ public:
         }
         else
         {
-            provider = CGDataProviderCreateWithData (nullptr, srcData.data, (size_t) srcData.lineStride * (size_t) srcData.height, nullptr);
+            auto* imageDataContainer = [](const Image& img) -> HeapBlockContainer::Ptr*
+            {
+                if (auto* cgim = dynamic_cast<CoreGraphicsImage*> (img.getPixelData()))
+                    return new HeapBlockContainer::Ptr (cgim->imageDataHolder);
+
+                return nullptr;
+            } (juceImage);
+
+            provider = CGDataProviderCreateWithData (imageDataContainer,
+                                                     srcData.data,
+                                                     (size_t) srcData.lineStride * (size_t) srcData.height,
+                                                     [] (void * __nullable info, const void*, size_t) { delete (HeapBlockContainer::Ptr*) info; });
         }
 
         CGImageRef imageRef = CGImageCreate ((size_t) srcData.width,
@@ -204,7 +154,14 @@ public:
     //==============================================================================
     CGContextRef context;
     CGImageRef cachedImageRef = {};
-    HeapBlock<uint8> imageData;
+
+    struct HeapBlockContainer   : public ReferenceCountedObject
+    {
+        using Ptr = ReferenceCountedObjectPtr<HeapBlockContainer>;
+        HeapBlock<uint8> data;
+    };
+
+    HeapBlockContainer::Ptr imageDataHolder = new HeapBlockContainer();
     int pixelStride, lineStride;
 
 private:
@@ -883,22 +840,31 @@ void CoreGraphicsContext::applyTransform (const AffineTransform& transform) cons
 #if USE_COREGRAPHICS_RENDERING && JUCE_USE_COREIMAGE_LOADER
 Image juce_loadWithCoreImage (InputStream& input)
 {
-    MemoryBlock data;
-    input.readIntoMemoryBlock (data, -1);
+    struct MemoryBlockHolder   : public ReferenceCountedObject
+    {
+        using Ptr = ReferenceCountedObjectPtr<MemoryBlockHolder>;
+        MemoryBlock block;
+    };
+
+    MemoryBlockHolder::Ptr memBlockHolder = new MemoryBlockHolder();
+    input.readIntoMemoryBlock (memBlockHolder->block, -1);
 
    #if JUCE_IOS
     JUCE_AUTORELEASEPOOL
    #endif
     {
       #if JUCE_IOS
-        if (UIImage* uiImage = [UIImage imageWithData: [NSData dataWithBytesNoCopy: data.getData()
-                                                                            length: data.getSize()
+        if (UIImage* uiImage = [UIImage imageWithData: [NSData dataWithBytesNoCopy: memBlockHolder->block.getData()
+                                                                            length: memBlockHolder->block.getSize()
                                                                       freeWhenDone: NO]])
         {
             CGImageRef loadedImage = uiImage.CGImage;
 
       #else
-        auto provider = CGDataProviderCreateWithData (nullptr, data.getData(), data.getSize(), nullptr);
+        auto provider = CGDataProviderCreateWithData (new MemoryBlockHolder::Ptr (memBlockHolder),
+                                                      memBlockHolder->block.getData(),
+                                                      memBlockHolder->block.getSize(),
+                                                      [] (void * __nullable info, const void*, size_t) { delete (MemoryBlockHolder::Ptr*) info; });
         auto imageSource = CGImageSourceCreateWithDataProvider (provider, nullptr);
         CGDataProviderRelease (provider);
 

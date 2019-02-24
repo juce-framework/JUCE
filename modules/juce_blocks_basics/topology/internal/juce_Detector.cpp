@@ -23,40 +23,11 @@
 namespace juce
 {
 
-namespace
-{
-    static bool containsBlockWithUID (const Block::Array& blocks, Block::UID uid) noexcept
-    {
-        for (auto&& block : blocks)
-            if (block->uid == uid)
-                return true;
-
-        return false;
-    }
-
-    static bool versionNumberChanged (const DeviceInfo& device, juce::String version) noexcept
-    {
-        auto deviceVersion = asString (device.version);
-        return deviceVersion != version && deviceVersion.isNotEmpty();
-    }
-
-    static void setVersionNumberForBlock (const DeviceInfo& deviceInfo, Block& block) noexcept
-    {
-        jassert (deviceInfo.uid == block.uid);
-        block.versionNumber = asString (deviceInfo.version);
-    }
-
-    static void setNameForBlock (const DeviceInfo& deviceInfo, Block& block)
-    {
-        jassert (deviceInfo.uid == block.uid);
-        block.name = asString (deviceInfo.name);
-    }
-}
-
 //==============================================================================
 /** This is the main singleton object that keeps track of connected blocks */
-struct Detector   : public juce::ReferenceCountedObject,
-                    private juce::Timer
+struct Detector   : public ReferenceCountedObject,
+                    private Timer,
+                    private AsyncUpdater
 {
     using BlockImpl = BlockImplementation<Detector>;
 
@@ -75,7 +46,7 @@ struct Detector   : public juce::ReferenceCountedObject,
         jassert (activeTopologySources.isEmpty());
     }
 
-    using Ptr = juce::ReferenceCountedObjectPtr<Detector>;
+    using Ptr = ReferenceCountedObjectPtr<Detector>;
 
     static Detector::Ptr getDefaultDetector()
     {
@@ -100,11 +71,10 @@ struct Detector   : public juce::ReferenceCountedObject,
         if (activeTopologySources.isEmpty())
         {
             for (auto& b : currentTopology.blocks)
-                if (auto bi = BlockImpl::getFrom (*b))
+                if (auto bi = BlockImpl::getFrom (b))
                     bi->sendCommandMessage (BlocksProtocol::endAPIMode);
 
             currentTopology = {};
-            lastTopology = {};
 
             auto& d = getDefaultDetectorPointer();
 
@@ -124,76 +94,154 @@ struct Detector   : public juce::ReferenceCountedObject,
         return false;
     }
 
-    const BlocksProtocol::DeviceStatus* getLastStatus (Block::UID deviceID) const noexcept
-    {
-        for (auto d : connectedDeviceGroups)
-            if (auto status = d->getLastStatus (deviceID))
-                return status;
-
-        return nullptr;
-    }
-
-    void handleTopologyChange()
+    void handleDeviceAdded (const DeviceInfo& info)
     {
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
+        const auto blockWasRemoved = containsBlockWithUID (blocksToRemove, info.uid);
+        const auto knownBlock = std::find_if (previouslySeenBlocks.begin(), previouslySeenBlocks.end(),
+                                              [uid = info.uid] (Block::Ptr block) { return uid == block->uid; });
+
+        Block::Ptr block;
+
+        if (knownBlock != previouslySeenBlocks.end())
         {
-            juce::Array<DeviceInfo> newDeviceInfo;
-            juce::Array<BlockDeviceConnection> newDeviceConnections;
+            block = *knownBlock;
 
-            for (auto d : connectedDeviceGroups)
+            if (auto* blockImpl = BlockImpl::getFrom (*block))
             {
-                newDeviceInfo.addArray (d->getCurrentDeviceInfo());
-                newDeviceConnections.addArray (d->getCurrentDeviceConnections());
+                blockImpl->markReconnected (info);
+                previouslySeenBlocks.removeObject (block);
             }
-
-            for (int i = currentTopology.blocks.size(); --i >= 0;)
-            {
-                auto currentBlock = currentTopology.blocks.getUnchecked (i);
-
-                auto newDeviceIter = std::find_if (newDeviceInfo.begin(), newDeviceInfo.end(),
-                                                   [&] (DeviceInfo& info) { return info.uid == currentBlock->uid; });
-
-                auto* blockImpl = BlockImpl::getFrom (*currentBlock);
-
-                if (newDeviceIter == newDeviceInfo.end())
-                {
-                    if (blockImpl != nullptr)
-                        blockImpl->markDisconnected();
-
-                    disconnectedBlocks.addIfNotAlreadyThere (currentTopology.blocks.removeAndReturn (i).get());
-                }
-                else
-                {
-                    if (blockImpl != nullptr && blockImpl->wasPowerCycled())
-                    {
-                        blockImpl->resetPowerCycleFlag();
-                        blockImpl->markReconnected (*newDeviceIter);
-                    }
-
-                    updateCurrentBlockInfo (currentBlock, *newDeviceIter);
-                }
-            }
-
-            static const int maxBlocksToSave = 100;
-
-            if (disconnectedBlocks.size() > maxBlocksToSave)
-                disconnectedBlocks.removeRange (0, 2 * (disconnectedBlocks.size() - maxBlocksToSave));
-
-            for (auto& info : newDeviceInfo)
-                if (info.serial.isValid() && ! containsBlockWithUID (currentTopology.blocks, getBlockUIDFromSerialNumber (info.serial)))
-                    addBlock (info);
-
-            currentTopology.connections.swapWith (newDeviceConnections);
+        }
+        else
+        {
+            block = new BlockImpl (*this, info);
         }
 
-        broadcastTopology();
+        currentTopology.blocks.addIfNotAlreadyThere (block);
+
+        if (blockWasRemoved)
+        {
+            blocksToUpdate.addIfNotAlreadyThere (block);
+            blocksToAdd.removeObject (block);
+        }
+        else
+        {
+            blocksToAdd.addIfNotAlreadyThere (block);
+            blocksToUpdate.removeObject (block);
+        }
+
+        blocksToRemove.removeObject (block);
+
+        triggerAsyncUpdate();
+    }
+
+    void handleDeviceRemoved (const DeviceInfo& info)
+    {
+        JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
+
+        const auto blockIt = std::find_if (currentTopology.blocks.begin(), currentTopology.blocks.end(),
+                                           [uid = info.uid] (Block::Ptr block) { return uid == block->uid; });
+
+        if (blockIt != currentTopology.blocks.end())
+        {
+            const auto block = *blockIt;
+
+            if (auto blockImpl = BlockImpl::getFrom (block))
+                blockImpl->markDisconnected();
+
+            currentTopology.blocks.removeObject (block);
+            previouslySeenBlocks.addIfNotAlreadyThere (block);
+
+            blocksToRemove.addIfNotAlreadyThere (block);
+            blocksToUpdate.removeObject (block);
+            blocksToAdd.removeObject (block);
+            triggerAsyncUpdate();
+        }
+    }
+
+    void handleConnectionsChanged()
+    {
+        JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
+        triggerAsyncUpdate();
+    }
+
+    void handleDeviceUpdated (const DeviceInfo& info)
+    {
+        if (containsBlockWithUID (blocksToRemove, info.uid))
+            return;
+
+        const auto blockIt = std::find_if (currentTopology.blocks.begin(), currentTopology.blocks.end(),
+                                           [uid = info.uid] (Block::Ptr block) { return uid == block->uid; });
+
+        if (blockIt != currentTopology.blocks.end())
+        {
+            const auto block = *blockIt;
+
+            if (auto blockImpl = BlockImpl::getFrom (block))
+                blockImpl->markReconnected (info);
+
+            if (! containsBlockWithUID (blocksToAdd, info.uid))
+            {
+                blocksToUpdate.addIfNotAlreadyThere (block);
+                triggerAsyncUpdate();
+            }
+        }
+    }
+
+    void handleBatteryChargingChanged (Block::UID deviceID, const BlocksProtocol::BatteryCharging isCharging)
+    {
+        if (auto block = currentTopology.getBlockWithUID (deviceID))
+            if (auto blockImpl = BlockImpl::getFrom (*block))
+                blockImpl->batteryCharging = isCharging;
+    }
+
+    void handleBatteryLevelChanged (Block::UID deviceID, const BlocksProtocol::BatteryLevel batteryLevel)
+    {
+        if (auto block = currentTopology.getBlockWithUID (deviceID))
+            if (auto blockImpl = BlockImpl::getFrom (*block))
+                blockImpl->batteryLevel = batteryLevel;
+    }
+
+    void handleIndexChanged (Block::UID deviceID, const BlocksProtocol::TopologyIndex index)
+    {
+        if (auto block = currentTopology.getBlockWithUID (deviceID))
+            if (auto blockImpl = BlockImpl::getFrom (*block))
+                blockImpl->topologyIndex = index;
     }
 
     void notifyBlockIsRestarting (Block::UID deviceID)
     {
         for (auto& group : connectedDeviceGroups)
-            group->notifyBlockIsRestarting (deviceID);
+            group->handleBlockRestarting (deviceID);
+    }
+
+    Array<Block::UID> getDnaDependentDeviceUIDs (Block::UID uid)
+    {
+        JUCE_ASSERT_MESSAGE_THREAD
+
+        Array<Block::UID> dependentDeviceUIDs;
+
+        if (auto block = getBlockImplementationWithUID (uid))
+        {
+            if (auto master = getBlockImplementationWithUID (block->masterUID))
+            {
+                auto graph = BlockGraph (currentTopology, [uid] (Block::Ptr b) { return b->uid != uid; });
+                const auto pathWithoutBlock = graph.getTraversalPathFromMaster (master);
+
+                for (const auto b : currentTopology.blocks)
+                {
+                    if (b->uid != uid && ! pathWithoutBlock.contains (b))
+                    {
+                        TOPOLOGY_LOG ( "Dependent device: " + b->name);
+                        dependentDeviceUIDs.add (b->uid);
+                    }
+                }
+            }
+        }
+
+        return dependentDeviceUIDs;
     }
 
     void handleSharedDataACK (Block::UID deviceID, uint32 packetCounter) const
@@ -305,24 +353,11 @@ struct Detector   : public juce::ReferenceCountedObject,
     }
 
     //==============================================================================
-    int getIndexFromDeviceID (Block::UID deviceID) const noexcept
-    {
-        for (auto* c : connectedDeviceGroups)
-        {
-            auto index = c->getIndexFromDeviceID (deviceID);
-
-            if (index >= 0)
-                return index;
-        }
-
-        return -1;
-    }
-
     template <typename PacketBuilder>
     bool sendMessageToDevice (Block::UID deviceID, const PacketBuilder& builder) const
     {
         for (auto* c : connectedDeviceGroups)
-            if (c->getIndexFromDeviceID (deviceID) >= 0)
+            if (c->contains (deviceID))
                 return c->sendMessageToDevice (builder);
 
         return false;
@@ -341,11 +376,8 @@ struct Detector   : public juce::ReferenceCountedObject,
     {
         for (const auto& d : connectedDeviceGroups)
         {
-            for (const auto& info : d->getCurrentDeviceInfo())
-            {
-                if (info.uid == b.uid)
-                    return d->getDeviceConnection();
-            }
+            if (d->contains (b.uid))
+                return d->getDeviceConnection();
         }
 
         return nullptr;
@@ -355,11 +387,8 @@ struct Detector   : public juce::ReferenceCountedObject,
     {
         for (const auto& d : connectedDeviceGroups)
         {
-            for (const auto& info : d->getCurrentDeviceInfo())
-            {
-                if (info.uid == b.uid)
-                    return d->getDeviceConnection();
-            }
+            if (d->contains (b.uid))
+                return d->getDeviceConnection();
         }
 
         return nullptr;
@@ -368,12 +397,13 @@ struct Detector   : public juce::ReferenceCountedObject,
     std::unique_ptr<MIDIDeviceDetector> defaultDetector;
     PhysicalTopologySource::DeviceDetector& deviceDetector;
 
-    juce::Array<PhysicalTopologySource*> activeTopologySources;
+    Array<PhysicalTopologySource*> activeTopologySources;
 
-    BlockTopology currentTopology, lastTopology;
-    juce::ReferenceCountedArray<Block, CriticalSection> disconnectedBlocks;
+    BlockTopology currentTopology;
 
 private:
+    Block::Array previouslySeenBlocks, blocksToAdd, blocksToRemove, blocksToUpdate;
+
     void timerCallback() override
     {
         startTimer (1500);
@@ -384,24 +414,23 @@ private:
         handleDevicesAdded (detectedDevices);
     }
 
-    void handleDevicesRemoved (const juce::StringArray& detectedDevices)
+    bool containsBlockWithUID (const Block::Array& blocks, Block::UID uid)
     {
-        bool anyDevicesRemoved = false;
+        for (const auto block : blocks)
+            if (block->uid == uid)
+                return true;
 
-        for (int i = connectedDeviceGroups.size(); --i >= 0;)
-        {
-            if (! connectedDeviceGroups.getUnchecked(i)->isStillConnected (detectedDevices))
-            {
-                connectedDeviceGroups.remove (i);
-                anyDevicesRemoved = true;
-            }
-        }
-
-        if (anyDevicesRemoved)
-            handleTopologyChange();
+        return false;
     }
 
-    void handleDevicesAdded (const juce::StringArray& detectedDevices)
+    void handleDevicesRemoved (const StringArray& detectedDevices)
+    {
+        for (int i = connectedDeviceGroups.size(); --i >= 0;)
+            if (! connectedDeviceGroups.getUnchecked(i)->isStillConnected (detectedDevices))
+                connectedDeviceGroups.remove (i);
+    }
+
+    void handleDevicesAdded (const StringArray& detectedDevices)
     {
         for (const auto& devName : detectedDevices)
         {
@@ -415,7 +444,7 @@ private:
         }
     }
 
-    bool hasDeviceFor (const juce::String& devName) const
+    bool hasDeviceFor (const String& devName) const
     {
         for (auto d : connectedDeviceGroups)
             if (d->deviceName == devName)
@@ -424,91 +453,53 @@ private:
         return false;
     }
 
-    void addBlock (DeviceInfo info)
-    {
-        if (! reactivateBlockIfKnown (info))
-            addNewBlock (info);
-    }
-
-    bool reactivateBlockIfKnown (DeviceInfo info)
-    {
-        const auto uid = getBlockUIDFromSerialNumber (info.serial);
-
-        for (int i = disconnectedBlocks.size(); --i >= 0;)
-        {
-            if (uid != disconnectedBlocks.getUnchecked (i)->uid)
-                continue;
-
-            auto block = disconnectedBlocks.removeAndReturn (i);
-
-            if (auto* blockImpl = BlockImpl::getFrom (*block))
-            {
-                blockImpl->markReconnected (info);
-                currentTopology.blocks.add (block);
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    void addNewBlock (DeviceInfo info)
-    {
-        currentTopology.blocks.add (new BlockImpl (info.serial, *this, info.version,
-                                                   info.name, info.isMaster));
-    }
-
-    void updateCurrentBlockInfo (Block::Ptr blockToUpdate, DeviceInfo& updatedInfo)
-    {
-        jassert (updatedInfo.uid == blockToUpdate->uid);
-
-        if (versionNumberChanged (updatedInfo, blockToUpdate->versionNumber))
-            setVersionNumberForBlock (updatedInfo, *blockToUpdate);
-
-        if (updatedInfo.name.isNotEmpty())
-            setNameForBlock (updatedInfo, *blockToUpdate);
-
-        if (updatedInfo.isMaster != blockToUpdate->isMasterBlock())
-            BlockImpl::getFrom (*blockToUpdate)->setToMaster (updatedInfo.isMaster);
-    }
-
     BlockImpl* getBlockImplementationWithUID (Block::UID deviceID) const noexcept
     {
-        if (auto&& block = currentTopology.getBlockWithUID (deviceID))
+        if (auto block = currentTopology.getBlockWithUID (deviceID))
             return BlockImpl::getFrom (*block);
 
             return nullptr;
     }
 
-    juce::OwnedArray<ConnectedDeviceGroup<Detector>> connectedDeviceGroups;
+    OwnedArray<ConnectedDeviceGroup<Detector>> connectedDeviceGroups;
 
     //==============================================================================
     /** This is a friend of the BlocksImplementation that will scan and set the
-     physical positions of the blocks */
-    struct BlocksTraverser
+        physical positions of the blocks.
+
+        Returns an array of blocks that were updated.
+    */
+    struct BlocksLayoutTraverser
     {
-        void traverseBlockArray (const BlockTopology& topology)
+        static Block::Array updateBlocks (const BlockTopology& topology)
         {
-            juce::Array<Block::UID> visited;
+            Block::Array updated;
+            Array<Block::UID> visited;
 
             for (auto& block : topology.blocks)
             {
                 if (block->isMasterBlock() && ! visited.contains (block->uid))
                 {
-                    if (auto* bi = dynamic_cast<BlockImpl*> (block))
+                    if (auto* bi = BlockImpl::getFrom (block))
                     {
-                        bi->masterUID = {};
-                        bi->position = {};
-                        bi->rotation = 0;
+                        if (bi->rotation != 0 || bi->position.first != 0 || bi->position.second != 0)
+                        {
+                            bi->rotation = 0;
+                            bi->position = {};
+                            updated.add (block);
+                        }
                     }
 
-                    layoutNeighbours (*block, topology, block->uid, visited);
+                    layoutNeighbours (*block, topology, visited, updated);
                 }
             }
+
+            return updated;
         }
 
+    private:
         // returns the distance from corner clockwise
-        int getUnitForIndex (Block::Ptr block, Block::ConnectionPort::DeviceEdge edge, int index)
+        static int getUnitForIndex (Block::Ptr block, Block::ConnectionPort::DeviceEdge edge, int index)
         {
             if (block->getType() == Block::seaboardBlock)
             {
@@ -533,7 +524,7 @@ private:
         }
 
         // returns how often north needs to rotate by 90 degrees
-        int getRotationForEdge (Block::ConnectionPort::DeviceEdge edge)
+        static int getRotationForEdge (Block::ConnectionPort::DeviceEdge edge)
         {
             switch (edge)
             {
@@ -547,8 +538,10 @@ private:
             return 0;
         }
 
-        void layoutNeighbours (Block::Ptr block, const BlockTopology& topology,
-                               Block::UID masterUid, juce::Array<Block::UID>& visited)
+        static void layoutNeighbours (const Block::Ptr block,
+                                      const BlockTopology& topology,
+                                      Array<Block::UID>& visited,
+                                      Block::Array& updated)
         {
             visited.add (block->uid);
 
@@ -568,10 +561,17 @@ private:
                         const auto  myOffset    = getUnitForIndex (block, myPort.edge, myPort.index);
                         const auto  theirOffset = getUnitForIndex (neighbourPtr, theirPort.edge, theirPort.index);
 
-                        neighbour->masterUID = masterUid;
-                        neighbour->rotation = (2 + block->getRotation()
-                                               + getRotationForEdge (myPort.edge)
-                                               - getRotationForEdge (theirPort.edge)) % 4;
+                        {
+                            const auto neighbourRotation = (2 + block->getRotation()
+                                                            + getRotationForEdge (myPort.edge)
+                                                            - getRotationForEdge (theirPort.edge)) % 4;
+
+                            if (neighbour->rotation != neighbourRotation)
+                            {
+                                neighbour->rotation = neighbourRotation;
+                                updated.addIfNotAlreadyThere (neighbourPtr);
+                            }
+                        }
 
                         std::pair<int, int> delta;
                         const auto theirBounds = neighbour->getBlockAreaWithinLayout();
@@ -592,10 +592,22 @@ private:
                                 break;
                         }
 
-                        neighbour->position = { myBounds.x + delta.first, myBounds.y + delta.second };
-                    }
+                        {
+                            const auto neighbourX = myBounds.x + delta.first;
+                            const auto neighbourY = myBounds.y + delta.second;
 
-                    layoutNeighbours (neighbourPtr, topology, masterUid, visited);
+                            if (neighbour->position.first != neighbourX
+                                || neighbour->position.second != neighbourY)
+                            {
+                                neighbour->position.first = neighbourX;
+                                neighbour->position.second = neighbourY;
+
+                                updated.addIfNotAlreadyThere (neighbourPtr);
+                            }
+                        }
+
+                        layoutNeighbours (neighbourPtr, topology, visited, updated);
+                    }
                 }
             }
         }
@@ -603,7 +615,7 @@ private:
 
     //==============================================================================
    #if DUMP_TOPOLOGY
-    static juce::String idToSerialNum (const BlockTopology& topology, Block::UID uid)
+    static String idToSerialNum (const BlockTopology& topology, Block::UID uid)
     {
         for (auto* b : topology.blocks)
             if (b->uid == uid)
@@ -612,7 +624,7 @@ private:
         return "???";
     }
 
-    static juce::String portEdgeToString (Block::ConnectionPort port)
+    static String portEdgeToString (Block::ConnectionPort port)
     {
         switch (port.edge)
         {
@@ -625,9 +637,9 @@ private:
         return {};
     }
 
-    static juce::String portToString (Block::ConnectionPort port)
+    static String portToString (Block::ConnectionPort port)
     {
-        return portEdgeToString (port) + "_" + juce::String (port.index);
+        return portEdgeToString (port) + "_" + String (port.index);
     }
 
     static void dumpTopology (const BlockTopology& topology)
@@ -650,8 +662,8 @@ private:
             if (auto bi = BlockImplementation<Detector>::getFrom (*block))
                 m << "  Short address: " << (int) bi->getDeviceIndex() << newLine;
 
-            m << "  Battery level: " + juce::String (juce::roundToInt (100.0f * block->getBatteryLevel())) + "%" << newLine
-            << "  Battery charging: " + juce::String (block->isBatteryCharging() ? "y" : "n") << newLine
+            m << "  Battery level: " + String (roundToInt (100.0f * block->getBatteryLevel())) + "%" << newLine
+            << "  Battery charging: " + String (block->isBatteryCharging() ? "y" : "n") << newLine
             << "  Width: " << block->getWidth() << newLine
             << "  Height: " << block->getHeight() << newLine
             << "  Millimeters per unit: " << block->getMillimetersPerUnit() << newLine
@@ -674,22 +686,64 @@ private:
    #endif
 
     //==============================================================================
-    void broadcastTopology()
+    void updateBlockPositions()
     {
-        if (currentTopology != lastTopology)
-        {
-            lastTopology = currentTopology;
+        const auto updated = BlocksLayoutTraverser::updateBlocks (currentTopology);
 
-            BlocksTraverser traverser;
-            traverser.traverseBlockArray (currentTopology);
+        for (const auto block : updated)
+        {
+            if (containsBlockWithUID (blocksToAdd, block->uid) || containsBlockWithUID (blocksToRemove, block->uid))
+                continue;
+
+            blocksToUpdate.addIfNotAlreadyThere (block);
+        }
+    }
+
+    void updateBlockConnections()
+    {
+        currentTopology.connections.clearQuick();
+
+        for (auto d : connectedDeviceGroups)
+            currentTopology.connections.addArray (d->getCurrentDeviceConnections());
+    }
+
+    void handleAsyncUpdate() override
+    {
+        updateBlockConnections();
+        updateBlockPositions();
+
+        for (auto* d : activeTopologySources)
+        {
+            for (const auto block : blocksToAdd)
+                d->listeners.call ([&block] (TopologySource::Listener& l) { l.blockAdded (block); });
+
+            for (const auto block : blocksToRemove)
+                d->listeners.call ([&block] (TopologySource::Listener& l) { l.blockRemoved (block); });
+
+            for (const auto block : blocksToUpdate)
+                d->listeners.call ([&block] (TopologySource::Listener& l) { l.blockUpdated (block); });
+        }
+
+        const auto topologyChanged = blocksToAdd.size() > 0 || blocksToRemove.size() > 0 || blocksToUpdate.size() > 0;
+
+        if (topologyChanged)
+        {
+           #if DUMP_TOPOLOGY
+            dumpTopology (currentTopology);
+           #endif
 
             for (auto* d : activeTopologySources)
                 d->listeners.call ([] (TopologySource::Listener& l) { l.topologyChanged(); });
-
-           #if DUMP_TOPOLOGY
-            dumpTopology (lastTopology);
-           #endif
         }
+
+        blocksToUpdate.clear();
+        blocksToAdd.clear();
+        blocksToRemove.clear();
+
+        static const int maxBlocksToSave = 100;
+
+        if (previouslySeenBlocks.size() > maxBlocksToSave)
+            previouslySeenBlocks.removeRange (0, 2 * (previouslySeenBlocks.size() - maxBlocksToSave));
     }
 
     //==============================================================================

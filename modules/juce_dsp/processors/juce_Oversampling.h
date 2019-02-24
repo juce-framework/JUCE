@@ -146,8 +146,6 @@ public:
         content created by the oversampled process, so usually the attenuation is
         increased when upsampling compared to downsampling.
 
-        @param type                            the type of filter design employed for filtering
-                                               during oversampling
         @param normalisedTransitionWidthUp     a value between 0 and 0.5 which specifies how much
                                                the transition between passband and stopband is
                                                steep, for upsampling filtering (the lower the better)

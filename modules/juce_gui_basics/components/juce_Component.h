@@ -867,8 +867,8 @@ public:
 
     /** Changes the default return value for the hitTest() method.
 
-        Setting this to false is an easy way to make a component pass its mouse-clicks
-        through to the components behind it.
+        Setting this to false is an easy way to make a component pass all its mouse events
+        (not just clicks) through to the components behind it.
 
         When a component is created, the default setting for this is true.
 
@@ -2249,7 +2249,7 @@ public:
 
     /** Sets a flag to indicate whether mouse drag events on this Component should be ignored when it is inside a
         Viewport with drag-to-scroll functionality enabled. This is useful for Components such as sliders that
-        should not move their parent Viewport when dragged.
+        should not move when their parent Viewport when dragged.
     */
     void setViewportIgnoreDragFlag (bool ignoreDrag) noexcept           { flags.viewportIgnoreDragFlag = ignoreDrag; }
 

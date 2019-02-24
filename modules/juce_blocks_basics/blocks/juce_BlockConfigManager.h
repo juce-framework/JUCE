@@ -237,7 +237,7 @@ struct BlockConfigManager
         // Send setConfigState message to Block
     }
 
-    juce::String getOptionName (ConfigItemId item, uint8 optionIndex)
+    String getOptionName (ConfigItemId item, uint8 optionIndex)
     {
         uint32 itemIndex;
 

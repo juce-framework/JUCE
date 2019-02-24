@@ -71,7 +71,7 @@ public:
         DeviceDetector();
         virtual ~DeviceDetector();
 
-        virtual juce::StringArray scanForDevices() = 0;
+        virtual StringArray scanForDevices() = 0;
         virtual DeviceConnection* openDevice (int index) = 0;
         virtual bool isLockedFromOutside() const { return false; }
     };

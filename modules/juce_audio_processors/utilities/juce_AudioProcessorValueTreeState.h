@@ -279,8 +279,11 @@ public:
     /** Returns a parameter by its ID string. */
     RangedAudioParameter* getParameter (StringRef parameterID) const noexcept;
 
-    /** Returns a pointer to a floating point representation of a particular
-        parameter which a realtime process can read to find out its current value.
+    /** Returns a pointer to a floating point representation of a particular parameter which a realtime
+        process can read to find out its current value.
+
+        Note that calling this method from within AudioProcessorValueTreeState::Listener::parameterChanged()
+        is not guaranteed to return an up-to-date value for the parameter.
     */
     float* getRawParameterValue (StringRef parameterID) const noexcept;
 
@@ -292,7 +295,12 @@ public:
     {
         virtual ~Listener() = default;
 
-        /** This callback method is called by the AudioProcessorValueTreeState when a parameter changes. */
+        /** This callback method is called by the AudioProcessorValueTreeState when a parameter changes.
+
+            Within this call, retrieving the value of the parameter that has changed via the getRawParameterValue()
+            or getParameter() methods is not guaranteed to return the up-to-date value. If you need this you should
+            instead use the newValue parameter.
+        */
         virtual void parameterChanged (const String& parameterID, float newValue) = 0;
     };
 

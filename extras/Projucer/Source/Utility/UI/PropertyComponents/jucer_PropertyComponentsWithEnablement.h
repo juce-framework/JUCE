@@ -118,3 +118,33 @@ private:
             setEnabled (valueWithDefault.get());
     }
 };
+
+//==============================================================================
+class MultiChoicePropertyComponentWithEnablement    : public MultiChoicePropertyComponent,
+                                                      private Value::Listener
+{
+public:
+    MultiChoicePropertyComponentWithEnablement (ValueWithDefault& valueToControl,
+                                                ValueWithDefault valueToListenTo,
+                                                const String& propertyName,
+                                                const StringArray& choices,
+                                                const Array<var>& correspondingValues)
+        : MultiChoicePropertyComponent (valueToControl,
+                                        propertyName,
+                                        choices,
+                                        correspondingValues),
+          valueWithDefault (valueToListenTo),
+          value (valueToListenTo.getPropertyAsValue())
+    {
+        value.addListener (this);
+        valueChanged (value);
+    }
+
+    ~MultiChoicePropertyComponentWithEnablement() override    { value.removeListener (this); }
+
+private:
+    void valueChanged (Value&) override       { setEnabled (valueWithDefault.get()); }
+
+    ValueWithDefault valueWithDefault;
+    Value value;
+};
