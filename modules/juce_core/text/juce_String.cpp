@@ -2258,6 +2258,48 @@ static String minimiseLengthOfFloatString (const String& input)
     return input;
 }
 
+static String serialiseDouble (double input)
+{
+    auto absInput = std::abs (input);
+
+    if (absInput >= 1.0e6 || absInput <= 1.0e-5)
+        return minimiseLengthOfFloatString ({ input, 15, true });
+
+    int intInput = (int) input;
+
+    if ((double) intInput == input)
+        return minimiseLengthOfFloatString ({ input, 1 });
+
+    auto numberOfDecimalPlaces = [absInput]
+    {
+        if (absInput < 1.0)
+        {
+            if (absInput >= 1.0e-3)
+            {
+                if (absInput >= 1.0e-1) return 16;
+                if (absInput >= 1.0e-2) return 17;
+                return 18;
+            }
+
+            if (absInput >= 1.0e-4) return 19;
+            return 20;
+        }
+
+        if (absInput < 1.0e3)
+        {
+            if (absInput < 1.0e1) return 15;
+            if (absInput < 1.0e2) return 14;
+            return 13;
+        }
+
+        if (absInput < 1.0e4) return 12;
+        if (absInput < 1.0e5) return 11;
+        return 10;
+    }();
+
+    return minimiseLengthOfFloatString (String (input, numberOfDecimalPlaces));
+}
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
@@ -2849,6 +2891,34 @@ public:
 
                 for (auto& test : tests)
                     expectEquals (minimiseLengthOfFloatString (String (test.first, 15, true)), test.second);
+            }
+        }
+
+        {
+            beginTest ("Serialisation");
+
+            std::map <double, String> tests;
+            tests[1234567890123456.7] = "1.234567890123457e15";
+            tests[12345678.901234567] = "1.234567890123457e7";
+            tests[1234567.8901234567] = "1.234567890123457e6";
+            tests[123456.78901234567] = "123456.7890123457";
+            tests[12345.678901234567] = "12345.67890123457";
+            tests[1234.5678901234567] = "1234.567890123457";
+            tests[123.45678901234567] = "123.4567890123457";
+            tests[12.345678901234567] = "12.34567890123457";
+            tests[1.2345678901234567] = "1.234567890123457";
+            tests[0.12345678901234567] = "0.1234567890123457";
+            tests[0.012345678901234567] = "0.01234567890123457";
+            tests[0.0012345678901234567] = "0.001234567890123457";
+            tests[0.00012345678901234567] = "0.0001234567890123457";
+            tests[0.000012345678901234567] = "0.00001234567890123457";
+            tests[0.0000012345678901234567] = "1.234567890123457e-6";
+            tests[0.00000012345678901234567] = "1.234567890123457e-7";
+
+            for (auto& test : tests)
+            {
+                expectEquals (serialiseDouble (test.first), test.second);
+                expectEquals (serialiseDouble (-test.first), "-" + test.second);
             }
         }
     }
