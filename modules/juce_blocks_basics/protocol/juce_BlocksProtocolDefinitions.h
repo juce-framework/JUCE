@@ -87,6 +87,11 @@ enum class MessageFromHost
     setName                 = 0x20
 };
 
+/** Messages that the host may send to a device that do not have the usual message format */
+namespace SpecialMessageFromHost
+{
+    constexpr uint8 resetMaster[6] = { 0xf0, 0x00, 0x21, 0x10, 0x49, 0xf7 };
+}
 
 /** This is the first item in a BLOCKS message, identifying the message type. */
 using MessageType = IntegerWithBitSize<7>;
