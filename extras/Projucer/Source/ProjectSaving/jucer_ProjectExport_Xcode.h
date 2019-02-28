@@ -137,6 +137,7 @@ public:
     String getCustomResourceFoldersString() const      { return customXcodeResourceFoldersValue.get().toString().replaceCharacters ("\r\n", "::"); }
     String getCustomXcassetsFolderString() const       { return customXcassetsFolderValue.get(); }
     String getCustomLaunchStoryboardString() const     { return customLaunchStoryboardValue.get(); }
+    bool shouldAddStoryboardToProject() const          { return getCustomLaunchStoryboardString().isNotEmpty() || getCustomXcassetsFolderString().isEmpty(); }
 
     bool isHardenedRuntimeEnabled() const              { return hardenedRuntimeValue.get(); }
     Array<var> getHardenedRuntimeOptions() const       { return *hardenedRuntimeOptionsValue.get().getArray(); }
@@ -1438,7 +1439,7 @@ public:
                 if (type != AudioUnitv3PlugIn)
                     addPlistDictionaryKeyBool (dict, "UIViewControllerBasedStatusBarAppearance", false);
 
-                if (owner.getCustomXcassetsFolderString().isEmpty())
+                if (owner.shouldAddStoryboardToProject())
                 {
                     auto customStoryboard = owner.getCustomLaunchStoryboardString();
 
@@ -1912,7 +1913,7 @@ private:
         {
             addXcassets();
 
-            if (getCustomXcassetsFolderString().isEmpty())
+            if (shouldAddStoryboardToProject())
             {
                 auto customLaunchStoryboard = getCustomLaunchStoryboardString();
 
