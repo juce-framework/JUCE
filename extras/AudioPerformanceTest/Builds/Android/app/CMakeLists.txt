@@ -114,11 +114,10 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_devices/audio_io/juce_AudioIODeviceType.cpp"
     "../../../../../modules/juce_audio_devices/audio_io/juce_AudioIODeviceType.h"
     "../../../../../modules/juce_audio_devices/audio_io/juce_SystemAudioVolume.h"
-    "../../../../../modules/juce_audio_devices/midi_io/juce_MidiInput.h"
+    "../../../../../modules/juce_audio_devices/midi_io/juce_MidiDevices.cpp"
+    "../../../../../modules/juce_audio_devices/midi_io/juce_MidiDevices.h"
     "../../../../../modules/juce_audio_devices/midi_io/juce_MidiMessageCollector.cpp"
     "../../../../../modules/juce_audio_devices/midi_io/juce_MidiMessageCollector.h"
-    "../../../../../modules/juce_audio_devices/midi_io/juce_MidiOutput.cpp"
-    "../../../../../modules/juce_audio_devices/midi_io/juce_MidiOutput.h"
     "../../../../../modules/juce_audio_devices/native/juce_android_Audio.cpp"
     "../../../../../modules/juce_audio_devices/native/juce_android_Midi.cpp"
     "../../../../../modules/juce_audio_devices/native/juce_android_Oboe.cpp"
@@ -1395,11 +1394,10 @@ set_source_files_properties("../../../../../modules/juce_audio_devices/audio_io/
 set_source_files_properties("../../../../../modules/juce_audio_devices/audio_io/juce_AudioIODeviceType.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/audio_io/juce_AudioIODeviceType.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/audio_io/juce_SystemAudioVolume.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/juce_MidiInput.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/juce_MidiDevices.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/juce_MidiDevices.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/juce_MidiMessageCollector.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/juce_MidiMessageCollector.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/juce_MidiOutput.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/juce_MidiOutput.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_android_Audio.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_android_Midi.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_android_Oboe.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
