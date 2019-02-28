@@ -26,8 +26,8 @@ Remove any classes that you are not interested in (typically you'll find
 Java.class, JuceApp.class and JuceSharingContentProvider.class which you will
 probably want to remove).
 
-6. Inside of app/build/intermediates/classes/release_/release execute the
-following dx command:
+6. Inside of build/intermediates/javac/release_Release/compileRelease_ReleaseJavaWithJavac/classes
+execute the following dx command:
 
     <path-to-your-android-sdk>/build-tools/<latest-build-tool-version>/dx --dex --verbose --min-sdk-version=<your-min-sdk-of-your-classes> --output /tmp/JavaDexByteCode.dex .
 
