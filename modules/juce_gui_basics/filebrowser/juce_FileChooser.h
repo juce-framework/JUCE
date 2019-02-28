@@ -182,6 +182,13 @@ public:
     */
     bool browseForMultipleFilesOrDirectories (FilePreviewComponent* previewComponent = nullptr);
 
+    /** Same as browseForDirectory, but allows the user to select multiple directories.
+
+        The directories chosen can be obtained by calling getResults(). See
+        browseForFileToOpen() for more info about the behaviour of this method.
+    */
+    bool browseForMultipleDirectories (FilePreviewComponent* previewComponent = nullptr);
+
     //==============================================================================
     /** Runs a dialog box for the given set of option flags.
         The flag values used are those in FileBrowserComponent::FileChooserFlags.

@@ -155,6 +155,14 @@ bool FileChooser::browseForMultipleFilesOrDirectories (FilePreviewComponent* pre
                        previewComp);
 }
 
+bool FileChooser::browseForMultipleDirectories (FilePreviewComponent* previewComp)
+{
+    return showDialog (FileBrowserComponent::openMode
+                       | FileBrowserComponent::canSelectDirectories
+                       | FileBrowserComponent::canSelectMultipleItems,
+                       previewComp);
+}
+
 bool FileChooser::showDialog (const int flags, FilePreviewComponent* const previewComp)
 {
     FocusRestorer focusRestorer;
