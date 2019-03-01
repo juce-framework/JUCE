@@ -152,6 +152,20 @@ public:
     AudioBlock& operator= (const AudioBlock& other) noexcept = default;
 
     //==============================================================================
+    bool operator== (const AudioBlock& other) const noexcept
+    {
+        return std::equal (channels,       channels + numChannels,
+                           other.channels, other.channels + other.numChannels)
+                   && startSample == other.startSample
+                   && numSamples == other.numSamples;
+    }
+
+    bool operator!= (const AudioBlock& other) const noexcept
+    {
+        return ! (*this == other);
+    }
+
+    //==============================================================================
     forcedinline size_t getNumSamples() const noexcept           { return numSamples; }
     forcedinline size_t getNumChannels() const noexcept          { return static_cast<size_t> (numChannels); }
 
