@@ -66,9 +66,9 @@ public:
         }
     }
 
-    static StringArray getDevices (bool input)
+    static Array<MidiDeviceInfo> getDevices (bool input)
     {
-        StringArray devices;
+        Array<MidiDeviceInfo> devices;
 
         for (auto& card : findAllALSACardIDs())
             findMidiDevices (devices, input, card);
@@ -96,7 +96,7 @@ private:
     }
 
     // Adds all midi devices to the devices array of the given input/output type on the given card
-    static void findMidiDevices (StringArray& devices, bool input, int cardNum)
+    static void findMidiDevices (Array<MidiDeviceInfo>& devices, bool input, int cardNum)
     {
         snd_ctl_t* ctl = nullptr;
         auto status = snd_ctl_open (&ctl, ("hw:" + String (cardNum)).toRawUTF8(), 0);
@@ -131,9 +131,10 @@ private:
                 status = snd_ctl_rawmidi_info (ctl, info);
 
                 if (status == 0)
-                    devices.add ("hw:" + String (cardNum) + ","
-                                       + String (device) + ","
-                                       + String (sub));
+                {
+                    String deviceName ("hw:" + String (cardNum) + "," + String (device) + "," + String (sub));
+                    devices.add (MidiDeviceInfo (deviceName, deviceName));
+                }
             }
         }
 
@@ -507,58 +508,74 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_Bela()
     return new BelaAudioIODeviceType();
 }
 
-
 //==============================================================================
-// TODO: Add Bela MidiOutput support
-
-StringArray MidiOutput::getDevices()                                { return {}; }
-int MidiOutput::getDefaultDeviceIndex()                             { return 0; }
-MidiOutput* MidiOutput::openDevice (int)                            { return {}; }
-MidiOutput* MidiOutput::createNewDevice (const String&)             { return {}; }
-MidiOutput::~MidiOutput() {}
-void MidiOutput::sendMessageNow (const MidiMessage&) {}
-
-
-//==============================================================================
-MidiInput::MidiInput (const String& nm) : name (nm) {}
-
-MidiInput::~MidiInput()
+MidiInput::MidiInput (const String& deviceName, const String& deviceID)
+    : deviceInfo (deviceName, deviceID)
 {
-    delete static_cast<BelaMidiInput*> (internal);
 }
 
-void MidiInput::start()     { static_cast<BelaMidiInput*> (internal)->start(); }
-void MidiInput::stop()      { static_cast<BelaMidiInput*> (internal)->stop(); }
+MidiInput::~MidiInput()   { delete static_cast<BelaMidiInput*> (internal); }
+void MidiInput::start()   { static_cast<BelaMidiInput*> (internal)->start(); }
+void MidiInput::stop()    { static_cast<BelaMidiInput*> (internal)->stop(); }
+
+void Array<MidiDeviceInfo> MidiInput::getAvailableDevices()
+{
+    return BelaMidiInput::getDevices (true);
+}
+
+MidiDeviceInfo MidiInput::getDefaultDevice()
+{
+    return getAvailableDevices().getFirst();
+}
+
+MidiInput* MidiInput::openDevice (const String& deviceIdentifier, MidiInputCallback* callback)
+{
+    if (deviceIdentifier.isEmpty())
+        return nullptr;
+
+    std::unique_ptr<MidiInput> midiInput (new MidiInput (deviceIdentifier, deviceIdentifier));
+    midiInput->internal = new BelaMidiInput (deviceIdentifier, result, callback);
+
+    return midiInput.release();
+}
+
+MidiInput* MidiInput::createNewDevice (const String&, MidiInputCallback*)
+{
+    // N/A on Bela
+    jassertfalse;
+    return nullptr;
+}
+
+StringArray MidiInput::getDevices()
+{
+    StringArray deviceNames;
+
+    for (auto& d : getAvailableDevices())
+        deviceNames.add (d.name);
+
+    return deviceNames;
+}
 
 int MidiInput::getDefaultDeviceIndex()
 {
     return 0;
 }
 
-StringArray MidiInput::getDevices()
-{
-    return BelaMidiInput::getDevices (true);
-}
-
 MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
 {
-    auto devices = getDevices();
-
-    if (index >= 0 && index < devices.size())
-    {
-        auto deviceName = devices[index];
-        auto result = new MidiInput (deviceName);
-        result->internal = new BelaMidiInput (deviceName, result, callback);
-        return result;
-    }
-
-    return {};
+    return openDevice (getAvailableDevices()[index].identifier, callback);
 }
 
-MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallback* callback)
-{
-    jassertfalse; // N/A on Bela
-    return {};
-}
+//==============================================================================
+// TODO: Add Bela MidiOutput support
+MidiOutput::~MidiOutput()                                 {}
+void MidiOutput::sendMessageNow (const MidiMessage&)      {}
+Array<MidiDeviceInfo> MidiOutput::getAvailableDevices()   { return {}; }
+MidiDeviceInfo MidiOutput::getDefaultDevice()             { return {}; }
+MidiOutput* MidiOutput::openDevice (const String&)        { return nullptr; }
+MidiOutput* MidiOutput::createNewDevice (const String&)   { return nullptr; }
+StringArray MidiOutput::getDevices()                      { return {}; }
+int MidiOutput::getDefaultDeviceIndex()                   { return 0;}
+MidiOutput* MidiOutput::openDevice (int)                  { return nullptr; }
 
 } // namespace juce

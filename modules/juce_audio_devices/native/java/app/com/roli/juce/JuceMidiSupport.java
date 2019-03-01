@@ -51,6 +51,8 @@ public class JuceMidiSupport
 
         // send will do nothing on an input port
         void sendMidi (byte[] msg, int offset, int count);
+
+        String getName ();
     }
 
     //==============================================================================
@@ -256,6 +258,12 @@ public class JuceMidiSupport
         {
         }
 
+        @Override
+        public String getName ()
+        {
+            return owner.getPortName (portPath);
+        }
+
         MidiDeviceManager owner;
         MidiOutputPort androidPort;
         MidiPortPath portPath;
@@ -331,6 +339,12 @@ public class JuceMidiSupport
             androidPort = null;
         }
 
+        @Override
+        public String getName ()
+        {
+            return owner.getPortName (portPath);
+        }
+
         MidiDeviceManager owner;
         MidiInputPort androidPort;
         MidiPortPath portPath;
@@ -343,7 +357,6 @@ public class JuceMidiSupport
             deviceId = deviceIdToUse;
             isInput = direction;
             portIndex = androidIndex;
-
         }
 
         public int deviceId;
@@ -555,17 +568,17 @@ public class JuceMidiSupport
             super.finalize ();
         }
 
-        public String[] getJuceAndroidMidiInputDevices ()
+        public String[] getJuceAndroidMidiOutputDeviceNameAndIDs ()
         {
-            return getJuceAndroidMidiDevices (MidiDeviceInfo.PortInfo.TYPE_OUTPUT);
+            return getJuceAndroidMidiDeviceNameAndIDs (MidiDeviceInfo.PortInfo.TYPE_OUTPUT);
         }
 
-        public String[] getJuceAndroidMidiOutputDevices ()
+        public String[] getJuceAndroidMidiInputDeviceNameAndIDs ()
         {
-            return getJuceAndroidMidiDevices (MidiDeviceInfo.PortInfo.TYPE_INPUT);
+            return getJuceAndroidMidiDeviceNameAndIDs (MidiDeviceInfo.PortInfo.TYPE_INPUT);
         }
 
-        private String[] getJuceAndroidMidiDevices (int portType)
+        private String[] getJuceAndroidMidiDeviceNameAndIDs (int portType)
         {
             // only update the list when JUCE asks for a new list
             synchronized (MidiDeviceManager.class)
@@ -573,22 +586,24 @@ public class JuceMidiSupport
                 deviceInfos = getDeviceInfos ();
             }
 
-            ArrayList<String> portNames = new ArrayList<String> ();
+            ArrayList<String> portNameAndIDs = new ArrayList<String> ();
 
-            int index = 0;
-            for (MidiPortPath portInfo = getPortPathForJuceIndex (portType, index); portInfo != null; portInfo = getPortPathForJuceIndex (portType, ++index))
-                portNames.add (getPortName (portInfo));
+            for (MidiPortPath portInfo  : getAllPorts (portType))
+            {
+                portNameAndIDs.add (getPortName (portInfo));
+                portNameAndIDs.add (Integer.toString (portInfo.hashCode ()));
+            }
 
-            String[] names = new String[portNames.size ()];
-            return portNames.toArray (names);
+            String[] names = new String[portNameAndIDs.size ()];
+            return portNameAndIDs.toArray (names);
         }
 
-        private JuceMidiPort openMidiPortWithJuceIndex (int index, long host, boolean isInput)
+        private JuceMidiPort openMidiPortWithID (int deviceID, long host, boolean isInput)
         {
             synchronized (MidiDeviceManager.class)
             {
-                int portTypeToFind = (isInput ? MidiDeviceInfo.PortInfo.TYPE_OUTPUT : MidiDeviceInfo.PortInfo.TYPE_INPUT);
-                MidiPortPath portInfo = getPortPathForJuceIndex (portTypeToFind, index);
+                int portTypeToFind = (isInput ? MidiDeviceInfo.PortInfo.TYPE_INPUT : MidiDeviceInfo.PortInfo.TYPE_OUTPUT);
+                MidiPortPath portInfo = getPortPathForID (portTypeToFind, deviceID);
 
                 if (portInfo != null)
                 {
@@ -633,14 +648,14 @@ public class JuceMidiSupport
             return null;
         }
 
-        public JuceMidiPort openMidiInputPortWithJuceIndex (int index, long host)
+        public JuceMidiPort openMidiInputPortWithID (int deviceID, long host)
         {
-            return openMidiPortWithJuceIndex (index, host, true);
+            return openMidiPortWithID (deviceID, host, true);
         }
 
-        public JuceMidiPort openMidiOutputPortWithJuceIndex (int index)
+        public JuceMidiPort openMidiOutputPortWithID (int deviceID)
         {
-            return openMidiPortWithJuceIndex (index, 0, false);
+            return openMidiPortWithID (deviceID, 0, false);
         }
 
         /* 0: unpaired, 1: paired, 2: pairing */
@@ -771,24 +786,6 @@ public class JuceMidiSupport
         public void removePort (MidiPortPath path)
         {
             openPorts.remove (path);
-        }
-
-        public String getInputPortNameForJuceIndex (int index)
-        {
-            MidiPortPath portInfo = getPortPathForJuceIndex (MidiDeviceInfo.PortInfo.TYPE_OUTPUT, index);
-            if (portInfo != null)
-                return getPortName (portInfo);
-
-            return "";
-        }
-
-        public String getOutputPortNameForJuceIndex (int index)
-        {
-            MidiPortPath portInfo = getPortPathForJuceIndex (MidiDeviceInfo.PortInfo.TYPE_INPUT, index);
-            if (portInfo != null)
-                return getPortName (portInfo);
-
-            return "";
         }
 
         public void onDeviceAdded (MidiDeviceInfo info)
@@ -980,24 +977,24 @@ public class JuceMidiSupport
             return "";
         }
 
-        public MidiPortPath getPortPathForJuceIndex (int portType, int juceIndex)
+        public ArrayList<MidiPortPath> getAllPorts (int portType)
         {
-            int portIdx = 0;
-            for (MidiDeviceInfo info : deviceInfos)
-            {
-                for (MidiDeviceInfo.PortInfo portInfo : info.getPorts ())
-                {
-                    if (portInfo.getType () == portType)
-                    {
-                        if (portIdx == juceIndex)
-                            return new MidiPortPath (info.getId (),
-                                    (portType == MidiDeviceInfo.PortInfo.TYPE_INPUT),
-                                    portInfo.getPortNumber ());
+            ArrayList<MidiPortPath> ports = new ArrayList<MidiPortPath> ();
 
-                        portIdx++;
-                    }
-                }
-            }
+            for (MidiDeviceInfo info : deviceInfos)
+                for (MidiDeviceInfo.PortInfo portInfo : info.getPorts ())
+                    if (portInfo.getType () == portType)
+                        ports.add (new MidiPortPath (info.getId (), (portType == MidiDeviceInfo.PortInfo.TYPE_INPUT),
+                                                     portInfo.getPortNumber ()));
+
+            return ports;
+        }
+
+        public MidiPortPath getPortPathForID (int portType, int deviceID)
+        {
+            for (MidiPortPath port : getAllPorts (portType))
+                if (port.hashCode () == deviceID)
+                    return port;
 
             return null;
         }

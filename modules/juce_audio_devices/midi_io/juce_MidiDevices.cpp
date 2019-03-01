@@ -23,18 +23,8 @@
 namespace juce
 {
 
-struct MidiOutput::PendingMessage
-{
-    PendingMessage (const void* data, int len, double timeStamp)
-        : message (data, len, timeStamp)
-    {}
-
-    MidiMessage message;
-    PendingMessage* next;
-};
-
-MidiOutput::MidiOutput (const String& deviceName)
-    : Thread ("midi out"), name (deviceName)
+MidiOutput::MidiOutput (const String& deviceName, const String& deviceIdentifier)
+    : Thread ("midi out"), deviceInfo (deviceName, deviceIdentifier)
 {
 }
 
@@ -116,7 +106,7 @@ void MidiOutput::run()
 {
     while (! threadShouldExit())
     {
-        uint32 now = Time::getMillisecondCounter();
+        auto now = Time::getMillisecondCounter();
         uint32 eventTime = 0;
         uint32 timeToWait = 500;
 
@@ -166,5 +156,107 @@ void MidiOutput::run()
 
     clearAllPendingMessages();
 }
+
+#if JUCE_UNIT_TESTS
+ class MidiDevicesUnitTests  : public UnitTest
+ {
+ public:
+     MidiDevicesUnitTests() : UnitTest ("MidiInput/MidiOutput", "MIDI/MPE")  {}
+
+     void runTest() override
+     {
+         beginTest ("default device (input)");
+         {
+             auto devices = MidiInput::getAvailableDevices();
+             auto defaultDevice = MidiInput::getDefaultDevice();
+
+             if (devices.size() == 0)
+                 expect (defaultDevice == MidiDeviceInfo());
+             else
+                 expect (devices.contains (defaultDevice));
+         }
+
+         beginTest ("default device (output)");
+         {
+             auto devices = MidiOutput::getAvailableDevices();
+             auto defaultDevice = MidiOutput::getDefaultDevice();
+
+             if (devices.size() == 0)
+                 expect (defaultDevice == MidiDeviceInfo());
+             else
+                 expect (devices.contains (defaultDevice));
+         }
+
+        #if JUCE_MAC || JUCE_LINUX || JUCE_IOS
+         String testDeviceName  ("TestDevice");
+         String testDeviceName2 ("TestDevice2");
+
+         struct MessageCallbackHandler  : public MidiInputCallback
+         {
+             void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message) override
+             {
+                 messageSource = source;
+                 messageReceived = message;
+             }
+
+             MidiInput* messageSource = nullptr;
+             MidiMessage messageReceived;
+         };
+
+         MessageCallbackHandler handler;
+
+         beginTest ("create device (input)");
+         {
+             std::unique_ptr<MidiInput> device (MidiInput::createNewDevice (testDeviceName, &handler));
+
+             expect (device.get() != nullptr);
+             expect (device->getName() == testDeviceName);
+
+             device->setName (testDeviceName2);
+             expect (device->getName() == testDeviceName2);
+         }
+
+         beginTest ("create device (output)");
+         {
+             std::unique_ptr<MidiOutput> device (MidiOutput::createNewDevice (testDeviceName));
+
+             expect (device.get() != nullptr);
+             expect (device->getName() == testDeviceName);
+         }
+
+         auto testMessage = MidiMessage::noteOn (5, 12, (uint8) 51);
+
+         beginTest ("send messages");
+         {
+             std::unique_ptr<MidiInput> midiInput (MidiInput::createNewDevice (testDeviceName, &handler));
+             expect (midiInput.get() != nullptr);
+             midiInput->start();
+
+             auto inputInfo = midiInput->getDeviceInfo();
+
+             expect (MidiOutput::getAvailableDevices().contains (inputInfo));
+
+             std::unique_ptr<MidiOutput> midiOutput (MidiOutput::openDevice (midiInput->getIdentifier()));
+             expect (midiOutput.get() != nullptr);
+
+             midiOutput->sendMessageNow (testMessage);
+
+             // Pump the message thread for a bit to allow the message to be delivered
+             MessageManager::getInstance()->runDispatchLoopUntil (100);
+
+             expect (handler.messageSource == midiInput.get());
+
+             expect (handler.messageReceived.getChannel()    == testMessage.getChannel());
+             expect (handler.messageReceived.getNoteNumber() == testMessage.getNoteNumber());
+             expect (handler.messageReceived.getVelocity()   == testMessage.getVelocity());
+
+             midiInput->stop();
+         }
+        #endif
+     }
+ };
+
+ static MidiDevicesUnitTests MidiDevicesUnitTests;
+#endif
 
 } // namespace juce

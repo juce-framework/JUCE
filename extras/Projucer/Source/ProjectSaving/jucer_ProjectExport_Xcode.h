@@ -137,6 +137,7 @@ public:
     String getCustomResourceFoldersString() const      { return customXcodeResourceFoldersValue.get().toString().replaceCharacters ("\r\n", "::"); }
     String getCustomXcassetsFolderString() const       { return customXcassetsFolderValue.get(); }
     String getCustomLaunchStoryboardString() const     { return customLaunchStoryboardValue.get(); }
+    bool shouldAddStoryboardToProject() const          { return getCustomLaunchStoryboardString().isNotEmpty() || getCustomXcassetsFolderString().isEmpty(); }
 
     bool isHardenedRuntimeEnabled() const              { return hardenedRuntimeValue.get(); }
     Array<var> getHardenedRuntimeOptions() const       { return *hardenedRuntimeOptionsValue.get().getArray(); }
@@ -217,9 +218,9 @@ public:
                        "a launch storyboard from being used.");
 
             props.add (new TextPropertyComponent (customLaunchStoryboardValue, "Custom Launch Storyboard", 256, false),
-                       "If this field is not empty then the specified launch storyboard will be used for the app's launch screen, "
-                       "otherwise a default blank launch storyboard will be generated. This should be the filename without the "
-                       "\".storyboard\" extension and the file should be added to the project's Xcode resources.");
+                       "If this field is not empty then the specified launch storyboard file will be added to the project as an Xcode "
+                       "resource and will be used for the app's launch screen, otherwise a default blank launch storyboard will be used. "
+                       "The file path should be relative to the project folder.");
         }
 
         props.add (new TextPropertyComponent (customXcodeResourceFoldersValue, "Custom Xcode Resource Folders", 8192, true),
@@ -1438,11 +1439,12 @@ public:
                 if (type != AudioUnitv3PlugIn)
                     addPlistDictionaryKeyBool (dict, "UIViewControllerBasedStatusBarAppearance", false);
 
-                if (owner.getCustomXcassetsFolderString().isEmpty())
+                if (owner.shouldAddStoryboardToProject())
                 {
                     auto customStoryboard = owner.getCustomLaunchStoryboardString();
 
-                    addPlistDictionaryKey (dict, "UILaunchStoryboardName", customStoryboard.isNotEmpty() ? customStoryboard
+                    addPlistDictionaryKey (dict, "UILaunchStoryboardName", customStoryboard.isNotEmpty() ? customStoryboard.fromLastOccurrenceOf ("/", false, false)
+                                                                                                                           .upToLastOccurrenceOf (".storyboard", false, false)
                                                                                                          : owner.getDefaultLaunchStoryboardName());
                 }
             }
@@ -1911,8 +1913,17 @@ private:
         {
             addXcassets();
 
-            if (getCustomXcassetsFolderString().isEmpty() && getCustomLaunchStoryboardString().isEmpty())
-                writeDefaultLaunchStoryboardFile();
+            if (shouldAddStoryboardToProject())
+            {
+                auto customLaunchStoryboard = getCustomLaunchStoryboardString();
+
+                if (customLaunchStoryboard.isEmpty())
+                    writeDefaultLaunchStoryboardFile();
+                else if (getProject().getProjectFolder().getChildFile (customLaunchStoryboard).existsAsFile())
+                    addLaunchStoryboardFileReference (RelativePath (customLaunchStoryboard, RelativePath::projectFolder)
+                                                          .rebased (getProject().getProjectFolder(), getTargetFolder(), RelativePath::buildTargetFolder)
+                                                          .toUnixStyle());
+            }
         }
         else
         {
@@ -3515,9 +3526,13 @@ private:
 
         overwriteFileIfDifferentOrThrow (storyboardFile, mo);
 
-        auto path   = RelativePath (storyboardFile, getTargetFolder(), RelativePath::buildTargetFolder).toUnixStyle();
-        auto refID  = addFileReference (path);
-        auto fileID = addBuildFile (path, refID, false, false);
+        addLaunchStoryboardFileReference (RelativePath (storyboardFile, getTargetFolder(), RelativePath::buildTargetFolder).toUnixStyle());
+    }
+
+    void addLaunchStoryboardFileReference (const String& relativePath) const
+    {
+        auto refID  = addFileReference (relativePath);
+        auto fileID = addBuildFile (relativePath, refID, false, false);
 
         resourceIDs.add (fileID);
         resourceFileRefs.add (refID);

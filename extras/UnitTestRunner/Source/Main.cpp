@@ -52,6 +52,9 @@ class ConsoleUnitTestRunner : public UnitTestRunner
 //==============================================================================
 int main (int argc, char **argv)
 {
+    // Needed for tests that require a message thread
+    ScopedJuceInitialiser_GUI guiInitialiser;
+
     ConsoleLogger logger;
     Logger::setCurrentLogger (&logger);
 
