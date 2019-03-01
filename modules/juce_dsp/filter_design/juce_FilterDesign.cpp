@@ -42,18 +42,18 @@ typename FIR::Coefficients<FloatType>::Ptr
     auto* result = new typename FIR::Coefficients<FloatType> (order + 1u);
 
     auto* c = result->getRawCoefficients();
-    auto normalizedFrequency = frequency / sampleRate;
+    auto normalisedFrequency = frequency / sampleRate;
 
     for (size_t i = 0; i <= order; ++i)
     {
         if (i == order * 0.5)
         {
-            c[i] = static_cast<FloatType> (normalizedFrequency * 2);
+            c[i] = static_cast<FloatType> (normalisedFrequency * 2);
         }
         else
         {
             auto indice = MathConstants<double>::pi * (static_cast<double> (i) - 0.5 * static_cast<double> (order));
-            c[i] = static_cast<FloatType> (std::sin (2.0 * indice * normalizedFrequency) / indice);
+            c[i] = static_cast<FloatType> (std::sin (2.0 * indice * normalisedFrequency) / indice);
         }
     }
 
@@ -66,23 +66,23 @@ typename FIR::Coefficients<FloatType>::Ptr
 template <typename FloatType>
 typename FIR::Coefficients<FloatType>::Ptr
     FilterDesign<FloatType>::designFIRLowpassKaiserMethod (FloatType frequency, double sampleRate,
-                                                           FloatType normalizedTransitionWidth,
-                                                           FloatType attenuationdB)
+                                                           FloatType normalisedTransitionWidth,
+                                                           FloatType amplitudedB)
 {
     jassert (sampleRate > 0);
     jassert (frequency > 0 && frequency <= sampleRate * 0.5);
-    jassert (normalizedTransitionWidth > 0 && normalizedTransitionWidth <= 0.5);
-    jassert (attenuationdB >= -100 && attenuationdB <= 0);
+    jassert (normalisedTransitionWidth > 0 && normalisedTransitionWidth <= 0.5);
+    jassert (amplitudedB >= -100 && amplitudedB <= 0);
 
     FloatType beta = 0;
 
-    if (attenuationdB < -50)
-        beta = static_cast<FloatType> (0.1102 * (-attenuationdB - 8.7));
-    else if (attenuationdB <= 21)
-        beta = static_cast<FloatType> (0.5842 * std::pow (-attenuationdB - 21, 0.4) + 0.07886 * (-attenuationdB - 21));
+    if (amplitudedB < -50)
+        beta = static_cast<FloatType> (0.1102 * (-amplitudedB - 8.7));
+    else if (amplitudedB <= -21)
+        beta = static_cast<FloatType> (0.5842 * std::pow (-amplitudedB - 21, 0.4) + 0.07886 * (-amplitudedB - 21));
 
-    int order = attenuationdB < -21 ? roundToInt (std::ceil ((-attenuationdB - 7.95) / (2.285 * normalizedTransitionWidth * MathConstants<double>::twoPi)))
-                                    : roundToInt (std::ceil (5.79 / (normalizedTransitionWidth * MathConstants<double>::twoPi)));
+    int order = amplitudedB < -21 ? roundToInt (std::ceil ((-amplitudedB - 7.95) / (2.285 * normalisedTransitionWidth * MathConstants<double>::twoPi)))
+                                    : roundToInt (std::ceil (5.79 / (normalisedTransitionWidth * MathConstants<double>::twoPi)));
 
     jassert (order >= 0);
 
@@ -94,14 +94,14 @@ typename FIR::Coefficients<FloatType>::Ptr
 template <typename FloatType>
 typename FIR::Coefficients<FloatType>::Ptr
     FilterDesign<FloatType>::designFIRLowpassTransitionMethod (FloatType frequency, double sampleRate, size_t order,
-                                                               FloatType normalizedTransitionWidth, FloatType spline)
+                                                               FloatType normalisedTransitionWidth, FloatType spline)
 {
     jassert (sampleRate > 0);
     jassert (frequency > 0 && frequency <= sampleRate * 0.5);
-    jassert (normalizedTransitionWidth > 0 && normalizedTransitionWidth <= 0.5);
+    jassert (normalisedTransitionWidth > 0 && normalisedTransitionWidth <= 0.5);
     jassert (spline >= 1.0 && spline <= 4.0);
 
-    auto normalizedFrequency = frequency / static_cast<FloatType> (sampleRate);
+    auto normalisedFrequency = frequency / static_cast<FloatType> (sampleRate);
 
     auto* result = new typename FIR::Coefficients<FloatType> (order + 1u);
     auto* c = result->getRawCoefficients();
@@ -110,13 +110,13 @@ typename FIR::Coefficients<FloatType>::Ptr
     {
         if (i == order / 2 && order % 2 == 0)
         {
-            c[i] = static_cast<FloatType> (2 * normalizedFrequency);
+            c[i] = static_cast<FloatType> (2 * normalisedFrequency);
         }
         else
         {
             auto indice  = MathConstants<double>::pi * (i - 0.5 * order);
-            auto indice2 = MathConstants<double>::pi * normalizedTransitionWidth * (i - 0.5 * order) / spline;
-            c[i] = static_cast<FloatType> (std::sin (2 * indice * normalizedFrequency)
+            auto indice2 = MathConstants<double>::pi * normalisedTransitionWidth * (i - 0.5 * order) / spline;
+            c[i] = static_cast<FloatType> (std::sin (2 * indice * normalisedFrequency)
                                             / indice * std::pow (std::sin (indice2) / indice2, spline));
         }
     }
@@ -128,18 +128,18 @@ template <typename FloatType>
 typename FIR::Coefficients<FloatType>::Ptr
     FilterDesign<FloatType>::designFIRLowpassLeastSquaresMethod (FloatType frequency,
                                                                  double sampleRate, size_t order,
-                                                                 FloatType normalizedTransitionWidth,
+                                                                 FloatType normalisedTransitionWidth,
                                                                  FloatType stopBandWeight)
 {
     jassert (sampleRate > 0);
     jassert (frequency > 0 && frequency <= sampleRate * 0.5);
-    jassert (normalizedTransitionWidth > 0 && normalizedTransitionWidth <= 0.5);
+    jassert (normalisedTransitionWidth > 0 && normalisedTransitionWidth <= 0.5);
     jassert (stopBandWeight >= 1.0 && stopBandWeight <= 100.0);
 
-    auto normalizedFrequency = static_cast<double> (frequency) / sampleRate;
+    auto normalisedFrequency = static_cast<double> (frequency) / sampleRate;
 
-    auto wp = MathConstants<double>::twoPi * (static_cast<double> (normalizedFrequency - normalizedTransitionWidth / 2.0));
-    auto ws = MathConstants<double>::twoPi * (static_cast<double> (normalizedFrequency + normalizedTransitionWidth / 2.0));
+    auto wp = MathConstants<double>::twoPi * (static_cast<double> (normalisedFrequency - normalisedTransitionWidth / 2.0));
+    auto ws = MathConstants<double>::twoPi * (static_cast<double> (normalisedFrequency + normalisedTransitionWidth / 2.0));
 
     auto N = order + 1;
 
@@ -236,15 +236,15 @@ typename FIR::Coefficients<FloatType>::Ptr
 
 template <typename FloatType>
 typename FIR::Coefficients<FloatType>::Ptr
-    FilterDesign<FloatType>::designFIRLowpassHalfBandEquirippleMethod (FloatType normalizedTransitionWidth,
-                                                                       FloatType attenuationdB)
+    FilterDesign<FloatType>::designFIRLowpassHalfBandEquirippleMethod (FloatType normalisedTransitionWidth,
+                                                                       FloatType amplitudedB)
 {
-    jassert (normalizedTransitionWidth > 0 && normalizedTransitionWidth <= 0.5);
-    jassert (attenuationdB >= -300 && attenuationdB <= -10);
+    jassert (normalisedTransitionWidth > 0 && normalisedTransitionWidth <= 0.5);
+    jassert (amplitudedB >= -300 && amplitudedB <= -10);
 
-    auto wpT = (0.5 - normalizedTransitionWidth) * MathConstants<double>::pi;
+    auto wpT = (0.5 - normalisedTransitionWidth) * MathConstants<double>::pi;
 
-    auto n = roundToInt (std::ceil ((attenuationdB - 18.18840664 * wpT + 33.64775300) / (18.54155181 * wpT - 29.13196871)));
+    auto n = roundToInt (std::ceil ((amplitudedB - 18.18840664 * wpT + 33.64775300) / (18.54155181 * wpT - 29.13196871)));
     auto kp = (n * wpT - 1.57111377 * n + 0.00665857) / (-1.01927560 * n + 0.37221484);
     auto A = (0.01525753 * n + 0.03682344 + 9.24760314 / (double) n) * kp + 1.01701407 + 0.73512298 / (double) n;
     auto B = (0.00233667 * n - 1.35418408 + 5.75145813 / (double) n) * kp + 1.02999650 - 0.72759508 / (double) n;
@@ -339,67 +339,67 @@ Array<double> FilterDesign<FloatType>::getPartialImpulseResponseHn (int n, doubl
 template <typename FloatType>
 ReferenceCountedArray<IIR::Coefficients<FloatType>>
     FilterDesign<FloatType>::designIIRLowpassHighOrderButterworthMethod (FloatType frequency, double sampleRate,
-                                                                         FloatType normalizedTransitionWidth,
-                                                                         FloatType passbandAttenuationdB,
-                                                                         FloatType stopbandAttenuationdB)
+                                                                         FloatType normalisedTransitionWidth,
+                                                                         FloatType passbandAmplitudedB,
+                                                                         FloatType stopbandAmplitudedB)
 {
-    return designIIRLowpassHighOrderGeneralMethod (0, frequency, sampleRate, normalizedTransitionWidth,
-                                                   passbandAttenuationdB, stopbandAttenuationdB);
+    return designIIRLowpassHighOrderGeneralMethod (0, frequency, sampleRate, normalisedTransitionWidth,
+                                                   passbandAmplitudedB, stopbandAmplitudedB);
 }
 
 template <typename FloatType>
 ReferenceCountedArray<IIR::Coefficients<FloatType>>
     FilterDesign<FloatType>::designIIRLowpassHighOrderChebyshev1Method (FloatType frequency, double sampleRate,
-                                                                        FloatType normalizedTransitionWidth,
-                                                                        FloatType passbandAttenuationdB,
-                                                                        FloatType stopbandAttenuationdB)
+                                                                        FloatType normalisedTransitionWidth,
+                                                                        FloatType passbandAmplitudedB,
+                                                                        FloatType stopbandAmplitudedB)
 {
-    return designIIRLowpassHighOrderGeneralMethod (1, frequency, sampleRate, normalizedTransitionWidth,
-                                                   passbandAttenuationdB, stopbandAttenuationdB);
+    return designIIRLowpassHighOrderGeneralMethod (1, frequency, sampleRate, normalisedTransitionWidth,
+                                                   passbandAmplitudedB, stopbandAmplitudedB);
 }
 
 template <typename FloatType>
 ReferenceCountedArray<IIR::Coefficients<FloatType>>
     FilterDesign<FloatType>::designIIRLowpassHighOrderChebyshev2Method (FloatType frequency, double sampleRate,
-                                                                        FloatType normalizedTransitionWidth,
-                                                                        FloatType passbandAttenuationdB,
-                                                                        FloatType stopbandAttenuationdB)
+                                                                        FloatType normalisedTransitionWidth,
+                                                                        FloatType passbandAmplitudedB,
+                                                                        FloatType stopbandAmplitudedB)
 {
-    return designIIRLowpassHighOrderGeneralMethod (2, frequency, sampleRate, normalizedTransitionWidth,
-                                                   passbandAttenuationdB, stopbandAttenuationdB);
+    return designIIRLowpassHighOrderGeneralMethod (2, frequency, sampleRate, normalisedTransitionWidth,
+                                                   passbandAmplitudedB, stopbandAmplitudedB);
 }
 
 template <typename FloatType>
 ReferenceCountedArray<IIR::Coefficients<FloatType>>
     FilterDesign<FloatType>::designIIRLowpassHighOrderEllipticMethod (FloatType frequency, double sampleRate,
-                                                                      FloatType normalizedTransitionWidth,
-                                                                      FloatType passbandAttenuationdB,
-                                                                      FloatType stopbandAttenuationdB)
+                                                                      FloatType normalisedTransitionWidth,
+                                                                      FloatType passbandAmplitudedB,
+                                                                      FloatType stopbandAmplitudedB)
 {
-    return designIIRLowpassHighOrderGeneralMethod (3, frequency, sampleRate, normalizedTransitionWidth,
-                                                   passbandAttenuationdB, stopbandAttenuationdB);
+    return designIIRLowpassHighOrderGeneralMethod (3, frequency, sampleRate, normalisedTransitionWidth,
+                                                   passbandAmplitudedB, stopbandAmplitudedB);
 }
 
 template <typename FloatType>
 ReferenceCountedArray<IIR::Coefficients<FloatType>>
     FilterDesign<FloatType>::designIIRLowpassHighOrderGeneralMethod (int type, FloatType frequency, double sampleRate,
-                                                                     FloatType normalizedTransitionWidth,
-                                                                     FloatType passbandAttenuationdB,
-                                                                     FloatType stopbandAttenuationdB)
+                                                                     FloatType normalisedTransitionWidth,
+                                                                     FloatType passbandAmplitudedB,
+                                                                     FloatType stopbandAmplitudedB)
 {
     jassert (sampleRate > 0);
     jassert (frequency > 0 && frequency <= sampleRate * 0.5);
-    jassert (normalizedTransitionWidth > 0 && normalizedTransitionWidth <= 0.5);
-    jassert (passbandAttenuationdB > -20 && passbandAttenuationdB < 0);
-    jassert (stopbandAttenuationdB > -300 && stopbandAttenuationdB < -20);
+    jassert (normalisedTransitionWidth > 0 && normalisedTransitionWidth <= 0.5);
+    jassert (passbandAmplitudedB > -20 && passbandAmplitudedB < 0);
+    jassert (stopbandAmplitudedB > -300 && stopbandAmplitudedB < -20);
 
-    auto normalizedFrequency = frequency / sampleRate;
+    auto normalisedFrequency = frequency / sampleRate;
 
-    auto fp = normalizedFrequency - normalizedTransitionWidth / 2;
-    auto fs = normalizedFrequency + normalizedTransitionWidth / 2;
+    auto fp = normalisedFrequency - normalisedTransitionWidth / 2;
+    auto fs = normalisedFrequency + normalisedTransitionWidth / 2;
 
-    double Ap = passbandAttenuationdB;
-    double As = stopbandAttenuationdB;
+    double Ap = passbandAmplitudedB;
+    double As = stopbandAmplitudedB;
     auto Gp = Decibels::decibelsToGain (Ap, -300.0);
     auto Gs = Decibels::decibelsToGain (As, -300.0);
     auto epsp = std::sqrt (1.0 / (Gp * Gp) - 1.0);
@@ -610,14 +610,14 @@ ReferenceCountedArray<IIR::Coefficients<FloatType>>
 
 template <typename FloatType>
 typename FilterDesign<FloatType>::IIRPolyphaseAllpassStructure
-    FilterDesign<FloatType>::designIIRLowpassHalfBandPolyphaseAllpassMethod (FloatType normalizedTransitionWidth,
-                                                                             FloatType stopbandAttenuationdB)
+    FilterDesign<FloatType>::designIIRLowpassHalfBandPolyphaseAllpassMethod (FloatType normalisedTransitionWidth,
+                                                                             FloatType stopbandAmplitudedB)
 {
-    jassert (normalizedTransitionWidth > 0 && normalizedTransitionWidth <= 0.5);
-    jassert (stopbandAttenuationdB > -300 && stopbandAttenuationdB < -10);
+    jassert (normalisedTransitionWidth > 0 && normalisedTransitionWidth <= 0.5);
+    jassert (stopbandAmplitudedB > -300 && stopbandAmplitudedB < -10);
 
-    const double wt = MathConstants<double>::twoPi * normalizedTransitionWidth;
-    const double ds = Decibels::decibelsToGain (stopbandAttenuationdB, static_cast<FloatType> (-300.0));
+    const double wt = MathConstants<double>::twoPi * normalisedTransitionWidth;
+    const double ds = Decibels::decibelsToGain (stopbandAmplitudedB, static_cast<FloatType> (-300.0));
 
     auto k = std::pow (std::tan ((MathConstants<double>::pi - wt) / 4), 2.0);
     auto kp = std::sqrt (1.0 - k * k);

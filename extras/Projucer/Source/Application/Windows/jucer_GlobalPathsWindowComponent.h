@@ -198,7 +198,7 @@ private:
                      String ("This should be the path to the folder containing the JUCE modules that you wish to use, typically the \"modules\" directory of your JUCE folder.")
                      + (isThisOS ? " Use the button below to re-scan a new path." : ""));
         builder.add (new FilePathPropertyComponent (userModulePathValue, "User Modules", true, isThisOS, {}, {}, true),
-                     String ("A semicolon-separated list of user module paths. These paths will be used to display any non-JUCE modules that are available.")
+                     String ("A path to a folder containing any custom modules that you wish to use.")
                      + (isThisOS ? " Use the button below to re-scan new paths." : ""));
 
         builder.add (new LabelPropertyComponent ("SDKs"), {});

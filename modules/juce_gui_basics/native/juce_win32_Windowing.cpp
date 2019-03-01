@@ -269,6 +269,12 @@ extern void* getUser32Function (const char*);
  #define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 ((DPI_AWARENESS_CONTEXT) - 4)
 #endif
 
+// Some versions of the Windows 10 SDK define _DPI_AWARENESS_CONTEXTS_ but not
+// DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2
+#ifndef DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2
+ #define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 ((DPI_AWARENESS_CONTEXT) - 4)
+#endif
+
 //==============================================================================
 typedef BOOL (WINAPI* RegisterTouchWindowFunc)   (HWND, ULONG);
 typedef BOOL (WINAPI* GetTouchInputInfoFunc)     (HTOUCHINPUT, UINT, TOUCHINPUT*, int);
@@ -1038,7 +1044,7 @@ private:
 
         const ScopedValueSetter<bool> setter (reentrant, true, false);
 
-        const bool isActive = isVisible();
+        auto isActive = isKeyboardVisible();
 
         if (isActive != shouldBeActive)
         {
@@ -1056,6 +1062,14 @@ private:
 
     bool isVisible()
     {
+        if (auto hwnd = FindWindowEx (NULL, NULL, L"ApplicationFrameWindow", NULL))
+            return FindWindowEx (hwnd, NULL, L"Windows.UI.Core.CoreWindow", L"Microsoft Text Input Application") != NULL;
+
+        return false;
+    }
+
+    bool isVisibleLegacy()
+    {
         if (auto hwnd = FindWindow (L"IPTip_Main_Window", NULL))
         {
             auto style = GetWindowLong (hwnd, GWL_STYLE);
@@ -1063,6 +1077,15 @@ private:
         }
 
         return false;
+    }
+
+    bool isKeyboardVisible()
+    {
+        if (isVisible())
+            return true;
+
+        // isVisible() may fail on Win10 versions < 1709 so try the old method too
+        return isVisibleLegacy();
     }
 
     bool shouldBeActive = false, reentrant = false;
@@ -1706,9 +1729,18 @@ public:
     private:
         Point<float> getMousePos (POINTL mousePos) const
         {
-            auto& comp = peer.getComponent();
-            return comp.getLocalPoint (nullptr, convertPhysicalScreenPointToLogical (pointFromPOINT ({ mousePos.x, mousePos.y }),
-                                                                                    (HWND) peer.getNativeHandle()).toFloat());
+            Point<float> screenPos;
+
+           #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+            auto h = (HWND) peer.getNativeHandle();
+
+            if (isPerMonitorDPIAwareWindow (h))
+                screenPos = convertPhysicalScreenPointToLogical (pointFromPOINT ({ mousePos.x, mousePos.y }), h).toFloat();
+            else
+           #endif
+                screenPos = pointFromPOINT ({ mousePos.x, mousePos.y }).toFloat() / static_cast<float> (getGlobalDPI() / USER_DEFAULT_SCREEN_DPI);
+
+            return peer.getComponent().getLocalPoint (nullptr, screenPos);
         }
 
         template <typename CharType>

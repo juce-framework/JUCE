@@ -65,8 +65,8 @@ public:
     void startNote (int midiNoteNumber, float velocity, SynthesiserSound*, int) override
     {
         frequency = MidiMessage::getMidiNoteInHertz (midiNoteNumber);
-        phaseIncrement.setValue (((MathConstants<double>::twoPi) * frequency) / sampleRate);
-        amplitude.setValue (velocity);
+        phaseIncrement.setTargetValue (((MathConstants<double>::twoPi) * frequency) / sampleRate);
+        amplitude.setTargetValue (velocity);
 
         // Store the initial note and work out the maximum frequency deviations for pitch bend
         initialNote = midiNoteNumber;
@@ -77,14 +77,14 @@ public:
     void stopNote (float, bool) override
     {
         clearCurrentNote();
-        amplitude.setValue (0.0);
+        amplitude.setTargetValue (0.0);
     }
 
     void pitchWheelMoved (int newValue) override
     {
         // Change the phase increment based on pitch bend amount
         auto frequencyOffset = ((newValue > 0 ? maxFreq : minFreq) * (newValue / 127.0));
-        phaseIncrement.setValue (((MathConstants<double>::twoPi) * (frequency + frequencyOffset)) / sampleRate);
+        phaseIncrement.setTargetValue (((MathConstants<double>::twoPi) * (frequency + frequencyOffset)) / sampleRate);
     }
 
     void controllerMoved (int, int) override {}
@@ -92,7 +92,7 @@ public:
     void channelPressureChanged (int newChannelPressureValue) override
     {
         // Set the amplitude based on pressure value
-        amplitude.setValue (newChannelPressureValue / 127.0);
+        amplitude.setTargetValue (newChannelPressureValue / 127.0);
     }
 
     void renderNextBlock (AudioBuffer<float>& outputBuffer, int startSample, int numSamples) override
@@ -128,7 +128,7 @@ public:
     virtual double renderWaveShape (const double currentPhase) = 0;
 
 private:
-    LinearSmoothedValue<double> amplitude, phaseIncrement;
+    SmoothedValue<double> amplitude, phaseIncrement;
 
     double frequency = 0.0;
     double phasePos = 0.0;

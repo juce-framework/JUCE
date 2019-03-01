@@ -27,9 +27,9 @@ struct MIDIDeviceDetector  : public PhysicalTopologySource::DeviceDetector
 {
     MIDIDeviceDetector() {}
 
-    juce::StringArray scanForDevices() override
+    StringArray scanForDevices() override
     {
-        juce::StringArray result;
+        StringArray result;
 
         for (auto& pair : findDevices())
             result.add (pair.inputName + " & " + pair.outputName);
@@ -49,8 +49,8 @@ struct MIDIDeviceDetector  : public PhysicalTopologySource::DeviceDetector
             {
                 lockedFromOutside = false;
 
-                dev->midiInput.reset (juce::MidiInput::openDevice (pair.inputIndex, dev.get()));
-                dev->midiOutput.reset (juce::MidiOutput::openDevice (pair.outputIndex));
+                dev->midiInput.reset (MidiInput::openDevice (pair.inputIndex, dev.get()));
+                dev->midiOutput.reset (MidiOutput::openDevice (pair.outputIndex));
 
                 if (dev->midiInput != nullptr)
                 {
@@ -72,12 +72,12 @@ struct MIDIDeviceDetector  : public PhysicalTopologySource::DeviceDetector
         return lockedFromOutside && ! findDevices().isEmpty();
     }
 
-    static bool isBlocksMidiDeviceName (const juce::String& name)
+    static bool isBlocksMidiDeviceName (const String& name)
     {
         return name.indexOf (" BLOCK") > 0 || name.indexOf (" Block") > 0;
     }
 
-    static String cleanBlocksDeviceName (juce::String name)
+    static String cleanBlocksDeviceName (String name)
     {
         name = name.trim();
 
@@ -96,16 +96,16 @@ struct MIDIDeviceDetector  : public PhysicalTopologySource::DeviceDetector
 
     struct MidiInputOutputPair
     {
-        juce::String outputName, inputName;
+        String outputName, inputName;
         int outputIndex = -1, inputIndex = -1;
     };
 
-    static juce::Array<MidiInputOutputPair> findDevices()
+    static Array<MidiInputOutputPair> findDevices()
     {
-        juce::Array<MidiInputOutputPair> result;
+        Array<MidiInputOutputPair> result;
 
-        auto midiInputs  = juce::MidiInput::getDevices();
-        auto midiOutputs = juce::MidiOutput::getDevices();
+        auto midiInputs  = MidiInput::getDevices();
+        auto midiOutputs = MidiOutput::getDevices();
 
         for (int j = 0; j < midiInputs.size(); ++j)
         {

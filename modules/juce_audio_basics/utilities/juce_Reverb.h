@@ -72,9 +72,9 @@ public:
         const float dryScaleFactor = 2.0f;
 
         const float wet = newParams.wetLevel * wetScaleFactor;
-        dryGain.setValue (newParams.dryLevel * dryScaleFactor);
-        wetGain1.setValue (0.5f * wet * (1.0f + newParams.width));
-        wetGain2.setValue (0.5f * wet * (1.0f - newParams.width));
+        dryGain.setTargetValue (newParams.dryLevel * dryScaleFactor);
+        wetGain1.setTargetValue (0.5f * wet * (1.0f + newParams.width));
+        wetGain2.setTargetValue (0.5f * wet * (1.0f - newParams.width));
 
         gain = isFrozen (newParams.freezeMode) ? 0.0f : 0.015f;
         parameters = newParams;
@@ -207,8 +207,8 @@ private:
 
     void setDamping (const float dampingToUse, const float roomSizeToUse) noexcept
     {
-        damping.setValue (dampingToUse);
-        feedback.setValue (roomSizeToUse);
+        damping.setTargetValue (dampingToUse);
+        feedback.setTargetValue (roomSizeToUse);
     }
 
     //==============================================================================
@@ -305,7 +305,7 @@ private:
     CombFilter comb [numChannels][numCombs];
     AllPassFilter allPass [numChannels][numAllPasses];
 
-    LinearSmoothedValue<float> damping, feedback, dryGain, wetGain1, wetGain2;
+    SmoothedValue<float> damping, feedback, dryGain, wetGain1, wetGain2;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Reverb)
 };

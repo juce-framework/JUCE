@@ -40,14 +40,14 @@ namespace dsp
 
     The principle of oversampling is to increase the sample rate of a given
     non-linear process, to prevent it from creating aliasing. Oversampling works
-    by upsampling N times the input signal, processing the upsampling signal
-    with the increased internal sample rate, and downsample the result to get
+    by upsampling N times the input signal, processing the upsampled signal
+    with the increased internal sample rate, and downsampling the result to get
     back the original processing sample rate.
 
     Choose between FIR or IIR filtering depending on your needs in term of
     latency and phase distortion. With FIR filters, the phase is linear but the
-    latency is maximum. With IIR filtering, the phase is compromised around the
-    Nyquist frequency but the latency is minimum.
+    latency is maximised. With IIR filtering, the phase is compromised around the
+    Nyquist frequency but the latency is minimised.
 
     @see FilterDesign.
 
@@ -70,9 +70,6 @@ public:
         Constructor of the oversampling class. All the processing parameters must be
         provided at the creation of the oversampling object.
 
-        Note: You might want to create a class inheriting from Oversampling with a
-        different constructor if you need more control on what happens in the process.
-
         @param numChannels      the number of channels to process with this object
         @param factor           the processing will perform 2 ^ factor times oversampling
         @param type             the type of filter design employed for filtering during
@@ -86,8 +83,13 @@ public:
                   FilterType type,
                   bool isMaxQuality = true);
 
-    /** Default constructor of the oversampling class, which can be used to create an
+    /** The default constructor of the oversampling class, which can be used to create an
         empty object and then add the appropriate stages.
+
+        Note: This creates a "dummy" oversampling stage, which needs to be removed first
+        before adding proper oversampling stages.
+
+        @see clearOversamplingStages, addOversamplingStage
     */
     explicit Oversampling (size_t numChannels = 1);
 
@@ -134,12 +136,47 @@ public:
     void processSamplesDown (dsp::AudioBlock<SampleType>& outputBlock) noexcept;
 
     //===============================================================================
-    void addOversamplingStage (FilterType,
-                               float normalizedTransitionWidthUp, float stopbandAttenuationdBUp,
-                               float normalizedTransitionWidthDown, float stopbandAttenuationdBDown);
+    /** Adds a new oversampling stage to the Oversampling class, multiplying the
+        current oversampling factor by two. This is used with the default constructor
+        to create custom oversampling chains, requiring a call to the
+        clearOversamplingStages before any addition.
 
+        Note: Upsampling and downsampling filtering have different purposes, the
+        former removes upsampling artefacts while the latter removes useless frequency
+        content created by the oversampled process, so usually the attenuation is
+        increased when upsampling compared to downsampling.
+
+        @param normalisedTransitionWidthUp     a value between 0 and 0.5 which specifies how much
+                                               the transition between passband and stopband is
+                                               steep, for upsampling filtering (the lower the better)
+        @param stopbandAmplitudedBUp           the amplitude in dB in the stopband for upsampling
+                                               filtering, must be negative
+        @param normalisedTransitionWidthDown   a value between 0 and 0.5 which specifies how much
+                                               the transition between passband and stopband is
+                                               steep, for downsampling filtering (the lower the better)
+        @param stopbandAmplitudedBDown         the amplitude in dB in the stopband for downsampling
+                                               filtering, must be negative
+
+        @see clearOversamplingStages
+    */
+    void addOversamplingStage (FilterType,
+                               float normalisedTransitionWidthUp,   float stopbandAmplitudedBUp,
+                               float normalisedTransitionWidthDown, float stopbandAmplitudedBDown);
+
+    /** Adds a new "dummy" oversampling stage, which does nothing to the signal. Using
+        one can be useful if your application features a customisable oversampling factor
+        and if you want to select the current one from an OwnedArray without changing
+        anything in the processing code.
+
+        @see OwnedArray, clearOversamplingStages, addOversamplingStage
+    */
     void addDummyOversamplingStage();
 
+    /** Removes all the previously registered oversampling stages, so you can add
+        your own from scratch.
+
+        @see addOversamplingStage, addDummyOversamplingStage
+    */
     void clearOversamplingStages();
 
     //===============================================================================

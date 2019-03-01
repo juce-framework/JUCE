@@ -70,7 +70,7 @@
 	#endif
 
 	#ifdef __cplusplus
-		#define SMTG_CPP11	__cplusplus >= 201103L || _MSC_VER > 1600 || SMTG_INTEL_CXX11_MODE
+		#define SMTG_CPP11	__cplusplus >= 201103L || _MSC_VER > 1800 || SMTG_INTEL_CXX11_MODE
 		#define SMTG_CPP11_STDLIBSUPPORT SMTG_CPP11
 		#define SMTG_HAS_NOEXCEPT _MSC_VER >= 1900 || (SMTG_INTEL_CXX11_MODE && SMTG_INTEL_COMPILER >= 1300)
 	#endif		

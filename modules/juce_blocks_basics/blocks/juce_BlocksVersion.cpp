@@ -108,7 +108,7 @@ bool BlocksVersion::isGreaterThan (const BlocksVersion& other) const
 
 bool BlocksVersion::releaseTypeGreaterThan (const BlocksVersion& other) const
 {
-    auto getReleaseTypePriority = [](const juce::BlocksVersion& version)
+    auto getReleaseTypePriority = [](const BlocksVersion& version)
     {
         String releaseTypes[4] = { "alpha", "beta", "rc", {} };
 

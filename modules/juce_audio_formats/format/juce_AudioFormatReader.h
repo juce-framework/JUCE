@@ -71,7 +71,28 @@ public:
     //==============================================================================
     /** Reads samples from the stream.
 
-        @param destSamples          an array of buffers into which the sample data for each
+        @param destChannels         an array of float buffers into which the sample data for each
+                                    channel will be written. Channels that aren't needed can be null
+        @param numDestChannels      the number of array elements in the destChannels array
+        @param startSampleInSource  the position in the audio file or stream at which the samples
+                                    should be read, as a number of samples from the start of the
+                                    stream. It's ok for this to be beyond the start or end of the
+                                    available data - any samples that are out-of-range will be returned
+                                    as zeros.
+        @param numSamplesToRead     the number of samples to read. If this is greater than the number
+                                    of samples that the file or stream contains. the result will be padded
+                                    with zeros
+        @returns                    true if the operation succeeded, false if there was an error. Note
+                                    that reading sections of data beyond the extent of the stream isn't an
+                                    error - the reader should just return zeros for these regions
+        @see readMaxLevels
+    */
+    bool read (float* const* destChannels, int numDestChannels,
+               int64 startSampleInSource, int numSamplesToRead);
+
+    /** Reads samples from the stream.
+
+        @param destChannels         an array of buffers into which the sample data for each
                                     channel will be written.
                                     If the format is fixed-point, each channel will be written
                                     as an array of 32-bit signed integers using the full
@@ -79,8 +100,8 @@ public:
                                     bit-depth. If it is a floating-point format, you should cast
                                     the resulting array to a (float**) to get the values (in the
                                     range -1.0 to 1.0 or beyond)
-                                    If the format is stereo, then destSamples[0] is the left channel
-                                    data, and destSamples[1] is the right channel.
+                                    If the format is stereo, then destChannels[0] is the left channel
+                                    data, and destChannels[1] is the right channel.
                                     The numDestChannels parameter indicates how many pointers this array
                                     contains, but some of these pointers can be null if you don't want to
                                     read data for some of the channels
@@ -107,7 +128,7 @@ public:
                                     error - the reader should just return zeros for these regions
         @see readMaxLevels
     */
-    bool read (int* const* destSamples,
+    bool read (int* const* destChannels,
                int numDestChannels,
                int64 startSampleInSource,
                int numSamplesToRead,
@@ -232,18 +253,18 @@ public:
 
         Callers should use read() instead of calling this directly.
 
-        @param destSamples  the array of destination buffers to fill. Some of these
-                            pointers may be null
-        @param numDestChannels  the number of items in the destSamples array. This
-                            value is guaranteed not to be greater than the number of
-                            channels that this reader object contains
-        @param startOffsetInDestBuffer      the number of samples from the start of the
-                            dest data at which to begin writing
-        @param startSampleInFile    the number of samples into the source data at which
-                            to begin reading. This value is guaranteed to be >= 0.
-        @param numSamples   the number of samples to read
+        @param destChannels              the array of destination buffers to fill. Some of these
+                                         pointers may be null
+        @param numDestChannels           the number of items in the destChannels array. This
+                                         value is guaranteed not to be greater than the number of
+                                         channels that this reader object contains
+        @param startOffsetInDestBuffer   the number of samples from the start of the
+                                         dest data at which to begin writing
+        @param startSampleInFile         the number of samples into the source data at which
+                                         to begin reading. This value is guaranteed to be >= 0.
+        @param numSamples                the number of samples to read
     */
-    virtual bool readSamples (int** destSamples,
+    virtual bool readSamples (int** destChannels,
                               int numDestChannels,
                               int startOffsetInDestBuffer,
                               int64 startSampleInFile,
@@ -282,18 +303,18 @@ protected:
     /** Used by AudioFormatReader subclasses to clear any parts of the data blocks that lie
         beyond the end of their available length.
     */
-    static void clearSamplesBeyondAvailableLength (int** destSamples, int numDestChannels,
+    static void clearSamplesBeyondAvailableLength (int** destChannels, int numDestChannels,
                                                    int startOffsetInDestBuffer, int64 startSampleInFile,
                                                    int& numSamples, int64 fileLengthInSamples)
     {
-        jassert (destSamples != nullptr);
+        jassert (destChannels != nullptr);
         const int64 samplesAvailable = fileLengthInSamples - startSampleInFile;
 
         if (samplesAvailable < numSamples)
         {
             for (int i = numDestChannels; --i >= 0;)
-                if (destSamples[i] != nullptr)
-                    zeromem (destSamples[i] + startOffsetInDestBuffer, sizeof (int) * (size_t) numSamples);
+                if (destChannels[i] != nullptr)
+                    zeromem (destChannels[i] + startOffsetInDestBuffer, sizeof (int) * (size_t) numSamples);
 
             numSamples = (int) samplesAvailable;
         }

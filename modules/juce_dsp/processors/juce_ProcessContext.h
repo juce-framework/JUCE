@@ -139,7 +139,12 @@ public:
         Note that the caller must not delete these blocks while they are still in use by this object!
     */
     ProcessContextNonReplacing (const AudioBlockType& input, AudioBlockType& output) noexcept
-        : inputBlock (input), outputBlock (output) {}
+        : inputBlock (input), outputBlock (output)
+    {
+        // If the input and output blocks are the same then you should use
+        // ProcessContextReplacing instead.
+        jassert (input != output);
+    }
 
     ProcessContextNonReplacing (const ProcessContextNonReplacing&) = default;
     ProcessContextNonReplacing (ProcessContextNonReplacing&&) = default;

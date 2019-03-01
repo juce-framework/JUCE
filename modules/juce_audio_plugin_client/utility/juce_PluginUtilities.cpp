@@ -48,7 +48,7 @@ std::function<bool(AudioProcessor&)> PluginHostType::jucePlugInIsRunningInAudioS
  bool juce_isRunningInUnity()    { return PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_Unity; }
 #endif
 
-#if JUCE_MODULE_AVAILABLE_juce_opengl
+#if JUCE_MODULE_AVAILABLE_juce_opengl && (JucePlugin_Build_VST || JucePlugin_Build_VST3)
  bool juce_shouldDoubleScaleNativeGLWindow()
  {
      auto wrapperType = PluginHostType::getPluginLoadedAs();

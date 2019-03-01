@@ -159,11 +159,28 @@ String SystemStats::getDeviceDescription()
    #endif
 
     size_t size;
+
     if (sysctlbyname (name, nullptr, &size, nullptr, 0) >= 0)
     {
         HeapBlock<char> model (size);
-        if (sysctlbyname (name, model,   &size, nullptr, 0) >= 0)
-            return model.get();
+
+        if (sysctlbyname (name, model, &size, nullptr, 0) >= 0)
+        {
+            String description (model.get());
+
+           #if JUCE_IOS
+            if (description == "x86_64") // running in the simulator
+            {
+                if (auto* userInfo = [[NSProcessInfo processInfo] environment])
+                {
+                    if (auto* simDeviceName = [userInfo objectForKey: @"SIMULATOR_DEVICE_NAME"])
+                        return nsStringToJuce (simDeviceName);
+                }
+            }
+          #endif
+
+            return description;
+        }
     }
 
     return {};

@@ -1988,3 +1988,48 @@ public:
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2017)
 };
+
+//==============================================================================
+class MSVCProjectExporterVC2019  : public MSVCProjectExporterBase
+{
+public:
+    MSVCProjectExporterVC2019 (Project& p, const ValueTree& t)
+        : MSVCProjectExporterBase (p, t, getTargetFolderForExporter (getValueTreeTypeName()))
+    {
+        name = getName();
+
+        targetPlatformVersion.setDefault (getDefaultWindowsTargetPlatformVersion());
+        platformToolsetValue.setDefault (getDefaultToolset());
+    }
+
+    static const char* getName()                                     { return "Visual Studio 2019"; }
+    static const char* getValueTreeTypeName()                        { return "VS2019"; }
+    int getVisualStudioVersion() const override                      { return 16; }
+    String getSolutionComment() const override                       { return "# Visual Studio 2019"; }
+    String getToolsVersion() const override                          { return "16.0"; }
+    String getDefaultToolset() const override                        { return "v142"; }
+    String getDefaultWindowsTargetPlatformVersion() const override   { return "10.0"; }
+
+    static MSVCProjectExporterVC2019* createForSettings (Project& project, const ValueTree& settings)
+    {
+        if (settings.hasType (getValueTreeTypeName()))
+            return new MSVCProjectExporterVC2019 (project, settings);
+
+        return nullptr;
+    }
+
+    void createExporterProperties (PropertyListBuilder& props) override
+    {
+        MSVCProjectExporterBase::createExporterProperties (props);
+
+        static const char* toolsetNames[] = { "v140", "v140_xp", "v141", "v141_xp", "v142" };
+        const var toolsets[]              = { "v140", "v140_xp", "v141", "v141_xp", "v142" };
+        addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
+
+        addIPPLibraryProperty (props);
+
+        addWindowsTargetPlatformProperties (props);
+    }
+
+    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2019)
+};

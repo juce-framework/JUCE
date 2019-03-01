@@ -285,7 +285,7 @@ private:
 
         double proportionOK = ((int) blockSize - differences) / (double) blockSize;
 
-        juce::ignoreUnused (proportionOK);
+        ignoreUnused (proportionOK);
 
         DBG ("Heap: " << areas << "  " << String (roundToInt (100 * proportionOK)) << "%  "
                << (isProgramLoaded() ? "Ready" : "Loading"));

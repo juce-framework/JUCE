@@ -1094,7 +1094,7 @@ String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
 {
     closeDevice();
 
-    sampleRate = sampleRate_;
+    sampleRate = sampleRate_ > 0.0 ? sampleRate_ : 44100.0;
 
     if (bufferSizeSamples_ <= 0)
         bufferSizeSamples_ = 960; // use as a default size if none is set.

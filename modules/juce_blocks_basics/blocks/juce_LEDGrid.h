@@ -73,7 +73,7 @@ public:
 
     //==============================================================================
     /** An interface to use for LEDGrid rendering. */
-    struct Renderer     : public juce::ReferenceCountedObject
+    struct Renderer     : public ReferenceCountedObject
     {
         ~Renderer() override;
         virtual void renderLEDGrid (LEDGrid&) = 0;
@@ -81,7 +81,7 @@ public:
         /** The Renderer class is reference-counted, so always use a Renderer::Ptr when
             you are keeping references to them.
          */
-        using Ptr = juce::ReferenceCountedObjectPtr<Renderer>;
+        using Ptr = ReferenceCountedObjectPtr<Renderer>;
     };
 
     /** Set the visualiser that will create visuals for this block (nullptr for none).

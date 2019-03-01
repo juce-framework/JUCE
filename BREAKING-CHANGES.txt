@@ -1,11 +1,63 @@
 JUCE breaking changes
 =====================
 
+Develop
+=======
+
+Change
+------
+The formatting of floating point numbers written to XML and JSON files has
+changed.
+
+Note that there is no change in precision - the XML and JSON files containing
+the new format numbers will parse in exactly the same way, it is only the
+string representation that has changed.
+
+Possible Issues
+---------------
+If you rely upon exactly reproducing XML or JSON files then the new files may
+be different.
+
+Workaround
+----------
+Update any reference XML or JSON files to use the new format.
+
+Rationale
+---------
+The new format retains full precision, provides a human friendly representation
+of values near 1, and uses scientific notation for small and large numbers.
+This prevents needless file size bloat from numbers like 0.00000000000000001.
+
+
+Version 5.4.3
+=============
+
+Change
+------
+The global user module path setting in the Projucer can now only contain a
+single path.
+
+Possible Issues
+---------------
+Projects that previously relied on using multiple global user module paths
+separated by a semicolon will fail to find these modules after re-saving.
+
+Workaround
+----------
+Replace the multiple paths with a single global user module path.
+
+Rationale
+---------
+Using multiple global user module paths did not work when saving a project
+which exported to different OSes. Only allowing a single path will prevent this
+from silently causing issues.
+
+
 Version 5.4.2
 =============
 
 Change
------
+------
 The return type of Block::getBlockAreaWithinLayout() has been changed from
 Rectangle to a simpler BlockArea struct.
 
@@ -26,7 +78,7 @@ GPL/Commercial licensed juce_graphics module that contains Rectangle.
 
 
 Change
------
+------
 Renaming and deletion of open file handles on Windows is now possible using the
 FILE_SHARE_DELETE flag.
 
@@ -45,7 +97,7 @@ This unifies the behaviour across OSes as POSIX systems already allow this.
 
 
 Change
------
+------
 Multiple changes to low-level, non-public JNI and Android APIs.
 
 Possible Issues
@@ -64,7 +116,7 @@ See the forum for further details.
 
 
 Change
------
+------
 The minimum Android version for a JUCE app is now Android 4.1
 
 Possible Issues

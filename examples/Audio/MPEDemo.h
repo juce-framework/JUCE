@@ -722,9 +722,9 @@ public:
         jassert (currentlyPlayingNote.keyState == MPENote::keyDown
                  || currentlyPlayingNote.keyState == MPENote::keyDownAndSustained);
 
-        level.setValue (currentlyPlayingNote.pressure.asUnsignedFloat());
-        frequency.setValue (currentlyPlayingNote.getFrequencyInHertz());
-        timbre.setValue (currentlyPlayingNote.timbre.asUnsignedFloat());
+        level    .setTargetValue (currentlyPlayingNote.pressure.asUnsignedFloat());
+        frequency.setTargetValue (currentlyPlayingNote.getFrequencyInHertz());
+        timbre   .setTargetValue (currentlyPlayingNote.timbre.asUnsignedFloat());
 
         phase = 0.0;
         auto cyclesPerSample = frequency.getNextValue() / currentSampleRate;
@@ -756,17 +756,17 @@ public:
 
     void notePressureChanged() override
     {
-        level.setValue (currentlyPlayingNote.pressure.asUnsignedFloat());
+        level.setTargetValue (currentlyPlayingNote.pressure.asUnsignedFloat());
     }
 
     void notePitchbendChanged() override
     {
-        frequency.setValue (currentlyPlayingNote.getFrequencyInHertz());
+        frequency.setTargetValue (currentlyPlayingNote.getFrequencyInHertz());
     }
 
     void noteTimbreChanged() override
     {
-        timbre.setValue (currentlyPlayingNote.timbre.asUnsignedFloat());
+        timbre.setTargetValue (currentlyPlayingNote.timbre.asUnsignedFloat());
     }
 
     void noteKeyStateChanged() override {}
@@ -851,7 +851,7 @@ private:
     }
 
     //==============================================================================
-    LinearSmoothedValue<double> level, timbre, frequency;
+    SmoothedValue<double> level, timbre, frequency;
 
     double phase      = 0.0;
     double phaseDelta = 0.0;

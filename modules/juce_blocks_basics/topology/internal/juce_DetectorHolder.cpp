@@ -23,7 +23,7 @@
 namespace juce
 {
 
-struct PhysicalTopologySource::DetectorHolder  : private juce::Timer
+struct PhysicalTopologySource::DetectorHolder  : private Timer
 {
     DetectorHolder (PhysicalTopologySource& pts)
         : topologySource (pts),

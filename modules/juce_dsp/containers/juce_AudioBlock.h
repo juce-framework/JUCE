@@ -152,6 +152,20 @@ public:
     AudioBlock& operator= (const AudioBlock& other) noexcept = default;
 
     //==============================================================================
+    bool operator== (const AudioBlock& other) const noexcept
+    {
+        return std::equal (channels,       channels + numChannels,
+                           other.channels, other.channels + other.numChannels)
+                   && startSample == other.startSample
+                   && numSamples == other.numSamples;
+    }
+
+    bool operator!= (const AudioBlock& other) const noexcept
+    {
+        return ! (*this == other);
+    }
+
+    //==============================================================================
     forcedinline size_t getNumSamples() const noexcept           { return numSamples; }
     forcedinline size_t getNumChannels() const noexcept          { return static_cast<size_t> (numChannels); }
 
@@ -486,7 +500,8 @@ public:
     }
 
     /** Multiplies all channels of the AudioBlock by a smoothly changing value and stores them . */
-    AudioBlock& multiply (LinearSmoothedValue<SampleType>& value) noexcept
+    template <typename SmoothingType>
+    AudioBlock& multiply (SmoothedValue<SampleType, SmoothingType>& value) noexcept
     {
         if (! value.isSmoothing())
         {
@@ -507,7 +522,8 @@ public:
     }
 
     /** Multiplies all channels of the source by a smoothly changing value and stores them in the receiver. */
-    AudioBlock& multiply (AudioBlock src, LinearSmoothedValue<SampleType>& value) noexcept
+    template <typename SmoothingType>
+    AudioBlock& multiply (AudioBlock src, SmoothedValue<SampleType, SmoothingType>& value) noexcept
     {
         jassert (numChannels == src.numChannels);
 
@@ -632,7 +648,8 @@ public:
     forcedinline AudioBlock&                      operator-= (AudioBlock src) noexcept   { return subtract (src); }
     forcedinline AudioBlock& JUCE_VECTOR_CALLTYPE operator*= (SampleType src) noexcept   { return multiply (src); }
     forcedinline AudioBlock&                      operator*= (AudioBlock src) noexcept   { return multiply (src); }
-    forcedinline AudioBlock&                      operator*= (LinearSmoothedValue<SampleType>& value) noexcept   { return multiply (value); }
+    template <typename SmoothingType>
+    forcedinline AudioBlock&                      operator*= (SmoothedValue<SampleType, SmoothingType>& value) noexcept   { return multiply (value); }
 
     //==============================================================================
     // This class can only be used with floating point types

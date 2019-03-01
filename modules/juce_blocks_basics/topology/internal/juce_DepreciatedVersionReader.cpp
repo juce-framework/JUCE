@@ -55,8 +55,8 @@ public:
 
         for (size_t i = 1; i < numFirmwareApps; ++i)
         {
-            const BlocksVersion highest { asString (highestVersion) };
-            const BlocksVersion test { asString ( result[i]) };
+            const BlocksVersion highest { highestVersion.asString() };
+            const BlocksVersion test { result[i].asString() };
 
             if (highest < test)
                 highestVersion = result[i];
@@ -70,7 +70,7 @@ private:
     static constexpr size_t numFirmwareApps = 3;
     BlocksProtocol::VersionNumber result[numFirmwareApps];
     MIDIDeviceConnection& deviceConnection;
-    juce::Atomic<size_t> currentRequest = 0;
+    Atomic<size_t> currentRequest = 0;
 
     //==============================================================================
     bool allRequestsComplete() const { return currentRequest.get() >= numFirmwareApps; }
@@ -80,10 +80,21 @@ private:
     {
         static constexpr size_t requestSize { 8 };
         static constexpr uint8 requests[][requestSize] = {{ 0xf0, 0x00, 0x21, 0x10, 0x47, 0x03, 0x00, 0xf7 },  // Main App
-                                                          { 0xf0, 0x00, 0x21, 0x10, 0x47, 0x03, 0x01, 0xf7 },  // Stm32
-                                                          { 0xf0, 0x00, 0x21, 0x10, 0x47, 0x03, 0x03, 0xf7 }}; // Bootloader
+                                                          { 0xf0, 0x00, 0x21, 0x10, 0x47, 0x03, 0x03, 0xf7 },  // Bootloader
+                                                          { 0xf0, 0x00, 0x21, 0x10, 0x47, 0x03, 0x01, 0xf7 }}; // Stm32
 
-        deviceConnection.sendMessageToDevice (&requests[currentRequest.get()][0], requestSize);
+        static const BlocksVersion depreciatedVersion ("0.3.0");
+
+        if (currentRequest.get() == numFirmwareApps - 1
+            && (BlocksVersion (result[0].asString()) >= depreciatedVersion
+                || BlocksVersion (result[1].asString()) >= depreciatedVersion))
+        {
+            stopTimer();
+        }
+        else
+        {
+            deviceConnection.sendMessageToDevice (&requests[currentRequest.get()][0], requestSize);
+        }
     }
 
     //==============================================================================

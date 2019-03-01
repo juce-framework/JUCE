@@ -50,6 +50,9 @@ namespace juce
 //==============================================================================
 static CGFloat getMainScreenHeight() noexcept
 {
+    if ([[NSScreen screens] count] == 0)
+        return 0.0f;
+
     return [[[NSScreen screens] objectAtIndex: 0] frame].size.height;
 }
 
@@ -2158,6 +2161,8 @@ void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, boo
     {
         if (shouldBeEnabled && ! allowMenusAndBars)
             [NSApp setPresentationOptions: NSApplicationPresentationHideDock | NSApplicationPresentationHideMenuBar];
+        else if (! shouldBeEnabled)
+            [NSApp setPresentationOptions: NSApplicationPresentationDefault];
 
         [peer->window performSelector: @selector (toggleFullScreen:) withObject: nil];
     }

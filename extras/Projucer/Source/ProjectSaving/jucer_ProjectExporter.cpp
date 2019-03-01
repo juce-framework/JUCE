@@ -52,6 +52,7 @@ Array<ProjectExporter::ExporterTypeInfo> ProjectExporter::getExporterTypes()
 
     addType (types, XcodeProjectExporter::getNameMac(),          BinaryData::export_xcode_svg,          BinaryData::export_xcode_svgSize);
     addType (types, XcodeProjectExporter::getNameiOS(),          BinaryData::export_xcode_svg,          BinaryData::export_xcode_svgSize);
+    addType (types, MSVCProjectExporterVC2019::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
     addType (types, MSVCProjectExporterVC2017::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
     addType (types, MSVCProjectExporterVC2015::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
     addType (types, MSVCProjectExporterVC2013::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
@@ -72,14 +73,15 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
     {
         case 0:     exp = new XcodeProjectExporter         (project, ValueTree (XcodeProjectExporter         ::getValueTreeTypeName (false)), false); break;
         case 1:     exp = new XcodeProjectExporter         (project, ValueTree (XcodeProjectExporter         ::getValueTreeTypeName (true)), true); break;
-        case 2:     exp = new MSVCProjectExporterVC2017    (project, ValueTree (MSVCProjectExporterVC2017    ::getValueTreeTypeName())); break;
-        case 3:     exp = new MSVCProjectExporterVC2015    (project, ValueTree (MSVCProjectExporterVC2015    ::getValueTreeTypeName())); break;
-        case 4:     exp = new MSVCProjectExporterVC2013    (project, ValueTree (MSVCProjectExporterVC2013    ::getValueTreeTypeName())); break;
-        case 5:     exp = new MakefileProjectExporter      (project, ValueTree (MakefileProjectExporter      ::getValueTreeTypeName())); break;
-        case 6:     exp = new AndroidProjectExporter       (project, ValueTree (AndroidProjectExporter       ::getValueTreeTypeName())); break;
-        case 7:     exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::windowsTarget)), CodeBlocksProjectExporter::windowsTarget); break;
-        case 8:     exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::linuxTarget)),   CodeBlocksProjectExporter::linuxTarget); break;
-        case 9:     exp = new CLionProjectExporter         (project, ValueTree (CLionProjectExporter         ::getValueTreeTypeName())); break;
+        case 2:     exp = new MSVCProjectExporterVC2019    (project, ValueTree (MSVCProjectExporterVC2019    ::getValueTreeTypeName())); break;
+        case 3:     exp = new MSVCProjectExporterVC2017    (project, ValueTree (MSVCProjectExporterVC2017    ::getValueTreeTypeName())); break;
+        case 4:     exp = new MSVCProjectExporterVC2015    (project, ValueTree (MSVCProjectExporterVC2015    ::getValueTreeTypeName())); break;
+        case 5:     exp = new MSVCProjectExporterVC2013    (project, ValueTree (MSVCProjectExporterVC2013    ::getValueTreeTypeName())); break;
+        case 6:     exp = new MakefileProjectExporter      (project, ValueTree (MakefileProjectExporter      ::getValueTreeTypeName())); break;
+        case 7:     exp = new AndroidProjectExporter       (project, ValueTree (AndroidProjectExporter       ::getValueTreeTypeName())); break;
+        case 8:     exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::windowsTarget)), CodeBlocksProjectExporter::windowsTarget); break;
+        case 9:     exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::linuxTarget)),   CodeBlocksProjectExporter::linuxTarget); break;
+        case 10:    exp = new CLionProjectExporter         (project, ValueTree (CLionProjectExporter         ::getValueTreeTypeName())); break;
     }
 
     exp->createDefaultConfigs();
@@ -116,14 +118,17 @@ String ProjectExporter::getValueTreeNameForExporter (const String& exporterName)
     if (exporterName == XcodeProjectExporter::getNameiOS())
         return XcodeProjectExporter::getValueTreeTypeName (true);
 
-    if (exporterName == MSVCProjectExporterVC2013::getName())
-        return MSVCProjectExporterVC2013::getValueTreeTypeName();
+    if (exporterName == MSVCProjectExporterVC2019::getName())
+        return MSVCProjectExporterVC2019::getValueTreeTypeName();
+
+    if (exporterName == MSVCProjectExporterVC2017::getName())
+        return MSVCProjectExporterVC2017::getValueTreeTypeName();
 
     if (exporterName == MSVCProjectExporterVC2015::getName())
         return MSVCProjectExporterVC2015::getValueTreeTypeName();
 
-    if (exporterName == MSVCProjectExporterVC2017::getName())
-        return MSVCProjectExporterVC2017::getValueTreeTypeName();
+    if (exporterName == MSVCProjectExporterVC2013::getName())
+        return MSVCProjectExporterVC2013::getValueTreeTypeName();
 
     if (exporterName == MakefileProjectExporter::getNameLinux())
         return MakefileProjectExporter::getValueTreeTypeName();
@@ -147,6 +152,7 @@ String ProjectExporter::getTargetFolderForExporter (const String& exporterValueT
 {
     if (exporterValueTreeName == "XCODE_MAC")             return "MacOSX";
     if (exporterValueTreeName == "XCODE_IPHONE")          return "iOS";
+    if (exporterValueTreeName == "VS2019")                return "VisualStudio2019";
     if (exporterValueTreeName == "VS2017")                return "VisualStudio2017";
     if (exporterValueTreeName == "VS2015")                return "VisualStudio2015";
     if (exporterValueTreeName == "VS2013")                return "VisualStudio2013";
@@ -165,9 +171,10 @@ StringArray ProjectExporter::getAllDefaultBuildsFolders()
 
     folders.add (getDefaultBuildsRootFolder() + "iOS");
     folders.add (getDefaultBuildsRootFolder() + "MacOSX");
-    folders.add (getDefaultBuildsRootFolder() + "VisualStudio2013");
-    folders.add (getDefaultBuildsRootFolder() + "VisualStudio2015");
+    folders.add (getDefaultBuildsRootFolder() + "VisualStudio2019");
     folders.add (getDefaultBuildsRootFolder() + "VisualStudio2017");
+    folders.add (getDefaultBuildsRootFolder() + "VisualStudio2015");
+    folders.add (getDefaultBuildsRootFolder() + "VisualStudio2013");
     folders.add (getDefaultBuildsRootFolder() + "LinuxMakefile");
     folders.add (getDefaultBuildsRootFolder() + "CodeBlocksWindows");
     folders.add (getDefaultBuildsRootFolder() + "CodeBlocksLinux");
@@ -197,9 +204,10 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const Str
 
 ProjectExporter* ProjectExporter::createExporter (Project& project, const ValueTree& settings)
 {
-    ProjectExporter*       exp = MSVCProjectExporterVC2013    ::createForSettings (project, settings);
-    if (exp == nullptr)    exp = MSVCProjectExporterVC2015    ::createForSettings (project, settings);
+    ProjectExporter*       exp = MSVCProjectExporterVC2019    ::createForSettings (project, settings);
     if (exp == nullptr)    exp = MSVCProjectExporterVC2017    ::createForSettings (project, settings);
+    if (exp == nullptr)    exp = MSVCProjectExporterVC2015    ::createForSettings (project, settings);
+    if (exp == nullptr)    exp = MSVCProjectExporterVC2013    ::createForSettings (project, settings);
     if (exp == nullptr)    exp = XcodeProjectExporter         ::createForSettings (project, settings);
     if (exp == nullptr)    exp = MakefileProjectExporter      ::createForSettings (project, settings);
     if (exp == nullptr)    exp = AndroidProjectExporter       ::createForSettings (project, settings);
@@ -220,9 +228,10 @@ bool ProjectExporter::canProjectBeLaunched (Project* project)
             XcodeProjectExporter::getValueTreeTypeName (false),
             XcodeProjectExporter::getValueTreeTypeName (true),
            #elif JUCE_WINDOWS
-            MSVCProjectExporterVC2013::getValueTreeTypeName(),
-            MSVCProjectExporterVC2015::getValueTreeTypeName(),
+            MSVCProjectExporterVC2019::getValueTreeTypeName(),
             MSVCProjectExporterVC2017::getValueTreeTypeName(),
+            MSVCProjectExporterVC2015::getValueTreeTypeName(),
+            MSVCProjectExporterVC2013::getValueTreeTypeName(),
            #elif JUCE_LINUX
             // (this doesn't currently launch.. not really sure what it would do on linux)
             //MakefileProjectExporter::getValueTreeTypeName(),

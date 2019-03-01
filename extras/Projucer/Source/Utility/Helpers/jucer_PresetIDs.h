@@ -190,6 +190,8 @@ namespace Ids
     DECLARE_ID (showAllCode);
     DECLARE_ID (useLocalCopy);
     DECLARE_ID (overwriteOnSave);
+    DECLARE_ID (hardenedRuntime);
+    DECLARE_ID (hardenedRuntimeOptions);
     DECLARE_ID (microphonePermissionNeeded);
     DECLARE_ID (microphonePermissionsText);
     DECLARE_ID (cameraPermissionNeeded);
