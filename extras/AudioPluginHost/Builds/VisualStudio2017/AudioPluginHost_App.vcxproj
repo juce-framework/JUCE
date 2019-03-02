@@ -1,5 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Project DefaultTargets="Build"
+         ToolsVersion="15.0"
+         xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
@@ -13,25 +16,29 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5666EAA2-C82B-D06A-5228-D0E810428536}</ProjectGuid>
   </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"
+                 Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <PlatformToolset>v141</PlatformToolset>
     <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)' == ''">$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</WindowsTargetPlatformVersion>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'"
+                 Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <PlatformToolset>v141</PlatformToolset>
     <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)' == ''">$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</WindowsTargetPlatformVersion>
   </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>
+  <ImportGroup Label="ExtensionSettings"/>
   <ImportGroup Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"
+            Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')"
+            Label="LocalAppDataPlatform"/>
   </ImportGroup>
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
@@ -51,7 +58,7 @@
       <MkTypLibCompatible>true</MkTypLibCompatible>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TargetEnvironment>Win32</TargetEnvironment>
-      <HeaderFileName />
+      <HeaderFileName/>
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -60,7 +67,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2017_78A5024=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <PrecompiledHeader />
+      <PrecompiledHeader/>
       <AssemblerListingLocation>$(IntDir)\</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)\</ObjectFileName>
       <ProgramDataBaseFileName>$(IntDir)\</ProgramDataBaseFileName>
@@ -86,7 +93,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\AudioPluginHost.bsc</OutputFile>
     </Bscmake>
-    <Lib />
+    <Lib/>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
@@ -94,7 +101,7 @@
       <MkTypLibCompatible>true</MkTypLibCompatible>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TargetEnvironment>Win32</TargetEnvironment>
-      <HeaderFileName />
+      <HeaderFileName/>
     </Midl>
     <ClCompile>
       <Optimization>Full</Optimization>
@@ -102,7 +109,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCER_VS2017_78A5024=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <PrecompiledHeader />
+      <PrecompiledHeader/>
       <AssemblerListingLocation>$(IntDir)\</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)\</ObjectFileName>
       <ProgramDataBaseFileName>$(IntDir)\</ProgramDataBaseFileName>
@@ -130,15 +137,15 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\AudioPluginHost.bsc</OutputFile>
     </Bscmake>
-    <Lib />
+    <Lib/>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Source\Filters\FilterGraph.cpp" />
-    <ClCompile Include="..\..\Source\Filters\FilterIOConfiguration.cpp" />
-    <ClCompile Include="..\..\Source\Filters\InternalFilters.cpp" />
-    <ClCompile Include="..\..\Source\UI\GraphEditorPanel.cpp" />
-    <ClCompile Include="..\..\Source\UI\MainHostWindow.cpp" />
-    <ClCompile Include="..\..\Source\HostStartup.cpp" />
+    <ClCompile Include="..\..\Source\Filters\FilterGraph.cpp"/>
+    <ClCompile Include="..\..\Source\Filters\FilterIOConfiguration.cpp"/>
+    <ClCompile Include="..\..\Source\Filters\InternalFilters.cpp"/>
+    <ClCompile Include="..\..\Source\UI\GraphEditorPanel.cpp"/>
+    <ClCompile Include="..\..\Source\UI\MainHostWindow.cpp"/>
+    <ClCompile Include="..\..\Source\HostStartup.cpp"/>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioChannelSet.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1888,21 +1895,21 @@
     <ClCompile Include="..\..\..\..\modules\juce_video\juce_video.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp" />
-    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_basics.cpp" />
-    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_devices.cpp" />
-    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_formats.cpp" />
-    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_processors.cpp" />
-    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_utils.cpp" />
-    <ClCompile Include="..\..\JuceLibraryCode\include_juce_core.cpp" />
-    <ClCompile Include="..\..\JuceLibraryCode\include_juce_cryptography.cpp" />
-    <ClCompile Include="..\..\JuceLibraryCode\include_juce_data_structures.cpp" />
-    <ClCompile Include="..\..\JuceLibraryCode\include_juce_events.cpp" />
-    <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics.cpp" />
-    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics.cpp" />
-    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_extra.cpp" />
-    <ClCompile Include="..\..\JuceLibraryCode\include_juce_opengl.cpp" />
-    <ClCompile Include="..\..\JuceLibraryCode\include_juce_video.cpp" />
+    <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_basics.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_devices.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_formats.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_processors.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_utils.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_core.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_cryptography.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_data_structures.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_events.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_extra.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_opengl.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_video.cpp"/>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Filters\FilterGraph.h"/>
@@ -2623,8 +2630,8 @@
     <None Include=".\icon.ico"/>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include=".\resources.rc" />
+    <ResourceCompile Include=".\resources.rc"/>
   </ItemGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
+  <ImportGroup Label="ExtensionTargets"/>
 </Project>

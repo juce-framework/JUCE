@@ -40,47 +40,6 @@ public:
         setSize (400, 400);
         setAudioChannels (0, 2);
 
-		juce::AudioDeviceManager::AudioDeviceSetup wasapiSetup1;
-		deviceManager.getAudioDeviceSetup(wasapiSetup1);
-
-		const juce::OwnedArray<juce::AudioIODeviceType>& availableDeviceTypes = deviceManager.getAvailableDeviceTypes();
-
-		juce::String wasapiDeviceType = deviceManager.getCurrentAudioDeviceType();
-
-		juce::AudioIODevice* wasapiDevice1 = deviceManager.getCurrentAudioDevice();
-		juce:Array<int> wasapiBufferSizes = wasapiDevice1->getAvailableBufferSizes();
-
-		// pick the smallest damn one we can get
-		wasapiSetup1.bufferSize = wasapiBufferSizes[0];
-		deviceManager.setAudioDeviceSetup(wasapiSetup1, true);
-
-		// and let's see if it took
-		juce::AudioDeviceManager::AudioDeviceSetup wasapiSetup2;
-		deviceManager.getAudioDeviceSetup(wasapiSetup2);
-
-		// ok let's try switching the device type too while we're at it
-		String directSoundString(L"DirectSound");
-		deviceManager.setCurrentAudioDeviceType(directSoundString, true);
-
-		juce::String directSoundAudioDeviceType = deviceManager.getCurrentAudioDeviceType();
-
-		juce::AudioDeviceManager::AudioDeviceSetup dsoundSetup1;
-		deviceManager.getAudioDeviceSetup(dsoundSetup1);
-		dsoundSetup1.sampleRate = 48000;
-		deviceManager.setAudioDeviceSetup(dsoundSetup1, true);
-
-		juce::AudioDeviceManager::AudioDeviceSetup dsoundSetup2;
-		deviceManager.getAudioDeviceSetup(dsoundSetup2);
-
-		juce::AudioIODevice* dsoundDevice2 = deviceManager.getCurrentAudioDevice();
-		juce::Array<int> dsoundBufferSizes = dsoundDevice2->getAvailableBufferSizes();
-
-		dsoundSetup2.bufferSize = dsoundBufferSizes[0];
-		deviceManager.setAudioDeviceSetup(dsoundSetup2, true);
-
-		juce::AudioDeviceManager::AudioDeviceSetup dsoundSetup3;
-		deviceManager.getAudioDeviceSetup(dsoundSetup3);
-
         initGui();
         Desktop::getInstance().setScreenSaverEnabled (false);
         startTimer (1000);
