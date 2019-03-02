@@ -62,6 +62,14 @@ namespace juce
 
 #if ! DOXYGEN
 
+#ifndef JUCE_UNIX_SUPPORTS_LOCALE
+  #define JUCE_UNIX_SUPPORTS_LOCALE 1
+
+  #if JUCE_GCC && ! defined (__UCLIBC_HAS_LOCALE__)
+    #undef JUCE_UNIX_SUPPORTS_LOCALE
+  #endif
+#endif
+
 //==============================================================================
 // GNU libstdc++ does not have std::make_unsigned
 namespace internal
@@ -391,16 +399,25 @@ public:
             writeExponentDigits (extraExponent, currentCharacter);
         }
 
-       #if JUCE_WINDOWS
+        #if JUCE_WINDOWS
         static _locale_t locale = _create_locale (LC_ALL, "C");
         return _strtod_l (&buffer[0], nullptr, locale);
        #else
-        static locale_t locale = newlocale (LC_ALL_MASK, "C", nullptr);
-        #if JUCE_ANDROID
-        return (double) strtold_l (&buffer[0], nullptr, locale);
+        #if JUCE_UNIX_SUPPORTS_LOCALE
+            static locale_t locale = newlocale (LC_ALL_MASK, "C", nullptr);
+           #if JUCE_ANDROID
+            return (double) strtold_l (&buffer[0], nullptr, locale);
+           #else
+            return strtod_l (&buffer[0], nullptr, locale);
+           #endif
         #else
-        return strtod_l (&buffer[0], nullptr, locale);
-        #endif
+            std::stringstream ss;
+            ss << &buffer[0];
+
+            double result = 0.0;
+            ss >> result;
+            return result;
+        #endif            
        #endif
 
        #endif   // JUCE_MINGW
