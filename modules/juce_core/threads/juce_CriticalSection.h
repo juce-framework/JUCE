@@ -90,13 +90,13 @@ public:
 
     //==============================================================================
     /** Provides the type of scoped lock to use with a CriticalSection. */
-    typedef GenericScopedLock <CriticalSection>       ScopedLockType;
+    using ScopedLockType = GenericScopedLock<CriticalSection>;
 
     /** Provides the type of scoped unlocker to use with a CriticalSection. */
-    typedef GenericScopedUnlock <CriticalSection>     ScopedUnlockType;
+    using ScopedUnlockType = GenericScopedUnlock<CriticalSection>;
 
     /** Provides the type of scoped try-locker to use with a CriticalSection. */
-    typedef GenericScopedTryLock <CriticalSection>    ScopedTryLockType;
+    using ScopedTryLockType = GenericScopedTryLock<CriticalSection>;
 
 
 private:
@@ -133,8 +133,8 @@ private:
 class JUCE_API  DummyCriticalSection
 {
 public:
-    inline DummyCriticalSection() noexcept      {}
-    inline ~DummyCriticalSection() noexcept     {}
+    inline DummyCriticalSection() = default;
+    inline ~DummyCriticalSection() = default;
 
     inline void enter() const noexcept          {}
     inline bool tryEnter() const noexcept       { return true; }
@@ -148,7 +148,7 @@ public:
     };
 
     /** A dummy scoped-unlocker type to use with a dummy critical section. */
-    typedef ScopedLockType ScopedUnlockType;
+    using ScopedUnlockType = ScopedLockType;
 
 private:
     JUCE_DECLARE_NON_COPYABLE (DummyCriticalSection)
@@ -183,7 +183,7 @@ private:
 
     @see CriticalSection, ScopedUnlock
 */
-typedef CriticalSection::ScopedLockType  ScopedLock;
+using ScopedLock = CriticalSection::ScopedLockType;
 
 //==============================================================================
 /**
@@ -223,7 +223,7 @@ typedef CriticalSection::ScopedLockType  ScopedLock;
 
     @see CriticalSection, ScopedLock
 */
-typedef CriticalSection::ScopedUnlockType  ScopedUnlock;
+using ScopedUnlock = CriticalSection::ScopedUnlockType;
 
 //==============================================================================
 /**
@@ -257,6 +257,6 @@ typedef CriticalSection::ScopedUnlockType  ScopedUnlock;
 
     @see CriticalSection::tryEnter, ScopedLock, ScopedUnlock, ScopedReadLock
 */
-typedef CriticalSection::ScopedTryLockType  ScopedTryLock;
+using ScopedTryLock = CriticalSection::ScopedTryLockType;
 
 } // namespace juce

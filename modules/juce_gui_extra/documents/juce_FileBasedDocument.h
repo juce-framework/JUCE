@@ -65,7 +65,7 @@ public:
                        const String& saveFileDialogTitle);
 
     /** Destructor. */
-    virtual ~FileBasedDocument();
+    ~FileBasedDocument() override;
 
     //==============================================================================
     /** Returns true if the changed() method has been called since the file was

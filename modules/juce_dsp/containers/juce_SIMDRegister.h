@@ -39,7 +39,7 @@ namespace dsp
 /**
     A wrapper around the platform's native SIMD register type.
 
-    This class is only availabe on SIMD machines. Use JUCE_USE_SIMD to query
+    This class is only available on SIMD machines. Use JUCE_USE_SIMD to query
     if SIMD is avaialble for your system.
 
     SIMDRegister<Type> is a templated class representing the native
@@ -109,7 +109,7 @@ struct SIMDRegister
     vSIMDType value;
 
     /** Default constructor. */
-    inline SIMDRegister() noexcept {}
+    inline SIMDRegister() noexcept = default;
 
     /** Constructs an object from the native SIMD type. */
     inline SIMDRegister (vSIMDType a) noexcept : value (a) {}
@@ -118,7 +118,7 @@ struct SIMDRegister
     inline SIMDRegister (Type s) noexcept  { *this = s; }
 
     /** Destrutor. */
-    inline ~SIMDRegister() noexcept {}
+    inline ~SIMDRegister() noexcept = default;
 
     //==============================================================================
     /** Returns the number of elements in this vector. */

@@ -24,6 +24,136 @@ namespace juce
 {
 
 //==============================================================================
+class BelaMidiInput
+{
+public:
+    static Array<BelaMidiInput*> midiInputs;
+
+    BelaMidiInput (const String& port, MidiInput* input, MidiInputCallback* callback)
+        : midiInput (input), midiPort (port), midiCallback (callback)
+    {
+        jassert (midiCallback != nullptr);
+        midiInputs.add (this);
+    }
+
+    ~BelaMidiInput()
+    {
+        stop();
+        midiInputs.removeAllInstancesOf (this);
+    }
+
+    void start()
+    {
+        midi.readFrom (midiPort.toRawUTF8());
+    }
+
+    void stop()
+    {
+        midi.enableParser (false);
+    }
+
+    void poll()
+    {
+        for (;;)
+        {
+            auto data = midi.getInput();
+
+            if (data < 0)
+                break;
+
+            auto byte = (uint8) data;
+            concatenator.pushMidiData (&byte, 1, 0.0, midiInput, *midiCallback);
+        }
+    }
+
+    static StringArray getDevices (bool input)
+    {
+        StringArray devices;
+
+        for (auto& card : findAllALSACardIDs())
+            findMidiDevices (devices, input, card);
+
+        return devices;
+    }
+
+private:
+    static Array<int> findAllALSACardIDs()
+    {
+        Array<int> cards;
+        int card = -1;
+
+        for (;;)
+        {
+            auto status = snd_card_next (&card);
+
+            if (status != 0 || card < 0)
+                break;
+
+            cards.add (card);
+        }
+
+        return cards;
+    }
+
+    // Adds all midi devices to the devices array of the given input/output type on the given card
+    static void findMidiDevices (StringArray& devices, bool input, int cardNum)
+    {
+        snd_ctl_t* ctl = nullptr;
+        auto status = snd_ctl_open (&ctl, ("hw:" + String (cardNum)).toRawUTF8(), 0);
+
+        if (status < 0)
+            return;
+
+        int device = -1;
+
+        for (;;)
+        {
+            status = snd_ctl_rawmidi_next_device (ctl, &device);
+
+            if (status < 0 || device < 0)
+                break;
+
+            snd_rawmidi_info_t* info;
+            snd_rawmidi_info_alloca (&info);
+
+            snd_rawmidi_info_set_device (info, device);
+            snd_rawmidi_info_set_stream (info, input ? SND_RAWMIDI_STREAM_INPUT
+                                                     : SND_RAWMIDI_STREAM_OUTPUT);
+
+            snd_ctl_rawmidi_info (ctl, info);
+
+            auto subCount = snd_rawmidi_info_get_subdevices_count (info);
+
+            for (int sub = 0; sub < subCount; ++sub)
+            {
+                snd_rawmidi_info_set_subdevice (info, sub);
+
+                status = snd_ctl_rawmidi_info (ctl, info);
+
+                if (status == 0)
+                    devices.add ("hw:" + String (cardNum) + ","
+                                       + String (device) + ","
+                                       + String (sub));
+            }
+        }
+
+        snd_ctl_close (ctl);
+    }
+
+    String midiPort;
+    MidiInput* const midiInput;
+    MidiInputCallback* const midiCallback;
+
+    Midi midi;
+    MidiDataConcatenator concatenator { 512 };
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BelaMidiInput)
+};
+
+Array<BelaMidiInput*> BelaMidiInput::midiInputs;
+
+
+//==============================================================================
 class BelaAudioIODevice   : public AudioIODevice
 {
 public:
@@ -33,7 +163,10 @@ public:
         Bela_defaultSettings (&defaultSettings);
     }
 
-    ~BelaAudioIODevice() {}
+    ~BelaAudioIODevice()
+    {
+        close();
+    }
 
     //==============================================================================
     StringArray getOutputChannelNames() override           { return { "Out #1", "Out #2" }; }
@@ -223,6 +356,10 @@ private:
 
         ScopedLock lock (callbackLock);
 
+        // Check for and process and midi
+        for (auto midiInput : BelaMidiInput::midiInputs)
+            midiInput->poll();
+
         if (callback != nullptr)
         {
             jassert (context.audioFrames <= actualBufferSize);
@@ -368,6 +505,60 @@ struct BelaAudioIODeviceType  : public AudioIODeviceType
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_Bela()
 {
     return new BelaAudioIODeviceType();
+}
+
+
+//==============================================================================
+// TODO: Add Bela MidiOutput support
+
+StringArray MidiOutput::getDevices()                                { return {}; }
+int MidiOutput::getDefaultDeviceIndex()                             { return 0; }
+MidiOutput* MidiOutput::openDevice (int)                            { return {}; }
+MidiOutput* MidiOutput::createNewDevice (const String&)             { return {}; }
+MidiOutput::~MidiOutput() {}
+void MidiOutput::sendMessageNow (const MidiMessage&) {}
+
+
+//==============================================================================
+MidiInput::MidiInput (const String& nm) : name (nm) {}
+
+MidiInput::~MidiInput()
+{
+    delete static_cast<BelaMidiInput*> (internal);
+}
+
+void MidiInput::start()     { static_cast<BelaMidiInput*> (internal)->start(); }
+void MidiInput::stop()      { static_cast<BelaMidiInput*> (internal)->stop(); }
+
+int MidiInput::getDefaultDeviceIndex()
+{
+    return 0;
+}
+
+StringArray MidiInput::getDevices()
+{
+    return BelaMidiInput::getDevices (true);
+}
+
+MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
+{
+    auto devices = getDevices();
+
+    if (index >= 0 && index < devices.size())
+    {
+        auto deviceName = devices[index];
+        auto result = new MidiInput (deviceName);
+        result->internal = new BelaMidiInput (deviceName, result, callback);
+        return result;
+    }
+
+    return {};
+}
+
+MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallback* callback)
+{
+    jassertfalse; // N/A on Bela
+    return {};
 }
 
 } // namespace juce

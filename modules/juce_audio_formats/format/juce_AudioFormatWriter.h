@@ -216,8 +216,8 @@ public:
         class JUCE_API  IncomingDataReceiver
         {
         public:
-            IncomingDataReceiver() {}
-            virtual ~IncomingDataReceiver() {}
+            IncomingDataReceiver() = default;
+            virtual ~IncomingDataReceiver() = default;
 
             virtual void reset (int numChannels, double sampleRate, int64 totalSamplesInSource) = 0;
             virtual void addBlock (int64 sampleNumberInSource, const AudioBuffer<float>& newData,
@@ -240,7 +240,6 @@ public:
 
     private:
         class Buffer;
-        friend struct ContainerDeletePolicy<Buffer>;
         std::unique_ptr<Buffer> buffer;
     };
 

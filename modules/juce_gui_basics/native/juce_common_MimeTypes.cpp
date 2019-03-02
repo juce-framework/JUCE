@@ -31,7 +31,7 @@ struct MimeTypeTableEntry
 {
     const char* fileExtension, *mimeType;
 
-    static MimeTypeTableEntry table[640];
+    static MimeTypeTableEntry table[641];
 };
 
 static StringArray getMimeTypesForFileExtension (const String& fileExtension)
@@ -88,7 +88,7 @@ static String getCommonMimeType (const StringArray& mimeTypes)
 }
 
 //==============================================================================
-MimeTypeTableEntry MimeTypeTableEntry::table[640] =
+MimeTypeTableEntry MimeTypeTableEntry::table[641] =
 {
     {"3dm",      "x-world/x-3dmf"},
     {"3dmf",     "x-world/x-3dmf"},
@@ -384,6 +384,7 @@ MimeTypeTableEntry MimeTypeTableEntry::table[640] =
     {"mp2",      "video/mpeg"},
     {"mp2",      "video/x-mpeg"},
     {"mp2",      "video/x-mpeq2a"},
+    {"mp3",      "audio/mpeg"},
     {"mp3",      "audio/mpeg3"},
     {"mp3",      "audio/x-mpeg-3"},
     {"mp3",      "video/mpeg"},
@@ -477,7 +478,7 @@ MimeTypeTableEntry MimeTypeTableEntry::table[640] =
     {"pvu",      "paleovu/x-pv"},
     {"pwz",      "application/vnd.ms-powerpoint"},
     {"py",       "text/x-script.phyton"},
-    {"pyc",      "applicaiton/x-bytecode.python"},
+    {"pyc",      "application/x-bytecode.python"},
     {"qcp",      "audio/vnd.qcelp"},
     {"qd3",      "x-world/x-3dmf"},
     {"qd3d",     "x-world/x-3dmf"},

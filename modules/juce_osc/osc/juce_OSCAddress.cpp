@@ -97,7 +97,7 @@ namespace
             if (pattern == patternEnd)
                 return false;
 
-            // Note: in case this code is ever moved into the more generic CharPointerFunctions,
+            // Note: In case this code is ever moved into the more generic CharPointerFunctions,
             // the next two lines probably will not compile as soon as this class is used with a
             // Char template type parameter that is not the same type as String::Char.
             StringArray set;
@@ -486,7 +486,7 @@ public:
             expectDoesNotThrow (OSCAddressPattern ("/[a-e]"));
             expectDoesNotThrow (OSCAddressPattern ("/foo/[a-z]x{foo,bar}/*BAZ42/"));
 
-            /* Note: if malformed expressions are used, e.g. "bracenotclosed{" or "{a-e}" or "[-foo]",
+            /* Note: If malformed expressions are used, e.g. "bracenotclosed{" or "{a-e}" or "[-foo]",
                this should not throw at construction time. Instead it should simply fail any pattern match later.
                So there is no need to test for those.
                The reason is that we do not actually parse the expressions now, but only during matching.
@@ -517,7 +517,7 @@ public:
 
         beginTest ("basic string matching");
         {
-            /* Note: the actual expression matching is tested in OSCPatternMatcher, so here we just
+            /* Note: The actual expression matching is tested in OSCPatternMatcher, so here we just
                do some basic tests and check if the matching works with multi-part addresses.
              */
             {

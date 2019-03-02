@@ -52,7 +52,7 @@ public:
     */
     static BigInteger createProbablePrime (int bitLength,
                                            int certainty,
-                                           const int* randomSeeds = 0,
+                                        const int* randomSeeds = nullptr,
                                            int numRandomSeeds = 0);
 
     /** Tests a number to see if it's prime.

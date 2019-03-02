@@ -40,7 +40,7 @@ class NormalisableRange
 {
 public:
     /** Creates a continuous range that performs a dummy mapping. */
-    NormalisableRange() noexcept {}
+    NormalisableRange() = default;
 
     NormalisableRange (const NormalisableRange&) = default;
     NormalisableRange& operator= (const NormalisableRange&) = default;
@@ -50,9 +50,9 @@ public:
         : start (other.start), end (other.end),
           interval (other.interval), skew (other.skew),
           symmetricSkew (other.symmetricSkew),
-          convertFrom0To1Function  (static_cast<ConverstionFunction&&> (other.convertFrom0To1Function)),
-          convertTo0To1Function    (static_cast<ConverstionFunction&&> (other.convertTo0To1Function)),
-          snapToLegalValueFunction (static_cast<ConverstionFunction&&> (other.snapToLegalValueFunction))
+          convertFrom0To1Function  (std::move (other.convertFrom0To1Function)),
+          convertTo0To1Function    (std::move (other.convertTo0To1Function)),
+          snapToLegalValueFunction (std::move (other.snapToLegalValueFunction))
     {
     }
 
@@ -64,9 +64,9 @@ public:
         interval = other.interval;
         skew = other.skew;
         symmetricSkew = other.symmetricSkew;
-        convertFrom0To1Function  = static_cast<ConverstionFunction&&> (other.convertFrom0To1Function);
-        convertTo0To1Function    = static_cast<ConverstionFunction&&> (other.convertTo0To1Function);
-        snapToLegalValueFunction = static_cast<ConverstionFunction&&> (other.snapToLegalValueFunction);
+        convertFrom0To1Function  = std::move (other.convertFrom0To1Function);
+        convertTo0To1Function    = std::move (other.convertTo0To1Function);
+        snapToLegalValueFunction = std::move (other.snapToLegalValueFunction);
 
         return *this;
     }
@@ -274,11 +274,11 @@ private:
         return clampedValue;
     }
 
-    using ConverstionFunction = std::function<ValueType(ValueType, ValueType, ValueType)>;
+    using ConversionFunction = std::function<ValueType(ValueType, ValueType, ValueType)>;
 
-    ConverstionFunction convertFrom0To1Function  = {},
-                        convertTo0To1Function    = {},
-                        snapToLegalValueFunction = {};
+    ConversionFunction convertFrom0To1Function  = {},
+                       convertTo0To1Function    = {},
+                       snapToLegalValueFunction = {};
 };
 
 } // namespace juce

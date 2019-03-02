@@ -51,10 +51,10 @@ public:
                  Colour arrowColour);
 
     /** Destructor. */
-    ~ArrowButton();
+    ~ArrowButton() override;
 
     /** @internal */
-    void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown) override;
+    void paintButton (Graphics&, bool, bool) override;
 
 private:
     Colour colour;

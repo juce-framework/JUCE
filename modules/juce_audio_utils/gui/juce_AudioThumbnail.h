@@ -68,7 +68,7 @@ public:
                     AudioThumbnailCache& cacheToUse);
 
     /** Destructor. */
-    ~AudioThumbnail();
+    ~AudioThumbnail() override;
 
     //==============================================================================
     /** Clears and resets the thumbnail. */
@@ -200,13 +200,6 @@ private:
     struct MinMaxValue;
     class ThumbData;
     class CachedWindow;
-
-    friend class LevelDataSource;
-    friend class ThumbData;
-    friend class CachedWindow;
-    friend struct ContainerDeletePolicy<LevelDataSource>;
-    friend struct ContainerDeletePolicy<ThumbData>;
-    friend struct ContainerDeletePolicy<CachedWindow>;
 
     std::unique_ptr<LevelDataSource> source;
     std::unique_ptr<CachedWindow> window;

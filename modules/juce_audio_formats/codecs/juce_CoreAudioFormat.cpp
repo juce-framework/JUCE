@@ -42,9 +42,9 @@ namespace
         CFArrayRef extensions = nullptr;
         UInt32 sizeOfArray = sizeof (extensions);
 
-        if (AudioFileGetGlobalInfo (kAudioFileGlobalInfo_AllExtensions, 0, 0, &sizeOfArray, &extensions) == noErr)
+        if (AudioFileGetGlobalInfo (kAudioFileGlobalInfo_AllExtensions, 0, nullptr, &sizeOfArray, &extensions) == noErr)
         {
-            const CFIndex numValues = CFArrayGetCount (extensions);
+            auto numValues = CFArrayGetCount (extensions);
 
             for (CFIndex i = 0; i < numValues; ++i)
                 extensionsArray.add ("." + String::fromCFString ((CFStringRef) CFArrayGetValueAtIndex (extensions, i)));
@@ -122,14 +122,14 @@ struct CoreAudioFormatMetatdata
     static StringPairArray parseUserDefinedChunk (InputStream& input, int64 size)
     {
         StringPairArray infoStrings;
-        const int64 originalPosition = input.getPosition();
+        auto originalPosition = input.getPosition();
 
         uint8 uuid[16];
         input.read (uuid, sizeof (uuid));
 
         if (memcmp (uuid, "\x29\x81\x92\x73\xB5\xBF\x4A\xEF\xB7\x8D\x62\xD1\xEF\x90\xBB\x2C", 16) == 0)
         {
-            const uint32 numEntries = (uint32) input.readIntBigEndian();
+            auto numEntries = (uint32) input.readIntBigEndian();
 
             for (uint32 i = 0; i < numEntries && input.getPosition() < originalPosition + size; ++i)
             {
@@ -314,7 +314,7 @@ struct CoreAudioFormatMetatdata
                     if (chunkHeader.chunkSize == -1)
                         break;
 
-                    input.skipNextBytes (chunkHeader.chunkSize);
+                    input.setPosition (input.getPosition() + chunkHeader.chunkSize);
                 }
                 else if (chunkHeader.chunkType == chunkName ("midi"))
                 {
@@ -327,7 +327,7 @@ struct CoreAudioFormatMetatdata
                 else
                 {
                     // we aren't decoding this chunk yet so just skip over it
-                    input.skipNextBytes (chunkHeader.chunkSize);
+                    input.setPosition (input.getPosition() + chunkHeader.chunkSize);
                 }
             }
         }
@@ -350,13 +350,13 @@ public:
         if (input != nullptr)
             CoreAudioFormatMetatdata::read (*input, metadataValues);
 
-        OSStatus status = AudioFileOpenWithCallbacks (this,
-                                                      &readCallback,
-                                                      nullptr,  // write needs to be null to avoid permisisions errors
-                                                      &getSizeCallback,
-                                                      nullptr,  // setSize needs to be null to avoid permisisions errors
-                                                      0,        // AudioFileTypeID inFileTypeHint
-                                                      &audioFileID);
+        auto status = AudioFileOpenWithCallbacks (this,
+                                                  &readCallback,
+                                                  nullptr,  // write needs to be null to avoid permisisions errors
+                                                  &getSizeCallback,
+                                                  nullptr,  // setSize needs to be null to avoid permisisions errors
+                                                  0,        // AudioFileTypeID inFileTypeHint
+                                                  &audioFileID);
         if (status == noErr)
         {
             status = ExtAudioFileWrapAudioFileID (audioFileID, false, &audioFileRef);
@@ -447,7 +447,7 @@ public:
         }
     }
 
-    ~CoreAudioReader()
+    ~CoreAudioReader() override
     {
         ExtAudioFileDispose (audioFileRef);
         AudioFileClose (audioFileID);
@@ -665,7 +665,7 @@ public:
             for (auto tagEntry : knownTags)
                 expect (AudioChannelSet::channelSetWithChannels (CoreAudioLayouts::getSpeakerLayoutForCoreAudioTag (tagEntry.tag))
                             == CoreAudioLayouts::fromCoreAudio (tagEntry.tag),
-                        "Tag \"" + String (tagEntry.name) + "\" is not converted consistantly by JUCE");
+                        "Tag \"" + String (tagEntry.name) + "\" is not converted consistently by JUCE");
         }
 
         {

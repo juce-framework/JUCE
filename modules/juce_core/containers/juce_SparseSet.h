@@ -41,13 +41,13 @@ class SparseSet
 {
 public:
     //==============================================================================
-    SparseSet() noexcept {}
+    SparseSet() = default;
 
     SparseSet (const SparseSet&) = default;
     SparseSet& operator= (const SparseSet&) = default;
 
-    SparseSet (SparseSet&& other) noexcept : ranges (static_cast<Array<Range<Type>>&&> (other.ranges)) {}
-    SparseSet& operator= (SparseSet&& other) noexcept { ranges = static_cast<Array<Range<Type>>&&> (other.ranges); return *this; }
+    SparseSet (SparseSet&& other) noexcept : ranges (std::move (other.ranges)) {}
+    SparseSet& operator= (SparseSet&& other) noexcept { ranges = std::move (other.ranges); return *this; }
 
     //==============================================================================
     /** Clears the set. */

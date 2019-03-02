@@ -37,7 +37,7 @@ namespace juce
 template <typename Type, typename MutexType, bool onlyCreateOncePerRun>
 struct SingletonHolder  : private MutexType // (inherited so we can use the empty-base-class optimisation)
 {
-    SingletonHolder() noexcept {}
+    SingletonHolder() = default;
 
     ~SingletonHolder()
     {

@@ -51,8 +51,8 @@ enum class MessageFromDevice
     firmwareUpdateACK       = 0x03,
     deviceTopologyExtend    = 0x04,
     deviceTopologyEnd       = 0x05,
-    deviceVersionList       = 0x06,
-    deviceNameList          = 0x07,
+    deviceVersion           = 0x06,
+    deviceName              = 0x07,
 
     touchStart              = 0x10,
     touchMove               = 0x11,
@@ -124,17 +124,59 @@ using BatteryCharging   = IntegerWithBitSize<1>;
 using ConnectorPort = IntegerWithBitSize<5>;
 
 //==============================================================================
+/** Structure for generic block data
+
+    @tags{Blocks}
+ */
+template <size_t MaxSize>
+struct BlockStringData
+{
+    uint8 data[MaxSize] = {};
+    uint8 length = 0;
+
+    static const size_t maxLength { MaxSize };
+
+    bool isNotEmpty() const
+    {
+        return length > 0;
+    }
+
+    String asString() const
+    {
+        return String ((const char*) data, length);
+    }
+
+    bool operator== (const BlockStringData& other) const
+    {
+        if (length != other.length)
+            return false;
+
+        for (int i = 0; i < length; ++i)
+            if (data[i] != other.data[i])
+                return false;
+
+        return true;
+    }
+
+    bool operator!= (const BlockStringData& other) const
+    {
+        return ! ( *this == other );
+    }
+};
+
+using VersionNumber = BlockStringData<21>;
+using BlockName = BlockStringData<33>;
+
+//==============================================================================
 /** Structure describing a block's serial number
 
     @tags{Blocks}
 */
-struct BlockSerialNumber
+struct BlockSerialNumber : public BlockStringData<16>
 {
-    uint8 serial[16];
-
     bool isValid() const noexcept
     {
-        for (auto c : serial)
+        for (auto c : data)
             if (c == 0)
                 return false;
 
@@ -150,29 +192,10 @@ struct BlockSerialNumber
 
     bool isAnyControlBlock() const noexcept     { return isLiveBlock() || isLoopBlock() || isDevCtrlBlock() || isTouchBlock(); }
 
-    bool hasPrefix (const char* prefix) const noexcept  { return memcmp (serial, prefix, 3) == 0; }
+    bool hasPrefix (const char* prefix) const noexcept  { return memcmp (data, prefix, 3) == 0; }
 };
 
-/** Structure for the version number
-
-    @tags{Blocks}
-*/
-struct VersionNumber
-{
-    uint8 version[21] = {};
-    uint8 length = 0;
-};
-
-/** Structure for the block name
-
-    @tags{Blocks}
-*/
-struct BlockName
-{
-    uint8 name[33] = {};
-    uint8 length = 0;
-};
-
+//==============================================================================
 /** Structure for the device status
 
     @tags{Blocks}
@@ -185,6 +208,7 @@ struct DeviceStatus
     BatteryCharging batteryCharging;
 };
 
+//==============================================================================
 /** Structure for the device connection
 
     @tags{Blocks}
@@ -193,8 +217,28 @@ struct DeviceConnection
 {
     TopologyIndex device1, device2;
     ConnectorPort port1, port2;
+
+    bool operator== (const DeviceConnection& other) const
+    {
+        return isEqual (other);
+    }
+
+    bool operator!= (const DeviceConnection& other) const
+    {
+        return ! isEqual (other);
+    }
+
+private:
+    bool isEqual (const DeviceConnection& other) const
+    {
+        return device1 == other.device1
+            && device2 == other.device2
+            && port1 == other.port1
+            && port2 == other.port2;
+    }
 };
 
+//==============================================================================
 /** Structure for the device version
 
     @tags{Blocks}
@@ -205,6 +249,7 @@ struct DeviceVersion
     VersionNumber version;
 };
 
+//==============================================================================
 /** Structure used for the device name
 
     @tags{Blocks}
@@ -232,6 +277,8 @@ enum ConfigItemId
     slideCC             = 6,
     slideMode           = 7,
     octaveTopology      = 8,
+    midiChannelRange    = 9,
+    MPEZone             = 40,
     // Touch
     velocitySensitivity = 10,
     glideSensitivity    = 11,
@@ -363,7 +410,8 @@ enum ConfigCommands
     updateUserConfig            = 0x05, // As above but contains user config metadata
     setConfigState              = 0x06, // Set config activation state and whether it is saved in flash
     factorySyncEnd              = 0x07,
-    clusterConfigSync           = 0x08
+    clusterConfigSync           = 0x08,
+    factorySyncReset            = 0x09
 };
 
 using ConfigCommand = IntegerWithBitSize<4>;
@@ -419,7 +467,7 @@ static constexpr uint32 controlBlockStackSize = 800;
 enum BitSizes
 {
     topologyMessageHeader    = MessageType::bits + ProtocolVersion::bits + DeviceCount::bits + ConnectionCount::bits,
-    topologyDeviceInfo       = sizeof (BlockSerialNumber) * 7 + BatteryLevel::bits + BatteryCharging::bits,
+    topologyDeviceInfo       = BlockSerialNumber::maxLength * 7 + BatteryLevel::bits + BatteryCharging::bits,
     topologyConnectionInfo   = topologyIndexBits + ConnectorPort::bits + topologyIndexBits + ConnectorPort::bits,
 
     typeDeviceAndTime        = MessageType::bits + PacketTimestampOffset::bits,

@@ -57,7 +57,7 @@ protected:
 
 public:
     /** Destructor. */
-    ~BubbleComponent();
+    ~BubbleComponent() override;
 
     //==============================================================================
     /** A list of permitted placements for the bubble, relative to the coordinates
@@ -150,7 +150,7 @@ public:
     */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         virtual void drawBubble (Graphics&, BubbleComponent&,
                                  const Point<float>& positionOfTip,

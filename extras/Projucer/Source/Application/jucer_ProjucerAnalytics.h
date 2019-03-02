@@ -43,7 +43,7 @@ class ProjucerAnalyticsDestination    : public ThreadedAnalyticsDestination
 {
 public:
     ProjucerAnalyticsDestination();
-    ~ProjucerAnalyticsDestination();
+    ~ProjucerAnalyticsDestination() override;
 
     //==============================================================================
     bool logBatchedEvents (const Array<AnalyticsEvent>&) override;

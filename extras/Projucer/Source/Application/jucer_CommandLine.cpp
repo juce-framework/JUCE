@@ -25,83 +25,23 @@
 */
 
 #include "jucer_Headers.h"
-#include "../Project/jucer_Module.h"
+#include "jucer_Application.h"
 #include "../Utility/Helpers/jucer_TranslationHelpers.h"
-#include "../Utility/PIPs/jucer_PIPGenerator.h"
 
 #include "jucer_CommandLine.h"
 
 //==============================================================================
-const char* preferredLinefeed = "\r\n";
-const char* getPreferredLinefeed()     { return preferredLinefeed; }
+const char* preferredLineFeed = "\r\n";
+const char* getPreferredLineFeed()     { return preferredLineFeed; }
 
 //==============================================================================
 namespace
 {
-    struct CommandLineError
-    {
-        CommandLineError (const String& s) : message (s) {}
-
-        String message;
-    };
-
     static void hideDockIcon()
     {
        #if JUCE_MAC
         Process::setDockIconVisible (false);
        #endif
-    }
-
-    static bool matchArgument (const String& arg, const String& possible)
-    {
-        return arg == possible
-            || arg == "-" + possible
-            || arg == "--" + possible;
-    }
-
-    static void checkArgumentCount (const StringArray& args, int minNumArgs)
-    {
-        if (args.size() < minNumArgs)
-            throw CommandLineError ("Not enough arguments!");
-    }
-
-    static bool findArgument (StringArray& args, const String& target)
-    {
-        for (int i = 0; i < args.size(); ++i)
-        {
-            if (args[i].trim() == target)
-            {
-                args.remove (i);
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    static File getFile (const String& filename)
-    {
-        return File::getCurrentWorkingDirectory().getChildFile (filename.unquoted());
-    }
-
-    static File getDirectoryCheckingForExistence (const String& filename)
-    {
-        File f = getFile (filename);
-
-        if (! f.isDirectory())
-            throw CommandLineError ("Could not find folder: " + f.getFullPathName());
-
-        return f;
-    }
-
-    static File getFileCheckingForExistence (const String& filename)
-    {
-        File f = getFile (filename);
-
-        if (! f.exists())
-            throw CommandLineError ("Could not find file: " + f.getFullPathName());
-
-        return f;
     }
 
     static Array<File> findAllSourceFiles (const File& folder)
@@ -122,45 +62,79 @@ namespace
         TemporaryFile temp (file);
 
         if (! temp.getFile().replaceWithText (newText, false, false, nullptr))
-            throw CommandLineError ("!!! ERROR Couldn't write to temp file!");
+            ConsoleApplication::fail ("!!! ERROR Couldn't write to temp file!");
 
         if (! temp.overwriteTargetFileWithTemporary())
-            throw CommandLineError ("!!! ERROR Couldn't write to file!");
+            ConsoleApplication::fail ("!!! ERROR Couldn't write to file!");
     }
 
     //==============================================================================
     struct LoadedProject
     {
-        LoadedProject (const String& fileToLoad)
+        LoadedProject (const ArgumentList::Argument& fileToLoad)
         {
             hideDockIcon();
 
-            auto projectFile = getFileCheckingForExistence (fileToLoad);
+            auto projectFile = fileToLoad.resolveAsExistingFile();
 
             if (! projectFile.hasFileExtension (Project::projectFileExtension))
-                throw CommandLineError (projectFile.getFullPathName() + " isn't a valid jucer project file!");
+                ConsoleApplication::fail (projectFile.getFullPathName() + " isn't a valid jucer project file!");
 
             project.reset (new Project (projectFile));
 
             if (! project->loadFrom (projectFile, true))
             {
                 project.reset();
-                throw CommandLineError ("Failed to load the project file: " + projectFile.getFullPathName());
+                ConsoleApplication::fail ("Failed to load the project file: " + projectFile.getFullPathName());
             }
+
+            preferredLineFeed = project->getProjectLineFeed().toRawUTF8();
         }
 
         void save (bool justSaveResources)
         {
             if (project != nullptr)
             {
+                if (! justSaveResources)
+                    rescanModulePathsIfNecessary();
+
                 auto error = justSaveResources ? project->saveResourcesOnly (project->getFile())
                                                : project->saveProject (project->getFile(), true);
 
                 project.reset();
 
                 if (error.failed())
-                    throw CommandLineError ("Error when saving: " + error.getErrorMessage());
+                    ConsoleApplication::fail ("Error when saving: " + error.getErrorMessage());
             }
+        }
+
+        void rescanModulePathsIfNecessary()
+        {
+            bool scanJUCEPath = false, scanUserPaths = false;
+
+            const auto& modules = project->getEnabledModules();
+
+            for (auto i = modules.getNumModules(); --i >= 0;)
+            {
+                const auto& id = modules.getModuleID (i);
+
+                if (isJUCEModule (id) && ! scanJUCEPath)
+                {
+                    if (modules.shouldUseGlobalPath (id))
+                        scanJUCEPath = true;
+                }
+                else if (! scanUserPaths)
+                {
+                    if (modules.shouldUseGlobalPath (id))
+                        scanUserPaths = true;
+                }
+            }
+
+            if (scanJUCEPath)
+                ProjucerApplication::getApp().rescanJUCEPathModules();
+
+            if (scanUserPaths)
+                ProjucerApplication::getApp().rescanUserPathModules();
         }
 
         std::unique_ptr<Project> project;
@@ -170,9 +144,9 @@ namespace
     /* Running a command-line of the form "projucer --resave foobar.jucer" will try to load
        that project and re-export all of its targets.
     */
-    static void resaveProject (const StringArray& args, bool justSaveResources)
+    static void resaveProject (const ArgumentList& args, bool justSaveResources)
     {
-        checkArgumentCount (args, 2);
+        args.checkMinNumArguments (2);
         LoadedProject proj (args[1]);
 
         std::cout << (justSaveResources ? "Re-saving project resources: "
@@ -183,21 +157,21 @@ namespace
     }
 
     //==============================================================================
-    static void getVersion (const StringArray& args)
+    static void getVersion (const ArgumentList& args)
     {
-        checkArgumentCount (args, 2);
+        args.checkMinNumArguments (2);
         LoadedProject proj (args[1]);
 
         std::cout << proj.project->getVersionString() << std::endl;
     }
 
     //==============================================================================
-    static void setVersion (const StringArray& args)
+    static void setVersion (const ArgumentList& args)
     {
-        checkArgumentCount (args, 3);
+        args.checkMinNumArguments (2);
         LoadedProject proj (args[2]);
 
-        String version (args[1].trim());
+        String version (args[1].text.trim());
 
         std::cout << "Setting project version: " << version << std::endl;
 
@@ -206,9 +180,9 @@ namespace
     }
 
     //==============================================================================
-    static void bumpVersion (const StringArray& args)
+    static void bumpVersion (const ArgumentList& args)
     {
-        checkArgumentCount (args, 2);
+        args.checkMinNumArguments (2);
         LoadedProject proj (args[1]);
 
         String version = proj.project->getVersionString();
@@ -222,15 +196,15 @@ namespace
         proj.save (false);
     }
 
-    static void gitTag (const StringArray& args)
+    static void gitTag (const ArgumentList& args)
     {
-        checkArgumentCount (args, 2);
+        args.checkMinNumArguments (2);
         LoadedProject proj (args[1]);
 
         String version (proj.project->getVersionString());
 
         if (version.trim().isEmpty())
-            throw CommandLineError ("Cannot read version number from project!");
+            ConsoleApplication::fail ("Cannot read version number from project!");
 
         StringArray command;
         command.add ("git");
@@ -245,19 +219,19 @@ namespace
         ChildProcess c;
 
         if (! c.start (command, 0))
-            throw CommandLineError ("Cannot run git!");
+            ConsoleApplication::fail ("Cannot run git!");
 
         c.waitForProcessToFinish (10000);
 
         if (c.getExitCode() != 0)
-            throw CommandLineError ("git command failed!");
+            ConsoleApplication::fail ("git command failed!");
     }
 
     //==============================================================================
-    static void showStatus (const StringArray& args)
+    static void showStatus (const ArgumentList& args)
     {
         hideDockIcon();
-        checkArgumentCount (args, 2);
+        args.checkMinNumArguments (2);
 
         LoadedProject proj (args[1]);
 
@@ -265,7 +239,7 @@ namespace
                   << "Name: " << proj.project->getProjectNameString() << std::endl
                   << "UID: " << proj.project->getProjectUIDString() << std::endl;
 
-        EnabledModuleList& modules = proj.project->getModules();
+        EnabledModuleList& modules = proj.project->getEnabledModules();
 
         if (int numModules = modules.getNumModules())
         {
@@ -286,13 +260,13 @@ namespace
     {
         jassert (targetFolder.isDirectory());
 
-        const File moduleFolderParent (moduleFolder.getParentDirectory());
+        auto moduleFolderParent = moduleFolder.getParentDirectory();
         LibraryModule module (moduleFolder);
 
         if (! module.isValid())
-            throw CommandLineError (moduleFolder.getFullPathName() + " is not a valid module folder!");
+            ConsoleApplication::fail (moduleFolder.getFullPathName() + " is not a valid module folder!");
 
-        const File targetFile (targetFolder.getChildFile (getModulePackageName (module)));
+        auto targetFile = targetFolder.getChildFile (getModulePackageName (module));
 
         ZipFile::Builder zip;
 
@@ -307,29 +281,31 @@ namespace
         std::cout << "Writing: " << targetFile.getFullPathName() << std::endl;
 
         TemporaryFile temp (targetFile);
-        std::unique_ptr<FileOutputStream> out (temp.getFile().createOutputStream());
 
-        bool ok = out != nullptr && zip.writeToStream (*out, nullptr);
-        out.reset();
-        ok = ok && temp.overwriteTargetFileWithTemporary();
+        {
+            FileOutputStream out (temp.getFile());
 
-        if (! ok)
-            throw CommandLineError ("Failed to write to the target file: " + targetFile.getFullPathName());
+            if (! (out.openedOk() && zip.writeToStream (out, nullptr)))
+                ConsoleApplication::fail ("Failed to write to the target file: " + targetFile.getFullPathName());
+        }
+
+        if (! temp.overwriteTargetFileWithTemporary())
+            ConsoleApplication::fail ("Failed to write to the target file: " + targetFile.getFullPathName());
     }
 
-    static void buildModules (const StringArray& args, const bool buildAllWithIndex)
+    static void buildModules (const ArgumentList& args, const bool buildAllWithIndex)
     {
         hideDockIcon();
-        checkArgumentCount (args, 3);
+        args.checkMinNumArguments (3);
 
-        const File targetFolder (getFile (args[1]));
+        auto targetFolder = args[1].resolveAsFile();
 
         if (! targetFolder.isDirectory())
-            throw CommandLineError ("The first argument must be the directory to put the result.");
+            ConsoleApplication::fail ("The first argument must be the directory to put the result.");
 
         if (buildAllWithIndex)
         {
-            const File folderToSearch (getFile (args[2]));
+            auto folderToSearch = args[2].resolveAsFile();
             DirectoryIterator i (folderToSearch, false, "*", File::findDirectories);
             var infoList;
 
@@ -348,14 +324,14 @@ namespace
                 }
             }
 
-            const File indexFile (targetFolder.getChildFile ("modulelist"));
+            auto indexFile = targetFolder.getChildFile ("modulelist");
             std::cout << "Writing: " << indexFile.getFullPathName() << std::endl;
             indexFile.replaceWithText (JSON::toString (infoList), false, false);
         }
         else
         {
             for (int i = 2; i < args.size(); ++i)
-                zipModule (targetFolder, getFile (args[i]));
+                zipModule (targetFolder, args[i].resolveAsFile());
         }
     }
 
@@ -424,18 +400,18 @@ namespace
 
         auto newText = joinLinesIntoSourceFile (lines);
 
-        if (newText != content && newText != content + getPreferredLinefeed())
+        if (newText != content && newText != content + getPreferredLineFeed())
             replaceFile (file, newText, options.removeTabs ? "Removing tabs in: "
                                                            : "Cleaning file: ");
     }
 
-    static void scanFilesForCleanup (const StringArray& args, CleanupOptions options)
+    static void scanFilesForCleanup (const ArgumentList& args, CleanupOptions options)
     {
-        checkArgumentCount (args, 2);
+        args.checkMinNumArguments (2);
 
-        for (auto it = args.begin() + 1; it < args.end(); ++it)
+        for (auto it = args.arguments.begin() + 1; it < args.arguments.end(); ++it)
         {
-            auto target = getFileCheckingForExistence (*it);
+            auto target = it->resolveAsFile();
 
             Array<File> files;
 
@@ -449,13 +425,13 @@ namespace
         }
     }
 
-    static void cleanWhitespace (const StringArray& args, bool replaceTabs)
+    static void cleanWhitespace (const ArgumentList& args, bool replaceTabs)
     {
         CleanupOptions options = { replaceTabs, false };
         scanFilesForCleanup (args, options);
     }
 
-    static void tidyDividerComments (const StringArray& args)
+    static void tidyDividerComments (const ArgumentList& args)
     {
         CleanupOptions options = { false, true };
         scanFilesForCleanup (args, options);
@@ -520,15 +496,15 @@ namespace
         {
             auto newText = joinLinesIntoSourceFile (lines);
 
-            if (newText != content && newText != content + getPreferredLinefeed())
+            if (newText != content && newText != content + getPreferredLineFeed())
                 replaceFile (file, newText, "Fixing includes in: ");
         }
     }
 
-    static void fixRelativeIncludePaths (const StringArray& args)
+    static void fixRelativeIncludePaths (const ArgumentList& args)
     {
-        checkArgumentCount (args, 2);
-        auto target = getDirectoryCheckingForExistence (args[1]);
+        args.checkMinNumArguments (2);
+        auto target = args[1].resolveAsExistingFolder();
         auto files = findAllSourceFiles (target);
 
         for (int i = 0; i < files.size(); ++i)
@@ -549,10 +525,10 @@ namespace
                 + " + " + getStringConcatenationExpression (rng, start + breakPos, length - breakPos) + ")";
     }
 
-    static void generateObfuscatedStringCode (const StringArray& args)
+    static void generateObfuscatedStringCode (const ArgumentList& args)
     {
-        checkArgumentCount (args, 2);
-        const String originalText (args[1].unquoted());
+        args.checkMinNumArguments (2);
+        auto originalText = args[1].text.unquoted();
 
         struct Section
         {
@@ -568,7 +544,7 @@ namespace
                 for (int i = 0; i < text.length(); ++i)
                     out << " << '" << String::charToString (text[i]) << "'";
 
-                out << ";" << preferredLinefeed;
+                out << ";" << preferredLineFeed;
             }
         };
 
@@ -592,45 +568,45 @@ namespace
 
         MemoryOutputStream out;
 
-        out << "String createString()" << preferredLinefeed
-            << "{" << preferredLinefeed;
+        out << "String createString()" << preferredLineFeed
+            << "{" << preferredLineFeed;
 
         for (int i = 0; i < sections.size(); ++i)
             sections.getReference(i).writeGenerator (out);
 
-        out << preferredLinefeed
-            << "    String result = " << getStringConcatenationExpression (rng, 0, sections.size()) << ";" << preferredLinefeed
-            << preferredLinefeed
-            << "    jassert (result == " << originalText.quoted() << ");" << preferredLinefeed
-            << "    return result;" << preferredLinefeed
-            << "}" << preferredLinefeed;
+        out << preferredLineFeed
+            << "    String result = " << getStringConcatenationExpression (rng, 0, sections.size()) << ";" << preferredLineFeed
+            << preferredLineFeed
+            << "    jassert (result == " << originalText.quoted() << ");" << preferredLineFeed
+            << "    return result;" << preferredLineFeed
+            << "}" << preferredLineFeed;
 
         std::cout << out.toString() << std::endl;
     }
 
-    static void scanFoldersForTranslationFiles (const StringArray& args)
+    static void scanFoldersForTranslationFiles (const ArgumentList& args)
     {
-        checkArgumentCount (args, 2);
+        args.checkMinNumArguments (2);
 
         StringArray translations;
 
-        for (auto it = args.begin() + 1; it != args.end(); ++it)
+        for (auto it = args.arguments.begin() + 1; it != args.arguments.end(); ++it)
         {
-            const File directoryToSearch (getDirectoryCheckingForExistence (*it));
+            auto directoryToSearch = it->resolveAsExistingFolder();
             TranslationHelpers::scanFolderForTranslations (translations, directoryToSearch);
         }
 
         std::cout << TranslationHelpers::mungeStrings (translations) << std::endl;
     }
 
-    static void createFinishedTranslationFile (const StringArray& args)
+    static void createFinishedTranslationFile (const ArgumentList& args)
     {
-        checkArgumentCount (args, 3);
+        args.checkMinNumArguments (3);
 
-        auto preTranslated  = getFileCheckingForExistence (args[1]).loadFileAsString();
-        auto postTranslated = getFileCheckingForExistence (args[2]).loadFileAsString();
+        auto preTranslated  = args[1].resolveAsExistingFile().loadFileAsString();
+        auto postTranslated = args[2].resolveAsExistingFile().loadFileAsString();
 
-        auto localisedContent = (args.size() > 3 ? getFileCheckingForExistence (args[3]).loadFileAsString() : String());
+        auto localisedContent = (args.size() > 3 ? args[3].resolveAsExistingFile().loadFileAsString() : String());
         auto localised        = LocalisedStrings (localisedContent, false);
 
         using TH = TranslationHelpers;
@@ -640,11 +616,11 @@ namespace
     }
 
     //==============================================================================
-    static void encodeBinary (const StringArray& args)
+    static void encodeBinary (const ArgumentList& args)
     {
-        checkArgumentCount (args, 3);
-        const File source (getFileCheckingForExistence (args[1]));
-        const File target (getFile (args[2]));
+        args.checkMinNumArguments (3);
+        auto source = args[1].resolveAsExistingFile();
+        auto target = args[2].resolveAsExistingFile();
 
         MemoryOutputStream literal;
         size_t dataSize = 0;
@@ -661,39 +637,39 @@ namespace
 
         MemoryOutputStream header, cpp;
 
-        header << "// Auto-generated binary data by the Projucer" << preferredLinefeed
-               << "// Source file: " << source.getRelativePathFrom (target.getParentDirectory()) << preferredLinefeed
-               << preferredLinefeed;
+        header << "// Auto-generated binary data by the Projucer" << preferredLineFeed
+               << "// Source file: " << source.getRelativePathFrom (target.getParentDirectory()) << preferredLineFeed
+               << preferredLineFeed;
 
         cpp << header.toString();
 
         if (target.hasFileExtension (headerFileExtensions))
         {
-            header << "static constexpr unsigned char " << variableName << "[] =" << preferredLinefeed
-                   << literal.toString() << preferredLinefeed
-                   << preferredLinefeed;
+            header << "static constexpr unsigned char " << variableName << "[] =" << preferredLineFeed
+                   << literal.toString() << preferredLineFeed
+                   << preferredLineFeed;
 
             replaceFile (target, header.toString(), "Writing: ");
         }
         else if (target.hasFileExtension (cppFileExtensions))
         {
-            header << "extern const char*  " << variableName << ";" << preferredLinefeed
-                   << "const unsigned int  " << variableName << "Size = " << (int) dataSize << ";" << preferredLinefeed
-                   << preferredLinefeed;
+            header << "extern const char*  " << variableName << ";" << preferredLineFeed
+                   << "const unsigned int  " << variableName << "Size = " << (int) dataSize << ";" << preferredLineFeed
+                   << preferredLineFeed;
 
-            cpp << CodeHelpers::createIncludeStatement (target.withFileExtension (".h").getFileName()) << preferredLinefeed
-                << preferredLinefeed
-                << "static constexpr unsigned char " << variableName << "_local[] =" << preferredLinefeed
-                << literal.toString() << preferredLinefeed
-                << preferredLinefeed
-                << "const char* " << variableName << " = (const char*) " << variableName << "_local;" << preferredLinefeed;
+            cpp << CodeHelpers::createIncludeStatement (target.withFileExtension (".h").getFileName()) << preferredLineFeed
+                << preferredLineFeed
+                << "static constexpr unsigned char " << variableName << "_local[] =" << preferredLineFeed
+                << literal.toString() << preferredLineFeed
+                << preferredLineFeed
+                << "const char* " << variableName << " = (const char*) " << variableName << "_local;" << preferredLineFeed;
 
             replaceFile (target, cpp.toString(), "Writing: ");
             replaceFile (target.withFileExtension (".h"), header.toString(), "Writing: ");
         }
         else
         {
-            throw CommandLineError ("You need to specify a .h or .cpp file as the target");
+            ConsoleApplication::fail ("You need to specify a .h or .cpp file as the target");
         }
     }
 
@@ -707,23 +683,23 @@ namespace
         else if (os == "linux")      targetOS = TargetOS::linux;
 
         if (targetOS == TargetOS::unknown)
-            throw CommandLineError ("You need to specify a valid OS! Use osx, windows or linux");
+            ConsoleApplication::fail ("You need to specify a valid OS! Use osx, windows or linux");
 
         return targetOS == TargetOS::getThisOS();
     }
 
     static bool isValidPathIdentifier (const String& id, const String& os)
     {
-        return id == "vst3Path" || (id == "aaxPath" && os != "linux") || (id == "rtasPath" && os != "linux")
+        return id == "vst3Path" || id == "vstLegacyPath" || (id == "aaxPath" && os != "linux") || (id == "rtasPath" && os != "linux")
             || id == "androidSDKPath" || id == "androidNDKPath" || id == "defaultJuceModulePath" || id == "defaultUserModulePath";
     }
 
-    static void setGlobalPath (const StringArray& args)
+    static void setGlobalPath (const ArgumentList& args)
     {
-        checkArgumentCount (args, 3);
+        args.checkMinNumArguments (3);
 
-        if (! isValidPathIdentifier (args[2], args[1]))
-            throw CommandLineError ("Identifier " + args[2] + " is not valid for the OS " + args[1]);
+        if (! isValidPathIdentifier (args[2].text, args[1].text))
+            ConsoleApplication::fail ("Identifier " + args[2].text + " is not valid for the OS " + args[1].text);
 
         auto userAppData = File::getSpecialLocation (File::userApplicationDataDirectory);
 
@@ -732,55 +708,84 @@ namespace
        #endif
 
         auto settingsFile = userAppData.getChildFile ("Projucer").getChildFile ("Projucer.settings");
-        std::unique_ptr<XmlElement> xml (XmlDocument::parse (settingsFile));
+        auto xml = parseXML (settingsFile);
+
+        if (xml == nullptr)
+            ConsoleApplication::fail ("Settings file not valid!");
+
         auto settingsTree = ValueTree::fromXml (*xml);
 
         if (! settingsTree.isValid())
-            throw CommandLineError ("Settings file not valid!");
+            ConsoleApplication::fail ("Settings file not valid!");
 
         ValueTree childToSet;
-        if (isThisOS (args[1]))
+
+        if (isThisOS (args[1].text))
         {
             childToSet = settingsTree.getChildWithProperty (Ids::name, "PROJECT_DEFAULT_SETTINGS")
-                                     .getChildWithName ("PROJECT_DEFAULT_SETTINGS");
+                                     .getOrCreateChildWithName ("PROJECT_DEFAULT_SETTINGS", nullptr);
         }
         else
         {
             childToSet = settingsTree.getChildWithProperty (Ids::name, "FALLBACK_PATHS")
-                                     .getChildWithName ("FALLBACK_PATHS")
-                                     .getChildWithName (args[1] + String ("Fallback"));
+                                     .getOrCreateChildWithName ("FALLBACK_PATHS", nullptr)
+                                     .getOrCreateChildWithName (args[1].text + "Fallback", nullptr);
         }
 
         if (! childToSet.isValid())
-            throw CommandLineError ("Failed to set the requested setting!");
+            ConsoleApplication::fail ("Failed to set the requested setting!");
 
-        childToSet.setProperty (args[2], File::getCurrentWorkingDirectory().getChildFile (args[3]).getFullPathName(), nullptr);
+        childToSet.setProperty (args[2].text, args[3].resolveAsFile().getFullPathName(), nullptr);
 
         settingsFile.replaceWithText (settingsTree.toXmlString());
     }
 
-    static void createProjectFromPIP (const StringArray& args)
+    static void createProjectFromPIP (const ArgumentList& args)
     {
-        checkArgumentCount (args, 3);
+        args.checkMinNumArguments (3);
 
-        auto pipFile = File::getCurrentWorkingDirectory().getChildFile (args[1].unquoted());
+        auto pipFile = args[1].resolveAsFile();
+
         if (! pipFile.existsAsFile())
-            throw CommandLineError ("PIP file doesn't exist.");
+            ConsoleApplication::fail ("PIP file doesn't exist.");
 
-        auto outputDir = File::getCurrentWorkingDirectory().getChildFile (args[2].unquoted());
+        auto outputDir = args[2].resolveAsFile();
+
         if (! outputDir.exists())
         {
             auto res = outputDir.createDirectory();
             std::cout << "Creating directory " << outputDir.getFullPathName() << std::endl;
         }
 
-        PIPGenerator generator (pipFile, outputDir);
+        File juceModulesPath, userModulesPath;
 
-        if (! generator.createJucerFile())
-            throw CommandLineError ("Failed to create .jucer file in " + outputDir.getFullPathName()+ ".");
+        if (args.size() > 3)
+        {
+            juceModulesPath = args[3].resolveAsFile();
 
-        if (! generator.createMainCpp())
-            throw CommandLineError ("Failed to create Main.cpp.");
+            if (! juceModulesPath.exists())
+                ConsoleApplication::fail ("Specified JUCE modules directory doesn't exist.");
+
+            if (args.size() == 5)
+            {
+                userModulesPath = args[4].resolveAsFile();
+
+                if (! userModulesPath.exists())
+                    ConsoleApplication::fail ("Specified JUCE modules directory doesn't exist.");
+            }
+        }
+
+        PIPGenerator generator (pipFile, outputDir, juceModulesPath, userModulesPath);
+
+        auto createJucerFileResult = generator.createJucerFile();
+
+        if (! createJucerFileResult)
+            ConsoleApplication::fail (createJucerFileResult.getErrorMessage());
+
+        auto createMainCppResult = generator.createMainCpp();
+
+        if (! createMainCppResult)
+            ConsoleApplication::fail (createMainCppResult.getErrorMessage());
     }
 
     //==============================================================================
@@ -847,10 +852,11 @@ namespace
                   << std::endl
                   << " " << appName << " --set-global-search-path os identifier_to_set new_path" << std::endl
                   << "    Sets the global path for a specified os and identifier. The os should be either osx, windows or linux and the identifiers can be any of the following: "
-                  << "defaultJuceModulePath, defaultUserModulePath, vst3path, aaxPath (not valid on linux), rtasPath (not valid on linux), androidSDKPath or androidNDKPath." << std::endl
+                  << "defaultJuceModulePath, defaultUserModulePath, vst3Path, vstLegacyPath, aaxPath (not valid on linux), rtasPath (not valid on linux), androidSDKPath or androidNDKPath. " << std::endl
                   << std::endl
-                  << " " << appName << " --create-project-from-pip path/to/PIP path/to/output" << std::endl
-                  << "    Generates a JUCE project from a PIP file." << std::endl
+                  << " " << appName << " --create-project-from-pip path/to/PIP path/to/output path/to/JUCE/modules (optional) path/to/user/modules (optional)" << std::endl
+                  << "    Generates a folder containing a JUCE project in the specified output path using the specified PIP file. Use the optional JUCE and user module paths to override "
+                     "the global module paths." << std::endl
                   << std::endl
                   << "Note that for any of the file-rewriting commands, add the option \"--lf\" if you want it to use LF linefeeds instead of CRLF" << std::endl
                   << std::endl;
@@ -858,46 +864,45 @@ namespace
 }
 
 //==============================================================================
-int performCommandLine (const String& commandLine)
+int performCommandLine (const ArgumentList& args)
 {
-    StringArray args;
-    args.addTokens (commandLine, true);
-    args.trim();
-
-    if (findArgument (args, "--lf") || findArgument (args, "-lf"))
-       preferredLinefeed = "\n";
-
-    String command (args[0]);
-
-    try
+    return ConsoleApplication::invokeCatchingFailures ([&] () -> int
     {
-        if (matchArgument (command, "help"))                     { showHelp();                            return 0; }
-        if (matchArgument (command, "h"))                        { showHelp();                            return 0; }
-        if (matchArgument (command, "resave"))                   { resaveProject (args, false);           return 0; }
-        if (matchArgument (command, "resave-resources"))         { resaveProject (args, true);            return 0; }
-        if (matchArgument (command, "get-version"))              { getVersion (args);                     return 0; }
-        if (matchArgument (command, "set-version"))              { setVersion (args);                     return 0; }
-        if (matchArgument (command, "bump-version"))             { bumpVersion (args);                    return 0; }
-        if (matchArgument (command, "git-tag-version"))          { gitTag (args);                         return 0; }
-        if (matchArgument (command, "buildmodule"))              { buildModules (args, false);            return 0; }
-        if (matchArgument (command, "buildallmodules"))          { buildModules (args, true);             return 0; }
-        if (matchArgument (command, "status"))                   { showStatus (args);                     return 0; }
-        if (matchArgument (command, "trim-whitespace"))          { cleanWhitespace (args, false);         return 0; }
-        if (matchArgument (command, "remove-tabs"))              { cleanWhitespace (args, true);          return 0; }
-        if (matchArgument (command, "tidy-divider-comments"))    { tidyDividerComments (args);            return 0; }
-        if (matchArgument (command, "fix-broken-include-paths")) { fixRelativeIncludePaths (args);        return 0; }
-        if (matchArgument (command, "obfuscated-string-code"))   { generateObfuscatedStringCode (args);   return 0; }
-        if (matchArgument (command, "encode-binary"))            { encodeBinary (args);                   return 0; }
-        if (matchArgument (command, "trans"))                    { scanFoldersForTranslationFiles (args); return 0; }
-        if (matchArgument (command, "trans-finish"))             { createFinishedTranslationFile (args);  return 0; }
-        if (matchArgument (command, "set-global-search-path"))   { setGlobalPath (args);                  return 0; }
-        if (matchArgument (command, "create-project-from-pip"))  { createProjectFromPIP (args);           return 0; }
-    }
-    catch (const CommandLineError& error)
-    {
-        std::cout << error.message << std::endl << std::endl;
-        return 1;
-    }
+        if (args.containsOption ("--lf"))
+            preferredLineFeed = "\n";
 
-    return commandLineNotPerformed;
+        auto command = args[0];
+
+        auto matchCommand = [&] (StringRef name) -> bool
+        {
+            return command == name || command.isLongOption (name);
+        };
+
+        if (matchCommand ("help"))                     { showHelp();                            return 0; }
+        if (matchCommand ("h"))                        { showHelp();                            return 0; }
+        if (matchCommand ("resave"))                   { resaveProject (args, false);           return 0; }
+        if (matchCommand ("resave-resources"))         { resaveProject (args, true);            return 0; }
+        if (matchCommand ("get-version"))              { getVersion (args);                     return 0; }
+        if (matchCommand ("set-version"))              { setVersion (args);                     return 0; }
+        if (matchCommand ("bump-version"))             { bumpVersion (args);                    return 0; }
+        if (matchCommand ("git-tag-version"))          { gitTag (args);                         return 0; }
+        if (matchCommand ("buildmodule"))              { buildModules (args, false);            return 0; }
+        if (matchCommand ("buildallmodules"))          { buildModules (args, true);             return 0; }
+        if (matchCommand ("status"))                   { showStatus (args);                     return 0; }
+        if (matchCommand ("trim-whitespace"))          { cleanWhitespace (args, false);         return 0; }
+        if (matchCommand ("remove-tabs"))              { cleanWhitespace (args, true);          return 0; }
+        if (matchCommand ("tidy-divider-comments"))    { tidyDividerComments (args);            return 0; }
+        if (matchCommand ("fix-broken-include-paths")) { fixRelativeIncludePaths (args);        return 0; }
+        if (matchCommand ("obfuscated-string-code"))   { generateObfuscatedStringCode (args);   return 0; }
+        if (matchCommand ("encode-binary"))            { encodeBinary (args);                   return 0; }
+        if (matchCommand ("trans"))                    { scanFoldersForTranslationFiles (args); return 0; }
+        if (matchCommand ("trans-finish"))             { createFinishedTranslationFile (args);  return 0; }
+        if (matchCommand ("set-global-search-path"))   { setGlobalPath (args);                  return 0; }
+        if (matchCommand ("create-project-from-pip"))  { createProjectFromPIP (args);           return 0; }
+
+        if (command.isLongOption() || command.isShortOption())
+            ConsoleApplication::fail ("Unrecognised command: " + command.text.quoted());
+
+        return commandLineNotPerformed;
+    });
 }

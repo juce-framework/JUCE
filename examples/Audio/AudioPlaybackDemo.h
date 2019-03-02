@@ -288,12 +288,24 @@ public:
         addAndMakeVisible (followTransportButton);
         followTransportButton.onClick = [this] { updateFollowTransportState(); };
 
+       #if (JUCE_ANDROID || JUCE_IOS)
+        addAndMakeVisible (chooseFileButton);
+        chooseFileButton.addListener (this);
+       #else
+        addAndMakeVisible (fileTreeComp);
+
+        directoryList.setDirectory (File::getSpecialLocation (File::userHomeDirectory), true, true);
+
+        fileTreeComp.setColour (FileTreeComponent::backgroundColourId, Colours::lightgrey.withAlpha (0.6f));
+        fileTreeComp.addListener (this);
+
         addAndMakeVisible (explanation);
         explanation.setFont (Font (14.00f, Font::plain));
         explanation.setJustificationType (Justification::bottomRight);
         explanation.setEditable (false, false, false);
         explanation.setColour (TextEditor::textColourId, Colours::black);
         explanation.setColour (TextEditor::backgroundColourId, Colour (0x00000000));
+       #endif
 
         addAndMakeVisible (zoomSlider);
         zoomSlider.setRange (0, 1, 0);
@@ -313,18 +325,6 @@ public:
         formatManager.registerBasicFormats();
 
         thread.startThread (3);
-
-       #if (JUCE_ANDROID || JUCE_IOS)
-        addAndMakeVisible (chooseFileButton);
-        chooseFileButton.addListener (this);
-       #else
-        addAndMakeVisible (fileTreeComp);
-
-        directoryList.setDirectory (File::getSpecialLocation (File::userHomeDirectory), true, true);
-
-        fileTreeComp.setColour (FileTreeComponent::backgroundColourId, Colours::lightgrey.withAlpha (0.6f));
-        fileTreeComp.addListener (this);
-       #endif
 
        #ifndef JUCE_DEMO_RUNNER
         RuntimePermissions::request (RuntimePermissions::recordAudio,
@@ -368,7 +368,14 @@ public:
         auto r = getLocalBounds().reduced (4);
 
         auto controls = r.removeFromBottom (90);
-        explanation.setBounds (controls.removeFromRight (controls.getWidth() / 3));
+
+        auto controlRightBounds = controls.removeFromRight (controls.getWidth() / 3);
+
+       #if (JUCE_ANDROID || JUCE_IOS)
+        chooseFileButton.setBounds (controlRightBounds.reduced (10));
+       #else
+        explanation.setBounds (controlRightBounds);
+       #endif
 
         auto zoom = controls.removeFromTop (25);
         zoomLabel .setBounds (zoom.removeFromLeft (50));
@@ -378,12 +385,13 @@ public:
         startStopButton      .setBounds (controls);
 
         r.removeFromBottom (6);
+
+       #if JUCE_ANDROID || JUCE_IOS
+        thumbnail->setBounds (r);
+       #else
         thumbnail->setBounds (r.removeFromBottom (140));
         r.removeFromBottom (6);
 
-       #if (JUCE_ANDROID || JUCE_IOS)
-        chooseFileButton.setBounds (r);
-       #else
         fileTreeComp.setBounds (r);
        #endif
     }
@@ -405,6 +413,7 @@ private:
    #else
     DirectoryContentsList directoryList {nullptr, thread};
     FileTreeComponent fileTreeComp {directoryList};
+    Label explanation { {}, "Select an audio file in the treeview above, and this page will display its waveform, and let you play it.." };
    #endif
 
     URL currentAudioFile;
@@ -413,8 +422,7 @@ private:
     std::unique_ptr<AudioFormatReaderSource> currentAudioFileSource;
 
     std::unique_ptr<DemoThumbnailComp> thumbnail;
-    Label zoomLabel   { {}, "zoom:" },
-          explanation { {}, "Select an audio file in the treeview above, and this page will display its waveform, and let you play it.." };
+    Label zoomLabel                     { {}, "zoom:" };
     Slider zoomSlider                   { Slider::LinearHorizontal, Slider::NoTextBox };
     ToggleButton followTransportButton  { "Follow Transport" };
     TextButton startStopButton          { "Play/Stop" };
@@ -423,7 +431,7 @@ private:
     void showAudioResource (URL resource)
     {
         if (loadURLIntoTransport (resource))
-            currentAudioFile = static_cast<URL&&> (resource);
+            currentAudioFile = std::move (resource);
 
         zoomSlider.setValue (0, dontSendNotification);
         thumbnail->setURL (currentAudioFile);
@@ -513,7 +521,7 @@ private:
                                               {
                                                   auto u = fc.getURLResult();
 
-                                                  safeThis->showAudioResource (static_cast<URL&&> (u));
+                                                  safeThis->showAudioResource (std::move (u));
                                               }
 
                                               safeThis->fileChooser = nullptr;

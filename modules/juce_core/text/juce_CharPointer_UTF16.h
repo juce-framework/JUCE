@@ -45,10 +45,7 @@ public:
     {
     }
 
-    inline CharPointer_UTF16 (const CharPointer_UTF16& other) noexcept
-        : data (other.data)
-    {
-    }
+    inline CharPointer_UTF16 (const CharPointer_UTF16& other) = default;
 
     inline CharPointer_UTF16 operator= (CharPointer_UTF16 other) noexcept
     {

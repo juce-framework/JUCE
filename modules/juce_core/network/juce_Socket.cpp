@@ -264,7 +264,7 @@ namespace SocketHelpers
         }
         else
         {
-            timeoutp = 0;
+            timeoutp = nullptr;
         }
 
         fd_set rset, wset;
@@ -282,7 +282,8 @@ namespace SocketHelpers
        #else
         {
             int result;
-            while ((result = select (h + 1, prset, pwset, 0, timeoutp)) < 0
+
+            while ((result = select (h + 1, prset, pwset, nullptr, timeoutp)) < 0
                     && errno == EINTR)
             {
             }
@@ -590,11 +591,9 @@ bool StreamingSocket::isLocal() const noexcept
     if (! isConnected())
         return false;
 
-    Array<IPAddress> localAddresses;
-    IPAddress::findAllAddresses (localAddresses);
     IPAddress currentIP (SocketHelpers::getConnectedAddress (handle));
 
-    for (auto& a : localAddresses)
+    for (auto& a : IPAddress::getAllAddresses())
         if (a == currentIP)
             return true;
 

@@ -33,7 +33,9 @@
                    juce_audio_processors, juce_audio_utils, juce_core,
                    juce_data_structures, juce_dsp, juce_events, juce_graphics,
                    juce_gui_basics, juce_gui_extra
- exporters:        xcode_mac, vs2017
+ exporters:        xcode_mac, vs2017, linux_make, androidstudio, xcode_iphone
+
+ moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
 
  type:             Component
  mainClass:        SimpleFFTDemo
@@ -61,12 +63,16 @@ public:
     {
         setOpaque (true);
 
-        auto audioDevice = deviceManager.getCurrentAudioDevice();
-        auto numInputChannels  = jmax (audioDevice != nullptr ? audioDevice->getActiveInputChannels() .countNumberOfSetBits() : 1, 1);
-        auto numOutputChannels = audioDevice != nullptr ? audioDevice->getActiveOutputChannels().countNumberOfSetBits() : 2;
-
-        // Specify the number of input and output channels that we want to open
-        setAudioChannels (numInputChannels, numOutputChannels);
+       #ifndef JUCE_DEMO_RUNNER
+        RuntimePermissions::request (RuntimePermissions::recordAudio,
+                                     [this] (bool granted)
+                                     {
+                                         int numInputChannels = granted ? 2 : 0;
+                                         setAudioChannels (numInputChannels, 2);
+                                     });
+       #else
+        setAudioChannels (2, 2);
+       #endif
 
         startTimerHz (60);
         setSize (700, 500);

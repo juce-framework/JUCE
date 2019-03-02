@@ -3,12 +3,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist>
   <dict>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>This app requires audio input. If you do not have an audio interface connected it will use the built-in microphone.</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
-    <key>NSMicrophoneUsageDescription</key>
-    <string>This is an audio app which requires audio input. If you do not have a USB audio interface connected it will use the microphone.</string>
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <false/>
+    <key>UILaunchStoryboardName</key>
+    <string>LaunchScreen</string>
     <key>CFBundleExecutable</key>
     <string>${EXECUTABLE_NAME}</string>
     <key>CFBundleIdentifier</key>

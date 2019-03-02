@@ -37,8 +37,8 @@ public:
         : item (group),
           header (item.getName(), { getIcons().openFolder, Colours::transparentBlack })
     {
-        list.setHeaderComponent (new ListBoxHeader ( { "File", "Binary Resource", "Xcode Resource", "Compile" },
-                                                     { 0.4f, 0.2f, 0.2f, 0.2f } ));
+        list.setHeaderComponent (new ListBoxHeader ( { "File", "Binary Resource", "Xcode Resource", "Compile", "Compiler Flag Scheme" },
+                                                     { 0.3f, 0.15f, 0.15f, 0.15f, 0.25f } ));
         list.setModel (this);
         list.setColour (ListBox::backgroundColourId, Colours::transparentBlack);
         addAndMakeVisible (list);
@@ -50,7 +50,7 @@ public:
         addAndMakeVisible (header);
     }
 
-    ~FileGroupInformationComponent()
+    ~FileGroupInformationComponent() override
     {
         item.state.removeListener (this);
     }
@@ -132,18 +132,23 @@ private:
     public:
         FileOptionComponent (const Project::Item& fileItem, ListBoxHeader* listBoxHeader)
             : item (fileItem),
-              header (listBoxHeader)
+              header (listBoxHeader),
+              compilerFlagSchemeSelector (item)
         {
             if (item.isFile())
             {
                 addAndMakeVisible (compileButton);
                 compileButton.getToggleStateValue().referTo (item.getShouldCompileValue());
+                compileButton.onStateChange = [this] { compilerFlagSchemeSelector.setVisible (compileButton.getToggleState()); };
 
                 addAndMakeVisible (binaryResourceButton);
                 binaryResourceButton.getToggleStateValue().referTo (item.getShouldAddToBinaryResourcesValue());
 
                 addAndMakeVisible (xcodeResourceButton);
                 xcodeResourceButton.getToggleStateValue().referTo (item.getShouldAddToXcodeResourcesValue());
+
+                addChildComponent (compilerFlagSchemeSelector);
+                compilerFlagSchemeSelector.setVisible (compileButton.getToggleState());
             }
         }
 
@@ -175,18 +180,163 @@ private:
 
                 bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (0) * width));
 
-                binaryResourceButton.setBounds (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (1) * width)));
-                xcodeResourceButton.setBounds  (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (2) * width)));
-                compileButton.setBounds        (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (3) * width)));
+                binaryResourceButton.setBounds       (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (1) * width)));
+                xcodeResourceButton.setBounds        (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (2) * width)));
+                compileButton.setBounds              (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (3) * width)));
+                compilerFlagSchemeSelector.setBounds (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (4) * width)));
             }
         }
 
         Project::Item item;
 
     private:
+        //==============================================================================
+        class CompilerFlagSchemeSelector  : public Component,
+                                            private Value::Listener
+        {
+        public:
+            CompilerFlagSchemeSelector (Project::Item& it)
+                : item (it)
+            {
+                schemeBox.setTextWhenNothingSelected ("None");
+                updateCompilerFlagSchemeComboBox();
+                schemeBox.onChange = [this] { handleComboBoxSelection(); };
+
+                addAndMakeVisible (schemeBox);
+                addChildComponent (newSchemeLabel);
+
+                newSchemeLabel.setEditable (true);
+                newSchemeLabel.setJustificationType (Justification::centredLeft);
+                newSchemeLabel.onEditorHide = [this]
+                {
+                    newSchemeLabel.setVisible (false);
+                    schemeBox.setVisible (true);
+
+                    auto newScheme = newSchemeLabel.getText();
+
+                    item.project.addCompilerFlagScheme (newScheme);
+
+                    if (item.getCompilerFlagSchemeString().isEmpty())
+                        item.setCompilerFlagScheme (newScheme);
+
+                    updateCompilerFlagSchemeComboBox();
+                };
+
+                selectScheme (item.getCompilerFlagSchemeString());
+
+                projectCompilerFlagSchemesValue = item.project.getProjectValue (Ids::compilerFlagSchemes);
+                projectCompilerFlagSchemesValue.addListener (this);
+
+                lookAndFeelChanged();
+            }
+
+            void resized() override
+            {
+                auto b =  getLocalBounds();
+
+                schemeBox.setBounds (b);
+                newSchemeLabel.setBounds (b);
+            }
+
+        private:
+            void valueChanged (Value&) override   { updateCompilerFlagSchemeComboBox(); }
+
+            void lookAndFeelChanged() override
+            {
+                schemeBox.setColour (ComboBox::outlineColourId, Colours::transparentBlack);
+                schemeBox.setColour (ComboBox::textColourId,    findColour (defaultTextColourId));
+            }
+
+            void updateCompilerFlagSchemeComboBox()
+            {
+                auto itemScheme = item.getCompilerFlagSchemeString();
+                auto allSchemes = item.project.getCompilerFlagSchemes();
+
+                if (itemScheme.isNotEmpty() && ! allSchemes.contains (itemScheme))
+                {
+                    item.clearCurrentCompilerFlagScheme();
+                    itemScheme = {};
+                }
+
+                schemeBox.clear();
+
+                schemeBox.addItemList (allSchemes, 1);
+                schemeBox.addSeparator();
+                schemeBox.addItem ("Add a new scheme...", -1);
+                schemeBox.addItem ("Delete selected scheme", -2);
+                schemeBox.addItem ("Clear", -3);
+
+                selectScheme (itemScheme);
+            }
+
+            void handleComboBoxSelection()
+            {
+                auto selectedID = schemeBox.getSelectedId();
+
+                if (selectedID > 0)
+                {
+                    item.setCompilerFlagScheme (schemeBox.getItemText (selectedID - 1));
+                }
+                else if (selectedID == -1)
+                {
+                    newSchemeLabel.setText ("NewScheme", dontSendNotification);
+
+                    schemeBox.setVisible (false);
+                    newSchemeLabel.setVisible (true);
+
+                    newSchemeLabel.showEditor();
+
+                    if (auto* ed = newSchemeLabel.getCurrentTextEditor())
+                        ed->setInputRestrictions (64, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_");
+                }
+                else if (selectedID == -2)
+                {
+                    auto currentScheme = item.getCompilerFlagSchemeString();
+
+                    if (currentScheme.isNotEmpty())
+                    {
+                        item.project.removeCompilerFlagScheme (currentScheme);
+                        item.clearCurrentCompilerFlagScheme();
+                    }
+
+                    updateCompilerFlagSchemeComboBox();
+                }
+                else if (selectedID == -3)
+                {
+                    schemeBox.setSelectedId (0);
+                    item.clearCurrentCompilerFlagScheme();
+                }
+            }
+
+            void selectScheme (const String& schemeToSelect)
+            {
+                if (schemeToSelect.isNotEmpty())
+                {
+                    for (int i = 0; i < schemeBox.getNumItems(); ++i)
+                    {
+                        if (schemeBox.getItemText (i) == schemeToSelect)
+                        {
+                            schemeBox.setSelectedItemIndex (i);
+                            return;
+                        }
+                    }
+                }
+
+                schemeBox.setSelectedId (0);
+            }
+
+            Project::Item& item;
+            Value projectCompilerFlagSchemesValue;
+
+            ComboBox schemeBox;
+            Label newSchemeLabel;
+        };
+
+        //==============================================================================
         ListBoxHeader* header;
 
         ToggleButton compileButton, binaryResourceButton, xcodeResourceButton;
+        CompilerFlagSchemeSelector compilerFlagSchemeSelector;
     };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileGroupInformationComponent)

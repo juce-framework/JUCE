@@ -27,7 +27,7 @@
 #include "../../Application/jucer_Headers.h"
 
 #ifdef BUILDING_JUCE_COMPILEENGINE
- const char* getPreferredLinefeed() { return "\r\n"; }
+ const char* getPreferredLineFeed() { return "\r\n"; }
 #endif
 
 //==============================================================================
@@ -36,7 +36,33 @@ String joinLinesIntoSourceFile (StringArray& lines)
     while (lines.size() > 10 && lines [lines.size() - 1].isEmpty())
         lines.remove (lines.size() - 1);
 
-    return lines.joinIntoString (getPreferredLinefeed()) + getPreferredLinefeed();
+    return lines.joinIntoString (getPreferredLineFeed()) + getPreferredLineFeed();
+}
+
+String replaceLineFeeds (const String& content, const String& lineFeed)
+{
+    StringArray lines;
+    lines.addLines (content);
+
+    return lines.joinIntoString (lineFeed);
+}
+
+String getLineFeedForFile (const String& fileContent)
+{
+    auto t = fileContent.getCharPointer();
+
+    while (! t.isEmpty())
+    {
+        switch (t.getAndAdvance())
+        {
+            case 0:     break;
+            case '\n':  return "\n";
+            case '\r':  if (*t == '\n') return "\r\n";
+            default:    continue;
+        }
+    }
+
+    return {};
 }
 
 String trimCommentCharsFromStartOfLine (const String& line)
@@ -383,4 +409,74 @@ bool isValidJUCEExamplesDirectory (const File& directory) noexcept
         return false;
 
     return directory.getChildFile ("Assets").getChildFile ("juce_icon.png").existsAsFile();
+}
+
+//==============================================================================
+static var parseJUCEHeaderMetadata (const StringArray& lines)
+{
+    auto* o = new DynamicObject();
+    var result (o);
+
+    for (auto& line : lines)
+    {
+        line = trimCommentCharsFromStartOfLine (line);
+
+        auto colon = line.indexOfChar (':');
+
+        if (colon >= 0)
+        {
+            auto key = line.substring (0, colon).trim();
+            auto value = line.substring (colon + 1).trim();
+
+            o->setProperty (key, value);
+        }
+    }
+
+    return result;
+}
+
+static String parseMetadataItem (const StringArray& lines, int& index)
+{
+    String result = lines[index++];
+
+    while (index < lines.size())
+    {
+        auto continuationLine = trimCommentCharsFromStartOfLine (lines[index]);
+
+        if (continuationLine.isEmpty() || continuationLine.indexOfChar (':') != -1
+            || continuationLine.startsWith ("END_JUCE_"))
+            break;
+
+        result += " " + continuationLine;
+        ++index;
+    }
+
+    return result;
+}
+
+var parseJUCEHeaderMetadata (const File& file)
+{
+    StringArray lines;
+    file.readLines (lines);
+
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        auto trimmedLine = trimCommentCharsFromStartOfLine (lines[i]);
+
+        if (trimmedLine.startsWith ("BEGIN_JUCE_"))
+        {
+            StringArray desc;
+            auto j = i + 1;
+
+            while (j < lines.size())
+            {
+                if (trimCommentCharsFromStartOfLine (lines[j]).startsWith ("END_JUCE_"))
+                    return parseJUCEHeaderMetadata (desc);
+
+                desc.add (parseMetadataItem (lines, j));
+            }
+        }
+    }
+
+    return {};
 }

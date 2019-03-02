@@ -40,6 +40,16 @@ XmlElement* XmlDocument::parse (const String& xmlData)
     return doc.getDocumentElement();
 }
 
+std::unique_ptr<XmlElement> parseXML (const String& textToParse)
+{
+    return std::unique_ptr<XmlElement> (XmlDocument::parse (textToParse));
+}
+
+std::unique_ptr<XmlElement> parseXML (const File& fileToParse)
+{
+    return std::unique_ptr<XmlElement> (XmlDocument::parse (fileToParse));
+}
+
 void XmlDocument::setInputSource (InputSource* newSource) noexcept
 {
     inputSource.reset (newSource);

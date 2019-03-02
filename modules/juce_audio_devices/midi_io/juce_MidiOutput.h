@@ -34,7 +34,7 @@ namespace juce
 
     @tags{Audio}
 */
-class JUCE_API  MidiOutput  : private Thread
+class JUCE_API  MidiOutput  final : private Thread
 {
 public:
     //==============================================================================
@@ -81,7 +81,7 @@ public:
 
     //==============================================================================
     /** Destructor. */
-    ~MidiOutput();
+    ~MidiOutput() override;
 
     /** Returns the name of this device. */
     const String& getName() const noexcept                      { return name; }

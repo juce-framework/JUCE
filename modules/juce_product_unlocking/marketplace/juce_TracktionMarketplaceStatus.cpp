@@ -62,37 +62,19 @@ String TracktionMarketplaceStatus::readReplyFromWebserver (const String& email, 
 
     if (stream->connect (nullptr))
     {
-        auto* thread = Thread::getCurrentThread();
+        auto thread = Thread::getCurrentThread();
+        MemoryOutputStream result;
 
-        if (thread->threadShouldExit() || stream->isError())
-            return {};
-
-        auto contentLength = stream->getTotalLength();
-        auto downloaded    = 0;
-
-        const size_t bufferSize = 0x8000;
-        HeapBlock<char> buffer (bufferSize);
-
-        while (! (stream->isExhausted() || stream->isError() || thread->threadShouldExit()))
+        while (! (stream->isExhausted() || stream->isError()
+                    || (thread != nullptr && thread->threadShouldExit())))
         {
-            auto max = jmin ((int) bufferSize, contentLength < 0 ? std::numeric_limits<int>::max()
-                                                                 : static_cast<int> (contentLength - downloaded));
+            auto bytesRead = result.writeFromInputStream (*stream, 8192);
 
-            auto actualBytesRead = stream->read (buffer.get() + downloaded, max - downloaded);
-
-            if (actualBytesRead < 0 || thread->threadShouldExit() || stream->isError())
-                break;
-
-            downloaded += actualBytesRead;
-
-            if (downloaded == contentLength)
+            if (bytesRead < 0)
                 break;
         }
 
-        if (thread->threadShouldExit() || stream->isError() || (contentLength > 0 && downloaded < contentLength))
-            return {};
-
-        return { CharPointer_UTF8 (buffer.get()) };
+        return result.toString();
     }
 
     return {};

@@ -95,7 +95,7 @@ public:
     /** Destructor.
         If a content component has been set with setContentOwned(), it will be deleted.
     */
-    ~DocumentWindow();
+    ~DocumentWindow() override;
 
     //==============================================================================
     /** Changes the component's name.
@@ -232,7 +232,7 @@ public:
     */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         virtual void drawDocumentWindowTitleBar (DocumentWindow&,
                                                  Graphics&, int w, int h,
@@ -286,7 +286,6 @@ private:
     MenuBarModel* menuBarModel = nullptr;
 
     class ButtonListenerProxy;
-    friend struct ContainerDeletePolicy<ButtonListenerProxy>;
     std::unique_ptr<ButtonListenerProxy> buttonListener;
 
     void repaintTitleBar();

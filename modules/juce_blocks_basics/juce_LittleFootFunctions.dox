@@ -110,7 +110,7 @@ float abs (float arg);
     @param value        the value within the source range to map
     @param sourceMin    the minimum value of the source range
     @param sourceMax    the maximum value of the source range
-    @param destMin      the minumum value of the destination range
+    @param destMin      the minimum value of the destination range
     @param destMax      the maximum value of the destination range
     @returns            the original value mapped to the destination range
 */

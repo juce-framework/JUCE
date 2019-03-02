@@ -29,11 +29,6 @@ namespace juce
 namespace dsp
 {
 
-#ifndef DOXYGEN
-template <typename NumericType>
-class OversamplingEngine;
-#endif
-
 //===============================================================================
 /**
     A processing class performing multi-channel oversampling.
@@ -45,14 +40,14 @@ class OversamplingEngine;
 
     The principle of oversampling is to increase the sample rate of a given
     non-linear process, to prevent it from creating aliasing. Oversampling works
-    by upsampling N times the input signal, processing the upsampling signal
-    with the increased internal sample rate, and downsample the result to get
+    by upsampling N times the input signal, processing the upsampled signal
+    with the increased internal sample rate, and downsampling the result to get
     back the original processing sample rate.
 
     Choose between FIR or IIR filtering depending on your needs in term of
     latency and phase distortion. With FIR filters, the phase is linear but the
-    latency is maximum. With IIR filtering, the phase is compromised around the
-    Nyquist frequency but the latency is minimum.
+    latency is maximised. With IIR filtering, the phase is compromised around the
+    Nyquist frequency but the latency is minimised.
 
     @see FilterDesign.
 
@@ -75,9 +70,6 @@ public:
         Constructor of the oversampling class. All the processing parameters must be
         provided at the creation of the oversampling object.
 
-        Note : you might want to create a class heriting from Oversampling with a
-        different constructor if you need more control on what happens in the process.
-
         @param numChannels      the number of channels to process with this object
         @param factor           the processing will perform 2 ^ factor times oversampling
         @param type             the type of filter design employed for filtering during
@@ -86,7 +78,20 @@ public:
                                 the filters will be more efficient, but the CPU load will
                                 increase as well
     */
-    Oversampling (size_t numChannels, size_t factor, FilterType type, bool isMaxQuality = true);
+    Oversampling (size_t numChannels,
+                  size_t factor,
+                  FilterType type,
+                  bool isMaxQuality = true);
+
+    /** The default constructor of the oversampling class, which can be used to create an
+        empty object and then add the appropriate stages.
+
+        Note: This creates a "dummy" oversampling stage, which needs to be removed first
+        before adding proper oversampling stages.
+
+        @see clearOversamplingStages, addOversamplingStage
+    */
+    explicit Oversampling (size_t numChannels = 1);
 
     /** Destructor. */
     ~Oversampling();
@@ -97,7 +102,7 @@ public:
         the oversampling, for example with a dry / wet functionality, and to report
         the latency to the DAW.
 
-        Note : the latency might not be integer, so you might need to round its value
+        Note: The latency might not be integer, so you might need to round its value
         or to compensate it properly in your processing code.
     */
     SampleType getLatencyInSamples() noexcept;
@@ -121,26 +126,71 @@ public:
         Don't forget to set the sample rate of that processing to N times the original
         sample rate.
     */
-    dsp::AudioBlock<SampleType> processSamplesUp (const dsp::AudioBlock<SampleType> &inputBlock) noexcept;
+    dsp::AudioBlock<SampleType> processSamplesUp (const dsp::AudioBlock<SampleType>& inputBlock) noexcept;
 
     /** Must be called to perform the downsampling, after the upsampling and the
         non-linear processing. The output signal is probably delayed by the internal
         latency of the whole oversampling behaviour, so don't forget to take this
         into account.
     */
-    void processSamplesDown (dsp::AudioBlock<SampleType> &outputBlock) noexcept;
+    void processSamplesDown (dsp::AudioBlock<SampleType>& outputBlock) noexcept;
+
+    //===============================================================================
+    /** Adds a new oversampling stage to the Oversampling class, multiplying the
+        current oversampling factor by two. This is used with the default constructor
+        to create custom oversampling chains, requiring a call to the
+        clearOversamplingStages before any addition.
+
+        Note: Upsampling and downsampling filtering have different purposes, the
+        former removes upsampling artefacts while the latter removes useless frequency
+        content created by the oversampled process, so usually the attenuation is
+        increased when upsampling compared to downsampling.
+
+        @param normalisedTransitionWidthUp     a value between 0 and 0.5 which specifies how much
+                                               the transition between passband and stopband is
+                                               steep, for upsampling filtering (the lower the better)
+        @param stopbandAmplitudedBUp           the amplitude in dB in the stopband for upsampling
+                                               filtering, must be negative
+        @param normalisedTransitionWidthDown   a value between 0 and 0.5 which specifies how much
+                                               the transition between passband and stopband is
+                                               steep, for downsampling filtering (the lower the better)
+        @param stopbandAmplitudedBDown         the amplitude in dB in the stopband for downsampling
+                                               filtering, must be negative
+
+        @see clearOversamplingStages
+    */
+    void addOversamplingStage (FilterType,
+                               float normalisedTransitionWidthUp,   float stopbandAmplitudedBUp,
+                               float normalisedTransitionWidthDown, float stopbandAmplitudedBDown);
+
+    /** Adds a new "dummy" oversampling stage, which does nothing to the signal. Using
+        one can be useful if your application features a customisable oversampling factor
+        and if you want to select the current one from an OwnedArray without changing
+        anything in the processing code.
+
+        @see OwnedArray, clearOversamplingStages, addOversamplingStage
+    */
+    void addDummyOversamplingStage();
+
+    /** Removes all the previously registered oversampling stages, so you can add
+        your own from scratch.
+
+        @see addOversamplingStage, addDummyOversamplingStage
+    */
+    void clearOversamplingStages();
+
+    //===============================================================================
+    size_t factorOversampling = 1;
+    size_t numChannels = 1;
+
+   #ifndef DOXYGEN
+    struct OversamplingStage;
+   #endif
 
 private:
     //===============================================================================
-    bool isMaximumQuality;
-    size_t factorOversampling, numStages;
-    FilterType type;
-    size_t numChannels;
-
-    //===============================================================================
+    OwnedArray<OversamplingStage> stages;
     bool isReady = false;
-
-    OwnedArray<OversamplingEngine<SampleType>> engines;
 
     //===============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Oversampling)

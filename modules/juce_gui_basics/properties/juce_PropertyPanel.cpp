@@ -45,7 +45,7 @@ struct PropertyPanel::SectionComponent  : public Component
         }
     }
 
-    ~SectionComponent()
+    ~SectionComponent() override
     {
         propertyComps.clear();
     }

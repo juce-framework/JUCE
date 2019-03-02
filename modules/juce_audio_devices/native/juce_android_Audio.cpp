@@ -23,7 +23,7 @@
 namespace juce
 {
 
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  STATICMETHOD (getMinBufferSize,            "getMinBufferSize",             "(III)I") \
  STATICMETHOD (getNativeOutputSampleRate,   "getNativeOutputSampleRate",    "(I)I") \
  METHOD (constructor,   "<init>",   "(IIIIII)V") \
@@ -34,11 +34,11 @@ namespace juce
  METHOD (flush,         "flush",    "()V") \
  METHOD (write,         "write",    "([SII)I") \
 
-DECLARE_JNI_CLASS (AudioTrack, "android/media/AudioTrack");
+DECLARE_JNI_CLASS (AudioTrack, "android/media/AudioTrack")
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  STATICMETHOD (getMinBufferSize, "getMinBufferSize", "(III)I") \
  METHOD (constructor,       "<init>",           "(IIIII)V") \
  METHOD (getState,          "getState",         "()I") \
@@ -47,14 +47,7 @@ DECLARE_JNI_CLASS (AudioTrack, "android/media/AudioTrack");
  METHOD (read,              "read",             "([SII)I") \
  METHOD (release,           "release",          "()V") \
 
-DECLARE_JNI_CLASS (AudioRecord, "android/media/AudioRecord");
-#undef JNI_CLASS_MEMBERS
-
-//==============================================================================
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- STATICFIELD (SDK_INT, "SDK_INT", "I") \
-
- DECLARE_JNI_CLASS (AndroidBuildVersion, "android/os/Build$VERSION");
+DECLARE_JNI_CLASS (AudioRecord, "android/media/AudioRecord")
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -198,11 +191,11 @@ public:
         if (numClientOutputChannels > 0)
         {
             numDeviceOutputChannels = 2;
-            outputDevice = GlobalRef (env->NewObject (AudioTrack, AudioTrack.constructor,
-                                                      STREAM_MUSIC, sampleRate, CHANNEL_OUT_STEREO, ENCODING_PCM_16BIT,
-                                                      (jint) (minBufferSizeOut * numDeviceOutputChannels * static_cast<int> (sizeof (int16))), MODE_STREAM));
+            outputDevice = GlobalRef (LocalRef<jobject>(env->NewObject (AudioTrack, AudioTrack.constructor,
+                                                                        STREAM_MUSIC, sampleRate, CHANNEL_OUT_STEREO, ENCODING_PCM_16BIT,
+                                                                        (jint) (minBufferSizeOut * numDeviceOutputChannels * static_cast<int> (sizeof (int16))), MODE_STREAM)));
 
-            const bool supportsUnderrunCount = (getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT) >= 24);
+            const bool supportsUnderrunCount = (getAndroidSDKVersion() >= 24);
             getUnderrunCount = supportsUnderrunCount ? env->GetMethodID (AudioTrack, "getUnderrunCount", "()I") : 0;
 
             int outputDeviceState = env->CallIntMethod (outputDevice, AudioTrack.getState);
@@ -232,11 +225,11 @@ public:
             else
             {
                 numDeviceInputChannels = jmin (numClientInputChannels, numDeviceInputChannelsAvailable);
-                inputDevice = GlobalRef (env->NewObject (AudioRecord, AudioRecord.constructor,
-                                                         0 /* (default audio source) */, sampleRate,
-                                                         numDeviceInputChannelsAvailable > 1 ? CHANNEL_IN_STEREO : CHANNEL_IN_MONO,
-                                                         ENCODING_PCM_16BIT,
-                                                         (jint) (minBufferSizeIn * numDeviceInputChannels * static_cast<int> (sizeof (int16)))));
+                inputDevice = GlobalRef (LocalRef<jobject>(env->NewObject (AudioRecord, AudioRecord.constructor,
+                                                                           0 /* (default audio source) */, sampleRate,
+                                                                           numDeviceInputChannelsAvailable > 1 ? CHANNEL_IN_STEREO : CHANNEL_IN_MONO,
+                                                                           ENCODING_PCM_16BIT,
+                                                                           (jint) (minBufferSizeIn * numDeviceInputChannels * static_cast<int> (sizeof (int16))))));
 
                 int inputDeviceState = env->CallIntMethod (inputDevice, AudioRecord.getState);
                 if (inputDeviceState > 0)

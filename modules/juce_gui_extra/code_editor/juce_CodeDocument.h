@@ -326,8 +326,8 @@ public:
     class JUCE_API  Listener
     {
     public:
-        Listener() {}
-        virtual ~Listener() {}
+        Listener() = default;
+        virtual ~Listener() = default;
 
         /** Called by a CodeDocument when text is added. */
         virtual void codeDocumentTextInserted (const String& newText, int insertIndex) = 0;
@@ -340,12 +340,12 @@ public:
         If the listener is already registered, this method has no effect.
         @see removeListener
     */
-    void addListener (Listener* listener) noexcept;
+    void addListener (Listener* listener);
 
     /** Deregisters a listener.
         @see addListener
     */
-    void removeListener (Listener* listener) noexcept;
+    void removeListener (Listener* listener);
 
     //==============================================================================
     /** Iterates the text in a CodeDocument.

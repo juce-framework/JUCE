@@ -50,7 +50,7 @@ public:
 
     int chooseBestEnabledPaintRoutine (int paintRoutineWanted) const;
 
-    ComponentLayout* getComponentLayout() const                 { return 0; }
+    ComponentLayout* getComponentLayout() const                 { return nullptr; }
 
     void addExtraClassProperties (PropertyPanel&);
 

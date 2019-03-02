@@ -40,7 +40,7 @@ class JucerDocument  : public ChangeBroadcaster,
 {
 public:
     JucerDocument (SourceCodeDocument* cpp);
-    ~JucerDocument();
+    ~JucerDocument() override;
 
     static bool isValidJucerCppFile (const File&);
     static XmlElement* pullMetaDataFromCppFile (const String& cpp);
@@ -58,7 +58,7 @@ public:
     File getCppFile() const     { return cpp->getFile(); }
     File getHeaderFile() const  { return getCppFile().withFileExtension (".h"); }
 
-    bool flushChangesToDocuments (Project*);
+    bool flushChangesToDocuments (Project*, bool);
     bool reloadFromDocument();
 
     //==============================================================================

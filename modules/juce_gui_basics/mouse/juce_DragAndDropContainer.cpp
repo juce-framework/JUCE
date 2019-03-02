@@ -62,7 +62,7 @@ public:
         setAlwaysOnTop (true);
     }
 
-    ~DragImageComponent()
+    ~DragImageComponent() override
     {
         owner.dragImageComponents.remove (owner.dragImageComponents.indexOf (this), false);
 
@@ -249,10 +249,16 @@ private:
 
         for (auto i = desktop.getNumComponents(); --i >= 0;)
         {
-            auto* c = desktop.getComponent(i);
+            auto* desktopComponent = desktop.getComponent (i);
+            auto dPoint = desktopComponent->getLocalPoint (nullptr, screenPos);
 
-            if (auto* hit = c->getComponentAt (c->getLocalPoint (nullptr, screenPos)))
-                return hit;
+            if (auto* c = desktopComponent->getComponentAt (dPoint))
+            {
+                auto cPoint = c->getLocalPoint (desktopComponent, dPoint);
+
+                if (c->hitTest (cPoint.getX(), cPoint.getY()))
+                    return c;
+            }
         }
 
         return nullptr;

@@ -74,7 +74,7 @@ public:
 
     void showDocument() override
     {
-        showSettingsPage (new SettingsComp (exporter.get()));
+        showSettingsPage (new SettingsComp (*exporter));
     }
 
     void deleteItem() override
@@ -186,15 +186,15 @@ private:
     //==============================================================================
     struct SettingsComp  : public Component
     {
-        SettingsComp (ProjectExporter* exp)
-            : group (exp->getName(),
-                     ExporterItem::getIconForExporter (exp),
-                     exp->getDescription())
+        SettingsComp (ProjectExporter& exp)
+            : group (exp.getName(),
+                     ExporterItem::getIconForExporter (&exp),
+                     exp.getDescription())
         {
             addAndMakeVisible (group);
 
             PropertyListBuilder props;
-            exp->createPropertyEditors (props);
+            exp.createPropertyEditors (props);
             group.setProperties (props);
             parentSizeChanged();
         }
@@ -234,7 +234,7 @@ public:
 
     void showDocument() override
     {
-        showSettingsPage (new SettingsComp (config));
+        showSettingsPage (new SettingsComp (*config));
     }
 
     void deleteItem() override
@@ -283,13 +283,13 @@ private:
     class SettingsComp  : public Component
     {
     public:
-        SettingsComp (ProjectExporter::BuildConfiguration* conf)
-            : group (conf->exporter.getName() + " - " + conf->getName(), Icon (getIcons().config, Colours::transparentBlack))
+        SettingsComp (ProjectExporter::BuildConfiguration& conf)
+            : group (conf.exporter.getName() + " - " + conf.getName(), Icon (getIcons().config, Colours::transparentBlack))
         {
             addAndMakeVisible (group);
 
             PropertyListBuilder props;
-            conf->createPropertyEditors (props);
+            conf.createPropertyEditors (props);
             group.setProperties (props);
             parentSizeChanged();
         }

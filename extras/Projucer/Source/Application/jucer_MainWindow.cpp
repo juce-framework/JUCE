@@ -628,7 +628,7 @@ void MainWindowList::closeWindow (MainWindow* w)
     jassert (windows.contains (w));
 
    #if ! JUCE_MAC
-    if (windows.size() == 1)
+    if (windows.size() == 1 && ! isInReopenLastProjects)
     {
         JUCEApplicationBase::getInstance()->systemRequestedQuit();
     }
@@ -688,7 +688,7 @@ bool MainWindowList::openFile (const File& file, bool openInBackground)
 
     if (file.hasFileExtension (Project::projectFileExtension))
     {
-        auto previousFrontWindow = getFrontmostWindow();
+        WeakReference<Component> previousFrontWindow (getFrontmostWindow());
 
         auto* w = getOrCreateEmptyWindow();
         bool ok = w->openFile (file);
@@ -703,7 +703,7 @@ bool MainWindowList::openFile (const File& file, bool openInBackground)
             closeWindow (w);
         }
 
-        if (openInBackground && (previousFrontWindow != nullptr))
+        if (openInBackground && previousFrontWindow != nullptr)
             previousFrontWindow->toFront (true);
 
         return ok;
@@ -829,8 +829,11 @@ void MainWindowList::saveCurrentlyOpenProjectList()
 
 void MainWindowList::reopenLastProjects()
 {
+    const ScopedValueSetter<bool> setter (isInReopenLastProjects, true);
+
     for (auto& p : getAppSettings().getLastProjects())
-        openFile (p, true);
+        if (p.existsAsFile())
+            openFile (p, true);
 }
 
 void MainWindowList::sendLookAndFeelChange()

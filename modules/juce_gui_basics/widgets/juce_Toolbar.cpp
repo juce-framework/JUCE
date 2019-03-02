@@ -174,7 +174,7 @@ public:
         layout (400);
     }
 
-    ~MissingItemsComponent()
+    ~MissingItemsComponent() override
     {
         if (owner != nullptr)
         {
@@ -543,7 +543,7 @@ void Toolbar::showMissingItems()
     {
         PopupMenu m;
         m.addCustomItem (1, new MissingItemsComponent (*this, getThickness()));
-        m.showMenuAsync (PopupMenu::Options().withTargetComponent (missingItemsButton.get()), nullptr);
+        m.showMenuAsync (PopupMenu::Options().withTargetComponent (missingItemsButton.get()), [] (int) {});
     }
 }
 
@@ -656,7 +656,7 @@ public:
         positionNearBar();
     }
 
-    ~CustomisationDialog()
+    ~CustomisationDialog() override
     {
         toolbar.setEditingActive (false);
     }

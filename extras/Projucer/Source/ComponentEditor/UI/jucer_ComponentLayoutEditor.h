@@ -39,8 +39,8 @@ class ComponentLayoutEditor  : public Component,
 {
 public:
     //==============================================================================
-    ComponentLayoutEditor (JucerDocument& document, ComponentLayout& layout);
-    ~ComponentLayoutEditor();
+    ComponentLayoutEditor (JucerDocument&, ComponentLayout&);
+    ~ComponentLayoutEditor() override;
 
     //==============================================================================
     void paint (Graphics&) override;

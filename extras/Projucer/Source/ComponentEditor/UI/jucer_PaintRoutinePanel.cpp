@@ -43,7 +43,7 @@ public:
         document.addChangeListener (this);
     }
 
-    ~ComponentBackgroundColourProperty()
+    ~ComponentBackgroundColourProperty() override
     {
         document.removeChangeListener (this);
     }

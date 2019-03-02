@@ -72,7 +72,7 @@ public:
     /** Destructor.
         If a content component has been set with setContentOwned(), it will be deleted.
     */
-    ~DialogWindow();
+    ~DialogWindow() override;
 
     //==============================================================================
     /** This class defines a collection of settings to be used to open a DialogWindow.
@@ -153,7 +153,7 @@ public:
     //==============================================================================
     /** Easy way of quickly showing a dialog box containing a given component.
 
-        Note: this method has been superceded by the DialogWindow::LaunchOptions structure,
+        Note: This method has been superceded by the DialogWindow::LaunchOptions structure,
         which does the same job with some extra flexibility. The showDialog method is here
         for backwards compatibility, but please use DialogWindow::LaunchOptions in new code.
 
@@ -199,7 +199,7 @@ public:
    #if JUCE_MODAL_LOOPS_PERMITTED || DOXYGEN
     /** Easy way of quickly showing a dialog box containing a given component.
 
-        Note: this method has been superceded by the DialogWindow::LaunchOptions structure,
+        Note: This method has been superceded by the DialogWindow::LaunchOptions structure,
         which does the same job with some extra flexibility. The showDialog method is here
         for backwards compatibility, but please use DialogWindow::LaunchOptions in new code.
 

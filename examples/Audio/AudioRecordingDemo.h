@@ -35,6 +35,8 @@
                    juce_gui_basics, juce_gui_extra
  exporters:        xcode_mac, vs2017, linux_make, androidstudio, xcode_iphone
 
+ moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+
  type:             Component
  mainClass:        AudioRecordingDemo
 
@@ -76,15 +78,13 @@ public:
         {
             // Create an OutputStream to write to our destination file...
             file.deleteFile();
-            std::unique_ptr<FileOutputStream> fileStream (file.createOutputStream());
 
-            if (fileStream.get() != nullptr)
+            if (auto fileStream = std::unique_ptr<FileOutputStream> (file.createOutputStream()))
             {
                 // Now create a WAV writer object that writes to our output stream...
                 WavAudioFormat wavFormat;
-                auto* writer = wavFormat.createWriterFor (fileStream.get(), sampleRate, 1, 16, {}, 0);
 
-                if (writer != nullptr)
+                if (auto writer = wavFormat.createWriterFor (fileStream.get(), sampleRate, 1, 16, {}, 0))
                 {
                     fileStream.release(); // (passes responsibility for deleting the stream to the writer object that is now using it)
 

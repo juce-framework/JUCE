@@ -60,8 +60,8 @@ class JUCE_API  PixelARGB
 {
 public:
     /** Creates a pixel without defining its colour. */
-    PixelARGB() noexcept {}
-    ~PixelARGB() noexcept {}
+    PixelARGB() = default;
+    ~PixelARGB() = default;
 
     PixelARGB (const uint8 a, const uint8 r, const uint8 g, const uint8 b) noexcept
     {
@@ -315,8 +315,7 @@ public:
 
 private:
     //==============================================================================
-    PixelARGB (const uint32 internalValue) noexcept
-        : internal (internalValue)
+    PixelARGB (uint32 internalValue) noexcept : internal (internalValue)
     {
     }
 
@@ -367,8 +366,8 @@ class JUCE_API  PixelRGB
 {
 public:
     /** Creates a pixel without defining its colour. */
-    PixelRGB() noexcept {}
-    ~PixelRGB() noexcept {}
+    PixelRGB() = default;
+    ~PixelRGB() = default;
 
     //==============================================================================
     /** Returns a uint32 which represents the pixel in a platform dependent format which is compatible
@@ -378,9 +377,9 @@ public:
     forcedinline uint32 getNativeARGB() const noexcept
     {
        #if JUCE_ANDROID
-        return (uint32) ((0xff << 24) | r | (g << 8) | (b << 16));
+        return (uint32) ((0xffu << 24) | r | ((uint32) g << 8) | ((uint32) b << 16));
        #else
-        return (uint32) ((0xff << 24) | b | (g << 8) | (r << 16));
+        return (uint32) ((0xffu << 24) | b | ((uint32) g << 8) | ((uint32) r << 16));
        #endif
     }
 
@@ -389,7 +388,7 @@ public:
     forcedinline uint32 getInARGBMaskOrder() const noexcept
     {
        #if JUCE_ANDROID
-        return (uint32) ((0xff << 24) | (r << 16) | (g << 8) | (b << 0));
+        return (uint32) ((0xffu << 24) | b | ((uint32) g << 8) | ((uint32) r << 16));
        #else
         return getNativeARGB();
        #endif
@@ -618,8 +617,8 @@ class JUCE_API  PixelAlpha
 {
 public:
     /** Creates a pixel without defining its colour. */
-    PixelAlpha() noexcept {}
-    ~PixelAlpha() noexcept {}
+    PixelAlpha() = default;
+    ~PixelAlpha() = default;
 
     //==============================================================================
     /** Returns a uint32 which represents the pixel in a platform dependent format which is compatible

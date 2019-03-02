@@ -1,8 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "27.0.3"
+    compileSdkVersion 28
     externalNativeBuild {
         cmake {
             path "CMakeLists.txt"
@@ -21,7 +20,7 @@ android {
     defaultConfig {
         applicationId "com.juce.audioperformancetest"
         minSdkVersion    23
-        targetSdkVersion 23
+        targetSdkVersion 28
         externalNativeBuild {
             cmake {
                 arguments "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-23", "-DANDROID_STL=c++_static", "-DANDROID_CPP_FEATURES=exceptions rtti", "-DANDROID_ARM_MODE=arm", "-DANDROID_ARM_NEON=TRUE"
@@ -86,11 +85,21 @@ android {
         }
     }
 
-repositories {
-}
+    sourceSets {
+        main.java.srcDirs +=
+            ["../../../../../modules/juce_core/native/javacore/init",
+             "../../../../../modules/juce_core/native/javacore/app",
+             "../../../../../modules/juce_gui_basics/native/javacore/app"]
 
-dependencies {
-}
+        main.res.srcDirs +=
+            []
+    }
+
+    repositories {
+    }
+
+    dependencies {
+    }
 
 
 }

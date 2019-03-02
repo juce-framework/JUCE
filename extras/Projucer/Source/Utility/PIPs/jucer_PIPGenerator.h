@@ -32,7 +32,8 @@
 class PIPGenerator
 {
 public:
-    PIPGenerator (const File& pipFile, const File& outputDirectory = {});
+    PIPGenerator (const File& pipFile, const File& outputDirectory = {},
+                  const File& pathToJUCEModules = {}, const File& pathToUserModules = {});
 
     //==============================================================================
     bool hasValidPIP() const noexcept                   { return ! metadata[Ids::name].toString().isEmpty(); }
@@ -45,13 +46,9 @@ public:
 
     //==============================================================================
     Result createJucerFile();
-    bool createMainCpp();
+    Result createMainCpp();
 
 private:
-    //==============================================================================
-    var parsePIPMetadata (const StringArray& lines);
-    var parsePIPMetadata();
-
     //==============================================================================
     void addFileToTree (ValueTree& groupTree, const String& name, bool compile, const String& path);
     void createFiles (ValueTree& jucerTree);
@@ -77,8 +74,14 @@ private:
     StringArray getExtraPluginFormatsToBuild() const;
     StringArray getPluginCharacteristics() const;
 
+    String getPathForModule (const String&) const;
+    File getExamplesDirectory() const;
+
     //==============================================================================
-    File pipFile, outputDirectory;
+    File pipFile, outputDirectory, juceModulesPath, userModulesPath;
+
+    std::unique_ptr<AvailableModuleList> availableUserModules;
+
     var metadata;
 
     bool isTemp = false;

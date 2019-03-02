@@ -107,9 +107,11 @@ public:
         If your application class returns true for this, more than one instance is
         permitted to run (except on the Mac where this isn't possible).
 
-        If it's false, the second instance won't start, but it you will still get a
+        If it's false, the second instance won't start, but you will still get a
         callback to anotherInstanceStarted() to tell you about this - which
         gives you a chance to react to what the user was trying to do.
+
+        @see anotherInstanceStarted
     */
     virtual bool moreThanOneInstanceAllowed() = 0;
 
@@ -151,6 +153,9 @@ public:
     /** Indicates that the user has tried to start up another instance of the app.
 
         This will get called even if moreThanOneInstanceAllowed() is false.
+        It is currently only implemented on Windows and Mac.
+
+        @see moreThanOneInstanceAllowed
     */
     virtual void anotherInstanceStarted (const String& commandLine) = 0;
 
@@ -270,7 +275,7 @@ public:
     static int main (int argc, const char* argv[]);
 
     static void appWillTerminateByForce();
-    typedef JUCEApplicationBase* (*CreateInstanceFunction)();
+    using CreateInstanceFunction = JUCEApplicationBase* (*)();
     static CreateInstanceFunction createInstance;
 
    #if JUCE_IOS
@@ -290,8 +295,6 @@ private:
     bool stillInitialising = true;
 
     struct MultipleInstanceHandler;
-    friend struct MultipleInstanceHandler;
-    friend struct ContainerDeletePolicy<MultipleInstanceHandler>;
     std::unique_ptr<MultipleInstanceHandler> multipleInstanceHandler;
 
     JUCE_DECLARE_NON_COPYABLE (JUCEApplicationBase)

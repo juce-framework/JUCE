@@ -79,10 +79,10 @@ public:
                 Component* parentComponent);
 
     /** Destructor. */
-    ~CallOutBox();
+    ~CallOutBox() override;
 
     //==============================================================================
-    /** Changes the length of the arrow. */
+    /** Changes the base width of the arrow. */
     void setArrowSize (float newSize);
 
     /** Updates the position and size of the box.
@@ -141,7 +141,7 @@ public:
     /** This abstract base class is implemented by LookAndFeel classes. */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         virtual void drawCallOutBoxBackground (CallOutBox&, Graphics&, const Path&, Image&) = 0;
         virtual int getCallOutBoxBorderSize (const CallOutBox&) = 0;

@@ -36,11 +36,7 @@ class StatisticsAccumulator
 public:
     //==============================================================================
     /** Constructs a new StatisticsAccumulator. */
-    StatisticsAccumulator() noexcept
-        : count (0),
-          minimum ( std::numeric_limits<FloatType>::infinity()),
-          maximum (-std::numeric_limits<FloatType>::infinity())
-    {}
+    StatisticsAccumulator() = default;
 
     //==============================================================================
     /** Add a new value to the accumulator.
@@ -116,7 +112,7 @@ private:
     //==============================================================================
     struct KahanSum
     {
-        KahanSum() noexcept : sum(), error() {}
+        KahanSum() = default;
         operator FloatType() const noexcept             { return sum; }
 
         void JUCE_NO_ASSOCIATIVE_MATH_OPTIMISATIONS operator+= (FloatType value) noexcept
@@ -127,13 +123,14 @@ private:
             sum = newSum;
         }
 
-        FloatType sum, error;
+        FloatType sum{}, error{};
     };
 
     //==============================================================================
-    size_t count;
+    size_t count { 0 };
     KahanSum sum, sumSquares;
-    FloatType minimum, maximum;
+    FloatType minimum {  std::numeric_limits<FloatType>::infinity() },
+              maximum { -std::numeric_limits<FloatType>::infinity() };
 };
 
 } // namespace juce

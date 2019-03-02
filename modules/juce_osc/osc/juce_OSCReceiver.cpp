@@ -37,7 +37,7 @@ namespace
         This class is implementing the Open Sound Control 1.0 Specification for
         interpreting the data.
 
-        Note: some older implementations of OSC may omit the OSC Type Tag string
+        Note: Some older implementations of OSC may omit the OSC Type Tag string
         in OSC messages. This class will treat such OSC messages as format errors.
     */
     class OSCInputStream
@@ -60,7 +60,7 @@ namespace
         size_t getDataSize() const noexcept         { return input.getDataSize(); }
 
         /** Returns the current position of the stream. */
-        uint64 getPosition()                        { return uint64 (input.getPosition()); }
+        uint64 getPosition()                        { return (uint64) input.getPosition(); }
 
         /** Attempts to set the current position of the stream. Returns true if this was successful. */
         bool setPosition (int64 pos)                { return input.setPosition (pos); }
@@ -74,32 +74,25 @@ namespace
         //==============================================================================
         int32 readInt32()
         {
-            if (input.getNumBytesRemaining() < 4)
-                throw OSCFormatError ("OSC input stream exhausted while reading int32");
-
+            checkBytesAvailable (4, "OSC input stream exhausted while reading int32");
             return input.readIntBigEndian();
         }
 
         uint64 readUint64()
         {
-            if (input.getNumBytesRemaining() < 8)
-                throw OSCFormatError ("OSC input stream exhausted while reading uint64");
-
+            checkBytesAvailable (8, "OSC input stream exhausted while reading uint64");
             return (uint64) input.readInt64BigEndian();
         }
 
         float readFloat32()
         {
-            if (input.getNumBytesRemaining() < 4)
-                throw OSCFormatError ("OSC input stream exhausted while reading float");
-
+            checkBytesAvailable (4, "OSC input stream exhausted while reading float");
             return input.readFloatBigEndian();
         }
 
         String readString()
         {
-            if (input.getNumBytesRemaining() < 4)
-                throw OSCFormatError ("OSC input stream exhausted while reading string");
+            checkBytesAvailable (4, "OSC input stream exhausted while reading string");
 
             auto posBegin = (size_t) getPosition();
             auto s = input.readString();
@@ -116,27 +109,27 @@ namespace
 
         MemoryBlock readBlob()
         {
-            if (input.getNumBytesRemaining() < 4)
-                throw OSCFormatError ("OSC input stream exhausted while reading blob");
+            checkBytesAvailable (4, "OSC input stream exhausted while reading blob");
 
-            auto blobDataSize = (size_t) input.readIntBigEndian();
-
-            if ((size_t) input.getNumBytesRemaining() < (blobDataSize + 3) % 4)
-                throw OSCFormatError ("OSC input stream exhausted before reaching end of blob");
+            auto blobDataSize = input.readIntBigEndian();
+            checkBytesAvailable ((blobDataSize + 3) % 4, "OSC input stream exhausted before reaching end of blob");
 
             MemoryBlock blob;
-
             auto bytesRead = input.readIntoMemoryBlock (blob, (ssize_t) blobDataSize);
             readPaddingZeros (bytesRead);
 
             return blob;
         }
 
+        OSCColour readColour()
+        {
+            checkBytesAvailable (4, "OSC input stream exhausted while reading colour");
+            return OSCColour::fromInt32 ((uint32) input.readIntBigEndian());
+        }
+
         OSCTimeTag readTimeTag()
         {
-            if (input.getNumBytesRemaining() < 8)
-                throw OSCFormatError ("OSC input stream exhausted while reading time tag");
-
+            checkBytesAvailable (8, "OSC input stream exhausted while reading time tag");
             return OSCTimeTag (uint64 (input.readInt64BigEndian()));
         }
 
@@ -155,8 +148,7 @@ namespace
         {
             OSCTypeList typeList;
 
-            if (input.getNumBytesRemaining() < 4)
-                throw OSCFormatError ("OSC input stream exhausted while reading type tag string");
+            checkBytesAvailable (4, "OSC input stream exhausted while reading type tag string");
 
             if (input.readByte() != ',')
                 throw OSCFormatError ("OSC input stream format error: expected type tag string");
@@ -192,6 +184,7 @@ namespace
                 case OSCTypes::float32:     return OSCArgument (readFloat32());
                 case OSCTypes::string:      return OSCArgument (readString());
                 case OSCTypes::blob:        return OSCArgument (readBlob());
+                case OSCTypes::colour:      return OSCArgument (readColour());
 
                 default:
                     // You supplied an invalid OSCType when calling readArgument! This should never happen.
@@ -221,8 +214,7 @@ namespace
             // bundle, so we know when to consider the next element *not* part of this
             // bundle anymore (but part of the outer bundle) and return.
 
-            if (input.getNumBytesRemaining() < 16)
-                throw OSCFormatError ("OSC input stream exhausted while reading bundle");
+            checkBytesAvailable (16, "OSC input stream exhausted while reading bundle");
 
             if (readString() != "#bundle")
                 throw OSCFormatError ("OSC input stream format error: bundle does not start with string '#bundle'");
@@ -247,8 +239,7 @@ namespace
         //==============================================================================
         OSCBundle::Element readElement()
         {
-            if (input.getNumBytesRemaining() < 4)
-                throw OSCFormatError ("OSC input stream exhausted while reading bundle element size");
+            checkBytesAvailable (4, "OSC input stream exhausted while reading bundle element size");
 
             auto elementSize = (size_t) readInt32();
 
@@ -261,8 +252,7 @@ namespace
         //==============================================================================
         OSCBundle::Element readElementWithKnownSize (size_t elementSize)
         {
-            if ((uint64) input.getNumBytesRemaining() < elementSize)
-                throw OSCFormatError ("OSC input stream exhausted while reading bundle element content");
+            checkBytesAvailable ((int64) elementSize, "OSC input stream exhausted while reading bundle element content");
 
             auto firstContentChar = static_cast<const char*> (getData()) [getPosition()];
 
@@ -305,12 +295,18 @@ namespace
         OSCMessage readMessageWithCheckedSize (size_t size)
         {
             auto begin = (size_t) getPosition();
-            OSCMessage message (readMessage());
+            auto message = readMessage();
 
             if (getPosition() - begin != size)
                 throw OSCFormatError ("OSC input stream format error: wrong element content size encountered while reading");
 
             return message;
+        }
+
+        void checkBytesAvailable (int64 requiredBytes, const char* message)
+        {
+            if (input.getNumBytesRemaining() < requiredBytes)
+                throw OSCFormatError (message);
         }
     };
 
@@ -321,7 +317,7 @@ namespace
 struct OSCReceiver::Pimpl   : private Thread,
                               private MessageListener
 {
-    Pimpl (const String& threadName)  : Thread (threadName)
+    Pimpl (const String& oscThreadName)  : Thread (oscThreadName)
     {
     }
 
@@ -367,6 +363,7 @@ struct OSCReceiver::Pimpl   : private Thread,
             waitForThreadToExit (10000);
             socket.reset();
         }
+
         return true;
     }
 
@@ -442,7 +439,7 @@ struct OSCReceiver::Pimpl   : private Thread,
             if (listeners.size() > 0 || listenersWithAddress.size() > 0)
                 postMessage (new CallbackMessage (content));
         }
-        catch (OSCFormatError)
+        catch (const OSCFormatError&)
         {
             if (formatErrorHandler != nullptr)
                 formatErrorHandler (data, (int) dataSize);
@@ -459,19 +456,24 @@ private:
     //==============================================================================
     void run() override
     {
+        int bufferSize = 65535;
+        HeapBlock<char> oscBuffer (bufferSize);
+
         while (! threadShouldExit())
         {
             jassert (socket != nullptr);
-            char buffer[oscBufferSize];
-            socket->waitUntilReady (true, -1);
+            auto ready = socket->waitUntilReady (true, 100);
 
-            if (threadShouldExit())
+            if (ready < 0 || threadShouldExit())
                 return;
 
-            auto bytesRead = (size_t) socket->read (buffer, (int) sizeof (buffer), false);
+            if (ready == 0)
+                continue;
+
+            auto bytesRead = (size_t) socket->read (oscBuffer.getData(), bufferSize, false);
 
             if (bytesRead >= 4)
-                handleBuffer (buffer, bytesRead);
+                handleBuffer (oscBuffer.getData(), bytesRead);
         }
     }
 
@@ -580,7 +582,6 @@ private:
 
     OptionalScopedPointer<DatagramSocket> socket;
     OSCReceiver::FormatErrorHandler formatErrorHandler { nullptr };
-    enum { oscBufferSize = 4098 };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
@@ -884,7 +885,7 @@ public:
 
                 OSCInputStream inStream (data, sizeof (data));
 
-                OSCMessage msg = inStream.readMessage();
+                auto msg = inStream.readMessage();
                 expect (msg.getAddressPattern().toString() == "/test");
                 expect (msg.size() == 0);
             }
@@ -958,7 +959,7 @@ public:
 
                 OSCInputStream inStream (data, sizeof (data));
 
-                OSCMessage msg = inStream.readMessage();
+                auto msg = inStream.readMessage();
 
                 expectEquals (msg.getAddressPattern().toString(), String ("/test"));
                 expectEquals (msg.size(), 4);

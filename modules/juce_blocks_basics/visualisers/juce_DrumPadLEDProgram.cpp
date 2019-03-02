@@ -27,8 +27,8 @@ DrumPadGridProgram::DrumPadGridProgram (Block& b)  : Program (b) {}
 
 int DrumPadGridProgram::getPadIndex (float posX, float posY) const
 {
-    posX = juce::jmin (0.99f, posX / block.getWidth());
-    posY = juce::jmin (0.99f, posY / block.getHeight());
+    posX = jmin (0.99f, posX / block.getWidth());
+    posY = jmin (0.99f, posY / block.getHeight());
 
     const uint32 offset  = block.getDataByte (visiblePads_byte) ? numColumns1_byte : numColumns0_byte;
     const int numColumns = block.getDataByte (offset + numColumns0_byte);
@@ -65,9 +65,9 @@ void DrumPadGridProgram::sendTouch (float x, float y, float z, LEDColour colour)
     Block::ProgramEventMessage e;
 
     e.values[0] = 0x20000000
-                    + (juce::jlimit (0, 255, juce::roundToInt (x * (255.0f / block.getWidth())))  << 16)
-                    + (juce::jlimit (0, 255, juce::roundToInt (y * (255.0f / block.getHeight()))) << 8)
-                    +  juce::jlimit (0, 255, juce::roundToInt (z * 255.0f));
+                    + (jlimit (0, 255, roundToInt (x * (255.0f / block.getWidth())))  << 16)
+                    + (jlimit (0, 255, roundToInt (y * (255.0f / block.getHeight()))) << 8)
+                    +  jlimit (0, 255, roundToInt (z * 255.0f));
 
     e.values[1] = (int32) colour.getARGB();
 
@@ -75,14 +75,14 @@ void DrumPadGridProgram::sendTouch (float x, float y, float z, LEDColour colour)
 }
 
 //==============================================================================
-void DrumPadGridProgram::setGridFills (int numColumns, int numRows, const juce::Array<GridFill>& fills)
+void DrumPadGridProgram::setGridFills (int numColumns, int numRows, const Array<GridFill>& fills)
 {
     uint8 visiblePads = block.getDataByte (visiblePads_byte);
 
     setGridFills (numColumns, numRows, fills, visiblePads * numColumns1_byte);
 }
 
-void DrumPadGridProgram::setGridFills (int numColumns, int numRows, const juce::Array<GridFill>& fills, uint32 byteOffset)
+void DrumPadGridProgram::setGridFills (int numColumns, int numRows, const Array<GridFill>& fills, uint32 byteOffset)
 {
     jassert (numColumns * numRows == fills.size());
 
@@ -113,7 +113,7 @@ void DrumPadGridProgram::setGridFills (int numColumns, int numRows, const juce::
 }
 
 void DrumPadGridProgram::triggerSlideTransition (int newNumColumns, int newNumRows,
-                                                 const juce::Array<GridFill>& newFills, SlideDirection direction)
+                                                 const Array<GridFill>& newFills, SlideDirection direction)
 {
     uint8 newVisible = block.getDataByte (visiblePads_byte) ? 0 : 1;
 
@@ -132,8 +132,8 @@ void DrumPadGridProgram::setPadAnimationState (uint32 padIdx, double loopTimeSec
     // Compensate for bluetooth latency & led resolution, tweaked by eye for POS app.
     currentProgress = std::fmod (currentProgress + 0.1, 1.0);
 
-    uint16 aniValue     = uint16 (juce::roundToInt ((255 << 8) * currentProgress));
-    uint16 aniIncrement = loopTimeSecs > 0.0 ? uint16 (juce::roundToInt (((255 << 8) / 25.0) / loopTimeSecs)) : 0;
+    uint16 aniValue     = uint16 (roundToInt ((255 << 8) * currentProgress));
+    uint16 aniIncrement = loopTimeSecs > 0.0 ? uint16 (roundToInt (((255 << 8) / 25.0) / loopTimeSecs)) : 0;
 
     uint32 offset = 8 * animationTimers_byte + 32 * padIdx;
 
@@ -160,7 +160,7 @@ void DrumPadGridProgram::resumeAnimations()
 }
 
 //==============================================================================
-juce::String DrumPadGridProgram::getLittleFootProgram()
+String DrumPadGridProgram::getLittleFootProgram()
 {
     if (block.versionNumber.isEmpty() || block.versionNumber.compare ("0.2.5") < 0)
         return getLittleFootProgramPre25();
@@ -168,7 +168,7 @@ juce::String DrumPadGridProgram::getLittleFootProgram()
     return getLittleFootProgramPost25();
 }
 
-juce::String DrumPadGridProgram::getLittleFootProgramPre25() const
+String DrumPadGridProgram::getLittleFootProgramPre25() const
 {
     // Uses its own heatmap, not the one provided in newer firmware
     // Also can't use blocks config, introduced in 2.5.
@@ -553,7 +553,7 @@ juce::String DrumPadGridProgram::getLittleFootProgramPre25() const
     )littlefoot";
 }
 
-juce::String DrumPadGridProgram::getLittleFootProgramPost25() const
+String DrumPadGridProgram::getLittleFootProgramPost25() const
 {
     // Uses heatmap provided in firmware (so the program's smaller)
     // Initialises config items introduced in firmware 2.5

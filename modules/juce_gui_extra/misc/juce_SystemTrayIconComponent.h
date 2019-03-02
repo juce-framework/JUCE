@@ -59,7 +59,7 @@ public:
     SystemTrayIconComponent();
 
     /** Destructor. */
-    ~SystemTrayIconComponent();
+    ~SystemTrayIconComponent() override;
 
     //==============================================================================
     /** Changes the image shown in the taskbar. */

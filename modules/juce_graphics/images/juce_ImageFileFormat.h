@@ -44,11 +44,11 @@ class JUCE_API  ImageFileFormat
 protected:
     //==============================================================================
     /** Creates an ImageFormat. */
-    ImageFileFormat()                   {}
+    ImageFileFormat() = default;
 
 public:
     /** Destructor. */
-    virtual ~ImageFileFormat()          {}
+    virtual ~ImageFileFormat() = default;
 
     //==============================================================================
     /** Returns a description of this file format.
@@ -153,7 +153,7 @@ class JUCE_API  PNGImageFormat  : public ImageFileFormat
 public:
     //==============================================================================
     PNGImageFormat();
-    ~PNGImageFormat();
+    ~PNGImageFormat() override;
 
     //==============================================================================
     String getFormatName() override;
@@ -177,7 +177,7 @@ class JUCE_API  JPEGImageFormat  : public ImageFileFormat
 public:
     //==============================================================================
     JPEGImageFormat();
-    ~JPEGImageFormat();
+    ~JPEGImageFormat() override;
 
     //==============================================================================
     /** Specifies the quality to be used when writing a JPEG file.
@@ -211,7 +211,7 @@ class JUCE_API  GIFImageFormat  : public ImageFileFormat
 public:
     //==============================================================================
     GIFImageFormat();
-    ~GIFImageFormat();
+    ~GIFImageFormat() override;
 
     //==============================================================================
     String getFormatName() override;

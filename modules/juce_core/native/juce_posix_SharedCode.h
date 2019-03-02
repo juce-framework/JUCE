@@ -44,7 +44,7 @@ void CriticalSection::exit() const noexcept         { pthread_mutex_unlock (&loc
 WaitableEvent::WaitableEvent (bool useManualReset) noexcept
     : triggered (false), manualReset (useManualReset)
 {
-    pthread_cond_init (&condition, 0);
+    pthread_cond_init (&condition, {});
 
     pthread_mutexattr_t atts;
     pthread_mutexattr_init (&atts);
@@ -78,7 +78,7 @@ bool WaitableEvent::wait (int timeOutMillisecs) const noexcept
         else
         {
             struct timeval now;
-            gettimeofday (&now, 0);
+            gettimeofday (&now, nullptr);
 
             struct timespec time;
             time.tv_sec  = now.tv_sec  + (timeOutMillisecs / 1000);
@@ -428,11 +428,14 @@ bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64
 
 bool File::deleteFile() const
 {
-    if (! exists() && ! isSymbolicLink())
-        return true;
+    if (! isSymbolicLink())
+    {
+        if (! exists())
+            return true;
 
-    if (isDirectory())
-        return rmdir (fullPath.toUTF8()) == 0;
+        if (isDirectory())
+            return rmdir (fullPath.toUTF8()) == 0;
+    }
 
     return remove (fullPath.toUTF8()) == 0;
 }
@@ -466,7 +469,7 @@ Result File::createDirectoryInternal (const String& fileName) const
 //==============================================================================
 int64 juce_fileSetPosition (void* handle, int64 pos)
 {
-    if (handle != 0 && lseek (getFD (handle), (off_t) pos, SEEK_SET) == pos)
+    if (handle != nullptr && lseek (getFD (handle), (off_t) pos, SEEK_SET) == pos)
         return pos;
 
     return -1;
@@ -484,7 +487,7 @@ void FileInputStream::openHandle()
 
 FileInputStream::~FileInputStream()
 {
-    if (fileHandle != 0)
+    if (fileHandle != nullptr)
         close (getFD (fileHandle));
 }
 
@@ -492,7 +495,7 @@ size_t FileInputStream::readInternal (void* buffer, size_t numBytes)
 {
     ssize_t result = 0;
 
-    if (fileHandle != 0)
+    if (fileHandle != nullptr)
     {
         result = ::read (getFD (fileHandle), buffer, numBytes);
 
@@ -545,16 +548,16 @@ void FileOutputStream::openHandle()
 
 void FileOutputStream::closeHandle()
 {
-    if (fileHandle != 0)
+    if (fileHandle != nullptr)
     {
         close (getFD (fileHandle));
-        fileHandle = 0;
+        fileHandle = nullptr;
     }
 }
 
 ssize_t FileOutputStream::writeInternal (const void* data, size_t numBytes)
 {
-    if (fileHandle == 0)
+    if (fileHandle == nullptr)
         return 0;
 
     auto result = ::write (getFD (fileHandle), data, numBytes);
@@ -568,14 +571,14 @@ ssize_t FileOutputStream::writeInternal (const void* data, size_t numBytes)
 #ifndef JUCE_ANDROID
 void FileOutputStream::flushInternal()
 {
-    if (fileHandle != 0 && fsync (getFD (fileHandle)) == -1)
+    if (fileHandle != nullptr && fsync (getFD (fileHandle)) == -1)
         status = getResultForErrno();
 }
 #endif
 
 Result FileOutputStream::truncate()
 {
-    if (fileHandle == 0)
+    if (fileHandle == nullptr)
         return status;
 
     flush();
@@ -607,10 +610,10 @@ void MemoryMappedFile::openInternal (const File& file, AccessMode mode, bool exc
 
     if (fileHandle != -1)
     {
-        void* m = mmap (0, (size_t) range.getLength(),
-                        mode == readWrite ? (PROT_READ | PROT_WRITE) : PROT_READ,
-                        exclusive ? MAP_PRIVATE : MAP_SHARED, fileHandle,
-                        (off_t) range.getStart());
+        auto m = mmap (nullptr, (size_t) range.getLength(),
+                       mode == readWrite ? (PROT_READ | PROT_WRITE) : PROT_READ,
+                       exclusive ? MAP_PRIVATE : MAP_SHARED, fileHandle,
+                       (off_t) range.getStart());
 
         if (m != MAP_FAILED)
         {
@@ -637,9 +640,6 @@ MemoryMappedFile::~MemoryMappedFile()
 File juce_getExecutableFile();
 File juce_getExecutableFile()
 {
-   #if JUCE_ANDROID
-    return File (android.appFile);
-   #else
     struct DLAddrReader
     {
         static String getFilename()
@@ -654,7 +654,6 @@ File juce_getExecutableFile()
 
     static String filename = DLAddrReader::getFilename();
     return File::getCurrentWorkingDirectory().getChildFile (filename);
-   #endif
 }
 
 //==============================================================================
@@ -715,23 +714,7 @@ String File::getVolumeLabel() const
 
 int File::getVolumeSerialNumber() const
 {
-    int result = 0;
-/*    int fd = open (getFullPathName().toUTF8(), O_RDONLY | O_NONBLOCK);
-
-    char info[512];
-
-    #ifndef HDIO_GET_IDENTITY
-     #define HDIO_GET_IDENTITY 0x030d
-    #endif
-
-    if (ioctl (fd, HDIO_GET_IDENTITY, info) == 0)
-    {
-        DBG (String (info + 20, 20));
-        result = String (info + 20, 20).trim().getIntValue();
-    }
-
-    close (fd);*/
-    return result;
+    return 0;
 }
 
 //==============================================================================
@@ -907,20 +890,24 @@ extern JavaVM* androidJNIJavaVM;
 extern "C" void* threadEntryProc (void*);
 extern "C" void* threadEntryProc (void* userData)
 {
-   #if JUCE_ANDROID
-    // JNI_OnLoad was not called - make sure you load the JUCE shared library
-    // using System.load inside of Java
-    jassert (androidJNIJavaVM != nullptr);
-
-    JNIEnv* env;
-    androidJNIJavaVM->AttachCurrentThread (&env, nullptr);
-    setEnv (env);
-   #endif
+    auto* myself = static_cast<Thread*> (userData);
 
     JUCE_AUTORELEASEPOOL
     {
-        juce_threadEntryPoint (userData);
+        juce_threadEntryPoint (myself);
     }
+
+   #if JUCE_ANDROID
+    if (androidJNIJavaVM != nullptr)
+    {
+        void* env = nullptr;
+        androidJNIJavaVM->GetEnv(&env, JNI_VERSION_1_2);
+
+        // only detach if we have actually been attached
+        if (env != nullptr)
+            androidJNIJavaVM->DetachCurrentThread();
+    }
+   #endif
 
     return nullptr;
 }
@@ -952,8 +939,8 @@ void Thread::launchThread()
     }
    #endif
 
-    threadHandle = 0;
-    pthread_t handle = 0;
+    threadHandle = {};
+    pthread_t handle = {};
     pthread_attr_t attr;
     pthread_attr_t* attrPtr = nullptr;
 
@@ -962,6 +949,7 @@ void Thread::launchThread()
         attrPtr = &attr;
         pthread_attr_setstacksize (attrPtr, threadStackSize);
     }
+
 
     if (pthread_create (&handle, attrPtr, threadEntryProc, this) == 0)
     {
@@ -976,13 +964,13 @@ void Thread::launchThread()
 
 void Thread::closeThreadHandle()
 {
-    threadId = 0;
-    threadHandle = 0;
+    threadId = {};
+    threadHandle = {};
 }
 
 void Thread::killThread()
 {
-    if (threadHandle.get() != 0)
+    if (threadHandle.get() != nullptr)
     {
        #if JUCE_ANDROID
         jassertfalse; // pthread_cancel not available!
@@ -1312,7 +1300,7 @@ struct HighResolutionTimer::Pimpl
     {
         isRunning = false;
 
-        if (thread == 0)
+        if (thread == pthread_t())
             return;
 
         if (thread == pthread_self())
@@ -1329,7 +1317,7 @@ struct HighResolutionTimer::Pimpl
         pthread_mutex_unlock (&timerMutex);
 
         pthread_join (thread, nullptr);
-        thread = 0;
+        thread = {};
     }
 
     HighResolutionTimer& owner;
@@ -1343,15 +1331,7 @@ private:
 
     static void* timerThread (void* param)
     {
-       #if JUCE_ANDROID
-        // JNI_OnLoad was not called - make sure you load the JUCE shared library
-        // using System.load inside of Java
-        jassert (androidJNIJavaVM != nullptr);
-
-        JNIEnv* env;
-        androidJNIJavaVM->AttachCurrentThread (&env, nullptr);
-        setEnv (env);
-       #else
+       #if ! JUCE_ANDROID
         int dummy;
         pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, &dummy);
        #endif

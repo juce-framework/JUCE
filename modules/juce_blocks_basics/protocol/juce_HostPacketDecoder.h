@@ -49,29 +49,38 @@ struct HostPacketDecoder
             auto packetTimestamp = reader.read<PacketTimestamp>();
             deviceIndex &= 63; // top bit is used as a direction indicator
 
-            while (processNextMessage (handler, reader, deviceIndex, packetTimestamp))
-            {}
+            for (;;)
+            {
+                auto nextMessageType = getMessageType (reader);
+
+                if (nextMessageType == 0)
+                    break;
+
+                if (! processNextMessage (handler, reader, (MessageFromDevice) nextMessageType, deviceIndex, packetTimestamp))
+                    break;
+            }
         }
     }
 
-    static bool processNextMessage (Handler& handler, Packed7BitArrayReader& reader,
-                                    TopologyIndex deviceIndex, PacketTimestamp packetTimestamp)
+    static uint32 getMessageType (Packed7BitArrayReader& reader)
     {
         if (reader.getRemainingBits() < MessageType::bits)
-            return false;
+            return 0;
 
-        auto messageType = reader.read<MessageType>().get();
+        return reader.read<MessageType>().get();
+    }
 
-        if (messageType == 0)
-            return false;
-
-        switch ((MessageFromDevice) messageType)
+    static bool processNextMessage (Handler& handler, Packed7BitArrayReader& reader,
+                                    MessageFromDevice messageType, TopologyIndex deviceIndex,
+                                    PacketTimestamp packetTimestamp)
+    {
+        switch (messageType)
         {
             case MessageFromDevice::deviceTopology:           return handleTopology (handler, reader, true);
             case MessageFromDevice::deviceTopologyExtend:     return handleTopology (handler, reader, false);
             case MessageFromDevice::deviceTopologyEnd:        return handleTopologyEnd (handler, reader);
-            case MessageFromDevice::deviceVersionList:        return handleVersion (handler, reader);
-            case MessageFromDevice::deviceNameList:           return handleName (handler, reader);
+            case MessageFromDevice::deviceVersion:            return handleVersion (handler, reader);
+            case MessageFromDevice::deviceName:               return handleName (handler, reader);
             case MessageFromDevice::touchStart:               return handleTouch (handler, reader, deviceIndex, packetTimestamp, true, false);
             case MessageFromDevice::touchMove:                return handleTouch (handler, reader, deviceIndex, packetTimestamp, false, false);
             case MessageFromDevice::touchEnd:                 return handleTouch (handler, reader, deviceIndex, packetTimestamp, false, true);
@@ -155,8 +164,11 @@ struct HostPacketDecoder
     {
         DeviceStatus status;
 
-        for (uint32 i = 0; i < sizeof (BlockSerialNumber); ++i)
-            status.serialNumber.serial[i] = (uint8) reader.readBits (7);
+        for (uint32 i = 0; i < BlockSerialNumber::maxLength; ++i)
+        {
+            status.serialNumber.data[i] = (uint8) reader.readBits (7);
+            ++status.serialNumber.length;
+        }
 
         status.index            = (TopologyIndex) reader.readBits (topologyIndexBits);
         status.batteryLevel     = reader.read<BatteryLevel>();
@@ -185,7 +197,7 @@ struct HostPacketDecoder
         version.version.length = (uint8) reader.readBits (7);
 
         for (uint32 i = 0; i < version.version.length; ++i)
-            version.version.version[i] = (uint8) reader.readBits (7);
+            version.version.data[i] = (uint8) reader.readBits (7);
 
         handler.handleVersion (version);
         return true;
@@ -199,7 +211,7 @@ struct HostPacketDecoder
         name.name.length = (uint8) reader.readBits (7);
 
         for (uint32 i = 0; i < name.name.length; ++i)
-            name.name.name[i] = (uint8) reader.readBits (7);
+            name.name.data[i] = (uint8) reader.readBits (7);
 
         handler.handleName (name);
         return true;
@@ -308,7 +320,10 @@ struct HostPacketDecoder
             return false;
         }
 
-        handler.handleFirmwareUpdateACK (deviceIndex, reader.read<FirmwareUpdateACKCode>(), reader.read<FirmwareUpdateACKDetail>());
+        auto ackCode   = reader.read<FirmwareUpdateACKCode>();
+        auto ackDetail = reader.read<FirmwareUpdateACKDetail>();
+
+        handler.handleFirmwareUpdateACK (deviceIndex, ackCode, ackDetail);
         return true;
     }
 
@@ -339,6 +354,11 @@ struct HostPacketDecoder
         if (type == factorySyncEnd)
         {
             handler.handleConfigFactorySyncEndMessage (deviceIndex);
+        }
+
+        if (type == factorySyncReset)
+        {
+            handler.handleConfigFactorySyncResetMessage (deviceIndex);
         }
 
         return true;

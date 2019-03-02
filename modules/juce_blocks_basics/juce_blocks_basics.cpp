@@ -28,6 +28,13 @@
  #endif
 #else
 
+#include <regex>
+
+namespace juce
+{
+ #include "littlefoot/juce_LittleFootRemoteHeap.h"
+}
+
 #include "protocol/juce_BitPackingUtilities.h"
 #include "protocol/juce_BlocksProtocolDefinitions.h"
 #include "protocol/juce_HostPacketDecoder.h"
@@ -36,6 +43,8 @@
 
 #include "blocks/juce_BlockConfigManager.h"
 #include "blocks/juce_Block.cpp"
+#include "blocks/juce_BlocksVersion.cpp"
+#include "topology/juce_BlockGraph.cpp"
 #include "topology/juce_PhysicalTopologySource.cpp"
 #include "topology/juce_RuleBasedTopologySource.cpp"
 #include "visualisers/juce_DrumPadLEDProgram.cpp"

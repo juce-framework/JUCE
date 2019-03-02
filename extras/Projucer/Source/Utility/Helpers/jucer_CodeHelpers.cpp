@@ -99,7 +99,7 @@ namespace CodeHelpers
         words.addTokens (s.retainCharacters (allowedChars), false);
         words.trim();
 
-        String n (words[0]);
+        auto n = words[0];
 
         if (capitalise)
             n = n.toLowerCase();
@@ -176,7 +176,7 @@ namespace CodeHelpers
         {
             for (int i = 0; i < lines.size(); ++i)
             {
-                String& line = lines.getReference (i);
+                auto& line = lines.getReference (i);
 
                 if (line.length() > maxLineLength)
                 {
@@ -259,7 +259,7 @@ namespace CodeHelpers
             #define COL(col)  #col,
             #include "jucer_Colours.h"
             #undef COL
-            0
+            nullptr
         };
 
         for (int i = 0; i < numElementsInArray (colourNames) - 1; ++i)
@@ -301,7 +301,7 @@ namespace CodeHelpers
     {
         const int maxCharsOnLine = 250;
 
-        const unsigned char* data = (const unsigned char*) mb.getData();
+        auto data = (const unsigned char*) mb.getData();
         int charsOnLine = 0;
 
         bool canUseStringLiteral = mb.getSize() < 32768; // MS compilers can't handle big string literals..
@@ -312,7 +312,8 @@ namespace CodeHelpers
 
             for (size_t i = 0; i < mb.getSize(); ++i)
             {
-                const unsigned int num = (unsigned int) data[i];
+                auto num = (unsigned int) data[i];
+
                 if (! ((num >= 32 && num < 127) || num == '\t' || num == '\r' || num == '\n'))
                 {
                     if (++numEscaped > mb.getSize() / 4)
@@ -330,7 +331,7 @@ namespace CodeHelpers
 
             for (size_t i = 0; i < mb.getSize(); ++i)
             {
-                const int num = (int) (unsigned int) data[i];
+                auto num = (int) (unsigned int) data[i];
                 out << num << ',';
 
                 charsOnLine += 2;
@@ -364,8 +365,9 @@ namespace CodeHelpers
     //==============================================================================
     static unsigned int calculateHash (const String& s, const unsigned int hashMultiplier)
     {
-        const char* t = s.toUTF8();
+        auto t = s.toUTF8();
         unsigned int hash = 0;
+
         while (*t != 0)
             hash = hashMultiplier * hash + (unsigned int) *t++;
 
@@ -378,11 +380,13 @@ namespace CodeHelpers
 
         for (;;)
         {
-            SortedSet <unsigned int> hashes;
+            SortedSet<unsigned int> hashes;
             bool collision = false;
+
             for (int i = strings.size(); --i >= 0;)
             {
-                const unsigned int hash = calculateHash (strings[i], v);
+                auto hash = calculateHash (strings[i], v);
+
                 if (hashes.contains (hash))
                 {
                     collision = true;
@@ -405,11 +409,12 @@ namespace CodeHelpers
                               const StringArray& strings, const StringArray& codeToExecute, const int indentLevel)
     {
         jassert (strings.size() == codeToExecute.size());
-        const String indent (String::repeatedString (" ", indentLevel));
-        const unsigned int hashMultiplier = findBestHashMultiplier (strings);
+        auto indent = String::repeatedString (" ", indentLevel);
+        auto hashMultiplier = findBestHashMultiplier (strings);
 
         out << indent << "unsigned int hash = 0;" << newLine
-            << indent << "if (" << utf8PointerVariable << " != 0)" << newLine
+            << newLine
+            << indent << "if (" << utf8PointerVariable << " != nullptr)" << newLine
             << indent << "    while (*" << utf8PointerVariable << " != 0)" << newLine
             << indent << "        hash = " << (int) hashMultiplier << " * hash + (unsigned int) *" << utf8PointerVariable << "++;" << newLine
             << newLine
@@ -428,7 +433,7 @@ namespace CodeHelpers
 
     String getLeadingWhitespace (String line)
     {
-        line = line.removeCharacters ("\r\n");
+        line = line.removeCharacters (line.endsWith ("\r\n") ? "\r\n" : "\n");
         auto endOfLeadingWS = line.getCharPointer().findEndOfWhitespace();
         return String (line.getCharPointer(), endOfLeadingWS);
     }
@@ -461,8 +466,8 @@ namespace CodeHelpers
         {
             pos = pos.movedByLines (-1);
 
-            const String line (pos.getLineText());
-            const String trimmedLine (line.trimStart());
+            auto line = pos.getLineText();
+            auto trimmedLine = line.trimStart();
 
             braceCount += getBraceCount (trimmedLine.getCharPointer());
 

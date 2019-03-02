@@ -38,16 +38,18 @@ class JUCE_API  LookAndFeel_V1    : public LookAndFeel_V2
 {
 public:
     LookAndFeel_V1();
-    ~LookAndFeel_V1();
+    ~LookAndFeel_V1() override;
 
     //==============================================================================
     void drawButtonBackground (Graphics&, Button&, const Colour& backgroundColour,
-                               bool isMouseOverButton, bool isButtonDown) override;
+                               bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
 
-    void drawToggleButton (Graphics&, ToggleButton&, bool isMouseOverButton, bool isButtonDown) override;
+    void drawToggleButton (Graphics&, ToggleButton&,
+                           bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
 
     void drawTickBox (Graphics&, Component&, float x, float y, float w, float h,
-                      bool ticked, bool isEnabled, bool isMouseOverButton, bool isButtonDown) override;
+                      bool ticked, bool isEnabled,
+                      bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
 
     void drawProgressBar (Graphics&, ProgressBar&, int width, int height,
                           double progress, const String& textToShow) override;
@@ -55,7 +57,7 @@ public:
     //==============================================================================
     void drawScrollbarButton (Graphics&, ScrollBar&, int width, int height,
                               int buttonDirection, bool isScrollbarVertical,
-                              bool isMouseOverButton, bool isButtonDown) override;
+                              bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
 
     void drawScrollbar (Graphics&, ScrollBar&, int x, int y, int width, int height,
                         bool isScrollbarVertical, int thumbStartPosition, int thumbSize,

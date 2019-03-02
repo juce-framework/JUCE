@@ -29,7 +29,7 @@ inline void zeromem (void* memory, size_t numBytes) noexcept        { memset (me
 
 /** Overwrites a structure or object with zeros. */
 template <typename Type>
-inline void zerostruct (Type& structure) noexcept                   { memset (&structure, 0, sizeof (structure)); }
+inline void zerostruct (Type& structure) noexcept                   { memset ((void*) &structure, 0, sizeof (structure)); }
 
 /** Delete an object pointer, and sets the pointer to null.
 
@@ -44,7 +44,7 @@ inline void deleteAndZero (Type& pointer)                           { delete poi
     a specific number of bytes,
 */
 template <typename Type, typename IntegerType>
-inline Type* addBytesToPointer (Type* basePointer, IntegerType bytes) noexcept  { return (Type*) (((char*) basePointer) + bytes); }
+inline Type* addBytesToPointer (Type* basePointer, IntegerType bytes) noexcept  { return (Type*) (const_cast<char*> (reinterpret_cast<const char*> (basePointer)) + bytes); }
 
 /** A handy function to round up a pointer to the nearest multiple of a given number of bytes.
     alignmentBytes must be a power of two. */

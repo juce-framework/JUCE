@@ -52,11 +52,10 @@ void AudioAppComponent::setAudioChannels (int numInputChannels, int numOutputCha
 
     if (usingCustomDeviceManager && xml == nullptr)
     {
-        AudioDeviceManager::AudioDeviceSetup setup;
-        deviceManager.getAudioDeviceSetup (setup);
+        auto setup = deviceManager.getAudioDeviceSetup();
 
         if (setup.inputChannels.countNumberOfSetBits() != numInputChannels
-            || setup.outputChannels.countNumberOfSetBits() != numOutputChannels)
+             || setup.outputChannels.countNumberOfSetBits() != numOutputChannels)
         {
             setup.inputChannels.clear();
             setup.outputChannels.clear();

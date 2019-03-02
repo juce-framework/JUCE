@@ -35,7 +35,7 @@
 
   ID:               juce_audio_processors
   vendor:           juce
-  version:          5.3.2
+  version:          5.4.3
   name:             JUCE audio processor classes
   description:      Classes for loading and playing VST, AU, LADSPA, or internally-generated audio processors.
   website:          http://www.juce.com/juce
@@ -58,7 +58,7 @@
 
 //==============================================================================
 /** Config: JUCE_PLUGINHOST_VST
-    Enables the VST audio plugin hosting classes.
+    Enables the VST audio plugin hosting classes. You will need to have the VST2 SDK files in your header search paths. You can obtain the VST2 SDK files from on older version of the VST3 SDK.
 
     @see VSTPluginFormat, VST3PluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_AU, JUCE_PLUGINHOST_VST3, JUCE_PLUGINHOST_LADSPA
 */
@@ -67,8 +67,7 @@
 #endif
 
 /** Config: JUCE_PLUGINHOST_VST3
-    Enables the VST3 audio plugin hosting classes. This requires the Steinberg VST3 SDK to be
-    installed on your machine.
+    Enables the VST3 audio plugin hosting classes.
 
     @see VSTPluginFormat, VST3PluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST, JUCE_PLUGINHOST_AU, JUCE_PLUGINHOST_LADSPA
 */
@@ -110,6 +109,7 @@
 #include "processors/juce_AudioProcessorEditor.h"
 #include "processors/juce_AudioProcessorListener.h"
 #include "processors/juce_AudioProcessorParameter.h"
+#include "processors/juce_AudioProcessorParameterGroup.h"
 #include "processors/juce_AudioProcessor.h"
 #include "processors/juce_PluginDescription.h"
 #include "processors/juce_AudioPluginInstance.h"
@@ -126,6 +126,7 @@
 #include "scanning/juce_PluginDirectoryScanner.h"
 #include "scanning/juce_PluginListComponent.h"
 #include "utilities/juce_AudioProcessorParameterWithID.h"
+#include "utilities/juce_RangedAudioParameter.h"
 #include "utilities/juce_AudioParameterFloat.h"
 #include "utilities/juce_AudioParameterInt.h"
 #include "utilities/juce_AudioParameterBool.h"

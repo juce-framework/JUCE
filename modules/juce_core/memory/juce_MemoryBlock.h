@@ -27,7 +27,6 @@ namespace juce
 /**
     A class to hold a resizable block of raw data.
 
-
     @tags{Core}
 */
 class JUCE_API  MemoryBlock
@@ -252,7 +251,7 @@ public:
 
 private:
     //==============================================================================
-    typedef HeapBlock<char, true> HeapBlockType;
+    using HeapBlockType = HeapBlock<char, true>;
     HeapBlockType data;
     size_t size = 0;
 

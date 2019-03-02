@@ -142,7 +142,7 @@ public:
 
             InAppPurchases class will own downloads and will delete them as soon as they are finished.
 
-            NOTE: it is possible to receive this callback for the same purchase multiple times. If that happens,
+            NOTE: It is possible to receive this callback for the same purchase multiple times. If that happens,
             only the newest set of downloads and the newest orderId will be valid, the old ones should be not used anymore!
         */
         virtual void productPurchaseFinished (const PurchaseInfo&, bool /*success*/, const String& /*statusDescription*/) {}
@@ -150,7 +150,7 @@ public:
         /** Called when a list of all purchases is restored. This can be used to figure out to
             which products a user is entitled to.
 
-            NOTE: it is possible to receive this callback for the same purchase multiple times. If that happens,
+            NOTE: It is possible to receive this callback for the same purchase multiple times. If that happens,
             only the newest set of downloads and the newest orderId will be valid, the old ones should be not used anymore!
         */
         virtual void purchasesListRestored (const Array<PurchaseInfo>&, bool /*success*/, const String& /*statusDescription*/) {}
@@ -218,7 +218,7 @@ public:
     /** Asynchronously asks about a list of products that a user has already bought. Upon completion, Listener::purchasesListReceived()
         callback will be invoked. The user may be prompted to login first.
 
-        @param includeDownloadInfo      (iOS only) if true, then after restoration is successfull, the downloads array passed to
+        @param includeDownloadInfo      (iOS only) if true, then after restoration is successful, the downloads array passed to
                                         Listener::purchasesListReceived() callback will contain all the download objects corresponding with
                                         the purchase. In the opposite case, the downloads array will be empty.
 

@@ -39,7 +39,7 @@ namespace juce
     the underlying object is also immediately destroyed. This allows you to use scoping
     to manage the lifetime of a shared resource.
 
-    Note: the construction/deletion of the shared object must not involve any
+    Note: The construction/deletion of the shared object must not involve any
     code that makes recursive calls to a SharedResourcePointer, or you'll cause
     a deadlock.
 
@@ -137,7 +137,7 @@ private:
 
     static SharedObjectHolder& getSharedObjectHolder() noexcept
     {
-        static void* holder [(sizeof (SharedObjectHolder) + sizeof(void*) - 1) / sizeof(void*)] = { 0 };
+        static void* holder [(sizeof (SharedObjectHolder) + sizeof(void*) - 1) / sizeof(void*)] = { nullptr };
         return *reinterpret_cast<SharedObjectHolder*> (holder);
     }
 

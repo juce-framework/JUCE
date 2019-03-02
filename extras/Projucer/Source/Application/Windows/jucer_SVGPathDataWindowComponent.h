@@ -163,9 +163,7 @@ public:
         dragOver = false;
         repaint();
 
-        std::unique_ptr<XmlElement> element (XmlDocument::parse (File (files[0])));
-
-        if (element != nullptr)
+        if (auto element = parseXML (File (files[0])))
         {
             if (auto* ePath = element->getChildByName ("path"))
                 userText.setText (ePath->getStringAttribute ("d"), true);

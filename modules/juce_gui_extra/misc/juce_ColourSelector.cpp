@@ -27,46 +27,22 @@
 namespace juce
 {
 
-class ColourSelector::ColourComponentSlider  : public Slider
+struct ColourComponentSlider  : public Slider
 {
-public:
-    ColourComponentSlider (const String& name)
-        : Slider (name)
+    ColourComponentSlider (const String& name)  : Slider (name)
     {
         setRange (0.0, 255.0, 1.0);
     }
 
-    String getTextFromValue (double value)
+    String getTextFromValue (double value) override
     {
         return String::toHexString ((int) value).toUpperCase().paddedLeft ('0', 2);
     }
 
-    double getValueFromText (const String& text)
+    double getValueFromText (const String& text) override
     {
         return (double) text.getHexValue32();
     }
-
-    JUCE_DECLARE_NON_COPYABLE (ColourComponentSlider)
-};
-
-//==============================================================================
-class ColourSelector::ColourSpaceMarker  : public Component
-{
-public:
-    ColourSpaceMarker()
-    {
-        setInterceptsMouseClicks (false, false);
-    }
-
-    void paint (Graphics& g) override
-    {
-        g.setColour (Colour::greyLevel (0.1f));
-        g.drawEllipse (1.0f, 1.0f, getWidth() - 2.0f, getHeight() - 2.0f, 1.0f);
-        g.setColour (Colour::greyLevel (0.9f));
-        g.drawEllipse (2.0f, 2.0f, getWidth() - 4.0f, getHeight() - 4.0f, 1.0f);
-    }
-
-    JUCE_DECLARE_NON_COPYABLE (ColourSpaceMarker)
 };
 
 //==============================================================================
@@ -74,7 +50,7 @@ class ColourSelector::ColourSpaceView  : public Component
 {
 public:
     ColourSpaceView (ColourSelector& cs, float& hue, float& sat, float& val, int edgeSize)
-        : owner (cs), h (hue), s (sat), v (val), lastHue (0.0f), edge (edgeSize)
+        : owner (cs), h (hue), s (sat), v (val), edge (edgeSize)
     {
         addAndMakeVisible (marker);
         setMouseCursor (MouseCursor::CrosshairCursor);
@@ -128,7 +104,7 @@ public:
         if (lastHue != h)
         {
             lastHue = h;
-            colours = Image();
+            colours = {};
             repaint();
         }
 
@@ -137,7 +113,7 @@ public:
 
     void resized() override
     {
-        colours = Image();
+        colours = {};
         updateMarker();
     }
 
@@ -146,53 +122,38 @@ private:
     float& h;
     float& s;
     float& v;
-    float lastHue;
-    ColourSpaceMarker marker;
+    float lastHue = 0;
     const int edge;
     Image colours;
 
+    struct ColourSpaceMarker  : public Component
+    {
+        ColourSpaceMarker()
+        {
+            setInterceptsMouseClicks (false, false);
+        }
+
+        void paint (Graphics& g) override
+        {
+            g.setColour (Colour::greyLevel (0.1f));
+            g.drawEllipse (1.0f, 1.0f, getWidth() - 2.0f, getHeight() - 2.0f, 1.0f);
+            g.setColour (Colour::greyLevel (0.9f));
+            g.drawEllipse (2.0f, 2.0f, getWidth() - 4.0f, getHeight() - 4.0f, 1.0f);
+        }
+    };
+
+    ColourSpaceMarker marker;
+
     void updateMarker()
     {
-        marker.setBounds (roundToInt ((getWidth() - edge * 2) * s),
-                          roundToInt ((getHeight() - edge * 2) * (1.0f - v)),
-                          edge * 2, edge * 2);
+        auto markerSize = jmax (14, edge * 2);
+        auto area = getLocalBounds().reduced (edge);
+
+        marker.setBounds (Rectangle<int> (markerSize, markerSize)
+                            .withCentre (area.getRelativePoint (s, 1.0f - v)));
     }
 
     JUCE_DECLARE_NON_COPYABLE (ColourSpaceView)
-};
-
-//==============================================================================
-class ColourSelector::HueSelectorMarker  : public Component
-{
-public:
-    HueSelectorMarker()
-    {
-        setInterceptsMouseClicks (false, false);
-    }
-
-    void paint (Graphics& g) override
-    {
-        auto cw = (float) getWidth();
-        auto ch = (float) getHeight();
-
-        Path p;
-        p.addTriangle (1.0f, 1.0f,
-                       cw * 0.3f, ch * 0.5f,
-                       1.0f, ch - 1.0f);
-
-        p.addTriangle (cw - 1.0f, 1.0f,
-                       cw * 0.7f, ch * 0.5f,
-                       cw - 1.0f, ch - 1.0f);
-
-        g.setColour (Colours::white.withAlpha (0.75f));
-        g.fillPath (p);
-
-        g.setColour (Colours::black.withAlpha (0.75f));
-        g.strokePath (p, PathStrokeType (1.2f));
-    }
-
-private:
-    JUCE_DECLARE_NON_COPYABLE (HueSelectorMarker)
 };
 
 //==============================================================================
@@ -221,7 +182,11 @@ public:
 
     void resized() override
     {
-        marker.setBounds (0, roundToInt ((getHeight() - edge * 2) * h), getWidth(), edge * 2);
+        auto markerSize = jmax (14, edge * 2);
+        auto area = getLocalBounds().reduced (edge);
+
+        marker.setBounds (Rectangle<int> (getWidth(), markerSize)
+                            .withCentre (area.getRelativePoint (0.5f, h)));
     }
 
     void mouseDown (const MouseEvent& e) override
@@ -242,8 +207,38 @@ public:
 private:
     ColourSelector& owner;
     float& h;
-    HueSelectorMarker marker;
     const int edge;
+
+    struct HueSelectorMarker  : public Component
+    {
+        HueSelectorMarker()
+        {
+            setInterceptsMouseClicks (false, false);
+        }
+
+        void paint (Graphics& g) override
+        {
+            auto cw = (float) getWidth();
+            auto ch = (float) getHeight();
+
+            Path p;
+            p.addTriangle (1.0f, 1.0f,
+                           cw * 0.3f, ch * 0.5f,
+                           1.0f, ch - 1.0f);
+
+            p.addTriangle (cw - 1.0f, 1.0f,
+                           cw * 0.7f, ch * 0.5f,
+                           cw - 1.0f, ch - 1.0f);
+
+            g.setColour (Colours::white.withAlpha (0.75f));
+            g.fillPath (p);
+
+            g.setColour (Colours::black.withAlpha (0.75f));
+            g.strokePath (p, PathStrokeType (1.2f));
+        }
+    };
+
+    HueSelectorMarker marker;
 
     JUCE_DECLARE_NON_COPYABLE (HueSelectorComp)
 };
@@ -285,10 +280,8 @@ private:
     {
         if (comp != nullptr)
         {
-            if (result == 1)
-                comp->setColourFromSwatch();
-            else if (result == 2)
-                comp->setSwatchFromColour();
+            if (result == 1)  comp->setColourFromSwatch();
+            if (result == 2)  comp->setSwatchFromColour();
         }
     }
 
@@ -334,14 +327,16 @@ ColourSelector::ColourSelector (int sectionsToShow, int edge, int gapAroundColou
 
         sliders[3]->setVisible ((flags & showAlphaChannel) != 0);
 
-        for (int i = 4; --i >= 0;)
-            sliders[i]->onValueChange = [this] { changeColour(); };
+        for (auto& slider : sliders)
+        { // braces needed here to avoid a VS2013 compiler bug
+            slider->onValueChange = [this] { changeColour(); };
+        }
     }
 
     if ((flags & showColourspace) != 0)
     {
         colourSpace.reset (new ColourSpaceView (*this, h, s, v, gapAroundColourSpaceComponent));
-        hueSelector.reset (new HueSelectorComp (*this, h,  gapAroundColourSpaceComponent));
+        hueSelector.reset (new HueSelectorComp (*this, h, gapAroundColourSpaceComponent));
 
         addAndMakeVisible (colourSpace.get());
         addAndMakeVisible (hueSelector.get());
@@ -455,12 +450,12 @@ void ColourSelector::paint (Graphics& g)
         g.setColour (findColour (labelTextColourId));
         g.setFont (11.0f);
 
-        for (int i = 4; --i >= 0;)
+        for (auto& slider : sliders)
         {
-            if (sliders[i]->isVisible())
-                g.drawText (sliders[i]->getName() + ":",
-                            0, sliders[i]->getY(),
-                            sliders[i]->getX() - 8, sliders[i]->getHeight(),
+            if (slider->isVisible())
+                g.drawText (slider->getName() + ":",
+                            0, slider->getY(),
+                            slider->getX() - 8, slider->getHeight(),
                             Justification::centredRight, false);
         }
     }

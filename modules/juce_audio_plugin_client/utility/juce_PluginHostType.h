@@ -41,8 +41,8 @@ class PluginHostType
 public:
     //==============================================================================
     PluginHostType()  : type (getHostType()) {}
-    PluginHostType (const PluginHostType& other) noexcept  : type (other.type) {}
-    PluginHostType& operator= (const PluginHostType& other) noexcept { type = other.type; return *this; }
+    PluginHostType (const PluginHostType& other) = default;
+    PluginHostType& operator= (const PluginHostType& other) = default;
 
     //==============================================================================
     /** Represents the host type and also its version for some hosts. */
@@ -63,11 +63,14 @@ public:
         BitwigStudio,               /**< Represents Bitwig Studio. */
         CakewalkSonar8,             /**< Represents Cakewalk Sonar 8. */
         CakewalkSonarGeneric,       /**< Represents Cakewalk Sonar. */
+        CakewalkByBandlab,          /**< Represents Cakewalk by Bandlab. */
         DaVinciResolve,             /**< Represents DaVinci Resolve. */
         DigitalPerformer,           /**< Represents Digital Performer. */
         FinalCut,                   /**< Represents Apple Final Cut Pro. */
         FruityLoops,                /**< Represents Fruity Loops. */
+        JUCEPluginHost,             /**< Represents the JUCE AudioPluginHost */
         MagixSamplitude,            /**< Represents Magix Samplitude. */
+        MagixSequoia,               /**< Represents Magix Sequoia. */
         MergingPyramix,             /**< Represents Merging Pyramix. */
         MuseReceptorGeneric,        /**< Represents Muse Receptor. */
         Reaper,                     /**< Represents Cockos Reaper. */
@@ -81,6 +84,8 @@ public:
         SteinbergCubase8,           /**< Represents Steinberg Cubase 8. */
         SteinbergCubase8_5,         /**< Represents Steinberg Cubase 8.5. */
         SteinbergCubase9,           /**< Represents Steinberg Cubase 9. */
+        SteinbergCubase9_5,         /**< Represents Steinberg Cubase 9.5. */
+        SteinbergCubase10,          /**< Represents Steinberg Cubase 10. */
         SteinbergCubaseGeneric,     /**< Represents Steinberg Cubase. */
         SteinbergNuendo3,           /**< Represents Steinberg Nuendo 3. */
         SteinbergNuendo4,           /**< Represents Steinberg Nuendo 4. */
@@ -112,7 +117,7 @@ public:
     /** Returns true if the host is Bitwig Studio. */
     bool isBitwigStudio() const noexcept      { return type == BitwigStudio; }
     /** Returns true if the host is any version of Steinberg Cubase. */
-    bool isCubase() const noexcept            { return type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase5Bridged || type == SteinbergCubase6 || type == SteinbergCubase7 || type == SteinbergCubase8 || type == SteinbergCubase8_5 || type == SteinbergCubase9 || type == SteinbergCubaseGeneric; }
+    bool isCubase() const noexcept            { return type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase5Bridged || type == SteinbergCubase6 || type == SteinbergCubase7 || type == SteinbergCubase8 || type == SteinbergCubase8_5 || type == SteinbergCubase9 || type == SteinbergCubase9_5 || type == SteinbergCubase10 || type == SteinbergCubaseGeneric; }
     /** Returns true if the host is Steinberg Cubase 7 or later. */
     bool isCubase7orLater() const noexcept    { return isCubase() && ! (type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase6); }
     /** Returns true if the host is Steinberg Cubase 5 Bridged. */
@@ -127,6 +132,8 @@ public:
     bool isFruityLoops() const noexcept       { return type == FruityLoops; }
     /** Returns true if the host is Apple GarageBand. */
     bool isGarageBand() const noexcept        { return type == AppleGarageBand; }
+    /** Returns true if the host is the JUCE AudioPluginHost */
+    bool isJUCEPluginHost() const noexcept    { return type == JUCEPluginHost; }
     /** Returns true if the host is Apple Logic Pro. */
     bool isLogic() const noexcept             { return type == AppleLogic; }
     /** Returns true if the host is Apple MainStage. */
@@ -149,8 +156,10 @@ public:
     bool isSADiE() const noexcept             { return type == SADiE; }
     /** Returns true if the host is Magix Samplitude. */
     bool isSamplitude() const noexcept        { return type == MagixSamplitude; }
+    /** Returns true if the host is Magix Sequoia. */
+    bool isSequoia() const noexcept           { return type == MagixSequoia; }
     /** Returns true if the host is any version of Cakewalk Sonar. */
-    bool isSonar() const noexcept             { return type == CakewalkSonar8 || type == CakewalkSonarGeneric; }
+    bool isSonar() const noexcept             { return type == CakewalkSonar8 || type == CakewalkSonarGeneric || type == CakewalkByBandlab; }
     /** Returns true if the host is Steinberg's VST3 Test Host. */
     bool isSteinbergTestHost() const noexcept { return type == SteinbergTestHost; }
     /** Returns true if the host is any product from Steinberg. */
@@ -190,11 +199,14 @@ public:
             case BitwigStudio:             return "Bitwig Studio";
             case CakewalkSonar8:           return "Cakewalk Sonar 8";
             case CakewalkSonarGeneric:     return "Cakewalk Sonar";
+            case CakewalkByBandlab:        return "Cakewalk by Bandlab";
             case DaVinciResolve:           return "DaVinci Resolve";
             case DigitalPerformer:         return "DigitalPerformer";
             case FinalCut:                 return "Final Cut";
             case FruityLoops:              return "FruityLoops";
+            case JUCEPluginHost:           return "JUCE AudioPluginHost";
             case MagixSamplitude:          return "Magix Samplitude";
+            case MagixSequoia:             return "Magix Sequoia";
             case MergingPyramix:           return "Pyramix";
             case MuseReceptorGeneric:      return "Muse Receptor";
             case Reaper:                   return "Reaper";
@@ -208,6 +220,8 @@ public:
             case SteinbergCubase8:         return "Steinberg Cubase 8";
             case SteinbergCubase8_5:       return "Steinberg Cubase 8.5";
             case SteinbergCubase9:         return "Steinberg Cubase 9";
+            case SteinbergCubase9_5:       return "Steinberg Cubase 9.5";
+            case SteinbergCubase10:        return "Steinberg Cubase 10";
             case SteinbergCubaseGeneric:   return "Steinberg Cubase";
             case SteinbergNuendo3:         return "Steinberg Nuendo 3";
             case SteinbergNuendo4:         return "Steinberg Nuendo 4";
@@ -259,11 +273,15 @@ public:
     */
     static AudioProcessor::WrapperType getPluginLoadedAs() noexcept    { return jucePlugInClientCurrentWrapperType; }
 
+    /** Returns true if the AudioProcessor instance is an AAX plug-in running in AudioSuite. */
+    static bool isInAAXAudioSuite (AudioProcessor&);
+
     //==============================================================================
 
    #ifndef DOXYGEN
     // @internal
     static AudioProcessor::WrapperType jucePlugInClientCurrentWrapperType;
+    static std::function<bool(AudioProcessor&)> jucePlugInIsRunningInAudioSuiteFn;
    #endif
 
 private:
@@ -295,6 +313,8 @@ private:
         if (hostPath.containsIgnoreCase       ("Cubase 8.app"))      return SteinbergCubase8;
         if (hostPath.containsIgnoreCase       ("Cubase 8.5.app"))    return SteinbergCubase8_5;
         if (hostPath.containsIgnoreCase       ("Cubase 9.app"))      return SteinbergCubase9;
+        if (hostPath.containsIgnoreCase       ("Cubase 9.5.app"))    return SteinbergCubase9_5;
+        if (hostPath.containsIgnoreCase       ("Cubase 10.app"))     return SteinbergCubase10;
         if (hostFilename.containsIgnoreCase   ("Cubase"))            return SteinbergCubaseGeneric;
         if (hostPath.containsIgnoreCase       ("Wavelab 7"))         return SteinbergWavelab7;
         if (hostPath.containsIgnoreCase       ("Wavelab 8"))         return SteinbergWavelab8;
@@ -309,6 +329,8 @@ private:
         if (hostFilename.containsIgnoreCase   ("Renoise"))           return Renoise;
         if (hostFilename.containsIgnoreCase   ("Resolve"))           return DaVinciResolve;
         if (hostFilename.startsWith           ("Bitwig"))            return BitwigStudio;
+        if (hostFilename.containsIgnoreCase   ("OsxFL"))             return FruityLoops;
+        if (hostFilename.containsIgnoreCase   ("AudioPluginHost"))   return JUCEPluginHost;
 
        #elif JUCE_WINDOWS
         if (hostFilename.containsIgnoreCase   ("Live 6."))           return AbletonLive6;
@@ -320,6 +342,7 @@ private:
         if (hostFilename.containsIgnoreCase   ("ProTools"))          return AvidProTools;
         if (hostPath.containsIgnoreCase       ("SONAR 8"))           return CakewalkSonar8;
         if (hostFilename.containsIgnoreCase   ("SONAR"))             return CakewalkSonarGeneric;
+        if (hostFilename.containsIgnoreCase   ("Cakewalk.exe"))      return CakewalkByBandlab;
         if (hostFilename.containsIgnoreCase   ("GarageBand"))        return AppleGarageBand;
         if (hostFilename.containsIgnoreCase   ("Logic"))             return AppleLogic;
         if (hostFilename.containsIgnoreCase   ("MainStage"))         return AppleMainStage;
@@ -333,9 +356,13 @@ private:
         if (hostFilename.containsIgnoreCase   ("Cubase7"))           return SteinbergCubase7;
         if (hostFilename.containsIgnoreCase   ("Cubase8.exe"))       return SteinbergCubase8;
         if (hostFilename.containsIgnoreCase   ("Cubase8.5.exe"))     return SteinbergCubase8_5;
-        // Cubase 9 scans plug-ins with a separate executable "vst2xscanner"
+        // Later version of Cubase scan plug-ins with a separate executable "vst2xscanner"
+        if (hostFilename.containsIgnoreCase   ("Cubase9.5.exe")
+            || hostPath.containsIgnoreCase    ("Cubase 9.5"))        return SteinbergCubase9_5;
         if (hostFilename.containsIgnoreCase   ("Cubase9.exe")
             || hostPath.containsIgnoreCase    ("Cubase 9"))          return SteinbergCubase9;
+        if (hostFilename.containsIgnoreCase   ("Cubase10.exe")
+            || hostPath.containsIgnoreCase    ("Cubase 10"))         return SteinbergCubase10;
         if (hostFilename.containsIgnoreCase   ("Cubase"))            return SteinbergCubaseGeneric;
         if (hostFilename.containsIgnoreCase   ("VSTBridgeApp"))      return SteinbergCubase5Bridged;
         if (hostPath.containsIgnoreCase       ("Wavelab 5"))         return SteinbergWavelab5;
@@ -353,16 +380,19 @@ private:
         if (hostFilename.containsIgnoreCase   ("VST_Scanner"))       return VBVSTScanner;
         if (hostPath.containsIgnoreCase       ("Merging Technologies")) return MergingPyramix;
         if (hostFilename.startsWithIgnoreCase ("Sam"))               return MagixSamplitude;
+        if (hostFilename.startsWithIgnoreCase ("Sequoia"))           return MagixSequoia;
         if (hostFilename.containsIgnoreCase   ("Renoise"))           return Renoise;
         if (hostFilename.containsIgnoreCase   ("Resolve"))           return DaVinciResolve;
         if (hostPath.containsIgnoreCase       ("Bitwig Studio"))     return BitwigStudio;
         if (hostFilename.containsIgnoreCase   ("Sadie"))             return SADiE;
+        if (hostFilename.containsIgnoreCase   ("AudioPluginHost"))   return JUCEPluginHost;
 
        #elif JUCE_LINUX
         if (hostFilename.containsIgnoreCase   ("Ardour"))            return Ardour;
         if (hostFilename.startsWithIgnoreCase ("Waveform"))          return TracktionWaveform;
         if (hostFilename.containsIgnoreCase   ("Tracktion"))         return TracktionGeneric;
         if (hostFilename.startsWith           ("Bitwig"))            return BitwigStudio;
+        if (hostFilename.containsIgnoreCase   ("AudioPluginHost"))   return JUCEPluginHost;
 
        #elif JUCE_IOS
        #elif JUCE_ANDROID

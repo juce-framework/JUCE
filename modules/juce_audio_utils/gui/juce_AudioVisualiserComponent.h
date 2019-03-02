@@ -51,7 +51,7 @@ public:
     AudioVisualiserComponent (int initialNumChannels);
 
     /** Destructor. */
-    ~AudioVisualiserComponent();
+    ~AudioVisualiserComponent() override;
 
     /** Changes the number of channels that the visualiser stores. */
     void setNumChannels (int numChannels);
@@ -121,8 +121,6 @@ public:
 
 private:
     struct ChannelInfo;
-    friend struct ChannelInfo;
-    friend struct ContainerDeletePolicy<ChannelInfo>;
 
     OwnedArray<ChannelInfo> channels;
     int numSamples, inputSamplesPerBlock;

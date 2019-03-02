@@ -85,7 +85,7 @@ public:
         pipTree.addListener (this);
     }
 
-    ~PIPCreatorWindowComponent()
+    ~PIPCreatorWindowComponent() override
     {
         setLookAndFeel (nullptr);
     }
@@ -223,7 +223,7 @@ private:
             if (descriptionValue.get().toString().isNotEmpty())   section.add ("  description:      " + descriptionValue.get().toString());
 
             if (! section.isEmpty())
-                metadata.add (section.joinIntoString (getPreferredLinefeed()));
+                metadata.add (section.joinIntoString (getPreferredLineFeed()));
         }
 
         {
@@ -236,7 +236,7 @@ private:
             if (exportersString.isNotEmpty())                     section.add ("  exporters:        " + exportersString);
 
             if (! section.isEmpty())
-                metadata.add (section.joinIntoString (getPreferredLinefeed()));
+                metadata.add (section.joinIntoString (getPreferredLineFeed()));
         }
 
         {
@@ -246,7 +246,7 @@ private:
             if (definesValue.get().toString().isNotEmpty())       section.add ("  defines:          " + definesValue.get().toString());
 
             if (! section.isEmpty())
-                metadata.add (section.joinIntoString (getPreferredLinefeed()));
+                metadata.add (section.joinIntoString (getPreferredLineFeed()));
         }
 
         {
@@ -256,7 +256,7 @@ private:
             if (mainClassValue.get().toString().isNotEmpty())     section.add ("  mainClass:        " + mainClassValue.get().toString());
 
             if (! section.isEmpty())
-                metadata.add (section.joinIntoString (getPreferredLinefeed()));
+                metadata.add (section.joinIntoString (getPreferredLineFeed()));
         }
 
         {
@@ -265,10 +265,10 @@ private:
             if (useLocalCopyValue.get())                          section.add ("  useLocalCopy:     " + useLocalCopyValue.get().toString());
 
             if (! section.isEmpty())
-                metadata.add (section.joinIntoString (getPreferredLinefeed()));
+                metadata.add (section.joinIntoString (getPreferredLineFeed()));
         }
 
-        return metadata.joinIntoString (String (getPreferredLinefeed()) + getPreferredLinefeed());
+        return metadata.joinIntoString (String (getPreferredLineFeed()) + getPreferredLineFeed());
     }
 
     void createPIPFile (File fileToSave)
@@ -307,13 +307,6 @@ private:
     }
 
     //==============================================================================
-    std::unique_ptr<LookAndFeel> lf;
-
-    Viewport propertyViewport;
-    PropertyGroupComponent propertyGroup  { "PIP Creator", { getIcons().juceLogo, Colours::transparentBlack } };
-
-    TextButton createButton  { "Create PIP" };
-
     ValueTree pipTree  { "PIPSettings" };
     ValueWithDefault nameValue          { pipTree, Ids::name,          nullptr, "MyComponentPIP" },
                      versionValue       { pipTree, Ids::version,       nullptr },
@@ -323,11 +316,18 @@ private:
                      dependenciesValue  { pipTree, Ids::dependencies_, nullptr, getModulesRequiredForComponent(), "," },
                      exportersValue     { pipTree, Ids::exporters,     nullptr,
                                           StringArray (ProjectExporter::getValueTreeNameForExporter (ProjectExporter::getCurrentPlatformExporterName()).toLowerCase()), "," },
-                     moduleFlagsValue   { pipTree, Ids::moduleFlags,   nullptr },
+                     moduleFlagsValue   { pipTree, Ids::moduleFlags,   nullptr, "JUCE_STRICT_REFCOUNTEDPOINTER=1" },
                      definesValue       { pipTree, Ids::defines,       nullptr },
                      typeValue          { pipTree, Ids::type,          nullptr, "Component" },
                      mainClassValue     { pipTree, Ids::mainClass,     nullptr, "MyComponent" },
                      useLocalCopyValue  { pipTree, Ids::useLocalCopy,  nullptr, false };
+
+    std::unique_ptr<LookAndFeel> lf;
+
+    Viewport propertyViewport;
+    PropertyGroupComponent propertyGroup  { "PIP Creator", { getIcons().juceLogo, Colours::transparentBlack } };
+
+    TextButton createButton  { "Create PIP" };
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PIPCreatorWindowComponent)

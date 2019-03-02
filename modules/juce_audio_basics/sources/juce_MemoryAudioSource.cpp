@@ -49,7 +49,8 @@ void MemoryAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& bufferT
     auto max = 0, pos = 0;
     auto n = buffer.getNumSamples(), m = bufferToFill.numSamples;
 
-    for (auto i = position; (i < n || isLooping) && (pos < m); i += max)
+    int i;
+    for (i = position; (i < n || isLooping) && (pos < m); i += max)
     {
         max = jmin (m - pos, n - (i % n));
 
@@ -65,6 +66,8 @@ void MemoryAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& bufferT
 
     if (pos < m)
         dst.clear (bufferToFill.startSample + pos, m - pos);
+
+    position = (i % n);
 }
 
 } // namespace juce

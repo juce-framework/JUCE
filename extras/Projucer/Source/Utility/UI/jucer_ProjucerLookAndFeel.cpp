@@ -41,8 +41,6 @@ void ProjucerLookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bool
     const auto area = button.getActiveArea();
     auto backgroundColour = findColour (button.isFrontTab() ? secondaryBackgroundColourId
                                                             : inactiveTabBackgroundColourId);
-    auto iconColour = findColour (button.isFrontTab() ? activeTabIconColourId
-                                                      : inactiveTabIconColourId);
 
     g.setColour (backgroundColour);
     g.fillRect (area);
@@ -50,6 +48,9 @@ void ProjucerLookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bool
     const auto alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
 
    #ifndef BUILDING_JUCE_COMPILEENGINE
+    auto iconColour = findColour (button.isFrontTab() ? activeTabIconColourId
+                                                      : inactiveTabIconColourId);
+
     if (button.getName() == "Project")
     {
         auto icon = Icon (getIcons().closedFolder, iconColour.withMultipliedAlpha (alpha));

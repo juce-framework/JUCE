@@ -81,8 +81,9 @@ MainHostWindow::MainHostWindow()
     formatManager.addDefaultFormats();
     formatManager.addFormat (new InternalPluginFormat());
 
+    auto safeThis = SafePointer<MainHostWindow> (this);
     RuntimePermissions::request (RuntimePermissions::recordAudio,
-                                 [safeThis = SafePointer<MainHostWindow> (this)] (bool granted) mutable
+                                 [safeThis] (bool granted) mutable
                                  {
                                      std::unique_ptr<XmlElement> savedAudioState (getAppProperties().getUserSettings()
                                                                                   ->getXmlValue ("audioDeviceState"));
@@ -573,9 +574,11 @@ void MainHostWindow::showAudioSettings()
     o.resizable                     = false;
 
      auto* w = o.create();
+     auto safeThis = SafePointer<MainHostWindow> (this);
+
      w->enterModalState (true,
                          ModalCallbackFunction::create
-                         ([safeThis = SafePointer<MainHostWindow> (this)] (int)
+                         ([safeThis] (int)
                          {
                              std::unique_ptr<XmlElement> audioState (safeThis->deviceManager.createStateXml());
 

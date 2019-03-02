@@ -91,7 +91,7 @@ public:
         }
     }
 
-    ~ApplicationUsageDataWindowComponent()
+    ~ApplicationUsageDataWindowComponent() override
     {
         if (auto* controller = ProjucerApplication::getApp().licenseController.get())
         {

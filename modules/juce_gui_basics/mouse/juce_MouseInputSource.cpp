@@ -149,7 +149,7 @@ public:
         comp.internalMouseDrag (MouseInputSource (this), screenPosToLocalPos (comp, screenPos), time, pressure, orientation, rotation, tiltX, tiltY);
     }
 
-    void sendMouseUp (Component& comp, Point<float> screenPos, Time time, const ModifierKeys oldMods)
+    void sendMouseUp (Component& comp, Point<float> screenPos, Time time, ModifierKeys oldMods)
     {
         JUCE_MOUSE_EVENT_DBG ("up")
             comp.internalMouseUp (MouseInputSource (this), screenPosToLocalPos (comp, screenPos), time, oldMods, pressure, orientation, rotation, tiltX, tiltY);
@@ -161,7 +161,7 @@ public:
         comp.internalMouseWheel (MouseInputSource (this), screenPosToLocalPos (comp, screenPos), time, wheel);
     }
 
-    void sendMagnifyGesture (Component& comp, Point<float> screenPos, Time time, const float amount)
+    void sendMagnifyGesture (Component& comp, Point<float> screenPos, Time time, float amount)
     {
         JUCE_MOUSE_EVENT_DBG ("magnify")
         comp.internalMagnifyGesture (MouseInputSource (this), screenPosToLocalPos (comp, screenPos), time, amount);
@@ -169,7 +169,7 @@ public:
 
     //==============================================================================
     // (returns true if the button change caused a modal event loop)
-    bool setButtons (Point<float> screenPos, Time time, const ModifierKeys newButtonState)
+    bool setButtons (Point<float> screenPos, Time time, ModifierKeys newButtonState)
     {
         if (buttonState == newButtonState)
             return false;
@@ -220,7 +220,7 @@ public:
         return lastCounter != mouseEventCounter;
     }
 
-    void setComponentUnderMouse (Component* const newComponent, Point<float> screenPos, Time time)
+    void setComponentUnderMouse (Component* newComponent, Point<float> screenPos, Time time)
     {
         auto* current = getComponentUnderMouse();
 
@@ -234,16 +234,17 @@ public:
                 WeakReference<Component> safeOldComp (current);
                 setButtons (screenPos, time, ModifierKeys());
 
-                if (safeOldComp != nullptr)
+                if (auto oldComp = safeOldComp.get())
                 {
                     componentUnderMouse = safeNewComp;
-                    sendMouseExit (*safeOldComp, screenPos, time);
+                    sendMouseExit (*oldComp, screenPos, time);
                 }
 
                 buttonState = originalButtonState;
             }
 
-            current = componentUnderMouse = safeNewComp;
+            componentUnderMouse = safeNewComp.get();
+            current = safeNewComp.get();
 
             if (current != nullptr)
                 sendMouseEnter (*current, screenPos, time);
@@ -263,7 +264,7 @@ public:
         }
     }
 
-    void setScreenPos (Point<float> newScreenPos, Time time, const bool forceUpdate)
+    void setScreenPos (Point<float> newScreenPos, Time time, bool forceUpdate)
     {
         if (! isDragging())
             setComponentUnderMouse (findComponentAt (newScreenPos), newScreenPos, time);
@@ -368,7 +369,7 @@ public:
         else
             screenPos = peer.localToGlobal (positionWithinPeer);
 
-        if (Component* target = lastNonInertialWheelTarget)
+        if (auto target = lastNonInertialWheelTarget.get())
             sendMouseWheel (*target, screenPos, time, wheel);
     }
 
@@ -737,7 +738,7 @@ struct MouseInputSource::SourceList  : public Timer
         return nullptr;
     }
 
-    void beginDragAutoRepeat (const int interval)
+    void beginDragAutoRepeat (int interval)
     {
         if (interval > 0)
         {

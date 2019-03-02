@@ -64,9 +64,9 @@ void ThreadedAnalyticsDestination::stopAnalyticsThread (int timeout)
         saveUnloggedEvents (dispatcher.eventQueue);
 }
 
-ThreadedAnalyticsDestination::EventDispatcher::EventDispatcher (const String& threadName,
+ThreadedAnalyticsDestination::EventDispatcher::EventDispatcher (const String& dispatcherThreadName,
                                                                 ThreadedAnalyticsDestination& destination)
-    : Thread (threadName),
+    : Thread (dispatcherThreadName),
       parent (destination)
 {}
 

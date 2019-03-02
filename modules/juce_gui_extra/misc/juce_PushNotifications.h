@@ -142,7 +142,7 @@ public:
                                   file, then the URL should be "sounds/my_sound.caf".
 
                                   For a custom sound on Android, set URL to the name of a raw resource file
-                                  (without an extention) that was included when exporting an Android project in
+                                  (without an extension) that was included when exporting an Android project in
                                   Projucer (see "Extra Android Raw Resources" setting). */
 
         var properties;      /**< Optional: collection of additional properties that may be passed as a dictionary. */
@@ -396,7 +396,7 @@ public:
         */
         struct Category
         {
-            juce::String identifier;         /**< unique indentifier */
+            juce::String identifier;         /**< unique identifier */
             juce::Array<Action> actions;     /**< optional list of actions within this category */
             bool sendDismissAction = false;  /**< whether dismiss action will be sent to the app (from iOS 10 only) */
         };
@@ -593,7 +593,7 @@ public:
     */
     struct Listener
     {
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         /** This callback will be called after you call requestSettingsUsed() or
             requestPermissionsWithSettings().
@@ -615,7 +615,7 @@ public:
             notification was received when the app was in the foreground already. On iOS 10 it will be
             called when a user presses on a notification
 
-            Note: on Android, if remote notification was received while the app was in the background and
+            Note: On Android, if remote notification was received while the app was in the background and
             then user pressed on it, the notification object received in this callback will contain only
             "properties" member set. Hence, if you want to know what was the notification title, content
             etc, you need to set them as additional properties, so that you will be able to restore them
@@ -694,7 +694,7 @@ public:
 
 private:
     PushNotifications();
-    ~PushNotifications();
+    ~PushNotifications() override;
 
     ListenerList<PushNotifications::Listener> listeners;
 

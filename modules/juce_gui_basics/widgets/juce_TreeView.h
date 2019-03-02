@@ -651,7 +651,7 @@ public:
     TreeView (const String& componentName = String());
 
     /** Destructor. */
-    ~TreeView();
+    ~TreeView() override;
 
     //==============================================================================
     /** Sets the item that is displayed in the treeview.
@@ -858,7 +858,7 @@ public:
     */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         virtual void drawTreeviewPlusMinusBox (Graphics&, const Rectangle<float>& area,
                                                Colour backgroundColour, bool isItemOpen, bool isMouseOver) = 0;
@@ -900,15 +900,12 @@ public:
     void itemDropped (const SourceDetails&) override;
 
 private:
+    friend class TreeViewItem;
+
     class ContentComponent;
     class TreeViewport;
     class InsertPointHighlight;
     class TargetGroupHighlight;
-    friend class TreeViewItem;
-    friend class ContentComponent;
-    friend struct ContainerDeletePolicy<TreeViewport>;
-    friend struct ContainerDeletePolicy<InsertPointHighlight>;
-    friend struct ContainerDeletePolicy<TargetGroupHighlight>;
 
     std::unique_ptr<TreeViewport> viewport;
     CriticalSection nodeAlterationLock;

@@ -92,25 +92,8 @@ static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& lis
 struct AutoResizingNSViewComponent  : public ViewComponentBaseClass,
                                       private AsyncUpdater
 {
-    AutoResizingNSViewComponent() : recursive (false) {}
-
-    void childBoundsChanged (Component*) override
-    {
-        if (recursive)
-        {
-            triggerAsyncUpdate();
-        }
-        else
-        {
-            recursive = true;
-            resizeToFitView();
-            recursive = true;
-        }
-    }
-
-    void handleAsyncUpdate() override               { resizeToFitView(); }
-
-    bool recursive;
+    void childBoundsChanged (Component*) override  { triggerAsyncUpdate(); }
+    void handleAsyncUpdate() override              { resizeToFitView(); }
 };
 
 //==============================================================================
@@ -169,4 +152,5 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 #include "scanning/juce_PluginDirectoryScanner.cpp"
 #include "scanning/juce_PluginListComponent.cpp"
 #include "utilities/juce_AudioProcessorParameters.cpp"
+#include "processors/juce_AudioProcessorParameterGroup.cpp"
 #include "utilities/juce_AudioProcessorValueTreeState.cpp"

@@ -5,7 +5,7 @@ The first 7 bits of a message is the index of the device within the topology to 
 message should be delivered, or from which it originated. The 0x40 bit of this will be set
 to indicate that it's a device->host message, or clear for host->device
 
-The next 32 bits are a timestamp, in milliseconds since the source device was booted. 
+The next 32 bits are a timestamp, in milliseconds since the source device was booted.
 If sending from the host to the device, or for types of packet 
 where the timestamp is irrelevant, this can be 0.
 
@@ -27,7 +27,7 @@ This is followed by a series of device-info blocks of the form:
 10 bits - device firmware version
 6 bits - battery status
 
-Next follows by a series of connection-info blocks of ths form:
+Next follows by a series of connection-info blocks of the form:
 
 7 bits - device 1 index (i.e. index in the list of devices sent above)
 5 bits - device 1 port type

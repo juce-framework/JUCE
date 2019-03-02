@@ -59,6 +59,9 @@ namespace IIR
         */
         using NumericType = typename SampleTypeHelpers::ElementType<SampleType>::Type;
 
+        /** A typedef for a ref-counted pointer to the coefficients object */
+        using CoefficientsPtr = typename Coefficients<NumericType>::Ptr;
+
         //==============================================================================
         /** Creates a filter.
 
@@ -69,7 +72,7 @@ namespace IIR
         Filter();
 
         /** Creates a filter with a given set of coefficients. */
-        Filter (Coefficients<NumericType>* coefficientsToUse);
+        Filter (CoefficientsPtr coefficientsToUse);
 
         Filter (const Filter&) = default;
         Filter (Filter&&) = default;
@@ -77,13 +80,13 @@ namespace IIR
         Filter& operator= (Filter&&) = default;
 
         //==============================================================================
-        /** The coefficients of the IIR filter. It's up to the called to ensure that
+        /** The coefficients of the IIR filter. It's up to the caller to ensure that
             these coefficients are modified in a thread-safe way.
 
             If you change the order of the coefficients then you must call reset after
             modifying them.
         */
-        typename Coefficients<NumericType>::Ptr coefficients;
+        CoefficientsPtr coefficients;
 
         //==============================================================================
         /** Resets the filter's processing pipeline, ready to start a new stream of data.

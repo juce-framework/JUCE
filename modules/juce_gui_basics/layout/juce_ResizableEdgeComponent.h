@@ -74,7 +74,7 @@ public:
                             Edge edgeToResize);
 
     /** Destructor. */
-    ~ResizableEdgeComponent();
+    ~ResizableEdgeComponent() override;
 
     bool isVertical() const noexcept;
 

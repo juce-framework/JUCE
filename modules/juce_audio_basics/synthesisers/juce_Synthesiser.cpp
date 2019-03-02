@@ -217,6 +217,18 @@ void Synthesiser::processNextBlock (AudioBuffer<floatType>& outputAudio,
 template void Synthesiser::processNextBlock<float>  (AudioBuffer<float>&,  const MidiBuffer&, int, int);
 template void Synthesiser::processNextBlock<double> (AudioBuffer<double>&, const MidiBuffer&, int, int);
 
+void Synthesiser::renderNextBlock (AudioBuffer<float>& outputAudio, const MidiBuffer& inputMidi,
+                                   int startSample, int numSamples)
+{
+    processNextBlock (outputAudio, inputMidi, startSample, numSamples);
+}
+
+void Synthesiser::renderNextBlock (AudioBuffer<double>& outputAudio, const MidiBuffer& inputMidi,
+                                   int startSample, int numSamples)
+{
+    processNextBlock (outputAudio, inputMidi, startSample, numSamples);
+}
+
 void Synthesiser::renderVoices (AudioBuffer<float>& buffer, int startSample, int numSamples)
 {
     for (auto* voice : voices)
@@ -323,7 +335,7 @@ void Synthesiser::stopVoice (SynthesiserVoice* voice, float velocity, const bool
     voice->stopNote (velocity, allowTailOff);
 
     // the subclass MUST call clearCurrentNote() if it's not tailing off! RTFM for stopNote()!
-    jassert (allowTailOff || (voice->getCurrentlyPlayingNote() < 0 && voice->getCurrentlyPlayingSound() == 0));
+    jassert (allowTailOff || (voice->getCurrentlyPlayingNote() < 0 && voice->getCurrentlyPlayingSound() == nullptr));
 }
 
 void Synthesiser::noteOff (const int midiChannel,
@@ -338,7 +350,7 @@ void Synthesiser::noteOff (const int midiChannel,
         if (voice->getCurrentlyPlayingNote() == midiNoteNumber
               && voice->isPlayingChannel (midiChannel))
         {
-            if (SynthesiserSound* const sound = voice->getCurrentlyPlayingSound())
+            if (auto sound = voice->getCurrentlyPlayingSound())
             {
                 if (sound->appliesToNote (midiNoteNumber)
                      && sound->appliesToChannel (midiChannel))

@@ -502,11 +502,11 @@ void ComponentLayout::setComponentRelativeTarget (Component* comp, int whichDime
 
     jassert (comp != nullptr);
     jassert (pe != nullptr || components.contains (comp));
-    jassert (compToBeRelativeTo == 0 || components.contains (compToBeRelativeTo));
-    jassert (compToBeRelativeTo == 0 || ! dependsOnComponentForRelativePos (compToBeRelativeTo, comp));
+    jassert (compToBeRelativeTo == nullptr || components.contains (compToBeRelativeTo));
+    jassert (compToBeRelativeTo == nullptr || ! dependsOnComponentForRelativePos (compToBeRelativeTo, comp));
 
     if (compToBeRelativeTo != getComponentRelativePosTarget (comp, whichDimension)
-         && (compToBeRelativeTo == 0 || ! dependsOnComponentForRelativePos (compToBeRelativeTo, comp)))
+         && (compToBeRelativeTo == nullptr || ! dependsOnComponentForRelativePos (compToBeRelativeTo, comp)))
     {
         const int64 compId = ComponentTypeHandler::getComponentId (compToBeRelativeTo);
 
@@ -554,15 +554,24 @@ bool ComponentLayout::dependsOnComponentForRelativePos (Component* comp, Compone
     return false;
 }
 
+bool ComponentLayout::isComponentPositionRelative (Component* comp) const
+{
+    for (int i = 0; i < getNumComponents(); ++i)
+        if (dependsOnComponentForRelativePos (comp, getComponent (i)))
+            return true;
+
+    return false;
+}
+
 const int menuIdBase = 0x63240000;
 
 PopupMenu ComponentLayout::getRelativeTargetMenu (Component* comp, int whichDimension) const
 {
     PopupMenu m;
 
-    Component* const current = getComponentRelativePosTarget (comp, whichDimension);
+    auto current = getComponentRelativePosTarget (comp, whichDimension);
 
-    m.addItem (menuIdBase, "Relative to parent component", true, current == 0);
+    m.addItem (menuIdBase, "Relative to parent component", true, current == nullptr);
     m.addSeparator();
 
     for (int i = 0; i < components.size(); ++i)

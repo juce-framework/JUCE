@@ -111,7 +111,7 @@ public:
         lookAndFeelChanged();
     }
 
-    ~FindPanel()
+    ~FindPanel() override
     {
         Desktop::getInstance().removeFocusChangeListener (this);
     }
@@ -194,7 +194,7 @@ public:
         addAndMakeVisible (treeToDisplay.get());
     }
 
-    ~ConcertinaTreeComponent()
+    ~ConcertinaTreeComponent() override
     {
         treeToDisplay.reset();
         addButton.reset();

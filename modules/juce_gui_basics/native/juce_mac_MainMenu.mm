@@ -33,11 +33,11 @@ struct JuceMainMenuBarHolder : private DeletedAtShutdown
     JuceMainMenuBarHolder()
         : mainMenuBar ([[NSMenu alloc] initWithTitle: nsStringLiteral ("MainMenu")])
     {
-        auto* item = [mainMenuBar addItemWithTitle: nsStringLiteral ("Apple")
-                                            action: nil
+        auto item = [mainMenuBar addItemWithTitle: nsStringLiteral ("Apple")
+                                           action: nil
                                      keyEquivalent: nsEmptyString()];
 
-        auto* appMenu = [[NSMenu alloc] initWithTitle: nsStringLiteral ("Apple")];
+        auto appMenu = [[NSMenu alloc] initWithTitle: nsStringLiteral ("Apple")];
 
         [NSApp performSelector: @selector (setAppleMenu:) withObject: appMenu];
         [mainMenuBar setSubmenu: appMenu forItem: item];
@@ -73,7 +73,7 @@ public:
         JuceMenuCallbackClass::setOwner (callback, this);
     }
 
-    ~JuceMainMenuHandler()
+    ~JuceMainMenuHandler() override
     {
         setMenu (nullptr, nullptr, String());
 
@@ -277,9 +277,9 @@ public:
         }
         else
         {
-            auto* item = [[NSMenuItem alloc] initWithTitle: text
-                                                    action: @selector (menuItemInvoked:)
-                                             keyEquivalent: nsEmptyString()];
+            auto item = [[NSMenuItem alloc] initWithTitle: text
+                                                   action: @selector (menuItemInvoked:)
+                                            keyEquivalent: nsEmptyString()];
 
             [item setTag: topLevelIndex];
             [item setEnabled: i.isEnabled];
@@ -478,9 +478,9 @@ private:
     {
         if (isPositiveAndBelow (menuItemIndex, (int) [parentMenu numberOfItems]))
         {
-            auto* menuItem = [parentMenu itemAtIndex:menuItemIndex];
+            auto menuItem = [parentMenu itemAtIndex:menuItemIndex];
 
-            if (auto* submenu = [menuItem submenu])
+            if (auto submenu = [menuItem submenu])
                 removeItemRecursive (submenu);
 
             [parentMenu removeItem:menuItem];
@@ -706,7 +706,7 @@ namespace MainMenuHelpers
             {
                 if ([mainMenu numberOfItems] > 0)
                 {
-                    if (auto* appMenu = [[mainMenu itemAtIndex:0] submenu])
+                    if (auto appMenu = [[mainMenu itemAtIndex: 0] submenu])
                     {
                         [appMenu removeAllItems];
                         MainMenuHelpers::createStandardAppMenu (appMenu, app->getApplicationName(), extraItems);
@@ -765,7 +765,7 @@ const PopupMenu* MenuBarModel::getMacExtraAppleItemsMenu()
     return nullptr;
 }
 
-typedef void (*MenuTrackingChangedCallback) (bool);
+using MenuTrackingChangedCallback = void (*)(bool);
 extern MenuTrackingChangedCallback menuTrackingChangedCallback;
 
 static void mainMenuTrackingChanged (bool isTracking)

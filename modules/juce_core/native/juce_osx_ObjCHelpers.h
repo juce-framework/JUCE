@@ -59,7 +59,7 @@ static inline NSURL* createNSURLFromFile (const File& f)
 
 static inline NSArray* createNSArrayFromStringArray (const StringArray& strings)
 {
-    auto* array = [[NSMutableArray alloc] init];
+    auto array = [[NSMutableArray alloc] init];
 
     for (auto string: strings)
         [array addObject:juceStringToNS (string)];
@@ -71,7 +71,7 @@ static NSArray* varArrayToNSArray (const var& varToParse);
 
 static NSDictionary* varObjectToNSDictionary (const var& varToParse)
 {
-    auto* dictionary = [NSMutableDictionary dictionary];
+    auto dictionary = [NSMutableDictionary dictionary];
 
     if (varToParse.isObject())
     {
@@ -118,7 +118,7 @@ static NSArray* varArrayToNSArray (const var& varToParse)
 
     const auto* varArray = varToParse.getArray();
 
-    auto* array = [NSMutableArray arrayWithCapacity: (NSUInteger) varArray->size()];
+    auto array = [NSMutableArray arrayWithCapacity: (NSUInteger) varArray->size()];
 
     for (const auto& aVar : *varArray)
     {
@@ -145,29 +145,14 @@ static NSArray* varArrayToNSArray (const var& varToParse)
     return array;
 }
 
-static var nsArrayToVar (NSArray* array);
+static var nsObjectToVar (NSObject* array);
 
 static var nsDictionaryToVar (NSDictionary* dictionary)
 {
-    DynamicObject::Ptr dynamicObject = new DynamicObject();
+    DynamicObject::Ptr dynamicObject (new DynamicObject());
 
     for (NSString* key in dictionary)
-    {
-        const auto keyString = nsStringToJuce (key);
-
-        id value = dictionary[key];
-
-        if ([value isKindOfClass: [NSString class]])
-            dynamicObject->setProperty (keyString, nsStringToJuce ((NSString*) value));
-        else if ([value isKindOfClass: [NSNumber class]])
-            dynamicObject->setProperty (keyString, nsStringToJuce ([(NSNumber*) value stringValue]));
-        else if ([value isKindOfClass: [NSDictionary class]])
-            dynamicObject->setProperty (keyString, nsDictionaryToVar ((NSDictionary*) value));
-        else if ([value isKindOfClass: [NSArray class]])
-            dynamicObject->setProperty (keyString, nsArrayToVar ((NSArray*) value));
-        else
-            jassertfalse; // Unsupported yet, add here!
-    }
+        dynamicObject->setProperty (nsStringToJuce (key), nsObjectToVar (dictionary[key]));
 
     return var (dynamicObject.get());
 }
@@ -177,20 +162,24 @@ static var nsArrayToVar (NSArray* array)
     Array<var> resultArray;
 
     for (id value in array)
-    {
-        if ([value isKindOfClass: [NSString class]])
-            resultArray.add (var (nsStringToJuce ((NSString*) value)));
-        else if ([value isKindOfClass: [NSNumber class]])
-            resultArray.add (var (nsStringToJuce ([(NSNumber*) value stringValue])));
-        else if ([value isKindOfClass: [NSDictionary class]])
-            resultArray.add (nsDictionaryToVar ((NSDictionary*) value));
-        else if ([value isKindOfClass: [NSArray class]])
-            resultArray.add (nsArrayToVar ((NSArray*) value));
-        else
-            jassertfalse; // Unsupported yet, add here!
-    }
+        resultArray.add (nsObjectToVar (value));
 
     return var (resultArray);
+}
+
+static var nsObjectToVar (NSObject* obj)
+{
+    if ([obj isKindOfClass: [NSString class]])          return nsStringToJuce ((NSString*) obj);
+    else if ([obj isKindOfClass: [NSNumber class]])     return nsStringToJuce ([(NSNumber*) obj stringValue]);
+    else if ([obj isKindOfClass: [NSDictionary class]]) return nsDictionaryToVar ((NSDictionary*) obj);
+    else if ([obj isKindOfClass: [NSArray class]])      return nsArrayToVar ((NSArray*) obj);
+    else
+    {
+        // Unsupported yet, add here!
+        jassertfalse;
+    }
+
+    return {};
 }
 
 #if JUCE_MAC
@@ -211,7 +200,7 @@ static NSRect makeNSRect (const RectangleType& r) noexcept
 template <typename ReturnValue, typename... Params>
 static inline ReturnValue ObjCMsgSendSuper (struct objc_super* s, SEL sel, Params... params)
 {
-    typedef ReturnValue (*SuperFn)(struct objc_super*, SEL, Params...);
+    using SuperFn = ReturnValue (*)(struct objc_super*, SEL, Params...);
     SuperFn fn = reinterpret_cast<SuperFn> (objc_msgSendSuper);
     return fn (s, sel, params...);
 }
@@ -225,16 +214,6 @@ typedef double (*MsgSendFPRetFn) (id, SEL op, ...);
 static inline MsgSendFPRetFn getMsgSendFPRetFn() noexcept   { return (MsgSendFPRetFn) (void*) objc_msgSend_fpret; }
 #endif
 #endif
-
-//==============================================================================
-template <typename ObjectType>
-struct NSObjectRetainer
-{
-    inline NSObjectRetainer (ObjectType* o) : object (o)  { [object retain]; }
-    inline ~NSObjectRetainer()                            { [object release]; }
-
-    ObjectType* object;
-};
 
 //==============================================================================
 struct NSObjectDeleter

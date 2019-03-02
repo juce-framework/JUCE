@@ -51,7 +51,7 @@ public:
                                bool showResetToDefaultButton);
 
     /** Destructor. */
-    ~KeyMappingEditorComponent();
+    ~KeyMappingEditorComponent() override;
 
     //==============================================================================
     /** Sets up the colours to use for parts of the component.
@@ -125,9 +125,6 @@ private:
     class MappingItem;
     class CategoryItem;
     class ItemComponent;
-    friend class TopLevelItem;
-    friend struct ContainerDeletePolicy<ChangeKeyButton>;
-    friend struct ContainerDeletePolicy<TopLevelItem>;
     std::unique_ptr<TopLevelItem> treeItem;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KeyMappingEditorComponent)

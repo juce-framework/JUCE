@@ -298,7 +298,12 @@ struct Grid::PlacementHelpers
                                     const std::map<juce::String, LineArea>& namedAreas)
     {
         if (item.area.isNotEmpty() && ! grid.templateAreas.isEmpty())
+        {
+            // Must be a named area!
+            jassert (namedAreas.count (item.area) != 0);
+
             return namedAreas.at (item.area);
+        }
 
         return { deduceLineRange (item.column, grid.templateColumns),
                  deduceLineRange (item.row,    grid.templateRows) };
@@ -349,11 +354,7 @@ struct Grid::PlacementHelpers
                 }
                 else
                 {
-                    if (string == emptyAreaCharacter)
-                    {
-                        break;
-                    }
-                    else if (string == area.name)
+                    if (string == area.name)
                     {
                         area.lines.row.end = stringsArrays.indexOf (stringArray) + 2;
                         area.lines.column.end = stringArray.indexOf (string) + 2;
@@ -532,9 +533,9 @@ struct Grid::AutoPlacement
     {
         struct Cell { int column, row; };
 
-        OccupancyPlane (int highestColumnToUse, int highestRowToUse, bool isColoumnFirst)
-            : highestCrossDimension (isColoumnFirst ? highestRowToUse : highestColumnToUse),
-              columnFirst (isColoumnFirst)
+        OccupancyPlane (int highestColumnToUse, int highestRowToUse, bool isColumnFirst)
+            : highestCrossDimension (isColumnFirst ? highestRowToUse : highestColumnToUse),
+              columnFirst (isColumnFirst)
         {}
 
         Grid::PlacementHelpers::LineArea setCell (Cell cell, int columnSpan, int rowSpan)

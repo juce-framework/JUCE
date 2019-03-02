@@ -25,11 +25,6 @@ namespace juce
 
 #if JUCE_ALSA
 
-// You can define these strings in your app if you want to override the default names:
-#ifndef JUCE_ALSA_MIDI_NAME
- #define JUCE_ALSA_MIDI_NAME  JUCEApplicationBase::getInstance()->getApplicationName().toUTF8()
-#endif
-
 //==============================================================================
 namespace
 {
@@ -38,6 +33,49 @@ namespace
 class AlsaClient  : public ReferenceCountedObject
 {
 public:
+    AlsaClient()
+    {
+        jassert (instance == nullptr);
+
+        snd_seq_open (&handle, "default", SND_SEQ_OPEN_DUPLEX, 0);
+
+        if (handle != nullptr)
+        {
+            snd_seq_nonblock (handle, SND_SEQ_NONBLOCK);
+            snd_seq_set_client_name (handle, getAlsaMidiName().toRawUTF8());
+            clientId = snd_seq_client_id (handle);
+
+            // It's good idea to pre-allocate a good number of elements
+            ports.ensureStorageAllocated (32);
+        }
+    }
+
+    ~AlsaClient()
+    {
+        jassert (instance != nullptr);
+        instance = nullptr;
+
+        if (handle != nullptr)
+            snd_seq_close (handle);
+
+        jassert (activeCallbacks.get() == 0);
+
+        if (inputThread)
+            inputThread->stopThread (3000);
+    }
+
+    static String getAlsaMidiName()
+    {
+        #ifdef JUCE_ALSA_MIDI_NAME
+            return JUCE_ALSA_MIDI_NAME;
+        #else
+            if (auto* app = JUCEApplicationBase::getInstance())
+                return app->getApplicationName();
+
+            return "JUCE";
+        #endif
+    }
+
     using Ptr = ReferenceCountedObjectPtr<AlsaClient>;
 
     //==============================================================================
@@ -113,9 +151,9 @@ public:
             snd_seq_ev_clear (&event);
 
             auto numBytes = (long) message.getRawDataSize();
-            const uint8* data = message.getRawData();
+            auto* data = message.getRawData();
 
-            auto* seqHandle = client.get();
+            auto seqHandle = client.get();
             bool success = true;
 
             while (numBytes > 0)
@@ -154,12 +192,12 @@ public:
 
         void createPort (const String& name, bool enableSubscription)
         {
-            if (auto* seqHandle = client.get())
+            if (auto seqHandle = client.get())
             {
                 const unsigned int caps =
-                    isInput
-                    ? (SND_SEQ_PORT_CAP_WRITE | (enableSubscription ? SND_SEQ_PORT_CAP_SUBS_WRITE : 0))
-                    : (SND_SEQ_PORT_CAP_WRITE | (enableSubscription ? SND_SEQ_PORT_CAP_SUBS_READ : 0));
+                    isInput ? (SND_SEQ_PORT_CAP_WRITE | (enableSubscription ? SND_SEQ_PORT_CAP_SUBS_WRITE : 0))
+                            : (SND_SEQ_PORT_CAP_READ  | (enableSubscription ? SND_SEQ_PORT_CAP_SUBS_READ : 0));
+
                 portId = snd_seq_create_simple_port (seqHandle, name.toUTF8(), caps,
                                                      SND_SEQ_PORT_TYPE_MIDI_GENERIC |
                                                      SND_SEQ_PORT_TYPE_APPLICATION);
@@ -252,38 +290,6 @@ private:
     static AlsaClient* instance;
 
     //==============================================================================
-    friend class ReferenceCountedObjectPtr<AlsaClient>;
-    friend struct ContainerDeletePolicy<AlsaClient>;
-
-    AlsaClient()
-    {
-        jassert (instance == nullptr);
-
-        snd_seq_open (&handle, "default", SND_SEQ_OPEN_DUPLEX, 0);
-        snd_seq_nonblock (handle, SND_SEQ_NONBLOCK);
-        snd_seq_set_client_name (handle, JUCE_ALSA_MIDI_NAME);
-        clientId = snd_seq_client_id(handle);
-
-        // It's good idea to pre-allocate a good number of elements
-        ports.ensureStorageAllocated (32);
-    }
-
-    ~AlsaClient()
-    {
-        jassert (instance != nullptr);
-
-        instance = nullptr;
-
-        if (handle != nullptr)
-            snd_seq_close (handle);
-
-        jassert (activeCallbacks.get() == 0);
-
-        if (inputThread)
-            inputThread->stopThread (3000);
-    }
-
-    //==============================================================================
     class MidiInputThread   : public Thread
     {
     public:
@@ -295,9 +301,10 @@ private:
 
         void run() override
         {
+            auto seqHandle = client.get();
+
             const int maxEventSize = 16 * 1024;
             snd_midi_event_t* midiParser;
-            snd_seq_t* seqHandle = client.get();
 
             if (snd_midi_event_new (maxEventSize, &midiParser) >= 0)
             {
@@ -321,8 +328,8 @@ private:
                             if (snd_seq_event_input (seqHandle, &inputEvent) >= 0)
                             {
                                 // xxx what about SYSEXes that are too big for the buffer?
-                                const long numBytes = snd_midi_event_decode (midiParser, buffer,
-                                                                            maxEventSize, inputEvent);
+                                auto numBytes = snd_midi_event_decode (midiParser, buffer,
+                                                                       maxEventSize, inputEvent);
 
                                 snd_midi_event_reset_decode (midiParser);
 
@@ -360,7 +367,7 @@ static AlsaClient::Port* iterateMidiClient (const AlsaClient::Ptr& client,
 {
     AlsaClient::Port* port = nullptr;
 
-    snd_seq_t* seqHandle = client->get();
+    auto seqHandle = client->get();
     snd_seq_port_info_t* portInfo = nullptr;
 
     snd_seq_port_info_alloca (&portInfo);
@@ -406,7 +413,7 @@ static AlsaClient::Port* iterateMidiDevices (bool forInput,
     AlsaClient::Port* port = nullptr;
     auto client = AlsaClient::getInstance();
 
-    if (auto* seqHandle = client->get())
+    if (auto seqHandle = client->get())
     {
         snd_seq_system_info_t* systemInfo = nullptr;
         snd_seq_client_info_t* clientInfo = nullptr;
@@ -503,8 +510,7 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
 }
 
 //==============================================================================
-MidiInput::MidiInput (const String& nm)
-    : name (nm), internal (nullptr)
+MidiInput::MidiInput (const String& nm)  : name (nm)
 {
 }
 
@@ -538,8 +544,6 @@ StringArray MidiInput::getDevices()
 
 MidiInput* MidiInput::openDevice (int deviceIndex, MidiInputCallback* callback)
 {
-    MidiInput* newDevice = nullptr;
-
     StringArray devices;
     auto* port = iterateMidiDevices (true, devices, deviceIndex);
 
@@ -548,26 +552,22 @@ MidiInput* MidiInput::openDevice (int deviceIndex, MidiInputCallback* callback)
 
     jassert (port->isValid());
 
-    newDevice = new MidiInput (devices [deviceIndex]);
+    auto newDevice = new MidiInput (devices [deviceIndex]);
     port->setupInput (newDevice, callback);
     newDevice->internal = port;
-
     return newDevice;
 }
 
 MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallback* callback)
 {
-    MidiInput* newDevice = nullptr;
-
     auto client = AlsaClient::getInstance();
     auto* port = client->createPort (deviceName, true, true);
 
     jassert (port->isValid());
 
-    newDevice = new MidiInput (deviceName);
+    auto newDevice = new MidiInput (deviceName);
     port->setupInput (newDevice, callback);
     newDevice->internal = port;
-
     return newDevice;
 }
 
@@ -584,7 +584,7 @@ MidiOutput* MidiOutput::createNewDevice (const String&)             { return nul
 MidiOutput::~MidiOutput()   {}
 void MidiOutput::sendMessageNow (const MidiMessage&)    {}
 
-MidiInput::MidiInput (const String& nm) : name (nm), internal (nullptr)  {}
+MidiInput::MidiInput (const String& nm) : name (nm)  {}
 MidiInput::~MidiInput() {}
 void MidiInput::start() {}
 void MidiInput::stop()  {}

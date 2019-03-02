@@ -43,7 +43,7 @@ public:
                      const bool showOutline_,
                      const bool showJointAndEnd_);
 
-    ~ColouredElement();
+    ~ColouredElement() override;
 
     //==============================================================================
     void getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelected) override;

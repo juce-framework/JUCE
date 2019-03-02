@@ -343,6 +343,35 @@ private:
         InternetSetOption (sessionHandle, option, &timeOutMs, sizeof (timeOutMs));
     }
 
+    void sendHTTPRequest (INTERNET_BUFFERS& buffers, WebInputStream::Listener* listener)
+    {
+        if (! HttpSendRequestEx (request, &buffers, 0, HSR_INITIATE, 0))
+            return;
+
+        int totalBytesSent = 0;
+
+        while (totalBytesSent < (int) postData.getSize())
+        {
+            auto bytesToSend = jmin (1024, (int) postData.getSize() - totalBytesSent);
+            DWORD bytesSent = 0;
+
+            if (bytesToSend == 0
+                || ! InternetWriteFile (request, static_cast<const char*> (postData.getData()) + totalBytesSent,
+                                        (DWORD) bytesToSend, &bytesSent))
+            {
+                return;
+            }
+
+            totalBytesSent += bytesSent;
+
+            if (listener != nullptr
+                && ! listener->postDataSendProgress (owner, totalBytesSent, (int) postData.getSize()))
+            {
+                return;
+            }
+        }
+    }
+
     void openHTTPConnection (URL_COMPONENTS& uc, const String& address, WebInputStream::Listener* listener)
     {
         const TCHAR* mimeTypes[] = { _T("*/*"), nullptr };
@@ -365,43 +394,29 @@ private:
         if (request != 0)
         {
             INTERNET_BUFFERS buffers = { 0 };
-            buffers.dwStructSize = sizeof (INTERNET_BUFFERS);
-            buffers.lpcszHeader = headers.toWideCharPointer();
+            buffers.dwStructSize    = sizeof (INTERNET_BUFFERS);
+            buffers.lpcszHeader     = headers.toWideCharPointer();
             buffers.dwHeadersLength = (DWORD) headers.length();
-            buffers.dwBufferTotal = (DWORD) postData.getSize();
+            buffers.dwBufferTotal   = (DWORD) postData.getSize();
 
-            if (HttpSendRequestEx (request, &buffers, 0, HSR_INITIATE, 0))
+            auto sendRequestAndTryEnd = [this, &buffers, &listener]() -> bool
             {
-                int bytesSent = 0;
+                sendHTTPRequest (buffers, listener);
 
-                for (;;)
-                {
-                    const int bytesToDo = jmin (1024, (int) postData.getSize() - bytesSent);
-                    DWORD bytesDone = 0;
+                if (HttpEndRequest (request, 0, 0, 0))
+                    return true;
 
-                    if (bytesToDo > 0
-                         && ! InternetWriteFile (request,
-                                                 static_cast<const char*> (postData.getData()) + bytesSent,
-                                                 (DWORD) bytesToDo, &bytesDone))
-                    {
-                        break;
-                    }
+                return false;
+            };
 
-                    if (bytesToDo == 0 || (int) bytesDone < bytesToDo)
-                    {
-                        if (HttpEndRequest (request, 0, 0, 0))
-                            return;
+            auto closed = sendRequestAndTryEnd();
 
-                        break;
-                    }
+            // N.B. this is needed for some authenticated HTTP connections
+            if (! closed && GetLastError() == ERROR_INTERNET_FORCE_RETRY)
+                closed = sendRequestAndTryEnd();
 
-                    bytesSent += bytesDone;
-
-                    if (listener != nullptr
-                          && ! listener->postDataSendProgress (owner, bytesSent, (int) postData.getSize()))
-                        break;
-                }
-            }
+            if (closed)
+                return;
         }
 
         closeConnection();
@@ -514,6 +529,37 @@ namespace MACAddressHelpers
         split[1] = sa_in6->sin6_addr.u.Byte[off];
        #endif
     }
+
+    static IPAddress createAddress (const sockaddr_in6* sa_in6)
+    {
+        IPAddressByteUnion temp;
+        uint16 arr[8];
+
+        for (int i = 0; i < 8; ++i)
+        {
+            split (sa_in6, i * 2, temp.split);
+            arr[i] = temp.combined;
+        }
+
+        return IPAddress (arr);
+    }
+
+    static IPAddress createAddress (const sockaddr_in* sa_in)
+    {
+        return IPAddress ((uint8*) &sa_in->sin_addr.s_addr, false);
+    }
+
+    template <typename Type>
+    static void findAddresses (Array<IPAddress>& result, bool includeIPv6, Type start)
+    {
+        for (auto addr = start; addr != nullptr; addr = addr->Next)
+        {
+            if (addr->Address.lpSockaddr->sa_family == AF_INET)
+                result.addIfNotAlreadyThere (createAddress ((sockaddr_in*) addr->Address.lpSockaddr));
+            else if (addr->Address.lpSockaddr->sa_family == AF_INET6 && includeIPv6)
+                result.addIfNotAlreadyThere (createAddress ((sockaddr_in6*) addr->Address.lpSockaddr));
+        }
+    }
 }
 
 void MACAddress::findAllAddresses (Array<MACAddress>& result)
@@ -530,93 +576,24 @@ void IPAddress::findAllAddresses (Array<IPAddress>& result, bool includeIPv6)
         result.addIfNotAlreadyThere (IPAddress::local (true));
 
     GetAdaptersAddressesHelper addressesHelper;
+
     if (addressesHelper.callGetAdaptersAddresses())
     {
         for (PIP_ADAPTER_ADDRESSES adapter = addressesHelper.adaptersAddresses; adapter != nullptr; adapter = adapter->Next)
         {
-            PIP_ADAPTER_UNICAST_ADDRESS pUnicast = nullptr;
-            for (pUnicast = adapter->FirstUnicastAddress; pUnicast != nullptr; pUnicast = pUnicast->Next)
-            {
-                if (pUnicast->Address.lpSockaddr->sa_family == AF_INET)
-                {
-                    const sockaddr_in* sa_in = (sockaddr_in*)pUnicast->Address.lpSockaddr;
-                    IPAddress ip ((uint8*)&sa_in->sin_addr.s_addr, false);
-                    result.addIfNotAlreadyThere (ip);
-                }
-                else if (pUnicast->Address.lpSockaddr->sa_family == AF_INET6 && includeIPv6)
-                {
-                    const sockaddr_in6* sa_in6 = (sockaddr_in6*)pUnicast->Address.lpSockaddr;
-
-                    ByteUnion temp;
-                    uint16 arr[8];
-
-                    for (int i = 0; i < 8; ++i)
-                    {
-                        MACAddressHelpers::split (sa_in6, i * 2, temp.split);
-                        arr[i] = temp.combined;
-                    }
-
-                    IPAddress ip (arr);
-                    result.addIfNotAlreadyThere (ip);
-                }
-            }
-
-            PIP_ADAPTER_ANYCAST_ADDRESS   pAnycast = nullptr;
-            for (pAnycast = adapter->FirstAnycastAddress; pAnycast != nullptr; pAnycast = pAnycast->Next)
-            {
-                if (pAnycast->Address.lpSockaddr->sa_family == AF_INET)
-                {
-                    const sockaddr_in* sa_in = (sockaddr_in*)pAnycast->Address.lpSockaddr;
-                    IPAddress ip ((uint8*)&sa_in->sin_addr.s_addr, false);
-                    result.addIfNotAlreadyThere (ip);
-                }
-                else if (pAnycast->Address.lpSockaddr->sa_family == AF_INET6 && includeIPv6)
-                {
-                    const sockaddr_in6* sa_in6 = (sockaddr_in6*)pAnycast->Address.lpSockaddr;
-
-                    ByteUnion temp;
-                    uint16 arr[8];
-
-                    for (int i = 0; i < 8; ++i)
-                    {
-                        MACAddressHelpers::split (sa_in6, i * 2, temp.split);
-                        arr[i] = temp.combined;
-                    }
-
-                    IPAddress ip (arr);
-                    result.addIfNotAlreadyThere (ip);
-                }
-            }
-
-            PIP_ADAPTER_MULTICAST_ADDRESS pMulticast = nullptr;
-            for (pMulticast = adapter->FirstMulticastAddress; pMulticast != nullptr; pMulticast = pMulticast->Next)
-            {
-                if (pMulticast->Address.lpSockaddr->sa_family == AF_INET)
-                {
-                    const sockaddr_in* sa_in = (sockaddr_in*)pMulticast->Address.lpSockaddr;
-                    IPAddress ip ((uint8*)&sa_in->sin_addr.s_addr, false);
-                    result.addIfNotAlreadyThere (ip);
-                }
-                else if (pMulticast->Address.lpSockaddr->sa_family == AF_INET6 && includeIPv6)
-                {
-                    const sockaddr_in6* sa_in6 = (sockaddr_in6*)pMulticast->Address.lpSockaddr;
-
-                    ByteUnion temp;
-                    uint16 arr[8];
-
-                    for (int i = 0; i < 8; ++i)
-                    {
-                        MACAddressHelpers::split (sa_in6, i * 2, temp.split);
-                        arr[i] = temp.combined;
-                    }
-
-                    IPAddress ip (arr);
-                    result.addIfNotAlreadyThere (ip);
-                }
-            }
+            MACAddressHelpers::findAddresses (result, includeIPv6, adapter->FirstUnicastAddress);
+            MACAddressHelpers::findAddresses (result, includeIPv6, adapter->FirstAnycastAddress);
+            MACAddressHelpers::findAddresses (result, includeIPv6, adapter->FirstMulticastAddress);
         }
     }
 }
+
+IPAddress IPAddress::getInterfaceBroadcastAddress (const IPAddress&)
+{
+    // TODO
+    return {};
+}
+
 
 //==============================================================================
 bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailAddress,

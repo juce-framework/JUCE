@@ -33,6 +33,8 @@
                    juce_gui_basics
  exporters:        xcode_mac, vs2017, linux_make, androidstudio, xcode_iphone
 
+ moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+
  type:             Component
  mainClass:        MultithreadingDemo
 
@@ -120,7 +122,7 @@ private:
           parentWidth = 50.0f, parentHeight = 50.0f;
 
     Colour colour;
-    Thread::ThreadID threadId = 0;
+    Thread::ThreadID threadId = {};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BouncingBallComp)
 };

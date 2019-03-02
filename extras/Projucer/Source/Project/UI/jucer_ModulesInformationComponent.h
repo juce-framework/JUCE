@@ -35,7 +35,7 @@ class ModulesInformationComponent  : public Component,
 public:
     ModulesInformationComponent (Project& p)
         : project (p),
-          modulesValueTree (p.getModules().state)
+          modulesValueTree (p.getEnabledModules().state)
     {
         listHeader = new ListBoxHeader ( { "Module", "Version", "Make Local Copy", "Paths" },
                                         { 0.25f, 0.2f, 0.2f, 0.35f } );
@@ -106,7 +106,7 @@ public:
 
     int getNumRows() override
     {
-        return project.getModules().getNumModules();
+        return project.getEnabledModules().getNumModules();
     }
 
     void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected) override
@@ -123,26 +123,26 @@ public:
         g.setColour (rowIsSelected ? findColour (defaultHighlightedTextColourId) : findColour (widgetTextColourId));
 
         //======================================================================
-        auto moduleID = project.getModules().getModuleID (rowNumber);
+        auto moduleID = project.getEnabledModules().getModuleID (rowNumber);
 
         g.drawFittedText (moduleID, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (0) * width)), Justification::centredLeft, 1);
 
         //======================================================================
-        auto version = project.getModules().getModuleInfo (moduleID).getVersion();
+        auto version = project.getEnabledModules().getModuleInfo (moduleID).getVersion();
         if (version.isEmpty())
             version = "?";
 
         g.drawFittedText (version, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (1) * width)), Justification::centredLeft, 1);
 
         //======================================================================
-        auto copyLocally = project.getModules().shouldCopyModuleFilesLocally (moduleID).getValue() ? "Yes" : "No";
+        auto copyLocally = project.getEnabledModules().shouldCopyModuleFilesLocally (moduleID).getValue() ? "Yes" : "No";
 
         g.drawFittedText (copyLocally, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (2) * width)), Justification::centredLeft, 1);
 
         //======================================================================
         String pathText;
 
-        if (project.getModules().shouldUseGlobalPath (moduleID))
+        if (project.getEnabledModules().shouldUseGlobalPath (moduleID))
         {
             pathText = "Global";
         }
@@ -161,7 +161,7 @@ public:
 
     void listBoxItemDoubleClicked (int row, const MouseEvent&) override
     {
-        auto moduleID = project.getModules().getModuleID (row);
+        auto moduleID = project.getEnabledModules().getModuleID (row);
 
         if (moduleID.isNotEmpty())
             if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
@@ -170,7 +170,7 @@ public:
 
     void deleteKeyPressed (int row) override
     {
-        project.getModules().removeModule (project.getModules().getModuleID (row));
+        project.getEnabledModules().removeModule (project.getEnabledModules().getModuleID (row));
     }
 
     void lookAndFeelChanged() override
@@ -224,7 +224,7 @@ private:
         auto res = m.showAt (&setCopyModeButton);
 
         if (res != 0)
-            project.getModules().setLocalCopyModeForAllModules (res == 1);
+            project.getEnabledModules().setLocalCopyModeForAllModules (res == 1);
     }
 
     void showGlobalPathsMenu()
@@ -243,7 +243,7 @@ private:
         {
             auto enableGlobalPaths = (res % 2 == 1);
 
-            auto& moduleList = project.getModules();
+            auto& moduleList = project.getEnabledModules();
 
             if (res < 3)
             {
@@ -271,7 +271,7 @@ private:
             pastePathsID
         };
 
-        auto& moduleList = project.getModules();
+        auto& moduleList = project.getEnabledModules();
         auto moduleToCopy = moduleList.getModuleID (list.getSelectedRow());
 
         if (moduleToCopy.isNotEmpty())
@@ -292,7 +292,7 @@ private:
                         auto modID = moduleList.getModuleID (i);
 
                         if (modID != moduleToCopy)
-                            exporter->getPathForModuleValue (modID) = exporter->getPathForModuleValue (moduleToCopy).getValue();
+                            exporter->getPathForModuleValue (modID) = exporter->getPathForModuleValue (moduleToCopy).get();
                     }
                 }
             }
@@ -301,7 +301,7 @@ private:
                  modulePathClipboard.clear();
 
                  for (Project::ExporterIterator exporter (project); exporter.next();)
-                     modulePathClipboard[exporter->getName()] = exporter->getPathForModuleValue (moduleToCopy).getValue();
+                     modulePathClipboard[exporter->getName()] = exporter->getPathForModuleValue (moduleToCopy).get();
             }
             else if (res == pastePathsID)
             {

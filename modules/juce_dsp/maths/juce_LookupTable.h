@@ -164,7 +164,7 @@ private:
         LookupTableTransform<float> tanhApprox ([] (float x) { return std::tanh (x); }, -5.0f, 5.0f, 64);
         auto outValue = tanhApprox (4.2f);
 
-    Note : if you try to call the function with an input outside the provided
+    Note: If you try to call the function with an input outside the provided
     range, it will return either the first or the last recorded LookupTable value.
 
     @see LookupTable
@@ -183,8 +183,7 @@ public:
 
         @see initialise
     */
-    LookupTableTransform()
-    {}
+    LookupTableTransform() = default;
 
     //==============================================================================
     /** Creates and initialises a LookupTableTransform object.

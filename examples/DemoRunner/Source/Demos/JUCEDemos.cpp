@@ -53,7 +53,7 @@ void JUCEDemos::registerDemo (std::function<Component*()> constructorCallback, c
 {
    #if JUCE_MAC
     auto f = File::getSpecialLocation (File::currentExecutableFile)
-                  .getParentDirectory().getParentDirectory().getChildFile ("Resources").getChildFile (filePath);
+                  .getParentDirectory().getParentDirectory().getChildFile ("Resources");
    #else
     auto f = findExamplesDirectoryFromExecutable (File::getSpecialLocation (File::currentApplicationFile));
    #endif
@@ -85,8 +85,6 @@ File JUCEDemos::findExamplesDirectoryFromExecutable (File exec)
 }
 
 //==============================================================================
-std::unique_ptr<AudioDeviceManager> sharedAudioDeviceManager;
-
 static String getCurrentDefaultAudioDeviceName (AudioDeviceManager& deviceManager, bool isInput)
 {
     auto* deviceType = deviceManager.getCurrentDeviceTypeObject();
@@ -129,8 +127,7 @@ AudioDeviceManager& getSharedAudioDeviceManager (int numInputChannels, int numOu
 
     if (sharedAudioDeviceManager->getCurrentAudioDevice() != nullptr)
     {
-        AudioDeviceManager::AudioDeviceSetup setup;
-        sharedAudioDeviceManager->getAudioDeviceSetup (setup);
+        auto setup = sharedAudioDeviceManager->getAudioDeviceSetup();
 
         auto numInputs  = jmax (numInputChannels,  setup.inputChannels.countNumberOfSetBits());
         auto numOutputs = jmax (numOutputChannels, setup.outputChannels.countNumberOfSetBits());

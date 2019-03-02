@@ -219,9 +219,9 @@ void OnlineUnlockForm::resized()
 
     const int buttonHeight = 22;
 
-    Rectangle<int> r (getLocalBounds().reduced (10, 20));
+    auto r = getLocalBounds().reduced (10, 20);
 
-    Rectangle<int> buttonArea (r.removeFromBottom (buttonHeight));
+    auto buttonArea = r.removeFromBottom (buttonHeight);
     registerButton.changeWidthToFitText (buttonHeight);
     cancelButton.changeWidthToFitText (buttonHeight);
 

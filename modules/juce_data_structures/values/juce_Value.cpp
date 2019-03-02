@@ -123,7 +123,7 @@ Value::Value (Value&& other) noexcept
     jassert (other.listeners.size() == 0);
 
     other.removeFromListenerList();
-    value = static_cast<ReferenceCountedObjectPtr<ValueSource>&&> (other.value);
+    value = std::move (other.value);
 }
 
 Value& Value::operator= (Value&& other) noexcept
@@ -133,7 +133,7 @@ Value& Value::operator= (Value&& other) noexcept
     jassert (other.listeners.size() == 0);
 
     other.removeFromListenerList();
-    value = static_cast<ReferenceCountedObjectPtr<ValueSource>&&> (other.value);
+    value = std::move (other.value);
     return *this;
 }
 

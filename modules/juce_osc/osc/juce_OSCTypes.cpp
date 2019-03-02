@@ -26,8 +26,24 @@
 
 namespace juce
 {
-    const OSCType OSCTypes::int32   = 'i';
-    const OSCType OSCTypes::float32 = 'f';
-    const OSCType OSCTypes::string  = 's';
-    const OSCType OSCTypes::blob    = 'b';
+
+const OSCType OSCTypes::int32   = 'i';
+const OSCType OSCTypes::float32 = 'f';
+const OSCType OSCTypes::string  = 's';
+const OSCType OSCTypes::blob    = 'b';
+const OSCType OSCTypes::colour  = 'r';
+
+uint32 OSCColour::toInt32() const
+{
+    return ByteOrder::makeInt (alpha, blue, green, red);
 }
+
+OSCColour OSCColour::fromInt32 (uint32 c)
+{
+    return { (uint8) (c >> 24),
+             (uint8) (c >> 16),
+             (uint8) (c >> 8),
+             (uint8) c };
+}
+
+} // namespace juce

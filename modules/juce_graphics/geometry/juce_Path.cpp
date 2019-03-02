@@ -132,7 +132,7 @@ Path& Path::operator= (const Path& other)
 }
 
 Path::Path (Path&& other) noexcept
-    : data (static_cast<Array<float>&&> (other.data)),
+    : data (std::move (other.data)),
       bounds (other.bounds),
       useNonZeroWinding (other.useNonZeroWinding)
 {
@@ -140,7 +140,7 @@ Path::Path (Path&& other) noexcept
 
 Path& Path::operator= (Path&& other) noexcept
 {
-    data = static_cast<Array<float>&&> (other.data);
+    data = std::move (other.data);
     bounds = other.bounds;
     useNonZeroWinding = other.useNonZeroWinding;
     return *this;
@@ -674,8 +674,8 @@ void Path::addBubble (Rectangle<float> bodyArea,
 
     startNewSubPath (bodyArea.getX() + cornerSizeW, bodyArea.getY());
 
-    const Rectangle<float> targetLimit (bodyArea.reduced (jmin (halfW - 1.0f, cornerSizeW + arrowBaseWidth),
-                                                          jmin (halfH - 1.0f, cornerSizeH + arrowBaseWidth)));
+    auto targetLimit = bodyArea.reduced (jmin (halfW - 1.0f, cornerSizeW + arrowBaseWidth),
+                                         jmin (halfH - 1.0f, cornerSizeH + arrowBaseWidth));
 
     if (Rectangle<float> (targetLimit.getX(), maximumArea.getY(),
                           targetLimit.getWidth(), bodyArea.getY() - maximumArea.getY()).contains (arrowTip))

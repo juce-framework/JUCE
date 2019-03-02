@@ -1,8 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 10
-    buildToolsVersion "27.0.3"
+    compileSdkVersion 28
     externalNativeBuild {
         cmake {
             path "CMakeLists.txt"
@@ -20,11 +19,11 @@ android {
 
     defaultConfig {
         applicationId "com.juce.networkgraphicsdemo"
-        minSdkVersion    10
-        targetSdkVersion 10
+        minSdkVersion    16
+        targetSdkVersion 28
         externalNativeBuild {
             cmake {
-                arguments "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-10", "-DANDROID_STL=c++_static", "-DANDROID_CPP_FEATURES=exceptions rtti", "-DANDROID_ARM_MODE=arm", "-DANDROID_ARM_NEON=TRUE"
+                arguments "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-16", "-DANDROID_STL=c++_static", "-DANDROID_CPP_FEATURES=exceptions rtti", "-DANDROID_ARM_MODE=arm", "-DANDROID_ARM_NEON=TRUE"
                 cFlags "-fsigned-char"
                 cppFlags "-fsigned-char", "-std=c++14"
             }
@@ -50,7 +49,7 @@ android {
     productFlavors {
         debug_ {
             ndk {
-                abiFilters "armeabi", "armeabi-v7a", "x86"
+                abiFilters "armeabi-v7a", "x86"
             }
             externalNativeBuild {
                 cmake {
@@ -83,11 +82,21 @@ android {
         }
     }
 
-repositories {
-}
+    sourceSets {
+        main.java.srcDirs +=
+            ["../../../../../modules/juce_core/native/javacore/init",
+             "../../../../../modules/juce_core/native/javacore/app",
+             "../../../../../modules/juce_gui_basics/native/javacore/app"]
 
-dependencies {
-}
+        main.res.srcDirs +=
+            []
+    }
+
+    repositories {
+    }
+
+    dependencies {
+    }
 
 
 }

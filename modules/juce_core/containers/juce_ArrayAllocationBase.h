@@ -27,13 +27,9 @@ namespace juce
 /**
     Implements some basic array storage allocation functions.
 
-    This class isn't really for public use - it's used by the other
-    array classes, but might come in handy for some purposes.
-
-    It inherits from a critical section class to allow the arrays to use
-    the "empty base class optimisation" pattern to reduce their footprint.
-
-    @see Array, OwnedArray, ReferenceCountedArray
+    This class isn't really for public use - it used to be part of the
+    container classes but has since been superseded by ArrayBase. Eventually
+    it will be removed from the API.
 
     @tags{Core}
 */
@@ -43,24 +39,20 @@ class ArrayAllocationBase  : public TypeOfCriticalSectionToUse
 public:
     //==============================================================================
     /** Creates an empty array. */
-    ArrayAllocationBase() noexcept
-    {
-    }
+    ArrayAllocationBase() = default;
 
     /** Destructor. */
-    ~ArrayAllocationBase() noexcept
-    {
-    }
+    ~ArrayAllocationBase() = default;
 
     ArrayAllocationBase (ArrayAllocationBase&& other) noexcept
-        : elements (static_cast<HeapBlock<ElementType>&&> (other.elements)),
+        : elements (std::move (other.elements)),
           numAllocated (other.numAllocated)
     {
     }
 
     ArrayAllocationBase& operator= (ArrayAllocationBase&& other) noexcept
     {
-        elements = static_cast<HeapBlock<ElementType>&&> (other.elements);
+        elements = std::move (other.elements);
         numAllocated = other.numAllocated;
         return *this;
     }

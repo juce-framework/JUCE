@@ -40,7 +40,7 @@ class JUCE_API  CPlusPlusCodeTokeniser    : public CodeTokeniser
 public:
     //==============================================================================
     CPlusPlusCodeTokeniser();
-    ~CPlusPlusCodeTokeniser();
+    ~CPlusPlusCodeTokeniser() override;
 
     //==============================================================================
     int readNextToken (CodeDocument::Iterator&) override;

@@ -57,10 +57,10 @@ public:
     {
     public:
         /** */
-        Callback() {}
+        Callback() = default;
 
         /** Destructor. */
-        virtual ~Callback() {}
+        virtual ~Callback() = default;
 
         /** Called to indicate that a modal component has been dismissed.
 
@@ -134,17 +134,16 @@ protected:
     ModalComponentManager();
 
     /** Destructor. */
-    ~ModalComponentManager();
+    ~ModalComponentManager() override;
 
     /** @internal */
     void handleAsyncUpdate() override;
 
 private:
     //==============================================================================
-    struct ModalItem;
-
     friend class Component;
-    friend struct ContainerDeletePolicy<ModalItem>;
+
+    struct ModalItem;
     OwnedArray<ModalItem> stack;
 
     void startModal (Component*, bool autoDelete);
@@ -161,7 +160,7 @@ private:
 
     @tags{GUI}
 */
-class ModalCallbackFunction
+class JUCE_API ModalCallbackFunction
 {
 public:
     /** This is a utility function to create a ModalComponentManager::Callback that will

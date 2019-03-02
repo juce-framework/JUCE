@@ -27,10 +27,8 @@
 namespace juce
 {
 
-ResizableBorderComponent::Zone::Zone() noexcept  : zone (0) {}
-
-ResizableBorderComponent::Zone::Zone (const int zoneFlags) noexcept  : zone (zoneFlags) {}
-
+ResizableBorderComponent::Zone::Zone() noexcept {}
+ResizableBorderComponent::Zone::Zone (int zoneFlags) noexcept  : zone (zoneFlags) {}
 ResizableBorderComponent::Zone::Zone (const ResizableBorderComponent::Zone& other) noexcept  : zone (other.zone) {}
 
 ResizableBorderComponent::Zone& ResizableBorderComponent::Zone::operator= (const ResizableBorderComponent::Zone& other) noexcept
@@ -42,8 +40,8 @@ ResizableBorderComponent::Zone& ResizableBorderComponent::Zone::operator= (const
 bool ResizableBorderComponent::Zone::operator== (const ResizableBorderComponent::Zone& other) const noexcept      { return zone == other.zone; }
 bool ResizableBorderComponent::Zone::operator!= (const ResizableBorderComponent::Zone& other) const noexcept      { return zone != other.zone; }
 
-ResizableBorderComponent::Zone ResizableBorderComponent::Zone::fromPositionOnBorder (const Rectangle<int>& totalSize,
-                                                                                     const BorderSize<int>& border,
+ResizableBorderComponent::Zone ResizableBorderComponent::Zone::fromPositionOnBorder (Rectangle<int> totalSize,
+                                                                                     BorderSize<int> border,
                                                                                      Point<int> position)
 {
     int z = 0;
@@ -51,13 +49,15 @@ ResizableBorderComponent::Zone ResizableBorderComponent::Zone::fromPositionOnBor
     if (totalSize.contains (position)
          && ! border.subtractedFrom (totalSize).contains (position))
     {
-        const int minW = jmax (totalSize.getWidth() / 10, jmin (10, totalSize.getWidth() / 3));
+        auto minW = jmax (totalSize.getWidth() / 10, jmin (10, totalSize.getWidth() / 3));
+
         if (position.x < jmax (border.getLeft(), minW) && border.getLeft() > 0)
             z |= left;
         else if (position.x >= totalSize.getWidth() - jmax (border.getRight(), minW) && border.getRight() > 0)
             z |= right;
 
-        const int minH = jmax (totalSize.getHeight() / 10, jmin (10, totalSize.getHeight() / 3));
+        auto minH = jmax (totalSize.getHeight() / 10, jmin (10, totalSize.getHeight() / 3));
+
         if (position.y < jmax (border.getTop(), minH) && border.getTop() > 0)
             z |= top;
         else if (position.y >= totalSize.getHeight() - jmax (border.getBottom(), minH) && border.getBottom() > 0)
@@ -69,7 +69,7 @@ ResizableBorderComponent::Zone ResizableBorderComponent::Zone::fromPositionOnBor
 
 MouseCursor ResizableBorderComponent::Zone::getMouseCursor() const noexcept
 {
-    MouseCursor::StandardCursorType mc = MouseCursor::NormalCursor;
+    auto mc = MouseCursor::NormalCursor;
 
     switch (zone)
     {
@@ -141,7 +141,7 @@ void ResizableBorderComponent::mouseDrag (const MouseEvent& e)
         return;
     }
 
-    const Rectangle<int> newBounds (mouseZone.resizeRectangleBy (originalBounds, e.getOffsetFromDragStart()));
+    auto newBounds = mouseZone.resizeRectangleBy (originalBounds, e.getOffsetFromDragStart());
 
     if (constrainer != nullptr)
     {
@@ -153,8 +153,8 @@ void ResizableBorderComponent::mouseDrag (const MouseEvent& e)
     }
     else
     {
-        if (Component::Positioner* const pos = component->getPositioner())
-            pos->applyNewBounds (newBounds);
+        if (auto* p = component->getPositioner())
+            p->applyNewBounds (newBounds);
         else
             component->setBounds (newBounds);
     }
@@ -190,7 +190,7 @@ BorderSize<int> ResizableBorderComponent::getBorderThickness() const
 
 void ResizableBorderComponent::updateMouseZone (const MouseEvent& e)
 {
-    Zone newZone (Zone::fromPositionOnBorder (getLocalBounds(), borderSize, e.getPosition()));
+    auto newZone = Zone::fromPositionOnBorder (getLocalBounds(), borderSize, e.getPosition());
 
     if (mouseZone != newZone)
     {

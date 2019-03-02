@@ -191,7 +191,6 @@ private:
     StringArray countryCodes;
     StringPairArray translations;
     std::unique_ptr<LocalisedStrings> fallback;
-    friend struct ContainerDeletePolicy<LocalisedStrings>;
 
     void loadFromText (const String&, bool ignoreCase);
 

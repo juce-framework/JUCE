@@ -28,8 +28,8 @@
     See also SystemStats::getJUCEVersion() for a string version.
 */
 #define JUCE_MAJOR_VERSION      5
-#define JUCE_MINOR_VERSION      3
-#define JUCE_BUILDNUMBER        2
+#define JUCE_MINOR_VERSION      4
+#define JUCE_BUILDNUMBER        3
 
 /** Current JUCE version number.
 
@@ -51,6 +51,9 @@
 #include <algorithm>
 #include <limits>
 #include <atomic>
+#include <sstream>
+#include <iomanip>
+#include <map>
 
 //==============================================================================
 #include "juce_CompilerSupport.h"

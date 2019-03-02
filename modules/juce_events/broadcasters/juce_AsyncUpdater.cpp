@@ -43,7 +43,7 @@ public:
 //==============================================================================
 AsyncUpdater::AsyncUpdater()
 {
-    activeMessage = new AsyncUpdaterMessage (*this);
+    activeMessage = *new AsyncUpdaterMessage (*this);
 }
 
 AsyncUpdater::~AsyncUpdater()
@@ -63,7 +63,7 @@ void AsyncUpdater::triggerAsyncUpdate()
 {
     // If you're calling this before (or after) the MessageManager is
     // running, then you're not going to get any callbacks!
-    jassert (MessageManager::getInstanceWithoutCreating() != nullptr);
+    JUCE_ASSERT_MESSAGE_MANAGER_EXISTS
 
     if (activeMessage->shouldDeliver.compareAndSetBool (1, 0))
         if (! activeMessage->post())
@@ -79,7 +79,7 @@ void AsyncUpdater::cancelPendingUpdate() noexcept
 void AsyncUpdater::handleUpdateNowIfNeeded()
 {
     // This can only be called by the event thread.
-    jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
     if (activeMessage->shouldDeliver.exchange (0) != 0)
         handleAsyncUpdate();

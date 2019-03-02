@@ -125,7 +125,7 @@ public:
     Slider (SliderStyle style, TextEntryBoxPosition textBoxPosition);
 
     /** Destructor. */
-    ~Slider();
+    ~Slider() override;
 
     //==============================================================================
     /** Changes the type of slider interface being used.
@@ -558,7 +558,7 @@ public:
     public:
         //==============================================================================
         /** Destructor. */
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         //==============================================================================
         /** Called when the slider's value is changed.
@@ -612,16 +612,19 @@ public:
     std::function<String (double)> textFromValueFunction;
 
     //==============================================================================
-    /** This lets you choose whether double-clicking moves the slider to a given position.
+    /** This lets you choose whether double-clicking or single-clicking with a specified
+        key modifier moves the slider to a given position.
 
-        By default this is turned off, but it's handy if you want a double-click to act
-        as a quick way of resetting a slider. Just pass in the value you want it to
-        go to when double-clicked.
+        By default this is turned off, but it's handy if you want either of these actions
+        to act as a quick way of resetting a slider. Just pass in the value you want it to
+        go to when double-clicked. By default the key modifier is the alt key but you can
+        pass in another key modifier, or none to disable this behaviour.
 
         @see getDoubleClickReturnValue
     */
     void setDoubleClickReturnValue (bool shouldDoubleClickBeEnabled,
-                                    double valueToSetOnDoubleClick);
+                                    double valueToSetOnDoubleClick,
+                                    ModifierKeys singleClickModifiers = ModifierKeys::altModifier);
 
     /** Returns the values last set by setDoubleClickReturnValue() method.
         @see setDoubleClickReturnValue
@@ -843,6 +846,10 @@ public:
     bool isRotary() const noexcept;
     /** True if the slider is in a linear bar mode. */
     bool isBar() const noexcept;
+    /** True if the slider has two thumbs. */
+    bool isTwoValue() const noexcept;
+    /** True if the slider has three thumbs. */
+    bool isThreeValue() const noexcept;
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the slider.
@@ -883,7 +890,7 @@ public:
     */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         //==============================================================================
         virtual void drawLinearSlider (Graphics&,
@@ -973,8 +980,6 @@ public:
 private:
     //==============================================================================
     JUCE_PUBLIC_IN_DLL_BUILD (class Pimpl)
-    friend class Pimpl;
-    friend struct ContainerDeletePolicy<Pimpl>;
     std::unique_ptr<Pimpl> pimpl;
 
     void init (SliderStyle, TextEntryBoxPosition);

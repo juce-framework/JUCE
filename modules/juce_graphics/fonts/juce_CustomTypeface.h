@@ -65,7 +65,7 @@ public:
     explicit CustomTypeface (InputStream& serialisedTypefaceStream);
 
     /** Destructor. */
-    ~CustomTypeface();
+    ~CustomTypeface() override;
 
     //==============================================================================
     /** Resets this typeface, deleting all its glyphs and settings. */
@@ -155,9 +155,8 @@ protected:
 private:
     //==============================================================================
     class GlyphInfo;
-    friend struct ContainerDeletePolicy<GlyphInfo>;
     OwnedArray<GlyphInfo> glyphs;
-    short lookupTable [128];
+    short lookupTable[128];
 
     GlyphInfo* findGlyph (const juce_wchar character, bool loadIfNeeded) noexcept;
 

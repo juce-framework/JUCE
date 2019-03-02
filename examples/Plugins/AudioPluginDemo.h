@@ -35,6 +35,8 @@
                    juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
  exporters:        xcode_mac, vs2017, linux_make, xcode_iphone, androidstudio
 
+ moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+
  type:             AudioProcessor
  mainClass:        JuceDemoPluginAudioProcessor
 
@@ -172,15 +174,15 @@ class JuceDemoPluginAudioProcessor  : public AudioProcessor
 public:
     //==============================================================================
     JuceDemoPluginAudioProcessor()
-        : AudioProcessor (getBusesProperties())
+        : AudioProcessor (getBusesProperties()),
+    state (*this, nullptr, "state",
+           { std::make_unique<AudioParameterFloat> ("gain", "Gain", NormalisableRange<float> (0.0f, 1.0f), 0.9f),
+             std::make_unique<AudioParameterFloat> ("delay", "Delay Feedback", NormalisableRange<float> (0.0f, 1.0f), 0.5f) })
     {
         lastPosInfo.resetToDefault();
 
-        // This creates our parameters. We'll keep some raw pointers to them in this class,
-        // so that we can easily access them later, but the base class will take care of
-        // deleting them for us.
-        addParameter (gainParam  = new AudioParameterFloat ("gain",  "Gain",           0.0f, 1.0f, 0.9f));
-        addParameter (delayParam = new AudioParameterFloat ("delay", "Delay Feedback", 0.0f, 1.0f, 0.5f));
+        // Add a sub-tree to store the state of our UI
+        state.state.addChild ({ "uiState", { { "width",  400 }, { "height", 200 } }, {} }, -1, nullptr);
 
         initialiseSynth();
     }
@@ -282,48 +284,21 @@ public:
     //==============================================================================
     void getStateInformation (MemoryBlock& destData) override
     {
-        // You should use this method to store your parameters in the memory block.
-        // Here's an example of how you can use XML to make it easy and more robust:
+        // Store an xml representation of our state.
+        std::unique_ptr<XmlElement> xmlState (state.copyState().createXml());
 
-        // Create an outer XML element..
-        XmlElement xml ("MYPLUGINSETTINGS");
-
-        // add some attributes to it..
-        xml.setAttribute ("uiWidth",  lastUIWidth);
-        xml.setAttribute ("uiHeight", lastUIHeight);
-
-        // Store the values of all our parameters, using their param ID as the XML attribute
-        for (auto* param : getParameters())
-            if (auto* p = dynamic_cast<AudioProcessorParameterWithID*> (param))
-                xml.setAttribute (p->paramID, p->getValue());
-
-        // then use this helper function to stuff it into the binary blob and return it..
-        copyXmlToBinary (xml, destData);
+        if (xmlState.get() != nullptr)
+            copyXmlToBinary (*xmlState, destData);
     }
 
     void setStateInformation (const void* data, int sizeInBytes) override
     {
-        // You should use this method to restore your parameters from this memory block,
-        // whose contents will have been created by the getStateInformation() call.
-
-        // This getXmlFromBinary() helper function retrieves our XML from the binary blob..
+        // Restore our plug-in's state from the xml representation stored in the above
+        // method.
         std::unique_ptr<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
 
         if (xmlState.get() != nullptr)
-        {
-            // make sure that it's actually our type of XML object..
-            if (xmlState->hasTagName ("MYPLUGINSETTINGS"))
-            {
-                // ok, now pull out our last window size..
-                lastUIWidth  = jmax (xmlState->getIntAttribute ("uiWidth",  lastUIWidth),  400);
-                lastUIHeight = jmax (xmlState->getIntAttribute ("uiHeight", lastUIHeight), 200);
-
-                // Now reload our parameters..
-                for (auto* param : getParameters())
-                    if (auto* p = dynamic_cast<AudioProcessorParameterWithID*> (param))
-                        p->setValue ((float) xmlState->getDoubleAttribute (p->paramID, p->getValue()));
-            }
-        }
+            state.replaceState (ValueTree::fromXml (*xmlState));
     }
 
     //==============================================================================
@@ -348,14 +323,8 @@ public:
     // callback - the UI component will read this and display it.
     AudioPlayHead::CurrentPositionInfo lastPosInfo;
 
-    // these are used to persist the UI's size - the values are stored along with the
-    // filter's other parameters, and the UI component will update them when it gets
-    // resized.
-    int lastUIWidth = 400, lastUIHeight = 200;
-
-    // Our parameters
-    AudioParameterFloat* gainParam  = nullptr;
-    AudioParameterFloat* delayParam = nullptr;
+    // Our plug-in's current state
+    AudioProcessorValueTreeState state;
 
     // Current track colour and name
     TrackProperties trackProperties;
@@ -364,27 +333,28 @@ private:
     //==============================================================================
     /** This is the editor component that our filter will display. */
     class JuceDemoPluginAudioProcessorEditor  : public AudioProcessorEditor,
-                                                private Timer
+                                                private Timer,
+                                                private Value::Listener
     {
     public:
         JuceDemoPluginAudioProcessorEditor (JuceDemoPluginAudioProcessor& owner)
             : AudioProcessorEditor (owner),
-              midiKeyboard         (owner.keyboardState, MidiKeyboardComponent::horizontalKeyboard)
+              midiKeyboard         (owner.keyboardState, MidiKeyboardComponent::horizontalKeyboard),
+              gainAttachment       (owner.state, "gain",  gainSlider),
+              delayAttachment      (owner.state, "delay", delaySlider)
         {
             // add some sliders..
-            gainSlider.reset (new ParameterSlider (*owner.gainParam));
-            addAndMakeVisible (gainSlider.get());
-            gainSlider->setSliderStyle (Slider::Rotary);
+            addAndMakeVisible (gainSlider);
+            gainSlider.setSliderStyle (Slider::Rotary);
 
-            delaySlider.reset (new ParameterSlider (*owner.delayParam));
-            addAndMakeVisible (delaySlider.get());
-            delaySlider->setSliderStyle (Slider::Rotary);
+            addAndMakeVisible (delaySlider);
+            delaySlider.setSliderStyle (Slider::Rotary);
 
             // add some labels for the sliders..
-            gainLabel.attachToComponent (gainSlider.get(), false);
+            gainLabel.attachToComponent (&gainSlider, false);
             gainLabel.setFont (Font (11.0f));
 
-            delayLabel.attachToComponent (delaySlider.get(), false);
+            delayLabel.attachToComponent (&delaySlider, false);
             delayLabel.setFont (Font (11.0f));
 
             // add the midi keyboard component..
@@ -397,9 +367,14 @@ private:
             // set resize limits for this plug-in
             setResizeLimits (400, 200, 1024, 700);
 
+            lastUIWidth .referTo (owner.state.state.getChildWithName ("uiState").getPropertyAsValue ("width",  nullptr));
+            lastUIHeight.referTo (owner.state.state.getChildWithName ("uiState").getPropertyAsValue ("height", nullptr));
+
             // set our component's initial size to be the last one that was stored in the filter's settings
-            setSize (owner.lastUIWidth,
-                     owner.lastUIHeight);
+            setSize (lastUIWidth.getValue(), lastUIHeight.getValue());
+
+            lastUIWidth. addListener (this);
+            lastUIHeight.addListener (this);
 
             updateTrackProperties();
 
@@ -427,11 +402,11 @@ private:
 
             r.removeFromTop (20);
             auto sliderArea = r.removeFromTop (60);
-            gainSlider->setBounds  (sliderArea.removeFromLeft (jmin (180, sliderArea.getWidth() / 2)));
-            delaySlider->setBounds (sliderArea.removeFromLeft (jmin (180, sliderArea.getWidth())));
+            gainSlider.setBounds  (sliderArea.removeFromLeft (jmin (180, sliderArea.getWidth() / 2)));
+            delaySlider.setBounds (sliderArea.removeFromLeft (jmin (180, sliderArea.getWidth())));
 
-            getProcessor().lastUIWidth  = getWidth();
-            getProcessor().lastUIHeight = getHeight();
+            lastUIWidth  = getWidth();
+            lastUIHeight = getHeight();
         }
 
         void timerCallback() override
@@ -442,6 +417,17 @@ private:
         void hostMIDIControllerIsAvailable (bool controllerIsAvailable) override
         {
             midiKeyboard.setVisible (! controllerIsAvailable);
+        }
+
+        int getControlParameterIndex (Component& control) override
+        {
+            if (&control == &gainSlider)
+                return 0;
+
+            if (&control == &delaySlider)
+                return 1;
+
+            return -1;
         }
 
         void updateTrackProperties()
@@ -455,52 +441,20 @@ private:
         }
 
     private:
-        //==============================================================================
-        // This is a handy slider subclass that controls an AudioProcessorParameter
-        // (may move this class into the library itself at some point in the future..)
-        class ParameterSlider   : public Slider,
-                                  private Timer
-        {
-        public:
-            ParameterSlider (AudioProcessorParameter& p)
-                : Slider (p.getName (256)), param (p)
-            {
-                setRange (0.0, 1.0, 0.0);
-                startTimerHz (30);
-                updateSliderPos();
-            }
-
-            void valueChanged() override        { param.setValueNotifyingHost ((float) Slider::getValue()); }
-
-            void timerCallback() override       { updateSliderPos(); }
-
-            void startedDragging() override     { param.beginChangeGesture(); }
-            void stoppedDragging() override     { param.endChangeGesture();   }
-
-            double getValueFromText (const String& text) override   { return param.getValueForText (text); }
-            String getTextFromValue (double value) override         { return param.getText ((float) value, 1024); }
-
-            void updateSliderPos()
-            {
-                auto newValue = param.getValue();
-
-                if (newValue != (float) Slider::getValue() && ! isMouseButtonDown())
-                    Slider::setValue (newValue, NotificationType::dontSendNotification);
-            }
-
-            AudioProcessorParameter& param;
-
-            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParameterSlider)
-        };
-
         MidiKeyboardComponent midiKeyboard;
 
         Label timecodeDisplayLabel,
               gainLabel  { {}, "Throughput level:" },
               delayLabel { {}, "Delay:" };
 
-        std::unique_ptr<ParameterSlider> gainSlider, delaySlider;
+        Slider gainSlider, delaySlider;
+        AudioProcessorValueTreeState::SliderAttachment gainAttachment, delayAttachment;
         Colour backgroundColour;
+
+        // these are used to persist the UI's size - the values are stored along with the
+        // filter's other parameters, and the UI component will update them when it gets
+        // resized.
+        Value lastUIWidth, lastUIHeight;
 
         //==============================================================================
         JuceDemoPluginAudioProcessor& getProcessor() const
@@ -558,12 +512,20 @@ private:
 
             timecodeDisplayLabel.setText (displayText.toString(), dontSendNotification);
         }
+
+        // called when the stored window size changes
+        void valueChanged (Value&) override
+        {
+            setSize (lastUIWidth.getValue(), lastUIHeight.getValue());
+        }
     };
 
     //==============================================================================
     template <typename FloatType>
     void process (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages, AudioBuffer<FloatType>& delayBuffer)
     {
+        auto gainParamValue  = state.getParameter ("gain") ->getValue();
+        auto delayParamValue = state.getParameter ("delay")->getValue();
         auto numSamples = buffer.getNumSamples();
 
         // In case we have more outputs than inputs, we'll clear any output
@@ -580,29 +542,28 @@ private:
         synth.renderNextBlock (buffer, midiMessages, 0, numSamples);
 
         // Apply our delay effect to the new output..
-        applyDelay (buffer, delayBuffer);
+        applyDelay (buffer, delayBuffer, delayParamValue);
 
-        applyGain (buffer, delayBuffer); // apply our gain-change to the outgoing data..
+        // Apply our gain change to the outgoing data..
+        applyGain (buffer, delayBuffer, gainParamValue);
 
         // Now ask the host for the current time so we can store it to be displayed later...
         updateCurrentTimeInfoFromHost();
     }
 
     template <typename FloatType>
-    void applyGain (AudioBuffer<FloatType>& buffer, AudioBuffer<FloatType>& delayBuffer)
+    void applyGain (AudioBuffer<FloatType>& buffer, AudioBuffer<FloatType>& delayBuffer, float gainLevel)
     {
         ignoreUnused (delayBuffer);
-        auto gainLevel = gainParam->get();
 
         for (auto channel = 0; channel < getTotalNumOutputChannels(); ++channel)
             buffer.applyGain (channel, 0, buffer.getNumSamples(), gainLevel);
     }
 
     template <typename FloatType>
-    void applyDelay (AudioBuffer<FloatType>& buffer, AudioBuffer<FloatType>& delayBuffer)
+    void applyDelay (AudioBuffer<FloatType>& buffer, AudioBuffer<FloatType>& delayBuffer, float delayLevel)
     {
         auto numSamples = buffer.getNumSamples();
-        auto delayLevel = delayParam->get();
 
         auto delayPos = 0;
 
