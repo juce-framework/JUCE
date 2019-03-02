@@ -473,8 +473,8 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
     String error;
 
     // If new device name,  or no current device, or channel count changed, then recreate device.
-    if (currentSetup.inputDeviceName != newInputDeviceName
-         || currentSetup.outputDeviceName != newOutputDeviceName
+    if (currentSetup.inputDeviceName != newSetup.inputDeviceName
+         || currentSetup.outputDeviceName != newSetup.outputDeviceName
          || currentAudioDevice == nullptr
          || (inputChannels.getHighestBit() + 1 != numInputChansNeeded)
          || (outputChannels.getHighestBit() + 1 != numOutputChansNeeded))
