@@ -20,6 +20,13 @@
   ==============================================================================
 */
 
+#ifndef _NL_IDENTIFICATION_LANGUAGE
+  #define _NL_IDENTIFICATION_LANGUAGE 0x42
+#endif
+#ifndef _NL_IDENTIFICATION_TERRITORY
+  #define _NL_IDENTIFICATION_TERRITORY 0x43
+#endif
+
 namespace juce
 {
 

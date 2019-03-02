@@ -111,7 +111,7 @@
  #define JUCE_CONSTEXPR
 #endif
 
-#if (! JUCE_MSVC) && (! JUCE_CXX14_IS_AVAILABLE)
+#if ! JUCE_MSVC && ! JUCE_CXX14_IS_AVAILABLE && JUCE_BACKPORT_MAKE_UNIQUE
 namespace std
 {
     template<typename T, typename... Args>
