@@ -131,15 +131,6 @@ bool FileChooser::browseForMultipleFilesToOpen (FilePreviewComponent* previewCom
                        previewComp);
 }
 
-bool FileChooser::browseForMultipleFilesOrDirectories (FilePreviewComponent* previewComp)
-{
-    return showDialog (FileBrowserComponent::openMode
-                        | FileBrowserComponent::canSelectFiles
-                        | FileBrowserComponent::canSelectDirectories
-                        | FileBrowserComponent::canSelectMultipleItems,
-                       previewComp);
-}
-
 bool FileChooser::browseForFileToSave (const bool warnAboutOverwrite)
 {
     return showDialog (FileBrowserComponent::saveMode
@@ -153,6 +144,15 @@ bool FileChooser::browseForDirectory()
     return showDialog (FileBrowserComponent::openMode
                         | FileBrowserComponent::canSelectDirectories,
                        nullptr);
+}
+
+bool FileChooser::browseForMultipleFilesOrDirectories (FilePreviewComponent* previewComp)
+{
+    return showDialog (FileBrowserComponent::openMode
+                        | FileBrowserComponent::canSelectFiles
+                        | FileBrowserComponent::canSelectDirectories
+                        | FileBrowserComponent::canSelectMultipleItems,
+                       previewComp);
 }
 
 bool FileChooser::showDialog (const int flags, FilePreviewComponent* const previewComp)
