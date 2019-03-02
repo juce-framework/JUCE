@@ -110,17 +110,17 @@ public:
     void clear();
 
     //==============================================================================
-    /** Creates a new OSCArgument of type int32 with a given value
+    /** Creates a new OSCArgument of type int32 with the given value,
         and adds it to the OSCMessage object.
     */
     void addInt32 (int32 value);
 
-    /** Creates a new OSCArgument of type float32 with a given value
+    /** Creates a new OSCArgument of type float32 with the given value,
         and adds it to the OSCMessage object.
     */
     void addFloat32 (float value);
 
-    /** Creates a new OSCArgument of type string with a given value
+    /** Creates a new OSCArgument of type string with the given value,
         and adds it to the OSCMessage object.
     */
     void addString (const String& value);
@@ -128,9 +128,14 @@ public:
     /** Creates a new OSCArgument of type blob with binary data content copied from
         the given MemoryBlock.
 
-        Note: if the argument passed is an lvalue, this may copy the binary data.
+        Note: If the argument passed is an lvalue, this may copy the binary data.
     */
-    void addBlob (const MemoryBlock& blob);
+    void addBlob (MemoryBlock blob);
+
+    /** Creates a new OSCArgument of type colour with the given value,
+        and adds it to the OSCMessage object.
+    */
+    void addColour (OSCColour colour);
 
     /** Adds the OSCArgument argument to the OSCMessage object.
 

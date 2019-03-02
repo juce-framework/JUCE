@@ -224,9 +224,16 @@ MidiMessage::MidiMessage (const void* srcData, int sz, int& numBytesUsed, const 
         }
         else if (byte == 0xff)
         {
-            int n;
-            const int bytesLeft = readVariableLengthVal (src + 1, n);
-            size = jmin (sz + 1, n + 2 + bytesLeft);
+            if (sz == 1)
+            {
+                size = 1;
+            }
+            else
+            {
+                int n;
+                const int bytesLeft = readVariableLengthVal (src + 1, n);
+                size = jmin (sz + 1, n + 2 + bytesLeft);
+            }
 
             auto dest = allocateSpace (size);
             *dest = (uint8) byte;

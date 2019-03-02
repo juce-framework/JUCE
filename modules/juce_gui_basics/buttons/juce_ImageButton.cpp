@@ -109,13 +109,13 @@ Image ImageButton::getDownImage() const
 }
 
 void ImageButton::paintButton (Graphics& g,
-                               bool isMouseOverButton,
-                               bool isButtonDown)
+                               bool shouldDrawButtonAsHighlighted,
+                               bool shouldDrawButtonAsDown)
 {
     if (! isEnabled())
     {
-        isMouseOverButton = false;
-        isButtonDown = false;
+        shouldDrawButtonAsHighlighted = false;
+        shouldDrawButtonAsDown = false;
     }
 
     Image im (getCurrentImage());
@@ -168,14 +168,14 @@ void ImageButton::paintButton (Graphics& g,
 
         imageBounds.setBounds (x, y, w, h);
 
-        const bool useDownImage = isButtonDown || getToggleState();
+        const bool useDownImage = shouldDrawButtonAsDown || getToggleState();
 
         getLookAndFeel().drawImageButton (g, &im, x, y, w, h,
                                           useDownImage ? downOverlay
-                                                       : (isMouseOverButton ? overOverlay
+                                                       : (shouldDrawButtonAsHighlighted ? overOverlay
                                                                             : normalOverlay),
                                           useDownImage ? downOpacity
-                                                       : (isMouseOverButton ? overOpacity
+                                                       : (shouldDrawButtonAsHighlighted ? overOpacity
                                                                             : normalOpacity),
                                           *this);
     }

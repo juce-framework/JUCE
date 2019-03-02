@@ -329,11 +329,11 @@ long oggpack_read(oggpack_buffer *b,int bits){
   if(bits>8){
     ret|=b->ptr[1]<<(8-b->endbit);
     if(bits>16){
-      ret|=b->ptr[2]<<(16-b->endbit);
+      ret|=((unsigned long) b->ptr[2]) << (16 - b->endbit);
       if(bits>24){
-	ret|=b->ptr[3]<<(24-b->endbit);
+	ret |= ((unsigned long) b->ptr[3]) << (24 - b->endbit);
 	if(bits>32 && b->endbit){
-	  ret|=b->ptr[4]<<(32-b->endbit);
+	  ret |= ((unsigned long) b->ptr[4]) << (32 - b->endbit);
 	}
       }
     }

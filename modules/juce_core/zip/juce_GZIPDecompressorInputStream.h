@@ -70,7 +70,7 @@ public:
     GZIPDecompressorInputStream (InputStream& sourceStream);
 
     /** Destructor. */
-    ~GZIPDecompressorInputStream();
+    ~GZIPDecompressorInputStream() override;
 
     //==============================================================================
     int64 getPosition() override;
@@ -90,7 +90,6 @@ private:
     HeapBlock<uint8> buffer;
 
     class GZIPDecompressHelper;
-    friend struct ContainerDeletePolicy<GZIPDecompressHelper>;
     std::unique_ptr<GZIPDecompressHelper> helper;
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE

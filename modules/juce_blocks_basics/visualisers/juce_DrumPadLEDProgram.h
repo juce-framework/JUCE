@@ -75,7 +75,7 @@ struct DrumPadGridProgram  : public Block::Program
     };
 
     void setGridFills (int numColumns, int numRows,
-                       const juce::Array<GridFill>&);
+                       const Array<GridFill>&);
 
     /** Set up a new pad layout, with a slide animation from the old to the new. */
     enum SlideDirection : uint8
@@ -89,7 +89,7 @@ struct DrumPadGridProgram  : public Block::Program
     };
 
     void triggerSlideTransition (int newNumColumns, int newNumRows,
-                                 const juce::Array<GridFill>& newFills, SlideDirection);
+                                 const Array<GridFill>& newFills, SlideDirection);
 
 private:
     //==============================================================================
@@ -116,11 +116,11 @@ private:
     static constexpr uint32 colourSizeBytes   = 2;
 
     int getPadIndex (float posX, float posY) const;
-    void setGridFills (int numColumns, int numRows, const juce::Array<GridFill>& fills, uint32 byteOffset);
+    void setGridFills (int numColumns, int numRows, const Array<GridFill>& fills, uint32 byteOffset);
 
-    juce::String getLittleFootProgram() override;
-    juce::String getLittleFootProgramPre25() const;
-    juce::String getLittleFootProgramPost25() const;
+    String getLittleFootProgram() override;
+    String getLittleFootProgramPre25() const;
+    String getLittleFootProgramPost25() const;
 };
 
 } // namespace juce

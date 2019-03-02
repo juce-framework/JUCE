@@ -30,6 +30,99 @@
 
 class FilterGraph;
 
+/**
+    A window that shows a log of parameter change messagse sent by the plugin.
+*/
+class FilterDebugWindow : public AudioProcessorEditor,
+                          public AudioProcessorParameter::Listener,
+                          public ListBoxModel,
+                          public AsyncUpdater
+{
+public:
+    FilterDebugWindow (AudioProcessor& proc)
+        : AudioProcessorEditor (proc), processor (proc)
+    {
+        setSize (500, 200);
+        addAndMakeVisible (list);
+
+        for (auto* p : processor.getParameters())
+            p->addListener (this);
+
+        log.add ("Parameter debug log started");
+    }
+
+    void parameterValueChanged (int parameterIndex, float newValue) override
+    {
+        auto* param = processor.getParameters()[parameterIndex];
+        auto value = param->getCurrentValueAsText().quoted() + " (" + String (newValue, 4) + ")";
+
+        appendToLog ("parameter change", *param, value);
+    }
+
+    void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override
+    {
+        auto* param = processor.getParameters()[parameterIndex];
+        appendToLog ("gesture", *param, gestureIsStarting ? "start" : "end");
+    }
+
+private:
+    void appendToLog (StringRef action, AudioProcessorParameter& param, StringRef value)
+    {
+        String entry (action + " " + param.getName (30).quoted() + " [" + String (param.getParameterIndex()) + "]: " + value);
+
+        {
+            ScopedLock lock (pendingLogLock);
+            pendingLogEntries.add (entry);
+        }
+
+        triggerAsyncUpdate();
+    }
+
+    void resized() override
+    {
+        list.setBounds(getLocalBounds());
+    }
+
+    int getNumRows() override
+    {
+        return log.size();
+    }
+
+    void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool) override
+    {
+        g.setColour (getLookAndFeel().findColour (TextEditor::textColourId));
+
+        if (isPositiveAndBelow (rowNumber, log.size()))
+            g.drawText (log[rowNumber], Rectangle<int> { 0, 0, width, height }, Justification::left, true);
+    }
+
+    void handleAsyncUpdate() override
+    {
+        if (log.size() > logSizeTrimThreshold)
+            log.removeRange (0, log.size() - maxLogSize);
+
+        {
+            ScopedLock lock (pendingLogLock);
+            log.addArray (pendingLogEntries);
+            pendingLogEntries.clear();
+        }
+
+        list.updateContent();
+        list.scrollToEnsureRowIsOnscreen (log.size() - 1);
+    }
+
+    constexpr static int maxLogSize = 300;
+    constexpr static int logSizeTrimThreshold = 400;
+
+    ListBox list { "Log", this };
+
+    StringArray log;
+    StringArray pendingLogEntries;
+    CriticalSection pendingLogLock;
+
+    AudioProcessor& processor;
+};
+
 //==============================================================================
 /**
     A desktop window containing a plugin's GUI.
@@ -43,6 +136,7 @@ public:
         generic,
         programs,
         audioIO,
+        debug,
         numTypes
     };
 
@@ -123,6 +217,9 @@ private:
         if (type == PluginWindow::Type::audioIO)
             return new FilterIOConfigurationWindow (processor);
 
+        if (type == PluginWindow::Type::debug)
+            return new FilterDebugWindow (processor);
+
         jassertfalse;
         return {};
     }
@@ -135,6 +232,7 @@ private:
             case Type::generic:    return "Generic";
             case Type::programs:   return "Programs";
             case Type::audioIO:    return "IO";
+            case Type::debug:      return "Debug";
             default:               return {};
         }
     }

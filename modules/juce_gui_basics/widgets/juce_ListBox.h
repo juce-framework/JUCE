@@ -40,7 +40,7 @@ class JUCE_API  ListBoxModel
 public:
     //==============================================================================
     /** Destructor. */
-    virtual ~ListBoxModel()  {}
+    virtual ~ListBoxModel() = default;
 
     //==============================================================================
     /** This has to return the number of items in the list.
@@ -193,7 +193,7 @@ public:
              ListBoxModel* model = nullptr);
 
     /** Destructor. */
-    ~ListBox();
+    ~ListBox() override;
 
 
     //==============================================================================

@@ -59,24 +59,24 @@ public:
     //==============================================================================
     /** Creates an empty set. */
     // VS2013 doesn't allow defaulted noexcept constructors.
-    SortedSet() noexcept {}
+    SortedSet() = default;
 
     /** Creates a copy of another set. */
     SortedSet (const SortedSet&) = default;
 
     /** Creates a copy of another set. */
     // VS2013 doesn't allow defaulted noexcept constructors.
-    SortedSet (SortedSet&& other) noexcept : data (static_cast<decltype(data)&&> (other.data)) {}
+    SortedSet (SortedSet&& other) noexcept : data (std::move (other.data)) {}
 
     /** Makes a copy of another set. */
     SortedSet& operator= (const SortedSet&) = default;
 
     /** Makes a copy of another set. */
     // VS2013 doesn't allow defaulted noexcept constructors.
-    SortedSet& operator= (SortedSet&& other) noexcept { data = static_cast<decltype(data)&&> (other.data); return *this; }
+    SortedSet& operator= (SortedSet&& other) noexcept { data = std::move (other.data); return *this; }
 
     /** Destructor. */
-    ~SortedSet() noexcept {}
+    ~SortedSet() = default;
 
     //==============================================================================
     /** Compares this set to another one.

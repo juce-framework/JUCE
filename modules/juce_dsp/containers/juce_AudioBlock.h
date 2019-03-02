@@ -62,7 +62,7 @@ public:
 
     //==============================================================================
     /** Create a zero-sized AudioBlock. */
-    forcedinline AudioBlock() noexcept {}
+    forcedinline AudioBlock() noexcept = default;
 
     /** Creates an AudioBlock from a pointer to an array of channels.
         AudioBlock does not copy nor own the memory pointed to by dataToUse.
@@ -143,7 +143,7 @@ public:
         : channels (buffer.getArrayOfWritePointers()),
           numChannels (static_cast<ChannelCountType> (buffer.getNumChannels())),
           startSample (startSampleIndex),
-          numSamples (static_cast<size_t> (buffer.getNumSamples()))
+          numSamples (static_cast<size_t> (buffer.getNumSamples()) - startSampleIndex)
     {
         jassert (startSample < numSamples);
     }
@@ -327,7 +327,7 @@ public:
         pointed to by the receiver remains valid through-out the life-time of the
         returned sub-block.
 
-        @param newOffset   The index of an element inside the reciever which will
+        @param newOffset   The index of an element inside the receiver which will
                            will become the first element of the return value.
         @param newLength   The number of elements of the newly created sub-block.
     */
@@ -344,7 +344,7 @@ public:
         pointed to by the receiver remains valid through-out the life-time of the
         returned sub-block.
 
-        @param newOffset   The index of an element inside the reciever which will
+        @param newOffset   The index of an element inside the receiver which will
                            will become the first element of the return value.
                            The return value will include all subsequent elements
                            of the receiver.
@@ -486,7 +486,8 @@ public:
     }
 
     /** Multiplies all channels of the AudioBlock by a smoothly changing value and stores them . */
-    AudioBlock& multiply (LinearSmoothedValue<SampleType>& value) noexcept
+    template <typename SmoothingType>
+    AudioBlock& multiply (SmoothedValue<SampleType, SmoothingType>& value) noexcept
     {
         if (! value.isSmoothing())
         {
@@ -507,13 +508,14 @@ public:
     }
 
     /** Multiplies all channels of the source by a smoothly changing value and stores them in the receiver. */
-    AudioBlock& multiply (AudioBlock src, LinearSmoothedValue<SampleType>& value) noexcept
+    template <typename SmoothingType>
+    AudioBlock& multiply (AudioBlock src, SmoothedValue<SampleType, SmoothingType>& value) noexcept
     {
         jassert (numChannels == src.numChannels);
 
         if (! value.isSmoothing())
         {
-            copy (src);
+            multiply (src, value.getTargetValue());
         }
         else
         {
@@ -632,7 +634,8 @@ public:
     forcedinline AudioBlock&                      operator-= (AudioBlock src) noexcept   { return subtract (src); }
     forcedinline AudioBlock& JUCE_VECTOR_CALLTYPE operator*= (SampleType src) noexcept   { return multiply (src); }
     forcedinline AudioBlock&                      operator*= (AudioBlock src) noexcept   { return multiply (src); }
-    forcedinline AudioBlock&                      operator*= (LinearSmoothedValue<SampleType>& value) noexcept   { return multiply (value); }
+    template <typename SmoothingType>
+    forcedinline AudioBlock&                      operator*= (SmoothedValue<SampleType, SmoothingType>& value) noexcept   { return multiply (value); }
 
     //==============================================================================
     // This class can only be used with floating point types

@@ -55,10 +55,20 @@ public:
     /** Destructor.
         Any processor objects that have been added to the graph will also be deleted.
     */
-    ~AudioProcessorGraph();
+    ~AudioProcessorGraph() override;
 
     /** Each node in the graph has a UID of this type. */
-    using NodeID = uint32;
+    struct NodeID
+    {
+        NodeID() {}
+        explicit NodeID (uint32 i) : uid (i) {}
+
+        uint32 uid = 0;
+
+        bool operator== (const NodeID& other) const noexcept    { return uid == other.uid; }
+        bool operator!= (const NodeID& other) const noexcept    { return uid != other.uid; }
+        bool operator<  (const NodeID& other) const noexcept    { return uid <  other.uid; }
+    };
 
     //==============================================================================
     /** A special index that represents the midi channel of a node.
@@ -185,7 +195,7 @@ public:
         This will return nullptr if the index is out of range.
         @see getNodeForId
     */
-    Node* getNode (int index) const noexcept                        { return nodes [index]; }
+    Node::Ptr getNode (int index) const noexcept                    { return nodes[index]; }
 
     /** Searches the graph for a node with the given ID number and returns it.
         If no such node was found, this returns nullptr.
@@ -312,7 +322,7 @@ public:
 
         //==============================================================================
         AudioGraphIOProcessor (IODeviceType);
-        ~AudioGraphIOProcessor();
+        ~AudioGraphIOProcessor() override;
 
         const String getName() const override;
         void fillInPluginDescription (PluginDescription&) const override;

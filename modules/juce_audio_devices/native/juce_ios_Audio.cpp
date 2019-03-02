@@ -235,6 +235,7 @@ private:
 
     SharedResourcePointer<AudioSessionHolder> sessionHolder;
 
+    JUCE_DECLARE_WEAK_REFERENCEABLE (iOSAudioIODeviceType)
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (iOSAudioIODeviceType)
 };
 
@@ -242,7 +243,7 @@ private:
 struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                                       public AsyncUpdater
 {
-    Pimpl (iOSAudioIODeviceType& ioDeviceType, iOSAudioIODevice& ioDevice)
+    Pimpl (iOSAudioIODeviceType* ioDeviceType, iOSAudioIODevice& ioDevice)
         : deviceType (ioDeviceType),
           owner (ioDevice)
     {
@@ -255,9 +256,8 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
 
         setAudioSessionActive (true);
         updateHardwareInfo();
-        setAudioSessionActive (false);
-
         channelData.reconfigure ({}, {});
+        setAudioSessionActive (false);
 
         sessionHolder->activeDevices.add (this);
     }
@@ -278,7 +278,9 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
        #endif
 
         if (category == AVAudioSessionCategoryPlayAndRecord)
-            options |= (AVAudioSessionCategoryOptionDefaultToSpeaker | AVAudioSessionCategoryOptionAllowBluetooth);
+            options |= (AVAudioSessionCategoryOptionDefaultToSpeaker
+                      | AVAudioSessionCategoryOptionAllowBluetooth
+                      | AVAudioSessionCategoryOptionAllowBluetoothA2DP);
 
         JUCE_NSERROR_CHECK ([[AVAudioSession sharedInstance] setCategory: category
                                                              withOptions: options
@@ -405,9 +407,9 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         JUCE_IOS_AUDIO_LOG ("Sample rate after detecting available sample rates: " << sampleRate);
     }
 
-    void updateHardwareInfo()
+    void updateHardwareInfo (bool forceUpdate = false)
     {
-        if (! hardwareInfoNeedsUpdating.compareAndSetBool (false, true))
+        if (! forceUpdate && ! hardwareInfoNeedsUpdating.compareAndSetBool (false, true))
             return;
 
         JUCE_IOS_AUDIO_LOG ("Updating hardware info");
@@ -415,7 +417,8 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         updateAvailableSampleRates();
         updateAvailableBufferSizes();
 
-        deviceType.callDeviceChangeListeners();
+        if (deviceType != nullptr)
+            deviceType->callDeviceChangeListeners();
     }
 
     void setTargetSampleRateAndBufferSize()
@@ -451,13 +454,12 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                             << ", targetSampleRate: " << targetSampleRate
                             << ", targetBufferSize: " << targetBufferSize);
 
-        channelData.reconfigure (requestedInputChannels, requestedOutputChannels);
-
-        setAudioSessionCategory (channelData.areInputChannelsAvailable() ? AVAudioSessionCategoryPlayAndRecord : AVAudioSessionCategoryPlayback);
         setAudioSessionActive (true);
-
+        setAudioSessionCategory (requestedInputChannels > 0 ? AVAudioSessionCategoryPlayAndRecord
+                                                            : AVAudioSessionCategoryPlayback);
+        channelData.reconfigure (requestedInputChannels, requestedOutputChannels);
+        updateHardwareInfo (true);
         setTargetSampleRateAndBufferSize();
-
         fixAudioRouteIfSetToReceiver();
 
         isRunning = true;
@@ -486,11 +488,11 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         {
             isRunning = false;
 
-            if (audioUnit != 0)
+            if (audioUnit != nullptr)
             {
                 AudioOutputUnitStart (audioUnit);
                 AudioComponentInstanceDispose (audioUnit);
-                audioUnit = 0;
+                audioUnit = nullptr;
             }
 
             setAudioSessionActive (false);
@@ -819,6 +821,9 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
             {
                 AudioOutputUnitStop (audioUnit);
                 setAudioSessionActive (false);
+
+                if (callback != nullptr)
+                    callback->audioDeviceStopped();
             }
         }
     }
@@ -836,9 +841,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         if (useInput)
             err = AudioUnitRender (audioUnit, flags, time, 1, numFrames, data);
 
-        const int numChannels = jmax (channelData.inputs->numHardwareChannels,
-                                      channelData.outputs->numHardwareChannels);
-        const UInt32 totalDataSize = sizeof (short) * (uint32) numChannels * numFrames;
+        const auto channelDataSize = sizeof (float) * numFrames;
 
         const ScopedTryLock stl (callbackLock);
 
@@ -847,49 +850,40 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
             if ((int) numFrames > channelData.getFloatBufferSize())
                 channelData.setFloatBufferSize ((int) numFrames);
 
-            float** inputData  = channelData.audioData.getArrayOfWritePointers();
-            float** outputData = inputData + channelData.inputs->numActiveChannels;
+            float** const inputData = channelData.audioData.getArrayOfWritePointers();
+            float** const outputData = inputData + channelData.inputs->numActiveChannels;
 
             if (useInput)
             {
-                const auto* inputShortData = (short*) data->mBuffers[0].mData;
-
-                for (UInt32 i = 0; i < numFrames; ++i)
+                for (int c = 0; c < channelData.inputs->numActiveChannels; ++c)
                 {
-                    for (int channel = 0; channel < channelData.inputs->numActiveChannels; ++channel)
-                        inputData[channel][i] = *(inputShortData + channelData.inputs->activeChannelIndicies[channel]) * (1.0f / 32768.0f);
-
-                    inputShortData += numChannels;
+                    auto channelIndex = channelData.inputs->activeChannelIndices[c];
+                    memcpy (inputData[c], (float*) data->mBuffers[channelIndex].mData, channelDataSize);
                 }
             }
             else
             {
-                for (int i = 0; i < channelData.inputs->numActiveChannels; ++i)
-                    zeromem (inputData, sizeof (float) * numFrames);
+                for (int c = 0; c < channelData.inputs->numActiveChannels; ++c)
+                    zeromem (inputData[c], channelDataSize);
             }
 
             callback->audioDeviceIOCallback ((const float**) inputData,  channelData.inputs ->numActiveChannels,
                                                              outputData, channelData.outputs->numActiveChannels,
                                              (int) numFrames);
 
-            auto* outputShortData = (short*) data->mBuffers[0].mData;
-
-            zeromem (outputShortData, totalDataSize);
-
-            if (channelData.outputs->numActiveChannels > 0)
+            for (int c = 0; c < channelData.outputs->numActiveChannels; ++c)
             {
-                for (UInt32 i = 0; i < numFrames; ++i)
-                {
-                    for (int channel = 0; channel < channelData.outputs->numActiveChannels; ++channel)
-                        *(outputShortData + channelData.outputs->activeChannelIndicies[channel]) = (short) (outputData[channel][i] * 32767.0f);
-
-                    outputShortData += numChannels;
-                }
+                auto channelIndex = channelData.outputs->activeChannelIndices[c];
+                memcpy (data->mBuffers[channelIndex].mData, outputData[c], channelDataSize);
             }
+
+            for (auto c : channelData.outputs->inactiveChannelIndices)
+                zeromem (data->mBuffers[c].mData, channelDataSize);
         }
         else
         {
-            zeromem (data->mBuffers[0].mData, totalDataSize);
+            for (uint32 c = 0; c < data->mNumberBuffers; ++c)
+                zeromem (data->mBuffers[c].mData, channelDataSize);
         }
 
         return err;
@@ -927,10 +921,10 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
     {
         JUCE_IOS_AUDIO_LOG ("Creating the audio unit");
 
-        if (audioUnit != 0)
+        if (audioUnit != nullptr)
         {
             AudioComponentInstanceDispose (audioUnit);
-            audioUnit = 0;
+            audioUnit = nullptr;
         }
 
         AudioComponentDescription desc;
@@ -940,10 +934,10 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         desc.componentFlags = 0;
         desc.componentFlagsMask = 0;
 
-        AudioComponent comp = AudioComponentFindNext (0, &desc);
+        AudioComponent comp = AudioComponentFindNext (nullptr, &desc);
         AudioComponentInstanceNew (comp, &audioUnit);
 
-        if (audioUnit == 0)
+        if (audioUnit == nullptr)
             return false;
 
        #if JucePlugin_Enable_IAA
@@ -1001,11 +995,11 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
             zerostruct (format);
             format.mSampleRate = sampleRate;
             format.mFormatID = kAudioFormatLinearPCM;
-            format.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked | kAudioFormatFlagsNativeEndian;
-            format.mBitsPerChannel = 8 * sizeof (short);
+            format.mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagIsNonInterleaved | kAudioFormatFlagsNativeEndian | kLinearPCMFormatFlagIsPacked;
+            format.mBitsPerChannel = 8 * sizeof (float);
             format.mFramesPerPacket = 1;
             format.mChannelsPerFrame = (UInt32) jmax (channelData.inputs->numHardwareChannels, channelData.outputs->numHardwareChannels);
-            format.mBytesPerFrame = format.mBytesPerPacket = format.mChannelsPerFrame * sizeof (short);
+            format.mBytesPerFrame = format.mBytesPerPacket = sizeof (float);
 
             AudioUnitSetProperty (audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input,  0, &format, sizeof (format));
             AudioUnitSetProperty (audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &format, sizeof (format));
@@ -1082,10 +1076,10 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
 
         if (isRunning)
         {
-            if (audioUnit != 0)
+            if (audioUnit != nullptr)
             {
                 AudioComponentInstanceDispose (audioUnit);
-                audioUnit = 0;
+                audioUnit = nullptr;
 
                 if (callback != nullptr)
                     callback->audioDeviceStopped();
@@ -1095,7 +1089,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
 
             createAudioUnit();
 
-            if (audioUnit != 0)
+            if (audioUnit != nullptr)
             {
                 isRunning = true;
 
@@ -1172,7 +1166,8 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                   areChannelsAccessible ((! isInput) || [AVAudioSession sharedInstance].isInputAvailable),
                   activeChannels (limitRequiredChannelsToHardware (numHardwareChannels, requiredChannels)),
                   numActiveChannels (activeChannels.countNumberOfSetBits()),
-                  activeChannelIndicies (getActiveChannelIndicies (activeChannels))
+                  activeChannelIndices (getActiveChannelIndices (activeChannels)),
+                  inactiveChannelIndices (getInactiveChannelIndices (activeChannelIndices, numHardwareChannels))
             {
                #if JUCE_IOS_AUDIO_LOGGING
                 {
@@ -1187,7 +1182,12 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                     info << ", Are channels available: " << (areChannelsAccessible ? "yes" : "no")
                          << ", Active channel indices:";
 
-                    for (auto i : activeChannelIndicies)
+                    for (auto i : activeChannelIndices)
+                        info << " " << i;
+
+                    info << ", Inactive channel indices:";
+
+                    for (auto i : inactiveChannelIndices)
                         info << " " << i;
 
                     JUCE_IOS_AUDIO_LOG ((isInput ? "Input" : "Output") << " channel configuration: {" << info << "}");
@@ -1202,7 +1202,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
             const BigInteger activeChannels;
             const int numActiveChannels;
 
-            const Array<int> activeChannelIndicies;
+            const Array<int> activeChannelIndices, inactiveChannelIndices;
 
         private:
             static StringArray getHardwareChannelNames (const bool isInput)
@@ -1234,7 +1234,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                 return requiredChannels;
             }
 
-            static Array<int> getActiveChannelIndicies (const BigInteger activeChannelsToIndex)
+            static Array<int> getActiveChannelIndices (const BigInteger activeChannelsToIndex)
             {
                 Array<int> result;
 
@@ -1245,6 +1245,21 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                     result.add (index);
                     index = activeChannelsToIndex.findNextSetBit (++index);
                 }
+
+                return result;
+            }
+
+            static Array<int> getInactiveChannelIndices (const Array<int>& activeIndices, int numChannels)
+            {
+                Array<int> result;
+
+                auto nextActiveChannel = activeIndices.begin();
+
+                for (int i = 0; i < numChannels; ++i)
+                    if (nextActiveChannel != activeIndices.end() && i == *nextActiveChannel)
+                        ++nextActiveChannel;
+                    else
+                        result.add (i);
 
                 return result;
             }
@@ -1307,7 +1322,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
 
     MidiMessageCollector* messageCollector = nullptr;
 
-    iOSAudioIODeviceType& deviceType;
+    WeakReference<iOSAudioIODeviceType> deviceType;
     iOSAudioIODevice& owner;
 
     CriticalSection callbackLock;
@@ -1327,7 +1342,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
 };
 
 //==============================================================================
-iOSAudioIODevice::iOSAudioIODevice (iOSAudioIODeviceType& ioDeviceType, const String&, const String&)
+iOSAudioIODevice::iOSAudioIODevice (iOSAudioIODeviceType* ioDeviceType, const String&, const String&)
     : AudioIODevice (iOSAudioDeviceName, iOSAudioDeviceName),
       pimpl (new Pimpl (ioDeviceType, *this))
 {
@@ -1401,7 +1416,7 @@ bool iOSAudioIODeviceType::hasSeparateInputsAndOutputs() const            { retu
 
 AudioIODevice* iOSAudioIODeviceType::createDevice (const String& outputDeviceName, const String& inputDeviceName)
 {
-    return new iOSAudioIODevice (*this, outputDeviceName, inputDeviceName);
+    return new iOSAudioIODevice (this, outputDeviceName, inputDeviceName);
 }
 
 void iOSAudioIODeviceType::handleRouteChange (AVAudioSessionRouteChangeReason)

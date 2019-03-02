@@ -49,7 +49,7 @@ public:
     TabBarButton (const String& name, TabbedButtonBar& ownerBar);
 
     /** Destructor. */
-    ~TabBarButton();
+    ~TabBarButton() override;
 
     /** Returns the bar that contains this button. */
     TabbedButtonBar& getTabbedButtonBar() const   { return owner; }
@@ -109,7 +109,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown) override;
+    void paintButton (Graphics&, bool, bool) override;
     /** @internal */
     void clicked (const ModifierKeys&) override;
     /** @internal */
@@ -173,7 +173,7 @@ public:
     TabbedButtonBar (Orientation orientation);
 
     /** Destructor. */
-    ~TabbedButtonBar();
+    ~TabbedButtonBar() override;
 
     //==============================================================================
     /** Changes the bar's orientation.
@@ -308,7 +308,7 @@ public:
     */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         virtual int getTabButtonSpaceAroundImage() = 0;
         virtual int getTabButtonOverlap (int tabDepth) = 0;
@@ -359,8 +359,6 @@ private:
     int currentTabIndex = -1;
 
     class BehindFrontTabComp;
-    friend class BehindFrontTabComp;
-    friend struct ContainerDeletePolicy<BehindFrontTabComp>;
     std::unique_ptr<BehindFrontTabComp> behindFrontTab;
     std::unique_ptr<Button> extraTabsButton;
 

@@ -107,14 +107,14 @@ struct Expression::Helpers
     class Constant  : public Term
     {
     public:
-        Constant (const double val, const bool resolutionTarget)
+        Constant (double val, bool resolutionTarget)
             : value (val), isResolutionTarget (resolutionTarget) {}
 
         Type getType() const noexcept                { return constantType; }
         Term* clone() const                          { return new Constant (value, isResolutionTarget); }
-        TermPtr resolve (const Scope&, int)          { return this; }
+        TermPtr resolve (const Scope&, int)          { return *this; }
         double toDouble() const                      { return value; }
-        TermPtr negated()                            { return new Constant (-value, isResolutionTarget); }
+        TermPtr negated()                            { return *new Constant (-value, isResolutionTarget); }
 
         String toString() const
         {
@@ -133,9 +133,9 @@ struct Expression::Helpers
     class BinaryTerm  : public Term
     {
     public:
-        BinaryTerm (Term* const l, Term* const r) : left (l), right (r)
+        BinaryTerm (TermPtr l, TermPtr r) : left (std::move (l)), right (std::move (r))
         {
-            jassert (l != nullptr && r != nullptr);
+            jassert (left != nullptr && right != nullptr);
         }
 
         int getInputIndexFor (const Term* possibleInput) const
@@ -145,22 +145,22 @@ struct Expression::Helpers
 
         Type getType() const noexcept       { return operatorType; }
         int getNumInputs() const            { return 2; }
-        Term* getInput (int index) const    { return index == 0 ? left.get() : (index == 1 ? right.get() : 0); }
+        Term* getInput (int index) const    { return index == 0 ? left.get() : (index == 1 ? right.get() : nullptr); }
 
         virtual double performFunction (double left, double right) const = 0;
         virtual void writeOperator (String& dest) const = 0;
 
         TermPtr resolve (const Scope& scope, int recursionDepth)
         {
-            return new Constant (performFunction (left ->resolve (scope, recursionDepth)->toDouble(),
-                                                  right->resolve (scope, recursionDepth)->toDouble()), false);
+            return *new Constant (performFunction (left ->resolve (scope, recursionDepth)->toDouble(),
+                                                   right->resolve (scope, recursionDepth)->toDouble()), false);
         }
 
         String toString() const
         {
             String s;
+            auto ourPrecendence = getOperatorPrecedence();
 
-            const int ourPrecendence = getOperatorPrecedence();
             if (left->getOperatorPrecedence() > ourPrecendence)
                 s << '(' << left->toString() << ')';
             else
@@ -183,12 +183,12 @@ struct Expression::Helpers
         {
             jassert (input == left || input == right);
             if (input != left && input != right)
-                return TermPtr();
+                return {};
 
-            if (const Term* const dest = findDestinationFor (topLevelTerm, this))
+            if (auto dest = findDestinationFor (topLevelTerm, this))
                 return dest->createTermToEvaluateInput (scope, this, overallTarget, topLevelTerm);
 
-            return new Constant (overallTarget, false);
+            return *new Constant (overallTarget, false);
         }
     };
 
@@ -238,7 +238,7 @@ struct Expression::Helpers
         Type getType() const noexcept   { return functionType; }
         Term* clone() const             { return new Function (functionName, parameters); }
         int getNumInputs() const        { return parameters.size(); }
-        Term* getInput (int i) const    { return parameters.getReference(i).term; }
+        Term* getInput (int i) const    { return parameters.getReference(i).term.get(); }
         String getName() const          { return functionName; }
 
         TermPtr resolve (const Scope& scope, int recursionDepth)
@@ -261,7 +261,7 @@ struct Expression::Helpers
                 result = scope.evaluateFunction (functionName, nullptr, 0);
             }
 
-            return new Constant (result, false);
+            return *new Constant (result, false);
         }
 
         int getInputIndexFor (const Term* possibleInput) const
@@ -300,7 +300,7 @@ struct Expression::Helpers
     class DotOperator  : public BinaryTerm
     {
     public:
-        DotOperator (SymbolTerm* const l, Term* const r)  : BinaryTerm (l, r) {}
+        DotOperator (SymbolTerm* l, TermPtr r)  : BinaryTerm (TermPtr (l), r) {}
 
         TermPtr resolve (const Scope& scope, int recursionDepth)
         {
@@ -311,7 +311,7 @@ struct Expression::Helpers
             return visitor.output;
         }
 
-        Term* clone() const                             { return new DotOperator (getSymbol(), right); }
+        Term* clone() const                             { return new DotOperator (getSymbol(), *right); }
         String getName() const                          { return "."; }
         int getOperatorPrecedence() const               { return 1; }
         void writeOperator (String& dest) const         { dest << '.'; }
@@ -414,11 +414,11 @@ struct Expression::Helpers
         int getInputIndexFor (const Term* possibleInput) const  { return possibleInput == input ? 0 : -1; }
         int getNumInputs() const                                { return 1; }
         Term* getInput (int index) const                        { return index == 0 ? input.get() : nullptr; }
-        Term* clone() const                                     { return new Negate (input->clone()); }
+        Term* clone() const                                     { return new Negate (*input->clone()); }
 
         TermPtr resolve (const Scope& scope, int recursionDepth)
         {
-            return new Constant (-input->resolve (scope, recursionDepth)->toDouble(), false);
+            return *new Constant (-input->resolve (scope, recursionDepth)->toDouble(), false);
         }
 
         String getName() const          { return "-"; }
@@ -431,8 +431,8 @@ struct Expression::Helpers
 
             const Term* const dest = findDestinationFor (topLevelTerm, this);
 
-            return new Negate (dest == nullptr ? new Constant (overallTarget, false)
-                                               : dest->createTermToEvaluateInput (scope, this, overallTarget, topLevelTerm));
+            return *new Negate (dest == nullptr ? TermPtr (*new Constant (overallTarget, false))
+                                                : dest->createTermToEvaluateInput (scope, this, overallTarget, topLevelTerm));
         }
 
         String toString() const
@@ -451,9 +451,9 @@ struct Expression::Helpers
     class Add  : public BinaryTerm
     {
     public:
-        Add (Term* const l, Term* const r) : BinaryTerm (l, r) {}
+        Add (TermPtr l, TermPtr r) : BinaryTerm (l, r) {}
 
-        Term* clone() const                     { return new Add (left->clone(), right->clone()); }
+        Term* clone() const                     { return new Add (*left->clone(), *right->clone()); }
         double performFunction (double lhs, double rhs) const    { return lhs + rhs; }
         int getOperatorPrecedence() const       { return 3; }
         String getName() const                  { return "+"; }
@@ -461,11 +461,10 @@ struct Expression::Helpers
 
         TermPtr createTermToEvaluateInput (const Scope& scope, const Term* input, double overallTarget, Term* topLevelTerm) const
         {
-            const TermPtr newDest (createDestinationTerm (scope, input, overallTarget, topLevelTerm));
-            if (newDest == nullptr)
-                return TermPtr();
+            if (auto newDest = createDestinationTerm (scope, input, overallTarget, topLevelTerm))
+                return *new Subtract (newDest, *(input == left ? right : left)->clone());
 
-            return new Subtract (newDest, (input == left ? right : left)->clone());
+            return {};
         }
 
     private:
@@ -476,9 +475,9 @@ struct Expression::Helpers
     class Subtract  : public BinaryTerm
     {
     public:
-        Subtract (Term* const l, Term* const r) : BinaryTerm (l, r) {}
+        Subtract (TermPtr l, TermPtr r) : BinaryTerm (l, r) {}
 
-        Term* clone() const                     { return new Subtract (left->clone(), right->clone()); }
+        Term* clone() const                     { return new Subtract (*left->clone(), *right->clone()); }
         double performFunction (double lhs, double rhs) const    { return lhs - rhs; }
         int getOperatorPrecedence() const       { return 3; }
         String getName() const                  { return "-"; }
@@ -486,14 +485,15 @@ struct Expression::Helpers
 
         TermPtr createTermToEvaluateInput (const Scope& scope, const Term* input, double overallTarget, Term* topLevelTerm) const
         {
-            const TermPtr newDest (createDestinationTerm (scope, input, overallTarget, topLevelTerm));
-            if (newDest == nullptr)
-                return TermPtr();
+            if (auto newDest = createDestinationTerm (scope, input, overallTarget, topLevelTerm))
+            {
+                if (input == left)
+                    return *new Add (*newDest, *right->clone());
 
-            if (input == left)
-                return new Add (newDest, right->clone());
+                return *new Subtract (*left->clone(), *newDest);
+            }
 
-            return new Subtract (left->clone(), newDest);
+            return {};
         }
 
     private:
@@ -504,9 +504,9 @@ struct Expression::Helpers
     class Multiply  : public BinaryTerm
     {
     public:
-        Multiply (Term* const l, Term* const r) : BinaryTerm (l, r) {}
+        Multiply (TermPtr l, TermPtr r) : BinaryTerm (l, r) {}
 
-        Term* clone() const                     { return new Multiply (left->clone(), right->clone()); }
+        Term* clone() const                     { return new Multiply (*left->clone(), *right->clone()); }
         double performFunction (double lhs, double rhs) const    { return lhs * rhs; }
         String getName() const                  { return "*"; }
         void writeOperator (String& dest) const { dest << " * "; }
@@ -514,14 +514,12 @@ struct Expression::Helpers
 
         TermPtr createTermToEvaluateInput (const Scope& scope, const Term* input, double overallTarget, Term* topLevelTerm) const
         {
-            const TermPtr newDest (createDestinationTerm (scope, input, overallTarget, topLevelTerm));
-            if (newDest == nullptr)
-                return TermPtr();
+            if (auto newDest = createDestinationTerm (scope, input, overallTarget, topLevelTerm))
+                return *new Divide (newDest, *(input == left ? right : left)->clone());
 
-            return new Divide (newDest, (input == left ? right : left)->clone());
+            return {};
         }
 
-    private:
         JUCE_DECLARE_NON_COPYABLE (Multiply)
     };
 
@@ -529,9 +527,9 @@ struct Expression::Helpers
     class Divide  : public BinaryTerm
     {
     public:
-        Divide (Term* const l, Term* const r) : BinaryTerm (l, r) {}
+        Divide (TermPtr l, TermPtr r) : BinaryTerm (l, r) {}
 
-        Term* clone() const                     { return new Divide (left->clone(), right->clone()); }
+        Term* clone() const                     { return new Divide (*left->clone(), *right->clone()); }
         double performFunction (double lhs, double rhs) const    { return lhs / rhs; }
         String getName() const                  { return "/"; }
         void writeOperator (String& dest) const { dest << " / "; }
@@ -539,17 +537,17 @@ struct Expression::Helpers
 
         TermPtr createTermToEvaluateInput (const Scope& scope, const Term* input, double overallTarget, Term* topLevelTerm) const
         {
-            const TermPtr newDest (createDestinationTerm (scope, input, overallTarget, topLevelTerm));
+            auto newDest = createDestinationTerm (scope, input, overallTarget, topLevelTerm);
+
             if (newDest == nullptr)
-                return TermPtr();
+                return {};
 
             if (input == left)
-                return new Multiply (newDest, right->clone());
+                return *new Multiply (*newDest, *right->clone());
 
-            return new Divide (left->clone(), newDest);
+            return *new Divide (*left->clone(), *newDest);
         }
 
-    private:
         JUCE_DECLARE_NON_COPYABLE (Divide)
     };
 
@@ -601,22 +599,19 @@ struct Expression::Helpers
         }
 
         for (int i = 0; i < numIns; ++i)
-        {
-            Constant* const c = findTermToAdjust (term->getInput (i), mustBeFlagged);
-            if (c != nullptr)
+            if (auto c = findTermToAdjust (term->getInput (i), mustBeFlagged))
                 return c;
-        }
 
         return nullptr;
     }
 
-    static bool containsAnySymbols (const Term* const t)
+    static bool containsAnySymbols (const Term& t)
     {
-        if (t->getType() == Expression::symbolType)
+        if (t.getType() == Expression::symbolType)
             return true;
 
-        for (int i = t->getNumInputs(); --i >= 0;)
-            if (containsAnySymbols (t->getInput (i)))
+        for (int i = t.getNumInputs(); --i >= 0;)
+            if (containsAnySymbols (*t.getInput (i)))
                 return true;
 
         return false;
@@ -662,9 +657,9 @@ struct Expression::Helpers
         TermPtr readUpToComma()
         {
             if (text.isEmpty())
-                return new Constant (0.0, false);
+                return *new Constant (0.0, false);
 
-            const TermPtr e (readExpression());
+            auto e = readExpression();
 
             if (e == nullptr || ((! readOperator (",")) && ! text.isEmpty()))
                 return parseError ("Syntax error: \"" + String (text) + "\"");
@@ -677,12 +672,12 @@ struct Expression::Helpers
     private:
         String::CharPointerType& text;
 
-        Term* parseError (const String& message)
+        TermPtr parseError (const String& message)
         {
             if (error.isEmpty())
                 error = message;
 
-            return nullptr;
+            return {};
         }
 
         //==============================================================================
@@ -777,20 +772,20 @@ struct Expression::Helpers
 
         TermPtr readExpression()
         {
-            TermPtr lhs (readMultiplyOrDivideExpression());
-
+            auto lhs = readMultiplyOrDivideExpression();
             char opType;
+
             while (lhs != nullptr && readOperator ("+-", &opType))
             {
-                TermPtr rhs (readMultiplyOrDivideExpression());
+                auto rhs = readMultiplyOrDivideExpression();
 
                 if (rhs == nullptr)
                     return parseError ("Expected expression after \"" + String::charToString ((juce_wchar) (uint8) opType) + "\"");
 
                 if (opType == '+')
-                    lhs = new Add (lhs, rhs);
+                    lhs = *new Add (lhs, rhs);
                 else
-                    lhs = new Subtract (lhs, rhs);
+                    lhs = *new Subtract (lhs, rhs);
             }
 
             return lhs;
@@ -798,9 +793,9 @@ struct Expression::Helpers
 
         TermPtr readMultiplyOrDivideExpression()
         {
-            TermPtr lhs (readUnaryExpression());
-
+            auto lhs = readUnaryExpression();
             char opType;
+
             while (lhs != nullptr && readOperator ("*/", &opType))
             {
                 TermPtr rhs (readUnaryExpression());
@@ -809,9 +804,9 @@ struct Expression::Helpers
                     return parseError ("Expected expression after \"" + String::charToString ((juce_wchar) (uint8) opType) + "\"");
 
                 if (opType == '*')
-                    lhs = new Multiply (lhs, rhs);
+                    lhs = *new Multiply (lhs, rhs);
                 else
-                    lhs = new Divide (lhs, rhs);
+                    lhs = *new Divide (lhs, rhs);
             }
 
             return lhs;
@@ -838,12 +833,10 @@ struct Expression::Helpers
 
         TermPtr readPrimaryExpression()
         {
-            TermPtr e (readParenthesisedExpression());
-            if (e != nullptr)
+            if (auto e = readParenthesisedExpression())
                 return e;
 
-            e = readNumber();
-            if (e != nullptr)
+            if (auto e = readNumber())
                 return e;
 
             return readSymbolOrFunction();
@@ -852,24 +845,25 @@ struct Expression::Helpers
         TermPtr readSymbolOrFunction()
         {
             String identifier;
+
             if (readIdentifier (identifier))
             {
                 if (readOperator ("(")) // method call...
                 {
-                    Function* const f = new Function (identifier);
+                    auto f = new Function (identifier);
                     std::unique_ptr<Term> func (f);  // (can't use std::unique_ptr<Function> in MSVC)
 
-                    TermPtr param (readExpression());
+                    auto param = readExpression();
 
                     if (param == nullptr)
                     {
                         if (readOperator (")"))
-                            return func.release();
+                            return TermPtr (func.release());
 
                         return parseError ("Expected parameters after \"" + identifier + " (\"");
                     }
 
-                    f->parameters.add (Expression (param));
+                    f->parameters.add (Expression (param.get()));
 
                     while (readOperator (","))
                     {
@@ -878,11 +872,11 @@ struct Expression::Helpers
                         if (param == nullptr)
                             return parseError ("Expected expression after \",\"");
 
-                        f->parameters.add (Expression (param));
+                        f->parameters.add (Expression (param.get()));
                     }
 
                     if (readOperator (")"))
-                        return func.release();
+                        return TermPtr (func.release());
 
                     return parseError ("Expected \")\"");
                 }
@@ -897,25 +891,26 @@ struct Expression::Helpers
                     if (identifier == "this")
                         return rhs;
 
-                    return new DotOperator (new SymbolTerm (identifier), rhs);
+                    return *new DotOperator (new SymbolTerm (identifier), rhs);
                 }
 
                 // just a symbol..
                 jassert (identifier.trim() == identifier);
-                return new SymbolTerm (identifier);
+                return *new SymbolTerm (identifier);
             }
 
-            return TermPtr();
+            return {};
         }
 
         TermPtr readParenthesisedExpression()
         {
             if (! readOperator ("("))
-                return TermPtr();
+                return {};
 
-            const TermPtr e (readExpression());
+            auto e = readExpression();
+
             if (e == nullptr || ! readOperator (")"))
-                return TermPtr();
+                return {};
 
             return e;
         }
@@ -956,13 +951,13 @@ Expression& Expression::operator= (const Expression& other)
 }
 
 Expression::Expression (Expression&& other) noexcept
-    : term (static_cast<ReferenceCountedObjectPtr<Term>&&> (other.term))
+    : term (std::move (other.term))
 {
 }
 
 Expression& Expression::operator= (Expression&& other) noexcept
 {
-    term = static_cast<ReferenceCountedObjectPtr<Term>&&> (other.term);
+    term = std::move (other.term);
     return *this;
 }
 
@@ -977,7 +972,7 @@ Expression::Expression (const String& stringToParse, String& parseError)
 Expression Expression::parse (String::CharPointerType& stringToParse, String& parseError)
 {
     Helpers::Parser parser (stringToParse);
-    Expression e (parser.readUpToComma());
+    Expression e (parser.readUpToComma().get());
     parseError = parser.error;
     return e;
 }
@@ -1011,7 +1006,7 @@ Expression Expression::operator+ (const Expression& other) const  { return Expre
 Expression Expression::operator- (const Expression& other) const  { return Expression (new Helpers::Subtract (term, other.term)); }
 Expression Expression::operator* (const Expression& other) const  { return Expression (new Helpers::Multiply (term, other.term)); }
 Expression Expression::operator/ (const Expression& other) const  { return Expression (new Helpers::Divide (term, other.term)); }
-Expression Expression::operator-() const                          { return Expression (term->negated()); }
+Expression Expression::operator-() const                          { return Expression (term->negated().get()); }
 Expression Expression::symbol (const String& symbol)              { return Expression (new Helpers::SymbolTerm (symbol)); }
 
 Expression Expression::function (const String& functionName, const Array<Expression>& parameters)
@@ -1023,14 +1018,14 @@ Expression Expression::adjustedToGiveNewResult (const double targetValue, const 
 {
     std::unique_ptr<Term> newTerm (term->clone());
 
-    Helpers::Constant* termToAdjust = Helpers::findTermToAdjust (newTerm.get(), true);
+    auto termToAdjust = Helpers::findTermToAdjust (newTerm.get(), true);
 
     if (termToAdjust == nullptr)
         termToAdjust = Helpers::findTermToAdjust (newTerm.get(), false);
 
     if (termToAdjust == nullptr)
     {
-        newTerm.reset (new Helpers::Add (newTerm.release(), new Helpers::Constant (0, false)));
+        newTerm.reset (new Helpers::Add (*newTerm.release(), *new Helpers::Constant (0, false)));
         termToAdjust = Helpers::findTermToAdjust (newTerm.get(), false);
     }
 
@@ -1039,7 +1034,7 @@ Expression Expression::adjustedToGiveNewResult (const double targetValue, const 
     if (const Term* parent = Helpers::findDestinationFor (newTerm.get(), termToAdjust))
     {
         if (Helpers::TermPtr reverseTerm = parent->createTermToEvaluateInput (scope, termToAdjust, targetValue, newTerm.get()))
-            termToAdjust->value = Expression (reverseTerm).evaluate (scope);
+            termToAdjust->value = Expression (reverseTerm.get()).evaluate (scope);
         else
             return Expression (targetValue);
     }
@@ -1089,7 +1084,7 @@ void Expression::findReferencedSymbols (Array<Symbol>& results, const Scope& sco
 }
 
 String Expression::toString() const                     { return term->toString(); }
-bool Expression::usesAnySymbols() const                 { return Helpers::containsAnySymbols (term); }
+bool Expression::usesAnySymbols() const                 { return Helpers::containsAnySymbols (*term); }
 Expression::Type Expression::getType() const noexcept   { return term->getType(); }
 String Expression::getSymbolOrFunction() const          { return term->getName(); }
 int Expression::getNumInputs() const                    { return term->getNumInputs(); }
@@ -1098,7 +1093,7 @@ Expression Expression::getInput (int index) const       { return Expression (ter
 //==============================================================================
 ReferenceCountedObjectPtr<Expression::Term> Expression::Term::negated()
 {
-    return new Helpers::Negate (this);
+    return *new Helpers::Negate (*this);
 }
 
 //==============================================================================

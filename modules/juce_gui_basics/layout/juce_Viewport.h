@@ -56,7 +56,7 @@ public:
     explicit Viewport (const String& componentName = String());
 
     /** Destructor. */
-    ~Viewport();
+    ~Viewport() override;
 
     //==============================================================================
     /** Sets the component that this viewport will contain and scroll around.
@@ -81,7 +81,7 @@ public:
 
         @see setViewedComponent
     */
-    Component* getViewedComponent() const noexcept                  { return contentComp; }
+    Component* getViewedComponent() const noexcept                  { return contentComp.get(); }
 
     //==============================================================================
     /** Changes the position of the viewed component.
@@ -272,7 +272,12 @@ public:
     */
     bool canScrollHorizontally() const noexcept;
 
-    /** Enables or disables drag-to-scroll functionality in the viewport. */
+    /** Enables or disables drag-to-scroll functionality in the viewport.
+
+        If your viewport contains a Component that you don't want to receive mouse events when the
+        user is drag-scrolling, you can disable this with the Component::setViewportIgnoreDragFlag()
+        method.
+    */
     void setScrollOnDragEnabled (bool shouldScrollOnDrag);
 
     /** Returns true if drag-to-scroll functionality is enabled. */
@@ -322,8 +327,6 @@ private:
     bool vScrollbarRight = true, hScrollbarBottom = true;
 
     struct DragToScrollListener;
-    friend struct DragToScrollListener;
-    friend struct ContainerDeletePolicy<DragToScrollListener>;
     std::unique_ptr<DragToScrollListener> dragToScrollListener;
 
     Point<int> viewportPosToCompPos (Point<int>) const;

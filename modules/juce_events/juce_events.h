@@ -31,7 +31,7 @@
 
   ID:               juce_events
   vendor:           juce
-  version:          5.3.2
+  version:          5.4.3
   name:             JUCE message and event handling classes
   description:      Classes for running an application's main event loop and sending/receiving messages, timers, etc.
   website:          http://www.juce.com/juce
@@ -59,6 +59,12 @@
 #endif
 
 #if JUCE_EVENTS_INCLUDE_WINRT_WRAPPER && JUCE_WINDOWS
+ // If this header file is missing then you are probably attempting to use WinRT
+ // functionality without the WinRT libraries installed on your system. Try installing
+ // the latest Windows Standalone SDK and maybe also adding the path to the WinRT
+ // headers to your build system. This path should have the form
+ // "C:\Program Files (x86)\Windows Kits\10\Include\10.0.14393.0\winrt".
+ #include <inspectable.h>
  #include <hstring.h>
 #endif
 
@@ -81,6 +87,7 @@
 #include "interprocess/juce_InterprocessConnection.h"
 #include "interprocess/juce_InterprocessConnectionServer.h"
 #include "interprocess/juce_ConnectedChildProcess.h"
+#include "interprocess/juce_NetworkServiceDiscovery.h"
 
 #if JUCE_LINUX
  #include "native/juce_linux_EventLoop.h"

@@ -35,7 +35,7 @@ namespace juce
 
     @tags{Audio}
 */
-class JUCE_API  AudioParameterFloat  : public AudioProcessorParameterWithID
+class JUCE_API  AudioParameterFloat  : public RangedAudioParameter
 {
 public:
     /** Creates a AudioParameterFloat with the specified parameters.
@@ -53,7 +53,8 @@ public:
                                    converts it into a non-normalised value. Some hosts use
                                    this to allow users to type in parameter values.
     */
-    AudioParameterFloat (const String& parameterID, const String& name,
+    AudioParameterFloat (const String& parameterID,
+                         const String& name,
                          NormalisableRange<float> normalisableRange,
                          float defaultValue,
                          const String& label = String(),
@@ -66,21 +67,26 @@ public:
         For control over skew factors, you can use the other
         constructor and provide a NormalisableRange.
     */
-    AudioParameterFloat (String parameterID, String name,
+    AudioParameterFloat (String parameterID,
+                         String name,
                          float minValue,
                          float maxValue,
                          float defaultValue);
 
     /** Destructor. */
-    ~AudioParameterFloat();
+    ~AudioParameterFloat() override;
 
     /** Returns the parameter's current value. */
     float get() const noexcept                  { return value; }
+
     /** Returns the parameter's current value. */
     operator float() const noexcept             { return value; }
 
     /** Changes the parameter's current value. */
     AudioParameterFloat& operator= (float newValue);
+
+    /** Returns the range of values that the parameter can take. */
+    const NormalisableRange<float>& getNormalisableRange() const override   { return range; }
 
     /** Provides access to the parameter's range. */
     NormalisableRange<float> range;

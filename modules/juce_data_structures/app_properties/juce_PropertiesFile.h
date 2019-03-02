@@ -180,7 +180,7 @@ public:
     /** Destructor.
         When deleted, the file will first call saveIfNeeded() to flush any changes to disk.
     */
-    ~PropertiesFile();
+    ~PropertiesFile() override;
 
     //==============================================================================
     /** Returns true if this file was created from a valid (or non-existent) file.

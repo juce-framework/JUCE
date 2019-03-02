@@ -49,7 +49,7 @@ public:
                                       const RectangleList<int>& initialClip);
 
     /** Destructor. */
-    ~LowLevelGraphicsSoftwareRenderer();
+    ~LowLevelGraphicsSoftwareRenderer() override;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LowLevelGraphicsSoftwareRenderer)

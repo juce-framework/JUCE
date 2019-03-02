@@ -120,6 +120,8 @@ public:
             EndDialog (hwnd, 0);
     }
 
+    Component* getCustomComponent()    { return customComponent.get(); }
+
     Array<URL> results;
 
 private:
@@ -355,38 +357,42 @@ private:
         {
             nativeDialogRef.set (hdlg);
 
-            if (customComponent)
+            if (customComponent != nullptr)
             {
-                Component::SafePointer<Component> custom (customComponent.get());
+                Component::SafePointer<Component> safeCustomComponent (customComponent.get());
 
-                RECT r, cr;
-                GetWindowRect (hdlg, &r);
-                GetClientRect (hdlg, &cr);
+                RECT dialogScreenRect, dialogClientRect;
+                GetWindowRect (hdlg, &dialogScreenRect);
+                GetClientRect (hdlg, &dialogClientRect);
 
-                auto componentWidth = custom->getWidth();
+                auto screenRectangle = Rectangle<int>::leftTopRightBottom (dialogScreenRect.left,  dialogScreenRect.top,
+                                                                           dialogScreenRect.right, dialogScreenRect.bottom);
 
-                SetWindowPos (hdlg, 0,
-                                r.left, r.top,
-                                componentWidth + jmax (150, (int) (r.right - r.left)),
-                                jmax (150, (int) (r.bottom - r.top)),
-                                SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
+                auto scale = Desktop::getInstance().getDisplays().findDisplayForRect (screenRectangle, true).scale;
+                auto physicalComponentWidth = roundToInt (safeCustomComponent->getWidth() * scale);
+
+                SetWindowPos (hdlg, 0, screenRectangle.getX(), screenRectangle.getY(),
+                              physicalComponentWidth + jmax (150, screenRectangle.getWidth()),
+                              jmax (150, screenRectangle.getHeight()),
+                              SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
+
+                auto appendCustomComponent = [safeCustomComponent, dialogClientRect, scale, hdlg]() mutable
+                {
+                    if (safeCustomComponent != nullptr)
+                    {
+                        auto scaledClientRectangle = Rectangle<int>::leftTopRightBottom (dialogClientRect.left, dialogClientRect.top,
+                                                                                         dialogClientRect.right, dialogClientRect.bottom) / scale;
+
+                        safeCustomComponent->setBounds (scaledClientRectangle.getRight(), scaledClientRectangle.getY(),
+                                                        safeCustomComponent->getWidth(), scaledClientRectangle.getHeight());
+                        safeCustomComponent->addToDesktop (0, hdlg);
+                    }
+                };
 
                 if (MessageManager::getInstance()->isThisTheMessageThread())
-                {
-                    custom->setBounds (cr.right, cr.top, componentWidth, cr.bottom - cr.top);
-                    custom->addToDesktop (0, hdlg);
-                }
+                    appendCustomComponent();
                 else
-                {
-                    MessageManager::callAsync ([custom, cr, componentWidth, hdlg]() mutable
-                    {
-                        if (custom != nullptr)
-                        {
-                            custom->setBounds (cr.right, cr.top, componentWidth, cr.bottom - cr.top);
-                            custom->addToDesktop (0, hdlg);
-                        }
-                    });
-                }
+                    MessageManager::callAsync (appendCustomComponent);
             }
         }
     }
@@ -397,6 +403,11 @@ private:
 
         getNativeDialogList().remove (hdlg);
         nativeDialogRef.set (nullptr);
+
+        if (MessageManager::getInstance()->isThisTheMessageThread())
+            customComponent = nullptr;
+        else
+            MessageManager::callAsync ([this] { customComponent = nullptr; });
     }
 
     void selectionChanged (HWND hdlg)
@@ -551,6 +562,17 @@ public:
         nativeFileChooser->cancel();
 
         owner.finished (nativeFileChooser->results);
+    }
+
+    bool canModalEventBeSentToComponent (const Component* targetComponent) override
+    {
+        if (targetComponent == nullptr)
+            return false;
+
+        if (targetComponent == nativeFileChooser->getCustomComponent())
+            return true;
+
+        return targetComponent->findParentComponentOfClass<FilePreviewComponent>() != nullptr;
     }
 
 private:

@@ -32,11 +32,15 @@ namespace juce
     A window that displays a pop-up tooltip when the mouse hovers over another component.
 
     To enable tooltips in your app, just create a single instance of a TooltipWindow
-    object. Note that if you instantiate more than one instance of this class, you'll
-    end up with multiple tooltips being shown! This is a common problem when compiling
-    audio plug-ins with JUCE: depending on the way you instantiate TooltipWindow,
-    you may end up with a TooltipWindow for each plug-in instance. To avoid this use a
-    SharedResourcePointer to instantiate the TooltipWindow only once.
+    object. Note that if you instantiate more than one instance of this class with the
+    same parentComponent (even if both TooltipWindow's parentComponent is nil), you'll
+    end up with multiple tooltips being shown! To avoid this use a SharedResourcePointer
+    to instantiate the TooltipWindow only once.
+
+    For audio plug-ins (which should not be opening native windows) it is better
+    to add a TooltipWindow as a member variable to the editor and ensure that the
+    editor is the parentComponent of your TooltipWindow. This will ensure that your
+    TooltipWindow is scaled according to your editor and the DAWs scaling setting.
 
     The TooltipWindow object will then stay invisible, waiting until the mouse
     hovers for the specified length of time - it will then see if it's currently
@@ -61,7 +65,7 @@ public:
         To change the style of tooltips, see the LookAndFeel class for its tooltip
         methods.
 
-        @param parentComponent  if set to 0, the TooltipWindow will appear on the desktop,
+        @param parentComponent  if set to nullptr, the TooltipWindow will appear on the desktop,
                                 otherwise the tooltip will be added to the given parent
                                 component.
         @param millisecondsBeforeTipAppears     the time for which the mouse has to stay still
@@ -73,7 +77,7 @@ public:
                             int millisecondsBeforeTipAppears = 700);
 
     /** Destructor. */
-    ~TooltipWindow();
+    ~TooltipWindow() override;
 
     //==============================================================================
     /** Changes the time before the tip appears.
@@ -113,7 +117,7 @@ public:
     */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         /** returns the bounds for a tooltip at the given screen coordinate, constrained within the given desktop area. */
         virtual Rectangle<int> getTooltipBounds (const String& tipText, Point<int> screenPos, Rectangle<int> parentArea) = 0;

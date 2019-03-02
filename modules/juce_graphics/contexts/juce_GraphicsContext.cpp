@@ -203,7 +203,7 @@ void Graphics::setGradientFill (const ColourGradient& gradient)
 
 void Graphics::setGradientFill (ColourGradient&& gradient)
 {
-    setFillType (static_cast<ColourGradient&&> (gradient));
+    setFillType (std::move (gradient));
 }
 
 void Graphics::setTiledImageFill (const Image& imageToUse, const int anchorX, const int anchorY, const float opacity)
@@ -273,7 +273,8 @@ void Graphics::drawSingleLineText (const String& text, const int startX, const i
 }
 
 void Graphics::drawMultiLineText (const String& text, const int startX,
-                                  const int baselineY, const int maximumLineWidth) const
+                                  const int baselineY, const int maximumLineWidth,
+                                  Justification justification) const
 {
     if (text.isNotEmpty()
          && startX < context.getClipBounds().getRight())
@@ -281,7 +282,7 @@ void Graphics::drawMultiLineText (const String& text, const int startX,
         GlyphArrangement arr;
         arr.addJustifiedText (context.getFont(), text,
                               (float) startX, (float) baselineY, (float) maximumLineWidth,
-                              Justification::left);
+                              justification);
         arr.draw (*this);
     }
 }

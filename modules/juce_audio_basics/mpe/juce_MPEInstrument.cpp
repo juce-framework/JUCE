@@ -129,12 +129,12 @@ void MPEInstrument::setTimbreTrackingMode (TrackingMode modeToUse)
 }
 
 //==============================================================================
-void MPEInstrument::addListener (Listener* const listenerToAdd) noexcept
+void MPEInstrument::addListener (Listener* listenerToAdd)
 {
     listeners.add (listenerToAdd);
 }
 
-void MPEInstrument::removeListener (Listener* const listenerToRemove) noexcept
+void MPEInstrument::removeListener (Listener* listenerToRemove)
 {
     listeners.remove (listenerToRemove);
 }
@@ -156,7 +156,7 @@ void MPEInstrument::processNextMidiEvent (const MidiMessage& message)
 //==============================================================================
 void MPEInstrument::processMidiNoteOnMessage (const MidiMessage& message)
 {
-    // Note: if a note-on with velocity = 0 is used to convey a note-off,
+    // Note: If a note-on with velocity = 0 is used to convey a note-off,
     // then the actual note-off velocity is not known. In this case,
     // the MPE convention is to use note-off velocity = 64.
 

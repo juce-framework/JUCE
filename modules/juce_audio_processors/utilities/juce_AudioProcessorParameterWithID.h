@@ -37,7 +37,7 @@ namespace juce
 class JUCE_API  AudioProcessorParameterWithID  : public AudioProcessorParameter
 {
 public:
-    /** Creation of this object requires providing a name and ID which will be
+    /** The creation of this object requires providing a name and ID which will be
         constant for its lifetime.
     */
     AudioProcessorParameterWithID (const String& parameterID,
@@ -46,7 +46,7 @@ public:
                                    Category category = AudioProcessorParameter::genericParameter);
 
     /** Destructor. */
-    ~AudioProcessorParameterWithID();
+    ~AudioProcessorParameterWithID() override;
 
     /** Provides access to the parameter's ID string. */
     const String paramID;

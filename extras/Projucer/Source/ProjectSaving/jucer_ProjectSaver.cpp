@@ -83,6 +83,7 @@ void ProjectSaver::writePluginCharacteristicsFile()
     flags.set ("JucePlugin_Build_RTAS",                  boolToString (project.shouldBuildRTAS()));
     flags.set ("JucePlugin_Build_AAX",                   boolToString (project.shouldBuildAAX()));
     flags.set ("JucePlugin_Build_Standalone",            boolToString (project.shouldBuildStandalonePlugin()));
+    flags.set ("JucePlugin_Build_Unity",                 boolToString (project.shouldBuildUnityPlugin()));
     flags.set ("JucePlugin_Enable_IAA",                  boolToString (project.shouldEnableIAA()));
     flags.set ("JucePlugin_Name",                        toStringLiteral (project.getPluginNameString()));
     flags.set ("JucePlugin_Desc",                        toStringLiteral (project.getPluginDescriptionString()));
@@ -122,6 +123,8 @@ void ProjectSaver::writePluginCharacteristicsFile()
     flags.set ("JucePlugin_IAAType",                     toCharLiteral (project.getIAATypeCode()));
     flags.set ("JucePlugin_IAASubType",                  "JucePlugin_PluginCode");
     flags.set ("JucePlugin_IAAName",                     project.getIAAPluginName().quoted());
+    flags.set ("JucePlugin_VSTNumMidiInputs",            project.getVSTNumMIDIInputsString());
+    flags.set ("JucePlugin_VSTNumMidiOutputs",           project.getVSTNumMIDIOutputsString());
 
     {
         String plugInChannelConfig = project.getPluginChannelConfigsString();
@@ -135,6 +138,7 @@ void ProjectSaver::writePluginCharacteristicsFile()
     }
 
     MemoryOutputStream mem;
+    mem.setNewLineString (projectLineFeed);
 
     mem << "//==============================================================================" << newLine
         << "// Audio plugin settings.." << newLine

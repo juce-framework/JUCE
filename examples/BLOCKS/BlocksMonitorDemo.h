@@ -35,6 +35,8 @@
                    juce_gui_basics, juce_gui_extra
  exporters:        xcode_mac, vs2017, linux_make, xcode_iphone
 
+ moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+
  type:             Component
  mainClass:        BlocksMonitorDemo
 
@@ -110,7 +112,7 @@ public:
     }
 
     /** Subclasses should override this to paint the Block object on the screen */
-    virtual void paint (Graphics&) override = 0;
+    void paint (Graphics&) override = 0;
 
     /** Subclasses can override this to receive button down events from the Block */
     virtual void handleButtonPressed  (ControlButton::ButtonFunction, uint32) {}
@@ -444,7 +446,7 @@ private:
         {}
 
         /** Subclasses should override this to paint the button on the screen */
-        virtual void paint (Graphics&) override = 0;
+        void paint (Graphics&) override = 0;
 
         /** Sets the colour of the button */
         void setColour (Colour c)   { componentColour = c; }
@@ -603,6 +605,13 @@ public:
        #endif
 
         setSize (600, 600);
+
+        topologyChanged();
+    }
+
+    ~BlocksMonitorDemo()
+    {
+        topologySource.removeListener (this);
     }
 
     void paint (Graphics&) override {}

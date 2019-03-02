@@ -28,8 +28,12 @@
 
 
 //==============================================================================
-const char* getPreferredLinefeed();
+const char* getPreferredLineFeed();
 String joinLinesIntoSourceFile (StringArray& lines);
+String replaceLineFeeds (const String& content, const String& lineFeed);
+String getLineFeedForFile (const String& fileContent);
+
+var parseJUCEHeaderMetadata (const File&);
 
 String trimCommentCharsFromStartOfLine (const String& line);
 

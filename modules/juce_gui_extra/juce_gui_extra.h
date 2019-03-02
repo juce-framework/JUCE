@@ -35,7 +35,7 @@
 
   ID:               juce_gui_extra
   vendor:           juce
-  version:          5.3.2
+  version:          5.4.3
   name:             JUCE extended GUI classes
   description:      Miscellaneous GUI classes for specialised tasks.
   website:          http://www.juce.com/juce
@@ -64,11 +64,12 @@
 #endif
 
 /** Config: JUCE_ENABLE_LIVE_CONSTANT_EDITOR
-    This lets you turn on the JUCE_ENABLE_LIVE_CONSTANT_EDITOR support. See the documentation
+    This lets you turn on the JUCE_ENABLE_LIVE_CONSTANT_EDITOR support (desktop only). By default
+    this will be enabled for debug builds and disabled for release builds. See the documentation
     for that macro for more details.
 */
 #ifndef JUCE_ENABLE_LIVE_CONSTANT_EDITOR
- #if JUCE_DEBUG
+ #if JUCE_DEBUG && ! (JUCE_IOS || JUCE_ANDROID)
   #define JUCE_ENABLE_LIVE_CONSTANT_EDITOR 1
  #endif
 #endif
@@ -87,6 +88,7 @@
 #include "embedding/juce_NSViewComponent.h"
 #include "embedding/juce_UIViewComponent.h"
 #include "embedding/juce_XEmbedComponent.h"
+#include "embedding/juce_ScopedDPIAwarenessDisabler.h"
 #include "misc/juce_AppleRemote.h"
 #include "misc/juce_BubbleMessageComponent.h"
 #include "misc/juce_ColourSelector.h"

@@ -59,7 +59,7 @@ public:
     TextButton (const String& buttonName, const String& toolTip);
 
     /** Destructor. */
-    ~TextButton();
+    ~TextButton() override;
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the button.
@@ -99,7 +99,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void paintButton (Graphics&, bool isMouseOverButton, bool isButtonDown) override;
+    void paintButton (Graphics&, bool, bool) override;
     /** @internal */
     void colourChanged() override;
 

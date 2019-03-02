@@ -25,16 +25,19 @@
 namespace juce
 {
 
-#if JUCE_MAC || JUCE_IOS || JUCE_MSVC
+#if ! (JUCE_LINUX || JUCE_PROJUCER_LIVE_BUILD)
 
 #if JUCE_MAC || JUCE_IOS
  #include "../native/juce_mac_Video.h"
 #elif JUCE_WINDOWS
  #include "../native/juce_win32_Video.h"
+#elif JUCE_ANDROID
+ #include "../native/juce_android_Video.h"
 #endif
 
 //==============================================================================
-VideoComponent::VideoComponent()  : pimpl (new Pimpl())
+VideoComponent::VideoComponent (bool useNativeControlsIfAvailable)
+    : pimpl (new Pimpl (*this, useNativeControlsIfAvailable))
 {
     addAndMakeVisible (pimpl.get());
 }
@@ -46,22 +49,55 @@ VideoComponent::~VideoComponent()
 
 Result VideoComponent::load (const File& file)
 {
+   #if JUCE_ANDROID || JUCE_IOS
+    ignoreUnused (file);
+    jassertfalse;
+    return Result::fail ("load() is not supported on this platform. Use loadAsync() instead.");
+   #else
     auto r = pimpl->load (file);
     resized();
     return r;
+   #endif
 }
 
 Result VideoComponent::load (const URL& url)
 {
+   #if JUCE_ANDROID || JUCE_IOS
+    // You need to use loadAsync on Android & iOS.
+    ignoreUnused (url);
+    jassertfalse;
+    return Result::fail ("load() is not supported on this platform. Use loadAsync() instead.");
+   #else
     auto r = pimpl->load (url);
     resized();
     return r;
+   #endif
+}
+
+void VideoComponent::loadAsync (const URL& url, std::function<void (const URL&, Result)> callback)
+{
+    if (callback == nullptr)
+    {
+        jassertfalse;
+        return;
+    }
+
+   #if JUCE_ANDROID || JUCE_IOS || JUCE_MAC
+    pimpl->loadAsync (url, callback);
+   #else
+    auto result = load (url);
+    callback (url, result);
+   #endif
 }
 
 void VideoComponent::closeVideo()
 {
     pimpl->close();
+    // Closing on Android is async and resized() will be called internally by pimpl once
+    // close operation finished.
+   #if ! JUCE_ANDROID// TODO JUCE_IOS too?
     resized();
+   #endif
 }
 
 bool VideoComponent::isVideoOpen() const                    { return pimpl->isOpen(); }
@@ -81,6 +117,8 @@ void VideoComponent::setPlayPosition (double newPos)        { pimpl->setPosition
 double VideoComponent::getPlayPosition() const              { return pimpl->getPosition(); }
 
 void VideoComponent::setPlaySpeed (double newSpeed)         { pimpl->setSpeed (newSpeed); }
+double VideoComponent::getPlaySpeed() const                 { return pimpl->getSpeed(); }
+
 void VideoComponent::setAudioVolume (float newVolume)       { pimpl->setVolume (newVolume); }
 float VideoComponent::getAudioVolume() const                { return pimpl->getVolume(); }
 

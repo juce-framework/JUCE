@@ -33,6 +33,8 @@
                    juce_gui_basics, juce_gui_extra
  exporters:        xcode_mac, vs2017, linux_make, androidstudio, xcode_iphone
 
+ moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+
  type:             Component
  mainClass:        WindowsDemo
 
@@ -178,7 +180,7 @@ public:
     void mouseDrag (const MouseEvent& e) override
     {
         // as there's no titlebar we have to manage the dragging ourselves
-        dragger.dragComponent (this, e, 0);
+        dragger.dragComponent (this, e, nullptr);
     }
 
     void paint (Graphics& g) override

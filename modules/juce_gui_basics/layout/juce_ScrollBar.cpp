@@ -308,7 +308,7 @@ void ScrollBar::resized()
 
     if (upButton != nullptr)
     {
-        Rectangle<int> r (getLocalBounds());
+        auto r = getLocalBounds();
 
         if (vertical)
         {

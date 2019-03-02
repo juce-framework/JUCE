@@ -108,7 +108,7 @@ void AlertWindow::addButton (const String& name,
 
     b->setWantsKeyboardFocus (true);
     b->setMouseClickGrabsKeyboardFocus (false);
-    b->setCommandToTrigger (0, returnValue, false);
+    b->setCommandToTrigger (nullptr, returnValue, false);
     b->addShortcut (shortcutKey1);
     b->addShortcut (shortcutKey2);
     b->onClick = [this, b] { exitAlert (b); };

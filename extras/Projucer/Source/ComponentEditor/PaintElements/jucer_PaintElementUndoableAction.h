@@ -38,7 +38,7 @@ public:
         : routine (*element->getOwner()),
           elementIndex (element->getOwner()->indexOfElement (element))
     {
-        jassert (element != 0);
+        jassert (element != nullptr);
 
         if (elementIndex < 0)
             findGroupIndices (element->getOwner(), element);
@@ -50,28 +50,27 @@ public:
     {
         if (containerGroups.size() > 0)
         {
-            PaintElementGroup* group = 0;
-            group = dynamic_cast<PaintElementGroup*> (routine.getElement (containerGroups.getFirst()));
+            auto group = dynamic_cast<PaintElementGroup*> (routine.getElement (containerGroups.getFirst()));
 
-            if (group == 0)
-                return 0;
+            if (group == nullptr)
+                return nullptr;
 
             for (int i = 1; i < containerGroups.size(); ++i)
             {
                 group = dynamic_cast<PaintElementGroup*> (group->getElement (containerGroups.getUnchecked(i)));
 
-                if (group == 0)
-                    return 0;
+                if (group == nullptr)
+                    return nullptr;
             }
 
-            ElementType* const e = dynamic_cast<ElementType*> (group->getElement (elementIndex));
-            jassert (e != 0);
+            auto e = dynamic_cast<ElementType*> (group->getElement (elementIndex));
+            jassert (e != nullptr);
             return e;
         }
         else
         {
-            ElementType* const e = dynamic_cast<ElementType*> (routine.getElement (elementIndex));
-            jassert (e != 0);
+            auto e = dynamic_cast<ElementType*> (routine.getElement (elementIndex));
+            jassert (e != nullptr);
             return e;
         }
     }
@@ -104,12 +103,13 @@ private:
     {
         for (int i = pr->getNumElements(); --i >= 0;)
         {
-            PaintElementGroup* const pg = dynamic_cast<PaintElementGroup*> (pr->getElement (i));
-
-            if (pg != 0 && pg->containsElement (element))
+            if (auto pg = dynamic_cast<PaintElementGroup*> (pr->getElement (i)))
             {
-                containerGroups.add (i);
-                findGroupIndices (pg, element);
+                if (pg->containsElement (element))
+                {
+                    containerGroups.add (i);
+                    findGroupIndices (pg, element);
+                }
             }
         }
     }
@@ -122,12 +122,13 @@ private:
         {
             for (int i = group->getNumElements(); --i >= 0;)
             {
-                PaintElementGroup* pg = dynamic_cast<PaintElementGroup*> (group->getElement (i));
-
-                if (pg != 0 && pg->containsElement (element))
+                if (auto pg = dynamic_cast<PaintElementGroup*> (group->getElement (i)))
                 {
-                    containerGroups.add (i);
-                    findGroupIndices (pg, element);
+                    if (pg->containsElement (element))
+                    {
+                        containerGroups.add (i);
+                        findGroupIndices (pg, element);
+                    }
                 }
             }
         }

@@ -35,7 +35,7 @@ public:
 
     void messageCallback() override
     {
-        if (const ActionBroadcaster* const b = broadcaster)
+        if (auto b = broadcaster.get())
             if (b->actionListeners.contains (listener))
                 listener->actionListenerCallback (message);
     }
@@ -52,13 +52,13 @@ private:
 ActionBroadcaster::ActionBroadcaster()
 {
     // are you trying to create this object before or after juce has been intialised??
-    jassert (MessageManager::getInstanceWithoutCreating() != nullptr);
+    JUCE_ASSERT_MESSAGE_MANAGER_EXISTS
 }
 
 ActionBroadcaster::~ActionBroadcaster()
 {
     // all event-based objects must be deleted BEFORE juce is shut down!
-    jassert (MessageManager::getInstanceWithoutCreating() != nullptr);
+    JUCE_ASSERT_MESSAGE_MANAGER_EXISTS
 }
 
 void ActionBroadcaster::addActionListener (ActionListener* const listener)

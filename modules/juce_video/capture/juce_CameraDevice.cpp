@@ -81,19 +81,19 @@ public:
 
         pendingOpen.device->pimpl->open ([this](const String& deviceId, const String& error)
                                          {
-                                             int index = getCameraIndex (deviceId);
+                                             int cIndex = getCameraIndex (deviceId);
 
-                                             if (index == -1)
+                                             if (cIndex == -1)
                                                  return;
 
-                                             auto& pendingOpen = camerasToOpen.getReference (index);
+                                             auto& cameraPendingOpen = camerasToOpen.getReference (cIndex);
 
                                              if (error.isEmpty())
-                                                 pendingOpen.resultCallback (pendingOpen.device.release(), error);
+                                                 cameraPendingOpen.resultCallback (cameraPendingOpen.device.release(), error);
                                              else
-                                                 pendingOpen.resultCallback (nullptr, error);
+                                                 cameraPendingOpen.resultCallback (nullptr, error);
 
-                                             int id = pendingOpen.requestId;
+                                             int id = cameraPendingOpen.requestId;
 
                                              MessageManager::callAsync ([this, id]() { removeRequestWithId (id); });
                                          });
@@ -237,7 +237,7 @@ void CameraDevice::openDeviceAsync (int index, OpenCameraResultCallback resultCa
     }
 
    #if JUCE_ANDROID || JUCE_IOS
-    CameraFactory::getInstance().openCamera (index, static_cast<OpenCameraResultCallback&&> (resultCallback),
+    CameraFactory::getInstance().openCamera (index, std::move (resultCallback),
                                              minWidth, minHeight, maxWidth, maxHeight, useHighQuality);
    #else
     auto* device = openDevice (index, minWidth, minHeight, maxWidth, maxHeight, useHighQuality);

@@ -36,7 +36,7 @@ class CompileEngineChildProcess  : public ReferenceCountedObject,
 {
 public:
     CompileEngineChildProcess (Project&);
-    ~CompileEngineChildProcess();
+    ~CompileEngineChildProcess() override;
 
     //==============================================================================
     bool openedOk() const       { return process != nullptr; }
@@ -117,34 +117,31 @@ struct ChildProcessCache
 
     CompileEngineChildProcess::Ptr getExisting (Project& project) const noexcept
     {
-        for (CompileEngineChildProcess* p : processes)
+        for (auto& p : processes)
             if (&(p->project) == &project)
-                return p;
+                return *p;
 
-        return nullptr;
+        return {};
     }
 
     CompileEngineChildProcess::Ptr getOrCreate (Project& project)
     {
-        CompileEngineChildProcess::Ptr p (getExisting (project));
+        if (auto p = getExisting (project))
+            return p;
 
-        if (p == nullptr)
-        {
-            p = new CompileEngineChildProcess (project);
-            tellNewProcessAboutExistingEditors (p);
-            processes.add (p);
-        }
-
-        return p;
+        auto p = new CompileEngineChildProcess (project);
+        tellNewProcessAboutExistingEditors (*p);
+        processes.add (p);
+        return *p;
     }
 
-    static void tellNewProcessAboutExistingEditors (CompileEngineChildProcess* process)
+    static void tellNewProcessAboutExistingEditors (CompileEngineChildProcess& process)
     {
-        OpenDocumentManager& odm = ProjucerApplication::getApp().openDocumentManager;
+        auto& odm = ProjucerApplication::getApp().openDocumentManager;
 
         for (int i = odm.getNumOpenDocuments(); --i >= 0;)
-            if (SourceCodeDocument* d = dynamic_cast<SourceCodeDocument*> (odm.getOpenDocument (i)))
-                process->editorOpened (d->getFile(), d->getCodeDocument());
+            if (auto d = dynamic_cast<SourceCodeDocument*> (odm.getOpenDocument (i)))
+                process.editorOpened (d->getFile(), d->getCodeDocument());
     }
 
     void removeOrphans()

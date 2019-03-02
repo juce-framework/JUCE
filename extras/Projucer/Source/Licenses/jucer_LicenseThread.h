@@ -33,9 +33,9 @@ struct NetWorkerThread   : public Thread,
 {
     NetWorkerThread()  : Thread ("License") {}
 
-    ~NetWorkerThread()
+    ~NetWorkerThread() override
     {
-        jassert (MessageManager::getInstance()->isThisTheMessageThread());
+        JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
         signalThreadShouldExit();
         cancelPendingUpdate();
@@ -269,10 +269,10 @@ struct LicenseThread : NetWorkerThread
 
             if (productKey.isNotEmpty())
             {
-                DynamicObject::Ptr redeamObject = new DynamicObject();
-                redeamObject->setProperty (serialIdentifier, productKey);
+                DynamicObject::Ptr redeemObject (new DynamicObject());
+                redeemObject->setProperty (serialIdentifier, productKey);
 
-                String postData (JSON::toString (var (redeamObject.get())));
+                String postData (JSON::toString (var (redeemObject.get())));
 
                 std::unique_ptr<WebInputStream> shared (getSharedWebInputStream (URL ("https://api.roli.com/api/v1/user/products").withPOSTData (postData),
                                                                                  true));
@@ -295,12 +295,12 @@ struct LicenseThread : NetWorkerThread
             if (chosenLicenseType.isNotEmpty())
             {
                 // redeem the license
-                DynamicObject::Ptr jsonLicenseObject = new DynamicObject();
+                DynamicObject::Ptr jsonLicenseObject (new DynamicObject());
                 jsonLicenseObject->setProperty (projucerLicenseTypeIdentifier, chosenLicenseType);
                 jsonLicenseObject->setProperty (versionIdentifier,     5);
 
 
-                DynamicObject::Ptr jsonLicenseRequest = new DynamicObject();
+                DynamicObject::Ptr jsonLicenseRequest (new DynamicObject());
                 jsonLicenseRequest->setProperty (licenseIdentifier, var (jsonLicenseObject.get()));
                 jsonLicenseRequest->setProperty (searchInternalIdentifier, "com.roli.projucer");
                 jsonLicenseRequest->setProperty (licenseTypeIdentifier, "software");

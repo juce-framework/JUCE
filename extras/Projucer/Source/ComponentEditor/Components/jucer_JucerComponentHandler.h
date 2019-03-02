@@ -43,7 +43,7 @@ public:
 
     Component* createNewComponent (JucerDocument* doc) override
     {
-        return new TestComponent (doc, 0, false);
+        return new TestComponent (doc, nullptr, false);
     }
 
     String getXmlTagName() const noexcept override               { return "JUCERCOMP"; }
@@ -61,7 +61,7 @@ public:
 
     bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout) override
     {
-        TestComponent* const tc = dynamic_cast<TestComponent*> (comp);
+        auto tc = dynamic_cast<TestComponent*> (comp);
 
         if (! ComponentTypeHandler::restoreFromXml (xml, comp, layout))
             return false;
@@ -74,11 +74,11 @@ public:
 
     String getClassName (Component* comp) const override
     {
-        TestComponent* const tc = dynamic_cast<TestComponent*> (comp);
+        auto tc = dynamic_cast<TestComponent*> (comp);
 
         String jucerCompClassName;
 
-        if (tc->getDocument() != 0)
+        if (tc->getDocument() != nullptr)
             jucerCompClassName = tc->getDocument()->getClassName();
 
         if (jucerCompClassName.isEmpty())
@@ -95,7 +95,7 @@ public:
         if (multipleSelected)
             return;
 
-        if (auto* const tc = dynamic_cast<TestComponent*> (component))
+        if (auto tc = dynamic_cast<TestComponent*> (component))
         {
             props.add (new JucerCompFileProperty (tc, document));
             props.add (new ConstructorParamsProperty (tc, document));
@@ -112,7 +112,7 @@ public:
     {
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 
-        if (TestComponent* const tc = dynamic_cast<TestComponent*> (component))
+        if (auto tc = dynamic_cast<TestComponent*> (component))
             code.includeFilesH.add (tc->findFile().withFileExtension (".h"));
         else
             jassertfalse;

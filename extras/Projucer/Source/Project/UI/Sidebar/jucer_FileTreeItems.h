@@ -38,7 +38,7 @@ public:
         item.state.addListener (this);
     }
 
-    ~FileTreeItemBase()
+    ~FileTreeItemBase() override
     {
         item.state.removeListener (this);
     }
@@ -465,6 +465,21 @@ public:
         return getFile().getFileName();
     }
 
+    void paintItem (Graphics& g, int width, int height) override
+    {
+        JucerTreeViewBase::paintItem (g, width, height);
+
+        if (item.needsSaving())
+        {
+            auto bounds = g.getClipBounds().withY (0).withHeight (height);
+
+            g.setFont (getFont());
+            g.setColour (getContentColour (false));
+
+            g.drawFittedText ("*", bounds.removeFromLeft (height), Justification::centred, 1);
+        }
+    }
+
     static File findCorrespondingHeaderOrCpp (const File& f)
     {
         if (f.hasFileExtension (sourceFileExtensions))  return f.withFileExtension (".h");
@@ -715,7 +730,7 @@ public:
 
     static void setFilesToCompile (Project::Item item, const bool shouldCompile)
     {
-        if (item.isFile())
+        if (item.isFile() && (item.getFile().hasFileExtension (fileTypesToCompileByDefault)))
             item.getShouldCompileValue() = shouldCompile;
 
         for (auto i = item.getNumChildren(); --i >= 0;)

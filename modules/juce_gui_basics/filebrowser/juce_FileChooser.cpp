@@ -39,10 +39,11 @@ public:
 
           filter (selectsFiles ? owner.filters : String(), selectsDirectories ? "*" : String(), {}),
           browserComponent (flags, owner.startingFile, &filter, preview),
-          dialogBox (owner.title, {}, browserComponent, warnAboutOverwrite, browserComponent.findColour (AlertWindow::backgroundColourId))
+          dialogBox (owner.title, {}, browserComponent, warnAboutOverwrite,
+                     browserComponent.findColour (AlertWindow::backgroundColourId), owner.parent)
     {}
 
-    ~NonNative()
+    ~NonNative() override
     {
         dialogBox.exitModalState (0);
     }
@@ -92,10 +93,12 @@ FileChooser::FileChooser (const String& chooserBoxTitle,
                           const File& currentFileOrDirectory,
                           const String& fileFilters,
                           const bool useNativeBox,
-                          const bool treatFilePackagesAsDirectories)
+                          const bool treatFilePackagesAsDirectories,
+                          Component* parentComponentToUse)
     : title (chooserBoxTitle),
       filters (fileFilters),
       startingFile (currentFileOrDirectory),
+      parent (parentComponentToUse),
       useNativeDialogBox (useNativeBox && isPlatformDialogAvailable()),
       treatFilePackagesAsDirs (treatFilePackagesAsDirectories)
 {
@@ -175,7 +178,7 @@ void FileChooser::launchAsync (int flags, std::function<void (const FileChooser&
     // you cannot run two file chooser dialog boxes at the same time
     jassert (asyncCallback == nullptr);
 
-    asyncCallback = static_cast<std::function<void (const FileChooser&)>&&> (callback);
+    asyncCallback = std::move (callback);
 
     pimpl.reset (createPimpl (flags, previewComp));
     pimpl->launch();

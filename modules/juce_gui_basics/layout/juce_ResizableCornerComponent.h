@@ -65,7 +65,7 @@ public:
                               ComponentBoundsConstrainer* constrainer);
 
     /** Destructor. */
-    ~ResizableCornerComponent();
+    ~ResizableCornerComponent() override;
 
 
 protected:

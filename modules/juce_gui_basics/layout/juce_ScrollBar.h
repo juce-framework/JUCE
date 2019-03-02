@@ -61,7 +61,7 @@ public:
     ScrollBar (bool isVertical);
 
     /** Destructor. */
-    ~ScrollBar();
+    ~ScrollBar() override;
 
     //==============================================================================
     /** Returns true if the scrollbar is vertical, false if it's horizontal. */
@@ -305,7 +305,7 @@ public:
     {
     public:
         /** Destructor. */
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         /** Called when a ScrollBar is moved.
 
@@ -328,7 +328,7 @@ public:
     */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         virtual bool areScrollbarButtonsVisible() = 0;
 
@@ -420,7 +420,6 @@ private:
     int initialDelayInMillisecs = 100, repeatDelayInMillisecs = 50, minimumDelayInMillisecs = 10;
     bool vertical, isDraggingThumb = false, autohides = true, userVisibilityFlag = false;
     class ScrollbarButton;
-    friend struct ContainerDeletePolicy<ScrollbarButton>;
     std::unique_ptr<ScrollbarButton> upButton, downButton;
     ListenerList<Listener> listeners;
 

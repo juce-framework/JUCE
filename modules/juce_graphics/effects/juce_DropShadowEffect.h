@@ -36,7 +36,7 @@ namespace juce
 struct JUCE_API  DropShadow
 {
     /** Creates a default drop-shadow effect. */
-    DropShadow() noexcept;
+    DropShadow() = default;
 
     /** Creates a drop-shadow object with the given parameters. */
     DropShadow (Colour shadowColour, int radius, Point<int> offset) noexcept;
@@ -56,10 +56,10 @@ struct JUCE_API  DropShadow
         In most cases you'll probably want to leave this as black with an alpha
         value of around 0.5
     */
-    Colour colour;
+    Colour colour { 0x90000000 };
 
     /** The approximate spread of the shadow. */
-    int radius;
+    int radius { 4 };
 
     /** The offset of the shadow. */
     Point<int> offset;
@@ -93,7 +93,7 @@ public:
     DropShadowEffect();
 
     /** Destructor. */
-    ~DropShadowEffect();
+    ~DropShadowEffect() override;
 
     //==============================================================================
     /** Sets up parameters affecting the shadow's appearance. */

@@ -60,12 +60,15 @@ namespace FIR
         */
         using NumericType = typename SampleTypeHelpers::ElementType<SampleType>::Type;
 
+        /** A typedef for a ref-counted pointer to the coefficients object */
+        using CoefficientsPtr = typename Coefficients<NumericType>::Ptr;
+
         //==============================================================================
         /** This will create a filter which will produce silence. */
         Filter() : coefficients (new Coefficients<NumericType>)                                     { reset(); }
 
         /** Creates a filter with a given set of coefficients. */
-        Filter (Coefficients<NumericType>* coefficientsToUse)  : coefficients (coefficientsToUse)   { reset(); }
+        Filter (CoefficientsPtr coefficientsToUse)  : coefficients (std::move (coefficientsToUse))   { reset(); }
 
         Filter (const Filter&) = default;
         Filter (Filter&&) = default;
@@ -108,7 +111,7 @@ namespace FIR
         }
 
         //==============================================================================
-        /** The coefficients of the FIR filter. It's up to the called to ensure that
+        /** The coefficients of the FIR filter. It's up to the caller to ensure that
             these coefficients are modified in a thread-safe way.
 
             If you change the order of the coefficients then you must call reset after

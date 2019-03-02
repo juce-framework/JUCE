@@ -56,7 +56,7 @@ public:
                 const int64 maxInitialFileSizeBytes = 128 * 1024);
 
     /** Destructor. */
-    ~FileLogger();
+    ~FileLogger() override;
 
     //==============================================================================
     /** Returns the file that this logger is writing to. */
@@ -114,7 +114,7 @@ public:
     static File getSystemLogFileFolder();
 
     // (implementation of the Logger virtual method)
-    void logMessage (const String&);
+    void logMessage (const String&) override;
 
     //==============================================================================
     /** This is a utility function which removes lines from the start of a text

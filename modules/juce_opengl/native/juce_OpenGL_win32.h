@@ -28,9 +28,19 @@ namespace juce
 {
 
 extern ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component&, void* parent);
+extern bool shouldScaleGLWindow (void* hwnd);
+
+#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && (JucePlugin_Build_VST || JucePlugin_Build_VST3)
+ bool juce_shouldDoubleScaleNativeGLWindow();
+#else
+ bool juce_shouldDoubleScaleNativeGLWindow()  { return false; }
+#endif
 
 //==============================================================================
 class OpenGLContext::NativeContext
+   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+    : private Timer
+   #endif
 {
 public:
     NativeContext (Component& component,
@@ -117,9 +127,14 @@ public:
     void updateWindowPosition (Rectangle<int> bounds)
     {
         if (nativeWindow != nullptr)
+        {
+            if (! approximatelyEqual (nativeScaleFactor, 1.0))
+                bounds = (bounds.toDouble() * nativeScaleFactor).toNearestInt();
+
             SetWindowPos ((HWND) nativeWindow->getNativeHandle(), 0,
                           bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
                           SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+        }
     }
 
     bool createdOk() const noexcept                 { return getRawContext() != nullptr; }
@@ -133,6 +148,14 @@ public:
     }
 
     struct Locker { Locker (NativeContext&) {} };
+
+    double getWindowScaleFactor (const Rectangle<int>& screenBounds)
+    {
+        if (nativeWindow != nullptr && shouldScaleGLWindow (nativeWindow->getNativeHandle()))
+            return Desktop::getInstance().getDisplays().findDisplayForRect (screenBounds).scale;
+
+        return Desktop::getInstance().getGlobalScaleFactor();
+    }
 
 private:
     struct DummyComponent  : public Component
@@ -151,6 +174,12 @@ private:
     HDC dc;
     OpenGLContext* context = {};
 
+    double nativeScaleFactor = 1.0;
+
+   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+    Component::SafePointer<Component> safeComponent;
+   #endif
+
     #define JUCE_DECLARE_WGL_EXTENSION_FUNCTION(name, returnType, params) \
         typedef returnType (__stdcall *type_ ## name) params; type_ ## name name;
 
@@ -158,6 +187,28 @@ private:
     JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglSwapIntervalEXT,       BOOL, (int))
     JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglGetSwapIntervalEXT,    int, ())
     #undef JUCE_DECLARE_WGL_EXTENSION_FUNCTION
+
+   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+    void timerCallback() override
+    {
+        if (safeComponent != nullptr)
+        {
+            if (auto* peer = safeComponent->getTopLevelComponent()->getPeer())
+            {
+                auto newScale = peer->getPlatformScaleFactor();
+
+                if (juce_shouldDoubleScaleNativeGLWindow())
+                    newScale *= newScale;
+
+                if (! approximatelyEqual (newScale, nativeScaleFactor))
+                {
+                    nativeScaleFactor = newScale;
+                    updateWindowPosition (peer->getAreaCoveredBy (*safeComponent));
+                }
+            }
+        }
+    }
+   #endif
 
     void initialiseGLExtensions()
     {
@@ -174,7 +225,19 @@ private:
         nativeWindow.reset (createNonRepaintingEmbeddedWindowsPeer (*dummyComponent, topComp->getWindowHandle()));
 
         if (auto* peer = topComp->getPeer())
+        {
+           #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+            safeComponent = Component::SafePointer<Component> (&component);
+            nativeScaleFactor = peer->getPlatformScaleFactor();
+
+            if (juce_shouldDoubleScaleNativeGLWindow())
+                nativeScaleFactor *= nativeScaleFactor;
+
+            startTimer (50);
+           #endif
+
             updateWindowPosition (peer->getAreaCoveredBy (component));
+        }
 
         nativeWindow->setVisible (true);
         dc = GetDC ((HWND) nativeWindow->getNativeHandle());

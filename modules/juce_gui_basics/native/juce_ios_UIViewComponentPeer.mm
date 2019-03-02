@@ -163,8 +163,17 @@ using namespace juce;
 namespace juce
 {
 
+struct UIViewPeerControllerReceiver
+{
+    virtual ~UIViewPeerControllerReceiver();
+    virtual void setViewController (UIViewController*) = 0;
+};
+
+UIViewPeerControllerReceiver::~UIViewPeerControllerReceiver() {}
+
 class UIViewComponentPeer  : public ComponentPeer,
-                             public FocusChangeListener
+                             public FocusChangeListener,
+                             public UIViewPeerControllerReceiver
 {
 public:
     UIViewComponentPeer (Component&, int windowStyleFlags, UIView* viewToAttachTo);
@@ -175,6 +184,12 @@ public:
     void setVisible (bool shouldBeVisible) override;
     void setTitle (const String& title) override;
     void setBounds (const Rectangle<int>&, bool isNowFullScreen) override;
+
+    void setViewController (UIViewController* newController) override
+    {
+        jassert (controller == nullptr);
+        controller = [newController retain];
+    }
 
     Rectangle<int> getBounds() const override               { return getBounds (! isSharedWindow); }
     Rectangle<int> getBounds (bool global) const;
@@ -218,7 +233,7 @@ public:
     //==============================================================================
     UIWindow* window;
     JuceUIView* view;
-    JuceUIViewController* controller;
+    UIViewController* controller;
     bool isSharedWindow, fullScreen, insideDrawRect, isAppex;
 
     static int64 getMouseTime (UIEvent* e) noexcept
@@ -374,6 +389,13 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 {
     return isKioskModeView (self);
 }
+
+#if defined (__IPHONE_11_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_11_0
+ - (BOOL) prefersHomeIndicatorAutoHidden
+ {
+     return isKioskModeView (self);
+ }
+#endif
 
 - (UIStatusBarStyle) preferredStatusBarStyle
 {
@@ -702,7 +724,7 @@ void UIViewComponentPeer::updateTransformAndScreenBounds()
     const Rectangle<int> oldArea (component.getBounds());
     const Rectangle<int> oldDesktop (desktop.getDisplays().getMainDisplay().userArea);
 
-    const_cast<Desktop::Displays&> (desktop.getDisplays()).refresh();
+    const_cast<Displays&> (desktop.getDisplays()).refresh();
 
     window.transform = Orientations::getCGTransformFor (desktop.getCurrentOrientation());
     view.transform = CGAffineTransformIdentity;

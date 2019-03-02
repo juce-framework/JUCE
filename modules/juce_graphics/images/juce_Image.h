@@ -360,9 +360,9 @@ public:
         class BitmapDataReleaser
         {
         protected:
-            BitmapDataReleaser() {}
+            BitmapDataReleaser() = default;
         public:
-            virtual ~BitmapDataReleaser() {}
+            virtual ~BitmapDataReleaser() = default;
         };
 
         std::unique_ptr<BitmapDataReleaser> dataReleaser;
@@ -409,10 +409,10 @@ public:
 
     //==============================================================================
     /** @internal */
-    ImagePixelData* getPixelData() const noexcept       { return image; }
+    ImagePixelData* getPixelData() const noexcept       { return image.get(); }
 
     /** @internal */
-    explicit Image (ImagePixelData*) noexcept;
+    explicit Image (ReferenceCountedObjectPtr<ImagePixelData>) noexcept;
 
     /* A null Image object that can be used when you need to return an invalid image.
         @deprecated If you need a default-constructed var, just use Image() or {}.
@@ -444,7 +444,7 @@ class JUCE_API  ImagePixelData  : public ReferenceCountedObject
 {
 public:
     ImagePixelData (Image::PixelFormat, int width, int height);
-    ~ImagePixelData();
+    ~ImagePixelData() override;
 
     using Ptr = ReferenceCountedObjectPtr<ImagePixelData>;
 
@@ -475,7 +475,7 @@ public:
     /** Used to receive callbacks for image data changes */
     struct Listener
     {
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         virtual void imageDataChanged (ImagePixelData*) = 0;
         virtual void imageDataBeingDeleted (ImagePixelData*) = 0;
@@ -528,7 +528,7 @@ class JUCE_API  SoftwareImageType   : public ImageType
 {
 public:
     SoftwareImageType();
-    ~SoftwareImageType();
+    ~SoftwareImageType() override;
 
     ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const override;
     int getTypeID() const override;
@@ -546,7 +546,7 @@ class JUCE_API  NativeImageType   : public ImageType
 {
 public:
     NativeImageType();
-    ~NativeImageType();
+    ~NativeImageType() override;
 
     ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const override;
     int getTypeID() const override;

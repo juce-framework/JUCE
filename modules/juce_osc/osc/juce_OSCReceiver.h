@@ -110,7 +110,7 @@ public:
     {
     public:
         /** Destructor. */
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         /** Called when the OSCReceiver receives a new OSC message.
             You must implement this function.
@@ -140,7 +140,7 @@ public:
         and has to be either MessageLoopCallback or RealtimeCallback. If not specified,
         MessageLoopCallback will be used by default.
 
-        Note: this type of listener will ignore OSC bundles.
+        Note: This type of listener will ignore OSC bundles.
 
         @see OSCReceiver::addListener, OSCReceiver::Listener,
              OSCReceiver::MessageLoopCallback, OSCReceiver::RealtimeCallback
@@ -150,7 +150,7 @@ public:
     {
     public:
         /** Destructor. */
-        virtual ~ListenerWithOSCAddress() {}
+        virtual ~ListenerWithOSCAddress() = default;
 
         /** Called when the OSCReceiver receives an OSC message with an OSC address
             pattern that matches the OSC address with which this listener was added.
@@ -216,8 +216,6 @@ public:
 private:
     //==============================================================================
     struct Pimpl;
-    friend struct Pimpl;
-    friend struct ContainerDeletePolicy<Pimpl>;
     std::unique_ptr<Pimpl> pimpl;
     friend struct OSCReceiverCallbackMessage;
 

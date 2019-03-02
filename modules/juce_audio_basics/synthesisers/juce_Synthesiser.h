@@ -46,7 +46,7 @@ protected:
 
 public:
     /** Destructor. */
-    virtual ~SynthesiserSound();
+    ~SynthesiserSound() override;
 
     //==============================================================================
     /** Returns true if this sound should be played when a given midi note is pressed.
@@ -352,7 +352,7 @@ public:
     int getNumSounds() const noexcept                               { return sounds.size(); }
 
     /** Returns one of the sounds. */
-    SynthesiserSound* getSound (int index) const noexcept           { return sounds [index]; }
+    SynthesiserSound::Ptr getSound (int index) const noexcept       { return sounds[index]; }
 
     /** Adds a new sound to the synthesiser.
 
@@ -525,21 +525,15 @@ public:
         both to the audio output buffer and the midi input buffer, so any midi events
         with timestamps outside the specified region will be ignored.
     */
-    inline void renderNextBlock (AudioBuffer<float>& outputAudio,
-                                 const MidiBuffer& inputMidi,
-                                 int startSample,
-                                 int numSamples)
-    {
-        processNextBlock (outputAudio, inputMidi, startSample, numSamples);
-    }
+    void renderNextBlock (AudioBuffer<float>& outputAudio,
+                          const MidiBuffer& inputMidi,
+                          int startSample,
+                          int numSamples);
 
-    inline void renderNextBlock (AudioBuffer<double>& outputAudio,
-                                 const MidiBuffer& inputMidi,
-                                 int startSample,
-                                 int numSamples)
-    {
-        processNextBlock (outputAudio, inputMidi, startSample, numSamples);
-    }
+    void renderNextBlock (AudioBuffer<double>& outputAudio,
+                          const MidiBuffer& inputMidi,
+                          int startSample,
+                          int numSamples);
 
     /** Returns the current target sample rate at which rendering is being done.
         Subclasses may need to know this so that they can pitch things correctly.
@@ -632,18 +626,15 @@ protected:
 
 private:
     //==============================================================================
-    template <typename floatType>
-    void processNextBlock (AudioBuffer<floatType>& outputAudio,
-                           const MidiBuffer& inputMidi,
-                           int startSample,
-                           int numSamples);
-    //==============================================================================
     double sampleRate = 0;
     uint32 lastNoteOnCounter = 0;
     int minimumSubBlockSize = 32;
     bool subBlockSubdivisionIsStrict = false;
     bool shouldStealNotes = true;
     BigInteger sustainPedalsDown;
+
+    template <typename floatType>
+    void processNextBlock (AudioBuffer<floatType>&, const MidiBuffer&, int startSample, int numSamples);
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
     // Note the new parameters for these methods.

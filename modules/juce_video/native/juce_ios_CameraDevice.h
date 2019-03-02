@@ -41,7 +41,7 @@ struct CameraDevice::Pimpl
 
     void open (InternalOpenCameraResultCallback cameraOpenCallbackToUse)
     {
-        cameraOpenCallback = static_cast<InternalOpenCameraResultCallback&&> (cameraOpenCallbackToUse);
+        cameraOpenCallback = std::move (cameraOpenCallbackToUse);
 
         if (cameraOpenCallback == nullptr)
         {
@@ -83,7 +83,7 @@ struct CameraDevice::Pimpl
             return;
         }
 
-        pictureTakenCallback = static_cast<std::function<void (const Image&)>&&> (pictureTakenCallbackToUse);
+        pictureTakenCallback = std::move (pictureTakenCallbackToUse);
 
         triggerStillPictureCapture();
     }
@@ -402,7 +402,7 @@ private:
             dispatch_async (captureSessionQueue,^
                             {
                                 cameraDevice = [AVCaptureDevice deviceWithUniqueID: juceStringToNS (cameraIdToUse)];
-                                auto* audioDevice = [AVCaptureDevice defaultDeviceWithMediaType: AVMediaTypeAudio];
+                                auto audioDevice = [AVCaptureDevice defaultDeviceWithMediaType: AVMediaTypeAudio];
 
                                 [captureSession.get() beginConfiguration];
 
@@ -507,8 +507,8 @@ private:
         {
             NSError* error = nil;
 
-            auto* input = [AVCaptureDeviceInput deviceInputWithDevice: device
-                                                                error: &error];
+            auto input = [AVCaptureDeviceInput deviceInputWithDevice: device
+                                                               error: &error];
 
             if (error != nil)
                 return nsStringToJuce (error.localizedDescription);
@@ -629,7 +629,7 @@ private:
                     if (Pimpl::getIOSVersion().major >= 10 && [captureOutput isKindOfClass: [AVCapturePhotoOutput class]])
                     {
                         auto* photoOutput = (AVCapturePhotoOutput*) captureOutput;
-                        auto* outputConnection = [photoOutput connectionWithMediaType: AVMediaTypeVideo];
+                        auto outputConnection = [photoOutput connectionWithMediaType: AVMediaTypeVideo];
                         outputConnection.videoOrientation = orientationToUse;
 
                         [photoOutput capturePhotoWithSettings: [AVCapturePhotoSettings photoSettings]
@@ -640,7 +640,7 @@ private:
                    #endif
 
                     auto* stillImageOutput = (AVCaptureStillImageOutput*) captureOutput;
-                    auto* outputConnection = [stillImageOutput connectionWithMediaType: AVMediaTypeVideo];
+                    auto outputConnection = [stillImageOutput connectionWithMediaType: AVMediaTypeVideo];
                     outputConnection.videoOrientation = orientationToUse;
 
                     [stillImageOutput captureStillImageAsynchronouslyFromConnection: connection completionHandler:
@@ -925,7 +925,7 @@ private:
                     }
 
                     NSData* origImageData = [AVCapturePhotoOutput JPEGPhotoDataRepresentationForJPEGSampleBuffer: imageBuffer previewPhotoSampleBuffer: imagePreviewBuffer];
-                    auto* origImage = [UIImage imageWithData: origImageData];
+                    auto origImage = [UIImage imageWithData: origImageData];
                     auto imageOrientation = uiImageOrientationToCGImageOrientation (origImage.imageOrientation);
 
                     auto* uiImage = getImageWithCorrectOrientation (imageOrientation, origImage.CGImage);
@@ -1009,10 +1009,10 @@ private:
                 if (Pimpl::getIOSVersion().major >= 10)
                     printVideoOutputDebugInfo (movieFileOutput);
 
-                auto* url = [NSURL fileURLWithPath: juceStringToNS (file.getFullPathName())
-                                       isDirectory: NO];
+                auto url = [NSURL fileURLWithPath: juceStringToNS (file.getFullPathName())
+                                      isDirectory: NO];
 
-                auto* outputConnection = [movieFileOutput connectionWithMediaType: AVMediaTypeVideo];
+                auto outputConnection = [movieFileOutput connectionWithMediaType: AVMediaTypeVideo];
                 outputConnection.videoOrientation = orientationToUse;
 
                 [movieFileOutput startRecordingToOutputFileURL: url recordingDelegate: delegate.get()];
@@ -1307,7 +1307,7 @@ struct CameraDevice::ViewerComponent  : public UIViewComponent
         // Initial size that can be overriden later.
         setSize (640, 480);
 
-        auto* view = [cls.createInstance() init];
+        auto view = [cls.createInstance() init];
         setView (view);
 
         auto* previewLayer = device.pimpl->captureSession.createPreviewLayer();

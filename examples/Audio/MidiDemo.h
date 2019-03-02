@@ -33,7 +33,9 @@
                    juce_audio_processors, juce_audio_utils, juce_core,
                    juce_data_structures, juce_events, juce_graphics,
                    juce_gui_basics, juce_gui_extra
- exporters:        xcode_mac, vs2017, linux_make, xcode_iphone, androidstudio
+ exporters:        xcode_mac, vs2017, linux_make, androidstudio, xcode_iphone
+
+ moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
 
  type:             Component
  mainClass:        MidiDemo
@@ -59,19 +61,13 @@ struct MidiDeviceListEntry : ReferenceCountedObject
     using Ptr = ReferenceCountedObjectPtr<MidiDeviceListEntry>;
 };
 
-//==============================================================================
-struct MidiCallbackMessage : public Message
-{
-    MidiCallbackMessage (const MidiMessage& msg) : message (msg) {}
-    MidiMessage message;
-};
 
 //==============================================================================
 class MidiDemo  : public Component,
                   private Timer,
                   private MidiKeyboardStateListener,
                   private MidiInputCallback,
-                  private MessageListener
+                  private AsyncUpdater
 {
 public:
     //==============================================================================
@@ -150,21 +146,6 @@ public:
         MidiMessage m (MidiMessage::noteOff (midiChannel, midiNoteNumber, velocity));
         m.setTimeStamp (Time::getMillisecondCounterHiRes() * 0.001);
         sendToOutputs (m);
-    }
-
-    void handleMessage (const Message& msg) override
-    {
-        // This is called on the message loop
-
-        auto& mm = dynamic_cast<const MidiCallbackMessage&> (msg).message;
-        String midiString;
-        midiString << (mm.isNoteOn() ? String ("Note on: ") : String ("Note off: "));
-        midiString << (MidiMessage::getMidiNoteName (mm.getNoteNumber(), true, true, true));
-        midiString << (String (" vel = "));
-        midiString << static_cast<int> (mm.getVelocity());
-        midiString << "\n";
-
-        midiMonitor.insertTextAtCaret (midiString);
     }
 
     void paint (Graphics&) override {}
@@ -260,11 +241,9 @@ public:
 
 private:
     //==============================================================================
-    class MidiDeviceListBox : public ListBox,
-                              private ListBoxModel
+    struct MidiDeviceListBox : public ListBox,
+                               private ListBoxModel
     {
-    public:
-        //==============================================================================
         MidiDeviceListBox (const String& name,
                            MidiDemo& contentComponent,
                            bool isInputDeviceList)
@@ -284,7 +263,6 @@ private:
                            : parent.getNumMidiOutputs();
         }
 
-        //==============================================================================
         void paintListBoxItem (int rowNumber, Graphics& g,
                                int width, int height, bool rowIsSelected) override
         {
@@ -359,12 +337,30 @@ private:
     void handleIncomingMidiMessage (MidiInput* /*source*/, const MidiMessage& message) override
     {
         // This is called on the MIDI thread
-
-        if (message.isNoteOnOrOff())
-            postMessage (new MidiCallbackMessage (message));
+        const ScopedLock sl (midiMonitorLock);
+        incomingMessages.add (message);
+        triggerAsyncUpdate();
     }
 
-    void sendToOutputs(const MidiMessage& msg)
+    void handleAsyncUpdate() override
+    {
+        // This is called on the message loop
+        Array<MidiMessage> messages;
+
+        {
+            const ScopedLock sl (midiMonitorLock);
+            messages.swapWith (incomingMessages);
+        }
+
+        String messageText;
+
+        for (auto& m : messages)
+            messageText << m.getDescription() << "\n";
+
+        midiMonitor.insertTextAtCaret (messageText);
+    }
+
+    void sendToOutputs (const MidiMessage& msg)
     {
         for (auto midiOutput : midiOutputs)
             if (midiOutput->outDevice.get() != nullptr)
@@ -476,11 +472,11 @@ private:
     TextEditor midiMonitor  { "MIDI Monitor" };
     TextButton pairButton   { "MIDI Bluetooth devices..." };
 
-    std::unique_ptr<MidiDeviceListBox> midiInputSelector;
-    std::unique_ptr<MidiDeviceListBox> midiOutputSelector;
+    std::unique_ptr<MidiDeviceListBox> midiInputSelector, midiOutputSelector;
+    ReferenceCountedArray<MidiDeviceListEntry> midiInputs, midiOutputs;
 
-    ReferenceCountedArray<MidiDeviceListEntry> midiInputs;
-    ReferenceCountedArray<MidiDeviceListEntry> midiOutputs;
+    CriticalSection midiMonitorLock;
+    Array<MidiMessage> incomingMessages;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiDemo)

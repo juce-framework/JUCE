@@ -90,10 +90,10 @@ namespace BinaryData
     const int            jucer_AnimatedComponentTemplate_hSize = 1201;
 
     extern const char*   jucer_AudioComponentSimpleTemplate_h;
-    const int            jucer_AudioComponentSimpleTemplate_hSize = 3194;
+    const int            jucer_AudioComponentSimpleTemplate_hSize = 3693;
 
     extern const char*   jucer_AudioComponentTemplate_cpp;
-    const int            jucer_AudioComponentTemplate_cppSize = 2635;
+    const int            jucer_AudioComponentTemplate_cppSize = 3094;
 
     extern const char*   jucer_AudioComponentTemplate_h;
     const int            jucer_AudioComponentTemplate_hSize = 1374;
@@ -135,10 +135,10 @@ namespace BinaryData
     const int            jucer_MainTemplate_NoWindow_cppSize = 2021;
 
     extern const char*   jucer_MainTemplate_SimpleWindow_cpp;
-    const int            jucer_MainTemplate_SimpleWindow_cppSize = 4012;
+    const int            jucer_MainTemplate_SimpleWindow_cppSize = 4127;
 
     extern const char*   jucer_MainTemplate_Window_cpp;
-    const int            jucer_MainTemplate_Window_cppSize = 3972;
+    const int            jucer_MainTemplate_Window_cppSize = 4127;
 
     extern const char*   jucer_NewComponentTemplate_cpp;
     const int            jucer_NewComponentTemplate_cppSize = 1491;
@@ -173,6 +173,9 @@ namespace BinaryData
     extern const char*   jucer_PIPTemplate_h;
     const int            jucer_PIPTemplate_hSize = 517;
 
+    extern const char*   jucer_UnityPluginGUIScript_cs;
+    const int            jucer_UnityPluginGUIScript_csSize = 6433;
+
     extern const char*   colourscheme_dark_xml;
     const int            colourscheme_dark_xmlSize = 1050;
 
@@ -192,7 +195,7 @@ namespace BinaryData
     const int            RecentFilesMenuTemplate_nibSize = 2842;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 61;
+    const int namedResourceListSize = 62;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];

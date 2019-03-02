@@ -47,7 +47,7 @@ public:
     FileSearchPathListComponent();
 
     /** Destructor. */
-    ~FileSearchPathListComponent();
+    ~FileSearchPathListComponent() override;
 
     //==============================================================================
     /** Returns the path as it is currently shown. */

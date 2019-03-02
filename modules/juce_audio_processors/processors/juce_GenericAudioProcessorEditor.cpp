@@ -32,8 +32,8 @@ class ParameterListener   : private AudioProcessorParameter::Listener,
                             private Timer
 {
 public:
-    ParameterListener (AudioProcessor& p, AudioProcessorParameter& param)
-        : processor (p), parameter (param)
+    ParameterListener (AudioProcessor& proc, AudioProcessorParameter& param)
+        : processor (proc), parameter (param)
     {
         if (LegacyAudioParameter::isLegacy (&parameter))
             processor.addListener (this);
@@ -43,7 +43,7 @@ public:
         startTimer (100);
     }
 
-    virtual ~ParameterListener()
+    ~ParameterListener() override
     {
         if (LegacyAudioParameter::isLegacy (&parameter))
             processor.removeListener (this);
@@ -101,8 +101,8 @@ class BooleanParameterComponent final   : public Component,
                                           private ParameterListener
 {
 public:
-    BooleanParameterComponent (AudioProcessor& processor, AudioProcessorParameter& param)
-        : ParameterListener (processor, param)
+    BooleanParameterComponent (AudioProcessor& proc, AudioProcessorParameter& param)
+        : ParameterListener (proc, param)
     {
         // Set the initial value.
         handleNewParameterValue();
@@ -154,8 +154,8 @@ class SwitchParameterComponent final   : public Component,
                                          private ParameterListener
 {
 public:
-    SwitchParameterComponent (AudioProcessor& processor, AudioProcessorParameter& param)
-        : ParameterListener (processor, param)
+    SwitchParameterComponent (AudioProcessor& proc, AudioProcessorParameter& param)
+        : ParameterListener (proc, param)
     {
         auto* leftButton  = buttons.add (new TextButton());
         auto* rightButton = buttons.add (new TextButton());
@@ -259,8 +259,8 @@ class ChoiceParameterComponent final   : public Component,
                                          private ParameterListener
 {
 public:
-    ChoiceParameterComponent (AudioProcessor& processor, AudioProcessorParameter& param)
-        : ParameterListener (processor, param),
+    ChoiceParameterComponent (AudioProcessor& proc, AudioProcessorParameter& param)
+        : ParameterListener (proc, param),
           parameterValues (getParameter().getAllValueStrings())
     {
         box.addItemList (parameterValues, 1);
@@ -321,8 +321,8 @@ class SliderParameterComponent final   : public Component,
                                          private ParameterListener
 {
 public:
-    SliderParameterComponent (AudioProcessor& processor, AudioProcessorParameter& param)
-        : ParameterListener (processor, param)
+    SliderParameterComponent (AudioProcessor& proc, AudioProcessorParameter& param)
+        : ParameterListener (proc, param)
     {
         if (getParameter().getNumSteps() != AudioProcessor::getDefaultNumParameterSteps())
             slider.setRange (0.0, 1.0, 1.0 / (getParameter().getNumSteps() - 1.0));
@@ -506,7 +506,7 @@ private:
 };
 
 //==============================================================================
-struct  GenericAudioProcessorEditor::Pimpl
+struct GenericAudioProcessorEditor::Pimpl
 {
     Pimpl (GenericAudioProcessorEditor& parent)
         : owner (parent)

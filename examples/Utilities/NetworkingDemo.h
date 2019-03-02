@@ -33,6 +33,8 @@
                    juce_gui_basics, juce_gui_extra
  exporters:        xcode_mac, vs2017, linux_make, androidstudio, xcode_iphone
 
+ moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+
  type:             Component
  mainClass:        NetworkingDemo
 
@@ -101,15 +103,16 @@ public:
         StringPairArray responseHeaders;
         int statusCode = 0;
 
-        std::unique_ptr<InputStream> stream (url.createInputStream (false, nullptr, nullptr, {},
-                                                                    10000, // timeout in millisecs
-                                                                    &responseHeaders, &statusCode));
-        if (stream.get() != nullptr)
+        if (auto stream = std::unique_ptr<InputStream> (url.createInputStream (false, nullptr, nullptr, {},
+                                                                               10000, // timeout in millisecs
+                                                                               &responseHeaders, &statusCode)))
+        {
             return (statusCode != 0 ? "Status code: " + String (statusCode) + newLine : String())
                     + "Response headers: " + newLine
                     + responseHeaders.getDescription() + newLine
                     + "----------------------------------------------------" + newLine
                     + stream->readEntireStreamAsString();
+        }
 
         if (statusCode != 0)
             return "Failed to connect, status code = " + String (statusCode);

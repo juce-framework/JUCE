@@ -39,7 +39,7 @@ struct FastMathApproximations
     /** Provides a fast approximation of the function cosh(x) using a Pade approximant
         continued fraction, calculated sample by sample.
 
-        Note : this is an approximation which works on a limited range. You are
+        Note: This is an approximation which works on a limited range. You are
         advised to use input values only between -5 and +5 for limiting the error.
     */
     template <typename FloatType>
@@ -54,7 +54,7 @@ struct FastMathApproximations
     /** Provides a fast approximation of the function cosh(x) using a Pade approximant
         continued fraction, calculated on a whole buffer.
 
-        Note : this is an approximation which works on a limited range. You are
+        Note: This is an approximation which works on a limited range. You are
         advised to use input values only between -5 and +5 for limiting the error.
     */
     template <typename FloatType>
@@ -67,7 +67,7 @@ struct FastMathApproximations
     /** Provides a fast approximation of the function sinh(x) using a Pade approximant
         continued fraction, calculated sample by sample.
 
-        Note : this is an approximation which works on a limited range. You are
+        Note: This is an approximation which works on a limited range. You are
         advised to use input values only between -5 and +5 for limiting the error.
     */
     template <typename FloatType>
@@ -82,7 +82,7 @@ struct FastMathApproximations
     /** Provides a fast approximation of the function sinh(x) using a Pade approximant
         continued fraction, calculated on a whole buffer.
 
-        Note : this is an approximation which works on a limited range. You are
+        Note: This is an approximation which works on a limited range. You are
         advised to use input values only between -5 and +5 for limiting the error.
     */
     template <typename FloatType>
@@ -95,7 +95,7 @@ struct FastMathApproximations
     /** Provides a fast approximation of the function tanh(x) using a Pade approximant
         continued fraction, calculated sample by sample.
 
-        Note : this is an approximation which works on a limited range. You are
+        Note: This is an approximation which works on a limited range. You are
         advised to use input values only between -5 and +5 for limiting the error.
     */
     template <typename FloatType>
@@ -110,7 +110,7 @@ struct FastMathApproximations
     /** Provides a fast approximation of the function tanh(x) using a Pade approximant
         continued fraction, calculated on a whole buffer.
 
-        Note : this is an approximation which works on a limited range. You are
+        Note: This is an approximation which works on a limited range. You are
         advised to use input values only between -5 and +5 for limiting the error.
     */
     template <typename FloatType>
@@ -124,7 +124,7 @@ struct FastMathApproximations
     /** Provides a fast approximation of the function cos(x) using a Pade approximant
         continued fraction, calculated sample by sample.
 
-        Note : this is an approximation which works on a limited range. You are
+        Note: This is an approximation which works on a limited range. You are
         advised to use input values only between -pi and +pi for limiting the error.
     */
     template <typename FloatType>
@@ -139,7 +139,7 @@ struct FastMathApproximations
     /** Provides a fast approximation of the function cos(x) using a Pade approximant
         continued fraction, calculated on a whole buffer.
 
-        Note : this is an approximation which works on a limited range. You are
+        Note: This is an approximation which works on a limited range. You are
         advised to use input values only between -pi and +pi for limiting the error.
     */
     template <typename FloatType>
@@ -152,7 +152,7 @@ struct FastMathApproximations
     /** Provides a fast approximation of the function sin(x) using a Pade approximant
         continued fraction, calculated sample by sample.
 
-        Note : this is an approximation which works on a limited range. You are
+        Note: This is an approximation which works on a limited range. You are
         advised to use input values only between -pi and +pi for limiting the error.
     */
     template <typename FloatType>
@@ -167,7 +167,7 @@ struct FastMathApproximations
     /** Provides a fast approximation of the function sin(x) using a Pade approximant
         continued fraction, calculated on a whole buffer.
 
-        Note : this is an approximation which works on a limited range. You are
+        Note: This is an approximation which works on a limited range. You are
         advised to use input values only between -pi and +pi for limiting the error.
     */
     template <typename FloatType>
@@ -180,7 +180,7 @@ struct FastMathApproximations
     /** Provides a fast approximation of the function tan(x) using a Pade approximant
         continued fraction, calculated sample by sample.
 
-        Note : this is an approximation which works on a limited range. You are
+        Note: This is an approximation which works on a limited range. You are
         advised to use input values only between -pi/2 and +pi/2 for limiting the error.
     */
     template <typename FloatType>
@@ -195,7 +195,7 @@ struct FastMathApproximations
     /** Provides a fast approximation of the function tan(x) using a Pade approximant
         continued fraction, calculated on a whole buffer.
 
-        Note : this is an approximation which works on a limited range. You are
+        Note: This is an approximation which works on a limited range. You are
         advised to use input values only between -pi/2 and +pi/2 for limiting the error.
     */
     template <typename FloatType>
@@ -209,7 +209,7 @@ struct FastMathApproximations
     /** Provides a fast approximation of the function exp(x) using a Pade approximant
         continued fraction, calculated sample by sample.
 
-        Note : this is an approximation which works on a limited range. You are
+        Note: This is an approximation which works on a limited range. You are
         advised to use input values only between -6 and +4 for limiting the error.
     */
     template <typename FloatType>
@@ -223,7 +223,7 @@ struct FastMathApproximations
     /** Provides a fast approximation of the function exp(x) using a Pade approximant
         continued fraction, calculated on a whole buffer.
 
-        Note : this is an approximation which works on a limited range. You are
+        Note: This is an approximation which works on a limited range. You are
         advised to use input values only between -6 and +4 for limiting the error.
     */
     template <typename FloatType>
@@ -236,7 +236,7 @@ struct FastMathApproximations
     /** Provides a fast approximation of the function log(x+1) using a Pade approximant
         continued fraction, calculated sample by sample.
 
-        Note : this is an approximation which works on a limited range. You are
+        Note: This is an approximation which works on a limited range. You are
         advised to use input values only between -0.8 and +5 for limiting the error.
     */
     template <typename FloatType>
@@ -250,7 +250,7 @@ struct FastMathApproximations
     /** Provides a fast approximation of the function log(x+1) using a Pade approximant
         continued fraction, calculated on a whole buffer.
 
-        Note : this is an approximation which works on a limited range. You are
+        Note: This is an approximation which works on a limited range. You are
         advised to use input values only between -0.8 and +5 for limiting the error.
     */
     template <typename FloatType>

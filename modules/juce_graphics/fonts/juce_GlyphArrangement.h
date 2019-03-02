@@ -51,7 +51,7 @@ public:
     PositionedGlyph (const PositionedGlyph&) = default;
     PositionedGlyph& operator= (const PositionedGlyph&) = default;
 
-    // VS2013 can't default move constructors and assignmants
+    // VS2013 can't default move constructors and assignments
     PositionedGlyph (PositionedGlyph&&) noexcept;
     PositionedGlyph& operator= (PositionedGlyph&&) noexcept;
 

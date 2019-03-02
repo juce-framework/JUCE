@@ -77,7 +77,7 @@ void ResizableEdgeComponent::mouseDrag (const MouseEvent& e)
         return;
     }
 
-    Rectangle<int> newBounds (originalBounds);
+    auto newBounds = originalBounds;
 
     switch (edge)
     {
@@ -98,8 +98,8 @@ void ResizableEdgeComponent::mouseDrag (const MouseEvent& e)
     }
     else
     {
-        if (Component::Positioner* const pos = component->getPositioner())
-            pos->applyNewBounds (newBounds);
+        if (auto* p = component->getPositioner())
+            p->applyNewBounds (newBounds);
         else
             component->setBounds (newBounds);
     }

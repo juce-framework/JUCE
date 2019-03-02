@@ -107,7 +107,6 @@ private:
     friend unsigned long juce_getCurrentFocusWindow (ComponentPeer*);
 
     class Pimpl;
-    friend struct ContainerDeletePolicy<Pimpl>;
     std::unique_ptr<Pimpl> pimpl;
 };
 

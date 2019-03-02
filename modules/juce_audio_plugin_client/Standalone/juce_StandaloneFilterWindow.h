@@ -89,12 +89,14 @@ public:
         if (preferredSetupOptions != nullptr)
             options.reset (new AudioDeviceManager::AudioDeviceSetup (*preferredSetupOptions));
 
-        if (inChannels > 0 && RuntimePermissions::isRequired (RuntimePermissions::recordAudio)
+        auto audioInputRequired = (inChannels > 0);
+
+        if (audioInputRequired && RuntimePermissions::isRequired (RuntimePermissions::recordAudio)
             && ! RuntimePermissions::isGranted (RuntimePermissions::recordAudio))
             RuntimePermissions::request (RuntimePermissions::recordAudio,
                                          [this, preferredDefaultDeviceName] (bool granted) { init (granted, preferredDefaultDeviceName); });
         else
-            init (true, preferredDefaultDeviceName);
+            init (audioInputRequired, preferredDefaultDeviceName);
     }
 
     void init (bool enableAudioInput, const String& preferredDefaultDeviceName)
@@ -118,7 +120,6 @@ public:
     //==============================================================================
     virtual void createPlugin()
     {
-
       #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
         processor.reset (::createPluginFilterOfType (AudioProcessor::wrapperType_Standalone));
       #else
@@ -427,7 +428,8 @@ private:
               deviceSelector (deviceManagerToUse,
                               minAudioInputChannels, maxAudioInputChannels,
                               minAudioOutputChannels, maxAudioOutputChannels,
-                              true, false,
+                              true,
+                              (pluginHolder.processor.get() != nullptr && pluginHolder.processor->producesMidi()),
                               true, false),
               shouldMuteLabel  ("Feedback Loop:", "Feedback Loop:"),
               shouldMuteButton ("Mute audio input")
@@ -508,10 +510,12 @@ private:
         emptyBuffer.clear();
 
         player.audioDeviceAboutToStart (device);
+        player.setMidiOutput (deviceManager.getDefaultMidiOutput());
     }
 
     void audioDeviceStopped() override
     {
+        player.setMidiOutput (nullptr);
         player.audioDeviceStopped();
         emptyBuffer.setSize (0, 0);
     }

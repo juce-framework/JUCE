@@ -48,8 +48,8 @@ protected:
             addGCCOptimisationProperty (props);
 
             props.add (new ChoicePropertyComponent (architectureTypeValue, "Architecture",
-                                                    { "<None>",      "Native",        "32-bit (-m32)", "64-bit (-m64)", "ARM v6",       "ARM v7" },
-                                                    { { String() } , "-march=native", "-m32",          "-m64",          "-march=armv6", "-march=armv7" }),
+                                                    { "<None>",     "Native",        "32-bit (-m32)", "64-bit (-m64)", "ARM v6",       "ARM v7" },
+                                                    { { String() }, "-march=native", "-m32",          "-m64",          "-march=armv6", "-march=armv7" }),
                        "Specifies the 32/64-bit architecture to use.");
         }
 
@@ -78,7 +78,7 @@ protected:
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
     {
-        return new MakeBuildConfiguration (project, tree, *this);
+        return *new MakeBuildConfiguration (project, tree, *this);
     }
 
 public:
@@ -133,10 +133,8 @@ public:
 
         StringArray getTargetSettings (const MakeBuildConfiguration& config) const
         {
-            if (type == AggregateTarget)
-                // the aggregate target should not specify any settings at all!
-                // it just defines dependencies on the other targets.
-                return {};
+            if (type == AggregateTarget) // the aggregate target should not specify any settings at all!
+                return {};               // it just defines dependencies on the other targets.
 
             StringArray defines;
             auto defs = getDefines (config);
@@ -179,6 +177,7 @@ public:
             switch (type)
             {
                 case VSTPlugIn:
+                case UnityPlugIn:
                 case DynamicLibrary:        return ".so";
                 case SharedCodeTarget:
                 case StaticLibrary:         return ".a";
@@ -193,63 +192,31 @@ public:
             return String (getName()).toUpperCase().replaceCharacter (L' ', L'_');
         }
 
-        void writeObjects (OutputStream& out) const
+        void writeObjects (OutputStream& out, const Array<std::pair<File, String>>& filesToCompile) const
         {
-            Array<RelativePath> targetFiles;
-            for (int i = 0; i < owner.getAllGroups().size(); ++i)
-                findAllFilesToCompile (owner.getAllGroups().getReference(i), targetFiles);
-
             out << "OBJECTS_" + getTargetVarName() + String (" := \\") << newLine;
 
-            for (int i = 0; i < targetFiles.size(); ++i)
-                out << "  $(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor (targetFiles.getReference(i))) << " \\" << newLine;
+            for (auto& f : filesToCompile)
+                out << "  $(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor ({ f.first, owner.getTargetFolder(), RelativePath::buildTargetFolder })) << " \\" << newLine;
 
             out << newLine;
         }
 
-        void findAllFilesToCompile (const Project::Item& projectItem, Array<RelativePath>& results) const
+        void addFiles (OutputStream& out, const Array<std::pair<File, String>>& filesToCompile)
         {
-            if (projectItem.isGroup())
-            {
-                for (int i = 0; i < projectItem.getNumChildren(); ++i)
-                    findAllFilesToCompile (projectItem.getChild(i), results);
-            }
-            else
-            {
-                if (projectItem.shouldBeCompiled())
-                {
-                    auto targetType = (owner.getProject().getProjectType().isAudioPlugin() ? type : SharedCodeTarget);
-                    auto f = projectItem.getFile();
-                    RelativePath relativePath (f, owner.getTargetFolder(), RelativePath::buildTargetFolder);
-
-                    if (owner.shouldFileBeCompiledByDefault (relativePath)
-                     && owner.getProject().getTargetTypeFromFilePath (f, true) == targetType)
-                        results.add (relativePath);
-                }
-            }
-        }
-
-        void addFiles (OutputStream& out)
-        {
-            Array<RelativePath> targetFiles;
-            for (int i = 0; i < owner.getAllGroups().size(); ++i)
-                findAllFilesToCompile (owner.getAllGroups().getReference(i), targetFiles);
-
             auto cppflagsVarName = "JUCE_CPPFLAGS_" + getTargetVarName();
             auto cflagsVarName   = "JUCE_CFLAGS_"   + getTargetVarName();
 
-            for (int i = 0; i < targetFiles.size(); ++i)
+            for (auto& f : filesToCompile)
             {
-                jassert (targetFiles.getReference(i).getRoot() == RelativePath::buildTargetFolder);
+                RelativePath relativePath (f.first, owner.getTargetFolder(), RelativePath::buildTargetFolder);
 
-                out << "$(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor (targetFiles.getReference(i)))
-                    << ": " << escapeSpaces (targetFiles.getReference(i).toUnixStyle())            << newLine
-                    << "\t-$(V_AT)mkdir -p $(JUCE_OBJDIR)"                                         << newLine
-                    << "\t@echo \"Compiling " << targetFiles.getReference(i).getFileName() << "\"" << newLine
-                    << (targetFiles.getReference(i).hasFileExtension ("c;s;S") ? "\t$(V_AT)$(CC) $(JUCE_CFLAGS) "
-                                                                               : "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) ")
-                    << "$(" << cppflagsVarName << ") $(" << cflagsVarName << ") -o \"$@\" -c \"$<\""
-                    << newLine
+                out << "$(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor (relativePath)) << ": " << escapeSpaces (relativePath.toUnixStyle()) << newLine
+                    << "\t-$(V_AT)mkdir -p $(JUCE_OBJDIR)"                                                                                            << newLine
+                    << "\t@echo \"Compiling " << relativePath.getFileName() << "\""                                                                   << newLine
+                    << (relativePath.hasFileExtension ("c;s;S") ? "\t$(V_AT)$(CC) $(JUCE_CFLAGS) " : "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) ")
+                    << "$(" << cppflagsVarName << ") $(" << cflagsVarName << ")"
+                    << (f.second.isNotEmpty() ? " $(" + owner.getCompilerFlagSchemeVariableName (f.second) + ")" : "") << " -o \"$@\" -c \"$<\""        << newLine
                     << newLine;
             }
         }
@@ -264,25 +231,50 @@ public:
             return String (getName()).upToFirstOccurrenceOf (" ", false, false);
         }
 
-        void writeTargetLine (OutputStream& out, const bool useLinuxPackages)
+        void writeTargetLine (OutputStream& out, const StringArray& packages)
         {
             jassert (type != AggregateTarget);
 
             out << getBuildProduct() << " : "
-                << ((useLinuxPackages) ? "check-pkg-config " : "")
                 << "$(OBJECTS_" << getTargetVarName() << ") $(RESOURCES)";
 
             if (type != SharedCodeTarget && owner.shouldBuildTargetType (SharedCodeTarget))
                 out << " $(JUCE_OUTDIR)/$(JUCE_TARGET_SHARED_CODE)";
 
-            out << newLine << "\t@echo Linking \"" << owner.projectName << " - " << getName() << "\"" << newLine
+            out << newLine;
+
+            if (! packages.isEmpty())
+            {
+                out << "\t@command -v pkg-config >/dev/null 2>&1 || { echo >&2 \"pkg-config not installed. Please, install it.\"; exit 1; }" << newLine
+                    << "\t@pkg-config --print-errors";
+
+                for (auto& pkg : packages)
+                    out << " " << pkg;
+
+                out << newLine;
+            }
+
+            out << "\t@echo Linking \"" << owner.projectName << " - " << getName() << "\"" << newLine
                 << "\t-$(V_AT)mkdir -p $(JUCE_BINDIR)" << newLine
                 << "\t-$(V_AT)mkdir -p $(JUCE_LIBDIR)" << newLine
                 << "\t-$(V_AT)mkdir -p $(JUCE_OUTDIR)" << newLine;
 
+            if (type == UnityPlugIn)
+            {
+                auto scriptName = owner.getProject().getUnityScriptName();
+
+                RelativePath scriptPath (owner.getProject().getGeneratedCodeFolder().getChildFile (scriptName),
+                                         owner.getTargetFolder(),
+                                         RelativePath::projectFolder);
+
+                out << "\t-$(V_AT)cp " + scriptPath.toUnixStyle() + " $(JUCE_OUTDIR)/" + scriptName << newLine;
+            }
+
             if (owner.projectType.isStaticLibrary() || type == SharedCodeTarget)
+            {
                 out << "\t$(V_AT)$(AR) -rcs " << getBuildProduct()
                     << " $(OBJECTS_" << getTargetVarName() << ")" << newLine;
+            }
             else
             {
                 out << "\t$(V_AT)$(CXX) -o " << getBuildProduct()
@@ -362,6 +354,7 @@ public:
             case ProjectType::Target::VSTPlugIn:
             case ProjectType::Target::StandalonePlugIn:
             case ProjectType::Target::DynamicLibrary:
+            case ProjectType::Target::UnityPlugIn:
                 return true;
             default:
                 break;
@@ -374,6 +367,12 @@ public:
     {
         properties.add (new TextPropertyComponent (extraPkgConfigValue, "pkg-config libraries", 8192, false),
                    "Extra pkg-config libraries for you application. Each package should be space separated.");
+    }
+
+    void initialiseDependencyPathValues() override
+    {
+        vstLegacyPathValueWrapper.init ({ settings, Ids::vstLegacyFolder, nullptr },
+                                          getAppSettings().getStoredPath (Ids::vstLegacyPath, TargetOS::linux), TargetOS::linux);
     }
 
     //==============================================================================
@@ -395,6 +394,8 @@ public:
     void create (const OwnedArray<LibraryModule>&) const override
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
+
         writeMakefile (mo);
 
         overwriteFileIfDifferentOrThrow (getTargetFolder().getChildFile ("Makefile"), mo);
@@ -418,9 +419,6 @@ public:
         // that does not support any of your targets!
         jassert (targets.size() > 0);
     }
-
-    //==============================================================================
-    void initialiseDependencyPathValues() override  {}
 
 private:
     ValueWithDefault extraPkgConfigValue;
@@ -460,6 +458,10 @@ private:
             packages.add ("webkit2gtk-4.0");
             packages.add ("gtk+-x11-3.0");
         }
+
+        // don't add libcurl if curl symbols are loaded at runtime
+        if (! isLoadCurlSymbolsLazilyEnabled())
+            packages.add ("libcurl");
 
         packages.removeDuplicates (false);
 
@@ -597,8 +599,16 @@ private:
     {
         static String guiExtrasModule ("juce_gui_extra");
 
-        return (project.getModules().isModuleEnabled (guiExtrasModule)
+        return (project.getEnabledModules().isModuleEnabled (guiExtrasModule)
                 && project.isConfigFlagEnabled ("JUCE_WEB_BROWSER", true));
+    }
+
+    bool isLoadCurlSymbolsLazilyEnabled() const
+    {
+        static String juceCoreModule ("juce_core");
+
+        return (project.getEnabledModules().isModuleEnabled (juceCoreModule)
+                && project.isConfigFlagEnabled ("JUCE_LOAD_CURL_SYMBOLS_LAZILY", false));
     }
 
     //==============================================================================
@@ -662,7 +672,7 @@ private:
         out << " $(LDFLAGS)" << newLine;
     }
 
-    void writeTargetLines (OutputStream& out, const bool useLinuxPackages) const
+    void writeTargetLines (OutputStream& out, const StringArray& packages) const
     {
         auto n = targets.size();
 
@@ -692,14 +702,14 @@ private:
                     }
 
                     out << "all : " << dependencies.joinIntoString (" ") << newLine << newLine;
-                    out << subTargetLines.toString() << newLine << newLine;
+                    out << subTargetLines.toString()                     << newLine << newLine;
                 }
                 else
                 {
                     if (! getProject().getProjectType().isAudioPlugin())
                         out << "all : " << target->getBuildProduct() << newLine << newLine;
 
-                    target->writeTargetLine (out, useLinuxPackages);
+                    target->writeTargetLine (out, packages);
                 }
             }
         }
@@ -717,15 +727,15 @@ private:
             outputDir = binaryPath.rebased (projectFolder, getTargetFolder(), RelativePath::buildTargetFolder).toUnixStyle();
         }
 
-        out << "ifeq ($(CONFIG)," << escapeSpaces (config.getName()) << ")" << newLine;
-        out << "  JUCE_BINDIR := " << escapeSpaces (buildDirName) << newLine
-            << "  JUCE_LIBDIR := " << escapeSpaces (buildDirName) << newLine
-            << "  JUCE_OBJDIR := " << escapeSpaces (intermediatesDirName) << newLine
-            << "  JUCE_OUTDIR := " << escapeSpaces (outputDir) << newLine
+        out << "ifeq ($(CONFIG)," << escapeSpaces (config.getName()) << ")" << newLine
+            << "  JUCE_BINDIR := " << escapeSpaces (buildDirName)           << newLine
+            << "  JUCE_LIBDIR := " << escapeSpaces (buildDirName)           << newLine
+            << "  JUCE_OBJDIR := " << escapeSpaces (intermediatesDirName)   << newLine
+            << "  JUCE_OUTDIR := " << escapeSpaces (outputDir)              << newLine
             << newLine
-            << "  ifeq ($(TARGET_ARCH),)" << newLine
-            << "    TARGET_ARCH := " << getArchFlags (config) << newLine
-            << "  endif"  << newLine
+            << "  ifeq ($(TARGET_ARCH),)"                                   << newLine
+            << "    TARGET_ARCH := " << getArchFlags (config)               << newLine
+            << "  endif"                                                    << newLine
             << newLine;
 
         writeCppFlags (out, config);
@@ -784,37 +794,84 @@ private:
         }
     }
 
+    static String getCompilerFlagSchemeVariableName (const String& schemeName)   { return "JUCE_COMPILERFLAGSCHEME_" + schemeName; }
+
+    void findAllFilesToCompile (const Project::Item& projectItem, Array<std::pair<File, String>>& results) const
+    {
+        if (projectItem.isGroup())
+        {
+            for (int i = 0; i < projectItem.getNumChildren(); ++i)
+                findAllFilesToCompile (projectItem.getChild (i), results);
+        }
+        else
+        {
+            if (projectItem.shouldBeCompiled())
+            {
+                auto f = projectItem.getFile();
+
+                if (shouldFileBeCompiledByDefault (f))
+                {
+                    auto scheme = projectItem.getCompilerFlagSchemeString();
+                    auto flags = compilerFlagSchemesMap[scheme].get().toString();
+
+                    if (scheme.isNotEmpty() && flags.isNotEmpty())
+                        results.add ({ f, scheme });
+                    else
+                        results.add ({ f, {} });
+                }
+            }
+        }
+    }
+
+    void writeCompilerFlagSchemes (OutputStream& out, const Array<std::pair<File, String>>& filesToCompile) const
+    {
+        StringArray schemesToWrite;
+
+        for (auto& f : filesToCompile)
+            if (f.second.isNotEmpty())
+                schemesToWrite.addIfNotAlreadyThere (f.second);
+
+        if (! schemesToWrite.isEmpty())
+        {
+            for (auto& s : schemesToWrite)
+                out << getCompilerFlagSchemeVariableName (s) << " := "
+                    << compilerFlagSchemesMap[s].get().toString() << newLine;
+
+            out << newLine;
+        }
+    }
+
     void writeMakefile (OutputStream& out) const
     {
-        out << "# Automatically generated makefile, created by the Projucer" << newLine
+        out << "# Automatically generated makefile, created by the Projucer"                                     << newLine
             << "# Don't edit this file! Your changes will be overwritten when you re-save the Projucer project!" << newLine
             << newLine;
 
         out << "# build with \"V=1\" for verbose builds" << newLine
-            << "ifeq ($(V), 1)" << newLine
-            << "V_AT =" << newLine
-            << "else" << newLine
-            << "V_AT = @" << newLine
-            << "endif" << newLine
+            << "ifeq ($(V), 1)"                          << newLine
+            << "V_AT ="                                  << newLine
+            << "else"                                    << newLine
+            << "V_AT = @"                                << newLine
+            << "endif"                                   << newLine
             << newLine;
 
         out << "# (this disables dependency generation if multiple architectures are set)" << newLine
-            << "DEPFLAGS := $(if $(word 2, $(TARGET_ARCH)), , -MMD)" << newLine
+            << "DEPFLAGS := $(if $(word 2, $(TARGET_ARCH)), , -MMD)"                       << newLine
             << newLine;
 
-        out << "ifndef STRIP" << newLine
+        out << "ifndef STRIP"  << newLine
             << "  STRIP=strip" << newLine
-            << "endif" << newLine
+            << "endif"         << newLine
             << newLine;
 
         out << "ifndef AR" << newLine
-            << "  AR=ar" << newLine
-            << "endif" << newLine
+            << "  AR=ar"   << newLine
+            << "endif"     << newLine
             << newLine;
 
-        out << "ifndef CONFIG" << newLine
+        out << "ifndef CONFIG"                                              << newLine
             << "  CONFIG=" << escapeSpaces (getConfiguration(0)->getName()) << newLine
-            << "endif" << newLine
+            << "endif"                                                      << newLine
             << newLine;
 
         out << "JUCE_ARCH_LABEL := $(shell uname -m)" << newLine
@@ -823,39 +880,43 @@ private:
         for (ConstConfigIterator config (*this); config.next();)
             writeConfig (out, dynamic_cast<const MakeBuildConfiguration&> (*config));
 
+        Array<std::pair<File, String>> filesToCompile;
+
+        for (int i = 0; i < getAllGroups().size(); ++i)
+            findAllFilesToCompile (getAllGroups().getReference (i), filesToCompile);
+
+        writeCompilerFlagSchemes (out, filesToCompile);
+
+        auto getFilesForTarget = [] (const Array<std::pair<File, String>>& files, MakefileTarget* target, const Project& p) -> Array<std::pair<File, String>>
+        {
+            Array<std::pair<File, String>> targetFiles;
+
+            auto targetType = (p.getProjectType().isAudioPlugin() ? target->type : MakefileTarget::SharedCodeTarget);
+
+            for (auto& f : files)
+                if (p.getTargetTypeFromFilePath (f.first, true) == targetType)
+                    targetFiles.add (f);
+
+            return targetFiles;
+        };
+
         for (auto target : targets)
-            target->writeObjects (out);
+            target->writeObjects (out, getFilesForTarget (filesToCompile, target, project));
 
         out << getPhonyTargetLine() << newLine << newLine;
 
-        auto packages = getPackages();
-
-        writeTargetLines (out, ! packages.isEmpty());
+        writeTargetLines (out, getPackages());
 
         for (auto target : targets)
-            target->addFiles (out);
+            target->addFiles (out, getFilesForTarget (filesToCompile, target, project));
 
-        if (! packages.isEmpty())
-        {
-            out << "check-pkg-config:" << newLine
-                << "\t@command -v pkg-config >/dev/null 2>&1 || "
-                "{ echo >&2 \"pkg-config not installed. Please, install it.\"; "
-                "exit 1; }" << newLine
-                << "\t@pkg-config --print-errors";
-
-            for (auto& pkg : packages)
-                out << " " << pkg;
-
-            out << newLine << newLine;
-        }
-
-        out << "clean:" << newLine
+        out << "clean:"                           << newLine
             << "\t@echo Cleaning " << projectName << newLine
-            << "\t$(V_AT)$(CLEANCMD)" << newLine
+            << "\t$(V_AT)$(CLEANCMD)"             << newLine
             << newLine;
 
-        out << "strip:" << newLine
-            << "\t@echo Stripping " << projectName << newLine
+        out << "strip:"                                                       << newLine
+            << "\t@echo Stripping " << projectName                            << newLine
             << "\t-$(V_AT)$(STRIP) --strip-unneeded $(JUCE_OUTDIR)/$(TARGET)" << newLine
             << newLine;
 
@@ -880,7 +941,7 @@ private:
     {
         MemoryOutputStream phonyTargetLine;
 
-        phonyTargetLine << ".PHONY: clean all";
+        phonyTargetLine << ".PHONY: clean all strip";
 
         if (! getProject().getProjectType().isAudioPlugin())
             return phonyTargetLine.toString();

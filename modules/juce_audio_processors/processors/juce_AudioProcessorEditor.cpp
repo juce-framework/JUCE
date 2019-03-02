@@ -88,18 +88,13 @@ void AudioProcessorEditor::setResizable (const bool shouldBeResizable, const boo
     {
         resizable = shouldBeResizable;
 
-        if (! resizable)
+        if (! resizable && constrainer == &defaultConstrainer)
         {
-            setConstrainer (&defaultConstrainer);
+            auto width = getWidth();
+            auto height = getHeight();
 
-            if (auto w = getWidth())
-            {
-                if (auto h = getHeight())
-                {
-                    defaultConstrainer.setSizeLimits (w, h, w, h);
-                    resized();
-                }
-            }
+            if (width > 0 && height > 0)
+                defaultConstrainer.setSizeLimits (width, height, width, height);
         }
     }
 
@@ -146,7 +141,10 @@ void AudioProcessorEditor::setConstrainer (ComponentBoundsConstrainer* newConstr
 {
     if (constrainer != newConstrainer)
     {
-        resizable = true;
+        if (newConstrainer != nullptr)
+            resizable = (newConstrainer->getMinimumWidth()  != newConstrainer->getMaximumWidth()
+                      || newConstrainer->getMinimumHeight() != newConstrainer->getMaximumHeight());
+
         attachConstrainer (newConstrainer);
     }
 }
@@ -205,6 +203,25 @@ void AudioProcessorEditor::setScaleFactor (float newScale)
 {
     setTransform (AffineTransform::scale (newScale));
     editorResized (true);
+}
+
+//==============================================================================
+#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && JucePlugin_Build_Unity
+ typedef ComponentPeer* (*createUnityPeerFunctionType) (Component&);
+ createUnityPeerFunctionType juce_createUnityPeerFn = nullptr;
+#endif
+
+ComponentPeer* AudioProcessorEditor::createNewPeer (int styleFlags, void* nativeWindow)
+{
+   #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && JucePlugin_Build_Unity
+    if (juce_createUnityPeerFn != nullptr)
+    {
+        ignoreUnused (styleFlags, nativeWindow);
+        return juce_createUnityPeerFn (*this);
+    }
+   #endif
+
+    return Component::createNewPeer (styleFlags, nativeWindow);
 }
 
 } // namespace juce

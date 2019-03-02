@@ -42,7 +42,7 @@ class JUCE_API  FilenameComponentListener
 {
 public:
     /** Destructor. */
-    virtual ~FilenameComponentListener() {}
+    virtual ~FilenameComponentListener() = default;
 
     /** This method is called after the FilenameComponent's file has been changed. */
     virtual void filenameComponentChanged (FilenameComponent* fileComponentThatHasChanged) = 0;
@@ -100,7 +100,7 @@ public:
                        const String& textWhenNothingSelected);
 
     /** Destructor. */
-    ~FilenameComponent();
+    ~FilenameComponent() override;
 
     //==============================================================================
     /** Returns the currently displayed filename. */
@@ -191,7 +191,7 @@ public:
     /** This abstract base class is implemented by LookAndFeel classes. */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         virtual Button* createFilenameComponentBrowseButton (const String& text) = 0;
         virtual void layoutFilenameComponent (FilenameComponent&, ComboBox* filenameBox, Button* browseButton) =  0;

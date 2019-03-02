@@ -52,6 +52,7 @@ Project::Project (const File& f)
     setFile (f);
 
     removeDefunctExporters();
+    exporterPathsModuleList.reset (new AvailableModuleList());
     updateOldModulePaths();
     updateOldStyleConfigList();
     setCppVersionFromOldExporterSettings();
@@ -64,7 +65,7 @@ Project::Project (const File& f)
 
     parsedPreprocessorDefs = parsePreprocessorDefs (preprocessorDefsValue.get());
 
-    getModules().sortAlphabetically();
+    getEnabledModules().sortAlphabetically();
 
     projectRoot.addListener (this);
 
@@ -87,25 +88,32 @@ void Project::setTitle (const String& newTitle)
 {
     projectNameValue = newTitle;
 
-    updateTitle();
+    updateTitleDependencies();
 }
 
-void Project::updateTitle()
+void Project::updateTitleDependencies()
 {
     auto projectName = getProjectNameString();
 
     getMainGroup().getNameValue() = projectName;
 
-    pluginNameValue.setDefault (projectName);
-    pluginDescriptionValue.setDefault (projectName);
-    bundleIdentifierValue.setDefault (getDefaultBundleIdentifierString());
+    pluginNameValue.          setDefault (projectName);
+    pluginDescriptionValue.   setDefault (projectName);
+    bundleIdentifierValue.    setDefault (getDefaultBundleIdentifierString());
     pluginAUExportPrefixValue.setDefault (CodeHelpers::makeValidIdentifier (projectName, false, true, false) + "AU");
-    pluginAAXIdentifierValue.setDefault (getDefaultAAXIdentifierString());
+    pluginAAXIdentifierValue. setDefault (getDefaultAAXIdentifierString());
 }
 
 String Project::getDocumentTitle()
 {
     return getProjectNameString();
+}
+
+void Project::updateCompanyNameDependencies()
+{
+    bundleIdentifierValue.setDefault    (getDefaultBundleIdentifierString());
+    pluginAAXIdentifierValue.setDefault (getDefaultAAXIdentifierString());
+    pluginManufacturerValue.setDefault  (getDefaultPluginManufacturerString());
 }
 
 void Project::updateProjectSettings()
@@ -178,7 +186,7 @@ void Project::initialiseMainGroup()
     if (! projectRoot.getChildWithName (Ids::MAINGROUP).isValid())
     {
         Item mainGroup (*this, ValueTree (Ids::MAINGROUP), false);
-        projectRoot.addChild (mainGroup.state, 0, 0);
+        projectRoot.addChild (mainGroup.state, 0, nullptr);
     }
 
     getMainGroup().initialiseMissingProperties();
@@ -192,14 +200,16 @@ void Project::initialiseProjectValues()
     if (projectUIDValue.isUsingDefault())
         projectUIDValue = projectUIDValue.getDefault();
 
-    projectTypeValue.referTo         (projectRoot, Ids::projectType,      getUndoManager(), ProjectType_GUIApp::getTypeName());
-    versionValue.referTo             (projectRoot, Ids::version,          getUndoManager(), "1.0.0");
-    bundleIdentifierValue.referTo    (projectRoot, Ids::bundleIdentifier, getUndoManager(), getDefaultBundleIdentifierString());
+    projectLineFeedValue.referTo     (projectRoot, Ids::projectLineFeed,  getUndoManager(), "\r\n");
 
     companyNameValue.referTo         (projectRoot, Ids::companyName,      getUndoManager());
     companyCopyrightValue.referTo    (projectRoot, Ids::companyCopyright, getUndoManager());
     companyWebsiteValue.referTo      (projectRoot, Ids::companyWebsite,   getUndoManager());
     companyEmailValue.referTo        (projectRoot, Ids::companyEmail,     getUndoManager());
+
+    projectTypeValue.referTo         (projectRoot, Ids::projectType,      getUndoManager(), ProjectType_GUIApp::getTypeName());
+    versionValue.referTo             (projectRoot, Ids::version,          getUndoManager(), "1.0.0");
+    bundleIdentifierValue.referTo    (projectRoot, Ids::bundleIdentifier, getUndoManager(), getDefaultBundleIdentifierString());
 
     displaySplashScreenValue.referTo (projectRoot, Ids::displaySplashScreen, getUndoManager(), ! ProjucerApplication::getApp().isPaidOrGPL());
     splashScreenColourValue.referTo  (projectRoot, Ids::splashScreenColour,  getUndoManager(), "Dark");
@@ -215,13 +225,13 @@ void Project::initialiseProjectValues()
         reportAppUsageValue.setDefault (true);
     }
 
-    cppStandardValue.referTo                   (projectRoot, Ids::cppLanguageStandard, getUndoManager(), "14");
+    cppStandardValue.referTo       (projectRoot, Ids::cppLanguageStandard, getUndoManager(), "14");
 
-    headerSearchPathsValue.referTo             (projectRoot, Ids::headerPath, getUndoManager());
-    preprocessorDefsValue.referTo              (projectRoot, Ids::defines,    getUndoManager());
-    userNotesValue.referTo                     (projectRoot, Ids::userNotes,  getUndoManager());
+    headerSearchPathsValue.referTo (projectRoot, Ids::headerPath, getUndoManager());
+    preprocessorDefsValue.referTo  (projectRoot, Ids::defines,    getUndoManager());
+    userNotesValue.referTo         (projectRoot, Ids::userNotes,  getUndoManager());
 
-    maxBinaryFileSizeValue.referTo             (projectRoot, Ids::maxBinaryFileSize,         getUndoManager(), 10240 * 1024);
+    maxBinaryFileSizeValue.referTo (projectRoot, Ids::maxBinaryFileSize,         getUndoManager(), 10240 * 1024);
 
     // this is here for backwards compatibility with old projects using the incorrect id
     if (projectRoot.hasProperty ("includeBinaryInAppConfig"))
@@ -229,18 +239,20 @@ void Project::initialiseProjectValues()
     else
         includeBinaryDataInJuceHeaderValue.referTo (projectRoot, Ids::includeBinaryInJuceHeader, getUndoManager(), true);
 
-    binaryDataNamespaceValue.referTo           (projectRoot, Ids::binaryDataNamespace,       getUndoManager(), "BinaryData");
+    binaryDataNamespaceValue.referTo (projectRoot, Ids::binaryDataNamespace, getUndoManager(), "BinaryData");
+
+    compilerFlagSchemesValue.referTo (projectRoot, Ids::compilerFlagSchemes, getUndoManager(), Array<var>(), ",");
 }
 
 void Project::initialiseAudioPluginValues()
 {
     pluginFormatsValue.referTo               (projectRoot, Ids::pluginFormats,              getUndoManager(),
-                                              Array<var> (Ids::buildVST.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString()), ",");
+                                              Array<var> (Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString()), ",");
     pluginCharacteristicsValue.referTo       (projectRoot, Ids::pluginCharacteristicsValue, getUndoManager(), Array<var> (), ",");
 
     pluginNameValue.referTo                  (projectRoot, Ids::pluginName,                 getUndoManager(), getProjectNameString());
     pluginDescriptionValue.referTo           (projectRoot, Ids::pluginDesc,                 getUndoManager(), getProjectNameString());
-    pluginManufacturerValue.referTo          (projectRoot, Ids::pluginManufacturer,         getUndoManager(), "yourcompany");
+    pluginManufacturerValue.referTo          (projectRoot, Ids::pluginManufacturer,         getUndoManager(), getDefaultPluginManufacturerString());
     pluginManufacturerCodeValue.referTo      (projectRoot, Ids::pluginManufacturerCode,     getUndoManager(), "Manu");
     pluginCodeValue.referTo                  (projectRoot, Ids::pluginCode,                 getUndoManager(), makeValid4CC (getProjectUIDString() + getProjectUIDString()));
     pluginChannelConfigsValue.referTo        (projectRoot, Ids::pluginChannelConfigs,       getUndoManager());
@@ -249,10 +261,14 @@ void Project::initialiseAudioPluginValues()
                                               CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false) + "AU");
 
     pluginAUMainTypeValue.referTo            (projectRoot, Ids::pluginAUMainType,           getUndoManager(), getDefaultAUMainTypes(),    ",");
+    pluginAUSandboxSafeValue.referTo         (projectRoot, Ids::pluginAUIsSandboxSafe,      getUndoManager(), false);
     pluginVSTCategoryValue.referTo           (projectRoot, Ids::pluginVSTCategory,          getUndoManager(), getDefaultVSTCategories(),  ",");
     pluginVST3CategoryValue.referTo          (projectRoot, Ids::pluginVST3Category,         getUndoManager(), getDefaultVST3Categories(), ",");
     pluginRTASCategoryValue.referTo          (projectRoot, Ids::pluginRTASCategory,         getUndoManager(), getDefaultRTASCategories(), ",");
     pluginAAXCategoryValue.referTo           (projectRoot, Ids::pluginAAXCategory,          getUndoManager(), getDefaultAAXCategories(),  ",");
+
+    pluginVSTNumMidiInputsValue.referTo      (projectRoot, Ids::pluginVSTNumMidiInputs,     getUndoManager(), 16);
+    pluginVSTNumMidiOutputsValue.referTo     (projectRoot, Ids::pluginVSTNumMidiOutputs,    getUndoManager(), 16);
 }
 
 void Project::updateOldStyleConfigList()
@@ -357,7 +373,18 @@ void Project::coalescePluginFormatValues()
 
     if (formatsToBuild.size() > 0)
     {
-        pluginFormatsValue = formatsToBuild;
+        if (pluginFormatsValue.isUsingDefault())
+        {
+            pluginFormatsValue = formatsToBuild;
+        }
+        else
+        {
+            auto formatVar = pluginFormatsValue.get();
+
+            if (auto* arr = formatVar.getArray())
+                arr->addArray (formatsToBuild);
+        }
+
         shouldWriteLegacyPluginFormatSettings = true;
     }
 }
@@ -487,45 +514,35 @@ static int getBuiltJuceVersion()
          + JUCE_BUILDNUMBER;
 }
 
-static bool isAnyModuleNewerThanProjucer (const OwnedArray<ModuleDescription>& modules)
+static bool isModuleNewerThanProjucer (const ModuleDescription& module)
 {
-    for (auto i = modules.size(); --i >= 0;)
-    {
-        auto* m = modules.getUnchecked(i);
-
-        if (m->getID().startsWith ("juce_")
-              && getJuceVersion (m->getVersion()) > getBuiltJuceVersion())
-            return true;
-    }
+    if (module.getID().startsWith ("juce_")
+        && getJuceVersion (module.getVersion()) > getBuiltJuceVersion())
+        return true;
 
     return false;
 }
 
 void Project::warnAboutOldProjucerVersion()
 {
-    ModuleList available;
+    for (auto& juceModule : ProjucerApplication::getApp().getJUCEPathModuleList().getAllModules())
+    {
+        if (isModuleNewerThanProjucer ({ juceModule.second }))
+        {
+            // Projucer is out of date!
+            if (ProjucerApplication::getApp().isRunningCommandLine)
+                std::cout <<  "WARNING! This version of the Projucer is out-of-date!" << std::endl;
+            else
+                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                                  "Projucer",
+                                                  "This version of the Projucer is out-of-date!"
+                                                  "\n\n"
+                                                  "Always make sure that you're running the very latest version, "
+                                                  "preferably compiled directly from the JUCE repository that you're working with!");
 
-    available.scanGlobalJuceModulePath();
-
-    if (! isAnyModuleNewerThanProjucer (available.modules))
-        available.scanGlobalUserModulePath();
-
-    if (! isAnyModuleNewerThanProjucer (available.modules))
-        available.scanProjectExporterModulePaths (*this);
-
-    if (! isAnyModuleNewerThanProjucer (available.modules))
-        return;
-
-    // Projucer is out of date!
-    if (ProjucerApplication::getApp().isRunningCommandLine)
-        std::cout <<  "WARNING! This version of the Projucer is out-of-date!" << std::endl;
-    else
-        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                          "Projucer",
-                                          "This version of the Projucer is out-of-date!"
-                                          "\n\n"
-                                          "Always make sure that you're running the very latest version, "
-                                          "preferably compiled directly from the JUCE repository that you're working with!");
+            return;
+        }
+    }
 }
 
 //==============================================================================
@@ -551,7 +568,7 @@ static void forgetRecentFile (const File& file)
 //==============================================================================
 Result Project::loadDocument (const File& file)
 {
-    std::unique_ptr<XmlElement> xml (XmlDocument::parse (file));
+    auto xml = parseXML (file);
 
     if (xml == nullptr || ! xml->hasTagName (Ids::JUCERPROJECT.toString()))
         return Result::fail ("Not a valid Jucer project!");
@@ -563,7 +580,7 @@ Result Project::loadDocument (const File& file)
 
     registerRecentFile (file);
 
-    enabledModulesList.reset();
+    enabledModuleList.reset();
     projectRoot = newTree;
 
     initialiseProjectValues();
@@ -584,6 +601,9 @@ Result Project::loadDocument (const File& file)
         warnAboutOldProjucerVersion();
 
     compileEngineSettings.reset (new CompileEngineSettings (projectRoot));
+
+    exporterPathsModuleList.reset (new AvailableModuleList());
+    rescanExporterPathModules (! ProjucerApplication::getApp().isRunningCommandLine);
 
     return Result::ok();
 }
@@ -606,8 +626,13 @@ Result Project::saveProject (const File& file, bool isCommandLineApp)
 
     updateProjectSettings();
 
-    if (! isCommandLineApp && ! isTemporaryProject())
-        registerRecentFile (file);
+    if (! isCommandLineApp)
+    {
+        ProjucerApplication::getApp().openDocumentManager.saveAll();
+
+        if (! isTemporaryProject())
+            registerRecentFile (file);
+    }
 
     const ScopedValueSetter<bool> vs (isSaving, true, false);
 
@@ -694,13 +719,15 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
     {
         if (property == Ids::projectType)
         {
-            sendChangeMessage();
-
             sendProjectSettingAnalyticsEvent ("Project Type = " + projectTypeValue.get().toString());
         }
         else if (property == Ids::name)
         {
-            updateTitle();
+            updateTitleDependencies();
+        }
+        else if (property == Ids::companyName)
+        {
+            updateCompanyNameDependencies();
         }
         else if (property == Ids::defines)
         {
@@ -822,6 +849,8 @@ bool Project::shouldBuildTargetType (ProjectType::Target::Type targetType) const
             return shouldBuildAUv3();
         case ProjectType::Target::StandalonePlugIn:
             return shouldBuildStandalonePlugin();
+        case ProjectType::Target::UnityPlugIn:
+            return shouldBuildUnityPlugin();
         case ProjectType::Target::AggregateTarget:
         case ProjectType::Target::SharedCodeTarget:
             return projectType.isAudioPlugin();
@@ -843,6 +872,7 @@ ProjectType::Target::Type Project::getTargetTypeFromFilePath (const File& file, 
     else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST2"))       return ProjectType::Target::VSTPlugIn;
     else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST3"))       return ProjectType::Target::VST3PlugIn;
     else if (LibraryModule::CompileUnit::hasSuffix (file, "_Standalone")) return ProjectType::Target::StandalonePlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Unity"))      return ProjectType::Target::UnityPlugIn;
 
     return (returnSharedTargetIfNoValidSuffix ? ProjectType::Target::SharedCodeTarget : ProjectType::Target::unspecified);
 }
@@ -862,6 +892,7 @@ const char* ProjectType::Target::getName() const noexcept
         case AudioUnitv3PlugIn: return "AUv3 AppExtension";
         case AAXPlugIn:         return "AAX";
         case RTASPlugIn:        return "RTAS";
+        case UnityPlugIn:       return "Unity Plugin";
         case SharedCodeTarget:  return "Shared Code";
         case AggregateTarget:   return "All";
         default:                return "undefined";
@@ -883,6 +914,7 @@ ProjectType::Target::TargetFileType ProjectType::Target::getTargetFileType() con
         case AudioUnitv3PlugIn: return macOSAppex;
         case AAXPlugIn:         return pluginBundle;
         case RTASPlugIn:        return pluginBundle;
+        case UnityPlugIn:       return pluginBundle;
         case SharedCodeTarget:  return staticLibrary;
         default:
             break;
@@ -898,7 +930,12 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
                "The name of the project.");
 
     props.add (new TextPropertyComponent (versionValue, "Project Version", 16, false),
-               "The project's version number, This should be in the format major.minor.point[.point]");
+               "The project's version number. This should be in the format major.minor.point[.point] where you should omit the final "
+               "(optional) [.point] if you are targeting AU and AUv3 plug-ins as they only support three number versions.");
+
+    props.add (new ChoicePropertyComponent (projectLineFeedValue, "Project Line Feed", { "\\r\\n", "\\n", }, { "\r\n", "\n" }),
+               "Use this to set the line feed which will be used when creating new source files for this project "
+               "(this won't affect any existing files).");
 
     props.add (new TextPropertyComponent (companyNameValue, "Company Name", 256, false),
                "Your company name, which will be added to the properties of the binary where possible");
@@ -1016,10 +1053,13 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
 {
     props.add (new MultiChoicePropertyComponent (pluginFormatsValue, "Plugin Formats",
-                                                 { "VST", "VST3", "AU", "AUv3", "RTAS", "AAX", "Standalone", "Enable IAA" },
-                                                 { Ids::buildVST.toString(), Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildAUv3.toString(),
-                                                   Ids::buildRTAS.toString(), Ids::buildAAX.toString(), Ids::buildStandalone.toString(), Ids::enableIAA.toString() }),
-               "Plugin formats to build.");
+                                                 { "VST3", "AU", "AUv3", "RTAS", "AAX", "Standalone", "Unity", "Enable IAA", "VST (Legacy)" },
+                                                 { Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildAUv3.toString(),
+                                                   Ids::buildRTAS.toString(), Ids::buildAAX.toString(), Ids::buildStandalone.toString(), Ids::buildUnity.toString(),
+                                                   Ids::enableIAA.toString(), Ids::buildVST.toString() }),
+               "Plugin formats to build. If you have selected \"VST (Legacy)\" then you will need to ensure that you have a VST2 SDK "
+               "in your header search paths. The VST2 SDK can be obtained from the vstsdk3610_11_06_2018_build_37 (or older) VST3 SDK "
+               "or JUCE version 5.3.2. You also need a VST2 license from Steinberg to distribute VST2 plug-ins.");
     props.add (new MultiChoicePropertyComponent (pluginCharacteristicsValue, "Plugin Characteristics",
                                                  { "Plugin is a Synth", "Plugin MIDI Input", "Plugin MIDI Output", "MIDI Effect Plugin", "Plugin Editor Requires Keyboard Focus",
                                                    "Disable RTAS Bypass", "Disable AAX Bypass", "Disable RTAS Multi-Mono", "Disable AAX Multi-Mono" },
@@ -1027,7 +1067,6 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
                                                    Ids::pluginIsMidiEffectPlugin.toString(), Ids::pluginEditorRequiresKeys.toString(), Ids::pluginRTASDisableBypass.toString(),
                                                    Ids::pluginAAXDisableBypass.toString(), Ids::pluginRTASDisableMultiMono.toString(), Ids::pluginAAXDisableMultiMono.toString() }),
               "Some characteristics of your plugin such as whether it is a synth, produces MIDI messages, accepts MIDI messages etc.");
-
     props.add (new TextPropertyComponent (pluginNameValue, "Plugin Name", 128, false),
                "The name of your plugin (keep it short!)");
     props.add (new TextPropertyComponent (pluginDescriptionValue, "Plugin Description", 256, false),
@@ -1047,32 +1086,55 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
                "The value to use for the JucePlugin_AAXIdentifier setting");
     props.add (new TextPropertyComponent (pluginAUExportPrefixValue, "Plugin AU Export Prefix", 128, false),
                "A prefix for the names of exported entry-point functions that the component exposes - typically this will be a version of your plugin's name that can be used as part of a C++ token.");
-
     props.add (new MultiChoicePropertyComponent (pluginAUMainTypeValue, "Plugin AU Main Type", getAllAUMainTypeStrings(), getAllAUMainTypeVars(), 1),
                "AU main type.");
+    props.add (new ChoicePropertyComponent (pluginAUSandboxSafeValue, "Plugin AU is sandbox safe"),
+               "Check this box if your plug-in is sandbox safe. A sand-box safe plug-in is loaded in a restricted path and can only access it's own bundle resources and "
+               "the Music folder. Your plug-in must be able to deal with this. Newer versions of GarageBand require this to be enabled.");
 
     {
-        Array<var> vstCategoryVars;
-        for (auto s : getAllVSTCategoryStrings())
-            vstCategoryVars.add (s);
+        Array<var> varChoices;
+        StringArray stringChoices;
 
-        props.add (new MultiChoicePropertyComponent (pluginVSTCategoryValue, "Plugin VST Category", getAllVSTCategoryStrings(), vstCategoryVars, 1),
-                   "VST category.");
+        for (int i = 1; i <= 16; ++i)
+        {
+            varChoices.add (i);
+            stringChoices.add (String (i));
+        }
+
+        props.add (new ChoicePropertyComponentWithEnablement (pluginVSTNumMidiInputsValue, pluginCharacteristicsValue, Ids::pluginWantsMidiIn,
+                                                              "Plugin VST Num MIDI Inputs",  stringChoices, varChoices),
+                   "For VST and VST3 plug-ins that accept MIDI, this allows you to configure the number of inputs.");
+
+        props.add (new ChoicePropertyComponentWithEnablement (pluginVSTNumMidiOutputsValue, pluginCharacteristicsValue, Ids::pluginProducesMidiOut,
+                                                              "Plugin VST Num MIDI Outputs", stringChoices, varChoices),
+                   "For VST and VST3 plug-ins that produce MIDI, this allows you to configure the number of outputs.");
     }
 
     {
         Array<var> vst3CategoryVars;
+
         for (auto s : getAllVST3CategoryStrings())
             vst3CategoryVars.add (s);
 
         props.add (new MultiChoicePropertyComponent (pluginVST3CategoryValue, "Plugin VST3 Category", getAllVST3CategoryStrings(), vst3CategoryVars),
-                   "VST3 category.");
+                   "VST3 category. Most hosts require either \"Fx\" or \"Instrument\" to be selected in order for the plugin to be recognised. "
+                   "If neither of these are selected, the appropriate one will be automatically added based on the \"Plugin is a synth\" option.");
     }
 
     props.add (new MultiChoicePropertyComponent (pluginRTASCategoryValue, "Plugin RTAS Category", getAllRTASCategoryStrings(), getAllRTASCategoryVars()),
                "RTAS category.");
     props.add (new MultiChoicePropertyComponent (pluginAAXCategoryValue, "Plugin AAX Category", getAllAAXCategoryStrings(), getAllAAXCategoryVars()),
                "AAX category.");
+
+    {
+        Array<var> vstCategoryVars;
+        for (auto s : getAllVSTCategoryStrings())
+            vstCategoryVars.add (s);
+
+        props.add (new MultiChoicePropertyComponent (pluginVSTCategoryValue, "Plugin VST (Legacy) Category", getAllVSTCategoryStrings(), vstCategoryVars, 1),
+                   "VST category.");
+    }
 }
 
 //==============================================================================
@@ -1092,7 +1154,7 @@ int Project::getVersionAsHexInteger() const
                + (segments[1].getIntValue() << 8)
                +  segments[2].getIntValue();
 
-    if (segments.size() >= 4)
+    if (segments.size() > 3)
         value = (value << 8) + segments[3].getIntValue();
 
     return value;
@@ -1234,6 +1296,19 @@ Value Project::Item::getShouldInhibitWarningsValue()        { return state.getPr
 bool Project::Item::shouldInhibitWarnings() const           { return state [Ids::noWarnings]; }
 
 bool Project::Item::isModuleCode() const                    { return belongsToModule; }
+
+Value Project::Item::getCompilerFlagSchemeValue()           { return state.getPropertyAsValue (Ids::compilerFlagScheme, getUndoManager()); }
+String Project::Item::getCompilerFlagSchemeString() const   { return state [Ids::compilerFlagScheme]; }
+
+void Project::Item::setCompilerFlagScheme (const String& scheme)
+{
+    state.getPropertyAsValue (Ids::compilerFlagScheme, getUndoManager()).setValue (scheme);
+}
+
+void Project::Item::clearCurrentCompilerFlagScheme()
+{
+    state.removeProperty (Ids::compilerFlagScheme, getUndoManager());
+}
 
 String Project::Item::getFilePath() const
 {
@@ -1563,6 +1638,23 @@ bool Project::Item::isIconCrossedOut() const
                    || getFile().hasFileExtension (headerFileExtensions));
 }
 
+bool Project::Item::needsSaving() const noexcept
+{
+    auto& odm = ProjucerApplication::getApp().openDocumentManager;
+
+    if (odm.anyFilesNeedSaving())
+    {
+        for (int i = 0; i < odm.getNumOpenDocuments(); ++i)
+        {
+            auto* doc = odm.getOpenDocument (i);
+            if (doc->needsSaving() && doc->getFile() == getFile())
+                return true;
+        }
+    }
+
+    return false;
+}
+
 //==============================================================================
 ValueTree Project::getConfigNode()
 {
@@ -1587,6 +1679,74 @@ bool Project::isConfigFlagEnabled (const String& name, bool defaultIsEnabled) co
 }
 
 //==============================================================================
+StringArray Project::getCompilerFlagSchemes() const
+{
+    if (compilerFlagSchemesValue.isUsingDefault())
+        return {};
+
+    StringArray schemes;
+    auto schemesVar = compilerFlagSchemesValue.get();
+
+    if (auto* arr = schemesVar.getArray())
+        schemes.addArray (arr->begin(), arr->end());
+
+    return schemes;
+}
+
+void Project::addCompilerFlagScheme (const String& schemeToAdd)
+{
+    auto schemesVar = compilerFlagSchemesValue.get();
+
+    if (auto* arr = schemesVar.getArray())
+    {
+        arr->addIfNotAlreadyThere (schemeToAdd);
+        compilerFlagSchemesValue.setValue ({ *arr }, getUndoManager());
+    }
+}
+
+void Project::removeCompilerFlagScheme (const String& schemeToRemove)
+{
+    auto schemesVar = compilerFlagSchemesValue.get();
+
+    if (auto* arr = schemesVar.getArray())
+    {
+        for (int i = 0; i < arr->size(); ++i)
+        {
+            if (arr->getUnchecked (i).toString() == schemeToRemove)
+            {
+                arr->remove (i);
+
+                if (arr->isEmpty())
+                    compilerFlagSchemesValue.resetToDefault();
+                else
+                    compilerFlagSchemesValue.setValue ({ *arr }, getUndoManager());
+
+                return;
+            }
+        }
+    }
+}
+
+//==============================================================================
+static String getCompanyNameOrDefault (StringRef str)
+{
+    if (str.isEmpty())
+        return "yourcompany";
+
+    return str;
+}
+
+String Project::getDefaultBundleIdentifierString() const
+{
+    return "com." + CodeHelpers::makeValidIdentifier (getCompanyNameOrDefault (getCompanyNameString()), false, true, false)
+            + "." + CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false);
+}
+
+String Project::getDefaultPluginManufacturerString() const
+{
+    return getCompanyNameOrDefault (getCompanyNameString());
+}
+
 String Project::getAUMainTypeString() const noexcept
 {
     auto v = pluginAUMainTypeValue.get();
@@ -1596,6 +1756,11 @@ String Project::getAUMainTypeString() const noexcept
 
     jassertfalse;
     return {};
+}
+
+bool Project::isAUSandBoxSafe() const noexcept
+{
+    return pluginAUSandboxSafeValue.get();
 }
 
 String Project::getVSTCategoryString() const noexcept
@@ -1609,19 +1774,28 @@ String Project::getVSTCategoryString() const noexcept
     return {};
 }
 
-static String getVST3CategoryStringFromSelection (Array<var> selected) noexcept
+static String getVST3CategoryStringFromSelection (Array<var> selected, const Project& p) noexcept
 {
     StringArray categories;
 
     for (auto& category : selected)
         categories.add (category);
 
-    // "Fx" and "Instrument" should come first and if both are present prioritise "Fx"
-    if (categories.contains ("Instrument"))
-        categories.move (categories.indexOf ("Instrument"), 0);
+    // One of these needs to be selected in order for the plug-in to be recognised in Cubase
+    if (! categories.contains ("Fx") && ! categories.contains ("Instrument"))
+    {
+        categories.insert (0, p.isPluginSynth() ? "Instrument"
+                                                : "Fx");
+    }
+    else
+    {
+        // "Fx" and "Instrument" should come first and if both are present prioritise "Fx"
+        if (categories.contains ("Instrument"))
+            categories.move (categories.indexOf ("Instrument"), 0);
 
-    if (categories.contains ("Fx"))
-        categories.move (categories.indexOf ("Fx"), 0);
+        if (categories.contains ("Fx"))
+            categories.move (categories.indexOf ("Fx"), 0);
+    }
 
     return categories.joinIntoString ("|");
 }
@@ -1631,7 +1805,7 @@ String Project::getVST3CategoryString() const noexcept
     auto v = pluginVST3CategoryValue.get();
 
     if (auto* arr = v.getArray())
-        return getVST3CategoryStringFromSelection (*arr);
+        return getVST3CategoryStringFromSelection (*arr, *this);
 
     jassertfalse;
     return {};
@@ -1698,17 +1872,17 @@ String Project::getIAAPluginName()
 //==============================================================================
 bool Project::isAUPluginHost()
 {
-    return getModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_AU");
+    return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_AU");
 }
 
 bool Project::isVSTPluginHost()
 {
-    return getModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST");
+    return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST");
 }
 
 bool Project::isVST3PluginHost()
 {
-    return getModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3");
+    return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3");
 }
 
 //==============================================================================
@@ -1829,12 +2003,104 @@ Array<var> Project::getDefaultRTASCategories() const noexcept
 }
 
 //==============================================================================
-EnabledModuleList& Project::getModules()
+EnabledModuleList& Project::getEnabledModules()
 {
-    if (enabledModulesList == nullptr)
-        enabledModulesList.reset (new EnabledModuleList (*this, projectRoot.getOrCreateChildWithName (Ids::MODULES, nullptr)));
+    if (enabledModuleList == nullptr)
+        enabledModuleList.reset (new EnabledModuleList (*this, projectRoot.getOrCreateChildWithName (Ids::MODULES, nullptr)));
 
-    return *enabledModulesList;
+    return *enabledModuleList;
+}
+
+static StringArray getModulePathsFromExporters (Project& project, bool onlyThisOS)
+{
+    StringArray paths;
+
+    for (Project::ExporterIterator exporter (project); exporter.next();)
+    {
+        if (onlyThisOS && ! exporter->mayCompileOnCurrentOS())
+            continue;
+
+        auto& modules = project.getEnabledModules();
+        auto n = modules.getNumModules();
+
+        for (int i = 0; i < n; ++i)
+        {
+            auto id = modules.getModuleID (i);
+
+            if (modules.shouldUseGlobalPath (id))
+                continue;
+
+            auto path = exporter->getPathForModuleString (id);
+
+            if (path.isNotEmpty())
+                paths.addIfNotAlreadyThere (path);
+        }
+
+        auto oldPath = exporter->getLegacyModulePath();
+
+        if (oldPath.isNotEmpty())
+            paths.addIfNotAlreadyThere (oldPath);
+    }
+
+    return paths;
+}
+
+static Array<File> getExporterModulePathsToScan (Project& project)
+{
+    auto exporterPaths = getModulePathsFromExporters (project, true);
+
+    if (exporterPaths.isEmpty())
+        exporterPaths = getModulePathsFromExporters (project, false);
+
+    Array<File> files;
+
+    for (auto& path : exporterPaths)
+    {
+        auto f = project.resolveFilename (path);
+
+        if (f.isDirectory())
+        {
+            files.addIfNotAlreadyThere (f);
+
+            if (f.getChildFile ("modules").isDirectory())
+                files.addIfNotAlreadyThere (f.getChildFile ("modules"));
+        }
+    }
+
+    return files;
+}
+
+AvailableModuleList& Project::getExporterPathsModuleList()
+{
+    return *exporterPathsModuleList;
+}
+
+void Project::rescanExporterPathModules (bool async)
+{
+    if (async)
+        exporterPathsModuleList->scanPathsAsync (getExporterModulePathsToScan (*this));
+    else
+        exporterPathsModuleList->scanPaths (getExporterModulePathsToScan (*this));
+}
+
+ModuleIDAndFolder Project::getModuleWithID (const String& id)
+{
+    if (! getEnabledModules().shouldUseGlobalPath (id))
+    {
+        const auto& mod = exporterPathsModuleList->getModuleWithID (id);
+
+        if (mod.second != File())
+            return mod;
+    }
+
+    const auto& list = (isJUCEModule (id) ? ProjucerApplication::getApp().getJUCEPathModuleList().getAllModules()
+                                          : ProjucerApplication::getApp().getUserPathsModuleList().getAllModules());
+
+    for (auto& m : list)
+        if (m.first == id)
+            return m;
+
+    return exporterPathsModuleList->getModuleWithID (id);
 }
 
 //==============================================================================

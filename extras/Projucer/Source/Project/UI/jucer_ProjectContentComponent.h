@@ -44,7 +44,7 @@ class ProjectContentComponent  : public Component,
 public:
     //==============================================================================
     ProjectContentComponent();
-    ~ProjectContentComponent();
+    ~ProjectContentComponent() override;
 
     Project* getProject() const noexcept    { return project; }
     virtual void setProject (Project*);
@@ -97,6 +97,7 @@ public:
 
     void deleteSelectedTreeItems();
 
+    void refreshProjectTreeFileStatuses();
     void updateMissingFileStatuses();
     void createProjectTabs();
     void deleteProjectTabs();

@@ -26,6 +26,6 @@
 
 #pragma once
 
-int performCommandLine (const String& commandLine);
+int performCommandLine (const ArgumentList&);
 
 enum { commandLineNotPerformed = 0x72346231 };

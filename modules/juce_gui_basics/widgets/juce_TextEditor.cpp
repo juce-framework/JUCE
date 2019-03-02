@@ -77,9 +77,9 @@ public:
 
     // VS2013 can't default move constructors
     UniformTextSection (UniformTextSection&& other)
-        : font (static_cast<Font&&> (other.font)),
+        : font (std::move (other.font)),
           colour (other.colour),
-          atoms (static_cast<Array<TextAtom>&&> (other.atoms))
+          atoms (std::move (other.atoms))
     {
     }
 
@@ -711,13 +711,13 @@ struct TextEditor::InsertAction  : public UndoableAction
 
     bool perform() override
     {
-        owner.insert (text, insertIndex, font, colour, 0, newCaretPos);
+        owner.insert (text, insertIndex, font, colour, nullptr, newCaretPos);
         return true;
     }
 
     bool undo() override
     {
-        owner.remove ({ insertIndex, insertIndex + text.length() }, 0, oldCaretPos);
+        owner.remove ({ insertIndex, insertIndex + text.length() }, nullptr, oldCaretPos);
         return true;
     }
 
@@ -751,7 +751,7 @@ struct TextEditor::RemoveAction  : public UndoableAction
 
     bool perform() override
     {
-        owner.remove (range, 0, newCaretPos);
+        owner.remove (range, nullptr, newCaretPos);
         return true;
     }
 
@@ -795,7 +795,7 @@ struct TextEditor::TextHolderComponent  : public Component,
         owner.getTextValue().addListener (this);
     }
 
-    ~TextHolderComponent()
+    ~TextHolderComponent() override
     {
         owner.getTextValue().removeListener (this);
     }
@@ -1171,7 +1171,7 @@ void TextEditor::setText (const String& newText, bool sendTextChangeMessage)
         bool cursorWasAtEnd = oldCursorPos >= getTotalNumChars();
 
         clearInternal (nullptr);
-        insert (newText, 0, currentFont, findColour (textColourId), 0, caretPosition);
+        insert (newText, 0, currentFont, findColour (textColourId), nullptr, caretPosition);
 
         // if you're adding text with line-feeds to a single-line text editor, it
         // ain't gonna look right!

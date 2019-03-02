@@ -59,7 +59,7 @@ public:
     ComponentAnimator();
 
     /** Destructor. */
-    ~ComponentAnimator();
+    ~ComponentAnimator() override;
 
     //==============================================================================
     /** Starts a component moving from its current position to a specified position.
@@ -87,7 +87,7 @@ public:
                                     component, or if there's a chance the parent might decide to delete its children.
         @param startSpeed           a value to indicate the relative start speed of the animation. If this is 0,
                                     the component will start by accelerating from rest; higher values mean that it
-                                    will have an initial speed greater than zero. If the value if greater than 1, it
+                                    will have an initial speed greater than zero. If the value is greater than 1, it
                                     will decelerate towards the middle of its journey. To move the component at a
                                     constant rate for its entire animation, set both the start and end speeds to 1.0
         @param endSpeed             a relative speed at which the component should be moving when the animation finishes.

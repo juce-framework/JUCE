@@ -1,8 +1,43 @@
-
 == Major JUCE features and updates ==
 
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
+
+Version 5.4.3
+  - Added a Visual Studio 2019 exporter to the Projucer
+  - Added options to configure macOS Hardened Runtime in the Projucer
+  - Fixed a potential memory corruption when drawing on macOS/iOS
+  - Fixed file drag and drop for Windows 8
+  - Multiple DSP module enhancements
+  - Various bug-fixes, improvements and documentation updates
+
+Version 5.4.2
+  - Restructured the low-level Android native code
+  - Added an ADSR envelope class
+  - AudioProcessorValueTreeState performance improvements
+  - Improved Xcode 10 support
+  - Improved VST3 hosting
+  - Windows hiDPI scaling enhancements
+
+Version 5.4.1
+  - Fixed a VST2 compilation error in VS2013
+  - Fixed some live-build compilation errors in the Projucer
+  - Fixed a bug in the Oversampling class
+  - Made MPESynthesiserVoice::noteOnTime public
+  - Fixed some bugs in the Unity plug-in wrapper
+  - Fixed some VS2015 compiler errors
+
+Version 5.4.0
+  - macOS Mojave and iOS 12 support
+  - Windows hiDPI support
+  - Unity native plug-in support
+  - Microsoft BLE MIDI support
+  - Plug-in parameter groups
+  - Support for production-ready Android OBOE
+  - Video playback support on Android and iOS
+  - AudioProcessorValueTreeState improvements
+  - Support for Android Studio 3.2
+  - Various bug-fixes, improvements and documentation updates
 
 Version 5.3.2
   - Removed the OSX 10.5 and 10.6 deployment target options from the Projucer and enabled more C++11 features across all platforms
@@ -95,7 +130,6 @@ Version 5.2.0
   - Added support for multi-touch drag and drop
   - Improved the performance of 3D rendering when multiple OpenGL contexts are used at the same time
   - Tweaked the rate at which EdgeTable grows its internal storage, to improve performance rendering large and complex paths
-
 
 Version 5.1.2
   - Fixed multiple plugin-resizing bugs
@@ -334,4 +368,3 @@ Version 3.2.0
     and valueTreeChildOrderChanged() methods to include more info about
     exactly what changed
   - Over 400 minor changes, bug-fixes, documentation improvements, etc.
-

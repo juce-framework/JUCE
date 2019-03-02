@@ -102,7 +102,7 @@ public:
 private:
     //==============================================================================
     Analytics() = default;
-    ~Analytics()  { clearSingletonInstance(); }
+    ~Analytics() override  { clearSingletonInstance(); }
 
     String userId;
     StringPairArray userProperties;

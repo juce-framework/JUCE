@@ -40,7 +40,7 @@ PositionedGlyph::PositionedGlyph (const Font& font_, juce_wchar character_, int 
 }
 
 PositionedGlyph::PositionedGlyph (PositionedGlyph&& other) noexcept
-    : font (static_cast<Font&&> (other.font)),
+    : font (std::move (other.font)),
       character (other.character), glyph (other.glyph),
       x (other.x), y (other.y), w (other.w), whitespace (other.whitespace)
 {
@@ -48,7 +48,7 @@ PositionedGlyph::PositionedGlyph (PositionedGlyph&& other) noexcept
 
 PositionedGlyph& PositionedGlyph::operator= (PositionedGlyph&& other) noexcept
 {
-    font = static_cast<Font&&> (other.font);
+    font = std::move (other.font);
     character = other.character;
     glyph = other.glyph;
     x = other.x;
@@ -129,13 +129,13 @@ GlyphArrangement::GlyphArrangement()
 }
 
 GlyphArrangement::GlyphArrangement (GlyphArrangement&& other)
-    : glyphs (static_cast<Array<PositionedGlyph>&&> (other.glyphs))
+    : glyphs (std::move (other.glyphs))
 {
 }
 
 GlyphArrangement& GlyphArrangement::operator= (GlyphArrangement&& other)
 {
-    glyphs = static_cast<Array<PositionedGlyph>&&> (other.glyphs);
+    glyphs = std::move (other.glyphs);
 
     return *this;
 }

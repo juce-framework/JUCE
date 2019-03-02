@@ -35,6 +35,8 @@
                    juce_gui_basics, juce_gui_extra
  exporters:        xcode_mac, vs2017, linux_make, xcode_iphone
 
+ moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+
  type:             Component
  mainClass:        BlocksDrawingDemo
 
@@ -311,6 +313,8 @@ public:
        #endif
 
         setSize (600, 600);
+
+        topologyChanged();
     }
 
     ~BlocksDrawingDemo()
@@ -319,6 +323,7 @@ public:
             detachActiveBlock();
 
         lightpadComponent.removeListener (this);
+        topologySource.removeListener (this);
     }
 
     void resized() override

@@ -42,12 +42,12 @@ class JUCE_API  AudioProcessorListener
 public:
     //==============================================================================
     /** Destructor. */
-    virtual ~AudioProcessorListener() {}
+    virtual ~AudioProcessorListener() = default;
 
     //==============================================================================
     /** Receives a callback when a parameter is changed.
 
-        IMPORTANT NOTE: this will be called synchronously when a parameter changes, and
+        IMPORTANT NOTE: This will be called synchronously when a parameter changes, and
         many audio processors will change their parameter during their audio callback.
         This means that not only has your handler code got to be completely thread-safe,
         but it's also got to be VERY fast, and avoid blocking. If you need to handle
@@ -61,7 +61,7 @@ public:
     /** Called to indicate that something else in the plugin has changed, like its
         program, number of parameters, etc.
 
-        IMPORTANT NOTE: this will be called synchronously, and many audio processors will
+        IMPORTANT NOTE: This will be called synchronously, and many audio processors will
         call it during their audio callback. This means that not only has your handler code
         got to be completely thread-safe, but it's also got to be VERY fast, and avoid
         blocking. If you need to handle this event on your message thread, use this callback
@@ -76,7 +76,7 @@ public:
         press the mouse button, and audioProcessorParameterChangeGestureEnd would be
         called when they release it.
 
-        IMPORTANT NOTE: this will be called synchronously, and many audio processors will
+        IMPORTANT NOTE: This will be called synchronously, and many audio processors will
         call it during their audio callback. This means that not only has your handler code
         got to be completely thread-safe, but it's also got to be VERY fast, and avoid
         blocking. If you need to handle this event on your message thread, use this callback
@@ -93,7 +93,7 @@ public:
         E.g. if the user is dragging a slider, this would be called when they release
         the mouse button.
 
-        IMPORTANT NOTE: this will be called synchronously, and many audio processors will
+        IMPORTANT NOTE: This will be called synchronously, and many audio processors will
         call it during their audio callback. This means that not only has your handler code
         got to be completely thread-safe, but it's also got to be VERY fast, and avoid
         blocking. If you need to handle this event on your message thread, use this callback

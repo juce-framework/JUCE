@@ -86,7 +86,7 @@ bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
     const int bufferSize = 16384;
     AudioBuffer<float> tempBuffer ((int) numChannels, bufferSize);
 
-    int* buffers[128] = { 0 };
+    int* buffers[128] = { nullptr };
 
     for (int i = tempBuffer.getNumChannels(); --i >= 0;)
         buffers[i] = reinterpret_cast<int*> (tempBuffer.getWritePointer (i, 0));
@@ -222,7 +222,7 @@ public:
         timeSliceThread.addTimeSliceClient (this);
     }
 
-    ~Buffer()
+    ~Buffer() override
     {
         isRunning = false;
         timeSliceThread.removeTimeSliceClient (this);

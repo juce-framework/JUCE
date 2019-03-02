@@ -38,7 +38,7 @@ class JUCE_API  FileDragAndDropTarget
 {
 public:
     /** Destructor. */
-    virtual ~FileDragAndDropTarget()  {}
+    virtual ~FileDragAndDropTarget() = default;
 
     /** Callback to check whether this target is interested in the set of files being offered.
 

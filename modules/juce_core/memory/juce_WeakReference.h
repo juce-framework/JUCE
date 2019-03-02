@@ -32,18 +32,16 @@ namespace juce
     It must embed a WeakReference::Master object, which stores a shared pointer object, and must clear
     this master pointer in its destructor.
 
+    Note that WeakReference is not designed to be thread-safe, so if you're accessing it from
+    different threads, you'll need to do your own locking around all uses of the pointer and
+    the object it refers to.
+
     E.g.
     @code
     class MyObject
     {
     public:
-        MyObject()
-        {
-            // If you're planning on using your WeakReferences in a multi-threaded situation, you may choose
-            // to create a WeakReference to the object here in the constructor, which will pre-initialise the
-            // embedded object, avoiding an (extremely unlikely) race condition that could occur if multiple
-            // threads overlap while creating the first WeakReference to it.
-        }
+        MyObject() {}
 
         ~MyObject()
         {
@@ -63,12 +61,12 @@ namespace juce
 
     // Here's an example of using a pointer..
 
-    MyObject* n = new MyObject();
+    auto* n = new MyObject();
     WeakReference<MyObject> myObjectRef = n;
 
-    MyObject* pointer1 = myObjectRef;  // returns a valid pointer to 'n'
+    auto pointer1 = myObjectRef.get();  // returns a valid pointer to 'n'
     delete n;
-    MyObject* pointer2 = myObjectRef;  // returns a null pointer
+    auto pointer2 = myObjectRef.get();  // now returns nullptr
     @endcode
 
     @see WeakReference::Master
@@ -80,7 +78,7 @@ class WeakReference
 {
 public:
     /** Creates a null WeakReference. */
-    inline WeakReference() noexcept {}
+    inline WeakReference() = default;
 
     /** Creates a WeakReference that points at the given object. */
     WeakReference (ObjectType* object)  : holder (getRef (object)) {}
@@ -89,7 +87,7 @@ public:
     WeakReference (const WeakReference& other) noexcept         : holder (other.holder) {}
 
     /** Move constructor */
-    WeakReference (WeakReference&& other) noexcept              : holder (static_cast<SharedRef&&> (other.holder)) {}
+    WeakReference (WeakReference&& other) noexcept              : holder (std::move (other.holder)) {}
 
     /** Copies another pointer to this one. */
     WeakReference& operator= (const WeakReference& other)       { holder = other.holder; return *this; }
@@ -98,7 +96,7 @@ public:
     WeakReference& operator= (ObjectType* newObject)            { holder = getRef (newObject); return *this; }
 
     /** Move assignment operator */
-    WeakReference& operator= (WeakReference&& other) noexcept   { holder = static_cast<SharedRef&&> (other.holder); return *this; }
+    WeakReference& operator= (WeakReference&& other) noexcept   { holder = std::move (other.holder); return *this; }
 
     /** Returns the object that this pointer refers to, or null if the object no longer exists. */
     ObjectType* get() const noexcept                            { return holder != nullptr ? holder->get() : nullptr; }
@@ -143,7 +141,7 @@ public:
         JUCE_DECLARE_NON_COPYABLE (SharedPointer)
     };
 
-    typedef ReferenceCountedObjectPtr<SharedPointer> SharedRef;
+    using SharedRef = ReferenceCountedObjectPtr<SharedPointer>;
 
     //==============================================================================
     /**
@@ -154,7 +152,7 @@ public:
     class Master
     {
     public:
-        Master() noexcept {}
+        Master() = default;
 
         ~Master() noexcept
         {
@@ -166,11 +164,11 @@ public:
         /** The first call to this method will create an internal object that is shared by all weak
             references to the object.
         */
-        SharedPointer* getSharedPointer (ObjectType* object)
+        SharedRef getSharedPointer (ObjectType* object)
         {
             if (sharedPointer == nullptr)
             {
-                sharedPointer = new SharedPointer (object);
+                sharedPointer = *new SharedPointer (object);
             }
             else
             {
@@ -206,9 +204,12 @@ public:
 private:
     SharedRef holder;
 
-    static inline SharedPointer* getRef (ObjectType* o)
+    static inline SharedRef getRef (ObjectType* o)
     {
-        return (o != nullptr) ? o->masterReference.getSharedPointer (o) : nullptr;
+        if (o != nullptr)
+            return o->masterReference.getSharedPointer (o);
+
+        return {};
     }
 };
 
@@ -234,9 +235,9 @@ private:
      @see WeakReference, WeakReference::Master
 */
 #define JUCE_DECLARE_WEAK_REFERENCEABLE(Class) \
-    struct WeakRefMaster  : public WeakReference<Class>::Master { ~WeakRefMaster() { this->clear(); } }; \
+    struct WeakRefMaster  : public juce::WeakReference<Class>::Master { ~WeakRefMaster() { this->clear(); } }; \
     WeakRefMaster masterReference; \
-    friend class WeakReference<Class>; \
+    friend class juce::WeakReference<Class>; \
 
 
 } // namespace juce

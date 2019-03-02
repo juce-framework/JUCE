@@ -48,10 +48,12 @@ namespace juce
 //==============================================================================
 // Debugging and assertion macros
 
-#if JUCE_LOG_ASSERTIONS || JUCE_DEBUG
- #define JUCE_LOG_CURRENT_ASSERTION    juce::logAssertion (__FILE__, __LINE__);
-#else
- #define JUCE_LOG_CURRENT_ASSERTION
+#ifndef JUCE_LOG_CURRENT_ASSERTION
+ #if JUCE_LOG_ASSERTIONS || JUCE_DEBUG
+  #define JUCE_LOG_CURRENT_ASSERTION    juce::logAssertion (__FILE__, __LINE__);
+ #else
+  #define JUCE_LOG_CURRENT_ASSERTION
+ #endif
 #endif
 
 //==============================================================================

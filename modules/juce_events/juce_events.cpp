@@ -66,6 +66,7 @@
 #include "interprocess/juce_InterprocessConnection.cpp"
 #include "interprocess/juce_InterprocessConnectionServer.cpp"
 #include "interprocess/juce_ConnectedChildProcess.cpp"
+#include "interprocess/juce_NetworkServiceDiscovery.cpp"
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS

@@ -632,7 +632,7 @@ struct FFTWImpl  : public FFT::Instance
             if (! Symbols::symbol (lib, symbols.execute_c2r_fftw, "fftwf_execute_dft_c2r")) return nullptr;
            #endif
 
-            return new FFTWImpl (static_cast<size_t> (order), static_cast<DynamicLibrary&&> (lib), symbols);
+            return new FFTWImpl (static_cast<size_t> (order), std::move (lib), symbols);
         }
 
         return nullptr;
@@ -641,6 +641,8 @@ struct FFTWImpl  : public FFT::Instance
     FFTWImpl (size_t orderToUse, DynamicLibrary&& libraryToUse, const Symbols& symbols)
         : fftwLibrary (std::move (libraryToUse)), fftw (symbols), order (static_cast<size_t> (orderToUse))
     {
+        ScopedLock lock (getFFTWPlanLock());
+
         auto n = (1u << order);
         HeapBlock<Complex<float>> in (n), out (n);
 
@@ -653,6 +655,8 @@ struct FFTWImpl  : public FFT::Instance
 
     ~FFTWImpl() override
     {
+        ScopedLock lock (getFFTWPlanLock());
+
         fftw.destroy_fftw (c2cForward);
         fftw.destroy_fftw (c2cInverse);
         fftw.destroy_fftw (r2c);
@@ -695,6 +699,15 @@ struct FFTWImpl  : public FFT::Instance
 
         fftw.execute_c2r_fftw (c2r, (Complex<float>*) inputOutputData, inputOutputData);
         FloatVectorOperations::multiply ((float*) inputOutputData, 1.0f / static_cast<float> (n), (int) n);
+    }
+
+    //==============================================================================
+    // fftw's plan_* and destroy_* methods are NOT thread safe. So we need to share
+    // a lock between all instances of FFTWImpl
+    static CriticalSection& getFFTWPlanLock() noexcept
+    {
+        static CriticalSection cs;
+        return cs;
     }
 
     //==============================================================================

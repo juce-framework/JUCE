@@ -130,7 +130,7 @@ public:
 
 protected:
     //==============================================================================
-    juce::ListenerList<Listener> listeners;
+    ListenerList<Listener> listeners;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TouchSurface)
 };

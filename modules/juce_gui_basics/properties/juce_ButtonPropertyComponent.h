@@ -51,7 +51,7 @@ public:
                              bool triggerOnMouseDown);
 
     /** Destructor. */
-    ~ButtonPropertyComponent();
+    ~ButtonPropertyComponent() override;
 
     //==============================================================================
     /** Called when the user clicks the button.
@@ -66,7 +66,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void refresh();
+    void refresh() override;
 
 private:
     TextButton button;

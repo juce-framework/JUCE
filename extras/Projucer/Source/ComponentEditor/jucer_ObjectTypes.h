@@ -34,12 +34,12 @@ namespace ObjectTypes
 {
     //==============================================================================
     // Component types
-    extern ComponentTypeHandler** const componentTypeHandlers;
+    extern ComponentTypeHandler* const* const componentTypeHandlers;
     extern const int numComponentTypes;
 
     //==============================================================================
     // Element types
-    extern const char** const elementTypeNames;
+    extern const char* const* const elementTypeNames;
     extern const int numElementTypes;
 
     PaintElement* createNewElement (const int index, PaintRoutine* owner);

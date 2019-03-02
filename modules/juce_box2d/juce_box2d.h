@@ -35,7 +35,7 @@
 
   ID:               juce_box2d
   vendor:           juce
-  version:          5.3.2
+  version:          5.4.3
   name:             JUCE wrapper for the Box2D physics engine
   description:      The Box2D physics engine and some utility classes.
   website:          http://www.juce.com/juce
@@ -57,6 +57,11 @@
 #ifdef __GNUC__
  #pragma GCC diagnostic push
  #pragma GCC diagnostic ignored "-Wconversion"
+ #if defined (__clang__)
+  #if __has_warning("-Wzero-as-null-pointer-constant")
+   #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+  #endif
+ #endif
 #endif
 
 #include <climits>

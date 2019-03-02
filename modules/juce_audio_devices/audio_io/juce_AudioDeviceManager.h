@@ -76,7 +76,7 @@ public:
     AudioDeviceManager();
 
     /** Destructor. */
-    ~AudioDeviceManager();
+    ~AudioDeviceManager() override;
 
     //==============================================================================
     /**
@@ -89,17 +89,6 @@ public:
     */
     struct JUCE_API  AudioDeviceSetup
     {
-        /** Creates an AudioDeviceSetup object.
-
-            The default constructor sets all the member variables to indicate default values.
-            You can then fill-in any values you want to before passing the object to
-            AudioDeviceManager::initialise().
-        */
-        AudioDeviceSetup();
-
-        bool operator== (const AudioDeviceSetup& other) const;
-        bool operator!= (const AudioDeviceSetup& other) const;
-
         /** The name of the audio device used for output.
             The name has to be one of the ones listed by the AudioDeviceManager's currently
             selected device type.
@@ -119,13 +108,13 @@ public:
             A value of 0 indicates that you don't care what rate is used, and the
             device will choose a sensible rate for you.
         */
-        double sampleRate;
+        double sampleRate = 0;
 
         /** The buffer size, in samples.
             This buffer size is used for both the input and output devices.
             A value of 0 indicates the default buffer size.
         */
-        int bufferSize;
+        int bufferSize = 0;
 
         /** The set of active input channels.
             The bits that are set in this array indicate the channels of the
@@ -138,7 +127,7 @@ public:
             should be ignored, and instead, the device's default channels
             should be used.
         */
-        bool useDefaultInputChannels;
+        bool useDefaultInputChannels = true;
 
         /** The set of active output channels.
             The bits that are set in this array indicate the channels of the
@@ -151,7 +140,10 @@ public:
             should be ignored, and instead, the device's default channels
             should be used.
         */
-        bool useDefaultOutputChannels;
+        bool useDefaultOutputChannels = true;
+
+        bool operator== (const AudioDeviceSetup&) const;
+        bool operator!= (const AudioDeviceSetup&) const;
     };
 
 
@@ -211,6 +203,13 @@ public:
     /** Returns the current device properties that are in use.
         @see setAudioDeviceSetup
     */
+    AudioDeviceSetup getAudioDeviceSetup() const;
+
+    /** Returns the current device properties that are in use.
+        This is an old method, kept around for compatibility, but you should prefer the new
+        version which returns the result rather than taking an out-parameter.
+        @see getAudioDeviceSetup()
+    */
     void getAudioDeviceSetup (AudioDeviceSetup& result) const;
 
     /** Changes the current device or its settings.
@@ -232,8 +231,7 @@ public:
 
         @see getAudioDeviceSetup
     */
-    String setAudioDeviceSetup (const AudioDeviceSetup& newSetup,
-                                bool treatAsChosenDevice);
+    String setAudioDeviceSetup (const AudioDeviceSetup& newSetup, bool treatAsChosenDevice);
 
 
     /** Returns the currently-active audio device. */
@@ -257,8 +255,7 @@ public:
 
         For a list of types, see getAvailableDeviceTypes().
     */
-    void setCurrentAudioDeviceType (const String& type,
-                                    bool treatAsChosenDevice);
+    void setCurrentAudioDeviceType (const String& type, bool treatAsChosenDevice);
 
     /** Closes the currently-open device.
         You can call restartLastAudioDevice() later to reopen it in the same state
@@ -435,10 +432,10 @@ public:
     */
     LevelMeter::Ptr getInputLevelGetter() noexcept          { return inputLevelGetter; }
 
-    /** Returns a reference-counted object that can be used to get the current input level.
+    /** Returns a reference-counted object that can be used to get the current output level.
 
         You need to store this object locally to ensure that the reference count is incremented
-        and decremented properly. The current input level value can be read using getCurrentLevel().
+        and decremented properly. The current output level value can be read using getCurrentLevel().
     */
     LevelMeter::Ptr getOutputLevelGetter() noexcept         { return outputLevelGetter; }
 
@@ -473,7 +470,7 @@ private:
     std::unique_ptr<AudioIODevice> currentAudioDevice;
     Array<AudioIODeviceCallback*> callbacks;
     int numInputChansNeeded = 0, numOutputChansNeeded = 2;
-    String currentDeviceType;
+    String preferredDeviceName, currentDeviceType;
     BigInteger inputChannels, outputChannels;
     std::unique_ptr<XmlElement> lastExplicitSettings;
     mutable bool listNeedsScanning = true;
@@ -496,16 +493,13 @@ private:
     std::unique_ptr<AudioBuffer<float>> testSound;
     int testSoundPosition = 0;
 
-    double cpuUsageMs = 0, timeToCpuScale = 0, msPerBlock = 0;
-    int xruns = 0;
+    AudioProcessLoadMeasurer loadMeasurer;
 
     LevelMeter::Ptr inputLevelGetter   { new LevelMeter() },
                     outputLevelGetter  { new LevelMeter() };
 
     //==============================================================================
     class CallbackHandler;
-    friend class CallbackHandler;
-    friend struct ContainerDeletePolicy<CallbackHandler>;
     std::unique_ptr<CallbackHandler> callbackHandler;
 
     void audioDeviceIOCallbackInt (const float** inputChannelData, int totalNumInputChannels,

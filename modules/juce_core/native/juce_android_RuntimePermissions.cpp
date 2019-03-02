@@ -23,33 +23,185 @@
 namespace juce
 {
 
-static void handleAndroidCallback (bool permissionWasGranted, RuntimePermissions::Callback* callbackPtr)
+//==============================================================================
+static String jucePermissionToAndroidPermission (RuntimePermissions::PermissionID permission)
 {
-    if (callbackPtr == nullptr)
+    switch (permission)
     {
-        // got a nullptr passed in from java! this should never happen...
-        jassertfalse;
-        return;
+        case RuntimePermissions::recordAudio:            return "android.permission.RECORD_AUDIO";
+        case RuntimePermissions::bluetoothMidi:          return "android.permission.ACCESS_COARSE_LOCATION";
+        case RuntimePermissions::readExternalStorage:    return "android.permission.READ_EXTERNAL_STORAGE";
+        case RuntimePermissions::writeExternalStorage:   return "android.permission.WRITE_EXTERNAL_STORAGE";
+        case RuntimePermissions::camera:                 return "android.permission.CAMERA";
     }
 
-    std::unique_ptr<RuntimePermissions::Callback> uptr (callbackPtr);
-
-    if (RuntimePermissions::Callback callbackObj = *uptr)
-        callbackObj (permissionWasGranted);
+    // invalid permission
+    jassertfalse;
+    return {};
 }
 
-JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME,
-                   androidRuntimePermissionsCallback,
-                   void, (JNIEnv* env, jobject, jboolean permissionsGranted, jlong callbackPtr))
+static RuntimePermissions::PermissionID androidPermissionToJucePermission (const String& permission)
 {
-    setEnv (env);
-    handleAndroidCallback (permissionsGranted != 0,
-                           reinterpret_cast<RuntimePermissions::Callback*> (callbackPtr));
+    if      (permission == "android.permission.RECORD_AUDIO")             return RuntimePermissions::recordAudio;
+    else if (permission == "android.permission.ACCESS_COARSE_LOCATION")   return RuntimePermissions::bluetoothMidi;
+    else if (permission == "android.permission.READ_EXTERNAL_STORAGE")    return RuntimePermissions::readExternalStorage;
+    else if (permission == "android.permission.WRITE_EXTERNAL_STORAGE")   return RuntimePermissions::writeExternalStorage;
+    else if (permission == "android.permission.CAMERA")                   return RuntimePermissions::camera;
+
+    return static_cast<RuntimePermissions::PermissionID> (-1);
 }
 
+//==============================================================================
+struct PermissionsRequest
+{
+    PermissionsRequest() {}
+
+    // using "= default" on the following method triggers an internal compiler error
+    // in Android NDK 17
+    PermissionsRequest (const PermissionsRequest& o)
+        : callback (o.callback), permission (o.permission)
+    {}
+
+    PermissionsRequest (PermissionsRequest&& o)
+        : callback (std::move (o.callback)), permission (o.permission)
+    {
+        o.permission = static_cast<RuntimePermissions::PermissionID> (-1);
+    }
+
+    PermissionsRequest (RuntimePermissions::Callback && callbackToUse,
+                        RuntimePermissions::PermissionID permissionToRequest)
+        : callback (std::move (callbackToUse)), permission (permissionToRequest)
+    {}
+
+    PermissionsRequest& operator= (const PermissionsRequest & o)
+    {
+        callback   = o.callback;
+        permission = o.permission;
+        return *this;
+    }
+
+    PermissionsRequest& operator= (PermissionsRequest && o)
+    {
+        callback   = std::move (o.callback);
+        permission = o.permission;
+        return *this;
+    }
+
+    RuntimePermissions::Callback callback;
+    RuntimePermissions::PermissionID permission;
+};
+
+//==============================================================================
+struct PermissionsOverlay   : FragmentOverlay
+{
+    PermissionsOverlay (CriticalSection& cs) : overlayGuard (cs) {}
+    ~PermissionsOverlay() {}
+
+    struct PermissionResult
+    {
+        PermissionsRequest request;
+        bool granted;
+    };
+
+    void onStart() override    { onRequestPermissionsResult (0, {}, {}); }
+
+    void onRequestPermissionsResult (int /*requestCode*/,
+                                     const StringArray& permissions,
+                                     const Array<int>& grantResults) override
+    {
+        std::vector<PermissionResult> results;
+
+        {
+            ScopedLock lock (overlayGuard);
+
+            for (auto it = requests.begin(); it != requests.end();)
+            {
+                auto& request = *it;
+
+                if (RuntimePermissions::isGranted (request.permission))
+                {
+                    results.push_back ({std::move (request), true});
+                    it = requests.erase (it);
+                }
+                else
+                {
+                    ++it;
+                }
+            }
+
+            auto n = permissions.size();
+
+            for (int i = 0; i < n; ++i)
+            {
+                auto permission = androidPermissionToJucePermission (permissions[i]);
+                auto granted = (grantResults.getReference (i) == 0);
+
+                for (auto it = requests.begin(); it != requests.end();)
+                {
+                    auto& request = *it;
+
+                    if (request.permission == permission)
+                    {
+                        results.push_back ({std::move (request), granted});
+                        it = requests.erase (it);
+                    }
+                    else
+                    {
+                        ++it;
+                    }
+                }
+            }
+        }
+
+        for (const auto& result : results)
+            if (result.request.callback)
+                result.request.callback (result.granted);
+
+        {
+            auto* env = getEnv();
+            ScopedLock lock (overlayGuard);
+
+            if (requests.size() > 0)
+            {
+                auto &request = requests.front();
+
+                StringArray permissionsArray{
+                        jucePermissionToAndroidPermission (request.permission)};
+                auto jPermissionsArray = juceStringArrayToJava (permissionsArray);
+
+
+                auto requestPermissionsMethodID
+                    = env->GetMethodID(AndroidFragment, "requestPermissions", "([Ljava/lang/String;I)V");
+
+                // this code should only be reached for SDKs >= 23, so this method should be
+                // be available
+                jassert(requestPermissionsMethodID != 0);
+
+                env->CallVoidMethod (getNativeHandle(), requestPermissionsMethodID, jPermissionsArray.get (), 0);
+            }
+            else
+            {
+                getSingleton() = nullptr;
+            }
+        }
+    }
+
+    static std::unique_ptr<PermissionsOverlay>& getSingleton()
+    {
+        static std::unique_ptr<PermissionsOverlay> instance;
+        return instance;
+    }
+
+    CriticalSection& overlayGuard;
+    std::vector<PermissionsRequest> requests;
+};
+
+//==============================================================================
 void RuntimePermissions::request (PermissionID permission, Callback callback)
 {
-    if (! android.activity.callBooleanMethod  (JuceAppActivity.isPermissionDeclaredInManifest, (jint) permission))
+    auto requestedPermission = jucePermissionToAndroidPermission (permission);
+
+    if (! isPermissionDeclaredInManifest (requestedPermission))
     {
         // Error! If you want to be able to request this runtime permission, you
         // also need to declare it in your app's manifest. You can do so via
@@ -60,29 +212,50 @@ void RuntimePermissions::request (PermissionID permission, Callback callback)
         return;
     }
 
-    if (JUCE_ANDROID_API_VERSION < 23)
+    auto alreadyGranted = isGranted (permission);
+
+    if (alreadyGranted || getAndroidSDKVersion() < 23)
     {
-        // There is no runtime permission system on API level below 23. As long as the
-        // permission is in the manifest (seems to be the case), we can simply ask Android
-        // if the app has the permission, and then directly call through to the callback.
-        callback (isGranted (permission));
+        callback (alreadyGranted);
         return;
     }
 
-    // we need to move the callback object to the heap so Java can keep track of the pointer
-    // and asynchronously pass it back to us (to be called and then deleted)
-    Callback* callbackPtr = new Callback (std::move (callback));
-    android.activity.callVoidMethod (JuceAppActivity.requestRuntimePermission, permission, (jlong) callbackPtr);
+    PermissionsRequest request (std::move (callback), permission);
+
+    static CriticalSection overlayGuard;
+    ScopedLock lock (overlayGuard);
+
+    std::unique_ptr<PermissionsOverlay>& overlay = PermissionsOverlay::getSingleton();
+
+    bool alreadyOpen = true;
+
+    if (overlay == nullptr)
+    {
+        overlay.reset (new PermissionsOverlay (overlayGuard));
+        alreadyOpen = false;
+    }
+
+    overlay->requests.push_back (std::move (request));
+
+    if (! alreadyOpen)
+        overlay->open();
 }
 
 bool RuntimePermissions::isRequired (PermissionID /*permission*/)
 {
-    return JUCE_ANDROID_API_VERSION >= 23;
+    return getAndroidSDKVersion() >= 23;
 }
 
 bool RuntimePermissions::isGranted (PermissionID permission)
 {
-    return android.activity.callBooleanMethod (JuceAppActivity.isPermissionGranted, permission);
+    auto* env = getEnv();
+
+    auto requestedPermission = jucePermissionToAndroidPermission (permission);
+    int result = env->CallIntMethod (getAppContext().get(), AndroidContext.checkCallingOrSelfPermission,
+                                     javaString (requestedPermission).get());
+
+
+    return result == 0 /* PERMISSION_GRANTED */;
 }
 
 } // namespace juce

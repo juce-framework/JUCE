@@ -288,39 +288,43 @@ public:
            #else
             urlString = [urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
            #endif
-            NSMutableURLRequest* r
-                = [NSMutableURLRequest requestWithURL: [NSURL URLWithString: urlString]
-                                          cachePolicy: NSURLRequestUseProtocolCachePolicy
-                                      timeoutInterval: 30.0];
 
-            if (postData != nullptr && postData->getSize() > 0)
+            if (NSURL* nsURL = [NSURL URLWithString: urlString])
             {
-                [r setHTTPMethod: nsStringLiteral ("POST")];
-                [r setHTTPBody: [NSData dataWithBytes: postData->getData()
-                                               length: postData->getSize()]];
-            }
+                NSMutableURLRequest* r
+                    = [NSMutableURLRequest requestWithURL: nsURL
+                                              cachePolicy: NSURLRequestUseProtocolCachePolicy
+                                          timeoutInterval: 30.0];
 
-            if (headers != nullptr)
-            {
-                for (int i = 0; i < headers->size(); ++i)
+                if (postData != nullptr && postData->getSize() > 0)
                 {
-                    const String headerName  ((*headers)[i].upToFirstOccurrenceOf (":", false, false).trim());
-                    const String headerValue ((*headers)[i].fromFirstOccurrenceOf (":", false, false).trim());
-
-                    [r setValue: juceStringToNS (headerValue)
-                       forHTTPHeaderField: juceStringToNS (headerName)];
+                    [r setHTTPMethod: nsStringLiteral ("POST")];
+                    [r setHTTPBody: [NSData dataWithBytes: postData->getData()
+                                                   length: postData->getSize()]];
                 }
+
+                if (headers != nullptr)
+                {
+                    for (int i = 0; i < headers->size(); ++i)
+                    {
+                        auto headerName  = (*headers)[i].upToFirstOccurrenceOf (":", false, false).trim();
+                        auto headerValue = (*headers)[i].fromFirstOccurrenceOf (":", false, false).trim();
+
+                        [r setValue: juceStringToNS (headerValue)
+                           forHTTPHeaderField: juceStringToNS (headerName)];
+                    }
+                }
+
+               #if JUCE_MAC
+                [[webView mainFrame] loadRequest: r];
+               #else
+                [webView loadRequest: r];
+               #endif
+
+               #if JUCE_IOS
+                [webView setScalesPageToFit:YES];
+               #endif
             }
-
-           #if JUCE_MAC
-            [[webView mainFrame] loadRequest: r];
-           #else
-            [webView loadRequest: r];
-           #endif
-
-           #if JUCE_IOS
-            [webView setScalesPageToFit:YES];
-           #endif
         }
     }
 
@@ -436,7 +440,7 @@ void WebBrowserComponent::checkWindowAssociation()
             // page to avoid this, (and send it back when it's made visible again).
 
             blankPageShown = true;
-            browser->goToURL ("about:blank", 0, 0);
+            browser->goToURL ("about:blank", nullptr, nullptr);
         }
     }
 }

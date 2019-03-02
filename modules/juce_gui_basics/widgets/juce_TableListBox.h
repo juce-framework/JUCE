@@ -42,10 +42,10 @@ class JUCE_API  TableListBoxModel
 {
 public:
     //==============================================================================
-    TableListBoxModel()  {}
+    TableListBoxModel() = default;
 
     /** Destructor. */
-    virtual ~TableListBoxModel()  {}
+    virtual ~TableListBoxModel() = default;
 
     //==============================================================================
     /** This must return the number of rows currently in the table.
@@ -225,7 +225,7 @@ public:
                   TableListBoxModel* model = nullptr);
 
     /** Destructor. */
-    ~TableListBox();
+    ~TableListBox() override;
 
     //==============================================================================
     /** Changes the TableListBoxModel that is being used for this table.

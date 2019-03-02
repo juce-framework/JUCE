@@ -81,7 +81,7 @@ public:
     {
     public:
         ElementBase (ElementType type);
-        virtual ~ElementBase() {}
+        virtual ~ElementBase() = default;
         virtual void addToPath (Path& path, Expression::Scope*) const = 0;
         virtual RelativePoint* getControlPoints (int& numPoints) = 0;
         virtual ElementBase* clone() const = 0;
@@ -99,9 +99,9 @@ public:
     {
     public:
         StartSubPath (const RelativePoint& pos);
-        void addToPath (Path& path, Expression::Scope*) const;
-        RelativePoint* getControlPoints (int& numPoints);
-        ElementBase* clone() const;
+        void addToPath (Path& path, Expression::Scope*) const override;
+        RelativePoint* getControlPoints (int& numPoints) override;
+        ElementBase* clone() const override;
 
         RelativePoint startPos;
 
@@ -115,9 +115,9 @@ public:
     {
     public:
         CloseSubPath();
-        void addToPath (Path& path, Expression::Scope*) const;
-        RelativePoint* getControlPoints (int& numPoints);
-        ElementBase* clone() const;
+        void addToPath (Path& path, Expression::Scope*) const override;
+        RelativePoint* getControlPoints (int& numPoints) override;
+        ElementBase* clone() const override;
 
     private:
         JUCE_DECLARE_NON_COPYABLE (CloseSubPath)
@@ -129,9 +129,9 @@ public:
     {
     public:
         LineTo (const RelativePoint& endPoint);
-        void addToPath (Path& path, Expression::Scope*) const;
-        RelativePoint* getControlPoints (int& numPoints);
-        ElementBase* clone() const;
+        void addToPath (Path& path, Expression::Scope*) const override;
+        RelativePoint* getControlPoints (int& numPoints) override;
+        ElementBase* clone() const override;
 
         RelativePoint endPoint;
 
@@ -146,9 +146,9 @@ public:
     public:
         QuadraticTo (const RelativePoint& controlPoint, const RelativePoint& endPoint);
         ValueTree createTree() const;
-        void addToPath (Path& path, Expression::Scope*) const;
-        RelativePoint* getControlPoints (int& numPoints);
-        ElementBase* clone() const;
+        void addToPath (Path& path, Expression::Scope*) const override;
+        RelativePoint* getControlPoints (int& numPoints) override;
+        ElementBase* clone() const override;
 
         RelativePoint controlPoints[2];
 
@@ -163,9 +163,9 @@ public:
     public:
         CubicTo (const RelativePoint& controlPoint1, const RelativePoint& controlPoint2, const RelativePoint& endPoint);
         ValueTree createTree() const;
-        void addToPath (Path& path, Expression::Scope*) const;
-        RelativePoint* getControlPoints (int& numPoints);
-        ElementBase* clone() const;
+        void addToPath (Path& path, Expression::Scope*) const override;
+        RelativePoint* getControlPoints (int& numPoints) override;
+        ElementBase* clone() const override;
 
         RelativePoint controlPoints[3];
 

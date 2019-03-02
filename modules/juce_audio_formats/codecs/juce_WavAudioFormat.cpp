@@ -849,20 +849,21 @@ namespace WavFileHelpers
     {
         static void addToMetadata (StringPairArray& destValues, const String& source)
         {
-            std::unique_ptr<XmlElement> xml (XmlDocument::parse (source));
-
-            if (xml != nullptr && xml->hasTagName ("ebucore:ebuCoreMain"))
+            if (auto xml = parseXML (source))
             {
-                if (auto* xml2 = xml->getChildByName ("ebucore:coreMetadata"))
+                if (xml->hasTagName ("ebucore:ebuCoreMain"))
                 {
-                    if (auto* xml3 = xml2->getChildByName ("ebucore:identifier"))
+                    if (auto xml2 = xml->getChildByName ("ebucore:coreMetadata"))
                     {
-                        if (auto* xml4 = xml3->getChildByName ("dc:identifier"))
+                        if (auto xml3 = xml2->getChildByName ("ebucore:identifier"))
                         {
-                            auto ISRCCode = xml4->getAllSubText().fromFirstOccurrenceOf ("ISRC:", false, true);
+                            if (auto xml4 = xml3->getChildByName ("dc:identifier"))
+                            {
+                                auto ISRCCode = xml4->getAllSubText().fromFirstOccurrenceOf ("ISRC:", false, true);
 
-                            if (ISRCCode.isNotEmpty())
-                                destValues.set (WavAudioFormat::ISRC, ISRCCode);
+                                if (ISRCCode.isNotEmpty())
+                                    destValues.set (WavAudioFormat::ISRC, ISRCCode);
+                            }
                         }
                     }
                 }
@@ -1318,7 +1319,7 @@ public:
         writeHeader();
     }
 
-    ~WavAudioFormatWriter()
+    ~WavAudioFormatWriter() override
     {
         writeHeader();
     }

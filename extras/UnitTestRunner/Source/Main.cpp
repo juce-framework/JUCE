@@ -48,14 +48,40 @@ class ConsoleUnitTestRunner : public UnitTestRunner
     }
 };
 
+
 //==============================================================================
-int main()
+int main (int argc, char **argv)
 {
     ConsoleLogger logger;
     Logger::setCurrentLogger (&logger);
 
     ConsoleUnitTestRunner runner;
-    runner.runAllTests();
+
+    ArgumentList args (argc, argv);
+
+    if (args.size() == 0)
+    {
+        runner.runAllTests();
+    }
+    else
+    {
+        if (args.containsOption ("--help|-h"))
+        {
+            std::cout << argv[0] << " [--help|-h] [--category category] [--list-categories]" << std::endl;
+            return 0;
+        }
+
+        if (args.containsOption ("--list-categories"))
+        {
+            for (auto& category : UnitTest::getAllCategories())
+                std::cout << category << std::endl;
+
+            return  0;
+        }
+
+        if (args.containsOption ("--category"))
+            runner.runTestsInCategory (args.getValueForOption ("--category"));
+    }
 
     Logger::setCurrentLogger (nullptr);
 

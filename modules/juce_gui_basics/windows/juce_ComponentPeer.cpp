@@ -109,11 +109,15 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
         g.addTransform (component.getTransform());
 
     auto peerBounds = getBounds();
+    auto componentBounds = component.getLocalBounds();
 
-    if (peerBounds.getWidth() != component.getWidth() || peerBounds.getHeight() != component.getHeight())
+    if (component.isTransformed())
+        componentBounds = componentBounds.transformedBy (component.getTransform());
+
+    if (peerBounds.getWidth() != componentBounds.getWidth() || peerBounds.getHeight() != componentBounds.getHeight())
         // Tweak the scaling so that the component's integer size exactly aligns with the peer's scaled size
-        g.addTransform (AffineTransform::scale (peerBounds.getWidth()  / (float) component.getWidth(),
-                                                peerBounds.getHeight() / (float) component.getHeight()));
+        g.addTransform (AffineTransform::scale (peerBounds.getWidth()  / (float) componentBounds.getWidth(),
+                                                peerBounds.getHeight() / (float) componentBounds.getHeight()));
 
   #if JUCE_ENABLE_REPAINT_DEBUGGING
    #ifdef JUCE_IS_REPAINT_DEBUGGING_ACTIVE

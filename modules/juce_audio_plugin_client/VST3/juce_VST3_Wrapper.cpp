@@ -50,7 +50,10 @@
 #endif
 
 #if JUCE_VST3_CAN_REPLACE_VST2
-#include "../../juce_audio_processors/format_types/juce_VSTInterface.h"
+namespace Vst2
+{
+#include "pluginterfaces/vst2.x/vstfxstore.h"
+}
 #endif
 
 #ifndef JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
@@ -83,7 +86,6 @@ using namespace Steinberg;
 
   extern JUCE_API void* attachComponentToWindowRefVST (Component*, void* parentWindowOrView, bool isNSView);
   extern JUCE_API void detachComponentFromWindowRefVST (Component*, void* nsWindow, bool isNSView);
-  extern JUCE_API void setNativeHostWindowSizeVST (void* window, Component*, int newWidth, int newHeight, bool isNSView);
 #endif
 
 //==============================================================================
@@ -121,6 +123,11 @@ public:
     AudioProcessorParameter* getBypassParameter() const noexcept
     {
         return getParamForVSTParamID (bypassParamID);
+    }
+
+    static Vst::UnitID getUnitID (const AudioProcessorParameterGroup* group)
+    {
+        return group == nullptr ? Vst::kRootUnitId : group->getID().hashCode();
     }
 
     int getNumParameters() const noexcept             { return vstParamIDs.size(); }
@@ -191,7 +198,7 @@ private:
             {
                 // we need to remain backward compatible with the old bypass id
                 if (vst3WrapperProvidedBypassParam)
-                    vstParamID = static_cast<Vst::ParamID> (isUsingManagedParameters() ? paramBypass : numParameters);
+                    vstParamID = static_cast<Vst::ParamID> ((isUsingManagedParameters() && ! forceLegacyParamIDs) ? paramBypass : numParameters);
 
                 bypassParamID = vstParamID;
             }
@@ -327,10 +334,12 @@ public:
     struct Param  : public Vst::Parameter
     {
         Param (JuceVST3EditController& editController, AudioProcessorParameter& p,
-               Vst::ParamID vstParamID, bool isBypassParameter, bool forceLegacyParamIDs)
+               Vst::ParamID vstParamID, Vst::UnitID vstUnitID,
+               bool isBypassParameter, bool forceLegacyParamIDs)
             : owner (editController), param (p)
         {
             info.id = vstParamID;
+            info.unitId = vstUnitID;
 
             toString128 (info.title,      param.getName (128));
             toString128 (info.shortTitle, param.getName (8));
@@ -346,7 +355,6 @@ public:
 
             info.defaultNormalizedValue = param.getDefaultValue();
             jassert (info.defaultNormalizedValue >= 0 && info.defaultNormalizedValue <= 1.0f);
-            info.unitId = Vst::kRootUnitId;
 
             // Is this a meter?
             if (((param.getCategory() & 0xffff0000) >> 16) == 2)
@@ -711,6 +719,7 @@ private:
 
     //==============================================================================
     Atomic<int> vst3IsPlaying { 0 };
+    float lastScaleFactorReceived = 1.0f;
 
     void setupParameters()
     {
@@ -737,8 +746,10 @@ private:
                 {
                     auto vstParamID = audioProcessor->getVSTParamIDForIndex (i);
                     auto* juceParam = audioProcessor->getParamForVSTParamID (vstParamID);
+                    auto* parameterGroup = pluginInstance->parameterTree.getGroupsForParameter (juceParam).getLast();
+                    auto unitID = JuceAudioProcessor::getUnitID (parameterGroup);
 
-                    parameters.addParameter (new Param (*this, *juceParam, vstParamID,
+                    parameters.addParameter (new Param (*this, *juceParam, vstParamID, unitID,
                                                         (vstParamID == audioProcessor->bypassParamID), forceLegacyParamIDs));
                 }
 
@@ -797,7 +808,14 @@ private:
           : Vst::EditorView (&ec, nullptr),
             owner (&ec), pluginInstance (p)
         {
+            editorScaleFactor = ec.lastScaleFactorReceived;
+
             component.reset (new ContentWrapperComponent (*this, p));
+
+           #if JUCE_MAC
+            if (getHostType().type == PluginHostType::SteinbergCubase10)
+                cubase10Workaround.reset (new Cubase10WindowResizeWorkaround (*this));
+           #endif
         }
 
         tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
@@ -841,6 +859,10 @@ private:
             macHostWindow = juce::attachComponentToWindowRefVST (component.get(), parent, isNSView);
            #endif
 
+           #if ! JUCE_MAC
+            setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) editorScaleFactor);
+           #endif
+
             component->resizeHostWindow();
             systemWindow = parent;
             attachedToParent();
@@ -880,10 +902,41 @@ private:
 
                 if (component != nullptr)
                 {
-                    component->setSize (rect.getWidth(), rect.getHeight());
+                    auto w = rect.getWidth();
+                    auto h = rect.getHeight();
 
+                   #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                    w = roundToInt (w / editorScaleFactor);
+                    h = roundToInt (h / editorScaleFactor);
+
+                    if (getHostType().type == PluginHostType::SteinbergCubase10)
+                    {
+                        auto integerScaleFactor = (int) std::round (editorScaleFactor);
+
+                        // Workaround for Cubase 10 sending double-scaled bounds when opening editor
+                        if (isWithin ((int) w, component->getWidth() * integerScaleFactor, 2)
+                            && isWithin ((int) h, component->getHeight() * integerScaleFactor, 2))
+                        {
+                            w /= integerScaleFactor;
+                            h /= integerScaleFactor;
+                        }
+                    }
+                   #endif
+
+                    component->setSize (w, h);
+
+                   #if JUCE_MAC
+                    if (cubase10Workaround != nullptr)
+                        cubase10Workaround->triggerAsyncUpdate();
+                    else
+                   #endif
                     if (auto* peer = component->getPeer())
                         peer->updateBounds();
+
+                   #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                    if (getHostType().type == PluginHostType::SteinbergCubase10)
+                        component->resizeHostWindow();
+                   #endif
                 }
 
                 return kResultTrue;
@@ -897,7 +950,16 @@ private:
         {
             if (size != nullptr && component != nullptr)
             {
-                *size = ViewRect (0, 0, component->getWidth(), component->getHeight());
+                auto w = component->getWidth();
+                auto h = component->getHeight();
+
+               #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                w = roundToInt (w * editorScaleFactor);
+                h = roundToInt (h * editorScaleFactor);
+               #endif
+
+                *size = ViewRect (0, 0, w, h);
+
                 return kResultTrue;
             }
 
@@ -919,17 +981,67 @@ private:
             {
                 if (auto* editor = component->pluginEditor.get())
                 {
-                    // checkSizeConstraint
-                    auto juceRect = editor->getLocalArea (component.get(), Rectangle<int>::leftTopRightBottom (rectToCheck->left, rectToCheck->top,
-                                                                                                               rectToCheck->right, rectToCheck->bottom));
                     if (auto* constrainer = editor->getConstrainer())
                     {
-                        Rectangle<int> limits (0, 0, constrainer->getMaximumWidth(), constrainer->getMaximumHeight());
-                        constrainer->checkBounds (juceRect, editor->getBounds(), limits, false, false, false, false);
+                        auto minW = (double) constrainer->getMinimumWidth();
+                        auto maxW = (double) constrainer->getMaximumWidth();
+                        auto minH = (double) constrainer->getMinimumHeight();
+                        auto maxH = (double) constrainer->getMaximumHeight();
 
-                        juceRect = component->getLocalArea (editor, juceRect);
-                        rectToCheck->right  = rectToCheck->left + juceRect.getWidth();
-                        rectToCheck->bottom = rectToCheck->top  + juceRect.getHeight();
+                        auto width  = (double) (rectToCheck->right - rectToCheck->left);
+                        auto height = (double) (rectToCheck->bottom - rectToCheck->top);
+
+                       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                        width  /= editorScaleFactor;
+                        height /= editorScaleFactor;
+                       #endif
+
+                        width  = jlimit (minW, maxW, width);
+                        height = jlimit (minH, maxH, height);
+
+                        auto aspectRatio = constrainer->getFixedAspectRatio();
+
+                        if (aspectRatio != 0.0)
+                        {
+                            bool adjustWidth = (width / height > aspectRatio);
+
+                            if (getHostType().type == PluginHostType::SteinbergCubase9)
+                            {
+                                if (editor->getWidth() == width && editor->getHeight() != height)
+                                    adjustWidth = true;
+                                else if (editor->getHeight() == height && editor->getWidth() != width)
+                                    adjustWidth = false;
+                            }
+
+                            if (adjustWidth)
+                            {
+                                width = height * aspectRatio;
+
+                                if (width > maxW || width < minW)
+                                {
+                                    width = jlimit (minW, maxW, width);
+                                    height = width / aspectRatio;
+                                }
+                            }
+                            else
+                            {
+                                height = width / aspectRatio;
+
+                                if (height > maxH || height < minH)
+                                {
+                                    height = jlimit (minH, maxH, height);
+                                    width = height * aspectRatio;
+                                }
+                            }
+                        }
+
+                       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                        width  *= editorScaleFactor;
+                        height *= editorScaleFactor;
+                       #endif
+
+                        rectToCheck->right  = rectToCheck->left + roundToInt (width);
+                        rectToCheck->bottom = rectToCheck->top  + roundToInt (height);
                     }
                 }
 
@@ -942,17 +1054,40 @@ private:
 
         tresult PLUGIN_API setContentScaleFactor (Steinberg::IPlugViewContentScaleSupport::ScaleFactor factor) override
         {
-           #if (JUCE_MAC || JUCE_IOS)
-            ignoreUnused (factor);
-           #else
-            if (auto* editor = component->pluginEditor.get())
+           #if ! JUCE_MAC
+            // Cubase 10 doesn't support non-integer scale factors...
+            if (getHostType().type == PluginHostType::SteinbergCubase10)
             {
-                editor->setScaleFactor (factor);
-                return kResultTrue;
+                if (component.get() != nullptr)
+                    if (auto* peer = component->getPeer())
+                        factor = static_cast<Steinberg::IPlugViewContentScaleSupport::ScaleFactor> (peer->getPlatformScaleFactor());
             }
-           #endif
 
+            if (! approximatelyEqual ((float) factor, editorScaleFactor))
+            {
+                editorScaleFactor = (float) factor;
+
+                if (auto* o = owner.get())
+                    o->lastScaleFactorReceived = editorScaleFactor;
+
+                if (component == nullptr)
+                    return kResultFalse;
+
+               #if JUCE_WINDOWS && ! JUCE_WIN_PER_MONITOR_DPI_AWARE
+                if (auto* ed = component->pluginEditor.get())
+                    ed->setScaleFactor ((float) factor);
+               #endif
+
+                component->resizeHostWindow();
+                component->setTopLeftPosition (0, 0);
+                component->repaint();
+            }
+
+            return kResultTrue;
+           #else
+            ignoreUnused (factor);
             return kResultFalse;
+           #endif
         }
 
     private:
@@ -969,8 +1104,8 @@ private:
         struct ContentWrapperComponent  : public Component
         {
             ContentWrapperComponent (JuceVST3Editor& editor, AudioProcessor& plugin)
-               : pluginEditor (plugin.createEditorIfNeeded()),
-                 owner (editor)
+                : pluginEditor (plugin.createEditorIfNeeded()),
+                  owner (editor)
             {
                 setOpaque (true);
                 setBroughtToFrontOnMouseClick (true);
@@ -1032,10 +1167,27 @@ private:
                 }
             }
 
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+            void checkScaleFactorIsCorrect()
+            {
+                if (auto* peer = pluginEditor->getPeer())
+                {
+                    auto peerScaleFactor = (float) peer->getPlatformScaleFactor();
+
+                    if (! approximatelyEqual (peerScaleFactor, owner.editorScaleFactor))
+                        owner.setContentScaleFactor (peerScaleFactor);
+                }
+            }
+           #endif
+
             void resized() override
             {
                 if (pluginEditor != nullptr)
                 {
+                   #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                    checkScaleFactorIsCorrect();
+                   #endif
+
                     if (! isResizingParentToFitChild)
                     {
                         lastBounds = getLocalBounds();
@@ -1074,17 +1226,21 @@ private:
 
                    #if JUCE_WINDOWS
                     setSize (w, h);
-                   #else
-                    if (owner.macHostWindow != nullptr && ! (host.isWavelab() || host.isReaper() || host.isBitwigStudio()))
-                        juce::setNativeHostWindowSizeVST (owner.macHostWindow, this, w, h, owner.isNSView);
                    #endif
 
                     if (owner.plugFrame != nullptr)
                     {
+                       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                        w = roundToInt (w * owner.editorScaleFactor);
+                        h = roundToInt (h * owner.editorScaleFactor);
+                       #endif
+
                         ViewRect newSize (0, 0, w, h);
-                        isResizingParentToFitChild = true;
-                        owner.plugFrame->resizeView (&owner, &newSize);
-                        isResizingParentToFitChild = false;
+
+                        {
+                            const ScopedValueSetter<bool> resizingParentSetter (isResizingParentToFitChild, true);
+                            owner.plugFrame->resizeView (&owner, &newSize);
+                        }
 
                        #if JUCE_MAC
                         if (host.isWavelab() || host.isReaper())
@@ -1118,7 +1274,26 @@ private:
        #if JUCE_MAC
         void* macHostWindow = nullptr;
         bool isNSView = false;
+
+        // On macOS Cubase 10 resizes the host window after calling onSize() resulting in the peer
+        // bounds being a step behind the plug-in. Calling updateBounds() asynchronously seems to fix things...
+        struct Cubase10WindowResizeWorkaround  : public AsyncUpdater
+        {
+            Cubase10WindowResizeWorkaround (JuceVST3Editor& o)  : owner (o) {}
+
+            void handleAsyncUpdate() override
+            {
+                if (auto* peer = owner.component->getPeer())
+                    peer->updateBounds();
+            }
+
+            JuceVST3Editor& owner;
+        };
+
+        std::unique_ptr<Cubase10WindowResizeWorkaround> cubase10Workaround;
        #endif
+
+        float editorScaleFactor = 1.0f;
 
        #if JUCE_WINDOWS
         WindowsHooks hooks;
@@ -1172,6 +1347,8 @@ public:
         // For example, your default layout must be mono, stereo, quadrophonic
         // and not AudioChannelSet::discreteChannels (2) etc.
         jassert (checkBusFormatsAreNotDiscrete());
+
+        parameterGroups = pluginInstance->parameterTree.getSubgroups (true);
 
         comPluginInstance = new JuceAudioProcessor (pluginInstance);
 
@@ -1440,16 +1617,16 @@ public:
 
     bool loadVST2CcnKBlock (const char* data, int size)
     {
-        auto bank = (const vst2FxBank*) data;
+        auto bank = (const Vst2::fxBank*) data;
 
-        jassert ('CcnK' == htonl (bank->magic1));
-        jassert ('FBCh' == htonl (bank->magic2));
-        jassert (htonl (bank->version1) == 1 || htonl (bank->version1) == 2);
+        jassert ('CcnK' == htonl (bank->chunkMagic));
+        jassert ('FBCh' == htonl (bank->fxMagic));
+        jassert (htonl (bank->version) == 1 || htonl (bank->version) == 2);
         jassert (JucePlugin_VSTUniqueID == htonl (bank->fxID));
 
-        setStateInformation (bank->chunk,
-                             jmin ((int) (size - (bank->chunk - data)),
-                                   (int) htonl (bank->chunkSize)));
+        setStateInformation (bank->content.data.chunk,
+                             jmin ((int) (size - (bank->content.data.chunk - data)),
+                                   (int) htonl (bank->content.data.size)));
         return true;
     }
 
@@ -1642,16 +1819,16 @@ public:
             return status;
 
         const int bankBlockSize = 160;
-        vst2FxBank bank;
+        Vst2::fxBank bank;
 
         zerostruct (bank);
-        bank.magic1         = (int32) htonl ('CcnK');
-        bank.size           = (int32) htonl (bankBlockSize - 8 + (unsigned int) mem.getSize());
-        bank.magic2         = (int32) htonl ('FBCh');
-        bank.version1       = (int32) htonl (2);
-        bank.fxID           = (int32) htonl (JucePlugin_VSTUniqueID);
-        bank.version2       = (int32) htonl (JucePlugin_VersionCode);
-        bank.chunkSize      = (int32) htonl ((unsigned int) mem.getSize());
+        bank.chunkMagic         = (int32) htonl ('CcnK');
+        bank.byteSize           = (int32) htonl (bankBlockSize - 8 + (unsigned int) mem.getSize());
+        bank.fxMagic            = (int32) htonl ('FBCh');
+        bank.version            = (int32) htonl (2);
+        bank.fxID               = (int32) htonl (JucePlugin_VSTUniqueID);
+        bank.fxVersion          = (int32) htonl (JucePlugin_VersionCode);
+        bank.content.data.size  = (int32) htonl ((unsigned int) mem.getSize());
 
         status = state->write (&bank, bankBlockSize);
 
@@ -1665,7 +1842,7 @@ public:
     //==============================================================================
     Steinberg::int32 PLUGIN_API getUnitCount() override
     {
-        return 1;
+        return parameterGroups.size() + 1;
     }
 
     tresult PLUGIN_API getUnitInfo (Steinberg::int32 unitIndex, Vst::UnitInfo& info) override
@@ -1681,7 +1858,17 @@ public:
             return kResultTrue;
         }
 
-        zerostruct (info);
+        if (auto* group = parameterGroups[unitIndex - 1])
+        {
+            info.id             = JuceAudioProcessor::getUnitID (group);
+            info.parentUnitId   = JuceAudioProcessor::getUnitID (group->getParent());
+            info.programListId  = Vst::kNoProgramListId;
+
+            toString128 (info.name, group->getName());
+
+            return kResultTrue;
+        }
+
         return kResultFalse;
     }
 
@@ -1860,7 +2047,13 @@ public:
             {
                 info.mediaType = Vst::kEvent;
                 info.direction = dir;
+
+               #ifdef JucePlugin_VSTNumMidiInputs
+                info.channelCount = JucePlugin_VSTNumMidiInputs;
+               #else
                 info.channelCount = 16;
+               #endif
+
                 toString128 (info.name, TRANS("MIDI Input"));
                 info.busType = Vst::kMain;
                 return kResultTrue;
@@ -1872,7 +2065,13 @@ public:
             {
                 info.mediaType = Vst::kEvent;
                 info.direction = dir;
+
+               #ifdef JucePlugin_VSTNumMidiOutputs
+                info.channelCount = JucePlugin_VSTNumMidiOutputs;
+               #else
                 info.channelCount = 16;
+               #endif
+
                 toString128 (info.name, TRANS("MIDI Output"));
                 info.busType = Vst::kMain;
                 return kResultTrue;
@@ -2033,6 +2232,9 @@ public:
         if (tailLengthSeconds <= 0.0 || processSetup.sampleRate <= 0.0)
             return Vst::kNoTail;
 
+        if (tailLengthSeconds == std::numeric_limits<double>::infinity())
+            return Vst::kInfiniteTail;
+
         return (Steinberg::uint32) roundToIntAccurate (tailLengthSeconds * processSetup.sampleRate);
     }
 
@@ -2162,43 +2364,6 @@ public:
     }
 
 private:
-    //==============================================================================
-    Atomic<int> refCount { 1 };
-
-    AudioProcessor* pluginInstance;
-    ComSmartPtr<Vst::IHostApplication> host;
-    ComSmartPtr<JuceAudioProcessor> comPluginInstance;
-    ComSmartPtr<JuceVST3EditController> juceVST3EditController;
-
-    /**
-        Since VST3 does not provide a way of knowing the buffer size and sample rate at any point,
-        this object needs to be copied on every call to process() to be up-to-date...
-    */
-    Vst::ProcessContext processContext;
-    Vst::ProcessSetup processSetup;
-
-    MidiBuffer midiBuffer;
-    Array<float*> channelListFloat;
-    Array<double*> channelListDouble;
-
-    AudioBuffer<float>  emptyBufferFloat;
-    AudioBuffer<double> emptyBufferDouble;
-
-   #if JucePlugin_WantsMidiInput
-    bool isMidiInputBusEnabled = true;
-   #else
-    bool isMidiInputBusEnabled = false;
-   #endif
-
-   #if JucePlugin_ProducesMidiOutput
-    bool isMidiOutputBusEnabled = true;
-   #else
-    bool isMidiOutputBusEnabled = false;
-   #endif
-
-    ScopedJuceInitialiser_GUI libraryInitialiser;
-    static const char* kJucePrivateDataIdentifier;
-
     //==============================================================================
     template <typename FloatType>
     void processAudio (Vst::ProcessData& data, Array<FloatType*>& channelList)
@@ -2410,9 +2575,51 @@ private:
 
         p.setRateAndBufferSizeDetails (sampleRate, bufferSize);
         p.prepareToPlay (sampleRate, bufferSize);
+
+        midiBuffer.ensureSize (2048);
+        midiBuffer.clear();
     }
 
     //==============================================================================
+    Atomic<int> refCount { 1 };
+
+    AudioProcessor* pluginInstance;
+    ComSmartPtr<Vst::IHostApplication> host;
+    ComSmartPtr<JuceAudioProcessor> comPluginInstance;
+    ComSmartPtr<JuceVST3EditController> juceVST3EditController;
+
+    /**
+        Since VST3 does not provide a way of knowing the buffer size and sample rate at any point,
+        this object needs to be copied on every call to process() to be up-to-date...
+    */
+    Vst::ProcessContext processContext;
+
+    Vst::ProcessSetup processSetup;
+
+    MidiBuffer midiBuffer;
+    Array<float*> channelListFloat;
+    Array<double*> channelListDouble;
+
+    AudioBuffer<float>  emptyBufferFloat;
+    AudioBuffer<double> emptyBufferDouble;
+
+   #if JucePlugin_WantsMidiInput
+    bool isMidiInputBusEnabled = true;
+   #else
+    bool isMidiInputBusEnabled = false;
+   #endif
+
+   #if JucePlugin_ProducesMidiOutput
+    bool isMidiOutputBusEnabled = true;
+   #else
+    bool isMidiOutputBusEnabled = false;
+   #endif
+
+    ScopedJuceInitialiser_GUI libraryInitialiser;
+    static const char* kJucePrivateDataIdentifier;
+
+    Array<const AudioProcessorParameterGroup*> parameterGroups;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVST3Component)
 };
 
@@ -2531,7 +2738,7 @@ bool shutdownModule()
 
 //==============================================================================
 /** This typedef represents VST3's createInstance() function signature */
-typedef FUnknown* (*CreateFunction) (Vst::IHostApplication*);
+using CreateFunction = FUnknown* (*)(Vst::IHostApplication*);
 
 static FUnknown* createComponentInstance (Vst::IHostApplication* host)
 {

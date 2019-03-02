@@ -23,13 +23,13 @@
 namespace juce
 {
 
-typedef void (*AppFocusChangeCallback)();
+using AppFocusChangeCallback = void (*)();
 AppFocusChangeCallback appFocusChangeCallback = nullptr;
 
-typedef bool (*CheckEventBlockedByModalComps) (NSEvent*);
+using CheckEventBlockedByModalComps = bool (*)(NSEvent*);
 CheckEventBlockedByModalComps isEventBlockedByModalComps = nullptr;
 
-typedef void (*MenuTrackingChangedCallback)(bool);
+using MenuTrackingChangedCallback = void (*)(bool);
 MenuTrackingChangedCallback menuTrackingChangedCallback = nullptr;
 
 //==============================================================================
@@ -235,8 +235,10 @@ private:
         static String quotedIfContainsSpaces (NSString* file)
         {
             String s (nsStringToJuce (file));
+            s = s.unquoted().replace ("\"", "\\\"");
+
             if (s.containsChar (' '))
-                s = s.quoted ('"');
+                s = s.quoted();
 
             return s;
         }
@@ -381,7 +383,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
     jassert (millisecondsToRunFor >= 0);
     jassert (isThisTheMessageThread()); // must only be called by the message thread
 
-    uint32 endTime = Time::getMillisecondCounter() + (uint32) millisecondsToRunFor;
+    auto endTime = Time::currentTimeMillis() + millisecondsToRunFor;
 
     while (quitMessagePosted.get() == 0)
     {
@@ -397,7 +399,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
             if (e != nil && (isEventBlockedByModalComps == nullptr || ! (*isEventBlockedByModalComps) (e)))
                 [NSApp sendEvent: e];
 
-            if (Time::getMillisecondCounter() >= endTime)
+            if (Time::currentTimeMillis() >= endTime)
                 break;
         }
     }
@@ -454,7 +456,7 @@ void __attribute__ ((visibility("default"))) repostCurrentNSEvent()
     struct EventReposter  : public CallbackMessage
     {
         EventReposter() : e ([[NSApp currentEvent] retain])  {}
-        ~EventReposter()  { [e release]; }
+        ~EventReposter() override  { [e release]; }
 
         void messageCallback() override
         {

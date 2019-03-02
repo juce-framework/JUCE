@@ -118,10 +118,8 @@ private:
     std::vector<std::array<Type, numStates>> state;
     std::array<Type, numStates> A;
 
-    LinearSmoothedValue<Type> cutoffTransformSmoother;
-    LinearSmoothedValue<Type> scaledResonanceSmoother;
-    Type cutoffTransformValue;
-    Type scaledResonanceValue;
+    SmoothedValue<Type> cutoffTransformSmoother, scaledResonanceSmoother;
+    Type cutoffTransformValue, scaledResonanceValue;
 
     LookupTableTransform<Type> saturationLUT { [] (Type x) { return std::tanh (x); }, Type (-5), Type (5), 128 };
 
@@ -136,8 +134,8 @@ private:
     //==============================================================================
     void setSampleRate (Type newValue) noexcept;
     void setNumChannels (size_t newValue)   { state.resize (newValue); }
-    void updateCutoffFreq() noexcept        { cutoffTransformSmoother.setValue (std::exp (cutoffFreqHz * cutoffFreqScaler)); }
-    void updateResonance() noexcept         { scaledResonanceSmoother.setValue (jmap (resonance, Type (0.1), Type (1.0))); }
+    void updateCutoffFreq() noexcept        { cutoffTransformSmoother.setTargetValue (std::exp (cutoffFreqHz * cutoffFreqScaler)); }
+    void updateResonance() noexcept         { scaledResonanceSmoother.setTargetValue (jmap (resonance, Type (0.1), Type (1.0))); }
 };
 
 } // namespace dsp

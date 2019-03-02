@@ -71,6 +71,7 @@ public:
     void setComponentRelativeTarget (Component* comp, int whichDimension, Component* compToBeRelativeTo);
     // checks recursively whether the comp depends on the given comp for its position
     bool dependsOnComponentForRelativePos (Component* comp, Component* possibleDependee) const;
+    bool isComponentPositionRelative (Component* comp) const;
 
     PopupMenu getRelativeTargetMenu (Component* comp, int whichDimension) const;
     void processRelativeTargetMenuResult (Component* comp, int whichDimension, int menuResultID);

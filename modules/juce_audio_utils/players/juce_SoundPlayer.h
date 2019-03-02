@@ -36,14 +36,14 @@ namespace juce
 
     @tags{Audio}
 */
-class JUCE_API  SoundPlayer             : public AudioIODeviceCallback
+class JUCE_API  SoundPlayer   : public AudioIODeviceCallback
 {
 public:
     //==============================================================================
     SoundPlayer();
 
     /** Destructor. */
-    virtual ~SoundPlayer();
+    ~SoundPlayer() override;
 
     //==============================================================================
     /** Plays a sound from a file. */

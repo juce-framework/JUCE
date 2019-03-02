@@ -48,7 +48,7 @@ public:
                     const String& labelText = String());
 
     /** Destructor. */
-    ~GroupComponent();
+    ~GroupComponent() override;
 
     //==============================================================================
     /** Changes the text that's shown at the top of the component. */
@@ -89,7 +89,7 @@ public:
     /** This abstract base class is implemented by LookAndFeel classes. */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         virtual void drawGroupComponentOutline (Graphics&, int w, int h, const String& text,
                                                 const Justification&, GroupComponent&) = 0;

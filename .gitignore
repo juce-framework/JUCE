@@ -21,6 +21,7 @@
 xcuserdata
 *.xccheckout
 *.xcscmblueprint
+*.xcscheme
 contents.xcworkspacedata
 .DS_Store
 .svn

@@ -41,7 +41,7 @@ class ValueWithDefault
 public:
     //==============================================================================
     /** Creates an unitialised ValueWithDefault. Initialise it using one of the referTo() methods. */
-    ValueWithDefault()    : undoManager (nullptr) {}
+    ValueWithDefault() = default;
 
     /** Creates an ValueWithDefault object. The default value will be an empty var. */
     ValueWithDefault (ValueTree& tree, const Identifier& propertyID, UndoManager* um)
@@ -121,13 +121,13 @@ public:
         }
     }
 
-    /** Returns true if the property does not exist or is empty. */
+    /** Returns true if the property does not exist in the referenced ValueTree. */
     bool isUsingDefault() const
     {
         return ! targetTree.hasProperty (targetProperty);
     }
 
-    /** Resets the property to an empty var. */
+    /** Removes the property from the referenced ValueTree. */
     void resetToDefault() noexcept
     {
         targetTree.removeProperty (targetProperty, nullptr);
@@ -181,17 +181,29 @@ public:
     /** Returns the property ID of the referenced property. */
     Identifier& getPropertyID() noexcept                    { return targetProperty; }
 
+    /** Returns the UndoManager that is being used. */
+    UndoManager* getUndoManager() noexcept                  { return undoManager; }
+
+    //==============================================================================
+    ValueWithDefault& operator= (const ValueWithDefault& other)
+    {
+        referToWithDefault (other.targetTree, other.targetProperty, other.undoManager,
+                            other.defaultValue, other.delimiter);
+
+        return *this;
+    }
+
 private:
     //==============================================================================
     ValueTree targetTree;
     Identifier targetProperty;
-    UndoManager* undoManager;
+    UndoManager* undoManager = nullptr;
     var defaultValue;
 
     String delimiter;
 
     //==============================================================================
-    void referToWithDefault (ValueTree& v, const Identifier& i, UndoManager* um,
+    void referToWithDefault (const ValueTree& v, const Identifier& i, UndoManager* um,
                              const var& defaultVal, StringRef del)
     {
         targetTree = v;
@@ -209,6 +221,7 @@ private:
         jassert (delimiter.isNotEmpty());
 
         StringArray elements;
+
         for (auto& v : input)
             elements.add (v.toString());
 
@@ -224,6 +237,9 @@ private:
 
         return arr;
     }
+
+    //==============================================================================
+    JUCE_DECLARE_WEAK_REFERENCEABLE (ValueWithDefault)
 };
 
 } // namespace juce

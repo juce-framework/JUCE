@@ -35,6 +35,8 @@
                    juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
  exporters:        xcode_mac, vs2017
 
+ moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+
  type:             AudioProcessor
  mainClass:        DspModulePluginDemoAudioProcessor
 
@@ -496,7 +498,7 @@ private:
     {
         ScopedNoDenormals noDenormals;
 
-        // Input volume applied with a LinearSmoothedValue
+        // Input volume applied with a SmoothedValue
         inputVolume.process (context);
 
         // Pre-highpass filtering, very useful for distortion audio effects
@@ -541,7 +543,7 @@ private:
         convolution.process (context);
         context.isBypassed = wasBypassed;
 
-        // Output volume applied with a LinearSmoothedValue
+        // Output volume applied with a SmoothedValue
         outputVolume.process (context);
     }
 

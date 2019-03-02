@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="AKfc5m" name="AudioPerformanceTest" projectType="guiapp"
-              bundleIdentifier="com.juce.AudioPerformanceTest" jucerVersion="5.3.1"
+              bundleIdentifier="com.juce.AudioPerformanceTest" jucerVersion="5.4.3"
               displaySplashScreen="0" reportAppUsage="0" companyName="ROLI Ltd."
               companyCopyright="ROLI Ltd.">
   <MAINGROUP id="b1eVTe" name="AudioPerformanceTest">

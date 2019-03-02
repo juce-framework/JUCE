@@ -54,9 +54,9 @@ static uint8 calculatePacketChecksum (const uint8* data, uint32 size) noexcept
 template <int numBits>
 struct IntegerWithBitSize
 {
-    IntegerWithBitSize() noexcept = default;
-    IntegerWithBitSize (const IntegerWithBitSize&) noexcept = default;
-    IntegerWithBitSize& operator= (const IntegerWithBitSize&) noexcept = default;
+    IntegerWithBitSize() = default;
+    IntegerWithBitSize (const IntegerWithBitSize&) = default;
+    IntegerWithBitSize& operator= (const IntegerWithBitSize&) = default;
 
     IntegerWithBitSize (uint32 v) noexcept : value (v)
     {

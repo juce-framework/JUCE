@@ -105,7 +105,7 @@ public:
         the stopThread method will wait for a given time-period for this to
         happen.
 
-        If the thread is stuck and fails to respond after the time-out, it gets
+        If the thread is stuck and fails to respond after the timeout, it gets
         forcibly killed, which is a very bad thing to happen, as it could still
         be holding locks, etc. which are needed by other parts of your program.
 
@@ -120,10 +120,12 @@ public:
 
     //==============================================================================
     /** Invokes a lambda or function on its own thread.
+
         This will spin up a Thread object which calls the function and then exits.
         Bear in mind that starting and stopping a thread can be a fairly heavyweight
         operation, so you might prefer to use a ThreadPool if you're kicking off a lot
         of short background tasks.
+
         Also note that using an anonymous thread makes it very difficult to interrupt
         the function when you need to stop it, e.g. when your app quits. So it's up to
         you to deal with situations where the function may fail to stop in time.
@@ -143,8 +145,7 @@ public:
         this method, to interrupt any waits that might be in progress, and allow it
         to reach a point where it can exit.
 
-        @see threadShouldExit
-        @see waitForThreadToExit
+        @see threadShouldExit, waitForThreadToExit
     */
     void signalThreadShouldExit();
 
@@ -179,7 +180,7 @@ public:
     class JUCE_API Listener
     {
     public:
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         /** Called if Thread::signalThreadShouldExit was called.
             @see Thread::threadShouldExit, Thread::addListener, Thread::removeListener
@@ -189,6 +190,7 @@ public:
 
     /** Add a listener to this thread which will receive a callback when
         signalThreadShouldExit was called on this thread.
+
         @see signalThreadShouldExit, removeListener
     */
     void addListener (Listener*);
@@ -223,11 +225,11 @@ public:
     };
 
     /** Changes the thread's priority.
+
         May return false if for some reason the priority can't be changed.
 
         @param priority     the new priority, in the range 0 (lowest) to 10 (highest). A priority
                             of 5 is normal.
-
         @see realtimeAudioPriority
     */
     bool setPriority (int priority);
@@ -252,25 +254,35 @@ public:
     void setAffinityMask (uint32 affinityMask);
 
     /** Changes the affinity mask for the caller thread.
+
         This will change the affinity mask for the thread that calls this static method.
+
         @see setAffinityMask
     */
     static void JUCE_CALLTYPE setCurrentThreadAffinityMask (uint32 affinityMask);
 
     //==============================================================================
-    // this can be called from any thread that needs to pause..
+    /** Suspends the execution of the current thread until the specified timeout period
+        has elapsed (note that this may not be exact).
+
+        The timeout period must not be negative and whilst sleeping the thread cannot
+        be woken up so it should only be used for short periods of time and when other
+        methods such as using a WaitableEvent or CriticalSection are not possible.
+    */
     static void JUCE_CALLTYPE sleep (int milliseconds);
 
-    /** Yields the calling thread's current time-slot. */
+    /** Yields the current thread's CPU time-slot and allows a new thread to run.
+
+        If there are no other threads of equal or higher priority currently running then
+        this will return immediately and the current thread will continue to run.
+    */
     static void JUCE_CALLTYPE yield();
 
     //==============================================================================
-    /** Makes the thread wait for a notification.
+    /** Suspends the execution of this thread until either the specified timeout period
+        has elapsed, or another thread calls the notify() method to wake it up.
 
-        This puts the thread to sleep until either the timeout period expires, or
-        another thread calls the notify() method to wake it up.
-
-        A negative time-out value means that the method will wait indefinitely.
+        A negative timeout value means that the method will wait indefinitely.
 
         @returns    true if the event has been signalled, false if the timeout expires.
     */
@@ -286,9 +298,10 @@ public:
 
     //==============================================================================
     /** A value type used for thread IDs.
+
         @see getCurrentThreadId(), getThreadId()
     */
-    typedef void* ThreadID;
+    using ThreadID = void*;
 
     /** Returns an id that identifies the caller thread.
 
@@ -307,23 +320,65 @@ public:
     static Thread* JUCE_CALLTYPE getCurrentThread();
 
     /** Returns the ID of this thread.
+
         That means the ID of this thread object - not of the thread that's calling the method.
         This can change when the thread is started and stopped, and will be invalid if the
         thread's not actually running.
+
         @see getCurrentThreadId
     */
     ThreadID getThreadId() const noexcept;
 
-    /** Returns the name of the thread.
-        This is the name that gets set in the constructor.
-    */
+    /** Returns the name of the thread. This is the name that gets set in the constructor. */
     const String& getThreadName() const noexcept                    { return threadName; }
 
     /** Changes the name of the caller thread.
+
         Different OSes may place different length or content limits on this name.
     */
     static void JUCE_CALLTYPE setCurrentThreadName (const String& newThreadName);
 
+   #if JUCE_ANDROID || defined (DOXYGEN)
+    //==============================================================================
+    /** Initialises the JUCE subsystem for projects not created by the Projucer
+
+        On Android, JUCE needs to be initialised once before it is used. The Projucer
+        will automatically generate the necessary java code to do this. However, if
+        you are using JUCE without the Projucer or are creating a library made with
+        JUCE intended for use in non-JUCE apks, then you must call this method
+        manually once on apk startup.
+
+        You can call this method from C++ or directly from java by calling the
+        following java method:
+
+        @code
+        com.roli.juce.Java.initialiseJUCE (myContext);
+        @endcode
+
+        Note that the above java method is only available in Android Studio projects
+        created by the Projucer. If you need to call this from another type of project
+        then you need to add the following java file to
+        your project:
+
+        @code
+        package com.roli.juce;
+
+        public class Java
+        {
+            static { System.loadLibrary ("juce_jni"); }
+            public native static void initialiseJUCE (Context context);
+        }
+        @endcode
+
+        @param jniEnv   this is a pointer to JNI's JNIEnv variable. Any callback
+                        from Java into C++ will have this passed in as it's first
+                        parameter.
+        @param jContext this is a jobject referring to your app/service/receiver/
+                        provider's Context. JUCE needs this for many of it's internal
+                        functions.
+    */
+    static void initialiseJUCE (void* jniEnv, void* jContext);
+   #endif
 
 private:
     //==============================================================================

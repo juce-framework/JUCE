@@ -346,11 +346,11 @@ public:
 
         if (asioObject != nullptr)
         {
-            const int possibleSampleRates[] = { 32000, 44100, 48000, 88200, 96000, 176400, 192000, 352800, 384000 };
-
-            for (int index = 0; index < numElementsInArray (possibleSampleRates); ++index)
-                if (asioObject->canSampleRate ((double) possibleSampleRates[index]) == 0)
-                    newRates.add ((double) possibleSampleRates[index]);
+            for (auto rate : { 8000, 11025, 16000, 22050, 32000,
+                               44100, 48000, 88200, 96000, 176400,
+                               192000, 352800, 384000, 705600, 768000 })
+                if (asioObject->canSampleRate ((double) rate) == 0)
+                    newRates.add ((double) rate);
         }
 
         if (newRates.isEmpty())
@@ -770,7 +770,7 @@ private:
         if (CharPointer_UTF8::isValidString (text, length))
             return String::fromUTF8 (text, length);
 
-        WCHAR wideVersion[64] = {};
+        WCHAR wideVersion[512] = {};
         MultiByteToWideChar (CP_ACP, 0, text, length, wideVersion, numElementsInArray (wideVersion));
         return wideVersion;
     }
@@ -787,9 +787,14 @@ private:
 
     void reloadChannelNames()
     {
+        long totalInChannels = 0, totalOutChannels = 0;
+
         if (asioObject != nullptr
-             && asioObject->getChannels (&totalNumInputChans, &totalNumOutputChans) == ASE_OK)
+             && asioObject->getChannels (&totalInChannels, &totalOutChannels) == ASE_OK)
         {
+            totalNumInputChans  = totalInChannels;
+            totalNumOutputChans = totalOutChannels;
+
             inputChannelNames.clear();
             outputChannelNames.clear();
 
@@ -1108,9 +1113,11 @@ private:
     String getLastDriverError() const
     {
         jassert (asioObject != nullptr);
+
         char buffer[512] = {};
         asioObject->getErrorMessage (buffer);
-        return String (buffer, sizeof (buffer) - 1);
+
+        return convertASIOString (buffer, sizeof (buffer));
     }
 
     String initDriver()
@@ -1420,7 +1427,12 @@ public:
             TCHAR name[256] = {};
 
             while (RegEnumKey (hk, index++, name, numElementsInArray (name)) == ERROR_SUCCESS)
+            {
+                if (isBlacklistedDriver (name))
+                    continue;
+
                 addDriverInfo (name, hk);
+            }
 
             RegCloseKey (hk);
         }
@@ -1552,6 +1564,11 @@ private:
     }
 
     //==============================================================================
+    static bool isBlacklistedDriver (const String& driverName)
+    {
+        return driverName == "ASIO DirectX Full Duplex Driver" || driverName == "ASIO Multimedia Driver";
+    }
+
     void addDriverInfo (const String& keyName, HKEY hk)
     {
         HKEY subKey;

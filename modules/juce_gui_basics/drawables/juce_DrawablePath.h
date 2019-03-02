@@ -46,7 +46,7 @@ public:
     DrawablePath (const DrawablePath&);
 
     /** Destructor. */
-    ~DrawablePath();
+    ~DrawablePath() override;
 
     //==============================================================================
     /** Changes the path that will be drawn.
@@ -67,7 +67,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    Drawable* createCopy() const;
+    Drawable* createCopy() const override;
 
 private:
     //==============================================================================

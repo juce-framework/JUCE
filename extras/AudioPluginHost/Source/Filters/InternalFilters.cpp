@@ -98,7 +98,7 @@ public:
         descr.descriptiveName   = pluginName;
         descr.pluginFormatName  = "Internal";
         descr.category          = (registerAsGenerator ? (acceptsMidi ? "Synth" : "Generator") : "Effect");
-        descr.manufacturerName  = "ROLI Ltd.";
+        descr.manufacturerName  = "JUCE";
         descr.version           = ProjectInfo::versionString;
         descr.fileOrIdentifier  = pluginName + ":" + pluginState;
         descr.uid               = pluginName.hashCode();
@@ -377,7 +377,7 @@ void InternalPluginFormat::createPluginInstance (const PluginDescription& desc,
                                                  double /*initialSampleRate*/,
                                                  int /*initialBufferSize*/,
                                                  void* userData,
-                                                 void (*callback) (void*, AudioPluginInstance*, const String&))
+                                                 PluginCreationCallback callback)
 {
     auto* p = createInstance (desc.name);
 

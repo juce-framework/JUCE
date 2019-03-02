@@ -35,7 +35,7 @@ class JucerTreeViewBase   : public TreeViewItem,
 {
 public:
     JucerTreeViewBase();
-    ~JucerTreeViewBase();
+    ~JucerTreeViewBase() override;
 
     int getItemWidth() const override                   { return -1; }
     int getItemHeight() const override                  { return 25; }
@@ -45,6 +45,8 @@ public:
     void itemClicked (const MouseEvent& e) override;
     void itemSelectionChanged (bool isNowSelected) override;
     void itemDoubleClicked (const MouseEvent&) override;
+    Component* createItemComponent() override;
+    String getTooltip() override    { return {}; }
 
     void cancelDelayedSelectionTimer();
 
@@ -59,12 +61,11 @@ public:
     virtual Icon getIcon() const = 0;
     virtual bool isIconCrossedOut() const                         { return false; }
     virtual void paintIcon (Graphics& g, Rectangle<float> area);
-    virtual void paintContent (Graphics& g, const Rectangle<int>& area);
+    virtual void paintContent (Graphics& g, Rectangle<int> area);
     virtual int getRightHandButtonSpace() { return 0; }
     virtual Colour getContentColour (bool isIcon) const;
     virtual int getMillisecsAllowedForDragGesture()               { return 120; }
     virtual File getDraggableFile() const                         { return {}; }
-    virtual Component* createItemComponent() override;
 
     void refreshSubItems();
     virtual void deleteItem();
@@ -78,8 +79,6 @@ public:
     virtual void showAddMenu();
     virtual void handlePopupMenuResult (int resultCode);
     virtual void setSearchFilter (const String&) {}
-
-    String getTooltip() override    { return {}; }
 
     //==============================================================================
     // To handle situations where an item gets deleted before openness is
@@ -134,7 +133,7 @@ public:
         tree.addMouseListener (this, true);
     }
 
-    ~TreePanelBase()
+    ~TreePanelBase() override
     {
         tree.setRootItem (nullptr);
     }

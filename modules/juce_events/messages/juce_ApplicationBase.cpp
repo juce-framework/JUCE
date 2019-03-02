@@ -23,7 +23,7 @@
 namespace juce
 {
 
-JUCEApplicationBase::CreateInstanceFunction JUCEApplicationBase::createInstance = 0;
+JUCEApplicationBase::CreateInstanceFunction JUCEApplicationBase::createInstance = nullptr;
 JUCEApplicationBase* JUCEApplicationBase::appInstance = nullptr;
 
 #if JUCE_IOS

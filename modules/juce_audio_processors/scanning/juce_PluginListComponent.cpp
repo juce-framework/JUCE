@@ -195,7 +195,7 @@ void PluginListComponent::setNumberOfThreadsForScanning (int num)
 
 void PluginListComponent::resized()
 {
-    Rectangle<int> r (getLocalBounds().reduced (2));
+    auto r = getLocalBounds().reduced (2);
 
     optionsButton.setBounds (r.removeFromBottom (24));
     optionsButton.changeWidthToFitText (24);
@@ -379,7 +379,7 @@ public:
         }
     }
 
-    ~Scanner()
+    ~Scanner() override
     {
         if (pool != nullptr)
         {
@@ -399,7 +399,7 @@ private:
     String pluginBeingScanned;
     double progress;
     int numThreads;
-    bool allowAsync, finished;
+    bool allowAsync, finished, timerReentrancyCheck = false;
     std::unique_ptr<ThreadPool> pool;
 
     static void startScanCallback (int result, AlertWindow* alert, Scanner* scanner)
@@ -518,6 +518,11 @@ private:
 
     void timerCallback() override
     {
+        if (timerReentrancyCheck)
+            return;
+
+        const ScopedValueSetter<bool> setter (timerReentrancyCheck, true);
+
         if (pool == nullptr)
         {
             if (doNextScan())

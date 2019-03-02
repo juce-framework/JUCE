@@ -29,7 +29,7 @@ b2DynamicTree::b2DynamicTree()
 	m_nodeCapacity = 16;
 	m_nodeCount = 0;
 	m_nodes = (b2TreeNode*)b2Alloc(m_nodeCapacity * sizeof(b2TreeNode));
-	memset(m_nodes, 0, m_nodeCapacity * sizeof(b2TreeNode));
+	memset((void*)m_nodes, 0, m_nodeCapacity * sizeof(b2TreeNode));
 
 	// Build a linked list for the free list.
 	for (int32 i = 0; i < m_nodeCapacity - 1; ++i)

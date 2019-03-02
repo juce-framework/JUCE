@@ -28,12 +28,12 @@ namespace juce
 
     @tags{Blocks}
 */
-class Block   : public juce::ReferenceCountedObject
+class Block   : public ReferenceCountedObject
 {
 public:
     //==============================================================================
     /** Destructor. */
-    virtual ~Block();
+    ~Block() override;
 
     /** The different block types.
         @see Block::getType()
@@ -52,21 +52,21 @@ public:
     /** The Block class is reference-counted, so always use a Block::Ptr when
         you are keeping references to them.
     */
-    using Ptr = juce::ReferenceCountedObjectPtr<Block>;
+    using Ptr = ReferenceCountedObjectPtr<Block>;
 
     /** The Block class is reference-counted, so Block::Array is useful when
         you are storing lists of them.
     */
-    using Array = juce::ReferenceCountedArray<Block>;
+    using Array = ReferenceCountedArray<Block>;
 
     /** The Block's serial number. */
-    const juce::String serialNumber;
+    const String serialNumber;
 
     /** The Block's version number */
-    juce::String versionNumber;
+    String versionNumber;
 
     /** The Block's name */
-    juce::String name;
+    String name;
 
     /** This type is used for the unique block identifier. */
     using UID = uint64;
@@ -88,8 +88,14 @@ public:
     */
     virtual Type getType() const = 0;
 
+    /** Returns true if this a control block. **/
+    bool isControlBlock() const;
+
+    /** Returns true if Block::Type is a control block. */
+    static bool isControlBlock (Block::Type);
+
     /** Returns a human-readable description of this device type. */
-    virtual juce::String getDeviceDescription() const = 0;
+    virtual String getDeviceDescription() const = 0;
 
     /** Returns the battery level in the range 0.0 to 1.0. */
     virtual float getBatteryLevel() const = 0;
@@ -101,12 +107,22 @@ public:
     /** Returns true if this block is connected and active. */
     virtual bool isConnected() const = 0;
 
+    /** Returns the time this block object was connected to the topology.
+        Only valid when isConnected == true.
+
+        @see isConnected
+     */
+    virtual Time getConnectionTime() const = 0;
+
     /** Returns true if this block is directly connected to the application,
         as opposed to only being connected to a different block via a connection port.
 
         @see ConnectionPort
     */
     virtual bool isMasterBlock() const = 0;
+
+    /** Returns the UID of the master block this block is connected to. */
+    virtual UID getConnectedMasterUID() const = 0;
 
     //==============================================================================
     /** Returns the width of the device in logical device units. */
@@ -121,6 +137,17 @@ public:
     /** Returns the length of one logical device unit as physical millimeters. */
     virtual float getMillimetersPerUnit() const = 0;
 
+    /** A simple struct representing the area of a block. */
+    struct BlockArea  { int x, y, width, height; };
+
+    /** Returns the area that this block covers within the layout of the group as a whole.
+        The coordinates are in logical block units, and are relative to the origin, which is the master block's top-left corner.
+     */
+    virtual BlockArea getBlockAreaWithinLayout() const = 0;
+
+    /** Returns the rotation of this block relative to the master block in 90 degree steps clockwise. */
+    virtual int getRotation() const = 0;
+
     //==============================================================================
     /** If this block has a grid of LEDs, this will return an object to control it.
         Note that the pointer that is returned belongs to this object, and the caller must
@@ -134,7 +161,7 @@ public:
         neither delete it or use it after the lifetime of this Block object has finished.
         If there are no LEDs, then this method will return nullptr.
     */
-    virtual LEDRow* getLEDRow() const = 0;
+    virtual LEDRow* getLEDRow() = 0;
 
     /** If this block has any status LEDs, this will return an array of objects to control them.
         Note that the objects in the array belong to this Block object, and the caller must
@@ -202,7 +229,10 @@ public:
         virtual ~Program();
 
         /** Returns the LittleFoot program to execute on the BLOCKS device. */
-        virtual juce::String getLittleFootProgram() = 0;
+        virtual String getLittleFootProgram() = 0;
+
+        /** Returns an array of search paths to use when resolving includes. **/
+        virtual juce::Array<File> getSearchPaths() { return {}; }
 
         Block& block;
     };
@@ -212,7 +242,7 @@ public:
         The supplied Program's lifetime will be managed by this class, so do not
         use the Program in other places in your code.
     */
-    virtual juce::Result setProgram (Program*) = 0;
+    virtual Result setProgram (Program*) = 0;
 
     /** Returns a pointer to the currently loaded program. */
     virtual Program* getProgram() const = 0;
@@ -240,7 +270,7 @@ public:
     /** Interface for objects listening to custom program events. */
     struct ProgramEventListener
     {
-        virtual ~ProgramEventListener() {}
+        virtual ~ProgramEventListener() = default;
 
         /** Called whenever a message from a block is received. */
         virtual void handleProgramEvent (Block& source, const ProgramEventMessage&) = 0;
@@ -253,8 +283,11 @@ public:
     virtual void removeProgramEventListener (ProgramEventListener*);
 
     //==============================================================================
-    /** Returns the size of the data block that setDataByte and other functions can write to. */
+    /** Returns the overall memory of the block. */
     virtual uint32 getMemorySize() = 0;
+
+    /** Returns the size of the data block that setDataByte and other functions can write to. */
+    virtual uint32 getHeapMemorySize() = 0;
 
     /** Sets a single byte on the littlefoot heap. */
     virtual void setDataByte (size_t offset, uint8 value) = 0;
@@ -277,15 +310,24 @@ public:
     {
         static constexpr int32 numOptionNames = 8;
 
-        ConfigMetaData() {}
+        enum class ConfigType
+        {
+            integer,
+            floating,
+            boolean,
+            colour,
+            options
+        };
+
+        ConfigMetaData() = default;
 
         // Constructor to work around VS2015 bugs...
         ConfigMetaData (uint32 itemIndex,
                         int32 itemValue,
-                        juce::Range<int32> rangeToUse,
+                        Range<int32> rangeToUse,
                         bool active,
                         const char* itemName,
-                        uint32 itemType,
+                        ConfigType itemType,
                         const char* options[ConfigMetaData::numOptionNames],
                         const char* groupName)
           : item (itemIndex),
@@ -345,12 +387,12 @@ public:
 
         uint32 item = 0;
         int32 value = 0;
-        juce::Range<int32> range;
+        Range<int32> range;
         bool isActive = false;
-        juce::String name;
-        uint32 type = 0;
-        juce::String optionNames[numOptionNames] = {};
-        juce::String group;
+        String name;
+        ConfigType type = ConfigType::integer;
+        String optionNames[numOptionNames] = {};
+        String group;
     };
 
     /** Returns the maximum number of config items available */
@@ -390,7 +432,7 @@ public:
     virtual void blockReset() = 0;
 
     /** Set Block name */
-    virtual bool setName (const juce::String& name) = 0;
+    virtual bool setName (const String& name) = 0;
 
     //==============================================================================
     /** Allows the user to provide a function that will receive log messages from the block. */
@@ -403,11 +445,14 @@ public:
     /** Provides a callback that will be called when a config changes. */
     virtual void setConfigChangedCallback (std::function<void(Block&, const ConfigMetaData&, uint32)>) = 0;
 
+    /** Provides a callback that will be called when a prgoram has been loaded. */
+    virtual void setProgramLoadedCallback (std::function<void(Block&)> programLoaded) = 0;
+
     //==============================================================================
     /** Interface for objects listening to input data port. */
     struct DataInputPortListener
     {
-        virtual ~DataInputPortListener() {}
+        virtual ~DataInputPortListener() = default;
 
         /** Called whenever a message from a block is received. */
         virtual void handleIncomingDataPortMessage (Block& source, const void* messageData, size_t messageSize) = 0;
@@ -430,11 +475,11 @@ public:
 
 protected:
     //==============================================================================
-    Block (const juce::String& serialNumberToUse);
-    Block (const juce::String& serial, const juce::String& version, const juce::String& name);
+    Block (const String& serialNumberToUse);
+    Block (const String& serial, const String& version, const String& name);
 
-    juce::ListenerList<DataInputPortListener> dataInputPortListeners;
-    juce::ListenerList<ProgramEventListener> programEventListeners;
+    ListenerList<DataInputPortListener> dataInputPortListeners;
+    ListenerList<ProgramEventListener> programEventListeners;
 
 private:
     //==============================================================================

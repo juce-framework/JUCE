@@ -125,13 +125,13 @@ static void drawButtonShape (Graphics& g, const Path& outline, Colour baseColour
 }
 
 void LookAndFeel_V3::drawButtonBackground (Graphics& g, Button& button, const Colour& backgroundColour,
-                                           bool isMouseOverButton, bool isButtonDown)
+                                           bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
 {
     Colour baseColour (backgroundColour.withMultipliedSaturation (button.hasKeyboardFocus (true) ? 1.3f : 0.9f)
                                        .withMultipliedAlpha (button.isEnabled() ? 0.9f : 0.5f));
 
-    if (isButtonDown || isMouseOverButton)
-        baseColour = baseColour.contrasting (isButtonDown ? 0.2f : 0.1f);
+    if (shouldDrawButtonAsDown || shouldDrawButtonAsHighlighted)
+        baseColour = baseColour.contrasting (shouldDrawButtonAsDown ? 0.2f : 0.1f);
 
     const bool flatOnLeft   = button.isConnectedOnLeft();
     const bool flatOnRight  = button.isConnectedOnRight();
@@ -158,7 +158,7 @@ void LookAndFeel_V3::drawButtonBackground (Graphics& g, Button& button, const Co
 
 void LookAndFeel_V3::drawTableHeaderBackground (Graphics& g, TableHeaderComponent& header)
 {
-    Rectangle<int> r (header.getLocalBounds());
+    auto r = header.getLocalBounds();
     auto outlineColour = header.findColour (TableHeaderComponent::outlineColourId);
 
     g.setColour (outlineColour);
@@ -353,7 +353,7 @@ int LookAndFeel_V3::getTreeViewIndentSize (TreeView&)
     return 20;
 }
 
-void LookAndFeel_V3::drawComboBox (Graphics& g, int width, int height, const bool /*isButtonDown*/,
+void LookAndFeel_V3::drawComboBox (Graphics& g, int width, int height, const bool /*isMouseButtonDown*/,
                                    int buttonX, int buttonY, int buttonW, int buttonH, ComboBox& box)
 {
     g.fillAll (box.findColour (ComboBox::backgroundColourId));
@@ -536,7 +536,7 @@ public:
     {
     }
 
-    void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown) override
+    void paintButton (Graphics& g, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
     {
         Colour background (Colours::grey);
 
@@ -544,7 +544,7 @@ public:
             background = rw->getBackgroundColour();
 
         const float cx = getWidth() * 0.5f, cy = getHeight() * 0.5f;
-        const float diam = jmin (cx, cy) * (isButtonDown ? 0.60f : 0.65f);
+        const float diam = jmin (cx, cy) * (shouldDrawButtonAsDown ? 0.60f : 0.65f);
 
         g.setColour (background);
         g.fillEllipse (cx - diam, cy - diam, diam * 2.0f, diam * 2.0f);
@@ -553,7 +553,7 @@ public:
 
         if (! isEnabled())
             c = c.withAlpha (0.6f);
-        else if (isMouseOverButton)
+        else if (shouldDrawButtonAsHighlighted)
             c = c.brighter();
 
         g.setColour (c);

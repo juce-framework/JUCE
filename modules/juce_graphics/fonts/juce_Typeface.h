@@ -75,7 +75,7 @@ public:
 
     //==============================================================================
     /** Destructor. */
-    virtual ~Typeface();
+    ~Typeface() override;
 
     /** Returns true if this typeface can be used to render the specified font.
         When called, the font will already have been checked to make sure that its name and
@@ -153,7 +153,6 @@ protected:
 
 private:
     struct HintingParams;
-    friend struct ContainerDeletePolicy<HintingParams>;
     std::unique_ptr<HintingParams> hintingParams;
     CriticalSection hintingLock;
 

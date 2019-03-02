@@ -241,7 +241,7 @@ public:
     {
     public:
         /** Destructor. */
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         /** Implement this callback to be informed whenever a new expressive MIDI
             note is triggered.
@@ -271,7 +271,7 @@ public:
             MPE note's key state (whether the key is down and/or the note is
             sustained) has changed.
 
-            Note: if the key state changes to MPENote::off, noteReleased is
+            Note: If the key state changes to MPENote::off, noteReleased is
             called instead.
         */
         virtual void noteKeyStateChanged (MPENote changedNote) = 0;
@@ -286,10 +286,10 @@ public:
 
     //==============================================================================
     /** Adds a listener. */
-    void addListener (Listener* listenerToAdd) noexcept;
+    void addListener (Listener* listenerToAdd);
 
     /** Removes a listener. */
-    void removeListener (Listener* listenerToRemove) noexcept;
+    void removeListener (Listener* listenerToRemove);
 
     //==============================================================================
     /** Puts the instrument into legacy mode.
@@ -352,8 +352,7 @@ private:
 
     struct MPEDimension
     {
-        MPEDimension() noexcept  : trackingMode (lastNotePlayedOnChannel) {}
-        TrackingMode trackingMode;
+        TrackingMode trackingMode = lastNotePlayedOnChannel;
         MPEValue lastValueReceivedOnChannel[16];
         MPEValue MPENote::* value;
         MPEValue& getValue (MPENote& note) noexcept   { return note.*(value); }

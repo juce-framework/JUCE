@@ -142,22 +142,22 @@ bool AppleRemoteDevice::isActive() const
 
 bool AppleRemoteDevice::open (const bool openInExclusiveMode)
 {
-    Array <int> cookies;
+    Array<int> cookies;
 
     CFArrayRef elements;
-    IOHIDDeviceInterface122** const device122 = (IOHIDDeviceInterface122**) device;
+    auto device122 = (IOHIDDeviceInterface122**) device;
 
-    if ((*device122)->copyMatchingElements (device122, 0, &elements) != kIOReturnSuccess)
+    if ((*device122)->copyMatchingElements (device122, nullptr, &elements) != kIOReturnSuccess)
         return false;
 
     for (int i = 0; i < CFArrayGetCount (elements); ++i)
     {
-        CFDictionaryRef element = (CFDictionaryRef) CFArrayGetValueAtIndex (elements, i);
+        auto element = (CFDictionaryRef) CFArrayGetValueAtIndex (elements, i);
 
         // get the cookie
         CFTypeRef object = CFDictionaryGetValue (element, CFSTR (kIOHIDElementCookieKey));
 
-        if (object == 0 || CFGetTypeID (object) != CFNumberGetTypeID())
+        if (object == nullptr || CFGetTypeID (object) != CFNumberGetTypeID())
             continue;
 
         long number;
@@ -176,7 +176,7 @@ bool AppleRemoteDevice::open (const bool openInExclusiveMode)
     {
         queue = (*(IOHIDDeviceInterface**) device)->allocQueue ((IOHIDDeviceInterface**) device);
 
-        if (queue != 0)
+        if (queue != nullptr)
         {
             (*(IOHIDQueueInterface**) queue)->create ((IOHIDQueueInterface**) queue, 0, 12);
 
@@ -192,7 +192,7 @@ bool AppleRemoteDevice::open (const bool openInExclusiveMode)
                     ->createAsyncEventSource ((IOHIDQueueInterface**) queue, &eventSource) == KERN_SUCCESS)
             {
                 if ((*(IOHIDQueueInterface**) queue)->setEventCallout ((IOHIDQueueInterface**) queue,
-                                                                       appleRemoteQueueCallback, this, 0) == KERN_SUCCESS)
+                                                                       appleRemoteQueueCallback, this, nullptr) == KERN_SUCCESS)
                 {
                     CFRunLoopAddSource (CFRunLoopGetCurrent(), eventSource, kCFRunLoopDefaultMode);
 

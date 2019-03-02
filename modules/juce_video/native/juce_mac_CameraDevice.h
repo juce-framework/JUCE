@@ -71,7 +71,7 @@ struct CameraDevice::Pimpl
         if (imageOutput == nil)
         {
             imageOutput = [[AVCaptureStillImageOutput alloc] init];
-            auto* imageSettings = [[NSDictionary alloc] initWithObjectsAndKeys: AVVideoCodecJPEG, AVVideoCodecKey, nil];
+            auto imageSettings = [[NSDictionary alloc] initWithObjectsAndKeys: AVVideoCodecJPEG, AVVideoCodecKey, nil];
             [imageOutput setOutputSettings: imageSettings];
             [imageSettings release];
             [session addOutput: imageOutput];
@@ -131,7 +131,7 @@ struct CameraDevice::Pimpl
             return;
         }
 
-        pictureTakenCallback = static_cast<std::function<void (const Image&)>&&> (pictureTakenCallbackToUse);
+        pictureTakenCallback = std::move (pictureTakenCallbackToUse);
 
         triggerImageCapture();
     }
@@ -143,6 +143,7 @@ struct CameraDevice::Pimpl
         firstPresentationTime = Time::getCurrentTime();
         file.deleteFile();
 
+        isRecording = true;
         [fileOutput startRecordingToOutputFileURL: createNSURLFromFile (file)
                                 recordingDelegate: callbackDelegate];
     }

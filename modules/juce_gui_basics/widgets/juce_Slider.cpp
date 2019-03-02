@@ -42,7 +42,7 @@ public:
         rotaryParams.stopAtEnd = true;
     }
 
-    ~Pimpl()
+    ~Pimpl() override
     {
         currentValue.removeListener (this);
         valueMin.removeListener (this);
@@ -86,6 +86,18 @@ public:
     {
         return style == LinearBar
             || style == LinearBarVertical;
+    }
+
+    bool isTwoValue() const noexcept
+    {
+        return style == TwoValueHorizontal
+            || style == TwoValueVertical;
+    }
+
+    bool isThreeValue() const noexcept
+    {
+        return style == ThreeValueHorizontal
+            || style == ThreeValueVertical;
     }
 
     bool incDecDragDirectionIsHorizontal() const noexcept
@@ -650,10 +662,7 @@ public:
 
     int getThumbIndexAt (const MouseEvent& e)
     {
-        bool isTwoValue   = (style == TwoValueHorizontal   || style == TwoValueVertical);
-        bool isThreeValue = (style == ThreeValueHorizontal || style == ThreeValueVertical);
-
-        if (isTwoValue || isThreeValue)
+        if (isTwoValue() || isThreeValue())
         {
             auto mousePos = isVertical() ? e.position.y : e.position.x;
 
@@ -661,7 +670,7 @@ public:
             auto minPosDistance    = std::abs (getLinearSliderPos (valueMin.getValue()) + (isVertical() ? 0.1f : -0.1f) - mousePos);
             auto maxPosDistance    = std::abs (getLinearSliderPos (valueMax.getValue()) + (isVertical() ? -0.1f : 0.1f) - mousePos);
 
-            if (isTwoValue)
+            if (isTwoValue())
                 return maxPosDistance <= minPosDistance ? 2 : 1;
 
             if (normalPosDistance >= minPosDistance && maxPosDistance >= minPosDistance)
@@ -819,7 +828,7 @@ public:
                 showPopupMenu();
             }
             else if (canDoubleClickToValue()
-                      && e.mods.withoutMouseButtons() == ModifierKeys (ModifierKeys::altModifier))
+                     && (singleClickModifiers != ModifierKeys() && e.mods.withoutMouseButtons() == singleClickModifiers))
             {
                 mouseDoubleClick();
             }
@@ -834,9 +843,10 @@ public:
 
                 minMaxDiff = static_cast<double> (valueMax.getValue()) - static_cast<double> (valueMin.getValue());
 
-                lastAngle = rotaryParams.startAngleRadians
-                                + (rotaryParams.endAngleRadians - rotaryParams.startAngleRadians)
-                                     * owner.valueToProportionOfLength (currentValue.getValue());
+                if (! isTwoValue())
+                    lastAngle = rotaryParams.startAngleRadians
+                                    + (rotaryParams.endAngleRadians - rotaryParams.startAngleRadians)
+                                         * owner.valueToProportionOfLength (currentValue.getValue());
 
                 valueWhenLastDragged = (sliderBeingDragged == 2 ? valueMax
                                                                 : (sliderBeingDragged == 1 ? valueMin
@@ -955,17 +965,14 @@ public:
 
     void mouseMove()
     {
-        auto isTwoValue   = (style == TwoValueHorizontal   || style == TwoValueVertical);
-        auto isThreeValue = (style == ThreeValueHorizontal || style == ThreeValueVertical);
-
         // this is a workaround for a bug where the popup display being dismissed triggers
         // a mouse move causing it to never be hidden
         auto shouldShowPopup = showPopupOnHover
                                 && (Time::getMillisecondCounterHiRes() - lastPopupDismissal) > 250;
 
         if (shouldShowPopup
-             && ! isTwoValue
-             && ! isThreeValue)
+             && ! isTwoValue()
+             && ! isThreeValue())
         {
             if (owner.isMouseOver (true))
             {
@@ -990,12 +997,14 @@ public:
 
         if (popupDisplay == nullptr)
         {
-            popupDisplay.reset (new PopupDisplayComponent (owner));
+            popupDisplay.reset (new PopupDisplayComponent (owner, parentForPopupDisplay == nullptr));
 
             if (parentForPopupDisplay != nullptr)
                 parentForPopupDisplay->addChildComponent (popupDisplay.get());
             else
-                popupDisplay->addToDesktop (ComponentPeer::windowIsTemporary);
+                popupDisplay->addToDesktop (ComponentPeer::windowIsTemporary
+                                            | ComponentPeer::windowIgnoresKeyPresses
+                                            | ComponentPeer::windowIgnoresMouseClicks);
 
             if (style == SliderStyle::TwoValueHorizontal
                 || style == SliderStyle::TwoValueVertical)
@@ -1268,6 +1277,8 @@ public:
     int popupHoverTimeout = 2000;
     double lastPopupDismissal = 0.0;
 
+    ModifierKeys singleClickModifiers;
+
     std::unique_ptr<Label> valueBox;
     std::unique_ptr<Button> incButton, decButton;
 
@@ -1275,18 +1286,22 @@ public:
     struct PopupDisplayComponent  : public BubbleComponent,
                                     public Timer
     {
-        PopupDisplayComponent (Slider& s)
+        PopupDisplayComponent (Slider& s, bool isOnDesktop)
             : owner (s),
               font (s.getLookAndFeel().getSliderPopupFont (s))
         {
+            if (isOnDesktop)
+                setTransform (AffineTransform::scale (getApproximateScaleFactor (&s)));
+
             setAlwaysOnTop (true);
             setAllowedPlacement (owner.getLookAndFeel().getSliderPopupPlacement (s));
             setLookAndFeel (&s.getLookAndFeel());
         }
 
-        ~PopupDisplayComponent()
+        ~PopupDisplayComponent() override
         {
-            owner.pimpl->lastPopupDismissal = Time::getMillisecondCounterHiRes();
+            if (owner.pimpl != nullptr)
+                owner.pimpl->lastPopupDismissal = Time::getMillisecondCounterHiRes();
         }
 
         void paintContent (Graphics& g, int w, int h) override
@@ -1316,6 +1331,22 @@ public:
         }
 
     private:
+        static float getApproximateScaleFactor (Component* targetComponent)
+        {
+            AffineTransform transform;
+
+            for (Component* target = targetComponent; target != nullptr; target = target->getParentComponent())
+            {
+                transform = transform.followedBy (target->getTransform());
+
+                if (target->isOnDesktop())
+                    transform = transform.scaled (target->getDesktopScaleFactor());
+            }
+
+            return (transform.getScaleFactor() / Desktop::getInstance().getGlobalScaleFactor());
+        }
+
+        //==============================================================================
         Slider& owner;
         Font font;
         String text;
@@ -1514,10 +1545,11 @@ void Slider::setMinAndMaxValues (double newMinValue, double newMaxValue, Notific
     pimpl->setMinAndMaxValues (newMinValue, newMaxValue, notification);
 }
 
-void Slider::setDoubleClickReturnValue (bool isDoubleClickEnabled,  double valueToSetOnDoubleClick)
+void Slider::setDoubleClickReturnValue (bool isDoubleClickEnabled,  double valueToSetOnDoubleClick, ModifierKeys mods)
 {
     pimpl->doubleClickToValue = isDoubleClickEnabled;
     pimpl->doubleClickReturnValue = valueToSetOnDoubleClick;
+    pimpl->singleClickModifiers = mods;
 }
 
 double Slider::getDoubleClickReturnValue() const noexcept       { return pimpl->doubleClickReturnValue; }
@@ -1540,24 +1572,29 @@ String Slider::getTextValueSuffix() const
 
 String Slider::getTextFromValue (double v)
 {
-    if (textFromValueFunction != nullptr)
-        return textFromValueFunction (v);
+    auto getText = [this] (double val)
+    {
+        if (textFromValueFunction != nullptr)
+            return textFromValueFunction (val);
 
-    if (getNumDecimalPlacesToDisplay() > 0)
-        return String (v, getNumDecimalPlacesToDisplay()) + getTextValueSuffix();
+        if (getNumDecimalPlacesToDisplay() > 0)
+            return String (val, getNumDecimalPlacesToDisplay());
 
-    return String (roundToInt (v)) + getTextValueSuffix();
+        return String (roundToInt (val));
+    };
+
+    return getText (v) + getTextValueSuffix();
 }
 
 double Slider::getValueFromText (const String& text)
 {
-    if (valueFromTextFunction != nullptr)
-        return valueFromTextFunction (text);
-
     auto t = text.trimStart();
 
     if (t.endsWith (getTextValueSuffix()))
         t = t.substring (0, t.length() - getTextValueSuffix().length());
+
+    if (valueFromTextFunction != nullptr)
+        return valueFromTextFunction (t);
 
     while (t.startsWithChar ('+'))
         t = t.substring (1).trimStart();
@@ -1603,6 +1640,8 @@ bool Slider::isHorizontal() const noexcept                  { return pimpl->isHo
 bool Slider::isVertical() const noexcept                    { return pimpl->isVertical(); }
 bool Slider::isRotary() const noexcept                      { return pimpl->isRotary(); }
 bool Slider::isBar() const noexcept                         { return pimpl->isBar(); }
+bool Slider::isTwoValue() const noexcept                    { return pimpl->isTwoValue(); }
+bool Slider::isThreeValue() const noexcept                  { return pimpl->isThreeValue(); }
 
 float Slider::getPositionOfValue (double value) const       { return pimpl->getPositionOfValue (value); }
 

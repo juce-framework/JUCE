@@ -1115,7 +1115,7 @@ private:
             if (cardNum < 0)
                 break;
 
-            if (JUCE_CHECKED_RESULT (snd_ctl_open (&handle, ("hw:" + String (cardNum)).toUTF8(), SND_CTL_NONBLOCK)) >= 0)
+            if (JUCE_CHECKED_RESULT (snd_ctl_open (&handle, ("hw:" + String (cardNum)).toRawUTF8(), SND_CTL_NONBLOCK)) >= 0)
             {
                 if (JUCE_CHECKED_RESULT (snd_ctl_card_info (handle, info)) >= 0)
                 {

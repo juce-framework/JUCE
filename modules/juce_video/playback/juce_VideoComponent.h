@@ -44,24 +44,54 @@ public:
     //==============================================================================
     /** Creates an empty VideoComponent.
 
-        Use the load() method to open a video once you've added this component to
-        a parent (or put it on the desktop).
+        Use the loadAsync() or load() method to open a video once you've added
+        this component to a parent (or put it on the desktop).
+
+        If useNativeControlsIfAvailable is enabled and a target OS has a video view with
+        dedicated controls for transport etc, that view will be used. In opposite
+        case a bare video view without any controls will be presented, allowing you to
+        tailor your own UI. Currently this flag is used on iOS and 64bit macOS.
+        Android, Windows and 32bit macOS will always use plain video views without
+        dedicated controls.
     */
-    VideoComponent();
+    VideoComponent (bool useNativeControlsIfAvailable);
 
     /** Destructor. */
-    ~VideoComponent();
+    ~VideoComponent() override;
 
     //==============================================================================
     /** Tries to load a video from a local file.
+
+        This function is supported on macOS and Windows. For iOS and Android, use
+        loadAsync() instead.
+
         @returns an error if the file failed to be loaded correctly
+
+        @see loadAsync
     */
     Result load (const File& file);
 
     /** Tries to load a video from a URL.
+
+        This function is supported on macOS and Windows. For iOS and Android, use
+        loadAsync() instead.
+
         @returns an error if the file failed to be loaded correctly
+
+        @see loadAsync
     */
     Result load (const URL& url);
+
+    /** Tries to load a video from a URL asynchronously. When finished, invokes the
+        callback supplied to the function on the message thread.
+
+        This is the preferred way of loading content, since it works not only on
+        macOS and Windows, but also on iOS and Android. On Windows, it will internally
+        call load().
+
+        @see load
+     */
+    void loadAsync (const URL& url, std::function<void (const URL&, Result)> loadFinishedCallback);
 
     /** Closes the video and resets the component. */
     void closeVideo();
@@ -109,6 +139,9 @@ public:
     */
     void setPlaySpeed (double newSpeed);
 
+    /** Returns the current play speed of the video. */
+    double getPlaySpeed() const;
+
     /** Changes the video's playback volume.
         @param newVolume    the volume in the range 0 (silent) to 1.0 (full)
     */
@@ -119,11 +152,26 @@ public:
     */
     float getAudioVolume() const;
 
+   #if JUCE_SYNC_VIDEO_VOLUME_WITH_OS_MEDIA_VOLUME
+    /** Set this callback to be notified whenever OS global media volume changes.
+        Currently used on Android only.
+     */
+    std::function<void()> onGlobalMediaVolumeChanged;
+   #endif
+
+    /** Set this callback to be notified whenever the playback starts. */
+    std::function<void()> onPlaybackStarted;
+
+    /** Set this callback to be notified whenever the playback stops. */
+    std::function<void()> onPlaybackStopped;
+
+    /** Set this callback to be notified whenever an error occurs. Upon error, you
+        may need to load the video again. */
+    std::function<void (const String& /*error*/)> onErrorOccurred;
+
 private:
     //==============================================================================
     struct Pimpl;
-    friend struct Pimpl;
-    friend struct ContainerDeletePolicy<Pimpl>;
     std::unique_ptr<Pimpl> pimpl;
 
     void resized() override;
