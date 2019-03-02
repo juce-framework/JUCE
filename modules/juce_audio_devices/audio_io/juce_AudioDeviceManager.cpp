@@ -447,9 +447,12 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
         return {};
     }
 
+    // If new device, or no current device, or change in in/output channel count, then recreate device.
     if (currentSetup.inputDeviceName != newInputDeviceName
          || currentSetup.outputDeviceName != newOutputDeviceName
-         || currentAudioDevice == nullptr)
+         || currentAudioDevice == nullptr
+         || (inputChannels.getHighestBit() + 1 != numInputChansNeeded)
+         || (outputChannels.getHighestBit() + 1 != numOutputChansNeeded))
     {
         deleteCurrentDevice();
         scanDevicesIfNeeded();
