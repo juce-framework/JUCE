@@ -5,7 +5,8 @@
 namespace juce
 {
 
-// Shared base class for ARAPlaybackRenderer and ARAEditorRenderer, not to be used directly
+/** Shared base class for ARAPlaybackRenderer and ARAEditorRenderer, not to be used directly
+*/
 class ARARendererBase
 {
 public:
@@ -22,14 +23,10 @@ public:
     int getMaxSamplesPerBlock() const noexcept  { return maxSamplesPerBlock; }
 
 protected:
-    /** Must be called before any rendering is done in processBlock. 
-        @param newSampleRate The desired sample rate. 
-        @param newNumChannels The desired channel count. 
-        @param newMaxSamplesPerBlock The desired max # of samples per block. 
-    */
+    /** Internal implementation helper, do not call directly. */
     void prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock);
 
-    /** Called after playback has stopped, allowing the render to clean up unnecessary resources. */
+    /** Internal implementation helper, do not call directly. */
     void releaseResources();
 
 private:
@@ -44,7 +41,7 @@ private:
 
     Instances of this class are constructed by the DocumentController. 
     If you are subclassing ARAPlaybackRenderer, make sure to call the base class
-    implementations of any overridden function, except for processBlock().
+    implementations of any overridden function, except for processBlock.
 
     @tags{ARA}
 */
@@ -57,21 +54,37 @@ public:
     /** Returns true if prepareToPlay has been called with \p (mayBeRealTime==true) */
     bool isPreparedForRealtime() const noexcept { return preparedForRealtime; }
 
-    /** Must be called before any rendering is done in processBlock. 
-        @param newSampleRate The desired sample rate. 
-        @param newNumChannels The desired channel count. 
-        @param newMaxSamplesPerBlock The desired max # of samples per block. 
-        @param mayBeRealtime Whether or not the renderer should be prepared to output samples in real time. 
+    /** Must be called before any rendering is done via processBlock,
+        to allow for allocating any ressources needed while processing.
+
+        @param newSampleRate The desired sample rate.
+        @param newNumChannels The desired channel count.
+        @param newMaxSamplesPerBlock The desired max number of samples per block.
+        @param mayBeRealtime Whether or not the renderer should be prepared to output samples in real time.
+
+        Overrides of this method must call the inherited implementation!
     */
     virtual void prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock, bool mayBeRealtime);
 
-    /** \copydoc ARAEditorRenderer::processBlock
-    
+    /** Render a buffer of playback output samples, replacing the input samples.
+        This default implementation just clears the provided buffer,
+        so typically this method will be overridden to do something more useful.
+
+        Generally this will be called from your plugin's @see AudioProcessor implementation,
+        but playback renderers can be used to calculate the output of playback regions in any context
+        provided they are configured and used properly - see for example ARAPlaybackRegionReader.
+
+        @param buffer The buffer that the renderer will output samples in to.
+        @param timeInSamples The current playback time, in samples.
+        @param isPlayingBack Whether or not the host playhead is rolling.
         @param isNonRealtime Whether or not we're rendering in a non-realitme context.
     */
     virtual bool processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack, bool isNonRealtime);
 
-    /** copydoc ARARendererBase::releaseResources */
+    /** Called when no longer processing blocks, allowing the render to clean up unnecessary resources.
+
+        Overrides of this method must call the inherited implementation!
+    */
     virtual void releaseResources();
 
     /** Add a playback region to the renderer
@@ -101,7 +114,7 @@ private:
     
     Instances of this class are constructed by the DocumentController. 
     If you are subclassing ARAEditorRenderer, make sure to call the base class
-    implementations of any overridden function, except for processBlock().
+    implementations of any overridden function, except for processBlock.
 
     @tags{ARA}
 */
@@ -111,14 +124,22 @@ class ARAEditorRenderer   : public ARA::PlugIn::EditorRenderer,
 public:
     using ARA::PlugIn::EditorRenderer::EditorRenderer;
 
-    //** \copydoc ARAEditorRendererBase::prepareToPlay */
+    /** Must be called before any rendering is done via processBlock,
+        to allow for allocating any ressources needed while processing.
+
+        @param newSampleRate The desired sample rate.
+        @param newNumChannels The desired channel count.
+        @param newMaxSamplesPerBlock The desired max number of samples per block.
+
+        Overrides of this method must call the inherited implementation!
+    */
     virtual void prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock);
 
-    /** Render a buffer of output samples.
+    /** Render a buffer of editor signal output samples, adding to the input samples.
+        This default implementation does nothing, i.e. just forwards the input.
 
-        Generally this will be called from your plugin's @see AudioProcessor implementation, but this
-        function can be used to render playback regions in any context so long as the renderer is
-        properly formatted.
+        This will be called from your plugin's @see AudioProcessor implementation,
+        and is typically only called for realtime playback (not offline bounces).
 
         @param buffer The buffer that the renderer will output samples in to.
         @param timeInSamples The current playback time, in samples.
@@ -126,7 +147,10 @@ public:
     */
     virtual bool processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack);
 
-    /** copydoc ARARendererBase::releaseResources */
+    /** Called when no longer processing blocks, allowing the render to clean up unnecessary resources.
+
+        Overrides of this method must call the inherited implementation!
+    */
     virtual void releaseResources();
 
 private:
