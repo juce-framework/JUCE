@@ -2,6 +2,8 @@
 
 #if JucePlugin_Enable_ARA
 
+#define ARA_DEBUG_MESSAGE_PREFIX JucePlugin_Name
+
 #include <ARA_Library/PlugIn/ARAPlug.cpp>
 #include <ARA_Library/Debug/ARADebug.c>
 #include <ARA_Library/Dispatch/ARAPlugInDispatch.cpp>
