@@ -1368,9 +1368,9 @@ private:
 //==============================================================================
 #if JucePlugin_Enable_ARA
 
-class JuceARAFactory : public ARA::IMainFactory
-{
-public:
+ class JuceARAFactory : public ARA::IMainFactory
+ {
+ public:
     JuceARAFactory()    FUNKNOWN_CTOR;
     virtual ~JuceARAFactory() {}
 
@@ -1382,13 +1382,13 @@ public:
         return ARA::PlugIn::DocumentController::getARAFactory();
     }
     static const FUID iid;
-protected:
-};
+ protected:
+ };
 
-IMPLEMENT_REFCOUNT(JuceARAFactory);
+ IMPLEMENT_REFCOUNT(JuceARAFactory);
 
-::Steinberg::tresult PLUGIN_API JuceARAFactory::queryInterface (const ::Steinberg::TUID targetIID, void** obj)
-{
+ ::Steinberg::tresult PLUGIN_API JuceARAFactory::queryInterface (const ::Steinberg::TUID targetIID, void** obj)
+ {
     TEST_FOR_AND_RETURN_IF_VALID (targetIID, FObject)
     TEST_FOR_AND_RETURN_IF_VALID (targetIID, ARA::IMainFactory)
 
@@ -1401,7 +1401,7 @@ IMPLEMENT_REFCOUNT(JuceARAFactory);
 
     *obj = nullptr;
     return kNoInterface;
-}
+ }
 
 #endif
 
@@ -1425,10 +1425,10 @@ class JuceVST3Component : public Vst::IComponent,
                           public Vst::IUnitInfo,
                           public Vst::IConnectionPoint,
                           public AudioPlayHead
-#if JucePlugin_Enable_ARA
+                        #if JucePlugin_Enable_ARA
                         , public ARA::IPlugInEntryPoint,
                           public ARA::IPlugInEntryPoint2
-#endif
+                        #endif
 {
 public:
     JuceVST3Component (Vst::IHostApplication* h)
@@ -1493,10 +1493,10 @@ public:
         TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IConnectionPoint)
         TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, FUnknown, Vst::IComponent)
 
-#if JucePlugin_Enable_ARA
-         TEST_FOR_AND_RETURN_IF_VALID (targetIID, ARA::IPlugInEntryPoint)
-         TEST_FOR_AND_RETURN_IF_VALID (targetIID, ARA::IPlugInEntryPoint2)
-#endif
+       #if JucePlugin_Enable_ARA
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, ARA::IPlugInEntryPoint)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, ARA::IPlugInEntryPoint2)
+       #endif
 
         if (doUIDsMatch (targetIID, JuceAudioProcessor::iid))
         {
@@ -2689,7 +2689,7 @@ private:
     }
 
     //==============================================================================
-#if JucePlugin_Enable_ARA
+   #if JucePlugin_Enable_ARA
 
     const ARA::ARAFactory* PLUGIN_API getFactory() SMTG_OVERRIDE
     {
@@ -2709,7 +2709,7 @@ private:
         return araAudioProcessorExtension->bindToARA (documentControllerRef, knownRoles, assignedRoles);
     }
 
-#endif
+   #endif
 
     //==============================================================================
     Atomic<int> refCount { 1 };
@@ -2882,10 +2882,10 @@ static FUnknown* createControllerInstance (Vst::IHostApplication* host)
 }
 
 #if JucePlugin_Enable_ARA
-static FUnknown* createARAFactoryInstance (Vst::IHostApplication* /*host*/)
-{
+ static FUnknown* createARAFactoryInstance (Vst::IHostApplication* /*host*/)
+ {
     return static_cast<ARA::IMainFactory*> (new JuceARAFactory());
-}
+ }
 #endif
 
 //==============================================================================
@@ -3146,7 +3146,7 @@ JUCE_EXPORTED_FUNCTION IPluginFactory* PLUGIN_API GetPluginFactory()
 
         globalFactory->registerClass (controllerClass, createControllerInstance);
 
-#if JucePlugin_Enable_ARA
+       #if JucePlugin_Enable_ARA
         static const PClassInfo2 araFactoryClass (JuceARAFactory::iid,
                                                   PClassInfo::kManyInstances,
                                                   kARAMainFactoryClass,
@@ -3158,7 +3158,7 @@ JUCE_EXPORTED_FUNCTION IPluginFactory* PLUGIN_API GetPluginFactory()
                                                   kVstVersionString);
 
         globalFactory->registerClass (araFactoryClass, createARAFactoryInstance);
-#endif
+       #endif
     }
     else
     {
