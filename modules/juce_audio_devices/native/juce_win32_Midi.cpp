@@ -342,7 +342,7 @@ private:
 
             for (int i = 0; i < deviceCaps.size(); ++i)
             {
-                deviceNames.add ({ deviceCaps[i].szPname, (size_t) numElementsInArray (deviceCaps[i].szPname) });
+                deviceNames.add (deviceCaps[i].szPname);
                 deviceIDs.add (getInterfaceIDForDevice ((UINT) i));
             }
 
