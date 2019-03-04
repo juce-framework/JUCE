@@ -383,12 +383,14 @@ private:
             {
                 if (exporter.isXcode() && target->getTargetFileType() == ProjectType::Target::TargetFileType::executable)
                 {
-                    auto xcodeIcnsFile = getTargetFolder().getParentDirectory()
-                                                          .getChildFile ("MacOSX")
-                                                          .getChildFile ("Icon.icns");
+                    StringArray pathComponents = { "..", "MacOSX", "Icon.icns" };
+                    auto xcodeIcnsFile = getTargetFolder();
+
+                    for (auto& comp : pathComponents)
+                        xcodeIcnsFile = xcodeIcnsFile.getChildFile (comp);
 
                     if (xcodeIcnsFile.existsAsFile())
-                        return xcodeIcnsFile.getRelativePathFrom (getTargetFolder()).quoted();
+                        return pathComponents.joinIntoString ("/").quoted();
                 }
 
                 return {};
@@ -399,12 +401,14 @@ private:
 
             if (exporter.isCodeBlocks() && target->getTargetFileType() == ProjectType::Target::TargetFileType::executable)
             {
-                auto windowsRcFile = getTargetFolder().getParentDirectory()
-                                                      .getChildFile ("CodeBlocksWindows")
-                                                      .getChildFile ("resources.rc");
+                StringArray pathComponents = { "..", "CodeBlocksWindows", "resources.rc" };
+                auto windowsRcFile = getTargetFolder();
+
+                for (auto& comp : pathComponents)
+                    windowsRcFile = windowsRcFile.getChildFile (comp);
 
                 if (windowsRcFile.existsAsFile())
-                    out << "    " << windowsRcFile.getRelativePathFrom (getTargetFolder()).quoted() << newLine;
+                    out << "    " << pathComponents.joinIntoString ("/").quoted() << newLine;
             }
 
             out << ")" << newLine << newLine;
@@ -966,11 +970,14 @@ private:
                             auto sdkVersion = config.getOSXSDKVersionString().upToFirstOccurrenceOf (" ", false, false);
                             auto sysroot = "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX" + sdkVersion + ".sdk";
 
+                            RelativePath rFile ("JuceLibraryCode/include_juce_audio_plugin_client_AU.r", RelativePath::projectFolder);
+                            rFile = rebaseFromProjectFolderToBuildTarget (rFile);
+
                             out << "if (RC_COMPILER)" << newLine
                                 << "    set (" << resSourcesVar << newLine
-                                << "        " << item.determineGroupFolder().getChildFile ("include_juce_audio_plugin_client_AU.r").getFullPathName().quoted() << newLine
+                                << "        " << ("${CMAKE_CURRENT_SOURCE_DIR}/" + rFile.toUnixStyle()).quoted() << newLine
                                 << "    )" << newLine
-                                << "    set (" << resOutputVar << " \"${CMAKE_CURRENT_BINARY_DIR}/" << binaryName << ".rsrc\")" << newLine
+                                << "    set (" << resOutputVar << " " << ("${CMAKE_CURRENT_BINARY_DIR}/" + binaryName + ".rsrc").quoted() << ")" << newLine
                                 << "    target_sources (" << targetVarName << " PRIVATE" << newLine
                                 << "        ${" << resSourcesVar << "}" << newLine
                                 << "        ${" << resOutputVar << "}" << newLine
@@ -1033,7 +1040,7 @@ private:
 
                         auto updatedPlist = getTargetFolder().getChildFile (config.getName() + "-" + plistFile.getFileName());
                         plist->writeToFile (updatedPlist, "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">");
-                        targetAttributes.set ("INFOPLIST_FILE", updatedPlist.getFullPathName().quoted());
+                        targetAttributes.set ("INFOPLIST_FILE", ("${CMAKE_CURRENT_SOURCE_DIR}/" + updatedPlist.getFileName()).quoted());
                     }
                     else
                     {
