@@ -5348,7 +5348,7 @@ static const unsigned char temp_binary_data_24[] =
 "\r\n"
 "//==============================================================================\r\n"
 "// This creates new instances of the document controller..\r\n"
-"ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController ()\r\n"
+"ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController () noexcept\r\n"
 "{\r\n"
 "    return new %%aradocumentcontroller_class_name%%();\r\n"
 "};\r\n";
@@ -5370,8 +5370,6 @@ static const unsigned char temp_binary_data_25[] =
 "#pragma once\r\n"
 "\r\n"
 "%%app_headers%%\r\n"
-"\r\n"
-"#include \"juce_audio_plugin_client/ARA/juce_ARA_interface.h\"\r\n"
 "\r\n"
 "//==============================================================================\r\n"
 "/**\r\n"
@@ -5813,10 +5811,18 @@ static const unsigned char temp_binary_data_32[] =
 "//==============================================================================\r\n"
 "%%editor_class_name%%::%%editor_class_name%% (%%filter_class_name%%& p)\r\n"
 "    : AudioProcessorEditor (&p), processor (p)\r\n"
+"#if JucePlugin_Enable_ARA\r\n"
+"    , AudioProcessorEditorARAExtension (&p)\r\n"
+"#endif\r\n"
 "{\r\n"
 "    // Make sure that before the constructor has finished, you've set the\r\n"
 "    // editor's size to whatever you need it to be.\r\n"
 "    setSize (400, 300);\r\n"
+"\r\n"
+"#if JucePlugin_Enable_ARA\r\n"
+"    // for proper view embedding, ARA plug-ins must be resizable\r\n"
+"    setResizable (true, false);\r\n"
+"#endif\r\n"
 "}\r\n"
 "\r\n"
 "%%editor_class_name%%::~%%editor_class_name%%()\r\n"
@@ -5862,6 +5868,9 @@ static const unsigned char temp_binary_data_33[] =
 "/**\r\n"
 "*/\r\n"
 "class %%editor_class_name%%  : public AudioProcessorEditor\r\n"
+"#if JucePlugin_Enable_ARA\r\n"
+", public AudioProcessorEditorARAExtension\r\n"
+"#endif\r\n"
 "{\r\n"
 "public:\r\n"
 "    %%editor_class_name%% (%%filter_class_name%%&);\r\n"
@@ -6096,6 +6105,9 @@ static const unsigned char temp_binary_data_35[] =
 "/**\r\n"
 "*/\r\n"
 "class %%filter_class_name%%  : public AudioProcessor\r\n"
+"#if JucePlugin_Enable_ARA\r\n"
+", public AudioProcessorARAExtension\r\n"
+"#endif\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
@@ -6111,6 +6123,10 @@ static const unsigned char temp_binary_data_35[] =
 "   #endif\r\n"
 "\r\n"
 "    void processBlock (AudioBuffer<float>&, MidiBuffer&) override;\r\n"
+"\r\n"
+"#if JucePlugin_Enable_ARA\r\n"
+"    bool didProcessBlockSucceed() override { return true; };\r\n"
+"#endif\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
 "    AudioProcessorEditor* createEditor() override;\r\n"
@@ -7906,18 +7922,18 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x52a8dfdf:  numBytes = 1859; return wizard_Openfile_svg;
         case 0x58e2ae48:  numBytes = 4551; return wizard_OpenGL_svg;
         case 0xb1da6f9e:  numBytes = 7488; return wizard_StaticLibrary_svg;
-        case 0x744d44d6:  numBytes = 899; return jucer_AudioPluginARADocumentControllerTemplate_cpp;
-        case 0x3eb8f45b:  numBytes = 1019; return jucer_AudioPluginARADocumentControllerTemplate_h;
+        case 0x744d44d6:  numBytes = 908; return jucer_AudioPluginARADocumentControllerTemplate_cpp;
+        case 0x3eb8f45b:  numBytes = 955; return jucer_AudioPluginARADocumentControllerTemplate_h;
         case 0xd11e6d35:  numBytes = 2085; return jucer_AnimatedComponentSimpleTemplate_h;
         case 0x6cf2645e:  numBytes = 1563; return jucer_AnimatedComponentTemplate_cpp;
         case 0x97b055e3:  numBytes = 1201; return jucer_AnimatedComponentTemplate_h;
         case 0xfb6f6d96:  numBytes = 3693; return jucer_AudioComponentSimpleTemplate_h;
         case 0xafccbd3f:  numBytes = 3094; return jucer_AudioComponentTemplate_cpp;
         case 0x915d7304:  numBytes = 1374; return jucer_AudioComponentTemplate_h;
-        case 0x27c5a93a:  numBytes = 1356; return jucer_AudioPluginEditorTemplate_cpp;
-        case 0x4d0721bf:  numBytes = 977; return jucer_AudioPluginEditorTemplate_h;
+        case 0x27c5a93a:  numBytes = 1572; return jucer_AudioPluginEditorTemplate_cpp;
+        case 0x4d0721bf:  numBytes = 1055; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 6036; return jucer_AudioPluginFilterTemplate_cpp;
-        case 0x488afa0a:  numBytes = 2272; return jucer_AudioPluginFilterTemplate_h;
+        case 0x488afa0a:  numBytes = 2443; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2126; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2042; return jucer_ComponentTemplate_h;
         case 0x1657b643:  numBytes = 1693; return jucer_ContentCompSimpleTemplate_h;

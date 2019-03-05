@@ -16,6 +16,9 @@
 /**
 */
 class %%filter_class_name%%  : public AudioProcessor
+#if JucePlugin_Enable_ARA
+, public AudioProcessorARAExtension
+#endif
 {
 public:
     //==============================================================================
@@ -31,6 +34,10 @@ public:
    #endif
 
     void processBlock (AudioBuffer<float>&, MidiBuffer&) override;
+
+#if JucePlugin_Enable_ARA
+    bool didProcessBlockSucceed() override { return true; };
+#endif
 
     //==============================================================================
     AudioProcessorEditor* createEditor() override;

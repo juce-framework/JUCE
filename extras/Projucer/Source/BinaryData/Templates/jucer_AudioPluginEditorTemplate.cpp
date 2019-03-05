@@ -13,10 +13,18 @@
 //==============================================================================
 %%editor_class_name%%::%%editor_class_name%% (%%filter_class_name%%& p)
     : AudioProcessorEditor (&p), processor (p)
+#if JucePlugin_Enable_ARA
+    , AudioProcessorEditorARAExtension (&p)
+#endif
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     setSize (400, 300);
+
+#if JucePlugin_Enable_ARA
+    // for proper view embedding, ARA plug-ins must be resizable
+    setResizable (true, false);
+#endif
 }
 
 %%editor_class_name%%::~%%editor_class_name%%()

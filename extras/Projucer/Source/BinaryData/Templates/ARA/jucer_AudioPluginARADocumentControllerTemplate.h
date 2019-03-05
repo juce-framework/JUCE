@@ -12,8 +12,6 @@
 
 %%app_headers%%
 
-#include "juce_audio_plugin_client/ARA/juce_ARA_interface.h"
-
 //==============================================================================
 /**
 */

@@ -81,10 +81,10 @@ namespace BinaryData
     const int            wizard_StaticLibrary_svgSize = 7488;
 
     extern const char*   jucer_AudioPluginARADocumentControllerTemplate_cpp;
-    const int            jucer_AudioPluginARADocumentControllerTemplate_cppSize = 899;
+    const int            jucer_AudioPluginARADocumentControllerTemplate_cppSize = 908;
 
     extern const char*   jucer_AudioPluginARADocumentControllerTemplate_h;
-    const int            jucer_AudioPluginARADocumentControllerTemplate_hSize = 1019;
+    const int            jucer_AudioPluginARADocumentControllerTemplate_hSize = 955;
 
     extern const char*   jucer_AnimatedComponentSimpleTemplate_h;
     const int            jucer_AnimatedComponentSimpleTemplate_hSize = 2085;
@@ -105,16 +105,16 @@ namespace BinaryData
     const int            jucer_AudioComponentTemplate_hSize = 1374;
 
     extern const char*   jucer_AudioPluginEditorTemplate_cpp;
-    const int            jucer_AudioPluginEditorTemplate_cppSize = 1356;
+    const int            jucer_AudioPluginEditorTemplate_cppSize = 1572;
 
     extern const char*   jucer_AudioPluginEditorTemplate_h;
-    const int            jucer_AudioPluginEditorTemplate_hSize = 977;
+    const int            jucer_AudioPluginEditorTemplate_hSize = 1055;
 
     extern const char*   jucer_AudioPluginFilterTemplate_cpp;
     const int            jucer_AudioPluginFilterTemplate_cppSize = 6036;
 
     extern const char*   jucer_AudioPluginFilterTemplate_h;
-    const int            jucer_AudioPluginFilterTemplate_hSize = 2272;
+    const int            jucer_AudioPluginFilterTemplate_hSize = 2443;
 
     extern const char*   jucer_ComponentTemplate_cpp;
     const int            jucer_ComponentTemplate_cppSize = 2126;
