@@ -74,8 +74,6 @@ public:
     */
     static void JUCE_CALLTYPE outputDebugString (const String& text);
 
-    /** Writes a celebratory message to the current logger. */
-    static void JUCE_CALLTYPE print10000thCommitMessage();
 
 protected:
     //==============================================================================
