@@ -130,7 +130,7 @@ public:
 protected:
     ARAPlaybackRenderer* getPlaybackRenderer() const { return dynamic_cast<AudioProcessorARAExtension*> (audioProcessor.get())->getARAPlaybackRenderer(); }
 
-    virtual bool getCurrentPosition (CurrentPositionInfo& result) override;
+    bool getCurrentPosition (CurrentPositionInfo& result) override;
 
 private:
     std::unique_ptr<AudioProcessor> audioProcessor;

@@ -41,8 +41,8 @@ public:
 
 // TODO JUCE_ARA see definition of these in .cpp
 //#if ARA_VALIDATE_API_CALLS
-//    virtual void addPlaybackRegion (ARA::ARAPlaybackRegionRef playbackRegionRef) noexcept override;
-//    virtual void removePlaybackRegion (ARA::ARAPlaybackRegionRef playbackRegionRef) noexcept override;
+//    void addPlaybackRegion (ARA::ARAPlaybackRegionRef playbackRegionRef) noexcept override;
+//    void removePlaybackRegion (ARA::ARAPlaybackRegionRef playbackRegionRef) noexcept override;
 //#endif
 
 private:
