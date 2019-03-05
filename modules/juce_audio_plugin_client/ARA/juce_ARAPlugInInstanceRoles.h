@@ -5,37 +5,6 @@
 namespace juce
 {
 
-/** Shared base class for ARAPlaybackRenderer and ARAEditorRenderer, not to be used directly
-*/
-class ARARendererBase
-{
-public:
-    /** Returns true if prepareToPlay has been called after construction or releasing resources. */
-    bool isPrepared() const noexcept            { return prepared; }
-
-    /** Returns the renderer sample rate as configured in prepareToPlay (or the default value of 44100.0). */
-    double getSampleRate() const noexcept       { return sampleRate; }
-
-    /** Returns the number of channels as configured in prepareToPlay (or the default value of 1). */
-    int getNumChannels() const noexcept         { return numChannels; }
-
-    /** Returns max samples per block as configured in prepareToPlay (or the default value of 1024). */
-    int getMaxSamplesPerBlock() const noexcept  { return maxSamplesPerBlock; }
-
-protected:
-    /** Internal implementation helper, do not call directly. */
-    void prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock);
-
-    /** Internal implementation helper, do not call directly. */
-    void releaseResources();
-
-private:
-    double sampleRate = 44100.0;
-    int numChannels = 1;
-    int maxSamplesPerBlock = 1024;
-    bool prepared = false;
-};
-
 //==============================================================================
 /** Base class for a renderer fulfulling the ARAPlaybackRenderer role as described in the ARA SDK. 
 
@@ -45,47 +14,14 @@ private:
 
     @tags{ARA}
 */
-class ARAPlaybackRenderer     : public ARA::PlugIn::PlaybackRenderer,
-                                public ARARendererBase
+class ARAPlaybackRenderer     : public ARA::PlugIn::PlaybackRenderer
 {
 public:
     using ARA::PlugIn::PlaybackRenderer::PlaybackRenderer;
 
-    /** Returns true if prepareToPlay has been called with \p (mayBeRealTime==true) */
-    bool isPreparedForRealtime() const noexcept { return preparedForRealtime; }
-
-    /** Must be called before any rendering is done via processBlock,
-        to allow for allocating any ressources needed while processing.
-
-        @param newSampleRate The desired sample rate.
-        @param newNumChannels The desired channel count.
-        @param newMaxSamplesPerBlock The desired max number of samples per block.
-        @param mayBeRealtime Whether or not the renderer should be prepared to output samples in real time.
-
-        Overrides of this method must call the inherited implementation!
-    */
-    virtual void prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock, bool mayBeRealtime);
-
-    /** Render a buffer of playback output samples, replacing the input samples.
-        This default implementation just clears the provided buffer,
-        so typically this method will be overridden to do something more useful.
-
-        Generally this will be called from your plugin's @see AudioProcessor implementation,
-        but playback renderers can be used to calculate the output of playback regions in any context
-        provided they are configured and used properly - see for example ARAPlaybackRegionReader.
-
-        @param buffer The buffer that the renderer will output samples in to.
-        @param timeInSamples The current playback time, in samples.
-        @param isPlayingBack Whether or not the host playhead is rolling.
-        @param isNonRealtime Whether or not we're rendering in a non-realitme context.
-    */
-    virtual bool processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack, bool isNonRealtime);
-
-    /** Called when no longer processing blocks, allowing the render to clean up unnecessary resources.
-
-        Overrides of this method must call the inherited implementation!
-    */
-    virtual void releaseResources();
+// TODO JUCE_ARA should we add this here for subclasses, even if it is currently unused?
+//  void setAudioProcessor (AudioProcessor* processor) { audioProcessor = processor; }
+//  AudioProcessor* getAudioProcessor() const { return audioProcessor; };
 
     /** Add a playback region to the renderer
         
@@ -103,13 +39,14 @@ public:
     */
     void removePlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
 
-#if ARA_VALIDATE_API_CALLS
-    virtual void addPlaybackRegion (ARA::ARAPlaybackRegionRef playbackRegionRef) noexcept override;
-    virtual void removePlaybackRegion (ARA::ARAPlaybackRegionRef playbackRegionRef) noexcept override;
-#endif
+// TODO JUCE_ARA see definition of these in .cpp
+//#if ARA_VALIDATE_API_CALLS
+//    virtual void addPlaybackRegion (ARA::ARAPlaybackRegionRef playbackRegionRef) noexcept override;
+//    virtual void removePlaybackRegion (ARA::ARAPlaybackRegionRef playbackRegionRef) noexcept override;
+//#endif
 
 private:
-    bool preparedForRealtime;
+//  AudioProcessor* audioProcessor;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAPlaybackRenderer)
 };
@@ -123,42 +60,18 @@ private:
 
     @tags{ARA}
 */
-class ARAEditorRenderer   : public ARA::PlugIn::EditorRenderer,
-                            public ARARendererBase
+class ARAEditorRenderer   : public ARA::PlugIn::EditorRenderer
 {
 public:
     using ARA::PlugIn::EditorRenderer::EditorRenderer;
 
-    /** Must be called before any rendering is done via processBlock,
-        to allow for allocating any ressources needed while processing.
-
-        @param newSampleRate The desired sample rate.
-        @param newNumChannels The desired channel count.
-        @param newMaxSamplesPerBlock The desired max number of samples per block.
-
-        Overrides of this method must call the inherited implementation!
-    */
-    virtual void prepareToPlay (double newSampleRate, int newNumChannels, int newMaxSamplesPerBlock);
-
-    /** Render a buffer of editor signal output samples, adding to the input samples.
-        This default implementation does nothing, i.e. just forwards the input.
-
-        This will be called from your plugin's @see AudioProcessor implementation,
-        and is typically only called for realtime playback (not offline bounces).
-
-        @param buffer The buffer that the renderer will output samples in to.
-        @param timeInSamples The current playback time, in samples.
-        @param isPlayingBack Whether or not the host playhead is rolling.
-    */
-    virtual bool processBlock (AudioBuffer<float>& buffer, int64 timeInSamples, bool isPlayingBack);
-
-    /** Called when no longer processing blocks, allowing the render to clean up unnecessary resources.
-
-        Overrides of this method must call the inherited implementation!
-    */
-    virtual void releaseResources();
+// TODO JUCE_ARA should we add this here for subclasses, even if it is currently unused?
+//  void setAudioProcessor (AudioProcessor* processor) { audioProcessor = processor; }
+//  AudioProcessor* getAudioProcessor() const { return audioProcessor; };
 
 private:
+//  AudioProcessor* audioProcessor;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAEditorRenderer)
 };
 

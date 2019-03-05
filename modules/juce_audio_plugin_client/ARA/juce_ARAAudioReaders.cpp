@@ -1,5 +1,7 @@
 #include "juce_ARAAudioReaders.h"
 
+extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
+
 namespace juce
 {
 
@@ -140,11 +142,17 @@ bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, 
 
 //==============================================================================
 
-ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* renderer, std::vector<ARAPlaybackRegion*> const& playbackRegions, bool nonRealtime, double playbackSampleRate /*= 0.0*/, int channelCount /*= 0*/, bool use64BitSamples /*= false*/)
-    : AudioFormatReader (nullptr, "ARAPlaybackRegionReader"),
-      isNonRealtime (nonRealtime),
-      playbackRenderer (renderer)
+MidiBuffer ARAPlaybackRegionReader::dummyMidiBuffer;
+
+ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARADocumentController* documentController, std::vector<ARAPlaybackRegion*> const& playbackRegions,
+                                                  bool alwaysNonRealtime, double playbackSampleRate, int channelCount, bool use64BitSamples)
+    : AudioFormatReader (nullptr, "ARAPlaybackRegionReader")
 {
+    audioProcessor.reset (createPluginFilter());
+    jassert (dynamic_cast<AudioProcessorARAExtension*> (audioProcessor.get()) != nullptr);
+    dynamic_cast<AudioProcessorARAExtension*> (audioProcessor.get())->bindToARA (ARA::PlugIn::toRef (documentController),
+                                                                ARA::kARAPlaybackRendererRole | ARA::kARAEditorRendererRole | ARA::kARAEditorViewRole, ARA::kARAPlaybackRendererRole);
+
     sampleRate = (playbackSampleRate > 0.0) ? playbackSampleRate :
                                               playbackRegions.empty() ? 44100.0 : playbackRegions.front()->getAudioModification()->getAudioSource()->getSampleRate();
     numChannels = (channelCount > 0) ? channelCount :
@@ -167,7 +175,7 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* renderer,
             regionsStartTime = jmin (regionsStartTime, playbackRegion->getStartInPlaybackTime() - playbackRegion->getHeadTime());
             regionsEndTime = jmax (regionsEndTime, playbackRegion->getEndInPlaybackTime() + playbackRegion->getTailTime());
 
-            playbackRenderer->addPlaybackRegion (playbackRegion);
+            getPlaybackRenderer()->addPlaybackRegion (playbackRegion);
             playbackRegion->addListener (this);
         }
 
@@ -175,7 +183,19 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRenderer* renderer,
         lengthInSamples = (int64) ((regionsEndTime - regionsStartTime) * sampleRate + 0.5);
     }
 
-    playbackRenderer->prepareToPlay (sampleRate, numChannels, 16*1024, ! isNonRealtime);
+    audioProcessor->setProcessingPrecision (use64BitSamples ? AudioProcessor::doublePrecision : AudioProcessor::singlePrecision);
+    audioProcessor->setPlayHead (this);
+    audioProcessor->setNonRealtime (alwaysNonRealtime);
+    dynamic_cast<AudioProcessorARAExtension*> (audioProcessor.get())->setAlwaysNonRealtime (alwaysNonRealtime);
+    audioProcessor->setRateAndBufferSizeDetails (sampleRate, 16*1024);
+    audioProcessor->prepareToPlay (sampleRate, 16*1024);
+}
+
+ARAPlaybackRegionReader::ARAPlaybackRegionReader (std::vector<ARAPlaybackRegion*> const& playbackRegions, bool alwaysNonRealtime,
+                                                  double playbackSampleRate /*= 0.0*/, int channelCount /*= 0*/, bool use64BitSamples /*= false*/)
+    : ARAPlaybackRegionReader (playbackRegions.front()->getAudioModification()->getAudioSource()->getDocument()->getDocumentController<ARADocumentController>(),
+                                playbackRegions, alwaysNonRealtime, playbackSampleRate, channelCount, use64BitSamples)
+{
 }
 
 ARAPlaybackRegionReader::~ARAPlaybackRegionReader()
@@ -190,10 +210,11 @@ void ARAPlaybackRegionReader::invalidate()
     if (! isValid())
         return;
 
-    for (auto playbackRegion : playbackRenderer->getPlaybackRegions<ARAPlaybackRegion>())
+    for (auto playbackRegion : getPlaybackRenderer()->getPlaybackRegions<ARAPlaybackRegion>())
         playbackRegion->removeListener (this);
 
-    playbackRenderer.reset();
+    audioProcessor->releaseResources();
+    audioProcessor.reset();
 }
 
 bool ARAPlaybackRegionReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
@@ -207,15 +228,17 @@ bool ARAPlaybackRegionReader::readSamples (int** destSamples, int numDestChannel
         {
             success = true;
             needClearSamples = false;
-            startSampleInFile += startInSamples;
+            renderPosition = startSampleInFile + startInSamples;
             while (numSamples > 0)
             {
-                int numSliceSamples = jmin(numSamples, playbackRenderer->getMaxSamplesPerBlock());
+                int numSliceSamples = jmin (numSamples, audioProcessor->getBlockSize());
                 AudioBuffer<float> buffer ((float **) destSamples, numDestChannels, startOffsetInDestBuffer, numSliceSamples);
-                success &= playbackRenderer->processBlock (buffer, startSampleInFile, true, isNonRealtime);
+                audioProcessor->processBlock (buffer, dummyMidiBuffer);
+                jassert (dummyMidiBuffer.getNumEvents() == 0);
+                success &= dynamic_cast<AudioProcessorARAExtension*> (audioProcessor.get())->didProcessBlockSucceed();
                 numSamples -= numSliceSamples;
                 startOffsetInDestBuffer += numSliceSamples;
-                startSampleInFile += numSliceSamples;
+                renderPosition += numSliceSamples;
             }
         }
 
@@ -231,9 +254,22 @@ bool ARAPlaybackRegionReader::readSamples (int** destSamples, int numDestChannel
     return success;
 }
 
+bool ARAPlaybackRegionReader::getCurrentPosition (CurrentPositionInfo& result)
+{
+    // we're only providing the minimal set of meaningful values, since the ARA renderer
+    // should only look at the time position and the playing state, and read any related
+    // tempo or bar signature information from the ARA model directly (MusicalContext)
+    result.resetToDefault();
+
+    result.timeInSamples = renderPosition;
+    result.timeInSeconds = static_cast<double> (renderPosition) / sampleRate;
+    result.isPlaying = true;
+    return true;
+}
+
 void ARAPlaybackRegionReader::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties)
 {
-    jassert (ARA::contains (playbackRenderer->getPlaybackRegions(), playbackRegion));
+    jassert (ARA::contains (getPlaybackRenderer()->getPlaybackRegions(), playbackRegion));
 
     // TODO JUCE_ARA most of these tests should be unnecessary now that we're listening to contentChanged...?
     if ((playbackRegion->getStartInAudioModificationTime() != newProperties->startInModificationTime) ||
@@ -251,7 +287,7 @@ void ARAPlaybackRegionReader::willUpdatePlaybackRegionProperties (ARAPlaybackReg
 
 void ARAPlaybackRegionReader::didUpdatePlaybackRegionContent (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags)
 {
-    jassert (ARA::contains (playbackRenderer->getPlaybackRegions(), playbackRegion));
+    jassert (ARA::contains (getPlaybackRenderer()->getPlaybackRegions(), playbackRegion));
 
     // don't invalidate if the audio signal is unchanged
     if (scopeFlags.affectSamples())
@@ -260,15 +296,18 @@ void ARAPlaybackRegionReader::didUpdatePlaybackRegionContent (ARAPlaybackRegion*
 
 void ARAPlaybackRegionReader::willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion)
 {
-    jassert (ARA::contains (playbackRenderer->getPlaybackRegions(), playbackRegion));
+    jassert (ARA::contains (getPlaybackRenderer()->getPlaybackRegions(), playbackRegion));
 
     invalidate();
 }
 
 //==============================================================================
 
-ARARegionSequenceReader::ARARegionSequenceReader (ARAPlaybackRenderer* renderer, ARARegionSequence* regionSequence, bool nonRealtime, double playbackSampleRate /*= 0.0*/, int channelCount /*= 0*/, bool use64BitSamples /*= false*/)
-    : ARAPlaybackRegionReader (renderer, regionSequence->getPlaybackRegions<ARAPlaybackRegion>(), nonRealtime, playbackSampleRate, channelCount, use64BitSamples),
+ARARegionSequenceReader::ARARegionSequenceReader (ARARegionSequence* regionSequence, bool nonRealtime,
+                                                  double playbackSampleRate /*= 0.0*/, int channelCount /*= 0*/, bool use64BitSamples /*= false*/)
+    : ARAPlaybackRegionReader (regionSequence->getDocument()->getDocumentController<ARADocumentController>(),
+                               regionSequence->getPlaybackRegions<ARAPlaybackRegion>(),
+                               nonRealtime, playbackSampleRate, channelCount, use64BitSamples),
       sequence (regionSequence)
 {
     sequence->addListener (this);

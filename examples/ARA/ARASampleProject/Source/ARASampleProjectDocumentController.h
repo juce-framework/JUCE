@@ -15,10 +15,6 @@ public:
 
     TimeSliceThread& getAudioSourceReadingThread() { return audioSourceReadingThread; }
 
-protected:
-    // ARA class creation overrides
-    ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer() noexcept override;
-
 private:
     // Thread used by buffering audio sources to read samples from the host
     TimeSliceThread audioSourceReadingThread;

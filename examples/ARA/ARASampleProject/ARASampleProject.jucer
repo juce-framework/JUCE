@@ -40,10 +40,6 @@
             resource="0" file="Source/ARASampleProjectDocumentController.cpp"/>
       <FILE id="fmxPsc" name="ARASampleProjectDocumentController.h" compile="0"
             resource="0" file="Source/ARASampleProjectDocumentController.h"/>
-      <FILE id="bBCffP" name="ARASampleProjectPlaybackRenderer.cpp" compile="1"
-            resource="0" file="Source/ARASampleProjectPlaybackRenderer.cpp"/>
-      <FILE id="euv9Vd" name="ARASampleProjectPlaybackRenderer.h" compile="0"
-            resource="0" file="Source/ARASampleProjectPlaybackRenderer.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>

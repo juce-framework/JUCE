@@ -1,16 +1,10 @@
 #include "ARASampleProjectDocumentController.h"
-#include "ARASampleProjectPlaybackRenderer.h"
 
 ARASampleProjectDocumentController::ARASampleProjectDocumentController() noexcept
     : ARADocumentController(),
       audioSourceReadingThread (String (JucePlugin_Name) + " ARA Sample Reading Thread")
 {
     audioSourceReadingThread.startThread();
-}
-
-ARA::PlugIn::PlaybackRenderer* ARASampleProjectDocumentController::doCreatePlaybackRenderer() noexcept
-{
-    return new ARASampleProjectPlaybackRenderer (this);
 }
 
 //==============================================================================

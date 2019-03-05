@@ -16,6 +16,13 @@ const ARA::ARAPlugInExtensionInstance* AudioProcessorARAExtension::bindToARA (AR
     }
 
     araPlugInExtension.reset (documentController->createPlugInExtensionWithRoles (knownRoles, assignedRoles));
+
+// currently unused and disabled
+//  if (isARAPlaybackRenderer())
+//      getARAPlaybackRenderer()->setAudioProcessor (dynamic_cast<AudioProcessor*> (this));
+//  if (isARAEditorRenderer())
+//      getARAEditorRenderer()->setAudioProcessor (dynamic_cast<AudioProcessor*> (this));
+
     return araPlugInExtension->getInstance();
 }
 

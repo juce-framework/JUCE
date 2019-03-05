@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include <map>
 
 #if ! JucePlugin_Enable_ARA
     #error "bad project configuration, JucePlugin_Enable_ARA is required for compiling this class"
@@ -9,8 +10,9 @@
 //==============================================================================
 /**
     Processor class for ARA sample project
-    This class delegates to an ARASampleProjectPlaybackRenderer instance
-    which fulfills the PlaybackRenderer role of our ARA enabled plug-in
+    In this simple demo we're using a buffered ARA sample reader to pull audio samples
+    from the host and render them without any modifications, effectively making this
+    an ARA enabled pass-through renderer.
 */
 class ARASampleProjectAudioProcessor    : public AudioProcessor,
                                           public AudioProcessorARAExtension
@@ -29,6 +31,7 @@ public:
    #endif
 
     void processBlock (AudioBuffer<float>&, MidiBuffer&) override;
+    bool didProcessBlockSucceed() override { return lastProcessBlockSucceeded; };
 
     //==============================================================================
     AudioProcessorEditor* createEditor() override;
@@ -57,6 +60,15 @@ public:
 
 private:
     AudioPlayHead::CurrentPositionInfo lastPositionInfo;
+
+    // map of audio sources to buffering audio source readers
+    // we'll use them to pull ARA samples from the host as we render
+    std::map<ARAAudioSource*, std::unique_ptr<AudioFormatReader>> audioSourceReaders;
+
+    // temp buffers to use for summing signals if rendering multiple regions
+    std::unique_ptr<AudioBuffer<float>> tempBuffer;
+
+    bool lastProcessBlockSucceeded = true;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectAudioProcessor)
 };
