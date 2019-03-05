@@ -50,8 +50,8 @@ struct ProcessSpec
 //==============================================================================
 /**
     This is a handy base class for the state of a processor (such as parameter values)
-    which is typically shared among several procoessors. This is useful to for
-    multi-mono filters which share the same state among several mono processors.
+    which is typically shared among several processors. This is useful for multi-mono
+    filters which share the same state among several mono processors.
 
     @tags{DSP}
 */
