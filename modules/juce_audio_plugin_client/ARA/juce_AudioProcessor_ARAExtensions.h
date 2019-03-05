@@ -51,10 +51,6 @@ public:
     /** Returns true if plugin instance fulfills the ARAEditorView role. */
     bool isARAEditorView() const noexcept { return getARAEditorView() != nullptr; }
 
-    /** Returns the ARA document controller (provided the plugin instance is bound to ARA). */
-    template<typename DocumentController_t = ARADocumentController>
-    DocumentController_t* getARADocumentController() const noexcept { return araPlugInExtension != nullptr ? static_cast<DocumentController_t*> (araPlugInExtension->getDocumentController()) : nullptr; }
-
 private:
     std::unique_ptr<const ARA::PlugIn::PlugInExtension> araPlugInExtension;
 
@@ -80,10 +76,6 @@ public:
     
     /** \copydoc AudioProcessorARAExtension::isARAEditorView */
     bool isARAEditorView() const noexcept { return getARAEditorView() != nullptr; }
-
-    /** \copydoc AudioProcessorARAExtension::getARADocumentController */
-    template<typename DocumentController_t = ARADocumentController>
-    DocumentController_t* getARADocumentController() const noexcept { return araProcessorExtension != nullptr ? araProcessorExtension->getARADocumentController<DocumentController_t>() : nullptr; }
 
 private:
     AudioProcessorARAExtension* araProcessorExtension;

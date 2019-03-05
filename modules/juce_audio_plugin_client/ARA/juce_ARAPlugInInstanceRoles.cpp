@@ -24,7 +24,6 @@ void ARAPlaybackRenderer::prepareToPlay (double newSampleRate, int newNumChannel
 {
     ARARendererBase::prepareToPlay (newSampleRate, newNumChannels, newMaxSamplesPerBlock);
     preparedForRealtime = mayBeRealtime;
-    ARA::PlugIn::PlaybackRenderer::setRendering (true);
 }
 
 bool ARAPlaybackRenderer::processBlock (AudioBuffer<float>& buffer, int64 /*timeInSamples*/, bool /*isPlayingBack*/, bool isNonRealtime)
@@ -37,7 +36,6 @@ bool ARAPlaybackRenderer::processBlock (AudioBuffer<float>& buffer, int64 /*time
 
 void ARAPlaybackRenderer::releaseResources()
 {
-    ARA::PlugIn::PlaybackRenderer::setRendering (false);
     preparedForRealtime = false;
     ARARendererBase::releaseResources();
 }
@@ -51,6 +49,20 @@ void ARAPlaybackRenderer::removePlaybackRegion (ARAPlaybackRegion* playbackRegio
 {
     ARA::PlugIn::PlaybackRenderer::removePlaybackRegion (ARA::PlugIn::toRef (playbackRegion));
 }
+
+#if ARA_VALIDATE_API_CALLS
+void ARAPlaybackRenderer::addPlaybackRegion (ARA::ARAPlaybackRegionRef playbackRegionRef) noexcept
+{
+    ARA_VALIDATE_API_STATE (! isPrepared());
+    ARA::PlugIn::PlaybackRenderer::addPlaybackRegion (playbackRegionRef);
+}
+
+void ARAPlaybackRenderer::removePlaybackRegion (ARA::ARAPlaybackRegionRef playbackRegionRef) noexcept
+{
+    ARA_VALIDATE_API_STATE (! isPrepared());
+    ARA::PlugIn::PlaybackRenderer::removePlaybackRegion (playbackRegionRef);
+}
+#endif
 
 //==============================================================================
 

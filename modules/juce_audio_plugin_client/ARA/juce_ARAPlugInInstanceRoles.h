@@ -103,6 +103,11 @@ public:
     */
     void removePlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
 
+#if ARA_VALIDATE_API_CALLS
+    virtual void addPlaybackRegion (ARA::ARAPlaybackRegionRef playbackRegionRef) noexcept override;
+    virtual void removePlaybackRegion (ARA::ARAPlaybackRegionRef playbackRegionRef) noexcept override;
+#endif
+
 private:
     bool preparedForRealtime;
 

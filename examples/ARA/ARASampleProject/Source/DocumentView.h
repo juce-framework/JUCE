@@ -73,7 +73,7 @@ public:
     EditorView_t* getARAEditorView() const noexcept { return araExtension.getARAEditorView<EditorView_t>(); }
 
     template<typename DocumentController_t = ARADocumentController>
-    DocumentController_t* getARADocumentController() const noexcept { return araExtension.getARADocumentController<DocumentController_t>(); }
+    DocumentController_t* getARADocumentController() const noexcept { return getARAEditorView()->getDocumentController<DocumentController_t>(); }
 
     // total time range
     Range<double> getTimeRange() const { return timeRange; }
