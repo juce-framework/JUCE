@@ -45,6 +45,20 @@ void Logger::writeToLog (const String& message)
         outputDebugString (message);
 }
 
+void Logger::print10000thCommitMessage()
+{
+    writeToLog (R"CAKE(
+
+         )  (  )  (
+        (^)(^)(^)(^)
+        _i__i__i__i_
+       (____________)
+       |####10000###|
+       (____________)
+
+    )CAKE");
+}
+
 #if JUCE_LOG_ASSERTIONS || JUCE_DEBUG
 void JUCE_API JUCE_CALLTYPE logAssertion (const char* const filename, const int lineNum) noexcept
 {
