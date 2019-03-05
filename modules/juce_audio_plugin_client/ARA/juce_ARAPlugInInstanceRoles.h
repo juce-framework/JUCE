@@ -23,22 +23,6 @@ public:
 //  void setAudioProcessor (AudioProcessor* processor) { audioProcessor = processor; }
 //  AudioProcessor* getAudioProcessor() const { return audioProcessor; };
 
-    /** Add a playback region to the renderer
-        
-        Only to be called if using a playback renderer created internally, i.e. not by the host.
-    
-        @param playbackRegion The playback region to add to the renderer instance. 
-    */
-    void addPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
-
-    /** Remove a playback region from the renderer
-
-        Only to be called if using a playback renderer created internally, i.e. not by the host.
-
-        @param playbackRegion The playback region to remove from the renderer instance.
-    */
-    void removePlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept;
-
 // TODO JUCE_ARA see definition of these in .cpp
 //#if ARA_VALIDATE_API_CALLS
 //    void addPlaybackRegion (ARA::ARAPlaybackRegionRef playbackRegionRef) noexcept override;

@@ -5,16 +5,6 @@ namespace juce
 
 //==============================================================================
 
-void ARAPlaybackRenderer::addPlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept
-{
-    ARA::PlugIn::PlaybackRenderer::addPlaybackRegion (ARA::PlugIn::toRef (playbackRegion));
-}
-
-void ARAPlaybackRenderer::removePlaybackRegion (ARAPlaybackRegion* playbackRegion) noexcept
-{
-    ARA::PlugIn::PlaybackRenderer::removePlaybackRegion (ARA::PlugIn::toRef (playbackRegion));
-}
-
 // TODO JUCE_ARA while there is prepareToPlay()/releaseRessources() in AudioProcessor,
 //       this state is not tracked and there is no getter for it.
 //#if ARA_VALIDATE_API_CALLS
