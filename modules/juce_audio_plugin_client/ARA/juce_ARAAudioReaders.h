@@ -128,12 +128,11 @@ public:
     int64 startInSamples = 0;
 
 protected:
-    ARAPlaybackRenderer* getPlaybackRenderer() const { return dynamic_cast<AudioProcessorARAExtension*> (audioProcessor.get())->getARAPlaybackRenderer(); }
-
     bool getCurrentPosition (CurrentPositionInfo& result) override;
 
 private:
     std::unique_ptr<AudioProcessor> audioProcessor;
+    AudioProcessorARAExtension* audioProcessorAraExtension; // cache of dynamic_cast<AudioProcessorARAExtension*> (audioProcessor)
     int64 renderPosition = 0;
     static MidiBuffer dummyMidiBuffer;
     ReadWriteLock lock;
