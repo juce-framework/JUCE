@@ -174,7 +174,8 @@ void ProjucerApplication::handleAsyncUpdate()
     MenuBarModel::setMacMainMenu (menuModel.get(), &extraAppleMenuItems); //, "Open Recent");
    #endif
 
-    versionChecker.reset (new LatestVersionChecker());
+    if (getGlobalProperties().getValue (Ids::dontQueryForUpdate, {}).isEmpty())
+        LatestVersionCheckerAndUpdater::getInstance()->checkForNewVersion (false);
 
     if (licenseController != nullptr)
     {
@@ -217,7 +218,6 @@ void ProjucerApplication::shutdown()
         Logger::writeToLog ("Server shutdown cleanly");
     }
 
-    versionChecker.reset();
     utf8Window.reset();
     svgPathWindow.reset();
     aboutWindow.reset();
@@ -438,6 +438,7 @@ void ProjucerApplication::createFileMenu (PopupMenu& menu)
     #if ! JUCE_MAC
       menu.addCommandItem (commandManager.get(), CommandIDs::showAboutWindow);
       menu.addCommandItem (commandManager.get(), CommandIDs::showAppUsageWindow);
+      menu.addCommandItem (commandManager.get(), CommandIDs::checkForNewVersion);
       menu.addCommandItem (commandManager.get(), CommandIDs::showGlobalPathsWindow);
       menu.addSeparator();
       menu.addCommandItem (commandManager.get(), StandardApplicationCommandIDs::quit);
@@ -589,6 +590,7 @@ void ProjucerApplication::createExtraAppleMenuItems (PopupMenu& menu)
 {
     menu.addCommandItem (commandManager.get(), CommandIDs::showAboutWindow);
     menu.addCommandItem (commandManager.get(), CommandIDs::showAppUsageWindow);
+    menu.addCommandItem (commandManager.get(), CommandIDs::checkForNewVersion);
     menu.addSeparator();
     menu.addCommandItem (commandManager.get(), CommandIDs::showGlobalPathsWindow);
 }
@@ -1000,6 +1002,7 @@ void ProjucerApplication::getAllCommands (Array <CommandID>& commands)
                               CommandIDs::showSVGPathTool,
                               CommandIDs::showAboutWindow,
                               CommandIDs::showAppUsageWindow,
+                              CommandIDs::checkForNewVersion,
                               CommandIDs::showForum,
                               CommandIDs::showAPIModules,
                               CommandIDs::showAPIClasses,
@@ -1090,6 +1093,10 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
         result.setInfo ("Application Usage Data", "Shows the application usage data agreement window", CommandCategories::general, 0);
         break;
 
+    case CommandIDs::checkForNewVersion:
+        result.setInfo ("Check for New Version...", "Checks the web server for a new version of JUCE", CommandCategories::general, 0);
+        break;
+
     case CommandIDs::showForum:
         result.setInfo ("JUCE Community Forum", "Shows the JUCE community forum in a browser", CommandCategories::general, 0);
         break;
@@ -1149,6 +1156,7 @@ bool ProjucerApplication::perform (const InvocationInfo& info)
         case CommandIDs::showGlobalPathsWindow:     showPathsWindow (false); break;
         case CommandIDs::showAboutWindow:           showAboutWindow(); break;
         case CommandIDs::showAppUsageWindow:        showApplicationUsageDataAgreementPopup(); break;
+        case CommandIDs::checkForNewVersion:        LatestVersionCheckerAndUpdater::getInstance()->checkForNewVersion (true); break;
         case CommandIDs::showForum:                 launchForumBrowser(); break;
         case CommandIDs::showAPIModules:            launchModulesBrowser(); break;
         case CommandIDs::showAPIClasses:            launchClassesBrowser(); break;

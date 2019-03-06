@@ -123,7 +123,6 @@ public:
     void launchTutorialsBrowser();
 
     void updateAllBuildTabs();
-    LatestVersionChecker* createVersionChecker() const;
 
     //==============================================================================
     void licenseStateChanged (const LicenseState&) override;
@@ -196,7 +195,6 @@ private:
     //==============================================================================
     void* server = nullptr;
 
-    std::unique_ptr<LatestVersionChecker> versionChecker;
     TooltipWindow tooltipWindow;
 
     AvailableModuleList jucePathModuleList, userPathsModuleList;
