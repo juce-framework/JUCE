@@ -1695,14 +1695,13 @@ public:
     }
    #endif
 
-    bool loadStateData (const void* data, int size)
+    void loadStateData (const void* data, int size)
     {
        #if JUCE_VST3_CAN_REPLACE_VST2
-        return loadVST2CompatibleState ((const char*) data, size);
-       #else
-        setStateInformation (data, size);
-        return true;
+        if (loadVST2CompatibleState ((const char*) data, size))
+            return;
        #endif
+        setStateInformation (data, size);
     }
 
     bool readFromMemoryStream (IBStream* state)
@@ -1735,7 +1734,8 @@ public:
                 if (block.getSize() >= 5 && memcmp (block.getData(), "VC2!E", 5) == 0)
                     return false;
 
-            return loadStateData (block.getData(), (int) block.getSize());
+            loadStateData (block.getData(), (int) block.getSize());
+            return true;
         }
 
         return false;
@@ -1763,8 +1763,11 @@ public:
 
         const size_t dataSize = allData.getDataSize();
 
-        return dataSize > 0 && dataSize < 0x7fffffff
-                && loadStateData (allData.getData(), (int) dataSize);
+        if (dataSize <= 0 || dataSize >= 0x7fffffff)
+            return false;
+
+        loadStateData (allData.getData(), (int) dataSize);
+        return true;
     }
 
     tresult PLUGIN_API setState (IBStream* state) override
