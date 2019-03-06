@@ -1819,20 +1819,19 @@ MidiInput* MidiInput::openDevice (const String& deviceIdentifier, MidiInputCallb
     if (deviceIdentifier.isEmpty() || callback == nullptr)
         return nullptr;
 
-    MidiInput input ({}, {});
+    std::unique_ptr<MidiInput> in (new MidiInput ({}, deviceIdentifier));
     std::unique_ptr<MidiServiceType::InputWrapper> wrapper;
 
     try
     {
-        wrapper.reset (MidiService::getService().createInputWrapper (input, deviceIdentifier, *callback));
+        wrapper.reset (MidiService::getService().createInputWrapper (*in, deviceIdentifier, *callback));
     }
     catch (std::runtime_error&)
     {
         return nullptr;
     }
 
-    std::unique_ptr<MidiInput> in;
-    in.reset (new MidiInput (wrapper->getDeviceName(), deviceIdentifier));
+    in->setName (wrapper->getDeviceName());
     in->internal = wrapper.release();
 
     return in.release();
