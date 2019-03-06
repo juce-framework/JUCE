@@ -439,6 +439,25 @@ AudioIODeviceType* AudioDeviceManager::getCurrentDeviceTypeObject() const
     return availableDeviceTypes.getFirst();
 }
 
+static void updateSetupChannels (AudioDeviceManager::AudioDeviceSetup& setup, int defaultNumIns, int defaultNumOuts)
+{
+    auto updateChannels = [](const String& deviceName, BigInteger& channels, int defaultNumChannels)
+    {
+        if (deviceName.isEmpty())
+        {
+            channels.clear();
+        }
+        else if (defaultNumChannels != -1)
+        {
+            channels.clear();
+            channels.setRange (0, defaultNumChannels, true);
+        }
+    };
+
+    updateChannels (setup.inputDeviceName,  setup.inputChannels,  setup.useDefaultInputChannels  ? defaultNumIns  : -1);
+    updateChannels (setup.outputDeviceName, setup.outputChannels, setup.useDefaultOutputChannels ? defaultNumOuts : -1);
+}
+
 String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup,
                                                 bool treatAsChosenDevice)
 {
@@ -447,20 +466,7 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
     if (newSetup == currentSetup && currentAudioDevice != nullptr)
         return {};
 
-    if (! (newSetup == currentSetup))
-        sendChangeMessage();
-
-    stopDevice();
-
-    if (! newSetup.useDefaultInputChannels)
-        numInputChansNeeded = newSetup.inputChannels.countNumberOfSetBits();
-
-    if (! newSetup.useDefaultOutputChannels)
-        numOutputChansNeeded = newSetup.outputChannels.countNumberOfSetBits();
-
-    auto* type = getCurrentDeviceTypeObject();
-
-    if (type == nullptr)
+    if (getCurrentDeviceTypeObject() == nullptr)
     {
         deleteCurrentDevice();
 
@@ -470,6 +476,11 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
         return {};
     }
 
+    stopDevice();
+
+    if (newSetup != currentSetup)
+        sendChangeMessage();
+
     String error;
 
     if (currentSetup.inputDeviceName  != newSetup.inputDeviceName
@@ -478,6 +489,8 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
     {
         deleteCurrentDevice();
         scanDevicesIfNeeded();
+
+        auto* type = getCurrentDeviceTypeObject();
 
         if (newSetup.outputDeviceName.isNotEmpty() && ! deviceListContains (type, false, newSetup.outputDeviceName))
             return "No such device: " + newSetup.outputDeviceName;
@@ -499,32 +512,16 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
             deleteCurrentDevice();
             return error;
         }
-
-        if (newSetup.useDefaultInputChannels)
-        {
-            inputChannels.clear();
-            inputChannels.setRange (0, numInputChansNeeded, true);
-        }
-
-        if (newSetup.useDefaultOutputChannels)
-        {
-            outputChannels.clear();
-            outputChannels.setRange (0, numOutputChansNeeded, true);
-        }
-
-        if (newSetup.inputDeviceName.isEmpty())  inputChannels.clear();
-        if (newSetup.outputDeviceName.isEmpty()) outputChannels.clear();
     }
-
-    if (! newSetup.useDefaultInputChannels)
-        inputChannels = newSetup.inputChannels;
-
-    if (! newSetup.useDefaultOutputChannels)
-        outputChannels = newSetup.outputChannels;
 
     currentSetup = newSetup;
 
-    if (inputChannels.isZero() && outputChannels.isZero())
+    if (! currentSetup.useDefaultInputChannels)    numInputChansNeeded  = currentSetup.inputChannels.countNumberOfSetBits();
+    if (! currentSetup.useDefaultOutputChannels)   numOutputChansNeeded = currentSetup.outputChannels.countNumberOfSetBits();
+
+    updateSetupChannels (currentSetup, numInputChansNeeded, numOutputChansNeeded);
+
+    if (currentSetup.inputChannels.isZero() && currentSetup.outputChannels.isZero())
     {
         if (treatAsChosenDevice)
             updateXml();
@@ -532,11 +529,11 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
         return {};
     }
 
-    currentSetup.sampleRate = chooseBestSampleRate (newSetup.sampleRate);
-    currentSetup.bufferSize = chooseBestBufferSize (newSetup.bufferSize);
+    currentSetup.sampleRate = chooseBestSampleRate (currentSetup.sampleRate);
+    currentSetup.bufferSize = chooseBestBufferSize (currentSetup.bufferSize);
 
-    error = currentAudioDevice->open (inputChannels,
-                                      outputChannels,
+    error = currentAudioDevice->open (currentSetup.inputChannels,
+                                      currentSetup.outputChannels,
                                       currentSetup.sampleRate,
                                       currentSetup.bufferSize);
 
