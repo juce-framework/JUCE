@@ -1754,7 +1754,14 @@ public:
             {
                 if (AudioProcessor* filter = static_cast<AudioProcessor*> (pointers[0]))
                     if (AudioProcessorEditor* editorComp = filter->createEditorIfNeeded())
+                    {
+                       #if JucePlugin_Enable_ARA
+                        jassert (dynamic_cast<AudioProcessorEditorARAExtension*> (editorComp) != nullptr);
+                        // for proper view embedding, ARA plug-ins must be resizable
+                        jassert (editorComp->isResizable());
+                       #endif
                         return EditorCompHolder::createViewFor (filter, static_cast<JuceAU*> (pointers[1]), editorComp);
+                    }
             }
 
             return nil;
