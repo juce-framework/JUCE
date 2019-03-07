@@ -224,6 +224,7 @@ void MidiOutput::run()
              expect (device->getName() == testDeviceName);
          }
 
+        #if JUCE_MODAL_LOOPS_PERMITTED
          auto testMessage = MidiMessage::noteOn (5, 12, (uint8) 51);
 
          beginTest ("send messages");
@@ -252,6 +253,8 @@ void MidiOutput::run()
 
              midiInput->stop();
          }
+        #endif
+
         #endif
      }
  };
