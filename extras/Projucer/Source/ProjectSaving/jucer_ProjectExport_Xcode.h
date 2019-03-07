@@ -589,7 +589,7 @@ protected:
                            "The type of OSX binary that will be produced.");
             }
 
-            props.add (new TextPropertyComponent (customXcodeFlags, "Custom Xcode Flags", 8192, false),
+            props.add (new TextPropertyComponent (customXcodeFlags, "Custom Xcode Flags", 8192, true),
                        "A comma-separated list of custom Xcode setting flags which will be appended to the list of generated flags, "
                        "e.g. MACOSX_DEPLOYMENT_TARGET_i386 = 10.5, VALID_ARCHS = \"ppc i386 x86_64\"");
 
