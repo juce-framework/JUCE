@@ -17,6 +17,16 @@ const ARA::ARAPlugInExtensionInstance* AudioProcessorARAExtension::bindToARA (AR
 
     araPlugInExtension.reset (documentController->createPlugInExtensionWithRoles (knownRoles, assignedRoles));
 
+   #if (! JUCE_DISABLE_ASSERTIONS)
+    // validate proper subclassing of the instance role classes
+    if (isARAPlaybackRenderer())
+        jassert (dynamic_cast<ARAPlaybackRenderer*> (getARAPlaybackRenderer()) != nullptr);
+    if (isARAEditorRenderer())
+        jassert (dynamic_cast<ARAEditorRenderer*> (getARAEditorRenderer()) != nullptr);
+    if (isARAEditorView())
+        jassert (dynamic_cast<ARAEditorView*> (getARAEditorView()) != nullptr);
+   #endif
+
 // currently unused and disabled
 //  if (isARAPlaybackRenderer())
 //      getARAPlaybackRenderer()->setAudioProcessor (dynamic_cast<AudioProcessor*> (this));
