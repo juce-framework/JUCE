@@ -19,7 +19,10 @@ class ARAPlaybackRenderer     : public ARA::PlugIn::PlaybackRenderer
 public:
     using ARA::PlugIn::PlaybackRenderer::PlaybackRenderer;
 
-// TODO JUCE_ARA should we add this here for subclasses, even if it is currently unused?
+// TODO JUCE_ARA Should we add this here for subclasses? There is also didBindToARA(), which
+//               can provide this if needed. We could get rid of both renderer subclasses otherwise,
+//               in fact we could even go further and hide the instance roles entirely behind
+//               AudioProcessor(Editor)ARAExtension, which is maybe a good way reduce complexity?
 //  void setAudioProcessor (AudioProcessor* processor) { audioProcessor = processor; }
 //  AudioProcessor* getAudioProcessor() const { return audioProcessor; };
 

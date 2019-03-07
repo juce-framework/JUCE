@@ -23,6 +23,8 @@ const ARA::ARAPlugInExtensionInstance* AudioProcessorARAExtension::bindToARA (AR
 //  if (isARAEditorRenderer())
 //      getARAEditorRenderer()->setAudioProcessor (dynamic_cast<AudioProcessor*> (this));
 
+    didBindToARA();
+
     return araPlugInExtension->getInstance();
 }
 

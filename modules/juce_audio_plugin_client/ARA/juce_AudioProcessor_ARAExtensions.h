@@ -37,6 +37,11 @@ public:
     /** Called by the ARA Companion SDK code to bind the plugin instance to an ARA document. */
     const ARA::ARAPlugInExtensionInstance* bindToARA (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
 
+    /** Optional hook for derived classes to perform any additional ARA-specific initialization
+        of the AudioProcessor, or of the instance role objects (such as providing them with a
+        pointer to the AudioProcessor if needed). */
+    virtual void didBindToARA() {}
+
     /** Returns true if this plugin instance is bound to an ARA document. */
     bool isBoundToARA() const noexcept { return araPlugInExtension != nullptr; }
 
