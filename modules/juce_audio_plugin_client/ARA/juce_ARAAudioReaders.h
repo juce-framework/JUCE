@@ -5,6 +5,8 @@
 namespace juce
 {
 
+class AudioProcessor;
+
 // All these readers follow a common pattern of "invalidation":
 //
 // Whenever the samples they are reading are altered, the readers become invalid and will stop
@@ -97,11 +99,12 @@ class ARAPlaybackRegionReader  : public AudioFormatReader,
                                  private ARAPlaybackRegion::Listener
 {
 protected:
-    ARAPlaybackRegionReader (ARADocumentController* documentController, std::vector<ARAPlaybackRegion*> const& playbackRegions,
+    ARAPlaybackRegionReader (ARADocumentController* documentController, AudioProcessor* audioProcessor,
+                             std::vector<ARAPlaybackRegion*> const& playbackRegions,
                              bool alwaysNonRealtime, double playbackSampleRate, int channelCount, bool use64BitSamples);
 
 public:
-    /** Create an ARAPlaybackRegionReader instance to read all \p playbackRegions
+    /** Create an ARAPlaybackRegionReader instance to read the given \p playbackRegions
         @param playbackRegions The vector of playback regions that shall be read - must not be empty!
         @param alwaysNonRealtime Whether or not the samples need to be read in real time
         @param playbackSampleRate The sample rate at which to read (the first region's audio source sample rate will be used if left 0.0)
@@ -110,6 +113,15 @@ public:
     */
     ARAPlaybackRegionReader (std::vector<ARAPlaybackRegion*> const& playbackRegions, bool alwaysNonRealtime,
                              double playbackSampleRate = 0.0, int channelCount = 0, bool use64BitSamples = false);
+
+    /** Extended version of the regular c'tor that allows for additional customization if needed.
+        \copydoc ARAPlaybackRegionReader::ARAPlaybackRegionReader
+        @param audioProcessor A custom ARA-compatible audio processor used for rendering \p regionSequence's playback regions
+               the reader becomes the owner of the auidoProcessor
+    */
+    ARAPlaybackRegionReader (AudioProcessor* audioProcessor, std::vector<ARAPlaybackRegion*> const& playbackRegions, bool alwaysNonRealtime,
+                             double playbackSampleRate = 0.0, int channelCount = 0, bool use64BitSamples = false);
+
     virtual ~ARAPlaybackRegionReader();
 
     /** Returns true as long as any of the reader's underlying playback region's haven't changed. */
@@ -167,6 +179,15 @@ public:
     */
     ARARegionSequenceReader (ARARegionSequence* regionSequence, bool nonRealtime,
                              double playbackSampleRate = 0.0, int channelCount = 0, bool use64BitSamples = false);
+
+    /** Extended version of the regular c'tor that allows for additional customization if needed.
+        \copydoc ARARegionSequenceReader::ARARegionSequenceReader
+        @param audioProcessor A custom ARA-compatible audio processor used for rendering \p regionSequence's playback regions
+               the reader becomes the owner of the auidoProcessor
+    */
+    ARARegionSequenceReader (AudioProcessor* audioProcessor, ARARegionSequence* regionSequence, bool nonRealtime,
+                             double playbackSampleRate = 0.0, int channelCount = 0, bool use64BitSamples = false);
+
     virtual ~ARARegionSequenceReader();
 
     void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) override;

@@ -144,12 +144,13 @@ bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, 
 
 MidiBuffer ARAPlaybackRegionReader::dummyMidiBuffer;
 
-ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARADocumentController* documentController, std::vector<ARAPlaybackRegion*> const& playbackRegions,
+ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARADocumentController* documentController, AudioProcessor* processor,
+                                                  std::vector<ARAPlaybackRegion*> const& playbackRegions,
                                                   bool alwaysNonRealtime, double playbackSampleRate, int channelCount, bool use64BitSamples)
     : AudioFormatReader (nullptr, "ARAPlaybackRegionReader")
 {
-    audioProcessor.reset (createPluginFilter());
-    audioProcessorAraExtension = dynamic_cast<AudioProcessorARAExtension*> (audioProcessor.get());
+    audioProcessor.reset (processor);
+    audioProcessorAraExtension = dynamic_cast<AudioProcessorARAExtension*> (processor);
     jassert (audioProcessorAraExtension != nullptr);
     audioProcessorAraExtension->bindToARA (ARA::PlugIn::toRef (documentController),
                                            ARA::kARAPlaybackRendererRole | ARA::kARAEditorRendererRole | ARA::kARAEditorViewRole, ARA::kARAPlaybackRendererRole);
@@ -195,7 +196,7 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARADocumentController* documen
 ARAPlaybackRegionReader::ARAPlaybackRegionReader (std::vector<ARAPlaybackRegion*> const& playbackRegions, bool alwaysNonRealtime,
                                                   double playbackSampleRate /*= 0.0*/, int channelCount /*= 0*/, bool use64BitSamples /*= false*/)
     : ARAPlaybackRegionReader (playbackRegions.front()->getAudioModification()->getAudioSource()->getDocument()->getDocumentController<ARADocumentController>(),
-                                playbackRegions, alwaysNonRealtime, playbackSampleRate, channelCount, use64BitSamples)
+                               createPluginFilter(), playbackRegions, alwaysNonRealtime, playbackSampleRate, channelCount, use64BitSamples)
 {
 }
 
@@ -307,7 +308,14 @@ void ARAPlaybackRegionReader::willDestroyPlaybackRegion (ARAPlaybackRegion* play
 
 ARARegionSequenceReader::ARARegionSequenceReader (ARARegionSequence* regionSequence, bool nonRealtime,
                                                   double playbackSampleRate /*= 0.0*/, int channelCount /*= 0*/, bool use64BitSamples /*= false*/)
-    : ARAPlaybackRegionReader (regionSequence->getDocument()->getDocumentController<ARADocumentController>(),
+    : ARARegionSequenceReader (createPluginFilter(), regionSequence, nonRealtime,
+                               playbackSampleRate, channelCount, use64BitSamples)
+{
+}
+
+ARARegionSequenceReader::ARARegionSequenceReader (AudioProcessor* audioProcessor, ARARegionSequence* regionSequence, bool nonRealtime,
+                                                  double playbackSampleRate /*= 0.0*/, int channelCount /*= 0*/, bool use64BitSamples /*= false*/)
+    : ARAPlaybackRegionReader (regionSequence->getDocument()->getDocumentController<ARADocumentController>(), audioProcessor,
                                regionSequence->getPlaybackRegions<ARAPlaybackRegion>(),
                                nonRealtime, playbackSampleRate, channelCount, use64BitSamples),
       sequence (regionSequence)
