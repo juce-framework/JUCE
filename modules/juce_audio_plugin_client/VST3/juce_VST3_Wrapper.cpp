@@ -1537,7 +1537,7 @@ public:
     {
         if (pluginInstance->getBypassParameter() == nullptr)
         {
-            if (auto* bypassParam = comPluginInstance->getBypassParameter())
+            if (comPluginInstance->getBypassParameter() != nullptr)
             {
                 auto privateData = ValueTree::readFromData (data, static_cast<size_t> (sizeInBytes));
                 setBypassed (static_cast<bool> (privateData.getProperty ("Bypass", var (false))));
