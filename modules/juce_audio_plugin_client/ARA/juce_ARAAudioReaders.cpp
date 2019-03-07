@@ -1,7 +1,5 @@
 #include "juce_ARAAudioReaders.h"
 
-extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
-
 namespace juce
 {
 
@@ -196,7 +194,7 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARADocumentController* documen
 ARAPlaybackRegionReader::ARAPlaybackRegionReader (std::vector<ARAPlaybackRegion*> const& playbackRegions, bool alwaysNonRealtime,
                                                   double playbackSampleRate /*= 0.0*/, int channelCount /*= 0*/, bool use64BitSamples /*= false*/)
     : ARAPlaybackRegionReader (playbackRegions.front()->getAudioModification()->getAudioSource()->getDocument()->getDocumentController<ARADocumentController>(),
-                               createPluginFilter(), playbackRegions, alwaysNonRealtime, playbackSampleRate, channelCount, use64BitSamples)
+                               createPluginFilterOfType (PluginHostType::getPluginLoadedAs()), playbackRegions, alwaysNonRealtime, playbackSampleRate, channelCount, use64BitSamples)
 {
 }
 
@@ -308,7 +306,7 @@ void ARAPlaybackRegionReader::willDestroyPlaybackRegion (ARAPlaybackRegion* play
 
 ARARegionSequenceReader::ARARegionSequenceReader (ARARegionSequence* regionSequence, bool nonRealtime,
                                                   double playbackSampleRate /*= 0.0*/, int channelCount /*= 0*/, bool use64BitSamples /*= false*/)
-    : ARARegionSequenceReader (createPluginFilter(), regionSequence, nonRealtime,
+    : ARARegionSequenceReader (createPluginFilterOfType (PluginHostType::getPluginLoadedAs()), regionSequence, nonRealtime,
                                playbackSampleRate, channelCount, use64BitSamples)
 {
 }
