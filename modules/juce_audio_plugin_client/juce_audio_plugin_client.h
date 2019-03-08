@@ -121,4 +121,5 @@
  #include "ARA/juce_AudioProcessor_ARAExtensions.h"
  #include "ARA/juce_ARAAudioReaders.h"
  #include "ARA/juce_ARAPlugInInstanceRoles.h"
+ #include "ARA/juce_ARAStreams.h"
 #endif
