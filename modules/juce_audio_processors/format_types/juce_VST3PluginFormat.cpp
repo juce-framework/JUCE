@@ -1886,7 +1886,10 @@ public:
         cachedBusLayouts = getBusesLayout();
 
         warnOnFailure (holder->component->setActive (true));
-        warnOnFailure (processor->setProcessing (true));
+        auto result = processor->setProcessing (true);
+
+        if (result != kResultOk && result != kNotImplemented)
+            warnOnFailure (result);
 
         isActive = true;
     }
@@ -1901,7 +1904,12 @@ public:
         setStateForAllMidiBuses (false);
 
         if (processor != nullptr)
-            warnOnFailure (processor->setProcessing (false));
+        {
+            auto result = processor->setProcessing (false);
+
+            if (result != kResultOk && result != kNotImplemented)
+                warnOnFailure (result);
+        }
 
         if (holder->component != nullptr)
             warnOnFailure (holder->component->setActive (false));
@@ -2618,8 +2626,15 @@ private:
         Steinberg::MemoryStream stream;
 
         if (holder->component->getState (&stream) == kResultTrue)
+        {
             if (stream.seek (0, Steinberg::IBStream::kIBSeekSet, nullptr) == kResultTrue)
-                warnOnFailure (editController->setComponentState (&stream));
+            {
+                auto result = editController->setComponentState (&stream);
+
+                if (result != kResultOk && result != kNotImplemented)
+                    warnOnFailure (result);
+            }
+        }
     }
 
     void grabInformationObjects()
