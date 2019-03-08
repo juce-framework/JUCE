@@ -40,7 +40,7 @@ class GraphEditorPanel   : public Component,
 {
 public:
     GraphEditorPanel (FilterGraph& graph);
-    ~GraphEditorPanel();
+    ~GraphEditorPanel() override;
 
     void createNewPlugin (const PluginDescription&, Point<int> position);
 
@@ -107,7 +107,7 @@ public:
                             AudioDeviceManager& deviceManager,
                             KnownPluginList& pluginList);
 
-    ~GraphDocumentComponent();
+    ~GraphDocumentComponent() override;
 
     //==============================================================================
     void createNewPlugin (const PluginDescription&, Point<int> position);
