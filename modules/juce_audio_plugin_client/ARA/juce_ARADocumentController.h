@@ -104,8 +104,8 @@ protected:
     // Persistency Management
     // * Overriding these methods does not require calling the base class.
     // * You may override either the methods with JUCE streams or with the ARA SDK's archive reader/writer.
-    virtual bool restoreObjectsFromStream (InputStream& input, ARA::PlugIn::RestoreObjectsFilter* filter) noexcept;
-    virtual bool storeObjectsToStream (OutputStream& output, ARA::PlugIn::StoreObjectsFilter* filter) noexcept;
+    virtual bool doRestoreObjectsFromStream (InputStream& input, ARA::PlugIn::RestoreObjectsFilter* filter) noexcept;
+    virtual bool doStoreObjectsToStream (OutputStream& output, ARA::PlugIn::StoreObjectsFilter* filter) noexcept;
     bool doRestoreObjectsFromArchive (ARA::PlugIn::HostArchiveReader* archiveReader, ARA::PlugIn::RestoreObjectsFilter* filter) noexcept override;
     bool doStoreObjectsToArchive (ARA::PlugIn::HostArchiveWriter* archiveWriter, ARA::PlugIn::StoreObjectsFilter* filter) noexcept override;
 

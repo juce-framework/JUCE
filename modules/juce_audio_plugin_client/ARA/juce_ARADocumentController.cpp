@@ -162,12 +162,12 @@ void ARADocumentController::doNotifyModelUpdates() noexcept
 
 //==============================================================================
 
-bool ARADocumentController::restoreObjectsFromStream (InputStream& input, ARA::PlugIn::RestoreObjectsFilter* filter) noexcept
+bool ARADocumentController::doRestoreObjectsFromStream (InputStream& /*input*/, ARA::PlugIn::RestoreObjectsFilter* /*filter*/) noexcept
 {
     return true;
 }
 
-bool ARADocumentController::storeObjectsToStream (OutputStream& output, ARA::PlugIn::StoreObjectsFilter* filter) noexcept
+bool ARADocumentController::doStoreObjectsToStream (OutputStream& /*output*/, ARA::PlugIn::StoreObjectsFilter* /*filter*/) noexcept
 {
     return true;
 }
@@ -175,13 +175,13 @@ bool ARADocumentController::storeObjectsToStream (OutputStream& output, ARA::Plu
 bool ARADocumentController::doRestoreObjectsFromArchive (ARA::PlugIn::HostArchiveReader* archiveReader, ARA::PlugIn::RestoreObjectsFilter* filter) noexcept
 {
     ARAHostArchiveInputStream input (archiveReader);
-    return restoreObjectsFromStream (input, filter);
+    return doRestoreObjectsFromStream (input, filter);
 }
 
 bool ARADocumentController::doStoreObjectsToArchive (ARA::PlugIn::HostArchiveWriter* archiveWriter, ARA::PlugIn::StoreObjectsFilter* filter) noexcept
 {
     ARAHostArchiveOutputStream output (archiveWriter);
-    return storeObjectsToStream (output, filter);
+    return doStoreObjectsToStream(output, filter);
 }
 
 //==============================================================================
