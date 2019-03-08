@@ -53,6 +53,15 @@
  #if __has_warning("-Wcomma")
   #pragma clang diagnostic ignored "-Wcomma"
  #endif
+ #if __has_warning("-Wzero-as-null-pointer-constant")
+  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+ #endif
+ #if __has_warning("-Winconsistent-missing-destructor-override")
+  #pragma clang diagnostic ignored "-Winconsistent-missing-destructor-override"
+ #endif
+ #if __has_warning("-Wcast-align")
+  #pragma clang diagnostic ignored "-Wcast-align"
+ #endif
 #endif
 
 #undef DEVELOPMENT

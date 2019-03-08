@@ -40,7 +40,7 @@ class FilterGraph   : public FileBasedDocument,
 public:
     //==============================================================================
     FilterGraph (AudioPluginFormatManager&);
-    ~FilterGraph();
+    ~FilterGraph() override;
 
     //==============================================================================
     using NodeID = AudioProcessorGraph::NodeID;

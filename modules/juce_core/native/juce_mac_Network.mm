@@ -692,7 +692,7 @@ public:
         DelegateClass::setState (delegate, this);
     }
 
-    ~URLConnectionState()
+    ~URLConnectionState() override
     {
         stop();
 

@@ -35,7 +35,7 @@ class FilterIOConfigurationWindow   : public  AudioProcessorEditor
 {
 public:
     FilterIOConfigurationWindow (AudioProcessor&);
-    ~FilterIOConfigurationWindow();
+    ~FilterIOConfigurationWindow() override;
 
     //==============================================================================
     void paint (Graphics& g) override;

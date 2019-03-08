@@ -41,7 +41,7 @@ public:
     VST3PluginFormat();
 
     /** Destructor */
-    ~VST3PluginFormat();
+    ~VST3PluginFormat() override;
 
     //==============================================================================
     /** Attempts to reload a VST3 plugin's state from some preset file data.
