@@ -174,6 +174,8 @@ void ProjucerApplication::handleAsyncUpdate()
     MenuBarModel::setMacMainMenu (menuModel.get(), &extraAppleMenuItems); //, "Open Recent");
    #endif
 
+    versionChecker.reset (new LatestVersionChecker());
+
     if (licenseController != nullptr)
     {
         setAnalyticsEnabled (licenseController->getState().applicationUsageDataState == LicenseState::ApplicationUsageData::enabled);
