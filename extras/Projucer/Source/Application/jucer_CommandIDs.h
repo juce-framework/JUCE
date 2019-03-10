@@ -56,6 +56,7 @@ namespace CommandIDs
         showSVGPathTool         = 0x300023,
         showAboutWindow         = 0x300024,
         showAppUsageWindow      = 0x300025,
+        checkForNewVersion      = 0x300026,
 
         showProjectSettings     = 0x300030,
         showProjectTab          = 0x300031,

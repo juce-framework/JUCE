@@ -60,7 +60,7 @@ class MainHostWindow    : public DocumentWindow,
 public:
     //==============================================================================
     MainHostWindow();
-    ~MainHostWindow();
+    ~MainHostWindow() override;
 
     //==============================================================================
     void closeButtonPressed() override;

@@ -4,6 +4,30 @@ JUCE breaking changes
 Develop
 =======
 
+Change
+------
+The formatting of floating point numbers written to XML and JSON files has
+changed.
+
+Note that there is no change in precision - the XML and JSON files containing
+the new format numbers will parse in exactly the same way, it is only the
+string representation that has changed.
+
+Possible Issues
+---------------
+If you rely upon exactly reproducing XML or JSON files then the new files may
+be different.
+
+Workaround
+----------
+Update any reference XML or JSON files to use the new format.
+
+Rationale
+---------
+The new format retains full precision, provides a human friendly representation
+of values near 1, and uses scientific notation for small and large numbers.
+This prevents needless file size bloat from numbers like 0.00000000000000001.
+
 
 Version 5.4.3
 =============

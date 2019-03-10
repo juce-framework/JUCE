@@ -237,7 +237,8 @@ static inline AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::Speak
         case Steinberg::Vst::kSpeakerTrc:   return AudioChannelSet::topRearCentre;
         case Steinberg::Vst::kSpeakerTrr:   return AudioChannelSet::topRearRight;
         case Steinberg::Vst::kSpeakerLfe2:  return AudioChannelSet::LFE2;
-        case Steinberg::Vst::kSpeakerACN0:  return ((arr & Steinberg::Vst::kSpeakerC) != 0 ? AudioChannelSet::discreteChannel0 : AudioChannelSet::centre); /* kSpeakerACN0 */
+        case Steinberg::Vst::kSpeakerM:     return ((arr & Steinberg::Vst::kSpeakerC) != 0 ? AudioChannelSet::discreteChannel0 : AudioChannelSet::centre);
+        case Steinberg::Vst::kSpeakerACN0:  return AudioChannelSet::ambisonicACN0;
         case Steinberg::Vst::kSpeakerACN1:  return AudioChannelSet::ambisonicACN1;
         case Steinberg::Vst::kSpeakerACN2:  return AudioChannelSet::ambisonicACN2;
         case Steinberg::Vst::kSpeakerACN3:  return AudioChannelSet::ambisonicACN3;

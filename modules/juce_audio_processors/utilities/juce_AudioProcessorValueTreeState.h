@@ -543,7 +543,12 @@ private:
 
     const Identifier valueType { "PARAM" }, valuePropertyID { "value" }, idPropertyID { "id" };
 
-    std::map<String, std::unique_ptr<ParameterAdapter>> adapterTable;
+    struct StringRefLessThan final
+    {
+        bool operator() (StringRef a, StringRef b) const noexcept { return a.text.compare (b.text) < 0; }
+    };
+
+    std::map<StringRef, std::unique_ptr<ParameterAdapter>, StringRefLessThan> adapterTable;
 
     CriticalSection valueTreeChanging;
 

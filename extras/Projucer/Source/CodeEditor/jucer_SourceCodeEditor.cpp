@@ -69,7 +69,12 @@ void SourceCodeDocument::reloadInternal()
     auto lineFeed = getLineFeedForFile (fileContent);
 
     if (lineFeed.isEmpty())
-        lineFeed = project->getProjectLineFeed();
+    {
+        if (project != nullptr)
+            lineFeed = project->getProjectLineFeed();
+        else
+            lineFeed = "\r\n";
+    }
 
     codeDoc->setNewLineCharacters (lineFeed);
 

@@ -133,6 +133,9 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 
 #if JUCE_CLANG
  #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+ #if __has_warning("-Wcast-align")
+  #pragma clang diagnostic ignored "-Wcast-align"
+ #endif
 #endif
 
 #include "format/juce_AudioPluginFormat.cpp"
@@ -151,6 +154,11 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 #include "scanning/juce_KnownPluginList.cpp"
 #include "scanning/juce_PluginDirectoryScanner.cpp"
 #include "scanning/juce_PluginListComponent.cpp"
-#include "utilities/juce_AudioProcessorParameters.cpp"
 #include "processors/juce_AudioProcessorParameterGroup.cpp"
+#include "utilities/juce_AudioProcessorParameterWithID.cpp"
+#include "utilities/juce_RangedAudioParameter.cpp"
+#include "utilities/juce_AudioParameterFloat.cpp"
+#include "utilities/juce_AudioParameterInt.cpp"
+#include "utilities/juce_AudioParameterBool.cpp"
+#include "utilities/juce_AudioParameterChoice.cpp"
 #include "utilities/juce_AudioProcessorValueTreeState.cpp"

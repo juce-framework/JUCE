@@ -43,8 +43,7 @@ public:
     RangedAudioParameter (const String& parameterID,
                           const String& name,
                           const String& label = {},
-                          Category category = AudioProcessorParameter::genericParameter)
-        : AudioProcessorParameterWithID (parameterID, name, label, category) {}
+                          Category category = AudioProcessorParameter::genericParameter);
 
     /** Returns the range of values that the parameter can take. */
     virtual const NormalisableRange<float>& getNormalisableRange() const = 0;
@@ -53,29 +52,13 @@ public:
         If you are using lambda functions to define the normalisable range's snapping behaviour
         then you should override this function so that it returns the number of snapping points.
     */
-    int getNumSteps() const override
-    {
-        const auto& range = getNormalisableRange();
-
-        if (range.interval > 0)
-            return (static_cast<int> ((range.end - range.start) / range.interval) + 1);
-
-        return AudioProcessor::getDefaultNumParameterSteps();
-    }
+    int getNumSteps() const override;
 
     /** Normalises and snaps a value based on the normalisable range. */
-    float convertTo0to1 (float v) const noexcept
-    {
-        const auto& range = getNormalisableRange();
-        return range.convertTo0to1 (range.snapToLegalValue (v));
-    }
+    float convertTo0to1 (float v) const noexcept;
 
     /** Denormalises and snaps a value based on the normalisable range. */
-    float convertFrom0to1 (float v) const noexcept
-    {
-        const auto& range = getNormalisableRange();
-        return range.snapToLegalValue (range.convertFrom0to1 (jlimit (0.0f, 1.0f, v)));
-    }
+    float convertFrom0to1 (float v) const noexcept;
 };
 
 } // namespace juce

@@ -532,8 +532,21 @@ public:
 
     void blockReset() override
     {
-        if (buildAndSendPacket<32> ([] (BlocksProtocol::HostPacketBuilder<32>& p)
-                                    { return p.addBlockReset(); }))
+        bool messageSent = false;
+
+        if (isMasterBlock())
+        {
+            sendMessage (BlocksProtocol::SpecialMessageFromHost::resetMaster,
+                         sizeof (BlocksProtocol::SpecialMessageFromHost::resetMaster));
+            messageSent = true;
+        }
+        else
+        {
+            messageSent = buildAndSendPacket<32> ([] (BlocksProtocol::HostPacketBuilder<32>& p)
+                                                  { return p.addBlockReset(); });
+        }
+
+        if (messageSent)
         {
             hasBeenPowerCycled = true;
 

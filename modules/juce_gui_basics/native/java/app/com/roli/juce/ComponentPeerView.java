@@ -240,7 +240,7 @@ public final class ComponentPeerView extends ViewGroup
                 return super.onKeyDown (keyCode, event);
             case KeyEvent.KEYCODE_BACK:
             {
-                ((Activity) getContext ()).onBackPressed ();
+                backButtonPressed();
                 return true;
             }
 

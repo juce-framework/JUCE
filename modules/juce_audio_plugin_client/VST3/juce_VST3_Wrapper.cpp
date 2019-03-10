@@ -1370,6 +1370,7 @@ public:
         short configs[][2] = { JucePlugin_PreferredChannelConfigurations };
         const int numConfigs = sizeof (configs) / sizeof (short[2]);
 
+        ignoreUnused (numConfigs);
         jassert (numConfigs > 0 && (configs[0][0] > 0 || configs[0][1] > 0));
 
         pluginInstance->setPlayConfigDetails (configs[0][0], configs[0][1], 44100.0, 1024);
@@ -1568,7 +1569,7 @@ public:
     {
         if (pluginInstance->getBypassParameter() == nullptr)
         {
-            if (auto* bypassParam = comPluginInstance->getBypassParameter())
+            if (comPluginInstance->getBypassParameter() != nullptr)
             {
                 auto privateData = ValueTree::readFromData (data, static_cast<size_t> (sizeInBytes));
                 setBypassed (static_cast<bool> (privateData.getProperty ("Bypass", var (false))));
@@ -1726,14 +1727,13 @@ public:
     }
    #endif
 
-    bool loadStateData (const void* data, int size)
+    void loadStateData (const void* data, int size)
     {
        #if JUCE_VST3_CAN_REPLACE_VST2
-        return loadVST2CompatibleState ((const char*) data, size);
-       #else
-        setStateInformation (data, size);
-        return true;
+        if (loadVST2CompatibleState ((const char*) data, size))
+            return;
        #endif
+        setStateInformation (data, size);
     }
 
     bool readFromMemoryStream (IBStream* state)
@@ -1766,7 +1766,8 @@ public:
                 if (block.getSize() >= 5 && memcmp (block.getData(), "VC2!E", 5) == 0)
                     return false;
 
-            return loadStateData (block.getData(), (int) block.getSize());
+            loadStateData (block.getData(), (int) block.getSize());
+            return true;
         }
 
         return false;
@@ -1794,8 +1795,11 @@ public:
 
         const size_t dataSize = allData.getDataSize();
 
-        return dataSize > 0 && dataSize < 0x7fffffff
-                && loadStateData (allData.getData(), (int) dataSize);
+        if (dataSize <= 0 || dataSize >= 0x7fffffff)
+            return false;
+
+        loadStateData (allData.getData(), (int) dataSize);
+        return true;
     }
 
     tresult PLUGIN_API setState (IBStream* state) override

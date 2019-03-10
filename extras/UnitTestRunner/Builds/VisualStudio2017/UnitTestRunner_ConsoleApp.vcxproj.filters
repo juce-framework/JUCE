@@ -619,10 +619,10 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\audio_io\juce_AudioIODeviceType.cpp">
       <Filter>JUCE Modules\juce_audio_devices\audio_io</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\juce_MidiMessageCollector.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\juce_MidiDevices.cpp">
       <Filter>JUCE Modules\juce_audio_devices\midi_io</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\juce_MidiOutput.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\juce_MidiMessageCollector.cpp">
       <Filter>JUCE Modules\juce_audio_devices\midi_io</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\juce_android_Audio.cpp">
@@ -973,10 +973,25 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\scanning\juce_PluginListComponent.cpp">
       <Filter>JUCE Modules\juce_audio_processors\scanning</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioProcessorParameters.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioParameterBool.cpp">
+      <Filter>JUCE Modules\juce_audio_processors\utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioParameterChoice.cpp">
+      <Filter>JUCE Modules\juce_audio_processors\utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioParameterFloat.cpp">
+      <Filter>JUCE Modules\juce_audio_processors\utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioParameterInt.cpp">
+      <Filter>JUCE Modules\juce_audio_processors\utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioProcessorParameterWithID.cpp">
       <Filter>JUCE Modules\juce_audio_processors\utilities</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioProcessorValueTreeState.cpp">
+      <Filter>JUCE Modules\juce_audio_processors\utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_RangedAudioParameter.cpp">
       <Filter>JUCE Modules\juce_audio_processors\utilities</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\juce_audio_processors.cpp">
@@ -2751,13 +2766,10 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\audio_io\juce_SystemAudioVolume.h">
       <Filter>JUCE Modules\juce_audio_devices\audio_io</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\juce_MidiInput.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\juce_MidiDevices.h">
       <Filter>JUCE Modules\juce_audio_devices\midi_io</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\juce_MidiMessageCollector.h">
-      <Filter>JUCE Modules\juce_audio_devices\midi_io</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\juce_MidiOutput.h">
       <Filter>JUCE Modules\juce_audio_devices\midi_io</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\juce_ios_Audio.h">

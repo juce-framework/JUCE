@@ -40,7 +40,7 @@ class JUCE_API  AudioUnitPluginFormat   : public AudioPluginFormat
 public:
     //==============================================================================
     AudioUnitPluginFormat();
-    ~AudioUnitPluginFormat();
+    ~AudioUnitPluginFormat() override;
 
     //==============================================================================
     String getName() const override                { return "AudioUnit"; }

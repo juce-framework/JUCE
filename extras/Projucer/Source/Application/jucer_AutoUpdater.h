@@ -26,81 +26,35 @@
 
 #pragma once
 
-class UpdaterDialogModalCallback;
+class DownloadAndInstallThread;
 
-//==============================================================================
-class LatestVersionChecker  : private Thread,
-                              private Timer
+class LatestVersionCheckerAndUpdater   : public DeletedAtShutdown,
+                                         private Thread
 {
 public:
-    struct JuceVersionTriple
-    {
-        JuceVersionTriple();
-        JuceVersionTriple (int juceVersionNumber);
-        JuceVersionTriple (int majorInt, int minorInt, int buildNumber);
+    LatestVersionCheckerAndUpdater();
+    ~LatestVersionCheckerAndUpdater() override;
 
-        static bool fromString (const String& versionString, JuceVersionTriple& result);
-        String toString() const;
-
-        bool operator> (const JuceVersionTriple& b) const noexcept;
-
-        int major, minor, build;
-    };
+    void checkForNewVersion (bool showAlerts);
 
     //==============================================================================
-    struct JuceServerLocationsAndKeys
-    {
-        const char* updateSeverHostname;
-        const char* publicAPIKey;
-        int apiVersion;
-        const char* updatePath;
-    };
-
-    //==============================================================================
-    LatestVersionChecker();
-    ~LatestVersionChecker() override;
-
-    static String getOSString();
-
-    URL getLatestVersionURL (String& headers, const String& path) const;
-    URL getLatestVersionURL (String& headers) const;
-
-    void checkForNewVersion();
-    bool processResult (var reply, const String& downloadPath);
-
-    bool askUserAboutNewVersion (const JuceVersionTriple& version,
-                                 const String& releaseNotes,
-                                 URL& newVersionToDownload,
-                                 const String& extraHeaders);
-
-    void askUserForLocationToDownload (URL& newVersionToDownload, const String& extraHeaders);
-
-    static bool isZipFolder (const File&);
-
-    virtual Result performUpdate (const MemoryBlock& data, File& targetFolder);
-
-protected:
-    const JuceServerLocationsAndKeys& getJuceServerURLsAndKeys() const;
-    int getProductVersionNumber() const;
-    const char* getProductName() const;
-    bool allowCustomLocation() const;
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (LatestVersionCheckerAndUpdater)
 
 private:
     //==============================================================================
-    friend class UpdaterDialogModalCallback;
-
-    // callbacks
-    void timerCallback() override;
     void run() override;
-    void modalStateFinished (int result,
-                             URL& newVersionToDownload,
-                             const String& extraHeaders,
-                             File appParentFolder);
+    void queryUpdateServer();
+    void processResult();
+    void askUserAboutNewVersion (const String&, const String&);
+    void askUserForLocationToDownload();
+    void downloadAndInstall (const File&);
 
-    int statusCode;
+    //==============================================================================
+    bool showAlertWindows = false;
+    int statusCode = 0;
+    String relativeDownloadPath;
     var jsonReply;
-    bool hasAttemptedToReadWebsite;
-    String newRelativeDownloadPath;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LatestVersionChecker)
+    std::unique_ptr<DownloadAndInstallThread> installer;
+    std::unique_ptr<Component> dialogWindow;
 };

@@ -50,8 +50,8 @@ struct ProcessSpec
 //==============================================================================
 /**
     This is a handy base class for the state of a processor (such as parameter values)
-    which is typically shared among several procoessors. This is useful to for
-    multi-mono filters which share the same state among several mono processors.
+    which is typically shared among several processors. This is useful for multi-mono
+    filters which share the same state among several mono processors.
 
     @tags{DSP}
 */
@@ -139,7 +139,12 @@ public:
         Note that the caller must not delete these blocks while they are still in use by this object!
     */
     ProcessContextNonReplacing (const AudioBlockType& input, AudioBlockType& output) noexcept
-        : inputBlock (input), outputBlock (output) {}
+        : inputBlock (input), outputBlock (output)
+    {
+        // If the input and output blocks are the same then you should use
+        // ProcessContextReplacing instead.
+        jassert (input != output);
+    }
 
     ProcessContextNonReplacing (const ProcessContextNonReplacing&) = default;
     ProcessContextNonReplacing (ProcessContextNonReplacing&&) = default;
