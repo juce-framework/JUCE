@@ -3388,7 +3388,7 @@ private:
     {
         String attributes;
 
-        attributes << "{ LastUpgradeCheck = 0930; "
+        attributes << "{ LastUpgradeCheck = 1010; "
                    << "ORGANIZATIONNAME = " << getProject().getCompanyNameString().quoted()
                    <<"; ";
 
