@@ -420,7 +420,9 @@ MidiInput* MidiInput::openDevice (const String& deviceIdentifier, MidiInputCallb
     {
         for (auto& endpoint : getEndpoints (true))
         {
-            if (deviceIdentifier == getConnectedEndpointInfo (endpoint).identifier)
+            auto endpointInfo = getConnectedEndpointInfo (endpoint);
+
+            if (deviceIdentifier == endpointInfo.identifier)
             {
                 ScopedCFString cfName;
 
@@ -435,7 +437,7 @@ MidiInput* MidiInput::openDevice (const String& deviceIdentifier, MidiInputCallb
                         {
                             mpc->portAndEndpoint.reset (new MidiPortAndEndpoint (port, endpoint));
 
-                            std::unique_ptr<MidiInput> midiInput (new MidiInput (String::fromCFString (cfName.cfString), deviceIdentifier));
+                            std::unique_ptr<MidiInput> midiInput (new MidiInput (endpointInfo.name, endpointInfo.identifier));
 
                             mpc->input = midiInput.get();
                             midiInput->internal = mpc.get();
@@ -559,7 +561,9 @@ MidiOutput* MidiOutput::openDevice (const String& deviceIdentifier)
     {
         for (auto& endpoint : getEndpoints (false))
         {
-            if (deviceIdentifier == getConnectedEndpointInfo (endpoint).identifier)
+            auto endpointInfo = getConnectedEndpointInfo (endpoint);
+
+            if (deviceIdentifier == endpointInfo.identifier)
             {
                 ScopedCFString cfName;
 
@@ -569,7 +573,7 @@ MidiOutput* MidiOutput::openDevice (const String& deviceIdentifier)
 
                     if (CHECK_ERROR (MIDIOutputPortCreate (client, cfName.cfString, &port)))
                     {
-                        std::unique_ptr<MidiOutput> midiOutput (new MidiOutput (String::fromCFString (cfName.cfString), deviceIdentifier));
+                        std::unique_ptr<MidiOutput> midiOutput (new MidiOutput (endpointInfo.name, endpointInfo.identifier));
                         midiOutput->internal = new MidiPortAndEndpoint (port, endpoint);
 
                         return midiOutput.release();
