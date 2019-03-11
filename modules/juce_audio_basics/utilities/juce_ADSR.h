@@ -71,6 +71,9 @@ public:
 
         sustainLevel = newParameters.sustain;
         calculateRates (newParameters);
+
+        if (currentState != State::idle)
+            checkCurrentState();
     }
 
     /** Returns the parameters currently being used by an ADSR object.
@@ -115,9 +118,16 @@ public:
         if (currentState != State::idle)
         {
             if (releaseRate > 0.0f)
+            {
+                if (currentState != State::sustain)
+                    releaseRate = static_cast<float> (envelopeVal / (currentParameters.release * sr));
+
                 currentState = State::release;
+            }
             else
+            {
                 reset();
+            }
         }
     }
 
@@ -203,6 +213,13 @@ private:
         attackRate  = (parameters.attack  > 0.0f ? static_cast<float> (1.0f                  / (parameters.attack * sr))  : -1.0f);
         decayRate   = (parameters.decay   > 0.0f ? static_cast<float> ((1.0f - sustainLevel) / (parameters.decay * sr))   : -1.0f);
         releaseRate = (parameters.release > 0.0f ? static_cast<float> (sustainLevel          / (parameters.release * sr)) : -1.0f);
+    }
+
+    void checkCurrentState()
+    {
+        if      (currentState == State::attack  && attackRate <= 0.0f)   currentState = decayRate > 0.0f ? State::decay : State::sustain;
+        else if (currentState == State::decay   && decayRate <= 0.0f)    currentState = State::sustain;
+        else if (currentState == State::release && releaseRate <= 0.0f)  reset();
     }
 
     //==============================================================================
