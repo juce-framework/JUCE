@@ -541,8 +541,16 @@ namespace
 
                 out << "    String " << name << ";  " << name;
 
+                auto escapeIfSingleQuote = [] (const String& s) -> String
+                {
+                    if (s == "\'")
+                        return "\\'";
+
+                    return s;
+                };
+
                 for (int i = 0; i < text.length(); ++i)
-                    out << " << '" << String::charToString (text[i]) << "'";
+                    out << " << '" << escapeIfSingleQuote (String::charToString (text[i])) << "'";
 
                 out << ";" << preferredLineFeed;
             }
