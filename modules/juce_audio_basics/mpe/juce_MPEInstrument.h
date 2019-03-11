@@ -185,6 +185,13 @@ public:
     */
     virtual void timbre (int midiChannel, MPEValue value);
 
+    /** Request a poly-aftertouch change for a given note number.
+
+        The change will be broadcast to all notes sharing the channel and note
+        number of the change message.
+     */
+    virtual void polyAftertouch (int midiChannel, int midiNoteNumber, MPEValue value);
+
     /** Request a sustain pedal press or release.
 
         If midiChannel is a zone's master channel, this will act on all notes in

@@ -258,18 +258,8 @@ void MPEInstrument::processMidiAfterTouchMessage (const MidiMessage& message)
     if (! isMasterChannel (message.getChannel()))
         return;
 
-    const ScopedLock sl (lock);
-
-    for (auto i = notes.size(); --i >= 0;)
-    {
-        auto& note = notes.getReference (i);
-
-        if (note.midiChannel == message.getChannel() && note.initialNote == message.getNoteNumber())
-        {
-            pressureDimension.getValue (note) = MPEValue::from7BitInt (message.getAfterTouchValue());
-            listeners.call ([&] (Listener& l) { l.notePressureChanged (note); });
-        }
-    }
+    polyAftertouch (message.getChannel(), message.getNoteNumber(),
+                    MPEValue::from7BitInt (message.getAfterTouchValue()));
 }
 
 //==============================================================================
@@ -383,6 +373,24 @@ void MPEInstrument::timbre (int midiChannel, MPEValue value)
 {
     const ScopedLock sl (lock);
     updateDimension (midiChannel, timbreDimension, value);
+}
+
+void MPEInstrument::polyAftertouch (int midiChannel, int midiNoteNumber, MPEValue value)
+{
+    const ScopedLock sl (lock);
+
+    for (auto i = notes.size(); --i >= 0;)
+    {
+        auto& note = notes.getReference (i);
+
+        if (note.midiChannel == midiChannel
+            && note.initialNote == midiNoteNumber
+            && pressureDimension.getValue (note) != value)
+        {
+            pressureDimension.getValue (note) = value;
+            callListenersDimensionChanged (note, pressureDimension);
+        }
+    }
 }
 
 MPEValue MPEInstrument::getInitialValueForNewNote (int midiChannel, MPEDimension& dimension) const
