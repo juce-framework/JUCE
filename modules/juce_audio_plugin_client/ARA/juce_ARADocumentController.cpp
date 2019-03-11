@@ -219,6 +219,37 @@ ARA::PlugIn::PlaybackRegion* ARADocumentController::doCreatePlaybackRegion (ARA:
     return new ARAPlaybackRegion (static_cast<ARAAudioModification*>(modification), hostRef);
 }
 
+void ARADocumentController::willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) noexcept 
+{
+    // if any playback region changes would affect the sample content, prepare to
+    // post a sample content update to any of our playback region listeners
+    _playbackRegionSamplesAffected =
+        ((playbackRegion->getStartInAudioModificationTime () != newProperties->startInModificationTime) ||
+        (playbackRegion->getDurationInAudioModificationTime () != newProperties->durationInModificationTime) ||
+        (playbackRegion->getStartInPlaybackTime () != newProperties->startInPlaybackTime) ||
+        (playbackRegion->getDurationInPlaybackTime () != newProperties->durationInPlaybackTime)||
+        (playbackRegion->isTimestretchEnabled() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretch) != 0)) ||
+        (playbackRegion->isTimeStretchReflectingTempo() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretchReflectingTempo) != 0)) ||
+        (playbackRegion->hasContentBasedFadeAtHead() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationContentBasedFadeAtHead) != 0)) ||
+        (playbackRegion->hasContentBasedFadeAtTail() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationContentBasedFadeAtTail) != 0)));
+
+    auto araPlaybackRegion = static_cast<ARAPlaybackRegion*> (playbackRegion);
+    araPlaybackRegion->notifyListeners ([araPlaybackRegion, newProperties](ARAPlaybackRegion::Listener& l) { l.willUpdatePlaybackRegionProperties (araPlaybackRegion, newProperties); });
+}
+
+void ARADocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept 
+{
+    // post a content update if the updated properties affect the playback region sample content
+    if (_playbackRegionSamplesAffected)
+    {
+        notify_listeners (didUpdatePlaybackRegionContent, ARAPlaybackRegion*, playbackRegion, ARAContentUpdateScopes::samplesAreAffected());
+        _playbackRegionSamplesAffected = false;
+    }
+
+    auto araPlaybackRegion = static_cast<ARAPlaybackRegion*> (playbackRegion);
+    araPlaybackRegion->notifyListeners ([araPlaybackRegion](ARAPlaybackRegion::Listener& l) { l.didUpdatePlaybackRegionProperties (araPlaybackRegion); });
+}
+
 void ARADocumentController::doGetPlaybackRegionHeadAndTailTime (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::ARATimeDuration* headTime, ARA::ARATimeDuration* tailTime) noexcept
 {
     auto araPlaybackRegion = static_cast<ARAPlaybackRegion*> (playbackRegion);

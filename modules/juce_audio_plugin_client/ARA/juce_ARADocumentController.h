@@ -182,10 +182,12 @@ protected:
 
     // PlaybackRegion callbacks
     ARA::PlugIn::PlaybackRegion* doCreatePlaybackRegion (ARA::PlugIn::AudioModification* modification, ARA::ARAPlaybackRegionHostRef hostRef) noexcept override;
-    OVERRIDE_TO_NOTIFY_3 (willUpdatePlaybackRegionProperties, PlaybackRegion*, playbackRegion, ARAPlaybackRegion::PropertiesPtr, newProperties);
-    OVERRIDE_TO_NOTIFY_1 (didUpdatePlaybackRegionProperties, PlaybackRegion*, playbackRegion);
     void doGetPlaybackRegionHeadAndTailTime (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::ARATimeDuration* headTime, ARA::ARATimeDuration* tailTime) noexcept override;
     OVERRIDE_TO_NOTIFY_1 (willDestroyPlaybackRegion, PlaybackRegion*, playbackRegion);
+
+    // declare these overrides explicitly so we can forward playback region sample content changes
+    void willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) noexcept override;
+    void didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
 
     // PlugIn instance role creation
     // these can be overridden with custom types so long as
@@ -256,6 +258,11 @@ private:
    #undef OVERRIDE_TO_NOTIFY_4
 
 private:
+    // use this flag to post playback region sample content updates from
+    // didUpdatePlaybackRegionProperties if the changes affect sample content
+    // TODO JUCE_ARA should we cache an ARAContentUpdateScopes?
+    bool _playbackRegionSamplesAffected { false };
+
     std::map<ARAAudioSource*, ARAContentUpdateScopes> audioSourceUpdates;
     std::map<ARAAudioModification*, ARAContentUpdateScopes> audioModificationUpdates;
     std::map<ARAPlaybackRegion*, ARAContentUpdateScopes> playbackRegionUpdates;

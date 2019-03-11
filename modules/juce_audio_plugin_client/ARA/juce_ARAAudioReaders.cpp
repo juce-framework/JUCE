@@ -268,29 +268,11 @@ bool ARAPlaybackRegionReader::getCurrentPosition (CurrentPositionInfo& result)
     return true;
 }
 
-void ARAPlaybackRegionReader::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties)
-{
-    jassert (ARA::contains (audioProcessorAraExtension->getARAPlaybackRenderer()->getPlaybackRegions(), playbackRegion));
-
-    // TODO JUCE_ARA most of these tests should be unnecessary now that we're listening to contentChanged...?
-    if ((playbackRegion->getStartInAudioModificationTime() != newProperties->startInModificationTime) ||
-        (playbackRegion->getDurationInAudioModificationTime() != newProperties->durationInModificationTime) ||
-        (playbackRegion->getStartInPlaybackTime() != newProperties->startInPlaybackTime) ||
-        (playbackRegion->getDurationInPlaybackTime() != newProperties->durationInPlaybackTime) ||
-        (playbackRegion->isTimestretchEnabled() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretch) != 0)) ||
-        (playbackRegion->isTimeStretchReflectingTempo() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretchReflectingTempo) != 0)) ||
-        (playbackRegion->hasContentBasedFadeAtHead() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationContentBasedFadeAtHead) != 0)) ||
-        (playbackRegion->hasContentBasedFadeAtTail() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationContentBasedFadeAtTail) != 0)))
-    {
-        invalidate();
-    }
-}
-
 void ARAPlaybackRegionReader::didUpdatePlaybackRegionContent (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags)
 {
     jassert (ARA::contains (audioProcessorAraExtension->getARAPlaybackRenderer()->getPlaybackRegions(), playbackRegion));
 
-    // don't invalidate if the audio signal is unchanged
+    // invalidate if the audio signal is changed
     if (scopeFlags.affectSamples())
         invalidate();
 }
