@@ -661,7 +661,7 @@ void ProjectContentComponent::openInSelectedIDE (bool saveFirst)
 
             for (Project::ExporterIterator exporter (*project); exporter.next();)
             {
-                if (exporter->canLaunchProject() && exporter->getName() == selectedIDE)
+                if (exporter->canLaunchProject() && exporter->getName().contains (selectedIDE))
                 {
                     auto tempProject = project->isTemporaryProject(); // store this before saving as it will always be false after
 
