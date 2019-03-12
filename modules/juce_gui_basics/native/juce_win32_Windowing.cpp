@@ -3368,7 +3368,7 @@ private:
         forceDisplayUpdate();
 
         if (fullScreen && ! isMinimised())
-            setWindowPos (hwnd, Desktop::getInstance().getDisplays().findDisplayForRect (component.getScreenBounds()).userArea,
+            setWindowPos (hwnd, ScalingHelpers::scaledScreenPosToUnscaled (component, Desktop::getInstance().getDisplays().findDisplayForRect (component.getScreenBounds()).userArea),
                           SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
     }
 
