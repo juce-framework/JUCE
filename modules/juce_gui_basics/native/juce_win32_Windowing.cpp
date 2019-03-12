@@ -621,6 +621,9 @@ int64 getMouseEventTime()
     return eventTimeOffset + thisMessageTime;
 }
 
+Point<float> juce_lastTouchPos;
+static JUCE_CONSTEXPR Point<float> juce_invalidTouchPos { -10.0f, -10.0f };
+
 //==============================================================================
 const int extendedKeyModifier               = 0x10000;
 
@@ -2439,6 +2442,8 @@ private:
     //==============================================================================
     void doMouseEvent (Point<float> position, float pressure, float orientation = 0.0f, ModifierKeys mods = ModifierKeys::currentModifiers)
     {
+        juce_lastTouchPos = juce_invalidTouchPos;
+
         handleMouseEvent (MouseInputSource::InputSourceType::mouse, position, mods, pressure, orientation, getMouseEventTime());
     }
 
@@ -2767,6 +2772,8 @@ private:
         const auto pressure = touchPressure;
         auto modsToSend = ModifierKeys::currentModifiers;
 
+        juce_lastTouchPos = pos;
+
         if (isDown)
         {
             ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
@@ -2801,7 +2808,7 @@ private:
 
         if (isUp)
         {
-            handleMouseEvent (MouseInputSource::InputSourceType::touch, { -10.0f, -10.0f }, ModifierKeys::currentModifiers.withoutMouseButtons(),
+            handleMouseEvent (MouseInputSource::InputSourceType::touch, juce_invalidTouchPos, ModifierKeys::currentModifiers.withoutMouseButtons(),
                               pressure, orientation, time, {}, touchIndex);
 
             if (! isValidPeer (this))
@@ -2914,7 +2921,7 @@ private:
 
         if (isUp)
         {
-            handleMouseEvent (MouseInputSource::InputSourceType::pen, { -10.0f, -10.0f }, ModifierKeys::currentModifiers,
+            handleMouseEvent (MouseInputSource::InputSourceType::pen, juce_invalidTouchPos, ModifierKeys::currentModifiers,
                               pressure, MouseInputSource::invalidOrientation, time, penDetails);
 
             if (! isValidPeer (this))
@@ -4281,6 +4288,9 @@ bool MouseInputSource::SourceList::canUseTouch()
 
 Point<float> MouseInputSource::getCurrentRawMousePosition()
 {
+    if (juce_lastTouchPos != juce_invalidTouchPos)
+        return juce_lastTouchPos;
+
     POINT mousePos;
     GetCursorPos (&mousePos);
 
