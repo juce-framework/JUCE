@@ -386,37 +386,51 @@ const std::vector<ConsoleApplication::Command>& ConsoleApplication::getCommands(
     return commands;
 }
 
-void ConsoleApplication::printCommandList (const ArgumentList& args) const
+static String getExeNameAndArgs (const ArgumentList& args, const ConsoleApplication::Command& command)
 {
     auto exeName = args.executableName.fromLastOccurrenceOf ("/", false, false)
                                       .fromLastOccurrenceOf ("\\", false, false);
 
-    StringArray namesAndArgs;
+    return " " + exeName + " " + command.argumentDescription;
+}
+
+static void printCommandDescription (const ArgumentList& args, const ConsoleApplication::Command& command,
+                                     int descriptionIndent)
+{
+    auto nameAndArgs = getExeNameAndArgs (args, command);
+
+    if (nameAndArgs.length() > descriptionIndent)
+        std::cout << nameAndArgs << std::endl << String().paddedRight (' ', descriptionIndent);
+    else
+        std::cout << nameAndArgs.paddedRight (' ', descriptionIndent);
+
+    std::cout << command.shortDescription << std::endl;
+}
+
+void ConsoleApplication::printCommandList (const ArgumentList& args) const
+{
     int descriptionIndent = 0;
 
     for (auto& c : commands)
-    {
-        auto nameAndArgs = exeName + " " + c.argumentDescription;
-        namesAndArgs.add (nameAndArgs);
-        descriptionIndent = std::max (descriptionIndent, nameAndArgs.length());
-    }
+        descriptionIndent = std::max (descriptionIndent, getExeNameAndArgs (args, c).length());
 
-    descriptionIndent = std::min (descriptionIndent + 1, 40);
+    descriptionIndent = std::min (descriptionIndent + 2, 40);
 
-    for (size_t i = 0; i < commands.size(); ++i)
-    {
-        auto nameAndArgs = namesAndArgs[(int) i];
-        std::cout << ' ';
-
-        if (nameAndArgs.length() > descriptionIndent)
-            std::cout << nameAndArgs << std::endl << String::repeatedString (" ", descriptionIndent + 1);
-        else
-            std::cout << nameAndArgs.paddedRight (' ', descriptionIndent);
-
-        std::cout << commands[i].shortDescription << std::endl;
-    }
+    for (auto& c : commands)
+        printCommandDescription (args, c, descriptionIndent);
 
     std::cout << std::endl;
 }
+
+void ConsoleApplication::printCommandDetails (const ArgumentList& args, const Command& command) const
+{
+    auto len = getExeNameAndArgs (args, command).length();
+
+    printCommandDescription (args, command, std::min (len + 3, 40));
+
+    if (command.longDescription.isNotEmpty())
+        std::cout << std::endl << command.longDescription << std::endl;
+}
+
 
 } // namespace juce

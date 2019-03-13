@@ -281,6 +281,11 @@ struct ConsoleApplication
     */
     void printCommandList (const ArgumentList&) const;
 
+    /** Prints out a longer description of a particular command, based on its
+        longDescription member.
+    */
+    void printCommandDetails (const ArgumentList&, const Command&) const;
+
     //==============================================================================
     /** Throws a failure exception to cause a command-line app to terminate.
         This is intended to be called from code in a Command, so that the
