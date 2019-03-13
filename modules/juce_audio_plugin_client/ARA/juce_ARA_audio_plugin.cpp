@@ -14,7 +14,6 @@
 #include "juce_ARADocumentController.cpp"
 #include "juce_ARAAudioReaders.cpp"
 #include "juce_ARAPlugInInstanceRoles.cpp"
-#include "juce_ARAStreams.cpp"
 #include "juce_AudioProcessor_ARAExtensions.cpp"
 
 namespace juce

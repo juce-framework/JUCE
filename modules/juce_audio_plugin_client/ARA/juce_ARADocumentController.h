@@ -101,11 +101,32 @@ protected:
     void didEndEditing() noexcept override;
     void doNotifyModelUpdates() noexcept override;
 
-    // Persistency Management
-    // * Overriding these methods does not require calling the base class.
-    // * You may override either the methods with JUCE streams or with the ARA SDK's archive reader/writer.
+    /** Read an ARADocument archive from a juce::InputStream.
+    @param input Data stream containing previously persisted data to be used when restoring the ARADocument
+    @param filter An optional filter to be applied to the stream; nullptr if no filtering is required
+
+    The optional \p filter parameter can be used to restore a subsection of the document, in which case
+    it will not be nullptr. 
+
+    Overriding this method is the preferred way of handling ARA document persistence, but you can also
+    override ARA::PlugIn::DocumentController::doRestoreObjectsFromArchive to deal with an ARA archive 
+    ARA::PlugIn::HostArchiveReader directly. 
+    */
     virtual bool doRestoreObjectsFromStream (InputStream& input, ARA::PlugIn::RestoreObjectsFilter* filter) noexcept;
+
+    /** Write an ARADocument archive to a juce::OutputStream.
+    @param output Data stream that should be used to write the persistent ARADocument data
+    @param filter An optional filter to be applied to the stream; nullptr if no filtering is required
+
+    The optional \p filter parameter can be used to store a subsection of the document, in which case
+    it will not be nullptr. 
+
+    Overriding this method is the preferred way of handling ARA document persistence, but you can also
+    override ARA::PlugIn::DocumentController::doStoreObjectsToArchive to deal with an ARA archive 
+    ARA::PlugIn::HostArchiveWriter directly. 
+    */
     virtual bool doStoreObjectsToStream (OutputStream& output, ARA::PlugIn::StoreObjectsFilter* filter) noexcept;
+
     bool doRestoreObjectsFromArchive (ARA::PlugIn::HostArchiveReader* archiveReader, ARA::PlugIn::RestoreObjectsFilter* filter) noexcept override;
     bool doStoreObjectsToArchive (ARA::PlugIn::HostArchiveWriter* archiveWriter, ARA::PlugIn::StoreObjectsFilter* filter) noexcept override;
 
@@ -172,6 +193,61 @@ protected:
     ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer() noexcept override;
     ARA::PlugIn::EditorRenderer* doCreateEditorRenderer() noexcept override;
     ARA::PlugIn::EditorView* doCreateEditorView() noexcept override;
+
+protected:
+
+    //==============================================================================
+    /**
+    Archive reader class that subclasses juce::InputStream. 
+
+    This class can optionally be used to read ARADocument archive streams supplied by the
+    host instead of the ARA::PlugIn::HostArchiveReader class. Generally this class won't
+    be constructed directly; instead, it will be passed by reference to doRestoreObjectsFromStream. 
+
+    @see doRestoreObjectsFromStream, doRestoreObjectsFromArchive
+    */
+    class ArchiveReader : public InputStream
+    {
+    public:
+        ArchiveReader (ARA::PlugIn::HostArchiveReader*);
+
+        int64 getPosition() override { return (int64) position; }
+        int64 getTotalLength() override { return (int64) size; }
+
+        bool setPosition (int64) override;
+        bool isExhausted() override;
+        int read (void*, int) override;
+
+    private:
+        ARA::PlugIn::HostArchiveReader* archiveReader;
+        size_t position, size;
+    };
+
+    //==============================================================================
+    /**
+    Archive writer class that subclasses juce::OutputStream. 
+
+    This class can optionally be used to write to ARADocument archive streams supplied by the
+    host instead of the ARA::PlugIn::HostArchiveWriter class. Generally this class won't
+    be constructed directly; instead, it will be passed by reference to doStoreObjectsToStream. 
+    
+    @see doStoreObjectsToStream, doStoreObjectsToArchive
+    */
+    class ArchiveWriter : public OutputStream
+    {
+    public:
+        ArchiveWriter (ARA::PlugIn::HostArchiveWriter*);
+
+        int64 getPosition() override { return (int64) position; }
+        void flush() override {}
+
+        bool setPosition (int64) override;
+        bool write (const void*, size_t) override;
+
+    private:
+        ARA::PlugIn::HostArchiveWriter* archiveWriter;
+        size_t position;
+    };
 
 private:
    #undef OVERRIDE_TO_NOTIFY_1
