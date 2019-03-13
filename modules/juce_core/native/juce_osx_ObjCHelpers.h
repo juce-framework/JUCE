@@ -412,5 +412,19 @@ private:
     BlockType block;
 };
 
+struct ScopedCFString
+{
+    ScopedCFString() = default;
+    ScopedCFString (String s) : cfString (s.toCFString())  {}
+
+    ~ScopedCFString() noexcept
+    {
+        if (cfString != nullptr)
+            CFRelease (cfString);
+    }
+
+    CFStringRef cfString = {};
+};
+
 
 } // namespace juce

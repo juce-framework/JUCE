@@ -30,21 +30,6 @@ namespace juce
 namespace CoreMidiHelpers
 {
     //==============================================================================
-    struct ScopedCFString
-    {
-        ScopedCFString() = default;
-        ScopedCFString (String s) : cfString (s.toCFString())  {}
-
-        ~ScopedCFString() noexcept
-        {
-            if (cfString != nullptr)
-                CFRelease (cfString);
-        }
-
-        CFStringRef cfString = {};
-    };
-
-    //==============================================================================
     static bool checkError (OSStatus err, int lineNum)
     {
         if (err == noErr)
@@ -195,9 +180,9 @@ namespace CoreMidiHelpers
         uniqueID = JUCE_STRINGIFY (JucePlugin_CFBundleIdentifier);
        #else
         auto appBundle = File::getSpecialLocation (File::currentApplicationFile);
+        ScopedCFString appBundlePath (appBundle.getFullPathName());
 
-        if (auto bundleURL = CFURLCreateWithFileSystemPath (kCFAllocatorDefault, appBundle.getFullPathName().toCFString(),
-                                                            kCFURLPOSIXPathStyle, true))
+        if (auto bundleURL = CFURLCreateWithFileSystemPath (kCFAllocatorDefault, appBundlePath.cfString, kCFURLPOSIXPathStyle, true))
         {
             auto bundleRef = CFBundleCreate (kCFAllocatorDefault, bundleURL);
             CFRelease (bundleURL);
@@ -259,7 +244,7 @@ namespace CoreMidiHelpers
 
             enableSimulatorMidiSession();
 
-            CoreMidiHelpers::ScopedCFString name (getGlobalMidiClientName());
+            ScopedCFString name (getGlobalMidiClientName());
             CHECK_ERROR (MIDIClientCreate (name.cfString, &globalSystemChangeCallback, nullptr, &globalMidiClient));
         }
 
