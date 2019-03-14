@@ -227,17 +227,17 @@ public:
     }
 
     //==============================================================================
-    std::function<void(const String&)> logger;
+    std::function<void(const Block& block, const String&)> logger;
 
-    void setLogger (std::function<void(const String&)> newLogger) override
+    void setLogger (std::function<void(const Block& block, const String&)> newLogger) override
     {
-        logger = newLogger;
+        logger = std::move (newLogger);
     }
 
     void handleLogMessage (const String& message) const
     {
         if (logger != nullptr)
-            logger (message);
+            logger (*this, message);
     }
 
     //==============================================================================

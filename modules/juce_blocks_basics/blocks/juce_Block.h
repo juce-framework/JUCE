@@ -436,7 +436,7 @@ public:
 
     //==============================================================================
     /** Allows the user to provide a function that will receive log messages from the block. */
-    virtual void setLogger (std::function<void(const String&)> loggingCallback) = 0;
+    virtual void setLogger (std::function<void(const Block& block, const String&)> loggingCallback) = 0;
 
     /** Sends a firmware update packet to a block, and waits for a reply. Returns an error code. */
     virtual bool sendFirmwareUpdatePacket (const uint8* data, uint8 size,
