@@ -249,8 +249,13 @@ void Project::initialiseProjectValues()
 
 void Project::initialiseAudioPluginValues()
 {
-    pluginFormatsValue.referTo               (projectRoot, Ids::pluginFormats,              getUndoManager(),
-                                              Array<var> (Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString()), ",");
+    // TODO JUCE_ARA this gets called before the project type has been set, 
+    // so we don't yet know if we're an ARA plug-in - should the Wizard fix this?
+    Array<var> defaultFormats (Ids::buildVST3.toString (), Ids::buildAU.toString ());
+    if (! shouldEnableARA())
+        defaultFormats.add (Ids::buildStandalone.toString());
+
+    pluginFormatsValue.referTo               (projectRoot, Ids::pluginFormats,              getUndoManager(), defaultFormats , ",");
     pluginCharacteristicsValue.referTo       (projectRoot, Ids::pluginCharacteristicsValue, getUndoManager(), Array<var> (), ",");
 
     pluginNameValue.referTo                  (projectRoot, Ids::pluginName,                 getUndoManager(), getProjectNameString());
