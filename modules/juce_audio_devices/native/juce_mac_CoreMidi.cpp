@@ -197,9 +197,10 @@ namespace CoreMidiHelpers
         }
        #endif
 
-        if (uniqueID.isNotEmpty())
-            uniqueID += "." + deviceName + (isInput ? ".input" : ".output");
+        if (uniqueID.isEmpty())
+            uniqueID = String (Random::getSystemRandom().nextInt (1024));
 
+        uniqueID += "." + deviceName + (isInput ? ".input" : ".output");
         return uniqueID.hashCode();
     }
 
