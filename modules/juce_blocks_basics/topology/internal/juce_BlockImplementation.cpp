@@ -384,7 +384,7 @@ public:
         remoteHeap.handleACKFromDevice (*this, packetCounter);
     }
 
-    bool sendFirmwareUpdatePacket (const uint8* data, uint8 size, std::function<void (uint8, uint32)> callback) override
+    bool sendFirmwareUpdatePacket (const uint8* data, uint8 size, std::function<void(uint8, uint32)> callback) override
     {
         firmwarePacketAckCallback = {};
 

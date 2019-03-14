@@ -91,7 +91,7 @@ public:
 
         @see load
      */
-    void loadAsync (const URL& url, std::function<void (const URL&, Result)> loadFinishedCallback);
+    void loadAsync (const URL& url, std::function<void(const URL&, Result)> loadFinishedCallback);
 
     /** Closes the video and resets the component. */
     void closeVideo();
@@ -167,7 +167,7 @@ public:
 
     /** Set this callback to be notified whenever an error occurs. Upon error, you
         may need to load the video again. */
-    std::function<void (const String& /*error*/)> onErrorOccurred;
+    std::function<void(const String& /*error*/)> onErrorOccurred;
 
 private:
     //==============================================================================

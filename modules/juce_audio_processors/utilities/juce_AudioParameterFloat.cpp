@@ -30,8 +30,8 @@ namespace juce
 AudioParameterFloat::AudioParameterFloat (const String& idToUse, const String& nameToUse,
                                           NormalisableRange<float> r, float def,
                                           const String& labelToUse, Category categoryToUse,
-                                          std::function<String (float, int)> stringFromValue,
-                                          std::function<float (const String&)> valueFromString)
+                                          std::function<String(float, int)> stringFromValue,
+                                          std::function<float(const String&)> valueFromString)
    : RangedAudioParameter (idToUse, nameToUse, labelToUse, categoryToUse),
      range (r), value (def), defaultValue (def),
      stringFromValueFunction (stringFromValue),

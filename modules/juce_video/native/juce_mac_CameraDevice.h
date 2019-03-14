@@ -123,7 +123,7 @@ struct CameraDevice::Pimpl
             refreshConnections();
     }
 
-    void takeStillPicture (std::function<void (const Image&)> pictureTakenCallbackToUse)
+    void takeStillPicture (std::function<void(const Image&)> pictureTakenCallbackToUse)
     {
         if (pictureTakenCallbackToUse == nullptr)
         {
@@ -259,7 +259,7 @@ struct CameraDevice::Pimpl
     CriticalSection listenerLock;
     ListenerList<Listener> listeners;
 
-    std::function<void (const Image&)> pictureTakenCallback;
+    std::function<void(const Image&)> pictureTakenCallback;
 
     JUCE_DECLARE_WEAK_REFERENCEABLE (Pimpl)
 

@@ -174,11 +174,11 @@ void AudioPluginFormat::createPluginInstanceAsync (const PluginDescription& desc
 void AudioPluginFormat::createPluginInstanceAsync (const PluginDescription& description,
                                                    double initialSampleRate,
                                                    int initialBufferSize,
-                                                   std::function<void (AudioPluginInstance*, const String&)> f)
+                                                   std::function<void(AudioPluginInstance*, const String&)> f)
 {
     struct CallbackInvoker  : public AudioPluginFormat::InstantiationCompletionCallback
     {
-        CallbackInvoker (std::function<void (AudioPluginInstance*, const String&)> inCompletion)
+        CallbackInvoker (std::function<void(AudioPluginInstance*, const String&)> inCompletion)
             : completion (inCompletion)
         {}
 
@@ -187,7 +187,7 @@ void AudioPluginFormat::createPluginInstanceAsync (const PluginDescription& desc
             completion (instance, error);
         }
 
-        std::function<void (AudioPluginInstance*, const String&)> completion;
+        std::function<void(AudioPluginInstance*, const String&)> completion;
     };
 
     createPluginInstanceAsync (description, initialSampleRate, initialBufferSize, new CallbackInvoker (f));
