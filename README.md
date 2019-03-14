@@ -58,6 +58,6 @@ There are multiple commercial licensing tiers for JUCE 5, with different terms f
 - JUCE Personal (developers or startup businesses with revenue under 50K USD) - free
 - JUCE Indie (small businesses with revenue under 200K USD) - $35/month
 - JUCE Pro (no revenue limit) - $65/month
-- JUCE Eductational (no revenue limit) - free for bona fide educational institutes
+- JUCE Educational (no revenue limit) - free for bona fide educational institutes
 
 For full terms see [LICENSE.md](LICENSE.md).
