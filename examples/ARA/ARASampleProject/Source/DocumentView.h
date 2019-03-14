@@ -178,13 +178,13 @@ public:
 
          @param newTrackHeight           new trackHeight in pixels.
          */
-        virtual void trackHeightChanged (int newTrackHeight) {};
+        virtual void trackHeightChanged (int /*newTrackHeight*/) {};
 
         /** Called when a rulersHeight is changed.
 
          @param newRulersHeight           new rulersHeight in pixels.
          */
-        virtual void rulersHeightChanged (int newRulersHeight) {};
+        virtual void rulersHeightChanged (int /*newRulersHeight*/) {};
     };
 
     /** Registers a listener that will be called for changes of the DocumentView. */

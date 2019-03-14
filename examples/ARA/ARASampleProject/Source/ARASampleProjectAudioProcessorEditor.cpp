@@ -94,11 +94,11 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         };
         verticalZoomInButton.onClick = [this, zoomStepFactor]
         {
-            documentView->setTrackHeight (documentView->getTrackHeight() * zoomStepFactor);
+            documentView->setTrackHeight ((int) (documentView->getTrackHeight() * zoomStepFactor));
         };
         verticalZoomOutButton.onClick = [this, zoomStepFactor]
         {
-            documentView->setTrackHeight (documentView->getTrackHeight() / zoomStepFactor);
+            documentView->setTrackHeight ((int) (documentView->getTrackHeight () / zoomStepFactor));
         };
         addAndMakeVisible (horizontalZoomInButton);
         addAndMakeVisible (horizontalZoomOutButton);

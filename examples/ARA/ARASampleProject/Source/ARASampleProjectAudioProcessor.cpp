@@ -111,8 +111,8 @@ void ARASampleProjectAudioProcessor::prepareToPlay (double newSampleRate, int sa
                 {
                     // if we're being used in real-time, wrap our source reader in buffering
                     // reader  to avoid blocking while reading samples in processBlock
-                    const int readAheadSizeBySampleRate = roundToInt (2.0 * getSampleRate());
-                    const int readAheadSizeByBlockSize = 8 * getBlockSize();
+                    const int readAheadSizeBySampleRate = roundToInt (2.0 * newSampleRate);
+                    const int readAheadSizeByBlockSize = 8 * samplesPerBlock;
                     const int readAheadSize = jmax (readAheadSizeBySampleRate, readAheadSizeByBlockSize);
 
                     sourceReader = new BufferingAudioReader (sourceReader, documentController->getAudioSourceReadingThread(), readAheadSize);
