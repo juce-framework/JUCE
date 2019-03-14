@@ -36,7 +36,7 @@ public:
     void processBlock (AudioBuffer<float>&, MidiBuffer&) override;
 
 #if JucePlugin_Enable_ARA
-    bool didProcessBlockSucceed() override { return true; };
+    bool didProcessBlockSucceed() override;
 #endif
 
     //==============================================================================

@@ -23,6 +23,7 @@
 
 #if JucePlugin_Enable_ARA
     // for proper view embedding, ARA plug-ins must be resizable
+    setResizeLimits (getWidth(), getHeight(), 32768, 32768);
     setResizable (true, false);
 #endif
 }

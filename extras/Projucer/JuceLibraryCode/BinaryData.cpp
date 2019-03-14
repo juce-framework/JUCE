@@ -5821,6 +5821,7 @@ static const unsigned char temp_binary_data_32[] =
 "\r\n"
 "#if JucePlugin_Enable_ARA\r\n"
 "    // for proper view embedding, ARA plug-ins must be resizable\r\n"
+"    setResizeLimits (getWidth(), getHeight(), 32768, 32768);\r\n"
 "    setResizable (true, false);\r\n"
 "#endif\r\n"
 "}\r\n"
@@ -6051,6 +6052,15 @@ static const unsigned char temp_binary_data_34[] =
 "    }\r\n"
 "}\r\n"
 "\r\n"
+"#if JucePlugin_Enable_ARA\r\n"
+"bool %%filter_class_name%%::didProcessBlockSucceed()\r\n"
+"{\r\n"
+"    // You can use this function to inform the calling code that the \r\n"
+"    // most recent processBlock call didn't output samples as expected. \r\n"
+"    return true;\r\n"
+"}\r\n"
+"#endif\r\n"
+"\r\n"
 "//==============================================================================\r\n"
 "bool %%filter_class_name%%::hasEditor() const\r\n"
 "{\r\n"
@@ -6125,7 +6135,7 @@ static const unsigned char temp_binary_data_35[] =
 "    void processBlock (AudioBuffer<float>&, MidiBuffer&) override;\r\n"
 "\r\n"
 "#if JucePlugin_Enable_ARA\r\n"
-"    bool didProcessBlockSucceed() override { return true; };\r\n"
+"    bool didProcessBlockSucceed() override;\r\n"
 "#endif\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
@@ -7930,10 +7940,10 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0xfb6f6d96:  numBytes = 3693; return jucer_AudioComponentSimpleTemplate_h;
         case 0xafccbd3f:  numBytes = 3094; return jucer_AudioComponentTemplate_cpp;
         case 0x915d7304:  numBytes = 1374; return jucer_AudioComponentTemplate_h;
-        case 0x27c5a93a:  numBytes = 1572; return jucer_AudioPluginEditorTemplate_cpp;
+        case 0x27c5a93a:  numBytes = 1634; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 1055; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:  numBytes = 6036; return jucer_AudioPluginFilterTemplate_cpp;
-        case 0x488afa0a:  numBytes = 2443; return jucer_AudioPluginFilterTemplate_h;
+        case 0x51b49ac5:  numBytes = 6296; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x488afa0a:  numBytes = 2426; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2126; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2042; return jucer_ComponentTemplate_h;
         case 0x1657b643:  numBytes = 1693; return jucer_ContentCompSimpleTemplate_h;
