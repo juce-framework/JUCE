@@ -241,7 +241,6 @@ static void parseAndAddLibs (StringArray& libList, const String& libs)
 {
     libList.addTokens (libs, ", ", {});
     libList.trim();
-    libList.sort (false);
     libList.removeDuplicates (false);
 }
 

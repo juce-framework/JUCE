@@ -40,7 +40,7 @@ class JUCE_API  VSTPluginFormat   : public AudioPluginFormat
 public:
     //==============================================================================
     VSTPluginFormat();
-    ~VSTPluginFormat();
+    ~VSTPluginFormat() override;
 
     //==============================================================================
     /** Attempts to retrieve the VSTXML data from a plugin.

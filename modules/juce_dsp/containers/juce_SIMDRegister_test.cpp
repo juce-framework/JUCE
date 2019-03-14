@@ -90,7 +90,7 @@ namespace SIMDRegister_test_internal
     template <typename type>
     struct VecFiller<SIMDRegister<type>>
     {
-        static SIMDRegister<type> fill(Random& random)
+        static SIMDRegister<type> fill (Random& random)
         {
             constexpr int size = (int) SIMDRegister<type>::SIMDNumElements;
            #ifdef _MSC_VER
@@ -735,6 +735,29 @@ public:
         }
     };
 
+    struct CheckAbs
+    {
+        template <typename type>
+        static void run (UnitTest& u, Random& random)
+        {
+            type inArray[SIMDRegister<type>::SIMDNumElements];
+            type outArray[SIMDRegister<type>::SIMDNumElements];
+
+            SIMDRegister_test_internal::VecFiller<type>::fill (inArray, SIMDRegister<type>::SIMDNumElements, random);
+
+            SIMDRegister<type> a;
+            copy (a, inArray);
+            a = SIMDRegister<type>::abs (a);
+
+            auto calcAbs = [] (type x) -> type { return x >= type (0) ? x : -x; };
+
+            for (size_t j = 0; j < SIMDRegister<type>::SIMDNumElements; ++j)
+                outArray[j] = calcAbs (inArray[j]);
+
+            u.expect (vecEqualToArray (a, outArray));
+        }
+    };
+
     struct CheckBoolEquals
     {
         template <typename type>
@@ -813,6 +836,21 @@ public:
         TheTest::template run<uint64_t>(*this, random);
     }
 
+    template <class TheTest>
+    void runTestSigned (const char* unitTestName)
+    {
+        beginTest (unitTestName);
+
+        Random random = getRandom();
+
+        TheTest::template run<float>   (*this, random);
+        TheTest::template run<double>  (*this, random);
+        TheTest::template run<int8_t>  (*this, random);
+        TheTest::template run<int16_t> (*this, random);
+        TheTest::template run<int32_t> (*this, random);
+        TheTest::template run<int64_t> (*this, random);
+    }
+
     void runTest()
     {
         runTestForAllTypes<InitializationTest> ("InitializationTest");
@@ -833,6 +871,8 @@ public:
 
         runTestForAllTypes<CheckMultiplyAdd> ("CheckMultiplyAdd");
         runTestForAllTypes<CheckSum> ("CheckSum");
+
+        runTestSigned<CheckAbs> ("CheckAbs");
     }
 };
 

@@ -90,7 +90,7 @@ public:
         When in legacy mode, this will return true if the given channel is
         contained in the current legacy mode channel range; false otherwise.
     */
-    bool isMemberChannel (int midiChannel) noexcept;
+    bool isMemberChannel (int midiChannel) const noexcept;
 
     /** Returns true if the given MIDI channel (1-16) is a master channel (channel
         1 or 16).
@@ -98,6 +98,14 @@ public:
         In legacy mode, this will always return false.
     */
     bool isMasterChannel (int midiChannel) const noexcept;
+
+    /** Returns true if the given MIDI channel (1-16) is used by any of the
+        MPEInstrument's MPE zones; false otherwise.
+
+        When in legacy mode, this will return true if the given channel is
+        contained in the current legacy mode channel range; false otherwise.
+     */
+    bool isUsingChannel (int midiChannel) const noexcept;
 
     //==============================================================================
     /** The MPE note tracking mode. In case there is more than one note playing
@@ -176,6 +184,13 @@ public:
         the timbre change will be broadcast to all notes in this zone.
     */
     virtual void timbre (int midiChannel, MPEValue value);
+
+    /** Request a poly-aftertouch change for a given note number.
+
+        The change will be broadcast to all notes sharing the channel and note
+        number of the change message.
+     */
+    virtual void polyAftertouch (int midiChannel, int midiNoteNumber, MPEValue value);
 
     /** Request a sustain pedal press or release.
 
@@ -373,6 +388,7 @@ private:
     void processMidiChannelPressureMessage (const MidiMessage&);
     void processMidiControllerMessage (const MidiMessage&);
     void processMidiResetAllControllersMessage (const MidiMessage&);
+    void processMidiAfterTouchMessage (const MidiMessage&);
     void handlePressureMSB (int midiChannel, int value) noexcept;
     void handlePressureLSB (int midiChannel, int value) noexcept;
     void handleTimbreMSB (int midiChannel, int value) noexcept;

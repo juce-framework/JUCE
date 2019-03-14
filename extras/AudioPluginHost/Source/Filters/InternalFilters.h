@@ -38,7 +38,7 @@ class InternalPluginFormat   : public AudioPluginFormat
 public:
     //==============================================================================
     InternalPluginFormat();
-    ~InternalPluginFormat() {}
+    ~InternalPluginFormat() override {}
 
     //==============================================================================
     PluginDescription audioInDesc, audioOutDesc, midiInDesc;

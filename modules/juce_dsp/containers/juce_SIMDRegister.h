@@ -329,6 +329,13 @@ struct SIMDRegister
     inline ElementType sum() const noexcept          { return CmplxOps::sum (value); }
 
     //==============================================================================
+    /** Returns the absolute value of each element. */
+    static inline SIMDRegister JUCE_VECTOR_CALLTYPE abs (SIMDRegister a) noexcept
+    {
+        return a - (a * (expand (ElementType (2)) & lessThan (a, expand (ElementType (0)))));
+    }
+
+    //==============================================================================
     /** Checks if the given pointer is suffeciently aligned for using SIMD operations. */
     static inline bool isSIMDAligned (const ElementType* ptr) noexcept
     {

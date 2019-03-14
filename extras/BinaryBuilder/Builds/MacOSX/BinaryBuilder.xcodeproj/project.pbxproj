@@ -402,7 +402,7 @@
 		36B6F402BC83F21646259DEF = {
 			isa = PBXProject;
 			buildConfigurationList = E4C85B0464A93027D035AA1F;
-			attributes = { LastUpgradeCheck = 0930; ORGANIZATIONNAME = "ROLI Ltd."; };
+			attributes = { LastUpgradeCheck = 1010; ORGANIZATIONNAME = "ROLI Ltd."; };
 			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 0;
 			mainGroup = C18D022743CF5BD14D6A6A9E;

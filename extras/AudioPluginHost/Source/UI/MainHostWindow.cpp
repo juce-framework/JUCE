@@ -55,7 +55,7 @@ public:
         setVisible (true);
     }
 
-    ~PluginListWindow()
+    ~PluginListWindow() override
     {
         getAppProperties().getUserSettings()->setValue ("listWindowPos", getWindowStateAsString());
         clearContentComponent();

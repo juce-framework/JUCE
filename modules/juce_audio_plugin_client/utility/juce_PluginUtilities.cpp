@@ -48,9 +48,12 @@ std::function<bool(AudioProcessor&)> PluginHostType::jucePlugInIsRunningInAudioS
  bool juce_shouldDoubleScaleNativeGLWindow()
  {
      auto wrapperType = PluginHostType::getPluginLoadedAs();
+     auto hostType = getHostType().type;
 
-     if (wrapperType == AudioProcessor::wrapperType_VST || wrapperType == AudioProcessor::wrapperType_VST3)
-         return getHostType().type == PluginHostType::SteinbergCubase10;
+     if (wrapperType == AudioProcessor::wrapperType_VST)
+         return hostType == PluginHostType::SteinbergCubase10 || hostType == PluginHostType::AbletonLive10;
+     else if (wrapperType == AudioProcessor::wrapperType_VST3)
+         return hostType == PluginHostType::SteinbergCubase10;
 
      return false;
  }
