@@ -67,7 +67,7 @@ public:
     /** Creates a MidiKeyboardComponent.
 
         @param state        the midi keyboard model that this component will represent
-        @param orientation  whether the keyboard is horizonal or vertical
+        @param orientation  whether the keyboard is horizontal or vertical
     */
     MidiKeyboardComponent (MidiKeyboardState& state,
                            Orientation orientation);

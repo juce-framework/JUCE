@@ -1995,8 +1995,8 @@ public:
         for (int i = getTotalNumInputChannels(); i < buffer.getNumChannels(); ++i)
             buffer.clear (i, 0, numSamples);
 
-        associateTo (data, buffer);
-        associateTo (data, midiMessages);
+        associateWith (data, buffer);
+        associateWith (data, midiMessages);
 
         processor->process (data);
 
@@ -2759,23 +2759,24 @@ private:
 
     //==============================================================================
     template <typename FloatType>
-    void associateTo (Vst::ProcessData& destination, AudioBuffer<FloatType>& buffer)
+    void associateWith (Vst::ProcessData& destination, AudioBuffer<FloatType>& buffer)
     {
-        VST3BufferExchange<FloatType>::mapBufferToBuses (inputBuses, inputBusMap.get<FloatType>(), cachedBusLayouts.inputBuses, buffer);
+        VST3BufferExchange<FloatType>::mapBufferToBuses (inputBuses,  inputBusMap.get<FloatType>(),  cachedBusLayouts.inputBuses,  buffer);
         VST3BufferExchange<FloatType>::mapBufferToBuses (outputBuses, outputBusMap.get<FloatType>(), cachedBusLayouts.outputBuses, buffer);
 
         destination.inputs  = inputBuses.getRawDataPointer();
         destination.outputs = outputBuses.getRawDataPointer();
     }
 
-    void associateTo (Vst::ProcessData& destination, MidiBuffer& midiBuffer)
+    void associateWith (Vst::ProcessData& destination, MidiBuffer& midiBuffer)
     {
         midiInputs->clear();
         midiOutputs->clear();
 
-        MidiEventList::toEventList (*midiInputs, midiBuffer,
-                                    destination.inputParameterChanges,
-                                    midiMapping);
+        if (acceptsMidi())
+            MidiEventList::toEventList (*midiInputs, midiBuffer,
+                                        destination.inputParameterChanges,
+                                        midiMapping);
 
         destination.inputEvents = midiInputs;
         destination.outputEvents = midiOutputs;

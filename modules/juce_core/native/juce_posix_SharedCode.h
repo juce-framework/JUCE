@@ -1176,14 +1176,24 @@ public:
             close (pipeHandle);
     }
 
-    bool isRunning() const noexcept
+    bool isRunning() noexcept
     {
         if (childPID == 0)
             return false;
 
         int childState;
         auto pid = waitpid (childPID, &childState, WNOHANG);
-        return pid == 0 || ! (WIFEXITED (childState) || WIFSIGNALED (childState));
+
+        if (pid == 0)
+            return true;
+
+        if (WIFEXITED (childState))
+        {
+            exitCode = WEXITSTATUS (childState);
+            return false;
+        }
+
+        return ! WIFSIGNALED (childState);
     }
 
     int read (void* dest, int numBytes) noexcept
@@ -1198,7 +1208,21 @@ public:
             readHandle = fdopen (pipeHandle, "r");
 
         if (readHandle != nullptr)
-            return (int) fread (dest, 1, (size_t) numBytes, readHandle);
+        {
+            for (;;)
+            {
+                auto numBytesRead = (int) fread (dest, 1, (size_t) numBytes, readHandle);
+
+                if (numBytesRead > 0 || feof (readHandle))
+                    return numBytesRead;
+
+                // signal occured during fread() so try again
+                if (ferror (readHandle) && errno == EINTR)
+                    continue;
+
+                break;
+            }
+        }
 
         return 0;
     }
@@ -1208,15 +1232,21 @@ public:
         return ::kill (childPID, SIGKILL) == 0;
     }
 
-    uint32 getExitCode() const noexcept
+    uint32 getExitCode() noexcept
     {
+        if (exitCode >= 0)
+            return (uint32) exitCode;
+
         if (childPID != 0)
         {
             int childState = 0;
             auto pid = waitpid (childPID, &childState, WNOHANG);
 
             if (pid >= 0 && WIFEXITED (childState))
-                return WEXITSTATUS (childState);
+            {
+                exitCode = WEXITSTATUS (childState);
+                return (uint32) exitCode;
+            }
         }
 
         return 0;
@@ -1224,6 +1254,7 @@ public:
 
     int childPID = 0;
     int pipeHandle = 0;
+    int exitCode = -1;
     FILE* readHandle = {};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ActiveProcess)

@@ -519,7 +519,7 @@ namespace
         if (length == 1)
             return "s" + String (start);
 
-        int breakPos = jlimit (1, length - 1, (length / 3) + rng.nextInt (length / 3));
+        int breakPos = jlimit (1, length - 1, (length / 3) + rng.nextInt (jmax (1, length / 3)));
 
         return "(" + getStringConcatenationExpression (rng, start, breakPos)
                 + " + " + getStringConcatenationExpression (rng, start + breakPos, length - breakPos) + ")";
@@ -541,8 +541,16 @@ namespace
 
                 out << "    String " << name << ";  " << name;
 
+                auto escapeIfSingleQuote = [] (const String& s) -> String
+                {
+                    if (s == "\'")
+                        return "\\'";
+
+                    return s;
+                };
+
                 for (int i = 0; i < text.length(); ++i)
-                    out << " << '" << String::charToString (text[i]) << "'";
+                    out << " << '" << escapeIfSingleQuote (String::charToString (text[i])) << "'";
 
                 out << ";" << preferredLineFeed;
             }

@@ -158,6 +158,10 @@ public:
     bool isDocumentBrowserEnabled() const              { return uiSupportsDocumentBrowserValue.get(); }
     bool isStatusBarHidden() const                     { return uiStatusBarHiddenValue.get(); }
 
+    String getDocumentExtensionsString() const         { return documentExtensionsValue.get(); }
+
+    bool shouldKeepCustomXcodeSchemes() const          { return keepCustomXcodeSchemesValue.get(); }
+
     String getIosDevelopmentTeamIDString() const       { return iosDevelopmentTeamIDValue.get(); }
     String getAppGroupIdString() const                 { return iosAppGroupsIDValue.get(); }
 
@@ -1474,8 +1478,8 @@ public:
             addPlistDictionaryKey (dict, "NSHumanReadableCopyright",    owner.project.getCompanyCopyrightString());
             addPlistDictionaryKeyBool (dict, "NSHighResolutionCapable", true);
 
-            auto documentExtensions = StringArray::fromTokens (replacePreprocessorDefs (owner.getAllPreprocessorDefs(), owner.settings ["documentExtensions"]),
-                                                               ",", {});
+            auto documentExtensions = StringArray::fromTokens (replacePreprocessorDefs (owner.getAllPreprocessorDefs(),
+                                                                                        owner.getDocumentExtensionsString()), ",", {});
             documentExtensions.trim();
             documentExtensions.removeEmptyStrings (true);
 
@@ -3277,7 +3281,7 @@ private:
     //==============================================================================
     void removeMismatchedXcuserdata() const
     {
-        if (settings ["keepCustomXcodeSchemes"])
+        if (shouldKeepCustomXcodeSchemes())
             return;
 
         auto xcuserdata = getProjectBundle().getChildFile ("xcuserdata");
@@ -3288,6 +3292,7 @@ private:
         if (! xcuserdataMatchesTargets (xcuserdata))
         {
             xcuserdata.deleteRecursively();
+            getProjectBundle().getChildFile ("xcshareddata").getChildFile ("xcschemes").deleteRecursively();
             getProjectBundle().getChildFile ("project.xcworkspace").deleteRecursively();
         }
     }
@@ -3411,7 +3416,7 @@ private:
     {
         String attributes;
 
-        attributes << "{ LastUpgradeCheck = 0930; "
+        attributes << "{ LastUpgradeCheck = 1010; "
                    << "ORGANIZATIONNAME = " << getProject().getCompanyNameString().quoted()
                    <<"; ";
 

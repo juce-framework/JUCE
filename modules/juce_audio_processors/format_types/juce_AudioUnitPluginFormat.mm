@@ -428,7 +428,9 @@ public:
                 {
                     AudioUnitParameterValueFromString valueString;
                     valueString.inParamID = paramID;
-                    valueString.inString = text.toCFString();
+
+                    ScopedCFString cfInString (text);
+                    valueString.inString = cfInString.cfString;
 
                     UInt32 propertySize = sizeof (valueString);
 

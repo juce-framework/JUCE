@@ -256,7 +256,8 @@ int GlyphArrangement::insertEllipsis (const Font& font, float maxXPos, int start
 
 void GlyphArrangement::addJustifiedText (const Font& font, const String& text,
                                          float x, float y, float maxLineWidth,
-                                         Justification horizontalLayout)
+                                         Justification horizontalLayout,
+                                         float leading)
 {
     auto lineStartIndex = glyphs.size();
     addLineOfText (font, text, x, y);
@@ -331,7 +332,7 @@ void GlyphArrangement::addJustifiedText (const Font& font, const String& text,
 
         lineStartIndex = i;
 
-        y += font.getHeight();
+        y += font.getHeight() + leading;
     }
 }
 

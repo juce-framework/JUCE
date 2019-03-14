@@ -194,13 +194,14 @@ public:
         between x and (x + maxLineWidth).
 
         The y coordinate is the position of the baseline of the first line of text - subsequent
-        lines will be placed below it, separated by a distance of font.getHeight().
+        lines will be placed below it, separated by a distance of font.getHeight() + leading.
     */
     void addJustifiedText (const Font& font,
                            const String& text,
                            float x, float y,
                            float maxLineWidth,
-                           Justification horizontalLayout);
+                           Justification horizontalLayout,
+                           float leading = 0.0f);
 
     /** Tries to fit some text within a given space.
 
