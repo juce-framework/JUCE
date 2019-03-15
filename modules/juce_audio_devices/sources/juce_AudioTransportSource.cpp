@@ -129,12 +129,8 @@ void AudioTransportSource::stop()
             const ScopedLock sl (callbackLock);
             playing = false;
         }
-
-        int n = 500;
-        while (--n >= 0 && ! stopped)
-            Thread::sleep (2);
-
-        sendChangeMessage();
+        stopTimeOut = 500;
+        startTimer(0, 2);
     }
 }
 
@@ -282,5 +278,14 @@ void AudioTransportSource::getNextAudioBlock (const AudioSourceChannelInfo& info
 
     lastGain = gain;
 }
+    
+void AudioTransportSource::timerCallback(int timerID)
+{
+    if (stopped || stopTimeOut-- == 0)
+    {
+        sendChangeMessage();
+        stopTimer(0);
+    }
+};
 
 } // namespace juce
