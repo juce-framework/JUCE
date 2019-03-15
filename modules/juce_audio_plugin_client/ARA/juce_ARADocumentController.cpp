@@ -223,7 +223,8 @@ void ARADocumentController::willUpdatePlaybackRegionProperties (ARA::PlugIn::Pla
 {
     // if any playback region changes would affect the sample content, prepare to
     // post a sample content update to any of our playback region listeners
-    _playbackRegionSamplesAffected =
+    jassert(! _currentPropertyUpdateAffectsContent);
+    _currentPropertyUpdateAffectsContent =
         ((playbackRegion->getStartInAudioModificationTime () != newProperties->startInModificationTime) ||
         (playbackRegion->getDurationInAudioModificationTime () != newProperties->durationInModificationTime) ||
         (playbackRegion->getStartInPlaybackTime () != newProperties->startInPlaybackTime) ||
@@ -239,15 +240,20 @@ void ARADocumentController::willUpdatePlaybackRegionProperties (ARA::PlugIn::Pla
 
 void ARADocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept 
 {
-    // post a content update if the updated properties affect the playback region sample content
-    if (_playbackRegionSamplesAffected)
-    {
-        notify_listeners (didUpdatePlaybackRegionContent, ARAPlaybackRegion*, playbackRegion, ARAContentUpdateScopes::samplesAreAffected());
-        _playbackRegionSamplesAffected = false;
-    }
-
     auto araPlaybackRegion = static_cast<ARAPlaybackRegion*> (playbackRegion);
     araPlaybackRegion->notifyListeners ([araPlaybackRegion](ARAPlaybackRegion::Listener& l) { l.didUpdatePlaybackRegionProperties (araPlaybackRegion); });
+
+    // post a content update if the updated properties affect the playback region sample content
+    if (_currentPropertyUpdateAffectsContent)
+    {
+        _currentPropertyUpdateAffectsContent = false;
+        auto scopes = ARAContentUpdateScopes::samplesAreAffected();
+        if (JucePlugin_ARAContentTypes & 1)
+            scopes += ARAContentUpdateScopes::notesAreAffected();
+        // other content such as tempo or key signatures are not exported at playback region level
+        // because this would simply mirror the musical context content.
+        notifyPlaybackRegionContentChanged (araPlaybackRegion, scopes);
+    }
 }
 
 void ARADocumentController::doGetPlaybackRegionHeadAndTailTime (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::ARATimeDuration* headTime, ARA::ARATimeDuration* tailTime) noexcept
