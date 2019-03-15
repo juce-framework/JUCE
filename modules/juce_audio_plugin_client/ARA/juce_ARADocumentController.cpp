@@ -291,15 +291,10 @@ ARADocumentController::ArchiveReader::ArchiveReader (ARA::PlugIn::HostArchiveRea
 int ARADocumentController::ArchiveReader::read (void* destBuffer, int maxBytesToRead)
 {
     const int bytesToRead = std::min (maxBytesToRead, (int) (size - position));
-    const int result =
-        archiveReader->readBytesFromArchive (
-            position,
-            bytesToRead,
-            (ARA::ARAByte*) destBuffer)
-        ? bytesToRead
-        : 0;
-    position += result;
-    return result;
+    if (! archiveReader->readBytesFromArchive (position, bytesToRead, (ARA::ARAByte*) destBuffer))
+        return 0;
+    position += bytesToRead;
+    return bytesToRead;
 }
 
 bool ARADocumentController::ArchiveReader::setPosition (int64 newPosition)
@@ -322,10 +317,7 @@ ARADocumentController::ArchiveWriter::ArchiveWriter (ARA::PlugIn::HostArchiveWri
 
 bool ARADocumentController::ArchiveWriter::write (const void* dataToWrite, size_t numberOfBytes)
 {
-    if (! archiveWriter->writeBytesToArchive (
-        position,
-        numberOfBytes,
-        (const ARA::ARAByte*) dataToWrite))
+    if (! archiveWriter->writeBytesToArchive (position, numberOfBytes, (const ARA::ARAByte*) dataToWrite))
         return false;
     position += numberOfBytes;
     return true;

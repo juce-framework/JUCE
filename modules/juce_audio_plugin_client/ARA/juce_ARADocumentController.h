@@ -197,16 +197,7 @@ protected:
 protected:
 
     //==============================================================================
-    /**
-    Archive reader class that subclasses juce::InputStream. 
-
-    This class can optionally be used to read ARADocument archive streams supplied by the
-    host instead of the ARA::PlugIn::HostArchiveReader class. Generally this class won't
-    be constructed directly; instead, it will be passed by reference to doRestoreObjectsFromStream. 
-
-    @see doRestoreObjectsFromStream, doRestoreObjectsFromArchive
-    */
-    class ArchiveReader : public InputStream
+    class ArchiveReader     : public InputStream
     {
     public:
         ArchiveReader (ARA::PlugIn::HostArchiveReader*);
@@ -224,16 +215,7 @@ protected:
     };
 
     //==============================================================================
-    /**
-    Archive writer class that subclasses juce::OutputStream. 
-
-    This class can optionally be used to write to ARADocument archive streams supplied by the
-    host instead of the ARA::PlugIn::HostArchiveWriter class. Generally this class won't
-    be constructed directly; instead, it will be passed by reference to doStoreObjectsToStream. 
-    
-    @see doStoreObjectsToStream, doStoreObjectsToArchive
-    */
-    class ArchiveWriter : public OutputStream
+    class ArchiveWriter     : public OutputStream
     {
     public:
         ArchiveWriter (ARA::PlugIn::HostArchiveWriter*);
