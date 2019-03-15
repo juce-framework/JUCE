@@ -263,7 +263,7 @@ public:
 		cg.point2.setXY(0.0f, (float)getHeight());
 
 		for (float i = 0.0f; i <= 1.0f; i += 0.02f)
-			cg.addColour(i, Colour(h, s, v, 1.0f));
+			cg.addColour(i, Colour(h, s, 1-i, 1.0f));
 
 		g.setGradientFill(cg);
 		g.fillRect(getLocalBounds().reduced(edge));
