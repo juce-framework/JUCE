@@ -289,15 +289,19 @@ public:
         TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, IDependent, Vst::IEditController)
         TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, FUnknown, Vst::IEditController)
 
-        if (audioProcessor->metersParamIDs.size() > 0)
-        {
-            TEST_FOR_AND_RETURN_IF_VALID (targetIID, Presonus::IGainReductionInfo)
-        }
-
         if (doUIDsMatch (targetIID, JuceAudioProcessor::iid))
         {
             audioProcessor->addRef();
             *obj = audioProcessor;
+            return kResultOk;
+        }
+
+        if (doUIDsMatch (targetIID, Presonus::IGainReductionInfo::iid)
+            && audioProcessor != nullptr
+            && ! audioProcessor->metersParamIDs.isEmpty())
+        {
+            addRef();
+            *obj = dynamic_cast<Presonus::IGainReductionInfo*> (this);
             return kResultOk;
         }
 
@@ -337,6 +341,7 @@ public:
         double gainReduction = 1.0;
         bool hasGRMeter = false;
 
+        jassert (audioProcessor != nullptr);
         for (int id : audioProcessor->metersParamIDs)
         {
             // sum gain reduction meters only
