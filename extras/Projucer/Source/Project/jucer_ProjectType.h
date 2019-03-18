@@ -214,6 +214,7 @@ struct ProjectType_ARAAudioPlugin : public ProjectType
         {
             case Target::VST3PlugIn:
             case Target::AudioUnitPlugIn:
+            case Target::StandalonePlugIn:
             case Target::SharedCodeTarget:
             case Target::AggregateTarget:
                 return true;
