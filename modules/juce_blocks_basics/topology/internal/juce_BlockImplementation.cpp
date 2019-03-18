@@ -422,12 +422,41 @@ public:
         lastMessageReceiveTime = Time::getCurrentTime();
     }
 
+    MIDIDeviceConnection* getDeviceConnection()
+    {
+        return dynamic_cast<MIDIDeviceConnection*> (detector->getDeviceConnectionFor (*this));
+    }
+
     void addDataInputPortListener (DataInputPortListener* listener) override
     {
-        Block::addDataInputPortListener (listener);
+        if (auto deviceConnection = getDeviceConnection())
+        {
+            {
+                ScopedLock scopedLock (deviceConnection->criticalSecton);
+                Block::addDataInputPortListener (listener);
+            }
 
-        if (auto midiInput = getMidiInput())
-            midiInput->start();
+            deviceConnection->midiInput->start();
+        }
+        else
+        {
+            Block::addDataInputPortListener (listener);
+        }
+    }
+
+    void removeDataInputPortListener (DataInputPortListener* listener) override
+    {
+        if (auto deviceConnection = getDeviceConnection())
+        {
+            {
+                ScopedLock scopedLock (deviceConnection->criticalSecton);
+                Block::removeDataInputPortListener (listener);
+            }
+        }
+        else
+        {
+            Block::removeDataInputPortListener (listener);
+        }
     }
 
     void sendMessage (const void* message, size_t messageSize) override
