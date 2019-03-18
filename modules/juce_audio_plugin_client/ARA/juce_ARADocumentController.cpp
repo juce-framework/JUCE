@@ -248,7 +248,8 @@ void ARADocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::Play
     {
         _currentPropertyUpdateAffectsContent = false;
         auto scopes = ARAContentUpdateScopes::samplesAreAffected();
-        if (JucePlugin_ARAContentTypes & 1)
+        JUCE_CONSTEXPR auto areNotesAnalyzable = (bool) (JucePlugin_ARAContentTypes & 1);
+        if (areNotesAnalyzable)
             scopes += ARAContentUpdateScopes::notesAreAffected();
         // other content such as tempo or key signatures are not exported at playback region level
         // because this would simply mirror the musical context content.
