@@ -20,8 +20,11 @@ namespace Presonus {
      */
     //************************************************************************************************
 
-    struct IGainReductionInfo: Steinberg::FUnknown
+    class IGainReductionInfo : public Steinberg::FUnknown
     {
+    public:
+        virtual ~IGainReductionInfo() {}
+    
         /** Get current gain reduction for display. The returned value in dB is either 0.0 (no reduction)
          or negative. The host calls this function periodically while the plug-in is active.
          The value is used AS IS for UI display purposes, without imposing additional ballistics or
