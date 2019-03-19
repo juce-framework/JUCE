@@ -6,6 +6,28 @@ Develop
 
 Change
 ------
+The AudioBlock class now differentiates between const and non-const data.
+
+Possible Issues
+---------------
+The return type of the getInputBlock() method of the ProcessContextReplacing
+and ProcessContextNonReplacing classes has changed from AudioBlock<X> to
+AudioBlock<const X>.
+
+Workaround
+----------
+For ProcessContextReplacing you should use getOutputBlock() instead of
+getInputBlock(). For ProcessContextNonReplacing attempting to modify the input
+block is very likely an error.
+
+Rationale
+---------
+This change makes the intent of the code much clearer and means that we can
+remove some const_cast operations.
+
+
+Change
+------
 The formatting of floating point numbers written to XML and JSON files has
 changed.
 

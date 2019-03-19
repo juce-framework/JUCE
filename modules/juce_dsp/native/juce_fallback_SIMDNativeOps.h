@@ -43,8 +43,8 @@ namespace SIMDInternal
     template <> struct MaskTypeFor <std::complex<float>>    { using type = uint32_t; };
     template <> struct MaskTypeFor <std::complex<double>>   { using type = uint64_t; };
 
-    template <typename Primitive> struct PrimitiveType                           { using type = Primitive; };
-    template <typename Primitive> struct PrimitiveType<std::complex<Primitive>>  { using type = Primitive; };
+    template <typename Primitive> struct PrimitiveType                           { using type = typename std::remove_cv<Primitive>::type; };
+    template <typename Primitive> struct PrimitiveType<std::complex<Primitive>>  { using type = typename std::remove_cv<Primitive>::type; };
 
     template <int n>    struct Log2Helper    { enum { value = Log2Helper<n/2>::value + 1 }; };
     template <>         struct Log2Helper<1> { enum { value = 0 }; };

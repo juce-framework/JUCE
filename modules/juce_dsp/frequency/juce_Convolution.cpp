@@ -718,7 +718,7 @@ struct Convolution::Pimpl  : private Thread
     /** Convolution processing handling interpolation between previous and new states
         of the convolution engines.
     */
-    void processSamples (const AudioBlock<float>& input, AudioBlock<float>& output)
+    void processSamples (const AudioBlock<const float>& input, AudioBlock<float>& output)
     {
         processFifo();
 
@@ -1197,7 +1197,7 @@ void Convolution::reset() noexcept
     pimpl->reset();
 }
 
-void Convolution::processSamples (const AudioBlock<float>& input, AudioBlock<float>& output, bool isBypassed) noexcept
+void Convolution::processSamples (const AudioBlock<const float>& input, AudioBlock<float>& output, bool isBypassed) noexcept
 {
     if (! isActive)
         return;

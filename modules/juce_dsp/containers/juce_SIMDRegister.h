@@ -358,13 +358,6 @@ struct SIMDRegister
         return snapPointerToAlignment (ptr, SIMDRegisterSize);
     }
 
-   #ifndef DOXYGEN
-    static inline const ElementType* getNextSIMDAlignedPtr (const ElementType* ptr) noexcept
-    {
-        return snapPointerToAlignment (ptr, SIMDRegisterSize);
-    }
-   #endif
-
 private:
     static inline vMaskType JUCE_VECTOR_CALLTYPE toMaskType (vSIMDType a) noexcept
     {

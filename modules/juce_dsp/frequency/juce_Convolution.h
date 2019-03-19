@@ -156,7 +156,7 @@ private:
     std::unique_ptr<Pimpl> pimpl;
 
     //==============================================================================
-    void processSamples (const AudioBlock<float>&, AudioBlock<float>&, bool isBypassed) noexcept;
+    void processSamples (const AudioBlock<const float>&, AudioBlock<float>&, bool isBypassed) noexcept;
 
     //==============================================================================
     double sampleRate;
