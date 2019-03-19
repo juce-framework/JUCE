@@ -34,7 +34,7 @@ However, you'll have to add your own document controller implementation - refere
 
 <img src="https://i.imgur.com/VGcDWEc.png"/>
 
-The generated plugin will have, in addition to the standard PluginProcessor and PluginEditor classes, a PluginARADocumentController file containing a class that overrides the ARA::PlugIn::DocumentController type.
+The generated plugin will have, in addition to the standard PluginProcessor and PluginEditor classes, a PluginARADocumentController file containing a class that overrides the ARA::PlugIn::DocumentController type. Note that when enabling ARA in an existing Audio Plug-In project you'll have to implement an ARADocumentController yourself. 
 
 <img src="https://i.imgur.com/JqNIe2b.png"/>
 
