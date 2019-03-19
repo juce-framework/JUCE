@@ -297,12 +297,7 @@ void ignoreUnused (Types&&...) noexcept {}
     @endcode
 */
 template <typename Type, int N>
-int numElementsInArray (Type (&array)[N])
-{
-    (void) array;
-    (void) sizeof (0[array]); // This line should cause an error if you pass an object with a user-defined subscript operator
-    return N;
-}
+JUCE_CONSTEXPR int numElementsInArray (Type (&)[N]) noexcept     { return N; }
 
 //==============================================================================
 // Some useful maths functions that aren't always present with all compilers and build settings.
