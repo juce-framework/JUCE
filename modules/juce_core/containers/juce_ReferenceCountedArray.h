@@ -437,8 +437,9 @@ public:
 
             if (indexToChange < values.size())
             {
-                releaseObject (values[indexToChange]);
+                auto* e = values[indexToChange];
                 values[indexToChange] = newObject;
+                releaseObject (e);
             }
             else
             {
@@ -570,9 +571,9 @@ public:
 
         if (isPositiveAndBelow (indexToRemove, values.size()))
         {
-            auto** e = values.begin() + indexToRemove;
-            releaseObject (*e);
+            auto* e = *(values.begin() + indexToRemove);
             values.removeElements (indexToRemove, 1);
+            releaseObject (e);
 
             if ((values.size() << 1) < values.capacity())
                 minimiseStorageOverheads();
@@ -595,10 +596,10 @@ public:
 
         if (isPositiveAndBelow (indexToRemove, values.size()))
         {
-            auto** e = values.begin() + indexToRemove;
-            removedItem = *e;
-            releaseObject (*e);
+            auto* e = *(values.begin() + indexToRemove);
+            removedItem = e;
             values.removeElements (indexToRemove, 1);
+            releaseObject (e);
 
             if ((values.size() << 1) < values.capacity())
                 minimiseStorageOverheads();
@@ -656,13 +657,13 @@ public:
 
         if (numberToRemove > 0)
         {
-            for (int i = startIndex; i < endIndex; ++i)
-            {
-                releaseObject (values[i]);
-                values[i] = nullptr; // (in case one of the destructors accesses this array and hits a dangling pointer)
-            }
+            Array<ObjectClass*> objectsToRemove;
+            objectsToRemove.addArray (values.begin() + startIndex, numberToRemove);
 
             values.removeElements (startIndex, numberToRemove);
+
+            for (auto& o : objectsToRemove)
+                releaseObject (o);
 
             if ((values.size() << 1) < values.capacity())
                 minimiseStorageOverheads();
@@ -848,10 +849,14 @@ private:
 
     void releaseAllObjects()
     {
-        for (auto& v : values)
-            releaseObject (v);
+        auto i = values.size();
 
-        values.clear();
+        while (--i >= 0)
+        {
+            auto* e = values[i];
+            values.removeElements (i, 1);
+            releaseObject (e);
+        }
     }
 
     static void releaseObject (ObjectClass* o)

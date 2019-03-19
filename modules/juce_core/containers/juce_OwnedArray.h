@@ -625,16 +625,15 @@ public:
 
         if (numberToRemove > 0)
         {
+            Array<ObjectClass*> objectsToDelete;
+
             if (deleteObjects)
-            {
-                for (int i = startIndex; i < endIndex; ++i)
-                {
-                    ContainerDeletePolicy<ObjectClass>::destroy (values[i]);
-                    values[i] = nullptr; // (in case one of the destructors accesses this array and hits a dangling pointer)
-                }
-            }
+                objectsToDelete.addArray (values.begin() + startIndex, numberToRemove);
 
             values.removeElements (startIndex, numberToRemove);
+
+            for (auto& o : objectsToDelete)
+                ContainerDeletePolicy<ObjectClass>::destroy (o);
 
             if ((values.size() << 1) < values.capacity())
                 minimiseStorageOverheads();
@@ -792,10 +791,14 @@ private:
 
     void deleteAllObjects()
     {
-        for (auto& e : values)
-            ContainerDeletePolicy<ObjectClass>::destroy (e);
+        auto i = values.size();
 
-        values.clear();
+        while (--i >= 0)
+        {
+            auto* e = values[i];
+            values.removeElements (i, 1);
+            ContainerDeletePolicy<ObjectClass>::destroy (e);
+        }
     }
 
     template <class OtherObjectClass, class OtherCriticalSection>
