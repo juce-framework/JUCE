@@ -90,7 +90,9 @@ namespace juce
         {
             const auto windowCloseCallback = [&]
             {
-                exitCallback->modalStateFinished(0);
+                if (exitCallback) {
+                    exitCallback->modalStateFinished(0);
+                }
                 
                 // TODO: This is only called when the BLE MIDI pairing window is closed.
                 //       Since the pairing window is not modal, the parent window can be closed first,
