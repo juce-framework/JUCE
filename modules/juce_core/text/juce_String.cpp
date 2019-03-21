@@ -2187,7 +2187,7 @@ StringRef::StringRef (const std::string& string)       : StringRef (string.c_str
 
 //==============================================================================
 
-static String minimiseLengthOfFloatString (const String& input)
+static String reduceLengthOfFloatString (const String& input)
 {
     const auto start = input.getCharPointer();
     const auto end = start + (int) input.length();
@@ -2208,8 +2208,8 @@ static String minimiseLengthOfFloatString (const String& input)
         }
         else if (currentChar == '.')
         {
-            if (trimStart == c + 1)
-                --trimStart;
+            if (trimStart == c + 1 && trimStart != end && *trimStart == '0')
+                ++trimStart;
 
             break;
         }
@@ -2263,12 +2263,12 @@ static String serialiseDouble (double input)
     auto absInput = std::abs (input);
 
     if (absInput >= 1.0e6 || absInput <= 1.0e-5)
-        return minimiseLengthOfFloatString ({ input, 15, true });
+        return reduceLengthOfFloatString ({ input, 15, true });
 
     int intInput = (int) input;
 
     if ((double) intInput == input)
-        return minimiseLengthOfFloatString ({ input, 1 });
+        return { input, 1 };
 
     auto numberOfDecimalPlaces = [absInput]
     {
@@ -2297,7 +2297,7 @@ static String serialiseDouble (double input)
         return 10;
     }();
 
-    return minimiseLengthOfFloatString (String (input, numberOfDecimalPlaces));
+    return reduceLengthOfFloatString (String (input, numberOfDecimalPlaces));
 }
 
 //==============================================================================
@@ -2836,13 +2836,14 @@ public:
             {
                 StringPairArray tests;
                 tests.set ("1", "1");
+                tests.set ("1.0", "1.0");
                 tests.set ("-1", "-1");
                 tests.set ("-100", "-100");
                 tests.set ("110", "110");
                 tests.set ("9090", "9090");
-                tests.set ("1000.0", "1000");
-                tests.set ("1.0", "1");
-                tests.set ("-1.00", "-1");
+                tests.set ("1000.0", "1000.0");
+                tests.set ("1.0", "1.0");
+                tests.set ("-1.00", "-1.0");
                 tests.set ("1.20", "1.2");
                 tests.set ("1.300", "1.3");
                 tests.set ("1.301", "1.301");
@@ -2857,7 +2858,7 @@ public:
                 tests.set ("-1e-000", "-1");
                 tests.set ("1e100", "1e100");
                 tests.set ("100e100", "100e100");
-                tests.set ("100.0e0100", "100e100");
+                tests.set ("100.0e0100", "100.0e100");
                 tests.set ("-1e1", "-1e1");
                 tests.set ("1e10", "1e10");
                 tests.set ("-1e+10", "-1e10");
@@ -2865,32 +2866,32 @@ public:
                 tests.set ("1e0010", "1e10");
                 tests.set ("1e-0010", "1e-10");
                 tests.set ("1e-1", "1e-1");
-                tests.set ("-1.0e1", "-1e1");
-                tests.set ("1.0e-1", "1e-1");
-                tests.set ("1.00e-1", "1e-1");
+                tests.set ("-1.0e1", "-1.0e1");
+                tests.set ("1.0e-1", "1.0e-1");
+                tests.set ("1.00e-1", "1.0e-1");
                 tests.set ("1.001e1", "1.001e1");
                 tests.set ("1.010e+1", "1.01e1");
                 tests.set ("-1.1000e1", "-1.1e1");
 
                 for (auto& input : tests.getAllKeys())
-                    expectEquals (minimiseLengthOfFloatString (input), tests[input]);
+                    expectEquals (reduceLengthOfFloatString (input), tests[input]);
             }
 
             {
                 std::map<double, String> tests;
-                tests[1] = "1";
+                tests[1] = "1.0";
                 tests[1.1] = "1.1";
                 tests[1.01] = "1.01";
                 tests[0.76378] = "7.6378e-1";
-                tests[-10] = "-1e1";
+                tests[-10] = "-1.0e1";
                 tests[10.01] = "1.001e1";
                 tests[10691.01] = "1.069101e4";
                 tests[0.0123] = "1.23e-2";
                 tests[-3.7e-27] = "-3.7e-27";
-                tests[1e+40] = "1e40";
+                tests[1e+40] = "1.0e40";
 
                 for (auto& test : tests)
-                    expectEquals (minimiseLengthOfFloatString (String (test.first, 15, true)), test.second);
+                    expectEquals (reduceLengthOfFloatString (String (test.first, 15, true)), test.second);
             }
         }
 
@@ -2898,6 +2899,11 @@ public:
             beginTest ("Serialisation");
 
             std::map <double, String> tests;
+
+            tests[364] = "364.0";
+            tests[1e7] = "1.0e7";
+            tests[12345678901] = "1.2345678901e10";
+
             tests[1234567890123456.7] = "1.234567890123457e15";
             tests[12345678.901234567] = "1.234567890123457e7";
             tests[1234567.8901234567] = "1.234567890123457e6";

@@ -942,20 +942,20 @@ public:
             Identifier number ("number");
 
             std::map<double, String> tests;
-            tests[1] = "1";
+            tests[1] = "1.0";
             tests[1.1] = "1.1";
             tests[1.01] = "1.01";
             tests[0.76378] = "0.76378";
-            tests[-10] = "-10";
+            tests[-10] = "-10.0";
             tests[10.01] = "10.01";
             tests[0.0123] = "0.0123";
             tests[-3.7e-27] = "-3.7e-27";
-            tests[1e+40] = "1e40";
+            tests[1e+40] = "1.0e40";
             tests[-12345678901234567.0] = "-1.234567890123457e16";
-            tests[192000] = "192000";
+            tests[192000] = "192000.0";
             tests[1234567] = "1.234567e6";
             tests[0.00006] = "0.00006";
-            tests[0.000006] = "6e-6";
+            tests[0.000006] = "6.0e-6";
 
             for (auto& test : tests)
             {
