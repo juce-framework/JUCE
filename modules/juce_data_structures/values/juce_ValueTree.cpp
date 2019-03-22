@@ -1088,7 +1088,12 @@ ValueTree ValueTree::readFromGZIPData (const void* data, size_t numBytes)
     return readFromStream (gzipStream);
 }
 
-void ValueTree::Listener::valueTreeRedirected (ValueTree&) {}
+void ValueTree::Listener::valueTreePropertyChanged   (ValueTree&, const Identifier&)  {}
+void ValueTree::Listener::valueTreeChildAdded        (ValueTree&, ValueTree&)         {}
+void ValueTree::Listener::valueTreeChildRemoved      (ValueTree&, ValueTree&, int)    {}
+void ValueTree::Listener::valueTreeChildOrderChanged (ValueTree&, int, int)           {}
+void ValueTree::Listener::valueTreeParentChanged     (ValueTree&)                     {}
+void ValueTree::Listener::valueTreeRedirected        (ValueTree&)                     {}
 
 //==============================================================================
 #if JUCE_UNIT_TESTS
