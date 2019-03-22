@@ -343,7 +343,13 @@ private:
             for (int i = 0; i < deviceCaps.size(); ++i)
             {
                 deviceNames.add (deviceCaps[i].szPname);
-                deviceIDs.add (getInterfaceIDForDevice ((UINT) i));
+
+                auto identifier = getInterfaceIDForDevice ((UINT) i);
+
+                if (identifier.isNotEmpty())
+                    deviceIDs.add (identifier);
+                else
+                    deviceIDs.add (deviceNames[i]);
             }
 
             deviceNames.appendNumbersToDuplicates (false, false, CharPointer_UTF8 ("-"), CharPointer_UTF8 (""));
