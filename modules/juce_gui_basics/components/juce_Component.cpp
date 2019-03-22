@@ -2902,7 +2902,7 @@ bool Component::isMouseOver (bool includeChildren) const
         auto* c = ms.getComponentUnderMouse();
 
         if (c == this || (includeChildren && isParentOf (c)))
-            if (ms.isDragging() || ! ms.isTouch())
+            if (ms.isDragging() || ! (ms.isTouch() || ms.isPen()))
                 if (c->reallyContains (c->getLocalPoint (nullptr, ms.getScreenPosition()).roundToInt(), false))
                     return true;
     }
