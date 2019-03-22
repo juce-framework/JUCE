@@ -66,12 +66,6 @@ struct ProjectTreeItemBase  : public JucerTreeViewBase,
            refreshSubItems();
     }
 
-    void valueTreePropertyChanged (ValueTree&, const Identifier&) override {}
-    void valueTreeChildAdded (ValueTree&, ValueTree&) override {}
-    void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override {}
-    void valueTreeChildOrderChanged (ValueTree&, int, int) override {}
-    void valueTreeParentChanged (ValueTree&) override {}
-
     virtual bool isProjectSettings() const          { return false; }
     virtual bool isModulesList() const              { return false; }
 

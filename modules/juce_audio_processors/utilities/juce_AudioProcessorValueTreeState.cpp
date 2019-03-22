@@ -411,18 +411,11 @@ void AudioProcessorValueTreeState::valueTreeChildAdded (ValueTree& parent, Value
         setNewState (tree);
 }
 
-void AudioProcessorValueTreeState::valueTreeChildRemoved (ValueTree&, ValueTree&, int)
-{
-}
-
 void AudioProcessorValueTreeState::valueTreeRedirected (ValueTree& v)
 {
     if (v == state)
         updateParameterConnectionsToChildTrees();
 }
-
-void AudioProcessorValueTreeState::valueTreeChildOrderChanged (ValueTree&, int, int) {}
-void AudioProcessorValueTreeState::valueTreeParentChanged (ValueTree&) {}
 
 bool AudioProcessorValueTreeState::flushParameterValuesToValueTree()
 {

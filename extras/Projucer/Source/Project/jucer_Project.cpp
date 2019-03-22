@@ -764,7 +764,6 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
 void Project::valueTreeChildAdded (ValueTree&, ValueTree&)          { changed(); }
 void Project::valueTreeChildRemoved (ValueTree&, ValueTree&, int)   { changed(); }
 void Project::valueTreeChildOrderChanged (ValueTree&, int, int)     { changed(); }
-void Project::valueTreeParentChanged (ValueTree&)                   {}
 
 //==============================================================================
 bool Project::hasProjectBeenModified()

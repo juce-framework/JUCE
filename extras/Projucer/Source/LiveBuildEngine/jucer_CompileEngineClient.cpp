@@ -310,7 +310,6 @@ private:
     void valueTreeChildAdded (ValueTree&, ValueTree&) override                   { projectStructureChanged(); }
     void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override            { projectStructureChanged(); }
     void valueTreeParentChanged (ValueTree&) override                            { projectStructureChanged(); }
-    void valueTreeChildOrderChanged (ValueTree&, int, int) override              {}
 
     String getGlobalDefs()
     {
