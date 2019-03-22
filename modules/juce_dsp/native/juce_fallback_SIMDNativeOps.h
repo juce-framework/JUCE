@@ -120,6 +120,19 @@ struct SIMDFallbackOps
         return retval;
     }
 
+    static forcedinline vSIMDType truncate (vSIMDType av) noexcept
+    {
+        UnionType a {av};
+
+        for (size_t i = 0; i < n; ++i)
+        {
+            jassert (a.s[i] >= ScalarType (0));
+            a.s[i] = static_cast <ScalarType> (static_cast<int> (a.s[i]));
+        }
+
+        return a.v;
+    }
+
     static forcedinline vSIMDType multiplyAdd (vSIMDType av, vSIMDType bv, vSIMDType cv) noexcept
     {
         UnionType a {av}, b {bv}, c {cv};

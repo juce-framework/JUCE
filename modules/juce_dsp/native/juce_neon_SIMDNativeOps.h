@@ -92,6 +92,8 @@ struct SIMDNativeOps<uint32_t>
     static forcedinline vSIMDType greaterThan (vSIMDType a, vSIMDType b) noexcept               { return (vSIMDType) vcgtq_u32 (a, b); }
     static forcedinline vSIMDType greaterThanOrEqual (vSIMDType a, vSIMDType b) noexcept        { return (vSIMDType) vcgeq_u32 (a, b); }
     static forcedinline vSIMDType multiplyAdd (vSIMDType a, vSIMDType b, vSIMDType c) noexcept  { return vmlaq_u32 (a, b, c); }
+    static forcedinline vSIMDType truncate (vSIMDType a) noexcept                               { return a; }
+
     static forcedinline uint32_t sum (vSIMDType a) noexcept
     {
         auto rr = vadd_u32 (vget_high_u32 (a), vget_low_u32 (a));
@@ -136,6 +138,8 @@ struct SIMDNativeOps<int32_t>
     static forcedinline vSIMDType greaterThan (vSIMDType a, vSIMDType b) noexcept               { return (vSIMDType) vcgtq_s32 (a, b); }
     static forcedinline vSIMDType greaterThanOrEqual (vSIMDType a, vSIMDType b) noexcept        { return (vSIMDType) vcgeq_s32 (a, b); }
     static forcedinline vSIMDType multiplyAdd (vSIMDType a, vSIMDType b, vSIMDType c) noexcept  { return vmlaq_s32 (a, b, c); }
+    static forcedinline vSIMDType truncate (vSIMDType a) noexcept                               { return a; }
+
     static forcedinline int32_t sum (vSIMDType a) noexcept
     {
         auto rr = vadd_s32 (vget_high_s32 (a), vget_low_s32 (a));
@@ -182,6 +186,7 @@ struct SIMDNativeOps<int8_t>
     static forcedinline bool      allEqual (vSIMDType a, vSIMDType b) noexcept                 { return (SIMDNativeOps<int32_t>::sum ((SIMDNativeOps<int32_t>::vSIMDType) notEqual (a, b)) == 0); }
     static forcedinline vSIMDType multiplyAdd (vSIMDType a, vSIMDType b, vSIMDType c) noexcept { return vmlaq_s8 (a, b, c); }
     static forcedinline int8_t sum (vSIMDType a) noexcept                                      { return fb::sum (a); }
+    static forcedinline vSIMDType truncate (vSIMDType a) noexcept                              { return a; }
 };
 
 //==============================================================================
@@ -222,6 +227,7 @@ struct SIMDNativeOps<uint8_t>
     static forcedinline bool      allEqual (vSIMDType a, vSIMDType b) noexcept                 { return (SIMDNativeOps<uint32_t>::sum ((SIMDNativeOps<uint32_t>::vSIMDType) notEqual (a, b)) == 0); }
     static forcedinline vSIMDType multiplyAdd (vSIMDType a, vSIMDType b, vSIMDType c) noexcept { return vmlaq_u8 (a, b, c); }
     static forcedinline uint8_t sum (vSIMDType a) noexcept                                     { return fb::sum (a); }
+    static forcedinline vSIMDType truncate (vSIMDType a) noexcept                              { return a; }
 };
 
 //==============================================================================
@@ -262,6 +268,7 @@ struct SIMDNativeOps<int16_t>
     static forcedinline bool      allEqual (vSIMDType a, vSIMDType b) noexcept                 { return (SIMDNativeOps<int32_t>::sum ((SIMDNativeOps<int32_t>::vSIMDType) notEqual (a, b)) == 0); }
     static forcedinline vSIMDType multiplyAdd (vSIMDType a, vSIMDType b, vSIMDType c) noexcept { return vmlaq_s16 (a, b, c); }
     static forcedinline int16_t sum (vSIMDType a) noexcept                                     { return fb::sum (a); }
+    static forcedinline vSIMDType truncate (vSIMDType a) noexcept                              { return a; }
 };
 
 
@@ -303,6 +310,7 @@ struct SIMDNativeOps<uint16_t>
     static forcedinline bool      allEqual (vSIMDType a, vSIMDType b) noexcept                 { return (SIMDNativeOps<uint32_t>::sum ((SIMDNativeOps<uint32_t>::vSIMDType) notEqual (a, b)) == 0); }
     static forcedinline vSIMDType multiplyAdd (vSIMDType a, vSIMDType b, vSIMDType c) noexcept { return vmlaq_u16 (a, b, c); }
     static forcedinline uint16_t sum (vSIMDType a) noexcept                                    { return fb::sum (a); }
+    static forcedinline vSIMDType truncate (vSIMDType a) noexcept                              { return a; }
 };
 
 //==============================================================================
@@ -343,6 +351,7 @@ struct SIMDNativeOps<int64_t>
     static forcedinline bool      allEqual (vSIMDType a, vSIMDType b) noexcept                 { return (SIMDNativeOps<int32_t>::sum ((SIMDNativeOps<int32_t>::vSIMDType) notEqual (a, b)) == 0); }
     static forcedinline vSIMDType multiplyAdd (vSIMDType a, vSIMDType b, vSIMDType c) noexcept { return fb::multiplyAdd (a, b, c); }
     static forcedinline int64_t sum (vSIMDType a) noexcept                                     { return fb::sum (a); }
+    static forcedinline vSIMDType truncate (vSIMDType a) noexcept                              { return a; }
 };
 
 
@@ -383,7 +392,8 @@ struct SIMDNativeOps<uint64_t>
     static forcedinline vSIMDType greaterThanOrEqual (vSIMDType a, vSIMDType b) noexcept        { return fb::greaterThanOrEqual (a, b); }
     static forcedinline bool      allEqual (vSIMDType a, vSIMDType b) noexcept                  { return (SIMDNativeOps<uint32_t>::sum ((SIMDNativeOps<uint32_t>::vSIMDType) notEqual (a, b)) == 0); }
     static forcedinline vSIMDType multiplyAdd (vSIMDType a, vSIMDType b, vSIMDType c) noexcept  { return fb::multiplyAdd (a, b, c); }
-    static forcedinline uint64_t sum (vSIMDType a) noexcept { return fb::sum (a); }
+    static forcedinline uint64_t sum (vSIMDType a) noexcept                                     { return fb::sum (a); }
+    static forcedinline vSIMDType truncate (vSIMDType a) noexcept                               { return a; }
 };
 
     //==============================================================================
@@ -430,6 +440,7 @@ struct SIMDNativeOps<float>
     static forcedinline vSIMDType dupodd  (vSIMDType a) noexcept                               { return fb::shuffle<(1 << 0) | (1 << 2) | (3 << 4) | (3 << 6)>     (a); }
     static forcedinline vSIMDType swapevenodd (vSIMDType a) noexcept                           { return fb::shuffle<(1 << 0) | (0 << 2) | (3 << 4) | (2 << 6)> (a); }
     static forcedinline vSIMDType oddevensum (vSIMDType a) noexcept                            { return add (fb::shuffle<(2 << 0) | (3 << 2) | (0 << 4) | (1 << 6)> (a), a); }
+    static forcedinline vSIMDType truncate (vSIMDType a) noexcept                              { return vcvtq_f32_s32 (vcvtq_s32_f32 (a)); }
 
     //==============================================================================
     static forcedinline vSIMDType cmplxmul (vSIMDType a, vSIMDType b) noexcept
@@ -483,6 +494,7 @@ struct SIMDNativeOps<double>
     static forcedinline vSIMDType cmplxmul (vSIMDType a, vSIMDType b) noexcept                 { return fb::cmplxmul (a, b); }
     static forcedinline double sum (vSIMDType a) noexcept                                      { return fb::sum (a); }
     static forcedinline vSIMDType oddevensum (vSIMDType a) noexcept                            { return a; }
+    static forcedinline vSIMDType truncate (vSIMDType a) noexcept                              { return fb::truncate (a); }
 };
 
 #endif
