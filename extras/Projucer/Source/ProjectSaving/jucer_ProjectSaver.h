@@ -108,6 +108,7 @@ public:
             writeAppHeader (modules);
             writeModuleCppWrappers (modules);
             writeProjects (modules, specifiedExporterToSave, ! showProgressBox);
+            runPostExportScript();
 
             // if the project root has changed after writing the other files then re-save it
             if (project.getProjectRoot().toXmlString().hashCode() != projectRootHash)
@@ -707,6 +708,46 @@ private:
     }
 
     void writeProjects (const OwnedArray<LibraryModule>&, const String&, bool);
+
+    void runPostExportScript()
+    {
+       #if JUCE_WINDOWS
+        auto cmdString = project.getPostExportShellCommandWinString();
+       #else
+        auto cmdString = project.getPostExportShellCommandPosixString();
+       #endif
+
+        auto shellCommand = cmdString.replace ("%%1%%", project.getProjectFolder().getFullPathName());
+
+        if (shellCommand.isNotEmpty())
+        {
+           #if JUCE_WINDOWS
+            StringArray argList ("cmd.exe", "/c");
+           #else
+            StringArray argList ("/bin/sh", "-c");
+           #endif
+
+            argList.add (shellCommand);
+            ChildProcess shellProcess;
+
+            if (! shellProcess.start (argList))
+            {
+                addError ("Failed to run shell command: " + argList.joinIntoString (" "));
+                return;
+            }
+
+            if (! shellProcess.waitForProcessToFinish (10000))
+            {
+                addError ("Timeout running shell command: " + argList.joinIntoString (" "));
+                return;
+            }
+
+            auto exitCode = shellProcess.getExitCode();
+
+            if (exitCode != 0)
+                addError ("Shell command: " + argList.joinIntoString (" ") + " failed with exit code: " + String (exitCode));
+        }
+    }
 
     void saveExporter (ProjectExporter* exporter, const OwnedArray<LibraryModule>& modules)
     {
