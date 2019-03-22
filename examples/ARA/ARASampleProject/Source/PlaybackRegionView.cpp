@@ -37,16 +37,12 @@ PlaybackRegionView::~PlaybackRegionView()
 //==============================================================================
 void PlaybackRegionView::paint (Graphics& g)
 {
-    Colour regionColour;
-    const auto& colour = playbackRegion->getEffectiveColor();
-    if (colour != nullptr)
-        regionColour = Colour::fromFloatRGBA (colour->r, colour->g, colour->b, 1.0f);
-
     auto rect = getLocalBounds();
     g.setColour (isSelected ? Colours::yellow : Colours::black);
     g.drawRect (rect);
     rect.reduce (1, 1);
 
+    const Colour regionColour = convertOptionalARAColour (playbackRegion->getEffectiveColor());
     g.setColour (regionColour);
     g.fillRect (rect);
 
@@ -74,12 +70,9 @@ void PlaybackRegionView::paint (Graphics& g)
         g.drawText ("Access Disabled", getBounds(), Justification::centred);
     }
 
-    if (const auto& name = playbackRegion->getEffectiveName())
-    {
-        g.setColour (regionColour.contrasting (1.0f));
-        g.setFont (Font (12.0f));
-        g.drawText (convertARAString (name), rect, Justification::topLeft);
-    }
+    g.setColour (regionColour.contrasting (1.0f));
+    g.setFont (Font (12.0f));
+    g.drawText (convertOptionalARAString (playbackRegion->getEffectiveName()), rect, Justification::topLeft);
 }
 
 //==============================================================================

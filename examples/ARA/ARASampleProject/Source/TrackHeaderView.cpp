@@ -34,24 +34,18 @@ void TrackHeaderView::paint (juce::Graphics& g)
     if (regionSequence == nullptr)
         return;
 
-    Colour trackColour;
-    if (const auto& colour = regionSequence->getColor())
-        trackColour = Colour::fromFloatRGBA (colour->r, colour->g, colour->b, 1.0f);
-
     auto rect = getLocalBounds();
     g.setColour (isSelected ? Colours::yellow : Colours::black);
     g.drawRect (rect);
     rect.reduce (1, 1);
 
+    const Colour trackColour = convertOptionalARAColour (regionSequence->getColor());
     g.setColour (trackColour);
     g.fillRect (rect);
 
-    if (const auto& name = regionSequence->getName())
-    {
-        g.setColour (trackColour.contrasting (1.0f));
-        g.setFont (Font (12.0f));
-        g.drawText (convertARAString (name), rect, Justification::centredLeft);
-    }
+    g.setColour (trackColour.contrasting (1.0f));
+    g.setFont (Font (12.0f));
+    g.drawText (convertOptionalARAString (regionSequence->getName()), rect, Justification::centredLeft);
 }
 
 //==============================================================================
