@@ -46,7 +46,7 @@ JUCE_DECLARE_UUID_GETTER (WebBrowser,                "8856F961-340A-11D0-A96B-00
 class WebBrowserComponent::Pimpl   : public ActiveXControlComponent
 {
 public:
-    Pimpl() : htmlSource(nullptr) {}
+    Pimpl() {}
 
     ~Pimpl()
     {
@@ -85,12 +85,8 @@ public:
 
     void loadHTMLString(const String& htmlString, const String& /*baseURLString*/)
     {
-        if (htmlSource)
-        {
-            delete[] htmlSource;
-        }
-        htmlSource = new wchar_t[htmlString.length() + 1];
-        wcscpy(htmlSource, htmlString.toWideCharPointer());
+		htmlSource = htmlString;
+
         if (browser != nullptr)
         {
             VARIANT vURL;
@@ -108,6 +104,8 @@ public:
 
         if (browser == nullptr) return;
 
+		if (!htmlSource.length()) return;
+
         IHTMLDocument2 *pHtmlDoc2 = 0;
         IPersistStreamInit *pPSI = 0;
         IDispatch *pDispatch = 0;
@@ -116,12 +114,15 @@ public:
         if (SUCCEEDED(hr) && pDispatch) hr = pDispatch->QueryInterface(IID_IHTMLDocument2, (void**)&pHtmlDoc2);
         if (SUCCEEDED(hr) && pHtmlDoc2) hr = pHtmlDoc2->QueryInterface(IID_IPersistStreamInit, (void **)&pPSI);
 
-        // allocate global memoery to copy the HTML content to
-        HGLOBAL hHTMLContent = ::GlobalAlloc(GMEM_MOVEABLE, (::wcslen(htmlSource) + 1) * sizeof(TCHAR));
+        // allocate global memory to copy the HTML content to
+		auto* content = new wchar_t[htmlSource.length() + 1];
+		wcscpy(content, htmlSource.toWideCharPointer());
+
+        HGLOBAL hHTMLContent = ::GlobalAlloc(GMEM_MOVEABLE, (::wcslen(content) + 1) * sizeof(TCHAR));
         if (hHTMLContent)
         {
             wchar_t * p_content(static_cast<wchar_t *>(GlobalLock(hHTMLContent)));
-            ::wcscpy(p_content, htmlSource);
+            ::wcscpy(p_content, content);
             GlobalUnlock(hHTMLContent);
 
             // create a stream object based on the HTML content
@@ -130,12 +131,13 @@ public:
             if (SUCCEEDED(hr) && pStream) hr = pPSI->InitNew();
             if (SUCCEEDED(hr) && pPSI) hr = pPSI->Load(pStream);
         }
+
         if (pStream) pStream->Release();
         if (pPSI) pPSI->Release();
         if (pHtmlDoc2) pHtmlDoc2->Release();
         if (pDispatch) pDispatch->Release();
-        delete[] htmlSource;
-        htmlSource = nullptr;
+		delete[] content;
+		htmlSource = "";
     }
 
     void goToURL (const String& url,
@@ -199,7 +201,7 @@ public:
 
     //==============================================================================
     IWebBrowser2* browser = nullptr;
-	wchar_t* htmlSource;
+	String htmlSource;
 
 private:
     IConnectionPoint* connectionPoint = nullptr;
@@ -235,7 +237,7 @@ private:
 
             if (dispIdMember == DISPID_DOCUMENTCOMPLETE)
             {
-                if (pimpl.htmlSource)
+                if (pimpl.htmlSource.length())
                 {
                     pimpl.loadHTMLSource();
                 }
