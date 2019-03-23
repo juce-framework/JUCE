@@ -64,7 +64,7 @@ class PaintElementPath   : public ColouredElement
 {
 public:
     PaintElementPath (PaintRoutine* owner);
-    ~PaintElementPath();
+    ~PaintElementPath() override;
 
     //==============================================================================
     void setInitialBounds (int parentWidth, int parentHeight) override;

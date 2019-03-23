@@ -69,6 +69,10 @@
 			isa = PBXBuildFile;
 			fileRef = 5273768FBB55D0DD57A5E70C;
 		};
+		D832165EE981EF309D4B21BF = {
+			isa = PBXBuildFile;
+			fileRef = 9D2DAC7D0C9DB77CB83E2992;
+		};
 		006DF460F8DF66EFFA80D968 = {
 			isa = PBXBuildFile;
 			fileRef = 70F1CAF3C4C561DD81E6AFC1;
@@ -389,6 +393,13 @@
 			path = "../../../../modules/juce_gui_extra";
 			sourceTree = "SOURCE_ROOT";
 		};
+		9D2DAC7D0C9DB77CB83E2992 = {
+			isa = PBXFileReference;
+			lastKnownFileType = file.storyboard;
+			name = LaunchScreen.storyboard;
+			path = LaunchScreen.storyboard;
+			sourceTree = "SOURCE_ROOT";
+		};
 		9E8129263CD42C6029FC2CAD = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
@@ -601,6 +612,7 @@
 			children = (
 				1FD6DBAC73414DD4C152E34E,
 				5273768FBB55D0DD57A5E70C,
+				9D2DAC7D0C9DB77CB83E2992,
 				70F1CAF3C4C561DD81E6AFC1,
 			);
 			name = Resources;
@@ -759,7 +771,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf";
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = c11;
@@ -781,7 +793,7 @@
 				PRODUCT_NAME = "JUCE Network Graphics Demo";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				WARNING_CFLAGS = -Wreorder;
+				WARNING_CFLAGS = "-Wreorder";
 				ZERO_LINK = NO;
 			};
 			name = Debug;
@@ -809,7 +821,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf";
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
@@ -829,7 +841,7 @@
 				PRODUCT_NAME = "JUCE Network Graphics Demo";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				WARNING_CFLAGS = -Wreorder;
+				WARNING_CFLAGS = "-Wreorder";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -861,6 +873,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1282A62308CD1AC3F88A5D03,
+				D832165EE981EF309D4B21BF,
 				006DF460F8DF66EFFA80D968,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -927,13 +940,14 @@
 		A5398ADB6F5B128C00EB935C = {
 			isa = PBXProject;
 			buildConfigurationList = 02715337C584F3C721251428;
-			attributes = { LastUpgradeCheck = 0930; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { 4311FBCBD02948A0ED96C7DD = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; };
+			attributes = { LastUpgradeCheck = 0930; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { 4311FBCBD02948A0ED96C7DD = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
 			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 0;
 			mainGroup = D2EB65517396C974F0415A7F;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (4311FBCBD02948A0ED96C7DD);
+			knownRegions = (en, Base);
 		};
 	};
 	rootObject = A5398ADB6F5B128C00EB935C;

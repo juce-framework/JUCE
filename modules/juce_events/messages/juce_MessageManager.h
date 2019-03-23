@@ -186,8 +186,8 @@ public:
     class JUCE_API  MessageBase  : public ReferenceCountedObject
     {
     public:
-        MessageBase() noexcept {}
-        virtual ~MessageBase() {}
+        MessageBase() = default;
+        ~MessageBase() override = default;
 
         virtual void messageCallback() = 0;
         bool post();
@@ -452,7 +452,7 @@ public:
         Make sure this object is created and deleted by the same thread,
         otherwise there are no guarantees what will happen!
    */
-    ~MessageManagerLock() noexcept;
+    ~MessageManagerLock() override;
 
     //==============================================================================
     /** Returns true if the lock was successfully acquired.

@@ -123,6 +123,8 @@ void ProjectSaver::writePluginCharacteristicsFile()
     flags.set ("JucePlugin_IAAType",                     toCharLiteral (project.getIAATypeCode()));
     flags.set ("JucePlugin_IAASubType",                  "JucePlugin_PluginCode");
     flags.set ("JucePlugin_IAAName",                     project.getIAAPluginName().quoted());
+    flags.set ("JucePlugin_VSTNumMidiInputs",            project.getVSTNumMIDIInputsString());
+    flags.set ("JucePlugin_VSTNumMidiOutputs",           project.getVSTNumMIDIOutputsString());
 
     {
         String plugInChannelConfig = project.getPluginChannelConfigsString();
@@ -136,6 +138,7 @@ void ProjectSaver::writePluginCharacteristicsFile()
     }
 
     MemoryOutputStream mem;
+    mem.setNewLineString (projectLineFeed);
 
     mem << "//==============================================================================" << newLine
         << "// Audio plugin settings.." << newLine

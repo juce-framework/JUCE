@@ -76,6 +76,8 @@ public:
             return thread.result;
         }
 
+        projectLineFeed = project.getProjectLineFeed();
+
         auto appConfigUserContent = loadUserContentFromAppConfig();
 
         auto oldFile = project.getFile();
@@ -269,6 +271,7 @@ private:
 
     File appConfigFile;
     bool hasBinaryData = false;
+    String projectLineFeed = "\r\n";
 
     // Recursively clears out any files in a folder that we didn't create, but avoids
     // any folders containing hidden files that might be used by version-control systems.
@@ -325,6 +328,8 @@ private:
         if (xml != nullptr)
         {
             MemoryOutputStream mo;
+            mo.setNewLineString (projectLineFeed);
+
             xml->writeToStream (mo, String());
             replaceFileIfDifferent (projectFile, mo);
         }
@@ -367,7 +372,7 @@ private:
             userContent.add ({});
         }
 
-        return userContent.joinIntoString (newLine) + newLine;
+        return userContent.joinIntoString (projectLineFeed) + projectLineFeed;
     }
 
     void checkModuleValidity (OwnedArray<LibraryModule>& modules)
@@ -516,6 +521,8 @@ private:
         appConfigFile = getAppConfigFile();
 
         MemoryOutputStream mem;
+        mem.setNewLineString (projectLineFeed);
+
         writeAppConfig (mem, modules, userContent);
         saveGeneratedFile (project.getAppConfigFilename(), mem);
     }
@@ -570,6 +577,8 @@ private:
     void writeAppHeader (const OwnedArray<LibraryModule>& modules)
     {
         MemoryOutputStream mem;
+        mem.setNewLineString (projectLineFeed);
+
         writeAppHeader (mem, modules);
         saveGeneratedFile (project.getJuceSourceHFilename(), mem);
     }
@@ -581,6 +590,7 @@ private:
             for (auto& cu : module->getAllCompileUnits())
             {
                 MemoryOutputStream mem;
+                mem.setNewLineString (projectLineFeed);
 
                 writeAutoGenWarningComment (mem);
 
@@ -650,6 +660,8 @@ private:
     void writeReadmeFile()
     {
         MemoryOutputStream out;
+        out.setNewLineString (projectLineFeed);
+
         out << newLine
             << " Important Note!!" << newLine
             << " ================" << newLine
@@ -676,7 +688,8 @@ private:
 
     void writeUnityScriptFile()
     {
-        String unityScriptContents (BinaryData::jucer_UnityPluginGUIScript_cs);
+        auto unityScriptContents = replaceLineFeeds (BinaryData::jucer_UnityPluginGUIScript_cs,
+                                                     projectLineFeed);
 
         auto projectName = Project::addUnityPluginPrefixIfNecessary (project.getProjectNameString());
 

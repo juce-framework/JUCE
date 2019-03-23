@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 // This file is part of a Steinberg SDK. It is subject to the license terms
 // in the LICENSE file found in the top-level directory of this distribution
-// and at www.steinberg.net/sdklicenses.
+// and at www.steinberg.net/sdklicenses. 
 // No part of the SDK, including this file, may be copied, modified, propagated,
 // or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
@@ -70,6 +70,7 @@ static const int32 kAllProgramInvalid =	-1;		///< all program information is inv
 - [host imp]
 - [extends IComponentHandler]
 - [released: 3.0.0]
+- [optional]
 
 Host callback interface, used with IUnitInfo.
 Retrieve via queryInterface from IComponentHandler.
@@ -101,6 +102,7 @@ DECLARE_CLASS_IID (IUnitHandler, 0x4B5147F8, 0x4654486B, 0x8DAB30BA, 0x163A3C56)
 - [host imp]
 - [extends IUnitHandler]
 - [released: 3.6.5]
+- [optional]
 
 Host callback interface, used with IUnitInfo.
 Retrieve via queryInterface from IComponentHandler.
@@ -127,6 +129,7 @@ DECLARE_CLASS_IID (IUnitHandler2, 0xF89F8CDF, 0x699E4BA5, 0x96AAC9A4, 0x81452B01
 - [plug imp]
 - [extends IEditController]
 - [released: 3.0.0]
+- [optional]
 
 IUnitInfo describes the internal structure of the Plug-in.
 - The root unit is the component itself, so getUnitCount must return 1 at least.
@@ -199,6 +202,7 @@ DECLARE_CLASS_IID (IUnitInfo, 0x3D4BD6B5, 0x913A4FD2, 0xA886E768, 0xA5EB92C1)
 - [plug imp]
 - [extends IComponent]
 - [released: 3.0.0]
+- [optional]
 
 A component can either support program list data via this interface or
 unit preset data (IUnitData), but not both!
@@ -230,6 +234,7 @@ DECLARE_CLASS_IID (IProgramListData, 0x8683B01F, 0x7B354F70, 0xA2651DEC, 0x353AF
 - [plug imp]
 - [extends IComponent]
 - [released: 3.0.0]
+- [optional]
 
 A component can either support unit preset data via this interface or
 program list data (IProgramListData), but not both!

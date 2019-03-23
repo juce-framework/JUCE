@@ -651,7 +651,7 @@ public:
     TreeView (const String& componentName = String());
 
     /** Destructor. */
-    ~TreeView();
+    ~TreeView() override;
 
     //==============================================================================
     /** Sets the item that is displayed in the treeview.
@@ -858,7 +858,7 @@ public:
     */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         virtual void drawTreeviewPlusMinusBox (Graphics&, const Rectangle<float>& area,
                                                Colour backgroundColour, bool isItemOpen, bool isMouseOver) = 0;

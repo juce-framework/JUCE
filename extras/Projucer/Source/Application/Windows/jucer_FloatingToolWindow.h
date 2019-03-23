@@ -60,7 +60,7 @@ struct FloatingToolWindow  : public DialogWindow
         owner.reset (this);
     }
 
-    ~FloatingToolWindow()
+    ~FloatingToolWindow() override
     {
         if (windowPosProperty.isNotEmpty())
             getGlobalProperties().setValue (windowPosProperty, getWindowStateAsString());

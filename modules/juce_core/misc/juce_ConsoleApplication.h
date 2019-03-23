@@ -86,8 +86,16 @@ struct ArgumentList
         /** Returns true if this argument starts with a double dash, followed by the given string. */
         bool isLongOption (const String& optionRoot) const;
 
+        /** If this argument is a long option with a value, this returns the value.
+            e.g. for "--foo=bar", this would return 'bar'.
+        */
+        String getLongOptionValue() const;
+
         /** Returns true if this argument starts with a single dash and then contains the given character somewhere inside it. */
         bool isShortOption (char shortOptionCharacter) const;
+
+        /** Returns true if this argument starts with one or more dashes. */
+        bool isOption() const;
 
         /** Compares this argument against a string.
             The string may be a pipe-separated list of options, e.g. "--help|-h"
@@ -123,34 +131,33 @@ struct ArgumentList
     /** Throws an error unless the given option is found in the argument list. */
     void failIfOptionIsMissing (StringRef option) const;
 
-    /** Looks for the given argument and returns the one that follows it in the list.
+    /** Looks for a given argument and returns either its assigned value (for long options) or the
+        string that follows it (for short options).
         The option can also be a list of different versions separated by pipes, e.g. "--help|-h"
+        If it finds a long option, it will look for an assignment with a '=' sign, e.g. "--file=foo.txt",
+        and will return the string following the '='. If there's no '=', it will return an empty string.
+        If it finds a short option, it will attempt to return the argument that follows it, unless
+        it's another option.
         If the argument isn't found, this returns an empty string.
     */
-    Argument getArgumentAfterOption (StringRef option) const;
+    String getValueForOption (StringRef option) const;
 
-    /** Looks for a given argument and tries to parse the following argument as a file.
-        The option can also be a list of different versions separated by pipes, e.g. "--help|-h"
-        If the option isn't found, or if the next argument isn't a filename, it will throw
+    /** Looks for the value of argument using getValueForOption() and tries to parse that value
+        as a file.
+        If the option isn't found, or if the value can't be parsed as a filename, it will throw
         an error.
     */
-    File getFileAfterOption (StringRef option) const;
+    File getFileForOption (StringRef option) const;
 
-    /** Looks for a given argument and tries to parse the following argument as a file
-        which must exist for this to succeed.
-        The option can also be a list of different versions separated by pipes, e.g. "--help|-h"
-        If the option isn't found, or if the next argument isn't a filename, or if the file
-        doesn't exist, or if it's a folder rather than a file, then it will throw a suitable error.
+    /** Looks for a file argument using getFileForOption() and fails with a suitable error if
+        the file doesn't exist.
     */
-    File getExistingFileAfterOption (StringRef option) const;
+    File getExistingFileForOption (StringRef option) const;
 
-    /** Looks for a given argument and tries to parse the following argument as a folder
-        which must exist for this to succeed.
-        The option can also be a list of different versions separated by pipes, e.g. "--help|-h"
-        If the option isn't found, or if the next argument isn't a filename, or if it doesn't
-        point to a folder, then it will throw a suitable error.
+    /** Looks for a filename argument using getFileForOption() and fails with a suitable error if
+        the file isn't a folder that exists.
     */
-    File getExistingFolderAfterOption (StringRef option) const;
+    File getExistingFolderForOption (StringRef option) const;
 
     /** The name or path of the executable that was invoked, as it was specified on the command-line. */
     String executableName;
@@ -206,8 +213,13 @@ struct ConsoleApplication
         */
         String argumentDescription;
 
-        /** A description of the meaning of this command, for use in the help text. */
-        String commandDescription;
+        /** A short (one line) description of this command, which can be printed by
+            ConsoleApplication::printCommandList().
+        */
+        String shortDescription;
+
+        /** A longer description of this command, for use in extended help. */
+        String longDescription;
 
         /** The actual command that should be invoked to perform this action. */
         std::function<void(const ArgumentList&)> command;
@@ -217,15 +229,24 @@ struct ConsoleApplication
     /** Adds a command to the list. */
     void addCommand (Command);
 
+    /** Adds a command to the list, and marks it as one which is invoked if no other
+        command matches.
+    */
+    void addDefaultCommand (Command);
+
+    /** Adds a command that will print the given text in response to the "--version" option. */
+    void addVersionCommand (String versionArgument, String versionText);
+
     /** Adds a help command to the list.
         This command will print the user-supplied message that's passed in here as an
         argument, followed by a list of all the registered commands.
     */
-    void addHelpCommand (String helpArgument, String helpMessage,
-                         bool invokeIfNoOtherCommandRecognised);
+    void addHelpCommand (String helpArgument, String helpMessage, bool makeDefaultCommand);
 
-    /** Adds a command that will print the given text in response to the "--version" option. */
-    void addVersionCommand (String versionArgument, String versionText);
+    /** Prints out the list of commands and their short descriptions in a format that's
+        suitable for use as help.
+    */
+    void printCommandList (const ArgumentList&) const;
 
     //==============================================================================
     /** Throws a failure exception to cause a command-line app to terminate.
@@ -246,24 +267,40 @@ struct ConsoleApplication
     /** Looks for the first command in the list which matches the given arguments, and
         tries to invoke it.
 
-        If no command is found, it prints a help message listing the available commands.
+        If no command is found, and if there is no default command to run, it fails with
+        a suitable error message.
         If the command calls the fail() function, this will throw an exception that gets
         automatically caught and handled, and this method will return the error code that
         was passed into the fail() call.
+
+        If optionMustBeFirstArg is true, then only the first argument will be looked at
+        when searching the available commands - this lets you do 'git' style commands where
+        the executable name is followed by a verb.
     */
-    int findAndRunCommand (const ArgumentList&) const;
+    int findAndRunCommand (const ArgumentList&,
+                           bool optionMustBeFirstArg = false) const;
 
     /** Creates an ArgumentList object from the argc and argv variablrs, and invokes
         findAndRunCommand() using it.
     */
     int findAndRunCommand (int argc, char* argv[]) const;
 
+    /** Looks for the first command in the list which matches the given arguments.
+        If none is found, this returns either the default command (if one is set)
+        or nullptr.
+        If optionMustBeFirstArg is true, then only the first argument will be looked at
+        when searching the available commands - this lets you do 'git' style commands where
+        the executable name is followed by a verb.
+    */
+    const Command* findCommand (const ArgumentList&, bool optionMustBeFirstArg) const;
+
+    /** Gives read-only access to the list of registered commands. */
+    const std::vector<Command>& getCommands() const;
+
 private:
     //==============================================================================
     std::vector<Command> commands;
-    String commandIfNoOthersRecognised;
-
-    void printHelp (const String& preamble, const ArgumentList&) const;
+    int commandIfNoOthersRecognised = -1;
 };
 
 } // namespace juce

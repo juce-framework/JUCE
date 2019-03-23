@@ -42,7 +42,7 @@ class MainWindow  : public DocumentWindow,
 public:
     //==============================================================================
     MainWindow();
-    ~MainWindow();
+    ~MainWindow() override;
 
     //==============================================================================
     void closeButtonPressed() override;

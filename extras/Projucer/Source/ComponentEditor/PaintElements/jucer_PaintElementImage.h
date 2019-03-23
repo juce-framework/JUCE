@@ -36,7 +36,7 @@ class PaintElementImage   : public PaintElement
 {
 public:
     PaintElementImage (PaintRoutine*);
-    ~PaintElementImage();
+    ~PaintElementImage() override;
 
     enum StretchMode
     {

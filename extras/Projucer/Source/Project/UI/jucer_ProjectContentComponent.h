@@ -44,7 +44,7 @@ class ProjectContentComponent  : public Component,
 public:
     //==============================================================================
     ProjectContentComponent();
-    ~ProjectContentComponent();
+    ~ProjectContentComponent() override;
 
     Project* getProject() const noexcept    { return project; }
     virtual void setProject (Project*);

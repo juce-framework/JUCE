@@ -456,6 +456,9 @@ private:
     //==============================================================================
     void run() override
     {
+        int bufferSize = 65535;
+        HeapBlock<char> oscBuffer (bufferSize);
+
         while (! threadShouldExit())
         {
             jassert (socket != nullptr);
@@ -467,11 +470,10 @@ private:
             if (ready == 0)
                 continue;
 
-            char buffer[oscBufferSize];
-            auto bytesRead = (size_t) socket->read (buffer, (int) sizeof (buffer), false);
+            auto bytesRead = (size_t) socket->read (oscBuffer.getData(), bufferSize, false);
 
             if (bytesRead >= 4)
-                handleBuffer (buffer, bytesRead);
+                handleBuffer (oscBuffer.getData(), bytesRead);
         }
     }
 
@@ -580,7 +582,6 @@ private:
 
     OptionalScopedPointer<DatagramSocket> socket;
     OSCReceiver::FormatErrorHandler formatErrorHandler { nullptr };
-    enum { oscBufferSize = 4098 };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };

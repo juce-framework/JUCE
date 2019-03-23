@@ -250,12 +250,12 @@ public:
         jassert (currentlyPlayingNote.keyState == MPENote::keyDown
               || currentlyPlayingNote.keyState == MPENote::keyDownAndSustained);
 
-        level    .setValue (currentlyPlayingNote.pressure.asUnsignedFloat());
-        frequency.setValue (currentlyPlayingNote.getFrequencyInHertz());
+        level    .setTargetValue (currentlyPlayingNote.pressure.asUnsignedFloat());
+        frequency.setTargetValue (currentlyPlayingNote.getFrequencyInHertz());
 
         auto loopPoints = samplerSound->getLoopPointsInSeconds();
-        loopBegin.setValue (loopPoints.getStart() * samplerSound->getSample()->getSampleRate());
-        loopEnd  .setValue (loopPoints.getEnd()   * samplerSound->getSample()->getSampleRate());
+        loopBegin.setTargetValue (loopPoints.getStart() * samplerSound->getSample()->getSampleRate());
+        loopEnd  .setTargetValue (loopPoints.getEnd()   * samplerSound->getSample()->getSampleRate());
 
         for (auto smoothed : { &level, &frequency, &loopBegin, &loopEnd })
             smoothed->reset (currentSampleRate, smoothingLengthInSeconds);
@@ -276,12 +276,12 @@ public:
 
     void notePressureChanged() override
     {
-        level.setValue (currentlyPlayingNote.pressure.asUnsignedFloat());
+        level.setTargetValue (currentlyPlayingNote.pressure.asUnsignedFloat());
     }
 
     void notePitchbendChanged() override
     {
-        frequency.setValue (currentlyPlayingNote.getFrequencyInHertz());
+        frequency.setTargetValue (currentlyPlayingNote.getFrequencyInHertz());
     }
 
     void noteTimbreChanged()   override {}
@@ -294,8 +294,8 @@ public:
         jassert (samplerSound->getSample() != nullptr);
 
         auto loopPoints = samplerSound->getLoopPointsInSeconds();
-        loopBegin.setValue (loopPoints.getStart() * samplerSound->getSample()->getSampleRate());
-        loopEnd  .setValue (loopPoints.getEnd()   * samplerSound->getSample()->getSampleRate());
+        loopBegin.setTargetValue (loopPoints.getStart() * samplerSound->getSample()->getSampleRate());
+        loopEnd  .setTargetValue (loopPoints.getEnd()   * samplerSound->getSample()->getSampleRate());
 
         auto& data = samplerSound->getSample()->getBuffer();
 
@@ -446,10 +446,10 @@ private:
     }
 
     std::shared_ptr<const MPESamplerSound> samplerSound;
-    LinearSmoothedValue<double> level { 0 };
-    LinearSmoothedValue<double> frequency { 0 };
-    LinearSmoothedValue<double> loopBegin;
-    LinearSmoothedValue<double> loopEnd;
+    SmoothedValue<double> level { 0 };
+    SmoothedValue<double> frequency { 0 };
+    SmoothedValue<double> loopBegin;
+    SmoothedValue<double> loopEnd;
     double currentSamplePos { 0 };
     double tailOff { 0 };
     Direction currentDirection { Direction::forward };

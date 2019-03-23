@@ -42,7 +42,7 @@ public:
     /** Structure used for callbacks when instantiation is completed. */
     struct JUCE_API  InstantiationCompletionCallback
     {
-        virtual ~InstantiationCompletionCallback() {}
+        virtual ~InstantiationCompletionCallback() = default;
         virtual void completionCallback (AudioPluginInstance* instance, const String& error) = 0;
 
         JUCE_LEAK_DETECTOR (InstantiationCompletionCallback)

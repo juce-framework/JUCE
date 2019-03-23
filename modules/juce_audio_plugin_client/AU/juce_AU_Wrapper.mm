@@ -130,7 +130,6 @@ public:
           MusicDeviceBase (component,
                            (UInt32) AudioUnitHelpers::getBusCount (juceFilter.get(), true),
                            (UInt32) AudioUnitHelpers::getBusCount (juceFilter.get(), false)),
-          isBypassed (false),
           mapper (*juceFilter)
     {
         inParameterChangedCallback = false;
@@ -1462,7 +1461,6 @@ public:
     public:
         EditorCompHolder (AudioProcessorEditor* const editor)
         {
-            setSize (editor->getWidth(), editor->getHeight());
             addAndMakeVisible (editor);
 
            #if ! JucePlugin_EditorRequiresKeyboardFocus
@@ -1472,6 +1470,7 @@ public:
            #endif
 
             ignoreUnused (fakeMouseGenerator);
+            setBounds (getSizeToContainChild());
         }
 
         ~EditorCompHolder()
@@ -1480,13 +1479,21 @@ public:
                                  // have been transferred to another parent which takes over ownership.
         }
 
+        Rectangle<int> getSizeToContainChild()
+        {
+            if (auto* editor = getChildComponent (0))
+                return getLocalArea (editor, editor->getLocalBounds());
+
+            return {};
+        }
+
         static NSView* createViewFor (AudioProcessor* filter, JuceAU* au, AudioProcessorEditor* const editor)
         {
-            EditorCompHolder* editorCompHolder = new EditorCompHolder (editor);
-            NSRect r = makeNSRect (editorCompHolder->getLocalBounds());
+            auto* editorCompHolder = new EditorCompHolder (editor);
+            auto r = makeNSRect (editorCompHolder->getSizeToContainChild());
 
             static JuceUIViewClass cls;
-            NSView* view = [[cls.createInstance() initWithFrame: r] autorelease];
+            auto* view = [[cls.createInstance() initWithFrame: r] autorelease];
 
             JuceUIViewClass::setFilter (view, filter);
             JuceUIViewClass::setAU (view, au);
@@ -1503,29 +1510,33 @@ public:
 
             editorCompHolder->addToDesktop (0, (void*) view);
             editorCompHolder->setVisible (view);
+
             return view;
         }
 
         void childBoundsChanged (Component*) override
         {
-            if (Component* editor = getChildComponent(0))
+            auto b = getSizeToContainChild();
+
+            if (lastBounds != b)
             {
-                const int w = jmax (32, editor->getWidth());
-                const int h = jmax (32, editor->getHeight());
+                lastBounds = b;
 
-                if (getWidth() != w || getHeight() != h)
-                    setSize (w, h);
+                auto w = jmax (32, b.getWidth());
+                auto h = jmax (32, b.getHeight());
 
-                NSView* view = (NSView*) getWindowHandle();
-                NSRect r = [[view superview] frame];
-                r.size.width = editor->getWidth();
-                r.size.height = editor->getHeight();
+                setSize (w, h);
+
+                auto* view = (NSView*) getWindowHandle();
+                auto r = [[view superview] frame];
+                r.size.width  = w;
+                r.size.height = h;
 
                 [CATransaction begin];
-                [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
+                [CATransaction setValue:(id) kCFBooleanTrue forKey:kCATransactionDisableActions];
 
                 [[view superview] setFrame: r];
-                [view setFrame: makeNSRect (editor->getLocalBounds())];
+                [view setFrame: makeNSRect (b)];
                 [CATransaction commit];
 
                 [view setNeedsDisplay: YES];
@@ -1558,6 +1569,7 @@ public:
 
     private:
         FakeMouseMoveGenerator fakeMouseGenerator;
+        Rectangle<int> lastBounds;
 
         JUCE_DECLARE_NON_COPYABLE (EditorCompHolder)
     };
@@ -1707,7 +1719,7 @@ private:
     //==============================================================================
     AudioUnitHelpers::CoreAudioBufferList audioBuffer;
     MidiBuffer midiEvents, incomingEvents;
-    bool prepared, isBypassed;
+    bool prepared = false, isBypassed = false;
 
     //==============================================================================
    #if JUCE_FORCE_USE_LEGACY_PARAM_IDS

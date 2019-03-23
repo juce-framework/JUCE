@@ -45,7 +45,7 @@ public:
         Make sure this object isn't still being used by an AudioIODevice before
         deleting it!
     */
-    virtual ~AudioSourcePlayer();
+    ~AudioSourcePlayer() override;
 
     //==============================================================================
     /** Changes the current audio source to play from.

@@ -52,6 +52,7 @@ Array<ProjectExporter::ExporterTypeInfo> ProjectExporter::getExporterTypes()
 
     addType (types, XcodeProjectExporter::getNameMac(),          BinaryData::export_xcode_svg,          BinaryData::export_xcode_svgSize);
     addType (types, XcodeProjectExporter::getNameiOS(),          BinaryData::export_xcode_svg,          BinaryData::export_xcode_svgSize);
+    addType (types, MSVCProjectExporterVC2019::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
     addType (types, MSVCProjectExporterVC2017::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
     addType (types, MSVCProjectExporterVC2015::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
     addType (types, MSVCProjectExporterVC2013::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
@@ -72,14 +73,15 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
     {
         case 0:     exp = new XcodeProjectExporter         (project, ValueTree (XcodeProjectExporter         ::getValueTreeTypeName (false)), false); break;
         case 1:     exp = new XcodeProjectExporter         (project, ValueTree (XcodeProjectExporter         ::getValueTreeTypeName (true)), true); break;
-        case 2:     exp = new MSVCProjectExporterVC2017    (project, ValueTree (MSVCProjectExporterVC2017    ::getValueTreeTypeName())); break;
-        case 3:     exp = new MSVCProjectExporterVC2015    (project, ValueTree (MSVCProjectExporterVC2015    ::getValueTreeTypeName())); break;
-        case 4:     exp = new MSVCProjectExporterVC2013    (project, ValueTree (MSVCProjectExporterVC2013    ::getValueTreeTypeName())); break;
-        case 5:     exp = new MakefileProjectExporter      (project, ValueTree (MakefileProjectExporter      ::getValueTreeTypeName())); break;
-        case 6:     exp = new AndroidProjectExporter       (project, ValueTree (AndroidProjectExporter       ::getValueTreeTypeName())); break;
-        case 7:     exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::windowsTarget)), CodeBlocksProjectExporter::windowsTarget); break;
-        case 8:     exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::linuxTarget)),   CodeBlocksProjectExporter::linuxTarget); break;
-        case 9:     exp = new CLionProjectExporter         (project, ValueTree (CLionProjectExporter         ::getValueTreeTypeName())); break;
+        case 2:     exp = new MSVCProjectExporterVC2019    (project, ValueTree (MSVCProjectExporterVC2019    ::getValueTreeTypeName())); break;
+        case 3:     exp = new MSVCProjectExporterVC2017    (project, ValueTree (MSVCProjectExporterVC2017    ::getValueTreeTypeName())); break;
+        case 4:     exp = new MSVCProjectExporterVC2015    (project, ValueTree (MSVCProjectExporterVC2015    ::getValueTreeTypeName())); break;
+        case 5:     exp = new MSVCProjectExporterVC2013    (project, ValueTree (MSVCProjectExporterVC2013    ::getValueTreeTypeName())); break;
+        case 6:     exp = new MakefileProjectExporter      (project, ValueTree (MakefileProjectExporter      ::getValueTreeTypeName())); break;
+        case 7:     exp = new AndroidProjectExporter       (project, ValueTree (AndroidProjectExporter       ::getValueTreeTypeName())); break;
+        case 8:     exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::windowsTarget)), CodeBlocksProjectExporter::windowsTarget); break;
+        case 9:     exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::linuxTarget)),   CodeBlocksProjectExporter::linuxTarget); break;
+        case 10:    exp = new CLionProjectExporter         (project, ValueTree (CLionProjectExporter         ::getValueTreeTypeName())); break;
     }
 
     exp->createDefaultConfigs();
@@ -116,14 +118,17 @@ String ProjectExporter::getValueTreeNameForExporter (const String& exporterName)
     if (exporterName == XcodeProjectExporter::getNameiOS())
         return XcodeProjectExporter::getValueTreeTypeName (true);
 
-    if (exporterName == MSVCProjectExporterVC2013::getName())
-        return MSVCProjectExporterVC2013::getValueTreeTypeName();
+    if (exporterName == MSVCProjectExporterVC2019::getName())
+        return MSVCProjectExporterVC2019::getValueTreeTypeName();
+
+    if (exporterName == MSVCProjectExporterVC2017::getName())
+        return MSVCProjectExporterVC2017::getValueTreeTypeName();
 
     if (exporterName == MSVCProjectExporterVC2015::getName())
         return MSVCProjectExporterVC2015::getValueTreeTypeName();
 
-    if (exporterName == MSVCProjectExporterVC2017::getName())
-        return MSVCProjectExporterVC2017::getValueTreeTypeName();
+    if (exporterName == MSVCProjectExporterVC2013::getName())
+        return MSVCProjectExporterVC2013::getValueTreeTypeName();
 
     if (exporterName == MakefileProjectExporter::getNameLinux())
         return MakefileProjectExporter::getValueTreeTypeName();
@@ -147,6 +152,7 @@ String ProjectExporter::getTargetFolderForExporter (const String& exporterValueT
 {
     if (exporterValueTreeName == "XCODE_MAC")             return "MacOSX";
     if (exporterValueTreeName == "XCODE_IPHONE")          return "iOS";
+    if (exporterValueTreeName == "VS2019")                return "VisualStudio2019";
     if (exporterValueTreeName == "VS2017")                return "VisualStudio2017";
     if (exporterValueTreeName == "VS2015")                return "VisualStudio2015";
     if (exporterValueTreeName == "VS2013")                return "VisualStudio2013";
@@ -165,9 +171,10 @@ StringArray ProjectExporter::getAllDefaultBuildsFolders()
 
     folders.add (getDefaultBuildsRootFolder() + "iOS");
     folders.add (getDefaultBuildsRootFolder() + "MacOSX");
-    folders.add (getDefaultBuildsRootFolder() + "VisualStudio2013");
-    folders.add (getDefaultBuildsRootFolder() + "VisualStudio2015");
+    folders.add (getDefaultBuildsRootFolder() + "VisualStudio2019");
     folders.add (getDefaultBuildsRootFolder() + "VisualStudio2017");
+    folders.add (getDefaultBuildsRootFolder() + "VisualStudio2015");
+    folders.add (getDefaultBuildsRootFolder() + "VisualStudio2013");
     folders.add (getDefaultBuildsRootFolder() + "LinuxMakefile");
     folders.add (getDefaultBuildsRootFolder() + "CodeBlocksWindows");
     folders.add (getDefaultBuildsRootFolder() + "CodeBlocksLinux");
@@ -197,9 +204,10 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const Str
 
 ProjectExporter* ProjectExporter::createExporter (Project& project, const ValueTree& settings)
 {
-    ProjectExporter*       exp = MSVCProjectExporterVC2013    ::createForSettings (project, settings);
-    if (exp == nullptr)    exp = MSVCProjectExporterVC2015    ::createForSettings (project, settings);
+    ProjectExporter*       exp = MSVCProjectExporterVC2019    ::createForSettings (project, settings);
     if (exp == nullptr)    exp = MSVCProjectExporterVC2017    ::createForSettings (project, settings);
+    if (exp == nullptr)    exp = MSVCProjectExporterVC2015    ::createForSettings (project, settings);
+    if (exp == nullptr)    exp = MSVCProjectExporterVC2013    ::createForSettings (project, settings);
     if (exp == nullptr)    exp = XcodeProjectExporter         ::createForSettings (project, settings);
     if (exp == nullptr)    exp = MakefileProjectExporter      ::createForSettings (project, settings);
     if (exp == nullptr)    exp = AndroidProjectExporter       ::createForSettings (project, settings);
@@ -220,9 +228,10 @@ bool ProjectExporter::canProjectBeLaunched (Project* project)
             XcodeProjectExporter::getValueTreeTypeName (false),
             XcodeProjectExporter::getValueTreeTypeName (true),
            #elif JUCE_WINDOWS
-            MSVCProjectExporterVC2013::getValueTreeTypeName(),
-            MSVCProjectExporterVC2015::getValueTreeTypeName(),
+            MSVCProjectExporterVC2019::getValueTreeTypeName(),
             MSVCProjectExporterVC2017::getValueTreeTypeName(),
+            MSVCProjectExporterVC2015::getValueTreeTypeName(),
+            MSVCProjectExporterVC2013::getValueTreeTypeName(),
            #elif JUCE_LINUX
             // (this doesn't currently launch.. not really sure what it would do on linux)
             //MakefileProjectExporter::getValueTreeTypeName(),
@@ -257,6 +266,9 @@ ProjectExporter::ProjectExporter (Project& p, const ValueTree& state)
       smallIconValue          (settings, Ids::smallIcon,           getUndoManager()),
       extraPPDefsValue        (settings, Ids::extraDefs,           getUndoManager())
 {
+    projectCompilerFlagSchemesValue = project.getProjectValue (Ids::compilerFlagSchemes);
+    projectCompilerFlagSchemesValue.addListener (this);
+    updateCompilerFlagValues();
 }
 
 ProjectExporter::~ProjectExporter()
@@ -283,10 +295,18 @@ RelativePath ProjectExporter::rebaseFromProjectFolderToBuildTarget (const Relati
     return path.rebased (project.getProjectFolder(), getTargetFolder(), RelativePath::buildTargetFolder);
 }
 
-bool ProjectExporter::shouldFileBeCompiledByDefault (const RelativePath& file) const
+bool ProjectExporter::shouldFileBeCompiledByDefault (const File& file) const
 {
     return file.hasFileExtension (cOrCppFileExtensions)
         || file.hasFileExtension (asmFileExtensions);
+}
+
+void ProjectExporter::updateCompilerFlagValues()
+{
+    compilerFlagSchemesMap.clear();
+
+    for (auto& scheme : project.getCompilerFlagSchemes())
+        compilerFlagSchemesMap.set (scheme, { settings, scheme, getUndoManager() });
 }
 
 //==============================================================================
@@ -298,29 +318,33 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
                    "The location of the folder in which the " + name + " project will be created. "
                    "This path can be absolute, but it's much more sensible to make it relative to the jucer project directory.");
 
-        if (shouldBuildTargetType (ProjectType::Target::VSTPlugIn) && project.shouldBuildVST())
+        if ((shouldBuildTargetType (ProjectType::Target::VSTPlugIn) && project.shouldBuildVST()) || project.isVSTPluginHost())
         {
-            props.add (new FilePathPropertyComponent (vstLegacyPathValueWrapper.wrappedValue, "VST (Legacy) SDK Folder", true, getTargetOSForExporter() == TargetOS::getThisOS()),
-                       "If you're building a VST plug-in, you can use this field to override the global VST (Legacy) SDK path with a project-specific path. "
+            props.add (new FilePathPropertyComponent (vstLegacyPathValueWrapper.wrappedValue, "VST (Legacy) SDK Folder", true,
+                                                      getTargetOSForExporter() == TargetOS::getThisOS(), "*", project.getProjectFolder()),
+                       "If you're building a VST plug-in or host, you can use this field to override the global VST (Legacy) SDK path with a project-specific path. "
                        "This can be an absolute path, or a path relative to the Projucer project file.");
         }
 
-        if (shouldBuildTargetType (ProjectType::Target::VST3PlugIn) && project.shouldBuildVST3())
+        if ((shouldBuildTargetType (ProjectType::Target::VST3PlugIn) && project.shouldBuildVST3()) || project.isVST3PluginHost())
         {
-            props.add (new FilePathPropertyComponent (vst3PathValueWrapper.wrappedValue, "VST3 SDK Folder", true, getTargetOSForExporter() == TargetOS::getThisOS()),
-                       "If you're building a VST3 plug-in, you can use this field to override the global VST3 SDK path with a project-specific path. "
+            props.add (new FilePathPropertyComponent (vst3PathValueWrapper.wrappedValue, "VST3 SDK Folder", true,
+                                                      getTargetOSForExporter() == TargetOS::getThisOS(), "*", project.getProjectFolder()),
+                       "If you're building a VST3 plug-in or host, you can use this field to override the global VST3 SDK path with a project-specific path. "
                        "This can be an absolute path, or a path relative to the Projucer project file.");
         }
 
         if (shouldBuildTargetType (ProjectType::Target::AAXPlugIn) && project.shouldBuildAAX())
         {
-            props.add (new FilePathPropertyComponent (aaxPathValueWrapper.wrappedValue, "AAX SDK Folder", true, getTargetOSForExporter() == TargetOS::getThisOS()),
+            props.add (new FilePathPropertyComponent (aaxPathValueWrapper.wrappedValue, "AAX SDK Folder", true,
+                                                      getTargetOSForExporter() == TargetOS::getThisOS(), "*", project.getProjectFolder()),
                        "If you're building an AAX plug-in, this must be the folder containing the AAX SDK. This can be an absolute path, or a path relative to the Projucer project file.");
         }
 
         if (shouldBuildTargetType (ProjectType::Target::RTASPlugIn) && project.shouldBuildRTAS())
         {
-            props.add (new FilePathPropertyComponent (rtasPathValueWrapper.wrappedValue, "RTAS SDK Folder", true, getTargetOSForExporter() == TargetOS::getThisOS()),
+            props.add (new FilePathPropertyComponent (rtasPathValueWrapper.wrappedValue, "RTAS SDK Folder", true,
+                                                      getTargetOSForExporter() == TargetOS::getThisOS(), "*", project.getProjectFolder()),
                        "If you're building an RTAS plug-in, this must be the folder containing the RTAS SDK. This can be an absolute path, or a path relative to the Projucer project file.");
         }
 
@@ -331,6 +355,10 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
         props.add (new TextPropertyComponent (extraCompilerFlagsValue, "Extra Compiler Flags", 8192, true),
                    "Extra command-line flags to be passed to the compiler. This string can contain references to preprocessor definitions in the "
                    "form ${NAME_OF_DEFINITION}, which will be replaced with their values.");
+
+        for (HashMap<String, ValueWithDefault>::Iterator i (compilerFlagSchemesMap); i.next();)
+            props.add (new TextPropertyComponent (compilerFlagSchemesMap.getReference (i.getKey()), "Compiler Flags for " + i.getKey().quoted(), 8192, false),
+                       "The exporter-specific compiler flags that will be added to files using this scheme.");
 
         props.add (new TextPropertyComponent (extraLinkerFlagsValue, "Extra Linker Flags", 8192, true),
                    "Extra command-line flags to be passed to the linker. You might want to use this for adding additional libraries. "
@@ -390,8 +418,8 @@ void ProjectExporter::addSettingsForProjectType (const ProjectType& type)
 
 void ProjectExporter::addVSTPathsIfPluginOrHost()
 {
-    if (shouldBuildTargetType (ProjectType::Target::VST3PlugIn) || project.isVST3PluginHost()
-         || shouldBuildTargetType (ProjectType::Target::VSTPlugIn) || project.isVSTPluginHost())
+    if (((shouldBuildTargetType (ProjectType::Target::VSTPlugIn) && project.shouldBuildVST()) || project.isVSTPluginHost())
+         || ((shouldBuildTargetType (ProjectType::Target::VST3PlugIn) && project.shouldBuildVST3()) || project.isVST3PluginHost()))
     {
         addLegacyVSTFolderToPathIfSpecified();
         addVST3FolderToPath();

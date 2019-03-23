@@ -60,7 +60,7 @@ public:
                           std::function<int (const String& text)> indexFromString = nullptr);
 
     /** Destructor. */
-    ~AudioParameterChoice();
+    ~AudioParameterChoice() override;
 
     /** Returns the current index of the selected item. */
     int getIndex() const noexcept                   { return roundToInt (value); }

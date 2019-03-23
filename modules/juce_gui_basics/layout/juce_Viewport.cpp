@@ -37,10 +37,7 @@ Viewport::Viewport (const String& name)  : Component (name)
 
     setInterceptsMouseClicks (false, true);
     setWantsKeyboardFocus (true);
-
-  #if JUCE_ANDROID || JUCE_IOS
-    setScrollOnDragEnabled (true);
-  #endif
+    setScrollOnDragEnabled (Desktop::getInstance().getMainMouseSource().isTouch());
 
     recreateScrollbars();
 }
@@ -214,7 +211,7 @@ struct Viewport::DragToScrollListener   : private MouseListener,
         offsetY.behaviour.setMinimumVelocity (60);
     }
 
-    ~DragToScrollListener()
+    ~DragToScrollListener() override
     {
         viewport.contentHolder.removeMouseListener (this);
         Desktop::getInstance().removeGlobalMouseListener (this);

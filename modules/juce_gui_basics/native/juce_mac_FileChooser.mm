@@ -128,7 +128,7 @@ public:
        #endif
     }
 
-    ~Native()
+    ~Native() override
     {
         exitModalState (0);
         removeFromDesktop();
@@ -186,6 +186,14 @@ public:
        #endif
 
         finished (result);
+    }
+
+    bool canModalEventBeSentToComponent (const Component* targetComponent) override
+    {
+        if (targetComponent == nullptr)
+            return false;
+
+        return targetComponent->findParentComponentOfClass<FilePreviewComponent>() != nullptr;
     }
 
 private:

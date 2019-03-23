@@ -11,6 +11,8 @@
     <true/>
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <false/>
+    <key>UILaunchStoryboardName</key>
+    <string>LaunchScreen</string>
     <key>CFBundleExecutable</key>
     <string>${EXECUTABLE_NAME}</string>
     <key>CFBundleIdentifier</key>
@@ -24,9 +26,9 @@
     <key>CFBundleSignature</key>
     <string>????</string>
     <key>CFBundleShortVersionString</key>
-    <string>5.4.1</string>
+    <string>5.4.3</string>
     <key>CFBundleVersion</key>
-    <string>5.4.1</string>
+    <string>5.4.3</string>
     <key>NSHumanReadableCopyright</key>
     <string>Copyright (c) 2018 - ROLI Ltd.</string>
     <key>NSHighResolutionCapable</key>

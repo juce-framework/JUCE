@@ -46,7 +46,7 @@ public:
     //==============================================================================
     /** Creates an uninitialised message. */
     Message() noexcept;
-    ~Message();
+    ~Message() override;
 
     using Ptr = ReferenceCountedObjectPtr<Message>;
 

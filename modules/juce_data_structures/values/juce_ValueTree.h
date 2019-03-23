@@ -475,7 +475,7 @@ public:
     {
     public:
         /** Destructor. */
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         /** This method is called when a property of this tree (or of one of its sub-trees) is changed.
             Note that when you register a listener to a tree, it will receive this callback for

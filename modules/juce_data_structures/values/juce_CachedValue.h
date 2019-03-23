@@ -181,11 +181,14 @@ public:
     /** Returns the property ID of the referenced property. */
     const Identifier& getPropertyID() const noexcept        { return targetProperty; }
 
+    /** Returns the UndoManager that is being used. */
+    UndoManager* getUndoManager() noexcept                  { return undoManager; }
+
 private:
     //==============================================================================
     ValueTree targetTree;
     Identifier targetProperty;
-    UndoManager* undoManager;
+    UndoManager* undoManager = nullptr;
     Type defaultValue;
     Type cachedValue;
 
@@ -199,13 +202,15 @@ private:
     void valueTreeChildOrderChanged (ValueTree&, int, int) override {}
     void valueTreeParentChanged (ValueTree&) override {}
 
+    //==============================================================================
+    JUCE_DECLARE_WEAK_REFERENCEABLE (CachedValue)
     JUCE_DECLARE_NON_COPYABLE (CachedValue)
 };
 
 
 //==============================================================================
 template <typename Type>
-inline CachedValue<Type>::CachedValue()  : undoManager (nullptr) {}
+inline CachedValue<Type>::CachedValue() = default;
 
 template <typename Type>
 inline CachedValue<Type>::CachedValue (ValueTree& v, const Identifier& i, UndoManager* um)

@@ -77,7 +77,7 @@ public:
 
 private:
     //==============================================================================
-    iOSAudioIODevice (iOSAudioIODeviceType&, const String&, const String&);
+    iOSAudioIODevice (iOSAudioIODeviceType*, const String&, const String&);
 
     //==============================================================================
     friend class iOSAudioIODeviceType;

@@ -65,7 +65,7 @@ public:
         To change the style of tooltips, see the LookAndFeel class for its tooltip
         methods.
 
-        @param parentComponent  if set to 0, the TooltipWindow will appear on the desktop,
+        @param parentComponent  if set to nullptr, the TooltipWindow will appear on the desktop,
                                 otherwise the tooltip will be added to the given parent
                                 component.
         @param millisecondsBeforeTipAppears     the time for which the mouse has to stay still
@@ -77,7 +77,7 @@ public:
                             int millisecondsBeforeTipAppears = 700);
 
     /** Destructor. */
-    ~TooltipWindow();
+    ~TooltipWindow() override;
 
     //==============================================================================
     /** Changes the time before the tip appears.
@@ -117,7 +117,7 @@ public:
     */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         /** returns the bounds for a tooltip at the given screen coordinate, constrained within the given desktop area. */
         virtual Rectangle<int> getTooltipBounds (const String& tipText, Point<int> screenPos, Rectangle<int> parentArea) = 0;

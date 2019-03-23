@@ -54,7 +54,7 @@ protected:
 
 public:
     /** Destructor. */
-    virtual ~Button();
+    ~Button() override;
 
     //==============================================================================
     /** Changes the button's text.
@@ -166,7 +166,7 @@ public:
     {
     public:
         /** Destructor. */
-        virtual ~Listener()  {}
+        virtual ~Listener() = default;
 
         /** Called when the button is clicked. */
         virtual void buttonClicked (Button*) = 0;
@@ -367,7 +367,7 @@ public:
     */
     struct JUCE_API  LookAndFeelMethods
     {
-        virtual ~LookAndFeelMethods() {}
+        virtual ~LookAndFeelMethods() = default;
 
         virtual void drawButtonBackground (Graphics&, Button&, const Colour& backgroundColour,
                                            bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) = 0;

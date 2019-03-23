@@ -112,7 +112,7 @@ BigInteger::BigInteger (const BigInteger& other)
 }
 
 BigInteger::BigInteger (BigInteger&& other) noexcept
-    : heapAllocation (static_cast<HeapBlock<uint32>&&> (other.heapAllocation)),
+    : heapAllocation (std::move (other.heapAllocation)),
       allocatedSize (other.allocatedSize),
       highestBit (other.highestBit),
       negative (other.negative)
@@ -122,7 +122,7 @@ BigInteger::BigInteger (BigInteger&& other) noexcept
 
 BigInteger& BigInteger::operator= (BigInteger&& other) noexcept
 {
-    heapAllocation = static_cast<HeapBlock<uint32>&&> (other.heapAllocation);
+    heapAllocation = std::move (other.heapAllocation);
     memcpy (preallocated, other.preallocated, sizeof (preallocated));
     allocatedSize = other.allocatedSize;
     highestBit = other.highestBit;
@@ -171,7 +171,7 @@ uint32* BigInteger::getValues() const noexcept
     jassert (heapAllocation != nullptr || allocatedSize <= numPreallocatedInts);
 
     return heapAllocation != nullptr ? heapAllocation
-                                     : (uint32*) preallocated;
+                                     : const_cast<uint32*> (preallocated);
 }
 
 uint32* BigInteger::ensureSize (const size_t numVals)

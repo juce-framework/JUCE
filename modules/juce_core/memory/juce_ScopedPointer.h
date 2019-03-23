@@ -60,7 +60,7 @@ class ScopedPointer
 public:
     //==============================================================================
     /** Creates a ScopedPointer containing a null pointer. */
-    inline ScopedPointer() noexcept {}
+    inline ScopedPointer() = default;
 
     /** Creates a ScopedPointer containing a null pointer. */
     inline ScopedPointer (decltype (nullptr)) noexcept {}
@@ -149,8 +149,9 @@ public:
     /** Clears this pointer, deleting the object it points to if there is one. */
     void reset()
     {
-        ContainerDeletePolicy<ObjectType>::destroy (object);
+        auto* oldObject = object;
         object = {};
+        ContainerDeletePolicy<ObjectType>::destroy (oldObject);
     }
 
     /** Sets this pointer to a new object, deleting the old object that it was previously pointing to if there was one. */

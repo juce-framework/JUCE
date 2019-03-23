@@ -78,7 +78,7 @@ static const char* const elementNames[] =
     nullptr
 };
 
-const char** const elementTypeNames = (const char**) elementNames;
+const char* const* const elementTypeNames = (const char* const*) elementNames;
 const int numElementTypes = (sizeof (elementNames) / sizeof (elementNames[0])) - 1;
 
 PaintElement* createNewElement (const int index, PaintRoutine* owner)
@@ -158,7 +158,7 @@ static ComponentTypeHandler* const compTypes[] =
     nullptr
 };
 
-ComponentTypeHandler** const componentTypeHandlers = (ComponentTypeHandler**) compTypes;
+ComponentTypeHandler* const* const componentTypeHandlers = (ComponentTypeHandler* const*) compTypes;
 const int numComponentTypes = numElementsInArray (compTypes) - 1;
 
 }

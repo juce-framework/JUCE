@@ -349,24 +349,23 @@ public:
     /** Represents a download task.
         Returned by downloadToFile to allow querying and controlling the download task.
     */
-    class DownloadTask
+    class JUCE_API  DownloadTask
     {
     public:
         /** Used to receive callbacks for download progress */
-        struct Listener
+        struct JUCE_API  Listener
         {
             virtual ~Listener();
 
             /** Called when the download has finished. Be aware that this callback may
                 come on an arbitrary thread. */
-            virtual void finished (DownloadTask* task, bool success) = 0;
+            virtual void finished (URL::DownloadTask* task, bool success) = 0;
 
             /** Called periodically by the OS to indicate download progress.
                 Beware that this callback may come on an arbitrary thread.
             */
-            virtual void progress (DownloadTask* task, int64 bytesDownloaded, int64 totalLength);
+            virtual void progress (URL::DownloadTask* task, int64 bytesDownloaded, int64 totalLength);
         };
-
 
         /** Releases the resources of the download task, unregisters the listener
             and cancels the download if necessary. */
@@ -391,10 +390,14 @@ public:
         /** Returns true if there was an error. */
         inline bool hadError() const                      { return error; }
 
+        /** Returns the target file location that was provided in URL::downloadToFile. */
+        File getTargetLocation() const                    { return targetLocation; }
+
     protected:
         int64 contentLength = -1, downloaded = 0;
         bool finished = false, error = false;
         int httpCode = -1;
+        File targetLocation;
 
         DownloadTask();
 
@@ -526,6 +529,7 @@ private:
     StringArray parameterNames, parameterValues;
 
     static File fileFromFileSchemeURL (const URL&);
+    String getDomainInternal (bool) const;
 
     struct Upload  : public ReferenceCountedObject
     {

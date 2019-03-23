@@ -29,7 +29,7 @@
 */
 #define JUCE_MAJOR_VERSION      5
 #define JUCE_MINOR_VERSION      4
-#define JUCE_BUILDNUMBER        1
+#define JUCE_BUILDNUMBER        3
 
 /** Current JUCE version number.
 
@@ -53,6 +53,7 @@
 #include <atomic>
 #include <sstream>
 #include <iomanip>
+#include <map>
 
 //==============================================================================
 #include "juce_CompilerSupport.h"

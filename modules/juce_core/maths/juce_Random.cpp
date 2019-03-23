@@ -38,6 +38,16 @@ Random::~Random() noexcept
 
 void Random::setSeed (const int64 newSeed) noexcept
 {
+    if (this == &getSystemRandom())
+    {
+        // Resetting the system Random risks messing up
+        // JUCE's internal state. If you need a predictable
+        // stream of random numbers you should use a local
+        // Random object.
+        jassertfalse;
+        return;
+    }
+
     seed = newSeed;
 }
 

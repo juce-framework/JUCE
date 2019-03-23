@@ -127,10 +127,10 @@ XmlElement& XmlElement::operator= (const XmlElement& other)
 }
 
 XmlElement::XmlElement (XmlElement&& other) noexcept
-    : nextListItem      (static_cast<LinkedListPointer<XmlElement>&&> (other.nextListItem)),
-      firstChildElement (static_cast<LinkedListPointer<XmlElement>&&> (other.firstChildElement)),
-      attributes        (static_cast<LinkedListPointer<XmlAttributeNode>&&> (other.attributes)),
-      tagName           (static_cast<String&&> (other.tagName))
+    : nextListItem      (std::move (other.nextListItem)),
+      firstChildElement (std::move (other.firstChildElement)),
+      attributes        (std::move (other.attributes)),
+      tagName           (std::move (other.tagName))
 {
 }
 
@@ -141,10 +141,10 @@ XmlElement& XmlElement::operator= (XmlElement&& other) noexcept
     removeAllAttributes();
     deleteAllChildElements();
 
-    nextListItem      = static_cast<LinkedListPointer<XmlElement>&&> (other.nextListItem);
-    firstChildElement = static_cast<LinkedListPointer<XmlElement>&&> (other.firstChildElement);
-    attributes        = static_cast<LinkedListPointer<XmlAttributeNode>&&> (other.attributes);
-    tagName           = static_cast<String&&> (other.tagName);
+    nextListItem      = std::move (other.nextListItem);
+    firstChildElement = std::move (other.firstChildElement);
+    attributes        = std::move (other.attributes);
+    tagName           = std::move (other.tagName);
 
     return *this;
 }
@@ -580,7 +580,8 @@ void XmlElement::setAttribute (const Identifier& attributeName, const int number
 
 void XmlElement::setAttribute (const Identifier& attributeName, const double number)
 {
-    setAttribute (attributeName, String (number, 20));
+    String doubleString (number, 15, true);
+    setAttribute (attributeName, minimiseLengthOfFloatString (doubleString));
 }
 
 void XmlElement::removeAttribute (const Identifier& attributeName) noexcept
@@ -695,6 +696,8 @@ void XmlElement::removeChildElement (XmlElement* const childToRemove,
 {
     if (childToRemove != nullptr)
     {
+        jassert (containsChildElement (childToRemove));
+
         firstChildElement.remove (childToRemove);
 
         if (shouldDeleteTheChild)
@@ -922,5 +925,45 @@ void XmlElement::deleteAllTextElements() noexcept
         child = next;
     }
 }
+
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class XmlElementTests  : public UnitTest
+{
+public:
+    XmlElementTests() : UnitTest ("XmlElement", "XML") {}
+
+    void runTest() override
+    {
+        {
+            beginTest ("Float formatting");
+
+            auto element = std::make_unique<XmlElement> ("test");
+            Identifier number ("number");
+
+            std::map<double, String> tests;
+            tests[1] = "1";
+            tests[1.1] = "1.1";
+            tests[1.01] = "1.01";
+            tests[0.76378] = "7.6378e-1";
+            tests[-10] = "-1e1";
+            tests[10.01] = "1.001e1";
+            tests[0.0123] = "1.23e-2";
+            tests[-3.7e-27] = "-3.7e-27";
+            tests[1e+40] = "1e40";
+
+            for (auto& test : tests)
+            {
+                element->setAttribute (number, test.first);
+                expectEquals (element->getStringAttribute (number), test.second);
+            }
+        }
+    }
+};
+
+static XmlElementTests xmlElementTests;
+
+#endif
 
 } // namespace juce

@@ -351,9 +351,14 @@ struct JSONFormatter
             auto d = static_cast<double> (v);
 
             if (juce_isfinite (d))
-                out << String (d, maximumDecimalPlaces);
+            {
+                String doubleString (d, maximumDecimalPlaces, true);
+                out << minimiseLengthOfFloatString (doubleString);
+            }
             else
+            {
                 out << "null";
+            }
         }
         else if (v.isArray())
         {
@@ -622,31 +627,52 @@ public:
 
     void runTest() override
     {
-        beginTest ("JSON");
-        Random r = getRandom();
-
-        expect (JSON::parse (String()) == var());
-        expect (JSON::parse ("{}").isObject());
-        expect (JSON::parse ("[]").isArray());
-        expect (JSON::parse ("[ 1234 ]")[0].isInt());
-        expect (JSON::parse ("[ 12345678901234 ]")[0].isInt64());
-        expect (JSON::parse ("[ 1.123e3 ]")[0].isDouble());
-        expect (JSON::parse ("[ -1234]")[0].isInt());
-        expect (JSON::parse ("[-12345678901234]")[0].isInt64());
-        expect (JSON::parse ("[-1.123e3]")[0].isDouble());
-
-        for (int i = 100; --i >= 0;)
         {
-            var v;
+            beginTest ("JSON");
 
-            if (i > 0)
-                v = createRandomVar (r, 0);
+            Random r = getRandom();
 
-            const bool oneLine = r.nextBool();
-            String asString (JSON::toString (v, oneLine));
-            var parsed = JSON::parse ("[" + asString + "]")[0];
-            String parsedString (JSON::toString (parsed, oneLine));
-            expect (asString.isNotEmpty() && parsedString == asString);
+            expect (JSON::parse (String()) == var());
+            expect (JSON::parse ("{}").isObject());
+            expect (JSON::parse ("[]").isArray());
+            expect (JSON::parse ("[ 1234 ]")[0].isInt());
+            expect (JSON::parse ("[ 12345678901234 ]")[0].isInt64());
+            expect (JSON::parse ("[ 1.123e3 ]")[0].isDouble());
+            expect (JSON::parse ("[ -1234]")[0].isInt());
+            expect (JSON::parse ("[-12345678901234]")[0].isInt64());
+            expect (JSON::parse ("[-1.123e3]")[0].isDouble());
+
+            for (int i = 100; --i >= 0;)
+            {
+                var v;
+
+                if (i > 0)
+                    v = createRandomVar (r, 0);
+
+                const bool oneLine = r.nextBool();
+                String asString (JSON::toString (v, oneLine));
+                var parsed = JSON::parse ("[" + asString + "]")[0];
+                String parsedString (JSON::toString (parsed, oneLine));
+                expect (asString.isNotEmpty() && parsedString == asString);
+            }
+        }
+
+        {
+            beginTest ("Float formatting");
+
+            std::map<double, String> tests;
+            tests[1] = "1";
+            tests[1.1] = "1.1";
+            tests[1.01] = "1.01";
+            tests[0.76378] = "7.6378e-1";
+            tests[-10] = "-1e1";
+            tests[10.01] = "1.001e1";
+            tests[0.0123] = "1.23e-2";
+            tests[-3.7e-27] = "-3.7e-27";
+            tests[1e+40] = "1e40";
+
+            for (auto& test : tests)
+                expectEquals (JSON::toString (test.first), test.second);
         }
     }
 };

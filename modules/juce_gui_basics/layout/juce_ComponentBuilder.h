@@ -59,7 +59,7 @@ public:
     ComponentBuilder();
 
     /** Destructor. */
-    ~ComponentBuilder();
+    ~ComponentBuilder() override;
 
     /** This is the ValueTree data object that the builder is working with. */
     ValueTree state;
@@ -186,8 +186,8 @@ public:
     class JUCE_API  ImageProvider
     {
     public:
-        ImageProvider() {}
-        virtual ~ImageProvider() {}
+        ImageProvider() = default;
+        virtual ~ImageProvider() = default;
 
         /** Retrieves the image associated with this identifier, which could be any
             kind of string, number, filename, etc.

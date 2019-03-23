@@ -55,6 +55,7 @@ public:
         {
             case ProjectType::Target::GUIApp:
             case ProjectType::Target::StaticLibrary:
+            case ProjectType::Target::DynamicLibrary:
             case ProjectType::Target::StandalonePlugIn:
                 return true;
             default:
@@ -93,27 +94,29 @@ public:
     }
 
     //==============================================================================
-    ValueWithDefault androidJavaLibs, androidRepositories, androidDependencies, androidScreenOrientation, androidActivityClass,
-                     androidActivitySubClassName, androidActivityBaseClassName, androidManifestCustomXmlElements, androidVersionCode,
-                     androidMinimumSDK, androidTheme, androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder,
+    ValueWithDefault androidJavaLibs, androidAdditionalJavaFolders, androidAdditionalResourceFolders, androidRepositories, androidDependencies, androidScreenOrientation,
+                     androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements, androidVersionCode,
+                     androidMinimumSDK, androidTargetSDK, androidTheme, androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder,
                      androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded, androidBluetoothNeeded, androidExternalReadPermission,
                      androidExternalWritePermission, androidInAppBillingPermission, androidVibratePermission,androidOtherPermissions,
                      androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
-                     androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion, buildToolsVersion;
+                     androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion;
 
     //==============================================================================
     AndroidProjectExporter (Project& p, const ValueTree& t)
         : ProjectExporter (p, t),
           androidJavaLibs                      (settings, Ids::androidJavaLibs,                      getUndoManager()),
+          androidAdditionalJavaFolders         (settings, Ids::androidAdditionalJavaFolders,         getUndoManager()),
+          androidAdditionalResourceFolders     (settings, Ids::androidAdditionalResourceFolders,     getUndoManager()),
           androidRepositories                  (settings, Ids::androidRepositories,                  getUndoManager()),
           androidDependencies                  (settings, Ids::androidDependencies,                  getUndoManager()),
           androidScreenOrientation             (settings, Ids::androidScreenOrientation,             getUndoManager(), "unspecified"),
-          androidActivityClass                 (settings, Ids::androidActivityClass,                 getUndoManager(), createDefaultClassName()),
-          androidActivitySubClassName          (settings, Ids::androidActivitySubClassName,          getUndoManager()),
-          androidActivityBaseClassName         (settings, Ids::androidActivityBaseClassName,         getUndoManager(), "Activity"),
+          androidCustomActivityClass           (settings, Ids::androidCustomActivityClass,           getUndoManager()),
+          androidCustomApplicationClass        (settings, Ids::androidCustomApplicationClass,        getUndoManager(), "com.roli.juce.JuceApp"),
           androidManifestCustomXmlElements     (settings, Ids::androidManifestCustomXmlElements,     getUndoManager()),
           androidVersionCode                   (settings, Ids::androidVersionCode,                   getUndoManager(), "1"),
-          androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "10"),
+          androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "16"),
+          androidTargetSDK                     (settings, Ids::androidTargetSDK,                     getUndoManager(), "28"),
           androidTheme                         (settings, Ids::androidTheme,                         getUndoManager()),
           androidSharedLibraries               (settings, Ids::androidSharedLibraries,               getUndoManager()),
           androidStaticLibraries               (settings, Ids::androidStaticLibraries,               getUndoManager()),
@@ -135,10 +138,9 @@ public:
           androidKeyStorePass                  (settings, Ids::androidKeyStorePass,                  getUndoManager(), "android"),
           androidKeyAlias                      (settings, Ids::androidKeyAlias,                      getUndoManager(), "androiddebugkey"),
           androidKeyAliasPass                  (settings, Ids::androidKeyAliasPass,                  getUndoManager(), "android"),
-          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "4.4"),
+          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "4.10"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
-          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "3.1.3"),
-          buildToolsVersion                    (settings, Ids::buildToolsVersion,                    getUndoManager(), "28.0.0"),
+          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "3.2.1"),
           AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
     {
         name = getName();
@@ -150,7 +152,7 @@ public:
     void createToolchainExporterProperties (PropertyListBuilder& props)
     {
         props.add (new TextPropertyComponent (gradleVersion, "Gradle Version", 32, false),
-                   "The version of gradle that is used to build this app (4.4 is fine for JUCE)");
+                   "The version of gradle that is used to build this app (4.10 is fine for JUCE)");
 
         props.add (new TextPropertyComponent (androidPluginVersion, "Android Plug-in Version", 32, false),
                    "The version of the android build plugin for gradle that is used to build this app");
@@ -159,9 +161,6 @@ public:
                                                 { "clang", "gcc" },
                                                 { "clang", "gcc" }),
                    "The toolchain that gradle should invoke for NDK compilation (variable model.android.ndk.tooclhain in app/build.gradle)");
-
-        props.add (new TextPropertyComponent (buildToolsVersion, "Android Build Tools Version", 32, false),
-                   "The Android build tools version that should use to build this app");
     }
 
     void createLibraryModuleExporterProperties (PropertyListBuilder& props)
@@ -201,15 +200,11 @@ public:
         auto appFolder = targetFolder.getChildFile (isLibrary() ? "lib" : "app");
 
         removeOldFiles (targetFolder);
-
-        if (! isLibrary())
-            copyJavaFiles (modules);
-
         copyExtraResourceFiles();
 
         writeFile (targetFolder, "settings.gradle",                          isLibrary() ? "include ':lib'" : "include ':app'");
         writeFile (targetFolder, "build.gradle",                             getProjectBuildGradleFileContent());
-        writeFile (appFolder,    "build.gradle",                             getAppBuildGradleFileContent());
+        writeFile (appFolder,    "build.gradle",                             getAppBuildGradleFileContent (modules));
         writeFile (targetFolder, "local.properties",                         getLocalPropertiesFileContent());
         writeFile (targetFolder, "gradle/wrapper/gradle-wrapper.properties", getGradleWrapperPropertiesFileContent());
 
@@ -224,8 +219,9 @@ public:
 
         if (! isLibrary())
         {
-            writeStringsXML      (targetFolder);
-            writeAppIcons        (targetFolder);
+            copyAdditionalJavaLibs (appFolder);
+            writeStringsXML        (targetFolder);
+            writeAppIcons          (targetFolder);
         }
 
         writeCmakeFile (appFolder.getChildFile ("CMakeLists.txt"));
@@ -258,6 +254,8 @@ public:
     void writeFile (const File& gradleProjectFolder, const String& filePath, const String& fileContent) const
     {
         MemoryOutputStream outStream;
+        outStream.setNewLineString ("\n");
+
         outStream << fileContent;
         overwriteFileIfDifferentOrThrow (gradleProjectFolder.getChildFile (filePath), outStream);
     }
@@ -265,6 +263,8 @@ public:
     void writeBinaryFile (const File& gradleProjectFolder, const String& filePath, const char* binaryData, const int binarySize) const
     {
         MemoryOutputStream outStream;
+        outStream.setNewLineString ("\n");
+
         outStream.write (binaryData, static_cast<size_t> (binarySize));
         overwriteFileIfDifferentOrThrow (gradleProjectFolder.getChildFile (filePath), outStream);
     }
@@ -276,7 +276,7 @@ protected:
     public:
         AndroidBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
             : BuildConfiguration (p, settings, e),
-              androidArchitectures               (config, Ids::androidArchitectures,               getUndoManager(), isDebug() ? "armeabi-v7a x86" : ""),
+              androidArchitectures               (config, Ids::androidArchitectures,               getUndoManager(), isDebug() ? "armeabi-v7a x86 arm64-v8a x86_64" : ""),
               androidBuildConfigRemoteNotifsConfigFile (config, Ids::androidBuildConfigRemoteNotifsConfigFile, getUndoManager()),
               androidAdditionalXmlValueResources (config, Ids::androidAdditionalXmlValueResources, getUndoManager()),
               androidAdditionalDrawableResources (config, Ids::androidAdditionalDrawableResources, getUndoManager()),
@@ -299,7 +299,7 @@ protected:
             addGCCOptimisationProperty (props);
 
             props.add (new TextPropertyComponent (androidArchitectures, "Architectures", 256, false),
-                       "A list of the ARM architectures to build (for a fat binary). Leave empty to build for all possible android architectures.");
+                       "A list of the architectures to build (for a fat binary). Leave empty to build for all possible android architectures.");
 
             props.add (new TextPropertyComponent (androidBuildConfigRemoteNotifsConfigFile.getPropertyAsValue(), "Remote Notifications Config File", 2048, false),
                        "Path to google-services.json file. This will be the file provided by Firebase when creating a new app in Firebase console. "
@@ -355,6 +355,7 @@ private:
     void writeCmakeFile (const File& file) const
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
 
         mo << "# Automatically generated makefile, created by the Projucer" << newLine
            << "# Don't edit this file! Your changes will be overwritten when you re-save the Projucer project!" << newLine
@@ -367,7 +368,7 @@ private:
 
         if (project.getConfigFlag ("JUCE_USE_ANDROID_OBOE").get())
         {
-            String oboePath (androidOboeRepositoryPath.get().toString().quoted());
+            String oboePath (androidOboeRepositoryPath.get().toString().trim().quoted());
 
             mo << "SET(OBOE_DIR " << oboePath << ")" << newLine << newLine;
             mo << "add_subdirectory (${OBOE_DIR} ./oboe)" << newLine << newLine;
@@ -500,18 +501,27 @@ private:
         }
 
         Array<RelativePath> excludeFromBuild;
+        Array<std::pair<RelativePath, String>> extraCompilerFlags;
 
         mo << "add_library( ${BINARY_NAME}" << newLine;
         mo << newLine;
         mo << "    " << (getProject().getProjectType().isStaticLibrary() ? "STATIC" : "SHARED") << newLine;
         mo << newLine;
-        addCompileUnits (mo, excludeFromBuild);
+        addCompileUnits (mo, excludeFromBuild, extraCompilerFlags);
         mo << ")" << newLine << newLine;
 
         if (excludeFromBuild.size() > 0)
         {
             for (auto& exclude : excludeFromBuild)
                 mo << "set_source_files_properties(\"" << exclude.toUnixStyle() << "\" PROPERTIES HEADER_FILE_ONLY TRUE)" << newLine;
+
+            mo << newLine;
+        }
+
+        if (! extraCompilerFlags.isEmpty())
+        {
+            for (auto& extra : extraCompilerFlags)
+                mo << "set_source_files_properties(\"" << extra.first.toUnixStyle() << "\" PROPERTIES COMPILE_FLAGS " << extra.second << " )" << newLine;
 
             mo << newLine;
         }
@@ -549,6 +559,7 @@ private:
     String getProjectBuildGradleFileContent() const
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
 
         mo << "buildscript {"                                                                              << newLine;
         mo << "   repositories {"                                                                          << newLine;
@@ -583,14 +594,15 @@ private:
     }
 
     //==============================================================================
-    String getAppBuildGradleFileContent() const
+    String getAppBuildGradleFileContent (const OwnedArray<LibraryModule>& modules) const
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
+
         mo << "apply plugin: 'com.android." << (isLibrary() ? "library" : "application") << "'" << newLine << newLine;
 
         mo << "android {"                                                                    << newLine;
-        mo << "    compileSdkVersion " << static_cast<int> (androidMinimumSDK.get())         << newLine;
-        mo << "    buildToolsVersion \"" << buildToolsVersion.get().toString() << "\""       << newLine;
+        mo << "    compileSdkVersion " << static_cast<int> (androidTargetSDK.get())          << newLine;
         mo << "    externalNativeBuild {"                                                    << newLine;
         mo << "        cmake {"                                                              << newLine;
         mo << "            path \"CMakeLists.txt\""                                          << newLine;
@@ -603,6 +615,7 @@ private:
         mo << getAndroidProductFlavours()                                                    << newLine;
         mo << getAndroidVariantFilter()                                                      << newLine;
 
+        mo << getAndroidJavaSourceSets (modules)                                             << newLine;
         mo << getAndroidRepositories()                                                       << newLine;
         mo << getAndroidDependencies()                                                       << newLine;
         mo << getApplyPlugins()                                                              << newLine;
@@ -615,6 +628,7 @@ private:
     String getAndroidProductFlavours() const
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
 
         mo << "    flavorDimensions \"default\"" << newLine;
         mo << "    productFlavors {" << newLine;
@@ -658,6 +672,7 @@ private:
     String getAndroidSigningConfig() const
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
 
         auto keyStoreFilePath = androidKeyStore.get().toString().replace ("${user.home}", "${System.properties['user.home']}")
                                                                 .replace ("/", "${File.separator}");
@@ -682,8 +697,10 @@ private:
         auto cFlags            = getProjectCompilerFlags();
         auto cxxFlags          = getProjectCxxCompilerFlags();
         auto minSdkVersion     = static_cast<int> (androidMinimumSDK.get());
+        auto targetSdkVersion  = static_cast<int> (androidTargetSDK.get());
 
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
 
         mo << "    defaultConfig {"                                               << newLine;
 
@@ -691,7 +708,7 @@ private:
             mo << "        applicationId \"" << bundleIdentifier << "\""          << newLine;
 
         mo << "        minSdkVersion    " << minSdkVersion                        << newLine;
-        mo << "        targetSdkVersion " << minSdkVersion                        << newLine;
+        mo << "        targetSdkVersion " << targetSdkVersion                     << newLine;
 
         mo << "        externalNativeBuild {"                                     << newLine;
         mo << "            cmake {"                                               << newLine;
@@ -714,6 +731,7 @@ private:
     String getAndroidBuildTypes() const
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
 
         mo << "    buildTypes {"                                                  << newLine;
 
@@ -744,6 +762,7 @@ private:
     String getAndroidVariantFilter() const
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
 
         mo << "    variantFilter { variant ->"            << newLine;
         mo << "        def names = variant.flavors*.name" << newLine;
@@ -766,15 +785,16 @@ private:
     String getAndroidRepositories() const
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
 
         auto repositories = StringArray::fromLines (androidRepositories.get().toString());
 
-        mo << "repositories {"                << newLine;
+        mo << "    repositories {"                << newLine;
 
         for (auto& r : repositories)
-            mo << "    " << r << newLine;
+            mo << "        " << r << newLine;
 
-        mo << "}"                             << newLine;
+        mo << "    }"                             << newLine;
 
         return mo.toString();
     }
@@ -782,21 +802,23 @@ private:
     String getAndroidDependencies() const
     {
         MemoryOutputStream mo;
-        mo << "dependencies {" << newLine;
+        mo.setNewLineString ("\n");
+
+        mo << "    dependencies {" << newLine;
 
         for (auto& d : StringArray::fromLines (androidDependencies.get().toString()))
-            mo << "    " << d << newLine;
+            mo << "        " << d << newLine;
 
         for (auto& d : StringArray::fromLines (androidJavaLibs.get().toString()))
-            mo << "    implementation files('libs/" << File (d).getFileName() << "')" << newLine;
+            mo << "        implementation files('libs/" << File (d).getFileName() << "')" << newLine;
 
         if (androidEnableRemoteNotifications.get())
         {
-            mo << "    'com.google.firebase:firebase-core:11.4.0'" << newLine;
-            mo << "    compile 'com.google.firebase:firebase-messaging:11.4.0'" << newLine;
+            mo << "        'com.google.firebase:firebase-core:11.4.0'" << newLine;
+            mo << "        compile 'com.google.firebase:firebase-messaging:11.4.0'" << newLine;
         }
 
-        mo << "}" << newLine;
+        mo << "    }" << newLine;
 
         return mo.toString();
     }
@@ -804,11 +826,98 @@ private:
     String getApplyPlugins() const
     {
         MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
 
         if (androidEnableRemoteNotifications.get())
             mo << "apply plugin: 'com.google.gms.google-services'" << newLine;
 
         return mo.toString();
+    }
+
+    void addModuleJavaFolderToSourceSet(StringArray& javaSourceSets, const File& javacore) const
+    {
+        if (javacore.isDirectory())
+        {
+            auto appFolder = getTargetFolder().getChildFile ("app");
+
+            RelativePath relativePath (javacore, appFolder, RelativePath::buildTargetFolder);
+            javaSourceSets.add (relativePath.toUnixStyle());
+        }
+    }
+
+    String getAndroidJavaSourceSets (const OwnedArray<LibraryModule>& modules) const
+    {
+        auto javaSourceSets = getSourceSetArrayFor (androidAdditionalJavaFolders.get().toString());
+        auto resourceSets   = getSourceSetArrayFor (androidAdditionalResourceFolders.get().toString());
+
+        for (auto* module : modules)
+        {
+            auto javaFolder = module->getFolder().getChildFile ("native").getChildFile ("javacore");
+
+            addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile("init"));
+
+            if (! isLibrary())
+                addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile("app"));
+        }
+
+        MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
+
+        mo << "    sourceSets {" << newLine;
+        mo << getSourceSetStringFor ("main.java.srcDirs", javaSourceSets);
+        mo << newLine;
+        mo << getSourceSetStringFor ("main.res.srcDirs", resourceSets);
+        mo << "    }" << newLine;
+
+        return mo.toString();
+    }
+
+    StringArray getSourceSetArrayFor (const String& srcDirs) const
+    {
+        StringArray sourceSets;
+
+        for (auto folder : StringArray::fromLines (srcDirs))
+        {
+            if (File::isAbsolutePath (folder))
+            {
+                sourceSets.add (folder);
+            }
+            else
+            {
+                auto appFolder = getTargetFolder().getChildFile ("app");
+
+                auto relativePath = RelativePath (folder, RelativePath::projectFolder)
+                                        .rebased (getProject().getProjectFolder(), appFolder,
+                                                  RelativePath::buildTargetFolder);
+
+                sourceSets.add (relativePath.toUnixStyle());
+            }
+        }
+
+        return sourceSets;
+    }
+
+    static String getSourceSetStringFor (const String& type, const StringArray& srcDirs)
+    {
+        String s;
+
+        s << "        " << type << " +=" << newLine;
+        s << "            [";
+
+        bool isFirst = true;
+
+        for (auto sourceSet : srcDirs)
+        {
+            if (! isFirst)
+                s << "," << newLine << "             ";
+
+            isFirst = false;
+            s << "\"" << sourceSet << "\"";
+        }
+
+        s << "]"     << newLine;
+
+        return replaceLineFeeds (s, "\n");
     }
 
     //==============================================================================
@@ -819,7 +928,7 @@ private:
         props << "ndk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidNDKPath, TargetOS::getThisOS()).get().toString()) << newLine
               << "sdk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidSDKPath, TargetOS::getThisOS()).get().toString()) << newLine;
 
-        return props;
+        return replaceLineFeeds (props, "\n");
     }
 
     String getGradleWrapperPropertiesFileContent() const
@@ -835,7 +944,17 @@ private:
     //==============================================================================
     void createBaseExporterProperties (PropertyListBuilder& props)
     {
-        props.add (new TextPropertyComponent (androidJavaLibs, "Java Libraries to Include", 32768, true),
+        props.add (new TextPropertyComponent (androidAdditionalJavaFolders, "Java Source code folders", 32768, true),
+                   "Folders inside which additional java source files can be found (one per line). For example, if you "
+                   "are using your own Activity you should place the java files for this into a folder and add the folder "
+                   "path to this field.");
+
+        props.add (new TextPropertyComponent (androidAdditionalResourceFolders, "Resource folders", 32768, true),
+                   "Folders inside which additional resource files can be found (one per line). For example, if you "
+                   "want to add your own layout xml files then you should place a layout xml file inside a folder and add "
+                   "the folder path to this field.");
+
+        props.add (new TextPropertyComponent (androidJavaLibs, "Java libraries to include", 32768, true),
                    "Java libs (JAR files) (one per line). These will be copied to app/libs folder and \"implementation files\" "
                    "dependency will be automatically added to module \"dependencies\" section for each library, so do "
                    "not add the dependency yourself.");
@@ -853,24 +972,23 @@ private:
                                                 { "unspecified",            "portrait", "landscape" }),
                    "The screen orientations that this app should support");
 
-        props.add (new TextPropertyComponent (androidActivityClass, "Android Activity Class Name", 256, false),
-                   "The full java class name to use for the app's Activity class.");
+        props.add (new TextPropertyComponent (androidCustomActivityClass, "Custom Android Activity", 256, false),
+                   "If not empty, specifies the Android Activity class name stored in the app's manifest which "
+                   "should be used instead of Android's default Activity.");
 
-        props.add (new TextPropertyComponent (androidActivitySubClassName, "Android Activity Sub-Class Name", 256, false),
-                   "If not empty, specifies the Android Activity class name stored in the app's manifest. "
-                   "Use this if you would like to use your own Android Activity sub-class.");
-
-        props.add (new TextPropertyComponent (androidActivityBaseClassName, "Android Activity Base Class", 256, false),
-                   "If not empty, specifies the base class to use for your activity. If custom base class is "
-                   "specified, that base class should be a sub-class of android.app.Activity. When empty, Activity "
-                   "(android.app.Activity) will be used as the base class. "
-                   "Use this if you would like to use your own Android Activity base class.");
+        props.add (new TextPropertyComponent (androidCustomApplicationClass, "Custom Android Application", 256, false),
+                   "If not empty, specifies the Android Application class name stored in the app's manifest which "
+                   "should be used instead of JUCE's default JuceApp class. If you specify a custom App then you must "
+                   "call com.roli.juce.Java.initialiseJUCE somewhere in your code before calling any JUCE functions.");
 
         props.add (new TextPropertyComponent (androidVersionCode, "Android Version Code", 32, false),
                    "An integer value that represents the version of the application code, relative to other versions.");
 
         props.add (new TextPropertyComponent (androidMinimumSDK, "Minimum SDK Version", 32, false),
-                   "The number of the minimum version of the Android SDK that the app requires");
+                   "The number of the minimum version of the Android SDK that the app requires (must be 16 or higher).");
+
+        props.add (new TextPropertyComponent (androidTargetSDK, "Target SDK Version", 32, false),
+                   "The number of the version of the Android SDK that the app is targeting.");
 
         props.add (new TextPropertyComponent (androidExtraAssetsFolder, "Extra Android Assets", 256, false),
                    "A path to a folder (relative to the project folder) which contains extra android assets.");
@@ -950,351 +1068,22 @@ private:
     }
 
     //==============================================================================
-    String createDefaultClassName() const
-    {
-        auto s = project.getBundleIdentifierString().toLowerCase();
-
-        if (s.length() > 5
-            && s.containsChar ('.')
-            && s.containsOnly ("abcdefghijklmnopqrstuvwxyz_.")
-            && ! s.startsWithChar ('.'))
-        {
-            if (! s.endsWithChar ('.'))
-                s << ".";
-        }
-        else
-        {
-            s = "com.yourcompany.";
-        }
-
-        return s + CodeHelpers::makeValidIdentifier (project.getProjectFilenameRootString(), false, true, false);
-    }
-
-    //==============================================================================
-    void copyJavaFiles (const OwnedArray<LibraryModule>& modules) const
-    {
-        if (auto* coreModule = getCoreModule (modules))
-        {
-            auto package = getActivityClassPackage();
-            auto targetFolder = getTargetFolder();
-
-            auto inAppBillingPath = String ("com.android.vending.billing").replaceCharacter ('.', File::getSeparatorChar());
-            auto javaSourceFolder = coreModule->getFolder().getChildFile ("native").getChildFile ("java");
-            auto javaInAppBillingTarget = targetFolder.getChildFile ("app/src/main/java").getChildFile (inAppBillingPath);
-            auto javaTarget = targetFolder.getChildFile ("app/src/main/java")
-                                          .getChildFile (package.replaceCharacter ('.', File::getSeparatorChar()));
-            auto libTarget = targetFolder.getChildFile ("app/libs");
-            libTarget.createDirectory();
-
-            copyActivityJavaFiles (javaSourceFolder, javaTarget, package);
-            copyServicesJavaFiles (javaSourceFolder, javaTarget, package);
-            copyProviderJavaFile  (javaSourceFolder, javaTarget, package);
-            copyAdditionalJavaFiles (javaSourceFolder, javaInAppBillingTarget);
-            copyAdditionalJavaLibs (libTarget);
-        }
-    }
-
-    void copyActivityJavaFiles (const File& javaSourceFolder, const File& targetFolder, const String& package) const
-    {
-        if (androidActivityClass.get().toString().contains ("_"))
-            throw SaveError ("Your Android activity class name or path may not contain any underscores! Try a project name without underscores.");
-
-        auto className = getActivityName();
-
-        if (className.isEmpty())
-            throw SaveError ("Invalid Android Activity class name: " + androidActivityClass.get().toString());
-
-        createDirectoryOrThrow (targetFolder);
-
-        auto activityCode = getActivityCode (javaSourceFolder, className, package);
-
-        auto javaDestFile = targetFolder.getChildFile (className + ".java");
-        overwriteFileIfDifferentOrThrow (javaDestFile, activityCode);
-    }
-
-    String getActivityCode (const File& javaSourceFolder, const String& className, const String& package) const
-    {
-        auto runtimePermissionsCode = getRuntimePermissionsCode (javaSourceFolder, className);
-        auto midiCode = getMidiCode (javaSourceFolder, className);
-        auto webViewCode = getWebViewCode (javaSourceFolder);
-        auto cameraCode = getCameraCode (javaSourceFolder);
-        auto videoCode = getVideoCode (javaSourceFolder);
-
-        auto javaSourceFile = javaSourceFolder.getChildFile ("JuceAppActivity.java");
-        auto javaSourceLines = StringArray::fromLines (javaSourceFile.loadFileAsString());
-
-        {
-            MemoryOutputStream newFile;
-
-            for (auto& line : javaSourceLines)
-            {
-                if (line.contains ("$$JuceAndroidMidiImports$$"))
-                    newFile << midiCode.imports;
-                else if (line.contains ("$$JuceAndroidMidiCode$$"))
-                    newFile << midiCode.main;
-                else if (line.contains ("$$JuceAndroidRuntimePermissionsCode$$"))
-                    newFile << runtimePermissionsCode;
-                else if (line.contains ("$$JuceAndroidWebViewImports$$"))
-                    newFile << webViewCode.imports;
-                else if (line.contains ("$$JuceAndroidWebViewNativeCode$$"))
-                    newFile << webViewCode.native;
-                else if (line.contains ("$$JuceAndroidWebViewCode$$"))
-                    newFile << webViewCode.main;
-                else if (line.contains ("$$JuceAndroidCameraImports$$"))
-                    newFile << cameraCode.imports;
-                else if (line.contains ("$$JuceAndroidCameraCode$$"))
-                    newFile << cameraCode.main;
-                else if (line.contains ("$$JuceAndroidVideoImports$$"))
-                    newFile << videoCode.imports;
-                else if (line.contains ("$$JuceAndroidVideoCode$$"))
-                    newFile << videoCode.main;
-                else
-                    newFile << line.replace ("$$JuceAppActivityBaseClass$$", androidActivityBaseClassName.get().toString())
-                                   .replace ("JuceAppActivity", className)
-                                   .replace ("package com.juce;", "package " + package + ";") << newLine;
-            }
-
-            javaSourceLines = StringArray::fromLines (newFile.toString());
-        }
-
-        while (javaSourceLines.size() > 2
-                && javaSourceLines[javaSourceLines.size() - 1].trim().isEmpty()
-                && javaSourceLines[javaSourceLines.size() - 2].trim().isEmpty())
-            javaSourceLines.remove (javaSourceLines.size() - 1);
-
-        return javaSourceLines.joinIntoString (newLine);
-    }
-
-    String getRuntimePermissionsCode (const File& javaSourceFolder, const String& className) const
-    {
-        if (static_cast<int> (androidMinimumSDK.get()) >= 23)
-        {
-            auto javaRuntimePermissions = javaSourceFolder.getChildFile ("AndroidRuntimePermissions.java");
-            return javaRuntimePermissions.loadFileAsString().replace ("JuceAppActivity", className);
-        }
-
-        return {};
-    }
-
-    struct MidiCode
-    {
-        String imports;
-        String main;
-    };
-
-    MidiCode getMidiCode (const File& javaSourceFolder, const String& className) const
-    {
-        String juceMidiCode, juceMidiImports;
-
-        juceMidiImports << newLine;
-
-        if (static_cast<int> (androidMinimumSDK.get()) >= 23)
-        {
-            auto javaAndroidMidi = javaSourceFolder.getChildFile ("AndroidMidi.java");
-
-            juceMidiImports << "import android.media.midi.*;" << newLine
-                            << "import android.bluetooth.*;" << newLine
-                            << "import android.bluetooth.le.*;" << newLine;
-
-            juceMidiCode = javaAndroidMidi.loadFileAsString().replace ("JuceAppActivity", className);
-        }
-        else
-        {
-            juceMidiCode = javaSourceFolder.getChildFile ("AndroidMidiFallback.java")
-                                           .loadFileAsString()
-                                           .replace ("JuceAppActivity", className);
-        }
-
-        return { juceMidiImports, juceMidiCode };
-    }
-
-    struct WebViewCode
-    {
-        String imports;
-        String native;
-        String main;
-    };
-
-    WebViewCode getWebViewCode (const File& javaSourceFolder) const
-    {
-        String juceWebViewImports, juceWebViewCodeNative, juceWebViewCode;
-
-        if (static_cast<int> (androidMinimumSDK.get()) >= 23)
-            juceWebViewImports << "import android.webkit.WebResourceError;" << newLine;
-
-        if (static_cast<int> (androidMinimumSDK.get()) >= 21)
-            juceWebViewImports << "import android.webkit.WebResourceRequest;" << newLine;
-
-        if (static_cast<int> (androidMinimumSDK.get()) >= 11)
-            juceWebViewImports << "import android.webkit.WebResourceResponse;" << newLine;
-
-        auto javaWebViewFile = javaSourceFolder.getChildFile ("AndroidWebView.java");
-        auto juceWebViewCodeAll = javaWebViewFile.loadFileAsString();
-
-        if (static_cast<int> (androidMinimumSDK.get()) <= 10)
-        {
-            juceWebViewCode << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewApi1_10", false, false)
-                                                 .upToFirstOccurrenceOf ("WebViewApi1_10$$", false, false);
-        }
-        else
-        {
-            if (static_cast<int> (androidMinimumSDK.get()) >= 23)
-            {
-                juceWebViewCodeNative << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewNativeApi23", false, false)
-                                                           .upToFirstOccurrenceOf ("WebViewNativeApi23$$", false, false);
-
-                juceWebViewCode << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewApi23", false, false)
-                                                     .upToFirstOccurrenceOf ("WebViewApi23$$", false, false);
-            }
-
-            if (static_cast<int> (androidMinimumSDK.get()) >= 21)
-            {
-                juceWebViewCodeNative << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewNativeApi21", false, false)
-                                                           .upToFirstOccurrenceOf ("WebViewNativeApi21$$", false, false);
-
-                juceWebViewCode << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewApi21", false, false)
-                                                     .upToFirstOccurrenceOf ("WebViewApi21$$", false, false);
-            }
-            else
-            {
-                juceWebViewCode << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewApi11_20", false, false)
-                                                     .upToFirstOccurrenceOf ("WebViewApi11_20$$", false, false);
-            }
-        }
-
-        return { juceWebViewImports, juceWebViewCodeNative, juceWebViewCode };
-    }
-
-    struct CameraCode
-    {
-        String imports;
-        String main;
-    };
-
-    CameraCode getCameraCode (const File& javaSourceFolder) const
-    {
-        String juceCameraImports, juceCameraCode;
-
-        if (static_cast<int> (androidMinimumSDK.get()) >= 21)
-        {
-            juceCameraImports << "import android.hardware.camera2.*;" << newLine;
-
-            auto javaCameraFile = javaSourceFolder.getChildFile ("AndroidCamera.java");
-            auto juceCameraCodeAll = javaCameraFile.loadFileAsString();
-
-            juceCameraCode << juceCameraCodeAll.fromFirstOccurrenceOf ("$$CameraApi21", false, false)
-                                               .upToFirstOccurrenceOf ("CameraApi21$$", false, false);
-        }
-
-        return { juceCameraImports, juceCameraCode };
-    }
-
-    struct VideoCode
-    {
-        String imports;
-        String main;
-    };
-
-    VideoCode getVideoCode (const File& javaSourceFolder) const
-    {
-        String juceVideoImports, juceVideoCode;
-
-        if (static_cast<int> (androidMinimumSDK.get()) >= 21)
-        {
-            juceVideoImports << "import android.database.ContentObserver;" << newLine;
-            juceVideoImports << "import android.media.session.*;" << newLine;
-            juceVideoImports << "import android.media.MediaMetadata;" << newLine;
-
-            auto javaVideoFile = javaSourceFolder.getChildFile ("AndroidVideo.java");
-            auto juceVideoCodeAll = javaVideoFile.loadFileAsString();
-
-            juceVideoCode << juceVideoCodeAll.fromFirstOccurrenceOf ("$$VideoApi21", false, false)
-                                             .upToFirstOccurrenceOf ("VideoApi21$$", false, false);
-        }
-
-        return { juceVideoImports, juceVideoCode };
-    }
-
-    void copyAdditionalJavaFiles (const File& sourceFolder, const File& targetFolder) const
-    {
-        auto inAppBillingJavaFileName = String ("IInAppBillingService.java");
-
-        auto inAppBillingJavaSrcFile  = sourceFolder.getChildFile (inAppBillingJavaFileName);
-        auto inAppBillingJavaDestFile = targetFolder.getChildFile (inAppBillingJavaFileName);
-
-        createDirectoryOrThrow (targetFolder);
-
-        jassert (inAppBillingJavaSrcFile.existsAsFile());
-
-        if (inAppBillingJavaSrcFile.existsAsFile())
-            inAppBillingJavaSrcFile.copyFileTo (inAppBillingJavaDestFile);
-    }
-
     void copyAdditionalJavaLibs (const File& targetFolder) const
     {
+        auto libFolder = targetFolder.getChildFile ("libs");
+        libFolder.createDirectory();
+
         auto libPaths = StringArray::fromLines (androidJavaLibs.get().toString());
 
         for (auto& p : libPaths)
         {
-            File f = getTargetFolder().getChildFile (p);
+            auto f = getTargetFolder().getChildFile (p);
 
             // Is the path to the java lib correct?
             jassert (f.existsAsFile());
 
-            f.copyFileTo (targetFolder.getChildFile (f.getFileName()));
+            f.copyFileTo (libFolder.getChildFile (f.getFileName()));
         }
-    }
-
-    void copyServicesJavaFiles (const File& javaSourceFolder, const File& targetFolder, const String& package) const
-    {
-        if (androidEnableRemoteNotifications.get())
-        {
-            String instanceIdFileName ("JuceFirebaseInstanceIdService.java");
-            String messagingFileName  ("JuceFirebaseMessagingService.java");
-
-            File instanceIdFile (javaSourceFolder.getChildFile (instanceIdFileName));
-            File messagingFile  (javaSourceFolder.getChildFile (messagingFileName));
-
-            jassert (instanceIdFile.existsAsFile());
-            jassert (messagingFile .existsAsFile());
-
-            Array<File> files;
-            files.add (instanceIdFile);
-            files.add (messagingFile);
-
-            for (auto& file : files)
-            {
-                auto newContent = file.loadFileAsString()
-                                      .replace ("package com.juce;", "package " + package + ";");
-                auto targetFile = targetFolder.getChildFile (file.getFileName());
-                overwriteFileIfDifferentOrThrow (targetFile, newContent);
-            }
-        }
-    }
-
-    void copyProviderJavaFile (const File& javaSourceFolder, const File& targetFolder, const String& package) const
-    {
-        auto providerFile = javaSourceFolder.getChildFile ("AndroidSharingContentProvider.java");
-
-        jassert (providerFile.existsAsFile());
-
-        auto targetFile = targetFolder.getChildFile ("SharingContentProvider.java");
-
-        auto fileContent = providerFile.loadFileAsString()
-                                       .replace ("package com.juce;", "package " + package + ";");
-
-        auto commonStart = fileContent.upToFirstOccurrenceOf ("$$ContentProviderApi11", false, false);
-        auto commonEnd   = fileContent.fromFirstOccurrenceOf ("ContentProviderApi11$$", false, false);
-
-        auto middleContent = static_cast<int> (androidMinimumSDK.get()) >= 11
-                                ? fileContent.fromFirstOccurrenceOf ("$$ContentProviderApi11", false, false)
-                                             .upToFirstOccurrenceOf ("ContentProviderApi11$$", false, false)
-                                : String();
-
-        auto newContent = commonStart;
-        newContent << middleContent << commonEnd;
-
-        overwriteFileIfDifferentOrThrow (targetFile, newContent);
     }
 
     void copyExtraResourceFiles() const
@@ -1346,26 +1135,23 @@ private:
         }
     }
 
-    String getActivityName() const
+    String getActivityClass() const
     {
-        return androidActivityClass.get().toString().fromLastOccurrenceOf (".", false, false);
+        auto customActivityClass = androidCustomActivityClass.get().toString();
+
+        return (customActivityClass.isEmpty()) ? "android.app.Activity" : customActivityClass;
     }
 
-    String getActivitySubClassName() const
+    String getApplicationClass() const
     {
-        auto activityPath = androidActivitySubClassName.get().toString();
+        auto customApplicationClass = androidCustomApplicationClass.get().toString();
 
-        return (activityPath.isEmpty()) ? getActivityName() : activityPath.fromLastOccurrenceOf (".", false, false);
-    }
-
-    String getActivityClassPackage() const
-    {
-        return androidActivityClass.get().toString().upToLastOccurrenceOf (".", false, false);
+        return (customApplicationClass.isEmpty()) ? "com.roli.juce.JuceApp" : customApplicationClass;
     }
 
     String getJNIActivityClassName() const
     {
-        return androidActivityClass.get().toString().replaceCharacter ('.', '/');
+        return getActivityClass().replaceCharacter ('.', '/');
     }
 
     static LibraryModule* getCoreModule (const OwnedArray<LibraryModule>& modules)
@@ -1432,7 +1218,9 @@ private:
             createDirectoryOrThrow (file.getParentDirectory());
 
             PNGImageFormat png;
+
             MemoryOutputStream mo;
+            mo.setNewLineString ("\n");
 
             if (! png.writeImageToStream (im, mo))
                 throw SaveError ("Can't generate Android icon file");
@@ -1479,32 +1267,45 @@ private:
     }
 
     //==============================================================================
-    void addCompileUnits (const Project::Item& projectItem, MemoryOutputStream& mo, Array<RelativePath>& excludeFromBuild) const
+    void addCompileUnits (const Project::Item& projectItem, MemoryOutputStream& mo,
+                          Array<RelativePath>& excludeFromBuild, Array<std::pair<RelativePath, String>>& extraCompilerFlags) const
     {
         if (projectItem.isGroup())
         {
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
-                addCompileUnits (projectItem.getChild(i), mo, excludeFromBuild);
+                addCompileUnits (projectItem.getChild(i), mo, excludeFromBuild, extraCompilerFlags);
         }
         else if (projectItem.shouldBeAddedToTargetProject())
         {
-            RelativePath file (projectItem.getFile(), getTargetFolder().getChildFile ("app"), RelativePath::buildTargetFolder);
-            auto targetType = getProject().getTargetTypeFromFilePath (projectItem.getFile(), true);
+            auto f = projectItem.getFile();
+            RelativePath file (f, getTargetFolder().getChildFile ("app"), RelativePath::buildTargetFolder);
+
+            auto targetType = getProject().getTargetTypeFromFilePath (f, true);
 
             mo << "    \"" << file.toUnixStyle() << "\"" << newLine;
 
-            if ((! projectItem.shouldBeCompiled()) || (! shouldFileBeCompiledByDefault (file))
+            if ((! projectItem.shouldBeCompiled()) || (! shouldFileBeCompiledByDefault (f))
                 || (getProject().getProjectType().isAudioPlugin()
                     && targetType != ProjectType::Target::SharedCodeTarget
                     && targetType != ProjectType::Target::StandalonePlugIn))
+            {
                 excludeFromBuild.add (file);
+            }
+            else
+            {
+                auto extraFlags = compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get().toString();
+
+                if (extraFlags.isNotEmpty())
+                    extraCompilerFlags.add ({ file, extraFlags });
+            }
         }
     }
 
-    void addCompileUnits (MemoryOutputStream& mo, Array<RelativePath>& excludeFromBuild) const
+    void addCompileUnits (MemoryOutputStream& mo, Array<RelativePath>& excludeFromBuild,
+                          Array<std::pair<RelativePath, String>>& extraCompilerFlags) const
     {
         for (int i = 0; i < getAllGroups().size(); ++i)
-            addCompileUnits (getAllGroups().getReference(i), mo, excludeFromBuild);
+            addCompileUnits (getAllGroups().getReference(i), mo, excludeFromBuild, extraCompilerFlags);
     }
 
     //==============================================================================
@@ -1572,32 +1373,15 @@ private:
 
         defines.set ("JUCE_ANDROID", "1");
         defines.set ("JUCE_ANDROID_API_VERSION", androidMinimumSDK.get());
-        defines.set ("JUCE_ANDROID_ACTIVITY_CLASSNAME", getJNIActivityClassName().replaceCharacter ('/', '_'));
-        defines.set ("JUCE_ANDROID_ACTIVITY_CLASSPATH", "\"" + getJNIActivityClassName() + "\"");
-        defines.set ("JUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSNAME", getSharingContentProviderClassName().replaceCharacter('.', '_'));
-        defines.set ("JUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSPATH", "\"" + getSharingContentProviderClassName().replaceCharacter('.', '/') + "\"");
         defines.set ("JUCE_PUSH_NOTIFICATIONS", "1");
 
         if (androidInAppBillingPermission.get())
             defines.set ("JUCE_IN_APP_PURCHASES", "1");
 
-        if (androidEnableRemoteNotifications.get())
-        {
-            auto instanceIdClassName = getActivityClassPackage() + ".JuceFirebaseInstanceIdService";
-            auto messagingClassName  = getActivityClassPackage() + ".JuceFirebaseMessagingService";
-            defines.set ("JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME", instanceIdClassName.replaceCharacter ('.', '_'));
-            defines.set ("JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME", messagingClassName.replaceCharacter ('.', '_'));
-        }
-
         if (supportsGLv3())
             defines.set ("JUCE_ANDROID_GL_ES_VERSION_3_0", "1");
 
         return defines;
-    }
-
-    String getSharingContentProviderClassName() const
-    {
-        return getActivityClassPackage() + ".SharingContentProvider";
     }
 
     StringPairArray getProjectPreprocessorDefs() const
@@ -1737,7 +1521,7 @@ private:
         setAttributeIfNotPresent (*manifest, "xmlns:android", "http://schemas.android.com/apk/res/android");
         setAttributeIfNotPresent (*manifest, "android:versionCode", androidVersionCode.get());
         setAttributeIfNotPresent (*manifest, "android:versionName",  project.getVersionString());
-        setAttributeIfNotPresent (*manifest, "package", getActivityClassPackage());
+        setAttributeIfNotPresent (*manifest, "package", project.getBundleIdentifierString());
 
         return manifest;
     }
@@ -1797,6 +1581,7 @@ private:
     {
         auto* app = getOrCreateChildWithName (manifest, "application");
         setAttributeIfNotPresent (*app, "android:label", "@string/app_name");
+        setAttributeIfNotPresent (*app, "android:name", getApplicationClass());
 
         if (androidTheme.get().toString().isNotEmpty())
             setAttributeIfNotPresent (*app, "android:theme", androidTheme.get());
@@ -1826,7 +1611,7 @@ private:
     {
         auto* act = getOrCreateChildWithName (application, "activity");
 
-        setAttributeIfNotPresent (*act, "android:name", getActivitySubClassName());
+        setAttributeIfNotPresent (*act, "android:name", getActivityClass());
         setAttributeIfNotPresent (*act, "android:label", "@string/app_name");
 
         if (! act->hasAttribute ("android:configChanges"))
@@ -1918,8 +1703,9 @@ private:
         if (androidEnableContentSharing.get())
         {
             auto* provider = application.createNewChildElement ("provider");
-            provider->setAttribute ("android:name", getSharingContentProviderClassName());
-            provider->setAttribute ("android:authorities", getSharingContentProviderClassName().toLowerCase());
+
+            provider->setAttribute ("android:name", "com.roli.juce.JuceSharingContentProvider");
+            provider->setAttribute ("android:authorities", project.getBundleIdentifierString().toLowerCase() + ".sharingcontentprovider");
             provider->setAttribute ("android:grantUriPermissions", "true");
             provider->setAttribute ("android:exported", "false");
         }

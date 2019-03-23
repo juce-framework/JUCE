@@ -80,13 +80,7 @@ public:
     */
     struct Zone
     {
-        Zone (const Zone& other) noexcept
-            : numMemberChannels (other.numMemberChannels),
-              perNotePitchbendRange (other.perNotePitchbendRange),
-              masterPitchbendRange (other.masterPitchbendRange),
-              lowerZone (other.lowerZone)
-        {
-        }
+        Zone (const Zone& other) = default;
 
         bool isLowerZone() const noexcept             { return lowerZone; }
         bool isUpperZone() const noexcept             { return ! lowerZone; }
@@ -185,7 +179,7 @@ public:
     {
     public:
         /** Destructor. */
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         /** Implement this callback to be notified about any changes to this
             MPEZoneLayout. Will be called whenever a zone is added, zones are

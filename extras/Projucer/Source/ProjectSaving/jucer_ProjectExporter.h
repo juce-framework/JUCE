@@ -32,11 +32,11 @@
 class ProjectSaver;
 
 //==============================================================================
-class ProjectExporter
+class ProjectExporter  : private Value::Listener
 {
 public:
     ProjectExporter (Project&, const ValueTree& settings);
-    virtual ~ProjectExporter();
+    virtual ~ProjectExporter() override;
 
     struct ExporterTypeInfo
     {
@@ -78,7 +78,7 @@ public:
     virtual bool canLaunchProject() = 0;
     virtual bool launchProject() = 0;
     virtual void create (const OwnedArray<LibraryModule>&) const = 0; // may throw a SaveError
-    virtual bool shouldFileBeCompiledByDefault (const RelativePath& path) const;
+    virtual bool shouldFileBeCompiledByDefault (const File& path) const;
     virtual bool canCopeWithDuplicateFiles() = 0;
     virtual bool supportsUserDefinedConfigurations() const = 0; // false if exporter only supports two configs Debug and Release
     virtual void updateDeprecatedProjectSettingsInteractively();
@@ -406,6 +406,9 @@ protected:
     ValueWithDefault targetLocationValue, extraCompilerFlagsValue, extraLinkerFlagsValue, externalLibrariesValue,
                      userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue;
 
+    Value projectCompilerFlagSchemesValue;
+    HashMap<String, ValueWithDefault> compilerFlagSchemesMap;
+
     mutable Array<Project::Item> itemGroups;
     void initItemGroups() const;
     Project::Item* modulesGroup = nullptr;
@@ -443,23 +446,21 @@ protected:
     static void writeXmlOrThrow (const XmlElement& xml, const File& file, const String& encoding, int maxCharsPerLine, bool useUnixNewLines = false)
     {
         MemoryOutputStream mo;
-        xml.writeToStream (mo, String(), false, true, encoding, maxCharsPerLine);
 
         if (useUnixNewLines)
-        {
-            MemoryOutputStream mo2;
-            mo2 << mo.toString().replace ("\r\n", "\n");
-            overwriteFileIfDifferentOrThrow (file, mo2);
-        }
-        else
-        {
-            overwriteFileIfDifferentOrThrow (file, mo);
-        }
+            mo.setNewLineString ("\n");
+
+        xml.writeToStream (mo, String(), false, true, encoding, maxCharsPerLine);
+        overwriteFileIfDifferentOrThrow (file, mo);
     }
 
     static Image rescaleImageForIcon (Drawable&, int iconSize);
 
 private:
+    //==============================================================================
+    void valueChanged (Value&) override   { updateCompilerFlagValues(); }
+    void updateCompilerFlagValues();
+
     //==============================================================================
     static String addLibPrefix (const String name)
     {

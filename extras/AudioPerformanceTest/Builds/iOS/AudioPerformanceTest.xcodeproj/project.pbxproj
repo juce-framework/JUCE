@@ -65,6 +65,10 @@
 			isa = PBXBuildFile;
 			fileRef = 8693552B5FA53C2003A66302;
 		};
+		3C0CA1E555411B8B5B8F8FF0 = {
+			isa = PBXBuildFile;
+			fileRef = C8D9488DE9A88E4FBF28D417;
+		};
 		07451DA87757F9EF80E31BE8 = {
 			isa = PBXBuildFile;
 			fileRef = 0564535EEA7E4462926EA0C9;
@@ -358,6 +362,13 @@
 			path = System/Library/Frameworks/AVFoundation.framework;
 			sourceTree = SDKROOT;
 		};
+		C8D9488DE9A88E4FBF28D417 = {
+			isa = PBXFileReference;
+			lastKnownFileType = file.storyboard;
+			name = LaunchScreen.storyboard;
+			path = LaunchScreen.storyboard;
+			sourceTree = "SOURCE_ROOT";
+		};
 		C8EE61FDD1F06817A014B881 = {
 			isa = PBXFileReference;
 			lastKnownFileType = file;
@@ -467,6 +478,7 @@
 			children = (
 				9516A19EE58DED8326DD0306,
 				8693552B5FA53C2003A66302,
+				C8D9488DE9A88E4FBF28D417,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -623,7 +635,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf";
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = c11;
@@ -645,7 +657,7 @@
 				PRODUCT_NAME = "AudioPerformanceTest";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				WARNING_CFLAGS = -Wreorder;
+				WARNING_CFLAGS = "-Wreorder";
 				ZERO_LINK = NO;
 			};
 			name = Debug;
@@ -673,7 +685,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf";
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
@@ -693,7 +705,7 @@
 				PRODUCT_NAME = "AudioPerformanceTest";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				WARNING_CFLAGS = -Wreorder;
+				WARNING_CFLAGS = "-Wreorder";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -725,6 +737,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A783F6E198806332E7FB9744,
+				3C0CA1E555411B8B5B8F8FF0,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -785,13 +798,14 @@
 		9CE2A44801B5B4BE7A9667DA = {
 			isa = PBXProject;
 			buildConfigurationList = 7097CF6AC086DAC346ACCCD9;
-			attributes = { LastUpgradeCheck = 0930; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { E9FD2656EC625C9C8DE30219 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; };
+			attributes = { LastUpgradeCheck = 0930; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { E9FD2656EC625C9C8DE30219 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
 			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 0;
 			mainGroup = 3BA1BA0CAFE969E99950C06B;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (E9FD2656EC625C9C8DE30219);
+			knownRegions = (en, Base);
 		};
 	};
 	rootObject = 9CE2A44801B5B4BE7A9667DA;

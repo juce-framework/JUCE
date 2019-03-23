@@ -23,6 +23,10 @@
 namespace juce
 {
 
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+DECLARE_JNI_CLASS (AndroidAudioManager, "android/media/AudioManager")
+#undef JNI_CLASS_MEMBERS
+
 //==============================================================================
 #ifndef SL_ANDROID_DATAFORMAT_PCM_EX
  #define SL_ANDROID_DATAFORMAT_PCM_EX                   ((SLuint32) 0x00000004)
@@ -84,12 +88,12 @@ public:
     //==============================================================================
     SlObjectRef() noexcept {}
     SlObjectRef (const SlObjectRef& obj) noexcept : cb (obj.cb) {}
-    SlObjectRef (SlObjectRef&& obj) noexcept : cb (static_cast<ReferenceCountedObjectPtr<ControlBlock>&&> (obj.cb)) { obj.cb = nullptr; }
+    SlObjectRef (SlObjectRef&& obj) noexcept : cb (std::move (obj.cb)) { obj.cb = nullptr; }
     explicit SlObjectRef (SLObjectItf o) : cb (new ControlBlock (o)) {}
 
     //==============================================================================
     SlObjectRef& operator= (const SlObjectRef& r) noexcept  { cb = r.cb; return *this; }
-    SlObjectRef& operator= (SlObjectRef&& r) noexcept       { cb = static_cast<ReferenceCountedObjectPtr<ControlBlock>&&> (r.cb); r.cb = nullptr; return *this; }
+    SlObjectRef& operator= (SlObjectRef&& r) noexcept       { cb = std::move (r.cb); r.cb = nullptr; return *this; }
     SlObjectRef& operator= (std::nullptr_t) noexcept        { cb = nullptr; return *this; }
 
     //==============================================================================
@@ -121,11 +125,11 @@ public:
     //==============================================================================
     SlRef() noexcept {}
     SlRef (const SlRef& r) noexcept : SlObjectRef (r), type (r.type) {}
-    SlRef (SlRef&& r) noexcept : SlObjectRef (static_cast<SlRef&&> (r)), type (r.type) { r.type = nullptr; }
+    SlRef (SlRef&& r) noexcept : SlObjectRef (std::move (r)), type (r.type) { r.type = nullptr; }
 
     //==============================================================================
     SlRef& operator= (const SlRef& r)  noexcept { SlObjectRef::operator= (r); type = r.type; return *this; }
-    SlRef& operator= (SlRef&& r) noexcept       { SlObjectRef::operator= (static_cast<SlObjectRef&&> (r)); type = r.type; r.type = nullptr; return *this; }
+    SlRef& operator= (SlRef&& r) noexcept       { SlObjectRef::operator= (std::move (r)); type = r.type; r.type = nullptr; return *this; }
     SlRef& operator= (std::nullptr_t) noexcept  { SlObjectRef::operator= (nullptr); type = nullptr; return *this; }
 
     //==============================================================================
@@ -135,7 +139,7 @@ public:
 
     //==============================================================================
     static SlRef cast (SlObjectRef&  base)      { return SlRef (base); }
-    static SlRef cast (SlObjectRef&& base)      { return SlRef (static_cast<SlObjectRef&&> (base)); }
+    static SlRef cast (SlObjectRef&& base)      { return SlRef (std::move (base)); }
 
 private:
     SlRef (SlObjectRef& base) : SlObjectRef (base)
@@ -151,7 +155,7 @@ private:
         *this = nullptr;
     }
 
-    SlRef (SlObjectRef&& base) : SlObjectRef (static_cast<SlObjectRef&&> (base))
+    SlRef (SlObjectRef&& base) : SlObjectRef (std::move (base))
     {
         if (auto obj = SlObjectRef::operator->())
         {
@@ -323,7 +327,7 @@ public:
             if (runner == nullptr)
                 return false;
 
-            const bool supportsJavaProxy = (getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT) >= 24);
+            const bool supportsJavaProxy = (getAndroidSDKVersion() >= 24);
 
             if (supportsJavaProxy)
             {
@@ -337,7 +341,7 @@ public:
                                                                &audioRoutingJni);
 
                     if (status == SL_RESULT_SUCCESS && audioRoutingJni != 0)
-                        javaProxy = GlobalRef (audioRoutingJni);
+                        javaProxy = GlobalRef (LocalRef<jobject>(getEnv()->NewLocalRef (audioRoutingJni)));
                 }
             }
 
@@ -372,8 +376,6 @@ public:
 
         void finished (SLAndroidSimpleBufferQueueItf)
         {
-            attachAndroidJNI();
-
             --numBlocksOut;
             owner.doSomeWorkOnAudioThread();
         }
@@ -489,8 +491,7 @@ public:
         {
             if (Base::config != nullptr)
             {
-                const bool supportsUnprocessed = (getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT) >= 25);
-
+                const bool supportsUnprocessed = (getAndroidSDKVersion() >= 25);
                 const SLuint32 recordingPresetValue
                     = (shouldEnable ? SL_ANDROID_RECORDING_PRESET_GENERIC
                                     : (supportsUnprocessed ? SL_ANDROID_RECORDING_PRESET_UNPROCESSED
@@ -660,7 +661,7 @@ public:
                         return;
                     }
 
-                    const bool supportsUnderrunCount = (getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT) >= 24);
+                    const bool supportsUnderrunCount = (getAndroidSDKVersion() >= 24);
                     getUnderrunCount = supportsUnderrunCount ? getEnv()->GetMethodID (AudioTrack, "getUnderrunCount", "()I") : 0;
                 }
             }
@@ -1048,9 +1049,7 @@ private:
             // "For Android 4.2 (API level 17) and earlier, a buffer count of two or more is required
             //  for lower latency. Beginning with Android 4.3 (API level 18), a buffer count of one
             //  is sufficient for lower latency."
-
-            auto sdkVersion = getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT);
-            return (sdkVersion >= 18 ? 1 : 2);
+            return (getAndroidSDKVersion() >= 18 ? 1 : 2);
         }
 
         // we will not use the low-latency path so we can use the absolute minimum number of buffers
@@ -1079,23 +1078,6 @@ private:
     }
 
     //==============================================================================
-    static String audioManagerGetProperty (const String& property)
-    {
-        const LocalRef<jstring> jProperty (javaString (property));
-        const LocalRef<jstring> text ((jstring) android.activity.callObjectMethod (JuceAppActivity.audioManagerGetProperty,
-                                                                                   jProperty.get()));
-        if (text.get() != 0)
-            return juceString (text);
-
-        return {};
-    }
-
-    static bool androidHasSystemFeature (const String& property)
-    {
-        const LocalRef<jstring> jProperty (javaString (property));
-        return android.activity.callBooleanMethod (JuceAppActivity.hasSystemFeature, jProperty.get());
-    }
-
     static double getNativeSampleRate()
     {
         return audioManagerGetProperty ("android.media.property.OUTPUT_SAMPLE_RATE").getDoubleValue();
@@ -1147,7 +1129,7 @@ OpenSLAudioIODevice::OpenSLSession* OpenSLAudioIODevice::OpenSLSession::create (
                                                                                 int numBuffersToUse)
 {
     std::unique_ptr<OpenSLSession> retval;
-    auto sdkVersion = getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT);
+    auto sdkVersion = getAndroidSDKVersion();
 
     // SDK versions 21 and higher should natively support floating point...
     if (sdkVersion >= 21)

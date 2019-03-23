@@ -75,7 +75,6 @@ public:
     /** Creates a text property component with a default value.
 
         @param valueToControl The ValueWithDefault that is controlled by the TextPropertyComponent.
-                              NB: this object must outlive the TextPropertyComponent.
         @param propertyName   The name of the property
         @param maxNumChars    If not zero, then this specifies the maximum allowable length of
                               the string. If zero, then the string will have no length limit.
@@ -91,7 +90,7 @@ public:
                            bool isEditable = true);
 
     /** Destructor. */
-    ~TextPropertyComponent();
+    ~TextPropertyComponent() override;
 
     //==============================================================================
     /** Called when the user edits the text.
@@ -134,7 +133,7 @@ public:
     {
     public:
         /** Destructor. */
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         /** Called when text has finished being entered (i.e. not per keypress) has changed. */
         virtual void textPropertyComponentChanged (TextPropertyComponent*) = 0;
@@ -183,7 +182,7 @@ private:
     std::unique_ptr<LabelComp> textEditor;
     ListenerList<Listener> listenerList;
 
-    ValueWithDefault* valueWithDefault = nullptr;
+    WeakReference<ValueWithDefault> valueWithDefault;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextPropertyComponent)

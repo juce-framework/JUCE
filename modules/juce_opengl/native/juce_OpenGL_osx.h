@@ -200,6 +200,10 @@ public:
 
     bool setSwapInterval (int numFramesPerSwap)
     {
+        // The macOS OpenGL programming guide says that numFramesPerSwap
+        // can only be 0 or 1.
+        jassert (isPositiveAndBelow (numFramesPerSwap, 2));
+
         minSwapTimeMs = (numFramesPerSwap * 1000) / 60;
 
         [renderContext setValues: (const GLint*) &numFramesPerSwap

@@ -42,7 +42,7 @@ class JUCE_API  AudioProcessorListener
 public:
     //==============================================================================
     /** Destructor. */
-    virtual ~AudioProcessorListener() {}
+    virtual ~AudioProcessorListener() = default;
 
     //==============================================================================
     /** Receives a callback when a parameter is changed.

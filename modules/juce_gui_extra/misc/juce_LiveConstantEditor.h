@@ -196,7 +196,7 @@ namespace LiveConstantEditor
     {
     public:
         ValueList();
-        ~ValueList();
+        ~ValueList() override;
 
         JUCE_DECLARE_SINGLETON (ValueList, false)
 

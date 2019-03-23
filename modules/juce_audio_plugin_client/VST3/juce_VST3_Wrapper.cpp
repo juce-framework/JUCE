@@ -198,7 +198,7 @@ private:
             {
                 // we need to remain backward compatible with the old bypass id
                 if (vst3WrapperProvidedBypassParam)
-                    vstParamID = static_cast<Vst::ParamID> (isUsingManagedParameters() ? paramBypass : numParameters);
+                    vstParamID = static_cast<Vst::ParamID> ((isUsingManagedParameters() && ! forceLegacyParamIDs) ? paramBypass : numParameters);
 
                 bypassParamID = vstParamID;
             }
@@ -811,6 +811,11 @@ private:
             editorScaleFactor = ec.lastScaleFactorReceived;
 
             component.reset (new ContentWrapperComponent (*this, p));
+
+           #if JUCE_MAC
+            if (getHostType().type == PluginHostType::SteinbergCubase10)
+                cubase10Workaround.reset (new Cubase10WindowResizeWorkaround (*this));
+           #endif
         }
 
         tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
@@ -903,12 +908,35 @@ private:
                    #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
                     w = roundToInt (w / editorScaleFactor);
                     h = roundToInt (h / editorScaleFactor);
+
+                    if (getHostType().type == PluginHostType::SteinbergCubase10)
+                    {
+                        auto integerScaleFactor = (int) std::round (editorScaleFactor);
+
+                        // Workaround for Cubase 10 sending double-scaled bounds when opening editor
+                        if (isWithin ((int) w, component->getWidth() * integerScaleFactor, 2)
+                            && isWithin ((int) h, component->getHeight() * integerScaleFactor, 2))
+                        {
+                            w /= integerScaleFactor;
+                            h /= integerScaleFactor;
+                        }
+                    }
                    #endif
 
                     component->setSize (w, h);
 
+                   #if JUCE_MAC
+                    if (cubase10Workaround != nullptr)
+                        cubase10Workaround->triggerAsyncUpdate();
+                    else
+                   #endif
                     if (auto* peer = component->getPeer())
                         peer->updateBounds();
+
+                   #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                    if (getHostType().type == PluginHostType::SteinbergCubase10)
+                        component->resizeHostWindow();
+                   #endif
                 }
 
                 return kResultTrue;
@@ -953,36 +981,67 @@ private:
             {
                 if (auto* editor = component->pluginEditor.get())
                 {
-                   #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                    auto juceRect = editor->getLocalArea (component.get(),
-                                                          Rectangle<int>::leftTopRightBottom (rectToCheck->left, rectToCheck->top,
-                                                                                              rectToCheck->right, rectToCheck->bottom) / editorScaleFactor);
-                   #else
-                    auto juceRect = editor->getLocalArea (component.get(),
-                                                          { rectToCheck->left, rectToCheck->top, rectToCheck->right, rectToCheck->bottom });
-                   #endif
-
                     if (auto* constrainer = editor->getConstrainer())
                     {
-                        Rectangle<int> limits (0, 0, constrainer->getMaximumWidth(), constrainer->getMaximumHeight());
+                        auto minW = (double) constrainer->getMinimumWidth();
+                        auto maxW = (double) constrainer->getMaximumWidth();
+                        auto minH = (double) constrainer->getMinimumHeight();
+                        auto maxH = (double) constrainer->getMaximumHeight();
 
-                        auto currentRect = editor->getBounds();
-
-                        constrainer->checkBounds (juceRect, currentRect, limits,
-                                                  juceRect.getY() != currentRect.getY() && juceRect.getBottom() == currentRect.getBottom(),
-                                                  juceRect.getX() != currentRect.getX() && juceRect.getRight()  == currentRect.getRight(),
-                                                  juceRect.getY() == currentRect.getY() && juceRect.getBottom() != currentRect.getBottom(),
-                                                  juceRect.getX() == currentRect.getX() && juceRect.getRight()  != currentRect.getRight());
-
-                        juceRect = component->getLocalArea (editor, juceRect);
+                        auto width  = (double) (rectToCheck->right - rectToCheck->left);
+                        auto height = (double) (rectToCheck->bottom - rectToCheck->top);
 
                        #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                        rectToCheck->right = rectToCheck->left + roundToInt (juceRect.getWidth() * editorScaleFactor);
-                        rectToCheck->bottom = rectToCheck->top + roundToInt (juceRect.getHeight() * editorScaleFactor);
-                       #else
-                        rectToCheck->right = rectToCheck->left + juceRect.getWidth();
-                        rectToCheck->bottom = rectToCheck->top + juceRect.getHeight();
+                        width  /= editorScaleFactor;
+                        height /= editorScaleFactor;
                        #endif
+
+                        width  = jlimit (minW, maxW, width);
+                        height = jlimit (minH, maxH, height);
+
+                        auto aspectRatio = constrainer->getFixedAspectRatio();
+
+                        if (aspectRatio != 0.0)
+                        {
+                            bool adjustWidth = (width / height > aspectRatio);
+
+                            if (getHostType().type == PluginHostType::SteinbergCubase9)
+                            {
+                                if (editor->getWidth() == width && editor->getHeight() != height)
+                                    adjustWidth = true;
+                                else if (editor->getHeight() == height && editor->getWidth() != width)
+                                    adjustWidth = false;
+                            }
+
+                            if (adjustWidth)
+                            {
+                                width = height * aspectRatio;
+
+                                if (width > maxW || width < minW)
+                                {
+                                    width = jlimit (minW, maxW, width);
+                                    height = width / aspectRatio;
+                                }
+                            }
+                            else
+                            {
+                                height = width / aspectRatio;
+
+                                if (height > maxH || height < minH)
+                                {
+                                    height = jlimit (minH, maxH, height);
+                                    width = height * aspectRatio;
+                                }
+                            }
+                        }
+
+                       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                        width  *= editorScaleFactor;
+                        height *= editorScaleFactor;
+                       #endif
+
+                        rectToCheck->right  = rectToCheck->left + roundToInt (width);
+                        rectToCheck->bottom = rectToCheck->top  + roundToInt (height);
                     }
                 }
 
@@ -996,6 +1055,14 @@ private:
         tresult PLUGIN_API setContentScaleFactor (Steinberg::IPlugViewContentScaleSupport::ScaleFactor factor) override
         {
            #if ! JUCE_MAC
+            // Cubase 10 doesn't support non-integer scale factors...
+            if (getHostType().type == PluginHostType::SteinbergCubase10)
+            {
+                if (component.get() != nullptr)
+                    if (auto* peer = component->getPeer())
+                        factor = static_cast<Steinberg::IPlugViewContentScaleSupport::ScaleFactor> (peer->getPlatformScaleFactor());
+            }
+
             if (! approximatelyEqual ((float) factor, editorScaleFactor))
             {
                 editorScaleFactor = (float) factor;
@@ -1012,12 +1079,8 @@ private:
                #endif
 
                 component->resizeHostWindow();
-
-                if (getHostType().isBitwigStudio())
-                {
-                    component->setTopLeftPosition (0, 0);
-                    component->repaint();
-                }
+                component->setTopLeftPosition (0, 0);
+                component->repaint();
             }
 
             return kResultTrue;
@@ -1211,6 +1274,23 @@ private:
        #if JUCE_MAC
         void* macHostWindow = nullptr;
         bool isNSView = false;
+
+        // On macOS Cubase 10 resizes the host window after calling onSize() resulting in the peer
+        // bounds being a step behind the plug-in. Calling updateBounds() asynchronously seems to fix things...
+        struct Cubase10WindowResizeWorkaround  : public AsyncUpdater
+        {
+            Cubase10WindowResizeWorkaround (JuceVST3Editor& o)  : owner (o) {}
+
+            void handleAsyncUpdate() override
+            {
+                if (auto* peer = owner.component->getPeer())
+                    peer->updateBounds();
+            }
+
+            JuceVST3Editor& owner;
+        };
+
+        std::unique_ptr<Cubase10WindowResizeWorkaround> cubase10Workaround;
        #endif
 
         float editorScaleFactor = 1.0f;
@@ -1967,7 +2047,13 @@ public:
             {
                 info.mediaType = Vst::kEvent;
                 info.direction = dir;
+
+               #ifdef JucePlugin_VSTNumMidiInputs
+                info.channelCount = JucePlugin_VSTNumMidiInputs;
+               #else
                 info.channelCount = 16;
+               #endif
+
                 toString128 (info.name, TRANS("MIDI Input"));
                 info.busType = Vst::kMain;
                 return kResultTrue;
@@ -1979,7 +2065,13 @@ public:
             {
                 info.mediaType = Vst::kEvent;
                 info.direction = dir;
+
+               #ifdef JucePlugin_VSTNumMidiOutputs
+                info.channelCount = JucePlugin_VSTNumMidiOutputs;
+               #else
                 info.channelCount = 16;
+               #endif
+
                 toString128 (info.name, TRANS("MIDI Output"));
                 info.busType = Vst::kMain;
                 return kResultTrue;

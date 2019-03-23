@@ -33,7 +33,7 @@ struct NetWorkerThread   : public Thread,
 {
     NetWorkerThread()  : Thread ("License") {}
 
-    ~NetWorkerThread()
+    ~NetWorkerThread() override
     {
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 

@@ -1257,6 +1257,9 @@ public:
            #if JUCE_WINDOWS
             if (! getHostType().isReceptor())
                 addMouseListener (this, true);
+            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+             wrapper.editorScaleFactor = static_cast<float> (Desktop::getInstance().getDisplays().getMainDisplay().scale);
+            #endif
            #endif
 
             ignoreUnused (fakeMouseGenerator);
@@ -1462,6 +1465,11 @@ public:
                 int dh = 0;
                 const int frameThickness = GetSystemMetrics (SM_CYFIXEDFRAME);
 
+               #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+                newWidth  = roundToInt (newWidth  * wrapper.editorScaleFactor);
+                newHeight = roundToInt (newHeight * wrapper.editorScaleFactor);
+               #endif
+
                 HWND w = (HWND) getWindowHandle();
 
                 while (w != 0)
@@ -1481,8 +1489,9 @@ public:
                     GetWindowRect (w, &windowPos);
                     GetWindowRect (parent, &parentPos);
 
-                    SetWindowPos (w, 0, 0, 0, newWidth + dw, newHeight + dh,
-                                  SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+                    if (w != (HWND) getWindowHandle())
+                        SetWindowPos (w, 0, 0, 0, newWidth + dw, newHeight + dh,
+                                      SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 
                     dw = (parentPos.right - parentPos.left) - (windowPos.right - windowPos.left);
                     dh = (parentPos.bottom - parentPos.top) - (windowPos.bottom - windowPos.top);
@@ -2221,7 +2230,11 @@ private:
     pointer_sized_int handleGetNumMidiInputChannels()
     {
        #if JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
-        return 16;
+        #ifdef JucePlugin_VSTNumMidiInputs
+         return JucePlugin_VSTNumMidiInputs;
+        #else
+         return 16;
+        #endif
        #else
         return 0;
        #endif
@@ -2230,7 +2243,11 @@ private:
     pointer_sized_int handleGetNumMidiOutputChannels()
     {
        #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
-        return 16;
+        #ifdef JucePlugin_VSTNumMidiOutputs
+         return JucePlugin_VSTNumMidiOutputs;
+        #else
+         return 16;
+        #endif
        #else
         return 0;
        #endif

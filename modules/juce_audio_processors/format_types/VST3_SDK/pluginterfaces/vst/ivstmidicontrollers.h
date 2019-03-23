@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 // This file is part of a Steinberg SDK. It is subject to the license terms
 // in the LICENSE file found in the top-level directory of this distribution
-// and at www.steinberg.net/sdklicenses.
+// and at www.steinberg.net/sdklicenses. 
 // No part of the SDK, including this file, may be copied, modified, propagated,
 // or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
@@ -102,9 +102,15 @@ enum ControllerNumbers
 
 	//---Extra--------------------------
 	kAfterTouch = 128,			///< After Touch
-	kPitchBend,					///< Pitch Bend
+	kPitchBend  = 129,			///< Pitch Bend
 
-	kCountCtrlNumber			///< Count of Controller Number
+	kCountCtrlNumber,			///< Count of Controller Number
+
+	//---Extra for kLegacyMIDICCOutEvent-
+	kCtrlProgramChange = 130,	///< Program Change (use LegacyMIDICCOutEvent.value only)
+	kCtrlPolyPressure  = 131,	///< Poly Pressure (use LegacyMIDICCOutEvent.value for pitch and
+								/// LegacyMIDICCOutEvent.value2 for pressure)
+	kCtrlQuarterFrame  = 132	///< Quarter Frame ((use LegacyMIDICCOutEvent.value only)
 };
 
 //------------------------------------------------------------------------

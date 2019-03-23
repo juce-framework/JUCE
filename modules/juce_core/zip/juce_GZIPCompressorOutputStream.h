@@ -72,7 +72,7 @@ public:
                                 int windowBits = 0);
 
     /** Destructor. */
-    ~GZIPCompressorOutputStream();
+    ~GZIPCompressorOutputStream() override;
 
     //==============================================================================
     /** Flushes and closes the stream.

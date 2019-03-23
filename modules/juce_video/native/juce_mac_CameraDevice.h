@@ -131,7 +131,7 @@ struct CameraDevice::Pimpl
             return;
         }
 
-        pictureTakenCallback = static_cast<std::function<void (const Image&)>&&> (pictureTakenCallbackToUse);
+        pictureTakenCallback = std::move (pictureTakenCallbackToUse);
 
         triggerImageCapture();
     }
@@ -143,6 +143,7 @@ struct CameraDevice::Pimpl
         firstPresentationTime = Time::getCurrentTime();
         file.deleteFile();
 
+        isRecording = true;
         [fileOutput startRecordingToOutputFileURL: createNSURLFromFile (file)
                                 recordingDelegate: callbackDelegate];
     }

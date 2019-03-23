@@ -3,11 +3,27 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 5.4.3
+  - Added a Visual Studio 2019 exporter to the Projucer
+  - Added options to configure macOS Hardened Runtime in the Projucer
+  - Fixed a potential memory corruption when drawing on macOS/iOS
+  - Fixed file drag and drop for Windows 8
+  - Multiple DSP module enhancements
+  - Various bug-fixes, improvements and documentation updates
+
+Version 5.4.2
+  - Restructured the low-level Android native code
+  - Added an ADSR envelope class
+  - AudioProcessorValueTreeState performance improvements
+  - Improved Xcode 10 support
+  - Improved VST3 hosting
+  - Windows hiDPI scaling enhancements
+
 Version 5.4.1
   - Fixed a VST2 compilation error in VS2013
-  - Projucer:  Fixed some live-build compilation errors
+  - Fixed some live-build compilation errors in the Projucer
   - Fixed a bug in the Oversampling class
-  - MPE:  Made MPESynthesiserVoice::noteOnTime public
+  - Made MPESynthesiserVoice::noteOnTime public
   - Fixed some bugs in the Unity plug-in wrapper
   - Fixed some VS2015 compiler errors
 

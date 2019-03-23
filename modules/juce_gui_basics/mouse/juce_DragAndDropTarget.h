@@ -47,7 +47,7 @@ class JUCE_API  DragAndDropTarget
 {
 public:
     /** Destructor. */
-    virtual ~DragAndDropTarget()  {}
+    virtual ~DragAndDropTarget() = default;
 
     //==============================================================================
     /** Contains details about the source of a drag-and-drop operation. */

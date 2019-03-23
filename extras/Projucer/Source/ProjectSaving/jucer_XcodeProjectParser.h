@@ -46,10 +46,12 @@ public:
         auto content = pbxprojs[0].loadFileAsString().toStdString();
 
         std::regex comments ("/\\*.*?\\*/");
-        content = (std::regex_replace (content, comments, ""));
+        std::string empty ("");
+        content = (std::regex_replace (content, comments, empty));
 
         std::regex whitespace ("\\s+");
-        content = (std::regex_replace (content, whitespace, " "));
+        std::string space (" ");
+        content = (std::regex_replace (content, whitespace, space));
 
         auto objects = std::make_unique<HashMap<std::string, std::string>>();
         std::smatch objectsStartMatch;

@@ -139,13 +139,6 @@ private:
 
     void deleteTemporaryFiles();
     void sharingFinished (bool, const String&);
-
-  #if JUCE_ANDROID
-    friend void* juce_contentSharerOpenFile (void*, void*, void*);
-    friend void* juce_contentSharerQuery (void*, void*, void*, void*, void*, void*);
-    friend void* juce_contentSharerGetStreamTypes (void*, void*);
-    friend void  juce_contentSharingCompleted (int);
-  #endif
 };
 
 } // namespace juce

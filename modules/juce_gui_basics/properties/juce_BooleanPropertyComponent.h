@@ -71,7 +71,7 @@ public:
                               const String& buttonText);
 
     /** Destructor. */
-    ~BooleanPropertyComponent();
+    ~BooleanPropertyComponent() override;
 
     //==============================================================================
     /** Called to change the state of the boolean value. */

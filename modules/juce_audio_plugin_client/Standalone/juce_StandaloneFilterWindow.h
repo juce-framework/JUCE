@@ -89,12 +89,14 @@ public:
         if (preferredSetupOptions != nullptr)
             options.reset (new AudioDeviceManager::AudioDeviceSetup (*preferredSetupOptions));
 
-        if (inChannels > 0 && RuntimePermissions::isRequired (RuntimePermissions::recordAudio)
+        auto audioInputRequired = (inChannels > 0);
+
+        if (audioInputRequired && RuntimePermissions::isRequired (RuntimePermissions::recordAudio)
             && ! RuntimePermissions::isGranted (RuntimePermissions::recordAudio))
             RuntimePermissions::request (RuntimePermissions::recordAudio,
                                          [this, preferredDefaultDeviceName] (bool granted) { init (granted, preferredDefaultDeviceName); });
         else
-            init (true, preferredDefaultDeviceName);
+            init (audioInputRequired, preferredDefaultDeviceName);
     }
 
     void init (bool enableAudioInput, const String& preferredDefaultDeviceName)

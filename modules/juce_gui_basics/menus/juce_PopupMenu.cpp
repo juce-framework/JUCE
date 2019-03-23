@@ -94,7 +94,7 @@ struct ItemComponent  : public Component
         addMouseListener (&parent, false);
     }
 
-    ~ItemComponent()
+    ~ItemComponent() override
     {
         removeChildComponent (customComp.get());
     }
@@ -267,7 +267,7 @@ struct MenuWindow  : public Component
         getMouseState (Desktop::getInstance().getMainMouseSource()); // forces creation of a mouse source watcher for the main mouse
     }
 
-    ~MenuWindow()
+    ~MenuWindow() override
     {
         getActiveWindows().removeFirstMatchingValue (this);
         Desktop::getInstance().removeGlobalMouseListener (this);
@@ -598,7 +598,7 @@ struct MenuWindow  : public Component
             targetPoint = relativeTo->localPointToGlobal (targetPoint);
 
         auto parentArea = Desktop::getInstance().getDisplays().findDisplayForPoint (targetPoint)
-                              #if JUCE_MAC
+                              #if JUCE_MAC || JUCE_ANDROID
                                .userArea;
                               #else
                                .totalArea; // on windows, don't stop the menu overlapping the taskbar

@@ -5,6 +5,112 @@ Develop
 =======
 
 
+Version 5.4.3
+=============
+
+Change
+------
+The global user module path setting in the Projucer can now only contain a
+single path.
+
+Possible Issues
+---------------
+Projects that previously relied on using multiple global user module paths
+separated by a semicolon will fail to find these modules after re-saving.
+
+Workaround
+----------
+Replace the multiple paths with a single global user module path.
+
+Rationale
+---------
+Using multiple global user module paths did not work when saving a project
+which exported to different OSes. Only allowing a single path will prevent this
+from silently causing issues.
+
+
+Version 5.4.2
+=============
+
+Change
+------
+The return type of Block::getBlockAreaWithinLayout() has been changed from
+Rectangle to a simpler BlockArea struct.
+
+Possible Issues
+---------------
+Classes that derive from Block and implement this pure virtual method will no
+longer compile due to a change in the function signature.
+
+Workaround
+----------
+Update the method to return a BlockArea struct and update code that calls
+getBlockAreaWithinLayout to handle a BlockArea instead of a Rectangle.
+
+Rationale
+---------
+The juce_blocks_basics is ISC licensed and therefore cannot depend on the
+GPL/Commercial licensed juce_graphics module that contains Rectangle.
+
+
+Change
+------
+Renaming and deletion of open file handles on Windows is now possible using the
+FILE_SHARE_DELETE flag.
+
+Possible Issues
+---------------
+Previous code that relied on open files not being able to be renamed or deleted
+on Windows may fail.
+
+Workaround
+----------
+No workaround.
+
+Rationale
+---------
+This unifies the behaviour across OSes as POSIX systems already allow this.
+
+
+Change
+------
+Multiple changes to low-level, non-public JNI and Android APIs.
+
+Possible Issues
+---------------
+If you were using any non-public, low-level JNI macros, calling java code or
+recieving JNI callbacks, then your code will probably no longer work. See the
+forum for further details.
+
+Workaround
+----------
+See the forum for further details.
+
+Rationale
+---------
+See the forum for further details.
+
+
+Change
+------
+The minimum Android version for a JUCE app is now Android 4.1
+
+Possible Issues
+---------------
+Your app may not run on very old versions of Android  (less than 0.5% of the
+devices).
+
+Workaround
+----------
+There is no workaround.
+
+Rationale
+---------
+Less than 0.5% of all devices in the world run versions of Android older than
+Android 4.1. In the interest of keeping JUCE code clean and lean, we must
+depricate support for very old Android versions from time to time.
+
+
 Version 5.4.0
 =============
 
@@ -41,8 +147,7 @@ Possible Issues
    which is no longer part of JUCE.
 2. Building a VST2-compatible VST3 plug-in (the previous default behaviour in
    JUCE) requires header files from the VST2 SDK, which is no longer part of
-   JUCE. When a new JUCE plug-in project is created the option
-   JUCE_VST3_CAN_REPLACE_VST2 will be set to zero.
+   JUCE.
 
 Workaround
 ----------
@@ -54,6 +159,8 @@ Workaround
    version, and you want the VST3 plug-in to replace the VST2 plug-in in
    hosts that support it, then you should enable the JUCE_VST3_CAN_REPLACE_VST2
    option.
+3. When a new JUCE plug-in project is created the value of
+   JUCE_VST3_CAN_REPLACE_VST2 will be set to zero.
 
 Rationale
 ---------

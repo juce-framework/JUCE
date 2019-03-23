@@ -42,7 +42,7 @@ public:
     //==============================================================================
     DynamicObject();
     DynamicObject (const DynamicObject&);
-    ~DynamicObject();
+    ~DynamicObject() override;
 
     using Ptr = ReferenceCountedObjectPtr<DynamicObject>;
 

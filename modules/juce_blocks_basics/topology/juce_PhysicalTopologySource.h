@@ -37,7 +37,7 @@ public:
     PhysicalTopologySource (bool startDetached = false);
 
     /** Destructor. */
-    ~PhysicalTopologySource();
+    ~PhysicalTopologySource() override;
 
     /** Returns the current physical topology. */
     BlockTopology getCurrentTopology() const override;
@@ -71,7 +71,7 @@ public:
         DeviceDetector();
         virtual ~DeviceDetector();
 
-        virtual juce::StringArray scanForDevices() = 0;
+        virtual StringArray scanForDevices() = 0;
         virtual DeviceConnection* openDevice (int index) = 0;
         virtual bool isLockedFromOutside() const { return false; }
     };
@@ -88,7 +88,7 @@ protected:
 private:
     //==========================================================================
     DeviceDetector* customDetector = nullptr;
-    struct Internal;
+    friend struct Detector;
     struct DetectorHolder;
     std::unique_ptr<DetectorHolder> detector;
 

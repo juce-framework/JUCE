@@ -197,13 +197,13 @@ public:
             beginTest ("move constructor");
 
             std::unique_ptr<std::function<int()>> fStackTmp (new std::function<int()> (fStack));
-            std::function<int()> f1 (static_cast<std::function<int()>&&> (*fStackTmp));
+            std::function<int()> f1 (std::move (*fStackTmp));
 
             fStackTmp.reset();
             expectEquals (f1(), 3);
 
             std::unique_ptr<std::function<int()>> fHeapTmp (new std::function<int()> (fHeap));
-            std::function<int()> f2 (static_cast<std::function<int()>&&> (*fHeapTmp));
+            std::function<int()> f2 (std::move (*fHeapTmp));
             if (*fHeapTmp)
                 expect (false);
 
@@ -211,7 +211,7 @@ public:
             expectEquals (f2(), FunctionTestsHelpers::BigData::bigDataSum);
 
             std::unique_ptr<std::function<int()>> fEmptyTmp (new std::function<int()>());
-            std::function<int()> f3 (static_cast<std::function<int()>&&> (*fEmptyTmp));
+            std::function<int()> f3 (std::move (*fEmptyTmp));
             fEmptyTmp.reset();
             if (f3)
                 expect (false);
@@ -222,14 +222,14 @@ public:
 
             std::function<int()> f1 (fHeap);
             std::unique_ptr<std::function<int()>> fStackTmp (new std::function<int()> (fStack));
-            f1 = static_cast<std::function<int()>&&> (*fStackTmp);
+            f1 = std::move (*fStackTmp);
 
             fStackTmp.reset();
             expectEquals (f1(), 3);
 
             std::function<int()> f2 (fStack);
             std::unique_ptr<std::function<int()>> fHeapTmp (new std::function<int()> (fHeap));
-            f2 = static_cast<std::function<int()>&&> (*fHeapTmp);
+            f2 = std::move (*fHeapTmp);
             if (*fHeapTmp)
                 expect (false);
 
@@ -238,7 +238,7 @@ public:
 
             std::function<int()> f3 (fHeap);
             std::unique_ptr<std::function<int()>> fEmptyTmp (new std::function<int()>());
-            f3 = static_cast<std::function<int()>&&> (*fEmptyTmp);
+            f3 = std::move (*fEmptyTmp);
             fEmptyTmp.reset();
             if (f3)
                 expect (false);

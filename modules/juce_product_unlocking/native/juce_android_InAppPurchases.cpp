@@ -27,7 +27,7 @@
 namespace juce
 {
 
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
     METHOD (isBillingSupported,      "isBillingSupported",      "(ILjava/lang/String;Ljava/lang/String;)I") \
     METHOD (getSkuDetails,           "getSkuDetails",           "(ILjava/lang/String;Ljava/lang/String;Landroid/os/Bundle;)Landroid/os/Bundle;") \
     METHOD (getBuyIntent,            "getBuyIntent",            "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/os/Bundle;") \
@@ -39,7 +39,7 @@ namespace juce
 DECLARE_JNI_CLASS (IInAppBillingService, "com/android/vending/billing/IInAppBillingService")
 #undef JNI_CLASS_MEMBERS
 
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
     STATICMETHOD (asInterface,      "asInterface",      "(Landroid/os/IBinder;)Lcom/android/vending/billing/IInAppBillingService;") \
 
 DECLARE_JNI_CLASS (IInAppBillingServiceStub, "com/android/vending/billing/IInAppBillingService$Stub")
@@ -84,9 +84,10 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
                                       javaString ("com.android.vending.billing.InAppBillingService.BIND").get());
         env->CallObjectMethod (intent, AndroidIntent.setPackage, javaString ("com.android.vending").get());
 
-        serviceConnection = GlobalRef (CreateJavaInterface (this, "android/content/ServiceConnection").get());
-        android.activity.callBooleanMethod (JuceAppActivity.bindService, intent,
-                                            serviceConnection.get(), 1 /*BIND_AUTO_CREATE*/);
+        serviceConnection = GlobalRef (CreateJavaInterface (this, "android/content/ServiceConnection"));
+
+        env->CallBooleanMethod (getCurrentActivity().get(), AndroidContext.bindService, intent,
+                                serviceConnection.get(), 1 /*BIND_AUTO_CREATE*/);
 
         if (threadPool == nullptr)
             threadPool.reset (new ThreadPool (1));
@@ -98,7 +99,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
 
         if (serviceConnection != nullptr)
         {
-            android.activity.callVoidMethod (JuceAppActivity.unbindService, serviceConnection.get());
+            getEnv()->CallVoidMethod (getCurrentActivity().get(), AndroidContext.unbindService, serviceConnection.get());
             serviceConnection.clear();
         }
     }
@@ -144,8 +145,8 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
             auto flagsValues     = LocalRef<jobject> (env->CallStaticObjectMethod (JavaInteger, JavaInteger.valueOf, 0));
             auto extraFlags      = LocalRef<jobject> (env->CallStaticObjectMethod (JavaInteger, JavaInteger.valueOf, 0));
 
-            android.activity.callVoidMethod (JuceAppActivity.startIntentSenderForResult, intentSender.get(), requestCode,
-                                             fillInIntent.get(), flagsMask.get(), flagsValues.get(), extraFlags.get());
+            env->CallVoidMethod (getCurrentActivity().get(), AndroidActivity.startIntentSenderForResult, intentSender.get(), requestCode,
+                                 fillInIntent.get(), flagsMask.get(), flagsValues.get(), extraFlags.get());
         }
         else if (responseCode == 7)
         {
@@ -325,7 +326,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
     //==============================================================================
     static LocalRef<jstring> getPackageName()
     {
-        return LocalRef<jstring> ((jstring) (android.activity.callObjectMethod (JuceAppActivity.getPackageName)));
+        return LocalRef<jstring> ((jstring) (getEnv()->CallObjectMethod (getAppContext().get(), AndroidContext.getPackageName)));
     }
 
     //==============================================================================
@@ -339,7 +340,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
                                    const Callback& callbackToUse)
             : ThreadPoolJob ("GetProductsInformationJob"),
               owner (parent),
-              packageName (packageNameToUse.get()),
+              packageName (LocalRef<jobject> (packageNameToUse.get())),
               productIdentifiers (productIdentifiersToUse),
               callback (callbackToUse)
         {}
@@ -509,7 +510,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
                               const Callback& callbackToUse)
             : ThreadPoolJob ("GetProductsBoughtJob"),
               owner (parent),
-              packageName (packageNameToUse.get()),
+              packageName (LocalRef<jobject> (packageNameToUse.get())),
               callback (callbackToUse)
         {}
 
@@ -631,7 +632,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
                             const Callback& callbackToUse)
             : ThreadPoolJob ("ConsumePurchaseJob"),
               owner (parent),
-              packageName (packageNameToUse.get()),
+              packageName (LocalRef<jobject> (packageNameToUse.get())),
               productIdentifier (productIdentifierToUse),
               purchaseToken (purchaseTokenToUse),
               callback (callbackToUse)

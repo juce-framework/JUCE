@@ -32,7 +32,7 @@ class TopologySource
 public:
     //==========================================================================
     /** Destructor. */
-    virtual ~TopologySource() {}
+    virtual ~TopologySource() = default;
 
     /** Returns the current topology that this object manages. */
     virtual BlockTopology getCurrentTopology() const = 0;
@@ -47,8 +47,21 @@ public:
     /** Used to receive callbacks for topology changes */
     struct Listener
     {
-        virtual ~Listener() {}
-        virtual void topologyChanged() = 0;
+        virtual ~Listener() = default;
+
+        /** Called for any change in topology - devices changed, connections changed, etc. */
+        virtual void topologyChanged() {}
+
+        /** Called when a new block is added to the topology. */
+        virtual void blockAdded (const Block::Ptr) {}
+
+        /** Called when a block is removed from the topology. */
+        virtual void blockRemoved (const Block::Ptr) {}
+
+        /** Called when a known block is updated.
+            This could be becasue details have been reveived asyncroniously. E.g. Block name.
+         */
+        virtual void blockUpdated (const Block::Ptr) {}
     };
 
     void addListener (Listener* l)       { listeners.add (l); }
@@ -59,7 +72,7 @@ public:
 
 protected:
     //==========================================================================
-    juce::ListenerList<Listener> listeners;
+    ListenerList<Listener> listeners;
 };
 
 } // namespace juce

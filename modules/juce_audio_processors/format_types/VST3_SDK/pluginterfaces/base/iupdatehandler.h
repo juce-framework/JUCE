@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 // This file is part of a Steinberg SDK. It is subject to the license terms
 // in the LICENSE file found in the top-level directory of this distribution
-// and at www.steinberg.net/sdklicenses.
+// and at www.steinberg.net/sdklicenses. 
 // No part of the SDK, including this file, may be copied, modified, propagated,
 // or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
@@ -31,7 +31,7 @@ class IDependent;
 - Install/Remove change notifications
 - Trigger updates when an object has changed
 
-Can be used between host-objects and the Plug-In or
+Can be used between host-objects and the Plug-In or 
 inside the Plug-In to handle internal updates!
 
 \see IDependent
@@ -44,15 +44,15 @@ public:
 //------------------------------------------------------------------------
 	/** Install update notification for given object. It is essential to
 	    remove all dependencies again using 'removeDependent'! Dependencies
-		are not removed automatically when the 'object' is released!
-	\param object : interface to object that sends change notifications
+		are not removed automatically when the 'object' is released! 
+	\param object : interface to object that sends change notifications 
 	\param dependent : interface through which the update is passed */
 	virtual tresult PLUGIN_API addDependent (FUnknown* object, IDependent* dependent) = 0;
-
+	
 	/** Remove a previously installed dependency.*/
 	virtual tresult PLUGIN_API removeDependent (FUnknown* object, IDependent* dependent) = 0;
 
-	/** Inform all dependents, that object has changed.
+	/** Inform all dependents, that object has changed. 
 	\param object is the object that has changed
 	\param message is a value of enum IDependent::ChangeMessage, usually  IDependent::kChanged - can be
 	                 a private message as well (only known to sender and dependent)*/
@@ -81,7 +81,7 @@ public:
 	/** Inform the dependent, that the passed FUnknown has changed. */
 	virtual void PLUGIN_API update (FUnknown* changedUnknown, int32 message) = 0;
 
-	enum ChangeMessage
+	enum ChangeMessage 
 	{
 		kWillChange,
 		kChanged,

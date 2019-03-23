@@ -122,6 +122,10 @@ public:
            #if defined (MAC_OS_X_VERSION_10_14)
             if (! [window isOpaque])
                 [window setBackgroundColor: [NSColor clearColor]];
+
+            #if defined (MAC_OS_X_VERSION_10_9) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9)
+             [view setAppearance: [NSAppearance appearanceNamed: NSAppearanceNameAqua]];
+            #endif
            #endif
 
             [window setHasShadow: ((windowStyleFlags & windowHasDropShadow) != 0)];
@@ -151,7 +155,7 @@ public:
 
            #if defined (MAC_OS_X_VERSION_10_13) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_13)
             if ([window respondsToSelector: @selector (setTabbingMode:)])
-                [window setTabbingMode:NSWindowTabbingModeDisallowed];
+                [window setTabbingMode: NSWindowTabbingModeDisallowed];
            #endif
 
             [notificationCenter  addObserver: view
@@ -193,7 +197,7 @@ public:
         };
     }
 
-    ~NSViewComponentPeer()
+    ~NSViewComponentPeer() override
     {
         [notificationCenter removeObserver: view];
         setOwner (view, nullptr);
@@ -1334,10 +1338,13 @@ public:
 
                 while ((track = [enumerator nextObject]) != nil)
                 {
-                    NSURL* url = [NSURL URLWithString: [track valueForKey: nsStringLiteral ("Location")]];
+                    if (id value = [track valueForKey: nsStringLiteral ("Location")])
+                    {
+                        NSURL* url = [NSURL URLWithString: value];
 
-                    if ([url isFileURL])
-                        files.add (nsStringToJuce ([url path]));
+                        if ([url isFileURL])
+                            files.add (nsStringToJuce ([url path]));
+                    }
                 }
             }
         }
@@ -1699,10 +1706,9 @@ private:
         if (auto* p = getOwner (self))
         {
             if (p->wasAlwaysOnTop)
-            {
                 p->setAlwaysOnTop (true);
-                p->redirectMovedOrResized();
-            }
+
+            p->redirectMovedOrResized();
         }
     }
 
@@ -2152,6 +2158,8 @@ void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, boo
     {
         if (shouldBeEnabled && ! allowMenusAndBars)
             [NSApp setPresentationOptions: NSApplicationPresentationHideDock | NSApplicationPresentationHideMenuBar];
+        else if (! shouldBeEnabled)
+            [NSApp setPresentationOptions: NSApplicationPresentationDefault];
 
         [peer->window performSelector: @selector (toggleFullScreen:) withObject: nil];
     }

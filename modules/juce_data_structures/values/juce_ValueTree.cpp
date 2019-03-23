@@ -414,7 +414,7 @@ public:
         SetPropertyAction (Ptr targetObject, const Identifier& propertyName,
                            const var& newVal, const var& oldVal, bool isAdding, bool isDeleting,
                            ValueTree::Listener* listenerToExclude = nullptr)
-            : target (static_cast<Ptr&&> (targetObject)),
+            : target (std::move (targetObject)),
               name (propertyName), newValue (newVal), oldValue (oldVal),
               isAddingNewProperty (isAdding), isDeletingProperty (isDeleting),
               excludeListener (listenerToExclude)
@@ -476,7 +476,7 @@ public:
     struct AddOrRemoveChildAction  : public UndoableAction
     {
         AddOrRemoveChildAction (Ptr parentObject, int index, SharedObject* newChild)
-            : target (static_cast<Ptr&&> (parentObject)),
+            : target (std::move (parentObject)),
               child (newChild != nullptr ? newChild : target->children.getObjectPointer (index)),
               childIndex (index),
               isDeleting (newChild == nullptr)
@@ -528,7 +528,7 @@ public:
     struct MoveChildAction  : public UndoableAction
     {
         MoveChildAction (Ptr parentObject, int fromIndex, int toIndex) noexcept
-            : parent (static_cast<Ptr&&> (parentObject)), startIndex (fromIndex), endIndex (toIndex)
+            : parent (std::move (parentObject)), startIndex (fromIndex), endIndex (toIndex)
         {
         }
 
@@ -598,7 +598,7 @@ ValueTree::ValueTree (const Identifier& type,
         addChild (tree, -1, nullptr);
 }
 
-ValueTree::ValueTree (SharedObject::Ptr so) noexcept  : object (static_cast<SharedObject::Ptr&&> (so)) {}
+ValueTree::ValueTree (SharedObject::Ptr so) noexcept  : object (std::move (so)) {}
 ValueTree::ValueTree (SharedObject& so) noexcept      : object (so) {}
 
 ValueTree::ValueTree (const ValueTree& other) noexcept  : object (other.object)
@@ -631,7 +631,7 @@ ValueTree& ValueTree::operator= (const ValueTree& other)
 }
 
 ValueTree::ValueTree (ValueTree&& other) noexcept
-    : object (static_cast<SharedObject::Ptr&&> (other.object))
+    : object (std::move (other.object))
 {
     if (object != nullptr)
         object->valueTreesWithListeners.removeValue (&other);
@@ -815,7 +815,7 @@ struct ValueTreePropertyValueSource  : public Value::ValueSource,
         tree.addListener (this);
     }
 
-    ~ValueTreePropertyValueSource()
+    ~ValueTreePropertyValueSource() override
     {
         tree.removeListener (this);
     }
@@ -1157,32 +1157,63 @@ public:
 
     void runTest() override
     {
-        beginTest ("ValueTree");
-        auto r = getRandom();
-
-        for (int i = 10; --i >= 0;)
         {
-            MemoryOutputStream mo;
-            auto v1 = createRandomTree (nullptr, 0, r);
-            v1.writeToStream (mo);
+            beginTest ("ValueTree");
 
-            MemoryInputStream mi (mo.getData(), mo.getDataSize(), false);
-            auto v2 = ValueTree::readFromStream (mi);
-            expect (v1.isEquivalentTo (v2));
+            auto r = getRandom();
 
-            MemoryOutputStream zipped;
+            for (int i = 10; --i >= 0;)
             {
-                GZIPCompressorOutputStream zippedOut (zipped);
-                v1.writeToStream (zippedOut);
+                MemoryOutputStream mo;
+                auto v1 = createRandomTree (nullptr, 0, r);
+                v1.writeToStream (mo);
+
+                MemoryInputStream mi (mo.getData(), mo.getDataSize(), false);
+                auto v2 = ValueTree::readFromStream (mi);
+                expect (v1.isEquivalentTo (v2));
+
+                MemoryOutputStream zipped;
+                {
+                    GZIPCompressorOutputStream zippedOut (zipped);
+                    v1.writeToStream (zippedOut);
+                }
+                expect (v1.isEquivalentTo (ValueTree::readFromGZIPData (zipped.getData(), zipped.getDataSize())));
+
+                std::unique_ptr<XmlElement> xml1 (v1.createXml());
+                std::unique_ptr<XmlElement> xml2 (v2.createCopy().createXml());
+                expect (xml1->isEquivalentTo (xml2.get(), false));
+
+                auto v4 = v2.createCopy();
+                expect (v1.isEquivalentTo (v4));
             }
-            expect (v1.isEquivalentTo (ValueTree::readFromGZIPData (zipped.getData(), zipped.getDataSize())));
+        }
 
-            std::unique_ptr<XmlElement> xml1 (v1.createXml());
-            std::unique_ptr<XmlElement> xml2 (v2.createCopy().createXml());
-            expect (xml1->isEquivalentTo (xml2.get(), false));
+        {
+            beginTest ("Float formatting");
 
-            auto v4 = v2.createCopy();
-            expect (v1.isEquivalentTo (v4));
+            ValueTree testVT ("Test");
+            Identifier number ("number");
+
+            std::map<double, String> tests;
+            tests[1] = "1";
+            tests[1.1] = "1.1";
+            tests[1.01] = "1.01";
+            tests[0.76378] = "7.6378e-1";
+            tests[-10] = "-1e1";
+            tests[10.01] = "1.001e1";
+            tests[0.0123] = "1.23e-2";
+            tests[-3.7e-27] = "-3.7e-27";
+            tests[1e+40] = "1e40";
+
+            for (auto& test : tests)
+            {
+                testVT.setProperty (number, test.first, nullptr);
+                auto lines = StringArray::fromLines (testVT.toXmlString());
+                lines.removeEmptyStrings();
+                auto numLines = lines.size();
+                expect (numLines > 1);
+                expectEquals (lines[numLines - 1], "<Test number=\"" + test.second + "\"/>");
+            }
         }
     }
 };

@@ -145,7 +145,7 @@ class SourceCodeEditor  : public DocumentEditorComponent,
 public:
     SourceCodeEditor (OpenDocumentManager::Document*, CodeDocument&);
     SourceCodeEditor (OpenDocumentManager::Document*, GenericCodeEditorComponent*);
-    ~SourceCodeEditor();
+    ~SourceCodeEditor() override;
 
     void scrollToKeepRangeOnScreen (Range<int> range);
     void highlight (Range<int> range, bool cursorAtStart);
@@ -179,7 +179,7 @@ class GenericCodeEditorComponent  : public CodeEditorComponent
 {
 public:
     GenericCodeEditorComponent (const File&, CodeDocument&, CodeTokeniser*);
-    ~GenericCodeEditorComponent();
+    ~GenericCodeEditorComponent() override;
 
     void addPopupMenuItems (PopupMenu&, const MouseEvent*) override;
     void performPopupMenuAction (int menuItemID) override;
@@ -225,7 +225,7 @@ class CppCodeEditorComponent  : public GenericCodeEditorComponent
 {
 public:
     CppCodeEditorComponent (const File&, CodeDocument&);
-    ~CppCodeEditorComponent();
+    ~CppCodeEditorComponent() override;
 
     void addPopupMenuItems (PopupMenu&, const MouseEvent*) override;
     void performPopupMenuAction (int menuItemID) override;

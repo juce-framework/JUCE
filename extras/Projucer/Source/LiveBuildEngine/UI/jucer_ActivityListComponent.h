@@ -45,7 +45,7 @@ public:
         activityList.addChangeListener (this);
     }
 
-    ~CurrentActivitiesComp()
+    ~CurrentActivitiesComp() override
     {
         activityList.removeChangeListener (this);
     }

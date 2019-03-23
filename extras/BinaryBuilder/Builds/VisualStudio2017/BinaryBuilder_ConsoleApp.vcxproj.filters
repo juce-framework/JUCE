@@ -29,6 +29,9 @@
     <Filter Include="JUCE Modules\juce_core\misc">
       <UniqueIdentifier>{09B91E68-1FF4-C7ED-9055-D4D96E66A0BA}</UniqueIdentifier>
     </Filter>
+    <Filter Include="JUCE Modules\juce_core\native\java">
+      <UniqueIdentifier>{30B3DA63-C1E4-F2EA-CEF0-8035D8CBFF64}</UniqueIdentifier>
+    </Filter>
     <Filter Include="JUCE Modules\juce_core\native">
       <UniqueIdentifier>{4F24EEED-AA33-AC6C-9A39-72E71CF83EF0}</UniqueIdentifier>
     </Filter>
@@ -170,6 +173,9 @@
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_Files.cpp">
+      <Filter>JUCE Modules\juce_core\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_JNIHelpers.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_Misc.cpp">
@@ -813,6 +819,11 @@
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h">
       <Filter>JUCE Library Code</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\modules\juce_core\native\java\README.txt">
+      <Filter>JUCE Modules\juce_core\native\java</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include=".\resources.rc">

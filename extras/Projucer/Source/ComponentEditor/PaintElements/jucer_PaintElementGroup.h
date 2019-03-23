@@ -34,8 +34,7 @@ class PaintElementGroup   : public PaintElement
 {
 public:
     PaintElementGroup (PaintRoutine*);
-
-    ~PaintElementGroup();
+    ~PaintElementGroup() override;
 
     void ungroup (const bool);
 

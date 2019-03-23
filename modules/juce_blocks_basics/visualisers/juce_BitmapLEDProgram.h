@@ -36,7 +36,7 @@ struct BitmapLEDProgram   : public Block::Program
     void setLED (uint32 x, uint32 y, LEDColour);
 
 private:
-    juce::String getLittleFootProgram() override;
+    String getLittleFootProgram() override;
 };
 
 } // namespace juce

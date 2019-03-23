@@ -52,7 +52,7 @@ public:
     ComponentMovementWatcher (Component* componentToWatch);
 
     /** Destructor. */
-    ~ComponentMovementWatcher();
+    ~ComponentMovementWatcher() override;
 
     //==============================================================================
     /** This callback happens when the component that is being watched is moved
