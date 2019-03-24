@@ -1155,7 +1155,7 @@ public:
                 argv.add (nullptr);
 
                 execvp (exe.toRawUTF8(), argv.getRawDataPointer());
-                exit (-1);
+                _exit (-1);
             }
             else
             {

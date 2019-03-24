@@ -159,7 +159,7 @@ Component* CameraDevice::createViewerComponent()
     return new ViewerComponent (*this);
 }
 
-void CameraDevice::takeStillPicture (std::function<void (const Image&)> pictureTakenCallback)
+void CameraDevice::takeStillPicture (std::function<void(const Image&)> pictureTakenCallback)
 {
     pimpl->takeStillPicture (pictureTakenCallback);
 }

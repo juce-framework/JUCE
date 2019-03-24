@@ -73,7 +73,7 @@ public:
                                      int maxWidth = 1024, int maxHeight = 768,
                                      bool highQuality = true);
 
-    using OpenCameraResultCallback = std::function<void (CameraDevice*, const String& /*error*/)>;
+    using OpenCameraResultCallback = std::function<void(CameraDevice*, const String& /*error*/)>;
 
     /** Asynchronously opens a camera device on iOS (iOS 7+) or Android (API 21+).
         On other platforms, the function will simply call openDevice(). Upon completion,
@@ -127,7 +127,7 @@ public:
 
         Android does not support simultaneous video recording and still picture capture.
      */
-    void takeStillPicture (std::function<void (const Image&)> pictureTakenCallback);
+    void takeStillPicture (std::function<void(const Image&)> pictureTakenCallback);
 
     /** Starts recording video to the specified file.
 
@@ -172,7 +172,7 @@ public:
 
     /** Set this callback to be notified whenever an error occurs. You may need to close
         and reopen the device to be able to use it further. */
-    std::function<void (const String& /*error*/)> onErrorOccurred;
+    std::function<void(const String& /*error*/)> onErrorOccurred;
 
     //==============================================================================
     /**

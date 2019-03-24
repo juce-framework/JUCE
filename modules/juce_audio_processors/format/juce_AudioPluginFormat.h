@@ -98,7 +98,7 @@ public:
     void createPluginInstanceAsync (const PluginDescription& description,
                                     double initialSampleRate,
                                     int initialBufferSize,
-                                    std::function<void (AudioPluginInstance*, const String&)> completionCallback);
+                                    std::function<void(AudioPluginInstance*, const String&)> completionCallback);
 
     /** Should do a quick check to see if this file or directory might be a plugin of
         this format.

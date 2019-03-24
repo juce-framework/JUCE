@@ -52,8 +52,8 @@ public:
     */
     AudioParameterBool (const String& parameterID, const String& name, bool defaultValue,
                         const String& label = String(),
-                        std::function<String (bool value, int maximumStringLength)> stringFromBool = nullptr,
-                        std::function<bool (const String& text)> boolFromString = nullptr);
+                        std::function<String(bool value, int maximumStringLength)> stringFromBool = nullptr,
+                        std::function<bool(const String& text)> boolFromString = nullptr);
 
     /** Destructor. */
     ~AudioParameterBool() override;
@@ -90,8 +90,8 @@ private:
     const NormalisableRange<float> range { 0.0f, 1.0f, 1.0f };
     float value;
     const float defaultValue;
-    std::function<String (bool, int)> stringFromBoolFunction;
-    std::function<bool (const String&)> boolFromStringFunction;
+    std::function<String(bool, int)> stringFromBoolFunction;
+    std::function<bool(const String&)> boolFromStringFunction;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioParameterBool)
 };

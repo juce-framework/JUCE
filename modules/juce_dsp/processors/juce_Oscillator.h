@@ -51,7 +51,7 @@ public:
         If lookup table is not zero, then the function will be approximated
         with a lookup table.
     */
-    Oscillator (const std::function<NumericType (NumericType)>& function,
+    Oscillator (const std::function<NumericType(NumericType)>& function,
                 size_t lookupTableNumPoints = 0)
     {
         initialise (function, lookupTableNumPoints);
@@ -61,7 +61,7 @@ public:
     bool isInitialised() const noexcept     { return static_cast<bool> (generator); }
 
     /** Initialises the oscillator with a waveform. */
-    void initialise (const std::function<NumericType (NumericType)>& function,
+    void initialise (const std::function<NumericType(NumericType)>& function,
                      size_t lookupTableNumPoints = 0)
     {
         if (lookupTableNumPoints != 0)
@@ -240,7 +240,7 @@ public:
 
 private:
     //==============================================================================
-    std::function<NumericType (NumericType)> generator;
+    std::function<NumericType(NumericType)> generator;
     std::unique_ptr<LookupTableTransform<NumericType>> lookupTable;
     Array<NumericType> rampBuffer;
     SmoothedValue<NumericType> frequency { static_cast<NumericType> (440.0) };

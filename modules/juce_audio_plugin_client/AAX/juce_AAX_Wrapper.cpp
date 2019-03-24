@@ -1794,7 +1794,7 @@ namespace AAXClasses
         // parameter steps.
         static int32_t getSafeNumberOfParameterSteps (const AudioProcessorParameter& param)
         {
-            return jmax (param.getNumSteps(), 2048);
+            return jmin (param.getNumSteps(), 2048);
         }
 
         void addAudioProcessorParameters()

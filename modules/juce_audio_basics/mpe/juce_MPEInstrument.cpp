@@ -607,7 +607,11 @@ bool MPEInstrument::isMasterChannel (int midiChannel) const noexcept
     if (legacyMode.isEnabled)
         return false;
 
-    return (midiChannel == 1 || midiChannel == 16);
+    const auto lowerZone = zoneLayout.getLowerZone();
+    const auto upperZone = zoneLayout.getUpperZone();
+
+    return (lowerZone.isActive() && midiChannel == lowerZone.getMasterChannel())
+            || (upperZone.isActive() && midiChannel == upperZone.getMasterChannel());
 }
 
 bool MPEInstrument::isUsingChannel (int midiChannel) const noexcept

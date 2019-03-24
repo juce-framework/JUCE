@@ -46,7 +46,7 @@ namespace PluginFormatManagerHelpers
     struct ErrorLambdaOnMessageThread : public CallbackMessage
     {
         ErrorLambdaOnMessageThread (const String& inError,
-                                    std::function<void (AudioPluginInstance*, const String&)> f)
+                                    std::function<void(AudioPluginInstance*, const String&)> f)
             : error (inError), lambda (f)
         {
         }
@@ -54,7 +54,7 @@ namespace PluginFormatManagerHelpers
         void messageCallback() override          { lambda (nullptr, error); }
 
         String error;
-        std::function<void (AudioPluginInstance*, const String&)> lambda;
+        std::function<void(AudioPluginInstance*, const String&)> lambda;
     };
 }
 
@@ -145,7 +145,7 @@ void AudioPluginFormatManager::createPluginInstanceAsync (const PluginDescriptio
 void AudioPluginFormatManager::createPluginInstanceAsync (const PluginDescription& description,
                                                           double initialSampleRate,
                                                           int initialBufferSize,
-                                                          std::function<void (AudioPluginInstance*, const String&)> f)
+                                                          std::function<void(AudioPluginInstance*, const String&)> f)
 {
     String error;
 

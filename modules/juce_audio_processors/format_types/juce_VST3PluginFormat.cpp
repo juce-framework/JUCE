@@ -1126,10 +1126,6 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
         warnOnFailure (view->setFrame (this));
 
-       #if JUCE_MAC
-        resizeToFit();
-       #endif
-
         Steinberg::IPlugViewContentScaleSupport* scaleInterface = nullptr;
         view->queryInterface (Steinberg::IPlugViewContentScaleSupport::iid, (void**) &scaleInterface);
 
@@ -1138,6 +1134,8 @@ struct VST3PluginWindow : public AudioProcessorEditor,
             pluginRespondsToDPIChanges = true;
             scaleInterface->release();
         }
+
+        resizeToFit();
     }
 
     ~VST3PluginWindow() override

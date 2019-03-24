@@ -3494,6 +3494,9 @@ void Displays::findDisplays (float masterScale)
                         xrandr.freeScreenResources (screens);
                     }
                 }
+
+                if (! displays.isEmpty() && ! displays.getReference (0).isMain)
+                    displays.getReference (0).isMain = true;
             }
         }
 

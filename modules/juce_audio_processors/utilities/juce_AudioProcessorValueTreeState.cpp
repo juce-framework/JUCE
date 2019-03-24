@@ -33,8 +33,8 @@ AudioProcessorValueTreeState::Parameter::Parameter (const String& parameterID,
                                                     const String& labelText,
                                                     NormalisableRange<float> valueRange,
                                                     float defaultValue,
-                                                    std::function<String (float)> valueToTextFunction,
-                                                    std::function<float (const String&)> textToValueFunction,
+                                                    std::function<String(float)> valueToTextFunction,
+                                                    std::function<float(const String&)> textToValueFunction,
                                                     bool isMetaParameter,
                                                     bool isAutomatableParameter,
                                                     bool isDiscrete,
@@ -46,7 +46,7 @@ AudioProcessorValueTreeState::Parameter::Parameter (const String& parameterID,
                            defaultValue,
                            labelText,
                            category,
-                           valueToTextFunction == nullptr ? std::function<String (float v, int)>()
+                           valueToTextFunction == nullptr ? std::function<String(float v, int)>()
                                                           : [valueToTextFunction](float v, int) { return valueToTextFunction (v); },
                            std::move (textToValueFunction)),
       unsnappedDefault (valueRange.convertTo0to1 (defaultValue)),
@@ -252,8 +252,8 @@ RangedAudioParameter* AudioProcessorValueTreeState::createAndAddParameter (const
                                                                            const String& labelText,
                                                                            NormalisableRange<float> range,
                                                                            float defaultVal,
-                                                                           std::function<String (float)> valueToTextFunction,
-                                                                           std::function<float (const String&)> textToValueFunction,
+                                                                           std::function<String(float)> valueToTextFunction,
+                                                                           std::function<float(const String&)> textToValueFunction,
                                                                            bool isMetaParameter,
                                                                            bool isAutomatableParameter,
                                                                            bool isDiscreteParameter,
@@ -411,18 +411,11 @@ void AudioProcessorValueTreeState::valueTreeChildAdded (ValueTree& parent, Value
         setNewState (tree);
 }
 
-void AudioProcessorValueTreeState::valueTreeChildRemoved (ValueTree&, ValueTree&, int)
-{
-}
-
 void AudioProcessorValueTreeState::valueTreeRedirected (ValueTree& v)
 {
     if (v == state)
         updateParameterConnectionsToChildTrees();
 }
-
-void AudioProcessorValueTreeState::valueTreeChildOrderChanged (ValueTree&, int, int) {}
-void AudioProcessorValueTreeState::valueTreeParentChanged (ValueTree&) {}
 
 bool AudioProcessorValueTreeState::flushParameterValuesToValueTree()
 {
