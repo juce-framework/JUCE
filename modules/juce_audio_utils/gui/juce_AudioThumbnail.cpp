@@ -740,7 +740,7 @@ void AudioThumbnail::setLevels (const MinMaxValue* const* values, int thumbIndex
     if (numSamplesFinished >= start && end > numSamplesFinished)
         numSamplesFinished = end;
 
-    totalSamples = jmax (numSamplesFinished, totalSamples);
+    totalSamples = jmax (numSamplesFinished, totalSamples.load());
     window->invalidate();
     sendChangeMessage();
 }
@@ -763,7 +763,7 @@ bool AudioThumbnail::isFullyLoaded() const noexcept
 
 double AudioThumbnail::getProportionComplete() const noexcept
 {
-    return jlimit (0.0, 1.0, numSamplesFinished / (double) jmax ((int64) 1, totalSamples));
+    return jlimit (0.0, 1.0, numSamplesFinished / (double) jmax ((int64) 1, totalSamples.load()));
 }
 
 int64 AudioThumbnail::getNumSamplesFinished() const noexcept
