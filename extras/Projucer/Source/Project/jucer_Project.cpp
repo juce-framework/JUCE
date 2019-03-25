@@ -333,9 +333,13 @@ void Project::removeDefunctExporters()
 
         if (oldExporter.isValid())
         {
-            AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                         TRANS (oldExporters[key]),
-                                         TRANS ("The " + oldExporters[key]  + " Exporter is deprecated. The exporter will be removed from this project."));
+            if (ProjucerApplication::getApp().isRunningCommandLine)
+                std::cout <<  "WARNING! The " + oldExporters[key]  + " Exporter is deprecated. The exporter will be removed from this project." << std::endl;
+            else
+                AlertWindow::showMessageBox (AlertWindow::WarningIcon,
+                                             TRANS (oldExporters[key]),
+                                             TRANS ("The " + oldExporters[key]  + " Exporter is deprecated. The exporter will be removed from this project."));
+
             exporters.removeChild (oldExporter, nullptr);
         }
     }
