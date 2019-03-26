@@ -304,6 +304,9 @@ public:
     /** Sets the current program as the block's default state. */
     virtual void saveProgramAsDefault() = 0;
 
+    /** Resets the loaded program to the block's default state. */
+    virtual void resetProgramToDefault() = 0;
+
     //==============================================================================
     /** Metadata for a given config item */
     struct ConfigMetaData
