@@ -760,6 +760,13 @@ void AudioProcessor::reset() {}
 template <typename floatType>
 void AudioProcessor::processBypassed (AudioBuffer<floatType>& buffer, MidiBuffer&)
 {
+    // If you hit this assertion then your plug-in is reporting that it introduces
+    // some latency, but you haven't overridden processBlockBypassed to produce
+    // an identical amount of latency. Without identical latency in
+    // processBlockBypassed a host's latency compensation could shift the audio
+    // passing through your bypassed plug-in forward in time.
+    jassert (getLatencySamples() == 0);
+
     for (int ch = getMainBusNumInputChannels(); ch < getTotalNumOutputChannels(); ++ch)
         buffer.clear (ch, 0, buffer.getNumSamples());
 }
