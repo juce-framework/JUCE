@@ -1352,7 +1352,7 @@ struct HighResolutionTimer::Pimpl
     }
 
     HighResolutionTimer& owner;
-    std::atomic<int> periodMs;
+    std::atomic<int> periodMs { 0 };
 
 private:
     pthread_t thread = {};
