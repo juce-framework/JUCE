@@ -965,6 +965,9 @@ public:
             createConnection();
         }
 
+        if (connection == nullptr)
+            return false;
+
         if (! connection->start (owner, webInputListener))
         {
             // Workaround for deployment targets below 10.10 where HTTPS POST requests with keep-alive fail with the NSURLErrorNetworkConnectionLost error code.
@@ -980,7 +983,7 @@ public:
             return false;
         }
 
-        if (connection != nullptr && connection->headers != nil)
+        if (connection->headers != nil)
         {
             statusCode = connection->statusCode;
 
