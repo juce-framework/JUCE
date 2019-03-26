@@ -190,7 +190,7 @@ public:
 
         Component* someKindOfComp;
         ...
-        someKindOfComp->enterModalState (ModalCallbackFunction::create (myCallbackFunction, 3.0));
+        someKindOfComp->enterModalState (true, ModalCallbackFunction::create (myCallbackFunction, 3.0));
         @endcode
         @see ModalComponentManager::Callback
     */
@@ -219,7 +219,7 @@ public:
 
         Component* someKindOfComp;
         ...
-        someKindOfComp->enterModalState (ModalCallbackFunction::create (myCallbackFunction, 3.0, String ("xyz")));
+        someKindOfComp->enterModalState (true, ModalCallbackFunction::create (myCallbackFunction, 3.0, String ("xyz")));
         @endcode
         @see ModalComponentManager::Callback
     */
@@ -250,7 +250,7 @@ public:
         Component* someKindOfComp;
         Slider* mySlider;
         ...
-        someKindOfComp->enterModalState (ModalCallbackFunction::forComponent (myCallbackFunction, mySlider));
+        someKindOfComp->enterModalState (true, ModalCallbackFunction::forComponent (myCallbackFunction, mySlider));
         @endcode
         @see ModalComponentManager::Callback
     */
@@ -281,7 +281,7 @@ public:
         Component* someKindOfComp;
         Slider* mySlider;
         ...
-        someKindOfComp->enterModalState (ModalCallbackFunction::forComponent (myCallbackFunction, mySlider, String ("hello")));
+        someKindOfComp->enterModalState (true, ModalCallbackFunction::forComponent (myCallbackFunction, mySlider, String ("hello")));
         @endcode
         @see ModalComponentManager::Callback
     */
