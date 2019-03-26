@@ -2144,7 +2144,7 @@ private:
 
             if (auto a = dynamic_cast<ArraySubscript*> (target))
             {
-                cg.emitArrayElementIndex (a, parentBlock, stackDepth, location);
+                cg.emitArrayElementIndex (a, parentBlock, ++stackDepth, location);
                 cg.emit (OpCode::setHeapInt);
             }
             else
