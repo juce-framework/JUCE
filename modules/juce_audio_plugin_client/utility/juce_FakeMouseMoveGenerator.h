@@ -88,7 +88,7 @@ public:
                 {
                     if (auto* peer = safeOldComponent->getPeer())
                     {
-                        peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, { -1.0f, -1.0f }, mods,
+                        peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, MouseInputSource::offscreenMousePos, mods,
                                                 MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, Time::currentTimeMillis());
                     }
                 }
