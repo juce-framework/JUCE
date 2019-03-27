@@ -1373,7 +1373,7 @@ namespace AAXClasses
             AAX_CBoolean res;
             Controller()->GetIsAudioSuite (&res);
 
-            return res;
+            return res > 0;
         }
 
     private:
