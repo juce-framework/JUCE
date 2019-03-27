@@ -195,12 +195,15 @@ void MidiOutput::run()
          {
              void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message) override
              {
+                 const ScopedLock sl (messageLock);
+
                  messageSource = source;
                  messageReceived = message;
              }
 
              MidiInput* messageSource = nullptr;
              MidiMessage messageReceived;
+             CriticalSection messageLock;
          };
 
          MessageCallbackHandler handler;
@@ -245,11 +248,15 @@ void MidiOutput::run()
              // Pump the message thread for a bit to allow the message to be delivered
              MessageManager::getInstance()->runDispatchLoopUntil (100);
 
-             expect (handler.messageSource == midiInput.get());
+             {
+                 const ScopedLock sl (handler.messageLock);
 
-             expect (handler.messageReceived.getChannel()    == testMessage.getChannel());
-             expect (handler.messageReceived.getNoteNumber() == testMessage.getNoteNumber());
-             expect (handler.messageReceived.getVelocity()   == testMessage.getVelocity());
+                 expect (handler.messageSource == midiInput.get());
+
+                 expect (handler.messageReceived.getChannel()    == testMessage.getChannel());
+                 expect (handler.messageReceived.getNoteNumber() == testMessage.getNoteNumber());
+                 expect (handler.messageReceived.getVelocity()   == testMessage.getVelocity());
+             }
 
              midiInput->stop();
          }
