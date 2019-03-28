@@ -170,7 +170,7 @@ public:
     bool isBypassed = false;
 
 private:
-    const ConstAudioBlockType& inputBlock;
+    ConstAudioBlockType inputBlock;
     AudioBlockType& outputBlock;
 };
 
