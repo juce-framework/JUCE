@@ -243,7 +243,7 @@ public:
         @param channelStart       First channel of the subset
         @param numChannelsToUse   Count of channels in the subset
     */
-    forcedinline AudioBlock getSubsetChannelBlock (size_t channelStart, size_t numChannelsToUse) noexcept
+    forcedinline AudioBlock getSubsetChannelBlock (size_t channelStart, size_t numChannelsToUse) const noexcept
     {
         jassert (channelStart < numChannels);
         jassert ((channelStart + numChannelsToUse) <= numChannels);
