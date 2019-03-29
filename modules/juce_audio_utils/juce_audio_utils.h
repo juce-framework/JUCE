@@ -42,7 +42,7 @@
   license:          GPL/Commercial
 
   dependencies:     juce_gui_extra, juce_audio_processors, juce_audio_formats, juce_audio_devices
-  OSXFrameworks:    DiscRecording
+  OSXFrameworks:    CoreAudioKit DiscRecording
   iOSFrameworks:    CoreAudioKit
 
  END_JUCE_MODULE_DECLARATION
