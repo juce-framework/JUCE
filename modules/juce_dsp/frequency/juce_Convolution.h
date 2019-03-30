@@ -149,6 +149,15 @@ public:
                                               bool wantsStereo, bool wantsTrimming, bool wantsNormalisation,
                                               size_t size);
 
+    /** This function defines the time it takes for the convolution engine
+     to fade between impulse responses. Small values (e.g. 0.05) will result in
+     faster transitions, eventually resulting in audible signal discontinuities (zipper noises).
+     Large values (e.g. 0.4) will ensure the output is free of discontinuities at the price of
+     responsiveness of the engine upon impulse response update.
+     
+     @param rampLengthInSeconds      the new ramp length to fade between impulse responses (in seconds)
+     */
+    void setImpulseResponseChangeRampLength (double rampLengthInSeconds);
 
 private:
     //==============================================================================
@@ -162,6 +171,7 @@ private:
     double sampleRate;
     bool currentIsBypassed = false;
     bool isActive = false;
+    double irRampLengthInSeconds = 0.4;
     SmoothedValue<float> volumeDry[2], volumeWet[2];
     AudioBlock<float> dryBuffer;
     HeapBlock<char> dryBufferStorage;

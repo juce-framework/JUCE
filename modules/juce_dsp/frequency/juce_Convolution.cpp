@@ -67,6 +67,8 @@ struct ConvolutionEngine
 
         double sampleRate = 0;
         size_t maximumBufferSize = 0;
+        
+        double impulseResponseRampLength;
     };
 
     //==============================================================================
@@ -346,6 +348,7 @@ struct Convolution::Pimpl  : private Thread
         changeStereo,
         changeTrimming,
         changeNormalisation,
+        changeImpulseResponseRampTime,
         changeIgnore,
         numChangeRequestTypes
     };
@@ -640,6 +643,15 @@ struct Convolution::Pimpl  : private Thread
                         changeLevel = jmax (1, changeLevel);
 
                     currentInfo.wantsNormalisation = newWantsNormalisation;
+                }
+                case ChangeRequest::changeImpulseResponseRampTime:
+                {
+                    double newImpulseResponseRampLength = requestsParameter[n];
+                    
+                    if (currentInfo.impulseResponseRampLength != newImpulseResponseRampLength)
+                        changeLevel = jmax (1, changeLevel);
+                    
+                    currentInfo.impulseResponseRampLength = newImpulseResponseRampLength;
                 }
                 break;
 
@@ -1007,13 +1019,12 @@ private:
             for (auto i = 0; i < 2; ++i)
             {
                 changeVolumes[i].setTargetValue (1.0f);
-                changeVolumes[i].reset (currentInfo.sampleRate, 0.05);
+                changeVolumes[i].reset (currentInfo.sampleRate, currentInfo.impulseResponseRampLength);
                 changeVolumes[i].setTargetValue (0.0f);
 
                 changeVolumes[i + 2].setTargetValue (0.0f);
-                changeVolumes[i + 2].reset (currentInfo.sampleRate, 0.05);
+                changeVolumes[i + 2].reset (currentInfo.sampleRate, currentInfo.impulseResponseRampLength);
                 changeVolumes[i + 2].setTargetValue (1.0f);
-
             }
 
             mustInterpolate = true;
@@ -1080,7 +1091,8 @@ void Convolution::loadImpulseResponse (const void* sourceData, size_t sourceData
                                      Pimpl::ChangeRequest::changeImpulseResponseSize,
                                      Pimpl::ChangeRequest::changeStereo,
                                      Pimpl::ChangeRequest::changeTrimming,
-                                     Pimpl::ChangeRequest::changeNormalisation };
+                                     Pimpl::ChangeRequest::changeNormalisation,
+                                     Pimpl::ChangeRequest::changeImpulseResponseRampTime };
 
     Array<juce::var> sourceParameter;
 
@@ -1091,9 +1103,10 @@ void Convolution::loadImpulseResponse (const void* sourceData, size_t sourceData
                                juce::var (static_cast<int64> (wantedSize)),
                                juce::var (wantsStereo),
                                juce::var (wantsTrimming),
-                               juce::var (wantsNormalisation) };
+                               juce::var (wantsNormalisation),
+                               juce::var (irRampLengthInSeconds) };
 
-    pimpl->addToFifo (types, parameters, 5);
+    pimpl->addToFifo (types, parameters, 6);
 }
 
 void Convolution::loadImpulseResponse (const File& fileImpulseResponse, bool wantsStereo,
@@ -1109,7 +1122,8 @@ void Convolution::loadImpulseResponse (const File& fileImpulseResponse, bool wan
                                      Pimpl::ChangeRequest::changeImpulseResponseSize,
                                      Pimpl::ChangeRequest::changeStereo,
                                      Pimpl::ChangeRequest::changeTrimming,
-                                     Pimpl::ChangeRequest::changeNormalisation };
+                                     Pimpl::ChangeRequest::changeNormalisation,
+                                     Pimpl::ChangeRequest::changeImpulseResponseRampTime };
 
     Array<juce::var> sourceParameter;
 
@@ -1120,9 +1134,10 @@ void Convolution::loadImpulseResponse (const File& fileImpulseResponse, bool wan
                                juce::var (static_cast<int64> (wantedSize)),
                                juce::var (wantsStereo),
                                juce::var (wantsTrimming),
-                               juce::var (wantsNormalisation) };
+                               juce::var (wantsNormalisation),
+                               juce::var (irRampLengthInSeconds) };
 
-    pimpl->addToFifo (types, parameters, 5);
+    pimpl->addToFifo (types, parameters, 6);
 }
 
 void Convolution::copyAndLoadImpulseResponseFromBuffer (AudioBuffer<float>& buffer,
@@ -1149,7 +1164,8 @@ void Convolution::copyAndLoadImpulseResponseFromBlock (AudioBlock<float> block, 
                                      Pimpl::ChangeRequest::changeImpulseResponseSize,
                                      Pimpl::ChangeRequest::changeStereo,
                                      Pimpl::ChangeRequest::changeTrimming,
-                                     Pimpl::ChangeRequest::changeNormalisation };
+                                     Pimpl::ChangeRequest::changeNormalisation,
+                                     Pimpl::ChangeRequest::changeImpulseResponseRampTime };
 
     Array<juce::var> sourceParameter;
     sourceParameter.add (juce::var ((int) ConvolutionEngine::ProcessingInformation::SourceType::sourceAudioBuffer));
@@ -1159,9 +1175,23 @@ void Convolution::copyAndLoadImpulseResponseFromBlock (AudioBlock<float> block, 
                                juce::var (static_cast<int64> (wantedSize)),
                                juce::var (wantsStereo),
                                juce::var (wantsTrimming),
-                               juce::var (wantsNormalisation) };
+                               juce::var (wantsNormalisation),
+                               juce::var (irRampLengthInSeconds) };
 
-    pimpl->addToFifo (types, parameters, 5);
+    pimpl->addToFifo (types, parameters, 6);
+}
+
+void Convolution::setImpulseResponseChangeRampLength (double rampLengthInSeconds)
+{
+    // discard if ramp length did not change
+    if( irRampLengthInSeconds == rampLengthInSeconds ){ return; }
+    irRampLengthInSeconds = rampLengthInSeconds;
+    
+    Pimpl::ChangeRequest types[] = { Pimpl::ChangeRequest::changeImpulseResponseRampTime };
+    
+    juce::var parameters[] = { juce::var (irRampLengthInSeconds) };
+    
+    pimpl->addToFifo (types, parameters, 1);
 }
 
 void Convolution::prepare (const ProcessSpec& spec)
