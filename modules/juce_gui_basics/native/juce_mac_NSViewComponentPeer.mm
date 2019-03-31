@@ -629,7 +629,7 @@ public:
             sendMouseEvent (ev);
         else
             // moved into another window which overlaps this one, so trigger an exit
-            handleMouseEvent (MouseInputSource::InputSourceType::mouse, { -1.0f, -1.0f }, ModifierKeys::currentModifiers,
+            handleMouseEvent (MouseInputSource::InputSourceType::mouse, MouseInputSource::offscreenMousePos, ModifierKeys::currentModifiers,
                               getMousePressure (ev), MouseInputSource::invalidOrientation, getMouseTime (ev));
 
         showArrowCursorIfNeeded();
@@ -840,13 +840,9 @@ public:
         float displayScale = 1.0f;
 
        #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
-        if (! usingCoreGraphics)
-        {
-            NSScreen* screen = [[view window] screen];
-
-            if ([screen respondsToSelector: @selector (backingScaleFactor)])
-                displayScale = (float) screen.backingScaleFactor;
-        }
+        NSScreen* screen = [[view window] screen];
+        if ([screen respondsToSelector: @selector (backingScaleFactor)])
+            displayScale = (float) screen.backingScaleFactor;
        #endif
 
        #if USE_COREGRAPHICS_RENDERING && JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS

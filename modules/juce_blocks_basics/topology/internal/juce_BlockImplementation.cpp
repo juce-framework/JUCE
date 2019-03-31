@@ -347,6 +347,15 @@ public:
             doSaveProgramAsDefault();
     }
 
+    void resetProgramToDefault() override
+    {
+        if (! shouldSaveProgramAsDefault)
+            setProgram (nullptr);
+
+        sendCommandMessage (BlocksProtocol::endAPIMode);
+        sendCommandMessage (BlocksProtocol::beginAPIMode);
+    }
+
     uint32 getMemorySize() override
     {
         return modelData.programAndHeapSize;

@@ -511,7 +511,7 @@ private:
         setLatencySamples (audioCurrentlyOversampled ? roundToInt (oversampling->getLatencyInSamples()) : 0);
 
         if (audioCurrentlyOversampled)
-            oversampledBlock = oversampling->processSamplesUp (context.getInputBlock());
+            oversampledBlock = oversampling->processSamplesUp (context.getOutputBlock());
 
         auto waveshaperContext = audioCurrentlyOversampled ? dsp::ProcessContextReplacing<float> (oversampledBlock)
                                                            : context;

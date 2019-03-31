@@ -900,7 +900,7 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
 
         if (isUp || isCancel)
         {
-            handleMouseEvent (MouseInputSource::InputSourceType::touch, Point<float> (-1.0f, -1.0f), modsToSend,
+            handleMouseEvent (MouseInputSource::InputSourceType::touch, MouseInputSource::offscreenMousePos, modsToSend,
                               MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, time, {}, touchIndex);
 
             if (! isValidPeer (this))

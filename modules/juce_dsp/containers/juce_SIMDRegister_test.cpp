@@ -758,6 +758,27 @@ public:
         }
     };
 
+    struct CheckTruncate
+    {
+        template <typename type>
+        static void run (UnitTest& u, Random& random)
+        {
+            type inArray[SIMDRegister<type>::SIMDNumElements];
+            type outArray[SIMDRegister<type>::SIMDNumElements];
+
+            SIMDRegister_test_internal::VecFiller<type>::fill (inArray, SIMDRegister<type>::SIMDNumElements, random);
+
+            SIMDRegister<type> a;
+            copy (a, inArray);
+            a = SIMDRegister<type>::truncate (a);
+
+            for (size_t j = 0; j < SIMDRegister<type>::SIMDNumElements; ++j)
+                outArray[j] = (type) (int) inArray[j];
+
+            u.expect (vecEqualToArray (a, outArray));
+        }
+    };
+
     struct CheckBoolEquals
     {
         template <typename type>
@@ -794,6 +815,18 @@ public:
             u.expect (! (a == b));
         }
     };
+
+    //==============================================================================
+    template <class TheTest>
+    void runTestFloatingPoint (const char* unitTestName)
+    {
+        beginTest (unitTestName);
+
+        Random random = getRandom();
+
+        TheTest::template run<float>  (*this, random);
+        TheTest::template run<double> (*this, random);
+    }
 
     //==============================================================================
     template <class TheTest>
@@ -873,6 +906,8 @@ public:
         runTestForAllTypes<CheckSum> ("CheckSum");
 
         runTestSigned<CheckAbs> ("CheckAbs");
+
+        runTestFloatingPoint<CheckTruncate> ("CheckTruncate");
     }
 };
 

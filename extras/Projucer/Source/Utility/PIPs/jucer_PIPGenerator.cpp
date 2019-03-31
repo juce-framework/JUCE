@@ -120,7 +120,7 @@ PIPGenerator::PIPGenerator (const File& pip, const File& output, const File& juc
                         && pip.getParentDirectory().getParentDirectory().getFileName() == "PIPs");
 
     outputDirectory = outputDirectory.getChildFile (metadata[Ids::name].toString());
-    useLocalCopy = metadata[Ids::useLocalCopy].toString().isNotEmpty() || isClipboard;
+    useLocalCopy = metadata[Ids::useLocalCopy].toString().trim().getIntValue() == 1 || isClipboard;
 
     if (userModulesPath != File())
     {
@@ -355,7 +355,7 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
 
     auto defines = metadata[Ids::defines].toString();
 
-    if (useLocalCopy && isJUCEExample (pipFile))
+    if (isJUCEExample (pipFile))
     {
         auto examplesDir = getExamplesDirectory();
 

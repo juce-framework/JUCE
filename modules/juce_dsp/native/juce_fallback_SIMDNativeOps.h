@@ -43,8 +43,8 @@ namespace SIMDInternal
     template <> struct MaskTypeFor <std::complex<float>>    { using type = uint32_t; };
     template <> struct MaskTypeFor <std::complex<double>>   { using type = uint64_t; };
 
-    template <typename Primitive> struct PrimitiveType                           { using type = Primitive; };
-    template <typename Primitive> struct PrimitiveType<std::complex<Primitive>>  { using type = Primitive; };
+    template <typename Primitive> struct PrimitiveType                           { using type = typename std::remove_cv<Primitive>::type; };
+    template <typename Primitive> struct PrimitiveType<std::complex<Primitive>>  { using type = typename std::remove_cv<Primitive>::type; };
 
     template <int n>    struct Log2Helper    { enum { value = Log2Helper<n/2>::value + 1 }; };
     template <>         struct Log2Helper<1> { enum { value = 0 }; };
@@ -118,6 +118,19 @@ struct SIMDFallbackOps
             retval += a.s[i];
 
         return retval;
+    }
+
+    static forcedinline vSIMDType truncate (vSIMDType av) noexcept
+    {
+        UnionType a {av};
+
+        for (size_t i = 0; i < n; ++i)
+        {
+            jassert (a.s[i] >= ScalarType (0));
+            a.s[i] = static_cast <ScalarType> (static_cast<int> (a.s[i]));
+        }
+
+        return a.v;
     }
 
     static forcedinline vSIMDType multiplyAdd (vSIMDType av, vSIMDType bv, vSIMDType cv) noexcept

@@ -29,6 +29,10 @@
 			isa = PBXBuildFile;
 			fileRef = 6799B056504F9F017998B9E2;
 		};
+		770AB74B1D3A0108F764DD47 = {
+			isa = PBXBuildFile;
+			fileRef = 4D1DB6D77B6F3DE7A569780B;
+		};
 		CA694B2A73FCF12D7F9E7E49 = {
 			isa = PBXBuildFile;
 			fileRef = 448838BE6E937D450A3C84CE;
@@ -200,6 +204,13 @@
 			lastKnownFileType = wrapper.framework;
 			name = CoreMIDI.framework;
 			path = System/Library/Frameworks/CoreMIDI.framework;
+			sourceTree = SDKROOT;
+		};
+		4D1DB6D77B6F3DE7A569780B = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
+			name = CoreAudioKit.framework;
+			path = System/Library/Frameworks/CoreAudioKit.framework;
 			sourceTree = SDKROOT;
 		};
 		4FF648D72D6F1A78956CDA1B = {
@@ -581,6 +592,7 @@
 				398A945EFD9ED923162982B1,
 				C78806A6727F44EACFDED4A5,
 				6799B056504F9F017998B9E2,
+				4D1DB6D77B6F3DE7A569780B,
 				448838BE6E937D450A3C84CE,
 				CB82A14817C3E2ABBBBC3864,
 				F3292E3563DB7ABB076DB400,
@@ -851,6 +863,7 @@
 				BED88ADEA4DC91AA8C810FA8,
 				3C30D7C28C86F4054257DCD5,
 				67DF295E93E54432043126DF,
+				770AB74B1D3A0108F764DD47,
 				CA694B2A73FCF12D7F9E7E49,
 				80B9F7ED2009922C693B7DD4,
 				77745BF98931B91341FE17F6,
