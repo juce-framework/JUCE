@@ -969,6 +969,9 @@ public:
 
             if (prepared)
             {
+                if (! haveParameterList)
+                    refreshParameterList();
+
                 if (! syncBusLayouts (getBusesLayout(), true, ignore))
                 {
                     prepared = false;
@@ -1357,6 +1360,7 @@ public:
             UInt32 paramListSize = 0;
             AudioUnitGetPropertyInfo (audioUnit, kAudioUnitProperty_ParameterList, kAudioUnitScope_Global,
                                       0, &paramListSize, nullptr);
+            haveParameterList = paramListSize >= 0;
 
             if (paramListSize > 0)
             {
@@ -1657,6 +1661,7 @@ private:
     MidiBuffer incomingMidi;
     std::unique_ptr<AUBypassParameter> bypassParam;
     bool lastProcessBlockCallWasBypass = false, auSupportsBypass = false;
+    bool haveParameterList = false;
 
     void createPluginCallbacks()
     {
