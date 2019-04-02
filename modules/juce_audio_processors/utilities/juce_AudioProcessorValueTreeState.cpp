@@ -744,7 +744,7 @@ AudioProcessorValueTreeState::ButtonAttachment::~ButtonAttachment() {}
 
 static struct ParameterAdapterTests final   : public UnitTest
 {
-    ParameterAdapterTests() : UnitTest ("Parameter Adapter") {}
+    ParameterAdapterTests() : UnitTest ("Parameter Adapter", "AudioProcessor Parameters") {}
 
     void runTest() override
     {
@@ -880,7 +880,7 @@ private:
     };
 
 public:
-    AudioProcessorValueTreeStateTests() : UnitTest ("Audio Processor Value Tree State", "AudioProcessor parameters") {}
+    AudioProcessorValueTreeStateTests() : UnitTest ("Audio Processor Value Tree State", "AudioProcessor Parameters") {}
 
     void runTest() override
     {

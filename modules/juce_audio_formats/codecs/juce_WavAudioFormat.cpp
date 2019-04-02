@@ -1814,7 +1814,7 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
 
 struct WaveAudioFormatTests : public UnitTest
 {
-    WaveAudioFormatTests() : UnitTest ("Wave audio format tests") {}
+    WaveAudioFormatTests() : UnitTest ("Wave audio format tests", "Audio") {}
 
     void runTest() override
     {

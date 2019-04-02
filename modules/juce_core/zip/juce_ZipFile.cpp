@@ -643,7 +643,7 @@ bool ZipFile::Builder::writeToStream (OutputStream& target, double* const progre
 
 struct ZIPTests   : public UnitTest
 {
-    ZIPTests()   : UnitTest ("ZIP") {}
+    ZIPTests()   : UnitTest ("ZIP", "Compression") {}
 
     void runTest() override
     {
