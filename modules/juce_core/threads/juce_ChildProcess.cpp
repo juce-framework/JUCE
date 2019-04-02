@@ -101,8 +101,8 @@ public:
         expect (p.start ("ls /"));
        #endif
 
-        //String output (p.readAllProcessOutput());
-        //expect (output.isNotEmpty());
+        auto output = p.readAllProcessOutput();
+        expect (output.isNotEmpty());
       #endif
     }
 };
