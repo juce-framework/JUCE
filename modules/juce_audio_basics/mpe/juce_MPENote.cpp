@@ -84,6 +84,7 @@ bool MPENote::operator!= (const MPENote& other) const noexcept
     return noteID != other.noteID;
 }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
@@ -119,6 +120,6 @@ private:
 
 static MPENoteTests MPENoteUnitTests;
 
-#endif // JUCE_UNIT_TESTS
+#endif
 
 } // namespace juce

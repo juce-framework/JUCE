@@ -179,6 +179,8 @@ juce_wchar CharacterFunctions::getUnicodeCharFromWindows1252Codepage (const uint
     return (juce_wchar) lookup[c - 0x80];
 }
 
+
+//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 

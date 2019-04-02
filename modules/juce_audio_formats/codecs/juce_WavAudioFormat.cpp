@@ -1809,6 +1809,8 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
     return slowCopyWavFileWithNewMetadata (wavFile, newMetadata);
 }
 
+
+//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 

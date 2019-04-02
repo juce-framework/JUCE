@@ -60,8 +60,9 @@ String NamedPipe::getName() const
 
 // other methods for this class are implemented in the platform-specific files
 
-//==============================================================================
 
+//==============================================================================
+//==============================================================================
 #if JUCE_UNIT_TESTS
 
 class NamedPipeTests  : public UnitTest

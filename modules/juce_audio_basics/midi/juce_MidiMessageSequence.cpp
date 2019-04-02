@@ -344,6 +344,9 @@ void MidiMessageSequence::createControllerUpdatesForTime (int channelNumber, dou
     }
 }
 
+
+//==============================================================================
+//==============================================================================
 #if JUCE_UNIT_TESTS
 
 struct MidiMessageSequenceTest  : public UnitTest

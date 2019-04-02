@@ -926,6 +926,7 @@ void XmlElement::deleteAllTextElements() noexcept
 }
 
 //==============================================================================
+//==============================================================================
 #if JUCE_UNIT_TESTS
 
 class XmlElementTests  : public UnitTest

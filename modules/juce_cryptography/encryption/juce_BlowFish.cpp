@@ -366,6 +366,8 @@ int BlowFish::unpad (const void* data, size_t size) noexcept
     return static_cast<int> (size - static_cast<size_t> (paddingSize));
 }
 
+
+//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 

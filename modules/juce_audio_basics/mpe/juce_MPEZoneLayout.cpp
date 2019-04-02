@@ -205,6 +205,7 @@ void MPEZoneLayout::checkAndLimitZoneParameters (int minValue, int maxValue,
     }
 }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
@@ -382,6 +383,6 @@ public:
 static MPEZoneLayoutTests MPEZoneLayoutUnitTests;
 
 
-#endif // JUCE_UNIT_TESTS
+#endif
 
 } // namespace juce

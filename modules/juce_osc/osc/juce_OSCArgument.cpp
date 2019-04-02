@@ -78,6 +78,7 @@ OSCColour OSCArgument::getColour() const noexcept
     return { 0, 0, 0, 0 };
 }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
@@ -242,6 +243,6 @@ public:
 
 static OSCArgumentTests OSCArgumentUnitTests;
 
-#endif // JUCE_UNIT_TESTS
+#endif
 
 } // namespace juce

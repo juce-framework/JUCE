@@ -159,6 +159,7 @@ MidiBuffer MidiRPNGenerator::generate (int midiChannel,
     return buffer;
 }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
@@ -371,6 +372,6 @@ private:
 
 static MidiRPNGeneratorTests MidiRPNGeneratorUnitTests;
 
-#endif // JUCE_UNIT_TESTS
+#endif
 
 } // namespace juce

@@ -538,6 +538,7 @@ Result JSON::parseQuotedString (String::CharPointerType& t, var& result)
     return Result::fail ("Not a quoted string!");
 }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS

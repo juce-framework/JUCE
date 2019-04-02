@@ -1278,6 +1278,7 @@ uint32 readLittleEndianBitsInBuffer (const void* buffer, uint32 startBit, uint32
     return result;
 }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS

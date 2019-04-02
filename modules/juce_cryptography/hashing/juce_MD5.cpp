@@ -305,6 +305,7 @@ bool MD5::operator!= (const MD5& other) const noexcept   { return ! operator== (
 
 
 //==============================================================================
+//==============================================================================
 #if JUCE_UNIT_TESTS
 
 class MD5Tests  : public UnitTest

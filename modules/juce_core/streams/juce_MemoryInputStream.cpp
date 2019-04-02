@@ -95,6 +95,8 @@ void MemoryInputStream::skipNextBytes (int64 numBytesToSkip)
         setPosition (getPosition() + numBytesToSkip);
 }
 
+
+//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 

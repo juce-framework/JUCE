@@ -1095,6 +1095,8 @@ void ValueTree::Listener::valueTreeChildOrderChanged (ValueTree&, int, int)     
 void ValueTree::Listener::valueTreeParentChanged     (ValueTree&)                    {}
 void ValueTree::Listener::valueTreeRedirected        (ValueTree&)                    {}
 
+
+//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 

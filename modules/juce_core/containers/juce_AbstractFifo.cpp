@@ -167,6 +167,7 @@ AbstractFifo::ScopedWrite AbstractFifo::write (int numToWrite) noexcept    { ret
 
 
 //==============================================================================
+//==============================================================================
 #if JUCE_UNIT_TESTS
 
 class AbstractFifoTests  : public UnitTest

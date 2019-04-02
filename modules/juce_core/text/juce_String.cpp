@@ -2300,6 +2300,7 @@ static String serialiseDouble (double input)
     return reduceLengthOfFloatString (String (input, numberOfDecimalPlaces));
 }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS

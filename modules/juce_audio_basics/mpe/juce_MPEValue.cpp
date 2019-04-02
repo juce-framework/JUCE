@@ -82,6 +82,7 @@ bool MPEValue::operator!= (const MPEValue& other) const noexcept
     return ! operator== (other);
 }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
@@ -165,6 +166,6 @@ private:
 
 static MPEValueTests MPEValueUnitTests;
 
-#endif // JUCE_UNIT_TESTS
+#endif
 
 } // namespace juce

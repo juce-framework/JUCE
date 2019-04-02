@@ -394,6 +394,7 @@ String OSCAddressPattern::toString() const noexcept
     return asString;
 }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
@@ -780,6 +781,6 @@ public:
 
 static OSCPatternMatcherTests OSCPatternMatcherUnitTests;
 
-#endif // JUCE_UNIT_TESTS
+#endif
 
 } // namespace juce

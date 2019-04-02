@@ -332,6 +332,7 @@ bool OSCSender::send (const OSCBundle& bundle)      { return pimpl->send (bundle
 bool OSCSender::sendToIPAddress (const String& host, int port, const OSCMessage& message) { return pimpl->send (message, host, port); }
 bool OSCSender::sendToIPAddress (const String& host, int port, const OSCBundle& bundle)   { return pimpl->send (bundle,  host, port); }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
@@ -867,7 +868,6 @@ public:
 
 static OSCRoundTripTests OSCRoundTripUnitTests;
 
-//==============================================================================
-#endif // JUCE_UNIT_TESTS
+#endif
 
 } // namespace juce

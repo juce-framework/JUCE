@@ -791,6 +791,7 @@ void MPEInstrument::releaseAllNotes()
     notes.clear();
 }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
@@ -2286,6 +2287,6 @@ private:
 
 static MPEInstrumentTests MPEInstrumentUnitTests;
 
-#endif // JUCE_UNIT_TESTS
+#endif
 
 } // namespace juce

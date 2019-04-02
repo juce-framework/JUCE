@@ -106,6 +106,7 @@ MidiBuffer MPEMessages::setZoneLayout (MPEZoneLayout layout)
     return buffer;
 }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
@@ -233,6 +234,6 @@ private:
 
 static MPEMessagesTests MPEMessagesUnitTests;
 
-#endif // JUCE_UNIT_TESTS
+#endif
 
 } // namespace juce

@@ -1188,6 +1188,6 @@ public:
 
 static OSCInputStreamTests OSCInputStreamUnitTests;
 
-#endif // JUCE_UNIT_TESTS
+#endif
 
 } // namespace juce

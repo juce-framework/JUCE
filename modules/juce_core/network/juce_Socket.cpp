@@ -780,6 +780,8 @@ bool DatagramSocket::setEnablePortReuse (bool enabled)
  #pragma warning (pop)
 #endif
 
+
+//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 

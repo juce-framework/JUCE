@@ -1260,6 +1260,6 @@ struct GridTests  : public UnitTest
 
 static GridTests gridUnitTests;
 
-#endif // JUCE_UNIT_TESTS
+#endif
 
 } // namespace juce

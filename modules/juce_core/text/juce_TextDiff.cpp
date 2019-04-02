@@ -216,6 +216,7 @@ String TextDiff::Change::appliedTo (const String& text) const noexcept
     return text.replaceSection (start, length, insertedText);
 }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS

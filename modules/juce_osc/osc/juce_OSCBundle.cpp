@@ -108,6 +108,8 @@ const OSCBundle& OSCBundle::Element::getBundle() const
     return *bundle;
 }
 
+
+//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
@@ -239,6 +241,6 @@ public:
 
 static OSCBundleElementTests OSCBundleElementUnitTests;
 
-#endif // JUCE_UNIT_TESTS
+#endif
 
 } // namespace juce

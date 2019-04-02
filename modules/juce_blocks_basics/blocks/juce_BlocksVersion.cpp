@@ -155,7 +155,11 @@ bool BlocksVersion::operator>= (const BlocksVersion& other) const
     return (*this > other) || (*this == other);
 }
 
+
+//==============================================================================
+//==============================================================================
 #if JUCE_UNIT_TESTS
+
 class BlocksVersionUnitTests  : public UnitTest
 {
 public:
@@ -225,6 +229,7 @@ public:
 };
 
 static BlocksVersionUnitTests BlocksVersionUnitTests;
+
 #endif
 
 } // namespace juce

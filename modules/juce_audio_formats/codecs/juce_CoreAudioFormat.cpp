@@ -592,8 +592,8 @@ AudioFormatWriter* CoreAudioFormat::createWriterFor (OutputStream*,
     return nullptr;
 }
 
+
 //==============================================================================
-// Unit tests for Core Audio layout conversions
 //==============================================================================
 #if JUCE_UNIT_TESTS
 

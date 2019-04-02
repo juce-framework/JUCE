@@ -740,9 +740,12 @@ AudioProcessorValueTreeState::ButtonAttachment::ButtonAttachment (AudioProcessor
 
 AudioProcessorValueTreeState::ButtonAttachment::~ButtonAttachment() {}
 
+
+//==============================================================================
+//==============================================================================
 #if JUCE_UNIT_TESTS
 
-static struct ParameterAdapterTests final   : public UnitTest
+struct ParameterAdapterTests  : public UnitTest
 {
     ParameterAdapterTests() : UnitTest ("Parameter Adapter", "AudioProcessor Parameters") {}
 
@@ -812,7 +815,9 @@ static struct ParameterAdapterTests final   : public UnitTest
             test ({ 0, 7.5 }, "2.5", 2.5);
         }
     }
-} parameterAdapterTests;
+};
+
+static ParameterAdapterTests parameterAdapterTests;
 
 namespace
 {
@@ -832,7 +837,7 @@ inline bool operator!= (const NormalisableRange<ValueType>& a,
 }
 } // namespace
 
-static class AudioProcessorValueTreeStateTests final   : public UnitTest
+class AudioProcessorValueTreeStateTests  : public UnitTest
 {
 private:
     using Parameter = AudioProcessorValueTreeState::Parameter;
@@ -1166,7 +1171,9 @@ public:
             expectEquals (listener.id, String (key));
         }
     }
-} audioProcessorValueTreeStateTests;
+};
+
+static AudioProcessorValueTreeStateTests audioProcessorValueTreeStateTests;
 
 #endif
 

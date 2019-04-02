@@ -372,6 +372,8 @@ Array<IPAddress> IPAddress::getAllAddresses (bool includeIPv6)
     return addresses;
 }
 
+
+//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
