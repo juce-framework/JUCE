@@ -1513,15 +1513,6 @@ JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, CharPointer_UTF16
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, CharPointer_UTF32 string2) noexcept;
 
-/** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator>  (const String& string1, const String& string2) noexcept;
-/** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator<  (const String& string1, const String& string2) noexcept;
-/** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator>= (const String& string1, const String& string2) noexcept;
-/** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator<= (const String& string1, const String& string2) noexcept;
-
 //==============================================================================
 /** This operator allows you to write a juce String directly to std output streams.
     This is handy for writing strings to std::cout, std::cerr, etc.
