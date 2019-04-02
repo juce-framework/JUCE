@@ -96,7 +96,7 @@ void PlaybackRegionView::didEndEditing (ARADocument* document)
 {
     jassert (document == playbackRegion->getRegionSequence()->getDocument());
 
-    // our reader will pick up any changes in samples or position
+    // our reader will pick up any changes in audio samples or region time range
     if ((playbackRegionReader ==  nullptr) || ! playbackRegionReader->isValid())
     {
         recreatePlaybackRegionReader();
@@ -159,15 +159,9 @@ void PlaybackRegionView::recreatePlaybackRegionReader()
 
     // create a non-realtime playback region reader for our audio thumb
     playbackRegionReader = new ARAPlaybackRegionReader ({playbackRegion}, true);
-    // see juce_AudioThumbnail.cpp line 122 - AudioThumbnail does not deal with zero length sources.
+    audioThumb.setReader (playbackRegionReader, reinterpret_cast<intptr_t> (playbackRegion));   // TODO JUCE_ARA better hash?
+    // TODO JUCE_ARA see juce_AudioThumbnail.cpp, line 122: AudioThumbnail handles zero-length sources
+    // by deleting the reader, therefore we must clear our "weak" pointer to the reader in this case.
     if (playbackRegionReader->lengthInSamples <= 0)
-    {
-        delete playbackRegionReader;
         playbackRegionReader = nullptr;
-        audioThumb.clear();
-    }
-    else
-    {
-        audioThumb.setReader (playbackRegionReader, reinterpret_cast<intptr_t> (playbackRegion));   // TODO JUCE_ARA better hash?
-    }
 }
