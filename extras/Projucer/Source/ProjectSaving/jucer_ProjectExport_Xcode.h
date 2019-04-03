@@ -334,7 +334,8 @@ public:
         if (iOS)
         {
             props.add (new ChoicePropertyComponent (iosBackgroundAudioValue, "Audio Background Capability"),
-                       "Enable this to grant your app the capability to access audio when in background mode.");
+                       "Enable this to grant your app the capability to access audio when in background mode. "
+                       "This permission is required if your app creates a MIDI input or output device.");
 
             props.add (new ChoicePropertyComponent (iosBackgroundBleValue, "Bluetooth MIDI Background Capability"),
                        "Enable this to grant your app the capability to connect to Bluetooth LE devices when in background mode.");
