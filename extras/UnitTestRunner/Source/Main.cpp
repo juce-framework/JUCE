@@ -52,39 +52,34 @@ class ConsoleUnitTestRunner : public UnitTestRunner
 //==============================================================================
 int main (int argc, char **argv)
 {
-    // Needed for tests that require a message thread
-    ScopedJuceInitialiser_GUI guiInitialiser;
+    ArgumentList args (argc, argv);
+
+    if (args.containsOption ("--help|-h"))
+    {
+        std::cout << argv[0] << " [--help|-h] [--list-categories] [--category category] [--seed seed]" << std::endl;
+        return 0;
+    }
+
+    if (args.containsOption ("--list-categories"))
+    {
+        for (auto& category : UnitTest::getAllCategories())
+            std::cout << category << std::endl;
+
+        return  0;
+    }
 
     ConsoleLogger logger;
     Logger::setCurrentLogger (&logger);
 
     ConsoleUnitTestRunner runner;
 
-    ArgumentList args (argc, argv);
+    auto seed = (args.containsOption ("--seed") ? args.getValueForOption ("--seed").getLargeIntValue()
+                                                : Random::getSystemRandom().nextInt64());
 
-    if (args.size() == 0)
-    {
-        runner.runAllTests();
-    }
+    if (args.containsOption ("--category"))
+        runner.runTestsInCategory (args.getValueForOption ("--category"), seed);
     else
-    {
-        if (args.containsOption ("--help|-h"))
-        {
-            std::cout << argv[0] << " [--help|-h] [--category category] [--list-categories]" << std::endl;
-            return 0;
-        }
-
-        if (args.containsOption ("--list-categories"))
-        {
-            for (auto& category : UnitTest::getAllCategories())
-                std::cout << category << std::endl;
-
-            return  0;
-        }
-
-        if (args.containsOption ("--category"))
-            runner.runTestsInCategory (args.getValueForOption ("--category"));
-    }
+        runner.runAllTests (seed);
 
     Logger::setCurrentLogger (nullptr);
 
