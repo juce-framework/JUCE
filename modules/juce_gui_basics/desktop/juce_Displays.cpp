@@ -116,8 +116,8 @@ Point<ValueType> Displays::physicalToLogical (Point<ValueType> point, const Disp
 
     auto globalScale = Desktop::getInstance().getGlobalScaleFactor();
 
-    Point<ValueType> logicalTopLeft  (display.totalArea.getX(),       display.totalArea.getY());
-    Point<ValueType> physicalTopLeft (display.topLeftPhysical.getX(), display.topLeftPhysical.getY());
+    Point<ValueType> logicalTopLeft  (static_cast<ValueType> (display.totalArea.getX()),       static_cast<ValueType> (display.totalArea.getY()));
+    Point<ValueType> physicalTopLeft (static_cast<ValueType> (display.topLeftPhysical.getX()), static_cast<ValueType> (display.topLeftPhysical.getY()));
 
     return ((point - physicalTopLeft) / (display.scale / globalScale)) + (logicalTopLeft * globalScale);
 }
@@ -130,8 +130,8 @@ Point<ValueType> Displays::logicalToPhysical (Point<ValueType> point, const Disp
 
     auto globalScale = Desktop::getInstance().getGlobalScaleFactor();
 
-    Point<ValueType> logicalTopLeft  (display.totalArea.getX(),       display.totalArea.getY());
-    Point<ValueType> physicalTopLeft (display.topLeftPhysical.getX(), display.topLeftPhysical.getY());
+    Point<ValueType> logicalTopLeft  (static_cast<ValueType> (display.totalArea.getX()),       static_cast<ValueType> (display.totalArea.getY()));
+    Point<ValueType> physicalTopLeft (static_cast<ValueType> (display.topLeftPhysical.getX()), static_cast<ValueType> (display.topLeftPhysical.getY()));
 
     return ((point - (logicalTopLeft * globalScale)) * (display.scale / globalScale)) + physicalTopLeft;
 }
