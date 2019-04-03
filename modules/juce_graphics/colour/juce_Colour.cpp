@@ -542,7 +542,7 @@ String Colour::toString() const
 
 Colour Colour::fromString (StringRef encodedColourString)
 {
-    return Colour ((uint32) CharacterFunctions::HexParser<int>::parse (encodedColourString.text));
+    return Colour (CharacterFunctions::HexParser<uint32>::parse (encodedColourString.text));
 }
 
 String Colour::toDisplayString (const bool includeAlphaValue) const

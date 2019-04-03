@@ -1957,8 +1957,8 @@ String String::toHexString (const void* const d, const int size, const int group
     return s;
 }
 
-int   String::getHexValue32() const noexcept    { return CharacterFunctions::HexParser<int>  ::parse (text); }
-int64 String::getHexValue64() const noexcept    { return CharacterFunctions::HexParser<int64>::parse (text); }
+int   String::getHexValue32() const noexcept    { return (int32) CharacterFunctions::HexParser<uint32>::parse (text); }
+int64 String::getHexValue64() const noexcept    { return (int64) CharacterFunctions::HexParser<uint64>::parse (text); }
 
 //==============================================================================
 static String getStringFromWindows1252Codepage (const char* data, size_t num)
