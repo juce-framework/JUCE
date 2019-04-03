@@ -199,7 +199,9 @@ juce_wchar CharacterFunctions::getUnicodeCharFromWindows1252Codepage (const uint
 class CharacterFunctionsTests  : public UnitTest
 {
 public:
-    CharacterFunctionsTests() : UnitTest ("CharacterFunctions", "Text") {}
+    CharacterFunctionsTests()
+        : UnitTest ("CharacterFunctions", UnitTestCategories::text)
+    {}
 
     void runTest() override
     {

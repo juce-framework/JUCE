@@ -1031,7 +1031,9 @@ void Grid::performLayout (juce::Rectangle<int> targetArea)
 
 struct GridTests  : public UnitTest
 {
-    GridTests() : UnitTest ("Grid", "GUI") {}
+    GridTests()
+        : UnitTest ("Grid", UnitTestCategories::gui)
+    {}
 
     void runTest() override
     {

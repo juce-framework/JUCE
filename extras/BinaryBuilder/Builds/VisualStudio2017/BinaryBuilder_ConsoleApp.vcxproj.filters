@@ -762,6 +762,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\unit_tests\juce_UnitTest.h">
       <Filter>JUCE Modules\juce_core\unit_tests</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\unit_tests\juce_UnitTestCategories.h">
+      <Filter>JUCE Modules\juce_core\unit_tests</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\xml\juce_XmlDocument.h">
       <Filter>JUCE Modules\juce_core\xml</Filter>
     </ClInclude>

@@ -850,6 +850,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/time/juce_Time.h"
     "../../../../../modules/juce_core/unit_tests/juce_UnitTest.cpp"
     "../../../../../modules/juce_core/unit_tests/juce_UnitTest.h"
+    "../../../../../modules/juce_core/unit_tests/juce_UnitTestCategories.h"
     "../../../../../modules/juce_core/xml/juce_XmlDocument.cpp"
     "../../../../../modules/juce_core/xml/juce_XmlDocument.h"
     "../../../../../modules/juce_core/xml/juce_XmlElement.cpp"
@@ -2447,6 +2448,7 @@ set_source_files_properties("../../../../../modules/juce_core/time/juce_Time.cpp
 set_source_files_properties("../../../../../modules/juce_core/time/juce_Time.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/unit_tests/juce_UnitTest.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/unit_tests/juce_UnitTest.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/unit_tests/juce_UnitTestCategories.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/xml/juce_XmlDocument.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/xml/juce_XmlDocument.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/xml/juce_XmlElement.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)

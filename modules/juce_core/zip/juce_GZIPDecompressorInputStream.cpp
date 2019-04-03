@@ -306,7 +306,7 @@ bool GZIPDecompressorInputStream::setPosition (int64 newPos)
 struct GZIPDecompressorInputStreamTests   : public UnitTest
 {
     GZIPDecompressorInputStreamTests()
-        : UnitTest ("GZIPDecompressorInputStreamTests", "Streams")
+        : UnitTest ("GZIPDecompressorInputStreamTests", UnitTestCategories::streams)
     {}
 
     void runTest() override

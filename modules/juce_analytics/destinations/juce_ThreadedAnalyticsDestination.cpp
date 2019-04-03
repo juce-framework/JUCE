@@ -215,7 +215,7 @@ namespace DestinationTestHelpers
 struct ThreadedAnalyticsDestinationTests   : public UnitTest
 {
     ThreadedAnalyticsDestinationTests()
-        : UnitTest ("ThreadedAnalyticsDestination", "Analytics")
+        : UnitTest ("ThreadedAnalyticsDestination", UnitTestCategories::analytics)
     {}
 
     void compareEventQueues (const std::deque<AnalyticsDestination::AnalyticsEvent>& a,

@@ -161,7 +161,9 @@ bool GZIPCompressorOutputStream::setPosition (int64 /*newPosition*/)
 
 struct GZIPTests  : public UnitTest
 {
-    GZIPTests()   : UnitTest ("GZIP", "Compression") {}
+    GZIPTests()
+        : UnitTest ("GZIP", UnitTestCategories::compression)
+    {}
 
     void runTest() override
     {

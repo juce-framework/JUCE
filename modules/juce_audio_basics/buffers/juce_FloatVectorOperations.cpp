@@ -1147,7 +1147,9 @@ ScopedNoDenormals::~ScopedNoDenormals() noexcept
 class FloatVectorOperationsTests  : public UnitTest
 {
 public:
-    FloatVectorOperationsTests() : UnitTest ("FloatVectorOperations", "Audio") {}
+    FloatVectorOperationsTests()
+        : UnitTest ("FloatVectorOperations", UnitTestCategories::audio)
+    {}
 
     template <typename ValueType>
     struct TestRunner

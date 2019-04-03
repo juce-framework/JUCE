@@ -565,7 +565,9 @@ int JUCE_CALLTYPE AudioChannelSet::getAmbisonicOrderForNumChannels (int numChann
 class AudioChannelSetUnitTest  : public UnitTest
 {
 public:
-    AudioChannelSetUnitTest() : UnitTest ("AudioChannelSetUnitTest", "Audio") {}
+    AudioChannelSetUnitTest()
+        : UnitTest ("AudioChannelSetUnitTest", UnitTestCategories::audio)
+    {}
 
     void runTest() override
     {

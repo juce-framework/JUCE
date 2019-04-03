@@ -94,7 +94,9 @@ void OSCMessage::addArgument (OSCArgument arg)      { arguments.add (arg); }
 class OSCMessageTests  : public UnitTest
 {
 public:
-    OSCMessageTests() : UnitTest ("OSCMessage class", "OSC") {}
+    OSCMessageTests()
+        : UnitTest ("OSCMessage class", UnitTestCategories::osc)
+    {}
 
     void runTest()
     {

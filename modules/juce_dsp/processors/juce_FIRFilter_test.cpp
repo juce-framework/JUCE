@@ -205,7 +205,9 @@ class FIRFilterTest : public UnitTest
 
 
 public:
-    FIRFilterTest() : UnitTest ("FIR Filter", "DSP") {}
+    FIRFilterTest()
+        : UnitTest ("FIR Filter", UnitTestCategories::dsp)
+    {}
 
     void runTest() override
     {

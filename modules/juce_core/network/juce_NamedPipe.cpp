@@ -70,7 +70,7 @@ class NamedPipeTests  : public UnitTest
 public:
     //==============================================================================
     NamedPipeTests()
-        : UnitTest ("NamedPipe", "Networking")
+        : UnitTest ("NamedPipe", UnitTestCategories::networking)
     {}
 
     void runTest() override

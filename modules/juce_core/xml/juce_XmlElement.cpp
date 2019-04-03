@@ -932,7 +932,9 @@ void XmlElement::deleteAllTextElements() noexcept
 class XmlElementTests  : public UnitTest
 {
 public:
-    XmlElementTests() : UnitTest ("XmlElement", "XML") {}
+    XmlElementTests()
+        : UnitTest ("XmlElement", UnitTestCategories::xml)
+    {}
 
     void runTest() override
     {

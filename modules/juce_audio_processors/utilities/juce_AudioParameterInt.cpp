@@ -76,7 +76,9 @@ AudioParameterInt& AudioParameterInt::operator= (int newValue)
 
 struct AudioParameterIntTests  : public UnitTest
 {
-    AudioParameterIntTests() : UnitTest ("AudioParameterInt", "AudioProcessor Parameters") {}
+    AudioParameterIntTests()
+        : UnitTest ("AudioParameterInt", UnitTestCategories::audioProcessorParameters)
+    {}
 
     void runTest() override
     {

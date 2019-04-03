@@ -31,7 +31,9 @@ namespace dsp
 
 struct LinearAlgebraUnitTest  : public UnitTest
 {
-    LinearAlgebraUnitTest()  : UnitTest ("Linear Algebra UnitTests", "DSP") {}
+    LinearAlgebraUnitTest()
+        : UnitTest ("Linear Algebra UnitTests", UnitTestCategories::dsp)
+    {}
 
     struct AdditionTest
     {

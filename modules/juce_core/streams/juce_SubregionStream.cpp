@@ -86,7 +86,7 @@ bool SubregionStream::isExhausted()
 struct SubregionInputStreamTests   : public UnitTest
 {
     SubregionInputStreamTests()
-        : UnitTest ("SubregionInputStream", "Streams")
+        : UnitTest ("SubregionInputStream", UnitTestCategories::streams)
     {}
 
     void runTest() override

@@ -402,7 +402,9 @@ String OSCAddressPattern::toString() const noexcept
 class OSCAddressTests : public UnitTest
 {
 public:
-    OSCAddressTests() : UnitTest ("OSCAddress class", "OSC") {}
+    OSCAddressTests()
+        : UnitTest ("OSCAddress class", UnitTestCategories::osc)
+    {}
 
     void runTest()
     {
@@ -446,7 +448,9 @@ static OSCAddressTests OSCAddressUnitTests;
 class OSCAddressPatternTests  : public UnitTest
 {
 public:
-    OSCAddressPatternTests() : UnitTest ("OSCAddressPattern class", "OSC") {}
+    OSCAddressPatternTests()
+        : UnitTest ("OSCAddressPattern class", UnitTestCategories::osc)
+    {}
 
     void runTest()
     {
@@ -585,7 +589,9 @@ static OSCAddressPatternTests OSCAddressPatternUnitTests;
 class OSCPatternMatcherTests : public UnitTest
 {
 public:
-    OSCPatternMatcherTests() : UnitTest ("OSCAddress class / pattern matching", "OSC") {}
+    OSCPatternMatcherTests()
+        : UnitTest ("OSCAddress class / pattern matching", UnitTestCategories::osc)
+    {}
 
     void runTest()
     {

@@ -68,7 +68,9 @@ static struct OwnedArrayTest : public UnitTest
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DestructorObj)
     };
 
-    OwnedArrayTest() : UnitTest ("OwnedArray", "Containers") {}
+    OwnedArrayTest()
+        : UnitTest ("OwnedArray", UnitTestCategories::containers)
+    {}
 
     void runTest() override
     {

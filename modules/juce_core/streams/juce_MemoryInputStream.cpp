@@ -104,7 +104,7 @@ class MemoryStreamTests  : public UnitTest
 {
 public:
     MemoryStreamTests()
-        : UnitTest ("MemoryInputStream & MemoryOutputStream", "Streams")
+        : UnitTest ("MemoryInputStream & MemoryOutputStream", UnitTestCategories::streams)
     {}
 
     void runTest() override

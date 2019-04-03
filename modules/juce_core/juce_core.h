@@ -353,6 +353,10 @@ namespace juce
  #include "native/juce_android_JNIHelpers.h"
 #endif
 
+#if JUCE_UNIT_TESTS
+ #include "unit_tests/juce_UnitTestCategories.h"
+#endif
+
 #ifndef DOXYGEN
 namespace juce
 {

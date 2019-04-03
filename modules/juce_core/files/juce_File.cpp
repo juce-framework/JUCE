@@ -1011,7 +1011,9 @@ MemoryMappedFile::MemoryMappedFile (const File& file, const Range<int64>& fileRa
 class FileTests  : public UnitTest
 {
 public:
-    FileTests() : UnitTest ("Files", "Files") {}
+    FileTests()
+        : UnitTest ("Files", UnitTestCategories::files)
+    {}
 
     void runTest() override
     {

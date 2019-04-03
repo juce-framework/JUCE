@@ -630,7 +630,9 @@ bool Whirlpool::operator!= (const Whirlpool& other) const noexcept  { return ! o
 class WhirlpoolTests  : public UnitTest
 {
 public:
-    WhirlpoolTests() : UnitTest ("Whirlpool", "Cryptography") {}
+    WhirlpoolTests()
+        : UnitTest ("Whirlpool", UnitTestCategories::cryptography)
+    {}
 
     void test (const char* input, const char* expected)
     {

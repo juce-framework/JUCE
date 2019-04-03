@@ -173,7 +173,9 @@ AbstractFifo::ScopedWrite AbstractFifo::write (int numToWrite) noexcept    { ret
 class AbstractFifoTests  : public UnitTest
 {
 public:
-    AbstractFifoTests() : UnitTest ("Abstract Fifo", "Containers") {}
+    AbstractFifoTests()
+        : UnitTest ("Abstract Fifo", UnitTestCategories::containers)
+    {}
 
     struct WriteThread  : public Thread
     {

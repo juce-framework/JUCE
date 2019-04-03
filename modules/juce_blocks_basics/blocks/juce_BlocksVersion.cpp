@@ -163,7 +163,9 @@ bool BlocksVersion::operator>= (const BlocksVersion& other) const
 class BlocksVersionUnitTests  : public UnitTest
 {
 public:
-    BlocksVersionUnitTests() : UnitTest ("BlocksVersionUnitTests", "Blocks") {}
+    BlocksVersionUnitTests()
+        : UnitTest ("BlocksVersionUnitTests", UnitTestCategories::blocks)
+    {}
 
     void runTest() override
     {

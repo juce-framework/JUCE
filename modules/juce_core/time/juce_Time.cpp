@@ -612,7 +612,9 @@ Time Time::getCompilationDate()
 class TimeTests  : public UnitTest
 {
 public:
-    TimeTests() : UnitTest ("Time", "Time") {}
+    TimeTests()
+        : UnitTest ("Time", UnitTestCategories::time)
+    {}
 
     void runTest() override
     {

@@ -84,7 +84,7 @@ bool FileInputStream::setPosition (int64 pos)
 struct FileInputStreamTests   : public UnitTest
 {
     FileInputStreamTests()
-        : UnitTest ("FileInputStream", "Streams")
+        : UnitTest ("FileInputStream", UnitTestCategories::streams)
     {}
 
     void runTest() override

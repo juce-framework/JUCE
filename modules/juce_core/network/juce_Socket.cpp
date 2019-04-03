@@ -788,7 +788,7 @@ bool DatagramSocket::setEnablePortReuse (bool enabled)
 struct SocketTests : public UnitTest
 {
     SocketTests()
-        : UnitTest ("Sockets", "Networking")
+        : UnitTest ("Sockets", UnitTestCategories::networking)
     {
     }
 

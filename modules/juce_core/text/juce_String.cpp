@@ -2311,7 +2311,9 @@ static String serialiseDouble (double input)
 class StringTests  : public UnitTest
 {
 public:
-    StringTests() : UnitTest ("String class", "Text") {}
+    StringTests()
+        : UnitTest ("String class", UnitTestCategories::text)
+    {}
 
     template <class CharPointerType>
     struct TestUTFConversion

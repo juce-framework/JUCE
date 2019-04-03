@@ -263,7 +263,7 @@ void MPEChannelRemapper::zeroArrays()
 struct MPEUtilsUnitTests  : public UnitTest
 {
     MPEUtilsUnitTests()
-        : UnitTest ("MPE Utilities", "MIDI/MPE")
+        : UnitTest ("MPE Utilities", UnitTestCategories::midi)
     {}
 
     void runTest() override

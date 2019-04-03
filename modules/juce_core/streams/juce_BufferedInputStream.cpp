@@ -204,7 +204,7 @@ String BufferedInputStream::readString()
 struct BufferedInputStreamTests   : public UnitTest
 {
     BufferedInputStreamTests()
-        : UnitTest ("BufferedInputStream", "Streams")
+        : UnitTest ("BufferedInputStream", UnitTestCategories::streams)
     {}
 
     void runTest() override

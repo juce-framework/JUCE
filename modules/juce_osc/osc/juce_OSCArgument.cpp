@@ -86,7 +86,9 @@ OSCColour OSCArgument::getColour() const noexcept
 class OSCArgumentTests  : public UnitTest
 {
 public:
-    OSCArgumentTests() : UnitTest ("OSCArgument class", "OSC") {}
+    OSCArgumentTests()
+         : UnitTest ("OSCArgument class", UnitTestCategories::osc)
+    {}
 
 
     MemoryBlock getMemoryBlockWithRandomData (size_t numBytes)

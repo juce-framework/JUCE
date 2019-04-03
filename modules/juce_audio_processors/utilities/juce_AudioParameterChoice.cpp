@@ -76,7 +76,9 @@ AudioParameterChoice& AudioParameterChoice::operator= (int newValue)
 
 struct AudioParameterChoiceTests  : public UnitTest
 {
-    AudioParameterChoiceTests() : UnitTest ("AudioParameterChoice", "AudioProcessor Parameters") {}
+    AudioParameterChoiceTests()
+        : UnitTest ("AudioParameterChoice", UnitTestCategories::audioProcessorParameters)
+    {}
 
     void runTest() override
     {
