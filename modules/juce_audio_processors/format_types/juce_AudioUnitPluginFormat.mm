@@ -1358,9 +1358,11 @@ public:
         if (audioUnit != nullptr)
         {
             UInt32 paramListSize = 0;
-            AudioUnitGetPropertyInfo (audioUnit, kAudioUnitProperty_ParameterList, kAudioUnitScope_Global,
-                                      0, &paramListSize, nullptr);
-            haveParameterList = paramListSize >= 0;
+            haveParameterList = AudioUnitGetPropertyInfo (audioUnit, kAudioUnitProperty_ParameterList, kAudioUnitScope_Global,
+                                                          0, &paramListSize, nullptr) == noErr;
+
+            if (! haveParameterList)
+                return;
 
             if (paramListSize > 0)
             {
