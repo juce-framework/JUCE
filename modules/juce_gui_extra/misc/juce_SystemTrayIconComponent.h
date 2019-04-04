@@ -56,14 +56,23 @@ class JUCE_API  SystemTrayIconComponent  : public Component
 {
 public:
     //==============================================================================
+    /** Constructor. */
     SystemTrayIconComponent();
 
     /** Destructor. */
     ~SystemTrayIconComponent() override;
 
     //==============================================================================
-    /** Changes the image shown in the taskbar. */
-    void setIconImage (const Image& newImage);
+    /** Changes the image shown in the taskbar.
+
+        On Windows and Linux a full colour Image is used as an icon.
+        On macOS a template image is used, where all non-transparent regions will be
+        rendered in a monochrome colour selected dynamically by the operating system.
+
+        @param colourImage     An colour image to use as an icon on Windows and Linux
+        @param templateImage   A template image to use as an icon on macOS
+    */
+    void setIconImage (const Image& colourImage, const Image& templateImage);
 
     /** Changes the icon's tooltip (if the current OS supports this). */
     void setIconTooltip (const String& tooltip);
@@ -97,6 +106,10 @@ private:
     //==============================================================================
     JUCE_PUBLIC_IN_DLL_BUILD (class Pimpl)
     std::unique_ptr<Pimpl> pimpl;
+
+    // The new setIconImage function signature requires different images for macOS
+    // and the other platforms
+    JUCE_DEPRECATED (void setIconImage (const Image& newImage));
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SystemTrayIconComponent)
 };
