@@ -84,6 +84,7 @@ bool MPENote::operator!= (const MPENote& other) const noexcept
     return noteID != other.noteID;
 }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
@@ -91,7 +92,9 @@ bool MPENote::operator!= (const MPENote& other) const noexcept
 class MPENoteTests : public UnitTest
 {
 public:
-    MPENoteTests() : UnitTest ("MPENote class", "MIDI/MPE") {}
+    MPENoteTests()
+        : UnitTest ("MPENote class", UnitTestCategories::midi)
+    {}
 
     //==============================================================================
     void runTest() override
@@ -119,6 +122,6 @@ private:
 
 static MPENoteTests MPENoteUnitTests;
 
-#endif // JUCE_UNIT_TESTS
+#endif
 
 } // namespace juce

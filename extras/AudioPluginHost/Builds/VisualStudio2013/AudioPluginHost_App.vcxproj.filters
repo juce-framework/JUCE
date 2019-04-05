@@ -1909,9 +1909,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GridItem.cpp">
       <Filter>JUCE Modules\juce_gui_basics\layout</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GridUnitTests.cpp">
-      <Filter>JUCE Modules\juce_gui_basics\layout</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GroupComponent.cpp">
       <Filter>JUCE Modules\juce_gui_basics\layout</Filter>
     </ClCompile>
@@ -3520,6 +3517,9 @@
       <Filter>JUCE Modules\juce_core\time</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\unit_tests\juce_UnitTest.h">
+      <Filter>JUCE Modules\juce_core\unit_tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\unit_tests\juce_UnitTestCategories.h">
       <Filter>JUCE Modules\juce_core\unit_tests</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\xml\juce_XmlDocument.h">

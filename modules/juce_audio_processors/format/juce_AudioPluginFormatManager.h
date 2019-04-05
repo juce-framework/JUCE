@@ -119,7 +119,7 @@ public:
     void createPluginInstanceAsync (const PluginDescription& description,
                                     double initialSampleRate,
                                     int initialBufferSize,
-                                    std::function<void (AudioPluginInstance*, const String&)> completionCallback);
+                                    std::function<void(AudioPluginInstance*, const String&)> completionCallback);
 
     /** Checks that the file or component for this plugin actually still exists.
 

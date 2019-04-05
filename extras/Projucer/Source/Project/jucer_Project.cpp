@@ -242,6 +242,9 @@ void Project::initialiseProjectValues()
     binaryDataNamespaceValue.referTo (projectRoot, Ids::binaryDataNamespace, getUndoManager(), "BinaryData");
 
     compilerFlagSchemesValue.referTo (projectRoot, Ids::compilerFlagSchemes, getUndoManager(), Array<var>(), ",");
+
+    postExportShellCommandPosixValue.referTo (projectRoot, Ids::postExportShellCommandPosix, getUndoManager());
+    postExportShellCommandWinValue.referTo   (projectRoot, Ids::postExportShellCommandWin,   getUndoManager());
 }
 
 void Project::initialiseAudioPluginValues()
@@ -330,9 +333,13 @@ void Project::removeDefunctExporters()
 
         if (oldExporter.isValid())
         {
-            AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                         TRANS (oldExporters[key]),
-                                         TRANS ("The " + oldExporters[key]  + " Exporter is deprecated. The exporter will be removed from this project."));
+            if (ProjucerApplication::getApp().isRunningCommandLine)
+                std::cout <<  "WARNING! The " + oldExporters[key]  + " Exporter is deprecated. The exporter will be removed from this project." << std::endl;
+            else
+                AlertWindow::showMessageBox (AlertWindow::WarningIcon,
+                                             TRANS (oldExporters[key]),
+                                             TRANS ("The " + oldExporters[key]  + " Exporter is deprecated. The exporter will be removed from this project."));
+
             exporters.removeChild (oldExporter, nullptr);
         }
     }
@@ -761,7 +768,6 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
 void Project::valueTreeChildAdded (ValueTree&, ValueTree&)          { changed(); }
 void Project::valueTreeChildRemoved (ValueTree&, ValueTree&, int)   { changed(); }
 void Project::valueTreeChildOrderChanged (ValueTree&, int, int)     { changed(); }
-void Project::valueTreeParentChanged (ValueTree&)                   {}
 
 //==============================================================================
 bool Project::hasProjectBeenModified()
@@ -1045,6 +1051,14 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
                "new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
 
     props.addSearchPathProperty (headerSearchPathsValue, "Header Search Paths", "Global header search paths.");
+
+    props.add (new TextPropertyComponent (postExportShellCommandPosixValue, "Post-Export Shell Command (macOS, Linux)", 1024, false),
+               "A command that will be executed by the system shell after saving this project on macOS or Linux. "
+               "The string \"%%1%%\" will be substituted with the absolute path to the project root folder.");
+
+    props.add (new TextPropertyComponent (postExportShellCommandWinValue, "Post-Export Shell Command (Windows)", 1024, false),
+               "A command that will be executed by the system shell after saving this project on Windows. "
+               "The string \"%%1%%\" will be substituted with the absolute path to the project root folder.");
 
     props.add (new TextPropertyComponent (userNotesValue, "Notes", 32768, true),
                "Extra comments: This field is not used for code or project generation, it's just a space where you can express your thoughts.");

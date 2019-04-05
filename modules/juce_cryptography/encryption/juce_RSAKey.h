@@ -55,7 +55,7 @@ namespace juce
             $result = $result->add ($remainder->modPow ($part1, $part2));
         }
 
-        return strrev ($result->toBytes());
+        return ($result->toBytes());
     }
     @endcode
 

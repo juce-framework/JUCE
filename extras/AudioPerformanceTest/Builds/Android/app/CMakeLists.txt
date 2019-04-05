@@ -690,6 +690,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/time/juce_Time.h"
     "../../../../../modules/juce_core/unit_tests/juce_UnitTest.cpp"
     "../../../../../modules/juce_core/unit_tests/juce_UnitTest.h"
+    "../../../../../modules/juce_core/unit_tests/juce_UnitTestCategories.h"
     "../../../../../modules/juce_core/xml/juce_XmlDocument.cpp"
     "../../../../../modules/juce_core/xml/juce_XmlDocument.h"
     "../../../../../modules/juce_core/xml/juce_XmlElement.cpp"
@@ -1067,7 +1068,6 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_basics/layout/juce_Grid.h"
     "../../../../../modules/juce_gui_basics/layout/juce_GridItem.cpp"
     "../../../../../modules/juce_gui_basics/layout/juce_GridItem.h"
-    "../../../../../modules/juce_gui_basics/layout/juce_GridUnitTests.cpp"
     "../../../../../modules/juce_gui_basics/layout/juce_GroupComponent.cpp"
     "../../../../../modules/juce_gui_basics/layout/juce_GroupComponent.h"
     "../../../../../modules/juce_gui_basics/layout/juce_MultiDocumentPanel.cpp"
@@ -1975,6 +1975,7 @@ set_source_files_properties("../../../../../modules/juce_core/time/juce_Time.cpp
 set_source_files_properties("../../../../../modules/juce_core/time/juce_Time.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/unit_tests/juce_UnitTest.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/unit_tests/juce_UnitTest.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/unit_tests/juce_UnitTestCategories.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/xml/juce_XmlDocument.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/xml/juce_XmlDocument.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/xml/juce_XmlElement.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2352,7 +2353,6 @@ set_source_files_properties("../../../../../modules/juce_gui_basics/layout/juce_
 set_source_files_properties("../../../../../modules/juce_gui_basics/layout/juce_Grid.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/layout/juce_GridItem.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/layout/juce_GridItem.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_gui_basics/layout/juce_GridUnitTests.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/layout/juce_GroupComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/layout/juce_GroupComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/layout/juce_MultiDocumentPanel.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)

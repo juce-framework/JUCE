@@ -40,7 +40,7 @@
  defines:          JUCE_UNIT_TESTS=1
 
  type:             Component
- mainClass:        UnitTestClasses::UnitTestsDemo
+ mainClass:        UnitTestsDemo
 
  useLocalCopy:     1
 
@@ -53,35 +53,98 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-struct UnitTestClasses
+class UnitTestsDemo  : public Component
 {
-    class UnitTestsDemo;
-    class TestRunnerThread;
+public:
+    UnitTestsDemo()
+    {
+        setOpaque (true);
+
+        addAndMakeVisible (startTestButton);
+        startTestButton.onClick = [this] { start(); };
+
+        addAndMakeVisible (testResultsBox);
+        testResultsBox.setMultiLine (true);
+        testResultsBox.setFont (Font (Font::getDefaultMonospacedFontName(), 12.0f, Font::plain));
+
+        addAndMakeVisible (categoriesBox);
+        categoriesBox.addItem ("All Tests", 1);
+
+        auto categories = UnitTest::getAllCategories();
+        categories.sort (true);
+
+        categoriesBox.addItemList (categories, 2);
+        categoriesBox.setSelectedId (1);
+
+        logMessage ("This panel runs the built-in JUCE unit-tests from the selected category.\n");
+        logMessage ("To add your own unit-tests, see the JUCE_UNIT_TESTS macro.");
+
+        setSize (500, 500);
+    }
+
+    ~UnitTestsDemo()
+    {
+        stopTest();
+    }
 
     //==============================================================================
-    // This subclass of UnitTestRunner is used to redirect the test output to our
-    // TextBox, and to interrupt the running tests when our thread is asked to stop..
-    class CustomTestRunner  : public UnitTestRunner
+    void paint (Graphics& g) override
     {
-    public:
-        CustomTestRunner (TestRunnerThread& trt)  : owner (trt) {}
+        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
+                                           Colours::grey));
+    }
 
-        void logMessage (const String& message) override
+    void resized() override
+    {
+        auto bounds = getLocalBounds().reduced (6);
+
+        auto topSlice = bounds.removeFromTop (25);
+        startTestButton.setBounds (topSlice.removeFromLeft (200));
+        topSlice.removeFromLeft (10);
+        categoriesBox  .setBounds (topSlice.removeFromLeft (250));
+
+        bounds.removeFromTop (5);
+        testResultsBox.setBounds (bounds);
+    }
+
+    void start()
+    {
+        startTest (categoriesBox.getText());
+    }
+
+    void startTest (const String& category)
+    {
+        testResultsBox.clear();
+        startTestButton.setEnabled (false);
+
+        currentTestThread.reset (new TestRunnerThread (*this, category));
+        currentTestThread->startThread();
+    }
+
+    void stopTest()
+    {
+        if (currentTestThread.get() != nullptr)
         {
-            owner.logMessage (message);
+            currentTestThread->stopThread (15000);
+            currentTestThread.reset();
         }
+    }
 
-        bool shouldAbortTests() override
-        {
-            return owner.threadShouldExit();
-        }
+    void logMessage (const String& message)
+    {
+        testResultsBox.moveCaretToEnd();
+        testResultsBox.insertTextAtCaret (message + newLine);
+        testResultsBox.moveCaretToEnd();
+    }
 
-    private:
-        TestRunnerThread& owner;
+    void testFinished()
+    {
+        stopTest();
+        startTestButton.setEnabled (true);
+        logMessage (newLine + "*** Tests finished ***");
+    }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomTestRunner)
-    };
-
+private:
     //==============================================================================
     class TestRunnerThread  : public Thread,
                               private Timer
@@ -108,10 +171,13 @@ struct UnitTestClasses
 
         void logMessage (const String& message)
         {
-            MessageManagerLock mm (this);
+            WeakReference<UnitTestsDemo> safeOwner (&owner);
 
-            if (mm.lockWasGained()) // this lock may fail if this thread has been told to stop
-                owner.logMessage (message);
+            MessageManager::callAsync ([=]
+            {
+                if (auto* o = safeOwner.get())
+                    o->logMessage (message);
+            });
         }
 
         void timerCallback() override
@@ -121,117 +187,46 @@ struct UnitTestClasses
         }
 
     private:
+        //==============================================================================
+        // This subclass of UnitTestRunner is used to redirect the test output to our
+        // TextBox, and to interrupt the running tests when our thread is asked to stop..
+        class CustomTestRunner  : public UnitTestRunner
+        {
+        public:
+            CustomTestRunner (TestRunnerThread& trt)  : owner (trt) {}
+
+            void logMessage (const String& message) override
+            {
+                owner.logMessage (message);
+            }
+
+            bool shouldAbortTests() override
+            {
+                return owner.threadShouldExit();
+            }
+
+        private:
+            TestRunnerThread& owner;
+
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomTestRunner)
+        };
+
         UnitTestsDemo& owner;
         const String category;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TestRunnerThread)
     };
+    std::unique_ptr<TestRunnerThread> currentTestThread;
 
+    TextButton startTestButton { "Run Unit Tests..." };
+    ComboBox categoriesBox;
+    TextEditor testResultsBox;
 
-    //==============================================================================
-    class UnitTestsDemo  : public Component
+    void lookAndFeelChanged() override
     {
-    public:
-        UnitTestsDemo()
-        {
-            setOpaque (true);
+        testResultsBox.applyFontToAllText (testResultsBox.getFont());
+    }
 
-            addAndMakeVisible (startTestButton);
-            startTestButton.onClick = [this] { start(); };
-
-            addAndMakeVisible (testResultsBox);
-            testResultsBox.setMultiLine (true);
-            testResultsBox.setFont (Font (Font::getDefaultMonospacedFontName(), 12.0f, Font::plain));
-
-            addAndMakeVisible (categoriesBox);
-            categoriesBox.addItem ("All Tests", 1);
-
-            auto categories = UnitTest::getAllCategories();
-            categories.sort (true);
-
-            categoriesBox.addItemList (categories, 2);
-            categoriesBox.setSelectedId (1);
-
-            logMessage ("This panel runs the built-in JUCE unit-tests from the selected category.\n");
-            logMessage ("To add your own unit-tests, see the JUCE_UNIT_TESTS macro.");
-
-            setSize (500, 500);
-        }
-
-        ~UnitTestsDemo()
-        {
-            stopTest();
-        }
-
-        //==============================================================================
-        void paint (Graphics& g) override
-        {
-            g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
-                                               Colours::grey));
-        }
-
-        void resized() override
-        {
-            auto bounds = getLocalBounds().reduced (6);
-
-            auto topSlice = bounds.removeFromTop (25);
-            startTestButton.setBounds (topSlice.removeFromLeft (200));
-            topSlice.removeFromLeft (10);
-            categoriesBox  .setBounds (topSlice.removeFromLeft (250));
-
-            bounds.removeFromTop (5);
-            testResultsBox.setBounds (bounds);
-        }
-
-        void start()
-        {
-            startTest (categoriesBox.getText());
-        }
-
-        void startTest (const String& category)
-        {
-            testResultsBox.clear();
-            startTestButton.setEnabled (false);
-
-            currentTestThread.reset (new TestRunnerThread (*this, category));
-            currentTestThread->startThread();
-        }
-
-        void stopTest()
-        {
-            if (currentTestThread.get() != nullptr)
-            {
-                currentTestThread->stopThread (15000);
-                currentTestThread.reset();
-            }
-        }
-
-        void logMessage (const String& message)
-        {
-            testResultsBox.moveCaretToEnd();
-            testResultsBox.insertTextAtCaret (message + newLine);
-            testResultsBox.moveCaretToEnd();
-        }
-
-        void testFinished()
-        {
-            stopTest();
-            startTestButton.setEnabled (true);
-            logMessage (newLine + "*** Tests finished ***");
-        }
-
-    private:
-        std::unique_ptr<TestRunnerThread> currentTestThread;
-
-        TextButton startTestButton { "Run Unit Tests..." };
-        ComboBox categoriesBox;
-        TextEditor testResultsBox;
-
-        void lookAndFeelChanged() override
-        {
-            testResultsBox.applyFontToAllText (testResultsBox.getFont());
-        }
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UnitTestsDemo)
-    };
+    JUCE_DECLARE_WEAK_REFERENCEABLE (UnitTestsDemo)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UnitTestsDemo)
 };

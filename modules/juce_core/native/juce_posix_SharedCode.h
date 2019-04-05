@@ -1155,7 +1155,7 @@ public:
                 argv.add (nullptr);
 
                 execvp (exe.toRawUTF8(), argv.getRawDataPointer());
-                exit (-1);
+                _exit (-1);
             }
             else
             {
@@ -1352,7 +1352,7 @@ struct HighResolutionTimer::Pimpl
     }
 
     HighResolutionTimer& owner;
-    std::atomic<int> periodMs;
+    std::atomic<int> periodMs { 0 };
 
 private:
     pthread_t thread = {};

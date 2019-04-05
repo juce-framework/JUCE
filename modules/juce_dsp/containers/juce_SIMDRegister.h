@@ -329,6 +329,11 @@ struct SIMDRegister
     inline ElementType sum() const noexcept          { return CmplxOps::sum (value); }
 
     //==============================================================================
+    /** Truncates each element to its integer part.
+        Effectively discards the fractional part of each element. A.k.a. round to zero. */
+    static inline SIMDRegister JUCE_VECTOR_CALLTYPE truncate (SIMDRegister a) noexcept    { return { NativeOps::truncate (a.value) }; }
+
+    //==============================================================================
     /** Returns the absolute value of each element. */
     static inline SIMDRegister JUCE_VECTOR_CALLTYPE abs (SIMDRegister a) noexcept
     {
@@ -352,13 +357,6 @@ struct SIMDRegister
     {
         return snapPointerToAlignment (ptr, SIMDRegisterSize);
     }
-
-   #ifndef DOXYGEN
-    static inline const ElementType* getNextSIMDAlignedPtr (const ElementType* ptr) noexcept
-    {
-        return snapPointerToAlignment (ptr, SIMDRegisterSize);
-    }
-   #endif
 
 private:
     static inline vMaskType JUCE_VECTOR_CALLTYPE toMaskType (vSIMDType a) noexcept

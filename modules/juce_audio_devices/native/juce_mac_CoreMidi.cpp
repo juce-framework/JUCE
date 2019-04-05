@@ -197,9 +197,10 @@ namespace CoreMidiHelpers
         }
        #endif
 
-        if (uniqueID.isNotEmpty())
-            uniqueID += "." + deviceName + (isInput ? ".input" : ".output");
+        if (uniqueID.isEmpty())
+            uniqueID = String (Random::getSystemRandom().nextInt (1024));
 
+        uniqueID += "." + deviceName + (isInput ? ".input" : ".output");
         return uniqueID.hashCode();
     }
 
@@ -458,7 +459,19 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
         MIDIEndpointRef endpoint;
         ScopedCFString name (deviceName);
 
-        if (CHECK_ERROR (MIDIDestinationCreate (client, name.cfString, midiInputProc, mpc.get(), &endpoint)))
+        auto err = MIDIDestinationCreate (client, name.cfString, midiInputProc, mpc.get(), &endpoint);
+
+       #if JUCE_IOS
+        if (err == kMIDINotPermitted)
+        {
+            // If you've hit this assertion then you probably haven't enabled the "Audio Background Capability"
+            // setting in the iOS exporter for your app - this is required if you want to create a MIDI device!
+            jassertfalse;
+            return nullptr;
+        }
+       #endif
+
+        if (CHECK_ERROR (err))
         {
             auto deviceIdentifier = createUniqueIDForMidiPort (deviceName, true);
 
@@ -581,7 +594,19 @@ MidiOutput* MidiOutput::createNewDevice (const String& deviceName)
 
         ScopedCFString name (deviceName);
 
-        if (CHECK_ERROR (MIDISourceCreate (client, name.cfString, &endpoint)))
+        auto err = MIDISourceCreate (client, name.cfString, &endpoint);
+
+       #if JUCE_IOS
+        if (err == kMIDINotPermitted)
+        {
+            // If you've hit this assertion then you probably haven't enabled the "Audio Background Capability"
+            // setting in the iOS exporter for your app - this is required if you want to create a MIDI device!
+            jassertfalse;
+            return nullptr;
+        }
+       #endif
+
+        if (CHECK_ERROR (err))
         {
             auto deviceIdentifier = createUniqueIDForMidiPort (deviceName, true);
 

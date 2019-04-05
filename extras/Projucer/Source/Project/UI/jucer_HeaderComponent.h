@@ -70,9 +70,6 @@ private:
     void timerCallback() override;
 
     //==========================================================================
-    void valueTreePropertyChanged (ValueTree&, const Identifier&) override       {}
-    void valueTreeParentChanged (ValueTree&) override                            {}
-
     void valueTreeChildAdded (ValueTree& parentTree, ValueTree&) override        { updateIfNeeded (parentTree); }
     void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&, int) override { updateIfNeeded (parentTree); }
     void valueTreeChildOrderChanged (ValueTree& parentTree, int, int) override   { updateIfNeeded (parentTree); }

@@ -86,6 +86,7 @@ void OSCMessage::addBlob (MemoryBlock blob)         { arguments.add (OSCArgument
 void OSCMessage::addColour (OSCColour colour)       { arguments.add (OSCArgument (colour)); }
 void OSCMessage::addArgument (OSCArgument arg)      { arguments.add (arg); }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
@@ -93,7 +94,9 @@ void OSCMessage::addArgument (OSCArgument arg)      { arguments.add (arg); }
 class OSCMessageTests  : public UnitTest
 {
 public:
-    OSCMessageTests() : UnitTest ("OSCMessage class", "OSC") {}
+    OSCMessageTests()
+        : UnitTest ("OSCMessage class", UnitTestCategories::osc)
+    {}
 
     void runTest()
     {
@@ -210,6 +213,6 @@ public:
 
 static OSCMessageTests OSCMessageUnitTests;
 
-#endif // JUCE_UNIT_TESTS
+#endif
 
 } // namespace juce

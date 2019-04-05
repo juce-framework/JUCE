@@ -304,6 +304,9 @@ public:
     /** Sets the current program as the block's default state. */
     virtual void saveProgramAsDefault() = 0;
 
+    /** Resets the loaded program to the block's default state. */
+    virtual void resetProgramToDefault() = 0;
+
     //==============================================================================
     /** Metadata for a given config item */
     struct ConfigMetaData
@@ -436,11 +439,11 @@ public:
 
     //==============================================================================
     /** Allows the user to provide a function that will receive log messages from the block. */
-    virtual void setLogger (std::function<void(const String&)> loggingCallback) = 0;
+    virtual void setLogger (std::function<void(const Block& block, const String&)> loggingCallback) = 0;
 
     /** Sends a firmware update packet to a block, and waits for a reply. Returns an error code. */
     virtual bool sendFirmwareUpdatePacket (const uint8* data, uint8 size,
-                                           std::function<void (uint8, uint32)> packetAckCallback) = 0;
+                                           std::function<void(uint8, uint32)> packetAckCallback) = 0;
 
     /** Provides a callback that will be called when a config changes. */
     virtual void setConfigChangedCallback (std::function<void(Block&, const ConfigMetaData&, uint32)>) = 0;

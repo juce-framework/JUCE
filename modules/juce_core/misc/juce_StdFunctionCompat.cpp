@@ -98,7 +98,9 @@ namespace FunctionTestsHelpers
 class FunctionTests  : public UnitTest
 {
 public:
-    FunctionTests() : UnitTest ("Function", "Function") {}
+    FunctionTests()
+        : UnitTest ("Function", UnitTestCategories::function)
+    {}
 
     void runTest() override
     {

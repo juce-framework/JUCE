@@ -668,7 +668,9 @@ void OSCReceiver::registerFormatErrorHandler (FormatErrorHandler handler)
 class OSCInputStreamTests  : public UnitTest
 {
 public:
-    OSCInputStreamTests() : UnitTest ("OSCInputStream class", "OSC") {}
+    OSCInputStreamTests()
+        : UnitTest ("OSCInputStream class", UnitTestCategories::osc)
+    {}
 
     void runTest()
     {
@@ -1188,6 +1190,6 @@ public:
 
 static OSCInputStreamTests OSCInputStreamUnitTests;
 
-#endif // JUCE_UNIT_TESTS
+#endif
 
 } // namespace juce

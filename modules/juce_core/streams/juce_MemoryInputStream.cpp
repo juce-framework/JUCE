@@ -95,6 +95,8 @@ void MemoryInputStream::skipNextBytes (int64 numBytesToSkip)
         setPosition (getPosition() + numBytesToSkip);
 }
 
+
+//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
@@ -102,7 +104,7 @@ class MemoryStreamTests  : public UnitTest
 {
 public:
     MemoryStreamTests()
-        : UnitTest ("MemoryInputStream & MemoryOutputStream", "Streams")
+        : UnitTest ("MemoryInputStream & MemoryOutputStream", UnitTestCategories::streams)
     {}
 
     void runTest() override

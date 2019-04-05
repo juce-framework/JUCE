@@ -255,6 +255,7 @@ void MPEChannelRemapper::zeroArrays()
     }
 }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
@@ -262,7 +263,7 @@ void MPEChannelRemapper::zeroArrays()
 struct MPEUtilsUnitTests  : public UnitTest
 {
     MPEUtilsUnitTests()
-        : UnitTest ("MPE Utilities", "MIDI/MPE")
+        : UnitTest ("MPE Utilities", UnitTestCategories::midi)
     {}
 
     void runTest() override
@@ -475,4 +476,5 @@ struct MPEUtilsUnitTests  : public UnitTest
 static MPEUtilsUnitTests MPEUtilsUnitTests;
 
 #endif
+
 } // namespace juce

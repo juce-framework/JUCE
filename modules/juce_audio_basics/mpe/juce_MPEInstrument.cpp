@@ -607,7 +607,11 @@ bool MPEInstrument::isMasterChannel (int midiChannel) const noexcept
     if (legacyMode.isEnabled)
         return false;
 
-    return (midiChannel == 1 || midiChannel == 16);
+    const auto lowerZone = zoneLayout.getLowerZone();
+    const auto upperZone = zoneLayout.getUpperZone();
+
+    return (lowerZone.isActive() && midiChannel == lowerZone.getMasterChannel())
+            || (upperZone.isActive() && midiChannel == upperZone.getMasterChannel());
 }
 
 bool MPEInstrument::isUsingChannel (int midiChannel) const noexcept
@@ -787,6 +791,7 @@ void MPEInstrument::releaseAllNotes()
     notes.clear();
 }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
@@ -795,7 +800,7 @@ class MPEInstrumentTests : public UnitTest
 {
 public:
     MPEInstrumentTests()
-        : UnitTest ("MPEInstrument class", "MIDI/MPE")
+        : UnitTest ("MPEInstrument class", UnitTestCategories::midi)
     {
         // using lower and upper MPE zones with the following layout for testing
         //
@@ -2282,6 +2287,6 @@ private:
 
 static MPEInstrumentTests MPEInstrumentUnitTests;
 
-#endif // JUCE_UNIT_TESTS
+#endif
 
 } // namespace juce

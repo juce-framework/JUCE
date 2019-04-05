@@ -28,13 +28,13 @@ For further help getting started, please refer to the JUCE
 [documentation](https://juce.com/learn/documentation) and
 [tutorials](https://juce.com/learn/tutorials).
 
-## System Requirements
+## Minimum System Requirements
 #### Building JUCE Projects
 - __macOS__: macOS 10.11 and Xcode 7.3.1
 - __Windows__: Windows 8.1 and Visual Studio 2013 64-bit
 - __Linux__: GCC 4.8
 
-#### Minimum Deployment Targets
+#### Deployment Targets
 - __macOS__: macOS 10.7
 - __Windows__: Windows Vista
 - __Linux__: Mainstream Linux distributions
@@ -58,6 +58,6 @@ There are multiple commercial licensing tiers for JUCE 5, with different terms f
 - JUCE Personal (developers or startup businesses with revenue under 50K USD) - free
 - JUCE Indie (small businesses with revenue under 200K USD) - $35/month
 - JUCE Pro (no revenue limit) - $65/month
-- JUCE Eductational (no revenue limit) - free for bona fide educational institutes
+- JUCE Educational (no revenue limit) - free for bona fide educational institutes
 
 For full terms see [LICENSE.md](LICENSE.md).

@@ -83,6 +83,7 @@ public:
     using SampleType     = ContextSampleType;
     /** The type of audio block that this context handles. */
     using AudioBlockType = AudioBlock<SampleType>;
+    using ConstAudioBlockType = AudioBlock<const SampleType>;
 
     /** Creates a ProcessContextReplacing that uses the given audio block.
         Note that the caller must not delete the block while it is still in use by this object!
@@ -93,10 +94,10 @@ public:
     ProcessContextReplacing (ProcessContextReplacing&&) = default;
 
     /** Returns the audio block to use as the input to a process function. */
-    const AudioBlockType& getInputBlock() const noexcept        { return ioBlock; }
+    const ConstAudioBlockType& getInputBlock() const noexcept   { return constBlock; }
 
     /** Returns the audio block to use as the output to a process function. */
-    AudioBlockType& getOutputBlock() const noexcept             { return const_cast<AudioBlockType&> (ioBlock); }
+    AudioBlockType& getOutputBlock() const noexcept             { return ioBlock; }
 
     /** All process context classes will define this constant method so that templated
         code can determine whether the input and output blocks refer to the same buffer,
@@ -111,6 +112,7 @@ public:
 
 private:
     AudioBlockType& ioBlock;
+    ConstAudioBlockType constBlock { ioBlock };
 };
 
 //==============================================================================
@@ -134,11 +136,12 @@ public:
     using SampleType     = ContextSampleType;
     /** The type of audio block that this context handles. */
     using AudioBlockType = AudioBlock<SampleType>;
+    using ConstAudioBlockType = AudioBlock<const SampleType>;
 
     /** Creates a ProcessContextReplacing that uses the given input and output blocks.
         Note that the caller must not delete these blocks while they are still in use by this object!
     */
-    ProcessContextNonReplacing (const AudioBlockType& input, AudioBlockType& output) noexcept
+    ProcessContextNonReplacing (const ConstAudioBlockType& input, AudioBlockType& output) noexcept
         : inputBlock (input), outputBlock (output)
     {
         // If the input and output blocks are the same then you should use
@@ -150,10 +153,10 @@ public:
     ProcessContextNonReplacing (ProcessContextNonReplacing&&) = default;
 
     /** Returns the audio block to use as the input to a process function. */
-    const AudioBlockType& getInputBlock() const noexcept        { return inputBlock; }
+    const ConstAudioBlockType& getInputBlock() const noexcept   { return inputBlock; }
 
     /** Returns the audio block to use as the output to a process function. */
-    AudioBlockType& getOutputBlock() const noexcept             { return const_cast<AudioBlockType&> (outputBlock); }
+    AudioBlockType& getOutputBlock() const noexcept             { return outputBlock; }
 
     /** All process context classes will define this constant method so that templated
         code can determine whether the input and output blocks refer to the same buffer,
@@ -167,7 +170,7 @@ public:
     bool isBypassed = false;
 
 private:
-    const AudioBlockType& inputBlock;
+    ConstAudioBlockType inputBlock;
     AudioBlockType& outputBlock;
 };
 

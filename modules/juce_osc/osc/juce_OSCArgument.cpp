@@ -78,6 +78,7 @@ OSCColour OSCArgument::getColour() const noexcept
     return { 0, 0, 0, 0 };
 }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
@@ -85,7 +86,9 @@ OSCColour OSCArgument::getColour() const noexcept
 class OSCArgumentTests  : public UnitTest
 {
 public:
-    OSCArgumentTests() : UnitTest ("OSCArgument class", "OSC") {}
+    OSCArgumentTests()
+         : UnitTest ("OSCArgument class", UnitTestCategories::osc)
+    {}
 
 
     MemoryBlock getMemoryBlockWithRandomData (size_t numBytes)
@@ -242,6 +245,6 @@ public:
 
 static OSCArgumentTests OSCArgumentUnitTests;
 
-#endif // JUCE_UNIT_TESTS
+#endif
 
 } // namespace juce

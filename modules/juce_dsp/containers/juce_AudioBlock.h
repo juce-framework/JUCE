@@ -32,10 +32,17 @@ namespace dsp
 #ifndef DOXYGEN
 namespace SampleTypeHelpers // Internal classes needed for handling sample type classes
 {
-    template <typename Container> struct ElementType { using Type = typename Container::value_type; };
-    template <> struct ElementType<float>            { using Type = float;  };
-    template <> struct ElementType<double>           { using Type = double; };
-    template <> struct ElementType<long double>      { using Type = long double; };
+    template <typename T, bool = std::is_floating_point<T>::value>
+    struct ElementType
+    {
+        using Type = T;
+    };
+
+    template <typename T>
+    struct ElementType<T, false>
+    {
+        using Type = typename T::value_type;
+    };
 }
 #endif
 
@@ -56,6 +63,15 @@ namespace SampleTypeHelpers // Internal classes needed for handling sample type 
 template <typename SampleType>
 class AudioBlock
 {
+private:
+    template <typename OtherSampleType>
+    using MayUseConvertingConstructor =
+        std::enable_if_t<std::is_same<std::remove_const_t<SampleType>,
+                                      std::remove_const_t<OtherSampleType>>::value
+                             && std::is_const<SampleType>::value
+                             && ! std::is_const<OtherSampleType>::value,
+                         int>;
+
 public:
     //==============================================================================
     using NumericType = typename SampleTypeHelpers::ElementType<SampleType>::Type;
@@ -127,7 +143,8 @@ public:
         Therefore it is the user's responsibility to ensure that the buffer is retained
         throughout the life-time of the AudioBlock without being modified.
     */
-    AudioBlock (AudioBuffer<SampleType>& buffer) noexcept
+    template <typename OtherSampleType>
+    AudioBlock (AudioBuffer<OtherSampleType>& buffer) noexcept
         : channels (buffer.getArrayOfWritePointers()),
           numChannels (static_cast<ChannelCountType> (buffer.getNumChannels())),
           numSamples (static_cast<size_t> (buffer.getNumSamples()))
@@ -139,7 +156,8 @@ public:
         Therefore it is the user's responsibility to ensure that the buffer is retained
         throughout the life-time of the AudioBlock without being modified.
     */
-    AudioBlock (AudioBuffer<SampleType>& buffer, size_t startSampleIndex) noexcept
+    template <typename OtherSampleType>
+    AudioBlock (AudioBuffer<OtherSampleType>& buffer, size_t startSampleIndex) noexcept
         : channels (buffer.getArrayOfWritePointers()),
           numChannels (static_cast<ChannelCountType> (buffer.getNumChannels())),
           startSample (startSampleIndex),
@@ -151,16 +169,45 @@ public:
     AudioBlock (const AudioBlock& other) noexcept = default;
     AudioBlock& operator= (const AudioBlock& other) noexcept = default;
 
-    //==============================================================================
-    bool operator== (const AudioBlock& other) const noexcept
+    template <typename OtherSampleType, MayUseConvertingConstructor<OtherSampleType> = 0>
+    AudioBlock (const AudioBlock<OtherSampleType>& other) noexcept
+        : channels { other.channels },
+          numChannels { other.numChannels },
+          startSample { other.startSample },
+          numSamples { other.numSamples }
     {
-        return std::equal (channels,       channels + numChannels,
-                           other.channels, other.channels + other.numChannels)
-                   && startSample == other.startSample
-                   && numSamples == other.numSamples;
     }
 
-    bool operator!= (const AudioBlock& other) const noexcept
+    template <typename OtherSampleType, MayUseConvertingConstructor<OtherSampleType> = 0>
+    AudioBlock& operator= (const AudioBlock<OtherSampleType>& other) noexcept
+    {
+        AudioBlock copy { other };
+        swap (copy);
+        return *this;
+    }
+
+    void swap (AudioBlock& other) noexcept
+    {
+        std::swap (other.channels, channels);
+        std::swap (other.numChannels, numChannels);
+        std::swap (other.startSample, startSample);
+        std::swap (other.numSamples, numSamples);
+    }
+
+    //==============================================================================
+    template <typename OtherSampleType>
+    bool operator== (const AudioBlock<OtherSampleType>& other) const noexcept
+    {
+        return std::equal (channels,
+                           channels + numChannels,
+                           other.channels,
+                           other.channels + other.numChannels)
+               && startSample == other.startSample
+               && numSamples == other.numSamples;
+    }
+
+    template <typename OtherSampleType>
+    bool operator!= (const AudioBlock<OtherSampleType>& other) const noexcept
     {
         return ! (*this == other);
     }
@@ -196,7 +243,7 @@ public:
         @param channelStart       First channel of the subset
         @param numChannelsToUse   Count of channels in the subset
     */
-    forcedinline AudioBlock getSubsetChannelBlock (size_t channelStart, size_t numChannelsToUse) noexcept
+    forcedinline AudioBlock getSubsetChannelBlock (size_t channelStart, size_t numChannelsToUse) const noexcept
     {
         jassert (channelStart < numChannels);
         jassert ((channelStart + numChannelsToUse) <= numChannels);
@@ -264,7 +311,8 @@ public:
     }
 
     /** Copy the values in src to the receiver. */
-    forcedinline AudioBlock& copy (AudioBlock src) noexcept
+    template <typename OtherSampleType>
+    forcedinline AudioBlock& copy (const AudioBlock<OtherSampleType>& src) noexcept
     {
         auto maxChannels = jmin (src.numChannels, numChannels);
         auto n = static_cast<int> (jmin (src.numSamples, numSamples) * sizeFactor);
@@ -381,7 +429,8 @@ public:
     }
 
     /** Adds the source values to the receiver. */
-    forcedinline AudioBlock& add (AudioBlock src) noexcept
+    template <typename OtherSampleType>
+    forcedinline AudioBlock& add (AudioBlock<OtherSampleType> src) noexcept
     {
         jassert (numChannels == src.numChannels);
         auto n = static_cast<int> (jmin (numSamples, src.numSamples) * sizeFactor);
@@ -393,7 +442,8 @@ public:
     }
 
     /** Adds a fixed value to each source value and stores it in the destination array of the receiver. */
-    forcedinline AudioBlock& JUCE_VECTOR_CALLTYPE add (AudioBlock src, SampleType value) noexcept
+    template <typename OtherSampleType>
+    forcedinline AudioBlock& JUCE_VECTOR_CALLTYPE add (AudioBlock<OtherSampleType> src, SampleType value) noexcept
     {
         jassert (numChannels == src.numChannels);
         auto n = static_cast<int> (jmin (numSamples, src.numSamples) * sizeFactor);
@@ -405,7 +455,8 @@ public:
     }
 
     /** Adds each source1 value to the corresponding source2 value and stores it in the destination array of the receiver. */
-    forcedinline AudioBlock& add (AudioBlock src1, AudioBlock src2) noexcept
+    template <typename Src1SampleType, typename Src2SampleType>
+    forcedinline AudioBlock& add (AudioBlock<Src1SampleType> src1, AudioBlock<Src2SampleType> src2) noexcept
     {
         jassert (numChannels == src1.numChannels && src1.numChannels == src2.numChannels);
         auto n = static_cast<int> (jmin (numSamples, src1.numSamples, src2.numSamples) * sizeFactor);
@@ -423,7 +474,8 @@ public:
     }
 
     /** Subtracts the source values from the receiver. */
-    forcedinline AudioBlock& subtract (AudioBlock src) noexcept
+    template <typename OtherSampleType>
+    forcedinline AudioBlock& subtract (AudioBlock<OtherSampleType> src) noexcept
     {
         jassert (numChannels == src.numChannels);
         auto n = static_cast<int> (jmin (numSamples, src.numSamples) * sizeFactor);
@@ -435,13 +487,15 @@ public:
     }
 
     /** Subtracts a fixed value from each source value and stores it in the destination array of the receiver. */
-    forcedinline AudioBlock& JUCE_VECTOR_CALLTYPE subtract (AudioBlock src, SampleType value) noexcept
+    template <typename OtherSampleType>
+    forcedinline AudioBlock& JUCE_VECTOR_CALLTYPE subtract (AudioBlock<OtherSampleType> src, SampleType value) noexcept
     {
         return add (src, static_cast<SampleType> (-1.0) * value);
     }
 
     /** Subtracts each source2 value from the corresponding source1 value and stores it in the destination array of the receiver. */
-    forcedinline AudioBlock& subtract (AudioBlock src1, AudioBlock src2) noexcept
+    template <typename Src1SampleType, typename Src2SampleType>
+    forcedinline AudioBlock& subtract (AudioBlock<Src1SampleType> src1, AudioBlock<Src2SampleType> src2) noexcept
     {
         jassert (numChannels == src1.numChannels && src1.numChannels == src2.numChannels);
         auto n = static_cast<int> (jmin (numSamples, src1.numSamples, src2.numSamples) * sizeFactor);
@@ -464,7 +518,8 @@ public:
     }
 
     /** Multiplies the source values to the receiver. */
-    forcedinline AudioBlock& multiply (AudioBlock src) noexcept
+    template <typename OtherSampleType>
+    forcedinline AudioBlock& multiply (AudioBlock<OtherSampleType> src) noexcept
     {
         jassert (numChannels == src.numChannels);
         auto n = static_cast<int> (jmin (numSamples, src.numSamples) * sizeFactor);
@@ -476,7 +531,8 @@ public:
     }
 
     /** Multiplies a fixed value to each source value and stores it in the destination array of the receiver. */
-    forcedinline AudioBlock& JUCE_VECTOR_CALLTYPE multiply (AudioBlock src, SampleType value) noexcept
+    template <typename OtherSampleType>
+    forcedinline AudioBlock& JUCE_VECTOR_CALLTYPE multiply (AudioBlock<OtherSampleType> src, SampleType value) noexcept
     {
         jassert (numChannels == src.numChannels);
         auto n = static_cast<int> (jmin (numSamples, src.numSamples) * sizeFactor);
@@ -488,7 +544,8 @@ public:
     }
 
     /** Multiplies each source1 value to the corresponding source2 value and stores it in the destination array of the receiver. */
-    forcedinline AudioBlock& multiply (AudioBlock src1, AudioBlock src2) noexcept
+    template <typename Src1SampleType, typename Src2SampleType>
+    forcedinline AudioBlock& multiply (AudioBlock<Src1SampleType> src1, AudioBlock<Src2SampleType> src2) noexcept
     {
         jassert (numChannels == src1.numChannels && src1.numChannels == src2.numChannels);
         auto n = static_cast<int> (jmin (numSamples, src1.numSamples, src2.numSamples) * sizeFactor);
@@ -522,8 +579,8 @@ public:
     }
 
     /** Multiplies all channels of the source by a smoothly changing value and stores them in the receiver. */
-    template <typename SmoothingType>
-    AudioBlock& multiply (AudioBlock src, SmoothedValue<SampleType, SmoothingType>& value) noexcept
+    template <typename OtherSampleType, typename SmoothingType>
+    AudioBlock& multiply (AudioBlock<OtherSampleType> src, SmoothedValue<SampleType, SmoothingType>& value) noexcept
     {
         jassert (numChannels == src.numChannels);
 
@@ -548,7 +605,8 @@ public:
     }
 
     /** Multiplies each value in src with factor and adds the result to the receiver. */
-    forcedinline AudioBlock& JUCE_VECTOR_CALLTYPE addWithMultiply (AudioBlock src, SampleType factor) noexcept
+    template <typename OtherSampleType>
+    forcedinline AudioBlock& JUCE_VECTOR_CALLTYPE addWithMultiply (AudioBlock<OtherSampleType> src, SampleType factor) noexcept
     {
         jassert (numChannels == src.numChannels);
         auto n = static_cast<int> (jmin (numSamples, src.numSamples) * sizeFactor);
@@ -560,7 +618,8 @@ public:
     }
 
     /** Multiplies each value in srcA with the corresponding value in srcB and adds the result to the receiver. */
-    forcedinline AudioBlock& addWithMultiply (AudioBlock src1, AudioBlock src2) noexcept
+    template <typename Src1SampleType, typename Src2SampleType>
+    forcedinline AudioBlock& addWithMultiply (AudioBlock<Src1SampleType> src1, AudioBlock<Src2SampleType> src2) noexcept
     {
         jassert (numChannels == src1.numChannels && src1.numChannels == src2.numChannels);
         auto n = static_cast<int> (jmin (numSamples, src1.numSamples, src2.numSamples) * sizeFactor);
@@ -578,7 +637,8 @@ public:
     }
 
     /** Negates each value of source and stores it in the receiver. */
-    forcedinline AudioBlock& replaceWithNegativeOf (AudioBlock src) noexcept
+    template <typename OtherSampleType>
+    forcedinline AudioBlock& replaceWithNegativeOf (AudioBlock<OtherSampleType> src) noexcept
     {
         jassert (numChannels == src.numChannels);
         auto n = static_cast<int> (jmin (numSamples, src.numSamples) * sizeFactor);
@@ -590,7 +650,8 @@ public:
     }
 
     /** Takes the absolute value of each element of src and stores it inside the receiver. */
-    forcedinline AudioBlock& replaceWithAbsoluteValueOf (AudioBlock src) noexcept
+    template <typename OtherSampleType>
+    forcedinline AudioBlock& replaceWithAbsoluteValueOf (AudioBlock<OtherSampleType> src) noexcept
     {
         jassert (numChannels == src.numChannels);
         auto n = static_cast<int> (jmin (numSamples, src.numSamples) * sizeFactor);
@@ -602,7 +663,8 @@ public:
     }
 
     /** Each element of receiver will be the minimum of the corresponding element of the source arrays. */
-    forcedinline AudioBlock& min (AudioBlock src1, AudioBlock src2) noexcept
+    template <typename Src1SampleType, typename Src2SampleType>
+    forcedinline AudioBlock& min (AudioBlock<Src1SampleType> src1, AudioBlock<Src2SampleType> src2) noexcept
     {
         jassert (numChannels == src1.numChannels && src1.numChannels == src2.numChannels);
         auto n = static_cast<int> (jmin (src1.numSamples, src2.numSamples, numSamples) * sizeFactor);
@@ -614,7 +676,8 @@ public:
     }
 
     /** Each element of the receiver will be the maximum of the corresponding element of the source arrays. */
-    forcedinline AudioBlock& max (AudioBlock src1, AudioBlock src2) noexcept
+    template <typename Src1SampleType, typename Src2SampleType>
+    forcedinline AudioBlock& max (AudioBlock<Src1SampleType> src1, AudioBlock<Src2SampleType> src2) noexcept
     {
         jassert (numChannels == src1.numChannels && src1.numChannels == src2.numChannels);
         auto n = static_cast<int> (jmin (src1.numSamples, src2.numSamples, numSamples) * sizeFactor);
@@ -653,11 +716,11 @@ public:
 
     //==============================================================================
     // This class can only be used with floating point types
-    static_assert (std::is_same<SampleType, float>::value
-                    || std::is_same<SampleType, double>::value
+    static_assert (std::is_same<std::remove_const_t<SampleType>, float>::value
+                    || std::is_same<std::remove_const_t<SampleType>, double>::value
                   #if JUCE_USE_SIMD
-                    || std::is_same<SampleType, SIMDRegister<float>>::value
-                    || std::is_same<SampleType, SIMDRegister<double>>::value
+                    || std::is_same<std::remove_const_t<SampleType>, SIMDRegister<float>>::value
+                    || std::is_same<std::remove_const_t<SampleType>, SIMDRegister<double>>::value
                   #endif
                    , "AudioBlock only supports single or double precision floating point types");
 
@@ -666,8 +729,8 @@ public:
         The function supplied must take a SampleType as its parameter, and return a SampleType.
         The two blocks must have the same number of channels and samples.
     */
-    template <typename FunctionType>
-    static void process (AudioBlock inBlock, AudioBlock outBlock, FunctionType&& function)
+    template <typename Src1SampleType, typename Src2SampleType, typename FunctionType>
+    static void process (AudioBlock<Src1SampleType> inBlock, AudioBlock<Src2SampleType> outBlock, FunctionType&& function)
     {
         auto len = inBlock.getNumSamples();
         auto numChans = inBlock.getNumChannels();
@@ -707,6 +770,9 @@ private:
     SampleType* const* channels;
     ChannelCountType numChannels = 0;
     size_t startSample = 0, numSamples = 0;
+
+    template <typename OtherSampleType>
+    friend class AudioBlock;
 };
 
 } // namespace dsp

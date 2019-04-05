@@ -87,7 +87,7 @@ namespace SocketHelpers
 
     static bool resetSocketOptions (SocketHandle handle, bool isDatagram, bool allowBroadcast) noexcept
     {
-        return handle > 0
+        return handle >= 0
                 && setOption (handle, SO_RCVBUF, (int) 65536)
                 && setOption (handle, SO_SNDBUF, (int) 65536)
                 && (isDatagram ? ((! allowBroadcast) || setOption (handle, SO_BROADCAST, (int) 1))
@@ -103,7 +103,7 @@ namespace SocketHelpers
        #if JUCE_WINDOWS
         ignoreUnused (portNumber, isListener, readLock);
 
-        if (h != (unsigned) SOCKET_ERROR || connected)
+        if (h != invalidSocket || connected)
             closesocket (h);
 
         // make sure any read process finishes before we delete the socket
@@ -122,7 +122,7 @@ namespace SocketHelpers
             }
         }
 
-        if (h != -1)
+        if (h >= 0)
         {
             // unblock any pending read requests
             ::shutdown (h, SHUT_RDWR);
@@ -147,7 +147,7 @@ namespace SocketHelpers
 
     static bool bindSocket (SocketHandle handle, int port, const String& address) noexcept
     {
-        if (handle <= 0 || ! isValidPortNumber (port))
+        if (handle < 0 || ! isValidPortNumber (port))
             return false;
 
         struct sockaddr_in addr;
@@ -163,7 +163,7 @@ namespace SocketHelpers
 
     static int getBoundPort (SocketHandle handle) noexcept
     {
-        if (handle > 0)
+        if (handle >= 0)
         {
             struct sockaddr_in addr;
             socklen_t len = sizeof (addr);
@@ -183,7 +183,7 @@ namespace SocketHelpers
         if (getpeername (handle, (struct sockaddr*) &addr, &len) >= 0)
             return inet_ntoa (addr.sin_addr);
 
-        return String ("0.0.0.0");
+        return "0.0.0.0";
     }
 
     static int readSocket (SocketHandle handle,
@@ -281,11 +281,14 @@ namespace SocketHelpers
             return -1;
        #else
         {
-            int result;
+            int result = 0;
 
-            while ((result = select (h + 1, prset, pwset, nullptr, timeoutp)) < 0
-                    && errno == EINTR)
+            for (;;)
             {
+                result = select (h + 1, prset, pwset, nullptr, timeoutp);
+
+                if (result >= 0 || errno != EINTR)
+                    break;
             }
 
             if (result < 0)
@@ -501,7 +504,8 @@ bool StreamingSocket::connect (const String& remoteHostName, int remotePortNumbe
 
     if (isListener)
     {
-        jassertfalse;    // a listener socket can't connect to another one!
+        // a listener socket can't connect to another one!
+        jassertfalse;
         return false;
     }
 
@@ -515,7 +519,10 @@ bool StreamingSocket::connect (const String& remoteHostName, int remotePortNumbe
     connected = SocketHelpers::connectSocket (handle, readLock, remoteHostName,
                                               remotePortNumber, timeOutMillisecs);
 
-    if (! (connected && SocketHelpers::resetSocketOptions (handle, false, false)))
+    if (! connected)
+        return false;
+
+    if (! SocketHelpers::resetSocketOptions (handle, false, false))
     {
         close();
         return false;
@@ -526,7 +533,8 @@ bool StreamingSocket::connect (const String& remoteHostName, int remotePortNumbe
 
 void StreamingSocket::close()
 {
-    SocketHelpers::closeSocket (handle, readLock, isListener, portNumber, connected);
+    if (handle >= 0)
+        SocketHelpers::closeSocket (handle, readLock, isListener, portNumber, connected);
 
     hostName.clear();
     portNumber = 0;
@@ -631,8 +639,11 @@ void DatagramSocket::shutdown()
 
     std::atomic<int> handleCopy { handle.load() };
     handle = -1;
+
     std::atomic<bool> connected { false };
     SocketHelpers::closeSocket (handleCopy, readLock, false, 0, connected);
+
+    isBound = false;
 }
 
 bool DatagramSocket::bindToPort (int port)
@@ -643,6 +654,9 @@ bool DatagramSocket::bindToPort (int port)
 bool DatagramSocket::bindToPort (int port, const String& addr)
 {
     jassert (SocketHelpers::isValidPortNumber (port));
+
+    if (handle < 0)
+        return false;
 
     if (SocketHelpers::bindSocket (handle, port, addr))
     {
@@ -722,7 +736,7 @@ int DatagramSocket::write (const String& remoteHostname, int remotePortNumber,
 
 bool DatagramSocket::joinMulticast (const String& multicastIPAddress)
 {
-    if (! isBound || handle < 0)
+    if (handle < 0 || ! isBound)
         return false;
 
     return SocketHelpers::multicast (handle, multicastIPAddress, lastBindAddress, true);
@@ -730,7 +744,7 @@ bool DatagramSocket::joinMulticast (const String& multicastIPAddress)
 
 bool DatagramSocket::leaveMulticast (const String& multicastIPAddress)
 {
-    if (! isBound || handle < 0)
+    if (handle < 0 || ! isBound)
         return false;
 
     return SocketHelpers::multicast (handle, multicastIPAddress, lastBindAddress, false);
@@ -738,7 +752,7 @@ bool DatagramSocket::leaveMulticast (const String& multicastIPAddress)
 
 bool DatagramSocket::setMulticastLoopbackEnabled (bool enable)
 {
-    if (! isBound || handle < 0)
+    if (handle < 0 || ! isBound)
         return false;
 
     return SocketHelpers::setOption<bool> (handle, IPPROTO_IP, IP_MULTICAST_LOOP, enable);
@@ -764,6 +778,75 @@ bool DatagramSocket::setEnablePortReuse (bool enabled)
 
 #if JUCE_MSVC
  #pragma warning (pop)
+#endif
+
+
+//==============================================================================
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+struct SocketTests : public UnitTest
+{
+    SocketTests()
+        : UnitTest ("Sockets", UnitTestCategories::networking)
+    {
+    }
+
+    void runTest() override
+    {
+        auto localHost = IPAddress::local();
+        int portNum = 12345;
+
+        beginTest ("StreamingSocket");
+        {
+            StreamingSocket socketServer;
+
+            expect (socketServer.isConnected() == false);
+            expect (socketServer.getHostName().isEmpty());
+            expect (socketServer.getBoundPort() == -1);
+            expect (socketServer.getRawSocketHandle() == invalidSocket);
+
+            expect (socketServer.createListener (portNum, localHost.toString()));
+
+            StreamingSocket socket;
+
+            expect (socket.connect (localHost.toString(), portNum));
+
+            expect (socket.isConnected() == true);
+            expect (socket.getHostName() == localHost.toString());
+            expect (socket.getBoundPort() != -1);
+            expect (socket.getRawSocketHandle() != invalidSocket);
+
+            socket.close();
+
+            expect (socket.isConnected() == false);
+            expect (socket.getHostName().isEmpty());
+            expect (socket.getBoundPort() == -1);
+            expect (socket.getRawSocketHandle() == invalidSocket);
+        }
+
+        beginTest ("DatagramSocket");
+        {
+            DatagramSocket socket;
+
+            expect (socket.getBoundPort() == -1);
+            expect (socket.getRawSocketHandle() != invalidSocket);
+
+            expect (socket.bindToPort (portNum, localHost.toString()));
+
+            expect (socket.getBoundPort() == portNum);
+            expect (socket.getRawSocketHandle() != invalidSocket);
+
+            socket.shutdown();
+
+            expect (socket.getBoundPort() == -1);
+            expect (socket.getRawSocketHandle() == invalidSocket);
+        }
+    }
+};
+
+static SocketTests socketTests;
+
 #endif
 
 } // namespace juce

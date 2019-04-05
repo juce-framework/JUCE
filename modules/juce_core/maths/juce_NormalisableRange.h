@@ -125,9 +125,9 @@ public:
     */
     NormalisableRange (ValueType rangeStart,
                        ValueType rangeEnd,
-                       std::function<ValueType (ValueType currentRangeStart, ValueType currentRangeEnd, ValueType normalisedValue)> convertFrom0To1Func,
-                       std::function<ValueType (ValueType currentRangeStart, ValueType currentRangeEnd, ValueType mappedValue)> convertTo0To1Func,
-                       std::function<ValueType (ValueType currentRangeStart, ValueType currentRangeEnd, ValueType valueToSnap)> snapToLegalValueFunc = nullptr) noexcept
+                       std::function<ValueType(ValueType currentRangeStart, ValueType currentRangeEnd, ValueType normalisedValue)> convertFrom0To1Func,
+                       std::function<ValueType(ValueType currentRangeStart, ValueType currentRangeEnd, ValueType mappedValue)> convertTo0To1Func,
+                       std::function<ValueType(ValueType currentRangeStart, ValueType currentRangeEnd, ValueType valueToSnap)> snapToLegalValueFunc = nullptr) noexcept
         : start (rangeStart),
           end   (rangeEnd),
           convertFrom0To1Function  (convertFrom0To1Func),

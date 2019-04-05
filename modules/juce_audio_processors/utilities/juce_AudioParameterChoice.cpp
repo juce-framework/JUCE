@@ -29,8 +29,8 @@ namespace juce
 
 AudioParameterChoice::AudioParameterChoice (const String& idToUse, const String& nameToUse,
                                             const StringArray& c, int def, const String& labelToUse,
-                                            std::function<String (int, int)> stringFromIndex,
-                                            std::function<int (const String&)> indexFromString)
+                                            std::function<String(int, int)> stringFromIndex,
+                                            std::function<int(const String&)> indexFromString)
    : RangedAudioParameter (idToUse, nameToUse, labelToUse), choices (c),
      range (0.0f, choices.size() - 1.0f,
             [](float, float end, float v) { return jlimit (0.0f, end, v * end); },
@@ -69,11 +69,16 @@ AudioParameterChoice& AudioParameterChoice::operator= (int newValue)
     return *this;
 }
 
+
+//==============================================================================
+//==============================================================================
 #if JUCE_UNIT_TESTS
 
-static struct AudioParameterChoiceTests final   : public UnitTest
+struct AudioParameterChoiceTests  : public UnitTest
 {
-    AudioParameterChoiceTests() : UnitTest ("AudioParameterChoice", "AudioProcessor parameters") {}
+    AudioParameterChoiceTests()
+        : UnitTest ("AudioParameterChoice", UnitTestCategories::audioProcessorParameters)
+    {}
 
     void runTest() override
     {
@@ -112,7 +117,9 @@ static struct AudioParameterChoiceTests final   : public UnitTest
         }
     }
 
-} audioParameterChoiceTests;
+};
+
+static AudioParameterChoiceTests audioParameterChoiceTests;
 
 #endif
 

@@ -30,8 +30,8 @@ namespace juce
 AudioParameterInt::AudioParameterInt (const String& idToUse, const String& nameToUse,
                                       int minValue, int maxValue, int def,
                                       const String& labelToUse,
-                                      std::function<String (int, int)> stringFromInt,
-                                      std::function<int (const String&)> intFromString)
+                                      std::function<String(int, int)> stringFromInt,
+                                      std::function<int(const String&)> intFromString)
    : RangedAudioParameter (idToUse, nameToUse, labelToUse),
      range ((float) minValue, (float) maxValue,
             [](float start, float end, float v) { return jlimit (start, end, v * (end - start) + start); },
@@ -69,11 +69,16 @@ AudioParameterInt& AudioParameterInt::operator= (int newValue)
     return *this;
 }
 
+
+//==============================================================================
+//==============================================================================
 #if JUCE_UNIT_TESTS
 
-static struct AudioParameterIntTests final   : public UnitTest
+struct AudioParameterIntTests  : public UnitTest
 {
-    AudioParameterIntTests() : UnitTest ("AudioParameterInt", "AudioProcessor parameters") {}
+    AudioParameterIntTests()
+        : UnitTest ("AudioParameterInt", UnitTestCategories::audioProcessorParameters)
+    {}
 
     void runTest() override
     {
@@ -117,7 +122,9 @@ static struct AudioParameterIntTests final   : public UnitTest
             expectEquals (intParam.get(), 2);
         }
     }
-} audioParameterIntTests;
+};
+
+static AudioParameterIntTests audioParameterIntTests;
 
 #endif
 

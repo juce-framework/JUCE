@@ -592,8 +592,8 @@ AudioFormatWriter* CoreAudioFormat::createWriterFor (OutputStream*,
     return nullptr;
 }
 
+
 //==============================================================================
-// Unit tests for Core Audio layout conversions
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
@@ -603,7 +603,9 @@ AudioFormatWriter* CoreAudioFormat::createWriterFor (OutputStream*,
 class CoreAudioLayoutsUnitTest  : public UnitTest
 {
 public:
-    CoreAudioLayoutsUnitTest() : UnitTest ("Core Audio Layout <-> JUCE channel layout conversion", "Audio") {}
+    CoreAudioLayoutsUnitTest()
+        : UnitTest ("Core Audio Layout <-> JUCE channel layout conversion", UnitTestCategories::audio)
+    {}
 
     // some ambisonic tags which are not explicitely defined
     enum

@@ -76,13 +76,15 @@ bool FileInputStream::setPosition (int64 pos)
     return currentPosition == pos;
 }
 
+
+//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
 struct FileInputStreamTests   : public UnitTest
 {
     FileInputStreamTests()
-        : UnitTest ("FileInputStream", "Streams")
+        : UnitTest ("FileInputStream", UnitTestCategories::streams)
     {}
 
     void runTest() override

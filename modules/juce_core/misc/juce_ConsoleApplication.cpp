@@ -219,7 +219,6 @@ String ArgumentList::getValueForOption (StringRef option) const
     }
 
     return {};
-
 }
 
 String ArgumentList::removeValueForOption (StringRef option)
@@ -334,11 +333,15 @@ const ConsoleApplication::Command* ConsoleApplication::findCommand (const Argume
 
 int ConsoleApplication::findAndRunCommand (const ArgumentList& args, bool optionMustBeFirstArg) const
 {
-    if (auto c = findCommand (args, optionMustBeFirstArg))
-        return invokeCatchingFailures ([&args, c] { c->command (args); return 0; });
+    return invokeCatchingFailures ([&args, optionMustBeFirstArg, this]
+    {
+        if (auto c = findCommand (args, optionMustBeFirstArg))
+            c->command (args);
+        else
+            fail ("Unrecognised arguments");
 
-    fail ("Unrecognised arguments");
-    return 0;
+        return 0;
+    });
 }
 
 int ConsoleApplication::findAndRunCommand (int argc, char* argv[]) const

@@ -519,7 +519,7 @@ private:
     void sendStateMessage();
     void setToggleState (bool shouldBeOn, NotificationType click, NotificationType state);
 
-    bool isMouseOrTouchOver (const MouseEvent& e);
+    bool isMouseSourceOver (const MouseEvent& e);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Button)
 };
