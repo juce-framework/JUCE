@@ -283,7 +283,7 @@ public:
         {
             NSString* urlString = juceStringToNS (url);
 
-           #if (JUCE_MAC && (defined (__MAC_OS_X_VERSION_MIN_REQUIRED) && defined (__MAC_10_9) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_9)) || (JUCE_IOS && (defined (__IPHONE_OS_VERSION_MIN_REQUIRED) && defined (__IPHONE_7_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_7_0))
+           #if (JUCE_MAC && (defined (MAC_OS_X_VERSION_10_9) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9)) || (JUCE_IOS && (defined (__IPHONE_7_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_7_0))
             urlString = [urlString stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
            #else
             urlString = [urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];

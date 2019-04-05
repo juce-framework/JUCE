@@ -35,7 +35,7 @@
 
  // In the 10.14 SDK these methods are defined in the <functional> header, which we don't compile
  // in the live-build engine, so we'll define them here
- #if defined (MAC_OS_X_VERSION_10_14)
+ #if defined (MAC_OS_X_VERSION_10_14) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_14
   #include <memory>
 
   namespace std { inline namespace __1 {

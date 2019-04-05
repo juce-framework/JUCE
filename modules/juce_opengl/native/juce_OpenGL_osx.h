@@ -45,10 +45,8 @@ public:
         view = [cls.createInstance() initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)
                                        pixelFormat: format];
 
-       #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
         if ([view respondsToSelector: @selector (setWantsBestResolutionOpenGLSurface:)])
             [view setWantsBestResolutionOpenGLSurface: YES];
-       #endif
 
         [[NSNotificationCenter defaultCenter] addObserver: view
                                                  selector: @selector (_surfaceNeedsUpdate:)
