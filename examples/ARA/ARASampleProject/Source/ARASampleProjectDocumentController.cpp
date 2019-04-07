@@ -1,7 +1,7 @@
 #include "ARASampleProjectDocumentController.h"
 
-ARASampleProjectDocumentController::ARASampleProjectDocumentController() noexcept
-    : ARADocumentController(),
+ARASampleProjectDocumentController::ARASampleProjectDocumentController (const ARA::ARADocumentControllerHostInstance* instance) noexcept
+    : ARADocumentController (instance),
       audioSourceReadingThread (String (JucePlugin_Name) + " ARA Sample Reading Thread")
 {
     audioSourceReadingThread.startThread();
@@ -9,7 +9,7 @@ ARASampleProjectDocumentController::ARASampleProjectDocumentController() noexcep
 
 //==============================================================================
 // Hook defined by the ARA SDK to create custom subclass
-ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController() noexcept
+ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController (const ARA::ARADocumentControllerHostInstance* instance) noexcept
 {
-    return new ARASampleProjectDocumentController();
+    return new ARASampleProjectDocumentController (instance);
 }

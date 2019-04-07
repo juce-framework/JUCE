@@ -142,17 +142,17 @@ void ARADocumentController::didEndEditing() noexcept
 
 void ARADocumentController::doNotifyModelUpdates() noexcept
 {
-    auto modelUpdateController = getHostInstance()->getModelUpdateController();
-    if (modelUpdateController != nullptr)
+    auto hostModelUpdateController = getHostModelUpdateController();
+    if (hostModelUpdateController != nullptr)
     {
         for (auto& audioSourceUpdate : audioSourceUpdates)
-            modelUpdateController->notifyAudioSourceContentChanged (audioSourceUpdate.first->getHostRef(), nullptr, audioSourceUpdate.second);
+            hostModelUpdateController->notifyAudioSourceContentChanged (audioSourceUpdate.first->getHostRef(), nullptr, audioSourceUpdate.second);
 
         for (auto& audioModificationUpdate : audioModificationUpdates)
-            modelUpdateController->notifyAudioModificationContentChanged (audioModificationUpdate.first->getHostRef(), nullptr, audioModificationUpdate.second);
+            hostModelUpdateController->notifyAudioModificationContentChanged (audioModificationUpdate.first->getHostRef(), nullptr, audioModificationUpdate.second);
 
         for (auto& playbackRegionUpdate : playbackRegionUpdates)
-            modelUpdateController->notifyPlaybackRegionContentChanged (playbackRegionUpdate.first->getHostRef(), nullptr, playbackRegionUpdate.second);
+            hostModelUpdateController->notifyPlaybackRegionContentChanged (playbackRegionUpdate.first->getHostRef(), nullptr, playbackRegionUpdate.second);
     }
 
     audioSourceUpdates.clear();

@@ -11,7 +11,7 @@
 class ARASampleProjectDocumentController    : public ARADocumentController
 {
 public:
-    ARASampleProjectDocumentController() noexcept;
+    ARASampleProjectDocumentController (const ARA::ARADocumentControllerHostInstance* instance) noexcept;
 
     TimeSliceThread& getAudioSourceReadingThread() { return audioSourceReadingThread; }
 

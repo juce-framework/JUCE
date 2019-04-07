@@ -210,17 +210,17 @@ void RulersView::paint (juce::Graphics& g)
 void RulersView::mouseDown (const MouseEvent& event)
 {
     // use mouse click to set the playhead position in the host (if they provide a playback controller interface)
-    auto playbackController = musicalContext->getDocument()->getDocumentController()->getHostInstance()->getPlaybackController();
-    if (playbackController != nullptr)
-        playbackController->requestSetPlaybackPosition (documentView.getPlaybackRegionsViewsTimeForX (roundToInt (event.position.x)));
+    auto hostPlaybackController = musicalContext->getDocument()->getDocumentController()->getHostPlaybackController();
+    if (hostPlaybackController != nullptr)
+        hostPlaybackController->requestSetPlaybackPosition (documentView.getPlaybackRegionsViewsTimeForX (roundToInt (event.position.x)));
 }
 
 void RulersView::mouseDoubleClick (const MouseEvent& /*event*/)
 {
     // use mouse double click to start host playback (if they provide a playback controller interface)
-    auto playbackController = musicalContext->getDocument()->getDocumentController()->getHostInstance()->getPlaybackController();
-    if (playbackController != nullptr)
-        playbackController->requestStartPlayback();
+    auto hostPlaybackController = musicalContext->getDocument()->getDocumentController()->getHostPlaybackController();
+    if (hostPlaybackController != nullptr)
+        hostPlaybackController->requestStartPlayback();
 }
 
 //==============================================================================

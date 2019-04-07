@@ -12,7 +12,7 @@ class ARARegionSequenceReader;
 class ARADocumentController  : public ARA::PlugIn::DocumentController
 {
 public:
-    ARADocumentController() noexcept {}
+    using ARA::PlugIn::DocumentController::DocumentController;
 
     //==============================================================================
     // notify the host and any potential internal reader about content changes
