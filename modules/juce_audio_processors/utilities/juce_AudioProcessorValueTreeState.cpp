@@ -532,46 +532,42 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
             slider.setDoubleClickReturnValue (true, range.convertFrom0to1 (param->getParameter().getDefaultValue()));
         }
 
-        if (range.interval != 0.0f || range.skew != 1.0f)
+        auto convertFrom0To1Function = [range](double currentRangeStart,
+                                               double currentRangeEnd,
+                                               double normalisedValue) mutable
         {
-            slider.setRange (range.start, range.end, range.interval);
-            slider.setSkewFactor (range.skew, range.symmetricSkew);
-        }
-        else
+            range.start = (float) currentRangeStart;
+            range.end = (float) currentRangeEnd;
+            return (double) range.convertFrom0to1 ((float) normalisedValue);
+        };
+
+        auto convertTo0To1Function = [range](double currentRangeStart,
+                                             double currentRangeEnd,
+                                             double mappedValue) mutable
         {
-            auto convertFrom0To1Function = [range](double currentRangeStart,
-                                                   double currentRangeEnd,
-                                                   double normalisedValue) mutable
-            {
-                range.start = (float) currentRangeStart;
-                range.end = (float) currentRangeEnd;
-                return (double) range.convertFrom0to1 ((float) normalisedValue);
-            };
+            range.start = (float) currentRangeStart;
+            range.end = (float) currentRangeEnd;
+            return (double) range.convertTo0to1 ((float) mappedValue);
+        };
 
-            auto convertTo0To1Function = [range](double currentRangeStart,
-                                                 double currentRangeEnd,
-                                                 double mappedValue) mutable
-            {
-                range.start = (float) currentRangeStart;
-                range.end = (float) currentRangeEnd;
-                return (double) range.convertTo0to1 ((float) mappedValue);
-            };
+        auto snapToLegalValueFunction = [range](double currentRangeStart,
+                                                double currentRangeEnd,
+                                                double valueToSnap) mutable
+        {
+            range.start = (float) currentRangeStart;
+            range.end = (float) currentRangeEnd;
+            return (double) range.snapToLegalValue ((float) valueToSnap);
+        };
 
-            auto snapToLegalValueFunction = [range](double currentRangeStart,
-                                                    double currentRangeEnd,
-                                                    double valueToSnap) mutable
-            {
-                range.start = (float) currentRangeStart;
-                range.end = (float) currentRangeEnd;
-                return (double) range.snapToLegalValue ((float) valueToSnap);
-            };
+        NormalisableRange<double> newRange { (double) range.start,
+                                             (double) range.end,
+                                             convertFrom0To1Function,
+                                             convertTo0To1Function,
+                                             snapToLegalValueFunction };
+        newRange.interval = (double) range.interval;
+        newRange.skew = (double) range.skew;
 
-            slider.setNormalisableRange ({ (double) range.start,
-                                           (double) range.end,
-                                           convertFrom0To1Function,
-                                           convertTo0To1Function,
-                                           snapToLegalValueFunction });
-        }
+        slider.setNormalisableRange (newRange);
 
         sendInitialUpdate();
         slider.addListener (this);
@@ -1094,7 +1090,7 @@ public:
 
             TestAudioProcessor proc (std::make_unique<AudioParameterInt> (key, "", min, max, 0));
 
-            expect (proc.state.getParameterRange (key) == NormalisableRange<float> (float (min), float (max)));
+            expect (proc.state.getParameterRange (key) == NormalisableRange<float> (float (min), float (max), 1.0f));
         }
 
         beginTest ("Choice parameters retain their specified range");
@@ -1104,7 +1100,7 @@ public:
 
             TestAudioProcessor proc (std::make_unique<AudioParameterChoice> (key, "", choices, 0));
 
-            expect (proc.state.getParameterRange (key) == NormalisableRange<float> (0.0f, (float) (choices.size() - 1)));
+            expect (proc.state.getParameterRange (key) == NormalisableRange<float> (0.0f, (float) (choices.size() - 1), 1.0f));
             expect (proc.state.getParameter (key)->getNumSteps() == choices.size());
         }
 
