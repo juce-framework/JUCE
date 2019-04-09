@@ -94,6 +94,16 @@ struct Detector   : public ReferenceCountedObject,
         return false;
     }
 
+    bool isConnectedViaBluetooth (const Block& block) const noexcept
+    {
+        if (const auto connection = getDeviceConnectionFor (block))
+            if (const auto midiConnection = dynamic_cast<const MIDIDeviceConnection*> (connection))
+                if (midiConnection->midiInput != nullptr)
+                    return midiConnection->midiInput->getName().containsIgnoreCase ("bluetooth");
+
+        return false;
+    }
+
     void handleDeviceAdded (const DeviceInfo& info)
     {
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
@@ -146,9 +156,9 @@ struct Detector   : public ReferenceCountedObject,
 
         if (blockIt != currentTopology.blocks.end())
         {
-            const auto block = *blockIt;
+            const Block::Ptr block { *blockIt };
 
-            if (auto blockImpl = BlockImpl::getFrom (block))
+            if (auto blockImpl = BlockImpl::getFrom (block.get()))
                 blockImpl->markDisconnected();
 
             currentTopology.blocks.removeObject (block);
@@ -177,9 +187,9 @@ struct Detector   : public ReferenceCountedObject,
 
         if (blockIt != currentTopology.blocks.end())
         {
-            const auto block = *blockIt;
+            const Block::Ptr block { *blockIt };
 
-            if (auto blockImpl = BlockImpl::getFrom (block))
+            if (auto blockImpl = BlockImpl::getFrom (block.get()))
                 blockImpl->markReconnected (info);
 
             if (! containsBlockWithUID (blocksToAdd, info.uid))

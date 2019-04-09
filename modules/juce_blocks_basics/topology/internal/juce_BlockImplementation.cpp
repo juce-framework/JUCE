@@ -63,11 +63,7 @@ public:
 
     ~BlockImplementation()
     {
-        if (listenerToMidiConnection != nullptr)
-        {
-            config.setDeviceComms (nullptr);
-            listenerToMidiConnection->removeListener (this);
-        }
+        markDisconnected();
     }
 
     void markDisconnected()
@@ -75,6 +71,7 @@ public:
         if (auto surface = dynamic_cast<TouchSurfaceImplementation*> (touchSurface.get()))
             surface->disableTouchSurface();
 
+        disconnectMidiConnectionListener();
         connectionTime = Time();
     }
 
@@ -121,6 +118,32 @@ public:
         config.setDeviceComms (listenerToMidiConnection);
     }
 
+    void disconnectMidiConnectionListener()
+    {
+        if (listenerToMidiConnection != nullptr)
+        {
+            config.setDeviceComms (nullptr);
+            listenerToMidiConnection->removeListener (this);
+            listenerToMidiConnection = nullptr;
+        }
+    }
+
+    bool isConnected() const override
+    {
+        if (detector != nullptr)
+            return detector->isConnected (uid);
+
+        return false;
+    }
+
+    bool isConnectedViaBluetooth() const override
+    {
+        if (detector != nullptr)
+            return detector->isConnectedViaBluetooth (*this);
+
+        return false;
+    }
+
     Type getType() const override                                   { return modelData.apiType; }
     String getDeviceDescription() const override                    { return modelData.description; }
     int getWidth() const override                                   { return modelData.widthUnits; }
@@ -128,7 +151,6 @@ public:
     float getMillimetersPerUnit() const override                    { return 47.0f; }
     bool isHardwareBlock() const override                           { return true; }
     juce::Array<Block::ConnectionPort> getPorts() const override    { return modelData.ports; }
-    bool isConnected() const override                               { return detector && detector->isConnected (uid); }
     Time getConnectionTime() const override                         { return connectionTime; }
     bool isMasterBlock() const override                             { return isMaster; }
     Block::UID getConnectedMasterUID() const override               { return masterUID; }
@@ -696,9 +718,7 @@ private:
     {
         jassert (listenerToMidiConnection == &c);
         ignoreUnused (c);
-        listenerToMidiConnection->removeListener (this);
-        listenerToMidiConnection = nullptr;
-        config.setDeviceComms (nullptr);
+        disconnectMidiConnectionListener();
     }
 
     void doSaveProgramAsDefault()

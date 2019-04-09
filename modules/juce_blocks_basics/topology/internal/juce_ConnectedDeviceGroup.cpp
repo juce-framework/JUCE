@@ -41,8 +41,6 @@ struct ConnectedDeviceGroup  : private AsyncUpdater,
     {
         if (auto midiDeviceConnection = static_cast<MIDIDeviceConnection*> (deviceConnection.get()))
         {
-            depreciatedVersionReader = std::make_unique<DepreciatedVersionReader> (*midiDeviceConnection);
-
             ScopedLock lock (midiDeviceConnection->criticalSecton);
             setMidiMessageCallback();
         }
@@ -300,7 +298,8 @@ private:
     struct TouchStart { float x, y; };
     TouchList<TouchStart> touchStartPositions;
 
-    Block::UID masterBlock = 0;
+    static constexpr Block::UID invalidUid = 0;
+    Block::UID masterBlock = invalidUid;
 
     //==============================================================================
     void timerCallback() override
@@ -499,6 +498,9 @@ private:
 
         removeDevice (uid);
 
+        if (uid == masterBlock)
+            masterBlock = invalidUid;
+
         scheduleNewTopologyRequest();
     }
 
@@ -643,8 +645,13 @@ private:
             if (! getDeviceInfoFromUID (uid))
             {
                 // For backwards compatibility we assume the first device we see in a group is the master and won't change
-                if (masterBlock == 0)
+                if (masterBlock == invalidUid)
+                {
                     masterBlock = uid;
+
+                    if (auto midiDeviceConnection = static_cast<MIDIDeviceConnection*> (deviceConnection.get()))
+                        depreciatedVersionReader = std::make_unique<DepreciatedVersionReader> (*midiDeviceConnection);
+                }
 
                 currentDeviceInfo.add ({ uid,
                                          device.index,
