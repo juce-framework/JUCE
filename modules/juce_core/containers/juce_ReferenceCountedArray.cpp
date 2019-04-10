@@ -28,7 +28,9 @@ namespace juce
 class ReferenceCountedArrayTests   : public UnitTest
 {
 public:
-    ReferenceCountedArrayTests() : UnitTest ("ReferenceCountedArray", "Containers") {}
+    ReferenceCountedArrayTests()
+        : UnitTest ("ReferenceCountedArray", UnitTestCategories::containers)
+    {}
 
     //==============================================================================
     void runTest() override

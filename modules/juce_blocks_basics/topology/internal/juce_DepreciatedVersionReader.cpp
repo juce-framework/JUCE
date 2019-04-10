@@ -24,7 +24,7 @@ namespace juce
 {
 
 /**
-    Firmware below 0.2.5 does not report its version over the Blocks API.
+    Firmware below 0.3.0 does not report its version over the Blocks API.
     This class can make requests and process responses to retreive the master Block version.
 */
 class DepreciatedVersionReader :  private MIDIDeviceConnection::Listener,

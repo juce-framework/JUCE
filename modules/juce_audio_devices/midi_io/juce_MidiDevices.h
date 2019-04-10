@@ -112,6 +112,9 @@ public:
         This will attempt to create a new midi input device with the specified name for other
         apps to connect to.
 
+        NB - if you are calling this method on iOS you must have enabled the "Audio Background Capability"
+        setting in the iOS exporter otherwise this method will fail.
+
         Returns nullptr if a device can't be created.
 
         @param deviceName  the name of the device to create
@@ -264,6 +267,9 @@ public:
 
         This will attempt to create a new midi output device with the specified name that other
         apps can connect to and use as their midi input.
+
+        NB - if you are calling this method on iOS you must have enabled the "Audio Background Capability"
+        setting in the iOS exporter otherwise this method will fail.
 
         Returns nullptr if a device can't be created.
 

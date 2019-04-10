@@ -111,6 +111,14 @@ public:
     bool operator== (const String& s) const noexcept                    { return text.compare (s.getCharPointer()) == 0; }
     /** Compares this StringRef with a String. */
     bool operator!= (const String& s) const noexcept                    { return text.compare (s.getCharPointer()) != 0; }
+    /** Compares this StringRef with a String. */
+    bool operator<  (const String& s) const noexcept                    { return text.compare (s.getCharPointer()) < 0; }
+    /** Compares this StringRef with a String. */
+    bool operator<= (const String& s) const noexcept                    { return text.compare (s.getCharPointer()) <= 0; }
+    /** Compares this StringRef with a String. */
+    bool operator>  (const String& s) const noexcept                    { return text.compare (s.getCharPointer()) > 0; }
+    /** Compares this StringRef with a String. */
+    bool operator>= (const String& s) const noexcept                    { return text.compare (s.getCharPointer()) >= 0; }
 
     /** Case-sensitive comparison of two StringRefs. */
     bool operator== (StringRef s) const noexcept                        { return text.compare (s.text) == 0; }
@@ -133,6 +141,14 @@ public:
 JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, StringRef string2) noexcept;
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, StringRef string2) noexcept;
+/** Case-sensitive comparison of two strings. */
+JUCE_API bool JUCE_CALLTYPE operator<  (const String& string1, StringRef string2) noexcept;
+/** Case-sensitive comparison of two strings. */
+JUCE_API bool JUCE_CALLTYPE operator<= (const String& string1, StringRef string2) noexcept;
+/** Case-sensitive comparison of two strings. */
+JUCE_API bool JUCE_CALLTYPE operator>  (const String& string1, StringRef string2) noexcept;
+/** Case-sensitive comparison of two strings. */
+JUCE_API bool JUCE_CALLTYPE operator>= (const String& string1, StringRef string2) noexcept;
 
 inline String operator+ (String s1, StringRef s2)           { return s1 += String (s2.text); }
 inline String operator+ (StringRef s1, const String& s2)    { return String (s1.text) + s2; }

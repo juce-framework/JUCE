@@ -35,7 +35,7 @@ class LogRampedValueTests  : public UnitTest
 {
 public:
     LogRampedValueTests()
-        : UnitTest ("LogRampedValueTests", "DSP")
+        : UnitTest ("LogRampedValueTests", UnitTestCategories::dsp)
     {}
 
     void runTest() override

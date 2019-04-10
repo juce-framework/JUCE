@@ -97,7 +97,8 @@ public:
           iosAppGroupsIDValue                          (settings, Ids::iosAppGroupsId,                          getUndoManager()),
           keepCustomXcodeSchemesValue                  (settings, Ids::keepCustomXcodeSchemes,                  getUndoManager()),
           useHeaderMapValue                            (settings, Ids::useHeaderMap,                            getUndoManager()),
-          customLaunchStoryboardValue                  (settings, Ids::customLaunchStoryboard,                  getUndoManager())
+          customLaunchStoryboardValue                  (settings, Ids::customLaunchStoryboard,                  getUndoManager()),
+          exporterBundleIdentifierValue                (settings, Ids::bundleIdentifier,                        getUndoManager())
     {
         name = iOS ? getNameiOS() : getNameMac();
 
@@ -334,7 +335,8 @@ public:
         if (iOS)
         {
             props.add (new ChoicePropertyComponent (iosBackgroundAudioValue, "Audio Background Capability"),
-                       "Enable this to grant your app the capability to access audio when in background mode.");
+                       "Enable this to grant your app the capability to access audio when in background mode. "
+                       "This permission is required if your app creates a MIDI input or output device.");
 
             props.add (new ChoicePropertyComponent (iosBackgroundBleValue, "Bluetooth MIDI Background Capability"),
                        "Enable this to grant your app the capability to connect to Bluetooth LE devices when in background mode.");
@@ -390,6 +392,10 @@ public:
 
         props.add (new TextPropertyComponent (postbuildCommandValue, "Post-Build Shell Script", 32768, true),
                    "Some shell-script that will be run after a build completes.");
+
+        props.add (new TextPropertyComponent (exporterBundleIdentifierValue, "Exporter Bundle Identifier", 256, false),
+                   "Use this to override the project bundle identifier for this exporter. "
+                   "This is useful if you want to use different bundle identifiers for Mac and iOS exporters in the same project.");
 
         props.add (new TextPropertyComponent (iosDevelopmentTeamIDValue, "Development Team ID", 10, false),
                    "The Development Team ID to be used for setting up code-signing your iOS app. This is a ten-character "
@@ -1085,7 +1091,9 @@ public:
 
         String getBundleIdentifier() const
         {
-            auto bundleIdentifier = owner.project.getBundleIdentifierString();
+            auto exporterBundleIdentifier = owner.exporterBundleIdentifierValue.get().toString();
+            auto bundleIdentifier = exporterBundleIdentifier.isNotEmpty() ? exporterBundleIdentifier
+                                                                          : owner.project.getBundleIdentifierString();
 
             if (xcodeBundleIDSubPath.isNotEmpty())
             {
@@ -1892,7 +1900,8 @@ private:
                      microphonePermissionNeededValue, microphonePermissionsTextValue, cameraPermissionNeededValue, cameraPermissionTextValue,
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
                      iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
-                     iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue;
+                     iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
+                     exporterBundleIdentifierValue;
 
     static String sanitisePath (const String& path)
     {

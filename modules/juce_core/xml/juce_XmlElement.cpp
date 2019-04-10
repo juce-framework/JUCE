@@ -926,12 +926,15 @@ void XmlElement::deleteAllTextElements() noexcept
 }
 
 //==============================================================================
+//==============================================================================
 #if JUCE_UNIT_TESTS
 
 class XmlElementTests  : public UnitTest
 {
 public:
-    XmlElementTests() : UnitTest ("XmlElement", "XML") {}
+    XmlElementTests()
+        : UnitTest ("XmlElement", UnitTestCategories::xml)
+    {}
 
     void runTest() override
     {

@@ -538,6 +538,7 @@ Result JSON::parseQuotedString (String::CharPointerType& t, var& result)
     return Result::fail ("Not a quoted string!");
 }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
@@ -545,7 +546,9 @@ Result JSON::parseQuotedString (String::CharPointerType& t, var& result)
 class JSONTests  : public UnitTest
 {
 public:
-    JSONTests() : UnitTest ("JSON", "JSON") {}
+    JSONTests()
+        : UnitTest ("JSON", UnitTestCategories::json)
+    {}
 
     static String createRandomWideCharString (Random& r)
     {

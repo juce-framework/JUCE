@@ -791,6 +791,7 @@ void MPEInstrument::releaseAllNotes()
     notes.clear();
 }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
@@ -799,7 +800,7 @@ class MPEInstrumentTests : public UnitTest
 {
 public:
     MPEInstrumentTests()
-        : UnitTest ("MPEInstrument class", "MIDI/MPE")
+        : UnitTest ("MPEInstrument class", UnitTestCategories::midi)
     {
         // using lower and upper MPE zones with the following layout for testing
         //
@@ -2286,6 +2287,6 @@ private:
 
 static MPEInstrumentTests MPEInstrumentUnitTests;
 
-#endif // JUCE_UNIT_TESTS
+#endif
 
 } // namespace juce

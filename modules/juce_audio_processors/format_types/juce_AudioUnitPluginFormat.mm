@@ -40,8 +40,8 @@
 
 #ifndef JUCE_SUPPORTS_AUv3
  #if __OBJC2__ \
-      &&  ((defined (MAC_OS_X_VERSION_MIN_REQUIRED)    && defined (MAC_OS_X_VERSION_10_11) && (MAC_OS_X_VERSION_MIN_REQUIRED    >= MAC_OS_X_VERSION_10_11)) \
-       ||  (defined (__IPHONE_OS_VERSION_MIN_REQUIRED) && defined (__IPHONE_9_0)           && (__IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_9_0)))
+      &&  ((defined (MAC_OS_X_VERSION_10_11) && (MAC_OS_X_VERSION_MIN_REQUIRED    >= MAC_OS_X_VERSION_10_11)) \
+       ||  (defined (__IPHONE_9_0)           && (__IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_9_0)))
   #define JUCE_SUPPORTS_AUv3 1
  #else
   #define JUCE_SUPPORTS_AUv3 0
@@ -969,6 +969,9 @@ public:
 
             if (prepared)
             {
+                if (! haveParameterList)
+                    refreshParameterList();
+
                 if (! syncBusLayouts (getBusesLayout(), true, ignore))
                 {
                     prepared = false;
@@ -1355,8 +1358,11 @@ public:
         if (audioUnit != nullptr)
         {
             UInt32 paramListSize = 0;
-            AudioUnitGetPropertyInfo (audioUnit, kAudioUnitProperty_ParameterList, kAudioUnitScope_Global,
-                                      0, &paramListSize, nullptr);
+            haveParameterList = AudioUnitGetPropertyInfo (audioUnit, kAudioUnitProperty_ParameterList, kAudioUnitScope_Global,
+                                                          0, &paramListSize, nullptr) == noErr;
+
+            if (! haveParameterList)
+                return;
 
             if (paramListSize > 0)
             {
@@ -1657,6 +1663,7 @@ private:
     MidiBuffer incomingMidi;
     std::unique_ptr<AUBypassParameter> bypassParam;
     bool lastProcessBlockCallWasBypass = false, auSupportsBypass = false;
+    bool haveParameterList = false;
 
     void createPluginCallbacks()
     {

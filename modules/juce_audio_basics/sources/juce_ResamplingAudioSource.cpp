@@ -27,11 +27,6 @@ ResamplingAudioSource::ResamplingAudioSource (AudioSource* const inputSource,
                                               const bool deleteInputWhenDeleted,
                                               const int channels)
     : input (inputSource, deleteInputWhenDeleted),
-      ratio (1.0),
-      lastRatio (1.0),
-      bufferPos (0),
-      sampsInBuffer (0),
-      subSampleOffset (0),
       numChannels (channels)
 {
     jassert (input != nullptr);
@@ -67,6 +62,8 @@ void ResamplingAudioSource::prepareToPlay (int samplesPerBlockExpected, double s
 
 void ResamplingAudioSource::flushBuffers()
 {
+    const ScopedLock sl (callbackLock);
+
     buffer.clear();
     bufferPos = 0;
     sampsInBuffer = 0;
@@ -82,10 +79,12 @@ void ResamplingAudioSource::releaseResources()
 
 void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& info)
 {
+    const ScopedLock sl (callbackLock);
+
     double localRatio;
 
     {
-        const SpinLock::ScopedLockType sl (ratioLock);
+        const SpinLock::ScopedLockType ratioSl (ratioLock);
         localRatio = ratio;
     }
 

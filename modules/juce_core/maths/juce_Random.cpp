@@ -161,13 +161,17 @@ void Random::fillBitsRandomly (BigInteger& arrayToChange, int startBit, int numB
         arrayToChange.setBit (startBit + numBits, nextBool());
 }
 
+
+//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
 class RandomTests  : public UnitTest
 {
 public:
-    RandomTests() : UnitTest ("Random", "Maths") {}
+    RandomTests()
+        : UnitTest ("Random", UnitTestCategories::maths)
+    {}
 
     void runTest() override
     {

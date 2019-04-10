@@ -141,6 +141,8 @@ void ThreadedAnalyticsDestination::EventDispatcher::addToQueue (const AnalyticsE
     eventQueue.push_back (event);
 }
 
+
+//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
@@ -213,7 +215,7 @@ namespace DestinationTestHelpers
 struct ThreadedAnalyticsDestinationTests   : public UnitTest
 {
     ThreadedAnalyticsDestinationTests()
-        : UnitTest ("ThreadedAnalyticsDestination")
+        : UnitTest ("ThreadedAnalyticsDestination", UnitTestCategories::analytics)
     {}
 
     void compareEventQueues (const std::deque<AnalyticsDestination::AnalyticsEvent>& a,

@@ -542,7 +542,7 @@ private:
             auto* currentDevice = setup.manager->getCurrentAudioDevice();
             auto index = type.getIndexOfDevice (currentDevice, isInput);
 
-            box->setSelectedId (index + 1, dontSendNotification);
+            box->setSelectedId (index < 0 ? index : index + 1, dontSendNotification);
 
             if (testButton != nullptr && ! isInput)
                 testButton->setEnabled (index >= 0);

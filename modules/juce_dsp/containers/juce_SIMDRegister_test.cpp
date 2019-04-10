@@ -136,7 +136,9 @@ namespace SIMDRegister_test_internal
 class SIMDRegisterUnitTests   : public UnitTest
 {
 public:
-    SIMDRegisterUnitTests()  : UnitTest ("SIMDRegister UnitTests", "DSP") {}
+    SIMDRegisterUnitTests()
+        : UnitTest ("SIMDRegister UnitTests", UnitTestCategories::dsp)
+    {}
 
     //==============================================================================
     // Some helper classes

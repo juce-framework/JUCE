@@ -1095,13 +1095,17 @@ void ValueTree::Listener::valueTreeChildOrderChanged (ValueTree&, int, int)     
 void ValueTree::Listener::valueTreeParentChanged     (ValueTree&)                    {}
 void ValueTree::Listener::valueTreeRedirected        (ValueTree&)                    {}
 
+
+//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
 class ValueTreeTests  : public UnitTest
 {
 public:
-    ValueTreeTests() : UnitTest ("ValueTrees", "Values") {}
+    ValueTreeTests()
+        : UnitTest ("ValueTrees", UnitTestCategories::values)
+    {}
 
     static String createRandomIdentifier (Random& r)
     {

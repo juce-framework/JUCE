@@ -171,10 +171,13 @@ private:
 
         void logMessage (const String& message)
         {
-            MessageManagerLock mm (this);
+            WeakReference<UnitTestsDemo> safeOwner (&owner);
 
-            if (mm.lockWasGained()) // this lock may fail if this thread has been told to stop
-                owner.logMessage (message);
+            MessageManager::callAsync ([=]
+            {
+                if (auto* o = safeOwner.get())
+                    o->logMessage (message);
+            });
         }
 
         void timerCallback() override
@@ -224,5 +227,6 @@ private:
         testResultsBox.applyFontToAllText (testResultsBox.getFont());
     }
 
+    JUCE_DECLARE_WEAK_REFERENCEABLE (UnitTestsDemo)
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UnitTestsDemo)
 };

@@ -205,6 +205,7 @@ void MPEZoneLayout::checkAndLimitZoneParameters (int minValue, int maxValue,
     }
 }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
@@ -212,7 +213,9 @@ void MPEZoneLayout::checkAndLimitZoneParameters (int minValue, int maxValue,
 class MPEZoneLayoutTests  : public UnitTest
 {
 public:
-    MPEZoneLayoutTests() : UnitTest ("MPEZoneLayout class", "MIDI/MPE") {}
+    MPEZoneLayoutTests()
+        : UnitTest ("MPEZoneLayout class", UnitTestCategories::midi)
+    {}
 
     void runTest() override
     {
@@ -382,6 +385,6 @@ public:
 static MPEZoneLayoutTests MPEZoneLayoutUnitTests;
 
 
-#endif // JUCE_UNIT_TESTS
+#endif
 
 } // namespace juce

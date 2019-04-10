@@ -1809,12 +1809,16 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
     return slowCopyWavFileWithNewMetadata (wavFile, newMetadata);
 }
 
+
+//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
 struct WaveAudioFormatTests : public UnitTest
 {
-    WaveAudioFormatTests() : UnitTest ("Wave audio format tests") {}
+    WaveAudioFormatTests()
+        : UnitTest ("Wave audio format tests", UnitTestCategories::audio)
+    {}
 
     void runTest() override
     {

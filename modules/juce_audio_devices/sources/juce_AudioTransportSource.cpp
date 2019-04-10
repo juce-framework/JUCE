@@ -125,10 +125,7 @@ void AudioTransportSource::stop()
 {
     if (playing)
     {
-        {
-            const ScopedLock sl (callbackLock);
-            playing = false;
-        }
+        playing = false;
 
         int n = 500;
         while (--n >= 0 && ! stopped)
