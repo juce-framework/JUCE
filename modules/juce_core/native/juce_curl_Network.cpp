@@ -567,11 +567,7 @@ public:
         size_t len = size * nmemb;
 
         String header (ptr, len);
-
-        if (! header.contains (":") && header.startsWithIgnoreCase ("HTTP/"))
-            responseHeaders.clear();
-        else
-            responseHeaders += header;
+        responseHeaders += header;
 
         return len;
     }
@@ -621,7 +617,8 @@ public:
     int64 contentLength = -1, streamPos = 0;
     MemoryBlock curlBuffer;
     MemoryBlock headersAndPostData;
-    String responseHeaders, requestHeaders;
+    String responseHeaders { "\r\n" }; // WebInputStream::parseHttpHeaders skips the first header line (assumes status)
+    String requestHeaders;
     int statusCode = -1;
 
     //==============================================================================
