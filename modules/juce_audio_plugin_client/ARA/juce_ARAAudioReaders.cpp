@@ -183,6 +183,10 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARADocumentController* documen
         lengthInSamples = (int64) ((regionsEndTime - regionsStartTime) * sampleRate + 0.5);
     }
 
+    auto channelSet = AudioChannelSet::canonicalChannelSet (numChannels);
+    for (int i = 0; i < audioProcessor->getBusCount (false); i++)
+        audioProcessor->setChannelLayoutOfBus (false, i, channelSet);
+
     audioProcessor->setProcessingPrecision (use64BitSamples ? AudioProcessor::doublePrecision : AudioProcessor::singlePrecision);
     audioProcessor->setPlayHead (this);
     audioProcessor->setNonRealtime (alwaysNonRealtime);
