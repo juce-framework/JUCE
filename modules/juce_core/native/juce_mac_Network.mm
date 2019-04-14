@@ -331,8 +331,8 @@ public:
     NSMutableData* data = nil;
     NSDictionary* headers = nil;
     int statusCode = 0;
-    std::atomic<bool> initialised { false };
-    bool hasFailed = false, hasFinished = false, isBeingDeleted = false;
+    std::atomic<bool> initialised { false }, hasFailed { false }, hasFinished { false };
+    bool isBeingDeleted = false;
     const int numRedirectsToFollow;
     int numRedirects = 0;
     int64 latestTotalBytes = 0;
