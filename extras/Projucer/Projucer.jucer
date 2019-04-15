@@ -2,9 +2,8 @@
 
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
               jucerVersion="5.4.3" version="5.4.3" bundleIdentifier="com.juce.theprojucer"
-              splashScreenColour="Dark" displaySplashScreen="0"
-              reportAppUsage="0" companyName="ROLI Ltd." companyCopyright="ROLI Ltd."
-              cppLanguageStandard="11">
+              splashScreenColour="Dark" displaySplashScreen="0" reportAppUsage="0"
+              companyName="ROLI Ltd." companyCopyright="ROLI Ltd." cppLanguageStandard="11">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                documentExtensions=".jucer" objCExtraSuffix="zkVtji" bigIcon="rv1F4h"
@@ -28,11 +27,10 @@
     </XCODE_MAC>
     <VS2013 targetFolder="Builds/VisualStudio2013" bigIcon="rv1F4h">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" 
-                       wholeProgramOptimisation="1" debugInformationFormat="ProgramDatabase"
-                       useRuntimeLibDLL="1"/>
-        <CONFIGURATION name="Release" isDebug="0" targetName="Projucer" 
-                       useRuntimeLibDLL="0" debugInformationFormat="None"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" wholeProgramOptimisation="1"
+                       debugInformationFormat="ProgramDatabase" useRuntimeLibDLL="1"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="Projucer" useRuntimeLibDLL="0"
+                       debugInformationFormat="None"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -47,10 +45,10 @@
     </VS2013>
     <VS2015 targetFolder="Builds/VisualStudio2015" bigIcon="rv1F4h">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" 
-                       debugInformationFormat="ProgramDatabase" useRuntimeLibDLL="1"/>
-        <CONFIGURATION name="Release" isDebug="0" targetName="Projucer"
-                       useRuntimeLibDLL="0" debugInformationFormat="None"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" debugInformationFormat="ProgramDatabase"
+                       useRuntimeLibDLL="1"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="Projucer" useRuntimeLibDLL="0"
+                       debugInformationFormat="None"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>

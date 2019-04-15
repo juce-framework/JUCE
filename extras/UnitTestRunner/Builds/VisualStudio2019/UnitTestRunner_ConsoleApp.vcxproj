@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <Project DefaultTargets="Build"
-         ToolsVersion="14.0"
+         ToolsVersion="16.0"
          xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -14,7 +14,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{882FE2E3-F4EF-9825-1908-F6FEE5366B5C}</ProjectGuid>
+    <ProjectGuid>{8059D6DB-7FA3-D129-4ADE-B3C1A560027C}</ProjectGuid>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"
@@ -22,16 +22,16 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <WholeProgramOptimization>false</WholeProgramOptimization>
-    <PlatformToolset>v140</PlatformToolset>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <PlatformToolset>v142</PlatformToolset>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'"
                  Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <PlatformToolset>v140</PlatformToolset>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <PlatformToolset>v142</PlatformToolset>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>
   <ImportGroup Label="ExtensionSettings"/>
@@ -43,13 +43,13 @@
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <TargetExt>.exe</TargetExt>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)$(Platform)\$(Configuration)\App\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\App\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">DemoRunner</TargetName>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)$(Platform)\$(Configuration)\ConsoleApp\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\ConsoleApp\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">UnitTestRunner</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)$(Platform)\$(Configuration)\App\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\App\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">DemoRunner</TargetName>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)$(Platform)\$(Configuration)\ConsoleApp\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\ConsoleApp\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">UnitTestRunner</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -64,7 +64,7 @@
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCE_DEMO_RUNNER=1;JUCE_UNIT_TESTS=1;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=5.4.3;JUCE_APP_VERSION_HEX=0x50403;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CONSOLE;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCE_UNIT_TESTS=1;JUCER_VS2019_78A5026=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
@@ -75,23 +75,24 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/w44265 /w45038 /w44062 %(AdditionalOptions)</AdditionalOptions>
+      <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <OutputFile>$(OutDir)\DemoRunner.exe</OutputFile>
+      <OutputFile>$(OutDir)\UnitTestRunner.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreSpecificDefaultLibraries>libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(IntDir)\DemoRunner.pdb</ProgramDatabaseFile>
-      <SubSystem>Windows</SubSystem>
+      <ProgramDatabaseFile>$(IntDir)\UnitTestRunner.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>$(IntDir)\DemoRunner.bsc</OutputFile>
+      <OutputFile>$(IntDir)\UnitTestRunner.bsc</OutputFile>
     </Bscmake>
     <Lib/>
   </ItemDefinitionGroup>
@@ -106,8 +107,8 @@
     <ClCompile>
       <Optimization>Full</Optimization>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCE_DEMO_RUNNER=1;JUCE_UNIT_TESTS=1;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=5.4.3;JUCE_APP_VERSION_HEX=0x50403;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CONSOLE;WIN32;_WINDOWS;NDEBUG;JUCE_UNIT_TESTS=1;JUCER_VS2019_78A5026=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
       <AssemblerListingLocation>$(IntDir)\</AssemblerListingLocation>
@@ -117,34 +118,30 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/w44265 /w45038 /w44062 %(AdditionalOptions)</AdditionalOptions>
+      <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <OutputFile>$(OutDir)\DemoRunner.exe</OutputFile>
+      <OutputFile>$(OutDir)\UnitTestRunner.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(IntDir)\DemoRunner.pdb</ProgramDatabaseFile>
-      <SubSystem>Windows</SubSystem>
+      <ProgramDatabaseFile>$(IntDir)\UnitTestRunner.pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>$(IntDir)\DemoRunner.bsc</OutputFile>
+      <OutputFile>$(IntDir)\UnitTestRunner.bsc</OutputFile>
     </Bscmake>
     <Lib/>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Source\Demos\DemoPIPs1.cpp"/>
-    <ClCompile Include="..\..\Source\Demos\DemoPIPs2.cpp"/>
-    <ClCompile Include="..\..\Source\Demos\JUCEDemos.cpp"/>
-    <ClCompile Include="..\..\Source\UI\DemoContentComponent.cpp"/>
-    <ClCompile Include="..\..\Source\UI\MainComponent.cpp"/>
     <ClCompile Include="..\..\Source\Main.cpp"/>
     <ClCompile Include="..\..\..\..\modules\juce_analytics\analytics\juce_Analytics.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
@@ -732,147 +729,6 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\juce_blocks_basics.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\Shapes\b2ChainShape.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\Shapes\b2CircleShape.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\Shapes\b2EdgeShape.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\Shapes\b2PolygonShape.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2BroadPhase.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2CollideCircle.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2CollideEdge.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2CollidePolygon.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2Collision.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2Distance.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2DynamicTree.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2TimeOfImpact.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2BlockAllocator.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2Draw.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2Math.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2Settings.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2StackAllocator.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2Timer.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2ChainAndCircleContact.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2ChainAndPolygonContact.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2CircleContact.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2Contact.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2ContactSolver.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2EdgeAndCircleContact.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2EdgeAndPolygonContact.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2PolygonAndCircleContact.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2PolygonContact.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2DistanceJoint.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2FrictionJoint.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2GearJoint.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2Joint.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2MouseJoint.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2PrismaticJoint.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2PulleyJoint.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2RevoluteJoint.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2RopeJoint.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2WeldJoint.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2WheelJoint.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2Body.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2ContactManager.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2Fixture.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2Island.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2World.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2WorldCallbacks.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Rope\b2Rope.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\utils\juce_Box2DRenderer.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_box2d\juce_box2d.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_AbstractFifo.cpp">
@@ -2226,7 +2082,6 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_processors.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_utils.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_blocks_basics.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\include_juce_box2d.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_core.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_cryptography.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_data_structures.cpp"/>
@@ -2241,11 +2096,6 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_video.cpp"/>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Source\Demos\IntroScreen.h"/>
-    <ClInclude Include="..\..\Source\Demos\JUCEDemos.h"/>
-    <ClInclude Include="..\..\Source\UI\DemoContentComponent.h"/>
-    <ClInclude Include="..\..\Source\UI\MainComponent.h"/>
-    <ClInclude Include="..\..\Source\UI\SettingsContent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_analytics\analytics\juce_Analytics.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_analytics\analytics\juce_ButtonTracker.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_analytics\destinations\juce_AnalyticsDestination.h"/>
@@ -2532,54 +2382,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\visualisers\juce_BitmapLEDProgram.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\visualisers\juce_DrumPadLEDProgram.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\juce_blocks_basics.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Collision\Shapes\b2ChainShape.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Collision\Shapes\b2CircleShape.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Collision\Shapes\b2EdgeShape.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Collision\Shapes\b2PolygonShape.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Collision\Shapes\b2Shape.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2BroadPhase.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2Collision.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2Distance.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2DynamicTree.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2TimeOfImpact.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2BlockAllocator.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2Draw.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2GrowableStack.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2Math.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2Settings.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2StackAllocator.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2Timer.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2ChainAndCircleContact.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2ChainAndPolygonContact.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2CircleContact.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2Contact.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2ContactSolver.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2EdgeAndCircleContact.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2EdgeAndPolygonContact.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2PolygonAndCircleContact.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2PolygonContact.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2DistanceJoint.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2FrictionJoint.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2GearJoint.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2Joint.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2MouseJoint.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2PrismaticJoint.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2PulleyJoint.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2RevoluteJoint.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2RopeJoint.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2WeldJoint.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2WheelJoint.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2Body.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2ContactManager.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2Fixture.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2Island.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2TimeStep.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2World.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2WorldCallbacks.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Rope\b2Rope.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Box2D.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\utils\juce_Box2DRenderer.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_box2d\juce_box2d.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_AbstractFifo.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_Array.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_ArrayAllocationBase.h"/>
@@ -3070,7 +2872,6 @@
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Source\JUCEAppIcon.png"/>
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\Flac Licence.txt"/>
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\Ogg Vorbis Licence.txt"/>
     <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\base\LICENSE.txt"/>
@@ -3081,11 +2882,9 @@
     <None Include="..\..\..\..\modules\juce_blocks_basics\littlefoot\LittleFoot Language README.txt"/>
     <None Include="..\..\..\..\modules\juce_blocks_basics\protocol\Protocol Format.txt"/>
     <None Include="..\..\..\..\modules\juce_blocks_basics\README.txt"/>
-    <None Include="..\..\..\..\modules\juce_box2d\box2d\README.txt"/>
     <None Include="..\..\..\..\modules\juce_core\native\java\README.txt"/>
     <None Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\changes to libjpeg for JUCE.txt"/>
     <None Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\libpng_readme.txt"/>
-    <None Include=".\icon.ico"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include=".\resources.rc"/>
