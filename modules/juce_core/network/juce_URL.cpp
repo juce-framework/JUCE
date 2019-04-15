@@ -325,8 +325,8 @@ void URL::addParameter (const String& name, const String& value)
 
 String URL::toString (bool includeGetParameters) const
 {
-    if (includeGetParameters && parameterNames.size() > 0)
-        return url + "?" + URLHelpers::getMangledParameters (*this);
+    if (includeGetParameters)
+        return url + getQueryString();
 
     return url;
 }
@@ -347,12 +347,24 @@ String URL::getDomain() const
     return getDomainInternal (false);
 }
 
-String URL::getSubPath() const
+String URL::getSubPath (bool includeGetParameters) const
 {
     auto startOfPath = URLHelpers::findStartOfPath (url);
+    auto subPath = startOfPath <= 0 ? String()
+                                    : url.substring (startOfPath);
 
-    return startOfPath <= 0 ? String()
-        : url.substring (startOfPath);
+    if (includeGetParameters)
+        subPath += getQueryString();
+
+    return subPath;
+}
+
+String URL::getQueryString() const
+{
+    if (parameterNames.size() > 0)
+        return "?" + URLHelpers::getMangledParameters (*this);
+
+    return {};
 }
 
 String URL::getScheme() const
