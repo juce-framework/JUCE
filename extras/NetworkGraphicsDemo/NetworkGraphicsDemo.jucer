@@ -38,29 +38,7 @@
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <VS2013 targetFolder="Builds/VisualStudio2013" bigIcon="Ww6bQw">
-      <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JUCE Network Graphics Demo"/>
-        <CONFIGURATION name="Release" isDebug="0" targetName="JUCE Network Graphics Demo"/>
-      </CONFIGURATIONS>
-      <MODULEPATHS>
-        <MODULEPATH id="juce_osc" path="../../modules"/>
-        <MODULEPATH id="juce_opengl" path="../../modules"/>
-        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
-        <MODULEPATH id="juce_graphics" path="../../modules"/>
-        <MODULEPATH id="juce_events" path="../../modules"/>
-        <MODULEPATH id="juce_data_structures" path="../../modules"/>
-        <MODULEPATH id="juce_cryptography" path="../../modules"/>
-        <MODULEPATH id="juce_core" path="../../modules"/>
-        <MODULEPATH id="juce_audio_utils" path="../../modules"/>
-        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
-        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
-        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
-        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
-      </MODULEPATHS>
-    </VS2013>
-    <VS2017 targetFolder="Builds/VisualStudio2017">
+    <VS2019 targetFolder="Builds/VisualStudio2019">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="JUCE Network Graphics Demo"/>
         <CONFIGURATION name="Release" isDebug="0" targetName="JUCE Network Graphics Demo"/>
@@ -81,7 +59,7 @@
         <MODULEPATH id="juce_audio_devices" path="../../modules"/>
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
-    </VS2017>
+    </VS2019>
     <XCODE_IPHONE targetFolder="Builds/iOS" bigIcon="Ww6bQw">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="JUCE Network Graphics Demo"/>
@@ -127,12 +105,11 @@
       </MODULEPATHS>
     </LINUX_MAKE>
     <ANDROIDSTUDIO androidActivityClass="com.juce.networkgraphicsdemo.JUCENetworkGraphicsDemo"
-                   androidCpp11="1" targetFolder="Builds/Android" androidSDKPath=""
-                   androidNDKPath="" bigIcon="Ww6bQw" gradleToolchainVersion="3.6">
+                   androidCpp11="1" targetFolder="Builds/Android" bigIcon="Ww6bQw" gradleToolchainVersion="3.6">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi-v7a x86" isDebug="1"
                        optimisation="6" targetName="JUCE Network Graphics Demo" defines="JUCE_DEBUG=0"/>
-        <CONFIGURATION name="Release" androidArchitectures="" isDebug="0" targetName="JUCE Network Graphics Demo"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="JUCE Network Graphics Demo"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc" path="../../modules"/>

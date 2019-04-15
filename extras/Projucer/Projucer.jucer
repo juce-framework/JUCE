@@ -2,20 +2,18 @@
 
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
               jucerVersion="5.4.3" version="5.4.3" bundleIdentifier="com.juce.theprojucer"
-              defines="" splashScreenColour="Dark" displaySplashScreen="0"
+              splashScreenColour="Dark" displaySplashScreen="0"
               reportAppUsage="0" companyName="ROLI Ltd." companyCopyright="ROLI Ltd."
               cppLanguageStandard="11">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                documentExtensions=".jucer" objCExtraSuffix="zkVtji" bigIcon="rv1F4h"
-               extraLinkerFlags="" extraCompilerFlags="-Wall -Wno-missing-field-initializers -Wshadow-all -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Wconditional-uninitialized -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion  -Wunused-private-field -Wbool-conversion -Wextra-semi -Wno-ignored-qualifiers -Wunreachable-code -Wzero-as-null-pointer-constant -Wcast-align -Winconsistent-missing-destructor-override -Wshift-sign-overflow -Wundefined-func-template -Wnullable-to-nonnull-conversion"
+               extraCompilerFlags="-Wall -Wno-missing-field-initializers -Wshadow-all -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Wconditional-uninitialized -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion  -Wunused-private-field -Wbool-conversion -Wextra-semi -Wno-ignored-qualifiers -Wunreachable-code -Wzero-as-null-pointer-constant -Wcast-align -Winconsistent-missing-destructor-override -Wshift-sign-overflow -Wundefined-func-template -Wnullable-to-nonnull-conversion"
                customPList="&lt;plist&gt;&#10;&lt;dict&gt;&#10;&#9;&lt;key&gt;NSAppTransportSecurity&lt;/key&gt;&#10;&#9;&lt;dict&gt;&#10;&#9;&#9;&lt;key&gt;NSAllowsArbitraryLoads&lt;/key&gt;&#10;&#9;&#9;&lt;true/&gt;&#10;&#9;&#9;&lt;key&gt;NSExceptionDomains&lt;/key&gt;&#10;&#9;&#9;&lt;dict&gt;&#10;&#9;&#9;&#9;&lt;key&gt;amazonaws.com&lt;/key&gt;&#10;&#9;&#9;&#9;&lt;dict&gt;&#10;&#9;&#9;&#9;&#9;&lt;key&gt;NSExceptionAllowsInsecureHTTPLoads&lt;/key&gt;&#10;&#9;&#9;&#9;&#9;&lt;true/&gt;&#10;&#9;&#9;&#9;&#9;&lt;key&gt;NSIncludesSubdomains&lt;/key&gt;&#10;&#9;&#9;&#9;&#9;&lt;true/&gt;&#10;&#9;&#9;&#9;&lt;/dict&gt;&#10;&#9;&#9;&lt;/dict&gt;&#10;&#9;&lt;/dict&gt;&#10;&lt;/dict&gt;&#10;&lt;/plist&gt;"
                extraFrameworks="AudioUnit; Accelerate; AVFoundation; CoreAudio; CoreAudioKit; CoreMIDI; DiscRecording; QuartzCore; AudioToolbox; OpenGL; QTKit; QuickTime">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" headerPath=""
-                       libraryPath="" cppLibType="libc++"/>
-        <CONFIGURATION name="Release" isDebug="0" targetName="Projucer" headerPath=""
-                       libraryPath="" cppLibType="libc++"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" cppLibType="libc++"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="Projucer" cppLibType="libc++"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -28,14 +26,13 @@
         <MODULEPATH id="juce_analytics" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <VS2013 targetFolder="Builds/VisualStudio2013" externalLibraries="" extraLinkerFlags=""
-            bigIcon="rv1F4h" vstFolder="">
+    <VS2013 targetFolder="Builds/VisualStudio2013" bigIcon="rv1F4h">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" headerPath=""
-                       libraryPath="" defines="" wholeProgramOptimisation="1" debugInformationFormat="ProgramDatabase"
+        <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" 
+                       wholeProgramOptimisation="1" debugInformationFormat="ProgramDatabase"
                        useRuntimeLibDLL="1"/>
-        <CONFIGURATION name="Release" isDebug="0" targetName="Projucer" headerPath=""
-                       libraryPath="" useRuntimeLibDLL="0" debugInformationFormat="None"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="Projucer" 
+                       useRuntimeLibDLL="0" debugInformationFormat="None"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -48,13 +45,12 @@
         <MODULEPATH id="juce_analytics" path="../../modules"/>
       </MODULEPATHS>
     </VS2013>
-    <VS2015 targetFolder="Builds/VisualStudio2015" externalLibraries="" bigIcon="rv1F4h"
-            vstFolder="">
+    <VS2015 targetFolder="Builds/VisualStudio2015" bigIcon="rv1F4h">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" headerPath=""
-                       libraryPath="" debugInformationFormat="ProgramDatabase" useRuntimeLibDLL="1"/>
-        <CONFIGURATION name="Release" isDebug="0" targetName="Projucer" headerPath=""
-                       libraryPath="" useRuntimeLibDLL="0" debugInformationFormat="None"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" 
+                       debugInformationFormat="ProgramDatabase" useRuntimeLibDLL="1"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="Projucer"
+                       useRuntimeLibDLL="0" debugInformationFormat="None"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -84,13 +80,27 @@
         <MODULEPATH id="juce_analytics" path="../../modules"/>
       </MODULEPATHS>
     </VS2017>
-    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" extraCompilerFlags="" extraLinkerFlags=""
-                bigIcon="rv1F4h" vstFolder="">
+    <VS2019 targetFolder="Builds/VisualStudio2019" bigIcon="rv1F4h" extraCompilerFlags="/w44265 /w45038 /w44062">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" libraryPath="" isDebug="1" targetName="Projucer"
-                       headerPath=""/>
-        <CONFIGURATION name="Release" libraryPath="" isDebug="0" targetName="Projucer"
-                       headerPath=""/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" useRuntimeLibDLL="0"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Projucer"
+                       debugInformationFormat="None" useRuntimeLibDLL="0"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_analytics" path="../../modules"/>
+      </MODULEPATHS>
+    </VS2019>
+    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" bigIcon="rv1F4h">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="Projucer"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -732,7 +742,7 @@
     <MODULE id="juce_gui_extra" showAllCode="1"/>
   </MODULES>
   <LIVE_SETTINGS>
-    <OSX headerPath="" enableCxx11="1" systemHeaderPath=""/>
+    <OSX enableCxx11="1"/>
     <WINDOWS enableCxx11="1"/>
     <LINUX/>
   </LIVE_SETTINGS>
