@@ -1074,7 +1074,7 @@ public:
                                           && owner.getProject().shouldEnableIAA()) ? 1 : 0;
 
             auto pushNotificationsEnabled = owner.isPushNotificationsEnabled() ? 1 : 0;
-            auto sandboxEnabled = ((type == Target::AudioUnitv3PlugIn) | owner.isAppSandboxEnabled()) ? 1 : 0;
+            auto sandboxEnabled = ((type == Target::AudioUnitv3PlugIn) || owner.isAppSandboxEnabled()) ? 1 : 0;
             auto hardendedRuntimeEnabled = owner.isHardenedRuntimeEnabled() ? 1 : 0;
 
             attributes << "SystemCapabilities = {";
