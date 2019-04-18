@@ -164,7 +164,7 @@ void HeaderComponent::updateExporters() noexcept
         if (selectedName == exporter->getName())
             exporterBox.setSelectedId (i + 1);
 
-        if (exporter->canLaunchProject() && preferredExporterIndex == -1)
+        if (exporter->getName().contains (ProjectExporter::getCurrentPlatformExporterName()) && preferredExporterIndex == -1)
             preferredExporterIndex = i;
     }
 
