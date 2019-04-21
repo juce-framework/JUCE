@@ -90,8 +90,17 @@ public:
 
     /** Returns the path part of the URL.
         E.g. for "http://www.xyz.com/foo/bar?x=1", this will return "foo/bar".
+
+        If includeGetParameters is true and any parameters have been set with the
+        withParameter() method, then the string will have these appended on the
+        end and url-encoded.
     */
-    String getSubPath() const;
+    String getSubPath (bool includeGetParamters = false) const;
+
+    /** If any parameters are set, returns these URL encoded, including the "?"
+     *  prefix.
+    */
+    String getQueryString() const;
 
     /** Returns the scheme of the URL.
         E.g. for "http://www.xyz.com/foobar", this will return "http". (It won't

@@ -33,7 +33,7 @@
                    juce_audio_processors, juce_audio_utils, juce_blocks_basics,
                    juce_core, juce_data_structures, juce_events, juce_graphics,
                    juce_gui_basics, juce_gui_extra
- exporters:        xcode_mac, vs2017, linux_make, xcode_iphone
+ exporters:        xcode_mac, vs2019, linux_make, xcode_iphone
 
  moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
 

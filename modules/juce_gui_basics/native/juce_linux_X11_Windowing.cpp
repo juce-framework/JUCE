@@ -1202,7 +1202,7 @@ public:
 
             auto& displays = Desktop::getInstance().getDisplays();
 
-            auto newScaleFactor = displays.findDisplayForRect (bounds, true).scale;
+            auto newScaleFactor = displays.findDisplayForRect (bounds, true).scale / Desktop::getInstance().getGlobalScaleFactor();
             if (! approximatelyEqual (newScaleFactor, currentScaleFactor))
             {
                 currentScaleFactor = newScaleFactor;
@@ -2796,7 +2796,7 @@ private:
             Rectangle<int> physicalBounds (wx, wy, (int) ww, (int) wh);
             auto& displays = Desktop::getInstance().getDisplays();
 
-            auto newScaleFactor = displays.findDisplayForRect (physicalBounds, true).scale;
+            auto newScaleFactor = displays.findDisplayForRect (physicalBounds, true).scale / Desktop::getInstance().getGlobalScaleFactor();
             if (! approximatelyEqual (newScaleFactor, currentScaleFactor))
             {
                 currentScaleFactor = newScaleFactor;

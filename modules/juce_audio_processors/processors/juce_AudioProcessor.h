@@ -1055,14 +1055,14 @@ public:
     /** This must return the correct value immediately after the object has been
         created, and mustn't change the number of parameters later.
 
-        NOTE! This method will eventually be deprecated! It's recommended that you use the
+        NOTE! This method is deprecated! It's recommended that you use the
         AudioProcessorParameter class instead to manage your parameters.
     */
     JUCE_DEPRECATED (virtual int getNumParameters());
 
     /** Returns the name of a particular parameter.
 
-        NOTE! This method will eventually be deprecated! It's recommended that you use the
+        NOTE! This method is deprecated! It's recommended that you use the
         AudioProcessorParameter class instead to manage your parameters.
     */
     JUCE_DEPRECATED (virtual const String getParameterName (int parameterIndex));
@@ -1073,7 +1073,7 @@ public:
         the host. By default this method will simply return a string representation of
         index.
 
-        NOTE! This method will eventually be deprecated! It's recommended that you use the
+        NOTE! This method is deprecated! It's recommended that you use the
         AudioProcessorParameterWithID class instead to manage your parameters.
      */
     JUCE_DEPRECATED (virtual String getParameterID (int index));
@@ -1086,7 +1086,7 @@ public:
         It's also likely to be called by non-UI threads, so the code in here should
         be thread-aware.
 
-        NOTE! This method will eventually be deprecated! It's recommended that you use the
+        NOTE! This method is deprecated! It's recommended that you use the
         AudioProcessorParameter class instead to manage your parameters.
     */
     JUCE_DEPRECATED (virtual float getParameter (int parameterIndex));
@@ -1098,13 +1098,13 @@ public:
         If you don't override it, the default implementation will call getParameterName(int),
         and truncate the result.
 
-        NOTE! This method will eventually be deprecated! It's recommended that you use
+        NOTE! This method is deprecated! It's recommended that you use
         AudioProcessorParameter::getName() instead.
     */
     JUCE_DEPRECATED (virtual String getParameterName (int parameterIndex, int maximumStringLength));
 
     /** Returns the value of a parameter as a text string.
-        NOTE! This method will eventually be deprecated! It's recommended that you use
+        NOTE! This method is deprecated! It's recommended that you use
         AudioProcessorParameter::getText() instead.
     */
     JUCE_DEPRECATED (virtual const String getParameterText (int parameterIndex));
@@ -1116,7 +1116,7 @@ public:
         If you don't override it, the default implementation will call getParameterText(int),
         and truncate the result.
 
-        NOTE! This method will eventually be deprecated! It's recommended that you use
+        NOTE! This method is deprecated! It's recommended that you use
         AudioProcessorParameter::getText() instead.
     */
     JUCE_DEPRECATED (virtual String getParameterText (int parameterIndex, int maximumStringLength));
@@ -1134,7 +1134,7 @@ public:
 
         The value that is returned may or may not be used, depending on the host.
 
-        NOTE! This method will eventually be deprecated! It's recommended that you use
+        NOTE! This method is deprecated! It's recommended that you use
         AudioProcessorParameter::getNumSteps() instead.
 
         @see isParameterDiscrete
@@ -1143,7 +1143,7 @@ public:
 
     /** Returns the default number of steps for a parameter.
 
-        NOTE! This method will eventually be deprecated! It's recommended that you use
+        NOTE! This method is deprecated! It's recommended that you use
         AudioProcessorParameter::getNumSteps() instead.
 
         @see getParameterNumSteps
@@ -1158,7 +1158,7 @@ public:
 
         The value that is returned may or may not be used, depending on the host.
 
-        NOTE! This method will eventually be deprecated! It's recommended that you use
+        NOTE! This method is deprecated! It's recommended that you use
         AudioProcessorParameter::isDiscrete() instead.
 
         @see getParameterNumSteps
@@ -1169,7 +1169,7 @@ public:
         By default, this just returns 0.
         The value that is returned may or may not be used, depending on the host.
 
-        NOTE! This method will eventually be deprecated! It's recommended that you use
+        NOTE! This method is deprecated! It's recommended that you use
         AudioProcessorParameter::getDefaultValue() instead.
     */
     JUCE_DEPRECATED (virtual float getParameterDefaultValue (int parameterIndex));
@@ -1177,7 +1177,7 @@ public:
     /** Some plugin types may be able to return a label string for a
         parameter's units.
 
-        NOTE! This method will eventually be deprecated! It's recommended that you use
+        NOTE! This method is deprecated! It's recommended that you use
         AudioProcessorParameter::getLabel() instead.
     */
     JUCE_DEPRECATED (virtual String getParameterLabel (int index) const);
@@ -1185,7 +1185,7 @@ public:
     /** This can be overridden to tell the host that particular parameters operate in the
         reverse direction. (Not all plugin formats or hosts will actually use this information).
 
-        NOTE! This method will eventually be deprecated! It's recommended that you use
+        NOTE! This method is deprecated! It's recommended that you use
         AudioProcessorParameter::isOrientationInverted() instead.
     */
     JUCE_DEPRECATED (virtual bool isParameterOrientationInverted (int index) const);
@@ -1203,7 +1203,7 @@ public:
 
         The value passed will be between 0 and 1.0.
 
-        NOTE! This method will eventually be deprecated! It's recommended that you use
+        NOTE! This method is deprecated! It's recommended that you use
         AudioProcessorParameter::setValue() instead.
     */
     JUCE_DEPRECATED (virtual void setParameter (int parameterIndex, float newValue));
@@ -1218,7 +1218,7 @@ public:
         the beginParameterChangeGesture() and endParameterChangeGesture() methods to
         tell the host when the user has started and stopped changing the parameter.
 
-        NOTE! This method will eventually be deprecated! It's recommended that you use
+        NOTE! This method is deprecated! It's recommended that you use
         AudioProcessorParameter::setValueNotifyingHost() instead.
     */
     void setParameterNotifyingHost (int parameterIndex, float newValue);
@@ -1226,7 +1226,7 @@ public:
     /** Returns true if the host can automate this parameter.
         By default, this returns true for all parameters.
 
-        NOTE! This method will eventually be deprecated! It's recommended that you use
+        NOTE! This method is deprecated! It's recommended that you use
         AudioProcessorParameter::isAutomatable() instead.
     */
     JUCE_DEPRECATED (virtual bool isParameterAutomatable (int parameterIndex) const);
@@ -1236,7 +1236,7 @@ public:
         by some hosts (e.g. AudioUnit hosts).
         By default this returns false.
 
-        NOTE! This method will eventually be deprecated! It's recommended that you use
+        NOTE! This method is deprecated! It's recommended that you use
         AudioProcessorParameter::isMetaParameter() instead.
     */
     JUCE_DEPRECATED (virtual bool isMetaParameter (int parameterIndex) const);
@@ -1244,7 +1244,7 @@ public:
     /** Should return the parameter's category.
         By default, this returns the "generic" category.
 
-        NOTE! This method will eventually be deprecated! It's recommended that you use
+        NOTE! This method is deprecated! It's recommended that you use
         AudioProcessorParameter::getCategory() instead.
     */
     JUCE_DEPRECATED (virtual AudioProcessorParameter::Category getParameterCategory (int parameterIndex) const);
@@ -1257,7 +1257,7 @@ public:
 
         If you call this, it must be matched by a later call to endParameterChangeGesture().
 
-        NOTE! This method will eventually be deprecated! It's recommended that you use
+        NOTE! This method is deprecated! It's recommended that you use
         AudioProcessorParameter::beginChangeGesture() instead.
     */
     JUCE_DEPRECATED (void beginParameterChangeGesture (int parameterIndex));
@@ -1269,7 +1269,7 @@ public:
 
         A call to this method must follow a call to beginParameterChangeGesture().
 
-        NOTE! This method will eventually be deprecated! It's recommended that you use
+        NOTE! This method is deprecated! It's recommended that you use
         AudioProcessorParameter::endChangeGesture() instead.
     */
     JUCE_DEPRECATED (void endParameterChangeGesture (int parameterIndex));
