@@ -3001,6 +3001,7 @@ private:
             case VK_NUMLOCK:
             case VK_SCROLL:
             case VK_APPS:
+                used = handleKeyUpOrDown (true);
                 sendModifierKeyChangeIfNeeded();
                 break;
 
