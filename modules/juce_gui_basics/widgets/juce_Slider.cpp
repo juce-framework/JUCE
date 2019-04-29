@@ -1298,7 +1298,7 @@ public:
               font (s.getLookAndFeel().getSliderPopupFont (s))
         {
             if (isOnDesktop)
-                setTransform (AffineTransform::scale (getApproximateScaleFactor (&s)));
+                setTransform (AffineTransform::scale (Component::getApproximateScaleFactorForComponent (&s)));
 
             setAlwaysOnTop (true);
             setAllowedPlacement (owner.getLookAndFeel().getSliderPopupPlacement (s));
@@ -1338,21 +1338,6 @@ public:
         }
 
     private:
-        static float getApproximateScaleFactor (Component* targetComponent)
-        {
-            AffineTransform transform;
-
-            for (Component* target = targetComponent; target != nullptr; target = target->getParentComponent())
-            {
-                transform = transform.followedBy (target->getTransform());
-
-                if (target->isOnDesktop())
-                    transform = transform.scaled (target->getDesktopScaleFactor());
-            }
-
-            return (transform.getScaleFactor() / Desktop::getInstance().getGlobalScaleFactor());
-        }
-
         //==============================================================================
         Slider& owner;
         Font font;
