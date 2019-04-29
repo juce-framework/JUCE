@@ -983,9 +983,11 @@ public:
     */
     String (double doubleValue, int numberOfDecimalPlaces, bool useScientificNotation = false);
 
+   #ifndef DOXYGEN
     // Automatically creating a String from a bool opens up lots of nasty type conversion edge cases.
     // If you want a String representation of a bool you can cast the bool to an int first.
     explicit String (bool) = delete;
+   #endif
 
     /** Reads the value of the string as a decimal number (up to 32 bits in size).
 
@@ -1482,9 +1484,11 @@ JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, float number);
 /** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, double number);
 
+#ifndef DOXYGEN
 // Automatically creating a String from a bool opens up lots of nasty type conversion edge cases.
 // If you want a String representation of a bool you can cast the bool to an int first.
 String& JUCE_CALLTYPE operator<< (String&, bool) = delete;
+#endif
 
 //==============================================================================
 /** Case-sensitive comparison of two strings. */
