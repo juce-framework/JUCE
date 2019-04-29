@@ -893,7 +893,8 @@ Image ListBox::createSnapshotOfRows (const SparseSet<int>& rows, int& imageX, in
     imageX = imageArea.getX();
     imageY = imageArea.getY();
 
-    Image snapshot (Image::ARGB, imageArea.getWidth(), imageArea.getHeight(), true);
+    auto listScale = Component::getApproximateScaleFactorForComponent (this);
+    Image snapshot (Image::ARGB, roundToInt (imageArea.getWidth() * listScale), roundToInt (imageArea.getHeight() * listScale), true);
 
     for (int i = getNumRowsOnScreen() + 2; --i >= 0;)
     {
@@ -904,9 +905,12 @@ Image ListBox::createSnapshotOfRows (const SparseSet<int>& rows, int& imageX, in
                 Graphics g (snapshot);
                 g.setOrigin (getLocalPoint (rowComp, Point<int>()) - imageArea.getPosition());
 
-                if (g.reduceClipRegion (rowComp->getLocalBounds()))
+                auto rowScale = Component::getApproximateScaleFactorForComponent (rowComp);
+
+                if (g.reduceClipRegion (rowComp->getLocalBounds() * rowScale))
                 {
                     g.beginTransparencyLayer (0.6f);
+                    g.addTransform (AffineTransform::scale (rowScale));
                     rowComp->paintEntireComponent (g, false);
                     g.endTransparencyLayer();
                 }
