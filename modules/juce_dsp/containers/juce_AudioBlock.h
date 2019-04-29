@@ -163,7 +163,7 @@ public:
           startSample (startSampleIndex),
           numSamples (static_cast<size_t> (buffer.getNumSamples()) - startSampleIndex)
     {
-        jassert (startSample < numSamples);
+        jassert (startSample < static_cast<size_t> (buffer.getNumSamples()));
     }
 
     AudioBlock (const AudioBlock& other) noexcept = default;
