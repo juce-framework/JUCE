@@ -468,7 +468,7 @@ private:
         if (auto block = currentTopology.getBlockWithUID (deviceID))
             return BlockImpl::getFrom (*block);
 
-            return nullptr;
+        return nullptr;
     }
 
     OwnedArray<ConnectedDeviceGroup<Detector>> connectedDeviceGroups;

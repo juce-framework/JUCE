@@ -858,8 +858,8 @@ public:
                 if (t.value.isActive)
                     killTouch (t.touch, t.value, now);
 
-                    touches.clear();
-                    }
+            touches.clear();
+        }
 
         BlockImplementation& blockImpl;
         TouchList<TouchStatus> touches;
