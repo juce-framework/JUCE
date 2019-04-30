@@ -181,8 +181,8 @@ public:
     template <typename OtherSampleType, MayUseConvertingConstructor<OtherSampleType> = 0>
     AudioBlock& operator= (const AudioBlock<OtherSampleType>& other) noexcept
     {
-        AudioBlock copy { other };
-        swap (copy);
+        AudioBlock blockCopy { other };
+        swap (blockCopy);
         return *this;
     }
 
