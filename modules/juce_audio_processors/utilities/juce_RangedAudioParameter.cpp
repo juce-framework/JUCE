@@ -28,10 +28,10 @@ namespace juce
 {
 
 RangedAudioParameter::RangedAudioParameter (const String& parameterID,
-                                            const String& name,
-                                            const String& label,
-                                            Category category)
-    : AudioProcessorParameterWithID (parameterID, name, label, category)
+                                            const String& parameterName,
+                                            const String& parameterLabel,
+                                            Category parameterCategory)
+    : AudioProcessorParameterWithID (parameterID, parameterName, parameterLabel, parameterCategory)
 {
 }
 
