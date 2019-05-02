@@ -53,7 +53,7 @@
  #undef KeyPress
 #endif
 
-#if ! JUCE_WINDOWS && ! JUCE_MAC
+#if ! JUCE_WINDOWS && ! JUCE_MAC && ! JUCE_LINUX
  #undef JUCE_PLUGINHOST_VST3
  #define JUCE_PLUGINHOST_VST3 0
 #endif

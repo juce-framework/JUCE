@@ -168,6 +168,10 @@ namespace Steinberg
  #include <windows.h>
 #endif
 
+#if JUCE_LINUX
+#include <dlfcn.h>
+#endif
+
 //==============================================================================
 #undef ASSERT
 #undef WARNING

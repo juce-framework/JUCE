@@ -74,7 +74,7 @@
  #define JucePlugin_Build_RTAS 0
 #endif
 
-#if ! (defined (_MSC_VER) || defined (__APPLE_CPP__) || defined (__APPLE_CC__))
+#if ! (defined (_MSC_VER) || defined (__APPLE_CPP__) || defined (__linux__) || defined (__APPLE_CC__))
  #undef JucePlugin_Build_VST3
  #define JucePlugin_Build_VST3 0
 #endif

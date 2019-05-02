@@ -63,7 +63,7 @@ std::function<bool(AudioProcessor&)> PluginHostType::jucePlugInIsRunningInAudioS
  #define JUCE_VST3_CAN_REPLACE_VST2 1
 #endif
 
-#if JucePlugin_Build_VST3 && (__APPLE_CPP__ || __APPLE_CC__ || _WIN32 || _WIN64) && JUCE_VST3_CAN_REPLACE_VST2
+#if JucePlugin_Build_VST3 && (__APPLE_CPP__ || __APPLE_CC__ || _WIN32 || _WIN64 || __linux__) && JUCE_VST3_CAN_REPLACE_VST2
 #define VST3_REPLACEMENT_AVAILABLE 1
 
 // NB: Nasty old-fashioned code in here because it's copied from the Steinberg example code.

@@ -27,9 +27,9 @@
 #include "../../juce_core/system/juce_TargetPlatform.h"
 
 //==============================================================================
-#if JucePlugin_Build_VST3 && (__APPLE_CPP__ || __APPLE_CC__ || _WIN32 || _WIN64)
+#if JucePlugin_Build_VST3 && (__APPLE_CPP__ || __APPLE_CC__ || _WIN32 || _WIN64 || __linux__)
 
-#if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS)
+#if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
  #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
  #define JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY 1
 #endif
@@ -1064,7 +1064,7 @@ private:
             if (component == nullptr)
                 component.reset (new ContentWrapperComponent (*this, pluginInstance));
 
-           #if JUCE_WINDOWS
+           #if !JUCE_MAC
             component->addToDesktop (0, parent);
             component->setOpaque (true);
             component->setVisible (true);
@@ -1092,7 +1092,7 @@ private:
         {
             if (component != nullptr)
             {
-               #if JUCE_WINDOWS
+               #if !JUCE_MAC
                 component->removeFromDesktop();
                #else
                 if (macHostWindow != nullptr)
@@ -2830,7 +2830,7 @@ bool shutdownModule()
     extern "C" __declspec (dllexport) bool ExitDll()   { return shutdownModule(); }
     #define JUCE_EXPORTED_FUNCTION
 
-#else
+#elif JUCE_MAC
     #define JUCE_EXPORTED_FUNCTION extern "C" __attribute__ ((visibility ("default")))
 
     CFBundleRef globalBundleInstance = nullptr;
@@ -2881,6 +2881,8 @@ bool shutdownModule()
 
         return false;
     }
+#else
+    #define JUCE_EXPORTED_FUNCTION extern "C" __attribute__ ((visibility ("default")))
 #endif
 
 //==============================================================================

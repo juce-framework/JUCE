@@ -179,6 +179,7 @@ public:
                 case VSTPlugIn:
                 case UnityPlugIn:
                 case DynamicLibrary:        return ".so";
+                case VST3PlugIn:            return ".vst3"
                 case SharedCodeTarget:
                 case StaticLibrary:         return ".a";
                 default:                    break;
@@ -352,6 +353,7 @@ public:
             case ProjectType::Target::SharedCodeTarget:
             case ProjectType::Target::AggregateTarget:
             case ProjectType::Target::VSTPlugIn:
+            case ProjectType::Target::VST3PlugIn:
             case ProjectType::Target::StandalonePlugIn:
             case ProjectType::Target::DynamicLibrary:
             case ProjectType::Target::UnityPlugIn:
