@@ -3435,6 +3435,18 @@ void Displays::findDisplays (float masterScale)
 
     if (auto display = xDisplay.display)
     {
+        Atom hints = Atoms::getIfExists (display, "_NET_WORKAREA");
+
+        auto getWorkAreaPropertyData = [&] (int screenNum) -> unsigned char*
+        {
+            GetXProperty prop (display, RootWindow (display, screenNum), hints, 0, 4, false, XA_CARDINAL);
+
+            if (prop.success && prop.actualType == XA_CARDINAL && prop.actualFormat == 32 && prop.numItems == 4)
+                return prop.data;
+
+            return nullptr;
+        };
+
        #if JUCE_USE_XRANDR
         {
             int major_opcode, first_event, first_error;
@@ -3448,6 +3460,9 @@ void Displays::findDisplays (float masterScale)
 
                 for (int i = 0; i < numMonitors; ++i)
                 {
+                    if (getWorkAreaPropertyData (i) == nullptr)
+                        continue;
+
                     if (auto* screens = xrandr.getScreenResources (display, RootWindow (display, i)))
                     {
                         for (int j = 0; j < screens->noutput; ++j)
@@ -3535,20 +3550,14 @@ void Displays::findDisplays (float masterScale)
         if (displays.isEmpty())
        #endif
         {
-            Atom hints = Atoms::getIfExists (display, "_NET_WORKAREA");
-
             if (hints != None)
             {
                 auto numMonitors = ScreenCount (display);
 
                 for (int i = 0; i < numMonitors; ++i)
                 {
-                    GetXProperty prop (display, RootWindow (display, i), hints, 0, 4, false, XA_CARDINAL);
-
-                    if (prop.success && prop.actualType == XA_CARDINAL && prop.actualFormat == 32 && prop.numItems == 4)
+                    if (auto* position = (const long*) getWorkAreaPropertyData (i))
                     {
-                        auto position = (const long*) prop.data;
-
                         Display d;
                         d.totalArea = Rectangle<int> ((int) position[0], (int) position[1],
                                                       (int) position[2], (int) position[3]);
