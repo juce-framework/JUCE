@@ -179,7 +179,7 @@ public:
                 case VSTPlugIn:
                 case UnityPlugIn:
                 case DynamicLibrary:        return ".so";
-                case VST3PlugIn:            return ".vst3"
+                case VST3PlugIn:            return ".vst3";
                 case SharedCodeTarget:
                 case StaticLibrary:         return ".a";
                 default:                    break;
