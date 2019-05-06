@@ -6,6 +6,33 @@ Develop
 
 Change
 ------
+SystemTrayIconComponent::setIconImage now takes two arguments, rather than one.
+The new argument is a template image for use on macOS where all non-transparent
+regions will render in a monochrome colour determined dynamically by the
+operating system.
+
+Possible Issues
+---------------
+You will now need to provide two images to display a SystemTrayIconComponent
+and the SystemTrayIconComponent will have a different appearance on macOS.
+
+Workaround
+----------
+If you are not targeting macOS then you can provide an empty image, `{}`, for
+the second argument. If you are targeting macOS then you will likely need to
+design a new monochrome icon.
+
+Rationale
+---------
+The introduction of "Dark Mode" in macOS 10.14 means that menu bar icons must
+support several different colours and highlight modes to retain the same
+appearance as the native Apple icons. Doing this correctly without delegating
+the behaviour to the operating system is extremely cumbersome, and the APIs we
+were previously using to interact with menu bar items have been deprecated.
+
+
+Change
+------
 The AudioBlock class now differentiates between const and non-const data.
 
 Possible Issues

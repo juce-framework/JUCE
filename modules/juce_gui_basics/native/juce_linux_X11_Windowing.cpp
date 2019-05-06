@@ -3034,21 +3034,10 @@ private:
             if (targetWindow == None)
                 return;
 
-            GetXProperty prop (display, targetWindow, atoms->XdndAware,
-                               0, 2, false, AnyPropertyType);
+            dragState->xdndVersion = getDnDVersionForWindow (targetWindow);
 
-            if (prop.success
-                 && prop.data != None
-                 && prop.actualFormat == 32
-                 && prop.numItems == 1)
-            {
-                dragState->xdndVersion = jmin ((int) prop.data[0], (int) atoms->DndVersion);
-            }
-            else
-            {
-                dragState->xdndVersion = -1;
+            if (dragState->xdndVersion == -1)
                 return;
-            }
 
             sendExternalDragAndDropEnter (targetWindow);
             dragState->targetWindow = targetWindow;
@@ -3253,6 +3242,17 @@ private:
         return dndAwarePropFound;
     }
 
+    int getDnDVersionForWindow (Window targetWindow)
+    {
+        GetXProperty prop (display, targetWindow, atoms->XdndAware,
+                           0, 2, false, AnyPropertyType);
+
+        if (prop.success && prop.data != None && prop.actualFormat == 32 && prop.numItems == 1)
+            return jmin ((int) prop.data[0], (int) atoms->DndVersion);
+
+        return -1;
+    }
+
     Window externalFindDragTargetWindow (Window targetWindow)
     {
         if (targetWindow == None)
@@ -3297,7 +3297,11 @@ private:
                              dragState->allowedTypes.size());
 
             dragState->dragging = true;
+            dragState->xdndVersion = getDnDVersionForWindow (dragState->targetWindow);
+
+            sendExternalDragAndDropEnter (dragState->targetWindow);
             handleExternalDragMotionNotify();
+
             return true;
         }
 

@@ -102,7 +102,7 @@ struct BlockTopology
             }
         }
 
-        return {};
+        return blockConnections;
     }
 
     int getNumberOfConnectionsToBlock (Block::UID uid) const

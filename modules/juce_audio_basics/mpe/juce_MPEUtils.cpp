@@ -84,15 +84,29 @@ int MPEChannelAssigner::findMidiChannelForNewNote (int noteNumber) noexcept
     return midiChannelLastAssigned;
 }
 
-void MPEChannelAssigner::noteOff (int noteNumber)
+void MPEChannelAssigner::noteOff (int noteNumber, int midiChannel)
 {
+    const auto removeNote = [] (MidiChannel& ch, int noteNum)
+    {
+        if (ch.notes.removeAllInstancesOf (noteNum) > 0)
+        {
+            ch.lastNotePlayed = noteNum;
+            return true;
+        }
+
+        return false;
+    };
+
+    if (midiChannel >= 0 && midiChannel < 17)
+    {
+        removeNote (midiChannels[midiChannel], noteNumber);
+        return;
+    }
+
     for (auto& ch : midiChannels)
     {
-        if (ch.notes.removeAllInstancesOf (noteNumber) > 0)
-        {
-            ch.lastNotePlayed = noteNumber;
+        if (removeNote (ch, noteNumber))
             return;
-        }
     }
 }
 

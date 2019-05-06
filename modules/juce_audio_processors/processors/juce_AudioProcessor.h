@@ -1587,7 +1587,7 @@ protected:
     */
     virtual bool isBusesLayoutSupported (const BusesLayout&) const          { return true; }
 
-    /** Callback to check if a certain bus layout can now be applied
+    /** Callback to check if a certain bus layout can now be applied.
 
         Most subclasses will not need to override this method and should instead
         override the isBusesLayoutSupported callback to reject certain layout changes.
@@ -1619,6 +1619,13 @@ protected:
         @see isBusesLayoutSupported, setBusesLayout
     */
     virtual bool canApplyBusesLayout (const BusesLayout& layouts) const     { return isBusesLayoutSupported (layouts); }
+
+    /** This method will be called when a new bus layout needs to be applied.
+
+        Most subclasses will not need to override this method and should just use the default
+        implementation.
+    */
+    virtual bool applyBusLayouts (const BusesLayout& layouts);
 
     //==============================================================================
     /** Structure used for AudioProcessor Callbacks */
@@ -1770,7 +1777,6 @@ private:
 
     AudioProcessorListener* getListenerLocked (int) const noexcept;
     void updateSpeakerFormatStrings();
-    bool applyBusLayouts (const BusesLayout&);
     void audioIOChanged (bool busNumberChanged, bool channelNumChanged);
     void getNextBestLayout (const BusesLayout&, BusesLayout&) const;
 

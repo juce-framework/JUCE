@@ -260,7 +260,7 @@ private:
 
       #if JUCE_ANDROID
         // Note: this is not strictly speaking required param, just doing it here because it is the fastest way!
-        n.publicVersion = new PushNotifications::Notification();
+        n.publicVersion.reset (new PushNotifications::Notification());
         n.publicVersion->identifier = "blahblahblah";
         n.publicVersion->title      = "Public title!";
         n.publicVersion->body       = "Public body!";

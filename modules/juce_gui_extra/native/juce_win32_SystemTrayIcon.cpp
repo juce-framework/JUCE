@@ -196,11 +196,11 @@ private:
 };
 
 //==============================================================================
-void SystemTrayIconComponent::setIconImage (const Image& newImage)
+void SystemTrayIconComponent::setIconImage (const Image& colourImage, const Image&)
 {
-    if (newImage.isValid())
+    if (colourImage.isValid())
     {
-        HICON hicon = IconConverters::createHICONFromImage (newImage, TRUE, 0, 0);
+        HICON hicon = IconConverters::createHICONFromImage (colourImage, TRUE, 0, 0);
 
         if (pimpl == nullptr)
             pimpl.reset (new Pimpl (*this, hicon, (HWND) getWindowHandle()));
