@@ -244,7 +244,7 @@ public:
                             // Work around for dots in the path which aren't handled well.
                             // SVGs saved by Adobe Illustrator may include dots (small filled circles)
                             // coded this way.
-                            p1.x += 0.001;
+                            p1.x += 0.001f;
                         }
                         path.lineTo (p1);
                     }
