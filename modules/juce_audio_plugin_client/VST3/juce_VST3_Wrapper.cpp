@@ -2114,8 +2114,8 @@ public:
     bool getCurrentPosition (CurrentPositionInfo& info) override
     {
         const bool isContinousTimeAvailable = (processContext.state & Vst::ProcessContext::kContTimeValid) != 0;
-        info.timeInSamples              = isContinousTimeAvailable ? processContext.continousTimeSamples : jmax ((juce::int64) 0, processContext.projectTimeSamples);
-        info.timeInSeconds              = static_cast<double> (info.timeInSamples) / processContext.sampleRate;
+        info.timeInSamples              = isContinousTimeAvailable && ((processContext.state & Vst::ProcessContext::kPlaying) != 0) ? processContext.continousTimeSamples : jmax ((juce::int64) 0, processContext.projectTimeSamples);
+        info.timeInSeconds              = processContext.systemTime / 1000000000.0;
         info.bpm                        = jmax (1.0, processContext.tempo);
         info.timeSigNumerator           = jmax (1, (int) processContext.timeSigNumerator);
         info.timeSigDenominator         = jmax (1, (int) processContext.timeSigDenominator);
