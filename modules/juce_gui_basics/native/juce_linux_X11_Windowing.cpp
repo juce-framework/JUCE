@@ -3790,6 +3790,7 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (AlertWindow::AlertIconType ico
 }
 
 //============================== X11 - MouseCursor =============================
+std::map<Cursor, Display*> cursorMap;
 
 void* CustomMouseCursorInfo::create() const
 {
@@ -3852,7 +3853,10 @@ void* CustomMouseCursorInfo::create() const
                 xcursorImageDestroy (xcImage);
 
                 if (result != nullptr)
+                {
+                    cursorMap[(Cursor) result] = display;
                     return result;
+                }
             }
         }
     }
@@ -3916,6 +3920,7 @@ void* CustomMouseCursorInfo::create() const
     XFreePixmap (display, sourcePixmap);
     XFreePixmap (display, maskPixmap);
 
+    cursorMap[(Cursor) result] = display;
     return result;
 }
 
@@ -3983,13 +3988,33 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
     }
 
     ScopedXLock xlock (display);
-    return (void*) XCreateFontCursor (display, shape);
+
+    auto* result = (void*) XCreateFontCursor (display, shape);
+    cursorMap[(Cursor) result] = display;
+
+    return result;
 }
 
 void MouseCursor::showInWindow (ComponentPeer* peer) const
 {
     if (auto* lp = dynamic_cast<LinuxComponentPeer*> (peer))
+    {
+        ScopedXDisplay xDisplay;
+
+        if (cursorHandle != nullptr && xDisplay.display != cursorMap[(Cursor) getHandle()])
+        {
+            auto oldHandle = (Cursor) getHandle();
+
+            if (auto* customInfo = cursorHandle->getCustomInfo())
+                cursorHandle->setHandle (customInfo->create());
+            else
+                cursorHandle->setHandle (createStandardMouseCursor (cursorHandle->getType()));
+
+            cursorMap.erase (oldHandle);
+        }
+
         lp->showMouseCursor ((Cursor) getHandle());
+    }
 }
 
 //=================================== X11 - DND ================================
