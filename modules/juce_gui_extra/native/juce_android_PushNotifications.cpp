@@ -203,8 +203,8 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (RemoteInputBuilder, "android/app/RemoteInput$Bui
  #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
    STATICMETHOD (getInstance, "getInstance", "()Lcom/google/firebase/messaging/FirebaseMessaging;") \
    METHOD (send,                 "send",                 "(Lcom/google/firebase/messaging/RemoteMessage;)V") \
-   METHOD (subscribeToTopic,     "subscribeToTopic",     "(Ljava/lang/String;)V") \
-   METHOD (unsubscribeFromTopic, "unsubscribeFromTopic", "(Ljava/lang/String;)V") \
+   METHOD (subscribeToTopic,     "subscribeToTopic",     "(Ljava/lang/String;)Lcom/google/android/gms/tasks/Task;") \
+   METHOD (unsubscribeFromTopic, "unsubscribeFromTopic", "(Ljava/lang/String;)Lcom/google/android/gms/tasks/Task;") \
 
  DECLARE_JNI_CLASS (FirebaseMessaging, "com/google/firebase/messaging/FirebaseMessaging")
  #undef JNI_CLASS_MEMBERS
@@ -349,7 +349,7 @@ struct PushNotifications::Pimpl
     void notifyListenersAboutLocalNotification (const LocalRef<jobject>& intent)
     {
         auto* env = getEnv();
-        LocalRef<jobject> context (getAppContext());
+        LocalRef<jobject> context (getMainActivity());
 
         auto bundle = LocalRef<jobject> (env->CallObjectMethod (intent, AndroidIntent.getExtras));
 
@@ -461,6 +461,7 @@ struct PushNotifications::Pimpl
       #endif
     }
 
+    //==========================================================================
     void subscribeToTopic (const String& topic)
     {
       #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
@@ -469,7 +470,7 @@ struct PushNotifications::Pimpl
         auto firebaseMessaging = LocalRef<jobject> (env->CallStaticObjectMethod (FirebaseMessaging,
                                                                                  FirebaseMessaging.getInstance));
 
-        env->CallVoidMethod (firebaseMessaging, FirebaseMessaging.subscribeToTopic, javaString (topic).get());
+        env->CallObjectMethod (firebaseMessaging, FirebaseMessaging.subscribeToTopic, javaString (topic).get());
       #else
         ignoreUnused (topic);
       #endif
@@ -483,7 +484,7 @@ struct PushNotifications::Pimpl
         auto firebaseMessaging = LocalRef<jobject> (env->CallStaticObjectMethod (FirebaseMessaging,
                                                                                  FirebaseMessaging.getInstance));
 
-        env->CallVoidMethod (firebaseMessaging, FirebaseMessaging.unsubscribeFromTopic, javaString (topic).get());
+        env->CallObjectMethod (firebaseMessaging, FirebaseMessaging.unsubscribeFromTopic, javaString (topic).get());
       #else
         ignoreUnused (topic);
       #endif
@@ -545,7 +546,7 @@ struct PushNotifications::Pimpl
     void notifyListenersAboutRemoteNotificationFromService (const LocalRef<jobject>& remoteNotification)
     {
       #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
-        GlobalRef rn (remoteNotification.get());
+        GlobalRef rn (remoteNotification);
 
         MessageManager::callAsync ([this, rn]
         {
@@ -570,7 +571,7 @@ struct PushNotifications::Pimpl
     void notifyListenersAboutUpstreamMessageSent (const LocalRef<jstring>& messageId)
     {
       #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
-        GlobalRef mid (messageId);
+        GlobalRef mid (LocalRef<jobject>(messageId.get()));
 
         MessageManager::callAsync ([this, mid]
         {
@@ -586,7 +587,7 @@ struct PushNotifications::Pimpl
                                                           const LocalRef<jstring>& error)
     {
       #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
-        GlobalRef mid (messageId), e (error);
+        GlobalRef mid (LocalRef<jobject>(messageId.get())), e (LocalRef<jobject>(error.get()));
 
         MessageManager::callAsync ([this, mid, e]
         {
@@ -603,7 +604,7 @@ struct PushNotifications::Pimpl
     static LocalRef<jobject> getNotificationManager()
     {
         auto* env = getEnv();
-        LocalRef<jobject> context (getAppContext());
+        LocalRef<jobject> context (getMainActivity());
 
         return LocalRef<jobject> (env->CallObjectMethod (context.get(),
                                                          AndroidContext.getSystemService,
@@ -631,7 +632,7 @@ struct PushNotifications::Pimpl
     static LocalRef<jobject> createNotificationBuilder (const PushNotifications::Notification& n)
     {
         auto* env = getEnv();
-        LocalRef<jobject> context (getAppContext());
+        LocalRef<jobject> context (getMainActivity());
 
         jclass builderClass = env->FindClass ("android/app/Notification$Builder");
         jassert (builderClass != 0);
@@ -663,7 +664,7 @@ struct PushNotifications::Pimpl
     static void setupRequiredFields (const PushNotifications::Notification& n, LocalRef<jobject>& notificationBuilder)
     {
         auto* env = getEnv();
-        LocalRef<jobject> context (getAppContext());
+        LocalRef<jobject> context (getMainActivity());
 
         auto activityClass = LocalRef<jobject> (env->CallObjectMethod (context.get(), JavaObject.getClass));
         auto notifyIntent  = LocalRef<jobject> (env->NewObject (AndroidIntent, AndroidIntent.constructorWithContextAndClass, context.get(), activityClass.get()));
@@ -902,7 +903,7 @@ struct PushNotifications::Pimpl
                                                   LocalRef<jobject>& notificationBuilder)
     {
         auto* env = getEnv();
-        LocalRef<jobject> context (getAppContext());
+        LocalRef<jobject> context (getMainActivity());
 
         auto activityClass = LocalRef<jobject> (env->CallObjectMethod (context.get(), JavaObject.getClass));
         auto deleteIntent  = LocalRef<jobject> (env->NewObject (AndroidIntent, AndroidIntent.constructorWithContextAndClass, context.get(), activityClass.get()));
@@ -930,7 +931,7 @@ struct PushNotifications::Pimpl
             return;
 
         auto* env = getEnv();
-        LocalRef<jobject> context (getAppContext());
+        LocalRef<jobject> context (getMainActivity());
 
         int actionIndex = 0;
 
@@ -1025,7 +1026,7 @@ struct PushNotifications::Pimpl
     static LocalRef<jobject> juceUrlToAndroidUri (const URL& url)
     {
         auto* env = getEnv();
-        LocalRef<jobject> context (getAppContext());
+        LocalRef<jobject> context (getMainActivity());
 
         auto packageNameString = LocalRef<jstring> ((jstring) (env->CallObjectMethod (context.get(), AndroidContext.getPackageName)));
 
@@ -1351,7 +1352,7 @@ struct PushNotifications::Pimpl
             dataDynamicObject->setProperty (juceString (key.get()), juceString (value.get()));
         }
 
-        var dataVar (dataDynamicObject);
+        var dataVar (dataDynamicObject.get());
 
         DynamicObject::Ptr propertiesDynamicObject = new DynamicObject();
         propertiesDynamicObject->setProperty ("collapseKey", juceString (collapseKey.get()));
@@ -1402,7 +1403,7 @@ struct PushNotifications::Pimpl
             propertiesDynamicObject->setProperty ("link",                  link.get() != 0 ? juceString ((jstring) env->CallObjectMethod (link, AndroidUri.toString)) : String());
         }
 
-        n.properties = var (propertiesDynamicObject);
+        n.properties = var (propertiesDynamicObject.get());
 
         return n;
     }
@@ -1492,7 +1493,7 @@ struct PushNotifications::Pimpl
     static bool intentActionContainsAnyOf (jobject intent, const StringArray& strings, bool includePackageName)
     {
         auto* env = getEnv();
-        LocalRef<jobject> context (getAppContext());
+        LocalRef<jobject> context (getMainActivity());
 
         String packageName = includePackageName ? juceString ((jstring) env->CallObjectMethod (context.get(),
                                                                                                AndroidContext.getPackageName))
@@ -1551,6 +1552,70 @@ struct PushNotifications::Pimpl
     PushNotifications& owner;
 };
 
+#if defined(JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME)
+//==============================================================================
+struct JuceFirebaseInstanceIdService
+{
+    #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+     CALLBACK (tokenRefreshed, "firebaseInstanceIdTokenRefreshed", "(Ljava/lang/String;)V")
+
+     DECLARE_JNI_CLASS (InstanceIdService, "com/roli/juce/JuceFirebaseInstanceIdService")
+    #undef JNI_CLASS_MEMBERS
+
+    static void JNICALL tokenRefreshed (void* token)
+    {
+        if (auto* instance = PushNotifications::getInstanceWithoutCreating())
+            instance->pimpl->notifyListenersTokenRefreshed (juceString (static_cast<jstring> (token)));
+    }
+};
+
+JuceFirebaseInstanceIdService::InstanceIdService_Class JuceFirebaseInstanceIdService::InstanceIdService;
+#endif
+
+#if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
+//==============================================================================
+struct JuceFirebaseMessagingService
+{
+    #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+     CALLBACK (remoteNotificationReceived,  "firebaseRemoteMessageReceived",  "(Lcom/google/firebase/messaging/RemoteMessage;)V") \
+     CALLBACK (remoteMessagesDeleted,  "firebaseRemoteMessagesDeleted",  "()V") \
+     CALLBACK (remoteMessageSent,      "firebaseRemoteMessageSent",      "(Ljava/lang/String;)V") \
+     CALLBACK (remoteMessageSendError, "firebaseRemoteMessageSendError", "(Ljava/lang/String;Ljava/lang/String;)V")
+
+     DECLARE_JNI_CLASS (MessagingService, "com/roli/juce/JuceFirebaseMessagingService")
+    #undef JNI_CLASS_MEMBERS
+
+    static void JNICALL remoteNotificationReceived (JNIEnv*, jobject /*messagingService*/, void* remoteMessage)
+    {
+        if (auto* instance = PushNotifications::getInstanceWithoutCreating())
+            instance->pimpl->notifyListenersAboutRemoteNotificationFromService (LocalRef<jobject> (static_cast<jobject> (remoteMessage)));
+
+    }
+
+    static void JNICALL remoteMessagesDeleted()
+    {
+        if (auto* instance = PushNotifications::getInstanceWithoutCreating())
+            instance->pimpl->notifyListenersAboutRemoteNotificationsDeleted();
+    }
+
+    static void JNICALL remoteMessageSent (JNIEnv*, jobject /*messagingService*/, void* messageId)
+    {
+        if (auto* instance = PushNotifications::getInstanceWithoutCreating())
+            instance->pimpl->notifyListenersAboutUpstreamMessageSent (LocalRef<jstring> (static_cast<jstring> (messageId)));
+    }
+
+    static void JNICALL remoteMessageSendError (JNIEnv*, jobject /*messagingService*/, void* messageId, void* error)
+    {
+        if (auto* instance = PushNotifications::getInstanceWithoutCreating())
+            instance->pimpl->notifyListenersAboutUpstreamMessageSendingError (LocalRef<jstring> (static_cast<jstring> (messageId)),
+                                                                              LocalRef<jstring> (static_cast<jstring> (error)));
+    }
+};
+
+JuceFirebaseMessagingService::MessagingService_Class  JuceFirebaseMessagingService::MessagingService;
+#endif
+
+//==============================================================================
 bool juce_handleNotificationIntent (void* intent)
 {
     auto* instance = PushNotifications::getInstanceWithoutCreating();
@@ -1582,35 +1647,25 @@ bool juce_handleNotificationIntent (void* intent)
     return false;
 }
 
-void juce_firebaseDeviceNotificationsTokenRefreshed (void* token)
+//==============================================================================
+struct JuceActivityNewIntentListener
 {
-    if (auto* instance = PushNotifications::getInstanceWithoutCreating())
-        instance->pimpl->notifyListenersTokenRefreshed (juceString (static_cast<jstring> (token)));
-}
+    #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+     CALLBACK (appNewIntent, "appNewIntent", "(Landroid/content/Intent;)V")
 
-void juce_firebaseRemoteNotificationReceived (void* remoteMessage)
-{
-    if (auto* instance = PushNotifications::getInstanceWithoutCreating())
-        instance->pimpl->notifyListenersAboutRemoteNotificationFromService (LocalRef<jobject> (static_cast<jobject> (remoteMessage)));
-}
+     DECLARE_JNI_CLASS (JavaActivity, JUCE_PUSH_NOTIFICATIONS_ACTIVITY)
+    #undef JNI_CLASS_MEMBERS
 
-void juce_firebaseRemoteMessagesDeleted()
-{
-    if (auto* instance = PushNotifications::getInstanceWithoutCreating())
-        instance->pimpl->notifyListenersAboutRemoteNotificationsDeleted();
-}
+    static void JNICALL appNewIntent (JNIEnv*, jobject /*activity*/, jobject intentData)
+    {
+       #if JUCE_PUSH_NOTIFICATIONS && JUCE_MODULE_AVAILABLE_juce_gui_extra
+        juce_handleNotificationIntent(static_cast<void*>(intentData));
+       #else
+        juce::ignoreUnused(intentData);
+       #endif
+    }
+};
 
-void juce_firebaseRemoteMessageSent (void* messageId)
-{
-    if (auto* instance = PushNotifications::getInstanceWithoutCreating())
-        instance->pimpl->notifyListenersAboutUpstreamMessageSent (LocalRef<jstring> (static_cast<jstring> (messageId)));
-}
-
-void juce_firebaseRemoteMessageSendError (void* messageId, void* error)
-{
-    if (auto* instance = PushNotifications::getInstanceWithoutCreating())
-        instance->pimpl->notifyListenersAboutUpstreamMessageSendingError (LocalRef<jstring> (static_cast<jstring> (messageId)),
-                                                                          LocalRef<jstring> (static_cast<jstring> (error)));
-}
+JuceActivityNewIntentListener::JavaActivity_Class JuceActivityNewIntentListener::JavaActivity;
 
 } // namespace juce

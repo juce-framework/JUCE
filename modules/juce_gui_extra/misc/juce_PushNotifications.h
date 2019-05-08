@@ -700,11 +700,9 @@ private:
 
    #if JUCE_ANDROID
     friend bool juce_handleNotificationIntent (void*);
-    friend void juce_firebaseDeviceNotificationsTokenRefreshed (void*);
-    friend void juce_firebaseRemoteNotificationReceived (void*);
-    friend void juce_firebaseRemoteMessagesDeleted();
-    friend void juce_firebaseRemoteMessageSent (void*);
-    friend void juce_firebaseRemoteMessageSendError (void*, void*);
+
+    friend struct JuceFirebaseInstanceIdService;
+    friend struct JuceFirebaseMessagingService;
    #endif
 
   #if JUCE_PUSH_NOTIFICATIONS
