@@ -319,15 +319,15 @@ void KnownPluginList::sort (const SortMethod method, bool forwards)
 }
 
 //==============================================================================
-XmlElement* KnownPluginList::createXml() const
+std::unique_ptr<XmlElement> KnownPluginList::createXml() const
 {
-    auto e = new XmlElement ("KNOWNPLUGINS");
+    auto e = std::make_unique<XmlElement> ("KNOWNPLUGINS");
 
     {
         ScopedLock lock (typesArrayLock);
 
         for (int i = types.size(); --i >= 0;)
-            e->prependChildElement (types.getUnchecked(i)->createXml());
+            e->prependChildElement (types.getUnchecked(i)->createXml().release());
     }
 
     for (auto& b : blacklist)

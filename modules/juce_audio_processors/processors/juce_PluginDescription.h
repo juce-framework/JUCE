@@ -140,7 +140,7 @@ public:
 
         @see loadFromXml
     */
-    XmlElement* createXml() const;
+    std::unique_ptr<XmlElement> createXml() const;
 
     /** Reloads the info in this structure from an XML record that was previously
         saved with createXML().

@@ -100,10 +100,12 @@ String PluginDescription::createIdentifierString() const
     return pluginFormatName + "-" + name + getPluginDescSuffix (*this);
 }
 
-XmlElement* PluginDescription::createXml() const
+std::unique_ptr<XmlElement> PluginDescription::createXml() const
 {
-    XmlElement* const e = new XmlElement ("PLUGIN");
+    auto e = std::make_unique<XmlElement> ("PLUGIN");
+
     e->setAttribute ("name", name);
+
     if (descriptiveName != name)
         e->setAttribute ("descriptiveName", descriptiveName);
 

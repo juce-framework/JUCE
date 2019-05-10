@@ -64,8 +64,8 @@ public:
     void audioProcessorChanged (AudioProcessor*) override { changed(); }
 
     //==============================================================================
-    XmlElement* createXml() const;
-    void restoreFromXml (const XmlElement& xml);
+    std::unique_ptr<XmlElement> createXml() const;
+    void restoreFromXml (const XmlElement&);
 
     static const char* getFilenameSuffix()      { return ".filtergraph"; }
     static const char* getFilenameWildcard()    { return "*.filtergraph"; }

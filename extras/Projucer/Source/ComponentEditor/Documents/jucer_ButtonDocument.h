@@ -55,8 +55,8 @@ public:
     void addExtraClassProperties (PropertyPanel&);
 
     //==============================================================================
-    XmlElement* createXml() const;
-    bool loadFromXml (const XmlElement& xml);
+    std::unique_ptr<XmlElement> createXml() const;
+    bool loadFromXml (const XmlElement&);
 
     void fillInGeneratedCode (GeneratedCode& code) const;
     void fillInPaintCode (GeneratedCode& code) const;

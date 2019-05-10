@@ -149,7 +149,7 @@ protected:
 
     BinaryResources resources;
 
-    virtual XmlElement* createXml() const;
+    virtual std::unique_ptr<XmlElement> createXml() const;
     virtual bool loadFromXml (const XmlElement&);
 
     virtual void fillInGeneratedCode (GeneratedCode&) const;

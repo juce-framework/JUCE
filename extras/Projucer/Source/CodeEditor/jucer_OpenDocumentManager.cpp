@@ -423,9 +423,9 @@ static void saveDocList (const Array <OpenDocumentManager::Document*>& list, Xml
     }
 }
 
-XmlElement* RecentDocumentList::createXML() const
+std::unique_ptr<XmlElement> RecentDocumentList::createXML() const
 {
-    XmlElement* xml = new XmlElement ("RECENT_DOCUMENTS");
+    auto xml = std::make_unique<XmlElement> ("RECENT_DOCUMENTS");
 
     saveDocList (previousDocs, *xml->createNewChildElement ("PREVIOUS"));
     saveDocList (nextDocs,     *xml->createNewChildElement ("NEXT"));
