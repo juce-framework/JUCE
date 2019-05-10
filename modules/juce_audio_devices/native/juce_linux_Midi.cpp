@@ -279,7 +279,7 @@ public:
 
     void deletePort (Port* port)
     {
-        ports.remove (port->portId);
+        ports.set (port->portId, nullptr);
         decReferenceCount();
     }
 
