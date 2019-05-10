@@ -36,6 +36,10 @@ extern bool shouldScaleGLWindow (void* hwnd);
  bool juce_shouldDoubleScaleNativeGLWindow()  { return false; }
 #endif
 
+#if JUCE_WIN_PER_MONITOR_DPI_AWARE
+ void setProcessDPIAwarenessIfNecessary (void*);
+#endif
+
 //==============================================================================
 class OpenGLContext::NativeContext
    #if JUCE_WIN_PER_MONITOR_DPI_AWARE
@@ -101,6 +105,10 @@ public:
 
     bool initialiseOnRenderThread (OpenGLContext& c)
     {
+       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+        setProcessDPIAwarenessIfNecessary (nativeWindow->getNativeHandle());
+       #endif
+
         context = &c;
         return true;
     }

@@ -377,6 +377,7 @@ static void setDPIAwareness()
         getThreadDPIAwarenessContext        = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
         getAwarenessFromDPIAwarenessContext = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
         setThreadDPIAwarenessContext        = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
+        setProcessDPIAwareness              = (SetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "SetProcessDpiAwareness");
 
         // Only set the DPI awareness context of the process if we are a standalone app
         if (! JUCEApplicationBase::isStandaloneApp())
@@ -388,7 +389,6 @@ static void setDPIAwareness()
             && SUCCEEDED (setProcessDPIAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2)))
             return;
 
-        setProcessDPIAwareness    = (SetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "SetProcessDpiAwareness");
         enableNonClientDPIScaling = (EnableNonClientDPIScalingFunc) getUser32Function ("EnableNonClientDpiScaling");
 
         if (setProcessDPIAwareness != nullptr && enableNonClientDPIScaling != nullptr
@@ -4072,6 +4072,20 @@ JUCE_API bool shouldScaleGLWindow (void* hwnd)
 {
     return isPerMonitorDPIAwareWindow ((HWND) hwnd);
 }
+
+#if JUCE_WIN_PER_MONITOR_DPI_AWARE
+ JUCE_API void setProcessDPIAwarenessIfNecessary (void* hwnd)
+ {
+     DPI_Awareness context;
+     getProcessDPIAwareness (0, &context);
+
+     if (isPerMonitorDPIAwareWindow ((HWND) hwnd) && context != DPI_Awareness::DPI_Awareness_Per_Monitor_Aware
+         && setProcessDPIAwareness != nullptr)
+     {
+         setProcessDPIAwareness (DPI_Awareness::DPI_Awareness_Per_Monitor_Aware);
+     }
+ }
+#endif
 
 JUCE_IMPLEMENT_SINGLETON (HWNDComponentPeer::WindowClassHolder)
 
