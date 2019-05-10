@@ -68,6 +68,7 @@
 #elif defined (LINUX) || defined (__linux__)
   #define     JUCE_LINUX 1
 #elif defined (__APPLE_CPP__) || defined (__APPLE_CC__)
+  #define CF_EXCLUDE_CSTD_HEADERS 1
   #include <CoreFoundation/CoreFoundation.h> // (needed to find out what platform we're using)
   #include "../native/juce_mac_ClangBugWorkaround.h"
 

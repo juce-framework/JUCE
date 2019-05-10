@@ -102,6 +102,7 @@
 #if JUCE_MAC || JUCE_IOS
  #include <xlocale.h>
  #include <mach/mach.h>
+ #include <signal.h>
 #endif
 
 #if JUCE_ANDROID
