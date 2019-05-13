@@ -632,17 +632,21 @@ private:
         {
            #if ! JUCE_32BIT
             if (useNativeControls)
-            {
                 [playerView setPlayer: player];
+            else
+           #endif
+                [playerLayer setPlayer: player];
+
+            if (player != nil)
+            {
                 attachPlayerStatusObserver();
                 attachPlaybackObserver();
-                return;
             }
-           #endif
-
-            [playerLayer setPlayer: player];
-            attachPlayerStatusObserver();
-            attachPlaybackObserver();
+            else
+            {
+                detachPlayerStatusObserver();
+                detachPlaybackObserver();
+            }
         }
 
         AVPlayer* getPlayer() const

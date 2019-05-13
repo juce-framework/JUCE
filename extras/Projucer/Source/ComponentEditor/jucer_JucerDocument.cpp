@@ -426,7 +426,7 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
 
     std::unique_ptr<XmlElement> e (createXml());
     jassert (e != nullptr);
-    code.jucerMetadata = e->createDocument ("", false, false);
+    code.jucerMetadata = e->toString (XmlElement::TextFormat().withoutHeader());
 
     resources.fillInGeneratedCode (code);
 
@@ -621,7 +621,7 @@ void JucerDocument::extractCustomPaintSnippetsFromCppFile (const String& cppCont
     applyCustomPaintSnippets (customPaintSnippets);
 }
 
-XmlElement* JucerDocument::pullMetaDataFromCppFile (const String& cpp)
+std::unique_ptr<XmlElement> JucerDocument::pullMetaDataFromCppFile (const String& cpp)
 {
     auto lines = StringArray::fromLines (cpp);
 

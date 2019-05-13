@@ -180,10 +180,10 @@ bool FileBrowserComponent::currentFileIsValid() const
 {
     auto f = getSelectedFile (0);
 
-    if (isSaveMode())
-        return (flags & canSelectDirectories) != 0 || ! f.isDirectory();
+    if ((flags & canSelectDirectories) == 0 && f.isDirectory())
+        return false;
 
-    return f.exists();
+    return isSaveMode() || f.exists();
 }
 
 File FileBrowserComponent::getHighlightedFile() const noexcept

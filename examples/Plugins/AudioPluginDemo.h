@@ -33,7 +33,7 @@
                    juce_audio_plugin_client, juce_audio_processors,
                    juce_audio_utils, juce_core, juce_data_structures,
                    juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
- exporters:        xcode_mac, vs2017, linux_make, xcode_iphone, androidstudio
+ exporters:        xcode_mac, vs2017, vs2019, linux_make, xcode_iphone, androidstudio
 
  moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
 
@@ -285,9 +285,7 @@ public:
     void getStateInformation (MemoryBlock& destData) override
     {
         // Store an xml representation of our state.
-        std::unique_ptr<XmlElement> xmlState (state.copyState().createXml());
-
-        if (xmlState.get() != nullptr)
+        if (auto xmlState = state.copyState().createXml())
             copyXmlToBinary (*xmlState, destData);
     }
 

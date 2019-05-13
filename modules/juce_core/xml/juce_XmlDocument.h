@@ -100,7 +100,7 @@ public:
                     there was an error.
         @see getLastParseError
     */
-    XmlElement* getDocumentElement (bool onlyReadOuterDocumentElement = false);
+    std::unique_ptr<XmlElement> getDocumentElement (bool onlyReadOuterDocumentElement = false);
 
     /** Returns the parsing error that occurred the last time getDocumentElement was called.
 
@@ -136,14 +136,14 @@ public:
         An even better shortcut is the juce::parseXML() function, which returns a std::unique_ptr<XmlElement>!
         @returns    a new XmlElement which the caller will need to delete, or null if there was an error.
     */
-    static XmlElement* parse (const File& file);
+    static std::unique_ptr<XmlElement> parse (const File& file);
 
     /** A handy static method that parses some XML data.
         This is a shortcut for creating an XmlDocument object and calling getDocumentElement() on it.
         An even better shortcut is the juce::parseXML() function, which returns a std::unique_ptr<XmlElement>!
         @returns    a new XmlElement which the caller will need to delete, or null if there was an error.
     */
-    static XmlElement* parse (const String& xmlData);
+    static std::unique_ptr<XmlElement> parse (const String& xmlData);
 
 
     //==============================================================================
@@ -156,7 +156,7 @@ private:
     bool needToLoadDTD = false, ignoreEmptyTextElements = true;
     std::unique_ptr<InputSource> inputSource;
 
-    XmlElement* parseDocumentElement (String::CharPointerType, bool outer);
+    std::unique_ptr<XmlElement> parseDocumentElement (String::CharPointerType, bool outer);
     void setLastError (const String&, bool carryOn);
     bool parseHeader();
     bool parseDTD();

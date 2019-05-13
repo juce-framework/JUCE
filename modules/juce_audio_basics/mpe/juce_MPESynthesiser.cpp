@@ -299,6 +299,8 @@ void MPESynthesiser::reduceNumVoices (const int newNumVoices)
 
 void MPESynthesiser::turnOffAllVoices (bool allowTailOff)
 {
+    const ScopedLock sl (voicesLock);
+
     // first turn off all voices (it's more efficient to do this immediately
     // rather than to go through the MPEInstrument for this).
     for (auto* voice : voices)
@@ -311,6 +313,8 @@ void MPESynthesiser::turnOffAllVoices (bool allowTailOff)
 //==============================================================================
 void MPESynthesiser::renderNextSubBlock (AudioBuffer<float>& buffer, int startSample, int numSamples)
 {
+    const ScopedLock sl (voicesLock);
+
     for (auto* voice : voices)
     {
         if (voice->isActive())
@@ -320,6 +324,8 @@ void MPESynthesiser::renderNextSubBlock (AudioBuffer<float>& buffer, int startSa
 
 void MPESynthesiser::renderNextSubBlock (AudioBuffer<double>& buffer, int startSample, int numSamples)
 {
+    const ScopedLock sl (voicesLock);
+
     for (auto* voice : voices)
     {
         if (voice->isActive())

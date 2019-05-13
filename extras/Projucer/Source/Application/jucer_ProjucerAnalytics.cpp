@@ -209,7 +209,7 @@ void ProjucerAnalyticsDestination::saveUnloggedEvents (const std::deque<Analytic
         xml->addChildElement (xmlEvent);
     }
 
-    xml->writeToFile (savedEventsFile, {});
+    xml->writeTo (savedEventsFile, {});
 }
 
 void ProjucerAnalyticsDestination::restoreUnloggedEvents (std::deque<AnalyticsEvent>& restoredEventQueue)

@@ -84,6 +84,8 @@ public:
 
     static const char* getName()                         { return "Android"; }
     static const char* getValueTreeTypeName()            { return "ANDROIDSTUDIO"; }
+    static const char* getDefaultActivityClass()         { return "com.roli.juce.JuceActivity"; }
+    static const char* getDefaultApplicationClass()      { return "com.roli.juce.JuceApp"; }
 
     static AndroidProjectExporter* createForSettings (Project& project, const ValueTree& settings)
     {
@@ -98,7 +100,7 @@ public:
                      androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements, androidVersionCode,
                      androidMinimumSDK, androidTargetSDK, androidTheme, androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder,
                      androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded, androidBluetoothNeeded, androidExternalReadPermission,
-                     androidExternalWritePermission, androidInAppBillingPermission, androidVibratePermission,androidOtherPermissions,
+                     androidExternalWritePermission, androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions,
                      androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
                      androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion;
 
@@ -111,8 +113,8 @@ public:
           androidRepositories                  (settings, Ids::androidRepositories,                  getUndoManager()),
           androidDependencies                  (settings, Ids::androidDependencies,                  getUndoManager()),
           androidScreenOrientation             (settings, Ids::androidScreenOrientation,             getUndoManager(), "unspecified"),
-          androidCustomActivityClass           (settings, Ids::androidCustomActivityClass,           getUndoManager()),
-          androidCustomApplicationClass        (settings, Ids::androidCustomApplicationClass,        getUndoManager(), "com.roli.juce.JuceApp"),
+          androidCustomActivityClass           (settings, Ids::androidCustomActivityClass,           getUndoManager(), getDefaultActivityClass()),
+          androidCustomApplicationClass        (settings, Ids::androidCustomApplicationClass,        getUndoManager(), getDefaultApplicationClass()),
           androidManifestCustomXmlElements     (settings, Ids::androidManifestCustomXmlElements,     getUndoManager()),
           androidVersionCode                   (settings, Ids::androidVersionCode,                   getUndoManager(), "1"),
           androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "16"),
@@ -570,7 +572,7 @@ private:
         mo << "       classpath 'com.android.tools.build:gradle:" << androidPluginVersion.get().toString() << "'" << newLine;
 
         if (androidEnableRemoteNotifications.get())
-            mo << "       classpath 'com.google.gms:google-services:3.1.0'" << newLine;
+            mo << "       classpath 'com.google.gms:google-services:4.0.1'" << newLine;
 
         mo << "   }"                                                                                   << newLine;
         mo << "}"                                                                                      << newLine;
@@ -814,8 +816,8 @@ private:
 
         if (androidEnableRemoteNotifications.get())
         {
-            mo << "        'com.google.firebase:firebase-core:11.4.0'" << newLine;
-            mo << "        compile 'com.google.firebase:firebase-messaging:11.4.0'" << newLine;
+            mo << "        implementation 'com.google.firebase:firebase-core:16.0.1'" << newLine;
+            mo << "        implementation 'com.google.firebase:firebase-messaging:17.6.0'" << newLine;
         }
 
         mo << "    }" << newLine;
@@ -834,14 +836,29 @@ private:
         return mo.toString();
     }
 
-    void addModuleJavaFolderToSourceSet(StringArray& javaSourceSets, const File& javacore) const
+    void addModuleJavaFolderToSourceSet(StringArray& javaSourceSets, const File& source) const
     {
-        if (javacore.isDirectory())
+        if (source.isDirectory())
         {
             auto appFolder = getTargetFolder().getChildFile ("app");
 
-            RelativePath relativePath (javacore, appFolder, RelativePath::buildTargetFolder);
+            RelativePath relativePath (source, appFolder, RelativePath::buildTargetFolder);
             javaSourceSets.add (relativePath.toUnixStyle());
+        }
+    }
+
+    void addOptJavaFolderToSourceSetsForModule (StringArray& javaSourceSets,
+                                                const OwnedArray<LibraryModule>& modules,
+                                                const String& moduleID) const
+    {
+        for (auto& m : modules)
+        {
+            if (m->getID() == moduleID)
+            {
+                auto javaFolder = m->getFolder().getChildFile ("native").getChildFile ("javaopt");
+                addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile("app"));
+                return;
+            }
         }
     }
 
@@ -859,6 +876,12 @@ private:
             if (! isLibrary())
                 addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile("app"));
         }
+
+        if (androidCustomActivityClass.get() == getDefaultActivityClass())
+            addOptJavaFolderToSourceSetsForModule (javaSourceSets, modules, "juce_gui_basics");
+
+        if (androidEnableRemoteNotifications.get())
+            addOptJavaFolderToSourceSetsForModule (javaSourceSets, modules, "juce_gui_extra");
 
         MemoryOutputStream mo;
         mo.setNewLineString ("\n");
@@ -974,7 +997,9 @@ private:
 
         props.add (new TextPropertyComponent (androidCustomActivityClass, "Custom Android Activity", 256, false),
                    "If not empty, specifies the Android Activity class name stored in the app's manifest which "
-                   "should be used instead of Android's default Activity.");
+                   "should be used instead of default com.roli.juce.JuceActivity. If you specify a custom Activity "
+                   "then you should implement onNewIntent() function like the one in com.roli.juce.JuceActivity, if "
+                   "you wish to be able to handle push notification events.");
 
         props.add (new TextPropertyComponent (androidCustomApplicationClass, "Custom Android Application", 256, false),
                    "If not empty, specifies the Android Application class name stored in the app's manifest which "
@@ -1135,19 +1160,8 @@ private:
         }
     }
 
-    String getActivityClass() const
-    {
-        auto customActivityClass = androidCustomActivityClass.get().toString();
-
-        return (customActivityClass.isEmpty()) ? "android.app.Activity" : customActivityClass;
-    }
-
-    String getApplicationClass() const
-    {
-        auto customApplicationClass = androidCustomApplicationClass.get().toString();
-
-        return (customApplicationClass.isEmpty()) ? "com.roli.juce.JuceApp" : customApplicationClass;
-    }
+    String getActivityClass() const       { return androidCustomActivityClass.get(); }
+    String getApplicationClass() const    { return androidCustomApplicationClass.get(); }
 
     String getJNIActivityClassName() const
     {
@@ -1374,12 +1388,19 @@ private:
         defines.set ("JUCE_ANDROID", "1");
         defines.set ("JUCE_ANDROID_API_VERSION", androidMinimumSDK.get());
         defines.set ("JUCE_PUSH_NOTIFICATIONS", "1");
+        defines.set ("JUCE_PUSH_NOTIFICATIONS_ACTIVITY", String::formatted("\"%s\"", getJNIActivityClassName().toUTF8()));
 
         if (androidInAppBillingPermission.get())
             defines.set ("JUCE_IN_APP_PURCHASES", "1");
 
         if (supportsGLv3())
             defines.set ("JUCE_ANDROID_GL_ES_VERSION_3_0", "1");
+
+        if (androidEnableRemoteNotifications.get())
+        {
+            defines.set ("JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME", "com_roli_juce_JuceFirebaseInstanceIdService");
+            defines.set ("JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME", "com_roli_juce_JuceFirebaseMessagingService");
+        }
 
         return defines;
     }
@@ -1489,9 +1510,9 @@ private:
     }
 
     //==============================================================================
-    XmlElement* createManifestXML() const
+    std::unique_ptr<XmlElement> createManifestXML() const
     {
-        auto* manifest = createManifestElement();
+        auto manifest = createManifestElement();
 
         createSupportsScreensElement (*manifest);
         createPermissionElements     (*manifest);
@@ -1511,12 +1532,12 @@ private:
         return manifest;
     }
 
-    XmlElement* createManifestElement() const
+    std::unique_ptr<XmlElement> createManifestElement() const
     {
-        auto* manifest = XmlDocument::parse (androidManifestCustomXmlElements.get());
+        auto manifest = XmlDocument::parse (androidManifestCustomXmlElements.get());
 
         if (manifest == nullptr)
-            manifest = new XmlElement ("manifest");
+            manifest = std::make_unique<XmlElement> ("manifest");
 
         setAttributeIfNotPresent (*manifest, "xmlns:android", "http://schemas.android.com/apk/res/android");
         setAttributeIfNotPresent (*manifest, "android:versionCode", androidVersionCode.get());
@@ -1683,12 +1704,12 @@ private:
         if (androidEnableRemoteNotifications.get())
         {
             auto* service = application.createNewChildElement ("service");
-            service->setAttribute ("android:name", ".JuceFirebaseMessagingService");
+            service->setAttribute ("android:name", "com.roli.juce.JuceFirebaseMessagingService");
             auto* intentFilter = service->createNewChildElement ("intent-filter");
             intentFilter->createNewChildElement ("action")->setAttribute ("android:name", "com.google.firebase.MESSAGING_EVENT");
 
             service = application.createNewChildElement ("service");
-            service->setAttribute ("android:name", ".JuceFirebaseInstanceIdService");
+            service->setAttribute ("android:name", "com.roli.juce.JuceFirebaseInstanceIdService");
             intentFilter = service->createNewChildElement ("intent-filter");
             intentFilter->createNewChildElement ("action")->setAttribute ("android:name", "com.google.firebase.INSTANCE_ID_EVENT");
 

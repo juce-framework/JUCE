@@ -163,7 +163,7 @@ public:
           startSample (startSampleIndex),
           numSamples (static_cast<size_t> (buffer.getNumSamples()) - startSampleIndex)
     {
-        jassert (startSample < numSamples);
+        jassert (startSample < static_cast<size_t> (buffer.getNumSamples()));
     }
 
     AudioBlock (const AudioBlock& other) noexcept = default;
@@ -181,8 +181,8 @@ public:
     template <typename OtherSampleType, MayUseConvertingConstructor<OtherSampleType> = 0>
     AudioBlock& operator= (const AudioBlock<OtherSampleType>& other) noexcept
     {
-        AudioBlock copy { other };
-        swap (copy);
+        AudioBlock blockCopy { other };
+        swap (blockCopy);
         return *this;
     }
 

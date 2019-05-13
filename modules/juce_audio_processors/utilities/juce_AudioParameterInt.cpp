@@ -33,10 +33,15 @@ AudioParameterInt::AudioParameterInt (const String& idToUse, const String& nameT
                                       std::function<String(int, int)> stringFromInt,
                                       std::function<int(const String&)> intFromString)
    : RangedAudioParameter (idToUse, nameToUse, labelToUse),
-     range ((float) minValue, (float) maxValue,
-            [](float start, float end, float v) { return jlimit (start, end, v * (end - start) + start); },
-            [](float start, float end, float v) { return jlimit (0.0f, 1.0f, (v - start) / (end - start)); },
-            [](float start, float end, float v) { return (float) roundToInt (juce::jlimit (start, end, v)); }),
+     range ([minValue, maxValue]
+            {
+                NormalisableRange<float> rangeWithInterval { (float) minValue, (float) maxValue,
+                                                             [](float start, float end, float v) { return jlimit (start, end, v * (end - start) + start); },
+                                                             [](float start, float end, float v) { return jlimit (0.0f, 1.0f, (v - start) / (end - start)); },
+                                                             [](float start, float end, float v) { return (float) roundToInt (juce::jlimit (start, end, v)); } };
+                 rangeWithInterval.interval = 1.0f;
+                 return rangeWithInterval;
+            }()),
      value ((float) def),
      defaultValue (convertTo0to1 ((float) def)),
      stringFromIntFunction (stringFromInt),

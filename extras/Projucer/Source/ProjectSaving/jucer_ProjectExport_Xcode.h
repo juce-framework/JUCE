@@ -75,6 +75,8 @@ public:
           iPadScreenOrientationValue                   (settings, Ids::iPadScreenOrientation,                   getUndoManager(), "portraitlandscape"),
           customXcodeResourceFoldersValue              (settings, Ids::customXcodeResourceFolders,              getUndoManager()),
           customXcassetsFolderValue                    (settings, Ids::customXcassetsFolder,                    getUndoManager()),
+          appSandboxValue                              (settings, Ids::appSandbox,                              getUndoManager()),
+          appSandboxOptionsValue                       (settings, Ids::appSandboxOptions,                       getUndoManager(), Array<var>(), ","),
           hardenedRuntimeValue                         (settings, Ids::hardenedRuntime,                         getUndoManager()),
           hardenedRuntimeOptionsValue                  (settings, Ids::hardenedRuntimeOptions,                  getUndoManager(), Array<var>(), ","),
           microphonePermissionNeededValue              (settings, Ids::microphonePermissionNeeded,              getUndoManager()),
@@ -97,7 +99,8 @@ public:
           iosAppGroupsIDValue                          (settings, Ids::iosAppGroupsId,                          getUndoManager()),
           keepCustomXcodeSchemesValue                  (settings, Ids::keepCustomXcodeSchemes,                  getUndoManager()),
           useHeaderMapValue                            (settings, Ids::useHeaderMap,                            getUndoManager()),
-          customLaunchStoryboardValue                  (settings, Ids::customLaunchStoryboard,                  getUndoManager())
+          customLaunchStoryboardValue                  (settings, Ids::customLaunchStoryboard,                  getUndoManager()),
+          exporterBundleIdentifierValue                (settings, Ids::bundleIdentifier,                        getUndoManager())
     {
         name = iOS ? getNameiOS() : getNameMac();
 
@@ -141,6 +144,9 @@ public:
 
     bool isHardenedRuntimeEnabled() const              { return hardenedRuntimeValue.get(); }
     Array<var> getHardenedRuntimeOptions() const       { return *hardenedRuntimeOptionsValue.get().getArray(); }
+
+    bool isAppSandboxEnabled() const                   { return appSandboxValue.get(); }
+    Array<var> getAppSandboxOptions() const            { return *appSandboxOptionsValue.get().getArray(); }
 
     bool isMicrophonePermissionEnabled() const         { return microphonePermissionNeededValue.get(); }
     String getMicrophonePermissionsTextString() const  { return microphonePermissionsTextValue.get(); }
@@ -275,40 +281,86 @@ public:
 
         if (isOSX())
         {
+            props.add (new ChoicePropertyComponent (appSandboxValue, "Use App Sandbox"),
+                       "Enable this to use the app sandbox.");
+
+            std::vector<std::pair<String, String>> sandboxOptions
+            {
+                { "Network: Incoming Connections (Server)",         "network.server" },
+                { "Network: Outgoing Connections (Client)",         "network.client" },
+
+                { "Hardware: Camera",                               "device.camera" },
+                { "Hardware: Microphone",                           "device.microphone" },
+                { "Hardware: USB",                                  "device.usb" },
+                { "Hardware: Printing",                             "print" },
+                { "Hardware: Bluetooth",                            "device.bluetooth" },
+
+                { "App Data: Contacts",                             "personal-information.addressbook" },
+                { "App Data: Location",                             "personal-information.location" },
+                { "App Data: Calendar",                             "personal-information.calendars" },
+
+                { "File Access: User Selected File (Read Only)",    "files.user-selected.read-only" },
+                { "File Access: User Selected File (Read/Write)",   "files.user-selected.read-write" },
+                { "File Access: Downloads Folder (Read Only)",      "files.downloads.read-only" },
+                { "File Access: Downloads Folder (Read/Write)",     "files.downloads.read-write" },
+                { "File Access: Pictures Folder (Read Only)",       "files.pictures.read-only" },
+                { "File Access: Pictures Folder (Read/Write)",      "files.pictures.read-write" },
+                { "File Access: Music Folder (Read Only)",          "assets.music.read-only" },
+                { "File Access: Music Folder (Read/Write)",         "assets.music.read-write" },
+                { "File Access: Movies Folder (Read Only)",         "assets.movies.read-only" },
+                { "File Access: Movies Folder (Read/Write)",        "assets.movies.read-write" }
+            };
+
+            StringArray sandboxKeys;
+            Array<var> sanboxValues;
+
+            for (auto& opt : sandboxOptions)
+            {
+                sandboxKeys.add (opt.first);
+                sanboxValues.add ("com.apple.security." + opt.second);
+            }
+
+            props.add (new MultiChoicePropertyComponentWithEnablement (appSandboxOptionsValue,
+                                                                       appSandboxValue,
+                                                                       "App Sandbox Options",
+                                                                       sandboxKeys,
+                                                                       sanboxValues));
+
             props.add (new ChoicePropertyComponent (hardenedRuntimeValue, "Use Hardened Runtime"),
                        "Enable this to use the hardened runtime required for app notarization.");
 
-            std::vector<std::pair<String, String>> options
+            std::vector<std::pair<String, String>> hardeningOptions
             {
-                { "Allow Execution of JIT-compiled Code", "cs.allow-jit" },
-                { "Allow Unsigned Executable Memory",     "cs.allow-unsigned-executable-memory" },
-                { "Allow DYLD Environment Variables",     "cs.allow-dyld-environment-variables" },
-                { "Disable Library Validation",           "cs.disable-library-validation" },
-                { "Disable Executable Memory Protection", "cs.disable-executable-page-protection" },
-                { "Debugging Tool",                       "cs.debugger" },
-                { "Audio Input",                          "device.audio-input" },
-                { "Camera",                               "device.camera" },
-                { "Location",                             "personal-information.location" },
-                { "Address Book",                         "personal-information.addressbook" },
-                { "Calendar",                             "personal-information.calendars" },
-                { "Photos Library",                       "personal-information.photos-library" },
-                { "Apple Events",                         "automation.apple-events" },
+                { "Runtime Exceptions: Allow Execution of JIT-compiled Code", "cs.allow-jit" },
+                { "Runtime Exceptions: Allow Unsigned Executable Memory",     "cs.allow-unsigned-executable-memory" },
+                { "Runtime Exceptions: Allow DYLD Environment Variables",     "cs.allow-dyld-environment-variables" },
+                { "Runtime Exceptions: Disable Library Validation",           "cs.disable-library-validation" },
+                { "Runtime Exceptions: Disable Executable Memory Protection", "cs.disable-executable-page-protection" },
+                { "Runtime Exceptions: Debugging Tool",                       "cs.debugger" },
+
+                { "Resource Access: Audio Input",                             "device.audio-input" },
+                { "Resource Access: Camera",                                  "device.camera" },
+                { "Resource Access: Location",                                "personal-information.location" },
+                { "Resource Access: Address Book",                            "personal-information.addressbook" },
+                { "Resource Access: Calendar",                                "personal-information.calendars" },
+                { "Resource Access: Photos Library",                          "personal-information.photos-library" },
+                { "Resource Access: Apple Events",                            "automation.apple-events" }
             };
 
-            StringArray keys;
-            Array<var> values;
+            StringArray hardeningKeys;
+            Array<var> hardeningValues;
 
-            for (auto& opt : options)
+            for (auto& opt : hardeningOptions)
             {
-                keys.add (opt.first);
-                values.add ("com.apple.security." + opt.second);
+                hardeningKeys.add (opt.first);
+                hardeningValues.add ("com.apple.security." + opt.second);
             }
 
             props.add (new MultiChoicePropertyComponentWithEnablement (hardenedRuntimeOptionsValue,
                                                                        hardenedRuntimeValue,
                                                                        "Hardened Runtime Options",
-                                                                       keys,
-                                                                       values));
+                                                                       hardeningKeys,
+                                                                       hardeningValues));
         }
 
         props.add (new ChoicePropertyComponent (microphonePermissionNeededValue, "Microphone Access"),
@@ -391,6 +443,10 @@ public:
 
         props.add (new TextPropertyComponent (postbuildCommandValue, "Post-Build Shell Script", 32768, true),
                    "Some shell-script that will be run after a build completes.");
+
+        props.add (new TextPropertyComponent (exporterBundleIdentifierValue, "Exporter Bundle Identifier", 256, false),
+                   "Use this to override the project bundle identifier for this exporter. "
+                   "This is useful if you want to use different bundle identifiers for Mac and iOS exporters in the same project.");
 
         props.add (new TextPropertyComponent (iosDevelopmentTeamIDValue, "Development Team ID", 10, false),
                    "The Development Team ID to be used for setting up code-signing your iOS app. This is a ten-character "
@@ -1004,20 +1060,21 @@ public:
             auto attributes = getID() + " = { ";
 
             auto developmentTeamID = owner.getIosDevelopmentTeamIDString();
+
             if (developmentTeamID.isNotEmpty())
             {
                 attributes << "DevelopmentTeam = " << developmentTeamID << "; ";
                 attributes << "ProvisioningStyle = Automatic; ";
             }
 
-            auto appGroupsEnabled      = (owner.iOS && owner.isAppGroupsEnabled() ? 1 : 0);
+            auto appGroupsEnabled      = (owner.iOS && owner.isAppGroupsEnabled()) ? 1 : 0;
             auto inAppPurchasesEnabled = owner.isInAppPurchasesEnabled() ? 1 : 0;
             auto interAppAudioEnabled  = (owner.iOS
                                           && type == Target::StandalonePlugIn
                                           && owner.getProject().shouldEnableIAA()) ? 1 : 0;
 
             auto pushNotificationsEnabled = owner.isPushNotificationsEnabled() ? 1 : 0;
-            auto sandboxEnabled = (type == Target::AudioUnitv3PlugIn ? 1 : 0);
+            auto sandboxEnabled = ((type == Target::AudioUnitv3PlugIn) || owner.isAppSandboxEnabled()) ? 1 : 0;
             auto hardendedRuntimeEnabled = owner.isHardenedRuntimeEnabled() ? 1 : 0;
 
             attributes << "SystemCapabilities = {";
@@ -1072,6 +1129,7 @@ public:
         {
             if (owner.isPushNotificationsEnabled()
              || owner.isAppGroupsEnabled()
+             || owner.isAppSandboxEnabled()
              || owner.isHardenedRuntimeEnabled()
              || (owner.isiOS() && owner.isiCloudPermissionsEnabled()))
                 return true;
@@ -1086,7 +1144,9 @@ public:
 
         String getBundleIdentifier() const
         {
-            auto bundleIdentifier = owner.project.getBundleIdentifierString();
+            auto exporterBundleIdentifier = owner.exporterBundleIdentifierValue.get().toString();
+            auto bundleIdentifier = exporterBundleIdentifier.isNotEmpty() ? exporterBundleIdentifier
+                                                                          : owner.project.getBundleIdentifierString();
 
             if (xcodeBundleIDSubPath.isNotEmpty())
             {
@@ -1547,8 +1607,9 @@ public:
                 dict->addChildElement (new XmlElement (e));
 
             MemoryOutputStream mo;
-            plist->writeToStream (mo, "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">");
-
+            XmlElement::TextFormat format;
+            format.dtd = "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">";
+            plist->writeTo (mo, format);
             overwriteFileIfDifferentOrThrow (infoPlistFile, mo);
         }
 
@@ -1877,11 +1938,13 @@ private:
                      postbuildCommandValue, prebuildCommandValue,
                      duplicateAppExResourcesFolderValue, iosDeviceFamilyValue, iPhoneScreenOrientationValue,
                      iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue,
+                     appSandboxValue, appSandboxOptionsValue,
                      hardenedRuntimeValue, hardenedRuntimeOptionsValue,
                      microphonePermissionNeededValue, microphonePermissionsTextValue, cameraPermissionNeededValue, cameraPermissionTextValue,
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
                      iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
-                     iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue;
+                     iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
+                     exporterBundleIdentifierValue;
 
     static String sanitisePath (const String& path)
     {
@@ -3024,6 +3087,10 @@ private:
 
         if (isHardenedRuntimeEnabled())
             for (auto& option : getHardenedRuntimeOptions())
+                entitlements.set (option, "<true/>");
+
+        if (isAppSandboxEnabled())
+            for (auto& option : getAppSandboxOptions())
                 entitlements.set (option, "<true/>");
 
         if (isiOS() && isiCloudPermissionsEnabled())

@@ -110,14 +110,23 @@ public:
     /** Returns the time this block object was connected to the topology.
         Only valid when isConnected == true.
 
-        @see isConnected
+        @see Block::isConnected
      */
     virtual Time getConnectionTime() const = 0;
+
+    /** Returns true if this block or the master block this block is connected to,
+        is connected via bluetooth.
+
+        Only valid when isConnected == true.
+
+        @see Block::isConnected, Block::isMasterBlock
+     */
+    virtual bool isConnectedViaBluetooth() const = 0;
 
     /** Returns true if this block is directly connected to the application,
         as opposed to only being connected to a different block via a connection port.
 
-        @see ConnectionPort
+        @see Block::ConnectionPort
     */
     virtual bool isMasterBlock() const = 0;
 

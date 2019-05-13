@@ -326,12 +326,6 @@ inline float juce_hypot (float a, float b) noexcept
 }
 #endif
 
-#if JUCE_MSVC && ! defined (DOXYGEN)  // The MSVC libraries omit these functions for some reason...
- template<typename Type> Type asinh (Type x)  { return std::log (x + std::sqrt (x * x + (Type) 1)); }
- template<typename Type> Type acosh (Type x)  { return std::log (x + std::sqrt (x * x - (Type) 1)); }
- template<typename Type> Type atanh (Type x)  { return (std::log (x + (Type) 1) - std::log (((Type) 1) - x)) / (Type) 2; }
-#endif
-
 //==============================================================================
 #if JUCE_HAS_CONSTEXPR
 

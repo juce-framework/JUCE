@@ -297,7 +297,7 @@ void PaintRoutine::copySelectedToClipboard()
         if (selectedElements.isSelected (pe))
             clip.addChildElement (pe->createXml());
 
-    SystemClipboard::copyTextToClipboard (clip.createDocument ("", false, false));
+    SystemClipboard::copyTextToClipboard (clip.toString());
 }
 
 void PaintRoutine::paste()

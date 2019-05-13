@@ -113,12 +113,7 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
 
             case CopyingCursor:
             {
-               #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6
-                if (void* m = MouseCursorHelpers::fromHIServices ("copy"))
-                    return m;
-               #endif
-
-                c = [NSCursor dragCopyCursor]; // added in 10.6
+                c = [NSCursor dragCopyCursor];
                 break;
             }
 

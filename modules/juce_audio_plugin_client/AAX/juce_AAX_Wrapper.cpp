@@ -713,7 +713,7 @@ namespace AAXClasses
             if (isPrepared && pluginInstance != nullptr)
             {
                 isPrepared = false;
-                processingSidechainChange.set (0);
+                processingSidechainChange = false;
 
                 pluginInstance->releaseResources();
             }
@@ -725,7 +725,7 @@ namespace AAXClasses
         {
             cancelPendingUpdate();
             check (Controller()->GetSampleRate (&sampleRate));
-            processingSidechainChange.set (0);
+            processingSidechainChange = false;
             auto err = preparePlugin();
 
             if (err != AAX_SUCCESS)
@@ -1103,8 +1103,8 @@ namespace AAXClasses
                 case AAX_eNotificationEvent_SideChainBeingConnected:
                 case AAX_eNotificationEvent_SideChainBeingDisconnected:
                 {
-                    processingSidechainChange.set (1);
-                    sidechainDesired.set (type == AAX_eNotificationEvent_SideChainBeingConnected ? 1 : 0);
+                    processingSidechainChange = true;
+                    sidechainDesired = (type == AAX_eNotificationEvent_SideChainBeingConnected);
                     updateSidechainState();
                     break;
                 }
@@ -1132,23 +1132,25 @@ namespace AAXClasses
             auto numOuts   = pluginInstance->getTotalNumOutputChannels();
             auto numMeters = aaxMeters.size();
 
-            bool processWantsSidechain = (sideChainBufferIdx != -1);
-            bool isSuspended = pluginInstance->isSuspended();
+            const ScopedLock sl (pluginInstance->getCallbackLock());
 
-            if (processingSidechainChange.get() == 0)
+            bool isSuspended = [this, sideChainBufferIdx]
             {
-                if (hasSidechain && canDisableSidechain && (sidechainDesired.get() != 0) != processWantsSidechain)
+                if (processingSidechainChange)
+                    return true;
+
+                bool processWantsSidechain = (sideChainBufferIdx != -1);
+
+                if (hasSidechain && canDisableSidechain && (sidechainDesired != processWantsSidechain))
                 {
-                    isSuspended = true;
-                    sidechainDesired.set (processWantsSidechain ? 1 : 0);
-                    processingSidechainChange.set (1);
+                    sidechainDesired = processWantsSidechain;
+                    processingSidechainChange = true;
                     triggerAsyncUpdate();
+                    return true;
                 }
-            }
-            else
-            {
-                isSuspended = true;
-            }
+
+                return pluginInstance->isSuspended();
+            }();
 
             if (isSuspended)
             {
@@ -1422,8 +1424,6 @@ namespace AAXClasses
                     }
                 }
 
-                const ScopedLock sl (pluginInstance->getCallbackLock());
-
                 if (bypass)
                     pluginInstance->processBlockBypassed (buffer, midiBuffer);
                 else
@@ -1632,7 +1632,7 @@ namespace AAXClasses
 
             if (hasSidechain)
             {
-                sidechainDesired.set (1);
+                sidechainDesired = true;
 
                 auto disabledSidechainLayout = newLayout;
                 disabledSidechainLayout.inputBuses.getReference (1) = AudioChannelSet::disabled();
@@ -1641,7 +1641,7 @@ namespace AAXClasses
 
                 if (canDisableSidechain && ! lastSideChainState)
                 {
-                    sidechainDesired.set (0);
+                    sidechainDesired = false;
                     newLayout = disabledSidechainLayout;
                 }
             }
@@ -1765,15 +1765,15 @@ namespace AAXClasses
         //==============================================================================
         void updateSidechainState()
         {
-            if (processingSidechainChange.get() == 0)
+            if (! processingSidechainChange)
                 return;
 
             auto& audioProcessor = getPluginInstance();
             bool sidechainActual = audioProcessor.getChannelCountOfBus (true, 1) > 0;
 
-            if (hasSidechain && canDisableSidechain && (sidechainDesired.get() != 0) != sidechainActual)
+            if (hasSidechain && canDisableSidechain && sidechainDesired != sidechainActual)
             {
-                lastSideChainState = (sidechainDesired.get() != 0);
+                lastSideChainState = sidechainDesired;
 
                 if (isPrepared)
                 {
@@ -1789,7 +1789,7 @@ namespace AAXClasses
                 isPrepared = true;
             }
 
-            processingSidechainChange.set (0);
+            processingSidechainChange = false;
         }
 
         void handleAsyncUpdate() override
@@ -1960,7 +1960,7 @@ namespace AAXClasses
         int lastBufferSize = 1024, maxBufferSize = 1024;
         bool hasSidechain = false, canDisableSidechain = false, lastSideChainState = false;
 
-        Atomic<int> processingSidechainChange, sidechainDesired;
+        std::atomic<bool> processingSidechainChange, sidechainDesired;
 
         HeapBlock<float> sideChainBuffer;
         Array<int> inputLayoutMap, outputLayoutMap;

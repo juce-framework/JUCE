@@ -43,7 +43,7 @@ public:
     ~JucerDocument() override;
 
     static bool isValidJucerCppFile (const File&);
-    static XmlElement* pullMetaDataFromCppFile (const String& cpp);
+    static std::unique_ptr<XmlElement> pullMetaDataFromCppFile (const String& cpp);
     static JucerDocument* createForCppFile (Project*, const File&);
 
     void changed();

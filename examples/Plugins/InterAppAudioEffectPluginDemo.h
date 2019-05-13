@@ -230,8 +230,8 @@ public:
     //==============================================================================
     void getStateInformation (MemoryBlock& destData) override
     {
-        auto xml = std::unique_ptr<XmlElement> (parameters.state.createXml());
-        copyXmlToBinary (*xml, destData);
+        if (auto xml = parameters.state.createXml())
+            copyXmlToBinary (*xml, destData);
     }
 
     void setStateInformation (const void* data, int sizeInBytes) override

@@ -283,8 +283,13 @@ int ModalComponentManager::runEventLoopForCurrentComponent()
 //==============================================================================
 struct LambdaCallback  : public ModalComponentManager::Callback
 {
-    LambdaCallback (std::function<void(int)> fn) noexcept : function (fn) {}
-    void modalStateFinished (int result) override  { function (result); }
+    LambdaCallback (std::function<void(int)> fn) noexcept  : function (fn)  {}
+
+    void modalStateFinished (int result) override
+    {
+        if (function != nullptr)
+            function (result);
+    }
 
     std::function<void(int)> function;
 

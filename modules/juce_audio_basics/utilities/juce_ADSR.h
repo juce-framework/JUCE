@@ -102,14 +102,30 @@ public:
     {
         envelopeVal = 0.0f;
         currentState = State::idle;
+
+        if (resetReleaseRate)
+        {
+            releaseRate = static_cast<float> (sustainLevel / (currentParameters.release * sr));
+            resetReleaseRate = false;
+        }
     }
 
     /** Starts the attack phase of the envelope. */
     void noteOn()
     {
-        if      (attackRate > 0.0f)  currentState = State::attack;
-        else if (decayRate > 0.0f)   currentState = State::decay;
-        else                         currentState = State::sustain;
+        if (attackRate > 0.0f)
+        {
+            currentState = State::attack;
+        }
+        else if (decayRate > 0.0f)
+        {
+            envelopeVal = 1.0f;
+            currentState = State::decay;
+        }
+        else
+        {
+            currentState = State::sustain;
+        }
     }
 
     /** Starts the release phase of the envelope. */
@@ -120,7 +136,10 @@ public:
             if (releaseRate > 0.0f)
             {
                 if (currentState != State::sustain)
+                {
                     releaseRate = static_cast<float> (envelopeVal / (currentParameters.release * sr));
+                    resetReleaseRate = true;
+                }
 
                 currentState = State::release;
             }
@@ -229,11 +248,8 @@ private:
     Parameters currentParameters;
 
     double sr = 0.0;
-
-    float envelopeVal = 0.0f;
-
-    float sustainLevel = 0.0f;
-    float attackRate = 0.0f, decayRate = 0.0f, releaseRate = 0.0f;
+    float envelopeVal = 0.0f, sustainLevel = 0.0f, attackRate = 0.0f, decayRate = 0.0f, releaseRate = 0.0f;
+    bool resetReleaseRate = false;
 };
 
 } // namespace juce

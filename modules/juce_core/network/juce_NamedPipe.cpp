@@ -198,9 +198,9 @@ private:
     //==============================================================================
     struct NamedPipeThread   : public Thread
     {
-        NamedPipeThread (const String& threadName, const String& pName,
+        NamedPipeThread (const String& tName, const String& pName,
                          bool shouldCreatePipe, WaitableEvent& completed)
-            : Thread (threadName), pipeName (pName), workCompleted (completed)
+            : Thread (tName), pipeName (pName), workCompleted (completed)
         {
             if (shouldCreatePipe)
                 pipe.createNewPipe (pipeName);

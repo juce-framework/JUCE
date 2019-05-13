@@ -609,7 +609,7 @@ void JucerDocumentEditor::saveLastSelectedTab() const
         {
             auto& projectProps = project->getStoredProperties();
 
-            std::unique_ptr<XmlElement> root (projectProps.getXmlValue ("GUIComponentsLastTab"));
+            auto root = projectProps.getXmlValue ("GUIComponentsLastTab");
 
             if (root == nullptr)
                 root.reset (new XmlElement ("FILES"));
@@ -631,20 +631,10 @@ void JucerDocumentEditor::saveLastSelectedTab() const
 void JucerDocumentEditor::restoreLastSelectedTab()
 {
     if (document != nullptr)
-    {
         if (auto* project = document->getCppDocument().getProject())
-        {
-            std::unique_ptr<XmlElement> root (project->getStoredProperties().getXmlValue ("GUIComponentsLastTab"));
-
-            if (root != nullptr)
-            {
-                auto* child = root->getChildByName (document->getCppFile().getFileName());
-
-                if (child != nullptr)
+            if (auto root = project->getStoredProperties().getXmlValue ("GUIComponentsLastTab"))
+                if (auto child = root->getChildByName (document->getCppFile().getFileName()))
                     tabbedComponent.setCurrentTabIndex (child->getIntAttribute ("tab"));
-            }
-        }
-    }
 }
 
 //==============================================================================

@@ -31,7 +31,7 @@
 
  dependencies:     juce_core, juce_data_structures, juce_events, juce_graphics,
                    juce_gui_basics
- exporters:        xcode_mac, vs2017, linux_make
+ exporters:        xcode_mac, vs2019, linux_make
 
  moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
 
@@ -69,10 +69,8 @@ static MemoryBlock valueTreeToMemoryBlock (const ValueTree& v)
 
 static String valueTreeToString (const ValueTree& v)
 {
-    std::unique_ptr<XmlElement> xml (v.createXml());
-
-    if (xml.get() != nullptr)
-        return xml->createDocument ({}, true, false);
+    if (auto xml = v.createXml())
+        return xml->toString (XmlElement::TextFormat().singleLine().withoutHeader());
 
     return {};
 }

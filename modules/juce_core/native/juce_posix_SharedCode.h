@@ -271,7 +271,7 @@ namespace
         return statfs (f.getFullPathName().toUTF8(), &result) == 0;
     }
 
-   #if (JUCE_MAC && MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5) || JUCE_IOS
+   #if JUCE_MAC || JUCE_IOS
     static int64 getCreationTime (const juce_statStruct& s) noexcept     { return (int64) s.st_birthtime; }
    #else
     static int64 getCreationTime (const juce_statStruct& s) noexcept     { return (int64) s.st_ctime; }
@@ -402,7 +402,7 @@ void File::getFileTimesInternal (int64& modificationTime, int64& accessTime, int
     {
         modificationTime  = (int64) info.st_mtime * 1000;
         accessTime        = (int64) info.st_atime * 1000;
-       #if (JUCE_MAC && MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5) || JUCE_IOS
+       #if JUCE_MAC || JUCE_IOS
         creationTime      = (int64) info.st_birthtime * 1000;
        #else
         creationTime      = (int64) info.st_ctime * 1000;
@@ -887,8 +887,7 @@ void JUCE_API juce_threadEntryPoint (void*);
 extern JavaVM* androidJNIJavaVM;
 #endif
 
-extern "C" void* threadEntryProc (void*);
-extern "C" void* threadEntryProc (void* userData)
+static void* threadEntryProc (void* userData)
 {
     auto* myself = static_cast<Thread*> (userData);
 

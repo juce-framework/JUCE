@@ -325,8 +325,8 @@ void URL::addParameter (const String& name, const String& value)
 
 String URL::toString (bool includeGetParameters) const
 {
-    if (includeGetParameters && parameterNames.size() > 0)
-        return url + "?" + URLHelpers::getMangledParameters (*this);
+    if (includeGetParameters)
+        return url + getQueryString();
 
     return url;
 }
@@ -347,12 +347,24 @@ String URL::getDomain() const
     return getDomainInternal (false);
 }
 
-String URL::getSubPath() const
+String URL::getSubPath (bool includeGetParameters) const
 {
     auto startOfPath = URLHelpers::findStartOfPath (url);
+    auto subPath = startOfPath <= 0 ? String()
+                                    : url.substring (startOfPath);
 
-    return startOfPath <= 0 ? String()
-        : url.substring (startOfPath);
+    if (includeGetParameters)
+        subPath += getQueryString();
+
+    return subPath;
+}
+
+String URL::getQueryString() const
+{
+    if (parameterNames.size() > 0)
+        return "?" + URLHelpers::getMangledParameters (*this);
+
+    return {};
 }
 
 String URL::getScheme() const
@@ -776,7 +788,7 @@ String URL::readEntireTextStream (bool usePostCommand) const
     return {};
 }
 
-XmlElement* URL::readEntireXmlStream (bool usePostCommand) const
+std::unique_ptr<XmlElement> URL::readEntireXmlStream (bool usePostCommand) const
 {
     return XmlDocument::parse (readEntireTextStream (usePostCommand));
 }
@@ -785,14 +797,14 @@ XmlElement* URL::readEntireXmlStream (bool usePostCommand) const
 URL URL::withParameter (const String& parameterName,
                         const String& parameterValue) const
 {
-    URL u (*this);
+    auto u = *this;
     u.addParameter (parameterName, parameterValue);
     return u;
 }
 
 URL URL::withParameters (const StringPairArray& parametersToAdd) const
 {
-    URL u (*this);
+    auto u = *this;
 
     for (int i = 0; i < parametersToAdd.size(); ++i)
         u.addParameter (parametersToAdd.getAllKeys()[i],
@@ -808,7 +820,7 @@ URL URL::withPOSTData (const String& newPostData) const
 
 URL URL::withPOSTData (const MemoryBlock& newPostData) const
 {
-    URL u (*this);
+    auto u = *this;
     u.postData = newPostData;
     return u;
 }
@@ -822,7 +834,7 @@ URL::Upload::Upload (const String& param, const String& name,
 
 URL URL::withUpload (Upload* const f) const
 {
-    URL u (*this);
+    auto u = *this;
 
     for (int i = u.filesToUpload.size(); --i >= 0;)
         if (u.filesToUpload.getObjectPointerUnchecked(i)->parameterName == f->parameterName)

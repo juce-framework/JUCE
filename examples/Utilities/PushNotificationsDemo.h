@@ -34,7 +34,7 @@
                    juce_audio_processors, juce_audio_utils, juce_core,
                    juce_data_structures, juce_events, juce_graphics,
                    juce_gui_basics, juce_gui_extra
- exporters:        xcode_mac, vs2017, xcode_iphone, androidstudio
+ exporters:        xcode_mac, vs2019, xcode_iphone, androidstudio
 
  moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
 
@@ -50,6 +50,74 @@
 #pragma once
 
 #include "../Assets/DemoUtilities.h"
+
+/*
+    To finish the setup of this demo, do the following:
+
+1. Download google_services.json from your Firebase project.
+2. Update "Remote Notifications Config File" path in Android exporter (this can be different for debug and release)
+   to point to that json file.
+3. Add image and sound resources by adding the following to "Extra Android Raw Resources" in Projucer:
+
+../../Assets/Notifications/images/ic_stat_name.png
+../../Assets/Notifications/images/ic_stat_name2.png
+../../Assets/Notifications/images/ic_stat_name3.png
+../../Assets/Notifications/images/ic_stat_name4.png
+../../Assets/Notifications/images/ic_stat_name5.png
+../../Assets/Notifications/images/ic_stat_name6.png
+../../Assets/Notifications/images/ic_stat_name7.png
+../../Assets/Notifications/images/ic_stat_name8.png
+../../Assets/Notifications/images/ic_stat_name9.png
+../../Assets/Notifications/images/ic_stat_name10.png
+../../Assets/Notifications/sounds/demonstrative.mp3
+../../Assets/Notifications/sounds/isntit.mp3
+../../Assets/Notifications/sounds/jinglebellssms.mp3
+../../Assets/Notifications/sounds/served.mp3
+../../Assets/Notifications/sounds/solemn.mp3
+
+4. Set "Remote Notifications" to enabled in Projucer Android exporter.
+
+To verify that remote notifications are configured properly, go to Remote tab in the demo and press "GetDeviceToken"
+button, a dialog with your token (also printed to console in debug build) should show up.
+
+
+The following steps are only necessary if you have a custom activity defined:
+
+5. Ensure that its launchMode is set to "singleTop" or "singleTask" in Android manifest. This is the default behaviour
+   in JUCE so you only need to do it if you have custom Android manifest content. You can do it from Projucer by
+   ensuring that "Custom Manifest XML Content" contains:
+
+<manifest>
+<application>
+<activity android:launchMode="singleTask">
+</activity>
+</application>
+</manifest>
+
+6. Ensure that you override onNewIntent() function in the same way as it is done in JuceActivity.java:
+
+package com.roli.juce;
+
+import android.app.Activity;
+import android.content.Intent;
+
+//==============================================================================
+public class JuceActivity   extends Activity
+{
+    //==============================================================================
+    private native void appNewIntent (Intent intent);
+
+    @Override
+    protected void onNewIntent (Intent intent)
+    {
+        super.onNewIntent(intent);
+        setIntent(intent);
+
+        appNewIntent (intent);
+    }
+}
+
+*/
 
 //==============================================================================
 class PushNotificationsDemo   : public Component,
@@ -101,11 +169,11 @@ public:
       #endif
 
         sendButton.onClick = [this] { sendLocalNotification(); };
-        auxActionsView.getDeliveredNotificationsButton .onClick = [this]
+        auxActionsView.getDeliveredNotificationsButton .onClick = []
             { PushNotifications::getInstance()->getDeliveredNotifications(); };
         auxActionsView.removeDeliveredNotifWithIdButton.onClick = [this]
             { PushNotifications::getInstance()->removeDeliveredNotification (auxActionsView.deliveredNotifIdentifier.getText()); };
-        auxActionsView.removeAllDeliveredNotifsButton  .onClick = [this]
+        auxActionsView.removeAllDeliveredNotifsButton  .onClick = []
             { PushNotifications::getInstance()->removeAllDeliveredNotifications(); };
       #if JUCE_IOS || JUCE_MAC
         auxActionsView.getPendingNotificationsButton .onClick = [this]
@@ -116,7 +184,7 @@ public:
             { PushNotifications::getInstance()->removeAllPendingLocalNotifications(); };
       #endif
 
-        remoteView.getDeviceTokenButton.onClick = [this]
+        remoteView.getDeviceTokenButton.onClick = []
         {
             String token = PushNotifications::getInstance()->getDeviceToken();
 
@@ -129,7 +197,7 @@ public:
         };
 
       #if JUCE_ANDROID
-        remoteView.sendRemoteMessageButton.onClick = [this]
+        remoteView.sendRemoteMessageButton.onClick = []
         {
             StringPairArray data;
             data.set ("key1", "value1");
@@ -144,9 +212,9 @@ public:
                                                                    data);
         };
 
-        remoteView.subscribeToSportsButton    .onClick = [this]
+        remoteView.subscribeToSportsButton    .onClick = []
             { PushNotifications::getInstance()->subscribeToTopic ("sports"); };
-        remoteView.unsubscribeFromSportsButton.onClick = [this]
+        remoteView.unsubscribeFromSportsButton.onClick = []
             { PushNotifications::getInstance()->unsubscribeFromTopic ("sports"); };
       #endif
 
@@ -164,11 +232,31 @@ public:
         PushNotifications::ChannelGroup cg { "demoGroup", "demo group" };
         PushNotifications::getInstance()->setupChannels ({ { cg } }, getAndroidChannels());
       #endif
+
+       #if JUCE_IOS || JUCE_ANDROID
+        setPortraitOrientationEnabled (true);
+       #endif
     }
 
     ~PushNotificationsDemo()
     {
         PushNotifications::getInstance()->removeListener (this);
+
+       #if JUCE_IOS || JUCE_ANDROID
+        setPortraitOrientationEnabled (false);
+       #endif
+    }
+
+    void setPortraitOrientationEnabled (bool shouldBeEnabled)
+    {
+        auto allowedOrientations = Desktop::getInstance().getOrientationsEnabled();
+
+        if (shouldBeEnabled)
+            allowedOrientations |= Desktop::upright;
+        else
+            allowedOrientations &= ~Desktop::upright;
+
+        Desktop::getInstance().setOrientationsEnabled (allowedOrientations);
     }
 
     void paint (Graphics& g) override
@@ -260,7 +348,7 @@ private:
 
       #if JUCE_ANDROID
         // Note: this is not strictly speaking required param, just doing it here because it is the fastest way!
-        n.publicVersion = new PushNotifications::Notification();
+        n.publicVersion.reset (new PushNotifications::Notification());
         n.publicVersion->identifier = "blahblahblah";
         n.publicVersion->title      = "Public title!";
         n.publicVersion->body       = "Public body!";

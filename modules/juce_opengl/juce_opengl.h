@@ -98,14 +98,9 @@
   #include <OpenGLES/ES2/gl.h>
  #endif
 #elif JUCE_MAC
- #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7)
   #define JUCE_OPENGL3 1
   #include <OpenGL/gl3.h>
   #include <OpenGL/gl3ext.h>
- #else
-  #include <OpenGL/gl.h>
-  #include <OpenGL/glext.h>
- #endif
 #elif JUCE_ANDROID
  #include <android/native_window.h>
  #include <android/native_window_jni.h>

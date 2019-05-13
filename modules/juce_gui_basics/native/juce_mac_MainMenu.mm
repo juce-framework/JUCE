@@ -283,7 +283,11 @@ public:
 
             [item setTag: topLevelIndex];
             [item setEnabled: i.isEnabled];
+           #if defined (MAC_OS_X_VERSION_10_13) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_13
+            [item setState: i.isTicked ? NSControlStateValueOn : NSControlStateValueOff];
+           #else
             [item setState: i.isTicked ? NSOnState : NSOffState];
+           #endif
             [item setTarget: (id) callback];
 
             auto* juceItem = new PopupMenu::Item (i);
@@ -327,13 +331,7 @@ public:
         [m setAutoenablesItems: false];
 
         if (addDelegate)
-        {
-           #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
             [m setDelegate: (id<NSMenuDelegate>) callback];
-           #else
-            [m setDelegate: callback];
-           #endif
-        }
 
         for (PopupMenu::MenuItemIterator iter (menu); iter.next();)
             addMenuItem (iter, m, topLevelMenuId, topLevelIndex);
@@ -515,9 +513,7 @@ private:
             addMethod (@selector (menuItemInvoked:),  menuItemInvoked, "v@:@");
             addMethod (@selector (menuNeedsUpdate:),  menuNeedsUpdate, "v@:@");
 
-           #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
             addProtocol (@protocol (NSMenuDelegate));
-           #endif
 
             registerClass();
         }
