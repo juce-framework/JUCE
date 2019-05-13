@@ -24,10 +24,10 @@
   ==============================================================================
 */
 
-#if JucePlugin_Build_RTAS
-
 #include "../../juce_core/system/juce_TargetPlatform.h"
 #include "../utility/juce_CheckSettingMacros.h"
+
+#if JucePlugin_Build_RTAS
 
 // Horrible carbon-based fix for a cocoa bug, where an NSWindow that wraps a carbon
 // window fails to keep its position updated when the user drags the window around..
@@ -38,12 +38,8 @@
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_CarbonVisibility.h"
 
-namespace juce
-{
-
-using namespace juce;
-
 //==============================================================================
+using namespace juce;
 void initialiseMacRTAS();
 void initialiseMacRTAS()
 {
@@ -169,7 +165,5 @@ void forwardCurrentKeyEventToHostWindow()
         repostCurrentNSEvent();
     }
 }
-
-} // namespace juce
 
 #endif
