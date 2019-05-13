@@ -30,7 +30,7 @@ namespace juce
 extern ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component&, void* parent);
 extern bool shouldScaleGLWindow (void* hwnd);
 
-#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && (JucePlugin_Build_VST || JucePlugin_Build_VST3)
+#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && JucePlugin_Build_VST
  bool juce_shouldDoubleScaleNativeGLWindow();
 #else
  bool juce_shouldDoubleScaleNativeGLWindow()  { return false; }
