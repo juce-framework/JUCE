@@ -113,9 +113,19 @@ public:
     /** Starts the attack phase of the envelope. */
     void noteOn()
     {
-        if      (attackRate > 0.0f)  currentState = State::attack;
-        else if (decayRate > 0.0f)   currentState = State::decay;
-        else                         currentState = State::sustain;
+        if (attackRate > 0.0f)
+        {
+            currentState = State::attack;
+        }
+        else if (decayRate > 0.0f)
+        {
+            envelopeVal = 1.0f;
+            currentState = State::decay;
+        }
+        else
+        {
+            currentState = State::sustain;
+        }
     }
 
     /** Starts the release phase of the envelope. */

@@ -1735,7 +1735,7 @@ public:
     virtual void modifierKeysChanged (const ModifierKeys& modifiers);
 
     //==============================================================================
-    /** Enumeration used by the focusChanged() and focusLost() methods. */
+    /** Enumeration used by the focusGained() and focusLost() methods. */
     enum FocusChangeType
     {
         focusChangedByMouseClick,   /**< Means that the user clicked the mouse to change focus. */

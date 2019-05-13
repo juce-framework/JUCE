@@ -85,10 +85,8 @@ MainHostWindow::MainHostWindow()
     RuntimePermissions::request (RuntimePermissions::recordAudio,
                                  [safeThis] (bool granted) mutable
                                  {
-                                     std::unique_ptr<XmlElement> savedAudioState (getAppProperties().getUserSettings()
-                                                                                  ->getXmlValue ("audioDeviceState"));
-
-                                     safeThis->deviceManager.initialise (granted ? 256 : 0, 256, savedAudioState.get(), true);
+                                     auto savedState = getAppProperties().getUserSettings()->getXmlValue ("audioDeviceState");
+                                     safeThis->deviceManager.initialise (granted ? 256 : 0, 256, savedState.get(), true);
                                  });
 
    #if JUCE_IOS || JUCE_ANDROID
@@ -110,9 +108,7 @@ MainHostWindow::MainHostWindow()
     InternalPluginFormat internalFormat;
     internalFormat.getAllTypes (internalTypes);
 
-    std::unique_ptr<XmlElement> savedPluginList (getAppProperties().getUserSettings()->getXmlValue ("pluginList"));
-
-    if (savedPluginList != nullptr)
+    if (auto savedPluginList = getAppProperties().getUserSettings()->getXmlValue ("pluginList"))
         knownPluginList.recreateFromXml (*savedPluginList);
 
     for (auto* t : internalTypes)
@@ -221,9 +217,7 @@ void MainHostWindow::changeListenerCallback (ChangeBroadcaster* changed)
 
         // save the plugin list every time it gets changed, so that if we're scanning
         // and it crashes, we've still saved the previous ones
-        std::unique_ptr<XmlElement> savedPluginList (knownPluginList.createXml());
-
-        if (savedPluginList != nullptr)
+        if (auto savedPluginList = std::unique_ptr<XmlElement> (knownPluginList.createXml()))
         {
             getAppProperties().getUserSettings()->setValue ("pluginList", savedPluginList.get());
             getAppProperties().saveIfNeeded();

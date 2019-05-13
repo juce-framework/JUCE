@@ -514,7 +514,7 @@ public:
 
         @see TreeView::getOpennessState, restoreOpennessState
     */
-    XmlElement* getOpennessState() const;
+    std::unique_ptr<XmlElement> getOpennessState() const;
 
     /** Restores the openness of this item and all its sub-items from a saved state.
 
@@ -818,7 +818,7 @@ public:
                                             so this can also be restored
         @see restoreOpennessState
     */
-    XmlElement* getOpennessState (bool alsoIncludeScrollPosition) const;
+    std::unique_ptr<XmlElement> getOpennessState (bool alsoIncludeScrollPosition) const;
 
     /** Restores a previously saved arrangement of open/closed nodes.
 

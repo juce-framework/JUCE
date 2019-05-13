@@ -203,7 +203,7 @@ public:
     }
 
     //==============================================================================
-    /** Returns true if the map contains an item with the specied key. */
+    /** Returns true if the map contains an item with the specified key. */
     bool contains (KeyTypeParameter keyToLookFor) const
     {
         const ScopedLockType sl (getLock());

@@ -697,18 +697,15 @@ void Project::moveTemporaryDirectory (const File& newParentDirectory)
 
 bool Project::saveProjectRootToFile()
 {
-    std::unique_ptr<XmlElement> xml (projectRoot.createXml());
-
-    if (xml == nullptr)
+    if (auto xml = projectRoot.createXml())
     {
-        jassertfalse;
-        return false;
+        MemoryOutputStream mo;
+        xml->writeTo (mo, {});
+        return FileHelpers::overwriteFileWithNewDataIfDifferent (getFile(), mo);
     }
 
-    MemoryOutputStream mo;
-    xml->writeToStream (mo, {});
-
-    return FileHelpers::overwriteFileWithNewDataIfDifferent (getFile(), mo);
+    jassertfalse;
+    return false;
 }
 
 //==============================================================================

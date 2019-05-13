@@ -197,7 +197,7 @@ static LONG WINAPI handleCrash (LPEXCEPTION_POINTERS ep)
 static void handleCrash (int signum)
 {
     globalCrashHandler ((void*) (pointer_sized_int) signum);
-    kill (getpid(), SIGKILL);
+    ::kill (getpid(), SIGKILL);
 }
 
 int juce_siginterrupt (int sig, int flag);

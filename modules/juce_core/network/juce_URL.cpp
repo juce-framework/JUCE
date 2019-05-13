@@ -788,7 +788,7 @@ String URL::readEntireTextStream (bool usePostCommand) const
     return {};
 }
 
-XmlElement* URL::readEntireXmlStream (bool usePostCommand) const
+std::unique_ptr<XmlElement> URL::readEntireXmlStream (bool usePostCommand) const
 {
     return XmlDocument::parse (readEntireTextStream (usePostCommand));
 }
@@ -797,14 +797,14 @@ XmlElement* URL::readEntireXmlStream (bool usePostCommand) const
 URL URL::withParameter (const String& parameterName,
                         const String& parameterValue) const
 {
-    URL u (*this);
+    auto u = *this;
     u.addParameter (parameterName, parameterValue);
     return u;
 }
 
 URL URL::withParameters (const StringPairArray& parametersToAdd) const
 {
-    URL u (*this);
+    auto u = *this;
 
     for (int i = 0; i < parametersToAdd.size(); ++i)
         u.addParameter (parametersToAdd.getAllKeys()[i],
@@ -820,7 +820,7 @@ URL URL::withPOSTData (const String& newPostData) const
 
 URL URL::withPOSTData (const MemoryBlock& newPostData) const
 {
-    URL u (*this);
+    auto u = *this;
     u.postData = newPostData;
     return u;
 }
@@ -834,7 +834,7 @@ URL::Upload::Upload (const String& param, const String& name,
 
 URL URL::withUpload (Upload* const f) const
 {
-    URL u (*this);
+    auto u = *this;
 
     for (int i = u.filesToUpload.size(); --i >= 0;)
         if (u.filesToUpload.getObjectPointerUnchecked(i)->parameterName == f->parameterName)

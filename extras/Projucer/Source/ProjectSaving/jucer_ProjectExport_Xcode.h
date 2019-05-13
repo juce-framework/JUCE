@@ -1615,8 +1615,9 @@ public:
                 dict->addChildElement (new XmlElement (e));
 
             MemoryOutputStream mo;
-            plist->writeToStream (mo, "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">");
-
+            XmlElement::TextFormat format;
+            format.dtd = "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">";
+            plist->writeTo (mo, format);
             overwriteFileIfDifferentOrThrow (infoPlistFile, mo);
         }
 

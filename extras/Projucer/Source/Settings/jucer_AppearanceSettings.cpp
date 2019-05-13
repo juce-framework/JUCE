@@ -138,8 +138,10 @@ bool AppearanceSettings::readFromFile (const File& file)
 
 bool AppearanceSettings::writeToFile (const File& file) const
 {
-    const std::unique_ptr<XmlElement> xml (settings.createXml());
-    return xml != nullptr && xml->writeToFile (file, String());
+    if (auto xml = settings.createXml())
+        return xml->writeTo (file, {});
+
+    return false;
 }
 
 Font AppearanceSettings::getDefaultCodeFont()

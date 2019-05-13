@@ -254,19 +254,19 @@ void ComponentLayout::copySelectedToClipboard()
 
     for (int i = 0; i < components.size(); ++i)
     {
-        Component* const c = components.getUnchecked(i);
+        auto c = components.getUnchecked(i);
 
         if (selected.isSelected (c))
         {
-            if (ComponentTypeHandler* const type = ComponentTypeHandler::getHandlerFor (*c))
+            if (auto type = ComponentTypeHandler::getHandlerFor (*c))
             {
-                XmlElement* const e = type->createXmlFor (c, this);
+                auto e = type->createXmlFor (c, this);
                 clip.addChildElement (e);
             }
         }
     }
 
-    SystemClipboard::copyTextToClipboard (clip.createDocument ("", false, false));
+    SystemClipboard::copyTextToClipboard (clip.toString());
 }
 
 void ComponentLayout::paste()
