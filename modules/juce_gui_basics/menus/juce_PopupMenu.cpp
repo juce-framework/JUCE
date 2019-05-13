@@ -258,10 +258,10 @@ struct MenuWindow  : public Component
                           | ComponentPeer::windowIgnoresKeyPresses
                           | lf.getMenuWindowFlags());
 
-            getActiveWindows().add (this);
             Desktop::getInstance().addGlobalMouseListener (this);
         }
 
+        getActiveWindows().add (this);
         lf.preparePopupMenuWindow (*this);
 
         getMouseState (Desktop::getInstance().getMainMouseSource()); // forces creation of a mouse source watcher for the main mouse
