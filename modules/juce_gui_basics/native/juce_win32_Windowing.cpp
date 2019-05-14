@@ -4076,6 +4076,9 @@ JUCE_API bool shouldScaleGLWindow (void* hwnd)
 #if JUCE_WIN_PER_MONITOR_DPI_AWARE
  JUCE_API void setProcessDPIAwarenessIfNecessary (void* hwnd)
  {
+     if (getProcessDPIAwareness == nullptr)
+         return;
+
      DPI_Awareness context;
      getProcessDPIAwareness (0, &context);
 
