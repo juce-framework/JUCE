@@ -419,7 +419,7 @@ struct PluginTreeUtils
                 if (current->plugins.size() + current->subFolders.size() > 0)
                 {
                     current->folder = lastType;
-                    tree.subFolders.add (current.release());
+                    tree.subFolders.add (std::move (current));
                     current.reset (new KnownPluginList::PluginTree());
                 }
 
@@ -432,7 +432,7 @@ struct PluginTreeUtils
         if (current->plugins.size() + current->subFolders.size() > 0)
         {
             current->folder = lastType;
-            tree.subFolders.add (current.release());
+            tree.subFolders.add (std::move (current));
         }
     }
 

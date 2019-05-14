@@ -2385,15 +2385,11 @@ private:
 
     void getIconImages (OwnedArray<Drawable>& images) const
     {
-        std::unique_ptr<Drawable> bigIcon (getBigIcon());
+        if (auto icon = getBigIcon())
+            images.add (std::move (icon));
 
-        if (bigIcon != nullptr)
-            images.add (bigIcon.release());
-
-        std::unique_ptr<Drawable> smallIcon (getSmallIcon());
-
-        if (smallIcon != nullptr)
-            images.add (smallIcon.release());
+        if (auto icon = getSmallIcon())
+            images.add (std::move (icon));
     }
 
     void createiOSIconFiles (File appIconSet) const

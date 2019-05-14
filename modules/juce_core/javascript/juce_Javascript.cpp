@@ -1183,7 +1183,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             if (matchIf (TokenTypes::comma))
             {
                 std::unique_ptr<BlockStatement> block (new BlockStatement (location));
-                block->statements.add (s.release());
+                block->statements.add (std::move (s));
                 block->statements.add (parseVar());
                 return block.release();
             }

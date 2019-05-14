@@ -179,8 +179,8 @@ public:
 
     void addProjectPathToBuildPathList (StringArray&, const RelativePath&, int index = -1) const;
 
-    Drawable* getBigIcon() const;
-    Drawable* getSmallIcon() const;
+    std::unique_ptr<Drawable> getBigIcon() const;
+    std::unique_ptr<Drawable> getSmallIcon() const;
     Image getBestIconForSize (int size, bool returnNullIfNothingBigEnough) const;
 
     String getExporterIdentifierMacro() const
