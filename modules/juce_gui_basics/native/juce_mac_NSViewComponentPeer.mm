@@ -1362,6 +1362,17 @@ public:
 
     void textInputRequired (Point<int>, TextInputTarget&) override {}
 
+    void resetWindowPresentation()
+    {
+        if (hasNativeTitleBar())
+        {
+            [window setStyleMask: (NSViewComponentPeer::getNSWindowStyleMask (getStyleFlags()))];
+            setTitle (getComponent().getName()); // required to force the OS to update the title
+        }
+
+        [NSApp setPresentationOptions: NSApplicationPresentationDefault];
+    }
+
     //==============================================================================
     NSWindow* window = nil;
     NSView* view = nil;
@@ -1911,6 +1922,7 @@ struct JuceNSWindowClass   : public ObjCClass<NSWindow>
         addMethod (@selector (constrainFrameRect:toScreen:),        constrainFrameRect,        @encode (NSRect), "@:",  @encode (NSRect), "@");
         addMethod (@selector (windowWillResize:toSize:),            windowWillResize,          @encode (NSSize), "@:@", @encode (NSSize));
         addMethod (@selector (windowDidExitFullScreen:),            windowDidExitFullScreen,   "v@:@");
+        addMethod (@selector (windowWillEnterFullScreen:),          windowWillEnterFullScreen, "v@:@");
         addMethod (@selector (zoom:),                               zoom,                      "v@:@");
         addMethod (@selector (windowWillMove:),                     windowWillMove,            "v@:@");
         addMethod (@selector (windowWillStartLiveResize:),          windowWillStartLiveResize, "v@:@");
@@ -1991,9 +2003,17 @@ private:
         return frameRect.size;
     }
 
-    static void windowDidExitFullScreen (id, SEL, NSNotification*)
+    static void windowDidExitFullScreen (id self, SEL, NSNotification*)
     {
-        [NSApp setPresentationOptions: NSApplicationPresentationDefault];
+        if (auto* owner = getOwner (self))
+            owner->resetWindowPresentation();
+    }
+
+    static void windowWillEnterFullScreen (id self, SEL, NSNotification*)
+    {
+        if (auto* owner = getOwner (self))
+            if (owner->hasNativeTitleBar() && (owner->getStyleFlags() & ComponentPeer::windowIsResizable) == 0)
+                [owner->window setStyleMask: NSWindowStyleMaskBorderless];
     }
 
     static void zoom (id self, SEL, id sender)
@@ -2126,13 +2146,7 @@ void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, boo
         }
         else
         {
-            if (peer->hasNativeTitleBar())
-            {
-                [peer->window setStyleMask: (NSViewComponentPeer::getNSWindowStyleMask (peer->getStyleFlags()))];
-                peer->setTitle (peer->getComponent().getName()); // required to force the OS to update the title
-            }
-
-            [NSApp setPresentationOptions: NSApplicationPresentationDefault];
+            peer->resetWindowPresentation();
         }
     }
 }
