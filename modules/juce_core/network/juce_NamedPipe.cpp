@@ -60,8 +60,9 @@ String NamedPipe::getName() const
 
 // other methods for this class are implemented in the platform-specific files
 
-//==============================================================================
 
+//==============================================================================
+//==============================================================================
 #if JUCE_UNIT_TESTS
 
 class NamedPipeTests  : public UnitTest
@@ -69,7 +70,7 @@ class NamedPipeTests  : public UnitTest
 public:
     //==============================================================================
     NamedPipeTests()
-        : UnitTest ("NamedPipe", "Networking")
+        : UnitTest ("NamedPipe", UnitTestCategories::networking)
     {}
 
     void runTest() override
@@ -197,14 +198,19 @@ private:
     //==============================================================================
     struct NamedPipeThread   : public Thread
     {
-        NamedPipeThread (const String& threadName, const String& pName,
+        NamedPipeThread (const String& tName, const String& pName,
                          bool shouldCreatePipe, WaitableEvent& completed)
-            : Thread (threadName), pipeName (pName), workCompleted (completed)
+            : Thread (tName), pipeName (pName), workCompleted (completed)
         {
             if (shouldCreatePipe)
                 pipe.createNewPipe (pipeName);
             else
                 pipe.openExisting (pipeName);
+        }
+
+        ~NamedPipeThread()
+        {
+            stopThread (100);
         }
 
         NamedPipe pipe;

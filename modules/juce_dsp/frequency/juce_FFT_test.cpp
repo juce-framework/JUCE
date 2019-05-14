@@ -31,7 +31,9 @@ namespace dsp
 
 struct FFTUnitTest  : public UnitTest
 {
-    FFTUnitTest()  : UnitTest ("FFT", "DSP") {}
+    FFTUnitTest()
+        : UnitTest ("FFT", UnitTestCategories::dsp)
+    {}
 
     static void fillRandom (Random& random, Complex<float>* buffer, size_t n)
     {

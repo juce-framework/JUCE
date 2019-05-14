@@ -270,9 +270,6 @@ namespace juce
 #if JUCE_HAS_CONSTEXPR
  #include "layout/juce_GridItem.cpp"
  #include "layout/juce_Grid.cpp"
- #if JUCE_UNIT_TESTS
-  #include "layout/juce_GridUnitTests.cpp"
- #endif
 #endif
 
 #if JUCE_IOS || JUCE_WINDOWS

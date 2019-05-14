@@ -32,7 +32,9 @@ namespace juce
 class ParameterGroupTests   : public UnitTest
 {
 public:
-    ParameterGroupTests() : UnitTest ("ParameterGroups", "Parameters") {}
+    ParameterGroupTests()
+        : UnitTest ("ParameterGroups", UnitTestCategories::audioProcessorParameters)
+    {}
 
     void runTest() override
     {

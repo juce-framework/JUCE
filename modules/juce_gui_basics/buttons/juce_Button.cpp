@@ -461,7 +461,7 @@ void Button::mouseUp (const MouseEvent& e)
 {
     const bool wasDown = isDown();
     const bool wasOver = isOver();
-    updateState (isMouseOrTouchOver (e), false);
+    updateState (isMouseSourceOver (e), false);
 
     if (wasDown && wasOver && ! triggerOnMouseDown)
     {
@@ -475,15 +475,15 @@ void Button::mouseUp (const MouseEvent& e)
 void Button::mouseDrag (const MouseEvent& e)
 {
     auto oldState = buttonState;
-    updateState (isMouseOrTouchOver (e), true);
+    updateState (isMouseSourceOver (e), true);
 
     if (autoRepeatDelay >= 0 && buttonState != oldState && isDown())
         callbackHelper->startTimer (autoRepeatSpeed);
 }
 
-bool Button::isMouseOrTouchOver (const MouseEvent& e)
+bool Button::isMouseSourceOver (const MouseEvent& e)
 {
-    if (e.source.isTouch())
+    if (e.source.isTouch() || e.source.isPen())
         return getLocalBounds().toFloat().contains (e.position);
 
     return isMouseOver();

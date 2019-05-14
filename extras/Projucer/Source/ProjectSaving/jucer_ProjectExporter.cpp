@@ -189,7 +189,7 @@ String ProjectExporter::getCurrentPlatformExporterName()
    #if JUCE_MAC
     return XcodeProjectExporter::getNameMac();
    #elif JUCE_WINDOWS
-    return MSVCProjectExporterVC2017::getName();
+    return MSVCProjectExporterVC2019::getName();
    #elif JUCE_LINUX
     return MakefileProjectExporter::getNameLinux();
    #else

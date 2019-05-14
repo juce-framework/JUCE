@@ -79,8 +79,17 @@ static int warnOnFailure (int result) noexcept
     DBG (message);
     return result;
 }
+
+static int warnOnFailureIfImplemented (int result) noexcept
+{
+    if (result != kResultOk && result != kNotImplemented)
+        return warnOnFailure (result);
+
+    return result;
+}
 #else
  #define warnOnFailure(x) x
+ #define warnOnFailureIfImplemented(x) x
 #endif
 
 //==============================================================================
@@ -1000,7 +1009,7 @@ private:
         const File file (filePath);
         const char* const utf8 = file.getFullPathName().toRawUTF8();
 
-        if (CFURLRef url = CFURLCreateFromFileSystemRepresentation (0, (const UInt8*) utf8, (CFIndex) std::strlen (utf8), file.isDirectory()))
+        if (CFURLRef url = CFURLCreateFromFileSystemRepresentation (nullptr, (const UInt8*) utf8, (CFIndex) std::strlen (utf8), file.isDirectory()))
         {
             bundleRef = CFBundleCreate (kCFAllocatorDefault, url);
             CFRelease (url);
@@ -1168,10 +1177,6 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
         warnOnFailure (view->setFrame (this));
 
-       #if JUCE_MAC
-        resizeToFit();
-       #endif
-
         Steinberg::IPlugViewContentScaleSupport* scaleInterface = nullptr;
         view->queryInterface (Steinberg::IPlugViewContentScaleSupport::iid, (void**) &scaleInterface);
 
@@ -1180,9 +1185,11 @@ struct VST3PluginWindow : public AudioProcessorEditor,
             pluginRespondsToDPIChanges = true;
             scaleInterface->release();
         }
+
+        resizeToFit();
     }
 
-    ~VST3PluginWindow()
+    ~VST3PluginWindow() override
     {
         warnOnFailure (view->removed());
         warnOnFailure (view->setFrame (nullptr));
@@ -1768,7 +1775,7 @@ public:
         holder->host->setPlugin (this);
     }
 
-    ~VST3PluginInstance()
+    ~VST3PluginInstance() override
     {
         jassert (getActiveEditor() == nullptr); // You must delete any editors before deleting the plugin instance!
 
@@ -1938,7 +1945,7 @@ public:
         cachedBusLayouts = getBusesLayout();
 
         warnOnFailure (holder->component->setActive (true));
-        warnOnFailure (processor->setProcessing (true));
+        warnOnFailureIfImplemented (processor->setProcessing (true));
 
         isActive = true;
     }
@@ -1953,7 +1960,7 @@ public:
         setStateForAllMidiBuses (false);
 
         if (processor != nullptr)
-            warnOnFailure (processor->setProcessing (false));
+            warnOnFailureIfImplemented (processor->setProcessing (false));
 
         if (holder->component != nullptr)
             warnOnFailure (holder->component->setActive (false));
@@ -2038,8 +2045,8 @@ public:
         for (int i = getTotalNumInputChannels(); i < buffer.getNumChannels(); ++i)
             buffer.clear (i, 0, numSamples);
 
-        associateTo (data, buffer);
-        associateTo (data, midiMessages);
+        associateWith (data, buffer);
+        associateWith (data, midiMessages);
 
         processor->process (data);
 
@@ -2348,7 +2355,7 @@ public:
 
         if (head != nullptr)
         {
-            ComSmartPtr<Steinberg::MemoryStream> componentStream (createMemoryStreamForState (*head, "IComponent"));
+            auto componentStream (createMemoryStreamForState (*head, "IComponent"));
 
             if (componentStream != nullptr && holder->component != nullptr)
                 holder->component->setState (componentStream);
@@ -2362,7 +2369,7 @@ public:
                     editController->setComponentState (componentStream);
                 }
 
-                ComSmartPtr<Steinberg::MemoryStream> controllerStream = createMemoryStreamForState (*head, "IEditController");
+                auto controllerStream (createMemoryStreamForState (*head, "IEditController"));
 
                 if (controllerStream != nullptr)
                     editController->setState (controllerStream);
@@ -2567,23 +2574,22 @@ private:
         }
     }
 
-    static Steinberg::MemoryStream* createMemoryStreamForState (XmlElement& head, StringRef identifier)
+    static ComSmartPtr<Steinberg::MemoryStream> createMemoryStreamForState (XmlElement& head, StringRef identifier)
     {
-        Steinberg::MemoryStream* stream = nullptr;
-
         if (auto* state = head.getChildByName (identifier))
         {
             MemoryBlock mem;
 
             if (mem.fromBase64Encoding (state->getAllSubText()))
             {
-                stream = new Steinberg::MemoryStream();
+                ComSmartPtr<Steinberg::MemoryStream> stream (new Steinberg::MemoryStream(), false);
                 stream->setSize ((TSize) mem.getSize());
                 mem.copyTo (stream->getData(), 0, mem.getSize());
+                return stream;
             }
         }
 
-        return stream;
+        return nullptr;
     }
 
     ComSmartPtr<ParamValueQueueList> inputParameterChanges, outputParameterChanges;
@@ -2678,7 +2684,7 @@ private:
 
         if (holder->component->getState (&stream) == kResultTrue)
             if (stream.seek (0, Steinberg::IBStream::kIBSeekSet, nullptr) == kResultTrue)
-                warnOnFailure (editController->setComponentState (&stream));
+                warnOnFailureIfImplemented (editController->setComponentState (&stream));
     }
 
     void grabInformationObjects()
@@ -2809,23 +2815,24 @@ private:
 
     //==============================================================================
     template <typename FloatType>
-    void associateTo (Vst::ProcessData& destination, AudioBuffer<FloatType>& buffer)
+    void associateWith (Vst::ProcessData& destination, AudioBuffer<FloatType>& buffer)
     {
-        VST3BufferExchange<FloatType>::mapBufferToBuses (inputBuses, inputBusMap.get<FloatType>(), cachedBusLayouts.inputBuses, buffer);
+        VST3BufferExchange<FloatType>::mapBufferToBuses (inputBuses,  inputBusMap.get<FloatType>(),  cachedBusLayouts.inputBuses,  buffer);
         VST3BufferExchange<FloatType>::mapBufferToBuses (outputBuses, outputBusMap.get<FloatType>(), cachedBusLayouts.outputBuses, buffer);
 
         destination.inputs  = inputBuses.getRawDataPointer();
         destination.outputs = outputBuses.getRawDataPointer();
     }
 
-    void associateTo (Vst::ProcessData& destination, MidiBuffer& midiBuffer)
+    void associateWith (Vst::ProcessData& destination, MidiBuffer& midiBuffer)
     {
         midiInputs->clear();
         midiOutputs->clear();
 
-        MidiEventList::toEventList (*midiInputs, midiBuffer,
-                                    destination.inputParameterChanges,
-                                    midiMapping);
+        if (acceptsMidi())
+            MidiEventList::toEventList (*midiInputs, midiBuffer,
+                                        destination.inputParameterChanges,
+                                        midiMapping);
 
         destination.inputEvents = midiInputs;
         destination.outputEvents = midiOutputs;

@@ -196,13 +196,15 @@ String BufferedInputStream::readString()
     return InputStream::readString();
 }
 
+
+//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
 struct BufferedInputStreamTests   : public UnitTest
 {
     BufferedInputStreamTests()
-        : UnitTest ("BufferedInputStream", "Streams")
+        : UnitTest ("BufferedInputStream", UnitTestCategories::streams)
     {}
 
     void runTest() override

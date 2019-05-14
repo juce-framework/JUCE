@@ -40,12 +40,12 @@ class FilterDebugWindow : public AudioProcessorEditor,
 {
 public:
     FilterDebugWindow (AudioProcessor& proc)
-        : AudioProcessorEditor (proc), processor (proc)
+        : AudioProcessorEditor (proc), audioProc (proc)
     {
         setSize (500, 200);
         addAndMakeVisible (list);
 
-        for (auto* p : processor.getParameters())
+        for (auto* p : audioProc.getParameters())
             p->addListener (this);
 
         log.add ("Parameter debug log started");
@@ -53,7 +53,7 @@ public:
 
     void parameterValueChanged (int parameterIndex, float newValue) override
     {
-        auto* param = processor.getParameters()[parameterIndex];
+        auto* param = audioProc.getParameters()[parameterIndex];
         auto value = param->getCurrentValueAsText().quoted() + " (" + String (newValue, 4) + ")";
 
         appendToLog ("parameter change", *param, value);
@@ -61,7 +61,7 @@ public:
 
     void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override
     {
-        auto* param = processor.getParameters()[parameterIndex];
+        auto* param = audioProc.getParameters()[parameterIndex];
         appendToLog ("gesture", *param, gestureIsStarting ? "start" : "end");
     }
 
@@ -120,7 +120,7 @@ private:
     StringArray pendingLogEntries;
     CriticalSection pendingLogLock;
 
-    AudioProcessor& processor;
+    AudioProcessor& audioProc;
 };
 
 //==============================================================================
@@ -170,7 +170,7 @@ public:
         setVisible (true);
     }
 
-    ~PluginWindow()
+    ~PluginWindow() override
     {
         clearContentComponent();
     }
@@ -287,7 +287,7 @@ private:
                 owner.addListener (this);
             }
 
-            ~PropertyComp()
+            ~PropertyComp() override
             {
                 owner.removeListener (this);
             }

@@ -218,7 +218,7 @@ struct MenuWindow  : public Component
 
         if (parentComponent == nullptr && parentWindow == nullptr && lf.shouldPopupMenuScaleWithTargetComponent (options))
             if (auto* targetComponent = options.getTargetComponent())
-                scaleFactor = getApproximateScaleFactorForTargetComponent (targetComponent);
+                scaleFactor = Component::getApproximateScaleFactorForComponent (targetComponent);
 
         setOpaque (lf.findColour (PopupMenu::backgroundColourId).isOpaque()
                      || ! Desktop::canUseSemiTransparentWindows());
@@ -258,10 +258,10 @@ struct MenuWindow  : public Component
                           | ComponentPeer::windowIgnoresKeyPresses
                           | lf.getMenuWindowFlags());
 
-            getActiveWindows().add (this);
             Desktop::getInstance().addGlobalMouseListener (this);
         }
 
+        getActiveWindows().add (this);
         lf.preparePopupMenuWindow (*this);
 
         getMouseState (Desktop::getInstance().getMainMouseSource()); // forces creation of a mouse source watcher for the main mouse
@@ -968,22 +968,6 @@ struct MenuWindow  : public Component
     bool canScroll() const noexcept                 { return childYOffset != 0 || needsToScroll; }
     bool isTopScrollZoneActive() const noexcept     { return canScroll() && childYOffset > 0; }
     bool isBottomScrollZoneActive() const noexcept  { return canScroll() && childYOffset < contentHeight - windowPos.getHeight(); }
-
-    //==============================================================================
-    static float getApproximateScaleFactorForTargetComponent (Component* targetComponent)
-    {
-        AffineTransform transform;
-
-        for (auto* target = targetComponent; target != nullptr; target = target->getParentComponent())
-        {
-            transform = transform.followedBy (target->getTransform());
-
-            if (target->isOnDesktop())
-                transform = transform.scaled (target->getDesktopScaleFactor());
-        }
-
-        return (transform.getScaleFactor() / Desktop::getInstance().getGlobalScaleFactor());
-    }
 
     //==============================================================================
     MenuWindow* parent;

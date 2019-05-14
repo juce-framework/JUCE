@@ -120,7 +120,7 @@ namespace FIR
         typename Coefficients<NumericType>::Ptr coefficients;
 
         //==============================================================================
-        /** Processes as a block of samples */
+        /** Processes a block of samples */
         template <typename ProcessContext>
         void process (const ProcessContext& context) noexcept
         {

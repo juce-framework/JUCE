@@ -170,7 +170,7 @@
     constructor code.
 */
 #ifndef JUCE_ALLOW_STATIC_NULL_VARIABLES
- #define JUCE_ALLOW_STATIC_NULL_VARIABLES 1
+ #define JUCE_ALLOW_STATIC_NULL_VARIABLES 0
 #endif
 
 /** Config: JUCE_STRICT_REFCOUNTEDPOINTER
@@ -351,6 +351,10 @@ namespace juce
 #if JUCE_CORE_INCLUDE_JNI_HELPERS && JUCE_ANDROID
  #include <jni.h>
  #include "native/juce_android_JNIHelpers.h"
+#endif
+
+#if JUCE_UNIT_TESTS
+ #include "unit_tests/juce_UnitTestCategories.h"
 #endif
 
 #ifndef DOXYGEN

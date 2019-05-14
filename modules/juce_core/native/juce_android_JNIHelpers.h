@@ -966,7 +966,7 @@ public:
 //==============================================================================
 // Allows you to start an activity without requiring to have an activity
 void startAndroidActivityForResult (const LocalRef<jobject>& intent, int requestCode,
-                                    std::function<void (int, int, LocalRef<jobject>)> && callback);
+                                    std::function<void(int, int, LocalRef<jobject>)> && callback);
 
 //==============================================================================
 bool androidHasSystemFeature (const String& property);

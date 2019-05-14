@@ -491,7 +491,7 @@ Time Time::fromISO8601 (StringRef iso)
         if (seconds < 0)
              return {};
 
-        if (*t == '.')
+        if (*t == '.' || *t == ',')
         {
             ++t;
             milliseconds = parseFixedSizeIntAndSkip (t, 3, 0);
@@ -612,7 +612,9 @@ Time Time::getCompilationDate()
 class TimeTests  : public UnitTest
 {
 public:
-    TimeTests() : UnitTest ("Time", "Time") {}
+    TimeTests()
+        : UnitTest ("Time", UnitTestCategories::time)
+    {}
 
     void runTest() override
     {
@@ -632,15 +634,22 @@ public:
         expect (Time::fromISO8601 (t.toISO8601 (false)) == t);
 
         expect (Time::fromISO8601 ("2016-02-16") == Time (2016, 1, 16, 0, 0, 0, 0, false));
-        expect (Time::fromISO8601 ("20160216Z") == Time (2016, 1, 16, 0, 0, 0, 0, false));
+        expect (Time::fromISO8601 ("20160216Z")  == Time (2016, 1, 16, 0, 0, 0, 0, false));
+
         expect (Time::fromISO8601 ("2016-02-16T15:03:57+00:00") == Time (2016, 1, 16, 15, 3, 57, 0, false));
-        expect (Time::fromISO8601 ("20160216T150357+0000") == Time (2016, 1, 16, 15, 3, 57, 0, false));
+        expect (Time::fromISO8601 ("20160216T150357+0000")      == Time (2016, 1, 16, 15, 3, 57, 0, false));
+
         expect (Time::fromISO8601 ("2016-02-16T15:03:57.999+00:00") == Time (2016, 1, 16, 15, 3, 57, 999, false));
-        expect (Time::fromISO8601 ("20160216T150357.999+0000") == Time (2016, 1, 16, 15, 3, 57, 999, false));
-        expect (Time::fromISO8601 ("2016-02-16T15:03:57.999Z") == Time (2016, 1, 16, 15, 3, 57, 999, false));
-        expect (Time::fromISO8601 ("20160216T150357.999Z") == Time (2016, 1, 16, 15, 3, 57, 999, false));
+        expect (Time::fromISO8601 ("20160216T150357.999+0000")      == Time (2016, 1, 16, 15, 3, 57, 999, false));
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57.999Z")      == Time (2016, 1, 16, 15, 3, 57, 999, false));
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57,999Z")      == Time (2016, 1, 16, 15, 3, 57, 999, false));
+        expect (Time::fromISO8601 ("20160216T150357.999Z")          == Time (2016, 1, 16, 15, 3, 57, 999, false));
+        expect (Time::fromISO8601 ("20160216T150357,999Z")          == Time (2016, 1, 16, 15, 3, 57, 999, false));
+
         expect (Time::fromISO8601 ("2016-02-16T15:03:57.999-02:30") == Time (2016, 1, 16, 17, 33, 57, 999, false));
-        expect (Time::fromISO8601 ("20160216T150357.999-0230") == Time (2016, 1, 16, 17, 33, 57, 999, false));
+        expect (Time::fromISO8601 ("2016-02-16T15:03:57,999-02:30") == Time (2016, 1, 16, 17, 33, 57, 999, false));
+        expect (Time::fromISO8601 ("20160216T150357.999-0230")      == Time (2016, 1, 16, 17, 33, 57, 999, false));
+        expect (Time::fromISO8601 ("20160216T150357,999-0230")      == Time (2016, 1, 16, 17, 33, 57, 999, false));
 
         expect (Time (1970,  0,  1,  0,  0,  0, 0, false) == Time (0));
         expect (Time (2106,  1,  7,  6, 28, 15, 0, false) == Time (4294967295000));

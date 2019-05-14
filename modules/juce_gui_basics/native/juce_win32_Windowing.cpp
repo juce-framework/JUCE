@@ -377,6 +377,7 @@ static void setDPIAwareness()
         getThreadDPIAwarenessContext        = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
         getAwarenessFromDPIAwarenessContext = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
         setThreadDPIAwarenessContext        = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
+        setProcessDPIAwareness              = (SetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "SetProcessDpiAwareness");
 
         // Only set the DPI awareness context of the process if we are a standalone app
         if (! JUCEApplicationBase::isStandaloneApp())
@@ -388,7 +389,6 @@ static void setDPIAwareness()
             && SUCCEEDED (setProcessDPIAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2)))
             return;
 
-        setProcessDPIAwareness    = (SetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "SetProcessDpiAwareness");
         enableNonClientDPIScaling = (EnableNonClientDPIScalingFunc) getUser32Function ("EnableNonClientDpiScaling");
 
         if (setProcessDPIAwareness != nullptr && enableNonClientDPIScaling != nullptr
@@ -411,25 +411,27 @@ static void setDPIAwareness()
         setProcessDPIAware();
 }
 
-#if JUCE_WIN_PER_MONITOR_DPI_AWARE
- static bool isPerMonitorDPIAwareProcess()
- {
-     static bool dpiAware = []() -> bool
-     {
-         setDPIAwareness();
+static bool isPerMonitorDPIAwareProcess()
+{
+   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+    static bool dpiAware = []() -> bool
+    {
+        setDPIAwareness();
 
-         if (getProcessDPIAwareness == nullptr)
-             return false;
+        if (getProcessDPIAwareness == nullptr)
+            return false;
 
-         DPI_Awareness context;
-         getProcessDPIAwareness (0, &context);
+        DPI_Awareness context;
+        getProcessDPIAwareness (0, &context);
 
-         return context == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
-     }();
+        return context == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
+    }();
 
-     return dpiAware;
- }
-#endif
+    return dpiAware;
+   #else
+    return false;
+   #endif
+}
 
 static bool isPerMonitorDPIAwareWindow (HWND h)
 {
@@ -448,17 +450,19 @@ static bool isPerMonitorDPIAwareWindow (HWND h)
    #endif
 }
 
-#if JUCE_WIN_PER_MONITOR_DPI_AWARE
- static bool isPerMonitorDPIAwareThread()
- {
-     setDPIAwareness();
+static bool isPerMonitorDPIAwareThread()
+{
+   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+    setDPIAwareness();
 
-     if (getThreadDPIAwarenessContext != nullptr && getAwarenessFromDPIAwarenessContext != nullptr)
-         return getAwarenessFromDPIAwarenessContext (getThreadDPIAwarenessContext()) == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
+    if (getThreadDPIAwarenessContext != nullptr && getAwarenessFromDPIAwarenessContext != nullptr)
+        return getAwarenessFromDPIAwarenessContext (getThreadDPIAwarenessContext()) == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
 
-     return isPerMonitorDPIAwareProcess();
- }
-#endif
+    return isPerMonitorDPIAwareProcess();
+   #else
+    return false;
+   #endif
+}
 
 static double getGlobalDPI()
 {
@@ -845,15 +849,32 @@ Image createSnapshotOfNativeWindow (void* nativeWindowHandle)
 {
     auto hwnd = (HWND) nativeWindowHandle;
 
-    auto r = getWindowRect (hwnd);
-    const int w = r.right - r.left;
-    const int h = r.bottom - r.top;
+    auto r = convertPhysicalScreenRectangleToLogical (rectangleFromRECT (getWindowRect (hwnd)), hwnd);
+    const int w = r.getWidth();
+    const int h = r.getHeight();
 
     auto nativeBitmap = new WindowsBitmapImage (Image::RGB, w, h, true);
     Image bitmap (nativeBitmap);
 
     HDC dc = GetDC (hwnd);
-    BitBlt (nativeBitmap->hdc, 0, 0, w, h, dc, 0, 0, SRCCOPY);
+
+    if (isPerMonitorDPIAwareProcess())
+    {
+        auto scale = getScaleFactorForWindow (hwnd);
+        auto prevStretchMode = SetStretchBltMode (nativeBitmap->hdc, HALFTONE);
+        SetBrushOrgEx (nativeBitmap->hdc, 0, 0, NULL);
+
+        StretchBlt (nativeBitmap->hdc, 0, 0, w, h,
+                    dc, 0, 0, roundToInt (w * scale), roundToInt (h * scale),
+                    SRCCOPY);
+
+        SetStretchBltMode (nativeBitmap->hdc, prevStretchMode);
+    }
+    else
+    {
+        BitBlt (nativeBitmap->hdc, 0, 0, w, h, dc, 0, 0, SRCCOPY);
+    }
+
     ReleaseDC (hwnd, dc);
 
     return SoftwareImageType().convert (bitmap);
@@ -2801,7 +2822,7 @@ private:
 
         if (isUp)
         {
-            handleMouseEvent (MouseInputSource::InputSourceType::touch, { -10.0f, -10.0f }, ModifierKeys::currentModifiers.withoutMouseButtons(),
+            handleMouseEvent (MouseInputSource::InputSourceType::touch, MouseInputSource::offscreenMousePos, ModifierKeys::currentModifiers.withoutMouseButtons(),
                               pressure, orientation, time, {}, touchIndex);
 
             if (! isValidPeer (this))
@@ -2914,7 +2935,7 @@ private:
 
         if (isUp)
         {
-            handleMouseEvent (MouseInputSource::InputSourceType::pen, { -10.0f, -10.0f }, ModifierKeys::currentModifiers,
+            handleMouseEvent (MouseInputSource::InputSourceType::pen, MouseInputSource::offscreenMousePos, ModifierKeys::currentModifiers,
                               pressure, MouseInputSource::invalidOrientation, time, penDetails);
 
             if (! isValidPeer (this))
@@ -2984,6 +3005,7 @@ private:
             case VK_NUMLOCK:
             case VK_SCROLL:
             case VK_APPS:
+                used = handleKeyUpOrDown (true);
                 sendModifierKeyChangeIfNeeded();
                 break;
 
@@ -3368,7 +3390,7 @@ private:
         forceDisplayUpdate();
 
         if (fullScreen && ! isMinimised())
-            setWindowPos (hwnd, Desktop::getInstance().getDisplays().findDisplayForRect (component.getScreenBounds()).userArea,
+            setWindowPos (hwnd, ScalingHelpers::scaledScreenPosToUnscaled (component, Desktop::getInstance().getDisplays().findDisplayForRect (component.getScreenBounds()).userArea),
                           SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
     }
 
@@ -4050,6 +4072,20 @@ JUCE_API bool shouldScaleGLWindow (void* hwnd)
 {
     return isPerMonitorDPIAwareWindow ((HWND) hwnd);
 }
+
+#if JUCE_WIN_PER_MONITOR_DPI_AWARE
+ JUCE_API void setProcessDPIAwarenessIfNecessary (void* hwnd)
+ {
+     DPI_Awareness context;
+     getProcessDPIAwareness (0, &context);
+
+     if (isPerMonitorDPIAwareWindow ((HWND) hwnd) && context != DPI_Awareness::DPI_Awareness_Per_Monitor_Aware
+         && setProcessDPIAwareness != nullptr)
+     {
+         setProcessDPIAwareness (DPI_Awareness::DPI_Awareness_Per_Monitor_Aware);
+     }
+ }
+#endif
 
 JUCE_IMPLEMENT_SINGLETON (HWNDComponentPeer::WindowClassHolder)
 

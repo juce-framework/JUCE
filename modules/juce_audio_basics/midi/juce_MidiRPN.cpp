@@ -159,6 +159,7 @@ MidiBuffer MidiRPNGenerator::generate (int midiChannel,
     return buffer;
 }
 
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
@@ -166,7 +167,9 @@ MidiBuffer MidiRPNGenerator::generate (int midiChannel,
 class MidiRPNDetectorTests   : public UnitTest
 {
 public:
-    MidiRPNDetectorTests()  : UnitTest ("MidiRPNDetector class", "MIDI/MPE") {}
+    MidiRPNDetectorTests()
+        : UnitTest ("MidiRPNDetector class", UnitTestCategories::midi)
+    {}
 
     void runTest() override
     {
@@ -308,7 +311,9 @@ static MidiRPNDetectorTests MidiRPNDetectorUnitTests;
 class MidiRPNGeneratorTests   : public UnitTest
 {
 public:
-    MidiRPNGeneratorTests()  : UnitTest ("MidiRPNGenerator class", "MIDI/MPE") {}
+    MidiRPNGeneratorTests()
+        : UnitTest ("MidiRPNGenerator class", UnitTestCategories::midi)
+    {}
 
     void runTest() override
     {
@@ -371,6 +376,6 @@ private:
 
 static MidiRPNGeneratorTests MidiRPNGeneratorUnitTests;
 
-#endif // JUCE_UNIT_TESTS
+#endif
 
 } // namespace juce

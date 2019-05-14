@@ -70,42 +70,42 @@
 
 void registerDemos_Two() noexcept
 {
-    REGISTER_DEMO (AnimationAppDemo,          GUI,       false)
-    REGISTER_DEMO (AnimationDemo,             GUI,       false)
-    REGISTER_DEMO (BouncingBallWavetableDemo, GUI,       false)
+    REGISTER_DEMO (AnimationAppDemo,          GUI, false)
+    REGISTER_DEMO (AnimationDemo,             GUI, false)
+    REGISTER_DEMO (BouncingBallWavetableDemo, GUI, false)
    #if JUCE_USE_CAMERA && ! JUCE_LINUX
-    REGISTER_DEMO (CameraDemo,                GUI,       true)
+    REGISTER_DEMO (CameraDemo,                GUI, true)
    #endif
    #if ! JUCE_ANDROID
-    REGISTER_DEMO (CodeEditorDemo,            GUI,       false)
+    REGISTER_DEMO (CodeEditorDemo,            GUI, false)
    #endif
-    REGISTER_DEMO (ComponentDemo,             GUI,       false)
-    REGISTER_DEMO (ComponentTransformsDemo,   GUI,       false)
-    REGISTER_DEMO (DialogsDemo,               GUI,       false)
-    REGISTER_DEMO (FlexBoxDemo,               GUI,       false)
-    REGISTER_DEMO (FontsDemo,                 GUI,       false)
-    REGISTER_DEMO (GraphicsDemo,              GUI,       false)
+    REGISTER_DEMO (ComponentDemo,             GUI, false)
+    REGISTER_DEMO (ComponentTransformsDemo,   GUI, false)
+    REGISTER_DEMO (DialogsDemo,               GUI, false)
+    REGISTER_DEMO (FlexBoxDemo,               GUI, false)
+    REGISTER_DEMO (FontsDemo,                 GUI, false)
+    REGISTER_DEMO (GraphicsDemo,              GUI, false)
    #if JUCE_HAS_CONSTEXPR
-    REGISTER_DEMO (GridDemo,                  GUI,       false)
+    REGISTER_DEMO (GridDemo,                  GUI, false)
    #endif
-    REGISTER_DEMO (ImagesDemo,                GUI,       false)
-    REGISTER_DEMO (KeyMappingsDemo,           GUI,       false)
-    REGISTER_DEMO (LookAndFeelDemo,           GUI,       false)
-    REGISTER_DEMO (MDIDemo,                   GUI,       false)
-    REGISTER_DEMO (MenusDemo,                 GUI,       false)
-    REGISTER_DEMO (MultiTouchDemo,            GUI,       false)
+    REGISTER_DEMO (ImagesDemo,                GUI, false)
+    REGISTER_DEMO (KeyMappingsDemo,           GUI, false)
+    REGISTER_DEMO (LookAndFeelDemo,           GUI, false)
+    REGISTER_DEMO (MDIDemo,                   GUI, false)
+    REGISTER_DEMO (MenusDemo,                 GUI, false)
+    REGISTER_DEMO (MultiTouchDemo,            GUI, false)
    #if JUCE_OPENGL
-    REGISTER_DEMO (OpenGLAppDemo,             GUI,       true)
-    REGISTER_DEMO (OpenGLDemo2D,              GUI,       true)
-    REGISTER_DEMO_WITH_FILENAME (OpenGLDemoClasses::OpenGLDemo, GUI, OpenGLDemo, true)
+    REGISTER_DEMO (OpenGLAppDemo,             GUI, true)
+    REGISTER_DEMO (OpenGLDemo2D,              GUI, true)
+    REGISTER_DEMO (OpenGLDemo,                GUI, true)
    #endif
-    REGISTER_DEMO (PropertiesDemo,            GUI,       false)
+    REGISTER_DEMO (PropertiesDemo,            GUI, false)
    #if ! JUCE_LINUX
-    REGISTER_DEMO (VideoDemo,                 GUI,       true)
+    REGISTER_DEMO (VideoDemo,                 GUI, true)
    #endif
-    REGISTER_DEMO (WebBrowserDemo,            GUI,       true)
-    REGISTER_DEMO (WidgetsDemo,               GUI,       false)
-    REGISTER_DEMO (WindowsDemo,               GUI,       false)
+    REGISTER_DEMO (WebBrowserDemo,            GUI, true)
+    REGISTER_DEMO (WidgetsDemo,               GUI, false)
+    REGISTER_DEMO (WindowsDemo,               GUI, false)
 }
 
 CodeEditorComponent::ColourScheme getDarkColourScheme()

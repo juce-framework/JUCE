@@ -298,13 +298,15 @@ bool GZIPDecompressorInputStream::setPosition (int64 newPos)
     return true;
 }
 
+
+//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
 struct GZIPDecompressorInputStreamTests   : public UnitTest
 {
     GZIPDecompressorInputStreamTests()
-        : UnitTest ("GZIPDecompressorInputStreamTests", "Streams")
+        : UnitTest ("GZIPDecompressorInputStreamTests", UnitTestCategories::streams)
     {}
 
     void runTest() override

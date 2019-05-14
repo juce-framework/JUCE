@@ -57,8 +57,8 @@ public:
                        int minValue, int maxValue,
                        int defaultValue,
                        const String& label = String(),
-                       std::function<String (int value, int maximumStringLength)> stringFromInt = nullptr,
-                       std::function<int (const String& text)> intFromString = nullptr);
+                       std::function<String(int value, int maximumStringLength)> stringFromInt = nullptr,
+                       std::function<int(const String& text)> intFromString = nullptr);
 
     /** Destructor. */
     ~AudioParameterInt() override;
@@ -98,8 +98,8 @@ private:
     const NormalisableRange<float> range;
     float value;
     const float defaultValue;
-    std::function<String (int, int)> stringFromIntFunction;
-    std::function<int (const String&)> intFromStringFunction;
+    std::function<String(int, int)> stringFromIntFunction;
+    std::function<int(const String&)> intFromStringFunction;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioParameterInt)
 };

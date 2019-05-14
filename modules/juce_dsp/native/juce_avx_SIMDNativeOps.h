@@ -97,6 +97,8 @@ struct SIMDNativeOps<float>
     static forcedinline __m256 JUCE_VECTOR_CALLTYPE swapevenodd (__m256 a) noexcept                      { return _mm256_shuffle_ps (a, a, _MM_SHUFFLE (2, 3, 0, 1)); }
     static forcedinline float  JUCE_VECTOR_CALLTYPE get (__m256 v, size_t i) noexcept                    { return SIMDFallbackOps<float, __m256>::get (v, i); }
     static forcedinline __m256 JUCE_VECTOR_CALLTYPE set (__m256 v, size_t i, float s) noexcept           { return SIMDFallbackOps<float, __m256>::set (v, i, s); }
+    static forcedinline __m256 JUCE_VECTOR_CALLTYPE truncate (__m256 a) noexcept                         { return _mm256_cvtepi32_ps (_mm256_cvttps_epi32 (a)); }
+
     static forcedinline __m256 JUCE_VECTOR_CALLTYPE oddevensum (__m256 a) noexcept
     {
         a = _mm256_add_ps (_mm256_shuffle_ps (a, a, _MM_SHUFFLE (1, 0, 3, 2)), a);
@@ -168,7 +170,7 @@ struct SIMDNativeOps<double>
     static forcedinline __m256d JUCE_VECTOR_CALLTYPE oddevensum (__m256d a) noexcept                        { return _mm256_add_pd (_mm256_permute2f128_pd (a, a, 1), a); }
     static forcedinline double  JUCE_VECTOR_CALLTYPE get (__m256d v, size_t i) noexcept                     { return SIMDFallbackOps<double, __m256d>::get (v, i); }
     static forcedinline __m256d JUCE_VECTOR_CALLTYPE set (__m256d v, size_t i, double s) noexcept           { return SIMDFallbackOps<double, __m256d>::set (v, i, s); }
-
+    static forcedinline __m256d JUCE_VECTOR_CALLTYPE truncate (__m256d a) noexcept                          { return _mm256_cvtepi32_pd (_mm256_cvttpd_epi32 (a)); }
 
     //==============================================================================
     static forcedinline __m256d JUCE_VECTOR_CALLTYPE cmplxmul (__m256d a, __m256d b) noexcept
@@ -225,6 +227,7 @@ struct SIMDNativeOps<int8_t>
     static forcedinline __m256i JUCE_VECTOR_CALLTYPE notEqual (__m256i a, __m256i b) noexcept               { return bit_not (equal (a, b)); }
     static forcedinline int8_t  JUCE_VECTOR_CALLTYPE get (__m256i v, size_t i) noexcept                     { return SIMDFallbackOps<int8_t, __m256i>::get (v, i); }
     static forcedinline __m256i JUCE_VECTOR_CALLTYPE set (__m256i v, size_t i, int8_t s) noexcept           { return SIMDFallbackOps<int8_t, __m256i>::set (v, i, s); }
+    static forcedinline __m256i JUCE_VECTOR_CALLTYPE truncate (__m256i a) noexcept                          { return a; }
 
     //==============================================================================
     static forcedinline int8_t JUCE_VECTOR_CALLTYPE sum (__m256i a) noexcept
@@ -300,6 +303,7 @@ struct SIMDNativeOps<uint8_t>
     static forcedinline __m256i JUCE_VECTOR_CALLTYPE notEqual (__m256i a, __m256i b) noexcept                { return bit_not (equal (a, b)); }
     static forcedinline uint8_t JUCE_VECTOR_CALLTYPE get (__m256i v, size_t i) noexcept                      { return SIMDFallbackOps<uint8_t, __m256i>::get (v, i); }
     static forcedinline __m256i JUCE_VECTOR_CALLTYPE set (__m256i v, size_t i, uint8_t s) noexcept           { return SIMDFallbackOps<uint8_t, __m256i>::set (v, i, s); }
+    static forcedinline __m256i JUCE_VECTOR_CALLTYPE truncate (__m256i a) noexcept                           { return a; }
 
     //==============================================================================
     static forcedinline uint8_t JUCE_VECTOR_CALLTYPE sum (__m256i a) noexcept
@@ -375,6 +379,7 @@ struct SIMDNativeOps<int16_t>
     static forcedinline bool    JUCE_VECTOR_CALLTYPE allEqual (__m256i a, __m256i b) noexcept                { return (_mm256_movemask_epi8 (equal (a, b)) == -1); }
     static forcedinline int16_t JUCE_VECTOR_CALLTYPE get (__m256i v, size_t i) noexcept                      { return SIMDFallbackOps<int16_t, __m256i>::get (v, i); }
     static forcedinline __m256i JUCE_VECTOR_CALLTYPE set (__m256i v, size_t i, int16_t s) noexcept           { return SIMDFallbackOps<int16_t, __m256i>::set (v, i, s); }
+    static forcedinline __m256i JUCE_VECTOR_CALLTYPE truncate (__m256i a) noexcept                           { return a; }
 
     //==============================================================================
     static forcedinline int16_t JUCE_VECTOR_CALLTYPE sum (__m256i a) noexcept
@@ -432,6 +437,7 @@ struct SIMDNativeOps<uint16_t>
     static forcedinline bool     JUCE_VECTOR_CALLTYPE allEqual (__m256i a, __m256i b) noexcept                { return (_mm256_movemask_epi8 (equal (a, b)) == -1); }
     static forcedinline uint16_t JUCE_VECTOR_CALLTYPE get (__m256i v, size_t i) noexcept                      { return SIMDFallbackOps<uint16_t, __m256i>::get (v, i); }
     static forcedinline __m256i  JUCE_VECTOR_CALLTYPE set (__m256i v, size_t i, uint16_t s) noexcept          { return SIMDFallbackOps<uint16_t, __m256i>::set (v, i, s); }
+    static forcedinline __m256i JUCE_VECTOR_CALLTYPE truncate (__m256i a) noexcept                            { return a; }
 
     //==============================================================================
     static forcedinline uint16_t JUCE_VECTOR_CALLTYPE sum (__m256i a) noexcept
@@ -488,6 +494,7 @@ struct SIMDNativeOps<int32_t>
     static forcedinline bool    JUCE_VECTOR_CALLTYPE allEqual (__m256i a, __m256i b) noexcept                { return (_mm256_movemask_epi8 (equal (a, b)) == -1); }
     static forcedinline int32_t JUCE_VECTOR_CALLTYPE get (__m256i v, size_t i) noexcept                      { return SIMDFallbackOps<int32_t, __m256i>::get (v, i); }
     static forcedinline __m256i JUCE_VECTOR_CALLTYPE set (__m256i v, size_t i, int32_t s) noexcept           { return SIMDFallbackOps<int32_t, __m256i>::set (v, i, s); }
+    static forcedinline __m256i JUCE_VECTOR_CALLTYPE truncate (__m256i a) noexcept                           { return a; }
 
     //==============================================================================
     static forcedinline int32_t JUCE_VECTOR_CALLTYPE sum (__m256i a) noexcept
@@ -543,6 +550,7 @@ struct SIMDNativeOps<uint32_t>
     static forcedinline bool     JUCE_VECTOR_CALLTYPE allEqual (__m256i a, __m256i b) noexcept                { return (_mm256_movemask_epi8 (equal (a, b)) == -1); }
     static forcedinline uint32_t JUCE_VECTOR_CALLTYPE get (__m256i v, size_t i) noexcept                      { return SIMDFallbackOps<uint32_t, __m256i>::get (v, i); }
     static forcedinline __m256i  JUCE_VECTOR_CALLTYPE set (__m256i v, size_t i, uint32_t s) noexcept          { return SIMDFallbackOps<uint32_t, __m256i>::set (v, i, s); }
+    static forcedinline __m256i JUCE_VECTOR_CALLTYPE truncate (__m256i a) noexcept                            { return a; }
 
     //==============================================================================
     static forcedinline uint32_t JUCE_VECTOR_CALLTYPE sum (__m256i a) noexcept
@@ -597,6 +605,7 @@ struct SIMDNativeOps<int64_t>
     static forcedinline __m256i JUCE_VECTOR_CALLTYPE set (__m256i v, size_t i, int64_t s) noexcept           { return SIMDFallbackOps<int64_t, __m256i>::set (v, i, s); }
     static forcedinline int64_t JUCE_VECTOR_CALLTYPE sum (__m256i a) noexcept                                { return SIMDFallbackOps<int64_t, __m256i>::sum (a); }
     static forcedinline __m256i JUCE_VECTOR_CALLTYPE mul (__m256i a, __m256i b) noexcept                     { return SIMDFallbackOps<int64_t, __m256i>::mul (a, b); }
+    static forcedinline __m256i JUCE_VECTOR_CALLTYPE truncate (__m256i a) noexcept                           { return a; }
 };
 
 //==============================================================================
@@ -637,6 +646,7 @@ struct SIMDNativeOps<uint64_t>
     static forcedinline __m256i  JUCE_VECTOR_CALLTYPE set (__m256i v, size_t i, uint64_t s) noexcept          { return SIMDFallbackOps<uint64_t, __m256i>::set (v, i, s); }
     static forcedinline uint64_t JUCE_VECTOR_CALLTYPE sum (__m256i a) noexcept                                { return SIMDFallbackOps<uint64_t, __m256i>::sum (a); }
     static forcedinline __m256i  JUCE_VECTOR_CALLTYPE mul (__m256i a, __m256i b) noexcept                     { return SIMDFallbackOps<uint64_t, __m256i>::mul (a, b); }
+    static forcedinline __m256i JUCE_VECTOR_CALLTYPE truncate (__m256i a) noexcept                            { return a; }
 };
 
 #endif

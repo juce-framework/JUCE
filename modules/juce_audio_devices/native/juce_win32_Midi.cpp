@@ -342,8 +342,14 @@ private:
 
             for (int i = 0; i < deviceCaps.size(); ++i)
             {
-                deviceNames.add ({ deviceCaps[i].szPname, (size_t) numElementsInArray (deviceCaps[i].szPname) });
-                deviceIDs.add (getInterfaceIDForDevice ((UINT) i));
+                deviceNames.add (deviceCaps[i].szPname);
+
+                auto identifier = getInterfaceIDForDevice ((UINT) i);
+
+                if (identifier.isNotEmpty())
+                    deviceIDs.add (identifier);
+                else
+                    deviceIDs.add (deviceNames[i]);
             }
 
             deviceNames.appendNumbersToDuplicates (false, false, CharPointer_UTF8 ("-"), CharPointer_UTF8 (""));
@@ -1819,20 +1825,19 @@ MidiInput* MidiInput::openDevice (const String& deviceIdentifier, MidiInputCallb
     if (deviceIdentifier.isEmpty() || callback == nullptr)
         return nullptr;
 
-    MidiInput input ({}, {});
+    std::unique_ptr<MidiInput> in (new MidiInput ({}, deviceIdentifier));
     std::unique_ptr<MidiServiceType::InputWrapper> wrapper;
 
     try
     {
-        wrapper.reset (MidiService::getService().createInputWrapper (input, deviceIdentifier, *callback));
+        wrapper.reset (MidiService::getService().createInputWrapper (*in, deviceIdentifier, *callback));
     }
     catch (std::runtime_error&)
     {
         return nullptr;
     }
 
-    std::unique_ptr<MidiInput> in;
-    in.reset (new MidiInput (wrapper->getDeviceName(), deviceIdentifier));
+    in->setName (wrapper->getDeviceName());
     in->internal = wrapper.release();
 
     return in.release();

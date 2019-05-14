@@ -31,7 +31,7 @@
 
  dependencies:     juce_core, juce_data_structures, juce_events, juce_graphics,
                    juce_gui_basics, juce_gui_extra
- exporters:        xcode_mac, vs2017, linux_make, androidstudio, xcode_iphone
+ exporters:        xcode_mac, vs2019, linux_make, androidstudio, xcode_iphone
 
  moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
 
@@ -314,7 +314,7 @@ private:
         std::unique_ptr<XmlElement> openness;
 
         if (rootItem.get() != nullptr)
-            openness.reset (rootItem->getOpennessState());
+            openness = rootItem->getOpennessState();
 
         createNewRootNode();
 
@@ -351,7 +351,7 @@ private:
         parsedXml.reset();
 
         XmlDocument doc (codeDocument.getAllContent());
-        parsedXml.reset (doc.getDocumentElement());
+        parsedXml = doc.getDocumentElement();
 
         if (parsedXml.get() == nullptr)
         {

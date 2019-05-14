@@ -96,9 +96,9 @@ public:
     //==============================================================================
     /** Asynchronously invokes a function or C++11 lambda on the message thread. */
     template <typename FunctionType>
-    static void callAsync (FunctionType functionToCall)
+    static void callAsync (FunctionType&& functionToCall)
     {
-        new AsyncCallInvoker<FunctionType> (functionToCall);
+        new AsyncCallInvoker<FunctionType> (std::forward<FunctionType> (functionToCall));
     }
 
     /** Calls a function using the message-thread.
@@ -201,7 +201,7 @@ public:
     /** A lock you can use to lock the message manager. You can use this class with
         the RAII-based ScopedLock classes.
     */
-    class Lock
+    class JUCE_API  Lock
     {
     public:
         /**
@@ -343,8 +343,8 @@ private:
     template <typename FunctionType>
     struct AsyncCallInvoker  : public MessageBase
     {
-        AsyncCallInvoker (FunctionType f) : callback (f)  { post(); }
-        void messageCallback() override                   { callback(); }
+        AsyncCallInvoker (FunctionType&& f) : callback (std::forward<FunctionType> (f)) { post(); }
+        void messageCallback() override                                                 { callback(); }
         FunctionType callback;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AsyncCallInvoker)

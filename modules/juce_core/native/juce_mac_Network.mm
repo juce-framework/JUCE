@@ -110,7 +110,7 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailA
 
 //==============================================================================
 // Unfortunately, we need to have this ugly ifdef here as long as some older OS X versions do not support NSURLSession
-#if JUCE_IOS || (defined (__MAC_OS_X_VERSION_MIN_REQUIRED) && defined (__MAC_10_10) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_10)
+#if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_10) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_10)
 
 //==============================================================================
 class URLConnectionState   : private Thread
@@ -331,8 +331,8 @@ public:
     NSMutableData* data = nil;
     NSDictionary* headers = nil;
     int statusCode = 0;
-    std::atomic<bool> initialised { false };
-    bool hasFailed = false, hasFinished = false, isBeingDeleted = false;
+    std::atomic<bool> initialised { false }, hasFailed { false }, hasFinished { false };
+    bool isBeingDeleted = false;
     const int numRedirectsToFollow;
     int numRedirects = 0;
     int64 latestTotalBytes = 0;
@@ -692,7 +692,7 @@ public:
         DelegateClass::setState (delegate, this);
     }
 
-    ~URLConnectionState()
+    ~URLConnectionState() override
     {
         stop();
 
@@ -965,10 +965,13 @@ public:
             createConnection();
         }
 
+        if (connection == nullptr)
+            return false;
+
         if (! connection->start (owner, webInputListener))
         {
             // Workaround for deployment targets below 10.10 where HTTPS POST requests with keep-alive fail with the NSURLErrorNetworkConnectionLost error code.
-           #if ! (JUCE_IOS || (defined (__MAC_OS_X_VERSION_MIN_REQUIRED) && defined (__MAC_10_10) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_10))
+           #if ! (JUCE_IOS || (defined (MAC_OS_X_VERSION_10_10) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_10))
             if (numRetries == 0 && connection->nsUrlErrorCode == NSURLErrorNetworkConnectionLost)
             {
                 connection.reset();
@@ -980,7 +983,7 @@ public:
             return false;
         }
 
-        if (connection != nullptr && connection->headers != nil)
+        if (connection->headers != nil)
         {
             statusCode = connection->statusCode;
 

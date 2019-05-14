@@ -40,7 +40,7 @@ class JUCE_API  AudioUnitPluginFormat   : public AudioPluginFormat
 public:
     //==============================================================================
     AudioUnitPluginFormat();
-    ~AudioUnitPluginFormat();
+    ~AudioUnitPluginFormat() override;
 
     //==============================================================================
     String getName() const override                { return "AudioUnit"; }
@@ -68,7 +68,7 @@ private:
 #endif
 
 //==============================================================================
-#if MAC_OS_X_VERSION_MAX_ALLOWED < 101200
+#if (! defined (MAC_OS_X_VERSION_10_12)) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_12)
 enum
 {
     /** Custom AudioUnit property used to indicate MPE support */

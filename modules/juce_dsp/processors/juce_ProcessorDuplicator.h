@@ -89,8 +89,8 @@ private:
 
         size_t channel;
 
-        typename ProcessContext::AudioBlockType getInputBlock()  const noexcept       { return ProcessContext::getInputBlock().getSingleChannelBlock (channel); }
-        typename ProcessContext::AudioBlockType getOutputBlock() const noexcept       { return ProcessContext::getOutputBlock().getSingleChannelBlock (channel); }
+        typename ProcessContext::ConstAudioBlockType getInputBlock()  const noexcept       { return ProcessContext::getInputBlock() .getSingleChannelBlock (channel); }
+        typename ProcessContext::AudioBlockType      getOutputBlock() const noexcept       { return ProcessContext::getOutputBlock().getSingleChannelBlock (channel); }
     };
 
     juce::OwnedArray<MonoProcessorType> processors;

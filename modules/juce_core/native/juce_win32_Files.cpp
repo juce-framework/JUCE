@@ -544,7 +544,12 @@ uint64 File::getFileIdentifier() const
 {
     uint64 result = 0;
 
-    auto h = CreateFile (getFullPathName().toWideCharPointer(),
+    String path = getFullPathName();
+
+    if (isRoot())
+        path += "\\";
+
+    auto h = CreateFile (path.toWideCharPointer(),
                          GENERIC_READ, FILE_SHARE_READ, nullptr,
                          OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
 

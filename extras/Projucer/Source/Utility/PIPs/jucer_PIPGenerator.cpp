@@ -120,7 +120,7 @@ PIPGenerator::PIPGenerator (const File& pip, const File& output, const File& juc
                         && pip.getParentDirectory().getParentDirectory().getFileName() == "PIPs");
 
     outputDirectory = outputDirectory.getChildFile (metadata[Ids::name].toString());
-    useLocalCopy = metadata[Ids::useLocalCopy].toString().isNotEmpty() || isClipboard;
+    useLocalCopy = metadata[Ids::useLocalCopy].toString().trim().getIntValue() == 1 || isClipboard;
 
     if (userModulesPath != File())
     {
@@ -146,10 +146,9 @@ Result PIPGenerator::createJucerFile()
 
     auto outputFile = outputDirectory.getChildFile (metadata[Ids::name].toString() + ".jucer");
 
-    std::unique_ptr<XmlElement> xml (root.createXml());
-
-    if (xml->writeToFile (outputFile, {}))
-        return Result::ok();
+    if (auto xml = root.createXml())
+        if (xml->writeTo (outputFile, {}))
+            return Result::ok();
 
     return Result::fail ("Failed to create .jucer file in " + outputDirectory.getFullPathName());
 }
@@ -355,7 +354,7 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
 
     auto defines = metadata[Ids::defines].toString();
 
-    if (useLocalCopy && isJUCEExample (pipFile))
+    if (isJUCEExample (pipFile))
     {
         auto examplesDir = getExamplesDirectory();
 

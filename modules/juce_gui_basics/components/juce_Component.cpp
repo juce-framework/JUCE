@@ -1288,6 +1288,21 @@ AffineTransform Component::getTransform() const
     return affineTransform != nullptr ? *affineTransform : AffineTransform();
 }
 
+float Component::getApproximateScaleFactorForComponent (Component* targetComponent)
+{
+    AffineTransform transform;
+
+    for (auto* target = targetComponent; target != nullptr; target = target->getParentComponent())
+    {
+        transform = transform.followedBy (target->getTransform());
+
+        if (target->isOnDesktop())
+            transform = transform.scaled (target->getDesktopScaleFactor());
+    }
+
+    return (transform.getScaleFactor() / Desktop::getInstance().getGlobalScaleFactor());
+}
+
 //==============================================================================
 bool Component::hitTest (int x, int y)
 {
@@ -2902,7 +2917,7 @@ bool Component::isMouseOver (bool includeChildren) const
         auto* c = ms.getComponentUnderMouse();
 
         if (c == this || (includeChildren && isParentOf (c)))
-            if (ms.isDragging() || ! ms.isTouch())
+            if (ms.isDragging() || ! (ms.isTouch() || ms.isPen()))
                 if (c->reallyContains (c->getLocalPoint (nullptr, ms.getScreenPosition()).roundToInt(), false))
                     return true;
     }

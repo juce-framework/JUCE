@@ -52,6 +52,8 @@ public:
         AbletonLive6,               /**< Represents Ableton Live 6. */
         AbletonLive7,               /**< Represents Ableton Live 7. */
         AbletonLive8,               /**< Represents Ableton Live 8. */
+        AbletonLive9,               /**< Represents Ableton Live 9. */
+        AbletonLive10,              /**< Represents Ableton Live 10. */
         AbletonLiveGeneric,         /**< Represents Ableton Live. */
         AdobeAudition,              /**< Represents Adobe Audition. */
         AdobePremierePro,           /**< Represents Adobe Premiere Pro. */
@@ -109,7 +111,7 @@ public:
 
     //==============================================================================
     /** Returns true if the host is any version of Ableton Live. */
-    bool isAbletonLive() const noexcept       { return type == AbletonLive6 || type == AbletonLive7 || type == AbletonLive8 || type == AbletonLiveGeneric; }
+    bool isAbletonLive() const noexcept       { return type == AbletonLive6 || type == AbletonLive7 || type == AbletonLive8 || type == AbletonLive9 || type == AbletonLive10 || type == AbletonLiveGeneric; }
     /** Returns true if the host is Adobe Audition. */
     bool isAdobeAudition() const noexcept     { return type == AdobeAudition; }
     /** Returns true if the host is Ardour. */
@@ -188,6 +190,8 @@ public:
             case AbletonLive6:             return "Ableton Live 6";
             case AbletonLive7:             return "Ableton Live 7";
             case AbletonLive8:             return "Ableton Live 8";
+            case AbletonLive9:             return "Ableton Live 9";
+            case AbletonLive10:            return "Ableton Live 10";
             case AbletonLiveGeneric:       return "Ableton Live";
             case AdobeAudition:            return "Adobe Audition";
             case AdobePremierePro:         return "Adobe Premiere";
@@ -296,6 +300,8 @@ private:
         if (hostPath.containsIgnoreCase       ("Live 6."))           return AbletonLive6;
         if (hostPath.containsIgnoreCase       ("Live 7."))           return AbletonLive7;
         if (hostPath.containsIgnoreCase       ("Live 8."))           return AbletonLive8;
+        if (hostPath.containsIgnoreCase       ("Live 9."))           return AbletonLive9;
+        if (hostPath.containsIgnoreCase       ("Live 10."))          return AbletonLive10;
         if (hostFilename.containsIgnoreCase   ("Live"))              return AbletonLiveGeneric;
         if (hostFilename.containsIgnoreCase   ("Adobe Premiere"))    return AdobePremierePro;
         if (hostFilename.containsIgnoreCase   ("GarageBand"))        return AppleGarageBand;
@@ -336,6 +342,8 @@ private:
         if (hostFilename.containsIgnoreCase   ("Live 6."))           return AbletonLive6;
         if (hostFilename.containsIgnoreCase   ("Live 7."))           return AbletonLive7;
         if (hostFilename.containsIgnoreCase   ("Live 8."))           return AbletonLive8;
+        if (hostFilename.containsIgnoreCase   ("Live 9."))           return AbletonLive9;
+        if (hostFilename.containsIgnoreCase   ("Live 10."))          return AbletonLive10;
         if (hostFilename.containsIgnoreCase   ("Live "))             return AbletonLiveGeneric;
         if (hostFilename.containsIgnoreCase   ("Audition"))          return AdobeAudition;
         if (hostFilename.containsIgnoreCase   ("Adobe Premiere"))    return AdobePremierePro;

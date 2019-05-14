@@ -30,21 +30,6 @@ namespace juce
 namespace CoreMidiHelpers
 {
     //==============================================================================
-    struct ScopedCFString
-    {
-        ScopedCFString() = default;
-        ScopedCFString (String s) : cfString (s.toCFString())  {}
-
-        ~ScopedCFString() noexcept
-        {
-            if (cfString != nullptr)
-                CFRelease (cfString);
-        }
-
-        CFStringRef cfString = {};
-    };
-
-    //==============================================================================
     static bool checkError (OSStatus err, int lineNum)
     {
         if (err == noErr)
@@ -195,9 +180,9 @@ namespace CoreMidiHelpers
         uniqueID = JUCE_STRINGIFY (JucePlugin_CFBundleIdentifier);
        #else
         auto appBundle = File::getSpecialLocation (File::currentApplicationFile);
+        ScopedCFString appBundlePath (appBundle.getFullPathName());
 
-        if (auto bundleURL = CFURLCreateWithFileSystemPath (kCFAllocatorDefault, appBundle.getFullPathName().toCFString(),
-                                                            kCFURLPOSIXPathStyle, true))
+        if (auto bundleURL = CFURLCreateWithFileSystemPath (kCFAllocatorDefault, appBundlePath.cfString, kCFURLPOSIXPathStyle, true))
         {
             auto bundleRef = CFBundleCreate (kCFAllocatorDefault, bundleURL);
             CFRelease (bundleURL);
@@ -212,9 +197,10 @@ namespace CoreMidiHelpers
         }
        #endif
 
-        if (uniqueID.isNotEmpty())
-            uniqueID += "." + deviceName + (isInput ? ".input" : ".output");
+        if (uniqueID.isEmpty())
+            uniqueID = String (Random::getSystemRandom().nextInt (1024));
 
+        uniqueID += "." + deviceName + (isInput ? ".input" : ".output");
         return uniqueID.hashCode();
     }
 
@@ -259,7 +245,7 @@ namespace CoreMidiHelpers
 
             enableSimulatorMidiSession();
 
-            CoreMidiHelpers::ScopedCFString name (getGlobalMidiClientName());
+            ScopedCFString name (getGlobalMidiClientName());
             CHECK_ERROR (MIDIClientCreate (name.cfString, &globalSystemChangeCallback, nullptr, &globalMidiClient));
         }
 
@@ -420,7 +406,9 @@ MidiInput* MidiInput::openDevice (const String& deviceIdentifier, MidiInputCallb
     {
         for (auto& endpoint : getEndpoints (true))
         {
-            if (deviceIdentifier == getConnectedEndpointInfo (endpoint).identifier)
+            auto endpointInfo = getConnectedEndpointInfo (endpoint);
+
+            if (deviceIdentifier == endpointInfo.identifier)
             {
                 ScopedCFString cfName;
 
@@ -435,7 +423,7 @@ MidiInput* MidiInput::openDevice (const String& deviceIdentifier, MidiInputCallb
                         {
                             mpc->portAndEndpoint.reset (new MidiPortAndEndpoint (port, endpoint));
 
-                            std::unique_ptr<MidiInput> midiInput (new MidiInput (String::fromCFString (cfName.cfString), deviceIdentifier));
+                            std::unique_ptr<MidiInput> midiInput (new MidiInput (endpointInfo.name, endpointInfo.identifier));
 
                             mpc->input = midiInput.get();
                             midiInput->internal = mpc.get();
@@ -471,7 +459,19 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
         MIDIEndpointRef endpoint;
         ScopedCFString name (deviceName);
 
-        if (CHECK_ERROR (MIDIDestinationCreate (client, name.cfString, midiInputProc, mpc.get(), &endpoint)))
+        auto err = MIDIDestinationCreate (client, name.cfString, midiInputProc, mpc.get(), &endpoint);
+
+       #if JUCE_IOS
+        if (err == kMIDINotPermitted)
+        {
+            // If you've hit this assertion then you probably haven't enabled the "Audio Background Capability"
+            // setting in the iOS exporter for your app - this is required if you want to create a MIDI device!
+            jassertfalse;
+            return nullptr;
+        }
+       #endif
+
+        if (CHECK_ERROR (err))
         {
             auto deviceIdentifier = createUniqueIDForMidiPort (deviceName, true);
 
@@ -559,7 +559,9 @@ MidiOutput* MidiOutput::openDevice (const String& deviceIdentifier)
     {
         for (auto& endpoint : getEndpoints (false))
         {
-            if (deviceIdentifier == getConnectedEndpointInfo (endpoint).identifier)
+            auto endpointInfo = getConnectedEndpointInfo (endpoint);
+
+            if (deviceIdentifier == endpointInfo.identifier)
             {
                 ScopedCFString cfName;
 
@@ -569,7 +571,7 @@ MidiOutput* MidiOutput::openDevice (const String& deviceIdentifier)
 
                     if (CHECK_ERROR (MIDIOutputPortCreate (client, cfName.cfString, &port)))
                     {
-                        std::unique_ptr<MidiOutput> midiOutput (new MidiOutput (String::fromCFString (cfName.cfString), deviceIdentifier));
+                        std::unique_ptr<MidiOutput> midiOutput (new MidiOutput (endpointInfo.name, endpointInfo.identifier));
                         midiOutput->internal = new MidiPortAndEndpoint (port, endpoint);
 
                         return midiOutput.release();
@@ -592,7 +594,19 @@ MidiOutput* MidiOutput::createNewDevice (const String& deviceName)
 
         ScopedCFString name (deviceName);
 
-        if (CHECK_ERROR (MIDISourceCreate (client, name.cfString, &endpoint)))
+        auto err = MIDISourceCreate (client, name.cfString, &endpoint);
+
+       #if JUCE_IOS
+        if (err == kMIDINotPermitted)
+        {
+            // If you've hit this assertion then you probably haven't enabled the "Audio Background Capability"
+            // setting in the iOS exporter for your app - this is required if you want to create a MIDI device!
+            jassertfalse;
+            return nullptr;
+        }
+       #endif
+
+        if (CHECK_ERROR (err))
         {
             auto deviceIdentifier = createUniqueIDForMidiPort (deviceName, true);
 

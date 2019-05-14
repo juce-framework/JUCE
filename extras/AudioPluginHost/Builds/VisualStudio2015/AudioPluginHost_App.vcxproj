@@ -74,6 +74,7 @@
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/w44265 /w45038 /w44062 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
@@ -115,6 +116,7 @@
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/w44265 /w45038 /w44062 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
@@ -597,10 +599,25 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\scanning\juce_PluginListComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioProcessorParameters.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioParameterBool.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioParameterChoice.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioParameterFloat.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioParameterInt.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioProcessorParameterWithID.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioProcessorValueTreeState.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_RangedAudioParameter.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\juce_audio_processors.cpp">
@@ -1518,9 +1535,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GridItem.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GridUnitTests.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GroupComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -2291,6 +2305,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\time\juce_RelativeTime.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\time\juce_Time.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\unit_tests\juce_UnitTest.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\unit_tests\juce_UnitTestCategories.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\xml\juce_XmlDocument.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\xml\juce_XmlElement.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\zip\zlib\crc32.h"/>

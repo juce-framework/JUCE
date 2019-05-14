@@ -32,18 +32,6 @@ namespace juce
     extern CheckEventBlockedByModalComps isEventBlockedByModalComps;
 }
 
-//==============================================================================
-#if ! (defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7)
-
-@interface NSEvent (JuceDeviceDelta)
- - (CGFloat) scrollingDeltaX;
- - (CGFloat) scrollingDeltaY;
- - (BOOL) hasPreciseScrollingDeltas;
- - (BOOL) isDirectionInvertedFromDevice;
-@end
-
-#endif
-
 namespace juce
 {
 
@@ -114,15 +102,11 @@ public:
                                                            defer: YES];
             setOwner (window, this);
             [window orderOut: nil];
-           #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
             [window setDelegate: (id<NSWindowDelegate>) window];
-           #else
-            [window setDelegate: window];
-           #endif
 
             [window setOpaque: component.isOpaque()];
 
-           #if defined (MAC_OS_X_VERSION_10_14)
+          #if defined (MAC_OS_X_VERSION_10_14) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_14)
             if (! [window isOpaque])
                 [window setBackgroundColor: [NSColor clearColor]];
 
@@ -148,13 +132,11 @@ public:
             [window setExcludedFromWindowsMenu: (windowStyleFlags & windowIsTemporary) != 0];
             [window setIgnoresMouseEvents: (windowStyleFlags & windowIgnoresMouseClicks) != 0];
 
-           #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
             if ((windowStyleFlags & (windowHasMaximiseButton | windowHasTitleBar)) == (windowHasMaximiseButton | windowHasTitleBar))
                 [window setCollectionBehavior: NSWindowCollectionBehaviorFullScreenPrimary];
 
             if ([window respondsToSelector: @selector (setRestorable:)])
                 [window setRestorable: NO];
-           #endif
 
            #if defined (MAC_OS_X_VERSION_10_13) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_13)
             if ([window respondsToSelector: @selector (setTabbingMode:)])
@@ -191,10 +173,8 @@ public:
 
         getNativeRealtimeModifiers = []
         {
-           #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
             if ([NSEvent respondsToSelector: @selector (modifierFlags)])
                 NSViewComponentPeer::updateModifiers ([NSEvent modifierFlags]);
-           #endif
 
             return ModifierKeys::currentModifiers;
         };
@@ -315,12 +295,7 @@ public:
         if (global && viewWindow != nil)
         {
             r = [[view superview] convertRect: r toView: nil];
-
-           #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7
             r = [viewWindow convertRectToScreen: r];
-           #else
-            r.origin = [viewWindow convertBaseToScreen: r.origin];
-           #endif
 
             flipScreenRect (r);
         }
@@ -412,10 +387,8 @@ public:
 
     static bool isWindowAtPoint (NSWindow* w, NSPoint screenPoint)
     {
-       #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
         if ([NSWindow respondsToSelector: @selector (windowNumberAtPoint:belowWindowWithWindowNumber:)])
             return [NSWindow windowNumberAtPoint: screenPoint belowWindowWithWindowNumber: 0] == [w windowNumber];
-       #endif
 
         return true;
     }
@@ -472,9 +445,7 @@ public:
     {
         if (hasNativeTitleBar())
         {
-           #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
             isWindowInKioskMode = (([window styleMask] & NSWindowStyleMaskFullScreen) != 0);
-           #endif
 
             auto screen = getFrameSize().subtractedFrom (component.getParentMonitorArea());
 
@@ -621,18 +592,13 @@ public:
         ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons();
 
         NSPoint windowPos = [ev locationInWindow];
-
-       #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7
         NSPoint screenPos = [[ev window] convertRectToScreen: NSMakeRect (windowPos.x, windowPos.y, 1.0f, 1.0f)].origin;
-       #else
-        NSPoint screenPos = [[ev window] convertBaseToScreen: windowPos];
-       #endif
 
         if (isWindowAtPoint ([ev window], screenPos))
             sendMouseEvent (ev);
         else
             // moved into another window which overlaps this one, so trigger an exit
-            handleMouseEvent (MouseInputSource::InputSourceType::mouse, { -1.0f, -1.0f }, ModifierKeys::currentModifiers,
+            handleMouseEvent (MouseInputSource::InputSourceType::mouse, MouseInputSource::offscreenMousePos, ModifierKeys::currentModifiers,
                               getMousePressure (ev), MouseInputSource::invalidOrientation, getMouseTime (ev));
 
         showArrowCursorIfNeeded();
@@ -671,7 +637,6 @@ public:
 
         @try
         {
-           #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
             if ([ev respondsToSelector: @selector (isDirectionInvertedFromDevice)])
                 wheel.isReversed = [ev isDirectionInvertedFromDevice];
 
@@ -687,9 +652,7 @@ public:
                     wheel.isSmooth = true;
                 }
             }
-            else
-           #endif
-            if ([ev respondsToSelector: @selector (deviceDeltaX)])
+            else if ([ev respondsToSelector: @selector (deviceDeltaX)])
             {
                 wheel.deltaX = checkDeviceDeltaReturnValue ((float) getMsgSendFPRetFn() (ev, @selector (deviceDeltaX)));
                 wheel.deltaY = checkDeviceDeltaReturnValue ((float) getMsgSendFPRetFn() (ev, @selector (deviceDeltaY)));
@@ -710,13 +673,10 @@ public:
 
     void redirectMagnify (NSEvent* ev)
     {
-       #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
         const float invScale = 1.0f - (float) [ev magnification];
 
         if (invScale > 0.0f)
             handleMagnifyGesture (MouseInputSource::InputSourceType::mouse, getMousePos (ev, view), getMouseTime (ev), 1.0f / invScale);
-       #endif
-        ignoreUnused (ev);
     }
 
     void redirectCopy  (NSObject*) { handleKeyPress (KeyPress ('c', ModifierKeys (ModifierKeys::commandModifier), 'c')); }
@@ -850,12 +810,10 @@ public:
             CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
 
         float displayScale = 1.0f;
-
-       #if defined (MAC_OS_X_VERSION_10_7) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
         NSScreen* screen = [[view window] screen];
+
         if ([screen respondsToSelector: @selector (backingScaleFactor)])
             displayScale = (float) screen.backingScaleFactor;
-       #endif
 
        #if USE_COREGRAPHICS_RENDERING && JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
         // This option invokes a separate paint call for each rectangle of the clip region.
@@ -1102,12 +1060,7 @@ public:
 
             auto screenBounds = Desktop::getInstance().getDisplays().getTotalBounds (true);
 
-           #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
             const bool inLiveResize = [window inLiveResize];
-           #else
-            const bool inLiveResize = [window respondsToSelector: @selector (inLiveResize)]
-                                   && [window performSelector: @selector (inLiveResize)];
-           #endif
 
             if (! inLiveResize || isFirstLiveResize)
             {
@@ -1967,9 +1920,7 @@ struct JuceNSWindowClass   : public ObjCClass<NSWindow>
         addMethod (@selector (window:shouldDragDocumentWithEvent:from:withPasteboard:),
                    shouldAllowIconDrag, "B@:@", @encode (NSEvent*), @encode (NSPoint), @encode (NSPasteboard*));
 
-       #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
         addProtocol (@protocol (NSWindowDelegate));
-       #endif
 
         registerClass();
     }
@@ -2042,9 +1993,7 @@ private:
 
     static void windowDidExitFullScreen (id, SEL, NSNotification*)
     {
-       #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
         [NSApp setPresentationOptions: NSApplicationPresentationDefault];
-       #endif
     }
 
     static void zoom (id self, SEL, id sender)
@@ -2150,12 +2099,9 @@ bool MouseInputSource::SourceList::canUseTouch()
 //==============================================================================
 void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, bool allowMenusAndBars)
 {
-   #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
-
     auto* peer = dynamic_cast<NSViewComponentPeer*> (kioskComp->getPeer());
     jassert (peer != nullptr); // (this should have been checked by the caller)
 
-   #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
     if (peer->hasNativeTitleBar()
           && [peer->window respondsToSelector: @selector (toggleFullScreen:)])
     {
@@ -2167,7 +2113,6 @@ void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, boo
         [peer->window performSelector: @selector (toggleFullScreen:) withObject: nil];
     }
     else
-   #endif
     {
         if (shouldBeEnabled)
         {
@@ -2190,23 +2135,6 @@ void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, boo
             [NSApp setPresentationOptions: NSApplicationPresentationDefault];
         }
     }
-   #elif JUCE_SUPPORT_CARBON
-    if (shouldBeEnabled)
-    {
-        SetSystemUIMode (kUIModeAllSuppressed, allowMenusAndBars ? kUIOptionAutoShowMenuBar : 0);
-        kioskComp->setBounds (Desktop::getInstance().getDisplays().getMainDisplay().totalArea);
-    }
-    else
-    {
-        SetSystemUIMode (kUIModeNormal, 0);
-    }
-   #else
-    ignoreUnused (kioskComp, shouldBeEnabled, allowMenusAndBars);
-
-    // If you're targeting OSes earlier than 10.6 and want to use this feature,
-    // you'll need to enable JUCE_SUPPORT_CARBON.
-    jassertfalse;
-   #endif
 }
 
 void Desktop::allowedOrientationsChanged() {}

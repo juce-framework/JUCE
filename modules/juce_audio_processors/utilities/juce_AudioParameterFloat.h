@@ -59,8 +59,8 @@ public:
                          float defaultValue,
                          const String& label = String(),
                          Category category = AudioProcessorParameter::genericParameter,
-                         std::function<String (float value, int maximumStringLength)> stringFromValue = nullptr,
-                         std::function<float (const String& text)> valueFromString = nullptr);
+                         std::function<String(float value, int maximumStringLength)> stringFromValue = nullptr,
+                         std::function<float(const String& text)> valueFromString = nullptr);
 
     /** Creates a AudioParameterFloat with an ID, name, and range.
         On creation, its value is set to the default value.
@@ -108,8 +108,8 @@ private:
 
     float value;
     const float defaultValue;
-    std::function<String (float, int)> stringFromValueFunction;
-    std::function<float (const String&)> valueFromStringFunction;
+    std::function<String(float, int)> stringFromValueFunction;
+    std::function<float(const String&)> valueFromStringFunction;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioParameterFloat)
 };

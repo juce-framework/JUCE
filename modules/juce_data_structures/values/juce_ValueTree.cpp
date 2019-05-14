@@ -992,9 +992,9 @@ void ValueTree::sendPropertyChangeMessage (const Identifier& property)
 }
 
 //==============================================================================
-XmlElement* ValueTree::createXml() const
+std::unique_ptr<XmlElement> ValueTree::createXml() const
 {
-    return object != nullptr ? object->createXml() : nullptr;
+    return std::unique_ptr<XmlElement> (object != nullptr ? object->createXml() : nullptr);
 }
 
 ValueTree ValueTree::fromXml (const XmlElement& xml)
@@ -1015,12 +1015,10 @@ ValueTree ValueTree::fromXml (const XmlElement& xml)
     return {};
 }
 
-String ValueTree::toXmlString() const
+String ValueTree::toXmlString (const XmlElement::TextFormat& format) const
 {
-    std::unique_ptr<XmlElement> xml (createXml());
-
-    if (xml != nullptr)
-        return xml->createDocument ({});
+    if (auto xml = createXml())
+        return xml->toString (format);
 
     return {};
 }
@@ -1088,15 +1086,24 @@ ValueTree ValueTree::readFromGZIPData (const void* data, size_t numBytes)
     return readFromStream (gzipStream);
 }
 
-void ValueTree::Listener::valueTreeRedirected (ValueTree&) {}
+void ValueTree::Listener::valueTreePropertyChanged   (ValueTree&, const Identifier&) {}
+void ValueTree::Listener::valueTreeChildAdded        (ValueTree&, ValueTree&)        {}
+void ValueTree::Listener::valueTreeChildRemoved      (ValueTree&, ValueTree&, int)   {}
+void ValueTree::Listener::valueTreeChildOrderChanged (ValueTree&, int, int)          {}
+void ValueTree::Listener::valueTreeParentChanged     (ValueTree&)                    {}
+void ValueTree::Listener::valueTreeRedirected        (ValueTree&)                    {}
 
+
+//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
 class ValueTreeTests  : public UnitTest
 {
 public:
-    ValueTreeTests() : UnitTest ("ValueTrees", "Values") {}
+    ValueTreeTests()
+        : UnitTest ("ValueTrees", UnitTestCategories::values)
+    {}
 
     static String createRandomIdentifier (Random& r)
     {
@@ -1179,8 +1186,8 @@ public:
                 }
                 expect (v1.isEquivalentTo (ValueTree::readFromGZIPData (zipped.getData(), zipped.getDataSize())));
 
-                std::unique_ptr<XmlElement> xml1 (v1.createXml());
-                std::unique_ptr<XmlElement> xml2 (v2.createCopy().createXml());
+                auto xml1 = v1.createXml();
+                auto xml2 = v2.createCopy().createXml();
                 expect (xml1->isEquivalentTo (xml2.get(), false));
 
                 auto v4 = v2.createCopy();
@@ -1195,20 +1202,20 @@ public:
             Identifier number ("number");
 
             std::map<double, String> tests;
-            tests[1] = "1";
+            tests[1] = "1.0";
             tests[1.1] = "1.1";
             tests[1.01] = "1.01";
             tests[0.76378] = "0.76378";
-            tests[-10] = "-10";
+            tests[-10] = "-10.0";
             tests[10.01] = "10.01";
             tests[0.0123] = "0.0123";
             tests[-3.7e-27] = "-3.7e-27";
-            tests[1e+40] = "1e40";
+            tests[1e+40] = "1.0e40";
             tests[-12345678901234567.0] = "-1.234567890123457e16";
-            tests[192000] = "192000";
+            tests[192000] = "192000.0";
             tests[1234567] = "1.234567e6";
             tests[0.00006] = "0.00006";
-            tests[0.000006] = "6e-6";
+            tests[0.000006] = "6.0e-6";
 
             for (auto& test : tests)
             {

@@ -56,8 +56,8 @@ public:
                           const StringArray& choices,
                           int defaultItemIndex,
                           const String& label = String(),
-                          std::function<String (int index, int maximumStringLength)> stringFromIndex = nullptr,
-                          std::function<int (const String& text)> indexFromString = nullptr);
+                          std::function<String(int index, int maximumStringLength)> stringFromIndex = nullptr,
+                          std::function<int(const String& text)> indexFromString = nullptr);
 
     /** Destructor. */
     ~AudioParameterChoice() override;
@@ -102,8 +102,8 @@ private:
     const NormalisableRange<float> range;
     float value;
     const float defaultValue;
-    std::function<String (int, int)> stringFromIndexFunction;
-    std::function<int (const String&)> indexFromStringFunction;
+    std::function<String(int, int)> stringFromIndexFunction;
+    std::function<int(const String&)> indexFromStringFunction;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioParameterChoice)
 };

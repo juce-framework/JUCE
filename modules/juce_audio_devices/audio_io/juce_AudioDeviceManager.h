@@ -471,7 +471,6 @@ private:
     Array<AudioIODeviceCallback*> callbacks;
     int numInputChansNeeded = 0, numOutputChansNeeded = 2;
     String preferredDeviceName, currentDeviceType;
-    BigInteger inputChannels, outputChannels;
     std::unique_ptr<XmlElement> lastExplicitSettings;
     mutable bool listNeedsScanning = true;
     AudioBuffer<float> tempBuffer;

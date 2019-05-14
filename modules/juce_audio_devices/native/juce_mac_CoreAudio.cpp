@@ -547,7 +547,7 @@ public:
             if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, &currentSourceID)))
             {
                 HeapBlock<OSType> types;
-                const int num = getAllDataSourcesForDevice (deviceID, types);
+                auto num = getAllDataSourcesForDevice (deviceID, types);
 
                 for (int i = 0; i < num; ++i)
                 {
@@ -568,7 +568,7 @@ public:
         if (deviceID != 0)
         {
             HeapBlock<OSType> types;
-            const int num = getAllDataSourcesForDevice (deviceID, types);
+            auto num = getAllDataSourcesForDevice (deviceID, types);
 
             if (isPositiveAndBelow (index, num))
             {
@@ -816,8 +816,8 @@ public:
         JUCE_COREAUDIOLOG ("Device changed");
 
         stopTimer();
-        const double oldSampleRate = sampleRate;
-        const int oldBufferSize = bufferSize;
+        auto oldSampleRate = sampleRate;
+        auto oldBufferSize = bufferSize;
 
         if (! updateDetailsFromDevice())
             owner.stopInternal();
@@ -866,15 +866,17 @@ private:
         return noErr;
     }
 
-    static OSStatus deviceListenerProc (AudioDeviceID /*inDevice*/, UInt32 /*inLine*/, const AudioObjectPropertyAddress* pa, void* inClientData)
+    static OSStatus deviceListenerProc (AudioDeviceID /*inDevice*/, UInt32 /*inLine*/,
+                                        const AudioObjectPropertyAddress* pa, void* inClientData)
     {
-        CoreAudioInternal* const intern = static_cast<CoreAudioInternal*> (inClientData);
+        auto intern = static_cast<CoreAudioInternal*> (inClientData);
 
         switch (pa->mSelector)
         {
             case kAudioDeviceProcessorOverload:
                 intern->xruns++;
                 break;
+
             case kAudioDevicePropertyBufferSize:
             case kAudioDevicePropertyBufferFrameSize:
             case kAudioDevicePropertyNominalSampleRate:
@@ -950,8 +952,8 @@ class CoreAudioIODevice   : public AudioIODevice,
 public:
     CoreAudioIODevice (CoreAudioIODeviceType* dt,
                        const String& deviceName,
-                       AudioDeviceID inputDeviceId, const int inputIndex_,
-                       AudioDeviceID outputDeviceId, const int outputIndex_)
+                       AudioDeviceID inputDeviceId, int inputIndex_,
+                       AudioDeviceID outputDeviceId, int outputIndex_)
         : AudioIODevice (deviceName, "CoreAudio"),
           deviceType (dt),
           inputIndex (inputIndex_),
@@ -1027,11 +1029,12 @@ public:
 
         inputChannelsRequested = inputChannels;
         outputChannelsRequested = outputChannels;
-        sampleRateRequested = sampleRate;
-        bufferSizeSamplesRequested = bufferSizeSamples;
 
         if (bufferSizeSamples <= 0)
             bufferSizeSamples = getDefaultBufferSize();
+
+        if (sampleRate <= 0)
+            sampleRate = internal->getNominalSampleRate();
 
         lastError = internal->reopen (inputChannels, outputChannels, sampleRate, bufferSizeSamples);
         JUCE_COREAUDIOLOG ("Opened: " << getName());
@@ -1086,7 +1089,7 @@ public:
 
         if (isStarted)
         {
-            AudioIODeviceCallback* const lastCallback = internal->callback;
+            auto lastCallback = internal->callback;
 
             isStarted = false;
             internal->stop (true);
@@ -1167,8 +1170,6 @@ private:
     AudioIODeviceCallback* previousCallback = nullptr;
     std::function<void()> deviceWrapperRestartCallback = nullptr;
     BigInteger inputChannelsRequested, outputChannelsRequested;
-    double sampleRateRequested;
-    int bufferSizeSamplesRequested;
     CriticalSection closeLock;
 
     void timerCallback() override

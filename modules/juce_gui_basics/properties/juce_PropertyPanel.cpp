@@ -319,9 +319,9 @@ void PropertyPanel::removeSection (int sectionIndex)
 }
 
 //==============================================================================
-XmlElement* PropertyPanel::getOpennessState() const
+std::unique_ptr<XmlElement> PropertyPanel::getOpennessState() const
 {
-    auto* xml = new XmlElement ("PROPERTYPANELSTATE");
+    auto xml = std::make_unique<XmlElement> ("PROPERTYPANELSTATE");
 
     xml->setAttribute ("scrollPos", viewport.getViewPositionY());
 

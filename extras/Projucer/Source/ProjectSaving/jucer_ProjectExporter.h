@@ -444,14 +444,16 @@ protected:
             throw SaveError ("Can't create folder: " + dirToCreate.getFullPathName());
     }
 
-    static void writeXmlOrThrow (const XmlElement& xml, const File& file, const String& encoding, int maxCharsPerLine, bool useUnixNewLines = false)
+    static void writeXmlOrThrow (const XmlElement& xml, const File& file, const String& encoding,
+                                 int maxCharsPerLine, bool useUnixNewLines = false)
     {
-        MemoryOutputStream mo;
+        XmlElement::TextFormat format;
+        format.customEncoding = encoding;
+        format.lineWrapLength = maxCharsPerLine;
+        format.newLineChars = useUnixNewLines ? "\r\n" : "\n";
 
-        if (useUnixNewLines)
-            mo.setNewLineString ("\n");
-
-        xml.writeToStream (mo, String(), false, true, encoding, maxCharsPerLine);
+        MemoryOutputStream mo (8192);
+        xml.writeTo (mo, format);
         overwriteFileIfDifferentOrThrow (file, mo);
     }
 

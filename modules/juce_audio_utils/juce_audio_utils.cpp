@@ -43,6 +43,7 @@
 
 #if JUCE_MAC
   #import <DiscRecording/DiscRecording.h>
+  #import <CoreAudioKit/CABTLEMIDIWindowController.h>
 #elif JUCE_WINDOWS
  #if JUCE_USE_CDBURNER
   /* You'll need the Platform SDK for these headers - if you don't have it and don't

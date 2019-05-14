@@ -1202,7 +1202,7 @@ public:
 
             auto& displays = Desktop::getInstance().getDisplays();
 
-            auto newScaleFactor = displays.findDisplayForRect (bounds, true).scale;
+            auto newScaleFactor = displays.findDisplayForRect (bounds, true).scale / Desktop::getInstance().getGlobalScaleFactor();
             if (! approximatelyEqual (newScaleFactor, currentScaleFactor))
             {
                 currentScaleFactor = newScaleFactor;
@@ -2796,7 +2796,7 @@ private:
             Rectangle<int> physicalBounds (wx, wy, (int) ww, (int) wh);
             auto& displays = Desktop::getInstance().getDisplays();
 
-            auto newScaleFactor = displays.findDisplayForRect (physicalBounds, true).scale;
+            auto newScaleFactor = displays.findDisplayForRect (physicalBounds, true).scale / Desktop::getInstance().getGlobalScaleFactor();
             if (! approximatelyEqual (newScaleFactor, currentScaleFactor))
             {
                 currentScaleFactor = newScaleFactor;
@@ -3034,21 +3034,10 @@ private:
             if (targetWindow == None)
                 return;
 
-            GetXProperty prop (display, targetWindow, atoms->XdndAware,
-                               0, 2, false, AnyPropertyType);
+            dragState->xdndVersion = getDnDVersionForWindow (targetWindow);
 
-            if (prop.success
-                 && prop.data != None
-                 && prop.actualFormat == 32
-                 && prop.numItems == 1)
-            {
-                dragState->xdndVersion = jmin ((int) prop.data[0], (int) atoms->DndVersion);
-            }
-            else
-            {
-                dragState->xdndVersion = -1;
+            if (dragState->xdndVersion == -1)
                 return;
-            }
 
             sendExternalDragAndDropEnter (targetWindow);
             dragState->targetWindow = targetWindow;
@@ -3253,6 +3242,17 @@ private:
         return dndAwarePropFound;
     }
 
+    int getDnDVersionForWindow (Window targetWindow)
+    {
+        GetXProperty prop (display, targetWindow, atoms->XdndAware,
+                           0, 2, false, AnyPropertyType);
+
+        if (prop.success && prop.data != None && prop.actualFormat == 32 && prop.numItems == 1)
+            return jmin ((int) prop.data[0], (int) atoms->DndVersion);
+
+        return -1;
+    }
+
     Window externalFindDragTargetWindow (Window targetWindow)
     {
         if (targetWindow == None)
@@ -3297,7 +3297,11 @@ private:
                              dragState->allowedTypes.size());
 
             dragState->dragging = true;
+            dragState->xdndVersion = getDnDVersionForWindow (dragState->targetWindow);
+
+            sendExternalDragAndDropEnter (dragState->targetWindow);
             handleExternalDragMotionNotify();
+
             return true;
         }
 
@@ -3431,6 +3435,18 @@ void Displays::findDisplays (float masterScale)
 
     if (auto display = xDisplay.display)
     {
+        Atom hints = Atoms::getIfExists (display, "_NET_WORKAREA");
+
+        auto getWorkAreaPropertyData = [&] (int screenNum) -> unsigned char*
+        {
+            GetXProperty prop (display, RootWindow (display, screenNum), hints, 0, 4, false, XA_CARDINAL);
+
+            if (prop.success && prop.actualType == XA_CARDINAL && prop.actualFormat == 32 && prop.numItems == 4)
+                return prop.data;
+
+            return nullptr;
+        };
+
        #if JUCE_USE_XRANDR
         {
             int major_opcode, first_event, first_error;
@@ -3444,6 +3460,9 @@ void Displays::findDisplays (float masterScale)
 
                 for (int i = 0; i < numMonitors; ++i)
                 {
+                    if (getWorkAreaPropertyData (i) == nullptr)
+                        continue;
+
                     if (auto* screens = xrandr.getScreenResources (display, RootWindow (display, i)))
                     {
                         for (int j = 0; j < screens->noutput; ++j)
@@ -3494,6 +3513,9 @@ void Displays::findDisplays (float masterScale)
                         xrandr.freeScreenResources (screens);
                     }
                 }
+
+                if (! displays.isEmpty() && ! displays.getReference (0).isMain)
+                    displays.getReference (0).isMain = true;
             }
         }
 
@@ -3528,20 +3550,14 @@ void Displays::findDisplays (float masterScale)
         if (displays.isEmpty())
        #endif
         {
-            Atom hints = Atoms::getIfExists (display, "_NET_WORKAREA");
-
             if (hints != None)
             {
                 auto numMonitors = ScreenCount (display);
 
                 for (int i = 0; i < numMonitors; ++i)
                 {
-                    GetXProperty prop (display, RootWindow (display, i), hints, 0, 4, false, XA_CARDINAL);
-
-                    if (prop.success && prop.actualType == XA_CARDINAL && prop.actualFormat == 32 && prop.numItems == 4)
+                    if (auto* position = (const long*) getWorkAreaPropertyData (i))
                     {
-                        auto position = (const long*) prop.data;
-
                         Display d;
                         d.totalArea = Rectangle<int> ((int) position[0], (int) position[1],
                                                       (int) position[2], (int) position[3]);
@@ -3783,6 +3799,7 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (AlertWindow::AlertIconType ico
 }
 
 //============================== X11 - MouseCursor =============================
+std::map<Cursor, Display*> cursorMap;
 
 void* CustomMouseCursorInfo::create() const
 {
@@ -3845,7 +3862,10 @@ void* CustomMouseCursorInfo::create() const
                 xcursorImageDestroy (xcImage);
 
                 if (result != nullptr)
+                {
+                    cursorMap[(Cursor) result] = display;
                     return result;
+                }
             }
         }
     }
@@ -3909,6 +3929,7 @@ void* CustomMouseCursorInfo::create() const
     XFreePixmap (display, sourcePixmap);
     XFreePixmap (display, maskPixmap);
 
+    cursorMap[(Cursor) result] = display;
     return result;
 }
 
@@ -3976,13 +3997,33 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
     }
 
     ScopedXLock xlock (display);
-    return (void*) XCreateFontCursor (display, shape);
+
+    auto* result = (void*) XCreateFontCursor (display, shape);
+    cursorMap[(Cursor) result] = display;
+
+    return result;
 }
 
 void MouseCursor::showInWindow (ComponentPeer* peer) const
 {
     if (auto* lp = dynamic_cast<LinuxComponentPeer*> (peer))
+    {
+        ScopedXDisplay xDisplay;
+
+        if (cursorHandle != nullptr && xDisplay.display != cursorMap[(Cursor) getHandle()])
+        {
+            auto oldHandle = (Cursor) getHandle();
+
+            if (auto* customInfo = cursorHandle->getCustomInfo())
+                cursorHandle->setHandle (customInfo->create());
+            else
+                cursorHandle->setHandle (createStandardMouseCursor (cursorHandle->getType()));
+
+            cursorMap.erase (oldHandle);
+        }
+
         lp->showMouseCursor ((Cursor) getHandle());
+    }
 }
 
 //=================================== X11 - DND ================================

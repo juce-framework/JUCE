@@ -169,7 +169,7 @@ bool FileChooser::showDialog (const int flags, FilePreviewComponent* const previ
 }
 #endif
 
-void FileChooser::launchAsync (int flags, std::function<void (const FileChooser&)> callback,
+void FileChooser::launchAsync (int flags, std::function<void(const FileChooser&)> callback,
                                FilePreviewComponent* previewComp)
 {
     // You must specify a callback when using launchAsync
@@ -254,7 +254,7 @@ URL FileChooser::getURLResult() const
 
 void FileChooser::finished (const Array<URL>& asyncResults)
 {
-     std::function<void (const FileChooser&)> callback;
+     std::function<void(const FileChooser&)> callback;
      std::swap (callback, asyncCallback);
 
      results = asyncResults;

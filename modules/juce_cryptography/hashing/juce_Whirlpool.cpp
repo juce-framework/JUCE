@@ -624,12 +624,15 @@ bool Whirlpool::operator!= (const Whirlpool& other) const noexcept  { return ! o
 
 
 //==============================================================================
+//==============================================================================
 #if JUCE_UNIT_TESTS
 
 class WhirlpoolTests  : public UnitTest
 {
 public:
-    WhirlpoolTests() : UnitTest ("Whirlpool", "Cryptography") {}
+    WhirlpoolTests()
+        : UnitTest ("Whirlpool", UnitTestCategories::cryptography)
+    {}
 
     void test (const char* input, const char* expected)
     {

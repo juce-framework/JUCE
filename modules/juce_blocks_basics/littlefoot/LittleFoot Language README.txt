@@ -66,6 +66,20 @@ Casts of primitive types are done with function-style syntax, e.g.
     int x = int (123.0);
     float f = float (getIntegerValue());
 
+Arrays of any type can be created in the global scope using C-style syntax.
+Elements of arrays can be set and read from functions.
+Arrays cannot be created within functions or returned from functions.
+
+For example:
+
+    int foo[12];
+
+    void initialise()
+    {
+        for (int i = 0; i < 12; ++i)
+            foo[i] = i;
+    }
+
 The program communicates with the host computer by using a shared area of memory
 called the heap which the host can change. There are some built-in functions
 available for the program to use to read from the heap:

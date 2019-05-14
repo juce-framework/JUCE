@@ -557,12 +557,17 @@ int JUCE_CALLTYPE AudioChannelSet::getAmbisonicOrderForNumChannels (int numChann
     return (static_cast<float> (ambisonicOrder) == sqrtMinusOne ? ambisonicOrder : -1);
 }
 
+
+//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
+
 class AudioChannelSetUnitTest  : public UnitTest
 {
 public:
-    AudioChannelSetUnitTest() : UnitTest ("AudioChannelSetUnitTest", "Audio") {}
+    AudioChannelSetUnitTest()
+        : UnitTest ("AudioChannelSetUnitTest", UnitTestCategories::audio)
+    {}
 
     void runTest() override
     {
@@ -645,6 +650,7 @@ private:
 };
 
 static AudioChannelSetUnitTest audioChannelSetUnitTest;
+
 #endif
 
 } // namespace juce

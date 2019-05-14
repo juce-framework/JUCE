@@ -25,7 +25,9 @@ namespace juce
 
 struct HashMapTest : public UnitTest
 {
-    HashMapTest() : UnitTest ("HashMap", "Containers") {}
+    HashMapTest()
+        : UnitTest ("HashMap", UnitTestCategories::containers)
+    {}
 
     void runTest() override
     {

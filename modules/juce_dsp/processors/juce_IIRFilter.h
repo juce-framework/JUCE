@@ -66,8 +66,8 @@ namespace IIR
         /** Creates a filter.
 
             Initially the filter is inactive, so will have no effect on samples that
-            you process with it. Use the setCoefficients() method to turn it into the
-            type of filter needed.
+            you process with it. You can modify the coefficients member to turn it into
+            the type of filter needed.
         */
         Filter();
 
@@ -105,7 +105,7 @@ namespace IIR
         /** Called before processing starts. */
         void prepare (const ProcessSpec&) noexcept;
 
-        /** Processes as a block of samples */
+        /** Processes a block of samples */
         template <typename ProcessContext>
         void process (const ProcessContext& context) noexcept
         {
@@ -134,7 +134,7 @@ namespace IIR
         //==============================================================================
         void check();
 
-        /** Processes as a block of samples */
+        /** Processes a block of samples */
         template <typename ProcessContext, bool isBypassed>
         void processInternal (const ProcessContext& context) noexcept;
 

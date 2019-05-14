@@ -28,765 +28,292 @@
 #include "jucer_Application.h"
 #include "jucer_AutoUpdater.h"
 
-LatestVersionChecker::JuceVersionTriple::JuceVersionTriple()
-  :  major ((ProjectInfo::versionNumber & 0xff0000) >> 16),
-     minor ((ProjectInfo::versionNumber & 0x00ff00) >> 8),
-     build ((ProjectInfo::versionNumber & 0x0000ff) >> 0)
-{}
-
-LatestVersionChecker::JuceVersionTriple::JuceVersionTriple (int juceVersionNumber)
-  :  major ((juceVersionNumber & 0xff0000) >> 16),
-     minor ((juceVersionNumber & 0x00ff00) >> 8),
-     build ((juceVersionNumber & 0x0000ff) >> 0)
-{}
-
-LatestVersionChecker::JuceVersionTriple::JuceVersionTriple (int majorInt, int minorInt, int buildNumber)
-    : major (majorInt),
-      minor (minorInt),
-      build (buildNumber)
-{}
-
-bool LatestVersionChecker::JuceVersionTriple::fromString (const String& versionString,
-                                                          LatestVersionChecker::JuceVersionTriple& result)
+//==============================================================================
+LatestVersionCheckerAndUpdater::LatestVersionCheckerAndUpdater()
+    : Thread ("VersionChecker")
 {
-    StringArray tokenizedString = StringArray::fromTokens (versionString, ".", StringRef());
-
-    if (tokenizedString.size() != 3)
-        return false;
-
-    result.major = tokenizedString [0].getIntValue();
-    result.minor = tokenizedString [1].getIntValue();
-    result.build = tokenizedString [2].getIntValue();
-
-    return true;
 }
 
-String LatestVersionChecker::JuceVersionTriple::toString() const
+LatestVersionCheckerAndUpdater::~LatestVersionCheckerAndUpdater()
 {
-    String retval;
-    retval << major << '.' << minor << '.' << build;
-    return retval;
+    stopThread (1000);
+    clearSingletonInstance();
 }
 
-bool LatestVersionChecker::JuceVersionTriple::operator> (const LatestVersionChecker::JuceVersionTriple& b) const noexcept
+void LatestVersionCheckerAndUpdater::checkForNewVersion (bool showAlerts)
 {
-    if (major == b.major)
+    if (! isThreadRunning())
     {
-        if (minor == b.minor)
-            return build > b.build;
-
-        return minor > b.minor;
+        showAlertWindows = showAlerts;
+        startThread (3);
     }
-
-    return major > b.major;
 }
 
 //==============================================================================
-struct RelaunchTimer  : private Timer
+void LatestVersionCheckerAndUpdater::run()
 {
-    RelaunchTimer (const File& f)  : parentFolder (f)
+    queryUpdateServer();
+
+    if (! threadShouldExit())
+        MessageManager::callAsync ([this] { processResult(); });
+}
+
+//==============================================================================
+String getOSString()
+{
+   #if JUCE_MAC
+    return "OSX";
+   #elif JUCE_WINDOWS
+    return "Windows";
+   #elif JUCE_LINUX
+    return "Linux";
+   #else
+    jassertfalse;
+    return "Unknown";
+   #endif
+}
+
+namespace VersionHelpers
+{
+    String formatProductVersion (int versionNum)
     {
-        startTimer (1500);
+        int major = (versionNum & 0xff0000) >> 16;
+        int minor = (versionNum & 0x00ff00) >> 8;
+        int build = (versionNum & 0x0000ff) >> 0;
+
+        return String (major) + '.' + String (minor) + '.' + String (build);
     }
 
-    void timerCallback() override
+    String getProductVersionString()
     {
-        stopTimer();
+        return formatProductVersion (ProjectInfo::versionNumber);
+    }
 
-        File app = parentFolder.getChildFile (
-                      #if JUCE_MAC
-                       "Projucer.app");
-                      #elif JUCE_WINDOWS
-                       "Projucer.exe");
-                      #elif JUCE_LINUX
-                       "Projucer");
-                      #endif
+    bool isNewVersion (const String& current, const String& other)
+    {
+        auto currentTokens = StringArray::fromTokens (current, ".", {});
+        auto otherTokens   = StringArray::fromTokens (other, ".", {});
 
-        JUCEApplication::quit();
+        jassert (currentTokens.size() == 3 && otherTokens.size() == 3);
 
-        if (app.exists())
+        if (currentTokens[0].getIntValue() == otherTokens[0].getIntValue())
         {
-            app.setExecutePermission (true);
+            if (currentTokens[1].getIntValue() == otherTokens[1].getIntValue())
+                return currentTokens[2].getIntValue() < otherTokens[2].getIntValue();
 
-           #if JUCE_MAC
-            app.getChildFile ("Contents")
-               .getChildFile ("MacOS")
-               .getChildFile ("Projucer").setExecutePermission (true);
-           #endif
-
-                app.startAsProcess();
+            return currentTokens[1].getIntValue() < otherTokens[1].getIntValue();
         }
 
-        delete this;
+        return currentTokens[0].getIntValue() < otherTokens[0].getIntValue();
     }
+}
 
-    File parentFolder;
-};
+void LatestVersionCheckerAndUpdater::queryUpdateServer()
+{
+    StringPairArray responseHeaders;
+
+    URL latestVersionURL ("https://my.roli.com/software_versions/update_to/Projucer/"
+                          + VersionHelpers::getProductVersionString() + '/' + getOSString()
+                          + "?language=" + SystemStats::getUserLanguage());
+
+    std::unique_ptr<InputStream> inStream (latestVersionURL.createInputStream (false, nullptr, nullptr,
+                                                                               "X-API-Key: 265441b-343403c-20f6932-76361d\nContent-Type: "
+                                                                               "application/json\nAccept: application/json; version=1",
+                                                                               0, &responseHeaders, &statusCode, 0));
+
+    if (threadShouldExit())
+        return;
+
+    if (inStream.get() != nullptr && (statusCode == 303 || statusCode == 400))
+    {
+        if (statusCode == 303)
+            relativeDownloadPath = responseHeaders["Location"];
+
+        jassert (relativeDownloadPath.isNotEmpty());
+
+        jsonReply = JSON::parse (inStream->readEntireStreamAsString());
+    }
+    else if (showAlertWindows)
+    {
+        if (statusCode == 204)
+            AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon, "No New Version Available", "Your JUCE version is up to date.");
+        else
+            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Network Error", "Could not connect to the web server.\n"
+                                                                                          "Please check your internet connection and try again.");
+    }
+}
+
+void LatestVersionCheckerAndUpdater::processResult()
+{
+    if (! jsonReply.isObject())
+        return;
+
+    if (statusCode == 400)
+    {
+        auto errorObject = jsonReply.getDynamicObject()->getProperty ("error");
+
+        if (errorObject.isObject())
+        {
+            auto message = errorObject.getProperty ("message", {}).toString();
+
+            if (message.isNotEmpty())
+                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "JUCE Updater", message);
+        }
+    }
+    else if (statusCode == 303)
+    {
+        askUserAboutNewVersion (jsonReply.getProperty ("version", {}).toString(),
+                                jsonReply.getProperty ("notes",   {}).toString());
+    }
+}
 
 //==============================================================================
-class DownloadNewVersionThread   : public ThreadWithProgressWindow
+class UpdateDialog  : public Component
 {
 public:
-    DownloadNewVersionThread (LatestVersionChecker& versionChecker,URL u,
-                              const String& extraHeaders, File target)
-        : ThreadWithProgressWindow ("Downloading New Version", true, true),
-          owner (versionChecker),
-          result (Result::ok()),
-          url (u), headers (extraHeaders), targetFolder (target)
+    UpdateDialog (const String& newVersion, const String& releaseNotes)
     {
-    }
+        titleLabel.setText ("JUCE version " + newVersion, dontSendNotification);
+        titleLabel.setFont ({ 15.0f, Font::bold });
+        titleLabel.setJustificationType (Justification::centred);
+        addAndMakeVisible (titleLabel);
 
-    static void performDownload (LatestVersionChecker& versionChecker, URL u,
-                                 const String& extraHeaders, File targetFolder)
-    {
-        DownloadNewVersionThread d (versionChecker, u, extraHeaders, targetFolder);
+        contentLabel.setText ("A new version of JUCE is available - would you like to download it?", dontSendNotification);
+        contentLabel.setFont (15.0f);
+        contentLabel.setJustificationType (Justification::topLeft);
+        addAndMakeVisible (contentLabel);
 
-        if (d.runThread())
+        releaseNotesLabel.setText ("Release notes:", dontSendNotification);
+        releaseNotesLabel.setFont (15.0f);
+        releaseNotesLabel.setJustificationType (Justification::topLeft);
+        addAndMakeVisible (releaseNotesLabel);
+
+        releaseNotesEditor.setMultiLine (true);
+        releaseNotesEditor.setReadOnly (true);
+        releaseNotesEditor.setText (releaseNotes);
+        addAndMakeVisible (releaseNotesEditor);
+
+        addAndMakeVisible (chooseButton);
+        chooseButton.onClick = [this] { exitModalStateWithResult (1); };
+
+        addAndMakeVisible (cancelButton);
+        cancelButton.onClick = [this]
         {
-            if (d.result.failed())
-            {
-                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                                  "Installation Failed",
-                                                  d.result.getErrorMessage());
-            }
+            if (dontAskAgainButton.getToggleState())
+                getGlobalProperties().setValue (Ids::dontQueryForUpdate.toString(), 1);
             else
-            {
-                new RelaunchTimer (targetFolder);
-            }
-        }
-    }
+                getGlobalProperties().removeValue (Ids::dontQueryForUpdate);
 
-    void run() override
-    {
-        setProgress (-1.0);
+            exitModalStateWithResult (-1);
+        };
 
-        MemoryBlock zipData;
-        result = download (zipData);
+        dontAskAgainButton.setToggleState (getGlobalProperties().getValue (Ids::dontQueryForUpdate, {}).isNotEmpty(), dontSendNotification);
+        addAndMakeVisible (dontAskAgainButton);
 
-        if (result.wasOk() && ! threadShouldExit())
-        {
-            setStatusMessage ("Installing...");
-            result = owner.performUpdate (zipData, targetFolder);
-        }
-    }
-
-    Result download (MemoryBlock& dest)
-    {
-        setStatusMessage ("Downloading...");
-
-        int statusCode = 302;
-        const int maxRedirects = 5;
-
-        // we need to do the redirecting manually due to inconsistencies on the way headers are handled on redirects
-        std::unique_ptr<InputStream> in;
-
-        for (int redirect = 0; redirect < maxRedirects; ++redirect)
-        {
-            StringPairArray responseHeaders;
-
-            in.reset (url.createInputStream (false, nullptr, nullptr, headers,
-                                             10000, &responseHeaders, &statusCode, 0));
-
-            if (in == nullptr || statusCode != 302)
-                break;
-
-            String redirectPath = responseHeaders ["Location"];
-            if (redirectPath.isEmpty())
-                break;
-
-            url = owner.getLatestVersionURL (headers, redirectPath);
-        }
-
-        if (in != nullptr && statusCode == 200)
-        {
-            int64 total = 0;
-            MemoryOutputStream mo (dest, true);
-
-            for (;;)
-            {
-                if (threadShouldExit())
-                    return Result::fail ("cancel");
-
-                int64 written = mo.writeFromInputStream (*in, 8192);
-
-                if (written == 0)
-                    break;
-
-                total += written;
-
-                setStatusMessage (String (TRANS("Downloading...  (123)"))
-                                  .replace ("123", File::descriptionOfSizeInBytes (total)));
-            }
-
-            return Result::ok();
-        }
-
-        return Result::fail ("Failed to download from: " + url.toString (false));
-    }
-
-    LatestVersionChecker& owner;
-    Result result;
-    URL url;
-    String headers;
-    File targetFolder;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DownloadNewVersionThread)
-};
-
-//==============================================================================
-class UpdateUserDialog   : public Component
-{
-public:
-    UpdateUserDialog (const LatestVersionChecker::JuceVersionTriple& version,
-                      const String& productName,
-                      const String& releaseNotes,
-                      const char* overwriteFolderPath)
-        : hasOverwriteButton (overwriteFolderPath != nullptr)
-    {
-        titleLabel.reset (new Label ("Title Label",
-                                     TRANS("Download \"123\" version 456?")
-                                         .replace ("123", productName)
-                                         .replace ("456", version.toString())));
-        addAndMakeVisible (titleLabel.get());
-
-        titleLabel->setFont (Font (15.00f, Font::bold));
-        titleLabel->setJustificationType (Justification::centredLeft);
-        titleLabel->setEditable (false, false, false);
-
-        contentLabel.reset(new Label ("Content Label",
-                                      TRANS("A new version of \"123\" is available - would you like to download it?")
-                                          .replace ("123", productName)));
-        addAndMakeVisible (contentLabel.get());
-        contentLabel->setFont (Font (15.00f, Font::plain));
-        contentLabel->setJustificationType (Justification::topLeft);
-        contentLabel->setEditable (false, false, false);
-
-        okButton.reset (new TextButton ("OK Button"));
-        addAndMakeVisible (okButton.get());
-        okButton->setButtonText (TRANS(hasOverwriteButton ? "Choose Another Folder..." : "OK"));
-        okButton->onClick = [this] { exitParentDialog (2); };
-
-        cancelButton.reset (new TextButton ("Cancel Button"));
-        addAndMakeVisible (cancelButton.get());
-        cancelButton->setButtonText (TRANS("Cancel"));
-        cancelButton->onClick = [this] { exitParentDialog (-1); };
-
-        changeLogLabel.reset (new Label ("Change Log Label", TRANS("Release Notes:")));
-        addAndMakeVisible (changeLogLabel.get());
-        changeLogLabel->setFont (Font (15.00f, Font::plain));
-        changeLogLabel->setJustificationType (Justification::topLeft);
-        changeLogLabel->setEditable (false, false, false);
-
-        changeLog.reset (new TextEditor ("Change Log"));
-        addAndMakeVisible (changeLog.get());
-        changeLog->setMultiLine (true);
-        changeLog->setReturnKeyStartsNewLine (true);
-        changeLog->setReadOnly (true);
-        changeLog->setScrollbarsShown (true);
-        changeLog->setCaretVisible (false);
-        changeLog->setPopupMenuEnabled (false);
-        changeLog->setText (releaseNotes);
-
-        if (hasOverwriteButton)
-        {
-            overwriteLabel.reset (new Label ("Overwrite Label",
-                                             TRANS("Updating will overwrite everything in the following folder:")));
-            addAndMakeVisible (overwriteLabel.get());
-            overwriteLabel->setFont (Font (15.00f, Font::plain));
-            overwriteLabel->setJustificationType (Justification::topLeft);
-            overwriteLabel->setEditable (false, false, false);
-
-            overwritePath.reset (new Label ("Overwrite Path", overwriteFolderPath));
-            addAndMakeVisible (overwritePath.get());
-            overwritePath->setFont (Font (15.00f, Font::bold));
-            overwritePath->setJustificationType (Justification::topLeft);
-            overwritePath->setEditable (false, false, false);
-
-            overwriteButton.reset (new TextButton ("Overwrite Button"));
-            addAndMakeVisible (overwriteButton.get());
-            overwriteButton->setButtonText (TRANS("Overwrite"));
-            overwriteButton->onClick = [this] { exitParentDialog (1); };
-        }
-
-        juceIcon.reset (Drawable::createFromImageData (BinaryData::juce_icon_png,
-                                                       BinaryData::juce_icon_pngSize));
-
-        setSize (518, overwritePath != nullptr ? 345 : 269);
+        juceIcon.reset (Drawable::createFromImageData (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize));
 
         lookAndFeelChanged();
+
+        setSize (500, 280);
     }
 
-    ~UpdateUserDialog() override
+    void resized() override
     {
-        titleLabel.reset();
-        contentLabel.reset();
-        okButton.reset();
-        cancelButton.reset();
-        changeLogLabel.reset();
-        changeLog.reset();
-        overwriteLabel.reset();
-        overwritePath.reset();
-        overwriteButton.reset();
-        juceIcon.reset();
+        auto b = getLocalBounds().reduced (10);
+
+        auto topSlice = b.removeFromTop (juceIconBounds.getHeight())
+                         .withTrimmedLeft (juceIconBounds.getWidth());
+
+        titleLabel.setBounds (topSlice.removeFromTop (25));
+        topSlice.removeFromTop (5);
+        contentLabel.setBounds (topSlice.removeFromTop (25));
+
+        auto buttonBounds = b.removeFromBottom (60);
+        buttonBounds.removeFromBottom (25);
+        chooseButton.setBounds (buttonBounds.removeFromLeft (buttonBounds.getWidth() / 2).reduced (20, 0));
+        cancelButton.setBounds (buttonBounds.reduced (20, 0));
+        dontAskAgainButton.setBounds (cancelButton.getBounds().withY (cancelButton.getBottom() + 5).withHeight (20));
+
+        releaseNotesEditor.setBounds (b.reduced (0, 10));
     }
 
     void paint (Graphics& g) override
     {
         g.fillAll (findColour (backgroundColourId));
-        g.setColour (findColour (defaultTextColourId));
 
         if (juceIcon != nullptr)
-            juceIcon->drawWithin (g, Rectangle<float> (20, 17, 64, 64),
-                                  RectanglePlacement::stretchToFit, 1.000f);
+            juceIcon->drawWithin (g, juceIconBounds.toFloat(),
+                                  RectanglePlacement::stretchToFit, 1.0f);
     }
 
-    void resized() override
+    static std::unique_ptr<DialogWindow> launchDialog (const String& newVersion, const String& releaseNotes)
     {
-        titleLabel->setBounds (88, 10, 397, 24);
-        contentLabel->setBounds (88, 40, 397, 51);
-        changeLogLabel->setBounds (22, 92, 341, 24);
-        changeLog->setBounds (24, 112, 476, 102);
+        DialogWindow::LaunchOptions options;
 
-        if (hasOverwriteButton)
-        {
-            okButton->setBounds (getWidth() - 24 - 174, getHeight() - 37, 174, 28);
-            overwriteButton->setBounds ((getWidth() - 24 - 174) + -14 - 86, getHeight() - 37, 86, 28);
-            cancelButton->setBounds (24, getHeight() - 37, 70, 28);
+        options.dialogTitle = "Download JUCE version " + newVersion + "?";
+        options.resizable = false;
 
-            overwriteLabel->setBounds (24, 238, 472, 16);
-            overwritePath->setBounds (24, 262, 472, 40);
-        }
-        else
-        {
-            okButton->setBounds (getWidth() - 24 - 47, getHeight() - 37, 47, 28);
-            cancelButton->setBounds ((getWidth() - 24 - 47) + -14 - 70, getHeight() - 37, 70, 28);
-        }
-    }
+        auto* content = new UpdateDialog (newVersion, releaseNotes);
+        options.content.set (content, true);
 
-    void exitParentDialog (int returnVal)
-    {
-        if (auto* parentDialog = findParentComponentOfClass<DialogWindow>())
-            parentDialog->exitModalState (returnVal);
-        else
-            jassertfalse;
-    }
+        std::unique_ptr<DialogWindow> dialog (options.create());
 
-    static DialogWindow* launch (const LatestVersionChecker::JuceVersionTriple& version,
-                                 const String& productName,
-                                 const String& releaseNotes,
-                                 const char* overwritePath = nullptr)
-    {
-        OptionalScopedPointer<Component> userDialog (new UpdateUserDialog (version, productName,
-                                                                           releaseNotes, overwritePath), true);
+        content->setParentWindow (dialog.get());
+        dialog->enterModalState (true, nullptr, true);
 
-        DialogWindow::LaunchOptions lo;
-        lo.dialogTitle = TRANS("Download \"123\" version 456?").replace ("456", version.toString())
-                                                                .replace ("123", productName);
-        lo.dialogBackgroundColour = userDialog->findColour (backgroundColourId);
-        lo.content = userDialog;
-        lo.componentToCentreAround = nullptr;
-        lo.escapeKeyTriggersCloseButton = true;
-        lo.useNativeTitleBar = true;
-        lo.resizable = false;
-        lo.useBottomRightCornerResizer = false;
-
-        return lo.launchAsync();
+        return dialog;
     }
 
 private:
-    bool hasOverwriteButton;
-    std::unique_ptr<Label> titleLabel, contentLabel, changeLogLabel, overwriteLabel, overwritePath;
-    std::unique_ptr<TextButton> okButton, cancelButton;
-    std::unique_ptr<TextEditor> changeLog;
-    std::unique_ptr<TextButton> overwriteButton;
-    std::unique_ptr<Drawable> juceIcon;
-
     void lookAndFeelChanged() override
     {
-        cancelButton->setColour (TextButton::buttonColourId,
-                                 findColour (secondaryButtonBackgroundColourId));
-        changeLog->applyFontToAllText (changeLog->getFont());
+        cancelButton.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
+        releaseNotesEditor.applyFontToAllText (releaseNotesEditor.getFont());
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UpdateUserDialog)
+    void setParentWindow (DialogWindow* parent)
+    {
+        parentWindow = parent;
+    }
+
+    void exitModalStateWithResult (int result)
+    {
+        if (parentWindow != nullptr)
+            parentWindow->exitModalState (result);
+    }
+
+    Label titleLabel, contentLabel, releaseNotesLabel;
+    TextEditor releaseNotesEditor;
+    TextButton chooseButton { "Choose Location..." }, cancelButton { "Cancel" };
+    ToggleButton dontAskAgainButton { "Don't ask again" };
+    std::unique_ptr<Drawable> juceIcon;
+    Rectangle<int> juceIconBounds { 10, 10, 64, 64 };
+
+    DialogWindow* parentWindow = nullptr;
 };
 
-//==============================================================================
-class UpdaterDialogModalCallback : public ModalComponentManager::Callback
+void LatestVersionCheckerAndUpdater::askUserForLocationToDownload()
 {
-public:
-    struct DelayedCallback  : private Timer
-    {
-        DelayedCallback (LatestVersionChecker& versionChecker,
-                         URL& newVersionToDownload,
-                         const String& extraHeaders,
-                         const File& appParentFolder,
-                         int returnValue)
-            : parent (versionChecker), download (newVersionToDownload),
-              headers (extraHeaders), folder (appParentFolder), result (returnValue)
-        {
-            startTimer (200);
-        }
-
-    private:
-        void timerCallback() override
-        {
-            stopTimer();
-            parent.modalStateFinished (result, download, headers, folder);
-
-            delete this;
-        }
-
-        LatestVersionChecker& parent;
-        URL download;
-        String headers;
-        File folder;
-        int result;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DelayedCallback)
-    };
-
-    UpdaterDialogModalCallback (LatestVersionChecker& versionChecker,
-                                URL& newVersionToDownload,
-                                const String& extraHeaders,
-                                const File& appParentFolder)
-        : parent (versionChecker), download (newVersionToDownload),
-          headers (extraHeaders), folder (appParentFolder)
-    {}
-
-    void modalStateFinished (int returnValue) override
-    {
-        // the dialog window is only closed after this function exits
-        // so we need a deferred callback to the parent. Unfortunately
-        // our instance is also deleted after this function is used
-        // so we can't use our own instance for a timer callback
-        // we must allocate a new one.
-        new DelayedCallback (parent, download, headers, folder, returnValue);
-    }
-
-private:
-    LatestVersionChecker& parent;
-    URL download;
-    String headers;
-    File folder;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UpdaterDialogModalCallback)
-};
-
-
-//==============================================================================
-LatestVersionChecker::LatestVersionChecker()  : Thread ("Updater"),
-                                                statusCode (-1),
-                                                hasAttemptedToReadWebsite (false)
-{
-    startTimer (2000);
-}
-
-LatestVersionChecker::~LatestVersionChecker()
-{
-    stopThread (20000);
-}
-
-String LatestVersionChecker::getOSString()
-{
-    SystemStats::OperatingSystemType osType = SystemStats::getOperatingSystemType();
-
-    if      ((osType & SystemStats::MacOSX)  != 0) return "OSX";
-    else if ((osType & SystemStats::Windows) != 0) return "Windows";
-    else if ((osType & SystemStats::Linux)   != 0) return "Linux";
-    else return SystemStats::getOperatingSystemName();
-}
-
-const LatestVersionChecker::JuceServerLocationsAndKeys& LatestVersionChecker::getJuceServerURLsAndKeys() const
-{
-    static LatestVersionChecker::JuceServerLocationsAndKeys urlsAndKeys =
-    {
-        "https://my.roli.com",
-        "265441b-343403c-20f6932-76361d",
-        1,
-        "/software_versions/update_to/Projucer/"
-    };
-
-    return urlsAndKeys;
-}
-
-int LatestVersionChecker::getProductVersionNumber() const   { return ProjectInfo::versionNumber; }
-const char* LatestVersionChecker::getProductName() const    { return ProjectInfo::projectName; }
-bool LatestVersionChecker::allowCustomLocation() const      { return true; }
-
-Result LatestVersionChecker::performUpdate (const MemoryBlock& data, File& targetFolder)
-{
-    File unzipTarget;
-    bool isUsingTempFolder = false;
-
-    {
-        MemoryInputStream input (data, false);
-        ZipFile zip (input);
-
-        if (zip.getNumEntries() == 0)
-            return Result::fail ("The downloaded file wasn't a valid JUCE file!");
-
-        unzipTarget = targetFolder;
-
-        if (unzipTarget.exists())
-        {
-            isUsingTempFolder = true;
-            unzipTarget = targetFolder.getNonexistentSibling();
-
-            if (! unzipTarget.createDirectory())
-                return Result::fail ("Couldn't create a folder to unzip the new version!");
-        }
-
-        Result r (zip.uncompressTo (unzipTarget));
-
-        if (r.failed())
-        {
-            if (isUsingTempFolder)
-                unzipTarget.deleteRecursively();
-
-            return r;
-        }
-    }
-
-    if (isUsingTempFolder)
-    {
-        File oldFolder (targetFolder.getSiblingFile (targetFolder.getFileNameWithoutExtension() + "_old")
-                        .getNonexistentSibling());
-
-        if (! targetFolder.moveFileTo (oldFolder))
-        {
-            unzipTarget.deleteRecursively();
-            return Result::fail ("Could not remove the existing folder!");
-        }
-
-        if (! unzipTarget.moveFileTo (targetFolder))
-        {
-            unzipTarget.deleteRecursively();
-            return Result::fail ("Could not overwrite the existing folder!");
-        }
-    }
-
-    return Result::ok();
-}
-
-URL LatestVersionChecker::getLatestVersionURL (String& headers, const String& path) const
-{
-    const LatestVersionChecker::JuceServerLocationsAndKeys& urlsAndKeys = getJuceServerURLsAndKeys();
-
-    String updateURL;
-    bool isAbsolute = (path.startsWith ("http://") || path.startsWith ("https://"));
-    bool isRedirect = path.isNotEmpty();
-
-    if (isAbsolute)
-    {
-        updateURL = path;
-    }
-    else
-    {
-        updateURL << urlsAndKeys.updateSeverHostname
-                  << (isRedirect ? path : String (urlsAndKeys.updatePath));
-
-        if (! isRedirect)
-        {
-            updateURL << JuceVersionTriple (getProductVersionNumber()).toString() << '/'
-                      << getOSString() << "?language=" << SystemStats::getUserLanguage();
-        }
-    }
-
-    headers.clear();
-
-    if (! isAbsolute)
-    {
-        headers << "X-API-Key: " << urlsAndKeys.publicAPIKey;
-
-        if (! isRedirect)
-        {
-            headers << "\nContent-Type: application/json\n"
-                    << "Accept: application/json; version=" << urlsAndKeys.apiVersion;
-        }
-    }
-
-    return URL (updateURL);
-}
-
-URL LatestVersionChecker::getLatestVersionURL (String& headers) const
-{
-    String emptyString;
-    return getLatestVersionURL (headers, emptyString);
-}
-
-void LatestVersionChecker::checkForNewVersion()
-{
-    hasAttemptedToReadWebsite = true;
-
-    {
-        String extraHeaders;
-        URL updateURL (getLatestVersionURL (extraHeaders));
-        StringPairArray responseHeaders;
-
-        const int numRedirects = 0;
-
-        const std::unique_ptr<InputStream> in (updateURL.createInputStream (false, nullptr, nullptr,
-                                                                            extraHeaders, 0, &responseHeaders,
-                                                                            &statusCode, numRedirects));
-
-        if (threadShouldExit())
-            return;  // can't connect: fail silently.
-
-        if (in != nullptr && (statusCode == 303 || statusCode == 400))
-        {
-            // if this doesn't fail then there is a new version available.
-            // By leaving the scope of this function we will abort the download
-            // to give the user a chance to cancel an update
-            if (statusCode == 303)
-                newRelativeDownloadPath = responseHeaders ["Location"];
-
-            jsonReply = JSON::parse (in->readEntireStreamAsString());
-        }
-    }
-
-    if (! threadShouldExit())
-        startTimer (100);
-}
-
- bool LatestVersionChecker::processResult (var reply, const String& downloadPath)
- {
-     if (statusCode == 303)
-     {
-         String versionString = reply.getProperty ("version", var()).toString();
-         String releaseNotes = reply.getProperty ("notes", var()).toString();
-         JuceVersionTriple version;
-
-         if (versionString.isNotEmpty() && releaseNotes.isNotEmpty())
-         {
-             if (JuceVersionTriple::fromString (versionString, version))
-             {
-                 String extraHeaders;
-
-                 URL newVersionToDownload = getLatestVersionURL (extraHeaders, downloadPath);
-                 return askUserAboutNewVersion (version, releaseNotes, newVersionToDownload, extraHeaders);
-             }
-         }
-     }
-     else if (statusCode == 400)
-     {
-         // In the far-distant future, this may be contacting a defunct
-         // URL, so hopefully the website will contain a helpful message
-         // for the user..
-         var errorObj = reply.getDynamicObject()->getProperty ("error");
-
-         if (errorObj.isObject())
-         {
-             String message = errorObj.getProperty ("message", var()).toString();
-
-             if (message.isNotEmpty())
-             {
-                 AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                              TRANS("JUCE Updater"),
-                                              message);
-
-                 return false;
-             }
-         }
-     }
-
-     // try again
-     return true;
-}
-
-bool LatestVersionChecker::askUserAboutNewVersion (const LatestVersionChecker::JuceVersionTriple& version,
-                                                   const String& releaseNotes,
-                                                   URL& newVersionToDownload,
-                                                   const String& extraHeaders)
-{
-    JuceVersionTriple currentVersion (getProductVersionNumber());
-
-    if (version > currentVersion)
-    {
-        File appParentFolder (File::getSpecialLocation (File::currentApplicationFile).getParentDirectory());
-        DialogWindow* modalDialog = nullptr;
-
-        if (isZipFolder (appParentFolder) && allowCustomLocation())
-        {
-            modalDialog = UpdateUserDialog::launch (version, getProductName(), releaseNotes,
-                                                    appParentFolder.getFullPathName().toRawUTF8());
-        }
-        else
-        {
-            modalDialog = UpdateUserDialog::launch (version, getProductName(), releaseNotes);
-        }
-
-        if (modalDialog != nullptr)
-        {
-            UpdaterDialogModalCallback* callback = new UpdaterDialogModalCallback (*this,
-                                                                                   newVersionToDownload,
-                                                                                   extraHeaders,
-                                                                                   appParentFolder);
-
-            // attachCallback will delete callback
-            if (ModalComponentManager* mm = ModalComponentManager::getInstance())
-                mm->attachCallback (modalDialog, callback);
-        }
-
-        return false;
-    }
-
-    return true;
-}
-
-void LatestVersionChecker::modalStateFinished (int result,
-                                               URL& newVersionToDownload,
-                                               const String& extraHeaders,
-                                               File appParentFolder)
-{
-
-    if (result == 1 || result == 2)
-    {
-        if (result == 1 || ! allowCustomLocation())
-            DownloadNewVersionThread::performDownload (*this, newVersionToDownload, extraHeaders, appParentFolder);
-        else
-            askUserForLocationToDownload (newVersionToDownload, extraHeaders);
-    }
-}
-
-void LatestVersionChecker::askUserForLocationToDownload (URL& newVersionToDownload, const String& extraHeaders)
-{
-    File targetFolder (getAppSettings().getStoredPath (Ids::jucePath, TargetOS::getThisOS()).get());
-
-    FileChooser chooser (TRANS("Please select the location into which you'd like to install the new version"),
-                         targetFolder);
+    FileChooser chooser ("Please select the location into which you'd like to install the new version",
+                         { getAppSettings().getStoredPath (Ids::jucePath, TargetOS::getThisOS()).get() });
 
     if (chooser.browseForDirectory())
     {
-        targetFolder = chooser.getResult();
-
-        if (isJUCEModulesFolder (targetFolder))
-            targetFolder = targetFolder.getParentDirectory();
-
-        if (targetFolder.getChildFile ("JUCE").isDirectory())
-            targetFolder = targetFolder.getChildFile ("JUCE");
-
-        if (targetFolder.getChildFile (".git").isDirectory())
-        {
-            AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                         TRANS("Downloading new JUCE version"),
-                                         TRANS("This folder is a GIT repository!\n\n"
-                                                "You should use a \"git pull\" to update it to the latest version. "
-                                                "Or to use the Projucer to get an update, you should select an empty "
-                                                "folder into which you'd like to download the new code."));
-
-            return;
-        }
+        auto targetFolder = chooser.getResult();
 
         if (isJUCEFolder (targetFolder))
         {
-            if (! AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
-                                                TRANS("Overwrite existing JUCE folder?"),
-                                                TRANS("Do you want to overwrite the folder:\n\n"
-                                                      "xfldrx\n\n"
-                                                      " ..with the latest version from juce.com?\n\n"
-                                                      "(Please note that this will overwrite everything in that folder!)")
-                                                .replace ("xfldrx", targetFolder.getFullPathName())))
+            if (targetFolder.getChildFile (".git").isDirectory())
+            {
+                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Downloading New JUCE Version",
+                                                  "This folder is a GIT repository!\n\nYou should use a \"git pull\" to update it to the latest version.");
+
+                return;
+            }
+
+            if (! AlertWindow::showOkCancelBox (AlertWindow::WarningIcon, "Overwrite Existing JUCE Folder?",
+                                                String ("Do you want to overwrite the folder:\n\n" + targetFolder.getFullPathName() + "\n\n..with the latest version from juce.com?\n\n"
+                                                        "This will move the existing folder to " + targetFolder.getFullPathName() + "_old.")))
             {
                 return;
             }
@@ -796,40 +323,228 @@ void LatestVersionChecker::askUserForLocationToDownload (URL& newVersionToDownlo
             targetFolder = targetFolder.getChildFile ("JUCE").getNonexistentSibling();
         }
 
-        DownloadNewVersionThread::performDownload (*this, newVersionToDownload, extraHeaders, targetFolder);
+        downloadAndInstall (targetFolder);
     }
 }
 
-bool LatestVersionChecker::isZipFolder (const File& f)
+void LatestVersionCheckerAndUpdater::askUserAboutNewVersion (const String& newVersion, const String& releaseNotes)
 {
-    return f.getChildFile ("modules").isDirectory()
-        && f.getChildFile ("extras").isDirectory()
-        && f.getChildFile ("examples").isDirectory()
-        && ! f.getChildFile (".git").isDirectory();
-}
-
-void LatestVersionChecker::timerCallback()
-{
-    stopTimer();
-
-    if (hasAttemptedToReadWebsite)
+    if (newVersion.isNotEmpty() && releaseNotes.isNotEmpty()
+        && VersionHelpers::isNewVersion (VersionHelpers::getProductVersionString(), newVersion))
     {
-        bool restartTimer = true;
-        if (jsonReply.isObject())
-            restartTimer = processResult (jsonReply, newRelativeDownloadPath);
+        dialogWindow = UpdateDialog::launchDialog (newVersion, releaseNotes);
 
-        hasAttemptedToReadWebsite = false;
+        if (auto* mm = ModalComponentManager::getInstance())
+            mm->attachCallback (dialogWindow.get(), ModalCallbackFunction::create ([this] (int result)
+                                                                             {
+                                                                                 if (result == 1)
+                                                                                     askUserForLocationToDownload();
 
-        if (restartTimer)
-            startTimer (7200000);
-    }
-    else
-    {
-        startThread (3);
+                                                                                 dialogWindow.reset();
+                                                                             }));
     }
 }
 
-void LatestVersionChecker::run()
+//==============================================================================
+class DownloadAndInstallThread   : private ThreadWithProgressWindow
 {
-    checkForNewVersion();
+public:
+    DownloadAndInstallThread  (const URL& u, const File& t, std::function<void()>&& cb)
+        : ThreadWithProgressWindow ("Downloading New Version", true, true),
+          downloadURL (u), targetFolder (t), completionCallback (std::move (cb))
+    {
+        launchThread (3);
+    }
+
+private:
+    void run() override
+    {
+        setProgress (-1.0);
+
+        MemoryBlock zipData;
+        auto result = download (zipData);
+
+        if (result.wasOk() && ! threadShouldExit())
+            result = install (zipData);
+
+        if (result.failed())
+            MessageManager::callAsync ([result] () { AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Installation Failed", result.getErrorMessage()); });
+        else
+            MessageManager::callAsync (completionCallback);
+    }
+
+    Result download (MemoryBlock& dest)
+    {
+        setStatusMessage ("Downloading...");
+
+        int statusCode = 0;
+        StringPairArray responseHeaders;
+
+        std::unique_ptr<InputStream> inStream (downloadURL.createInputStream (false, nullptr, nullptr, {}, 0,
+                                                                              &responseHeaders, &statusCode, 0));
+
+        if (inStream != nullptr && statusCode == 200)
+        {
+            int64 total = 0;
+            MemoryOutputStream mo (dest, true);
+
+            for (;;)
+            {
+                if (threadShouldExit())
+                    return Result::fail ("Cancelled");
+
+                auto written = mo.writeFromInputStream (*inStream, 8192);
+
+                if (written == 0)
+                    break;
+
+                total += written;
+
+                setStatusMessage ("Downloading... " + File::descriptionOfSizeInBytes (total));
+            }
+
+            return Result::ok();
+        }
+
+        return Result::fail ("Failed to download from: " + downloadURL.toString (false));
+    }
+
+    Result install (MemoryBlock& data)
+    {
+        setStatusMessage ("Installing...");
+
+        auto result = unzipDownload (data);
+
+        if (threadShouldExit())
+            result = Result::fail ("Cancelled");
+
+        if (result.failed())
+            return result;
+
+        return Result::ok();
+    }
+
+    Result unzipDownload (const MemoryBlock& data)
+    {
+        MemoryInputStream input (data, false);
+        ZipFile zip (input);
+
+        if (zip.getNumEntries() == 0)
+            return Result::fail ("The downloaded file was not a valid JUCE file!");
+
+        auto unzipTarget = File::createTempFile ({});
+
+        if (! unzipTarget.createDirectory())
+            return Result::fail ("Couldn't create a temporary folder to unzip the new version!");
+
+        auto r = zip.uncompressTo (unzipTarget);
+
+        if (r.failed())
+        {
+            unzipTarget.deleteRecursively();
+            return r;
+        }
+
+        r = applyAutoUpdaterFile (unzipTarget);
+
+        if (r.failed())
+        {
+            unzipTarget.deleteRecursively();
+            return r;
+        }
+
+        if (targetFolder.exists())
+        {
+            auto oldFolder = targetFolder.getSiblingFile (targetFolder.getFileNameWithoutExtension() + "_old").getNonexistentSibling();
+
+            if (! targetFolder.moveFileTo (oldFolder))
+            {
+                unzipTarget.deleteRecursively();
+                return Result::fail ("Could not remove the existing folder!\n\n"
+                                     "This may happen if you are trying to download into a directory that requires administrator privileges to modify.\n"
+                                     "Please select a folder that is writable by the current user.");
+            }
+        }
+
+        if (! unzipTarget.moveFileTo (targetFolder))
+        {
+            unzipTarget.deleteRecursively();
+            return Result::fail ("Could not overwrite the existing folder!\n\n"
+                                 "This may happen if you are trying to download into a directory that requires administrator privileges to modify.\n"
+                                 "Please select a folder that is writable by the current user.");
+        }
+
+        return Result::ok();
+    }
+
+    Result applyAutoUpdaterFile (const File& root)
+    {
+        auto autoUpdaterFile = root.getChildFile (".autoupdater.xml");
+
+        if (autoUpdaterFile.existsAsFile())
+        {
+           #if JUCE_LINUX || JUCE_MAC
+            if (auto parent = parseXML (autoUpdaterFile))
+            {
+                if (auto* execElement = parent->getChildByName ("EXECUTABLE"))
+                {
+                    forEachXmlChildElementWithTagName (*execElement, e, "FILE")
+                    {
+                        auto file = root.getChildFile (e->getAllSubText());
+
+                        if (file.exists() && ! file.setExecutePermission (true))
+                            return Result::fail ("Failed to set executable file permission for " + file.getFileName());
+                    }
+                }
+            }
+           #endif
+
+            autoUpdaterFile.deleteFile();
+        }
+
+        return Result::ok();
+    }
+
+    URL downloadURL;
+    File targetFolder;
+    std::function<void()> completionCallback;
+};
+
+void restartProcess (const File& targetFolder)
+{
+   #if JUCE_MAC || JUCE_LINUX
+    #if JUCE_MAC
+     auto newProcess = targetFolder.getChildFile ("Projucer.app").getChildFile ("Contents").getChildFile ("MacOS").getChildFile ("Projucer");
+    #elif JUCE_LINUX
+     auto newProcess = targetFolder.getChildFile ("Projucer");
+    #endif
+
+    StringArray command ("/bin/sh", "-c", "while killall -0 Projucer; do sleep 5; done; " + newProcess.getFullPathName().quoted());
+   #elif JUCE_WINDOWS
+    auto newProcess = targetFolder.getChildFile ("Projucer.exe");
+
+    auto command = "cmd.exe /c\"@echo off & for /l %a in (0) do ( tasklist | find \"Projucer\" >nul & ( if errorlevel 1 ( "
+                    + targetFolder.getChildFile ("Projucer.exe").getFullPathName().quoted() + " & exit /b ) else ( timeout /t 10 >nul ) ) )\"";
+   #endif
+
+    if (newProcess.existsAsFile())
+    {
+        ChildProcess restartProcess;
+        restartProcess.start (command, 0);
+
+        ProjucerApplication::getApp().systemRequestedQuit();
+    }
 }
+
+void LatestVersionCheckerAndUpdater::downloadAndInstall (const File& targetFolder)
+{
+    installer.reset (new DownloadAndInstallThread ({ relativeDownloadPath }, targetFolder,
+                                                   [this, targetFolder]
+                                                   {
+                                                       installer.reset();
+                                                       restartProcess (targetFolder);
+                                                   }));
+}
+
+//==============================================================================
+JUCE_IMPLEMENT_SINGLETON (LatestVersionCheckerAndUpdater)

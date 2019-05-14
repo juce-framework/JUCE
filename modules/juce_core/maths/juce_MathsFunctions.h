@@ -297,12 +297,7 @@ void ignoreUnused (Types&&...) noexcept {}
     @endcode
 */
 template <typename Type, int N>
-int numElementsInArray (Type (&array)[N])
-{
-    (void) array;
-    (void) sizeof (0[array]); // This line should cause an error if you pass an object with a user-defined subscript operator
-    return N;
-}
+JUCE_CONSTEXPR int numElementsInArray (Type (&)[N]) noexcept     { return N; }
 
 //==============================================================================
 // Some useful maths functions that aren't always present with all compilers and build settings.
@@ -329,12 +324,6 @@ inline float juce_hypot (float a, float b) noexcept
     return hypotf (a, b);
    #endif
 }
-#endif
-
-#if JUCE_MSVC && ! defined (DOXYGEN)  // The MSVC libraries omit these functions for some reason...
- template<typename Type> Type asinh (Type x)  { return std::log (x + std::sqrt (x * x + (Type) 1)); }
- template<typename Type> Type acosh (Type x)  { return std::log (x + std::sqrt (x * x - (Type) 1)); }
- template<typename Type> Type atanh (Type x)  { return (std::log (x + (Type) 1) - std::log (((Type) 1) - x)) / (Type) 2; }
 #endif
 
 //==============================================================================

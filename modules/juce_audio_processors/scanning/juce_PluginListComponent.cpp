@@ -521,10 +521,10 @@ private:
         if (timerReentrancyCheck)
             return;
 
-        const ScopedValueSetter<bool> setter (timerReentrancyCheck, true);
-
         if (pool == nullptr)
         {
+            const ScopedValueSetter<bool> setter (timerReentrancyCheck, true);
+
             if (doNextScan())
                 startTimer (20);
         }

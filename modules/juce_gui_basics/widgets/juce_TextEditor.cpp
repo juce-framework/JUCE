@@ -1251,7 +1251,7 @@ void TextEditor::timerCallbackInt()
 
 void TextEditor::checkFocus()
 {
-    if (hasKeyboardFocus (false) && ! isCurrentlyBlockedByAnotherModalComponent())
+    if (! wasFocused && hasKeyboardFocus (false) && ! isCurrentlyBlockedByAnotherModalComponent())
     {
         wasFocused = true;
 
@@ -2071,11 +2071,7 @@ void TextEditor::focusGained (FocusChangeType)
         moveCaretTo (getTotalNumChars(), true);
     }
 
-    // When caret position changes, we check focus automatically, to
-    // show any native keyboard if needed. If the position does not
-    // change though, we need to check focus manually.
-    if (getTotalNumChars() == 0)
-        checkFocus();
+    checkFocus();
 
     repaint();
     updateCaretPosition();

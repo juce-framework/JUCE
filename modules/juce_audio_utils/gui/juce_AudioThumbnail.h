@@ -206,7 +206,8 @@ private:
     OwnedArray<ThumbData> channels;
 
     int32 samplesPerThumbSample = 0;
-    int64 totalSamples = 0, numSamplesFinished = 0;
+    std::atomic<int64> totalSamples { 0 };
+    int64 numSamplesFinished = 0;
     int32 numChannels = 0;
     double sampleRate = 0;
     CriticalSection lock;

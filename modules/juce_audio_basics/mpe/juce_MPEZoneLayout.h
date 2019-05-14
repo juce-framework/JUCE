@@ -98,6 +98,11 @@ public:
                              : (channel < 16 && channel >= 16 - numMemberChannels);
         }
 
+        bool isUsing (int channel) const noexcept
+        {
+            return isUsingChannelAsMemberChannel (channel) || channel == getMasterChannel();
+        }
+
         bool operator== (const Zone& other) const noexcept    { return lowerZone == other.lowerZone
                                                                     && numMemberChannels == other.numMemberChannels
                                                                     && perNotePitchbendRange == other.perNotePitchbendRange

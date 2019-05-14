@@ -214,7 +214,7 @@ private:
     std::unique_ptr<InputSource> source;
     std::unique_ptr<AudioFormatReader> reader;
     CriticalSection readerLock;
-    uint32 lastReaderUseTime = 0;
+    std::atomic<uint32> lastReaderUseTime { 0 };
 
     void createReader()
     {
@@ -645,6 +645,7 @@ bool AudioThumbnail::setDataSource (LevelDataSource* newSource)
     JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
     numSamplesFinished = 0;
+    auto wasSuccessful = [&] { return sampleRate > 0 && totalSamples > 0; };
 
     if (cache.loadThumb (*this, newSource->hashCode) && isFullyLoaded())
     {
@@ -654,22 +655,22 @@ bool AudioThumbnail::setDataSource (LevelDataSource* newSource)
         source->sampleRate = sampleRate;
         source->numChannels = (unsigned int) numChannels;
         source->numSamplesFinished = numSamplesFinished;
-    }
-    else
-    {
-        source.reset (newSource); // (make sure this isn't done before loadThumb is called)
 
-        const ScopedLock sl (lock);
-        source->initialise (numSamplesFinished);
-
-        totalSamples = source->lengthInSamples;
-        sampleRate = source->sampleRate;
-        numChannels = (int32) source->numChannels;
-
-        createChannels (1 + (int) (totalSamples / samplesPerThumbSample));
+        return wasSuccessful();
     }
 
-    return sampleRate > 0 && totalSamples > 0;
+    source.reset (newSource);
+
+    const ScopedLock sl (lock);
+    source->initialise (numSamplesFinished);
+
+    totalSamples = source->lengthInSamples;
+    sampleRate = source->sampleRate;
+    numChannels = (int32) source->numChannels;
+
+    createChannels (1 + (int) (totalSamples / samplesPerThumbSample));
+
+    return wasSuccessful();
 }
 
 bool AudioThumbnail::setSource (InputSource* const newSource)
@@ -740,7 +741,7 @@ void AudioThumbnail::setLevels (const MinMaxValue* const* values, int thumbIndex
     if (numSamplesFinished >= start && end > numSamplesFinished)
         numSamplesFinished = end;
 
-    totalSamples = jmax (numSamplesFinished, totalSamples);
+    totalSamples = jmax (numSamplesFinished, totalSamples.load());
     window->invalidate();
     sendChangeMessage();
 }
@@ -763,7 +764,7 @@ bool AudioThumbnail::isFullyLoaded() const noexcept
 
 double AudioThumbnail::getProportionComplete() const noexcept
 {
-    return jlimit (0.0, 1.0, numSamplesFinished / (double) jmax ((int64) 1, totalSamples));
+    return jlimit (0.0, 1.0, numSamplesFinished / (double) jmax ((int64) 1, totalSamples.load()));
 }
 
 int64 AudioThumbnail::getNumSamplesFinished() const noexcept

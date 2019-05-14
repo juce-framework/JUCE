@@ -590,6 +590,11 @@ public:
     */
     bool isTransformed() const noexcept;
 
+    /** Returns the approximate scale factor for a given component by traversing its parent hierarchy
+        and applying each transform and finally scaling this by the global scale factor.
+    */
+    static float JUCE_CALLTYPE getApproximateScaleFactorForComponent (Component* targetComponent);
+
     //==============================================================================
     /** Returns a proportion of the component's width.
         This is a handy equivalent of (getWidth() * proportion).
@@ -1730,7 +1735,7 @@ public:
     virtual void modifierKeysChanged (const ModifierKeys& modifiers);
 
     //==============================================================================
-    /** Enumeration used by the focusChanged() and focusLost() methods. */
+    /** Enumeration used by the focusGained() and focusLost() methods. */
     enum FocusChangeType
     {
         focusChangedByMouseClick,   /**< Means that the user clicked the mouse to change focus. */

@@ -66,7 +66,8 @@ public:
                          bool makeThisTheDefaultFormat);
 
     /** Handy method to make it easy to register the formats that come with JUCE.
-        Currently, this will add WAV and AIFF to the list.
+        This will add WAV and AIFF to the list, along with any other formats enabled
+        in either the Projucer or your application's AppConfig.h.
     */
     void registerBasicFormats();
 
