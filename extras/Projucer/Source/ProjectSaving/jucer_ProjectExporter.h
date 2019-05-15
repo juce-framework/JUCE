@@ -449,7 +449,7 @@ protected:
         XmlElement::TextFormat format;
         format.customEncoding = encoding;
         format.lineWrapLength = maxCharsPerLine;
-        format.newLineChars = useUnixNewLines ? "\r\n" : "\n";
+        format.newLineChars = useUnixNewLines ? "\n" : "\r\n";
 
         MemoryOutputStream mo (8192);
         xml.writeTo (mo, format);
