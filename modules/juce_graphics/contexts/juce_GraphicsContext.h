@@ -741,8 +741,8 @@ public:
 
 private:
     //==============================================================================
+    std::unique_ptr<LowLevelGraphicsContext> contextHolder;
     LowLevelGraphicsContext& context;
-    std::unique_ptr<LowLevelGraphicsContext> contextToDelete;
 
     bool saveStatePending = false;
     void saveStateIfPending();

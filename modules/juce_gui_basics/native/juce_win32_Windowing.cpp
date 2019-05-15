@@ -763,12 +763,12 @@ public:
         DeleteObject (hBitmap);
     }
 
-    ImageType* createType() const override                       { return new NativeImageType(); }
+    std::unique_ptr<ImageType> createType() const override    { return std::make_unique<NativeImageType>(); }
 
-    LowLevelGraphicsContext* createLowLevelContext() override
+    std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
     {
         sendDataChangeMessage();
-        return new LowLevelGraphicsSoftwareRenderer (Image (this));
+        return std::make_unique<LowLevelGraphicsSoftwareRenderer> (Image (this));
     }
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
@@ -2441,8 +2441,8 @@ private:
                         offscreenImage.clear (i);
 
                 {
-                    std::unique_ptr<LowLevelGraphicsContext> context (component.getLookAndFeel()
-                                                                        .createGraphicsContext (offscreenImage, Point<int> (-x, -y), contextClip));
+                    auto context = component.getLookAndFeel()
+                                    .createGraphicsContext (offscreenImage, { -x, -y }, contextClip);
 
                     context->addTransform (AffineTransform::scale ((float) getPlatformScaleFactor()));
                     handlePaint (*context);

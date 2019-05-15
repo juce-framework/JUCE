@@ -51,8 +51,8 @@ LowLevelGraphicsContext::~LowLevelGraphicsContext() {}
 
 //==============================================================================
 Graphics::Graphics (const Image& imageToDrawOnto)
-    : context (*imageToDrawOnto.createLowLevelContext()),
-      contextToDelete (&context)
+    : contextHolder (imageToDrawOnto.createLowLevelContext()),
+      context (*contextHolder)
 {
     jassert (imageToDrawOnto.isValid()); // Can't draw into a null image!
 }

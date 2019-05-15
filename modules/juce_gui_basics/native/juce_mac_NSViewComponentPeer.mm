@@ -876,8 +876,8 @@ public:
                     if (intScale != 1)
                         clip.scaleAll (intScale);
 
-                    std::unique_ptr<LowLevelGraphicsContext> context (component.getLookAndFeel()
-                                                                        .createGraphicsContext (temp, offset * intScale, clip));
+                    auto context = component.getLookAndFeel()
+                                     .createGraphicsContext (temp, offset * intScale, clip);
 
                     if (intScale != 1)
                         context->addTransform (AffineTransform::scale (displayScale));
