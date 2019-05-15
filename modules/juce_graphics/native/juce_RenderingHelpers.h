@@ -2504,7 +2504,7 @@ public:
         {
             auto layerBounds = clip->getClipBounds();
 
-            const std::unique_ptr<LowLevelGraphicsContext> g (image.createLowLevelContext());
+            auto g = image.createLowLevelContext();
             g->setOpacity (finishedLayerState.transparencyLayerAlpha);
             g->drawImage (finishedLayerState.image, AffineTransform::translation (layerBounds.getPosition()));
         }

@@ -252,6 +252,19 @@ public:
     */
     Colour getColourForTokenType (int tokenType) const;
 
+    /** Rebuilds the syntax highlighting for a section of text.
+
+        This happens automatically any time the CodeDocument is edited, but this
+        method lets you change text colours even when the CodeDocument hasn't changed.
+
+        For example, you could use this to highlight tokens as the cursor moves.
+        To do so you'll need to tell your custom CodeTokeniser where the token you
+        want to highlight is, and make it return a special type of token. Then you
+        should call this method supplying the range of the highlighted text.
+        @see CodeTokeniser
+     */
+    void retokenise (int startIndex, int endIndex);
+
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the editor.
 
@@ -286,6 +299,9 @@ public:
 
     /** Called when the view position is scrolled horizontally or vertically. */
     virtual void editorViewportPositionChanged();
+
+    /** Called when the caret position moves. */
+    virtual void caretPositionMoved();
 
     //==============================================================================
     /** This adds the items to the popup menu.
@@ -406,7 +422,7 @@ private:
     void rebuildLineTokensAsync();
     void codeDocumentChanged (int start, int end);
 
-    OwnedArray<CodeDocument::Iterator> cachedIterators;
+    Array<CodeDocument::Iterator> cachedIterators;
     void clearCachedIterators (int firstLineToBeInvalid);
     void updateCachedIterators (int maxLineNum);
     void getIteratorForPosition (int position, CodeDocument::Iterator&);

@@ -322,9 +322,9 @@ void JucerDocument::addExtraClassProperties (PropertyPanel&)
 //==============================================================================
 const char* const JucerDocument::jucerCompXmlTag = "JUCER_COMPONENT";
 
-XmlElement* JucerDocument::createXml() const
+std::unique_ptr<XmlElement> JucerDocument::createXml() const
 {
-    XmlElement* doc = new XmlElement (jucerCompXmlTag);
+    auto doc = std::make_unique<XmlElement> (jucerCompXmlTag);
 
     doc->setAttribute ("documentType", getTypeName());
     doc->setAttribute ("className", className);

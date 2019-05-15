@@ -168,10 +168,11 @@ MouseCursor LookAndFeel::getMouseCursorFor (Component& component)
     return cursor;
 }
 
-LowLevelGraphicsContext* LookAndFeel::createGraphicsContext (const Image& imageToRenderOn, const Point<int>& origin,
-                                                             const RectangleList<int>& initialClip)
+std::unique_ptr<LowLevelGraphicsContext> LookAndFeel::createGraphicsContext (const Image& imageToRenderOn,
+                                                                             Point<int> origin,
+                                                                             RectangleList<int> initialClip)
 {
-    return new LowLevelGraphicsSoftwareRenderer (imageToRenderOn, origin, initialClip);
+    return std::make_unique<LowLevelGraphicsSoftwareRenderer> (imageToRenderOn, origin, initialClip);
 }
 
 //==============================================================================

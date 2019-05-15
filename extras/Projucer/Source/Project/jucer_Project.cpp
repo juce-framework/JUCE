@@ -1231,15 +1231,17 @@ Project::Item Project::Item::createCopy()         { Item i (*this); i.state = i.
 String Project::Item::getID() const               { return state [Ids::ID]; }
 void Project::Item::setID (const String& newID)   { state.setProperty (Ids::ID, newID, nullptr); }
 
-Drawable* Project::Item::loadAsImageFile() const
+std::unique_ptr<Drawable> Project::Item::loadAsImageFile() const
 {
     const MessageManagerLock mml (ThreadPoolJob::getCurrentThreadPoolJob());
 
     if (! mml.lockWasGained())
         return nullptr;
 
-    return isValid() ? Drawable::createFromImageFile (getFile())
-                     : nullptr;
+    if (isValid())
+        return std::unique_ptr<Drawable> (Drawable::createFromImageFile (getFile()));
+
+    return {};
 }
 
 Project::Item Project::Item::createGroup (Project& project, const String& name, const String& uid, bool isModuleCode)

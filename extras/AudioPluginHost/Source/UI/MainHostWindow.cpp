@@ -574,7 +574,7 @@ void MainHostWindow::showAudioSettings()
                          ModalCallbackFunction::create
                          ([safeThis] (int)
                          {
-                             std::unique_ptr<XmlElement> audioState (safeThis->deviceManager.createStateXml());
+                             auto audioState = safeThis->deviceManager.createStateXml();
 
                              getAppProperties().getUserSettings()->setValue ("audioDeviceState", audioState.get());
                              getAppProperties().getUserSettings()->saveIfNeeded();

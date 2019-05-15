@@ -296,7 +296,7 @@ public:
     {
         if (settings != nullptr)
         {
-            std::unique_ptr<XmlElement> xml (deviceManager.createStateXml());
+            auto xml = deviceManager.createStateXml();
 
             settings->setValue ("audioSetup", xml.get());
 

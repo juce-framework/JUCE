@@ -172,7 +172,7 @@ void ProjectSaver::writeProjects (const OwnedArray<LibraryModule>& modules, cons
             if (specifiedExporterToSave.isNotEmpty() && exp->getName() != specifiedExporterToSave)
                 continue;
 
-            auto* exporter = exporters.add (exp.exporter.release());
+            auto exporter = exporters.add (std::move (exp.exporter));
 
             exporter->initialiseDependencyPathValues();
 

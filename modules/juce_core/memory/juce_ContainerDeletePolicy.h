@@ -32,7 +32,7 @@ namespace juce
     create a specialised version of it for a particular class if you need to
     delete that type of object in a more appropriate way.
 
-    @see ScopedPointer, OwnedArray
+    @see OwnedArray
 
     @tags{Core}
 */
@@ -45,8 +45,8 @@ struct ContainerDeletePolicy
         // an incomplete type for ObjectType (for example, a type that is declared
         // but not defined). This is a problem because then the following delete is
         // undefined behaviour. The purpose of the sizeof is to capture this situation.
-        // If this was caused by a ScopedPointer to a forward-declared type, move the
-        // implementation of all methods trying to use the ScopedPointer (e.g. the destructor
+        // If this was caused by a OwnedArray of a forward-declared type, move the
+        // implementation of all methods trying to use the OwnedArray (e.g. the destructor
         // of the class owning it) into cpp files where they can see to the definition
         // of ObjectType. This should fix the error.
         ignoreUnused (sizeof (ObjectType));

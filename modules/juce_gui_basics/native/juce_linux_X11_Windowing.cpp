@@ -620,10 +620,10 @@ public:
         }
     }
 
-    LowLevelGraphicsContext* createLowLevelContext() override
+    std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
     {
         sendDataChangeMessage();
-        return new LowLevelGraphicsSoftwareRenderer (Image (this));
+        return std::make_unique<LowLevelGraphicsSoftwareRenderer> (Image (this));
     }
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y,
@@ -644,7 +644,7 @@ public:
         return nullptr;
     }
 
-    ImageType* createType() const override     { return new NativeImageType(); }
+    std::unique_ptr<ImageType> createType() const override     { return std::make_unique<NativeImageType>(); }
 
     void blitToWindow (Window window, int dx, int dy,
                        unsigned int dw, unsigned int dh, int sx, int sy)
@@ -2305,8 +2305,9 @@ private:
                         image.clear (i - totalArea.getPosition());
 
                 {
-                    std::unique_ptr<LowLevelGraphicsContext> context (peer.getComponent().getLookAndFeel()
-                                                                          .createGraphicsContext (image, -totalArea.getPosition(), adjustedList));
+                    auto context = peer.getComponent().getLookAndFeel()
+                                     .createGraphicsContext (image, -totalArea.getPosition(), adjustedList);
+
                     context->addTransform (AffineTransform::scale ((float) peer.currentScaleFactor));
                     peer.handlePaint (*context);
                 }
