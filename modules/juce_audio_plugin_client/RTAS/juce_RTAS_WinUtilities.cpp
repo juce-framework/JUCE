@@ -88,6 +88,8 @@ void JUCE_CALLTYPE resizeHostWindow (void* hostWindow,
                   SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 }
 
+// RTAS is 32bit, This is just to avoid entire solution not building (64bit RTAS is bogus)
+#if ! _WIN64
 extern "C" BOOL WINAPI DllMainRTAS (HINSTANCE, DWORD, LPVOID);
 
 extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID reserved)
@@ -101,6 +103,7 @@ extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID reserve
     juce::ignoreUnused (reserved);
     return TRUE;
 }
+#endif
 
 #if ! JucePlugin_EditorRequiresKeyboardFocus
 
