@@ -85,6 +85,13 @@ public:
     static Font getPropertyComponentFont()                                 { return { 14.0f, Font::FontStyleFlags::bold }; }
     static int getTextWidthForPropertyComponent (PropertyComponent* pp)    { return jmin (200, pp->getWidth() / 2); }
 
+    static ColourScheme getProjucerDarkColourScheme()
+    {
+        return { 0xff323e44, 0xff263238, 0xff323e44,
+                 0xff8e989b, 0xffffffff, 0xffa45c94,
+                 0xffffffff, 0xff181f22, 0xffffffff };
+    }
+
     //==============================================================================
     void setupColours();
 
