@@ -239,6 +239,8 @@ void ARASampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
 
                     startSongSample = jmax (startSongSample, startAvailableSourceSamples - offsetToPlaybackRegion);
                     endSongSample = jmin (endSongSample, endAvailableSourceSamples - offsetToPlaybackRegion);
+                    if (endSongSample <= startSongSample)
+                        continue;
 
                     // calculate buffer offsets
                     int startInDestBuffer = (int) (startSongSample - sampleStart);
