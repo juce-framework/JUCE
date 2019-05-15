@@ -31,18 +31,37 @@
 //==============================================================================
 namespace
 {
-    const char* const osxVersionDefault         = "10.11";
-    const char* const iosVersionDefault         = "9.3";
+    static const char* const iOSDefaultVersion = "9.3";
+    static const StringArray iOSVersions { "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4",
+                                           "9.0", "9.1", "9.2", "9.3", "10.0", "10.1", "10.2", "10.3",
+                                           "11.0", "12.0" };
 
-    const int oldestSDKVersion  = 7;
-    const int currentSDKVersion = 14;
-    const int minimumAUv3SDKVersion = 11;
+    static const int oldestDeploymentTarget  = 7;
+    static const int defaultDeploymentTarget = 11;
+    static const int oldestSDKVersion        = 11;
+    static const int currentSDKVersion       = 14;
+    static const int minimumAUv3SDKVersion   = 11;
 
-    const char* const osxArch_Default           = "default";
-    const char* const osxArch_Native            = "Native";
-    const char* const osxArch_32BitUniversal    = "32BitUniversal";
-    const char* const osxArch_64BitUniversal    = "64BitUniversal";
-    const char* const osxArch_64Bit             = "64BitIntel";
+    static String getVersionName    (int version)  { return "10." + String (version); }
+    static String getSDKDisplayName (int version)  { return getVersionName (version) + " SDK"; }
+    static String getSDKRootName    (int version)  { return "macosx" + getVersionName (version); }
+
+    template<class ContainerType>
+    static ContainerType getSDKChoiceList (int oldestVersion, bool displayName)
+    {
+        ContainerType container;
+
+        for (int v = oldestVersion; v <= currentSDKVersion; ++v)
+            container.add (displayName ? getSDKDisplayName (v) : getVersionName (v));
+
+        return container;
+    }
+
+    static const char* const osxArch_Default        = "default";
+    static const char* const osxArch_Native         = "Native";
+    static const char* const osxArch_32BitUniversal = "32BitUniversal";
+    static const char* const osxArch_64BitUniversal = "64BitUniversal";
+    static const char* const osxArch_64Bit          = "64BitIntel";
 }
 
 //==============================================================================
@@ -586,8 +605,8 @@ protected:
             : BuildConfiguration (p, t, e),
               iOS (isIOS),
               osxSDKVersion                (config, Ids::osxSDK,                       getUndoManager()),
-              osxDeploymentTarget          (config, Ids::osxCompatibility,             getUndoManager(), String (osxVersionDefault) + " SDK"),
-              iosDeploymentTarget          (config, Ids::iosCompatibility,             getUndoManager(), iosVersionDefault),
+              osxDeploymentTarget          (config, Ids::osxCompatibility,             getUndoManager(), getSDKDisplayName (defaultDeploymentTarget)),
+              iosDeploymentTarget          (config, Ids::iosCompatibility,             getUndoManager(), iOSDefaultVersion),
               osxArchitecture              (config, Ids::osxArchitecture,              getUndoManager(), osxArch_Default),
               customXcodeFlags             (config, Ids::customXcodeFlags,             getUndoManager()),
               plistPreprocessorDefinitions (config, Ids::plistPreprocessorDefinitions, getUndoManager()),
@@ -616,32 +635,23 @@ protected:
 
             if (iOS)
             {
-                props.add (new ChoicePropertyComponent (iosDeploymentTarget, "iOS Deployment Target",
-                                                        { "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4",
-                                                          "9.0", "9.1", "9.2", "9.3", "10.0", "10.1", "10.2", "10.3",
-                                                          "11.0", "12.0" },
-                                                        { "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4",
-                                                          "9.0", "9.1", "9.2", "9.3", "10.0", "10.1", "10.2", "10.3",
-                                                          "11.0", "12.0" }),
+                Array<var> iOSVersionVars;
+
+                for (auto& s : iOSVersions)
+                    iOSVersionVars.add (s);
+
+                props.add (new ChoicePropertyComponent (iosDeploymentTarget, "iOS Deployment Target", iOSVersions, iOSVersionVars),
                            "The minimum version of iOS that the target binary will run on.");
             }
             else
             {
-                StringArray sdkVersionNames, osxVersionNames;
-                Array<var> versionValues;
-
-                for (int ver = oldestSDKVersion; ver <= currentSDKVersion; ++ver)
-                {
-                    sdkVersionNames.add (getSDKName (ver));
-                    osxVersionNames.add (getOSXVersionName (ver));
-                    versionValues.add (getSDKName (ver));
-                }
-
-                props.add (new ChoicePropertyComponent (osxSDKVersion, "OSX Base SDK Version", sdkVersionNames, versionValues),
+                props.add (new ChoicePropertyComponent (osxSDKVersion, "OSX Base SDK Version", getSDKChoiceList<StringArray> (oldestSDKVersion, true),
+                                                                                               getSDKChoiceList<Array<var>>  (oldestSDKVersion, true)),
                            "The version of OSX to link against in the Xcode build. If \"Default\" is selected then the field will be left "
                            "empty and the Xcode default will be used.");
 
-                props.add (new ChoicePropertyComponent (osxDeploymentTarget, "OSX Deployment Target", osxVersionNames, versionValues),
+                props.add (new ChoicePropertyComponent (osxDeploymentTarget, "OSX Deployment Target", getSDKChoiceList<StringArray> (oldestDeploymentTarget, false),
+                                                                                                      getSDKChoiceList<Array<var>>  (oldestDeploymentTarget, true)),
                            "The minimum version of OSX that the target binary will be compatible with.");
 
                 props.add (new ChoicePropertyComponent (osxArchitecture, "OSX Architecture",
@@ -1168,9 +1178,9 @@ public:
             {
                 // the aggregate target needs to have the deployment target set for
                 // pre-/post-build scripts
+                s.set ("MACOSX_DEPLOYMENT_TARGET", getOSXDeploymentTarget (config.getOSXDeploymentTargetString()));
 
-                String sdkRoot;
-                s.set ("MACOSX_DEPLOYMENT_TARGET", getOSXDeploymentTarget (config, &sdkRoot));
+                auto sdkRoot = getOSXSDKVersion (config.getOSXSDKVersionString());
 
                 if (sdkRoot.isNotEmpty())
                     s.set ("SDKROOT", sdkRoot);
@@ -1298,8 +1308,9 @@ public:
             }
             else
             {
-                String sdkRoot;
-                s.set ("MACOSX_DEPLOYMENT_TARGET", getOSXDeploymentTarget (config, &sdkRoot));
+                s.set ("MACOSX_DEPLOYMENT_TARGET", getOSXDeploymentTarget (config.getOSXDeploymentTargetString()));
+
+                auto sdkRoot = getOSXSDKVersion (config.getOSXSDKVersionString());
 
                 if (sdkRoot.isNotEmpty())
                     s.set ("SDKROOT", sdkRoot);
@@ -1880,25 +1891,24 @@ public:
             return targetExtraSearchPaths;
         }
 
-        String getOSXDeploymentTarget (const XcodeBuildConfiguration& config, String* sdkRoot = nullptr) const
+        String getOSXDeploymentTarget (const String& deploymentTarget) const
         {
-            auto sdk = config.getOSXSDKVersionString();
-            auto sdkCompat = config.getOSXDeploymentTargetString();
+            auto minVersion = (type == Target::AudioUnitv3PlugIn ? minimumAUv3SDKVersion : oldestDeploymentTarget);
 
-            // The AUv3 target always needs to be at least 10.11
-            int oldestAllowedDeploymentTarget = (type == Target::AudioUnitv3PlugIn ? minimumAUv3SDKVersion
-                                                                                   : oldestSDKVersion);
+            for (int v = minVersion; v < currentSDKVersion; ++v)
+                if (deploymentTarget == getSDKDisplayName (v))
+                    return getVersionName (v);
 
-            // if the user doesn't set it, then use the last known version that works well with JUCE
-            String deploymentTarget (osxVersionDefault);
+            return getVersionName (minVersion);
+        }
 
-            for (int ver = oldestAllowedDeploymentTarget; ver <= currentSDKVersion; ++ver)
-            {
-                if (sdk.isNotEmpty() && (sdk == getSDKName (ver) && sdkRoot != nullptr)) *sdkRoot = String ("macosx10." + String (ver));
-                if (sdkCompat == getSDKName (ver))                                       deploymentTarget = "10." + String (ver);
-            }
+        String getOSXSDKVersion (const String& sdkVersion) const
+        {
+            for (int v = oldestSDKVersion; v < currentSDKVersion; ++v)
+                if (sdkVersion == getSDKDisplayName (v))
+                    return getSDKRootName (v);
 
-            return deploymentTarget;
+            return {};
         }
 
         bool isUsingCodeSigning (const XcodeBuildConfiguration& config) const
@@ -3661,17 +3671,6 @@ private:
     bool shouldFileBeCompiledByDefault (const File& file) const override
     {
         return file.hasFileExtension (sourceFileExtensions);
-    }
-
-    static String getOSXVersionName (int version)
-    {
-        jassert (version >= 4);
-        return "10." + String (version);
-    }
-
-    static String getSDKName (int version)
-    {
-        return getOSXVersionName (version) + " SDK";
     }
 
     JUCE_DECLARE_NON_COPYABLE (XcodeProjectExporter)
