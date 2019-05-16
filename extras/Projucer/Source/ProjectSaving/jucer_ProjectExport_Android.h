@@ -96,8 +96,8 @@ public:
     }
 
     //==============================================================================
-    ValueWithDefault androidJavaLibs, androidAdditionalJavaFolders, androidAdditionalResourceFolders, androidRepositories, androidDependencies, androidScreenOrientation,
-                     androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements, androidGradleSettingsContent, androidVersionCode,
+    ValueWithDefault androidJavaLibs, androidAdditionalJavaFolders, androidAdditionalResourceFolders, androidRepositories, androidDependencies, androidCustomAppBuildGradleContent,
+                     androidScreenOrientation, androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements, androidGradleSettingsContent, androidVersionCode,
                      androidMinimumSDK, androidTargetSDK, androidTheme, androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder,
                      androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded, androidBluetoothNeeded, androidExternalReadPermission,
                      androidExternalWritePermission, androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions,
@@ -112,6 +112,7 @@ public:
           androidAdditionalResourceFolders     (settings, Ids::androidAdditionalResourceFolders,     getUndoManager()),
           androidRepositories                  (settings, Ids::androidRepositories,                  getUndoManager()),
           androidDependencies                  (settings, Ids::androidDependencies,                  getUndoManager()),
+          androidCustomAppBuildGradleContent   (settings, Ids::androidCustomAppBuildGradleContent,   getUndoManager()),
           androidScreenOrientation             (settings, Ids::androidScreenOrientation,             getUndoManager(), "unspecified"),
           androidCustomActivityClass           (settings, Ids::androidCustomActivityClass,           getUndoManager(), getDefaultActivityClass()),
           androidCustomApplicationClass        (settings, Ids::androidCustomApplicationClass,        getUndoManager(), getDefaultApplicationClass()),
@@ -621,6 +622,7 @@ private:
         mo << getAndroidJavaSourceSets (modules)                                             << newLine;
         mo << getAndroidRepositories()                                                       << newLine;
         mo << getAndroidDependencies()                                                       << newLine;
+        mo << androidCustomAppBuildGradleContent.get().toString()                            << newLine;
         mo << getApplyPlugins()                                                              << newLine;
 
         mo << "}"                                                                            << newLine << newLine;
@@ -990,6 +992,9 @@ private:
                    "Module dependencies (one per line). These will be added to module-level gradle file \"dependencies\" section. "
                    "If adding any java libs in \"Java libraries to include\" setting, do not add them here as "
                    "they will be added automatically.");
+
+        props.add (new TextPropertyComponent (androidCustomAppBuildGradleContent, "Extra module's build.gradle content", 32768, true),
+                   "Additional content to be appended to module's build.gradle inside android { section. ");
 
         props.add (new TextPropertyComponent (androidGradleSettingsContent, "Custom gradle.settings content", 32768, true),
                    "You can customize the content of settings.gradle here");

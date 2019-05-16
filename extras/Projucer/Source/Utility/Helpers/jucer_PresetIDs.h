@@ -198,6 +198,7 @@ namespace Ids
     DECLARE_ID (androidAdditionalResourceFolders);
     DECLARE_ID (androidRepositories);
     DECLARE_ID (androidDependencies);
+    DECLARE_ID (androidCustomAppBuildGradleContent);
     DECLARE_ID (androidBuildConfigRemoteNotifsConfigFile);
     DECLARE_ID (androidAdditionalXmlValueResources);
     DECLARE_ID (androidAdditionalDrawableResources);
