@@ -52,9 +52,9 @@ DrawableText::~DrawableText()
 {
 }
 
-Drawable* DrawableText::createCopy() const
+std::unique_ptr<Drawable> DrawableText::createCopy() const
 {
-    return new DrawableText (*this);
+    return std::make_unique<DrawableText> (*this);
 }
 
 //==============================================================================

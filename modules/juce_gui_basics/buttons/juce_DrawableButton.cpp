@@ -37,9 +37,12 @@ DrawableButton::~DrawableButton()
 }
 
 //==============================================================================
-static Drawable* copyDrawableIfNotNull (const Drawable* const d)
+static std::unique_ptr<Drawable> copyDrawableIfNotNull (const Drawable* const d)
 {
-    return d != nullptr ? d->createCopy() : nullptr;
+    if (d != nullptr)
+        return d->createCopy();
+
+    return {};
 }
 
 void DrawableButton::setImages (const Drawable* normal,
@@ -53,14 +56,14 @@ void DrawableButton::setImages (const Drawable* normal,
 {
     jassert (normal != nullptr); // you really need to give it at least a normal image..
 
-    normalImage     .reset (copyDrawableIfNotNull (normal));
-    overImage       .reset (copyDrawableIfNotNull (over));
-    downImage       .reset (copyDrawableIfNotNull (down));
-    disabledImage   .reset (copyDrawableIfNotNull (disabled));
-    normalImageOn   .reset (copyDrawableIfNotNull (normalOn));
-    overImageOn     .reset (copyDrawableIfNotNull (overOn));
-    downImageOn     .reset (copyDrawableIfNotNull (downOn));
-    disabledImageOn .reset (copyDrawableIfNotNull (disabledOn));
+    normalImage     = copyDrawableIfNotNull (normal);
+    overImage       = copyDrawableIfNotNull (over);
+    downImage       = copyDrawableIfNotNull (down);
+    disabledImage   = copyDrawableIfNotNull (disabled);
+    normalImageOn   = copyDrawableIfNotNull (normalOn);
+    overImageOn     = copyDrawableIfNotNull (overOn);
+    downImageOn     = copyDrawableIfNotNull (downOn);
+    disabledImageOn = copyDrawableIfNotNull (disabledOn);
 
     currentImage = nullptr;
 

@@ -809,7 +809,7 @@ private:
             if (drawableClipPath->getNumChildComponents() > 0)
             {
                 setCommonAttributes (*drawableClipPath, xmlPath);
-                target.setClipPath (drawableClipPath.release());
+                target.setClipPath (std::move (drawableClipPath));
                 return true;
             }
         }
@@ -1696,32 +1696,32 @@ private:
 
 
 //==============================================================================
-Drawable* Drawable::createFromSVG (const XmlElement& svgDocument)
+std::unique_ptr<Drawable> Drawable::createFromSVG (const XmlElement& svgDocument)
 {
     if (! svgDocument.hasTagNameIgnoringNamespace ("svg"))
-        return nullptr;
+        return {};
 
     SVGState state (&svgDocument);
-    return state.parseSVGElement (SVGState::XmlPath (&svgDocument, nullptr));
+    return std::unique_ptr<Drawable> (state.parseSVGElement (SVGState::XmlPath (&svgDocument, nullptr)));
 }
 
-Drawable* Drawable::createFromSVGFile (const File& svgFile)
+std::unique_ptr<Drawable> Drawable::createFromSVGFile (const File& svgFile)
 {
     XmlDocument doc (svgFile);
-    std::unique_ptr<XmlElement> outer (doc.getDocumentElement (true));
 
-    if (outer != nullptr && outer->hasTagName ("svg"))
+    if (auto outer = doc.getDocumentElement (true))
     {
-        std::unique_ptr<XmlElement> svgDocument (doc.getDocumentElement());
-
-        if (svgDocument != nullptr)
+        if (outer->hasTagName ("svg"))
         {
-            SVGState state (svgDocument.get(), svgFile);
-            return state.parseSVGElement (SVGState::XmlPath (svgDocument.get(), nullptr));
+            if (auto svgDocument = doc.getDocumentElement())
+            {
+                SVGState state (svgDocument.get(), svgFile);
+                return std::unique_ptr<Drawable> (state.parseSVGElement (SVGState::XmlPath (svgDocument.get(), nullptr)));
+            }
         }
     }
 
-    return nullptr;
+    return {};
 }
 
 Path Drawable::parseSVGPath (const String& svgPath)

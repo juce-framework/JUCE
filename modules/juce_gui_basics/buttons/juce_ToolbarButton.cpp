@@ -28,11 +28,11 @@ namespace juce
 {
 
 ToolbarButton::ToolbarButton (const int iid, const String& buttonText,
-                              Drawable* const normalIm, Drawable* const toggledOnIm)
+                              std::unique_ptr<Drawable> normalIm,
+                              std::unique_ptr<Drawable> toggledOnIm)
    : ToolbarItemComponent (iid, buttonText, true),
-     normalImage (normalIm),
-     toggledOnImage (toggledOnIm),
-     currentImage (nullptr)
+     normalImage (std::move (normalIm)),
+     toggledOnImage (std::move (toggledOnIm))
 {
     jassert (normalImage != nullptr);
 }
