@@ -170,7 +170,7 @@ MouseCursor LookAndFeel::getMouseCursorFor (Component& component)
 
 std::unique_ptr<LowLevelGraphicsContext> LookAndFeel::createGraphicsContext (const Image& imageToRenderOn,
                                                                              Point<int> origin,
-                                                                             RectangleList<int> initialClip)
+                                                                             const RectangleList<int>& initialClip)
 {
     return std::make_unique<LowLevelGraphicsSoftwareRenderer> (imageToRenderOn, origin, initialClip);
 }

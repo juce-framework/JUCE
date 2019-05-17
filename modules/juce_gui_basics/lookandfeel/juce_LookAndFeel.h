@@ -198,7 +198,7 @@ public:
     /** Creates a new graphics context object. */
     virtual std::unique_ptr<LowLevelGraphicsContext> createGraphicsContext (const Image& imageToRenderOn,
                                                                             Point<int> origin,
-                                                                            RectangleList<int> initialClip);
+                                                                            const RectangleList<int>& initialClip);
 
     void setUsingNativeAlertWindows (bool shouldUseNativeAlerts);
     bool isUsingNativeAlertWindows();
