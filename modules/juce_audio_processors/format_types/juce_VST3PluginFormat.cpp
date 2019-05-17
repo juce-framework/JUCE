@@ -1089,11 +1089,9 @@ private:
         if (pluginFactory != nullptr)
         {
             ComSmartPtr<VST3HostContext> host (new VST3HostContext());
-            MatchingDescriptionFinder finder (host, pluginFactory, description);
 
-            auto result = finder.findDescriptionsAndPerform (f);
-
-            if (result.getErrorMessage() == MatchingDescriptionFinder::getSuccessString())
+            auto result = findName(pluginFactory, description);
+            if (result.wasOk())
             {
                 name = description.name;
                 return true;
@@ -1101,6 +1099,30 @@ private:
         }
 
         return false;
+    }
+
+    Result findName(IPluginFactory* factory, const PluginDescription& description)
+    {
+        if (factory == nullptr)
+            return Result::fail(L"Invalid Parameter");
+
+        Result result(Result::fail(L"not found"));
+        auto numClasses = factory->countClasses();
+
+        for (Steinberg::int32 i = 0; i < numClasses; ++i)
+        {
+            PClassInfo info;
+            factory->getClassInfo(i, &info);
+
+            if (std::strcmp(info.category, kVstAudioEffectClass) != 0)
+                continue;
+
+            const String infoName(toString(info.name).trim());
+
+            if (infoName == description.name)
+                return Result::ok();
+        }
+        return result;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3ModuleHandle)
