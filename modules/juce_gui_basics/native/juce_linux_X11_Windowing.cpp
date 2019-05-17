@@ -3057,6 +3057,8 @@ private:
 
         Point<int> dropPos ((int) clientMsg.data.l[2] >> 16,
                             (int) clientMsg.data.l[2] & 0xffff);
+
+        dropPos = Desktop::getInstance().getDisplays().physicalToLogical (dropPos);
         dropPos -= bounds.getPosition();
 
         Atom targetAction = atoms->XdndActionCopy;
