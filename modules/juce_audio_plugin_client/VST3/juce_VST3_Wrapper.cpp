@@ -2727,6 +2727,8 @@ private:
     }
 
     //==============================================================================
+    ScopedJuceInitialiser_GUI libraryInitialiser;
+
     Atomic<int> refCount { 1 };
 
     AudioProcessor* pluginInstance;
@@ -2761,7 +2763,6 @@ private:
     bool isMidiOutputBusEnabled = false;
    #endif
 
-    ScopedJuceInitialiser_GUI libraryInitialiser;
     static const char* kJucePrivateDataIdentifier;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVST3Component)
