@@ -152,6 +152,7 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 #include "scanning/juce_KnownPluginList.cpp"
 #include "scanning/juce_PluginDirectoryScanner.cpp"
 #include "scanning/juce_PluginListComponent.cpp"
+#include "processors/juce_ControllableProcessorBase.cpp"
 #include "processors/juce_AudioProcessorParameterGroup.cpp"
 #include "utilities/juce_AudioProcessorParameterWithID.cpp"
 #include "utilities/juce_RangedAudioParameter.cpp"

@@ -27,12 +27,12 @@
 namespace juce
 {
 
-AudioProcessorEditor::AudioProcessorEditor (AudioProcessor& p) noexcept  : processor (p)
+AudioProcessorEditor::AudioProcessorEditor (ControllableProcessorBase& p) noexcept  : processor (p)
 {
     initialise();
 }
 
-AudioProcessorEditor::AudioProcessorEditor (AudioProcessor* p) noexcept  : processor (*p)
+AudioProcessorEditor::AudioProcessorEditor (ControllableProcessorBase* p) noexcept  : processor (*p)
 {
     // the filter must be valid..
     jassert (p != nullptr);

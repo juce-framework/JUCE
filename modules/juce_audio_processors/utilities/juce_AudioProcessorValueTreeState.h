@@ -202,7 +202,7 @@ public:
         @param parameterLayout          An object that holds all parameters and parameter groups that the
                                         AudioProcessor should use.
     */
-    AudioProcessorValueTreeState (AudioProcessor& processorToConnectTo,
+    AudioProcessorValueTreeState (ControllableProcessorBase& processorToConnectTo,
                                   UndoManager* undoManagerToUse,
                                   const Identifier& valueTreeType,
                                   ParameterLayout parameterLayout);
@@ -217,7 +217,7 @@ public:
         AudioProcessorValueTreeState should be attached to only one processor, and must have
         the same lifetime as the processor, as they will have dependencies on each other.
     */
-    AudioProcessorValueTreeState (AudioProcessor& processorToConnectTo, UndoManager* undoManagerToUse);
+    AudioProcessorValueTreeState (ControllableProcessorBase& processorToConnectTo, UndoManager* undoManagerToUse);
 
     /** Destructor. */
     ~AudioProcessorValueTreeState() override;
@@ -347,7 +347,7 @@ public:
 
     //==============================================================================
     /** A reference to the processor with which this state is associated. */
-    AudioProcessor& processor;
+    ControllableProcessorBase& processor;
 
     /** The state of the whole processor.
 

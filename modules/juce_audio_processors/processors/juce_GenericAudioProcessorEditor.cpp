@@ -511,7 +511,7 @@ struct GenericAudioProcessorEditor::Pimpl
     Pimpl (GenericAudioProcessorEditor& parent)
         : owner (parent)
     {
-        auto* p = parent.getAudioProcessor();
+        auto* p = dynamic_cast<AudioProcessor*> (parent.getAudioProcessor());
         jassert (p != nullptr);
 
         juceParameters.update (*p, false);

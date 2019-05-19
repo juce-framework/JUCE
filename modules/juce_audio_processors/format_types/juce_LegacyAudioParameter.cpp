@@ -42,28 +42,29 @@ class LegacyAudioParameter :   public AudioProcessorParameter
 {
 public:
     LegacyAudioParameter (AudioProcessor& audioProcessorToUse, int audioParameterIndex)
+      : audioProcessor (audioProcessorToUse)
     {
         processor = &audioProcessorToUse;
 
         parameterIndex = audioParameterIndex;
-        jassert (parameterIndex < processor->getNumParameters());
+        jassert (parameterIndex < audioProcessor.getNumParameters());
     }
 
     //==============================================================================
-    float getValue() const override                    { return processor->getParameter (parameterIndex); }
-    void setValue (float newValue) override            { processor->setParameter (parameterIndex, newValue); }
-    float getDefaultValue() const override             { return processor->getParameterDefaultValue (parameterIndex); }
-    String getName (int maxLen) const override         { return processor->getParameterName (parameterIndex, maxLen); }
-    String getLabel() const override                   { return processor->getParameterLabel (parameterIndex); }
-    int getNumSteps() const override                   { return processor->getParameterNumSteps (parameterIndex); }
-    bool isDiscrete() const override                   { return processor->isParameterDiscrete (parameterIndex); }
+    float getValue() const override                    { return audioProcessor.getParameter (parameterIndex); }
+    void setValue (float newValue) override            { audioProcessor.setParameter (parameterIndex, newValue); }
+    float getDefaultValue() const override             { return audioProcessor.getParameterDefaultValue (parameterIndex); }
+    String getName (int maxLen) const override         { return audioProcessor.getParameterName (parameterIndex, maxLen); }
+    String getLabel() const override                   { return audioProcessor.getParameterLabel (parameterIndex); }
+    int getNumSteps() const override                   { return audioProcessor.getParameterNumSteps (parameterIndex); }
+    bool isDiscrete() const override                   { return audioProcessor.isParameterDiscrete (parameterIndex); }
     bool isBoolean() const override                    { return false; }
-    bool isOrientationInverted() const override        { return processor->isParameterOrientationInverted (parameterIndex); }
-    bool isAutomatable() const override                { return processor->isParameterAutomatable (parameterIndex); }
-    bool isMetaParameter() const override              { return processor->isMetaParameter (parameterIndex); }
-    Category getCategory() const override              { return processor->getParameterCategory (parameterIndex); }
-    String getCurrentValueAsText() const override      { return processor->getParameterText (parameterIndex); }
-    String getParamID() const                          { return processor->getParameterID (parameterIndex); }
+    bool isOrientationInverted() const override        { return audioProcessor.isParameterOrientationInverted (parameterIndex); }
+    bool isAutomatable() const override                { return audioProcessor.isParameterAutomatable (parameterIndex); }
+    bool isMetaParameter() const override              { return audioProcessor.isMetaParameter (parameterIndex); }
+    Category getCategory() const override              { return audioProcessor.getParameterCategory (parameterIndex); }
+    String getCurrentValueAsText() const override      { return audioProcessor.getParameterText (parameterIndex); }
+    String getParamID() const                          { return audioProcessor.getParameterID (parameterIndex); }
 
     //==============================================================================
     float getValueForText (const String&) const override
@@ -121,6 +122,9 @@ public:
 
         return String (param->getParameterIndex());
     }
+
+private:
+    AudioProcessor& audioProcessor;
 };
 
 //==============================================================================

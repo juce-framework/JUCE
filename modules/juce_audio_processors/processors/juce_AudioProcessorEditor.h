@@ -27,6 +27,7 @@
 namespace juce
 {
 
+    class ControllableProcessorBase;
 class AudioProcessor;
 class AudioProcessorEditorListener;
 
@@ -46,10 +47,10 @@ class JUCE_API  AudioProcessorEditor  : public Component
 protected:
     //==============================================================================
     /** Creates an editor for the specified processor. */
-    AudioProcessorEditor (AudioProcessor&) noexcept;
+    AudioProcessorEditor (ControllableProcessorBase&) noexcept;
 
     /** Creates an editor for the specified processor. */
-    AudioProcessorEditor (AudioProcessor*) noexcept;
+    AudioProcessorEditor (ControllableProcessorBase*) noexcept;
 
 public:
     /** Destructor. */
@@ -57,14 +58,14 @@ public:
 
 
     //==============================================================================
-    /** The AudioProcessor that this editor represents. */
-    AudioProcessor& processor;
+    /** The Processor that this editor represents. */
+    ControllableProcessorBase& processor;
 
     /** Returns a pointer to the processor that this editor represents.
         This method is here to support legacy code, but it's easier to just use the
         AudioProcessorEditor::processor member variable directly to get this object.
     */
-    AudioProcessor* getAudioProcessor() const noexcept        { return &processor; }
+    ControllableProcessorBase* getAudioProcessor() const noexcept  { return &processor; }
 
     //==============================================================================
     /** Used by the setParameterHighlighting() method. */

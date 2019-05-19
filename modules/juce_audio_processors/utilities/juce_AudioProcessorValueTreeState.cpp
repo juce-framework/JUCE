@@ -180,7 +180,7 @@ private:
 };
 
 //==============================================================================
-AudioProcessorValueTreeState::AudioProcessorValueTreeState (AudioProcessor& processorToConnectTo,
+AudioProcessorValueTreeState::AudioProcessorValueTreeState (ControllableProcessorBase& processorToConnectTo,
                                                             UndoManager* undoManagerToUse,
                                                             const Identifier& valueTreeType,
                                                             ParameterLayout parameterLayout)
@@ -237,7 +237,7 @@ AudioProcessorValueTreeState::AudioProcessorValueTreeState (AudioProcessor& proc
     state = ValueTree (valueTreeType);
 }
 
-AudioProcessorValueTreeState::AudioProcessorValueTreeState (AudioProcessor& p, UndoManager* um)
+AudioProcessorValueTreeState::AudioProcessorValueTreeState (ControllableProcessorBase& p, UndoManager* um)
     : processor (p), undoManager (um)
 {
     startTimerHz (10);

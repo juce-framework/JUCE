@@ -286,9 +286,10 @@ public:
 
 private:
     //==============================================================================
+    friend class ControllableProcessorBase;
     friend class AudioProcessor;
     friend class LegacyAudioParameter;
-    AudioProcessor* processor = nullptr;
+    ControllableProcessorBase* processor = nullptr;
     int parameterIndex = -1;
     CriticalSection listenerLock;
     Array<Listener*> listeners;
