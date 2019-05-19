@@ -438,6 +438,12 @@ public:
     */
     static ValueTree fromXml (const XmlElement& xml);
 
+    /** Tries to recreate a tree from its XML representation.
+        This isn't designed to cope with random XML data - it should only be fed XML that was created
+        by the createXml() method.
+    */
+    static ValueTree fromXml (const String& xmlText);
+
     /** This returns a string containing an XML representation of the tree.
         This is quite handy for debugging purposes, as it provides a quick way to view a tree.
         @see createXml()
