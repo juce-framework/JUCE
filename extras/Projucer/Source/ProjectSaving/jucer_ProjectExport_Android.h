@@ -1543,7 +1543,7 @@ private:
 
     std::unique_ptr<XmlElement> createManifestElement() const
     {
-        auto manifest = XmlDocument::parse (androidManifestCustomXmlElements.get());
+        auto manifest = parseXML (androidManifestCustomXmlElements.get());
 
         if (manifest == nullptr)
             manifest = std::make_unique<XmlElement> ("manifest");

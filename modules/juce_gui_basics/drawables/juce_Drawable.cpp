@@ -180,14 +180,8 @@ std::unique_ptr<Drawable> Drawable::createFromImageData (const void* data, const
     }
     else
     {
-        auto asString = String::createStringFromData (data, (int) numBytes);
-
-        XmlDocument doc (asString);
-        std::unique_ptr<XmlElement> outer (doc.getDocumentElement (true));
-
-        if (outer != nullptr && outer->hasTagName ("svg"))
-            if (auto svg = doc.getDocumentElement())
-                result = Drawable::createFromSVG (*svg);
+        if (auto svg = parseXMLIfTagMatches (String::createStringFromData (data, (int) numBytes), "svg"))
+            result = Drawable::createFromSVG (*svg);
     }
 
     return result;

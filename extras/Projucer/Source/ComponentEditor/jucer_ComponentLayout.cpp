@@ -271,10 +271,7 @@ void ComponentLayout::copySelectedToClipboard()
 
 void ComponentLayout::paste()
 {
-    XmlDocument clip (SystemClipboard::getTextFromClipboard());
-    std::unique_ptr<XmlElement> doc (clip.getDocumentElement());
-
-    if (doc != nullptr && doc->hasTagName (clipboardXmlTag))
+    if (auto doc = parseXMLIfTagMatches (SystemClipboard::getTextFromClipboard(), clipboardXmlTag))
     {
         selected.deselectAll();
 

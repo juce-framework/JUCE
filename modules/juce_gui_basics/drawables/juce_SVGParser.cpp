@@ -1702,24 +1702,13 @@ std::unique_ptr<Drawable> Drawable::createFromSVG (const XmlElement& svgDocument
         return {};
 
     SVGState state (&svgDocument);
-    return std::unique_ptr<Drawable> (state.parseSVGElement (SVGState::XmlPath (&svgDocument, nullptr)));
+    return std::unique_ptr<Drawable> (state.parseSVGElement (SVGState::XmlPath (&svgDocument, {})));
 }
 
 std::unique_ptr<Drawable> Drawable::createFromSVGFile (const File& svgFile)
 {
-    XmlDocument doc (svgFile);
-
-    if (auto outer = doc.getDocumentElement (true))
-    {
-        if (outer->hasTagName ("svg"))
-        {
-            if (auto svgDocument = doc.getDocumentElement())
-            {
-                SVGState state (svgDocument.get(), svgFile);
-                return std::unique_ptr<Drawable> (state.parseSVGElement (SVGState::XmlPath (svgDocument.get(), nullptr)));
-            }
-        }
-    }
+    if (auto xml = parseXMLIfTagMatches (svgFile, "svg"))
+        return createFromSVG (*xml);
 
     return {};
 }

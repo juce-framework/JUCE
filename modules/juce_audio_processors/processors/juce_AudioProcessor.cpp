@@ -1121,8 +1121,8 @@ std::unique_ptr<XmlElement> AudioProcessor::getXmlFromBinary (const void* data, 
         auto stringLength = (int) ByteOrder::littleEndianInt (addBytesToPointer (data, 4));
 
         if (stringLength > 0)
-            return XmlDocument::parse (String::fromUTF8 (static_cast<const char*> (data) + 8,
-                                                         jmin ((sizeInBytes - 8), stringLength)));
+            return parseXML (String::fromUTF8 (static_cast<const char*> (data) + 8,
+                                                jmin ((sizeInBytes - 8), stringLength)));
     }
 
     return {};

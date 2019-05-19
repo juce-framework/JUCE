@@ -221,26 +221,26 @@ void FilterGraph::newDocument()
 
 Result FilterGraph::loadDocument (const File& file)
 {
-    XmlDocument doc (file);
-    std::unique_ptr<XmlElement> xml (doc.getDocumentElement());
+    if (auto xml = parseXMLIfTagMatches (file, "FILTERGRAPH"))
+    {
+        graph.removeChangeListener (this);
+        restoreFromXml (*xml);
 
-    if (xml == nullptr || ! xml->hasTagName ("FILTERGRAPH"))
-        return Result::fail ("Not a valid filter graph file");
+        MessageManager::callAsync ([this]
+        {
+            setChangedFlag (false);
+            graph.addChangeListener (this);
+        });
 
-    graph.removeChangeListener (this);
-    restoreFromXml (*xml);
+        return Result::ok();
+    }
 
-    MessageManager::callAsync ([this] () {
-        setChangedFlag (false);
-        graph.addChangeListener (this);
-    } );
-
-    return Result::ok();
+    return Result::fail ("Not a valid filter graph file");
 }
 
 Result FilterGraph::saveDocument (const File& file)
 {
-    std::unique_ptr<XmlElement> xml (createXml());
+    auto xml = createXml();
 
     if (! xml->writeTo (file, {}))
         return Result::fail ("Couldn't write to the file");

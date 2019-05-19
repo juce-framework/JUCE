@@ -1013,9 +1013,8 @@ private:
                 if (targetAttributeKeys.contains ("INFOPLIST_FILE"))
                 {
                     auto plistFile = exporter.getTargetFolder().getChildFile (targetAttributes["INFOPLIST_FILE"]);
-                    XmlDocument infoPlistData (plistFile);
 
-                    if (auto plist = std::unique_ptr<XmlElement> (infoPlistData.getDocumentElement()))
+                    if (auto plist = parseXML (plistFile))
                     {
                         if (auto* dict = plist->getChildByName ("dict"))
                         {
