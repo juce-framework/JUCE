@@ -575,9 +575,9 @@ static void forgetRecentFile (const File& file)
 //==============================================================================
 Result Project::loadDocument (const File& file)
 {
-    auto xml = parseXML (file);
+    auto xml = parseXMLIfTagMatches (file, Ids::JUCERPROJECT.toString());
 
-    if (xml == nullptr || ! xml->hasTagName (Ids::JUCERPROJECT.toString()))
+    if (xml == nullptr)
         return Result::fail ("Not a valid Jucer project!");
 
     auto newTree = ValueTree::fromXml (*xml);
@@ -1239,7 +1239,7 @@ std::unique_ptr<Drawable> Project::Item::loadAsImageFile() const
         return nullptr;
 
     if (isValid())
-        return std::unique_ptr<Drawable> (Drawable::createFromImageFile (getFile()));
+        return Drawable::createFromImageFile (getFile());
 
     return {};
 }

@@ -153,13 +153,9 @@ StringArray AppearanceSettings::getColourNames() const
 {
     StringArray s;
 
-    for (int i = 0; i < settings.getNumChildren(); ++i)
-    {
-        const ValueTree c (settings.getChild(i));
-
+    for (auto c : settings)
         if (c.hasType ("COLOUR"))
-            s.add (c [Ids::name]);
-    }
+            s.add (c[Ids::name]);
 
     return s;
 }

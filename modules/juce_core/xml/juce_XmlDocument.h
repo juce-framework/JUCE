@@ -32,19 +32,16 @@ namespace juce
 
     e.g.
     @code
-
     XmlDocument myDocument (File ("myfile.xml"));
-    std::unique_ptr<XmlElement> mainElement (myDocument.getDocumentElement());
 
-    if (mainElement == nullptr)
-    {
-        String error = myDocument.getLastParseError();
-    }
-    else
+    if (auto mainElement = myDocument.getDocumentElement())
     {
         ..use the element
     }
-
+    else
+    {
+        String error = myDocument.getLastParseError();
+    }
     @endcode
 
     Or you can use the helper functions for much less verbose parsing..
