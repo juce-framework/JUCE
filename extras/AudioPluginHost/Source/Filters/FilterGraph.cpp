@@ -77,20 +77,6 @@ AudioProcessorGraph::Node::Ptr FilterGraph::getNodeForName (const String& name) 
 
 void FilterGraph::addPlugin (const PluginDescription& desc, Point<double> p)
 {
-    struct AsyncCallback : public AudioPluginFormat::InstantiationCompletionCallback
-    {
-        AsyncCallback (FilterGraph& g, Point<double> pos)  : owner (g), position (pos)
-        {}
-
-        void completionCallback (AudioPluginInstance* instance, const String& error) override
-        {
-            owner.addFilterCallback (instance, error, position);
-        }
-
-        FilterGraph& owner;
-        Point<double> position;
-    };
-
     formatManager.createPluginInstanceAsync (desc,
                                              graph.getSampleRate(),
                                              graph.getBlockSize(),
