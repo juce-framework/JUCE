@@ -43,7 +43,7 @@ class JUCE_API  GenericAudioProcessorEditor      : public AudioProcessorEditor
 {
 public:
     //==============================================================================
-    GenericAudioProcessorEditor (AudioProcessor* owner);
+    GenericAudioProcessorEditor (ControllableProcessorBase* owner);
     ~GenericAudioProcessorEditor() override;
 
     //==============================================================================

@@ -287,7 +287,6 @@ public:
 private:
     //==============================================================================
     friend class ControllableProcessorBase;
-    friend class AudioProcessor;
     friend class LegacyAudioParameter;
     ControllableProcessorBase* processor = nullptr;
     int parameterIndex = -1;

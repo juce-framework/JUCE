@@ -49,7 +49,9 @@ ControllableProcessorBase::~ControllableProcessorBase()
 }
 
 //==============================================================================
+StringArray ControllableProcessorBase::getAlternateDisplayNames() const     { return StringArray (getName()); }
 
+//==============================================================================
 void ControllableProcessorBase::editorBeingDeleted (AudioProcessorEditor* const editor) noexcept
 {
     const ScopedLock sl (getCallbackLock());

@@ -535,7 +535,7 @@ struct GenericAudioProcessorEditor::Pimpl
 
 
 //==============================================================================
-GenericAudioProcessorEditor::GenericAudioProcessorEditor (AudioProcessor* const p)
+GenericAudioProcessorEditor::GenericAudioProcessorEditor (ControllableProcessorBase* const p)
     : AudioProcessorEditor (p), pimpl (new Pimpl (*this))
 {
     setSize (pimpl->view.getViewedComponent()->getWidth() + pimpl->view.getVerticalScrollBar().getWidth(),
