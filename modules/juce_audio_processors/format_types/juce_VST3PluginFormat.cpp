@@ -1104,9 +1104,9 @@ private:
     Result findName(IPluginFactory* factory, const PluginDescription& description)
     {
         if (factory == nullptr)
-            return Result::fail(L"Invalid Parameter");
+            return Result::fail("Invalid Parameter");
 
-        Result result(Result::fail(L"not found"));
+        Result result(Result::fail("not found"));
         auto numClasses = factory->countClasses();
 
         for (Steinberg::int32 i = 0; i < numClasses; ++i)
