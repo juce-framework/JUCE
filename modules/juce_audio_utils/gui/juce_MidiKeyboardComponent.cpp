@@ -762,7 +762,6 @@ void MidiKeyboardComponent::updateNoteUnderMouse (Point<float> pos, bool isDown,
 void MidiKeyboardComponent::mouseMove (const MouseEvent& e)
 {
     updateNoteUnderMouse (e, false);
-    shouldCheckMousePos = false;
 }
 
 void MidiKeyboardComponent::mouseDrag (const MouseEvent& e)
@@ -770,14 +769,12 @@ void MidiKeyboardComponent::mouseDrag (const MouseEvent& e)
     float mousePositionVelocity;
     auto newNote = xyToNote (e.position, mousePositionVelocity);
 
-    if (newNote >= 0)
-        mouseDraggedToKey (newNote, e);
-
-    updateNoteUnderMouse (e, true);
+    if (newNote >= 0 && mouseDraggedToKey (newNote, e))
+        updateNoteUnderMouse (e, true);
 }
 
 bool MidiKeyboardComponent::mouseDownOnKey    (int, const MouseEvent&)  { return true; }
-void MidiKeyboardComponent::mouseDraggedToKey (int, const MouseEvent&)  {}
+bool MidiKeyboardComponent::mouseDraggedToKey (int, const MouseEvent&)  { return true; }
 void MidiKeyboardComponent::mouseUpOnKey      (int, const MouseEvent&)  {}
 
 void MidiKeyboardComponent::mouseDown (const MouseEvent& e)
@@ -786,15 +783,11 @@ void MidiKeyboardComponent::mouseDown (const MouseEvent& e)
     auto newNote = xyToNote (e.position, mousePositionVelocity);
 
     if (newNote >= 0 && mouseDownOnKey (newNote, e))
-    {
         updateNoteUnderMouse (e, true);
-        shouldCheckMousePos = true;
-    }
 }
 
 void MidiKeyboardComponent::mouseUp (const MouseEvent& e)
 {
-    shouldCheckMousePos = false;
 
     float mousePositionVelocity;
     auto note = xyToNote (e.position, mousePositionVelocity);
@@ -840,13 +833,6 @@ void MidiKeyboardComponent::timerCallback()
                 repaintNote (i);
             }
         }
-    }
-
-    if (shouldCheckMousePos)
-    {
-        for (auto& ms : Desktop::getInstance().getMouseSources())
-            if (ms.getComponentUnderMouse() == this || isParentOf (ms.getComponentUnderMouse()))
-                updateNoteUnderMouse (getLocalPoint (nullptr, ms.getScreenPosition()), ms.isDragging(), ms.getIndex());
     }
 }
 

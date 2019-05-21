@@ -179,8 +179,8 @@ public:
 
     void addProjectPathToBuildPathList (StringArray&, const RelativePath&, int index = -1) const;
 
-    Drawable* getBigIcon() const;
-    Drawable* getSmallIcon() const;
+    std::unique_ptr<Drawable> getBigIcon() const;
+    std::unique_ptr<Drawable> getSmallIcon() const;
     Image getBestIconForSize (int size, bool returnNullIfNothingBigEnough) const;
 
     String getExporterIdentifierMacro() const
@@ -449,7 +449,7 @@ protected:
         XmlElement::TextFormat format;
         format.customEncoding = encoding;
         format.lineWrapLength = maxCharsPerLine;
-        format.newLineChars = useUnixNewLines ? "\r\n" : "\n";
+        format.newLineChars = useUnixNewLines ? "\n" : "\r\n";
 
         MemoryOutputStream mo (8192);
         xml.writeTo (mo, format);

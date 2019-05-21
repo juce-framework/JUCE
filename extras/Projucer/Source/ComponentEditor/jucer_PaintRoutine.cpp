@@ -302,10 +302,7 @@ void PaintRoutine::copySelectedToClipboard()
 
 void PaintRoutine::paste()
 {
-    XmlDocument clip (SystemClipboard::getTextFromClipboard());
-    std::unique_ptr<XmlElement> doc (clip.getDocumentElement());
-
-    if (doc != nullptr && doc->hasTagName (clipboardXmlTag))
+    if (auto doc = parseXMLIfTagMatches (SystemClipboard::getTextFromClipboard(), clipboardXmlTag))
     {
         selectedElements.deselectAll();
         selectedPoints.deselectAll();

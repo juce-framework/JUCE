@@ -241,7 +241,7 @@ class AndroidComponentPeer  : public ComponentPeer,
                               private Timer
 {
 public:
-    AndroidComponentPeer (Component& comp, const int windowStyleFlags, void* nativeViewHandle)
+    AndroidComponentPeer (Component& comp, int windowStyleFlags, void* nativeViewHandle)
         : ComponentPeer (comp, windowStyleFlags),
           fullScreen (false),
           navBarsHidden (false),
@@ -424,7 +424,7 @@ public:
             class ViewMover  : public CallbackMessage
             {
             public:
-                ViewMover (const GlobalRef& v, const Rectangle<int>& boundsToUse)  : view (v), bounds (boundsToUse) {}
+                ViewMover (const GlobalRef& v, Rectangle<int> boundsToUse)  : view (v), bounds (boundsToUse) {}
 
                 void messageCallback() override
                 {
@@ -925,7 +925,7 @@ private:
 
     struct PreallocatedImage  : public ImagePixelData
     {
-        PreallocatedImage (const int width_, const int height_, jint* data_, bool hasAlpha_)
+        PreallocatedImage (int width_, int height_, jint* data_, bool hasAlpha_)
             : ImagePixelData (Image::ARGB, width_, height_), data (data_), hasAlpha (hasAlpha_)
         {
             if (hasAlpha_)
@@ -936,7 +936,7 @@ private:
         {
             if (hasAlpha)
             {
-                PixelARGB* pix = (PixelARGB*) data;
+                auto pix = (PixelARGB*) data;
 
                 for (int i = width * height; --i >= 0;)
                 {
@@ -946,8 +946,15 @@ private:
             }
         }
 
-        ImageType* createType() const override                      { return new SoftwareImageType(); }
-        LowLevelGraphicsContext* createLowLevelContext() override   { return new LowLevelGraphicsSoftwareRenderer (Image (this)); }
+        std::unique_ptr<ImageType> createType() const override
+        {
+            return std::make_unique<SoftwareImageType>();
+        }
+
+        std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
+        {
+            return std::make_unique<LowLevelGraphicsSoftwareRenderer> (Image (this));
+        }
 
         void initialiseBitmapData (Image::BitmapData& bm, int x, int y, Image::BitmapData::ReadWriteMode /*mode*/) override
         {
@@ -959,7 +966,7 @@ private:
 
         ImagePixelData::Ptr clone() override
         {
-            PreallocatedImage* s = new PreallocatedImage (width, height, 0, hasAlpha);
+            auto s = new PreallocatedImage (width, height, 0, hasAlpha);
             s->allocatedData.malloc (sizeof (jint) * static_cast<size_t> (width * height));
             s->data = s->allocatedData;
             memcpy (s->data, data, sizeof (jint) * static_cast<size_t> (width * height));
@@ -1060,7 +1067,7 @@ void MouseInputSource::setRawMousePosition (Point<float>)
 }
 
 //==============================================================================
-bool KeyPress::isKeyCurrentlyDown (const int /*keyCode*/)
+bool KeyPress::isKeyCurrentlyDown (int /*keyCode*/)
 {
     // TODO
     return false;
@@ -1244,7 +1251,7 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (AlertWindow::AlertIconType /*i
 //==============================================================================
 static bool androidScreenSaverEnabled = false;
 
-void Desktop::setScreenSaverEnabled (const bool shouldEnable)
+void Desktop::setScreenSaverEnabled (bool shouldEnable)
 {
     constexpr auto FLAG_KEEP_SCREEN_ON = 0x80;
 
@@ -1488,15 +1495,15 @@ Image juce_createIconForFile (const File& /*file*/)
 }
 
 //==============================================================================
-void* CustomMouseCursorInfo::create() const                                                     { return nullptr; }
-void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorType)            { return nullptr; }
-void MouseCursor::deleteMouseCursor (void* const /*cursorHandle*/, const bool /*isStandard*/)   {}
+void* CustomMouseCursorInfo::create() const                                         { return nullptr; }
+void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType)      { return nullptr; }
+void MouseCursor::deleteMouseCursor (void* /*cursorHandle*/, bool /*isStandard*/)   {}
 
 //==============================================================================
 void MouseCursor::showInWindow (ComponentPeer*) const   {}
 
 //==============================================================================
-bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& /*files*/, const bool /*canMove*/,
+bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& /*files*/, bool /*canMove*/,
                                                            Component* /*srcComp*/, std::function<void()> /*callback*/)
 {
     jassertfalse;    // no such thing on Android!

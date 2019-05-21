@@ -60,7 +60,7 @@ public:
         e->setAttribute ("initialTab", t->getCurrentTabIndex());
 
         for (int i = 0; i < t->getNumTabs(); ++i)
-            e->addChildElement (getTabState (t, i));
+            e->addChildElement (getTabState (t, i).release());
 
         return e;
     }
@@ -228,9 +228,9 @@ public:
     }
 
     //==============================================================================
-    static XmlElement* getTabState (TabbedComponent* tc, int tabIndex)
+    static std::unique_ptr<XmlElement> getTabState (TabbedComponent* tc, int tabIndex)
     {
-        XmlElement* xml = new XmlElement ("TAB");
+        auto xml = std::make_unique<XmlElement> ("TAB");
         xml->setAttribute ("name", tc->getTabNames() [tabIndex]);
         xml->setAttribute ("colour", tc->getTabBackgroundColour (tabIndex).toString());
 
@@ -698,7 +698,7 @@ private:
                 : ComponentUndoableAction<TabbedComponent> (comp, l),
                   indexToRemove (indexToRemove_)
             {
-                previousState.reset (getTabState (comp, indexToRemove));
+                previousState = getTabState (comp, indexToRemove);
             }
 
             bool perform()
@@ -1164,7 +1164,7 @@ private:
             {
                 showCorrectTab();
 
-                std::unique_ptr<XmlElement> state (getTabState (getComponent(), from));
+                auto state = getTabState (getComponent(), from);
 
                 getComponent()->removeTab (from);
                 addNewTab (getComponent(), to);

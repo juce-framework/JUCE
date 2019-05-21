@@ -184,6 +184,8 @@ public:
         CodeDocument* owner = nullptr;
         int characterPos = 0, line = 0, indexInLine = 0;
         bool positionMaintained = false;
+
+        friend class CodeDocument;
     };
 
     //==============================================================================
@@ -358,18 +360,36 @@ public:
     class JUCE_API  Iterator
     {
     public:
+        /** Creates an uninitialised iterator.
+            Don't attempt to call any methods on this until you've given it an
+            owner document to refer to!
+         */
+        Iterator() noexcept;
+
         Iterator (const CodeDocument& document) noexcept;
-        Iterator (const Iterator&) = default;
-        Iterator& operator= (const Iterator&) = default;
+        Iterator (CodeDocument::Position) noexcept;
         ~Iterator() noexcept;
 
-        /** Reads the next character and returns it.
-            @see peekNextChar
+        Iterator (const Iterator&) = default;
+        Iterator& operator= (const Iterator&) = default;
+
+        /** Reads the next character and returns it. Returns 0 if you try to
+            read past the document's end.
+            @see peekNextChar, previousChar
         */
         juce_wchar nextChar() noexcept;
 
-        /** Reads the next character without advancing the current position. */
+        /** Reads the next character without moving the current position. */
         juce_wchar peekNextChar() const noexcept;
+
+        /** Reads the previous character and returns it. Returns 0 if you try to
+            read past the document's start.
+            @see isSOF, peekPreviousChar, nextChar
+         */
+        juce_wchar previousChar() noexcept;
+
+        /** Reads the next character without moving the current position. */
+        juce_wchar peekPreviousChar() const noexcept;
 
         /** Advances the position by one character. */
         void skip() noexcept;
@@ -383,13 +403,24 @@ public:
         /** Skips forward until the next character will be the first character on the next line */
         void skipToEndOfLine() noexcept;
 
+        /** Skips backward until the next character will be the first character on this line */
+        void skipToStartOfLine() noexcept;
+
         /** Returns the line number of the next character. */
         int getLine() const noexcept            { return line; }
 
         /** Returns true if the iterator has reached the end of the document. */
         bool isEOF() const noexcept;
 
+        /** Returns true if the iterator is at the start of the document. */
+        bool isSOF() const noexcept;
+
+        /** Convert this iterator to a CodeDocument::Position. */
+        CodeDocument::Position toPosition() const;
+
     private:
+        bool reinitialiseCharPtr() const;
+
         const CodeDocument* document;
         mutable String::CharPointerType charPointer { nullptr };
         int line = 0, position = 0;

@@ -171,9 +171,8 @@ class JucePlugInProcess  : public CEffectProcessMIDI,
 public:
     //==============================================================================
     JucePlugInProcess()
-        : sampleRate (44100.0)
     {
-        juceFilter = createPluginFilterOfType (AudioProcessor::wrapperType_RTAS);
+        juceFilter.reset (createPluginFilterOfType (AudioProcessor::wrapperType_RTAS));
 
         AddChunk (juceChunkType, "Juce Audio Plugin Data");
 
@@ -187,13 +186,13 @@ public:
             if (mLoggedIn)
                 MIDILogOut();
 
-            midiBufferNode = nullptr;
-            midiTransport = nullptr;
+            midiBufferNode.reset();
+            midiTransport.reset();
 
             if (juceFilter != nullptr)
             {
                 juceFilter->releaseResources();
-                juceFilter = nullptr;
+                juceFilter.reset();
             }
 
             if (--numInstances == 0)
@@ -231,7 +230,7 @@ public:
         {
             if (editorComp == nullptr)
             {
-                editorComp = filter->createEditorIfNeeded();
+                editorComp.reset (filter->createEditorIfNeeded());
                 jassert (editorComp != nullptr);
             }
 
@@ -273,12 +272,12 @@ public:
                     updateSize();
 
                    #if JUCE_WINDOWS
-                    void* const hostWindow = (void*) ASI_GethWnd ((WindowPtr) port);
+                    auto hostWindow = (void*) ASI_GethWnd ((WindowPtr) port);
                    #else
-                    void* const hostWindow = (void*) GetWindowFromPort (port);
+                    auto hostWindow = (void*) GetWindowFromPort (port);
                    #endif
-                    wrapper = nullptr;
-                    wrapper = new EditorCompWrapper (hostWindow, editorComp, this);
+                    wrapper.reset();
+                    wrapper.reset (new EditorCompWrapper (hostWindow, editorComp.get(), this));
                 }
             }
             else
@@ -291,10 +290,8 @@ public:
         {
            #if JUCE_WINDOWS
             if (wrapper != nullptr)
-            {
-                if (ComponentPeer* const peer = wrapper->getPeer())
+                if (auto peer = wrapper->getPeer())
                     peer->repaint (wrapper->getLocalBounds());  // (seems to be required in PT6.4, but not in 7.x)
-            }
            #endif
         }
 
@@ -304,8 +301,8 @@ public:
     private:
         AudioProcessor* const filter;
         JucePlugInProcess* const process;
-        ScopedPointer<Component> wrapper;
-        ScopedPointer<AudioProcessorEditor> editorComp;
+        std::unique_ptr<Component> wrapper;
+        std::unique_ptr<AudioProcessorEditor> editorComp;
 
         void deleteEditorComp()
         {
@@ -320,8 +317,8 @@ public:
 
                     filter->editorBeingDeleted (editorComp);
 
-                    editorComp = nullptr;
-                    wrapper = nullptr;
+                    editorComp.reset();
+                    wrapper.reset();
                 }
             }
         }
@@ -335,9 +332,9 @@ public:
                                  #endif
         {
         public:
-            EditorCompWrapper (void* const hostWindow_,
-                               Component* const editorComp,
-                               JuceCustomUIView* const owner_)
+            EditorCompWrapper (void* hostWindow_,
+                               Component* editorComp,
+                               JuceCustomUIView* owner_)
                 : hostWindow (hostWindow_),
                   owner (owner_),
                   titleW (0),
@@ -351,7 +348,7 @@ public:
                 setBroughtToFrontOnMouseClick (true);
                 setBounds (editorComp->getBounds());
                 editorComp->setTopLeftPosition (0, 0);
-                addAndMakeVisible (editorComp);
+                addAndMakeVisible (*editorComp);
 
                #if JUCE_WINDOWS
                 attachSubWindow (hostWindow, titleW, titleH, this);
@@ -448,7 +445,7 @@ public:
 
     CPlugInView* CreateCPlugInView() override
     {
-        return new JuceCustomUIView (juceFilter, this);
+        return new JuceCustomUIView (juceFilter.get(), this);
     }
 
     void SetViewPort (GrafPtr port) override
@@ -522,18 +519,18 @@ public:
                 type->GetProcessTypeName (63, nodeName);
                 nodeName[nodeName[0] + 1] = 0;
 
-                midiBufferNode = new CEffectMIDIOtherBufferedNode (&mMIDIWorld,
-                                                                   8192,
-                                                                   eLocalNode,
-                                                                   nodeName + 1,
-                                                                   midiBuffer);
+                midiBufferNode.reset (new CEffectMIDIOtherBufferedNode (&mMIDIWorld,
+                                                                        8192,
+                                                                        eLocalNode,
+                                                                        nodeName + 1,
+                                                                        midiBuffer));
 
                 midiBufferNode->Initialize (0xffff, true);
             }
            #endif
         }
 
-        midiTransport = new CEffectMIDITransport (&mMIDIWorld);
+        midiTransport.reset (new CEffectMIDITransport (&mMIDIWorld));
         midiEvents.ensureSize (2048);
 
         channels.calloc (jmax (juceFilter->getTotalNumInputChannels(),
@@ -862,15 +859,15 @@ public:
     }
 
 private:
-    ScopedPointer<AudioProcessor> juceFilter;
+    std::unique_ptr<AudioProcessor> juceFilter;
     MidiBuffer midiEvents;
-    ScopedPointer<CEffectMIDIOtherBufferedNode> midiBufferNode;
-    ScopedPointer<CEffectMIDITransport> midiTransport;
+    std::unique_ptr<CEffectMIDIOtherBufferedNode> midiBufferNode;
+    std::unique_ptr<CEffectMIDITransport> midiTransport;
     DirectMidiPacket midiBuffer [midiBufferSize];
 
     juce::MemoryBlock tempFilterData;
     HeapBlock<float*> channels;
-    double sampleRate;
+    double sampleRate = 44100.0;
 
     static float longToFloat (const long n) noexcept
     {
@@ -1199,7 +1196,7 @@ public:
     //==============================================================================
     void CreateEffectTypes()
     {
-        ScopedPointer<AudioProcessor> plugin = createPluginFilterOfType (AudioProcessor::wrapperType_RTAS);
+        std::unique_ptr<AudioProcessor> plugin (createPluginFilterOfType (AudioProcessor::wrapperType_RTAS));
 
         const int numInputBuses = plugin->getBusCount (true);
         const int numOutputBuses = plugin->getBusCount (false);

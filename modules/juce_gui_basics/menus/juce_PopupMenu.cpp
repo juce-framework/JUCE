@@ -1331,7 +1331,7 @@ PopupMenu::Item& PopupMenu::Item::operator= (const Item& other)
     text = other.text;
     itemID = other.itemID;
     subMenu.reset (createCopyIfNotNull (other.subMenu.get()));
-    image.reset (other.image != nullptr ? other.image->createCopy() : nullptr);
+    image = other.image != nullptr ? other.image->createCopy() : std::unique_ptr<Drawable>();
     customComponent = other.customComponent;
     customCallback = other.customCallback;
     commandManager = other.commandManager;
@@ -1365,16 +1365,16 @@ void PopupMenu::addItem (int itemResultID, const String& itemText, bool isActive
     addItem (i);
 }
 
-static Drawable* createDrawableFromImage (const Image& im)
+static std::unique_ptr<Drawable> createDrawableFromImage (const Image& im)
 {
     if (im.isValid())
     {
         auto d = new DrawableImage();
         d->setImage (im);
-        return d;
+        return std::unique_ptr<Drawable> (d);
     }
 
-    return nullptr;
+    return {};
 }
 
 void PopupMenu::addItem (int itemResultID, const String& itemText, bool isActive, bool isTicked, const Image& iconToUse)
@@ -1382,21 +1382,22 @@ void PopupMenu::addItem (int itemResultID, const String& itemText, bool isActive
     addItem (itemResultID, itemText, isActive, isTicked, createDrawableFromImage (iconToUse));
 }
 
-void PopupMenu::addItem (int itemResultID, const String& itemText, bool isActive, bool isTicked, Drawable* iconToUse)
+void PopupMenu::addItem (int itemResultID, const String& itemText, bool isActive,
+                         bool isTicked, std::unique_ptr<Drawable> iconToUse)
 {
     Item i;
     i.text = itemText;
     i.itemID = itemResultID;
     i.isEnabled = isActive;
     i.isTicked = isTicked;
-    i.image.reset (iconToUse);
+    i.image = std::move (iconToUse);
     addItem (i);
 }
 
 void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
                                 const CommandID commandID,
                                 const String& displayName,
-                                Drawable* iconToUse)
+                                std::unique_ptr<Drawable> iconToUse)
 {
     jassert (commandManager != nullptr && commandID != 0);
 
@@ -1411,13 +1412,13 @@ void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
         i.commandManager = commandManager;
         i.isEnabled = target != nullptr && (info.flags & ApplicationCommandInfo::isDisabled) == 0;
         i.isTicked = (info.flags & ApplicationCommandInfo::isTicked) != 0;
-        i.image.reset (iconToUse);
+        i.image = std::move (iconToUse);
         addItem (i);
     }
 }
 
 void PopupMenu::addColouredItem (int itemResultID, const String& itemText, Colour itemTextColour,
-                                 bool isActive, bool isTicked, Drawable* iconToUse)
+                                 bool isActive, bool isTicked, std::unique_ptr<Drawable> iconToUse)
 {
     Item i;
     i.text = itemText;
@@ -1425,7 +1426,7 @@ void PopupMenu::addColouredItem (int itemResultID, const String& itemText, Colou
     i.colour = itemTextColour;
     i.isEnabled = isActive;
     i.isTicked = isTicked;
-    i.image.reset (iconToUse);
+    i.image = std::move (iconToUse);
     addItem (i);
 }
 
@@ -1438,7 +1439,7 @@ void PopupMenu::addColouredItem (int itemResultID, const String& itemText, Colou
     i.colour = itemTextColour;
     i.isEnabled = isActive;
     i.isTicked = isTicked;
-    i.image.reset (createDrawableFromImage (iconToUse));
+    i.image = createDrawableFromImage (iconToUse);
     addItem (i);
 }
 
@@ -1472,7 +1473,7 @@ void PopupMenu::addSubMenu (const String& subMenuName, const PopupMenu& subMenu,
 }
 
 void PopupMenu::addSubMenu (const String& subMenuName, const PopupMenu& subMenu, bool isActive,
-                            Drawable* iconToUse, bool isTicked, int itemResultID)
+                            std::unique_ptr<Drawable> iconToUse, bool isTicked, int itemResultID)
 {
     Item i;
     i.text = subMenuName;
@@ -1480,7 +1481,7 @@ void PopupMenu::addSubMenu (const String& subMenuName, const PopupMenu& subMenu,
     i.subMenu.reset (new PopupMenu (subMenu));
     i.isEnabled = isActive && (itemResultID != 0 || subMenu.getNumItems() > 0);
     i.isTicked = isTicked;
-    i.image.reset (iconToUse);
+    i.image = std::move (iconToUse);
     addItem (i);
 }
 

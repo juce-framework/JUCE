@@ -30,24 +30,32 @@ XmlDocument::~XmlDocument() {}
 
 std::unique_ptr<XmlElement> XmlDocument::parse (const File& file)
 {
-    XmlDocument doc (file);
-    return doc.getDocumentElement();
+    return XmlDocument (file).getDocumentElement();
 }
 
-std::unique_ptr<XmlElement> XmlDocument::parse (const String& xmlData)
+std::unique_ptr<XmlElement> XmlDocument::parse (const String& textToParse)
 {
-    XmlDocument doc (xmlData);
-    return doc.getDocumentElement();
+    return XmlDocument (textToParse).getDocumentElement();
 }
 
 std::unique_ptr<XmlElement> parseXML (const String& textToParse)
 {
-    return std::unique_ptr<XmlElement> (XmlDocument::parse (textToParse));
+    return XmlDocument (textToParse).getDocumentElement();
 }
 
-std::unique_ptr<XmlElement> parseXML (const File& fileToParse)
+std::unique_ptr<XmlElement> parseXML (const File& file)
 {
-    return std::unique_ptr<XmlElement> (XmlDocument::parse (fileToParse));
+    return XmlDocument (file).getDocumentElement();
+}
+
+std::unique_ptr<XmlElement> parseXMLIfTagMatches (const String& textToParse, StringRef requiredTag)
+{
+    return XmlDocument (textToParse).getDocumentElementIfTagMatches (requiredTag);
+}
+
+std::unique_ptr<XmlElement> parseXMLIfTagMatches (const File& file, StringRef requiredTag)
+{
+    return XmlDocument (file).getDocumentElementIfTagMatches (requiredTag);
 }
 
 void XmlDocument::setInputSource (InputSource* newSource) noexcept
@@ -137,6 +145,15 @@ std::unique_ptr<XmlElement> XmlDocument::getDocumentElement (const bool onlyRead
     }
 
     return parseDocumentElement (originalText.getCharPointer(), onlyReadOuterDocumentElement);
+}
+
+std::unique_ptr<XmlElement> XmlDocument::getDocumentElementIfTagMatches (StringRef requiredTag)
+{
+    if (auto xml = getDocumentElement (true))
+        if (xml->hasTagName (requiredTag))
+            return getDocumentElement (false);
+
+    return {};
 }
 
 const String& XmlDocument::getLastParseError() const noexcept
