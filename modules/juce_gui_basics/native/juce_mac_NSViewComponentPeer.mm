@@ -2011,6 +2011,9 @@ private:
 
     static void windowWillEnterFullScreen (id self, SEL, NSNotification*)
     {
+        if (SystemStats::getOperatingSystemType() <= SystemStats::MacOSX_10_9)
+            return;
+
         if (auto* owner = getOwner (self))
             if (owner->hasNativeTitleBar() && (owner->getStyleFlags() & ComponentPeer::windowIsResizable) == 0)
                 [owner->window setStyleMask: NSWindowStyleMaskBorderless];
