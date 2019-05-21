@@ -404,6 +404,9 @@ static void setDPIAwareness()
             return;
     }
 
+    if (! JUCEApplicationBase::isStandaloneApp())
+        return;
+
     // fallback for pre Windows 8.1 - equivalent to Process_System_DPI_Aware
     setProcessDPIAware = (SetProcessDPIAwareFunc) getUser32Function ("SetProcessDPIAware");
 
