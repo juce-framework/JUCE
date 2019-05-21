@@ -138,8 +138,10 @@ bool AppearanceSettings::readFromFile (const File& file)
 
 bool AppearanceSettings::writeToFile (const File& file) const
 {
-    const std::unique_ptr<XmlElement> xml (settings.createXml());
-    return xml != nullptr && xml->writeToFile (file, String());
+    if (auto xml = settings.createXml())
+        return xml->writeTo (file, {});
+
+    return false;
 }
 
 Font AppearanceSettings::getDefaultCodeFont()
@@ -151,13 +153,9 @@ StringArray AppearanceSettings::getColourNames() const
 {
     StringArray s;
 
-    for (int i = 0; i < settings.getNumChildren(); ++i)
-    {
-        const ValueTree c (settings.getChild(i));
-
+    for (auto c : settings)
         if (c.hasType ("COLOUR"))
-            s.add (c [Ids::name]);
-    }
+            s.add (c[Ids::name]);
 
     return s;
 }

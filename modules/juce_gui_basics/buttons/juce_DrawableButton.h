@@ -183,7 +183,7 @@ private:
     //==============================================================================
     ButtonStyle style;
     std::unique_ptr<Drawable> normalImage, overImage, downImage, disabledImage,
-                            normalImageOn, overImageOn, downImageOn, disabledImageOn;
+                              normalImageOn, overImageOn, downImageOn, disabledImageOn;
     Drawable* currentImage = nullptr;
     int edgeIndent = 3;
 

@@ -139,12 +139,10 @@ void AudioDeviceManager::audioDeviceListChanged()
         {
             closeAudioDevice();
 
-            std::unique_ptr<XmlElement> e (createStateXml());
-
-            if (e == nullptr)
-                initialiseDefault (preferredDeviceName, &currentSetup);
-            else
+            if (auto e = createStateXml())
                 initialiseFromXML (*e, true, preferredDeviceName, &currentSetup);
+            else
+                initialiseDefault (preferredDeviceName, &currentSetup);
         }
 
         if (currentAudioDevice != nullptr)
@@ -344,9 +342,12 @@ void AudioDeviceManager::insertDefaultDeviceNames (AudioDeviceSetup& setup) cons
     }
 }
 
-XmlElement* AudioDeviceManager::createStateXml() const
+std::unique_ptr<XmlElement> AudioDeviceManager::createStateXml() const
 {
-    return createCopyIfNotNull (lastExplicitSettings.get());
+    if (lastExplicitSettings != nullptr)
+        return std::make_unique<XmlElement> (*lastExplicitSettings);
+
+    return {};
 }
 
 //==============================================================================

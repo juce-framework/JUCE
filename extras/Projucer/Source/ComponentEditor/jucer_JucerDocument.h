@@ -43,7 +43,7 @@ public:
     ~JucerDocument() override;
 
     static bool isValidJucerCppFile (const File&);
-    static XmlElement* pullMetaDataFromCppFile (const String& cpp);
+    static std::unique_ptr<XmlElement> pullMetaDataFromCppFile (const String& cpp);
     static JucerDocument* createForCppFile (Project*, const File&);
 
     void changed();
@@ -149,7 +149,7 @@ protected:
 
     BinaryResources resources;
 
-    virtual XmlElement* createXml() const;
+    virtual std::unique_ptr<XmlElement> createXml() const;
     virtual bool loadFromXml (const XmlElement&);
 
     virtual void fillInGeneratedCode (GeneratedCode&) const;

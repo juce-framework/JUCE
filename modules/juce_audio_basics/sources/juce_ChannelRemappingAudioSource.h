@@ -112,7 +112,7 @@ public:
     /** Returns an XML object to encapsulate the state of the mappings.
         @see restoreFromXml
     */
-    XmlElement* createXml() const;
+    std::unique_ptr<XmlElement> createXml() const;
 
     /** Restores the mappings from an XML object created by createXML().
         @see createXml

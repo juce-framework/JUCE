@@ -73,7 +73,7 @@ struct KeyFileUtils
     static String encryptXML (const XmlElement& xml, RSAKey privateKey)
     {
         MemoryOutputStream text;
-        text << xml.createDocument (StringRef(), true);
+        text << xml.toString (XmlElement::TextFormat().singleLine());
 
         BigInteger val;
         val.loadFromMemoryBlock (text.getMemoryBlock());

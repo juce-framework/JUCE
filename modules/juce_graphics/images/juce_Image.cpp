@@ -55,7 +55,7 @@ ImageType::~ImageType() {}
 
 Image ImageType::convert (const Image& source) const
 {
-    if (source.isNull() || getTypeID() == (std::unique_ptr<ImageType> (source.getPixelData()->createType())->getTypeID()))
+    if (source.isNull() || getTypeID() == source.getPixelData()->createType()->getTypeID())
         return source;
 
     const Image::BitmapData src (source, Image::BitmapData::readOnly);
@@ -90,10 +90,10 @@ public:
         imageData.allocate ((size_t) lineStride * (size_t) jmax (1, h), clearImage);
     }
 
-    LowLevelGraphicsContext* createLowLevelContext() override
+    std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
     {
         sendDataChangeMessage();
-        return new LowLevelGraphicsSoftwareRenderer (Image (*this));
+        return std::make_unique<LowLevelGraphicsSoftwareRenderer> (Image (*this));
     }
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
@@ -114,7 +114,7 @@ public:
         return *s;
     }
 
-    ImageType* createType() const override    { return new SoftwareImageType(); }
+    std::unique_ptr<ImageType> createType() const override    { return std::make_unique<SoftwareImageType>(); }
 
 private:
     HeapBlock<uint8> imageData;
@@ -162,9 +162,9 @@ public:
     {
     }
 
-    LowLevelGraphicsContext* createLowLevelContext() override
+    std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
     {
-        LowLevelGraphicsContext* g = sourceImage->createLowLevelContext();
+        auto g = sourceImage->createLowLevelContext();
         g->clipToRectangle (area);
         g->setOrigin (area.getPosition());
         return g;
@@ -181,7 +181,7 @@ public:
     ImagePixelData::Ptr clone() override
     {
         jassert (getReferenceCount() > 0); // (This method can't be used on an unowned pointer, as it will end up self-deleting)
-        const std::unique_ptr<ImageType> type (createType());
+        auto type = createType();
 
         Image newImage (type->create (pixelFormat, area.getWidth(), area.getHeight(), pixelFormat != Image::RGB));
 
@@ -193,7 +193,7 @@ public:
         return *newImage.getPixelData();
     }
 
-    ImageType* createType() const override          { return sourceImage->createType(); }
+    std::unique_ptr<ImageType> createType() const override          { return sourceImage->createType(); }
 
     /* as we always hold a reference to image, don't double count */
     int getSharedCount() const noexcept override    { return getReferenceCount() + sourceImage->getSharedCount() - 1; }
@@ -278,9 +278,12 @@ bool Image::isRGB() const noexcept                      { return getFormat() == 
 bool Image::isSingleChannel() const noexcept            { return getFormat() == SingleChannel; }
 bool Image::hasAlphaChannel() const noexcept            { return getFormat() != RGB; }
 
-LowLevelGraphicsContext* Image::createLowLevelContext() const
+std::unique_ptr<LowLevelGraphicsContext> Image::createLowLevelContext() const
 {
-    return image == nullptr ? nullptr : image->createLowLevelContext();
+    if (image != nullptr)
+        return image->createLowLevelContext();
+
+    return {};
 }
 
 void Image::duplicateIfShared()
@@ -302,7 +305,7 @@ Image Image::rescaled (int newWidth, int newHeight, Graphics::ResamplingQuality 
     if (image == nullptr || (image->width == newWidth && image->height == newHeight))
         return *this;
 
-    const std::unique_ptr<ImageType> type (image->createType());
+    auto type = image->createType();
     Image newImage (type->create (image->pixelFormat, newWidth, newHeight, hasAlphaChannel()));
 
     Graphics g (newImage);
@@ -319,7 +322,7 @@ Image Image::convertedToFormat (PixelFormat newFormat) const
 
     auto w = image->width, h = image->height;
 
-    const std::unique_ptr<ImageType> type (image->createType());
+    auto type = image->createType();
     Image newImage (type->create (newFormat, w, h, false));
 
     if (newFormat == SingleChannel)
@@ -450,7 +453,7 @@ void Image::clear (const Rectangle<int>& area, Colour colourToClearTo)
 {
     if (image != nullptr)
     {
-        const std::unique_ptr<LowLevelGraphicsContext> g (image->createLowLevelContext());
+        auto g = image->createLowLevelContext();
         g->setFill (colourToClearTo);
         g->fillRect (area, true);
     }

@@ -70,6 +70,9 @@
 #if JUCE_MAC || JUCE_IOS
  #include <libkern/OSAtomic.h>
  #include <xlocale.h>
+ #if JUCE_IOS
+  #include <signal.h>
+ #endif
 #endif
 
 #if JUCE_LINUX

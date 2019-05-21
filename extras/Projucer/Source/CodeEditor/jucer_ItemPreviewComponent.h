@@ -109,7 +109,7 @@ private:
 
         if (drawable == nullptr)
             if (auto svg = parseXML (file))
-                drawable.reset (Drawable::createFromSVG (*svg));
+                drawable = Drawable::createFromSVG (*svg);
 
         facts.removeEmptyStrings (true);
     }

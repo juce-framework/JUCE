@@ -188,8 +188,8 @@ const Drawable* BinaryResources::getDrawable (const String& name) const
     if (auto* res = const_cast<BinaryResources::BinaryResource*> (getResource (name)))
     {
         if (res->drawable == nullptr && res->data.getSize() > 0)
-            res->drawable.reset (Drawable::createFromImageData (res->data.getData(),
-                                                                res->data.getSize()));
+            res->drawable = Drawable::createFromImageData (res->data.getData(),
+                                                           res->data.getSize());
 
         return res->drawable.get();
     }

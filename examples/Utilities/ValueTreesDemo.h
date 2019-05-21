@@ -71,6 +71,10 @@ public:
 
     void paintItem (Graphics& g, int width, int height) override
     {
+        if (isSelected())
+            g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::highlightedFill,
+                                               Colours::teal));
+
         g.setColour (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::defaultText,
                                              Colours::black));
         g.setFont (15.0f);
@@ -233,7 +237,7 @@ public:
     {
         auto vt = createTree ("This demo displays a ValueTree as a treeview.");
         vt.appendChild (createTree ("You can drag around the nodes to rearrange them"),               nullptr);
-        vt.appendChild (createTree ("..and press 'delete' to delete them"),                           nullptr);
+        vt.appendChild (createTree ("..and press 'delete' or 'backspace' to delete them"),            nullptr);
         vt.appendChild (createTree ("Then, you can use the undo/redo buttons to undo these changes"), nullptr);
 
         int n = 1;
@@ -267,7 +271,7 @@ public:
 
     bool keyPressed (const KeyPress& key) override
     {
-        if (key == KeyPress::deleteKey)
+        if (key == KeyPress::deleteKey || key == KeyPress::backspaceKey)
         {
             deleteSelectedItems();
             return true;

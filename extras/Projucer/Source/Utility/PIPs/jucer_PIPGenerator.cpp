@@ -146,10 +146,9 @@ Result PIPGenerator::createJucerFile()
 
     auto outputFile = outputDirectory.getChildFile (metadata[Ids::name].toString() + ".jucer");
 
-    std::unique_ptr<XmlElement> xml (root.createXml());
-
-    if (xml->writeToFile (outputFile, {}))
-        return Result::ok();
+    if (auto xml = root.createXml())
+        if (xml->writeTo (outputFile, {}))
+            return Result::ok();
 
     return Result::fail ("Failed to create .jucer file in " + outputDirectory.getFullPathName());
 }

@@ -2292,9 +2292,7 @@ public:
 
     void setStateInformation (const void* data, int sizeInBytes) override
     {
-        std::unique_ptr<XmlElement> head (AudioProcessor::getXmlFromBinary (data, sizeInBytes));
-
-        if (head != nullptr)
+        if (auto head = AudioProcessor::getXmlFromBinary (data, sizeInBytes))
         {
             auto componentStream (createMemoryStreamForState (*head, "IComponent"));
 

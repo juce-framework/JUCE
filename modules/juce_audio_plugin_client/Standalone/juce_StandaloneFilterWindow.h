@@ -296,7 +296,7 @@ public:
     {
         if (settings != nullptr)
         {
-            std::unique_ptr<XmlElement> xml (deviceManager.createStateXml());
+            auto xml = deviceManager.createStateXml();
 
             settings->setValue ("audioSetup", xml.get());
 
@@ -314,7 +314,7 @@ public:
 
         if (settings != nullptr)
         {
-            savedState.reset (settings->getXmlValue ("audioSetup"));
+            savedState = settings->getXmlValue ("audioSetup");
 
            #if ! (JUCE_IOS || JUCE_ANDROID)
             shouldMuteInput.setValue (settings->getBoolValue ("shouldMuteInput", true));

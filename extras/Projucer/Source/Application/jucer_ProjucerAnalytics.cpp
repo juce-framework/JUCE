@@ -178,11 +178,10 @@ void ProjucerAnalyticsDestination::stopLoggingEvents()
 //==============================================================================
 void ProjucerAnalyticsDestination::saveUnloggedEvents (const std::deque<AnalyticsEvent>& eventsToSave)
 {
-    XmlDocument previouslySavedEvents (savedEventsFile);
-    std::unique_ptr<XmlElement> xml (previouslySavedEvents.getDocumentElement());
+    auto xml = parseXMLIfTagMatches (savedEventsFile, "events");
 
-    if (xml.get() == nullptr || xml->getTagName() != "events")
-        xml.reset (new XmlElement ("events"));
+    if (xml == nullptr)
+        xml = std::make_unique<XmlElement> ("events");
 
     for (auto& event : eventsToSave)
     {
@@ -209,15 +208,14 @@ void ProjucerAnalyticsDestination::saveUnloggedEvents (const std::deque<Analytic
         xml->addChildElement (xmlEvent);
     }
 
-    xml->writeToFile (savedEventsFile, {});
+    xml->writeTo (savedEventsFile, {});
 }
 
 void ProjucerAnalyticsDestination::restoreUnloggedEvents (std::deque<AnalyticsEvent>& restoredEventQueue)
 {
-    XmlDocument savedEvents (savedEventsFile);
-    std::unique_ptr<XmlElement> xml (savedEvents.getDocumentElement());
+    auto xml = parseXMLIfTagMatches (savedEventsFile, "events");
 
-    if (xml.get() == nullptr || xml->getTagName() != "events")
+    if (xml == nullptr)
         return;
 
     auto numEvents = xml->getNumChildElements();

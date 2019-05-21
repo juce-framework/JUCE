@@ -230,15 +230,13 @@ public:
     //==============================================================================
     void getStateInformation (MemoryBlock& destData) override
     {
-        auto xml = std::unique_ptr<XmlElement> (parameters.state.createXml());
-        copyXmlToBinary (*xml, destData);
+        if (auto xml = parameters.state.createXml())
+            copyXmlToBinary (*xml, destData);
     }
 
     void setStateInformation (const void* data, int sizeInBytes) override
     {
-        auto xmlState = std::unique_ptr<XmlElement> (getXmlFromBinary (data, sizeInBytes));
-
-        if (xmlState.get() != nullptr)
+        if (auto xmlState = getXmlFromBinary (data, sizeInBytes))
             if (xmlState->hasTagName (parameters.state.getType()))
                 parameters.state = ValueTree::fromXml (*xmlState);
     }

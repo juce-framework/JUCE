@@ -2315,14 +2315,14 @@ Button* LookAndFeel_V2::createTabBarExtrasButton()
     dp.setFill (Colour (0x59000000));
 
     DrawableComposite normalImage;
-    normalImage.addAndMakeVisible (ellipse.createCopy());
-    normalImage.addAndMakeVisible (dp.createCopy());
+    normalImage.addAndMakeVisible (ellipse.createCopy().release());
+    normalImage.addAndMakeVisible (dp.createCopy().release());
 
     dp.setFill (Colour (0xcc000000));
 
     DrawableComposite overImage;
-    overImage.addAndMakeVisible (ellipse.createCopy());
-    overImage.addAndMakeVisible (dp.createCopy());
+    overImage.addAndMakeVisible (ellipse.createCopy().release());
+    overImage.addAndMakeVisible (dp.createCopy().release());
 
     auto db = new DrawableButton ("tabs", DrawableButton::ImageFitted);
     db->setImages (&normalImage, &overImage, nullptr);
@@ -2653,7 +2653,7 @@ void LookAndFeel_V2::layoutFileBrowserComponent (FileBrowserComponent& browserCo
 }
 
 //==============================================================================
-static Drawable* createDrawableFromSVG (const char* data)
+static std::unique_ptr<Drawable> createDrawableFromSVG (const char* data)
 {
     auto xml = parseXML (data);
     jassert (xml != nullptr);
@@ -2663,7 +2663,7 @@ static Drawable* createDrawableFromSVG (const char* data)
 const Drawable* LookAndFeel_V2::getDefaultFolderImage()
 {
     if (folderImage == nullptr)
-        folderImage.reset (createDrawableFromSVG (R"svgdata(
+        folderImage = createDrawableFromSVG (R"svgdata(
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="706" height="532">
   <defs>
     <linearGradient id="a">
@@ -2678,7 +2678,7 @@ const Drawable* LookAndFeel_V2::getDefaultFolderImage()
     <path d="M608.6 136.8L235.2 208a22.7 22.7 0 0 0-16 19l-40.8 241c1.7 8.4 9.6 14.5 17.8 12.3l380-104c8-2.2 10.7-10.2 12.3-18.4l38-210.1c.4-15.4-10.4-11.8-18-11.1z" display="block" fill="url(#c)" opacity=".8" stroke="#446c98" stroke-width="7"/>
   </g>
 </svg>
-)svgdata"));
+)svgdata");
 
     return folderImage.get();
 }
@@ -2686,12 +2686,12 @@ const Drawable* LookAndFeel_V2::getDefaultFolderImage()
 const Drawable* LookAndFeel_V2::getDefaultDocumentFileImage()
 {
     if (documentImage == nullptr)
-        documentImage.reset (createDrawableFromSVG (R"svgdata(
+        documentImage = createDrawableFromSVG (R"svgdata(
 <svg version="1" viewBox="-10 -10 450 600" xmlns="http://www.w3.org/2000/svg">
   <path d="M17 0h290l120 132v426c0 10-8 19-17 19H17c-9 0-17-9-17-19V19C0 8 8 0 17 0z" fill="#e5e5e5" stroke="#888888" stroke-width="7"/>
   <path d="M427 132H324c-9 0-17-9-17-19V0l120 132z" fill="#ccc"/>
 </svg>
-)svgdata"));
+)svgdata");
 
     return documentImage.get();
 }

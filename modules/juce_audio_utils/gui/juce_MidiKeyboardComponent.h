@@ -370,9 +370,13 @@ protected:
     virtual bool mouseDownOnKey (int midiNoteNumber, const MouseEvent& e);
 
     /** Callback when the mouse is dragged from one key onto another.
+
+        Return true if you want the drag to trigger the new note, or false if you
+        want to handle it yourself and not have the note played.
+
         @see mouseDownOnKey
     */
-    virtual void mouseDraggedToKey (int midiNoteNumber, const MouseEvent& e);
+    virtual bool mouseDraggedToKey (int midiNoteNumber, const MouseEvent& e);
 
     /** Callback when the mouse is released from a key.
         @see mouseDownOnKey
@@ -414,7 +418,7 @@ private:
 
     int rangeStart = 0, rangeEnd = 127;
     float firstKey = 12 * 4.0f;
-    bool canScroll = true, useMousePositionForVelocity = true, shouldCheckMousePos = false;
+    bool canScroll = true, useMousePositionForVelocity = true;
     std::unique_ptr<Button> scrollDown, scrollUp;
 
     Array<KeyPress> keyPresses;

@@ -297,15 +297,12 @@ void PaintRoutine::copySelectedToClipboard()
         if (selectedElements.isSelected (pe))
             clip.addChildElement (pe->createXml());
 
-    SystemClipboard::copyTextToClipboard (clip.createDocument ("", false, false));
+    SystemClipboard::copyTextToClipboard (clip.toString());
 }
 
 void PaintRoutine::paste()
 {
-    XmlDocument clip (SystemClipboard::getTextFromClipboard());
-    std::unique_ptr<XmlElement> doc (clip.getDocumentElement());
-
-    if (doc != nullptr && doc->hasTagName (clipboardXmlTag))
+    if (auto doc = parseXMLIfTagMatches (SystemClipboard::getTextFromClipboard(), clipboardXmlTag))
     {
         selectedElements.deselectAll();
         selectedPoints.deselectAll();

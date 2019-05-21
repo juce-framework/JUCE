@@ -167,7 +167,7 @@ public:
 
     //==============================================================================
     /** Creates some XML that can be used to store the state of this list. */
-    XmlElement* createXml() const;
+    std::unique_ptr<XmlElement> createXml() const;
 
     /** Recreates the state of this list from its stored XML format. */
     void recreateFromXml (const XmlElement& xml);

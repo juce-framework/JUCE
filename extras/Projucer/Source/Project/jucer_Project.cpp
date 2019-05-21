@@ -575,9 +575,9 @@ static void forgetRecentFile (const File& file)
 //==============================================================================
 Result Project::loadDocument (const File& file)
 {
-    auto xml = parseXML (file);
+    auto xml = parseXMLIfTagMatches (file, Ids::JUCERPROJECT.toString());
 
-    if (xml == nullptr || ! xml->hasTagName (Ids::JUCERPROJECT.toString()))
+    if (xml == nullptr)
         return Result::fail ("Not a valid Jucer project!");
 
     auto newTree = ValueTree::fromXml (*xml);
@@ -697,18 +697,15 @@ void Project::moveTemporaryDirectory (const File& newParentDirectory)
 
 bool Project::saveProjectRootToFile()
 {
-    std::unique_ptr<XmlElement> xml (projectRoot.createXml());
-
-    if (xml == nullptr)
+    if (auto xml = projectRoot.createXml())
     {
-        jassertfalse;
-        return false;
+        MemoryOutputStream mo;
+        xml->writeTo (mo, {});
+        return FileHelpers::overwriteFileWithNewDataIfDifferent (getFile(), mo);
     }
 
-    MemoryOutputStream mo;
-    xml->writeToStream (mo, {});
-
-    return FileHelpers::overwriteFileWithNewDataIfDifferent (getFile(), mo);
+    jassertfalse;
+    return false;
 }
 
 //==============================================================================
@@ -1234,15 +1231,17 @@ Project::Item Project::Item::createCopy()         { Item i (*this); i.state = i.
 String Project::Item::getID() const               { return state [Ids::ID]; }
 void Project::Item::setID (const String& newID)   { state.setProperty (Ids::ID, newID, nullptr); }
 
-Drawable* Project::Item::loadAsImageFile() const
+std::unique_ptr<Drawable> Project::Item::loadAsImageFile() const
 {
     const MessageManagerLock mml (ThreadPoolJob::getCurrentThreadPoolJob());
 
     if (! mml.lockWasGained())
         return nullptr;
 
-    return isValid() ? Drawable::createFromImageFile (getFile())
-                     : nullptr;
+    if (isValid())
+        return Drawable::createFromImageFile (getFile());
+
+    return {};
 }
 
 Project::Item Project::Item::createGroup (Project& project, const String& name, const String& uid, bool isModuleCode)

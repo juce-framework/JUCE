@@ -30,10 +30,14 @@ namespace juce
 extern ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component&, void* parent);
 extern bool shouldScaleGLWindow (void* hwnd);
 
-#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && (JucePlugin_Build_VST || JucePlugin_Build_VST3)
+#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && JucePlugin_Build_VST
  bool juce_shouldDoubleScaleNativeGLWindow();
 #else
  bool juce_shouldDoubleScaleNativeGLWindow()  { return false; }
+#endif
+
+#if JUCE_WIN_PER_MONITOR_DPI_AWARE
+ void setProcessDPIAwarenessIfNecessary (void*);
 #endif
 
 //==============================================================================
@@ -101,6 +105,10 @@ public:
 
     bool initialiseOnRenderThread (OpenGLContext& c)
     {
+       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+        setProcessDPIAwarenessIfNecessary (nativeWindow->getNativeHandle());
+       #endif
+
         context = &c;
         return true;
     }

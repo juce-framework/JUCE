@@ -377,6 +377,7 @@ static void setDPIAwareness()
         getThreadDPIAwarenessContext        = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
         getAwarenessFromDPIAwarenessContext = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
         setThreadDPIAwarenessContext        = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
+        setProcessDPIAwareness              = (SetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "SetProcessDpiAwareness");
 
         // Only set the DPI awareness context of the process if we are a standalone app
         if (! JUCEApplicationBase::isStandaloneApp())
@@ -388,7 +389,6 @@ static void setDPIAwareness()
             && SUCCEEDED (setProcessDPIAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2)))
             return;
 
-        setProcessDPIAwareness    = (SetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "SetProcessDpiAwareness");
         enableNonClientDPIScaling = (EnableNonClientDPIScalingFunc) getUser32Function ("EnableNonClientDpiScaling");
 
         if (setProcessDPIAwareness != nullptr && enableNonClientDPIScaling != nullptr
@@ -403,6 +403,9 @@ static void setDPIAwareness()
              && SUCCEEDED (setProcessDPIAwareness (DPI_Awareness::DPI_Awareness_System_Aware)))
             return;
     }
+
+    if (! JUCEApplicationBase::isStandaloneApp())
+        return;
 
     // fallback for pre Windows 8.1 - equivalent to Process_System_DPI_Aware
     setProcessDPIAware = (SetProcessDPIAwareFunc) getUser32Function ("SetProcessDPIAware");
@@ -763,12 +766,12 @@ public:
         DeleteObject (hBitmap);
     }
 
-    ImageType* createType() const override                       { return new NativeImageType(); }
+    std::unique_ptr<ImageType> createType() const override    { return std::make_unique<NativeImageType>(); }
 
-    LowLevelGraphicsContext* createLowLevelContext() override
+    std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
     {
         sendDataChangeMessage();
-        return new LowLevelGraphicsSoftwareRenderer (Image (this));
+        return std::make_unique<LowLevelGraphicsSoftwareRenderer> (Image (this));
     }
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
@@ -2441,8 +2444,8 @@ private:
                         offscreenImage.clear (i);
 
                 {
-                    std::unique_ptr<LowLevelGraphicsContext> context (component.getLookAndFeel()
-                                                                        .createGraphicsContext (offscreenImage, Point<int> (-x, -y), contextClip));
+                    auto context = component.getLookAndFeel()
+                                    .createGraphicsContext (offscreenImage, { -x, -y }, contextClip);
 
                     context->addTransform (AffineTransform::scale ((float) getPlatformScaleFactor()));
                     handlePaint (*context);
@@ -4072,6 +4075,23 @@ JUCE_API bool shouldScaleGLWindow (void* hwnd)
 {
     return isPerMonitorDPIAwareWindow ((HWND) hwnd);
 }
+
+#if JUCE_WIN_PER_MONITOR_DPI_AWARE
+ JUCE_API void setProcessDPIAwarenessIfNecessary (void* hwnd)
+ {
+     if (getProcessDPIAwareness == nullptr)
+         return;
+
+     DPI_Awareness context;
+     getProcessDPIAwareness (0, &context);
+
+     if (isPerMonitorDPIAwareWindow ((HWND) hwnd) && context != DPI_Awareness::DPI_Awareness_Per_Monitor_Aware
+         && setProcessDPIAwareness != nullptr)
+     {
+         setProcessDPIAwareness (DPI_Awareness::DPI_Awareness_Per_Monitor_Aware);
+     }
+ }
+#endif
 
 JUCE_IMPLEMENT_SINGLETON (HWNDComponentPeer::WindowClassHolder)
 

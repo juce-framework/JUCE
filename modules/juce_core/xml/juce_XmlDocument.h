@@ -32,19 +32,16 @@ namespace juce
 
     e.g.
     @code
-
     XmlDocument myDocument (File ("myfile.xml"));
-    std::unique_ptr<XmlElement> mainElement (myDocument.getDocumentElement());
 
-    if (mainElement == nullptr)
-    {
-        String error = myDocument.getLastParseError();
-    }
-    else
+    if (auto mainElement = myDocument.getDocumentElement())
     {
         ..use the element
     }
-
+    else
+    {
+        String error = myDocument.getLastParseError();
+    }
     @endcode
 
     Or you can use the helper functions for much less verbose parsing..
@@ -98,12 +95,17 @@ public:
                                                 tag, without having to parse the entire file
         @returns    a new XmlElement which the caller will need to delete, or null if
                     there was an error.
-        @see getLastParseError
+        @see getLastParseError, getDocumentElementIfTagMatches
     */
-    XmlElement* getDocumentElement (bool onlyReadOuterDocumentElement = false);
+    std::unique_ptr<XmlElement> getDocumentElement (bool onlyReadOuterDocumentElement = false);
+
+    /** Does an inexpensive check to see whether the outer element has the given tag name, and
+        then does a full parse if it matches.
+        If the tag is different, or the XML parse fails, this will return nullptr.
+    */
+    std::unique_ptr<XmlElement> getDocumentElementIfTagMatches (StringRef requiredTag);
 
     /** Returns the parsing error that occurred the last time getDocumentElement was called.
-
         @returns the error, or an empty string if there was no error.
     */
     const String& getLastParseError() const noexcept;
@@ -136,14 +138,14 @@ public:
         An even better shortcut is the juce::parseXML() function, which returns a std::unique_ptr<XmlElement>!
         @returns    a new XmlElement which the caller will need to delete, or null if there was an error.
     */
-    static XmlElement* parse (const File& file);
+    static std::unique_ptr<XmlElement> parse (const File& file);
 
     /** A handy static method that parses some XML data.
         This is a shortcut for creating an XmlDocument object and calling getDocumentElement() on it.
         An even better shortcut is the juce::parseXML() function, which returns a std::unique_ptr<XmlElement>!
         @returns    a new XmlElement which the caller will need to delete, or null if there was an error.
     */
-    static XmlElement* parse (const String& xmlData);
+    static std::unique_ptr<XmlElement> parse (const String& xmlData);
 
 
     //==============================================================================
@@ -156,7 +158,7 @@ private:
     bool needToLoadDTD = false, ignoreEmptyTextElements = true;
     std::unique_ptr<InputSource> inputSource;
 
-    XmlElement* parseDocumentElement (String::CharPointerType, bool outer);
+    std::unique_ptr<XmlElement> parseDocumentElement (String::CharPointerType, bool outer);
     void setLastError (const String&, bool carryOn);
     bool parseHeader();
     bool parseDTD();
@@ -178,18 +180,31 @@ private:
 //==============================================================================
 /** Attempts to parse some XML text, returning a new XmlElement if it was valid.
     If the parse fails, this will return a nullptr - if you need more information about
-    errors or more parsing options, see the XmlDocument instead.
-    @see XmlDocument
+    errors or more parsing options, see the XmlDocument class instead.
+    @see XmlDocument, parseXMLIfTagMatches
 */
 std::unique_ptr<XmlElement> parseXML (const String& textToParse);
 
 /** Attempts to parse some XML text, returning a new XmlElement if it was valid.
     If the parse fails, this will return a nullptr - if you need more information about
-    errors or more parsing options, see the XmlDocument instead.
-    @see XmlDocument
+    errors or more parsing options, see the XmlDocument class instead.
+    @see XmlDocument, parseXMLIfTagMatches
 */
 std::unique_ptr<XmlElement> parseXML (const File& fileToParse);
 
+/** Does an inexpensive check to see whether the top-level element has the given tag
+    name, and if that's true, does a full parse and returns the result.
+    If the outer tag doesn't match, or the XML has errors, this will return nullptr;
+    @see parseXML
+*/
+std::unique_ptr<XmlElement> parseXMLIfTagMatches (const String& textToParse, StringRef requiredTag);
+
+/** Does an inexpensive check to see whether the top-level element has the given tag
+    name, and if that's true, does a full parse and returns the result.
+    If the outer tag doesn't match, or the XML has errors, this will return nullptr;
+    @see parseXML
+*/
+std::unique_ptr<XmlElement> parseXMLIfTagMatches (const File& fileToParse, StringRef requiredTag);
 
 
 } // namespace juce

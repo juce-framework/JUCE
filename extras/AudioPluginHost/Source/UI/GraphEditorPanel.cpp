@@ -1150,6 +1150,8 @@ struct GraphDocumentComponent::PluginListBoxModel    : public ListBoxModel,
    #if JUCE_IOS
     std::unique_ptr<AUScanner> scanner;
    #endif
+
+    JUCE_DECLARE_NON_COPYABLE (PluginListBoxModel)
 };
 
 //==============================================================================

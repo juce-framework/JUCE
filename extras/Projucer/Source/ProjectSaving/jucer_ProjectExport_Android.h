@@ -96,8 +96,8 @@ public:
     }
 
     //==============================================================================
-    ValueWithDefault androidJavaLibs, androidAdditionalJavaFolders, androidAdditionalResourceFolders, androidRepositories, androidDependencies, androidScreenOrientation,
-                     androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements, androidVersionCode,
+    ValueWithDefault androidJavaLibs, androidAdditionalJavaFolders, androidAdditionalResourceFolders, androidRepositories, androidDependencies, androidCustomAppBuildGradleContent,
+                     androidScreenOrientation, androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements, androidGradleSettingsContent, androidVersionCode,
                      androidMinimumSDK, androidTargetSDK, androidTheme, androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder,
                      androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded, androidBluetoothNeeded, androidExternalReadPermission,
                      androidExternalWritePermission, androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions,
@@ -112,10 +112,12 @@ public:
           androidAdditionalResourceFolders     (settings, Ids::androidAdditionalResourceFolders,     getUndoManager()),
           androidRepositories                  (settings, Ids::androidRepositories,                  getUndoManager()),
           androidDependencies                  (settings, Ids::androidDependencies,                  getUndoManager()),
+          androidCustomAppBuildGradleContent   (settings, Ids::androidCustomAppBuildGradleContent,   getUndoManager()),
           androidScreenOrientation             (settings, Ids::androidScreenOrientation,             getUndoManager(), "unspecified"),
           androidCustomActivityClass           (settings, Ids::androidCustomActivityClass,           getUndoManager(), getDefaultActivityClass()),
           androidCustomApplicationClass        (settings, Ids::androidCustomApplicationClass,        getUndoManager(), getDefaultApplicationClass()),
           androidManifestCustomXmlElements     (settings, Ids::androidManifestCustomXmlElements,     getUndoManager()),
+          androidGradleSettingsContent         (settings, Ids::androidGradleSettingsContent,         getUndoManager(), isLibrary() ? "include ':lib'" : "include ':app'"),
           androidVersionCode                   (settings, Ids::androidVersionCode,                   getUndoManager(), "1"),
           androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "16"),
           androidTargetSDK                     (settings, Ids::androidTargetSDK,                     getUndoManager(), "28"),
@@ -204,7 +206,7 @@ public:
         removeOldFiles (targetFolder);
         copyExtraResourceFiles();
 
-        writeFile (targetFolder, "settings.gradle",                          isLibrary() ? "include ':lib'" : "include ':app'");
+        writeFile (targetFolder, "settings.gradle",                          androidGradleSettingsContent.get().toString());
         writeFile (targetFolder, "build.gradle",                             getProjectBuildGradleFileContent());
         writeFile (appFolder,    "build.gradle",                             getAppBuildGradleFileContent (modules));
         writeFile (targetFolder, "local.properties",                         getLocalPropertiesFileContent());
@@ -620,6 +622,7 @@ private:
         mo << getAndroidJavaSourceSets (modules)                                             << newLine;
         mo << getAndroidRepositories()                                                       << newLine;
         mo << getAndroidDependencies()                                                       << newLine;
+        mo << androidCustomAppBuildGradleContent.get().toString()                            << newLine;
         mo << getApplyPlugins()                                                              << newLine;
 
         mo << "}"                                                                            << newLine << newLine;
@@ -989,6 +992,12 @@ private:
                    "Module dependencies (one per line). These will be added to module-level gradle file \"dependencies\" section. "
                    "If adding any java libs in \"Java libraries to include\" setting, do not add them here as "
                    "they will be added automatically.");
+
+        props.add (new TextPropertyComponent (androidCustomAppBuildGradleContent, "Extra module's build.gradle content", 32768, true),
+                   "Additional content to be appended to module's build.gradle inside android { section. ");
+
+        props.add (new TextPropertyComponent (androidGradleSettingsContent, "Custom gradle.settings content", 32768, true),
+                   "You can customize the content of settings.gradle here");
 
         props.add (new ChoicePropertyComponent (androidScreenOrientation, "Screen Orientation",
                                                 { "Portrait and Landscape", "Portrait", "Landscape" },
@@ -1510,9 +1519,9 @@ private:
     }
 
     //==============================================================================
-    XmlElement* createManifestXML() const
+    std::unique_ptr<XmlElement> createManifestXML() const
     {
-        auto* manifest = createManifestElement();
+        auto manifest = createManifestElement();
 
         createSupportsScreensElement (*manifest);
         createPermissionElements     (*manifest);
@@ -1532,12 +1541,12 @@ private:
         return manifest;
     }
 
-    XmlElement* createManifestElement() const
+    std::unique_ptr<XmlElement> createManifestElement() const
     {
-        auto* manifest = XmlDocument::parse (androidManifestCustomXmlElements.get());
+        auto manifest = parseXML (androidManifestCustomXmlElements.get());
 
         if (manifest == nullptr)
-            manifest = new XmlElement ("manifest");
+            manifest = std::make_unique<XmlElement> ("manifest");
 
         setAttributeIfNotPresent (*manifest, "xmlns:android", "http://schemas.android.com/apk/res/android");
         setAttributeIfNotPresent (*manifest, "android:versionCode", androidVersionCode.get());

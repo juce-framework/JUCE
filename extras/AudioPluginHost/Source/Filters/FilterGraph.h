@@ -64,8 +64,8 @@ public:
     void audioProcessorChanged (AudioProcessor*) override { changed(); }
 
     //==============================================================================
-    XmlElement* createXml() const;
-    void restoreFromXml (const XmlElement& xml);
+    std::unique_ptr<XmlElement> createXml() const;
+    void restoreFromXml (const XmlElement&);
 
     static const char* getFilenameSuffix()      { return ".filtergraph"; }
     static const char* getFilenameWildcard()    { return "*.filtergraph"; }
@@ -84,6 +84,23 @@ public:
     AudioProcessorGraph graph;
 
 private:
+    //==============================================================================
+    struct AsyncCallback : public AudioPluginFormat::InstantiationCompletionCallback
+    {
+        AsyncCallback(FilterGraph& g, Point<double> pos) : owner(g), position(pos)
+        {}
+
+        void completionCallback(AudioPluginInstance* instance, const String& error) override
+        {
+            owner.addFilterCallback(instance, error, position);
+        }
+
+        FilterGraph& owner;
+        Point<double> position;
+
+        JUCE_DECLARE_NON_COPYABLE (AsyncCallback)
+    };
+
     //==============================================================================
     AudioPluginFormatManager& formatManager;
     OwnedArray<PluginWindow> activePluginWindows;

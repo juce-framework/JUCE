@@ -496,18 +496,20 @@ public:
 
         if (svgFileStream.get() != nullptr)
         {
-            svgDrawable.reset (dynamic_cast<DrawableComposite*> (Drawable::createFromImageDataStream (*svgFileStream)));
+            svgDrawable = Drawable::createFromImageDataStream (*svgFileStream);
 
-            if (svgDrawable.get() != nullptr)
+            if (svgDrawable != nullptr)
             {
                 // to make our icon the right size, we'll set its bounding box to the size and position that we want.
-                svgDrawable->setBoundingBox ({ -100.0f, -100.0f, 200.0f, 200.0f });
+
+                if (auto comp = dynamic_cast<DrawableComposite*> (svgDrawable.get()))
+                    comp->setBoundingBox ({ -100.0f, -100.0f, 200.0f, 200.0f });
             }
         }
     }
 
     Time lastSVGLoadTime;
-    std::unique_ptr<DrawableComposite> svgDrawable;
+    std::unique_ptr<Drawable> svgDrawable;
 };
 
 //==============================================================================
