@@ -268,10 +268,10 @@ public:
         }
 
         g1->addChild (std::make_unique<AudioProcessorParameterGroup> ("g6", "g6", " | ",
-                                                                      std::make_unique<AudioParameterFloat> ("p11", "p11", NormalisableRange<float> (0.0f, 2.0f), 0.5f),
+                                                                      std::make_unique<AudioParameterFloat> ("p13", "p13", NormalisableRange<float> (0.0f, 2.0f), 0.5f),
                                                                       std::make_unique<AudioProcessorParameterGroup> ("g7", "g7", " | ",
-                                                                                                                      std::make_unique<AudioParameterFloat> ("p12", "p12", NormalisableRange<float> (0.0f, 2.0f), 0.5f)),
-                                                                      std::make_unique<AudioParameterFloat> ("p13", "p13", NormalisableRange<float> (0.0f, 2.0f), 0.5f)));
+                                                                                                                      std::make_unique<AudioParameterFloat> ("p14", "p14", NormalisableRange<float> (0.0f, 2.0f), 0.5f)),
+                                                                      std::make_unique<AudioParameterFloat> ("p15", "p15", NormalisableRange<float> (0.0f, 2.0f), 0.5f)));
 
         TestAudioProcessor processor;
 

@@ -2560,7 +2560,6 @@ private:
             auto* param = new VST3Parameter (*this,
                                              paramInfo.id,
                                              (paramInfo.flags & Vst::ParameterInfo::kCanAutomate) != 0);
-            addParameterInternal (param);
 
             if ((paramInfo.flags & Vst::ParameterInfo::kIsBypass) != 0)
                 bypassParam = param;
@@ -2594,7 +2593,7 @@ private:
             group->addChild (std::unique_ptr<AudioProcessorParameter> (param));
         }
 
-        getParameterTree() = std::move (newParameterTree);
+        setParameterTree (std::move (newParameterTree));
     }
 
     void synchroniseStates()

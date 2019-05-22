@@ -1351,7 +1351,6 @@ public:
 
     void refreshParameterList() override
     {
-        managedParameters.clear (false);
         paramIDToIndex.clear();
         AudioProcessorParameterGroup newParameterTree;
 
@@ -1440,7 +1439,6 @@ public:
                                                                    isBoolean,
                                                                    label,
                                                                    (info.flags & kAudioUnitParameterFlag_ValuesHaveStrings) != 0);
-                        addParameterInternal (parameter);
 
                         if (info.flags & kAudioUnitParameterFlag_HasClump)
                         {
@@ -1487,7 +1485,7 @@ public:
             }
         }
 
-        getParameterTree() = std::move (newParameterTree);
+        setParameterTree (std::move (newParameterTree));
 
         UInt32 propertySize = 0;
         Boolean writable = false;
