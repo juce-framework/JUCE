@@ -554,10 +554,10 @@ MidiDeviceInfo MidiInput::getDefaultDevice()
     return getAvailableDevices().getFirst();
 }
 
-MidiInput* MidiInput::openDevice (const String& deviceIdentifier, MidiInputCallback* callback)
+std::unique_ptr<MidiInput> MidiInput::openDevice (const String& deviceIdentifier, MidiInputCallback* callback)
 {
     if (getAndroidSDKVersion() < 23 || deviceIdentifier.isEmpty())
-        return nullptr;
+        return {};
 
     AndroidMidiDeviceManager manager;
 
@@ -568,10 +568,10 @@ MidiInput* MidiInput::openDevice (const String& deviceIdentifier, MidiInputCallb
         midiInput->internal = port;
         midiInput->setName (port->getName());
 
-        return midiInput.release();
+        return midiInput;
     }
 
-    return nullptr;
+    return {};
 }
 
 StringArray MidiInput::getDevices()
@@ -592,7 +592,7 @@ int MidiInput::getDefaultDeviceIndex()
     return (getAndroidSDKVersion() < 23 ? -1 : 0);
 }
 
-MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
+std::unique_ptr<MidiInput> MidiInput::openDevice (int index, MidiInputCallback* callback)
 {
     return openDevice (getAvailableDevices()[index].identifier, callback);
 }
@@ -637,10 +637,10 @@ MidiDeviceInfo MidiOutput::getDefaultDevice()
     return getAvailableDevices().getFirst();
 }
 
-MidiOutput* MidiOutput::openDevice (const String& deviceIdentifier)
+std::unique_ptr<MidiOutput> MidiOutput::openDevice (const String& deviceIdentifier)
 {
     if (getAndroidSDKVersion() < 23 || deviceIdentifier.isEmpty())
-        return nullptr;
+        return {};
 
     AndroidMidiDeviceManager manager;
 
@@ -650,10 +650,10 @@ MidiOutput* MidiOutput::openDevice (const String& deviceIdentifier)
         midiOutput->internal = port;
         midiOutput->setName (port->getName());
 
-        return midiOutput.release();
+        return midiOutput;
     }
 
-    return nullptr;
+    return {};
 }
 
 StringArray MidiOutput::getDevices()
@@ -674,7 +674,7 @@ int MidiOutput::getDefaultDeviceIndex()
     return (getAndroidSDKVersion() < 23 ? -1 : 0);
 }
 
-MidiOutput* MidiOutput::openDevice (int index)
+std::unique_ptr<MidiOutput> MidiOutput::openDevice (int index)
 {
     return openDevice (getAvailableDevices()[index].identifier);
 }

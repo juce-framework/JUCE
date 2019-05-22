@@ -51,8 +51,8 @@ struct MIDIDeviceDetector  : public PhysicalTopologySource::DeviceDetector
                 lockedFromOutside = false;
 
                 dev->setLockAgainstOtherProcesses (lock);
-                dev->midiInput.reset (MidiInput::openDevice (pair.input.identifier, dev.get()));
-                dev->midiOutput.reset (MidiOutput::openDevice (pair.output.identifier));
+                dev->midiInput  = MidiInput::openDevice  (pair.input.identifier, dev.get());
+                dev->midiOutput = MidiOutput::openDevice (pair.output.identifier);
 
                 if (dev->midiInput != nullptr)
                 {

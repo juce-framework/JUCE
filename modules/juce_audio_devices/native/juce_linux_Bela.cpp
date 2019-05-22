@@ -528,22 +528,22 @@ MidiDeviceInfo MidiInput::getDefaultDevice()
     return getAvailableDevices().getFirst();
 }
 
-MidiInput* MidiInput::openDevice (const String& deviceIdentifier, MidiInputCallback* callback)
+std::unique_ptr<MidiInput> MidiInput::openDevice (const String& deviceIdentifier, MidiInputCallback* callback)
 {
     if (deviceIdentifier.isEmpty())
-        return nullptr;
+        return {};
 
     std::unique_ptr<MidiInput> midiInput (new MidiInput (deviceIdentifier, deviceIdentifier));
     midiInput->internal = new BelaMidiInput (deviceIdentifier, result, callback);
 
-    return midiInput.release();
+    return midiInput;
 }
 
-MidiInput* MidiInput::createNewDevice (const String&, MidiInputCallback*)
+std::unique_ptr<MidiInput> MidiInput::createNewDevice (const String&, MidiInputCallback*)
 {
     // N/A on Bela
     jassertfalse;
-    return nullptr;
+    return {};
 }
 
 StringArray MidiInput::getDevices()
@@ -561,21 +561,21 @@ int MidiInput::getDefaultDeviceIndex()
     return 0;
 }
 
-MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
+std::unique_ptr<MidiInput> MidiInput::openDevice (int index, MidiInputCallback* callback)
 {
     return openDevice (getAvailableDevices()[index].identifier, callback);
 }
 
 //==============================================================================
 // TODO: Add Bela MidiOutput support
-MidiOutput::~MidiOutput()                                 {}
-void MidiOutput::sendMessageNow (const MidiMessage&)      {}
-Array<MidiDeviceInfo> MidiOutput::getAvailableDevices()   { return {}; }
-MidiDeviceInfo MidiOutput::getDefaultDevice()             { return {}; }
-MidiOutput* MidiOutput::openDevice (const String&)        { return nullptr; }
-MidiOutput* MidiOutput::createNewDevice (const String&)   { return nullptr; }
-StringArray MidiOutput::getDevices()                      { return {}; }
-int MidiOutput::getDefaultDeviceIndex()                   { return 0;}
-MidiOutput* MidiOutput::openDevice (int)                  { return nullptr; }
+MidiOutput::~MidiOutput()                                                {}
+void MidiOutput::sendMessageNow (const MidiMessage&)                     {}
+Array<MidiDeviceInfo> MidiOutput::getAvailableDevices()                  { return {}; }
+MidiDeviceInfo MidiOutput::getDefaultDevice()                            { return {}; }
+std::unique_ptr<MidiOutput> MidiOutput::openDevice (const String&)       { return {}; }
+std::unique_ptr<MidiOutput> MidiOutput::createNewDevice (const String&)  { return {}; }
+StringArray MidiOutput::getDevices()                                     { return {}; }
+int MidiOutput::getDefaultDeviceIndex()                                  { return 0;}
+std::unique_ptr<MidiOutput> MidiOutput::openDevice (int)                 { return {}; }
 
 } // namespace juce

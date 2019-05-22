@@ -93,10 +93,10 @@ public:
 
     /** Tries to open one of the midi input devices.
 
-        This will return a MidiInput object if it manages to open it. You can then
-        call start() and stop() on this device, and delete it when no longer needed.
+        This will return a MidiInput object if it manages to open it, you can then
+        call start() and stop() on this device.
 
-        If the device can't be opened, this will return nullptr.
+        If the device can't be opened, this will return an empty object.
 
         @param deviceIdentifier  the ID of the device to open - use the getAvailableDevices() method to
                                  find the available devices that can be opened
@@ -104,7 +104,7 @@ public:
 
         @see MidiInputCallback, getDevices
     */
-    static MidiInput* openDevice (const String& deviceIdentifier, MidiInputCallback* callback);
+    static std::unique_ptr<MidiInput> openDevice (const String& deviceIdentifier, MidiInputCallback* callback);
 
    #if JUCE_LINUX || JUCE_MAC || JUCE_IOS || DOXYGEN
     /** This will try to create a new midi input device (only available on Linux, macOS and iOS).
@@ -115,12 +115,12 @@ public:
         NB - if you are calling this method on iOS you must have enabled the "Audio Background Capability"
         setting in the iOS exporter otherwise this method will fail.
 
-        Returns nullptr if a device can't be created.
+        Returns an empty object if a device can't be created.
 
         @param deviceName  the name of the device to create
         @param callback    the object that will receive the midi messages from this device
     */
-    static MidiInput* createNewDevice (const String& deviceName, MidiInputCallback* callback);
+    static std::unique_ptr<MidiInput> createNewDevice (const String& deviceName, MidiInputCallback* callback);
    #endif
 
     //==============================================================================
@@ -160,7 +160,7 @@ public:
     /** Deprecated. */
     static int getDefaultDeviceIndex();
     /** Deprecated. */
-    static MidiInput* openDevice (int, MidiInputCallback*);
+    static std::unique_ptr<MidiInput> openDevice (int, MidiInputCallback*);
 
 private:
     //==============================================================================
@@ -251,16 +251,16 @@ public:
 
     /** Tries to open one of the midi output devices.
 
-        This will return a MidiOutput object if it manages to open it. You can then
-        send messages to this device, and delete it when no longer needed.
+        This will return a MidiOutput object if it manages to open it, you can then
+        send messages to this device.
 
-        If the device can't be opened, this will return nullptr.
+        If the device can't be opened, this will return an empty object.
 
         @param deviceIdentifier  the ID of the device to open - use the getAvailableDevices() method to
                                  find the available devices that can be opened
         @see getDevices
     */
-    static MidiOutput* openDevice (const String& deviceIdentifier);
+    static std::unique_ptr<MidiOutput> openDevice (const String& deviceIdentifier);
 
    #if JUCE_LINUX || JUCE_MAC || JUCE_IOS || DOXYGEN
     /** This will try to create a new midi output device (only available on Linux, macOS and iOS).
@@ -271,11 +271,11 @@ public:
         NB - if you are calling this method on iOS you must have enabled the "Audio Background Capability"
         setting in the iOS exporter otherwise this method will fail.
 
-        Returns nullptr if a device can't be created.
+        Returns an empty object if a device can't be created.
 
         @param deviceName  the name of the device to create
     */
-    static MidiOutput* createNewDevice (const String& deviceName);
+    static std::unique_ptr<MidiOutput> createNewDevice (const String& deviceName);
    #endif
 
     //==============================================================================
@@ -341,7 +341,7 @@ public:
     /** Deprecated. */
     static int getDefaultDeviceIndex();
     /** Deprecated. */
-    static MidiOutput* openDevice (int);
+    static std::unique_ptr<MidiOutput> openDevice (int);
 
 private:
     //==============================================================================
