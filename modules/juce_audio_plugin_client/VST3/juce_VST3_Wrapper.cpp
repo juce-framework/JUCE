@@ -1618,8 +1618,14 @@ public:
         info.isRecording                = (processContext.state & Vst::ProcessContext::kRecording) != 0;
         info.isPlaying                  = (processContext.state & Vst::ProcessContext::kPlaying) != 0;
         info.isLooping                  = (processContext.state & Vst::ProcessContext::kCycleActive) != 0;
+        info.isContinuousValid          = (processContext.state & Vst::ProcessContext::kContTimeValid) != 0;
         info.editOriginTime             = 0.0;
         info.frameRate                  = AudioPlayHead::fpsUnknown;
+
+        if (info.isContinuousValid)
+        {
+            info.continuousTimeInSamples = jmax ((juce::int64) 0, processContext.continousTimeSamples);
+        }
 
         if ((processContext.state & Vst::ProcessContext::kSmpteValid) != 0)
         {
