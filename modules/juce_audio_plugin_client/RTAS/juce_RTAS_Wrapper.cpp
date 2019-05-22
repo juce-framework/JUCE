@@ -24,10 +24,10 @@
   ==============================================================================
 */
 
-#if JucePlugin_Build_RTAS
-
 #include "../../juce_core/system/juce_TargetPlatform.h"
 #include "../utility/juce_CheckSettingMacros.h"
+
+#if JucePlugin_Build_RTAS
 
 #ifdef _MSC_VER
  // (this is a workaround for a build problem in VC9)
@@ -111,11 +111,6 @@
 
 #include "../utility/juce_IncludeModuleHeaders.h"
 
-using namespace juce;
-
-namespace juce
-{
-
 #ifdef _MSC_VER
  #pragma pack (pop)
 
@@ -165,6 +160,8 @@ const OSType juceChunkType = 'juce';
 static const int bypassControlIndex = 1;
 
 static int numInstances = 0;
+
+using namespace juce;
 
 //==============================================================================
 class JucePlugInProcess  : public CEffectProcessMIDI,
@@ -686,7 +683,7 @@ public:
             auto paramIndex = controlIndex - 2;
             auto floatValue = longToFloat (value);
 
-            if (auto* param = owner.getParameters()[paramIndex])
+            if (auto* param = juceFilter->getParameters()[paramIndex])
             {
                 param->setValue (floatValue);
                 param->sendValueChangedMessageToListeners (floatValue);
@@ -1049,8 +1046,6 @@ private:
 };
 
 void initialiseMacRTAS();
-
-} // namespace juce
 
 CProcessGroupInterface* CProcessGroup::CreateProcessGroup()
 {
