@@ -2111,7 +2111,7 @@ public:
     bool getCurrentPosition (CurrentPositionInfo& info) override
     {
         info.timeInSamples              = jmax ((juce::int64) 0, processContext.projectTimeSamples);
-        info.timeInSeconds              = static_cast<double> (info.timeInSamples) / processContext.sampleRate;
+        info.timeInSeconds              = processContext.systemTime / 1000000000.0;
         info.bpm                        = jmax (1.0, processContext.tempo);
         info.timeSigNumerator           = jmax (1, (int) processContext.timeSigNumerator);
         info.timeSigDenominator         = jmax (1, (int) processContext.timeSigDenominator);
@@ -2122,8 +2122,14 @@ public:
         info.isRecording                = (processContext.state & Vst::ProcessContext::kRecording) != 0;
         info.isPlaying                  = (processContext.state & Vst::ProcessContext::kPlaying) != 0;
         info.isLooping                  = (processContext.state & Vst::ProcessContext::kCycleActive) != 0;
+        info.isContinuousValid          = (processContext.state & Vst::ProcessContext::kContTimeValid) != 0;
         info.editOriginTime             = 0.0;
         info.frameRate                  = AudioPlayHead::fpsUnknown;
+
+        if (info.isContinuousValid)
+        {
+            info.continuousTimeInSamples = jmax ((juce::int64) 0, processContext.continousTimeSamples);
+        }
 
         if ((processContext.state & Vst::ProcessContext::kSmpteValid) != 0)
         {
