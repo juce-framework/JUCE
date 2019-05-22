@@ -86,7 +86,7 @@ public:
             Note - this value may be unavailable on some hosts.
             @see isContinuousValid.
          */
-        double continuousTimeInSamples;
+        int64 continuousTimeInSamples;
 
         /** The current play position, in pulses-per-quarter-note. */
         double ppqPosition;
