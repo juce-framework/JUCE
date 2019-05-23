@@ -171,14 +171,15 @@ class JucePlugInProcess  : public CEffectProcessMIDI,
 {
 public:
     //==============================================================================
-    JucePlugInProcess()
+	// RTAS builds will be removed from JUCE in the next release
+    JUCE_DEPRECATED_WITH_BODY (JucePlugInProcess(),
     {
         juceFilter.reset (createPluginFilterOfType (AudioProcessor::wrapperType_RTAS));
 
         AddChunk (juceChunkType, "Juce Audio Plugin Data");
 
         ++numInstances;
-    }
+    })
 
     ~JucePlugInProcess()
     {
@@ -316,7 +317,7 @@ public:
                     if (Component* const modalComponent = Component::getCurrentlyModalComponent())
                         modalComponent->exitModalState (0);
 
-                    filter->editorBeingDeleted (editorComp);
+                    filter->editorBeingDeleted (editorComp.get());
 
                     editorComp.reset();
                     wrapper.reset();
@@ -950,6 +951,10 @@ public:
     void CreateEffectTypes()
     {
         std::unique_ptr<AudioProcessor> plugin (createPluginFilterOfType (AudioProcessor::wrapperType_RTAS));
+
+	   #ifndef JucePlugin_PreferredChannelConfigurations
+        #error You need to set the "Plugin Channel Configurations" field in the Projucer to build RTAS plug-ins
+       #endif
 
         const short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };
         const int numConfigs = numElementsInArray (channelConfigs);
