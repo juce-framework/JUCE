@@ -1090,7 +1090,7 @@ private:
         {
             ComSmartPtr<VST3HostContext> host (new VST3HostContext());
 
-            auto result = findName(pluginFactory, description);
+            auto result = findMatch(pluginFactory, description);
             if (result.wasOk())
             {
                 name = description.name;
@@ -1101,7 +1101,7 @@ private:
         return false;
     }
 
-    Result findName(IPluginFactory* factory, const PluginDescription& description)
+    Result findMatch(IPluginFactory* factory, const PluginDescription& description)
     {
         if (factory == nullptr)
             return Result::fail("Invalid Parameter");
@@ -1119,7 +1119,7 @@ private:
 
             const String infoName(toString(info.name).trim());
 
-            if (infoName == description.name)
+            if (infoName == description.name && getHashForTUID(info.cid) == description.uid)
                 return Result::ok();
         }
         return result;
