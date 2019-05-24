@@ -263,7 +263,7 @@ public:
 
 private:
     //==============================================================================
-    MPENote* findActiveNote (int noteID) const noexcept
+    const MPENote* findActiveNote (int noteID) const noexcept
     {
         for (auto& note : activeNotes)
             if (note.noteID == noteID)

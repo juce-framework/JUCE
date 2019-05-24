@@ -682,7 +682,7 @@ struct MouseInputSource::SourceList  : public Timer
         return &sourceArray.getReference (sourceArray.size() - 1);
     }
 
-    MouseInputSource* getMouseSource (int index) const noexcept
+    MouseInputSource* getMouseSource (int index) noexcept
     {
         return isPositiveAndBelow (index, sourceArray.size()) ? &sourceArray.getReference (index)
                                                               : nullptr;
@@ -724,7 +724,7 @@ struct MouseInputSource::SourceList  : public Timer
         return num;
     }
 
-    MouseInputSource* getDraggingMouseSource (int index) const noexcept
+    MouseInputSource* getDraggingMouseSource (int index) noexcept
     {
         int num = 0;
 

@@ -210,9 +210,12 @@ public:
     // These methods have been deprecated! When getting the list of plugin types you should instead use
     // the getTypes() method which returns a copy of the internal PluginDescription array and can be accessed
     // in a thread-safe way.
-    JUCE_DEPRECATED_WITH_BODY (PluginDescription* getType (int index) const noexcept, { return &types.getReference (index); })
-    JUCE_DEPRECATED_WITH_BODY (PluginDescription** begin() const noexcept,            { jassertfalse; return nullptr; })
-    JUCE_DEPRECATED_WITH_BODY (PluginDescription** end() const noexcept,              { jassertfalse; return nullptr; })
+    JUCE_DEPRECATED_WITH_BODY (PluginDescription* getType (int index)  noexcept,            { return &types.getReference (index); })
+    JUCE_DEPRECATED_WITH_BODY (const PluginDescription* getType (int index) const noexcept, { return &types.getReference (index); })
+    JUCE_DEPRECATED_WITH_BODY (PluginDescription** begin() noexcept,                        { jassertfalse; return nullptr; })
+    JUCE_DEPRECATED_WITH_BODY (PluginDescription* const* begin() const noexcept,            { jassertfalse; return nullptr; })
+    JUCE_DEPRECATED_WITH_BODY (PluginDescription** end() noexcept,                          { jassertfalse; return nullptr; })
+    JUCE_DEPRECATED_WITH_BODY (PluginDescription* const* end() const noexcept,              { jassertfalse; return nullptr; })
 
 private:
     //==============================================================================

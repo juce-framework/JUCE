@@ -88,19 +88,36 @@ public:
         Note that the pointer returned will probably become invalid when the
         block is resized.
     */
-    void* getData() const noexcept                                  { return data; }
+    void* getData() noexcept                                        { return data; }
+
+    /** Returns a void pointer to the data.
+
+        Note that the pointer returned will probably become invalid when the
+        block is resized.
+    */
+    const void* getData() const noexcept                            { return data; }
 
     /** Returns a byte from the memory block.
         This returns a reference, so you can also use it to set a byte.
     */
     template <typename Type>
-    char& operator[] (const Type offset) const noexcept             { return data [offset]; }
+    char& operator[] (const Type offset) noexcept                   { return data [offset]; }
+
+    /** Returns a byte from the memory block. */
+    template <typename Type>
+    const char& operator[] (const Type offset) const noexcept       { return data [offset]; }
 
     /** Returns an iterator for the data. */
-    char* begin() const noexcept                                    { return data; }
+    char* begin() noexcept                                          { return data; }
+
+    /** Returns an iterator for the data. */
+    const char* begin() const noexcept                              { return data; }
 
     /** Returns an end-iterator for the data. */
-    char* end() const noexcept                                      { return begin() + getSize(); }
+    char* end() noexcept                                            { return begin() + getSize(); }
+
+    /** Returns an end-iterator for the data. */
+    const char* end() const noexcept                                { return begin() + getSize(); }
 
     //==============================================================================
     /** Returns the block's current allocated size, in bytes. */

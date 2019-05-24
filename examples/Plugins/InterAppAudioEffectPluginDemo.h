@@ -94,7 +94,7 @@ private:
     {
         auto callbackLevel = maxLevel.exchange (0.0);
 
-        auto decayFactor = 0.95;
+        float decayFactor = 0.95f;
 
         if (callbackLevel > level)
             level = callbackLevel;
@@ -265,13 +265,13 @@ public:
     // meter values directly from the audio thread.
     struct MeterListener
     {
-        virtual ~MeterListener() {};
+        virtual ~MeterListener() {}
 
         virtual void handleNewMeterValue (int, float) = 0;
     };
 
-    void addMeterListener    (MeterListener& listener) { meterListeners.add    (&listener); };
-    void removeMeterListener (MeterListener& listener) { meterListeners.remove (&listener); };
+    void addMeterListener    (MeterListener& listener) { meterListeners.add    (&listener); }
+    void removeMeterListener (MeterListener& listener) { meterListeners.remove (&listener); }
 
 
 private:

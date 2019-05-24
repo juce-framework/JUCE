@@ -2298,7 +2298,8 @@ public:
 
     bool setStateFromPresetFile (const MemoryBlock& rawData)
     {
-        ComSmartPtr<Steinberg::MemoryStream> memoryStream = new Steinberg::MemoryStream (rawData.getData(), (int) rawData.getSize());
+        MemoryBlock rawDataCopy (rawData);
+        ComSmartPtr<Steinberg::MemoryStream> memoryStream = new Steinberg::MemoryStream (rawDataCopy.getData(), (int) rawDataCopy.getSize());
 
         if (memoryStream == nullptr || holder->component == nullptr)
             return false;

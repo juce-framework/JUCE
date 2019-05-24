@@ -162,8 +162,8 @@ public:
     const AudioProcessorParameterGroup* getParent() const noexcept;
 
     //==============================================================================
-    const AudioProcessorParameterNode** begin() const noexcept;
-    const AudioProcessorParameterNode** end()   const noexcept;
+    const AudioProcessorParameterNode* const* begin() const noexcept;
+    const AudioProcessorParameterNode* const* end()   const noexcept;
 
     //==============================================================================
     /** Returns all subgroups of this group.
