@@ -270,7 +270,7 @@ public:
        #endif
 
         audioDeviceManager.addAudioCallback (&audioSourcePlayer);
-        audioDeviceManager.addMidiInputCallback ({}, &(synthAudioSource.midiCollector));
+        audioDeviceManager.addMidiInputDeviceCallback ({}, &(synthAudioSource.midiCollector));
 
         setOpaque (true);
         setSize (640, 480);
@@ -279,7 +279,7 @@ public:
     ~AudioSynthesiserDemo()
     {
         audioSourcePlayer.setSource (nullptr);
-        audioDeviceManager.removeMidiInputCallback ({}, &(synthAudioSource.midiCollector));
+        audioDeviceManager.removeMidiInputDeviceCallback ({}, &(synthAudioSource.midiCollector));
         audioDeviceManager.removeAudioCallback (&audioSourcePlayer);
         audioDeviceManager.removeAudioCallback (&liveAudioDisplayComp);
     }

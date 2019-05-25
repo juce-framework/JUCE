@@ -792,29 +792,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DescriptionFactory)
 };
 
-struct MatchingDescriptionFinder  : public DescriptionFactory
-{
-    MatchingDescriptionFinder (VST3HostContext* h, IPluginFactory* f, const PluginDescription& desc)
-       : DescriptionFactory (h, f), description (desc)
-    {
-    }
-
-    static const char* getSuccessString() noexcept  { return "Found Description"; }
-
-    Result performOnDescription (PluginDescription& desc)
-    {
-        if (description.isDuplicateOf (desc))
-            return Result::fail (getSuccessString());
-
-        return Result::ok();
-    }
-
-private:
-    const PluginDescription& description;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MatchingDescriptionFinder)
-};
-
 struct DescriptionLister  : public DescriptionFactory
 {
     DescriptionLister (VST3HostContext* host, IPluginFactory* pluginFactory)
@@ -1088,15 +1065,22 @@ private:
 
         if (pluginFactory != nullptr)
         {
-            ComSmartPtr<VST3HostContext> host (new VST3HostContext());
-            MatchingDescriptionFinder finder (host, pluginFactory, description);
+            auto numClasses = pluginFactory->countClasses();
 
-            auto result = finder.findDescriptionsAndPerform (f);
-
-            if (result.getErrorMessage() == MatchingDescriptionFinder::getSuccessString())
+            for (Steinberg::int32 i = 0; i < numClasses; ++i)
             {
-                name = description.name;
-                return true;
+                PClassInfo info;
+                pluginFactory->getClassInfo (i, &info);
+
+                if (std::strcmp (info.category, kVstAudioEffectClass) != 0)
+                    continue;
+
+                if (toString (info.name).trim() == description.name
+                        && getHashForTUID (info.cid) == description.uid)
+                {
+                    name = description.name;
+                    return true;
+                }
             }
         }
 

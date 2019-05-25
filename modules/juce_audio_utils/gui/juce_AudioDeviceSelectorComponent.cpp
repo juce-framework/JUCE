@@ -90,7 +90,7 @@ public:
 
     void updateDevices()
     {
-        items = MidiInput::getDevices();
+        items = MidiInput::getAvailableDevices();
     }
 
     int getNumRows() override
@@ -107,7 +107,7 @@ public:
                                .withMultipliedAlpha (0.3f));
 
             auto item = items[row];
-            bool enabled = deviceManager.isMidiInputEnabled (item);
+            bool enabled = deviceManager.isMidiInputDeviceEnabled (item.identifier);
 
             auto x = getTickX();
             auto tickW = height * 0.75f;
@@ -117,7 +117,7 @@ public:
 
             g.setFont (height * 0.6f);
             g.setColour (findColour (ListBox::textColourId, true).withMultipliedAlpha (enabled ? 1.0f : 0.6f));
-            g.drawText (item, x + 5, 0, width - x - 5, height, Justification::centredLeft, true);
+            g.drawText (item.name, x + 5, 0, width - x - 5, height, Justification::centredLeft, true);
         }
     }
 
@@ -166,14 +166,14 @@ private:
     //==============================================================================
     AudioDeviceManager& deviceManager;
     const String noItemsMessage;
-    StringArray items;
+    Array<MidiDeviceInfo> items;
 
     void flipEnablement (const int row)
     {
         if (isPositiveAndBelow (row, items.size()))
         {
-            auto item = items[row];
-            deviceManager.setMidiInputEnabled (item, ! deviceManager.isMidiInputEnabled (item));
+            auto identifier = items[row].identifier;
+            deviceManager.setMidiInputDeviceEnabled (identifier, ! deviceManager.isMidiInputDeviceEnabled (identifier));
         }
     }
 
@@ -1115,12 +1115,12 @@ void AudioDeviceSelectorComponent::updateDeviceType()
 
 void AudioDeviceSelectorComponent::updateMidiOutput()
 {
-    auto midiDeviceName = midiOutputSelector->getText();
+    auto selectedId = midiOutputSelector->getSelectedId();
 
-    if (midiDeviceName == getNoDeviceString())
-        midiDeviceName = {};
-
-    deviceManager.setDefaultMidiOutput (midiDeviceName);
+    if (selectedId == -1)
+        deviceManager.setDefaultMidiOutputDevice ({});
+    else
+        deviceManager.setDefaultMidiOutputDevice (currentMidiOutputs[selectedId - 1].identifier);
 }
 
 void AudioDeviceSelectorComponent::changeListenerCallback (ChangeBroadcaster*)
@@ -1168,20 +1168,23 @@ void AudioDeviceSelectorComponent::updateAllControls()
     {
         midiOutputSelector->clear();
 
-        auto midiOuts = MidiOutput::getDevices();
+        currentMidiOutputs = MidiOutput::getAvailableDevices();
 
         midiOutputSelector->addItem (getNoDeviceString(), -1);
         midiOutputSelector->addSeparator();
 
-        for (int i = 0; i < midiOuts.size(); ++i)
-            midiOutputSelector->addItem (midiOuts[i], i + 1);
+        auto defaultOutputIdentifier = deviceManager.getDefaultMidiOutputIdentifier();
+        int i = 0;
 
-        int current = -1;
+        for (auto& out : currentMidiOutputs)
+        {
+            midiOutputSelector->addItem (out.name, i + 1);
 
-        if (deviceManager.getDefaultMidiOutput() != nullptr)
-            current = 1 + midiOuts.indexOf (deviceManager.getDefaultMidiOutputName());
+            if (defaultOutputIdentifier.isNotEmpty() && out.identifier == defaultOutputIdentifier)
+                midiOutputSelector->setSelectedId (i + 1);
 
-        midiOutputSelector->setSelectedId (current, dontSendNotification);
+            ++i;
+        }
     }
 
     resized();

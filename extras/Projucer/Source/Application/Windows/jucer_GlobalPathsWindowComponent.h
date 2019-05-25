@@ -214,7 +214,7 @@ private:
         {
             builder.add (new FilePathPropertyComponent (aaxPathValue, "AAX SDK", true, isThisOS),
                          "If you are building AAX plug-ins, this should be the path to the AAX SDK folder.");
-            builder.add (new FilePathPropertyComponent (rtasPathValue, "RTAS SDK", true, isThisOS),
+            builder.add (new FilePathPropertyComponent (rtasPathValue, "RTAS SDK (deprecated)", true, isThisOS),
                          "If you are building RTAS plug-ins, this should be the path to the RTAS SDK folder.");
         }
 

@@ -448,6 +448,20 @@ public:
         }
     }
 
+    /** Replaces an object in the array with a different one.
+
+        If the index is less than zero, this method does nothing.
+        If the index is beyond the end of the array, the new object is added to the end of the array.
+
+        The object being added has its reference count increased, and if it's replacing
+        another object, then that one has its reference count decreased, and may be deleted.
+
+        @param indexToChange        the index whose value you want to change
+        @param newObject            the new value to set for this index.
+        @see add, insert, remove
+    */
+    void set (int indexToChange, const ObjectClassPtr& newObject)       { set (indexToChange, newObject.get()); }
+
     /** Adds elements from another array to the end of this array.
 
         @param arrayToAddFrom       the array from which to copy the elements

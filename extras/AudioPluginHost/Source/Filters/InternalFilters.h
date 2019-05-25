@@ -42,8 +42,7 @@ public:
 
     //==============================================================================
     PluginDescription audioInDesc, audioOutDesc, midiInDesc;
-
-    void getAllTypes (OwnedArray<PluginDescription>&);
+    void getAllTypes (Array<PluginDescription>&);
 
     //==============================================================================
     String getName() const override                                                     { return "Internal"; }
