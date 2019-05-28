@@ -6,6 +6,27 @@ Develop
 
 Change
 ------
+JUCE is moving towards using C++11 pointer container types instead of passing
+raw pointers as arguments and return values.
+
+Possible Issues
+---------------
+You will need to change your code to pass std::unique_ptr into and out of
+various functions across JUCE's API.
+
+Workaround
+----------
+None
+
+Rationale
+---------
+Indicating ownership through the transfer of smart pointer types has been part
+of mainstream C++ for a long time and this change enforces memory safety by
+default in most situations.
+
+
+Change
+------
 SystemTrayIconComponent::setIconImage now takes two arguments, rather than one.
 The new argument is a template image for use on macOS where all non-transparent
 regions will render in a monochrome colour determined dynamically by the
