@@ -176,11 +176,11 @@ public:
         auxActionsView.removeAllDeliveredNotifsButton  .onClick = []
             { PushNotifications::getInstance()->removeAllDeliveredNotifications(); };
       #if JUCE_IOS || JUCE_MAC
-        auxActionsView.getPendingNotificationsButton .onClick = [this]
+        auxActionsView.getPendingNotificationsButton .onClick = []
             { PushNotifications::getInstance()->getPendingLocalNotifications(); };
         auxActionsView.removePendingNotifWithIdButton.onClick = [this]
             { PushNotifications::getInstance()->removePendingLocalNotification (auxActionsView.pendingNotifIdentifier.getText()); };
-        auxActionsView.removeAllPendingNotifsButton  .onClick = [this]
+        auxActionsView.removeAllPendingNotifsButton  .onClick = []
             { PushNotifications::getInstance()->removeAllPendingLocalNotifications(); };
       #endif
 
