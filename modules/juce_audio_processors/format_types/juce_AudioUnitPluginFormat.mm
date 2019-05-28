@@ -1353,7 +1353,7 @@ public:
     {
         managedParameters.clear (false);
         paramIDToIndex.clear();
-        AudioProcessorParameterGroup parameterGroups ({}, {}, {});
+        AudioProcessorParameterGroup newParameterTree;
 
         if (audioUnit != nullptr)
         {
@@ -1471,7 +1471,7 @@ public:
                                                                                              getClumpName(), String());
                                 group->addChild (std::unique_ptr<AudioProcessorParameter> (parameter));
                                 groupIDMap[info.clumpID] = group.get();
-                                parameterGroups.addChild (std::move (group));
+                                newParameterTree.addChild (std::move (group));
                             }
                             else
                             {
@@ -1480,14 +1480,14 @@ public:
                         }
                         else
                         {
-                            parameterGroups.addChild (std::unique_ptr<AudioProcessorParameter> (parameter));
+                            newParameterTree.addChild (std::unique_ptr<AudioProcessorParameter> (parameter));
                         }
                     }
                 }
             }
         }
 
-        parameterTree.swapWith (parameterGroups);
+        getParameterTree() = std::move (newParameterTree);
 
         UInt32 propertySize = 0;
         Boolean writable = false;

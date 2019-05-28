@@ -1752,11 +1752,8 @@ public:
         if (! holder->initialise())
             return false;
 
-        if (! isControllerInitialised)
-        {
-            if (! holder->fetchController (editController))
-                return false;
-        }
+        if (! (isControllerInitialised || holder->fetchController (editController)))
+            return false;
 
         // (May return an error if the plugin combines the IComponent and IEditController implementations)
         editController->initialize (holder->host->getFUnknown());
@@ -1768,12 +1765,12 @@ public:
 
         auto configureParameters = [this]
         {
-            addParameters();
+            refreshParameterList();
             synchroniseStates();
             syncProgramNames();
         };
-        configureParameters();
 
+        configureParameters();
         setupIO();
 
         // Some plug-ins don't present their parameters until after the IO has been
@@ -1785,12 +1782,11 @@ public:
     }
 
     void* getPlatformSpecificData() override   { return holder->component; }
-    void refreshParameterList() override {}
 
     //==============================================================================
     const String getName() const override
     {
-        VST3ModuleHandle::Ptr& module = holder->module;
+        auto& module = holder->module;
         return module != nullptr ? module->name : String();
     }
 
@@ -2536,15 +2532,15 @@ private:
         }
     }
 
-    void addParameters()
+    void refreshParameterList() override
     {
-        AudioProcessorParameterGroup parameterGroups ({}, {}, {});
+        AudioProcessorParameterGroup newParameterTree;
 
         // We're going to add parameter groups to the tree recursively in the same order as the
         // first parameters contained within them.
         std::map<Vst::UnitID, Vst::UnitInfo> infoMap;
         std::map<Vst::UnitID, AudioProcessorParameterGroup*> groupMap;
-        groupMap[Vst::kRootUnitId] = &parameterGroups;
+        groupMap[Vst::kRootUnitId] = &newParameterTree;
 
         if (unitInfo != nullptr)
         {
@@ -2598,7 +2594,7 @@ private:
             group->addChild (std::unique_ptr<AudioProcessorParameter> (param));
         }
 
-        parameterTree.swapWith (parameterGroups);
+        getParameterTree() = std::move (newParameterTree);
     }
 
     void synchroniseStates()

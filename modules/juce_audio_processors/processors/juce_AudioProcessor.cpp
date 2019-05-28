@@ -721,7 +721,7 @@ void AudioProcessor::addParameterGroup (std::unique_ptr<AudioProcessorParameterG
     parameterTree.addChild (std::move (group));
 }
 
-const AudioProcessorParameterGroup& AudioProcessor::getParameterTree()
+AudioProcessorParameterGroup& AudioProcessor::getParameterTree()
 {
     return parameterTree;
 }

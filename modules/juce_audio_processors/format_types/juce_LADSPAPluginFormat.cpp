@@ -181,15 +181,16 @@ public:
         inputs.clear();
         outputs.clear();
         managedParameters.clear (false);
-        AudioProcessorParameterGroup group ({}, {}, {});
-        parameterTree.swapWith (group);
+        AudioProcessorParameterGroup parameterGroups;
 
         for (unsigned int i = 0; i < plugin->PortCount; ++i)
         {
             const auto portDesc = plugin->PortDescriptors[i];
 
             if ((portDesc & LADSPA_PORT_CONTROL) != 0)
-                addParameter (new LADSPAParameter (*this, (int) i, String (plugin->PortNames[i]).trim(), (portDesc & LADSPA_PORT_INPUT) != 0));
+                parameterGroups.addChild (std::make_unique<LADSPAParameter> (*this, (int) i,
+                                                                             String (plugin->PortNames[i]).trim(),
+                                                                             (portDesc & LADSPA_PORT_INPUT) != 0));
 
             if ((portDesc & LADSPA_PORT_AUDIO) != 0)
             {
@@ -197,6 +198,8 @@ public:
                 if ((portDesc & LADSPA_PORT_OUTPUT) != 0)   outputs.add ((int) i);
             }
         }
+
+        getParameterTree() = std::move (parameterGroups);
 
         for (auto* param : getParameters())
             if (auto* ladspaParam = dynamic_cast<LADSPAParameter*> (param))

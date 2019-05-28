@@ -1222,7 +1222,7 @@ public:
     void addParameterGroup (std::unique_ptr<AudioProcessorParameterGroup>);
 
     /** Returns the group of parameters managed by this AudioProcessor. */
-    const AudioProcessorParameterGroup& getParameterTree();
+    AudioProcessorParameterGroup& getParameterTree();
 
     /** Returns the current list of parameters. */
     const OwnedArray<AudioProcessorParameter>& getParameters() const noexcept;
@@ -1669,7 +1669,7 @@ private:
     OwnedArray<AudioProcessorParameter> managedParameters;
     AudioProcessorParameter* getParamChecked (int) const noexcept;
 
-    AudioProcessorParameterGroup parameterTree { {}, {}, {} };
+    AudioProcessorParameterGroup parameterTree;
 
    #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
     BigInteger changingParams;
