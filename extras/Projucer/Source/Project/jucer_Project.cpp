@@ -606,9 +606,9 @@ static void forgetRecentFile (const File& file)
 //==============================================================================
 Result Project::loadDocument (const File& file)
 {
-    auto xml = parseXML (file);
+    auto xml = parseXMLIfTagMatches (file, Ids::JUCERPROJECT.toString());
 
-    if (xml == nullptr || ! xml->hasTagName (Ids::JUCERPROJECT.toString()))
+    if (xml == nullptr)
         return Result::fail ("Not a valid Jucer project!");
 
     auto newTree = ValueTree::fromXml (*xml);
@@ -1097,7 +1097,7 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 
 void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
 {
-    StringArray pluginFormatChoices{ "VST3", "AU", "AUv3", "RTAS", "AAX", "Standalone", "Unity", "Enable IAA", "VST (legacy)" };
+    StringArray pluginFormatChoices{ "VST3", "AU", "AUv3", "RTAS (deprecated)", "AAX", "Standalone", "Unity", "Enable IAA", "VST (Legacy)" };
     Array<var> pluginFormatChoiceValues{ Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildAUv3.toString(),
         Ids::buildRTAS.toString(), Ids::buildAAX.toString(), Ids::buildStandalone.toString(), Ids::buildUnity.toString(),
         Ids::enableIAA.toString(), Ids::buildVST.toString() };
@@ -1107,7 +1107,7 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
         pluginFormatChoiceValues.add (Ids::enableARA.toString());
     }
     props.add (new MultiChoicePropertyComponent (pluginFormatsValue, "Plugin Formats", pluginFormatChoices, pluginFormatChoiceValues), 
-               "Plugin formats to build. If you have selected \"VST (legacy)\" then you will need to ensure that you have a VST2 SDK "
+               "Plugin formats to build. If you have selected \"VST (Legacy)\" then you will need to ensure that you have a VST2 SDK "
                "in your header search paths. The VST2 SDK can be obtained from the vstsdk3610_11_06_2018_build_37 (or older) VST3 SDK "
                "or JUCE version 5.3.2. You also need a VST2 license from Steinberg to distribute VST2 plug-ins.");
 
@@ -1290,15 +1290,17 @@ Project::Item Project::Item::createCopy()         { Item i (*this); i.state = i.
 String Project::Item::getID() const               { return state [Ids::ID]; }
 void Project::Item::setID (const String& newID)   { state.setProperty (Ids::ID, newID, nullptr); }
 
-Drawable* Project::Item::loadAsImageFile() const
+std::unique_ptr<Drawable> Project::Item::loadAsImageFile() const
 {
     const MessageManagerLock mml (ThreadPoolJob::getCurrentThreadPoolJob());
 
     if (! mml.lockWasGained())
         return nullptr;
 
-    return isValid() ? Drawable::createFromImageFile (getFile())
-                     : nullptr;
+    if (isValid())
+        return Drawable::createFromImageFile (getFile());
+
+    return {};
 }
 
 Project::Item Project::Item::createGroup (Project& project, const String& name, const String& uid, bool isModuleCode)

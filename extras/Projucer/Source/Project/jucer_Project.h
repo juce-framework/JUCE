@@ -282,7 +282,7 @@ public:
         Item findItemWithID (const String& targetId) const; // (recursive search)
 
         String getImageFileID() const;
-        Drawable* loadAsImageFile() const;
+        std::unique_ptr<Drawable> loadAsImageFile() const;
 
         //==============================================================================
         Value getNameValue();

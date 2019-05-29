@@ -94,7 +94,7 @@ private:
     {
         auto callbackLevel = maxLevel.exchange (0.0);
 
-        auto decayFactor = 0.95;
+        float decayFactor = 0.95f;
 
         if (callbackLevel > level)
             level = callbackLevel;
@@ -236,9 +236,7 @@ public:
 
     void setStateInformation (const void* data, int sizeInBytes) override
     {
-        auto xmlState = std::unique_ptr<XmlElement> (getXmlFromBinary (data, sizeInBytes));
-
-        if (xmlState.get() != nullptr)
+        if (auto xmlState = getXmlFromBinary (data, sizeInBytes))
             if (xmlState->hasTagName (parameters.state.getType()))
                 parameters.state = ValueTree::fromXml (*xmlState);
     }
@@ -267,13 +265,13 @@ public:
     // meter values directly from the audio thread.
     struct MeterListener
     {
-        virtual ~MeterListener() {};
+        virtual ~MeterListener() {}
 
         virtual void handleNewMeterValue (int, float) = 0;
     };
 
-    void addMeterListener    (MeterListener& listener) { meterListeners.add    (&listener); };
-    void removeMeterListener (MeterListener& listener) { meterListeners.remove (&listener); };
+    void addMeterListener    (MeterListener& listener) { meterListeners.add    (&listener); }
+    void removeMeterListener (MeterListener& listener) { meterListeners.remove (&listener); }
 
 
 private:

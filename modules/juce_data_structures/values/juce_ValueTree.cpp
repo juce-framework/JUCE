@@ -1015,6 +1015,14 @@ ValueTree ValueTree::fromXml (const XmlElement& xml)
     return {};
 }
 
+ValueTree ValueTree::fromXml (const String& xmlText)
+{
+    if (auto xml = parseXML (xmlText))
+        return fromXml (*xml);
+
+    return {};
+}
+
 String ValueTree::toXmlString (const XmlElement::TextFormat& format) const
 {
     if (auto xml = createXml())

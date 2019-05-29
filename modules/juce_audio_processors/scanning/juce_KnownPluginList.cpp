@@ -41,26 +41,38 @@ void KnownPluginList::clear()
     }
 }
 
-PluginDescription* KnownPluginList::getTypeForFile (const String& fileOrIdentifier) const
+int KnownPluginList::getNumTypes() const noexcept
 {
     ScopedLock lock (typesArrayLock);
-
-    for (auto* desc : types)
-        if (desc->fileOrIdentifier == fileOrIdentifier)
-            return desc;
-
-    return nullptr;
+    return types.size();
 }
 
-PluginDescription* KnownPluginList::getTypeForIdentifierString (const String& identifierString) const
+Array<PluginDescription> KnownPluginList::getTypes() const
+{
+    ScopedLock lock (typesArrayLock);
+    return types;
+}
+
+std::unique_ptr<PluginDescription> KnownPluginList::getTypeForFile (const String& fileOrIdentifier) const
 {
     ScopedLock lock (typesArrayLock);
 
-    for (auto* desc : types)
-        if (desc->matchesIdentifierString (identifierString))
-            return desc;
+    for (auto& desc : types)
+        if (desc.fileOrIdentifier == fileOrIdentifier)
+            return std::make_unique<PluginDescription> (desc);
 
-    return nullptr;
+    return {};
+}
+
+std::unique_ptr<PluginDescription> KnownPluginList::getTypeForIdentifierString (const String& identifierString) const
+{
+    ScopedLock lock (typesArrayLock);
+
+    for (auto& desc : types)
+        if (desc.matchesIdentifierString (identifierString))
+            return std::make_unique<PluginDescription> (desc);
+
+    return {};
 }
 
 bool KnownPluginList::addType (const PluginDescription& type)
@@ -68,31 +80,34 @@ bool KnownPluginList::addType (const PluginDescription& type)
     {
         ScopedLock lock (typesArrayLock);
 
-        for (auto* desc : types)
+        for (auto& desc : types)
         {
-            if (desc->isDuplicateOf (type))
+            if (desc.isDuplicateOf (type))
             {
                 // strange - found a duplicate plugin with different info..
-                jassert (desc->name == type.name);
-                jassert (desc->isInstrument == type.isInstrument);
+                jassert (desc.name == type.name);
+                jassert (desc.isInstrument == type.isInstrument);
 
-                *desc = type;
+                desc = type;
                 return false;
             }
         }
 
-        types.insert (0, new PluginDescription (type));
+        types.insert (0, type);
     }
 
     sendChangeMessage();
     return true;
 }
 
-void KnownPluginList::removeType (const int index)
+void KnownPluginList::removeType (const PluginDescription& type)
 {
     {
         ScopedLock lock (typesArrayLock);
-        types.remove (index);
+
+        for (auto& desc : types)
+            if (desc.isDuplicateOf (type))
+                types.remove (&desc);
     }
 
     sendChangeMessage();
@@ -106,16 +121,17 @@ bool KnownPluginList::isListingUpToDate (const String& fileOrIdentifier,
 
     ScopedLock lock (typesArrayLock);
 
-    for (auto* d : types)
-        if (d->fileOrIdentifier == fileOrIdentifier && formatToUse.pluginNeedsRescanning (*d))
+    for (auto& d : types)
+        if (d.fileOrIdentifier == fileOrIdentifier && formatToUse.pluginNeedsRescanning (d))
             return false;
 
     return true;
 }
 
-void KnownPluginList::setCustomScanner (CustomScanner* newScanner)
+void KnownPluginList::setCustomScanner (std::unique_ptr<CustomScanner> newScanner)
 {
-    scanner.reset (newScanner);
+    if (scanner != newScanner)
+        scanner = std::move (newScanner);
 }
 
 bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
@@ -132,14 +148,14 @@ bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
 
         ScopedLock lock (typesArrayLock);
 
-        for (auto* d : types)
+        for (auto& d : types)
         {
-            if (d->fileOrIdentifier == fileOrIdentifier && d->pluginFormatName == format.getName())
+            if (d.fileOrIdentifier == fileOrIdentifier && d.pluginFormatName == format.getName())
             {
-                if (format.pluginNeedsRescanning (*d))
+                if (format.pluginNeedsRescanning (d))
                     needsRescanning = true;
                 else
-                    typesFound.add (new PluginDescription (*d));
+                    typesFound.add (new PluginDescription (d));
             }
         }
 
@@ -198,7 +214,7 @@ void KnownPluginList::scanAndAddDragAndDroppedFiles (AudioPluginFormatManager& f
 
         if (! found)
         {
-            const File f (filenameOrID);
+            File f (filenameOrID);
 
             if (f.isDirectory())
             {
@@ -261,22 +277,22 @@ struct PluginSorter
     PluginSorter (KnownPluginList::SortMethod sortMethod, bool forwards) noexcept
         : method (sortMethod), direction (forwards ? 1 : -1) {}
 
-    bool operator() (const PluginDescription* first, const PluginDescription* second) const
+    bool operator() (const PluginDescription& first, const PluginDescription& second) const
     {
         int diff = 0;
 
         switch (method)
         {
-            case KnownPluginList::sortByCategory:           diff = first->category.compareNatural (second->category, false); break;
-            case KnownPluginList::sortByManufacturer:       diff = first->manufacturerName.compareNatural (second->manufacturerName, false); break;
-            case KnownPluginList::sortByFormat:             diff = first->pluginFormatName.compare (second->pluginFormatName); break;
-            case KnownPluginList::sortByFileSystemLocation: diff = lastPathPart (first->fileOrIdentifier).compare (lastPathPart (second->fileOrIdentifier)); break;
-            case KnownPluginList::sortByInfoUpdateTime:     diff = compare (first->lastInfoUpdateTime, second->lastInfoUpdateTime); break;
+            case KnownPluginList::sortByCategory:           diff = first.category.compareNatural (second.category, false); break;
+            case KnownPluginList::sortByManufacturer:       diff = first.manufacturerName.compareNatural (second.manufacturerName, false); break;
+            case KnownPluginList::sortByFormat:             diff = first.pluginFormatName.compare (second.pluginFormatName); break;
+            case KnownPluginList::sortByFileSystemLocation: diff = lastPathPart (first.fileOrIdentifier).compare (lastPathPart (second.fileOrIdentifier)); break;
+            case KnownPluginList::sortByInfoUpdateTime:     diff = compare (first.lastInfoUpdateTime, second.lastInfoUpdateTime); break;
             default: break;
         }
 
         if (diff == 0)
-            diff = first->name.compareNatural (second->name, false);
+            diff = first.name.compareNatural (second.name, false);
 
         return diff * direction < 0;
     }
@@ -303,7 +319,7 @@ void KnownPluginList::sort (const SortMethod method, bool forwards)
 {
     if (method != defaultOrder)
     {
-        Array<PluginDescription*> oldOrder, newOrder;
+        Array<PluginDescription> oldOrder, newOrder;
 
         {
             ScopedLock lock (typesArrayLock);
@@ -313,21 +329,30 @@ void KnownPluginList::sort (const SortMethod method, bool forwards)
             newOrder.addArray (types);
         }
 
-        if (oldOrder != newOrder)
+        auto hasOrderChanged = [&]
+        {
+            for (int i = 0; i < oldOrder.size(); ++i)
+                 if (! oldOrder[i].isDuplicateOf (newOrder[i]))
+                     return true;
+
+            return false;
+        }();
+
+        if (hasOrderChanged)
             sendChangeMessage();
     }
 }
 
 //==============================================================================
-XmlElement* KnownPluginList::createXml() const
+std::unique_ptr<XmlElement> KnownPluginList::createXml() const
 {
-    auto e = new XmlElement ("KNOWNPLUGINS");
+    auto e = std::make_unique<XmlElement> ("KNOWNPLUGINS");
 
     {
         ScopedLock lock (typesArrayLock);
 
         for (int i = types.size(); --i >= 0;)
-            e->prependChildElement (types.getUnchecked(i)->createXml());
+            e->prependChildElement (types.getUnchecked (i).createXml().release());
     }
 
     for (auto& b : blacklist)
@@ -360,12 +385,12 @@ struct PluginTreeUtils
 {
     enum { menuIdBase = 0x324503f4 };
 
-    static void buildTreeByFolder (KnownPluginList::PluginTree& tree, const Array<PluginDescription*>& allPlugins)
+    static void buildTreeByFolder (KnownPluginList::PluginTree& tree, const Array<PluginDescription>& allPlugins)
     {
-        for (auto* pd : allPlugins)
+        for (auto& pd : allPlugins)
         {
-            auto path = pd->fileOrIdentifier.replaceCharacter ('\\', '/')
-                                            .upToLastOccurrenceOf ("/", false, false);
+            auto path = pd.fileOrIdentifier.replaceCharacter ('\\', '/')
+                                           .upToLastOccurrenceOf ("/", false, false);
 
             if (path.substring (1, 2) == ":")
                 path = path.substring (2);
@@ -400,16 +425,16 @@ struct PluginTreeUtils
     }
 
     static void buildTreeByCategory (KnownPluginList::PluginTree& tree,
-                                     const Array<PluginDescription*>& sorted,
+                                     const Array<PluginDescription>& sorted,
                                      const KnownPluginList::SortMethod sortMethod)
     {
         String lastType;
-        std::unique_ptr<KnownPluginList::PluginTree> current (new KnownPluginList::PluginTree());
+        auto current = std::make_unique<KnownPluginList::PluginTree>();
 
-        for (auto* pd : sorted)
+        for (auto& pd : sorted)
         {
-            auto thisType = (sortMethod == KnownPluginList::sortByCategory ? pd->category
-                                                                           : pd->manufacturerName);
+            auto thisType = (sortMethod == KnownPluginList::sortByCategory ? pd.category
+                                                                           : pd.manufacturerName);
 
             if (! thisType.containsNonWhitespaceChars())
                 thisType = "Other";
@@ -419,8 +444,8 @@ struct PluginTreeUtils
                 if (current->plugins.size() + current->subFolders.size() > 0)
                 {
                     current->folder = lastType;
-                    tree.subFolders.add (current.release());
-                    current.reset (new KnownPluginList::PluginTree());
+                    tree.subFolders.add (std::move (current));
+                    current = std::make_unique<KnownPluginList::PluginTree>();
                 }
 
                 lastType = thisType;
@@ -432,11 +457,11 @@ struct PluginTreeUtils
         if (current->plugins.size() + current->subFolders.size() > 0)
         {
             current->folder = lastType;
-            tree.subFolders.add (current.release());
+            tree.subFolders.add (std::move (current));
         }
     }
 
-    static void addPlugin (KnownPluginList::PluginTree& tree, PluginDescription* const pd, String path)
+    static void addPlugin (KnownPluginList::PluginTree& tree, PluginDescription pd, String path)
     {
         if (path.isEmpty())
         {
@@ -454,7 +479,7 @@ struct PluginTreeUtils
 
             for (int i = tree.subFolders.size(); --i >= 0;)
             {
-                KnownPluginList::PluginTree& subFolder = *tree.subFolders.getUnchecked(i);
+                auto& subFolder = *tree.subFolders.getUnchecked (i);
 
                 if (subFolder.folder.equalsIgnoreCase (firstSubFolder))
                 {
@@ -463,27 +488,26 @@ struct PluginTreeUtils
                 }
             }
 
-            auto newFolder = new KnownPluginList::PluginTree();
+            auto* newFolder = new KnownPluginList::PluginTree();
             newFolder->folder = firstSubFolder;
             tree.subFolders.add (newFolder);
             addPlugin (*newFolder, pd, remainingPath);
         }
     }
 
-    static bool containsDuplicateNames (const Array<const PluginDescription*>& plugins, const String& name)
+    static bool containsDuplicateNames (const Array<PluginDescription>& plugins, const String& name)
     {
         int matches = 0;
 
-        for (int i = 0; i < plugins.size(); ++i)
-            if (plugins.getUnchecked(i)->name == name)
-                if (++matches > 1)
-                    return true;
+        for (auto& p : plugins)
+            if (p.name == name && ++matches > 1)
+                return true;
 
         return false;
     }
 
     static bool addToMenu (const KnownPluginList::PluginTree& tree, PopupMenu& m,
-                           const OwnedArray<PluginDescription>& allPlugins,
+                           const Array<PluginDescription>& allPlugins,
                            const String& currentlyTickedPluginID)
     {
         bool isTicked = false;
@@ -491,32 +515,47 @@ struct PluginTreeUtils
         for (auto* sub : tree.subFolders)
         {
             PopupMenu subMenu;
-            const bool isItemTicked = addToMenu (*sub, subMenu, allPlugins, currentlyTickedPluginID);
+            auto isItemTicked = addToMenu (*sub, subMenu, allPlugins, currentlyTickedPluginID);
             isTicked = isTicked || isItemTicked;
 
             m.addSubMenu (sub->folder, subMenu, true, nullptr, isItemTicked, 0);
         }
 
-        for (auto* plugin : tree.plugins)
+        auto getPluginMenuIndex = [&] (const PluginDescription& d)
         {
-            auto name = plugin->name;
+            int i = 0;
+
+            for (auto& p : allPlugins)
+            {
+                if (p.isDuplicateOf (d))
+                    return i + menuIdBase;
+
+                ++i;
+            }
+
+            return 0;
+        };
+
+        for (auto& plugin : tree.plugins)
+        {
+            auto name = plugin.name;
 
             if (containsDuplicateNames (tree.plugins, name))
-                name << " (" << plugin->pluginFormatName << ')';
+                name << " (" << plugin.pluginFormatName << ')';
 
-            const bool isItemTicked = plugin->matchesIdentifierString (currentlyTickedPluginID);
+            auto isItemTicked = plugin.matchesIdentifierString (currentlyTickedPluginID);
             isTicked = isTicked || isItemTicked;
 
-            m.addItem (allPlugins.indexOf (plugin) + menuIdBase, name, true, isItemTicked);
+            m.addItem (getPluginMenuIndex (plugin), name, true, isItemTicked);
         }
 
         return isTicked;
     }
 };
 
-KnownPluginList::PluginTree* KnownPluginList::createTree (const SortMethod sortMethod) const
+std::unique_ptr<KnownPluginList::PluginTree> KnownPluginList::createTree (const SortMethod sortMethod) const
 {
-    Array<PluginDescription*> sorted;
+    Array<PluginDescription> sorted;
 
     {
         ScopedLock lock (typesArrayLock);
@@ -525,7 +564,7 @@ KnownPluginList::PluginTree* KnownPluginList::createTree (const SortMethod sortM
 
     std::stable_sort (sorted.begin(), sorted.end(), PluginSorter (sortMethod, true));
 
-    auto* tree = new PluginTree();
+    auto tree = std::make_unique<PluginTree>();
 
     if (sortMethod == sortByCategory || sortMethod == sortByManufacturer || sortMethod == sortByFormat)
     {
@@ -537,7 +576,7 @@ KnownPluginList::PluginTree* KnownPluginList::createTree (const SortMethod sortM
     }
     else
     {
-        for (auto* p : sorted)
+        for (auto& p : sorted)
             tree->plugins.add (p);
     }
 
@@ -548,7 +587,7 @@ KnownPluginList::PluginTree* KnownPluginList::createTree (const SortMethod sortM
 void KnownPluginList::addToMenu (PopupMenu& menu, const SortMethod sortMethod,
                                  const String& currentlyTickedPluginID) const
 {
-    std::unique_ptr<PluginTree> tree (createTree (sortMethod));
+    auto tree = createTree (sortMethod);
     PluginTreeUtils::addToMenu (*tree, menu, types, currentlyTickedPluginID);
 }
 

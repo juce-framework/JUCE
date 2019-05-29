@@ -165,22 +165,19 @@ String ButtonDocument::getTypeName() const
 
 JucerDocument* ButtonDocument::createCopy()
 {
-    ButtonDocument* newOne = new ButtonDocument (cpp);
+    auto newOne = new ButtonDocument (cpp);
     newOne->resources = resources;
-
-    std::unique_ptr<XmlElement> xml (createXml());
-    newOne->loadFromXml (*xml);
-
+    newOne->loadFromXml (*createXml());
     return newOne;
 }
 
-XmlElement* ButtonDocument::createXml() const
+std::unique_ptr<XmlElement> ButtonDocument::createXml() const
 {
-    XmlElement* const doc = JucerDocument::createXml();
+    auto doc = JucerDocument::createXml();
 
     for (int i = 0; i < 7; ++i)
     {
-        XmlElement* e = paintRoutines [i]->createXml();
+        auto e = paintRoutines[i]->createXml();
         e->setAttribute ("buttonState", stateNames [i]);
         e->setAttribute ("enabled", paintStatesEnabled [i]);
 

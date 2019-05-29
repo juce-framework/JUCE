@@ -67,15 +67,17 @@ public:
             else if (columnId == descCol)
                 text = TRANS("Deactivated after failing to initialise correctly");
         }
-        else if (const PluginDescription* const desc = list.getType (row))
+        else
         {
+            auto desc = list.getTypes()[row];
+
             switch (columnId)
             {
-                case nameCol:         text = desc->name; break;
-                case typeCol:         text = desc->pluginFormatName; break;
-                case categoryCol:     text = desc->category.isNotEmpty() ? desc->category : "-"; break;
-                case manufacturerCol: text = desc->manufacturerName; break;
-                case descCol:         text = getPluginDescription (*desc); break;
+                case nameCol:         text = desc.name; break;
+                case typeCol:         text = desc.pluginFormatName; break;
+                case categoryCol:     text = desc.category.isNotEmpty() ? desc.category : "-"; break;
+                case manufacturerCol: text = desc.manufacturerName; break;
+                case descCol:         text = getPluginDescription (desc); break;
 
                 default: jassertfalse; break;
             }
@@ -238,30 +240,32 @@ void PluginListComponent::setTableModel (TableListBoxModel* model)
 
 bool PluginListComponent::canShowSelectedFolder() const
 {
-    if (const PluginDescription* const desc = list.getType (table.getSelectedRow()))
-        return File::createFileWithoutCheckingPath (desc->fileOrIdentifier).exists();
-
-    return false;
+    return File::createFileWithoutCheckingPath (list.getTypes()[table.getSelectedRow()].fileOrIdentifier).exists();
 }
 
 void PluginListComponent::showSelectedFolder()
 {
     if (canShowSelectedFolder())
-        if (const PluginDescription* const desc = list.getType (table.getSelectedRow()))
-            File (desc->fileOrIdentifier).getParentDirectory().startAsProcess();
+        File (list.getTypes()[table.getSelectedRow()].fileOrIdentifier).getParentDirectory().startAsProcess();
 }
 
 void PluginListComponent::removeMissingPlugins()
 {
-    for (int i = list.getNumTypes(); --i >= 0;)
-        if (! formatManager.doesPluginStillExist (*list.getType (i)))
-            list.removeType (i);
+    auto types = list.getTypes();
+
+    for (int i = types.size(); --i >= 0;)
+    {
+        auto type = types.getUnchecked (i);
+
+        if (! formatManager.doesPluginStillExist (type))
+            list.removeType (type);
+    }
 }
 
 void PluginListComponent::removePluginItem (int index)
 {
     if (index < list.getNumTypes())
-        list.removeType (index);
+        list.removeType (list.getTypes()[index]);
     else
         list.removeFromBlacklist (list.getBlacklistedFiles() [index - list.getNumTypes()]);
 }

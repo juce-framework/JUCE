@@ -419,14 +419,14 @@ static var parseJUCEHeaderMetadata (const StringArray& lines)
 
     for (auto& line : lines)
     {
-        line = trimCommentCharsFromStartOfLine (line);
+        auto trimmedLine = trimCommentCharsFromStartOfLine (line);
 
-        auto colon = line.indexOfChar (':');
+        auto colon = trimmedLine.indexOfChar (':');
 
         if (colon >= 0)
         {
-            auto key = line.substring (0, colon).trim();
-            auto value = line.substring (colon + 1).trim();
+            auto key = trimmedLine.substring (0, colon).trim();
+            auto value = trimmedLine.substring (colon + 1).trim();
 
             o->setProperty (key, value);
         }

@@ -726,7 +726,7 @@ MPENote* MPEInstrument::getLastNotePlayedPtr (int midiChannel) noexcept
 const MPENote* MPEInstrument::getHighestNotePtr (int midiChannel) const noexcept
 {
     int initialNoteMax = -1;
-    MPENote* result = nullptr;
+    const MPENote* result = nullptr;
 
     for (auto i = notes.size(); --i >= 0;)
     {
@@ -752,7 +752,7 @@ MPENote* MPEInstrument::getHighestNotePtr (int midiChannel) noexcept
 const MPENote* MPEInstrument::getLowestNotePtr (int midiChannel) const noexcept
 {
     int initialNoteMin = 128;
-    MPENote* result = nullptr;
+    const MPENote* result = nullptr;
 
     for (auto i = notes.size(); --i >= 0;)
     {

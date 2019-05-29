@@ -48,7 +48,7 @@ public:
     ComponentLayout* getComponentLayout() const                 { return components.get(); }
 
     //==============================================================================
-    XmlElement* createXml() const;
+    std::unique_ptr<XmlElement> createXml() const;
     bool loadFromXml (const XmlElement& xml);
 
     void fillInGeneratedCode (GeneratedCode& code) const;

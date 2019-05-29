@@ -111,8 +111,8 @@ MainHostWindow::MainHostWindow()
     if (auto savedPluginList = getAppProperties().getUserSettings()->getXmlValue ("pluginList"))
         knownPluginList.recreateFromXml (*savedPluginList);
 
-    for (auto* t : internalTypes)
-        knownPluginList.addType (*t);
+    for (auto& t : internalTypes)
+        knownPluginList.addType (t);
 
     pluginSortMethod = (KnownPluginList::SortMethod) getAppProperties().getUserSettings()
                             ->getIntValue ("pluginSortMethod", KnownPluginList::sortByManufacturer);
@@ -346,10 +346,9 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
     }
     else
     {
-        if (auto* desc = getChosenType (menuItemID))
-            createPlugin (*desc,
-                          { proportionOfWidth  (0.3f + Random::getSystemRandom().nextFloat() * 0.6f),
-                            proportionOfHeight (0.3f + Random::getSystemRandom().nextFloat() * 0.6f) });
+        if (knownPluginList.getIndexChosenByMenu (menuItemID) >= 0)
+            createPlugin (getChosenType (menuItemID), { proportionOfWidth  (0.3f + Random::getSystemRandom().nextFloat() * 0.6f),
+                                                        proportionOfHeight (0.3f + Random::getSystemRandom().nextFloat() * 0.6f) });
     }
 }
 
@@ -371,9 +370,9 @@ void MainHostWindow::addPluginsToMenu (PopupMenu& m) const
     {
         int i = 0;
 
-        for (auto* t : internalTypes)
-            m.addItem (++i, t->name + " (" + t->pluginFormatName + ")",
-                       graphHolder->graph->getNodeForName (t->name) == nullptr);
+        for (auto& t : internalTypes)
+            m.addItem (++i, t.name + " (" + t.pluginFormatName + ")",
+                       graphHolder->graph->getNodeForName (t.name) == nullptr);
     }
 
     m.addSeparator();
@@ -381,12 +380,12 @@ void MainHostWindow::addPluginsToMenu (PopupMenu& m) const
     knownPluginList.addToMenu (m, pluginSortMethod);
 }
 
-const PluginDescription* MainHostWindow::getChosenType (const int menuID) const
+PluginDescription MainHostWindow::getChosenType (const int menuID) const
 {
     if (menuID >= 1 && menuID < 1 + internalTypes.size())
         return internalTypes [menuID - 1];
 
-    return knownPluginList.getType (knownPluginList.getIndexChosenByMenu (menuID));
+    return knownPluginList.getTypes()[knownPluginList.getIndexChosenByMenu (menuID)];
 }
 
 //==============================================================================
@@ -574,7 +573,7 @@ void MainHostWindow::showAudioSettings()
                          ModalCallbackFunction::create
                          ([safeThis] (int)
                          {
-                             std::unique_ptr<XmlElement> audioState (safeThis->deviceManager.createStateXml());
+                             auto audioState = safeThis->deviceManager.createStateXml();
 
                              getAppProperties().getUserSettings()->setValue ("audioDeviceState", audioState.get());
                              getAppProperties().getUserSettings()->saveIfNeeded();

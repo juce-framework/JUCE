@@ -845,12 +845,12 @@ void ProjectExporter::createDefaultConfigs()
     }
 }
 
-Drawable* ProjectExporter::getBigIcon() const
+std::unique_ptr<Drawable> ProjectExporter::getBigIcon() const
 {
     return project.getMainGroup().findItemWithID (settings [Ids::bigIcon]).loadAsImageFile();
 }
 
-Drawable* ProjectExporter::getSmallIcon() const
+std::unique_ptr<Drawable> ProjectExporter::getSmallIcon() const
 {
     return project.getMainGroup().findItemWithID (settings [Ids::smallIcon]).loadAsImageFile();
 }
@@ -859,8 +859,8 @@ Image ProjectExporter::getBestIconForSize (int size, bool returnNullIfNothingBig
 {
     Drawable* im = nullptr;
 
-    std::unique_ptr<Drawable> im1 (getSmallIcon());
-    std::unique_ptr<Drawable> im2 (getBigIcon());
+    auto im1 = getSmallIcon();
+    auto im2 = getBigIcon();
 
     if (im1 != nullptr && im2 != nullptr)
     {

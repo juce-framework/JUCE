@@ -43,13 +43,13 @@ public:
         return frameBuffer.initialise (context, width, height);
     }
 
-    LowLevelGraphicsContext* createLowLevelContext() override
+    std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
     {
         sendDataChangeMessage();
         return createOpenGLGraphicsContext (context, frameBuffer);
     }
 
-    ImageType* createType() const override     { return new OpenGLImageType(); }
+    std::unique_ptr<ImageType> createType() const override     { return std::make_unique<OpenGLImageType>(); }
 
     ImagePixelData::Ptr clone() override
     {

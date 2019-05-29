@@ -973,95 +973,6 @@ public:
     AudioProcessorEditor* createEditorIfNeeded();
 
     //==============================================================================
-    /** This must return the correct value immediately after the object has been
-        created, and mustn't change the number of parameters later.
-
-        NOTE! This method is deprecated! It's recommended that you use the
-        AudioProcessorParameter class instead to manage your parameters.
-    */
-    JUCE_DEPRECATED (virtual int getNumParameters());
-
-    /** Returns the name of a particular parameter.
-
-        NOTE! This method is deprecated! It's recommended that you use the
-        AudioProcessorParameter class instead to manage your parameters.
-    */
-    JUCE_DEPRECATED (virtual const String getParameterName (int parameterIndex));
-
-    /** Returns the ID of a particular parameter.
-
-        The ID is used to communicate the value or mapping of a particular parameter with
-        the host. By default this method will simply return a string representation of
-        index.
-
-        NOTE! This method is deprecated! It's recommended that you use the
-        AudioProcessorParameterWithID class instead to manage your parameters.
-     */
-    JUCE_DEPRECATED (virtual String getParameterID (int index));
-
-    /** Called by the host to find out the value of one of the processor's parameters.
-
-        The host will expect the value returned to be between 0 and 1.0.
-
-        This could be called quite frequently, so try to make your code efficient.
-        It's also likely to be called by non-UI threads, so the code in here should
-        be thread-aware.
-
-        NOTE! This method is deprecated! It's recommended that you use the
-        AudioProcessorParameter class instead to manage your parameters.
-    */
-    JUCE_DEPRECATED (virtual float getParameter (int parameterIndex));
-
-    /** Returns the name of a parameter as a text string with a preferred maximum length.
-        If you want to provide customised short versions of your parameter names that
-        will look better in constrained spaces (e.g. the displays on hardware controller
-        devices or mixing desks) then you should implement this method.
-        If you don't override it, the default implementation will call getParameterName(int),
-        and truncate the result.
-
-        NOTE! This method is deprecated! It's recommended that you use
-        AudioProcessorParameter::getName() instead.
-    */
-    JUCE_DEPRECATED (virtual String getParameterName (int parameterIndex, int maximumStringLength));
-
-    /** Returns the value of a parameter as a text string.
-        NOTE! This method is deprecated! It's recommended that you use
-        AudioProcessorParameter::getText() instead.
-    */
-    JUCE_DEPRECATED (virtual const String getParameterText (int parameterIndex));
-
-    /** Returns the value of a parameter as a text string with a preferred maximum length.
-        If you want to provide customised short versions of your parameter values that
-        will look better in constrained spaces (e.g. the displays on hardware controller
-        devices or mixing desks) then you should implement this method.
-        If you don't override it, the default implementation will call getParameterText(int),
-        and truncate the result.
-
-        NOTE! This method is deprecated! It's recommended that you use
-        AudioProcessorParameter::getText() instead.
-    */
-    JUCE_DEPRECATED (virtual String getParameterText (int parameterIndex, int maximumStringLength));
-
-    /** Returns the number of discrete steps that this parameter can represent.
-
-        The default return value if you don't implement this method is
-        AudioProcessor::getDefaultNumParameterSteps().
-
-        If your parameter is boolean, then you may want to make this return 2.
-
-        If you want the host to display stepped automation values, rather than a
-        continuous interpolation between successive values, you should ensure that
-        isParameterDiscrete returns true.
-
-        The value that is returned may or may not be used, depending on the host.
-
-        NOTE! This method is deprecated! It's recommended that you use
-        AudioProcessorParameter::getNumSteps() instead.
-
-        @see isParameterDiscrete
-    */
-    JUCE_DEPRECATED (virtual int getParameterNumSteps (int parameterIndex));
-
     /** Returns the default number of steps for a parameter.
 
         NOTE! This method is deprecated! It's recommended that you use
@@ -1070,130 +981,6 @@ public:
         @see getParameterNumSteps
     */
     static int getDefaultNumParameterSteps() noexcept;
-
-    /** Returns true if the parameter should take discrete, rather than continuous
-        values.
-
-        If the parameter is boolean, this should return true (with getParameterNumSteps
-        returning 2).
-
-        The value that is returned may or may not be used, depending on the host.
-
-        NOTE! This method is deprecated! It's recommended that you use
-        AudioProcessorParameter::isDiscrete() instead.
-
-        @see getParameterNumSteps
-    */
-    JUCE_DEPRECATED (virtual bool isParameterDiscrete (int parameterIndex) const);
-
-    /** Returns the default value for the parameter.
-        By default, this just returns 0.
-        The value that is returned may or may not be used, depending on the host.
-
-        NOTE! This method is deprecated! It's recommended that you use
-        AudioProcessorParameter::getDefaultValue() instead.
-    */
-    JUCE_DEPRECATED (virtual float getParameterDefaultValue (int parameterIndex));
-
-    /** Some plugin types may be able to return a label string for a
-        parameter's units.
-
-        NOTE! This method is deprecated! It's recommended that you use
-        AudioProcessorParameter::getLabel() instead.
-    */
-    JUCE_DEPRECATED (virtual String getParameterLabel (int index) const);
-
-    /** This can be overridden to tell the host that particular parameters operate in the
-        reverse direction. (Not all plugin formats or hosts will actually use this information).
-
-        NOTE! This method is deprecated! It's recommended that you use
-        AudioProcessorParameter::isOrientationInverted() instead.
-    */
-    JUCE_DEPRECATED (virtual bool isParameterOrientationInverted (int index) const);
-
-    /** The host will call this method to change the value of one of the processor's parameters.
-
-        The host may call this at any time, including during the audio processing
-        callback, so the processor has to process this very fast and avoid blocking.
-
-        If you want to set the value of a parameter internally, e.g. from your
-        editor component, then don't call this directly - instead, use the
-        setParameterNotifyingHost() method, which will also send a message to
-        the host telling it about the change. If the message isn't sent, the host
-        won't be able to automate your parameters properly.
-
-        The value passed will be between 0 and 1.0.
-
-        NOTE! This method is deprecated! It's recommended that you use
-        AudioProcessorParameter::setValue() instead.
-    */
-    JUCE_DEPRECATED (virtual void setParameter (int parameterIndex, float newValue));
-
-    /** Your processor can call this when it needs to change one of its parameters.
-
-        This could happen when the editor or some other internal operation changes
-        a parameter. This method will call the setParameter() method to change the
-        value, and will then send a message to the host telling it about the change.
-
-        Note that to make sure the host correctly handles automation, you should call
-        the beginParameterChangeGesture() and endParameterChangeGesture() methods to
-        tell the host when the user has started and stopped changing the parameter.
-
-        NOTE! This method is deprecated! It's recommended that you use
-        AudioProcessorParameter::setValueNotifyingHost() instead.
-    */
-    void setParameterNotifyingHost (int parameterIndex, float newValue);
-
-    /** Returns true if the host can automate this parameter.
-        By default, this returns true for all parameters.
-
-        NOTE! This method is deprecated! It's recommended that you use
-        AudioProcessorParameter::isAutomatable() instead.
-    */
-    JUCE_DEPRECATED (virtual bool isParameterAutomatable (int parameterIndex) const);
-
-    /** Should return true if this parameter is a "meta" parameter.
-        A meta-parameter is a parameter that changes other params. It is used
-        by some hosts (e.g. AudioUnit hosts).
-        By default this returns false.
-
-        NOTE! This method is deprecated! It's recommended that you use
-        AudioProcessorParameter::isMetaParameter() instead.
-    */
-    JUCE_DEPRECATED (virtual bool isMetaParameter (int parameterIndex) const);
-
-    /** Should return the parameter's category.
-        By default, this returns the "generic" category.
-
-        NOTE! This method is deprecated! It's recommended that you use
-        AudioProcessorParameter::getCategory() instead.
-    */
-    JUCE_DEPRECATED (virtual AudioProcessorParameter::Category getParameterCategory (int parameterIndex) const);
-
-    /** Sends a signal to the host to tell it that the user is about to start changing this
-        parameter.
-
-        This allows the host to know when a parameter is actively being held by the user, and
-        it may use this information to help it record automation.
-
-        If you call this, it must be matched by a later call to endParameterChangeGesture().
-
-        NOTE! This method is deprecated! It's recommended that you use
-        AudioProcessorParameter::beginChangeGesture() instead.
-    */
-    JUCE_DEPRECATED (void beginParameterChangeGesture (int parameterIndex));
-
-    /** Tells the host that the user has finished changing this parameter.
-
-        This allows the host to know when a parameter is actively being held by the user, and
-        it may use this information to help it record automation.
-
-        A call to this method must follow a call to beginParameterChangeGesture().
-
-        NOTE! This method is deprecated! It's recommended that you use
-        AudioProcessorParameter::endChangeGesture() instead.
-    */
-    JUCE_DEPRECATED (void endParameterChangeGesture (int parameterIndex));
 
     /** The processor can call this when something (apart from a parameter value) has changed.
 
@@ -1220,10 +1007,21 @@ public:
     void addParameterGroup (std::unique_ptr<AudioProcessorParameterGroup>);
 
     /** Returns the group of parameters managed by this AudioProcessor. */
-    const AudioProcessorParameterGroup& getParameterTree();
+    const AudioProcessorParameterGroup& getParameterTree() const;
 
-    /** Returns the current list of parameters. */
-    const OwnedArray<AudioProcessorParameter>& getParameters() const noexcept;
+    /** Returns the group of parameters managed by this AudioProcessor. */
+    void setParameterTree (AudioProcessorParameterGroup&& newTree);
+
+    /** A processor should implement this method so that the host can ask it to
+        rebuild its parameter tree.
+        If a plugin never changes its parameters, it's enough to create its
+        parameters in its constructor and do nothing in this method, but some
+        may want to
+    */
+    virtual void refreshParameterList();
+
+    /** Returns a flat list of the parameters in the current tree. */
+    const Array<AudioProcessorParameter*>& getParameters() const;
 
     //==============================================================================
     /** Returns the number of preset programs the processor supports.
@@ -1431,38 +1229,6 @@ public:
     virtual void updateTrackProperties (const TrackProperties& properties);
 
     //==============================================================================
-   #ifndef DOXYGEN
-    /** Deprecated: use getTotalNumInputChannels instead. */
-    JUCE_DEPRECATED_WITH_BODY (int getNumInputChannels()  const noexcept, { return getTotalNumInputChannels(); })
-    JUCE_DEPRECATED_WITH_BODY (int getNumOutputChannels() const noexcept, { return getTotalNumOutputChannels(); })
-
-    /** Returns a string containing a whitespace-separated list of speaker types
-        These functions are deprecated: use the methods provided in the AudioChannelSet
-        class.
-     */
-    JUCE_DEPRECATED_WITH_BODY (const String getInputSpeakerArrangement()  const noexcept, { return cachedInputSpeakerArrString; })
-    JUCE_DEPRECATED_WITH_BODY (const String getOutputSpeakerArrangement() const noexcept, { return cachedOutputSpeakerArrString; })
-
-    /** Returns the name of one of the processor's input channels.
-
-        These functions are deprecated: your audio processor can inform the host
-        on channel layouts and names via the methods in the AudioChannelSet class.
-
-        @see getBus, Bus::getCurrentLayout, AudioChannelSet
-     */
-    JUCE_DEPRECATED (virtual const String getInputChannelName  (int channelIndex) const);
-    JUCE_DEPRECATED (virtual const String getOutputChannelName (int channelIndex) const);
-
-    /** Returns true if the specified channel is part of a stereo pair with its neighbour.
-
-        These functions are deprecated: your audio processor should specify the audio
-        channel pairing information by modifying the busLayout member variable in
-        the constructor. */
-    JUCE_DEPRECATED (virtual bool isInputChannelStereoPair  (int index) const);
-    JUCE_DEPRECATED (virtual bool isOutputChannelStereoPair (int index) const);
-   #endif
-
-    //==============================================================================
     /** Helper function that just converts an xml element into a binary blob.
 
         Use this in your processor's getStateInformation() method if you want to
@@ -1599,10 +1365,44 @@ protected:
     /** @internal */
     void sendParamChangeMessageToListeners (int parameterIndex, float newValue);
 
-private:
     //==============================================================================
-    void addParameterInternal (AudioProcessorParameter*);
+   #ifndef DOXYGEN
+public:
+    // These methods are all deprecated in favour of using AudioProcessorParameter
+    // and AudioProcessorParameterGroup
+    JUCE_DEPRECATED (virtual int getNumParameters());
+    JUCE_DEPRECATED (virtual const String getParameterName (int parameterIndex));
+    JUCE_DEPRECATED (virtual String getParameterID (int index));
+    JUCE_DEPRECATED (virtual float getParameter (int parameterIndex));
+    JUCE_DEPRECATED (virtual String getParameterName (int parameterIndex, int maximumStringLength));
+    JUCE_DEPRECATED (virtual const String getParameterText (int parameterIndex));
+    JUCE_DEPRECATED (virtual String getParameterText (int parameterIndex, int maximumStringLength));
+    JUCE_DEPRECATED (virtual int getParameterNumSteps (int parameterIndex));
+    JUCE_DEPRECATED (virtual bool isParameterDiscrete (int parameterIndex) const);
+    JUCE_DEPRECATED (virtual float getParameterDefaultValue (int parameterIndex));
+    JUCE_DEPRECATED (virtual String getParameterLabel (int index) const);
+    JUCE_DEPRECATED (virtual bool isParameterOrientationInverted (int index) const);
+    JUCE_DEPRECATED (virtual void setParameter (int parameterIndex, float newValue));
+    JUCE_DEPRECATED (virtual bool isParameterAutomatable (int parameterIndex) const);
+    JUCE_DEPRECATED (virtual bool isMetaParameter (int parameterIndex) const);
+    JUCE_DEPRECATED (virtual AudioProcessorParameter::Category getParameterCategory (int parameterIndex) const);
+    JUCE_DEPRECATED (void beginParameterChangeGesture (int parameterIndex));
+    JUCE_DEPRECATED (void endParameterChangeGesture (int parameterIndex));
+    JUCE_DEPRECATED (void setParameterNotifyingHost (int parameterIndex, float newValue));
 
+    // These functions are deprecated: your audio processor can inform the host
+    // on its bus and channel layouts and names using the AudioChannelSet and various bus classes.
+    JUCE_DEPRECATED_WITH_BODY (int getNumInputChannels()  const noexcept, { return getTotalNumInputChannels(); })
+    JUCE_DEPRECATED_WITH_BODY (int getNumOutputChannels() const noexcept, { return getTotalNumOutputChannels(); })
+    JUCE_DEPRECATED_WITH_BODY (const String getInputSpeakerArrangement()  const noexcept, { return cachedInputSpeakerArrString; })
+    JUCE_DEPRECATED_WITH_BODY (const String getOutputSpeakerArrangement() const noexcept, { return cachedOutputSpeakerArrString; })
+    JUCE_DEPRECATED (virtual const String getInputChannelName  (int channelIndex) const);
+    JUCE_DEPRECATED (virtual const String getOutputChannelName (int channelIndex) const);
+    JUCE_DEPRECATED (virtual bool isInputChannelStereoPair  (int index) const);
+    JUCE_DEPRECATED (virtual bool isOutputChannelStereoPair (int index) const);
+   #endif
+
+private:
     //==============================================================================
     struct InOutChannelPair
     {
@@ -1664,19 +1464,18 @@ private:
     String cachedInputSpeakerArrString, cachedOutputSpeakerArrString;
     int cachedTotalIns = 0, cachedTotalOuts = 0;
 
-    OwnedArray<AudioProcessorParameter> managedParameters;
-    AudioProcessorParameter* getParamChecked (int) const noexcept;
+    AudioProcessorParameterGroup parameterTree;
+    mutable Array<AudioProcessorParameter*> flatParameterList;
+    mutable bool flatParamListNeedsRebuilding = true;
 
-    AudioProcessorParameterGroup parameterTree { {}, {}, {} };
-
-   #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
-    BigInteger changingParams;
-   #endif
+    AudioProcessorParameter* getParamChecked (int) const;
 
    #if JUCE_DEBUG
+    #if ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
+     BigInteger changingParams;
+    #endif
+
     bool textRecursionCheck = false;
-    bool shouldCheckParamsForDupeIDs = false;
-    void checkForDupedParamIDs();
    #endif
 
     AudioProcessorListener* getListenerLocked (int) const noexcept;
@@ -1688,11 +1487,6 @@ private:
     void processBypassed (AudioBuffer<floatType>&, MidiBuffer&);
 
     friend class AudioProcessorParameter;
-
-    friend class JuceVST3EditController;
-    friend class JuceVST3Component;
-    friend class VST3PluginInstance;
-    friend class AudioUnitPluginInstance;
     friend class LADSPAPluginInstance;
 
     // This method is no longer used - you can delete it from your AudioProcessor classes.

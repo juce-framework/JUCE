@@ -77,20 +77,6 @@ AudioProcessorGraph::Node::Ptr FilterGraph::getNodeForName (const String& name) 
 
 void FilterGraph::addPlugin (const PluginDescription& desc, Point<double> p)
 {
-    struct AsyncCallback : public AudioPluginFormat::InstantiationCompletionCallback
-    {
-        AsyncCallback (FilterGraph& g, Point<double> pos)  : owner (g), position (pos)
-        {}
-
-        void completionCallback (AudioPluginInstance* instance, const String& error) override
-        {
-            owner.addFilterCallback (instance, error, position);
-        }
-
-        FilterGraph& owner;
-        Point<double> position;
-    };
-
     formatManager.createPluginInstanceAsync (desc,
                                              graph.getSampleRate(),
                                              graph.getBlockSize(),
@@ -221,26 +207,26 @@ void FilterGraph::newDocument()
 
 Result FilterGraph::loadDocument (const File& file)
 {
-    XmlDocument doc (file);
-    std::unique_ptr<XmlElement> xml (doc.getDocumentElement());
+    if (auto xml = parseXMLIfTagMatches (file, "FILTERGRAPH"))
+    {
+        graph.removeChangeListener (this);
+        restoreFromXml (*xml);
 
-    if (xml == nullptr || ! xml->hasTagName ("FILTERGRAPH"))
-        return Result::fail ("Not a valid filter graph file");
+        MessageManager::callAsync ([this]
+        {
+            setChangedFlag (false);
+            graph.addChangeListener (this);
+        });
 
-    graph.removeChangeListener (this);
-    restoreFromXml (*xml);
+        return Result::ok();
+    }
 
-    MessageManager::callAsync ([this] () {
-        setChangedFlag (false);
-        graph.addChangeListener (this);
-    } );
-
-    return Result::ok();
+    return Result::fail ("Not a valid filter graph file");
 }
 
 Result FilterGraph::saveDocument (const File& file)
 {
-    std::unique_ptr<XmlElement> xml (createXml());
+    auto xml = createXml();
 
     if (! xml->writeTo (file, {}))
         return Result::fail ("Couldn't write to the file");
@@ -354,7 +340,7 @@ static XmlElement* createNodeXml (AudioProcessorGraph::Node* const node) noexcep
         {
             PluginDescription pd;
             plugin->fillInPluginDescription (pd);
-            e->addChildElement (pd.createXml());
+            e->addChildElement (pd.createXml().release());
         }
 
         {
@@ -437,9 +423,9 @@ void FilterGraph::createNodeFromXml (const XmlElement& xml)
     }
 }
 
-XmlElement* FilterGraph::createXml() const
+std::unique_ptr<XmlElement> FilterGraph::createXml() const
 {
-    auto* xml = new XmlElement ("FILTERGRAPH");
+    auto xml = std::make_unique<XmlElement> ("FILTERGRAPH");
 
     for (auto* node : graph.getNodes())
         xml->addChildElement (createNodeXml (node));

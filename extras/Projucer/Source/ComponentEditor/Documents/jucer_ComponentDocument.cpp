@@ -51,19 +51,17 @@ String ComponentDocument::getTypeName() const
 
 JucerDocument* ComponentDocument::createCopy()
 {
-    ComponentDocument* newOne = new ComponentDocument (cpp);
+    auto newOne = new ComponentDocument (cpp);
 
     newOne->resources = resources;
-
-    std::unique_ptr<XmlElement> xml (createXml());
-    newOne->loadFromXml (*xml);
+    newOne->loadFromXml (*createXml());
 
     return newOne;
 }
 
-XmlElement* ComponentDocument::createXml() const
+std::unique_ptr<XmlElement> ComponentDocument::createXml() const
 {
-    XmlElement* const doc = JucerDocument::createXml();
+    auto doc = JucerDocument::createXml();
 
     doc->addChildElement (backgroundGraphics->createXml());
     components->addToXml (*doc);

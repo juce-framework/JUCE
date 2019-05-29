@@ -293,9 +293,7 @@ public:
     {
         // Restore our plug-in's state from the xml representation stored in the above
         // method.
-        std::unique_ptr<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
-
-        if (xmlState.get() != nullptr)
+        if (auto xmlState = getXmlFromBinary (data, sizeInBytes))
             state.replaceState (ValueTree::fromXml (*xmlState));
     }
 

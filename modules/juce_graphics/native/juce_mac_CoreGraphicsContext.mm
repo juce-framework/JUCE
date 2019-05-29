@@ -63,11 +63,11 @@ public:
         CGContextRelease (context);
     }
 
-    LowLevelGraphicsContext* createLowLevelContext() override
+    std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
     {
         freeCachedImageRef();
         sendDataChangeMessage();
-        return new CoreGraphicsContext (context, height, 1.0f);
+        return std::make_unique<CoreGraphicsContext> (context, height, 1.0f);
     }
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
@@ -91,7 +91,7 @@ public:
         return *im;
     }
 
-    ImageType* createType() const override    { return new NativeImageType(); }
+    std::unique_ptr<ImageType> createType() const override    { return std::make_unique<NativeImageType>(); }
 
     //==============================================================================
     static CGImageRef getCachedImageRef (const Image& juceImage, CGColorSpaceRef colourSpace)
