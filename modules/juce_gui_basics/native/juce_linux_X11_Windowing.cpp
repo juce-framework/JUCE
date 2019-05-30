@@ -2250,6 +2250,16 @@ private:
         void timerCallback() override
         {
            #if JUCE_USE_XSHM
+            if (XPending (display))
+            {
+                XEvent e;
+
+                ScopedXLock l (display);
+
+                while (XCheckTypedWindowEvent (display, peer.windowH, XShmGetEventBase (display), &e))
+                    --shmPaintsPending;
+            }
+
             if (shmPaintsPending != 0)
                 return;
            #endif
