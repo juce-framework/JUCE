@@ -829,7 +829,7 @@ public:
     */
     template <class ElementComparator>
     void sort (ElementComparator& comparator,
-               bool retainOrderOfEquivalentItems = false) const noexcept
+               bool retainOrderOfEquivalentItems = false) noexcept
     {
         // If you pass in an object with a static compareElements() method, this
         // avoids getting warning messages about the parameter being unused
