@@ -95,7 +95,7 @@ public:
     }
 
     //==============================================================================
-    ValueWithDefault androidJavaLibs, androidAdditionalJavaFolders, androidAdditionalResourceFolders, androidRepositories, androidDependencies, androidCustomAppBuildGradleContent,
+    ValueWithDefault androidJavaLibs, androidAdditionalJavaFolders, androidAdditionalResourceFolders, androidProjectRepositories, androidRepositories, androidDependencies, androidCustomAppBuildGradleContent,
                      androidScreenOrientation, androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements, androidGradleSettingsContent, androidVersionCode,
                      androidMinimumSDK, androidTargetSDK, androidTheme, androidExtraAssetsFolder, androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded,
                      androidBluetoothNeeded, androidExternalReadPermission, androidExternalWritePermission, androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions,
@@ -108,6 +108,7 @@ public:
           androidJavaLibs                      (settings, Ids::androidJavaLibs,                      getUndoManager()),
           androidAdditionalJavaFolders         (settings, Ids::androidAdditionalJavaFolders,         getUndoManager()),
           androidAdditionalResourceFolders     (settings, Ids::androidAdditionalResourceFolders,     getUndoManager()),
+          androidProjectRepositories           (settings, Ids::androidProjectRepositories,           getUndoManager(), "google()\njcenter()"),
           androidRepositories                  (settings, Ids::androidRepositories,                  getUndoManager()),
           androidDependencies                  (settings, Ids::androidDependencies,                  getUndoManager()),
           androidCustomAppBuildGradleContent   (settings, Ids::androidCustomAppBuildGradleContent,   getUndoManager()),
@@ -567,18 +568,7 @@ private:
         mo << "}"                                                                                      << newLine;
         mo << ""                                                                                       << newLine;
         mo << "allprojects {"                                                                          << newLine;
-        mo << "   repositories {"                                                                      << newLine;
-        mo << "       google()"                                                                        << newLine;
-        mo << "       jcenter()"                                                                       << newLine;
-
-        if (androidEnableRemoteNotifications.get())
-        {
-            mo << "       maven {"                                                                     << newLine;
-            mo << "           url \"https://maven.google.com\""                                        << newLine;
-            mo << "       }"                                                                           << newLine;
-        }
-
-        mo << "   }"                                                                                   << newLine;
+        mo << getAndroidProjectRepositories();
         mo << "}"                                                                                      << newLine;
 
         return mo.toString();
@@ -770,6 +760,26 @@ private:
         }
 
         mo << "    }" << newLine;
+
+        return mo.toString();
+    }
+
+    String getAndroidProjectRepositories() const
+    {
+        MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
+
+        auto repositories = StringArray::fromLines (androidProjectRepositories.get().toString());
+
+        if (androidEnableRemoteNotifications.get())
+            repositories.add ("maven { url \"https://maven.google.com\" }");
+
+        mo << "   repositories {"                << newLine;
+
+        for (auto& r : repositories)
+            mo << "       " << r << newLine;
+
+        mo << "   }"                             << newLine;
 
         return mo.toString();
     }
@@ -971,6 +981,10 @@ private:
                    "Java libs (JAR files) (one per line). These will be copied to app/libs folder and \"implementation files\" "
                    "dependency will be automatically added to module \"dependencies\" section for each library, so do "
                    "not add the dependency yourself.");
+
+        props.add (new TextPropertyComponent (androidProjectRepositories, "Project Repositories", 32768, true),
+                   "Custom project repositories (one per line). These will be used in project-level gradle file "
+                   "\"allprojects { repositories {\" section instead of default ones.");
 
         props.add (new TextPropertyComponent (androidRepositories, "Module Repositories", 32768, true),
                    "Module repositories (one per line). These will be added to module-level gradle file repositories section. ");
