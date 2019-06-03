@@ -240,7 +240,15 @@ public:
     /** Returns a pointer to the first element in the array.
         This method is provided for compatibility with standard C++ iteration mechanisms.
     */
-    inline ObjectClass** begin() const noexcept
+    inline ObjectClass** begin() noexcept
+    {
+        return values.begin();
+    }
+
+    /** Returns a pointer to the first element in the array.
+        This method is provided for compatibility with standard C++ iteration mechanisms.
+    */
+    inline ObjectClass* const* begin() const noexcept
     {
         return values.begin();
     }
@@ -248,7 +256,15 @@ public:
     /** Returns a pointer to the element which follows the last element in the array.
         This method is provided for compatibility with standard C++ iteration mechanisms.
     */
-    inline ObjectClass** end() const noexcept
+    inline ObjectClass** end() noexcept
+    {
+        return values.end();
+    }
+
+    /** Returns a pointer to the element which follows the last element in the array.
+        This method is provided for compatibility with standard C++ iteration mechanisms.
+    */
+    inline ObjectClass* const* end() const noexcept
     {
         return values.end();
     }
@@ -256,7 +272,15 @@ public:
     /** Returns a pointer to the first element in the array.
         This method is provided for compatibility with the standard C++ containers.
     */
-    inline ObjectClass** data() const noexcept
+    inline ObjectClass** data() noexcept
+    {
+        return begin();
+    }
+
+    /** Returns a pointer to the first element in the array.
+        This method is provided for compatibility with the standard C++ containers.
+    */
+    inline ObjectClass* const* data() const noexcept
     {
         return begin();
     }
@@ -270,8 +294,8 @@ public:
     int indexOf (const ObjectClass* objectToLookFor) const noexcept
     {
         const ScopedLockType lock (getLock());
-        auto** e = values.begin();
-        auto** endPointer = values.end();
+        auto* e = values.begin();
+        auto* endPointer = values.end();
 
         while (e != endPointer)
         {
@@ -299,8 +323,8 @@ public:
     bool contains (const ObjectClass* objectToLookFor) const noexcept
     {
         const ScopedLockType lock (getLock());
-        auto** e = values.begin();
-        auto** endPointer = values.end();
+        auto* e = values.begin();
+        auto* endPointer = values.end();
 
         while (e != endPointer)
         {
@@ -447,6 +471,20 @@ public:
             }
         }
     }
+
+    /** Replaces an object in the array with a different one.
+
+        If the index is less than zero, this method does nothing.
+        If the index is beyond the end of the array, the new object is added to the end of the array.
+
+        The object being added has its reference count increased, and if it's replacing
+        another object, then that one has its reference count decreased, and may be deleted.
+
+        @param indexToChange        the index whose value you want to change
+        @param newObject            the new value to set for this index.
+        @see add, insert, remove
+    */
+    void set (int indexToChange, const ObjectClassPtr& newObject)       { set (indexToChange, newObject.get()); }
 
     /** Adds elements from another array to the end of this array.
 
@@ -791,7 +829,7 @@ public:
     */
     template <class ElementComparator>
     void sort (ElementComparator& comparator,
-               bool retainOrderOfEquivalentItems = false) const noexcept
+               bool retainOrderOfEquivalentItems = false) noexcept
     {
         // If you pass in an object with a static compareElements() method, this
         // avoids getting warning messages about the parameter being unused

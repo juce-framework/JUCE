@@ -66,7 +66,8 @@ struct ConcertinaPanel::PanelSizes
 
     Array<Panel> sizes;
 
-    Panel& get (const int index) const noexcept    { return sizes.getReference(index); }
+    Panel& get (const int index) noexcept               { return sizes.getReference (index); }
+    const Panel& get (const int index) const noexcept   { return sizes.getReference (index); }
 
     PanelSizes withMovedPanel (const int index, int targetPosition, int totalSpace) const
     {

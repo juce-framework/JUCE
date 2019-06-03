@@ -40,7 +40,7 @@ void Displays::init (Desktop& desktop)
 const Displays::Display& Displays::findDisplayForRect (Rectangle<int> rect, bool isPhysical) const noexcept
 {
     int maxArea = -1;
-    Display* retVal = nullptr;
+    const Display* retVal = nullptr;
 
     for (auto& display : displays)
     {
@@ -65,7 +65,7 @@ const Displays::Display& Displays::findDisplayForRect (Rectangle<int> rect, bool
 const Displays::Display& Displays::findDisplayForPoint (Point<int> point, bool isPhysical) const noexcept
 {
     auto minDistance = std::numeric_limits<int>::max();
-    Display* retVal = nullptr;
+    const Display* retVal = nullptr;
 
     for (auto& display : displays)
     {
@@ -198,7 +198,7 @@ bool operator!= (const Displays::Display& d1, const Displays::Display& d2) noexc
 const Displays::Display& Displays::getDisplayContaining (Point<int> position) const noexcept
 {
     JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
-    auto* best = &displays.getReference (0);
+    const auto* best = &displays.getReference (0);
     auto bestDistance = std::numeric_limits<int>::max();
 
     for (auto& d : displays)
@@ -249,7 +249,7 @@ struct DisplayNode
 };
 
 /** Recursive - will calculate and set the logicalArea member of current. */
-static void processDisplay (DisplayNode* currentNode, const Array<DisplayNode>& allNodes)
+static void processDisplay (DisplayNode* currentNode, Array<DisplayNode>& allNodes)
 {
     const auto physicalArea = currentNode->display->totalArea.toDouble();
     const auto scale = currentNode->display->scale;

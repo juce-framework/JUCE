@@ -580,10 +580,8 @@ bool File::isOnHardDisk() const
 
     auto n = WindowsFileHelpers::getWindowsDriveType (getFullPathName());
 
-    if (fullPath.toLowerCase()[0] <= 'b' && fullPath[1] == ':')
-        return n != DRIVE_REMOVABLE;
-
-    return n != DRIVE_CDROM
+    return n != DRIVE_REMOVABLE
+        && n != DRIVE_CDROM
         && n != DRIVE_REMOTE
         && n != DRIVE_NO_ROOT_DIR;
 }

@@ -298,16 +298,21 @@ void LookAndFeel_V4::drawButtonBackground (Graphics& g,
 
     g.setColour (baseColour);
 
-    if (button.isConnectedOnLeft() || button.isConnectedOnRight())
+    auto flatOnLeft   = button.isConnectedOnLeft();
+    auto flatOnRight  = button.isConnectedOnRight();
+    auto flatOnTop    = button.isConnectedOnTop();
+    auto flatOnBottom = button.isConnectedOnBottom();
+
+    if (flatOnLeft || flatOnRight || flatOnTop || flatOnBottom)
     {
         Path path;
         path.addRoundedRectangle (bounds.getX(), bounds.getY(),
                                   bounds.getWidth(), bounds.getHeight(),
                                   cornerSize, cornerSize,
-                                  ! button.isConnectedOnLeft(),
-                                  ! button.isConnectedOnRight(),
-                                  ! button.isConnectedOnLeft(),
-                                  ! button.isConnectedOnRight());
+                                  ! (flatOnLeft  || flatOnTop),
+                                  ! (flatOnRight || flatOnTop),
+                                  ! (flatOnLeft  || flatOnBottom),
+                                  ! (flatOnRight || flatOnBottom));
 
         g.fillPath (path);
 

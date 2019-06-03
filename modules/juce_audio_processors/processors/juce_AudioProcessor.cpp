@@ -60,11 +60,6 @@ AudioProcessor::~AudioProcessor()
     // or more parameters without having made a corresponding call to endParameterChangeGesture...
     jassert (changingParams.countNumberOfSetBits() == 0);
    #endif
-
-    // The parameters are owned by an AudioProcessorParameterGroup, but we need
-    // to keep the managedParameters array populated to maintain backwards
-    // compatibility.
-    managedParameters.clearQuick (false);
 }
 
 //==============================================================================
@@ -378,10 +373,6 @@ void AudioProcessor::setRateAndBufferSizeDetails (double newSampleRate, int newB
 {
     currentSampleRate = newSampleRate;
     blockSize = newBlockSize;
-
-   #ifdef JUCE_DEBUG
-    checkForDupedParamIDs();
-   #endif
 }
 
 //==============================================================================
@@ -412,12 +403,12 @@ int AudioProcessor::getOffsetInBusBufferForAbsoluteChannelIndex (bool isInput, i
 }
 
 //==============================================================================
-void AudioProcessor::setNonRealtime (const bool newNonRealtime) noexcept
+void AudioProcessor::setNonRealtime (bool newNonRealtime) noexcept
 {
     nonRealtime = newNonRealtime;
 }
 
-void AudioProcessor::setLatencySamples (const int newLatency)
+void AudioProcessor::setLatencySamples (int newLatency)
 {
     if (latencySamples != newLatency)
     {
@@ -433,148 +424,6 @@ bool AudioProcessor::isHighResolutionParameters(bool initialValue)
 }
 
 //==============================================================================
-#if JUCE_GCC
- #pragma GCC diagnostic push
- #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#elif JUCE_CLANG
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#elif JUCE_MSVC
- #pragma warning (push, 0)
- #pragma warning (disable: 4996)
-#endif
-
-void AudioProcessor::setParameterNotifyingHost (int parameterIndex, float newValue)
-{
-    if (auto* param = getParameters()[parameterIndex])
-    {
-        param->setValueNotifyingHost (newValue);
-    }
-    else if (isPositiveAndBelow (parameterIndex, getNumParameters()))
-    {
-        setParameter (parameterIndex, newValue);
-        sendParamChangeMessageToListeners (parameterIndex, newValue);
-    }
-}
-
-void AudioProcessor::sendParamChangeMessageToListeners (int parameterIndex, float newValue)
-{
-    if (auto* param = getParameters()[parameterIndex])
-    {
-        param->sendValueChangedMessageToListeners (newValue);
-    }
-    else
-    {
-        if (isPositiveAndBelow (parameterIndex, getNumParameters()))
-        {
-            for (int i = listeners.size(); --i >= 0;)
-                if (auto* l = getListenerLocked (i))
-                    l->audioProcessorParameterChanged (this, parameterIndex, newValue);
-        }
-        else
-        {
-            jassertfalse; // called with an out-of-range parameter index!
-        }
-    }
-}
-
-void AudioProcessor::beginParameterChangeGesture (int parameterIndex)
-{
-    if (auto* param = getParameters()[parameterIndex])
-    {
-        param->beginChangeGesture();
-    }
-    else
-    {
-        if (isPositiveAndBelow (parameterIndex, getNumParameters()))
-        {
-           #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
-            // This means you've called beginParameterChangeGesture twice in succession without a matching
-            // call to endParameterChangeGesture. That might be fine in most hosts, but better to avoid doing it.
-            jassert (! changingParams[parameterIndex]);
-            changingParams.setBit (parameterIndex);
-           #endif
-
-            for (int i = listeners.size(); --i >= 0;)
-                if (auto* l = getListenerLocked (i))
-                    l->audioProcessorParameterChangeGestureBegin (this, parameterIndex);
-        }
-        else
-        {
-            jassertfalse; // called with an out-of-range parameter index!
-        }
-    }
-}
-
-void AudioProcessor::endParameterChangeGesture (int parameterIndex)
-{
-    if (auto* param = getParameters()[parameterIndex])
-    {
-        param->endChangeGesture();
-    }
-    else
-    {
-        if (isPositiveAndBelow (parameterIndex, getNumParameters()))
-        {
-           #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
-            // This means you've called endParameterChangeGesture without having previously called
-            // beginParameterChangeGesture. That might be fine in most hosts, but better to keep the
-            // calls matched correctly.
-            jassert (changingParams[parameterIndex]);
-            changingParams.clearBit (parameterIndex);
-           #endif
-
-            for (int i = listeners.size(); --i >= 0;)
-                if (auto* l = getListenerLocked (i))
-                    l->audioProcessorParameterChangeGestureEnd (this, parameterIndex);
-        }
-        else
-        {
-            jassertfalse; // called with an out-of-range parameter index!
-        }
-    }
-}
-
-String AudioProcessor::getParameterName (int index, int maximumStringLength)
-{
-    if (auto* p = managedParameters[index])
-        return p->getName (maximumStringLength);
-
-    return isPositiveAndBelow (index, getNumParameters()) ? getParameterName (index).substring (0, maximumStringLength)
-                                                          : String();
-}
-
-const String AudioProcessor::getParameterText (int index)
-{
-   #if JUCE_DEBUG
-    // if you hit this, then you're probably using the old parameter control methods,
-    // but have forgotten to implement either of the getParameterText() methods.
-    jassert (! textRecursionCheck);
-    ScopedValueSetter<bool> sv (textRecursionCheck, true, false);
-   #endif
-
-    return isPositiveAndBelow (index, getNumParameters()) ? getParameterText (index, 1024)
-                                                          : String();
-}
-
-String AudioProcessor::getParameterText (int index, int maximumStringLength)
-{
-    if (auto* p = managedParameters[index])
-        return p->getText (p->getValue(), maximumStringLength);
-
-    return isPositiveAndBelow (index, getNumParameters()) ? getParameterText (index).substring (0, maximumStringLength)
-                                                          : String();
-}
-
-#if JUCE_GCC
- #pragma GCC diagnostic pop
-#elif JUCE_CLANG
- #pragma clang diagnostic pop
-#elif JUCE_MSVC
- #pragma warning (pop)
-#endif
-
-//==============================================================================
 AudioProcessorListener* AudioProcessor::getListenerLocked (int index) const noexcept
 {
     const ScopedLock sl (listenerLock);
@@ -588,179 +437,72 @@ void AudioProcessor::updateHostDisplay()
             l->audioProcessorChanged (this);
 }
 
-const OwnedArray<AudioProcessorParameter>& AudioProcessor::getParameters() const noexcept
+const Array<AudioProcessorParameter*>& AudioProcessor::getParameters() const
 {
-    return managedParameters;
+    if (flatParamListNeedsRebuilding)
+    {
+        flatParamListNeedsRebuilding = false;
+        flatParameterList = parameterTree.getParameters (true);
+
+       #ifdef JUCE_DEBUG
+        StringArray usedIDs;
+        usedIDs.ensureStorageAllocated (flatParameterList.size());
+       #endif
+
+        int index = 0;
+
+        for (auto& p : flatParameterList)
+        {
+            p->processor = const_cast<AudioProcessor*> (this);
+            p->parameterIndex = index++;
+
+           #ifdef JUCE_DEBUG
+            if (auto* withID = dynamic_cast<AudioProcessorParameterWithID*> (p))
+                usedIDs.add (withID->paramID);
+           #endif
+        }
+
+       #ifdef JUCE_DEBUG
+        usedIDs.sort (false);
+
+        // This assertion checks whether you attempted to add two or more parameters with the same ID
+        for (int i = 1; i < usedIDs.size(); ++i)
+            jassert (usedIDs[i - 1] != usedIDs[i]);
+       #endif
+    }
+
+    return flatParameterList;
 }
 
-int AudioProcessor::getNumParameters()
+void AudioProcessor::addParameter (AudioProcessorParameter* param)
 {
-    return managedParameters.size();
+    parameterTree.addChild (std::unique_ptr<AudioProcessorParameter> (param));
+    flatParamListNeedsRebuilding = true;
 }
 
-float AudioProcessor::getParameter (int index)
+void AudioProcessor::addParameterGroup (std::unique_ptr<AudioProcessorParameterGroup> group)
 {
-    if (auto* p = getParamChecked (index))
-        return p->getValue();
-
-    return 0;
+    parameterTree.addChild (std::move (group));
+    flatParamListNeedsRebuilding = true;
 }
 
-void AudioProcessor::setParameter (int index, float newValue)
+const AudioProcessorParameterGroup& AudioProcessor::getParameterTree() const
 {
-    if (auto* p = getParamChecked (index))
-        p->setValue (newValue);
+    return parameterTree;
 }
 
-float AudioProcessor::getParameterDefaultValue (int index)
+void AudioProcessor::setParameterTree (AudioProcessorParameterGroup&& newTree)
 {
-    if (auto* p = managedParameters[index])
-        return p->getDefaultValue();
-
-    return 0;
+    parameterTree = std::move (newTree);
+    flatParamListNeedsRebuilding = true;
 }
 
-const String AudioProcessor::getParameterName (int index)
-{
-    if (auto* p = getParamChecked (index))
-        return p->getName (512);
-
-    return {};
-}
-
-String AudioProcessor::getParameterID (int index)
-{
-    // Don't use getParamChecked here, as this must also work for legacy plug-ins
-    if (auto* p = dynamic_cast<AudioProcessorParameterWithID*> (managedParameters[index]))
-        return p->paramID;
-
-    return String (index);
-}
-
-int AudioProcessor::getParameterNumSteps (int index)
-{
-    if (auto* p = managedParameters[index])
-        return p->getNumSteps();
-
-    return AudioProcessor::getDefaultNumParameterSteps();
-}
+void AudioProcessor::refreshParameterList() {}
 
 int AudioProcessor::getDefaultNumParameterSteps() noexcept
 {
     return 0x7fffffff;
 }
-
-bool AudioProcessor::isParameterDiscrete (int index) const
-{
-    if (auto* p = managedParameters[index])
-        return p->isDiscrete();
-
-    return false;
-}
-
-String AudioProcessor::getParameterLabel (int index) const
-{
-    if (auto* p = managedParameters[index])
-        return p->getLabel();
-
-    return {};
-}
-
-bool AudioProcessor::isParameterAutomatable (int index) const
-{
-    if (auto* p = managedParameters[index])
-        return p->isAutomatable();
-
-    return true;
-}
-
-bool AudioProcessor::isParameterOrientationInverted (int index) const
-{
-    if (auto* p = managedParameters[index])
-        return p->isOrientationInverted();
-
-    return false;
-}
-
-bool AudioProcessor::isMetaParameter (int index) const
-{
-    if (auto* p = managedParameters[index])
-        return p->isMetaParameter();
-
-    return false;
-}
-
-AudioProcessorParameter::Category AudioProcessor::getParameterCategory (int index) const
-{
-    if (auto* p = managedParameters[index])
-        return p->getCategory();
-
-    return AudioProcessorParameter::genericParameter;
-}
-
-AudioProcessorParameter* AudioProcessor::getParamChecked (int index) const noexcept
-{
-    AudioProcessorParameter* p = managedParameters[index];
-
-    // If you hit this, then you're either trying to access parameters that are out-of-range,
-    // or you're not using addParameter and the managed parameter list, but have failed
-    // to override some essential virtual methods and implement them appropriately.
-    jassert (p != nullptr);
-    return p;
-}
-
-void AudioProcessor::addParameterInternal (AudioProcessorParameter* param)
-{
-    param->processor = this;
-    param->parameterIndex = managedParameters.size();
-    managedParameters.add (param);
-
-   #ifdef JUCE_DEBUG
-    shouldCheckParamsForDupeIDs = true;
-   #endif
-}
-
-void AudioProcessor::addParameter (AudioProcessorParameter* param)
-{
-    addParameterInternal (param);
-    parameterTree.addChild (std::unique_ptr<AudioProcessorParameter> (param));
-}
-
-void AudioProcessor::addParameterGroup (std::unique_ptr<AudioProcessorParameterGroup> group)
-{
-    for (auto* param : group->getParameters (true))
-        addParameterInternal (param);
-
-    parameterTree.addChild (std::move (group));
-}
-
-const AudioProcessorParameterGroup& AudioProcessor::getParameterTree()
-{
-    return parameterTree;
-}
-
-#ifdef JUCE_DEBUG
-void AudioProcessor::checkForDupedParamIDs()
-{
-    if (shouldCheckParamsForDupeIDs)
-    {
-        shouldCheckParamsForDupeIDs = false;
-        StringArray ids;
-
-        for (auto p : managedParameters)
-            if (auto* withID = dynamic_cast<AudioProcessorParameterWithID*> (p))
-                ids.add (withID->paramID);
-
-        ids.sort (false);
-
-        for (int i = 1; i < ids.size(); ++i)
-        {
-            // This is triggered if you have two or more parameters with the same ID!
-            jassert (ids[i - 1] != ids[i]);
-        }
-    }
-}
-#endif
 
 void AudioProcessor::suspendProcessing (const bool shouldBeSuspended)
 {
@@ -1472,6 +1214,259 @@ const char* AudioProcessor::getWrapperTypeDescription (AudioProcessor::WrapperTy
         default:                                        jassertfalse; return {};
     }
 }
+
+//==============================================================================
+#if JUCE_GCC
+ #pragma GCC diagnostic push
+ #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#elif JUCE_CLANG
+ #pragma clang diagnostic push
+ #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#elif JUCE_MSVC
+ #pragma warning (push, 0)
+ #pragma warning (disable: 4996)
+#endif
+
+void AudioProcessor::setParameterNotifyingHost (int parameterIndex, float newValue)
+{
+    if (auto* param = getParameters()[parameterIndex])
+    {
+        param->setValueNotifyingHost (newValue);
+    }
+    else if (isPositiveAndBelow (parameterIndex, getNumParameters()))
+    {
+        setParameter (parameterIndex, newValue);
+        sendParamChangeMessageToListeners (parameterIndex, newValue);
+    }
+}
+
+void AudioProcessor::sendParamChangeMessageToListeners (int parameterIndex, float newValue)
+{
+    if (auto* param = getParameters()[parameterIndex])
+    {
+        param->sendValueChangedMessageToListeners (newValue);
+    }
+    else
+    {
+        if (isPositiveAndBelow (parameterIndex, getNumParameters()))
+        {
+            for (int i = listeners.size(); --i >= 0;)
+                if (auto* l = getListenerLocked (i))
+                    l->audioProcessorParameterChanged (this, parameterIndex, newValue);
+        }
+        else
+        {
+            jassertfalse; // called with an out-of-range parameter index!
+        }
+    }
+}
+
+void AudioProcessor::beginParameterChangeGesture (int parameterIndex)
+{
+    if (auto* param = getParameters()[parameterIndex])
+    {
+        param->beginChangeGesture();
+    }
+    else
+    {
+        if (isPositiveAndBelow (parameterIndex, getNumParameters()))
+        {
+           #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
+            // This means you've called beginParameterChangeGesture twice in succession without a matching
+            // call to endParameterChangeGesture. That might be fine in most hosts, but better to avoid doing it.
+            jassert (! changingParams[parameterIndex]);
+            changingParams.setBit (parameterIndex);
+           #endif
+
+            for (int i = listeners.size(); --i >= 0;)
+                if (auto* l = getListenerLocked (i))
+                    l->audioProcessorParameterChangeGestureBegin (this, parameterIndex);
+        }
+        else
+        {
+            jassertfalse; // called with an out-of-range parameter index!
+        }
+    }
+}
+
+void AudioProcessor::endParameterChangeGesture (int parameterIndex)
+{
+    if (auto* param = getParameters()[parameterIndex])
+    {
+        param->endChangeGesture();
+    }
+    else
+    {
+        if (isPositiveAndBelow (parameterIndex, getNumParameters()))
+        {
+           #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
+            // This means you've called endParameterChangeGesture without having previously called
+            // beginParameterChangeGesture. That might be fine in most hosts, but better to keep the
+            // calls matched correctly.
+            jassert (changingParams[parameterIndex]);
+            changingParams.clearBit (parameterIndex);
+           #endif
+
+            for (int i = listeners.size(); --i >= 0;)
+                if (auto* l = getListenerLocked (i))
+                    l->audioProcessorParameterChangeGestureEnd (this, parameterIndex);
+        }
+        else
+        {
+            jassertfalse; // called with an out-of-range parameter index!
+        }
+    }
+}
+
+String AudioProcessor::getParameterName (int index, int maximumStringLength)
+{
+    if (auto* p = getParameters()[index])
+        return p->getName (maximumStringLength);
+
+    return isPositiveAndBelow (index, getNumParameters()) ? getParameterName (index).substring (0, maximumStringLength)
+                                                          : String();
+}
+
+const String AudioProcessor::getParameterText (int index)
+{
+   #if JUCE_DEBUG
+    // if you hit this, then you're probably using the old parameter control methods,
+    // but have forgotten to implement either of the getParameterText() methods.
+    jassert (! textRecursionCheck);
+    ScopedValueSetter<bool> sv (textRecursionCheck, true, false);
+   #endif
+
+    return isPositiveAndBelow (index, getNumParameters()) ? getParameterText (index, 1024)
+                                                          : String();
+}
+
+String AudioProcessor::getParameterText (int index, int maximumStringLength)
+{
+    if (auto* p = getParameters()[index])
+        return p->getText (p->getValue(), maximumStringLength);
+
+    return isPositiveAndBelow (index, getNumParameters()) ? getParameterText (index).substring (0, maximumStringLength)
+                                                          : String();
+}
+
+int AudioProcessor::getNumParameters()
+{
+    return getParameters().size();
+}
+
+float AudioProcessor::getParameter (int index)
+{
+    if (auto* p = getParamChecked (index))
+        return p->getValue();
+
+    return 0;
+}
+
+void AudioProcessor::setParameter (int index, float newValue)
+{
+    if (auto* p = getParamChecked (index))
+        p->setValue (newValue);
+}
+
+float AudioProcessor::getParameterDefaultValue (int index)
+{
+    if (auto* p = getParameters()[index])
+        return p->getDefaultValue();
+
+    return 0;
+}
+
+const String AudioProcessor::getParameterName (int index)
+{
+    if (auto* p = getParamChecked (index))
+        return p->getName (512);
+
+    return {};
+}
+
+String AudioProcessor::getParameterID (int index)
+{
+    // Don't use getParamChecked here, as this must also work for legacy plug-ins
+    if (auto* p = dynamic_cast<AudioProcessorParameterWithID*> (getParameters()[index]))
+        return p->paramID;
+
+    return String (index);
+}
+
+int AudioProcessor::getParameterNumSteps (int index)
+{
+    if (auto* p = getParameters()[index])
+        return p->getNumSteps();
+
+    return AudioProcessor::getDefaultNumParameterSteps();
+}
+
+bool AudioProcessor::isParameterDiscrete (int index) const
+{
+    if (auto* p = getParameters()[index])
+        return p->isDiscrete();
+
+    return false;
+}
+
+String AudioProcessor::getParameterLabel (int index) const
+{
+    if (auto* p = getParameters()[index])
+        return p->getLabel();
+
+    return {};
+}
+
+bool AudioProcessor::isParameterAutomatable (int index) const
+{
+    if (auto* p = getParameters()[index])
+        return p->isAutomatable();
+
+    return true;
+}
+
+bool AudioProcessor::isParameterOrientationInverted (int index) const
+{
+    if (auto* p = getParameters()[index])
+        return p->isOrientationInverted();
+
+    return false;
+}
+
+bool AudioProcessor::isMetaParameter (int index) const
+{
+    if (auto* p = getParameters()[index])
+        return p->isMetaParameter();
+
+    return false;
+}
+
+AudioProcessorParameter::Category AudioProcessor::getParameterCategory (int index) const
+{
+    if (auto* p = getParameters()[index])
+        return p->getCategory();
+
+    return AudioProcessorParameter::genericParameter;
+}
+
+AudioProcessorParameter* AudioProcessor::getParamChecked (int index) const
+{
+    auto p = getParameters()[index];
+
+    // If you hit this, then you're either trying to access parameters that are out-of-range,
+    // or you're not using addParameter and the managed parameter list, but have failed
+    // to override some essential virtual methods and implement them appropriately.
+    jassert (p != nullptr);
+    return p;
+}
+
+#if JUCE_GCC
+ #pragma GCC diagnostic pop
+#elif JUCE_CLANG
+ #pragma clang diagnostic pop
+#elif JUCE_MSVC
+ #pragma warning (pop)
+#endif
 
 //==============================================================================
 void AudioProcessorListener::audioProcessorParameterChangeGestureBegin (AudioProcessor*, int) {}

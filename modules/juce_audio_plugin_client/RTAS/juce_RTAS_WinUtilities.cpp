@@ -24,10 +24,10 @@
   ==============================================================================
 */
 
-#if JucePlugin_Build_RTAS
-
 #include "../../juce_core/system/juce_TargetPlatform.h"
 #include "../utility/juce_CheckSettingMacros.h"
+
+#if JucePlugin_Build_RTAS
 
 // (these functions are in their own file because of problems including windows.h
 // at the same time as the Digi headers)
@@ -51,6 +51,7 @@ void JUCE_CALLTYPE attachSubWindow (void* hostWindow,
                                     Component* comp)
 {
     using namespace juce;
+
     RECT clientRect;
     GetClientRect ((HWND) hostWindow, &clientRect);
 
@@ -76,6 +77,7 @@ void JUCE_CALLTYPE resizeHostWindow (void* hostWindow,
                                      Component* comp)
 {
     using namespace juce;
+
     RECT clientRect, windowRect;
     GetClientRect ((HWND) hostWindow, &clientRect);
     GetWindowRect ((HWND) hostWindow, &windowRect);
@@ -95,7 +97,7 @@ extern "C" BOOL WINAPI DllMainRTAS (HINSTANCE, DWORD, LPVOID);
 extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID reserved)
 {
     if (reason == DLL_PROCESS_ATTACH)
-       juce::Process::setCurrentModuleInstanceHandle (instance);
+        juce::Process::setCurrentModuleInstanceHandle (instance);
 
     if (GetModuleHandleA ("DAE.DLL") != 0)
         return DllMainRTAS (instance, reason, reserved);

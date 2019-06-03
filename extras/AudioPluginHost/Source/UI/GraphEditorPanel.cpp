@@ -844,9 +844,9 @@ void GraphEditorPanel::showPopupMenu (Point<int> mousePos)
         menu->showMenuAsync ({},
                              ModalCallbackFunction::create ([this, mousePos] (int r)
                                                             {
-                                                                if (auto* mainWin = findParentComponentOfClass<MainHostWindow>())
-                                                                    if (auto* desc = mainWin->getChosenType (r))
-                                                                        createNewPlugin (*desc, mousePos);
+                                                                if (r > 0)
+                                                                    if (auto* mainWin = findParentComponentOfClass<MainHostWindow>())
+                                                                        createNewPlugin (mainWin->getChosenType (r), mousePos);
                                                             }));
     }
 }
@@ -1114,10 +1114,7 @@ struct GraphDocumentComponent::PluginListBoxModel    : public ListBoxModel,
         g.setColour (rowIsSelected ? Colours::black : Colours::white);
 
         if (rowNumber < knownPlugins.getNumTypes())
-            g.drawFittedText (knownPlugins.getType (rowNumber)->name,
-                              { 0, 0, width, height - 2 },
-                              Justification::centred,
-                              1);
+            g.drawFittedText (knownPlugins.getTypes()[rowNumber].name, { 0, 0, width, height - 2 }, Justification::centred, 1);
 
         g.setColour (Colours::black.withAlpha (0.4f));
         g.drawRect (0, height - 1, width, 1);
@@ -1283,7 +1280,7 @@ void GraphDocumentComponent::itemDropped (const SourceDetails& details)
     // must be a valid index!
     jassert (isPositiveAndBelow (pluginTypeIndex, pluginList.getNumTypes()));
 
-    createNewPlugin (*pluginList.getType (pluginTypeIndex), details.localPosition);
+    createNewPlugin (pluginList.getTypes()[pluginTypeIndex], details.localPosition);
 }
 
 void GraphDocumentComponent::showSidePanel (bool showSettingsPanel)

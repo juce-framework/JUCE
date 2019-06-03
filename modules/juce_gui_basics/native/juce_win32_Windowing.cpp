@@ -404,6 +404,9 @@ static void setDPIAwareness()
             return;
     }
 
+    if (! JUCEApplicationBase::isStandaloneApp())
+        return;
+
     // fallback for pre Windows 8.1 - equivalent to Process_System_DPI_Aware
     setProcessDPIAware = (SetProcessDPIAwareFunc) getUser32Function ("SetProcessDPIAware");
 
@@ -4456,7 +4459,7 @@ void Desktop::allowedOrientationsChanged() {}
 //==============================================================================
 static const Displays::Display* getCurrentDisplayFromScaleFactor (HWND hwnd)
 {
-    Array<Displays::Display*> candidateDisplays;
+    Array<const Displays::Display*> candidateDisplays;
     double scaleToLookFor = -1.0;
 
     if (auto* peer = HWNDComponentPeer::getOwnerOfWindow (hwnd))
@@ -4482,7 +4485,7 @@ static const Displays::Display* getCurrentDisplayFromScaleFactor (HWND hwnd)
         else
             bounds = Desktop::getInstance().getDisplays().physicalToLogical (rectangleFromRECT (getWindowRect (hwnd)));
 
-        Displays::Display* retVal = nullptr;
+        const Displays::Display* retVal = nullptr;
         int maxArea = -1;
 
         for (auto* d : candidateDisplays)

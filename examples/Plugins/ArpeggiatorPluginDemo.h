@@ -125,7 +125,7 @@ public:
     bool isMidiEffect() const override                     { return true; }
 
     //==============================================================================
-    AudioProcessorEditor* createEditor() override          { return new GenericAudioProcessorEditor (this); }
+    AudioProcessorEditor* createEditor() override          { return new GenericAudioProcessorEditor (*this); }
     bool hasEditor() const override                        { return true; }
 
     //==============================================================================

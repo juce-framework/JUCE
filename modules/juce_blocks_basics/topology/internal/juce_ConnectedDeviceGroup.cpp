@@ -555,7 +555,7 @@ private:
         return -1;
     }
 
-    DeviceInfo* getDeviceInfoFromUID (Block::UID uid) const noexcept
+    DeviceInfo* getDeviceInfoFromUID (Block::UID uid) noexcept
     {
         for (auto& d : currentDeviceInfo)
             if (d.uid == uid)
@@ -564,7 +564,7 @@ private:
         return nullptr;
     }
 
-    DeviceInfo* getDeviceInfoFromIndex (BlocksProtocol::TopologyIndex index) const noexcept
+    DeviceInfo* getDeviceInfoFromIndex (BlocksProtocol::TopologyIndex index) noexcept
     {
         for (auto& d : currentDeviceInfo)
             if (d.index == index)

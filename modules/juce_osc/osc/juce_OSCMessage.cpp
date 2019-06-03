@@ -63,12 +63,22 @@ const OSCArgument& OSCMessage::operator[] (const int i) const noexcept
     return arguments.getReference (i);
 }
 
-OSCArgument* OSCMessage::begin() const noexcept
+OSCArgument* OSCMessage::begin() noexcept
 {
     return arguments.begin();
 }
 
-OSCArgument* OSCMessage::end() const noexcept
+const OSCArgument* OSCMessage::begin() const noexcept
+{
+    return arguments.begin();
+}
+
+OSCArgument* OSCMessage::end() noexcept
+{
+    return arguments.end();
+}
+
+const OSCArgument* OSCMessage::end() const noexcept
 {
     return arguments.end();
 }

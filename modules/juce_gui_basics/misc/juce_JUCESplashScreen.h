@@ -68,7 +68,6 @@ private:
     std::unique_ptr<Drawable> content;
     CriticalSection appUsageReporting;
     ComponentAnimator fader;
-    bool hasStartedFading = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JUCESplashScreen)
 };

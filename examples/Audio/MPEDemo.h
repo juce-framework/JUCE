@@ -263,7 +263,7 @@ public:
 
 private:
     //==============================================================================
-    MPENote* findActiveNote (int noteID) const noexcept
+    const MPENote* findActiveNote (int noteID) const noexcept
     {
         for (auto& note : activeNotes)
             if (note.noteID == noteID)
@@ -879,7 +879,7 @@ public:
         audioDeviceManager.initialise (0, 2, 0, true, {}, 0);
        #endif
 
-        audioDeviceManager.addMidiInputCallback ({}, this);
+        audioDeviceManager.addMidiInputDeviceCallback ({}, this);
         audioDeviceManager.addAudioCallback (this);
 
         addAndMakeVisible (audioSetupComp);
@@ -904,7 +904,7 @@ public:
 
     ~MPEDemo()
     {
-        audioDeviceManager.removeMidiInputCallback ({}, this);
+        audioDeviceManager.removeMidiInputDeviceCallback ({}, this);
         audioDeviceManager.removeAudioCallback (this);
     }
 

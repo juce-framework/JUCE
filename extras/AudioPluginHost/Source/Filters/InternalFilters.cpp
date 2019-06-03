@@ -389,11 +389,7 @@ bool InternalPluginFormat::requiresUnblockedMessageThreadDuringCreation (const P
     return false;
 }
 
-void InternalPluginFormat::getAllTypes (OwnedArray<PluginDescription>& results)
+void InternalPluginFormat::getAllTypes (Array<PluginDescription>& results)
 {
-    results.add (new PluginDescription (audioInDesc));
-    results.add (new PluginDescription (audioOutDesc));
-    results.add (new PluginDescription (midiInDesc));
-    results.add (new PluginDescription (SineWaveSynth::getPluginDescription()));
-    results.add (new PluginDescription (ReverbFilter::getPluginDescription()));
+    results.add (audioInDesc, audioOutDesc, midiInDesc, SineWaveSynth::getPluginDescription(), ReverbFilter::getPluginDescription());
 }
