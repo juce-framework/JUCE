@@ -299,12 +299,14 @@ void MPESynthesiser::reduceNumVoices (const int newNumVoices)
 
 void MPESynthesiser::turnOffAllVoices (bool allowTailOff)
 {
-    const ScopedLock sl (voicesLock);
+    {
+        const ScopedLock sl (voicesLock);
 
-    // first turn off all voices (it's more efficient to do this immediately
-    // rather than to go through the MPEInstrument for this).
-    for (auto* voice : voices)
-        voice->noteStopped (allowTailOff);
+        // first turn off all voices (it's more efficient to do this immediately
+        // rather than to go through the MPEInstrument for this).
+        for (auto* voice : voices)
+            voice->noteStopped (allowTailOff);
+    }
 
     // finally make sure the MPE Instrument also doesn't have any notes anymore.
     instrument->releaseAllNotes();
