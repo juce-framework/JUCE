@@ -113,12 +113,14 @@ protected:
 
 private:
     //==============================================================================
+    using Button::clicked;
+    Font getFontToUse() const;
+
+    //==============================================================================
     URL url;
     Font font;
     bool resizeFont;
     Justification justification;
-
-    Font getFontToUse() const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HyperlinkButton)
 };

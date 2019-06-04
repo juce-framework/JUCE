@@ -49,6 +49,8 @@ struct SlidingPanelComponent::DotButton  : public Button
         owner.goToTab (index);
     }
 
+    using Button::clicked;
+
     SlidingPanelComponent& owner;
     int index;
 };

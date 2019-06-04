@@ -583,7 +583,7 @@ struct Runner
 
     //==============================================================================
     /** */
-    uint8 allMemory[((programAndHeapSpace + stackAndGlobalsSpace) + 3) & ~3];
+    uint8 allMemory[(size_t) (((programAndHeapSpace + stackAndGlobalsSpace) + 3) & ~3)];
 
     /** */
     Program program;

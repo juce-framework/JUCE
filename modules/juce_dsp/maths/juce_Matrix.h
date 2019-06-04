@@ -101,7 +101,7 @@ public:
     Array<size_t> getSize() const noexcept             { return { rows, columns }; }
 
     /** Fills the contents of the matrix with zeroes. */
-    void clear() noexcept                              { zeromem (data.begin(), sizeof (ElementType) * (size_t) data.size()); }
+    void clear() noexcept                              { zeromem (data.begin(), (size_t) data.size() * sizeof (ElementType)); }
 
     //==============================================================================
     /** Swaps the contents of two rows in the matrix and returns a reference to itself. */

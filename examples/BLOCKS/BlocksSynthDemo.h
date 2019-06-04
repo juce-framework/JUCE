@@ -108,6 +108,8 @@ public:
         }
     }
 
+    using SynthesiserVoice::renderNextBlock;
+
     /** Returns the next sample */
     double getSample()
     {

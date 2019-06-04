@@ -38,6 +38,8 @@ struct ModalComponentManager::ModalItem  : public ComponentMovementWatcher
 
     void componentMovedOrResized (bool, bool) override {}
 
+    using ComponentMovementWatcher::componentMovedOrResized;
+
     void componentPeerChanged() override
     {
         componentVisibilityChanged();
@@ -48,6 +50,8 @@ struct ModalComponentManager::ModalItem  : public ComponentMovementWatcher
         if (! component->isShowing())
             cancel();
     }
+
+    using ComponentMovementWatcher::componentVisibilityChanged;
 
     void componentBeingDeleted (Component& comp) override
     {

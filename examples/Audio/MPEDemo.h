@@ -828,6 +828,8 @@ public:
         }
     }
 
+    using MPESynthesiserVoice::renderNextBlock;
+
 private:
     //==============================================================================
     float getNextSample() noexcept

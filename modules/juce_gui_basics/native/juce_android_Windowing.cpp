@@ -478,10 +478,14 @@ public:
         return relativePosition + (getScreenPosition().toFloat() / scale);
     }
 
+    using ComponentPeer::localToGlobal;
+
     Point<float> globalToLocal (Point<float> screenPosition) override
     {
         return screenPosition - (getScreenPosition().toFloat() / scale);
     }
+
+    using ComponentPeer::globalToLocal;
 
     void setMinimised (bool /*shouldBeMinimised*/) override
     {

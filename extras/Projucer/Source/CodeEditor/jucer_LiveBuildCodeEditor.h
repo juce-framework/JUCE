@@ -201,6 +201,8 @@ private:
                 if (auto* l = findParentComponentOfClass<LaunchClassOverlayComponent>())
                     l->launch();
             }
+
+            using Button::clicked;
         };
 
         void launch()

@@ -160,6 +160,8 @@ public:
         }
     }
 
+    using SynthesiserVoice::renderNextBlock;
+
 private:
     double currentAngle = 0.0;
     double angleDelta   = 0.0;

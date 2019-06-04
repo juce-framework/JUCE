@@ -496,8 +496,8 @@ struct MP3Frame
 
         mpeg25              = (header & (1 << 20)) == 0;
         lsf                 = mpeg25 ? 1 : ((header & (1 << 19)) ? 0 : 1);
-        layer               = 4 - ((header >> 17) & 3);
-        sampleRateIndex     = mpeg25 ? (6 + ((header >> 10) & 3)) : ((int) ((header >> 10) & 3) + (lsf * 3));
+        layer               = (int) (4 - ((header >> 17) & 3));
+        sampleRateIndex     = (int) ((header >> 10) & 3) + (mpeg25 ? 6 : (lsf * 3));
         crc16FollowsHeader  = ((header >> 16) & 1) == 0;
         bitrateIndex        = (header >> 12) & 15;
         padding             = (header >> 9) & 1;
@@ -1625,7 +1625,7 @@ private:
 
     static bool isValidHeader (uint32 header, int oldLayer) noexcept
     {
-        int newLayer = 4 - ((header >> 17) & 3);
+        auto newLayer = (int) (4 - ((header >> 17) & 3));
 
         return (header & 0xffe00000) == 0xffe00000
                 && newLayer != 4
@@ -1655,8 +1655,8 @@ private:
         if (numBits <= 0 || bufferPointer == nullptr)
             return 0;
 
-        const uint32 result = ((((((bufferPointer[0] << 8) | bufferPointer[1]) << 8)
-                               | bufferPointer[2]) << bitIndex) & 0xffffff) >> (24 - numBits);
+        const auto result = (uint32) (((((((bufferPointer[0] << 8) | bufferPointer[1]) << 8)
+                                       | bufferPointer[2]) << bitIndex) & 0xffffff) >> (24 - numBits));
         bitIndex += numBits;
         bufferPointer += (bitIndex >> 3);
         bitIndex &= 7;
@@ -1669,12 +1669,12 @@ private:
         ++bitIndex;
         bufferPointer += (bitIndex >> 3);
         bitIndex &= 7;
-        return result >> 7;
+        return (uint32) (result >> 7);
     }
 
     uint32 getBitsUnchecked (int numBits) noexcept
     {
-        const uint32 result = ((((bufferPointer[0] << 8) | bufferPointer[1]) << bitIndex) & 0xffff) >> (16 - numBits);
+        const auto result = (uint32) (((((bufferPointer[0] << 8) | bufferPointer[1]) << bitIndex) & 0xffff) >> (16 - numBits));
         bitIndex += numBits;
         bufferPointer += (bitIndex >> 3);
         bitIndex &= 7;
@@ -1912,9 +1912,10 @@ private:
             getLayer3SideInfo2 (numChannels, msStereo, sampleRate, single);
 
         int databits = 0;
+
         for (int gr = 0; gr < granules; ++gr)
             for (int ch = 0; ch < numChannels; ++ch)
-                databits += sideinfo.ch[ch].gr[gr].part2_3Length;
+                databits += (int) sideinfo.ch[ch].gr[gr].part2_3Length;
 
         return databits - 8 * (int) sideinfo.mainDataStart;
     }
@@ -2452,7 +2453,7 @@ private:
         auto* xrpnt = (float*) xr;
         auto part2remain = (int) granule.part2_3Length - part2bits;
 
-        zeromem (xrpnt, sizeof (float) * (size_t) (&xr[32][0] - xrpnt));
+        zeromem (xrpnt, (size_t) (&xr[32][0] - xrpnt) * sizeof (float));
 
         auto bv = (int) granule.bigValues;
         auto region1 = (int) granule.region1Start;
@@ -2549,8 +2550,8 @@ private:
                     if (x == 15)
                     {
                         max[lwin] = cb;
-                        part2remain -= h->bits + 1;
-                        x += getBits ((int) h->bits);
+                        part2remain -= (int) (h->bits + 1);
+                        x += (int) getBits ((int) h->bits);
                         *xrpnt = constants.nToThe4Over3[x] * (getOneBit() ? -v : v);
                     }
                     else if (x)
@@ -2567,8 +2568,8 @@ private:
                     if (y == 15)
                     {
                         max[lwin] = cb;
-                        part2remain -= h->bits + 1;
-                        y += getBits ((int) h->bits);
+                        part2remain -= (int) (h->bits + 1);
+                        y += (int) getBits ((int) h->bits);
                         *xrpnt = constants.nToThe4Over3[y] * (getOneBit() ? -v : v);
                     }
                     else if (y)
@@ -2709,8 +2710,8 @@ private:
                     if (x == 15)
                     {
                         max = cb;
-                        part2remain -= h->bits + 1;
-                        x += getBits ((int) h->bits);
+                        part2remain -= (int) (h->bits + 1);
+                        x += (int) getBits ((int) h->bits);
                         *xrpnt++ = constants.nToThe4Over3[x] * (getOneBit() ? -v : v);
                     }
                     else if (x)
@@ -2725,8 +2726,8 @@ private:
                     if (y == 15)
                     {
                         max = cb;
-                        part2remain -= h->bits + 1;
-                        y += getBits ((int) h->bits);
+                        part2remain -= (int) (h->bits + 1);
+                        y += (int) getBits ((int) h->bits);
                         *xrpnt++ = constants.nToThe4Over3[y] * (getOneBit() ? -v : v);
                     }
                     else if (y)
@@ -2788,7 +2789,7 @@ private:
                 }
             }
 
-            zeromem (xrpnt, sizeof (float) * (size_t) (&xr[32][0] - xrpnt));
+            zeromem (xrpnt, (size_t) (&xr[32][0] - xrpnt) * sizeof (float));
 
             granule.maxBandl = (uint32) (max + 1);
             granule.maxb = (uint32) constants.longLimit[sampleRate][granule.maxBandl];
@@ -3006,17 +3007,17 @@ public:
             {
                 for (int i = numDestChannels; --i >= 0;)
                     if (destSamples[i] != nullptr)
-                        zeromem (destSamples[i] + startOffsetInDestBuffer, sizeof (float) * (size_t) numSamples);
+                        zeromem (destSamples[i] + startOffsetInDestBuffer, (size_t) numSamples * sizeof (float));
 
                 return false;
             }
 
             const int numToCopy = jmin (decodedEnd - decodedStart, numSamples);
             float* const* const dst = reinterpret_cast<float**> (destSamples);
-            memcpy (dst[0] + startOffsetInDestBuffer, decoded0 + decodedStart, sizeof (float) * (size_t) numToCopy);
+            memcpy (dst[0] + startOffsetInDestBuffer, decoded0 + decodedStart, (size_t) numToCopy * sizeof (float));
 
             if (numDestChannels > 1 && dst[1] != nullptr)
-                memcpy (dst[1] + startOffsetInDestBuffer, (numChannels < 2 ? decoded0 : decoded1) + decodedStart, sizeof (float) * (size_t) numToCopy);
+                memcpy (dst[1] + startOffsetInDestBuffer, (numChannels < 2 ? decoded0 : decoded1) + decodedStart, (size_t) numToCopy * sizeof (float));
 
             startOffsetInDestBuffer += numToCopy;
             decodedStart += numToCopy;

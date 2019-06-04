@@ -97,6 +97,8 @@ public:
         CallOutBox::launchAsynchronously (colourSelector, getScreenBounds(), nullptr);
     }
 
+    using TextButton::clicked;
+
     void changeListenerCallback (ChangeBroadcaster* source) override
     {
         if (auto* cs = dynamic_cast<ColourSelector*> (source))

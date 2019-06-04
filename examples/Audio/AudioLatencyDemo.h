@@ -175,7 +175,7 @@ public:
             // We need to clear the output buffers, in case they're full of junk..
             for (int i = 0; i < numOutputChannels; ++i)
                 if (outputChannelData[i] != nullptr)
-                    zeromem (outputChannelData[i], sizeof (float) * (size_t) numSamples);
+                    zeromem (outputChannelData[i], (size_t) numSamples * sizeof (float));
         }
     }
 

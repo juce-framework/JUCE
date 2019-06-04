@@ -207,7 +207,7 @@ bool Process::openDocument (const String& fileName, const String& parameters)
         cmdString = cmdLines.joinIntoString (" || ");
     }
 
-    const char* const argv[4] = { "/bin/sh", "-c", cmdString.toUTF8(), 0 };
+    const char* const argv[4] = { "/bin/sh", "-c", cmdString.toUTF8(), nullptr };
 
     auto cpid = fork();
 

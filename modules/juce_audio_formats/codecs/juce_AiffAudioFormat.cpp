@@ -846,7 +846,7 @@ public:
         {
             jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read.
 
-            zeromem (result, sizeof (float) * (size_t) num);
+            zeromem (result, (size_t) num * sizeof (float));
             return;
         }
 
@@ -906,6 +906,8 @@ public:
             default:    jassertfalse; break;
         }
     }
+
+    using AudioFormatReader::readMaxLevels;
 
 private:
     const bool littleEndian;

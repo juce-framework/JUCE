@@ -1052,7 +1052,7 @@ public:
                         for (AudioUnitElement j = 0; j < abl.mNumberBuffers; ++j)
                         {
                             abl.mBuffers[j].mNumberChannels = 1;
-                            abl.mBuffers[j].mDataByteSize = (UInt32) (sizeof (float) * (size_t) numSamples);
+                            abl.mBuffers[j].mDataByteSize = (UInt32) ((size_t) numSamples * sizeof (float));
                             abl.mBuffers[j].mData = buffer.getWritePointer (chIdx++);
                         }
                     }

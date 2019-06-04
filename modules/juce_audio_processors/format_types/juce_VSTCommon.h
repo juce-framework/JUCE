@@ -195,8 +195,8 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
 
         Vst2::VstSpeakerArrangement* allocate (int numChannels)
         {
-            auto arrangementSize = sizeof (Vst2::VstSpeakerArrangement)
-                                     + sizeof (Vst2::VstSpeakerProperties) * static_cast<size_t> (jmax (8, numChannels) - 8);
+            auto arrangementSize = (size_t) (jmax (8, numChannels) - 8) * sizeof (Vst2::VstSpeakerProperties)
+                                    + sizeof (Vst2::VstSpeakerArrangement);
 
             storage.malloc (1, arrangementSize);
             return storage.get();

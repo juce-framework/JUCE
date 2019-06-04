@@ -219,13 +219,13 @@ namespace XSHMHelpers
                     zerostruct (segmentInfo);
 
                     if (auto* xImage = XShmCreateImage (display, DefaultVisual (display, DefaultScreen (display)),
-                                                        24, ZPixmap, 0, &segmentInfo, 50, 50))
+                                                        24, ZPixmap, nullptr, &segmentInfo, 50, 50))
                     {
                         if ((segmentInfo.shmid = shmget (IPC_PRIVATE,
                                                          (size_t) (xImage->bytes_per_line * xImage->height),
                                                          IPC_CREAT | 0777)) >= 0)
                         {
-                            segmentInfo.shmaddr = (char*) shmat (segmentInfo.shmid, 0, 0);
+                            segmentInfo.shmaddr = (char*) shmat (segmentInfo.shmid, nullptr, 0);
 
                             if (segmentInfo.shmaddr != (void*) -1)
                             {
@@ -248,7 +248,7 @@ namespace XSHMHelpers
                             shmdt (segmentInfo.shmaddr);
                         }
 
-                        shmctl (segmentInfo.shmid, IPC_RMID, 0);
+                        shmctl (segmentInfo.shmid, IPC_RMID, nullptr);
 
                         XSetErrorHandler (oldHandler);
                         if (trappedErrorCode != 0)
@@ -515,7 +515,7 @@ public:
             segmentInfo.shmaddr = (char *) -1;
             segmentInfo.readOnly = False;
 
-            xImage = XShmCreateImage (display, visual, imageDepth, ZPixmap, 0,
+            xImage = XShmCreateImage (display, visual, imageDepth, ZPixmap, nullptr,
                                       &segmentInfo, (unsigned int) w, (unsigned int) h);
 
             if (xImage != nullptr)
@@ -526,7 +526,7 @@ public:
                 {
                     if (segmentInfo.shmid != -1)
                     {
-                        segmentInfo.shmaddr = (char*) shmat (segmentInfo.shmid, 0, 0);
+                        segmentInfo.shmaddr = (char*) shmat (segmentInfo.shmid, nullptr, 0);
 
                         if (segmentInfo.shmaddr != (void*) -1)
                         {
@@ -542,7 +542,7 @@ public:
                         }
                         else
                         {
-                            shmctl (segmentInfo.shmid, IPC_RMID, 0);
+                            shmctl (segmentInfo.shmid, IPC_RMID, nullptr);
                         }
                     }
                 }
@@ -610,7 +610,7 @@ public:
             XDestroyImage (xImage);
 
             shmdt (segmentInfo.shmaddr);
-            shmctl (segmentInfo.shmid, IPC_RMID, 0);
+            shmctl (segmentInfo.shmid, IPC_RMID, nullptr);
         }
         else
        #endif
@@ -989,7 +989,7 @@ namespace PixmapHelpers
         Pixmap pixmap = XCreatePixmap (display, DefaultRootWindow (display),
                                        width, height, 24);
 
-        GC gc = XCreateGC (display, pixmap, 0, 0);
+        GC gc = XCreateGC (display, pixmap, 0, nullptr);
         XPutImage (display, pixmap, gc, ximage, 0, 0, 0, 0, width, height);
         XFreeGC (display, gc);
 
@@ -1252,10 +1252,14 @@ public:
         return relativePosition + bounds.getPosition().toFloat();
     }
 
+    using ComponentPeer::localToGlobal;
+
     Point<float> globalToLocal (Point<float> screenPosition) override
     {
         return screenPosition - bounds.getPosition().toFloat();
     }
+
+    using ComponentPeer::globalToLocal;
 
     void setAlpha (float /* newAlpha */) override
     {
@@ -1662,9 +1666,9 @@ public:
             ScopedXLock xlock (display);
             updateKeyStates ((int) keyEvent.keycode, true);
 
-            String oldLocale (::setlocale (LC_ALL, 0));
+            String oldLocale (::setlocale (LC_ALL, nullptr));
             ::setlocale (LC_ALL, "");
-            XLookupString (&keyEvent, utf8, sizeof (utf8), &sym, 0);
+            XLookupString (&keyEvent, utf8, sizeof (utf8), &sym, nullptr);
 
             if (oldLocale.isNotEmpty())
                 ::setlocale (LC_ALL, oldLocale.toRawUTF8());
@@ -2230,7 +2234,7 @@ private:
                 XShmSegmentInfo segmentinfo;
 
                 auto testImage = XShmCreateImage (display, DefaultVisual (display, DefaultScreen (display)),
-                                                  24, ZPixmap, 0, &segmentinfo, 64, 64);
+                                                  24, ZPixmap, nullptr, &segmentinfo, 64, 64);
 
                 useARGBImagesForRendering = (testImage->bits_per_pixel == 32);
                 XDestroyImage (testImage);
@@ -3180,12 +3184,12 @@ private:
                 for (;;)
                 {
                     GetXProperty prop (display, evt.xany.window, evt.xselection.property,
-                                       dropData.getSize() / 4, 65536, false, AnyPropertyType);
+                                       (long) (dropData.getSize() / 4), 65536, false, AnyPropertyType);
 
                     if (! prop.success)
                         break;
 
-                    dropData.append (prop.data, prop.numItems * (size_t) prop.actualFormat / 8);
+                    dropData.append (prop.data, (size_t) (prop.actualFormat / 8) * prop.numItems);
 
                     if (prop.bytesLeft <= 0)
                         break;
@@ -3337,7 +3341,7 @@ private:
 
     void initialisePointerMap()
     {
-        const int numButtons = XGetPointerMapping (display, 0, 0);
+        const int numButtons = XGetPointerMapping (display, nullptr, 0);
         pointerMap[2] = pointerMap[3] = pointerMap[4] = Keys::NoButton;
 
         if (numButtons == 2)
