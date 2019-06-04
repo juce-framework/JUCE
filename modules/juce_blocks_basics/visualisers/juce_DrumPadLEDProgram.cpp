@@ -102,9 +102,9 @@ void DrumPadGridProgram::setGridFills (int numColumns, int numRows, const Array<
         const uint32 colourOffsetBytes = byteOffset + colours0_byte + i * colourSizeBytes;
         const uint32 colourOffsetBits  = colourOffsetBytes * 8;
 
-        block.setDataBits (colourOffsetBits,      5, fill.colour.getRed()   >> 3);
-        block.setDataBits (colourOffsetBits + 5,  6, fill.colour.getGreen() >> 2);
-        block.setDataBits (colourOffsetBits + 11, 5, fill.colour.getBlue()  >> 3);
+        block.setDataBits (colourOffsetBits,      5, (uint32) (fill.colour.getRed()   >> 3));
+        block.setDataBits (colourOffsetBits + 5,  6, (uint32) (fill.colour.getGreen() >> 2));
+        block.setDataBits (colourOffsetBits + 11, 5, (uint32) (fill.colour.getBlue()  >> 3));
 
         block.setDataByte (byteOffset + fillTypes0_byte + i, static_cast<uint8> (fill.fillType));
 

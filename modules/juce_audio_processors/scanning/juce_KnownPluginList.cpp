@@ -105,9 +105,9 @@ void KnownPluginList::removeType (const PluginDescription& type)
     {
         ScopedLock lock (typesArrayLock);
 
-        for (auto& desc : types)
-            if (desc.isDuplicateOf (type))
-                types.remove (&desc);
+        for (int i = types.size(); --i >= 0;)
+            if (types.getUnchecked (i).isDuplicateOf (type))
+                types.remove (i);
     }
 
     sendChangeMessage();

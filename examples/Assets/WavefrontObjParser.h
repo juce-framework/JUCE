@@ -243,7 +243,7 @@ private:
     };
 
     static Shape* parseFaceGroup (const Mesh& srcMesh,
-                                  const Array<Face>& faceGroup,
+                                  Array<Face>& faceGroup,
                                   const Material& material,
                                   const String& name)
     {

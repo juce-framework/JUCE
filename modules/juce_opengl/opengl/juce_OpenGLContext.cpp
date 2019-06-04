@@ -702,6 +702,8 @@ public:
         }
     }
 
+    using ComponentMovementWatcher::componentMovedOrResized;
+
     void componentPeerChanged() override
     {
         detach();
@@ -724,6 +726,8 @@ public:
             detach();
         }
     }
+
+    using ComponentMovementWatcher::componentVisibilityChanged;
 
    #if JUCE_DEBUG || JUCE_LOG_ASSERTIONS
     void componentBeingDeleted (Component& c) override

@@ -958,7 +958,7 @@ private:
                 {
                     auto vstParamID = audioProcessor->getVSTParamIDForIndex (i);
                     auto* juceParam = audioProcessor->getParamForVSTParamID (vstParamID);
-                    auto* parameterGroup = pluginInstance->parameterTree.getGroupsForParameter (juceParam).getLast();
+                    auto* parameterGroup = pluginInstance->getParameterTree().getGroupsForParameter (juceParam).getLast();
                     auto unitID = JuceAudioProcessor::getUnitID (parameterGroup);
 
                     parameters.addParameter (new Param (*this, *juceParam, vstParamID, unitID,
@@ -1267,8 +1267,9 @@ private:
         tresult PLUGIN_API setContentScaleFactor (Steinberg::IPlugViewContentScaleSupport::ScaleFactor factor) override
         {
            #if ! JUCE_MAC
-            // Cubase 10 doesn't support non-integer scale factors...
-            if (getHostType().type == PluginHostType::SteinbergCubase10)
+            auto hostType = getHostType().type;
+
+            if (hostType == PluginHostType::SteinbergCubase10 || hostType == PluginHostType::FruityLoops)
             {
                 if (component.get() != nullptr)
                     if (auto* peer = component->getPeer())

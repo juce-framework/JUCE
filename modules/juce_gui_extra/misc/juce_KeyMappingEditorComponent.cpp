@@ -82,6 +82,8 @@ public:
         }
     }
 
+    using Button::clicked;
+
     void fitToContent (const int h) noexcept
     {
         if (keyNum < 0)

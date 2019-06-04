@@ -170,6 +170,8 @@ public:
         buffer.applyGain (0.8f);
     }
 
+    using InternalPlugin::processBlock;
+
 private:
     //==============================================================================
     class SineWaveSound : public SynthesiserSound
@@ -282,6 +284,8 @@ private:
             }
         }
 
+        using SynthesiserVoice::renderNextBlock;
+
     private:
         double currentAngle, angleDelta, level, tailOff;
     };
@@ -336,6 +340,8 @@ public:
         for (int ch = 2; ch < numChannels; ++ch)
             buffer.clear (ch, 0, buffer.getNumSamples());
     }
+
+    using InternalPlugin::processBlock;
 
 private:
     Reverb reverb;

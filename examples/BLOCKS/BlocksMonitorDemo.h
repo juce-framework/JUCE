@@ -150,7 +150,7 @@ public:
             { CB::down }
         };
 
-        for (auto i = 0; i < numElementsInArray (map); ++i)
+        for (int i = 0; i < numElementsInArray (map); ++i)
             if (map[i].contains (f))
                 return i;
 

@@ -296,7 +296,7 @@ void ignoreUnused (Types&&...) noexcept {}
     int numElements = numElementsInArray (myArray) // returns 3
     @endcode
 */
-template <typename Type, int N>
+template <typename Type, size_t N>
 JUCE_CONSTEXPR int numElementsInArray (Type (&)[N]) noexcept     { return N; }
 
 //==============================================================================

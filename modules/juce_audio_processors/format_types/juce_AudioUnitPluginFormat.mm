@@ -1052,7 +1052,7 @@ public:
                         for (AudioUnitElement j = 0; j < abl.mNumberBuffers; ++j)
                         {
                             abl.mBuffers[j].mNumberChannels = 1;
-                            abl.mBuffers[j].mDataByteSize = (UInt32) (sizeof (float) * (size_t) numSamples);
+                            abl.mBuffers[j].mDataByteSize = (UInt32) ((size_t) numSamples * sizeof (float));
                             abl.mBuffers[j].mData = buffer.getWritePointer (chIdx++);
                         }
                     }
@@ -1351,9 +1351,8 @@ public:
 
     void refreshParameterList() override
     {
-        managedParameters.clear (false);
         paramIDToIndex.clear();
-        AudioProcessorParameterGroup parameterGroups ({}, {}, {});
+        AudioProcessorParameterGroup newParameterTree;
 
         if (audioUnit != nullptr)
         {
@@ -1440,7 +1439,6 @@ public:
                                                                    isBoolean,
                                                                    label,
                                                                    (info.flags & kAudioUnitParameterFlag_ValuesHaveStrings) != 0);
-                        addParameterInternal (parameter);
 
                         if (info.flags & kAudioUnitParameterFlag_HasClump)
                         {
@@ -1471,7 +1469,7 @@ public:
                                                                                              getClumpName(), String());
                                 group->addChild (std::unique_ptr<AudioProcessorParameter> (parameter));
                                 groupIDMap[info.clumpID] = group.get();
-                                parameterGroups.addChild (std::move (group));
+                                newParameterTree.addChild (std::move (group));
                             }
                             else
                             {
@@ -1480,14 +1478,14 @@ public:
                         }
                         else
                         {
-                            parameterGroups.addChild (std::unique_ptr<AudioProcessorParameter> (parameter));
+                            newParameterTree.addChild (std::unique_ptr<AudioProcessorParameter> (parameter));
                         }
                     }
                 }
             }
         }
 
-        parameterTree.swapWith (parameterGroups);
+        setParameterTree (std::move (newParameterTree));
 
         UInt32 propertySize = 0;
         Boolean writable = false;

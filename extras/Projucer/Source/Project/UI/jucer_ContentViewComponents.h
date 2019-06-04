@@ -185,6 +185,8 @@ public:
         CallOutBox::launchAsynchronously (w, getScreenBounds(), nullptr);
     }
 
+    using Button::clicked;
+
     void setInfoToDisplay (const String& infoToDisplay)
     {
         if (infoToDisplay.isNotEmpty())

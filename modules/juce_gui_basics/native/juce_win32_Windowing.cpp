@@ -1415,6 +1415,8 @@ public:
 
     Point<float> localToGlobal (Point<float> relativePosition) override  { return relativePosition + getScreenPosition().toFloat(); }
     Point<float> globalToLocal (Point<float> screenPosition) override    { return screenPosition   - getScreenPosition().toFloat(); }
+    using ComponentPeer::localToGlobal;
+    using ComponentPeer::globalToLocal;
 
     void setAlpha (float newAlpha) override
     {
@@ -4457,7 +4459,7 @@ void Desktop::allowedOrientationsChanged() {}
 //==============================================================================
 static const Displays::Display* getCurrentDisplayFromScaleFactor (HWND hwnd)
 {
-    Array<Displays::Display*> candidateDisplays;
+    Array<const Displays::Display*> candidateDisplays;
     double scaleToLookFor = -1.0;
 
     if (auto* peer = HWNDComponentPeer::getOwnerOfWindow (hwnd))
@@ -4483,7 +4485,7 @@ static const Displays::Display* getCurrentDisplayFromScaleFactor (HWND hwnd)
         else
             bounds = Desktop::getInstance().getDisplays().physicalToLogical (rectangleFromRECT (getWindowRect (hwnd)));
 
-        Displays::Display* retVal = nullptr;
+        const Displays::Display* retVal = nullptr;
         int maxArea = -1;
 
         for (auto* d : candidateDisplays)

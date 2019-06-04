@@ -1196,7 +1196,7 @@ void BigInteger::loadFromMemoryBlock (const MemoryBlock& data)
     auto* values = ensureSize (numInts);
 
     for (int i = 0; i < (int) numInts - 1; ++i)
-        values[i] = (uint32) ByteOrder::littleEndianInt (addBytesToPointer (data.getData(), sizeof (uint32) * (size_t) i));
+        values[i] = (uint32) ByteOrder::littleEndianInt (addBytesToPointer (data.getData(), (size_t) i * sizeof (uint32)));
 
     values[numInts - 1] = 0;
 
@@ -1240,7 +1240,7 @@ void writeLittleEndianBitsInBuffer (void* buffer, uint32 startBit, uint32 numBit
     }
 
     if (numBits > 0)
-        *data = (uint8) ((*data & (0xff << numBits)) | value);
+        *data = (uint8) ((*data & (uint32) (0xff << numBits)) | value);
 }
 
 uint32 readLittleEndianBitsInBuffer (const void* buffer, uint32 startBit, uint32 numBits) noexcept
@@ -1255,7 +1255,7 @@ uint32 readLittleEndianBitsInBuffer (const void* buffer, uint32 startBit, uint32
     if (const uint32 offset = (startBit & 7))
     {
         const uint32 bitsInByte = 8 - offset;
-        result = (*data >> offset);
+        result = (uint32) (*data >> offset);
 
         if (bitsInByte >= numBits)
             return result & ((1u << numBits) - 1u);

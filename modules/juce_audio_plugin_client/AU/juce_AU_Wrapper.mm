@@ -866,9 +866,14 @@ public:
 
     //==============================================================================
     // When parameters are discrete we need to use integer values.
-    float getMaximumParameterValue (AudioProcessorParameter* param)
+    float getMaximumParameterValue (AudioProcessorParameter* juceParam)
     {
-        return param->isDiscrete() && (! forceUseLegacyParamIDs) ? (float) (param->getNumSteps() - 1) : 1.0f;
+       #if JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
+        ignoreUnused (juceParam);
+        return 1.0f;
+       #else
+        return juceParam->isDiscrete() ? (float) (juceParam->getNumSteps() - 1) : 1.0f;
+       #endif
     }
 
     ComponentResult GetParameterInfo (AudioUnitScope inScope,
@@ -912,7 +917,7 @@ public:
                 }
 
                 // Is this a meter?
-                if (((param->getCategory() & 0xffff0000) >> 16) == 2)
+                if ((((unsigned int) param->getCategory() & 0xffff0000) >> 16) == 2)
                 {
                     outParameterInfo.flags &= ~kAudioUnitParameterFlag_IsWritable;
                     outParameterInfo.flags |= kAudioUnitParameterFlag_MeterReadOnly | kAudioUnitParameterFlag_DisplayLogarithmic;

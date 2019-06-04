@@ -77,7 +77,6 @@ public:
         createBaseExporterProperties (props);
         createToolchainExporterProperties (props);
         createManifestExporterProperties (props);
-        createLibraryModuleExporterProperties (props);
         createCodeSigningExporterProperties (props);
         createOtherExporterProperties (props);
     }
@@ -96,13 +95,12 @@ public:
     }
 
     //==============================================================================
-    ValueWithDefault androidJavaLibs, androidAdditionalJavaFolders, androidAdditionalResourceFolders, androidRepositories, androidDependencies, androidCustomAppBuildGradleContent,
+    ValueWithDefault androidJavaLibs, androidAdditionalJavaFolders, androidAdditionalResourceFolders, androidProjectRepositories, androidRepositories, androidDependencies, androidCustomAppBuildGradleContent,
                      androidScreenOrientation, androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements, androidGradleSettingsContent, androidVersionCode,
-                     androidMinimumSDK, androidTargetSDK, androidTheme, androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder,
-                     androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded, androidBluetoothNeeded, androidExternalReadPermission,
-                     androidExternalWritePermission, androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions,
-                     androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
-                     androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion;
+                     androidMinimumSDK, androidTargetSDK, androidTheme, androidExtraAssetsFolder, androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded,
+                     androidBluetoothNeeded, androidExternalReadPermission, androidExternalWritePermission, androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions,
+                     androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore, androidKeyStorePass, androidKeyAlias, androidKeyAliasPass,
+                     gradleVersion, gradleToolchain, androidPluginVersion;
 
     //==============================================================================
     AndroidProjectExporter (Project& p, const ValueTree& t)
@@ -110,6 +108,7 @@ public:
           androidJavaLibs                      (settings, Ids::androidJavaLibs,                      getUndoManager()),
           androidAdditionalJavaFolders         (settings, Ids::androidAdditionalJavaFolders,         getUndoManager()),
           androidAdditionalResourceFolders     (settings, Ids::androidAdditionalResourceFolders,     getUndoManager()),
+          androidProjectRepositories           (settings, Ids::androidProjectRepositories,           getUndoManager(), "google()\njcenter()"),
           androidRepositories                  (settings, Ids::androidRepositories,                  getUndoManager()),
           androidDependencies                  (settings, Ids::androidDependencies,                  getUndoManager()),
           androidCustomAppBuildGradleContent   (settings, Ids::androidCustomAppBuildGradleContent,   getUndoManager()),
@@ -122,8 +121,6 @@ public:
           androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "16"),
           androidTargetSDK                     (settings, Ids::androidTargetSDK,                     getUndoManager(), "28"),
           androidTheme                         (settings, Ids::androidTheme,                         getUndoManager()),
-          androidSharedLibraries               (settings, Ids::androidSharedLibraries,               getUndoManager()),
-          androidStaticLibraries               (settings, Ids::androidStaticLibraries,               getUndoManager()),
           androidExtraAssetsFolder             (settings, Ids::androidExtraAssetsFolder,             getUndoManager()),
           androidOboeRepositoryPath            (settings, Ids::androidOboeRepositoryPath,            getUndoManager()),
           androidInternetNeeded                (settings, Ids::androidInternetNeeded,                getUndoManager(), true),
@@ -165,15 +162,6 @@ public:
                                                 { "clang", "gcc" },
                                                 { "clang", "gcc" }),
                    "The toolchain that gradle should invoke for NDK compilation (variable model.android.ndk.tooclhain in app/build.gradle)");
-    }
-
-    void createLibraryModuleExporterProperties (PropertyListBuilder& props)
-    {
-        props.add (new TextPropertyComponent (androidStaticLibraries, "Import Static Library Modules", 8192, true),
-                   "Comma or whitespace delimited list of static libraries (.a) defined in NDK_MODULE_PATH.");
-
-        props.add (new TextPropertyComponent (androidSharedLibraries, "Import Shared Library Modules", 8192, true),
-                   "Comma or whitespace delimited list of shared libraries (.so) defined in NDK_MODULE_PATH.");
     }
 
     //==============================================================================
@@ -580,18 +568,7 @@ private:
         mo << "}"                                                                                      << newLine;
         mo << ""                                                                                       << newLine;
         mo << "allprojects {"                                                                          << newLine;
-        mo << "   repositories {"                                                                      << newLine;
-        mo << "       google()"                                                                        << newLine;
-        mo << "       jcenter()"                                                                       << newLine;
-
-        if (androidEnableRemoteNotifications.get())
-        {
-            mo << "       maven {"                                                                     << newLine;
-            mo << "           url \"https://maven.google.com\""                                        << newLine;
-            mo << "       }"                                                                           << newLine;
-        }
-
-        mo << "   }"                                                                                   << newLine;
+        mo << getAndroidProjectRepositories();
         mo << "}"                                                                                      << newLine;
 
         return mo.toString();
@@ -783,6 +760,26 @@ private:
         }
 
         mo << "    }" << newLine;
+
+        return mo.toString();
+    }
+
+    String getAndroidProjectRepositories() const
+    {
+        MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
+
+        auto repositories = StringArray::fromLines (androidProjectRepositories.get().toString());
+
+        if (androidEnableRemoteNotifications.get())
+            repositories.add ("maven { url \"https://maven.google.com\" }");
+
+        mo << "   repositories {"                << newLine;
+
+        for (auto& r : repositories)
+            mo << "       " << r << newLine;
+
+        mo << "   }"                             << newLine;
 
         return mo.toString();
     }
@@ -984,6 +981,10 @@ private:
                    "Java libs (JAR files) (one per line). These will be copied to app/libs folder and \"implementation files\" "
                    "dependency will be automatically added to module \"dependencies\" section for each library, so do "
                    "not add the dependency yourself.");
+
+        props.add (new TextPropertyComponent (androidProjectRepositories, "Project Repositories", 32768, true),
+                   "Custom project repositories (one per line). These will be used in project-level gradle file "
+                   "\"allprojects { repositories {\" section instead of default ones.");
 
         props.add (new TextPropertyComponent (androidRepositories, "Module Repositories", 32768, true),
                    "Module repositories (one per line). These will be added to module-level gradle file repositories section. ");

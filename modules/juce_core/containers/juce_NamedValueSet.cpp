@@ -147,7 +147,16 @@ var NamedValueSet::getWithDefault (const Identifier& name, const var& defaultRet
     return defaultReturnValue;
 }
 
-var* NamedValueSet::getVarPointer (const Identifier& name) const noexcept
+var* NamedValueSet::getVarPointer (const Identifier& name) noexcept
+{
+    for (auto& i : values)
+        if (i.name == name)
+            return &(i.value);
+
+    return {};
+}
+
+const var* NamedValueSet::getVarPointer (const Identifier& name) const noexcept
 {
     for (auto& i : values)
         if (i.name == name)
@@ -236,7 +245,15 @@ const var& NamedValueSet::getValueAt (const int index) const noexcept
     return getNullVarRef();
 }
 
-var* NamedValueSet::getVarPointerAt (int index) const noexcept
+var* NamedValueSet::getVarPointerAt (int index) noexcept
+{
+    if (isPositiveAndBelow (index, values.size()))
+        return &(values.getReference (index).value);
+
+    return {};
+}
+
+const var* NamedValueSet::getVarPointerAt (int index) const noexcept
 {
     if (isPositiveAndBelow (index, values.size()))
         return &(values.getReference (index).value);

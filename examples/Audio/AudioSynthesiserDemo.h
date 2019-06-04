@@ -149,6 +149,8 @@ struct SineWaveVoice  : public SynthesiserVoice
         }
     }
 
+    using SynthesiserVoice::renderNextBlock;
+
 private:
     double currentAngle = 0.0, angleDelta = 0.0, level = 0.0, tailOff = 0.0;
 };

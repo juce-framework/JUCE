@@ -198,7 +198,15 @@ public:
     /** Returns a pointer to the first element in the array.
         This method is provided for compatibility with standard C++ iteration mechanisms.
     */
-    inline ObjectClass** begin() const noexcept
+    inline ObjectClass** begin() noexcept
+    {
+        return values.begin();
+    }
+
+    /** Returns a pointer to the first element in the array.
+        This method is provided for compatibility with standard C++ iteration mechanisms.
+    */
+    inline ObjectClass* const* begin() const noexcept
     {
         return values.begin();
     }
@@ -206,7 +214,15 @@ public:
     /** Returns a pointer to the element which follows the last element in the array.
         This method is provided for compatibility with standard C++ iteration mechanisms.
     */
-    inline ObjectClass** end() const noexcept
+    inline ObjectClass** end() noexcept
+    {
+        return values.end();
+    }
+
+    /** Returns a pointer to the element which follows the last element in the array.
+        This method is provided for compatibility with standard C++ iteration mechanisms.
+    */
+    inline ObjectClass* const* end() const noexcept
     {
         return values.end();
     }
@@ -228,7 +244,7 @@ public:
     int indexOf (const ObjectClass* objectToLookFor) const noexcept
     {
         const ScopedLockType lock (getLock());
-        auto** e = values.begin();
+        auto* e = values.begin();
 
         for (; e != values.end(); ++e)
             if (objectToLookFor == *e)
@@ -245,7 +261,7 @@ public:
     bool contains (const ObjectClass* objectToLookFor) const noexcept
     {
         const ScopedLockType lock (getLock());
-        auto** e = values.begin();
+        auto* e = values.begin();
 
         for (; e != values.end(); ++e)
             if (objectToLookFor == *e)
@@ -795,7 +811,7 @@ public:
     */
     template <class ElementComparator>
     void sort (ElementComparator& comparator,
-               bool retainOrderOfEquivalentItems = false) const noexcept
+               bool retainOrderOfEquivalentItems = false) noexcept
     {
         // If you pass in an object with a static compareElements() method, this
         // avoids getting warning messages about the parameter being unused

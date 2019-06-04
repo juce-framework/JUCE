@@ -61,7 +61,7 @@ public:
             events->numEvents = 0;
     }
 
-    void addEvent (const void* const midiData, const int numBytes, const int frameOffset)
+    void addEvent (const void* const midiData, int numBytes, int frameOffset)
     {
         ensureSize (numEventsUsed + 1);
 
@@ -137,7 +137,7 @@ public:
         {
             numEventsNeeded = (numEventsNeeded + 32) & ~31;
 
-            const size_t size = 20 + sizeof (Vst2::VstEvent*) * (size_t) numEventsNeeded;
+            const size_t size = 20 + (size_t) numEventsNeeded * sizeof (Vst2::VstEvent*);
 
             if (events == nullptr)
                 events.calloc (size, 1);

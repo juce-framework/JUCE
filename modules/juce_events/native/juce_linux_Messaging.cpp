@@ -188,7 +188,7 @@ namespace LinuxErrorHandling
         saction.sa_handler = keyboardBreakSignalHandler;
         saction.sa_mask = maskSet;
         saction.sa_flags = 0;
-        sigaction (SIGINT, &saction, 0);
+        sigaction (SIGINT, &saction, nullptr);
     }
 }
 
