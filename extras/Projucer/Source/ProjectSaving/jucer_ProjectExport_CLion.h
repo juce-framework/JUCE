@@ -57,10 +57,10 @@ public:
     static const char* getName()                { return "CLion (beta)"; }
     static const char* getValueTreeTypeName()   { return "CLION"; }
 
-    static CLionProjectExporter* createForSettings (Project& project, const ValueTree& settings)
+    static CLionProjectExporter* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
-        if (settings.hasType (getValueTreeTypeName()))
-            return new CLionProjectExporter (project, settings);
+        if (settingsToUse.hasType (getValueTreeTypeName()))
+            return new CLionProjectExporter (projectToUse, settingsToUse);
 
         return nullptr;
     }

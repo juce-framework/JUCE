@@ -693,10 +693,10 @@ private:
 class LiveBuildCodeEditorDocument  : public SourceCodeDocument
 {
 public:
-    LiveBuildCodeEditorDocument (Project* project, const File& file)
-        : SourceCodeDocument (project, file)
+    LiveBuildCodeEditorDocument (Project* projectToUse, const File& file)
+        : SourceCodeDocument (projectToUse, file)
     {
-        if (project != nullptr)
+        if (projectToUse != nullptr)
             if (CompileEngineChildProcess::Ptr childProcess = getChildProcess())
                 childProcess->editorOpened (file, getCodeDocument());
     }

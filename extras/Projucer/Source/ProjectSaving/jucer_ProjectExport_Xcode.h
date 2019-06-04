@@ -126,10 +126,10 @@ public:
         targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderForExporter (getValueTreeTypeName (isIOS)));
     }
 
-    static XcodeProjectExporter* createForSettings (Project& project, const ValueTree& settings)
+    static XcodeProjectExporter* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
-        if (settings.hasType (getValueTreeTypeName (false)))  return new XcodeProjectExporter (project, settings, false);
-        if (settings.hasType (getValueTreeTypeName (true)))   return new XcodeProjectExporter (project, settings, true);
+        if (settingsToUse.hasType (getValueTreeTypeName (false)))  return new XcodeProjectExporter (projectToUse, settingsToUse, false);
+        if (settingsToUse.hasType (getValueTreeTypeName (true)))   return new XcodeProjectExporter (projectToUse, settingsToUse, true);
 
         return nullptr;
     }
