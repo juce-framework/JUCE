@@ -586,7 +586,8 @@ void LADSPAPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& res
     desc.fileOrIdentifier = fileOrIdentifier;
     desc.uid = 0;
 
-    std::unique_ptr<LADSPAPluginInstance> instance (dynamic_cast<LADSPAPluginInstance*> (createInstanceFromDescription (desc, 44100.0, 512)));
+    auto createdInstance = createInstanceFromDescription (desc, 44100.0, 512);
+    auto instance = dynamic_cast<LADSPAPluginInstance*> (createdInstance.get());
 
     if (instance == nullptr || ! instance->isValid())
         return;
@@ -616,7 +617,7 @@ void LADSPAPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& res
 
 void LADSPAPluginFormat::createPluginInstance (const PluginDescription& desc,
                                                double sampleRate, int blockSize,
-                                               void* userData, PluginCreationCallback callback)
+                                               PluginCreationCallback callback)
 {
     std::unique_ptr<LADSPAPluginInstance> result;
 
@@ -647,9 +648,9 @@ void LADSPAPluginFormat::createPluginInstance (const PluginDescription& desc,
     String errorMsg;
 
     if (result == nullptr)
-        errorMsg = String (NEEDS_TRANS ("Unable to load XXX plug-in file")).replace ("XXX", "LADSPA");
+        errorMsg = TRANS ("Unable to load XXX plug-in file").replace ("XXX", "LADSPA");
 
-    callback (userData, result.release(), errorMsg);
+    callback (std::move (result), errorMsg);
 }
 
 bool LADSPAPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept

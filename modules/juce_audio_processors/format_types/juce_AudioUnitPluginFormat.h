@@ -57,7 +57,7 @@ private:
     //==============================================================================
     void createPluginInstance (const PluginDescription&,
                                double initialSampleRate, int initialBufferSize,
-                               void* userData, PluginCreationCallback) override;
+                               PluginCreationCallback) override;
 
     bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept override;
 

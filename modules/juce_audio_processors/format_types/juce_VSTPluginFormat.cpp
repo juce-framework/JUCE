@@ -3498,11 +3498,11 @@ static pointer_sized_int VSTCALLBACK audioMaster (Vst2::AEffect* effect, int32 o
 VSTPluginFormat::VSTPluginFormat() {}
 VSTPluginFormat::~VSTPluginFormat() {}
 
-static VSTPluginInstance* createAndUpdateDesc (VSTPluginFormat& format, PluginDescription& desc)
+static std::unique_ptr<VSTPluginInstance> createAndUpdateDesc (VSTPluginFormat& format, PluginDescription& desc)
 {
-    if (auto* p = format.createInstanceFromDescription (desc, 44100.0, 512))
+    if (auto p = format.createInstanceFromDescription (desc, 44100.0, 512))
     {
-        if (auto* instance = dynamic_cast<VSTPluginInstance*> (p))
+        if (auto instance = dynamic_cast<VSTPluginInstance*> (p.release()))
         {
            #if JUCE_MAC
             if (instance->vstModule->resFileId != 0)
@@ -3510,13 +3510,13 @@ static VSTPluginInstance* createAndUpdateDesc (VSTPluginFormat& format, PluginDe
            #endif
 
             instance->fillInPluginDescription (desc);
-            return instance;
+            return std::unique_ptr<VSTPluginInstance> (instance);
         }
 
         jassertfalse;
     }
 
-    return nullptr;
+    return {};
 }
 
 void VSTPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& results,
@@ -3529,7 +3529,7 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& result
     desc.fileOrIdentifier = fileOrIdentifier;
     desc.uid = 0;
 
-    std::unique_ptr<VSTPluginInstance> instance (createAndUpdateDesc (*this, desc));
+    auto instance = createAndUpdateDesc (*this, desc);
 
     if (instance == nullptr)
         return;
@@ -3574,7 +3574,7 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& result
 
 void VSTPluginFormat::createPluginInstance (const PluginDescription& desc,
                                             double sampleRate, int blockSize,
-                                            void* userData, PluginCreationCallback callback)
+                                            PluginCreationCallback callback)
 {
     std::unique_ptr<VSTPluginInstance> result;
 
@@ -3601,9 +3601,9 @@ void VSTPluginFormat::createPluginInstance (const PluginDescription& desc,
     String errorMsg;
 
     if (result == nullptr)
-        errorMsg = String (NEEDS_TRANS ("Unable to load XXX plug-in file")).replace ("XXX", "VST-2");
+        errorMsg = TRANS ("Unable to load XXX plug-in file").replace ("XXX", "VST-2");
 
-    callback (userData, result.release(), errorMsg);
+    callback (std::move (result), errorMsg);
 }
 
 bool VSTPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept
