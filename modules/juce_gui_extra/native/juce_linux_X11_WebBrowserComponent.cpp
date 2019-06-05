@@ -612,7 +612,7 @@ private:
             int result = 0;
 
             while (result == 0 || (result < 0 && errno == EINTR))
-                result = select (max_fd + 1, &set, NULL, NULL, NULL);
+                result = select (max_fd + 1, &set, nullptr, nullptr, nullptr);
 
             if (result < 0)
                 break;

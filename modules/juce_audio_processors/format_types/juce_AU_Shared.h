@@ -304,11 +304,11 @@ struct AudioUnitHelpers
         }
     }
 
-    template <int numLayouts>
+    template <size_t numLayouts>
     static bool isLayoutSupported (const AudioProcessor& processor,
                                    bool isInput, int busIdx,
                                    int numChannels,
-                                   const short (&channelLayoutList) [(size_t) numLayouts][2],
+                                   const short (&channelLayoutList) [numLayouts][2],
                                    bool hasLayoutMap = true)
     {
         if (const AudioProcessor::Bus* bus = processor.getBus (isInput, busIdx))

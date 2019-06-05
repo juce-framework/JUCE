@@ -763,8 +763,8 @@ public:
         return containsLayout (layouts, layoutListToArray (channelLayoutList));
     }
 
-    template <int numLayouts>
-    static bool containsLayout (const BusesLayout& layouts, const short (&channelLayoutList) [(size_t) numLayouts][2])
+    template <size_t numLayouts>
+    static bool containsLayout (const BusesLayout& layouts, const short (&channelLayoutList) [numLayouts][2])
     {
         return containsLayout (layouts, layoutListToArray (channelLayoutList));
     }
@@ -780,9 +780,9 @@ public:
         }
         @endcode
     */
-    template <int numLayouts>
+    template <size_t numLayouts>
     BusesLayout getNextBestLayoutInLayoutList (const BusesLayout& layouts,
-                                               const short (&channelLayoutList) [(size_t) numLayouts][2])
+                                               const short (&channelLayoutList) [numLayouts][2])
     {
         return getNextBestLayoutInList (layouts, layoutListToArray (channelLayoutList));
     }
@@ -1421,8 +1421,8 @@ private:
         int16 inChannels = 0, outChannels = 0;
     };
 
-    template <int numLayouts>
-    static Array<InOutChannelPair> layoutListToArray (const short (&configuration) [(size_t) numLayouts][2])
+    template <size_t numLayouts>
+    static Array<InOutChannelPair> layoutListToArray (const short (&configuration) [numLayouts][2])
     {
         Array<InOutChannelPair> layouts;
 
