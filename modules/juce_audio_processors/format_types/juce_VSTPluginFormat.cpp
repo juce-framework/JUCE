@@ -36,9 +36,11 @@
  #define __cdecl
 #endif
 
-#if JUCE_CLANG && __has_warning("-Wzero-as-null-pointer-constant")
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+#if JUCE_CLANG
+ #if __has_warning("-Wzero-as-null-pointer-constant")
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+ #endif
 #endif
 
 #if JUCE_GCC
@@ -67,8 +69,10 @@ namespace Vst2
  #pragma warning (disable: 4355) // ("this" used in initialiser list warning)
 #endif
 
-#if JUCE_CLANG && __has_warning("-Wzero-as-null-pointer-constant")
- #pragma clang diagnostic pop
+#if JUCE_CLANG
+ #if __has_warning("-Wzero-as-null-pointer-constant")
+  #pragma clang diagnostic pop
+ #endif
 #endif
 
 #if JUCE_GCC
@@ -2769,6 +2773,7 @@ public:
        #if JUCE_LINUX
         pluginWindow = None;
         display = XWindowSystem::getInstance()->displayRef();
+        ignoreUnused (pluginRefusesToResize, alreadyInside);
 
        #elif JUCE_MAC
         ignoreUnused (recursiveResize, pluginRefusesToResize, alreadyInside);

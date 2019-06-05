@@ -152,7 +152,7 @@ public:
         --insideLADSPACallback;
     }
 
-    ~LADSPAPluginInstance()
+    ~LADSPAPluginInstance() override
     {
         const ScopedLock sl (lock);
 

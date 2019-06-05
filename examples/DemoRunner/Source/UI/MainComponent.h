@@ -35,7 +35,7 @@ class MainComponent    : public Component
 public:
     //==============================================================================
     MainComponent();
-    ~MainComponent();
+    ~MainComponent() override;
 
     //==============================================================================
     void paint (Graphics&) override;

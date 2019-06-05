@@ -109,10 +109,23 @@
    #endif
   #endif
 
+  #if JUCE_CLANG
+   #if __has_warning("-Wzero-as-null-pointer-constant")
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+   #endif
+  #endif
+
   #include <gtk/gtk.h>
 
   #if JUCE_GCC
    #pragma GCC diagnostic pop
+  #endif
+
+  #if JUCE_CLANG
+   #if __has_warning("-Wzero-as-null-pointer-constant")
+    #pragma clang diagnostic pop
+   #endif
   #endif
 
   #include <gtk/gtkx.h>

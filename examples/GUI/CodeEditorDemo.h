@@ -83,7 +83,7 @@ public:
         setSize (500, 500);
     }
 
-    ~CodeEditorDemo()
+    ~CodeEditorDemo() override
     {
         fileChooser.removeListener (this);
     }

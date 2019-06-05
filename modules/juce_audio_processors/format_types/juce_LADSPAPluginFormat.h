@@ -39,7 +39,7 @@ class JUCE_API  LADSPAPluginFormat   : public AudioPluginFormat
 {
 public:
     LADSPAPluginFormat();
-    ~LADSPAPluginFormat();
+    ~LADSPAPluginFormat() override;
 
     //==============================================================================
     String getName() const override                { return "LADSPA"; }

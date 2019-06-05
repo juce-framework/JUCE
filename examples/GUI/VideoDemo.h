@@ -186,7 +186,7 @@ public:
         setSize (500, 500);
     }
 
-    ~VideoDemo()
+    ~VideoDemo() override
     {
         fileTree.removeListener (this);
     }

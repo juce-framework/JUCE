@@ -81,7 +81,7 @@ struct BurgerMenuHeader  : public Component
         addAndMakeVisible (burgerButton);
     }
 
-    ~BurgerMenuHeader()
+    ~BurgerMenuHeader() override
     {
         sidePanel.showOrHide (false);
     }
@@ -167,7 +167,7 @@ public:
         setSize (500, 500);
     }
 
-    ~MenusDemo()
+    ~MenusDemo() override
     {
        #if JUCE_MAC
         MenuBarModel::setMacMainMenu (nullptr);

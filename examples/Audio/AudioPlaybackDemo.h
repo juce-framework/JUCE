@@ -75,7 +75,7 @@ public:
         addAndMakeVisible (currentPositionMarker);
     }
 
-    ~DemoThumbnailComp()
+    ~DemoThumbnailComp() override
     {
         scrollbar.removeListener (this);
         thumbnail.removeChangeListener (this);
@@ -342,7 +342,7 @@ public:
         setSize (500, 500);
     }
 
-    ~AudioPlaybackDemo()
+    ~AudioPlaybackDemo() override
     {
         transportSource  .setSource (nullptr);
         audioSourcePlayer.setSource (nullptr);

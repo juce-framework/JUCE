@@ -151,7 +151,7 @@ public:
         owner.addComponentListener (this);
     }
 
-    ~Pimpl()
+    ~Pimpl() override
     {
         owner.removeComponentListener (this);
         setClient (0, true);
@@ -381,12 +381,16 @@ private:
         if (embedInfo.success && embedInfo.actualFormat == 32
              && embedInfo.numItems >= 2 && embedInfo.data != nullptr)
         {
-            auto* buffer = (long*) embedInfo.data;
+            long version;
+            memcpy (&version, embedInfo.data, sizeof (long));
 
             supportsXembed = true;
-            xembedVersion = jmin ((int) maxXEmbedVersionToSupport, (int) buffer[0]);
+            xembedVersion = jmin ((int) maxXEmbedVersionToSupport, (int) version);
 
-            return ((buffer[1] & XEMBED_MAPPED) != 0);
+            long flags;
+            memcpy (&flags, embedInfo.data + sizeof (long), sizeof (long));
+
+            return ((flags & XEMBED_MAPPED) != 0);
         }
         else
         {

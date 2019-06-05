@@ -192,7 +192,7 @@ public:
         setSize (500, 500);
     }
 
-    ~Box2DDemo()
+    ~Box2DDemo() override
     {
         testsListModel.removeChangeListener (this);
     }

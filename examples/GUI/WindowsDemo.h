@@ -231,7 +231,7 @@ public:
         setSize (250, 250);
     }
 
-    ~WindowsDemo()
+    ~WindowsDemo() override
     {
         if (dialogWindow != nullptr)
         {
