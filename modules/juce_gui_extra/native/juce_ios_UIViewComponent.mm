@@ -41,7 +41,7 @@ public:
             componentPeerChanged();
     }
 
-    ~Pimpl()
+    ~Pimpl() override
     {
         [view removeFromSuperview];
         [view release];

@@ -363,7 +363,7 @@ public:
         setPortraitOrientationEnabled (true);
     }
 
-    ~VideoDemo()
+    ~VideoDemo() override
     {
         curVideoComp->onPlaybackStarted = nullptr;
         curVideoComp->onPlaybackStopped = nullptr;

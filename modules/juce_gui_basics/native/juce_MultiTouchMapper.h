@@ -35,7 +35,7 @@ public:
 
     int getIndexOfTouch (ComponentPeer* peer, IDType touchID)
     {
-        jassert (touchID != 0); // need to rethink this if IDs can be 0!
+        jassert (touchID != nullptr); // need to rethink this if IDs can be 0!
         TouchInfo info {touchID, peer};
 
         int touchIndex = currentTouches.indexOf (info);
@@ -64,7 +64,7 @@ public:
     bool areAnyTouchesActive() const noexcept
     {
         for (auto& t : currentTouches)
-            if (t.touchId != 0)
+            if (t.touchId != nullptr)
                 return true;
 
         return false;
@@ -74,14 +74,14 @@ public:
     {
         for (auto& t : currentTouches)
             if (t.owner == peer)
-                t.touchId = 0;
+                t.touchId = nullptr;
     }
 
 private:
     //==============================================================================
     struct TouchInfo
     {
-        TouchInfo() noexcept  : touchId (0), owner (nullptr) {}
+        TouchInfo() noexcept  : touchId (nullptr), owner (nullptr) {}
         TouchInfo (IDType idToUse, ComponentPeer* peer) noexcept  : touchId (idToUse), owner (peer) {}
 
         TouchInfo (const TouchInfo&) = default;

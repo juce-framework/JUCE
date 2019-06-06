@@ -421,7 +421,7 @@ public:
         enterModalState (true, exitCallback.release(), true);
     }
 
-    ~BluetoothMidiSelectorOverlay()
+    ~BluetoothMidiSelectorOverlay() override
     {
         AndroidBluetoothMidiInterface::startStopScan (false);
     }

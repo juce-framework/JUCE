@@ -297,7 +297,7 @@ public:
 
         const ScopedLock lock (createStreamLock);
 
-        if (stream != 0)
+        if (stream != nullptr)
         {
             stream.callVoidMethod (HTTPStream.release);
             stream.clear();
@@ -333,7 +333,7 @@ public:
             if (isPost)
                 WebInputStream::createHeadersAndPostData (url, headers, postData);
 
-            jbyteArray postDataArray = 0;
+            jbyteArray postDataArray = nullptr;
 
             if (postData.getSize() > 0)
             {
@@ -348,7 +348,7 @@ public:
             jassert (Thread::getCurrentThread() != nullptr);
 
             jintArray statusCodeArray = env->NewIntArray (1);
-            jassert (statusCodeArray != 0);
+            jassert (statusCodeArray != nullptr);
 
             {
                 const ScopedLock lock (createStreamLock);
@@ -367,18 +367,18 @@ public:
                                                                                         javaString (httpRequest).get())));
             }
 
-            if (stream != 0 && ! stream.callBooleanMethod (HTTPStream.connect))
+            if (stream != nullptr && ! stream.callBooleanMethod (HTTPStream.connect))
                 stream.clear();
 
-            jint* const statusCodeElements = env->GetIntArrayElements (statusCodeArray, 0);
+            jint* const statusCodeElements = env->GetIntArrayElements (statusCodeArray, nullptr);
             statusCode = statusCodeElements[0];
             env->ReleaseIntArrayElements (statusCodeArray, statusCodeElements, 0);
             env->DeleteLocalRef (statusCodeArray);
 
-            if (postDataArray != 0)
+            if (postDataArray != nullptr)
                 env->DeleteLocalRef (postDataArray);
 
-            if (stream != 0)
+            if (stream != nullptr)
             {
                 StringArray headerLines;
 
@@ -547,12 +547,12 @@ static Array<InterfaceInfo> findIPAddresses (int dummySocket)
         if (item.ifr_addr.sa_family == AF_INET)
         {
             InterfaceInfo info;
-            info.interfaceAddress = makeAddress ((const sockaddr_in*) &item.ifr_addr);
+            info.interfaceAddress = makeAddress (reinterpret_cast<const sockaddr_in*> (&item.ifr_addr));
 
             if (! info.interfaceAddress.isNull())
             {
                 if (ioctl (dummySocket, SIOCGIFBRDADDR, &item) == 0)
-                    info.broadcastAddress = makeAddress ((const sockaddr_in*) &item.ifr_broadaddr);
+                    info.broadcastAddress = makeAddress (reinterpret_cast<const sockaddr_in*> (&item.ifr_broadaddr));
 
                 result.add (info);
             }

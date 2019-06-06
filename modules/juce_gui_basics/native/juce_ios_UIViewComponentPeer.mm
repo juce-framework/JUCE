@@ -177,7 +177,7 @@ class UIViewComponentPeer  : public ComponentPeer,
 {
 public:
     UIViewComponentPeer (Component&, int windowStyleFlags, UIView* viewToAttachTo);
-    ~UIViewComponentPeer();
+    ~UIViewComponentPeer() override;
 
     //==============================================================================
     void* getNativeHandle() const override                  { return view; }
