@@ -79,9 +79,9 @@ public:
 
     void deleteAllTouchesForPeer (ComponentPeer* peer)
     {
-		for (auto& t : currentTouches)
-			if (t.owner == peer)
-				t.touchId = 0;
+        for (auto& t : currentTouches)
+            if (t.owner == peer)
+                t.touchId = 0;
     }
 
 private:
