@@ -24,6 +24,13 @@
   ==============================================================================
 */
 
+#if JUCE_CLANG
+ #if __has_warning("-Wzero-as-null-pointer-constant")
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+ #endif
+#endif
+
 namespace juce
 {
 
@@ -35,7 +42,7 @@ public:
 
     int getIndexOfTouch (ComponentPeer* peer, IDType touchID)
     {
-        jassert (touchID != nullptr); // need to rethink this if IDs can be 0!
+        jassert (touchID != 0); // need to rethink this if IDs can be 0!
         TouchInfo info {touchID, peer};
 
         int touchIndex = currentTouches.indexOf (info);
@@ -64,7 +71,7 @@ public:
     bool areAnyTouchesActive() const noexcept
     {
         for (auto& t : currentTouches)
-            if (t.touchId != nullptr)
+            if (t.touchId != 0)
                 return true;
 
         return false;
@@ -72,16 +79,16 @@ public:
 
     void deleteAllTouchesForPeer (ComponentPeer* peer)
     {
-        for (auto& t : currentTouches)
-            if (t.owner == peer)
-                t.touchId = nullptr;
+		for (auto& t : currentTouches)
+			if (t.owner == peer)
+				t.touchId = 0;
     }
 
 private:
     //==============================================================================
     struct TouchInfo
     {
-        TouchInfo() noexcept  : touchId (nullptr), owner (nullptr) {}
+        TouchInfo() noexcept  : touchId (0), owner (nullptr) {}
         TouchInfo (IDType idToUse, ComponentPeer* peer) noexcept  : touchId (idToUse), owner (peer) {}
 
         TouchInfo (const TouchInfo&) = default;
@@ -112,3 +119,9 @@ private:
 };
 
 } // namespace juce
+
+#if JUCE_CLANG
+ #if __has_warning("-Wzero-as-null-pointer-constant")
+  #pragma clang diagnostic pop
+ #endif
+#endif
