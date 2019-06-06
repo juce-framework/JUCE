@@ -718,22 +718,22 @@ public:
                 openOrCloseAllSubGroups (*sub, false);
     }
 
-    static void openOrCloseAllSubGroups (TreeViewItem& item, bool shouldOpen)
+    static void openOrCloseAllSubGroups (TreeViewItem& treeItem, bool shouldOpen)
     {
-        item.setOpen (shouldOpen);
+        treeItem.setOpen (shouldOpen);
 
-        for (auto i = item.getNumSubItems(); --i >= 0;)
-            if (auto* sub = item.getSubItem (i))
+        for (auto i = treeItem.getNumSubItems(); --i >= 0;)
+            if (auto* sub = treeItem.getSubItem (i))
                 openOrCloseAllSubGroups (*sub, shouldOpen);
     }
 
-    static void setFilesToCompile (Project::Item item, const bool shouldCompile)
+    static void setFilesToCompile (Project::Item projectItem, const bool shouldCompile)
     {
-        if (item.isFile() && (item.getFile().hasFileExtension (fileTypesToCompileByDefault)))
-            item.getShouldCompileValue() = shouldCompile;
+        if (projectItem.isFile() && (projectItem.getFile().hasFileExtension (fileTypesToCompileByDefault)))
+            projectItem.getShouldCompileValue() = shouldCompile;
 
-        for (auto i = item.getNumChildren(); --i >= 0;)
-            setFilesToCompile (item.getChild (i), shouldCompile);
+        for (auto i = projectItem.getNumChildren(); --i >= 0;)
+            setFilesToCompile (projectItem.getChild (i), shouldCompile);
     }
 
     void showPopupMenu() override

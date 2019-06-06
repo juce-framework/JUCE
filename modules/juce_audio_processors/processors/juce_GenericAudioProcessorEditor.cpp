@@ -97,6 +97,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParameterListener)
 };
 
+//==============================================================================
 class BooleanParameterComponent final   : public Component,
                                           private ParameterListener
 {
@@ -150,6 +151,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BooleanParameterComponent)
 };
 
+//==============================================================================
 class SwitchParameterComponent final   : public Component,
                                          private ParameterListener
 {
@@ -255,6 +257,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SwitchParameterComponent)
 };
 
+//==============================================================================
 class ChoiceParameterComponent final   : public Component,
                                          private ParameterListener
 {
@@ -317,6 +320,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChoiceParameterComponent)
 };
 
+//==============================================================================
 class SliderParameterComponent final   : public Component,
                                          private ParameterListener
 {
@@ -340,9 +344,9 @@ public:
         // Set the initial value.
         handleNewParameterValue();
 
-        slider.onValueChange = [this]() { sliderValueChanged(); };
-        slider.onDragStart   = [this]() { sliderStartedDragging(); };
-        slider.onDragEnd     = [this]() { sliderStoppedDragging(); };
+        slider.onValueChange = [this] { sliderValueChanged(); };
+        slider.onDragStart   = [this] { sliderStartedDragging(); };
+        slider.onDragEnd     = [this] { sliderStoppedDragging(); };
     }
 
     void paint (Graphics&) override {}
@@ -408,6 +412,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SliderParameterComponent)
 };
 
+//==============================================================================
 class ParameterDisplayComponent   : public Component
 {
 public:
@@ -427,27 +432,27 @@ public:
             // marking a parameter as boolean. If you want consistency across
             // all  formats then it might be best to use a
             // SwitchParameterComponent instead.
-            parameterComp.reset (new BooleanParameterComponent (processor, param));
+            parameterComp = std::make_unique<BooleanParameterComponent> (processor, param);
         }
         else if (param.getNumSteps() == 2)
         {
             // Most hosts display any parameter with just two steps as a switch.
-            parameterComp.reset (new SwitchParameterComponent (processor, param));
+            parameterComp = std::make_unique<SwitchParameterComponent> (processor, param);
         }
         else if (! param.getAllValueStrings().isEmpty())
         {
             // If we have a list of strings to represent the different states a
             // parameter can be in then we should present a dropdown allowing a
             // user to pick one of them.
-            parameterComp.reset (new ChoiceParameterComponent (processor, param));
+            parameterComp = std::make_unique<ChoiceParameterComponent> (processor, param);
         }
         else
         {
             // Everything else can be represented as a slider.
-            parameterComp.reset (new SliderParameterComponent (processor, param));
+            parameterComp = std::make_unique<SliderParameterComponent> (processor, param);
         }
 
-        addAndMakeVisible (parameterComp.get());
+        addAndMakeVisible (*parameterComp);
 
         setSize (400, 40);
     }
@@ -471,6 +476,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParameterDisplayComponent)
 };
 
+//==============================================================================
 class ParametersPanel   : public Component
 {
 public:
@@ -480,10 +486,16 @@ public:
             if (param->isAutomatable())
                 addAndMakeVisible (paramComponents.add (new ParameterDisplayComponent (processor, *param)));
 
-        if (auto* comp = paramComponents[0])
-            setSize (comp->getWidth(), comp->getHeight() * paramComponents.size());
-        else
-            setSize (400, 100);
+        int maxWidth = 400;
+        int height = 0;
+
+        for (auto& comp : paramComponents)
+        {
+            maxWidth = jmax (maxWidth, comp->getWidth());
+            height += comp->getHeight();
+        }
+
+        setSize (maxWidth, height);
     }
 
     void paint (Graphics& g) override
@@ -508,26 +520,31 @@ private:
 //==============================================================================
 struct GenericAudioProcessorEditor::Pimpl
 {
-    Pimpl (GenericAudioProcessorEditor& parent)
-        : owner (parent)
+    Pimpl (GenericAudioProcessorEditor& parent)  : owner (parent)
     {
         auto* p = parent.getAudioProcessor();
         jassert (p != nullptr);
 
-        juceParameters.update (*p, false);
+        legacyParameters.update (*p, false);
 
         owner.setOpaque (true);
 
-        view.setViewedComponent (new ParametersPanel (*p, juceParameters.params));
+        view.setViewedComponent (new ParametersPanel (*p, legacyParameters.params));
         owner.addAndMakeVisible (view);
 
         view.setScrollBarsShown (true, false);
     }
 
+    void resize (Rectangle<int> size)
+    {
+        view.setBounds (size);
+        auto content = view.getViewedComponent();
+        content->setSize (view.getMaximumVisibleWidth(), content->getHeight());
+    }
 
     //==============================================================================
     GenericAudioProcessorEditor& owner;
-    LegacyAudioParametersWrapper juceParameters;
+    LegacyAudioParametersWrapper legacyParameters;
     Viewport view;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
@@ -535,7 +552,7 @@ struct GenericAudioProcessorEditor::Pimpl
 
 
 //==============================================================================
-GenericAudioProcessorEditor::GenericAudioProcessorEditor (AudioProcessor* const p)
+GenericAudioProcessorEditor::GenericAudioProcessorEditor (AudioProcessor& p)
     : AudioProcessorEditor (p), pimpl (new Pimpl (*this))
 {
     setSize (pimpl->view.getViewedComponent()->getWidth() + pimpl->view.getVerticalScrollBar().getWidth(),
@@ -551,7 +568,7 @@ void GenericAudioProcessorEditor::paint (Graphics& g)
 
 void GenericAudioProcessorEditor::resized()
 {
-    pimpl->view.setBounds (getLocalBounds());
+    pimpl->resize (getLocalBounds());
 }
 
 } // namespace juce

@@ -314,7 +314,7 @@ protected:
         {
             for (int i = numDestChannels; --i >= 0;)
                 if (destChannels[i] != nullptr)
-                    zeromem (destChannels[i] + startOffsetInDestBuffer, sizeof (int) * (size_t) numSamples);
+                    zeromem (destChannels[i] + startOffsetInDestBuffer, (size_t) numSamples * sizeof (int));
 
             numSamples = (int) samplesAvailable;
         }

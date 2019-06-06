@@ -617,12 +617,6 @@ private:
     void removeAllSubItemsFromList();
     bool areLinesDrawn() const;
 
-   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-    // The parameters for these methods have changed - please update your code!
-    virtual void isInterestedInDragSource (const String&, Component*) {}
-    virtual int itemDropped (const String&, Component*, int) { return 0; }
-   #endif
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeViewItem)
 };
 

@@ -74,6 +74,12 @@ namespace pnglibNamespace
    #endif
   #endif
 
+  #if JUCE_GCC
+   #pragma GCC diagnostic push
+   #pragma GCC diagnostic ignored "-Wsign-conversion"
+   #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+  #endif
+
   #undef check
   using std::abs;
   #define NO_DUMMY_DECL
@@ -294,6 +300,11 @@ namespace pnglibNamespace
   #if JUCE_CLANG
    #pragma clang diagnostic pop
   #endif
+
+  #if JUCE_GCC
+   #pragma GCC diagnostic pop
+  #endif
+
 #else
   extern "C"
   {
@@ -358,7 +369,7 @@ namespace PNGHelpers
             png_get_IHDR (pngReadStruct, pngInfoStruct,
                           &width, &height,
                           &bitDepth, &colorType,
-                          &interlaceType, 0, 0);
+                          &interlaceType, nullptr, nullptr);
 
             if (bitDepth == 16)
                 png_set_strip_16 (pngReadStruct);
@@ -472,16 +483,16 @@ namespace PNGHelpers
 
     static Image readImage (InputStream& in)
     {
-        if (png_structp pngReadStruct = png_create_read_struct (PNG_LIBPNG_VER_STRING, 0, 0, 0))
+        if (png_structp pngReadStruct = png_create_read_struct (PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr))
         {
             if (png_infop pngInfoStruct = png_create_info_struct (pngReadStruct))
             {
                 Image image (readImage (in, pngReadStruct, pngInfoStruct));
-                png_destroy_read_struct (&pngReadStruct, &pngInfoStruct, 0);
+                png_destroy_read_struct (&pngReadStruct, &pngInfoStruct, nullptr);
                 return image;
             }
 
-            png_destroy_read_struct (&pngReadStruct, 0, 0);
+            png_destroy_read_struct (&pngReadStruct, nullptr, nullptr);
         }
 
         return Image();

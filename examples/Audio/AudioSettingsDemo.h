@@ -88,7 +88,7 @@ public:
         setSize (500, 600);
     }
 
-    ~AudioSettingsDemo()
+    ~AudioSettingsDemo() override
     {
         audioDeviceManager.removeChangeListener (this);
     }

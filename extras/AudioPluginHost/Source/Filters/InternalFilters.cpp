@@ -64,10 +64,8 @@ public:
     bool isBusesLayoutSupported (const BusesLayout& layout) const override
     {
         if (! isGenerator)
-        {
             if (layout.getMainOutputChannelSet() != channelSet)
                 return false;
-        }
 
         if (layout.getMainInputChannelSet() != channelSet)
             return false;
@@ -130,7 +128,7 @@ private:
 class SineWaveSynth :   public InternalPlugin
 {
 public:
-    SineWaveSynth (const PluginDescription& descr) :   InternalPlugin (descr)
+    SineWaveSynth (const PluginDescription& descr)  : InternalPlugin (descr)
     {
         const int numVoices = 8;
 
@@ -170,24 +168,21 @@ public:
         buffer.applyGain (0.8f);
     }
 
+    using InternalPlugin::processBlock;
+
 private:
     //==============================================================================
-    class SineWaveSound : public SynthesiserSound
+    struct SineWaveSound  : public SynthesiserSound
     {
-    public:
-        SineWaveSound() {}
+        SineWaveSound() = default;
 
         bool appliesToNote (int /*midiNoteNumber*/) override    { return true; }
         bool appliesToChannel (int /*midiChannel*/) override    { return true; }
     };
 
-    class SineWaveVoice   : public SynthesiserVoice
+    struct SineWaveVoice  : public SynthesiserVoice
     {
-    public:
-        SineWaveVoice()
-        : currentAngle (0), angleDelta (0), level (0), tailOff (0)
-        {
-        }
+        SineWaveVoice() = default;
 
         bool canPlaySound (SynthesiserSound* sound) override
         {
@@ -282,8 +277,10 @@ private:
             }
         }
 
+        using SynthesiserVoice::renderNextBlock;
+
     private:
-        double currentAngle, angleDelta, level, tailOff;
+        double currentAngle = 0, angleDelta = 0, level = 0, tailOff = 0;
     };
 
     //==============================================================================
@@ -337,6 +334,8 @@ public:
             buffer.clear (ch, 0, buffer.getNumSamples());
     }
 
+    using InternalPlugin::processBlock;
+
 private:
     Reverb reverb;
 };
@@ -360,28 +359,27 @@ InternalPluginFormat::InternalPluginFormat()
     }
 }
 
-AudioPluginInstance* InternalPluginFormat::createInstance (const String& name)
+std::unique_ptr<AudioPluginInstance> InternalPluginFormat::createInstance (const String& name)
 {
-    if (name == audioOutDesc.name) return new AudioProcessorGraph::AudioGraphIOProcessor (AudioProcessorGraph::AudioGraphIOProcessor::audioOutputNode);
-    if (name == audioInDesc.name)  return new AudioProcessorGraph::AudioGraphIOProcessor (AudioProcessorGraph::AudioGraphIOProcessor::audioInputNode);
-    if (name == midiInDesc.name)   return new AudioProcessorGraph::AudioGraphIOProcessor (AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode);
+    if (name == audioOutDesc.name) return std::make_unique<AudioProcessorGraph::AudioGraphIOProcessor> (AudioProcessorGraph::AudioGraphIOProcessor::audioOutputNode);
+    if (name == audioInDesc.name)  return std::make_unique<AudioProcessorGraph::AudioGraphIOProcessor> (AudioProcessorGraph::AudioGraphIOProcessor::audioInputNode);
+    if (name == midiInDesc.name)   return std::make_unique<AudioProcessorGraph::AudioGraphIOProcessor> (AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode);
 
 
-    if (name == SineWaveSynth::getIdentifier()) return new SineWaveSynth (SineWaveSynth::getPluginDescription());
-    if (name == ReverbFilter::getIdentifier())  return new ReverbFilter  (ReverbFilter::getPluginDescription());
+    if (name == SineWaveSynth::getIdentifier()) return std::make_unique<SineWaveSynth> (SineWaveSynth::getPluginDescription());
+    if (name == ReverbFilter::getIdentifier())  return std::make_unique<ReverbFilter>  (ReverbFilter::getPluginDescription());
 
-    return nullptr;
+    return {};
 }
 
 void InternalPluginFormat::createPluginInstance (const PluginDescription& desc,
-                                                 double /*initialSampleRate*/,
-                                                 int /*initialBufferSize*/,
-                                                 void* userData,
+                                                 double /*initialSampleRate*/, int /*initialBufferSize*/,
                                                  PluginCreationCallback callback)
 {
-    auto* p = createInstance (desc.name);
-
-    callback (userData, p, p == nullptr ? NEEDS_TRANS ("Invalid internal filter name") : String());
+    if (auto p = createInstance (desc.name))
+        callback (std::move (p), {});
+    else
+        callback (nullptr, NEEDS_TRANS ("Invalid internal plugin name"));
 }
 
 bool InternalPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept

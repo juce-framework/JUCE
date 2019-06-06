@@ -109,7 +109,7 @@ public:
            startTimer (500);
     }
 
-    virtual ~StandalonePluginHolder()
+    virtual ~StandalonePluginHolder() override
     {
         stopTimer();
 
@@ -636,7 +636,7 @@ public:
        #endif
     }
 
-    ~StandaloneFilterWindow()
+    ~StandaloneFilterWindow() override
     {
        #if (! JUCE_IOS) && (! JUCE_ANDROID)
         if (auto* props = pluginHolder->settings.get())
@@ -753,7 +753,7 @@ private:
             inputMutedChanged (shouldShowNotification);
         }
 
-        ~MainContentComponent()
+        ~MainContentComponent() override
         {
             if (editor != nullptr)
             {

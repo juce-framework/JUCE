@@ -151,7 +151,7 @@ public:
        #else
         JUCE_CONSTEXPR const int maxSignificantDigits = 17 + 1; // An additional digit for rounding
         JUCE_CONSTEXPR const int bufferSize = maxSignificantDigits + 7 + 1; // -.E-XXX and a trailing null-terminator
-        char buffer[bufferSize] = {};
+        char buffer[(size_t) bufferSize] = {};
         char* currentCharacter = &(buffer[0]);
        #endif
 
@@ -505,12 +505,12 @@ public:
     {
         auto startAddress = dest.getAddress();
         auto maxBytes = (ssize_t) maxBytesToWrite;
-        maxBytes -= sizeof (typename DestCharPointerType::CharType); // (allow for a terminating null)
+        maxBytes -= (ssize_t) sizeof (typename DestCharPointerType::CharType); // (allow for a terminating null)
 
         for (;;)
         {
             auto c = src.getAndAdvance();
-            auto bytesNeeded = DestCharPointerType::getBytesRequiredFor (c);
+            auto bytesNeeded = (ssize_t) DestCharPointerType::getBytesRequiredFor (c);
             maxBytes -= bytesNeeded;
 
             if (c == 0 || maxBytes < 0)

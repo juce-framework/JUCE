@@ -340,7 +340,7 @@ public:
         if (newNumSamples != size || newNumChannels != numChannels)
         {
             auto allocatedSamplesPerChannel = ((size_t) newNumSamples + 3) & ~3u;
-            auto channelListSize = ((sizeof (Type*) * (size_t) (newNumChannels + 1)) + 15) & ~15u;
+            auto channelListSize = ((static_cast<size_t> (1 + newNumChannels) * sizeof (Type*)) + 15) & ~15u;
             auto newTotalBytes = ((size_t) newNumChannels * (size_t) allocatedSamplesPerChannel * sizeof (Type))
                                     + channelListSize + 32;
 
@@ -1076,7 +1076,7 @@ private:
     void allocateData()
     {
         jassert (size >= 0);
-        auto channelListSize = sizeof (Type*) * (size_t) (numChannels + 1);
+        auto channelListSize = (size_t) (numChannels + 1) * sizeof (Type*);
         allocatedBytes = (size_t) numChannels * (size_t) size * sizeof (Type) + channelListSize + 32;
         allocatedData.malloc (allocatedBytes);
         channels = reinterpret_cast<Type**> (allocatedData.get());

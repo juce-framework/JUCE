@@ -424,7 +424,7 @@ private:
         else
         {
             for (int i = 0; i < numOutputChannels; ++i)
-                zeromem (outputChannelData[i], sizeof (float) * static_cast<size_t> (numFrames));
+                zeromem (outputChannelData[i], (size_t) (numFrames) * sizeof (float));
         }
     }
 

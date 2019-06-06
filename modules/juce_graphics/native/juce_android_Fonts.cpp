@@ -374,7 +374,7 @@ public:
         {
             et = new EdgeTable (bounds);
 
-            jint* const maskDataElements = env->GetIntArrayElements ((jintArray) cachedRenderArray.get(), 0);
+            jint* const maskDataElements = env->GetIntArrayElements ((jintArray) cachedRenderArray.get(), nullptr);
             const jint* mask = maskDataElements;
 
             for (int y = bounds.getY(); y < bounds.getBottom(); ++y)
@@ -494,7 +494,7 @@ private:
         String key;
         {
             LocalRef<jobject> digest (env->CallStaticObjectMethod (JavaMessageDigest, JavaMessageDigest.getInstance, javaString("MD5").get()));
-            LocalRef<jbyteArray> bytes(env->NewByteArray(size));
+            LocalRef<jbyteArray> bytes(env->NewByteArray ((int) size));
 
             jboolean ignore;
             auto* jbytes = env->GetByteArrayElements(bytes.get(), &ignore);

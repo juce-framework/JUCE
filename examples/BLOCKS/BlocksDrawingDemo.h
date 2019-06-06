@@ -317,7 +317,7 @@ public:
         topologyChanged();
     }
 
-    ~BlocksDrawingDemo()
+    ~BlocksDrawingDemo() override
     {
         if (activeBlock != nullptr)
             detachActiveBlock();

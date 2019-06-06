@@ -317,10 +317,14 @@ public:
         return relativePosition + getBounds (true).getPosition().toFloat();
     }
 
+    using ComponentPeer::localToGlobal;
+
     Point<float> globalToLocal (Point<float> screenPosition) override
     {
         return screenPosition - getBounds (true).getPosition().toFloat();
     }
+
+    using ComponentPeer::globalToLocal;
 
     void setAlpha (float newAlpha) override
     {

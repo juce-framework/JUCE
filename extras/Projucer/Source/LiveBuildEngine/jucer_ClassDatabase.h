@@ -452,6 +452,7 @@ struct ClassDatabase
         InstantiationFlags instantiationFlags;
 
         JUCE_LEAK_DETECTOR (Class)
+        JUCE_DECLARE_WEAK_REFERENCEABLE (Class)
     };
 
     //==============================================================================
@@ -522,11 +523,11 @@ struct ClassDatabase
             return nullptr;
         }
 
-        void findClassesDeclaredInFile (Array<Class*>& results, const File& file)
+        void findClassesDeclaredInFile (Array<WeakReference<Class>>& results, const File& file)
         {
             for (int i = 0; i < components.size(); ++i)
             {
-                auto c = components.getReference (i);
+                auto& c = components.getReference (i);
 
                 if (c.isDeclaredInFile (file))
                     results.add (&c);

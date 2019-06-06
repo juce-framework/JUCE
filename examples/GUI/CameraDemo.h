@@ -86,7 +86,7 @@ public:
        #endif
     }
 
-    ~CameraDemo()
+    ~CameraDemo() override
     {
        #if JUCE_IOS || JUCE_ANDROID
         setPortraitOrientationEnabled (false);

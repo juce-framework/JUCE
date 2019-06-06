@@ -57,12 +57,12 @@ Time OSCTimeTag::toTime() const noexcept
     const uint64 seconds = rawTimeTag >> 32;
     const uint32 fractionalPart = (rawTimeTag & 0x00000000FFFFFFFFULL);
 
-    const double fractionalPartInMillis = (double) fractionalPart / 4294967.296;
+    const auto fractionalPartInMillis = (double) fractionalPart / 4294967.296;
 
     // now using signed integer, because this is allowed to become negative:
-    const int64 juceTimeInMillis = int64 ((seconds * 1000)
-                                           + (uint64) roundToInt(fractionalPartInMillis)
-                                           - millisecondsBetweenOscAndJuceEpochs);
+    const auto juceTimeInMillis = (int64) (seconds * 1000)
+                                + (int64) roundToInt (fractionalPartInMillis)
+                                - (int64) millisecondsBetweenOscAndJuceEpochs;
 
     return Time (juceTimeInMillis);
 }

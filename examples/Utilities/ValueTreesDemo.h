@@ -203,7 +203,7 @@ public:
         setSize (500, 500);
     }
 
-    ~ValueTreesDemo()
+    ~ValueTreesDemo() override
     {
         tree.setRootItem (nullptr);
     }

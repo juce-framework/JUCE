@@ -95,7 +95,7 @@ struct PermissionsRequest
 struct PermissionsOverlay   : FragmentOverlay
 {
     PermissionsOverlay (CriticalSection& cs) : overlayGuard (cs) {}
-    ~PermissionsOverlay() {}
+    ~PermissionsOverlay() override = default;
 
     struct PermissionResult
     {
@@ -175,7 +175,7 @@ struct PermissionsOverlay   : FragmentOverlay
 
                 // this code should only be reached for SDKs >= 23, so this method should be
                 // be available
-                jassert(requestPermissionsMethodID != 0);
+                jassert(requestPermissionsMethodID != nullptr);
 
                 env->CallVoidMethod (getNativeHandle(), requestPermissionsMethodID, jPermissionsArray.get (), 0);
             }

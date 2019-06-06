@@ -51,13 +51,6 @@ public:
         @param source the ChangeBroadcaster that triggered the callback.
     */
     virtual void changeListenerCallback (ChangeBroadcaster* source) = 0;
-
-
-    //==============================================================================
-   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-    // This method's signature has changed to take a ChangeBroadcaster parameter - please update your code!
-    private: virtual int changeListenerCallback (void*) { return 0; }
-   #endif
 };
 
 } // namespace juce

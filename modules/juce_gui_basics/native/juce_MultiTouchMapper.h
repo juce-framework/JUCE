@@ -24,6 +24,13 @@
   ==============================================================================
 */
 
+#if JUCE_CLANG
+ #if __has_warning("-Wzero-as-null-pointer-constant")
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+ #endif
+#endif
+
 namespace juce
 {
 
@@ -112,3 +119,9 @@ private:
 };
 
 } // namespace juce
+
+#if JUCE_CLANG
+ #if __has_warning("-Wzero-as-null-pointer-constant")
+  #pragma clang diagnostic pop
+ #endif
+#endif

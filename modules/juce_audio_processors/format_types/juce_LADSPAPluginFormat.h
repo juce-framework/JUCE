@@ -39,7 +39,7 @@ class JUCE_API  LADSPAPluginFormat   : public AudioPluginFormat
 {
 public:
     LADSPAPluginFormat();
-    ~LADSPAPluginFormat();
+    ~LADSPAPluginFormat() override;
 
     //==============================================================================
     String getName() const override                { return "LADSPA"; }
@@ -55,7 +55,7 @@ public:
 private:
     //==============================================================================
     void createPluginInstance (const PluginDescription&, double initialSampleRate,
-                               int initialBufferSize, void* userData, PluginCreationCallback) override;
+                               int initialBufferSize, PluginCreationCallback) override;
 
     bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept override;
 

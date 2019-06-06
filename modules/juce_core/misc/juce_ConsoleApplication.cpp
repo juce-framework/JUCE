@@ -111,7 +111,7 @@ bool ArgumentList::Argument::isShortOption (char option) const
 {
     jassert (option != '-'); // this is probably not what you intended to pass in
 
-    return isShortOption() && text.containsChar (option);
+    return isShortOption() && text.containsChar (String (option)[0]);
 }
 
 bool ArgumentList::Argument::operator== (StringRef wildcard) const

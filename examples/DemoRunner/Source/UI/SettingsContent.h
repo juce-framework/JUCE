@@ -173,7 +173,9 @@ private:
 
         //==============================================================================
         void componentMovedOrResized (bool, bool) override    {}
+        using ComponentListener::componentMovedOrResized;
         void componentVisibilityChanged() override            {}
+        using ComponentListener::componentVisibilityChanged;
         void componentPeerChanged() override
         {
             auto* newPeer = getPeer();

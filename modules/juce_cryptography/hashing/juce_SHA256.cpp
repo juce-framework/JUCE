@@ -137,7 +137,7 @@ public:
                 break;
             }
 
-            numBytesToRead -= sizeof (buffer);
+            numBytesToRead -= (int64) sizeof (buffer);
             processFullBlock (buffer);
         }
 

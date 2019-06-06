@@ -101,15 +101,31 @@
   #include <fcntl.h>
   #include <sys/wait.h>
 
-  #if JUCE_GCC && __GNUC__ > 7
+  #if JUCE_GCC
    #pragma GCC diagnostic push
-   #pragma GCC diagnostic ignored "-Wparentheses"
+   #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+   #if __GNUC__ > 7
+    #pragma GCC diagnostic ignored "-Wparentheses"
+   #endif
+  #endif
+
+  #if JUCE_CLANG
+   #if __has_warning("-Wzero-as-null-pointer-constant")
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+   #endif
   #endif
 
   #include <gtk/gtk.h>
 
-  #if JUCE_GCC && __GNUC__ > 7
+  #if JUCE_GCC
    #pragma GCC diagnostic pop
+  #endif
+
+  #if JUCE_CLANG
+   #if __has_warning("-Wzero-as-null-pointer-constant")
+    #pragma clang diagnostic pop
+   #endif
   #endif
 
   #include <gtk/gtkx.h>
@@ -172,10 +188,21 @@
 
 //==============================================================================
 #elif JUCE_LINUX
-  #include "native/juce_linux_XEmbedComponent.cpp"
+ #if JUCE_GCC
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+ #endif
+
+ #include "native/juce_linux_XEmbedComponent.cpp"
+
  #if JUCE_WEB_BROWSER
   #include "native/juce_linux_X11_WebBrowserComponent.cpp"
  #endif
+
+ #if JUCE_GCC
+  #pragma GCC diagnostic pop
+ #endif
+
  #include "native/juce_linux_X11_SystemTrayIcon.cpp"
 
 //==============================================================================

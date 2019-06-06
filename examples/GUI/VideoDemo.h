@@ -186,7 +186,7 @@ public:
         setSize (500, 500);
     }
 
-    ~VideoDemo()
+    ~VideoDemo() override
     {
         fileTree.removeListener (this);
     }
@@ -363,7 +363,7 @@ public:
         setPortraitOrientationEnabled (true);
     }
 
-    ~VideoDemo()
+    ~VideoDemo() override
     {
         curVideoComp->onPlaybackStarted = nullptr;
         curVideoComp->onPlaybackStopped = nullptr;

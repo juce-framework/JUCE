@@ -425,7 +425,8 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
         DelegateClass::setState (delegate, this);
 
         activeSessions.set (uniqueIdentifier, this);
-        NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:juceStringToNS (urlToUse.toString (true))]];
+        auto nsUrl = [NSURL URLWithString: juceStringToNS (urlToUse.toString (true))];
+        NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL: nsUrl];
 
         if (shouldUsePostRequest)
             [request setHTTPMethod: @"POST"];

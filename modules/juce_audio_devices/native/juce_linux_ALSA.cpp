@@ -261,7 +261,7 @@ public:
         unsigned int periods = 4;
         snd_pcm_uframes_t samplesPerPeriod = (snd_pcm_uframes_t) bufferSize;
 
-        if (JUCE_ALSA_FAILED (snd_pcm_hw_params_set_rate_near (handle, hwParams, &sampleRate, 0))
+        if (JUCE_ALSA_FAILED (snd_pcm_hw_params_set_rate_near (handle, hwParams, &sampleRate, nullptr))
             || JUCE_ALSA_FAILED (snd_pcm_hw_params_set_channels (handle, hwParams, (unsigned int ) numChannels))
             || JUCE_ALSA_FAILED (snd_pcm_hw_params_set_periods_near (handle, hwParams, &periods, &dir))
             || JUCE_ALSA_FAILED (snd_pcm_hw_params_set_period_size_near (handle, hwParams, &samplesPerPeriod, &dir))
@@ -494,7 +494,7 @@ public:
         initialiseRatesAndChannels();
     }
 
-    ~ALSAThread()
+    ~ALSAThread() override
     {
         close();
     }
@@ -722,7 +722,7 @@ public:
                 else
                 {
                     for (int i = 0; i < outputChannelDataForCallback.size(); ++i)
-                        zeromem (outputChannelDataForCallback[i], sizeof (float) * (size_t) bufferSize);
+                        zeromem (outputChannelDataForCallback[i], (size_t) bufferSize * sizeof (float));
                 }
             }
 
@@ -853,7 +853,7 @@ public:
     {
     }
 
-    ~ALSAAudioIODevice()
+    ~ALSAAudioIODevice() override
     {
         close();
     }

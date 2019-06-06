@@ -219,13 +219,13 @@ namespace XSHMHelpers
                     zerostruct (segmentInfo);
 
                     if (auto* xImage = XShmCreateImage (display, DefaultVisual (display, DefaultScreen (display)),
-                                                        24, ZPixmap, 0, &segmentInfo, 50, 50))
+                                                        24, ZPixmap, nullptr, &segmentInfo, 50, 50))
                     {
                         if ((segmentInfo.shmid = shmget (IPC_PRIVATE,
                                                          (size_t) (xImage->bytes_per_line * xImage->height),
                                                          IPC_CREAT | 0777)) >= 0)
                         {
-                            segmentInfo.shmaddr = (char*) shmat (segmentInfo.shmid, 0, 0);
+                            segmentInfo.shmaddr = (char*) shmat (segmentInfo.shmid, nullptr, 0);
 
                             if (segmentInfo.shmaddr != (void*) -1)
                             {
@@ -248,7 +248,7 @@ namespace XSHMHelpers
                             shmdt (segmentInfo.shmaddr);
                         }
 
-                        shmctl (segmentInfo.shmid, IPC_RMID, 0);
+                        shmctl (segmentInfo.shmid, IPC_RMID, nullptr);
 
                         XSetErrorHandler (oldHandler);
                         if (trappedErrorCode != 0)
@@ -515,7 +515,7 @@ public:
             segmentInfo.shmaddr = (char *) -1;
             segmentInfo.readOnly = False;
 
-            xImage = XShmCreateImage (display, visual, imageDepth, ZPixmap, 0,
+            xImage = XShmCreateImage (display, visual, imageDepth, ZPixmap, nullptr,
                                       &segmentInfo, (unsigned int) w, (unsigned int) h);
 
             if (xImage != nullptr)
@@ -526,7 +526,7 @@ public:
                 {
                     if (segmentInfo.shmid != -1)
                     {
-                        segmentInfo.shmaddr = (char*) shmat (segmentInfo.shmid, 0, 0);
+                        segmentInfo.shmaddr = (char*) shmat (segmentInfo.shmid, nullptr, 0);
 
                         if (segmentInfo.shmaddr != (void*) -1)
                         {
@@ -542,7 +542,7 @@ public:
                         }
                         else
                         {
-                            shmctl (segmentInfo.shmid, IPC_RMID, 0);
+                            shmctl (segmentInfo.shmid, IPC_RMID, nullptr);
                         }
                     }
                 }
@@ -594,7 +594,7 @@ public:
         }
     }
 
-    ~XBitmapImage()
+    ~XBitmapImage() override
     {
         ScopedXLock xlock (display);
 
@@ -610,7 +610,7 @@ public:
             XDestroyImage (xImage);
 
             shmdt (segmentInfo.shmaddr);
-            shmctl (segmentInfo.shmid, IPC_RMID, 0);
+            shmctl (segmentInfo.shmid, IPC_RMID, nullptr);
         }
         else
        #endif
@@ -989,7 +989,7 @@ namespace PixmapHelpers
         Pixmap pixmap = XCreatePixmap (display, DefaultRootWindow (display),
                                        width, height, 24);
 
-        GC gc = XCreateGC (display, pixmap, 0, 0);
+        GC gc = XCreateGC (display, pixmap, 0, nullptr);
         XPutImage (display, pixmap, gc, ximage, 0, 0, 0, 0, width, height);
         XFreeGC (display, gc);
 
@@ -1070,16 +1070,16 @@ public:
         {
             ScopedXDisplay xDisplay;
 
-            if (auto display = xDisplay.display)
+            if (auto d = xDisplay.display)
             {
                 Window root, child;
                 int x, y, winx, winy;
                 unsigned int mask;
                 int mouseMods = 0;
 
-                ScopedXLock xlock (display);
+                ScopedXLock xlock (d);
 
-                if (XQueryPointer (display, RootWindow (display, DefaultScreen (display)),
+                if (XQueryPointer (d, RootWindow (d, DefaultScreen (d)),
                                    &root, &child, &x, &y, &winx, &winy, &mask) != False)
                 {
                     if ((mask & Button1Mask) != 0)  mouseMods |= ModifierKeys::leftButtonModifier;
@@ -1094,7 +1094,7 @@ public:
         };
     }
 
-    ~LinuxComponentPeer()
+    ~LinuxComponentPeer() override
     {
         // it's dangerous to delete a window on a thread other than the message thread..
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
@@ -1252,10 +1252,14 @@ public:
         return relativePosition + bounds.getPosition().toFloat();
     }
 
+    using ComponentPeer::localToGlobal;
+
     Point<float> globalToLocal (Point<float> screenPosition) override
     {
         return screenPosition - bounds.getPosition().toFloat();
     }
+
+    using ComponentPeer::globalToLocal;
 
     void setAlpha (float /* newAlpha */) override
     {
@@ -1295,11 +1299,14 @@ public:
         ScopedXLock xlock (display);
         GetXProperty prop (display, windowH, atoms->state, 0, 64, false, atoms->state);
 
+        unsigned long state;
+        memcpy (&state, prop.data, sizeof (unsigned long));
+
         return prop.success
                 && prop.actualType == atoms->state
                 && prop.actualFormat == 32
                 && prop.numItems > 0
-                && ((unsigned long*) prop.data)[0] == IconicState;
+                && state == IconicState;
     }
 
     void setFullScreen (bool shouldBeFullScreen) override
@@ -1662,9 +1669,9 @@ public:
             ScopedXLock xlock (display);
             updateKeyStates ((int) keyEvent.keycode, true);
 
-            String oldLocale (::setlocale (LC_ALL, 0));
+            String oldLocale (::setlocale (LC_ALL, nullptr));
             ::setlocale (LC_ALL, "");
-            XLookupString (&keyEvent, utf8, sizeof (utf8), &sym, 0);
+            XLookupString (&keyEvent, utf8, sizeof (utf8), &sym, nullptr);
 
             if (oldLocale.isNotEmpty())
                 ::setlocale (LC_ALL, oldLocale.toRawUTF8());
@@ -2230,7 +2237,7 @@ private:
                 XShmSegmentInfo segmentinfo;
 
                 auto testImage = XShmCreateImage (display, DefaultVisual (display, DefaultScreen (display)),
-                                                  24, ZPixmap, 0, &segmentinfo, 64, 64);
+                                                  24, ZPixmap, nullptr, &segmentinfo, 64, 64);
 
                 useARGBImagesForRendering = (testImage->bits_per_pixel == 32);
                 XDestroyImage (testImage);
@@ -2750,7 +2757,10 @@ private:
     long getUserTime() const
     {
         GetXProperty prop (display, windowH, atoms->userTime, 0, 65536, false, XA_CARDINAL);
-        return prop.success ? *(long*) prop.data : 0;
+        long result;
+        memcpy (&result, prop.data, sizeof (long));
+
+        return prop.success ? result : 0;
     }
 
     void updateBorderSize()
@@ -2770,7 +2780,14 @@ private:
 
                 if (prop.success && prop.actualFormat == 32)
                 {
-                    auto* sizes = (const unsigned long*) prop.data;
+                    auto data = prop.data;
+                    std::array<unsigned long, 4> sizes;
+
+                    for (auto& size : sizes)
+                    {
+                        memcpy (&size, data, sizeof (unsigned long));
+                        data += sizeof (unsigned long);
+                    }
 
                     windowBorder = BorderSize<int> ((int) sizes[2], (int) sizes[0],
                                                     (int) sizes[3], (int) sizes[1]);
@@ -3137,11 +3154,18 @@ private:
                  && prop.actualFormat == 32
                  && prop.numItems != 0)
             {
-                auto* types = (const unsigned long*) prop.data;
+                auto* types = prop.data;
 
                 for (unsigned long i = 0; i < prop.numItems; ++i)
-                    if (types[i] != None)
-                        srcMimeTypeAtomList.add (types[i]);
+                {
+                    unsigned long type;
+                    memcpy (&type, types, sizeof (unsigned long));
+
+                    if (type != None)
+                        srcMimeTypeAtomList.add (type);
+
+                    types += sizeof (unsigned long);
+                }
             }
         }
 
@@ -3180,12 +3204,12 @@ private:
                 for (;;)
                 {
                     GetXProperty prop (display, evt.xany.window, evt.xselection.property,
-                                       dropData.getSize() / 4, 65536, false, AnyPropertyType);
+                                       (long) (dropData.getSize() / 4), 65536, false, AnyPropertyType);
 
                     if (! prop.success)
                         break;
 
-                    dropData.append (prop.data, prop.numItems * (size_t) prop.actualFormat / 8);
+                    dropData.append (prop.data, (size_t) (prop.actualFormat / 8) * prop.numItems);
 
                     if (prop.bytesLeft <= 0)
                         break;
@@ -3337,7 +3361,7 @@ private:
 
     void initialisePointerMap()
     {
-        const int numButtons = XGetPointerMapping (display, 0, 0);
+        const int numButtons = XGetPointerMapping (display, nullptr, 0);
         pointerMap[2] = pointerMap[3] = pointerMap[4] = Keys::NoButton;
 
         if (numButtons == 2)
@@ -3562,8 +3586,16 @@ void Displays::findDisplays (float masterScale)
 
                 for (int i = 0; i < numMonitors; ++i)
                 {
-                    if (auto* position = (const long*) getWorkAreaPropertyData (i))
+                    if (auto* positionData = getWorkAreaPropertyData (i))
                     {
+                        std::array<long, 4> position;
+
+                        for (auto& p : position)
+                        {
+                            memcpy (&p, positionData, sizeof (long));
+                            positionData += sizeof (long);
+                        }
+
                         Display d;
                         d.totalArea = Rectangle<int> ((int) position[0], (int) position[1],
                                                       (int) position[2], (int) position[3]);

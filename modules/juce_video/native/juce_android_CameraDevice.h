@@ -508,7 +508,7 @@ struct CameraDevice::Pimpl
         startBackgroundThread();
     }
 
-    ~Pimpl()
+    ~Pimpl() override
     {
         auto* env = getEnv();
 
@@ -764,18 +764,18 @@ private:
 
         auto* env = getEnv();
 
-        #define PRINT_ELEMENTS(elem_type, array_type, fun_name_middle)                                        \
-        {                                                                                                     \
-            elem_type* elements = env->Get##fun_name_middle##ArrayElements ((array_type) keyValue.get(), 0);  \
-            int size = env->GetArrayLength ((array_type) keyValue.get());                                     \
-                                                                                                              \
-            for (int i = 0; i < size - 1; ++i)                                                                \
-                result << String (elements[i]) << " ";                                                        \
-                                                                                                              \
-            if (size > 0)                                                                                     \
-                result << String (elements[size - 1]);                                                        \
-                                                                                                              \
-            env->Release##fun_name_middle##ArrayElements ((array_type) keyValue.get(), elements, 0);          \
+        #define PRINT_ELEMENTS(elem_type, array_type, fun_name_middle)                                              \
+        {                                                                                                           \
+            elem_type* elements = env->Get##fun_name_middle##ArrayElements ((array_type) keyValue.get(), nullptr);  \
+            int size = env->GetArrayLength ((array_type) keyValue.get());                                           \
+                                                                                                                    \
+            for (int i = 0; i < size - 1; ++i)                                                                      \
+                result << String (elements[i]) << " ";                                                              \
+                                                                                                                    \
+            if (size > 0)                                                                                           \
+                result << String (elements[size - 1]);                                                              \
+                                                                                                                    \
+            env->Release##fun_name_middle##ArrayElements ((array_type) keyValue.get(), elements, 0);                \
         }
 
         if (keyValueString.startsWith ("[I"))
@@ -996,7 +996,7 @@ private:
                                                           "android/view/TextureView$SurfaceTextureListener").get());
         }
 
-        ~PreviewDisplay()
+        ~PreviewDisplay() override
         {
             getEnv()->CallVoidMethod (textureView, AndroidTextureView.setSurfaceTextureListener, nullptr);
         }
@@ -1144,7 +1144,7 @@ private:
                                       handlerToUse.get());
         }
 
-        ~ImageReader()
+        ~ImageReader() override
         {
             getEnv()->CallVoidMethod (imageReader, AndroidImageReader.close);
         }
@@ -1405,7 +1405,7 @@ private:
             getEnv()->CallVoidMethod (mediaRecorder, AndroidMediaRecorder.prepare);
         }
 
-        ~MediaRecorder()
+        ~MediaRecorder() override
         {
             getEnv()->CallVoidMethod (mediaRecorder, AndroidMediaRecorder.release);
         }
@@ -2494,7 +2494,7 @@ private:
     //==============================================================================
     struct CaptureSessionModeBase
     {
-        virtual ~CaptureSessionModeBase() { }
+        virtual ~CaptureSessionModeBase() = default;
 
         virtual bool isVideoRecordSession() const = 0;
 
@@ -2507,7 +2507,7 @@ private:
                                   private PreviewDisplay::Listener,
                                   private ScopedCameraDevice::CaptureSession::ConfiguredCallback
     {
-        ~CaptureSessionMode()
+        ~CaptureSessionMode() override
         {
             captureSession.reset();
 
@@ -2789,7 +2789,7 @@ private:
             setEnabled (true);
         }
 
-        ~DeviceOrientationChangeListener()
+        ~DeviceOrientationChangeListener() override
         {
             setEnabled (false);
         }
@@ -2985,7 +2985,7 @@ private:
     {
         auto* env = getEnv();
 
-        auto* jArrayElems = env->GetIntArrayElements (jArray, 0);
+        auto* jArrayElems = env->GetIntArrayElements (jArray, nullptr);
         auto numElems = env->GetArrayLength (jArray);
 
         Array<int> juceArray;
