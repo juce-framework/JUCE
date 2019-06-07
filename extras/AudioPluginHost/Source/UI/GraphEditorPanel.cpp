@@ -1164,7 +1164,7 @@ GraphDocumentComponent::GraphDocumentComponent (AudioPluginFormatManager& fm,
 
     deviceManager.addChangeListener (graphPanel.get());
     deviceManager.addAudioCallback (&graphPlayer);
-    deviceManager.addMidiInputCallback (String(), &graphPlayer.getMidiMessageCollector());
+    deviceManager.addMidiInputDeviceCallback ({}, &graphPlayer.getMidiMessageCollector());
 }
 
 void GraphDocumentComponent::init()
@@ -1246,7 +1246,7 @@ void GraphDocumentComponent::unfocusKeyboardComponent()
 void GraphDocumentComponent::releaseGraph()
 {
     deviceManager.removeAudioCallback (&graphPlayer);
-    deviceManager.removeMidiInputCallback (String(), &graphPlayer.getMidiMessageCollector());
+    deviceManager.removeMidiInputDeviceCallback ({}, &graphPlayer.getMidiMessageCollector());
 
     if (graphPanel != nullptr)
     {
