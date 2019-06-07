@@ -1299,14 +1299,16 @@ public:
         ScopedXLock xlock (display);
         GetXProperty prop (display, windowH, atoms->state, 0, 64, false, atoms->state);
 
-        unsigned long state;
-        memcpy (&state, prop.data, sizeof (unsigned long));
+        if (prop.success && prop.actualType == atoms->state
+            && prop.actualFormat == 32 && prop.numItems > 0)
+        {
+            unsigned long state;
+            memcpy (&state, prop.data, sizeof (unsigned long));
 
-        return prop.success
-                && prop.actualType == atoms->state
-                && prop.actualFormat == 32
-                && prop.numItems > 0
-                && state == IconicState;
+            return state == IconicState;
+        }
+
+        return false;
     }
 
     void setFullScreen (bool shouldBeFullScreen) override
@@ -2757,10 +2759,14 @@ private:
     long getUserTime() const
     {
         GetXProperty prop (display, windowH, atoms->userTime, 0, 65536, false, XA_CARDINAL);
+
+        if (! prop.success)
+            return 0;
+
         long result;
         memcpy (&result, prop.data, sizeof (long));
 
-        return prop.success ? result : 0;
+        return result;
     }
 
     void updateBorderSize()
