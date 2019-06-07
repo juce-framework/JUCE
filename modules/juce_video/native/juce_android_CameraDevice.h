@@ -2647,10 +2647,10 @@ private:
     struct CaptureSessionPreviewMode : public CaptureSessionMode<CaptureSessionPreviewMode>
     {
         CaptureSessionPreviewMode (Pimpl& ownerToUse, ScopedCameraDevice& cameraDeviceToUse, GlobalRef& handlerToUse,
-                                   PreviewDisplay& pd, ImageReader& ir, int cameraSensorOrientation,
+                                   PreviewDisplay& pd, ImageReader& ir, int sensorOrientation,
                                    int cameraLensFacingToUse, StreamConfigurationMap& streamConfigurationMapToUse)
             : CaptureSessionMode<CaptureSessionPreviewMode> (ownerToUse, cameraDeviceToUse, handlerToUse, pd,
-                                                             cameraSensorOrientation, cameraLensFacingToUse, streamConfigurationMapToUse),
+                                                             sensorOrientation, cameraLensFacingToUse, streamConfigurationMapToUse),
               imageReader (ir)
         {
         }
@@ -2712,10 +2712,10 @@ private:
     struct CaptureSessionVideoRecordingMode : public CaptureSessionMode<CaptureSessionVideoRecordingMode>
     {
         CaptureSessionVideoRecordingMode (Pimpl& ownerToUse, ScopedCameraDevice& cameraDeviceToUse, GlobalRef& handlerToUse,
-                                          PreviewDisplay& pd, MediaRecorder& mr, int cameraSensorOrientation,
+                                          PreviewDisplay& pd, MediaRecorder& mr, int sensorOrientation,
                                           int cameraLensFacingToUse, StreamConfigurationMap& streamConfigurationMapToUse)
             : CaptureSessionMode<CaptureSessionVideoRecordingMode> (ownerToUse, cameraDeviceToUse, handlerToUse, pd,
-                                                                    cameraSensorOrientation, cameraLensFacingToUse, streamConfigurationMapToUse),
+                                                                    sensorOrientation, cameraLensFacingToUse, streamConfigurationMapToUse),
               mediaRecorder (mr)
         {
         }

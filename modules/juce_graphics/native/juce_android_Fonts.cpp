@@ -425,12 +425,12 @@ private:
         return file;
     }
 
-    static File getFontFile (const String& family, const String& style)
+    static File getFontFile (const String& family, const String& fontStyle)
     {
         String path ("/system/fonts/" + family);
 
-        if (style.isNotEmpty())
-            path << '-' << style;
+        if (fontStyle.isNotEmpty())
+            path << '-' << fontStyle;
 
         return File (path + ".ttf");
     }
