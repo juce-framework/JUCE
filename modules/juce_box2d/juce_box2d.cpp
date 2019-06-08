@@ -39,6 +39,7 @@
  #pragma clang diagnostic push
  #pragma clang diagnostic ignored "-Wsign-conversion"
  #pragma clang diagnostic ignored "-Wfloat-conversion"
+ #pragma clang diagnostic ignored "-Wcast-align"
  #if __has_warning("-Wzero-as-null-pointer-constant")
   #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
  #endif

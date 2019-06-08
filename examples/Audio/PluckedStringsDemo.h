@@ -268,7 +268,7 @@ public:
         setAudioChannels (numInputChannels, numOutputChannels);
     }
 
-    ~PluckedStringsDemo()
+    ~PluckedStringsDemo() override
     {
         shutdownAudio();
     }

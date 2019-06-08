@@ -48,7 +48,6 @@
 
 #pragma once
 
-
 //==============================================================================
 class ZoneColourPicker
 {
@@ -904,7 +903,7 @@ public:
         setSize (880, 720);
     }
 
-    ~MPEDemo()
+    ~MPEDemo() override
     {
         audioDeviceManager.removeMidiInputDeviceCallback ({}, this);
         audioDeviceManager.removeAudioCallback (this);

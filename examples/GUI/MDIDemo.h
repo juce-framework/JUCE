@@ -140,7 +140,7 @@ class DemoMultiDocumentPanel    : public MultiDocumentPanel
 public:
     DemoMultiDocumentPanel() {}
 
-    ~DemoMultiDocumentPanel()
+    ~DemoMultiDocumentPanel() override
     {
         closeAllDocuments (true);
     }

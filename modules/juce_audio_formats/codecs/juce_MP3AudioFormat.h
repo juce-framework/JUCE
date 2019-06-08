@@ -50,7 +50,7 @@ class MP3AudioFormat  : public AudioFormat
 public:
     //==============================================================================
     MP3AudioFormat();
-    ~MP3AudioFormat();
+    ~MP3AudioFormat() override;
 
     //==============================================================================
     Array<int> getPossibleSampleRates() override;

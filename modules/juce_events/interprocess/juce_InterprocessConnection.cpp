@@ -290,7 +290,7 @@ bool InterprocessConnection::readNextMessage()
     uint32 messageHeader[2];
     auto bytes = readData (messageHeader, sizeof (messageHeader));
 
-    if (bytes == sizeof (messageHeader)
+    if (bytes == (int) sizeof (messageHeader)
          && ByteOrder::swapIfBigEndian (messageHeader[0]) == magicMessageHeader)
     {
         auto bytesInMessage = (int) ByteOrder::swapIfBigEndian (messageHeader[1]);

@@ -345,7 +345,7 @@ public:
         setSize (500, 500);
     }
 
-    ~AudioLatencyDemo()
+    ~AudioLatencyDemo() override
     {
         audioDeviceManager.removeAudioCallback (liveAudioScroller.get());
         audioDeviceManager.removeAudioCallback (latencyTester    .get());

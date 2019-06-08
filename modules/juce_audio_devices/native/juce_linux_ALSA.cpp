@@ -494,7 +494,7 @@ public:
         initialiseRatesAndChannels();
     }
 
-    ~ALSAThread()
+    ~ALSAThread() override
     {
         close();
     }
@@ -853,7 +853,7 @@ public:
     {
     }
 
-    ~ALSAAudioIODevice()
+    ~ALSAAudioIODevice() override
     {
         close();
     }

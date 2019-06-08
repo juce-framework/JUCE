@@ -216,7 +216,7 @@ class iOSAudioIODeviceType  : public AudioIODeviceType,
 {
 public:
     iOSAudioIODeviceType();
-    ~iOSAudioIODeviceType();
+    ~iOSAudioIODeviceType() override;
 
     void scanForDevices() override;
     StringArray getDeviceNames (bool) const override;
@@ -262,7 +262,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         sessionHolder->activeDevices.add (this);
     }
 
-    ~Pimpl()
+    ~Pimpl() override
     {
         sessionHolder->activeDevices.removeFirstMatchingValue (this);
 

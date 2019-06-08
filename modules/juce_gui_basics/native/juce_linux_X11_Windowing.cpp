@@ -594,7 +594,7 @@ public:
         }
     }
 
-    ~XBitmapImage()
+    ~XBitmapImage() override
     {
         ScopedXLock xlock (display);
 
@@ -1070,16 +1070,16 @@ public:
         {
             ScopedXDisplay xDisplay;
 
-            if (auto display = xDisplay.display)
+            if (auto d = xDisplay.display)
             {
                 Window root, child;
                 int x, y, winx, winy;
                 unsigned int mask;
                 int mouseMods = 0;
 
-                ScopedXLock xlock (display);
+                ScopedXLock xlock (d);
 
-                if (XQueryPointer (display, RootWindow (display, DefaultScreen (display)),
+                if (XQueryPointer (d, RootWindow (d, DefaultScreen (d)),
                                    &root, &child, &x, &y, &winx, &winy, &mask) != False)
                 {
                     if ((mask & Button1Mask) != 0)  mouseMods |= ModifierKeys::leftButtonModifier;
@@ -1094,7 +1094,7 @@ public:
         };
     }
 
-    ~LinuxComponentPeer()
+    ~LinuxComponentPeer() override
     {
         // it's dangerous to delete a window on a thread other than the message thread..
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
@@ -1299,11 +1299,16 @@ public:
         ScopedXLock xlock (display);
         GetXProperty prop (display, windowH, atoms->state, 0, 64, false, atoms->state);
 
-        return prop.success
-                && prop.actualType == atoms->state
-                && prop.actualFormat == 32
-                && prop.numItems > 0
-                && ((unsigned long*) prop.data)[0] == IconicState;
+        if (prop.success && prop.actualType == atoms->state
+            && prop.actualFormat == 32 && prop.numItems > 0)
+        {
+            unsigned long state;
+            memcpy (&state, prop.data, sizeof (unsigned long));
+
+            return state == IconicState;
+        }
+
+        return false;
     }
 
     void setFullScreen (bool shouldBeFullScreen) override
@@ -2754,7 +2759,14 @@ private:
     long getUserTime() const
     {
         GetXProperty prop (display, windowH, atoms->userTime, 0, 65536, false, XA_CARDINAL);
-        return prop.success ? *(long*) prop.data : 0;
+
+        if (! prop.success)
+            return 0;
+
+        long result;
+        memcpy (&result, prop.data, sizeof (long));
+
+        return result;
     }
 
     void updateBorderSize()
@@ -2774,7 +2786,14 @@ private:
 
                 if (prop.success && prop.actualFormat == 32)
                 {
-                    auto* sizes = (const unsigned long*) prop.data;
+                    auto data = prop.data;
+                    std::array<unsigned long, 4> sizes;
+
+                    for (auto& size : sizes)
+                    {
+                        memcpy (&size, data, sizeof (unsigned long));
+                        data += sizeof (unsigned long);
+                    }
 
                     windowBorder = BorderSize<int> ((int) sizes[2], (int) sizes[0],
                                                     (int) sizes[3], (int) sizes[1]);
@@ -3141,11 +3160,18 @@ private:
                  && prop.actualFormat == 32
                  && prop.numItems != 0)
             {
-                auto* types = (const unsigned long*) prop.data;
+                auto* types = prop.data;
 
                 for (unsigned long i = 0; i < prop.numItems; ++i)
-                    if (types[i] != None)
-                        srcMimeTypeAtomList.add (types[i]);
+                {
+                    unsigned long type;
+                    memcpy (&type, types, sizeof (unsigned long));
+
+                    if (type != None)
+                        srcMimeTypeAtomList.add (type);
+
+                    types += sizeof (unsigned long);
+                }
             }
         }
 
@@ -3566,8 +3592,16 @@ void Displays::findDisplays (float masterScale)
 
                 for (int i = 0; i < numMonitors; ++i)
                 {
-                    if (auto* position = (const long*) getWorkAreaPropertyData (i))
+                    if (auto* positionData = getWorkAreaPropertyData (i))
                     {
+                        std::array<long, 4> position;
+
+                        for (auto& p : position)
+                        {
+                            memcpy (&p, positionData, sizeof (long));
+                            positionData += sizeof (long);
+                        }
+
                         Display d;
                         d.totalArea = Rectangle<int> ((int) position[0], (int) position[1],
                                                       (int) position[2], (int) position[3]);

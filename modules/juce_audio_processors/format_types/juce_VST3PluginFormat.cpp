@@ -3078,8 +3078,8 @@ void VST3PluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& resul
         VST3ModuleHandle::getAllDescriptionsForFile (results, fileOrIdentifier);
 }
 
-void VST3PluginFormat::createPluginInstance (const PluginDescription& description, double, int,
-                                             void* userData, PluginCreationCallback callback)
+void VST3PluginFormat::createPluginInstance (const PluginDescription& description,
+                                             double, int, PluginCreationCallback callback)
 {
     std::unique_ptr<VST3PluginInstance> result;
 
@@ -3109,9 +3109,9 @@ void VST3PluginFormat::createPluginInstance (const PluginDescription& descriptio
     String errorMsg;
 
     if (result == nullptr)
-        errorMsg = String (NEEDS_TRANS ("Unable to load XXX plug-in file")).replace ("XXX", "VST-3");
+        errorMsg = TRANS ("Unable to load XXX plug-in file").replace ("XXX", "VST-3");
 
-    callback (userData, result.release(), errorMsg);
+    callback (std::move (result), errorMsg);
 }
 
 bool VST3PluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept

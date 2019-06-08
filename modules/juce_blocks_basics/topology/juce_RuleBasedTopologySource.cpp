@@ -31,7 +31,7 @@ struct RuleBasedTopologySource::Internal  : public TopologySource::Listener,
         detector.addListener (this);
     }
 
-    ~Internal()
+    ~Internal() override
     {
         detector.removeListener (this);
     }

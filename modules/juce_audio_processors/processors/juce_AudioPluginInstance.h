@@ -115,8 +115,8 @@ protected:
 
     AudioPluginInstance() = default;
     AudioPluginInstance (const BusesProperties& ioLayouts) : AudioProcessor (ioLayouts) {}
-    template <int numLayouts>
-    AudioPluginInstance (const short channelLayoutList[(size_t) numLayouts][2]) : AudioProcessor (channelLayoutList) {}
+    template <size_t numLayouts>
+    AudioPluginInstance (const short channelLayoutList[numLayouts][2]) : AudioProcessor (channelLayoutList) {}
 
 private:
     void assertOnceOnDeprecatedMethodUse() const noexcept;

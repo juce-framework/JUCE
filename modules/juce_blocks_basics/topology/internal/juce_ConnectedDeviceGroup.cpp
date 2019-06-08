@@ -53,7 +53,7 @@ struct ConnectedDeviceGroup  : private AsyncUpdater,
         sendTopologyRequest();
     }
 
-    ~ConnectedDeviceGroup()
+    ~ConnectedDeviceGroup() override
     {
         for (const auto& device : currentDeviceInfo)
             detector.handleDeviceRemoved (device);

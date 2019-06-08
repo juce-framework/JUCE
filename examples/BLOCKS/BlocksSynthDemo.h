@@ -302,7 +302,7 @@ public:
         synthesiser.addSound (new TriangleSound());
     }
 
-    ~Audio()
+    ~Audio() override
     {
         audioDeviceManager.removeAudioCallback (this);
     }
@@ -613,7 +613,7 @@ public:
         topologyChanged();
     }
 
-    ~BlocksSynthDemo()
+    ~BlocksSynthDemo() override
     {
         if (activeBlock != nullptr)
             detachActiveBlock();

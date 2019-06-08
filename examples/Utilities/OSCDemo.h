@@ -58,7 +58,7 @@ public:
         setModel (this);
     }
 
-    ~OSCLogListBox() {}
+    ~OSCLogListBox() override = default;
 
     //==============================================================================
     int getNumRows() override

@@ -41,10 +41,10 @@ public:
     /** Creates a AudioParameterChoice with the specified parameters.
 
         @param parameterID         The parameter ID to use
-        @param name                The parameter name to use
+        @param parameterName       The parameter name to use
         @param choices             The set of choices to use
         @param defaultItemIndex    The index of the default choice
-        @param label               An optional label for the parameter's value
+        @param parameterLabel      An optional label for the parameter's value
         @param stringFromIndex     An optional lambda function that converts a choice
                                    index to a string with a maximum length. This may
                                    be used by hosts to display the parameter's value.
@@ -52,10 +52,10 @@ public:
                                    converts it into a choice index. Some hosts use this
                                    to allow users to type in parameter values.
     */
-    AudioParameterChoice (const String& parameterID, const String& name,
+    AudioParameterChoice (const String& parameterID, const String& parameterName,
                           const StringArray& choices,
                           int defaultItemIndex,
-                          const String& label = String(),
+                          const String& parameterLabel = String(),
                           std::function<String(int index, int maximumStringLength)> stringFromIndex = nullptr,
                           std::function<int(const String& text)> indexFromString = nullptr);
 

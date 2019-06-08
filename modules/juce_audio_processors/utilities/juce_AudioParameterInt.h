@@ -41,11 +41,11 @@ public:
     /** Creates a AudioParameterInt with the specified parameters.
 
         @param parameterID         The parameter ID to use
-        @param name                The parameter name to use
+        @param parameterName       The parameter name to use
         @param minValue            The minimum parameter value
         @param maxValue            The maximum parameter value
         @param defaultValue        The default value
-        @param label               An optional label for the parameter's value
+        @param parameterLabel      An optional label for the parameter's value
         @param stringFromInt       An optional lambda function that converts a int
                                    value to a string with a maximum length. This may
                                    be used by hosts to display the parameter's value.
@@ -53,10 +53,10 @@ public:
                                    and converts it into an int. Some hosts use this
                                    to allow users to type in parameter values.
     */
-    AudioParameterInt (const String& parameterID, const String& name,
+    AudioParameterInt (const String& parameterID, const String& parameterName,
                        int minValue, int maxValue,
                        int defaultValue,
-                       const String& label = String(),
+                       const String& parameterLabel = String(),
                        std::function<String(int value, int maximumStringLength)> stringFromInt = nullptr,
                        std::function<int(const String& text)> intFromString = nullptr);
 

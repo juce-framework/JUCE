@@ -41,9 +41,9 @@ public:
         constant for its lifetime.
     */
     AudioProcessorParameterWithID (const String& parameterID,
-                                   const String& name,
-                                   const String& label = String(),
-                                   Category category = AudioProcessorParameter::genericParameter);
+                                   const String& parameterName,
+                                   const String& parameterLabel = String(),
+                                   Category parameterCategory = AudioProcessorParameter::genericParameter);
 
     /** Destructor. */
     ~AudioProcessorParameterWithID() override;

@@ -230,7 +230,15 @@ public:
     /** Returns a pointer to the first element in the array.
         This method is provided for compatibility with the standard C++ containers.
     */
-    inline ObjectClass** data() const noexcept
+    inline ObjectClass** data() noexcept
+    {
+        return begin();
+    }
+
+    /** Returns a pointer to the first element in the array.
+        This method is provided for compatibility with the standard C++ containers.
+    */
+    inline ObjectClass* const* data() const noexcept
     {
         return begin();
     }

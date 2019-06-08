@@ -278,7 +278,7 @@ public:
         setSize (640, 480);
     }
 
-    ~AudioSynthesiserDemo()
+    ~AudioSynthesiserDemo() override
     {
         audioSourcePlayer.setSource (nullptr);
         audioDeviceManager.removeMidiInputDeviceCallback ({}, &(synthAudioSource.midiCollector));

@@ -75,15 +75,19 @@ AudioProcessorGraph::Node::Ptr FilterGraph::getNodeForName (const String& name) 
     return nullptr;
 }
 
-void FilterGraph::addPlugin (const PluginDescription& desc, Point<double> p)
+void FilterGraph::addPlugin (const PluginDescription& desc, Point<double> pos)
 {
     formatManager.createPluginInstanceAsync (desc,
                                              graph.getSampleRate(),
                                              graph.getBlockSize(),
-                                             new AsyncCallback (*this, p));
+                                             [this, pos] (std::unique_ptr<AudioPluginInstance> instance, const String& error)
+                                             {
+                                                 addPluginCallback (std::move (instance), error, pos);
+                                             });
 }
 
-void FilterGraph::addFilterCallback (AudioPluginInstance* instance, const String& error, Point<double> pos)
+void FilterGraph::addPluginCallback (std::unique_ptr<AudioPluginInstance> instance,
+                                     const String& error, Point<double> pos)
 {
     if (instance == nullptr)
     {
@@ -95,7 +99,7 @@ void FilterGraph::addFilterCallback (AudioPluginInstance* instance, const String
     {
         instance->enableAllBuses();
 
-        if (auto node = graph.addNode (instance))
+        if (auto node = graph.addNode (std::move (instance)))
         {
             node->properties.set ("x", pos.x);
             node->properties.set ("y", pos.y);
@@ -256,8 +260,8 @@ void FilterGraph::setLastDocumentOpened (const File& file)
 }
 
 //==============================================================================
-static void readBusLayoutFromXml (AudioProcessor::BusesLayout& busesLayout, AudioProcessor* plugin,
-                                  const XmlElement& xml, const bool isInput)
+static void readBusLayoutFromXml (AudioProcessor::BusesLayout& busesLayout, AudioProcessor& plugin,
+                                  const XmlElement& xml, bool isInput)
 {
     auto& targetBuses = (isInput ? busesLayout.inputBuses
                                  : busesLayout.outputBuses);
@@ -272,12 +276,12 @@ static void readBusLayoutFromXml (AudioProcessor::BusesLayout& busesLayout, Audi
 
             // the number of buses on busesLayout may not be in sync with the plugin after adding buses
             // because adding an input bus could also add an output bus
-            for (int actualIdx = plugin->getBusCount (isInput) - 1; actualIdx < busIdx; ++actualIdx)
-                if (! plugin->addBus (isInput))
+            for (int actualIdx = plugin.getBusCount (isInput) - 1; actualIdx < busIdx; ++actualIdx)
+                if (! plugin.addBus (isInput))
                     return;
 
             for (int actualIdx = targetBuses.size() - 1; actualIdx < busIdx; ++actualIdx)
-                targetBuses.add (plugin->getChannelLayoutOfBus (isInput, busIdx));
+                targetBuses.add (plugin.getChannelLayoutOfBus (isInput, busIdx));
 
             auto layout = e->getStringAttribute ("layout");
 
@@ -289,7 +293,7 @@ static void readBusLayoutFromXml (AudioProcessor::BusesLayout& busesLayout, Audi
     // if the plugin has more buses than specified in the xml, then try to remove them!
     while (maxNumBuses < targetBuses.size())
     {
-        if (! plugin->removeBus (isInput))
+        if (! plugin.removeBus (isInput))
             return;
 
         targetBuses.removeLast();
@@ -374,20 +378,20 @@ void FilterGraph::createNodeFromXml (const XmlElement& xml)
 
     String errorMessage;
 
-    if (auto* instance = formatManager.createPluginInstance (pd, graph.getSampleRate(),
-                                                             graph.getBlockSize(), errorMessage))
+    if (auto instance = formatManager.createPluginInstance (pd, graph.getSampleRate(),
+                                                            graph.getBlockSize(), errorMessage))
     {
         if (auto* layoutEntity = xml.getChildByName ("LAYOUT"))
         {
             auto layout = instance->getBusesLayout();
 
-            readBusLayoutFromXml (layout, instance, *layoutEntity, true);
-            readBusLayoutFromXml (layout, instance, *layoutEntity, false);
+            readBusLayoutFromXml (layout, *instance, *layoutEntity, true);
+            readBusLayoutFromXml (layout, *instance, *layoutEntity, false);
 
             instance->setBusesLayout (layout);
         }
 
-        if (auto node = graph.addNode (instance, NodeID ((uint32) xml.getIntAttribute ("uid"))))
+        if (auto node = graph.addNode (std::move (instance), NodeID ((uint32) xml.getIntAttribute ("uid"))))
         {
             if (auto* state = xml.getChildByName ("STATE"))
             {

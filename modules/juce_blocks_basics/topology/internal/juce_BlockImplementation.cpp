@@ -61,7 +61,7 @@ public:
         updateMidiConnectionListener();
     }
 
-    ~BlockImplementation()
+    ~BlockImplementation() override
     {
         markDisconnected();
     }
@@ -757,7 +757,7 @@ public:
             activateTouchSurface();
         }
 
-        ~TouchSurfaceImplementation()
+        ~TouchSurfaceImplementation() override
         {
             disableTouchSurface();
         }
@@ -875,7 +875,7 @@ public:
         {
         }
 
-        ~ControlButtonImplementation()
+        ~ControlButtonImplementation() override
         {
         }
 

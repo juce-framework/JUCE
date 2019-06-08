@@ -304,10 +304,10 @@ public:
 
     String getExtraPkgConfigString() const      { return extraPkgConfigValue.get(); }
 
-    static MakefileProjectExporter* createForSettings (Project& project, const ValueTree& settings)
+    static MakefileProjectExporter* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
-        if (settings.hasType (getValueTreeTypeName()))
-            return new MakefileProjectExporter (project, settings);
+        if (settingsToUse.hasType (getValueTreeTypeName()))
+            return new MakefileProjectExporter (projectToUse, settingsToUse);
 
         return nullptr;
     }

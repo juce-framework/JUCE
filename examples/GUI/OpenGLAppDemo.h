@@ -63,7 +63,7 @@ public:
         setSize (800, 600);
     }
 
-    ~OpenGLAppDemo()
+    ~OpenGLAppDemo() override
     {
         shutdownOpenGL();
     }
