@@ -88,7 +88,7 @@ public:
          */
         double continuousTimeInSamples;
 
-        /** The current play position, in pulses-per-quarter-note. */
+        /** The current play position, in units of quarter-notes. */
         double ppqPosition;
 
         /** The position of the start of the last bar, in units of quarter-notes.
