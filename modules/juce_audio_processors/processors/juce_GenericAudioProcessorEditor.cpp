@@ -33,9 +33,9 @@ class ParameterListener   : private AudioProcessorParameter::Listener,
 {
 public:
     ParameterListener (AudioProcessor& proc, AudioProcessorParameter& param)
-        : processor (proc), parameter (param)
+        : processor (proc), parameter (param), isLegacyParam (LegacyAudioParameter::isLegacy (&param))
     {
-        if (LegacyAudioParameter::isLegacy (&parameter))
+        if (isLegacyParam)
             processor.addListener (this);
         else
             parameter.addListener (this);
@@ -45,7 +45,7 @@ public:
 
     ~ParameterListener() override
     {
-        if (LegacyAudioParameter::isLegacy (&parameter))
+        if (isLegacyParam)
             processor.removeListener (this);
         else
             parameter.removeListener (this);
@@ -93,6 +93,7 @@ private:
     AudioProcessor& processor;
     AudioProcessorParameter& parameter;
     Atomic<int> parameterValueHasChanged { 0 };
+    const bool isLegacyParam;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParameterListener)
 };
@@ -498,6 +499,11 @@ public:
         setSize (maxWidth, height);
     }
 
+    ~ParametersPanel()
+    {
+        paramComponents.clear();
+    }
+
     void paint (Graphics& g) override
     {
         g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
@@ -533,6 +539,11 @@ struct GenericAudioProcessorEditor::Pimpl
         owner.addAndMakeVisible (view);
 
         view.setScrollBarsShown (true, false);
+    }
+
+    ~Pimpl()
+    {
+        view.setViewedComponent (nullptr, false);
     }
 
     void resize (Rectangle<int> size)
