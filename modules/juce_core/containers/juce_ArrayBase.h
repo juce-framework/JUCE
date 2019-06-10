@@ -521,13 +521,13 @@ private:
         {
             memmove (elements + currentIndex,
                      elements + currentIndex + 1,
-                     sizeof (ElementType) * (size_t) (newIndex - currentIndex));
+                     (size_t) (newIndex - currentIndex) * sizeof (ElementType));
         }
         else
         {
             memmove (elements + newIndex + 1,
                      elements + newIndex,
-                     sizeof (ElementType) * (size_t) (currentIndex - newIndex));
+                     (size_t) (currentIndex - newIndex) * sizeof (ElementType));
         }
 
         memcpy (elements + newIndex, tempCopy, sizeof (ElementType));

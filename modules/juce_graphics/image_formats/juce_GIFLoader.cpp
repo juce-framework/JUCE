@@ -426,7 +426,7 @@ bool GIFImageFormat::canUnderstand (InputStream& in)
 {
     char header [4];
 
-    return (in.read (header, sizeof (header)) == sizeof (header))
+    return (in.read (header, sizeof (header)) == (int) sizeof (header))
              && header[0] == 'G'
              && header[1] == 'I'
              && header[2] == 'F';

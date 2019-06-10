@@ -1001,7 +1001,7 @@ public:
                     }
                     else
                     {
-                        bytesPerFrame = numChannels * bitsPerSample / 8;
+                        bytesPerFrame = (int) (numChannels * bitsPerSample / 8);
                     }
 
                     if (format == 3)
@@ -1220,17 +1220,17 @@ public:
         return true;
     }
 
-    static void copySampleData (unsigned int bitsPerSample, const bool usesFloatingPointData,
+    static void copySampleData (unsigned int numBitsPerSample, const bool floatingPointData,
                                 int* const* destSamples, int startOffsetInDestBuffer, int numDestChannels,
-                                const void* sourceData, int numChannels, int numSamples) noexcept
+                                const void* sourceData, int numberOfChannels, int numSamples) noexcept
     {
-        switch (bitsPerSample)
+        switch (numBitsPerSample)
         {
-            case 8:     ReadHelper<AudioData::Int32, AudioData::UInt8, AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, sourceData, numChannels, numSamples); break;
-            case 16:    ReadHelper<AudioData::Int32, AudioData::Int16, AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, sourceData, numChannels, numSamples); break;
-            case 24:    ReadHelper<AudioData::Int32, AudioData::Int24, AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, sourceData, numChannels, numSamples); break;
-            case 32:    if (usesFloatingPointData) ReadHelper<AudioData::Float32, AudioData::Float32, AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, sourceData, numChannels, numSamples);
-                        else                       ReadHelper<AudioData::Int32,   AudioData::Int32,   AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, sourceData, numChannels, numSamples);
+            case 8:     ReadHelper<AudioData::Int32, AudioData::UInt8, AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, sourceData, numberOfChannels, numSamples); break;
+            case 16:    ReadHelper<AudioData::Int32, AudioData::Int16, AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, sourceData, numberOfChannels, numSamples); break;
+            case 24:    ReadHelper<AudioData::Int32, AudioData::Int24, AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, sourceData, numberOfChannels, numSamples); break;
+            case 32:    if (floatingPointData) ReadHelper<AudioData::Float32, AudioData::Float32, AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, sourceData, numberOfChannels, numSamples);
+                        else                   ReadHelper<AudioData::Int32,   AudioData::Int32,   AudioData::LittleEndian>::read (destSamples, startOffsetInDestBuffer, numDestChannels, sourceData, numberOfChannels, numSamples);
                         break;
             default:    jassertfalse; break;
         }
@@ -1518,17 +1518,17 @@ private:
         }
     }
 
-    static int getChannelMaskFromChannelLayout (const AudioChannelSet& channelLayout)
+    static int getChannelMaskFromChannelLayout (const AudioChannelSet& layout)
     {
-        if (channelLayout.isDiscreteLayout())
+        if (layout.isDiscreteLayout())
             return 0;
 
         // Don't add an extended format chunk for mono and stereo. Basically, all wav players
         // interpret a wav file with only one or two channels to be mono or stereo anyway.
-        if (channelLayout == AudioChannelSet::mono() || channelLayout == AudioChannelSet::stereo())
+        if (layout == AudioChannelSet::mono() || layout == AudioChannelSet::stereo())
             return 0;
 
-        auto channels = channelLayout.getChannelTypes();
+        auto channels = layout.getChannelTypes();
         auto wavChannelMask = 0;
 
         for (auto channel : channels)
@@ -1581,7 +1581,7 @@ public:
         {
             jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read.
 
-            zeromem (result, sizeof (float) * (size_t) num);
+            zeromem (result, (size_t) num * sizeof (float));
             return;
         }
 
@@ -1625,6 +1625,8 @@ public:
             default:    jassertfalse; break;
         }
     }
+
+    using AudioFormatReader::readMaxLevels;
 
 private:
     template <typename SampleType>

@@ -65,7 +65,7 @@ public:
         // We need to clear the output buffers before returning, in case they're full of junk..
         for (int j = 0; j < numOutputChannels; ++j)
             if (float* outputChannel = outputChannelData[j])
-                zeromem (outputChannel, sizeof (float) * (size_t) numberOfSamples);
+                zeromem (outputChannel, (size_t) numberOfSamples * sizeof (float));
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LiveScrollingAudioDisplay)

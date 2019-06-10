@@ -40,7 +40,7 @@ public:
     }
 
     //==============================================================================
-    ~DepreciatedVersionReader()
+    ~DepreciatedVersionReader() override
     {
         deviceConnection.removeListener (this);
     }

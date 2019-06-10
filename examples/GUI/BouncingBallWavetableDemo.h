@@ -70,7 +70,7 @@ public:
         startTimerHz (60);
     }
 
-    ~BouncingBallWavetableDemo()
+    ~BouncingBallWavetableDemo() override
     {
         shutdownAudio();
     }

@@ -40,7 +40,7 @@ struct FTLibWrapper  : public ReferenceCountedObject
 
     ~FTLibWrapper()
     {
-        if (library != 0)
+        if (library != nullptr)
             FT_Done_FreeType (library);
     }
 
@@ -71,7 +71,7 @@ struct FTFaceWrapper     : public ReferenceCountedObject
 
     ~FTFaceWrapper()
     {
-        if (face != 0)
+        if (face != nullptr)
             FT_Done_Face (face);
     }
 
@@ -244,7 +244,7 @@ private:
         {
             FTFaceWrapper face (library, file, faceIndex);
 
-            if (face.face != 0)
+            if (face.face != nullptr)
             {
                 if (faceIndex == 0)
                     numFaces = (int) face.face->num_faces;

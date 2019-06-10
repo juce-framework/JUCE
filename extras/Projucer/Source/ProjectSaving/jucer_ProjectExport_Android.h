@@ -86,10 +86,10 @@ public:
     static const char* getDefaultActivityClass()         { return "com.roli.juce.JuceActivity"; }
     static const char* getDefaultApplicationClass()      { return "com.roli.juce.JuceApp"; }
 
-    static AndroidProjectExporter* createForSettings (Project& project, const ValueTree& settings)
+    static AndroidProjectExporter* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
-        if (settings.hasType (getValueTreeTypeName()))
-            return new AndroidProjectExporter (project, settings);
+        if (settingsToUse.hasType (getValueTreeTypeName()))
+            return new AndroidProjectExporter (projectToUse, settingsToUse);
 
         return nullptr;
     }
@@ -1742,12 +1742,12 @@ private:
         }
     }
 
-    static XmlElement* getOrCreateChildWithName (XmlElement& element, const String& name)
+    static XmlElement* getOrCreateChildWithName (XmlElement& element, const String& childName)
     {
-        auto* child = element.getChildByName (name);
+        auto* child = element.getChildByName (childName);
 
         if (child == nullptr)
-            child = element.createNewChildElement (name);
+            child = element.createNewChildElement (childName);
 
         return child;
     }

@@ -234,11 +234,11 @@ public:
         return vp->getProperties() ["contentClass"].toString();
     }
 
-    static void setViewportGenericComponentClass (Viewport* vp, const String& className)
+    static void setViewportGenericComponentClass (Viewport* vp, const String& name)
     {
-        if (className != getViewportGenericComponentClass (vp))
+        if (name != getViewportGenericComponentClass (vp))
         {
-            vp->getProperties().set ("contentClass", className);
+            vp->getProperties().set ("contentClass", name);
             updateViewportContentComp (vp);
         }
     }

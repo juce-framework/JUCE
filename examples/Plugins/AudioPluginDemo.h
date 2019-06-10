@@ -160,6 +160,8 @@ public:
         }
     }
 
+    using SynthesiserVoice::renderNextBlock;
+
 private:
     double currentAngle = 0.0;
     double angleDelta   = 0.0;
@@ -187,7 +189,7 @@ public:
         initialiseSynth();
     }
 
-    ~JuceDemoPluginAudioProcessor() {}
+    ~JuceDemoPluginAudioProcessor() override = default;
 
     //==============================================================================
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override
@@ -378,7 +380,7 @@ private:
             startTimerHz (30);
         }
 
-        ~JuceDemoPluginAudioProcessorEditor() {}
+        ~JuceDemoPluginAudioProcessorEditor() override {}
 
         //==============================================================================
         void paint (Graphics& g) override

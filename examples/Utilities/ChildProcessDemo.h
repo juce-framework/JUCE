@@ -103,7 +103,7 @@ public:
         setSize (500, 500);
     }
 
-    ~ChildProcessDemo()
+    ~ChildProcessDemo() override
     {
         masterProcess.reset();
     }

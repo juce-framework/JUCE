@@ -41,9 +41,9 @@ void BitmapLEDProgram::setLED (uint32 x, uint32 y, LEDColour colour)
         {
             auto bit = (x + y * w) * 16;
 
-            block.setDataBits (bit,      5, colour.getRed()   >> 3);
-            block.setDataBits (bit + 5,  6, colour.getGreen() >> 2);
-            block.setDataBits (bit + 11, 5, colour.getBlue()  >> 3);
+            block.setDataBits (bit,      5, (uint32) (colour.getRed()   >> 3));
+            block.setDataBits (bit + 5,  6, (uint32) (colour.getGreen() >> 2));
+            block.setDataBits (bit + 11, 5, (uint32) (colour.getBlue()  >> 3));
         }
     }
     else

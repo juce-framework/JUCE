@@ -116,7 +116,7 @@ public:
         startTimer (500);
     }
 
-    ~MidiDemo()
+    ~MidiDemo() override
     {
         stopTimer();
         midiInputs .clear();

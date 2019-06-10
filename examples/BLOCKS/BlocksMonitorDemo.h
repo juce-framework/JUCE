@@ -85,7 +85,7 @@ public:
         constrainer.setMinimumOnscreenAmounts (50, 50, 50, 50);
     }
 
-    ~BlockComponent()
+    ~BlockComponent() override
     {
         // Remove any listeners
         if (auto touchSurface = block->getTouchSurface())
@@ -150,7 +150,7 @@ public:
             { CB::down }
         };
 
-        for (auto i = 0; i < numElementsInArray (map); ++i)
+        for (int i = 0; i < numElementsInArray (map); ++i)
             if (map[i].contains (f))
                 return i;
 
@@ -609,7 +609,7 @@ public:
         topologyChanged();
     }
 
-    ~BlocksMonitorDemo()
+    ~BlocksMonitorDemo() override
     {
         topologySource.removeListener (this);
     }

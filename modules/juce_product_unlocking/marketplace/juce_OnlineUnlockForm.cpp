@@ -62,7 +62,7 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
         startThread (4);
     }
 
-    ~OverlayComp()
+    ~OverlayComp() override
     {
         stopThread (10000);
     }

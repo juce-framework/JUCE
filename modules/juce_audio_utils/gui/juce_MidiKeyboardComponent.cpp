@@ -50,6 +50,8 @@ struct MidiKeyboardComponent::UpDownButton  : public Button
         owner.setLowestVisibleKey (note * 12);
     }
 
+    using Button::clicked;
+
     void paintButton (Graphics& g, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
     {
         owner.drawUpDownButton (g, getWidth(), getHeight(),

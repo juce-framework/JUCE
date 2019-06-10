@@ -424,7 +424,7 @@ private:
             startThread();
         }
 
-        ~ConnectionThread()
+        ~ConnectionThread() override
         {
             webInputStream->cancel();
             signalThreadShouldExit();
@@ -559,11 +559,11 @@ private:
 
         LocalRef<jclass> responseClass (env->FindClass ("android/webkit/WebResourceResponse"));
 
-        if (responseClass != 0)
+        if (responseClass != nullptr)
         {
             jmethodID method = env->GetMethodID (responseClass, "getReasonPhrase", "()Ljava/lang/String;");
 
-            if (method != 0)
+            if (method != nullptr)
             {
                 auto errorString = LocalRef<jstring> ((jstring) env->CallObjectMethod (errorResponse, method));
 
@@ -671,7 +671,7 @@ void WebBrowserComponent::checkWindowAssociation()
             // page to avoid this, (and send it back when it's made visible again).
 
             blankPageShown = true;
-            browser->goToURL ("about:blank", 0, 0);
+            browser->goToURL ("about:blank", nullptr, nullptr);
         }
     }
 }
@@ -711,7 +711,7 @@ void WebBrowserComponent::clearCookies()
     auto cookieManager = LocalRef<jobject> (env->CallStaticObjectMethod (AndroidCookieManager,
                                                                          AndroidCookieManager.getInstance));
 
-    jmethodID clearCookiesMethod = 0;
+    jmethodID clearCookiesMethod = nullptr;
 
     if (getAndroidSDKVersion() >= 21)
     {

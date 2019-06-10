@@ -115,7 +115,7 @@ protected:
 
     AudioPluginInstance() = default;
     AudioPluginInstance (const BusesProperties& ioLayouts) : AudioProcessor (ioLayouts) {}
-    template <int numLayouts>
+    template <size_t numLayouts>
     AudioPluginInstance (const short channelLayoutList[numLayouts][2]) : AudioProcessor (channelLayoutList) {}
 
 private:

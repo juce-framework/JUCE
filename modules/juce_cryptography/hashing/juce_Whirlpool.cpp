@@ -51,7 +51,7 @@ struct WhirlpoolProcessor
             if (bytesRead < (int) sizeof (data))
                 break;
 
-            numBytesToRead -= sizeof (data);
+            numBytesToRead -= (int64) sizeof (data);
         }
 
         finalize (result);
@@ -84,7 +84,7 @@ private:
         while (numBits > 8)
         {
             b = ((source[sourcePos] << sourceGap) & 0xff)
-                  | ((source[sourcePos + 1] & 0xff) >> (8 - sourceGap));
+                  | (uint32) ((source[sourcePos + 1] & 0xff) >> (8 - sourceGap));
 
             buffer[bufferPos++] |= (uint8) (b >> bufferRem);
             bufferBits += 8 - bufferRem;

@@ -53,7 +53,6 @@ public:
     /** Animates the window to the desired tab. */
     void goToTab (int targetTabIndex);
 
-
     //==============================================================================
     /** @internal */
     void resized() override;

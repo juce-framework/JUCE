@@ -108,6 +108,8 @@ public:
         }
     }
 
+    using SynthesiserVoice::renderNextBlock;
+
     /** Returns the next sample */
     double getSample()
     {
@@ -300,7 +302,7 @@ public:
         synthesiser.addSound (new TriangleSound());
     }
 
-    ~Audio()
+    ~Audio() override
     {
         audioDeviceManager.removeAudioCallback (this);
     }
@@ -611,7 +613,7 @@ public:
         topologyChanged();
     }
 
-    ~BlocksSynthDemo()
+    ~BlocksSynthDemo() override
     {
         if (activeBlock != nullptr)
             detachActiveBlock();

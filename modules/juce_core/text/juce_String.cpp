@@ -733,7 +733,7 @@ void String::appendCharPointer (const CharPointerType startOfTextToAppend,
     if (extraBytesNeeded > 0)
     {
         auto byteOffsetOfNull = getByteOffsetOfEnd();
-        preallocateBytes (byteOffsetOfNull + (size_t) extraBytesNeeded);
+        preallocateBytes ((size_t) extraBytesNeeded + byteOffsetOfNull);
 
         auto* newStringStart = addBytesToPointer (text.getAddress(), (int) byteOffsetOfNull);
         memcpy (newStringStart, startOfTextToAppend.getAddress(), (size_t) extraBytesNeeded);
@@ -1929,7 +1929,7 @@ String String::toHexString (const void* const d, const int size, const int group
     if (groupSize > 0)
         numChars += size / groupSize;
 
-    String s (PreallocationBytes (sizeof (CharPointerType::CharType) * (size_t) numChars));
+    String s (PreallocationBytes ((size_t) numChars * sizeof (CharPointerType::CharType)));
 
     auto* data = static_cast<const unsigned char*> (d);
     auto dest = s.text;

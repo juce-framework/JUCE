@@ -40,8 +40,8 @@ extern Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
 // this prevents them from happening (which some messy locking behaviour)
 struct iOSBackgroundProcessCheck  : public AppInactivityCallback
 {
-    iOSBackgroundProcessCheck()     { isBackgroundProcess(); appBecomingInactiveCallbacks.add (this); }
-    ~iOSBackgroundProcessCheck()    { appBecomingInactiveCallbacks.removeAllInstancesOf (this); }
+    iOSBackgroundProcessCheck()              { isBackgroundProcess(); appBecomingInactiveCallbacks.add (this); }
+    ~iOSBackgroundProcessCheck() override    { appBecomingInactiveCallbacks.removeAllInstancesOf (this); }
 
     bool isBackgroundProcess()
     {
@@ -729,6 +729,8 @@ public:
         }
     }
 
+    using ComponentMovementWatcher::componentMovedOrResized;
+
     void componentPeerChanged() override
     {
         detach();
@@ -751,6 +753,8 @@ public:
             detach();
         }
     }
+
+    using ComponentMovementWatcher::componentVisibilityChanged;
 
    #if JUCE_DEBUG || JUCE_LOG_ASSERTIONS
     void componentBeingDeleted (Component& c) override

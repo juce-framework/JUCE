@@ -58,7 +58,7 @@ public:
             addZenityArgs();
     }
 
-    ~Native()
+    ~Native() override
     {
         finish (true);
     }

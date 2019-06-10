@@ -55,12 +55,12 @@ struct ZipFile::ZipEntryHolder
 
     static Time parseFileTime (uint32 time, uint32 date) noexcept
     {
-        int year      = 1980 + (date >> 9);
-        int month     = ((date >> 5) & 15) - 1;
-        int day       = date & 31;
-        int hours     = time >> 11;
-        int minutes   = (time >> 5) & 63;
-        int seconds   = (int) ((time & 31) << 1);
+        auto year      = (int) (1980 + (date >> 9));
+        auto month     = (int) (((date >> 5) & 15) - 1);
+        auto day       = (int) (date & 31);
+        auto hours     = (int) time >> 11;
+        auto minutes   = (int) ((time >> 5) & 63);
+        auto seconds   = (int) ((time & 31) << 1);
 
         return { year, month, day, hours, minutes, seconds };
     }
@@ -369,16 +369,16 @@ void ZipFile::init()
                         break;
 
                     auto* buffer = static_cast<const char*> (headerData.getData()) + pos;
-                    auto fileNameLen = readUnalignedLittleEndianShort (buffer + 28);
+                    auto fileNameLen = readUnalignedLittleEndianShort (buffer + 28u);
 
                     if (pos + 46 + fileNameLen > size)
                         break;
 
                     entries.add (new ZipEntryHolder (buffer, fileNameLen));
 
-                    pos += 46 + fileNameLen
-                            + readUnalignedLittleEndianShort (buffer + 30)
-                            + readUnalignedLittleEndianShort (buffer + 32);
+                    pos += 46u + fileNameLen
+                            + readUnalignedLittleEndianShort (buffer + 30u)
+                            + readUnalignedLittleEndianShort (buffer + 32u);
                 }
             }
         }

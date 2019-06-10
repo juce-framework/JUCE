@@ -85,31 +85,14 @@ public:
 
 private:
     //==============================================================================
-    struct AsyncCallback : public AudioPluginFormat::InstantiationCompletionCallback
-    {
-        AsyncCallback(FilterGraph& g, Point<double> pos) : owner(g), position(pos)
-        {}
-
-        void completionCallback(AudioPluginInstance* instance, const String& error) override
-        {
-            owner.addFilterCallback(instance, error, position);
-        }
-
-        FilterGraph& owner;
-        Point<double> position;
-
-        JUCE_DECLARE_NON_COPYABLE (AsyncCallback)
-    };
-
-    //==============================================================================
     AudioPluginFormatManager& formatManager;
     OwnedArray<PluginWindow> activePluginWindows;
 
     NodeID lastUID;
     NodeID getNextUID() noexcept;
 
-    void createNodeFromXml (const XmlElement& xml);
-    void addFilterCallback (AudioPluginInstance*, const String& error, Point<double>);
+    void createNodeFromXml (const XmlElement&);
+    void addPluginCallback (std::unique_ptr<AudioPluginInstance>, const String& error, Point<double>);
     void changeListenerCallback (ChangeBroadcaster*) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilterGraph)

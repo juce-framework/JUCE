@@ -154,10 +154,10 @@ public:
 
        #if JUCE_IOS || JUCE_ANDROID
         auto screenBounds = Desktop::getInstance().getDisplays().getTotalBounds (true).toFloat();
-
         auto scaleFactor = jmin ((screenBounds.getWidth() - 50) / getWidth(), (screenBounds.getHeight() - 50) / getHeight());
+
         if (scaleFactor < 1.0f)
-            setSize (getWidth() * scaleFactor, getHeight() * scaleFactor);
+            setSize ((int) (getWidth() * scaleFactor), (int) (getHeight() * scaleFactor));
 
         setTopLeftPosition (20, 20);
        #else

@@ -196,7 +196,7 @@ public:
         setSize (600, 600);
     }
 
-    ~TimersAndEventsDemo()
+    ~TimersAndEventsDemo() override
     {
         for (auto* fc : flashingComponents)
             fc->removeChangeListener (this);

@@ -113,7 +113,7 @@ public:
         checkActivityIsMain (androidApkContext);
     }
 
-    ~JuceActivityWatcher()
+    ~JuceActivityWatcher() override
     {
         LocalRef<jobject> appContext (getAppContext());
 

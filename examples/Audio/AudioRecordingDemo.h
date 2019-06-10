@@ -64,7 +64,7 @@ public:
         backgroundThread.startThread();
     }
 
-    ~AudioRecorder()
+    ~AudioRecorder() override
     {
         stop();
     }
@@ -178,7 +178,7 @@ public:
         thumbnail.addChangeListener (this);
     }
 
-    ~RecordingThumbnail()
+    ~RecordingThumbnail() override
     {
         thumbnail.removeChangeListener (this);
     }
@@ -272,7 +272,7 @@ public:
         setSize (500, 500);
     }
 
-    ~AudioRecordingDemo()
+    ~AudioRecordingDemo() override
     {
         audioDeviceManager.removeAudioCallback (&recorder);
         audioDeviceManager.removeAudioCallback (&liveAudioScroller);

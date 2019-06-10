@@ -127,6 +127,8 @@ private:
         Analytics::getInstance()->logEvent ("Start Page Button", data, ProjucerAnalyticsEvent::startPageEvent);
     }
 
+    using DrawableButton::clicked;
+
     std::unique_ptr<Drawable> thumb, hoverBackground;
     String name, description;
 

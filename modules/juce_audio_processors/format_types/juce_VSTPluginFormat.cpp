@@ -38,8 +38,14 @@
 
 #if JUCE_CLANG
  #if __has_warning("-Wzero-as-null-pointer-constant")
+  #pragma clang diagnostic push
   #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
  #endif
+#endif
+
+#if JUCE_GCC
+ #pragma GCC diagnostic push
+ #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
 #endif
 
 #define VST_FORCE_DEPRECATED 0
@@ -61,6 +67,16 @@ namespace Vst2
 #if JUCE_MSVC
  #pragma warning (pop)
  #pragma warning (disable: 4355) // ("this" used in initialiser list warning)
+#endif
+
+#if JUCE_CLANG
+ #if __has_warning("-Wzero-as-null-pointer-constant")
+  #pragma clang diagnostic pop
+ #endif
+#endif
+
+#if JUCE_GCC
+ #pragma GCC diagnostic pop
 #endif
 
 #include "juce_VSTMidiEventList.h"
@@ -180,7 +196,7 @@ namespace
         return timeGetTime() * 1000000.0;
        #elif JUCE_LINUX || JUCE_IOS || JUCE_ANDROID
         timeval micro;
-        gettimeofday (&micro, 0);
+        gettimeofday (&micro, nullptr);
         return micro.tv_usec * 1000.0;
        #elif JUCE_MAC
         UnsignedWide micro;
@@ -692,7 +708,7 @@ struct ModuleHandle    : public ReferenceCountedObject
 
     void closeEffect (Vst2::AEffect* eff)
     {
-        eff->dispatcher (eff, Vst2::effClose, 0, 0, 0, 0);
+        eff->dispatcher (eff, Vst2::effClose, 0, 0, nullptr, 0);
     }
 
    #if JUCE_WINDOWS
@@ -1131,7 +1147,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
            #endif
 
             // Must delete any editors before deleting the plugin instance!
-            jassert (getActiveEditor() == 0);
+            jassert (getActiveEditor() == nullptr);
 
             _fpreset(); // some dodgy plug-ins mess around with this
 
@@ -1894,7 +1910,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
             if (isFXB)
             {
                 auto progLen = (int) sizeof (fxProgram) + (numParams - 1) * (int) sizeof (float);
-                auto len = (sizeof (fxSet) - sizeof (fxProgram)) + (size_t) (progLen * jmax (1, numPrograms));
+                auto len = (size_t) (progLen * jmax (1, numPrograms)) + (sizeof (fxSet) - sizeof (fxProgram));
                 dest.setSize (len, true);
 
                 auto set = (fxSet*) dest.getData();
@@ -1930,7 +1946,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
             }
             else
             {
-                dest.setSize (sizeof (fxProgram) + (size_t) ((numParams - 1) * (int) sizeof (float)), true);
+                dest.setSize ((size_t) ((numParams - 1) * (int) sizeof (float)) + sizeof (fxProgram), true);
                 setParamsInProgramBlock ((fxProgram*) dest.getData());
             }
         }
@@ -2162,7 +2178,7 @@ private:
             if (effect != nullptr && effect->magic == 0x56737450 /* 'VstP' */)
             {
                 jassert (effect->resvd2 == 0);
-                jassert (effect->object != 0);
+                jassert (effect->object != nullptr);
 
                 _fpreset(); // some dodgy plugs mess around with this
             }
@@ -2757,6 +2773,7 @@ public:
        #if JUCE_LINUX
         pluginWindow = None;
         display = XWindowSystem::getInstance()->displayRef();
+        ignoreUnused (pluginRefusesToResize, alreadyInside);
 
        #elif JUCE_MAC
         ignoreUnused (recursiveResize, pluginRefusesToResize, alreadyInside);
@@ -2891,6 +2908,8 @@ public:
         }
     }
 
+    using ComponentMovementWatcher::componentMovedOrResized;
+
     void componentVisibilityChanged() override
     {
         if (isShowing())
@@ -2903,6 +2922,8 @@ public:
 
         componentMovedOrResized (true, true);
     }
+
+    using ComponentMovementWatcher::componentVisibilityChanged;
 
     void componentPeerChanged() override
     {
@@ -3086,7 +3107,7 @@ private:
    #else
     void openPluginWindow()
     {
-        if (isOpen || getWindowHandle() == 0)
+        if (isOpen || getWindowHandle() == nullptr)
             return;
 
         JUCE_VST_LOG ("Opening VST UI: " + plugin.getName());
@@ -3121,10 +3142,10 @@ private:
 
         // do this before and after like in the steinberg example
         dispatch (Vst2::effEditGetRect, 0, 0, &rect, 0);
-        dispatch (Vst2::effGetProgram, 0, 0, 0, 0); // also in steinberg code
+        dispatch (Vst2::effGetProgram, 0, 0, nullptr, 0); // also in steinberg code
 
         // Install keyboard hooks
-        pluginWantsKeys = (dispatch (Vst2::effKeysRequired, 0, 0, 0, 0) == 0);
+        pluginWantsKeys = (dispatch (Vst2::effKeysRequired, 0, 0, nullptr, 0) == 0);
 
        #if JUCE_WINDOWS
         originalWndProc = 0;
@@ -3482,11 +3503,11 @@ static pointer_sized_int VSTCALLBACK audioMaster (Vst2::AEffect* effect, int32 o
 VSTPluginFormat::VSTPluginFormat() {}
 VSTPluginFormat::~VSTPluginFormat() {}
 
-static VSTPluginInstance* createAndUpdateDesc (VSTPluginFormat& format, PluginDescription& desc)
+static std::unique_ptr<VSTPluginInstance> createAndUpdateDesc (VSTPluginFormat& format, PluginDescription& desc)
 {
-    if (auto* p = format.createInstanceFromDescription (desc, 44100.0, 512))
+    if (auto p = format.createInstanceFromDescription (desc, 44100.0, 512))
     {
-        if (auto* instance = dynamic_cast<VSTPluginInstance*> (p))
+        if (auto instance = dynamic_cast<VSTPluginInstance*> (p.release()))
         {
            #if JUCE_MAC
             if (instance->vstModule->resFileId != 0)
@@ -3494,13 +3515,13 @@ static VSTPluginInstance* createAndUpdateDesc (VSTPluginFormat& format, PluginDe
            #endif
 
             instance->fillInPluginDescription (desc);
-            return instance;
+            return std::unique_ptr<VSTPluginInstance> (instance);
         }
 
         jassertfalse;
     }
 
-    return nullptr;
+    return {};
 }
 
 void VSTPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& results,
@@ -3513,7 +3534,7 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& result
     desc.fileOrIdentifier = fileOrIdentifier;
     desc.uid = 0;
 
-    std::unique_ptr<VSTPluginInstance> instance (createAndUpdateDesc (*this, desc));
+    auto instance = createAndUpdateDesc (*this, desc);
 
     if (instance == nullptr)
         return;
@@ -3558,7 +3579,7 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& result
 
 void VSTPluginFormat::createPluginInstance (const PluginDescription& desc,
                                             double sampleRate, int blockSize,
-                                            void* userData, PluginCreationCallback callback)
+                                            PluginCreationCallback callback)
 {
     std::unique_ptr<VSTPluginInstance> result;
 
@@ -3585,9 +3606,9 @@ void VSTPluginFormat::createPluginInstance (const PluginDescription& desc,
     String errorMsg;
 
     if (result == nullptr)
-        errorMsg = String (NEEDS_TRANS ("Unable to load XXX plug-in file")).replace ("XXX", "VST-2");
+        errorMsg = TRANS ("Unable to load XXX plug-in file").replace ("XXX", "VST-2");
 
-    callback (userData, result.release(), errorMsg);
+    callback (std::move (result), errorMsg);
 }
 
 bool VSTPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept

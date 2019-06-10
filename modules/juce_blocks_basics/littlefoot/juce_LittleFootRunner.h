@@ -174,7 +174,7 @@ struct NativeFunction
         jassert (slash > 0); // The slash can't be the first character in this string!
         jassert (nameAndArgTypes[slash + 1] != 0);  // The slash must be followed by a return type character
         jassert (String (nameAndArgTypes).substring (0, slash).containsOnly ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"));
-        jassert (! String ("0123456789").containsChar (nameAndArgTypes[0]));
+        jassert (! String ("0123456789").containsChar (String (nameAndArgTypes)[0]));
         jassert (String (nameAndArgTypes).substring (slash + 1).containsOnly ("vifb"));
         jassert (String (nameAndArgTypes).substring (slash + 2).containsOnly ("ifb")); // arguments must only be of these types
 
@@ -583,7 +583,7 @@ struct Runner
 
     //==============================================================================
     /** */
-    uint8 allMemory[((programAndHeapSpace + stackAndGlobalsSpace) + 3) & ~3];
+    uint8 allMemory[(size_t) (((programAndHeapSpace + stackAndGlobalsSpace) + 3) & ~3)];
 
     /** */
     Program program;

@@ -1052,7 +1052,7 @@ public:
                         for (AudioUnitElement j = 0; j < abl.mNumberBuffers; ++j)
                         {
                             abl.mBuffers[j].mNumberChannels = 1;
-                            abl.mBuffers[j].mDataByteSize = (UInt32) (sizeof (float) * (size_t) numSamples);
+                            abl.mBuffers[j].mDataByteSize = (UInt32) ((size_t) numSamples * sizeof (float));
                             abl.mBuffers[j].mData = buffer.getWritePointer (chIdx++);
                         }
                     }
@@ -2637,9 +2637,9 @@ void AudioUnitPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& 
 
     try
     {
-        std::unique_ptr<AudioPluginInstance> createdInstance (createInstanceFromDescription (desc, 44100.0, 512));
+        auto createdInstance = createInstanceFromDescription (desc, 44100.0, 512);
 
-        if (AudioUnitPluginInstance* auInstance = dynamic_cast<AudioUnitPluginInstance*> (createdInstance.get()))
+        if (auto auInstance = dynamic_cast<AudioUnitPluginInstance*> (createdInstance.get()))
             results.add (new PluginDescription (auInstance->getPluginDescription()));
     }
     catch (...)
@@ -2650,13 +2650,12 @@ void AudioUnitPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& 
 
 void AudioUnitPluginFormat::createPluginInstance (const PluginDescription& desc,
                                                   double rate, int blockSize,
-                                                  void* userData, PluginCreationCallback callback)
+                                                  PluginCreationCallback callback)
 {
     using namespace AudioUnitFormatHelpers;
 
     if (fileMightContainThisPluginType (desc.fileOrIdentifier))
     {
-
         String pluginName, version, manufacturer;
         AudioComponentDescription componentDesc;
         AudioComponent auComponent;
@@ -2665,19 +2664,19 @@ void AudioUnitPluginFormat::createPluginInstance (const PluginDescription& desc,
         if ((! getComponentDescFromIdentifier (desc.fileOrIdentifier, componentDesc, pluginName, version, manufacturer))
               && (! getComponentDescFromFile (desc.fileOrIdentifier, componentDesc, pluginName, version, manufacturer)))
         {
-            callback (userData, nullptr, errMessage);
+            callback (nullptr, errMessage);
             return;
         }
 
         if ((auComponent = AudioComponentFindNext (nullptr, &componentDesc)) == nullptr)
         {
-            callback (userData, nullptr, errMessage);
+            callback (nullptr, errMessage);
             return;
         }
 
         if (AudioComponentGetDescription (auComponent, &componentDesc) != noErr)
         {
-            callback (userData, nullptr, errMessage);
+            callback (nullptr, errMessage);
             return;
         }
 
@@ -2688,9 +2687,9 @@ void AudioUnitPluginFormat::createPluginInstance (const PluginDescription& desc,
            #endif
 
             AUAsyncInitializationCallback (double inSampleRate, int inFramesPerBuffer,
-                                           void* inUserData, PluginCreationCallback inOriginalCallback)
+                                           PluginCreationCallback inOriginalCallback)
                 : sampleRate (inSampleRate), framesPerBuffer (inFramesPerBuffer),
-                  passUserData (inUserData), originalCallback (inOriginalCallback)
+                  originalCallback (std::move (inOriginalCallback))
             {
                #if JUCE_SUPPORTS_AUv3
                 block = CreateObjCBlock (this, &AUAsyncInitializationCallback::completion);
@@ -2708,15 +2707,14 @@ void AudioUnitPluginFormat::createPluginInstance (const PluginDescription& desc,
                     std::unique_ptr<AudioUnitPluginInstance> instance (new AudioUnitPluginInstance (audioUnit));
 
                     if (instance->initialise (sampleRate, framesPerBuffer))
-                        originalCallback (passUserData, instance.release(), StringRef());
+                        originalCallback (std::move (instance), {});
                     else
-                        originalCallback (passUserData, nullptr,
-                                          NEEDS_TRANS ("Unable to initialise the AudioUnit plug-in"));
+                        originalCallback (nullptr, NEEDS_TRANS ("Unable to initialise the AudioUnit plug-in"));
                 }
                 else
                 {
-                    String errMsg = NEEDS_TRANS ("An OS error occurred during initialisation of the plug-in (XXX)");
-                    originalCallback (passUserData, nullptr, errMsg.replace ("XXX", String (err)));
+                    auto errMsg = TRANS ("An OS error occurred during initialisation of the plug-in (XXX)");
+                    originalCallback (nullptr, errMsg.replace ("XXX", String (err)));
                 }
 
                 delete this;
@@ -2724,7 +2722,6 @@ void AudioUnitPluginFormat::createPluginInstance (const PluginDescription& desc,
 
             double sampleRate;
             int framesPerBuffer;
-            void* passUserData;
             PluginCreationCallback originalCallback;
 
            #if JUCE_SUPPORTS_AUv3
@@ -2732,7 +2729,7 @@ void AudioUnitPluginFormat::createPluginInstance (const PluginDescription& desc,
            #endif
         };
 
-        auto callbackBlock = new AUAsyncInitializationCallback (rate, blockSize, userData, callback);
+        auto callbackBlock = new AUAsyncInitializationCallback (rate, blockSize, std::move (callback));
 
        #if JUCE_SUPPORTS_AUv3
         //==============================================================================
@@ -2753,7 +2750,7 @@ void AudioUnitPluginFormat::createPluginInstance (const PluginDescription& desc,
     }
     else
     {
-        callback (userData, nullptr, NEEDS_TRANS ("Plug-in description is not an AudioUnit plug-in"));
+        callback (nullptr, NEEDS_TRANS ("Plug-in description is not an AudioUnit plug-in"));
     }
 }
 
