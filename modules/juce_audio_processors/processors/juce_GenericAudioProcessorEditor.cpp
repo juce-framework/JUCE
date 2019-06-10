@@ -499,7 +499,7 @@ public:
         setSize (maxWidth, height);
     }
 
-    ~ParametersPanel()
+    ~ParametersPanel() override
     {
         paramComponents.clear();
     }
