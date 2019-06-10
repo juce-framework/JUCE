@@ -1895,7 +1895,7 @@ public:
         {
             auto minVersion = (type == Target::AudioUnitv3PlugIn ? minimumAUv3SDKVersion : oldestDeploymentTarget);
 
-            for (int v = minVersion; v < currentSDKVersion; ++v)
+            for (int v = minVersion; v <= currentSDKVersion; ++v)
                 if (deploymentTarget == getSDKDisplayName (v))
                     return getVersionName (v);
 
@@ -1904,7 +1904,7 @@ public:
 
         String getOSXSDKVersion (const String& sdkVersion) const
         {
-            for (int v = oldestSDKVersion; v < currentSDKVersion; ++v)
+            for (int v = oldestSDKVersion; v <= currentSDKVersion; ++v)
                 if (sdkVersion == getSDKDisplayName (v))
                     return getSDKRootName (v);
 
