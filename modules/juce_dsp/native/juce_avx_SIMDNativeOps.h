@@ -91,13 +91,21 @@ struct SIMDNativeOps<float>
     static forcedinline __m256 JUCE_VECTOR_CALLTYPE greaterThan (__m256 a, __m256 b) noexcept            { return _mm256_cmp_ps (a, b, _CMP_GT_OQ); }
     static forcedinline __m256 JUCE_VECTOR_CALLTYPE greaterThanOrEqual (__m256 a, __m256 b) noexcept     { return _mm256_cmp_ps (a, b, _CMP_GE_OQ); }
     static forcedinline bool   JUCE_VECTOR_CALLTYPE allEqual (__m256 a, __m256 b) noexcept               { return (_mm256_movemask_ps (equal (a, b)) == 0xff); }
-    static forcedinline __m256 JUCE_VECTOR_CALLTYPE multiplyAdd (__m256 a, __m256 b, __m256 c) noexcept  { return _mm256_fmadd_ps (b, c, a); }
     static forcedinline __m256 JUCE_VECTOR_CALLTYPE dupeven (__m256 a) noexcept                          { return _mm256_shuffle_ps (a, a, _MM_SHUFFLE (2, 2, 0, 0)); }
     static forcedinline __m256 JUCE_VECTOR_CALLTYPE dupodd (__m256 a) noexcept                           { return _mm256_shuffle_ps (a, a, _MM_SHUFFLE (3, 3, 1, 1)); }
     static forcedinline __m256 JUCE_VECTOR_CALLTYPE swapevenodd (__m256 a) noexcept                      { return _mm256_shuffle_ps (a, a, _MM_SHUFFLE (2, 3, 0, 1)); }
     static forcedinline float  JUCE_VECTOR_CALLTYPE get (__m256 v, size_t i) noexcept                    { return SIMDFallbackOps<float, __m256>::get (v, i); }
     static forcedinline __m256 JUCE_VECTOR_CALLTYPE set (__m256 v, size_t i, float s) noexcept           { return SIMDFallbackOps<float, __m256>::set (v, i, s); }
     static forcedinline __m256 JUCE_VECTOR_CALLTYPE truncate (__m256 a) noexcept                         { return _mm256_cvtepi32_ps (_mm256_cvttps_epi32 (a)); }
+
+    static forcedinline __m256 JUCE_VECTOR_CALLTYPE multiplyAdd (__m256 a, __m256 b, __m256 c) noexcept
+    {
+       #if __FMA__
+        return _mm256_fmadd_ps (b, c, a);
+       #else
+        return add (a, mul (b, c));
+       #endif
+    }
 
     static forcedinline __m256 JUCE_VECTOR_CALLTYPE oddevensum (__m256 a) noexcept
     {
