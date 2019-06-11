@@ -41,8 +41,15 @@
  #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
  #pragma clang diagnostic ignored "-Wsign-conversion"
  #pragma clang diagnostic ignored "-Wextra-semi"
+ #pragma clang diagnostic ignored "-Wshift-sign-overflow"
  #if __has_warning("-Wpragma-pack")
   #pragma clang diagnostic ignored "-Wpragma-pack"
+ #endif
+ #if __has_warning("-Wzero-as-null-pointer-constant")
+  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+ #endif
+ #if __has_warning("-Winconsistent-missing-destructor-override")
+  #pragma clang diagnostic ignored "-Winconsistent-missing-destructor-override"
  #endif
 #endif
 
@@ -455,8 +462,8 @@ namespace AAXClasses
                           public ModifierKeyProvider
     {
     public:
-        JuceAAX_GUI() {}
-        ~JuceAAX_GUI() { DeleteViewContainer(); }
+        JuceAAX_GUI() = default;
+        ~JuceAAX_GUI() override { DeleteViewContainer(); }
 
         static AAX_IEffectGUI* AAX_CALLBACK Create()   { return new JuceAAX_GUI(); }
 
@@ -580,7 +587,7 @@ namespace AAXClasses
                 ignoreUnused (fakeMouseGenerator);
             }
 
-            ~ContentWrapperComponent()
+            ~ContentWrapperComponent() override
             {
                 if (pluginEditor != nullptr)
                 {
@@ -681,7 +688,7 @@ namespace AAXClasses
             activeProcessors.add (this);
         }
 
-        ~JuceAAX_Processor()
+        ~JuceAAX_Processor() override
         {
             activeProcessors.removeAllInstancesOf (this);
         }
