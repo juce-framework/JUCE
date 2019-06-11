@@ -45,6 +45,7 @@ protected:
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
+            addRecommendedLinuxCompilerWarningsProperty (props);
             addGCCOptimisationProperty (props);
 
             props.add (new ChoicePropertyComponent (architectureTypeValue, "Architecture",
@@ -520,6 +521,9 @@ private:
 
         if (extra.isNotEmpty())
             result.add (extra);
+
+        for (auto& recommended : config.getRecommendedCompilerWarningFlags())
+            result.add (recommended);
 
         return result;
     }

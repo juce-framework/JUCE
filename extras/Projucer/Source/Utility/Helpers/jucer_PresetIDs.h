@@ -90,6 +90,7 @@ namespace Ids
     DECLARE_ID (alwaysGenerateDebugSymbols);
     DECLARE_ID (targetName);
     DECLARE_ID (binaryPath);
+    DECLARE_ID (recommendedWarnings);
     DECLARE_ID (optimisation);
     DECLARE_ID (defines);
     DECLARE_ID (headerPath);

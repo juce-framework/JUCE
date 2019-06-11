@@ -631,6 +631,7 @@ protected:
         void createConfigProperties (PropertyListBuilder& props) override
         {
             addXcodePluginInstallPathProperties (props);
+            addRecommendedLLVMCompilerWarningsProperty (props);
             addGCCOptimisationProperty (props);
 
             if (iOS)
@@ -1244,10 +1245,11 @@ public:
             if (config.isFastMathEnabled())
                 s.set ("GCC_FAST_MATH", "YES");
 
-            auto extraFlags = owner.replacePreprocessorTokens (config, owner.getExtraCompilerFlagsString()).trim();
+            auto flags = (owner.replacePreprocessorTokens (config, owner.getExtraCompilerFlagsString())
+                          + " " + config.getRecommendedCompilerWarningFlags().joinIntoString (" ")).trim();
 
-            if (extraFlags.isNotEmpty())
-                s.set ("OTHER_CPLUSPLUSFLAGS", extraFlags.quoted());
+            if (flags.isNotEmpty())
+                s.set ("OTHER_CPLUSPLUSFLAGS", flags.quoted());
 
             auto installPath = getInstallPathForConfiguration (config);
 
