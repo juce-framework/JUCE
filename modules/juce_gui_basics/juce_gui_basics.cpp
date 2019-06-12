@@ -309,7 +309,18 @@ namespace juce
 #elif JUCE_LINUX
  #include "native/juce_linux_X11.cpp"
  #include "native/juce_linux_X11_Clipboard.cpp"
+
+ #if JUCE_GCC
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+ #endif
+
  #include "native/juce_linux_X11_Windowing.cpp"
+
+ #if JUCE_GCC
+  #pragma GCC diagnostic pop
+ #endif
+
  #include "native/juce_linux_FileChooser.cpp"
 
 #elif JUCE_ANDROID

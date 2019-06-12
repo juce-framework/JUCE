@@ -177,7 +177,7 @@ class UIViewComponentPeer  : public ComponentPeer,
 {
 public:
     UIViewComponentPeer (Component&, int windowStyleFlags, UIView* viewToAttachTo);
-    ~UIViewComponentPeer();
+    ~UIViewComponentPeer() override;
 
     //==============================================================================
     void* getNativeHandle() const override                  { return view; }
@@ -194,7 +194,9 @@ public:
     Rectangle<int> getBounds() const override               { return getBounds (! isSharedWindow); }
     Rectangle<int> getBounds (bool global) const;
     Point<float> localToGlobal (Point<float> relativePosition) override;
+    using ComponentPeer::localToGlobal;
     Point<float> globalToLocal (Point<float> screenPosition) override;
+    using ComponentPeer::globalToLocal;
     void setAlpha (float newAlpha) override;
     void setMinimised (bool) override                       {}
     bool isMinimised() const override                       { return false; }

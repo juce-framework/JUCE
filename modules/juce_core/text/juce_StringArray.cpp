@@ -300,7 +300,7 @@ String StringArray::joinIntoString (StringRef separator, int start, int numberTo
         return strings.getReference (start);
 
     auto separatorBytes = separator.text.sizeInBytes() - sizeof (String::CharPointerType::CharType);
-    auto bytesNeeded = separatorBytes * (size_t) (last - start - 1);
+    auto bytesNeeded = (size_t) (last - start - 1) * separatorBytes;
 
     for (int i = start; i < last; ++i)
         bytesNeeded += strings.getReference(i).getCharPointer().sizeInBytes() - sizeof (String::CharPointerType::CharType);

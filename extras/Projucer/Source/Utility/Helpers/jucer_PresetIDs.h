@@ -90,6 +90,7 @@ namespace Ids
     DECLARE_ID (alwaysGenerateDebugSymbols);
     DECLARE_ID (targetName);
     DECLARE_ID (binaryPath);
+    DECLARE_ID (recommendedWarnings);
     DECLARE_ID (optimisation);
     DECLARE_ID (defines);
     DECLARE_ID (headerPath);
@@ -196,8 +197,10 @@ namespace Ids
     DECLARE_ID (androidJavaLibs);
     DECLARE_ID (androidAdditionalJavaFolders);
     DECLARE_ID (androidAdditionalResourceFolders);
+    DECLARE_ID (androidProjectRepositories);
     DECLARE_ID (androidRepositories);
     DECLARE_ID (androidDependencies);
+    DECLARE_ID (androidCustomAppBuildGradleContent);
     DECLARE_ID (androidBuildConfigRemoteNotifsConfigFile);
     DECLARE_ID (androidAdditionalXmlValueResources);
     DECLARE_ID (androidAdditionalDrawableResources);
@@ -213,6 +216,7 @@ namespace Ids
     DECLARE_ID (androidInternetNeeded);
     DECLARE_ID (androidArchitectures);
     DECLARE_ID (androidManifestCustomXmlElements);
+    DECLARE_ID (androidGradleSettingsContent);
     DECLARE_ID (androidCustomStringXmlElements);
     DECLARE_ID (androidBluetoothNeeded);
     DECLARE_ID (androidExternalReadNeeded);

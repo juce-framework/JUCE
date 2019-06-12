@@ -935,14 +935,6 @@ public:
         virtual int getSliderPopupPlacement (Slider&) = 0;
 
         virtual SliderLayout getSliderLayout (Slider&) = 0;
-
-       #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-        // These methods' parameters have changed: see the new method signatures.
-        virtual void createSliderButton (bool) {}
-        virtual void getSliderEffect() {}
-        virtual void getSliderPopupFont() {}
-        virtual void getSliderPopupPlacement() {}
-       #endif
     };
 
     //==============================================================================
@@ -996,7 +988,6 @@ private:
     JUCE_DEPRECATED (void setMaxValue (double, bool));
     JUCE_DEPRECATED (void setMinAndMaxValues (double, double, bool, bool));
     JUCE_DEPRECATED (void setMinAndMaxValues (double, double, bool));
-    virtual void snapValue (double, bool) {}
    #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Slider)

@@ -304,7 +304,7 @@ struct AudioUnitHelpers
         }
     }
 
-    template <int numLayouts>
+    template <size_t numLayouts>
     static bool isLayoutSupported (const AudioProcessor& processor,
                                    bool isInput, int busIdx,
                                    int numChannels,

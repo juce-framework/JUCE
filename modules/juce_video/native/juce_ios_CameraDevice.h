@@ -304,7 +304,7 @@ private:
 
     static String cmTimeToString (CMTime time)
     {
-        CFStringRef timeDesc = CMTimeCopyDescription (NULL, time);
+        CFStringRef timeDesc = CMTimeCopyDescription (nullptr, time);
         String result = String::fromCFString (timeDesc);
 
         CFRelease (timeDesc);
@@ -984,7 +984,7 @@ private:
         class VideoRecorder
         {
         public:
-            VideoRecorder (CaptureSession& captureSession)
+            VideoRecorder (CaptureSession& session)
                 : movieFileOutput ([AVCaptureMovieFileOutput new]),
                   delegate (nullptr)
             {
@@ -992,7 +992,7 @@ private:
                 delegate.reset ([cls.createInstance() init]);
                 FileOutputRecordingDelegateClass::setOwner (delegate.get(), this);
 
-                captureSession.addOutputIfPossible (movieFileOutput);
+                session.addOutputIfPossible (movieFileOutput);
             }
 
             ~VideoRecorder()

@@ -76,7 +76,7 @@ struct AndroidMessageQueue     : private Android::Runnable
     {
     }
 
-    ~AndroidMessageQueue()
+    ~AndroidMessageQueue() override
     {
         JUCE_ASSERT_MESSAGE_THREAD
         clearSingletonInstance();
@@ -156,14 +156,14 @@ void MessageManager::stopDispatchLoop()
             {
                 jmethodID quitMethod = env->GetMethodID (AndroidActivity, "finishAndRemoveTask", "()V");
 
-                if (quitMethod != 0)
+                if (quitMethod != nullptr)
                 {
                     env->CallVoidMethod (activity.get(), quitMethod);
                     return;
                 }
 
                 quitMethod = env->GetMethodID (AndroidActivity, "finish", "()V");
-                jassert (quitMethod != 0);
+                jassert (quitMethod != nullptr);
                 env->CallVoidMethod (activity.get(), quitMethod);
             }
             else
@@ -195,7 +195,7 @@ public:
         }
     }
 
-    ~JuceAppLifecycle()
+    ~JuceAppLifecycle() override
     {
         LocalRef<jobject> appContext (getAppContext());
 

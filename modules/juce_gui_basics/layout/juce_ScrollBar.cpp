@@ -47,6 +47,8 @@ public:
         owner.moveScrollbarInSteps ((direction == 1 || direction == 2) ? 1 : -1);
     }
 
+    using Button::clicked;
+
     int direction;
 
 private:

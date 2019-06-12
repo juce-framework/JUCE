@@ -54,7 +54,7 @@ public:
     */
     WildcardFileFilter (const String& fileWildcardPatterns,
                         const String& directoryWildcardPatterns,
-                        const String& description);
+                        const String& filterDescription);
 
     /** Destructor. */
     ~WildcardFileFilter() override;

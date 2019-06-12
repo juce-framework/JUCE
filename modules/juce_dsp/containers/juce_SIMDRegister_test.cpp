@@ -96,7 +96,7 @@ namespace SIMDRegister_test_internal
            #ifdef _MSC_VER
             __declspec(align(sizeof (SIMDRegister<type>))) type elements[size];
            #else
-            type elements[size] __attribute__((aligned(sizeof (SIMDRegister<type>))));
+            type elements[(size_t) size] __attribute__((aligned(sizeof (SIMDRegister<type>))));
            #endif
 
             VecFiller<type>::fill (elements, size, random);

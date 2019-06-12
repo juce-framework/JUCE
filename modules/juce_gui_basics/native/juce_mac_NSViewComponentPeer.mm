@@ -317,10 +317,14 @@ public:
         return relativePosition + getBounds (true).getPosition().toFloat();
     }
 
+    using ComponentPeer::localToGlobal;
+
     Point<float> globalToLocal (Point<float> screenPosition) override
     {
         return screenPosition - getBounds (true).getPosition().toFloat();
     }
+
+    using ComponentPeer::globalToLocal;
 
     void setAlpha (float newAlpha) override
     {
@@ -2011,6 +2015,9 @@ private:
 
     static void windowWillEnterFullScreen (id self, SEL, NSNotification*)
     {
+        if (SystemStats::getOperatingSystemType() <= SystemStats::MacOSX_10_9)
+            return;
+
         if (auto* owner = getOwner (self))
             if (owner->hasNativeTitleBar() && (owner->getStyleFlags() & ComponentPeer::windowIsResizable) == 0)
                 [owner->window setStyleMask: NSWindowStyleMaskBorderless];

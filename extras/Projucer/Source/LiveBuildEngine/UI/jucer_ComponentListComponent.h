@@ -242,6 +242,8 @@ private:
                     classItem.launchEditor();
             }
 
+            using Button::clicked;
+
             const ClassItem& classItem;
             bool isShowCode;
         };

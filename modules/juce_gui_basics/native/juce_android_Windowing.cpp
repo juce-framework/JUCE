@@ -318,7 +318,7 @@ public:
             handleFocusGain();
     }
 
-    ~AndroidComponentPeer()
+    ~AndroidComponentPeer() override
     {
         auto* env = getEnv();
 
@@ -466,7 +466,7 @@ public:
         LocalRef<jintArray> position (env->NewIntArray (2));
         env->CallVoidMethod (view.get(), AndroidView.getLocationOnScreen, position.get());
 
-        jint* const screenPosition = env->GetIntArrayElements (position.get(), 0);
+        jint* const screenPosition = env->GetIntArrayElements (position.get(), nullptr);
         Point<int> pos (screenPosition[0], screenPosition[1]);
         env->ReleaseIntArrayElements (position.get(), screenPosition, 0);
 
@@ -478,10 +478,14 @@ public:
         return relativePosition + (getScreenPosition().toFloat() / scale);
     }
 
+    using ComponentPeer::localToGlobal;
+
     Point<float> globalToLocal (Point<float> screenPosition) override
     {
         return screenPosition - (getScreenPosition().toFloat() / scale);
     }
+
+    using ComponentPeer::globalToLocal;
 
     void setMinimised (bool /*shouldBeMinimised*/) override
     {
@@ -770,7 +774,7 @@ public:
             return;
         }
 
-        if (jint* dest = env->GetIntArrayElements ((jintArray) buffer.get(), 0))
+        if (jint* dest = env->GetIntArrayElements ((jintArray) buffer.get(), nullptr))
         {
             {
                 Image temp (new PreallocatedImage (clip.getWidth(), clip.getHeight(),
@@ -932,7 +936,7 @@ private:
                 zeromem (data_, static_cast<size_t> (width * height) * sizeof (jint));
         }
 
-        ~PreallocatedImage()
+        ~PreallocatedImage() override
         {
             if (hasAlpha)
             {
@@ -966,7 +970,7 @@ private:
 
         ImagePixelData::Ptr clone() override
         {
-            auto s = new PreallocatedImage (width, height, 0, hasAlpha);
+            auto s = new PreallocatedImage (width, height, nullptr, hasAlpha);
             s->allocatedData.malloc (sizeof (jint) * static_cast<size_t> (width * height));
             s->data = s->allocatedData;
             memcpy (s->data, data, sizeof (jint) * static_cast<size_t> (width * height));
@@ -1023,11 +1027,11 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 
     LocalRef<jobject> windowManager = LocalRef<jobject> (env->CallObjectMethod (getAppContext().get(), AndroidContext.getSystemService, windowServiceString.get()));
 
-    if (windowManager.get() != 0)
+    if (windowManager.get() != nullptr)
     {
         LocalRef<jobject> display = LocalRef<jobject> (env->CallObjectMethod (windowManager, AndroidWindowManager.getDefaultDisplay));
 
-        if (display.get() != 0)
+        if (display.get() != nullptr)
         {
             int rotation = env->CallIntMethod (display, AndroidDisplay.getRotation);
 
@@ -1410,7 +1414,7 @@ void Displays::findDisplays (float masterScale)
 
     jmethodID getRealMetricsMethod = env->GetMethodID (AndroidDisplay, "getRealMetrics", "(Landroid/util/DisplayMetrics;)V");
 
-    if (getRealMetricsMethod != 0)
+    if (getRealMetricsMethod != nullptr)
         env->CallVoidMethod (display.get(), getRealMetricsMethod, displayMetrics.get());
     else
         env->CallVoidMethod (display.get(), AndroidDisplay.getMetrics, displayMetrics.get());

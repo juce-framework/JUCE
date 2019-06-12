@@ -264,7 +264,21 @@ public:
         @param index    the index of the element being requested (0 is the first element in the array)
         @see operator[], getFirst, getLast
     */
-    inline ElementType& getReference (int index) const noexcept
+    inline ElementType& getReference (int index) noexcept
+    {
+        const ScopedLockType lock (getLock());
+        return values[index];
+    }
+
+    /** Returns a direct reference to one of the elements in the array, without checking the index passed in.
+
+        This is like getUnchecked, but returns a direct reference to the element. Obviously
+        this can be dangerous, so only use it when absolutely necessary.
+
+        @param index    the index of the element being requested (0 is the first element in the array)
+        @see operator[], getFirst, getLast
+    */
+    inline const ElementType& getReference (int index) const noexcept
     {
         const ScopedLockType lock (getLock());
         return values[index];
@@ -298,11 +312,28 @@ public:
         return values.begin();
     }
 
+    /** Returns a pointer to the actual array data.
+        This pointer will only be valid until the next time a non-const method
+        is called on the array.
+    */
+    inline const ElementType* getRawDataPointer() const noexcept
+    {
+        return values.begin();
+    }
+
     //==============================================================================
     /** Returns a pointer to the first element in the array.
         This method is provided for compatibility with standard C++ iteration mechanisms.
     */
-    inline ElementType* begin() const noexcept
+    inline ElementType* begin() noexcept
+    {
+        return values.begin();
+    }
+
+    /** Returns a pointer to the first element in the array.
+        This method is provided for compatibility with standard C++ iteration mechanisms.
+    */
+    inline const ElementType* begin() const noexcept
     {
         return values.begin();
     }
@@ -310,7 +341,15 @@ public:
     /** Returns a pointer to the element which follows the last element in the array.
         This method is provided for compatibility with standard C++ iteration mechanisms.
     */
-    inline ElementType* end() const noexcept
+    inline ElementType* end() noexcept
+    {
+        return values.end();
+    }
+
+    /** Returns a pointer to the element which follows the last element in the array.
+        This method is provided for compatibility with standard C++ iteration mechanisms.
+    */
+    inline const ElementType* end() const noexcept
     {
         return values.end();
     }
@@ -318,7 +357,15 @@ public:
     /** Returns a pointer to the first element in the array.
         This method is provided for compatibility with the standard C++ containers.
     */
-    inline ElementType* data() const noexcept
+    inline ElementType* data() noexcept
+    {
+        return begin();
+    }
+
+    /** Returns a pointer to the first element in the array.
+        This method is provided for compatibility with the standard C++ containers.
+    */
+    inline const ElementType* data() const noexcept
     {
         return begin();
     }

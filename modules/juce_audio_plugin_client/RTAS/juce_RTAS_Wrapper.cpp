@@ -24,10 +24,10 @@
   ==============================================================================
 */
 
-#if JucePlugin_Build_RTAS
-
 #include "../../juce_core/system/juce_TargetPlatform.h"
 #include "../utility/juce_CheckSettingMacros.h"
+
+#if JucePlugin_Build_RTAS
 
 #ifdef _MSC_VER
  // (this is a workaround for a build problem in VC9)
@@ -111,11 +111,6 @@
 
 #include "../utility/juce_IncludeModuleHeaders.h"
 
-using namespace juce;
-
-namespace juce
-{
-
 #ifdef _MSC_VER
  #pragma pack (pop)
 
@@ -166,6 +161,8 @@ static const int bypassControlIndex = 1;
 
 static int numInstances = 0;
 
+using namespace juce;
+
 //==============================================================================
 class JucePlugInProcess  : public CEffectProcessMIDI,
                            public CEffectProcessRTAS,
@@ -174,14 +171,15 @@ class JucePlugInProcess  : public CEffectProcessMIDI,
 {
 public:
     //==============================================================================
-    JucePlugInProcess()
+    // RTAS builds will be removed from JUCE in the next release
+    JUCE_DEPRECATED_WITH_BODY (JucePlugInProcess(),
     {
         juceFilter.reset (createPluginFilterOfType (AudioProcessor::wrapperType_RTAS));
 
         AddChunk (juceChunkType, "Juce Audio Plugin Data");
 
         ++numInstances;
-    }
+    })
 
     ~JucePlugInProcess()
     {
@@ -319,7 +317,7 @@ public:
                     if (Component* const modalComponent = Component::getCurrentlyModalComponent())
                         modalComponent->exitModalState (0);
 
-                    filter->editorBeingDeleted (editorComp);
+                    filter->editorBeingDeleted (editorComp.get());
 
                     editorComp.reset();
                     wrapper.reset();
@@ -686,7 +684,7 @@ public:
             auto paramIndex = controlIndex - 2;
             auto floatValue = longToFloat (value);
 
-            if (auto* param = owner.getParameters()[paramIndex])
+            if (auto* param = juceFilter->getParameters()[paramIndex])
             {
                 param->setValue (floatValue);
                 param->sendValueChangedMessageToListeners (floatValue);
@@ -954,6 +952,10 @@ public:
     {
         std::unique_ptr<AudioProcessor> plugin (createPluginFilterOfType (AudioProcessor::wrapperType_RTAS));
 
+       #ifndef JucePlugin_PreferredChannelConfigurations
+        #error You need to set the "Plugin Channel Configurations" field in the Projucer to build RTAS plug-ins
+       #endif
+
         const short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };
         const int numConfigs = numElementsInArray (channelConfigs);
 
@@ -1049,8 +1051,6 @@ private:
 };
 
 void initialiseMacRTAS();
-
-} // namespace juce
 
 CProcessGroupInterface* CProcessGroup::CreateProcessGroup()
 {

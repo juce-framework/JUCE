@@ -97,6 +97,8 @@ public:
         CallOutBox::launchAsynchronously (colourSelector, getScreenBounds(), nullptr);
     }
 
+    using TextButton::clicked;
+
     void changeListenerCallback (ChangeBroadcaster* source) override
     {
         if (auto* cs = dynamic_cast<ColourSelector*> (source))
@@ -632,12 +634,14 @@ private:
                 case edit_copy:         return createButtonFromZipFileSVG (itemId, "copy",    "edit-copy.svg");
                 case edit_cut:          return createButtonFromZipFileSVG (itemId, "cut",     "edit-cut.svg");
                 case edit_paste:        return createButtonFromZipFileSVG (itemId, "paste",   "edit-paste.svg");
+
                 case juceLogoButton:
                 {
-                    auto* drawable = new DrawableImage();
+                    auto drawable = std::make_unique<DrawableImage>();
                     drawable->setImage (getImageFromAssets ("juce_icon.png"));
-                    return new ToolbarButton (itemId, "juce!", drawable, nullptr);
+                    return new ToolbarButton (itemId, "juce!", std::move (drawable), {});
                 }
+
                 case customComboBox:    return new CustomToolbarComboBox (itemId);
                 default:                break;
             }
@@ -670,8 +674,8 @@ private:
                 }
             }
 
-            auto* image = iconsFromZipFile[iconNames.indexOf (filename)]->createCopy();
-            return new ToolbarButton (itemId, text, image, nullptr);
+            auto* image = iconsFromZipFile[iconNames.indexOf (filename)];
+            return new ToolbarButton (itemId, text, image->createCopy(), {});
         }
 
         // Demonstrates how to put a custom component into a toolbar - this one contains

@@ -64,7 +64,7 @@ public:
         setSize (800, 600);
     }
 
-    ~AudioAppDemo()
+    ~AudioAppDemo() override
     {
         shutdownAudio();
     }

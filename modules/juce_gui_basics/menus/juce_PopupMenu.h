@@ -231,7 +231,7 @@ public:
                   const String& itemText,
                   bool isEnabled,
                   bool isTicked,
-                  Drawable* iconToUse);
+                  std::unique_ptr<Drawable> iconToUse);
 
     /** Adds an item that represents one of the commands in a command manager object.
 
@@ -247,7 +247,7 @@ public:
     void addCommandItem (ApplicationCommandManager* commandManager,
                          CommandID commandID,
                          const String& displayName = String(),
-                         Drawable* iconToUse = nullptr);
+                         std::unique_ptr<Drawable> iconToUse = {});
 
     /** Appends a text item with a special colour.
 
@@ -273,7 +273,7 @@ public:
                           Colour itemTextColour,
                           bool isEnabled,
                           bool isTicked,
-                          Drawable* iconToUse);
+                          std::unique_ptr<Drawable> iconToUse);
 
     /** Appends a custom menu item.
 
@@ -344,7 +344,7 @@ public:
     void addSubMenu (const String& subMenuName,
                      const PopupMenu& subMenu,
                      bool isEnabled,
-                     Drawable* iconToUse,
+                     std::unique_ptr<Drawable> iconToUse,
                      bool isTicked = false,
                      int itemResultID = 0);
 

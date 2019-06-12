@@ -267,7 +267,7 @@ public:
                                                                   bool isMetaParameter = false,
                                                                   bool isAutomatableParameter = true,
                                                                   bool isDiscrete = false,
-                                                                  AudioProcessorParameter::Category category = AudioProcessorParameter::genericParameter,
+                                                                  AudioProcessorParameter::Category parameterCategory = AudioProcessorParameter::genericParameter,
                                                                   bool isBoolean = false));
 
     /** This function adds a parameter to the attached AudioProcessor and that parameter will
@@ -402,7 +402,7 @@ public:
                    bool isMetaParameter = false,
                    bool isAutomatableParameter = true,
                    bool isDiscrete = false,
-                   AudioProcessorParameter::Category category = AudioProcessorParameter::genericParameter,
+                   AudioProcessorParameter::Category parameterCategory = AudioProcessorParameter::genericParameter,
                    bool isBoolean = false);
 
         float getDefaultValue() const override;

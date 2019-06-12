@@ -83,7 +83,7 @@ public:
     //==============================================================================
     DemoRunnerApplication() {}
 
-    ~DemoRunnerApplication()
+    ~DemoRunnerApplication() override
     {
         sharedAudioDeviceManager.reset();
     }

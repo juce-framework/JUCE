@@ -278,7 +278,7 @@ public:
         setSize (500, 500);
     }
 
-    ~XMLandJSONDemo()
+    ~XMLandJSONDemo() override
     {
         resultsTree.setRootItem (nullptr);
     }

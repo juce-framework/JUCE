@@ -55,6 +55,7 @@ public:
     AudioFormatWriter* createWriterFor (OutputStream*, double sampleRateToUse,
                                         unsigned int numberOfChannels, int bitsPerSample,
                                         const StringPairArray& metadataValues, int qualityOptionIndex) override;
+    using AudioFormat::createWriterFor;
 };
 
 #endif

@@ -483,7 +483,9 @@ public:
         static void test (UnitTest& unitTest, bool inPlace, Random& r)
         {
             const int numSamples = 2048;
-            int32 original[numSamples], converted[numSamples], reversed[numSamples];
+            int32 original [(size_t) numSamples],
+                  converted[(size_t) numSamples],
+                  reversed [(size_t) numSamples];
 
             {
                 AudioData::Pointer<F1, E1, AudioData::NonInterleaved, AudioData::NonConst> d (original);

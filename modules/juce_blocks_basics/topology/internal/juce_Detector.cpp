@@ -41,7 +41,7 @@ struct Detector   : public ReferenceCountedObject,
         startTimer (10);
     }
 
-    ~Detector()
+    ~Detector() override
     {
         jassert (activeTopologySources.isEmpty());
     }

@@ -131,7 +131,7 @@ public:
         initialiseJuce_GUI();
     }
 
-    virtual ~JuceAudioUnitv3Base() {}
+    virtual ~JuceAudioUnitv3Base() = default;
 
     //==============================================================================
     AUAudioUnit* getAudioUnit() noexcept                                   { return au; }
@@ -441,7 +441,7 @@ public:
         init();
     }
 
-    ~JuceAudioUnitv3()
+    ~JuceAudioUnitv3() override
     {
         auto& processor = getAudioProcessor();
         processor.removeListener (this);

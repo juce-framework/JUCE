@@ -25,9 +25,10 @@ namespace juce
 
 #if JUCE_DEBUG
 
+//==============================================================================
 struct DanglingStreamChecker
 {
-    DanglingStreamChecker() {}
+    DanglingStreamChecker() = default;
 
     ~DanglingStreamChecker()
     {
@@ -38,12 +39,20 @@ struct DanglingStreamChecker
             nastiness..
         */
         jassert (activeStreams.size() == 0);
+
+        // We need to flag when this helper struct has been destroyed to prevent some
+        // nasty order-of-static-destruction issues
+        hasBeenDestroyed = true;
     }
 
     Array<void*, CriticalSection> activeStreams;
+
+    static bool hasBeenDestroyed;
 };
 
+bool DanglingStreamChecker::hasBeenDestroyed = false;
 static DanglingStreamChecker danglingStreamChecker;
+
 #endif
 
 //==============================================================================
@@ -51,14 +60,16 @@ OutputStream::OutputStream()
     : newLineString (NewLine::getDefault())
 {
    #if JUCE_DEBUG
-    danglingStreamChecker.activeStreams.add (this);
+    if (! DanglingStreamChecker::hasBeenDestroyed)
+        danglingStreamChecker.activeStreams.add (this);
    #endif
 }
 
 OutputStream::~OutputStream()
 {
    #if JUCE_DEBUG
-    danglingStreamChecker.activeStreams.removeFirstMatchingValue (this);
+    if (! DanglingStreamChecker::hasBeenDestroyed)
+        danglingStreamChecker.activeStreams.removeFirstMatchingValue (this);
    #endif
 }
 

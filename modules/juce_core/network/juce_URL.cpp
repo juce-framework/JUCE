@@ -790,7 +790,7 @@ String URL::readEntireTextStream (bool usePostCommand) const
 
 std::unique_ptr<XmlElement> URL::readEntireXmlStream (bool usePostCommand) const
 {
-    return XmlDocument::parse (readEntireTextStream (usePostCommand));
+    return parseXML (readEntireTextStream (usePostCommand));
 }
 
 //==============================================================================

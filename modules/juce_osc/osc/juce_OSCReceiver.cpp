@@ -321,7 +321,7 @@ struct OSCReceiver::Pimpl   : private Thread,
     {
     }
 
-    ~Pimpl()
+    ~Pimpl() override
     {
         disconnect();
     }

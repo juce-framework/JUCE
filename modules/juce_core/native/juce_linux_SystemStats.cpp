@@ -205,7 +205,7 @@ bool Time::setSystemTimeToThisTime() const
     t.tv_sec = millisSinceEpoch / 1000;
     t.tv_usec = (millisSinceEpoch - t.tv_sec * 1000) * 1000;
 
-    return settimeofday (&t, 0) == 0;
+    return settimeofday (&t, nullptr) == 0;
 }
 
 JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept

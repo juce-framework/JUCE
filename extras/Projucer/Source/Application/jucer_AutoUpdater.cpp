@@ -210,8 +210,8 @@ public:
         dontAskAgainButton.setToggleState (getGlobalProperties().getValue (Ids::dontQueryForUpdate, {}).isNotEmpty(), dontSendNotification);
         addAndMakeVisible (dontAskAgainButton);
 
-        juceIcon.reset (Drawable::createFromImageData (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize));
-
+        juceIcon = Drawable::createFromImageData (BinaryData::juce_icon_png,
+                                                  BinaryData::juce_icon_pngSize);
         lookAndFeelChanged();
 
         setSize (500, 280);

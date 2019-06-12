@@ -130,7 +130,7 @@ namespace juce
     auto xmlString = animalsList.toString();
     @endcode
 
-    @see XmlDocument
+    @see parseXML, parseXMLIfTagMatches, XmlDocument
 
     @tags{Core}
 */

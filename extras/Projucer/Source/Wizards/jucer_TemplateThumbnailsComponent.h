@@ -41,12 +41,12 @@ public:
         // svg for thumbnail icon
         auto svg = parseXML (thumbSvg);
         jassert (svg != nullptr);
-        thumb.reset (Drawable::createFromSVG (*svg));
+        thumb = Drawable::createFromSVG (*svg);
 
         // svg for thumbnail background highlight
         auto backSvg = parseXML (BinaryData::wizard_Highlight_svg);
         jassert (backSvg != nullptr);
-        hoverBackground.reset (Drawable::createFromSVG (*backSvg));
+        hoverBackground = Drawable::createFromSVG (*backSvg);
 
         name = buttonName;
 
@@ -126,6 +126,8 @@ private:
 
         Analytics::getInstance()->logEvent ("Start Page Button", data, ProjucerAnalyticsEvent::startPageEvent);
     }
+
+    using DrawableButton::clicked;
 
     std::unique_ptr<Drawable> thumb, hoverBackground;
     String name, description;

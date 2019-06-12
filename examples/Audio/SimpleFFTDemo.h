@@ -78,7 +78,7 @@ public:
         setSize (700, 500);
     }
 
-    ~SimpleFFTDemo()
+    ~SimpleFFTDemo() override
     {
         shutdownAudio();
     }

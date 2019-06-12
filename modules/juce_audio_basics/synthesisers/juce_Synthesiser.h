@@ -274,11 +274,6 @@ private:
 
     AudioBuffer<float> tempBuffer;
 
-   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-    // Note the new parameters for this method.
-    virtual int stopNote (bool) { return 0; }
-   #endif
-
     JUCE_LEAK_DETECTOR (SynthesiserVoice)
 };
 

@@ -112,7 +112,7 @@ bool PropertySet::getBoolValue (StringRef keyName, bool defaultValue) const noex
 
 std::unique_ptr<XmlElement> PropertySet::getXmlValue (StringRef keyName) const
 {
-    return XmlDocument::parse (getValue (keyName));
+    return parseXML (getValue (keyName));
 }
 
 void PropertySet::setValue (const String& keyName, const var& v)

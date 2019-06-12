@@ -50,7 +50,7 @@ public:
     UIViewComponent();
 
     /** Destructor. */
-    ~UIViewComponent();
+    ~UIViewComponent() override;
 
     /** Assigns an UIView to this peer.
 

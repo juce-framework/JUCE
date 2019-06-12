@@ -610,13 +610,13 @@ static void addAllSelectedItemIds (TreeViewItem* item, XmlElement& parent)
         addAllSelectedItemIds (item->getSubItem(i), parent);
 }
 
-std::unique_ptr<XmlElement> TreeView::getOpennessState (const bool alsoIncludeScrollPosition) const
+std::unique_ptr<XmlElement> TreeView::getOpennessState (bool alsoIncludeScrollPosition) const
 {
-    XmlElement* e = nullptr;
+    std::unique_ptr<XmlElement> e;
 
     if (rootItem != nullptr)
     {
-        e = rootItem->getOpennessState (false);
+        e.reset (rootItem->getOpennessState (false));
 
         if (e != nullptr)
         {
@@ -627,7 +627,7 @@ std::unique_ptr<XmlElement> TreeView::getOpennessState (const bool alsoIncludeSc
         }
     }
 
-    return std::unique_ptr<XmlElement> (e);
+    return e;
 }
 
 void TreeView::restoreOpennessState (const XmlElement& newState, const bool restoreStoredSelection)
@@ -1863,7 +1863,7 @@ std::unique_ptr<XmlElement> TreeViewItem::getOpennessState() const
     return std::unique_ptr<XmlElement> (getOpennessState (true));
 }
 
-XmlElement* TreeViewItem::getOpennessState (const bool canReturnNull) const
+XmlElement* TreeViewItem::getOpennessState (bool canReturnNull) const
 {
     auto name = getUniqueName();
 

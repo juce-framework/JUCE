@@ -104,7 +104,7 @@ public:
         thumbnail.addChangeListener (this);
     }
 
-    ~AudioThumbnailComponent()
+    ~AudioThumbnailComponent() override
     {
         thumbnail.removeChangeListener (this);
     }
@@ -367,7 +367,7 @@ public:
         setSize (800, 250);
     }
 
-    ~AudioFileReaderComponent()
+    ~AudioFileReaderComponent() override
     {
         signalThreadShouldExit();
         stop();
@@ -551,7 +551,7 @@ private:
             loopButton.getToggleStateValue().referTo (audioFileReader.loopState);
         }
 
-        ~AudioPlayerHeader()
+        ~AudioPlayerHeader() override
         {
             audioFileReader.playState.removeListener (this);
         }

@@ -120,7 +120,7 @@ struct CmplxSIMDOps<std::complex<Scalar>>
         union
         {
             vSIMDType v;
-            Scalar floats[n];
+            Scalar floats[(size_t) n];
         } u;
 
         for (int i = 0; i < n; ++i)

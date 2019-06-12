@@ -39,7 +39,7 @@ public:
             componentPeerChanged();
     }
 
-    ~Pimpl()
+    ~Pimpl() override
     {
         removeFromParent();
     }
@@ -123,7 +123,7 @@ private:
         auto* env = getEnv();
         auto parentView = env->CallObjectMethod (view, AndroidView.getParent);
 
-        if (parentView != 0)
+        if (parentView != nullptr)
         {
             // Assuming a parent is always of ViewGroup type
             env->CallVoidMethod (parentView, AndroidViewGroup.removeView, view.get());

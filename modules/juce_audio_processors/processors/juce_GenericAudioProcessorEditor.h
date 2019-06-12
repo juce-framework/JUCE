@@ -39,16 +39,19 @@ namespace juce
 
     @tags{Audio}
 */
-class JUCE_API  GenericAudioProcessorEditor      : public AudioProcessorEditor
+class JUCE_API  GenericAudioProcessorEditor  : public AudioProcessorEditor
 {
 public:
     //==============================================================================
-    GenericAudioProcessorEditor (AudioProcessor* owner);
+    GenericAudioProcessorEditor (AudioProcessor&);
     ~GenericAudioProcessorEditor() override;
 
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
+
+    // This constructor has been changed to take a reference instead of a pointer
+    JUCE_DEPRECATED_WITH_BODY (GenericAudioProcessorEditor (AudioProcessor* p), : GenericAudioProcessorEditor (*p) {})
 
 private:
     //==============================================================================

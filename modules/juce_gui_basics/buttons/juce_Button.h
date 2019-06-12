@@ -393,13 +393,6 @@ public:
 
         virtual void drawDrawableButton (Graphics&, DrawableButton&,
                                          bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) = 0;
-
-    private:
-       #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-        // These method have been deprecated: see their replacements above.
-        virtual int getTextButtonFont (TextButton&) { return 0; }
-        virtual int changeTextButtonWidthToFitText (TextButton&, int) { return 0; }
-       #endif
     };
 
     // This method's parameters have changed - see the new version.

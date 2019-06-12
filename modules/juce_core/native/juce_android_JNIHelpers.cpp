@@ -116,7 +116,7 @@ struct SystemJavaClassComparator
 
 //==============================================================================
 JNIClassBase::JNIClassBase (const char* cp, int classMinSDK, const void* bc, size_t n)
-    : classPath (cp), byteCode (bc), byteCodeSize (n), minSDK (classMinSDK), classRef (0)
+    : classPath (cp), byteCode (bc), byteCodeSize (n), minSDK (classMinSDK), classRef (nullptr)
 {
     SystemJavaClassComparator comparator;
 
@@ -162,13 +162,13 @@ void JNIClassBase::initialise (JNIEnv* env)
             LocalRef<jobject> defaultClassLoader (env->CallStaticObjectMethod (JavaClassLoader, JavaClassLoader.getSystemClassLoader));
             tryLoadingClassWithClassLoader (env, defaultClassLoader.get());
 
-            if (classRef == 0)
+            if (classRef == nullptr)
             {
                 for (auto& byteCodeLoader : byteCodeLoaders)
                 {
                     tryLoadingClassWithClassLoader (env, byteCodeLoader.get());
 
-                    if (classRef != 0)
+                    if (classRef != nullptr)
                         break;
                 }
 
@@ -234,10 +234,10 @@ void JNIClassBase::initialise (JNIEnv* env)
             }
         }
 
-        if (classRef == 0)
+        if (classRef == nullptr)
             classRef = (jclass) env->NewGlobalRef (LocalRef<jobject> (env->FindClass (classPath)));
 
-        jassert (classRef != 0);
+        jassert (classRef != nullptr);
         initialiseFields (env);
     }
 }
@@ -253,7 +253,7 @@ void JNIClassBase::tryLoadingClassWithClassLoader (JNIEnv* env, jobject classLoa
     if (jthrowable exception = env->ExceptionOccurred ())
     {
         env->ExceptionClear();
-        classObj = 0;
+        classObj = nullptr;
     }
 
     // later versions of Android don't throw at all, so re-check the object
@@ -263,7 +263,7 @@ void JNIClassBase::tryLoadingClassWithClassLoader (JNIEnv* env, jobject classLoa
 
 void JNIClassBase::release (JNIEnv* env)
 {
-    if (classRef != 0)
+    if (classRef != nullptr)
         env->DeleteGlobalRef (classRef);
 }
 
@@ -284,28 +284,28 @@ void JNIClassBase::releaseAllClasses (JNIEnv* env)
 jmethodID JNIClassBase::resolveMethod (JNIEnv* env, const char* methodName, const char* params)
 {
     jmethodID m = env->GetMethodID (classRef, methodName, params);
-    jassert (m != 0);
+    jassert (m != nullptr);
     return m;
 }
 
 jmethodID JNIClassBase::resolveStaticMethod (JNIEnv* env, const char* methodName, const char* params)
 {
     jmethodID m = env->GetStaticMethodID (classRef, methodName, params);
-    jassert (m != 0);
+    jassert (m != nullptr);
     return m;
 }
 
 jfieldID JNIClassBase::resolveField (JNIEnv* env, const char* fieldName, const char* signature)
 {
     jfieldID f = env->GetFieldID (classRef, fieldName, signature);
-    jassert (f != 0);
+    jassert (f != nullptr);
     return f;
 }
 
 jfieldID JNIClassBase::resolveStaticField (JNIEnv* env, const char* fieldName, const char* signature)
 {
     jfieldID f = env->GetStaticFieldID (classRef, fieldName, signature);
-    jassert (f != 0);
+    jassert (f != nullptr);
     return f;
 }
 
@@ -440,10 +440,10 @@ int getAndroidSDKVersion()
         auto* env = getEnv();
 
         auto buildVersion = env->FindClass ("android/os/Build$VERSION");
-        jassert (buildVersion != 0);
+        jassert (buildVersion != nullptr);
 
         auto sdkVersionField = env->GetStaticFieldID (buildVersion, "SDK_INT", "I");
-        jassert (sdkVersionField != 0);
+        jassert (sdkVersionField != nullptr);
 
         return env->GetStaticIntField (buildVersion, sdkVersionField);
     }();
@@ -581,7 +581,7 @@ void FragmentOverlay::onRequestPermissionsResultNative (JNIEnv* env, jobject, jl
 
         if (n > 0)
         {
-            auto* data = env->GetIntArrayElements (jGrantResults, 0);
+            auto* data = env->GetIntArrayElements (jGrantResults, nullptr);
 
             for (int i = 0; i < n; ++i)
                 grantResults.add (data[i]);

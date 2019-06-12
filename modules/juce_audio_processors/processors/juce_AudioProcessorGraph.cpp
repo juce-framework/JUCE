@@ -47,18 +47,21 @@ struct GraphRenderSequence
 
         if (numSamples > maxSamples)
         {
-            // being asked to render more samples than our buffers have, so slice things up...
-            tempMIDI.clear();
-            tempMIDI.addEvents (midiMessages, maxSamples, numSamples, -maxSamples);
-
+            // Being asked to render more samples than our buffers have, so divide the buffer into chunks
+            int chunkStartSample = 0;
+            while (chunkStartSample < numSamples)
             {
-                AudioBuffer<FloatType> startAudio (buffer.getArrayOfWritePointers(), buffer.getNumChannels(), maxSamples);
-                midiMessages.clear (maxSamples, numSamples);
-                perform (startAudio, midiMessages, audioPlayHead);
+                auto chunkSize = jmin (maxSamples, numSamples - chunkStartSample);
+
+                AudioBuffer<FloatType> audioChunk (buffer.getArrayOfWritePointers(), buffer.getNumChannels(), chunkStartSample, chunkSize);
+                midiChunk.clear();
+                midiChunk.addEvents (midiMessages, chunkStartSample, chunkSize, -chunkStartSample);
+
+                perform (audioChunk, midiChunk, audioPlayHead);
+
+                chunkStartSample += maxSamples;
             }
 
-            AudioBuffer<FloatType> endAudio (buffer.getArrayOfWritePointers(), buffer.getNumChannels(), maxSamples, numSamples - maxSamples);
-            perform (endAudio, tempMIDI, audioPlayHead);
             return;
         }
 
@@ -145,7 +148,7 @@ struct GraphRenderSequence
 
         const int defaultMIDIBufferSize = 512;
 
-        tempMIDI.ensureSize (defaultMIDIBufferSize);
+        midiChunk.ensureSize (defaultMIDIBufferSize);
 
         for (auto&& m : midiBuffers)
             m.ensureSize (defaultMIDIBufferSize);
@@ -170,7 +173,7 @@ struct GraphRenderSequence
     MidiBuffer currentMidiOutputBuffer;
 
     Array<MidiBuffer> midiBuffers;
-    MidiBuffer tempMIDI;
+    MidiBuffer midiChunk;
 
 private:
     //==============================================================================
@@ -794,8 +797,8 @@ bool AudioProcessorGraph::Connection::operator< (const Connection& other) const 
 }
 
 //==============================================================================
-AudioProcessorGraph::Node::Node (NodeID n, AudioProcessor* p) noexcept
-    : nodeID (n), processor (p)
+AudioProcessorGraph::Node::Node (NodeID n, std::unique_ptr<AudioProcessor> p) noexcept
+    : nodeID (n), processor (std::move (p))
 {
     jassert (processor != nullptr);
 }
@@ -911,9 +914,9 @@ AudioProcessorGraph::Node* AudioProcessorGraph::getNodeForId (NodeID nodeID) con
     return {};
 }
 
-AudioProcessorGraph::Node::Ptr AudioProcessorGraph::addNode (AudioProcessor* newProcessor, NodeID nodeID)
+AudioProcessorGraph::Node::Ptr AudioProcessorGraph::addNode (std::unique_ptr<AudioProcessor> newProcessor, NodeID nodeID)
 {
-    if (newProcessor == nullptr || newProcessor == this)
+    if (newProcessor == nullptr || newProcessor.get() == this)
     {
         jassertfalse;
         return {};
@@ -924,7 +927,7 @@ AudioProcessorGraph::Node::Ptr AudioProcessorGraph::addNode (AudioProcessor* new
 
     for (auto* n : nodes)
     {
-        if (n->getProcessor() == newProcessor || n->nodeID == nodeID)
+        if (n->getProcessor() == newProcessor.get() || n->nodeID == nodeID)
         {
             jassertfalse; // Cannot add two copies of the same processor, or duplicate node IDs!
             return {};
@@ -936,7 +939,7 @@ AudioProcessorGraph::Node::Ptr AudioProcessorGraph::addNode (AudioProcessor* new
 
     newProcessor->setPlayHead (getPlayHead());
 
-    Node::Ptr n (new Node (nodeID, newProcessor));
+    Node::Ptr n (new Node (nodeID, std::move (newProcessor)));
     nodes.add (n.get());
     n->setParentGraph (this);
     topologyChanged();

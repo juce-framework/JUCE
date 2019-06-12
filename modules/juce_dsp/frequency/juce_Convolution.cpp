@@ -373,7 +373,7 @@ struct Convolution::Pimpl  : private Thread
         impulseResponse.setSize (2, static_cast<int> (maximumTimeInSamples), false, false, true);
     }
 
-    ~Pimpl()
+    ~Pimpl() override
     {
         stopThread (10000);
     }
