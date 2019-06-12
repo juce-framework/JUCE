@@ -27,7 +27,7 @@
 namespace juce
 {
 
-AudioPluginFormat::AudioPluginFormat() noexcept {}
+AudioPluginFormat::AudioPluginFormat() {}
 AudioPluginFormat::~AudioPluginFormat() {}
 
 std::unique_ptr<AudioPluginInstance> AudioPluginFormat::createInstanceFromDescription (const PluginDescription& desc,
@@ -69,41 +69,31 @@ std::unique_ptr<AudioPluginInstance> AudioPluginFormat::createInstanceFromDescri
     return instance;
 }
 
+struct AudioPluginFormat::AsyncCreateMessage  : public Message
+{
+    AsyncCreateMessage (const PluginDescription& d, double sr, int size, PluginCreationCallback call)
+        : desc (d), sampleRate (sr), bufferSize (size), callbackToUse (std::move (call))
+    {
+    }
+
+    PluginDescription desc;
+    double sampleRate;
+    int bufferSize;
+    PluginCreationCallback callbackToUse;
+};
+
 void AudioPluginFormat::createPluginInstanceAsync (const PluginDescription& description,
                                                    double initialSampleRate, int initialBufferSize,
                                                    PluginCreationCallback callback)
 {
     jassert (callback != nullptr);
+    postMessage (new AsyncCreateMessage (description, initialSampleRate, initialBufferSize, std::move (callback)));
+}
 
-    if (MessageManager::getInstance()->isThisTheMessageThread())
-    {
-        createPluginInstance (description, initialSampleRate, initialBufferSize, std::move (callback));
-        return;
-    }
-
-    struct InvokeOnMessageThread  : public CallbackMessage
-    {
-        InvokeOnMessageThread (AudioPluginFormat& f, const PluginDescription& d,
-                               double sr, int size, PluginCreationCallback call)
-            : format (f), desc (d), sampleRate (sr), bufferSize (size),
-              callbackToUse (std::move (call))
-        {
-            post();
-        }
-
-        void messageCallback() override
-        {
-            format.createPluginInstance (desc, sampleRate, bufferSize, std::move (callbackToUse));
-        }
-
-        AudioPluginFormat& format;
-        PluginDescription desc;
-        double sampleRate;
-        int bufferSize;
-        PluginCreationCallback callbackToUse;
-    };
-
-    new InvokeOnMessageThread (*this, description, initialSampleRate, initialBufferSize, std::move (callback));
+void AudioPluginFormat::handleMessage (const Message& message)
+{
+    if (auto m = dynamic_cast<const AsyncCreateMessage*> (&message))
+        createPluginInstance (m->desc, m->sampleRate, m->bufferSize, std::move (m->callbackToUse));
 }
 
 } // namespace juce
