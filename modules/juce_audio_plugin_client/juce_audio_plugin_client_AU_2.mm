@@ -35,6 +35,14 @@
  #pragma clang diagnostic ignored "-Wextra-semi"
  #pragma clang diagnostic ignored "-Wformat-pedantic"
  #pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+ #pragma clang diagnostic ignored "-Wshadow-all"
+ #pragma clang diagnostic ignored "-Wcast-align"
+ #if __has_warning("-Wzero-as-null-pointer-constant")
+  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+ #endif
+ #if __has_warning("-Wnullable-to-nonnull-conversion")
+  #pragma clang diagnostic ignored "-Wnullable-to-nonnull-conversion"
+ #endif
 #endif
 
 // From MacOS 10.13 and iOS 11 Apple has (sensibly!) stopped defining a whole

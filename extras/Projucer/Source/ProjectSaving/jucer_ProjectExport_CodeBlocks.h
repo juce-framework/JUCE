@@ -209,6 +209,7 @@ private:
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
+            addRecommendedLinuxCompilerWarningsProperty (props);
             addGCCOptimisationProperty (props);
 
             props.add (new ChoicePropertyComponent (architectureTypeValue, "Architecture",
@@ -400,6 +401,9 @@ private:
 
         if (auto* codeBlocksConfig = dynamic_cast<const CodeBlocksBuildConfiguration*> (&config))
             flags.add (codeBlocksConfig->getArchitectureTypeString());
+
+        for (auto& recommended : config.getRecommendedCompilerWarningFlags())
+            flags.add (recommended);
 
         flags.add ("-O" + config.getGCCOptimisationFlag());
 

@@ -1331,22 +1331,22 @@ public:
         void detachHostWindow()
         {
            #if JUCE_MAC
-            if (hostWindow != 0)
+            if (hostWindow != nullptr)
             {
                 detachComponentFromWindowRefVST (this, hostWindow, wrapper.useNSView);
-                hostWindow = 0;
+                hostWindow = nullptr;
             }
            #endif
 
            #if JUCE_LINUX
-            hostWindow = 0;
+            hostWindow = {};
            #endif
         }
 
         void checkVisibility()
         {
            #if JUCE_MAC
-            if (hostWindow != 0)
+            if (hostWindow != nullptr)
                 checkWindowVisibilityVST (hostWindow, this, wrapper.useNSView);
            #endif
         }
@@ -1563,7 +1563,7 @@ public:
         bool shouldResizeEditor = true;
 
        #if JUCE_MAC
-        void* hostWindow = {};
+        void* hostWindow = nullptr;
        #elif JUCE_LINUX
         ScopedXDisplay display;
         Window hostWindow = {};
