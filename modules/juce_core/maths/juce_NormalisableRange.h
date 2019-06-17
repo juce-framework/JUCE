@@ -112,6 +112,11 @@ public:
     {
     }
 
+    /** A function object which can remap a value in some way based on the start and end of a range. */
+    using ValueRemapFunction = std::function<ValueType(ValueType rangeStart,
+                                                       ValueType rangeEnd,
+                                                       ValueType valueToRemap)>;
+
     /** Creates a NormalisableRange with a given range and an injective mapping function.
 
         @param rangeStart           The minimum value in the range.
@@ -125,14 +130,14 @@ public:
     */
     NormalisableRange (ValueType rangeStart,
                        ValueType rangeEnd,
-                       std::function<ValueType(ValueType currentRangeStart, ValueType currentRangeEnd, ValueType normalisedValue)> convertFrom0To1Func,
-                       std::function<ValueType(ValueType currentRangeStart, ValueType currentRangeEnd, ValueType mappedValue)> convertTo0To1Func,
-                       std::function<ValueType(ValueType currentRangeStart, ValueType currentRangeEnd, ValueType valueToSnap)> snapToLegalValueFunc = nullptr) noexcept
+                       ValueRemapFunction convertFrom0To1Func,
+                       ValueRemapFunction convertTo0To1Func,
+                       ValueRemapFunction snapToLegalValueFunc = {}) noexcept
         : start (rangeStart),
           end   (rangeEnd),
-          convertFrom0To1Function  (convertFrom0To1Func),
-          convertTo0To1Function    (convertTo0To1Func),
-          snapToLegalValueFunction (snapToLegalValueFunc)
+          convertFrom0To1Function  (std::move (convertFrom0To1Func)),
+          convertTo0To1Function    (std::move (convertTo0To1Func)),
+          snapToLegalValueFunction (std::move (snapToLegalValueFunc))
     {
         checkInvariants();
     }
@@ -274,11 +279,7 @@ private:
         return clampedValue;
     }
 
-    using ConversionFunction = std::function<ValueType(ValueType, ValueType, ValueType)>;
-
-    ConversionFunction convertFrom0To1Function  = {},
-                       convertTo0To1Function    = {},
-                       snapToLegalValueFunction = {};
+    ValueRemapFunction convertFrom0To1Function, convertTo0To1Function, snapToLegalValueFunction;
 };
 
 } // namespace juce

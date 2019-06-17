@@ -88,18 +88,15 @@ MouseCursor ResizableBorderComponent::Zone::getMouseCursor() const noexcept
 }
 
 //==============================================================================
-ResizableBorderComponent::ResizableBorderComponent (Component* const componentToResize,
-                                                    ComponentBoundsConstrainer* const constrainer_)
+ResizableBorderComponent::ResizableBorderComponent (Component* componentToResize,
+                                                    ComponentBoundsConstrainer* boundsConstrainer)
    : component (componentToResize),
-     constrainer (constrainer_),
-     borderSize (5),
-     mouseZone (0)
+     constrainer (boundsConstrainer),
+     borderSize (5)
 {
 }
 
-ResizableBorderComponent::~ResizableBorderComponent()
-{
-}
+ResizableBorderComponent::~ResizableBorderComponent() = default;
 
 //==============================================================================
 void ResizableBorderComponent::paint (Graphics& g)
@@ -168,13 +165,10 @@ void ResizableBorderComponent::mouseUp (const MouseEvent&)
 
 bool ResizableBorderComponent::hitTest (int x, int y)
 {
-    return x < borderSize.getLeft()
-            || x >= getWidth() - borderSize.getRight()
-            || y < borderSize.getTop()
-            || y >= getHeight() - borderSize.getBottom();
+    return ! borderSize.subtractedFrom (getLocalBounds()).contains (x, y);
 }
 
-void ResizableBorderComponent::setBorderThickness (const BorderSize<int>& newBorderSize)
+void ResizableBorderComponent::setBorderThickness (BorderSize<int> newBorderSize)
 {
     if (borderSize != newBorderSize)
     {
