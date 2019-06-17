@@ -79,13 +79,7 @@ namespace juce
 */
 class JUCE_API  PopupMenu
 {
-private:
-    class Window;
-
 public:
-    class CustomComponent;
-    class CustomCallback;
-
     //==============================================================================
     /** Creates an empty popup menu. */
     PopupMenu();
@@ -106,6 +100,10 @@ public:
     PopupMenu& operator= (PopupMenu&&) noexcept;
 
     //==============================================================================
+    class CustomComponent;
+    class CustomCallback;
+
+    //==============================================================================
     /** Resets the menu, removing all its items. */
     void clear();
 
@@ -116,19 +114,21 @@ public:
             You'll need to set some fields after creating an Item before you
             can add it to a PopupMenu
         */
-        Item() noexcept;
+        Item();
 
-        /** Creates a copy of an item. */
         Item (const Item&);
-
-        /** Creates a copy of an item. */
         Item& operator= (const Item&);
+        Item (Item&&);
+        Item& operator= (Item&&);
 
         /** The menu item's name. */
         String text;
 
         /** The menu item's ID. This must not be 0 if you want the item to be triggerable! */
         int itemID = 0;
+
+        /** An optional function which should be invoked when this menu item is triggered. */
+        std::function<void()> action;
 
         /** A sub-menu, or nullptr if there isn't one. */
         std::unique_ptr<PopupMenu> subMenu;
@@ -175,7 +175,17 @@ public:
         You can call this method for full control over the item that is added, or use the other
         addItem helper methods if you want to pass arguments rather than creating an Item object.
     */
-    void addItem (const Item& newItem);
+    void addItem (Item newItem);
+
+    /** Adds an item to the menu with an action callback. */
+    void addItem (String itemText,
+                  std::function<void()> action);
+
+    /** Adds an item to the menu with an action callback. */
+    void addItem (String itemText,
+                  bool isEnabled,
+                  bool isTicked,
+                  std::function<void()> action);
 
     /** Appends a new text item for this menu to show.
 
@@ -190,7 +200,7 @@ public:
         @see addSeparator, addColouredItem, addCustomItem, addSubMenu
     */
     void addItem (int itemResultID,
-                  const String& itemText,
+                  String itemText,
                   bool isEnabled = true,
                   bool isTicked = false);
 
@@ -208,7 +218,7 @@ public:
         @see addSeparator, addColouredItem, addCustomItem, addSubMenu
     */
     void addItem (int itemResultID,
-                  const String& itemText,
+                  String itemText,
                   bool isEnabled,
                   bool isTicked,
                   const Image& iconToUse);
@@ -228,7 +238,7 @@ public:
         @see addSeparator, addColouredItem, addCustomItem, addSubMenu
     */
     void addItem (int itemResultID,
-                  const String& itemText,
+                  String itemText,
                   bool isEnabled,
                   bool isTicked,
                   std::unique_ptr<Drawable> iconToUse);
@@ -246,7 +256,7 @@ public:
     */
     void addCommandItem (ApplicationCommandManager* commandManager,
                          CommandID commandID,
-                         const String& displayName = String(),
+                         String displayName = {},
                          std::unique_ptr<Drawable> iconToUse = {});
 
     /** Appends a text item with a special colour.
@@ -256,11 +266,11 @@ public:
         current look-and-feel. See addItem() for a description of the parameters.
     */
     void addColouredItem (int itemResultID,
-                          const String& itemText,
+                          String itemText,
                           Colour itemTextColour,
                           bool isEnabled = true,
                           bool isTicked = false,
-                          const Image& iconToUse = Image());
+                          const Image& iconToUse = {});
 
     /** Appends a text item with a special colour.
 
@@ -269,7 +279,7 @@ public:
         current look-and-feel. See addItem() for a description of the parameters.
     */
     void addColouredItem (int itemResultID,
-                          const String& itemText,
+                          String itemText,
                           Colour itemTextColour,
                           bool isEnabled,
                           bool isTicked,
@@ -314,8 +324,8 @@ public:
         If the itemResultID argument is non-zero, then the sub-menu item itself can be
         clicked to trigger it as a command.
     */
-    void addSubMenu (const String& subMenuName,
-                     const PopupMenu& subMenu,
+    void addSubMenu (String subMenuName,
+                     PopupMenu subMenu,
                      bool isEnabled = true);
 
     /** Appends a sub-menu with an icon.
@@ -324,8 +334,8 @@ public:
         If the itemResultID argument is non-zero, then the sub-menu item itself can be
         clicked to trigger it as a command.
     */
-    void addSubMenu (const String& subMenuName,
-                     const PopupMenu& subMenu,
+    void addSubMenu (String subMenuName,
+                     PopupMenu subMenu,
                      bool isEnabled,
                      const Image& iconToUse,
                      bool isTicked = false,
@@ -341,8 +351,8 @@ public:
         the item. The menu will take ownership of this drawable object and will delete it
         later when no longer needed
     */
-    void addSubMenu (const String& subMenuName,
-                     const PopupMenu& subMenu,
+    void addSubMenu (String subMenuName,
+                     PopupMenu subMenu,
                      bool isEnabled,
                      std::unique_ptr<Drawable> iconToUse,
                      bool isTicked = false,
@@ -360,7 +370,7 @@ public:
         This is a bold-font items which can be used as a header to separate the items
         into named groups.
     */
-    void addSectionHeader (const String& title);
+    void addSectionHeader (String title);
 
     /** Returns the number of items that the menu currently contains.
         (This doesn't count separators).
@@ -509,6 +519,9 @@ public:
     int showMenu (const Options& options);
    #endif
 
+    /** Runs the menu asynchronously. */
+    void showMenuAsync (const Options& options);
+
     /** Runs the menu asynchronously, with a user-provided callback that will receive the result. */
     void showMenuAsync (const Options& options,
                         ModalComponentManager::Callback* callback);
@@ -594,7 +607,7 @@ public:
         /** Returns a reference to the description of the current item.
             It is only valid to call this after next() has returned true!
         */
-        Item& getItem() const noexcept;
+        Item& getItem() const;
 
     private:
         //==============================================================================
@@ -749,10 +762,11 @@ public:
 private:
     //==============================================================================
     JUCE_PUBLIC_IN_DLL_BUILD (struct HelperClasses)
+    class Window;
     friend struct HelperClasses;
     friend class MenuBarComponent;
 
-    OwnedArray<Item> items;
+    std::vector<Item> items;
     WeakReference<LookAndFeel> lookAndFeel;
 
     Component* createWindow (const Options&, ApplicationCommandManager**) const;

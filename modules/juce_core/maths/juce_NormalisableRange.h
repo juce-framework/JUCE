@@ -195,7 +195,7 @@ public:
     }
 
     /** Takes a non-normalised value and snaps it based on either the interval property of
-        this NormalisedRange or the lambda function supplied to the constructor.
+        this NormalisableRange or the lambda function supplied to the constructor.
     */
     ValueType snapToLegalValue (ValueType v) const noexcept
     {
