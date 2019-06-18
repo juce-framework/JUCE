@@ -463,17 +463,17 @@ struct PluginTreeUtils
 
     static void addPlugin (KnownPluginList::PluginTree& tree, PluginDescription pd, String path)
     {
+       #if JUCE_MAC
+        if (path.containsChar (':'))
+            path = path.fromFirstOccurrenceOf (":", false, false); // avoid the special AU formatting nonsense on Mac..
+       #endif
+
         if (path.isEmpty())
         {
             tree.plugins.add (pd);
         }
         else
         {
-           #if JUCE_MAC
-            if (path.containsChar (':'))
-                path = path.fromFirstOccurrenceOf (":", false, false); // avoid the special AU formatting nonsense on Mac..
-           #endif
-
             auto firstSubFolder = path.upToFirstOccurrenceOf ("/", false, false);
             auto remainingPath  = path.fromFirstOccurrenceOf ("/", false, false);
 
