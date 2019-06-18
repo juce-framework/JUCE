@@ -249,10 +249,10 @@ public:
         }
         else if (i.subMenu != nullptr)
         {
-            if (i.text == recentItemsMenuName)
+            if (recentItemsMenuName.isNotEmpty() && i.text == recentItemsMenuName)
             {
                 if (recent == nullptr)
-                    recent.reset (new RecentFilesMenuItem());
+                    recent = std::make_unique<RecentFilesMenuItem>();
 
                 if (recent->recentItem != nil)
                 {
@@ -572,7 +572,7 @@ public:
         : oldMenu (MenuBarModel::getMacMainMenu())
     {
         if (auto* appleMenu = MenuBarModel::getMacExtraAppleItemsMenu())
-            oldAppleMenu.reset (new PopupMenu (*appleMenu));
+            oldAppleMenu = std::make_unique<PopupMenu> (*appleMenu);
 
         if (auto* handler = JuceMainMenuHandler::instance)
             oldRecentItems = handler->recentItemsMenuName;
