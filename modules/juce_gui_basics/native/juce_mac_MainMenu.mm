@@ -200,6 +200,12 @@ public:
     {
         if (currentModel != nullptr)
         {
+            if (item.action != nullptr)
+            {
+                MessageManager::callAsync (item.action);
+                return;
+            }
+
             if (item.customCallback != nullptr)
                 if (! item.customCallback->menuItemTriggered())
                     return;
