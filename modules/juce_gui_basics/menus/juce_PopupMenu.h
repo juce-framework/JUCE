@@ -116,6 +116,12 @@ public:
         */
         Item();
 
+        /** Creates an item with the given text.
+            This constructor also initialises the itemID to -1, which makes it suitable for
+            creating lambda-based item actions.
+        */
+        Item (String text);
+
         Item (const Item&);
         Item& operator= (const Item&);
         Item (Item&&);
@@ -124,7 +130,11 @@ public:
         /** The menu item's name. */
         String text;
 
-        /** The menu item's ID. This must not be 0 if you want the item to be triggerable! */
+        /** The menu item's ID.
+            This must not be 0 if you want the item to be triggerable, but if you're attaching
+            an action callback to the item, you can set the itemID to -1 to indicate that it
+            isn't actively needed.
+        */
         int itemID = 0;
 
         /** An optional function which should be invoked when this menu item is triggered. */
@@ -169,6 +179,34 @@ public:
 
         /** True if this menu item is a section header. */
         bool isSectionHeader = false;
+
+        /** Sets the isTicked flag (and returns a reference to this item to allow chaining). */
+        Item& setTicked (bool shouldBeTicked = true) JUCE_REF_QUALIFIER noexcept;
+        /** Sets the isEnabled flag (and returns a reference to this item to allow chaining). */
+        Item& setEnabled (bool shouldBeEnabled) JUCE_REF_QUALIFIER noexcept;
+        /** Sets the action property (and returns a reference to this item to allow chaining). */
+        Item& setAction (std::function<void()> action) JUCE_REF_QUALIFIER noexcept;
+        /** Sets the itemID property (and returns a reference to this item to allow chaining). */
+        Item& setID (int newID) JUCE_REF_QUALIFIER noexcept;
+        /** Sets the colour property (and returns a reference to this item to allow chaining). */
+        Item& setColour (Colour) JUCE_REF_QUALIFIER noexcept;
+        /** Sets the customComponent property (and returns a reference to this item to allow chaining). */
+        Item& setCustomComponent (ReferenceCountedObjectPtr<CustomComponent> customComponent) JUCE_REF_QUALIFIER noexcept;
+
+       #if ! (JUCE_MSVC && _MSC_VER < 1900) // Gah.. no ref-qualifiers in VC2013...
+        /** Sets the isTicked flag (and returns a reference to this item to allow chaining). */
+        Item&& setTicked (bool shouldBeTicked = true) && noexcept;
+        /** Sets the isEnabled flag (and returns a reference to this item to allow chaining). */
+        Item&& setEnabled (bool shouldBeEnabled) && noexcept;
+        /** Sets the action property (and returns a reference to this item to allow chaining). */
+        Item&& setAction (std::function<void()> action) && noexcept;
+        /** Sets the itemID property (and returns a reference to this item to allow chaining). */
+        Item&& setID (int newID) && noexcept;
+        /** Sets the colour property (and returns a reference to this item to allow chaining). */
+        Item&& setColour (Colour) && noexcept;
+        /** Sets the customComponent property (and returns a reference to this item to allow chaining). */
+        Item&& setCustomComponent (ReferenceCountedObjectPtr<CustomComponent> customComponent) && noexcept;
+       #endif
     };
 
     /** Adds an item to the menu.
@@ -410,6 +448,7 @@ public:
 
         //==============================================================================
         Options withTargetComponent (Component* targetComponent) const noexcept;
+        Options withTargetComponent (Component& targetComponent) const noexcept;
         Options withTargetScreenArea (Rectangle<int> targetArea) const noexcept;
         Options withMinimumWidth (int minWidth) const noexcept;
         Options withMinimumNumColumns (int minNumColumns) const noexcept;

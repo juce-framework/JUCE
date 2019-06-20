@@ -1305,6 +1305,7 @@ void PopupMenu::clear()
 
 //==============================================================================
 PopupMenu::Item::Item() = default;
+PopupMenu::Item::Item (String t) : text (std::move (t)), itemID (-1) {}
 
 #if JUCE_MSVC && _MSC_VER < 1900 // tedious VC2013 workaround
 PopupMenu::Item::Item (Item&& other)
@@ -1385,6 +1386,80 @@ PopupMenu::Item& PopupMenu::Item::operator= (const Item& other)
     return *this;
 }
 
+PopupMenu::Item& PopupMenu::Item::setTicked (bool shouldBeTicked) JUCE_REF_QUALIFIER noexcept
+{
+    isTicked = shouldBeTicked;
+    return *this;
+}
+
+PopupMenu::Item& PopupMenu::Item::setEnabled (bool shouldBeEnabled) JUCE_REF_QUALIFIER noexcept
+{
+    isEnabled = shouldBeEnabled;
+    return *this;
+}
+
+PopupMenu::Item& PopupMenu::Item::setAction (std::function<void()> newAction) JUCE_REF_QUALIFIER noexcept
+{
+    action = std::move (newAction);
+    return *this;
+}
+
+PopupMenu::Item& PopupMenu::Item::setID (int newID) JUCE_REF_QUALIFIER noexcept
+{
+    itemID = newID;
+    return *this;
+}
+
+PopupMenu::Item& PopupMenu::Item::setColour (Colour newColour) JUCE_REF_QUALIFIER noexcept
+{
+    colour = newColour;
+    return *this;
+}
+
+PopupMenu::Item& PopupMenu::Item::setCustomComponent (ReferenceCountedObjectPtr<CustomComponent> comp) JUCE_REF_QUALIFIER noexcept
+{
+    customComponent = comp;
+    return *this;
+}
+
+#if ! (JUCE_MSVC && _MSC_VER < 1900) // Gah.. no ref-qualifiers in VC2013...
+PopupMenu::Item&& PopupMenu::Item::setTicked (bool shouldBeTicked) && noexcept
+{
+    isTicked = shouldBeTicked;
+    return std::move (*this);
+}
+
+PopupMenu::Item&& PopupMenu::Item::setEnabled (bool shouldBeEnabled) && noexcept
+{
+    isEnabled = shouldBeEnabled;
+    return std::move (*this);
+}
+
+PopupMenu::Item&& PopupMenu::Item::setAction (std::function<void()> newAction) && noexcept
+{
+    action = std::move (newAction);
+    return std::move (*this);
+}
+
+PopupMenu::Item&& PopupMenu::Item::setID (int newID) && noexcept
+{
+    itemID = newID;
+    return std::move (*this);
+}
+
+PopupMenu::Item&& PopupMenu::Item::setColour (Colour newColour) && noexcept
+{
+    colour = newColour;
+    return std::move (*this);
+}
+
+PopupMenu::Item&& PopupMenu::Item::setCustomComponent (ReferenceCountedObjectPtr<CustomComponent> comp) && noexcept
+{
+    customComponent = comp;
+    return std::move (*this);
+}
+#endif
+
 void PopupMenu::addItem (Item newItem)
 {
     // An ID of 0 is used as a return value to indicate that the user
@@ -1403,10 +1478,8 @@ void PopupMenu::addItem (String itemText, std::function<void()> action)
 
 void PopupMenu::addItem (String itemText, bool isActive, bool isTicked, std::function<void()> action)
 {
-    Item i;
-    i.text = std::move (itemText);
+    Item i (std::move (itemText));
     i.action = std::move (action);
-    i.itemID = -1;
     i.isEnabled = isActive;
     i.isTicked = isTicked;
     addItem (std::move (i));
@@ -1414,8 +1487,7 @@ void PopupMenu::addItem (String itemText, bool isActive, bool isTicked, std::fun
 
 void PopupMenu::addItem (int itemResultID, String itemText, bool isActive, bool isTicked)
 {
-    Item i;
-    i.text = std::move (itemText);
+    Item i (std::move (itemText));
     i.itemID = itemResultID;
     i.isEnabled = isActive;
     i.isTicked = isTicked;
@@ -1442,8 +1514,7 @@ void PopupMenu::addItem (int itemResultID, String itemText, bool isActive, bool 
 void PopupMenu::addItem (int itemResultID, String itemText, bool isActive,
                          bool isTicked, std::unique_ptr<Drawable> iconToUse)
 {
-    Item i;
-    i.text = std::move (itemText);
+    Item i (std::move (itemText));
     i.itemID = itemResultID;
     i.isEnabled = isActive;
     i.isTicked = isTicked;
@@ -1477,8 +1548,7 @@ void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
 void PopupMenu::addColouredItem (int itemResultID, String itemText, Colour itemTextColour,
                                  bool isActive, bool isTicked, std::unique_ptr<Drawable> iconToUse)
 {
-    Item i;
-    i.text = std::move (itemText);
+    Item i (std::move (itemText));
     i.itemID = itemResultID;
     i.colour = itemTextColour;
     i.isEnabled = isActive;
@@ -1490,8 +1560,7 @@ void PopupMenu::addColouredItem (int itemResultID, String itemText, Colour itemT
 void PopupMenu::addColouredItem (int itemResultID, String itemText, Colour itemTextColour,
                                  bool isActive, bool isTicked, const Image& iconToUse)
 {
-    Item i;
-    i.text = std::move (itemText);
+    Item i (std::move (itemText));
     i.itemID = itemResultID;
     i.colour = itemTextColour;
     i.isEnabled = isActive;
@@ -1533,8 +1602,7 @@ void PopupMenu::addSubMenu (String subMenuName, PopupMenu subMenu, bool isActive
 void PopupMenu::addSubMenu (String subMenuName, PopupMenu subMenu, bool isActive,
                             std::unique_ptr<Drawable> iconToUse, bool isTicked, int itemResultID)
 {
-    Item i;
-    i.text = std::move (subMenuName);
+    Item i (std::move (subMenuName));
     i.itemID = itemResultID;
     i.isEnabled = isActive && (itemResultID != 0 || subMenu.getNumItems() > 0);
     i.subMenu.reset (new PopupMenu (std::move (subMenu)));
@@ -1555,8 +1623,7 @@ void PopupMenu::addSeparator()
 
 void PopupMenu::addSectionHeader (String title)
 {
-    Item i;
-    i.text = std::move (title);
+    Item i (std::move (title));
     i.isSectionHeader = true;
     addItem (std::move (i));
 }
@@ -1576,6 +1643,11 @@ PopupMenu::Options PopupMenu::Options::withTargetComponent (Component* comp) con
         o.targetArea = comp->getScreenBounds();
 
     return o;
+}
+
+PopupMenu::Options PopupMenu::Options::withTargetComponent (Component& comp) const noexcept
+{
+    return withTargetComponent (&comp);
 }
 
 PopupMenu::Options PopupMenu::Options::withTargetScreenArea (Rectangle<int> area) const noexcept
