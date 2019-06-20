@@ -1255,7 +1255,7 @@ void Desktop::setScreenSaverEnabled (const bool shouldEnable)
             auto* env = getEnv();
 
             LocalRef<jobject> mainWindow (env->CallObjectMethod (activity.get(), AndroidActivity.getWindow));
-            env->CallVoidMethod(mainWindow.get(), AndroidWindow.setFlags, shouldEnable ? FLAG_KEEP_SCREEN_ON : 0, FLAG_KEEP_SCREEN_ON);
+            env->CallVoidMethod(mainWindow.get(), AndroidWindow.setFlags, ! shouldEnable ? FLAG_KEEP_SCREEN_ON : 0, FLAG_KEEP_SCREEN_ON);
         }
 
         androidScreenSaverEnabled = shouldEnable;
