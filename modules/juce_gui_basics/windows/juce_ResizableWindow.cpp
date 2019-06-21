@@ -540,8 +540,9 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s, bool forceV
     tokens.trim();
 
     const bool hidden = tokens[0].startsWithIgnoreCase ("h");
-    const bool fs = tokens[1].startsWithIgnoreCase ("fs");
-    const int firstCoord = (hidden ? 1 : 0) + (fs ? 1 : 0);
+    const int fsToken = (hidden ? 1 : 0);
+    const bool fs = tokens[fsToken].startsWithIgnoreCase ("fs");
+    const int firstCoord = fsToken + (fs ? 1 : 0);
 
     if (tokens.size() != firstCoord + 4)
         return false;
