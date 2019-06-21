@@ -528,18 +528,20 @@ void ResizableWindow::parentSizeChanged()
 String ResizableWindow::getWindowStateAsString()
 {
     updateLastPosIfShowing();
-    return (isFullScreen() && ! isKioskMode() ? "fs " : "") + lastNonFullScreenPos.toString();
+    return String (isVisible() ? "" : "h ") + String (isFullScreen() && ! isKioskMode() ? "fs " : "")
+                                            + lastNonFullScreenPos.toString();
 }
 
-bool ResizableWindow::restoreWindowStateFromString (const String& s)
+bool ResizableWindow::restoreWindowStateFromString (const String& s, bool forceVisible)
 {
     StringArray tokens;
     tokens.addTokens (s, false);
     tokens.removeEmptyStrings();
     tokens.trim();
 
-    const bool fs = tokens[0].startsWithIgnoreCase ("fs");
-    const int firstCoord = fs ? 1 : 0;
+    const bool hidden = tokens[0].startsWithIgnoreCase ("h");
+    const bool fs = tokens[1].startsWithIgnoreCase ("fs");
+    const int firstCoord = (hidden ? 1 : 0) + (fs ? 1 : 0);
 
     if (tokens.size() != firstCoord + 4)
         return false;
@@ -590,6 +592,8 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
 
     if (! fs)
         setBoundsConstrained (newPos);
+    
+    setVisible (forceVisible ? true : ! hidden);
 
     return true;
 }
