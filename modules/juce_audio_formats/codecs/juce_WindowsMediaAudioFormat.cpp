@@ -51,7 +51,7 @@ public:
         auto numRead = source.read (dest, (size_t) numBytes);
 
         if (bytesRead != nullptr)
-            *bytesRead = numRead;
+            *bytesRead = (ULONG) numRead;
 
         return (numRead == (int) numBytes) ? S_OK : S_FALSE;
     }

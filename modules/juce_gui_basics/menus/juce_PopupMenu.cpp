@@ -223,12 +223,12 @@ struct MenuWindow  : public Component
         setOpaque (lf.findColour (PopupMenu::backgroundColourId).isOpaque()
                      || ! Desktop::canUseSemiTransparentWindows());
 
-        for (int i = 0; i < menu.items.size(); ++i)
+        for (size_t i = 0; i < menu.items.size(); ++i)
         {
-            auto item = menu.items.getUnchecked (i);
+            auto& item = menu.items[i];
 
-            if (i < menu.items.size() - 1 || ! item->isSeparator)
-                items.add (new ItemComponent (*item, options.getStandardItemHeight(), *this));
+            if (i + 1 < menu.items.size() || ! item.isSeparator)
+                items.add (new ItemComponent (item, options.getStandardItemHeight(), *this));
         }
 
         auto targetArea = options.getTargetScreenArea() / scaleFactor;
@@ -323,10 +323,15 @@ struct MenuWindow  : public Component
                 *managerOfChosenCommand = item->commandManager;
             }
 
-            exitModalState (getResultItemID (item));
+            auto resultID = getResultItemID (item);
 
-            if (makeInvisible && (deletionChecker != nullptr))
+            exitModalState (resultID);
+
+            if (makeInvisible && deletionChecker != nullptr)
                 setVisible (false);
+
+            if (resultID != 0 && item != nullptr && item->action != nullptr)
+                MessageManager::callAsync (item->action);
         }
     }
 
@@ -1262,42 +1267,36 @@ PopupMenu::PopupMenu()
 }
 
 PopupMenu::PopupMenu (const PopupMenu& other)
-    : lookAndFeel (other.lookAndFeel)
+    : items (other.items),
+      lookAndFeel (other.lookAndFeel)
 {
-    items.addCopiesOf (other.items);
 }
 
 PopupMenu& PopupMenu::operator= (const PopupMenu& other)
 {
     if (this != &other)
     {
+        items = other.items;
         lookAndFeel = other.lookAndFeel;
-
-        clear();
-        items.addCopiesOf (other.items);
     }
 
     return *this;
 }
 
 PopupMenu::PopupMenu (PopupMenu&& other) noexcept
-    : lookAndFeel (other.lookAndFeel)
+    : items (std::move (other.items)),
+      lookAndFeel (std::move (other.lookAndFeel))
 {
-    items.swapWith (other.items);
 }
 
 PopupMenu& PopupMenu::operator= (PopupMenu&& other) noexcept
 {
-    jassert (this != &other); // hopefully the compiler should make this situation impossible!
-
-    items.swapWith (other.items);
+    items = std::move (other.items);
     lookAndFeel = other.lookAndFeel;
     return *this;
 }
 
-PopupMenu::~PopupMenu()
-{
-}
+PopupMenu::~PopupMenu() = default;
 
 void PopupMenu::clear()
 {
@@ -1305,13 +1304,55 @@ void PopupMenu::clear()
 }
 
 //==============================================================================
-PopupMenu::Item::Item() noexcept
+PopupMenu::Item::Item() = default;
+PopupMenu::Item::Item (String t) : text (std::move (t)), itemID (-1) {}
+
+#if JUCE_MSVC && _MSC_VER < 1900 // tedious VC2013 workaround
+PopupMenu::Item::Item (Item&& other)
+  : text (std::move (other.text)),
+    itemID (other.itemID),
+    action (std::move (other.action)),
+    subMenu (std::move (other.subMenu)),
+    image (std::move (other.image)),
+    customComponent (std::move (other.customComponent)),
+    customCallback (std::move (other.customCallback)),
+    commandManager (other.commandManager),
+    shortcutKeyDescription (std::move (other.shortcutKeyDescription)),
+    colour (other.colour),
+    isEnabled (other.isEnabled),
+    isTicked (other.isTicked),
+    isSeparator (other.isSeparator),
+    isSectionHeader (other.isSectionHeader)
 {
 }
+
+PopupMenu::Item& PopupMenu::Item::operator= (Item&& other)
+{
+    text = std::move (other.text);
+    itemID = other.itemID;
+    action = std::move (other.action);
+    subMenu = std::move (other.subMenu);
+    image = std::move (other.image);
+    customComponent = std::move (other.customComponent);
+    customCallback = std::move (other.customCallback);
+    commandManager = other.commandManager;
+    shortcutKeyDescription = std::move (other.shortcutKeyDescription);
+    colour = other.colour;
+    isEnabled = other.isEnabled;
+    isTicked = other.isTicked;
+    isSeparator = other.isSeparator;
+    isSectionHeader = other.isSectionHeader;
+    return *this;
+}
+#else
+PopupMenu::Item::Item (Item&&) = default;
+PopupMenu::Item& PopupMenu::Item::operator= (Item&&) = default;
+#endif
 
 PopupMenu::Item::Item (const Item& other)
   : text (other.text),
     itemID (other.itemID),
+    action (other.action),
     subMenu (createCopyIfNotNull (other.subMenu.get())),
     image (other.image != nullptr ? other.image->createCopy() : nullptr),
     customComponent (other.customComponent),
@@ -1330,6 +1371,7 @@ PopupMenu::Item& PopupMenu::Item::operator= (const Item& other)
 {
     text = other.text;
     itemID = other.itemID;
+    action = other.action;
     subMenu.reset (createCopyIfNotNull (other.subMenu.get()));
     image = other.image != nullptr ? other.image->createCopy() : std::unique_ptr<Drawable>();
     customComponent = other.customComponent;
@@ -1344,7 +1386,81 @@ PopupMenu::Item& PopupMenu::Item::operator= (const Item& other)
     return *this;
 }
 
-void PopupMenu::addItem (const Item& newItem)
+PopupMenu::Item& PopupMenu::Item::setTicked (bool shouldBeTicked) JUCE_REF_QUALIFIER noexcept
+{
+    isTicked = shouldBeTicked;
+    return *this;
+}
+
+PopupMenu::Item& PopupMenu::Item::setEnabled (bool shouldBeEnabled) JUCE_REF_QUALIFIER noexcept
+{
+    isEnabled = shouldBeEnabled;
+    return *this;
+}
+
+PopupMenu::Item& PopupMenu::Item::setAction (std::function<void()> newAction) JUCE_REF_QUALIFIER noexcept
+{
+    action = std::move (newAction);
+    return *this;
+}
+
+PopupMenu::Item& PopupMenu::Item::setID (int newID) JUCE_REF_QUALIFIER noexcept
+{
+    itemID = newID;
+    return *this;
+}
+
+PopupMenu::Item& PopupMenu::Item::setColour (Colour newColour) JUCE_REF_QUALIFIER noexcept
+{
+    colour = newColour;
+    return *this;
+}
+
+PopupMenu::Item& PopupMenu::Item::setCustomComponent (ReferenceCountedObjectPtr<CustomComponent> comp) JUCE_REF_QUALIFIER noexcept
+{
+    customComponent = comp;
+    return *this;
+}
+
+#if ! (JUCE_MSVC && _MSC_VER < 1900) // Gah.. no ref-qualifiers in VC2013...
+PopupMenu::Item&& PopupMenu::Item::setTicked (bool shouldBeTicked) && noexcept
+{
+    isTicked = shouldBeTicked;
+    return std::move (*this);
+}
+
+PopupMenu::Item&& PopupMenu::Item::setEnabled (bool shouldBeEnabled) && noexcept
+{
+    isEnabled = shouldBeEnabled;
+    return std::move (*this);
+}
+
+PopupMenu::Item&& PopupMenu::Item::setAction (std::function<void()> newAction) && noexcept
+{
+    action = std::move (newAction);
+    return std::move (*this);
+}
+
+PopupMenu::Item&& PopupMenu::Item::setID (int newID) && noexcept
+{
+    itemID = newID;
+    return std::move (*this);
+}
+
+PopupMenu::Item&& PopupMenu::Item::setColour (Colour newColour) && noexcept
+{
+    colour = newColour;
+    return std::move (*this);
+}
+
+PopupMenu::Item&& PopupMenu::Item::setCustomComponent (ReferenceCountedObjectPtr<CustomComponent> comp) && noexcept
+{
+    customComponent = comp;
+    return std::move (*this);
+}
+#endif
+
+void PopupMenu::addItem (Item newItem)
 {
     // An ID of 0 is used as a return value to indicate that the user
     // didn't pick anything, so you shouldn't use it as the ID for an item..
@@ -1352,17 +1468,30 @@ void PopupMenu::addItem (const Item& newItem)
               || newItem.isSeparator || newItem.isSectionHeader
               || newItem.subMenu != nullptr);
 
-    items.add (new Item (newItem));
+    items.push_back (std::move (newItem));
 }
 
-void PopupMenu::addItem (int itemResultID, const String& itemText, bool isActive, bool isTicked)
+void PopupMenu::addItem (String itemText, std::function<void()> action)
 {
-    Item i;
-    i.text = itemText;
+    addItem (std::move (itemText), true, false, std::move (action));
+}
+
+void PopupMenu::addItem (String itemText, bool isActive, bool isTicked, std::function<void()> action)
+{
+    Item i (std::move (itemText));
+    i.action = std::move (action);
+    i.isEnabled = isActive;
+    i.isTicked = isTicked;
+    addItem (std::move (i));
+}
+
+void PopupMenu::addItem (int itemResultID, String itemText, bool isActive, bool isTicked)
+{
+    Item i (std::move (itemText));
     i.itemID = itemResultID;
     i.isEnabled = isActive;
     i.isTicked = isTicked;
-    addItem (i);
+    addItem (std::move (i));
 }
 
 static std::unique_ptr<Drawable> createDrawableFromImage (const Image& im)
@@ -1377,26 +1506,25 @@ static std::unique_ptr<Drawable> createDrawableFromImage (const Image& im)
     return {};
 }
 
-void PopupMenu::addItem (int itemResultID, const String& itemText, bool isActive, bool isTicked, const Image& iconToUse)
+void PopupMenu::addItem (int itemResultID, String itemText, bool isActive, bool isTicked, const Image& iconToUse)
 {
-    addItem (itemResultID, itemText, isActive, isTicked, createDrawableFromImage (iconToUse));
+    addItem (itemResultID, std::move (itemText), isActive, isTicked, createDrawableFromImage (iconToUse));
 }
 
-void PopupMenu::addItem (int itemResultID, const String& itemText, bool isActive,
+void PopupMenu::addItem (int itemResultID, String itemText, bool isActive,
                          bool isTicked, std::unique_ptr<Drawable> iconToUse)
 {
-    Item i;
-    i.text = itemText;
+    Item i (std::move (itemText));
     i.itemID = itemResultID;
     i.isEnabled = isActive;
     i.isTicked = isTicked;
     i.image = std::move (iconToUse);
-    addItem (i);
+    addItem (std::move (i));
 }
 
 void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
                                 const CommandID commandID,
-                                const String& displayName,
+                                String displayName,
                                 std::unique_ptr<Drawable> iconToUse)
 {
     jassert (commandManager != nullptr && commandID != 0);
@@ -1407,40 +1535,38 @@ void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
         auto* target = commandManager->getTargetForCommand (commandID, info);
 
         Item i;
-        i.text = displayName.isNotEmpty() ? displayName : info.shortName;
+        i.text = displayName.isNotEmpty() ? std::move (displayName) : info.shortName;
         i.itemID = (int) commandID;
         i.commandManager = commandManager;
         i.isEnabled = target != nullptr && (info.flags & ApplicationCommandInfo::isDisabled) == 0;
         i.isTicked = (info.flags & ApplicationCommandInfo::isTicked) != 0;
         i.image = std::move (iconToUse);
-        addItem (i);
+        addItem (std::move (i));
     }
 }
 
-void PopupMenu::addColouredItem (int itemResultID, const String& itemText, Colour itemTextColour,
+void PopupMenu::addColouredItem (int itemResultID, String itemText, Colour itemTextColour,
                                  bool isActive, bool isTicked, std::unique_ptr<Drawable> iconToUse)
 {
-    Item i;
-    i.text = itemText;
+    Item i (std::move (itemText));
     i.itemID = itemResultID;
     i.colour = itemTextColour;
     i.isEnabled = isActive;
     i.isTicked = isTicked;
     i.image = std::move (iconToUse);
-    addItem (i);
+    addItem (std::move (i));
 }
 
-void PopupMenu::addColouredItem (int itemResultID, const String& itemText, Colour itemTextColour,
+void PopupMenu::addColouredItem (int itemResultID, String itemText, Colour itemTextColour,
                                  bool isActive, bool isTicked, const Image& iconToUse)
 {
-    Item i;
-    i.text = itemText;
+    Item i (std::move (itemText));
     i.itemID = itemResultID;
     i.colour = itemTextColour;
     i.isEnabled = isActive;
     i.isTicked = isTicked;
     i.image = createDrawableFromImage (iconToUse);
-    addItem (i);
+    addItem (std::move (i));
 }
 
 void PopupMenu::addCustomItem (int itemResultID, CustomComponent* cc, const PopupMenu* subMenu)
@@ -1449,7 +1575,7 @@ void PopupMenu::addCustomItem (int itemResultID, CustomComponent* cc, const Popu
     i.itemID = itemResultID;
     i.customComponent = cc;
     i.subMenu.reset (createCopyIfNotNull (subMenu));
-    addItem (i);
+    addItem (std::move (i));
 }
 
 void PopupMenu::addCustomItem (int itemResultID, Component* customComponent, int idealWidth, int idealHeight,
@@ -1461,46 +1587,45 @@ void PopupMenu::addCustomItem (int itemResultID, Component* customComponent, int
                    subMenu);
 }
 
-void PopupMenu::addSubMenu (const String& subMenuName, const PopupMenu& subMenu, bool isActive)
+void PopupMenu::addSubMenu (String subMenuName, PopupMenu subMenu, bool isActive)
 {
-    addSubMenu (subMenuName, subMenu, isActive, nullptr, false, 0);
+    addSubMenu (std::move (subMenuName), std::move (subMenu), isActive, nullptr, false, 0);
 }
 
-void PopupMenu::addSubMenu (const String& subMenuName, const PopupMenu& subMenu, bool isActive,
+void PopupMenu::addSubMenu (String subMenuName, PopupMenu subMenu, bool isActive,
                             const Image& iconToUse, bool isTicked, int itemResultID)
 {
-    addSubMenu (subMenuName, subMenu, isActive, createDrawableFromImage (iconToUse), isTicked, itemResultID);
+    addSubMenu (std::move (subMenuName), std::move (subMenu), isActive,
+                createDrawableFromImage (iconToUse), isTicked, itemResultID);
 }
 
-void PopupMenu::addSubMenu (const String& subMenuName, const PopupMenu& subMenu, bool isActive,
+void PopupMenu::addSubMenu (String subMenuName, PopupMenu subMenu, bool isActive,
                             std::unique_ptr<Drawable> iconToUse, bool isTicked, int itemResultID)
 {
-    Item i;
-    i.text = subMenuName;
+    Item i (std::move (subMenuName));
     i.itemID = itemResultID;
-    i.subMenu.reset (new PopupMenu (subMenu));
     i.isEnabled = isActive && (itemResultID != 0 || subMenu.getNumItems() > 0);
+    i.subMenu.reset (new PopupMenu (std::move (subMenu)));
     i.isTicked = isTicked;
     i.image = std::move (iconToUse);
-    addItem (i);
+    addItem (std::move (i));
 }
 
 void PopupMenu::addSeparator()
 {
-    if (items.size() > 0 && ! items.getLast()->isSeparator)
+    if (items.size() > 0 && ! items.back().isSeparator)
     {
         Item i;
         i.isSeparator = true;
-        addItem (i);
+        addItem (std::move (i));
     }
 }
 
-void PopupMenu::addSectionHeader (const String& title)
+void PopupMenu::addSectionHeader (String title)
 {
-    Item i;
-    i.text = title;
+    Item i (std::move (title));
     i.isSectionHeader = true;
-    addItem (i);
+    addItem (std::move (i));
 }
 
 //==============================================================================
@@ -1518,6 +1643,11 @@ PopupMenu::Options PopupMenu::Options::withTargetComponent (Component* comp) con
         o.targetArea = comp->getScreenBounds();
 
     return o;
+}
+
+PopupMenu::Options PopupMenu::Options::withTargetComponent (Component& comp) const noexcept
+{
+    return withTargetComponent (&comp);
 }
 
 PopupMenu::Options PopupMenu::Options::withTargetScreenArea (Rectangle<int> area) const noexcept
@@ -1579,11 +1709,11 @@ PopupMenu::Options PopupMenu::Options::withPreferredPopupDirection (PopupDirecti
 Component* PopupMenu::createWindow (const Options& options,
                                     ApplicationCommandManager** managerOfChosenCommand) const
 {
-    return items.isEmpty() ? nullptr
-                           : new HelperClasses::MenuWindow (*this, nullptr, options,
-                                                            ! options.getTargetScreenArea().isEmpty(),
-                                                            ModifierKeys::currentModifiers.isAnyMouseButtonDown(),
-                                                            managerOfChosenCommand);
+    return items.empty() ? nullptr
+                         : new HelperClasses::MenuWindow (*this, nullptr, options,
+                                                          ! options.getTargetScreenArea().isEmpty(),
+                                                          ModifierKeys::currentModifiers.isAnyMouseButtonDown(),
+                                                          managerOfChosenCommand);
 }
 
 //==============================================================================
@@ -1627,8 +1757,9 @@ struct PopupMenuCompletionCallback  : public ModalComponentManager::Callback
     JUCE_DECLARE_NON_COPYABLE (PopupMenuCompletionCallback)
 };
 
-int PopupMenu::showWithOptionalCallback (const Options& options, ModalComponentManager::Callback* const userCallback,
-                                         const bool canBeModal)
+int PopupMenu::showWithOptionalCallback (const Options& options,
+                                         ModalComponentManager::Callback* userCallback,
+                                         bool canBeModal)
 {
     std::unique_ptr<ModalComponentManager::Callback> userCallbackDeleter (userCallback);
     std::unique_ptr<PopupMenuCompletionCallback> callback (new PopupMenuCompletionCallback());
@@ -1663,6 +1794,11 @@ int PopupMenu::showMenu (const Options& options)
     return showWithOptionalCallback (options, nullptr, true);
 }
 #endif
+
+void PopupMenu::showMenuAsync (const Options& options)
+{
+    showWithOptionalCallback (options, nullptr, false);
+}
 
 void PopupMenu::showMenuAsync (const Options& options, ModalComponentManager::Callback* userCallback)
 {
@@ -1743,8 +1879,8 @@ int PopupMenu::getNumItems() const noexcept
 {
     int num = 0;
 
-    for (auto* mi : items)
-        if (! mi->isSeparator)
+    for (auto& mi : items)
+        if (! mi.isSeparator)
             ++num;
 
     return num;
@@ -1752,9 +1888,9 @@ int PopupMenu::getNumItems() const noexcept
 
 bool PopupMenu::containsCommandItem (const int commandID) const
 {
-    for (auto* mi : items)
-        if ((mi->itemID == commandID && mi->commandManager != nullptr)
-              || (mi->subMenu != nullptr && mi->subMenu->containsCommandItem (commandID)))
+    for (auto& mi : items)
+        if ((mi.itemID == commandID && mi.commandManager != nullptr)
+              || (mi.subMenu != nullptr && mi.subMenu->containsCommandItem (commandID)))
             return true;
 
     return false;
@@ -1762,14 +1898,14 @@ bool PopupMenu::containsCommandItem (const int commandID) const
 
 bool PopupMenu::containsAnyActiveItems() const noexcept
 {
-    for (auto* mi : items)
+    for (auto& mi : items)
     {
-        if (mi->subMenu != nullptr)
+        if (mi.subMenu != nullptr)
         {
-            if (mi->subMenu->containsAnyActiveItems())
+            if (mi.subMenu->containsAnyActiveItems())
                 return true;
         }
-        else if (mi->isEnabled)
+        else if (mi.isEnabled)
         {
             return true;
         }
@@ -1832,14 +1968,14 @@ PopupMenu::MenuItemIterator::MenuItemIterator (const PopupMenu& m, bool recurse)
     menus.add (&m);
 }
 
-PopupMenu::MenuItemIterator::~MenuItemIterator() {}
+PopupMenu::MenuItemIterator::~MenuItemIterator() = default;
 
 bool PopupMenu::MenuItemIterator::next()
 {
     if (index.size() == 0 || menus.getLast()->items.size() == 0)
         return false;
 
-    currentItem = menus.getLast()->items.getUnchecked (index.getLast());
+    currentItem = const_cast<PopupMenu::Item*> (&(menus.getLast()->items[(size_t) index.getLast()]));
 
     if (searchRecursively && currentItem->subMenu != nullptr)
     {
@@ -1851,7 +1987,7 @@ bool PopupMenu::MenuItemIterator::next()
         index.setUnchecked (index.size() - 1, index.getLast() + 1);
     }
 
-    while (index.size() > 0 && index.getLast() >= menus.getLast()->items.size())
+    while (index.size() > 0 && index.getLast() >= (int) menus.getLast()->items.size())
     {
         index.removeLast();
         menus.removeLast();
@@ -1863,7 +1999,7 @@ bool PopupMenu::MenuItemIterator::next()
     return true;
 }
 
-PopupMenu::Item& PopupMenu::MenuItemIterator::getItem() const noexcept
+PopupMenu::Item& PopupMenu::MenuItemIterator::getItem() const
 {
     jassert (currentItem != nullptr);
     return *(currentItem);

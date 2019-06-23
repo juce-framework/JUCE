@@ -51,7 +51,7 @@ public:
             parameter.removeListener (this);
     }
 
-    AudioProcessorParameter& getParameter() noexcept
+    AudioProcessorParameter& getParameter() const noexcept
     {
         return parameter;
     }
@@ -109,7 +109,7 @@ public:
         // Set the initial value.
         handleNewParameterValue();
 
-        button.onClick = [this]() { buttonClicked(); };
+        button.onClick = [this] { buttonClicked(); };
 
         addAndMakeVisible (button);
     }
@@ -126,15 +126,12 @@ public:
 private:
     void handleNewParameterValue() override
     {
-        auto parameterState = getParameterState (getParameter().getValue());
-
-        if (button.getToggleState() != parameterState)
-            button.setToggleState (parameterState, dontSendNotification);
+        button.setToggleState (isParameterOn(), dontSendNotification);
     }
 
     void buttonClicked()
     {
-        if (getParameterState (getParameter().getValue()) != button.getToggleState())
+        if (isParameterOn() != button.getToggleState())
         {
             getParameter().beginChangeGesture();
             getParameter().setValueNotifyingHost (button.getToggleState() ? 1.0f : 0.0f);
@@ -142,10 +139,7 @@ private:
         }
     }
 
-    bool getParameterState (float value) const noexcept
-    {
-        return value >= 0.5f;
-    }
+    bool isParameterOn() const    { return getParameter().getValue() >= 0.5f; }
 
     ToggleButton button;
 
@@ -160,28 +154,25 @@ public:
     SwitchParameterComponent (AudioProcessor& proc, AudioProcessorParameter& param)
         : ParameterListener (proc, param)
     {
-        auto* leftButton  = buttons.add (new TextButton());
-        auto* rightButton = buttons.add (new TextButton());
-
-        for (auto* button : buttons)
+        for (auto& button : buttons)
         {
-            button->setRadioGroupId (293847);
-            button->setClickingTogglesState (true);
+            button.setRadioGroupId (293847);
+            button.setClickingTogglesState (true);
         }
 
-        leftButton ->setButtonText (getParameter().getText (0.0f, 16));
-        rightButton->setButtonText (getParameter().getText (1.0f, 16));
+        buttons[0].setButtonText (getParameter().getText (0.0f, 16));
+        buttons[1].setButtonText (getParameter().getText (1.0f, 16));
 
-        leftButton ->setConnectedEdges (Button::ConnectedOnRight);
-        rightButton->setConnectedEdges (Button::ConnectedOnLeft);
+        buttons[0].setConnectedEdges (Button::ConnectedOnRight);
+        buttons[1].setConnectedEdges (Button::ConnectedOnLeft);
 
         // Set the initial value.
-        leftButton->setToggleState (true, dontSendNotification);
+        buttons[0].setToggleState (true, dontSendNotification);
         handleNewParameterValue();
 
-        rightButton->onStateChange = [this]() { rightButtonChanged(); };
+        buttons[1].onStateChange = [this] { rightButtonChanged(); };
 
-        for (auto* button : buttons)
+        for (auto& button : buttons)
             addAndMakeVisible (button);
     }
 
@@ -192,27 +183,27 @@ public:
         auto area = getLocalBounds().reduced (0, 8);
         area.removeFromLeft (8);
 
-        for (auto* button : buttons)
-            button->setBounds (area.removeFromLeft (80));
+        for (auto& button : buttons)
+            button.setBounds (area.removeFromLeft (80));
     }
 
 private:
     void handleNewParameterValue() override
     {
-        bool newState = getParameterState();
+        bool newState = isParameterOn();
 
-        if (buttons[1]->getToggleState() != newState)
+        if (buttons[1].getToggleState() != newState)
         {
-            buttons[1]->setToggleState (newState,   dontSendNotification);
-            buttons[0]->setToggleState (! newState, dontSendNotification);
+            buttons[1].setToggleState (newState,   dontSendNotification);
+            buttons[0].setToggleState (! newState, dontSendNotification);
         }
     }
 
     void rightButtonChanged()
     {
-        auto buttonState = buttons[1]->getToggleState();
+        auto buttonState = buttons[1].getToggleState();
 
-        if (getParameterState() != buttonState)
+        if (isParameterOn() != buttonState)
         {
             getParameter().beginChangeGesture();
 
@@ -227,7 +218,7 @@ private:
                 // have uneven spacing between the different allowed values and we
                 // want the snapping behaviour to be consistent with what we do with
                 // a combo box.
-                String selectedText = buttonState ? buttons[1]->getButtonText() : buttons[0]->getButtonText();
+                auto selectedText = buttons[buttonState ? 1 : 0].getButtonText();
                 getParameter().setValueNotifyingHost (getParameter().getValueForText (selectedText));
             }
 
@@ -235,7 +226,7 @@ private:
         }
     }
 
-    bool getParameterState()
+    bool isParameterOn() const
     {
         if (getParameter().getAllValueStrings().isEmpty())
             return getParameter().getValue() > 0.5f;
@@ -253,7 +244,7 @@ private:
         return index == 1;
     }
 
-    OwnedArray<TextButton> buttons;
+    TextButton buttons[2];
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SwitchParameterComponent)
 };
@@ -272,7 +263,7 @@ public:
         // Set the initial value.
         handleNewParameterValue();
 
-        box.onChange = [this]() { boxChanged(); };
+        box.onChange = [this] { boxChanged(); };
         addAndMakeVisible (box);
     }
 
@@ -427,33 +418,7 @@ public:
         parameterLabel.setText (parameter.getLabel(), dontSendNotification);
         addAndMakeVisible (parameterLabel);
 
-        if (param.isBoolean())
-        {
-            // The AU, AUv3 and VST (only via a .vstxml file) SDKs support
-            // marking a parameter as boolean. If you want consistency across
-            // all  formats then it might be best to use a
-            // SwitchParameterComponent instead.
-            parameterComp = std::make_unique<BooleanParameterComponent> (processor, param);
-        }
-        else if (param.getNumSteps() == 2)
-        {
-            // Most hosts display any parameter with just two steps as a switch.
-            parameterComp = std::make_unique<SwitchParameterComponent> (processor, param);
-        }
-        else if (! param.getAllValueStrings().isEmpty())
-        {
-            // If we have a list of strings to represent the different states a
-            // parameter can be in then we should present a dropdown allowing a
-            // user to pick one of them.
-            parameterComp = std::make_unique<ChoiceParameterComponent> (processor, param);
-        }
-        else
-        {
-            // Everything else can be represented as a slider.
-            parameterComp = std::make_unique<SliderParameterComponent> (processor, param);
-        }
-
-        addAndMakeVisible (*parameterComp);
+        addAndMakeVisible (*(parameterComp = createParameterComp (processor)));
 
         setSize (400, 40);
     }
@@ -473,6 +438,30 @@ private:
     AudioProcessorParameter& parameter;
     Label parameterName, parameterLabel;
     std::unique_ptr<Component> parameterComp;
+
+    std::unique_ptr<Component> createParameterComp (AudioProcessor& processor) const
+    {
+        // The AU, AUv3 and VST (only via a .vstxml file) SDKs support
+        // marking a parameter as boolean. If you want consistency across
+        // all  formats then it might be best to use a
+        // SwitchParameterComponent instead.
+        if (parameter.isBoolean())
+            return std::make_unique<BooleanParameterComponent> (processor, parameter);
+
+        // Most hosts display any parameter with just two steps as a switch.
+        if (parameter.getNumSteps() == 2)
+            return std::make_unique<SwitchParameterComponent> (processor, parameter);
+
+        // If we have a list of strings to represent the different states a
+        // parameter can be in then we should present a dropdown allowing a
+        // user to pick one of them.
+        if (! parameter.getAllValueStrings().isEmpty()
+             && std::abs (parameter.getNumSteps() - parameter.getAllValueStrings().size()) <= 1)
+            return std::make_unique<ChoiceParameterComponent> (processor, parameter);
+
+        // Everything else can be represented as a slider.
+        return std::make_unique<SliderParameterComponent> (processor, parameter);
+    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParameterDisplayComponent)
 };

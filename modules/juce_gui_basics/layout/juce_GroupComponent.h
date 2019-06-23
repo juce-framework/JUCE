@@ -44,8 +44,8 @@ public:
         @param componentName    the name to give the component
         @param labelText        the text to show at the top of the outline
     */
-    GroupComponent (const String& componentName = String(),
-                    const String& labelText = String());
+    GroupComponent (const String& componentName = {},
+                    const String& labelText = {});
 
     /** Destructor. */
     ~GroupComponent() override;
@@ -58,15 +58,12 @@ public:
     String getText() const;
 
     /** Sets the positioning of the text label.
-
         (The default is Justification::left)
-
         @see getTextLabelPosition
     */
     void setTextLabelPosition (Justification justification);
 
     /** Returns the current text label position.
-
         @see setTextLabelPosition
     */
     Justification getTextLabelPosition() const noexcept           { return justification; }

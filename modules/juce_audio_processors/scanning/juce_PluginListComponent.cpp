@@ -311,7 +311,7 @@ void PluginListComponent::showOptionsMenu()
             menu.addItem (10 + i, "Scan for new or updated " + format->getName() + " plug-ins");
     }
 
-    menu.showMenuAsync (PopupMenu::Options().withTargetComponent (&optionsButton),
+    menu.showMenuAsync (PopupMenu::Options().withTargetComponent (optionsButton),
                         ModalCallbackFunction::forComponent (optionsMenuStaticCallback, this));
 }
 
