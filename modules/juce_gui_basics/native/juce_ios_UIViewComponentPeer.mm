@@ -1086,7 +1086,7 @@ void Desktop::allowedOrientationsChanged()
         jassert (i < n);
         i = jmin (n - 1, i);
 
-        NSNumber *value = [NSNumber numberWithInt:Orientations::convertFromJuce (orientations[i])];
+        NSNumber *value = [NSNumber numberWithInt: (int) Orientations::convertFromJuce (orientations[i])];
         [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
         [value release];
     }

@@ -32,14 +32,6 @@ namespace juce
 #ifdef __clang__
  #pragma clang diagnostic push
  #pragma clang diagnostic ignored "-Wnonnull" // aovid some spurious 10.11 SDK warnings
-
- // The AudioHardwareService stuff was deprecated in 10.11 but there's no replacement yet,
- // so we'll have to silence the warnings here and revisit it in a future OS version..
- #if ((defined (MAC_OS_X_VERSION_10_13) && MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_13) \
-   || (defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_12) \
-   || (defined (MAC_OS_X_VERSION_10_11) && MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_11))
-  #pragma clang diagnostic ignored "-Wdeprecated-declarations"
- #endif
 #endif
 
 //==============================================================================
@@ -52,11 +44,10 @@ struct SystemVol
         addr.mElement  = kAudioObjectPropertyElementMaster;
         addr.mSelector = kAudioHardwarePropertyDefaultOutputDevice;
 
-        if (AudioHardwareServiceHasProperty (kAudioObjectSystemObject, &addr))
+        if (AudioObjectHasProperty (kAudioObjectSystemObject, &addr))
         {
             UInt32 deviceIDSize = sizeof (outputDeviceID);
-            OSStatus status = AudioHardwareServiceGetPropertyData (kAudioObjectSystemObject, &addr, 0,
-                                                                   nullptr, &deviceIDSize, &outputDeviceID);
+            OSStatus status = AudioObjectGetPropertyData (kAudioObjectSystemObject, &addr, 0, nullptr, &deviceIDSize, &outputDeviceID);
 
             if (status == noErr)
             {
@@ -64,7 +55,7 @@ struct SystemVol
                 addr.mSelector = selector;
                 addr.mScope    = kAudioDevicePropertyScopeOutput;
 
-                if (! AudioHardwareServiceHasProperty (outputDeviceID, &addr))
+                if (! AudioObjectHasProperty (outputDeviceID, &addr))
                     outputDeviceID = kAudioObjectUnknown;
             }
         }
@@ -77,8 +68,7 @@ struct SystemVol
         if (outputDeviceID != kAudioObjectUnknown)
         {
             UInt32 size = sizeof (gain);
-            AudioHardwareServiceGetPropertyData (outputDeviceID, &addr,
-                                                 0, nullptr, &size, &gain);
+            AudioObjectGetPropertyData (outputDeviceID, &addr,  0, nullptr, &size, &gain);
         }
 
         return (float) gain;
@@ -91,8 +81,7 @@ struct SystemVol
             Float32 newVolume = gain;
             UInt32 size = sizeof (newVolume);
 
-            return AudioHardwareServiceSetPropertyData (outputDeviceID, &addr, 0, nullptr,
-                                                        size, &newVolume) == noErr;
+            return AudioObjectSetPropertyData (outputDeviceID, &addr, 0, nullptr, size, &newVolume) == noErr;
         }
 
         return false;
@@ -105,8 +94,7 @@ struct SystemVol
         if (outputDeviceID != kAudioObjectUnknown)
         {
             UInt32 size = sizeof (muted);
-            AudioHardwareServiceGetPropertyData (outputDeviceID, &addr,
-                                                 0, nullptr, &size, &muted);
+            AudioObjectGetPropertyData (outputDeviceID, &addr, 0, nullptr, &size, &muted);
         }
 
         return muted != 0;
@@ -119,8 +107,7 @@ struct SystemVol
             UInt32 newMute = mute ? 1 : 0;
             UInt32 size = sizeof (newMute);
 
-            return AudioHardwareServiceSetPropertyData (outputDeviceID, &addr, 0, nullptr,
-                                                        size, &newMute) == noErr;
+            return AudioObjectSetPropertyData (outputDeviceID, &addr, 0, nullptr, size, &newMute) == noErr;
         }
 
         return false;
@@ -133,8 +120,7 @@ private:
     bool canSetVolume() const noexcept
     {
         Boolean isSettable = NO;
-        return AudioHardwareServiceIsPropertySettable (outputDeviceID, &addr, &isSettable) == noErr
-                 && isSettable;
+        return AudioObjectIsPropertySettable (outputDeviceID, &addr, &isSettable) == noErr && isSettable;
     }
 };
 
