@@ -59,8 +59,6 @@ public:
     /** Returns the current text colour. */
     Colour getColour() const noexcept                                   { return colour; }
 
-    bool replaceColour (Colour originalColour, Colour replacementColour) override;
-
     /** Sets the font to use.
         Note that the font height and horizontal scale are set using setFontHeight() and
         setFontHorizontalScale(). If applySizeAndScale is true, then these height

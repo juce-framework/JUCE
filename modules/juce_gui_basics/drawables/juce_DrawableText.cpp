@@ -76,14 +76,6 @@ void DrawableText::setColour (Colour newColour)
     }
 }
 
-bool DrawableText::replaceColour (Colour originalColour, Colour replacementColour)
-{
-    if (colour != originalColour)
-        return false;
-    setColour (replacementColour);
-    return true;
-}
-
 void DrawableText::setFont (const Font& newFont, bool applySizeAndScale)
 {
     if (font != newFont)
