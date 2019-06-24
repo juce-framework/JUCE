@@ -200,4 +200,13 @@ Path DrawableText::getOutlineAsPath() const
     return pathOfAllGlyphs;
 }
 
+bool DrawableText::replaceColour (Colour originalColour, Colour replacementColour)
+{
+    if (colour != originalColour)
+        return false;
+
+    setColour (replacementColour);
+    return true;
+}
+
 } // namespace juce
