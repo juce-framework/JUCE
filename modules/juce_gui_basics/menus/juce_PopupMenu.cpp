@@ -192,11 +192,11 @@ private:
 struct MenuWindow  : public Component
 {
     MenuWindow (const PopupMenu& menu, MenuWindow* parentWindow,
-                const Options& opts, bool alignToRectangle, bool shouldDismissOnMouseUp,
+                Options opts, bool alignToRectangle, bool shouldDismissOnMouseUp,
                 ApplicationCommandManager** manager, float parentScaleFactor = 1.0f)
        : Component ("menu"),
          parent (parentWindow),
-         options (opts),
+         options (std::move (opts)),
          managerOfChosenCommand (manager),
          componentAttachedTo (options.getTargetComponent()),
          dismissOnMouseUp (shouldDismissOnMouseUp),
@@ -323,14 +323,16 @@ struct MenuWindow  : public Component
                 *managerOfChosenCommand = item->commandManager;
             }
 
-            auto resultID = getResultItemID (item);
+            auto resultID = options.hasWatchedComponentBeenDeleted() ? 0 : getResultItemID (item);
 
             exitModalState (resultID);
 
             if (makeInvisible && deletionChecker != nullptr)
                 setVisible (false);
 
-            if (resultID != 0 && item != nullptr && item->action != nullptr)
+            if (resultID != 0
+                 && item != nullptr
+                 && item->action != nullptr)
                 MessageManager::callAsync (item->action);
         }
     }
@@ -347,7 +349,7 @@ struct MenuWindow  : public Component
         return item->itemID;
     }
 
-    void dismissMenu (const PopupMenu::Item* const item)
+    void dismissMenu (const PopupMenu::Item* item)
     {
         if (parent != nullptr)
         {
@@ -1634,7 +1636,7 @@ PopupMenu::Options::Options()
     targetArea.setPosition (Desktop::getMousePosition());
 }
 
-PopupMenu::Options PopupMenu::Options::withTargetComponent (Component* comp) const noexcept
+PopupMenu::Options PopupMenu::Options::withTargetComponent (Component* comp) const
 {
     Options o (*this);
     o.targetComponent = comp;
@@ -1645,61 +1647,69 @@ PopupMenu::Options PopupMenu::Options::withTargetComponent (Component* comp) con
     return o;
 }
 
-PopupMenu::Options PopupMenu::Options::withTargetComponent (Component& comp) const noexcept
+PopupMenu::Options PopupMenu::Options::withTargetComponent (Component& comp) const
 {
     return withTargetComponent (&comp);
 }
 
-PopupMenu::Options PopupMenu::Options::withTargetScreenArea (Rectangle<int> area) const noexcept
+PopupMenu::Options PopupMenu::Options::withTargetScreenArea (Rectangle<int> area) const
 {
     Options o (*this);
     o.targetArea = area;
     return o;
 }
 
-PopupMenu::Options PopupMenu::Options::withMinimumWidth (int w) const noexcept
+PopupMenu::Options PopupMenu::Options::withDeletionCheck (Component& comp) const
+{
+    Options o (*this);
+    o.componentToWatchForDeletion = &comp;
+    o.isWatchingForDeletion = true;
+    return o;
+}
+
+PopupMenu::Options PopupMenu::Options::withMinimumWidth (int w) const
 {
     Options o (*this);
     o.minWidth = w;
     return o;
 }
 
-PopupMenu::Options PopupMenu::Options::withMinimumNumColumns (int cols) const noexcept
+PopupMenu::Options PopupMenu::Options::withMinimumNumColumns (int cols) const
 {
     Options o (*this);
     o.minColumns = cols;
     return o;
 }
 
-PopupMenu::Options PopupMenu::Options::withMaximumNumColumns (int cols) const noexcept
+PopupMenu::Options PopupMenu::Options::withMaximumNumColumns (int cols) const
 {
     Options o (*this);
     o.maxColumns = cols;
     return o;
 }
 
-PopupMenu::Options PopupMenu::Options::withStandardItemHeight (int height) const noexcept
+PopupMenu::Options PopupMenu::Options::withStandardItemHeight (int height) const
 {
     Options o (*this);
     o.standardHeight = height;
     return o;
 }
 
-PopupMenu::Options PopupMenu::Options::withItemThatMustBeVisible (int idOfItemToBeVisible) const noexcept
+PopupMenu::Options PopupMenu::Options::withItemThatMustBeVisible (int idOfItemToBeVisible) const
 {
     Options o (*this);
     o.visibleItemID = idOfItemToBeVisible;
     return o;
 }
 
-PopupMenu::Options PopupMenu::Options::withParentComponent (Component* parent) const noexcept
+PopupMenu::Options PopupMenu::Options::withParentComponent (Component* parent) const
 {
     Options o (*this);
     o.parentComponent = parent;
     return o;
 }
 
-PopupMenu::Options PopupMenu::Options::withPreferredPopupDirection (PopupDirection direction) const noexcept
+PopupMenu::Options PopupMenu::Options::withPreferredPopupDirection (PopupDirection direction) const
 {
     Options o (*this);
     o.preferredPopupDirection = direction;
