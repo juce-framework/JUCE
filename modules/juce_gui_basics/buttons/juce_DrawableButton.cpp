@@ -119,11 +119,27 @@ void DrawableButton::resized()
     if (currentImage != nullptr)
     {
         if (style == ImageRaw)
+        {
             currentImage->setOriginWithOriginalSize (Point<float>());
+        }
         else
-            currentImage->setTransformToFit (getImageBounds(),
-                                             style == ImageStretched ? RectanglePlacement::stretchToFit
-                                                                     : RectanglePlacement::centred);
+        {
+            int transformFlags = 0;
+
+            if (style == ImageStretched)
+            {
+                transformFlags |= RectanglePlacement::stretchToFit;
+            }
+            else
+            {
+                transformFlags |= RectanglePlacement::centred;
+
+                if (style == ImageOnButtonBackgroundOriginalSize)
+                    transformFlags |= RectanglePlacement::doNotResize;
+            }
+
+            currentImage->setTransformToFit (getImageBounds(), transformFlags);
+        }
     }
 }
 
