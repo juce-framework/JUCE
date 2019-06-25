@@ -88,6 +88,17 @@ public:
         valueChanged (value);
     }
 
+    ChoicePropertyComponentWithEnablement (ValueWithDefault& valueToControl,
+                                           ValueWithDefault valueToListenTo,
+                                           const String& propertyName)
+        : ChoicePropertyComponent (valueToControl, propertyName),
+          valueWithDefault (valueToListenTo),
+          value (valueToListenTo.getPropertyAsValue())
+    {
+        value.addListener (this);
+        valueChanged (value);
+    }
+
     ~ChoicePropertyComponentWithEnablement() override    { value.removeListener (this); }
 
 private:
