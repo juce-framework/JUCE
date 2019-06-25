@@ -59,7 +59,7 @@ public:
         virtual void blockRemoved (const Block::Ptr) {}
 
         /** Called when a known block is updated.
-            This could be becasue details have been reveived asyncroniously. E.g. Block name.
+            This could be because details have been received asynchronously. E.g. Block name.
          */
         virtual void blockUpdated (const Block::Ptr) {}
     };
