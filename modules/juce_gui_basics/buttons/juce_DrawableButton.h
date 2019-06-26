@@ -183,6 +183,9 @@ public:
 
 private:
     //==============================================================================
+    bool shouldDrawButtonBackground() const  { return style == ImageOnButtonBackground || style == ImageOnButtonBackgroundOriginalSize; }
+
+    //==============================================================================
     ButtonStyle style;
     std::unique_ptr<Drawable> normalImage, overImage, downImage, disabledImage,
                               normalImageOn, overImageOn, downImageOn, disabledImageOn;

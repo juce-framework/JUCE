@@ -447,20 +447,22 @@ public:
         };
 
         //==============================================================================
-        Options withTargetComponent (Component* targetComponent) const noexcept;
-        Options withTargetComponent (Component& targetComponent) const noexcept;
-        Options withTargetScreenArea (Rectangle<int> targetArea) const noexcept;
-        Options withMinimumWidth (int minWidth) const noexcept;
-        Options withMinimumNumColumns (int minNumColumns) const noexcept;
-        Options withMaximumNumColumns (int maxNumColumns) const noexcept;
-        Options withStandardItemHeight (int standardHeight) const noexcept;
-        Options withItemThatMustBeVisible (int idOfItemToBeVisible) const noexcept;
-        Options withParentComponent (Component* parentComponent) const noexcept;
-        Options withPreferredPopupDirection (PopupDirection direction) const noexcept;
+        Options withTargetComponent (Component* targetComponent) const;
+        Options withTargetComponent (Component& targetComponent) const;
+        Options withTargetScreenArea (Rectangle<int> targetArea) const;
+        Options withDeletionCheck (Component& componentToWatchForDeletion) const;
+        Options withMinimumWidth (int minWidth) const;
+        Options withMinimumNumColumns (int minNumColumns) const;
+        Options withMaximumNumColumns (int maxNumColumns) const;
+        Options withStandardItemHeight (int standardHeight) const;
+        Options withItemThatMustBeVisible (int idOfItemToBeVisible) const;
+        Options withParentComponent (Component* parentComponent) const;
+        Options withPreferredPopupDirection (PopupDirection direction) const;
 
         //==============================================================================
         Component* getParentComponent() const noexcept               { return parentComponent; }
         Component* getTargetComponent() const noexcept               { return targetComponent; }
+        bool hasWatchedComponentBeenDeleted() const noexcept         { return isWatchingForDeletion && componentToWatchForDeletion == nullptr; }
         Rectangle<int> getTargetScreenArea() const noexcept          { return targetArea; }
         int getMinimumWidth() const noexcept                         { return minWidth; }
         int getMaximumNumColumns() const noexcept                    { return maxColumns; }
@@ -474,7 +476,9 @@ public:
         Rectangle<int> targetArea;
         Component* targetComponent = nullptr;
         Component* parentComponent = nullptr;
+        WeakReference<Component> componentToWatchForDeletion;
         int visibleItemID = 0, minWidth = 0, minColumns = 1, maxColumns = 0, standardHeight = 0;
+        bool isWatchingForDeletion = false;
         PopupDirection preferredPopupDirection = PopupDirection::downwards;
     };
 

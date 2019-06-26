@@ -555,7 +555,6 @@ void TabbedButtonBar::setTabBackgroundColour (int tabIndex, Colour newColour)
 void TabbedButtonBar::showExtraItemsMenu()
 {
     PopupMenu m;
-    Component::SafePointer<TabbedButtonBar> bar (this);
 
     for (int i = 0; i < tabs.size(); ++i)
     {
@@ -564,10 +563,12 @@ void TabbedButtonBar::showExtraItemsMenu()
         if (! tab->button->isVisible())
             m.addItem (PopupMenu::Item (tab->name)
                          .setTicked (i == currentTabIndex)
-                         .setAction ([this, bar, i] { if (bar != nullptr) setCurrentTabIndex (i); }));
+                         .setAction ([this, i] { setCurrentTabIndex (i); }));
     }
 
-    m.showMenuAsync (PopupMenu::Options().withTargetComponent (extraTabsButton.get()));
+    m.showMenuAsync (PopupMenu::Options()
+                        .withDeletionCheck (*this)
+                        .withTargetComponent (extraTabsButton.get()));
 }
 
 //==============================================================================

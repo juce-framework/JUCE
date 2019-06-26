@@ -325,7 +325,9 @@ private:
                          .setEnabled (false));
         }
 
-        m.showMenuAsync (PopupMenu::Options().withTargetComponent (copyPathButton));
+        m.showMenuAsync (PopupMenu::Options()
+                           .withDeletionCheck (*this)
+                           .withTargetComponent (copyPathButton));
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModulesInformationComponent)

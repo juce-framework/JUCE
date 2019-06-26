@@ -34,12 +34,12 @@ namespace
     static const char* const iOSDefaultVersion = "9.3";
     static const StringArray iOSVersions { "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4",
                                            "9.0", "9.1", "9.2", "9.3", "10.0", "10.1", "10.2", "10.3",
-                                           "11.0", "12.0" };
+                                           "11.0", "12.0", "13.0" };
 
     static const int oldestDeploymentTarget  = 7;
     static const int defaultDeploymentTarget = 11;
     static const int oldestSDKVersion        = 11;
-    static const int currentSDKVersion       = 14;
+    static const int currentSDKVersion       = 15;
     static const int minimumAUv3SDKVersion   = 11;
 
     static String getVersionName    (int version)  { return "10." + String (version); }
@@ -1744,7 +1744,8 @@ public:
         {
             xcodeOtherRezFlags = "-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64"
                                  " -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
-                                 " -I \\\"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\\\"";
+                                 " -I \\\"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\\\""
+                                 " -I \\\"$(DEVELOPER_DIR)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/AudioUnit.framework/Headers\\\"";
 
             xcodeFrameworks.addTokens ("AudioUnit CoreAudioKit", false);
 
@@ -3492,7 +3493,7 @@ private:
     {
         String attributes;
 
-        attributes << "{ LastUpgradeCheck = 1010; "
+        attributes << "{ LastUpgradeCheck = 1100; "
                    << "ORGANIZATIONNAME = " << getProject().getCompanyNameString().quoted()
                    <<"; ";
 
