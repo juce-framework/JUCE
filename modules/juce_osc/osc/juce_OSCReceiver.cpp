@@ -412,14 +412,19 @@ struct OSCReceiver::Pimpl   : private Thread,
     //==============================================================================
     struct CallbackMessage   : public Message
     {
-        CallbackMessage (OSCBundle::Element oscElement)  : content (oscElement) {}
+        CallbackMessage (OSCBundle::Element oscElement, const String& senderIPAddress, int senderPort)
+        : content (oscElement)
+        , senderIPAddress(senderIPAddress)
+        , senderPort(senderPort) {}
 
         // the payload of the message. Can be either an OSCMessage or an OSCBundle.
         OSCBundle::Element content;
+        String senderIPAddress;
+        int senderPort;
     };
 
     //==============================================================================
-    void handleBuffer (const char* data, size_t dataSize)
+    void handleBuffer (const char* data, size_t dataSize, const String& senderIPAddress, int senderPort)
     {
         OSCInputStream inStream (data, dataSize);
 
@@ -429,15 +434,15 @@ struct OSCReceiver::Pimpl   : private Thread,
 
             // realtime listeners should receive the OSC content first - and immediately
             // on this thread:
-            callRealtimeListeners (content);
+            callRealtimeListeners (content, senderIPAddress, senderPort);
 
             if (content.isMessage())
-                callRealtimeListenersWithAddress (content.getMessage());
+                callRealtimeListenersWithAddress (content.getMessage(), senderIPAddress, senderPort);
 
             // now post the message that will trigger the handleMessage callback
             // dealing with the non-realtime listeners.
             if (listeners.size() > 0 || listenersWithAddress.size() > 0)
-                postMessage (new CallbackMessage (content));
+                postMessage (new CallbackMessage (content, senderIPAddress, senderPort));
         }
         catch (const OSCFormatError&)
         {
@@ -470,10 +475,13 @@ private:
             if (ready == 0)
                 continue;
 
-            auto bytesRead = (size_t) socket->read (oscBuffer.getData(), bufferSize, false);
+            String senderIPAddress;
+            int senderPort;
+
+            auto bytesRead = (size_t) socket->read (oscBuffer.getData(), bufferSize, false, senderIPAddress, senderPort);
 
             if (bytesRead >= 4)
-                handleBuffer (oscBuffer.getData(), bytesRead);
+                handleBuffer (oscBuffer.getData(), bytesRead, senderIPAddress, senderPort);
         }
     }
 
@@ -516,61 +524,61 @@ private:
         {
             auto& content = callbackMessage->content;
 
-            callListeners (content);
+            callListeners (content, callbackMessage->senderIPAddress, callbackMessage->senderPort);
 
             if (content.isMessage())
-                callListenersWithAddress (content.getMessage());
+                callListenersWithAddress (content.getMessage(), callbackMessage->senderIPAddress, callbackMessage->senderPort);
         }
     }
 
     //==============================================================================
-    void callListeners (const OSCBundle::Element& content)
+    void callListeners (const OSCBundle::Element& content, const String& senderIPAddress, int senderPortNumber)
     {
         using Listener = OSCReceiver::Listener<OSCReceiver::MessageLoopCallback>;
 
         if (content.isMessage())
         {
             auto&& message = content.getMessage();
-            listeners.call ([&] (Listener& l) { l.oscMessageReceived (message); });
+            listeners.call ([&] (Listener& l) { l.oscMessageReceived (message, senderIPAddress, senderPortNumber); });
         }
         else if (content.isBundle())
         {
             auto&& bundle = content.getBundle();
-            listeners.call ([&] (Listener& l) { l.oscBundleReceived (bundle); });
+            listeners.call ([&] (Listener& l) { l.oscBundleReceived (bundle, senderIPAddress, senderPortNumber); });
         }
     }
 
-    void callRealtimeListeners (const OSCBundle::Element& content)
+    void callRealtimeListeners (const OSCBundle::Element& content, const String& senderIPAddress, int senderPortNumber)
     {
         using Listener = OSCReceiver::Listener<OSCReceiver::RealtimeCallback>;
 
         if (content.isMessage())
         {
             auto&& message = content.getMessage();
-            realtimeListeners.call ([&] (Listener& l) { l.oscMessageReceived (message); });
+            realtimeListeners.call ([&] (Listener& l) { l.oscMessageReceived (message, senderIPAddress, senderPortNumber); });
         }
         else if (content.isBundle())
         {
             auto&& bundle = content.getBundle();
-            realtimeListeners.call ([&] (Listener& l) { l.oscBundleReceived (bundle); });
+            realtimeListeners.call ([&] (Listener& l) { l.oscBundleReceived (bundle, senderIPAddress, senderPortNumber); });
         }
     }
 
     //==============================================================================
-    void callListenersWithAddress (const OSCMessage& message)
+    void callListenersWithAddress (const OSCMessage& message, const String& senderIPAddress, int senderPortNumber)
     {
         for (auto& entry : listenersWithAddress)
             if (auto* listener = entry.second)
                 if (message.getAddressPattern().matches (entry.first))
-                    listener->oscMessageReceived (message);
+                    listener->oscMessageReceived (message, senderIPAddress, senderPortNumber);
     }
 
-    void callRealtimeListenersWithAddress (const OSCMessage& message)
+    void callRealtimeListenersWithAddress (const OSCMessage& message, const String& senderIPAddress, int senderPortNumber)
     {
         for (auto& entry : realtimeListenersWithAddress)
             if (auto* listener = entry.second)
                 if (message.getAddressPattern().matches (entry.first))
-                    listener->oscMessageReceived (message);
+                    listener->oscMessageReceived (message, senderIPAddress, senderPortNumber);
     }
 
     //==============================================================================
