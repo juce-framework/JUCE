@@ -46,7 +46,7 @@ AudioParameterChoice::AudioParameterChoice (const String& idToUse, const String&
      stringFromIndexFunction (stringFromIndex),
      indexFromStringFunction (indexFromString)
 {
-    jassert (choices.size() > 0); // you must supply an actual set of items to choose from!
+    jassert (choices.size() > 1); // you must supply an actual set of items to choose from!
 
     if (stringFromIndexFunction == nullptr)
         stringFromIndexFunction = [this] (int index, int) { return choices [index]; };
