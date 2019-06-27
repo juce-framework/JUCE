@@ -1163,6 +1163,20 @@ public:
         }
     }
 
+    void updateScaleFactorFromNewBounds (const Rectangle<int>& newBounds, bool isPhysical)
+    {
+        Point<int> translation = (parentWindow != 0 ? getScreenPosition (isPhysical) : Point<int>());
+
+        auto newScaleFactor = Desktop::getInstance().getDisplays().findDisplayForRect (newBounds.translated (translation.x, translation.y), isPhysical).scale
+                                  / Desktop::getInstance().getGlobalScaleFactor();
+
+        if (! approximatelyEqual (newScaleFactor, currentScaleFactor))
+        {
+            currentScaleFactor = newScaleFactor;
+            scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (currentScaleFactor); });
+        }
+    }
+
     void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen) override
     {
         if (fullScreen && ! isNowFullScreen)
@@ -1200,16 +1214,10 @@ public:
             bounds = newBounds.withSize (jmax (1, newBounds.getWidth()),
                                          jmax (1, newBounds.getHeight()));
 
-            auto& displays = Desktop::getInstance().getDisplays();
+            updateScaleFactorFromNewBounds (bounds, false);
 
-            auto newScaleFactor = displays.findDisplayForRect (bounds, true).scale / Desktop::getInstance().getGlobalScaleFactor();
-            if (! approximatelyEqual (newScaleFactor, currentScaleFactor))
-            {
-                currentScaleFactor = newScaleFactor;
-                scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (currentScaleFactor); });
-            }
-
-            auto physicalBounds = displays.logicalToPhysical (bounds);
+            auto physicalBounds = (parentWindow == 0 ? Desktop::getInstance().getDisplays().logicalToPhysical (bounds)
+                                                     : bounds * currentScaleFactor);
 
             WeakReference<Component> deletionChecker (&component);
             ScopedXLock xlock (display);
@@ -1245,21 +1253,21 @@ public:
         }
     }
 
-    Rectangle<int> getBounds() const override          { return bounds; }
-
-    Point<float> localToGlobal (Point<float> relativePosition) override
+    Point<int> getScreenPosition (bool physical) const
     {
-        return relativePosition + bounds.getPosition().toFloat();
+        if (physical)
+            return Desktop::getInstance().getDisplays().logicalToPhysical (bounds.getTopLeft());
+
+        return bounds.getTopLeft();
     }
+
+    Rectangle<int> getBounds() const override                            { return bounds; }
 
     using ComponentPeer::localToGlobal;
-
-    Point<float> globalToLocal (Point<float> screenPosition) override
-    {
-        return screenPosition - bounds.getPosition().toFloat();
-    }
+    Point<float> localToGlobal (Point<float> relativePosition) override  { return relativePosition + getScreenPosition (false).toFloat(); }
 
     using ComponentPeer::globalToLocal;
+    Point<float> globalToLocal (Point<float> screenPosition) override    { return screenPosition   - getScreenPosition (false).toFloat(); }
 
     void setAlpha (float /* newAlpha */) override
     {
@@ -1624,7 +1632,7 @@ public:
             case ClientMessage:         handleClientMessageEvent (event.xclient, event); break;
             case SelectionNotify:       handleDragAndDropSelection (event); break;
             case ConfigureNotify:       handleConfigureNotifyEvent (event.xconfigure); break;
-            case ReparentNotify:        handleReparentNotifyEvent(); break;
+            case ReparentNotify:
             case GravityNotify:         handleGravityNotify(); break;
             case SelectionClear:        handleExternalSelectionClear(); break;
             case SelectionRequest:      handleExternalSelectionRequest (event); break;
@@ -2012,24 +2020,6 @@ public:
             handleBroughtToFront();
     }
 
-    void handleReparentNotifyEvent()
-    {
-        parentWindow = 0;
-        Window wRoot = 0;
-        Window* wChild = nullptr;
-        unsigned int numChildren;
-
-        {
-            ScopedXLock xlock (display);
-            XQueryTree (display, windowH, &wRoot, &parentWindow, &wChild, &numChildren);
-        }
-
-        if (parentWindow == windowH || parentWindow == wRoot)
-            parentWindow = 0;
-
-        handleGravityNotify();
-    }
-
     void handleGravityNotify()
     {
         updateWindowBounds();
@@ -2112,6 +2102,10 @@ public:
         {
             externalResetDragAndDrop();
         }
+        else if (clientMsg.message_type == atoms->XembedMsgType && clientMsg.format == 32)
+        {
+            handleXEmbedMessage (clientMsg);
+        }
     }
 
     bool externalDragTextInit (const String& text, std::function<void()> cb)
@@ -2138,6 +2132,27 @@ public:
         }
 
         return externalDragInit (false, uriList.joinIntoString ("\r\n"), cb);
+    }
+
+    void handleXEmbedMessage (XClientMessageEvent& clientMsg)
+    {
+        switch (clientMsg.data.l[1])
+        {
+            case XEMBED_EMBEDDED_NOTIFY:
+                parentWindow = (::Window) clientMsg.data.l[3];
+                updateWindowBounds();
+                component.setBounds (bounds);
+                break;
+            case XEMBED_FOCUS_IN:
+                handleFocusInEvent();
+                break;
+            case XEMBED_FOCUS_OUT:
+                handleFocusOutEvent();
+                break;
+
+            default:
+                break;
+        }
     }
 
     //==============================================================================
@@ -2714,6 +2729,9 @@ private:
         xchangeProperty (windowH, atoms->XdndActionDescription, XA_STRING, 8, "", 0);
         xchangeProperty (windowH, atoms->XdndAware, XA_ATOM, 32, &atoms->DndVersion, 1);
 
+        unsigned long info[2] = { 0, 1 };
+        xchangeProperty (windowH, atoms->XembedInfo, atoms->XembedInfo, 32, (unsigned char*) info, 2);
+
         initialisePointerMap();
         updateModifierMappings();
     }
@@ -2823,21 +2841,16 @@ private:
 
             ScopedXLock xlock (display);
 
-            if (XGetGeometry (display, (::Drawable) windowH, &root, &wx, &wy, &ww, &wh, &bw, &bitDepth))
+            if (XGetGeometry (display, (::Drawable) windowH, &root, &wx, &wy, &ww, &wh, &bw, &bitDepth) && parentWindow == 0)
                 if (! XTranslateCoordinates (display, windowH, root, 0, 0, &wx, &wy, &child))
                     wx = wy = 0;
 
             Rectangle<int> physicalBounds (wx, wy, (int) ww, (int) wh);
-            auto& displays = Desktop::getInstance().getDisplays();
 
-            auto newScaleFactor = displays.findDisplayForRect (physicalBounds, true).scale / Desktop::getInstance().getGlobalScaleFactor();
-            if (! approximatelyEqual (newScaleFactor, currentScaleFactor))
-            {
-                currentScaleFactor = newScaleFactor;
-                scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (currentScaleFactor); });
-            }
+            updateScaleFactorFromNewBounds (physicalBounds, true);
 
-            bounds = displays.physicalToLogical (physicalBounds);
+            bounds = (parentWindow == 0 ? Desktop::getInstance().getDisplays().physicalToLogical (physicalBounds)
+                                        : physicalBounds / currentScaleFactor);
         }
     }
 
