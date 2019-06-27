@@ -69,7 +69,7 @@ private:
     { \
         auto object = static_cast<ARA##ModelObjectPtrType> (modelObject); \
         object->notifyListeners ([&] (std::remove_pointer<ARA##ModelObjectPtrType>::type::Listener& l) { l.function (object); }); \
-    } \
+    }
 
     // single notification argument, model object version
    #define OVERRIDE_TO_NOTIFY_2(function, ModelObjectPtrType, modelObject, ArgumentType, argument) \
@@ -77,7 +77,7 @@ private:
     { \
         auto object = static_cast<ARA##ModelObjectPtrType> (modelObject); \
         object->notifyListeners ([&] (std::remove_pointer<ARA##ModelObjectPtrType>::type::Listener& l) { l.function (object, static_cast<ARA##ArgumentType> (argument)); }); \
-    } \
+    }
 
     // single notification argument, non-model object version
    #define OVERRIDE_TO_NOTIFY_3(function, ModelObjectPtrType, modelObject, ArgumentType, argument) \
@@ -85,7 +85,7 @@ private:
     { \
         auto object = static_cast<ARA##ModelObjectPtrType> (modelObject); \
         object->notifyListeners ([&] (std::remove_pointer<ARA##ModelObjectPtrType>::type::Listener& l) { l.function (object, argument); }); \
-    } \
+    }
 
     // single notification argument, version for content updates which drops the currently unsupported range parameter
    #define OVERRIDE_TO_NOTIFY_4(function, ModelObjectPtrType, modelObject, ArgumentType1, argument1, ArgumentType2, argument2) \
@@ -93,7 +93,7 @@ private:
     { \
         auto object = static_cast<ARA##ModelObjectPtrType> (modelObject); \
         object->notifyListeners ([&] (std::remove_pointer<ARA##ModelObjectPtrType>::type::Listener& l) { l.function (object, argument2); }); \
-    } \
+    }
 
 protected:
     // Model Update Management
