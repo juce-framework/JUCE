@@ -61,6 +61,8 @@ class ARADocument: public ARA::PlugIn::Document,
                    public ARAListenableModelClass<ARADocument>
 {
 public:
+    using PropertiesPtr = ARA::PlugIn::PropertiesPtr<ARA::ARADocumentProperties>;
+
     ARADocument (ARADocumentController* documentController);
 
     class Listener  : public ARAListenableModelClass<ARADocument>::Listener
@@ -163,6 +165,8 @@ class ARAMusicalContext  : public ARA::PlugIn::MusicalContext,
                            public ARAListenableModelClass<ARAMusicalContext>
 {
 public:
+    using PropertiesPtr = ARA::PlugIn::PropertiesPtr<ARA::ARAMusicalContextProperties>;
+
     ARAMusicalContext (ARADocument* document, ARA::ARAMusicalContextHostRef hostRef);
 
     class Listener  : public ARAListenableModelClass<ARAMusicalContext>::Listener
@@ -214,6 +218,8 @@ class ARARegionSequence  : public ARA::PlugIn::RegionSequence,
                            public ARAListenableModelClass<ARARegionSequence>
 {
 public:
+    using PropertiesPtr = ARA::PlugIn::PropertiesPtr<ARA::ARARegionSequenceProperties>;
+
     ARARegionSequence (ARADocument* document, ARA::ARARegionSequenceHostRef hostRef);
 
     class Listener  : public ARAListenableModelClass<ARARegionSequence>::Listener
@@ -277,6 +283,8 @@ class ARAAudioSource  : public ARA::PlugIn::AudioSource,
                         public ARAListenableModelClass<ARAAudioSource>
 {
 public:
+    using PropertiesPtr = ARA::PlugIn::PropertiesPtr<ARA::ARAAudioSourceProperties>;
+
     ARAAudioSource (ARADocument* document, ARA::ARAAudioSourceHostRef hostRef);
 
     class Listener  : public ARAListenableModelClass<ARAAudioSource>::Listener
@@ -368,6 +376,8 @@ class ARAAudioModification  : public ARA::PlugIn::AudioModification,
                               public ARAListenableModelClass<ARAAudioModification>
 {
 public:
+    using PropertiesPtr = ARA::PlugIn::PropertiesPtr<ARA::ARAAudioModificationProperties>;
+
     ARAAudioModification (ARAAudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, ARAAudioModification* optionalModificationToClone);
 
     class Listener  : public ARAListenableModelClass<ARAAudioModification>::Listener
@@ -447,6 +457,8 @@ class ARAPlaybackRegion  : public ARA::PlugIn::PlaybackRegion,
                            public ARAListenableModelClass<ARAPlaybackRegion>
 {
 public:
+    using PropertiesPtr = ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties>;
+
     ARAPlaybackRegion (ARAAudioModification* audioModification, ARA::ARAPlaybackRegionHostRef hostRef);
 
     class Listener  : public ARAListenableModelClass<ARAPlaybackRegion>::Listener
