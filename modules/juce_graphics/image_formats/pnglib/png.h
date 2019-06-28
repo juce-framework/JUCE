@@ -363,10 +363,11 @@
 
 #ifndef PNG_VERSION_INFO_ONLY
 
-/* Inhibit C++ name-mangling for libpng functions but not for system calls. */
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+// JUCE modification
+///* Inhibit C++ name-mangling for libpng functions but not for system calls. */
+//#ifdef __cplusplus
+//extern "C" {
+//#endif /* __cplusplus */
 
 /* Version information for C files, stored in png.c.  This had better match
  * the version above.
@@ -3238,9 +3239,10 @@ PNG_EXPORT(244, int, png_set_option, (png_structrp png_ptr, int option,
   PNG_EXPORT_LAST_ORDINAL(249);
 #endif
 
-#ifdef __cplusplus
-}
-#endif
+// JUCE modification
+//#ifdef __cplusplus
+//}
+//#endif
 
 #endif /* PNG_VERSION_INFO_ONLY */
 /* Do not put anything past this line */

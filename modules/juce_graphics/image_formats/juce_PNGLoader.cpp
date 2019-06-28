@@ -271,8 +271,8 @@ namespace pnglibNamespace
   #define PNG_sCAL_PRECISION 5
   #define PNG_sRGB_PROFILE_CHECKS 2
 
-  #define PNG_LINKAGE_API inline
-  #define PNG_LINKAGE_FUNCTION inline
+  #define PNG_LINKAGE_API
+  #define PNG_LINKAGE_FUNCTION
 
   #define PNG_ARM_NEON_OPT 0
 
