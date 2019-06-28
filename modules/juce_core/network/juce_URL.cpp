@@ -62,8 +62,8 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
             if (listener != nullptr)
                 listener->progress (this, downloaded, contentLength);
 
-            auto max = jmin ((int) bufferSize, contentLength < 0 ? std::numeric_limits<int>::max()
-                                                                 : static_cast<int> (contentLength - downloaded));
+            auto max = (int) jmin ((int64) bufferSize, contentLength < 0 ? std::numeric_limits<int64>::max()
+                                                                         : static_cast<int64> (contentLength - downloaded));
 
             auto actual = stream->read (buffer.get(), max);
 
