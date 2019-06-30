@@ -2238,7 +2238,7 @@ public:
     {
         if (programNames.size() > 0 && editController != nullptr)
         {
-            auto value = static_cast<Vst::ParamValue> (program) / static_cast<Vst::ParamValue> (programNames.size());
+            auto value = static_cast<Vst::ParamValue> (program) / static_cast<Vst::ParamValue> (jmax (1, programNames.size() - 1));
 
             editController->setParamNormalized (programParameterID, value);
             Steinberg::int32 index;

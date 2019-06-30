@@ -271,8 +271,8 @@ namespace pnglibNamespace
   #define PNG_sCAL_PRECISION 5
   #define PNG_sRGB_PROFILE_CHECKS 2
 
-  #define PNG_LINKAGE_API extern
-  #define PNG_LINKAGE_FUNCTION extern
+  #define PNG_LINKAGE_API
+  #define PNG_LINKAGE_FUNCTION
 
   #define PNG_ARM_NEON_OPT 0
 
@@ -281,7 +281,7 @@ namespace pnglibNamespace
   #endif
 
   #if ! defined (PNG_USER_HEIGHT_MAX)
-    #define PNG_USER_HEIGHT_MAX 1000000
+   #define PNG_USER_HEIGHT_MAX 1000000
   #endif
 
   #define png_debug(a, b)
