@@ -44,7 +44,7 @@
         <MODULEPATH id="juce_analytics" path="../../modules"/>
       </MODULEPATHS>
     </VS2013>
-    <VS2015 targetFolder="Builds/VisualStudio2015" bigIcon="rv1F4h" extraCompilerFlags="/bigobj">
+    <VS2015 targetFolder="Builds/VisualStudio2015" bigIcon="rv1F4h">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" debugInformationFormat="ProgramDatabase"
                        useRuntimeLibDLL="1"/>
