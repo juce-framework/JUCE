@@ -903,7 +903,7 @@ private:
                 addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile("app"));
         }
 
-        if (project.getEnabledModules().isModuleEnabled ("juce_gui_basics") && androidCustomActivityClass.get() == getDefaultActivityClass())
+        if (project.getEnabledModules().isModuleEnabled ("juce_gui_basics") && getActivityClassString() == getDefaultActivityClass())
             addOptJavaFolderToSourceSetsForModule (javaSourceSets, modules, "juce_gui_basics");
 
         if (areRemoteNotificationsEnabled())
