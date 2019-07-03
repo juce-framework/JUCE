@@ -176,6 +176,7 @@ void ThreadPool::addJob (std::function<void()> jobToRun)
 
 int ThreadPool::getNumJobs() const noexcept
 {
+    const ScopedLock sl (lock);
     return jobs.size();
 }
 
