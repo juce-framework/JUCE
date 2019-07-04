@@ -23,6 +23,18 @@
 namespace juce
 {
 
+#if ! DOXYGEN
+
+#ifndef JUCE_UNIX_SUPPORTS_UTIME
+  #define JUCE_UNIX_SUPPORTS_UTIME 1
+
+  #if JUCE_GCC && defined (__UCLIBC__)
+    #undef JUCE_UNIX_SUPPORTS_UTIME
+  #endif
+#endif
+
+#endif
+
 CriticalSection::CriticalSection() noexcept
 {
     pthread_mutexattr_t atts;
@@ -140,7 +152,7 @@ void JUCE_CALLTYPE Thread::sleep (int millisecs)
 
 void JUCE_CALLTYPE Process::terminate()
 {
-   #if JUCE_ANDROID
+   #if JUCE_ANDROID || defined (_ISOC99_SOURCE) || _POSIX_C_SOURCE < 200112L
     _exit (EXIT_FAILURE);
    #else
     std::_Exit (EXIT_FAILURE);
@@ -416,11 +428,22 @@ bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64
 
     if ((modificationTime != 0 || accessTime != 0) && juce_stat (fullPath, info))
     {
+       #if JUCE_UNIX_SUPPORTS_UTIME
         struct utimbuf times;
         times.actime  = accessTime != 0       ? static_cast<time_t> (accessTime / 1000)       : static_cast<time_t> (info.st_atime);
         times.modtime = modificationTime != 0 ? static_cast<time_t> (modificationTime / 1000) : static_cast<time_t> (info.st_mtime);
 
         return utime (fullPath.toUTF8(), &times) == 0;
+       #else
+        struct timeval times[2];
+        zerostruct (times[0]);
+        zerostruct (times[1]);
+
+        times[0].tv_sec = accessTime != 0       ? static_cast<long> (accessTime / 1000)       : static_cast<long> (info.st_atime);
+        times[1].tv_sec = modificationTime != 0 ? static_cast<long> (modificationTime / 1000) : static_cast<long> (info.st_mtime);
+
+        return utimes (fullPath.toUTF8(), times) == 0;
+       #endif
     }
 
     return false;

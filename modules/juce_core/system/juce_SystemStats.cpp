@@ -23,6 +23,18 @@
 namespace juce
 {
 
+#if ! DOXYGEN
+
+#ifndef JUCE_UNIX_SUPPORTS_BACKTRACE
+  #define JUCE_UNIX_SUPPORTS_BACKTRACE 1
+
+  #if JUCE_GCC && ! defined (_GLIBCXX_HAVE_EXECINFO_H)
+    #undef JUCE_UNIX_SUPPORTS_BACKTRACE
+  #endif
+#endif
+
+#endif
+
 String SystemStats::getJUCEVersion()
 {
     // Some basic tests, to keep an eye on things and make sure these types work ok
@@ -171,6 +183,7 @@ String SystemStats::getStackBacktrace()
     }
 
    #else
+    #if JUCE_UNIX_SUPPORTS_BACKTRACE
     void* stack[128];
     int frames = backtrace (stack, numElementsInArray (stack));
     char** frameStrings = backtrace_symbols (stack, frames);
@@ -179,6 +192,7 @@ String SystemStats::getStackBacktrace()
         result << frameStrings[i] << newLine;
 
     ::free (frameStrings);
+    #endif
    #endif
 
     return result;
