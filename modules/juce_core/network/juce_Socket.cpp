@@ -460,6 +460,7 @@ StreamingSocket::~StreamingSocket()
 //==============================================================================
 int StreamingSocket::read (void* destBuffer, int maxBytesToRead, bool shouldBlock)
 {
+	SocketHelpers::setSocketBlockingState(handle, shouldBlock);
     return (connected && ! isListener) ? SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead,
                                                                     connected, shouldBlock, readLock)
                                        : -1;
