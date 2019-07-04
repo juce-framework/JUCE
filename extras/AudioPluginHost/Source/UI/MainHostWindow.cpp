@@ -346,7 +346,7 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
     }
     else
     {
-        if (knownPluginList.getIndexChosenByMenu (menuItemID) >= 0)
+        if (KnownPluginList::getIndexChosenByMenu (pluginDescriptions, menuItemID) >= 0)
             createPlugin (getChosenType (menuItemID), { proportionOfWidth  (0.3f + Random::getSystemRandom().nextFloat() * 0.6f),
                                                         proportionOfHeight (0.3f + Random::getSystemRandom().nextFloat() * 0.6f) });
     }
@@ -364,7 +364,7 @@ void MainHostWindow::createPlugin (const PluginDescription& desc, Point<int> pos
         graphHolder->createNewPlugin (desc, pos);
 }
 
-void MainHostWindow::addPluginsToMenu (PopupMenu& m) const
+void MainHostWindow::addPluginsToMenu (PopupMenu& m)
 {
     if (graphHolder != nullptr)
     {
@@ -377,7 +377,8 @@ void MainHostWindow::addPluginsToMenu (PopupMenu& m) const
 
     m.addSeparator();
 
-    knownPluginList.addToMenu (m, pluginSortMethod);
+    pluginDescriptions = knownPluginList.getTypes();
+    KnownPluginList::addToMenu (m, pluginDescriptions, pluginSortMethod);
 }
 
 PluginDescription MainHostWindow::getChosenType (const int menuID) const
@@ -385,7 +386,7 @@ PluginDescription MainHostWindow::getChosenType (const int menuID) const
     if (menuID >= 1 && menuID < 1 + internalTypes.size())
         return internalTypes [menuID - 1];
 
-    return knownPluginList.getTypes()[knownPluginList.getIndexChosenByMenu (menuID)];
+    return pluginDescriptions[KnownPluginList::getIndexChosenByMenu (pluginDescriptions, menuID)];
 }
 
 //==============================================================================

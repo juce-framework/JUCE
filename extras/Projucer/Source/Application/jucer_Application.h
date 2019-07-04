@@ -208,7 +208,7 @@ private:
     ChildProcess makeProcess;
    #endif
 
-    int selectedColourSchemeIndex = 0, selectedEditorColourSchemeIndex = 0, numEditorColourSchemes = 0;
+    int selectedColourSchemeIndex = 0, selectedEditorColourSchemeIndex = 0;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjucerApplication)

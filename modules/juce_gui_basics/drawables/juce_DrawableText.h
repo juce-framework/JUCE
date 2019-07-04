@@ -97,6 +97,8 @@ public:
     Rectangle<float> getDrawableBounds() const override;
     /** @internal */
     Path getOutlineAsPath() const override;
+    /** @internal */
+    bool replaceColour (Colour originalColour, Colour replacementColour) override;
 
 private:
     //==============================================================================

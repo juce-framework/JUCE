@@ -26,7 +26,7 @@
         <MODULEPATH id="juce_analytics" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <VS2013 targetFolder="Builds/VisualStudio2013" bigIcon="rv1F4h">
+    <VS2013 targetFolder="Builds/VisualStudio2013" bigIcon="rv1F4h" extraCompilerFlags="/bigobj">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" wholeProgramOptimisation="1"
                        debugInformationFormat="ProgramDatabase" useRuntimeLibDLL="1"/>
@@ -44,7 +44,7 @@
         <MODULEPATH id="juce_analytics" path="../../modules"/>
       </MODULEPATHS>
     </VS2013>
-    <VS2015 targetFolder="Builds/VisualStudio2015" bigIcon="rv1F4h">
+    <VS2015 targetFolder="Builds/VisualStudio2015" bigIcon="rv1F4h" extraCompilerFlags="/bigobj">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" debugInformationFormat="ProgramDatabase"
                        useRuntimeLibDLL="1"/>

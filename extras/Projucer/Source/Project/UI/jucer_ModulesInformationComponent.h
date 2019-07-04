@@ -218,112 +218,116 @@ private:
     void showCopyModeMenu()
     {
         PopupMenu m;
-        m.addItem (1, "Set all modules to copy locally");
-        m.addItem (2, "Set all modules to not copy locally");
 
-        auto res = m.showAt (&setCopyModeButton);
+        m.addItem (PopupMenu::Item ("Set all modules to copy locally")
+                     .setAction ([&] { project.getEnabledModules().setLocalCopyModeForAllModules (true); }));
 
-        if (res != 0)
-            project.getEnabledModules().setLocalCopyModeForAllModules (res == 1);
+        m.addItem (PopupMenu::Item ("Set all modules to not copy locally")
+                     .setAction ([&] { project.getEnabledModules().setLocalCopyModeForAllModules (false); }));
+
+        m.showMenuAsync (PopupMenu::Options().withTargetComponent (setCopyModeButton));
+    }
+
+    static void setAllModulesToUseGlobalPaths (Project& project, bool useGlobal)
+    {
+        auto& moduleList = project.getEnabledModules();
+
+        for (auto id : moduleList.getAllModules())
+            moduleList.getShouldUseGlobalPathValue (id).setValue (useGlobal);
+    }
+
+    static void setSelectedModulesToUseGlobalPaths (Project& project, SparseSet<int> selected, bool useGlobal)
+    {
+        auto& moduleList = project.getEnabledModules();
+
+        for (int i = 0; i < selected.size(); ++i)
+            moduleList.getShouldUseGlobalPathValue (moduleList.getModuleID (selected[i])).setValue (useGlobal);
     }
 
     void showGlobalPathsMenu()
     {
-        auto areAnyModulesSelected = (list.getNumSelectedRows() > 0);
-
         PopupMenu m;
-        m.addItem (1, "Set all modules to use global paths");
-        m.addItem (2, "Set all modules to not use global paths");
-        m.addItem (3, "Set selected modules to use global paths", areAnyModulesSelected);
-        m.addItem (4, "Set selected modules to not use global paths", areAnyModulesSelected);
 
-        auto res = m.showAt (&globalPathsButton);
+        m.addItem (PopupMenu::Item ("Set all modules to use global paths")
+                    .setAction ([&] { setAllModulesToUseGlobalPaths (project, true); }));
 
-        if (res != 0)
-        {
-            auto enableGlobalPaths = (res % 2 == 1);
+        m.addItem (PopupMenu::Item ("Set all modules to not use global paths")
+                    .setAction ([&] { setAllModulesToUseGlobalPaths (project, false); }));
 
-            auto& moduleList = project.getEnabledModules();
+        m.addItem (PopupMenu::Item ("Set selected modules to use global paths")
+                    .setEnabled (list.getNumSelectedRows() > 0)
+                    .setAction ([&] { setSelectedModulesToUseGlobalPaths (project, list.getSelectedRows(), true); }));
 
-            if (res < 3)
-            {
-                auto moduleIDs = moduleList.getAllModules();
+        m.addItem (PopupMenu::Item ("Set selected modules to not use global paths")
+                    .setEnabled (list.getNumSelectedRows() > 0)
+                    .setAction ([&] { setSelectedModulesToUseGlobalPaths (project, list.getSelectedRows(), false); }));
 
-                for (auto id : moduleIDs)
-                    moduleList.getShouldUseGlobalPathValue (id).setValue (enableGlobalPaths);
-            }
-            else
-            {
-                auto selected = list.getSelectedRows();
-
-                for (int i = 0; i < selected.size(); ++i)
-                    moduleList.getShouldUseGlobalPathValue (moduleList.getModuleID (selected[i])).setValue (enableGlobalPaths);
-            }
-        }
+        m.showMenuAsync (PopupMenu::Options().withTargetComponent (globalPathsButton));
     }
 
     void showSetPathsMenu()
     {
-        enum
-        {
-            copyPathsToAllModulesID = 1,
-            copyPathsID,
-            pastePathsID
-        };
-
-        auto& moduleList = project.getEnabledModules();
-        auto moduleToCopy = moduleList.getModuleID (list.getSelectedRow());
+        PopupMenu m;
+        auto moduleToCopy = project.getEnabledModules().getModuleID (list.getSelectedRow());
 
         if (moduleToCopy.isNotEmpty())
         {
-            PopupMenu m;
-            m.addItem (copyPathsToAllModulesID, "Copy the paths from the module '" + moduleToCopy + "' to all other modules");
-            m.addItem (copyPathsID, "Copy paths from selected module", list.getNumSelectedRows() == 1);
-            m.addItem (pastePathsID, "Paste paths to selected modules", ! modulePathClipboard.empty());
+            m.addItem (PopupMenu::Item ("Copy the paths from the module '" + moduleToCopy + "' to all other modules")
+                         .setAction ([this, moduleToCopy]
+                                     {
+                                         auto& moduleList = project.getEnabledModules();
 
-            int res = m.showAt (&copyPathButton);
+                                         for (Project::ExporterIterator exporter (project); exporter.next();)
+                                         {
+                                             for (int i = 0; i < moduleList.getNumModules(); ++i)
+                                             {
+                                                 auto modID = moduleList.getModuleID (i);
 
-            if (res == copyPathsToAllModulesID)
-            {
-                for (Project::ExporterIterator exporter (project); exporter.next();)
-                {
-                    for (int i = 0; i < moduleList.getNumModules(); ++i)
-                    {
-                        auto modID = moduleList.getModuleID (i);
+                                                 if (modID != moduleToCopy)
+                                                     exporter->getPathForModuleValue (modID) = exporter->getPathForModuleValue (moduleToCopy).get();
+                                             }
+                                         }
 
-                        if (modID != moduleToCopy)
-                            exporter->getPathForModuleValue (modID) = exporter->getPathForModuleValue (moduleToCopy).get();
-                    }
-                }
-            }
-            else if (res == copyPathsID)
-            {
-                 modulePathClipboard.clear();
+                                         list.repaint();
+                                     }));
 
-                 for (Project::ExporterIterator exporter (project); exporter.next();)
-                     modulePathClipboard[exporter->getName()] = exporter->getPathForModuleValue (moduleToCopy).get();
-            }
-            else if (res == pastePathsID)
-            {
-                for (int selectionId = 0; selectionId < list.getNumSelectedRows(); ++selectionId)
-                {
-                    auto rowNumber = list.getSelectedRow (selectionId);
-                    auto modID = moduleList.getModuleID (rowNumber);
+            m.addItem (PopupMenu::Item ("Copy paths from selected module")
+                         .setEnabled (list.getNumSelectedRows() == 1)
+                         .setAction ([this, moduleToCopy]
+                                     {
+                                         modulePathClipboard.clear();
 
-                    for (Project::ExporterIterator exporter (project); exporter.next();)
-                        exporter->getPathForModuleValue (modID) = modulePathClipboard[exporter->getName()];
-                }
-            }
+                                         for (Project::ExporterIterator exporter (project); exporter.next();)
+                                             modulePathClipboard[exporter->getName()] = exporter->getPathForModuleValue (moduleToCopy).get();
 
-            list.repaint();
+                                         list.repaint();
+                                     }));
+
+            m.addItem (PopupMenu::Item ("Paste paths to selected modules")
+                         .setEnabled (! modulePathClipboard.empty())
+                         .setAction ([this]
+                                     {
+                                         for (int selectionId = 0; selectionId < list.getNumSelectedRows(); ++selectionId)
+                                         {
+                                             auto rowNumber = list.getSelectedRow (selectionId);
+                                             auto modID = project.getEnabledModules().getModuleID (rowNumber);
+
+                                             for (Project::ExporterIterator exporter (project); exporter.next();)
+                                                 exporter->getPathForModuleValue (modID) = modulePathClipboard[exporter->getName()];
+                                         }
+
+                                         list.repaint();
+                                     }));
         }
         else
         {
-            PopupMenu m;
-            m.addItem (1, "(Select a module in the list above to use this option)", false);
-
-            m.showAt (&copyPathButton);
+            m.addItem (PopupMenu::Item ("(Select a module in the list above to use this option)")
+                         .setEnabled (false));
         }
+
+        m.showMenuAsync (PopupMenu::Options()
+                           .withDeletionCheck (*this)
+                           .withTargetComponent (copyPathButton));
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModulesInformationComponent)

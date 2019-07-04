@@ -121,7 +121,6 @@ public:
                 setAlwaysOnTop (true);
 
             [window setContentView: view];
-            [window setAutodisplay: YES];
             [window setAcceptsMouseMovedEvents: YES];
 
             // We'll both retain and also release this on closing because plugin hosts can unexpectedly
@@ -808,7 +807,7 @@ public:
         if (r.size.width < 1.0f || r.size.height < 1.0f)
             return;
 
-        auto cg = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
+        auto cg = (CGContextRef) [[NSGraphicsContext currentContext] CGContext];
 
         if (! component.isOpaque())
             CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
@@ -1245,7 +1244,7 @@ public:
 
     static NSArray* getSupportedDragTypes()
     {
-        return [NSArray arrayWithObjects: NSFilenamesPboardType, NSFilesPromisePboardType, NSStringPboardType, nil];
+        return [NSArray arrayWithObjects: (NSString*) kUTTypeFileURL, (NSString*) kPasteboardTypeFileURLPromise, NSPasteboardTypeString, nil];
     }
 
     BOOL sendDragCallback (const int type, id <NSDraggingInfo> sender)
@@ -1260,8 +1259,8 @@ public:
         ComponentPeer::DragInfo dragInfo;
         dragInfo.position.setXY ((int) p.x, (int) ([view frame].size.height - p.y));
 
-        if (contentType == NSStringPboardType)
-            dragInfo.text = nsStringToJuce ([pasteboard stringForType: NSStringPboardType]);
+        if (contentType == NSPasteboardTypeString)
+            dragInfo.text = nsStringToJuce ([pasteboard stringForType: NSPasteboardTypeString]);
         else
             dragInfo.files = getDroppedFiles (pasteboard, contentType);
 
@@ -1284,7 +1283,7 @@ public:
         StringArray files;
         NSString* iTunesPasteboardType = nsStringLiteral ("CorePasteboardFlavorType 0x6974756E"); // 'itun'
 
-        if (contentType == NSFilesPromisePboardType
+        if ([contentType isEqualToString: (NSString*) kPasteboardTypeFileURLPromise]
              && [[pasteboard types] containsObject: iTunesPasteboardType])
         {
             id list = [pasteboard propertyListForType: iTunesPasteboardType];
@@ -1310,14 +1309,14 @@ public:
         }
         else
         {
-            id list = [pasteboard propertyListForType: NSFilenamesPboardType];
+            NSArray* items = [pasteboard readObjectsForClasses:@[[NSURL class]] options: nil];
 
-            if ([list isKindOfClass: [NSArray class]])
+            for (unsigned int i = 0; i < [items count]; ++i)
             {
-                NSArray* items = (NSArray*) [pasteboard propertyListForType: NSFilenamesPboardType];
+                NSURL* url = [items objectAtIndex: i];
 
-                for (unsigned int i = 0; i < [items count]; ++i)
-                    files.add (nsStringToJuce ((NSString*) [items objectAtIndex: i]));
+                if ([url isFileURL])
+                    files.add (nsStringToJuce ([url path]));
             }
         }
 

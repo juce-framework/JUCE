@@ -44,13 +44,13 @@ class JUCE_API  MD5
 public:
     //==============================================================================
     /** Creates a null MD5 object. */
-    MD5() noexcept;
+    MD5();
 
     /** Creates a copy of another MD5. */
-    MD5 (const MD5&) noexcept;
+    MD5 (const MD5&);
 
     /** Copies another MD5. */
-    MD5& operator= (const MD5&) noexcept;
+    MD5& operator= (const MD5&);
 
     //==============================================================================
     /** Creates a checksum for a block of binary data. */
@@ -78,7 +78,7 @@ public:
     explicit MD5 (CharPointer_UTF8 utf8Text) noexcept;
 
     /** Destructor. */
-    ~MD5() noexcept;
+    ~MD5();
 
     //==============================================================================
     /** Returns the checksum as a 16-byte block of data. */
@@ -106,9 +106,8 @@ public:
 
 private:
     //==============================================================================
-    uint8 result [16];
+    uint8 result[16] = {};
 
-    void processData (const void*, size_t) noexcept;
     void processStream (InputStream&, int64);
 
     // This private constructor is declared here to prevent you accidentally passing a

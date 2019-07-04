@@ -121,6 +121,12 @@
  #define JUCE_CONSTEXPR
 #endif
 
+#if JUCE_MSVC && _MSC_VER < 1900
+ #define JUCE_REF_QUALIFIER
+#else
+ #define JUCE_REF_QUALIFIER &
+#endif
+
 #if (! JUCE_MSVC) && (! JUCE_CXX14_IS_AVAILABLE)
 namespace std
 {

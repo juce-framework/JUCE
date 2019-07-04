@@ -335,7 +335,7 @@ private:
         m.addItem (1, "Use one thread per ball", true, ! isUsingPool);
         m.addItem (2, "Use a thread pool",       true,   isUsingPool);
 
-        m.showMenuAsync (PopupMenu::Options().withTargetComponent (&controlButton),
+        m.showMenuAsync (PopupMenu::Options().withTargetComponent (controlButton),
                          ModalCallbackFunction::forComponent (menuItemChosenCallback, this));
     }
 

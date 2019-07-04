@@ -27,21 +27,19 @@
 namespace juce
 {
 
-ResizableEdgeComponent::ResizableEdgeComponent (Component* const componentToResize,
-                                                ComponentBoundsConstrainer* const constrainer_,
-                                                Edge edge_)
+ResizableEdgeComponent::ResizableEdgeComponent (Component* componentToResize,
+                                                ComponentBoundsConstrainer* boundsConstrainer,
+                                                Edge e)
    : component (componentToResize),
-     constrainer (constrainer_),
-     edge (edge_)
+     constrainer (boundsConstrainer),
+     edge (e)
 {
     setRepaintsOnMouseActivity (true);
     setMouseCursor (isVertical() ? MouseCursor::LeftRightResizeCursor
                                  : MouseCursor::UpDownResizeCursor);
 }
 
-ResizableEdgeComponent::~ResizableEdgeComponent()
-{
-}
+ResizableEdgeComponent::~ResizableEdgeComponent() = default;
 
 //==============================================================================
 bool ResizableEdgeComponent::isVertical() const noexcept
