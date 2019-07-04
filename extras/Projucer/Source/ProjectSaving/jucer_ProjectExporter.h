@@ -415,7 +415,6 @@ protected:
     HashMap<String, ValueWithDefault> compilerFlagSchemesMap;
 
     mutable Array<Project::Item> itemGroups;
-    void initItemGroups() const;
     Project::Item* modulesGroup = nullptr;
 
     virtual BuildConfiguration::Ptr createBuildConfig (const ValueTree&) const = 0;
