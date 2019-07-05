@@ -169,8 +169,22 @@ void HeaderComponent::updateExporters() noexcept
     }
 
     if (exporterBox.getSelectedItemIndex() == -1)
-        exporterBox.setSelectedItemIndex (preferredExporterIndex != -1 ? preferredExporterIndex
-                                                                       : 0);
+    {
+        if (preferredExporterIndex == -1)
+        {
+            i = 0;
+            for (Project::ExporterIterator exporter (*project); exporter.next(); ++i)
+            {
+                if (exporter->canLaunchProject())
+                {
+                    preferredExporterIndex = i;
+                    break;
+                }
+            }
+        }
+
+        exporterBox.setSelectedItemIndex (preferredExporterIndex != -1 ? preferredExporterIndex : 0);
+    }
 
     updateExporterButton();
 }

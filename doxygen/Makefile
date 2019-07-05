@@ -8,7 +8,6 @@ doc/index.html: build/juce_modules.dox Doxyfile
 	doxygen
 
 build/juce_modules.dox: process_source_files.py $(SOURCE_FILES)
-	rm -rf build
 	python $< ../modules build
 
 clean:

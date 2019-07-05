@@ -1,0 +1,4 @@
+include:
+  - project: 'juce-repos/JUCE-utils'
+    file: '/CI/gitlab-ci.yml'
+

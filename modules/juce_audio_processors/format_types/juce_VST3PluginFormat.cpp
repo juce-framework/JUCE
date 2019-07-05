@@ -792,29 +792,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DescriptionFactory)
 };
 
-struct MatchingDescriptionFinder  : public DescriptionFactory
-{
-    MatchingDescriptionFinder (VST3HostContext* h, IPluginFactory* f, const PluginDescription& desc)
-       : DescriptionFactory (h, f), description (desc)
-    {
-    }
-
-    static const char* getSuccessString() noexcept  { return "Found Description"; }
-
-    Result performOnDescription (PluginDescription& desc)
-    {
-        if (description.isDuplicateOf (desc))
-            return Result::fail (getSuccessString());
-
-        return Result::ok();
-    }
-
-private:
-    const PluginDescription& description;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MatchingDescriptionFinder)
-};
-
 struct DescriptionLister  : public DescriptionFactory
 {
     DescriptionLister (VST3HostContext* host, IPluginFactory* pluginFactory)
@@ -1088,15 +1065,22 @@ private:
 
         if (pluginFactory != nullptr)
         {
-            ComSmartPtr<VST3HostContext> host (new VST3HostContext());
-            MatchingDescriptionFinder finder (host, pluginFactory, description);
+            auto numClasses = pluginFactory->countClasses();
 
-            auto result = finder.findDescriptionsAndPerform (f);
-
-            if (result.getErrorMessage() == MatchingDescriptionFinder::getSuccessString())
+            for (Steinberg::int32 i = 0; i < numClasses; ++i)
             {
-                name = description.name;
-                return true;
+                PClassInfo info;
+                pluginFactory->getClassInfo (i, &info);
+
+                if (std::strcmp (info.category, kVstAudioEffectClass) != 0)
+                    continue;
+
+                if (toString (info.name).trim() == description.name
+                        && getHashForTUID (info.cid) == description.uid)
+                {
+                    name = description.name;
+                    return true;
+                }
             }
         }
 
@@ -1768,11 +1752,8 @@ public:
         if (! holder->initialise())
             return false;
 
-        if (! isControllerInitialised)
-        {
-            if (! holder->fetchController (editController))
-                return false;
-        }
+        if (! (isControllerInitialised || holder->fetchController (editController)))
+            return false;
 
         // (May return an error if the plugin combines the IComponent and IEditController implementations)
         editController->initialize (holder->host->getFUnknown());
@@ -1784,12 +1765,12 @@ public:
 
         auto configureParameters = [this]
         {
-            addParameters();
+            refreshParameterList();
             synchroniseStates();
             syncProgramNames();
         };
-        configureParameters();
 
+        configureParameters();
         setupIO();
 
         // Some plug-ins don't present their parameters until after the IO has been
@@ -1801,12 +1782,11 @@ public:
     }
 
     void* getPlatformSpecificData() override   { return holder->component; }
-    void refreshParameterList() override {}
 
     //==============================================================================
     const String getName() const override
     {
-        VST3ModuleHandle::Ptr& module = holder->module;
+        auto& module = holder->module;
         return module != nullptr ? module->name : String();
     }
 
@@ -2258,7 +2238,7 @@ public:
     {
         if (programNames.size() > 0 && editController != nullptr)
         {
-            auto value = static_cast<Vst::ParamValue> (program) / static_cast<Vst::ParamValue> (programNames.size());
+            auto value = static_cast<Vst::ParamValue> (program) / static_cast<Vst::ParamValue> (jmax (1, programNames.size() - 1));
 
             editController->setParamNormalized (programParameterID, value);
             Steinberg::int32 index;
@@ -2292,9 +2272,7 @@ public:
 
     void setStateInformation (const void* data, int sizeInBytes) override
     {
-        std::unique_ptr<XmlElement> head (AudioProcessor::getXmlFromBinary (data, sizeInBytes));
-
-        if (head != nullptr)
+        if (auto head = AudioProcessor::getXmlFromBinary (data, sizeInBytes))
         {
             auto componentStream (createMemoryStreamForState (*head, "IComponent"));
 
@@ -2320,7 +2298,8 @@ public:
 
     bool setStateFromPresetFile (const MemoryBlock& rawData)
     {
-        ComSmartPtr<Steinberg::MemoryStream> memoryStream = new Steinberg::MemoryStream (rawData.getData(), (int) rawData.getSize());
+        MemoryBlock rawDataCopy (rawData);
+        ComSmartPtr<Steinberg::MemoryStream> memoryStream = new Steinberg::MemoryStream (rawDataCopy.getData(), (int) rawDataCopy.getSize());
 
         if (memoryStream == nullptr || holder->component == nullptr)
             return false;
@@ -2554,15 +2533,15 @@ private:
         }
     }
 
-    void addParameters()
+    void refreshParameterList() override
     {
-        AudioProcessorParameterGroup parameterGroups ({}, {}, {});
+        AudioProcessorParameterGroup newParameterTree;
 
         // We're going to add parameter groups to the tree recursively in the same order as the
         // first parameters contained within them.
         std::map<Vst::UnitID, Vst::UnitInfo> infoMap;
         std::map<Vst::UnitID, AudioProcessorParameterGroup*> groupMap;
-        groupMap[Vst::kRootUnitId] = &parameterGroups;
+        groupMap[Vst::kRootUnitId] = &newParameterTree;
 
         if (unitInfo != nullptr)
         {
@@ -2582,7 +2561,6 @@ private:
             auto* param = new VST3Parameter (*this,
                                              paramInfo.id,
                                              (paramInfo.flags & Vst::ParameterInfo::kCanAutomate) != 0);
-            addParameterInternal (param);
 
             if ((paramInfo.flags & Vst::ParameterInfo::kIsBypass) != 0)
                 bypassParam = param;
@@ -2616,7 +2594,7 @@ private:
             group->addChild (std::unique_ptr<AudioProcessorParameter> (param));
         }
 
-        parameterTree.swapWith (parameterGroups);
+        setParameterTree (std::move (newParameterTree));
     }
 
     void synchroniseStates()
@@ -3100,8 +3078,8 @@ void VST3PluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& resul
         VST3ModuleHandle::getAllDescriptionsForFile (results, fileOrIdentifier);
 }
 
-void VST3PluginFormat::createPluginInstance (const PluginDescription& description, double, int,
-                                             void* userData, PluginCreationCallback callback)
+void VST3PluginFormat::createPluginInstance (const PluginDescription& description,
+                                             double, int, PluginCreationCallback callback)
 {
     std::unique_ptr<VST3PluginInstance> result;
 
@@ -3131,9 +3109,9 @@ void VST3PluginFormat::createPluginInstance (const PluginDescription& descriptio
     String errorMsg;
 
     if (result == nullptr)
-        errorMsg = String (NEEDS_TRANS ("Unable to load XXX plug-in file")).replace ("XXX", "VST-3");
+        errorMsg = TRANS ("Unable to load XXX plug-in file").replace ("XXX", "VST-3");
 
-    callback (userData, result.release(), errorMsg);
+    callback (std::move (result), errorMsg);
 }
 
 bool VST3PluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept

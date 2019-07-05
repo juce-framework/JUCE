@@ -42,8 +42,7 @@ public:
 
     //==============================================================================
     PluginDescription audioInDesc, audioOutDesc, midiInDesc;
-
-    void getAllTypes (OwnedArray<PluginDescription>&);
+    void getAllTypes (Array<PluginDescription>&);
 
     //==============================================================================
     String getName() const override                                                     { return "Internal"; }
@@ -58,9 +57,11 @@ public:
 
 private:
     //==============================================================================
-    void createPluginInstance (const PluginDescription&, double initialSampleRate, int initialBufferSize,
-                               void* userData, PluginCreationCallback) override;
-    AudioPluginInstance* createInstance (const String& name);
+    void createPluginInstance (const PluginDescription&,
+                               double initialSampleRate, int initialBufferSize,
+                               PluginCreationCallback) override;
+
+    std::unique_ptr<AudioPluginInstance> createInstance (const String& name);
 
     bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept override;
 };

@@ -28,7 +28,7 @@ struct MIDIDeviceConnection  : public PhysicalTopologySource::DeviceConnection,
 {
     MIDIDeviceConnection() {}
 
-    ~MIDIDeviceConnection()
+    ~MIDIDeviceConnection() override
     {
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 

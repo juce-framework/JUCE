@@ -481,7 +481,7 @@ void ProjucerLookAndFeel::setupColours()
 {
     auto& colourScheme = getCurrentColourScheme();
 
-    if (colourScheme == getDarkColourScheme())
+    if (colourScheme == getDarkColourScheme() || colourScheme == getProjucerDarkColourScheme())
     {
         setColour (backgroundColourId,                   Colour (0xff323e44));
         setColour (secondaryBackgroundColourId,          Colour (0xff263238));
@@ -502,7 +502,7 @@ void ProjucerLookAndFeel::setupColours()
         setColour (widgetBackgroundColourId,             Colour (0xff495358));
         setColour (secondaryWidgetBackgroundColourId,    Colour (0xff303b41));
 
-        colourScheme.setUIColour (LookAndFeel_V4::ColourScheme::UIColour::defaultFill, Colour (0xffa45c94));
+        colourScheme = getProjucerDarkColourScheme();
     }
     else if (colourScheme == getGreyColourScheme())
     {

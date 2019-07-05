@@ -50,7 +50,7 @@ class MP3AudioFormat  : public AudioFormat
 public:
     //==============================================================================
     MP3AudioFormat();
-    ~MP3AudioFormat();
+    ~MP3AudioFormat() override;
 
     //==============================================================================
     Array<int> getPossibleSampleRates() override;
@@ -66,6 +66,7 @@ public:
     AudioFormatWriter* createWriterFor (OutputStream*, double sampleRateToUse,
                                         unsigned int numberOfChannels, int bitsPerSample,
                                         const StringPairArray& metadataValues, int qualityOptionIndex) override;
+    using AudioFormat::createWriterFor;
 };
 
 #endif

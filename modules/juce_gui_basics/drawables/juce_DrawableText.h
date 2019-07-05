@@ -92,11 +92,13 @@ public:
     /** @internal */
     void paint (Graphics&) override;
     /** @internal */
-    Drawable* createCopy() const override;
+    std::unique_ptr<Drawable> createCopy() const override;
     /** @internal */
     Rectangle<float> getDrawableBounds() const override;
     /** @internal */
     Path getOutlineAsPath() const override;
+    /** @internal */
+    bool replaceColour (Colour originalColour, Colour replacementColour) override;
 
 private:
     //==============================================================================

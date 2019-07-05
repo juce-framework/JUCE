@@ -341,7 +341,7 @@ void LibraryModule::getConfigFlags (Project& project, OwnedArray<Project::Config
 
         if (line.startsWith ("/**") && line.containsIgnoreCase ("Config:"))
         {
-            std::unique_ptr<Project::ConfigFlag> config (new Project::ConfigFlag());
+            auto config = std::make_unique<Project::ConfigFlag>();
             config->sourceModuleID = getID();
             config->symbol = line.fromFirstOccurrenceOf (":", false, false).trim();
 
@@ -361,6 +361,7 @@ void LibraryModule::getConfigFlags (Project& project, OwnedArray<Project::Config
                 config->value = project.getConfigFlag (config->symbol);
 
                 i += 2;
+
                 if (lines[i].contains ("#define " + config->symbol))
                 {
                     auto value = lines[i].fromFirstOccurrenceOf ("#define " + config->symbol, false, true).trim();
@@ -372,7 +373,7 @@ void LibraryModule::getConfigFlags (Project& project, OwnedArray<Project::Config
                 if      (currentValue == "enabled")     config->value = true;
                 else if (currentValue == "disabled")    config->value = false;
 
-                flags.add (config.release());
+                flags.add (std::move (config));
             }
         }
     }
@@ -519,11 +520,16 @@ void LibraryModule::addBrowseableCode (ProjectExporter& exporter, const Array<Fi
     if (sourceFiles.isEmpty())
         findBrowseableFiles (localModuleFolder, sourceFiles);
 
-    auto sourceGroup = Project::Item::createGroup (exporter.getProject(), getID(), "__mainsourcegroup" + getID(), false);
-
+    auto sourceGroup       = Project::Item::createGroup (exporter.getProject(), getID(), "__mainsourcegroup" + getID(), false);
     auto moduleFromProject = exporter.getModuleFolderRelativeToProject (getID());
+    auto moduleHeader      = moduleInfo.getHeader();
 
-    auto moduleHeader = moduleInfo.getHeader();
+    auto& project = exporter.getProject();
+
+    if (project.getEnabledModules().shouldCopyModuleFilesLocally (getID()).getValue())
+        moduleHeader = project.getLocalModuleFolder (getID()).getChildFile (moduleHeader.getFileName());
+
+    auto isModuleHeader = [&] (const File& f)  { return f.getFileName() == moduleHeader.getFileName(); };
 
     for (auto& sourceFile : sourceFiles)
     {
@@ -531,10 +537,8 @@ void LibraryModule::addBrowseableCode (ProjectExporter& exporter, const Array<Fi
 
         // (Note: in exporters like MSVC we have to avoid adding the same file twice, even if one of those instances
         // is flagged as being excluded from the build, because this overrides the other and it fails to compile)
-        if ((exporter.canCopeWithDuplicateFiles() || ! compiled.contains (sourceFile)) && sourceFile != moduleHeader)
-            addFileWithGroups (sourceGroup,
-                               moduleFromProject.getChildFile (pathWithinModule),
-                               pathWithinModule);
+        if ((exporter.canCopeWithDuplicateFiles() || ! compiled.contains (sourceFile)) && ! isModuleHeader (sourceFile))
+            addFileWithGroups (sourceGroup, moduleFromProject.getChildFile (pathWithinModule), pathWithinModule);
     }
 
     sourceGroup.sortAlphabetically (true, true);

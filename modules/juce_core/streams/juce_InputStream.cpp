@@ -33,6 +33,26 @@ int64 InputStream::getNumBytesRemaining()
     return len;
 }
 
+ssize_t InputStream::read (void* destBuffer, size_t size)
+{
+    ssize_t totalRead = 0;
+
+    while (size > 0)
+    {
+        auto numToRead = (int) std::min (size, (size_t) 0x70000000);
+        auto numRead = read (juce::addBytesToPointer (destBuffer, totalRead), numToRead);
+        jassert (numRead <= numToRead);
+
+        if (numRead < 0) return (ssize_t) numRead;
+        if (numRead == 0) break;
+
+        size -= (size_t) numRead;
+        totalRead += numRead;
+    }
+
+    return totalRead;
+}
+
 char InputStream::readByte()
 {
     char temp = 0;

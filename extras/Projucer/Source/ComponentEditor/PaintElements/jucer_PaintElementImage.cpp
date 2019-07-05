@@ -134,8 +134,8 @@ void PaintElementImage::fillInGeneratedCode (GeneratedCode& code, String& paintM
                     << "std::unique_ptr<Drawable> " << imageVariable << ";\n";
 
                 code.constructorCode
-                    << imageVariable << ".reset (Drawable::createFromImageData ("
-                    << resourceName << ", " << resourceName << "Size));\n";
+                    << imageVariable << " = Drawable::createFromImageData ("
+                    << resourceName << ", " << resourceName << "Size);\n";
 
                 code.destructorCode
                     << imageVariable << " = nullptr;\n";

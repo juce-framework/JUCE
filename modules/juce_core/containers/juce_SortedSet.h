@@ -58,7 +58,6 @@ class SortedSet
 public:
     //==============================================================================
     /** Creates an empty set. */
-    // VS2013 doesn't allow defaulted noexcept constructors.
     SortedSet() = default;
 
     /** Creates a copy of another set. */
@@ -169,7 +168,16 @@ public:
 
         @param index    the index of the element being requested (0 is the first element in the array)
     */
-    inline ElementType& getReference (const int index) const noexcept
+    inline ElementType& getReference (const int index) noexcept
+    {
+        return data.getReference (index);
+    }
+
+    /** Returns a direct reference to one of the elements in the set, without checking the index passed in.
+
+        @param index    the index of the element being requested (0 is the first element in the array)
+    */
+    inline const ElementType& getReference (const int index) const noexcept
     {
         return data.getReference (index);
     }
@@ -194,7 +202,7 @@ public:
     /** Returns a pointer to the first element in the set.
         This method is provided for compatibility with standard C++ iteration mechanisms.
     */
-    inline ElementType* begin() const noexcept
+    inline const ElementType* begin() const noexcept
     {
         return data.begin();
     }
@@ -202,7 +210,7 @@ public:
     /** Returns a pointer to the element which follows the last element in the set.
         This method is provided for compatibility with standard C++ iteration mechanisms.
     */
-    inline ElementType* end() const noexcept
+    inline const ElementType* end() const noexcept
     {
         return data.end();
     }

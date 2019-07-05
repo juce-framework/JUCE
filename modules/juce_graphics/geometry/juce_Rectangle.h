@@ -215,13 +215,13 @@ public:
                                                                                                                newCentre.y - h / (ValueType) 2, w, h }; }
 
     /** Returns a rectangle which has the same position and height as this one, but with a different width. */
-    Rectangle withWidth (ValueType newWidth) const noexcept                                         { return { pos.x, pos.y, newWidth, h }; }
+    Rectangle withWidth (ValueType newWidth) const noexcept                                         { return { pos.x, pos.y, jmax (ValueType(), newWidth), h }; }
 
     /** Returns a rectangle which has the same position and width as this one, but with a different height. */
-    Rectangle withHeight (ValueType newHeight) const noexcept                                       { return { pos.x, pos.y, w, newHeight }; }
+    Rectangle withHeight (ValueType newHeight) const noexcept                                       { return { pos.x, pos.y, w, jmax (ValueType(), newHeight) }; }
 
     /** Returns a rectangle with the same top-left position as this one, but a new size. */
-    Rectangle withSize (ValueType newWidth, ValueType newHeight) const noexcept                     { return { pos.x, pos.y, newWidth, newHeight }; }
+    Rectangle withSize (ValueType newWidth, ValueType newHeight) const noexcept                     { return { pos.x, pos.y, jmax (ValueType(), newWidth), jmax (ValueType(), newHeight) }; }
 
     /** Returns a rectangle with the same centre position as this one, but a new size. */
     Rectangle withSizeKeepingCentre (ValueType newWidth, ValueType newHeight) const noexcept        { return { pos.x + (w - newWidth)  / (ValueType) 2,
@@ -769,12 +769,13 @@ public:
     */
     Rectangle constrainedWithin (Rectangle areaToFitWithin) const noexcept
     {
-        auto newW = jmin (w, areaToFitWithin.getWidth());
-        auto newH = jmin (h, areaToFitWithin.getHeight());
+        auto newPos = areaToFitWithin.withSize (areaToFitWithin.getWidth() - w,
+                                                areaToFitWithin.getHeight() - h)
+                        .getConstrainedPoint (pos);
 
-        return { jlimit (areaToFitWithin.getX(), areaToFitWithin.getRight()  - newW, pos.x),
-                 jlimit (areaToFitWithin.getY(), areaToFitWithin.getBottom() - newH, pos.y),
-                 newW, newH };
+        return { newPos.x, newPos.y,
+                 jmin (w, areaToFitWithin.getWidth()),
+                 jmin (h, areaToFitWithin.getHeight()) };
     }
 
     /** Returns the smallest rectangle that can contain the shape created by applying
@@ -964,7 +965,7 @@ private:
     template <typename OtherType> friend class Rectangle;
 
     Point<ValueType> pos;
-    ValueType w{}, h{};
+    ValueType w {}, h {};
 
     static ValueType parseIntAfterSpace (StringRef s) noexcept
         { return static_cast<ValueType> (s.text.findEndOfWhitespace().getIntValue32()); }

@@ -191,7 +191,7 @@ public:
         recordButton.onClick = [this] { startRecording(); };
         addAndMakeVisible (recordButton);
 
-        roomSizeSlider.onValueChange = [this] { setParameterValue ("roomSize", roomSizeSlider.getValue()); };
+        roomSizeSlider.onValueChange = [this] { setParameterValue ("roomSize", (float) roomSizeSlider.getValue()); };
         roomSizeSlider.setRange (0.0, 1.0);
         addAndMakeVisible (roomSizeSlider);
 
@@ -260,7 +260,7 @@ private:
     {
         if (auto* processor = getAudioProcessor())
         {
-            const OwnedArray<AudioProcessorParameter>& params = processor->getParameters();
+            auto& params = processor->getParameters();
 
             for (auto p : params)
             {

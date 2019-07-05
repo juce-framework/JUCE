@@ -44,7 +44,7 @@ public:
         startThread();
     }
 
-    ~PrepareImagesThread()
+    ~PrepareImagesThread() override
     {
         signalThreadShouldExit();
         waitForThreadToExit (10000);
@@ -98,7 +98,7 @@ public:
         startThread();
     }
 
-    ~PrepareDataThread()
+    ~PrepareDataThread() override
     {
         signalThreadShouldExit();
         waitForThreadToExit (10000);

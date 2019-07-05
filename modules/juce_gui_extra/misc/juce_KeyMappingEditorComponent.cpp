@@ -30,8 +30,8 @@ namespace juce
 class KeyMappingEditorComponent::ChangeKeyButton  : public Button
 {
 public:
-    ChangeKeyButton (KeyMappingEditorComponent& kec, const CommandID command,
-                     const String& keyName, const int keyIndex)
+    ChangeKeyButton (KeyMappingEditorComponent& kec, CommandID command,
+                     const String& keyName, int keyIndex)
         : Button (keyName),
           owner (kec),
           commandID (command),
@@ -50,37 +50,39 @@ public:
                                                  keyNum >= 0 ? getName() : String());
     }
 
-    static void menuCallback (int result, ChangeKeyButton* button)
-    {
-        if (button != nullptr)
-        {
-            switch (result)
-            {
-                case 1: button->assignNewKey(); break;
-                case 2: button->owner.getMappings().removeKeyPress (button->commandID, button->keyNum); break;
-                default: break;
-            }
-        }
-    }
-
     void clicked() override
     {
         if (keyNum >= 0)
         {
-            // existing key clicked..
+            Component::SafePointer<ChangeKeyButton> button (this);
             PopupMenu m;
-            m.addItem (1, TRANS("Change this key-mapping"));
-            m.addSeparator();
-            m.addItem (2, TRANS("Remove this key-mapping"));
 
-            m.showMenuAsync (PopupMenu::Options(),
-                             ModalCallbackFunction::forComponent (menuCallback, this));
+            m.addItem (TRANS("Change this key-mapping"),
+                       [button]
+                       {
+                           if (button != nullptr)
+                               button.getComponent()->assignNewKey();
+                       });
+
+            m.addSeparator();
+
+            m.addItem (TRANS("Remove this key-mapping"),
+                       [button]
+                       {
+                           if (button != nullptr)
+                               button->owner.getMappings().removeKeyPress (button->commandID,
+                                                                           button->keyNum);
+                       });
+
+            m.showMenuAsync (PopupMenu::Options().withTargetComponent (this));
         }
         else
         {
             assignNewKey();  // + button pressed..
         }
     }
+
+    using Button::clicked;
 
     void fitToContent (const int h) noexcept
     {

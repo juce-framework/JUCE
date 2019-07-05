@@ -37,9 +37,12 @@ DrawableButton::~DrawableButton()
 }
 
 //==============================================================================
-static Drawable* copyDrawableIfNotNull (const Drawable* const d)
+static std::unique_ptr<Drawable> copyDrawableIfNotNull (const Drawable* const d)
 {
-    return d != nullptr ? d->createCopy() : nullptr;
+    if (d != nullptr)
+        return d->createCopy();
+
+    return {};
 }
 
 void DrawableButton::setImages (const Drawable* normal,
@@ -53,14 +56,14 @@ void DrawableButton::setImages (const Drawable* normal,
 {
     jassert (normal != nullptr); // you really need to give it at least a normal image..
 
-    normalImage     .reset (copyDrawableIfNotNull (normal));
-    overImage       .reset (copyDrawableIfNotNull (over));
-    downImage       .reset (copyDrawableIfNotNull (down));
-    disabledImage   .reset (copyDrawableIfNotNull (disabled));
-    normalImageOn   .reset (copyDrawableIfNotNull (normalOn));
-    overImageOn     .reset (copyDrawableIfNotNull (overOn));
-    downImageOn     .reset (copyDrawableIfNotNull (downOn));
-    disabledImageOn .reset (copyDrawableIfNotNull (disabledOn));
+    normalImage     = copyDrawableIfNotNull (normal);
+    overImage       = copyDrawableIfNotNull (over);
+    downImage       = copyDrawableIfNotNull (down);
+    disabledImage   = copyDrawableIfNotNull (disabled);
+    normalImageOn   = copyDrawableIfNotNull (normalOn);
+    overImageOn     = copyDrawableIfNotNull (overOn);
+    downImageOn     = copyDrawableIfNotNull (downOn);
+    disabledImageOn = copyDrawableIfNotNull (disabledOn);
 
     currentImage = nullptr;
 
@@ -93,7 +96,7 @@ Rectangle<float> DrawableButton::getImageBounds() const
         auto indentX = jmin (edgeIndent, proportionOfWidth  (0.3f));
         auto indentY = jmin (edgeIndent, proportionOfHeight (0.3f));
 
-        if (style == ImageOnButtonBackground)
+        if (shouldDrawButtonBackground())
         {
             indentX = jmax (getWidth()  / 4, indentX);
             indentY = jmax (getHeight() / 4, indentY);
@@ -115,12 +118,24 @@ void DrawableButton::resized()
 
     if (currentImage != nullptr)
     {
-        if (style == ImageRaw)
-            currentImage->setOriginWithOriginalSize (Point<float>());
-        else
-            currentImage->setTransformToFit (getImageBounds(),
-                                             style == ImageStretched ? RectanglePlacement::stretchToFit
-                                                                     : RectanglePlacement::centred);
+        if (style != ImageRaw)
+        {
+            int transformFlags = 0;
+
+            if (style == ImageStretched)
+            {
+                transformFlags |= RectanglePlacement::stretchToFit;
+            }
+            else
+            {
+                transformFlags |= RectanglePlacement::centred;
+
+                if (style == ImageOnButtonBackgroundOriginalSize)
+                    transformFlags |= RectanglePlacement::doNotResize;
+            }
+
+            currentImage->setTransformToFit (getImageBounds(), transformFlags);
+        }
     }
 }
 
@@ -181,7 +196,7 @@ void DrawableButton::paintButton (Graphics& g,
 {
     auto& lf = getLookAndFeel();
 
-    if (style == ImageOnButtonBackground)
+    if (shouldDrawButtonBackground())
         lf.drawButtonBackground (g, *this,
                                  findColour (getToggleState() ? TextButton::buttonOnColourId
                                                               : TextButton::buttonColourId),

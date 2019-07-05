@@ -116,7 +116,7 @@ public:
         startTimer (500);
     }
 
-    ~MidiDemo()
+    ~MidiDemo() override
     {
         stopTimer();
         midiInputs .clear();
@@ -187,7 +187,7 @@ public:
         if (isInput)
         {
             jassert (midiInputs[index]->inDevice.get() == nullptr);
-            midiInputs[index]->inDevice.reset (MidiInput::openDevice (midiInputs[index]->deviceInfo.identifier, this));
+            midiInputs[index]->inDevice = MidiInput::openDevice (midiInputs[index]->deviceInfo.identifier, this);
 
             if (midiInputs[index]->inDevice.get() == nullptr)
             {
@@ -200,7 +200,7 @@ public:
         else
         {
             jassert (midiOutputs[index]->outDevice.get() == nullptr);
-            midiOutputs[index]->outDevice.reset (MidiOutput::openDevice (midiOutputs[index]->deviceInfo.identifier));
+            midiOutputs[index]->outDevice = MidiOutput::openDevice (midiOutputs[index]->deviceInfo.identifier);
 
             if (midiOutputs[index]->outDevice.get() == nullptr)
             {

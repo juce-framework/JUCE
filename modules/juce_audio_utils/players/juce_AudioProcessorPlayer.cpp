@@ -122,14 +122,14 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
         for (int i = 0; i < numOutputChannels; ++i)
         {
             channels[totalNumChans] = outputChannelData[i];
-            memcpy (channels[totalNumChans], inputChannelData[i], sizeof (float) * (size_t) numSamples);
+            memcpy (channels[totalNumChans], inputChannelData[i], (size_t) numSamples * sizeof (float));
             ++totalNumChans;
         }
 
         for (int i = numOutputChannels; i < numInputChannels; ++i)
         {
             channels[totalNumChans] = tempBuffer.getWritePointer (i - numOutputChannels);
-            memcpy (channels[totalNumChans], inputChannelData[i], sizeof (float) * (size_t) numSamples);
+            memcpy (channels[totalNumChans], inputChannelData[i], (size_t) numSamples * sizeof (float));
             ++totalNumChans;
         }
     }
@@ -138,14 +138,14 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
         for (int i = 0; i < numInputChannels; ++i)
         {
             channels[totalNumChans] = outputChannelData[i];
-            memcpy (channels[totalNumChans], inputChannelData[i], sizeof (float) * (size_t) numSamples);
+            memcpy (channels[totalNumChans], inputChannelData[i], (size_t) numSamples * sizeof (float));
             ++totalNumChans;
         }
 
         for (int i = numInputChannels; i < numOutputChannels; ++i)
         {
             channels[totalNumChans] = outputChannelData[i];
-            zeromem (channels[totalNumChans], sizeof (float) * (size_t) numSamples);
+            zeromem (channels[totalNumChans], (size_t) numSamples * sizeof (float));
             ++totalNumChans;
         }
     }

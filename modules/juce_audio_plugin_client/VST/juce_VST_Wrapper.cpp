@@ -75,6 +75,15 @@
  #pragma clang diagnostic ignored "-Wunused-parameter"
  #pragma clang diagnostic ignored "-Wdeprecated-writable-strings"
  #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
+ #if __has_warning("-Wzero-as-null-pointer-constant")
+  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+ #endif
+#endif
+
+#if JUCE_GCC
+ #pragma GCC diagnostic push
+ #pragma GCC diagnostic ignored "-Wshadow"
+ #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
 #endif
 
 #ifdef _MSC_VER
@@ -104,6 +113,10 @@ using namespace juce;
 
 #if JUCE_CLANG
  #pragma clang diagnostic pop
+#endif
+
+#if JUCE_GCC
+ #pragma GCC diagnostic pop
 #endif
 
 //==============================================================================
@@ -213,7 +226,7 @@ struct SharedMessageThread  : public Thread
             sleep (1);
     }
 
-    ~SharedMessageThread()
+    ~SharedMessageThread() override
     {
         signalThreadShouldExit();
         JUCEApplicationBase::quit();
@@ -373,7 +386,7 @@ public:
         activePlugins.add (this);
     }
 
-    ~JuceVSTWrapper()
+    ~JuceVSTWrapper() override
     {
         JUCE_AUTORELEASEPOOL
         {
@@ -498,7 +511,7 @@ public:
                     if (i < numIn)
                     {
                         if (chan != inputs[i])
-                            memcpy (chan, inputs[i], sizeof (FloatType) * (size_t) numSamples);
+                            memcpy (chan, inputs[i], (size_t) numSamples * sizeof (FloatType));
                     }
                     else
                     {
@@ -525,7 +538,7 @@ public:
                 for (i = 0; i < numOut; ++i)
                     if (auto* chan = tmpBuffers.tempChannels.getUnchecked(i))
                         if (auto* dest = outputs[i])
-                            memcpy (dest, chan, sizeof (FloatType) * (size_t) numSamples);
+                            memcpy (dest, chan, (size_t) numSamples * sizeof (FloatType));
             }
         }
 
@@ -630,7 +643,7 @@ public:
             if (vstEffect.flags & Vst2::effFlagsIsSynth || JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect)
             {
                 if (hostCallback != nullptr)
-                    hostCallback (&vstEffect, Vst2::audioMasterWantMidi, 0, 1, 0, 0);
+                    hostCallback (&vstEffect, Vst2::audioMasterWantMidi, 0, 1, nullptr, 0);
             }
 
             if (getHostType().isAbletonLive()
@@ -680,7 +693,7 @@ public:
                         | Vst2::kVstTimeSigValid | Vst2::kVstSmpteValid
                         | Vst2::kVstClockValid;
 
-            auto result = hostCallback (&vstEffect, Vst2::audioMasterGetTime, 0, flags, 0, 0);
+            auto result = hostCallback (&vstEffect, Vst2::audioMasterGetTime, 0, flags, nullptr, 0);
             ti = reinterpret_cast<Vst2::VstTimeInfo*> (result);
         }
 
@@ -796,19 +809,19 @@ public:
         }
 
         if (hostCallback != nullptr)
-            hostCallback (&vstEffect, Vst2::audioMasterAutomate, index, 0, 0, newValue);
+            hostCallback (&vstEffect, Vst2::audioMasterAutomate, index, 0, nullptr, newValue);
     }
 
     void audioProcessorParameterChangeGestureBegin (AudioProcessor*, int index) override
     {
         if (hostCallback != nullptr)
-            hostCallback (&vstEffect, Vst2::audioMasterBeginEdit, index, 0, 0, 0);
+            hostCallback (&vstEffect, Vst2::audioMasterBeginEdit, index, 0, nullptr, 0);
     }
 
     void audioProcessorParameterChangeGestureEnd (AudioProcessor*, int index) override
     {
         if (hostCallback != nullptr)
-            hostCallback (&vstEffect, Vst2::audioMasterEndEdit, index, 0, 0, 0);
+            hostCallback (&vstEffect, Vst2::audioMasterEndEdit, index, 0, nullptr, 0);
     }
 
     void parameterValueChanged (int, float newValue) override
@@ -824,7 +837,7 @@ public:
         vstEffect.initialDelay = processor->getLatencySamples();
 
         if (hostCallback != nullptr)
-            hostCallback (&vstEffect, Vst2::audioMasterUpdateDisplay, 0, 0, 0, 0);
+            hostCallback (&vstEffect, Vst2::audioMasterUpdateDisplay, 0, 0, nullptr, 0);
 
         triggerAsyncUpdate();
     }
@@ -832,7 +845,7 @@ public:
     void handleAsyncUpdate() override
     {
         if (hostCallback != nullptr)
-            hostCallback (&vstEffect, Vst2::audioMasterIOChanged, 0, 0, 0, 0);
+            hostCallback (&vstEffect, Vst2::audioMasterIOChanged, 0, 0, nullptr, 0);
     }
 
     bool getPinProperties (Vst2::VstPinProperties& properties, bool direction, int index) const
@@ -1265,7 +1278,7 @@ public:
             ignoreUnused (fakeMouseGenerator);
         }
 
-        ~EditorCompWrapper()
+        ~EditorCompWrapper() override
         {
             deleteAllChildren(); // note that we can't use a std::unique_ptr because the editor may
                                  // have been transferred to another parent which takes over ownership.
@@ -1318,22 +1331,22 @@ public:
         void detachHostWindow()
         {
            #if JUCE_MAC
-            if (hostWindow != 0)
+            if (hostWindow != nullptr)
             {
                 detachComponentFromWindowRefVST (this, hostWindow, wrapper.useNSView);
-                hostWindow = 0;
+                hostWindow = nullptr;
             }
            #endif
 
            #if JUCE_LINUX
-            hostWindow = 0;
+            hostWindow = {};
            #endif
         }
 
         void checkVisibility()
         {
            #if JUCE_MAC
-            if (hostWindow != 0)
+            if (hostWindow != nullptr)
                 checkWindowVisibilityVST (hostWindow, this, wrapper.useNSView);
            #endif
         }
@@ -1446,7 +1459,7 @@ public:
                     const ScopedValueSetter<bool> inSizeWindowSetter (isInSizeWindow, true);
 
                     sizeWasSuccessful = (host (wrapper.getAEffect(), Vst2::audioMasterSizeWindow,
-                                               newWidth, newHeight, 0, 0) != 0);
+                                               newWidth, newHeight, nullptr, 0) != 0);
                 }
             }
 
@@ -1550,7 +1563,7 @@ public:
         bool shouldResizeEditor = true;
 
        #if JUCE_MAC
-        void* hostWindow = {};
+        void* hostWindow = nullptr;
        #elif JUCE_LINUX
         ScopedXDisplay display;
         Window hostWindow = {};
@@ -1569,7 +1582,7 @@ private:
     bool isProcessLevelOffline()
     {
         return hostCallback != nullptr
-                && (int32) hostCallback (&vstEffect, Vst2::audioMasterGetCurrentProcessLevel, 0, 0, 0, 0) == 4;
+                && (int32) hostCallback (&vstEffect, Vst2::audioMasterGetCurrentProcessLevel, 0, 0, nullptr, 0) == 4;
     }
 
     static inline int32 convertHexVersionToDecimal (const unsigned int hexVersion)
@@ -1897,7 +1910,7 @@ private:
     {
         if (auto* param = juceParameters.getParamForIndex (args.index))
         {
-            const bool isMeter = (((param->getCategory() & 0xffff0000) >> 16) == 2);
+            const bool isMeter = ((((unsigned int) param->getCategory() & 0xffff0000) >> 16) == 2);
             return (param->isAutomatable() && (! isMeter) ? 1 : 0);
         }
 
@@ -2275,11 +2288,13 @@ private:
     bool isProcessing = false, isBypassed = false, hasShutdown = false;
     bool firstProcessCallback = true, shouldDeleteEditor = false;
 
+  #if JUCE_MAC
    #if JUCE_64BIT
     bool useNSView = true;
    #else
     bool useNSView = false;
    #endif
+  #endif
 
     VstTempBuffers<float> floatTempBuffers;
     VstTempBuffers<double> doubleTempBuffers;
@@ -2305,7 +2320,7 @@ namespace
 
             try
             {
-                if (audioMaster (0, Vst2::audioMasterVersion, 0, 0, 0, 0) != 0)
+                if (audioMaster (nullptr, Vst2::audioMasterVersion, 0, 0, nullptr, 0) != 0)
                 {
                    #if JUCE_LINUX
                     MessageManagerLock mmLock;

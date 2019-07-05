@@ -179,8 +179,8 @@ public:
 
     void addProjectPathToBuildPathList (StringArray&, const RelativePath&, int index = -1) const;
 
-    Drawable* getBigIcon() const;
-    Drawable* getSmallIcon() const;
+    std::unique_ptr<Drawable> getBigIcon() const;
+    std::unique_ptr<Drawable> getSmallIcon() const;
     Image getBestIconForSize (int size, bool returnNullIfNothingBigEnough) const;
 
     String getExporterIdentifierMacro() const
@@ -272,6 +272,9 @@ public:
 
         //==============================================================================
         void createPropertyEditors (PropertyListBuilder&);
+        void addRecommendedLinuxCompilerWarningsProperty (PropertyListBuilder&);
+        void addRecommendedLLVMCompilerWarningsProperty (PropertyListBuilder&);
+        StringArray getRecommendedCompilerWarningFlags() const;
         void addGCCOptimisationProperty (PropertyListBuilder&);
         void removeFromExporter();
 
@@ -281,10 +284,12 @@ public:
         const ProjectExporter& exporter;
 
     protected:
-        ValueWithDefault isDebugValue, configNameValue, targetNameValue, targetBinaryPathValue, optimisationLevelValue,
+        ValueWithDefault isDebugValue, configNameValue, targetNameValue, targetBinaryPathValue, recommendedWarningsValue, optimisationLevelValue,
                          linkTimeOptimisationValue, ppDefinesValue, headerSearchPathValue, librarySearchPathValue, userNotesValue;
 
     private:
+        std::map<String, StringArray> recommendedCompilerWarningFlags;
+
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BuildConfiguration)
     };
 
@@ -410,7 +415,6 @@ protected:
     HashMap<String, ValueWithDefault> compilerFlagSchemesMap;
 
     mutable Array<Project::Item> itemGroups;
-    void initItemGroups() const;
     Project::Item* modulesGroup = nullptr;
 
     virtual BuildConfiguration::Ptr createBuildConfig (const ValueTree&) const = 0;
@@ -449,7 +453,7 @@ protected:
         XmlElement::TextFormat format;
         format.customEncoding = encoding;
         format.lineWrapLength = maxCharsPerLine;
-        format.newLineChars = useUnixNewLines ? "\r\n" : "\n";
+        format.newLineChars = useUnixNewLines ? "\n" : "\r\n";
 
         MemoryOutputStream mo (8192);
         xml.writeTo (mo, format);

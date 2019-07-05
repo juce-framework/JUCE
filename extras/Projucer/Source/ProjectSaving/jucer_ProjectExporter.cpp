@@ -819,12 +819,12 @@ void ProjectExporter::createDefaultConfigs()
     }
 }
 
-Drawable* ProjectExporter::getBigIcon() const
+std::unique_ptr<Drawable> ProjectExporter::getBigIcon() const
 {
     return project.getMainGroup().findItemWithID (settings [Ids::bigIcon]).loadAsImageFile();
 }
 
-Drawable* ProjectExporter::getSmallIcon() const
+std::unique_ptr<Drawable> ProjectExporter::getSmallIcon() const
 {
     return project.getMainGroup().findItemWithID (settings [Ids::smallIcon]).loadAsImageFile();
 }
@@ -833,8 +833,8 @@ Image ProjectExporter::getBestIconForSize (int size, bool returnNullIfNothingBig
 {
     Drawable* im = nullptr;
 
-    std::unique_ptr<Drawable> im1 (getSmallIcon());
-    std::unique_ptr<Drawable> im2 (getBigIcon());
+    auto im1 = getSmallIcon();
+    auto im2 = getBigIcon();
 
     if (im1 != nullptr && im2 != nullptr)
     {
@@ -923,6 +923,7 @@ ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const Value
      configNameValue           (config, Ids::name,                 getUndoManager(), "Build Configuration"),
      targetNameValue           (config, Ids::targetName,           getUndoManager(), project.getProjectFilenameRootString()),
      targetBinaryPathValue     (config, Ids::binaryPath,           getUndoManager()),
+     recommendedWarningsValue  (config, Ids::recommendedWarnings,  getUndoManager()),
      optimisationLevelValue    (config, Ids::optimisation,         getUndoManager()),
      linkTimeOptimisationValue (config, Ids::linkTimeOptimisation, getUndoManager(), ! isDebug()),
      ppDefinesValue            (config, Ids::defines,              getUndoManager()),
@@ -930,6 +931,18 @@ ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const Value
      librarySearchPathValue    (config, Ids::libraryPath,          getUndoManager()),
      userNotesValue            (config, Ids::userNotes,            getUndoManager())
 {
+    recommendedCompilerWarningFlags["LLVM"] = { "-Wall", "-Wshadow-all", "-Wshorten-64-to-32", "-Wstrict-aliasing", "-Wuninitialized", "-Wunused-parameter",
+        "-Wconversion", "-Wsign-compare", "-Wint-conversion", "-Wconditional-uninitialized", "-Woverloaded-virtual",
+        "-Wreorder", "-Wconstant-conversion", "-Wsign-conversion", "-Wunused-private-field", "-Wbool-conversion",
+        "-Wextra-semi", "-Wunreachable-code", "-Wzero-as-null-pointer-constant", "-Wcast-align",
+        "-Winconsistent-missing-destructor-override", "-Wshift-sign-overflow", "-Wnullable-to-nonnull-conversion",
+        "-Wno-missing-field-initializers", "-Wno-ignored-qualifiers" };
+    recommendedCompilerWarningFlags["GCC"] = { "-Wall", "-Wextra", "-Wstrict-aliasing", "-Wuninitialized", "-Wunused-parameter", "-Wsign-compare",
+        "-Woverloaded-virtual", "-Wreorder", "-Wsign-conversion", "-Wunreachable-code",
+        "-Wzero-as-null-pointer-constant", "-Wcast-align", "-Wno-implicit-fallthrough",
+        "-Wno-maybe-uninitialized", "-Wno-missing-field-initializers", "-Wno-ignored-qualifiers" };
+    recommendedCompilerWarningFlags["GCC-7"] = recommendedCompilerWarningFlags["GCC"];
+    recommendedCompilerWarningFlags["GCC-7"].add ("-Wno-strict-overflow");
 }
 
 ProjectExporter::BuildConfiguration::~BuildConfiguration()
@@ -959,6 +972,35 @@ void ProjectExporter::BuildConfiguration::addGCCOptimisationProperty (PropertyLi
                                               "-O3 (fastest with safe optimisations)", "-Ofast (uses aggressive optimisations)" },
                                             { gccO0, gccOs, gccO1, gccO2, gccO3, gccOfast }),
                "The optimisation level for this configuration");
+}
+
+void ProjectExporter::BuildConfiguration::addRecommendedLinuxCompilerWarningsProperty (PropertyListBuilder& props)
+{
+    props.add (new ChoicePropertyComponent (recommendedWarningsValue, "Add Recommended Compiler Warning Flags",
+                                            { "GCC", "GCC 7 and below", "LLVM", "Disabled" },
+                                            { "GCC", "GCC-7", "LLVM", "" }),
+               "Enable this to add a set of recommended compiler warning flags.");
+    recommendedWarningsValue.setDefault ("");
+}
+
+void ProjectExporter::BuildConfiguration::addRecommendedLLVMCompilerWarningsProperty (PropertyListBuilder& props)
+{
+    props.add (new ChoicePropertyComponent (recommendedWarningsValue, "Add Recommended Compiler Warning Flags",
+                                            { "Enabled", "Disabled" },
+                                            { "LLVM", "" }),
+               "Enable this to add a set of recommended compiler warning flags.");
+    recommendedWarningsValue.setDefault ("");
+}
+
+StringArray ProjectExporter::BuildConfiguration::getRecommendedCompilerWarningFlags() const
+{
+    auto label = recommendedWarningsValue.get().toString();
+    auto it = recommendedCompilerWarningFlags.find (label);
+
+    if (it != recommendedCompilerWarningFlags.end())
+        return it->second;
+
+    return {};
 }
 
 void ProjectExporter::BuildConfiguration::createPropertyEditors (PropertyListBuilder& props)

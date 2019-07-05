@@ -280,7 +280,7 @@ struct PushNotifications::Pimpl
 
             auto notificationManager = getNotificationManager();
 
-            if (notificationManager.get() != 0)
+            if (notificationManager.get() != nullptr)
                 return env->CallBooleanMethod (notificationManager, NotificationManagerApi24.areNotificationsEnabled);
         }
 
@@ -297,7 +297,7 @@ struct PushNotifications::Pimpl
 
         auto notificationManager = getNotificationManager();
 
-        if (notificationManager.get() != 0)
+        if (notificationManager.get() != nullptr)
         {
             auto notification = juceNotificationToJavaNotification (n);
 
@@ -317,10 +317,9 @@ struct PushNotifications::Pimpl
             Array<PushNotifications::Notification> notifications;
 
             auto notificationManager = getNotificationManager();
+            jassert (notificationManager != nullptr);
 
-            jassert (notificationManager.get() != 0);
-
-            if (notificationManager.get() != 0)
+            if (notificationManager.get() != nullptr)
             {
                 auto statusBarNotifications = LocalRef<jobjectArray> ((jobjectArray)env->CallObjectMethod (notificationManager,
                                                                                                            NotificationManagerApi23.getActiveNotifications));
@@ -389,7 +388,7 @@ struct PushNotifications::Pimpl
             auto remoteInputResult = LocalRef<jobject> (env->CallStaticObjectMethod (RemoteInput, RemoteInput.getResultsFromIntent, intent.get()));
             String responseString;
 
-            if (remoteInputResult.get() != 0)
+            if (remoteInputResult.get() == nullptr)
             {
                 auto charSequence      = LocalRef<jobject> (env->CallObjectMethod (remoteInputResult, AndroidBundle.getCharSequence, resultKeyString.get()));
                 auto responseStringRef = LocalRef<jstring> ((jstring) env->CallObjectMethod (charSequence, JavaCharSequence.toString));
@@ -416,7 +415,7 @@ struct PushNotifications::Pimpl
 
         auto notificationManager = getNotificationManager();
 
-        if (notificationManager.get() != 0)
+        if (notificationManager.get() != nullptr)
             env->CallVoidMethod (notificationManager.get(), NotificationManagerBase.cancelAll);
     }
 
@@ -426,7 +425,7 @@ struct PushNotifications::Pimpl
 
         auto notificationManager = getNotificationManager();
 
-        if (notificationManager.get() != 0)
+        if (notificationManager.get() != nullptr)
         {
             auto tag = javaString (identifier);
             const int id = 0;
@@ -635,12 +634,12 @@ struct PushNotifications::Pimpl
         LocalRef<jobject> context (getMainActivity());
 
         jclass builderClass = env->FindClass ("android/app/Notification$Builder");
-        jassert (builderClass != 0);
+        jassert (builderClass != nullptr);
 
-        if (builderClass == 0)
-            return LocalRef<jobject> (0);
+        if (builderClass == nullptr)
+            return LocalRef<jobject> (nullptr);
 
-        jmethodID builderConstructor = 0;
+        jmethodID builderConstructor = nullptr;
 
         const bool apiAtLeast26 = (getAndroidSDKVersion() >= 26);
 
@@ -649,10 +648,10 @@ struct PushNotifications::Pimpl
         else
             builderConstructor = env->GetMethodID (builderClass, "<init>", "(Landroid/content/Context;)V");
 
-        jassert (builderConstructor != 0);
+        jassert (builderConstructor != nullptr);
 
-        if (builderConstructor == 0)
-            return LocalRef<jobject> (0);
+        if (builderConstructor == nullptr)
+            return LocalRef<jobject> (nullptr);
 
         if (apiAtLeast26)
             return LocalRef<jobject> (env->NewObject (builderClass, builderConstructor,
@@ -754,7 +753,7 @@ struct PushNotifications::Pimpl
         {
             auto array = LocalRef<jlongArray> (env->NewLongArray (size));
 
-            jlong* elements = env->GetLongArrayElements (array, 0);
+            jlong* elements = env->GetLongArrayElements (array, nullptr);
 
             for (int i = 0; i < size; ++i)
                 elements[i] = (jlong) n.vibrationPattern[i];
@@ -808,7 +807,7 @@ struct PushNotifications::Pimpl
             {
                 auto array = LocalRef<jlongArray> (env->NewLongArray (size));
 
-                jlong* elements = env->GetLongArrayElements (array, 0);
+                jlong* elements = env->GetLongArrayElements (array, nullptr);
 
                 for (int i = 0; i < size; ++i)
                     elements[i] = (jlong) n.vibrationPattern[i];
@@ -993,7 +992,7 @@ struct PushNotifications::Pimpl
 
                         const int size = action.allowedResponses.size();
 
-                        auto array = LocalRef<jobjectArray> (env->NewObjectArray (size, env->FindClass ("java/lang/String"), 0));
+                        auto array = LocalRef<jobjectArray> (env->NewObjectArray (size, env->FindClass ("java/lang/String"), nullptr));
 
                         for (int i = 0; i < size; ++i)
                         {
@@ -1123,7 +1122,7 @@ struct PushNotifications::Pimpl
 
         PushNotifications::Notification n;
 
-        if (bundle.get() != 0)
+        if (bundle.get() != nullptr)
         {
             n.identifier  = getStringFromBundle (env, "identifier", bundle);
             n.title       = getStringFromBundle (env, "title", bundle);
@@ -1239,7 +1238,7 @@ struct PushNotifications::Pimpl
 
             const int size = env->GetArrayLength (array.get());
 
-            jlong* elements = env->GetLongArrayElements (array.get(), 0);
+            jlong* elements = env->GetLongArrayElements (array.get(), nullptr);
 
             Array<int> resultArray;
 
@@ -1280,7 +1279,7 @@ struct PushNotifications::Pimpl
 
     static var bundleToVar (const LocalRef<jobject>& bundle)
     {
-        if (bundle.get() != 0)
+        if (bundle.get() == nullptr)
         {
             auto* env = getEnv();
 
@@ -1400,7 +1399,7 @@ struct PushNotifications::Pimpl
             propertiesDynamicObject->setProperty ("titleLocalizationKey",  juceString (titleLocalizationKey.get()));
             propertiesDynamicObject->setProperty ("bodyLocalizationArgs",  javaStringArrayToJuce (bodyLocalizationArgs));
             propertiesDynamicObject->setProperty ("titleLocalizationArgs", javaStringArrayToJuce (titleLocalizationArgs));
-            propertiesDynamicObject->setProperty ("link",                  link.get() != 0 ? juceString ((jstring) env->CallObjectMethod (link, AndroidUri.toString)) : String());
+            propertiesDynamicObject->setProperty ("link",                  link.get() == nullptr ? juceString ((jstring) env->CallObjectMethod (link, AndroidUri.toString)) : String());
         }
 
         n.properties = var (propertiesDynamicObject.get());
@@ -1418,9 +1417,9 @@ struct PushNotifications::Pimpl
 
         auto notificationManager = getNotificationManager();
 
-        jassert (notificationManager.get() != 0);
+        jassert (notificationManager.get() != nullptr);
 
-        if (notificationManager.get() == 0)
+        if (notificationManager.get() == nullptr)
             return;
 
         for (const auto& g : groups)
@@ -1463,7 +1462,7 @@ struct PushNotifications::Pimpl
             if (size > 0)
             {
                 auto array = LocalRef<jlongArray> (env->NewLongArray (size));
-                jlong* elements = env->GetLongArrayElements (array, 0);
+                jlong* elements = env->GetLongArrayElements (array, nullptr);
 
                 for (int i = 0; i < size; ++i)
                     elements[i] = (jlong) c.vibrationPattern[i];
@@ -1527,7 +1526,7 @@ struct PushNotifications::Pimpl
 
         auto categories = LocalRef<jobject> (env->CallObjectMethod (intent, AndroidIntent.getCategories));
 
-        int categoriesNum = categories != 0
+        int categoriesNum = categories != nullptr
                           ? env->CallIntMethod (categories, JavaSet.size)
                           : 0;
 
@@ -1542,7 +1541,7 @@ struct PushNotifications::Pimpl
 
         auto extras = LocalRef<jobject> (env->CallObjectMethod (intent, AndroidIntent.getExtras));
 
-        if (extras == 0)
+        if (extras == nullptr)
             return false;
 
         return env->CallBooleanMethod (extras, AndroidBundle.containsKey, javaString ("google.sent_time").get())

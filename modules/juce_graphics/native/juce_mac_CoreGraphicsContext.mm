@@ -63,11 +63,11 @@ public:
         CGContextRelease (context);
     }
 
-    LowLevelGraphicsContext* createLowLevelContext() override
+    std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
     {
         freeCachedImageRef();
         sendDataChangeMessage();
-        return new CoreGraphicsContext (context, height, 1.0f);
+        return std::make_unique<CoreGraphicsContext> (context, height, 1.0f);
     }
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
@@ -91,7 +91,7 @@ public:
         return *im;
     }
 
-    ImageType* createType() const override    { return new NativeImageType(); }
+    std::unique_ptr<ImageType> createType() const override    { return std::make_unique<NativeImageType>(); }
 
     //==============================================================================
     static CGImageRef getCachedImageRef (const Image& juceImage, CGColorSpaceRef colourSpace)
@@ -639,9 +639,10 @@ void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& tra
 {
     if (state->fontRef != nullptr && state->fillType.isColour())
     {
-       #if JUCE_CLANG
+       #if JUCE_CLANG && ! (defined (MAC_OS_X_VERSION_10_16) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_16)
         #pragma clang diagnostic push
         #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        #define JUCE_DEPRECATION_IGNORED 1
        #endif
 
         if (transform.isOnlyTranslation())
@@ -668,8 +669,9 @@ void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& tra
             CGContextRestoreGState (context);
         }
 
-       #if JUCE_CLANG
+       #if JUCE_DEPRECATION_IGNORED
         #pragma clang diagnostic pop
+        #undef JUCE_DEPRECATION_IGNORED
        #endif
     }
     else

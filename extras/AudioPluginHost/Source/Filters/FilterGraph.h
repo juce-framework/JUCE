@@ -64,8 +64,8 @@ public:
     void audioProcessorChanged (AudioProcessor*) override { changed(); }
 
     //==============================================================================
-    XmlElement* createXml() const;
-    void restoreFromXml (const XmlElement& xml);
+    std::unique_ptr<XmlElement> createXml() const;
+    void restoreFromXml (const XmlElement&);
 
     static const char* getFilenameSuffix()      { return ".filtergraph"; }
     static const char* getFilenameWildcard()    { return "*.filtergraph"; }
@@ -91,8 +91,8 @@ private:
     NodeID lastUID;
     NodeID getNextUID() noexcept;
 
-    void createNodeFromXml (const XmlElement& xml);
-    void addFilterCallback (AudioPluginInstance*, const String& error, Point<double>);
+    void createNodeFromXml (const XmlElement&);
+    void addPluginCallback (std::unique_ptr<AudioPluginInstance>, const String& error, Point<double>);
     void changeListenerCallback (ChangeBroadcaster*) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilterGraph)

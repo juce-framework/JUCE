@@ -309,7 +309,7 @@ private:
 
        #if JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
         // studio one doesn't like negative parameters
-        paramHash &= ~(1 << (sizeof (Vst::ParamID) * 8 - 1));
+        paramHash &= ~(((Vst::ParamID) 1) << (sizeof (Vst::ParamID) * 8 - 1));
        #endif
 
         return paramHash;
@@ -454,7 +454,7 @@ public:
             valueNormalized = info.defaultNormalizedValue;
         }
 
-        virtual ~Param() {}
+        virtual ~Param() override = default;
 
         bool setNormalized (Vst::ParamValue v) override
         {
@@ -537,7 +537,7 @@ public:
             info.flags = Vst::ParameterInfo::kIsProgramChange | Vst::ParameterInfo::kCanAutomate;
         }
 
-        virtual ~ProgramChangeParameter() {}
+        virtual ~ProgramChangeParameter() override = default;
 
         bool setNormalized (Vst::ParamValue v) override
         {
@@ -558,7 +558,7 @@ public:
 
         void toString (Vst::ParamValue value, Vst::String128 result) const override
         {
-            toString128 (result, owner.getProgramName (static_cast<int> (value * info.stepCount)));
+            toString128 (result, owner.getProgramName (roundToInt (value * info.stepCount)));
         }
 
         bool fromString (const Vst::TChar* text, Vst::ParamValue& outValueNormalized) const override
@@ -958,7 +958,7 @@ private:
                 {
                     auto vstParamID = audioProcessor->getVSTParamIDForIndex (i);
                     auto* juceParam = audioProcessor->getParamForVSTParamID (vstParamID);
-                    auto* parameterGroup = pluginInstance->parameterTree.getGroupsForParameter (juceParam).getLast();
+                    auto* parameterGroup = pluginInstance->getParameterTree().getGroupsForParameter (juceParam).getLast();
                     auto unitID = JuceAudioProcessor::getUnitID (parameterGroup);
 
                     parameters.addParameter (new Param (*this, *juceParam, vstParamID, unitID,
@@ -991,7 +991,7 @@ private:
                 parameterToMidiController[p].ctrlNumber = i;
 
                 parameters.addParameter (new Vst::Parameter (toString ("MIDI CC " + String (c) + "|" + String (i)),
-                                         static_cast<Vst::ParamID> (p) + parameterToMidiControllerOffset, 0, 0, 0,
+                                         static_cast<Vst::ParamID> (p) + parameterToMidiControllerOffset, nullptr, 0, 0,
                                          0, Vst::kRootUnitId));
             }
         }
@@ -1267,8 +1267,9 @@ private:
         tresult PLUGIN_API setContentScaleFactor (Steinberg::IPlugViewContentScaleSupport::ScaleFactor factor) override
         {
            #if ! JUCE_MAC
-            // Cubase 10 doesn't support non-integer scale factors...
-            if (getHostType().type == PluginHostType::SteinbergCubase10)
+            auto hostType = getHostType().type;
+
+            if (hostType == PluginHostType::SteinbergCubase10 || hostType == PluginHostType::FruityLoops)
             {
                 if (component.get() != nullptr)
                     if (auto* peer = component->getPeer())
@@ -1341,7 +1342,7 @@ private:
                 ignoreUnused (fakeMouseGenerator);
             }
 
-            ~ContentWrapperComponent()
+            ~ContentWrapperComponent() override
             {
                 if (pluginEditor != nullptr)
                 {
@@ -1495,8 +1496,9 @@ private:
 
             void handleAsyncUpdate() override
             {
-                if (auto* peer = owner.component->getPeer())
-                    peer->updateBounds();
+                if (owner.component != nullptr)
+                    if (auto* peer = owner.component->getPeer())
+                        peer->updateBounds();
             }
 
             JuceVST3Editor& owner;
@@ -1571,7 +1573,7 @@ public:
         pluginInstance->setPlayHead (this);
     }
 
-    ~JuceVST3Component()
+    ~JuceVST3Component() override
     {
         if (juceVST3EditController != nullptr)
             juceVST3EditController->vst3IsPlaying = 0;
@@ -2726,6 +2728,8 @@ private:
     }
 
     //==============================================================================
+    ScopedJuceInitialiser_GUI libraryInitialiser;
+
     Atomic<int> refCount { 1 };
 
     AudioProcessor* pluginInstance;
@@ -2760,7 +2764,6 @@ private:
     bool isMidiOutputBusEnabled = false;
    #endif
 
-    ScopedJuceInitialiser_GUI libraryInitialiser;
     static const char* kJucePrivateDataIdentifier;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVST3Component)

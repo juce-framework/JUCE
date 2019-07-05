@@ -1,1 +1,2 @@
+rootProject.name = 'AudioPluginHost'
 include ':app'

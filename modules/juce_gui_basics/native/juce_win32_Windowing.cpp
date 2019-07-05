@@ -404,6 +404,9 @@ static void setDPIAwareness()
             return;
     }
 
+    if (! JUCEApplicationBase::isStandaloneApp())
+        return;
+
     // fallback for pre Windows 8.1 - equivalent to Process_System_DPI_Aware
     setProcessDPIAware = (SetProcessDPIAwareFunc) getUser32Function ("SetProcessDPIAware");
 
@@ -763,12 +766,12 @@ public:
         DeleteObject (hBitmap);
     }
 
-    ImageType* createType() const override                       { return new NativeImageType(); }
+    std::unique_ptr<ImageType> createType() const override    { return std::make_unique<NativeImageType>(); }
 
-    LowLevelGraphicsContext* createLowLevelContext() override
+    std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
     {
         sendDataChangeMessage();
-        return new LowLevelGraphicsSoftwareRenderer (Image (this));
+        return std::make_unique<LowLevelGraphicsSoftwareRenderer> (Image (this));
     }
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
@@ -1412,6 +1415,8 @@ public:
 
     Point<float> localToGlobal (Point<float> relativePosition) override  { return relativePosition + getScreenPosition().toFloat(); }
     Point<float> globalToLocal (Point<float> screenPosition) override    { return screenPosition   - getScreenPosition().toFloat(); }
+    using ComponentPeer::localToGlobal;
+    using ComponentPeer::globalToLocal;
 
     void setAlpha (float newAlpha) override
     {
@@ -2441,8 +2446,8 @@ private:
                         offscreenImage.clear (i);
 
                 {
-                    std::unique_ptr<LowLevelGraphicsContext> context (component.getLookAndFeel()
-                                                                        .createGraphicsContext (offscreenImage, Point<int> (-x, -y), contextClip));
+                    auto context = component.getLookAndFeel()
+                                    .createGraphicsContext (offscreenImage, { -x, -y }, contextClip);
 
                     context->addTransform (AffineTransform::scale ((float) getPlatformScaleFactor()));
                     handlePaint (*context);
@@ -4076,6 +4081,9 @@ JUCE_API bool shouldScaleGLWindow (void* hwnd)
 #if JUCE_WIN_PER_MONITOR_DPI_AWARE
  JUCE_API void setProcessDPIAwarenessIfNecessary (void* hwnd)
  {
+     if (getProcessDPIAwareness == nullptr)
+         return;
+
      DPI_Awareness context;
      getProcessDPIAwareness (0, &context);
 
@@ -4451,7 +4459,7 @@ void Desktop::allowedOrientationsChanged() {}
 //==============================================================================
 static const Displays::Display* getCurrentDisplayFromScaleFactor (HWND hwnd)
 {
-    Array<Displays::Display*> candidateDisplays;
+    Array<const Displays::Display*> candidateDisplays;
     double scaleToLookFor = -1.0;
 
     if (auto* peer = HWNDComponentPeer::getOwnerOfWindow (hwnd))
@@ -4477,7 +4485,7 @@ static const Displays::Display* getCurrentDisplayFromScaleFactor (HWND hwnd)
         else
             bounds = Desktop::getInstance().getDisplays().physicalToLogical (rectangleFromRECT (getWindowRect (hwnd)));
 
-        Displays::Display* retVal = nullptr;
+        const Displays::Display* retVal = nullptr;
         int maxArea = -1;
 
         for (auto* d : candidateDisplays)

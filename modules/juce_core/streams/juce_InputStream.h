@@ -77,6 +77,8 @@ public:
     */
     virtual int read (void* destBuffer, int maxBytesToRead) = 0;
 
+    ssize_t read (void* destBuffer, size_t maxBytesToRead);
+
     /** Reads a byte from the stream.
         If the stream is exhausted, this will return zero.
         @see OutputStream::writeByte

@@ -31,18 +31,18 @@ template <typename JavaType>
 class LocalRef
 {
 public:
-    explicit inline LocalRef() noexcept                 : obj (0) {}
+    explicit inline LocalRef() noexcept                 : obj (nullptr) {}
     explicit inline LocalRef (JavaType o) noexcept      : obj (o) {}
     inline LocalRef (const LocalRef& other) noexcept    : obj (retain (other.obj)) {}
-    inline LocalRef (LocalRef&& other) noexcept         : obj (0) { std::swap (obj, other.obj); }
+    inline LocalRef (LocalRef&& other) noexcept         : obj (nullptr) { std::swap (obj, other.obj); }
     ~LocalRef()                                         { clear(); }
 
     void clear()
     {
-        if (obj != 0)
+        if (obj != nullptr)
         {
             getEnv()->DeleteLocalRef (obj);
-            obj = 0;
+            obj = nullptr;
         }
     }
 
@@ -69,7 +69,7 @@ private:
 
     static JavaType retain (JavaType obj)
     {
-        return obj == 0 ? 0 : (JavaType) getEnv()->NewLocalRef (obj);
+        return obj == nullptr ? nullptr : (JavaType) getEnv()->NewLocalRef (obj);
     }
 };
 
@@ -77,21 +77,21 @@ private:
 class GlobalRef
 {
 public:
-    inline GlobalRef() noexcept                             : obj (0) {}
+    inline GlobalRef() noexcept                             : obj (nullptr) {}
     inline explicit GlobalRef (const LocalRef<jobject>& o)  : obj (retain (o.get(), getEnv())) {}
     inline explicit GlobalRef (const LocalRef<jobject>& o, JNIEnv* env)  : obj (retain (o.get(), env)) {}
     inline GlobalRef (const GlobalRef& other)           : obj (retain (other.obj, getEnv())) {}
-    inline GlobalRef (GlobalRef && other) noexcept      : obj (0) { std::swap (other.obj, obj); }
+    inline GlobalRef (GlobalRef && other) noexcept      : obj (nullptr) { std::swap (other.obj, obj); }
     ~GlobalRef()                                             { clear(); }
 
 
-    inline void clear()                                 { if (obj != 0) clear (getEnv()); }
+    inline void clear()                                 { if (obj != nullptr) clear (getEnv()); }
     inline void clear (JNIEnv* env)
     {
-        if (obj != 0)
+        if (obj != nullptr)
         {
             env->DeleteGlobalRef (obj);
-            obj = 0;
+            obj = nullptr;
         }
     }
 
@@ -147,11 +147,11 @@ public:
 
 private:
     //==============================================================================
-    jobject obj = 0;
+    jobject obj = nullptr;
 
     static inline jobject retain (jobject obj, JNIEnv* env)
     {
-        return obj == 0 ? 0 : env->NewGlobalRef (obj);
+        return obj == nullptr ? nullptr : env->NewGlobalRef (obj);
     }
 };
 
@@ -193,7 +193,7 @@ private:
     size_t byteCodeSize;
 
     int minSDK;
-    jclass classRef = 0;
+    jclass classRef = nullptr;
 
     static Array<JNIClassBase*>& getClasses();
     void initialise (JNIEnv*);
@@ -755,7 +755,7 @@ namespace
 {
     inline String juceString (JNIEnv* env, jstring s)
     {
-        if (s == 0)
+        if (s == nullptr)
             return {};
 
         const char* const utf8 = env->GetStringUTFChars (s, nullptr);
@@ -889,7 +889,7 @@ private:
 //==============================================================================
 struct SurfaceHolderCallback    : AndroidInterfaceImplementer
 {
-    virtual ~SurfaceHolderCallback() {}
+    virtual ~SurfaceHolderCallback() override = default;
 
     virtual void surfaceChanged (LocalRef<jobject> holder, int format, int width, int height) = 0;
     virtual void surfaceCreated (LocalRef<jobject> holder) = 0;

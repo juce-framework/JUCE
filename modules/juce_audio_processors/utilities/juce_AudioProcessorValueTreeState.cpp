@@ -276,6 +276,9 @@ RangedAudioParameter* AudioProcessorValueTreeState::createAndAddParameter (const
 
 RangedAudioParameter* AudioProcessorValueTreeState::createAndAddParameter (std::unique_ptr<RangedAudioParameter> param)
 {
+    if (param == nullptr)
+        return nullptr;
+
     // All parameters must be created before giving this manager a ValueTree state!
     jassert (! state.isValid());
 
@@ -854,6 +857,7 @@ private:
         void prepareToPlay (double, int) override {}
         void releaseResources() override {}
         void processBlock (AudioBuffer<float>&, MidiBuffer&) override {}
+        using AudioProcessor::processBlock;
         double getTailLengthSeconds() const override { return {}; }
         bool acceptsMidi() const override { return {}; }
         bool producesMidi() const override { return {}; }

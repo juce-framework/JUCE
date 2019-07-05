@@ -82,7 +82,7 @@ public:
         setSize (500, 500);
     }
 
-    ~UnitTestsDemo()
+    ~UnitTestsDemo() override
     {
         stopTest();
     }

@@ -45,9 +45,9 @@ DrawableImage::~DrawableImage()
 {
 }
 
-Drawable* DrawableImage::createCopy() const
+std::unique_ptr<Drawable> DrawableImage::createCopy() const
 {
-    return new DrawableImage (*this);
+    return std::make_unique<DrawableImage> (*this);
 }
 
 //==============================================================================

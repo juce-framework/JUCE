@@ -164,7 +164,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE (AsyncFunctionCallback)
 };
 
-void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* const func, void* const parameter)
+void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* func, void* parameter)
 {
     if (isThisTheMessageThread())
         return func (parameter);
@@ -182,6 +182,18 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* cons
 
     jassertfalse; // the OS message queue failed to send the message!
     return nullptr;
+}
+
+void MessageManager::callAsync (std::function<void()> fn)
+{
+    struct AsyncCallInvoker  : public MessageBase
+    {
+        AsyncCallInvoker (std::function<void()> f) : callback (std::move (f)) { post(); }
+        void messageCallback() override  { callback(); }
+        std::function<void()> callback;
+    };
+
+    new AsyncCallInvoker (std::move (fn));
 }
 
 //==============================================================================

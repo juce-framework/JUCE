@@ -41,9 +41,9 @@ public:
         constant for its lifetime.
     */
     RangedAudioParameter (const String& parameterID,
-                          const String& name,
-                          const String& label = {},
-                          Category category = AudioProcessorParameter::genericParameter);
+                          const String& parameterName,
+                          const String& parameterLabel = {},
+                          Category parameterCategory = AudioProcessorParameter::genericParameter);
 
     /** Returns the range of values that the parameter can take. */
     virtual const NormalisableRange<float>& getNormalisableRange() const = 0;

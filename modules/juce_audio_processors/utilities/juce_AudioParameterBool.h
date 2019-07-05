@@ -40,9 +40,9 @@ public:
     /** Creates a AudioParameterBool with the specified parameters.
 
         @param parameterID         The parameter ID to use
-        @param name                The parameter name to use
+        @param parameterName       The parameter name to use
         @param defaultValue        The default value
-        @param label               An optional label for the parameter's value
+        @param parameterLabel      An optional label for the parameter's value
         @param stringFromBool      An optional lambda function that converts a bool
                                    value to a string with a maximum length. This may
                                    be used by hosts to display the parameter's value.
@@ -50,8 +50,8 @@ public:
                                    converts it into a bool value. Some hosts use this
                                    to allow users to type in parameter values.
     */
-    AudioParameterBool (const String& parameterID, const String& name, bool defaultValue,
-                        const String& label = String(),
+    AudioParameterBool (const String& parameterID, const String& parameterName, bool defaultValue,
+                        const String& parameterLabel = String(),
                         std::function<String(bool value, int maximumStringLength)> stringFromBool = nullptr,
                         std::function<bool(const String& text)> boolFromString = nullptr);
 

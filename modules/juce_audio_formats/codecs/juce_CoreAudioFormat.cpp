@@ -475,7 +475,7 @@ public:
         while (numSamples > 0)
         {
             auto numThisTime = jmin (8192, numSamples);
-            auto numBytes = sizeof (float) * (size_t) numThisTime;
+            auto numBytes = (size_t) numThisTime * sizeof (float);
 
             audioDataBlock.ensureSize (numBytes * numChannels, false);
             auto* data = static_cast<float*> (audioDataBlock.getData());

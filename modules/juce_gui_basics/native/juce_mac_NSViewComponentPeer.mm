@@ -121,7 +121,6 @@ public:
                 setAlwaysOnTop (true);
 
             [window setContentView: view];
-            [window setAutodisplay: YES];
             [window setAcceptsMouseMovedEvents: YES];
 
             // We'll both retain and also release this on closing because plugin hosts can unexpectedly
@@ -317,10 +316,14 @@ public:
         return relativePosition + getBounds (true).getPosition().toFloat();
     }
 
+    using ComponentPeer::localToGlobal;
+
     Point<float> globalToLocal (Point<float> screenPosition) override
     {
         return screenPosition - getBounds (true).getPosition().toFloat();
     }
+
+    using ComponentPeer::globalToLocal;
 
     void setAlpha (float newAlpha) override
     {
@@ -804,7 +807,7 @@ public:
         if (r.size.width < 1.0f || r.size.height < 1.0f)
             return;
 
-        auto cg = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
+        auto cg = (CGContextRef) [[NSGraphicsContext currentContext] CGContext];
 
         if (! component.isOpaque())
             CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
@@ -876,8 +879,8 @@ public:
                     if (intScale != 1)
                         clip.scaleAll (intScale);
 
-                    std::unique_ptr<LowLevelGraphicsContext> context (component.getLookAndFeel()
-                                                                        .createGraphicsContext (temp, offset * intScale, clip));
+                    auto context = component.getLookAndFeel()
+                                     .createGraphicsContext (temp, offset * intScale, clip);
 
                     if (intScale != 1)
                         context->addTransform (AffineTransform::scale (displayScale));
@@ -1241,7 +1244,7 @@ public:
 
     static NSArray* getSupportedDragTypes()
     {
-        return [NSArray arrayWithObjects: NSFilenamesPboardType, NSFilesPromisePboardType, NSStringPboardType, nil];
+        return [NSArray arrayWithObjects: (NSString*) kUTTypeFileURL, (NSString*) kPasteboardTypeFileURLPromise, NSPasteboardTypeString, nil];
     }
 
     BOOL sendDragCallback (const int type, id <NSDraggingInfo> sender)
@@ -1256,8 +1259,8 @@ public:
         ComponentPeer::DragInfo dragInfo;
         dragInfo.position.setXY ((int) p.x, (int) ([view frame].size.height - p.y));
 
-        if (contentType == NSStringPboardType)
-            dragInfo.text = nsStringToJuce ([pasteboard stringForType: NSStringPboardType]);
+        if (contentType == NSPasteboardTypeString)
+            dragInfo.text = nsStringToJuce ([pasteboard stringForType: NSPasteboardTypeString]);
         else
             dragInfo.files = getDroppedFiles (pasteboard, contentType);
 
@@ -1280,7 +1283,7 @@ public:
         StringArray files;
         NSString* iTunesPasteboardType = nsStringLiteral ("CorePasteboardFlavorType 0x6974756E"); // 'itun'
 
-        if (contentType == NSFilesPromisePboardType
+        if ([contentType isEqualToString: (NSString*) kPasteboardTypeFileURLPromise]
              && [[pasteboard types] containsObject: iTunesPasteboardType])
         {
             id list = [pasteboard propertyListForType: iTunesPasteboardType];
@@ -1306,14 +1309,14 @@ public:
         }
         else
         {
-            id list = [pasteboard propertyListForType: NSFilenamesPboardType];
+            NSArray* items = [pasteboard readObjectsForClasses:@[[NSURL class]] options: nil];
 
-            if ([list isKindOfClass: [NSArray class]])
+            for (unsigned int i = 0; i < [items count]; ++i)
             {
-                NSArray* items = (NSArray*) [pasteboard propertyListForType: NSFilenamesPboardType];
+                NSURL* url = [items objectAtIndex: i];
 
-                for (unsigned int i = 0; i < [items count]; ++i)
-                    files.add (nsStringToJuce ((NSString*) [items objectAtIndex: i]));
+                if ([url isFileURL])
+                    files.add (nsStringToJuce ([url path]));
             }
         }
 
@@ -1361,6 +1364,17 @@ public:
     }
 
     void textInputRequired (Point<int>, TextInputTarget&) override {}
+
+    void resetWindowPresentation()
+    {
+        if (hasNativeTitleBar())
+        {
+            [window setStyleMask: (NSViewComponentPeer::getNSWindowStyleMask (getStyleFlags()))];
+            setTitle (getComponent().getName()); // required to force the OS to update the title
+        }
+
+        [NSApp setPresentationOptions: NSApplicationPresentationDefault];
+    }
 
     //==============================================================================
     NSWindow* window = nil;
@@ -1911,6 +1925,7 @@ struct JuceNSWindowClass   : public ObjCClass<NSWindow>
         addMethod (@selector (constrainFrameRect:toScreen:),        constrainFrameRect,        @encode (NSRect), "@:",  @encode (NSRect), "@");
         addMethod (@selector (windowWillResize:toSize:),            windowWillResize,          @encode (NSSize), "@:@", @encode (NSSize));
         addMethod (@selector (windowDidExitFullScreen:),            windowDidExitFullScreen,   "v@:@");
+        addMethod (@selector (windowWillEnterFullScreen:),          windowWillEnterFullScreen, "v@:@");
         addMethod (@selector (zoom:),                               zoom,                      "v@:@");
         addMethod (@selector (windowWillMove:),                     windowWillMove,            "v@:@");
         addMethod (@selector (windowWillStartLiveResize:),          windowWillStartLiveResize, "v@:@");
@@ -1991,9 +2006,20 @@ private:
         return frameRect.size;
     }
 
-    static void windowDidExitFullScreen (id, SEL, NSNotification*)
+    static void windowDidExitFullScreen (id self, SEL, NSNotification*)
     {
-        [NSApp setPresentationOptions: NSApplicationPresentationDefault];
+        if (auto* owner = getOwner (self))
+            owner->resetWindowPresentation();
+    }
+
+    static void windowWillEnterFullScreen (id self, SEL, NSNotification*)
+    {
+        if (SystemStats::getOperatingSystemType() <= SystemStats::MacOSX_10_9)
+            return;
+
+        if (auto* owner = getOwner (self))
+            if (owner->hasNativeTitleBar() && (owner->getStyleFlags() & ComponentPeer::windowIsResizable) == 0)
+                [owner->window setStyleMask: NSWindowStyleMaskBorderless];
     }
 
     static void zoom (id self, SEL, id sender)
@@ -2126,13 +2152,7 @@ void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, boo
         }
         else
         {
-            if (peer->hasNativeTitleBar())
-            {
-                [peer->window setStyleMask: (NSViewComponentPeer::getNSWindowStyleMask (peer->getStyleFlags()))];
-                peer->setTitle (peer->getComponent().getName()); // required to force the OS to update the title
-            }
-
-            [NSApp setPresentationOptions: NSApplicationPresentationDefault];
+            peer->resetWindowPresentation();
         }
     }
 }

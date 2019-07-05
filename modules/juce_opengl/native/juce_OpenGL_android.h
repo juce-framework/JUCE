@@ -118,7 +118,7 @@ public:
         hasInitialised = true;
     }
 
-    ~NativeContext()
+    ~NativeContext() override
     {
         auto env = getEnv();
 
@@ -165,7 +165,7 @@ public:
         }
 
         // create the surface
-        surface = eglCreateWindowSurface (display, config, window, 0);
+        surface = eglCreateWindowSurface (display, config, window, nullptr);
         jassert (surface != EGL_NO_SURFACE);
 
         ANativeWindow_release (window);
@@ -317,7 +317,7 @@ private:
             return false;
         }
 
-        if (! eglInitialize (display, 0, 0))
+        if (! eglInitialize (display, nullptr, nullptr))
         {
             jassertfalse;
             return false;

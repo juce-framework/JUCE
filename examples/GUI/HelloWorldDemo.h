@@ -64,7 +64,7 @@ public:
         helloWorldLabel.setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
         addAndMakeVisible (quitButton);
-        quitButton.onClick = [this] { JUCEApplication::quit(); };
+        quitButton.onClick = [] { JUCEApplication::quit(); };
 
         setSize (600, 300);
     }

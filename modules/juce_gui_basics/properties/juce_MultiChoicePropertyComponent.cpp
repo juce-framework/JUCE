@@ -43,6 +43,12 @@ public:
     }
 };
 
+void updateButtonTickColour (ToggleButton* button, bool usingDefault)
+{
+    button->setColour (ToggleButton::tickColourId, button->getLookAndFeel().findColour (ToggleButton::tickColourId)
+                                                                              .withAlpha (usingDefault ? 0.4f : 1.0f));
+}
+
 //==============================================================================
 class MultiChoicePropertyComponent::MultiChoiceRemapperSource    : public Value::ValueSource,
                                                                    private Value::Listener
@@ -127,7 +133,7 @@ public:
         {
             if (arr->contains (varToControl))
             {
-                updateButtonTickColour();
+                updateButtonTickColour (buttonToControl, valueWithDefault->isUsingDefault());
                 return true;
             }
         }
@@ -187,14 +193,6 @@ public:
 private:
     //==============================================================================
     void valueChanged (Value&) override { sendChangeMessage (true); }
-
-    void updateButtonTickColour() const noexcept
-    {
-        auto alpha = valueWithDefault->isUsingDefault() ? 0.4f : 1.0f;
-        auto baseColour = buttonToControl->findColour (ToggleButton::tickColourId);
-
-        buttonToControl->setColour (ToggleButton::tickColourId, baseColour.withAlpha (alpha));
-    }
 
     //==============================================================================
     WeakReference<ValueWithDefault> valueWithDefault;
@@ -350,6 +348,14 @@ void MultiChoicePropertyComponent::lookAndFeelChanged()
 {
     auto iconColour = findColour (TextEditor::backgroundColourId).contrasting();
     expandButton.setColours (iconColour, iconColour.darker(), iconColour.darker());
+
+    if (valueWithDefault != nullptr)
+    {
+        auto usingDefault = valueWithDefault->isUsingDefault();
+
+        for (auto* button : choiceButtons)
+            updateButtonTickColour (button, usingDefault);
+    }
 }
 
 } // namespace juce

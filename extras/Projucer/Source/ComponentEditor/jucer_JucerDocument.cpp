@@ -322,9 +322,9 @@ void JucerDocument::addExtraClassProperties (PropertyPanel&)
 //==============================================================================
 const char* const JucerDocument::jucerCompXmlTag = "JUCER_COMPONENT";
 
-XmlElement* JucerDocument::createXml() const
+std::unique_ptr<XmlElement> JucerDocument::createXml() const
 {
-    XmlElement* doc = new XmlElement (jucerCompXmlTag);
+    auto doc = std::make_unique<XmlElement> (jucerCompXmlTag);
 
     doc->setAttribute ("documentType", getTypeName());
     doc->setAttribute ("className", className);
@@ -624,16 +624,14 @@ void JucerDocument::extractCustomPaintSnippetsFromCppFile (const String& cppCont
 std::unique_ptr<XmlElement> JucerDocument::pullMetaDataFromCppFile (const String& cpp)
 {
     auto lines = StringArray::fromLines (cpp);
-
-    const int startLine = indexOfLineStartingWith (lines, "BEGIN_JUCER_METADATA", 0);
+    auto startLine = indexOfLineStartingWith (lines, "BEGIN_JUCER_METADATA", 0);
 
     if (startLine > 0)
     {
-        const int endLine = indexOfLineStartingWith (lines, "END_JUCER_METADATA", startLine);
+        auto endLine = indexOfLineStartingWith (lines, "END_JUCER_METADATA", startLine);
 
         if (endLine > startLine)
-            return XmlDocument::parse (lines.joinIntoString ("\n", startLine + 1,
-                                                             endLine - startLine - 1));
+            return parseXML (lines.joinIntoString ("\n", startLine + 1, endLine - startLine - 1));
     }
 
     return nullptr;

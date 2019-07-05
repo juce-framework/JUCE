@@ -35,22 +35,11 @@ namespace juce
 
     @tags{Audio}
 */
-class JUCE_API  AudioPluginFormat
+class JUCE_API  AudioPluginFormat  : private MessageListener
 {
 public:
-    //==============================================================================
-    /** Structure used for callbacks when instantiation is completed. */
-    struct JUCE_API  InstantiationCompletionCallback
-    {
-        virtual ~InstantiationCompletionCallback() = default;
-        virtual void completionCallback (AudioPluginInstance* instance, const String& error) = 0;
-
-        JUCE_LEAK_DETECTOR (InstantiationCompletionCallback)
-    };
-
-    //==============================================================================
     /** Destructor. */
-    virtual ~AudioPluginFormat();
+    ~AudioPluginFormat() override;
 
     //==============================================================================
     /** Returns the format name.
@@ -73,32 +62,30 @@ public:
     /** Tries to recreate a type from a previously generated PluginDescription.
         @see AudioPluginFormatManager::createInstance
     */
-    AudioPluginInstance* createInstanceFromDescription (const PluginDescription&,
-                                                        double initialSampleRate,
-                                                        int initialBufferSize);
+    std::unique_ptr<AudioPluginInstance> createInstanceFromDescription (const PluginDescription&,
+                                                                        double initialSampleRate,
+                                                                        int initialBufferSize);
 
     /** Same as above but with the possibility of returning an error message.
-
         @see AudioPluginFormatManager::createInstance
     */
-    AudioPluginInstance* createInstanceFromDescription (const PluginDescription&,
-                                                        double initialSampleRate,
-                                                        int initialBufferSize,
-                                                        String& errorMessage);
+    std::unique_ptr<AudioPluginInstance> createInstanceFromDescription (const PluginDescription&,
+                                                                        double initialSampleRate,
+                                                                        int initialBufferSize,
+                                                                        String& errorMessage);
+
+    /** A callback lambda that is passed to createPluginInstanceAsync() */
+    using PluginCreationCallback = std::function<void(std::unique_ptr<AudioPluginInstance>, const String&)>;
 
     /** Tries to recreate a type from a previously generated PluginDescription.
-
-        @see AudioPluginFormatManager::createInstanceAsync
+        When the plugin has been created, it will be passed to the caller via an
+        asynchronous call to the PluginCreationCallback lambda that was provided.
+        @see AudioPluginFormatManager::createPluginInstanceAsync
      */
     void createPluginInstanceAsync (const PluginDescription& description,
                                     double initialSampleRate,
                                     int initialBufferSize,
-                                    InstantiationCompletionCallback* completionCallback);
-
-    void createPluginInstanceAsync (const PluginDescription& description,
-                                    double initialSampleRate,
-                                    int initialBufferSize,
-                                    std::function<void(AudioPluginInstance*, const String&)> completionCallback);
+                                    PluginCreationCallback);
 
     /** Should do a quick check to see if this file or directory might be a plugin of
         this format.
@@ -149,23 +136,19 @@ protected:
     //==============================================================================
     friend class AudioPluginFormatManager;
 
-    AudioPluginFormat() noexcept;
-
-    using PluginCreationCallback = void (*) (void*, AudioPluginInstance*, const String&);
+    AudioPluginFormat();
 
     /** Implementors must override this function. This is guaranteed to be called on
         the message thread. You may call the callback on any thread.
     */
     virtual void createPluginInstance (const PluginDescription&, double initialSampleRate,
-                                       int initialBufferSize, void* userData,
-                                       PluginCreationCallback) = 0;
+                                       int initialBufferSize, PluginCreationCallback) = 0;
 
     virtual bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept = 0;
 
 private:
-    /** @internal */
-    void createPluginInstanceOnMessageThread (const PluginDescription&, double rate, int size,
-                                              AudioPluginFormat::InstantiationCompletionCallback*);
+    struct AsyncCreateMessage;
+    void handleMessage (const Message&) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginFormat)
 };

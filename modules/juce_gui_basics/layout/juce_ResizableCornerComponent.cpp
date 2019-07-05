@@ -27,26 +27,23 @@
 namespace juce
 {
 
-ResizableCornerComponent::ResizableCornerComponent (Component* const componentToResize,
-                                                    ComponentBoundsConstrainer* const constrainer_)
+ResizableCornerComponent::ResizableCornerComponent (Component* componentToResize,
+                                                    ComponentBoundsConstrainer* boundsConstrainer)
    : component (componentToResize),
-     constrainer (constrainer_)
+     constrainer (boundsConstrainer)
 {
     setRepaintsOnMouseActivity (true);
     setMouseCursor (MouseCursor::BottomRightCornerResizeCursor);
 }
 
-ResizableCornerComponent::~ResizableCornerComponent()
-{
-}
+ResizableCornerComponent::~ResizableCornerComponent() = default;
 
 //==============================================================================
 void ResizableCornerComponent::paint (Graphics& g)
 {
-    getLookAndFeel()
-        .drawCornerResizer (g, getWidth(), getHeight(),
-                            isMouseOverOrDragging(),
-                            isMouseButtonDown());
+    getLookAndFeel().drawCornerResizer (g, getWidth(), getHeight(),
+                                        isMouseOverOrDragging(),
+                                        isMouseButtonDown());
 }
 
 void ResizableCornerComponent::mouseDown (const MouseEvent&)
@@ -71,20 +68,15 @@ void ResizableCornerComponent::mouseDrag (const MouseEvent& e)
         return;
     }
 
-    Rectangle<int> r (originalBounds.withSize (originalBounds.getWidth() + e.getDistanceFromDragStartX(),
-                                               originalBounds.getHeight() + e.getDistanceFromDragStartY()));
+    auto r = originalBounds.withSize (originalBounds.getWidth() + e.getDistanceFromDragStartX(),
+                                      originalBounds.getHeight() + e.getDistanceFromDragStartY());
 
     if (constrainer != nullptr)
-    {
         constrainer->setBoundsForComponent (component, r, false, false, true, true);
-    }
+    else if (auto pos = component->getPositioner())
+        pos->applyNewBounds (r);
     else
-    {
-        if (Component::Positioner* const pos = component->getPositioner())
-            pos->applyNewBounds (r);
-        else
-            component->setBounds (r);
-    }
+        component->setBounds (r);
 }
 
 void ResizableCornerComponent::mouseUp (const MouseEvent&)
@@ -98,8 +90,7 @@ bool ResizableCornerComponent::hitTest (int x, int y)
     if (getWidth() <= 0)
         return false;
 
-    const int yAtX = getHeight() - (getHeight() * x / getWidth());
-
+    auto yAtX = getHeight() - (getHeight() * x / getWidth());
     return y >= yAtX - getHeight() / 4;
 }
 

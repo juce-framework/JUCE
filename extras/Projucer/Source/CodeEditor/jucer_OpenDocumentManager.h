@@ -142,7 +142,7 @@ public:
     OpenDocumentManager::Document* getClosestPreviousDocOtherThan (OpenDocumentManager::Document* oneToAvoid) const;
 
     void restoreFromXML (Project& project, const XmlElement& xml);
-    XmlElement* createXML() const;
+    std::unique_ptr<XmlElement> createXML() const;
 
 private:
     bool documentAboutToClose (OpenDocumentManager::Document*);

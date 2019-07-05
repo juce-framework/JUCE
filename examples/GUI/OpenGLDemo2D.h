@@ -87,7 +87,7 @@ public:
         setSize (500, 500);
     }
 
-    ~OpenGLDemo2D()
+    ~OpenGLDemo2D() override
     {
         openGLContext.detach();
         shader.reset();

@@ -201,6 +201,8 @@ private:
                 if (auto* l = findParentComponentOfClass<LaunchClassOverlayComponent>())
                     l->launch();
             }
+
+            using Button::clicked;
         };
 
         void launch()
@@ -231,24 +233,31 @@ private:
 
         void timerCallback() override
         {
-            Array<ClassDatabase::Class*> newClasses;
+            Array<WeakReference<ClassDatabase::Class>> newClasses;
 
             if (childProcess != nullptr)
                 const_cast <ClassDatabase::ClassList&> (childProcess->getComponentList()).globalNamespace.findClassesDeclaredInFile (newClasses, file);
 
             for (int i = newClasses.size(); --i >= 0;)
-                if (! newClasses.getUnchecked(i)->getInstantiationFlags().canBeInstantiated())
+            {
+                auto& c = newClasses.getReference (i);
+
+                if (c == nullptr || ! c->getInstantiationFlags().canBeInstantiated())
                     newClasses.remove (i);
+            }
 
             if (newClasses != classes)
             {
                 classes = newClasses;
                 deleteOverlays();
 
-                for (auto& c : classes)
+                for (auto c : classes)
                 {
-                    CodeDocument::Position pos (owner.getDocument(), c->getClassDeclarationRange().range.getStart());
-                    overlays.add (new LaunchClassOverlayComponent (owner, pos, pos, c->getName()));
+                    if (c != nullptr)
+                    {
+                        CodeDocument::Position pos (owner.getDocument(), c->getClassDeclarationRange().range.getStart());
+                        overlays.add (new LaunchClassOverlayComponent (owner, pos, pos, c->getName()));
+                    }
                 }
             }
         }
@@ -264,7 +273,7 @@ private:
         GenericCodeEditorComponent& owner;
         CompileEngineChildProcess::Ptr childProcess;
         File file;
-        Array<ClassDatabase::Class*> classes;
+        Array<WeakReference<ClassDatabase::Class>> classes;
         Array<Component::SafePointer<Component>> overlays;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentClassList)
@@ -684,10 +693,10 @@ private:
 class LiveBuildCodeEditorDocument  : public SourceCodeDocument
 {
 public:
-    LiveBuildCodeEditorDocument (Project* project, const File& file)
-        : SourceCodeDocument (project, file)
+    LiveBuildCodeEditorDocument (Project* projectToUse, const File& file)
+        : SourceCodeDocument (projectToUse, file)
     {
-        if (project != nullptr)
+        if (projectToUse != nullptr)
             if (CompileEngineChildProcess::Ptr childProcess = getChildProcess())
                 childProcess->editorOpened (file, getCodeDocument());
     }

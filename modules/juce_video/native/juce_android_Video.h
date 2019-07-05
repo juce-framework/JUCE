@@ -375,7 +375,7 @@ struct VideoComponent::Pimpl
         }
     }
 
-    ~Pimpl()
+    ~Pimpl() override
     {
         auto* env = getEnv();
 
@@ -502,7 +502,7 @@ private:
             env->CallVoidMethod (nativeMediaSession, AndroidMediaSession.setCallback, mediaSessionCallback.get());
         }
 
-        ~MediaSession()
+        ~MediaSession() override
         {
             auto* env = getEnv();
 
@@ -1405,7 +1405,7 @@ private:
 
             auto playPos = player.getPlayPosition();
             auto durationMs = player.getVideoDuration();
-            int playPosPercent = 100 * playPos / static_cast<double> (durationMs);
+            auto playPosPercent = (int) (100.0 * playPos / static_cast<double> (durationMs));
 
             // NB: assuming the playback will start roughly when there is 5% of content loaded...
             return ! bufferedRegions.containsRange (Range<int> (playPosPercent, jmin (101, playPosPercent + 5)));
@@ -1456,7 +1456,7 @@ private:
 
             auto playPos = player.getPlayPosition();
             auto durationMs = player.getVideoDuration();
-            int playPosPercent = 100 * playPos / static_cast<double> (durationMs);
+            auto playPosPercent = (int) (100.0 * playPos / static_cast<double> (durationMs));
 
             bufferedRegions.addRange (Range<int> (playPosPercent, progress + 1));
 

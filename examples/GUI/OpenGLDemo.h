@@ -760,7 +760,7 @@ public:
         setSize (500, 500);
     }
 
-    ~OpenGLDemo()
+    ~OpenGLDemo() override
     {
         openGLContext.detach();
     }

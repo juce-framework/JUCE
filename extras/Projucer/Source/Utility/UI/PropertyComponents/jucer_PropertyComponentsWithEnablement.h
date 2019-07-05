@@ -62,9 +62,9 @@ public:
     ChoicePropertyComponentWithEnablement (ValueWithDefault& valueToControl,
                                            ValueWithDefault valueToListenTo,
                                            const String& propertyName,
-                                           const StringArray& choices,
+                                           const StringArray& choiceToUse,
                                            const Array<var>& correspondingValues)
-        : ChoicePropertyComponent (valueToControl, propertyName, choices, correspondingValues),
+        : ChoicePropertyComponent (valueToControl, propertyName, choiceToUse, correspondingValues),
           valueWithDefault (valueToListenTo),
           value (valueToListenTo.getPropertyAsValue())
     {
@@ -76,15 +76,26 @@ public:
                                            ValueWithDefault valueToListenTo,
                                            const Identifier& multiChoiceID,
                                            const String& propertyName,
-                                           const StringArray& choices,
+                                           const StringArray& choicesToUse,
                                            const Array<var>& correspondingValues)
-        : ChoicePropertyComponentWithEnablement (valueToControl, valueToListenTo, propertyName, choices, correspondingValues)
+        : ChoicePropertyComponentWithEnablement (valueToControl, valueToListenTo, propertyName, choicesToUse, correspondingValues)
     {
         jassert (valueToListenTo.get().getArray() != nullptr);
 
         isMultiChoice = true;
         idToCheck = multiChoiceID;
 
+        valueChanged (value);
+    }
+
+    ChoicePropertyComponentWithEnablement (ValueWithDefault& valueToControl,
+                                           ValueWithDefault valueToListenTo,
+                                           const String& propertyName)
+        : ChoicePropertyComponent (valueToControl, propertyName),
+          valueWithDefault (valueToListenTo),
+          value (valueToListenTo.getPropertyAsValue())
+    {
+        value.addListener (this);
         valueChanged (value);
     }
 

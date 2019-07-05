@@ -43,13 +43,13 @@ public:
         return frameBuffer.initialise (context, width, height);
     }
 
-    LowLevelGraphicsContext* createLowLevelContext() override
+    std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
     {
         sendDataChangeMessage();
         return createOpenGLGraphicsContext (context, frameBuffer);
     }
 
-    ImageType* createType() const override     { return new OpenGLImageType(); }
+    std::unique_ptr<ImageType> createType() const override     { return std::make_unique<OpenGLImageType>(); }
 
     ImagePixelData::Ptr clone() override
     {
@@ -104,7 +104,7 @@ private:
         static void verticalRowFlip (PixelARGB* const data, const int w, const int h)
         {
             HeapBlock<PixelARGB> tempRow (w);
-            auto rowSize = sizeof (PixelARGB) * (size_t) w;
+            auto rowSize = (size_t) w * sizeof (PixelARGB);
 
             for (int y = 0; y < h / 2; ++y)
             {
@@ -126,7 +126,7 @@ private:
         void write (const PixelARGB* const data) const noexcept
         {
             HeapBlock<PixelARGB> invertedCopy (area.getWidth() * area.getHeight());
-            auto rowSize = sizeof (PixelARGB) * (size_t) area.getWidth();
+            auto rowSize = (size_t) area.getWidth() * sizeof (PixelARGB);
 
             for (int y = 0; y < area.getHeight(); ++y)
                 memcpy (invertedCopy + area.getWidth() * y,

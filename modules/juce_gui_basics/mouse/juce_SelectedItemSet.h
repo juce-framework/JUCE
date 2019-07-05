@@ -274,10 +274,15 @@ public:
     const ItemArray& getItemArray() const noexcept              { return selectedItems; }
 
     /** Provides iterator access to the array of items. */
-    SelectableItemType* begin() const noexcept                  { return selectedItems.begin(); }
+    SelectableItemType* begin() noexcept                        { return selectedItems.begin(); }
+
+    const SelectableItemType* begin() const noexcept            { return selectedItems.begin(); }
 
     /** Provides iterator access to the array of items. */
-    SelectableItemType* end() const noexcept                    { return selectedItems.end(); }
+    SelectableItemType* end() noexcept                          { return selectedItems.end(); }
+
+    /** Provides iterator access to the array of items. */
+    const SelectableItemType* end() const noexcept              { return selectedItems.end(); }
 
     //==============================================================================
     /** Can be overridden to do special handling when an item is selected.

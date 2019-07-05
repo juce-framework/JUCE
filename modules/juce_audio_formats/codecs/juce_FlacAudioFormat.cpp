@@ -122,6 +122,13 @@ namespace FlacNamespace
   #endif
  #endif
 
+ #if JUCE_GCC
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+  #pragma GCC diagnostic ignored "-Wconversion"
+  #pragma GCC diagnostic ignored "-Wsign-conversion"
+ #endif
+
  #if JUCE_INTEL
   #if JUCE_32BIT
    #define FLAC__CPU_IA32 1
@@ -160,6 +167,10 @@ namespace FlacNamespace
 
  #if JUCE_CLANG
   #pragma clang diagnostic pop
+ #endif
+
+ #if JUCE_GCC
+  #pragma GCC diagnostic pop
  #endif
 }
 
@@ -240,7 +251,7 @@ public:
                     if (destSamples[i] != nullptr)
                         memcpy (destSamples[i] + startOffsetInDestBuffer,
                                 reservoir.getReadPointer (i, (int) (startSampleInFile - reservoirStart)),
-                                sizeof (int) * (size_t) num);
+                                (size_t) num * sizeof (int));
 
                 startOffsetInDestBuffer += num;
                 startSampleInFile += num;
@@ -277,7 +288,7 @@ public:
         {
             for (int i = numDestChannels; --i >= 0;)
                 if (destSamples[i] != nullptr)
-                    zeromem (destSamples[i] + startOffsetInDestBuffer, sizeof (int) * (size_t) numSamples);
+                    zeromem (destSamples[i] + startOffsetInDestBuffer, (size_t) numSamples * sizeof (int));
         }
 
         return true;

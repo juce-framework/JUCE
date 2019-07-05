@@ -44,10 +44,10 @@ class JUCE_API  PluginDescription
 {
 public:
     //==============================================================================
-    PluginDescription();
-    PluginDescription (const PluginDescription& other);
-    PluginDescription& operator= (const PluginDescription& other);
-    ~PluginDescription();
+    PluginDescription() = default;
+    PluginDescription (const PluginDescription& other) = default;
+
+    PluginDescription& operator= (const PluginDescription& other) = default;
 
     //==============================================================================
     /** The name of the plug-in. */
@@ -96,19 +96,19 @@ public:
 
         @see createIdentifierString
     */
-    int uid;
+    int uid = 0;
 
     /** True if the plug-in identifies itself as a synthesiser. */
-    bool isInstrument;
+    bool isInstrument = false;
 
     /** The number of inputs. */
-    int numInputChannels;
+    int numInputChannels = 0;
 
     /** The number of outputs. */
-    int numOutputChannels;
+    int numOutputChannels = 0;
 
     /** True if the plug-in is part of a multi-type container, e.g. a VST Shell. */
-    bool hasSharedContainer;
+    bool hasSharedContainer = false;
 
     /** Returns true if the two descriptions refer to the same plug-in.
 
@@ -140,7 +140,7 @@ public:
 
         @see loadFromXml
     */
-    XmlElement* createXml() const;
+    std::unique_ptr<XmlElement> createXml() const;
 
     /** Reloads the info in this structure from an XML record that was previously
         saved with createXML().

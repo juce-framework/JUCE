@@ -141,7 +141,7 @@ public:
         startThread (Random::getSystemRandom().nextInt (3) + 3);
     }
 
-    ~DemoThread()
+    ~DemoThread() override
     {
         // allow the thread 2 seconds to stop cleanly - should be plenty of time.
         stopThread (2000);
@@ -234,7 +234,7 @@ public:
         setSize (500, 500);
     }
 
-    ~MultithreadingDemo()
+    ~MultithreadingDemo() override
     {
         pool.removeAllJobs (true, 2000);
     }
@@ -335,7 +335,7 @@ private:
         m.addItem (1, "Use one thread per ball", true, ! isUsingPool);
         m.addItem (2, "Use a thread pool",       true,   isUsingPool);
 
-        m.showMenuAsync (PopupMenu::Options().withTargetComponent (&controlButton),
+        m.showMenuAsync (PopupMenu::Options().withTargetComponent (controlButton),
                          ModalCallbackFunction::forComponent (menuItemChosenCallback, this));
     }
 

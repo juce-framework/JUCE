@@ -50,7 +50,7 @@ public:
     AndroidViewComponent();
 
     /** Destructor. */
-    ~AndroidViewComponent();
+    ~AndroidViewComponent() override;
 
     /** Assigns a View to this peer.
 

@@ -74,6 +74,12 @@ namespace pnglibNamespace
    #endif
   #endif
 
+  #if JUCE_GCC
+   #pragma GCC diagnostic push
+   #pragma GCC diagnostic ignored "-Wsign-conversion"
+   #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+  #endif
+
   #undef check
   using std::abs;
   #define NO_DUMMY_DECL
@@ -87,7 +93,6 @@ namespace pnglibNamespace
   #define PNG_ALIGNED_MEMORY_SUPPORTED
   #define PNG_BENIGN_ERRORS_SUPPORTED
   #define PNG_BENIGN_READ_ERRORS_SUPPORTED
-  #define PNG_BUILD_GRAYSCALE_PALETTE_SUPPORTED
   #define PNG_CHECK_FOR_INVALID_INDEX_SUPPORTED
   #define PNG_COLORSPACE_SUPPORTED
   #define PNG_CONSOLE_IO_SUPPORTED
@@ -103,7 +108,6 @@ namespace pnglibNamespace
   #define PNG_INCH_CONVERSIONS_SUPPORTED
   #define PNG_INFO_IMAGE_SUPPORTED
   #define PNG_IO_STATE_SUPPORTED
-  #define PNG_MNG_FEATURES_SUPPORTED
   #define PNG_POINTER_INDEXING_SUPPORTED
   #define PNG_PROGRESSIVE_READ_SUPPORTED
   #define PNG_READ_16BIT_SUPPORTED
@@ -267,6 +271,19 @@ namespace pnglibNamespace
   #define PNG_sCAL_PRECISION 5
   #define PNG_sRGB_PROFILE_CHECKS 2
 
+  #define PNG_LINKAGE_API
+  #define PNG_LINKAGE_FUNCTION
+
+  #define PNG_ARM_NEON_OPT 0
+
+  #if ! defined (PNG_USER_WIDTH_MAX)
+   #define PNG_USER_WIDTH_MAX 1000000
+  #endif
+
+  #if ! defined (PNG_USER_HEIGHT_MAX)
+   #define PNG_USER_HEIGHT_MAX 1000000
+  #endif
+
   #define png_debug(a, b)
   #define png_debug1(a, b, c)
   #define png_debug2(a, b, c, d)
@@ -282,6 +299,24 @@ namespace pnglibNamespace
   #include "pnglib/pngread.c"
   #include "pnglib/pngpread.c"
   #include "pnglib/pngrio.c"
+
+  void png_do_expand_palette (png_row_infop, png_bytep, png_const_colorp, png_const_bytep, int);
+  void png_do_expand (png_row_infop, png_bytep, png_const_color_16p);
+  void png_do_chop (png_row_infop, png_bytep);
+  void png_do_quantize (png_row_infop, png_bytep, png_const_bytep, png_const_bytep);
+  void png_do_gray_to_rgb (png_row_infop, png_bytep);
+  void png_do_unshift (png_row_infop, png_bytep, png_const_color_8p);
+  void png_do_unpack (png_row_infop, png_bytep);
+  int png_do_rgb_to_gray (png_structrp, png_row_infop, png_bytep);
+  void png_do_compose (png_row_infop, png_bytep, png_structrp);
+  void png_do_gamma (png_row_infop, png_bytep, png_structrp);
+  void png_do_encode_alpha (png_row_infop, png_bytep, png_structrp);
+  void png_do_scale_16_to_8 (png_row_infop, png_bytep);
+  void png_do_expand_16 (png_row_infop, png_bytep);
+  void png_do_read_filler (png_row_infop, png_bytep, png_uint_32, png_uint_32);
+  void png_do_read_invert_alpha (png_row_infop, png_bytep);
+  void png_do_read_swap_alpha (png_row_infop, png_bytep);
+
   #include "pnglib/pngrtran.c"
   #include "pnglib/pngrutil.c"
   #include "pnglib/pngset.c"
@@ -294,6 +329,11 @@ namespace pnglibNamespace
   #if JUCE_CLANG
    #pragma clang diagnostic pop
   #endif
+
+  #if JUCE_GCC
+   #pragma GCC diagnostic pop
+  #endif
+
 #else
   extern "C"
   {
@@ -358,7 +398,7 @@ namespace PNGHelpers
             png_get_IHDR (pngReadStruct, pngInfoStruct,
                           &width, &height,
                           &bitDepth, &colorType,
-                          &interlaceType, 0, 0);
+                          &interlaceType, nullptr, nullptr);
 
             if (bitDepth == 16)
                 png_set_strip_16 (pngReadStruct);
@@ -472,16 +512,16 @@ namespace PNGHelpers
 
     static Image readImage (InputStream& in)
     {
-        if (png_structp pngReadStruct = png_create_read_struct (PNG_LIBPNG_VER_STRING, 0, 0, 0))
+        if (png_structp pngReadStruct = png_create_read_struct (PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr))
         {
             if (png_infop pngInfoStruct = png_create_info_struct (pngReadStruct))
             {
                 Image image (readImage (in, pngReadStruct, pngInfoStruct));
-                png_destroy_read_struct (&pngReadStruct, &pngInfoStruct, 0);
+                png_destroy_read_struct (&pngReadStruct, &pngInfoStruct, nullptr);
                 return image;
             }
 
-            png_destroy_read_struct (&pngReadStruct, 0, 0);
+            png_destroy_read_struct (&pngReadStruct, nullptr, nullptr);
         }
 
         return Image();

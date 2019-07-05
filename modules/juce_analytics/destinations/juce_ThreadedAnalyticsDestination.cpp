@@ -160,7 +160,7 @@ namespace DestinationTestHelpers
             startAnalyticsThread (20);
         }
 
-        ~BasicDestination()
+        ~BasicDestination() override
         {
             stopAnalyticsThread (1000);
         }

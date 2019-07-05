@@ -340,7 +340,7 @@ public:
                     auto status = (*config)->AcquireJavaProxy (config, /*SL_ANDROID_JAVA_PROXY_ROUTING*/1,
                                                                &audioRoutingJni);
 
-                    if (status == SL_RESULT_SUCCESS && audioRoutingJni != 0)
+                    if (status == SL_RESULT_SUCCESS && audioRoutingJni != nullptr)
                         javaProxy = GlobalRef (LocalRef<jobject>(getEnv()->NewLocalRef (audioRoutingJni)));
                 }
             }
@@ -662,7 +662,7 @@ public:
                     }
 
                     const bool supportsUnderrunCount = (getAndroidSDKVersion() >= 24);
-                    getUnderrunCount = supportsUnderrunCount ? getEnv()->GetMethodID (AudioTrack, "getUnderrunCount", "()I") : 0;
+                    getUnderrunCount = supportsUnderrunCount ? getEnv()->GetMethodID (AudioTrack, "getUnderrunCount", "()I") : nullptr;
                 }
             }
         }
@@ -727,7 +727,7 @@ public:
 
         int getXRunCount() const noexcept override
         {
-            if (player != nullptr && player->javaProxy != nullptr && getUnderrunCount != 0)
+            if (player != nullptr && player->javaProxy != nullptr && getUnderrunCount != nullptr)
                 return getEnv()->CallIntMethod (player->javaProxy, getUnderrunCount);
 
             return -1;
@@ -783,7 +783,7 @@ public:
         std::unique_ptr<OpenSLQueueRunnerPlayer<T>> player;
         std::unique_ptr<OpenSLQueueRunnerRecorder<T>> recorder;
         Atomic<int> guard;
-        jmethodID getUnderrunCount = 0;
+        jmethodID getUnderrunCount = nullptr;
     };
 
     //==============================================================================
@@ -810,7 +810,7 @@ public:
         ignoreUnused (success);
     }
 
-    ~OpenSLAudioIODevice()
+    ~OpenSLAudioIODevice() override
     {
         close();
     }

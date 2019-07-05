@@ -52,37 +52,27 @@ public:
     /** Clears the list. */
     void clear();
 
-    /** Returns the number of types currently in the list.
-        @see getType
-    */
-    int getNumTypes() const noexcept                                { return types.size(); }
+    /** Adds a type manually from its description. */
+    bool addType (const PluginDescription& type);
 
-    /** Returns one of the types.
-        @see getNumTypes
-    */
-    PluginDescription* getType (int index) const noexcept           { return types [index]; }
+    /** Removes a type. */
+    void removeType (const PluginDescription& type);
 
-    /** Type iteration. */
-    PluginDescription** begin() const noexcept                      { return types.begin(); }
+    /** Returns the number of types currently in the list. */
+    int getNumTypes() const noexcept;
 
-    /** Type iteration. */
-    PluginDescription** end() const noexcept                        { return types.end(); }
+    /** Returns a copy of the current list. */
+    Array<PluginDescription> getTypes() const;
 
     /** Looks for a type in the list which comes from this file. */
-    PluginDescription* getTypeForFile (const String& fileOrIdentifier) const;
+    std::unique_ptr<PluginDescription> getTypeForFile (const String& fileOrIdentifier) const;
 
     /** Looks for a type in the list which matches a plugin type ID.
 
         The identifierString parameter must have been created by
         PluginDescription::createIdentifierString().
     */
-    PluginDescription* getTypeForIdentifierString (const String& identifierString) const;
-
-    /** Adds a type manually from its description. */
-    bool addType (const PluginDescription& type);
-
-    /** Removes a type. */
-    void removeType (int index);
+    std::unique_ptr<PluginDescription> getTypeForIdentifierString (const String& identifierString) const;
 
     /** Looks for all types that can be loaded from a given file, and adds them
         to the list.
@@ -145,21 +135,21 @@ public:
     };
 
     //==============================================================================
-    /** Adds all the plugin types to a popup menu so that the user can select one.
+    /** Adds the plug-in types to a popup menu so that the user can select one.
 
         Depending on the sort method, it may add sub-menus for categories,
         manufacturers, etc.
 
         Use getIndexChosenByMenu() to find out the type that was chosen.
     */
-    void addToMenu (PopupMenu& menu, SortMethod sortMethod,
-                    const String& currentlyTickedPluginID = String()) const;
+    static void addToMenu (PopupMenu& menu, const Array<PluginDescription>& types,
+                           SortMethod sortMethod, const String& currentlyTickedPluginID = {});
 
-    /** Converts a menu item index that has been chosen into its index in this list.
+    /** Converts a menu item index that has been chosen into its index in the list.
         Returns -1 if it's not an ID that was used.
         @see addToMenu
     */
-    int getIndexChosenByMenu (int menuResultCode) const;
+    static int getIndexChosenByMenu (const Array<PluginDescription>& types, int menuResultCode);
 
     //==============================================================================
     /** Sorts the list. */
@@ -167,7 +157,7 @@ public:
 
     //==============================================================================
     /** Creates some XML that can be used to store the state of this list. */
-    XmlElement* createXml() const;
+    std::unique_ptr<XmlElement> createXml() const;
 
     /** Recreates the state of this list from its stored XML format. */
     void recreateFromXml (const XmlElement& xml);
@@ -180,11 +170,11 @@ public:
     {
         String folder; /**< The name of this folder in the tree */
         OwnedArray<PluginTree> subFolders;
-        Array<const PluginDescription*> plugins;
+        Array<PluginDescription> plugins;
     };
 
-    /** Creates a PluginTree object containing all the known plugins. */
-    PluginTree* createTree (const SortMethod sortMethod) const;
+    /** Creates a PluginTree object representing the list of plug-ins. */
+    static std::unique_ptr<PluginTree> createTree (const Array<PluginDescription>& types, SortMethod sortMethod);
 
     //==============================================================================
     /** Class to define a custom plugin scanner */
@@ -214,11 +204,28 @@ public:
     /** Supplies a custom scanner to be used in future scans.
         The KnownPluginList will take ownership of the object passed in.
     */
-    void setCustomScanner (CustomScanner*);
+    void setCustomScanner (std::unique_ptr<CustomScanner> newScanner);
+
+    //==============================================================================
+    // These methods have been deprecated! When getting the list of plugin types you should instead use
+    // the getTypes() method which returns a copy of the internal PluginDescription array and can be accessed
+    // in a thread-safe way.
+    JUCE_DEPRECATED_WITH_BODY (PluginDescription* getType (int index)  noexcept,            { return &types.getReference (index); })
+    JUCE_DEPRECATED_WITH_BODY (const PluginDescription* getType (int index) const noexcept, { return &types.getReference (index); })
+    JUCE_DEPRECATED_WITH_BODY (PluginDescription** begin() noexcept,                        { jassertfalse; return nullptr; })
+    JUCE_DEPRECATED_WITH_BODY (PluginDescription* const* begin() const noexcept,            { jassertfalse; return nullptr; })
+    JUCE_DEPRECATED_WITH_BODY (PluginDescription** end() noexcept,                          { jassertfalse; return nullptr; })
+    JUCE_DEPRECATED_WITH_BODY (PluginDescription* const* end() const noexcept,              { jassertfalse; return nullptr; })
+
+    // These methods have been deprecated in favour of their static counterparts. You should call getTypes()
+    // to store the plug-in list at a point in time and use it when calling these methods.
+    JUCE_DEPRECATED (void addToMenu (PopupMenu& menu, SortMethod sortMethod, const String& currentlyTickedPluginID = {}) const);
+    JUCE_DEPRECATED (int getIndexChosenByMenu (int menuResultCode) const);
+    JUCE_DEPRECATED (std::unique_ptr<PluginTree> createTree (const SortMethod sortMethod) const);
 
 private:
     //==============================================================================
-    OwnedArray<PluginDescription> types;
+    Array<PluginDescription> types;
     StringArray blacklist;
     std::unique_ptr<CustomScanner> scanner;
     CriticalSection scanLock, typesArrayLock;

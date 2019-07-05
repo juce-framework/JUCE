@@ -161,7 +161,7 @@ public:
     String getParamID (AudioProcessor& processor, int idx) const noexcept
     {
         if (usingManagedParameters && ! legacyParamIDs)
-            processor.getParameterID (idx);
+            return processor.getParameterID (idx);
 
         return String (idx);
     }

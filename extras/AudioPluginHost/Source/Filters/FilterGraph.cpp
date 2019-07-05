@@ -75,29 +75,19 @@ AudioProcessorGraph::Node::Ptr FilterGraph::getNodeForName (const String& name) 
     return nullptr;
 }
 
-void FilterGraph::addPlugin (const PluginDescription& desc, Point<double> p)
+void FilterGraph::addPlugin (const PluginDescription& desc, Point<double> pos)
 {
-    struct AsyncCallback : public AudioPluginFormat::InstantiationCompletionCallback
-    {
-        AsyncCallback (FilterGraph& g, Point<double> pos)  : owner (g), position (pos)
-        {}
-
-        void completionCallback (AudioPluginInstance* instance, const String& error) override
-        {
-            owner.addFilterCallback (instance, error, position);
-        }
-
-        FilterGraph& owner;
-        Point<double> position;
-    };
-
     formatManager.createPluginInstanceAsync (desc,
                                              graph.getSampleRate(),
                                              graph.getBlockSize(),
-                                             new AsyncCallback (*this, p));
+                                             [this, pos] (std::unique_ptr<AudioPluginInstance> instance, const String& error)
+                                             {
+                                                 addPluginCallback (std::move (instance), error, pos);
+                                             });
 }
 
-void FilterGraph::addFilterCallback (AudioPluginInstance* instance, const String& error, Point<double> pos)
+void FilterGraph::addPluginCallback (std::unique_ptr<AudioPluginInstance> instance,
+                                     const String& error, Point<double> pos)
 {
     if (instance == nullptr)
     {
@@ -109,7 +99,7 @@ void FilterGraph::addFilterCallback (AudioPluginInstance* instance, const String
     {
         instance->enableAllBuses();
 
-        if (auto node = graph.addNode (instance))
+        if (auto node = graph.addNode (std::move (instance)))
         {
             node->properties.set ("x", pos.x);
             node->properties.set ("y", pos.y);
@@ -221,26 +211,26 @@ void FilterGraph::newDocument()
 
 Result FilterGraph::loadDocument (const File& file)
 {
-    XmlDocument doc (file);
-    std::unique_ptr<XmlElement> xml (doc.getDocumentElement());
+    if (auto xml = parseXMLIfTagMatches (file, "FILTERGRAPH"))
+    {
+        graph.removeChangeListener (this);
+        restoreFromXml (*xml);
 
-    if (xml == nullptr || ! xml->hasTagName ("FILTERGRAPH"))
-        return Result::fail ("Not a valid filter graph file");
+        MessageManager::callAsync ([this]
+        {
+            setChangedFlag (false);
+            graph.addChangeListener (this);
+        });
 
-    graph.removeChangeListener (this);
-    restoreFromXml (*xml);
+        return Result::ok();
+    }
 
-    MessageManager::callAsync ([this] () {
-        setChangedFlag (false);
-        graph.addChangeListener (this);
-    } );
-
-    return Result::ok();
+    return Result::fail ("Not a valid filter graph file");
 }
 
 Result FilterGraph::saveDocument (const File& file)
 {
-    std::unique_ptr<XmlElement> xml (createXml());
+    auto xml = createXml();
 
     if (! xml->writeTo (file, {}))
         return Result::fail ("Couldn't write to the file");
@@ -270,8 +260,8 @@ void FilterGraph::setLastDocumentOpened (const File& file)
 }
 
 //==============================================================================
-static void readBusLayoutFromXml (AudioProcessor::BusesLayout& busesLayout, AudioProcessor* plugin,
-                                  const XmlElement& xml, const bool isInput)
+static void readBusLayoutFromXml (AudioProcessor::BusesLayout& busesLayout, AudioProcessor& plugin,
+                                  const XmlElement& xml, bool isInput)
 {
     auto& targetBuses = (isInput ? busesLayout.inputBuses
                                  : busesLayout.outputBuses);
@@ -286,12 +276,12 @@ static void readBusLayoutFromXml (AudioProcessor::BusesLayout& busesLayout, Audi
 
             // the number of buses on busesLayout may not be in sync with the plugin after adding buses
             // because adding an input bus could also add an output bus
-            for (int actualIdx = plugin->getBusCount (isInput) - 1; actualIdx < busIdx; ++actualIdx)
-                if (! plugin->addBus (isInput))
+            for (int actualIdx = plugin.getBusCount (isInput) - 1; actualIdx < busIdx; ++actualIdx)
+                if (! plugin.addBus (isInput))
                     return;
 
             for (int actualIdx = targetBuses.size() - 1; actualIdx < busIdx; ++actualIdx)
-                targetBuses.add (plugin->getChannelLayoutOfBus (isInput, busIdx));
+                targetBuses.add (plugin.getChannelLayoutOfBus (isInput, busIdx));
 
             auto layout = e->getStringAttribute ("layout");
 
@@ -303,7 +293,7 @@ static void readBusLayoutFromXml (AudioProcessor::BusesLayout& busesLayout, Audi
     // if the plugin has more buses than specified in the xml, then try to remove them!
     while (maxNumBuses < targetBuses.size())
     {
-        if (! plugin->removeBus (isInput))
+        if (! plugin.removeBus (isInput))
             return;
 
         targetBuses.removeLast();
@@ -354,7 +344,7 @@ static XmlElement* createNodeXml (AudioProcessorGraph::Node* const node) noexcep
         {
             PluginDescription pd;
             plugin->fillInPluginDescription (pd);
-            e->addChildElement (pd.createXml());
+            e->addChildElement (pd.createXml().release());
         }
 
         {
@@ -388,20 +378,20 @@ void FilterGraph::createNodeFromXml (const XmlElement& xml)
 
     String errorMessage;
 
-    if (auto* instance = formatManager.createPluginInstance (pd, graph.getSampleRate(),
-                                                             graph.getBlockSize(), errorMessage))
+    if (auto instance = formatManager.createPluginInstance (pd, graph.getSampleRate(),
+                                                            graph.getBlockSize(), errorMessage))
     {
         if (auto* layoutEntity = xml.getChildByName ("LAYOUT"))
         {
             auto layout = instance->getBusesLayout();
 
-            readBusLayoutFromXml (layout, instance, *layoutEntity, true);
-            readBusLayoutFromXml (layout, instance, *layoutEntity, false);
+            readBusLayoutFromXml (layout, *instance, *layoutEntity, true);
+            readBusLayoutFromXml (layout, *instance, *layoutEntity, false);
 
             instance->setBusesLayout (layout);
         }
 
-        if (auto node = graph.addNode (instance, NodeID ((uint32) xml.getIntAttribute ("uid"))))
+        if (auto node = graph.addNode (std::move (instance), NodeID ((uint32) xml.getIntAttribute ("uid"))))
         {
             if (auto* state = xml.getChildByName ("STATE"))
             {
@@ -437,9 +427,9 @@ void FilterGraph::createNodeFromXml (const XmlElement& xml)
     }
 }
 
-XmlElement* FilterGraph::createXml() const
+std::unique_ptr<XmlElement> FilterGraph::createXml() const
 {
-    auto* xml = new XmlElement ("FILTERGRAPH");
+    auto xml = std::make_unique<XmlElement> ("FILTERGRAPH");
 
     for (auto* node : graph.getNodes())
         xml->addChildElement (createNodeXml (node));

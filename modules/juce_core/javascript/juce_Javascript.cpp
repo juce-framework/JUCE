@@ -1183,7 +1183,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             if (matchIf (TokenTypes::comma))
             {
                 std::unique_ptr<BlockStatement> block (new BlockStatement (location));
-                block->statements.add (s.release());
+                block->statements.add (std::move (s));
                 block->statements.add (parseVar());
                 return block.release();
             }
@@ -1760,9 +1760,10 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     //==============================================================================
     struct JSONClass  : public DynamicObject
     {
-        JSONClass()                        { setMethod ("stringify", stringify); }
+		JSONClass() { setMethod("stringify", stringify); setMethod("parse", parse);  }
         static Identifier getClassName()   { static const Identifier i ("JSON"); return i; }
-        static var stringify (Args a)      { return JSON::toString (get (a, 0)); }
+		static var stringify(Args a) { return JSON::toString(get(a, 0)); }
+		static var parse (Args a)     { return JSON::fromString (get (a, 0).toString()); }
     };
 
     //==============================================================================

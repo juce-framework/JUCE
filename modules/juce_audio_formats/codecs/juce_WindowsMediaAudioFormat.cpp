@@ -30,11 +30,11 @@ namespace juce
 namespace WindowsMediaCodec
 {
 
-class JuceIStream   : public ComBaseClassHelper <IStream>
+class JuceIStream   : public ComBaseClassHelper<IStream>
 {
 public:
     JuceIStream (InputStream& in) noexcept
-        : ComBaseClassHelper <IStream> (0), source (in)
+        : ComBaseClassHelper<IStream> (0), source (in)
     {
     }
 
@@ -48,10 +48,10 @@ public:
 
     JUCE_COMRESULT Read (void* dest, ULONG numBytes, ULONG* bytesRead)
     {
-        auto numRead = source.read (dest, numBytes);
+        auto numRead = source.read (dest, (size_t) numBytes);
 
         if (bytesRead != nullptr)
-            *bytesRead = numRead;
+            *bytesRead = (ULONG) numRead;
 
         return (numRead == (int) numBytes) ? S_OK : S_FALSE;
     }

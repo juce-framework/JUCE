@@ -183,7 +183,7 @@
 //==============================================================================
 // Compiler type macros.
 
-#ifdef __clang__
+#if defined (__clang__)
   #define JUCE_CLANG 1
 
 #elif defined (__GNUC__)

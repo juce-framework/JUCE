@@ -212,11 +212,10 @@ private:
         // a binary format may be more suitable if it is faster - remember that this
         // method is called on app shutdown so it needs to complete quickly!
 
-        XmlDocument previouslySavedEvents (savedEventsFile);
-        std::unique_ptr<XmlElement> xml (previouslySavedEvents.getDocumentElement());
+        auto xml = parseXMLIfTagMatches (savedEventsFile, "events");
 
-        if (xml.get() == nullptr || xml->getTagName() != "events")
-            xml.reset (new XmlElement ("events"));
+        if (xml == nullptr)
+            xml = std::make_unique<XmlElement> ("events");
 
         for (auto& event : eventsToSave)
         {
@@ -248,45 +247,42 @@ private:
 
     void restoreUnloggedEvents (std::deque<AnalyticsEvent>& restoredEventQueue) override
     {
-        XmlDocument savedEvents (savedEventsFile);
-        std::unique_ptr<XmlElement> xml (savedEvents.getDocumentElement());
-
-        if (xml.get() == nullptr || xml->getTagName() != "events")
-            return;
-
-        auto numEvents = xml->getNumChildElements();
-
-        for (auto iEvent = 0; iEvent < numEvents; ++iEvent)
+        if (auto xml = parseXMLIfTagMatches (savedEventsFile, "events"))
         {
-            auto* xmlEvent = xml->getChildElement (iEvent);
+            auto numEvents = xml->getNumChildElements();
 
-            StringPairArray parameters;
-            auto* xmlParameters = xmlEvent->getChildByName ("parameters");
-            auto numParameters = xmlParameters->getNumAttributes();
+            for (auto iEvent = 0; iEvent < numEvents; ++iEvent)
+            {
+                auto* xmlEvent = xml->getChildElement (iEvent);
 
-            for (auto iParam = 0; iParam < numParameters; ++iParam)
-                parameters.set (xmlParameters->getAttributeName (iParam),
-                                xmlParameters->getAttributeValue (iParam));
+                StringPairArray parameters;
+                auto* xmlParameters = xmlEvent->getChildByName ("parameters");
+                auto numParameters = xmlParameters->getNumAttributes();
 
-            StringPairArray userProperties;
-            auto* xmlUserProperties = xmlEvent->getChildByName ("user_properties");
-            auto numUserProperties = xmlUserProperties->getNumAttributes();
+                for (auto iParam = 0; iParam < numParameters; ++iParam)
+                    parameters.set (xmlParameters->getAttributeName (iParam),
+                                    xmlParameters->getAttributeValue (iParam));
 
-            for (auto iProp = 0; iProp < numUserProperties; ++iProp)
-                userProperties.set (xmlUserProperties->getAttributeName (iProp),
-                                    xmlUserProperties->getAttributeValue (iProp));
+                StringPairArray userProperties;
+                auto* xmlUserProperties = xmlEvent->getChildByName ("user_properties");
+                auto numUserProperties = xmlUserProperties->getNumAttributes();
 
-            restoredEventQueue.push_back ({
-                xmlEvent->getStringAttribute ("name"),
-                xmlEvent->getIntAttribute ("type"),
-                static_cast<uint32> (xmlEvent->getIntAttribute ("timestamp")),
-                parameters,
-                xmlEvent->getStringAttribute ("user_id"),
-                userProperties
-            });
+                for (auto iProp = 0; iProp < numUserProperties; ++iProp)
+                    userProperties.set (xmlUserProperties->getAttributeName (iProp),
+                                        xmlUserProperties->getAttributeValue (iProp));
+
+                restoredEventQueue.push_back ({
+                    xmlEvent->getStringAttribute ("name"),
+                    xmlEvent->getIntAttribute ("type"),
+                    static_cast<uint32> (xmlEvent->getIntAttribute ("timestamp")),
+                    parameters,
+                    xmlEvent->getStringAttribute ("user_id"),
+                    userProperties
+                });
+            }
+
+            savedEventsFile.deleteFile();
         }
-
-        savedEventsFile.deleteFile();
     }
 
     const int initialPeriodMs = 1000;

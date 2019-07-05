@@ -149,6 +149,8 @@ struct SineWaveVoice  : public SynthesiserVoice
         }
     }
 
+    using SynthesiserVoice::renderNextBlock;
+
 private:
     double currentAngle = 0.0, angleDelta = 0.0, level = 0.0, tailOff = 0.0;
 };
@@ -270,16 +272,16 @@ public:
        #endif
 
         audioDeviceManager.addAudioCallback (&audioSourcePlayer);
-        audioDeviceManager.addMidiInputCallback ({}, &(synthAudioSource.midiCollector));
+        audioDeviceManager.addMidiInputDeviceCallback ({}, &(synthAudioSource.midiCollector));
 
         setOpaque (true);
         setSize (640, 480);
     }
 
-    ~AudioSynthesiserDemo()
+    ~AudioSynthesiserDemo() override
     {
         audioSourcePlayer.setSource (nullptr);
-        audioDeviceManager.removeMidiInputCallback ({}, &(synthAudioSource.midiCollector));
+        audioDeviceManager.removeMidiInputDeviceCallback ({}, &(synthAudioSource.midiCollector));
         audioDeviceManager.removeAudioCallback (&audioSourcePlayer);
         audioDeviceManager.removeAudioCallback (&liveAudioDisplayComp);
     }

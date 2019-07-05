@@ -113,6 +113,12 @@ private:
         }
     };
 
+    void lookAndFeelChanged() override
+    {
+        lf->setColourScheme (ProjucerApplication::getApp().lookAndFeel.getCurrentColourScheme());
+        lf->setupColours();
+    }
+
     //==============================================================================
     void buildProps()
     {
@@ -317,7 +323,7 @@ private:
                      mainClassValue     { pipTree, Ids::mainClass,     nullptr, "MyComponent" },
                      useLocalCopyValue  { pipTree, Ids::useLocalCopy,  nullptr, false };
 
-    std::unique_ptr<LookAndFeel> lf;
+    std::unique_ptr<PIPCreatorLookAndFeel> lf;
 
     Viewport propertyViewport;
     PropertyGroupComponent propertyGroup  { "PIP Creator", { getIcons().juceLogo, Colours::transparentBlack } };

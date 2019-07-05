@@ -45,6 +45,7 @@ protected:
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
+            addRecommendedLinuxCompilerWarningsProperty (props);
             addGCCOptimisationProperty (props);
 
             props.add (new ChoicePropertyComponent (architectureTypeValue, "Architecture",
@@ -304,10 +305,10 @@ public:
 
     String getExtraPkgConfigString() const      { return extraPkgConfigValue.get(); }
 
-    static MakefileProjectExporter* createForSettings (Project& project, const ValueTree& settings)
+    static MakefileProjectExporter* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
-        if (settings.hasType (getValueTreeTypeName()))
-            return new MakefileProjectExporter (project, settings);
+        if (settingsToUse.hasType (getValueTreeTypeName()))
+            return new MakefileProjectExporter (projectToUse, settingsToUse);
 
         return nullptr;
     }
@@ -520,6 +521,9 @@ private:
 
         if (extra.isNotEmpty())
             result.add (extra);
+
+        for (auto& recommended : config.getRecommendedCompilerWarningFlags())
+            result.add (recommended);
 
         return result;
     }

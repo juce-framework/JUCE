@@ -50,7 +50,7 @@
   #endif
  #endif
 
- #define JUCE_CXX14_IS_AVAILABLE (__cplusplus >= 201402L)
+ #define JUCE_CXX14_IS_AVAILABLE ((__cplusplus >= 201402L) || ((__GNUC__ * 100 + __GNUC_MINOR__) >= 409 && (__cplusplus >= 201300L)))
  #define JUCE_CXX17_IS_AVAILABLE (__cplusplus >= 201703L)
 
 #endif
@@ -119,6 +119,12 @@
  #define JUCE_CONSTEXPR constexpr
 #else
  #define JUCE_CONSTEXPR
+#endif
+
+#if JUCE_MSVC && _MSC_VER < 1900
+ #define JUCE_REF_QUALIFIER
+#else
+ #define JUCE_REF_QUALIFIER &
 #endif
 
 #if (! JUCE_MSVC) && (! JUCE_CXX14_IS_AVAILABLE)

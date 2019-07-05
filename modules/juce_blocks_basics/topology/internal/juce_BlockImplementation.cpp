@@ -61,7 +61,7 @@ public:
         updateMidiConnectionListener();
     }
 
-    ~BlockImplementation()
+    ~BlockImplementation() override
     {
         markDisconnected();
     }
@@ -271,8 +271,6 @@ public:
             return Result::ok();
         }
 
-        stopTimer();
-
         {
             std::unique_ptr<Program> p (newProgram);
 
@@ -283,6 +281,8 @@ public:
 
             std::swap (program, p);
         }
+
+        stopTimer();
 
         programSize = 0;
         isProgramLoaded = shouldSaveProgramAsDefault = false;
@@ -757,7 +757,7 @@ public:
             activateTouchSurface();
         }
 
-        ~TouchSurfaceImplementation()
+        ~TouchSurfaceImplementation() override
         {
             disableTouchSurface();
         }
@@ -875,7 +875,7 @@ public:
         {
         }
 
-        ~ControlButtonImplementation()
+        ~ControlButtonImplementation() override
         {
         }
 
@@ -1041,9 +1041,9 @@ public:
 
         void write565Colour (uint32 bitIndex, LEDColour colour)
         {
-            block.setDataBits (bitIndex,      5, colour.getRed()   >> 3);
-            block.setDataBits (bitIndex + 5,  6, colour.getGreen() >> 2);
-            block.setDataBits (bitIndex + 11, 5, colour.getBlue()  >> 3);
+            block.setDataBits (bitIndex,      5, (uint32) (colour.getRed()   >> 3));
+            block.setDataBits (bitIndex + 5,  6, (uint32) (colour.getGreen() >> 2));
+            block.setDataBits (bitIndex + 11, 5, (uint32) (colour.getBlue()  >> 3));
         }
 
         struct DefaultLEDGridProgram  : public Block::Program

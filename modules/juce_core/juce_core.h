@@ -161,7 +161,7 @@
     to your JUCEApplicationBase::unhandledException() callback.
 */
 #ifndef JUCE_CATCH_UNHANDLED_EXCEPTIONS
- //#define JUCE_CATCH_UNHANDLED_EXCEPTIONS 1
+ #define JUCE_CATCH_UNHANDLED_EXCEPTIONS 0
 #endif
 
 /** Config: JUCE_ALLOW_STATIC_NULL_VARIABLES

@@ -40,7 +40,7 @@ struct LogoComponent  : public Component
     LogoComponent()
     {
         if (auto svg = parseXML (BinaryData::background_logo_svg))
-            logo.reset (Drawable::createFromSVG (*svg));
+            logo = Drawable::createFromSVG (*svg);
         else
             jassertfalse;
     }
