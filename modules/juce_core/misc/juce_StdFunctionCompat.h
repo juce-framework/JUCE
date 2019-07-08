@@ -113,7 +113,7 @@ namespace std
         /** Invokes the target of this function. */
         Result operator() (Arguments... args) const
         {
-            return (*functorHolderHelper) (args...);
+            return (*functorHolderHelper) (std::forward<Arguments> (args)...);
         }
 
         bool operator== (decltype (nullptr)) const noexcept     { return (functorHolderHelper == nullptr); }
@@ -147,7 +147,7 @@ namespace std
 
             ReturnType operator()(Args... args) override final
             {
-                return f (args...);
+                return f (std::forward<Arguments> (args)...);
             }
 
             Functor f;

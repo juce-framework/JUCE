@@ -98,7 +98,7 @@ public:
     Rectangle<float> getBounds() const noexcept;
 
     /** Returns the smallest rectangle that contains all points within the path
-        after it's been transformed with the given tranasform matrix.
+        after it's been transformed with the given transform matrix.
     */
     Rectangle<float> getBoundsTransformed (const AffineTransform& transform) const noexcept;
 

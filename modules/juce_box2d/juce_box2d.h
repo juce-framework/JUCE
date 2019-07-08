@@ -57,6 +57,9 @@
 #ifdef JUCE_CLANG
  #pragma clang diagnostic push
  #pragma clang diagnostic ignored "-Wconversion"
+ #if __has_warning("-Wshadow-field")
+  #pragma clang diagnostic ignored "-Wshadow-field"
+ #endif
  #if __has_warning("-Wzero-as-null-pointer-constant")
   #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
  #endif

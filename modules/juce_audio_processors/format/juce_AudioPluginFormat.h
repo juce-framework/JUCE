@@ -35,11 +35,11 @@ namespace juce
 
     @tags{Audio}
 */
-class JUCE_API  AudioPluginFormat
+class JUCE_API  AudioPluginFormat  : private MessageListener
 {
 public:
     /** Destructor. */
-    virtual ~AudioPluginFormat();
+    ~AudioPluginFormat() override;
 
     //==============================================================================
     /** Returns the format name.
@@ -136,7 +136,7 @@ protected:
     //==============================================================================
     friend class AudioPluginFormatManager;
 
-    AudioPluginFormat() noexcept;
+    AudioPluginFormat();
 
     /** Implementors must override this function. This is guaranteed to be called on
         the message thread. You may call the callback on any thread.
@@ -147,6 +147,9 @@ protected:
     virtual bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept = 0;
 
 private:
+    struct AsyncCreateMessage;
+    void handleMessage (const Message&) override;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginFormat)
 };
 

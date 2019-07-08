@@ -518,8 +518,8 @@ bool juce_areThereAnyAlwaysOnTopWindows()
 static void selectImageForDrawing (const Image& image)
 {
     [NSGraphicsContext saveGraphicsState];
-    [NSGraphicsContext setCurrentContext: [NSGraphicsContext graphicsContextWithGraphicsPort: juce_getImageContext (image)
-                                                                                     flipped: false]];
+    [NSGraphicsContext setCurrentContext: [NSGraphicsContext graphicsContextWithCGContext: juce_getImageContext (image)
+                                                                                  flipped: false]];
 }
 
 static void releaseImageAfterDrawing()
@@ -590,16 +590,16 @@ void SystemClipboard::copyTextToClipboard (const String& text)
 {
     NSPasteboard* pb = [NSPasteboard generalPasteboard];
 
-    [pb declareTypes: [NSArray arrayWithObject: NSStringPboardType]
+    [pb declareTypes: [NSArray arrayWithObject: NSPasteboardTypeString]
                owner: nil];
 
     [pb setString: juceStringToNS (text)
-          forType: NSStringPboardType];
+          forType: NSPasteboardTypeString];
 }
 
 String SystemClipboard::getTextFromClipboard()
 {
-    return nsStringToJuce ([[NSPasteboard generalPasteboard] stringForType: NSStringPboardType]);
+    return nsStringToJuce ([[NSPasteboard generalPasteboard] stringForType: NSPasteboardTypeString]);
 }
 
 void Process::setDockIconVisible (bool isVisible)

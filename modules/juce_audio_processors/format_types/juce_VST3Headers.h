@@ -47,6 +47,9 @@
  #pragma clang diagnostic ignored "-Wdeprecated-declarations"
  #pragma clang diagnostic ignored "-Wextra-semi"
  #pragma clang diagnostic ignored "-Wmissing-braces"
+ #if __has_warning("-Wshadow-field")
+  #pragma clang diagnostic ignored "-Wshadow-field"
+ #endif
  #if __has_warning("-Wpragma-pack")
   #pragma clang diagnostic ignored "-Wpragma-pack"
  #endif

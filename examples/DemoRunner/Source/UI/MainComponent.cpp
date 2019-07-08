@@ -245,9 +245,7 @@ MainComponent::MainComponent()
 {
     contentComponent.reset (new DemoContentComponent (*this, [this] (bool isHeavyweight)
     {
-       #if (JUCE_ANDROID || JUCE_IOS)
         demosPanel.showOrHide (false);
-       #endif
 
         if (isHeavyweight)
         {

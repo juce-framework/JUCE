@@ -311,7 +311,7 @@ void PluginListComponent::showOptionsMenu()
             menu.addItem (10 + i, "Scan for new or updated " + format->getName() + " plug-ins");
     }
 
-    menu.showMenuAsync (PopupMenu::Options().withTargetComponent (&optionsButton),
+    menu.showMenuAsync (PopupMenu::Options().withTargetComponent (optionsButton),
                         ModalCallbackFunction::forComponent (optionsMenuStaticCallback, this));
 }
 
@@ -328,14 +328,23 @@ void PluginListComponent::filesDropped (const StringArray& files, int, int)
 
 FileSearchPath PluginListComponent::getLastSearchPath (PropertiesFile& properties, AudioPluginFormat& format)
 {
-    return FileSearchPath (properties.getValue ("lastPluginScanPath_" + format.getName(),
-                                                format.getDefaultLocationsToSearch().toString()));
+    auto key = "lastPluginScanPath_" + format.getName();
+
+    if (properties.containsKey (key) && properties.getValue (key, {}).trim().isEmpty())
+        properties.removeValue (key);
+
+    return FileSearchPath (properties.getValue (key, format.getDefaultLocationsToSearch().toString()));
 }
 
 void PluginListComponent::setLastSearchPath (PropertiesFile& properties, AudioPluginFormat& format,
                                              const FileSearchPath& newPath)
 {
-    properties.setValue ("lastPluginScanPath_" + format.getName(), newPath.toString());
+    auto key = "lastPluginScanPath_" + format.getName();
+
+    if (newPath.getNumPaths() == 0)
+        properties.removeValue (key);
+    else
+        properties.setValue (key, newPath.toString());
 }
 
 //==============================================================================

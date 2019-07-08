@@ -131,7 +131,7 @@ public:
         initialiseJuce_GUI();
     }
 
-    virtual ~JuceAudioUnitv3Base() {}
+    virtual ~JuceAudioUnitv3Base() = default;
 
     //==============================================================================
     AUAudioUnit* getAudioUnit() noexcept                                   { return au; }
@@ -441,7 +441,7 @@ public:
         init();
     }
 
-    ~JuceAudioUnitv3()
+    ~JuceAudioUnitv3() override
     {
         auto& processor = getAudioProcessor();
         processor.removeListener (this);
@@ -1522,12 +1522,14 @@ private:
 
             // send MIDI
            #if JucePlugin_ProducesMidiOutput && JUCE_AUV3_MIDI_OUTPUT_SUPPORTED
-            auto midiOut = [au MIDIOutputEventBlock];
-            MidiMessage msg;
-            int samplePosition;
+            if (auto midiOut = [au MIDIOutputEventBlock])
+            {
+                MidiMessage msg;
+                int samplePosition;
 
-            for (MidiBuffer::Iterator it (midiMessages); it.getNextEvent (msg, samplePosition);)
-                midiOut (samplePosition, 0, msg.getRawDataSize(), msg.getRawData());
+                for (MidiBuffer::Iterator it (midiMessages); it.getNextEvent (msg, samplePosition);)
+                    midiOut (samplePosition, 0, msg.getRawDataSize(), msg.getRawData());
+            }
            #endif
 
             midiMessages.clear();

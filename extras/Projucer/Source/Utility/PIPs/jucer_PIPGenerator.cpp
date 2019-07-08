@@ -235,7 +235,7 @@ ValueTree PIPGenerator::createModulePathChild (const String& moduleID)
 
 ValueTree PIPGenerator::createBuildConfigChild (bool isDebug)
 {
-    ValueTree child (Ids::CONFIGURATIONS);
+    ValueTree child (Ids::CONFIGURATION);
 
     child.setProperty (Ids::name, isDebug ? "Debug" : "Release", nullptr);
     child.setProperty (Ids::isDebug, isDebug ? 1 : 0, nullptr);

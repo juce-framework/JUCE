@@ -75,6 +75,11 @@ if __name__ == "__main__":
                              "subdirectories")
     args = parser.parse_args()
 
+    try: 
+        shutil.rmtree(args.dest_dir)
+    except FileNotFoundError:
+        pass
+
     # Get the list of JUCE modules to include.
     if args.subdirs:
         juce_modules = args.subdirs.split(",")

@@ -327,7 +327,7 @@ private:
 
        #if JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
         // studio one doesn't like negative parameters
-        paramHash &= ~(1 << (sizeof (Vst::ParamID) * 8 - 1));
+        paramHash &= ~(((Vst::ParamID) 1) << (sizeof (Vst::ParamID) * 8 - 1));
        #endif
 
         return paramHash;
@@ -478,7 +478,7 @@ public:
             valueNormalized = info.defaultNormalizedValue;
         }
 
-        virtual ~Param() {}
+        virtual ~Param() override = default;
 
         bool setNormalized (Vst::ParamValue v) override
         {
@@ -561,7 +561,7 @@ public:
             info.flags = Vst::ParameterInfo::kIsProgramChange | Vst::ParameterInfo::kCanAutomate;
         }
 
-        virtual ~ProgramChangeParameter() {}
+        virtual ~ProgramChangeParameter() override = default;
 
         bool setNormalized (Vst::ParamValue v) override
         {
@@ -582,7 +582,7 @@ public:
 
         void toString (Vst::ParamValue value, Vst::String128 result) const override
         {
-            toString128 (result, owner.getProgramName (static_cast<int> (value * info.stepCount)));
+            toString128 (result, owner.getProgramName (roundToInt (value * info.stepCount)));
         }
 
         bool fromString (const Vst::TChar* text, Vst::ParamValue& outValueNormalized) const override
@@ -1033,7 +1033,7 @@ private:
                 parameterToMidiController[p].ctrlNumber = i;
 
                 parameters.addParameter (new Vst::Parameter (toString ("MIDI CC " + String (c) + "|" + String (i)),
-                                         static_cast<Vst::ParamID> (p) + parameterToMidiControllerOffset, 0, 0, 0,
+                                         static_cast<Vst::ParamID> (p) + parameterToMidiControllerOffset, nullptr, 0, 0,
                                          0, Vst::kRootUnitId));
             }
         }
@@ -1399,7 +1399,7 @@ private:
                 ignoreUnused (fakeMouseGenerator);
             }
 
-            ~ContentWrapperComponent()
+            ~ContentWrapperComponent() override
             {
                 if (pluginEditor != nullptr)
                 {
@@ -1677,7 +1677,7 @@ public:
         pluginInstance->setPlayHead (this);
     }
 
-    ~JuceVST3Component()
+    ~JuceVST3Component() override
     {
         if (juceVST3EditController != nullptr)
             juceVST3EditController->vst3IsPlaying = 0;

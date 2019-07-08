@@ -657,7 +657,7 @@ struct SIMDNativeOps<int64_t>
 
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE greaterThan (__m128i a, __m128i b) noexcept
     {
-       #if defined(__SSE4_1__)
+       #if defined(__SSE4_2__)
         return _mm_cmpgt_epi64 (a, b);
        #else
         return SIMDFallbackOps<int64_t, __m128i>::greaterThan (a, b);
@@ -717,7 +717,7 @@ struct SIMDNativeOps<uint64_t>
 
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE greaterThan (__m128i a, __m128i b) noexcept
     {
-       #if defined(__SSE4_1__)
+       #if defined(__SSE4_2__)
         return _mm_cmpgt_epi64 (ssign (a), ssign (b));
        #else
         return SIMDFallbackOps<uint64_t, __m128i>::greaterThan (a, b);

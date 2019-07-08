@@ -454,6 +454,10 @@ public:
         if (client != nullptr)
             client->Stop();
 
+        // N.B. this is needed to prevent a double-deletion of the IAudioSessionEvents object
+        // on older versions of Windows
+        Thread::sleep (5);
+
         deleteSessionEventCallback();
         client = nullptr;
         ResetEvent (clientEvent);

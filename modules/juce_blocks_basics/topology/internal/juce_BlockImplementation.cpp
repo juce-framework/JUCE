@@ -271,8 +271,6 @@ public:
             return Result::ok();
         }
 
-        stopTimer();
-
         {
             std::unique_ptr<Program> p (newProgram);
 
@@ -283,6 +281,8 @@ public:
 
             std::swap (program, p);
         }
+
+        stopTimer();
 
         programSize = 0;
         isProgramLoaded = shouldSaveProgramAsDefault = false;

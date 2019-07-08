@@ -27,26 +27,20 @@
 namespace juce
 {
 
-class SHA256Processor
+struct SHA256Processor
 {
-public:
-    SHA256Processor() noexcept
-        : length (0)
+    SHA256Processor()
     {
-        state[0] = 0x6a09e667;
-        state[1] = 0xbb67ae85;
-        state[2] = 0x3c6ef372;
-        state[3] = 0xa54ff53a;
-        state[4] = 0x510e527f;
-        state[5] = 0x9b05688c;
-        state[6] = 0x1f83d9ab;
-        state[7] = 0x5be0cd19;
+        // have to copy this data manually, as VS2013 doesn't support member array initialisers
+        const uint32_t initialState[8] = { 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+                                           0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 };
+        memcpy (state, initialState, sizeof (state));
     }
 
     // expects 64 bytes of data
-    void processFullBlock (const void* const data) noexcept
+    void processFullBlock (const void* data) noexcept
     {
-        const uint32 constants[] =
+        const uint32_t constants[] =
         {
             0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
             0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
@@ -58,25 +52,29 @@ public:
             0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
         };
 
-        uint32 block[16], s[8];
+        uint32_t block[16], s[8];
         memcpy (s, state, sizeof (s));
 
-        for (int i = 0; i < 16; ++i)
-            block[i] = ByteOrder::bigEndianInt (addBytesToPointer (data, i * 4));
+        auto d = static_cast<const uint8_t*> (data);
 
-        for (uint32 j = 0; j < 64; j += 16)
+        for (auto& b : block)
         {
-            #define JUCE_SHA256(i) \
-                s[(7 - i) & 7] += S1 (s[(4 - i) & 7]) + ch (s[(4 - i) & 7], s[(5 - i) & 7], s[(6 - i) & 7]) + constants[i + j] \
-                                     + (j != 0 ? (block[i & 15] += s1 (block[(i - 2) & 15]) + block[(i - 7) & 15] + s0 (block[(i - 15) & 15])) \
-                                               : block[i]); \
-                s[(3 - i) & 7] += s[(7 - i) & 7]; \
-                s[(7 - i) & 7] += S0 (s[(0 - i) & 7]) + maj (s[(0 - i) & 7], s[(1 - i) & 7], s[(2 - i) & 7])
-
-            JUCE_SHA256(0);  JUCE_SHA256(1);  JUCE_SHA256(2);  JUCE_SHA256(3);  JUCE_SHA256(4);  JUCE_SHA256(5);  JUCE_SHA256(6);  JUCE_SHA256(7);
-            JUCE_SHA256(8);  JUCE_SHA256(9);  JUCE_SHA256(10); JUCE_SHA256(11); JUCE_SHA256(12); JUCE_SHA256(13); JUCE_SHA256(14); JUCE_SHA256(15);
-            #undef JUCE_SHA256
+            b = (uint32_t (d[0]) << 24) | (uint32_t (d[1]) << 16) | (uint32_t (d[2]) << 8) | d[3];
+            d += 4;
         }
+
+        auto convolve = [&] (uint32_t i, uint32_t j)
+        {
+            s[(7 - i) & 7] += S1 (s[(4 - i) & 7]) + ch (s[(4 - i) & 7], s[(5 - i) & 7], s[(6 - i) & 7]) + constants[i + j]
+                                 + (j != 0 ? (block[i & 15] += s1 (block[(i - 2) & 15]) + block[(i - 7) & 15] + s0 (block[(i - 15) & 15]))
+                                           : block[i]);
+            s[(3 - i) & 7] += s[(7 - i) & 7];
+            s[(7 - i) & 7] += S0 (s[(0 - i) & 7]) + maj (s[(0 - i) & 7], s[(1 - i) & 7], s[(2 - i) & 7]);
+        };
+
+        for (uint32_t j = 0; j < 64; j += 16)
+            for (uint32_t i = 0; i < 16; ++i)
+                convolve (i, j);
 
         for (int i = 0; i < 8; ++i)
             state[i] += s[i];
@@ -84,23 +82,23 @@ public:
         length += 64;
     }
 
-    void processFinalBlock (const void* const data, unsigned int numBytes) noexcept
+    void processFinalBlock (const void* data, uint32_t numBytes) noexcept
     {
         jassert (numBytes < 64);
 
         length += numBytes;
         length *= 8; // (the length is stored as a count of bits, not bytes)
 
-        uint8 finalBlocks[128];
+        uint8_t finalBlocks[128];
 
         memcpy (finalBlocks, data, numBytes);
-        finalBlocks [numBytes++] = 128; // append a '1' bit
+        finalBlocks[numBytes++] = 128; // append a '1' bit
 
         while (numBytes != 56 && numBytes < 64 + 56)
-            finalBlocks [numBytes++] = 0; // pad with zeros..
+            finalBlocks[numBytes++] = 0; // pad with zeros..
 
         for (int i = 8; --i >= 0;)
-            finalBlocks [numBytes++] = (uint8) (length >> (i * 8)); // append the length.
+            finalBlocks[numBytes++] = (uint8_t) (length >> (i * 8)); // append the length.
 
         jassert (numBytes == 64 || numBytes == 128);
 
@@ -110,26 +108,26 @@ public:
             processFullBlock (finalBlocks + 64);
     }
 
-    void copyResult (uint8* result) const noexcept
+    void copyResult (uint8_t* result) const noexcept
     {
-        for (int i = 0; i < 8; ++i)
+        for (auto s : state)
         {
-            *result++ = (uint8) (state[i] >> 24);
-            *result++ = (uint8) (state[i] >> 16);
-            *result++ = (uint8) (state[i] >> 8);
-            *result++ = (uint8) state[i];
+            *result++ = (uint8_t) (s >> 24);
+            *result++ = (uint8_t) (s >> 16);
+            *result++ = (uint8_t) (s >> 8);
+            *result++ = (uint8_t) s;
         }
     }
 
-    void processStream (InputStream& input, int64 numBytesToRead, uint8* const result)
+    void processStream (InputStream& input, int64_t numBytesToRead, uint8_t* result)
     {
         if (numBytesToRead < 0)
-            numBytesToRead = std::numeric_limits<int64>::max();
+            numBytesToRead = std::numeric_limits<int64_t>::max();
 
         for (;;)
         {
-            uint8 buffer [64];
-            const int bytesRead = input.read (buffer, (int) jmin (numBytesToRead, (int64) sizeof (buffer)));
+            uint8_t buffer[64];
+            auto bytesRead = input.read (buffer, (int) jmin (numBytesToRead, (int64_t) sizeof (buffer)));
 
             if (bytesRead < (int) sizeof (buffer))
             {
@@ -137,7 +135,7 @@ public:
                 break;
             }
 
-            numBytesToRead -= (int64) sizeof (buffer);
+            numBytesToRead -= (int64_t) sizeof (buffer);
             processFullBlock (buffer);
         }
 
@@ -145,51 +143,36 @@ public:
     }
 
 private:
-    uint32 state[8];
-    uint64 length;
+    uint32_t state[8];
+    uint64_t length = 0;
 
-    static inline uint32 rotate (const uint32 x, const uint32 y) noexcept                { return (x >> y) | (x << (32 - y)); }
-    static inline uint32 ch  (const uint32 x, const uint32 y, const uint32 z) noexcept   { return z ^ ((y ^ z) & x); }
-    static inline uint32 maj (const uint32 x, const uint32 y, const uint32 z) noexcept   { return y ^ ((y ^ z) & (x ^ y)); }
+    static inline uint32_t rotate (uint32_t x, uint32_t y) noexcept            { return (x >> y) | (x << (32 - y)); }
+    static inline uint32_t ch  (uint32_t x, uint32_t y, uint32_t z) noexcept   { return z ^ ((y ^ z) & x); }
+    static inline uint32_t maj (uint32_t x, uint32_t y, uint32_t z) noexcept   { return y ^ ((y ^ z) & (x ^ y)); }
 
-    static inline uint32 s0 (const uint32 x) noexcept     { return rotate (x, 7)  ^ rotate (x, 18) ^ (x >> 3); }
-    static inline uint32 s1 (const uint32 x) noexcept     { return rotate (x, 17) ^ rotate (x, 19) ^ (x >> 10); }
-    static inline uint32 S0 (const uint32 x) noexcept     { return rotate (x, 2)  ^ rotate (x, 13) ^ rotate (x, 22); }
-    static inline uint32 S1 (const uint32 x) noexcept     { return rotate (x, 6)  ^ rotate (x, 11) ^ rotate (x, 25); }
-
-    JUCE_DECLARE_NON_COPYABLE (SHA256Processor)
+    static inline uint32_t s0 (uint32_t x) noexcept     { return rotate (x, 7)  ^ rotate (x, 18) ^ (x >> 3); }
+    static inline uint32_t s1 (uint32_t x) noexcept     { return rotate (x, 17) ^ rotate (x, 19) ^ (x >> 10); }
+    static inline uint32_t S0 (uint32_t x) noexcept     { return rotate (x, 2)  ^ rotate (x, 13) ^ rotate (x, 22); }
+    static inline uint32_t S1 (uint32_t x) noexcept     { return rotate (x, 6)  ^ rotate (x, 11) ^ rotate (x, 25); }
 };
 
 //==============================================================================
-SHA256::SHA256() noexcept
-{
-    zerostruct (result);
-}
-
-SHA256::~SHA256() noexcept {}
-
-SHA256::SHA256 (const SHA256& other) noexcept
-{
-    memcpy (result, other.result, sizeof (result));
-}
-
-SHA256& SHA256::operator= (const SHA256& other) noexcept
-{
-    memcpy (result, other.result, sizeof (result));
-    return *this;
-}
+SHA256::SHA256() = default;
+SHA256::~SHA256() = default;
+SHA256::SHA256 (const SHA256&) = default;
+SHA256& SHA256::operator= (const SHA256&) = default;
 
 SHA256::SHA256 (const MemoryBlock& data)
 {
     process (data.getData(), data.getSize());
 }
 
-SHA256::SHA256 (const void* const data, const size_t numBytes)
+SHA256::SHA256 (const void* data, size_t numBytes)
 {
     process (data, numBytes);
 }
 
-SHA256::SHA256 (InputStream& input, const int64 numBytesToRead)
+SHA256::SHA256 (InputStream& input, int64 numBytesToRead)
 {
     SHA256Processor processor;
     processor.processStream (input, numBytesToRead, result);
@@ -216,7 +199,7 @@ SHA256::SHA256 (CharPointer_UTF8 utf8) noexcept
     process (utf8.getAddress(), utf8.sizeInBytes() - 1);
 }
 
-void SHA256::process (const void* const data, size_t numBytes)
+void SHA256::process (const void* data, size_t numBytes)
 {
     MemoryInputStream m (data, numBytes, false);
     SHA256Processor processor;

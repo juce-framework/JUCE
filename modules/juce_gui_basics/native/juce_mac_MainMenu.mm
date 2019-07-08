@@ -200,6 +200,12 @@ public:
     {
         if (currentModel != nullptr)
         {
+            if (item.action != nullptr)
+            {
+                MessageManager::callAsync (item.action);
+                return;
+            }
+
             if (item.customCallback != nullptr)
                 if (! item.customCallback->menuItemTriggered())
                     return;
@@ -249,10 +255,10 @@ public:
         }
         else if (i.subMenu != nullptr)
         {
-            if (i.text == recentItemsMenuName)
+            if (recentItemsMenuName.isNotEmpty() && i.text == recentItemsMenuName)
             {
                 if (recent == nullptr)
-                    recent.reset (new RecentFilesMenuItem());
+                    recent = std::make_unique<RecentFilesMenuItem>();
 
                 if (recent->recentItem != nil)
                 {
@@ -572,7 +578,7 @@ public:
         : oldMenu (MenuBarModel::getMacMainMenu())
     {
         if (auto* appleMenu = MenuBarModel::getMacExtraAppleItemsMenu())
-            oldAppleMenu.reset (new PopupMenu (*appleMenu));
+            oldAppleMenu = std::make_unique<PopupMenu> (*appleMenu);
 
         if (auto* handler = JuceMainMenuHandler::instance)
             oldRecentItems = handler->recentItemsMenuName;

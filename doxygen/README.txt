@@ -1,10 +1,23 @@
-# The JUCE API Reference
+The JUCE API Reference
+======================
 
 From here, you can generate an offline HTML version of the JUCE API Reference.
 
-How to:
+Dependencies
+------------
 
-1. install doxygen
-2. cd into this directory on the command line
-3. run `make`
-4. doxygen will create a new subfolder "doc" - open doc/index.html in your browser to access the generated HTML documentation
+- doxygen
+- python
+- graphviz (to generate inheritance diagrams)
+
+Make sure that all the dependencies can be found on your PATH.
+
+Building
+--------
+
+- cd into this directory on the command line
+- run `make`
+
+Doxygen will create a new subfolder "doc". Open doc/index.html in your browser
+to access the generated HTML documentation.
+

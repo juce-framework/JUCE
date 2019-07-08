@@ -1424,8 +1424,8 @@ private:
     {
         Array<InOutChannelPair> layouts;
 
-        for (int i = 0; i < numLayouts; ++i)
-            layouts.add (InOutChannelPair (configuration[i]));
+        for (size_t i = 0; i < numLayouts; ++i)
+            layouts.add (InOutChannelPair (configuration[(int) i]));
 
         return layouts;
     }
@@ -1465,8 +1465,7 @@ private:
     int cachedTotalIns = 0, cachedTotalOuts = 0;
 
     AudioProcessorParameterGroup parameterTree;
-    mutable Array<AudioProcessorParameter*> flatParameterList;
-    mutable bool flatParamListNeedsRebuilding = true;
+    Array<AudioProcessorParameter*> flatParameterList;
 
     AudioProcessorParameter* getParamChecked (int) const;
 
@@ -1476,12 +1475,17 @@ private:
     #endif
 
     bool textRecursionCheck = false;
+
+    struct DuplicateParamIDCheck;
+    std::unique_ptr<DuplicateParamIDCheck> duplicateParamIDCheck;
+    void checkDuplicateParamIDs();
    #endif
 
     AudioProcessorListener* getListenerLocked (int) const noexcept;
     void updateSpeakerFormatStrings();
     void audioIOChanged (bool busNumberChanged, bool channelNumChanged);
     void getNextBestLayout (const BusesLayout&, BusesLayout&) const;
+    void triggerDuplicateParamIDCheck();
 
     template <typename floatType>
     void processBypassed (AudioBuffer<floatType>&, MidiBuffer&);

@@ -311,7 +311,11 @@ public:
                         p3 += last;
                     }
 
-                    p2 = last + (last - last2);
+                    p2 = last;
+
+                    if (CharPointer_ASCII ("CcSs").indexOf (previousCommand) >= 0)
+                        p2 += (last - last2);
+
                     path.cubicTo (p2, p1, p3);
 
                     last2 = p1;
@@ -344,8 +348,11 @@ public:
                     if (isRelative)
                         p1 += last;
 
-                    p2 = CharPointer_ASCII ("QqTt").indexOf (previousCommand) >= 0 ? last + (last - last2)
-                                                                                   : p1;
+                    p2 = last;
+
+                    if (CharPointer_ASCII ("QqTt").indexOf (previousCommand) >= 0)
+                        p2 += (last - last2);
+
                     path.quadraticTo (p2, p1);
 
                     last2 = p2;

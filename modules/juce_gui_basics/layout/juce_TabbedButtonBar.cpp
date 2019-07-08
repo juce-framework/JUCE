@@ -552,12 +552,6 @@ void TabbedButtonBar::setTabBackgroundColour (int tabIndex, Colour newColour)
     }
 }
 
-void TabbedButtonBar::extraItemsMenuCallback (int result, TabbedButtonBar* bar)
-{
-    if (bar != nullptr && result > 0)
-        bar->setCurrentTabIndex (result - 1);
-}
-
 void TabbedButtonBar::showExtraItemsMenu()
 {
     PopupMenu m;
@@ -567,11 +561,14 @@ void TabbedButtonBar::showExtraItemsMenu()
         auto* tab = tabs.getUnchecked(i);
 
         if (! tab->button->isVisible())
-            m.addItem (i + 1, tab->name, true, i == currentTabIndex);
+            m.addItem (PopupMenu::Item (tab->name)
+                         .setTicked (i == currentTabIndex)
+                         .setAction ([this, i] { setCurrentTabIndex (i); }));
     }
 
-    m.showMenuAsync (PopupMenu::Options().withTargetComponent (extraTabsButton.get()),
-                     ModalCallbackFunction::forComponent (extraItemsMenuCallback, this));
+    m.showMenuAsync (PopupMenu::Options()
+                        .withDeletionCheck (*this)
+                        .withTargetComponent (extraTabsButton.get()));
 }
 
 //==============================================================================
