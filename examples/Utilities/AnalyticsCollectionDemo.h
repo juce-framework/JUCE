@@ -89,7 +89,7 @@ public:
         startAnalyticsThread (initialPeriodMs);
     }
 
-    ~GoogleAnalyticsDestination()
+    ~GoogleAnalyticsDestination() override
     {
         // Here we sleep so that our background thread has a chance to send the
         // last lot of batched events. Be careful - if your app takes too long to
@@ -332,7 +332,7 @@ public:
         logEventButtonPress.reset (new ButtonTracker (eventButton, "button_press", logButtonPressParameters));
     }
 
-    ~AnalyticsCollectionDemo()
+    ~AnalyticsCollectionDemo() override
     {
         // The event type here should probably be DemoAnalyticsEventTypes::sessionEnd
         // in a more advanced app.
