@@ -325,6 +325,7 @@ private:
         }
 
         if (project.getEnabledModules().isModuleEnabled ("juce_core")
+            && project.isConfigFlagEnabled ("JUCE_USE_CURL", true)
             && ! project.isConfigFlagEnabled ("JUCE_LOAD_CURL_SYMBOLS_LAZILY", false))
             result.add ("libcurl");
 
