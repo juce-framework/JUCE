@@ -675,7 +675,7 @@ private:
         else
         {
             sampleRateDropDown->clear();
-            sampleRateDropDown->onChange = {};
+            sampleRateDropDown->onChange = nullptr;
         }
 
         for (auto rate : currentDevice->getAvailableSampleRates())
@@ -701,7 +701,7 @@ private:
         else
         {
             bufferSizeDropDown->clear();
-            bufferSizeDropDown->onChange = {};
+            bufferSizeDropDown->onChange = nullptr;
         }
 
         auto currentRate = currentDevice->getCurrentSampleRate();

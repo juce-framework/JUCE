@@ -417,7 +417,7 @@ public:
 
     bool sendFirmwareUpdatePacket (const uint8* data, uint8 size, std::function<void(uint8, uint32)> callback) override
     {
-        firmwarePacketAckCallback = {};
+        firmwarePacketAckCallback = nullptr;
 
         if (buildAndSendPacket<256> ([data, size] (BlocksProtocol::HostPacketBuilder<256>& p)
                                      { return p.addFirmwareUpdatePacket (data, size); }))
@@ -434,7 +434,7 @@ public:
         if (firmwarePacketAckCallback != nullptr)
         {
             firmwarePacketAckCallback (resultCode, resultDetail);
-            firmwarePacketAckCallback = {};
+            firmwarePacketAckCallback = nullptr;
         }
     }
 
