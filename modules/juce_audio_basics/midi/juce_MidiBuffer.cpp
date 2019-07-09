@@ -128,8 +128,8 @@ void MidiBuffer::addEvent (const void* newData, int maxBytes, int sampleNumber)
 
         auto d = data.begin() + offset;
         writeUnaligned<int32>  (d, sampleNumber);
-        writeUnaligned<uint16> (d + 4, static_cast<uint16> (numBytes));
-        memcpy (d + 6, newData, (size_t) numBytes);
+        writeUnaligned<uint16> (d + sizeof (int32), static_cast<uint16> (numBytes));
+        memcpy (d + sizeof (int32) + sizeof (uint16), newData, (size_t) numBytes);
     }
 }
 
