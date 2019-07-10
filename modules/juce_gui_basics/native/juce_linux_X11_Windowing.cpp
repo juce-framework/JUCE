@@ -966,7 +966,7 @@ static double getScaleForDisplay (const String& name, double dpi)
     // If no scale factor is set by GNOME or Ubuntu then calculate from monitor dpi
     // We use the same approach as chromium which simply divides the dpi by 96
     // and then rounds the result
-    return round (dpi / 150.0);
+    return round (dpi / 96.0);
 }
 
 //=============================== X11 - Pixmap =================================
