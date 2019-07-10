@@ -896,9 +896,13 @@ private:
 
 static double getDisplayDPI (::Display* display, int index)
 {
-    double dpiX = (DisplayWidth  (display, index) * 25.4) / DisplayWidthMM  (display, index);
-    double dpiY = (DisplayHeight (display, index) * 25.4) / DisplayHeightMM (display, index);
-    return (dpiX + dpiY) / 2.0;
+    auto widthMM  = DisplayWidthMM  (display, index);
+    auto heightMM = DisplayHeightMM (display, index);
+
+    if (widthMM > 0 && heightMM > 0)
+        return (((DisplayWidth (display, index) * 25.4) / widthMM) + ((DisplayHeight (display, index) * 25.4) / heightMM)) / 2.0;
+
+    return 96.0;
 }
 
 static double getScaleForDisplay (const String& name, double dpi)
