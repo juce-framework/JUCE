@@ -69,7 +69,7 @@ namespace
             if (! output.writeString (value))
                 return false;
 
-            const size_t numPaddingZeros = ~value.length() & 3;
+            const size_t numPaddingZeros = ~value.getNumBytesAsUTF8() & 3;
 
             return output.writeRepeatedByte ('\0', numPaddingZeros);
         }
