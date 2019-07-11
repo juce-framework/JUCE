@@ -2513,6 +2513,11 @@ int LookAndFeel_V2::getCallOutBoxBorderSize (const CallOutBox&)
     return 20;
 }
 
+float LookAndFeel_V2::getCallOutBoxCornerSize (const CallOutBox&)
+{
+    return 9.0f;
+}
+
 //==============================================================================
 AttributedString LookAndFeel_V2::createFileChooserHeaderText (const String& title,
                                                            const String& instructions)
