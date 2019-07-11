@@ -117,11 +117,29 @@ public:
         */
         virtual void oscMessageReceived (const OSCMessage& message) = 0;
 
+        /** This version also receives the IP and port of the sender.
+            The default implementation just passes the message to the
+            other version.
+        */
+        virtual void oscMessageReceived (const OSCMessage& message, const String& senderIPAddress, int senderPortNumber)
+        {
+            oscMessageReceived(message);
+        }
+
         /** Called when the OSCReceiver receives a new OSC bundle.
             If you are not interested in OSC bundles, just ignore this method.
             The default implementation provided here will simply do nothing.
         */
         virtual void oscBundleReceived (const OSCBundle& /*bundle*/) {}
+
+        /** This version also receives the IP and port of the sender.
+            The default implementation just passes the message to the
+            other version.
+        */
+        virtual void oscBundleReceived (const OSCBundle& bundle, const String& /*senderIPAddress*/, int /*senderPortNumber*/)
+        {
+            oscBundleReceived(bundle);
+        }
     };
 
     //==============================================================================
@@ -155,7 +173,16 @@ public:
         /** Called when the OSCReceiver receives an OSC message with an OSC address
             pattern that matches the OSC address with which this listener was added.
         */
-        virtual void oscMessageReceived (const OSCMessage& message) = 0;
+        virtual void oscMessageReceived (const OSCMessage& message) {};
+
+        /** This version also receives the IP and port of the sender.
+            The default implementation just passes the message to the
+            other version.
+        */
+        virtual void oscMessageReceived (const OSCMessage& message, const String& /*senderIPAddress*/, int /*senderPortNumber*/)
+        {
+            oscMessageReceived(message);
+        }
     };
 
     //==============================================================================
