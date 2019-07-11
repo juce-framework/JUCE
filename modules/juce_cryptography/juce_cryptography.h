@@ -54,10 +54,6 @@
 //==============================================================================
 #include <juce_core/juce_core.h>
 
-#if JUCE_MSVC
- #pragma warning (disable: 4351) // this is a dodgy VC2013 warning about C++11 behaviour
-#endif
-
 #include "encryption/juce_BlowFish.h"
 #include "encryption/juce_Primes.h"
 #include "encryption/juce_RSAKey.h"

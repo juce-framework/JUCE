@@ -273,8 +273,8 @@ bool MessageManager::existsAndIsCurrentThread() noexcept
 struct MessageManager::Lock::BlockingMessage   : public MessageManager::MessageBase
 {
     BlockingMessage (const MessageManager::Lock* parent) noexcept
-    // need a const_cast here as VS2013 doesn't like a const pointer to be in an atomic
-        : owner (const_cast<MessageManager::Lock*> (parent)) {}
+		: owner (parent)
+    {}
 
     void messageCallback() override
     {
@@ -289,7 +289,7 @@ struct MessageManager::Lock::BlockingMessage   : public MessageManager::MessageB
     }
 
     CriticalSection ownerCriticalSection;
-    Atomic<MessageManager::Lock*> owner;
+    Atomic<const MessageManager::Lock*> owner;
     WaitableEvent releaseEvent;
 
     JUCE_DECLARE_NON_COPYABLE (BlockingMessage)

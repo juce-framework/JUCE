@@ -50,16 +50,14 @@ public:
 
     URL (const URL&) = default;
     URL& operator= (const URL&) = default;
-
-    // VS2013 can't default move constructors and assignments
-    URL (URL&&);
-    URL& operator= (URL&&);
+    URL (URL&&) = default;
+    URL& operator= (URL&&) = default;
 
     /** Creates URL referring to a local file on your disk using the file:// scheme. */
     explicit URL (File);
 
     /** Destructor. */
-    ~URL();
+    ~URL() = default;
 
     /** Compares two URLs.
         All aspects of the URLs must be identical for them to match, including any parameters,

@@ -39,26 +39,6 @@ PositionedGlyph::PositionedGlyph (const Font& font_, juce_wchar character_, int 
 {
 }
 
-PositionedGlyph::PositionedGlyph (PositionedGlyph&& other) noexcept
-    : font (std::move (other.font)),
-      character (other.character), glyph (other.glyph),
-      x (other.x), y (other.y), w (other.w), whitespace (other.whitespace)
-{
-}
-
-PositionedGlyph& PositionedGlyph::operator= (PositionedGlyph&& other) noexcept
-{
-    font = std::move (other.font);
-    character = other.character;
-    glyph = other.glyph;
-    x = other.x;
-    y = other.y;
-    w = other.w;
-    whitespace = other.whitespace;
-
-    return *this;
-}
-
 PositionedGlyph::~PositionedGlyph() {}
 
 static inline void drawGlyphWithFont (Graphics& g, int glyph, const Font& font, AffineTransform t)
@@ -127,20 +107,6 @@ GlyphArrangement::GlyphArrangement()
 {
     glyphs.ensureStorageAllocated (128);
 }
-
-GlyphArrangement::GlyphArrangement (GlyphArrangement&& other)
-    : glyphs (std::move (other.glyphs))
-{
-}
-
-GlyphArrangement& GlyphArrangement::operator= (GlyphArrangement&& other)
-{
-    glyphs = std::move (other.glyphs);
-
-    return *this;
-}
-
-GlyphArrangement::~GlyphArrangement() {}
 
 //==============================================================================
 void GlyphArrangement::clear()

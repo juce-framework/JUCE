@@ -74,14 +74,7 @@ public:
     }
 
     UniformTextSection (const UniformTextSection&) = default;
-
-    // VS2013 can't default move constructors
-    UniformTextSection (UniformTextSection&& other)
-        : font (std::move (other.font)),
-          colour (other.colour),
-          atoms (std::move (other.atoms))
-    {
-    }
+    UniformTextSection (UniformTextSection&&) = default;
 
     UniformTextSection& operator= (const UniformTextSection&) = delete;
 

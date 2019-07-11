@@ -181,19 +181,18 @@ public:
         bool isSectionHeader = false;
 
         /** Sets the isTicked flag (and returns a reference to this item to allow chaining). */
-        Item& setTicked (bool shouldBeTicked = true) JUCE_REF_QUALIFIER noexcept;
+        Item& setTicked (bool shouldBeTicked = true) & noexcept;
         /** Sets the isEnabled flag (and returns a reference to this item to allow chaining). */
-        Item& setEnabled (bool shouldBeEnabled) JUCE_REF_QUALIFIER noexcept;
+        Item& setEnabled (bool shouldBeEnabled) & noexcept;
         /** Sets the action property (and returns a reference to this item to allow chaining). */
-        Item& setAction (std::function<void()> action) JUCE_REF_QUALIFIER noexcept;
+        Item& setAction (std::function<void()> action) & noexcept;
         /** Sets the itemID property (and returns a reference to this item to allow chaining). */
-        Item& setID (int newID) JUCE_REF_QUALIFIER noexcept;
+        Item& setID (int newID) & noexcept;
         /** Sets the colour property (and returns a reference to this item to allow chaining). */
-        Item& setColour (Colour) JUCE_REF_QUALIFIER noexcept;
+        Item& setColour (Colour) & noexcept;
         /** Sets the customComponent property (and returns a reference to this item to allow chaining). */
-        Item& setCustomComponent (ReferenceCountedObjectPtr<CustomComponent> customComponent) JUCE_REF_QUALIFIER noexcept;
+        Item& setCustomComponent (ReferenceCountedObjectPtr<CustomComponent> customComponent) & noexcept;
 
-       #if ! (JUCE_MSVC && _MSC_VER < 1900) // Gah.. no ref-qualifiers in VC2013...
         /** Sets the isTicked flag (and returns a reference to this item to allow chaining). */
         Item&& setTicked (bool shouldBeTicked = true) && noexcept;
         /** Sets the isEnabled flag (and returns a reference to this item to allow chaining). */
@@ -206,7 +205,6 @@ public:
         Item&& setColour (Colour) && noexcept;
         /** Sets the customComponent property (and returns a reference to this item to allow chaining). */
         Item&& setCustomComponent (ReferenceCountedObjectPtr<CustomComponent> customComponent) && noexcept;
-       #endif
     };
 
     /** Adds an item to the menu.

@@ -135,49 +135,12 @@ namespace
 }
 
 //==============================================================================
-AttributedString::Attribute::Attribute (Attribute&& other) noexcept
-    : range (other.range),
-      font (std::move (other.font)),
-      colour (other.colour)
-{
-}
-
-AttributedString::Attribute& AttributedString::Attribute::operator= (Attribute&& other) noexcept
-{
-    range = other.range;
-    font = std::move (other.font);
-    colour = other.colour;
-    return *this;
-}
-
 AttributedString::Attribute::Attribute (Range<int> r, const Font& f, Colour c) noexcept
     : range (r), font (f), colour (c)
 {
 }
 
 //==============================================================================
-AttributedString::AttributedString (AttributedString&& other) noexcept
-    : text (std::move (other.text)),
-      lineSpacing (other.lineSpacing),
-      justification (other.justification),
-      wordWrap (other.wordWrap),
-      readingDirection (other.readingDirection),
-      attributes (std::move (other.attributes))
-{
-}
-
-AttributedString& AttributedString::operator= (AttributedString&& other) noexcept
-{
-    text = std::move (other.text);
-    lineSpacing = other.lineSpacing;
-    justification = other.justification;
-    wordWrap = other.wordWrap;
-    readingDirection = other.readingDirection;
-    attributes = std::move (other.attributes);
-
-    return *this;
-}
-
 void AttributedString::setText (const String& newText)
 {
     auto newLength = newText.length();
