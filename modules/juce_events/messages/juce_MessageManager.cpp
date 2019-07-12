@@ -273,7 +273,7 @@ bool MessageManager::existsAndIsCurrentThread() noexcept
 struct MessageManager::Lock::BlockingMessage   : public MessageManager::MessageBase
 {
     BlockingMessage (const MessageManager::Lock* parent) noexcept
-		: owner (parent)
+        : owner (parent)
     {}
 
     void messageCallback() override
