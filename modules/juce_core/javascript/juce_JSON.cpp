@@ -38,7 +38,7 @@ struct JSONParser
         Result getResult() const        { return Result::fail (getDescription()); }
     };
 
-    void throwError (juce::String message, String::CharPointerType location)
+    [[noreturn]] void throwError (juce::String message, String::CharPointerType location)
     {
         ErrorException e;
         e.message = std::move (message);
@@ -182,7 +182,6 @@ struct JSONParser
         }
 
         throwError ("Syntax error", originalLocation);
-        return {};
     }
 
     var parseNumber (bool isNegative)
