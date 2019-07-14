@@ -896,9 +896,13 @@ private:
 
 static double getDisplayDPI (::Display* display, int index)
 {
-    double dpiX = (DisplayWidth  (display, index) * 25.4) / DisplayWidthMM  (display, index);
-    double dpiY = (DisplayHeight (display, index) * 25.4) / DisplayHeightMM (display, index);
-    return (dpiX + dpiY) / 2.0;
+    auto widthMM  = DisplayWidthMM  (display, index);
+    auto heightMM = DisplayHeightMM (display, index);
+
+    if (widthMM > 0 && heightMM > 0)
+        return (((DisplayWidth (display, index) * 25.4) / widthMM) + ((DisplayHeight (display, index) * 25.4) / heightMM)) / 2.0;
+
+    return 96.0;
 }
 
 static double getScaleForDisplay (const String& name, double dpi)
@@ -962,7 +966,7 @@ static double getScaleForDisplay (const String& name, double dpi)
     // If no scale factor is set by GNOME or Ubuntu then calculate from monitor dpi
     // We use the same approach as chromium which simply divides the dpi by 96
     // and then rounds the result
-    return round (dpi / 150.0);
+    return round (dpi / 96.0);
 }
 
 //=============================== X11 - Pixmap =================================
@@ -1029,7 +1033,7 @@ static void* createDraggingHandCursor()
     static unsigned char dragHandData[] = { 71,73,70,56,57,97,16,0,16,0,145,2,0,0,0,0,255,255,255,0,
       0,0,0,0,0,33,249,4,1,0,0,2,0,44,0,0,0,0,16,0, 16,0,0,2,52,148,47,0,200,185,16,130,90,12,74,139,107,84,123,39,
       132,117,151,116,132,146,248,60,209,138,98,22,203,114,34,236,37,52,77,217, 247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
-    const int dragHandDataSize = 99;
+    size_t dragHandDataSize = 99;
 
     return CustomMouseCursorInfo (ImageFileFormat::loadFrom (dragHandData, dragHandDataSize), { 8, 7 }).create();
 }

@@ -692,7 +692,8 @@ OSXTypeface::~OSXTypeface()
     if (fontRef != nullptr)
     {
        #if JUCE_MAC && defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8
-        CTFontManagerUnregisterGraphicsFont (fontRef, nullptr);
+        if (dataCopy.getSize() != 0)
+            CTFontManagerUnregisterGraphicsFont (fontRef, nullptr);
        #endif
 
         CGFontRelease (fontRef);
@@ -797,9 +798,16 @@ StringArray Font::findAllTypefaceStyles (const String& family)
 Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)                  { return *new OSXTypeface (font); }
 Typeface::Ptr Typeface::createSystemTypefaceFor (const void* data, size_t size)     { return *new OSXTypeface (data, size); }
 
-void Typeface::scanFolderForFonts (const File&)
+void Typeface::scanFolderForFonts (const File& folder)
 {
-    jassertfalse; // not implemented on this platform
+    for (auto& file : folder.findChildFiles (File::findFiles, false, "*.otf;*.ttf"))
+    {
+        if (auto urlref = CFURLCreateWithFileSystemPath (kCFAllocatorDefault, file.getFullPathName().toCFString(), kCFURLPOSIXPathStyle, true))
+        {
+            CTFontManagerRegisterFontsForURL (urlref, kCTFontManagerScopeProcess, nullptr);
+            CFRelease (urlref);
+        }
+    }
 }
 
 struct DefaultFontNames

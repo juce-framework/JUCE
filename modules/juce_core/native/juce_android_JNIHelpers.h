@@ -523,22 +523,23 @@ DECLARE_JNI_CLASS (AndroidUri, "android/net/Uri")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
- METHOD (construct,           "<init>",              "(Landroid/content/Context;)V") \
- METHOD (layout,              "layout",              "(IIII)V") \
- METHOD (getLeft,             "getLeft",             "()I") \
- METHOD (getTop,              "getTop",              "()I") \
- METHOD (getWidth,            "getWidth",            "()I") \
- METHOD (getHeight,           "getHeight",           "()I") \
- METHOD (getLocationOnScreen, "getLocationOnScreen", "([I)V") \
- METHOD (getParent,           "getParent",           "()Landroid/view/ViewParent;") \
- METHOD (bringToFront,        "bringToFront",        "()V") \
- METHOD (requestFocus,        "requestFocus",        "()Z") \
- METHOD (hasFocus,            "hasFocus",            "()Z") \
- METHOD (invalidate,          "invalidate",          "(IIII)V") \
- METHOD (setVisibility,       "setVisibility",       "(I)V") \
- METHOD (setLayoutParams,     "setLayoutParams",     "(Landroid/view/ViewGroup$LayoutParams;)V") \
- METHOD (findViewById,        "findViewById",        "(I)Landroid/view/View;") \
- METHOD (getRootView,         "getRootView",         "()Landroid/view/View;") \
+ METHOD (construct,                 "<init>",                    "(Landroid/content/Context;)V") \
+ METHOD (layout,                    "layout",                    "(IIII)V") \
+ METHOD (getLeft,                   "getLeft",                   "()I") \
+ METHOD (getTop,                    "getTop",                    "()I") \
+ METHOD (getWidth,                  "getWidth",                  "()I") \
+ METHOD (getHeight,                 "getHeight",                 "()I") \
+ METHOD (getLocationOnScreen,       "getLocationOnScreen",       "([I)V") \
+ METHOD (getParent,                 "getParent",                 "()Landroid/view/ViewParent;") \
+ METHOD (bringToFront,              "bringToFront",              "()V") \
+ METHOD (requestFocus,              "requestFocus",              "()Z") \
+ METHOD (hasFocus,                  "hasFocus",                  "()Z") \
+ METHOD (invalidate,                "invalidate",                "(IIII)V") \
+ METHOD (setVisibility,             "setVisibility",             "(I)V") \
+ METHOD (setLayoutParams,           "setLayoutParams",           "(Landroid/view/ViewGroup$LayoutParams;)V") \
+ METHOD (setSystemUiVisibility,     "setSystemUiVisibility",     "(I)V") \
+ METHOD (findViewById,              "findViewById",              "(I)Landroid/view/View;") \
+ METHOD (getRootView,               "getRootView",               "()Landroid/view/View;") \
  METHOD (addOnLayoutChangeListener, "addOnLayoutChangeListener", "(Landroid/view/View$OnLayoutChangeListener;)V")
 
 DECLARE_JNI_CLASS (AndroidView, "android/view/View")

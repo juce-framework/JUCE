@@ -209,34 +209,6 @@ void URL::init()
 
 URL::URL (const String& u, int)  : url (u) {}
 
-URL::URL (URL&& other)
-    : url             (std::move (other.url)),
-      postData        (std::move (other.postData)),
-      parameterNames  (std::move (other.parameterNames)),
-      parameterValues (std::move (other.parameterValues)),
-      filesToUpload   (std::move (other.filesToUpload))
-   #if JUCE_IOS
-    , bookmark        (std::move (other.bookmark))
-   #endif
-{
-}
-
-URL& URL::operator= (URL&& other)
-{
-    url             = std::move (other.url);
-    postData        = std::move (other.postData);
-    parameterNames  = std::move (other.parameterNames);
-    parameterValues = std::move (other.parameterValues);
-    filesToUpload   = std::move (other.filesToUpload);
-   #if JUCE_IOS
-    bookmark        = std::move (other.bookmark);
-   #endif
-
-    return *this;
-}
-
-URL::~URL() {}
-
 URL URL::createWithoutParsing (const String& u)
 {
     return URL (u, 0);
@@ -705,10 +677,6 @@ InputStream* URL::createInputStream (bool usePostCommand,
 
         OpenStreamProgressCallback* callback;
         void* const data;
-
-        // workaround a MSVC 2013 compiler warning
-        ProgressCallbackCaller (const ProgressCallbackCaller& o) : callback (o.callback), data (o.data) { jassertfalse; }
-        ProgressCallbackCaller& operator= (const ProgressCallbackCaller&) { jassertfalse; return *this; }
     };
 
     std::unique_ptr<ProgressCallbackCaller> callbackCaller

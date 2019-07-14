@@ -461,7 +461,7 @@ private:
         }
 
         // don't add libcurl if curl symbols are loaded at runtime
-        if (! isLoadCurlSymbolsLazilyEnabled())
+        if (isCurlEnabled() && ! isLoadCurlSymbolsLazilyEnabled())
             packages.add ("libcurl");
 
         packages.removeDuplicates (false);
@@ -605,6 +605,14 @@ private:
 
         return (project.getEnabledModules().isModuleEnabled (guiExtrasModule)
                 && project.isConfigFlagEnabled ("JUCE_WEB_BROWSER", true));
+    }
+
+    bool isCurlEnabled() const
+    {
+        static String juceCoreModule ("juce_core");
+
+        return (project.getEnabledModules().isModuleEnabled (juceCoreModule)
+                && project.isConfigFlagEnabled ("JUCE_USE_CURL", true));
     }
 
     bool isLoadCurlSymbolsLazilyEnabled() const

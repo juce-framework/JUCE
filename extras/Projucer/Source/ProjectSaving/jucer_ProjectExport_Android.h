@@ -1341,7 +1341,7 @@ private:
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
                 addCompileUnits (projectItem.getChild(i), mo, excludeFromBuild, extraCompilerFlags);
         }
-        else if (projectItem.shouldBeAddedToTargetProject())
+        else if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (*this))
         {
             auto f = projectItem.getFile();
             RelativePath file (f, getTargetFolder().getChildFile ("app"), RelativePath::buildTargetFolder);

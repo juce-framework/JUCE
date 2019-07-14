@@ -1296,6 +1296,14 @@ bool Project::Item::canContain (const Item& child) const
 
 bool Project::Item::shouldBeAddedToTargetProject() const    { return isFile(); }
 
+bool Project::Item::shouldBeAddedToTargetExporter (const ProjectExporter& exporter) const
+{
+    if (shouldBeAddedToXcodeResources())
+        return exporter.isXcode() || shouldBeCompiled();
+
+    return true;
+}
+
 Value Project::Item::getShouldCompileValue()                { return state.getPropertyAsValue (Ids::compile, getUndoManager()); }
 bool Project::Item::shouldBeCompiled() const                { return state [Ids::compile]; }
 

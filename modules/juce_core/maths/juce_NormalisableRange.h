@@ -44,32 +44,8 @@ public:
 
     NormalisableRange (const NormalisableRange&) = default;
     NormalisableRange& operator= (const NormalisableRange&) = default;
-
-    // VS2013 can't default move constructors
-    NormalisableRange (NormalisableRange&& other)
-        : start (other.start), end (other.end),
-          interval (other.interval), skew (other.skew),
-          symmetricSkew (other.symmetricSkew),
-          convertFrom0To1Function  (std::move (other.convertFrom0To1Function)),
-          convertTo0To1Function    (std::move (other.convertTo0To1Function)),
-          snapToLegalValueFunction (std::move (other.snapToLegalValueFunction))
-    {
-    }
-
-    // VS2013 can't default move assignments
-    NormalisableRange& operator= (NormalisableRange&& other)
-    {
-        start = other.start;
-        end = other.end;
-        interval = other.interval;
-        skew = other.skew;
-        symmetricSkew = other.symmetricSkew;
-        convertFrom0To1Function  = std::move (other.convertFrom0To1Function);
-        convertTo0To1Function    = std::move (other.convertTo0To1Function);
-        snapToLegalValueFunction = std::move (other.snapToLegalValueFunction);
-
-        return *this;
-    }
+    NormalisableRange (NormalisableRange&&) = default;
+    NormalisableRange& operator= (NormalisableRange&&) = default;
 
     /** Creates a NormalisableRange with a given range, interval and skew factor. */
     NormalisableRange (ValueType rangeStart,

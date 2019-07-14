@@ -230,11 +230,30 @@ DECLARE_JNI_CLASS (AndroidWindowManagerLayoutParams, "android/view/WindowManager
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  METHOD (getDecorView, "getDecorView",       "()Landroid/view/View;") \
- METHOD (setFlags,     "setFlags",           "(II)V")
+ METHOD (setFlags,     "setFlags",           "(II)V") \
+ METHOD (clearFlags,   "clearFlags",         "(I)V")
 
 DECLARE_JNI_CLASS (AndroidWindow, "android/view/Window")
 #undef JNI_CLASS_MEMBERS
 
+namespace
+{
+    enum
+    {
+        SYSTEM_UI_FLAG_VISIBLE = 0,
+        SYSTEM_UI_FLAG_LOW_PROFILE = 1,
+        SYSTEM_UI_FLAG_HIDE_NAVIGATION = 2,
+        SYSTEM_UI_FLAG_FULLSCREEN = 4,
+        SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION = 512,
+        SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = 1024,
+        SYSTEM_UI_FLAG_IMMERSIVE = 2048,
+        SYSTEM_UI_FLAG_IMMERSIVE_STICKY = 4096
+    };
+
+    constexpr int fullScreenFlags = SYSTEM_UI_FLAG_HIDE_NAVIGATION | SYSTEM_UI_FLAG_FULLSCREEN | SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+
+    constexpr int FLAG_NOT_FOCUSABLE = 0x8;
+}
 
 //==============================================================================
 class AndroidComponentPeer  : public ComponentPeer,
@@ -300,10 +319,13 @@ public:
             LocalRef<jobject> windowLayoutParams (env->NewObject (AndroidWindowManagerLayoutParams, AndroidWindowManagerLayoutParams.create,
                                                                   physicalBounds.getWidth(), physicalBounds.getHeight(),
                                                                   physicalBounds.getX(), physicalBounds.getY(),
-                                                                  TYPE_APPLICATION, FLAG_NOT_TOUCH_MODAL | FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_NO_LIMITS,
+                                                                  TYPE_APPLICATION, FLAG_NOT_TOUCH_MODAL | FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_NO_LIMITS | FLAG_NOT_FOCUSABLE,
                                                                   component.isOpaque() ? PIXEL_FORMAT_OPAQUE : PIXEL_FORMAT_TRANSPARENT));
             env->SetIntField (windowLayoutParams.get(), AndroidWindowManagerLayoutParams.gravity, GRAVITY_LEFT | GRAVITY_TOP);
             env->SetIntField (windowLayoutParams.get(), AndroidWindowManagerLayoutParams.windowAnimations, 0x01030000 /* android.R.style.Animation */);
+
+            if (Desktop::getInstance().getKioskModeComponent() != nullptr)
+                setNavBarsHidden (true);
 
             LocalRef<jobject> activity (getCurrentActivity());
 
@@ -509,20 +531,8 @@ public:
 
     void setNavBarsHidden (bool hidden)
     {
-        enum
-        {
-            SYSTEM_UI_FLAG_VISIBLE                  = 0,
-            SYSTEM_UI_FLAG_LOW_PROFILE              = 1,
-            SYSTEM_UI_FLAG_HIDE_NAVIGATION          = 2,
-            SYSTEM_UI_FLAG_FULLSCREEN               = 4,
-            SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION   = 512,
-            SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN        = 1024,
-            SYSTEM_UI_FLAG_IMMERSIVE                = 2048,
-            SYSTEM_UI_FLAG_IMMERSIVE_STICKY         = 4096
-        };
-
         view.callVoidMethod (ComponentPeerView.setSystemUiVisibilityCompat,
-                             hidden ? (jint) (SYSTEM_UI_FLAG_HIDE_NAVIGATION | SYSTEM_UI_FLAG_FULLSCREEN | SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+                             hidden ? (jint) (fullScreenFlags)
                                     : (jint) (SYSTEM_UI_FLAG_VISIBLE));
 
         navBarsHidden = hidden;
@@ -533,7 +543,7 @@ public:
         // updating the nav bar visibility is a bit odd on Android - need to wait for
         if (shouldNavBarsBeHidden (shouldBeFullScreen))
         {
-            if (! navBarsHidden && ! isTimerRunning())
+            if (! isTimerRunning())
             {
                 startTimer (500);
             }
@@ -706,6 +716,9 @@ public:
 
     void handleFocusChangeCallback (bool hasFocus)
     {
+        if (isFullScreen())
+            setFullScreen (true);
+
         if (hasFocus)
             handleFocusGain();
         else
@@ -1099,7 +1112,8 @@ JUCE_API void JUCE_CALLTYPE Process::makeForegroundProcess() {}
 
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
- METHOD (show,                   "show",                 "()V")
+ METHOD (show,                   "show",                 "()V") \
+ METHOD (getWindow,              "getWindow",            "()Landroid/view/Window;")
 
 DECLARE_JNI_CLASS (AndroidDialog, "android/app/Dialog")
 #undef JNI_CLASS_MEMBERS
@@ -1206,7 +1220,20 @@ static void createAndroidDialog (const String& title, const String& message,
                                                               "android/content/DialogInterface$OnClickListener").get()));
 
     LocalRef<jobject> dialog (env->CallObjectMethod (builder.get(), AndroidAlertDialogBuilder.create));
+
+    LocalRef<jobject> window (env->CallObjectMethod (dialog.get(), AndroidDialog.getWindow));
+
+    if (Desktop::getInstance().getKioskModeComponent() != nullptr)
+    {
+        env->CallVoidMethod (window.get(), AndroidWindow.setFlags, FLAG_NOT_FOCUSABLE, FLAG_NOT_FOCUSABLE);
+        LocalRef<jobject> decorView (env->CallObjectMethod (window.get(), AndroidWindow.getDecorView));
+        env->CallVoidMethod (decorView.get(), AndroidView.setSystemUiVisibility, fullScreenFlags);
+    }
+
     env->CallVoidMethod (dialog.get(), AndroidDialog.show);
+
+    if (Desktop::getInstance().getKioskModeComponent() != nullptr)
+        env->CallVoidMethod (window.get(), AndroidWindow.clearFlags, FLAG_NOT_FOCUSABLE);
 }
 
 void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType /*iconType*/,

@@ -56,7 +56,7 @@ struct EmptyString
     String::CharPointerType::CharType text;
 };
 
-static const EmptyString emptyString = { 0x3fffffff, sizeof (String::CharPointerType::CharType), 0 };
+static const EmptyString emptyString { 0x3fffffff, sizeof (String::CharPointerType::CharType), 0 };
 
 //==============================================================================
 class StringHolder
@@ -156,13 +156,13 @@ public:
     {
         auto* b = bufferFromText (text);
 
-        if (b != (StringHolder*) &emptyString)
+        if (! isEmptyString (b))
             ++(b->refCount);
     }
 
     static inline void release (StringHolder* const b) noexcept
     {
-        if (b != (StringHolder*) &emptyString)
+        if (! isEmptyString (b))
             if (--(b->refCount) == -1)
                 delete[] reinterpret_cast<char*> (b);
     }
@@ -182,7 +182,7 @@ public:
     {
         auto* b = bufferFromText (text);
 
-        if (b == (StringHolder*) &emptyString)
+        if (isEmptyString (b))
         {
             auto newText = createUninitialisedBytes (numBytes);
             newText.writeNull();
@@ -215,6 +215,11 @@ private:
         // (Can't use offsetof() here because of warnings about this not being a POD)
         return reinterpret_cast<StringHolder*> (reinterpret_cast<char*> (text.getAddress())
                     - (reinterpret_cast<size_t> (reinterpret_cast<StringHolder*> (128)->text) - 128));
+    }
+
+    static inline bool isEmptyString (StringHolder* other)
+    {
+        return (other->refCount.get() & 0x30000000) != 0;
     }
 
     void compileTimeChecks()
