@@ -795,7 +795,7 @@ public:
         if (r.size.width < 1.0f || r.size.height < 1.0f)
             return;
 
-        auto cg = (CGContextRef) [[NSGraphicsContext currentContext] CGContext];
+        auto cg = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
 
         if (! component.isOpaque())
             CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
