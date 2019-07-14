@@ -111,7 +111,7 @@ public:
         const ScopedLock sl (lock);
 
         fdReadCallbacks.push_back ({ fd, std::move (cb) });
-        pfds.push_back ({ fd, POLLIN, 0 });
+        pfds.push_back ({ fd, POLLIN | POLLOUT, 0 });
     }
 
     void unregisterFdCallback (int fd)

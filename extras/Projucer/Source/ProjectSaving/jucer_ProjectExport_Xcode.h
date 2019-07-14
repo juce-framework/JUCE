@@ -981,7 +981,7 @@ public:
                 for (int i = 0; i < projectItem.getNumChildren(); ++i)
                     result.addArray (getSourceFilesInfo (projectItem.getChild (i)));
             }
-            else if (projectItem.shouldBeAddedToTargetProject()
+            else if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (owner)
                      && owner.getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType)
             {
                 SourceFileInfo info;
@@ -3184,7 +3184,7 @@ private:
             return addGroup (projectItem, childIDs);
         }
 
-        if (projectItem.shouldBeAddedToTargetProject())
+        if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (*this))
         {
             auto itemPath = projectItem.getFilePath();
             RelativePath path;

@@ -50,10 +50,8 @@ public:
 
     AttributedString (const AttributedString&) = default;
     AttributedString& operator= (const AttributedString&) = default;
-
-    // VS2013 can't default move constructors and assignments
-    AttributedString (AttributedString&&) noexcept;
-    AttributedString& operator= (AttributedString&&) noexcept;
+    AttributedString (AttributedString&&) noexcept = default;
+    AttributedString& operator= (AttributedString&&) noexcept = default;
 
     //==============================================================================
     /** Returns the complete text of this attributed string. */
@@ -154,10 +152,8 @@ public:
 
         Attribute (const Attribute&) = default;
         Attribute& operator= (const Attribute&) = default;
-
-        // VS2013 can't default move constructors and assignments
-        Attribute (Attribute&&) noexcept;
-        Attribute& operator= (Attribute&&) noexcept;
+        Attribute (Attribute&&) noexcept = default;
+        Attribute& operator= (Attribute&&) noexcept = default;
 
         /** Creates an attribute that specifies the font and colour for a range of characters. */
         Attribute (Range<int> range, const Font& font, Colour colour) noexcept;

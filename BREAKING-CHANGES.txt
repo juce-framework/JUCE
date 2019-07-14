@@ -6,6 +6,31 @@ Develop
 
 Change
 ------
+The Visual Studio 2013 exporter has been removed from the Projucer and we will
+no longer maintain backwards compatibility with Visual Studio 2013 in JUCE.
+
+Possible Issues
+---------------
+It is no longer possible to create Visual Studio 2013 projects from the
+Projucer or compile JUCE-based software using Visual Studio 2013.
+
+Workaround
+----------
+If you are using Visual Studio 2013 to build your projects you will need to
+update to a more modern version of Visual Studio.
+
+Rationale
+---------
+Of all the platforms JUCE supports Visual Studio 2013 was holding us back the
+most in terms of C++ features we would like to use more broadly across the
+codebase. It is still possible to target older versions of Windows with more
+modern versions of Visual Studio. Until recently the AAX SDK was distributed as
+a Visual Studio 2013 project, but this is now provided as a Visual Studio 2017
+project.
+
+
+Change
+------
 JUCE is moving towards using C++11 pointer container types instead of passing
 raw pointers as arguments and return values.
 

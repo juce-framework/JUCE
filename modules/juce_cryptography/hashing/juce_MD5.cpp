@@ -29,13 +29,6 @@ namespace juce
 
 struct MD5Generator
 {
-    MD5Generator()
-    {
-        // have to copy this data manually, as VS2013 doesn't support member array initialisers
-        const uint32_t initialState[4] = { 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476 };
-        memcpy (state, initialState, sizeof (state));
-    }
-
     void processBlock (const void* data, size_t dataSize) noexcept
     {
         auto bufferPos = ((count[0] >> 3) & 0x3f);
@@ -141,7 +134,7 @@ struct MD5Generator
 
 private:
     uint8_t buffer[64] = {};
-    uint32_t state[4];
+    uint32_t state[4] = { 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476 };
     uint32_t count[2] = {};
 
     static void copyWithEndiannessConversion (void* output, const void* input, size_t numBytes) noexcept

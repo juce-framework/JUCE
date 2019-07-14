@@ -49,11 +49,14 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class BouncingBallComp  : public Component
+class BouncingBall   : private ComponentListener
 {
 public:
-    BouncingBallComp()
+    BouncingBall (Component& comp)
+        : containerComponent (comp)
     {
+        containerComponent.addComponentListener (this);
+
         auto speed = 5.0f; // give each ball a fixed speed so we can
                            // see the effects of thread priority on how fast
                            // they actually go.
@@ -66,26 +69,35 @@ public:
         colour = Colour ((juce::uint32) Random::getSystemRandom().nextInt())
                     .withAlpha (0.5f)
                     .withBrightness (0.7f);
+
+        componentMovedOrResized (containerComponent, true, true);
+
+        x = Random::getSystemRandom().nextFloat() * parentWidth;
+        y = Random::getSystemRandom().nextFloat() * parentHeight;
     }
 
-    void paint (Graphics& g) override
+    ~BouncingBall() override
     {
+        containerComponent.removeComponentListener (this);
+    }
+
+    // This will be called from the message thread
+    void draw (Graphics& g)
+    {
+        const ScopedLock lock (drawing);
+
         g.setColour (colour);
-        g.fillEllipse (innerX, innerY, size, size);
+        g.fillEllipse (x, y, size, size);
 
         g.setColour (Colours::black);
         g.setFont (10.0f);
-        g.drawText (String::toHexString ((int64) threadId), getLocalBounds(), Justification::centred, false);
-    }
-
-    void parentSizeChanged() override
-    {
-        parentWidth  = getParentWidth()  - size;
-        parentHeight = getParentHeight() - size;
+        g.drawText (String::toHexString ((int64) threadId), Rectangle<float> (x, y, size, size), Justification::centred, false);
     }
 
     void moveBall()
     {
+        const ScopedLock lock (drawing);
+
         threadId = Thread::getCurrentThreadId(); // this is so the component can print the thread ID inside the ball
 
         x += dx;
@@ -102,39 +114,39 @@ public:
 
         if (y > parentHeight)
             dy = -std::abs (dy);
-
-        setBounds (((int) x) - 2,
-                   ((int) y) - 2,
-                   ((int) size) + 4,
-                   ((int) size) + 4);
-
-        innerX = x - getX();
-        innerY = y - getY();
-
-        repaint();
     }
 
 private:
-    float x = Random::getSystemRandom().nextFloat() * 200.0f,
-          y = Random::getSystemRandom().nextFloat() * 200.0f,
+    void componentMovedOrResized (Component& comp, bool, bool) override
+    {
+        const ScopedLock lock (drawing);
+
+        parentWidth  = comp.getWidth()  - size;
+        parentHeight = comp.getHeight() - size;
+    }
+
+    float x = 0.0f, y = 0.0f,
           size = Random::getSystemRandom().nextFloat() * 30.0f + 30.0f,
-          dx = 0.0f, dy = 0.0f, innerX = 0.0f, innerY = 0.0f,
+          dx = 0.0f, dy = 0.0f,
           parentWidth = 50.0f, parentHeight = 50.0f;
 
     Colour colour;
     Thread::ThreadID threadId = {};
+    CriticalSection drawing;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BouncingBallComp)
+    Component& containerComponent;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BouncingBall)
 };
 
-
 //==============================================================================
-class DemoThread    : public BouncingBallComp,
+class DemoThread    : public BouncingBall,
                       public Thread
 {
 public:
-    DemoThread()
-        : Thread ("JUCE Demo Thread")
+    DemoThread (Component& containerComp)
+        : BouncingBall (containerComp),
+          Thread ("JUCE Demo Thread")
     {
         // give the threads a random priority, so some will move more
         // smoothly than others..
@@ -179,12 +191,13 @@ private:
 
 
 //==============================================================================
-class DemoThreadPoolJob  : public BouncingBallComp,
+class DemoThreadPoolJob  : public BouncingBall,
                            public ThreadPoolJob
 {
 public:
-    DemoThreadPoolJob()
-        : ThreadPoolJob ("Demo Threadpool Job")
+    DemoThreadPoolJob (Component& containerComp)
+        : BouncingBall (containerComp),
+          ThreadPoolJob ("Demo Threadpool Job")
     {}
 
     JobStatus runJob() override
@@ -220,6 +233,7 @@ class MultithreadingDemo   : public Component,
                              private Timer
 {
 public:
+    //==============================================================================
     MultithreadingDemo()
     {
         setOpaque (true);
@@ -232,6 +246,10 @@ public:
         controlButton.onClick = [this] { showMenu(); };
 
         setSize (500, 500);
+
+        resetAllBalls();
+
+        startTimerHz (60);
     }
 
     ~MultithreadingDemo() override
@@ -241,32 +259,23 @@ public:
 
     void resetAllBalls()
     {
-        stopTimer();
-
         pool.removeAllJobs (true, 4000);
         balls.clear();
 
-        if (isShowing())
-        {
-            while (balls.size() < 5)
-                addABall();
-
-            startTimer (300);
-        }
+        for (int i = 0; i < 5; ++i)
+            addABall();
     }
 
     void paint (Graphics& g) override
     {
         g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
+
+        for (auto* ball : balls)
+            ball->draw (g);
     }
 
 private:
-    ThreadPool pool           { 3 };
-    TextButton controlButton  { "Thread type" };
-    bool isUsingPool = false;
-
-    OwnedArray<Component> balls;
-
+    //==============================================================================
     void setUsingPool (bool usePool)
     {
         isUsingPool = usePool;
@@ -277,56 +286,20 @@ private:
     {
         if (isUsingPool)
         {
-            auto* newBall = new DemoThreadPoolJob();
-            balls.add (newBall);
-            addAndMakeVisible (newBall);
-            newBall->parentSizeChanged();
+            auto newBall = std::make_unique<DemoThreadPoolJob> (*this);
+            pool.addJob (newBall.get(), false);
+            balls.add (newBall.release());
 
-            pool.addJob (newBall, false);
         }
         else
         {
-            auto* newBall = new DemoThread();
-            balls.add (newBall);
-            addAndMakeVisible (newBall);
-            newBall->parentSizeChanged();
+            balls.add (new DemoThread (*this));
         }
-    }
-
-    void removeABall()
-    {
-        if (balls.size() > 0)
-        {
-            auto indexToRemove = Random::getSystemRandom().nextInt (balls.size());
-
-            if (isUsingPool)
-                pool.removeJob (dynamic_cast<DemoThreadPoolJob*> (balls[indexToRemove]), true, 4000);
-
-            balls.remove (indexToRemove);
-        }
-    }
-
-
-    // this gets called when a component is added or removed from a parent component.
-    void parentHierarchyChanged() override
-    {
-        // we'll use this as an opportunity to start and stop the threads, so that
-        // we don't leave them going when the component's not actually visible.
-        resetAllBalls();
     }
 
     void timerCallback() override
     {
-        if (Random::getSystemRandom().nextBool())
-        {
-            if (balls.size() <= 10)
-                addABall();
-        }
-        else
-        {
-            if (balls.size() > 3)
-                removeABall();
-        }
+        repaint();
     }
 
     void showMenu()
@@ -344,6 +317,13 @@ private:
         if (result != 0 && demoComponent != nullptr)
             demoComponent->setUsingPool (result == 2);
     }
+
+    //==============================================================================
+    ThreadPool pool           { 3 };
+    TextButton controlButton  { "Thread type" };
+    bool isUsingPool = false;
+
+    OwnedArray<BouncingBall> balls;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultithreadingDemo)
 };

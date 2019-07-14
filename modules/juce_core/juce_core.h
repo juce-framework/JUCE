@@ -134,14 +134,10 @@
     Enables http/https support via libcurl (Linux only). Enabling this will add an additional
     run-time dynamic dependency to libcurl.
 
-    If you disable this then https/ssl support will not be available on linux.
+    If you disable this then https/ssl support will not be available on Linux.
 */
 #ifndef JUCE_USE_CURL
- #if JUCE_LINUX
-  #define JUCE_USE_CURL 1
- #else
-  #define JUCE_USE_CURL 0
- #endif
+ #define JUCE_USE_CURL 1
 #endif
 
 /** Config: JUCE_LOAD_CURL_SYMBOLS_LAZILY
@@ -154,7 +150,6 @@
 #ifndef JUCE_LOAD_CURL_SYMBOLS_LAZILY
  #define JUCE_LOAD_CURL_SYMBOLS_LAZILY 0
 #endif
-
 
 /** Config: JUCE_CATCH_UNHANDLED_EXCEPTIONS
     If enabled, this will add some exception-catching code to forward unhandled exceptions

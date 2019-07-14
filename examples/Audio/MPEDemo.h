@@ -877,7 +877,7 @@ public:
           visualiserComp (colourPicker)
     {
        #ifndef JUCE_DEMO_RUNNER
-        audioDeviceManager.initialise (0, 2, 0, true, {}, 0);
+        audioDeviceManager.initialise (0, 2, nullptr, true, {}, nullptr);
        #endif
 
         audioDeviceManager.addMidiInputDeviceCallback ({}, this);

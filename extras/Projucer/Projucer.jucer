@@ -26,24 +26,6 @@
         <MODULEPATH id="juce_analytics" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <VS2013 targetFolder="Builds/VisualStudio2013" bigIcon="rv1F4h" extraCompilerFlags="/bigobj">
-      <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" wholeProgramOptimisation="1"
-                       debugInformationFormat="ProgramDatabase" useRuntimeLibDLL="1"/>
-        <CONFIGURATION name="Release" isDebug="0" targetName="Projucer" useRuntimeLibDLL="0"
-                       debugInformationFormat="None" linkTimeOptimisation="0"/>
-      </CONFIGURATIONS>
-      <MODULEPATHS>
-        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
-        <MODULEPATH id="juce_graphics" path="../../modules"/>
-        <MODULEPATH id="juce_events" path="../../modules"/>
-        <MODULEPATH id="juce_data_structures" path="../../modules"/>
-        <MODULEPATH id="juce_cryptography" path="../../modules"/>
-        <MODULEPATH id="juce_core" path="../../modules"/>
-        <MODULEPATH id="juce_analytics" path="../../modules"/>
-      </MODULEPATHS>
-    </VS2013>
     <VS2015 targetFolder="Builds/VisualStudio2015" bigIcon="rv1F4h" extraCompilerFlags="/bigobj">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" debugInformationFormat="ProgramDatabase"

@@ -118,11 +118,7 @@ void DrawableButton::resized()
 
     if (currentImage != nullptr)
     {
-        if (style == ImageRaw)
-        {
-            currentImage->setOriginWithOriginalSize (Point<float>());
-        }
-        else
+        if (style != ImageRaw)
         {
             int transformFlags = 0;
 

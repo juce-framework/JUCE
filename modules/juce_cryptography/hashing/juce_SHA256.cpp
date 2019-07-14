@@ -29,14 +29,6 @@ namespace juce
 
 struct SHA256Processor
 {
-    SHA256Processor()
-    {
-        // have to copy this data manually, as VS2013 doesn't support member array initialisers
-        const uint32_t initialState[8] = { 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
-                                           0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 };
-        memcpy (state, initialState, sizeof (state));
-    }
-
     // expects 64 bytes of data
     void processFullBlock (const void* data) noexcept
     {
@@ -143,7 +135,8 @@ struct SHA256Processor
     }
 
 private:
-    uint32_t state[8];
+    uint32_t state[8] = { 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+                          0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 };
     uint64_t length = 0;
 
     static inline uint32_t rotate (uint32_t x, uint32_t y) noexcept            { return (x >> y) | (x << (32 - y)); }

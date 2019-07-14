@@ -116,7 +116,7 @@ public:
           androidCustomActivityClass           (settings, Ids::androidCustomActivityClass,           getUndoManager()),
           androidCustomApplicationClass        (settings, Ids::androidCustomApplicationClass,        getUndoManager(), getDefaultApplicationClass()),
           androidManifestCustomXmlElements     (settings, Ids::androidManifestCustomXmlElements,     getUndoManager()),
-          androidGradleSettingsContent         (settings, Ids::androidGradleSettingsContent,         getUndoManager(), isLibrary() ? "include ':lib'" : "include ':app'"),
+          androidGradleSettingsContent         (settings, Ids::androidGradleSettingsContent,         getUndoManager()),
           androidVersionCode                   (settings, Ids::androidVersionCode,                   getUndoManager(), "1"),
           androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "16"),
           androidTargetSDK                     (settings, Ids::androidTargetSDK,                     getUndoManager(), "28"),
@@ -195,7 +195,7 @@ public:
         removeOldFiles (targetFolder);
         copyExtraResourceFiles();
 
-        writeFile (targetFolder, "settings.gradle",                          androidGradleSettingsContent.get().toString());
+        writeFile (targetFolder, "settings.gradle",                          getGradleSettingsFileContent());
         writeFile (targetFolder, "build.gradle",                             getProjectBuildGradleFileContent());
         writeFile (appFolder,    "build.gradle",                             getAppBuildGradleFileContent (modules));
         writeFile (targetFolder, "local.properties",                         getLocalPropertiesFileContent());
@@ -550,6 +550,22 @@ private:
     }
 
     //==============================================================================
+    String getGradleSettingsFileContent() const
+    {
+        MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
+
+        mo << "rootProject.name = " << "\'" << projectName << "\'" << newLine;
+        mo << (isLibrary() ? "include ':lib'" : "include ':app'");
+
+        auto extraContent = androidGradleSettingsContent.get().toString();
+
+        if (extraContent.isNotEmpty())
+            mo << newLine << extraContent << newLine;
+
+        return mo.toString();
+    }
+
     String getProjectBuildGradleFileContent() const
     {
         MemoryOutputStream mo;
@@ -887,7 +903,7 @@ private:
                 addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile("app"));
         }
 
-        if (project.getEnabledModules().isModuleEnabled ("juce_gui_basics") && androidCustomActivityClass.get() == getDefaultActivityClass())
+        if (project.getEnabledModules().isModuleEnabled ("juce_gui_basics") && getActivityClassString() == getDefaultActivityClass())
             addOptJavaFolderToSourceSetsForModule (javaSourceSets, modules, "juce_gui_basics");
 
         if (areRemoteNotificationsEnabled())
@@ -1325,7 +1341,7 @@ private:
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
                 addCompileUnits (projectItem.getChild(i), mo, excludeFromBuild, extraCompilerFlags);
         }
-        else if (projectItem.shouldBeAddedToTargetProject())
+        else if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (*this))
         {
             auto f = projectItem.getFile();
             RelativePath file (f, getTargetFolder().getChildFile ("app"), RelativePath::buildTargetFolder);

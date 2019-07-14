@@ -1818,13 +1818,10 @@ namespace AAXClasses
 
             juceParameters.update (audioProcessor, forceLegacyParamIDs);
 
-            bool aaxWrapperProvidedBypassParam = false;
             auto* bypassParameter = pluginInstance->getBypassParameter();
 
             if (bypassParameter == nullptr)
             {
-                aaxWrapperProvidedBypassParam = true;
-
                 ownedBypassParameter.reset (new AudioParameterBool (cDefaultMasterBypassID, "Master Bypass", false, {}, {}, {}));
                 bypassParameter = ownedBypassParameter.get();
             }

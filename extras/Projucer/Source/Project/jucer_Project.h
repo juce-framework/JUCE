@@ -275,6 +275,7 @@ public:
         bool renameFile (const File& newFile);
 
         bool shouldBeAddedToTargetProject() const;
+        bool shouldBeAddedToTargetExporter (const ProjectExporter&) const;
         bool shouldBeCompiled() const;
         Value getShouldCompileValue();
 
