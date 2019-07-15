@@ -459,6 +459,8 @@ public:
             if (initError.isNotEmpty())
                 JUCE_ASIO_LOG ("ASIOInit: " + initError);
 
+            setSampleRate (getSampleRate());
+
             needToReset = false;
         }
 
