@@ -772,7 +772,8 @@ private:
                 notification.setBounds (r.removeFromTop (NotificationArea::height));
 
             if (editor != nullptr)
-                editor->setBounds (r);
+                editor->setBounds (editor->getLocalArea (this, r)
+                                          .withPosition (r.getTopLeft().transformedBy (editor->getTransform().inverted())));
         }
 
     private:
@@ -833,9 +834,12 @@ private:
             resized();
            #else
             if (editor != nullptr)
-                setSize (editor->getWidth(),
-                         editor->getHeight()
-                         + (shouldShowNotification ? NotificationArea::height : 0));
+            {
+                auto rect = getSizeToContainEditor();
+
+                setSize (rect.getWidth(),
+                         rect.getHeight() + (shouldShowNotification ? NotificationArea::height : 0));
+            }
            #endif
         }
 
@@ -853,8 +857,20 @@ private:
         void componentMovedOrResized (Component&, bool, bool wasResized) override
         {
             if (wasResized && editor != nullptr)
-                setSize (editor->getWidth(),
-                         editor->getHeight() + (shouldShowNotification ? NotificationArea::height : 0));
+            {
+                auto rect = getSizeToContainEditor();
+
+                setSize (rect.getWidth(),
+                         rect.getHeight() + (shouldShowNotification ? NotificationArea::height : 0));
+            }
+        }
+
+        Rectangle<int> getSizeToContainEditor() const
+        {
+            if (editor != nullptr)
+                return getLocalArea (editor.get(), editor->getLocalBounds());
+
+            return {};
         }
 
         //==============================================================================
