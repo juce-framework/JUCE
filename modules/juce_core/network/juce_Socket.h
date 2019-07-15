@@ -181,7 +181,7 @@ private:
     String hostName;
     std::atomic<int> portNumber { 0 }, handle { -1 };
     std::atomic<bool> connected { false };
-    bool isListener = false;
+    std::atomic<bool> isListener = false;
     mutable CriticalSection readLock;
 
     StreamingSocket (const String& hostname, int portNumber, int handle);
