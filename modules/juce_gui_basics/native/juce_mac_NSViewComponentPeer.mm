@@ -795,7 +795,12 @@ public:
         if (r.size.width < 1.0f || r.size.height < 1.0f)
             return;
 
-        auto cg = (CGContextRef) [[NSGraphicsContext currentContext] CGContext];
+        auto cg = (CGContextRef) [[NSGraphicsContext currentContext]
+       #if (defined (MAC_OS_X_VERSION_10_10) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_10)
+                                  CGContext];
+       #else
+                                  graphicsPort];
+       #endif
 
         if (! component.isOpaque())
             CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
