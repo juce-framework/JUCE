@@ -854,9 +854,9 @@ private:
         }
 
         //==============================================================================
-        void componentMovedOrResized (Component&, bool, bool wasResized) override
+        void componentMovedOrResized (Component&, bool, bool) override
         {
-            if (wasResized && editor != nullptr)
+            if (editor != nullptr)
             {
                 auto rect = getSizeToContainEditor();
 
