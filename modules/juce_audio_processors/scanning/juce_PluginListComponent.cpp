@@ -94,6 +94,14 @@ public:
         }
     }
 
+    void cellClicked (int rowNumber, int columnId, const juce::MouseEvent& e) override
+    {
+        TableListBoxModel::cellClicked (rowNumber, columnId, e);
+
+        if (rowNumber >= 0 && rowNumber < getNumRows() && e.mods.isPopupMenu())
+            owner.createMenuForRow (rowNumber).showMenuAsync (PopupMenu::Options().withDeletionCheck (owner));
+    }
+
     void deleteKeyPressed (int) override
     {
         owner.removeSelectedPlugins();
@@ -161,7 +169,13 @@ PluginListComponent::PluginListComponent (AudioPluginFormatManager& manager, Kno
     addAndMakeVisible (table);
 
     addAndMakeVisible (optionsButton);
-    optionsButton.onClick = [this] { showOptionsMenu(); };
+    optionsButton.onClick = [this]
+    {
+        createOptionsMenu().showMenuAsync (PopupMenu::Options()
+                                              .withDeletionCheck (*this)
+                                              .withTargetComponent (optionsButton));
+    };
+
     optionsButton.setTriggeredOnMouseDown (true);
 
     setSize (400, 600);
@@ -199,10 +213,13 @@ void PluginListComponent::resized()
 {
     auto r = getLocalBounds().reduced (2);
 
-    optionsButton.setBounds (r.removeFromBottom (24));
-    optionsButton.changeWidthToFitText (24);
+    if (optionsButton.isVisible())
+    {
+        optionsButton.setBounds (r.removeFromBottom (24));
+        optionsButton.changeWidthToFitText (24);
+        r.removeFromBottom (3);
+    }
 
-    r.removeFromBottom (3);
     table.setBounds (r);
 }
 
@@ -220,7 +237,7 @@ void PluginListComponent::updateList()
 
 void PluginListComponent::removeSelectedPlugins()
 {
-    const SparseSet<int> selected (table.getSelectedRows());
+    auto selected = table.getSelectedRows();
 
     for (int i = table.getNumRows(); --i >= 0;)
         if (selected.contains (i))
@@ -238,15 +255,15 @@ void PluginListComponent::setTableModel (TableListBoxModel* model)
     table.repaint();
 }
 
-bool PluginListComponent::canShowSelectedFolder() const
+static bool canShowFolderForPlugin (KnownPluginList& list, int index)
 {
-    return File::createFileWithoutCheckingPath (list.getTypes()[table.getSelectedRow()].fileOrIdentifier).exists();
+    return File::createFileWithoutCheckingPath (list.getTypes()[index].fileOrIdentifier).exists();
 }
 
-void PluginListComponent::showSelectedFolder()
+static void showFolderForPlugin (KnownPluginList& list, int index)
 {
-    if (canShowSelectedFolder())
-        File (list.getTypes()[table.getSelectedRow()].fileOrIdentifier).getParentDirectory().startAsProcess();
+    if (canShowFolderForPlugin (list, index))
+        File (list.getTypes()[index].fileOrIdentifier).getParentDirectory().startAsProcess();
 }
 
 void PluginListComponent::removeMissingPlugins()
@@ -270,49 +287,81 @@ void PluginListComponent::removePluginItem (int index)
         list.removeFromBlacklist (list.getBlacklistedFiles() [index - list.getNumTypes()]);
 }
 
-void PluginListComponent::optionsMenuStaticCallback (int result, PluginListComponent* pluginList)
-{
-    if (pluginList != nullptr)
-        pluginList->optionsMenuCallback (result);
-}
-
-void PluginListComponent::optionsMenuCallback (int result)
-{
-    switch (result)
-    {
-        case 0:   break;
-        case 1:   list.clear(); break;
-        case 2:   removeSelectedPlugins(); break;
-        case 3:   showSelectedFolder(); break;
-        case 4:   removeMissingPlugins(); break;
-
-        default:
-            if (AudioPluginFormat* format = formatManager.getFormat (result - 10))
-                scanFor (*format);
-
-            break;
-    }
-}
-
-void PluginListComponent::showOptionsMenu()
+PopupMenu PluginListComponent::createOptionsMenu()
 {
     PopupMenu menu;
-    menu.addItem (1, TRANS("Clear list"));
-    menu.addItem (2, TRANS("Remove selected plug-in from list"), table.getNumSelectedRows() > 0);
-    menu.addItem (3, TRANS("Show folder containing selected plug-in"), canShowSelectedFolder());
-    menu.addItem (4, TRANS("Remove any plug-ins whose files no longer exist"));
+    menu.addItem (PopupMenu::Item (TRANS("Clear list"))
+                    .setAction ([this] { list.clear(); }));
+
     menu.addSeparator();
 
     for (int i = 0; i < formatManager.getNumFormats(); ++i)
     {
-        auto* format = formatManager.getFormat (i);
-
-        if (format->canScanForPlugins())
-            menu.addItem (10 + i, "Scan for new or updated " + format->getName() + " plug-ins");
+        if (auto format = formatManager.getFormat(i))
+        {
+            if (format->canScanForPlugins())
+            {
+                menu.addItem (PopupMenu::Item ("Remove all " + format->getName() + " plug-ins")
+                                .setEnabled (! list.getTypesForFormat (*format).isEmpty())
+                                .setAction ([this, i]
+                                            {
+                                                if (auto f = formatManager.getFormat (i))
+                                                    for (auto& pd : list.getTypesForFormat (*f))
+                                                        list.removeType (pd);
+                                            }));
+            }
+        }
     }
 
-    menu.showMenuAsync (PopupMenu::Options().withTargetComponent (optionsButton),
-                        ModalCallbackFunction::forComponent (optionsMenuStaticCallback, this));
+    menu.addSeparator();
+
+    menu.addItem (PopupMenu::Item (TRANS("Remove selected plug-in from list"))
+                    .setEnabled (table.getNumSelectedRows() > 0)
+                    .setAction ([this] { removeSelectedPlugins(); }));
+
+    menu.addItem (PopupMenu::Item (TRANS("Remove any plug-ins whose files no longer exist"))
+                    .setAction ([this] { removeMissingPlugins(); }));
+
+    menu.addSeparator();
+
+    auto selectedRow = table.getSelectedRow();
+
+    menu.addItem (PopupMenu::Item (TRANS("Show folder containing selected plug-in"))
+                    .setEnabled (canShowFolderForPlugin (list, selectedRow))
+                    .setAction ([this, selectedRow] { showFolderForPlugin (list, selectedRow); }));
+
+    menu.addSeparator();
+
+    for (int i = 0; i < formatManager.getNumFormats(); ++i)
+    {
+        if (auto format = formatManager.getFormat(i))
+            if (format->canScanForPlugins())
+                menu.addItem (PopupMenu::Item ("Scan for new or updated " + format->getName() + " plug-ins")
+                                .setAction ([this, i]
+                                            {
+                                                if (auto f = formatManager.getFormat (i))
+                                                    scanFor (*f);
+                                            }));
+    }
+
+    return menu;
+}
+
+PopupMenu PluginListComponent::createMenuForRow (int rowNumber)
+{
+    PopupMenu menu;
+
+    if (rowNumber >= 0 && rowNumber < tableModel->getNumRows())
+    {
+        menu.addItem (PopupMenu::Item (TRANS("Remove plug-in from list"))
+                        .setAction ([this, rowNumber] { removePluginItem (rowNumber); }));
+
+        menu.addItem (PopupMenu::Item (TRANS("Show folder containing plug-in"))
+                        .setEnabled (canShowFolderForPlugin (list, rowNumber))
+                        .setAction ([this, rowNumber] { showFolderForPlugin (list, rowNumber); }));
+    }
+
+    return menu;
 }
 
 bool PluginListComponent::isInterestedInFileDrag (const StringArray& /*files*/)
@@ -357,8 +406,7 @@ public:
         : owner (plc), formatToScan (format), filesOrIdentifiersToScan (filesOrIdentifiers), propertiesToUse (properties),
           pathChooserWindow (TRANS("Select folders to scan..."), String(), AlertWindow::NoIcon),
           progressWindow (title, text, AlertWindow::NoIcon),
-          progress (0.0), numThreads (threads), allowAsync (allowPluginsWhichRequireAsynchronousInstantiation),
-          finished (false)
+          numThreads (threads), allowAsync (allowPluginsWhichRequireAsynchronousInstantiation)
     {
         FileSearchPath path (formatToScan.getDefaultLocationsToSearch());
 
@@ -410,9 +458,9 @@ private:
     AlertWindow pathChooserWindow, progressWindow;
     FileSearchPathListComponent pathList;
     String pluginBeingScanned;
-    double progress;
+    double progress = 0;
     int numThreads;
-    bool allowAsync, finished, timerReentrancyCheck = false;
+    bool allowAsync, finished = false, timerReentrancyCheck = false;
     std::unique_ptr<ThreadPool> pool;
 
     static void startScanCallback (int result, AlertWindow* alert, Scanner* scanner)
@@ -431,7 +479,7 @@ private:
     {
         for (int i = 0; i < pathList.getPath().getNumPaths(); ++i)
         {
-            const File f (pathList.getPath()[i]);
+            auto f = pathList.getPath()[i];
 
             if (isStupidPath (f))
             {
@@ -472,9 +520,9 @@ private:
                 File::userMoviesDirectory,
                 File::userPicturesDirectory };
 
-        for (int i = 0; i < numElementsInArray (pathsThatWouldBeStupidToScan); ++i)
+        for (auto location : pathsThatWouldBeStupidToScan)
         {
-            const File sillyFolder (File::getSpecialLocation (pathsThatWouldBeStupidToScan[i]));
+            auto sillyFolder = File::getSpecialLocation (location);
 
             if (f == sillyFolder || sillyFolder.isAChildOf (f))
                 return true;
