@@ -26,37 +26,37 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "../UI/MainHostWindow.h"
-#include "FilterGraph.h"
-#include "InternalFilters.h"
+#include "PluginGraph.h"
+#include "InternalPlugins.h"
 #include "../UI/GraphEditorPanel.h"
 
 
 //==============================================================================
-FilterGraph::FilterGraph (AudioPluginFormatManager& fm)
+PluginGraph::PluginGraph (AudioPluginFormatManager& fm)
     : FileBasedDocument (getFilenameSuffix(),
                          getFilenameWildcard(),
-                         "Load a filter graph",
-                         "Save a filter graph"),
+                         "Load a graph",
+                         "Save a graph"),
       formatManager (fm)
 {
     newDocument();
     graph.addListener (this);
 }
 
-FilterGraph::~FilterGraph()
+PluginGraph::~PluginGraph()
 {
     graph.removeListener (this);
     graph.removeChangeListener (this);
     graph.clear();
 }
 
-FilterGraph::NodeID FilterGraph::getNextUID() noexcept
+PluginGraph::NodeID PluginGraph::getNextUID() noexcept
 {
-    return FilterGraph::NodeID (++(lastUID.uid));
+    return PluginGraph::NodeID (++(lastUID.uid));
 }
 
 //==============================================================================
-void FilterGraph::changeListenerCallback (ChangeBroadcaster*)
+void PluginGraph::changeListenerCallback (ChangeBroadcaster*)
 {
     changed();
 
@@ -65,7 +65,7 @@ void FilterGraph::changeListenerCallback (ChangeBroadcaster*)
             activePluginWindows.remove (i);
 }
 
-AudioProcessorGraph::Node::Ptr FilterGraph::getNodeForName (const String& name) const
+AudioProcessorGraph::Node::Ptr PluginGraph::getNodeForName (const String& name) const
 {
     for (auto* node : graph.getNodes())
         if (auto p = node->getProcessor())
@@ -75,7 +75,7 @@ AudioProcessorGraph::Node::Ptr FilterGraph::getNodeForName (const String& name) 
     return nullptr;
 }
 
-void FilterGraph::addPlugin (const PluginDescription& desc, Point<double> pos)
+void PluginGraph::addPlugin (const PluginDescription& desc, Point<double> pos)
 {
     formatManager.createPluginInstanceAsync (desc,
                                              graph.getSampleRate(),
@@ -86,13 +86,13 @@ void FilterGraph::addPlugin (const PluginDescription& desc, Point<double> pos)
                                              });
 }
 
-void FilterGraph::addPluginCallback (std::unique_ptr<AudioPluginInstance> instance,
+void PluginGraph::addPluginCallback (std::unique_ptr<AudioPluginInstance> instance,
                                      const String& error, Point<double> pos)
 {
     if (instance == nullptr)
     {
         AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                          TRANS("Couldn't create filter"),
+                                          TRANS("Couldn't create plugin"),
                                           error);
     }
     else
@@ -108,7 +108,7 @@ void FilterGraph::addPluginCallback (std::unique_ptr<AudioPluginInstance> instan
     }
 }
 
-void FilterGraph::setNodePosition (NodeID nodeID, Point<double> pos)
+void PluginGraph::setNodePosition (NodeID nodeID, Point<double> pos)
 {
     if (auto* n = graph.getNodeForId (nodeID))
     {
@@ -117,7 +117,7 @@ void FilterGraph::setNodePosition (NodeID nodeID, Point<double> pos)
     }
 }
 
-Point<double> FilterGraph::getNodePosition (NodeID nodeID) const
+Point<double> PluginGraph::getNodePosition (NodeID nodeID) const
 {
     if (auto* n = graph.getNodeForId (nodeID))
         return { static_cast<double> (n->properties ["x"]),
@@ -127,14 +127,14 @@ Point<double> FilterGraph::getNodePosition (NodeID nodeID) const
 }
 
 //==============================================================================
-void FilterGraph::clear()
+void PluginGraph::clear()
 {
     closeAnyOpenPluginWindows();
     graph.clear();
     changed();
 }
 
-PluginWindow* FilterGraph::getOrCreateWindowFor (AudioProcessorGraph::Node* node, PluginWindow::Type type)
+PluginWindow* PluginGraph::getOrCreateWindowFor (AudioProcessorGraph::Node* node, PluginWindow::Type type)
 {
     jassert (node != nullptr);
 
@@ -174,7 +174,7 @@ PluginWindow* FilterGraph::getOrCreateWindowFor (AudioProcessorGraph::Node* node
     return nullptr;
 }
 
-bool FilterGraph::closeAnyOpenPluginWindows()
+bool PluginGraph::closeAnyOpenPluginWindows()
 {
     bool wasEmpty = activePluginWindows.isEmpty();
     activePluginWindows.clear();
@@ -182,7 +182,7 @@ bool FilterGraph::closeAnyOpenPluginWindows()
 }
 
 //==============================================================================
-String FilterGraph::getDocumentTitle()
+String PluginGraph::getDocumentTitle()
 {
     if (! getFile().exists())
         return "Unnamed";
@@ -190,7 +190,7 @@ String FilterGraph::getDocumentTitle()
     return getFile().getFileNameWithoutExtension();
 }
 
-void FilterGraph::newDocument()
+void PluginGraph::newDocument()
 {
     clear();
     setFile ({});
@@ -209,7 +209,7 @@ void FilterGraph::newDocument()
     } );
 }
 
-Result FilterGraph::loadDocument (const File& file)
+Result PluginGraph::loadDocument (const File& file)
 {
     if (auto xml = parseXMLIfTagMatches (file, "FILTERGRAPH"))
     {
@@ -225,10 +225,10 @@ Result FilterGraph::loadDocument (const File& file)
         return Result::ok();
     }
 
-    return Result::fail ("Not a valid filter graph file");
+    return Result::fail ("Not a valid graph file");
 }
 
-Result FilterGraph::saveDocument (const File& file)
+Result PluginGraph::saveDocument (const File& file)
 {
     auto xml = createXml();
 
@@ -238,7 +238,7 @@ Result FilterGraph::saveDocument (const File& file)
     return Result::ok();
 }
 
-File FilterGraph::getLastDocumentOpened()
+File PluginGraph::getLastDocumentOpened()
 {
     RecentlyOpenedFilesList recentFiles;
     recentFiles.restoreFromString (getAppProperties().getUserSettings()
@@ -247,7 +247,7 @@ File FilterGraph::getLastDocumentOpened()
     return recentFiles.getFile (0);
 }
 
-void FilterGraph::setLastDocumentOpened (const File& file)
+void PluginGraph::setLastDocumentOpened (const File& file)
 {
     RecentlyOpenedFilesList recentFiles;
     recentFiles.restoreFromString (getAppProperties().getUserSettings()
@@ -366,7 +366,7 @@ static XmlElement* createNodeXml (AudioProcessorGraph::Node* const node) noexcep
     return nullptr;
 }
 
-void FilterGraph::createNodeFromXml (const XmlElement& xml)
+void PluginGraph::createNodeFromXml (const XmlElement& xml)
 {
     PluginDescription pd;
 
@@ -427,7 +427,7 @@ void FilterGraph::createNodeFromXml (const XmlElement& xml)
     }
 }
 
-std::unique_ptr<XmlElement> FilterGraph::createXml() const
+std::unique_ptr<XmlElement> PluginGraph::createXml() const
 {
     auto xml = std::make_unique<XmlElement> ("FILTERGRAPH");
 
@@ -447,7 +447,7 @@ std::unique_ptr<XmlElement> FilterGraph::createXml() const
     return xml;
 }
 
-void FilterGraph::restoreFromXml (const XmlElement& xml)
+void PluginGraph::restoreFromXml (const XmlElement& xml)
 {
     clear();
 
@@ -466,7 +466,7 @@ void FilterGraph::restoreFromXml (const XmlElement& xml)
     graph.removeIllegalConnections();
 }
 
-File FilterGraph::getDefaultGraphDocumentOnMobile()
+File PluginGraph::getDefaultGraphDocumentOnMobile()
 {
     auto persistantStorageLocation = File::getSpecialLocation (File::userApplicationDataDirectory);
     return persistantStorageLocation.getChildFile ("state.filtergraph");

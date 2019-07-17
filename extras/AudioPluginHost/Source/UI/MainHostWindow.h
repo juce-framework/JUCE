@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include "../Filters/FilterGraph.h"
+#include "../Plugins/PluginGraph.h"
 #include "GraphEditorPanel.h"
 
 

@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include "FilterGraph.h"
+#include "PluginGraph.h"
 
 
 //==============================================================================
@@ -49,7 +49,8 @@ public:
     bool fileMightContainThisPluginType (const String&) override                        { return true; }
     FileSearchPath getDefaultLocationsToSearch() override                               { return {}; }
     bool canScanForPlugins() const override                                             { return false; }
-    void findAllTypesForFile (OwnedArray <PluginDescription>&, const String&) override  {}
+    bool isTrivialToScan() const override                                               { return true; }
+    void findAllTypesForFile (OwnedArray<PluginDescription>&, const String&) override   {}
     bool doesPluginStillExist (const PluginDescription&) override                       { return true; }
     String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) override      { return fileOrIdentifier; }
     bool pluginNeedsRescanning (const PluginDescription&) override                      { return false; }
@@ -63,5 +64,5 @@ private:
 
     std::unique_ptr<AudioPluginInstance> createInstance (const String& name);
 
-    bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept override;
+    bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const override;
 };

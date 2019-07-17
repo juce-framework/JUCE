@@ -36,12 +36,12 @@ add_library( ${BINARY_NAME}
 
     SHARED
 
-    "../../../Source/Filters/FilterGraph.cpp"
-    "../../../Source/Filters/FilterGraph.h"
-    "../../../Source/Filters/FilterIOConfiguration.cpp"
-    "../../../Source/Filters/FilterIOConfiguration.h"
-    "../../../Source/Filters/InternalFilters.cpp"
-    "../../../Source/Filters/InternalFilters.h"
+    "../../../Source/Plugins/InternalPlugins.cpp"
+    "../../../Source/Plugins/InternalPlugins.h"
+    "../../../Source/Plugins/IOConfigurationWindow.cpp"
+    "../../../Source/Plugins/IOConfigurationWindow.h"
+    "../../../Source/Plugins/PluginGraph.cpp"
+    "../../../Source/Plugins/PluginGraph.h"
     "../../../Source/UI/GraphEditorPanel.cpp"
     "../../../Source/UI/GraphEditorPanel.h"
     "../../../Source/UI/MainHostWindow.cpp"
@@ -1401,9 +1401,9 @@ add_library( ${BINARY_NAME}
     "../../../JuceLibraryCode/JuceHeader.h"
 )
 
-set_source_files_properties("../../../Source/Filters/FilterGraph.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../Source/Filters/FilterIOConfiguration.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../Source/Filters/InternalFilters.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../Source/Plugins/InternalPlugins.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../Source/Plugins/IOConfigurationWindow.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../Source/Plugins/PluginGraph.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../Source/UI/GraphEditorPanel.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../Source/UI/MainHostWindow.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../Source/UI/PluginWindow.h" PROPERTIES HEADER_FILE_ONLY TRUE)
