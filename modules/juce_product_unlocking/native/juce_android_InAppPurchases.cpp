@@ -340,7 +340,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
                                    const Callback& callbackToUse)
             : ThreadPoolJob ("GetProductsInformationJob"),
               owner (parent),
-              packageName (LocalRef<jobject> (packageNameToUse.get())),
+              packageName (LocalRef<jobject> (getEnv()->NewLocalRef (packageNameToUse.get()))),
               productIdentifiers (productIdentifiersToUse),
               callback (callbackToUse)
         {}
