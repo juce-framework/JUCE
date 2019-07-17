@@ -110,6 +110,12 @@ public:
     /** Returns true if this format needs to run a scan to find its list of plugins. */
     virtual bool canScanForPlugins() const = 0;
 
+    /** Should return true if this format is both safe and quick to scan - i.e. if a file
+        can be scanned within a few milliseconds on a background thread, without actually
+        needing to load an executable.
+    */
+    virtual bool isTrivialToScan() const = 0;
+
     /** Searches a suggested set of directories for any plugins in this format.
         The path might be ignored, e.g. by AUs, which are found by the OS rather
         than manually.
@@ -144,7 +150,8 @@ protected:
     virtual void createPluginInstance (const PluginDescription&, double initialSampleRate,
                                        int initialBufferSize, PluginCreationCallback) = 0;
 
-    virtual bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept = 0;
+    /** Returns true if instantiation of this plugin type must be done from a non-message thread. */
+    virtual bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const = 0;
 
 private:
     struct AsyncCreateMessage;

@@ -3114,7 +3114,7 @@ void VST3PluginFormat::createPluginInstance (const PluginDescription& descriptio
     callback (std::move (result), errorMsg);
 }
 
-bool VST3PluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept
+bool VST3PluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const
 {
     return false;
 }
