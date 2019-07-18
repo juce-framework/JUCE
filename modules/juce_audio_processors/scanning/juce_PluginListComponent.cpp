@@ -295,23 +295,15 @@ PopupMenu PluginListComponent::createOptionsMenu()
 
     menu.addSeparator();
 
-    for (int i = 0; i < formatManager.getNumFormats(); ++i)
-    {
-        if (auto format = formatManager.getFormat(i))
-        {
-            if (format->canScanForPlugins())
-            {
-                menu.addItem (PopupMenu::Item ("Remove all " + format->getName() + " plug-ins")
-                                .setEnabled (! list.getTypesForFormat (*format).isEmpty())
-                                .setAction ([this, i]
-                                            {
-                                                if (auto f = formatManager.getFormat (i))
-                                                    for (auto& pd : list.getTypesForFormat (*f))
-                                                        list.removeType (pd);
-                                            }));
-            }
-        }
-    }
+    for (auto format : formatManager.getFormats())
+        if (format->canScanForPlugins())
+            menu.addItem (PopupMenu::Item ("Remove all " + format->getName() + " plug-ins")
+                            .setEnabled (! list.getTypesForFormat (*format).isEmpty())
+                            .setAction ([this, format]
+                                        {
+                                            for (auto& pd : list.getTypesForFormat (*format))
+                                                list.removeType (pd);
+                                        }));
 
     menu.addSeparator();
 
@@ -332,17 +324,10 @@ PopupMenu PluginListComponent::createOptionsMenu()
 
     menu.addSeparator();
 
-    for (int i = 0; i < formatManager.getNumFormats(); ++i)
-    {
-        if (auto format = formatManager.getFormat(i))
-            if (format->canScanForPlugins())
-                menu.addItem (PopupMenu::Item ("Scan for new or updated " + format->getName() + " plug-ins")
-                                .setAction ([this, i]
-                                            {
-                                                if (auto f = formatManager.getFormat (i))
-                                                    scanFor (*f);
-                                            }));
-    }
+    for (auto format : formatManager.getFormats())
+        if (format->canScanForPlugins())
+            menu.addItem (PopupMenu::Item ("Scan for new or updated " + format->getName() + " plug-ins")
+                            .setAction ([this, format]  { scanFor (*format); }));
 
     return menu;
 }

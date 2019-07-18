@@ -43,7 +43,8 @@ public:
     ~AudioUnitPluginFormat() override;
 
     //==============================================================================
-    String getName() const override                 { return "AudioUnit"; }
+    static String getFormatName()                   { return "AudioUnit"; }
+    String getName() const override                 { return getFormatName(); }
     bool canScanForPlugins() const override         { return true; }
     bool isTrivialToScan() const override           { return false; }
 

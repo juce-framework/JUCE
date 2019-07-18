@@ -211,10 +211,8 @@ void KnownPluginList::scanAndAddDragAndDroppedFiles (AudioPluginFormatManager& f
     {
         bool found = false;
 
-        for (int j = 0; j < formatManager.getNumFormats(); ++j)
+        for (auto format : formatManager.getFormats())
         {
-            auto* format = formatManager.getFormat (j);
-
             if (format->fileMightContainThisPluginType (filenameOrID)
                  && scanAndAddFile (filenameOrID, true, typesFound, *format))
             {

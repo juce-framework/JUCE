@@ -98,7 +98,8 @@ public:
     static AudioPluginInstance* getPluginInstanceFromVstEffectInterface (void* aEffect);
 
     //==============================================================================
-    String getName() const override                 { return "VST"; }
+    static String getFormatName()                   { return "VST"; }
+    String getName() const override                 { return getFormatName(); }
     bool canScanForPlugins() const override         { return true; }
     bool isTrivialToScan() const override           { return false; }
 

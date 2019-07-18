@@ -51,7 +51,8 @@ public:
     static bool setStateFromVSTPresetFile (AudioPluginInstance*, const MemoryBlock&);
 
     //==============================================================================
-    String getName() const override                 { return "VST3"; }
+    static String getFormatName()                   { return "VST3"; }
+    String getName() const override                 { return getFormatName(); }
     bool canScanForPlugins() const override         { return true; }
     bool isTrivialToScan() const override           { return false; }
 

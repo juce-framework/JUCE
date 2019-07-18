@@ -42,7 +42,8 @@ public:
     ~LADSPAPluginFormat() override;
 
     //==============================================================================
-    String getName() const override                 { return "LADSPA"; }
+    static String getFormatName()                   { return "LADSPA"; }
+    String getName() const override                 { return getFormatName(); }
     bool canScanForPlugins() const override         { return true; }
     bool isTrivialToScan() const override           { return false; }
 
