@@ -82,12 +82,12 @@ static int warnOnFailureIfImplemented (int result) noexcept
 //==============================================================================
 static int getHashForTUID (const TUID& tuid) noexcept
 {
-    int value = 0;
+    uint32 value = 0;
 
     for (int i = 0; i < numElementsInArray (tuid); ++i)
-        value = (value * 31) + tuid[i];
+        value = (value * 31) + (uint32) tuid[i];
 
-    return value;
+    return (int) value;
 }
 
 template <typename ObjectType>
