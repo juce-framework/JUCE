@@ -15,10 +15,10 @@
 //==============================================================================
 /**
 */
-class %%aradocumentcontroller_class_name%%  : public ARA::PlugIn::DocumentController
+class %%aradocumentcontroller_class_name%%  : public ARADocumentController
 {
 public:
-    %%aradocumentcontroller_class_name%%();
+    %%aradocumentcontroller_class_name%%(const ARA::ARADocumentControllerHostInstance* instance);
     ~%%aradocumentcontroller_class_name%%();
 
 //==============================================================================

@@ -5338,7 +5338,8 @@ static const unsigned char temp_binary_data_24[] =
 "%%aradocumentcontroller_headers%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"%%aradocumentcontroller_class_name%%::%%aradocumentcontroller_class_name%%()\r\n"
+"%%aradocumentcontroller_class_name%%::%%aradocumentcontroller_class_name%%(const ARA::ARADocumentControllerHostInstance* instance)\r\n"
+"    : ARADocumentController (instance)\r\n"
 "{\r\n"
 "}\r\n"
 "\r\n"
@@ -5348,9 +5349,9 @@ static const unsigned char temp_binary_data_24[] =
 "\r\n"
 "//==============================================================================\r\n"
 "// This creates new instances of the document controller..\r\n"
-"ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController () noexcept\r\n"
+"ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController (const ARADocumentControllerHostInstance* instance) noexcept\r\n"
 "{\r\n"
-"    return new %%aradocumentcontroller_class_name%%();\r\n"
+"    return new %%aradocumentcontroller_class_name%%(instance);\r\n"
 "};\r\n";
 
 const char* jucer_AudioPluginARADocumentControllerTemplate_cpp = (const char*) temp_binary_data_24;
@@ -5374,10 +5375,10 @@ static const unsigned char temp_binary_data_25[] =
 "//==============================================================================\r\n"
 "/**\r\n"
 "*/\r\n"
-"class %%aradocumentcontroller_class_name%%  : public ARA::PlugIn::DocumentController\r\n"
+"class %%aradocumentcontroller_class_name%%  : public ARADocumentController\r\n"
 "{\r\n"
 "public:\r\n"
-"    %%aradocumentcontroller_class_name%%();\r\n"
+"    %%aradocumentcontroller_class_name%%(const ARA::ARADocumentControllerHostInstance* instance);\r\n"
 "    ~%%aradocumentcontroller_class_name%%();\r\n"
 "\r\n"
 "//==============================================================================\r\n"
@@ -7932,8 +7933,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x52a8dfdf:  numBytes = 1859; return wizard_Openfile_svg;
         case 0x58e2ae48:  numBytes = 4551; return wizard_OpenGL_svg;
         case 0xb1da6f9e:  numBytes = 7488; return wizard_StaticLibrary_svg;
-        case 0x744d44d6:  numBytes = 908; return jucer_AudioPluginARADocumentControllerTemplate_cpp;
-        case 0x3eb8f45b:  numBytes = 955; return jucer_AudioPluginARADocumentControllerTemplate_h;
+        case 0x744d44d6:  numBytes = 1059; return jucer_AudioPluginARADocumentControllerTemplate_cpp;
+        case 0x3eb8f45b:  numBytes = 999; return jucer_AudioPluginARADocumentControllerTemplate_h;
         case 0xd11e6d35:  numBytes = 2085; return jucer_AnimatedComponentSimpleTemplate_h;
         case 0x6cf2645e:  numBytes = 1563; return jucer_AnimatedComponentTemplate_cpp;
         case 0x97b055e3:  numBytes = 1201; return jucer_AnimatedComponentTemplate_h;
