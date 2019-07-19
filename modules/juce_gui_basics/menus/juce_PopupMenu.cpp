@@ -1309,47 +1309,8 @@ void PopupMenu::clear()
 PopupMenu::Item::Item() = default;
 PopupMenu::Item::Item (String t) : text (std::move (t)), itemID (-1) {}
 
-#if JUCE_MSVC && _MSC_VER < 1900 // tedious VC2013 workaround
-PopupMenu::Item::Item (Item&& other)
-  : text (std::move (other.text)),
-    itemID (other.itemID),
-    action (std::move (other.action)),
-    subMenu (std::move (other.subMenu)),
-    image (std::move (other.image)),
-    customComponent (std::move (other.customComponent)),
-    customCallback (std::move (other.customCallback)),
-    commandManager (other.commandManager),
-    shortcutKeyDescription (std::move (other.shortcutKeyDescription)),
-    colour (other.colour),
-    isEnabled (other.isEnabled),
-    isTicked (other.isTicked),
-    isSeparator (other.isSeparator),
-    isSectionHeader (other.isSectionHeader)
-{
-}
-
-PopupMenu::Item& PopupMenu::Item::operator= (Item&& other)
-{
-    text = std::move (other.text);
-    itemID = other.itemID;
-    action = std::move (other.action);
-    subMenu = std::move (other.subMenu);
-    image = std::move (other.image);
-    customComponent = std::move (other.customComponent);
-    customCallback = std::move (other.customCallback);
-    commandManager = other.commandManager;
-    shortcutKeyDescription = std::move (other.shortcutKeyDescription);
-    colour = other.colour;
-    isEnabled = other.isEnabled;
-    isTicked = other.isTicked;
-    isSeparator = other.isSeparator;
-    isSectionHeader = other.isSectionHeader;
-    return *this;
-}
-#else
 PopupMenu::Item::Item (Item&&) = default;
 PopupMenu::Item& PopupMenu::Item::operator= (Item&&) = default;
-#endif
 
 PopupMenu::Item::Item (const Item& other)
   : text (other.text),
@@ -1388,43 +1349,42 @@ PopupMenu::Item& PopupMenu::Item::operator= (const Item& other)
     return *this;
 }
 
-PopupMenu::Item& PopupMenu::Item::setTicked (bool shouldBeTicked) JUCE_REF_QUALIFIER noexcept
+PopupMenu::Item& PopupMenu::Item::setTicked (bool shouldBeTicked) & noexcept
 {
     isTicked = shouldBeTicked;
     return *this;
 }
 
-PopupMenu::Item& PopupMenu::Item::setEnabled (bool shouldBeEnabled) JUCE_REF_QUALIFIER noexcept
+PopupMenu::Item& PopupMenu::Item::setEnabled (bool shouldBeEnabled) & noexcept
 {
     isEnabled = shouldBeEnabled;
     return *this;
 }
 
-PopupMenu::Item& PopupMenu::Item::setAction (std::function<void()> newAction) JUCE_REF_QUALIFIER noexcept
+PopupMenu::Item& PopupMenu::Item::setAction (std::function<void()> newAction) & noexcept
 {
     action = std::move (newAction);
     return *this;
 }
 
-PopupMenu::Item& PopupMenu::Item::setID (int newID) JUCE_REF_QUALIFIER noexcept
+PopupMenu::Item& PopupMenu::Item::setID (int newID) & noexcept
 {
     itemID = newID;
     return *this;
 }
 
-PopupMenu::Item& PopupMenu::Item::setColour (Colour newColour) JUCE_REF_QUALIFIER noexcept
+PopupMenu::Item& PopupMenu::Item::setColour (Colour newColour) & noexcept
 {
     colour = newColour;
     return *this;
 }
 
-PopupMenu::Item& PopupMenu::Item::setCustomComponent (ReferenceCountedObjectPtr<CustomComponent> comp) JUCE_REF_QUALIFIER noexcept
+PopupMenu::Item& PopupMenu::Item::setCustomComponent (ReferenceCountedObjectPtr<CustomComponent> comp) & noexcept
 {
     customComponent = comp;
     return *this;
 }
 
-#if ! (JUCE_MSVC && _MSC_VER < 1900) // Gah.. no ref-qualifiers in VC2013...
 PopupMenu::Item&& PopupMenu::Item::setTicked (bool shouldBeTicked) && noexcept
 {
     isTicked = shouldBeTicked;
@@ -1460,7 +1420,6 @@ PopupMenu::Item&& PopupMenu::Item::setCustomComponent (ReferenceCountedObjectPtr
     customComponent = comp;
     return std::move (*this);
 }
-#endif
 
 void PopupMenu::addItem (Item newItem)
 {

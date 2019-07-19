@@ -64,6 +64,9 @@ public:
     /** Returns a copy of the current list. */
     Array<PluginDescription> getTypes() const;
 
+    /** Returns the subset of plugin types for a given format. */
+    Array<PluginDescription> getTypesForFormat (AudioPluginFormat&) const;
+
     /** Looks for a type in the list which comes from this file. */
     std::unique_ptr<PluginDescription> getTypeForFile (const String& fileOrIdentifier) const;
 

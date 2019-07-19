@@ -53,6 +53,17 @@ Array<PluginDescription> KnownPluginList::getTypes() const
     return types;
 }
 
+Array<PluginDescription> KnownPluginList::getTypesForFormat (AudioPluginFormat& format) const
+{
+    Array<PluginDescription> result;
+
+    for (auto& d : getTypes())
+        if (d.pluginFormatName == format.getName())
+            result.add (d);
+
+    return result;
+}
+
 std::unique_ptr<PluginDescription> KnownPluginList::getTypeForFile (const String& fileOrIdentifier) const
 {
     ScopedLock lock (typesArrayLock);
@@ -200,10 +211,8 @@ void KnownPluginList::scanAndAddDragAndDroppedFiles (AudioPluginFormatManager& f
     {
         bool found = false;
 
-        for (int j = 0; j < formatManager.getNumFormats(); ++j)
+        for (auto format : formatManager.getFormats())
         {
-            auto* format = formatManager.getFormat (j);
-
             if (format->fileMightContainThisPluginType (filenameOrID)
                  && scanAndAddFile (filenameOrID, true, typesFound, *format))
             {

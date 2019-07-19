@@ -3611,7 +3611,7 @@ void VSTPluginFormat::createPluginInstance (const PluginDescription& desc,
     callback (std::move (result), errorMsg);
 }
 
-bool VSTPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept
+bool VSTPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const
 {
     return false;
 }

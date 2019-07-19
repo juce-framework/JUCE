@@ -984,7 +984,7 @@ public:
                 for (int i = 0; i < projectItem.getNumChildren(); ++i)
                     result.addArray (getSourceFilesInfo (projectItem.getChild (i)));
             }
-            else if (projectItem.shouldBeAddedToTargetProject()
+            else if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (owner)
                      && owner.getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType)
             {
                 SourceFileInfo info;
@@ -1458,35 +1458,38 @@ public:
             if (getTargetFileType() == pluginBundle)
                 flags.add (owner.isiOS() ? "-bitcode_bundle" : "-bundle");
 
-            Array<RelativePath> extraLibs;
-
-            addExtraLibsForTargetType (config, extraLibs);
-
-            for (auto& lib : extraLibs)
+            if (type != Target::SharedCodeTarget)
             {
-                flags.add (getLinkerFlagForLib (lib.getFileNameWithoutExtension()));
-                librarySearchPaths.add (owner.getSearchPathForStaticLibrary (lib));
-            }
+                Array<RelativePath> extraLibs;
 
-            if (owner.project.getProjectType().isAudioPlugin() && type != Target::SharedCodeTarget)
-            {
-                if (owner.getTargetOfType (Target::SharedCodeTarget) != nullptr)
+                addExtraLibsForTargetType (config, extraLibs);
+
+                for (auto& lib : extraLibs)
                 {
-                    auto productName = getStaticLibbedFilename (owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString()));
-
-                    RelativePath sharedCodelib (productName, RelativePath::buildTargetFolder);
-                    flags.add (getLinkerFlagForLib (sharedCodelib.getFileNameWithoutExtension()));
+                    flags.add (getLinkerFlagForLib (lib.getFileNameWithoutExtension()));
+                    librarySearchPaths.add (owner.getSearchPathForStaticLibrary (lib));
                 }
+
+                if (owner.project.getProjectType().isAudioPlugin())
+                {
+                    if (owner.getTargetOfType (Target::SharedCodeTarget) != nullptr)
+                    {
+                        auto productName = getStaticLibbedFilename (owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString()));
+
+                        RelativePath sharedCodelib (productName, RelativePath::buildTargetFolder);
+                        flags.add (getLinkerFlagForLib (sharedCodelib.getFileNameWithoutExtension()));
+                    }
+                }
+
+                flags.add (owner.replacePreprocessorTokens (config, owner.getExtraLinkerFlagsString()));
+                flags.add (owner.getExternalLibraryFlags (config));
+
+                auto libs = owner.xcodeLibs;
+                libs.addArray (xcodeLibs);
+
+                for (auto& l : libs)
+                    flags.add (getLinkerFlagForLib (l));
             }
-
-            flags.add (owner.replacePreprocessorTokens (config, owner.getExtraLinkerFlagsString()));
-            flags.add (owner.getExternalLibraryFlags (config));
-
-            auto libs = owner.xcodeLibs;
-            libs.addArray (xcodeLibs);
-
-            for (auto& l : libs)
-                flags.add (getLinkerFlagForLib (l));
 
             flags = getCleanedStringArray (flags);
         }
@@ -3175,7 +3178,7 @@ private:
             return addGroup (projectItem, childIDs);
         }
 
-        if (projectItem.shouldBeAddedToTargetProject())
+        if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (*this))
         {
             auto itemPath = projectItem.getFilePath();
             RelativePath path;

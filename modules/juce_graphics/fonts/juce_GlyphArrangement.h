@@ -50,10 +50,8 @@ public:
 
     PositionedGlyph (const PositionedGlyph&) = default;
     PositionedGlyph& operator= (const PositionedGlyph&) = default;
-
-    // VS2013 can't default move constructors and assignments
-    PositionedGlyph (PositionedGlyph&&) noexcept;
-    PositionedGlyph& operator= (PositionedGlyph&&) noexcept;
+    PositionedGlyph (PositionedGlyph&&) noexcept = default;
+    PositionedGlyph& operator= (PositionedGlyph&&) noexcept = default;
 
     ~PositionedGlyph();
 
@@ -132,13 +130,11 @@ public:
 
     GlyphArrangement (const GlyphArrangement&) = default;
     GlyphArrangement& operator= (const GlyphArrangement&) = default;
-
-    // VS2013 can't default move constructors and assignmants
-    GlyphArrangement (GlyphArrangement&&);
-    GlyphArrangement& operator= (GlyphArrangement&&);
+    GlyphArrangement (GlyphArrangement&&) = default;
+    GlyphArrangement& operator= (GlyphArrangement&&) = default;
 
     /** Destructor. */
-    ~GlyphArrangement();
+    ~GlyphArrangement() = default;
 
     //==============================================================================
     /** Returns the total number of glyphs in the arrangement. */

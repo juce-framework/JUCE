@@ -449,6 +449,8 @@ void AudioProcessor::checkDuplicateParamIDs()
 struct AudioProcessor::DuplicateParamIDCheck  : private AsyncUpdater
 {
     DuplicateParamIDCheck (AudioProcessor& p) : owner (p)   { triggerAsyncUpdate(); }
+    ~DuplicateParamIDCheck() override                       { cancelPendingUpdate(); }
+
     void handleAsyncUpdate() override                       { owner.checkDuplicateParamIDs(); }
 
     AudioProcessor& owner;

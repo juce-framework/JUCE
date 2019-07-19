@@ -2754,7 +2754,7 @@ void AudioUnitPluginFormat::createPluginInstance (const PluginDescription& desc,
     }
 }
 
-bool AudioUnitPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription& desc) const noexcept
+bool AudioUnitPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription& desc) const
 {
    #if JUCE_SUPPORTS_AUv3
     String pluginName, version, manufacturer;

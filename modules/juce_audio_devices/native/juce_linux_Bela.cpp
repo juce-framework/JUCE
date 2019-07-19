@@ -518,7 +518,7 @@ MidiInput::~MidiInput()   { delete static_cast<BelaMidiInput*> (internal); }
 void MidiInput::start()   { static_cast<BelaMidiInput*> (internal)->start(); }
 void MidiInput::stop()    { static_cast<BelaMidiInput*> (internal)->stop(); }
 
-void Array<MidiDeviceInfo> MidiInput::getAvailableDevices()
+Array<MidiDeviceInfo> MidiInput::getAvailableDevices()
 {
     return BelaMidiInput::getDevices (true);
 }
@@ -534,7 +534,7 @@ std::unique_ptr<MidiInput> MidiInput::openDevice (const String& deviceIdentifier
         return {};
 
     std::unique_ptr<MidiInput> midiInput (new MidiInput (deviceIdentifier, deviceIdentifier));
-    midiInput->internal = new BelaMidiInput (deviceIdentifier, result, callback);
+    midiInput->internal = new BelaMidiInput (deviceIdentifier, midiInput.get(), callback);
 
     return midiInput;
 }

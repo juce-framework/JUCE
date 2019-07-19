@@ -753,7 +753,7 @@ public:
                 for (int i = 0; i < projectItem.getNumChildren(); ++i)
                     addFilesToCompile (projectItem.getChild (i), cpps, headers, otherFiles);
             }
-            else if (projectItem.shouldBeAddedToTargetProject()
+            else if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (getOwner())
                      && getOwner().getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType)
             {
                 RelativePath path (projectItem.getFile(), getOwner().getTargetFolder(), RelativePath::buildTargetFolder);
@@ -845,7 +845,7 @@ public:
 
                 return filesWereAdded;
             }
-            else if (projectItem.shouldBeAddedToTargetProject())
+            else if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (getOwner()))
             {
                 RelativePath relativePath (projectItem.getFile(), getOwner().getTargetFolder(), RelativePath::buildTargetFolder);
 
@@ -1851,52 +1851,6 @@ protected:
     }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterBase)
-};
-
-//==============================================================================
-class MSVCProjectExporterVC2013  : public MSVCProjectExporterBase
-{
-public:
-    MSVCProjectExporterVC2013 (Project& p, const ValueTree& t)
-        : MSVCProjectExporterBase (p, t, getTargetFolderForExporter (getValueTreeTypeName()))
-    {
-        name = getName();
-
-        targetPlatformVersion.setDefault (getDefaultWindowsTargetPlatformVersion());
-        platformToolsetValue.setDefault (getDefaultToolset());
-    }
-
-    static const char* getName()                                     { return "Visual Studio 2013"; }
-    static const char* getValueTreeTypeName()                        { return "VS2013"; }
-    int getVisualStudioVersion() const override                      { return 12; }
-    String getSolutionComment() const override                       { return "# Visual Studio 2013"; }
-    String getToolsVersion() const override                          { return "12.0"; }
-    String getDefaultToolset() const override                        { return "v120"; }
-    String getDefaultWindowsTargetPlatformVersion() const override   { return "8.1"; }
-
-
-    static MSVCProjectExporterVC2013* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
-    {
-        if (settingsToUse.hasType (getValueTreeTypeName()))
-            return new MSVCProjectExporterVC2013 (projectToUse, settingsToUse);
-
-        return nullptr;
-    }
-
-    void createExporterProperties (PropertyListBuilder& props) override
-    {
-        MSVCProjectExporterBase::createExporterProperties (props);
-
-        static const char* toolsetNames[] = { "v120", "v120_xp", "Windows7.1SDK", "CTP_Nov2013" };
-        const var toolsets[]              = { "v120", "v120_xp", "Windows7.1SDK", "CTP_Nov2013" };
-        addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
-
-        addIPPLibraryProperty (props);
-
-        addWindowsTargetPlatformProperties (props);
-    }
-
-    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2013)
 };
 
 //==============================================================================

@@ -730,7 +730,8 @@ private:
     public:
         MainContentComponent (StandaloneFilterWindow& filterWindow)
             : owner (filterWindow), notification (this),
-              editor (owner.getAudioProcessor()->createEditorIfNeeded())
+              editor (owner.getAudioProcessor()->hasEditor() ? owner.getAudioProcessor()->createEditorIfNeeded()
+                                                             : new GenericAudioProcessorEditor (*owner.getAudioProcessor()))
         {
             Value& inputMutedValue = owner.pluginHolder->getMuteInputValue();
 
@@ -770,7 +771,9 @@ private:
             if (shouldShowNotification)
                 notification.setBounds (r.removeFromTop (NotificationArea::height));
 
-            editor->setBounds (r);
+            if (editor != nullptr)
+                editor->setBounds (editor->getLocalArea (this, r)
+                                          .withPosition (r.getTopLeft().transformedBy (editor->getTransform().inverted())));
         }
 
     private:
@@ -830,9 +833,13 @@ private:
            #if JUCE_IOS || JUCE_ANDROID
             resized();
            #else
-            setSize (editor->getWidth(),
-                     editor->getHeight()
-                     + (shouldShowNotification ? NotificationArea::height : 0));
+            if (editor != nullptr)
+            {
+                auto rect = getSizeToContainEditor();
+
+                setSize (rect.getWidth(),
+                         rect.getHeight() + (shouldShowNotification ? NotificationArea::height : 0));
+            }
            #endif
         }
 
@@ -847,11 +854,23 @@ private:
         }
 
         //==============================================================================
-        void componentMovedOrResized (Component&, bool, bool wasResized) override
+        void componentMovedOrResized (Component&, bool, bool) override
         {
-            if (wasResized && editor != nullptr)
-                setSize (editor->getWidth(),
-                         editor->getHeight() + (shouldShowNotification ? NotificationArea::height : 0));
+            if (editor != nullptr)
+            {
+                auto rect = getSizeToContainEditor();
+
+                setSize (rect.getWidth(),
+                         rect.getHeight() + (shouldShowNotification ? NotificationArea::height : 0));
+            }
+        }
+
+        Rectangle<int> getSizeToContainEditor() const
+        {
+            if (editor != nullptr)
+                return getLocalArea (editor.get(), editor->getLocalBounds());
+
+            return {};
         }
 
         //==============================================================================

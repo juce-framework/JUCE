@@ -26,7 +26,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "GraphEditorPanel.h"
-#include "../Filters/InternalFilters.h"
+#include "../Plugins/InternalPlugins.h"
 #include "MainHostWindow.h"
 
 //==============================================================================
@@ -164,7 +164,7 @@ struct GraphEditorPanel::PinComponent   : public Component,
     }
 
     GraphEditorPanel& panel;
-    FilterGraph& graph;
+    PluginGraph& graph;
     AudioProcessorGraph::NodeAndChannel pin;
     const bool isInput;
     int busIdx = 0;
@@ -173,11 +173,11 @@ struct GraphEditorPanel::PinComponent   : public Component,
 };
 
 //==============================================================================
-struct GraphEditorPanel::FilterComponent   : public Component,
+struct GraphEditorPanel::PluginComponent   : public Component,
                                              public Timer,
                                              private AudioProcessorParameter::Listener
 {
-    FilterComponent (GraphEditorPanel& p, AudioProcessorGraph::NodeID id)  : panel (p), graph (p.graph), pluginID (id)
+    PluginComponent (GraphEditorPanel& p, AudioProcessorGraph::NodeID id)  : panel (p), graph (p.graph), pluginID (id)
     {
         shadow.setShadowProperties (DropShadow (Colours::black.withAlpha (0.5f), 3, { 0, 1 }));
         setComponentEffect (&shadow);
@@ -194,10 +194,10 @@ struct GraphEditorPanel::FilterComponent   : public Component,
         setSize (150, 60);
     }
 
-    FilterComponent (const FilterComponent&) = delete;
-    FilterComponent& operator= (const FilterComponent&) = delete;
+    PluginComponent (const PluginComponent&) = delete;
+    PluginComponent& operator= (const PluginComponent&) = delete;
 
-    ~FilterComponent() override
+    ~PluginComponent() override
     {
         if (auto f = graph.graph.getNodeForId (pluginID))
         {
@@ -491,7 +491,7 @@ struct GraphEditorPanel::FilterComponent   : public Component,
     void parameterGestureChanged (int, bool) override  {}
 
     GraphEditorPanel& panel;
-    FilterGraph& graph;
+    PluginGraph& graph;
     const AudioProcessorGraph::NodeID pluginID;
     OwnedArray<PinComponent> pins;
     int numInputs = 0, numOutputs = 0;
@@ -572,10 +572,10 @@ struct GraphEditorPanel::ConnectorComponent   : public Component,
         p1 = lastInputPos;
         p2 = lastOutputPos;
 
-        if (auto* src = panel.getComponentForFilter (connection.source.nodeID))
+        if (auto* src = panel.getComponentForPlugin (connection.source.nodeID))
             p1 = src->getPinPos (connection.source.channelIndex, false);
 
-        if (auto* dest = panel.getComponentForFilter (connection.destination.nodeID))
+        if (auto* dest = panel.getComponentForPlugin (connection.destination.nodeID))
             p2 = dest->getPinPos (connection.destination.channelIndex, true);
     }
 
@@ -689,7 +689,7 @@ struct GraphEditorPanel::ConnectorComponent   : public Component,
     }
 
     GraphEditorPanel& panel;
-    FilterGraph& graph;
+    PluginGraph& graph;
     AudioProcessorGraph::Connection connection { { {}, 0 }, { {}, 0 } };
     Point<float> lastInputPos, lastOutputPos;
     Path linePath, hitPath;
@@ -700,7 +700,7 @@ struct GraphEditorPanel::ConnectorComponent   : public Component,
 
 
 //==============================================================================
-GraphEditorPanel::GraphEditorPanel (FilterGraph& g)  : graph (g)
+GraphEditorPanel::GraphEditorPanel (PluginGraph& g)  : graph (g)
 {
     graph.addChangeListener (this);
     setOpaque (true);
@@ -751,7 +751,7 @@ void GraphEditorPanel::createNewPlugin (const PluginDescription& desc, Point<int
     graph.addPlugin (desc, position.toDouble() / Point<double> ((double) getWidth(), (double) getHeight()));
 }
 
-GraphEditorPanel::FilterComponent* GraphEditorPanel::getComponentForFilter (AudioProcessorGraph::NodeID nodeID) const
+GraphEditorPanel::PluginComponent* GraphEditorPanel::getComponentForPlugin (AudioProcessorGraph::NodeID nodeID) const
 {
     for (auto* fc : nodes)
        if (fc->pluginID == nodeID)
@@ -812,9 +812,9 @@ void GraphEditorPanel::updateComponents()
 
     for (auto* f : graph.graph.getNodes())
     {
-        if (getComponentForFilter (f->nodeID) == nullptr)
+        if (getComponentForPlugin (f->nodeID) == nullptr)
         {
-            auto* comp = nodes.add (new FilterComponent (*this, f->nodeID));
+            auto* comp = nodes.add (new PluginComponent (*this, f->nodeID));
             addAndMakeVisible (comp);
             comp->update();
         }
@@ -1155,7 +1155,7 @@ struct GraphDocumentComponent::PluginListBoxModel    : public ListBoxModel,
 GraphDocumentComponent::GraphDocumentComponent (AudioPluginFormatManager& fm,
                                                 AudioDeviceManager& dm,
                                                 KnownPluginList& kpl)
-    : graph (new FilterGraph (fm)),
+    : graph (new PluginGraph (fm)),
       deviceManager (dm),
       pluginList (kpl),
       graphPlayer (getAppProperties().getUserSettings()->getBoolValue ("doublePrecisionProcessing", false))

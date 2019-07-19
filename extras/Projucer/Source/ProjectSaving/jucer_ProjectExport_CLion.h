@@ -311,7 +311,8 @@ private:
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
                 getFileInfoList (target, exporter, projectItem.getChild(i), fileInfoList);
         }
-        else if (projectItem.shouldBeAddedToTargetProject() && getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType )
+        else if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (*this)
+                 && getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType )
         {
             auto path = RelativePath (projectItem.getFile(), exporter.getTargetFolder(), RelativePath::buildTargetFolder).toUnixStyle();
 

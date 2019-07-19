@@ -459,6 +459,8 @@ public:
             if (initError.isNotEmpty())
                 JUCE_ASIO_LOG ("ASIOInit: " + initError);
 
+            setSampleRate (getSampleRate());
+
             needToReset = false;
         }
 
@@ -1566,7 +1568,7 @@ private:
     //==============================================================================
     static bool isBlacklistedDriver (const String& driverName)
     {
-        return driverName == "ASIO DirectX Full Duplex Driver" || driverName == "ASIO Multimedia Driver";
+        return driverName.startsWith ("ASIO DirectX Full Duplex") || driverName == "ASIO Multimedia Driver";
     }
 
     void addDriverInfo (const String& keyName, HKEY hk)
