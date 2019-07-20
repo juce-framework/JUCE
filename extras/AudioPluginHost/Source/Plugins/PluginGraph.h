@@ -31,16 +31,16 @@
 
 //==============================================================================
 /**
-    A collection of filters and some connections between them.
+    A collection of plugins and some connections between them.
 */
-class FilterGraph   : public FileBasedDocument,
+class PluginGraph   : public FileBasedDocument,
                       public AudioProcessorListener,
                       private ChangeListener
 {
 public:
     //==============================================================================
-    FilterGraph (AudioPluginFormatManager&);
-    ~FilterGraph() override;
+    PluginGraph (AudioPluginFormatManager&);
+    ~PluginGraph() override;
 
     //==============================================================================
     using NodeID = AudioProcessorGraph::NodeID;
@@ -95,5 +95,5 @@ private:
     void addPluginCallback (std::unique_ptr<AudioPluginInstance>, const String& error, Point<double>);
     void changeListenerCallback (ChangeBroadcaster*) override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilterGraph)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginGraph)
 };

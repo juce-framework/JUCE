@@ -62,14 +62,18 @@ public:
     //==============================================================================
     void postMessage (MessageManager::MessageBase* const msg) noexcept
     {
-        {
-            ScopedLock sl (lock);
-            queue.add (msg);
-        }
+        ScopedLock sl (lock);
+        queue.add (msg);
 
-        unsigned char x = 0xff;
-        auto numBytes = write (getWriteHandle(), &x, 1);
-        ignoreUnused (numBytes);
+        if (bytesInSocket < maxBytesInSocketQueue)
+        {
+            bytesInSocket++;
+
+            ScopedUnlock ul (lock);
+            unsigned char x = 0xff;
+            auto numBytes = write (getWriteHandle(), &x, 1);
+            ignoreUnused (numBytes);
+        }
     }
 
     //==============================================================================
@@ -80,17 +84,26 @@ private:
     ReferenceCountedArray <MessageManager::MessageBase> queue;
 
     int msgpipe[2];
+    int bytesInSocket = 0;
+    static constexpr int maxBytesInSocketQueue = 128;
 
     int getWriteHandle() const noexcept  { return msgpipe[0]; }
     int getReadHandle() const noexcept   { return msgpipe[1]; }
 
     MessageManager::MessageBase::Ptr popNextMessage (int fd) noexcept
     {
-        unsigned char x;
-        auto numBytes = read (fd, &x, 1);
-        ignoreUnused (numBytes);
-
         const ScopedLock sl (lock);
+
+        if (bytesInSocket > 0)
+        {
+            --bytesInSocket;
+
+            ScopedUnlock ul (lock);
+            unsigned char x;
+            auto numBytes = read (fd, &x, 1);
+            ignoreUnused (numBytes);
+        }
+
         return queue.removeAndReturn (0);
     }
 };

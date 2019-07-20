@@ -1739,33 +1739,15 @@ private:
 
 //==============================================================================
 //==============================================================================
+extern RTL_OSVERSIONINFOW getWindowsVersionInfo();
+
 struct MidiService :  public DeletedAtShutdown
 {
     MidiService()
     {
       #if JUCE_USE_WINRT_MIDI
        #if ! JUCE_FORCE_WINRT_MIDI
-        auto windowsVersionInfo = []
-        {
-            RTL_OSVERSIONINFOW versionInfo = { 0 };
-
-            if (auto* mod = ::GetModuleHandleW (L"ntdll.dll"))
-            {
-                using RtlGetVersion = LONG (WINAPI*)(PRTL_OSVERSIONINFOW);
-
-                if (auto* rtlGetVersion = (RtlGetVersion) ::GetProcAddress (mod, "RtlGetVersion"))
-                {
-                    versionInfo.dwOSVersionInfoSize = sizeof (versionInfo);
-                    LONG STATUS_SUCCESS = 0;
-
-                    if (rtlGetVersion (&versionInfo) != STATUS_SUCCESS)
-                        versionInfo = { 0 };
-                }
-            }
-
-            return versionInfo;
-        }();
-
+        auto windowsVersionInfo = getWindowsVersionInfo();
         if (windowsVersionInfo.dwMajorVersion >= 10 && windowsVersionInfo.dwBuildNumber >= 17763)
        #endif
         {
