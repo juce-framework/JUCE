@@ -25,8 +25,8 @@
 */
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "InternalFilters.h"
-#include "FilterGraph.h"
+#include "InternalPlugins.h"
+#include "PluginGraph.h"
 
 //==============================================================================
 class InternalPlugin   : public AudioPluginInstance
@@ -291,10 +291,10 @@ private:
 };
 
 //==============================================================================
-class ReverbFilter    : public InternalPlugin
+class ReverbPlugin    : public InternalPlugin
 {
 public:
-    ReverbFilter (const PluginDescription& descr) :   InternalPlugin (descr)
+    ReverbPlugin (const PluginDescription& descr) :   InternalPlugin (descr)
     {}
 
     static String getIdentifier()
@@ -365,9 +365,8 @@ std::unique_ptr<AudioPluginInstance> InternalPluginFormat::createInstance (const
     if (name == audioInDesc.name)  return std::make_unique<AudioProcessorGraph::AudioGraphIOProcessor> (AudioProcessorGraph::AudioGraphIOProcessor::audioInputNode);
     if (name == midiInDesc.name)   return std::make_unique<AudioProcessorGraph::AudioGraphIOProcessor> (AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode);
 
-
     if (name == SineWaveSynth::getIdentifier()) return std::make_unique<SineWaveSynth> (SineWaveSynth::getPluginDescription());
-    if (name == ReverbFilter::getIdentifier())  return std::make_unique<ReverbFilter>  (ReverbFilter::getPluginDescription());
+    if (name == ReverbPlugin::getIdentifier())  return std::make_unique<ReverbPlugin>  (ReverbPlugin::getPluginDescription());
 
     return {};
 }
@@ -382,12 +381,14 @@ void InternalPluginFormat::createPluginInstance (const PluginDescription& desc,
         callback (nullptr, NEEDS_TRANS ("Invalid internal plugin name"));
 }
 
-bool InternalPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept
+bool InternalPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const
 {
     return false;
 }
 
 void InternalPluginFormat::getAllTypes (Array<PluginDescription>& results)
 {
-    results.add (audioInDesc, audioOutDesc, midiInDesc, SineWaveSynth::getPluginDescription(), ReverbFilter::getPluginDescription());
+    results.add (audioInDesc, audioOutDesc, midiInDesc,
+                 SineWaveSynth::getPluginDescription(),
+                 ReverbPlugin::getPluginDescription());
 }

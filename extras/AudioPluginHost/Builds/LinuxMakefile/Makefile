@@ -68,9 +68,9 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS_APP := \
-  $(JUCE_OBJDIR)/FilterGraph_769715e3.o \
-  $(JUCE_OBJDIR)/FilterIOConfiguration_d1cf3d25.o \
-  $(JUCE_OBJDIR)/InternalFilters_eceadbab.o \
+  $(JUCE_OBJDIR)/InternalPlugins_8278e3f5.o \
+  $(JUCE_OBJDIR)/IOConfigurationWindow_d71a5732.o \
+  $(JUCE_OBJDIR)/PluginGraph_6bd15e2d.o \
   $(JUCE_OBJDIR)/GraphEditorPanel_2223d925.o \
   $(JUCE_OBJDIR)/MainHostWindow_b3494acd.o \
   $(JUCE_OBJDIR)/HostStartup_5ce96f96.o \
@@ -103,19 +103,19 @@ $(JUCE_OUTDIR)/$(JUCE_TARGET_APP) : $(OBJECTS_APP) $(RESOURCES)
 	-$(V_AT)mkdir -p $(JUCE_OUTDIR)
 	$(V_AT)$(CXX) -o $(JUCE_OUTDIR)/$(JUCE_TARGET_APP) $(OBJECTS_APP) $(JUCE_LDFLAGS) $(JUCE_LDFLAGS_APP) $(RESOURCES) $(TARGET_ARCH)
 
-$(JUCE_OBJDIR)/FilterGraph_769715e3.o: ../../Source/Filters/FilterGraph.cpp
+$(JUCE_OBJDIR)/InternalPlugins_8278e3f5.o: ../../Source/Plugins/InternalPlugins.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling FilterGraph.cpp"
+	@echo "Compiling InternalPlugins.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
-$(JUCE_OBJDIR)/FilterIOConfiguration_d1cf3d25.o: ../../Source/Filters/FilterIOConfiguration.cpp
+$(JUCE_OBJDIR)/IOConfigurationWindow_d71a5732.o: ../../Source/Plugins/IOConfigurationWindow.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling FilterIOConfiguration.cpp"
+	@echo "Compiling IOConfigurationWindow.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
-$(JUCE_OBJDIR)/InternalFilters_eceadbab.o: ../../Source/Filters/InternalFilters.cpp
+$(JUCE_OBJDIR)/PluginGraph_6bd15e2d.o: ../../Source/Plugins/PluginGraph.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling InternalFilters.cpp"
+	@echo "Compiling PluginGraph.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/GraphEditorPanel_2223d925.o: ../../Source/UI/GraphEditorPanel.cpp

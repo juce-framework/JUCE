@@ -58,6 +58,14 @@ public:
     /** Changes the text in the panel's options button. */
     void setOptionsButtonText (const String& newText);
 
+    /** Returns a pop-up menu that contains all the options for scanning and updating the list. */
+    PopupMenu createOptionsMenu();
+
+    /** Returns a menu that can be shown if a row is right-clicked, containing actions
+        like "remove plugin" or "show folder" etc.
+    */
+    PopupMenu createMenuForRow (int rowNumber);
+
     /** Changes the text in the progress dialog box that is shown when scanning. */
     void setScanDialogText (const String& textForProgressWindowTitle,
                             const String& textForProgressWindowDescription);
@@ -92,10 +100,15 @@ public:
     /** Sets a custom table model to be used.
         This will take ownership of the model and delete it when no longer needed.
      */
-    void setTableModel (TableListBoxModel* model);
+    void setTableModel (TableListBoxModel*);
 
     /** Returns the table used to display the plugin list. */
     TableListBox& getTableListBox() noexcept            { return table; }
+
+    /** Returns the button used to display the options menu - you can make this invisible
+        if you want to hide it and use some other method for showing the menu.
+    */
+    TextButton& getOptionsButton()                      { return optionsButton; }
 
 private:
     //==============================================================================
@@ -116,14 +129,9 @@ private:
     std::unique_ptr<Scanner> currentScanner;
 
     void scanFinished (const StringArray&);
-    static void optionsMenuStaticCallback (int, PluginListComponent*);
-    void optionsMenuCallback (int);
     void updateList();
-    void showSelectedFolder();
-    bool canShowSelectedFolder() const;
     void removeMissingPlugins();
     void removePluginItem (int index);
-    void showOptionsMenu();
 
     void resized() override;
     bool isInterestedInFileDrag (const StringArray&) override;

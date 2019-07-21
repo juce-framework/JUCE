@@ -52,12 +52,15 @@ public:
     /** Returns the number of types of format that are available.
         Use getFormat() to get one of them.
     */
-    int getNumFormats();
+    int getNumFormats() const;
 
     /** Returns one of the available formats.
         @see getNumFormats
     */
-    AudioPluginFormat* getFormat (int index);
+    AudioPluginFormat* getFormat (int index) const;
+
+    /** Returns a list of all the registered formats. */
+    Array<AudioPluginFormat*> getFormats() const;
 
     //==============================================================================
     /** Adds a format to the list.

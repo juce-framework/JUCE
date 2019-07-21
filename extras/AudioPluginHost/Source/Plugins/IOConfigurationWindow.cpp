@@ -26,9 +26,9 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "../UI/GraphEditorPanel.h"
-#include "InternalFilters.h"
+#include "InternalPlugins.h"
 #include "../UI/MainHostWindow.h"
-#include "FilterIOConfiguration.h"
+#include "IOConfigurationWindow.h"
 
 
 //==============================================================================
@@ -171,13 +171,13 @@ private:
 };
 
 //==============================================================================
-class FilterIOConfigurationWindow::InputOutputConfig  : public Component,
-                                                        private ComboBox::Listener,
-                                                        private Button::Listener,
-                                                        private NumberedBoxes::Listener
+class IOConfigurationWindow::InputOutputConfig  : public Component,
+                                                  private ComboBox::Listener,
+                                                  private Button::Listener,
+                                                  private NumberedBoxes::Listener
 {
 public:
-    InputOutputConfig (FilterIOConfigurationWindow& parent, bool direction)
+    InputOutputConfig (IOConfigurationWindow& parent, bool direction)
         : owner (parent),
           ioTitle ("ioLabel", direction ? "Input Configuration" : "Output Configuration"),
           ioBuses (*this, false, false),
@@ -235,12 +235,12 @@ public:
 private:
     void updateBusButtons()
     {
-        if (auto* filter = owner.getAudioProcessor())
+        if (auto* plugin = owner.getAudioProcessor())
         {
             auto& header = ioBuses.getHeader();
             header.removeAllColumns();
 
-            const int n = filter->getBusCount (isInput);
+            const int n = plugin->getBusCount (isInput);
 
             for (int i = 0; i < n; ++i)
                 header.addColumn ("", i + 1, 40);
@@ -248,8 +248,8 @@ private:
             header.addColumn ("+", NumberedBoxes::plusButtonColumnId,  20);
             header.addColumn ("-", NumberedBoxes::minusButtonColumnId, 20);
 
-            ioBuses.setCanAddColumn    (filter->canAddBus    (isInput));
-            ioBuses.setCanRemoveColumn (filter->canRemoveBus (isInput));
+            ioBuses.setCanAddColumn    (plugin->canAddBus    (isInput));
+            ioBuses.setCanRemoveColumn (plugin->canRemoveBus (isInput));
         }
 
         ioBuses.setSelected (currentBus + 1);
@@ -257,9 +257,9 @@ private:
 
     void updateBusLayout()
     {
-        if (auto* filter = owner.getAudioProcessor())
+        if (auto* plugin = owner.getAudioProcessor())
         {
-            if (auto* bus = filter->getBus (isInput, currentBus))
+            if (auto* bus = plugin->getBus (isInput, currentBus))
             {
                 name.setText (bus->getName(), NotificationType::dontSendNotification);
 
@@ -418,7 +418,7 @@ private:
     }
 
     //==============================================================================
-    FilterIOConfigurationWindow& owner;
+    IOConfigurationWindow& owner;
     Label ioTitle, name;
     Label nameLabel { "nameLabel", "Bus Name:" };
     Label layoutLabel { "layoutLabel", "Channel Layout:" };
@@ -432,7 +432,7 @@ private:
 };
 
 
-FilterIOConfigurationWindow::FilterIOConfigurationWindow (AudioProcessor& p)
+IOConfigurationWindow::IOConfigurationWindow (AudioProcessor& p)
    : AudioProcessorEditor (&p),
      title ("title", p.getName())
 {
@@ -463,7 +463,7 @@ FilterIOConfigurationWindow::FilterIOConfigurationWindow (AudioProcessor& p)
     setSize (400, (inConfig != nullptr && outConfig != nullptr ? 160 : 0) + 200);
 }
 
-FilterIOConfigurationWindow::~FilterIOConfigurationWindow()
+IOConfigurationWindow::~IOConfigurationWindow()
 {
     if (auto* graph = getGraph())
     {
@@ -483,12 +483,12 @@ FilterIOConfigurationWindow::~FilterIOConfigurationWindow()
     }
 }
 
-void FilterIOConfigurationWindow::paint (Graphics& g)
+void IOConfigurationWindow::paint (Graphics& g)
 {
      g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
 }
 
-void FilterIOConfigurationWindow::resized()
+void IOConfigurationWindow::resized()
 {
     auto r = getLocalBounds().reduced (10);
 
@@ -502,7 +502,7 @@ void FilterIOConfigurationWindow::resized()
         outConfig->setBounds (r.removeFromTop (160));
 }
 
-void FilterIOConfigurationWindow::update()
+void IOConfigurationWindow::update()
 {
     auto nodeID = getNodeID();
 
@@ -515,7 +515,7 @@ void FilterIOConfigurationWindow::update()
             panel->updateComponents();
 }
 
-AudioProcessorGraph::NodeID FilterIOConfigurationWindow::getNodeID() const
+AudioProcessorGraph::NodeID IOConfigurationWindow::getNodeID() const
 {
     if (auto* graph = getGraph())
         for (auto* node : graph->getNodes())
@@ -525,7 +525,7 @@ AudioProcessorGraph::NodeID FilterIOConfigurationWindow::getNodeID() const
     return {};
 }
 
-MainHostWindow* FilterIOConfigurationWindow::getMainWindow() const
+MainHostWindow* IOConfigurationWindow::getMainWindow() const
 {
     auto& desktop = Desktop::getInstance();
 
@@ -536,7 +536,7 @@ MainHostWindow* FilterIOConfigurationWindow::getMainWindow() const
     return nullptr;
 }
 
-GraphDocumentComponent* FilterIOConfigurationWindow::getGraphEditor() const
+GraphDocumentComponent* IOConfigurationWindow::getGraphEditor() const
 {
     if (auto* mainWindow = getMainWindow())
         return mainWindow->graphHolder.get();
@@ -544,7 +544,7 @@ GraphDocumentComponent* FilterIOConfigurationWindow::getGraphEditor() const
     return nullptr;
 }
 
-AudioProcessorGraph* FilterIOConfigurationWindow::getGraph() const
+AudioProcessorGraph* IOConfigurationWindow::getGraph() const
 {
     if (auto* graphEditor = getGraphEditor())
         if (auto* panel = graphEditor->graph.get())

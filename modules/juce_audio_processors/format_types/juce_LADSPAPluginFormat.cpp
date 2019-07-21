@@ -653,7 +653,7 @@ void LADSPAPluginFormat::createPluginInstance (const PluginDescription& desc,
     callback (std::move (result), errorMsg);
 }
 
-bool LADSPAPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept
+bool LADSPAPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const
 {
     return false;
 }

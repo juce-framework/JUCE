@@ -26,20 +26,20 @@
 
 #pragma once
 
-#include "../Filters/FilterIOConfiguration.h"
+#include "../Plugins/IOConfigurationWindow.h"
 
-class FilterGraph;
+class PluginGraph;
 
 /**
     A window that shows a log of parameter change messagse sent by the plugin.
 */
-class FilterDebugWindow : public AudioProcessorEditor,
+class PluginDebugWindow : public AudioProcessorEditor,
                           public AudioProcessorParameter::Listener,
                           public ListBoxModel,
                           public AsyncUpdater
 {
 public:
-    FilterDebugWindow (AudioProcessor& proc)
+    PluginDebugWindow (AudioProcessor& proc)
         : AudioProcessorEditor (proc), audioProc (proc)
     {
         setSize (500, 200);
@@ -209,17 +209,10 @@ private:
             type = PluginWindow::Type::generic;
         }
 
-        if (type == PluginWindow::Type::generic)
-            return new GenericAudioProcessorEditor (processor);
-
-        if (type == PluginWindow::Type::programs)
-            return new ProgramAudioProcessorEditor (processor);
-
-        if (type == PluginWindow::Type::audioIO)
-            return new FilterIOConfigurationWindow (processor);
-
-        if (type == PluginWindow::Type::debug)
-            return new FilterDebugWindow (processor);
+        if (type == PluginWindow::Type::generic)  return new GenericAudioProcessorEditor (processor);
+        if (type == PluginWindow::Type::programs) return new ProgramAudioProcessorEditor (processor);
+        if (type == PluginWindow::Type::audioIO)  return new IOConfigurationWindow (processor);
+        if (type == PluginWindow::Type::debug)    return new PluginDebugWindow (processor);
 
         jassertfalse;
         return {};

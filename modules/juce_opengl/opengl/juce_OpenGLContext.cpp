@@ -1230,12 +1230,19 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
         extensions.glEnableVertexAttribArray (index);
         JUCE_CHECK_OPENGL_ERROR
 
-        glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+        if (extensions.glCheckFramebufferStatus (GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE)
+        {
+            glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
 
-        extensions.glBindBuffer (GL_ARRAY_BUFFER, 0);
-        extensions.glUseProgram (0);
-        extensions.glDisableVertexAttribArray (index);
-        extensions.glDeleteBuffers (1, &vertexBuffer);
+            extensions.glBindBuffer (GL_ARRAY_BUFFER, 0);
+            extensions.glUseProgram (0);
+            extensions.glDisableVertexAttribArray (index);
+            extensions.glDeleteBuffers (1, &vertexBuffer);
+        }
+        else
+        {
+            clearGLError();
+        }
     }
     else
     {

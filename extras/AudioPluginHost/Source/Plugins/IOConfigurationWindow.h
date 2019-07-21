@@ -31,11 +31,11 @@ class GraphDocumentComponent;
 
 
 //==============================================================================
-class FilterIOConfigurationWindow   : public  AudioProcessorEditor
+class IOConfigurationWindow   : public  AudioProcessorEditor
 {
 public:
-    FilterIOConfigurationWindow (AudioProcessor&);
-    ~FilterIOConfigurationWindow() override;
+    IOConfigurationWindow (AudioProcessor&);
+    ~IOConfigurationWindow() override;
 
     //==============================================================================
     void paint (Graphics& g) override;
@@ -56,5 +56,5 @@ private:
     AudioProcessorGraph* getGraph() const;
     AudioProcessorGraph::NodeID getNodeID() const;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilterIOConfigurationWindow)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IOConfigurationWindow)
 };
