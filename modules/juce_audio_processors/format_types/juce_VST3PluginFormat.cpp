@@ -153,7 +153,7 @@ static bool doesComponentHaveARAEntryPoint(Vst::IComponent* component)
     if ((component->queryInterface (ARA::IPlugInEntryPoint::iid, (void**)&entry1) == kResultTrue) && (entry1 != nullptr))
     {
         auto araFactory = entry1->getFactory();
-        if (araFactory->lowestSupportedApiGeneration >= ARA::kARAAPIGeneration_2_0_Draft)
+        if (araFactory->highestSupportedApiGeneration >= ARA::kARAAPIGeneration_2_0_Draft)
         {
             ARA::IPlugInEntryPoint2 * entry2 = nullptr;
             if ((component->queryInterface (ARA::IPlugInEntryPoint2::iid, (void**)&entry2) == kResultTrue) && (entry2 != nullptr))
