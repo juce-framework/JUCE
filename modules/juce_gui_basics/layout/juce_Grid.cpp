@@ -519,7 +519,10 @@ struct Grid::PlacementHelpers
                              alignContent,
                              justifyContent);
 
-        return startCell.getUnion (endCell);
+        auto horizontalRange = startCell.getHorizontalRange().getUnionWith (endCell.getHorizontalRange());
+        auto verticalRange = startCell.getVerticalRange().getUnionWith (endCell.getVerticalRange());
+        return { horizontalRange.getStart(),  verticalRange.getStart(),
+                 horizontalRange.getLength(), verticalRange.getLength() };
     }
 };
 
