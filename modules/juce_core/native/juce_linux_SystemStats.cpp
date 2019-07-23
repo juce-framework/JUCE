@@ -20,6 +20,7 @@
   ==============================================================================
 */
 
+
 namespace juce
 {
 
@@ -175,18 +176,19 @@ void CPUInformation::initialise() noexcept
 //==============================================================================
 uint32 juce_millisecondsSinceStartup() noexcept
 {
-    timespec t;
-    clock_gettime (CLOCK_MONOTONIC, &t);
-
-    return (uint32) (t.tv_sec * 1000 + t.tv_nsec / 1000000);
+    return uint32 (Time::getHighResolutionTicks() / 1000);
 }
 
 int64 Time::getHighResolutionTicks() noexcept
 {
+#if JUCE_BELA
+    return rt_timer_read() / 1000;
+#else
     timespec t;
     clock_gettime (CLOCK_MONOTONIC, &t);
 
     return (t.tv_sec * (int64) 1000000) + (t.tv_nsec / 1000);
+#endif
 }
 
 int64 Time::getHighResolutionTicksPerSecond() noexcept
