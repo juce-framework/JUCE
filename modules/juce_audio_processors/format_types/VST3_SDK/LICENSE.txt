@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2018, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 This license applies only to files referencing this license,
 for other files of the Software Development Kit the respective embedded license text

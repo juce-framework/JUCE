@@ -57,7 +57,9 @@ namespace Vst2
 #endif
 
 #ifndef JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
- #define JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS 1
+ #if JucePlugin_WantsMidiInput
+  #define JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS 1
+ #endif
 #endif
 
 #if JUCE_VST3_CAN_REPLACE_VST2

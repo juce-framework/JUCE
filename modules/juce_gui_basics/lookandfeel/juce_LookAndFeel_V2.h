@@ -327,6 +327,7 @@ public:
     //==============================================================================
     void drawCallOutBoxBackground (CallOutBox&, Graphics&, const Path& path, Image& cachedImage) override;
     int getCallOutBoxBorderSize (const CallOutBox&) override;
+    float getCallOutBoxCornerSize (const CallOutBox&) override;
 
     //==============================================================================
     void drawLevelMeter (Graphics&, int width, int height, float level) override;

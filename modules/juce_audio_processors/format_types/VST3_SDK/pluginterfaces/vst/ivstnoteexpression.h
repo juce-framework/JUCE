@@ -34,7 +34,7 @@ VST predefines some types like volume, pan, tuning by defining their ranges and 
 Used by NoteExpressionEvent::typeId and NoteExpressionTypeID::typeId
 \see NoteExpressionTypeInfo
 */
-enum NoteExpressionTypeIDs
+enum NoteExpressionTypeIDs : uint32
 {
 	kVolumeTypeID = 0,		///< Volume, plain range [0 = -oo , 0.25 = 0dB, 0.5 = +6dB, 1 = +12dB]: plain = 20 * log (4 * norm)
 	kPanTypeID,				///< Panning (L-R), plain range [0 = left, 0.5 = center, 1 = right]
@@ -183,7 +183,7 @@ DECLARE_CLASS_IID (INoteExpressionController, 0xB7F8F859, 0x41234872, 0x91169581
 /** KeyswitchTypeIDs describes the type of a key switch
 \see KeyswitchInfo
 */
-enum KeyswitchTypeIDs
+enum KeyswitchTypeIDs : uint32
 {
 	kNoteOnKeyswitchTypeID = 0,				///< press before noteOn is played
 	kOnTheFlyKeyswitchTypeID,				///< press while noteOn is played

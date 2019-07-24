@@ -68,10 +68,11 @@ const CString kFxNetwork			= "Fx|Network";		///< using Network
 
 const CString kInstrument			= "Instrument";			///< Effect used as instrument (sound generator), not as insert
 const CString kInstrumentDrum		= "Instrument|Drum";	///< Instrument for Drum sounds
+const CString kInstrumentExternal	= "Instrument|External";///< External Instrument (wrapped Hardware)
+const CString kInstrumentPiano		= "Instrument|Piano";	///< Instrument for Piano sounds
 const CString kInstrumentSampler	= "Instrument|Sampler";	///< Instrument based on Samples
 const CString kInstrumentSynth		= "Instrument|Synth";	///< Instrument based on Synthesis
 const CString kInstrumentSynthSampler = "Instrument|Synth|Sampler";	///< Instrument based on Synthesis and Samples
-const CString kInstrumentExternal	= "Instrument|External";///< External Instrument (wrapped Hardware)
 
 const CString kSpatial				= "Spatial";		///< used for SurroundPanner
 const CString kSpatialFx			= "Spatial|Fx";		///< used for SurroundPanner and as insert effect

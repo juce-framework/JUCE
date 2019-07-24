@@ -1075,11 +1075,21 @@ private:
         }
     }
 
+    static bool shouldReleaseObject (const String& driverName)
+    {
+        return driverName != "Yamaha Steinberg USB ASIO";
+    }
+
     void removeCurrentDriver()
     {
         if (asioObject != nullptr)
         {
-            asioObject->Release();
+            char buffer[512] = {};
+            asioObject->getDriverName (buffer);
+
+            if (shouldReleaseObject (buffer))
+                asioObject->Release();
+
             asioObject = nullptr;
         }
     }
@@ -1127,7 +1137,7 @@ private:
         if (asioObject == nullptr)
             return "No Driver";
 
-        const bool initOk = !! asioObject->init (juce_messageWindowHandle);
+        auto initOk = (asioObject->init (juce_messageWindowHandle) > 0);
         String driverError;
 
         // Get error message if init() failed, or if it's a buggy Denon driver,
