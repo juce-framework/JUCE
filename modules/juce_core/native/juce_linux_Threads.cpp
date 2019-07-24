@@ -31,9 +31,9 @@ namespace juce
 //==============================================================================
 JUCE_API void JUCE_CALLTYPE Process::setPriority (const ProcessPriority prior)
 {
-    const int policy = (prior <= NormalPriority) ? SCHED_OTHER : SCHED_RR;
-    const int minp = sched_get_priority_min (policy);
-    const int maxp = sched_get_priority_max (policy);
+    auto policy = (prior <= NormalPriority) ? SCHED_OTHER : SCHED_RR;
+    auto minp = sched_get_priority_min (policy);
+    auto maxp = sched_get_priority_max (policy);
 
     struct sched_param param;
 
@@ -51,8 +51,8 @@ JUCE_API void JUCE_CALLTYPE Process::setPriority (const ProcessPriority prior)
 
 static bool swapUserAndEffectiveUser()
 {
-    int result1 = setreuid (geteuid(), getuid());
-    int result2 = setregid (getegid(), getgid());
+    auto result1 = setreuid (geteuid(), getuid());
+    auto result2 = setregid (getegid(), getgid());
     return result1 == 0 && result2 == 0;
 }
 

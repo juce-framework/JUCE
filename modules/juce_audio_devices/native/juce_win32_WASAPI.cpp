@@ -1020,7 +1020,9 @@ public:
                 sampleRates = d->rates;
             }
 
+            bufferSizes.clear();
             bufferSizes.addUsingDefaultSort (defaultBufferSize);
+
             if (minBufferSize != defaultBufferSize)
                 bufferSizes.addUsingDefaultSort (minBufferSize);
 

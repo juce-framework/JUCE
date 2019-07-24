@@ -62,7 +62,7 @@ public:
                 break;
 
             auto byte = (uint8) data;
-            concatenator.pushMidiData (&byte, 1, 0.0, midiInput, *midiCallback);
+            concatenator.pushMidiData (&byte, 1, Time::getMillisecondCounter() * 0.001, midiInput, *midiCallback);
         }
     }
 
