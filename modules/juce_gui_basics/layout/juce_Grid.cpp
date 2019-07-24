@@ -519,9 +519,7 @@ struct Grid::PlacementHelpers
                              alignContent,
                              justifyContent);
 
-        auto horiz = startCell.getHorizontalRange().getUnionWith (endCell.getHorizontalRange());
-        auto vert = startCell.getVerticalRange().getUnionWith (endCell.getVerticalRange());
-        return { horiz.getStart(), vert.getStart(), horiz.getLength(), vert.getLength() };
+        return startCell.getUnion (endCell);
     }
 };
 
