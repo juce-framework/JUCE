@@ -331,6 +331,16 @@ void Viewport::lookAndFeelChanged()
     }
 }
 
+void Viewport::setEnableKeyPressEvents(bool shouldEnableKeypresses)
+{
+	enableKeyPressEvents = shouldEnableKeypresses;
+}
+
+bool Viewport::keyPressEventsEnabled() const noexcept
+{
+	return enableKeyPressEvents;
+}
+
 void Viewport::resized()
 {
     updateVisibleArea();
@@ -597,6 +607,8 @@ static bool isLeftRightKeyPress (const KeyPress& key)
 
 bool Viewport::keyPressed (const KeyPress& key)
 {
+	if (!enableKeyPressEvents) return false;
+
     const bool isUpDownKey = isUpDownKeyPress (key);
 
     if (getVerticalScrollBar().isVisible() && isUpDownKey)
