@@ -288,6 +288,17 @@ public:
     */
     bool isCurrentlyScrollingOnDrag() const noexcept;
 
+	/** Enables or disables keypress events for this component.
+
+		If disabled, keypresses won't have any effect on the scrolling of the viewport. It is enabled by default, 
+		meaning that keypresses like up/down or left/right will scroll the viewport.
+
+	*/
+	void setEnableKeyPressEvents(bool shouldEnabledKeypresses);
+
+	/** Returns true if keypresses events are enabled. */
+	bool keyPressEventsEnabled() const noexcept;
+
     //==============================================================================
     /** @internal */
     void resized() override;
@@ -325,6 +336,7 @@ private:
     bool customScrollBarThickness = false;
     bool allowScrollingWithoutScrollbarV = false, allowScrollingWithoutScrollbarH = false;
     bool vScrollbarRight = true, hScrollbarBottom = true;
+	bool enableKeyPressEvents = true;
 
     struct DragToScrollListener;
     std::unique_ptr<DragToScrollListener> dragToScrollListener;
