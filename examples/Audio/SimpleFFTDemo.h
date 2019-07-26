@@ -163,7 +163,7 @@ public:
         for (auto y = 1; y < imageHeight; ++y)
         {
             auto skewedProportionY = 1.0f - std::exp (std::log (y / (float) imageHeight) * 0.2f);
-            auto fftDataIndex = jlimit (0, fftSize / 2, (int) (skewedProportionY * fftSize / 2));
+            auto fftDataIndex = jlimit (0, fftSize / 2, (int) (skewedProportionY * (int) fftSize / 2));
             auto level = jmap (fftData[fftDataIndex], 0.0f, jmax (maxLevel.getEnd(), 1e-5f), 0.0f, 1.0f);
 
             spectrogramImage.setPixelAt (rightHandEdge, y, Colour::fromHSV (level, 1.0f, level, 1.0f));
