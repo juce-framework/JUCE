@@ -162,23 +162,23 @@ void ARADocumentController::doNotifyModelUpdates() noexcept
 
 //==============================================================================
 
-bool ARADocumentController::doRestoreObjectsFromStream (InputStream& /*input*/, ARA::PlugIn::RestoreObjectsFilter* /*filter*/) noexcept
+bool ARADocumentController::doRestoreObjectsFromStream (InputStream& /*input*/, const ARA::PlugIn::RestoreObjectsFilter* /*filter*/) noexcept
 {
     return true;
 }
 
-bool ARADocumentController::doStoreObjectsToStream (OutputStream& /*output*/, ARA::PlugIn::StoreObjectsFilter* /*filter*/) noexcept
+bool ARADocumentController::doStoreObjectsToStream (OutputStream& /*output*/, const ARA::PlugIn::StoreObjectsFilter* /*filter*/) noexcept
 {
     return true;
 }
 
-bool ARADocumentController::doRestoreObjectsFromArchive (ARA::PlugIn::HostArchiveReader* archiveReader, ARA::PlugIn::RestoreObjectsFilter* filter) noexcept
+bool ARADocumentController::doRestoreObjectsFromArchive (ARA::PlugIn::HostArchiveReader* archiveReader, const ARA::PlugIn::RestoreObjectsFilter* filter) noexcept
 {
     ArchiveReader reader (archiveReader);
     return doRestoreObjectsFromStream (reader, filter);
 }
 
-bool ARADocumentController::doStoreObjectsToArchive (ARA::PlugIn::HostArchiveWriter* archiveWriter, ARA::PlugIn::StoreObjectsFilter* filter) noexcept
+bool ARADocumentController::doStoreObjectsToArchive (ARA::PlugIn::HostArchiveWriter* archiveWriter, const ARA::PlugIn::StoreObjectsFilter* filter) noexcept
 {
     ArchiveWriter writer (archiveWriter);
     return doStoreObjectsToStream(writer, filter);
@@ -207,9 +207,9 @@ ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugI
 
 //==============================================================================
 
-ARA::PlugIn::AudioModification* ARADocumentController::doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, ARA::PlugIn::AudioModification* optionalModificationToClone) noexcept
+ARA::PlugIn::AudioModification* ARADocumentController::doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, const ARA::PlugIn::AudioModification* optionalModificationToClone) noexcept
 {
-    return new ARAAudioModification (static_cast<ARAAudioSource*> (audioSource), hostRef, static_cast<ARAAudioModification*> (optionalModificationToClone));
+    return new ARAAudioModification (static_cast<ARAAudioSource*> (audioSource), hostRef, static_cast<const ARAAudioModification*> (optionalModificationToClone));
 }
 
 //==============================================================================
@@ -257,9 +257,9 @@ void ARADocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::Play
     }
 }
 
-void ARADocumentController::doGetPlaybackRegionHeadAndTailTime (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::ARATimeDuration* headTime, ARA::ARATimeDuration* tailTime) noexcept
+void ARADocumentController::doGetPlaybackRegionHeadAndTailTime (const ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::ARATimeDuration* headTime, ARA::ARATimeDuration* tailTime) noexcept
 {
-    auto araPlaybackRegion = static_cast<ARAPlaybackRegion*> (playbackRegion);
+    auto araPlaybackRegion = static_cast<const ARAPlaybackRegion*> (playbackRegion);
     *headTime = araPlaybackRegion->getHeadTime();
     *tailTime = araPlaybackRegion->getTailTime();
 }

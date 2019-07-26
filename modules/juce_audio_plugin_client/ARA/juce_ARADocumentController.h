@@ -113,7 +113,7 @@ protected:
     override ARA::PlugIn::DocumentController::doRestoreObjectsFromArchive to deal with an ARA archive 
     ARA::PlugIn::HostArchiveReader directly. 
     */
-    virtual bool doRestoreObjectsFromStream (InputStream& input, ARA::PlugIn::RestoreObjectsFilter* filter) noexcept;
+    virtual bool doRestoreObjectsFromStream (InputStream& input, const ARA::PlugIn::RestoreObjectsFilter* filter) noexcept;
 
     /** Write an ARADocument archive to a juce::OutputStream.
     @param output Data stream that should be used to write the persistent ARADocument data
@@ -126,10 +126,10 @@ protected:
     override ARA::PlugIn::DocumentController::doStoreObjectsToArchive to deal with an ARA archive 
     ARA::PlugIn::HostArchiveWriter directly. 
     */
-    virtual bool doStoreObjectsToStream (OutputStream& output, ARA::PlugIn::StoreObjectsFilter* filter) noexcept;
+    virtual bool doStoreObjectsToStream (OutputStream& output, const ARA::PlugIn::StoreObjectsFilter* filter) noexcept;
 
-    bool doRestoreObjectsFromArchive (ARA::PlugIn::HostArchiveReader* archiveReader, ARA::PlugIn::RestoreObjectsFilter* filter) noexcept override;
-    bool doStoreObjectsToArchive (ARA::PlugIn::HostArchiveWriter* archiveWriter, ARA::PlugIn::StoreObjectsFilter* filter) noexcept override;
+    bool doRestoreObjectsFromArchive (ARA::PlugIn::HostArchiveReader* archiveReader, const ARA::PlugIn::RestoreObjectsFilter* filter) noexcept override;
+    bool doStoreObjectsToArchive (ARA::PlugIn::HostArchiveWriter* archiveWriter, const ARA::PlugIn::StoreObjectsFilter* filter) noexcept override;
 
     // Document callbacks
     ARA::PlugIn::Document* doCreateDocument (ARA::PlugIn::DocumentController* documentController) noexcept override;
@@ -173,7 +173,7 @@ protected:
     OVERRIDE_TO_NOTIFY_1 (willDestroyAudioSource, AudioSource*, audioSource);
 
     // AudioModification callbacks
-    ARA::PlugIn::AudioModification* doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, ARA::PlugIn::AudioModification* optionalModificationToClone) noexcept override;
+    ARA::PlugIn::AudioModification* doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, const ARA::PlugIn::AudioModification* optionalModificationToClone) noexcept override;
     OVERRIDE_TO_NOTIFY_3 (willUpdateAudioModificationProperties, AudioModification*, audioModification, ARAAudioModification::PropertiesPtr, newProperties);
     OVERRIDE_TO_NOTIFY_1 (didUpdateAudioModificationProperties, AudioModification*, audioModification);
     OVERRIDE_TO_NOTIFY_2 (didAddPlaybackRegionToAudioModification, AudioModification*, audioModification, PlaybackRegion*, playbackRegion);
@@ -185,7 +185,7 @@ protected:
     ARA::PlugIn::PlaybackRegion* doCreatePlaybackRegion (ARA::PlugIn::AudioModification* modification, ARA::ARAPlaybackRegionHostRef hostRef) noexcept override;
     /*OVERRIDE_TO_NOTIFY_2*/ void willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) noexcept override;
     /*OVERRIDE_TO_NOTIFY_1*/ void didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
-    void doGetPlaybackRegionHeadAndTailTime (ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::ARATimeDuration* headTime, ARA::ARATimeDuration* tailTime) noexcept override;
+    void doGetPlaybackRegionHeadAndTailTime (const ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::ARATimeDuration* headTime, ARA::ARATimeDuration* tailTime) noexcept override;
     OVERRIDE_TO_NOTIFY_1 (willDestroyPlaybackRegion, PlaybackRegion*, playbackRegion);
 
     // PlugIn instance role creation

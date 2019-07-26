@@ -65,7 +65,7 @@ void ARAAudioSource::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bo
 
 //==============================================================================
 
-ARAAudioModification::ARAAudioModification (ARAAudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, ARAAudioModification* optionalModificationToClone)
+ARAAudioModification::ARAAudioModification (ARAAudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, const ARAAudioModification* optionalModificationToClone)
     : ARA::PlugIn::AudioModification (audioSource, hostRef, optionalModificationToClone)
 {}
 
