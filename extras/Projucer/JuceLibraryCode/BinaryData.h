@@ -81,7 +81,7 @@ namespace BinaryData
     const int            wizard_StaticLibrary_svgSize = 7488;
 
     extern const char*   jucer_AudioPluginARADocumentControllerTemplate_cpp;
-    const int            jucer_AudioPluginARADocumentControllerTemplate_cppSize = 1059;
+    const int            jucer_AudioPluginARADocumentControllerTemplate_cppSize = 1060;
 
     extern const char*   jucer_AudioPluginARADocumentControllerTemplate_h;
     const int            jucer_AudioPluginARADocumentControllerTemplate_hSize = 999;

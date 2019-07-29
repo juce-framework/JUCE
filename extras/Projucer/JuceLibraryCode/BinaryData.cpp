@@ -5351,7 +5351,7 @@ static const unsigned char temp_binary_data_24[] =
 "// This creates new instances of the document controller..\r\n"
 "ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController (const ARADocumentControllerHostInstance* instance) noexcept\r\n"
 "{\r\n"
-"    return new %%aradocumentcontroller_class_name%%(instance);\r\n"
+"    return new %%aradocumentcontroller_class_name%% (instance);\r\n"
 "};\r\n";
 
 const char* jucer_AudioPluginARADocumentControllerTemplate_cpp = (const char*) temp_binary_data_24;

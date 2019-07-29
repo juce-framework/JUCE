@@ -24,5 +24,5 @@
 // This creates new instances of the document controller..
 ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController (const ARADocumentControllerHostInstance* instance) noexcept
 {
-    return new %%aradocumentcontroller_class_name%%(instance);
+    return new %%aradocumentcontroller_class_name%% (instance);
 };
