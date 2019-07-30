@@ -100,7 +100,7 @@ protected:
     // Model Update Management
     void willBeginEditing() noexcept override;
     void didEndEditing() noexcept override;
-    void doNotifyModelUpdates() noexcept override;
+    void doNotifyModelContentUpdates() noexcept override;
 
     /** Read an ARADocument archive from a juce::InputStream.
     @param input Data stream containing previously persisted data to be used when restoring the ARADocument

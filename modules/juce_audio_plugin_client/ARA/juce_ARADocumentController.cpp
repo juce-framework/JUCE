@@ -140,7 +140,7 @@ void ARADocumentController::didEndEditing() noexcept
     notify_listeners (didEndEditing, ARADocument*, getDocument());
 }
 
-void ARADocumentController::doNotifyModelUpdates() noexcept
+void ARADocumentController::doNotifyModelContentUpdates() noexcept
 {
     auto hostModelUpdateController = getHostModelUpdateController();
     if (hostModelUpdateController != nullptr)
@@ -200,7 +200,7 @@ ARA::PlugIn::RegionSequence* ARADocumentController::doCreateRegionSequence (ARA:
 
 //==============================================================================
 
-ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugIn::Document *document, ARA::ARAAudioSourceHostRef hostRef) noexcept
+ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugIn::Document* document, ARA::ARAAudioSourceHostRef hostRef) noexcept
 {
     return new ARAAudioSource (static_cast<ARADocument*>(document), hostRef);
 }
