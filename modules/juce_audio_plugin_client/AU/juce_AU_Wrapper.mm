@@ -934,12 +934,8 @@ public:
                 {
                    #if ! JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
                     if (isParameterDiscrete)
-                    {
-                        outParameterInfo.unit = kAudioUnitParameterUnit_Indexed;
-
-                        if (param->isBoolean())
-                            outParameterInfo.unit = kAudioUnitParameterUnit_Boolean;
-                    }
+                        outParameterInfo.unit = param->isBoolean() ? kAudioUnitParameterUnit_Boolean
+                                                                   : kAudioUnitParameterUnit_Indexed;
                    #endif
                 }
 
@@ -1912,7 +1908,7 @@ private:
             {
                 const AudioUnitParameterID auParamID = generateAUParameterID (param);
 
-                // Consider yourself very unlucky if you hit this assertion. The hash code of your
+                // Consider yourself very unlucky if you hit this assertion. The hash codes of your
                 // parameter ids are not unique.
                 jassert (! paramMap.contains (static_cast<int32> (auParamID)));
 
