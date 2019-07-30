@@ -225,10 +225,10 @@ void ARADocumentController::willUpdatePlaybackRegionProperties (ARA::PlugIn::Pla
     // post a sample content update to any of our playback region listeners
     jassert(! _currentPropertyUpdateAffectsContent);
     _currentPropertyUpdateAffectsContent =
-        ((playbackRegion->getStartInAudioModificationTime () != newProperties->startInModificationTime) ||
-        (playbackRegion->getDurationInAudioModificationTime () != newProperties->durationInModificationTime) ||
-        (playbackRegion->getStartInPlaybackTime () != newProperties->startInPlaybackTime) ||
-        (playbackRegion->getDurationInPlaybackTime () != newProperties->durationInPlaybackTime)||
+        ((playbackRegion->getStartInAudioModificationTime() != newProperties->startInModificationTime) ||
+        (playbackRegion->getDurationInAudioModificationTime() != newProperties->durationInModificationTime) ||
+        (playbackRegion->getStartInPlaybackTime() != newProperties->startInPlaybackTime) ||
+        (playbackRegion->getDurationInPlaybackTime() != newProperties->durationInPlaybackTime)||
         (playbackRegion->isTimestretchEnabled() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretch) != 0)) ||
         (playbackRegion->isTimeStretchReflectingTempo() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretchReflectingTempo) != 0)) ||
         (playbackRegion->hasContentBasedFadeAtHead() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationContentBasedFadeAtHead) != 0)) ||
