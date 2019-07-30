@@ -309,7 +309,7 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
                    "The location of the folder in which the " + name + " project will be created. "
                    "This path can be absolute, but it's much more sensible to make it relative to the jucer project directory.");
 
-        if ((shouldBuildTargetType (ProjectType::Target::VSTPlugIn) && project.shouldBuildVST()) || project.isVSTPluginHost())
+        if ((shouldBuildTargetType (ProjectType::Target::VSTPlugIn) && project.shouldBuildVST()) || (project.isVSTPluginHost() && supportsTargetType (ProjectType::Target::VSTPlugIn)))
         {
             props.add (new FilePathPropertyComponent (vstLegacyPathValueWrapper.wrappedValue, "VST (Legacy) SDK Folder", true,
                                                       getTargetOSForExporter() == TargetOS::getThisOS(), "*", project.getProjectFolder()),
@@ -317,7 +317,7 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
                        "This can be an absolute path, or a path relative to the Projucer project file.");
         }
 
-        if ((shouldBuildTargetType (ProjectType::Target::VST3PlugIn) && project.shouldBuildVST3()) || project.isVST3PluginHost())
+        if ((shouldBuildTargetType (ProjectType::Target::VST3PlugIn) && project.shouldBuildVST3()) || (project.isVST3PluginHost() && supportsTargetType (ProjectType::Target::VST3PlugIn)))
         {
             props.add (new FilePathPropertyComponent (vst3PathValueWrapper.wrappedValue, "VST3 SDK Folder", true,
                                                       getTargetOSForExporter() == TargetOS::getThisOS(), "*", project.getProjectFolder()),
