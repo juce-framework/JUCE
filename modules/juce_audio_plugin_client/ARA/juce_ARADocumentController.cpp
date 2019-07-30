@@ -92,6 +92,8 @@ namespace juce
 
 void ARADocumentController::notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions)
 {
+    jassert (scopeFlags.affectEverything() || !scopeFlags.affectSamples());
+
     audioSourceUpdates[audioSource] += scopeFlags;
 
     notify_listeners (doUpdateAudioSourceContent, ARAAudioSource*, audioSource, scopeFlags);
