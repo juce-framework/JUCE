@@ -353,11 +353,12 @@ public:
     /** Provides access to the undo manager that this object is using. */
     UndoManager* const undoManager;
 
-    //==============================================================================
 private:
+    //==============================================================================
     class ParameterAdapter;
 
 public:
+    //==============================================================================
     /** A parameter class that maintains backwards compatibility with deprecated
         AudioProcessorValueTreeState functionality.
 
@@ -433,14 +434,12 @@ public:
     class JUCE_API  SliderAttachment
     {
     public:
-        SliderAttachment (AudioProcessorValueTreeState& stateToControl,
+        SliderAttachment (AudioProcessorValueTreeState& stateToUse,
                           const String& parameterID,
-                          Slider& sliderToControl);
-        ~SliderAttachment();
+                          Slider& slider);
 
     private:
-        struct Pimpl;
-        std::unique_ptr<Pimpl> pimpl;
+        std::unique_ptr<SliderParameterAttachment> attachment;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SliderAttachment)
     };
 
@@ -461,14 +460,12 @@ public:
     class JUCE_API  ComboBoxAttachment
     {
     public:
-        ComboBoxAttachment (AudioProcessorValueTreeState& stateToControl,
+        ComboBoxAttachment (AudioProcessorValueTreeState& stateToUse,
                             const String& parameterID,
-                            ComboBox& comboBoxToControl);
-        ~ComboBoxAttachment();
+                            ComboBox& combo);
 
     private:
-        struct Pimpl;
-        std::unique_ptr<Pimpl> pimpl;
+        std::unique_ptr<ComboBoxParameterAttachment> attachment;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComboBoxAttachment)
     };
 
@@ -484,14 +481,12 @@ public:
     class JUCE_API  ButtonAttachment
     {
     public:
-        ButtonAttachment (AudioProcessorValueTreeState& stateToControl,
+        ButtonAttachment (AudioProcessorValueTreeState& stateToUse,
                           const String& parameterID,
-                          Button& buttonToControl);
-        ~ButtonAttachment();
+                          Button& button);
 
     private:
-        struct Pimpl;
-        std::unique_ptr<Pimpl> pimpl;
+        std::unique_ptr<ButtonParameterAttachment> attachment;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonAttachment)
     };
 
