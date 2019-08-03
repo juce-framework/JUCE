@@ -427,7 +427,7 @@ public:
     /** Notify the ARA host and any listeners of a content update 
 
         Audio modification content changes should be triggered if, for example, 
-        the user adjusts some analysis parameter and causes the analysis to yield new results. 
+        the user changes the modification DSP settings, such as changing the pitch of a note. 
 
         @param scopeFlags The scope of the content update. 
         @param notifyAllPlaybackRegions A bool indicating whether the audio modification's 
@@ -515,7 +515,7 @@ public:
     /** Notify the ARA host and any listeners of a content update 
 
         Playback region content changes should be triggered if, for example,
-        the user adjusts some analysis parameter and causes the analysis to yield new results.
+        the user adjusted the underlying audio modification.
 
         @param scopeFlags The scope of the content update. 
     */
