@@ -346,14 +346,17 @@ public:
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
 
-    /** Notify the ARA host and any listeners of a content update. 
-
-        Audio source content changes should be triggered if, for example,
-        the user adjusts some analysis parameter and causes the analysis to yield new results.
+    /** Notify the ARA host and any listeners of a content update initiated by the plug-in.
+        This must be called by the plug-in model management code on the message thread whenever updating
+        the internal content representation, such as after successfully analyzing a new tempo map,
+        but it must not be called if the change is made in response to a content update in the host.
+        A notification to the host will be enqueued, and send out the next time it polls for updates.
+        This host notification should not be send if the update was triggered by the host via doUpdateAudioSourceContent().
+        Further, all listeners will be notified immediately.
 
         @param scopeFlags The scope of the content update.
-        @param notifyAllAudioModificationsAndPlaybackRegions A bool indicating whether all audio modifications and playback 
-                                                             regions associated with this audio source should be notified. 
+        @param notifyAllAudioModificationsAndPlaybackRegions A bool indicating whether all audio modifications and playback
+                                                             regions associated with this audio source should be notified too.
     */
     void notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions = false);
 };
@@ -424,14 +427,15 @@ public:
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
 
-    /** Notify the ARA host and any listeners of a content update 
+    /** Notify the ARA host and any listeners of a content update initiated by the plug-in.
+        This must be called by the plug-in model management code on the message thread whenever updating
+        the internal content representation, such as after the user editing the pitch of a note.
+        A notification to the host will be enqueued, and send out the next time it polls for updates.
+        Further, all listeners will be notified immediately.
 
-        Audio modification content changes should be triggered if, for example, 
-        the user changes the modification DSP settings, such as changing the pitch of a note. 
-
-        @param scopeFlags The scope of the content update. 
-        @param notifyAllPlaybackRegions A bool indicating whether the audio modification's 
-                                        playback regions should be notified of the content change. 
+        @param scopeFlags The scope of the content update.
+        @param notifyAllPlaybackRegions A bool indicating whether the audio modification's
+                                        playback regions should be notified of the content change.
     */
     void notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllPlaybackRegions = false);
 };
@@ -512,12 +516,14 @@ public:
     */
     Range<double> getTimeRange (bool includeHeadAndTail = false) const;
 
-    /** Notify the ARA host and any listeners of a content update 
+    /** Notify the ARA host and any listeners of a content update initiated by the plug-in.
+        This must be called by the plug-in model management code on the message thread whenever updating
+        the internal content representation, such as after the user edited the pitch of a note in the
+        underlying audio modification.
+        A notification to the host will be enqueued, and send out the next time it polls for updates.
+        Further, all listeners will be notified immediately.
 
-        Playback region content changes should be triggered if, for example,
-        the user adjusted the underlying audio modification.
-
-        @param scopeFlags The scope of the content update. 
+        @param scopeFlags The scope of the content update.
     */
     void notifyContentChanged (ARAContentUpdateScopes scopeFlags);
 

@@ -16,44 +16,13 @@ public:
     using ARA::PlugIn::DocumentController::DocumentController;
 
     //==============================================================================
-    // notify the host and any potential internal listener about content changes
+    // notify the host about content changes
     // Note that while the ARA API allows for specifying update time ranges, this feature is not yet
     // supported in our current plug-in implementation, since most hosts do not evaluate it anyways.
-
-    /** notify the host and any listeners of \p audioSource about updates to \p audioSource's content.
-        @param audioSource The ARAAudioSource with changed content
-        @param scopeFlags The scope of the changed content
-        @param notifyHost Set to true if notifying plug-in side edits, false if responding to doUpdateAudioSourceContent()
-        @param notifyAllAudioModificationsAndPlaybackRegions Whether or not to notify \p audioSource's underlying ARA audio modifications and playback regions.
-
-        This must be called by the plug-in model management code on the message thread whenever changing relevant parts of the internal model graph.
-        A notification to the host will be enqueued if notifyHost is true, and send out the next time it polls this document controller for model updates.
-        Listeners of \p audioSource however will be notified immediately, even if the call is made outside of a host edit cycle.
-        Accordingly, listeners must be either robust regarding this, or the calling code must set up the appropriate internal states.
-    */
-    void notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags, bool notifyHost, bool notifyAllAudioModificationsAndPlaybackRegions = false);
-
-    /** notify the host and any listeners of \p audioModification about updates to \p audioModification's content.
-        @param audioModification The ARAAudioModification with changed content
-        @param notifyAllPlaybackRegions Whether or not to notify \p audioModification's underlying ARA playback regions.
-        @param scopeFlags The scope of the changed content
-
-        This must be called by the plug-in model management code on the message thread whenever changing relevant parts of the internal model graph.
-        A notification to the host will be enqueued, and send out the next time it polls this document controller for model updates.
-        Listeners of \p audioModification however will be notified immediately, even if the call is made outside of a host edit cycle.
-        Accordingly, listeners must be either robust regarding this, or the calling code must set up the appropriate internal states.
-    */
-    void notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags, bool notifyAllPlaybackRegions = false);
-
-    /** notify the host and any listeners of \p playbackRegion about updates to \p playbackRegion's content.
-        @param playbackRegion The ARAPlaybackRegion whose content is changing
-        @param scopeFlags The scope of the changed content
-
-        This must be called by the plug-in model management code on the message thread whenever changing relevant parts of the internal model graph.
-        A notification to the host will be enqueued, and send out the next time it polls this document controller for model updates.
-        Listeners of \p playbackRegion however will be notified immediately, even if the call is made outside of a host edit cycle.
-        Accordingly, listeners must be either robust regarding this, or the calling code must set up the appropriate internal states.
-    */
+    // Typically, instead of calling these functions directly, rather use the respective model object's
+    // notifyContentChanged() which will forward here as appropriate.
+    void notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags);
+    void notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags);
     void notifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags);
 
     //==============================================================================

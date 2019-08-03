@@ -85,46 +85,27 @@ namespace juce
 
 //==============================================================================
 
-#define notify_listeners(function, ModelObjectPtrType, modelObject,  ...) \
-    static_cast<ModelObjectPtrType> (modelObject)->notifyListeners ([&] (std::remove_pointer<ModelObjectPtrType>::type::Listener& l) { l.function (static_cast<ModelObjectPtrType> (modelObject), ##__VA_ARGS__); })
-
-//==============================================================================
-
-void ARADocumentController::notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags, bool notifyHost, bool notifyAllAudioModificationsAndPlaybackRegions)
+void ARADocumentController::notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags)
 {
     jassert (scopeFlags.affectEverything() || !scopeFlags.affectSamples());
 
-    if (notifyHost)
-        audioSourceUpdates[audioSource] += scopeFlags;
-
-    notify_listeners (didUpdateAudioSourceContent, ARAAudioSource*, audioSource, scopeFlags);
-
-    if (notifyAllAudioModificationsAndPlaybackRegions)
-    {
-        for (auto audioModification : audioSource->getAudioModifications<ARAAudioModification>())
-            notifyAudioModificationContentChanged (audioModification, scopeFlags, true);
-    }
+    audioSourceUpdates[audioSource] += scopeFlags;
 }
 
-void ARADocumentController::notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags, bool notifyAllPlaybackRegions)
+void ARADocumentController::notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags)
 {
     audioModificationUpdates[audioModification] += scopeFlags;
-
-    notify_listeners (didUpdateAudioModificationContent, ARAAudioModification*, audioModification, scopeFlags);
-
-    if (notifyAllPlaybackRegions)
-    {
-        for (auto playbackRegion : audioModification->getPlaybackRegions<ARAPlaybackRegion>())
-            notifyPlaybackRegionContentChanged (playbackRegion, scopeFlags);
-    }
 }
 
 void ARADocumentController::notifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags)
 {
     playbackRegionUpdates[playbackRegion] += scopeFlags;
-
-    notify_listeners (didUpdatePlaybackRegionContent, ARAPlaybackRegion*, playbackRegion, scopeFlags);
 }
+
+//==============================================================================
+
+#define notify_listeners(function, ModelObjectPtrType, modelObject,  ...) \
+    static_cast<ModelObjectPtrType> (modelObject)->notifyListeners ([&] (std::remove_pointer<ModelObjectPtrType>::type::Listener& l) { l.function (static_cast<ModelObjectPtrType> (modelObject), ##__VA_ARGS__); })
 
 //==============================================================================
 
