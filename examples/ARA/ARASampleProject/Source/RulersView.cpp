@@ -258,7 +258,7 @@ void RulersView::didReorderMusicalContextsInDocument (ARADocument* doc)
     detachFromDocument();
 }
 
-void RulersView::doUpdateMusicalContextContent (ARAMusicalContext* context, ARAContentUpdateScopes /*scopeFlags*/)
+void RulersView::didUpdateMusicalContextContent (ARAMusicalContext* context, ARAContentUpdateScopes /*scopeFlags*/)
 {
     jassert (musicalContext == context);
 

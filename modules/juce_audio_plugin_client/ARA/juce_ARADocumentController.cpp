@@ -90,13 +90,14 @@ namespace juce
 
 //==============================================================================
 
-void ARADocumentController::notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions)
+void ARADocumentController::notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags, bool notifyHost, bool notifyAllAudioModificationsAndPlaybackRegions)
 {
     jassert (scopeFlags.affectEverything() || !scopeFlags.affectSamples());
 
-    audioSourceUpdates[audioSource] += scopeFlags;
+    if (notifyHost)
+        audioSourceUpdates[audioSource] += scopeFlags;
 
-    notify_listeners (doUpdateAudioSourceContent, ARAAudioSource*, audioSource, scopeFlags);
+    notify_listeners (didUpdateAudioSourceContent, ARAAudioSource*, audioSource, scopeFlags);
 
     if (notifyAllAudioModificationsAndPlaybackRegions)
     {
@@ -109,7 +110,7 @@ void ARADocumentController::notifyAudioModificationContentChanged (ARAAudioModif
 {
     audioModificationUpdates[audioModification] += scopeFlags;
 
-    notify_listeners (doUpdateAudioModificationContent, ARAAudioModification*, audioModification, scopeFlags);
+    notify_listeners (didUpdateAudioModificationContent, ARAAudioModification*, audioModification, scopeFlags);
 
     if (notifyAllPlaybackRegions)
     {
@@ -193,6 +194,12 @@ ARA::PlugIn::MusicalContext* ARADocumentController::doCreateMusicalContext (ARA:
     return new ARAMusicalContext (static_cast<ARADocument*> (document), hostRef);
 }
 
+void ARADocumentController::doUpdateMusicalContextContent (ARA::PlugIn::MusicalContext* musicalContext, const ARA::ARAContentTimeRange* /*range*/, ARA::ContentUpdateScopes scopeFlags) noexcept
+{
+    auto araMusicalContext = static_cast<ARAMusicalContext*> (musicalContext);
+    araMusicalContext->notifyListeners ([&] (ARAMusicalContext::Listener& l) { l.didUpdateMusicalContextContent(araMusicalContext, scopeFlags); });
+}
+
 //==============================================================================
 
 ARA::PlugIn::RegionSequence* ARADocumentController::doCreateRegionSequence (ARA::PlugIn::Document* document, ARA::ARARegionSequenceHostRef hostRef) noexcept
@@ -205,6 +212,12 @@ ARA::PlugIn::RegionSequence* ARADocumentController::doCreateRegionSequence (ARA:
 ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugIn::Document* document, ARA::ARAAudioSourceHostRef hostRef) noexcept
 {
     return new ARAAudioSource (static_cast<ARADocument*> (document), hostRef);
+}
+
+void ARADocumentController::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* AudioSource, const ARA::ARAContentTimeRange* /*range*/, ARA::ContentUpdateScopes scopeFlags) noexcept
+{
+    auto araAudioSource = static_cast<ARAAudioSource*> (AudioSource);
+    araAudioSource->notifyListeners ([&] (ARAAudioSource::Listener& l) { l.didUpdateAudioSourceContent(araAudioSource, scopeFlags); });
 }
 
 //==============================================================================
