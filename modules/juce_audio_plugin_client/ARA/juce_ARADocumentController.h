@@ -39,7 +39,7 @@ public:
 
         This must be called by the plug-in model management code on the message thread whenever changing relevant parts of the internal model graph.
         A notification to the host will be enqueued, and send out the next time it polls this document controller for model updates.
-        Listeners of \p audioSource however will be notified immediately, even if the call is made outside of a host edit cycle.
+        Listeners of \p audioModification however will be notified immediately, even if the call is made outside of a host edit cycle.
         Accordingly, listeners must be either robust regarding this, or the calling code must set up the appropriate internal states.
     */
     void notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags, bool notifyAllPlaybackRegions = false);
@@ -50,7 +50,7 @@ public:
 
         This must be called by the plug-in model management code on the message thread whenever changing relevant parts of the internal model graph.
         A notification to the host will be enqueued, and send out the next time it polls this document controller for model updates.
-        Listeners of \p audioSource however will be notified immediately, even if the call is made outside of a host edit cycle.
+        Listeners of \p playbackRegion however will be notified immediately, even if the call is made outside of a host edit cycle.
         Accordingly, listeners must be either robust regarding this, or the calling code must set up the appropriate internal states.
     */
     void notifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags);
