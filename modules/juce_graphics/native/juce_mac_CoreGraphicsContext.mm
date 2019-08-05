@@ -754,13 +754,11 @@ void CoreGraphicsContext::drawGradient()
 
     auto& g = *state->fillType.gradient;
 
-    auto p1 = convertToCGPoint (g.point1);
-    auto p2 = convertToCGPoint (g.point2);
-
-    state->fillType.transform.transformPoints (p1.x, p1.y, p2.x, p2.y);
-
     if (state->gradient == nullptr)
         state->gradient = createGradient (g, rgbColourSpace);
+
+    auto p1 = convertToCGPoint (g.point1);
+    auto p2 = convertToCGPoint (g.point2);
 
     if (g.isRadial)
         CGContextDrawRadialGradient (context, state->gradient, p1, 0, p1, g.point1.getDistanceFrom (g.point2),
