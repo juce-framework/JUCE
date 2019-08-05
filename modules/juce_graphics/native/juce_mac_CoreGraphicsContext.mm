@@ -639,19 +639,13 @@ void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& tra
 {
     if (state->fontRef != nullptr && state->fillType.isColour())
     {
-       #if JUCE_CLANG && ! (defined (MAC_OS_X_VERSION_10_16) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_16)
-        #pragma clang diagnostic push
-        #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-        #define JUCE_DEPRECATION_IGNORED 1
-       #endif
-
         if (transform.isOnlyTranslation())
         {
             CGContextSetTextMatrix (context, state->fontTransform); // have to set this each time, as it's not saved as part of the state
 
-            auto g = (CGGlyph) glyphNumber;
-            CGContextShowGlyphsAtPoint (context, transform.getTranslationX(),
-                                        flipHeight - roundToInt (transform.getTranslationY()), &g, 1);
+            CGGlyph glyphs[1] = { (CGGlyph) glyphNumber };
+            CGPoint positions[1] = { { transform.getTranslationX(), flipHeight - roundToInt (transform.getTranslationY()) } };
+            CGContextShowGlyphsAtPositions (context, glyphs, positions, 1);
         }
         else
         {
@@ -663,16 +657,12 @@ void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& tra
             t.d = -t.d;
             CGContextSetTextMatrix (context, t);
 
-            auto g = (CGGlyph) glyphNumber;
-            CGContextShowGlyphsAtPoint (context, 0, 0, &g, 1);
+            CGGlyph glyphs[1] = { (CGGlyph) glyphNumber };
+            CGPoint positions[1] = { { 0.0f, 0.0f } };
+            CGContextShowGlyphsAtPositions (context, glyphs, positions, 1);
 
             CGContextRestoreGState (context);
         }
-
-       #if JUCE_DEPRECATION_IGNORED
-        #pragma clang diagnostic pop
-        #undef JUCE_DEPRECATION_IGNORED
-       #endif
     }
     else
     {
