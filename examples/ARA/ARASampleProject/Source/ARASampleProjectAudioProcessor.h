@@ -31,7 +31,7 @@ public:
    #endif
 
     void processBlock (AudioBuffer<float>&, MidiBuffer&) override;
-    bool didProcessBlockSucceed() override { return lastProcessBlockSucceeded; };
+    bool didProcessBlockSucceed() override { return lastProcessBlockSucceeded; }
 
     //==============================================================================
     AudioProcessorEditor* createEditor() override;

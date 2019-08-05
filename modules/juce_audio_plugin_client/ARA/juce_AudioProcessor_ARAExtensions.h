@@ -26,7 +26,7 @@ public:
     virtual ~AudioProcessorARAExtension() {}
 
     /** Additional configuration for the AudioProcessor if used for internal rendering (waveform display). */
-    void setAlwaysNonRealtime (bool isAlwaysNonRealtime) noexcept   { alwaysNonRealtime = isAlwaysNonRealtime; };
+    void setAlwaysNonRealtime (bool isAlwaysNonRealtime) noexcept   { alwaysNonRealtime = isAlwaysNonRealtime; }
     bool isAlwaysNonRealtime() const noexcept                       { return alwaysNonRealtime; }
 
     /** Query whether last call to processBlock() was successful.
