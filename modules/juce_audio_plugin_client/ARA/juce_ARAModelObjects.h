@@ -280,6 +280,7 @@ class ARAAudioSource  : public ARA::PlugIn::AudioSource,
 {
 public:
     using PropertiesPtr = ARA::PlugIn::PropertiesPtr<ARA::ARAAudioSourceProperties>;
+    using ARAAnalysisProgressState = ARA::ARAAnalysisProgressState;
 
     ARAAudioSource (ARADocument* document, ARA::ARAAudioSourceHostRef hostRef);
 
@@ -307,6 +308,13 @@ public:
             @param scopeFlags The scope of the content update.
         */
         virtual void didUpdateAudioSourceContent (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags) {}
+
+        /** Called to notify progress when an audio source is being analyzed.
+            @param audioSource The audio source being analyzed.
+            @param state Indicates start, intermediate update or completion of the analysis.
+            @param progress Progress normalized to the 0..1 range.
+        */
+        virtual void didUpdateAudioSourceAnalyisProgress (ARAAudioSource* audioSource, ARAAnalysisProgressState state, float progress) {}
 
         /** Called before access to an audio source's samples is enabled or disabled.
             @param audioSource The audio source whose sample access state will be changed.
@@ -346,6 +354,17 @@ public:
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
 
+    /** Notify the ARA host and any listeners of analysis progress.
+        Contrary to most ARA functions, this call can be made from any thread.
+        The implementation will enqueue these notifications and later post them from the message thread.
+        Calling code must ensure start and completion state are always balanced,
+        and must send the updates in ascending order.
+
+        @param state Indicates start, intermediate update or completion of the analysis.
+        @param progress Progress normalized to the 0..1 range.
+    */
+    void notifyAnalysisProgress (ARAAnalysisProgressState state, float progress);
+
     /** Notify the ARA host and any listeners of a content update initiated by the plug-in.
         This must be called by the plug-in model management code on the message thread whenever updating
         the internal content representation, such as after successfully analyzing a new tempo map,
@@ -359,6 +378,10 @@ public:
                                                              regions associated with this audio source should be notified too.
     */
     void notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions = false);
+
+private:
+    friend ARADocumentController;
+    ARA::PlugIn::AnalysisProgressTracker internalAnalysisProgressTracker;
 };
 
 

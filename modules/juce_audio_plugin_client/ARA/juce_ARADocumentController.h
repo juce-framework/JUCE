@@ -10,23 +10,28 @@ class ARAAudioSourceReader;
 class ARAPlaybackRegionReader;
 class ARARegionSequenceReader;
 
-class ARADocumentController  : public ARA::PlugIn::DocumentController
+class ARADocumentController   : public ARA::PlugIn::DocumentController,
+                                private juce::Timer
 {
 public:
-    using ARA::PlugIn::DocumentController::DocumentController;
+    explicit ARADocumentController (const ARA::ARADocumentControllerHostInstance* instance);
 
     //==============================================================================
-    // notify the host about content changes
-    // Note that while the ARA API allows for specifying update time ranges, this feature is not yet
-    // supported in our current plug-in implementation, since most hosts do not evaluate it anyways.
+    // Change notifications
     // Typically, instead of calling these functions directly, rather use the respective model object's
-    // notifyContentChanged() which will forward here as appropriate.
+    // notify...() methods which will forward here as appropriate.
+    // Note that while the ARA API allows for specifying affected time ranges for content updates,
+    // this feature is not yet supported in our current plug-in implementation, since most hosts do not evaluate it anyways.
+
     void notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags);
     void notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags);
     void notifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags);
 
+    void notifyAudioSourceAnalysisProgress (ARAAudioSource* audioSource, ARA::ARAAnalysisProgressState state, float progress);
+
     //==============================================================================
     // Override document controller methods here
+    // These functions are called by the host through the ARA API.
     // If you are subclassing ARADocumentController, make sure to call the base class
     // implementations of any overridden function, except for any doCreate...()
     // or where explicitly specified otherwise. Be careful whether you place the call to the
@@ -158,6 +163,10 @@ protected:
     ARA::PlugIn::EditorRenderer* doCreateEditorRenderer() noexcept override;
     ARA::PlugIn::EditorView* doCreateEditorView() noexcept override;
 
+    //==============================================================================
+    // juce::Timer overrides
+    void timerCallback() override;
+
 protected:
 
     //==============================================================================
@@ -204,6 +213,7 @@ private:
     // this flag is used automatically trigger content update if a property change implies this
     bool currentPropertyUpdateAffectsContent { false };
 
+    std::atomic_flag internalAnalysisProgressIsSynced { true };
 
     std::map<ARAAudioSource*, ARAContentUpdateScopes> audioSourceUpdates;
     std::map<ARAAudioModification*, ARAContentUpdateScopes> audioModificationUpdates;

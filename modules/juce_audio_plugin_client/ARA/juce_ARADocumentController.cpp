@@ -85,6 +85,14 @@ namespace juce
 
 //==============================================================================
 
+ARADocumentController::ARADocumentController (const ARA::ARADocumentControllerHostInstance* instance)
+  : DocumentController (instance)
+{
+    startTimerHz (20);  // TODO JUCE_ARA we could start the timer on demand when the first audio source is created or activated, stop when last is deleted or deactivated.
+}
+
+//==============================================================================
+
 void ARADocumentController::notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags)
 {
     jassert (scopeFlags.affectEverything() || !scopeFlags.affectSamples());
@@ -100,6 +108,18 @@ void ARADocumentController::notifyAudioModificationContentChanged (ARAAudioModif
 void ARADocumentController::notifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags)
 {
     playbackRegionUpdates[playbackRegion] += scopeFlags;
+}
+
+//==============================================================================
+
+void ARADocumentController::notifyAudioSourceAnalysisProgress (ARAAudioSource* audioSource, ARA::ARAAnalysisProgressState state, float progress)
+{
+    // internal listeners updates
+    if (audioSource->internalAnalysisProgressTracker.updateProgress (state,  progress))
+        internalAnalysisProgressIsSynced.clear (std::memory_order_release);
+
+    // host update
+    DocumentController::notifyAudioSourceAnalysisProgress(audioSource, state, progress);
 }
 
 //==============================================================================
@@ -275,6 +295,63 @@ ARA::PlugIn::EditorRenderer* ARADocumentController::doCreateEditorRenderer() noe
 ARA::PlugIn::EditorView* ARADocumentController::doCreateEditorView() noexcept
 {
     return new ARAEditorView (this);
+}
+
+//==============================================================================
+
+// helper code for ARADocumentController::timerCallback() to rewire the host-related ARA SDK's progress tracker to our internal update mechanism
+namespace ModelUpdateControllerProgressAdapter
+{
+    using namespace ARA;
+
+    static void ARA_CALL notifyAudioSourceAnalysisProgress (ARAModelUpdateControllerHostRef controllerHostRef,
+                                                            ARAAudioSourceHostRef audioSourceHostRef, ARAAnalysisProgressState state, float value) noexcept
+    {
+        auto audioSource = reinterpret_cast<ARAAudioSource*> (audioSourceHostRef);
+        audioSource->notifyListeners ([&] (ARAAudioSource::Listener& l) { l.didUpdateAudioSourceAnalyisProgress (audioSource, state, value); });
+    }
+
+    static void ARA_CALL notifyAudioSourceContentChanged (ARAModelUpdateControllerHostRef controllerHostRef, ARAAudioSourceHostRef audioSourceHostRef,
+                                                          const ARAContentTimeRange* range, ARAContentUpdateFlags flags) noexcept
+    {
+        jassert (false);    // not to be called - this adapter only forwards analysis progress
+    }
+
+    static void ARA_CALL notifyAudioModificationContentChanged (ARAModelUpdateControllerHostRef controllerHostRef, ARAAudioModificationHostRef audioModificationHostRef,
+                                                                const ARAContentTimeRange* range, ARAContentUpdateFlags flags) noexcept
+    {
+        jassert (false);    // not to be called - this adapter only forwards analysis progress
+    }
+
+    static void ARA_CALL notifyPlaybackRegionContentChanged (ARAModelUpdateControllerHostRef controllerHostRef, ARAPlaybackRegionHostRef playbackRegionHostRef,
+                                                             const ARAContentTimeRange* range, ARAContentUpdateFlags flags) noexcept
+    {
+        jassert (false);    // not to be called - this adapter only forwards analysis progress
+    }
+
+    ARA::PlugIn::HostModelUpdateController* get()
+    {
+        static const SizedStruct<ARA_MEMBER_PTR_ARGS (ARAModelUpdateControllerInterface, notifyPlaybackRegionContentChanged)> modelUpdateControllerInterface {
+                ModelUpdateControllerProgressAdapter::notifyAudioSourceAnalysisProgress,
+                ModelUpdateControllerProgressAdapter::notifyAudioSourceContentChanged,
+                ModelUpdateControllerProgressAdapter::notifyAudioModificationContentChanged,
+                ModelUpdateControllerProgressAdapter::notifyPlaybackRegionContentChanged
+            };
+
+        static const SizedStruct<ARA_MEMBER_PTR_ARGS (ARADocumentControllerHostInstance, playbackControllerInterface)> instance {
+            nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, &modelUpdateControllerInterface, nullptr, nullptr
+        };
+
+        static auto progressAdapter = ARA::PlugIn::HostModelUpdateController { &instance };
+        return &progressAdapter;
+    }
+}
+
+void ARADocumentController::timerCallback()
+{
+    if (! internalAnalysisProgressIsSynced.test_and_set (std::memory_order_release))
+        for (auto audioSource : getDocument()->getAudioSources<ARAAudioSource>())
+            audioSource->internalAnalysisProgressTracker.notifyProgress (ModelUpdateControllerProgressAdapter::get(), reinterpret_cast<ARA::ARAAudioSourceHostRef> (audioSource));
 }
 
 //==============================================================================
