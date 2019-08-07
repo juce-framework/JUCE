@@ -202,7 +202,8 @@ private:
 
 private:
     // this flag is used automatically trigger content update if a property change implies this
-    bool _currentPropertyUpdateAffectsContent = false;
+    bool currentPropertyUpdateAffectsContent { false };
+
 
     std::map<ARAAudioSource*, ARAContentUpdateScopes> audioSourceUpdates;
     std::map<ARAAudioModification*, ARAContentUpdateScopes> audioModificationUpdates;

@@ -219,8 +219,8 @@ void ARADocumentController::willUpdatePlaybackRegionProperties (ARA::PlugIn::Pla
 {
     // if any playback region changes would affect the sample content, prepare to
     // post a sample content update to any of our playback region listeners
-    jassert(! _currentPropertyUpdateAffectsContent);
-    _currentPropertyUpdateAffectsContent =
+    jassert(! currentPropertyUpdateAffectsContent);
+    currentPropertyUpdateAffectsContent =
         ((playbackRegion->getStartInAudioModificationTime() != newProperties->startInModificationTime) ||
         (playbackRegion->getDurationInAudioModificationTime() != newProperties->durationInModificationTime) ||
         (playbackRegion->getStartInPlaybackTime() != newProperties->startInPlaybackTime) ||
@@ -240,9 +240,9 @@ void ARADocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::Play
     araPlaybackRegion->notifyListeners ([araPlaybackRegion](ARAPlaybackRegion::Listener& l) { l.didUpdatePlaybackRegionProperties (araPlaybackRegion); });
 
     // post a content update if the updated properties affect the playback region sample content
-    if (_currentPropertyUpdateAffectsContent)
+    if (currentPropertyUpdateAffectsContent)
     {
-        _currentPropertyUpdateAffectsContent = false;
+        currentPropertyUpdateAffectsContent = false;
         auto scopes = ARAContentUpdateScopes::samplesAreAffected();
         JUCE_CONSTEXPR auto areNotesAnalyzable = (bool) (JucePlugin_ARAContentTypes & 1);
         if (areNotesAnalyzable)
