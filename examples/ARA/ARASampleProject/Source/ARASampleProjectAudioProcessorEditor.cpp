@@ -120,7 +120,7 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         playheadMusicalPositionLabel.setJustificationType (Justification::centred);
         addAndMakeVisible (playheadMusicalPositionLabel);
         addAndMakeVisible (playheadLinearPositionLabel);
-        startTimerHz (30);
+        startTimerHz (20);
     }
 
     setSize (kWidth, kHeight);

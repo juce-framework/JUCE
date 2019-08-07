@@ -13,7 +13,7 @@ RulersView::RulersView (DocumentView& documentView)
     document->addListener (this);
     findMusicalContext();
     lastPaintedPosition.resetToDefault();
-    startTimerHz (10);
+    startTimerHz (20);
 }
 
 RulersView::~RulersView()
