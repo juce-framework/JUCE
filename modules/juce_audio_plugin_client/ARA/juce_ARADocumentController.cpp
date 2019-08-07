@@ -274,7 +274,8 @@ OVERRIDE_TO_NOTIFY_3 (willEnableAudioSourceSamplesAccess, AudioSource*, audioSou
 OVERRIDE_TO_NOTIFY_3 (didEnableAudioSourceSamplesAccess, AudioSource*, audioSource, bool, enable)
 OVERRIDE_TO_NOTIFY_2 (didAddAudioModificationToAudioSource, AudioSource*, audioSource, AudioModification*, audioModification)
 OVERRIDE_TO_NOTIFY_2 (willRemoveAudioModificationFromAudioSource, AudioSource*, audioSource, AudioModification*, audioModification)
-OVERRIDE_TO_NOTIFY_3 (doDeactivateAudioSourceForUndoHistory, AudioSource*, audioSource, bool, deactivate)
+OVERRIDE_TO_NOTIFY_3 (willDeactivateAudioSourceForUndoHistory, AudioSource*, audioSource, bool, deactivate)
+OVERRIDE_TO_NOTIFY_3 (didDeactivateAudioSourceForUndoHistory, AudioSource*, audioSource, bool, deactivate)
 OVERRIDE_TO_NOTIFY_1 (willDestroyAudioSource, AudioSource*, audioSource)
 
 //==============================================================================
@@ -288,7 +289,8 @@ OVERRIDE_TO_NOTIFY_3 (willUpdateAudioModificationProperties, AudioModification*,
 OVERRIDE_TO_NOTIFY_1 (didUpdateAudioModificationProperties, AudioModification*, audioModification)
 OVERRIDE_TO_NOTIFY_2 (didAddPlaybackRegionToAudioModification, AudioModification*, audioModification, PlaybackRegion*, playbackRegion)
 OVERRIDE_TO_NOTIFY_2 (willRemovePlaybackRegionFromAudioModification, AudioModification*, audioModification, PlaybackRegion*, playbackRegion)
-OVERRIDE_TO_NOTIFY_3 (doDeactivateAudioModificationForUndoHistory, AudioModification*, audioModification, bool, deactivate)
+OVERRIDE_TO_NOTIFY_3 (willDeactivateAudioModificationForUndoHistory, AudioModification*, audioModification, bool, deactivate)
+OVERRIDE_TO_NOTIFY_3 (didDeactivateAudioModificationForUndoHistory, AudioModification*, audioModification, bool, deactivate)
 OVERRIDE_TO_NOTIFY_1 (willDestroyAudioModification, AudioModification*, audioModification)
 
 //==============================================================================

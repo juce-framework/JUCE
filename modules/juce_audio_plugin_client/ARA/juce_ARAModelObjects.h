@@ -328,11 +328,17 @@ public:
         */
         virtual void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) {}
 
+        /** Called before an audio source is activated or deactivated when being removed / added from the host's undo history.
+            @param audioSource The audio source that will be activated or deactivated
+            @param deactivate A bool indicating whether \p audioSource was deactivated or activated.
+        */
+        virtual void willDeactivateAudioSourceForUndoHistory (ARAAudioSource* audioSource, bool deactivate) {}
+
         /** Called after an audio source is activated or deactivated when being removed / added from the host's undo history.
             @param audioSource The audio source that was activated or deactivated
             @param deactivate A bool indicating whether \p audioSource was deactivated or activated.
         */
-        virtual void doDeactivateAudioSourceForUndoHistory (ARAAudioSource* audioSource, bool deactivate) {}
+        virtual void didDeactivateAudioSourceForUndoHistory (ARAAudioSource* audioSource, bool deactivate) {}
 
         /** Called after an audio modification is added to the audio source.
             @param audioSource The region sequence that \p audioModification was added to.
@@ -424,11 +430,17 @@ public:
         */
         virtual void didUpdateAudioModificationContent (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags) {}
 
+        /** Called before an audio modification is activated or deactivated when being removed / added from the host's undo history.
+            @param audioModification The audio modification that was activated or deactivated
+            @param deactivate A bool indicating whether \p audioModification was deactivated or activated.
+        */
+        virtual void willDeactivateAudioModificationForUndoHistory (ARAAudioModification* audioModification, bool deactivate) {}
+
         /** Called after an audio modification is activated or deactivated when being removed / added from the host's undo history.
             @param audioModification The audio modification that was activated or deactivated
             @param deactivate A bool indicating whether \p audioModification was deactivated or activated.
         */
-        virtual void doDeactivateAudioModificationForUndoHistory (ARAAudioModification* audioModification, bool deactivate) {}
+        virtual void didDeactivateAudioModificationForUndoHistory (ARAAudioModification* audioModification, bool deactivate) {}
 
         /** Called after a playback region is added to the audio modification.
             @param audioModification The audio modification that \p playbackRegion was added to.
