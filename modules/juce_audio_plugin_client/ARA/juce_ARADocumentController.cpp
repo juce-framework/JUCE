@@ -124,8 +124,31 @@ void ARADocumentController::notifyAudioSourceAnalysisProgress (ARAAudioSource* a
 
 //==============================================================================
 
+// some helper macros to ease repeated declaration & implementation of notification functions below:
+
 #define notify_listeners(function, ModelObjectPtrType, modelObject,  ...) \
     static_cast<ModelObjectPtrType> (modelObject)->notifyListeners ([&] (std::remove_pointer<ModelObjectPtrType>::type::Listener& l) { l.function (static_cast<ModelObjectPtrType> (modelObject), ##__VA_ARGS__); })
+
+// no notification arguments
+#define OVERRIDE_TO_NOTIFY_1(function, ModelObjectPtrType, modelObject) \
+    void ARADocumentController::function (ARA::PlugIn::ModelObjectPtrType modelObject) noexcept \
+    { \
+        notify_listeners (function, ARA##ModelObjectPtrType, modelObject); \
+    }
+
+// single notification argument, model object version
+#define OVERRIDE_TO_NOTIFY_2(function, ModelObjectPtrType, modelObject, ArgumentType, argument) \
+    void ARADocumentController::function (ARA::PlugIn::ModelObjectPtrType modelObject, ARA::PlugIn::ArgumentType argument) noexcept \
+    { \
+        notify_listeners (function, ARA##ModelObjectPtrType, modelObject, static_cast<ARA##ArgumentType> (argument)); \
+    }
+
+// single notification argument, non-model object version
+#define OVERRIDE_TO_NOTIFY_3(function, ModelObjectPtrType, modelObject, ArgumentType, argument) \
+    void ARADocumentController::function (ARA::PlugIn::ModelObjectPtrType modelObject, ArgumentType argument) noexcept \
+    { \
+        notify_listeners (function, ARA##ModelObjectPtrType, modelObject, argument); \
+    }
 
 //==============================================================================
 
@@ -190,6 +213,20 @@ bool ARADocumentController::doStoreObjectsToArchive (ARA::PlugIn::HostArchiveWri
 
 //==============================================================================
 
+OVERRIDE_TO_NOTIFY_3 (willUpdateDocumentProperties, Document*, document, ARADocument::PropertiesPtr, newProperties)
+OVERRIDE_TO_NOTIFY_1 (didUpdateDocumentProperties, Document*, document)
+OVERRIDE_TO_NOTIFY_2 (didAddMusicalContextToDocument, Document*, document, MusicalContext*, musicalContext)
+OVERRIDE_TO_NOTIFY_2 (willRemoveMusicalContextFromDocument, Document*, document, MusicalContext*, musicalContext)
+OVERRIDE_TO_NOTIFY_1 (didReorderMusicalContextsInDocument, Document*, document)
+OVERRIDE_TO_NOTIFY_2 (didAddRegionSequenceToDocument, Document*, document, RegionSequence*, regionSequence)
+OVERRIDE_TO_NOTIFY_2 (willRemoveRegionSequenceFromDocument, Document*, document, RegionSequence*, regionSequence)
+OVERRIDE_TO_NOTIFY_1 (didReorderRegionSequencesInDocument, Document*, document)
+OVERRIDE_TO_NOTIFY_2 (didAddAudioSourceToDocument, Document*, document, AudioSource*, audioSource)
+OVERRIDE_TO_NOTIFY_2 (willRemoveAudioSourceFromDocument, Document*, document, AudioSource*, audioSource)
+OVERRIDE_TO_NOTIFY_1 (willDestroyDocument, Document*, document)
+
+//==============================================================================
+
 ARA::PlugIn::MusicalContext* ARADocumentController::doCreateMusicalContext (ARA::PlugIn::Document* document, ARA::ARAMusicalContextHostRef hostRef) noexcept
 {
     return new ARAMusicalContext (static_cast<ARADocument*> (document), hostRef);
@@ -201,12 +238,22 @@ void ARADocumentController::doUpdateMusicalContextContent (ARA::PlugIn::MusicalC
     araMusicalContext->notifyListeners ([&] (ARAMusicalContext::Listener& l) { l.didUpdateMusicalContextContent(araMusicalContext, scopeFlags); });
 }
 
+OVERRIDE_TO_NOTIFY_3 (willUpdateMusicalContextProperties, MusicalContext*, musicalContext, ARAMusicalContext::PropertiesPtr, newProperties)
+OVERRIDE_TO_NOTIFY_1 (didUpdateMusicalContextProperties, MusicalContext*, musicalContext)
+OVERRIDE_TO_NOTIFY_1 (willDestroyMusicalContext, MusicalContext*, musicalContext)
+
 //==============================================================================
 
 ARA::PlugIn::RegionSequence* ARADocumentController::doCreateRegionSequence (ARA::PlugIn::Document* document, ARA::ARARegionSequenceHostRef hostRef) noexcept
 {
     return new ARARegionSequence (static_cast<ARADocument*> (document), hostRef);
 }
+
+OVERRIDE_TO_NOTIFY_3 (willUpdateRegionSequenceProperties, RegionSequence*, regionSequence, ARARegionSequence::PropertiesPtr, newProperties)
+OVERRIDE_TO_NOTIFY_1 (didUpdateRegionSequenceProperties, RegionSequence*, regionSequence)
+OVERRIDE_TO_NOTIFY_2 (didAddPlaybackRegionToRegionSequence, RegionSequence*, regionSequence, PlaybackRegion*, playbackRegion)
+OVERRIDE_TO_NOTIFY_2 (willRemovePlaybackRegionFromRegionSequence, RegionSequence*, regionSequence, PlaybackRegion*, playbackRegion)
+OVERRIDE_TO_NOTIFY_1 (willDestroyRegionSequence, RegionSequence*, regionSequence)
 
 //==============================================================================
 
@@ -221,12 +268,28 @@ void ARADocumentController::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource
     araAudioSource->notifyListeners ([&] (ARAAudioSource::Listener& l) { l.didUpdateAudioSourceContent(araAudioSource, scopeFlags); });
 }
 
+OVERRIDE_TO_NOTIFY_3 (willUpdateAudioSourceProperties, AudioSource*, audioSource, ARAAudioSource::PropertiesPtr, newProperties)
+OVERRIDE_TO_NOTIFY_1 (didUpdateAudioSourceProperties, AudioSource*, audioSource)
+OVERRIDE_TO_NOTIFY_3 (willEnableAudioSourceSamplesAccess, AudioSource*, audioSource, bool, enable)
+OVERRIDE_TO_NOTIFY_3 (didEnableAudioSourceSamplesAccess, AudioSource*, audioSource, bool, enable)
+OVERRIDE_TO_NOTIFY_2 (didAddAudioModificationToAudioSource, AudioSource*, audioSource, AudioModification*, audioModification)
+OVERRIDE_TO_NOTIFY_2 (willRemoveAudioModificationFromAudioSource, AudioSource*, audioSource, AudioModification*, audioModification)
+OVERRIDE_TO_NOTIFY_3 (doDeactivateAudioSourceForUndoHistory, AudioSource*, audioSource, bool, deactivate)
+OVERRIDE_TO_NOTIFY_1 (willDestroyAudioSource, AudioSource*, audioSource)
+
 //==============================================================================
 
 ARA::PlugIn::AudioModification* ARADocumentController::doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, const ARA::PlugIn::AudioModification* optionalModificationToClone) noexcept
 {
     return new ARAAudioModification (static_cast<ARAAudioSource*> (audioSource), hostRef, static_cast<const ARAAudioModification*> (optionalModificationToClone));
 }
+
+OVERRIDE_TO_NOTIFY_3 (willUpdateAudioModificationProperties, AudioModification*, audioModification, ARAAudioModification::PropertiesPtr, newProperties)
+OVERRIDE_TO_NOTIFY_1 (didUpdateAudioModificationProperties, AudioModification*, audioModification)
+OVERRIDE_TO_NOTIFY_2 (didAddPlaybackRegionToAudioModification, AudioModification*, audioModification, PlaybackRegion*, playbackRegion)
+OVERRIDE_TO_NOTIFY_2 (willRemovePlaybackRegionFromAudioModification, AudioModification*, audioModification, PlaybackRegion*, playbackRegion)
+OVERRIDE_TO_NOTIFY_3 (doDeactivateAudioModificationForUndoHistory, AudioModification*, audioModification, bool, deactivate)
+OVERRIDE_TO_NOTIFY_1 (willDestroyAudioModification, AudioModification*, audioModification)
 
 //==============================================================================
 
@@ -279,6 +342,15 @@ void ARADocumentController::doGetPlaybackRegionHeadAndTailTime (const ARA::PlugI
     *headTime = araPlaybackRegion->getHeadTime();
     *tailTime = araPlaybackRegion->getTailTime();
 }
+
+OVERRIDE_TO_NOTIFY_1 (willDestroyPlaybackRegion, PlaybackRegion*, playbackRegion)
+
+//==============================================================================
+
+#undef notify_listeners
+#undef OVERRIDE_TO_NOTIFY_1
+#undef OVERRIDE_TO_NOTIFY_2
+#undef OVERRIDE_TO_NOTIFY_3
 
 //==============================================================================
 
@@ -401,9 +473,5 @@ bool ARADocumentController::ArchiveWriter::setPosition (int64 newPosition)
     position = (size_t) newPosition;
     return true;
 }
-
-//==============================================================================
-
-#undef notify_listeners
 
 } // namespace juce
