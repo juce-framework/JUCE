@@ -181,7 +181,7 @@ public:
             @param musicalContext The musical context whose properties will be updated. 
             @param newProperties The musical context properties that will be assigned to \p musicalContext. 
         */
-        virtual void willUpdateMusicalContextProperties (ARAMusicalContext* musicalContext, ARAMusicalContext::PropertiesPtr newProperties) {}
+        virtual void willUpdateMusicalContextProperties (ARAMusicalContext* musicalContext, PropertiesPtr newProperties) {}
 
         /** Called after the musical context's properties are updated by the host.
             @param musicalContext The musical context whose properties were updated.
@@ -230,7 +230,7 @@ public:
             @param regionSequence The region sequence whose properties will be updated. 
             @param newProperties The region sequence properties that will be assigned to \p regionSequence. 
         */
-        virtual void willUpdateRegionSequenceProperties (ARARegionSequence* regionSequence, ARARegionSequence::PropertiesPtr newProperties) {}
+        virtual void willUpdateRegionSequenceProperties (ARARegionSequence* regionSequence, PropertiesPtr newProperties) {}
 
         /** Called after the region sequence's properties are updated.
             @param regionSequence The region sequence whose properties were updated.
@@ -295,7 +295,7 @@ public:
             @param audioSource The audio source whose properties will be updated. 
             @param newProperties The audio source properties that will be assigned to \p audioSource.  
         */
-        virtual void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARAAudioSource::PropertiesPtr newProperties) {}
+        virtual void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, PropertiesPtr newProperties) {}
 
         /** Called after the audio source's properties are updated.
             @param audioSource The audio source whose properties were updated.
