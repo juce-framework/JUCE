@@ -197,7 +197,7 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARADocumentController* documen
 
 ARAPlaybackRegionReader::ARAPlaybackRegionReader (std::vector<ARAPlaybackRegion*> const& playbackRegions, bool alwaysNonRealtime,
                                                   double playbackSampleRate /*= 0.0*/, int channelCount /*= 0*/, bool use64BitSamples /*= false*/)
-    : ARAPlaybackRegionReader (playbackRegions.front()->getAudioModification()->getAudioSource()->getDocument()->getDocumentController<ARADocumentController>(),
+    : ARAPlaybackRegionReader (playbackRegions.front()->getDocumentController<ARADocumentController>(),
                                createPluginFilterOfType (PluginHostType::getPluginLoadedAs()), playbackRegions, alwaysNonRealtime, playbackSampleRate, channelCount, use64BitSamples)
 {
 }
@@ -299,7 +299,7 @@ ARARegionSequenceReader::ARARegionSequenceReader (ARARegionSequence* regionSeque
 
 ARARegionSequenceReader::ARARegionSequenceReader (AudioProcessor* audioProcessor, ARARegionSequence* regionSequence, bool nonRealtime,
                                                   double playbackSampleRate /*= 0.0*/, int channelCount /*= 0*/, bool use64BitSamples /*= false*/)
-    : ARAPlaybackRegionReader (regionSequence->getDocument()->getDocumentController<ARADocumentController>(), audioProcessor,
+    : ARAPlaybackRegionReader (regionSequence->getDocumentController<ARADocumentController>(), audioProcessor,
                                regionSequence->getPlaybackRegions<ARAPlaybackRegion>(),
                                nonRealtime, playbackSampleRate, channelCount, use64BitSamples),
       sequence (regionSequence)
