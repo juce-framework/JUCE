@@ -184,7 +184,8 @@ protected:
 
     private:
         ARA::PlugIn::HostArchiveReader* archiveReader;
-        size_t position, size;
+        size_t position { 0 };
+        size_t size;
     };
 
     //==============================================================================
@@ -201,7 +202,7 @@ protected:
 
     private:
         ARA::PlugIn::HostArchiveWriter* archiveWriter;
-        size_t position;
+        size_t position { 0 };
     };
 
 private:

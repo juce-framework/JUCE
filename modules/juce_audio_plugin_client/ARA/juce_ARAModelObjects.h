@@ -551,8 +551,8 @@ public:
     void notifyContentChanged (ARAContentUpdateScopes scopeFlags);
 
 private:
-    double headTime = 0.0;
-    double tailTime = 0.0;
+    double headTime { 0.0 };
+    double tailTime { 0.0 };
 };
 
 

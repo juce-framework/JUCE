@@ -257,15 +257,15 @@ private:
     AudioFormatManager audioFormatManger;
 
     // Component View States
-    bool scrollFollowsPlayHead = true;
-    bool showOnlySelectedRegionSequences = true;
+    bool scrollFollowsPlayHead { true };
+    bool showOnlySelectedRegionSequences { true };
 
-    double pixelsPerSecond;
-    double maxPixelsPerSecond, minPixelsPerSecond;
+    double pixelsPerSecond { 1.0 };
+    double maxPixelsPerSecond { 192000.0 }, minPixelsPerSecond { 1.0 };
 
-    int trackHeight = 80;
+    int trackHeight { 80 };
 
-    bool regionSequenceViewsAreInvalid = true;
+    bool regionSequenceViewsAreInvalid { true };
     Range<double> timeRange;
 
     juce::AudioPlayHead::CurrentPositionInfo lastReportedPosition;

@@ -50,8 +50,8 @@ private:
 private:
     DocumentView& documentView;
     ARAPlaybackRegion* playbackRegion;
-    ARAPlaybackRegionReader* playbackRegionReader = nullptr;  // careful: "weak" pointer, actual pointer is owned by our audioThumb
-    bool isSelected = false;
+    ARAPlaybackRegionReader* playbackRegionReader { nullptr };  // careful: "weak" pointer, actual pointer is owned by our audioThumb
+    bool isSelected { false };
 
     AudioThumbnailCache audioThumbCache;
     AudioThumbnail audioThumb;

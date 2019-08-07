@@ -358,7 +358,6 @@ void ARADocumentController::timerCallback()
 
 ARADocumentController::ArchiveReader::ArchiveReader (ARA::PlugIn::HostArchiveReader* reader)
 : archiveReader (reader), 
-  position (0), 
   size (reader->getArchiveSize())
 {}
 
@@ -385,8 +384,6 @@ bool ARADocumentController::ArchiveReader::isExhausted()
 }
 
 ARADocumentController::ArchiveWriter::ArchiveWriter (ARA::PlugIn::HostArchiveWriter* writer)
-: archiveWriter (writer), 
-  position (0)
 {}
 
 bool ARADocumentController::ArchiveWriter::write (const void* dataToWrite, size_t numberOfBytes)

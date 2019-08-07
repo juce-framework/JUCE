@@ -68,7 +68,7 @@ private:
     // temp buffers to use for summing signals if rendering multiple regions
     std::unique_ptr<AudioBuffer<float>> tempBuffer;
 
-    bool lastProcessBlockSucceeded = true;
+    bool lastProcessBlockSucceeded { true };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectAudioProcessor)
 };

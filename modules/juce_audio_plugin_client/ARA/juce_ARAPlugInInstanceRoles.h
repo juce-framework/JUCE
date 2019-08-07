@@ -57,7 +57,7 @@ public:
 //  AudioProcessor* getAudioProcessor() const { return audioProcessor; };
 
 private:
-//  AudioProcessor* audioProcessor;
+//  AudioProcessor* audioProcessor { nullptr };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAEditorRenderer)
 };

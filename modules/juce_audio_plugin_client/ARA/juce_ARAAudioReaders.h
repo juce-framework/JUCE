@@ -136,7 +136,7 @@ public:
     void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) override;
 
     /** The starting point of the reader in playback samples */
-    int64 startInSamples = 0;
+    int64 startInSamples { 0 };
 
 protected:
     bool getCurrentPosition (CurrentPositionInfo& result) override;
@@ -144,7 +144,7 @@ protected:
 private:
     std::unique_ptr<AudioProcessor> audioProcessor;
     AudioProcessorARAExtension* audioProcessorAraExtension; // cache of dynamic_cast<AudioProcessorARAExtension*> (audioProcessor)
-    int64 renderPosition = 0;
+    int64 renderPosition { 0 };
     static MidiBuffer dummyMidiBuffer;
     ReadWriteLock lock;
 

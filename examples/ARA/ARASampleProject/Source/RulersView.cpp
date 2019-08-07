@@ -6,10 +6,9 @@
 //==============================================================================
 RulersView::RulersView (DocumentView& documentView)
     : documentView (documentView),
-      document (nullptr),
+      document (documentView.getARADocumentController()->getDocument<ARADocument>()),
       musicalContext (nullptr)
 {
-    document = documentView.getARADocumentController()->getDocument<ARADocument>();
     document->addListener (this);
     findMusicalContext();
     lastPaintedPosition.resetToDefault();

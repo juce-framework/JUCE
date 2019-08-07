@@ -68,7 +68,7 @@ public:
 
 private:
     std::unique_ptr<const ARA::PlugIn::PlugInExtension> araPlugInExtension;
-    bool alwaysNonRealtime = false;
+    bool alwaysNonRealtime { false };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorARAExtension)
 };
