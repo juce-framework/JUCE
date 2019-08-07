@@ -209,6 +209,8 @@ private:
     std::map<ARAAudioModification*, ARAContentUpdateScopes> audioModificationUpdates;
     std::map<ARAPlaybackRegion*, ARAContentUpdateScopes> playbackRegionUpdates;
 
+    ScopedJuceInitialiser_GUI libraryInitialiser;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARADocumentController)
 };
 
