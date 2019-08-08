@@ -19,7 +19,7 @@ class ARADocumentController;
 
     @tags{ARA}
 */
-class AudioProcessorARAExtension
+class JUCE_API  AudioProcessorARAExtension
 {
 public:
     AudioProcessorARAExtension() = default;
@@ -80,7 +80,7 @@ private:
 
     @tags{ARA}
 */
-class AudioProcessorEditorARAExtension
+class JUCE_API  AudioProcessorEditorARAExtension
 {
 public:
     AudioProcessorEditorARAExtension (AudioProcessor* audioProcessor);

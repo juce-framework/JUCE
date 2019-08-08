@@ -14,7 +14,7 @@ namespace juce
 
     @tags{ARA}
 */
-class ARAPlaybackRenderer     : public ARA::PlugIn::PlaybackRenderer
+class JUCE_API  ARAPlaybackRenderer     : public ARA::PlugIn::PlaybackRenderer
 {
 public:
     using ARA::PlugIn::PlaybackRenderer::PlaybackRenderer;
@@ -47,7 +47,7 @@ private:
 
     @tags{ARA}
 */
-class ARAEditorRenderer   : public ARA::PlugIn::EditorRenderer
+class JUCE_API  ARAEditorRenderer   : public ARA::PlugIn::EditorRenderer
 {
 public:
     using ARA::PlugIn::EditorRenderer::EditorRenderer;
@@ -71,7 +71,7 @@ private:
     
     @tags{ARA}
 */
-class ARAEditorView  : public ARA::PlugIn::EditorView
+class JUCE_API  ARAEditorView  : public ARA::PlugIn::EditorView
 {
 public:
     using ARA::PlugIn::EditorView::EditorView;
@@ -80,7 +80,7 @@ public:
     void doNotifySelection (const ARA::PlugIn::ViewSelection* currentSelection) noexcept override;
     void doNotifyHideRegionSequences (std::vector<ARA::PlugIn::RegionSequence*> const& regionSequences) noexcept override;
 
-    class Listener
+    class JUCE_API  Listener
     {
     public:
         virtual ~Listener() = default;

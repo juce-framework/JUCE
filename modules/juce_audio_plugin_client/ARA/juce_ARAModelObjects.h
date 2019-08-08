@@ -14,7 +14,7 @@ class ARAAudioModification;
 class ARAPlaybackRegion;
 
 template<class ModelClassType>
-class ARAListenableModelClass
+class JUCE_API  ARAListenableModelClass
 {
 public:
     class Listener
@@ -57,15 +57,15 @@ private:
 
     @tags{ARA}
 */
-class ARADocument: public ARA::PlugIn::Document,
-                   public ARAListenableModelClass<ARADocument>
+class JUCE_API  ARADocument  : public ARA::PlugIn::Document,
+                               public ARAListenableModelClass<ARADocument>
 {
 public:
     using PropertiesPtr = ARA::PlugIn::PropertiesPtr<ARA::ARADocumentProperties>;
 
     ARADocument (ARADocumentController* documentController);
 
-    class Listener  : public ARAListenableModelClass<ARADocument>::Listener
+    class JUCE_API  Listener  : public ARAListenableModelClass<ARADocument>::Listener
     {
     public:
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
@@ -161,15 +161,15 @@ public:
 
     @tags{ARA}
 */
-class ARAMusicalContext  : public ARA::PlugIn::MusicalContext,
-                           public ARAListenableModelClass<ARAMusicalContext>
+class JUCE_API  ARAMusicalContext  : public ARA::PlugIn::MusicalContext,
+                                     public ARAListenableModelClass<ARAMusicalContext>
 {
 public:
     using PropertiesPtr = ARA::PlugIn::PropertiesPtr<ARA::ARAMusicalContextProperties>;
 
     ARAMusicalContext (ARADocument* document, ARA::ARAMusicalContextHostRef hostRef);
 
-    class Listener  : public ARAListenableModelClass<ARAMusicalContext>::Listener
+    class JUCE_API  Listener  : public ARAListenableModelClass<ARAMusicalContext>::Listener
     {
     public:
         Listener() = default;
@@ -210,15 +210,15 @@ public:
 
     @tags{ARA}
 */
-class ARARegionSequence  : public ARA::PlugIn::RegionSequence,
-                           public ARAListenableModelClass<ARARegionSequence>
+class JUCE_API  ARARegionSequence  : public ARA::PlugIn::RegionSequence,
+                                     public ARAListenableModelClass<ARARegionSequence>
 {
 public:
     using PropertiesPtr = ARA::PlugIn::PropertiesPtr<ARA::ARARegionSequenceProperties>;
 
     ARARegionSequence (ARADocument* document, ARA::ARARegionSequenceHostRef hostRef);
 
-    class Listener  : public ARAListenableModelClass<ARARegionSequence>::Listener
+    class JUCE_API  Listener  : public ARAListenableModelClass<ARARegionSequence>::Listener
     {
     public:
         Listener() = default;
@@ -275,8 +275,8 @@ public:
 
     @tags{ARA}
 */
-class ARAAudioSource  : public ARA::PlugIn::AudioSource,
-                        public ARAListenableModelClass<ARAAudioSource>
+class JUCE_API  ARAAudioSource  : public ARA::PlugIn::AudioSource,
+                                  public ARAListenableModelClass<ARAAudioSource>
 {
 public:
     using PropertiesPtr = ARA::PlugIn::PropertiesPtr<ARA::ARAAudioSourceProperties>;
@@ -284,7 +284,7 @@ public:
 
     ARAAudioSource (ARADocument* document, ARA::ARAAudioSourceHostRef hostRef);
 
-    class Listener  : public ARAListenableModelClass<ARAAudioSource>::Listener
+    class JUCE_API  Listener  : public ARAListenableModelClass<ARAAudioSource>::Listener
     {
     public:
         Listener() = default;
@@ -401,15 +401,15 @@ private:
 
     @tags{ARA}
 */
-class ARAAudioModification  : public ARA::PlugIn::AudioModification,
-                              public ARAListenableModelClass<ARAAudioModification>
+class JUCE_API  ARAAudioModification  : public ARA::PlugIn::AudioModification,
+                                        public ARAListenableModelClass<ARAAudioModification>
 {
 public:
     using PropertiesPtr = ARA::PlugIn::PropertiesPtr<ARA::ARAAudioModificationProperties>;
 
     ARAAudioModification (ARAAudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, const ARAAudioModification* optionalModificationToClone);
 
-    class Listener  : public ARAListenableModelClass<ARAAudioModification>::Listener
+    class JUCE_API  Listener  : public ARAListenableModelClass<ARAAudioModification>::Listener
     {
     public:
         Listener() = default;
@@ -486,15 +486,15 @@ public:
 
     @tags{ARA}
 */
-class ARAPlaybackRegion  : public ARA::PlugIn::PlaybackRegion,
-                           public ARAListenableModelClass<ARAPlaybackRegion>
+class JUCE_API  ARAPlaybackRegion  : public ARA::PlugIn::PlaybackRegion,
+                                     public ARAListenableModelClass<ARAPlaybackRegion>
 {
 public:
     using PropertiesPtr = ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties>;
 
     ARAPlaybackRegion (ARAAudioModification* audioModification, ARA::ARAPlaybackRegionHostRef hostRef);
 
-    class Listener  : public ARAListenableModelClass<ARAPlaybackRegion>::Listener
+    class JUCE_API  Listener  : public ARAListenableModelClass<ARAPlaybackRegion>::Listener
     {
     public:
         Listener() = default;

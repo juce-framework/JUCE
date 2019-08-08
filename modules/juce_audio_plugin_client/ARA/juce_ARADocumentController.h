@@ -9,8 +9,8 @@ class ARAAudioSourceReader;
 class ARAPlaybackRegionReader;
 class ARARegionSequenceReader;
 
-class ARADocumentController   : public ARA::PlugIn::DocumentController,
-                                private juce::Timer
+class JUCE_API  ARADocumentController  : public ARA::PlugIn::DocumentController,
+                                         private juce::Timer
 {
 public:
     explicit ARADocumentController (const ARA::ARADocumentControllerHostInstance* instance);
