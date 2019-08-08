@@ -527,28 +527,6 @@ public:
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
 
-    /** Get the head time (in seconds) before the stat of the playback region */
-    double getHeadTime() const { return headTime; }
-
-    /** Get the tail time (in seconds) after the end of the playback region */
-    double getTailTime() const { return tailTime; }
-
-    /** Set the head time (in seconds) before the stat of the playback region
-        @param newHeadTime The new head time. 
-    */
-    void setHeadTime (double newHeadTime);
-
-    /** Set the tail time (in seconds) after the end of the playback region
-        @param newTailTime The new tail time.
-    */
-    void setTailTime (double newTailTime);
-
-    /** Set both the head and tail time of the playback region
-        @param newHeadTime The new head time. 
-        @param newTailTime The new tail time.
-    */
-    void setHeadAndTailTime (double newHeadTime, double newTailTime);
-
     /** Returns time range covered by all playback regions in the region sequence
         @param includeHeadAndTail Whether or not the range includes the head and tail 
                                   time of all playback regions in the sequence. 
@@ -565,10 +543,6 @@ public:
         @param scopeFlags The scope of the content update.
     */
     void notifyContentChanged (ARAContentUpdateScopes scopeFlags);
-
-private:
-    double headTime { 0.0 };
-    double tailTime { 0.0 };
 };
 
 

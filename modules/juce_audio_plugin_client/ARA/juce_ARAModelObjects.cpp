@@ -106,28 +106,20 @@ ARAPlaybackRegion::ARAPlaybackRegion (ARAAudioModification* audioModification, A
     : ARA::PlugIn::PlaybackRegion (audioModification, hostRef)
 {}
 
-void ARAPlaybackRegion::setHeadTime (double newHeadTime)
-{
-    headTime = newHeadTime;
-    notifyContentChanged (ARAContentUpdateScopes::samplesAreAffected());
-}
-
-void ARAPlaybackRegion::setTailTime (double newTailTime)
-{
-    tailTime = newTailTime;
-    notifyContentChanged (ARAContentUpdateScopes::samplesAreAffected());
-}
-
-void ARAPlaybackRegion::setHeadAndTailTime (double newHeadTime, double newTailTime)
-{
-    headTime = newHeadTime;
-    tailTime = newTailTime;
-    notifyContentChanged (ARAContentUpdateScopes::samplesAreAffected());
-}
-
 Range<double> ARAPlaybackRegion::getTimeRange (bool includeHeadAndTail) const
 {
-    return { getStartInPlaybackTime() - (includeHeadAndTail ? headTime : 0.0), getEndInPlaybackTime() + (includeHeadAndTail ? tailTime : 0.0) };
+    auto startTime = getStartInPlaybackTime();
+    auto endTime = getEndInPlaybackTime();
+    
+    if (includeHeadAndTail)
+    {
+        ARA::ARATimeDuration headTime{}, tailTime{};
+        getDocumentController()->getPlaybackRegionHeadAndTailTime (toRef (this), &headTime, &tailTime);
+        startTime -= headTime;
+        endTime += tailTime;
+    }
+    
+    return { startTime, endTime };
 }
 
 void ARAPlaybackRegion::notifyContentChanged (ARAContentUpdateScopes scopeFlags)

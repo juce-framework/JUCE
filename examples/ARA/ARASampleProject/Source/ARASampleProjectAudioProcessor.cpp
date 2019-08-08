@@ -57,11 +57,16 @@ bool ARASampleProjectAudioProcessor::isMidiEffect() const
 
 double ARASampleProjectAudioProcessor::getTailLengthSeconds() const
 {
-    double tail = 0.0;
+    double tail{};
     if (auto playbackRenderer = getARAPlaybackRenderer())
     {
+        auto documentController = playbackRenderer->getDocumentController();
         for (auto playbackRegion : playbackRenderer->getPlaybackRegions<ARAPlaybackRegion>())
-            tail = jmax (tail, playbackRegion->getTailTime());
+        {
+            ARA::ARATimeDuration regionHeadTime{}, regionTailTime{};
+            documentController->getPlaybackRegionHeadAndTailTime (ARA::PlugIn::toRef (playbackRegion), &regionHeadTime, &regionTailTime);
+            tail = jmax (tail, regionTailTime);
+        }
     }
 
     return tail;

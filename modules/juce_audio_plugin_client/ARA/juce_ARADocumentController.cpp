@@ -313,13 +313,6 @@ void ARADocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::Play
     }
 }
 
-void ARADocumentController::doGetPlaybackRegionHeadAndTailTime (const ARA::PlugIn::PlaybackRegion* playbackRegion, ARA::ARATimeDuration* headTime, ARA::ARATimeDuration* tailTime) noexcept
-{
-    auto araPlaybackRegion = static_cast<const ARAPlaybackRegion*> (playbackRegion);
-    *headTime = araPlaybackRegion->getHeadTime();
-    *tailTime = araPlaybackRegion->getTailTime();
-}
-
 OVERRIDE_TO_NOTIFY_1 (willDestroyPlaybackRegion, PlaybackRegion*, playbackRegion)
 
 //==============================================================================

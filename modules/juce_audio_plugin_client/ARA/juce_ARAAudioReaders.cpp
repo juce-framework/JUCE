@@ -172,8 +172,9 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARADocumentController* documen
 
         for (auto playbackRegion : playbackRegions)
         {
-            regionsStartTime = jmin (regionsStartTime, playbackRegion->getStartInPlaybackTime() - playbackRegion->getHeadTime());
-            regionsEndTime = jmax (regionsEndTime, playbackRegion->getEndInPlaybackTime() + playbackRegion->getTailTime());
+            auto playbackRegionTimeRange = playbackRegion->getTimeRange (true);
+            regionsStartTime = jmin (regionsStartTime, playbackRegionTimeRange.getStart());
+            regionsEndTime = jmax (regionsEndTime, playbackRegionTimeRange.getEnd());
 
             audioProcessorAraExtension->getARAPlaybackRenderer()->addPlaybackRegion (ARA::PlugIn::toRef (playbackRegion));
             playbackRegion->addListener (this);
