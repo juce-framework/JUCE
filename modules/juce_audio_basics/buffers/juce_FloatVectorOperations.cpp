@@ -884,6 +884,11 @@ void JUCE_CALLTYPE FloatVectorOperations::convertFixedToFloat (float* dest, cons
    #endif
 }
 
+void FloatVectorOperations::convertFixedToFloat (std::complex<float>* dest, const std::complex<int>* src, float multiplier, int numValues) noexcept
+{
+    convertFixedToFloat (reinterpret_cast<float*> (dest), reinterpret_cast<const int*> (src), multiplier, 2 * numValues);
+}
+
 void JUCE_CALLTYPE FloatVectorOperations::min (float* dest, const float* src, float comp, int num) noexcept
 {
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = jmin (src[i], comp), Mode::min (s, cmp),

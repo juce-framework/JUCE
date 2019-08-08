@@ -49,6 +49,13 @@ public:
     /** Clears a vector of doubles. */
     static void JUCE_CALLTYPE clear (double* dest, int numValues) noexcept;
 
+    /** Clears a vector of complex values. */
+    template <typename CplxFloatType>
+    static void JUCE_CALLTYPE clear (std::complex<CplxFloatType>* dest, int numValues) noexcept
+    {
+        clear (reinterpret_cast<CplxFloatType*> (dest), 2 * numValues);
+    }
+
     /** Copies a repeated value into a vector of floats. */
     static void JUCE_CALLTYPE fill (float* dest, float valueToFill, int numValues) noexcept;
 
@@ -61,11 +68,28 @@ public:
     /** Copies a vector of doubles. */
     static void JUCE_CALLTYPE copy (double* dest, const double* src, int numValues) noexcept;
 
+    /** Copies a vector of complex values. */
+    template <typename CplxFloatType>
+    static void JUCE_CALLTYPE copy (std::complex<CplxFloatType>* dest, const std::complex<CplxFloatType>* src, int numValues) noexcept
+    {
+        copy (reinterpret_cast<CplxFloatType*> (dest), reinterpret_cast<const CplxFloatType*> (src), 2 * numValues);
+    }
+
     /** Copies a vector of floats, multiplying each value by a given multiplier */
     static void JUCE_CALLTYPE copyWithMultiply (float* dest, const float* src, float multiplier, int numValues) noexcept;
 
     /** Copies a vector of doubles, multiplying each value by a given multiplier */
     static void JUCE_CALLTYPE copyWithMultiply (double* dest, const double* src, double multiplier, int numValues) noexcept;
+
+    /** Copies a vector of complex values, multiplying each value by a given real valued multiplier */
+    template <typename CplxFloatType>
+    static void JUCE_CALLTYPE copyWithMultiply (std::complex<CplxFloatType>*       dest,
+                                                const std::complex<CplxFloatType>* src,
+                                                CplxFloatType                      multiplier,
+                                                int                                numValues) noexcept
+    {
+        copyWithMultiply (reinterpret_cast<CplxFloatType*> (dest), reinterpret_cast<const CplxFloatType*> (src), multiplier, 2 * numValues);
+    }
 
     /** Adds a fixed value to the destination values. */
     static void JUCE_CALLTYPE add (float* dest, float amountToAdd, int numValues) noexcept;
@@ -85,11 +109,28 @@ public:
     /** Adds the source values to the destination values. */
     static void JUCE_CALLTYPE add (double* dest, const double* src, int numValues) noexcept;
 
+    /** Adds the source values to the destination values. */
+    template <typename CplxFloatType>
+    static void JUCE_CALLTYPE add (std::complex<CplxFloatType>* dest, const std::complex<CplxFloatType>* src, int numValues) noexcept
+    {
+        add (reinterpret_cast<CplxFloatType*> (dest), reinterpret_cast<const CplxFloatType*> (src), 2 * numValues);
+    }
+
     /** Adds each source1 value to the corresponding source2 value and stores the result in the destination array. */
     static void JUCE_CALLTYPE add (float* dest, const float* src1, const float* src2, int num) noexcept;
 
     /** Adds each source1 value to the corresponding source2 value and stores the result in the destination array. */
     static void JUCE_CALLTYPE add (double* dest, const double* src1, const double* src2, int num) noexcept;
+
+    /** Adds each source1 value to the corresponding source2 value and stores the result in the destination array. */
+    template <typename CplxFloatType>
+    static void JUCE_CALLTYPE add (std::complex<CplxFloatType>*       dest,
+                                   const std::complex<CplxFloatType>* src1,
+                                   const std::complex<CplxFloatType>* src2,
+                                   int                                numValues) noexcept
+    {
+        add (reinterpret_cast<CplxFloatType*> (dest), reinterpret_cast<const CplxFloatType*> (src1), reinterpret_cast<const CplxFloatType*> (src2), 2 * numValues);
+    }
 
     /** Subtracts the source values from the destination values. */
     static void JUCE_CALLTYPE subtract (float* dest, const float* src, int numValues) noexcept;
@@ -97,17 +138,41 @@ public:
     /** Subtracts the source values from the destination values. */
     static void JUCE_CALLTYPE subtract (double* dest, const double* src, int numValues) noexcept;
 
+    /** Subtracts the source values from the destination values. */
+    template <typename CplxFloatType>
+    static void JUCE_CALLTYPE subtract (std::complex<CplxFloatType>* dest, const std::complex<CplxFloatType>* src, int numValues) noexcept
+    {
+        subtract (reinterpret_cast<CplxFloatType*> (dest), reinterpret_cast<const CplxFloatType*> (src), 2 * numValues);
+    }
+
     /** Subtracts each source2 value from the corresponding source1 value and stores the result in the destination array. */
     static void JUCE_CALLTYPE subtract (float* dest, const float* src1, const float* src2, int num) noexcept;
 
     /** Subtracts each source2 value from the corresponding source1 value and stores the result in the destination array. */
     static void JUCE_CALLTYPE subtract (double* dest, const double* src1, const double* src2, int num) noexcept;
 
+    /** Subtracts each source2 value from the corresponding source1 value and stores the result in the destination array. */
+    template <typename CplxFloatType>
+    static void JUCE_CALLTYPE subtract (std::complex<CplxFloatType>*       dest,
+                                        const std::complex<CplxFloatType>* src1,
+                                        const std::complex<CplxFloatType>* src2,
+                                        int                                numValues) noexcept
+    {
+        subtract (reinterpret_cast<CplxFloatType*> (dest), reinterpret_cast<const CplxFloatType*> (src1), reinterpret_cast<const CplxFloatType*> (src2), 2 * numValues);
+    }
+
     /** Multiplies each source value by the given multiplier, then adds it to the destination value. */
     static void JUCE_CALLTYPE addWithMultiply (float* dest, const float* src, float multiplier, int numValues) noexcept;
 
     /** Multiplies each source value by the given multiplier, then adds it to the destination value. */
     static void JUCE_CALLTYPE addWithMultiply (double* dest, const double* src, double multiplier, int numValues) noexcept;
+
+    /** Multiplies each source value by the given multiplier, then adds it to the destination value. */
+    template <typename CplxFloatType>
+    static void JUCE_CALLTYPE addWithMultiply (std::complex<CplxFloatType>* dest, const std::complex<CplxFloatType>* src, CplxFloatType multiplier, int numValues) noexcept
+    {
+        addWithMultiply (reinterpret_cast<CplxFloatType*> (dest), reinterpret_cast<const CplxFloatType*> (src), multiplier, 2 * numValues);
+    }
 
     /** Multiplies each source1 value by the corresponding source2 value, then adds it to the destination value. */
     static void JUCE_CALLTYPE addWithMultiply (float* dest, const float* src1, const float* src2, int num) noexcept;
@@ -120,6 +185,13 @@ public:
 
     /** Multiplies each source value by the given multiplier, then subtracts it to the destination value. */
     static void JUCE_CALLTYPE subtractWithMultiply (double* dest, const double* src, double multiplier, int numValues) noexcept;
+
+    /** Multiplies each source value by the given multiplier, then subtracts it to the destination value. */
+    template <typename CplxFloatType>
+    static void JUCE_CALLTYPE subtractWithMultiply (std::complex<CplxFloatType>* dest, const std::complex<CplxFloatType>* src, CplxFloatType multiplier, int numValues) noexcept
+    {
+        subtractWithMultiply (reinterpret_cast<CplxFloatType*> (dest), reinterpret_cast<const CplxFloatType*> (src), multiplier, 2 * numValues);
+    }
 
     /** Multiplies each source1 value by the corresponding source2 value, then subtracts it to the destination value. */
     static void JUCE_CALLTYPE subtractWithMultiply (float* dest, const float* src1, const float* src2, int num) noexcept;
@@ -145,11 +217,25 @@ public:
     /** Multiplies each of the destination values by a fixed multiplier. */
     static void JUCE_CALLTYPE multiply (double* dest, double multiplier, int numValues) noexcept;
 
+    /** Multiplies each of the destination values by a fixed multiplier. */
+    template <typename CplxFloatType>
+    static void JUCE_CALLTYPE multiply (std::complex<CplxFloatType>* dest, CplxFloatType multiplier, int numValues) noexcept
+    {
+        multiply (reinterpret_cast<CplxFloatType*> (dest), multiplier, 2 * numValues);
+    }
+
     /** Multiplies each of the source values by a fixed multiplier and stores the result in the destination array. */
     static void JUCE_CALLTYPE multiply (float* dest, const float* src, float multiplier, int num) noexcept;
 
     /** Multiplies each of the source values by a fixed multiplier and stores the result in the destination array. */
     static void JUCE_CALLTYPE multiply (double* dest, const double* src, double multiplier, int num) noexcept;
+
+    /** Multiplies each of the source values by a fixed multiplier and stores the result in the destination array. */
+    template <typename CplxFloatType>
+    static void JUCE_CALLTYPE multiply (std::complex<CplxFloatType>* dest, const std::complex<CplxFloatType>* src, CplxFloatType multiplier, int numValues) noexcept
+    {
+        multiply (reinterpret_cast<CplxFloatType*> (dest), reinterpret_cast<const CplxFloatType*> (src), multiplier, 2 * numValues);
+    }
 
     /** Copies a source vector to a destination, negating each value. */
     static void JUCE_CALLTYPE negate (float* dest, const float* src, int numValues) noexcept;
@@ -165,6 +251,9 @@ public:
 
     /** Converts a stream of integers to floats, multiplying each one by the given multiplier. */
     static void JUCE_CALLTYPE convertFixedToFloat (float* dest, const int* src, float multiplier, int numValues) noexcept;
+
+    /** Converts a stream of complex integers to complex floats, multiplying each one by the given multiplier. */
+    static void JUCE_CALLTYPE convertFixedToFloat (std::complex<float>* dest, const std::complex<int>* src, float multiplier, int numValues) noexcept;
 
     /** Each element of dest will be the minimum of the corresponding element of the source array and the given comp value. */
     static void JUCE_CALLTYPE min (float* dest, const float* src, float comp, int num) noexcept;
