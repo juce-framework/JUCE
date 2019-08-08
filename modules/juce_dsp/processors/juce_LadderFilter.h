@@ -121,8 +121,6 @@ private:
     SmoothedValue<Type> cutoffTransformSmoother, scaledResonanceSmoother;
     Type cutoffTransformValue, scaledResonanceValue;
 
-    LookupTableTransform<Type> saturationLUT { [] (Type x) { return std::tanh (x); }, Type (-5), Type (5), 128 };
-
     Type cutoffFreqHz { Type (200) };
     Type resonance;
 

@@ -123,8 +123,22 @@ Type LadderFilter<Type>::processSample (Type inputValue, size_t channelToUse) no
     const auto b0 = g * Type (0.76923076923);
     const auto b1 = g * Type (0.23076923076);
 
-    const auto dx = gain * saturationLUT (drive * inputValue);
-    const auto a = dx + scaledResonanceValue * Type (-4) * (gain2 * saturationLUT (drive2 * s[4]) - dx * comp);
+    // fast tanh approximation courtesy of Aleksey Vaneev (Voxengo) (public domain)
+    // https://www.kvraudio.com/forum/viewtopic.php?t=388650&start=45
+    // https://nbviewer.jupyter.org/gist/JTriggerFish/6226363
+
+    static const auto tanh = [](Type x){
+        const Type ax = std::fabs( x );
+        const Type x2 = x * x;
+
+        return( x * ( Type(2.45550750702956) + Type(2.45550750702956) * ax +
+                    ( Type(0.893229853513558) + Type(0.821226666969744) * ax ) * x2 ) /
+                    ( Type(2.44506634652299) + (Type(2.44506634652299) + x2 ) *
+                        std::fabs( x + Type(0.814642734961073) * x * ax )));
+    };
+
+    const auto dx = gain * tanh (drive * inputValue);
+    const auto a = dx + scaledResonanceValue * Type (-4) * (gain2 * tanh (drive2 * s[4]) - dx * comp);
 
     const auto b = b1 * s[0] + a1 * s[1] + b0 * a;
     const auto c = b1 * s[1] + a1 * s[2] + b0 * b;
