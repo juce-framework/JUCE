@@ -1,7 +1,6 @@
 #pragma once
 
 #include "JuceHeader.h"
-#include "juce_ARAModelObjects.h"
 
 namespace juce
 {
