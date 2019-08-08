@@ -6,7 +6,7 @@
 //==============================================================================
 RulersView::RulersView (DocumentView& documentView)
     : documentView (documentView),
-      document (documentView.getARADocumentController()->getDocument<ARADocument>()),
+      document (documentView.getDocument()),
       musicalContext (nullptr)
 {
     document->addListener (this);

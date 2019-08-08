@@ -46,7 +46,7 @@ DocumentView::DocumentView (const AudioProcessorEditorARAExtension& extension, c
     addAndMakeVisible (rulersViewport);
 
     getARAEditorView()->addListener (this);
-    getARADocumentController()->getDocument<ARADocument>()->addListener (this);
+    getDocument()->addListener (this);
 
     lastReportedPosition.resetToDefault();
 
@@ -58,7 +58,7 @@ DocumentView::~DocumentView()
     if (! araExtension.isARAEditorView())
         return;
 
-    getARADocumentController()->getDocument<ARADocument>()->removeListener (this);
+    getDocument()->removeListener (this);
     getARAEditorView()->removeListener (this);
 }
 
@@ -103,7 +103,7 @@ double DocumentView::getPlaybackRegionsViewsTimeForX (int x) const
 
 void DocumentView::invalidateRegionSequenceViews()
 {
-    if (getARADocumentController()->isHostEditingDocument() || getParentComponent() == nullptr)
+    if (getDocumentController()->isHostEditingDocument() || getParentComponent() == nullptr)
         regionSequenceViewsAreInvalid = true;
     else
         rebuildRegionSequenceViews();
@@ -183,7 +183,7 @@ void DocumentView::setTrackHeight (int newHeight)
 void DocumentView::parentHierarchyChanged()
 {
     // trigger lazy initial update after construction if needed
-    if (regionSequenceViewsAreInvalid && ! getARADocumentController()->isHostEditingDocument())
+    if (regionSequenceViewsAreInvalid && ! getDocumentController()->isHostEditingDocument())
         rebuildRegionSequenceViews();
 }
 
@@ -302,7 +302,7 @@ void DocumentView::rebuildRegionSequenceViews()
     }
     else    // show all RegionSequences of Document...
     {
-        for (auto regionSequence : getARADocumentController()->getDocument()->getRegionSequences<ARARegionSequence>())
+        for (auto regionSequence : getDocument()->getRegionSequences<ARARegionSequence>())
         {
             if (! ARA::contains (getARAEditorView()->getHiddenRegionSequences(), regionSequence))
                 regionSequenceViews.add (createViewForRegionSequence (regionSequence));
@@ -330,7 +330,7 @@ void DocumentView::onHideRegionSequences (std::vector<ARARegionSequence*> const&
 
 void DocumentView::didEndEditing (ARADocument* document)
 {
-    jassert (document == getARADocumentController()->getDocument());
+    jassert (document == getDocument());
     
     if (regionSequenceViewsAreInvalid)
         rebuildRegionSequenceViews();
@@ -338,14 +338,14 @@ void DocumentView::didEndEditing (ARADocument* document)
 
 void DocumentView::didAddRegionSequenceToDocument (ARADocument* document, ARARegionSequence* /*regionSequence*/)
 {
-    jassert (document == getARADocumentController()->getDocument());
+    jassert (document == getDocument());
 
     invalidateRegionSequenceViews();
 }
 
 void DocumentView::didReorderRegionSequencesInDocument (ARADocument* document)
 {
-    jassert (document == getARADocumentController()->getDocument());
+    jassert (document == getDocument());
 
     invalidateRegionSequenceViews();
 }
