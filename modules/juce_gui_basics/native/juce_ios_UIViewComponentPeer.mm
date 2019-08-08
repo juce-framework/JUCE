@@ -326,6 +326,8 @@ private:
                 peer->repaint (rect);
         }
     };
+    
+    RectangleList<int> dirtyRects;
 };
 
 static void sendScreenBoundsUpdate (JuceUIViewController* c)
@@ -1042,6 +1044,8 @@ void UIViewComponentPeer::drawRect (CGRect r)
     // NB the CTM on iOS already includes a factor for the display scale, so
     // we'll tell the context that the scale is 1.0 to avoid it using it twice
     CoreGraphicsContext g (cg, getComponent().getHeight(), 1.0f);
+    g.clipToRectangleList(dirtyRects);
+    dirtyRects.clear();
 
     insideDrawRect = true;
     handlePaint (g);
@@ -1095,6 +1099,8 @@ void Desktop::allowedOrientationsChanged()
 //==============================================================================
 void UIViewComponentPeer::repaint (const Rectangle<int>& area)
 {
+    dirtyRects.add(area);
+    
     if (insideDrawRect || ! MessageManager::getInstance()->isThisTheMessageThread())
         (new AsyncRepaintMessage (this, area))->post();
     else
