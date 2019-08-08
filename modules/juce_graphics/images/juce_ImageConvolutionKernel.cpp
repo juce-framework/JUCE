@@ -177,7 +177,7 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
                             }
                             else
                             {
-                                src += 4;
+                                src += destData.pixelStride;
                             }
 
                             ++sx;
@@ -231,7 +231,7 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
                             }
                             else
                             {
-                                src += 3;
+                                src += destData.pixelStride;
                             }
 
                             ++sx;
@@ -280,7 +280,7 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
                             }
                             else
                             {
-                                src += 3;
+                                src += destData.pixelStride;
                             }
 
                             ++sx;
