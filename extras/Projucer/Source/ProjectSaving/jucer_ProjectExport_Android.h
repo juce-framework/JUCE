@@ -1420,7 +1420,6 @@ private:
     StringArray getProjectCompilerFlags() const
     {
         auto cFlags = getAndroidCompilerFlags();
-
         cFlags.addArray (getEscapedFlags (StringArray::fromTokens (getExtraCompilerFlagsString(), true)));
         return cFlags;
     }
