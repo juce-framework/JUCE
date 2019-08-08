@@ -93,13 +93,11 @@ void RegionSequenceView::willUpdateRegionSequenceProperties (ARARegionSequence* 
     jassert (regionSequence == sequence);
     if (newProperties->color != regionSequence->getColor())
     {
-        //  repaints any PlaybackRegion that should follow RegionSequence color
+        // repaints any PlaybackRegion that should follow RegionSequence color
         for (auto region : playbackRegionViews)
         {
-            if  (region->getPlaybackRegion()->getColor() == nullptr)
-            {
+            if (region->getPlaybackRegion()->getColor() == nullptr)
                 region->repaint();
-            }
         }
     }
 }
