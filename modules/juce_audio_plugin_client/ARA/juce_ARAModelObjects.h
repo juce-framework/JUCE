@@ -364,12 +364,16 @@ public:
         Contrary to most ARA functions, this call can be made from any thread.
         The implementation will enqueue these notifications and later post them from the message thread.
         Calling code must ensure start and completion state are always balanced,
-        and must send the updates in ascending order.
-
-        @param state Indicates start, intermediate update or completion of the analysis.
+        and must send updates in ascending order.
+    */
+    void notifyAnalysisProgressStarted();
+    /** \copydoc notifyAnalysisProgressStarted
         @param progress Progress normalized to the 0..1 range.
     */
-    void notifyAnalysisProgress (ARAAnalysisProgressState state, float progress);
+    void notifyAnalysisProgressUpdated (float progress);
+    /** \copydoc notifyAnalysisProgressStarted
+    */
+    void notifyAnalysisProgressCompleted();
 
     /** Notify the ARA host and any listeners of a content update initiated by the plug-in.
         This must be called by the plug-in model management code on the message thread whenever updating

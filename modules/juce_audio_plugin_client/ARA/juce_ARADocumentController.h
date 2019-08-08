@@ -27,7 +27,9 @@ public:
     void notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags);
     void notifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags);
 
-    void notifyAudioSourceAnalysisProgress (ARAAudioSource* audioSource, ARA::ARAAnalysisProgressState state, float progress);
+    void notifyAudioSourceAnalysisProgressStarted (ARAAudioSource* audioSource);
+    void notifyAudioSourceAnalysisProgressUpdated (ARAAudioSource* audioSource, float progress);
+    void notifyAudioSourceAnalysisProgressCompleted (ARAAudioSource* audioSource);
 
     //==============================================================================
     // Override document controller methods here

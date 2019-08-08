@@ -112,14 +112,28 @@ void ARADocumentController::notifyPlaybackRegionContentChanged (ARAPlaybackRegio
 
 //==============================================================================
 
-void ARADocumentController::notifyAudioSourceAnalysisProgress (ARAAudioSource* audioSource, ARA::ARAAnalysisProgressState state, float progress)
+void ARADocumentController::notifyAudioSourceAnalysisProgressStarted (ARAAudioSource* audioSource)
 {
-    // internal listeners updates
-    if (audioSource->internalAnalysisProgressTracker.updateProgress (state,  progress))
+    if (audioSource->internalAnalysisProgressTracker.updateProgress (ARA::kARAAnalysisProgressStarted, 0.0f))
         internalAnalysisProgressIsSynced.clear (std::memory_order_release);
 
-    // host update
-    DocumentController::notifyAudioSourceAnalysisProgress(audioSource, state, progress);
+    DocumentController::notifyAudioSourceAnalysisProgressStarted (audioSource);
+}
+
+void ARADocumentController::notifyAudioSourceAnalysisProgressUpdated (ARAAudioSource* audioSource, float progress)
+{
+    if (audioSource->internalAnalysisProgressTracker.updateProgress (ARA::kARAAnalysisProgressUpdated,  progress))
+        internalAnalysisProgressIsSynced.clear (std::memory_order_release);
+
+    DocumentController::notifyAudioSourceAnalysisProgressUpdated (audioSource, progress);
+}
+
+void ARADocumentController::notifyAudioSourceAnalysisProgressCompleted (ARAAudioSource* audioSource)
+{
+    if (audioSource->internalAnalysisProgressTracker.updateProgress (ARA::kARAAnalysisProgressCompleted, 1.0f))
+        internalAnalysisProgressIsSynced.clear (std::memory_order_release);
+
+    DocumentController::notifyAudioSourceAnalysisProgressCompleted (audioSource);
 }
 
 //==============================================================================

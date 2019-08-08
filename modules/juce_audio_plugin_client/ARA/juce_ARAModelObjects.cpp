@@ -57,9 +57,19 @@ ARAAudioSource::ARAAudioSource (ARADocument* document, ARA::ARAAudioSourceHostRe
     : ARA::PlugIn::AudioSource(document, hostRef)
 {}
 
-void ARAAudioSource::notifyAnalysisProgress (ARAAnalysisProgressState state, float progress)
+void ARAAudioSource::notifyAnalysisProgressStarted()
 {
-    getDocumentController()->notifyAudioSourceAnalysisProgress (this, state, progress);
+    getDocumentController()->notifyAudioSourceAnalysisProgressStarted (this);
+}
+
+void ARAAudioSource::notifyAnalysisProgressUpdated (float progress)
+{
+    getDocumentController()->notifyAudioSourceAnalysisProgressUpdated (this, progress);
+}
+
+void ARAAudioSource::notifyAnalysisProgressCompleted()
+{
+    getDocumentController()->notifyAudioSourceAnalysisProgressCompleted (this);
 }
 
 void ARAAudioSource::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions)
