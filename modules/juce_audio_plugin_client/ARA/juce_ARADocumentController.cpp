@@ -207,10 +207,13 @@ ARA::PlugIn::MusicalContext* ARADocumentController::doCreateMusicalContext (ARA:
     return new ARAMusicalContext (static_cast<ARADocument*> (document), hostRef);
 }
 
-void ARADocumentController::doUpdateMusicalContextContent (ARA::PlugIn::MusicalContext* musicalContext, const ARA::ARAContentTimeRange* /*range*/, ARA::ContentUpdateScopes scopeFlags) noexcept
+void ARADocumentController::updateMusicalContextContent (ARA::ARAMusicalContextRef musicalContextRef, const ARA::ARAContentTimeRange* range, ARA::ContentUpdateScopes flags) noexcept
 {
+    DocumentController::updateMusicalContextContent (musicalContextRef, range, flags);
+
+    ARA::PlugIn::MusicalContext* musicalContext = ARA::PlugIn::fromRef (musicalContextRef);
     auto araMusicalContext = static_cast<ARAMusicalContext*> (musicalContext);
-    araMusicalContext->notifyListeners ([&] (ARAMusicalContext::Listener& l) { l.didUpdateMusicalContextContent(araMusicalContext, scopeFlags); });
+    araMusicalContext->notifyListeners ([&] (ARAMusicalContext::Listener& l) { l.didUpdateMusicalContextContent(araMusicalContext, flags); });
 }
 
 OVERRIDE_TO_NOTIFY_3 (willUpdateMusicalContextProperties, MusicalContext*, musicalContext, ARAMusicalContext::PropertiesPtr, newProperties)
@@ -237,10 +240,13 @@ ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugI
     return new ARAAudioSource (static_cast<ARADocument*> (document), hostRef);
 }
 
-void ARADocumentController::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* AudioSource, const ARA::ARAContentTimeRange* /*range*/, ARA::ContentUpdateScopes scopeFlags) noexcept
+void ARADocumentController::updateAudioSourceContent (ARA::ARAAudioSourceRef audioSourceRef, const ARA::ARAContentTimeRange* range, ARA::ContentUpdateScopes flags) noexcept
 {
-    auto araAudioSource = static_cast<ARAAudioSource*> (AudioSource);
-    araAudioSource->notifyListeners ([&] (ARAAudioSource::Listener& l) { l.didUpdateAudioSourceContent(araAudioSource, scopeFlags); });
+    DocumentController::updateAudioSourceContent (audioSourceRef, range, flags);
+
+    ARA::PlugIn::AudioSource* audioSource = ARA::PlugIn::fromRef (audioSourceRef);
+    auto araAudioSource = static_cast<ARAAudioSource*> (audioSource);
+    araAudioSource->notifyListeners ([&] (ARAAudioSource::Listener& l) { l.didUpdateAudioSourceContent(araAudioSource, flags); });
 }
 
 OVERRIDE_TO_NOTIFY_3 (willUpdateAudioSourceProperties, AudioSource*, audioSource, ARAAudioSource::PropertiesPtr, newProperties)
