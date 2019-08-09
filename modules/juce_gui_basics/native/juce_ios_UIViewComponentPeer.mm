@@ -661,7 +661,7 @@ void UIViewComponentPeer::setBounds (const Rectangle<int>& newBounds, const bool
         CGRect r = convertToCGRect (newBounds);
 
         if (view.frame.size.width != r.size.width || view.frame.size.height != r.size.height)
-            [view setNeedsDisplay];
+            repaint(newBounds);
 
         view.frame = r;
     }
@@ -752,7 +752,7 @@ void UIViewComponentPeer::updateTransformAndScreenBounds()
         component.setBounds (oldArea.withPosition (x, y));
     }
 
-    [view setNeedsDisplay];
+    repaint(getBounds());
 }
 
 bool UIViewComponentPeer::contains (Point<int> localPos, bool trueIfInAChildWindow) const
@@ -1044,9 +1044,17 @@ void UIViewComponentPeer::drawRect (CGRect r)
     // NB the CTM on iOS already includes a factor for the display scale, so
     // we'll tell the context that the scale is 1.0 to avoid it using it twice
     CoreGraphicsContext g (cg, getComponent().getHeight(), 1.0f);
-    g.clipToRectangleList(dirtyRects);
-    dirtyRects.clear();
 
+    g.clipToRectangleList(dirtyRects);
+
+    if (! component.isOpaque())
+    {
+        const auto dirtyBounds = dirtyRects.getBounds();
+        CGContextClearRect(cg, CGRectMake(dirtyBounds.getX(), dirtyBounds.getY(), dirtyBounds.getWidth(), dirtyBounds.getHeight()));
+    }
+
+    dirtyRects.clear();
+    
     insideDrawRect = true;
     handlePaint (g);
     insideDrawRect = false;
@@ -1099,12 +1107,13 @@ void Desktop::allowedOrientationsChanged()
 //==============================================================================
 void UIViewComponentPeer::repaint (const Rectangle<int>& area)
 {
-    dirtyRects.add(area);
-    
     if (insideDrawRect || ! MessageManager::getInstance()->isThisTheMessageThread())
         (new AsyncRepaintMessage (this, area))->post();
     else
+    {
+        dirtyRects.add(area);
         [view setNeedsDisplayInRect: convertToCGRect (area)];
+    }
 }
 
 void UIViewComponentPeer::performAnyPendingRepaintsNow()
