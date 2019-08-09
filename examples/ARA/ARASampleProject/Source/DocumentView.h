@@ -70,13 +70,13 @@ public:
 
 
     template<typename EditorView_t = ARAEditorView>
-    EditorView_t* getARAEditorView() const noexcept { return araExtension.getARAEditorView<EditorView_t>(); }
+    EditorView_t* getARAEditorView() const noexcept { return this->araExtension.getARAEditorView<EditorView_t>(); }
 
     template<typename DocumentController_t = ARADocumentController>
-    DocumentController_t* getDocumentController() const noexcept { return getARAEditorView()->getDocumentController<DocumentController_t>(); }
+    DocumentController_t* getDocumentController() const noexcept { return this->getARAEditorView()->getDocumentController<DocumentController_t>(); }
 
     template<typename Document_t = ARADocument>
-    Document_t* getDocument() const noexcept { return getDocumentController()->getDocument<Document_t>(); }
+    Document_t* getDocument() const noexcept { return this->getDocumentController()->getDocument<Document_t>(); }
 
     // total time range
     Range<double> getTimeRange() const { return timeRange; }

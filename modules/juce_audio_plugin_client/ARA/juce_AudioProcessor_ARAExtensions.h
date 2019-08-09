@@ -47,15 +47,15 @@ public:
 
     /** Return the ARAPlaybackRenderer instance, if it exists. */
     template<typename PlaybackRenderer_t = ARAPlaybackRenderer>
-    PlaybackRenderer_t* getARAPlaybackRenderer() const noexcept { return araPlugInExtension != nullptr ? static_cast<PlaybackRenderer_t*> (araPlugInExtension->getPlaybackRenderer()) : nullptr; }
+    PlaybackRenderer_t* getARAPlaybackRenderer() const noexcept { return this->araPlugInExtension != nullptr ? static_cast<PlaybackRenderer_t*> (this->araPlugInExtension->getPlaybackRenderer()) : nullptr; }
 
     /** Return the ARAEditorRenderer instance, if it exists. */
     template<typename EditorRenderer_t = ARAEditorRenderer>
-    EditorRenderer_t* getARAEditorRenderer() const noexcept { return araPlugInExtension != nullptr ? static_cast<EditorRenderer_t*> (araPlugInExtension->getEditorRenderer()) : nullptr; }
+    EditorRenderer_t* getARAEditorRenderer() const noexcept { return this->araPlugInExtension != nullptr ? static_cast<EditorRenderer_t*> (this->araPlugInExtension->getEditorRenderer()) : nullptr; }
 
     /** Return the ARAEditorView instance, if it exists. */
     template<typename EditorView_t = ARAEditorView>
-    EditorView_t* getARAEditorView() const noexcept { return araPlugInExtension != nullptr ? static_cast<EditorView_t*> (araPlugInExtension->getEditorView()) : nullptr; }
+    EditorView_t* getARAEditorView() const noexcept { return this->araPlugInExtension != nullptr ? static_cast<EditorView_t*> (this->araPlugInExtension->getEditorView()) : nullptr; }
 
     /** Returns true if plugin instance fulfills the ARAPlaybackRenderer role. */
     bool isARAPlaybackRenderer() const noexcept { return getARAPlaybackRenderer() != nullptr; }
@@ -88,7 +88,7 @@ public:
 
     /** \copydoc AudioProcessorARAExtension::getARAEditorView */
     template<typename EditorView_t = ARAEditorView>
-    EditorView_t* getARAEditorView() const noexcept { return araProcessorExtension != nullptr ? araProcessorExtension->getARAEditorView<EditorView_t>() : nullptr; }
+    EditorView_t* getARAEditorView() const noexcept { return this->araProcessorExtension != nullptr ? this->araProcessorExtension->getARAEditorView<EditorView_t>() : nullptr; }
     
     /** \copydoc AudioProcessorARAExtension::isARAEditorView */
     bool isARAEditorView() const noexcept { return getARAEditorView() != nullptr; }
