@@ -16,16 +16,10 @@ public:
     explicit ARADocumentController (const ARA::ARADocumentControllerHostInstance* instance);
 
     //==============================================================================
-    // Change notifications
-    // Typically, instead of calling these functions directly, rather use the respective model object's
-    // notify...() methods which will forward here as appropriate.
-    // Note that while the ARA API allows for specifying affected time ranges for content updates,
-    // this feature is not yet supported in our current plug-in implementation, since most hosts do not evaluate it anyways.
-
-    void notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags);
-    void notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags);
-    void notifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags);
-
+    // Analysis progress notifications
+    // Internal helper - instead of calling these functions directly, rather use
+    // ARAAudioSource::notifyAnalysisProgress() which will forward here as appropriate.
+    
     void notifyAudioSourceAnalysisProgressStarted (ARAAudioSource* audioSource);
     void notifyAudioSourceAnalysisProgressUpdated (ARAAudioSource* audioSource, float progress);
     void notifyAudioSourceAnalysisProgressCompleted (ARAAudioSource* audioSource);
@@ -42,7 +36,6 @@ protected:
     // Model Update Management
     void willBeginEditing() noexcept override;
     void didEndEditing() noexcept override;
-    void doNotifyModelContentUpdates() noexcept override final;
 
     /** Read an ARADocument archive from a juce::InputStream.
     @param input Data stream containing previously persisted data to be used when restoring the ARADocument
@@ -186,10 +179,6 @@ private:
     bool currentPropertyUpdateAffectsContent { false };
 
     std::atomic_flag internalAnalysisProgressIsSynced { true };
-
-    std::map<ARAAudioSource*, ARAContentUpdateScopes> audioSourceUpdates;
-    std::map<ARAAudioModification*, ARAContentUpdateScopes> audioModificationUpdates;
-    std::map<ARAPlaybackRegion*, ARAContentUpdateScopes> playbackRegionUpdates;
 
     ScopedJuceInitialiser_GUI libraryInitialiser;
 

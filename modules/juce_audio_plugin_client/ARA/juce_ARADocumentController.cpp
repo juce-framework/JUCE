@@ -93,25 +93,6 @@ ARADocumentController::ARADocumentController (const ARA::ARADocumentControllerHo
 
 //==============================================================================
 
-void ARADocumentController::notifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags)
-{
-    jassert (scopeFlags.affectEverything() || !scopeFlags.affectSamples());
-
-    audioSourceUpdates[audioSource] += scopeFlags;
-}
-
-void ARADocumentController::notifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags)
-{
-    audioModificationUpdates[audioModification] += scopeFlags;
-}
-
-void ARADocumentController::notifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags)
-{
-    playbackRegionUpdates[playbackRegion] += scopeFlags;
-}
-
-//==============================================================================
-
 void ARADocumentController::notifyAudioSourceAnalysisProgressStarted (ARAAudioSource* audioSource)
 {
     if (audioSource->internalAnalysisProgressTracker.updateProgress (ARA::kARAAnalysisProgressStarted, 0.0f))
@@ -179,26 +160,6 @@ void ARADocumentController::willBeginEditing() noexcept
 void ARADocumentController::didEndEditing() noexcept
 {
     notify_listeners (didEndEditing, ARADocument*, getDocument());
-}
-
-void ARADocumentController::doNotifyModelContentUpdates() noexcept
-{
-    auto hostModelUpdateController = getHostModelUpdateController();
-    if (hostModelUpdateController != nullptr)
-    {
-        for (auto& audioSourceUpdate : audioSourceUpdates)
-            hostModelUpdateController->notifyAudioSourceContentChanged (audioSourceUpdate.first->getHostRef(), nullptr, audioSourceUpdate.second);
-
-        for (auto& audioModificationUpdate : audioModificationUpdates)
-            hostModelUpdateController->notifyAudioModificationContentChanged (audioModificationUpdate.first->getHostRef(), nullptr, audioModificationUpdate.second);
-
-        for (auto& playbackRegionUpdate : playbackRegionUpdates)
-            hostModelUpdateController->notifyPlaybackRegionContentChanged (playbackRegionUpdate.first->getHostRef(), nullptr, playbackRegionUpdate.second);
-    }
-
-    audioSourceUpdates.clear();
-    audioModificationUpdates.clear();
-    playbackRegionUpdates.clear();
 }
 
 //==============================================================================

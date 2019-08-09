@@ -74,7 +74,7 @@ void ARAAudioSource::notifyAnalysisProgressCompleted()
 
 void ARAAudioSource::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions)
 {
-    getDocumentController<ARADocumentController>()->notifyAudioSourceContentChanged (this, scopeFlags);
+    getDocumentController()->notifyAudioSourceContentChanged (this, scopeFlags);
 
     notifyListeners ([&] (Listener& l) { l.didUpdateAudioSourceContent(this, scopeFlags); });
 
@@ -91,7 +91,7 @@ ARAAudioModification::ARAAudioModification (ARAAudioSource* audioSource, ARA::AR
 
 void ARAAudioModification::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllPlaybackRegions)
 {
-    getDocumentController<ARADocumentController>()->notifyAudioModificationContentChanged (this, scopeFlags);
+    getDocumentController()->notifyAudioModificationContentChanged (this, scopeFlags);
 
     notifyListeners ([&] (Listener& l) { l.didUpdateAudioModificationContent(this, scopeFlags); });
 
@@ -132,7 +132,7 @@ Range<double> ARAPlaybackRegion::getTimeRange (bool includeHeadAndTail) const
 
 void ARAPlaybackRegion::notifyContentChanged (ARAContentUpdateScopes scopeFlags)
 {
-    getDocumentController<ARADocumentController>()->notifyPlaybackRegionContentChanged (this, scopeFlags);
+    getDocumentController()->notifyPlaybackRegionContentChanged (this, scopeFlags);
 
     notifyListeners ([&] (Listener& l) { l.didUpdatePlaybackRegionContent(this, scopeFlags); });
 }
