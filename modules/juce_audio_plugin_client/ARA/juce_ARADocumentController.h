@@ -35,27 +35,13 @@ protected:
 
     /** Read an ARADocument archive from a juce::InputStream.
     @param input Data stream containing previously persisted data to be used when restoring the ARADocument
-    @param filter An optional filter to be applied to the stream; nullptr if no filtering is required
-
-    The optional \p filter parameter can be used to restore a subsection of the document, in which case
-    it will not be nullptr. 
-
-    Overriding this method is the preferred way of handling ARA document persistence, but you can also
-    override ARA::PlugIn::DocumentController::doRestoreObjectsFromArchive to deal with an ARA archive 
-    ARA::PlugIn::HostArchiveReader directly. 
+    @param filter A filter to be applied to the stream
     */
     virtual bool doRestoreObjectsFromStream (InputStream& input, const ARA::PlugIn::RestoreObjectsFilter* filter) noexcept;
 
     /** Write an ARADocument archive to a juce::OutputStream.
     @param output Data stream that should be used to write the persistent ARADocument data
-    @param filter An optional filter to be applied to the stream; nullptr if no filtering is required
-
-    The optional \p filter parameter can be used to store a subsection of the document, in which case
-    it will not be nullptr. 
-
-    Overriding this method is the preferred way of handling ARA document persistence, but you can also
-    override ARA::PlugIn::DocumentController::doStoreObjectsToArchive to deal with an ARA archive 
-    ARA::PlugIn::HostArchiveWriter directly. 
+    @param filter A filter to be applied to the stream
     */
     virtual bool doStoreObjectsToStream (OutputStream& output, const ARA::PlugIn::StoreObjectsFilter* filter) noexcept;
 
