@@ -34,6 +34,8 @@ public:
     {
         jassert (midiCallback != nullptr);
         midiInputs.add (this);
+
+        buffer.resize (32);
     }
 
     ~BelaMidiInput()
@@ -54,6 +56,8 @@ public:
 
     void poll()
     {
+        int receivedBytes = 0;
+
         for (;;)
         {
             auto data = midi.getInput();
@@ -61,9 +65,18 @@ public:
             if (data < 0)
                 break;
 
-            auto byte = (uint8) data;
-            concatenator.pushMidiData (&byte, 1, Time::getMillisecondCounter() * 0.001, midiInput, *midiCallback);
+            buffer[receivedBytes] = (uint8) data;
+            receivedBytes++;
+
+            if (receivedBytes == buffer.size())
+            {
+                pushMidiData (receivedBytes);
+                receivedBytes = 0;
+            }
         }
+
+        if (receivedBytes > 0)
+            pushMidiData (receivedBytes);
     }
 
     static Array<MidiDeviceInfo> getDevices (bool input)
@@ -77,6 +90,13 @@ public:
     }
 
 private:
+    void pushMidiData (int length)
+    {
+        concatenator.pushMidiData (buffer.data(), length, Time::getMillisecondCounter() * 0.001, midiInput, *midiCallback);
+    }
+
+    std::vector<uint8> buffer;
+
     static Array<int> findAllALSACardIDs()
     {
         Array<int> cards;

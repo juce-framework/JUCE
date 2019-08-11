@@ -1237,7 +1237,7 @@ private:
 //==============================================================================
 struct NormalComponentWrapper : public PopupMenu::CustomComponent
 {
-    NormalComponentWrapper (Component* comp, int w, int h, bool triggerMenuItemAutomaticallyWhenClicked)
+    NormalComponentWrapper (Component& comp, int w, int h, bool triggerMenuItemAutomaticallyWhenClicked)
         : PopupMenu::CustomComponent (triggerMenuItemAutomaticallyWhenClicked),
           width (w), height (h)
     {
@@ -1530,22 +1530,26 @@ void PopupMenu::addColouredItem (int itemResultID, String itemText, Colour itemT
     addItem (std::move (i));
 }
 
-void PopupMenu::addCustomItem (int itemResultID, CustomComponent* cc, const PopupMenu* subMenu)
+void PopupMenu::addCustomItem (int itemResultID,
+                               std::unique_ptr<CustomComponent> cc,
+                               std::unique_ptr<const PopupMenu> subMenu)
 {
     Item i;
     i.itemID = itemResultID;
-    i.customComponent = cc;
-    i.subMenu.reset (createCopyIfNotNull (subMenu));
+    i.customComponent = cc.release();
+    i.subMenu.reset (createCopyIfNotNull (subMenu.get()));
     addItem (std::move (i));
 }
 
-void PopupMenu::addCustomItem (int itemResultID, Component* customComponent, int idealWidth, int idealHeight,
-                               bool triggerMenuItemAutomaticallyWhenClicked, const PopupMenu* subMenu)
+void PopupMenu::addCustomItem (int itemResultID,
+                               Component& customComponent,
+                               int idealWidth, int idealHeight,
+                               bool triggerMenuItemAutomaticallyWhenClicked,
+                               std::unique_ptr<const PopupMenu> subMenu)
 {
-    addCustomItem (itemResultID,
-                   new HelperClasses::NormalComponentWrapper (customComponent, idealWidth, idealHeight,
-                                                              triggerMenuItemAutomaticallyWhenClicked),
-                   subMenu);
+    auto comp = std::make_unique<HelperClasses::NormalComponentWrapper> (customComponent, idealWidth, idealHeight,
+                                                                         triggerMenuItemAutomaticallyWhenClicked);
+    addCustomItem (itemResultID, std::move (comp), std::move (subMenu));
 }
 
 void PopupMenu::addSubMenu (String subMenuName, PopupMenu subMenu, bool isActive)

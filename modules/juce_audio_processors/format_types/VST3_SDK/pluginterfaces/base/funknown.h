@@ -296,7 +296,7 @@ public:
 	/** Prints the UID to a string (or debug output if string is NULL).
 	    \param string is the output string if not NULL.
 	    \param style can be chosen from the FUID::UIDPrintStyle enumeration. */
-	void print (char8* string = 0, int32 style = kINLINE_UID) const;
+	void print (char8* string = nullptr, int32 style = kINLINE_UID) const;
 
 	template <size_t N>
 	inline explicit FUID (const int8 (&uid)[N])

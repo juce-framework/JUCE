@@ -517,13 +517,13 @@ private:
         if (config.isLinkTimeOptimisationEnabled())
             result.add ("-flto");
 
+        for (auto& recommended : config.getRecommendedCompilerWarningFlags())
+            result.add (recommended);
+
         auto extra = replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim();
 
         if (extra.isNotEmpty())
             result.add (extra);
-
-        for (auto& recommended : config.getRecommendedCompilerWarningFlags())
-            result.add (recommended);
 
         return result;
     }

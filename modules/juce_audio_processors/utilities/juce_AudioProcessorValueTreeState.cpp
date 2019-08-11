@@ -65,6 +65,15 @@ bool AudioProcessorValueTreeState::Parameter::isAutomatable() const     { return
 bool AudioProcessorValueTreeState::Parameter::isDiscrete() const        { return discrete; }
 bool AudioProcessorValueTreeState::Parameter::isBoolean() const         { return boolean; }
 
+void AudioProcessorValueTreeState::Parameter::valueChanged (float newValue)
+{
+    if (lastValue == newValue)
+        return;
+
+    lastValue = newValue;
+    sendValueChangedMessageToListeners (newValue);
+}
+
 //==============================================================================
 class AudioProcessorValueTreeState::ParameterAdapter   : private AudioProcessorParameter::Listener
 {

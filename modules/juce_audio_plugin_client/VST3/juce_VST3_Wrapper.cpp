@@ -959,7 +959,7 @@ private:
 
     enum { numMIDIChannels = 16 };
     Vst::ParamID parameterToMidiControllerOffset;
-    MidiController parameterToMidiController[numMIDIChannels * Vst::kCountCtrlNumber];
+    MidiController parameterToMidiController[(int) numMIDIChannels * (int) Vst::kCountCtrlNumber];
     Vst::ParamID midiControllerToParameter[numMIDIChannels][Vst::kCountCtrlNumber];
 
     //==============================================================================

@@ -323,22 +323,21 @@ public:
 
     /** Appends a custom menu item.
 
-        This will add a user-defined component to use as a menu item. The component
-        passed in will be deleted by this menu when it's no longer needed.
+        This will add a user-defined component to use as a menu item.
 
         Note that native macOS menus do not support custom components.
 
         @see CustomComponent
     */
     void addCustomItem (int itemResultID,
-                        CustomComponent* customComponent,
-                        const PopupMenu* optionalSubMenu = nullptr);
+                        std::unique_ptr<CustomComponent> customComponent,
+                        std::unique_ptr<const PopupMenu> optionalSubMenu = nullptr);
 
     /** Appends a custom menu item that can't be used to trigger a result.
 
         This will add a user-defined component to use as a menu item.
-        It's the caller's responsibility to delete the component that is passed-in
-        when it's no longer needed after the menu has been hidden.
+        The caller must ensure that the passed-in component stays alive
+        until after the menu has been hidden.
 
         If triggerMenuItemAutomaticallyWhenClicked is true, the menu itself will handle
         detection of a mouse-click on your component, and use that to trigger the
@@ -348,11 +347,11 @@ public:
         Note that native macOS menus do support custom components.
     */
     void addCustomItem (int itemResultID,
-                        Component* customComponent,
+                        Component& customComponent,
                         int idealWidth,
                         int idealHeight,
                         bool triggerMenuItemAutomaticallyWhenClicked,
-                        const PopupMenu* optionalSubMenu = nullptr);
+                        std::unique_ptr<const PopupMenu> optionalSubMenu = nullptr);
 
     /** Appends a sub-menu.
 

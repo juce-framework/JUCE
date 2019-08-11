@@ -918,10 +918,10 @@ struct Grid::BoxAlignment
         // align and justify
         auto r = area;
 
-        if (item.width != GridItem::notAssigned)
+        if (item.width != (float) GridItem::notAssigned)
             r.setWidth (item.width);
 
-        if (item.height != GridItem::notAssigned)
+        if (item.height != (float) GridItem::notAssigned)
             r.setHeight (item.height);
 
         if (alignType == Grid::AlignItems::start && justifyType == Grid::JustifyItems::start)
