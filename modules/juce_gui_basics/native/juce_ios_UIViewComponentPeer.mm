@@ -502,6 +502,10 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
                     CGContextRelease(bitmapContext);
                 }
                 bitmapContext = CGBitmapContextCreate(nullptr, self.frame.size.width * scale, self.frame.size.height * scale, 8, 0, CGColorSpaceCreateDeviceRGB(), kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little);
+                
+                // we re-created the context, so we need to repaint everything
+                dirtyRects.clear();
+                dirtyRects.add(convertToRectInt(self.frame));
             }
         
             CGContextRef cg = UIGraphicsGetCurrentContext();
