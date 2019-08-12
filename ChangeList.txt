@@ -9,7 +9,7 @@ Version 5.4.4
   - Added support for persisting attachements to MIDI devices
   - Refactored Linux event loop handling
   - Multiple C++ modernisation improvements to the API
-  - Added support for macOS 10.55 and iOS 13
+  - Added support for macOS 10.15 and iOS 13
   - Added support for Visual Studio 2019
   - Removed support for Visual Studio 2013
 
