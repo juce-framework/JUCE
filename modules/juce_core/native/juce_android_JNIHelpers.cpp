@@ -425,7 +425,22 @@ jobject ActivityLifecycleCallbacks::invoke (jobject proxy, jobject method, jobje
     else if (methodName == "onActivitySaveInstanceState")   { onActivitySaveInstanceState (activity, bundle); return nullptr; }
     else if (methodName == "onActivityStarted")             { onActivityStarted (activity); return nullptr; }
     else if (methodName == "onActivityStopped")             { onActivityStopped (activity); return nullptr; }
-
+    // needed for running on Android Q (API 29)
+    else if (methodName == "onActivityPostCreated")             { return nullptr; }
+    else if (methodName == "onActivityPostDestroyed")           { return nullptr; }
+    else if (methodName == "onActivityPostPaused")              {  return nullptr; }
+    else if (methodName == "onActivityPostResumed")             {  return nullptr; }
+    else if (methodName == "onActivityPostSaveInstanceState")   {  return nullptr; }
+    else if (methodName == "onActivityPostStarted")             {  return nullptr; }
+    else if (methodName == "onActivityPostStopped")             {  return nullptr; }
+    else if (methodName == "onActivityPreCreated")             { return nullptr; }
+    else if (methodName == "onActivityPreDestroyed")           { return nullptr; }
+    else if (methodName == "onActivityPrePaused")              {  return nullptr; }
+    else if (methodName == "onActivityPreResumed")             {  return nullptr; }
+    else if (methodName == "onActivityPreSaveInstanceState")   {  return nullptr; }
+    else if (methodName == "onActivityPreStarted")             {  return nullptr; }
+    else if (methodName == "onActivityPreStopped")             {  return nullptr; }
+    
     return AndroidInterfaceImplementer::invoke (proxy, method, args);
 }
 
