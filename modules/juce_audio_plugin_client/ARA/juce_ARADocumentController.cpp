@@ -212,8 +212,7 @@ void ARADocumentController::updateMusicalContextContent (ARA::ARAMusicalContextR
     DocumentController::updateMusicalContextContent (musicalContextRef, range, flags);
 
     ARA::PlugIn::MusicalContext* musicalContext = ARA::PlugIn::fromRef (musicalContextRef);
-    auto araMusicalContext = static_cast<ARAMusicalContext*> (musicalContext);
-    araMusicalContext->notifyListeners ([&] (ARAMusicalContext::Listener& l) { l.didUpdateMusicalContextContent(araMusicalContext, flags); });
+    notify_listeners (didUpdateMusicalContextContent, ARAMusicalContext*, musicalContext, flags);
 }
 
 OVERRIDE_TO_NOTIFY_3 (willUpdateMusicalContextProperties, MusicalContext*, musicalContext, ARAMusicalContext::PropertiesPtr, newProperties)
@@ -245,8 +244,7 @@ void ARADocumentController::updateAudioSourceContent (ARA::ARAAudioSourceRef aud
     DocumentController::updateAudioSourceContent (audioSourceRef, range, flags);
 
     ARA::PlugIn::AudioSource* audioSource = ARA::PlugIn::fromRef (audioSourceRef);
-    auto araAudioSource = static_cast<ARAAudioSource*> (audioSource);
-    araAudioSource->notifyListeners ([&] (ARAAudioSource::Listener& l) { l.didUpdateAudioSourceContent(araAudioSource, flags); });
+    notify_listeners (didUpdateAudioSourceContent, ARAAudioSource*, audioSource, flags);
 }
 
 OVERRIDE_TO_NOTIFY_3 (willUpdateAudioSourceProperties, AudioSource*, audioSource, ARAAudioSource::PropertiesPtr, newProperties)
