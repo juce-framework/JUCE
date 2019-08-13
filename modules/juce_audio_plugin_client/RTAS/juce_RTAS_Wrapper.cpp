@@ -1200,10 +1200,6 @@ public:
     {
         std::unique_ptr<AudioProcessor> plugin (createPluginFilterOfType (AudioProcessor::wrapperType_RTAS));
 
-       #ifndef JucePlugin_PreferredChannelConfigurations
-        #error You need to set the "Plugin Channel Configurations" field in the Projucer to build RTAS plug-ins
-       #endif
-
         const int numInputBuses = plugin->getBusCount (true);
         const int numOutputBuses = plugin->getBusCount (false);
 
