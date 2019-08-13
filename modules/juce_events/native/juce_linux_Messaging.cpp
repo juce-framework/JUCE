@@ -38,7 +38,7 @@ public:
         LinuxEventLoop::registerFdCallback (getReadHandle(),
                                             [this] (int fd)
                                             {
-                                                if (auto msg = popNextMessage (fd))
+                                                while (auto msg = popNextMessage (fd))
                                                 {
                                                     JUCE_TRY
                                                     {
@@ -77,7 +77,7 @@ public:
     }
 
     //==============================================================================
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (InternalMessageQueue)
+    JUCE_DECLARE_SINGLETON (InternalMessageQueue, false)
 
 private:
     CriticalSection lock;
@@ -183,7 +183,7 @@ public:
     }
 
     //==============================================================================
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (InternalRunLoop)
+    JUCE_DECLARE_SINGLETON (InternalRunLoop, false)
 
 private:
     CriticalSection lock;
