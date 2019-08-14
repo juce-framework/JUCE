@@ -430,6 +430,7 @@ bool ARADocumentController::ArchiveReader::isExhausted()
 }
 
 ARADocumentController::ArchiveWriter::ArchiveWriter (ARA::PlugIn::HostArchiveWriter* writer)
+: archiveWriter (writer)
 {}
 
 bool ARADocumentController::ArchiveWriter::write (const void* dataToWrite, size_t numberOfBytes)
