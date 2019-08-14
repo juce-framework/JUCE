@@ -16,6 +16,7 @@
 
 //----------------------------------------------------------------------------------------------
 #if SMTG_OS_MACOS
+    #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wunknown-warning-option"
 	#pragma GCC diagnostic ignored "-Wpragma-pack"
 	#if SMTG_PLATFORM_64
@@ -23,8 +24,7 @@
 	#else
 		#pragma pack(push, 1)
 	#endif
-	#pragma GCC diagnostic default "-Wpragma-pack"
-    #pragma GCC diagnostic default "-Wunknown-warning-option"
+	#pragma GCC diagnostic pop
 #elif defined __BORLANDC__
 	#pragma -a8
 #elif SMTG_OS_WINDOWS

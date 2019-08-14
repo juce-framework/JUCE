@@ -38,7 +38,7 @@ public:
         LinuxEventLoop::registerFdCallback (getReadHandle(),
                                             [this] (int fd)
                                             {
-                                                if (auto msg = popNextMessage (fd))
+                                                while (auto msg = popNextMessage (fd))
                                                 {
                                                     JUCE_TRY
                                                     {
@@ -77,7 +77,7 @@ public:
     }
 
     //==============================================================================
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (InternalMessageQueue)
+    JUCE_DECLARE_SINGLETON (InternalMessageQueue, false)
 
 private:
     CriticalSection lock;
@@ -124,7 +124,7 @@ public:
         const ScopedLock sl (lock);
 
         fdReadCallbacks.push_back ({ fd, std::move (cb) });
-        pfds.push_back ({ fd, POLLIN | POLLOUT, 0 });
+        pfds.push_back ({ fd, POLLIN, 0 });
     }
 
     void unregisterFdCallback (int fd)
@@ -183,7 +183,7 @@ public:
     }
 
     //==============================================================================
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (InternalRunLoop)
+    JUCE_DECLARE_SINGLETON (InternalRunLoop, false)
 
 private:
     CriticalSection lock;

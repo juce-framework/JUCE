@@ -315,6 +315,12 @@ struct OpenSLEngineHolder
     SlRef<SLEngineItf_> engine;
 };
 
+OpenSLEngineHolder& getEngineHolder()
+{
+    static OpenSLEngineHolder holder;
+    return holder;
+}
+
 //==============================================================================
 class SLRealtimeThread;
 
@@ -458,11 +464,11 @@ public:
 
             SLObjectItf obj = nullptr;
 
-            SharedResourcePointer<OpenSLEngineHolder> holder;
+            auto& holder = getEngineHolder();
 
-            if (auto e = *holder->engine)
+            if (auto e = *holder.engine)
             {
-                auto status = e->CreateAudioPlayer (holder->engine, &obj, &source, &sink, 2,
+                auto status = e->CreateAudioPlayer (holder.engine, &obj, &source, &sink, 2,
                                                     queueInterfaces, interfaceRequired);
 
                 if (status != SL_RESULT_SUCCESS || obj == nullptr || (*obj)->Realize(obj, 0) != SL_RESULT_SUCCESS)
@@ -503,11 +509,11 @@ public:
 
             SLObjectItf obj = nullptr;
 
-            SharedResourcePointer<OpenSLEngineHolder> holder;
+            auto& holder = getEngineHolder();
 
-            if (auto e = *holder->engine)
+            if (auto e = *holder.engine)
             {
-                auto status = e->CreateAudioRecorder (holder->engine, &obj, &source, &sink, 2, queueInterfaces, interfaceRequired);
+                auto status = e->CreateAudioRecorder (holder.engine, &obj, &source, &sink, 2, queueInterfaces, interfaceRequired);
 
                 if (status != SL_RESULT_SUCCESS || obj == nullptr || (*obj)->Realize (obj, 0) != SL_RESULT_SUCCESS)
                 {
@@ -556,9 +562,10 @@ public:
 
             if (outputChannels > 0)
             {
-                SharedResourcePointer<OpenSLEngineHolder> holder;
+                auto& holder = getEngineHolder();
                 SLObjectItf obj = nullptr;
-                auto err = (*holder->engine)->CreateOutputMix (holder->engine, &obj, 0, nullptr, nullptr);
+
+                auto err = (*holder.engine)->CreateOutputMix (holder.engine, &obj, 0, nullptr, nullptr);
 
                 if (err != SL_RESULT_SUCCESS || obj == nullptr || *obj == nullptr
                      || (*obj)->Realize (obj, 0) != SL_RESULT_SUCCESS)
@@ -814,7 +821,7 @@ public:
         outputLatency = (int) ((longestLatency * outputLatency) / totalLatency) & ~15;
 
         // You can only create this class if you are sure that your hardware supports OpenSL
-        jassert (engineHolder->slLibrary.getNativeHandle() != nullptr);
+        jassert (getEngineHolder().slLibrary.getNativeHandle() != nullptr);
     }
 
     ~OpenSLAudioIODevice() override
@@ -1032,8 +1039,6 @@ private:
     friend class SLRealtimeThread;
 
     //==============================================================================
-    SharedResourcePointer<OpenSLEngineHolder> engineHolder;
-
     int actualBufferSize = 0, sampleRate = 0, audioBuffersToEnqueue = 0;
     int inputLatency, outputLatency;
     bool deviceOpen = false, audioProcessingEnabled = true;

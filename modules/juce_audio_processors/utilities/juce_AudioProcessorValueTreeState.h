@@ -414,8 +414,11 @@ public:
         bool isBoolean() const override;
 
     private:
+        void valueChanged (float) override;
+
         const float unsnappedDefault;
         const bool metaParameter, automatable, discrete, boolean;
+        float lastValue = 0.0f;
     };
 
     //==============================================================================

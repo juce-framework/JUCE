@@ -100,10 +100,10 @@ namespace DirectWriteTypeLayout
                 if (currentLine >= layout->getNumLines())
                 {
                     jassert (currentLine == layout->getNumLines());
-                    auto line = new TextLayout::Line();
-                    layout->addLine (line);
-
+                    auto line = std::make_unique<TextLayout::Line>();
                     line->lineOrigin = Point<float> (baselineOriginX, baselineOriginY);
+
+                    layout->addLine (std::move (line));
                 }
             }
 

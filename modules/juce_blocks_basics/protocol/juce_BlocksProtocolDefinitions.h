@@ -471,25 +471,25 @@ static constexpr uint32 controlBlockStackSize = 800;
 /** Contains the number of bits required to encode various items in the packets */
 enum BitSizes
 {
-    topologyMessageHeader    = MessageType::bits + ProtocolVersion::bits + DeviceCount::bits + ConnectionCount::bits,
-    topologyDeviceInfo       = BlockSerialNumber::maxLength * 7 + BatteryLevel::bits + BatteryCharging::bits,
-    topologyConnectionInfo   = topologyIndexBits + ConnectorPort::bits + topologyIndexBits + ConnectorPort::bits,
+    topologyMessageHeader    = (int) MessageType::bits + (int) ProtocolVersion::bits + (int) DeviceCount::bits + (int) ConnectionCount::bits,
+    topologyDeviceInfo       = (int) BlockSerialNumber::maxLength * 7 + (int) BatteryLevel::bits + (int) BatteryCharging::bits,
+    topologyConnectionInfo   = topologyIndexBits + (int) ConnectorPort::bits + topologyIndexBits + (int) ConnectorPort::bits,
 
-    typeDeviceAndTime        = MessageType::bits + PacketTimestampOffset::bits,
+    typeDeviceAndTime        = (int) MessageType::bits + (int) PacketTimestampOffset::bits,
 
-    touchMessage             = typeDeviceAndTime + TouchIndex::bits + TouchPosition::bits,
-    touchMessageWithVelocity = touchMessage + TouchVelocity::bits,
+    touchMessage             = (int) typeDeviceAndTime + (int) TouchIndex::bits + (int) TouchPosition::bits,
+    touchMessageWithVelocity = (int) touchMessage + (int) TouchVelocity::bits,
 
-    programEventMessage      = MessageType::bits + 32 * numProgramMessageInts,
-    packetACK                = MessageType::bits + PacketCounter::bits,
+    programEventMessage      = (int) MessageType::bits + 32 * numProgramMessageInts,
+    packetACK                = (int) MessageType::bits + (int) PacketCounter::bits,
 
-    firmwareUpdateACK        = MessageType::bits + FirmwareUpdateACKCode::bits + FirmwareUpdateACKDetail::bits,
+    firmwareUpdateACK        = (int) MessageType::bits + (int) FirmwareUpdateACKCode::bits + (int) FirmwareUpdateACKDetail::bits,
 
-    controlButtonMessage     = typeDeviceAndTime + ControlButtonID::bits,
+    controlButtonMessage     = (int) typeDeviceAndTime + (int) ControlButtonID::bits,
 
-    configSetMessage         = MessageType::bits + ConfigCommand::bits + ConfigItemIndex::bits + ConfigItemValue::bits,
-    configRespMessage        = MessageType::bits + ConfigCommand::bits + ConfigItemIndex::bits + (ConfigItemValue::bits * 3),
-    configSyncEndMessage     = MessageType::bits + ConfigCommand::bits,
+    configSetMessage         = (int) MessageType::bits + (int) ConfigCommand::bits + (int) ConfigItemIndex::bits + (int) ConfigItemValue::bits,
+    configRespMessage        = (int) MessageType::bits + (int) ConfigCommand::bits + (int) ConfigItemIndex::bits + ((int) ConfigItemValue::bits * 3),
+    configSyncEndMessage     = (int) MessageType::bits + (int) ConfigCommand::bits,
 };
 
 //==============================================================================
