@@ -9,6 +9,22 @@ class ARAAudioSourceReader;
 class ARAPlaybackRegionReader;
 class ARARegionSequenceReader;
 
+//==============================================================================
+/**
+    Base class for implementing an ARA DocumentController in JUCE - refer to the 
+    ARA SDK documentation for more details. 
+
+    Your ARA plug-in must subclass ARADocumentController and declare a valid
+    ARA::PlugIn::DocumentController::doCreateDocumentController implementation
+    that returns an instance of your ARADocumentController subclass.
+
+    Any `do` functions (i.e doRestoreObjectsFromStream(), doCreateAudioSource())
+    can be overridden to implement custom document controller behavior. The 
+    `will/did` methods found in ARA::PlugIn::DocumentController have been replaced
+    by listener callbacks on our ARA model object / plug-in instance role classes. 
+
+    @tags{ARA}
+*/
 class JUCE_API  ARADocumentController  : public ARA::PlugIn::DocumentController,
                                          private juce::Timer
 {
@@ -133,6 +149,11 @@ public:
 protected:
 
     //==============================================================================
+    /**
+        Used to read persisted ARA archives - see doRestoreObjectsFromStream() for details. 
+    
+        @tags{ARA}
+    */
     class ArchiveReader     : public InputStream
     {
     public:
@@ -151,7 +172,13 @@ protected:
         size_t size;
     };
 
+
     //==============================================================================
+    /**
+        Used to write persistent ARA archives - see doStoreObjectsToStream() for details.
+
+        @tags{ARA}
+    */
     class ArchiveWriter     : public OutputStream
     {
     public:
