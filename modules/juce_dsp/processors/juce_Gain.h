@@ -110,7 +110,7 @@ public:
             gain.skip (static_cast<int> (len));
 
             if (context.usesSeparateInputAndOutputBlocks())
-                outBlock.copy (inBlock);
+                outBlock.copyFrom (inBlock);
 
             return;
         }

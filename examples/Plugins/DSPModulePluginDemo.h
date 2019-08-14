@@ -196,7 +196,7 @@ public:
             process (dsp::ProcessContextReplacing<float> (firstChan));
 
             for (size_t chan = 1; chan < block.getNumChannels(); ++chan)
-                block.getSingleChannelBlock (chan).copy (firstChan);
+                block.getSingleChannelBlock (chan).copyFrom (firstChan);
         }
     }
 

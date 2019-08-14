@@ -73,11 +73,11 @@ struct OscillatorDemoDSP
 
     void process (const ProcessContextReplacing<float>& context)
     {
-        tempBuffer.copy (context.getInputBlock());
-        tempBuffer.multiply (static_cast<float> (fileMix));
+        tempBuffer.copyFrom (context.getInputBlock());
+        tempBuffer.multiplyBy (static_cast<float> (fileMix));
 
         oscillators[currentOscillatorIdx].process (context);
-        context.getOutputBlock().multiply (static_cast<float> (1.0 - fileMix));
+        context.getOutputBlock().multiplyBy (static_cast<float> (1.0 - fileMix));
 
         context.getOutputBlock().add (tempBuffer);
 

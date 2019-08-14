@@ -98,7 +98,7 @@ struct OversamplingDummy   : public Oversampling<SampleType>::OversamplingStage
         jassert (outputBlock.getNumChannels() <= static_cast<size_t> (ParentType::buffer.getNumChannels()));
         jassert (outputBlock.getNumSamples() * ParentType::factor <= static_cast<size_t> (ParentType::buffer.getNumSamples()));
 
-        outputBlock.copy (ParentType::getProcessedSamples (outputBlock.getNumSamples()));
+        outputBlock.copyFrom (ParentType::getProcessedSamples (outputBlock.getNumSamples()));
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OversamplingDummy)

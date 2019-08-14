@@ -89,6 +89,7 @@
   #include "containers/juce_SIMDRegister_test.cpp"
  #endif
 
+ #include "containers/juce_AudioBlock_test.cpp"
  #include "frequency/juce_FFT_test.cpp"
  #include "processors/juce_FIRFilter_test.cpp"
 #endif
