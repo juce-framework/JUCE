@@ -83,13 +83,7 @@ public:
         if (connectionTime == Time())
             connectionTime = Time::getCurrentTime();
 
-        versionNumber = deviceInfo.version.asString();
-        name = deviceInfo.name.asString();
-        isMaster = deviceInfo.isMaster;
-        masterUID = deviceInfo.masterUid;
-        batteryCharging = deviceInfo.batteryCharging;
-        batteryLevel = deviceInfo.batteryLevel;
-        topologyIndex = deviceInfo.index;
+        updateDeviceInfo (deviceInfo);
 
         setProgram (nullptr);
         remoteHeap.resetDeviceStateToUnknown();
@@ -98,6 +92,17 @@ public:
             surface->activateTouchSurface();
 
         updateMidiConnectionListener();
+    }
+
+    void updateDeviceInfo (const DeviceInfo& deviceInfo)
+    {
+        versionNumber = deviceInfo.version.asString();
+        name = deviceInfo.name.asString();
+        isMaster = deviceInfo.isMaster;
+        masterUID = deviceInfo.masterUid;
+        batteryCharging = deviceInfo.batteryCharging;
+        batteryLevel = deviceInfo.batteryLevel;
+        topologyIndex = deviceInfo.index;
     }
 
     void setToMaster (bool shouldBeMaster)
@@ -504,8 +509,13 @@ public:
 
         remoteHeap.sendChanges (*this, false);
 
-        if (lastMessageSendTime < Time::getCurrentTime() - RelativeTime::milliseconds (pingIntervalMs))
+        if (lastMessageSendTime < Time::getCurrentTime() - getPingInterval())
             sendCommandMessage (BlocksProtocol::ping);
+    }
+
+    RelativeTime getPingInterval()
+    {
+        return RelativeTime::milliseconds (isMaster ? masterPingIntervalMs : dnaPingIntervalMs);
     }
 
     //==============================================================================
@@ -629,7 +639,8 @@ public:
 
     MIDIDeviceConnection* listenerToMidiConnection = nullptr;
 
-    static constexpr int pingIntervalMs = 400;
+    static constexpr int masterPingIntervalMs = 400;
+    static constexpr int dnaPingIntervalMs = 1666;
 
     static constexpr uint32 maxBlockSize = BlocksProtocol::padBlockProgramAndHeapSize;
     static constexpr uint32 maxPacketCounter = BlocksProtocol::PacketCounter::maxValue;
