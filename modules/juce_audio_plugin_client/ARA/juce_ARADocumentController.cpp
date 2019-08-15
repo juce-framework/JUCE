@@ -357,20 +357,20 @@ namespace ModelUpdateControllerProgressAdapter
         audioSource->notifyListeners ([&] (ARAAudioSource::Listener& l) { l.didUpdateAudioSourceAnalyisProgress (audioSource, state, value); });
     }
 
-    static void ARA_CALL notifyAudioSourceContentChanged (ARAModelUpdateControllerHostRef controllerHostRef, ARAAudioSourceHostRef audioSourceHostRef,
-                                                          const ARAContentTimeRange* range, ARAContentUpdateFlags flags) noexcept
+    static void ARA_CALL notifyAudioSourceContentChanged (ARAModelUpdateControllerHostRef, ARAAudioSourceHostRef,
+                                                          const ARAContentTimeRange*, ARAContentUpdateFlags) noexcept
     {
         jassert (false);    // not to be called - this adapter only forwards analysis progress
     }
 
-    static void ARA_CALL notifyAudioModificationContentChanged (ARAModelUpdateControllerHostRef controllerHostRef, ARAAudioModificationHostRef audioModificationHostRef,
-                                                                const ARAContentTimeRange* range, ARAContentUpdateFlags flags) noexcept
+    static void ARA_CALL notifyAudioModificationContentChanged (ARAModelUpdateControllerHostRef, ARAAudioModificationHostRef,
+                                                                const ARAContentTimeRange*, ARAContentUpdateFlags) noexcept
     {
         jassert (false);    // not to be called - this adapter only forwards analysis progress
     }
 
-    static void ARA_CALL notifyPlaybackRegionContentChanged (ARAModelUpdateControllerHostRef controllerHostRef, ARAPlaybackRegionHostRef playbackRegionHostRef,
-                                                             const ARAContentTimeRange* range, ARAContentUpdateFlags flags) noexcept
+    static void ARA_CALL notifyPlaybackRegionContentChanged (ARAModelUpdateControllerHostRef, ARAPlaybackRegionHostRef,
+                                                             const ARAContentTimeRange*, ARAContentUpdateFlags) noexcept
     {
         jassert (false);    // not to be called - this adapter only forwards analysis progress
     }
