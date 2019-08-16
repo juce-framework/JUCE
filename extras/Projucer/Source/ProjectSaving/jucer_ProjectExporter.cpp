@@ -396,7 +396,9 @@ void ProjectExporter::addVSTPathsIfPluginOrHost()
          || ((shouldBuildTargetType (build_tools::ProjectType::Target::VST3PlugIn) && project.shouldBuildVST3()) || project.isVST3PluginHost()))
     {
         addLegacyVSTFolderToPathIfSpecified();
-        addToExtraSearchPaths (getInternalVST3SDKPath(), 0);
+
+        if (! project.isConfigFlagEnabled ("JUCE_CUSTOM_VST3_SDK"))
+            addToExtraSearchPaths (getInternalVST3SDKPath(), 0);
     }
 }
 

@@ -466,8 +466,11 @@ private:
         {
             paths.addIfNotAlreadyThere (module->getFolder().getParentDirectory().getFullPathName());
 
-            if (module->getID() == "juce_audio_processors" && (project.isAudioPluginProject() || isVSTHost))
+            if (module->getID() == "juce_audio_processors" && ((project.isAudioPluginProject() || isVSTHost)
+                                                                && ! project.isConfigFlagEnabled ("JUCE_CUSTOM_VST3_SDK")))
+            {
                 paths.addIfNotAlreadyThere (module->getFolder().getChildFile ("format_types").getChildFile ("VST3_SDK").getFullPathName());
+            }
         }
 
         return convertSearchPathsToAbsolute (paths);

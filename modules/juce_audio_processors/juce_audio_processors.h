@@ -86,6 +86,15 @@
  #define JUCE_PLUGINHOST_LADSPA 0
 #endif
 
+/** Config: JUCE_CUSTOM_VST3_SDK
+    If enabled, the embedded VST3 SDK in JUCE will not be added to the project and instead you should
+    add the path to your custom VST3 SDK to the project's header search paths. Most users shouldn't
+    need to enable this and should just use the version of the SDK included with JUCE.
+*/
+#ifndef JUCE_CUSTOM_VST3_SDK
+ #define JUCE_CUSTOM_VST3_SDK 0
+#endif
+
 #if ! (JUCE_PLUGINHOST_AU || JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_VST3 || JUCE_PLUGINHOST_LADSPA)
 // #error "You need to set either the JUCE_PLUGINHOST_AU and/or JUCE_PLUGINHOST_VST and/or JUCE_PLUGINHOST_VST3 and/or JUCE_PLUGINHOST_LADSPA flags if you're using this module!"
 #endif
