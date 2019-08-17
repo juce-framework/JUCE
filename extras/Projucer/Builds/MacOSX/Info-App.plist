@@ -41,9 +41,9 @@
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>NSCameraUsageDescription</key>
-    <string>The Live Build engine requires access to the Camera.</string>
+    <string>Projucer requires access to the Camera.</string>
     <key>NSMicrophoneUsageDescription</key>
-    <string>The Live Build engine requires access to the Microphone.</string>
+    <string>Projucer requires access to the Microphone.</string>
     <key>CFBundleDocumentTypes</key>
     <array>
       <dict>
