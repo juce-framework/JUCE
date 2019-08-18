@@ -203,6 +203,17 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (std::vector<ARAPlaybackRegion*
 {
 }
 
+ARAPlaybackRegionReader::ARAPlaybackRegionReader (
+    AudioProcessor* audioProcessor,
+    std::vector<ARAPlaybackRegion*> const& playbackRegions,
+    bool alwaysNonRealtime, double playbackSampleRate, int channelCount, bool use64BitSamples)
+    : ARAPlaybackRegionReader (
+        playbackRegions.front()->getDocumentController<ARADocumentController>(),
+        audioProcessor, playbackRegions, alwaysNonRealtime, playbackSampleRate,
+        channelCount, use64BitSamples)
+{
+}
+
 ARAPlaybackRegionReader::~ARAPlaybackRegionReader()
 {
     invalidate();
