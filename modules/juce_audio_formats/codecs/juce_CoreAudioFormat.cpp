@@ -494,6 +494,9 @@ public:
             if (status != noErr)
                 return false;
 
+            if (numFramesToRead == 0)
+                break;
+
             if ((int) numFramesToRead < numThisTime)
             {
                 numThisTime = (int) numFramesToRead;

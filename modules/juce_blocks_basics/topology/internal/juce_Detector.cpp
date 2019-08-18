@@ -177,27 +177,41 @@ struct Detector   : public ReferenceCountedObject,
         triggerAsyncUpdate();
     }
 
-    void handleDeviceUpdated (const DeviceInfo& info)
+    void handleDevicesUpdated (const Array<DeviceInfo>& infos)
     {
-        if (containsBlockWithUID (blocksToRemove, info.uid))
-            return;
+        bool shouldTriggerUpdate { false };
 
-        const auto blockIt = std::find_if (currentTopology.blocks.begin(), currentTopology.blocks.end(),
-                                           [uid = info.uid] (Block::Ptr block) { return uid == block->uid; });
-
-        if (blockIt != currentTopology.blocks.end())
+        for (auto& info : infos)
         {
-            const Block::Ptr block { *blockIt };
+            if (containsBlockWithUID (blocksToRemove, info.uid))
+                continue;
 
-            if (auto blockImpl = BlockImpl::getFrom (block.get()))
-                blockImpl->markReconnected (info);
+            const auto blockIt = std::find_if (currentTopology.blocks.begin(), currentTopology.blocks.end(),
+                                               [uid = info.uid] (Block::Ptr block) { return uid == block->uid; });
 
-            if (! containsBlockWithUID (blocksToAdd, info.uid))
+
+            if (blockIt != currentTopology.blocks.end())
             {
-                blocksToUpdate.addIfNotAlreadyThere (block);
-                triggerAsyncUpdate();
+                const Block::Ptr block { *blockIt };
+
+                if (auto blockImpl = BlockImpl::getFrom (block.get()))
+                    blockImpl->updateDeviceInfo (info);
+
+                if (! containsBlockWithUID (blocksToAdd, info.uid))
+                {
+                    blocksToUpdate.addIfNotAlreadyThere (block);
+                    shouldTriggerUpdate = true;
+                }
             }
         }
+
+        if (shouldTriggerUpdate)
+            triggerAsyncUpdate();
+    }
+
+    void handleDeviceUpdated (const DeviceInfo& info)
+    {
+        handleDevicesUpdated ({ info });
     }
 
     void handleBatteryChargingChanged (Block::UID deviceID, const BlocksProtocol::BatteryCharging isCharging)

@@ -1,6 +1,35 @@
 JUCE breaking changes
 =====================
 
+Develop
+=======
+
+Change
+------
+The AudioBlock class has been refactored and some of the method names have
+changed. Additionally the `const` behaviour now mirrors that of `std::span`,
+with the `const`-ness of the contained data decoupled from the `const`-ness of
+the container.
+
+Possible Issues
+---------------
+Code using the old method names or violating `const`-correctness will fail to
+compile.
+
+Workaround
+----------
+You will need to update your code to use the new method names and select an
+appropriate `const`-ness for the AudioBlock and the data it references.
+
+Rationale
+---------
+The names of some of the methods in the AudioBlock class were ambiguous,
+particularly when chaining methods involving references to other blocks. The
+interaction between the `const`-ness of the AudioBlock and the `const`-ness of
+the referenced data was also ambiguous and has now been standardised to the
+same behaviour as other non-owning data views like `std::span`.
+
+
 Version 5.4.4
 =============
 

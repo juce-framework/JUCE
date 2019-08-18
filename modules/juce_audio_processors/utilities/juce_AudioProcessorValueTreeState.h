@@ -362,6 +362,10 @@ public:
     UndoManager* const undoManager;
 
     //==============================================================================
+private:
+    class ParameterAdapter;
+
+public:
     /** A parameter class that maintains backwards compatibility with deprecated
         AudioProcessorValueTreeState functionality.
 
@@ -416,9 +420,13 @@ public:
     private:
         void valueChanged (float) override;
 
+        std::function<void()> onValueChanged;
+
         const float unsnappedDefault;
         const bool metaParameter, automatable, discrete, boolean;
-        float lastValue = 0.0f;
+        float lastValue = -1.0f;
+
+        friend class AudioProcessorValueTreeState::ParameterAdapter;
     };
 
     //==============================================================================
@@ -523,8 +531,6 @@ private:
                                                                             bool, bool, bool, AudioProcessorParameter::Category, bool));
 
     //==============================================================================
-    class ParameterAdapter;
-
    #if JUCE_UNIT_TESTS
     friend struct ParameterAdapterTests;
    #endif
