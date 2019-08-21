@@ -2352,8 +2352,7 @@ public:
 
     tresult PLUGIN_API setupProcessing (Vst::ProcessSetup& newSetup) override
     {
-        if (juceVST3EditController != nullptr)
-            juceVST3EditController->inSetupProcessing = true;
+        ScopedInSetupProcessingSetter inSetupProcessingSetter (juceVST3EditController);
 
         if (canProcessSampleSize (newSetup.symbolicSampleSize) != kResultTrue)
             return kResultFalse;
@@ -2367,9 +2366,6 @@ public:
         getPluginInstance().setNonRealtime (newSetup.processMode == Vst::kOffline);
 
         preparePlugin (processSetup.sampleRate, processSetup.maxSamplesPerBlock);
-
-        if (juceVST3EditController != nullptr)
-            juceVST3EditController->inSetupProcessing = false;
 
         return kResultTrue;
     }
@@ -2521,6 +2517,26 @@ public:
     }
 
 private:
+    //==============================================================================
+    struct ScopedInSetupProcessingSetter
+    {
+        ScopedInSetupProcessingSetter (JuceVST3EditController* c)
+            : controller (c)
+        {
+            if (controller != nullptr)
+                controller->inSetupProcessing = true;
+        }
+
+        ~ScopedInSetupProcessingSetter()
+        {
+            if (controller != nullptr)
+                controller->inSetupProcessing = false;
+        }
+
+    private:
+        JuceVST3EditController* controller = nullptr;
+    };
+
     //==============================================================================
     template <typename FloatType>
     void processAudio (Vst::ProcessData& data, Array<FloatType*>& channelList)
