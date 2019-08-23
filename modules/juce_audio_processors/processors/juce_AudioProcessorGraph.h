@@ -164,6 +164,7 @@ public:
         //==============================================================================
         Connection (NodeAndChannel source, NodeAndChannel destination) noexcept;
 
+        Connection() = default;
         Connection (const Connection&) = default;
         Connection& operator= (const Connection&) = default;
 
