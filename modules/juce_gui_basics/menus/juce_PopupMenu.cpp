@@ -1589,6 +1589,7 @@ void PopupMenu::addSeparator()
 void PopupMenu::addSectionHeader (String title)
 {
     Item i (std::move (title));
+    i.itemID = 0;
     i.isSectionHeader = true;
     addItem (std::move (i));
 }
