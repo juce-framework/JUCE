@@ -43,7 +43,7 @@ PerformanceCounter::PerformanceCounter (const String& name, int runsPerPrintout,
 
 PerformanceCounter::~PerformanceCounter()
 {
-    printStatistics();
+    if (stats.numRuns) printStatistics();
 }
 
 PerformanceCounter::Statistics::Statistics() noexcept
