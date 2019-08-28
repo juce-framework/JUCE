@@ -400,13 +400,19 @@ void File::getFileTimesInternal (int64& modificationTime, int64& accessTime, int
 
     if (juce_stat (fullPath, info))
     {
+      #if JUCE_MAC || (JUCE_IOS && __DARWIN_ONLY_64_BIT_INO_T)
+        modificationTime  = (int64) info.st_mtimespec.tv_sec * 1000 + info.st_mtimespec.tv_nsec / 1000000;
+        accessTime        = (int64) info.st_atimespec.tv_sec * 1000 + info.st_atimespec.tv_nsec / 1000000;
+        creationTime      = (int64) info.st_birthtimespec.tv_sec * 1000 + info.st_birthtimespec.tv_nsec / 1000000;
+      #else
         modificationTime  = (int64) info.st_mtime * 1000;
         accessTime        = (int64) info.st_atime * 1000;
-       #if JUCE_MAC || JUCE_IOS
+       #if JUCE_IOS
         creationTime      = (int64) info.st_birthtime * 1000;
        #else
         creationTime      = (int64) info.st_ctime * 1000;
        #endif
+      #endif
     }
 }
 
@@ -416,11 +422,26 @@ bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64
 
     if ((modificationTime != 0 || accessTime != 0) && juce_stat (fullPath, info))
     {
+       #if JUCE_MAC || (JUCE_IOS && __DARWIN_ONLY_64_BIT_INO_T)
+        struct timeval times[2];
+
+        bool setModificationTime = (modificationTime != 0);
+        bool setAccessTime       = (accessTime != 0);
+
+        times[0].tv_sec  = setAccessTime ? accessTime / 1000          : info.st_atimespec.tv_sec;
+        times[0].tv_usec = setAccessTime ? (accessTime % 1000) * 1000 : (int) info.st_atimespec.tv_nsec / 1000;
+
+        times[1].tv_sec  = setModificationTime ? modificationTime / 1000          : info.st_mtimespec.tv_sec;
+        times[1].tv_usec = setModificationTime ? (modificationTime % 1000) * 1000 : (int) info.st_mtimespec.tv_nsec / 1000;
+
+        return utimes (fullPath.toUTF8(), times) == 0;
+       #else
         struct utimbuf times;
         times.actime  = accessTime != 0       ? static_cast<time_t> (accessTime / 1000)       : static_cast<time_t> (info.st_atime);
         times.modtime = modificationTime != 0 ? static_cast<time_t> (modificationTime / 1000) : static_cast<time_t> (info.st_mtime);
 
         return utime (fullPath.toUTF8(), &times) == 0;
+       #endif
     }
 
     return false;
