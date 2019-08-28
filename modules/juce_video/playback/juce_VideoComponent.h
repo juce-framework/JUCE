@@ -179,6 +179,9 @@ private:
     void resized() override;
     void timerCallback() override;
 
+    template<class FileOrURL>
+    Result loadInternal (const FileOrURL&, bool);
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VideoComponent)
 };
 
