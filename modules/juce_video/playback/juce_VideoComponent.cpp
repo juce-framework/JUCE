@@ -142,10 +142,10 @@ void VideoComponent::timerCallback()
 }
 
 template<class FileOrURL>
-Result VideoComponent::loadInternal (const FileOrURL& fileOrUrl, bool async)
+Result VideoComponent::loadInternal (const FileOrURL& fileOrUrl, bool loadAsync)
 {
    #if JUCE_ANDROID || JUCE_IOS
-    ignoreUnused (fileOrUrl, async);
+    ignoreUnused (fileOrUrl, loadAsync);
 
     // You need to use loadAsync on Android & iOS.
     jassertfalse;
@@ -153,7 +153,9 @@ Result VideoComponent::loadInternal (const FileOrURL& fileOrUrl, bool async)
    #else
     auto result = pimpl->load (fileOrUrl);
 
-    if (! async)
+    if (loadAsync)
+        startTimer (50);
+    else
        resized();
 
     return result;
