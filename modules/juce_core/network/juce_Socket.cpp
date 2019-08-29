@@ -33,19 +33,19 @@ namespace juce
 #endif
 
 #if JUCE_WINDOWS
- typedef int       juce_socklen_t;
- typedef int       juce_recvsend_size_t;
- typedef SOCKET    SocketHandle;
+ using juce_socklen_t       = int;
+ using juce_recvsend_size_t = int;
+ using SocketHandle         = SOCKET;
  static const SocketHandle invalidSocket = INVALID_SOCKET;
 #elif JUCE_ANDROID
- typedef socklen_t juce_socklen_t;
- typedef size_t    juce_recvsend_size_t;
- typedef int       SocketHandle;
+ using juce_socklen_t       = socklen_t;
+ using juce_recvsend_size_t = size_t;
+ using SocketHandle         = int;
  static const SocketHandle invalidSocket = -1;
 #else
- typedef socklen_t juce_socklen_t;
- typedef socklen_t juce_recvsend_size_t;
- typedef int       SocketHandle;
+ using juce_socklen_t       = socklen_t;
+ using juce_recvsend_size_t = socklen_t;
+ using SocketHandle         = int;
  static const SocketHandle invalidSocket = -1;
 #endif
 
@@ -186,6 +186,33 @@ namespace SocketHelpers
         return "0.0.0.0";
     }
 
+    static bool setSocketBlockingState (SocketHandle handle, bool shouldBlock) noexcept
+    {
+       #if JUCE_WINDOWS
+        u_long nonBlocking = shouldBlock ? 0 : (u_long) 1;
+        return ioctlsocket (handle, FIONBIO, &nonBlocking) == 0;
+       #else
+        int socketFlags = fcntl (handle, F_GETFL, 0);
+
+        if (socketFlags == -1)
+            return false;
+
+        if (shouldBlock)
+            socketFlags &= ~O_NONBLOCK;
+        else
+            socketFlags |= O_NONBLOCK;
+
+        return fcntl (handle, F_SETFL, socketFlags) == 0;
+       #endif
+    }
+
+   #if ! JUCE_WINDOWS
+    static bool getSocketBlockingState (SocketHandle handle)
+    {
+        return (fcntl (handle, F_GETFL, 0) & O_NONBLOCK) == 0;
+    }
+   #endif
+
     static int readSocket (SocketHandle handle,
                            void* destBuffer, int maxBytesToRead,
                            std::atomic<bool>& connected,
@@ -194,6 +221,11 @@ namespace SocketHelpers
                            String* senderIP = nullptr,
                            int* senderPort = nullptr) noexcept
     {
+       #if ! JUCE_WINDOWS
+        if (blockUntilSpecifiedAmountHasArrived != getSocketBlockingState (handle))
+       #endif
+            setSocketBlockingState (handle, blockUntilSpecifiedAmountHasArrived);
+
         int bytesRead = 0;
 
         while (bytesRead < maxBytesToRead)
@@ -310,26 +342,6 @@ namespace SocketHelpers
         }
 
         return FD_ISSET (h, forReading ? &rset : &wset) ? 1 : 0;
-    }
-
-    static bool setSocketBlockingState (SocketHandle handle, bool shouldBlock) noexcept
-    {
-       #if JUCE_WINDOWS
-        u_long nonBlocking = shouldBlock ? 0 : (u_long) 1;
-        return ioctlsocket (handle, FIONBIO, &nonBlocking) == 0;
-       #else
-        int socketFlags = fcntl (handle, F_GETFL, 0);
-
-        if (socketFlags == -1)
-            return false;
-
-        if (shouldBlock)
-            socketFlags &= ~O_NONBLOCK;
-        else
-            socketFlags |= O_NONBLOCK;
-
-        return fcntl (handle, F_SETFL, socketFlags) == 0;
-       #endif
     }
 
     static addrinfo* getAddressInfo (bool isDatagram, const String& hostName, int portNumber)
@@ -688,8 +700,6 @@ int DatagramSocket::read (void* destBuffer, int maxBytesToRead, bool shouldBlock
         return -1;
 
     std::atomic<bool> connected { true };
-
-    SocketHelpers::setSocketBlockingState (handle, shouldBlock);
     return SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead,
                                       connected, shouldBlock, readLock);
 }
@@ -700,8 +710,6 @@ int DatagramSocket::read (void* destBuffer, int maxBytesToRead, bool shouldBlock
         return -1;
 
     std::atomic<bool> connected { true };
-
-    SocketHelpers::setSocketBlockingState (handle, shouldBlock);
     return SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead, connected,
                                       shouldBlock, readLock, &senderIPAddress, &senderPort);
 }
