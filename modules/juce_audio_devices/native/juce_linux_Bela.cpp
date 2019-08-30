@@ -56,7 +56,7 @@ public:
 
     void poll()
     {
-        int receivedBytes = 0;
+        size_t receivedBytes = 0;
 
         for (;;)
         {
@@ -70,7 +70,7 @@ public:
 
             if (receivedBytes == buffer.size())
             {
-                pushMidiData (receivedBytes);
+                pushMidiData (static_cast<int> (receivedBytes));
                 receivedBytes = 0;
             }
         }
@@ -144,7 +144,7 @@ private:
 
             auto subCount = snd_rawmidi_info_get_subdevices_count (info);
 
-            for (int sub = 0; sub < subCount; ++sub)
+            for (size_t sub = 0; sub < subCount; ++sub)
             {
                 snd_rawmidi_info_set_subdevice (info, sub);
 
@@ -161,8 +161,8 @@ private:
         snd_ctl_close (ctl);
     }
 
-    String midiPort;
     MidiInput* const midiInput;
+    String midiPort;
     MidiInputCallback* const midiCallback;
 
     Midi midi;
@@ -417,7 +417,7 @@ private:
             }
 
             for (int i = 0; i < actualNumberOfOutputs; ++i)
-                channelOutBuffer[i] = ((interleaved && context.audioOutChannels > 1) || i >= context.audioOutChannels ? audioOutBuffer.getWritePointer (i)
+                channelOutBuffer[i] = ((interleaved && context.audioOutChannels > 1) || static_cast<uint32_t> (i) >= context.audioOutChannels ? audioOutBuffer.getWritePointer (i)
                                                                                                                       : context.audioOut + (i * numSamples));
 
             callback->audioDeviceIOCallback (channelInBuffer.getData(), actualNumberOfInputs,
