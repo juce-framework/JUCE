@@ -920,10 +920,10 @@ struct Grid::BoxAlignment
 
         if (item.width     != (float) GridItem::notAssigned)  r.setWidth  (item.width);
         if (item.height    != (float) GridItem::notAssigned)  r.setHeight (item.height);
-        if (item.maxWidth  != GridItem::notAssigned)          r.setWidth  (jmin (item.maxWidth,  r.getWidth()));
-        if (item.minWidth  != GridItem::notAssigned)          r.setWidth  (jmax (item.minWidth,  r.getWidth()));
-        if (item.maxHeight != GridItem::notAssigned)          r.setHeight (jmin (item.maxHeight, r.getHeight()));
-        if (item.minHeight != GridItem::notAssigned)          r.setHeight (jmax (item.minHeight, r.getHeight()));
+        if (item.maxWidth  != (float) GridItem::notAssigned)  r.setWidth  (jmin (item.maxWidth,  r.getWidth()));
+        if (item.minWidth  > 0.0f)                            r.setWidth  (jmax (item.minWidth,  r.getWidth()));
+        if (item.maxHeight != (float) GridItem::notAssigned)  r.setHeight (jmin (item.maxHeight, r.getHeight()));
+        if (item.minHeight > 0.0f)                            r.setHeight (jmax (item.minHeight, r.getHeight()));
 
         if (alignType == Grid::AlignItems::start && justifyType == Grid::JustifyItems::start)
             return r;
