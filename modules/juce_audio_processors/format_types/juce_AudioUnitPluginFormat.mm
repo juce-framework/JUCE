@@ -1213,8 +1213,11 @@ public:
         if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_FactoryPresets,
                                   kAudioUnitScope_Global, 0, &presets, &sz) == noErr)
         {
-            num = (int) CFArrayGetCount (presets);
-            CFRelease (presets);
+            if (presets != nullptr)
+            {
+                num = (int) CFArrayGetCount (presets);
+                CFRelease (presets);
+            }
         }
 
         return num;
