@@ -6,6 +6,29 @@ Develop
 
 Change
 ------
+The JUCEApplicationBase::backButtonPressed() method now returns a bool to
+indicate whether the back event was handled or not.
+
+Possible Issues
+---------------
+Applications which override this method will fail to compile.
+
+Workaround
+----------
+You will need to update your code to return a bool indicating whether the back
+event was handled or not.
+
+Rationale
+---------
+The back button behaviour on Android was previously broken as it would not do
+anything. The new code will correctly call finish() on the Activity when the
+back button is pressed but this method now allows the user to override this to
+implement their own custom navigation behaviour by returning true to indicate
+that it has been handled.
+
+
+Change
+------
 The AudioBlock class has been refactored and some of the method names have
 changed. Additionally the `const` behaviour now mirrors that of `std::span`,
 with the `const`-ness of the contained data decoupled from the `const`-ness of
