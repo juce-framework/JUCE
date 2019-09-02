@@ -89,7 +89,6 @@ public:
 
     /** Returns the value of a named item.
         If the name isn't found, this will return a void variant.
-        @see getProperty
     */
     const var& operator[] (const Identifier& name) const noexcept;
 
