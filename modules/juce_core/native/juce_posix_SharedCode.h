@@ -428,11 +428,17 @@ bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64
         bool setModificationTime = (modificationTime != 0);
         bool setAccessTime       = (accessTime != 0);
 
-        times[0].tv_sec  = setAccessTime ? accessTime / 1000          : info.st_atimespec.tv_sec;
-        times[0].tv_usec = setAccessTime ? (accessTime % 1000) * 1000 : (int) info.st_atimespec.tv_nsec / 1000;
+        times[0].tv_sec  = setAccessTime ? static_cast<__darwin_time_t> (accessTime / 1000)
+                                         : info.st_atimespec.tv_sec;
 
-        times[1].tv_sec  = setModificationTime ? modificationTime / 1000          : info.st_mtimespec.tv_sec;
-        times[1].tv_usec = setModificationTime ? (modificationTime % 1000) * 1000 : (int) info.st_mtimespec.tv_nsec / 1000;
+        times[0].tv_usec = setAccessTime ? static_cast<__darwin_suseconds_t> ((accessTime % 1000) * 1000)
+                                         : static_cast<__darwin_suseconds_t> (info.st_atimespec.tv_nsec / 1000);
+
+        times[1].tv_sec  = setModificationTime ? static_cast<__darwin_time_t> (modificationTime / 1000)
+                                               : info.st_mtimespec.tv_sec;
+
+        times[1].tv_usec = setModificationTime ? static_cast<__darwin_suseconds_t> ((modificationTime % 1000) * 1000)
+                                               : static_cast<__darwin_suseconds_t> (info.st_mtimespec.tv_nsec / 1000);
 
         return utimes (fullPath.toUTF8(), times) == 0;
        #else
