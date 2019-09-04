@@ -1661,7 +1661,7 @@ public:
                 if (XSHMHelpers::isShmAvailable (display))
                 {
                     ScopedXLock xlock (display);
-                    if (event.xany.type == XShmGetEventBase (display))
+                    if (event.xany.type == shmCompletionEvent)
                         repainter->notifyPaintCompleted();
                 }
                #endif
@@ -2270,6 +2270,15 @@ private:
         {
            #if JUCE_USE_XSHM
             if (shmPaintsPending != 0)
+            {
+                ScopedXLock xlock (display);
+
+                XEvent evt;
+                while (XCheckTypedWindowEvent (display, peer.windowH, peer.shmCompletionEvent, &evt))
+                    --shmPaintsPending;
+            }
+
+            if (shmPaintsPending != 0)
                 return;
            #endif
 
@@ -2398,6 +2407,10 @@ private:
     Array<Component*> glRepaintListeners;
     enum { KeyPressEventType = 2 };
     static ::Display* display;
+
+   #if JUCE_USE_XSHM
+    int shmCompletionEvent = 0;
+   #endif
 
     struct MotifWmHints
     {
@@ -2728,6 +2741,11 @@ private:
 
         initialisePointerMap();
         updateModifierMappings();
+
+       #if JUCE_USE_XSHM
+        if (XSHMHelpers::isShmAvailable (display))
+            shmCompletionEvent = XShmGetEventBase (display) + ShmCompletion;
+       #endif
     }
 
     void destroyWindow()

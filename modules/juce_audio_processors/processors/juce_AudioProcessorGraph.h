@@ -162,6 +162,7 @@ public:
     struct JUCE_API  Connection
     {
         //==============================================================================
+        Connection() = default;
         Connection (NodeAndChannel source, NodeAndChannel destination) noexcept;
 
         Connection (const Connection&) = default;
@@ -173,10 +174,10 @@ public:
 
         //==============================================================================
         /** The channel and node which is the input source for this connection. */
-        NodeAndChannel source;
+        NodeAndChannel source { {}, 0 };
 
         /** The channel and node which is the input source for this connection. */
-        NodeAndChannel destination;
+        NodeAndChannel destination { {}, 0 };
     };
 
     //==============================================================================

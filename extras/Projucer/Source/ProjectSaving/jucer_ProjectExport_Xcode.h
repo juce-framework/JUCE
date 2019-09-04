@@ -1248,8 +1248,10 @@ public:
             if (config.isFastMathEnabled())
                 s.set ("GCC_FAST_MATH", "YES");
 
-            auto flags = (owner.replacePreprocessorTokens (config, owner.getExtraCompilerFlagsString())
-                          + " " + config.getRecommendedCompilerWarningFlags().joinIntoString (" ")).trim();
+
+            auto flags = (config.getRecommendedCompilerWarningFlags().joinIntoString (" ")
+                             + " " + owner.getExtraCompilerFlagsString()).trim();
+            flags = owner.replacePreprocessorTokens (config, flags);
 
             if (flags.isNotEmpty())
                 s.set ("OTHER_CPLUSPLUSFLAGS", flags.quoted());
@@ -1481,7 +1483,6 @@ public:
                     }
                 }
 
-                flags.add (owner.replacePreprocessorTokens (config, owner.getExtraLinkerFlagsString()));
                 flags.add (owner.getExternalLibraryFlags (config));
 
                 auto libs = owner.xcodeLibs;
@@ -1491,6 +1492,7 @@ public:
                     flags.add (getLinkerFlagForLib (l));
             }
 
+            flags.add (owner.replacePreprocessorTokens (config, owner.getExtraLinkerFlagsString()));
             flags = getCleanedStringArray (flags);
         }
 

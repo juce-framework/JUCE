@@ -288,6 +288,40 @@ struct BufferHelpers<float>
     }
 };
 
+//==============================================================================
+using CreateEngineFunc = SLresult (*) (SLObjectItf*, SLuint32, const SLEngineOption*,
+                                       SLuint32, const SLInterfaceID*, const SLboolean*);
+
+struct OpenSLEngineHolder
+{
+    OpenSLEngineHolder()
+    {
+        if (auto createEngine = (CreateEngineFunc) slLibrary.getFunction ("slCreateEngine"))
+        {
+            SLObjectItf obj = nullptr;
+            auto err = createEngine (&obj, 0, nullptr, 0, nullptr, nullptr);
+
+            if (err != SL_RESULT_SUCCESS || obj == nullptr || *obj == nullptr
+                || (*obj)->Realize (obj, 0) != SL_RESULT_SUCCESS)
+            {
+                destroyObject (obj);
+            }
+
+            engine = SlRef<SLEngineItf_>::cast (SlObjectRef (obj));
+        }
+    }
+
+    DynamicLibrary slLibrary { "libOpenSLES.so" };
+    SlRef<SLEngineItf_> engine;
+};
+
+OpenSLEngineHolder& getEngineHolder()
+{
+    static OpenSLEngineHolder holder;
+    return holder;
+}
+
+//==============================================================================
 class SLRealtimeThread;
 
 //==============================================================================
@@ -430,9 +464,11 @@ public:
 
             SLObjectItf obj = nullptr;
 
-            if (auto e = *Base::owner.engine)
+            auto& holder = getEngineHolder();
+
+            if (auto e = *holder.engine)
             {
-                auto status = e->CreateAudioPlayer (Base::owner.engine, &obj, &source, &sink, 2,
+                auto status = e->CreateAudioPlayer (holder.engine, &obj, &source, &sink, 2,
                                                     queueInterfaces, interfaceRequired);
 
                 if (status != SL_RESULT_SUCCESS || obj == nullptr || (*obj)->Realize(obj, 0) != SL_RESULT_SUCCESS)
@@ -473,9 +509,11 @@ public:
 
             SLObjectItf obj = nullptr;
 
-            if (auto e = *Base::owner.engine)
+            auto& holder = getEngineHolder();
+
+            if (auto e = *holder.engine)
             {
-                auto status = e->CreateAudioRecorder (Base::owner.engine, &obj, &source, &sink, 2, queueInterfaces, interfaceRequired);
+                auto status = e->CreateAudioRecorder (holder.engine, &obj, &source, &sink, 2, queueInterfaces, interfaceRequired);
 
                 if (status != SL_RESULT_SUCCESS || obj == nullptr || (*obj)->Realize (obj, 0) != SL_RESULT_SUCCESS)
                 {
@@ -514,8 +552,7 @@ public:
     class OpenSLSession
     {
     public:
-        OpenSLSession (DynamicLibrary& slLibraryToUse,
-                       int numInputChannels, int numOutputChannels,
+        OpenSLSession (int numInputChannels, int numOutputChannels,
                        double samleRateToUse, int bufferSizeToUse,
                        int numBuffersToUse)
             : inputChannels (numInputChannels), outputChannels (numOutputChannels),
@@ -523,25 +560,12 @@ public:
         {
             jassert (numInputChannels > 0 || numOutputChannels > 0);
 
-            if (auto createEngine = (CreateEngineFunc) slLibraryToUse.getFunction ("slCreateEngine"))
-            {
-                SLObjectItf obj = nullptr;
-                auto err = createEngine (&obj, 0, nullptr, 0, nullptr, nullptr);
-
-                if (err != SL_RESULT_SUCCESS || obj == nullptr || *obj == nullptr
-                     || (*obj)->Realize (obj, 0) != SL_RESULT_SUCCESS)
-                {
-                    destroyObject (obj);
-                    return;
-                }
-
-                engine = SlRef<SLEngineItf_>::cast (SlObjectRef (obj));
-            }
-
             if (outputChannels > 0)
             {
+                auto& holder = getEngineHolder();
                 SLObjectItf obj = nullptr;
-                auto err = (*engine)->CreateOutputMix (engine, &obj, 0, nullptr, nullptr);
+
+                auto err = (*holder.engine)->CreateOutputMix (holder.engine, &obj, 0, nullptr, nullptr);
 
                 if (err != SL_RESULT_SUCCESS || obj == nullptr || *obj == nullptr
                      || (*obj)->Realize (obj, 0) != SL_RESULT_SUCCESS)
@@ -556,7 +580,7 @@ public:
 
         virtual ~OpenSLSession() {}
 
-        virtual bool openedOK() const    { return (engine != nullptr && (outputChannels == 0 || (outputMix != nullptr))); }
+        virtual bool openedOK() const    { return (outputChannels == 0 || outputMix != nullptr); }
         virtual void start()             { stop(); jassert (callback.get() != nullptr); running = true; }
         virtual void stop()              { running = false; }
 
@@ -604,14 +628,9 @@ public:
             }
         }
 
-        static OpenSLSession* create (DynamicLibrary& slLibrary,
-                                      int numInputChannels, int numOutputChannels,
+        static OpenSLSession* create (int numInputChannels, int numOutputChannels,
                                       double samleRateToUse, int bufferSizeToUse,
                                       int numBuffersToUse);
-
-        //==============================================================================
-        using CreateEngineFunc = SLresult (*) (SLObjectItf*, SLuint32, const SLEngineOption*,
-                                               SLuint32, const SLInterfaceID*, const SLboolean*);
 
         //==============================================================================
         int inputChannels, outputChannels;
@@ -619,7 +638,6 @@ public:
         int bufferSize, numBuffers;
         bool running = false, audioProcessingEnabled = true;
 
-        SlRef<SLEngineItf_> engine;
         SlRef<SLOutputMixItf_> outputMix;
 
         Atomic<AudioIODeviceCallback*> callback { nullptr };
@@ -629,11 +647,10 @@ public:
     class OpenSLSessionT : public OpenSLSession
     {
     public:
-        OpenSLSessionT (DynamicLibrary& slLibraryToUse,
-                        int numInputChannels, int numOutputChannels,
+        OpenSLSessionT (int numInputChannels, int numOutputChannels,
                         double samleRateToUse, int bufferSizeToUse,
                         int numBuffersToUse)
-            : OpenSLSession (slLibraryToUse, numInputChannels, numOutputChannels,
+            : OpenSLSession (numInputChannels, numOutputChannels,
                              samleRateToUse, bufferSizeToUse, numBuffersToUse)
         {
             jassert (numInputChannels > 0 || numOutputChannels > 0);
@@ -803,11 +820,8 @@ public:
         inputLatency  = (int) ((longestLatency * inputLatency)  / totalLatency) & ~15;
         outputLatency = (int) ((longestLatency * outputLatency) / totalLatency) & ~15;
 
-        bool success = slLibrary.open ("libOpenSLES.so");
-
         // You can only create this class if you are sure that your hardware supports OpenSL
-        jassert (success);
-        ignoreUnused (success);
+        jassert (getEngineHolder().slLibrary.getNativeHandle() != nullptr);
     }
 
     ~OpenSLAudioIODevice() override
@@ -899,7 +913,7 @@ public:
             lastError = "Error opening OpenSL input device: the app was not granted android.permission.RECORD_AUDIO";
         }
 
-        session.reset (OpenSLSession::create (slLibrary, numInputChannels, numOutputChannels,
+        session.reset (OpenSLSession::create (numInputChannels, numOutputChannels,
                                               sampleRate, actualBufferSize, audioBuffersToEnqueue));
         if (session != nullptr)
         {
@@ -913,7 +927,7 @@ public:
                 activeInputChans = BigInteger(0);
                 numInputChannels = 0;
 
-                session.reset (OpenSLSession::create (slLibrary, numInputChannels, numOutputChannels,
+                session.reset (OpenSLSession::create (numInputChannels, numOutputChannels,
                                                       sampleRate, actualBufferSize, audioBuffersToEnqueue));
             }
         }
@@ -1025,7 +1039,6 @@ private:
     friend class SLRealtimeThread;
 
     //==============================================================================
-    DynamicLibrary slLibrary;
     int actualBufferSize = 0, sampleRate = 0, audioBuffersToEnqueue = 0;
     int inputLatency, outputLatency;
     bool deviceOpen = false, audioProcessingEnabled = true;
@@ -1123,8 +1136,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenSLAudioIODevice)
 };
 
-OpenSLAudioIODevice::OpenSLSession* OpenSLAudioIODevice::OpenSLSession::create (DynamicLibrary& slLibrary,
-                                                                                int numInputChannels, int numOutputChannels,
+OpenSLAudioIODevice::OpenSLSession* OpenSLAudioIODevice::OpenSLSession::create (int numInputChannels, int numOutputChannels,
                                                                                 double samleRateToUse, int bufferSizeToUse,
                                                                                 int numBuffersToUse)
 {
@@ -1134,7 +1146,7 @@ OpenSLAudioIODevice::OpenSLSession* OpenSLAudioIODevice::OpenSLSession::create (
     // SDK versions 21 and higher should natively support floating point...
     if (sdkVersion >= 21)
     {
-        retval.reset (new OpenSLSessionT<float> (slLibrary, numInputChannels, numOutputChannels, samleRateToUse,
+        retval.reset (new OpenSLSessionT<float> (numInputChannels, numOutputChannels, samleRateToUse,
                                                  bufferSizeToUse, numBuffersToUse));
 
         // ...however, some devices lie so re-try without floating point
@@ -1144,7 +1156,7 @@ OpenSLAudioIODevice::OpenSLSession* OpenSLAudioIODevice::OpenSLSession::create (
 
     if (retval == nullptr)
     {
-        retval.reset (new OpenSLSessionT<int16> (slLibrary, numInputChannels, numOutputChannels, samleRateToUse,
+        retval.reset (new OpenSLSessionT<int16> (numInputChannels, numOutputChannels, samleRateToUse,
                                                  bufferSizeToUse, numBuffersToUse));
 
         if (retval != nullptr && (! retval->openedOK()))
@@ -1186,9 +1198,6 @@ public:
         return library.open ("libOpenSLES.so");
     }
 
-private:
-
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenSLAudioDeviceType)
 };
 
@@ -1211,7 +1220,7 @@ public:
 
     SLRealtimeThread()
     {
-        if (auto createEngine = (OpenSLAudioIODevice::OpenSLSession::CreateEngineFunc) slLibrary.getFunction ("slCreateEngine"))
+        if (auto createEngine = (CreateEngineFunc) slLibrary.getFunction ("slCreateEngine"))
         {
             SLObjectItf obj = nullptr;
             auto err = createEngine (&obj, 0, nullptr, 0, nullptr, nullptr);

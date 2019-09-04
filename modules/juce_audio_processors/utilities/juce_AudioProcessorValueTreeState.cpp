@@ -65,6 +65,17 @@ bool AudioProcessorValueTreeState::Parameter::isAutomatable() const     { return
 bool AudioProcessorValueTreeState::Parameter::isDiscrete() const        { return discrete; }
 bool AudioProcessorValueTreeState::Parameter::isBoolean() const         { return boolean; }
 
+void AudioProcessorValueTreeState::Parameter::valueChanged (float newValue)
+{
+    if (lastValue == newValue)
+        return;
+
+    lastValue = newValue;
+
+    if (onValueChanged != nullptr)
+        onValueChanged();
+}
+
 //==============================================================================
 class AudioProcessorValueTreeState::ParameterAdapter   : private AudioProcessorParameter::Listener
 {
@@ -78,6 +89,9 @@ public:
           unnormalisedValue (getRange().convertFrom0to1 (parameter.getDefaultValue()))
     {
         parameter.addListener (this);
+
+        if (auto* ptr = dynamic_cast<Parameter*> (&parameter))
+            ptr->onValueChanged = [this] { parameterValueChanged ({}, {}); };
     }
 
     ~ParameterAdapter() override        { parameter.removeListener (this); }

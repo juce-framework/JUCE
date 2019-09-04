@@ -326,13 +326,13 @@ public:
             The coordinate you provide here isn't checked, so it's the caller's responsibility to make
             sure it's not out-of-range.
         */
-        inline uint8* getLinePointer (int y) const noexcept                 { return data + y * lineStride; }
+        inline uint8* getLinePointer (int y) const noexcept                 { return data + (size_t) y * (size_t) lineStride; }
 
         /** Returns a pointer to a pixel in the image.
             The coordinates you give here are not checked, so it's the caller's responsibility to make sure they're
             not out-of-range.
         */
-        inline uint8* getPixelPointer (int x, int y) const noexcept         { return data + y * lineStride + x * pixelStride; }
+        inline uint8* getPixelPointer (int x, int y) const noexcept         { return data + (size_t) y * (size_t) lineStride + (size_t) x * (size_t) pixelStride; }
 
         /** Returns the colour of a given pixel.
             For performance reasons, this won't do any bounds-checking on the coordinates, so it's the caller's

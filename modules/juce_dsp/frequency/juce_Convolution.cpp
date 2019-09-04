@@ -768,7 +768,7 @@ struct Convolution::Pimpl  : private Thread
         }
 
         if (input.getNumChannels() > 1 && currentInfo.wantsStereo == false)
-            output.getSingleChannelBlock (1).copy (output.getSingleChannelBlock (0));
+            output.getSingleChannelBlock (1).copyFrom (output.getSingleChannelBlock (0));
     }
 
     //==============================================================================
@@ -1212,7 +1212,7 @@ void Convolution::processSamples (const AudioBlock<const float>& input, AudioBlo
 
     if (volumeDry[0].isSmoothing())
     {
-        dry.copy (input);
+        dry.copyFrom (input);
 
         for (size_t channel = 0; channel < numChannels; ++channel)
             volumeDry[channel].applyGain (dry.getChannelPointer (channel), (int) numSamples);

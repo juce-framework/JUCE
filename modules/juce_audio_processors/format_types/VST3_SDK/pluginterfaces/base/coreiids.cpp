@@ -14,13 +14,17 @@
 //------------------------------------------------------------------------
 
 #include "pluginterfaces/base/funknown.h"
-#include "pluginterfaces/base/iupdatehandler.h"
-#include "pluginterfaces/base/icloneable.h"
 #include "pluginterfaces/base/ibstream.h"
+#include "pluginterfaces/base/icloneable.h"
+#include "pluginterfaces/base/ipluginbase.h"
+#include "pluginterfaces/base/iupdatehandler.h"
 
 //------------------------------------------------------------------------
 namespace Steinberg {
-
+DEF_CLASS_IID (IPluginBase)
+DEF_CLASS_IID (IPluginFactory)
+DEF_CLASS_IID (IPluginFactory2)
+DEF_CLASS_IID (IPluginFactory3)
 
 DEF_CLASS_IID (FUnknown)
 

@@ -3,6 +3,16 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 5.4.4
+  - Improvements to floating point number printing
+  - Faster plug-in parameter indexing
+  - Added support for persisting attachements to MIDI devices
+  - Refactored Linux event loop handling
+  - Multiple C++ modernisation improvements to the API
+  - Added support for macOS 10.15 and iOS 13
+  - Added support for Visual Studio 2019
+  - Removed support for Visual Studio 2013
+
 Version 5.4.3
   - Added a Visual Studio 2019 exporter to the Projucer
   - Added options to configure macOS Hardened Runtime in the Projucer

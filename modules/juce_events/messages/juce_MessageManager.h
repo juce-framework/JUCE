@@ -94,8 +94,12 @@ public:
    #endif
 
     //==============================================================================
-    /** Asynchronously invokes a function or C++11 lambda on the message thread. */
-    static void callAsync (std::function<void()> functionToCall);
+    /** Asynchronously invokes a function or C++11 lambda on the message thread.
+
+        @returns  true if the message was successfully posted to the message queue,
+                  or false otherwise.
+    */
+    static bool callAsync (std::function<void()> functionToCall);
 
     /** Calls a function using the message-thread.
 

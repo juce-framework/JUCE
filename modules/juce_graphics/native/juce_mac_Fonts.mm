@@ -41,7 +41,7 @@ namespace CoreTextTypeLayout
         if (! availableStyles.contains (style))
         {
             if (font.isItalic())  // Fake-up an italic font if there isn't a real one.
-                requiredTransform = CGAffineTransformMake (1.0f, 0, 0.25f, 1.0f, 0, 0);
+                requiredTransform = CGAffineTransformMake (1.0f, 0, 0.1f, 1.0f, 0, 0);
 
             return availableStyles[0];
         }
@@ -387,19 +387,18 @@ namespace CoreTextTypeLayout
             auto numRuns = CFArrayGetCount (runs);
 
             auto cfrlineStringRange = CTLineGetStringRange (line);
-            auto lineStringEnd = cfrlineStringRange.location + cfrlineStringRange.length - 1;
+            auto lineStringEnd = cfrlineStringRange.location + cfrlineStringRange.length;
             Range<int> lineStringRange ((int) cfrlineStringRange.location, (int) lineStringEnd);
 
             LineInfo lineInfo (frame, line, i);
 
-            auto glyphLine = new TextLayout::Line (lineStringRange,
-                                                   Point<float> ((float) lineInfo.origin.x,
-                                                                 (float) (boundsHeight - lineInfo.origin.y)),
-                                                   (float) lineInfo.ascent,
-                                                   (float) lineInfo.descent,
-                                                   (float) lineInfo.leading,
-                                                   (int) numRuns);
-            glyphLayout.addLine (glyphLine);
+            auto glyphLine = std::make_unique<TextLayout::Line> (lineStringRange,
+                                                                 Point<float> ((float) lineInfo.origin.x,
+                                                                               (float) (boundsHeight - lineInfo.origin.y)),
+                                                                 (float) lineInfo.ascent,
+                                                                 (float) lineInfo.descent,
+                                                                 (float) lineInfo.leading,
+                                                                 (int) numRuns);
 
             for (CFIndex j = 0; j < numRuns; ++j)
             {
@@ -457,6 +456,8 @@ namespace CoreTextTypeLayout
                                                                                              (float) positions.points[k].y),
                                                              (float) advances.advances[k].width));
             }
+
+            glyphLayout.addLine (std::move (glyphLine));
         }
 
         CFRelease (frame);

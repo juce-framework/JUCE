@@ -23,12 +23,12 @@ namespace Steinberg {
 namespace Vst {
 //------------------------------------------------------------------------
 #ifndef kVstVersionString
-#define kVstVersionString	"VST 3.6.12"	///< SDK version for PClassInfo2
+#define kVstVersionString	"VST 3.6.13"	///< SDK version for PClassInfo2
 #endif
 
 #define kVstVersionMajor	3
 #define kVstVersionMinor	6
-#define kVstVersionSub		12
+#define kVstVersionSub		13
 
 // this allows to write things like: #if VST_VERSION >= 0x030500 // note that 3.10.0 is 0x030a00
 #define VST_VERSION ((kVstVersionMajor << 16) | (kVstVersionMinor << 8) | kVstVersionSub)

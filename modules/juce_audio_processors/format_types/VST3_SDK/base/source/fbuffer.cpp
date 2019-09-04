@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2018, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -43,7 +43,7 @@ namespace Steinberg {
 
 //-------------------------------------------------------------------------------------
 Buffer::Buffer () 
-: buffer (0)
+: buffer (nullptr)
 , memSize (0)
 , fillSize (0)
 , delta (defaultDelta)
@@ -51,7 +51,7 @@ Buffer::Buffer ()
 
 //-------------------------------------------------------------------------------------
 Buffer::Buffer (uint32 s, uint8 initVal)
-: buffer (0)
+: buffer (nullptr)
 , memSize (s)
 , fillSize (0)
 , delta (defaultDelta)
@@ -67,7 +67,7 @@ Buffer::Buffer (uint32 s, uint8 initVal)
 
 //-------------------------------------------------------------------------------------
 Buffer::Buffer (uint32 s)
-: buffer (0)
+: buffer (nullptr)
 , memSize (s)
 , fillSize (0)
 , delta (defaultDelta)
@@ -81,7 +81,7 @@ Buffer::Buffer (uint32 s)
 
 //-------------------------------------------------------------------------------------
 Buffer::Buffer (const void* b , uint32 s) 
-: buffer (0)
+: buffer (nullptr)
 , memSize (s)
 , fillSize (s)
 , delta (defaultDelta)
@@ -100,7 +100,7 @@ Buffer::Buffer (const void* b , uint32 s)
 
 //-------------------------------------------------------------------------------------
 Buffer::Buffer (const Buffer& bufferR)
-: buffer (0)
+: buffer (nullptr)
 , memSize (bufferR.memSize)
 , fillSize (bufferR.fillSize)
 , delta (bufferR.delta)
@@ -120,7 +120,7 @@ Buffer::~Buffer ()
 {
  	if (buffer)
 		::free (buffer);
- 	buffer = 0;
+ 	buffer = nullptr;
 }
 
 //-------------------------------------------------------------------------------------
@@ -302,7 +302,7 @@ bool Buffer::makeHexString (String& result)
 	unsigned char* data = uint8Ptr ();
 	uint32 bytes = getSize ();
 
-	if (data == 0 || bytes == 0)
+	if (data == nullptr || bytes == 0)
 		return false;
 
 	char8* stringBuffer = (char8*)malloc ((bytes * 2) + 1);
@@ -338,7 +338,7 @@ bool Buffer::makeHexString (String& result)
 bool Buffer::fromHexString (const char8* string)
 {
 	flush ();
-	if (string == 0)
+	if (string == nullptr)
 		return false;
 
 	int32 len = strlen8 (string);
@@ -477,7 +477,7 @@ bool Buffer::setSize (uint32 newSize)
 			if (newSize > 0)
 			{
 				int8* newBuffer = (int8*) ::realloc (buffer, newSize);
-				if (newBuffer == 0)
+				if (newBuffer == nullptr)
 				{
 					newBuffer = (int8*)::malloc (newSize);
 					if (newBuffer)
@@ -492,7 +492,7 @@ bool Buffer::setSize (uint32 newSize)
 					else
 					{
 						::free (buffer);
-						buffer = 0;
+						buffer = nullptr;
 					}
 				}
 				else
@@ -501,7 +501,7 @@ bool Buffer::setSize (uint32 newSize)
 			else
 			{
 				::free (buffer);
-				buffer = 0;
+				buffer = nullptr;
 			}
 		}
 		else
@@ -515,7 +515,7 @@ bool Buffer::setSize (uint32 newSize)
 			fillSize = memSize;
 	}
 
-	return (newSize > 0) == (buffer != 0);
+	return (newSize > 0) == (buffer != nullptr);
 }
 
 //-------------------------------------------------------------------------------------
@@ -582,7 +582,7 @@ void Buffer::take (Buffer& from)
 	memSize = from.memSize;
 	fillSize = from.fillSize;	
 	buffer = from.buffer;
-	from.buffer = 0;
+	from.buffer = nullptr;
 	from.memSize = 0;
 	from.fillSize = 0;
 }
@@ -591,7 +591,7 @@ void Buffer::take (Buffer& from)
 int8* Buffer::pass ()
 {
 	int8* res = buffer;
-	buffer = 0;
+	buffer = nullptr;
 	memSize = 0;
 	fillSize = 0;
 	return res;
