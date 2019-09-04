@@ -7933,7 +7933,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x52a8dfdf:  numBytes = 1859; return wizard_Openfile_svg;
         case 0x58e2ae48:  numBytes = 4551; return wizard_OpenGL_svg;
         case 0xb1da6f9e:  numBytes = 7488; return wizard_StaticLibrary_svg;
-        case 0x744d44d6:  numBytes = 1059; return jucer_AudioPluginARADocumentControllerTemplate_cpp;
+        case 0x744d44d6:  numBytes = 1060; return jucer_AudioPluginARADocumentControllerTemplate_cpp;
         case 0x3eb8f45b:  numBytes = 999; return jucer_AudioPluginARADocumentControllerTemplate_h;
         case 0xd11e6d35:  numBytes = 2085; return jucer_AnimatedComponentSimpleTemplate_h;
         case 0x6cf2645e:  numBytes = 1563; return jucer_AnimatedComponentTemplate_cpp;
