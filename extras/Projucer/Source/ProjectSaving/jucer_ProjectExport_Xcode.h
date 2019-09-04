@@ -1480,7 +1480,6 @@ public:
                     }
                 }
 
-                flags.add (owner.replacePreprocessorTokens (config, owner.getExtraLinkerFlagsString()));
                 flags.add (owner.getExternalLibraryFlags (config));
 
                 auto libs = owner.xcodeLibs;
@@ -1490,6 +1489,7 @@ public:
                     flags.add (getLinkerFlagForLib (l));
             }
 
+            flags.add (owner.replacePreprocessorTokens (config, owner.getExtraLinkerFlagsString()));
             flags = getCleanedStringArray (flags);
         }
 
