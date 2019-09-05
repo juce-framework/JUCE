@@ -30,8 +30,8 @@ namespace juce
 #endif
 
 #if JUCE_X11_SUPPORTS_XEMBED
-bool juce_handleXEmbedEvent (ComponentPeer*, void*);
-unsigned long juce_getCurrentFocusWindow (ComponentPeer*);
+ bool juce_handleXEmbedEvent (ComponentPeer*, void*);
+ unsigned long juce_getCurrentFocusWindow (ComponentPeer*);
 #endif
 
 extern WindowMessageReceiveCallback dispatchWindowMessage;
@@ -87,9 +87,9 @@ bool KeyPress::isKeyCurrentlyDown (int keyCode)
 
         ScopedXLock xlock (display);
 
-        const int keycode = XKeysymToKeycode (display, (KeySym) keysym);
-        const int keybyte = keycode >> 3;
-        const int keybit = (1 << (keycode & 7));
+        auto keycode = X11Symbols::getInstance()->xKeysymToKeycode (display, (KeySym) keysym);
+        auto keybyte = keycode >> 3;
+        auto keybit = (1 << (keycode & 7));
 
         return (Keys::keyStates [keybyte] & keybit) != 0;
     }
@@ -202,16 +202,17 @@ namespace XSHMHelpers
 
                 ScopedXLock xlock (display);
 
-                if (XShmQueryVersion (display, &major, &minor, &pixmaps))
+                if (X11Symbols::getInstance()->xShmQueryVersion (display, &major, &minor, &pixmaps))
                 {
                     trappedErrorCode = 0;
-                    XErrorHandler oldHandler = XSetErrorHandler (errorTrapHandler);
+                    auto oldHandler = X11Symbols::getInstance()->xSetErrorHandler (errorTrapHandler);
 
                     XShmSegmentInfo segmentInfo;
                     zerostruct (segmentInfo);
 
-                    if (auto* xImage = XShmCreateImage (display, DefaultVisual (display, DefaultScreen (display)),
-                                                        24, ZPixmap, nullptr, &segmentInfo, 50, 50))
+                    if (auto* xImage = X11Symbols::getInstance()->xShmCreateImage (display,
+                                                                                   X11Symbols::getInstance()->xDefaultVisual (display, X11Symbols::getInstance()->xDefaultScreen (display)),
+                                                                                   24, ZPixmap, nullptr, &segmentInfo, 50, 50))
                     {
                         if ((segmentInfo.shmid = shmget (IPC_PRIVATE,
                                                          (size_t) (xImage->bytes_per_line * xImage->height),
@@ -223,26 +224,27 @@ namespace XSHMHelpers
                             {
                                 segmentInfo.readOnly = False;
                                 xImage->data = segmentInfo.shmaddr;
-                                XSync (display, False);
+                                X11Symbols::getInstance()->xSync (display, False);
 
-                                if (XShmAttach (display, &segmentInfo) != 0)
+                                if (X11Symbols::getInstance()->xShmAttach (display, &segmentInfo) != 0)
                                 {
-                                    XSync (display, False);
-                                    XShmDetach (display, &segmentInfo);
+                                    X11Symbols::getInstance()->xSync (display, False);
+                                    X11Symbols::getInstance()->xShmDetach (display, &segmentInfo);
 
                                     isAvailable = true;
                                 }
                             }
 
-                            XFlush (display);
-                            XDestroyImage (xImage);
+                            X11Symbols::getInstance()->xFlush (display);
+                            X11Symbols::getInstance()->xDestroyImage (xImage);
 
                             shmdt (segmentInfo.shmaddr);
                         }
 
                         shmctl (segmentInfo.shmid, IPC_RMID, nullptr);
 
-                        XSetErrorHandler (oldHandler);
+                        X11Symbols::getInstance()->xSetErrorHandler (oldHandler);
+
                         if (trappedErrorCode != 0)
                             isAvailable = false;
                     }
@@ -260,69 +262,25 @@ namespace XSHMHelpers
 #if JUCE_USE_XRENDER
 namespace XRender
 {
-    typedef Status (*tXRenderQueryVersion) (Display*, int*, int*);
-    typedef XRenderPictFormat* (*tXRenderFindStandardFormat) (Display*, int);
-    typedef XRenderPictFormat* (*tXRenderFindFormat) (Display*, unsigned long, XRenderPictFormat*, int);
-    typedef XRenderPictFormat* (*tXRenderFindVisualFormat) (Display*, Visual*);
-
-    static tXRenderQueryVersion xRenderQueryVersion = nullptr;
-    static tXRenderFindStandardFormat xRenderFindStandardFormat = nullptr;
-    static tXRenderFindFormat xRenderFindFormat = nullptr;
-    static tXRenderFindVisualFormat xRenderFindVisualFormat = nullptr;
-
     static bool isAvailable (::Display* display)
     {
-        static bool hasLoaded = false;
-
-        if (! hasLoaded)
-        {
-            if (display != nullptr)
-            {
-                hasLoaded = true;
-
-                ScopedXLock xlock (display);
-
-                if (void* h = dlopen ("libXrender.so.1", RTLD_GLOBAL | RTLD_NOW))
-                {
-                    xRenderQueryVersion         = (tXRenderQueryVersion)        dlsym (h, "XRenderQueryVersion");
-                    xRenderFindStandardFormat   = (tXRenderFindStandardFormat)  dlsym (h, "XRenderFindStandardFormat");
-                    xRenderFindFormat           = (tXRenderFindFormat)          dlsym (h, "XRenderFindFormat");
-                    xRenderFindVisualFormat     = (tXRenderFindVisualFormat)    dlsym (h, "XRenderFindVisualFormat");
-                }
-
-                if (xRenderQueryVersion != nullptr
-                     && xRenderFindStandardFormat != nullptr
-                     && xRenderFindFormat != nullptr
-                     && xRenderFindVisualFormat != nullptr)
-                {
-                    int major, minor;
-                    if (xRenderQueryVersion (display, &major, &minor))
-                        return true;
-                }
-            }
-
-            xRenderQueryVersion = nullptr;
-        }
-
-        return xRenderQueryVersion != nullptr;
+        int major, minor;
+        return X11Symbols::getInstance()->xRenderQueryVersion (display, &major, &minor);
     }
 
     static bool hasCompositingWindowManager (::Display* display) noexcept
     {
         return display != nullptr
-                && XGetSelectionOwner (display, Atoms::getCreating (display, "_NET_WM_CM_S0")) != 0;
+                && X11Symbols::getInstance()->xGetSelectionOwner (display, Atoms::getCreating (display, "_NET_WM_CM_S0")) != 0;
     }
 
     static XRenderPictFormat* findPictureFormat (::Display* display)
     {
         ScopedXLock xlock (display);
-        XRenderPictFormat* pictFormat = nullptr;
 
         if (isAvailable (display))
         {
-            pictFormat = xRenderFindStandardFormat (display, PictStandardARGB32);
-
-            if (pictFormat == nullptr)
+            if (auto* pictFormat = X11Symbols::getInstance()->xRenderFindStandardFormat (display, PictStandardARGB32))
             {
                 XRenderPictFormat desiredFormat;
                 desiredFormat.type = PictTypeDirect;
@@ -338,18 +296,20 @@ namespace XRender
                 desiredFormat.direct.green = 8;
                 desiredFormat.direct.blue  = 0;
 
-                pictFormat = xRenderFindFormat (display,
-                                                PictFormatType | PictFormatDepth
-                                                 | PictFormatRedMask | PictFormatRed
-                                                 | PictFormatGreenMask | PictFormatGreen
-                                                 | PictFormatBlueMask | PictFormatBlue
-                                                 | PictFormatAlphaMask | PictFormatAlpha,
-                                                &desiredFormat,
-                                                0);
+                pictFormat = X11Symbols::getInstance()->xRenderFindFormat (display,
+                                                                           PictFormatType | PictFormatDepth
+                                                                            | PictFormatRedMask | PictFormatRed
+                                                                            | PictFormatGreenMask | PictFormatGreen
+                                                                            | PictFormatBlueMask | PictFormatBlue
+                                                                            | PictFormatAlphaMask | PictFormatAlpha,
+                                                                           &desiredFormat,
+                                                                           0);
+
+                return pictFormat;
             }
         }
 
-        return pictFormat;
+        return nullptr;
     }
 }
 #endif
@@ -364,10 +324,10 @@ namespace Visuals
 
         Visual* visual = nullptr;
         int numVisuals = 0;
-        long desiredMask = VisualNoMask;
+        auto desiredMask = VisualNoMask;
         XVisualInfo desiredVisual;
 
-        desiredVisual.screen = DefaultScreen (display);
+        desiredVisual.screen = X11Symbols::getInstance()->xDefaultScreen (display);
         desiredVisual.depth = desiredDepth;
 
         desiredMask = VisualScreenMask | VisualDepthMask;
@@ -387,7 +347,7 @@ namespace Visuals
             desiredMask |= VisualBitsPerRGBMask;
         }
 
-        if (auto* xvinfos = XGetVisualInfo (display, desiredMask, &desiredVisual, &numVisuals))
+        if (auto* xvinfos = X11Symbols::getInstance()->xGetVisualInfo (display, desiredMask, &desiredVisual, &numVisuals))
         {
             for (int i = 0; i < numVisuals; i++)
             {
@@ -398,7 +358,7 @@ namespace Visuals
                 }
             }
 
-            XFree (xvinfos);
+            X11Symbols::getInstance()->xFree (xvinfos);
         }
 
         return visual;
@@ -416,21 +376,21 @@ namespace Visuals
                #if JUCE_USE_XRENDER
                 if (XRender::isAvailable (display))
                 {
-                    if (auto pictFormat = XRender::findPictureFormat (display))
+                    if (auto* pictFormat = XRender::findPictureFormat (display))
                     {
                         int numVisuals = 0;
                         XVisualInfo desiredVisual;
-                        desiredVisual.screen = DefaultScreen (display);
+                        desiredVisual.screen = X11Symbols::getInstance()->xDefaultScreen (display);
                         desiredVisual.depth = 32;
                         desiredVisual.bits_per_rgb = 8;
 
-                        if (auto xvinfos = XGetVisualInfo (display,
-                                                           VisualScreenMask | VisualDepthMask | VisualBitsPerRGBMask,
-                                                           &desiredVisual, &numVisuals))
+                        if (auto xvinfos = X11Symbols::getInstance()->xGetVisualInfo (display,
+                                                                                      VisualScreenMask | VisualDepthMask | VisualBitsPerRGBMask,
+                                                                                      &desiredVisual, &numVisuals))
                         {
                             for (int i = 0; i < numVisuals; ++i)
                             {
-                                auto pictVisualFormat = XRender::xRenderFindVisualFormat (display, xvinfos[i].visual);
+                                auto pictVisualFormat = X11Symbols::getInstance()->xRenderFindVisualFormat (display, xvinfos[i].visual);
 
                                 if (pictVisualFormat != nullptr
                                      && pictVisualFormat->type == PictTypeDirect
@@ -442,7 +402,7 @@ namespace Visuals
                                 }
                             }
 
-                            XFree (xvinfos);
+                            X11Symbols::getInstance()->xFree (xvinfos);
                         }
                     }
                 }
@@ -507,8 +467,8 @@ public:
             segmentInfo.shmaddr = (char *) -1;
             segmentInfo.readOnly = False;
 
-            xImage = XShmCreateImage (display, visual, imageDepth, ZPixmap, nullptr,
-                                      &segmentInfo, (unsigned int) w, (unsigned int) h);
+            xImage = X11Symbols::getInstance()->xShmCreateImage (display, visual, imageDepth, ZPixmap, nullptr,
+                                                                 &segmentInfo, (unsigned int) w, (unsigned int) h);
 
             if (xImage != nullptr)
             {
@@ -527,7 +487,7 @@ public:
                             xImage->data = segmentInfo.shmaddr;
                             imageData = (uint8*) segmentInfo.shmaddr;
 
-                            if (XShmAttach (display, &segmentInfo) != 0)
+                            if (X11Symbols::getInstance()->xShmAttach (display, &segmentInfo) != 0)
                                 usingXShm = true;
                             else
                                 jassertfalse;
@@ -554,9 +514,9 @@ public:
             xImage->xoffset = 0;
             xImage->format = ZPixmap;
             xImage->data = (char*) imageData;
-            xImage->byte_order = ImageByteOrder (display);
-            xImage->bitmap_unit = BitmapUnit (display);
-            xImage->bitmap_bit_order = BitmapBitOrder (display);
+            xImage->byte_order = X11Symbols::getInstance()->xImageByteOrder (display);
+            xImage->bitmap_unit = X11Symbols::getInstance()->xBitmapUnit (display);
+            xImage->bitmap_bit_order = X11Symbols::getInstance()->xBitmapBitOrder (display);
             xImage->bitmap_pad = 32;
             xImage->depth = pixelStride * 8;
             xImage->bytes_per_line = lineStride;
@@ -567,8 +527,8 @@ public:
 
             if (imageDepth == 16)
             {
-                const int pixStride = 2;
-                const int stride = ((w * pixStride + 3) & ~3);
+                int pixStride = 2;
+                auto stride = ((w * pixStride + 3) & ~3);
 
                 imageData16Bit.malloc (stride * h);
                 xImage->data = imageData16Bit;
@@ -581,7 +541,7 @@ public:
                 xImage->blue_mask  = visual->blue_mask;
             }
 
-            if (! XInitImage (xImage))
+            if (! X11Symbols::getInstance()->xInitImage (xImage))
                 jassertfalse;
         }
     }
@@ -591,15 +551,15 @@ public:
         ScopedXLock xlock (display);
 
         if (gc != None)
-            XFreeGC (display, gc);
+            X11Symbols::getInstance()->xFreeGC (display, gc);
 
        #if JUCE_USE_XSHM
         if (isUsingXShm())
         {
-            XShmDetach (display, &segmentInfo);
+            X11Symbols::getInstance()->xShmDetach (display, &segmentInfo);
 
-            XFlush (display);
-            XDestroyImage (xImage);
+            X11Symbols::getInstance()->xFlush (display);
+            X11Symbols::getInstance()->xDestroyImage (xImage);
 
             shmdt (segmentInfo.shmaddr);
             shmctl (segmentInfo.shmid, IPC_RMID, nullptr);
@@ -608,7 +568,7 @@ public:
        #endif
         {
             xImage->data = nullptr;
-            XDestroyImage (xImage);
+            X11Symbols::getInstance()->xDestroyImage (xImage);
         }
     }
 
@@ -653,9 +613,9 @@ public:
             gcvalues.clip_mask = None;
             gcvalues.graphics_exposures = False;
 
-            gc = XCreateGC (display, window,
-                            GCBackground | GCForeground | GCFunction | GCPlaneMask | GCClipMask | GCGraphicsExposures,
-                            &gcvalues);
+            gc = X11Symbols::getInstance()->xCreateGC (display, window,
+                                                       GCBackground | GCForeground | GCFunction | GCPlaneMask | GCClipMask | GCGraphicsExposures,
+                                                       &gcvalues);
         }
 
         if (imageDepth == 16)
@@ -670,21 +630,21 @@ public:
             auto bShiftL = (uint32) jmax (0,  getShiftNeeded (bMask));
             auto bShiftR = (uint32) jmax (0, -getShiftNeeded (bMask));
 
-            const Image::BitmapData srcData (Image (this), Image::BitmapData::readOnly);
+            Image::BitmapData srcData (Image (this), Image::BitmapData::readOnly);
 
-            for (int y = sy; y < sy + (int)dh; ++y)
+            for (int y = sy; y < sy + (int) dh; ++y)
             {
-                const uint8* p = srcData.getPixelPointer (sx, y);
+                auto* p = srcData.getPixelPointer (sx, y);
 
-                for (int x = sx; x < sx + (int)dw; ++x)
+                for (int x = sx; x < sx + (int) dw; ++x)
                 {
-                    auto* pixel = (const PixelRGB*) p;
+                    auto* pixel = (PixelRGB*) p;
                     p += srcData.pixelStride;
 
-                    XPutPixel (xImage, x, y,
-                                   (((((uint32) pixel->getRed())   << rShiftL) >> rShiftR) & rMask)
-                                 | (((((uint32) pixel->getGreen()) << gShiftL) >> gShiftR) & gMask)
-                                 | (((((uint32) pixel->getBlue())  << bShiftL) >> bShiftR) & bMask));
+                    X11Symbols::getInstance()->xPutPixel (xImage, x, y,
+                                                              (((((uint32) pixel->getRed())   << rShiftL) >> rShiftR) & rMask)
+                                                            | (((((uint32) pixel->getGreen()) << gShiftL) >> gShiftR) & gMask)
+                                                            | (((((uint32) pixel->getBlue())  << bShiftL) >> bShiftR) & bMask));
                 }
             }
         }
@@ -692,10 +652,10 @@ public:
         // blit results to screen.
        #if JUCE_USE_XSHM
         if (isUsingXShm())
-            XShmPutImage (display, (::Drawable) window, gc, xImage, sx, sy, dx, dy, dw, dh, True);
+            X11Symbols::getInstance()->xShmPutImage (display, (::Drawable) window, gc, xImage, sx, sy, dx, dy, dw, dh, True);
         else
        #endif
-            XPutImage (display, (::Drawable) window, gc, xImage, sx, sy, dx, dy, dw, dh);
+            X11Symbols::getInstance()->xPutImage (display, (::Drawable) window, gc, xImage, sx, sy, dx, dy, dw, dh);
     }
 
     #if JUCE_USE_XSHM
@@ -735,42 +695,19 @@ private:
 #if JUCE_USE_XINERAMA
 static Array<XineramaScreenInfo> XineramaQueryDisplays (::Display* display)
 {
-    typedef Bool (*tXineramaIsActive) (::Display*);
-    typedef XineramaScreenInfo* (*tXineramaQueryScreens) (::Display*, int*);
-
     int major_opcode, first_event, first_error;
 
-    if (XQueryExtension (display, "XINERAMA", &major_opcode, &first_event, &first_error))
+    if (X11Symbols::getInstance()->xQueryExtension (display, "XINERAMA", &major_opcode, &first_event, &first_error)
+        && (X11Symbols::getInstance()->xineramaIsActive (display) != 0))
     {
-        static void* libXinerama = nullptr;
-        static tXineramaIsActive isActiveFuncPtr = nullptr;
-        static tXineramaQueryScreens xineramaQueryScreens = nullptr;
+        int numScreens;
 
-        if (libXinerama == nullptr)
+        if (auto* xinfo = X11Symbols::getInstance()->xineramaQueryScreens (display, &numScreens))
         {
-            libXinerama = dlopen ("libXinerama.so", RTLD_GLOBAL | RTLD_NOW);
+            Array<XineramaScreenInfo> infos (xinfo, numScreens);
+            X11Symbols::getInstance()->xFree (xinfo);
 
-            if (libXinerama == nullptr)
-                libXinerama = dlopen ("libXinerama.so.1", RTLD_GLOBAL | RTLD_NOW);
-
-            if (libXinerama != nullptr)
-            {
-                isActiveFuncPtr = (tXineramaIsActive) dlsym (libXinerama, "XineramaIsActive");
-                xineramaQueryScreens = (tXineramaQueryScreens) dlsym (libXinerama, "XineramaQueryScreens");
-            }
-        }
-
-        if (isActiveFuncPtr != nullptr && xineramaQueryScreens != nullptr && isActiveFuncPtr (display) != 0)
-        {
-            int numScreens;
-
-            if (auto* xinfo = xineramaQueryScreens (display, &numScreens))
-            {
-                Array<XineramaScreenInfo> infos (xinfo, numScreens);
-                XFree (xinfo);
-
-                return infos;
-            }
+            return infos;
         }
     }
 
@@ -779,120 +716,14 @@ static Array<XineramaScreenInfo> XineramaQueryDisplays (::Display* display)
 #endif
 
 //==============================================================================
-#if JUCE_USE_XRANDR
-class XRandrWrapper
-{
-private:
-    XRandrWrapper()
-    {
-        if (libXrandr == nullptr)
-        {
-            libXrandr = dlopen ("libXrandr.so", RTLD_GLOBAL | RTLD_NOW);
-
-            if (libXrandr == nullptr)
-                libXrandr = dlopen ("libXrandr.so.2", RTLD_GLOBAL | RTLD_NOW);
-
-            if (libXrandr != nullptr)
-            {
-                getScreenResourcesPtr  = (tXRRGetScreenResources)  dlsym (libXrandr, "XRRGetScreenResources");
-                freeScreenResourcesPtr = (tXRRFreeScreenResources) dlsym (libXrandr, "XRRFreeScreenResources");
-                getOutputInfoPtr       = (tXRRGetOutputInfo)       dlsym (libXrandr, "XRRGetOutputInfo");
-                freeOutputInfoPtr      = (tXRRFreeOutputInfo)      dlsym (libXrandr, "XRRFreeOutputInfo");
-                getCrtcInfoPtr         = (tXRRGetCrtcInfo)         dlsym (libXrandr, "XRRGetCrtcInfo");
-                freeCrtcInfoPtr        = (tXRRFreeCrtcInfo)        dlsym (libXrandr, "XRRFreeCrtcInfo");
-                getOutputPrimaryPtr    = (tXRRGetOutputPrimary)    dlsym (libXrandr, "XRRGetOutputPrimary");
-            }
-        }
-    }
-
-public:
-    //==============================================================================
-    static XRandrWrapper& getInstance()
-    {
-        static XRandrWrapper xrandr;
-        return xrandr;
-    }
-
-    //==============================================================================
-    XRRScreenResources* getScreenResources (::Display* display, ::Window window)
-    {
-        if (getScreenResourcesPtr != nullptr)
-            return getScreenResourcesPtr (display, window);
-
-        return nullptr;
-    }
-
-    XRROutputInfo* getOutputInfo (::Display* display, XRRScreenResources* resources, RROutput output)
-    {
-        if (getOutputInfoPtr != nullptr)
-            return getOutputInfoPtr (display, resources, output);
-
-        return nullptr;
-    }
-
-    XRRCrtcInfo* getCrtcInfo (::Display* display, XRRScreenResources* resources, RRCrtc crtc)
-    {
-        if (getCrtcInfoPtr != nullptr)
-            return getCrtcInfoPtr (display, resources, crtc);
-
-        return nullptr;
-    }
-
-    RROutput getOutputPrimary (::Display* display, ::Window window)
-    {
-        if (getOutputPrimaryPtr != nullptr)
-            return getOutputPrimaryPtr (display, window);
-
-        return 0;
-    }
-
-    //==============================================================================
-    void freeScreenResources (XRRScreenResources* ptr)
-    {
-        if (freeScreenResourcesPtr != nullptr)
-            freeScreenResourcesPtr (ptr);
-    }
-
-    void freeOutputInfo (XRROutputInfo* ptr)
-    {
-        if (freeOutputInfoPtr != nullptr)
-            freeOutputInfoPtr (ptr);
-    }
-
-    void freeCrtcInfo (XRRCrtcInfo* ptr)
-    {
-        if (freeCrtcInfoPtr != nullptr)
-            freeCrtcInfoPtr (ptr);
-    }
-
-private:
-    using tXRRGetScreenResources   = XRRScreenResources* (*) (::Display*, ::Window);
-    using tXRRFreeScreenResources  = void (*) (XRRScreenResources*);
-    using tXRRGetOutputInfo        = XRROutputInfo* (*) (::Display*, XRRScreenResources*, RROutput);
-    using tXRRFreeOutputInfo       = void (*) (XRROutputInfo*);
-    using tXRRGetCrtcInfo          = XRRCrtcInfo* (*) (::Display*, XRRScreenResources*, RRCrtc);
-    using tXRRFreeCrtcInfo         = void (*) (XRRCrtcInfo*);
-    using tXRRGetOutputPrimary     = RROutput (*) (::Display*, ::Window);
-
-    void* libXrandr = nullptr;
-    tXRRGetScreenResources getScreenResourcesPtr = nullptr;
-    tXRRFreeScreenResources freeScreenResourcesPtr = nullptr;
-    tXRRGetOutputInfo getOutputInfoPtr = nullptr;
-    tXRRFreeOutputInfo freeOutputInfoPtr = nullptr;
-    tXRRGetCrtcInfo getCrtcInfoPtr = nullptr;
-    tXRRFreeCrtcInfo freeCrtcInfoPtr = nullptr;
-    tXRRGetOutputPrimary getOutputPrimaryPtr = nullptr;
-};
-#endif
-
-
 static double getDisplayDPI (::Display* display, int index)
 {
-    auto widthMM  = DisplayWidthMM  (display, index);
-    auto heightMM = DisplayHeightMM (display, index);
+    auto widthMM  = X11Symbols::getInstance()->xDisplayWidthMM  (display, index);
+    auto heightMM = X11Symbols::getInstance()->xDisplayHeightMM (display, index);
 
     if (widthMM > 0 && heightMM > 0)
-        return (((DisplayWidth (display, index) * 25.4) / widthMM) + ((DisplayHeight (display, index) * 25.4) / heightMM)) / 2.0;
+        return (((X11Symbols::getInstance()->xDisplayWidth (display, index) * 25.4) / widthMM)
+                + ((X11Symbols::getInstance()->xDisplayHeight (display, index) * 25.4) / heightMM)) / 2.0;
 
     return 96.0;
 }
@@ -971,26 +802,28 @@ namespace PixmapHelpers
     {
         ScopedXLock xlock (display);
 
-        auto width = (unsigned int) image.getWidth();
+        auto width  = (unsigned int) image.getWidth();
         auto height = (unsigned int) image.getHeight();
         HeapBlock<uint32> colour (width * height);
         int index = 0;
 
-        for (int y = 0; y < (int)  height; ++y)
+        for (int y = 0; y < (int) height; ++y)
             for (int x = 0; x < (int) width; ++x)
                 colour[index++] = image.getPixelAt (x, y).getARGB();
 
-        XImage* ximage = XCreateImage (display, CopyFromParent, 24, ZPixmap,
-                                       0, reinterpret_cast<char*> (colour.getData()),
-                                       width, height, 32, 0);
+        auto* ximage = X11Symbols::getInstance()->xCreateImage (display, CopyFromParent, 24, ZPixmap,
+                                                                0, reinterpret_cast<char*> (colour.getData()),
+                                                                width, height, 32, 0);
 
-        Pixmap pixmap = XCreatePixmap (display, DefaultRootWindow (display),
-                                       width, height, 24);
+        auto pixmap = X11Symbols::getInstance()->xCreatePixmap (display,
+                                                                X11Symbols::getInstance()->xDefaultRootWindow (display),
+                                                                width, height, 24);
 
-        GC gc = XCreateGC (display, pixmap, 0, nullptr);
-        XPutImage (display, pixmap, gc, ximage, 0, 0, 0, 0, width, height);
-        XFreeGC (display, gc);
-        XFree (ximage);
+        auto gc = X11Symbols::getInstance()->xCreateGC (display, pixmap, 0, nullptr);
+
+        X11Symbols::getInstance()->xPutImage (display, pixmap, gc, ximage, 0, 0, 0, 0, width, height);
+        X11Symbols::getInstance()->xFreeGC (display, gc);
+        X11Symbols::getInstance()->xFree (ximage);
 
         return pixmap;
     }
@@ -999,35 +832,38 @@ namespace PixmapHelpers
     {
         ScopedXLock xlock (display);
 
-        auto width = (unsigned int) image.getWidth();
+        auto width  = (unsigned int) image.getWidth();
         auto height = (unsigned int) image.getHeight();
         auto stride = (width + 7) >> 3;
         HeapBlock<char> mask;
         mask.calloc (stride * height);
-        const bool msbfirst = (BitmapBitOrder (display) == MSBFirst);
+
+        auto msbfirst = (X11Symbols::getInstance()->xBitmapBitOrder (display) == MSBFirst);
 
         for (unsigned int y = 0; y < height; ++y)
         {
             for (unsigned int x = 0; x < width; ++x)
             {
                 auto bit = (char) (1 << (msbfirst ? (7 - (x & 7)) : (x & 7)));
-                const unsigned int offset = y * stride + (x >> 3);
+                auto offset = y * stride + (x >> 3);
 
                 if (image.getPixelAt ((int) x, (int) y).getAlpha() >= 128)
                     mask[offset] |= bit;
             }
         }
 
-        return XCreatePixmapFromBitmapData (display, DefaultRootWindow (display),
-                                            mask.getData(), width, height, 1, 0, 1);
+        return X11Symbols::getInstance()->xCreatePixmapFromBitmapData (display, X11Symbols::getInstance()->xDefaultRootWindow (display),
+                                                                       mask.getData(), width, height, 1, 0, 1);
     }
 }
 
 static void* createDraggingHandCursor()
 {
-    static unsigned char dragHandData[] = { 71,73,70,56,57,97,16,0,16,0,145,2,0,0,0,0,255,255,255,0,
-      0,0,0,0,0,33,249,4,1,0,0,2,0,44,0,0,0,0,16,0, 16,0,0,2,52,148,47,0,200,185,16,130,90,12,74,139,107,84,123,39,
-      132,117,151,116,132,146,248,60,209,138,98,22,203,114,34,236,37,52,77,217, 247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
+    static unsigned char dragHandData[] = {
+        71,73,70,56,57,97,16,0,16,0,145,2,0,0,0,0,255,255,255,0,0,0,0,0,0,33,249,4,1,0,0,2,0,44,0,0,0,0,16,0,16,0,
+        0,2,52,148,47,0,200,185,16,130,90,12,74,139,107,84,123,39,132,117,151,116,132,146,248,60,209,138,98,22,203,
+        114,34,236,37,52,77,217, 247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59
+    };
     size_t dragHandDataSize = 99;
 
     return CustomMouseCursorInfo (ImageFileFormat::loadFrom (dragHandData, dragHandDataSize), { 8, 7 }).create();
@@ -1052,11 +888,14 @@ public:
         // it's dangerous to create a window on a thread other than the message thread..
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
+        // can't open a window on a system that doesn't have X11 installed!
+        jassert (X11Symbols::getInstance()->areXFunctionsAvailable());
+
         display = XWindowSystem::getInstance()->displayRef();
 
-        atoms.reset (new Atoms (display));
-        dragState.reset (new DragState (display));
-        repainter.reset (new LinuxRepaintManager (*this, display));
+        atoms     = std::make_unique<Atoms> (display);
+        dragState = std::make_unique<DragState> (display);
+        repainter = std::make_unique<LinuxRepaintManager> (*this, display);
 
         if (isAlwaysOnTop)
             ++numAlwaysOnTopPeers;
@@ -1078,8 +917,8 @@ public:
 
                 ScopedXLock xlock (d);
 
-                if (XQueryPointer (d, RootWindow (d, DefaultScreen (d)),
-                                   &root, &child, &x, &y, &winx, &winy, &mask) != False)
+                if (X11Symbols::getInstance()->xQueryPointer (d, X11Symbols::getInstance()->xRootWindow (d, X11Symbols::getInstance()->xDefaultScreen (d)),
+                                                              &root, &child, &x, &y, &winx, &winy, &mask) != False)
                 {
                     if ((mask & Button1Mask) != 0)  mouseMods |= ModifierKeys::leftButtonModifier;
                     if ((mask & Button2Mask) != 0)  mouseMods |= ModifierKeys::middleButtonModifier;
@@ -1129,7 +968,7 @@ public:
         {
             ScopedXLock xlock (display);
 
-            if (! XFindContext (display, (XID) windowHandle, windowHandleXContext, &peer))
+            if (! X11Symbols::getInstance()->xFindContext (display, (XID) windowHandle, windowHandleXContext, &peer))
                 if (peer != nullptr && ! ComponentPeer::isValidPeer (reinterpret_cast<LinuxComponentPeer*> (peer)))
                     peer = nullptr;
         }
@@ -1142,9 +981,9 @@ public:
         ScopedXLock xlock (display);
 
         if (shouldBeVisible)
-            XMapWindow (display, windowH);
+            X11Symbols::getInstance()->xMapWindow (display, windowH);
         else
-            XUnmapWindow (display, windowH);
+            X11Symbols::getInstance()->xUnmapWindow (display, windowH);
     }
 
     void setTitle (const String& title) override
@@ -1153,12 +992,12 @@ public:
         char* strings[] = { const_cast<char*> (title.toRawUTF8()) };
         ScopedXLock xlock (display);
 
-        if (XStringListToTextProperty (strings, 1, &nameProperty))
+        if (X11Symbols::getInstance()->xStringListToTextProperty (strings, 1, &nameProperty))
         {
-            XSetWMName (display, windowH, &nameProperty);
-            XSetWMIconName (display, windowH, &nameProperty);
+            X11Symbols::getInstance()->xSetWMName (display, windowH, &nameProperty);
+            X11Symbols::getInstance()->xSetWMIconName (display, windowH, &nameProperty);
 
-            XFree (nameProperty.value);
+            X11Symbols::getInstance()->xFree (nameProperty.value);
         }
     }
 
@@ -1186,7 +1025,7 @@ public:
 
             if (fs != None)
             {
-                Window root = RootWindow (display, DefaultScreen (display));
+                auto root = X11Symbols::getInstance()->xRootWindow (display, X11Symbols::getInstance()->xDefaultScreen (display));
 
                 XClientMessageEvent clientMsg;
                 clientMsg.display = display;
@@ -1200,9 +1039,9 @@ public:
                 clientMsg.data.l[3] = 1;  // Normal Source
 
                 ScopedXLock xlock (display);
-                XSendEvent (display, root, false,
-                            SubstructureRedirectMask | SubstructureNotifyMask,
-                            (XEvent*) &clientMsg);
+                X11Symbols::getInstance()->xSendEvent (display, root, false,
+                                                       SubstructureRedirectMask | SubstructureNotifyMask,
+                                                       (XEvent*) &clientMsg);
             }
         }
 
@@ -1221,7 +1060,7 @@ public:
             WeakReference<Component> deletionChecker (&component);
             ScopedXLock xlock (display);
 
-            auto* hints = XAllocSizeHints();
+            auto* hints = X11Symbols::getInstance()->xAllocSizeHints();
             hints->flags  = USSize | USPosition;
             hints->x      = physicalBounds.getX();
             hints->y      = physicalBounds.getY();
@@ -1235,14 +1074,14 @@ public:
                 hints->flags |= PMinSize | PMaxSize;
             }
 
-            XSetWMNormalHints (display, windowH, hints);
-            XFree (hints);
+            X11Symbols::getInstance()->xSetWMNormalHints (display, windowH, hints);
+            X11Symbols::getInstance()->xFree (hints);
 
-            XMoveResizeWindow (display, windowH,
-                               physicalBounds.getX() - windowBorder.getLeft(),
-                               physicalBounds.getY() - windowBorder.getTop(),
-                               (unsigned int) physicalBounds.getWidth(),
-                               (unsigned int) physicalBounds.getHeight());
+            X11Symbols::getInstance()->xMoveResizeWindow (display, windowH,
+                                                          physicalBounds.getX() - windowBorder.getLeft(),
+                                                          physicalBounds.getY() - windowBorder.getTop(),
+                                                          (unsigned int) physicalBounds.getWidth(),
+                                                          (unsigned int) physicalBounds.getHeight());
 
             if (deletionChecker != nullptr)
             {
@@ -1278,14 +1117,14 @@ public:
 
     StringArray getAvailableRenderingEngines() override
     {
-        return StringArray ("Software Renderer");
+        return { "Software Renderer" };
     }
 
     void setMinimised (bool shouldBeMinimised) override
     {
         if (shouldBeMinimised)
         {
-            Window root = RootWindow (display, DefaultScreen (display));
+            auto root = X11Symbols::getInstance()->xRootWindow (display, X11Symbols::getInstance()->xDefaultScreen (display));
 
             XClientMessageEvent clientMsg;
             clientMsg.display = display;
@@ -1296,7 +1135,7 @@ public:
             clientMsg.data.l[0] = IconicState;
 
             ScopedXLock xlock (display);
-            XSendEvent (display, root, false, SubstructureRedirectMask | SubstructureNotifyMask, (XEvent*) &clientMsg);
+            X11Symbols::getInstance()->xSendEvent (display, root, false, SubstructureRedirectMask | SubstructureNotifyMask, (XEvent*) &clientMsg);
         }
         else
         {
@@ -1351,10 +1190,10 @@ public:
         Window parent, root;
 
         ScopedXLock xlock (display);
-        if (XQueryTree (display, windowH, &root, &parent, &windowList, &windowListSize) != 0)
+        if (X11Symbols::getInstance()->xQueryTree (display, windowH, &root, &parent, &windowList, &windowListSize) != 0)
         {
             if (windowList != nullptr)
-                XFree (windowList);
+                X11Symbols::getInstance()->xFree (windowList);
 
             return parent == possibleParent;
         }
@@ -1374,10 +1213,10 @@ public:
             Window parent, root;
 
             ScopedXLock xlock (display);
-            if (XQueryTree (display, possibleChild, &root, &parent, &windowList, &windowListSize) != 0)
+            if (X11Symbols::getInstance()->xQueryTree (display, possibleChild, &root, &parent, &windowList, &windowListSize) != 0)
             {
                 if (windowList != nullptr)
-                    XFree (windowList);
+                    X11Symbols::getInstance()->xFree (windowList);
 
                 if (parent == root)
                     return false;
@@ -1396,9 +1235,10 @@ public:
         bool result = false;
 
         ScopedXLock xlock (display);
-        Window parent, root = RootWindow (display, DefaultScreen (display));
+        Window parent;
+        auto root = X11Symbols::getInstance()->xRootWindow (display, X11Symbols::getInstance()->xDefaultScreen (display));
 
-        if (XQueryTree (display, root, &root, &parent, &windowList, &windowListSize) != 0)
+        if (X11Symbols::getInstance()->xQueryTree (display, root, &root, &parent, &windowList, &windowListSize) != 0)
         {
             for (int i = (int) windowListSize; --i >= 0;)
             {
@@ -1411,7 +1251,7 @@ public:
         }
 
         if (windowList != nullptr)
-            XFree (windowList);
+            X11Symbols::getInstance()->xFree (windowList);
 
         return result;
     }
@@ -1447,8 +1287,8 @@ public:
 
         localPos *= currentScaleFactor;
 
-        return XGetGeometry (display, (::Drawable) windowH, &root, &wx, &wy, &ww, &wh, &bw, &bitDepth)
-                && XTranslateCoordinates (display, windowH, windowH, localPos.getX(), localPos.getY(), &wx, &wy, &child)
+        return X11Symbols::getInstance()->xGetGeometry (display, (::Drawable) windowH, &root, &wx, &wy, &ww, &wh, &bw, &bitDepth)
+                && X11Symbols::getInstance()->xTranslateCoordinates (display, windowH, windowH, localPos.getX(), localPos.getY(), &wx, &wy, &child)
                 && child == None;
     }
 
@@ -1485,10 +1325,10 @@ public:
             ev.xclient.data.l[3] = 0;
             ev.xclient.data.l[4] = 0;
 
-            XSendEvent (display, RootWindow (display, DefaultScreen (display)),
-                        False, SubstructureRedirectMask | SubstructureNotifyMask, &ev);
+            X11Symbols::getInstance()->xSendEvent (display, X11Symbols::getInstance()->xRootWindow (display, X11Symbols::getInstance()->xDefaultScreen (display)),
+                                                   False, SubstructureRedirectMask | SubstructureNotifyMask, &ev);
 
-            XSync (display, False);
+            X11Symbols::getInstance()->xSync (display, False);
         }
 
         handleBroughtToFront();
@@ -1506,10 +1346,12 @@ public:
             Window newStack[] = { otherPeer->windowH, windowH };
 
             ScopedXLock xlock (display);
-            XRestackWindows (display, newStack, 2);
+            X11Symbols::getInstance()->xRestackWindows (display, newStack, 2);
         }
         else
+        {
             jassertfalse; // wrong type of window?
+        }
     }
 
     bool isFocused() const override
@@ -1517,7 +1359,7 @@ public:
         int revert = 0;
         Window focusedWindow = 0;
         ScopedXLock xlock (display);
-        XGetInputFocus (display, &focusedWindow, &revert);
+        X11Symbols::getInstance()->xGetInputFocus (display, &focusedWindow, &revert);
 
         if (focusedWindow == PointerRoot)
             return false;
@@ -1541,11 +1383,11 @@ public:
         ScopedXLock xlock (display);
 
         if (windowH != 0
-            && XGetWindowAttributes (display, windowH, &atts)
+            && X11Symbols::getInstance()->xGetWindowAttributes (display, windowH, &atts)
             && atts.map_state == IsViewable
             && ! isFocused())
         {
-            XSetInputFocus (display, getFocusWindow(), RevertToParent, (::Time) getUserTime());
+            X11Symbols::getInstance()->xSetInputFocus (display, getFocusWindow(), RevertToParent, (::Time) getUserTime());
             isActiveApplication = true;
         }
     }
@@ -1564,7 +1406,7 @@ public:
 
     void setIcon (const Image& newIcon) override
     {
-        const int dataSize = newIcon.getWidth() * newIcon.getHeight() + 2;
+        auto dataSize = newIcon.getWidth() * newIcon.getHeight() + 2;
         HeapBlock<unsigned long> data (dataSize);
 
         int index = 0;
@@ -1580,41 +1422,41 @@ public:
 
         deleteIconPixmaps();
 
-        XWMHints* wmHints = XGetWMHints (display, windowH);
+        auto* wmHints = X11Symbols::getInstance()->xGetWMHints (display, windowH);
 
         if (wmHints == nullptr)
-            wmHints = XAllocWMHints();
+            wmHints = X11Symbols::getInstance()->xAllocWMHints();
 
         wmHints->flags |= IconPixmapHint | IconMaskHint;
         wmHints->icon_pixmap = PixmapHelpers::createColourPixmapFromImage (display, newIcon);
         wmHints->icon_mask = PixmapHelpers::createMaskPixmapFromImage (display, newIcon);
 
-        XSetWMHints (display, windowH, wmHints);
-        XFree (wmHints);
+        X11Symbols::getInstance()->xSetWMHints (display, windowH, wmHints);
+        X11Symbols::getInstance()->xFree (wmHints);
 
-        XSync (display, False);
+        X11Symbols::getInstance()->xSync (display, False);
     }
 
     void deleteIconPixmaps()
     {
         ScopedXLock xlock (display);
 
-        if (auto* wmHints = XGetWMHints (display, windowH))
+        if (auto* wmHints = X11Symbols::getInstance()->xGetWMHints (display, windowH))
         {
             if ((wmHints->flags & IconPixmapHint) != 0)
             {
                 wmHints->flags &= ~IconPixmapHint;
-                XFreePixmap (display, wmHints->icon_pixmap);
+                X11Symbols::getInstance()->xFreePixmap (display, wmHints->icon_pixmap);
             }
 
             if ((wmHints->flags & IconMaskHint) != 0)
             {
                 wmHints->flags &= ~IconMaskHint;
-                XFreePixmap (display, wmHints->icon_mask);
+                X11Symbols::getInstance()->xFreePixmap (display, wmHints->icon_mask);
             }
 
-            XSetWMHints (display, windowH, wmHints);
-            XFree (wmHints);
+            X11Symbols::getInstance()->xSetWMHints (display, windowH, wmHints);
+            X11Symbols::getInstance()->xFree (wmHints);
         }
     }
 
@@ -1686,7 +1528,7 @@ public:
 
             String oldLocale (::setlocale (LC_ALL, nullptr));
             ::setlocale (LC_ALL, "");
-            XLookupString (&keyEvent, utf8, sizeof (utf8), &sym, nullptr);
+            X11Symbols::getInstance()->xLookupString (&keyEvent, utf8, sizeof (utf8), &sym, nullptr);
 
             if (oldLocale.isNotEmpty())
                 ::setlocale (LC_ALL, oldLocale.toRawUTF8());
@@ -1695,7 +1537,8 @@ public:
             keyCode = (int) unicodeChar;
 
             if (keyCode < 0x20)
-                keyCode = (int) XkbKeycodeToKeysym (display, (::KeyCode) keyEvent.keycode, 0, ModifierKeys::currentModifiers.isShiftDown() ? 1 : 0);
+                keyCode = (int) X11Symbols::getInstance()->xkbKeycodeToKeysym (display, (::KeyCode) keyEvent.keycode, 0,
+                                                                               ModifierKeys::currentModifiers.isShiftDown() ? 1 : 0);
 
             keyDownChange = (sym != NoSymbol) && ! updateKeyModifiersFromSym (sym, true);
         }
@@ -1791,10 +1634,10 @@ public:
 
     static bool isKeyReleasePartOfAutoRepeat (const XKeyEvent& keyReleaseEvent)
     {
-        if (XPending (display))
+        if (X11Symbols::getInstance()->xPending (display))
         {
             XEvent e;
-            XPeekEvent (display, &e);
+            X11Symbols::getInstance()->xPeekEvent (display, &e);
 
             // Look for a subsequent key-down event with the same timestamp and keycode
             return e.type == KeyPressEventType
@@ -1814,11 +1657,11 @@ public:
 
             {
                 ScopedXLock xlock (display);
-                sym = XkbKeycodeToKeysym (display, (::KeyCode) keyEvent.keycode, 0, 0);
+                sym = X11Symbols::getInstance()->xkbKeycodeToKeysym (display, (::KeyCode) keyEvent.keycode, 0, 0);
             }
 
             auto oldMods = ModifierKeys::currentModifiers;
-            const bool keyDownChange = (sym != NoSymbol) && ! updateKeyModifiersFromSym (sym, false);
+            auto keyDownChange = (sym != NoSymbol) && ! updateKeyModifiersFromSym (sym, false);
 
             if (oldMods != ModifierKeys::currentModifiers)
                 handleModifierKeysChange();
@@ -1983,9 +1826,9 @@ public:
         if (exposeEvent.window != windowH)
         {
             Window child;
-            XTranslateCoordinates (display, exposeEvent.window, windowH,
-                                   exposeEvent.x, exposeEvent.y, &exposeEvent.x, &exposeEvent.y,
-                                   &child);
+            X11Symbols::getInstance()->xTranslateCoordinates (display, exposeEvent.window, windowH,
+                                                              exposeEvent.x, exposeEvent.y, &exposeEvent.x, &exposeEvent.y,
+                                                              &child);
         }
 
         // exposeEvent is in local window local coordinates so do not convert with
@@ -1993,14 +1836,14 @@ public:
         repaint (Rectangle<int> (exposeEvent.x, exposeEvent.y,
                                  exposeEvent.width, exposeEvent.height) / currentScaleFactor);
 
-        while (XEventsQueued (display, QueuedAfterFlush) > 0)
+        while (X11Symbols::getInstance()->xEventsQueued (display, QueuedAfterFlush) > 0)
         {
-            XPeekEvent (display, &nextEvent);
+            X11Symbols::getInstance()->xPeekEvent (display, &nextEvent);
 
             if (nextEvent.type != Expose || nextEvent.xany.window != exposeEvent.window)
                 break;
 
-            XNextEvent (display, &nextEvent);
+            X11Symbols::getInstance()->xNextEvent (display, &nextEvent);
             auto& nextExposeEvent = (const XExposeEvent&) nextEvent.xexpose;
             repaint (Rectangle<int> (nextExposeEvent.x, nextExposeEvent.y,
                                      nextExposeEvent.width, nextExposeEvent.height) / currentScaleFactor);
@@ -2038,7 +1881,7 @@ public:
         {
             // Deal with modifier/keyboard mapping
             ScopedXLock xlock (display);
-            XRefreshKeyboardMapping (&mappingEvent);
+            X11Symbols::getInstance()->xRefreshKeyboardMapping (&mappingEvent);
             updateModifierMappings();
         }
     }
@@ -2051,12 +1894,12 @@ public:
 
             if (atom == atoms->protocolList [Atoms::PING])
             {
-                Window root = RootWindow (display, DefaultScreen (display));
+                auto root = X11Symbols::getInstance()->xRootWindow (display, X11Symbols::getInstance()->xDefaultScreen (display));
 
                 clientMsg.window = root;
 
-                XSendEvent (display, root, False, NoEventMask, &event);
-                XFlush (display);
+                X11Symbols::getInstance()->xSendEvent (display, root, False, NoEventMask, &event);
+                X11Symbols::getInstance()->xFlush (display);
             }
             else if (atom == atoms->protocolList [Atoms::TAKE_FOCUS])
             {
@@ -2066,14 +1909,14 @@ public:
 
                     ScopedXLock xlock (display);
                     if (clientMsg.window != 0
-                         && XGetWindowAttributes (display, clientMsg.window, &atts))
+                         && X11Symbols::getInstance()->xGetWindowAttributes (display, clientMsg.window, &atts))
                     {
                         if (atts.map_state == IsViewable)
-                            XSetInputFocus (display,
-                                            (clientMsg.window == windowH ? getFocusWindow()
-                                                                         : clientMsg.window),
-                                            RevertToParent,
-                                            (::Time) clientMsg.data.l[1]);
+                            X11Symbols::getInstance()->xSetInputFocus (display,
+                                                                       (clientMsg.window == windowH ? getFocusWindow()
+                                                                                                    : clientMsg.window),
+                                                                       RevertToParent,
+                                                                       (::Time) clientMsg.data.l[1]);
                     }
                 }
             }
@@ -2143,15 +1986,15 @@ public:
     {
         switch (clientMsg.data.l[1])
         {
-            case XEMBED_EMBEDDED_NOTIFY:
+            case 0:   // XEMBED_EMBEDDED_NOTIFY
                 parentWindow = (::Window) clientMsg.data.l[3];
                 updateWindowBounds();
                 component.setBounds (bounds);
                 break;
-            case XEMBED_FOCUS_IN:
+            case 4:   // XEMBED_FOCUS_IN
                 handleFocusInEvent();
                 break;
-            case XEMBED_FOCUS_OUT:
+            case 5:   // XEMBED_FOCUS_OUT
                 handleFocusOutEvent();
                 break;
 
@@ -2164,7 +2007,7 @@ public:
     void showMouseCursor (Cursor cursor) noexcept
     {
         ScopedXLock xlock (display);
-        XDefineCursor (display, windowH, cursor);
+        X11Symbols::getInstance()->xDefineCursor (display, windowH, cursor);
     }
 
     //==============================================================================
@@ -2188,9 +2031,8 @@ public:
 
     void repaintOpenGLContexts()
     {
-        for (int i = 0; i < glRepaintListeners.size(); ++i)
-            if (auto* c = glRepaintListeners [i])
-                c->handleCommandMessage (0);
+        for (auto* c : glRepaintListeners)
+            c->handleCommandMessage (0);
     }
 
     //==============================================================================
@@ -2203,14 +2045,14 @@ public:
             XSetWindowAttributes swa;
             swa.event_mask = KeyPressMask | KeyReleaseMask | FocusChangeMask;
 
-            keyProxy = XCreateWindow (display, windowH,
-                                      -1, -1, 1, 1, 0, 0,
-                                      InputOnly, CopyFromParent,
-                                      CWEventMask,
-                                      &swa);
+            keyProxy = X11Symbols::getInstance()->xCreateWindow (display, windowH,
+                                                                 -1, -1, 1, 1, 0, 0,
+                                                                 InputOnly, CopyFromParent,
+                                                                 CWEventMask,
+                                                                 &swa);
 
-            XMapWindow (display, keyProxy);
-            XSaveContext (display, (XID) keyProxy, windowHandleXContext, (XPointer) this);
+            X11Symbols::getInstance()->xMapWindow (display, keyProxy);
+            X11Symbols::getInstance()->xSaveContext (display, (XID) keyProxy, windowHandleXContext, (XPointer) this);
         }
 
         return keyProxy;
@@ -2224,14 +2066,14 @@ public:
         {
             XPointer handlePointer;
 
-            if (! XFindContext (display, (XID) keyProxy, windowHandleXContext, &handlePointer))
-                XDeleteContext (display, (XID) keyProxy, windowHandleXContext);
+            if (! X11Symbols::getInstance()->xFindContext (display, (XID) keyProxy, windowHandleXContext, &handlePointer))
+                  X11Symbols::getInstance()->xDeleteContext (display, (XID) keyProxy, windowHandleXContext);
 
-            XDestroyWindow (display, keyProxy);
-            XSync (display, false);
+            X11Symbols::getInstance()->xDestroyWindow (display, keyProxy);
+            X11Symbols::getInstance()->xSync (display, false);
 
             XEvent event;
-            while (XCheckWindowEvent (display, keyProxy, getAllEventsMask(), &event) == True)
+            while (X11Symbols::getInstance()->xCheckWindowEvent (display, keyProxy, getAllEventsMask(), &event) == True)
             {}
 
             keyProxy = 0;
@@ -2258,11 +2100,12 @@ private:
                 ScopedXLock xlock (display);
                 XShmSegmentInfo segmentinfo;
 
-                auto testImage = XShmCreateImage (display, DefaultVisual (display, DefaultScreen (display)),
-                                                  24, ZPixmap, nullptr, &segmentinfo, 64, 64);
+                auto testImage = X11Symbols::getInstance()->xShmCreateImage (display,
+                                                                             X11Symbols::getInstance()->xDefaultVisual (display, X11Symbols::getInstance()->xDefaultScreen (display)),
+                                                                             24, ZPixmap, nullptr, &segmentinfo, 64, 64);
 
                 useARGBImagesForRendering = (testImage->bits_per_pixel == 32);
-                XDestroyImage (testImage);
+                X11Symbols::getInstance()->xDestroyImage (testImage);
             }
            #endif
         }
@@ -2275,7 +2118,7 @@ private:
                 ScopedXLock xlock (display);
 
                 XEvent evt;
-                while (XCheckTypedWindowEvent (display, peer.windowH, peer.shmCompletionEvent, &evt))
+                while (X11Symbols::getInstance()->xCheckTypedWindowEvent (display, peer.windowH, peer.shmCompletionEvent, &evt))
                     --shmPaintsPending;
             }
 
@@ -2389,6 +2232,7 @@ private:
         bool useARGBImagesForRendering;
         int shmPaintsPending = 0;
        #endif
+
         JUCE_DECLARE_NON_COPYABLE (LinuxRepaintManager)
     };
 
@@ -2425,8 +2269,8 @@ private:
 
     static void updateKeyStates (int keycode, bool press) noexcept
     {
-        const int keybyte = keycode >> 3;
-        const int keybit = (1 << (keycode & 7));
+        auto keybyte = keycode >> 3;
+        auto keybit = (1 << (keycode & 7));
 
         if (press)
             Keys::keyStates[keybyte] = static_cast<char> (Keys::keyStates[keybyte] | keybit);
@@ -2495,13 +2339,13 @@ private:
     static void updateModifierMappings() noexcept
     {
         ScopedXLock xlock (display);
-        int altLeftCode = XKeysymToKeycode (display, XK_Alt_L);
-        int numLockCode = XKeysymToKeycode (display, XK_Num_Lock);
+        auto altLeftCode = X11Symbols::getInstance()->xKeysymToKeycode (display, XK_Alt_L);
+        auto numLockCode = X11Symbols::getInstance()->xKeysymToKeycode (display, XK_Num_Lock);
 
         Keys::AltMask = 0;
         Keys::NumLockMask = 0;
 
-        if (auto* mapping = XGetModifierMapping (display))
+        if (auto* mapping = X11Symbols::getInstance()->xGetModifierMapping (display))
         {
             for (int modifierIdx = 0; modifierIdx < 8; ++modifierIdx)
             {
@@ -2516,14 +2360,14 @@ private:
                 }
             }
 
-            XFreeModifiermap (mapping);
+            X11Symbols::getInstance()->xFreeModifiermap (mapping);
         }
     }
 
     //==============================================================================
     static void xchangeProperty (Window wndH, Atom property, Atom type, int format, const void* data, int numElements)
     {
-        XChangeProperty (display, wndH, property, type, format, PropModeReplace, (const unsigned char*) data, numElements);
+        X11Symbols::getInstance()->xChangeProperty (display, wndH, property, type, format, PropModeReplace, (const unsigned char*) data, numElements);
     }
 
     void removeWindowDecorations (Window wndH)
@@ -2663,8 +2507,8 @@ private:
         resetDragAndDrop();
 
         // Get defaults for various properties
-        const int screen = DefaultScreen (display);
-        Window root = RootWindow (display, screen);
+        auto screen = X11Symbols::getInstance()->xDefaultScreen (display);
+        auto root = X11Symbols::getInstance()->xRootWindow (display, screen);
 
         parentWindow = parentToAddTo;
 
@@ -2678,8 +2522,8 @@ private:
         }
 
         // Create and install a colormap suitable fr our visual
-        Colormap colormap = XCreateColormap (display, root, visual, AllocNone);
-        XInstallColormap (display, colormap);
+        auto colormap = X11Symbols::getInstance()->xCreateColormap (display, root, visual, AllocNone);
+        X11Symbols::getInstance()->xInstallColormap (display, colormap);
 
         // Set up the window attributes
         XSetWindowAttributes swa;
@@ -2689,30 +2533,32 @@ private:
         swa.override_redirect = ((styleFlags & windowIsTemporary) != 0) ? True : False;
         swa.event_mask = getAllEventsMask();
 
-        windowH = XCreateWindow (display, parentToAddTo != 0 ? parentToAddTo : root,
-                                 0, 0, 1, 1,
-                                 0, depth, InputOutput, visual,
-                                 CWBorderPixel | CWColormap | CWBackPixmap | CWEventMask | CWOverrideRedirect,
-                                 &swa);
+        windowH = X11Symbols::getInstance()->xCreateWindow (display, parentToAddTo != 0 ? parentToAddTo : root,
+                                                            0, 0, 1, 1,
+                                                            0, depth, InputOutput, visual,
+                                                            CWBorderPixel | CWColormap | CWBackPixmap | CWEventMask | CWOverrideRedirect,
+                                                            &swa);
 
         // Set the window context to identify the window handle object
-        if (XSaveContext (display, (XID) windowH, windowHandleXContext, (XPointer) this))
+        if (X11Symbols::getInstance()->xSaveContext (display, (XID) windowH, windowHandleXContext, (XPointer) this))
         {
             // Failed
             jassertfalse;
+
             Logger::outputDebugString ("Failed to create context information for window.\n");
-            XDestroyWindow (display, windowH);
+            X11Symbols::getInstance()->xDestroyWindow (display, windowH);
             windowH = 0;
+
             return;
         }
 
         // Set window manager hints
-        XWMHints* wmHints = XAllocWMHints();
+        XWMHints* wmHints = X11Symbols::getInstance()->xAllocWMHints();
         wmHints->flags = InputHint | StateHint;
         wmHints->input = True;      // Locally active input model
         wmHints->initial_state = NormalState;
-        XSetWMHints (display, windowH, wmHints);
-        XFree (wmHints);
+        X11Symbols::getInstance()->xSetWMHints (display, windowH, wmHints);
+        X11Symbols::getInstance()->xFree (wmHints);
 
         // Set the window type
         setWindowType();
@@ -2726,7 +2572,7 @@ private:
         setTitle (component.getName());
 
         // Associate the PID, allowing to be shut down when something goes wrong
-        unsigned long pid = (unsigned long) getpid();
+        auto pid = (unsigned long) getpid();
         xchangeProperty (windowH, atoms->pid, XA_CARDINAL, 32, &pid, 1);
 
         // Set window manager protocols
@@ -2746,7 +2592,7 @@ private:
 
        #if JUCE_USE_XSHM
         if (XSHMHelpers::isShmAvailable (display))
-            shmCompletionEvent = XShmGetEventBase (display) + ShmCompletion;
+            shmCompletionEvent = X11Symbols::getInstance()->xShmGetEventBase (display) + ShmCompletion;
        #endif
     }
 
@@ -2759,17 +2605,17 @@ private:
         if (keyProxy != 0)
             deleteKeyProxy();
 
-        if (! XFindContext (display, (XID) windowH, windowHandleXContext, &handlePointer))
-            XDeleteContext (display, (XID) windowH, windowHandleXContext);
+        if (! X11Symbols::getInstance()->xFindContext (display, (XID) windowH, windowHandleXContext, &handlePointer))
+            X11Symbols::getInstance()->xDeleteContext (display, (XID) windowH, windowHandleXContext);
 
-        XDestroyWindow (display, windowH);
+        X11Symbols::getInstance()->xDestroyWindow (display, windowH);
 
         // Wait for it to complete and then remove any events for this
         // window from the event queue.
-        XSync (display, false);
+        X11Symbols::getInstance()->xSync (display, false);
 
         XEvent event;
-        while (XCheckWindowEvent (display, windowH, getAllEventsMask(), &event) == True)
+        while (X11Symbols::getInstance()->xCheckWindowEvent (display, windowH, getAllEventsMask(), &event) == True)
         {}
     }
 
@@ -2805,7 +2651,7 @@ private:
         if (! prop.success)
             return 0;
 
-        long result;
+        long result = 0;
         memcpy (&result, prop.data, sizeof (long));
 
         return result;
@@ -2820,7 +2666,7 @@ private:
         else if (windowBorder.getTopAndBottom() == 0 && windowBorder.getLeftAndRight() == 0)
         {
             ScopedXLock xlock (display);
-            Atom hints = Atoms::getIfExists (display, "_NET_FRAME_EXTENTS");
+            auto hints = Atoms::getIfExists (display, "_NET_FRAME_EXTENTS");
 
             if (hints != None)
             {
@@ -2855,11 +2701,11 @@ private:
 
             ScopedXLock xlock (display);
 
-            if (XGetGeometry (display, (::Drawable) windowH, &root, &wx, &wy, &ww, &wh, &bw, &bitDepth))
+            if (X11Symbols::getInstance()->xGetGeometry (display, (::Drawable) windowH, &root, &wx, &wy, &ww, &wh, &bw, &bitDepth))
             {
                 int rootX = 0, rootY = 0;
 
-                if (! XTranslateCoordinates (display, windowH, root, 0, 0, &rootX, &rootY, &child))
+                if (! X11Symbols::getInstance()->xTranslateCoordinates (display, windowH, root, 0, 0, &rootX, &rootY, &child))
                     rootX = rootY = 0;
 
                 if (parentWindow == 0)
@@ -2930,7 +2776,7 @@ private:
         msg.data.l[0] = (long) windowH;
 
         ScopedXLock xlock (display);
-        XSendEvent (display, dragAndDropSourceWindow, False, 0, (XEvent*) &msg);
+        X11Symbols::getInstance()->xSendEvent (display, dragAndDropSourceWindow, False, 0, (XEvent*) &msg);
     }
 
     bool sendExternalDragAndDropMessage (XClientMessageEvent& msg, Window targetWindow)
@@ -2942,7 +2788,7 @@ private:
         msg.data.l[0] = (long) windowH;
 
         ScopedXLock xlock (display);
-        return XSendEvent (display, targetWindow, False, 0, (XEvent*) &msg) != 0;
+        return X11Symbols::getInstance()->xSendEvent (display, targetWindow, False, 0, (XEvent*) &msg) != 0;
     }
 
     void sendExternalDragAndDropDrop (Window targetWindow)
@@ -2977,7 +2823,7 @@ private:
 
         msg.message_type = atoms->XdndPosition;
 
-        Point<int> mousePos (Desktop::getInstance().getMousePosition());
+        auto mousePos = Desktop::getInstance().getMousePosition();
 
         if (dragState->silentRect.contains (mousePos)) // we've been asked to keep silent
             return;
@@ -3052,7 +2898,7 @@ private:
                              (int) dragState->textOrFiles.getNumBytesAsUTF8());
         }
 
-        XSendEvent (display, evt.xselectionrequest.requestor, True, 0, &s);
+        X11Symbols::getInstance()->xSendEvent (display, evt.xselectionrequest.requestor, True, 0, &s);
     }
 
     void handleExternalDragAndDropStatus (const XClientMessageEvent& clientMsg)
@@ -3069,9 +2915,9 @@ private:
             {
                 if ((clientMsg.data.l[1] & 2) == 0) // target requests silent rectangle
                     dragState->silentRect.setBounds ((int) clientMsg.data.l[2] >> 16,
-                                                    (int) clientMsg.data.l[2] & 0xffff,
-                                                    (int) clientMsg.data.l[3] >> 16,
-                                                    (int) clientMsg.data.l[3] & 0xffff);
+                                                     (int) clientMsg.data.l[2] & 0xffff,
+                                                     (int) clientMsg.data.l[3] >> 16,
+                                                     (int) clientMsg.data.l[3] & 0xffff);
 
                 dragState->canDrop = true;
             }
@@ -3081,7 +2927,7 @@ private:
     void handleExternalDragButtonReleaseEvent()
     {
         if (dragState->dragging)
-            XUngrabPointer (display, CurrentTime);
+            X11Symbols::getInstance()->xUngrabPointer (display, CurrentTime);
 
         if (dragState->canDrop)
         {
@@ -3096,7 +2942,8 @@ private:
 
     void handleExternalDragMotionNotify()
     {
-        Window targetWindow = externalFindDragTargetWindow (RootWindow (display, DefaultScreen (display)));
+        auto targetWindow = externalFindDragTargetWindow (X11Symbols::getInstance()->xRootWindow (display,
+                                                                                                  X11Symbols::getInstance()->xDefaultScreen (display)));
 
         if (dragState->targetWindow != targetWindow)
         {
@@ -3104,7 +2951,7 @@ private:
                 sendExternalDragAndDropLeave (dragState->targetWindow);
 
             dragState->canDrop = false;
-            dragState->silentRect = Rectangle<int>();
+            dragState->silentRect = {};
 
             if (targetWindow == None)
                 return;
@@ -3135,7 +2982,7 @@ private:
         dropPos = Desktop::getInstance().getDisplays().physicalToLogical (dropPos);
         dropPos -= bounds.getPosition();
 
-        Atom targetAction = atoms->XdndActionCopy;
+        auto targetAction = atoms->XdndActionCopy;
 
         for (int i = numElementsInArray (atoms->allowedActions); --i >= 0;)
         {
@@ -3301,19 +3148,19 @@ private:
              && dragAndDropCurrentMimeType != None)
         {
             ScopedXLock xlock (display);
-            XConvertSelection (display,
-                               atoms->XdndSelection,
-                               dragAndDropCurrentMimeType,
-                               Atoms::getCreating (display, "JXSelectionWindowProperty"),
-                               windowH,
-                               (::Time) clientMsg.data.l[2]);
+            X11Symbols::getInstance()->xConvertSelection (display,
+                                                          atoms->XdndSelection,
+                                                          dragAndDropCurrentMimeType,
+                                                          Atoms::getCreating (display, "JXSelectionWindowProperty"),
+                                                          windowH,
+                                                          (::Time) clientMsg.data.l[2]);
         }
     }
 
     bool isWindowDnDAware (Window w) const
     {
         int numProperties = 0;
-        auto* properties = XListProperties (display, w, &numProperties);
+        auto* properties = X11Symbols::getInstance()->xListProperties (display, w, &numProperties);
         bool dndAwarePropFound = false;
 
         for (int i = 0; i < numProperties; ++i)
@@ -3321,7 +3168,7 @@ private:
                 dndAwarePropFound = true;
 
         if (properties != nullptr)
-            XFree (properties);
+            X11Symbols::getInstance()->xFree (properties);
 
         return dndAwarePropFound;
     }
@@ -3349,8 +3196,8 @@ private:
         int phony;
         unsigned int uphony;
 
-        XQueryPointer (display, targetWindow, &phonyWin, &child,
-                       &phony, &phony, &phony, &phony, &uphony);
+        X11Symbols::getInstance()->xQueryPointer (display, targetWindow, &phonyWin, &child,
+                                                  &phony, &phony, &phony, &phony, &uphony);
 
         return externalFindDragTargetWindow (child);
     }
@@ -3365,15 +3212,15 @@ private:
         dragState->targetWindow = windowH;
         dragState->completionCallback = cb;
 
-        const int pointerGrabMask = Button1MotionMask | ButtonReleaseMask;
+        auto pointerGrabMask = (unsigned int) (Button1MotionMask | ButtonReleaseMask);
 
-        if (XGrabPointer (display, windowH, True, pointerGrabMask,
-                          GrabModeAsync, GrabModeAsync, None, None, CurrentTime) == GrabSuccess)
+        if (X11Symbols::getInstance()->xGrabPointer (display, windowH, True, pointerGrabMask,
+                                                     GrabModeAsync, GrabModeAsync, None, None, CurrentTime) == GrabSuccess)
         {
             // No other method of changing the pointer seems to work, this call is needed from this very context
-            XChangeActivePointerGrab (display, pointerGrabMask, (Cursor) createDraggingHandCursor(), CurrentTime);
+            X11Symbols::getInstance()->xChangeActivePointerGrab (display, pointerGrabMask, (Cursor) createDraggingHandCursor(), CurrentTime);
 
-            XSetSelectionOwner (display, atoms->XdndSelection, windowH, CurrentTime);
+            X11Symbols::getInstance()->xSetSelectionOwner (display, atoms->XdndSelection, windowH, CurrentTime);
 
             // save the available types to XdndTypeList
             xchangeProperty (windowH, atoms->XdndTypeList, XA_ATOM, 32,
@@ -3397,7 +3244,7 @@ private:
         if (dragState->dragging)
         {
             ScopedXLock xlock (display);
-            XUngrabPointer (display, CurrentTime);
+            X11Symbols::getInstance()->xUngrabPointer (display, CurrentTime);
         }
 
         if (dragState->completionCallback != nullptr)
@@ -3418,7 +3265,7 @@ private:
 
     void initialisePointerMap()
     {
-        const int numButtons = XGetPointerMapping (display, nullptr, 0);
+        auto numButtons = X11Symbols::getInstance()->xGetPointerMapping (display, nullptr, 0);
         pointerMap[2] = pointerMap[3] = pointerMap[4] = Keys::NoButton;
 
         if (numButtons == 2)
@@ -3525,7 +3372,7 @@ void Displays::findDisplays (float masterScale)
         {
             if (hints != None)
             {
-                GetXProperty prop (display, RootWindow (display, screenNum), hints, 0, 4, false, XA_CARDINAL);
+                GetXProperty prop (display, X11Symbols::getInstance()->xRootWindow (display, screenNum), hints, 0, 4, false, XA_CARDINAL);
 
                 if (prop.success && prop.actualType == XA_CARDINAL && prop.actualFormat == 32 && prop.numItems == 4)
                     return prop.data;
@@ -3538,19 +3385,18 @@ void Displays::findDisplays (float masterScale)
         {
             int major_opcode, first_event, first_error;
 
-            if (XQueryExtension (display, "RANDR", &major_opcode, &first_event, &first_error))
+            if (X11Symbols::getInstance()->xQueryExtension (display, "RANDR", &major_opcode, &first_event, &first_error))
             {
-                auto& xrandr = XRandrWrapper::getInstance();
-
-                auto numMonitors = ScreenCount (display);
-                auto mainDisplay = xrandr.getOutputPrimary (display, RootWindow (display, 0));
+                auto numMonitors = X11Symbols::getInstance()->xScreenCount (display);
+                auto mainDisplay = X11Symbols::getInstance()->xRRGetOutputPrimary (display, X11Symbols::getInstance()->xRootWindow (display, 0));
 
                 for (int i = 0; i < numMonitors; ++i)
                 {
                     if (getWorkAreaPropertyData (i) == nullptr)
                         continue;
 
-                    if (auto* screens = xrandr.getScreenResources (display, RootWindow (display, i)))
+                    if (auto* screens = X11Symbols::getInstance()->xRRGetScreenResources (display,
+                                                                                          X11Symbols::getInstance()->xRootWindow (display, i)))
                     {
                         for (int j = 0; j < screens->noutput; ++j)
                         {
@@ -3561,15 +3407,14 @@ void Displays::findDisplays (float masterScale)
                                 if (! mainDisplay)
                                     mainDisplay = screens->outputs[j];
 
-                                if (auto* output = xrandr.getOutputInfo (display, screens, screens->outputs[j]))
+                                if (auto* output = X11Symbols::getInstance()->xRRGetOutputInfo (display, screens, screens->outputs[j]))
                                 {
                                     if (output->crtc)
                                     {
-                                        if (auto* crtc = xrandr.getCrtcInfo (display, screens, output->crtc))
+                                        if (auto* crtc = X11Symbols::getInstance()->xRRGetCrtcInfo (display, screens, output->crtc))
                                         {
                                             Display d;
-                                            d.totalArea = Rectangle<int> (crtc->x, crtc->y,
-                                                                          (int) crtc->width, (int) crtc->height);
+                                            d.totalArea = { crtc->x, crtc->y, (int) crtc->width, (int) crtc->height };
                                             d.isMain = (mainDisplay == screens->outputs[j]) && (i == 0);
                                             d.dpi = getDisplayDPI (display, 0);
 
@@ -3578,7 +3423,7 @@ void Displays::findDisplays (float masterScale)
                                                 d.dpi = ((static_cast<double> (crtc->width)  * 25.4 * 0.5) / static_cast<double> (output->mm_width))
                                                       + ((static_cast<double> (crtc->height) * 25.4 * 0.5) / static_cast<double> (output->mm_height));
 
-                                            double scale = getScaleForDisplay (output->name, d.dpi);
+                                            auto scale = getScaleForDisplay (output->name, d.dpi);
                                             scale = (scale <= 0.1 ? 1.0 : scale);
 
                                             d.scale = masterScale * scale;
@@ -3588,16 +3433,16 @@ void Displays::findDisplays (float masterScale)
                                             else
                                                 displays.add (d);
 
-                                            xrandr.freeCrtcInfo (crtc);
+                                            X11Symbols::getInstance()->xRRFreeCrtcInfo (crtc);
                                         }
                                     }
 
-                                    xrandr.freeOutputInfo (output);
+                                    X11Symbols::getInstance()->xRRFreeOutputInfo (output);
                                 }
                             }
                         }
 
-                        xrandr.freeScreenResources (screens);
+                        X11Symbols::getInstance()->xRRFreeScreenResources (screens);
                     }
                 }
 
@@ -3611,19 +3456,17 @@ void Displays::findDisplays (float masterScale)
        #if JUCE_USE_XINERAMA
         {
             auto screens = XineramaQueryDisplays (display);
-            int numMonitors = screens.size();
+            auto numMonitors = screens.size();
 
             for (int index = 0; index < numMonitors; ++index)
             {
-                for (int j = numMonitors; --j >= 0;)
+                for (auto j = numMonitors; --j >= 0;)
                 {
                     if (screens[j].screen_number == index)
                     {
                         Display d;
-                        d.totalArea = Rectangle<int> (screens[j].x_org,
-                                                      screens[j].y_org,
-                                                      screens[j].width,
-                                                      screens[j].height);
+                        d.totalArea = { screens[j].x_org, screens[j].y_org,
+                                        screens[j].width, screens[j].height };
                         d.isMain = (index == 0);
                         d.scale = masterScale;
                         d.dpi = getDisplayDPI (display, 0); // (all screens share the same DPI)
@@ -3639,7 +3482,7 @@ void Displays::findDisplays (float masterScale)
         {
             if (hints != None)
             {
-                auto numMonitors = ScreenCount (display);
+                auto numMonitors = X11Symbols::getInstance()->xScreenCount (display);
 
                 for (int i = 0; i < numMonitors; ++i)
                 {
@@ -3654,8 +3497,8 @@ void Displays::findDisplays (float masterScale)
                         }
 
                         Display d;
-                        d.totalArea = Rectangle<int> ((int) position[0], (int) position[1],
-                                                      (int) position[2], (int) position[3]);
+                        d.totalArea = { (int) position[0], (int) position[1],
+                                        (int) position[2], (int) position[3] };
                         d.isMain = displays.isEmpty();
                         d.scale = masterScale;
                         d.dpi = getDisplayDPI (display, i);
@@ -3668,8 +3511,8 @@ void Displays::findDisplays (float masterScale)
             if (displays.isEmpty())
             {
                 Display d;
-                d.totalArea = Rectangle<int> (DisplayWidth  (display, DefaultScreen (display)),
-                                              DisplayHeight (display, DefaultScreen (display)));
+                d.totalArea = { X11Symbols::getInstance()->xDisplayWidth  (display, X11Symbols::getInstance()->xDefaultScreen (display)),
+                                X11Symbols::getInstance()->xDisplayHeight (display, X11Symbols::getInstance()->xDefaultScreen (display)) };
                 d.isMain = true;
                 d.scale = masterScale;
                 d.dpi = getDisplayDPI (display, 0);
@@ -3733,10 +3576,10 @@ Point<float> MouseInputSource::getCurrentRawMousePosition()
 
     ScopedXLock xlock (display);
 
-    if (XQueryPointer (display,
-                       RootWindow (display, DefaultScreen (display)),
-                       &root, &child,
-                       &x, &y, &winx, &winy, &mask) == False)
+    if (X11Symbols::getInstance()->xQueryPointer (display,
+                                                  X11Symbols::getInstance()->xRootWindow (display, X11Symbols::getInstance()->xDefaultScreen (display)),
+                                                  &root, &child,
+                                                  &x, &y, &winx, &winy, &mask) == False)
     {
         // Pointer not on the default screen
         x = y = -1;
@@ -3752,9 +3595,10 @@ void MouseInputSource::setRawMousePosition (Point<float> newPosition)
     if (auto display = xDisplay.display)
     {
         ScopedXLock xlock (display);
-        Window root = RootWindow (display, DefaultScreen (display));
+
+        auto root = X11Symbols::getInstance()->xRootWindow (display, X11Symbols::getInstance()->xDefaultScreen (display));
         newPosition = Desktop::getInstance().getDisplays().logicalToPhysical (newPosition);
-        XWarpPointer (display, None, root, 0, 0, 0, 0, roundToInt (newPosition.getX()), roundToInt (newPosition.getY()));
+        X11Symbols::getInstance()->xWarpPointer (display, None, root, 0, 0, 0, 0, roundToInt (newPosition.getX()), roundToInt (newPosition.getY()));
     }
 }
 
@@ -3781,7 +3625,7 @@ void Desktop::setScreenSaverEnabled (bool isEnabled)
 
         if (auto display = xDisplay.display)
         {
-            typedef void (*tXScreenSaverSuspend) (Display*, Bool);
+            using tXScreenSaverSuspend = void (*) (Display*, Bool);
             static tXScreenSaverSuspend xScreenSaverSuspend = nullptr;
 
             if (xScreenSaverSuspend == nullptr)
@@ -3789,6 +3633,7 @@ void Desktop::setScreenSaverEnabled (bool isEnabled)
                     xScreenSaverSuspend = (tXScreenSaverSuspend) dlsym (h, "XScreenSaverSuspend");
 
             ScopedXLock xlock (display);
+
             if (xScreenSaverSuspend != nullptr)
                 xScreenSaverSuspend (display, ! isEnabled);
         }
@@ -3907,68 +3752,34 @@ void* CustomMouseCursorInfo::create() const
     ScopedXLock xlock (display);
     auto imageW = (unsigned int) image.getWidth();
     auto imageH = (unsigned int) image.getHeight();
-    int hotspotX = hotspot.x;
-    int hotspotY = hotspot.y;
+    auto hotspotX = hotspot.x;
+    auto hotspotY = hotspot.y;
 
   #if JUCE_USE_XCURSOR
+    if (auto* xcImage = X11Symbols::getInstance()->xcursorImageCreate ((int) imageW, (int) imageH))
     {
-        using tXcursorSupportsARGB    = XcursorBool (*) (Display*);
-        using tXcursorImageCreate     = XcursorImage* (*) (int, int);
-        using tXcursorImageDestroy    = void (*) (XcursorImage*);
-        using tXcursorImageLoadCursor = Cursor (*) (Display*, const XcursorImage*);
+        xcImage->xhot = (XcursorDim) hotspotX;
+        xcImage->yhot = (XcursorDim) hotspotY;
+        auto* dest = xcImage->pixels;
 
-        static tXcursorSupportsARGB    xcursorSupportsARGB    = nullptr;
-        static tXcursorImageCreate     xcursorImageCreate     = nullptr;
-        static tXcursorImageDestroy    xcursorImageDestroy    = nullptr;
-        static tXcursorImageLoadCursor xcursorImageLoadCursor = nullptr;
-        static bool hasBeenLoaded = false;
+        for (int y = 0; y < (int) imageH; ++y)
+            for (int x = 0; x < (int) imageW; ++x)
+                *dest++ = image.getPixelAt (x, y).getARGB();
 
-        if (! hasBeenLoaded)
+        auto* result = (void*) X11Symbols::getInstance()->xcursorImageLoadCursor (display, xcImage);
+        X11Symbols::getInstance()->xcursorImageDestroy (xcImage);
+
+        if (result != nullptr)
         {
-            hasBeenLoaded = true;
-
-            if (void* h = dlopen ("libXcursor.so.1", RTLD_GLOBAL | RTLD_NOW))
-            {
-                xcursorSupportsARGB    = (tXcursorSupportsARGB)    dlsym (h, "XcursorSupportsARGB");
-                xcursorImageCreate     = (tXcursorImageCreate)     dlsym (h, "XcursorImageCreate");
-                xcursorImageLoadCursor = (tXcursorImageLoadCursor) dlsym (h, "XcursorImageLoadCursor");
-                xcursorImageDestroy    = (tXcursorImageDestroy)    dlsym (h, "XcursorImageDestroy");
-
-                if (xcursorSupportsARGB == nullptr || xcursorImageCreate == nullptr
-                      || xcursorImageLoadCursor == nullptr || xcursorImageDestroy == nullptr
-                      || ! xcursorSupportsARGB (display))
-                    xcursorSupportsARGB = nullptr;
-            }
-        }
-
-        if (xcursorSupportsARGB != nullptr)
-        {
-            if (XcursorImage* xcImage = xcursorImageCreate ((int) imageW, (int) imageH))
-            {
-                xcImage->xhot = (XcursorDim) hotspotX;
-                xcImage->yhot = (XcursorDim) hotspotY;
-                XcursorPixel* dest = xcImage->pixels;
-
-                for (int y = 0; y < (int) imageH; ++y)
-                    for (int x = 0; x < (int) imageW; ++x)
-                        *dest++ = image.getPixelAt (x, y).getARGB();
-
-                void* result = (void*) xcursorImageLoadCursor (display, xcImage);
-                xcursorImageDestroy (xcImage);
-
-                if (result != nullptr)
-                {
-                    cursorMap[(Cursor) result] = display;
-                    return result;
-                }
-            }
+            cursorMap[(Cursor) result] = display;
+            return result;
         }
     }
   #endif
 
-    Window root = RootWindow (display, DefaultScreen (display));
+    auto root = X11Symbols::getInstance()->xRootWindow (display, X11Symbols::getInstance()->xDefaultScreen (display));
     unsigned int cursorW, cursorH;
-    if (! XQueryBestCursor (display, root, imageW, imageH, &cursorW, &cursorH))
+    if (! X11Symbols::getInstance()->xQueryBestCursor (display, root, imageW, imageH, &cursorW, &cursorH))
         return nullptr;
 
     Image im (Image::ARGB, (int) cursorW, (int) cursorH, true);
@@ -3990,16 +3801,16 @@ void* CustomMouseCursorInfo::create() const
         }
     }
 
-    const unsigned int stride = (cursorW + 7) >> 3;
+    auto stride = (cursorW + 7) >> 3;
     HeapBlock<char> maskPlane, sourcePlane;
     maskPlane.calloc (stride * cursorH);
     sourcePlane.calloc (stride * cursorH);
 
-    const bool msbfirst = (BitmapBitOrder (display) == MSBFirst);
+    auto msbfirst = (X11Symbols::getInstance()->xBitmapBitOrder (display) == MSBFirst);
 
-    for (int y = (int) cursorH; --y >= 0;)
+    for (auto y = (int) cursorH; --y >= 0;)
     {
-        for (int x = (int) cursorW; --x >= 0;)
+        for (auto x = (int) cursorW; --x >= 0;)
         {
             auto mask = (char) (1 << (msbfirst ? (7 - (x & 7)) : (x & 7)));
             auto offset = (unsigned int) y * stride + ((unsigned int) x >> 3);
@@ -4011,18 +3822,18 @@ void* CustomMouseCursorInfo::create() const
         }
     }
 
-    Pixmap sourcePixmap = XCreatePixmapFromBitmapData (display, root, sourcePlane.getData(), cursorW, cursorH, 0xffff, 0, 1);
-    Pixmap maskPixmap   = XCreatePixmapFromBitmapData (display, root, maskPlane.getData(),   cursorW, cursorH, 0xffff, 0, 1);
+    auto sourcePixmap = X11Symbols::getInstance()->xCreatePixmapFromBitmapData (display, root, sourcePlane.getData(), cursorW, cursorH, 0xffff, 0, 1);
+    auto maskPixmap   = X11Symbols::getInstance()->xCreatePixmapFromBitmapData (display, root, maskPlane.getData(),   cursorW, cursorH, 0xffff, 0, 1);
 
     XColor white, black;
     black.red = black.green = black.blue = 0;
     white.red = white.green = white.blue = 0xffff;
 
-    void* result = (void*) XCreatePixmapCursor (display, sourcePixmap, maskPixmap, &white, &black,
-                                                (unsigned int) hotspotX, (unsigned int) hotspotY);
+    auto* result = (void*) X11Symbols::getInstance()->xCreatePixmapCursor (display, sourcePixmap, maskPixmap, &white, &black,
+                                                                           (unsigned int) hotspotX, (unsigned int) hotspotY);
 
-    XFreePixmap (display, sourcePixmap);
-    XFreePixmap (display, maskPixmap);
+    X11Symbols::getInstance()->xFreePixmap (display, sourcePixmap);
+    X11Symbols::getInstance()->xFreePixmap (display, maskPixmap);
 
     cursorMap[(Cursor) result] = display;
     return result;
@@ -4039,7 +3850,7 @@ void MouseCursor::deleteMouseCursor (void* cursorHandle, bool)
             ScopedXLock xlock (display);
 
             cursorMap.erase ((Cursor) cursorHandle);
-            XFreeCursor (display, (Cursor) cursorHandle);
+            X11Symbols::getInstance()->xFreeCursor (display, (Cursor) cursorHandle);
         }
     }
 }
@@ -4079,10 +3890,12 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
 
         case CopyingCursor:
         {
-            static unsigned char copyCursorData[] = { 71,73,70,56,57,97,21,0,21,0,145,0,0,0,0,0,255,255,255,0,
-              128,128,255,255,255,33,249,4,1,0,0,3,0,44,0,0,0,0,21,0, 21,0,0,2,72,4,134,169,171,16,199,98,11,79,90,71,161,93,56,111,
-              78,133,218,215,137,31,82,154,100,200,86,91,202,142,12,108,212,87,235,174, 15,54,214,126,237,226,37,96,59,141,16,37,18,201,142,157,230,204,51,112,
-              252,114,147,74,83,5,50,68,147,208,217,16,71,149,252,124,5,0,59,0,0 };
+            static unsigned char copyCursorData[] = {
+                71,73,70,56,57,97,21,0,21,0,145,0,0,0,0,0,255,255,255,0,128,128,255,255,255,33,249,4,1,0,0,3,0,44,0,0,0,0,
+                21,0,21,0,0,2,72,4,134,169,171,16,199,98,11,79,90,71,161,93,56,111,78,133,218,215,137,31,82,154,100,200,
+                86,91,202,142,12,108,212,87,235,174,15,54,214,126,237,226,37,96,59,141,16,37,18,201,142,157,230,204,51,112,
+                252,114,147,74,83,5,50,68,147,208,217,16,71,149,252,124,5,0,59,0,0
+            };
             const int copyCursorSize = 119;
 
             return CustomMouseCursorInfo (ImageFileFormat::loadFrom (copyCursorData, copyCursorSize), { 1, 3 }).create();
@@ -4090,13 +3903,15 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
 
         case NumStandardCursorTypes:
         default:
+        {
             jassertfalse;
             return None;
+        }
     }
 
     ScopedXLock xlock (display);
 
-    auto* result = (void*) XCreateFontCursor (display, shape);
+    auto* result = (void*) X11Symbols::getInstance()->xCreateFontCursor (display, shape);
     cursorMap[(Cursor) result] = display;
 
     return result;

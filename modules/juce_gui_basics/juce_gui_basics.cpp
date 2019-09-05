@@ -33,6 +33,7 @@
 #define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
 #define JUCE_EVENTS_INCLUDE_WIN32_MESSAGE_WINDOW 1
 #define JUCE_GRAPHICS_INCLUDE_COREGRAPHICS_HELPERS 1
+#define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
 
 #include "juce_gui_basics.h"
 
@@ -79,48 +80,6 @@
    #pragma comment (lib, "D2d1.lib")
   #endif
  #endif
-
-//==============================================================================
-#elif JUCE_LINUX
- #include <X11/Xlib.h>
- #include <X11/Xatom.h>
- #include <X11/Xresource.h>
- #include <X11/Xutil.h>
- #include <X11/Xmd.h>
- #include <X11/keysym.h>
- #include <X11/XKBlib.h>
- #include <X11/cursorfont.h>
- #include <unistd.h>
-
- #if JUCE_USE_XRANDR
-  /* If you're trying to use Xrandr, you'll need to install the "libxrandr-dev" package..  */
-  #include <X11/extensions/Xrandr.h>
- #endif
-
- #if JUCE_USE_XINERAMA
-  /* If you're trying to use Xinerama, you'll need to install the "libxinerama-dev" package..  */
-  #include <X11/extensions/Xinerama.h>
- #endif
-
- #if JUCE_USE_XSHM
-  #include <X11/extensions/XShm.h>
-  #include <sys/shm.h>
-  #include <sys/ipc.h>
- #endif
-
- #if JUCE_USE_XRENDER
-  // If you're missing these headers, try installing the libxrender-dev and libxcomposite-dev
-  #include <X11/extensions/Xrender.h>
-  #include <X11/extensions/Xcomposite.h>
- #endif
-
- #if JUCE_USE_XCURSOR
-  // If you're missing this header, try installing the libxcursor-dev package
-  #include <X11/Xcursor/Xcursor.h>
- #endif
-
- #undef SIZEOF
- #undef KeyPress
 #endif
 
 #include <set>
@@ -291,6 +250,7 @@ namespace juce
  #include "native/juce_win32_FileChooser.cpp"
 
 #elif JUCE_LINUX
+ #include "native/juce_linux_X11Symbols.cpp"
  #include "native/juce_linux_X11.cpp"
  #include "native/juce_linux_X11_Clipboard.cpp"
 

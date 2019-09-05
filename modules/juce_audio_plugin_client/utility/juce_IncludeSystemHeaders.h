@@ -29,19 +29,10 @@
  #ifdef __INTEL_COMPILER
   #pragma warning (disable : 1899)
  #endif
-
 #elif JUCE_LINUX
  #include <float.h>
  #include <sys/time.h>
- #include <X11/Xlib.h>
- #include <X11/Xutil.h>
- #include <X11/Xatom.h>
- #undef Font
- #undef KeyPress
- #undef Drawable
- #undef Time
-#elif JUCE_ANDROID
-#else
+#elif JUCE_MAC || JUCE_IOS
  #if ! (defined (JUCE_SUPPORT_CARBON) || defined (__LP64__))
   #define JUCE_SUPPORT_CARBON 1
  #endif

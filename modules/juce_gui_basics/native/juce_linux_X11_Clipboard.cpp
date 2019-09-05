@@ -57,11 +57,11 @@ namespace ClipboardHelpers
             int actualFormat;
             unsigned long numItems, bytesLeft;
 
-            if (XGetWindowProperty (display, window, prop,
-                                    0L /* offset */, 1000000 /* length (max) */, False,
-                                    AnyPropertyType /* format */,
-                                    &actualType, &actualFormat, &numItems, &bytesLeft,
-                                    (unsigned char**) &clipData) == Success)
+            if (X11Symbols::getInstance()->xGetWindowProperty (display, window, prop,
+                                                               0L /* offset */, 1000000 /* length (max) */, False,
+                                                               AnyPropertyType /* format */,
+                                                               &actualType, &actualFormat, &numItems, &bytesLeft,
+                                                               (unsigned char**) &clipData) == Success)
             {
                 if (actualType == atom_UTF8_STRING && actualFormat == 8)
                     returnData = String::fromUTF8 (clipData, (int) numItems);
@@ -69,12 +69,12 @@ namespace ClipboardHelpers
                     returnData = String (clipData, numItems);
 
                 if (clipData != nullptr)
-                    XFree (clipData);
+                    X11Symbols::getInstance()->xFree (clipData);
 
                 jassert (bytesLeft == 0 || numItems == 1000000);
             }
 
-            XDeleteProperty (display, window, prop);
+            X11Symbols::getInstance()->xDeleteProperty (display, window, prop);
         }
 
         return returnData;
@@ -85,12 +85,12 @@ namespace ClipboardHelpers
     static bool requestSelectionContent (::Display* display, String& selectionContent,
                                          Atom selection, Atom requestedFormat)
     {
-        Atom property_name = XInternAtom (display, "JUCE_SEL", false);
+        auto property_name = X11Symbols::getInstance()->xInternAtom (display, "JUCE_SEL", false);
 
         // The selection owner will be asked to set the JUCE_SEL property on the
         // juce_messageWindowHandle with the selection content
-        XConvertSelection (display, selection, requestedFormat, property_name,
-                           juce_messageWindowHandle, CurrentTime);
+        X11Symbols::getInstance()->xConvertSelection (display, selection, requestedFormat, property_name,
+                                                      juce_messageWindowHandle, CurrentTime);
 
         int count = 50; // will wait at most for 200 ms
 
@@ -98,7 +98,7 @@ namespace ClipboardHelpers
         {
             XEvent event;
 
-            if (XCheckTypedWindowEvent (display, juce_messageWindowHandle, SelectionNotify, &event))
+            if (X11Symbols::getInstance()->xCheckTypedWindowEvent (display, juce_messageWindowHandle, SelectionNotify, &event))
             {
                 if (event.xselection.property == property_name)
                 {
@@ -176,15 +176,15 @@ namespace ClipboardHelpers
             // for very big chunks of data, we should use the "INCR" protocol , which is a pain in the *ss
             if (evt.property != None && numDataItems < maxReasonableSelectionSize)
             {
-                XChangeProperty (evt.display, evt.requestor,
-                                 evt.property, evt.target,
-                                 propertyFormat /* 8 or 32 */, PropModeReplace,
-                                 reinterpret_cast<const unsigned char*> (data.getData()), (int) numDataItems);
+                X11Symbols::getInstance()->xChangeProperty (evt.display, evt.requestor,
+                                                            evt.property, evt.target,
+                                                            propertyFormat /* 8 or 32 */, PropModeReplace,
+                                                            reinterpret_cast<const unsigned char*> (data.getData()), (int) numDataItems);
                 reply.property = evt.property; // " == success"
             }
         }
 
-        XSendEvent (evt.display, evt.requestor, 0, NoEventMask, (XEvent*) &reply);
+        X11Symbols::getInstance()->xSendEvent (evt.display, evt.requestor, 0, NoEventMask, (XEvent*) &reply);
     }
 }
 
@@ -212,8 +212,8 @@ void SystemClipboard::copyTextToClipboard (const String& clipText)
         ClipboardHelpers::initSelectionAtoms (display);
         ClipboardHelpers::localClipboardContent = clipText;
 
-        XSetSelectionOwner (display, XA_PRIMARY, juce_messageWindowHandle, CurrentTime);
-        XSetSelectionOwner (display, ClipboardHelpers::atom_CLIPBOARD, juce_messageWindowHandle, CurrentTime);
+        X11Symbols::getInstance()->xSetSelectionOwner (display, XA_PRIMARY, juce_messageWindowHandle, CurrentTime);
+        X11Symbols::getInstance()->xSetSelectionOwner (display, ClipboardHelpers::atom_CLIPBOARD, juce_messageWindowHandle, CurrentTime);
     }
 }
 
@@ -238,10 +238,10 @@ String SystemClipboard::getTextFromClipboard()
         Atom selection = XA_PRIMARY;
         Window selectionOwner = None;
 
-        if ((selectionOwner = XGetSelectionOwner (display, selection)) == None)
+        if ((selectionOwner = X11Symbols::getInstance()->xGetSelectionOwner (display, selection)) == None)
         {
             selection = ClipboardHelpers::atom_CLIPBOARD;
-            selectionOwner = XGetSelectionOwner (display, selection);
+            selectionOwner = X11Symbols::getInstance()->xGetSelectionOwner (display, selection);
         }
 
         if (selectionOwner != None)

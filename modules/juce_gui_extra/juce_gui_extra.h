@@ -50,7 +50,7 @@
 
 //==============================================================================
 /** Config: JUCE_WEB_BROWSER
-    This lets you disable the WebBrowserComponent class (Mac and Windows).
+    This lets you disable the WebBrowserComponent class (Mac, Windows, and Linux).
     If you're not using any embedded web-pages, turning this off may reduce your code size.
 */
 #ifndef JUCE_WEB_BROWSER

@@ -37,7 +37,6 @@
   dependencies:       juce_graphics juce_data_structures
   OSXFrameworks:      Cocoa Carbon QuartzCore
   iOSFrameworks:      UIKit MobileCoreServices
-  linuxPackages:      x11 xinerama xext
 
  END_JUCE_MODULE_DECLARATION
 
@@ -290,6 +289,51 @@ namespace juce
 
 #if JUCE_LINUX
  #include "native/juce_linux_X11.h"
+
+ #if JUCE_GUI_BASICS_INCLUDE_XHEADERS
+  // If you're missing these headers, you need to install the libx11-dev package
+  #include <X11/Xlib.h>
+  #include <X11/Xatom.h>
+  #include <X11/Xresource.h>
+  #include <X11/Xutil.h>
+  #include <X11/Xmd.h>
+  #include <X11/keysym.h>
+  #include <X11/XKBlib.h>
+  #include <X11/cursorfont.h>
+  #include <unistd.h>
+
+  #if JUCE_USE_XRANDR
+   // If you're missing this header, you need to install the libxrandr-dev package
+   #include <X11/extensions/Xrandr.h>
+  #endif
+
+  #if JUCE_USE_XINERAMA
+   // If you're missing this header, you need to install the libxinerama-dev package
+   #include <X11/extensions/Xinerama.h>
+  #endif
+
+  #if JUCE_USE_XSHM
+   #include <X11/extensions/XShm.h>
+   #include <sys/shm.h>
+   #include <sys/ipc.h>
+  #endif
+
+  #if JUCE_USE_XRENDER
+   // If you're missing these headers, you need to install the libxrender-dev and libxcomposite-dev packages
+   #include <X11/extensions/Xrender.h>
+   #include <X11/extensions/Xcomposite.h>
+  #endif
+
+  #if JUCE_USE_XCURSOR
+   // If you're missing this header, you need to install the libxcursor-dev package
+   #include <X11/Xcursor/Xcursor.h>
+  #endif
+
+  #undef SIZEOF
+  #undef KeyPress
+
+  #include "native/juce_linux_X11Symbols.h"
+ #endif
 #endif
 
 #include "layout/juce_FlexItem.h"

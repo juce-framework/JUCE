@@ -81,8 +81,6 @@ namespace Vst2
 #include "pluginterfaces/vst2.x/aeffectx.h"
 }
 
-using namespace juce;
-
 JUCE_END_IGNORE_WARNINGS_MSVC
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
@@ -92,8 +90,12 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
 
 #define JUCE_VSTINTERFACE_H_INCLUDED 1
+#define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
 
 #include "../utility/juce_IncludeModuleHeaders.h"
+
+using namespace juce;
+
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_WindowsHooks.h"
 
@@ -1086,7 +1088,7 @@ public:
            #elif JUCE_LINUX
             addToDesktop (0, args.ptr);
             hostWindow = (Window) args.ptr;
-            XReparentWindow (display.display, (Window) getWindowHandle(), hostWindow, 0, 0);
+            X11Symbols::getInstance()->xReparentWindow (display.display, (Window) getWindowHandle(), hostWindow, 0, 0);
            #else
             hostWindow = attachComponentToWindowRefVST (this, args.ptr, wrapper.useNSView);
            #endif
@@ -1195,9 +1197,9 @@ public:
                     if (auto* peer = ed->getPeer())
                         scale *= (float) peer->getPlatformScaleFactor();
 
-                    XResizeWindow (display.display, (Window) getWindowHandle(),
-                                   static_cast<unsigned int> (roundToInt (pos.getWidth()  * scale)),
-                                   static_cast<unsigned int> (roundToInt (pos.getHeight() * scale)));
+                    X11Symbols::getInstance()->xResizeWindow (display.display, (Window) getWindowHandle(),
+                                                              static_cast<unsigned int> (roundToInt (pos.getWidth()  * scale)),
+                                                              static_cast<unsigned int> (roundToInt (pos.getHeight() * scale)));
                    #endif
 
                    #if JUCE_MAC

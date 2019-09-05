@@ -27,6 +27,41 @@ unsigned long juce_createKeyProxyWindow (ComponentPeer*);
 void juce_deleteKeyProxyWindow (ComponentPeer*);
 
 //==============================================================================
+enum
+{
+    maxXEmbedVersionToSupport = 0
+};
+
+enum
+{
+    XEMBED_MAPPED  = (1<<0)
+};
+
+enum
+{
+    XEMBED_EMBEDDED_NOTIFY        = 0,
+    XEMBED_WINDOW_ACTIVATE        = 1,
+    XEMBED_WINDOW_DEACTIVATE      = 2,
+    XEMBED_REQUEST_FOCUS          = 3,
+    XEMBED_FOCUS_IN               = 4,
+    XEMBED_FOCUS_OUT              = 5,
+    XEMBED_FOCUS_NEXT             = 6,
+    XEMBED_FOCUS_PREV             = 7,
+    XEMBED_MODALITY_ON            = 10,
+    XEMBED_MODALITY_OFF           = 11,
+    XEMBED_REGISTER_ACCELERATOR   = 12,
+    XEMBED_UNREGISTER_ACCELERATOR = 13,
+    XEMBED_ACTIVATE_ACCELERATOR   = 14
+};
+
+enum
+{
+    XEMBED_FOCUS_CURRENT = 0,
+    XEMBED_FOCUS_FIRST   = 1,
+    XEMBED_FOCUS_LAST    = 2
+};
+
+//==============================================================================
 class XEmbedComponent::Pimpl  : private ComponentListener
 {
 public:
@@ -117,16 +152,17 @@ public:
         if (host != 0)
         {
             auto dpy = getDisplay();
-            XDestroyWindow (dpy, host);
-            XSync (dpy, false);
 
-            const long mask = NoEventMask | KeyPressMask | KeyReleaseMask
-                            | EnterWindowMask | LeaveWindowMask | PointerMotionMask
-                            | KeymapStateMask | ExposureMask | StructureNotifyMask
-                            | FocusChangeMask;
+            X11Symbols::getInstance()->xDestroyWindow (dpy, host);
+            X11Symbols::getInstance()->xSync (dpy, false);
+
+            auto mask = NoEventMask | KeyPressMask | KeyReleaseMask
+                      | EnterWindowMask | LeaveWindowMask | PointerMotionMask
+                      | KeymapStateMask | ExposureMask | StructureNotifyMask
+                      | FocusChangeMask;
 
             XEvent event;
-            while (XCheckWindowEvent (dpy, host, mask, &event) == True)
+            while (X11Symbols::getInstance()->xCheckWindowEvent (dpy, host, mask, &event) == True)
             {}
 
             host = 0;
@@ -155,22 +191,22 @@ public:
             else
             {
                 auto newBounds = getX11BoundsFromJuce();
-                XResizeWindow (dpy, client, static_cast<unsigned int> (newBounds.getWidth()),
-                                            static_cast<unsigned int> (newBounds.getHeight()));
+                X11Symbols::getInstance()->xResizeWindow (dpy, client, static_cast<unsigned int> (newBounds.getWidth()),
+                                                          static_cast<unsigned int> (newBounds.getHeight()));
             }
 
             auto eventMask = StructureNotifyMask | PropertyChangeMask | FocusChangeMask;
 
             XWindowAttributes clientAttr;
-            XGetWindowAttributes (dpy, client, &clientAttr);
+            X11Symbols::getInstance()->xGetWindowAttributes (dpy, client, &clientAttr);
 
             if ((eventMask & clientAttr.your_event_mask) != eventMask)
-                XSelectInput (dpy, client, clientAttr.your_event_mask | eventMask);
+                X11Symbols::getInstance()->xSelectInput (dpy, client, clientAttr.your_event_mask | eventMask);
 
             getXEmbedMappedFlag();
 
             if (shouldReparent)
-                XReparentWindow (dpy, client, host, 0, 0);
+                X11Symbols::getInstance()->xReparentWindow (dpy, client, host, 0, 0);
 
             if (supportsXembed)
                 sendXEmbedEvent (CurrentTime, XEMBED_EMBEDDED_NOTIFY, 0, (long) host, xembedVersion);
@@ -242,27 +278,27 @@ private:
             auto newBounds = getX11BoundsFromJuce();
             XWindowAttributes attr;
 
-            if (XGetWindowAttributes (dpy, host, &attr))
+            if (X11Symbols::getInstance()->xGetWindowAttributes (dpy, host, &attr))
             {
                 Rectangle<int> currentBounds (attr.x, attr.y, attr.width, attr.height);
                 if (currentBounds != newBounds)
                 {
-                    XMoveResizeWindow (dpy, host, newBounds.getX(), newBounds.getY(),
-                                       static_cast<unsigned int> (newBounds.getWidth()),
-                                       static_cast<unsigned int> (newBounds.getHeight()));
+                    X11Symbols::getInstance()->xMoveResizeWindow (dpy, host, newBounds.getX(), newBounds.getY(),
+                                                                  static_cast<unsigned int> (newBounds.getWidth()),
+                                                                  static_cast<unsigned int> (newBounds.getHeight()));
                 }
             }
 
-            if (client != 0 && XGetWindowAttributes (dpy, client, &attr))
+            if (client != 0 && X11Symbols::getInstance()->xGetWindowAttributes (dpy, client, &attr))
             {
                 Rectangle<int> currentBounds (attr.x, attr.y, attr.width, attr.height);
 
                 if ((currentBounds.getWidth() != newBounds.getWidth()
                      || currentBounds.getHeight() != newBounds.getHeight()))
                 {
-                    XMoveResizeWindow (dpy, client, 0, 0,
-                                       static_cast<unsigned int> (newBounds.getWidth()),
-                                       static_cast<unsigned int> (newBounds.getHeight()));
+                    X11Symbols::getInstance()->xMoveResizeWindow (dpy, client, 0, 0,
+                                                                  static_cast<unsigned int> (newBounds.getWidth()),
+                                                                  static_cast<unsigned int> (newBounds.getHeight()));
                 }
             }
         }
@@ -272,8 +308,8 @@ private:
     void createHostWindow()
     {
         auto dpy = getDisplay();
-        int defaultScreen = XDefaultScreen (dpy);
-        Window root = RootWindow (dpy, defaultScreen);
+        int defaultScreen = X11Symbols::getInstance()->xDefaultScreen (dpy);
+        Window root = X11Symbols::getInstance()->xRootWindow (dpy, defaultScreen);
 
         XSetWindowAttributes swa;
         swa.border_pixel = 0;
@@ -281,10 +317,10 @@ private:
         swa.override_redirect = True;
         swa.event_mask = SubstructureNotifyMask | StructureNotifyMask | FocusChangeMask;
 
-        host = XCreateWindow (dpy, root, 0, 0, 1, 1, 0, CopyFromParent,
-                              InputOutput, CopyFromParent,
-                              CWEventMask | CWBorderPixel | CWBackPixmap | CWOverrideRedirect,
-                              &swa);
+        host = X11Symbols::getInstance()->xCreateWindow (dpy, root, 0, 0, 1, 1, 0, CopyFromParent,
+                                                         InputOutput, CopyFromParent,
+                                                         CWEventMask | CWBorderPixel | CWBackPixmap | CWOverrideRedirect,
+                                                         &swa);
     }
 
     void removeClient()
@@ -292,20 +328,20 @@ private:
         if (client != 0)
         {
             auto dpy = getDisplay();
-            XSelectInput (dpy, client, 0);
+            X11Symbols::getInstance()->xSelectInput (dpy, client, 0);
 
             keyWindow = nullptr;
 
-            int defaultScreen = XDefaultScreen (dpy);
-            Window root = RootWindow (dpy, defaultScreen);
+            int defaultScreen = X11Symbols::getInstance()->xDefaultScreen (dpy);
+            Window root = X11Symbols::getInstance()->xRootWindow (dpy, defaultScreen);
 
             if (hasBeenMapped)
             {
-                XUnmapWindow (dpy, client);
+                X11Symbols::getInstance()->xUnmapWindow (dpy, client);
                 hasBeenMapped = false;
             }
 
-            XReparentWindow (dpy, client, root, 0, 0);
+            X11Symbols::getInstance()->xReparentWindow (dpy, client, root, 0, 0);
             client = 0;
         }
     }
@@ -321,9 +357,9 @@ private:
                 hasBeenMapped = shouldBeMapped;
 
                 if (shouldBeMapped)
-                    XMapWindow (getDisplay(), client);
+                    X11Symbols::getInstance()->xMapWindow (getDisplay(), client);
                 else
-                    XUnmapWindow (getDisplay(), client);
+                    X11Symbols::getInstance()->xUnmapWindow (getDisplay(), client);
             }
         }
     }
@@ -378,13 +414,13 @@ private:
         XWindowAttributes attr;
         auto dpy = getDisplay();
 
-        if (XGetWindowAttributes (dpy, client, &attr))
+        if (X11Symbols::getInstance()->xGetWindowAttributes (dpy, client, &attr))
         {
             XWindowAttributes hostAttr;
 
-            if (XGetWindowAttributes (dpy, host, &hostAttr))
+            if (X11Symbols::getInstance()->xGetWindowAttributes (dpy, host, &hostAttr))
                 if (attr.width != hostAttr.width || attr.height != hostAttr.height)
-                    XResizeWindow (dpy, host, (unsigned int) attr.width, (unsigned int) attr.height);
+                    X11Symbols::getInstance()->xResizeWindow (dpy, host, (unsigned int) attr.width, (unsigned int) attr.height);
 
             // as the client window is not on any screen yet, we need to guess
             // on which screen it might appear to get a scaling factor :-(
@@ -420,14 +456,14 @@ private:
                 keyWindow = nullptr;
 
             auto dpy = getDisplay();
-            Window rootWindow = RootWindow (dpy, DefaultScreen (dpy));
+            Window rootWindow = X11Symbols::getInstance()->xRootWindow (dpy, DefaultScreen (dpy));
             Rectangle<int> newBounds = getX11BoundsFromJuce();
 
             if (newPeer == nullptr)
-                XUnmapWindow (dpy, host);
+                X11Symbols::getInstance()->xUnmapWindow (dpy, host);
 
             Window newParent = (newPeer != nullptr ? getParentX11Window() : rootWindow);
-            XReparentWindow (dpy, host, newParent, newBounds.getX(), newBounds.getY());
+            X11Symbols::getInstance()->xReparentWindow (dpy, host, newParent, newBounds.getX(), newBounds.getY());
 
             lastPeer = newPeer;
 
@@ -440,7 +476,7 @@ private:
                 }
 
                 componentMovedOrResized (owner, true, true);
-                XMapWindow (dpy, host);
+                X11Symbols::getInstance()->xMapWindow (dpy, host);
 
                 broughtToFront();
             }
@@ -450,7 +486,7 @@ private:
     void updateKeyFocus()
     {
         if (lastPeer != nullptr && lastPeer->isFocused())
-            XSetInputFocus (getDisplay(), getCurrentFocusWindow (lastPeer), RevertToParent, CurrentTime);
+            X11Symbols::getInstance()->xSetInputFocus (getDisplay(), getCurrentFocusWindow (lastPeer), RevertToParent, CurrentTime);
     }
 
     //==============================================================================
@@ -560,8 +596,8 @@ private:
         msg.data.l[3] = data1;
         msg.data.l[4] = data2;
 
-        XSendEvent (dpy, client, False, NoEventMask, (XEvent*) &msg);
-        XSync (dpy, False);
+        X11Symbols::getInstance()->xSendEvent (dpy, client, False, NoEventMask, (XEvent*) &msg);
+        X11Symbols::getInstance()->xSync (dpy, False);
     }
 
     Rectangle<int> getX11BoundsFromJuce()

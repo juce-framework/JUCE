@@ -31,6 +31,7 @@
 #define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
 #define JUCE_EVENTS_INCLUDE_WIN32_MESSAGE_WINDOW 1
 #define JUCE_GRAPHICS_INCLUDE_COREGRAPHICS_HELPERS 1
+#define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
 
 #if JUCE_USE_WINRT_WEBVIEW
  #define JUCE_EVENTS_INCLUDE_WINRT_WRAPPER 1
@@ -99,28 +100,18 @@
  #endif
 
 //==============================================================================
-#elif JUCE_LINUX
- #include <X11/Xlib.h>
- #include <X11/Xatom.h>
- #include <X11/Xutil.h>
- #undef SIZEOF
- #undef KeyPress
+#elif JUCE_LINUX && JUCE_WEB_BROWSER
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant", "-Wparentheses")
 
- #if JUCE_WEB_BROWSER
-  #include <unistd.h>
-  #include <fcntl.h>
-  #include <sys/wait.h>
+ // If you're missing this header, you need to install the webkit2gtk-4.0 package
+ #include <gtk/gtk.h>
 
-  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant", "-Wparentheses")
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-  #include <gtk/gtk.h>
-
-  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-  #include <gtk/gtkx.h>
-  #include <glib-unix.h>
-  #include <webkit2/webkit2.h>
- #endif
+ // If you're missing these headers, you need to install the webkit2gtk-4.0 package
+ #include <gtk/gtkx.h>
+ #include <glib-unix.h>
+ #include <webkit2/webkit2.h>
 #endif
 
 //==============================================================================

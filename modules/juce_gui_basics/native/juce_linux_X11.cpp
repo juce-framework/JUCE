@@ -19,10 +19,11 @@
 namespace juce
 {
 
-typedef void (*WindowMessageReceiveCallback) (XEvent&);
+//==============================================================================
+using WindowMessageReceiveCallback = void (*) (XEvent&);
 WindowMessageReceiveCallback dispatchWindowMessage = nullptr;
 
-typedef void (*SelectionRequestCallback) (XSelectionRequestEvent&);
+using SelectionRequestCallback = void (*) (XSelectionRequestEvent&);
 SelectionRequestCallback handleSelectionRequest = nullptr;
 
 ::Window juce_messageWindowHandle;
@@ -31,7 +32,7 @@ XContext windowHandleXContext;
 //==============================================================================
 namespace X11ErrorHandling
 {
-    static XErrorHandler   oldErrorHandler = {};
+    static XErrorHandler   oldErrorHandler   = {};
     static XIOErrorHandler oldIOErrorHandler = {};
 
     //==============================================================================
@@ -52,11 +53,12 @@ namespace X11ErrorHandling
         ignoreUnused (display, event);
 
        #if JUCE_DEBUG_XERRORS
-        char errorStr[64] = { 0 };
+        char errorStr[64]   = { 0 };
         char requestStr[64] = { 0 };
 
-        XGetErrorText (display, event->error_code, errorStr, 64);
-        XGetErrorDatabaseText (display, "XRequest", String (event->request_code).toUTF8(), "Unknown", requestStr, 64);
+        X11Symbols::getInstance()->xGetErrorText (display, event->error_code, errorStr, 64);
+        X11Symbols::getInstance()->xGetErrorDatabaseText (display, "XRequest", String (event->request_code).toUTF8(), "Unknown", requestStr, 64);
+
         DBG ("ERROR: X returned " << errorStr << " for operation " << requestStr);
        #endif
 
@@ -65,35 +67,37 @@ namespace X11ErrorHandling
 
     void installXErrorHandlers()
     {
-        oldIOErrorHandler = XSetIOErrorHandler (ioErrorHandler);
-        oldErrorHandler = XSetErrorHandler (errorHandler);
+        oldIOErrorHandler = X11Symbols::getInstance()->xSetIOErrorHandler (ioErrorHandler);
+        oldErrorHandler   = X11Symbols::getInstance()->xSetErrorHandler   (errorHandler);
     }
 
     void removeXErrorHandlers()
     {
-        XSetIOErrorHandler (oldIOErrorHandler);
+        X11Symbols::getInstance()->xSetIOErrorHandler (oldIOErrorHandler);
         oldIOErrorHandler = {};
 
-        XSetErrorHandler (oldErrorHandler);
+        X11Symbols::getInstance()->xSetErrorHandler (oldErrorHandler);
         oldErrorHandler = {};
     }
 }
 
-//==============================================================================
 XWindowSystem::XWindowSystem() noexcept
 {
-    if (JUCEApplicationBase::isStandaloneApp())
+    xIsAvailable = X11Symbols::getInstance()->areXFunctionsAvailable();
+
+    if (JUCEApplicationBase::isStandaloneApp() && xIsAvailable)
     {
         // Initialise xlib for multiple thread support
         static bool initThreadCalled = false;
 
         if (! initThreadCalled)
         {
-            if (! XInitThreads())
+            if (! X11Symbols::getInstance()->xInitThreads())
             {
                 // This is fatal!  Print error and closedown
                 Logger::outputDebugString ("Failed to initialise xlib thread support.");
                 Process::terminate();
+
                 return;
             }
 
@@ -106,15 +110,18 @@ XWindowSystem::XWindowSystem() noexcept
 
 XWindowSystem::~XWindowSystem() noexcept
 {
-    if (JUCEApplicationBase::isStandaloneApp())
+    if (JUCEApplicationBase::isStandaloneApp() && xIsAvailable)
+    {
         X11ErrorHandling::removeXErrorHandlers();
+        X11Symbols::deleteInstance();
+    }
 
     clearSingletonInstance();
 }
 
 ::Display* XWindowSystem::displayRef() noexcept
 {
-    if (++displayCount == 1)
+    if (xIsAvailable && ++displayCount == 1)
     {
         jassert (display == nullptr);
 
@@ -127,7 +134,7 @@ XWindowSystem::~XWindowSystem() noexcept
         // fail the first time, but succeed on a second attempt..
         for (int retries = 2; --retries >= 0;)
         {
-            display = XOpenDisplay (displayName.toUTF8());
+            display = X11Symbols::getInstance()->xOpenDisplay (displayName.toUTF8());
 
             if (display != nullptr)
                 break;
@@ -141,14 +148,17 @@ XWindowSystem::~XWindowSystem() noexcept
 
 ::Display* XWindowSystem::displayUnref() noexcept
 {
-    jassert (display != nullptr);
-    jassert (displayCount.get() > 0);
-
-    if (--displayCount == 0)
+    if (xIsAvailable)
     {
-        destroyXDisplay();
-        XCloseDisplay (display);
-        display = nullptr;
+        jassert (display != nullptr);
+        jassert (displayCount.get() > 0);
+
+        if (--displayCount == 0)
+        {
+            destroyXDisplay();
+            X11Symbols::getInstance()->xCloseDisplay (display);
+            display = nullptr;
+        }
     }
 
     return display;
@@ -156,76 +166,83 @@ XWindowSystem::~XWindowSystem() noexcept
 
 void XWindowSystem::initialiseXDisplay() noexcept
 {
-    // This is fatal!  Print error and closedown
-    if (display == nullptr)
+    if (xIsAvailable)
     {
-        Logger::outputDebugString ("Failed to connect to the X Server.");
-        Process::terminate();
+        // This is fatal!  Print error and closedown
+        if (display == nullptr)
+        {
+            Logger::outputDebugString ("Failed to connect to the X Server.");
+            Process::terminate();
+        }
+
+        // Create a context to store user data associated with Windows we create
+        windowHandleXContext = (XContext) X11Symbols::getInstance()->xrmUniqueQuark();
+
+        // We're only interested in client messages for this window, which are always sent
+        XSetWindowAttributes swa;
+        swa.event_mask = NoEventMask;
+
+        // Create our message window (this will never be mapped)
+        auto screen = X11Symbols::getInstance()->xDefaultScreen (display);
+        juce_messageWindowHandle = X11Symbols::getInstance()->xCreateWindow (display, X11Symbols::getInstance()->xRootWindow (display, screen),
+                                                                             0, 0, 1, 1, 0, 0, InputOnly,
+                                                                             X11Symbols::getInstance()->xDefaultVisual (display, screen),
+                                                                             CWEventMask, &swa);
+
+        X11Symbols::getInstance()->xSync (display, False);
+
+        // Setup input event handler
+        LinuxEventLoop::registerFdCallback (X11Symbols::getInstance()->xConnectionNumber (display),
+             [this](int)
+             {
+                do
+                {
+                    XEvent evt;
+
+                    {
+                        ScopedXLock xlock (display);
+
+                        if (! X11Symbols::getInstance()->xPending (display))
+                            return;
+
+                        X11Symbols::getInstance()->xNextEvent (display, &evt);
+                    }
+
+                    if (evt.type == SelectionRequest && evt.xany.window == juce_messageWindowHandle
+                         && handleSelectionRequest != nullptr)
+                    {
+                        handleSelectionRequest (evt.xselectionrequest);
+                    }
+                    else if (evt.xany.window != juce_messageWindowHandle
+                              && dispatchWindowMessage != nullptr)
+                    {
+                        dispatchWindowMessage (evt);
+                    }
+
+                } while (display != nullptr);
+            });
     }
-
-    // Create a context to store user data associated with Windows we create
-    windowHandleXContext = XUniqueContext();
-
-    // We're only interested in client messages for this window, which are always sent
-    XSetWindowAttributes swa;
-    swa.event_mask = NoEventMask;
-
-    // Create our message window (this will never be mapped)
-    const int screen = DefaultScreen (display);
-    juce_messageWindowHandle = XCreateWindow (display, RootWindow (display, screen),
-                                              0, 0, 1, 1, 0, 0, InputOnly,
-                                              DefaultVisual (display, screen),
-                                              CWEventMask, &swa);
-
-    XSync (display, False);
-
-    // Setup input event handler
-    int fd = XConnectionNumber (display);
-
-    LinuxEventLoop::registerFdCallback (fd,
-         [this](int)
-         {
-            do
-            {
-                XEvent evt;
-
-                {
-                    ScopedXLock xlock (display);
-
-                    if (! XPending (display))
-                        return;
-
-                    XNextEvent (display, &evt);
-                }
-
-                if (evt.type == SelectionRequest && evt.xany.window == juce_messageWindowHandle
-                     && handleSelectionRequest != nullptr)
-                {
-                    handleSelectionRequest (evt.xselectionrequest);
-                }
-                else if (evt.xany.window != juce_messageWindowHandle
-                          && dispatchWindowMessage != nullptr)
-                {
-                    dispatchWindowMessage (evt);
-                }
-
-            } while (display != nullptr);
-        });
 }
 
 void XWindowSystem::destroyXDisplay() noexcept
 {
-    ScopedXLock xlock (display);
-    XDestroyWindow (display, juce_messageWindowHandle);
-    juce_messageWindowHandle = 0;
-    XSync (display, True);
-    LinuxEventLoop::unregisterFdCallback (XConnectionNumber (display));
+    if (xIsAvailable)
+    {
+        ScopedXLock xlock (display);
+
+        X11Symbols::getInstance()->xDestroyWindow (display, juce_messageWindowHandle);
+        juce_messageWindowHandle = 0;
+        X11Symbols::getInstance()->xSync (display, True);
+
+        LinuxEventLoop::unregisterFdCallback (X11Symbols::getInstance()->xConnectionNumber (display));
+    }
 }
 
 JUCE_IMPLEMENT_SINGLETON (XWindowSystem)
 
 //==============================================================================
-ScopedXDisplay::ScopedXDisplay() : display (XWindowSystem::getInstance()->displayRef())
+ScopedXDisplay::ScopedXDisplay()
+    : display (XWindowSystem::getInstance()->displayRef())
 {
 }
 
@@ -235,16 +252,17 @@ ScopedXDisplay::~ScopedXDisplay()
 }
 
 //==============================================================================
-ScopedXLock::ScopedXLock (::Display* d) : display (d)
+ScopedXLock::ScopedXLock (::Display* d)
+    : display (d)
 {
     if (display != nullptr)
-        XLockDisplay (display);
+        X11Symbols::getInstance()->xLockDisplay (display);
 }
 
 ScopedXLock::~ScopedXLock()
 {
     if (display != nullptr)
-        XUnlockDisplay (display);
+        X11Symbols::getInstance()->xUnlockDisplay (display);
 }
 
 //==============================================================================
@@ -292,15 +310,15 @@ Atoms::Atoms (::Display* display)
     allowedActions[4]            = XdndActionPrivate;
 }
 
-Atom Atoms::getIfExists (::Display* display, const char* name)  { return XInternAtom (display, name, True); }
-Atom Atoms::getCreating (::Display* display, const char* name)  { return XInternAtom (display, name, False); }
+Atom Atoms::getIfExists (::Display* display, const char* name)  { return X11Symbols::getInstance()->xInternAtom (display, name, True); }
+Atom Atoms::getCreating (::Display* display, const char* name)  { return X11Symbols::getInstance()->xInternAtom (display, name, False); }
 
 String Atoms::getName (::Display* display, const Atom atom)
 {
     if (atom == None)
         return "None";
 
-    return String (XGetAtomName (display, atom));
+    return X11Symbols::getInstance()->xGetAtomName (display, atom);
 }
 
 bool Atoms::isMimeTypeFile (::Display* display, const Atom atom)
@@ -313,19 +331,19 @@ const unsigned long Atoms::DndVersion = 3;
 
 //==============================================================================
 GetXProperty::GetXProperty (::Display* display, Window window, Atom atom,
-              long offset, long length, bool shouldDelete,
-              Atom requestedType)
+                            long offset, long length, bool shouldDelete,
+                            Atom requestedType)
 {
-    success = (XGetWindowProperty (display, window, atom, offset, length,
-                                   (Bool) shouldDelete, requestedType, &actualType,
-                                   &actualFormat, &numItems, &bytesLeft, &data) == Success)
+    success = (X11Symbols::getInstance()->xGetWindowProperty (display, window, atom, offset, length,
+                                                              (Bool) shouldDelete, requestedType, &actualType,
+                                                              &actualFormat, &numItems, &bytesLeft, &data) == Success)
                 && data != nullptr;
 }
 
 GetXProperty::~GetXProperty()
 {
     if (data != nullptr)
-        XFree (data);
+        X11Symbols::getInstance()->xFree (data);
 }
 
 } // namespace juce

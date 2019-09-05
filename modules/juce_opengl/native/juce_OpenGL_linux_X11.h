@@ -58,7 +58,7 @@ public:
         display = XWindowSystem::getInstance()->displayRef();
 
         ScopedXLock xlock (display);
-        XSync (display, False);
+        X11Symbols::getInstance()->xSync (display, False);
 
         GLint attribs[] =
         {
@@ -77,7 +77,7 @@ public:
             None
         };
 
-        bestVisual = glXChooseVisual (display, DefaultScreen (display), attribs);
+        bestVisual = glXChooseVisual (display, X11Symbols::getInstance()->xDefaultScreen (display), attribs);
         if (bestVisual == nullptr)
             return;
 
@@ -85,7 +85,7 @@ public:
         jassert (peer != nullptr);
 
         auto windowH = (Window) peer->getNativeHandle();
-        auto colourMap = XCreateColormap (display, windowH, bestVisual->visual, AllocNone);
+        auto colourMap = X11Symbols::getInstance()->xCreateColormap (display, windowH, bestVisual->visual, AllocNone);
 
         XSetWindowAttributes swa;
         swa.colormap = colourMap;
@@ -97,22 +97,22 @@ public:
 
         glBounds = juce_LinuxScaledToPhysicalBounds (peer, glBounds);
 
-        embeddedWindow = XCreateWindow (display, windowH,
-                                        glBounds.getX(), glBounds.getY(),
-                                        (unsigned int) jmax (1, glBounds.getWidth()),
-                                        (unsigned int) jmax (1, glBounds.getHeight()),
-                                        0, bestVisual->depth,
-                                        InputOutput,
-                                        bestVisual->visual,
-                                        CWBorderPixel | CWColormap | CWEventMask,
-                                        &swa);
+        embeddedWindow = X11Symbols::getInstance()->xCreateWindow (display, windowH,
+                                                                   glBounds.getX(), glBounds.getY(),
+                                                                   (unsigned int) jmax (1, glBounds.getWidth()),
+                                                                   (unsigned int) jmax (1, glBounds.getHeight()),
+                                                                   0, bestVisual->depth,
+                                                                   InputOutput,
+                                                                   bestVisual->visual,
+                                                                   CWBorderPixel | CWColormap | CWEventMask,
+                                                                   &swa);
 
-        XSaveContext (display, (XID) embeddedWindow, windowHandleXContext, (XPointer) peer);
+        X11Symbols::getInstance()->xSaveContext (display, (XID) embeddedWindow, windowHandleXContext, (XPointer) peer);
 
-        XMapWindow (display, embeddedWindow);
-        XFreeColormap (display, colourMap);
+        X11Symbols::getInstance()->xMapWindow (display, embeddedWindow);
+        X11Symbols::getInstance()->xFreeColormap (display, colourMap);
 
-        XSync (display, False);
+        X11Symbols::getInstance()->xSync (display, False);
 
         juce_LinuxAddRepaintListener (peer, &dummy);
     }
@@ -124,12 +124,12 @@ public:
         if (embeddedWindow != 0)
         {
             ScopedXLock xlock (display);
-            XUnmapWindow (display, embeddedWindow);
-            XDestroyWindow (display, embeddedWindow);
+            X11Symbols::getInstance()->xUnmapWindow (display, embeddedWindow);
+            X11Symbols::getInstance()->xDestroyWindow (display, embeddedWindow);
         }
 
         if (bestVisual != nullptr)
-            XFree (bestVisual);
+            X11Symbols::getInstance()->xFree (bestVisual);
 
         XWindowSystem::getInstance()->displayUnref();
     }
@@ -185,10 +185,10 @@ public:
         auto physicalBounds = juce_LinuxScaledToPhysicalBounds (component.getPeer(), bounds);
 
         ScopedXLock xlock (display);
-        XMoveResizeWindow (display, embeddedWindow,
-                           physicalBounds.getX(), physicalBounds.getY(),
-                           (unsigned int) jmax (1, physicalBounds.getWidth()),
-                           (unsigned int) jmax (1, physicalBounds.getHeight()));
+        X11Symbols::getInstance()->xMoveResizeWindow (display, embeddedWindow,
+                                                      physicalBounds.getX(), physicalBounds.getY(),
+                                                      (unsigned int) jmax (1, physicalBounds.getWidth()),
+                                                      (unsigned int) jmax (1, physicalBounds.getHeight()));
     }
 
     bool setSwapInterval (int numFramesPerSwap)

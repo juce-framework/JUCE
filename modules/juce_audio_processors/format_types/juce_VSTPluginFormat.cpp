@@ -239,7 +239,7 @@ namespace
 
         {
             ScopedXDisplay xDisplay;
-            XQueryTree (xDisplay.display, windowToCheck, &rootWindow, &parentWindow, &childWindows, &numChildren);
+            X11Symbols::getInstance()->xQueryTree (xDisplay.display, windowToCheck, &rootWindow, &parentWindow, &childWindows, &numChildren);
         }
 
         if (numChildren > 0)
@@ -2836,8 +2836,9 @@ public:
             {
                 auto clip = g.getClipBounds();
 
-                XClearArea (display, pluginWindow, clip.getX(), clip.getY(),
-                            static_cast<unsigned int> (clip.getWidth()), static_cast<unsigned int> (clip.getHeight()), True);
+                X11Symbols::getInstance()->xClearArea (display, pluginWindow, clip.getX(), clip.getY(),
+                                                       static_cast<unsigned int> (clip.getWidth()),
+                                                       static_cast<unsigned int> (clip.getHeight()), True);
             }
            #endif
         }
@@ -2875,13 +2876,13 @@ public:
            #elif JUCE_LINUX
             if (pluginWindow != 0)
             {
-                XMoveResizeWindow (display, pluginWindow,
-                                   pos.getX(), pos.getY(),
-                                   static_cast<unsigned int> (roundToInt (getWidth()  * nativeScaleFactor)),
-                                   static_cast<unsigned int> (roundToInt (getHeight() * nativeScaleFactor)));
+                X11Symbols::getInstance()->xMoveResizeWindow (display, pluginWindow,
+                                                              pos.getX(), pos.getY(),
+                                                              static_cast<unsigned int> (roundToInt (getWidth()  * nativeScaleFactor)),
+                                                              static_cast<unsigned int> (roundToInt (getHeight() * nativeScaleFactor)));
 
-                XMapRaised (display, pluginWindow);
-                XFlush (display);
+                X11Symbols::getInstance()->xMapRaised (display, pluginWindow);
+                X11Symbols::getInstance()->xFlush (display);
             }
            #endif
 
@@ -3160,7 +3161,7 @@ private:
         }
 
         if (pluginWindow != 0)
-            XMapRaised (display, pluginWindow);
+            X11Symbols::getInstance()->xMapRaised (display, pluginWindow);
        #endif
 
         w = roundToInt (w / nativeScaleFactor);
