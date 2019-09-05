@@ -3328,7 +3328,7 @@ JUCE_EXPORTED_FUNCTION IPluginFactory* PLUGIN_API GetPluginFactory()
         static const PClassInfo2 araFactoryClass (JuceARAFactory::iid,
                                                   PClassInfo::kManyInstances,
                                                   kARAMainFactoryClass,
-                                                  JucePlugin_Name "ARAFactory",
+                                                  JucePlugin_Name,
                                                   JucePlugin_Vst3ComponentFlags,
                                                   JucePlugin_Vst3Category,
                                                   JucePlugin_Manufacturer,
