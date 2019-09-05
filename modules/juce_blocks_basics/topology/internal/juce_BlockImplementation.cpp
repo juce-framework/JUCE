@@ -85,8 +85,9 @@ public:
 
         updateDeviceInfo (deviceInfo);
 
+        remoteHeap.reset();
+
         setProgram (nullptr);
-        remoteHeap.resetDeviceStateToUnknown();
 
         if (auto surface = dynamic_cast<TouchSurfaceImplementation*> (touchSurface.get()))
             surface->activateTouchSurface();
@@ -294,7 +295,7 @@ public:
 
         if (program == nullptr)
         {
-            remoteHeap.clear();
+            remoteHeap.clearTargetData();
             return Result::ok();
         }
 
@@ -316,7 +317,7 @@ public:
         programSize = (uint32) size;
 
         remoteHeap.resetDataRangeToUnknown (0, remoteHeap.blockSize);
-        remoteHeap.clear();
+        remoteHeap.clearTargetData();
         remoteHeap.sendChanges (*this, true);
 
         remoteHeap.resetDataRangeToUnknown (0, (uint32) size);
