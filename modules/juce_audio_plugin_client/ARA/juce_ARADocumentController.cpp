@@ -350,7 +350,7 @@ namespace ModelUpdateControllerProgressAdapter
 {
     using namespace ARA;
 
-    static void ARA_CALL notifyAudioSourceAnalysisProgress (ARAModelUpdateControllerHostRef controllerHostRef,
+    static void ARA_CALL notifyAudioSourceAnalysisProgress (ARAModelUpdateControllerHostRef /*controllerHostRef*/,
                                                             ARAAudioSourceHostRef audioSourceHostRef, ARAAnalysisProgressState state, float value) noexcept
     {
         auto audioSource = reinterpret_cast<ARAAudioSource*> (audioSourceHostRef);
