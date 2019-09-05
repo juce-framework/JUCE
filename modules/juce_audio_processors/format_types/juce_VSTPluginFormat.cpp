@@ -237,10 +237,8 @@ namespace
         Window* childWindows;
         unsigned int numChildren = 0;
 
-        {
-            ScopedXDisplay xDisplay;
-            X11Symbols::getInstance()->xQueryTree (xDisplay.display, windowToCheck, &rootWindow, &parentWindow, &childWindows, &numChildren);
-        }
+        X11Symbols::getInstance()->xQueryTree (XWindowSystem::getInstance()->getDisplay(),
+                                               windowToCheck, &rootWindow, &parentWindow, &childWindows, &numChildren);
 
         if (numChildren > 0)
             return childWindows [0];
@@ -2743,7 +2741,6 @@ public:
     {
        #if JUCE_LINUX
         pluginWindow = None;
-        display = XWindowSystem::getInstance()->displayRef();
         ignoreUnused (pluginRefusesToResize, alreadyInside);
        #elif JUCE_MAC
         ignoreUnused (recursiveResize, pluginRefusesToResize, alreadyInside);
@@ -2786,10 +2783,6 @@ public:
         #endif
         cocoaWrapper.reset();
        #else
-        #if JUCE_LINUX
-         display = XWindowSystem::getInstance()->displayUnref();
-        #endif
-
         removeScaleFactorListeners();
        #endif
 
@@ -3403,15 +3396,14 @@ private:
    #if ! JUCE_MAC
     bool pluginRespondsToDPIChanges = false;
     float nativeScaleFactor = 1.0f;
-   #endif
-
-   #if JUCE_WINDOWS
-    HWND pluginHWND = {};
-    void* originalWndProc = {};
-    int sizeCheckCount = 0;
-   #elif JUCE_LINUX
-    ::Display* display;
-    Window pluginWindow;
+    #if JUCE_WINDOWS
+     HWND pluginHWND = {};
+     void* originalWndProc = {};
+     int sizeCheckCount = 0;
+    #elif JUCE_LINUX
+     ::Display* display = XWindowSystem::getInstance()->getDisplay();
+     Window pluginWindow = 0;
+    #endif
    #endif
 
     //==============================================================================

@@ -43,7 +43,7 @@ namespace ReturnHelpers
 
 
 //==============================================================================
-class JUCE_API  X11Symbols  : public DeletedAtShutdown
+class JUCE_API  X11Symbols
 {
 public:
     //==============================================================================
@@ -223,7 +223,7 @@ public:
                                          char*)
 
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XGetErrorDatabaseText, xGetErrorDatabaseText,
-                                         (::Display*, char*, const char*, const char*, int),
+                                         (::Display*, const char*, const char*, const char*, const char*, int),
                                          void)
 
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XGetErrorText, xGetErrorText,

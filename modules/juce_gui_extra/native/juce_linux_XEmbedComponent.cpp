@@ -23,8 +23,8 @@ bool juce_handleXEmbedEvent (ComponentPeer*, void*);
 Window juce_getCurrentFocusWindow (ComponentPeer*);
 
 //==============================================================================
-unsigned long juce_createKeyProxyWindow (ComponentPeer*);
-void juce_deleteKeyProxyWindow (ComponentPeer*);
+::Window juce_createKeyProxyWindow (ComponentPeer*);
+void juce_deleteKeyProxyWindow (::Window);
 
 //==============================================================================
 enum
@@ -75,7 +75,7 @@ public:
 
         ~SharedKeyWindow()
         {
-            juce_deleteKeyProxyWindow (keyPeer);
+            juce_deleteKeyProxyWindow (keyProxy);
 
             auto& keyWindows = getKeyWindows();
             keyWindows.remove (keyPeer);
@@ -130,8 +130,12 @@ public:
     //==============================================================================
     Pimpl (XEmbedComponent& parent, Window x11Window,
            bool wantsKeyboardFocus, bool isClientInitiated, bool shouldAllowResize)
-        : owner (parent), atoms (x11display.display), clientInitiated (isClientInitiated),
-          wantsFocus (wantsKeyboardFocus), allowResize (shouldAllowResize)
+        : owner (parent),
+          infoAtom (XWindowSystem::getInstance()->getAtoms().XembedInfo),
+          messageTypeAtom (XWindowSystem::getInstance()->getAtoms().XembedMsgType),
+          clientInitiated (isClientInitiated),
+          wantsFocus (wantsKeyboardFocus),
+          allowResize (shouldAllowResize)
     {
         getWidgets().add (this);
 
@@ -254,9 +258,7 @@ private:
     //==============================================================================
     XEmbedComponent& owner;
     Window client = 0, host = 0;
-
-    ScopedXDisplay x11display;
-    Atoms atoms;
+    Atom infoAtom, messageTypeAtom;
 
     bool clientInitiated;
     bool wantsFocus        = false;
@@ -372,12 +374,12 @@ private:
         return {};
     }
 
-    Display* getDisplay()   { return reinterpret_cast<Display*> (x11display.display); }
+    Display* getDisplay()   { return XWindowSystem::getInstance()->getDisplay(); }
 
     //==============================================================================
     bool getXEmbedMappedFlag()
     {
-        GetXProperty embedInfo (x11display.display, client, atoms.XembedInfo, 0, 2, false, atoms.XembedInfo);
+        XWindowSystemUtilities::GetXProperty embedInfo (client, infoAtom, 0, 2, false, infoAtom);
 
         if (embedInfo.success && embedInfo.actualFormat == 32
              && embedInfo.numItems >= 2 && embedInfo.data != nullptr)
@@ -405,7 +407,7 @@ private:
     //==============================================================================
     void propertyChanged (const Atom& a)
     {
-        if (a == atoms.XembedInfo)
+        if (a == infoAtom)
             updateMapping();
     }
 
@@ -561,7 +563,7 @@ private:
                     return true;
 
                 case ClientMessage:
-                    if (e.xclient.message_type == atoms.XembedMsgType && e.xclient.format == 32)
+                    if (e.xclient.message_type == messageTypeAtom && e.xclient.format == 32)
                     {
                         handleXembedCmd ((::Time) e.xclient.data.l[0], e.xclient.data.l[1],
                                          e.xclient.data.l[2], e.xclient.data.l[3],
@@ -588,7 +590,7 @@ private:
         ::memset (&msg, 0, sizeof (XClientMessageEvent));
         msg.window = client;
         msg.type = ClientMessage;
-        msg.message_type = atoms.XembedMsgType;
+        msg.message_type = messageTypeAtom;
         msg.format = 32;
         msg.data.l[0] = (long) xTime;
         msg.data.l[1] = opcode;

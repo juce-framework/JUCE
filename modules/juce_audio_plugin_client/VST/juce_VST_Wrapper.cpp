@@ -214,8 +214,6 @@ struct SharedMessageThread  : public Thread
 
         MessageManager::getInstance()->setCurrentThreadAsMessageThread();
 
-        ScopedXDisplay xDisplay;
-
         while ((! threadShouldExit()) && MessageManager::getInstance()->runDispatchLoopUntil (250))
         {}
     }
@@ -1088,7 +1086,7 @@ public:
            #elif JUCE_LINUX
             addToDesktop (0, args.ptr);
             hostWindow = (Window) args.ptr;
-            X11Symbols::getInstance()->xReparentWindow (display.display, (Window) getWindowHandle(), hostWindow, 0, 0);
+            X11Symbols::getInstance()->xReparentWindow (display, (Window) getWindowHandle(), hostWindow, 0, 0);
            #else
             hostWindow = attachComponentToWindowRefVST (this, args.ptr, wrapper.useNSView);
            #endif
@@ -1197,7 +1195,7 @@ public:
                     if (auto* peer = ed->getPeer())
                         scale *= (float) peer->getPlatformScaleFactor();
 
-                    X11Symbols::getInstance()->xResizeWindow (display.display, (Window) getWindowHandle(),
+                    X11Symbols::getInstance()->xResizeWindow (display, (Window) getWindowHandle(),
                                                               static_cast<unsigned int> (roundToInt (pos.getWidth()  * scale)),
                                                               static_cast<unsigned int> (roundToInt (pos.getHeight() * scale)));
                    #endif
@@ -1366,7 +1364,7 @@ public:
        #if JUCE_MAC
         void* hostWindow = nullptr;
        #elif JUCE_LINUX
-        ScopedXDisplay display;
+        ::Display* display = XWindowSystem::getInstance()->getDisplay();
         Window hostWindow = {};
        #elif JUCE_WINDOWS
         HWND hostWindow = {};

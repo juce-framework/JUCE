@@ -250,13 +250,13 @@ namespace juce
  #include "native/juce_win32_FileChooser.cpp"
 
 #elif JUCE_LINUX
- #include "native/juce_linux_X11Symbols.cpp"
- #include "native/juce_linux_X11.cpp"
- #include "native/juce_linux_X11_Clipboard.cpp"
+ #include "native/x11/juce_linux_X11_Symbols.cpp"
+ #include "native/x11/juce_linux_X11_DragAndDrop.cpp"
 
  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant")
 
- #include "native/juce_linux_X11_Windowing.cpp"
+ #include "native/juce_linux_Windowing.cpp"
+ #include "native/x11/juce_linux_XWindowSystem.cpp"
 
  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 

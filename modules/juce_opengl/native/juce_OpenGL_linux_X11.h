@@ -23,7 +23,6 @@ extern XContext windowHandleXContext;
 
 //==============================================================================
 // Defined juce_linux_Windowing.cpp
-Rectangle<int> juce_LinuxScaledToPhysicalBounds (ComponentPeer*, Rectangle<int>);
 void juce_LinuxAddRepaintListener (ComponentPeer*, Component* dummy);
 void juce_LinuxRemoveRepaintListener (ComponentPeer*, Component* dummy);
 
@@ -55,9 +54,10 @@ public:
                    OpenGLVersion)
         : component (comp), contextToShareWith (shareContext), dummy (*this)
     {
-        display = XWindowSystem::getInstance()->displayRef();
+        display = XWindowSystem::getInstance()->getDisplay();
 
-        ScopedXLock xlock (display);
+        XWindowSystemUtilities::ScopedXLock xLock;
+
         X11Symbols::getInstance()->xSync (display, False);
 
         GLint attribs[] =
@@ -95,7 +95,7 @@ public:
         auto glBounds = component.getTopLevelComponent()
                            ->getLocalArea (&component, component.getLocalBounds());
 
-        glBounds = juce_LinuxScaledToPhysicalBounds (peer, glBounds);
+        glBounds = Desktop::getInstance().getDisplays().logicalToPhysical (glBounds);
 
         embeddedWindow = X11Symbols::getInstance()->xCreateWindow (display, windowH,
                                                                    glBounds.getX(), glBounds.getY(),
@@ -123,20 +123,18 @@ public:
 
         if (embeddedWindow != 0)
         {
-            ScopedXLock xlock (display);
+            XWindowSystemUtilities::ScopedXLock xLock;
             X11Symbols::getInstance()->xUnmapWindow (display, embeddedWindow);
             X11Symbols::getInstance()->xDestroyWindow (display, embeddedWindow);
         }
 
         if (bestVisual != nullptr)
             X11Symbols::getInstance()->xFree (bestVisual);
-
-        XWindowSystem::getInstance()->displayUnref();
     }
 
     bool initialiseOnRenderThread (OpenGLContext& c)
     {
-        ScopedXLock xlock (display);
+        XWindowSystemUtilities::ScopedXLock xLock;
         renderContext = glXCreateContext (display, bestVisual, (GLXContext) contextToShareWith, GL_TRUE);
         c.makeActive();
         context = &c;
@@ -146,7 +144,7 @@ public:
 
     void shutdownOnRenderThread()
     {
-        ScopedXLock xlock (display);
+        XWindowSystemUtilities::ScopedXLock xLock;
         context = nullptr;
         deactivateCurrentContext();
         glXDestroyContext (display, renderContext);
@@ -155,36 +153,38 @@ public:
 
     bool makeActive() const noexcept
     {
-        ScopedXLock xlock (display);
+        XWindowSystemUtilities::ScopedXLock xLock;
         return renderContext != nullptr
                  && glXMakeCurrent (display, embeddedWindow, renderContext);
     }
 
     bool isActive() const noexcept
     {
-        ScopedXLock xlock (display);
+        XWindowSystemUtilities::ScopedXLock xLock;
         return glXGetCurrentContext() == renderContext && renderContext != nullptr;
     }
 
     static void deactivateCurrentContext()
     {
-        ScopedXDisplay xDisplay;
-        ScopedXLock xlock (xDisplay.display);
-        glXMakeCurrent (xDisplay.display, None, nullptr);
+        if (auto* display = XWindowSystem::getInstance()->getDisplay())
+        {
+            XWindowSystemUtilities::ScopedXLock xLock;
+            glXMakeCurrent (display, None, nullptr);
+        }
     }
 
     void swapBuffers()
     {
-        ScopedXLock xlock (display);
+        XWindowSystemUtilities::ScopedXLock xLock;
         glXSwapBuffers (display, embeddedWindow);
     }
 
     void updateWindowPosition (Rectangle<int> newBounds)
     {
         bounds = newBounds;
-        auto physicalBounds = juce_LinuxScaledToPhysicalBounds (component.getPeer(), bounds);
+        auto physicalBounds = Desktop::getInstance().getDisplays().logicalToPhysical (bounds);
 
-        ScopedXLock xlock (display);
+        XWindowSystemUtilities::ScopedXLock xLock;
         X11Symbols::getInstance()->xMoveResizeWindow (display, embeddedWindow,
                                                       physicalBounds.getX(), physicalBounds.getY(),
                                                       (unsigned int) jmax (1, physicalBounds.getWidth()),
@@ -199,7 +199,7 @@ public:
         if (auto GLXSwapIntervalSGI
               = (PFNGLXSWAPINTERVALSGIPROC) OpenGLHelpers::getExtensionFunction ("glXSwapIntervalSGI"))
         {
-            ScopedXLock xlock (display);
+            XWindowSystemUtilities::ScopedXLock xLock;
             swapFrames = numFramesPerSwap;
             GLXSwapIntervalSGI (numFramesPerSwap);
             return true;
@@ -228,13 +228,13 @@ private:
 
     int swapFrames = 0;
     Rectangle<int> bounds;
-    XVisualInfo* bestVisual = {};
+    XVisualInfo* bestVisual = nullptr;
     void* contextToShareWith;
 
-    OpenGLContext* context = {};
+    OpenGLContext* context = nullptr;
     DummyComponent dummy;
 
-    ::Display* display = {};
+    ::Display* display = nullptr;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeContext)
 };
@@ -242,15 +242,8 @@ private:
 //==============================================================================
 bool OpenGLHelpers::isContextActive()
 {
-    ScopedXDisplay xDisplay;
-
-    if (xDisplay.display)
-    {
-        ScopedXLock xlock (xDisplay.display);
-        return glXGetCurrentContext() != nullptr;
-    }
-
-    return false;
+    XWindowSystemUtilities::ScopedXLock xLock;
+    return glXGetCurrentContext() != nullptr;
 }
 
 } // namespace juce

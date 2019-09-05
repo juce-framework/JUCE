@@ -288,8 +288,6 @@ namespace juce
 #include "mouse/juce_LassoComponent.h"
 
 #if JUCE_LINUX
- #include "native/juce_linux_X11.h"
-
  #if JUCE_GUI_BASICS_INCLUDE_XHEADERS
   // If you're missing these headers, you need to install the libx11-dev package
   #include <X11/Xlib.h>
@@ -332,7 +330,8 @@ namespace juce
   #undef SIZEOF
   #undef KeyPress
 
-  #include "native/juce_linux_X11Symbols.h"
+  #include "native/x11/juce_linux_XWindowSystem.h"
+  #include "native/x11/juce_linux_X11_Symbols.h"
  #endif
 #endif
 

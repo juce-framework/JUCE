@@ -24,17 +24,16 @@ class SystemTrayIconComponent::Pimpl
 public:
     Pimpl (const Image& im, Window windowH)  : image (im)
     {
-        ScopedXDisplay xDisplay;
-        auto display = xDisplay.display;
+        XWindowSystemUtilities::ScopedXLock xLock;
 
-        ScopedXLock xlock (display);
+        auto* display = XWindowSystem::getInstance()->getDisplay();
 
         auto* screen = X11Symbols::getInstance()->xDefaultScreenOfDisplay (display);
         auto screenNumber = X11Symbols::getInstance()->xScreenNumberOfScreen (screen);
 
         String screenAtom ("_NET_SYSTEM_TRAY_S");
         screenAtom << screenNumber;
-        Atom selectionAtom = Atoms::getCreating (display, screenAtom.toUTF8());
+        Atom selectionAtom = XWindowSystemUtilities::Atoms::getCreating (display, screenAtom.toUTF8());
 
         X11Symbols::getInstance()->xGrabServer (display);
         auto managerWin = X11Symbols::getInstance()->xGetSelectionOwner (display, selectionAtom);
@@ -50,7 +49,7 @@ public:
             XEvent ev = { 0 };
             ev.xclient.type = ClientMessage;
             ev.xclient.window = managerWin;
-            ev.xclient.message_type = Atoms::getCreating (display, "_NET_SYSTEM_TRAY_OPCODE");
+            ev.xclient.message_type = XWindowSystemUtilities::Atoms::getCreating (display, "_NET_SYSTEM_TRAY_OPCODE");
             ev.xclient.format = 32;
             ev.xclient.data.l[0] = CurrentTime;
             ev.xclient.data.l[1] = 0 /*SYSTEM_TRAY_REQUEST_DOCK*/;
@@ -64,12 +63,12 @@ public:
 
         // For older KDE's ...
         long atomData = 1;
-        Atom trayAtom = Atoms::getCreating (display, "KWM_DOCKWINDOW");
+        Atom trayAtom = XWindowSystemUtilities::Atoms::getCreating (display, "KWM_DOCKWINDOW");
         X11Symbols::getInstance()->xChangeProperty (display, windowH, trayAtom, trayAtom,
                                                     32, PropModeReplace, (unsigned char*) &atomData, 1);
 
         // For more recent KDE's...
-        trayAtom = Atoms::getCreating (display, "_KDE_NET_WM_SYSTEM_TRAY_WINDOW_FOR");
+        trayAtom = XWindowSystemUtilities::Atoms::getCreating (display, "_KDE_NET_WM_SYSTEM_TRAY_WINDOW_FOR");
         X11Symbols::getInstance()->xChangeProperty (display, windowH, trayAtom, XA_WINDOW,
                                                     32, PropModeReplace, (unsigned char*) &windowH, 1);
 
