@@ -87,7 +87,7 @@ namespace SocketHelpers
 
     static bool resetSocketOptions (SocketHandle handle, bool isDatagram, bool allowBroadcast) noexcept
     {
-        return handle >= 0
+        return handle != invalidSocket
                 && setOption (handle, SO_RCVBUF, (int) 65536)
                 && setOption (handle, SO_SNDBUF, (int) 65536)
                 && (isDatagram ? ((! allowBroadcast) || setOption (handle, SO_BROADCAST, (int) 1))
@@ -147,7 +147,7 @@ namespace SocketHelpers
 
     static bool bindSocket (SocketHandle handle, int port, const String& address) noexcept
     {
-        if (handle < 0 || ! isValidPortNumber (port))
+        if (handle == invalidSocket || ! isValidPortNumber (port))
             return false;
 
         struct sockaddr_in addr;
@@ -163,7 +163,7 @@ namespace SocketHelpers
 
     static int getBoundPort (SocketHandle handle) noexcept
     {
-        if (handle >= 0)
+        if (handle != invalidSocket)
         {
             struct sockaddr_in addr;
             socklen_t len = sizeof (addr);
