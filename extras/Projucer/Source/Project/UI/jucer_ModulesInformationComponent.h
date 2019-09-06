@@ -122,24 +122,24 @@ public:
         bounds.removeFromLeft (5);
         g.setColour (rowIsSelected ? findColour (defaultHighlightedTextColourId) : findColour (widgetTextColourId));
 
-        //======================================================================
+        //==============================================================================
         auto moduleID = project.getEnabledModules().getModuleID (rowNumber);
 
         g.drawFittedText (moduleID, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (0) * width)), Justification::centredLeft, 1);
 
-        //======================================================================
+        //==============================================================================
         auto version = project.getEnabledModules().getModuleInfo (moduleID).getVersion();
         if (version.isEmpty())
             version = "?";
 
         g.drawFittedText (version, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (1) * width)), Justification::centredLeft, 1);
 
-        //======================================================================
+        //==============================================================================
         auto copyLocally = project.getEnabledModules().shouldCopyModuleFilesLocally (moduleID).getValue() ? "Yes" : "No";
 
         g.drawFittedText (copyLocally, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (2) * width)), Justification::centredLeft, 1);
 
-        //======================================================================
+        //==============================================================================
         String pathText;
 
         if (project.getEnabledModules().shouldUseGlobalPath (moduleID))

@@ -189,7 +189,7 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (RemoteInputBuilder, "android/app/RemoteInput$Bui
  DECLARE_JNI_CLASS_WITH_MIN_SDK (StatusBarNotification, "android/service/notification/StatusBarNotification", 23)
  #undef JNI_CLASS_MEMBERS
 
-//==========================================================================
+//==============================================================================
 #if defined(JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME)
  #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
    STATICMETHOD (getInstance, "getInstance", "()Lcom/google/firebase/iid/FirebaseInstanceId;") \
@@ -265,7 +265,7 @@ bool PushNotifications::Notification::isValid() const noexcept
     return isValidForPreApi26;
 }
 
-//==========================================================================
+//==============================================================================
 struct PushNotifications::Pimpl
 {
     Pimpl (PushNotifications& p)
@@ -287,7 +287,7 @@ struct PushNotifications::Pimpl
         return true;
     }
 
-    //==========================================================================
+    //==============================================================================
     void sendLocalNotification (const PushNotifications::Notification& n)
     {
         // All required fields have to be setup!
@@ -434,7 +434,7 @@ struct PushNotifications::Pimpl
         }
     }
 
-    //==========================================================================
+    //==============================================================================
     String getDeviceToken() const
     {
       #if defined(JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME)
@@ -460,7 +460,7 @@ struct PushNotifications::Pimpl
       #endif
     }
 
-    //==========================================================================
+    //==============================================================================
     void subscribeToTopic (const String& topic)
     {
       #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)

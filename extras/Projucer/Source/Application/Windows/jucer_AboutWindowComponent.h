@@ -81,19 +81,19 @@ public:
         auto leftSlice   = bounds.removeFromLeft (150);
         auto centreSlice = bounds;
 
-        //======================================================================
+        //==============================================================================
         rightSlice.removeFromRight (20);
         auto iconSlice = rightSlice.removeFromRight (100);
         huckleberryLogoBounds = iconSlice.removeFromBottom (100).toFloat();
 
-        //======================================================================
+        //==============================================================================
         juceLogoBounds = leftSlice.removeFromTop (150).toFloat();
         juceLogoBounds.setWidth (juceLogoBounds.getWidth() + 100);
         juceLogoBounds.setHeight (juceLogoBounds.getHeight() + 100);
 
         copyrightLabel.setBounds (leftSlice.removeFromBottom (20));
 
-        //======================================================================
+        //==============================================================================
         auto titleHeight = 40;
 
         centreSlice.removeFromTop ((centreSlice.getHeight() / 2) - (titleHeight / 2));

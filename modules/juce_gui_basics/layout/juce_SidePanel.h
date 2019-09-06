@@ -193,7 +193,7 @@ public:
     std::function<void(bool)> onPanelShowHide;
 
 private:
-    //==========================================================================
+    //==============================================================================
     Component* parent = nullptr;
     OptionalScopedPointer<Component> contentComponent;
     OptionalScopedPointer<Component> titleBarComponent;
@@ -216,7 +216,7 @@ private:
 
     bool shouldShowDismissButton = true;
 
-    //==========================================================================
+    //==============================================================================
     void lookAndFeelChanged() override;
     void componentMovedOrResized (Component&, bool wasMoved, bool wasResized) override;
 
