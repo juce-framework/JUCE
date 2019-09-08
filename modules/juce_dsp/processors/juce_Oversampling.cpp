@@ -38,7 +38,7 @@ struct Oversampling<SampleType>::OversamplingStage
     OversamplingStage (size_t numChans, size_t newFactor)  : numChannels (numChans), factor (newFactor) {}
     virtual ~OversamplingStage() {}
 
-    //===============================================================================
+    //==============================================================================
     virtual SampleType getLatencyInSamples() = 0;
 
     virtual void initProcessing (size_t maximumNumberOfSamplesBeforeOversampling)
@@ -66,7 +66,7 @@ struct Oversampling<SampleType>::OversamplingStage
 };
 
 
-//===============================================================================
+//==============================================================================
 /** Dummy oversampling stage class which simply copies and pastes the input
     signal, which could be equivalent to a "one time" oversampling processing.
 */
@@ -77,7 +77,7 @@ struct OversamplingDummy   : public Oversampling<SampleType>::OversamplingStage
 
     OversamplingDummy (size_t numChans) : ParentType (numChans, 1) {}
 
-    //===============================================================================
+    //==============================================================================
     SampleType getLatencyInSamples() override
     {
         return 0;
@@ -104,7 +104,7 @@ struct OversamplingDummy   : public Oversampling<SampleType>::OversamplingStage
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OversamplingDummy)
 };
 
-//===============================================================================
+//==============================================================================
 /** Oversampling stage class performing 2 times oversampling using the Filter
     Design FIR Equiripple method. The resulting filter is linear phase,
     symmetric, and has every two samples but the middle one equal to zero,
@@ -138,7 +138,7 @@ struct Oversampling2TimesEquirippleFIR  : public Oversampling<SampleType>::Overs
         position.resize (static_cast<int> (this->numChannels));
     }
 
-    //===============================================================================
+    //==============================================================================
     SampleType getLatencyInSamples() override
     {
         return static_cast<SampleType> (coefficientsUp.getFilterOrder() + coefficientsDown.getFilterOrder()) * 0.5f;
@@ -247,17 +247,17 @@ struct Oversampling2TimesEquirippleFIR  : public Oversampling<SampleType>::Overs
     }
 
 private:
-    //===============================================================================
+    //==============================================================================
     dsp::FIR::Coefficients<SampleType> coefficientsUp, coefficientsDown;
     AudioBuffer<SampleType> stateUp, stateDown, stateDown2;
     Array<size_t> position;
 
-    //===============================================================================
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Oversampling2TimesEquirippleFIR)
 };
 
 
-//===============================================================================
+//==============================================================================
 /** Oversampling stage class performing 2 times oversampling using the Filter
     Design IIR Polyphase Allpass Cascaded method. The resulting filter is minimum
     phase, and provided with a method to get the exact resulting latency.
@@ -299,7 +299,7 @@ struct Oversampling2TimesPolyphaseIIR  : public Oversampling<SampleType>::Oversa
         delayDown.resize (static_cast<int> (this->numChannels));
     }
 
-    //===============================================================================
+    //==============================================================================
     SampleType getLatencyInSamples() override
     {
         return latency;
@@ -453,7 +453,7 @@ struct Oversampling2TimesPolyphaseIIR  : public Oversampling<SampleType>::Oversa
     }
 
 private:
-    //===============================================================================
+    //==============================================================================
     /** This function calculates the equivalent high order IIR filter of a given
         polyphase cascaded allpass filters structure.
     */
@@ -515,19 +515,19 @@ private:
         return coeffs;
     }
 
-    //===============================================================================
+    //==============================================================================
     Array<SampleType> coefficientsUp, coefficientsDown;
     SampleType latency;
 
     AudioBuffer<SampleType> v1Up, v1Down;
     Array<SampleType> delayDown;
 
-    //===============================================================================
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Oversampling2TimesPolyphaseIIR)
 };
 
 
-//===============================================================================
+//==============================================================================
 template <typename SampleType>
 Oversampling<SampleType>::Oversampling (size_t newNumChannels)
     : numChannels (newNumChannels)
@@ -590,7 +590,7 @@ Oversampling<SampleType>::~Oversampling()
     stages.clear();
 }
 
-//===============================================================================
+//==============================================================================
 template <typename SampleType>
 void Oversampling<SampleType>::addDummyOversamplingStage()
 {
@@ -627,7 +627,7 @@ void Oversampling<SampleType>::clearOversamplingStages()
     factorOversampling = 1u;
 }
 
-//===============================================================================
+//==============================================================================
 template <typename SampleType>
 SampleType Oversampling<SampleType>::getLatencyInSamples() noexcept
 {
@@ -649,7 +649,7 @@ size_t Oversampling<SampleType>::getOversamplingFactor() noexcept
     return factorOversampling;
 }
 
-//===============================================================================
+//==============================================================================
 template <typename SampleType>
 void Oversampling<SampleType>::initProcessing (size_t maximumNumberOfSamplesBeforeOversampling)
 {

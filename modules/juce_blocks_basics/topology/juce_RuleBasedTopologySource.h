@@ -43,7 +43,7 @@ public:
     /** Destructor. */
     ~RuleBasedTopologySource() override;
 
-    //==========================================================================
+    //==============================================================================
     /** Returns the currently active topology. */
     BlockTopology getCurrentTopology() const override;
 
@@ -80,7 +80,7 @@ public:
     bool isActive() const override;
 
 private:
-    //==========================================================================
+    //==============================================================================
     struct Internal;
     std::unique_ptr<Internal> internal;
 };

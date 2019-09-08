@@ -56,7 +56,7 @@ public:
 
     void poll()
     {
-        int receivedBytes = 0;
+        size_t receivedBytes = 0;
 
         for (;;)
         {
@@ -70,7 +70,7 @@ public:
 
             if (receivedBytes == buffer.size())
             {
-                pushMidiData (receivedBytes);
+                pushMidiData (static_cast<int> (receivedBytes));
                 receivedBytes = 0;
             }
         }
@@ -87,6 +87,11 @@ public:
             findMidiDevices (devices, input, card);
 
         return devices;
+    }
+
+    void pushMidiMessage (juce::MidiMessage& message)
+    {
+        concatenator.pushMidiData (message.getRawData(), message.getRawDataSize(), Time::getMillisecondCounter() * 0.001, midiInput, *midiCallback);
     }
 
 private:
@@ -144,7 +149,7 @@ private:
 
             auto subCount = snd_rawmidi_info_get_subdevices_count (info);
 
-            for (int sub = 0; sub < subCount; ++sub)
+            for (size_t sub = 0; sub < subCount; ++sub)
             {
                 snd_rawmidi_info_set_subdevice (info, sub);
 
@@ -161,8 +166,8 @@ private:
         snd_ctl_close (ctl);
     }
 
-    String midiPort;
     MidiInput* const midiInput;
+    String midiPort;
     MidiInputCallback* const midiCallback;
 
     Midi midi;
@@ -182,6 +187,9 @@ public:
                                           BelaAudioIODevice::belaTypeName)
     {
         Bela_defaultSettings (&defaultSettings);
+
+        if (includeAnalogSupport)
+            analogInputs.resize (8);
     }
 
     ~BelaAudioIODevice()
@@ -213,7 +221,7 @@ public:
         auto numIns = getNumContiguousSetBits (inputChannels);
         auto numOuts = getNumContiguousSetBits (outputChannels);
 
-        settings.useAnalog            = 0;
+        settings.useAnalog            = includeAnalogSupport ? 1 : 0;
         settings.useDigital           = 0;
         settings.numAudioInChannels   = numIns;
         settings.numAudioOutChannels  = numOuts;
@@ -353,6 +361,7 @@ public:
     static const char* const belaTypeName;
 
 private:
+
     //==============================================================================
     bool setup (BelaContext& context)
     {
@@ -376,6 +385,9 @@ private:
         calculateXruns (context.audioFramesElapsed, context.audioFrames);
 
         ScopedLock lock (callbackLock);
+
+        if (includeAnalogSupport)
+            updateAnalogInputs (context);
 
         // Check for and process and midi
         for (auto midiInput : BelaMidiInput::midiInputs)
@@ -417,7 +429,7 @@ private:
             }
 
             for (int i = 0; i < actualNumberOfOutputs; ++i)
-                channelOutBuffer[i] = ((interleaved && context.audioOutChannels > 1) || i >= context.audioOutChannels ? audioOutBuffer.getWritePointer (i)
+                channelOutBuffer[i] = ((interleaved && context.audioOutChannels > 1) || static_cast<uint32_t> (i) >= context.audioOutChannels ? audioOutBuffer.getWritePointer (i)
                                                                                                                       : context.audioOut + (i * numSamples));
 
             callback->audioDeviceIOCallback (channelInBuffer.getData(), actualNumberOfInputs,
@@ -447,6 +459,39 @@ private:
         if (callback != nullptr)
             callback->audioDeviceStopped();
     }
+
+    void updateAnalogInputs (BelaContext& context)
+    {
+        for (size_t i = 0; i < 8; i++)
+        {
+            auto v = analogRead (&context, 0, static_cast<int> (i));
+
+            if (fabs (analogInputs[i].previousInput - v) > 1.0f/512.0f)
+            {
+                auto controlValue = int (v * 127.0);
+
+                if (analogInputs[i].previousControlValue != controlValue)
+                {
+                    // Consider this to have moved
+                    analogInputs[i].previousInput        = v;
+                    analogInputs[i].previousControlValue = controlValue;
+
+                    auto message = MidiMessage::controllerEvent (1, 16 + i, controlValue);
+
+                    for (auto midiInput : BelaMidiInput::midiInputs)
+                        midiInput->pushMidiMessage (message);
+                }
+            }
+        }
+    }
+
+    struct AnalogInput
+    {
+        float previousInput        = 0;
+        int   previousControlValue = 0;
+    };
+
+    std::vector<AnalogInput> analogInputs;
 
 
     //==============================================================================
@@ -493,6 +538,8 @@ private:
     AudioBuffer<float> audioInBuffer, audioOutBuffer;
     HeapBlock<const float*> channelInBuffer;
     HeapBlock<float*> channelOutBuffer;
+
+    bool includeAnalogSupport = true;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BelaAudioIODevice)
 };

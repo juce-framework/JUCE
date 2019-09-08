@@ -1351,13 +1351,13 @@ public:
     }
 
 private:
-    //=============================================================================
+    //==============================================================================
     static void staticFinished (SLAndroidSimpleBufferQueueItf, void* context)
     {
         static_cast<SLRealtimeThread*> (context)->finished();
     }
 
-    //=============================================================================
+    //==============================================================================
     DynamicLibrary slLibrary { "libOpenSLES.so" };
 
     SlRef<SLEngineItf_>    engine;

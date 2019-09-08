@@ -4095,6 +4095,27 @@ JUCE_API bool shouldScaleGLWindow (void* hwnd)
  }
 #endif
 
+JUCE_API void setThreadDPIAwareness (void* hwnd)
+{
+    if (setThreadDPIAwarenessContext != nullptr)
+    {
+        if (! JUCEApplicationBase::isStandaloneApp())
+        {
+            if (hwnd != nullptr)
+                setThreadDPIAwarenessContext (isPerMonitorDPIAwareWindow ((HWND) hwnd) ? DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE
+                                                                                       : DPI_AWARENESS_CONTEXT_UNAWARE);
+        }
+        else
+        {
+           #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+            setThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+           #else
+            setThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
+           #endif
+        }
+    }
+}
+
 JUCE_IMPLEMENT_SINGLETON (HWNDComponentPeer::WindowClassHolder)
 
 //==============================================================================

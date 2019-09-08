@@ -281,15 +281,15 @@ public:
     //==============================================================================
     /** Appends a new object to the end of the array.
 
-        Note that the this object will be deleted by the OwnedArray when it
-        is removed, so be careful not to delete it somewhere else.
+        Note that this object will be deleted by the OwnedArray when it is removed,
+        so be careful not to delete it somewhere else.
 
         Also be careful not to add the same object to the array more than once,
         as this will obviously cause deletion of dangling pointers.
 
         @param newObject    the new object to add to the array
         @returns            the new object that was added
-        @see set, insert, addIfNotAlreadyThere, addSorted
+        @see set, insert, addSorted
     */
     ObjectClass* add (ObjectClass* newObject)
     {
@@ -300,15 +300,15 @@ public:
 
     /** Appends a new object to the end of the array.
 
-        Note that the this object will be deleted by the OwnedArray when it
-        is removed, so be careful not to delete it somewhere else.
+        Note that this object will be deleted by the OwnedArray when it is removed,
+        so be careful not to delete it somewhere else.
 
         Also be careful not to add the same object to the array more than once,
         as this will obviously cause deletion of dangling pointers.
 
         @param newObject    the new object to add to the array
         @returns            the new object that was added
-        @see set, insert, addIfNotAlreadyThere, addSorted
+        @see set, insert, addSorted
     */
     ObjectClass* add (std::unique_ptr<ObjectClass> newObject)
     {
@@ -317,8 +317,8 @@ public:
 
     /** Inserts a new object into the array at the given index.
 
-        Note that the this object will be deleted by the OwnedArray when it
-        is removed, so be careful not to delete it somewhere else.
+        Note that this object will be deleted by the OwnedArray when it is removed,
+        so be careful not to delete it somewhere else.
 
         If the index is less than 0 or greater than the size of the array, the
         element will be added to the end of the array.
@@ -331,7 +331,7 @@ public:
         @param indexToInsertAt      the index at which the new element should be inserted
         @param newObject            the new object to add to the array
         @returns                    the new object that was added
-        @see add, addSorted, addIfNotAlreadyThere, set
+        @see add, addSorted, set
     */
     ObjectClass* insert (int indexToInsertAt, ObjectClass* newObject)
     {
@@ -342,8 +342,8 @@ public:
 
     /** Inserts a new object into the array at the given index.
 
-        Note that the this object will be deleted by the OwnedArray when it
-        is removed, so be careful not to delete it somewhere else.
+        Note that this object will be deleted by the OwnedArray when it is removed,
+        so be careful not to delete it somewhere else.
 
         If the index is less than 0 or greater than the size of the array, the
         element will be added to the end of the array.
@@ -356,7 +356,7 @@ public:
         @param indexToInsertAt      the index at which the new element should be inserted
         @param newObject            the new object to add to the array
         @returns                    the new object that was added
-        @see add, addSorted, addIfNotAlreadyThere, set
+        @see add, addSorted, set
     */
     ObjectClass* insert (int indexToInsertAt, std::unique_ptr<ObjectClass> newObject)
     {

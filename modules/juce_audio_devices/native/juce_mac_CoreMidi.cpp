@@ -60,7 +60,16 @@ namespace CoreMidiHelpers
         SInt32 objectID = 0;
 
         if (CHECK_ERROR (MIDIObjectGetIntegerProperty (entity, kMIDIPropertyUniqueID, &objectID)))
+        {
             info.identifier = String (objectID);
+        }
+        else
+        {
+            ScopedCFString str;
+
+            if (CHECK_ERROR (MIDIObjectGetStringProperty (entity, kMIDIPropertyUniqueID, &str.cfString)))
+                info.identifier = String::fromCFString (str.cfString);
+        }
 
         return info;
     }
