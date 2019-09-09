@@ -1462,7 +1462,7 @@ private:
                        #if JUCE_MAC
                         if (host.isWavelab() || host.isReaper())
                        #else
-                        if (host.isWavelab())
+                        if (host.isWavelab() || host.isAbletonLive())
                        #endif
                             setBounds (0, 0, w, h);
                     }
