@@ -555,14 +555,14 @@ void AudioProcessor::processBypassed (AudioBuffer<floatType>& buffer, MidiBuffer
 void AudioProcessor::processBlockBypassed (AudioBuffer<float>&  buffer, MidiBuffer& midi)    { processBypassed (buffer, midi); }
 void AudioProcessor::processBlockBypassed (AudioBuffer<double>& buffer, MidiBuffer& midi)    { processBypassed (buffer, midi); }
 
-void AudioProcessor::analyseBlock (const AudioBuffer<const float>& buffer)
+void AudioProcessor::analyseBlock (const AudioBuffer<float>& buffer)
 {
     ignoreUnused (buffer);
     // If you hit this assertion then you've got analysis called but you haven't implement required callbacks.
     jassertfalse;
 }
 
-void AudioProcessor::analyseBlock (const AudioBuffer<const double>& buffer)
+void AudioProcessor::analyseBlock (const AudioBuffer<double>& buffer)
 {
     ignoreUnused (buffer);
 

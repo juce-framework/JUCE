@@ -300,14 +300,14 @@ public:
         For offline processing (currently Pro Tools AudioSuite) this basically pass input buffers.
         You can use those buffers to do analysis before doing the actual process.
      */
-    virtual void analyseBlock (const AudioBuffer<const float>& buffer);
+    virtual void analyseBlock (const AudioBuffer<float>& buffer);
 
     /** Analyses the next block before actual process.
 
         For offline processing (currently Pro Tools AudioSuite) this basically pass input buffers.
         You can use those buffers to do analysis before doing the actual process.
      */
-    virtual void analyseBlock (const AudioBuffer<const double>& buffer);
+    virtual void analyseBlock (const AudioBuffer<double>& buffer);
 
     /** Notifies AudioProcessor that analysis is about to start.
 
