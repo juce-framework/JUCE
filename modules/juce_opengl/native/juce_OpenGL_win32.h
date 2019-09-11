@@ -40,8 +40,6 @@ extern bool shouldScaleGLWindow (void* hwnd);
  void setProcessDPIAwarenessIfNecessary (void*);
 #endif
 
- void setThreadDPIAwareness (void*);
-
 //==============================================================================
 class OpenGLContext::NativeContext
    #if JUCE_WIN_PER_MONITOR_DPI_AWARE
@@ -111,8 +109,6 @@ public:
         setProcessDPIAwarenessIfNecessary (nativeWindow->getNativeHandle());
        #endif
 
-        updateThreadDPIAwareness();
-
         context = &c;
         return true;
     }
@@ -120,7 +116,7 @@ public:
     void shutdownOnRenderThread()           { deactivateCurrentContext(); context = nullptr; }
 
     static void deactivateCurrentContext()  { wglMakeCurrent (0, 0); }
-    bool makeActive() const noexcept        { updateThreadDPIAwareness(); return isActive() || wglMakeCurrent (dc, renderContext) != FALSE; }
+    bool makeActive() const noexcept        { return isActive() || wglMakeCurrent (dc, renderContext) != FALSE; }
     bool isActive() const noexcept          { return wglGetCurrentContext() == renderContext; }
     void swapBuffers() const noexcept       { SwapBuffers (dc); }
 
@@ -338,15 +334,6 @@ private:
         }
 
         return format;
-    }
-
-    void updateThreadDPIAwareness() const
-    {
-        if (nativeWindow.get() != nullptr)
-            setThreadDPIAwareness (nativeWindow->getNativeHandle());
-        else
-            setThreadDPIAwareness (nullptr);
-
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeContext)
