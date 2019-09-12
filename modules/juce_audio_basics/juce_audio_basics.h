@@ -50,6 +50,7 @@
 #define JUCE_AUDIO_BASICS_H_INCLUDED
 
 #include <juce_core/juce_core.h>
+#include <complex>
 
 //==============================================================================
 #undef Complex  // apparently some C libraries actually define these symbols (!)
@@ -87,6 +88,7 @@
 #include "buffers/juce_AudioProcessLoadMeasurer.h"
 #include "utilities/juce_Decibels.h"
 #include "utilities/juce_IIRFilter.h"
+#include "utilities/juce_ResamplerBase.h"
 #include "utilities/juce_LagrangeInterpolator.h"
 #include "utilities/juce_CatmullRomInterpolator.h"
 #include "utilities/juce_SmoothedValue.h"

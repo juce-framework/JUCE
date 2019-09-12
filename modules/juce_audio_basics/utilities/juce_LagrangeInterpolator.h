@@ -23,8 +23,48 @@
 namespace juce
 {
 
+template <typename SampleType, typename CoefficientType>
+class LagrangeAlgorithmInternal
+{
+public:
+    LagrangeAlgorithmInternal() = delete;
+
+    static forcedinline SampleType valueAtOffset (const SampleType* inputs, CoefficientType offset) noexcept
+    {
+        return calcCoefficient<0> (inputs[4], offset)
+                + calcCoefficient<1> (inputs[3], offset)
+                + calcCoefficient<2> (inputs[2], offset)
+                + calcCoefficient<3> (inputs[1], offset)
+                + calcCoefficient<4> (inputs[0], offset);
+    }
+
+private:
+    template<int k>
+    struct LagrangeResampleHelper
+    {
+        static forcedinline void calc (SampleType& a, CoefficientType b) noexcept
+        {
+            if (k != 0) a *= b * (1.0f / k);
+        }
+    };
+
+    template<int k>
+    static forcedinline SampleType calcCoefficient (SampleType input, CoefficientType offset) noexcept
+    {
+        LagrangeResampleHelper<0 - k>::calc (input, CoefficientType (-2.0) - offset);
+        LagrangeResampleHelper<1 - k>::calc (input, CoefficientType (-1.0) - offset);
+        LagrangeResampleHelper<2 - k>::calc (input, CoefficientType (0.0f) - offset);
+        LagrangeResampleHelper<3 - k>::calc (input, CoefficientType (1.0f) - offset);
+        LagrangeResampleHelper<4 - k>::calc (input, CoefficientType (2.0f) - offset);
+        return input;
+    }
+};
+
 /**
-    Interpolator for resampling a stream of floats using 4-point lagrange interpolation.
+    Interpolator for resampling a stream of floating point values using 4-point
+    lagrange interpolation. SampleType can be float, double, std::complex<float>
+    and std::complex<double>. Note that you need to specify a real valued
+    CoefficientType if working with complex data.
 
     Note that the resampler is stateful, so when there's a break in the continuity
     of the input stream you're feeding it, you should call reset() before feeding
@@ -36,108 +76,19 @@ namespace juce
 
     @tags{Audio}
 */
-class JUCE_API  LagrangeInterpolator
+template <typename SampleType = float, typename CoefficientType = SampleType>
+class JUCE_API  LagrangeResampler : public ResamplerBase<SampleType, CoefficientType, LagrangeAlgorithmInternal<SampleType, CoefficientType>>
 {
 public:
-    LagrangeInterpolator() noexcept;
-    ~LagrangeInterpolator() noexcept;
-
-    /** Resets the state of the interpolator.
-        Call this when there's a break in the continuity of the input data stream.
-    */
-    void reset() noexcept;
-
-    /** Resamples a stream of samples.
-
-        @param speedRatio       the number of input samples to use for each output sample
-        @param inputSamples     the source data to read from. This must contain at
-                                least (speedRatio * numOutputSamplesToProduce) samples.
-        @param outputSamples    the buffer to write the results into
-        @param numOutputSamplesToProduce    the number of output samples that should be created
-
-        @returns the actual number of input samples that were used
-    */
-    int process (double speedRatio,
-                 const float* inputSamples,
-                 float* outputSamples,
-                 int numOutputSamplesToProduce) noexcept;
-
-    /** Resamples a stream of samples.
-
-        @param speedRatio       the number of input samples to use for each output sample
-        @param inputSamples     the source data to read from. This must contain at
-                                least (speedRatio * numOutputSamplesToProduce) samples.
-        @param outputSamples    the buffer to write the results into
-        @param numOutputSamplesToProduce    the number of output samples that should be created
-        @param available        the number of available input samples. If it needs more samples
-                                than available, it either wraps back for wrapAround samples, or
-                                it feeds zeroes
-        @param wrapAround       if the stream exceeds available samples, it wraps back for
-                                wrapAround samples. If wrapAround is set to 0, it will feed zeroes.
-
-        @returns the actual number of input samples that were used
-    */
-    int process (double speedRatio,
-                 const float* inputSamples,
-                 float* outputSamples,
-                 int numOutputSamplesToProduce,
-                 int available,
-                 int wrapAround) noexcept;
-
-    /** Resamples a stream of samples, adding the results to the output data
-        with a gain.
-
-        @param speedRatio       the number of input samples to use for each output sample
-        @param inputSamples     the source data to read from. This must contain at
-                                least (speedRatio * numOutputSamplesToProduce) samples.
-        @param outputSamples    the buffer to write the results to - the result values will be added
-                                to any pre-existing data in this buffer after being multiplied by
-                                the gain factor
-        @param numOutputSamplesToProduce    the number of output samples that should be created
-        @param gain             a gain factor to multiply the resulting samples by before
-                                adding them to the destination buffer
-
-        @returns the actual number of input samples that were used
-    */
-    int processAdding (double speedRatio,
-                       const float* inputSamples,
-                       float* outputSamples,
-                       int numOutputSamplesToProduce,
-                       float gain) noexcept;
-
-    /** Resamples a stream of samples, adding the results to the output data
-        with a gain.
-
-        @param speedRatio       the number of input samples to use for each output sample
-        @param inputSamples     the source data to read from. This must contain at
-                                least (speedRatio * numOutputSamplesToProduce) samples.
-        @param outputSamples    the buffer to write the results to - the result values will be added
-                                to any pre-existing data in this buffer after being multiplied by
-                                the gain factor
-        @param numOutputSamplesToProduce    the number of output samples that should be created
-        @param available        the number of available input samples. If it needs more samples
-                                than available, it either wraps back for wrapAround samples, or
-                                it feeds zeroes
-        @param wrapAround       if the stream exceeds available samples, it wraps back for
-                                wrapAround samples. If wrapAround is set to 0, it will feed zeroes.
-        @param gain             a gain factor to multiply the resulting samples by before
-                                adding them to the destination buffer
-
-        @returns the actual number of input samples that were used
-    */
-    int processAdding (double speedRatio,
-                       const float* inputSamples,
-                       float* outputSamples,
-                       int numOutputSamplesToProduce,
-                       int available,
-                       int wrapAround,
-                       float gain) noexcept;
+    LagrangeResampler()  noexcept {};
+    ~LagrangeResampler() noexcept {};
 
 private:
-    float lastInputSamples[5];
-    double subSamplePos;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LagrangeInterpolator)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LagrangeResampler)
 };
 
+/** Alias to make the new templated class backwards compatible with the old float-only implementation */
+using LagrangeInterpolator = LagrangeResampler<float>;
+    
 } // namespace juce

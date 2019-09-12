@@ -23,8 +23,32 @@
 namespace juce
 {
 
+template <typename SampleType, typename CoefficientType>
+struct CatmullRomAlgorithmInternal
+{
+    CatmullRomAlgorithmInternal() = delete;
+
+    static forcedinline SampleType valueAtOffset (const SampleType* const inputs, const CoefficientType offset) noexcept
+    {
+        auto y0 = inputs[3];
+        auto y1 = inputs[2];
+        auto y2 = inputs[1];
+        auto y3 = inputs[0];
+
+        auto halfY0 = 0.5f * y0;
+        auto halfY3 = 0.5f * y3;
+
+        return y1 +  offset * ((0.5f * y2 - halfY0)
+                  + (offset * (((y0 + 2.0f * y2) - (halfY3 + 2.5f * y1))
+                  + (offset * ((halfY3 + 1.5f * y1) - (halfY0 + 1.5f * y2))))));
+    }
+};
+
 /**
-    Interpolator for resampling a stream of floats using Catmull-Rom interpolation.
+    Interpolator for resampling a stream of floating point values using Catmull-Rom
+    interpolation. SampleType can be float, double, std::complex<float> and
+    std::complex<double>. Note that you need to specify a real valued
+    CoefficientType if working with complex data.
 
     Note that the resampler is stateful, so when there's a break in the continuity
     of the input stream you're feeding it, you should call reset() before feeding
@@ -32,112 +56,23 @@ namespace juce
     multiple channels, make sure each one uses its own CatmullRomInterpolator
     object.
 
-    @see LagrangeInterpolator
+    @see LagrangeResampler
 
     @tags{Audio}
 */
-class JUCE_API  CatmullRomInterpolator
+template <typename SampleType, typename CoefficientType = SampleType>
+class JUCE_API  CatmullRomResampler : public ResamplerBase<SampleType, CoefficientType, CatmullRomAlgorithmInternal<SampleType, CoefficientType>>
 {
 public:
-    CatmullRomInterpolator() noexcept;
-    ~CatmullRomInterpolator() noexcept;
+    CatmullRomResampler()  noexcept {};
+    ~CatmullRomResampler() noexcept {};
 
-    /** Resets the state of the interpolator.
-        Call this when there's a break in the continuity of the input data stream.
-    */
-    void reset() noexcept;
-
-    /** Resamples a stream of samples.
-
-        @param speedRatio       the number of input samples to use for each output sample
-        @param inputSamples     the source data to read from. This must contain at
-                                least (speedRatio * numOutputSamplesToProduce) samples.
-        @param outputSamples    the buffer to write the results into
-        @param numOutputSamplesToProduce    the number of output samples that should be created
-
-        @returns the actual number of input samples that were used
-    */
-    int process (double speedRatio,
-                 const float* inputSamples,
-                 float* outputSamples,
-                 int numOutputSamplesToProduce) noexcept;
-
-    /** Resamples a stream of samples.
-
-        @param speedRatio       the number of input samples to use for each output sample
-        @param inputSamples     the source data to read from. This must contain at
-                                least (speedRatio * numOutputSamplesToProduce) samples.
-        @param outputSamples    the buffer to write the results into
-        @param numOutputSamplesToProduce    the number of output samples that should be created
-        @param available        the number of available input samples. If it needs more samples
-                                than available, it either wraps back for wrapAround samples, or
-                                it feeds zeroes
-        @param wrapAround       if the stream exceeds available samples, it wraps back for
-                                wrapAround samples. If wrapAround is set to 0, it will feed zeroes.
-
-        @returns the actual number of input samples that were used
-    */
-    int process (double speedRatio,
-                 const float* inputSamples,
-                 float* outputSamples,
-                 int numOutputSamplesToProduce,
-                 int available,
-                 int wrapAround) noexcept;
-
-    /** Resamples a stream of samples, adding the results to the output data
-        with a gain.
-
-        @param speedRatio       the number of input samples to use for each output sample
-        @param inputSamples     the source data to read from. This must contain at
-                                least (speedRatio * numOutputSamplesToProduce) samples.
-        @param outputSamples    the buffer to write the results to - the result values will be added
-                                to any pre-existing data in this buffer after being multiplied by
-                                the gain factor
-        @param numOutputSamplesToProduce    the number of output samples that should be created
-        @param gain             a gain factor to multiply the resulting samples by before
-                                adding them to the destination buffer
-
-        @returns the actual number of input samples that were used
-    */
-    int processAdding (double speedRatio,
-                       const float* inputSamples,
-                       float* outputSamples,
-                       int numOutputSamplesToProduce,
-                       float gain) noexcept;
-
-    /** Resamples a stream of samples, adding the results to the output data
-        with a gain.
-
-        @param speedRatio       the number of input samples to use for each output sample
-        @param inputSamples     the source data to read from. This must contain at
-                                least (speedRatio * numOutputSamplesToProduce) samples.
-        @param outputSamples    the buffer to write the results to - the result values will be added
-                                to any pre-existing data in this buffer after being multiplied by
-                                the gain factor
-        @param numOutputSamplesToProduce    the number of output samples that should be created
-        @param available        the number of available input samples. If it needs more samples
-                                than available, it either wraps back for wrapAround samples, or
-                                it feeds zeroes
-        @param wrapAround       if the stream exceeds available samples, it wraps back for
-                                wrapAround samples. If wrapAround is set to 0, it will feed zeroes.
-        @param gain             a gain factor to multiply the resulting samples by before
-                                adding them to the destination buffer
-
-        @returns the actual number of input samples that were used
-    */
-    int processAdding (double speedRatio,
-                       const float* inputSamples,
-                       float* outputSamples,
-                       int numOutputSamplesToProduce,
-                       int available,
-                       int wrapAround,
-                       float gain) noexcept;
 
 private:
-    float lastInputSamples[5];
-    double subSamplePos;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CatmullRomInterpolator)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CatmullRomResampler)
 };
+
+/** Alias to make the new templated class backwards compatible with the old float-only implementation */
+using CatmullRomInterpolator = CatmullRomResampler<float>;
 
 } // namespace juce
