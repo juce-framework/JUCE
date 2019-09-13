@@ -1098,12 +1098,19 @@ bool AudioDeviceManager::isMidiInputEnabled (const String& name) const
 
 void AudioDeviceManager::addMidiInputCallback (const String& name, MidiInputCallback* callbackToAdd)
 {
-    for (auto& device : MidiInput::getAvailableDevices())
+    if (name.isEmpty())
     {
-        if (device.name == name)
+        addMidiInputDeviceCallback ({}, callbackToAdd);
+    }
+    else
+    {
+        for (auto& device : MidiInput::getAvailableDevices())
         {
-            addMidiInputDeviceCallback (device.identifier, callbackToAdd);
-            return;
+            if (device.name == name)
+            {
+                addMidiInputDeviceCallback (device.identifier, callbackToAdd);
+                return;
+            }
         }
     }
 }

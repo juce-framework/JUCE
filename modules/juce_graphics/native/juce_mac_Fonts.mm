@@ -41,7 +41,7 @@ namespace CoreTextTypeLayout
         if (! availableStyles.contains (style))
         {
             if (font.isItalic())  // Fake-up an italic font if there isn't a real one.
-                requiredTransform = CGAffineTransformMake (1.0f, 0, 0.25f, 1.0f, 0, 0);
+                requiredTransform = CGAffineTransformMake (1.0f, 0, 0.1f, 1.0f, 0, 0);
 
             return availableStyles[0];
         }

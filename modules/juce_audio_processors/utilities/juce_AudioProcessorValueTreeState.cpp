@@ -71,7 +71,9 @@ void AudioProcessorValueTreeState::Parameter::valueChanged (float newValue)
         return;
 
     lastValue = newValue;
-    sendValueChangedMessageToListeners (newValue);
+
+    if (onValueChanged != nullptr)
+        onValueChanged();
 }
 
 //==============================================================================
@@ -87,6 +89,9 @@ public:
           unnormalisedValue (getRange().convertFrom0to1 (parameter.getDefaultValue()))
     {
         parameter.addListener (this);
+
+        if (auto* ptr = dynamic_cast<Parameter*> (&parameter))
+            ptr->onValueChanged = [this] { parameterValueChanged ({}, {}); };
     }
 
     ~ParameterAdapter() override        { parameter.removeListener (this); }

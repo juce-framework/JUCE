@@ -918,26 +918,20 @@ struct Grid::BoxAlignment
         // align and justify
         auto r = area;
 
-        if (item.width != (float) GridItem::notAssigned)
-            r.setWidth (item.width);
-
-        if (item.height != (float) GridItem::notAssigned)
-            r.setHeight (item.height);
+        if (item.width     != (float) GridItem::notAssigned)  r.setWidth  (item.width);
+        if (item.height    != (float) GridItem::notAssigned)  r.setHeight (item.height);
+        if (item.maxWidth  != (float) GridItem::notAssigned)  r.setWidth  (jmin (item.maxWidth,  r.getWidth()));
+        if (item.minWidth  > 0.0f)                            r.setWidth  (jmax (item.minWidth,  r.getWidth()));
+        if (item.maxHeight != (float) GridItem::notAssigned)  r.setHeight (jmin (item.maxHeight, r.getHeight()));
+        if (item.minHeight > 0.0f)                            r.setHeight (jmax (item.minHeight, r.getHeight()));
 
         if (alignType == Grid::AlignItems::start && justifyType == Grid::JustifyItems::start)
             return r;
 
-        if (alignType == Grid::AlignItems::end)
-            r.setY (r.getY() + (area.getHeight() - r.getHeight()));
-
-        if (justifyType == Grid::JustifyItems::end)
-            r.setX (r.getX() + (area.getWidth() - r.getWidth()));
-
-        if (alignType == Grid::AlignItems::center)
-            r.setCentre (r.getCentreX(), area.getCentreY());
-
-        if (justifyType == Grid::JustifyItems::center)
-            r.setCentre (area.getCentreX(), r.getCentreY());
+        if (alignType   == Grid::AlignItems::end)       r.setY (r.getY() + (area.getHeight() - r.getHeight()));
+        if (justifyType == Grid::JustifyItems::end)     r.setX (r.getX() + (area.getWidth()  - r.getWidth()));
+        if (alignType   == Grid::AlignItems::center)    r.setCentre (r.getCentreX(),    area.getCentreY());
+        if (justifyType == Grid::JustifyItems::center)  r.setCentre (area.getCentreX(), r.getCentreY());
 
         return r;
     }

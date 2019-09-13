@@ -2796,7 +2796,11 @@ public:
 
         Vst2::ERect* rect = nullptr;
         dispatch (Vst2::effEditGetRect, 0, 0, &rect, 0);
-        setSize (rect->right - rect->left, rect->bottom - rect->top);
+
+        if (rect != nullptr)
+            setSize (rect->right - rect->left, rect->bottom - rect->top);
+        else
+            setSize (1, 1);
 
         setOpaque (true);
         setVisible (true);

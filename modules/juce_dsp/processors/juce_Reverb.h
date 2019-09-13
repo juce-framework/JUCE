@@ -85,7 +85,7 @@ public:
 
         jassert (inputBlock.getNumSamples() == numSamples);
 
-        outputBlock.copy (inputBlock);
+        outputBlock.copyFrom (inputBlock);
 
         if (! enabled || context.isBypassed)
             return;

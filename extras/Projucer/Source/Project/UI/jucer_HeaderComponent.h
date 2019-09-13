@@ -43,33 +43,33 @@ public:
     HeaderComponent();
     ~HeaderComponent() override;
 
-    //==========================================================================
+    //==============================================================================
     void resized() override;
     void paint (Graphics&) override;
 
-    //==========================================================================
+    //==============================================================================
     void setCurrentProject (Project*) noexcept;
 
-    //==========================================================================
+    //==============================================================================
     void updateExporters() noexcept;
     String getSelectedExporterName() const noexcept;
     bool canCurrentExporterLaunchProject() const noexcept;
 
-    //==========================================================================
+    //==============================================================================
     int getUserButtonWidth() const noexcept;
     void sidebarTabsWidthChanged (int newWidth) noexcept;
 
-    //==========================================================================
+    //==============================================================================
     void showUserSettings() noexcept;
 
 private:
-    //==========================================================================
+    //==============================================================================
     void lookAndFeelChanged() override;
     void changeListenerCallback (ChangeBroadcaster* source) override;
     void valueChanged (Value&) override;
     void timerCallback() override;
 
-    //==========================================================================
+    //==============================================================================
     void valueTreeChildAdded (ValueTree& parentTree, ValueTree&) override        { updateIfNeeded (parentTree); }
     void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&, int) override { updateIfNeeded (parentTree); }
     void valueTreeChildOrderChanged (ValueTree& parentTree, int, int) override   { updateIfNeeded (parentTree); }
@@ -80,19 +80,19 @@ private:
             updateExporters();
     }
 
-    //==========================================================================
+    //==============================================================================
     void initialiseButtons() noexcept;
 
     void updateName() noexcept;
     void updateExporterButton() noexcept;
     void updateUserAvatar() noexcept;
 
-    //==========================================================================
+    //==============================================================================
     void buildPing();
     void buildFinished (bool);
     void setRunAppButtonState (bool);
 
-    //==========================================================================
+    //==============================================================================
     int tabsWidth = 200;
     bool isBuilding = false;
 

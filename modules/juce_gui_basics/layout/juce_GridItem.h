@@ -174,12 +174,12 @@ public:
     };
 
     /* TODO: move all of this into a common class that is shared with the FlexItem */
-    float width = notAssigned;
-    float minWidth = 0;
+    float width    = notAssigned;
+    float minWidth = 0.0f;
     float maxWidth = notAssigned;
 
-    float height = notAssigned;
-    float minHeight = 0;
+    float height    = notAssigned;
+    float minHeight = 0.0f;
     float maxHeight = notAssigned;
 
     /** Represents a margin. */

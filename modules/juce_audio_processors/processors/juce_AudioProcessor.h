@@ -1011,7 +1011,7 @@ public:
     /** Returns the group of parameters managed by this AudioProcessor. */
     const AudioProcessorParameterGroup& getParameterTree() const;
 
-    /** Returns the group of parameters managed by this AudioProcessor. */
+    /** Sets the group of parameters managed by this AudioProcessor. */
     void setParameterTree (AudioProcessorParameterGroup&& newTree);
 
     /** A processor should implement this method so that the host can ask it to

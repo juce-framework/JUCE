@@ -627,7 +627,7 @@ protected:
             optimisationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
         }
 
-        //==========================================================================
+        //==============================================================================
         void createConfigProperties (PropertyListBuilder& props) override
         {
             addXcodePluginInstallPathProperties (props);
@@ -684,7 +684,7 @@ protected:
             return "${CURRENT_ARCH}";
         }
 
-        //==========================================================================
+        //==============================================================================
         String getOSXArchitectureString() const                 { return osxArchitecture.get(); }
         String getPListPreprocessorDefinitionsString() const    { return plistPreprocessorDefinitions.get(); }
 
@@ -711,7 +711,7 @@ protected:
         String getUnityPluginBinaryLocationString() const       { return unityPluginBinaryLocation.get(); }
 
     private:
-        //==========================================================================
+        //==============================================================================
         bool iOS;
 
         ValueWithDefault osxSDKVersion, osxDeploymentTarget, iosDeploymentTarget, osxArchitecture,
@@ -720,7 +720,7 @@ protected:
                          vstBinaryLocation, vst3BinaryLocation, auBinaryLocation, rtasBinaryLocation,
                          aaxBinaryLocation, unityPluginBinaryLocation;
 
-        //==========================================================================
+        //==============================================================================
         void addXcodePluginInstallPathProperties (PropertyListBuilder& props)
         {
             auto isBuildingAnyPlugins = (project.shouldBuildVST() || project.shouldBuildVST3() || project.shouldBuildAU()
@@ -1480,7 +1480,6 @@ public:
                     }
                 }
 
-                flags.add (owner.replacePreprocessorTokens (config, owner.getExtraLinkerFlagsString()));
                 flags.add (owner.getExternalLibraryFlags (config));
 
                 auto libs = owner.xcodeLibs;
@@ -1490,6 +1489,7 @@ public:
                     flags.add (getLinkerFlagForLib (l));
             }
 
+            flags.add (owner.replacePreprocessorTokens (config, owner.getExtraLinkerFlagsString()));
             flags = getCleanedStringArray (flags);
         }
 

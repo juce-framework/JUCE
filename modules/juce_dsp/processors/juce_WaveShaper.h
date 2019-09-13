@@ -58,7 +58,7 @@ struct WaveShaper
         if (context.isBypassed)
         {
             if (context.usesSeparateInputAndOutputBlocks())
-                context.getOutputBlock().copy (context.getInputBlock());
+                context.getOutputBlock().copyFrom (context.getInputBlock());
         }
         else
         {

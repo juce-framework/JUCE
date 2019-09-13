@@ -677,12 +677,29 @@ public:
 
     void handleBackButtonCallback()
     {
+        bool handled = false;
+
         if (auto* app = JUCEApplicationBase::getInstance())
-            app->backButtonPressed();
+            handled = app->backButtonPressed();
 
         if (Component* kiosk = Desktop::getInstance().getKioskModeComponent())
             if (kiosk->getPeer() == this)
                 setNavBarsHidden (navBarsHidden);
+
+        if (! handled)
+        {
+            auto* env = getEnv();
+            LocalRef<jobject> activity (getCurrentActivity());
+
+            if (activity != nullptr)
+            {
+                jmethodID finishMethod = env->GetMethodID (AndroidActivity, "finish", "()V");
+
+                if (finishMethod != nullptr)
+                    env->CallVoidMethod (activity.get(), finishMethod);
+            }
+        }
+
     }
 
     void handleKeyboardHiddenCallback()
