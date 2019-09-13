@@ -1651,18 +1651,26 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     {
         StringClass()
         {
-            setMethod ("substring",     substring);
+			setMethod ("substring",		substring);
+			setMethod ("startsWith",	startsWith);
+			setMethod ("endsWith",		endsWith);
             setMethod ("indexOf",       indexOf);
             setMethod ("charAt",        charAt);
             setMethod ("charCodeAt",    charCodeAt);
             setMethod ("fromCharCode",  fromCharCode);
-            setMethod ("split",         split);
+			setMethod ("split",			split);
+			setMethod ("toLowerCase",	toLowerCase);
+			setMethod ("toUpperCase",   toUpperCase);
         }
 
         static Identifier getClassName()  { static const Identifier i ("String"); return i; }
 
         static var fromCharCode (Args a)  { return String::charToString (static_cast<juce_wchar> (getInt (a, 0))); }
-        static var substring (Args a)     { return a.thisObject.toString().substring (getInt (a, 0), getInt (a, 1)); }
+		static var substring(Args a) { return a.thisObject.toString().substring(getInt(a, 0), getInt(a, 1)); }
+		static var startsWith(Args a) { return a.thisObject.toString().startsWith(getString(a, 0)); }
+		static var endsWith(Args a) { return a.thisObject.toString().endsWith(getString(a, 0)); }
+		static var toLowerCase(Args a) { return a.thisObject.toString().toLowerCase(); }
+		static var toUpperCase (Args a)     { return a.thisObject.toString().toUpperCase(); }
         static var indexOf (Args a)       { return a.thisObject.toString().indexOf (getString (a, 0)); }
         static var charCodeAt (Args a)    { return (int) a.thisObject.toString() [getInt (a, 0)]; }
         static var charAt (Args a)        { int p = getInt (a, 0); return a.thisObject.toString().substring (p, p + 1); }
