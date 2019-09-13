@@ -384,7 +384,7 @@ namespace CoreMidiHelpers
     static Array<MIDIEndpointRef> getEndpoints (bool isInput)
     {
         Array<MIDIEndpointRef> endpoints;
-        auto numDevices = (isInput ? MIDIGetNumberOfSources() : MIDIGetNumberOfDevices());
+        auto numDevices = (isInput ? MIDIGetNumberOfSources() : MIDIGetNumberOfDestinations());
 
         for (ItemCount i = 0; i < numDevices; ++i)
             endpoints.add (isInput ? MIDIGetSource (i) : MIDIGetDestination (i));
