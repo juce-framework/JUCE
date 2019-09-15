@@ -21,38 +21,40 @@
 #include "../Project/jucer_Project.h"
 
 //==============================================================================
-class ResourceFile
+class JucerResourceFile
 {
 public:
     //==============================================================================
-    ResourceFile (Project& project);
-    ~ResourceFile();
+    explicit JucerResourceFile (Project& project);
+    ~JucerResourceFile();
 
     //==============================================================================
-    void setClassName (const String& className);
-    String getClassName() const       { return className; }
+    void setClassName (const String& className)         { resourceFile.setClassName (className); }
+    String getClassName() const                         { return resourceFile.getClassName(); }
 
-    void addFile (const File& file);
-    String getDataVariableFor (const File& file) const;
-    String getSizeVariableFor (const File& file) const;
+    void addFile (const File& file)                     { resourceFile.addFile (file); }
+    String getDataVariableFor (const File& file) const  { return resourceFile.getDataVariableFor (file); }
+    String getSizeVariableFor (const File& file) const  { return resourceFile.getSizeVariableFor (file); }
 
-    int getNumFiles() const                 { return files.size(); }
-    const File& getFile (int index) const   { return files.getReference (index); }
+    int getNumFiles() const                             { return resourceFile.getNumFiles(); }
+    const File& getFile (int index) const               { return resourceFile.getFile (index); }
 
-    int64 getTotalDataSize() const;
+    int64 getTotalDataSize() const                      { return resourceFile.getTotalDataSize(); }
 
-    Result write (Array<File>& filesCreated, int maxFileSize);
+    build_tools::ResourceFile::WriteResult write (int maxFileSize)
+    {
+        return resourceFile.write (maxFileSize,
+                                   project.getProjectLineFeed(),
+                                   project.getBinaryDataHeaderFile(),
+                                   [this] (int index) { return project.getBinaryDataCppFile (index); });
+    }
 
     //==============================================================================
 private:
-    Array<File> files;
-    StringArray variableNames;
-    Project& project;
-    String className  { "BinaryData" };
-
-    Result writeHeader (MemoryOutputStream&);
-    Result writeCpp (MemoryOutputStream&, const File& headerFile, int& index, int maxFileSize);
     void addResourcesFromProjectItem (const Project::Item& node);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResourceFile)
+    Project& project;
+    build_tools::ResourceFile resourceFile;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JucerResourceFile)
 };

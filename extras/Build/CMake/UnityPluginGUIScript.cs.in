@@ -6,24 +6,24 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-public class %%plugin_class_name%%GUI : IAudioEffectPluginGUI
+public class ${plugin_class_name}GUI : IAudioEffectPluginGUI
 {
-    public override string Name           { get { return "%%plugin_name%%"; } }
-    public override string Description    { get { return "%%plugin_description%%"; } }
-    public override string Vendor         { get { return "%%plugin_vendor%%"; } }
+    public override string Name           { get { return "${plugin_name}"; } }
+    public override string Description    { get { return "${plugin_description}"; } }
+    public override string Vendor         { get { return "${plugin_vendor}"; } }
 
     //==============================================================================
-	[DllImport("%%plugin_name%%")] static extern System.IntPtr getRenderCallback();
+    [DllImport("${plugin_name}")] static extern System.IntPtr getRenderCallback();
 
-    [DllImport("%%plugin_name%%")] static extern void unityInitialiseTexture (int id, System.IntPtr texture, int width, int height);
+    [DllImport("${plugin_name}")] static extern void unityInitialiseTexture (int id, System.IntPtr texture, int width, int height);
 
-    [DllImport("%%plugin_name%%")] static extern void unityMouseDown (int id, float x, float y, EventModifiers mods, int button);
-    [DllImport("%%plugin_name%%")] static extern void unityMouseDrag (int id, float x, float y, EventModifiers mods, int button);
-    [DllImport("%%plugin_name%%")] static extern void unityMouseUp   (int id, float x, float y, EventModifiers mods);
+    [DllImport("${plugin_name}")] static extern void unityMouseDown (int id, float x, float y, EventModifiers mods, int button);
+    [DllImport("${plugin_name}")] static extern void unityMouseDrag (int id, float x, float y, EventModifiers mods, int button);
+    [DllImport("${plugin_name}")] static extern void unityMouseUp   (int id, float x, float y, EventModifiers mods);
 
-    [DllImport("%%plugin_name%%")] static extern void unityKeyEvent (int id, KeyCode code, EventModifiers mods, string name);
+    [DllImport("${plugin_name}")] static extern void unityKeyEvent (int id, KeyCode code, EventModifiers mods, string name);
 
-    [DllImport("%%plugin_name%%")] static extern void unitySetScreenBounds (int id, float x, float y, float w, float h);
+    [DllImport("${plugin_name}")] static extern void unitySetScreenBounds (int id, float x, float y, float w, float h);
 
     //==============================================================================
     private class PluginGUIInstance
@@ -38,10 +38,10 @@ public class %%plugin_class_name%%GUI : IAudioEffectPluginGUI
         }
 
         public void repaint (Rect r)
-        { 
+        {
             Vector2 newScreenPosition = GUIUtility.GUIToScreenPoint (r.position);
 
-            if (bounds != r 
+            if (bounds != r
                 || screenPosition != newScreenPosition)
             {
                 screenPosition = newScreenPosition;
@@ -51,7 +51,7 @@ public class %%plugin_class_name%%GUI : IAudioEffectPluginGUI
                 setupTexture();
             }
 
-			GL.IssuePluginEvent (getRenderCallback(), instanceID);
+            GL.IssuePluginEvent (getRenderCallback(), instanceID);
 
             texture.SetPixels32 (pixels);
             texture.Apply();
@@ -69,7 +69,7 @@ public class %%plugin_class_name%%GUI : IAudioEffectPluginGUI
 
             Vector2 relativePos = new Vector2 (mousePos.x - bounds.x, mousePos.y - bounds.y);
 
-            if (eventType == EventType.MouseDown)    
+            if (eventType == EventType.MouseDown)
             {
                 unityMouseDown (instanceID, relativePos.x, relativePos.y, mods, Event.current.button);
                 GUIUtility.hotControl = GUIUtility.GetControlID (FocusType.Passive);
@@ -79,7 +79,7 @@ public class %%plugin_class_name%%GUI : IAudioEffectPluginGUI
                 unityMouseUp (instanceID, relativePos.x, relativePos.y, mods);
                 GUIUtility.hotControl = 0;
             }
-            else if (eventType == EventType.MouseDrag)    
+            else if (eventType == EventType.MouseDrag)
             {
                 unityMouseDrag (instanceID, relativePos.x, relativePos.y, mods, Event.current.button);
             }

@@ -76,11 +76,11 @@ protected:
 
 public:
     //==============================================================================
-    class MakefileTarget : public ProjectType::Target
+    class MakefileTarget : public build_tools::ProjectType::Target
     {
     public:
-        MakefileTarget (ProjectType::Target::Type targetType, const MakefileProjectExporter& exporter)
-            : ProjectType::Target (targetType), owner (exporter)
+        MakefileTarget (build_tools::ProjectType::Target::Type targetType, const MakefileProjectExporter& exporter)
+            : build_tools::ProjectType::Target (targetType), owner (exporter)
         {}
 
         StringArray getCompilerFlags() const
@@ -114,7 +114,7 @@ public:
         StringPairArray getDefines (const BuildConfiguration& config) const
         {
             StringPairArray result;
-            auto commonOptionKeys = owner.getAllPreprocessorDefs (config, ProjectType::Target::unspecified).getAllKeys();
+            auto commonOptionKeys = owner.getAllPreprocessorDefs (config, build_tools::ProjectType::Target::unspecified).getAllKeys();
             auto targetSpecific = owner.getAllPreprocessorDefs (config, type);
 
             for (auto& key : targetSpecific.getAllKeys())
@@ -186,7 +186,7 @@ public:
             out << "OBJECTS_" + getTargetVarName() + String (" := \\") << newLine;
 
             for (auto& f : filesToCompile)
-                out << "  $(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor ({ f.first, owner.getTargetFolder(), RelativePath::buildTargetFolder })) << " \\" << newLine;
+                out << "  $(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor ({ f.first, owner.getTargetFolder(), build_tools::RelativePath::buildTargetFolder })) << " \\" << newLine;
 
             out << newLine;
         }
@@ -198,7 +198,7 @@ public:
 
             for (auto& f : filesToCompile)
             {
-                RelativePath relativePath (f.first, owner.getTargetFolder(), RelativePath::buildTargetFolder);
+                build_tools::RelativePath relativePath (f.first, owner.getTargetFolder(), build_tools::RelativePath::buildTargetFolder);
 
                 out << "$(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor (relativePath)) << ": " << escapeSpaces (relativePath.toUnixStyle()) << newLine
                     << "\t-$(V_AT)mkdir -p $(JUCE_OBJDIR)"                                                                                            << newLine
@@ -252,9 +252,9 @@ public:
             {
                 auto scriptName = owner.getProject().getUnityScriptName();
 
-                RelativePath scriptPath (owner.getProject().getGeneratedCodeFolder().getChildFile (scriptName),
-                                         owner.getTargetFolder(),
-                                         RelativePath::projectFolder);
+                build_tools::RelativePath scriptPath (owner.getProject().getGeneratedCodeFolder().getChildFile (scriptName),
+                                                      owner.getTargetFolder(),
+                                                      build_tools::RelativePath::projectFolder);
 
                 out << "\t-$(V_AT)cp " + scriptPath.toUnixStyle() + " $(JUCE_OUTDIR)/" + scriptName << newLine;
             }
@@ -331,26 +331,26 @@ public:
     bool isOSX() const override                             { return false; }
     bool isiOS() const override                             { return false; }
 
-    bool supportsTargetType (ProjectType::Target::Type type) const override
+    bool supportsTargetType (build_tools::ProjectType::Target::Type type) const override
     {
         switch (type)
         {
-            case ProjectType::Target::GUIApp:
-            case ProjectType::Target::ConsoleApp:
-            case ProjectType::Target::StaticLibrary:
-            case ProjectType::Target::SharedCodeTarget:
-            case ProjectType::Target::AggregateTarget:
-            case ProjectType::Target::VSTPlugIn:
-            case ProjectType::Target::StandalonePlugIn:
-            case ProjectType::Target::DynamicLibrary:
-            case ProjectType::Target::UnityPlugIn:
+            case build_tools::ProjectType::Target::GUIApp:
+            case build_tools::ProjectType::Target::ConsoleApp:
+            case build_tools::ProjectType::Target::StaticLibrary:
+            case build_tools::ProjectType::Target::SharedCodeTarget:
+            case build_tools::ProjectType::Target::AggregateTarget:
+            case build_tools::ProjectType::Target::VSTPlugIn:
+            case build_tools::ProjectType::Target::StandalonePlugIn:
+            case build_tools::ProjectType::Target::DynamicLibrary:
+            case build_tools::ProjectType::Target::UnityPlugIn:
                 return true;
-            case ProjectType::Target::VST3PlugIn:
-            case ProjectType::Target::AAXPlugIn:
-            case ProjectType::Target::RTASPlugIn:
-            case ProjectType::Target::AudioUnitPlugIn:
-            case ProjectType::Target::AudioUnitv3PlugIn:
-            case ProjectType::Target::unspecified:
+            case build_tools::ProjectType::Target::VST3PlugIn:
+            case build_tools::ProjectType::Target::AAXPlugIn:
+            case build_tools::ProjectType::Target::RTASPlugIn:
+            case build_tools::ProjectType::Target::AudioUnitPlugIn:
+            case build_tools::ProjectType::Target::AudioUnitv3PlugIn:
+            case build_tools::ProjectType::Target::unspecified:
             default:
                 break;
         }
@@ -377,8 +377,8 @@ public:
         {
             auto fileType = target->getTargetFileType();
 
-            if (fileType == ProjectType::Target::sharedLibraryOrDLL
-             || fileType == ProjectType::Target::pluginBundle)
+            if (fileType == build_tools::ProjectType::Target::sharedLibraryOrDLL
+             || fileType == build_tools::ProjectType::Target::pluginBundle)
                 return true;
         }
 
@@ -388,20 +388,19 @@ public:
     //==============================================================================
     void create (const OwnedArray<LibraryModule>&) const override
     {
-        MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
-
-        writeMakefile (mo);
-
-        overwriteFileIfDifferentOrThrow (getTargetFolder().getChildFile ("Makefile"), mo);
+        build_tools::writeStreamToFile (getTargetFolder().getChildFile ("Makefile"), [&] (MemoryOutputStream& mo)
+        {
+            mo.setNewLineString ("\n");
+            writeMakefile (mo);
+        });
     }
 
     //==============================================================================
-    void addPlatformSpecificSettingsForProjectType (const ProjectType&) override
+    void addPlatformSpecificSettingsForProjectType (const build_tools::ProjectType&) override
     {
-        callForAllSupportedTargets ([this] (ProjectType::Target::Type targetType)
+        callForAllSupportedTargets ([this] (build_tools::ProjectType::Target::Type targetType)
                                     {
-                                        targets.insert (targetType == ProjectType::Target::AggregateTarget ? 0 : -1,
+                                        targets.insert (targetType == build_tools::ProjectType::Target::AggregateTarget ? 0 : -1,
                                                         new MakefileTarget (targetType, *this));
                                     });
 
@@ -430,7 +429,7 @@ private:
             result.set ("NDEBUG", "1");
         }
 
-        result = mergePreprocessorDefs (result, getAllPreprocessorDefs (config, ProjectType::Target::unspecified));
+        result = mergePreprocessorDefs (result, getAllPreprocessorDefs (config, build_tools::ProjectType::Target::unspecified));
 
         return result;
     }
@@ -542,7 +541,7 @@ private:
         StringArray result;
 
         for (auto& path : searchPaths)
-            result.add (FileHelpers::unixStylePath (replacePreprocessorTokens (config, path)));
+            result.add (build_tools::unixStylePath (replacePreprocessorTokens (config, path)));
 
         return result;
     }
@@ -614,7 +613,7 @@ private:
     //==============================================================================
     void writeDefineFlags (OutputStream& out, const MakeBuildConfiguration& config) const
     {
-        out << createGCCPreprocessorFlags (mergePreprocessorDefs (getDefines (config), getAllPreprocessorDefs (config, ProjectType::Target::unspecified)));
+        out << createGCCPreprocessorFlags (mergePreprocessorDefs (getDefines (config), getAllPreprocessorDefs (config, build_tools::ProjectType::Target::unspecified)));
     }
 
     void writePkgConfigFlags (OutputStream& out) const
@@ -680,7 +679,7 @@ private:
         {
             if (auto* target = targets.getUnchecked (i))
             {
-                if (target->type == ProjectType::Target::AggregateTarget)
+                if (target->type == build_tools::ProjectType::Target::AggregateTarget)
                 {
                     StringArray dependencies;
                     MemoryOutputStream subTargetLines;
@@ -691,7 +690,7 @@ private:
 
                         if (auto* dependency = targets.getUnchecked (j))
                         {
-                            if (dependency->type != ProjectType::Target::SharedCodeTarget)
+                            if (dependency->type != build_tools::ProjectType::Target::SharedCodeTarget)
                             {
                                 auto phonyName = dependency->getPhonyName();
 
@@ -723,8 +722,8 @@ private:
 
         if (config.getTargetBinaryRelativePathString().isNotEmpty())
         {
-            RelativePath binaryPath (config.getTargetBinaryRelativePathString(), RelativePath::projectFolder);
-            outputDir = binaryPath.rebased (projectFolder, getTargetFolder(), RelativePath::buildTargetFolder).toUnixStyle();
+            build_tools::RelativePath binaryPath (config.getTargetBinaryRelativePathString(), build_tools::RelativePath::projectFolder);
+            outputDir = binaryPath.rebased (projectFolder, getTargetFolder(), build_tools::RelativePath::buildTargetFolder).toUnixStyle();
         }
 
         out << "ifeq ($(CONFIG)," << escapeSpaces (config.getName()) << ")" << newLine
@@ -785,7 +784,7 @@ private:
         {
             if (auto* target = targets.getUnchecked (i))
             {
-                if (target->type == ProjectType::Target::AggregateTarget)
+                if (target->type == build_tools::ProjectType::Target::AggregateTarget)
                     continue;
 
                 out << "-include $(OBJECTS_" << target->getTargetVarName()
@@ -931,7 +930,7 @@ private:
         return "-march=native";
     }
 
-    String getObjectFileFor (const RelativePath& file) const
+    String getObjectFileFor (const build_tools::RelativePath& file) const
     {
         return file.getFileNameWithoutExtension()
                 + "_" + String::toHexString (file.toUnixStyle().hashCode()) + ".o";
@@ -947,8 +946,8 @@ private:
             return phonyTargetLine.toString();
 
         for (auto target : targets)
-            if (target->type != ProjectType::Target::SharedCodeTarget
-                   && target->type != ProjectType::Target::AggregateTarget)
+            if (target->type != build_tools::ProjectType::Target::SharedCodeTarget
+                && target->type != build_tools::ProjectType::Target::AggregateTarget)
                 phonyTargetLine << " " << target->getPhonyName();
 
         return phonyTargetLine.toString();

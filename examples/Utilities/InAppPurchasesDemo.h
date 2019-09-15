@@ -38,6 +38,7 @@
  exporters:        xcode_mac, xcode_iphone, androidstudio
 
  moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+                   JUCE_IN_APP_PURCHASES=1
 
  type:             Component
  mainClass:        InAppPurchasesDemo

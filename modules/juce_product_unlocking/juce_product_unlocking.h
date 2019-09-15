@@ -34,7 +34,7 @@
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
 
-  dependencies:       juce_cryptography juce_core, juce_events
+  dependencies:       juce_cryptography
 
  END_JUCE_MODULE_DECLARATION
 

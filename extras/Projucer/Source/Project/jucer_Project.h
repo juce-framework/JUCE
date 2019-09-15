@@ -18,8 +18,6 @@
 
 #pragma once
 
-#include "jucer_ProjectType.h"
-
 class ProjectExporter;
 class LibraryModule;
 class EnabledModuleList;
@@ -81,7 +79,7 @@ public:
     Value getProjectValue (const Identifier& name)       { return projectRoot.getPropertyAsValue (name, getUndoManagerFor (projectRoot)); }
     var   getProjectVar   (const Identifier& name) const { return projectRoot.getProperty        (name); }
 
-    const ProjectType& getProjectType() const;
+    const build_tools::ProjectType& getProjectType() const;
     String getProjectTypeString() const                  { return projectTypeValue.get(); }
     void setProjectType (const String& newProjectType)   { projectTypeValue = newProjectType; }
 
@@ -92,8 +90,8 @@ public:
     String getProjectLineFeed() const                    { return projectLineFeedValue.get(); }
 
     String getVersionString() const                      { return versionValue.get(); }
-    String getVersionAsHex() const;
-    int getVersionAsHexInteger() const;
+    String getVersionAsHex() const                       { return build_tools::getVersionAsHex (getVersionString()); }
+    int getVersionAsHexInteger() const                   { return build_tools::getVersionAsHexInteger (getVersionString()); }
     void setProjectVersion (const String& newVersion)    { versionValue = newVersion; }
 
     String getBundleIdentifierString() const             { return bundleIdentifierValue.get(); }
@@ -217,8 +215,9 @@ public:
     bool isVST3PluginHost();
 
     //==============================================================================
-    bool shouldBuildTargetType (ProjectType::Target::Type targetType) const noexcept;
-    static ProjectType::Target::Type getTargetTypeFromFilePath (const File& file, bool returnSharedTargetIfNoValidSuffix);
+    bool shouldBuildTargetType (
+        build_tools::ProjectType::Target::Type targetType) const noexcept;
+    static build_tools::ProjectType::Target::Type getTargetTypeFromFilePath (const File& file, bool returnSharedTargetIfNoValidSuffix);
 
     //==============================================================================
     void updateDeprecatedProjectSettingsInteractively();
@@ -258,7 +257,7 @@ public:
         File getFile() const;
         String getFilePath() const;
         void setFile (const File& file);
-        void setFile (const RelativePath& file);
+        void setFile (const build_tools::RelativePath& file);
         File determineGroupFolder() const;
         bool renameFile (const File& newFile);
 
@@ -295,11 +294,11 @@ public:
         bool addFileAtIndex (const File& file, int insertIndex, bool shouldCompile);
         bool addFileRetainingSortOrder (const File& file, bool shouldCompile);
         void addFileUnchecked (const File& file, int insertIndex, bool shouldCompile);
-        bool addRelativeFile (const RelativePath& file, int insertIndex, bool shouldCompile);
+        bool addRelativeFile (const build_tools::RelativePath& file, int insertIndex, bool shouldCompile);
         void removeItemFromProject();
         void sortAlphabetically (bool keepGroupsAtStart, bool recursive);
         Item findItemForFile (const File& file) const;
-        bool containsChildForFile (const RelativePath& file) const;
+        bool containsChildForFile (const build_tools::RelativePath& file) const;
 
         Item getParent() const;
         Item createCopy();

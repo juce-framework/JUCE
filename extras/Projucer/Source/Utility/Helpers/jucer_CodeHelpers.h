@@ -24,9 +24,6 @@ namespace CodeHelpers
 {
     String indent (const String& code, int numSpaces, bool indentFirstLine);
     String unindent (const String& code, int numSpaces);
-    String makeValidIdentifier (String s, bool capitalise, bool removeColons,
-                                bool allowTemplates, bool allowAsterisks = false);
-    String makeBinaryDataIdentifierName (const File& file);
 
     String createIncludeStatement (const File& includedFile, const File& targetFile);
     String createIncludeStatement (const String& includePath);
@@ -40,12 +37,6 @@ namespace CodeHelpers
     String justificationToCode (Justification);
 
     String alignFunctionCallParams (const String& call, const StringArray& parameters, int maxLineLength);
-
-    void writeDataAsCppLiteral (const MemoryBlock& data, OutputStream& out,
-                                bool breakAtNewLines, bool allowStringBreaks);
-
-    void createStringMatcher (OutputStream& out, const String& utf8PointerVariable,
-                              const StringArray& strings, const StringArray& codeToExecute, int indentLevel);
 
     String getLeadingWhitespace (String line);
     int getBraceCount (String::CharPointerType line);

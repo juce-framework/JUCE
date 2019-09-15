@@ -39,7 +39,7 @@
   license:            ISC
   minimumCppStandard: 14
 
-  dependencies:       juce_events juce_audio_devices
+  dependencies:       juce_audio_devices
 
  END_JUCE_MODULE_DECLARATION
 

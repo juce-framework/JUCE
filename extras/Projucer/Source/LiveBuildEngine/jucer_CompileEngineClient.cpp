@@ -386,11 +386,12 @@ private:
                                                              : m->moduleInfo.getFolder();
 
                         m->findAndAddCompiledUnits (*exporter, nullptr, compileUnits,
-                                                    isPluginProject || isVSTHost ? ProjectType::Target::SharedCodeTarget
-                                                                                 : ProjectType::Target::unspecified);
+                                                    isPluginProject || isVSTHost ? build_tools::ProjectType::Target::SharedCodeTarget
+                                                                                 : build_tools::ProjectType::Target::unspecified);
 
                         if (isPluginProject || isVSTHost)
-                            m->findAndAddCompiledUnits (*exporter, nullptr, compileUnits, ProjectType::Target::StandalonePlugIn);
+                            m->findAndAddCompiledUnits (*exporter, nullptr, compileUnits,
+                                                        build_tools::ProjectType::Target::StandalonePlugIn);
                     }
 
                     break;

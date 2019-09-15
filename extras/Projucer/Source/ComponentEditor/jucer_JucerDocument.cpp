@@ -118,9 +118,9 @@ void JucerDocument::refreshAllPropertyComps()
 void JucerDocument::setClassName (const String& newName)
 {
     if (newName != className
-         && CodeHelpers::makeValidIdentifier (newName, false, false, true).isNotEmpty())
+        && build_tools::makeValidIdentifier (newName, false, false, true).isNotEmpty())
     {
-        className = CodeHelpers::makeValidIdentifier (newName, false, false, true);
+        className = build_tools::makeValidIdentifier (newName, false, false, true);
         changed();
     }
 }
@@ -156,7 +156,7 @@ void JucerDocument::setParentClasses (const String& classes)
                     type = s = String();
             }
 
-            s = type + CodeHelpers::makeValidIdentifier (s.trim(), false, false, true, true);
+            s = type + build_tools::makeValidIdentifier (s.trim(), false, false, true, true);
 
             parentClassLines.set (i, s);
         }

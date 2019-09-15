@@ -7,8 +7,365 @@
 namespace BinaryData
 {
 
-//================== gradle-wrapper.jar ==================
+//================== LaunchScreen.storyboard ==================
 static const unsigned char temp_binary_data_0[] =
+"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+"<document type=\"com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB\" version=\"3.0\" toolsVersion=\"14460.31\" targetRuntime=\"iOS.CocoaTouch\" propertyAccessControl=\"none\" useAutolayout=\"YES\" launchScreen=\"YES\" useTraitCollections=\"YES\" "
+"useSafeAreas=\"YES\" colorMatched=\"YES\" initialViewController=\"01J-lp-oVM\">\n"
+"    <scenes>\n"
+"        <scene sceneID=\"EHf-IW-A2E\">\n"
+"            <objects>\n"
+"                <placeholder placeholderIdentifier=\"IBFirstResponder\" id=\"iYj-Kq-Ea1\" userLabel=\"\" sceneMemberID=\"firstResponder\"/>\n"
+"                <viewController id=\"01J-lp-oVM\" sceneMemberID=\"viewController\">\n"
+"                    <view key=\"view\" contentMode=\"scaleToFill\" id=\"Ze5-6b-2t3\">\n"
+"                        <autoresizingMask key=\"autoresizingMask\"/>\n"
+"                        <color key=\"backgroundColor\" red=\"0\" green=\"0\" blue=\"0\" alpha=\"1\" colorSpace=\"custom\" customColorSpace=\"sRGB\"/>\n"
+"                    </view>\n"
+"                </viewController>\n"
+"            </objects>\n"
+"        </scene>\n"
+"    </scenes>\n"
+"</document>\n";
+
+const char* LaunchScreen_storyboard = (const char*) temp_binary_data_0;
+
+//================== PIPAudioProcessor.cpp.in ==================
+static const unsigned char temp_binary_data_1[] =
+"/*\n"
+"  ==============================================================================\n"
+"\n"
+"    This file was auto-generated and contains the startup code for a PIP.\n"
+"\n"
+"  ==============================================================================\n"
+"*/\n"
+"\n"
+"#include <JuceHeader.h>\n"
+"#include \"${JUCE_PIP_HEADER}\"\n"
+"\n"
+"//==============================================================================\n"
+"AudioProcessor* JUCE_CALLTYPE createPluginFilter()\n"
+"{\n"
+"    return new ${JUCE_PIP_MAIN_CLASS}();\n"
+"}\n";
+
+const char* PIPAudioProcessor_cpp_in = (const char*) temp_binary_data_1;
+
+//================== PIPComponent.cpp.in ==================
+static const unsigned char temp_binary_data_2[] =
+"/*\n"
+"  ==============================================================================\n"
+"\n"
+"    This file was auto-generated and contains the startup code for a PIP.\n"
+"\n"
+"  ==============================================================================\n"
+"*/\n"
+"\n"
+"#include <JuceHeader.h>\n"
+"#include \"${JUCE_PIP_HEADER}\"\n"
+"\n"
+"class Application    : public JUCEApplication\n"
+"{\n"
+"public:\n"
+"    //==============================================================================\n"
+"    Application() {}\n"
+"\n"
+"    const String getApplicationName() override       { return \"${JUCE_PIP_NAME}\"; }\n"
+"    const String getApplicationVersion() override    { return \"${PROJECT_VERSION}\"; }\n"
+"\n"
+"    void initialise (const String&) override\n"
+"    {\n"
+"        mainWindow.reset (new MainWindow (\"${JUCE_PIP_NAME}\", new ${JUCE_PIP_MAIN_CLASS}, *this));\n"
+"    }\n"
+"\n"
+"    void shutdown() override                         { mainWindow = nullptr; }\n"
+"\n"
+"private:\n"
+"    class MainWindow    : public DocumentWindow\n"
+"    {\n"
+"    public:\n"
+"        MainWindow (const String& name, Component* c, JUCEApplication& a)\n"
+"            : DocumentWindow (name, Desktop::getInstance().getDefaultLookAndFeel()\n"
+"                                                          .findColour (ResizableWindow::backgroundColourId),\n"
+"                              DocumentWindow::allButtons),\n"
+"              app (a)\n"
+"        {\n"
+"            setUsingNativeTitleBar (true);\n"
+"            setContentOwned (c, true);\n"
+"\n"
+"           #if JUCE_ANDROID || JUCE_IOS\n"
+"            setFullScreen (true);\n"
+"           #else\n"
+"            setResizable (true, false);\n"
+"            setResizeLimits (300, 250, 10000, 10000);\n"
+"            centreWithSize (getWidth(), getHeight());\n"
+"           #endif\n"
+"\n"
+"            setVisible (true);\n"
+"        }\n"
+"\n"
+"        void closeButtonPressed() override\n"
+"        {\n"
+"            app.systemRequestedQuit();\n"
+"        }\n"
+"\n"
+"    private:\n"
+"        JUCEApplication& app;\n"
+"\n"
+"        //==============================================================================\n"
+"        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)\n"
+"    };\n"
+"\n"
+"    std::unique_ptr<MainWindow> mainWindow;\n"
+"};\n"
+"\n"
+"//==============================================================================\n"
+"START_JUCE_APPLICATION (Application)\n";
+
+const char* PIPComponent_cpp_in = (const char*) temp_binary_data_2;
+
+//================== PIPConsole.cpp.in ==================
+static const unsigned char temp_binary_data_3[] =
+"/*\n"
+"  ==============================================================================\n"
+"\n"
+"    This file was auto-generated and contains the startup code for a PIP.\n"
+"\n"
+"  ==============================================================================\n"
+"*/\n"
+"\n"
+"#include <JuceHeader.h>\n"
+"#include \"${JUCE_PIP_HEADER}\"\n";
+
+const char* PIPConsole_cpp_in = (const char*) temp_binary_data_3;
+
+//================== RecentFilesMenuTemplate.nib ==================
+static const unsigned char temp_binary_data_4[] =
+{ 98,112,108,105,115,116,48,48,212,0,1,0,2,0,3,0,4,0,5,0,6,1,53,1,54,88,36,118,101,114,115,105,111,110,88,36,111,98,106,101,99,116,115,89,36,97,114,99,104,105,118,101,114,84,36,116,111,112,18,0,1,134,160,175,16,74,0,7,0,8,0,31,0,35,0,36,0,42,0,46,0,50,
+0,53,0,57,0,74,0,77,0,78,0,86,0,87,0,97,0,112,0,113,0,114,0,119,0,120,0,121,0,124,0,128,0,129,0,132,0,143,0,144,0,145,0,149,0,153,0,162,0,163,0,164,0,169,0,173,0,180,0,181,0,182,0,185,0,192,0,193,0,200,0,201,0,208,0,209,0,216,0,217,0,224,0,225,0,226,
+0,229,0,230,0,232,0,249,1,11,1,29,1,30,1,31,1,32,1,33,1,34,1,35,1,36,1,37,1,38,1,39,1,40,1,41,1,42,1,43,1,44,1,47,1,50,85,36,110,117,108,108,219,0,9,0,10,0,11,0,12,0,13,0,14,0,15,0,16,0,17,0,18,0,19,0,20,0,21,0,22,0,23,0,24,0,25,0,26,0,27,0,28,0,29,0,
+29,95,16,16,78,83,86,105,115,105,98,108,101,87,105,110,100,111,119,115,93,78,83,79,98,106,101,99,116,115,75,101,121,115,86,78,83,82,111,111,116,92,78,83,79,105,100,115,86,97,108,117,101,115,86,36,99,108,97,115,115,90,78,83,79,105,100,115,75,101,121,115,
+93,78,83,67,111,110,110,101,99,116,105,111,110,115,95,16,15,78,83,79,98,106,101,99,116,115,86,97,108,117,101,115,95,16,25,78,83,65,99,99,101,115,115,105,98,105,108,105,116,121,67,111,110,110,101,99,116,111,114,115,95,16,23,78,83,65,99,99,101,115,115,
+105,98,105,108,105,116,121,79,105,100,115,75,101,121,115,95,16,25,78,83,65,99,99,101,115,115,105,98,105,108,105,116,121,79,105,100,115,86,97,108,117,101,115,128,5,128,9,128,2,128,55,128,73,128,54,128,7,128,53,128,71,128,72,128,72,210,0,13,0,32,0,33,0,
+34,91,78,83,67,108,97,115,115,78,97,109,101,128,4,128,3,93,78,83,65,112,112,108,105,99,97,116,105,111,110,210,0,37,0,38,0,39,0,40,90,36,99,108,97,115,115,110,97,109,101,88,36,99,108,97,115,115,101,115,94,78,83,67,117,115,116,111,109,79,98,106,101,99,
+116,162,0,39,0,41,88,78,83,79,98,106,101,99,116,210,0,13,0,43,0,44,0,45,90,78,83,46,111,98,106,101,99,116,115,128,6,160,210,0,37,0,38,0,47,0,48,92,78,83,77,117,116,97,98,108,101,83,101,116,163,0,47,0,49,0,41,85,78,83,83,101,116,210,0,13,0,43,0,51,0,52,
+128,8,160,210,0,37,0,38,0,54,0,55,94,78,83,77,117,116,97,98,108,101,65,114,114,97,121,163,0,54,0,56,0,41,87,78,83,65,114,114,97,121,210,0,13,0,43,0,58,0,59,128,52,174,0,60,0,61,0,62,0,63,0,64,0,65,0,66,0,67,0,68,0,69,0,70,0,71,0,72,0,73,128,10,128,12,
+128,45,128,15,128,39,128,25,128,28,128,30,128,33,128,35,128,43,128,41,128,47,128,50,210,0,13,0,32,0,33,0,76,128,4,128,11,93,78,83,65,112,112,108,105,99,97,116,105,111,110,212,0,79,0,13,0,80,0,81,0,82,0,83,0,84,0,85,91,78,83,77,101,110,117,73,116,101,
+109,115,86,78,83,78,97,109,101,87,78,83,84,105,116,108,101,128,14,128,38,128,49,128,13,89,65,77,97,105,110,77,101,110,117,210,0,13,0,43,0,51,0,89,128,8,167,0,63,0,65,0,64,0,71,0,70,0,62,0,72,128,15,128,25,128,39,128,41,128,43,128,45,128,47,216,0,98,0,
+99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,109,0,110,0,111,95,16,17,78,83,75,101,121,69,113,117,105,118,77,111,100,77,97,115,107,86,78,83,77,101,110,117,89,78,83,79,110,73,109,97,103,101,90,78,83,75,101,121,69,113,117,105,118,
+93,78,83,77,110,101,109,111,110,105,99,76,111,99,92,78,83,77,105,120,101,100,73,109,97,103,101,18,0,16,0,0,128,12,128,18,128,24,128,17,18,127,255,255,255,128,22,128,16,91,100,101,108,109,101,65,112,112,75,105,116,80,211,0,13,0,115,0,32,0,116,0,117,0,
+118,94,78,83,82,101,115,111,117,114,99,101,78,97,109,101,128,21,128,20,128,19,87,78,83,73,109,97,103,101,95,16,15,78,83,77,101,110,117,67,104,101,99,107,109,97,114,107,210,0,37,0,38,0,122,0,123,95,16,16,78,83,67,117,115,116,111,109,82,101,115,111,117,
+114,99,101,162,0,122,0,41,211,0,13,0,115,0,32,0,116,0,126,0,118,128,21,128,23,128,19,95,16,16,78,83,77,101,110,117,77,105,120,101,100,83,116,97,116,101,210,0,37,0,38,0,130,0,131,90,78,83,77,101,110,117,73,116,101,109,162,0,130,0,41,218,0,133,0,98,0,134,
+0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,135,0,104,0,66,0,61,0,106,0,107,0,108,0,109,0,110,0,142,88,78,83,65,99,116,105,111,110,89,78,83,83,117,98,109,101,110,117,128,27,128,28,128,12,128,18,128,24,128,17,128,22,128,26,84,70,105,108,101,94,115,117,98,
+109,101,110,117,65,99,116,105,111,110,58,211,0,79,0,13,0,81,0,146,0,83,0,142,128,29,128,38,128,26,210,0,13,0,43,0,51,0,151,128,8,161,0,67,128,30,218,0,133,0,98,0,134,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,154,0,104,0,68,0,66,0,106,0,107,0,108,0,109,
+0,110,0,161,128,32,128,33,128,28,128,18,128,24,128,17,128,22,128,31,91,79,112,101,110,32,82,101,99,101,110,116,94,115,117,98,109,101,110,117,65,99,116,105,111,110,58,212,0,79,0,13,0,80,0,81,0,165,0,83,0,167,0,161,128,34,128,38,128,37,128,31,210,0,13,
+0,43,0,51,0,171,128,8,161,0,69,128,35,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,68,0,106,0,107,0,108,0,109,0,110,0,179,128,33,128,18,128,24,128,17,128,22,128,36,90,67,108,101,97,114,32,77,101,110,117,95,16,22,95,78,83,82,101,99,101,110,
+116,68,111,99,117,109,101,110,116,115,77,101,110,117,210,0,37,0,38,0,183,0,184,86,78,83,77,101,110,117,162,0,183,0,41,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,109,0,110,0,191,128,12,128,18,128,24,128,17,128,22,128,
+40,84,69,100,105,116,215,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,61,0,106,0,107,0,108,0,109,0,110,0,199,128,12,128,18,128,24,128,17,128,22,128,42,86,70,111,114,109,97,116,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,
+109,0,110,0,207,128,12,128,18,128,24,128,17,128,22,128,44,84,86,105,101,119,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,109,0,110,0,215,128,12,128,18,128,24,128,17,128,22,128,46,86,87,105,110,100,111,119,215,0,99,0,
+100,0,13,0,101,0,102,0,103,0,81,0,61,0,106,0,107,0,108,0,109,0,110,0,223,128,12,128,18,128,24,128,17,128,22,128,48,84,72,101,108,112,91,95,78,83,77,97,105,110,77,101,110,117,210,0,13,0,32,0,33,0,228,128,4,128,51,93,78,83,70,111,110,116,77,97,110,97,103,
+101,114,210,0,37,0,38,0,56,0,231,162,0,56,0,41,210,0,13,0,43,0,58,0,234,128,52,174,0,22,0,22,0,61,0,61,0,61,0,61,0,65,0,66,0,67,0,68,0,61,0,61,0,61,0,22,128,2,128,2,128,12,128,12,128,12,128,12,128,25,128,28,128,30,128,33,128,12,128,12,128,12,128,2,210,
+0,13,0,43,0,58,0,251,128,52,175,16,15,0,22,0,60,0,61,0,62,0,63,0,64,0,65,0,66,0,67,0,68,0,69,0,70,0,71,0,72,0,73,128,2,128,10,128,12,128,45,128,15,128,39,128,25,128,28,128,30,128,33,128,35,128,43,128,41,128,47,128,50,210,0,13,0,43,0,58,1,13,128,52,175,
+16,15,1,14,1,15,1,16,1,17,1,18,1,19,1,20,1,21,1,22,1,23,1,24,1,25,1,26,1,27,1,28,128,56,128,57,128,58,128,59,128,60,128,61,128,62,128,63,128,64,128,65,128,66,128,67,128,68,128,69,128,70,17,2,22,17,2,23,17,2,24,17,2,25,17,2,26,17,2,27,17,2,28,17,2,29,
+17,2,30,17,2,31,17,2,32,17,2,33,17,2,34,17,2,35,17,2,36,210,0,13,0,43,0,51,1,46,128,8,160,210,0,13,0,43,0,58,1,49,128,52,160,210,0,37,0,38,1,51,1,52,94,78,83,73,66,79,98,106,101,99,116,68,97,116,97,162,1,51,0,41,95,16,15,78,83,75,101,121,101,100,65,114,
+99,104,105,118,101,114,209,1,55,1,56,93,73,66,46,111,98,106,101,99,116,100,97,116,97,128,1,0,8,0,25,0,34,0,43,0,53,0,58,0,63,0,214,0,220,1,9,1,28,1,42,1,49,1,62,1,69,1,80,1,94,1,112,1,140,1,166,1,194,1,196,1,198,1,200,1,202,1,204,1,206,1,208,1,210,1,
+212,1,214,1,216,1,225,1,237,1,239,1,241,1,255,2,8,2,19,2,28,2,43,2,48,2,57,2,66,2,77,2,79,2,80,2,89,2,102,2,109,2,115,2,124,2,126,2,127,2,136,2,151,2,158,2,166,2,175,2,177,2,206,2,208,2,210,2,212,2,214,2,216,2,218,2,220,2,222,2,224,2,226,2,228,2,230,
+2,232,2,234,2,243,2,245,2,247,3,5,3,22,3,34,3,41,3,49,3,51,3,53,3,55,3,57,3,67,3,76,3,78,3,93,3,95,3,97,3,99,3,101,3,103,3,105,3,107,3,140,3,160,3,167,3,177,3,188,3,202,3,215,3,220,3,222,3,224,3,226,3,228,3,233,3,235,3,237,3,249,3,250,4,7,4,22,4,24,4,
+26,4,28,4,36,4,54,4,63,4,82,4,87,4,100,4,102,4,104,4,106,4,125,4,134,4,145,4,150,4,191,4,200,4,210,4,212,4,214,4,216,4,218,4,220,4,222,4,224,4,226,4,231,4,246,5,3,5,5,5,7,5,9,5,18,5,20,5,23,5,25,5,66,5,68,5,70,5,72,5,74,5,76,5,78,5,80,5,82,5,94,5,109,
+5,126,5,128,5,130,5,132,5,134,5,143,5,145,5,148,5,150,5,183,5,185,5,187,5,189,5,191,5,193,5,195,5,206,5,231,5,240,5,247,5,252,6,29,6,31,6,33,6,35,6,37,6,39,6,41,6,46,6,75,6,77,6,79,6,81,6,83,6,85,6,87,6,94,6,127,6,129,6,131,6,133,6,135,6,137,6,139,6,
+144,6,177,6,179,6,181,6,183,6,185,6,187,6,189,6,196,6,225,6,227,6,229,6,231,6,233,6,235,6,237,6,242,6,254,7,7,7,9,7,11,7,25,7,34,7,39,7,48,7,50,7,79,7,81,7,83,7,85,7,87,7,89,7,91,7,93,7,95,7,97,7,99,7,101,7,103,7,105,7,107,7,116,7,118,7,151,7,153,7,155,
+7,157,7,159,7,161,7,163,7,165,7,167,7,169,7,171,7,173,7,175,7,177,7,179,7,181,7,190,7,192,7,225,7,227,7,229,7,231,7,233,7,235,7,237,7,239,7,241,7,243,7,245,7,247,7,249,7,251,7,253,7,255,8,2,8,5,8,8,8,11,8,14,8,17,8,20,8,23,8,26,8,29,8,32,8,35,8,38,8,
+41,8,44,8,53,8,55,8,56,8,65,8,67,8,68,8,77,8,92,8,97,8,115,8,120,8,134,0,0,0,0,0,0,2,2,0,0,0,0,0,0,1,57,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,136,0,0 };
+
+const char* RecentFilesMenuTemplate_nib = (const char*) temp_binary_data_4;
+
+//================== UnityPluginGUIScript.cs.in ==================
+static const unsigned char temp_binary_data_5[] =
+"#if UNITY_EDITOR\n"
+"\n"
+"using UnityEditor;\n"
+"using UnityEngine;\n"
+"\n"
+"using System.Collections.Generic;\n"
+"using System.Runtime.InteropServices;\n"
+"\n"
+"public class ${plugin_class_name}GUI : IAudioEffectPluginGUI\n"
+"{\n"
+"    public override string Name           { get { return \"${plugin_name}\"; } }\n"
+"    public override string Description    { get { return \"${plugin_description}\"; } }\n"
+"    public override string Vendor         { get { return \"${plugin_vendor}\"; } }\n"
+"\n"
+"    //==============================================================================\n"
+"    [DllImport(\"${plugin_name}\")] static extern System.IntPtr getRenderCallback();\n"
+"\n"
+"    [DllImport(\"${plugin_name}\")] static extern void unityInitialiseTexture (int id, System.IntPtr texture, int width, int height);\n"
+"\n"
+"    [DllImport(\"${plugin_name}\")] static extern void unityMouseDown (int id, float x, float y, EventModifiers mods, int button);\n"
+"    [DllImport(\"${plugin_name}\")] static extern void unityMouseDrag (int id, float x, float y, EventModifiers mods, int button);\n"
+"    [DllImport(\"${plugin_name}\")] static extern void unityMouseUp   (int id, float x, float y, EventModifiers mods);\n"
+"\n"
+"    [DllImport(\"${plugin_name}\")] static extern void unityKeyEvent (int id, KeyCode code, EventModifiers mods, string name);\n"
+"\n"
+"    [DllImport(\"${plugin_name}\")] static extern void unitySetScreenBounds (int id, float x, float y, float w, float h);\n"
+"\n"
+"    //==============================================================================\n"
+"    private class PluginGUIInstance\n"
+"    {\n"
+"        public PluginGUIInstance (ref IAudioEffectPlugin plugin, int id)\n"
+"        {\n"
+"            instanceID = id;\n"
+"\n"
+"            float[] arr;\n"
+"            plugin.GetFloatBuffer (\"Editor\", out arr, 1);\n"
+"            hasEditor = (arr[0] > 0.0f);\n"
+"        }\n"
+"\n"
+"        public void repaint (Rect r)\n"
+"        {\n"
+"            Vector2 newScreenPosition = GUIUtility.GUIToScreenPoint (r.position);\n"
+"\n"
+"            if (bounds != r\n"
+"                || screenPosition != newScreenPosition)\n"
+"            {\n"
+"                screenPosition = newScreenPosition;\n"
+"                bounds = r;\n"
+"\n"
+"                unitySetScreenBounds (instanceID, screenPosition.x, screenPosition.y, bounds.width, bounds.height);\n"
+"                setupTexture();\n"
+"            }\n"
+"\n"
+"            GL.IssuePluginEvent (getRenderCallback(), instanceID);\n"
+"\n"
+"            texture.SetPixels32 (pixels);\n"
+"            texture.Apply();\n"
+"\n"
+"            EditorGUI.DrawPreviewTexture (bounds, texture);\n"
+"        }\n"
+"\n"
+"        public bool handleMouseEvent (EventType eventType)\n"
+"        {\n"
+"            Vector2 mousePos = Event.current.mousePosition;\n"
+"            EventModifiers mods = Event.current.modifiers;\n"
+"\n"
+"            if (! bounds.Contains (mousePos))\n"
+"                return false;\n"
+"\n"
+"            Vector2 relativePos = new Vector2 (mousePos.x - bounds.x, mousePos.y - bounds.y);\n"
+"\n"
+"            if (eventType == EventType.MouseDown)\n"
+"            {\n"
+"                unityMouseDown (instanceID, relativePos.x, relativePos.y, mods, Event.current.button);\n"
+"                GUIUtility.hotControl = GUIUtility.GetControlID (FocusType.Passive);\n"
+"            }\n"
+"            else if (eventType == EventType.MouseUp)\n"
+"            {\n"
+"                unityMouseUp (instanceID, relativePos.x, relativePos.y, mods);\n"
+"                GUIUtility.hotControl = 0;\n"
+"            }\n"
+"            else if (eventType == EventType.MouseDrag)\n"
+"            {\n"
+"                unityMouseDrag (instanceID, relativePos.x, relativePos.y, mods, Event.current.button);\n"
+"            }\n"
+"\n"
+"            Event.current.Use();\n"
+"\n"
+"            return true;\n"
+"        }\n"
+"\n"
+"        public void handleKeyEvent (EventType eventType)\n"
+"        {\n"
+"            if (eventType == EventType.KeyDown)\n"
+"            {\n"
+"                KeyCode code = Event.current.keyCode;\n"
+"\n"
+"                if (code == KeyCode.None)\n"
+"                    return;\n"
+"\n"
+"                EventModifiers mods = Event.current.modifiers;\n"
+"\n"
+"                unityKeyEvent (instanceID, code, mods, code.ToString());\n"
+"            }\n"
+"        }\n"
+"\n"
+"        private void setupTexture()\n"
+"        {\n"
+"            if (pixelHandle.IsAllocated)\n"
+"                pixelHandle.Free();\n"
+"\n"
+"            texture = new Texture2D ((int) bounds.width, (int) bounds.height, TextureFormat.ARGB32, false);\n"
+"\n"
+"            pixels = texture.GetPixels32();\n"
+"            pixelHandle = GCHandle.Alloc (pixels, GCHandleType.Pinned);\n"
+"\n"
+"            unityInitialiseTexture (instanceID, pixelHandle.AddrOfPinnedObject(), texture.width, texture.height);\n"
+"        }\n"
+"\n"
+"        public int instanceID = -1;\n"
+"        public bool hasEditor;\n"
+"\n"
+"        private Vector2 screenPosition;\n"
+"        private Rect bounds;\n"
+"\n"
+"        private Texture2D texture;\n"
+"        private Color32[] pixels;\n"
+"        private GCHandle pixelHandle;\n"
+"    }\n"
+"    List<PluginGUIInstance> guis = new List<PluginGUIInstance>();\n"
+"\n"
+"    private PluginGUIInstance getGUIInstanceForPlugin (ref IAudioEffectPlugin plugin)\n"
+"    {\n"
+"        float[] idArray;\n"
+"        plugin.GetFloatBuffer (\"ID\", out idArray, 1);\n"
+"\n"
+"        int id = (int) idArray[0];\n"
+"\n"
+"        for (int i = 0; i < guis.Count; ++i)\n"
+"        {\n"
+"            if (guis[i].instanceID == id)\n"
+"                return guis[i];\n"
+"        }\n"
+"\n"
+"        PluginGUIInstance newInstance = new PluginGUIInstance (ref plugin, id);\n"
+"        guis.Add (newInstance);\n"
+"\n"
+"        return guis[guis.Count - 1];\n"
+"    }\n"
+"\n"
+"    //==============================================================================\n"
+"    public override bool OnGUI (IAudioEffectPlugin plugin)\n"
+"    {\n"
+"        PluginGUIInstance guiInstance = getGUIInstanceForPlugin (ref plugin);\n"
+"\n"
+"        if (! guiInstance.hasEditor)\n"
+"            return true;\n"
+"\n"
+"        float[] arr;\n"
+"        plugin.GetFloatBuffer (\"Size\", out arr, 6);\n"
+"\n"
+"        Rect r = GUILayoutUtility.GetRect (arr[0], arr[1],\n"
+"                                           new GUILayoutOption[] { GUILayout.MinWidth (arr[2]), GUILayout.MinHeight (arr[3]),\n"
+"                                                                   GUILayout.MaxWidth (arr[4]), GUILayout.MaxHeight (arr[5]) });\n"
+"\n"
+"        int controlID = GUIUtility.GetControlID (FocusType.Passive);\n"
+"        Event currentEvent = Event.current;\n"
+"        EventType currentEventType = currentEvent.GetTypeForControl (controlID);\n"
+"\n"
+"        if (currentEventType == EventType.Repaint)\n"
+"            guiInstance.repaint (r);\n"
+"        else if (currentEvent.isMouse)\n"
+"            guiInstance.handleMouseEvent (currentEventType);\n"
+"        else if (currentEvent.isKey)\n"
+"            guiInstance.handleKeyEvent (currentEventType);\n"
+"\n"
+"        return false;\n"
+"    }\n"
+"}\n"
+"\n"
+"#endif\n";
+
+const char* UnityPluginGUIScript_cs_in = (const char*) temp_binary_data_5;
+
+//================== gradle-wrapper.jar ==================
+static const unsigned char temp_binary_data_6[] =
 { 80,75,3,4,10,0,0,8,8,0,42,178,149,71,0,0,0,0,2,0,0,0,0,0,0,0,9,0,0,0,77,69,84,65,45,73,78,70,47,3,0,80,75,3,4,10,0,0,8,8,0,42,178,149,71,215,149,152,82,63,0,0,0,85,0,0,0,20,0,0,0,77,69,84,65,45,73,78,70,47,77,65,78,73,70,69,83,84,46,77,70,243,77,204,
 203,76,75,45,46,209,13,75,45,42,206,204,207,179,82,48,212,51,224,229,242,204,45,200,73,205,77,205,43,73,44,1,10,234,134,100,150,228,164,90,41,184,23,37,166,228,164,98,200,194,181,26,233,25,2,245,242,114,1,0,80,75,3,4,10,0,0,8,8,0,22,178,149,71,0,0,0,
 0,2,0,0,0,0,0,0,0,4,0,0,0,111,114,103,47,3,0,80,75,3,4,10,0,0,8,8,0,22,178,149,71,0,0,0,0,2,0,0,0,0,0,0,0,11,0,0,0,111,114,103,47,103,114,97,100,108,101,47,3,0,80,75,3,4,10,0,0,8,8,0,22,178,149,71,0,0,0,0,2,0,0,0,0,0,0,0,19,0,0,0,111,114,103,47,103,114,
@@ -760,10 +1117,10 @@ static const unsigned char temp_binary_data_0[] =
 76,105,110,101,80,97,114,115,101,114,36,65,102,116,101,114,70,105,114,115,116,83,117,98,67,111,109,109,97,110,100,46,99,108,97,115,115,80,75,1,2,20,3,10,0,0,8,8,0,10,178,149,71,105,222,125,0,70,0,0,0,68,0,0,0,31,0,0,0,0,0,0,0,0,0,0,0,180,129,219,191,
 0,0,103,114,97,100,108,101,45,99,108,105,45,99,108,97,115,115,112,97,116,104,46,112,114,111,112,101,114,116,105,101,115,80,75,5,6,0,0,0,0,49,0,49,0,16,17,0,0,94,192,0,0,0,0,0,0 };
 
-const char* gradlewrapper_jar = (const char*) temp_binary_data_0;
+const char* gradlewrapper_jar = (const char*) temp_binary_data_6;
 
 //================== gradlew ==================
-static const unsigned char temp_binary_data_1[] =
+static const unsigned char temp_binary_data_7[] =
 "#!/usr/bin/env bash\n"
 "\n"
 "##############################################################################\n"
@@ -925,10 +1282,10 @@ static const unsigned char temp_binary_data_1[] =
 "\n"
 "exec \"$JAVACMD\" \"${JVM_OPTS[@]}\" -classpath \"$CLASSPATH\" org.gradle.wrapper.GradleWrapperMain \"$@\"\n";
 
-const char* gradlew = (const char*) temp_binary_data_1;
+const char* gradlew = (const char*) temp_binary_data_7;
 
 //================== gradlew.bat ==================
-static const unsigned char temp_binary_data_2[] =
+static const unsigned char temp_binary_data_8[] =
 "@if \"%DEBUG%\" == \"\" @echo off\r\n"
 "@rem ##########################################################################\r\n"
 "@rem\r\n"
@@ -1020,10 +1377,10 @@ static const unsigned char temp_binary_data_2[] =
 "\r\n"
 ":omega\r\n";
 
-const char* gradlew_bat = (const char*) temp_binary_data_2;
+const char* gradlew_bat = (const char*) temp_binary_data_8;
 
 //================== LICENSE ==================
-static const unsigned char temp_binary_data_3[] =
+static const unsigned char temp_binary_data_9[] =
 "Apache License\n"
 "                           Version 2.0, January 2004\n"
 "                        http://www.apache.org/licenses/\n"
@@ -1227,10 +1584,10 @@ static const unsigned char temp_binary_data_3[] =
 "   limitations under the License.\n"
 "\n";
 
-const char* LICENSE = (const char*) temp_binary_data_3;
+const char* LICENSE = (const char*) temp_binary_data_9;
 
 //================== background_logo.svg ==================
-static const unsigned char temp_binary_data_4[] =
+static const unsigned char temp_binary_data_10[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\r\n"
 "\t viewBox=\"0 0 451.7 451.7\" enable-background=\"new 0 0 451.7 451.7\" xml:space=\"preserve\">\r\n"
@@ -1269,10 +1626,10 @@ static const unsigned char temp_binary_data_4[] =
 "</g>\r\n"
 "</svg>\r\n";
 
-const char* background_logo_svg = (const char*) temp_binary_data_4;
+const char* background_logo_svg = (const char*) temp_binary_data_10;
 
 //================== export_android.svg ==================
-static const unsigned char temp_binary_data_5[] =
+static const unsigned char temp_binary_data_11[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 "<svg width=\"19px\" height=\"23px\" viewBox=\"0 0 19 23\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n"
 "    <!-- Generator: Sketch 43.1 (39012) - http://www.bohemiancoding.com/sketch -->\n"
@@ -1303,10 +1660,10 @@ static const unsigned char temp_binary_data_5[] =
 "    </g>\n"
 "</svg>";
 
-const char* export_android_svg = (const char*) temp_binary_data_5;
+const char* export_android_svg = (const char*) temp_binary_data_11;
 
 //================== export_clion.svg ==================
-static const unsigned char temp_binary_data_6[] =
+static const unsigned char temp_binary_data_12[] =
 "<svg id=\"Layer_1\" data-name=\"Layer 1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 128 128\">\n"
 "  <defs>\n"
 "    <linearGradient id=\"linear-gradient\" x1=\"40.69\" y1=\"-676.56\" x2=\"83.48\" y2=\"-676.56\" gradientTransform=\"matrix(1, 0, 0, -1, 0, -648.86)\" gradientUnits=\"userSpaceOnUse\">\n"
@@ -1342,10 +1699,10 @@ static const unsigned char temp_binary_data_6[] =
 "  </g>\n"
 "</svg>\n";
 
-const char* export_clion_svg = (const char*) temp_binary_data_6;
+const char* export_clion_svg = (const char*) temp_binary_data_12;
 
 //================== export_codeBlocks.svg ==================
-static const unsigned char temp_binary_data_7[] =
+static const unsigned char temp_binary_data_13[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 "<svg width=\"20px\" height=\"20px\" viewBox=\"0 0 20 20\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n"
 "    <!-- Generator: Sketch 43.1 (39012) - http://www.bohemiancoding.com/sketch -->\n"
@@ -1367,10 +1724,10 @@ static const unsigned char temp_binary_data_7[] =
 "    </g>\n"
 "</svg>";
 
-const char* export_codeBlocks_svg = (const char*) temp_binary_data_7;
+const char* export_codeBlocks_svg = (const char*) temp_binary_data_13;
 
 //================== export_linux.svg ==================
-static const unsigned char temp_binary_data_8[] =
+static const unsigned char temp_binary_data_14[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 "<svg width=\"63px\" height=\"75px\" viewBox=\"0 0 63 75\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n"
 "    <!-- Generator: Sketch 43.1 (39012) - http://www.bohemiancoding.com/sketch -->\n"
@@ -1520,10 +1877,10 @@ static const unsigned char temp_binary_data_8[] =
 "    </g>\n"
 "</svg>";
 
-const char* export_linux_svg = (const char*) temp_binary_data_8;
+const char* export_linux_svg = (const char*) temp_binary_data_14;
 
 //================== export_visualStudio.svg ==================
-static const unsigned char temp_binary_data_9[] =
+static const unsigned char temp_binary_data_15[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 "<svg width=\"20px\" height=\"20px\" viewBox=\"0 0 20 20\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n"
 "    <!-- Generator: Sketch 43.1 (39012) - http://www.bohemiancoding.com/sketch -->\n"
@@ -1547,10 +1904,10 @@ static const unsigned char temp_binary_data_9[] =
 "    </g>\n"
 "</svg>";
 
-const char* export_visualStudio_svg = (const char*) temp_binary_data_9;
+const char* export_visualStudio_svg = (const char*) temp_binary_data_15;
 
 //================== export_xcode.svg ==================
-static const unsigned char temp_binary_data_10[] =
+static const unsigned char temp_binary_data_16[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 "<svg width=\"33px\" height=\"32px\" viewBox=\"0 0 33 32\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n"
 "    <!-- Generator: Sketch 43.1 (39012) - http://www.bohemiancoding.com/sketch -->\n"
@@ -1622,10 +1979,10 @@ static const unsigned char temp_binary_data_10[] =
 "    </g>\n"
 "</svg>";
 
-const char* export_xcode_svg = (const char*) temp_binary_data_10;
+const char* export_xcode_svg = (const char*) temp_binary_data_16;
 
 //================== huckleberry_icon.svg ==================
-static const unsigned char temp_binary_data_11[] =
+static const unsigned char temp_binary_data_17[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
 "<!-- Generator: Adobe Illustrator 21.0.2, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
 "<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\n"
@@ -1677,10 +2034,10 @@ static const unsigned char temp_binary_data_11[] =
 "</g>\n"
 "</svg>\n";
 
-const char* huckleberry_icon_svg = (const char*) temp_binary_data_11;
+const char* huckleberry_icon_svg = (const char*) temp_binary_data_17;
 
 //================== juce-logo-with-text.svg ==================
-static const unsigned char temp_binary_data_12[] =
+static const unsigned char temp_binary_data_18[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<svg\n"
 "   xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n"
@@ -1826,10 +2183,10 @@ static const unsigned char temp_binary_data_12[] =
 "     style=\"fill:#ffffff;fill-opacity:1\" />\n"
 "</svg>\n";
 
-const char* jucelogowithtext_svg = (const char*) temp_binary_data_12;
+const char* jucelogowithtext_svg = (const char*) temp_binary_data_18;
 
 //================== juce_icon.png ==================
-static const unsigned char temp_binary_data_13[] =
+static const unsigned char temp_binary_data_19[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,2,0,0,0,2,0,8,6,0,0,0,244,120,212,250,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,40,105,84,88,116,88,77,76,58,
 99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,120,
 58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,54,55,32,55,57,46,49,53,55,
@@ -2475,10 +2832,10 @@ static const unsigned char temp_binary_data_13[] =
 0,0,0,2,0,0,16,0,0,128,0,0,0,4,0,0,32,0,0,0,1,0,0,8,0,0,64,0,0,0,2,0,0,16,0,0,128,0,0,0,4,0,0,32,0,0,0,1,0,0,8,0,0,64,0,0,128,0,0,0,4,0,0,32,0,0,0,1,0,0,8,0,0,64,0,0,0,2,0,0,16,0,0,128,0,0,0,4,0,0,32,0,0,128,191,246,33,192,0,100,235,173,153,70,62,64,
 37,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* juce_icon_png = (const char*) temp_binary_data_13;
+const char* juce_icon_png = (const char*) temp_binary_data_19;
 
 //================== wizard_AnimatedApp.svg ==================
-static const unsigned char temp_binary_data_14[] =
+static const unsigned char temp_binary_data_20[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
 "\n"
@@ -2655,10 +3012,10 @@ static const unsigned char temp_binary_data_14[] =
 "     id=\"line44\"\n"
 "     style=\"stroke:#a45c94;stroke-opacity:0.94117647\" /></svg>";
 
-const char* wizard_AnimatedApp_svg = (const char*) temp_binary_data_14;
+const char* wizard_AnimatedApp_svg = (const char*) temp_binary_data_20;
 
 //================== wizard_AudioApp.svg ==================
-static const unsigned char temp_binary_data_15[] =
+static const unsigned char temp_binary_data_21[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
 "\n"
@@ -3412,10 +3769,10 @@ static const unsigned char temp_binary_data_15[] =
 "     id=\"line131\"\n"
 "     style=\"stroke:#a45c94;stroke-opacity:1\" /></svg>";
 
-const char* wizard_AudioApp_svg = (const char*) temp_binary_data_15;
+const char* wizard_AudioApp_svg = (const char*) temp_binary_data_21;
 
 //================== wizard_AudioPlugin.svg ==================
-static const unsigned char temp_binary_data_16[] =
+static const unsigned char temp_binary_data_22[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
 "\n"
@@ -4271,10 +4628,10 @@ static const unsigned char temp_binary_data_16[] =
 "           id=\"circle175\"\n"
 "           style=\"stroke:#a45c94;stroke-opacity:1;fill:#a45c94;fill-opacity:1\" /></g></g></g></svg>";
 
-const char* wizard_AudioPlugin_svg = (const char*) temp_binary_data_16;
+const char* wizard_AudioPlugin_svg = (const char*) temp_binary_data_22;
 
 //================== wizard_ConsoleApp.svg ==================
-static const unsigned char temp_binary_data_17[] =
+static const unsigned char temp_binary_data_23[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
 "\n"
@@ -4361,10 +4718,10 @@ static const unsigned char temp_binary_data_17[] =
 "         id=\"path19\"\n"
 "         style=\"stroke:#a45c94;stroke-opacity:1;fill:#a45c94;fill-opacity:1\" /></g></g></svg>";
 
-const char* wizard_ConsoleApp_svg = (const char*) temp_binary_data_17;
+const char* wizard_ConsoleApp_svg = (const char*) temp_binary_data_23;
 
 //================== wizard_DLL.svg ==================
-static const unsigned char temp_binary_data_18[] =
+static const unsigned char temp_binary_data_24[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
 "\n"
@@ -4635,10 +4992,10 @@ static const unsigned char temp_binary_data_18[] =
 "     id=\"path54\"\n"
 "     style=\"stroke:#a45c94;stroke-opacity:1\" /></svg>";
 
-const char* wizard_DLL_svg = (const char*) temp_binary_data_18;
+const char* wizard_DLL_svg = (const char*) temp_binary_data_24;
 
 //================== wizard_GUI.svg ==================
-static const unsigned char temp_binary_data_19[] =
+static const unsigned char temp_binary_data_25[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
 "\n"
@@ -4808,10 +5165,10 @@ static const unsigned char temp_binary_data_19[] =
 "     id=\"path47\"\n"
 "     style=\"stroke:#a45c94;stroke-opacity:1\" /></svg>";
 
-const char* wizard_GUI_svg = (const char*) temp_binary_data_19;
+const char* wizard_GUI_svg = (const char*) temp_binary_data_25;
 
 //================== wizard_Highlight.svg ==================
-static const unsigned char temp_binary_data_20[] =
+static const unsigned char temp_binary_data_26[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
 "\n"
@@ -4861,10 +5218,10 @@ static const unsigned char temp_binary_data_20[] =
 "     id=\"path3\"\n"
 "     style=\"fill:#a45c94;fill-opacity:1\" /></svg>";
 
-const char* wizard_Highlight_svg = (const char*) temp_binary_data_20;
+const char* wizard_Highlight_svg = (const char*) temp_binary_data_26;
 
 //================== wizard_Openfile.svg ==================
-static const unsigned char temp_binary_data_21[] =
+static const unsigned char temp_binary_data_27[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
 "\n"
@@ -4916,10 +5273,10 @@ static const unsigned char temp_binary_data_21[] =
 "     id=\"path3\"\n"
 "     style=\"stroke:#a45c94;stroke-opacity:1\" /></svg>";
 
-const char* wizard_Openfile_svg = (const char*) temp_binary_data_21;
+const char* wizard_Openfile_svg = (const char*) temp_binary_data_27;
 
 //================== wizard_OpenGL.svg ==================
-static const unsigned char temp_binary_data_22[] =
+static const unsigned char temp_binary_data_28[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
 "\n"
@@ -5047,10 +5404,10 @@ static const unsigned char temp_binary_data_22[] =
 "     id=\"path23\"\n"
 "     style=\"stroke:#a45c94;stroke-opacity:1\" /></svg>";
 
-const char* wizard_OpenGL_svg = (const char*) temp_binary_data_22;
+const char* wizard_OpenGL_svg = (const char*) temp_binary_data_28;
 
 //================== wizard_StaticLibrary.svg ==================
-static const unsigned char temp_binary_data_23[] =
+static const unsigned char temp_binary_data_29[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
 "\n"
@@ -5321,10 +5678,10 @@ static const unsigned char temp_binary_data_23[] =
 "     id=\"path54\"\n"
 "     style=\"stroke:#a45c94;stroke-opacity:1\" /></svg>";
 
-const char* wizard_StaticLibrary_svg = (const char*) temp_binary_data_23;
+const char* wizard_StaticLibrary_svg = (const char*) temp_binary_data_29;
 
 //================== jucer_AnimatedComponentSimpleTemplate.h ==================
-static const unsigned char temp_binary_data_24[] =
+static const unsigned char temp_binary_data_30[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -5390,10 +5747,10 @@ static const unsigned char temp_binary_data_24[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_AnimatedComponentSimpleTemplate_h = (const char*) temp_binary_data_24;
+const char* jucer_AnimatedComponentSimpleTemplate_h = (const char*) temp_binary_data_30;
 
 //================== jucer_AnimatedComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_25[] =
+static const unsigned char temp_binary_data_31[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -5440,10 +5797,10 @@ static const unsigned char temp_binary_data_25[] =
 "    // update their positions.\r\n"
 "}\r\n";
 
-const char* jucer_AnimatedComponentTemplate_cpp = (const char*) temp_binary_data_25;
+const char* jucer_AnimatedComponentTemplate_cpp = (const char*) temp_binary_data_31;
 
 //================== jucer_AnimatedComponentTemplate.h ==================
-static const unsigned char temp_binary_data_26[] =
+static const unsigned char temp_binary_data_32[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -5483,10 +5840,10 @@ static const unsigned char temp_binary_data_26[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_AnimatedComponentTemplate_h = (const char*) temp_binary_data_26;
+const char* jucer_AnimatedComponentTemplate_h = (const char*) temp_binary_data_32;
 
 //================== jucer_AudioComponentSimpleTemplate.h ==================
-static const unsigned char temp_binary_data_27[] =
+static const unsigned char temp_binary_data_33[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -5590,10 +5947,10 @@ static const unsigned char temp_binary_data_27[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_AudioComponentSimpleTemplate_h = (const char*) temp_binary_data_27;
+const char* jucer_AudioComponentSimpleTemplate_h = (const char*) temp_binary_data_33;
 
 //================== jucer_AudioComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_28[] =
+static const unsigned char temp_binary_data_34[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -5678,10 +6035,10 @@ static const unsigned char temp_binary_data_28[] =
 "    // update their positions.\r\n"
 "}\r\n";
 
-const char* jucer_AudioComponentTemplate_cpp = (const char*) temp_binary_data_28;
+const char* jucer_AudioComponentTemplate_cpp = (const char*) temp_binary_data_34;
 
 //================== jucer_AudioComponentTemplate.h ==================
-static const unsigned char temp_binary_data_29[] =
+static const unsigned char temp_binary_data_35[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -5723,10 +6080,10 @@ static const unsigned char temp_binary_data_29[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_AudioComponentTemplate_h = (const char*) temp_binary_data_29;
+const char* jucer_AudioComponentTemplate_h = (const char*) temp_binary_data_35;
 
 //================== jucer_AudioPluginEditorTemplate.cpp ==================
-static const unsigned char temp_binary_data_30[] =
+static const unsigned char temp_binary_data_36[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -5769,10 +6126,10 @@ static const unsigned char temp_binary_data_30[] =
 "    // subcomponents in your editor..\r\n"
 "}\r\n";
 
-const char* jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_binary_data_30;
+const char* jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_binary_data_36;
 
 //================== jucer_AudioPluginEditorTemplate.h ==================
-static const unsigned char temp_binary_data_31[] =
+static const unsigned char temp_binary_data_37[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -5808,10 +6165,10 @@ static const unsigned char temp_binary_data_31[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%editor_class_name%%)\r\n"
 "};\r\n";
 
-const char* jucer_AudioPluginEditorTemplate_h = (const char*) temp_binary_data_31;
+const char* jucer_AudioPluginEditorTemplate_h = (const char*) temp_binary_data_37;
 
 //================== jucer_AudioPluginFilterTemplate.cpp ==================
-static const unsigned char temp_binary_data_32[] =
+static const unsigned char temp_binary_data_38[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6003,10 +6360,10 @@ static const unsigned char temp_binary_data_32[] =
 "    return new %%filter_class_name%%();\r\n"
 "}\r\n";
 
-const char* jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_binary_data_32;
+const char* jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_binary_data_38;
 
 //================== jucer_AudioPluginFilterTemplate.h ==================
-static const unsigned char temp_binary_data_33[] =
+static const unsigned char temp_binary_data_39[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6069,10 +6426,10 @@ static const unsigned char temp_binary_data_33[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%filter_class_name%%)\r\n"
 "};\r\n";
 
-const char* jucer_AudioPluginFilterTemplate_h = (const char*) temp_binary_data_33;
+const char* jucer_AudioPluginFilterTemplate_h = (const char*) temp_binary_data_39;
 
 //================== jucer_ComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_34[] =
+static const unsigned char temp_binary_data_40[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6148,10 +6505,10 @@ static const unsigned char temp_binary_data_34[] =
 "//[EndFile] You can add extra defines here...\r\n"
 "//[/EndFile]\r\n";
 
-const char* jucer_ComponentTemplate_cpp = (const char*) temp_binary_data_34;
+const char* jucer_ComponentTemplate_cpp = (const char*) temp_binary_data_40;
 
 //================== jucer_ComponentTemplate.h ==================
-static const unsigned char temp_binary_data_35[] =
+static const unsigned char temp_binary_data_41[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6214,10 +6571,10 @@ static const unsigned char temp_binary_data_35[] =
 "//[EndFile] You can add extra defines here...\r\n"
 "//[/EndFile]\r\n";
 
-const char* jucer_ComponentTemplate_h = (const char*) temp_binary_data_35;
+const char* jucer_ComponentTemplate_h = (const char*) temp_binary_data_41;
 
 //================== jucer_ContentCompSimpleTemplate.h ==================
-static const unsigned char temp_binary_data_36[] =
+static const unsigned char temp_binary_data_42[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6275,10 +6632,10 @@ static const unsigned char temp_binary_data_36[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_ContentCompSimpleTemplate_h = (const char*) temp_binary_data_36;
+const char* jucer_ContentCompSimpleTemplate_h = (const char*) temp_binary_data_42;
 
 //================== jucer_ContentCompTemplate.cpp ==================
-static const unsigned char temp_binary_data_37[] =
+static const unsigned char temp_binary_data_43[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6317,10 +6674,10 @@ static const unsigned char temp_binary_data_37[] =
 "    // update their positions.\r\n"
 "}\r\n";
 
-const char* jucer_ContentCompTemplate_cpp = (const char*) temp_binary_data_37;
+const char* jucer_ContentCompTemplate_cpp = (const char*) temp_binary_data_43;
 
 //================== jucer_ContentCompTemplate.h ==================
-static const unsigned char temp_binary_data_38[] =
+static const unsigned char temp_binary_data_44[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6357,10 +6714,10 @@ static const unsigned char temp_binary_data_38[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_ContentCompTemplate_h = (const char*) temp_binary_data_38;
+const char* jucer_ContentCompTemplate_h = (const char*) temp_binary_data_44;
 
 //================== jucer_InlineComponentTemplate.h ==================
-static const unsigned char temp_binary_data_39[] =
+static const unsigned char temp_binary_data_45[] =
 "//==============================================================================\r\n"
 "class %%component_class%%    : public Component\r\n"
 "{\r\n"
@@ -6402,10 +6759,10 @@ static const unsigned char temp_binary_data_39[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_InlineComponentTemplate_h = (const char*) temp_binary_data_39;
+const char* jucer_InlineComponentTemplate_h = (const char*) temp_binary_data_45;
 
 //================== jucer_MainConsoleAppTemplate.cpp ==================
-static const unsigned char temp_binary_data_40[] =
+static const unsigned char temp_binary_data_46[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6428,10 +6785,10 @@ static const unsigned char temp_binary_data_40[] =
 "    return 0;\r\n"
 "}\r\n";
 
-const char* jucer_MainConsoleAppTemplate_cpp = (const char*) temp_binary_data_40;
+const char* jucer_MainConsoleAppTemplate_cpp = (const char*) temp_binary_data_46;
 
 //================== jucer_MainTemplate_NoWindow.cpp ==================
-static const unsigned char temp_binary_data_41[] =
+static const unsigned char temp_binary_data_47[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6486,10 +6843,10 @@ static const unsigned char temp_binary_data_41[] =
 "// This macro generates the main() routine that launches the app.\r\n"
 "START_JUCE_APPLICATION (%%app_class_name%%)\r\n";
 
-const char* jucer_MainTemplate_NoWindow_cpp = (const char*) temp_binary_data_41;
+const char* jucer_MainTemplate_NoWindow_cpp = (const char*) temp_binary_data_47;
 
 //================== jucer_MainTemplate_SimpleWindow.cpp ==================
-static const unsigned char temp_binary_data_42[] =
+static const unsigned char temp_binary_data_48[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6596,10 +6953,10 @@ static const unsigned char temp_binary_data_42[] =
 "// This macro generates the main() routine that launches the app.\r\n"
 "START_JUCE_APPLICATION (%%app_class_name%%)\r\n";
 
-const char* jucer_MainTemplate_SimpleWindow_cpp = (const char*) temp_binary_data_42;
+const char* jucer_MainTemplate_SimpleWindow_cpp = (const char*) temp_binary_data_48;
 
 //================== jucer_MainTemplate_Window.cpp ==================
-static const unsigned char temp_binary_data_43[] =
+static const unsigned char temp_binary_data_49[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6706,10 +7063,10 @@ static const unsigned char temp_binary_data_43[] =
 "// This macro generates the main() routine that launches the app.\r\n"
 "START_JUCE_APPLICATION (%%app_class_name%%)\r\n";
 
-const char* jucer_MainTemplate_Window_cpp = (const char*) temp_binary_data_43;
+const char* jucer_MainTemplate_Window_cpp = (const char*) temp_binary_data_49;
 
 //================== jucer_NewComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_44[] =
+static const unsigned char temp_binary_data_50[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6762,10 +7119,10 @@ static const unsigned char temp_binary_data_44[] =
 "\r\n"
 "}\r\n";
 
-const char* jucer_NewComponentTemplate_cpp = (const char*) temp_binary_data_44;
+const char* jucer_NewComponentTemplate_cpp = (const char*) temp_binary_data_50;
 
 //================== jucer_NewComponentTemplate.h ==================
-static const unsigned char temp_binary_data_45[] =
+static const unsigned char temp_binary_data_51[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6796,10 +7153,10 @@ static const unsigned char temp_binary_data_45[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_NewComponentTemplate_h = (const char*) temp_binary_data_45;
+const char* jucer_NewComponentTemplate_h = (const char*) temp_binary_data_51;
 
 //================== jucer_NewCppFileTemplate.cpp ==================
-static const unsigned char temp_binary_data_46[] =
+static const unsigned char temp_binary_data_52[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6812,10 +7169,10 @@ static const unsigned char temp_binary_data_46[] =
 "\r\n"
 "%%include_corresponding_header%%\r\n";
 
-const char* jucer_NewCppFileTemplate_cpp = (const char*) temp_binary_data_46;
+const char* jucer_NewCppFileTemplate_cpp = (const char*) temp_binary_data_52;
 
 //================== jucer_NewCppFileTemplate.h ==================
-static const unsigned char temp_binary_data_47[] =
+static const unsigned char temp_binary_data_53[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6828,10 +7185,10 @@ static const unsigned char temp_binary_data_47[] =
 "\r\n"
 "#pragma once\r\n";
 
-const char* jucer_NewCppFileTemplate_h = (const char*) temp_binary_data_47;
+const char* jucer_NewCppFileTemplate_h = (const char*) temp_binary_data_53;
 
 //================== jucer_NewInlineComponentTemplate.h ==================
-static const unsigned char temp_binary_data_48[] =
+static const unsigned char temp_binary_data_54[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6894,10 +7251,10 @@ static const unsigned char temp_binary_data_48[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_NewInlineComponentTemplate_h = (const char*) temp_binary_data_48;
+const char* jucer_NewInlineComponentTemplate_h = (const char*) temp_binary_data_54;
 
 //================== jucer_OpenGLComponentSimpleTemplate.h ==================
-static const unsigned char temp_binary_data_49[] =
+static const unsigned char temp_binary_data_55[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6974,10 +7331,10 @@ static const unsigned char temp_binary_data_49[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_OpenGLComponentSimpleTemplate_h = (const char*) temp_binary_data_49;
+const char* jucer_OpenGLComponentSimpleTemplate_h = (const char*) temp_binary_data_55;
 
 //================== jucer_OpenGLComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_50[] =
+static const unsigned char temp_binary_data_56[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7035,10 +7392,10 @@ static const unsigned char temp_binary_data_50[] =
 "    // update their positions.\r\n"
 "}\r\n";
 
-const char* jucer_OpenGLComponentTemplate_cpp = (const char*) temp_binary_data_50;
+const char* jucer_OpenGLComponentTemplate_cpp = (const char*) temp_binary_data_56;
 
 //================== jucer_OpenGLComponentTemplate.h ==================
-static const unsigned char temp_binary_data_51[] =
+static const unsigned char temp_binary_data_57[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7080,10 +7437,10 @@ static const unsigned char temp_binary_data_51[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_OpenGLComponentTemplate_h = (const char*) temp_binary_data_51;
+const char* jucer_OpenGLComponentTemplate_h = (const char*) temp_binary_data_57;
 
 //================== jucer_PIPAudioProcessorTemplate.h ==================
-static const unsigned char temp_binary_data_52[] =
+static const unsigned char temp_binary_data_58[] =
 "class %%class_name%%  : public AudioProcessor\r\n"
 "{\r\n"
 "public:\r\n"
@@ -7192,92 +7549,10 @@ static const unsigned char temp_binary_data_52[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%class_name%%)\r\n"
 "};\r\n";
 
-const char* jucer_PIPAudioProcessorTemplate_h = (const char*) temp_binary_data_52;
-
-//================== jucer_PIPMain.cpp ==================
-static const unsigned char temp_binary_data_53[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated and contains the startup code for a PIP.\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"%%include_juce%%\r\n"
-"#include \"%%filename%%\"\r\n"
-"\r\n"
-"%%component_begin%%\r\n"
-"class Application    : public JUCEApplication\r\n"
-"{\r\n"
-"public:\r\n"
-"    //==============================================================================\r\n"
-"    Application() {}\r\n"
-"\r\n"
-"    const String getApplicationName() override       { return \"%%project_name%%\"; }\r\n"
-"    const String getApplicationVersion() override    { return \"%%project_version%%\"; }\r\n"
-"\r\n"
-"    void initialise (const String&) override         { %%startup%% }\r\n"
-"    void shutdown() override                         { %%shutdown%% }\r\n"
-"\r\n"
-"private:\r\n"
-"    class MainWindow    : public DocumentWindow\r\n"
-"    {\r\n"
-"    public:\r\n"
-"        MainWindow (const String& name, Component* c, JUCEApplication& a)\r\n"
-"            : DocumentWindow (name, Desktop::getInstance().getDefaultLookAndFeel()\r\n"
-"                                                          .findColour (ResizableWindow::backgroundColourId),\r\n"
-"                              DocumentWindow::allButtons),\r\n"
-"              app (a)\r\n"
-"        {\r\n"
-"            setUsingNativeTitleBar (true);\r\n"
-"            setContentOwned (c, true);\r\n"
-"\r\n"
-"           #if JUCE_ANDROID || JUCE_IOS\r\n"
-"            setFullScreen (true);\r\n"
-"           #else\r\n"
-"            setResizable (true, false);\r\n"
-"            setResizeLimits (300, 250, 10000, 10000);\r\n"
-"            centreWithSize (getWidth(), getHeight());\r\n"
-"           #endif\r\n"
-"\r\n"
-"            setVisible (true);\r\n"
-"        }\r\n"
-"\r\n"
-"        void closeButtonPressed() override\r\n"
-"        {\r\n"
-"            app.systemRequestedQuit();\r\n"
-"        }\r\n"
-"\r\n"
-"    private:\r\n"
-"        JUCEApplication& app;\r\n"
-"\r\n"
-"        //==============================================================================\r\n"
-"        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)\r\n"
-"    };\r\n"
-"\r\n"
-"    std::unique_ptr<MainWindow> mainWindow;\r\n"
-"};\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"START_JUCE_APPLICATION (Application)\r\n"
-"%%component_end%%\r\n"
-"\r\n"
-"%%audioprocessor_begin%%\r\n"
-"//==============================================================================\r\n"
-"AudioProcessor* JUCE_CALLTYPE createPluginFilter()\r\n"
-"{\r\n"
-"    return new %%class_name%%();\r\n"
-"}\r\n"
-"%%audioprocessor_end%%\r\n"
-"\r\n"
-"%%console_begin%%\r\n"
-"%%console_end%%\r\n";
-
-const char* jucer_PIPMain_cpp = (const char*) temp_binary_data_53;
+const char* jucer_PIPAudioProcessorTemplate_h = (const char*) temp_binary_data_58;
 
 //================== jucer_PIPTemplate.h ==================
-static const unsigned char temp_binary_data_54[] =
+static const unsigned char temp_binary_data_59[] =
 "/*******************************************************************************\r\n"
 " The block below describes the properties of this PIP. A PIP is a short snippet\r\n"
 " of code that can be read by the Projucer and used to generate a JUCE project.\r\n"
@@ -7296,196 +7571,10 @@ static const unsigned char temp_binary_data_54[] =
 "//==============================================================================\r\n"
 "%%pip_code%%\r\n";
 
-const char* jucer_PIPTemplate_h = (const char*) temp_binary_data_54;
-
-//================== jucer_UnityPluginGUIScript.cs ==================
-static const unsigned char temp_binary_data_55[] =
-"#if UNITY_EDITOR\n"
-"\n"
-"using UnityEditor;\n"
-"using UnityEngine;\n"
-"\n"
-"using System.Collections.Generic;\n"
-"using System.Runtime.InteropServices;\n"
-"\n"
-"public class %%plugin_class_name%%GUI : IAudioEffectPluginGUI\n"
-"{\n"
-"    public override string Name           { get { return \"%%plugin_name%%\"; } }\n"
-"    public override string Description    { get { return \"%%plugin_description%%\"; } }\n"
-"    public override string Vendor         { get { return \"%%plugin_vendor%%\"; } }\n"
-"\n"
-"    //==============================================================================\n"
-"\t[DllImport(\"%%plugin_name%%\")] static extern System.IntPtr getRenderCallback();\n"
-"\n"
-"    [DllImport(\"%%plugin_name%%\")] static extern void unityInitialiseTexture (int id, System.IntPtr texture, int width, int height);\n"
-"\n"
-"    [DllImport(\"%%plugin_name%%\")] static extern void unityMouseDown (int id, float x, float y, EventModifiers mods, int button);\n"
-"    [DllImport(\"%%plugin_name%%\")] static extern void unityMouseDrag (int id, float x, float y, EventModifiers mods, int button);\n"
-"    [DllImport(\"%%plugin_name%%\")] static extern void unityMouseUp   (int id, float x, float y, EventModifiers mods);\n"
-"\n"
-"    [DllImport(\"%%plugin_name%%\")] static extern void unityKeyEvent (int id, KeyCode code, EventModifiers mods, string name);\n"
-"\n"
-"    [DllImport(\"%%plugin_name%%\")] static extern void unitySetScreenBounds (int id, float x, float y, float w, float h);\n"
-"\n"
-"    //==============================================================================\n"
-"    private class PluginGUIInstance\n"
-"    {\n"
-"        public PluginGUIInstance (ref IAudioEffectPlugin plugin, int id)\n"
-"        {\n"
-"            instanceID = id;\n"
-"\n"
-"            float[] arr;\n"
-"            plugin.GetFloatBuffer (\"Editor\", out arr, 1);\n"
-"            hasEditor = (arr[0] > 0.0f);\n"
-"        }\n"
-"\n"
-"        public void repaint (Rect r)\n"
-"        { \n"
-"            Vector2 newScreenPosition = GUIUtility.GUIToScreenPoint (r.position);\n"
-"\n"
-"            if (bounds != r \n"
-"                || screenPosition != newScreenPosition)\n"
-"            {\n"
-"                screenPosition = newScreenPosition;\n"
-"                bounds = r;\n"
-"\n"
-"                unitySetScreenBounds (instanceID, screenPosition.x, screenPosition.y, bounds.width, bounds.height);\n"
-"                setupTexture();\n"
-"            }\n"
-"\n"
-"\t\t\tGL.IssuePluginEvent (getRenderCallback(), instanceID);\n"
-"\n"
-"            texture.SetPixels32 (pixels);\n"
-"            texture.Apply();\n"
-"\n"
-"            EditorGUI.DrawPreviewTexture (bounds, texture);\n"
-"        }\n"
-"\n"
-"        public bool handleMouseEvent (EventType eventType)\n"
-"        {\n"
-"            Vector2 mousePos = Event.current.mousePosition;\n"
-"            EventModifiers mods = Event.current.modifiers;\n"
-"\n"
-"            if (! bounds.Contains (mousePos))\n"
-"                return false;\n"
-"\n"
-"            Vector2 relativePos = new Vector2 (mousePos.x - bounds.x, mousePos.y - bounds.y);\n"
-"\n"
-"            if (eventType == EventType.MouseDown)    \n"
-"            {\n"
-"                unityMouseDown (instanceID, relativePos.x, relativePos.y, mods, Event.current.button);\n"
-"                GUIUtility.hotControl = GUIUtility.GetControlID (FocusType.Passive);\n"
-"            }\n"
-"            else if (eventType == EventType.MouseUp)\n"
-"            {\n"
-"                unityMouseUp (instanceID, relativePos.x, relativePos.y, mods);\n"
-"                GUIUtility.hotControl = 0;\n"
-"            }\n"
-"            else if (eventType == EventType.MouseDrag)    \n"
-"            {\n"
-"                unityMouseDrag (instanceID, relativePos.x, relativePos.y, mods, Event.current.button);\n"
-"            }\n"
-"\n"
-"            Event.current.Use();\n"
-"\n"
-"            return true;\n"
-"        }\n"
-"\n"
-"        public void handleKeyEvent (EventType eventType)\n"
-"        {\n"
-"            if (eventType == EventType.KeyDown)\n"
-"            {\n"
-"                KeyCode code = Event.current.keyCode;\n"
-"\n"
-"                if (code == KeyCode.None)\n"
-"                    return;\n"
-"\n"
-"                EventModifiers mods = Event.current.modifiers;\n"
-"\n"
-"                unityKeyEvent (instanceID, code, mods, code.ToString());\n"
-"            }\n"
-"        }\n"
-"\n"
-"        private void setupTexture()\n"
-"        {\n"
-"            if (pixelHandle.IsAllocated)\n"
-"                pixelHandle.Free();\n"
-"\n"
-"            texture = new Texture2D ((int) bounds.width, (int) bounds.height, TextureFormat.ARGB32, false);\n"
-"\n"
-"            pixels = texture.GetPixels32();\n"
-"            pixelHandle = GCHandle.Alloc (pixels, GCHandleType.Pinned);\n"
-"\n"
-"            unityInitialiseTexture (instanceID, pixelHandle.AddrOfPinnedObject(), texture.width, texture.height);\n"
-"        }\n"
-"\n"
-"        public int instanceID = -1;\n"
-"        public bool hasEditor;\n"
-"\n"
-"        private Vector2 screenPosition;\n"
-"        private Rect bounds;\n"
-"\n"
-"        private Texture2D texture;\n"
-"        private Color32[] pixels;\n"
-"        private GCHandle pixelHandle;\n"
-"    }\n"
-"    List<PluginGUIInstance> guis = new List<PluginGUIInstance>();\n"
-"\n"
-"    private PluginGUIInstance getGUIInstanceForPlugin (ref IAudioEffectPlugin plugin)\n"
-"    {\n"
-"        float[] idArray;\n"
-"        plugin.GetFloatBuffer (\"ID\", out idArray, 1);\n"
-"\n"
-"        int id = (int) idArray[0];\n"
-"\n"
-"        for (int i = 0; i < guis.Count; ++i)\n"
-"        {\n"
-"            if (guis[i].instanceID == id)\n"
-"                return guis[i];\n"
-"        }\n"
-"\n"
-"        PluginGUIInstance newInstance = new PluginGUIInstance (ref plugin, id);\n"
-"        guis.Add (newInstance);\n"
-"\n"
-"        return guis[guis.Count - 1];\n"
-"    }\n"
-"\n"
-"    //==============================================================================\n"
-"    public override bool OnGUI (IAudioEffectPlugin plugin)\n"
-"    {\n"
-"        PluginGUIInstance guiInstance = getGUIInstanceForPlugin (ref plugin);\n"
-"\n"
-"        if (! guiInstance.hasEditor)\n"
-"            return true;\n"
-"\n"
-"        float[] arr;\n"
-"        plugin.GetFloatBuffer (\"Size\", out arr, 6);\n"
-"\n"
-"        Rect r = GUILayoutUtility.GetRect (arr[0], arr[1],\n"
-"                                           new GUILayoutOption[] { GUILayout.MinWidth (arr[2]), GUILayout.MinHeight (arr[3]),\n"
-"                                                                   GUILayout.MaxWidth (arr[4]), GUILayout.MaxHeight (arr[5]) });\n"
-"\n"
-"        int controlID = GUIUtility.GetControlID (FocusType.Passive);\n"
-"        Event currentEvent = Event.current;\n"
-"        EventType currentEventType = currentEvent.GetTypeForControl (controlID);\n"
-"\n"
-"        if (currentEventType == EventType.Repaint)\n"
-"            guiInstance.repaint (r);\n"
-"        else if (currentEvent.isMouse)\n"
-"            guiInstance.handleMouseEvent (currentEventType);\n"
-"        else if (currentEvent.isKey)\n"
-"            guiInstance.handleKeyEvent (currentEventType);\n"
-"\n"
-"        return false;\n"
-"    }\n"
-"}\n"
-"\n"
-"#endif\n";
-
-const char* jucer_UnityPluginGUIScript_cs = (const char*) temp_binary_data_55;
+const char* jucer_PIPTemplate_h = (const char*) temp_binary_data_59;
 
 //================== colourscheme_dark.xml ==================
-static const unsigned char temp_binary_data_56[] =
+static const unsigned char temp_binary_data_60[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
 "<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
@@ -7510,10 +7599,10 @@ static const unsigned char temp_binary_data_56[] =
 "  <COLOUR name=\"Error\" colour=\"FFE60000\"/>\r\n"
 "</COLOUR_SCHEME>\r\n";
 
-const char* colourscheme_dark_xml = (const char*) temp_binary_data_56;
+const char* colourscheme_dark_xml = (const char*) temp_binary_data_60;
 
 //================== colourscheme_light.xml ==================
-static const unsigned char temp_binary_data_57[] =
+static const unsigned char temp_binary_data_61[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
 "<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
@@ -7538,16 +7627,16 @@ static const unsigned char temp_binary_data_57[] =
 "  <COLOUR name=\"Error\" colour=\"ffcc0000\"/>\r\n"
 "</COLOUR_SCHEME>\r\n";
 
-const char* colourscheme_light_xml = (const char*) temp_binary_data_57;
+const char* colourscheme_light_xml = (const char*) temp_binary_data_61;
 
 //================== nothingtoseehere.txt ==================
-static const unsigned char temp_binary_data_58[] =
+static const unsigned char temp_binary_data_62[] =
 "VUEtMTk3NTkzMTgtNA==";
 
-const char* nothingtoseehere_txt = (const char*) temp_binary_data_58;
+const char* nothingtoseehere_txt = (const char*) temp_binary_data_62;
 
 //================== offlinepage.html ==================
-static const unsigned char temp_binary_data_59[] =
+static const unsigned char temp_binary_data_63[] =
 "<html>\n"
 "  <head>\n"
 "    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=11\">\n"
@@ -7591,10 +7680,10 @@ static const unsigned char temp_binary_data_59[] =
 "  </body>\n"
 "</html>";
 
-const char* offlinepage_html = (const char*) temp_binary_data_59;
+const char* offlinepage_html = (const char*) temp_binary_data_63;
 
 //================== projucer_EULA.txt ==================
-static const unsigned char temp_binary_data_60[] =
+static const unsigned char temp_binary_data_64[] =
 "\r\n"
 "IMPORTANT NOTICE: PLEASE READ CAREFULLY BEFORE INSTALLING THE SOFTWARE:\r\n"
 "\r\n"
@@ -7758,47 +7847,7 @@ static const unsigned char temp_binary_data_60[] =
 "\r\n"
 "10.6. Please note that this License, its subject matter and its formation, are governed by English law. You and we both agree to that the courts of England and Wales will have exclusive jurisdiction.\r\n";
 
-const char* projucer_EULA_txt = (const char*) temp_binary_data_60;
-
-//================== RecentFilesMenuTemplate.nib ==================
-static const unsigned char temp_binary_data_61[] =
-{ 98,112,108,105,115,116,48,48,212,0,1,0,2,0,3,0,4,0,5,0,6,1,53,1,54,88,36,118,101,114,115,105,111,110,88,36,111,98,106,101,99,116,115,89,36,97,114,99,104,105,118,101,114,84,36,116,111,112,18,0,1,134,160,175,16,74,0,7,0,8,0,31,0,35,0,36,0,42,0,46,0,50,
-0,53,0,57,0,74,0,77,0,78,0,86,0,87,0,97,0,112,0,113,0,114,0,119,0,120,0,121,0,124,0,128,0,129,0,132,0,143,0,144,0,145,0,149,0,153,0,162,0,163,0,164,0,169,0,173,0,180,0,181,0,182,0,185,0,192,0,193,0,200,0,201,0,208,0,209,0,216,0,217,0,224,0,225,0,226,
-0,229,0,230,0,232,0,249,1,11,1,29,1,30,1,31,1,32,1,33,1,34,1,35,1,36,1,37,1,38,1,39,1,40,1,41,1,42,1,43,1,44,1,47,1,50,85,36,110,117,108,108,219,0,9,0,10,0,11,0,12,0,13,0,14,0,15,0,16,0,17,0,18,0,19,0,20,0,21,0,22,0,23,0,24,0,25,0,26,0,27,0,28,0,29,0,
-29,95,16,16,78,83,86,105,115,105,98,108,101,87,105,110,100,111,119,115,93,78,83,79,98,106,101,99,116,115,75,101,121,115,86,78,83,82,111,111,116,92,78,83,79,105,100,115,86,97,108,117,101,115,86,36,99,108,97,115,115,90,78,83,79,105,100,115,75,101,121,115,
-93,78,83,67,111,110,110,101,99,116,105,111,110,115,95,16,15,78,83,79,98,106,101,99,116,115,86,97,108,117,101,115,95,16,25,78,83,65,99,99,101,115,115,105,98,105,108,105,116,121,67,111,110,110,101,99,116,111,114,115,95,16,23,78,83,65,99,99,101,115,115,
-105,98,105,108,105,116,121,79,105,100,115,75,101,121,115,95,16,25,78,83,65,99,99,101,115,115,105,98,105,108,105,116,121,79,105,100,115,86,97,108,117,101,115,128,5,128,9,128,2,128,55,128,73,128,54,128,7,128,53,128,71,128,72,128,72,210,0,13,0,32,0,33,0,
-34,91,78,83,67,108,97,115,115,78,97,109,101,128,4,128,3,93,78,83,65,112,112,108,105,99,97,116,105,111,110,210,0,37,0,38,0,39,0,40,90,36,99,108,97,115,115,110,97,109,101,88,36,99,108,97,115,115,101,115,94,78,83,67,117,115,116,111,109,79,98,106,101,99,
-116,162,0,39,0,41,88,78,83,79,98,106,101,99,116,210,0,13,0,43,0,44,0,45,90,78,83,46,111,98,106,101,99,116,115,128,6,160,210,0,37,0,38,0,47,0,48,92,78,83,77,117,116,97,98,108,101,83,101,116,163,0,47,0,49,0,41,85,78,83,83,101,116,210,0,13,0,43,0,51,0,52,
-128,8,160,210,0,37,0,38,0,54,0,55,94,78,83,77,117,116,97,98,108,101,65,114,114,97,121,163,0,54,0,56,0,41,87,78,83,65,114,114,97,121,210,0,13,0,43,0,58,0,59,128,52,174,0,60,0,61,0,62,0,63,0,64,0,65,0,66,0,67,0,68,0,69,0,70,0,71,0,72,0,73,128,10,128,12,
-128,45,128,15,128,39,128,25,128,28,128,30,128,33,128,35,128,43,128,41,128,47,128,50,210,0,13,0,32,0,33,0,76,128,4,128,11,93,78,83,65,112,112,108,105,99,97,116,105,111,110,212,0,79,0,13,0,80,0,81,0,82,0,83,0,84,0,85,91,78,83,77,101,110,117,73,116,101,
-109,115,86,78,83,78,97,109,101,87,78,83,84,105,116,108,101,128,14,128,38,128,49,128,13,89,65,77,97,105,110,77,101,110,117,210,0,13,0,43,0,51,0,89,128,8,167,0,63,0,65,0,64,0,71,0,70,0,62,0,72,128,15,128,25,128,39,128,41,128,43,128,45,128,47,216,0,98,0,
-99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,109,0,110,0,111,95,16,17,78,83,75,101,121,69,113,117,105,118,77,111,100,77,97,115,107,86,78,83,77,101,110,117,89,78,83,79,110,73,109,97,103,101,90,78,83,75,101,121,69,113,117,105,118,
-93,78,83,77,110,101,109,111,110,105,99,76,111,99,92,78,83,77,105,120,101,100,73,109,97,103,101,18,0,16,0,0,128,12,128,18,128,24,128,17,18,127,255,255,255,128,22,128,16,91,100,101,108,109,101,65,112,112,75,105,116,80,211,0,13,0,115,0,32,0,116,0,117,0,
-118,94,78,83,82,101,115,111,117,114,99,101,78,97,109,101,128,21,128,20,128,19,87,78,83,73,109,97,103,101,95,16,15,78,83,77,101,110,117,67,104,101,99,107,109,97,114,107,210,0,37,0,38,0,122,0,123,95,16,16,78,83,67,117,115,116,111,109,82,101,115,111,117,
-114,99,101,162,0,122,0,41,211,0,13,0,115,0,32,0,116,0,126,0,118,128,21,128,23,128,19,95,16,16,78,83,77,101,110,117,77,105,120,101,100,83,116,97,116,101,210,0,37,0,38,0,130,0,131,90,78,83,77,101,110,117,73,116,101,109,162,0,130,0,41,218,0,133,0,98,0,134,
-0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,135,0,104,0,66,0,61,0,106,0,107,0,108,0,109,0,110,0,142,88,78,83,65,99,116,105,111,110,89,78,83,83,117,98,109,101,110,117,128,27,128,28,128,12,128,18,128,24,128,17,128,22,128,26,84,70,105,108,101,94,115,117,98,
-109,101,110,117,65,99,116,105,111,110,58,211,0,79,0,13,0,81,0,146,0,83,0,142,128,29,128,38,128,26,210,0,13,0,43,0,51,0,151,128,8,161,0,67,128,30,218,0,133,0,98,0,134,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,154,0,104,0,68,0,66,0,106,0,107,0,108,0,109,
-0,110,0,161,128,32,128,33,128,28,128,18,128,24,128,17,128,22,128,31,91,79,112,101,110,32,82,101,99,101,110,116,94,115,117,98,109,101,110,117,65,99,116,105,111,110,58,212,0,79,0,13,0,80,0,81,0,165,0,83,0,167,0,161,128,34,128,38,128,37,128,31,210,0,13,
-0,43,0,51,0,171,128,8,161,0,69,128,35,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,68,0,106,0,107,0,108,0,109,0,110,0,179,128,33,128,18,128,24,128,17,128,22,128,36,90,67,108,101,97,114,32,77,101,110,117,95,16,22,95,78,83,82,101,99,101,110,
-116,68,111,99,117,109,101,110,116,115,77,101,110,117,210,0,37,0,38,0,183,0,184,86,78,83,77,101,110,117,162,0,183,0,41,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,109,0,110,0,191,128,12,128,18,128,24,128,17,128,22,128,
-40,84,69,100,105,116,215,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,61,0,106,0,107,0,108,0,109,0,110,0,199,128,12,128,18,128,24,128,17,128,22,128,42,86,70,111,114,109,97,116,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,
-109,0,110,0,207,128,12,128,18,128,24,128,17,128,22,128,44,84,86,105,101,119,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,109,0,110,0,215,128,12,128,18,128,24,128,17,128,22,128,46,86,87,105,110,100,111,119,215,0,99,0,
-100,0,13,0,101,0,102,0,103,0,81,0,61,0,106,0,107,0,108,0,109,0,110,0,223,128,12,128,18,128,24,128,17,128,22,128,48,84,72,101,108,112,91,95,78,83,77,97,105,110,77,101,110,117,210,0,13,0,32,0,33,0,228,128,4,128,51,93,78,83,70,111,110,116,77,97,110,97,103,
-101,114,210,0,37,0,38,0,56,0,231,162,0,56,0,41,210,0,13,0,43,0,58,0,234,128,52,174,0,22,0,22,0,61,0,61,0,61,0,61,0,65,0,66,0,67,0,68,0,61,0,61,0,61,0,22,128,2,128,2,128,12,128,12,128,12,128,12,128,25,128,28,128,30,128,33,128,12,128,12,128,12,128,2,210,
-0,13,0,43,0,58,0,251,128,52,175,16,15,0,22,0,60,0,61,0,62,0,63,0,64,0,65,0,66,0,67,0,68,0,69,0,70,0,71,0,72,0,73,128,2,128,10,128,12,128,45,128,15,128,39,128,25,128,28,128,30,128,33,128,35,128,43,128,41,128,47,128,50,210,0,13,0,43,0,58,1,13,128,52,175,
-16,15,1,14,1,15,1,16,1,17,1,18,1,19,1,20,1,21,1,22,1,23,1,24,1,25,1,26,1,27,1,28,128,56,128,57,128,58,128,59,128,60,128,61,128,62,128,63,128,64,128,65,128,66,128,67,128,68,128,69,128,70,17,2,22,17,2,23,17,2,24,17,2,25,17,2,26,17,2,27,17,2,28,17,2,29,
-17,2,30,17,2,31,17,2,32,17,2,33,17,2,34,17,2,35,17,2,36,210,0,13,0,43,0,51,1,46,128,8,160,210,0,13,0,43,0,58,1,49,128,52,160,210,0,37,0,38,1,51,1,52,94,78,83,73,66,79,98,106,101,99,116,68,97,116,97,162,1,51,0,41,95,16,15,78,83,75,101,121,101,100,65,114,
-99,104,105,118,101,114,209,1,55,1,56,93,73,66,46,111,98,106,101,99,116,100,97,116,97,128,1,0,8,0,25,0,34,0,43,0,53,0,58,0,63,0,214,0,220,1,9,1,28,1,42,1,49,1,62,1,69,1,80,1,94,1,112,1,140,1,166,1,194,1,196,1,198,1,200,1,202,1,204,1,206,1,208,1,210,1,
-212,1,214,1,216,1,225,1,237,1,239,1,241,1,255,2,8,2,19,2,28,2,43,2,48,2,57,2,66,2,77,2,79,2,80,2,89,2,102,2,109,2,115,2,124,2,126,2,127,2,136,2,151,2,158,2,166,2,175,2,177,2,206,2,208,2,210,2,212,2,214,2,216,2,218,2,220,2,222,2,224,2,226,2,228,2,230,
-2,232,2,234,2,243,2,245,2,247,3,5,3,22,3,34,3,41,3,49,3,51,3,53,3,55,3,57,3,67,3,76,3,78,3,93,3,95,3,97,3,99,3,101,3,103,3,105,3,107,3,140,3,160,3,167,3,177,3,188,3,202,3,215,3,220,3,222,3,224,3,226,3,228,3,233,3,235,3,237,3,249,3,250,4,7,4,22,4,24,4,
-26,4,28,4,36,4,54,4,63,4,82,4,87,4,100,4,102,4,104,4,106,4,125,4,134,4,145,4,150,4,191,4,200,4,210,4,212,4,214,4,216,4,218,4,220,4,222,4,224,4,226,4,231,4,246,5,3,5,5,5,7,5,9,5,18,5,20,5,23,5,25,5,66,5,68,5,70,5,72,5,74,5,76,5,78,5,80,5,82,5,94,5,109,
-5,126,5,128,5,130,5,132,5,134,5,143,5,145,5,148,5,150,5,183,5,185,5,187,5,189,5,191,5,193,5,195,5,206,5,231,5,240,5,247,5,252,6,29,6,31,6,33,6,35,6,37,6,39,6,41,6,46,6,75,6,77,6,79,6,81,6,83,6,85,6,87,6,94,6,127,6,129,6,131,6,133,6,135,6,137,6,139,6,
-144,6,177,6,179,6,181,6,183,6,185,6,187,6,189,6,196,6,225,6,227,6,229,6,231,6,233,6,235,6,237,6,242,6,254,7,7,7,9,7,11,7,25,7,34,7,39,7,48,7,50,7,79,7,81,7,83,7,85,7,87,7,89,7,91,7,93,7,95,7,97,7,99,7,101,7,103,7,105,7,107,7,116,7,118,7,151,7,153,7,155,
-7,157,7,159,7,161,7,163,7,165,7,167,7,169,7,171,7,173,7,175,7,177,7,179,7,181,7,190,7,192,7,225,7,227,7,229,7,231,7,233,7,235,7,237,7,239,7,241,7,243,7,245,7,247,7,249,7,251,7,253,7,255,8,2,8,5,8,8,8,11,8,14,8,17,8,20,8,23,8,26,8,29,8,32,8,35,8,38,8,
-41,8,44,8,53,8,55,8,56,8,65,8,67,8,68,8,77,8,92,8,97,8,115,8,120,8,134,0,0,0,0,0,0,2,2,0,0,0,0,0,0,1,57,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,136,0,0 };
-
-const char* RecentFilesMenuTemplate_nib = (const char*) temp_binary_data_61;
+const char* projucer_EULA_txt = (const char*) temp_binary_data_64;
 
 
 const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
@@ -7811,6 +7860,12 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
 
     switch (hash)
     {
+        case 0x31d21131:  numBytes = 1042; return LaunchScreen_storyboard;
+        case 0x24e5a04d:  numBytes = 477; return PIPAudioProcessor_cpp_in;
+        case 0xd572ce5a:  numBytes = 2162; return PIPComponent_cpp_in;
+        case 0x1a77c680:  numBytes = 299; return PIPConsole_cpp_in;
+        case 0xa41e649d:  numBytes = 2842; return RecentFilesMenuTemplate_nib;
+        case 0x667fbbb3:  numBytes = 6424; return UnityPluginGUIScript_cs_in;
         case 0x4d6bedc8:  numBytes = 53636; return gradlewrapper_jar;
         case 0x10b04d10:  numBytes = 4971; return gradlew;
         case 0x76cff066:  numBytes = 2404; return gradlew_bat;
@@ -7864,15 +7919,12 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x7fbac252:  numBytes = 1665; return jucer_OpenGLComponentTemplate_cpp;
         case 0x491fa0d7:  numBytes = 1263; return jucer_OpenGLComponentTemplate_h;
         case 0xbc050edc:  numBytes = 4926; return jucer_PIPAudioProcessorTemplate_h;
-        case 0xf4ca9e9a:  numBytes = 2421; return jucer_PIPMain_cpp;
         case 0x0b16e320:  numBytes = 517; return jucer_PIPTemplate_h;
-        case 0xcd472557:  numBytes = 6433; return jucer_UnityPluginGUIScript_cs;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
         case 0x938e96ec:  numBytes = 20; return nothingtoseehere_txt;
         case 0xf11580d8:  numBytes = 1155; return offlinepage_html;
         case 0xd6bb7d1d:  numBytes = 14361; return projucer_EULA_txt;
-        case 0xa41e649d:  numBytes = 2842; return RecentFilesMenuTemplate_nib;
         default: break;
     }
 
@@ -7882,6 +7934,12 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
 
 const char* namedResourceList[] =
 {
+    "LaunchScreen_storyboard",
+    "PIPAudioProcessor_cpp_in",
+    "PIPComponent_cpp_in",
+    "PIPConsole_cpp_in",
+    "RecentFilesMenuTemplate_nib",
+    "UnityPluginGUIScript_cs_in",
     "gradlewrapper_jar",
     "gradlew",
     "gradlew_bat",
@@ -7935,19 +7993,22 @@ const char* namedResourceList[] =
     "jucer_OpenGLComponentTemplate_cpp",
     "jucer_OpenGLComponentTemplate_h",
     "jucer_PIPAudioProcessorTemplate_h",
-    "jucer_PIPMain_cpp",
     "jucer_PIPTemplate_h",
-    "jucer_UnityPluginGUIScript_cs",
     "colourscheme_dark_xml",
     "colourscheme_light_xml",
     "nothingtoseehere_txt",
     "offlinepage_html",
-    "projucer_EULA_txt",
-    "RecentFilesMenuTemplate_nib"
+    "projucer_EULA_txt"
 };
 
 const char* originalFilenames[] =
 {
+    "LaunchScreen.storyboard",
+    "PIPAudioProcessor.cpp.in",
+    "PIPComponent.cpp.in",
+    "PIPConsole.cpp.in",
+    "RecentFilesMenuTemplate.nib",
+    "UnityPluginGUIScript.cs.in",
     "gradle-wrapper.jar",
     "gradlew",
     "gradlew.bat",
@@ -8001,15 +8062,12 @@ const char* originalFilenames[] =
     "jucer_OpenGLComponentTemplate.cpp",
     "jucer_OpenGLComponentTemplate.h",
     "jucer_PIPAudioProcessorTemplate.h",
-    "jucer_PIPMain.cpp",
     "jucer_PIPTemplate.h",
-    "jucer_UnityPluginGUIScript.cs",
     "colourscheme_dark.xml",
     "colourscheme_light.xml",
     "nothingtoseehere.txt",
     "offlinepage.html",
-    "projucer_EULA.txt",
-    "RecentFilesMenuTemplate.nib"
+    "projucer_EULA.txt"
 };
 
 const char* getNamedResourceOriginalFilename (const char* resourceNameUTF8)

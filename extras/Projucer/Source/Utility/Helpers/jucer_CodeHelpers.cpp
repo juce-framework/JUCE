@@ -60,63 +60,10 @@ namespace CodeHelpers
         return lines.joinIntoString (newLine);
     }
 
-    String makeValidIdentifier (String s, bool capitalise, bool removeColons, bool allowTemplates, bool allowAsterisks)
-    {
-        if (s.isEmpty())
-            return "unknown";
-
-        if (removeColons)
-            s = s.replaceCharacters (".,;:/@", "______");
-        else
-            s = s.replaceCharacters (".,;/@", "_____");
-
-        for (int i = s.length(); --i > 0;)
-            if (CharacterFunctions::isLetter (s[i])
-                 && CharacterFunctions::isLetter (s[i - 1])
-                 && CharacterFunctions::isUpperCase (s[i])
-                 && ! CharacterFunctions::isUpperCase (s[i - 1]))
-                s = s.substring (0, i) + " " + s.substring (i);
-
-        String allowedChars ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_ 0123456789");
-        if (allowTemplates)
-            allowedChars += "<>";
-
-        if (! removeColons)
-            allowedChars += ":";
-
-        if (allowAsterisks)
-            allowedChars += "*";
-
-        StringArray words;
-        words.addTokens (s.retainCharacters (allowedChars), false);
-        words.trim();
-
-        auto n = words[0];
-
-        if (capitalise)
-            n = n.toLowerCase();
-
-        for (int i = 1; i < words.size(); ++i)
-        {
-            if (capitalise && words[i].length() > 1)
-                n << words[i].substring (0, 1).toUpperCase()
-                  << words[i].substring (1).toLowerCase();
-            else
-                n << words[i];
-        }
-
-        if (CharacterFunctions::isDigit (n[0]))
-            n = "_" + n;
-
-        if (CPlusPlusCodeTokeniser::isReservedKeyword (n))
-            n << '_';
-
-        return n;
-    }
 
     String createIncludeStatement (const File& includeFile, const File& targetFile)
     {
-        return createIncludeStatement (FileHelpers::unixStylePath (FileHelpers::getRelativePathFrom (includeFile, targetFile.getParentDirectory())));
+        return createIncludeStatement (build_tools::unixStylePath (build_tools::getRelativePathFrom (includeFile, targetFile.getParentDirectory())));
     }
 
     String createIncludeStatement (const String& includePath)
@@ -130,14 +77,6 @@ namespace CodeHelpers
     String createIncludePathIncludeStatement (const String& includedFilename)
     {
         return "#include <" + includedFilename + ">";
-    }
-
-    String makeBinaryDataIdentifierName (const File& file)
-    {
-        return makeValidIdentifier (file.getFileName()
-                                        .replaceCharacters (" .", "__")
-                                        .retainCharacters ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789"),
-                                    false, true, false);
     }
 
     String stringLiteral (const String& text, int maxLineLength)
@@ -263,7 +202,7 @@ namespace CodeHelpers
             if (col == colours[i])
                 return "Colours::" + String (colourNames[i]);
 
-        return "Colour (0x" + hexString8Digits ((int) col.getARGB()) + ')';
+        return "Colour (0x" + build_tools::hexString8Digits ((int) col.getARGB()) + ')';
     }
 
     String justificationToCode (Justification justification)
@@ -293,141 +232,7 @@ namespace CodeHelpers
         return "Justification (" + String (justification.getFlags()) + ")";
     }
 
-    void writeDataAsCppLiteral (const MemoryBlock& mb, OutputStream& out,
-                                bool breakAtNewLines, bool allowStringBreaks)
-    {
-        const int maxCharsOnLine = 250;
-
-        auto data = (const unsigned char*) mb.getData();
-        int charsOnLine = 0;
-
-        bool canUseStringLiteral = mb.getSize() < 32768; // MS compilers can't handle big string literals..
-
-        if (canUseStringLiteral)
-        {
-            unsigned int numEscaped = 0;
-
-            for (size_t i = 0; i < mb.getSize(); ++i)
-            {
-                auto num = (unsigned int) data[i];
-
-                if (! ((num >= 32 && num < 127) || num == '\t' || num == '\r' || num == '\n'))
-                {
-                    if (++numEscaped > mb.getSize() / 4)
-                    {
-                        canUseStringLiteral = false;
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (! canUseStringLiteral)
-        {
-            out << "{ ";
-
-            for (size_t i = 0; i < mb.getSize(); ++i)
-            {
-                auto num = (int) (unsigned int) data[i];
-                out << num << ',';
-
-                charsOnLine += 2;
-
-                if (num >= 10)
-                {
-                    ++charsOnLine;
-
-                    if (num >= 100)
-                        ++charsOnLine;
-                }
-
-                if (charsOnLine >= maxCharsOnLine)
-                {
-                    charsOnLine = 0;
-                    out << newLine;
-                }
-            }
-
-            out << "0,0 };";
-        }
-        else
-        {
-            out << "\"";
-            CppTokeniserFunctions::writeEscapeChars (out, (const char*) data, (int) mb.getSize(),
-                                                     maxCharsOnLine, breakAtNewLines, false, allowStringBreaks);
-            out << "\";";
-        }
-    }
-
     //==============================================================================
-    static unsigned int calculateHash (const String& s, const unsigned int hashMultiplier)
-    {
-        auto t = s.toUTF8();
-        unsigned int hash = 0;
-
-        while (*t != 0)
-            hash = hashMultiplier * hash + (unsigned int) *t++;
-
-        return hash;
-    }
-
-    static unsigned int findBestHashMultiplier (const StringArray& strings)
-    {
-        unsigned int v = 31;
-
-        for (;;)
-        {
-            SortedSet<unsigned int> hashes;
-            bool collision = false;
-
-            for (int i = strings.size(); --i >= 0;)
-            {
-                auto hash = calculateHash (strings[i], v);
-
-                if (hashes.contains (hash))
-                {
-                    collision = true;
-                    break;
-                }
-
-                hashes.add (hash);
-            }
-
-            if (! collision)
-                break;
-
-            v += 2;
-        }
-
-        return v;
-    }
-
-    void createStringMatcher (OutputStream& out, const String& utf8PointerVariable,
-                              const StringArray& strings, const StringArray& codeToExecute, const int indentLevel)
-    {
-        jassert (strings.size() == codeToExecute.size());
-        auto indent = String::repeatedString (" ", indentLevel);
-        auto hashMultiplier = findBestHashMultiplier (strings);
-
-        out << indent << "unsigned int hash = 0;" << newLine
-            << newLine
-            << indent << "if (" << utf8PointerVariable << " != nullptr)" << newLine
-            << indent << "    while (*" << utf8PointerVariable << " != 0)" << newLine
-            << indent << "        hash = " << (int) hashMultiplier << " * hash + (unsigned int) *" << utf8PointerVariable << "++;" << newLine
-            << newLine
-            << indent << "switch (hash)" << newLine
-            << indent << "{" << newLine;
-
-        for (int i = 0; i < strings.size(); ++i)
-        {
-            out << indent << "    case 0x" << hexString8Digits ((int) calculateHash (strings[i], hashMultiplier))
-                << ":  " << codeToExecute[i] << newLine;
-        }
-
-        out << indent << "    default: break;" << newLine
-            << indent << "}" << newLine << newLine;
-    }
-
     String getLeadingWhitespace (String line)
     {
         line = line.removeCharacters (line.endsWith ("\r\n") ? "\r\n" : "\n");

@@ -546,7 +546,7 @@ void ComponentTypeHandler::fillInMemberVariableDeclarations (GeneratedCode& code
     String clsName (component->getProperties() ["virtualName"].toString());
 
     if (clsName.isNotEmpty())
-        clsName = CodeHelpers::makeValidIdentifier (clsName, false, false, true);
+        clsName = build_tools::makeValidIdentifier (clsName, false, false, true);
     else
         clsName = getClassName (component);
 
@@ -584,7 +584,7 @@ void ComponentTypeHandler::fillInCreationCode (GeneratedCode& code, Component* c
     s << memberVariableName << ".reset (new ";
 
     if (virtualName.isNotEmpty())
-        s << CodeHelpers::makeValidIdentifier (virtualName, false, false, true);
+        s << build_tools::makeValidIdentifier (virtualName, false, false, true);
     else
         s << getClassName (component);
 

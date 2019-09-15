@@ -15,6 +15,7 @@
 #include "AppConfig.h"
 
 #include <juce_analytics/juce_analytics.h>
+#include <juce_build_tools/juce_build_tools.h>
 #include <juce_core/juce_core.h>
 #include <juce_cryptography/juce_cryptography.h>
 #include <juce_data_structures/juce_data_structures.h>

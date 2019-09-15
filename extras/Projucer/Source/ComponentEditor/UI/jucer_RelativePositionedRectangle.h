@@ -732,7 +732,7 @@ struct RelativePositionedRectangle
     {
         double x, y, w, h;
         getRectangleDouble (x, y, w, h, parentArea, layout);
-        return Point<float> ((float) x, (float) y);
+        return { (float) x, (float) y };
     }
 
     void getXY (double& x, double& y,

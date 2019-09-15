@@ -179,7 +179,7 @@ void ProjectSaver::writeProjects (const OwnedArray<LibraryModule>& modules, cons
                     exporter->copyMainGroupFromProject();
                     exporter->settings = exporter->settings.createCopy();
 
-                    exporter->addToExtraSearchPaths (RelativePath ("JuceLibraryCode", RelativePath::projectFolder));
+                    exporter->addToExtraSearchPaths (build_tools::RelativePath ("JuceLibraryCode", build_tools::RelativePath::projectFolder));
 
                     generatedFilesGroup.state = originalGeneratedGroup.createCopy();
                     exporter->addSettingsForProjectType (project.getProjectType());
@@ -202,7 +202,7 @@ void ProjectSaver::writeProjects (const OwnedArray<LibraryModule>& modules, cons
             }
         }
     }
-    catch (ProjectExporter::SaveError& saveError)
+    catch (build_tools::SaveError& saveError)
     {
         addError (saveError.message);
     }

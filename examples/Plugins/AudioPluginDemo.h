@@ -23,24 +23,28 @@
 
  BEGIN_JUCE_PIP_METADATA
 
- name:             AudioPluginDemo
- version:          1.0.0
- vendor:           JUCE
- website:          http://juce.com
- description:      Synthesiser audio plugin.
+ name:                  AudioPluginDemo
+ version:               1.0.0
+ vendor:                JUCE
+ website:               http://juce.com
+ description:           Synthesiser audio plugin.
 
- dependencies:     juce_audio_basics, juce_audio_devices, juce_audio_formats,
-                   juce_audio_plugin_client, juce_audio_processors,
-                   juce_audio_utils, juce_core, juce_data_structures,
-                   juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
- exporters:        xcode_mac, vs2017, vs2019, linux_make, xcode_iphone, androidstudio
+ dependencies:          juce_audio_basics, juce_audio_devices, juce_audio_formats,
+                        juce_audio_plugin_client, juce_audio_processors,
+                        juce_audio_utils, juce_core, juce_data_structures,
+                        juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
+ exporters:             xcode_mac, vs2017, vs2019, linux_make, xcode_iphone, androidstudio
 
- moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+ moduleFlags:           JUCE_STRICT_REFCOUNTEDPOINTER=1
 
- type:             AudioProcessor
- mainClass:        JuceDemoPluginAudioProcessor
+ type:                  AudioProcessor
+ mainClass:             JuceDemoPluginAudioProcessor
 
- useLocalCopy:     1
+ useLocalCopy:          1
+
+ pluginCharacteristics: pluginIsSynth, pluginWantsMidiIn, pluginProducesMidiOut,
+                        pluginEditorRequiresKeys
+ extraPluginFormats:    AUv3
 
  END_JUCE_PIP_METADATA
 

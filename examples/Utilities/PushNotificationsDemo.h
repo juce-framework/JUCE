@@ -37,6 +37,7 @@
  exporters:        xcode_mac, vs2019, xcode_iphone, androidstudio
 
  moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+                   JUCE_PUSH_NOTIFICATIONS=1
 
  type:             Component
  mainClass:        PushNotificationsDemo

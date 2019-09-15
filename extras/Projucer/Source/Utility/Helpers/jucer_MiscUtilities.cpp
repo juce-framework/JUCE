@@ -79,11 +79,6 @@ String createAlphaNumericUID()
     return uid;
 }
 
-String hexString8Digits (int value)
-{
-    return String::toHexString (value).paddedLeft ('0', 8);
-}
-
 String createGUID (const String& seed)
 {
     auto hex = MD5 ((seed + "_guidsalt").toUTF8()).toHexString().toUpperCase();
@@ -183,19 +178,6 @@ String createGCCPreprocessorFlags (const StringPairArray& defs)
     return s;
 }
 
-String replacePreprocessorDefs (const StringPairArray& definitions, String sourceString)
-{
-    for (int i = 0; i < definitions.size(); ++i)
-    {
-        const String key (definitions.getAllKeys()[i]);
-        const String value (definitions.getAllValues()[i]);
-
-        sourceString = sourceString.replace ("${" + key + "}", value);
-    }
-
-    return sourceString;
-}
-
 StringArray getSearchPathsFromString (const String& searchPath)
 {
     StringArray s;
@@ -215,58 +197,6 @@ StringArray getCleanedStringArray (StringArray s)
     s.trim();
     s.removeEmptyStrings();
     return s;
-}
-
-//==============================================================================
-static bool keyFoundAndNotSequentialDuplicate (XmlElement* xml, const String& key)
-{
-    forEachXmlChildElementWithTagName (*xml, element, "key")
-    {
-        if (element->getAllSubText().trim().equalsIgnoreCase (key))
-        {
-            if (element->getNextElement() != nullptr && element->getNextElement()->hasTagName ("key"))
-            {
-                // found broken plist format (sequential duplicate), fix by removing
-                xml->removeChildElement (element, true);
-                return false;
-            }
-
-            // key found (not sequential duplicate)
-            return true;
-        }
-    }
-
-     // key not found
-    return false;
-}
-
-static bool addKeyIfNotFound (XmlElement* xml, const String& key)
-{
-    if (! keyFoundAndNotSequentialDuplicate (xml, key))
-    {
-        xml->createNewChildElement ("key")->addTextElement (key);
-        return true;
-    }
-
-    return false;
-}
-
-void addPlistDictionaryKey (XmlElement* xml, const String& key, const String& value)
-{
-    if (addKeyIfNotFound (xml, key))
-        xml->createNewChildElement ("string")->addTextElement (value);
-}
-
-void addPlistDictionaryKeyBool (XmlElement* xml, const String& key, const bool value)
-{
-    if (addKeyIfNotFound (xml, key))
-        xml->createNewChildElement (value ? "true" : "false");
-}
-
-void addPlistDictionaryKeyInt (XmlElement* xml, const String& key, int value)
-{
-    if (addKeyIfNotFound (xml, key))
-        xml->createNewChildElement ("integer")->addTextElement (String (value));
 }
 
 //==============================================================================
@@ -349,37 +279,43 @@ bool isJUCEModule (const String& moduleID) noexcept
 
 StringArray getModulesRequiredForConsole() noexcept
 {
-    return { "juce_core",
-             "juce_data_structures",
-             "juce_events"
-           };
+    return
+    {
+        "juce_core",
+        "juce_data_structures",
+        "juce_events"
+    };
 }
 
 StringArray getModulesRequiredForComponent() noexcept
 {
-    return { "juce_core",
-             "juce_data_structures",
-             "juce_events",
-             "juce_graphics",
-             "juce_gui_basics"
-           };
+    return
+    {
+        "juce_core",
+        "juce_data_structures",
+        "juce_events",
+        "juce_graphics",
+        "juce_gui_basics"
+    };
 }
 
 StringArray getModulesRequiredForAudioProcessor() noexcept
 {
-    return { "juce_audio_basics",
-             "juce_audio_devices",
-             "juce_audio_formats",
-             "juce_audio_plugin_client",
-             "juce_audio_processors",
-             "juce_audio_utils",
-             "juce_core",
-             "juce_data_structures",
-             "juce_events",
-             "juce_graphics",
-             "juce_gui_basics",
-             "juce_gui_extra"
-           };
+    return
+    {
+        "juce_audio_basics",
+        "juce_audio_devices",
+        "juce_audio_formats",
+        "juce_audio_plugin_client",
+        "juce_audio_processors",
+        "juce_audio_utils",
+        "juce_core",
+        "juce_data_structures",
+        "juce_events",
+        "juce_graphics",
+        "juce_gui_basics",
+        "juce_gui_extra"
+    };
 }
 
 bool isPIPFile (const File& file) noexcept

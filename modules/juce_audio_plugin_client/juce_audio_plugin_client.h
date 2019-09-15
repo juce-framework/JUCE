@@ -34,7 +34,7 @@
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
 
-  dependencies:       juce_gui_basics, juce_audio_basics, juce_audio_processors
+  dependencies:       juce_audio_processors
 
  END_JUCE_MODULE_DECLARATION
 

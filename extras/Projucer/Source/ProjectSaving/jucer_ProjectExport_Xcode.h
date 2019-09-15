@@ -207,7 +207,7 @@ public:
     String getDevelopmentTeamIDString() const               { return iosDevelopmentTeamIDValue.get(); }
     String getAppGroupIdString() const                      { return iosAppGroupsIDValue.get(); }
 
-    String getDefaultLaunchStoryboardName() const           { jassert (iOS); return "LaunchScreen"; }
+    String getDefaultLaunchStoryboardName() const           { return "LaunchScreen"; }
 
     //==============================================================================
     bool usesMMFiles() const override                       { return true; }
@@ -227,27 +227,27 @@ public:
     bool isOSX() const override                             { return ! iOS; }
     bool isiOS() const override                             { return iOS; }
 
-    bool supportsTargetType (ProjectType::Target::Type type) const override
+    bool supportsTargetType (build_tools::ProjectType::Target::Type type) const override
     {
         switch (type)
         {
-            case ProjectType::Target::AudioUnitv3PlugIn:
-            case ProjectType::Target::StandalonePlugIn:
-            case ProjectType::Target::GUIApp:
-            case ProjectType::Target::StaticLibrary:
-            case ProjectType::Target::DynamicLibrary:
-            case ProjectType::Target::SharedCodeTarget:
-            case ProjectType::Target::AggregateTarget:
+            case build_tools::ProjectType::Target::AudioUnitv3PlugIn:
+            case build_tools::ProjectType::Target::StandalonePlugIn:
+            case build_tools::ProjectType::Target::GUIApp:
+            case build_tools::ProjectType::Target::StaticLibrary:
+            case build_tools::ProjectType::Target::DynamicLibrary:
+            case build_tools::ProjectType::Target::SharedCodeTarget:
+            case build_tools::ProjectType::Target::AggregateTarget:
                 return true;
-            case ProjectType::Target::ConsoleApp:
-            case ProjectType::Target::VSTPlugIn:
-            case ProjectType::Target::VST3PlugIn:
-            case ProjectType::Target::AAXPlugIn:
-            case ProjectType::Target::RTASPlugIn:
-            case ProjectType::Target::AudioUnitPlugIn:
-            case ProjectType::Target::UnityPlugIn:
+            case build_tools::ProjectType::Target::ConsoleApp:
+            case build_tools::ProjectType::Target::VSTPlugIn:
+            case build_tools::ProjectType::Target::VST3PlugIn:
+            case build_tools::ProjectType::Target::AAXPlugIn:
+            case build_tools::ProjectType::Target::RTASPlugIn:
+            case build_tools::ProjectType::Target::AudioUnitPlugIn:
+            case build_tools::ProjectType::Target::UnityPlugIn:
                 return ! iOS;
-            case ProjectType::Target::unspecified:
+            case build_tools::ProjectType::Target::unspecified:
             default:
                 break;
         }
@@ -580,13 +580,8 @@ public:
 
         createObjects();
 
-        auto projectFile = projectBundle.getChildFile ("project.pbxproj");
-
-        {
-            MemoryOutputStream mo;
-            writeProjectFile (mo);
-            overwriteFileIfDifferentOrThrow (projectFile, mo);
-        }
+        build_tools::writeStreamToFile (projectBundle.getChildFile ("project.pbxproj"),
+                                        [this] (MemoryOutputStream& mo) { writeProjectFile (mo); });
 
         writeInfoPlistFiles();
 
@@ -599,11 +594,11 @@ public:
     }
 
     //==============================================================================
-    void addPlatformSpecificSettingsForProjectType (const ProjectType&) override
+    void addPlatformSpecificSettingsForProjectType (const build_tools::ProjectType&) override
     {
-        callForAllSupportedTargets ([this] (ProjectType::Target::Type targetType)
+        callForAllSupportedTargets ([this] (build_tools::ProjectType::Target::Type targetType)
                                     {
-                                        targets.insert (targetType == ProjectType::Target::AggregateTarget ? 0 : -1,
+                                        targets.insert (targetType == build_tools::ProjectType::Target::AggregateTarget ? 0 : -1,
                                                         new XcodeTarget (targetType, *this));
                                     });
 
@@ -860,18 +855,16 @@ public:
     };
 
     //==============================================================================
-    struct XcodeTarget : ProjectType::Target
+    struct XcodeTarget : build_tools::ProjectType::Target
     {
         //==============================================================================
-        XcodeTarget (ProjectType::Target::Type targetType, const XcodeProjectExporter& exporter)
-            : ProjectType::Target (targetType),
+        XcodeTarget (build_tools::ProjectType::Target::Type targetType, const XcodeProjectExporter& exporter)
+            : Target (targetType),
               owner (exporter)
         {
             switch (type)
             {
                 case GUIApp:
-                    xcodePackageType = "APPL";
-                    xcodeBundleSignature = "????";
                     xcodeFileType = "wrapper.application";
                     xcodeBundleExtension = ".app";
                     xcodeProductType = "com.apple.product-type.application";
@@ -900,8 +893,6 @@ public:
                     break;
 
                 case VSTPlugIn:
-                    xcodePackageType = "BNDL";
-                    xcodeBundleSignature = "????";
                     xcodeFileType = "wrapper.cfbundle";
                     xcodeBundleExtension = ".vst";
                     xcodeProductType = "com.apple.product-type.bundle";
@@ -909,8 +900,6 @@ public:
                     break;
 
                 case VST3PlugIn:
-                    xcodePackageType = "BNDL";
-                    xcodeBundleSignature = "????";
                     xcodeFileType = "wrapper.cfbundle";
                     xcodeBundleExtension = ".vst3";
                     xcodeProductType = "com.apple.product-type.bundle";
@@ -918,8 +907,6 @@ public:
                     break;
 
                 case AudioUnitPlugIn:
-                    xcodePackageType = "BNDL";
-                    xcodeBundleSignature = "????";
                     xcodeFileType = "wrapper.cfbundle";
                     xcodeBundleExtension = ".component";
                     xcodeProductType = "com.apple.product-type.bundle";
@@ -929,8 +916,6 @@ public:
                     break;
 
                 case StandalonePlugIn:
-                    xcodePackageType = "APPL";
-                    xcodeBundleSignature = "????";
                     xcodeFileType = "wrapper.application";
                     xcodeBundleExtension = ".app";
                     xcodeProductType = "com.apple.product-type.application";
@@ -938,8 +923,6 @@ public:
                     break;
 
                 case AudioUnitv3PlugIn:
-                    xcodePackageType = "XPC!";
-                    xcodeBundleSignature = "????";
                     xcodeFileType = "wrapper.app-extension";
                     xcodeBundleExtension = ".appex";
                     xcodeBundleIDSubPath = "AUv3";
@@ -950,8 +933,6 @@ public:
                     break;
 
                 case AAXPlugIn:
-                    xcodePackageType = "TDMw";
-                    xcodeBundleSignature = "PTul";
                     xcodeFileType = "wrapper.cfbundle";
                     xcodeBundleExtension = ".aaxplugin";
                     xcodeProductType = "com.apple.product-type.bundle";
@@ -959,8 +940,6 @@ public:
                     break;
 
                 case RTASPlugIn:
-                    xcodePackageType = "TDMw";
-                    xcodeBundleSignature = "PTul";
                     xcodeFileType = "wrapper.cfbundle";
                     xcodeBundleExtension = ".dpm";
                     xcodeProductType = "com.apple.product-type.bundle";
@@ -968,8 +947,6 @@ public:
                     break;
 
                 case UnityPlugIn:
-                    xcodePackageType = "BNDL";
-                    xcodeBundleSignature = "????";
                     xcodeFileType = "wrapper.cfbundle";
                     xcodeBundleExtension = ".bundle";
                     xcodeProductType = "com.apple.product-type.bundle";
@@ -987,7 +964,7 @@ public:
                     xcodeCopyToProductInstallPathAfterBuild = false;
                     break;
 
-                case ProjectType::Target::unspecified:
+                case unspecified:
                 default:
                     // unknown target type!
                     jassertfalse;
@@ -1015,7 +992,7 @@ public:
             return String (getName()).replace (" ", "_") + String (".entitlements");
         }
 
-        String xcodePackageType, xcodeBundleSignature, xcodeBundleExtension;
+        String xcodeBundleExtension;
         String xcodeProductType, xcodeFileType;
         String xcodeOtherRezFlags, xcodeBundleIDSubPath;
         bool xcodeCopyToProductInstallPathAfterBuild;
@@ -1029,7 +1006,7 @@ public:
 
         struct SourceFileInfo
         {
-            RelativePath path;
+            build_tools::RelativePath path;
             bool shouldBeCompiled = false;
         };
 
@@ -1049,9 +1026,11 @@ public:
             {
                 SourceFileInfo info;
 
-                info.path = RelativePath (projectItem.getFile(), owner.getTargetFolder(), RelativePath::buildTargetFolder);
+                info.path = build_tools::RelativePath (projectItem.getFile(),
+                                                       owner.getTargetFolder(),
+                                                       build_tools::RelativePath::buildTargetFolder);
 
-                jassert (info.path.getRoot() == RelativePath::buildTargetFolder);
+                jassert (info.path.getRoot() == build_tools::RelativePath::buildTargetFolder);
 
                 if (targetType == SharedCodeTarget || projectItem.shouldBeCompiled())
                     info.shouldBeCompiled = projectItem.shouldBeCompiled();
@@ -1352,8 +1331,11 @@ public:
                 // (= for audio plug-ins) or using a custom binary path (for everything else), but not both (= conflict!)
                 jassert (! xcodeCopyToProductInstallPathAfterBuild);
 
-                RelativePath binaryPath (config.getTargetBinaryRelativePathString(), RelativePath::projectFolder);
-                configurationBuildDir = sanitisePath (binaryPath.rebased (owner.projectFolder, owner.getTargetFolder(), RelativePath::buildTargetFolder)
+                build_tools::RelativePath binaryPath (config.getTargetBinaryRelativePathString(),
+                                                      build_tools::RelativePath::projectFolder);
+                configurationBuildDir = sanitisePath (binaryPath.rebased (owner.projectFolder,
+                                                                          owner.getTargetFolder(),
+                                                                          build_tools::RelativePath::buildTargetFolder)
                                                                 .toUnixStyle());
             }
 
@@ -1523,7 +1505,7 @@ public:
 
             if (type != Target::SharedCodeTarget)
             {
-                Array<RelativePath> extraLibs;
+                Array<build_tools::RelativePath> extraLibs;
 
                 addExtraLibsForTargetType (config, extraLibs);
 
@@ -1539,7 +1521,7 @@ public:
                     {
                         auto productName = getStaticLibbedFilename (owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString()));
 
-                        RelativePath sharedCodelib (productName, RelativePath::buildTargetFolder);
+                        build_tools::RelativePath sharedCodelib (productName, build_tools::RelativePath::buildTargetFolder);
                         flags.add (getLinkerFlagForLib (sharedCodelib.getFileNameWithoutExtension()));
                     }
                 }
@@ -1557,193 +1539,69 @@ public:
             flags = getCleanedStringArray (flags);
         }
 
-        //========================================================================== c
+        //==========================================================================
         void writeInfoPlistFile() const
         {
             if (! shouldCreatePList())
                 return;
 
-            auto plist = parseXML (owner.getPListToMergeString());
+            build_tools::PlistOptions options;
 
-            if (plist == nullptr || ! plist->hasTagName ("plist"))
-                plist.reset (new XmlElement ("plist"));
+            options.type                             = type;
+            options.executableName                   = "${EXECUTABLE_NAME}";
+            options.bundleIdentifier                 = getBundleIdentifier();
+            options.plistToMerge                     = owner.getPListToMergeString();
+            options.iOS                              = owner.iOS;
+            options.microphonePermissionEnabled      = owner.isMicrophonePermissionEnabled();
+            options.microphonePermissionText         = owner.getMicrophonePermissionsTextString();
+            options.cameraPermissionEnabled          = owner.isCameraPermissionEnabled();
+            options.cameraPermissionText             = owner.getCameraPermissionTextString();
+            options.bluetoothPermissionEnabled       = owner.isBluetoothPermissionEnabled();
+            options.bluetoothPermissionText          = owner.getBluetoothPermissionTextString();
+            options.sendAppleEventsPermissionEnabled = owner.isSendAppleEventsPermissionEnabled();
+            options.sendAppleEventsPermissionText    = owner.getSendAppleEventsPermissionTextString();
+            options.shouldAddStoryboardToProject     = owner.shouldAddStoryboardToProject();
+            options.iconFile                         = owner.iconFile;
+            options.projectName                      = owner.projectName;
+            options.version                          = owner.project.getVersionString();
+            options.companyCopyright                 = owner.project.getCompanyCopyrightString();
+            options.allPreprocessorDefs              = owner.getAllPreprocessorDefs();
+            options.documentExtensions               = owner.getDocumentExtensionsString();
+            options.fileSharingEnabled               = owner.isFileSharingEnabled();
+            options.documentBrowserEnabled           = owner.isDocumentBrowserEnabled();
+            options.statusBarHidden                  = owner.isStatusBarHidden();
+            options.backgroundAudioEnabled           = owner.isBackgroundAudioEnabled();
+            options.backgroundBleEnabled             = owner.isBackgroundBleEnabled();
+            options.pushNotificationsEnabled         = owner.isPushNotificationsEnabled();
+            options.enableIAA                        = owner.project.shouldEnableIAA();
+            options.IAAPluginName                    = owner.project.getIAAPluginName();
+            options.pluginManufacturerCode           = owner.project.getPluginManufacturerCodeString();
+            options.IAATypeCode                      = owner.project.getIAATypeCode();
+            options.pluginCode                       = owner.project.getPluginCodeString();
+            options.versionAsHex                     = owner.project.getVersionAsHexInteger();
+            options.iPhoneScreenOrientations         = owner.getiPhoneScreenOrientationString();
+            options.iPadScreenOrientations           = owner.getiPadScreenOrientationString();
 
-            auto* dict = plist->getChildByName ("dict");
-
-            if (dict == nullptr)
-                dict = plist->createNewChildElement ("dict");
-
-            if (owner.isMicrophonePermissionEnabled())
-                addPlistDictionaryKey (dict, "NSMicrophoneUsageDescription", owner.getMicrophonePermissionsTextString());
-
-            if (owner.isCameraPermissionEnabled())
-                addPlistDictionaryKey (dict, "NSCameraUsageDescription", owner.getCameraPermissionTextString());
-
-            if (owner.iOS)
+            options.storyboardName = [&]
             {
-                if (owner.isBluetoothPermissionEnabled())
-                {
-                    addPlistDictionaryKey (dict, "NSBluetoothAlwaysUsageDescription", owner.getBluetoothPermissionTextString());
-                    addPlistDictionaryKey (dict, "NSBluetoothPeripheralUsageDescription", owner.getBluetoothPermissionTextString()); // needed for pre iOS 13.0
-                }
+                const auto customLaunchStoryboard = owner.getCustomLaunchStoryboardString();
 
-                addPlistDictionaryKeyBool (dict, "LSRequiresIPhoneOS", true);
+                if (customLaunchStoryboard.isEmpty())
+                    return owner.getDefaultLaunchStoryboardName();
 
-                if (type != AudioUnitv3PlugIn)
-                    addPlistDictionaryKeyBool (dict, "UIViewControllerBasedStatusBarAppearance", false);
+                return customLaunchStoryboard.fromLastOccurrenceOf ("/", false, false)
+                                             .upToLastOccurrenceOf (".storyboard", false, false);
+            }();
 
-                if (owner.shouldAddStoryboardToProject())
-                {
-                    auto customStoryboard = owner.getCustomLaunchStoryboardString();
+            options.pluginName                      = owner.project.getPluginNameString();
+            options.pluginManufacturer              = owner.project.getPluginManufacturerString();
+            options.pluginDescription               = owner.project.getPluginDescriptionString();
+            options.pluginAUExportPrefix            = owner.project.getPluginAUExportPrefixString();
+            options.auMainType                      = owner.project.getAUMainTypeString();
+            options.isAuSandboxSafe                 = owner.project.isAUSandBoxSafe();
+            options.isPluginSynth                   = owner.project.isPluginSynth();
 
-                    addPlistDictionaryKey (dict, "UILaunchStoryboardName", customStoryboard.isNotEmpty() ? customStoryboard.fromLastOccurrenceOf ("/", false, false)
-                                                                                                                           .upToLastOccurrenceOf (".storyboard", false, false)
-                                                                                                         : owner.getDefaultLaunchStoryboardName());
-                }
-            }
-            else
-            {
-                if (owner.isSendAppleEventsPermissionEnabled())
-                    addPlistDictionaryKey (dict, "NSAppleEventsUsageDescription", owner.getSendAppleEventsPermissionTextString());
-            }
-
-            addPlistDictionaryKey (dict, "CFBundleExecutable",          "${EXECUTABLE_NAME}");
-
-            if (! owner.iOS) // (NB: on iOS this causes error ITMS-90032 during publishing)
-                addPlistDictionaryKey (dict, "CFBundleIconFile", owner.iconFile.exists() ? owner.iconFile.getFileName() : String());
-
-            addPlistDictionaryKey (dict, "CFBundleIdentifier",          getBundleIdentifier());
-            addPlistDictionaryKey (dict, "CFBundleName",                owner.projectName);
-
-            // needed by NSExtension on iOS
-            addPlistDictionaryKey (dict, "CFBundleDisplayName",         owner.projectName);
-            addPlistDictionaryKey (dict, "CFBundlePackageType",         xcodePackageType);
-            addPlistDictionaryKey (dict, "CFBundleSignature",           xcodeBundleSignature);
-            addPlistDictionaryKey (dict, "CFBundleShortVersionString",  owner.project.getVersionString());
-            addPlistDictionaryKey (dict, "CFBundleVersion",             owner.project.getVersionString());
-            addPlistDictionaryKey (dict, "NSHumanReadableCopyright",    owner.project.getCompanyCopyrightString());
-            addPlistDictionaryKeyBool (dict, "NSHighResolutionCapable", true);
-
-            auto documentExtensions = StringArray::fromTokens (replacePreprocessorDefs (owner.getAllPreprocessorDefs(),
-                                                                                        owner.getDocumentExtensionsString()), ",", {});
-            documentExtensions.trim();
-            documentExtensions.removeEmptyStrings (true);
-
-            if (documentExtensions.size() > 0 && type != AudioUnitv3PlugIn)
-            {
-                dict->createNewChildElement ("key")->addTextElement ("CFBundleDocumentTypes");
-                auto* dict2 = dict->createNewChildElement ("array")->createNewChildElement ("dict");
-                XmlElement* arrayTag = nullptr;
-
-                for (auto ex : documentExtensions)
-                {
-                    if (ex.startsWithChar ('.'))
-                        ex = ex.substring (1);
-
-                    if (arrayTag == nullptr)
-                    {
-                        dict2->createNewChildElement ("key")->addTextElement ("CFBundleTypeExtensions");
-                        arrayTag = dict2->createNewChildElement ("array");
-
-                        addPlistDictionaryKey (dict2, "CFBundleTypeName", ex);
-                        addPlistDictionaryKey (dict2, "CFBundleTypeRole", "Editor");
-                        addPlistDictionaryKey (dict2, "CFBundleTypeIconFile", "Icon");
-                        addPlistDictionaryKey (dict2, "NSPersistentStoreTypeKey", "XML");
-                    }
-
-                    arrayTag->createNewChildElement ("string")->addTextElement (ex);
-                }
-            }
-
-            if (owner.isFileSharingEnabled() && type != AudioUnitv3PlugIn)
-                addPlistDictionaryKeyBool (dict, "UIFileSharingEnabled", true);
-
-            if (owner.isDocumentBrowserEnabled())
-                addPlistDictionaryKeyBool (dict, "UISupportsDocumentBrowser", true);
-
-            if (owner.isStatusBarHidden() && type != AudioUnitv3PlugIn)
-                addPlistDictionaryKeyBool (dict, "UIStatusBarHidden", true);
-
-            if (owner.iOS)
-            {
-                if (type != AudioUnitv3PlugIn)
-                {
-                    // Forcing full screen disables the split screen feature and prevents error ITMS-90475
-                    addPlistDictionaryKeyBool (dict, "UIRequiresFullScreen", true);
-                    addPlistDictionaryKeyBool (dict, "UIStatusBarHidden", true);
-
-                    addIosScreenOrientations (dict);
-                    addIosBackgroundModes (dict);
-                }
-
-                if (type == StandalonePlugIn && owner.getProject().shouldEnableIAA())
-                {
-                    XmlElement audioComponentsPlistKey ("key");
-                    audioComponentsPlistKey.addTextElement ("AudioComponents");
-
-                    dict->addChildElement (new XmlElement (audioComponentsPlistKey));
-
-                    XmlElement audioComponentsPlistEntry ("array");
-                    auto* audioComponentsDict = audioComponentsPlistEntry.createNewChildElement ("dict");
-
-                    addPlistDictionaryKey    (audioComponentsDict, "name",         owner.project.getIAAPluginName());
-                    addPlistDictionaryKey    (audioComponentsDict, "manufacturer", owner.project.getPluginManufacturerCodeString().substring (0, 4));
-                    addPlistDictionaryKey    (audioComponentsDict, "type",         owner.project.getIAATypeCode());
-                    addPlistDictionaryKey    (audioComponentsDict, "subtype",      owner.project.getPluginCodeString().substring (0, 4));
-                    addPlistDictionaryKeyInt (audioComponentsDict, "version",      owner.project.getVersionAsHexInteger());
-
-                    dict->addChildElement (new XmlElement (audioComponentsPlistEntry));
-                }
-            }
-
-            for (auto& e : xcodeExtraPListEntries)
-                dict->addChildElement (new XmlElement (e));
-
-            MemoryOutputStream mo;
-            XmlElement::TextFormat format;
-            format.dtd = "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">";
-            plist->writeTo (mo, format);
-            overwriteFileIfDifferentOrThrow (infoPlistFile, mo);
-        }
-
-        //==============================================================================
-        void addIosScreenOrientations (XmlElement* dict) const
-        {
-            String screenOrientations[2] = { owner.getiPhoneScreenOrientationString(), owner.getiPadScreenOrientationString() };
-            String plistSuffix[2]        = { "", "~ipad" };
-            auto orientationsAreTheSame  = ( screenOrientations[0] == screenOrientations[1] );
-
-            for (int i = 0; i < (orientationsAreTheSame ? 1 : 2); ++i)
-            {
-                StringArray iOSOrientations;
-
-                if (screenOrientations[i].contains ("portrait"))   { iOSOrientations.add ("UIInterfaceOrientationPortrait"); }
-                if (screenOrientations[i].contains ("landscape"))  { iOSOrientations.add ("UIInterfaceOrientationLandscapeLeft");  iOSOrientations.add ("UIInterfaceOrientationLandscapeRight"); }
-
-                addArrayToPlist (dict, String ("UISupportedInterfaceOrientations") + plistSuffix[i], iOSOrientations);
-            }
-
-        }
-
-        //==============================================================================
-        void addIosBackgroundModes (XmlElement* dict) const
-        {
-            StringArray iosBackgroundModes;
-            if (owner.isBackgroundAudioEnabled())     iosBackgroundModes.add ("audio");
-            if (owner.isBackgroundBleEnabled())       iosBackgroundModes.add ("bluetooth-central");
-            if (owner.isPushNotificationsEnabled())   iosBackgroundModes.add ("remote-notification");
-
-            addArrayToPlist (dict, "UIBackgroundModes", iosBackgroundModes);
-        }
-
-        //==============================================================================
-        static void addArrayToPlist (XmlElement* dict, String arrayKey, const StringArray& arrayElements)
-        {
-            dict->createNewChildElement ("key")->addTextElement (arrayKey);
-            auto* plistStringArray = dict->createNewChildElement ("array");
-
-            for (auto& e : arrayElements)
-                plistStringArray->createNewChildElement ("string")->addTextElement (e);
+            options.write (infoPlistFile);
         }
 
         //==============================================================================
@@ -1795,7 +1653,7 @@ public:
             {
                 // Needed to compile .r files
                 paths.add (owner.getModuleFolderRelativeToProject ("juce_audio_plugin_client")
-                                .rebased (owner.projectFolder, owner.getTargetFolder(), RelativePath::buildTargetFolder)
+                                .rebased (owner.projectFolder, owner.getTargetFolder(), build_tools::RelativePath::buildTargetFolder)
                                 .toUnixStyle());
             }
 
@@ -1820,48 +1678,6 @@ public:
                                  " -I \\\"$(DEVELOPER_DIR)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/AudioUnit.framework/Headers\\\"";
 
             xcodeFrameworks.addArray ({ "AudioUnit", "CoreAudioKit" });
-
-            XmlElement plistKey ("key");
-            plistKey.addTextElement ("AudioComponents");
-
-            XmlElement plistEntry ("array");
-            auto* dict = plistEntry.createNewChildElement ("dict");
-
-            auto pluginManufacturerCode = owner.project.getPluginManufacturerCodeString().substring (0, 4);
-            auto pluginSubType          = owner.project.getPluginCodeString().substring (0, 4);
-
-            if (pluginManufacturerCode.toLowerCase() == pluginManufacturerCode)
-            {
-                throw SaveError ("AudioUnit plugin code identifiers invalid!\n\n"
-                                 "You have used only lower case letters in your AU plugin manufacturer identifier. "
-                                 "You must have at least one uppercase letter in your AU plugin manufacturer "
-                                 "identifier code.");
-            }
-
-            addPlistDictionaryKey (dict, "name", owner.project.getPluginManufacturerString()
-                                                   + ": " + owner.project.getPluginNameString());
-            addPlistDictionaryKey (dict, "description", owner.project.getPluginDescriptionString());
-            addPlistDictionaryKey (dict, "factoryFunction", owner.project.getPluginAUExportPrefixString() + "Factory");
-            addPlistDictionaryKey (dict, "manufacturer", pluginManufacturerCode);
-            addPlistDictionaryKey (dict, "type", owner.project.getAUMainTypeString().removeCharacters ("'"));
-            addPlistDictionaryKey (dict, "subtype", pluginSubType);
-            addPlistDictionaryKeyInt (dict, "version", owner.project.getVersionAsHexInteger());
-
-            if (owner.project.isAUSandBoxSafe())
-            {
-                addPlistDictionaryKeyBool (dict, "sandboxSafe", true);
-            }
-            else
-            {
-                dict->createNewChildElement ("key")->addTextElement ("resourceUsage");
-                auto* resourceUsageDict = dict->createNewChildElement ("dict");
-
-                addPlistDictionaryKeyBool (resourceUsageDict, "network.client", true);
-                addPlistDictionaryKeyBool (resourceUsageDict, "temporary-exception.files.all.read-write", true);
-            }
-
-            xcodeExtraPListEntries.add (plistKey);
-            xcodeExtraPListEntries.add (plistEntry);
         }
 
         void addExtraAudioUnitv3PlugInTargetSettings()
@@ -1870,47 +1686,13 @@ public:
 
             if (owner.isOSX())
                 xcodeFrameworks.add ("AudioUnit");
-
-            XmlElement plistKey ("key");
-            plistKey.addTextElement ("NSExtension");
-
-            XmlElement plistEntry ("dict");
-
-            addPlistDictionaryKey (&plistEntry, "NSExtensionPrincipalClass", owner.project.getPluginAUExportPrefixString() + "FactoryAUv3");
-            addPlistDictionaryKey (&plistEntry, "NSExtensionPointIdentifier", "com.apple.AudioUnit-UI");
-            plistEntry.createNewChildElement ("key")->addTextElement ("NSExtensionAttributes");
-
-            auto* dict = plistEntry.createNewChildElement ("dict");
-            dict->createNewChildElement ("key")->addTextElement ("AudioComponents");
-            auto* componentArray = dict->createNewChildElement ("array");
-
-            auto* componentDict = componentArray->createNewChildElement ("dict");
-
-            addPlistDictionaryKey (componentDict, "name", owner.project.getPluginManufacturerString()
-                                                            + ": " + owner.project.getPluginNameString());
-            addPlistDictionaryKey (componentDict, "description", owner.project.getPluginDescriptionString());
-            addPlistDictionaryKey (componentDict, "factoryFunction",owner.project. getPluginAUExportPrefixString() + "FactoryAUv3");
-            addPlistDictionaryKey (componentDict, "manufacturer", owner.project.getPluginManufacturerCodeString().substring (0, 4));
-            addPlistDictionaryKey (componentDict, "type", owner.project.getAUMainTypeString().removeCharacters ("'"));
-            addPlistDictionaryKey (componentDict, "subtype", owner.project.getPluginCodeString().substring (0, 4));
-            addPlistDictionaryKeyInt (componentDict, "version", owner.project.getVersionAsHexInteger());
-            addPlistDictionaryKeyBool (componentDict, "sandboxSafe", true);
-
-            componentDict->createNewChildElement ("key")->addTextElement ("tags");
-            auto* tagsArray = componentDict->createNewChildElement ("array");
-
-            tagsArray->createNewChildElement ("string")
-                ->addTextElement (static_cast<bool> (owner.project.isPluginSynth()) ? "Synth" : "Effects");
-
-            xcodeExtraPListEntries.add (plistKey);
-            xcodeExtraPListEntries.add (plistEntry);
         }
 
-        void addExtraLibsForTargetType  (const BuildConfiguration& config, Array<RelativePath>& extraLibs) const
+        void addExtraLibsForTargetType  (const BuildConfiguration& config, Array<build_tools::RelativePath>& extraLibs) const
         {
             if (type == AAXPlugIn)
             {
-                auto aaxLibsFolder = RelativePath (owner.getAAXPathString(), RelativePath::projectFolder).getChildFile ("Libs");
+                auto aaxLibsFolder = build_tools::RelativePath (owner.getAAXPathString(), build_tools::RelativePath::projectFolder).getChildFile ("Libs");
 
                 String libraryPath (config.isDebug() ? "Debug" : "Release");
                 libraryPath += "/libAAXLibrary_libcpp.a";
@@ -1919,7 +1701,7 @@ public:
             }
             else if (type == RTASPlugIn)
             {
-                RelativePath rtasFolder (owner.getRTASPathString(), RelativePath::projectFolder);
+                build_tools::RelativePath rtasFolder (owner.getRTASPathString(), build_tools::RelativePath::projectFolder);
 
                 extraLibs.add (rtasFolder.getChildFile ("MacBag/Libs/Debug/libPluginLibrary.a"));
                 extraLibs.add (rtasFolder.getChildFile ("MacBag/Libs/Release/libPluginLibrary.a"));
@@ -1932,7 +1714,7 @@ public:
 
             if (type == RTASPlugIn)
             {
-                RelativePath rtasFolder (owner.getRTASPathString(), RelativePath::projectFolder);
+                build_tools::RelativePath rtasFolder (owner.getRTASPathString(), build_tools::RelativePath::projectFolder);
 
                 targetExtraSearchPaths.add ("$(DEVELOPER_DIR)/Headers/FlatCarbon");
                 targetExtraSearchPaths.add ("$(SDKROOT)/Developer/Headers/FlatCarbon");
@@ -2069,8 +1851,8 @@ private:
                 if (customLaunchStoryboard.isEmpty())
                     writeDefaultLaunchStoryboardFile();
                 else if (getProject().getProjectFolder().getChildFile (customLaunchStoryboard).existsAsFile())
-                    addLaunchStoryboardFileReference (RelativePath (customLaunchStoryboard, RelativePath::projectFolder)
-                                                          .rebased (getProject().getProjectFolder(), getTargetFolder(), RelativePath::buildTargetFolder)
+                    addLaunchStoryboardFileReference (build_tools::RelativePath (customLaunchStoryboard, build_tools::RelativePath::projectFolder)
+                                                          .rebased (getProject().getProjectFolder(), getTargetFolder(), build_tools::RelativePath::buildTargetFolder)
                                                           .toUnixStyle());
             }
         }
@@ -2131,7 +1913,7 @@ private:
 
             if (target->shouldCreatePList())
             {
-                RelativePath plistPath (target->infoPlistFile, getTargetFolder(), RelativePath::buildTargetFolder);
+                build_tools::RelativePath plistPath (target->infoPlistFile, getTargetFolder(), build_tools::RelativePath::buildTargetFolder);
                 addFileReference (plistPath.toUnixStyle());
                 resourceFileRefs.add (createFileRefID (plistPath));
             }
@@ -2140,11 +1922,12 @@ private:
 
     void addNibFiles() const
     {
-        MemoryOutputStream nib;
-        nib.write (BinaryData::RecentFilesMenuTemplate_nib, BinaryData::RecentFilesMenuTemplate_nibSize);
-        overwriteFileIfDifferentOrThrow (menuNibFile, nib);
+        build_tools::writeStreamToFile (menuNibFile, [&] (MemoryOutputStream& mo)
+        {
+            mo.write (BinaryData::RecentFilesMenuTemplate_nib, BinaryData::RecentFilesMenuTemplate_nibSize);
+        });
 
-        RelativePath menuNibPath (menuNibFile, getTargetFolder(), RelativePath::buildTargetFolder);
+        build_tools::RelativePath menuNibPath (menuNibFile, getTargetFolder(), build_tools::RelativePath::buildTargetFolder);
         addFileReference (menuNibPath.toUnixStyle());
         resourceIDs.add (addBuildFile (menuNibPath, false, false));
         resourceFileRefs.add (createFileRefID (menuNibPath));
@@ -2154,7 +1937,7 @@ private:
     {
         if (iconFile.exists())
         {
-            RelativePath iconPath (iconFile, getTargetFolder(), RelativePath::buildTargetFolder);
+            build_tools::RelativePath iconPath (iconFile, getTargetFolder(), build_tools::RelativePath::buildTargetFolder);
             addFileReference (iconPath.toUnixStyle());
             resourceIDs.add (addBuildFile (iconPath, false, false));
             resourceFileRefs.add (createFileRefID (iconPath));
@@ -2303,9 +2086,9 @@ private:
     {
         if (auto* unityTarget = getTargetOfType (XcodeTarget::UnityPlugIn))
         {
-            RelativePath scriptPath (getProject().getGeneratedCodeFolder().getChildFile (getProject().getUnityScriptName()),
-                                     getTargetFolder(),
-                                     RelativePath::buildTargetFolder);
+            build_tools::RelativePath scriptPath (getProject().getGeneratedCodeFolder().getChildFile (getProject().getUnityScriptName()),
+                                                  getTargetFolder(),
+                                                  build_tools::RelativePath::buildTargetFolder);
 
             auto path = scriptPath.toUnixStyle();
             auto refID = addFileReference (path);
@@ -2318,32 +2101,8 @@ private:
         }
     }
 
-    static Image fixMacIconImageSize (Drawable& image)
-    {
-        const int validSizes[] = { 16, 32, 64, 128, 256, 512, 1024 };
-
-        auto w = image.getWidth();
-        auto h = image.getHeight();
-
-        int bestSize = 16;
-
-        for (int size : validSizes)
-        {
-            if (w == h && w == size)
-            {
-                bestSize = w;
-                break;
-            }
-
-            if (jmax (w, h) > size)
-                bestSize = size;
-        }
-
-        return rescaleImageForIcon (image, bestSize);
-    }
-
     //==============================================================================
-    XcodeTarget* getTargetOfType (ProjectType::Target::Type type) const
+    XcodeTarget* getTargetOfType (build_tools::ProjectType::Target::Type type) const
     {
         for (auto& target : targets)
             if (target->type == type)
@@ -2410,134 +2169,36 @@ private:
         return dependencies;
     }
 
-    static void writeIconData (MemoryOutputStream& out, const Image& image, const char* type)
-    {
-        MemoryOutputStream pngData;
-        PNGImageFormat pngFormat;
-        pngFormat.writeImageToStream (image, pngData);
-
-        out.write (type, 4);
-        out.writeIntBigEndian (8 + (int) pngData.getDataSize());
-        out << pngData;
-    }
-
-    void writeIcnsFile (const OwnedArray<Drawable>& images, OutputStream& out) const
-    {
-        MemoryOutputStream data;
-        auto smallest = std::numeric_limits<int>::max();
-        Drawable* smallestImage = nullptr;
-
-        for (int i = 0; i < images.size(); ++i)
-        {
-            auto image = fixMacIconImageSize (*images.getUnchecked (i));
-            jassert (image.getWidth() == image.getHeight());
-
-            if (image.getWidth() < smallest)
-            {
-                smallest = image.getWidth();
-                smallestImage = images.getUnchecked(i);
-            }
-
-            switch (image.getWidth())
-            {
-                case 16:   writeIconData (data, image, "icp4"); break;
-                case 32:   writeIconData (data, image, "icp5"); break;
-                case 64:   writeIconData (data, image, "icp6"); break;
-                case 128:  writeIconData (data, image, "ic07"); break;
-                case 256:  writeIconData (data, image, "ic08"); break;
-                case 512:  writeIconData (data, image, "ic09"); break;
-                case 1024: writeIconData (data, image, "ic10"); break;
-                default:   break;
-            }
-        }
-
-        jassert (data.getDataSize() > 0); // no suitable sized images?
-
-        // If you only supply a 1024 image, the file doesn't work on 10.8, so we need
-        // to force a smaller one in there too..
-        if (smallest > 512 && smallestImage != nullptr)
-            writeIconData (data, rescaleImageForIcon (*smallestImage, 512), "ic09");
-
-        out.write ("icns", 4);
-        out.writeIntBigEndian ((int) data.getDataSize() + 8);
-        out << data;
-    }
-
-    void getIconImages (OwnedArray<Drawable>& images) const
-    {
-        if (auto icon = getBigIcon())
-            images.add (std::move (icon));
-
-        if (auto icon = getSmallIcon())
-            images.add (std::move (icon));
-    }
-
-    void createiOSIconFiles (File appIconSet) const
-    {
-        OwnedArray<Drawable> images;
-        getIconImages (images);
-
-        if (images.size() > 0)
-        {
-            for (auto& type : getiOSAppIconTypes())
-            {
-                auto image = rescaleImageForIcon (*images.getFirst(), type.size);
-
-                if (image.hasAlphaChannel())
-                {
-                    Image background (Image::RGB, image.getWidth(), image.getHeight(), false);
-                    Graphics g (background);
-                    g.fillAll (Colours::white);
-
-                    g.drawImageWithin (image, 0, 0, image.getWidth(), image.getHeight(),
-                                       RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize);
-
-                    image = background;
-                }
-
-                MemoryOutputStream pngData;
-                PNGImageFormat pngFormat;
-                pngFormat.writeImageToStream (image, pngData);
-
-                overwriteFileIfDifferentOrThrow (appIconSet.getChildFile (type.filename), pngData);
-            }
-        }
-    }
-
     void createIconFile() const
     {
-        OwnedArray<Drawable> images;
-        getIconImages (images);
+        const auto icons = getIcons();
 
-        if (images.size() > 0)
+        if (! build_tools::asArray (icons).isEmpty())
         {
-            MemoryOutputStream mo;
-            writeIcnsFile (images, mo);
-
             iconFile = getTargetFolder().getChildFile ("Icon.icns");
-            overwriteFileIfDifferentOrThrow (iconFile, mo);
+            build_tools::writeMacIcon (icons, iconFile);
         }
     }
 
     void writeWorkspaceSettings() const
     {
-        auto settingsFile = getProjectBundle().getChildFile ("project.xcworkspace")
-                                              .getChildFile ("xcshareddata")
-                                              .getChildFile ("WorkspaceSettings.xcsettings");
+        const auto settingsFile = getProjectBundle().getChildFile ("project.xcworkspace")
+                                                    .getChildFile ("xcshareddata")
+                                                    .getChildFile ("WorkspaceSettings.xcsettings");
 
-        MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        build_tools::writeStreamToFile (settingsFile, [] (MemoryOutputStream& mo)
+        {
+            mo.setNewLineString ("\n");
 
-        mo << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << newLine
-           << "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" << newLine
-           << "<plist version=\"1.0\">"                    << newLine
-           << "<dict>"                                     << newLine
-           << "\t" << "<key>BuildSystemType</key>"         << newLine
-           << "\t" << "<string>Original</string>"          << newLine
-           << "</dict>"                                    << newLine
-           << "</plist>"                                   << newLine;
-
-        overwriteFileIfDifferentOrThrow (settingsFile, mo);
+            mo << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << newLine
+               << "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" << newLine
+               << "<plist version=\"1.0\">"                    << newLine
+               << "<dict>"                                     << newLine
+               << "\t" << "<key>BuildSystemType</key>"         << newLine
+               << "\t" << "<string>Original</string>"          << newLine
+               << "</dict>"                                    << newLine
+               << "</plist>"                                   << newLine;
+        });
     }
 
     void writeInfoPlistFiles() const
@@ -2571,13 +2232,13 @@ private:
         return "-l" + library.replace (" ", "\\\\ ").replace ("\"", "\\\\\"").replace ("\'", "\\\\\'").upToLastOccurrenceOf (".", false, false);
     }
 
-    String getSearchPathForStaticLibrary (const RelativePath& library) const
+    String getSearchPathForStaticLibrary (const build_tools::RelativePath& library) const
     {
         auto searchPath = library.toUnixStyle().upToLastOccurrenceOf ("/", false, false);
 
         if (! library.isAbsolute())
         {
-            auto srcRoot = rebaseFromProjectFolderToBuildTarget (RelativePath (".", RelativePath::projectFolder)).toUnixStyle();
+            auto srcRoot = rebaseFromProjectFolderToBuildTarget (build_tools::RelativePath (".", build_tools::RelativePath::projectFolder)).toUnixStyle();
 
             if (srcRoot.endsWith ("/."))      srcRoot = srcRoot.dropLastCharacters (2);
             if (! srcRoot.endsWithChar ('/')) srcRoot << '/';
@@ -2828,7 +2489,7 @@ private:
             if (availableBuildProducts.empty())
                 continue;
 
-            auto subprojectFileType = getFileType (RelativePath (subprojectFile.getFullPathName(), RelativePath::buildTargetFolder));
+            auto subprojectFileType = getFileType (build_tools::RelativePath (subprojectFile.getFullPathName(), build_tools::RelativePath::buildTargetFolder));
             auto subprojectFileID = addFileOrFolderReference (subprojectFile.getFullPathName(), "<group>", subprojectFileType);
             subprojectFileIDs.add (subprojectFileID);
 
@@ -2836,7 +2497,7 @@ private:
 
             for (auto& buildProduct : availableBuildProducts)
             {
-                auto buildProductFileType = getFileType (RelativePath (buildProduct.second, RelativePath::projectFolder));
+                auto buildProductFileType = getFileType (build_tools::RelativePath (buildProduct.second, build_tools::RelativePath::projectFolder));
 
                 auto containerID = addContainerItemProxy (subprojectFileID, buildProduct.first);
                 auto proxyID = addReferenceProxy (containerID, buildProduct.second, buildProductFileType);
@@ -2876,15 +2537,15 @@ private:
         auto customXcassetsPath = getCustomXcassetsFolderString();
 
         if (customXcassetsPath.isEmpty())
-            createXcassetsFolderFromIcons();
+            addDefaultXcassetsFolders();
         else
             addCustomResourceFolder (customXcassetsPath, "folder.assetcatalog");
     }
 
     void addCustomResourceFolder (String folderPathRelativeToProjectFolder, const String fileType = "folder") const
     {
-        auto folderPath = RelativePath (folderPathRelativeToProjectFolder, RelativePath::projectFolder)
-                                       .rebased (projectFolder, getTargetFolder(), RelativePath::buildTargetFolder)
+        auto folderPath = build_tools::RelativePath (folderPathRelativeToProjectFolder, build_tools::RelativePath::projectFolder)
+                                       .rebased (projectFolder, getTargetFolder(), build_tools::RelativePath::buildTargetFolder)
                                        .toUnixStyle();
 
         auto fileRefID = createFileRefID (folderPath);
@@ -2962,7 +2623,7 @@ private:
         return fileID;
     }
 
-    String addBuildFile (const RelativePath& path, bool addToSourceBuildPhase, bool inhibitWarnings, XcodeTarget* xcodeTarget = nullptr) const
+    String addBuildFile (const build_tools::RelativePath& path, bool addToSourceBuildPhase, bool inhibitWarnings, XcodeTarget* xcodeTarget = nullptr) const
     {
         return addBuildFile (path.toUnixStyle(), createFileRefID (path), addToSourceBuildPhase, inhibitWarnings, xcodeTarget);
     }
@@ -2970,7 +2631,7 @@ private:
     String addFileReference (String pathString) const
     {
         String sourceTree ("SOURCE_ROOT");
-        RelativePath path (pathString, RelativePath::unknown);
+        build_tools::RelativePath path (pathString, build_tools::RelativePath::unknown);
 
         if (pathString.startsWith ("${"))
         {
@@ -3058,7 +2719,7 @@ public:
     }
 
 private:
-    static String getFileType (const RelativePath& file)
+    static String getFileType (const build_tools::RelativePath& file)
     {
         if (file.hasFileExtension (cppFileExtensions))      return "sourcecode.cpp.cpp";
         if (file.hasFileExtension (".mm"))                  return "sourcecode.cpp.objcpp";
@@ -3083,7 +2744,7 @@ private:
         return "file" + file.getFileExtension();
     }
 
-    String addFile (const RelativePath& path, bool shouldBeCompiled, bool shouldBeAddedToBinaryResources,
+    String addFile (const build_tools::RelativePath& path, bool shouldBeCompiled, bool shouldBeAddedToBinaryResources,
                     bool shouldBeAddedToXcodeResources, bool inhibitWarnings, XcodeTarget* xcodeTarget, const String& compilerFlags) const
     {
         auto pathAsString = path.toUnixStyle();
@@ -3107,7 +2768,7 @@ private:
         return refID;
     }
 
-    String addRezFile (const Project::Item& projectItem, const RelativePath& path) const
+    String addRezFile (const Project::Item& projectItem, const build_tools::RelativePath& path) const
     {
         auto pathAsString = path.toUnixStyle();
         auto refID = addFileReference (path.toUnixStyle());
@@ -3126,97 +2787,28 @@ private:
         return {};
     }
 
-    StringPairArray getEntitlements (XcodeTarget& target) const
-    {
-        StringPairArray entitlements;
-
-        if (isiOS())
-        {
-            if (project.isAudioPluginProject() && project.shouldEnableIAA())
-                entitlements.set ("inter-app-audio", "<true/>");
-
-            if (isiCloudPermissionsEnabled())
-            {
-                entitlements.set ("com.apple.developer.icloud-container-identifiers",
-                                  "<array>\n"
-                                  "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
-                                  "    </array>");
-
-                entitlements.set ("com.apple.developer.icloud-services",
-                                  "<array>\n"
-                                  "        <string>CloudDocuments</string>\n"
-                                  "    </array>");
-
-                entitlements.set ("com.apple.developer.ubiquity-container-identifiers",
-                                  "<array>\n"
-                                  "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
-                                  "    </array>");
-            }
-        }
-
-        if (isPushNotificationsEnabled())
-            entitlements.set (isiOS() ? "aps-environment"
-                                      : "com.apple.developer.aps-environment",
-                                        "<string>development</string>");
-
-        if (isAppGroupsEnabled())
-        {
-            auto appGroups = StringArray::fromTokens (getAppGroupIdString(), ";", {});
-            auto groups = String ("<array>");
-
-            for (auto group : appGroups)
-                groups += "\n\t\t<string>" + group.trim() + "</string>";
-
-            groups += "\n\t</array>";
-
-            entitlements.set ("com.apple.security.application-groups", groups);
-        }
-
-        if (isHardenedRuntimeEnabled())
-            for (auto& option : getHardenedRuntimeOptions())
-                entitlements.set (option, "<true/>");
-
-        if (isAppSandboxEnabled() || (isOSX() && project.isAudioPluginProject() && target.type == XcodeTarget::AudioUnitv3PlugIn))
-        {
-            entitlements.set ("com.apple.security.app-sandbox", "<true/>");
-
-            if (isAppSandboxInhertianceEnabled())
-            {
-                // no other sandbox options can be specified if sandbox inheritance is enabled!
-                jassert (getAppSandboxOptions().isEmpty());
-
-                entitlements.set ("com.apple.security.inherit", "<true/>");
-            }
-
-            if (isAppSandboxEnabled())
-                for (auto& option : getAppSandboxOptions())
-                    entitlements.set (option, "<true/>");
-        }
-
-        return entitlements;
-    }
-
     void addEntitlementsFile (XcodeTarget& target) const
     {
-        String content =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-            "<plist version=\"1.0\">\n"
-            "<dict>\n";
+        build_tools::EntitlementOptions options;
 
-        auto entitlements = getEntitlements (target);
+        options.type                            = target.type;
+        options.isiOS                           = isiOS();
+        options.isAudioPluginProject            = project.isAudioPluginProject();
+        options.shouldEnableIAA                 = project.shouldEnableIAA();
+        options.isiCloudPermissionsEnabled      = isiCloudPermissionsEnabled();
+        options.isPushNotificationsEnabled      = isPushNotificationsEnabled();
+        options.isAppGroupsEnabled              = isAppGroupsEnabled();
+        options.isHardenedRuntimeEnabled        = isHardenedRuntimeEnabled();
+        options.isAppSandboxEnabled             = isAppSandboxEnabled();
+        options.isAppSandboxInhertianceEnabled  = isAppSandboxInhertianceEnabled();
+        options.appGroupIdString                = getAppGroupIdString();
+        options.hardenedRuntimeOptions          = getHardenedRuntimeOptions();
+        options.appSandboxOptions               = getAppSandboxOptions();
 
-        for (auto& key : entitlements.getAllKeys())
-            content += "\t<key>" + key + "</key>\n"
-                       "\t" + entitlements[key] + "\n";
+        const auto entitlementsFile = getTargetFolder().getChildFile (target.getEntitlementsFilename());
+        build_tools::overwriteFileIfDifferentOrThrow (entitlementsFile, options.getEntitlementsFileContent());
 
-        content += "</dict>\n"
-                   "</plist>\n";
-
-        auto entitlementsFile = getTargetFolder().getChildFile (target.getEntitlementsFilename());
-        overwriteFileIfDifferentOrThrow (entitlementsFile, content);
-
-        RelativePath entitlementsPath (entitlementsFile, getTargetFolder(), RelativePath::buildTargetFolder);
+        build_tools::RelativePath entitlementsPath (entitlementsFile, getTargetFolder(), build_tools::RelativePath::buildTargetFolder);
         addFile (entitlementsPath, false, false, false, false, nullptr, {});
     }
 
@@ -3247,12 +2839,12 @@ private:
         if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (*this))
         {
             auto itemPath = projectItem.getFilePath();
-            RelativePath path;
+            build_tools::RelativePath path;
 
             if (itemPath.startsWith ("${"))
-                path = RelativePath (itemPath, RelativePath::unknown);
+                path = build_tools::RelativePath (itemPath, build_tools::RelativePath::unknown);
             else
-                path = RelativePath (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
+                path = build_tools::RelativePath (projectItem.getFile(), getTargetFolder(), build_tools::RelativePath::buildTargetFolder);
 
             if (path.hasFileExtension (".r"))
                 return addRezFile (projectItem, path);
@@ -3298,7 +2890,7 @@ private:
 
         auto fileRefID = createFileRefID (frameworkPath);
 
-        auto fileType = getFileType (RelativePath (frameworkPath, RelativePath::projectFolder));
+        auto fileType = getFileType (build_tools::RelativePath (frameworkPath, build_tools::RelativePath::projectFolder));
         addFileOrFolderReference (frameworkPath, "<group>", fileType);
 
         frameworkFileIDs.add (fileRefID);
@@ -3310,7 +2902,7 @@ private:
     {
         auto fileRefID = createFileRefID (path);
 
-        auto fileType = getFileType (RelativePath (path, RelativePath::projectFolder));
+        auto fileType = getFileType (build_tools::RelativePath (path, build_tools::RelativePath::projectFolder));
         addFileOrFolderReference (path, "<group>", fileType);
 
         auto fileID = createID (path + "buildref");
@@ -3488,67 +3080,6 @@ private:
         return false;
     }
 
-    //==============================================================================
-    struct AppIconType
-    {
-        const char* idiom;
-        const char* sizeString;
-        const char* filename;
-        const char* scale;
-        int size;
-    };
-
-    static Array<AppIconType> getiOSAppIconTypes()
-    {
-        AppIconType types[] =
-        {
-            { "iphone",          "20x20",     "Icon-Notification-20@2x.png",       "2x", 40   },
-            { "iphone",          "20x20",     "Icon-Notification-20@3x.png",       "3x", 60   },
-            { "iphone",          "29x29",     "Icon-29.png",                       "1x", 29   },
-            { "iphone",          "29x29",     "Icon-29@2x.png",                    "2x", 58   },
-            { "iphone",          "29x29",     "Icon-29@3x.png",                    "3x", 87   },
-            { "iphone",          "40x40",     "Icon-Spotlight-40@2x.png",          "2x", 80   },
-            { "iphone",          "40x40",     "Icon-Spotlight-40@3x.png",          "3x", 120  },
-            { "iphone",          "57x57",     "Icon.png",                          "1x", 57   },
-            { "iphone",          "57x57",     "Icon@2x.png",                       "2x", 114  },
-            { "iphone",          "60x60",     "Icon-60@2x.png",                    "2x", 120  },
-            { "iphone",          "60x60",     "Icon-@3x.png",                      "3x", 180  },
-            { "ipad",            "20x20",     "Icon-Notifications-20.png",         "1x", 20   },
-            { "ipad",            "20x20",     "Icon-Notifications-20@2x.png",      "2x", 40   },
-            { "ipad",            "29x29",     "Icon-Small-1.png",                  "1x", 29   },
-            { "ipad",            "29x29",     "Icon-Small@2x-1.png",               "2x", 58   },
-            { "ipad",            "40x40",     "Icon-Spotlight-40.png",             "1x", 40   },
-            { "ipad",            "40x40",     "Icon-Spotlight-40@2x-1.png",        "2x", 80   },
-            { "ipad",            "50x50",     "Icon-Small-50.png",                 "1x", 50   },
-            { "ipad",            "50x50",     "Icon-Small-50@2x.png",              "2x", 100  },
-            { "ipad",            "72x72",     "Icon-72.png",                       "1x", 72   },
-            { "ipad",            "72x72",     "Icon-72@2x.png",                    "2x", 144  },
-            { "ipad",            "76x76",     "Icon-76.png",                       "1x", 76   },
-            { "ipad",            "76x76",     "Icon-76@2x.png",                    "2x", 152  },
-            { "ipad",            "83.5x83.5", "Icon-83.5@2x.png",                  "2x", 167  },
-            { "ios-marketing",   "1024x1024", "Icon-AppStore-1024.png",            "1x", 1024 }
-        };
-
-        return Array<AppIconType> (types, numElementsInArray (types));
-    }
-
-    static String getiOSAppIconContents()
-    {
-        var images;
-
-        for (auto& type : getiOSAppIconTypes())
-        {
-            DynamicObject::Ptr d (new DynamicObject());
-            d->setProperty ("idiom",    type.idiom);
-            d->setProperty ("size",     type.sizeString);
-            d->setProperty ("filename", type.filename);
-            d->setProperty ("scale",    type.scale);
-            images.append (var (d.get()));
-        }
-
-        return getiOSAssetContents (images);
-    }
-
     String getProjectObjectAttributes() const
     {
         String attributes;
@@ -3573,114 +3104,18 @@ private:
     }
 
     //==============================================================================
-    struct ImageType
-    {
-        const char* orientation;
-        const char* idiom;
-        const char* subtype;
-        const char* extent;
-        const char* scale;
-        const char* filename;
-        int width;
-        int height;
-    };
-
-    static Array<ImageType> getiOSLaunchImageTypes()
-    {
-        ImageType types[] =
-        {
-            { "portrait", "iphone", nullptr,      "full-screen", "2x", "LaunchImage-iphone-2x.png",         640, 960 },
-            { "portrait", "iphone", "retina4",    "full-screen", "2x", "LaunchImage-iphone-retina4.png",    640, 1136 },
-            { "portrait", "ipad",   nullptr,      "full-screen", "1x", "LaunchImage-ipad-portrait-1x.png",  768, 1024 },
-            { "landscape","ipad",   nullptr,      "full-screen", "1x", "LaunchImage-ipad-landscape-1x.png", 1024, 768 },
-            { "portrait", "ipad",   nullptr,      "full-screen", "2x", "LaunchImage-ipad-portrait-2x.png",  1536, 2048 },
-            { "landscape","ipad",   nullptr,      "full-screen", "2x", "LaunchImage-ipad-landscape-2x.png", 2048, 1536 }
-        };
-
-        return Array<ImageType> (types, numElementsInArray (types));
-    }
-
-    static String getiOSLaunchImageContents()
-    {
-        var images;
-
-        for (auto& type : getiOSLaunchImageTypes())
-        {
-            DynamicObject::Ptr d (new DynamicObject());
-            d->setProperty ("orientation", type.orientation);
-            d->setProperty ("idiom", type.idiom);
-            d->setProperty ("extent",  type.extent);
-            d->setProperty ("minimum-system-version", "7.0");
-            d->setProperty ("scale", type.scale);
-            d->setProperty ("filename", type.filename);
-
-            if (type.subtype != nullptr)
-                d->setProperty ("subtype", type.subtype);
-
-            images.append (var (d.get()));
-        }
-
-        return getiOSAssetContents (images);
-    }
-
-    static void createiOSLaunchImageFiles (const File& launchImageSet)
-    {
-        for (auto& type : getiOSLaunchImageTypes())
-        {
-            Image image (Image::ARGB, type.width, type.height, true); // (empty black image)
-            image.clear (image.getBounds(), Colours::black);
-
-            MemoryOutputStream pngData;
-            PNGImageFormat pngFormat;
-            pngFormat.writeImageToStream (image, pngData);
-            overwriteFileIfDifferentOrThrow (launchImageSet.getChildFile (type.filename), pngData);
-        }
-    }
-
-    //==============================================================================
-    static String getiOSAssetContents (var images)
-    {
-        DynamicObject::Ptr v (new DynamicObject());
-
-        var info (new DynamicObject());
-        info.getDynamicObject()->setProperty ("version", 1);
-        info.getDynamicObject()->setProperty ("author", "xcode");
-
-        v->setProperty ("images", images);
-        v->setProperty ("info", info);
-
-        return JSON::toString (var (v.get()));
-    }
-
     void writeDefaultLaunchStoryboardFile() const
     {
-        auto storyboardFile = getTargetFolder().getChildFile (getDefaultLaunchStoryboardName() + ".storyboard");
+        const auto storyboardFile = getTargetFolder().getChildFile (getDefaultLaunchStoryboardName() + ".storyboard");
 
-        MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        build_tools::writeStreamToFile (storyboardFile, [&] (MemoryOutputStream& mo)
+        {
+            mo << String (BinaryData::LaunchScreen_storyboard);
+        });
 
-        mo << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"                                                                                                                  << newLine
-           << "<document type=\"com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB\" version=\"3.0\" toolsVersion=\"14460.31\" "
-           << "targetRuntime=\"iOS.CocoaTouch\" propertyAccessControl=\"none\" useAutolayout=\"YES\" launchScreen=\"YES\" useTraitCollections=\"YES\" "
-           << "useSafeAreas=\"YES\" colorMatched=\"YES\" initialViewController=\"01J-lp-oVM\">"                                                                             << newLine
-           << "    <scenes>"                                                                                                                                                << newLine
-           << "        <scene sceneID=\"EHf-IW-A2E\">"                                                                                                                      << newLine
-           << "            <objects>"                                                                                                                                       << newLine
-           << "                <placeholder placeholderIdentifier=\"IBFirstResponder\" id=\"iYj-Kq-Ea1\" userLabel=\"\" sceneMemberID=\"firstResponder\"/>"                 << newLine
-           << "                <viewController id=\"01J-lp-oVM\" sceneMemberID=\"viewController\">"                                                                         << newLine
-           << "                    <view key=\"view\" contentMode=\"scaleToFill\" id=\"Ze5-6b-2t3\">"                                                                       << newLine
-           << "                        <autoresizingMask key=\"autoresizingMask\"/>"                                                                                        << newLine
-           << "                        <color key=\"backgroundColor\" red=\"0\" green=\"0\" blue=\"0\" alpha=\"1\" colorSpace=\"custom\" customColorSpace=\"sRGB\"/>"       << newLine
-           << "                    </view>"                                                                                                                                 << newLine
-           << "                </viewController>"                                                                                                                           << newLine
-           << "            </objects>"                                                                                                                                      << newLine
-           << "        </scene>"                                                                                                                                            << newLine
-           << "    </scenes>"                                                                                                                                               << newLine
-           << "</document>"                                                                                                                                                 << newLine;
-
-        overwriteFileIfDifferentOrThrow (storyboardFile, mo);
-
-        addLaunchStoryboardFileReference (RelativePath (storyboardFile, getTargetFolder(), RelativePath::buildTargetFolder).toUnixStyle());
+        addLaunchStoryboardFileReference (build_tools::RelativePath (storyboardFile,
+                                                                     getTargetFolder(),
+                                                                     build_tools::RelativePath::buildTargetFolder).toUnixStyle());
     }
 
     void addLaunchStoryboardFileReference (const String& relativePath) const
@@ -3692,20 +3127,11 @@ private:
         resourceFileRefs.add (refID);
     }
 
-    void createXcassetsFolderFromIcons() const
+    void addDefaultXcassetsFolders() const
     {
-        auto assets = getTargetFolder().getChildFile (project.getProjectFilenameRootString())
-                                       .getChildFile ("Images.xcassets");
-        auto iconSet = assets.getChildFile ("AppIcon.appiconset");
-        auto launchImage = assets.getChildFile ("LaunchImage.launchimage");
-
-        overwriteFileIfDifferentOrThrow (iconSet.getChildFile ("Contents.json"), getiOSAppIconContents());
-        createiOSIconFiles (iconSet);
-
-        overwriteFileIfDifferentOrThrow (launchImage.getChildFile ("Contents.json"), getiOSLaunchImageContents());
-        createiOSLaunchImageFiles (launchImage);
-
-        RelativePath assetsPath (assets, getTargetFolder(), RelativePath::buildTargetFolder);
+        const auto assetsPath = build_tools::createXcassetsFolderFromIcons (getIcons(),
+                                                                            getTargetFolder(),
+                                                                            project.getProjectFilenameRootString());
         addFileReference (assetsPath.toUnixStyle());
         resourceIDs.add (addBuildFile (assetsPath, false, false));
         resourceFileRefs.add (createFileRefID (assetsPath));
@@ -3739,7 +3165,7 @@ private:
         return MD5 (rootString.toUTF8()).toHexString().substring (0, 24).toUpperCase();
     }
 
-    String createFileRefID (const RelativePath& path) const     { return createFileRefID (path.toUnixStyle()); }
+    String createFileRefID (const build_tools::RelativePath& path) const { return createFileRefID (path.toUnixStyle()); }
     String createFileRefID (const String& path) const           { return createID ("__fileref_" + path); }
     String getIDForGroup (const Project::Item& item) const      { return createID (item.getID()); }
 

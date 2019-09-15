@@ -114,7 +114,7 @@ public:
 
         if (Project* project = cpp.getProject())
         {
-            ResourceFile resourceFile (*project);
+            JucerResourceFile resourceFile (*project);
 
             for (int i = 0; i < resourceFile.getNumFiles(); ++i)
             {

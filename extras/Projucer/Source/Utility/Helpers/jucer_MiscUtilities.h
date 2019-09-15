@@ -29,8 +29,6 @@ var parseJUCEHeaderMetadata (const File&);
 
 String trimCommentCharsFromStartOfLine (const String& line);
 
-String hexString8Digits (int value);
-
 String createAlphaNumericUID();
 String createGUID (const String& seed); // Turns a seed into a windows GUID
 
@@ -40,17 +38,12 @@ String addQuotesIfContainsSpaces (const String& text);
 StringPairArray parsePreprocessorDefs (const String& defs);
 StringPairArray mergePreprocessorDefs (StringPairArray inheritedDefs, const StringPairArray& overridingDefs);
 String createGCCPreprocessorFlags (const StringPairArray& defs);
-String replacePreprocessorDefs (const StringPairArray& definitions, String sourceString);
 
 StringArray getCleanedStringArray (StringArray);
 StringArray getSearchPathsFromString (const String& searchPath);
 StringArray getCommaOrWhitespaceSeparatedItems (const String&);
 
 void setValueIfVoid (Value value, const var& defaultValue);
-
-void addPlistDictionaryKey (XmlElement* xml, const String& key, const String& value);
-void addPlistDictionaryKeyBool (XmlElement* xml, const String& key, bool value);
-void addPlistDictionaryKeyInt (XmlElement* xml, const String& key, int value);
 
 bool fileNeedsCppSyntaxHighlighting (const File& file);
 

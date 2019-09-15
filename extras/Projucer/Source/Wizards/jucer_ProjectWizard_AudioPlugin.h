@@ -41,7 +41,7 @@ struct AudioPluginAppWizard   : public NewProjectWizard
     {
         createSourceFolder();
 
-        String filterClassName = CodeHelpers::makeValidIdentifier (appTitle, true, true, false) + "AudioProcessor";
+        String filterClassName = build_tools::makeValidIdentifier (appTitle, true, true, false) + "AudioProcessor";
         filterClassName = filterClassName.substring (0, 1).toUpperCase() + filterClassName.substring (1);
         String editorClassName = filterClassName + "Editor";
 
@@ -50,7 +50,7 @@ struct AudioPluginAppWizard   : public NewProjectWizard
         File editorCppFile = getSourceFilesFolder().getChildFile ("PluginEditor.cpp");
         File editorHFile   = editorCppFile.withFileExtension (".h");
 
-        project.setProjectType (ProjectType_AudioPlugin::getTypeName());
+        project.setProjectType (build_tools::ProjectType_AudioPlugin::getTypeName());
 
         setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
 
@@ -77,16 +77,16 @@ struct AudioPluginAppWizard   : public NewProjectWizard
                             .replace ("%%filter_class_name%%", filterClassName, false)
                             .replace ("%%editor_class_name%%", editorClassName, false);
 
-        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (filterCppFile, filterCpp))
+        if (!build_tools::overwriteFileWithNewDataIfDifferent (filterCppFile, filterCpp))
             failedFiles.add (filterCppFile.getFullPathName());
 
-        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (filterHFile, filterH))
+        if (!build_tools::overwriteFileWithNewDataIfDifferent (filterHFile, filterH))
             failedFiles.add (filterHFile.getFullPathName());
 
-        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (editorCppFile, editorCpp))
+        if (!build_tools::overwriteFileWithNewDataIfDifferent (editorCppFile, editorCpp))
             failedFiles.add (editorCppFile.getFullPathName());
 
-        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (editorHFile, editorH))
+        if (!build_tools::overwriteFileWithNewDataIfDifferent (editorHFile, editorH))
             failedFiles.add (editorHFile.getFullPathName());
 
         Project::Item sourceGroup (createSourceGroup (project));

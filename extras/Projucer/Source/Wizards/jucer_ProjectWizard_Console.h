@@ -52,7 +52,7 @@ struct ConsoleAppWizard   : public NewProjectWizard
     {
         createSourceFolder();
 
-        project.setProjectType (ProjectType_ConsoleApp::getTypeName());
+        project.setProjectType (build_tools::ProjectType_ConsoleApp::getTypeName());
 
         Project::Item sourceGroup (createSourceGroup (project));
 
@@ -65,7 +65,7 @@ struct ConsoleAppWizard   : public NewProjectWizard
             String mainCpp = project.getFileTemplate ("jucer_MainConsoleAppTemplate_cpp")
                                 .replace ("%%app_headers%%", CodeHelpers::createIncludePathIncludeStatement (Project::getJuceSourceHFilename()), false);
 
-            if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
+            if (!build_tools::overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
                 failedFiles.add (mainCppFile.getFullPathName());
 
             sourceGroup.addFileAtIndex (mainCppFile, -1, true);

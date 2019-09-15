@@ -66,18 +66,18 @@ struct NewProjectWizard
     {
         return
         {
-            "juce_core",
-            "juce_events",
-            "juce_graphics",
-            "juce_data_structures",
-            "juce_gui_basics",
-            "juce_gui_extra",
-            "juce_cryptography",
-            "juce_opengl",
             "juce_audio_basics",
             "juce_audio_devices",
             "juce_audio_formats",
-            "juce_audio_processors"
+            "juce_audio_processors",
+            "juce_core",
+            "juce_cryptography",
+            "juce_data_structures",
+            "juce_events",
+            "juce_graphics",
+            "juce_gui_basics",
+            "juce_gui_extra",
+            "juce_opengl",
         };
     }
 

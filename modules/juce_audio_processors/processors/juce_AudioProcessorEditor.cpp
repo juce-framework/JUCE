@@ -211,20 +211,16 @@ void AudioProcessorEditor::setScaleFactor (float newScale)
 }
 
 //==============================================================================
-#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && JucePlugin_Build_Unity
- typedef ComponentPeer* (*createUnityPeerFunctionType) (Component&);
- createUnityPeerFunctionType juce_createUnityPeerFn = nullptr;
-#endif
+typedef ComponentPeer* (*createUnityPeerFunctionType) (Component&);
+createUnityPeerFunctionType juce_createUnityPeerFn = nullptr;
 
 ComponentPeer* AudioProcessorEditor::createNewPeer (int styleFlags, void* nativeWindow)
 {
-   #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && JucePlugin_Build_Unity
     if (juce_createUnityPeerFn != nullptr)
     {
         ignoreUnused (styleFlags, nativeWindow);
         return juce_createUnityPeerFn (*this);
     }
-   #endif
 
     return Component::createNewPeer (styleFlags, nativeWindow);
 }

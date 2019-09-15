@@ -31,7 +31,7 @@ struct DynamicLibraryWizard   : public NewProjectWizard
     bool initialiseProject (Project& project) override
     {
         createSourceFolder();
-        project.setProjectType (ProjectType_DLL::getTypeName());
+        project.setProjectType (build_tools::ProjectType_DLL::getTypeName());
         createSourceGroup (project);
         setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
 

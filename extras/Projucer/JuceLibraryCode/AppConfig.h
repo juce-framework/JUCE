@@ -70,6 +70,7 @@
 
 //==============================================================================
 #define JUCE_MODULE_AVAILABLE_juce_analytics            1
+#define JUCE_MODULE_AVAILABLE_juce_build_tools          1
 #define JUCE_MODULE_AVAILABLE_juce_core                 1
 #define JUCE_MODULE_AVAILABLE_juce_cryptography         1
 #define JUCE_MODULE_AVAILABLE_juce_data_structures      1

@@ -127,7 +127,7 @@ String GeneratedCode::getCallbackDefinitions() const
         CallbackMethod* const cm = callbacks.getUnchecked(i);
 
         const String userCodeBlockName ("User"
-            + CodeHelpers::makeValidIdentifier (cm->prototype.upToFirstOccurrenceOf ("(", false, false),
+            + build_tools::makeValidIdentifier (cm->prototype.upToFirstOccurrenceOf ("(", false, false),
                                                 true, true, false).trim());
 
         if (userCodeBlockName.isNotEmpty() && cm->hasPrePostUserSections)

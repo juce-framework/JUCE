@@ -26,7 +26,7 @@ namespace
 {
     String makeValid4CC (const String& seed)
     {
-        auto s = CodeHelpers::makeValidIdentifier (seed, false, true, false) + "xxxx";
+        auto s = build_tools::makeValidIdentifier (seed, false, true, false) + "xxxx";
 
         return s.substring (0, 1).toUpperCase()
              + s.substring (1, 4).toLowerCase();
@@ -92,7 +92,7 @@ void Project::updateTitleDependencies()
     pluginNameValue.          setDefault (projectName);
     pluginDescriptionValue.   setDefault (projectName);
     bundleIdentifierValue.    setDefault (getDefaultBundleIdentifierString());
-    pluginAUExportPrefixValue.setDefault (CodeHelpers::makeValidIdentifier (projectName, false, true, false) + "AU");
+    pluginAUExportPrefixValue.setDefault (build_tools::makeValidIdentifier (projectName, false, true, false) + "AU");
     pluginAAXIdentifierValue. setDefault (getDefaultAAXIdentifierString());
 }
 
@@ -199,7 +199,7 @@ void Project::initialiseProjectValues()
     companyWebsiteValue.referTo      (projectRoot, Ids::companyWebsite,   getUndoManager());
     companyEmailValue.referTo        (projectRoot, Ids::companyEmail,     getUndoManager());
 
-    projectTypeValue.referTo         (projectRoot, Ids::projectType,      getUndoManager(), ProjectType_GUIApp::getTypeName());
+    projectTypeValue.referTo         (projectRoot, Ids::projectType,      getUndoManager(), build_tools::ProjectType_GUIApp::getTypeName());
     versionValue.referTo             (projectRoot, Ids::version,          getUndoManager(), "1.0.0");
     bundleIdentifierValue.referTo    (projectRoot, Ids::bundleIdentifier, getUndoManager(), getDefaultBundleIdentifierString());
 
@@ -253,7 +253,7 @@ void Project::initialiseAudioPluginValues()
     pluginChannelConfigsValue.referTo        (projectRoot, Ids::pluginChannelConfigs,       getUndoManager());
     pluginAAXIdentifierValue.referTo         (projectRoot, Ids::aaxIdentifier,              getUndoManager(), getDefaultAAXIdentifierString());
     pluginAUExportPrefixValue.referTo        (projectRoot, Ids::pluginAUExportPrefix,       getUndoManager(),
-                                              CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false) + "AU");
+                                              build_tools::makeValidIdentifier (getProjectNameString(), false, true, false) + "AU");
 
     pluginAUMainTypeValue.referTo            (projectRoot, Ids::pluginAUMainType,           getUndoManager(), getDefaultAUMainTypes(),    ",");
     pluginAUSandboxSafeValue.referTo         (projectRoot, Ids::pluginAUIsSandboxSafe,      getUndoManager(), false);
@@ -689,7 +689,7 @@ bool Project::saveProjectRootToFile()
     {
         MemoryOutputStream mo;
         xml->writeTo (mo, {});
-        return FileHelpers::overwriteFileWithNewDataIfDifferent (getFile(), mo);
+        return build_tools::overwriteFileWithNewDataIfDifferent (getFile(), mo);
     }
 
     jassertfalse;
@@ -769,17 +769,17 @@ File Project::resolveFilename (String filename) const
     if (filename.isEmpty())
         return {};
 
-    filename = replacePreprocessorDefs (getPreprocessorDefs(), filename);
+    filename = build_tools::replacePreprocessorDefs (getPreprocessorDefs(), filename);
 
    #if ! JUCE_WINDOWS
     if (filename.startsWith ("~"))
         return File::getSpecialLocation (File::userHomeDirectory).getChildFile (filename.trimCharactersAtStart ("~/"));
    #endif
 
-    if (FileHelpers::isAbsolutePath (filename))
-        return File::createFileWithoutCheckingPath (FileHelpers::currentOSStylePath (filename)); // (avoid assertions for windows-style paths)
+    if (build_tools::isAbsolutePath (filename))
+        return File::createFileWithoutCheckingPath (build_tools::currentOSStylePath (filename)); // (avoid assertions for windows-style paths)
 
-    return getFile().getSiblingFile (FileHelpers::currentOSStylePath (filename));
+    return getFile().getSiblingFile (build_tools::currentOSStylePath (filename));
 }
 
 String Project::getRelativePathForFile (const File& file) const
@@ -800,24 +800,24 @@ String Project::getRelativePathForFile (const File& file) const
     if (p1.upToFirstOccurrenceOf (File::getSeparatorString(), true, false)
           .equalsIgnoreCase (p2.upToFirstOccurrenceOf (File::getSeparatorString(), true, false)))
     {
-        filename = FileHelpers::getRelativePathFrom (file, relativePathBase);
+        filename = build_tools::getRelativePathFrom (file, relativePathBase);
     }
 
     return filename;
 }
 
 //==============================================================================
-const ProjectType& Project::getProjectType() const
+const build_tools::ProjectType& Project::getProjectType() const
 {
-    if (auto* type = ProjectType::findType (getProjectTypeString()))
+    if (auto* type = build_tools::ProjectType::findType (getProjectTypeString()))
         return *type;
 
-    auto* guiType = ProjectType::findType (ProjectType_GUIApp::getTypeName());
+    auto* guiType = build_tools::ProjectType::findType (build_tools::ProjectType_GUIApp::getTypeName());
     jassert (guiType != nullptr);
     return *guiType;
 }
 
-bool Project::shouldBuildTargetType (ProjectType::Target::Type targetType) const noexcept
+bool Project::shouldBuildTargetType (build_tools::ProjectType::Target::Type targetType) const noexcept
 {
     auto& projectType = getProjectType();
 
@@ -826,31 +826,31 @@ bool Project::shouldBuildTargetType (ProjectType::Target::Type targetType) const
 
     switch (targetType)
     {
-        case ProjectType::Target::VSTPlugIn:
+        case build_tools::ProjectType::Target::VSTPlugIn:
             return shouldBuildVST();
-        case ProjectType::Target::VST3PlugIn:
+        case build_tools::ProjectType::Target::VST3PlugIn:
             return shouldBuildVST3();
-        case ProjectType::Target::AAXPlugIn:
+        case build_tools::ProjectType::Target::AAXPlugIn:
             return shouldBuildAAX();
-        case ProjectType::Target::RTASPlugIn:
+        case build_tools::ProjectType::Target::RTASPlugIn:
             return shouldBuildRTAS();
-        case ProjectType::Target::AudioUnitPlugIn:
+        case build_tools::ProjectType::Target::AudioUnitPlugIn:
             return shouldBuildAU();
-        case ProjectType::Target::AudioUnitv3PlugIn:
+        case build_tools::ProjectType::Target::AudioUnitv3PlugIn:
             return shouldBuildAUv3();
-        case ProjectType::Target::StandalonePlugIn:
+        case build_tools::ProjectType::Target::StandalonePlugIn:
             return shouldBuildStandalonePlugin();
-        case ProjectType::Target::UnityPlugIn:
+        case build_tools::ProjectType::Target::UnityPlugIn:
             return shouldBuildUnityPlugin();
-        case ProjectType::Target::AggregateTarget:
-        case ProjectType::Target::SharedCodeTarget:
+        case build_tools::ProjectType::Target::AggregateTarget:
+        case build_tools::ProjectType::Target::SharedCodeTarget:
             return projectType.isAudioPlugin();
-        case ProjectType::Target::unspecified:
+        case build_tools::ProjectType::Target::unspecified:
             return false;
-        case ProjectType::Target::GUIApp:
-        case ProjectType::Target::ConsoleApp:
-        case ProjectType::Target::StaticLibrary:
-        case ProjectType::Target::DynamicLibrary:
+        case build_tools::ProjectType::Target::GUIApp:
+        case build_tools::ProjectType::Target::ConsoleApp:
+        case build_tools::ProjectType::Target::StaticLibrary:
+        case build_tools::ProjectType::Target::DynamicLibrary:
         default:
             break;
     }
@@ -858,67 +858,18 @@ bool Project::shouldBuildTargetType (ProjectType::Target::Type targetType) const
     return true;
 }
 
-ProjectType::Target::Type Project::getTargetTypeFromFilePath (const File& file, bool returnSharedTargetIfNoValidSuffix)
+build_tools::ProjectType::Target::Type Project::getTargetTypeFromFilePath (const File& file, bool returnSharedTargetIfNoValidSuffix)
 {
-    if      (LibraryModule::CompileUnit::hasSuffix (file, "_AU"))         return ProjectType::Target::AudioUnitPlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AUv3"))       return ProjectType::Target::AudioUnitv3PlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AAX"))        return ProjectType::Target::AAXPlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_RTAS"))       return ProjectType::Target::RTASPlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST2"))       return ProjectType::Target::VSTPlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST3"))       return ProjectType::Target::VST3PlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Standalone")) return ProjectType::Target::StandalonePlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Unity"))      return ProjectType::Target::UnityPlugIn;
+    if      (LibraryModule::CompileUnit::hasSuffix (file, "_AU"))         return build_tools::ProjectType::Target::AudioUnitPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AUv3"))       return build_tools::ProjectType::Target::AudioUnitv3PlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AAX"))        return build_tools::ProjectType::Target::AAXPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_RTAS"))       return build_tools::ProjectType::Target::RTASPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST2"))       return build_tools::ProjectType::Target::VSTPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST3"))       return build_tools::ProjectType::Target::VST3PlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Standalone")) return build_tools::ProjectType::Target::StandalonePlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Unity"))      return build_tools::ProjectType::Target::UnityPlugIn;
 
-    return (returnSharedTargetIfNoValidSuffix ? ProjectType::Target::SharedCodeTarget : ProjectType::Target::unspecified);
-}
-
-const char* ProjectType::Target::getName() const noexcept
-{
-    switch (type)
-    {
-        case GUIApp:            return "App";
-        case ConsoleApp:        return "ConsoleApp";
-        case StaticLibrary:     return "Static Library";
-        case DynamicLibrary:    return "Dynamic Library";
-        case VSTPlugIn:         return "VST";
-        case VST3PlugIn:        return "VST3";
-        case AudioUnitPlugIn:   return "AU";
-        case StandalonePlugIn:  return "Standalone Plugin";
-        case AudioUnitv3PlugIn: return "AUv3 AppExtension";
-        case AAXPlugIn:         return "AAX";
-        case RTASPlugIn:        return "RTAS";
-        case UnityPlugIn:       return "Unity Plugin";
-        case SharedCodeTarget:  return "Shared Code";
-        case AggregateTarget:   return "All";
-        case unspecified:
-        default:                return "undefined";
-    }
-}
-
-ProjectType::Target::TargetFileType ProjectType::Target::getTargetFileType() const noexcept
-{
-    switch (type)
-    {
-        case GUIApp:            return executable;
-        case ConsoleApp:        return executable;
-        case StaticLibrary:     return staticLibrary;
-        case DynamicLibrary:    return sharedLibraryOrDLL;
-        case VSTPlugIn:         return pluginBundle;
-        case VST3PlugIn:        return pluginBundle;
-        case AudioUnitPlugIn:   return pluginBundle;
-        case StandalonePlugIn:  return executable;
-        case AudioUnitv3PlugIn: return macOSAppex;
-        case AAXPlugIn:         return pluginBundle;
-        case RTASPlugIn:        return pluginBundle;
-        case UnityPlugIn:       return pluginBundle;
-        case SharedCodeTarget:  return staticLibrary;
-        case AggregateTarget:
-        case unspecified:
-        default:
-            break;
-    }
-
-    return unknown;
+    return (returnSharedTargetIfNoValidSuffix ? build_tools::ProjectType::Target::SharedCodeTarget : build_tools::ProjectType::Target::unspecified);
 }
 
 //==============================================================================
@@ -990,7 +941,7 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
         StringArray projectTypeNames;
         Array<var> projectTypeCodes;
 
-        auto types = ProjectType::getAllTypes();
+        auto types = build_tools::ProjectType::getAllTypes();
 
         for (int i = 0; i < types.size(); ++i)
         {
@@ -1144,33 +1095,6 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
 }
 
 //==============================================================================
-static StringArray getVersionSegments (const Project& p)
-{
-    auto segments = StringArray::fromTokens (p.getVersionString(), ",.", "");
-    segments.trim();
-    segments.removeEmptyStrings();
-    return segments;
-}
-
-int Project::getVersionAsHexInteger() const
-{
-    auto segments = getVersionSegments (*this);
-
-    auto value = (segments[0].getIntValue() << 16)
-               + (segments[1].getIntValue() << 8)
-               +  segments[2].getIntValue();
-
-    if (segments.size() > 3)
-        value = (value << 8) + segments[3].getIntValue();
-
-    return value;
-}
-
-String Project::getVersionAsHex() const
-{
-    return "0x" + String::toHexString (getVersionAsHexInteger());
-}
-
 File Project::getBinaryDataCppFile (int index) const
 {
     auto cpp = getGeneratedCodeFolder().getChildFile ("BinaryData.cpp");
@@ -1344,11 +1268,11 @@ File Project::Item::getFile() const
 
 void Project::Item::setFile (const File& file)
 {
-    setFile (RelativePath (project.getRelativePathForFile (file), RelativePath::projectFolder));
+    setFile (build_tools::RelativePath (project.getRelativePathForFile (file), build_tools::RelativePath::projectFolder));
     jassert (getFile() == file);
 }
 
-void Project::Item::setFile (const RelativePath& file)
+void Project::Item::setFile (const build_tools::RelativePath& file)
 {
     jassert (isFile());
     state.setProperty (Ids::file, file.toUnixStyle(), getUndoManager());
@@ -1370,7 +1294,7 @@ bool Project::Item::renameFile (const File& newFile)
     return false;
 }
 
-bool Project::Item::containsChildForFile (const RelativePath& file) const
+bool Project::Item::containsChildForFile (const build_tools::RelativePath& file) const
 {
     return state.getChildWithProperty (Ids::file, file.toUnixStyle()).isValid();
 }
@@ -1610,7 +1534,7 @@ void Project::Item::addFileUnchecked (const File& file, int insertIndex, const b
     }
 }
 
-bool Project::Item::addRelativeFile (const RelativePath& file, int insertIndex, bool shouldCompile)
+bool Project::Item::addRelativeFile (const build_tools::RelativePath& file, int insertIndex, bool shouldCompile)
 {
     Item item (project, ValueTree (Ids::FILE), belongsToModule);
     item.initialiseMissingProperties();
@@ -1754,8 +1678,8 @@ static String getCompanyNameOrDefault (StringRef str)
 
 String Project::getDefaultBundleIdentifierString() const
 {
-    return "com." + CodeHelpers::makeValidIdentifier (getCompanyNameOrDefault (getCompanyNameString()), false, true, false)
-            + "." + CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false);
+    return "com." + build_tools::makeValidIdentifier (getCompanyNameOrDefault (getCompanyNameString()), false, true, false)
+            + "." + build_tools::makeValidIdentifier (getProjectNameString(), false, true, false);
 }
 
 String Project::getDefaultPluginManufacturerString() const

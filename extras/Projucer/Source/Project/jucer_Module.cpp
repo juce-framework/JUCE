@@ -383,7 +383,7 @@ void LibraryModule::getConfigFlags (Project& project, OwnedArray<Project::Config
     }
 }
 
-static void addFileWithGroups (Project::Item& group, const RelativePath& file, const String& path)
+static void addFileWithGroups (Project::Item& group, const build_tools::RelativePath& file, const String& path)
 {
     auto slash = path.indexOfChar (File::getSeparatorChar());
 
@@ -436,7 +436,7 @@ bool LibraryModule::CompileUnit::isNeededForExporter (ProjectExporter& exporter)
 
     auto targetType = Project::getTargetTypeFromFilePath (file, false);
 
-    if (targetType != ProjectType::Target::unspecified && ! exporter.shouldBuildTargetType (targetType))
+    if (targetType != build_tools::ProjectType::Target::unspecified && ! exporter.shouldBuildTargetType (targetType))
         return false;
 
     return exporter.usesMMFiles() ? isCompiledForObjC
@@ -456,7 +456,7 @@ bool LibraryModule::CompileUnit::hasSuffix (const File& f, const char* suffix)
              || fileWithoutSuffix.containsIgnoreCase (suffix + String ("_"));
 }
 
-Array<LibraryModule::CompileUnit> LibraryModule::getAllCompileUnits (ProjectType::Target::Type forTarget) const
+Array<LibraryModule::CompileUnit> LibraryModule::getAllCompileUnits (build_tools::ProjectType::Target::Type forTarget) const
 {
     auto files = getFolder().findChildFiles (File::findFiles, false);
 
@@ -470,12 +470,12 @@ Array<LibraryModule::CompileUnit> LibraryModule::getAllCompileUnits (ProjectType
         if (file.getFileName().startsWithIgnoreCase (getID())
               && file.hasFileExtension (sourceFileExtensions))
         {
-            if (forTarget == ProjectType::Target::unspecified
+            if (forTarget == build_tools::ProjectType::Target::unspecified
              || forTarget == Project::getTargetTypeFromFilePath (file, true))
             {
                 CompileUnit cu;
                 cu.file = file;
-                units.add (cu);
+                units.add (std::move (cu));
             }
         }
     }
@@ -486,7 +486,7 @@ Array<LibraryModule::CompileUnit> LibraryModule::getAllCompileUnits (ProjectType
         cu.isCompiledForNonObjC = ! cu.file.hasFileExtension ("mm;m");
 
         if (cu.isCompiledForNonObjC)
-            if (files.contains (cu.file.withFileExtension ("mm")))
+            if (cu.file.withFileExtension ("mm").existsAsFile())
                 cu.isCompiledForObjC = false;
 
         jassert (cu.isCompiledForObjC || cu.isCompiledForNonObjC);
@@ -498,7 +498,7 @@ Array<LibraryModule::CompileUnit> LibraryModule::getAllCompileUnits (ProjectType
 void LibraryModule::findAndAddCompiledUnits (ProjectExporter& exporter,
                                              ProjectSaver* projectSaver,
                                              Array<File>& result,
-                                             ProjectType::Target::Type forTarget) const
+                                             build_tools::ProjectType::Target::Type forTarget) const
 {
     for (auto& cu : getAllCompileUnits (forTarget))
     {
@@ -532,7 +532,7 @@ void LibraryModule::addBrowseableCode (ProjectExporter& exporter, const Array<Fi
 
     for (auto& sourceFile : sourceFiles)
     {
-        auto pathWithinModule = FileHelpers::getRelativePathFrom (sourceFile, localModuleFolder);
+        auto pathWithinModule = build_tools::getRelativePathFrom (sourceFile, localModuleFolder);
 
         // (Note: in exporters like MSVC we have to avoid adding the same file twice, even if one of those instances
         // is flagged as being excluded from the build, because this overrides the other and it fails to compile)
@@ -731,8 +731,9 @@ void EnabledModuleList::addModule (const File& moduleFolder, bool copyLocally, b
             shouldCopyModuleFilesLocallyValue (moduleID) = copyLocally;
             shouldUseGlobalPathValue (moduleID) = useGlobalPath;
 
-            RelativePath path (moduleFolder.getParentDirectory(),
-                               project.getProjectFolder(), RelativePath::projectFolder);
+            build_tools::RelativePath path (moduleFolder.getParentDirectory(),
+                                            project.getProjectFolder(),
+                                            build_tools::RelativePath::projectFolder);
 
             for (Project::ExporterIterator exporter (project); exporter.next();)
                 exporter->getPathForModuleValue (moduleID) = path.toUnixStyle();

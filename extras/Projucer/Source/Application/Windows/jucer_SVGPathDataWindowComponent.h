@@ -77,7 +77,7 @@ public:
             MemoryOutputStream out;
 
             out << "static const unsigned char pathData[] = ";
-            CodeHelpers::writeDataAsCppLiteral (data.getMemoryBlock(), out, false, true);
+            build_tools::writeDataAsCppLiteral (data.getMemoryBlock(), out, false, true);
             out << newLine
                 << newLine
                 << "Path path;" << newLine

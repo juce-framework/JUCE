@@ -411,7 +411,7 @@ Component* ComponentLayout::addNewComponent (ComponentTypeHandler* const type, i
         std::unique_ptr<XmlElement> xml (type->createXmlFor (c.get(), this));
         c.reset (addComponentFromXml (*xml, true));
 
-        String memberName (CodeHelpers::makeValidIdentifier (type->getClassName (c.get()), true, true, false));
+        String memberName (build_tools::makeValidIdentifier (type->getClassName (c.get()), true, true, false));
         setComponentMemberVariableName (c.get(), memberName);
 
         selected.selectOnly (c.get());
@@ -852,7 +852,7 @@ String ComponentLayout::getComponentMemberVariableName (Component* comp) const
     String name (comp->getProperties() ["memberName"].toString());
 
     if (name.isEmpty())
-        name = getUnusedMemberName (CodeHelpers::makeValidIdentifier (comp->getName(), true, true, false), comp);
+        name = getUnusedMemberName (build_tools::makeValidIdentifier (comp->getName(), true, true, false), comp);
 
     return name;
 }
@@ -864,7 +864,7 @@ void ComponentLayout::setComponentMemberVariableName (Component* comp, const Str
 
     comp->getProperties().set ("memberName", String());
 
-    const String n (getUnusedMemberName (CodeHelpers::makeValidIdentifier (newName, false, true, false), comp));
+    const String n (getUnusedMemberName (build_tools::makeValidIdentifier (newName, false, true, false), comp));
     comp->getProperties().set ("memberName", n);
 
     if (n != oldName)
@@ -915,7 +915,7 @@ String ComponentLayout::getComponentVirtualClassName (Component* comp) const
 void ComponentLayout::setComponentVirtualClassName (Component* comp, const String& newName)
 {
     jassert (comp != nullptr);
-    const String name (CodeHelpers::makeValidIdentifier (newName, false, false, true));
+    const String name (build_tools::makeValidIdentifier (newName, false, false, true));
 
     if (name != getComponentVirtualClassName (comp))
     {

@@ -57,7 +57,6 @@ typedef TargetOS::OS DependencyPathOS;
 #include "../Utility/Helpers/jucer_MiscUtilities.h"
 #include "../Utility/Helpers/jucer_CodeHelpers.h"
 #include "../Utility/Helpers/jucer_FileHelpers.h"
-#include "../Utility/Helpers/jucer_RelativePath.h"
 #include "../Utility/Helpers/jucer_ValueSourceHelpers.h"
 #include "../Utility/Helpers/jucer_PresetIDs.h"
 #include "jucer_CommandIDs.h"

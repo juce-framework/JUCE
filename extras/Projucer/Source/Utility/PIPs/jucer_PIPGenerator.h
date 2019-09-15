@@ -64,7 +64,6 @@ private:
     bool copyRelativeFileToLocalSourceDirectory (const File&) const noexcept;
 
     StringArray getExtraPluginFormatsToBuild() const;
-    StringArray getPluginCharacteristics() const;
 
     String getPathForModule (const String&) const;
     File getExamplesDirectory() const;

@@ -154,7 +154,7 @@ String BinaryResources::browseForResource (const String& title,
 
 String BinaryResources::findUniqueName (const String& rootName) const
 {
-    auto nameRoot = CodeHelpers::makeValidIdentifier (rootName, true, true, false);
+    auto nameRoot = build_tools::makeValidIdentifier (rootName, true, true, false);
     auto name = nameRoot;
 
     auto names = getResourceNames();

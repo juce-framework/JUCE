@@ -214,7 +214,7 @@ public:
     {
         filesCreated.add (f);
 
-        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (f, newData))
+        if (!build_tools::overwriteFileWithNewDataIfDifferent (f, newData))
         {
             addError ("Can't write to file: " + f.getFullPathName());
             return false;
@@ -615,7 +615,7 @@ private:
     {
         auto binaryDataH = project.getBinaryDataHeaderFile();
 
-        ResourceFile resourceFile (project);
+        JucerResourceFile resourceFile (project);
 
         if (resourceFile.getNumFiles() > 0)
         {
@@ -626,20 +626,18 @@ private:
 
             resourceFile.setClassName (dataNamespace);
 
-            Array<File> binaryDataFiles;
-
             auto maxSize = project.getMaxBinaryFileSize();
 
             if (maxSize <= 0)
                 maxSize = 10 * 1024 * 1024;
 
-            auto r = resourceFile.write (binaryDataFiles, maxSize);
+            auto r = resourceFile.write (maxSize);
 
-            if (r.wasOk())
+            if (r.result.wasOk())
             {
                 hasBinaryData = true;
 
-                for (auto& f : binaryDataFiles)
+                for (auto& f : r.filesCreated)
                 {
                     filesCreated.add (f);
                     generatedFilesGroup.addFileRetainingSortOrder (f, ! f.hasFileExtension (".h"));
@@ -647,7 +645,7 @@ private:
             }
             else
             {
-                addError (r.getErrorMessage());
+                addError (r.result.getErrorMessage());
             }
         }
         else
@@ -690,15 +688,15 @@ private:
 
     void writeUnityScriptFile()
     {
-        auto unityScriptContents = replaceLineFeeds (BinaryData::jucer_UnityPluginGUIScript_cs,
+        auto unityScriptContents = replaceLineFeeds (BinaryData::UnityPluginGUIScript_cs_in,
                                                      projectLineFeed);
 
         auto projectName = Project::addUnityPluginPrefixIfNecessary (project.getProjectNameString());
 
-        unityScriptContents = unityScriptContents.replace ("%%plugin_class_name%%",  projectName.replace (" ", "_"))
-                                                 .replace ("%%plugin_name%%",        projectName)
-                                                 .replace ("%%plugin_vendor%%",      project.getPluginManufacturerString())
-                                                 .replace ("%%plugin_description%%", project.getPluginDescriptionString());
+        unityScriptContents = unityScriptContents.replace ("${plugin_class_name}",  projectName.replace (" ", "_"))
+                                                 .replace ("${plugin_name}",        projectName)
+                                                 .replace ("${plugin_vendor}",      project.getPluginManufacturerString())
+                                                 .replace ("${plugin_description}", project.getPluginDescriptionString());
 
         auto f = getGeneratedCodeFolder().getChildFile (project.getUnityScriptName());
 
@@ -759,7 +757,7 @@ private:
             if (! exporter->isCLion())
                 std::cout << "Finished saving: " << exporter->getName() << std::endl;
         }
-        catch (ProjectExporter::SaveError& error)
+        catch (build_tools::SaveError& error)
         {
             addError (error.message);
         }

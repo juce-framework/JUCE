@@ -22,17 +22,6 @@
 #include "../../Project/jucer_Module.h"
 
 //==============================================================================
-static String removeEnclosed (const String& input, const String& start, const String& end)
-{
-    auto startIndex = input.indexOf (start);
-    auto endIndex   = input.indexOf (end) + end.length();
-
-    if (startIndex != -1 && endIndex != -1)
-        return input.replaceSection (startIndex, endIndex - startIndex, {});
-
-    return input;
-}
-
 static void ensureSingleNewLineAfterIncludes (StringArray& lines)
 {
     int lastIncludeIndex = -1;
@@ -394,8 +383,12 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
 
         jucerTree.setProperty (Ids::pluginFormats, pluginFormatsToBuild.joinIntoString (","), nullptr);
 
-        if (! getPluginCharacteristics().isEmpty())
-            jucerTree.setProperty (Ids::pluginCharacteristicsValue, getPluginCharacteristics().joinIntoString (","), nullptr);
+        const auto characteristics = metadata[Ids::pluginCharacteristics].toString();
+
+        if (characteristics.isNotEmpty())
+            jucerTree.setProperty (Ids::pluginCharacteristicsValue,
+                                   characteristics.removeCharacters (" \t\n\r"),
+                                   nullptr);
     }
 
     return Result::ok();
@@ -422,52 +415,40 @@ void PIPGenerator::setModuleFlags (ValueTree& jucerTree)
 
 String PIPGenerator::getMainFileTextForType()
 {
-    String mainTemplate (BinaryData::jucer_PIPMain_cpp);
+    const auto type = metadata[Ids::type].toString();
 
-    auto includeFilename = [&]
+    const auto mainTemplate = [&]
+    {
+        if (type == "Console")
+            return String (BinaryData::PIPConsole_cpp_in);
+
+        if (type == "Component")
+            return String (BinaryData::PIPComponent_cpp_in)
+                   .replace ("${JUCE_PIP_NAME}",       metadata[Ids::name].toString())
+                   .replace ("${PROJECT_VERSION}",     metadata[Ids::version].toString())
+                   .replace ("${JUCE_PIP_MAIN_CLASS}", metadata[Ids::mainClass].toString());
+
+        if (type == "AudioProcessor")
+            return String (BinaryData::PIPAudioProcessor_cpp_in)
+                   .replace ("${JUCE_PIP_MAIN_CLASS}", metadata[Ids::mainClass].toString());
+
+        return String{};
+    }();
+
+    if (mainTemplate.isEmpty())
+        return {};
+
+    const auto includeFilename = [&]
     {
         if (useLocalCopy) return pipFile.getFileName();
         if (isTemp)       return pipFile.getFullPathName();
 
-        return RelativePath (pipFile, outputDirectory.getChildFile ("Source"), RelativePath::unknown).toUnixStyle();
+        return build_tools::RelativePath (pipFile,
+                                          outputDirectory.getChildFile ("Source"),
+                                          build_tools::RelativePath::unknown).toUnixStyle();
     }();
 
-    mainTemplate = mainTemplate.replace ("%%filename%%", includeFilename)
-                               .replace ("%%include_juce%%", CodeHelpers::createIncludePathIncludeStatement (Project::getJuceSourceHFilename()));
-
-    auto type = metadata[Ids::type].toString();
-
-    if (type == "Console")
-    {
-        mainTemplate = removeEnclosed (mainTemplate, "%%component_begin%%", "%%component_end%%");
-        mainTemplate = removeEnclosed (mainTemplate, "%%audioprocessor_begin%%", "%%audioprocessor_end%%");
-        mainTemplate = mainTemplate.replace ("%%console_begin%%", {}).replace ("%%console_end%%", {});
-
-        return ensureCorrectWhitespace (mainTemplate);
-    }
-    else if (type == "Component")
-    {
-        mainTemplate = removeEnclosed (mainTemplate, "%%audioprocessor_begin%%", "%%audioprocessor_end%%");
-        mainTemplate = removeEnclosed (mainTemplate, "%%console_begin%%", "%%console_end%%");
-        mainTemplate = mainTemplate.replace ("%%component_begin%%", {}).replace ("%%component_end%%", {});
-
-        mainTemplate = mainTemplate.replace ("%%project_name%%",    metadata[Ids::name].toString());
-        mainTemplate = mainTemplate.replace ("%%project_version%%", metadata[Ids::version].toString());
-
-        return ensureCorrectWhitespace (mainTemplate.replace ("%%startup%%", "mainWindow.reset (new MainWindow (" + metadata[Ids::name].toString().quoted()
-                                                            + ", new " + metadata[Ids::mainClass].toString() + "(), *this));")
-                                                    .replace ("%%shutdown%%", "mainWindow = nullptr;"));
-    }
-    else if (type == "AudioProcessor")
-    {
-        mainTemplate = removeEnclosed (mainTemplate, "%%component_begin%%", "%%component_end%%");
-        mainTemplate = removeEnclosed (mainTemplate, "%%console_begin%%", "%%console_end%%");
-        mainTemplate = mainTemplate.replace ("%%audioprocessor_begin%%", {}).replace ("%%audioprocessor_end%%", {});
-
-        return ensureCorrectWhitespace (mainTemplate.replace ("%%class_name%%", metadata[Ids::mainClass].toString()));
-    }
-
-    return {};
+    return ensureCorrectWhitespace (mainTemplate.replace ("${JUCE_PIP_HEADER}", includeFilename));
 }
 
 //==============================================================================
@@ -509,34 +490,20 @@ bool PIPGenerator::copyRelativeFileToLocalSourceDirectory (const File& fileToCop
 
 StringArray PIPGenerator::getExtraPluginFormatsToBuild() const
 {
-    auto name = metadata[Ids::name].toString();
+    auto tokens = StringArray::fromTokens (metadata[Ids::extraPluginFormats].toString(), ",", {});
 
-    if (name == "AUv3SynthPlugin" || name == "AudioPluginDemo")
-        return { Ids::buildAUv3.toString() };
-    else if (name == "InterAppAudioEffectPlugin")
-        return { Ids::enableIAA.toString() };
+    for (auto& token : tokens)
+    {
+        token = [&]
+        {
+            if (token == "IAA")
+                return Ids::enableIAA.toString();
 
-    return {};
-}
+            return "build" + token;
+        }();
+    }
 
-StringArray PIPGenerator::getPluginCharacteristics() const
-{
-    auto name = metadata[Ids::name].toString();
-
-    if (name == "AudioPluginDemo")
-        return { Ids::pluginIsSynth.toString(),
-                 Ids::pluginWantsMidiIn.toString(),
-                 Ids::pluginProducesMidiOut.toString(),
-                 Ids::pluginEditorRequiresKeys.toString() };
-    else if (name == "AUv3SynthPlugin" || name == "MultiOutSynthPlugin")
-        return { Ids::pluginIsSynth.toString(),
-                 Ids::pluginWantsMidiIn.toString() };
-    else if (name == "ArpeggiatorPlugin")
-        return { Ids::pluginWantsMidiIn.toString(),
-                 Ids::pluginProducesMidiOut.toString(),
-                 Ids::pluginIsMidiEffectPlugin.toString() };
-
-    return {};
+    return tokens;
 }
 
 String PIPGenerator::getPathForModule (const String& moduleID) const
@@ -548,7 +515,9 @@ String PIPGenerator::getPathForModule (const String& moduleID) const
             if (isTemp)
                 return juceModulesPath.getFullPathName();
 
-            return RelativePath (juceModulesPath, outputDirectory, RelativePath::projectFolder).toUnixStyle();
+            return build_tools::RelativePath (juceModulesPath,
+                                              outputDirectory,
+                                              build_tools::RelativePath::projectFolder).toUnixStyle();
         }
     }
     else if (availableUserModules != nullptr)
@@ -558,7 +527,9 @@ String PIPGenerator::getPathForModule (const String& moduleID) const
         if (isTemp)
             return moduleRoot.getFullPathName();
 
-        return RelativePath (moduleRoot , outputDirectory, RelativePath::projectFolder).toUnixStyle();
+        return build_tools::RelativePath (moduleRoot,
+                                          outputDirectory,
+                                          build_tools::RelativePath::projectFolder).toUnixStyle();
     }
 
     return {};

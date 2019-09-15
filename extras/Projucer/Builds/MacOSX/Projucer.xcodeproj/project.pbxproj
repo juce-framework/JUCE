@@ -297,6 +297,10 @@
 			isa = PBXBuildFile;
 			fileRef = 805A3A5FBA3B9E28363DD77B;
 		};
+		4C743A3DA8682EEE89BDBD28 = {
+			isa = PBXBuildFile;
+			fileRef = E2687B099347B364D1919A9B;
+		};
 		5DD883699B85E4C492CAD065 = {
 			isa = PBXBuildFile;
 			fileRef = DB9C8E35DF815B803CB4A9CF;
@@ -640,6 +644,13 @@
 			path = "../../../../modules/juce_events";
 			sourceTree = "SOURCE_ROOT";
 		};
+		233C7FC5157176DB33FE2F27 = {
+			isa = PBXFileReference;
+			lastKnownFileType = file.nib;
+			name = RecentFilesMenuTemplate.nib;
+			path = ../../../Build/CMake/RecentFilesMenuTemplate.nib;
+			sourceTree = "SOURCE_ROOT";
+		};
 		23A8DE16C0CDB8EED18B008B = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -836,13 +847,6 @@
 			path = "../../Source/Utility/UI/jucer_SlidingPanelComponent.h";
 			sourceTree = "SOURCE_ROOT";
 		};
-		3DC2ED15A9DFAAEF3D2ACDDF = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = "jucer_PIPMain.cpp";
-			path = "../../Source/BinaryData/Templates/jucer_PIPMain.cpp";
-			sourceTree = "SOURCE_ROOT";
-		};
 		3EA27F52A254912218F4DE94 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -911,6 +915,13 @@
 			lastKnownFileType = file.svg;
 			name = "juce-logo-with-text.svg";
 			path = "../../Source/BinaryData/Icons/juce-logo-with-text.svg";
+			sourceTree = "SOURCE_ROOT";
+		};
+		463C8CF42FAA00014198B71B = {
+			isa = PBXFileReference;
+			lastKnownFileType = file.in;
+			name = PIPComponent.cpp.in;
+			path = ../../../Build/CMake/PIPComponent.cpp.in;
 			sourceTree = "SOURCE_ROOT";
 		};
 		471C7B0A8B92320AF0C80839 = {
@@ -1025,6 +1036,13 @@
 			path = "../../Source/ComponentEditor/jucer_ObjectTypes.h";
 			sourceTree = "SOURCE_ROOT";
 		};
+		50F89D3827B83B48855B3564 = {
+			isa = PBXFileReference;
+			lastKnownFileType = file.storyboard;
+			name = LaunchScreen.storyboard;
+			path = ../../../Build/CMake/LaunchScreen.storyboard;
+			sourceTree = "SOURCE_ROOT";
+		};
 		512D80BE12634967A085A1DC = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.cpp;
@@ -1107,13 +1125,6 @@
 			lastKnownFileType = sourcecode.c.h;
 			name = "jucer_ComponentTextProperty.h";
 			path = "../../Source/ComponentEditor/Properties/jucer_ComponentTextProperty.h";
-			sourceTree = "SOURCE_ROOT";
-		};
-		58139D8D454051C59E77609B = {
-			isa = PBXFileReference;
-			lastKnownFileType = file.nib;
-			name = RecentFilesMenuTemplate.nib;
-			path = ../../Source/BinaryData/RecentFilesMenuTemplate.nib;
 			sourceTree = "SOURCE_ROOT";
 		};
 		5867DC4E39DF8539B54C0D59 = {
@@ -1366,13 +1377,6 @@
 			lastKnownFileType = sourcecode.c.h;
 			name = "jucer_SnapGridPainter.h";
 			path = "../../Source/ComponentEditor/UI/jucer_SnapGridPainter.h";
-			sourceTree = "SOURCE_ROOT";
-		};
-		763A63E75AC802F17D11FE8B = {
-			isa = PBXFileReference;
-			lastKnownFileType = file.cs;
-			name = "jucer_UnityPluginGUIScript.cs";
-			path = "../../Source/BinaryData/Templates/jucer_UnityPluginGUIScript.cs";
 			sourceTree = "SOURCE_ROOT";
 		};
 		7687A1374C60A025BDBE98DE = {
@@ -1823,6 +1827,13 @@
 			path = "../../Source/ComponentEditor/UI/jucer_ComponentLayoutPanel.h";
 			sourceTree = "SOURCE_ROOT";
 		};
+		A0ECDAF137029C445910D3ED = {
+			isa = PBXFileReference;
+			lastKnownFileType = file.in;
+			name = PIPAudioProcessor.cpp.in;
+			path = ../../../Build/CMake/PIPAudioProcessor.cpp.in;
+			sourceTree = "SOURCE_ROOT";
+		};
 		A160AEF56553A658E6EA6A8E = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.cpp;
@@ -1975,13 +1986,6 @@
 			lastKnownFileType = file;
 			name = "juce_graphics";
 			path = "../../../../modules/juce_graphics";
-			sourceTree = "SOURCE_ROOT";
-		};
-		B8385E9A644BD3CD94876448 = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			name = "jucer_ProjectType.h";
-			path = "../../Source/Project/jucer_ProjectType.h";
 			sourceTree = "SOURCE_ROOT";
 		};
 		B83C9BD89F31EA9E5E12A3C6 = {
@@ -2390,6 +2394,13 @@
 			path = "Info-App.plist";
 			sourceTree = "SOURCE_ROOT";
 		};
+		E2687B099347B364D1919A9B = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = "include_juce_build_tools.cpp";
+			path = "../../JuceLibraryCode/include_juce_build_tools.cpp";
+			sourceTree = "SOURCE_ROOT";
+		};
 		E2B668E2A65AEE8F07B406C8 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -2474,6 +2485,13 @@
 			path = "../../Source/ComponentEditor/UI/jucer_PaintRoutineEditor.h";
 			sourceTree = "SOURCE_ROOT";
 		};
+		EE12741389A87D1BF04AE795 = {
+			isa = PBXFileReference;
+			lastKnownFileType = file;
+			name = "juce_build_tools";
+			path = "../../../Build/juce_build_tools";
+			sourceTree = "SOURCE_ROOT";
+		};
 		EE690110171E1648FF2118B8 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -2516,6 +2534,13 @@
 			path = "../../Source/Utility/Helpers/jucer_CodeHelpers.cpp";
 			sourceTree = "SOURCE_ROOT";
 		};
+		F313EE01ECE306DB2CFE011D = {
+			isa = PBXFileReference;
+			lastKnownFileType = file.in;
+			name = UnityPluginGUIScript.cs.in;
+			path = ../../../Build/CMake/UnityPluginGUIScript.cs.in;
+			sourceTree = "SOURCE_ROOT";
+		};
 		F3CC8F26ECCDA6DCD8A284D2 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -2549,6 +2574,13 @@
 			lastKnownFileType = sourcecode.c.h;
 			name = "jucer_TranslationToolWindowComponent.h";
 			path = "../../Source/Application/Windows/jucer_TranslationToolWindowComponent.h";
+			sourceTree = "SOURCE_ROOT";
+		};
+		F84D031B2A6BB1EE6A316C71 = {
+			isa = PBXFileReference;
+			lastKnownFileType = file.in;
+			name = PIPConsole.cpp.in;
+			path = ../../../Build/CMake/PIPConsole.cpp.in;
 			sourceTree = "SOURCE_ROOT";
 		};
 		F8A38C0C7C45F2DB6A5FB812 = {
@@ -2652,7 +2684,7 @@
 			name = Application;
 			sourceTree = "<group>";
 		};
-		8CF70DA9AB4725126B9F55BE = {
+		59BA7D0ED63ACD9A7F3E8814 = {
 			isa = PBXGroup;
 			children = (
 				129F2DE0FEF154F8F8C7A74E,
@@ -2663,7 +2695,7 @@
 			name = gradle;
 			sourceTree = "<group>";
 		};
-		F0F189518721D46C0F94FD56 = {
+		C83BF6127A39BE2C4ED80B67 = {
 			isa = PBXGroup;
 			children = (
 				514F2FAFDBF535AC03FA2E6C,
@@ -2690,7 +2722,7 @@
 			name = Icons;
 			sourceTree = "<group>";
 		};
-		E59ABA0D11CBAAD77179E9C6 = {
+		86B4069D904AB46AC86FB383 = {
 			isa = PBXGroup;
 			children = (
 				9A3B8BBDA8E144A3DF6B9349,
@@ -2722,25 +2754,28 @@
 				023B92AC0340305762412E90,
 				3F7C5B53347A487C7FBD2223,
 				4ECF029E3A69BF42FED1503D,
-				3DC2ED15A9DFAAEF3D2ACDDF,
 				E67999BF57B139E00207A374,
-				763A63E75AC802F17D11FE8B,
 			);
 			name = Templates;
 			sourceTree = "<group>";
 		};
-		A9399733CAA07BDAB958242C = {
+		DC3A4B0AD79334BA8A7E0661 = {
 			isa = PBXGroup;
 			children = (
-				8CF70DA9AB4725126B9F55BE,
-				F0F189518721D46C0F94FD56,
-				E59ABA0D11CBAAD77179E9C6,
+				50F89D3827B83B48855B3564,
+				A0ECDAF137029C445910D3ED,
+				463C8CF42FAA00014198B71B,
+				F84D031B2A6BB1EE6A316C71,
+				233C7FC5157176DB33FE2F27,
+				F313EE01ECE306DB2CFE011D,
+				59BA7D0ED63ACD9A7F3E8814,
+				C83BF6127A39BE2C4ED80B67,
+				86B4069D904AB46AC86FB383,
 				41105E536155E394E54BDD35,
 				5F6584B675E30761521A9F42,
 				59B08C7B13B8EA5137ACA77A,
 				8C281F2F8EA3AD614ADF7955,
 				4073A12E196BDDADE211E19F,
-				58139D8D454051C59E77609B,
 			);
 			name = BinaryData;
 			sourceTree = "<group>";
@@ -2979,7 +3014,6 @@
 				7211101FFA28400ADBB1D47A,
 				BAC43B20E14A340CCF14119C,
 				BF3CEF080FA013E2778DCE90,
-				B8385E9A644BD3CD94876448,
 			);
 			name = Project;
 			sourceTree = "<group>";
@@ -3111,7 +3145,7 @@
 			isa = PBXGroup;
 			children = (
 				BC67FD952A6F210A11A1ECB8,
-				A9399733CAA07BDAB958242C,
+				DC3A4B0AD79334BA8A7E0661,
 				F1B44F007A02A0FAE4DC8D79,
 				F6BD840F9A06F2DA891E2CB8,
 				144B649D98AE8316058B8281,
@@ -3129,6 +3163,7 @@
 			isa = PBXGroup;
 			children = (
 				58DE91CE6B05AFBACADDB251,
+				EE12741389A87D1BF04AE795,
 				BA159A3B7D129771F5C15EA3,
 				AA1C44E89D792DDC4867B2C8,
 				69555CEFC6ED613AA3949298,
@@ -3147,6 +3182,7 @@
 				472F9A90F685220D730EBF6C,
 				4F687965FBE86EAFDB3ACFEC,
 				805A3A5FBA3B9E28363DD77B,
+				E2687B099347B364D1919A9B,
 				DB9C8E35DF815B803CB4A9CF,
 				D766BB9D8C32B5560F0493F3,
 				1DE5BBC777FB64798D823002,
@@ -3243,6 +3279,7 @@
 				HEADER_SEARCH_PATHS = (
 					"../../JuceLibraryCode",
 					"../../../../modules",
+					"../../../Build",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = Info-App.plist;
@@ -3287,6 +3324,7 @@
 				HEADER_SEARCH_PATHS = (
 					"../../JuceLibraryCode",
 					"../../../../modules",
+					"../../../Build",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = Info-App.plist;
@@ -3487,6 +3525,7 @@
 				B7EBA1A83575F48CD08140B9,
 				3C5267E06A897B0DC0F7EA50,
 				202DC8CF15ACBE096CC327EA,
+				4C743A3DA8682EEE89BDBD28,
 				5DD883699B85E4C492CAD065,
 				D5C9125F65493CA481F18E53,
 				02E8F35A8E0D4A0DF6F38D60,

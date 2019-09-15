@@ -629,11 +629,11 @@ namespace
             MemoryBlock data;
             FileInputStream input (source);
             input.readIntoMemoryBlock (data);
-            CodeHelpers::writeDataAsCppLiteral (data, literal, true, true);
+            build_tools::writeDataAsCppLiteral (data, literal, true, true);
             dataSize = data.getSize();
         }
 
-        auto variableName = CodeHelpers::makeBinaryDataIdentifierName (source);
+        auto variableName = build_tools::makeBinaryDataIdentifierName (source);
 
         MemoryOutputStream header, cpp;
 

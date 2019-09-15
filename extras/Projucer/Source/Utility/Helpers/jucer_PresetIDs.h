@@ -328,6 +328,8 @@ namespace Ids
     DECLARE_ID (pluginCode);
     DECLARE_ID (pluginChannelConfigs);
     DECLARE_ID (pluginCharacteristicsValue);
+    DECLARE_ID (pluginCharacteristics);
+    DECLARE_ID (extraPluginFormats);
     DECLARE_ID (pluginIsSynth);
     DECLARE_ID (pluginWantsMidiIn);
     DECLARE_ID (pluginProducesMidiOut);

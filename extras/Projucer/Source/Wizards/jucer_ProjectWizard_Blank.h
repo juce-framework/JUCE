@@ -31,7 +31,7 @@ struct BlankAppWizard   : public NewProjectWizard
     bool initialiseProject (Project& project) override
     {
         createSourceFolder();
-        project.setProjectType (ProjectType_GUIApp::getTypeName());
+        project.setProjectType (build_tools::ProjectType_GUIApp::getTypeName());
         Project::Item sourceGroup (createSourceGroup (project));
         setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
 

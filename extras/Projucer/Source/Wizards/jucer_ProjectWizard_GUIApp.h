@@ -61,7 +61,7 @@ struct GUIAppWizard   : public NewProjectWizard
         File contentCompH   = contentCompCpp.withFileExtension (".h");
         String contentCompName = "MainComponent";
 
-        project.setProjectType (ProjectType_GUIApp::getTypeName());
+        project.setProjectType (build_tools::ProjectType_GUIApp::getTypeName());
 
         Project::Item sourceGroup (createSourceGroup (project));
 
@@ -79,7 +79,7 @@ struct GUIAppWizard   : public NewProjectWizard
                                 .replace ("%%include_juce%%", juceHeaderInclude)
                                 .replace ("%%content_component_class%%", contentCompName, false);
 
-            if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompH, windowH))
+            if (!build_tools::overwriteFileWithNewDataIfDifferent (contentCompH, windowH))
                 failedFiles.add (contentCompH.getFullPathName());
 
             sourceGroup.addFileAtIndex (contentCompH, -1, false);
@@ -91,7 +91,7 @@ struct GUIAppWizard   : public NewProjectWizard
                                     .replace ("%%include_corresponding_header%%", CodeHelpers::createIncludeStatement (contentCompH, contentCompCpp), false)
                                     .replace ("%%content_component_class%%", contentCompName, false);
 
-                if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompCpp, windowCpp))
+                if (!build_tools::overwriteFileWithNewDataIfDifferent (contentCompCpp, windowCpp))
                     failedFiles.add (contentCompCpp.getFullPathName());
 
                 sourceGroup.addFileAtIndex (contentCompCpp, -1, true);
@@ -103,11 +103,11 @@ struct GUIAppWizard   : public NewProjectWizard
             String mainCpp = project.getFileTemplate (createWindow ? "jucer_MainTemplate_Window_cpp"
                                                                    : "jucer_MainTemplate_NoWindow_cpp")
                                 .replace ("%%app_headers%%", appHeaders, false)
-                                .replace ("%%app_class_name%%", CodeHelpers::makeValidIdentifier (appTitle + "Application", false, true, false), false)
+                                .replace ("%%app_class_name%%", build_tools::makeValidIdentifier (appTitle + "Application", false, true, false), false)
                                 .replace ("%%content_component_class%%", contentCompName, false)
                                 .replace ("%%allow_more_than_one_instance%%", "true", false);
 
-            if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
+            if (!build_tools::overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
                 failedFiles.add (mainCppFile.getFullPathName());
 
             sourceGroup.addFileAtIndex (mainCppFile, -1, true);

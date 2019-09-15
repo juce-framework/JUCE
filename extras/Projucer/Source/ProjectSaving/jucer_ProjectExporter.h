@@ -95,18 +95,18 @@ public:
 
     //==============================================================================
     // cross-platform audio plug-ins supported by exporter
-    virtual bool supportsTargetType (ProjectType::Target::Type type) const = 0;
+    virtual bool supportsTargetType (build_tools::ProjectType::Target::Type type) const = 0;
 
-    inline bool shouldBuildTargetType (ProjectType::Target::Type type) const
+    inline bool shouldBuildTargetType (build_tools::ProjectType::Target::Type type) const
     {
         return project.shouldBuildTargetType (type) && supportsTargetType (type);
     }
 
-    inline void callForAllSupportedTargets (std::function<void (ProjectType::Target::Type)> callback)
+    inline void callForAllSupportedTargets (std::function<void (build_tools::ProjectType::Target::Type)> callback)
     {
-        for (int i = 0; i < ProjectType::Target::unspecified; ++i)
-            if (shouldBuildTargetType (static_cast<ProjectType::Target::Type> (i)))
-                callback (static_cast<ProjectType::Target::Type> (i));
+        for (int i = 0; i < build_tools::ProjectType::Target::unspecified; ++i)
+            if (shouldBuildTargetType (static_cast<build_tools::ProjectType::Target::Type> (i)))
+                callback (static_cast<build_tools::ProjectType::Target::Type> (i));
     }
 
     //==============================================================================
@@ -158,22 +158,22 @@ public:
 
     TargetOS::OS getTargetOSForExporter() const;
 
-    RelativePath getLegacyModulePath (const String& moduleID) const;
+    build_tools::RelativePath getLegacyModulePath (const String& moduleID) const;
     String getLegacyModulePath() const;
 
     // Returns a path to the actual module folder itself
-    RelativePath getModuleFolderRelativeToProject (const String& moduleID) const;
+    build_tools::RelativePath getModuleFolderRelativeToProject (const String& moduleID) const;
     void updateOldModulePaths();
 
-    RelativePath rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const;
-    void addToExtraSearchPaths (const RelativePath& pathFromProjectFolder, int index = -1);
-    void addToModuleLibPaths   (const RelativePath& pathFromProjectFolder);
+    build_tools::RelativePath rebaseFromProjectFolderToBuildTarget (const build_tools::RelativePath& path) const;
+    void addToExtraSearchPaths (const build_tools::RelativePath& pathFromProjectFolder, int index = -1);
+    void addToModuleLibPaths   (const build_tools::RelativePath& pathFromProjectFolder);
 
-    void addProjectPathToBuildPathList (StringArray&, const RelativePath&, int index = -1) const;
+    void addProjectPathToBuildPathList (StringArray&, const build_tools::RelativePath&, int index = -1) const;
 
     std::unique_ptr<Drawable> getBigIcon() const;
     std::unique_ptr<Drawable> getSmallIcon() const;
-    Image getBestIconForSize (int size, bool returnNullIfNothingBigEnough) const;
+    build_tools::Icons getIcons() const { return { getSmallIcon(), getBigIcon() }; }
 
     String getExporterIdentifierMacro() const
     {
@@ -182,21 +182,8 @@ public:
     }
 
     // An exception that can be thrown by the create() method.
-    class SaveError
-    {
-    public:
-        SaveError (const String& error) : message (error)
-        {}
-
-        SaveError (const File& fileThatFailedToWrite)
-            : message ("Can't write to the file: " + fileThatFailedToWrite.getFullPathName())
-        {}
-
-        String message;
-    };
-
     void createPropertyEditors (PropertyListBuilder&);
-    void addSettingsForProjectType (const ProjectType&);
+    void addSettingsForProjectType (const build_tools::ProjectType&);
 
     //==============================================================================
     void copyMainGroupFromProject();
@@ -339,11 +326,11 @@ public:
     String getExporterPreprocessorDefsString() const    { return extraPPDefsValue.get(); }
 
     // includes exporter, project + config defs
-    StringPairArray getAllPreprocessorDefs (const BuildConfiguration& config, const ProjectType::Target::Type targetType) const;
+    StringPairArray getAllPreprocessorDefs (const BuildConfiguration& config, const build_tools::ProjectType::Target::Type targetType) const;
     // includes exporter + project defs..
     StringPairArray getAllPreprocessorDefs() const;
 
-    void addTargetSpecificPreprocessorDefs (StringPairArray& defs, const ProjectType::Target::Type targetType) const;
+    void addTargetSpecificPreprocessorDefs (StringPairArray& defs, const build_tools::ProjectType::Target::Type targetType) const;
 
     String replacePreprocessorTokens (const BuildConfiguration&, const String& sourceString) const;
 
@@ -363,7 +350,7 @@ protected:
     //==============================================================================
     String name;
     Project& project;
-    const ProjectType& projectType;
+    const build_tools::ProjectType& projectType;
     const String projectName;
     const File projectFolder;
 
@@ -418,25 +405,13 @@ protected:
     static String getStaticLibbedFilename (String name)   { return addSuffix (addLibPrefix (name), ".a"); }
     static String getDynamicLibbedFilename (String name)  { return addSuffix (addLibPrefix (name), ".so"); }
 
-    virtual void addPlatformSpecificSettingsForProjectType (const ProjectType&) = 0;
+    virtual void addPlatformSpecificSettingsForProjectType (const build_tools::ProjectType&) = 0;
 
     //==============================================================================
-    static void overwriteFileIfDifferentOrThrow (const File& file, const MemoryOutputStream& newData)
-    {
-        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (file, newData))
-            throw SaveError (file);
-    }
-
-    static void overwriteFileIfDifferentOrThrow (const File& file, const String& newData)
-    {
-        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (file, newData))
-            throw SaveError (file);
-    }
-
     static void createDirectoryOrThrow (const File& dirToCreate)
     {
         if (! dirToCreate.createDirectory())
-            throw SaveError ("Can't create folder: " + dirToCreate.getFullPathName());
+            throw build_tools::SaveError ("Can't create folder: " + dirToCreate.getFullPathName());
     }
 
     static void writeXmlOrThrow (const XmlElement& xml, const File& file, const String& encoding,
@@ -449,10 +424,8 @@ protected:
 
         MemoryOutputStream mo (8192);
         xml.writeTo (mo, format);
-        overwriteFileIfDifferentOrThrow (file, mo);
+        build_tools::overwriteFileIfDifferentOrThrow (file, mo);
     }
-
-    static Image rescaleImageForIcon (Drawable&, int iconSize);
 
 private:
     //==============================================================================
@@ -477,7 +450,7 @@ private:
     void addVSTPathsIfPluginOrHost();
     void addCommonAudioPluginSettings();
     void addLegacyVSTFolderToPathIfSpecified();
-    RelativePath getInternalVST3SDKPath();
+    build_tools::RelativePath getInternalVST3SDKPath();
     void addVST3FolderToPath();
     void addAAXFoldersToPath();
 

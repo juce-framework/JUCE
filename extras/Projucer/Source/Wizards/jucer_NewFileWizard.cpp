@@ -36,7 +36,7 @@ namespace
 
     static bool fillInNewCppFileTemplate (const File& file, const Project::Item& item, const char* templateName)
     {
-        return FileHelpers::overwriteFileWithNewDataIfDifferent (file, fillInBasicTemplateFields (file, item, templateName));
+        return build_tools::overwriteFileWithNewDataIfDifferent (file, fillInBasicTemplateFields (file, item, templateName));
     }
 
     const int menuBaseID = 0x12d83f0;
@@ -145,7 +145,7 @@ public:
 
             const String className (aw.getTextEditorContents (getClassNameFieldName()).trim());
 
-            if (className == CodeHelpers::makeValidIdentifier (className, false, true, false))
+            if (className == build_tools::makeValidIdentifier (className, false, true, false))
             {
                 const File newFile (askUserToChooseNewFile (className + ".h", "*.h;*.cpp", parent));
 
@@ -166,7 +166,7 @@ public:
 
         content = replaceLineFeeds (content, parent.project.getProjectLineFeed());
 
-        if (FileHelpers::overwriteFileWithNewDataIfDifferent (newFile, content))
+        if (build_tools::overwriteFileWithNewDataIfDifferent (newFile, content))
         {
             parent.addFileRetainingSortOrder (newFile, true);
             return true;

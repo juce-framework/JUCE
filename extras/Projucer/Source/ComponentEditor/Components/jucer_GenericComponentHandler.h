@@ -142,7 +142,7 @@ private:
         void setText (const String& newText) override
         {
             document.perform (new GenericCompClassChangeAction (component, *document.getComponentLayout(),
-                                                                CodeHelpers::makeValidIdentifier (newText, false, false, true)),
+                                                                build_tools::makeValidIdentifier (newText, false, false, true)),
                               "Change generic component class");
         }
 

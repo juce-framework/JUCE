@@ -23,24 +23,27 @@
 
  BEGIN_JUCE_PIP_METADATA
 
- name:             AUv3SynthPlugin
- version:          1.0.0
- vendor:           JUCE
- website:          http://juce.com
- description:      AUv3 synthesiser audio plugin.
+ name:                  AUv3SynthPlugin
+ version:               1.0.0
+ vendor:                JUCE
+ website:               http://juce.com
+ description:           AUv3 synthesiser audio plugin.
 
- dependencies:     juce_audio_basics, juce_audio_devices, juce_audio_formats,
-                   juce_audio_plugin_client, juce_audio_processors,
-                   juce_audio_utils, juce_core, juce_data_structures,
-                   juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
- exporters:        xcode_mac, xcode_iphone
+ dependencies:          juce_audio_basics, juce_audio_devices, juce_audio_formats,
+                        juce_audio_plugin_client, juce_audio_processors,
+                        juce_audio_utils, juce_core, juce_data_structures,
+                        juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
+ exporters:             xcode_mac, xcode_iphone
 
- moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+ moduleFlags:           JUCE_STRICT_REFCOUNTEDPOINTER=1
 
- type:             AudioProcessor
- mainClass:        AUv3SynthProcessor
+ type:                  AudioProcessor
+ mainClass:             AUv3SynthProcessor
 
- useLocalCopy:     1
+ useLocalCopy:          1
+
+ pluginCharacteristics: pluginIsSynth, pluginWantsMidiIn
+ extraPluginFormats:    AUv3
 
  END_JUCE_PIP_METADATA
 

@@ -74,16 +74,18 @@ public:
     struct CompileUnit
     {
         File file;
-        bool isCompiledForObjC, isCompiledForNonObjC;
+        bool isCompiledForObjC = false, isCompiledForNonObjC = false;
 
         bool isNeededForExporter (ProjectExporter&) const;
         String getFilenameForProxyFile() const;
         static bool hasSuffix (const File&, const char*);
     };
 
-    Array<CompileUnit> getAllCompileUnits (ProjectType::Target::Type forTarget = ProjectType::Target::unspecified) const;
+    Array<CompileUnit> getAllCompileUnits (build_tools::ProjectType::Target::Type forTarget =
+                                               build_tools::ProjectType::Target::unspecified) const;
     void findAndAddCompiledUnits (ProjectExporter&, ProjectSaver*, Array<File>& result,
-                                  ProjectType::Target::Type forTarget = ProjectType::Target::unspecified) const;
+                                  build_tools::ProjectType::Target::Type forTarget =
+                                      build_tools::ProjectType::Target::unspecified) const;
 
     ModuleDescription moduleInfo;
 

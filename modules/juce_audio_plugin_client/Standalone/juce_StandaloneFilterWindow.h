@@ -356,7 +356,6 @@ public:
         return false;
     }
 
-   #if JUCE_MODULE_AVAILABLE_juce_gui_basics
     Image getIAAHostIcon (int size)
     {
        #if JUCE_IOS && JucePlugin_Enable_IAA
@@ -368,7 +367,6 @@ public:
 
         return {};
     }
-   #endif
 
     static StandalonePluginHolder* getInstance();
 

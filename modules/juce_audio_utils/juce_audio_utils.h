@@ -34,7 +34,7 @@
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
 
-  dependencies:       juce_gui_extra, juce_audio_processors, juce_audio_formats, juce_audio_devices
+  dependencies:       juce_audio_processors, juce_audio_formats, juce_audio_devices
   OSXFrameworks:      CoreAudioKit DiscRecording
   iOSFrameworks:      CoreAudioKit
 

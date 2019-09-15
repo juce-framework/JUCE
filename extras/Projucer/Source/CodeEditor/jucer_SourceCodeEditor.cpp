@@ -646,7 +646,7 @@ void CppCodeEditorComponent::insertComponentClass()
     {
         auto className = aw.getTextEditorContents (classNameField).trim();
 
-        if (className == CodeHelpers::makeValidIdentifier (className, false, true, false))
+        if (className == build_tools::makeValidIdentifier (className, false, true, false))
         {
             String code (BinaryData::jucer_InlineComponentTemplate_h);
             code = code.replace ("%%component_class%%", className);
