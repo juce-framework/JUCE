@@ -39,7 +39,7 @@ class JUCE_API  URL
 public:
     //==============================================================================
     /** Creates an empty URL. */
-    URL() noexcept;
+    URL();
 
     /** Creates a URL from a string.
         This will parse any embedded parameters after a '?' character and store them
@@ -147,6 +147,11 @@ public:
         @see withNewDomainAndPath
     */
     URL withNewSubPath (const String& newPath) const;
+
+    /** Attempts to return a URL which is the parent folder containing this URL.
+        If there isn't a parent, this method will just return a copy of this URL.
+    */
+    URL getParentURL() const;
 
     /** Returns a new URL that refers to a sub-path relative to this one.
         E.g. if the URL is "http://www.xyz.com/foo" and you call this with
@@ -263,7 +268,7 @@ public:
     URL withPOSTData (const MemoryBlock& postData) const;
 
     /** Returns the data that was set using withPOSTData(). */
-    String getPostData() const noexcept                             { return postData.toString(); }
+    String getPostData() const                                      { return postData.toString(); }
 
     /** Returns the data that was set using withPOSTData() as MemoryBlock. */
     const MemoryBlock& getPostDataAsMemoryBlock() const noexcept    { return postData; }
@@ -338,12 +343,12 @@ public:
     InputStream* createInputStream (bool doPostLikeRequest,
                                     OpenStreamProgressCallback* progressCallback = nullptr,
                                     void* progressCallbackContext = nullptr,
-                                    String extraHeaders = String(),
+                                    String extraHeaders = {},
                                     int connectionTimeOutMs = 0,
                                     StringPairArray* responseHeaders = nullptr,
                                     int* statusCode = nullptr,
                                     int numRedirectsToFollow = 5,
-                                    String httpRequestCmd = String()) const;
+                                    String httpRequestCmd = {}) const;
 
     /** Attempts to open an output stream to a URL for writing
 
