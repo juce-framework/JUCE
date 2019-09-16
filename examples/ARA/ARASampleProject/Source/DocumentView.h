@@ -225,7 +225,7 @@ private:
     class ScrollMasterViewport    : public Viewport
     {
     public:
-        ScrollMasterViewport (DocumentView& documentView) : documentView (documentView) {}
+        ScrollMasterViewport (DocumentView& docView) : documentView (docView) {}
         void visibleAreaChanged (const Rectangle<int>& newVisibleArea) override;
     private:
         DocumentView& documentView;

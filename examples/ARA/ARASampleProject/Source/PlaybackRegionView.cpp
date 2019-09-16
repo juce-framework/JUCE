@@ -2,11 +2,11 @@
 #include "DocumentView.h"
 
 //==============================================================================
-PlaybackRegionView::PlaybackRegionView (DocumentView& documentView, ARAPlaybackRegion* region)
-    : documentView (documentView),
+PlaybackRegionView::PlaybackRegionView (DocumentView& docView, ARAPlaybackRegion* region)
+    : documentView (docView),
       playbackRegion (region),
       audioThumbCache (1),
-      audioThumb (128, documentView.getAudioFormatManger(), audioThumbCache)
+      audioThumb (128, docView.getAudioFormatManger(), audioThumbCache)
 {
     audioThumb.addChangeListener (this);
 

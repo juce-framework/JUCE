@@ -4,10 +4,10 @@
 #include "PlaybackRegionView.h"
 
 //==============================================================================
-RegionSequenceView::RegionSequenceView (DocumentView& documentView, ARARegionSequence* sequence)
-    : documentView (documentView),
+RegionSequenceView::RegionSequenceView (DocumentView& docView, ARARegionSequence* sequence)
+    : documentView (docView),
       regionSequence (sequence),
-      trackHeaderView (documentView.createHeaderViewForRegionSequence (regionSequence))
+      trackHeaderView (docView.createHeaderViewForRegionSequence (regionSequence))
 {
     regionSequence->addListener (this);
 

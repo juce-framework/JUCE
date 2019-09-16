@@ -4,9 +4,9 @@
 #include "ARA_Library/Utilities/ARATimelineConversion.h"
 
 //==============================================================================
-RulersView::RulersView (DocumentView& documentView)
-    : documentView (documentView),
-      document (documentView.getDocument()),
+RulersView::RulersView (DocumentView& docView)
+    : documentView (docView),
+      document (docView.getDocument()),
       musicalContext (nullptr)
 {
     document->addListener (this);
