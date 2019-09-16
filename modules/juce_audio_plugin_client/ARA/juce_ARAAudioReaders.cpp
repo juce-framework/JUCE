@@ -62,26 +62,24 @@ void ARAAudioSourceReader::willEnableAudioSourceSamplesAccess (ARAAudioSource* a
 {
     jassert (audioSourceBeingRead == audioSource);
 
-    // unlocked in didEnableAudioSourceSamplesAccess
-    lock.enterWrite();
-
     // invalidate our reader if sample access is disabled
     if (! enable)
+    {
+        ScopedWriteLock scopedLock (lock);
         araHostReader.reset();
+    }
 }
 
 void ARAAudioSourceReader::didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable)
 {
     jassert (audioSourceBeingRead == audioSource);
 
-    // following the invalidation above we can recreate any readers
-    // we had before access was disabled
-
     // recreate our reader if sample access is enabled
     if (enable && isValid())
+    {
+        ScopedWriteLock scopedLock (lock);
         araHostReader.reset (new ARA::PlugIn::HostAudioReader (audioSourceBeingRead));
-
-    lock.exitWrite();
+    }
 }
 
 void ARAAudioSourceReader::willDestroyAudioSource (ARAAudioSource* audioSource)
