@@ -2283,7 +2283,7 @@ private:
     int32 blockSize = 1024;
     Vst2::AEffect vstEffect;
     CriticalSection stateInformationLock;
-    MemoryBlock chunkMemory;
+    juce::MemoryBlock chunkMemory;
     uint32 chunkMemoryTime = 0;
     std::unique_ptr<EditorCompWrapper> editorComp;
     Vst2::ERect editorBounds;
