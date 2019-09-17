@@ -4,7 +4,7 @@ ARASampleProjectDocumentController::ARASampleProjectDocumentController (const AR
     : ARADocumentController (instance),
       audioSourceReadingThread (String (JucePlugin_Name) + " ARA Sample Reading Thread")
 {
-    audioSourceReadingThread.startThread();
+    audioSourceReadingThread.startThread (7);   // above "default" priority so playback is fluent, but below realtime
 }
 
 //==============================================================================

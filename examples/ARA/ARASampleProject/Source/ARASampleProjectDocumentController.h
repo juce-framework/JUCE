@@ -13,6 +13,7 @@ class ARASampleProjectDocumentController    : public ARADocumentController
 public:
     ARASampleProjectDocumentController (const ARA::ARADocumentControllerHostInstance* instance) noexcept;
 
+    // thread shared by renderers to read audio source samples ahead-of-time
     TimeSliceThread& getAudioSourceReadingThread() { return audioSourceReadingThread; }
 
 private:
