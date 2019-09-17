@@ -113,7 +113,7 @@ Range<double> ARAPlaybackRegion::getTimeRange (bool includeHeadAndTail) const
     
     if (includeHeadAndTail)
     {
-        ARA::ARATimeDuration headTime{}, tailTime{};
+        ARA::ARATimeDuration headTime {}, tailTime {};
         getDocumentController()->getPlaybackRegionHeadAndTailTime (toRef (this), &headTime, &tailTime);
         startTime -= headTime;
         endTime += tailTime;
