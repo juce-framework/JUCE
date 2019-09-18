@@ -61,7 +61,7 @@ public:
 
     /** Returns true as long as the reader's underlying ARAAudioSource remains accessible and its sample content is not changed. */
     bool isValid() const { return audioSourceBeingRead != nullptr; }
-    /** Invalidate the reader - the reader will call this internally if needed, but can also be invalidated from the outside. */
+    /** Invalidate the reader - the reader will call this internally if needed, but can also be invalidated from the outside (from message thread only!). */
     void invalidate();
 
     void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARAAudioSource::PropertiesPtr newProperties) override;
