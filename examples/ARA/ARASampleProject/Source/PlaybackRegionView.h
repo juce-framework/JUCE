@@ -35,6 +35,7 @@ public:
     void didEndEditing (ARADocument* document) override;
 
     // ARAAudioSource::Listener overrides
+    void willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) override;
     void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) override;
     void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARAAudioSource::PropertiesPtr newProperties) override;
     // ARAAudioModification::Listener overrides

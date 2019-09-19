@@ -104,9 +104,26 @@ void PlaybackRegionView::didEndEditing (ARADocument* document)
     }
 }
 
-void PlaybackRegionView::didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool /*enable*/)
+void PlaybackRegionView::willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable)
 {
     jassert (audioSource == playbackRegion->getAudioModification()->getAudioSource());
+
+    // AudioThumbnail does not handle "pausing" access, so we clear it if any data is still pending, and recreate it when access is reenabled
+    if (! enable && ! audioThumb.isFullyLoaded())
+    {
+        playbackRegionReader = nullptr; // reset our "weak" pointer, since audioThumb will delete the object upon clear
+        audioThumb.clear();
+    }
+}
+
+void PlaybackRegionView::didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable)
+{
+    jassert (audioSource == playbackRegion->getAudioModification()->getAudioSource());
+
+    // check whether we need to recreate the thumb data because it hadn't been loaded completely when access was disabled
+    // (if we're inside a host edit cycle, we'll wait until it has completed to catch all changes in one update)
+    if (enable && playbackRegionReader == nullptr && ! playbackRegion->getDocumentController()->isHostEditingDocument())
+        recreatePlaybackRegionReader();
 
     repaint();
 }
