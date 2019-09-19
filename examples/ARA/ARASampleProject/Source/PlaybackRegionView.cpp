@@ -163,7 +163,6 @@ void PlaybackRegionView::didUpdatePlaybackRegionContent (ARAPlaybackRegion* regi
     if (scopeFlags.affectSamples() &&
         ! playbackRegion->getDocumentController()->isHostEditingDocument())
     {
-        documentView.resized();
         repaint();
     }
 }
