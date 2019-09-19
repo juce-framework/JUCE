@@ -1588,7 +1588,7 @@ private:
  class JuceARAFactory : public ARA::IMainFactory
  {
  public:
-    JuceARAFactory()    FUNKNOWN_CTOR;
+    JuceARAFactory()    FUNKNOWN_CTOR
     virtual ~JuceARAFactory() {}
 
     DECLARE_FUNKNOWN_METHODS
@@ -1602,7 +1602,7 @@ private:
  protected:
  };
 
- IMPLEMENT_REFCOUNT(JuceARAFactory);
+ IMPLEMENT_REFCOUNT(JuceARAFactory)
 
  ::Steinberg::tresult PLUGIN_API JuceARAFactory::queryInterface (const ::Steinberg::TUID targetIID, void** obj)
  {

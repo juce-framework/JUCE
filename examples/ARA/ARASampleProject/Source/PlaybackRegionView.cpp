@@ -96,7 +96,7 @@ void PlaybackRegionView::didEndEditing (ARADocument* document)
     jassert (document == playbackRegion->getRegionSequence()->getDocument());
 
     // our reader will pick up any changes in audio samples or region time range
-    if ((playbackRegionReader ==  nullptr) || ! playbackRegionReader->isValid())
+    if (playbackRegionReader ==  nullptr || ! playbackRegionReader->isValid())
     {
         recreatePlaybackRegionReader();
         documentView.resized();
@@ -131,6 +131,7 @@ void PlaybackRegionView::didEnableAudioSourceSamplesAccess (ARAAudioSource* audi
 void PlaybackRegionView::willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARAAudioSource::PropertiesPtr newProperties)
 {
     jassert (audioSource == playbackRegion->getAudioModification()->getAudioSource());
+
     if (playbackRegion->getName() == nullptr && playbackRegion->getAudioModification()->getName() == nullptr && newProperties->name != audioSource->getName())
         repaint();
 }
@@ -138,6 +139,7 @@ void PlaybackRegionView::willUpdateAudioSourceProperties (ARAAudioSource* audioS
 void PlaybackRegionView::willUpdateAudioModificationProperties (ARAAudioModification* audioModification, ARAAudioModification::PropertiesPtr newProperties)
 {
     jassert (audioModification == playbackRegion->getAudioModification());
+
     if (playbackRegion->getName() == nullptr && newProperties->name != audioModification->getName())
         repaint();
 }
@@ -146,11 +148,8 @@ void PlaybackRegionView::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* 
 {
     jassert (playbackRegion == region);
 
-    if ((playbackRegion->getName() != newProperties->name) ||
-        (playbackRegion->getColor() != newProperties->color))
-    {
+    if (playbackRegion->getName() != newProperties->name || playbackRegion->getColor() != newProperties->color)
         repaint();
-    }
 }
 
 void PlaybackRegionView::didUpdatePlaybackRegionContent (ARAPlaybackRegion* region, ARAContentUpdateScopes scopeFlags)
@@ -160,11 +159,8 @@ void PlaybackRegionView::didUpdatePlaybackRegionContent (ARAPlaybackRegion* regi
     // Our reader catches this too, but we only check for its validity after host edits.
     // If the update is triggered inside the plug-in, we need to update the view from this call
     // (unless we're within a host edit already).
-    if (scopeFlags.affectSamples() &&
-        ! playbackRegion->getDocumentController()->isHostEditingDocument())
-    {
+    if (scopeFlags.affectSamples() && ! playbackRegion->getDocumentController()->isHostEditingDocument())
         repaint();
-    }
 }
 
 //==============================================================================
