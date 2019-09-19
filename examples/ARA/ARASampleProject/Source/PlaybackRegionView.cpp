@@ -31,7 +31,6 @@ PlaybackRegionView::~PlaybackRegionView()
     playbackRegion->getRegionSequence()->getDocument<ARADocument>()->removeListener (this);
 
     audioThumb.removeChangeListener (this);
-    audioThumb.clear();
 }
 
 //==============================================================================
