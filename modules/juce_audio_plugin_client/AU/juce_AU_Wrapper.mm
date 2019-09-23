@@ -43,6 +43,7 @@
  #pragma clang diagnostic ignored "-Woverloaded-virtual"
  #pragma clang diagnostic ignored "-Wextra-semi"
  #pragma clang diagnostic ignored "-Wcast-align"
+ #pragma clang diagnostic ignored "-Wshadow"
  #if __has_warning("-Wzero-as-null-pointer-constant")
   #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
  #endif
