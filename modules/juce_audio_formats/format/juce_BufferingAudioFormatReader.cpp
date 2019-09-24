@@ -106,6 +106,10 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
                     if (auto dest = (float*) destSamples[j])
                         FloatVectorOperations::clear (dest + startOffsetInDestBuffer, numSamples);
 
+                // TODO JUCE_ARA
+                // we want to treat a read timeout as a failure
+                // https://forum.juce.com/t/bufferingaudioreader-readsamples-return-value-seems-buggy/35173
+                success = false;
                 break;
             }
             else
