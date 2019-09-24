@@ -92,7 +92,11 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
             startOffsetInDestBuffer += numToDo;
             startSampleInFile += numToDo;
             numSamples -= numToDo;
-            success = block->success;
+
+            // TODO JUCE_ARA
+            // we want to continue reading but flag failure if any block fails
+            // https://forum.juce.com/t/bufferingaudioreader-readsamples-return-value-seems-buggy/35173
+            success = success && block->success;
         }
         else
         {
