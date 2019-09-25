@@ -678,7 +678,7 @@ public:
     /** Clips a rectangle so that it lies only within this one.
         Returns false if the two rectangles didn't overlap.
     */
-    bool intersectRectangle (Rectangle<ValueType> rectangleToClip) const noexcept
+    bool intersectRectangle (Rectangle<ValueType>& rectangleToClip) const noexcept
     {
         return intersectRectangle (rectangleToClip.pos.x, rectangleToClip.pos.y,
                                    rectangleToClip.w,     rectangleToClip.h);
