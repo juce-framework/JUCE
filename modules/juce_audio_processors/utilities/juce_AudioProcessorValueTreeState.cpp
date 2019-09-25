@@ -713,6 +713,7 @@ struct AudioProcessorValueTreeState::ButtonAttachment::Pimpl  : private Attached
     Pimpl (AudioProcessorValueTreeState& s, const String& p, Button& b)
         : AttachedControlBase (s, p), button (b), ignoreCallbacks (false)
     {
+        button.setClickingTogglesState (true);
         sendInitialUpdate();
         button.addListener (this);
     }
