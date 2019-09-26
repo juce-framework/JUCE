@@ -22,6 +22,8 @@ public:
     ARASampleProjectAudioProcessor();
     ~ARASampleProjectAudioProcessor();
 
+    const AudioPlayHead::CurrentPositionInfo& getLastKnownPositionInfo() { return lastPositionInfo; }
+
     //==============================================================================
     void prepareToPlay (double newSampleRate, int samplesPerBlock) override;
     void releaseResources() override;
@@ -56,11 +58,7 @@ public:
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    const AudioPlayHead::CurrentPositionInfo& getLastKnownPositionInfo() { return lastPositionInfo; }
-
 private:
-    AudioPlayHead::CurrentPositionInfo lastPositionInfo;
-
     // map of audio sources to buffering audio source readers
     // we'll use them to pull ARA samples from the host as we render
     std::map<ARAAudioSource*, std::unique_ptr<AudioFormatReader>> audioSourceReaders;
@@ -69,6 +67,8 @@ private:
     std::unique_ptr<AudioBuffer<float>> tempBuffer;
 
     bool lastProcessBlockSucceeded { true };
+
+    AudioPlayHead::CurrentPositionInfo lastPositionInfo;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectAudioProcessor)
 };
