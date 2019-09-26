@@ -355,6 +355,13 @@
 			path = "../../JuceLibraryCode/include_juce_audio_utils.mm";
 			sourceTree = "SOURCE_ROOT";
 		};
+		C3BE13F50343166A30728D8A = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			name = AudioPerformanceTest.entitlements;
+			path = AudioPerformanceTest.entitlements;
+			sourceTree = "SOURCE_ROOT";
+		};
 		C6030BFC7A19A5075AB0EC28 = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;

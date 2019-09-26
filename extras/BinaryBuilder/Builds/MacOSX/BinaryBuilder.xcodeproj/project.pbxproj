@@ -36,6 +36,13 @@
 			path = RecentFilesMenuTemplate.nib;
 			sourceTree = "SOURCE_ROOT";
 		};
+		25C3A81567A43C28D8A9C143 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			name = BinaryBuilder.entitlements;
+			path = BinaryBuilder.entitlements;
+			sourceTree = "SOURCE_ROOT";
+		};
 		50B7C64414A3E778021F5EC4 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.cpp;
