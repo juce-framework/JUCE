@@ -169,11 +169,11 @@ void PlaybackRegionView::didUpdatePlaybackRegionContent (ARAPlaybackRegion* regi
 //==============================================================================
 void PlaybackRegionView::recreatePlaybackRegionReader()
 {
-    audioThumbCache.clear();
-
     // create a non-realtime playback region reader for our audio thumb
-    playbackRegionReader = new ARAPlaybackRegionReader ({playbackRegion}, true);
-    audioThumb.setReader (playbackRegionReader, reinterpret_cast<intptr_t> (playbackRegion));   // TODO JUCE_ARA better hash?
+    playbackRegionReader = new ARAPlaybackRegionReader ({ playbackRegion }, true);
+    audioThumbCache.clear();                        // flush cache to make sure cache will update with new reader
+    audioThumb.setReader (playbackRegionReader, 0); // since our cache only contains 1 reader, we can use a dummy hash
+
     // TODO JUCE_ARA see juce_AudioThumbnail.cpp, line 122: AudioThumbnail handles zero-length sources
     // by deleting the reader, therefore we must clear our "weak" pointer to the reader in this case.
     if (playbackRegionReader->lengthInSamples <= 0)
