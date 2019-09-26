@@ -36,11 +36,11 @@ GridItem::Property::Property (GridItem::Keyword keyword) noexcept : isAuto (keyw
     jassert (keyword == GridItem::Keyword::autoValue);
 }
 
-GridItem::Property::Property (const char* lineNameToUse) noexcept : GridItem::Property (juce::String (lineNameToUse))
+GridItem::Property::Property (const char* lineNameToUse) noexcept : GridItem::Property (String (lineNameToUse))
 {
 }
 
-GridItem::Property::Property (const juce::String& lineNameToUse) noexcept : name (lineNameToUse), number (1)
+GridItem::Property::Property (const String& lineNameToUse) noexcept : name (lineNameToUse), number (1)
 {
 }
 
@@ -48,7 +48,7 @@ GridItem::Property::Property (int numberToUse) noexcept : number (numberToUse)
 {
 }
 
-GridItem::Property::Property (int numberToUse, const juce::String& lineNameToUse) noexcept
+GridItem::Property::Property (int numberToUse, const String& lineNameToUse) noexcept
     : name (lineNameToUse), number (numberToUse)
 {
 }
@@ -72,8 +72,8 @@ GridItem::Margin::Margin (float t, float r, float b, float l) noexcept : left (l
 GridItem::GridItem() noexcept {}
 GridItem::~GridItem() noexcept {}
 
-GridItem::GridItem (juce::Component& componentToUse) noexcept  : associatedComponent (&componentToUse) {}
-GridItem::GridItem (juce::Component* componentToUse) noexcept  : associatedComponent (componentToUse) {}
+GridItem::GridItem (Component& componentToUse) noexcept  : associatedComponent (&componentToUse) {}
+GridItem::GridItem (Component* componentToUse) noexcept  : associatedComponent (componentToUse) {}
 
 void GridItem::setArea (Property rowStart, Property columnStart, Property rowEnd, Property columnEnd)
 {
@@ -89,7 +89,7 @@ void GridItem::setArea (Property rowStart, Property columnStart)
     row.start = rowStart;
 }
 
-void GridItem::setArea (const juce::String& areaName)
+void GridItem::setArea (const String& areaName)
 {
     area = areaName;
 }
@@ -108,7 +108,7 @@ GridItem GridItem::withArea (Property rowStart, Property columnStart) const noex
     return gi;
 }
 
-GridItem GridItem::withArea (const juce::String& areaName) const noexcept
+GridItem GridItem::withArea (const String& areaName) const noexcept
 {
     auto gi = *this;
     gi.setArea (areaName);
