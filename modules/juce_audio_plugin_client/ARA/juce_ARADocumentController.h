@@ -5,10 +5,6 @@
 namespace juce
 {
 
-class ARAAudioSourceReader;
-class ARAPlaybackRegionReader;
-class ARARegionSequenceReader;
-
 //==============================================================================
 /**
     Base class for implementing an ARA DocumentController in JUCE - refer to the 
