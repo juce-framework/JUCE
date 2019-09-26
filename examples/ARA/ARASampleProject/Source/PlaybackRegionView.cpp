@@ -1,5 +1,7 @@
 #include "PlaybackRegionView.h"
 #include "DocumentView.h"
+#include <juce_audio_plugin_client/utility/juce_IncludeModuleHeaders.h>
+#include "ARASampleProjectAudioProcessor.h"
 
 //==============================================================================
 PlaybackRegionView::PlaybackRegionView (DocumentView& docView, ARAPlaybackRegion* region)
@@ -169,8 +171,21 @@ void PlaybackRegionView::didUpdatePlaybackRegionContent (ARAPlaybackRegion* regi
 //==============================================================================
 void PlaybackRegionView::recreatePlaybackRegionReader()
 {
-    // create a non-realtime playback region reader for our audio thumb
-    playbackRegionReader = new ARAPlaybackRegionReader ({ playbackRegion }, true);
+    // create an audio processor for renderering our region
+    std::unique_ptr<AudioProcessor> audioProcessor { createPluginFilterOfType (PluginHostType::getPluginLoadedAs()) };
+    const auto sampleRate = playbackRegion->getAudioModification()->getAudioSource()->getSampleRate();
+    const auto numChannels = playbackRegion->getAudioModification()->getAudioSource()->getChannelCount();
+    const auto channelSet = AudioChannelSet::canonicalChannelSet (numChannels);
+    for (int i = 0; i < audioProcessor->getBusCount (false); i++)
+        audioProcessor->setChannelLayoutOfBus (false, i, channelSet);
+    audioProcessor->setProcessingPrecision (AudioProcessor::singlePrecision);
+    audioProcessor->setRateAndBufferSizeDetails (sampleRate, 4*1024);
+    audioProcessor->setNonRealtime (true);
+
+    static_cast<ARASampleProjectAudioProcessor*> (audioProcessor.get())->setAlwaysNonRealtime (true);
+
+    // create a playback region reader using this processor for our audio thumb
+    playbackRegionReader = new ARAPlaybackRegionReader (std::move (audioProcessor), { playbackRegion });
     audioThumbCache.clear();                        // flush cache to make sure cache will update with new reader
     audioThumb.setReader (playbackRegionReader, 0); // since our cache only contains 1 reader, we can use a dummy hash
 

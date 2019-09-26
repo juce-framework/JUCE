@@ -22,6 +22,15 @@ public:
     ARASampleProjectAudioProcessor();
     ~ARASampleProjectAudioProcessor();
 
+    /** Additional configuration for the AudioProcessor if used for internal rendering (waveform display).
+        Like bus layout or other crucial renderer configuration, this may not be changed between
+        prepareToPlay() and releaseResources().
+        If \p isAlwaysNonRealtime is true, the plug-in skips the internal multi-threaded buffering
+        of any non-realtime ressources needed for rendering, such as audio source samples.
+    */
+    void setAlwaysNonRealtime (bool isAlwaysNonRealtime) noexcept   { alwaysNonRealtime = isAlwaysNonRealtime; }
+    bool isAlwaysNonRealtime() const noexcept                       { return alwaysNonRealtime; }
+
     const AudioPlayHead::CurrentPositionInfo& getLastKnownPositionInfo() { return lastPositionInfo; }
 
     //==============================================================================
@@ -65,6 +74,8 @@ private:
 
     // temp buffers to use for summing signals if rendering multiple regions
     std::unique_ptr<AudioBuffer<float>> tempBuffer;
+
+    bool alwaysNonRealtime { false };
 
     bool lastProcessBlockSucceeded { true };
 
