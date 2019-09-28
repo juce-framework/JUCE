@@ -1653,7 +1653,9 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 		{
 			setMethod("substring", substring);
 			setMethod("replace", replace);
+			setMethod("replaceCharacters", replaceCharacters);
 			setMethod("trim", trim);
+			setMethod("retainCharacters", retainCharacters);
 			setMethod("startsWith", startsWith);
 			setMethod("endsWith", endsWith);
 			setMethod("indexOf", indexOf);
@@ -1673,7 +1675,9 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 		static var fromCharCode(Args a) { return String::charToString(static_cast<juce_wchar> (getInt(a, 0))); }
 		static var substring(Args a) { return a.thisObject.toString().substring(getInt(a, 0), getInt(a, 1)); }
 		static var replace(Args a) { return a.thisObject.toString().replace(getString(a, 0), getString(a, 1), getInt(a, 2)); }
+		static var replaceCharacters(Args a) { return a.thisObject.toString().replace(getString(a, 0), getString(a, 1)); }
 		static var trim(Args a) { return a.thisObject.toString().trim(); }
+		static var retainCharacters(Args a) { return a.thisObject.toString().retainCharacters(getString(a,0)); }
 		static var contains(Args a) { return a.thisObject.toString().contains(getString(a, 0)); }
 		static var startsWith(Args a) { return a.thisObject.toString().startsWith(getString(a, 0)); }
 		static var endsWith(Args a) { return a.thisObject.toString().endsWith(getString(a, 0)); }
