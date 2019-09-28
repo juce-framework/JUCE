@@ -47,7 +47,7 @@ struct BlockConfigManager
     void setDeviceIndex (TopologyIndex newDeviceIndex)                       { deviceIndex = newDeviceIndex; }
     void setDeviceComms (PhysicalTopologySource::DeviceConnection* newConn)  { deviceConnection = newConn; }
 
-    static constexpr uint32 numConfigItems = 64;
+    static constexpr uint32 numConfigItems = 66;
 
     /** Structure describing a configuration */
     struct ConfigDescription
@@ -104,6 +104,10 @@ struct BlockConfigManager
         { chord,                0,      0,      127,    false,  "Chord",                ConfigType::integer,    {},               "Play mode" }, // NOTE: Should be options
         { arpPattern,           0,      0,      127,    false,  "Arp Pattern",          ConfigType::integer,    {},               "Play mode" },
         { tempo,                120,    1,      300,    false,  "Tempo",                ConfigType::integer,    {},               "Rhythm" },
+        { key,                  0,      0,      11,     false,  "Key",                  ConfigType::options,    { "C", "C#", "D", "D#",
+                                                                                                                  "E", "F", "F#", "G",
+                                                                                                                  "G#", "A", "A#", "B"}, "Play mode" },
+        { autoTransposeToKey,   0,      0,      1,      false,  "Auto Transpose To Key",ConfigType::boolean,    {},               "Pitch" },
         { xTrackingMode,        1,      1,      4,      false,  "Glide Tracking Mode",  ConfigType::options,    { "Multi-Channel",
                                                                                                                   "Last Played",
                                                                                                                   "Highest",

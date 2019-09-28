@@ -1973,6 +1973,13 @@
 			path = "../../../../modules/juce_graphics";
 			sourceTree = "SOURCE_ROOT";
 		};
+		B7017BD3427B46FBAAAE448A = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			name = Projucer.entitlements;
+			path = Projucer.entitlements;
+			sourceTree = "SOURCE_ROOT";
+		};
 		B8385E9A644BD3CD94876448 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
