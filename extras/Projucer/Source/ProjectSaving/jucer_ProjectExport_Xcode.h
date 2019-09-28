@@ -2115,10 +2115,7 @@ private:
 
     void addFilesAndGroupsToProject (StringArray& topLevelGroupIDs) const
     {
-        auto entitlements = getEntitlements();
-
-        if (entitlements.size() > 0)
-            topLevelGroupIDs.add (addEntitlementsFile (entitlements));
+        addEntitlementsFile();
 
         for (auto& group : getAllGroups())
         {
@@ -3128,7 +3125,7 @@ private:
         return entitlements;
     }
 
-    String addEntitlementsFile (StringPairArray entitlements) const
+    String addEntitlementsFile() const
     {
         String content =
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -3136,6 +3133,7 @@ private:
             "<plist version=\"1.0\">\n"
             "<dict>\n";
 
+        auto entitlements = getEntitlements();
         auto keys = entitlements.getAllKeys();
 
         for (auto& key : keys)

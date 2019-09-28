@@ -320,7 +320,7 @@ public:
     /** Metadata for a given config item */
     struct ConfigMetaData
     {
-        static constexpr int32 numOptionNames = 8;
+        static constexpr int32 numOptionNames = 16;
 
         enum class ConfigType
         {
