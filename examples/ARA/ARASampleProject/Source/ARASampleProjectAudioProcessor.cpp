@@ -18,10 +18,6 @@ ARASampleProjectAudioProcessor::ARASampleProjectAudioProcessor()
     lastPositionInfo.resetToDefault();
 }
 
-ARASampleProjectAudioProcessor::~ARASampleProjectAudioProcessor()
-{
-}
-
 //==============================================================================
 const String ARASampleProjectAudioProcessor::getName() const
 {

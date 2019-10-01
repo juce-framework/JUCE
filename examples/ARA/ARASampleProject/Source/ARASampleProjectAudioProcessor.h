@@ -20,7 +20,6 @@ class ARASampleProjectAudioProcessor    : public AudioProcessor,
 public:
     //==============================================================================
     ARASampleProjectAudioProcessor();
-    ~ARASampleProjectAudioProcessor();
 
     /** Additional configuration for the AudioProcessor if used for internal rendering (waveform display).
         Like bus layout or other crucial renderer configuration, this may not be changed between
