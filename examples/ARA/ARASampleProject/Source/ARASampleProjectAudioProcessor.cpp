@@ -1,6 +1,5 @@
 #include "ARASampleProjectAudioProcessor.h"
 #include "ARASampleProjectAudioProcessorEditor.h"
-#include "ARASampleProjectDocumentController.h"
 
 //==============================================================================
 ARASampleProjectAudioProcessor::ARASampleProjectAudioProcessor()
@@ -107,8 +106,6 @@ void ARASampleProjectAudioProcessor::prepareToPlay (double newSampleRate, int sa
     {
         audioSourceReaders.clear();
 
-        const auto documentController = getARAPlaybackRenderer()->getDocumentController<ARASampleProjectDocumentController>();
-
         for (auto playbackRegion : getARAPlaybackRenderer()->getPlaybackRegions())
         {
             auto audioSource = playbackRegion->getAudioModification()->getAudioSource<ARAAudioSource>();
@@ -124,7 +121,7 @@ void ARASampleProjectAudioProcessor::prepareToPlay (double newSampleRate, int sa
                     const int readAheadSizeByBlockSize = 8 * samplesPerBlock;
                     const int readAheadSize = jmax (readAheadSizeBySampleRate, readAheadSizeByBlockSize);
 
-                    sourceReader = new BufferingAudioReader (sourceReader, documentController->getAudioSourceReadingThread(), readAheadSize);
+                    sourceReader = new BufferingAudioReader (sourceReader, *sharedTimesliceThread, readAheadSize);
                 }
 
                 audioSourceReaders.emplace (audioSource, sourceReader);

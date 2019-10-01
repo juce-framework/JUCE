@@ -68,6 +68,19 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
 private:
+
+    // We're subclassing here only to provide a proper default c'tor for our shared ressource
+    class SharedTimeSliceThread : public TimeSliceThread
+    {
+        public:
+            SharedTimeSliceThread()
+                : TimeSliceThread (String (JucePlugin_Name) + " ARA Sample Reading Thread")
+            {
+                startThread (7);   // above "default" priority so playback is fluent, but below realtime
+            }
+    };
+    SharedResourcePointer<SharedTimeSliceThread> sharedTimesliceThread;
+
     // map of audio sources to buffering audio source readers
     // we'll use them to pull ARA samples from the host as we render
     std::map<ARAAudioSource*, std::unique_ptr<AudioFormatReader>> audioSourceReaders;
