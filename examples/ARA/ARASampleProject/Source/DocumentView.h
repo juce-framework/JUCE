@@ -45,7 +45,6 @@ public:
      */
     DocumentView (const AudioProcessorEditorARAExtension& editorARAExtension, const AudioPlayHead::CurrentPositionInfo& positionInfo);
 
-    /** Destructor. */
     ~DocumentView();
 
     /*
@@ -155,46 +154,16 @@ public:
     void didReorderRegionSequencesInDocument (ARADocument* document) override;
 
     //==============================================================================
-    /**
-     A class for receiving events from a DocumentView.
-
-     You can register a DocumentView::Listener with a DocumentView using DocumentView::addListener()
-     method, and it will be called on changes.
-
-     @see DocumentView::addListener, DocumentView::removeListener
-     */
     class Listener
     {
     public:
-        /** Destructor. */
         virtual ~Listener() {}
 
-        /** Called when a DocumentView visible time range is changed.
-            This happens when being scrolled or zoomed/scaled on the horizontal axis.
-
-         @param newVisibleTimeRange       the new range of the document that's currently visible.
-         @param pixelsPerSecond           current pixels per second.
-         */
         virtual void visibleTimeRangeChanged (Range<double> newVisibleTimeRange, double pixelsPerSecond) = 0;
-
-        /** Called when a trackHeight is changed.
-
-         @param newTrackHeight           new trackHeight in pixels.
-         */
-        virtual void trackHeightChanged (int /*newTrackHeight*/) {}
-
-        /** Called when a rulersHeight is changed.
-
-         @param newRulersHeight           new rulersHeight in pixels.
-         */
-        virtual void rulersHeightChanged (int /*newRulersHeight*/) {}
+        virtual void trackHeightChanged (int newTrackHeight) = 0;
     };
-
-    /** Registers a listener that will be called for changes of the DocumentView. */
-    void addListener (Listener* listener);
-
-    /** Deregisters a previously-registered listener. */
-    void removeListener (Listener* listener);
+    void addListener (Listener* listener) { listeners.add (listener); }
+    void removeListener (Listener* listener) { listeners.remove (listener); }
 
 private:
     void rebuildRegionSequenceViews();

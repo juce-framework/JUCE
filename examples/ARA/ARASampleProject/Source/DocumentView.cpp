@@ -368,17 +368,6 @@ void DocumentView::timerCallback()
 }
 
 //==============================================================================
-void DocumentView::addListener (Listener* const listener)
-{
-    listeners.add (listener);
-}
-
-void DocumentView::removeListener (Listener* const listener)
-{
-    listeners.remove (listener);
-}
-
-//==============================================================================
 DocumentView::PlayHeadView::PlayHeadView (DocumentView& docView)
     : documentView (docView)
 {}
