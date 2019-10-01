@@ -19,17 +19,18 @@ class ARASampleProjectAudioProcessor    : public AudioProcessor,
 {
 public:
     //==============================================================================
+    // Default construction as done by the plug-in client wrappers via createPluginFilterOfType()
+    // Since these may be used in realtime contexts, they must use internal buffering when reading
+    // audio source samples, thus this c'tor sets useBufferedAudioSourceReader to true.
     ARASampleProjectAudioProcessor();
 
-    /** Additional configuration for the AudioProcessor if used for internal rendering (waveform display).
-        Like bus layout or other crucial renderer configuration, this may not be changed between
-        prepareToPlay() and releaseResources().
-        If \p isAlwaysNonRealtime is true, the plug-in skips the internal multi-threaded buffering
-        of any non-realtime ressources needed for rendering, such as audio source samples.
-    */
-    void setAlwaysNonRealtime (bool isAlwaysNonRealtime) noexcept   { alwaysNonRealtime = isAlwaysNonRealtime; }
-    bool isAlwaysNonRealtime() const noexcept                       { return alwaysNonRealtime; }
+    // Explicit construction when used internally, see PlaybackRegionView.cpp for an example
+    // In typical UI use cases, these internal processors are used inside an ARAPlaybackRegionReader
+    // on a separate background thread which already implements buffering - to prevent unnecessary
+    // double buffering, set useBufferedAudioSourceReader to false in such cases.
+    explicit ARASampleProjectAudioProcessor(bool useBufferedAudioSourceReader);
 
+    // Getter of current playback state for the UI
     const AudioPlayHead::CurrentPositionInfo& getLastKnownPositionInfo() { return lastPositionInfo; }
 
     //==============================================================================
@@ -74,7 +75,7 @@ private:
     // temp buffers to use for summing signals if rendering multiple regions
     std::unique_ptr<AudioBuffer<float>> tempBuffer;
 
-    bool alwaysNonRealtime { false };
+    const bool useBufferedAudioSourceReader;
 
     bool lastProcessBlockSucceeded { true };
 

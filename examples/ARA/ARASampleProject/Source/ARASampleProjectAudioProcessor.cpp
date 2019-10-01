@@ -4,6 +4,11 @@
 
 //==============================================================================
 ARASampleProjectAudioProcessor::ARASampleProjectAudioProcessor()
+     : ARASampleProjectAudioProcessor (true)
+{
+}
+
+ARASampleProjectAudioProcessor::ARASampleProjectAudioProcessor(bool useBuffering)
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
@@ -12,8 +17,11 @@ ARASampleProjectAudioProcessor::ARASampleProjectAudioProcessor()
                       #endif
                        .withOutput ("Output", AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ),
+#else
+     :
 #endif
+       useBufferedAudioSourceReader (useBuffering)
 {
     lastPositionInfo.resetToDefault();
 }
@@ -108,7 +116,7 @@ void ARASampleProjectAudioProcessor::prepareToPlay (double newSampleRate, int sa
             {
                 AudioFormatReader* sourceReader = new ARAAudioSourceReader (audioSource);
 
-                if (! isAlwaysNonRealtime())
+                if (useBufferedAudioSourceReader)
                 {
                     // if we're being used in real-time, wrap our source reader in buffering
                     // reader to avoid blocking while reading samples in processBlock
@@ -187,7 +195,7 @@ void ARASampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
         if (isARAPlaybackRenderer())
         {
             jassert (buffer.getNumSamples() <= getBlockSize());
-            jassert (isNonRealtime() || ! isAlwaysNonRealtime());
+            jassert (isNonRealtime() || useBufferedAudioSourceReader);
 
             bool didRenderFirstRegion = false;
 
@@ -249,7 +257,7 @@ void ARASampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
                     int numSamplesToRead = (int) (endSongSample - startSongSample);
 
                     // if we're using a buffering reader then set the appropriate timeout
-                    if (! isAlwaysNonRealtime())
+                    if (useBufferedAudioSourceReader)
                     {
                         jassert (dynamic_cast<BufferingAudioReader*> (reader.get()) != nullptr);
                         auto bufferingReader = static_cast<BufferingAudioReader*> (reader.get());
