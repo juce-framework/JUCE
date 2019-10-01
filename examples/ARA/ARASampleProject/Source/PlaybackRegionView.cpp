@@ -6,8 +6,7 @@
 PlaybackRegionView::PlaybackRegionView (DocumentView& docView, ARAPlaybackRegion* region)
     : documentView (docView),
       playbackRegion (region),
-      audioThumbCache (1),
-      audioThumb (128, docView.getAudioFormatManger(), audioThumbCache)
+      audioThumb (128, docView.getAudioFormatManger(), *sharedAudioThumbnailCache)
 {
     audioThumb.addChangeListener (this);
 
@@ -31,6 +30,7 @@ PlaybackRegionView::~PlaybackRegionView()
     playbackRegion->getAudioModification()->getAudioSource<ARAAudioSource>()->removeListener (this);
     playbackRegion->getRegionSequence()->getDocument<ARADocument>()->removeListener (this);
 
+    destroyPlaybackRegionReader();
     audioThumb.removeChangeListener (this);
 }
 
@@ -111,10 +111,7 @@ void PlaybackRegionView::willEnableAudioSourceSamplesAccess (ARAAudioSource* aud
 
     // AudioThumbnail does not handle "pausing" access, so we clear it if any data is still pending, and recreate it when access is reenabled
     if (! enable && ! audioThumb.isFullyLoaded())
-    {
-        playbackRegionReader = nullptr; // reset our "weak" pointer, since audioThumb will delete the object upon clear
-        audioThumb.clear();
-    }
+        destroyPlaybackRegionReader();
 }
 
 void PlaybackRegionView::didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable)
@@ -168,8 +165,20 @@ void PlaybackRegionView::didUpdatePlaybackRegionContent (ARAPlaybackRegion* regi
 }
 
 //==============================================================================
+void PlaybackRegionView::destroyPlaybackRegionReader()
+{
+    if (playbackRegionReader == nullptr)
+        return;
+
+    sharedAudioThumbnailCache->removeThumb (reinterpret_cast<intptr_t> (playbackRegionReader));
+    audioThumb.clear();
+    playbackRegionReader = nullptr;
+}
+
 void PlaybackRegionView::recreatePlaybackRegionReader()
 {
+    destroyPlaybackRegionReader();
+
     // Create an audio processor for rendering our region
     // We're disabling buffered audio source reading because the thumb nail cache will do buffering.
     auto audioProcessor = std::make_unique<ARASampleProjectAudioProcessor> (false);
@@ -184,8 +193,7 @@ void PlaybackRegionView::recreatePlaybackRegionReader()
 
     // Create a playback region reader using this processor for our audio thumb
     playbackRegionReader = new ARAPlaybackRegionReader (std::move (audioProcessor), { playbackRegion });
-    audioThumbCache.clear();                        // flush cache to make sure cache will update with new reader
-    audioThumb.setReader (playbackRegionReader, 0); // since our cache only contains 1 reader, we can use a dummy hash
+    audioThumb.setReader (playbackRegionReader, reinterpret_cast<intptr_t> (playbackRegionReader));
 
     // TODO JUCE_ARA see juce_AudioThumbnail.cpp, line 122: AudioThumbnail handles zero-length sources
     // by deleting the reader, therefore we must clear our "weak" pointer to the reader in this case.

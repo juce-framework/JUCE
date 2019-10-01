@@ -46,16 +46,27 @@ public:
     void didUpdatePlaybackRegionContent (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags) override;
 
 private:
+    void destroyPlaybackRegionReader();
     void recreatePlaybackRegionReader();
 
 private:
+
+    // We're subclassing here only to provide a proper default c'tor for our shared ressource
+    class SharedAudioThumbnailCache : public AudioThumbnailCache
+    {
+        public:
+            SharedAudioThumbnailCache()
+                : AudioThumbnailCache (20000)
+            {}
+    };
+    SharedResourcePointer<SharedAudioThumbnailCache> sharedAudioThumbnailCache;
+
     DocumentView& documentView;
     ARAPlaybackRegion* playbackRegion;
-    ARAPlaybackRegionReader* playbackRegionReader { nullptr };  // careful: "weak" pointer, actual pointer is owned by our audioThumb
     bool isSelected { false };
 
-    AudioThumbnailCache audioThumbCache;
     AudioThumbnail audioThumb;
+    ARAPlaybackRegionReader* playbackRegionReader { nullptr };  // careful: "weak" pointer, actual pointer is owned by our audioThumb
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlaybackRegionView)
 };
