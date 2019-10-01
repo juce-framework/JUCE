@@ -18,16 +18,12 @@ class PlaybackRegionView;
     Any JUCE-based ARA plug-in should be able to utilize this to ease its view implementation.
 
  TODO JUCE_ARA:
-    - provide juce::LookAndFeel mechanism so it could be customized for developer needs.
-    - configuration for all sizes: track height, ruler height, track header width etc.
-    - refactor RulersViews to have RulersView::RulerBase and subclasses.
-      maybe we don't need a shared base class other than Component, that would be preferrable.
-    - option to show regions including their head and tail
+    - limit zoom to avoid integer overflow with long documents and high zoom level.
+    - maybe add option to show regions including their head and tail?
       (for crossfades mostly, renderer will already provide proper samples,
        but time ranges must be adjusted for this and updated if head/tail change)
     - properly compensate for presentation latency (IAudioPresentationLatency/contextPresentationLatency)
       when drawing play head (requires minor additons to the VST and AU wrapper)
-    - replace Viewport with better mechanism to avoid integer overflow with long documents and high zoom level.
  */
 class DocumentView  : public Component,
                       private ARAEditorView::Listener,

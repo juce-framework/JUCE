@@ -26,7 +26,7 @@ public:
     virtual ~AudioProcessorARAExtension() {}
 
     /** Query whether last call to processBlock() was successful.
-        TODO JUCE_ARA processBlock() should rather return a bool
+        TODO JUCE_ARA AudioProcessor::processBlock() should rather return a bool
     */
     virtual bool didProcessBlockSucceed() = 0;
 
