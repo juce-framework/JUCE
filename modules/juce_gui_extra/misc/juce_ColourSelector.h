@@ -139,7 +139,8 @@ public:
     //==============================================================================
     // These need to be public otherwise the Projucer's live-build engine will complain
     class ColourSpaceView;
-    class HueSelectorComp;
+	class HueSelectorComp;
+	class ValueSelectorComp;
 
 private:
     //==============================================================================
@@ -150,14 +151,17 @@ private:
     std::unique_ptr<Slider> sliders[4];
 	std::unique_ptr<Label> hexColorLabel;
     std::unique_ptr<ColourSpaceView> colourSpace;
-    std::unique_ptr<HueSelectorComp> hueSelector;
-    OwnedArray<SwatchComponent> swatchComponents;
+    //std::unique_ptr<HueSelectorComp> hueSelector;
+	std::unique_ptr<ValueSelectorComp> valueSelector; 
+	OwnedArray<SwatchComponent> swatchComponents;
     const int flags;
     int edgeGap;
     Rectangle<int> previewArea;
 
-    void setHue (float newH);
-    void setSV (float newS, float newV);
+	void setHue(float newH);
+	void setValue (float newV);
+	void setSV(float newS, float newV);
+	void setSH (float newS, float newH);
     void updateHSV();
     void update (NotificationType);
     void changeColour();
