@@ -100,7 +100,7 @@ void ARASampleProjectAudioProcessor::changeProgramName (int /*index*/, const Str
 }
 
 //==============================================================================
-void ARASampleProjectAudioProcessor::prepareToPlay (double newSampleRate, int samplesPerBlock)
+void ARASampleProjectAudioProcessor::prepareToPlay (double newSampleRate, int /*samplesPerBlock*/)
 {
     if (isARAPlaybackRenderer())
     {
@@ -115,12 +115,9 @@ void ARASampleProjectAudioProcessor::prepareToPlay (double newSampleRate, int sa
 
                 if (useBufferedAudioSourceReader)
                 {
-                    // if we're being used in real-time, wrap our source reader in buffering
+                    // if we're being used in real-time, wrap our source reader in a buffering
                     // reader to avoid blocking while reading samples in processBlock
-                    const int readAheadSizeBySampleRate = roundToInt (2.0 * newSampleRate);
-                    const int readAheadSizeByBlockSize = 8 * samplesPerBlock;
-                    const int readAheadSize = jmax (readAheadSizeBySampleRate, readAheadSizeByBlockSize);
-
+                    const int readAheadSize = roundToInt (2.0 * newSampleRate);
                     sourceReader = new BufferingAudioReader (sourceReader, *sharedTimesliceThread, readAheadSize);
                 }
 
