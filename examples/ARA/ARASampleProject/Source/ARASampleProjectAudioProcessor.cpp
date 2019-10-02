@@ -168,7 +168,7 @@ bool ARASampleProjectAudioProcessor::isBusesLayoutSupported (const BusesLayout& 
 }
 #endif
 
-void ARASampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& /*midiMessages*/)
+void ARASampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
 {
     ScopedNoDenormals noDenormals;
 
@@ -312,9 +312,9 @@ void ARASampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
     }
     else
     {
-        // this sample plug-in requires to be used with ARA.
-        // otherwise, proper non-ARA rendering would be invoked here
-        buffer.clear();
+        // this sample plug-in requires to be used with ARA - we just pass through otherwise.
+        // in an actual plug-in, proper non-ARA rendering would be invoked here
+        processBlockBypassed(buffer, midiMessages);
     }
 
     lastProcessBlockSucceeded = success;
