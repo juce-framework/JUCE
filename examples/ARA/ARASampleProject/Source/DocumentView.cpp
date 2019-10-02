@@ -123,13 +123,6 @@ void DocumentView::setIsRulersVisible (bool shouldBeVisible)
         resized();
 }
 
-void DocumentView::setIsTrackHeadersVisible (bool shouldBeVisible)
-{
-    trackHeadersViewport.setVisible (shouldBeVisible);
-    if (getParentComponent() != nullptr)
-        resized();
-}
-
 void DocumentView::setTrackHeaderWidth (int newWidth)
 {
     trackHeadersViewport.setBoundsForComponent (&trackHeadersViewport, trackHeadersViewport.getBounds().withWidth (newWidth), false, false, false, true);

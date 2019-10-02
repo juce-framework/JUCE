@@ -30,7 +30,6 @@ public:
 private:
     std::unique_ptr<DocumentView> documentView;
 
-    TextButton hideTrackHeaderButton;
     TextButton followPlayHeadButton;
     TextButton onlySelectedTracksButton;
     Label horizontalZoomLabel, verticalZoomLabel;

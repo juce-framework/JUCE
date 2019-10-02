@@ -111,9 +111,6 @@ public:
     void setIsRulersVisible (bool shouldBeVisible);
     bool isRulersVisible() const { return rulersViewport.isVisible(); }
 
-    void setIsTrackHeadersVisible (bool shouldBeVisible);
-    bool isTrackHeadersVisible() const { return trackHeadersViewport.isVisible(); }
-
     int getTrackHeaderWidth() const { return trackHeadersViewport.getWidth(); }
     int getTrackHeaderMaximumWidth () { return trackHeadersViewport.getMaximumWidth(); }
     int getTrackHeaderMinimumWidth () { return trackHeadersViewport.getMinimumWidth(); }
