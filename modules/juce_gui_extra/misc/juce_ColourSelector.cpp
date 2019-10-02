@@ -430,16 +430,20 @@ ColourSelector::ColourSelector(int sectionsToShow, int edge, int gapAroundColour
 
 	if ((flags & showColourspace) != 0)
 	{
-		colourSpace.reset(new ColourSpaceView(*this, h, s, v, gapAroundColourSpaceComponent));
-		hueSelector.reset(new HueSelectorComp(*this, h, gapAroundColourSpaceComponent));
+		colourSpace.reset  (new	ColourSpaceView		(*this, h, s, v, gapAroundColourSpaceComponent));
+		valueSelector.reset(new ValueSelectorComp	(*this, h, s, v, gapAroundColourSpaceComponent));
 
 		addAndMakeVisible(colourSpace.get());
-		addAndMakeVisible(hueSelector.get());
+		addAndMakeVisible(valueSelector.get());
 	}
 
 	if ((flags & showHexColorValue) != 0)
 	{
 		hexColorLabel.reset(new Label("Colour value",getCurrentColour().toDisplayString((flags & showAlphaChannel) != 0)));
+		hexColorLabel->setEditable(true);
+		hexColorLabel->setColour(hexColorLabel->backgroundColourId, Colours::darkgrey);
+		hexColorLabel->setColour(hexColorLabel->backgroundWhenEditingColourId, Colours::black);
+		hexColorLabel->setColour(hexColorLabel->textWhenEditingColourId, Colours::white);
 		addAndMakeVisible(hexColorLabel.get());
 		hexColorLabel->addListener(this);
 	}
@@ -542,11 +546,17 @@ void ColourSelector::update (NotificationType notification)
     if (colourSpace != nullptr)
     {
         colourSpace->updateIfNeeded();
-        hueSelector->updateIfNeeded();
+        valueSelector->updateIfNeeded();
     }
+
+	if ((flags & showHexColorValue) != 0)
+	{
+		hexColorLabel->setText(getCurrentColour().toDisplayString((flags & showAlphaChannel) != 0), dontSendNotification);
+	}
 
     if ((flags & showColourAtTop) != 0)
         repaint (previewArea);
+
 
     if (notification != dontSendNotification)
         sendChangeMessage();
@@ -613,7 +623,7 @@ void ColourSelector::resized()
 
         colourSpace->setBounds (edgeGap, y,
                                 getWidth() - hueWidth - edgeGap - 4,
-                                getHeight() - topSpace - sliderSpace - swatchSpace - edgeGap);
+                                getHeight() - topSpace - sliderSpace - hexLabelSpace - swatchSpace - edgeGap);
 
         valueSelector->setBounds (colourSpace->getRight() + 4, y,
                                 getWidth() - edgeGap - (colourSpace->getRight() + 4),
@@ -637,8 +647,8 @@ void ColourSelector::resized()
 
 	if ((flags & showHexColorValue) != 0)
 	{
-		hexColorLabel->setBounds(proportionOfWidth(0.2f), y,
-								 proportionOfWidth(0.72f), sliderSpace - 2);
+		hexColorLabel->setBounds(proportionOfWidth(0.48f), y,
+								 proportionOfWidth(0.42f), hexLabelSpace - 2);
 
 		y += hexLabelSpace;
 	}
