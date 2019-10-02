@@ -54,7 +54,7 @@ double ARARegionSequence::getCommonSampleRate() const
 //==============================================================================
 
 ARAAudioSource::ARAAudioSource (ARADocument* document, ARA::ARAAudioSourceHostRef hostRef)
-    : ARA::PlugIn::AudioSource(document, hostRef)
+    : ARA::PlugIn::AudioSource (document, hostRef)
 {}
 
 void ARAAudioSource::notifyAnalysisProgressStarted()
@@ -76,7 +76,7 @@ void ARAAudioSource::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bo
 {
     getDocumentController()->notifyAudioSourceContentChanged (this, scopeFlags);
 
-    notifyListeners ([&] (Listener& l) { l.didUpdateAudioSourceContent(this, scopeFlags); });
+    notifyListeners ([&] (Listener& l) { l.didUpdateAudioSourceContent (this, scopeFlags); });
 
     if (notifyAllAudioModificationsAndPlaybackRegions)
         for (auto audioModification : getAudioModifications<ARAAudioModification>())
@@ -93,7 +93,7 @@ void ARAAudioModification::notifyContentChanged (ARAContentUpdateScopes scopeFla
 {
     getDocumentController()->notifyAudioModificationContentChanged (this, scopeFlags);
 
-    notifyListeners ([&] (Listener& l) { l.didUpdateAudioModificationContent(this, scopeFlags); });
+    notifyListeners ([&] (Listener& l) { l.didUpdateAudioModificationContent (this, scopeFlags); });
 
     if (notifyAllPlaybackRegions)
         for (auto playbackRegion : getPlaybackRegions<ARAPlaybackRegion>())
@@ -126,7 +126,7 @@ void ARAPlaybackRegion::notifyContentChanged (ARAContentUpdateScopes scopeFlags)
 {
     getDocumentController()->notifyPlaybackRegionContentChanged (this, scopeFlags);
 
-    notifyListeners ([&] (Listener& l) { l.didUpdatePlaybackRegionContent(this, scopeFlags); });
+    notifyListeners ([&] (Listener& l) { l.didUpdatePlaybackRegionContent (this, scopeFlags); });
 }
 
 } // namespace juce

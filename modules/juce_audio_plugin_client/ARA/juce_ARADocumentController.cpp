@@ -374,11 +374,11 @@ namespace ModelUpdateControllerProgressAdapter
     ARA::PlugIn::HostModelUpdateController* get()
     {
         static const SizedStruct<ARA_MEMBER_PTR_ARGS (ARAModelUpdateControllerInterface, notifyPlaybackRegionContentChanged)> modelUpdateControllerInterface {
-                ModelUpdateControllerProgressAdapter::notifyAudioSourceAnalysisProgress,
-                ModelUpdateControllerProgressAdapter::notifyAudioSourceContentChanged,
-                ModelUpdateControllerProgressAdapter::notifyAudioModificationContentChanged,
-                ModelUpdateControllerProgressAdapter::notifyPlaybackRegionContentChanged
-            };
+            ModelUpdateControllerProgressAdapter::notifyAudioSourceAnalysisProgress,
+            ModelUpdateControllerProgressAdapter::notifyAudioSourceContentChanged,
+            ModelUpdateControllerProgressAdapter::notifyAudioModificationContentChanged,
+            ModelUpdateControllerProgressAdapter::notifyPlaybackRegionContentChanged
+        };
 
         static const SizedStruct<ARA_MEMBER_PTR_ARGS (ARADocumentControllerHostInstance, playbackControllerInterface)> instance {
             nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, &modelUpdateControllerInterface, nullptr, nullptr
