@@ -274,46 +274,4 @@ void ARAPlaybackRegionReader::willDestroyPlaybackRegion (ARAPlaybackRegion* play
     invalidate();
 }
 
-//==============================================================================
-
-ARARegionSequenceReader::ARARegionSequenceReader (std::unique_ptr<AudioProcessor> processor, ARARegionSequence* regionSequence)
-    : ARAPlaybackRegionReader (regionSequence->getDocumentController<ARADocumentController>(),
-                               std::move (processor), regionSequence->getPlaybackRegions<ARAPlaybackRegion>()),
-      sequence (regionSequence)
-{
-    sequence->addListener (this);
-}
-
-ARARegionSequenceReader::~ARARegionSequenceReader()
-{
-    if (sequence != nullptr)
-        sequence->removeListener (this);
-}
-
-void ARARegionSequenceReader::willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion)
-{
-    jassert (sequence == regionSequence);
-    jassert (ARA::contains (sequence->getPlaybackRegions(), playbackRegion));
-
-    invalidate();
-}
-
-void ARARegionSequenceReader::didAddPlaybackRegionToRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion)
-{
-    jassert (sequence == regionSequence);
-    jassert (ARA::contains (sequence->getPlaybackRegions(), playbackRegion));
-
-    invalidate();
-}
-
-void ARARegionSequenceReader::willDestroyRegionSequence (ARARegionSequence* regionSequence)
-{
-    jassert (sequence == regionSequence);
-
-    invalidate();
-
-    sequence->removeListener (this);
-    sequence = nullptr;
-}
-
 } // namespace juce

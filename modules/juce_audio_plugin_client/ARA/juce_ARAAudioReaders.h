@@ -150,42 +150,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAPlaybackRegionReader)
 };
 
-//==============================================================================
-/**
-    Subclass of ARAPlaybackRegionReader that reads all playback regions in a region sequence.
-
-    Like the ARAPlaybackRegionReader this class uses a playback renderer instance to read
-    playback region samples, typically for view purposes.
-
-    In addition to the reasons that an ARAPlaybackRegionReader would become invalidated,
-    this reader invalidates if
-        - any playback regions are added or removed from the sequence
-        - the region sequence is destroyed
-
-    @tags{ARA}
-*/
-class JUCE_API  ARARegionSequenceReader  : public ARAPlaybackRegionReader,
-                                           private ARARegionSequence::Listener
-{
-public:
-    /** Create an ARARegionSequenceReader instance to read all of \p regionSequence's playback regions
-        @param audioProcessor A custom ARA-compatible audio processor used for rendering the \p regionSequence,
-                              pre-configured appropriately for the intended use case (sample rate, output format, realtime, etc.)
-                              The reader takes ownership and binds it to the document controller of the \p regionSequence.
-        @param regionSequence The region sequence being read - all playback regions on this sequence will be read.
-    */
-    ARARegionSequenceReader (std::unique_ptr<AudioProcessor> audioProcessor, ARARegionSequence* regionSequence);
-
-    virtual ~ARARegionSequenceReader();
-
-    void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) override;
-    void didAddPlaybackRegionToRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) override;
-    void willDestroyRegionSequence (ARARegionSequence* regionSequence) override;
-
-private:
-    ARARegionSequence* sequence;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARARegionSequenceReader)
-};
-
 } // namespace juce
