@@ -209,14 +209,6 @@ void ARASampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
                     }
                     auto& reader = readerIt->second;
 
-                    // render silence if access is currently disabled
-                    // (the audio reader deals with this internally too, checking it here is merely an optimization)
-                    if (! audioSource->isSampleAccessEnabled())
-                    {
-                        success = false;
-                        continue;
-                    }
-
                     // this simplified test code "rendering" only produces audio if sample rate and channel count match
                     if ((audioSource->getChannelCount() != getTotalNumOutputChannels()) || (audioSource->getSampleRate() != getSampleRate()))
                         continue;
