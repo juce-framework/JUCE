@@ -1308,7 +1308,9 @@ public:
             if (owner.iOS)
             {
                 s.set ("ASSETCATALOG_COMPILER_APPICON_NAME", "AppIcon");
-                s.set ("ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME", "LaunchImage");
+
+                if (! owner.shouldAddStoryboardToProject())
+                    s.set ("ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME", "LaunchImage");
             }
             else
             {
