@@ -104,6 +104,9 @@ public:
           cameraPermissionNeededValue                  (settings, Ids::cameraPermissionNeeded,                  getUndoManager()),
           cameraPermissionTextValue                    (settings, Ids::cameraPermissionText,                    getUndoManager(),
                                                         "This app requires access to the camera to function correctly."),
+          iosBluetoothPermissionNeededValue            (settings, Ids::iosBluetoothPermissionNeeded,            getUndoManager()),
+          iosBluetoothPermissionTextValue              (settings, Ids::iosBluetoothPermissionText,              getUndoManager(),
+                                                        "This app requires access to Bluetooth to function correctly."),
           uiFileSharingEnabledValue                    (settings, Ids::UIFileSharingEnabled,                    getUndoManager()),
           uiSupportsDocumentBrowserValue               (settings, Ids::UISupportsDocumentBrowser,               getUndoManager()),
           uiStatusBarHiddenValue                       (settings, Ids::UIStatusBarHidden,                       getUndoManager()),
@@ -172,6 +175,9 @@ public:
 
     bool isCameraPermissionEnabled() const             { return cameraPermissionNeededValue.get(); }
     String getCameraPermissionTextString() const       { return cameraPermissionTextValue.get(); }
+
+    bool isBluetoothPermissionEnabled() const          { return iosBluetoothPermissionNeededValue.get(); }
+    String getBluetoothPermissionTextString() const    { return iosBluetoothPermissionTextValue.get(); }
 
     bool isInAppPurchasesEnabled() const               { return iosInAppPurchasesValue.get(); }
     bool isBackgroundAudioEnabled() const              { return iosBackgroundAudioValue.get(); }
@@ -397,6 +403,17 @@ public:
         props.add (new TextPropertyComponentWithEnablement (cameraPermissionTextValue, cameraPermissionNeededValue,
                                                             "Camera Access Text", 1024, false),
                    "A short description of why your app requires camera access.");
+
+        if (iOS)
+        {
+            props.add (new ChoicePropertyComponent (iosBluetoothPermissionNeededValue, "Bluetooth Access"),
+                       "Enable this to allow your app to use Bluetooth on iOS 13.0 and above. "
+                       "The user of your app will be prompted to grant Bluetooth access permissions.");
+
+            props.add (new TextPropertyComponentWithEnablement (iosBluetoothPermissionTextValue, iosBluetoothPermissionNeededValue,
+                                                                "Bluetooth Access Text", 1024, false),
+                       "A short description of why your app requires Bluetooth access.");
+        }
 
         props.add (new ChoicePropertyComponent (iosInAppPurchasesValue, "In-App Purchases Capability"),
                    "Enable this to grant your app the capability for in-app purchases. "
@@ -1519,6 +1536,12 @@ public:
 
             if (owner.iOS)
             {
+                if (owner.isBluetoothPermissionEnabled())
+                {
+                    addPlistDictionaryKey (dict, "NSBluetoothAlwaysUsageDescription", owner.getBluetoothPermissionTextString());
+                    addPlistDictionaryKey (dict, "NSBluetoothPeripheralUsageDescription", owner.getBluetoothPermissionTextString()); // needed for pre iOS 13.0
+                }
+
                 addPlistDictionaryKeyBool (dict, "LSRequiresIPhoneOS", true);
 
                 if (type != AudioUnitv3PlugIn)
@@ -1960,7 +1983,7 @@ private:
                      iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue,
                      appSandboxValue, appSandboxOptionsValue,
                      hardenedRuntimeValue, hardenedRuntimeOptionsValue,
-                     microphonePermissionNeededValue, microphonePermissionsTextValue, cameraPermissionNeededValue, cameraPermissionTextValue,
+                     microphonePermissionNeededValue, microphonePermissionsTextValue, cameraPermissionNeededValue, cameraPermissionTextValue, iosBluetoothPermissionNeededValue, iosBluetoothPermissionTextValue,
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
                      iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
                      iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
