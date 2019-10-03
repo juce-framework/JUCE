@@ -609,8 +609,6 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, const int windowStyle
             window.windowLevel = UIWindowLevelAlert;
 
         view.frame = CGRectMake (0, 0, r.size.width, r.size.height);
-
-        [window addSubview: view];
     }
 
     setTitle (component.getName());
