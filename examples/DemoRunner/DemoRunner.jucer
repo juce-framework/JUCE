@@ -121,7 +121,8 @@
     </ANDROIDSTUDIO>
     <XCODE_IPHONE targetFolder="Builds/iOS" UISupportsDocumentBrowser="1" microphonePermissionNeeded="1"
                   cameraPermissionNeeded="1" iCloudPermissions="1" UIFileSharingEnabled="1"
-                  customXcodeResourceFolders="../Assets" smallIcon="YyqWd2" bigIcon="YyqWd2">
+                  customXcodeResourceFolders="../Assets" smallIcon="YyqWd2" bigIcon="YyqWd2"
+                  iosBluetoothPermissionNeeded="1">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" recommendedWarnings="LLVM"/>
         <CONFIGURATION isDebug="0" name="Release" recommendedWarnings="LLVM"/>
