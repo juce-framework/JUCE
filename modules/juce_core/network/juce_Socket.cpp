@@ -36,6 +36,7 @@ namespace juce
  using juce_socklen_t       = int;
  using juce_recvsend_size_t = int;
  using SocketHandle         = SOCKET;
+ using pollfd               = WSAPOLLFD;
  static const SocketHandle invalidSocket = INVALID_SOCKET;
 #elif JUCE_ANDROID
  using juce_socklen_t       = socklen_t;
@@ -283,50 +284,35 @@ namespace SocketHelpers
         if (! lock.isLocked())
             return -1;
 
-        int h = handle.load();
+        auto h = handle.load();
 
-        struct timeval timeout;
-        struct timeval* timeoutp;
+        short eventsFlag = (forReading ? POLLIN : POLLOUT);
+        pollfd pfd { (SocketHandle) h, eventsFlag, 0 };
 
-        if (timeoutMsecs >= 0)
+        int result = 0;
+
+        for (;;)
         {
-            timeout.tv_sec = timeoutMsecs / 1000;
-            timeout.tv_usec = (timeoutMsecs % 1000) * 1000;
-            timeoutp = &timeout;
-        }
-        else
-        {
-            timeoutp = nullptr;
-        }
+           #if JUCE_WINDOWS
+            result = WSAPoll (&pfd, 1, timeoutMsecs);
+           #else
+            result = poll (&pfd, 1, timeoutMsecs);
+           #endif
 
-        fd_set rset, wset;
-        FD_ZERO (&rset);
-        FD_SET (h, &rset);
-        FD_ZERO (&wset);
-        FD_SET (h, &wset);
-
-        fd_set* const prset = forReading ? &rset : nullptr;
-        fd_set* const pwset = forReading ? nullptr : &wset;
-
-       #if JUCE_WINDOWS
-        if (select ((int) h + 1, prset, pwset, 0, timeoutp) < 0)
-            return -1;
-       #else
-        {
-            int result = 0;
-
-            for (;;)
+            if (result >= 0
+               #if JUCE_WINDOWS
+                || result == SOCKET_ERROR
+               #else
+                || errno != EINTR
+               #endif
+                )
             {
-                result = select (h + 1, prset, pwset, nullptr, timeoutp);
-
-                if (result >= 0 || errno != EINTR)
-                    break;
+                break;
             }
-
-            if (result < 0)
-                return -1;
         }
-       #endif
+
+        if (result < 0)
+            return -1;
 
         // we are closing
         if (handle.load() < 0)
@@ -341,7 +327,7 @@ namespace SocketHelpers
                 return -1;
         }
 
-        return FD_ISSET (h, forReading ? &rset : &wset) ? 1 : 0;
+        return (pfd.revents & eventsFlag) != 0;
     }
 
     static addrinfo* getAddressInfo (bool isDatagram, const String& hostName, int portNumber)
