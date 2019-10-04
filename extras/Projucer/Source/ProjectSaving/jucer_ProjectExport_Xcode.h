@@ -193,7 +193,7 @@ public:
 
     bool shouldKeepCustomXcodeSchemes() const          { return keepCustomXcodeSchemesValue.get(); }
 
-    String getIosDevelopmentTeamIDString() const       { return iosDevelopmentTeamIDValue.get(); }
+    String getDevelopmentTeamIDString() const          { return iosDevelopmentTeamIDValue.get(); }
     String getAppGroupIdString() const                 { return iosAppGroupsIDValue.get(); }
 
     String getDefaultLaunchStoryboardName() const      { jassert (iOS); return "LaunchScreen"; }
@@ -485,7 +485,7 @@ public:
                    "This is useful if you want to use different bundle identifiers for Mac and iOS exporters in the same project.");
 
         props.add (new TextPropertyComponent (iosDevelopmentTeamIDValue, "Development Team ID", 10, false),
-                   "The Development Team ID to be used for setting up code-signing your iOS app. This is a ten-character "
+                   "The Development Team ID to be used for setting up code-signing your app. This is a ten-character "
                    "string (for example, \"S7B6T5XJ2Q\") that describes the distribution certificate Apple issued to you. "
                    "You can find this string in the OS X app Keychain Access under \"Certificates\".");
 
@@ -627,7 +627,7 @@ protected:
               osxArchitecture              (config, Ids::osxArchitecture,              getUndoManager(), osxArch_Default),
               customXcodeFlags             (config, Ids::customXcodeFlags,             getUndoManager()),
               plistPreprocessorDefinitions (config, Ids::plistPreprocessorDefinitions, getUndoManager()),
-              codeSignIdentity             (config, Ids::codeSigningIdentity,          getUndoManager(), iOS ? "iPhone Developer" : "Mac Developer"),
+              codeSignIdentity             (config, Ids::codeSigningIdentity,          getUndoManager()),
               fastMathEnabled              (config, Ids::fastMath,                     getUndoManager()),
               stripLocalSymbolsEnabled     (config, Ids::stripLocalSymbols,            getUndoManager()),
               pluginBinaryCopyStepEnabled  (config, Ids::enablePluginBinaryCopyStep,   getUndoManager(), true),
@@ -715,7 +715,6 @@ protected:
         String getOSXDeploymentTargetString() const             { return osxDeploymentTarget.get(); }
 
         String getCodeSignIdentityString() const                { return codeSignIdentity.get(); }
-        bool isUsingDefaultCodeSignIdentity() const             { return codeSignIdentity.isUsingDefault(); }
 
         String getiOSDeploymentTargetString() const             { return iosDeploymentTarget.get(); }
 
@@ -1087,7 +1086,7 @@ public:
         {
             auto attributes = getID() + " = { ";
 
-            auto developmentTeamID = owner.getIosDevelopmentTeamIDString();
+            auto developmentTeamID = owner.getDevelopmentTeamIDString();
 
             if (developmentTeamID.isNotEmpty())
             {
@@ -1342,15 +1341,15 @@ public:
             s.set ("GCC_VERSION", gccVersion);
             s.set ("CLANG_LINK_OBJC_RUNTIME", "NO");
 
-            if (isUsingCodeSigning (config))
-            {
-                s.set (owner.iOS ? "\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\"" : "CODE_SIGN_IDENTITY",
-                       config.getCodeSignIdentityString().quoted());
-                s.set ("PROVISIONING_PROFILE_SPECIFIER", "\"\"");
-            }
+            auto codeSigningIdentity = owner.getCodeSigningIdentity (config);
+            s.set (owner.iOS ? "\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\"" : "CODE_SIGN_IDENTITY",
+                   codeSigningIdentity.quoted());
 
-            if (owner.getIosDevelopmentTeamIDString().isNotEmpty())
-                s.set ("DEVELOPMENT_TEAM", owner.getIosDevelopmentTeamIDString());
+            if (codeSigningIdentity.isNotEmpty())
+                s.set ("PROVISIONING_PROFILE_SPECIFIER", "\"\"");
+
+            if (owner.getDevelopmentTeamIDString().isNotEmpty())
+                s.set ("DEVELOPMENT_TEAM", owner.getDevelopmentTeamIDString());
 
             if (shouldAddEntitlements())
                 s.set ("CODE_SIGN_ENTITLEMENTS", owner.getEntitlementsFileName().quoted());
@@ -1942,12 +1941,6 @@ public:
                     return getSDKRootName (v);
 
             return {};
-        }
-
-        bool isUsingCodeSigning (const XcodeBuildConfiguration& config) const
-        {
-            return (! config.isUsingDefaultCodeSignIdentity())
-                     || owner.getIosDevelopmentTeamIDString().isNotEmpty();
         }
 
         //==============================================================================
@@ -2548,6 +2541,16 @@ private:
         return sanitisePath (searchPath);
     }
 
+    String getCodeSigningIdentity (const XcodeBuildConfiguration& config) const
+    {
+        auto identity = config.getCodeSignIdentityString();
+
+        if (identity.isEmpty() && getDevelopmentTeamIDString().isNotEmpty())
+            return iOS ? "iPhone Developer" : "Mac Developer";
+
+        return identity;
+    }
+
     StringPairArray getProjectSettings (const XcodeBuildConfiguration& config) const
     {
         StringPairArray s;
@@ -2605,17 +2608,14 @@ private:
                 s.set ("ONLY_ACTIVE_ARCH", "YES");
         }
 
+        s.set (iOS ? "\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\"" : "CODE_SIGN_IDENTITY",
+               getCodeSigningIdentity (config).quoted());
+
         if (iOS)
         {
-            s.set ("\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\"", config.getCodeSignIdentityString().quoted());
             s.set ("SDKROOT", "iphoneos");
             s.set ("TARGETED_DEVICE_FAMILY", getDeviceFamilyString().quoted());
             s.set ("IPHONEOS_DEPLOYMENT_TARGET", config.getiOSDeploymentTargetString());
-        }
-        else
-        {
-            if (! config.isUsingDefaultCodeSignIdentity() || getIosDevelopmentTeamIDString().isNotEmpty())
-                s.set ("CODE_SIGN_IDENTITY", config.getCodeSignIdentityString().quoted());
         }
 
         s.set ("ZERO_LINK", "NO");
