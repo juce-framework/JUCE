@@ -383,6 +383,8 @@ public:
             vstEffect.flags |= Vst2::effFlagsNoSoundInStop;
        #endif
 
+        vstEffectAtomicFlags = vstEffect.flags;
+
         activePlugins.add (this);
     }
 
@@ -640,7 +642,7 @@ public:
                 host that we want midi. In the SDK this method is marked as deprecated, but
                 some hosts rely on this behaviour.
             */
-            if (vstEffect.flags & Vst2::effFlagsIsSynth || JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect)
+            if (vstEffectAtomicFlags & Vst2::effFlagsIsSynth || JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect)
             {
                 if (hostCallback != nullptr)
                     hostCallback (&vstEffect, Vst2::audioMasterWantMidi, 0, 1, nullptr, 0);
@@ -1135,13 +1137,15 @@ public:
         {
             if (auto* ed = processor->createEditorIfNeeded())
             {
-                vstEffect.flags |= Vst2::effFlagsHasEditor;
+                vstEffectAtomicFlags |= Vst2::effFlagsHasEditor;
                 editorComp.reset (new EditorCompWrapper (*this, *ed));
             }
             else
             {
-                vstEffect.flags &= ~Vst2::effFlagsHasEditor;
+                vstEffectAtomicFlags&= ~Vst2::effFlagsHasEditor;
             }
+
+            vstEffect.flags = vstEffectAtomicFlags;
         }
 
         shouldDeleteEditor = false;
@@ -1707,9 +1711,11 @@ private:
     {
         // Note: most hosts call this on the UI thread, but wavelab doesn't, so be careful in here.
         if (processor->hasEditor())
-            vstEffect.flags |= Vst2::effFlagsHasEditor;
+            vstEffectAtomicFlags |= Vst2::effFlagsHasEditor;
         else
-            vstEffect.flags &= ~Vst2::effFlagsHasEditor;
+            vstEffectAtomicFlags &= ~Vst2::effFlagsHasEditor;
+
+        vstEffect.flags = vstEffectAtomicFlags;
 
         return 0;
     }
@@ -2282,6 +2288,7 @@ private:
     double sampleRate = 44100.0;
     int32 blockSize = 1024;
     Vst2::AEffect vstEffect;
+    std::atomic<Vst2::VstInt32> vstEffectAtomicFlags;
     CriticalSection stateInformationLock;
     juce::MemoryBlock chunkMemory;
     uint32 chunkMemoryTime = 0;
