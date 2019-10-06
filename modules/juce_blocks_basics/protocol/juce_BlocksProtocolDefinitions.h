@@ -303,6 +303,8 @@ enum ConfigItemId
     chord               = 24,
     arpPattern          = 25,
     tempo               = 26,
+    key                 = 27,
+    autoTransposeToKey  = 28,
     // Tracking
     xTrackingMode       = 30,
     yTrackingMode       = 31,
@@ -348,7 +350,7 @@ static constexpr uint8 numberOfUserConfigs = 32;
 static constexpr uint8 maxConfigIndex = uint8 (ConfigItemId::user0) + numberOfUserConfigs;
 
 static constexpr uint8 configUserConfigNameLength = 32;
-static constexpr uint8 configMaxOptions = 8;
+static constexpr uint8 configMaxOptions = 16;
 static constexpr uint8 configOptionNameLength = 16;
 
 //==============================================================================

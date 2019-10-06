@@ -398,6 +398,13 @@
 			path = System/Library/Frameworks/CoreMedia.framework;
 			sourceTree = SDKROOT;
 		};
+		911BC81C9C4E07C2E2FD68C1 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			name = UnitTestRunner.entitlements;
+			path = UnitTestRunner.entitlements;
+			sourceTree = "SOURCE_ROOT";
+		};
 		9514F6D920549F8A44B2E332 = {
 			isa = PBXFileReference;
 			lastKnownFileType = file;

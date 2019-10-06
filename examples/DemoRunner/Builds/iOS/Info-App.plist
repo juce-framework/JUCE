@@ -7,6 +7,10 @@
     <string>This app requires audio input. If you do not have an audio interface connected it will use the built-in microphone.</string>
     <key>NSCameraUsageDescription</key>
     <string>This app requires access to the camera to function correctly.</string>
+    <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>This app requires access to Bluetooth to function correctly.</string>
+    <key>NSBluetoothPeripheralUsageDescription</key>
+    <string>This app requires access to Bluetooth to function correctly.</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
     <key>UIViewControllerBasedStatusBarAppearance</key>

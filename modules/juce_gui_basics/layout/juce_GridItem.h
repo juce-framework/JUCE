@@ -48,57 +48,50 @@ public:
             jassert (numberToUse > 0);
         }
 
-        explicit Span (int numberToUse, const juce::String& nameToUse) : Span (numberToUse)
+        explicit Span (int numberToUse, const String& nameToUse) : Span (numberToUse)
         {
             /* Name must not be empty */
             jassert (nameToUse.isNotEmpty());
             name = nameToUse;
         }
 
-        explicit Span (const juce::String& nameToUse) : name (nameToUse)
+        explicit Span (const String& nameToUse) : name (nameToUse)
         {
             /* Name must not be empty */
             jassert (nameToUse.isNotEmpty());
         }
 
         int number = 1;
-        juce::String name;
+        String name;
     };
 
     //==============================================================================
     /** Represents a property. */
     struct Property
     {
-        /** */
         Property() noexcept;
 
-        /** */
         Property (Keyword keyword) noexcept;
 
-        /** */
         Property (const char* lineNameToUse) noexcept;
 
-        /** */
-        Property (const juce::String& lineNameToUse) noexcept;
+        Property (const String& lineNameToUse) noexcept;
 
-        /** */
         Property (int numberToUse) noexcept;
 
-        /** */
-        Property (int numberToUse, const juce::String& lineNameToUse) noexcept;
+        Property (int numberToUse, const String& lineNameToUse) noexcept;
 
-        /** */
         Property (Span spanToUse) noexcept;
 
+        bool hasSpan() const noexcept          { return isSpan && ! isAuto; }
+        bool hasAbsolute() const noexcept      { return ! (isSpan || isAuto);  }
+        bool hasAuto() const noexcept          { return isAuto; }
+        bool hasName() const noexcept          { return name.isNotEmpty(); }
+        const String& getName() const noexcept { return name; }
+        int getNumber() const noexcept         { return number; }
+
     private:
-        bool hasSpan() const noexcept       { return isSpan && ! isAuto; }
-        bool hasAbsolute() const noexcept   { return ! (isSpan || isAuto);  }
-        bool hasAuto() const noexcept       { return isAuto; }
-        bool hasName() const noexcept       { return name.isNotEmpty(); }
-
-        friend class Grid;
-
-        juce::String name;
+        String name;
         int number = 1; /** Either an absolute line number or number of lines to span across. */
         bool isSpan = false;
         bool isAuto = false;
@@ -132,16 +125,16 @@ public:
     /** Creates an item with default parameters. */
     GridItem() noexcept;
     /** Creates an item with a given Component to use. */
-    GridItem (juce::Component& componentToUse) noexcept;
+    GridItem (Component& componentToUse) noexcept;
     /** Creates an item with a given Component to use. */
-    GridItem (juce::Component* componentToUse) noexcept;
+    GridItem (Component* componentToUse) noexcept;
 
     /** Destructor. */
     ~GridItem() noexcept;
 
     //==============================================================================
     /** If this is non-null, it represents a Component whose bounds are controlled by this item. */
-    juce::Component* associatedComponent = nullptr;
+    Component* associatedComponent = nullptr;
 
     //==============================================================================
     /** Determines the order used to lay out items in their grid container. */
@@ -164,7 +157,7 @@ public:
     StartAndEndProperty row    = { Keyword::autoValue, Keyword::autoValue };
 
     /** */
-    juce::String area;
+    String area;
 
     //==============================================================================
     enum
@@ -200,7 +193,7 @@ public:
     Margin margin;
 
     /** The item's current bounds. */
-    juce::Rectangle<float> currentBounds;
+    Rectangle<float> currentBounds;
 
     /** Short-hand */
     void setArea (Property rowStart, Property columnStart, Property rowEnd, Property columnEnd);
@@ -209,7 +202,7 @@ public:
     void setArea (Property rowStart, Property columnStart);
 
     /** Short-hand */
-    void setArea (const juce::String& areaName);
+    void setArea (const String& areaName);
 
     /** Short-hand */
     GridItem withArea (Property rowStart, Property columnStart, Property rowEnd, Property columnEnd) const noexcept;
@@ -218,7 +211,7 @@ public:
     GridItem withArea (Property rowStart, Property columnStart) const noexcept;
 
     /** Short-hand */
-    GridItem withArea (const juce::String& areaName)  const noexcept;
+    GridItem withArea (const String& areaName)  const noexcept;
 
     /** Returns a copy of this object with a new row property. */
     GridItem withRow (StartAndEndProperty row) const noexcept;

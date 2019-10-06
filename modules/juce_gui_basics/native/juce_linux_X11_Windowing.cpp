@@ -958,6 +958,8 @@ static double getScaleForDisplay (const String& name, double dpi)
 
                     if (scaleFactor > 0.0)
                         return scaleFactor;
+
+                    return 1.0;
                 }
             }
         }
