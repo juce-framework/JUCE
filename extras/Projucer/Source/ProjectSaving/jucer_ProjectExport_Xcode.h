@@ -297,7 +297,7 @@ public:
             props.add (new ChoicePropertyComponent (uiStatusBarHiddenValue, "Status Bar Hidden"),
                        "Enable this to disable the status bar in your app.");
         }
-        else if (projectType.isGUIApplication())
+        else if (projectType.isGUIApplication() || project.shouldBuildStandalonePlugin())
         {
             props.add (new TextPropertyComponent (documentExtensionsValue, "Document File Extensions", 128, false),
                        "A comma-separated list of file extensions for documents that your app can open. "
