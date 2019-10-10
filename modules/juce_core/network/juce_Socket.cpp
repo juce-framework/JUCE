@@ -36,7 +36,9 @@ namespace juce
  using juce_socklen_t       = int;
  using juce_recvsend_size_t = int;
  using SocketHandle         = SOCKET;
- using pollfd               = WSAPOLLFD;
+ #if ! JUCE_MINGW
+  using pollfd              = WSAPOLLFD;
+ #endif
  static const SocketHandle invalidSocket = INVALID_SOCKET;
 #elif JUCE_ANDROID
  using juce_socklen_t       = socklen_t;
@@ -286,6 +288,33 @@ namespace SocketHelpers
 
         auto h = handle.load();
 
+       #if JUCE_MINGW
+        struct timeval timeout;
+        struct timeval* timeoutp;
+
+        if (timeoutMsecs >= 0)
+        {
+            timeout.tv_sec = timeoutMsecs / 1000;
+            timeout.tv_usec = (timeoutMsecs % 1000) * 1000;
+            timeoutp = &timeout;
+        }
+        else
+        {
+            timeoutp = nullptr;
+        }
+
+        fd_set rset, wset;
+        FD_ZERO (&rset);
+        FD_SET (h, &rset);
+        FD_ZERO (&wset);
+        FD_SET (h, &wset);
+
+        fd_set* const prset = forReading ? &rset : nullptr;
+        fd_set* const pwset = forReading ? nullptr : &wset;
+
+        if (select ((int) h + 1, prset, pwset, 0, timeoutp) < 0)
+            return -1;
+       #else
         short eventsFlag = (forReading ? POLLIN : POLLOUT);
         pollfd pfd { (SocketHandle) h, eventsFlag, 0 };
 
@@ -310,6 +339,7 @@ namespace SocketHelpers
                 break;
             }
         }
+       #endif
 
         if (result < 0)
             return -1;
@@ -327,7 +357,11 @@ namespace SocketHelpers
                 return -1;
         }
 
+       #if JUCE_MINGW
+        return FD_ISSET (h, forReading ? &rset : &wset) ? 1 : 0;
+       #else
         return (pfd.revents & eventsFlag) != 0;
+       #endif
     }
 
     static addrinfo* getAddressInfo (bool isDatagram, const String& hostName, int portNumber)
