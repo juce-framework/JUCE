@@ -41,27 +41,14 @@ Project::Project (const File& f)
                          "Save Jucer project")
 {
     Logger::writeToLog ("Loading project: " + f.getFullPathName());
-    setFile (f);
 
-    removeDefunctExporters();
-    exporterPathsModuleList.reset (new AvailableModuleList());
-    updateOldModulePaths();
-    updateOldStyleConfigList();
-    setCppVersionFromOldExporterSettings();
-    moveOldPropertyFromProjectToAllExporters (Ids::bigIcon);
-    moveOldPropertyFromProjectToAllExporters (Ids::smallIcon);
+    setFile (f);
 
     initialiseProjectValues();
     initialiseMainGroup();
     initialiseAudioPluginValues();
 
-    parsedPreprocessorDefs = parsePreprocessorDefs (preprocessorDefsValue.get());
-
-    getEnabledModules().sortAlphabetically();
-
-    projectRoot.addListener (this);
-
-    compileEngineSettings.reset (new CompileEngineSettings (projectRoot));
+    exporterPathsModuleList.reset (new AvailableModuleList());
 
     setChangedFlag (false);
     modificationTime = getFile().getLastModificationTime();
@@ -579,7 +566,9 @@ Result Project::loadDocument (const File& file)
     registerRecentFile (file);
 
     enabledModuleList.reset();
+
     projectRoot = newTree;
+    projectRoot.addListener (this);
 
     initialiseProjectValues();
     initialiseMainGroup();
@@ -591,8 +580,15 @@ Result Project::loadDocument (const File& file)
 
     parsedPreprocessorDefs = parsePreprocessorDefs (preprocessorDefsValue.get());
 
+    setCppVersionFromOldExporterSettings();
+
     removeDefunctExporters();
     updateOldModulePaths();
+    updateOldStyleConfigList();
+    moveOldPropertyFromProjectToAllExporters (Ids::bigIcon);
+    moveOldPropertyFromProjectToAllExporters (Ids::smallIcon);
+    getEnabledModules().sortAlphabetically();
+
     setChangedFlag (false);
 
     if (! ProjucerApplication::getApp().isRunningCommandLine)

@@ -422,13 +422,11 @@ public:
             }
 
             auto projectDir = fileBrowser.getSelectedFile (0);
-            std::unique_ptr<Project> project (wizard->runWizard (*this, projectName.getText(),
-                                                               projectDir,
-                                                               modulesPathBox.isUsingGlobalPaths));
+            std::unique_ptr<Project> project (wizard->runWizard (*this, projectName.getText(), projectDir, modulesPathBox.isUsingGlobalPaths));
 
             if (project != nullptr)
             {
-                mw->setProject (std::move (project));
+                mw->openFile (project->getFile());
                 getAppSettings().lastWizardFolder = projectDir.getParentDirectory();
             }
         }
