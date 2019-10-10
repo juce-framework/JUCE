@@ -259,8 +259,6 @@ ProjectExporter::~ProjectExporter()
 {
 }
 
-void ProjectExporter::updateDeprecatedProjectSettingsInteractively() {}
-
 String ProjectExporter::getName() const
 {
     if (! getAllDefaultBuildsFolders().contains (getTargetLocationString()))

@@ -31,8 +31,6 @@ public:
           manifestFileValue     (settings, Ids::msvcManifestFile,             getUndoManager())
     {
         targetLocationValue.setDefault (getDefaultBuildsRootFolder() + folderName);
-
-        updateOldSettings();
     }
 
     virtual int getVisualStudioVersion() const = 0;
@@ -88,6 +86,41 @@ public:
     }
 
     //==============================================================================
+    void updateDeprecatedSettings() override
+    {
+        {
+            auto oldStylePrebuildCommand = getSettingString (Ids::prebuildCommand);
+            settings.removeProperty (Ids::prebuildCommand, nullptr);
+
+            if (oldStylePrebuildCommand.isNotEmpty())
+                for (ConfigIterator config (*this); config.next();)
+                    dynamic_cast<MSVCBuildConfiguration&> (*config).getValue (Ids::prebuildCommand) = oldStylePrebuildCommand;
+        }
+
+        {
+            auto oldStyleLibName = getSettingString ("libraryName_Debug");
+            settings.removeProperty ("libraryName_Debug", nullptr);
+
+            if (oldStyleLibName.isNotEmpty())
+                for (ConfigIterator config (*this); config.next();)
+                    if (config->isDebug())
+                        config->getValue (Ids::targetName) = oldStyleLibName;
+        }
+
+        {
+            auto oldStyleLibName = getSettingString ("libraryName_Release");
+            settings.removeProperty ("libraryName_Release", nullptr);
+
+            if (oldStyleLibName.isNotEmpty())
+                for (ConfigIterator config (*this); config.next();)
+                    if (! config->isDebug())
+                        config->getValue (Ids::targetName) = oldStyleLibName;
+        }
+
+        for (ConfigIterator i (*this); i.next();)
+            dynamic_cast<MSVCBuildConfiguration&> (*i).updateOldLTOSetting();
+    }
+
     void initialiseDependencyPathValues() override
     {
         vstLegacyPathValueWrapper.init ({ settings, Ids::vstLegacyFolder, nullptr },
@@ -131,9 +164,6 @@ public:
               aaxBinaryLocation              (config, Ids::aaxBinaryLocation,          getUndoManager()),
               unityPluginBinaryLocation      (config, Ids::unityPluginBinaryLocation,  getUndoManager(), {})
         {
-            if (! isDebug())
-                updateOldLTOSetting();
-
             setPluginBinaryCopyLocationDefaults();
             optimisationLevelValue.setDefault (isDebug() ? optimisationOff : optimiseFull);
 
@@ -274,6 +304,12 @@ public:
             return result;
         }
 
+        void updateOldLTOSetting()
+        {
+            if (! isDebug() && config.getPropertyAsValue ("wholeProgramOptimisation", nullptr) != Value())
+                linkTimeOptimisationValue = (static_cast<int> (config ["wholeProgramOptimisation"]) == 0);
+        }
+
     private:
         ValueWithDefault warningLevelValue, warningsAreErrorsValue, prebuildCommandValue, postbuildCommandValue, generateDebugSymbolsValue,
                          generateManifestValue, enableIncrementalLinkingValue, useRuntimeLibDLLValue, multiProcessorCompilationValue,
@@ -285,12 +321,6 @@ public:
         Value architectureValueToListenTo;
 
         //==============================================================================
-        void updateOldLTOSetting()
-        {
-            if (config.getPropertyAsValue ("wholeProgramOptimisation", nullptr) != Value())
-                linkTimeOptimisationValue = (static_cast<int> (config ["wholeProgramOptimisation"]) == 0);
-        }
-
         void addVisualStudioPluginInstallPathProperties (PropertyListBuilder& props)
         {
             auto isBuildingAnyPlugins = (project.shouldBuildVST() || project.shouldBuildVST3() || project.shouldBuildRTAS()
@@ -1468,38 +1498,6 @@ protected:
 
     String getIntDirFile (const BuildConfiguration& config, const String& file) const  { return prependIfNotAbsolute (replacePreprocessorTokens (config, file), "$(IntDir)\\"); }
     String getOutDirFile (const BuildConfiguration& config, const String& file) const  { return prependIfNotAbsolute (replacePreprocessorTokens (config, file), "$(OutDir)\\"); }
-
-    void updateOldSettings()
-    {
-        {
-            auto oldStylePrebuildCommand = getSettingString (Ids::prebuildCommand);
-            settings.removeProperty (Ids::prebuildCommand, nullptr);
-
-            if (oldStylePrebuildCommand.isNotEmpty())
-                for (ConfigIterator config (*this); config.next();)
-                    dynamic_cast<MSVCBuildConfiguration&> (*config).getValue (Ids::prebuildCommand) = oldStylePrebuildCommand;
-        }
-
-        {
-            auto oldStyleLibName = getSettingString ("libraryName_Debug");
-            settings.removeProperty ("libraryName_Debug", nullptr);
-
-            if (oldStyleLibName.isNotEmpty())
-                for (ConfigIterator config (*this); config.next();)
-                    if (config->isDebug())
-                        config->getValue (Ids::targetName) = oldStyleLibName;
-        }
-
-        {
-            auto oldStyleLibName = getSettingString ("libraryName_Release");
-            settings.removeProperty ("libraryName_Release", nullptr);
-
-            if (oldStyleLibName.isNotEmpty())
-                for (ConfigIterator config (*this); config.next();)
-                    if (! config->isDebug())
-                        config->getValue (Ids::targetName) = oldStyleLibName;
-        }
-    }
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
     {

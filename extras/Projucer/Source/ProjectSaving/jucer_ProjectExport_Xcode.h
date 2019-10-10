@@ -607,7 +607,7 @@ public:
         jassert (targets.size() > 0);
     }
 
-    void updateDeprecatedProjectSettingsInteractively() override
+    void updateDeprecatedSettingsInteractively() override
     {
         if (hasInvalidPostBuildScript())
         {

@@ -435,6 +435,9 @@ private:
     std::unique_ptr<AvailableModuleList> exporterPathsModuleList;
 
     //==============================================================================
+    void updateDeprecatedProjectSettings();
+
+    //==============================================================================
     bool shouldWriteLegacyPluginFormatSettings = false;
     bool shouldWriteLegacyPluginCharacteristicsSettings = false;
 

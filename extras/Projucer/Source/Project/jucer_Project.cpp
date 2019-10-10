@@ -151,12 +151,18 @@ bool Project::setCppVersionFromOldExporterSettings()
     return false;
 }
 
+void Project::updateDeprecatedProjectSettings()
+{
+    for (Project::ExporterIterator exporter (*this); exporter.next();)
+        exporter->updateDeprecatedSettings();
+}
+
 void Project::updateDeprecatedProjectSettingsInteractively()
 {
     jassert (! ProjucerApplication::getApp().isRunningCommandLine);
 
     for (Project::ExporterIterator exporter (*this); exporter.next();)
-        exporter->updateDeprecatedProjectSettingsInteractively();
+        exporter->updateDeprecatedSettingsInteractively();
 }
 
 void Project::initialiseMainGroup()
@@ -580,14 +586,15 @@ Result Project::loadDocument (const File& file)
 
     parsedPreprocessorDefs = parsePreprocessorDefs (preprocessorDefsValue.get());
 
-    setCppVersionFromOldExporterSettings();
-
     removeDefunctExporters();
     updateOldModulePaths();
     updateOldStyleConfigList();
     moveOldPropertyFromProjectToAllExporters (Ids::bigIcon);
     moveOldPropertyFromProjectToAllExporters (Ids::smallIcon);
     getEnabledModules().sortAlphabetically();
+
+    setCppVersionFromOldExporterSettings();
+    updateDeprecatedProjectSettings();
 
     setChangedFlag (false);
 
