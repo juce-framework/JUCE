@@ -181,8 +181,8 @@ public:
         titleTextColour           = 0x100f002,
         shadowBaseColour          = 0x100f003,
         dismissButtonNormalColour = 0x100f004,
-        dismissButtonOverColour   = 0x100f004,
-        dismissButtonDownColour   = 0x100f005
+        dismissButtonOverColour   = 0x100f005,
+        dismissButtonDownColour   = 0x100f006
     };
 
     //==============================================================================
