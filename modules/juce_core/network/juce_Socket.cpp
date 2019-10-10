@@ -339,10 +339,10 @@ namespace SocketHelpers
                 break;
             }
         }
-       #endif
 
         if (result < 0)
             return -1;
+       #endif
 
         // we are closing
         if (handle.load() < 0)
