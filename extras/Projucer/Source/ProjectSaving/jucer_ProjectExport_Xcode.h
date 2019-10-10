@@ -91,8 +91,8 @@ public:
           prebuildCommandValue                         (settings, Ids::prebuildCommand,                         getUndoManager()),
           duplicateAppExResourcesFolderValue           (settings, Ids::duplicateAppExResourcesFolder,           getUndoManager(), true),
           iosDeviceFamilyValue                         (settings, Ids::iosDeviceFamily,                         getUndoManager(), "1,2"),
-          iPhoneScreenOrientationValue                 (settings, Ids::iPhoneScreenOrientation,                 getUndoManager(), "portraitlandscape"),
-          iPadScreenOrientationValue                   (settings, Ids::iPadScreenOrientation,                   getUndoManager(), "portraitlandscape"),
+          iPhoneScreenOrientationValue                 (settings, Ids::iPhoneScreenOrientation,                 getUndoManager(), getDefaultScreenOrientations(), ","),
+          iPadScreenOrientationValue                   (settings, Ids::iPadScreenOrientation,                   getUndoManager(), getDefaultScreenOrientations(), ","),
           customXcodeResourceFoldersValue              (settings, Ids::customXcodeResourceFolders,              getUndoManager()),
           customXcassetsFolderValue                    (settings, Ids::customXcassetsFolder,                    getUndoManager()),
           appSandboxValue                              (settings, Ids::appSandbox,                              getUndoManager()),
@@ -162,8 +162,12 @@ public:
 
     String getDeviceFamilyString() const                    { return iosDeviceFamilyValue.get(); }
 
-    String getiPhoneScreenOrientationString() const         { return iPhoneScreenOrientationValue.get(); }
-    String getiPadScreenOrientationString() const           { return iPadScreenOrientationValue.get(); }
+    Array<var> getDefaultScreenOrientations() const         { return { "UIInterfaceOrientationPortrait",
+                                                                       "UIInterfaceOrientationLandscapeLeft",
+                                                                       "UIInterfaceOrientationLandscapeRight" }; }
+
+    Array<var> getiPhoneScreenOrientations() const          { return *iPhoneScreenOrientationValue.get().getArray(); }
+    Array<var> getiPadScreenOrientations() const            { return *iPadScreenOrientationValue.get().getArray(); }
 
     String getCustomResourceFoldersString() const           { return customXcodeResourceFoldersValue.get().toString().replaceCharacters ("\r\n", "::"); }
     String getCustomXcassetsFolderString() const            { return customXcassetsFolderValue.get(); }
@@ -288,15 +292,16 @@ public:
                        "The device family to target.");
 
             {
-                StringArray orientationStrings { "Portrait and Landscape", "Portrait", "Landscape" };
-                Array<var> orientationValues   { "portraitlandscape",      "portrait", "landscape"};
+                StringArray orientationStrings { "Portrait", "Portrait Upside Down",
+                                                 "Landscape Left", "Landsscape Right" };
 
-                props.add (new ChoicePropertyComponent (iPhoneScreenOrientationValue, "iPhone Screen Orientation",
-                                                        orientationStrings, orientationValues),
+                Array<var> orientationVars { "UIInterfaceOrientationPortrait", "UIInterfaceOrientationPortraitUpsideDown",
+                                             "UIInterfaceOrientationLandscapeLeft", "UIInterfaceOrientationLandscapeRight" };
+
+                props.add (new MultiChoicePropertyComponent (iPhoneScreenOrientationValue, "iPhone Screen Orientation", orientationStrings, orientationVars),
                            "The screen orientations that this app should support on iPhones.");
 
-                props.add (new ChoicePropertyComponent (iPadScreenOrientationValue,   "iPad Screen Orientation",
-                                                        orientationStrings, orientationValues),
+                props.add (new MultiChoicePropertyComponent (iPadScreenOrientationValue, "iPad Screen Orientation", orientationStrings, orientationVars),
                            "The screen orientations that this app should support on iPads.");
             }
 
@@ -605,6 +610,12 @@ public:
         // If you hit this assert, you tried to generate a project for an exporter
         // that does not support any of your targets!
         jassert (targets.size() > 0);
+    }
+
+    void updateDeprecatedSettings() override
+    {
+        if (iOS)
+            updateOldOrientationSettings();
     }
 
     void updateDeprecatedSettingsInteractively() override
@@ -1590,8 +1601,8 @@ public:
             options.IAATypeCode                      = owner.project.getIAATypeCode();
             options.pluginCode                       = owner.project.getPluginCodeString();
             options.versionAsHex                     = owner.project.getVersionAsHexInteger();
-            options.iPhoneScreenOrientations         = owner.getiPhoneScreenOrientationString();
-            options.iPadScreenOrientations           = owner.getiPadScreenOrientationString();
+            options.iPhoneScreenOrientations         = owner.getiPhoneScreenOrientations();
+            options.iPadScreenOrientations           = owner.getiPadScreenOrientations();
 
             options.storyboardName = [&]
             {
@@ -3183,6 +3194,33 @@ private:
     bool shouldFileBeCompiledByDefault (const File& file) const override
     {
         return file.hasFileExtension (sourceFileExtensions);
+    }
+
+    //==============================================================================
+    void updateOldOrientationSettings()
+    {
+        jassert (iOS);
+
+        StringArray orientationSettingStrings { getSetting (Ids::iPhoneScreenOrientation).getValue().toString(),
+                                                getSetting (Ids::iPadScreenOrientation).getValue().toString() };
+
+        for (int i = 0; i < 2; ++i)
+        {
+            auto& settingsString = orientationSettingStrings[i];
+
+            if (settingsString.isNotEmpty())
+            {
+                Array<var> orientations;
+
+                if (settingsString.contains ("portrait"))   orientations.add ("UIInterfaceOrientationPortrait");
+                if (settingsString.contains ("landscape"))  orientations.addArray ({ "UIInterfaceOrientationLandscapeLeft",
+                                                                                    "UIInterfaceOrientationLandscapeRight" });
+                if (i == 0)
+                    iPhoneScreenOrientationValue = orientations;
+                else
+                    iPadScreenOrientationValue = orientations;
+            }
+        }
     }
 
     JUCE_DECLARE_NON_COPYABLE (XcodeProjectExporter)

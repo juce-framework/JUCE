@@ -248,19 +248,10 @@ namespace build_tools
 
     void PlistOptions::addIosScreenOrientations (XmlElement& dict) const
     {
-        String screenOrientations[]  = { iPhoneScreenOrientations, iPadScreenOrientations };
-        String plistSuffix[]         = { "", "~ipad" };
-        auto orientationsAreTheSame  = screenOrientations[0] == screenOrientations[1];
+        addArrayToPlist (dict, "UISupportedInterfaceOrientations", iPhoneScreenOrientations);
 
-        for (int i = 0; i < (orientationsAreTheSame ? 1 : 2); ++i)
-        {
-            StringArray iOSOrientations;
-
-            if (screenOrientations[i].contains ("portrait"))   { iOSOrientations.add ("UIInterfaceOrientationPortrait"); }
-            if (screenOrientations[i].contains ("landscape"))  { iOSOrientations.add ("UIInterfaceOrientationLandscapeLeft");  iOSOrientations.add ("UIInterfaceOrientationLandscapeRight"); }
-
-            addArrayToPlist (dict, String ("UISupportedInterfaceOrientations") + plistSuffix[i], iOSOrientations);
-        }
+        if (iPadScreenOrientations != iPhoneScreenOrientations)
+            addArrayToPlist (dict, "UISupportedInterfaceOrientations~ipad", iPadScreenOrientations);
     }
 
     void PlistOptions::addIosBackgroundModes (XmlElement& dict) const

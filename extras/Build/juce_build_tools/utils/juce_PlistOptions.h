@@ -72,8 +72,8 @@ namespace build_tools
         String pluginCode;
         int versionAsHex                        = 0;
 
-        String iPhoneScreenOrientations;
-        String iPadScreenOrientations;
+        StringArray iPhoneScreenOrientations;
+        StringArray iPadScreenOrientations;
 
         String pluginName;
         String pluginManufacturer;
