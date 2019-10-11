@@ -45,6 +45,7 @@ protected:
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
+            addRecommendedLinuxCompilerWarningsProperty (props);
             addGCCOptimisationProperty (props);
 
             props.add (new ChoicePropertyComponent (architectureTypeValue, "Architecture",
@@ -460,7 +461,7 @@ private:
         }
 
         // don't add libcurl if curl symbols are loaded at runtime
-        if (! isLoadCurlSymbolsLazilyEnabled())
+        if (isCurlEnabled() && ! isLoadCurlSymbolsLazilyEnabled())
             packages.add ("libcurl");
 
         packages.removeDuplicates (false);
@@ -515,6 +516,9 @@ private:
 
         if (config.isLinkTimeOptimisationEnabled())
             result.add ("-flto");
+
+        for (auto& recommended : config.getRecommendedCompilerWarningFlags())
+            result.add (recommended);
 
         auto extra = replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim();
 
@@ -601,6 +605,14 @@ private:
 
         return (project.getEnabledModules().isModuleEnabled (guiExtrasModule)
                 && project.isConfigFlagEnabled ("JUCE_WEB_BROWSER", true));
+    }
+
+    bool isCurlEnabled() const
+    {
+        static String juceCoreModule ("juce_core");
+
+        return (project.getEnabledModules().isModuleEnabled (juceCoreModule)
+                && project.isConfigFlagEnabled ("JUCE_USE_CURL", true));
     }
 
     bool isLoadCurlSymbolsLazilyEnabled() const

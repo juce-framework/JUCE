@@ -482,7 +482,7 @@ public:
     /** Changes the size of border left around the edge of the component.
         @see getBorder
     */
-    void setBorder (const BorderSize<int>& border);
+    void setBorder (BorderSize<int> border);
 
     /** Returns the size of border around the edge of the component.
         @see setBorder

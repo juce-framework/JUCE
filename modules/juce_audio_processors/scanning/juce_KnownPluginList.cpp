@@ -53,6 +53,17 @@ Array<PluginDescription> KnownPluginList::getTypes() const
     return types;
 }
 
+Array<PluginDescription> KnownPluginList::getTypesForFormat (AudioPluginFormat& format) const
+{
+    Array<PluginDescription> result;
+
+    for (auto& d : getTypes())
+        if (d.pluginFormatName == format.getName())
+            result.add (d);
+
+    return result;
+}
+
 std::unique_ptr<PluginDescription> KnownPluginList::getTypeForFile (const String& fileOrIdentifier) const
 {
     ScopedLock lock (typesArrayLock);
@@ -200,10 +211,8 @@ void KnownPluginList::scanAndAddDragAndDroppedFiles (AudioPluginFormatManager& f
     {
         bool found = false;
 
-        for (int j = 0; j < formatManager.getNumFormats(); ++j)
+        for (auto format : formatManager.getFormats())
         {
-            auto* format = formatManager.getFormat (j);
-
             if (format->fileMightContainThisPluginType (filenameOrID)
                  && scanAndAddFile (filenameOrID, true, typesFound, *format))
             {
@@ -463,17 +472,17 @@ struct PluginTreeUtils
 
     static void addPlugin (KnownPluginList::PluginTree& tree, PluginDescription pd, String path)
     {
+       #if JUCE_MAC
+        if (path.containsChar (':'))
+            path = path.fromFirstOccurrenceOf (":", false, false); // avoid the special AU formatting nonsense on Mac..
+       #endif
+
         if (path.isEmpty())
         {
             tree.plugins.add (pd);
         }
         else
         {
-           #if JUCE_MAC
-            if (path.containsChar (':'))
-                path = path.fromFirstOccurrenceOf (":", false, false); // avoid the special AU formatting nonsense on Mac..
-           #endif
-
             auto firstSubFolder = path.upToFirstOccurrenceOf ("/", false, false);
             auto remainingPath  = path.fromFirstOccurrenceOf ("/", false, false);
 
@@ -553,14 +562,10 @@ struct PluginTreeUtils
     }
 };
 
-std::unique_ptr<KnownPluginList::PluginTree> KnownPluginList::createTree (const SortMethod sortMethod) const
+std::unique_ptr<KnownPluginList::PluginTree> KnownPluginList::createTree (const Array<PluginDescription>& types, SortMethod sortMethod)
 {
     Array<PluginDescription> sorted;
-
-    {
-        ScopedLock lock (typesArrayLock);
-        sorted.addArray (types);
-    }
+    sorted.addArray (types);
 
     std::stable_sort (sorted.begin(), sorted.end(), PluginSorter (sortMethod, true));
 
@@ -584,16 +589,16 @@ std::unique_ptr<KnownPluginList::PluginTree> KnownPluginList::createTree (const 
 }
 
 //==============================================================================
-void KnownPluginList::addToMenu (PopupMenu& menu, const SortMethod sortMethod,
-                                 const String& currentlyTickedPluginID) const
+void KnownPluginList::addToMenu (PopupMenu& menu, const Array<PluginDescription>& types, SortMethod sortMethod,
+                                 const String& currentlyTickedPluginID)
 {
-    auto tree = createTree (sortMethod);
+    auto tree = createTree (types, sortMethod);
     PluginTreeUtils::addToMenu (*tree, menu, types, currentlyTickedPluginID);
 }
 
-int KnownPluginList::getIndexChosenByMenu (const int menuResultCode) const
+int KnownPluginList::getIndexChosenByMenu (const Array<PluginDescription>& types, int menuResultCode)
 {
-    const int i = menuResultCode - PluginTreeUtils::menuIdBase;
+    auto i = menuResultCode - PluginTreeUtils::menuIdBase;
     return isPositiveAndBelow (i, types.size()) ? i : -1;
 }
 
@@ -610,5 +615,22 @@ bool KnownPluginList::CustomScanner::shouldExit() const noexcept
 
     return false;
 }
+
+//==============================================================================
+void KnownPluginList::addToMenu (PopupMenu& menu, SortMethod sortMethod, const String& currentlyTickedPluginID) const
+{
+    addToMenu (menu, getTypes(), sortMethod, currentlyTickedPluginID);
+}
+
+int KnownPluginList::getIndexChosenByMenu (int menuResultCode) const
+{
+    return getIndexChosenByMenu (getTypes(), menuResultCode);
+}
+
+std::unique_ptr<KnownPluginList::PluginTree> KnownPluginList::createTree (const SortMethod sortMethod) const
+{
+    return createTree (getTypes(), sortMethod);
+}
+
 
 } // namespace juce

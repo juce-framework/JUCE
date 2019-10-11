@@ -75,6 +75,7 @@ public:
         MagixSequoia,               /**< Represents Magix Sequoia. */
         MergingPyramix,             /**< Represents Merging Pyramix. */
         MuseReceptorGeneric,        /**< Represents Muse Receptor. */
+        pluginval,                  /**< Represents pluginval. */
         Reaper,                     /**< Represents Cockos Reaper. */
         Renoise,                    /**< Represents Renoise. */
         SADiE,                      /**< Represents SADiE. */
@@ -142,6 +143,8 @@ public:
     bool isMainStage() const noexcept         { return type == AppleMainStage; }
     /** Returns true if the host is any version of Steinberg Nuendo. */
     bool isNuendo() const noexcept            { return type == SteinbergNuendo3 || type == SteinbergNuendo4  || type == SteinbergNuendo5 ||  type == SteinbergNuendoGeneric; }
+    /** Returns true if the host is pluginval. */
+    bool isPluginval() const noexcept         { return type == pluginval; }
     /** Returns true if the host is Adobe Premiere Pro. */
     bool isPremiere() const noexcept          { return type == AdobePremierePro; }
     /** Returns true if the host is Avid Pro Tools. */
@@ -211,6 +214,7 @@ public:
             case JUCEPluginHost:           return "JUCE AudioPluginHost";
             case MagixSamplitude:          return "Magix Samplitude";
             case MagixSequoia:             return "Magix Sequoia";
+            case pluginval:                return "pluginval";
             case MergingPyramix:           return "Pyramix";
             case MuseReceptorGeneric:      return "Muse Receptor";
             case Reaper:                   return "Reaper";
@@ -336,6 +340,7 @@ private:
         if (hostFilename.containsIgnoreCase   ("Resolve"))           return DaVinciResolve;
         if (hostFilename.startsWith           ("Bitwig"))            return BitwigStudio;
         if (hostFilename.containsIgnoreCase   ("OsxFL"))             return FruityLoops;
+        if (hostFilename.containsIgnoreCase   ("pluginval"))         return pluginval;
         if (hostFilename.containsIgnoreCase   ("AudioPluginHost"))   return JUCEPluginHost;
 
        #elif JUCE_WINDOWS
@@ -393,6 +398,7 @@ private:
         if (hostFilename.containsIgnoreCase   ("Resolve"))           return DaVinciResolve;
         if (hostPath.containsIgnoreCase       ("Bitwig Studio"))     return BitwigStudio;
         if (hostFilename.containsIgnoreCase   ("Sadie"))             return SADiE;
+        if (hostFilename.containsIgnoreCase   ("pluginval"))         return pluginval;
         if (hostFilename.containsIgnoreCase   ("AudioPluginHost"))   return JUCEPluginHost;
 
        #elif JUCE_LINUX
@@ -400,6 +406,7 @@ private:
         if (hostFilename.startsWithIgnoreCase ("Waveform"))          return TracktionWaveform;
         if (hostFilename.containsIgnoreCase   ("Tracktion"))         return TracktionGeneric;
         if (hostFilename.startsWith           ("Bitwig"))            return BitwigStudio;
+        if (hostFilename.containsIgnoreCase   ("pluginval"))         return pluginval;
         if (hostFilename.containsIgnoreCase   ("AudioPluginHost"))   return JUCEPluginHost;
 
        #elif JUCE_IOS

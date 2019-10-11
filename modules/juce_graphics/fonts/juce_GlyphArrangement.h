@@ -50,10 +50,8 @@ public:
 
     PositionedGlyph (const PositionedGlyph&) = default;
     PositionedGlyph& operator= (const PositionedGlyph&) = default;
-
-    // VS2013 can't default move constructors and assignments
-    PositionedGlyph (PositionedGlyph&&) noexcept;
-    PositionedGlyph& operator= (PositionedGlyph&&) noexcept;
+    PositionedGlyph (PositionedGlyph&&) noexcept = default;
+    PositionedGlyph& operator= (PositionedGlyph&&) noexcept = default;
 
     ~PositionedGlyph();
 
@@ -132,13 +130,11 @@ public:
 
     GlyphArrangement (const GlyphArrangement&) = default;
     GlyphArrangement& operator= (const GlyphArrangement&) = default;
-
-    // VS2013 can't default move constructors and assignmants
-    GlyphArrangement (GlyphArrangement&&);
-    GlyphArrangement& operator= (GlyphArrangement&&);
+    GlyphArrangement (GlyphArrangement&&) = default;
+    GlyphArrangement& operator= (GlyphArrangement&&) = default;
 
     /** Destructor. */
-    ~GlyphArrangement();
+    ~GlyphArrangement() = default;
 
     //==============================================================================
     /** Returns the total number of glyphs in the arrangement. */
@@ -206,7 +202,7 @@ public:
     /** Tries to fit some text within a given space.
 
         This does its best to make the given text readable within the specified rectangle,
-        so it useful for labelling things.
+        so it's useful for labelling things.
 
         If the text is too big, it'll be squashed horizontally or broken over multiple lines
         if the maximumLinesToUse value allows this. If the text just won't fit into the space,

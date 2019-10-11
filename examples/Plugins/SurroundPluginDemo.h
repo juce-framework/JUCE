@@ -78,8 +78,6 @@ public:
         startTimer (500);
     }
 
-    ~SurroundEditor() {}
-
     void resized() override
     {
         auto r = getLocalBounds();
@@ -221,8 +219,6 @@ public:
         : AudioProcessor(BusesProperties().withInput  ("Input",  AudioChannelSet::stereo())
                                           .withOutput ("Output", AudioChannelSet::stereo()))
     {}
-
-    ~SurroundProcessor() {}
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override

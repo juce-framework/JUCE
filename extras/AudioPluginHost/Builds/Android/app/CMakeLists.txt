@@ -36,12 +36,12 @@ add_library( ${BINARY_NAME}
 
     SHARED
 
-    "../../../Source/Filters/FilterGraph.cpp"
-    "../../../Source/Filters/FilterGraph.h"
-    "../../../Source/Filters/FilterIOConfiguration.cpp"
-    "../../../Source/Filters/FilterIOConfiguration.h"
-    "../../../Source/Filters/InternalFilters.cpp"
-    "../../../Source/Filters/InternalFilters.h"
+    "../../../Source/Plugins/InternalPlugins.cpp"
+    "../../../Source/Plugins/InternalPlugins.h"
+    "../../../Source/Plugins/IOConfigurationWindow.cpp"
+    "../../../Source/Plugins/IOConfigurationWindow.h"
+    "../../../Source/Plugins/PluginGraph.cpp"
+    "../../../Source/Plugins/PluginGraph.h"
     "../../../Source/UI/GraphEditorPanel.cpp"
     "../../../Source/UI/GraphEditorPanel.h"
     "../../../Source/UI/MainHostWindow.cpp"
@@ -337,6 +337,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/base/thread/include/flock.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/base/thread/source/flock.cpp"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/base/LICENSE.txt"
+    "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/base/README.md"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/base/conststringtable.cpp"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/base/conststringtable.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/base/coreiids.cpp"
@@ -382,11 +383,13 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstprefetchablesupport.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstprocesscontext.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstrepresentation.h"
+    "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivsttestplugprovider.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstunits.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/vstpshpack4.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/vstspeaker.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/vsttypes.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/LICENSE.txt"
+    "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/README.md"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/source/common/memorystream.cpp"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/source/common/memorystream.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/source/common/pluginview.cpp"
@@ -409,6 +412,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/source/vst/vstpresetfile.cpp"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/source/vst/vstpresetfile.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/LICENSE.txt"
+    "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/README.md"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/LICENSE.txt"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/README.md"
     "../../../../../modules/juce_audio_processors/format_types/juce_AU_Shared.h"
@@ -937,6 +941,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_graphics/image_formats/pnglib/png.c"
     "../../../../../modules/juce_graphics/image_formats/pnglib/png.h"
     "../../../../../modules/juce_graphics/image_formats/pnglib/pngconf.h"
+    "../../../../../modules/juce_graphics/image_formats/pnglib/pngdebug.h"
     "../../../../../modules/juce_graphics/image_formats/pnglib/pngerror.c"
     "../../../../../modules/juce_graphics/image_formats/pnglib/pngget.c"
     "../../../../../modules/juce_graphics/image_formats/pnglib/pnginfo.h"
@@ -1400,9 +1405,9 @@ add_library( ${BINARY_NAME}
     "../../../JuceLibraryCode/JuceHeader.h"
 )
 
-set_source_files_properties("../../../Source/Filters/FilterGraph.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../Source/Filters/FilterIOConfiguration.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../Source/Filters/InternalFilters.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../Source/Plugins/InternalPlugins.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../Source/Plugins/IOConfigurationWindow.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../Source/Plugins/PluginGraph.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../Source/UI/GraphEditorPanel.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../Source/UI/MainHostWindow.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../Source/UI/PluginWindow.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -1695,6 +1700,7 @@ set_source_files_properties("../../../../../modules/juce_audio_processors/format
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/base/thread/include/flock.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/base/thread/source/flock.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/base/LICENSE.txt" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/base/README.md" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/base/conststringtable.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/base/conststringtable.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/base/coreiids.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -1740,11 +1746,13 @@ set_source_files_properties("../../../../../modules/juce_audio_processors/format
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstprefetchablesupport.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstprocesscontext.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstrepresentation.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivsttestplugprovider.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstunits.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/vstpshpack4.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/vstspeaker.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/vsttypes.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/LICENSE.txt" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/README.md" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/source/common/memorystream.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/source/common/memorystream.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/source/common/pluginview.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -1767,6 +1775,7 @@ set_source_files_properties("../../../../../modules/juce_audio_processors/format
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/source/vst/vstpresetfile.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/source/vst/vstpresetfile.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/LICENSE.txt" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/README.md" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/LICENSE.txt" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/README.md" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_AU_Shared.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2295,6 +2304,7 @@ set_source_files_properties("../../../../../modules/juce_graphics/image_formats/
 set_source_files_properties("../../../../../modules/juce_graphics/image_formats/pnglib/png.c" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/image_formats/pnglib/png.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/image_formats/pnglib/pngconf.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_graphics/image_formats/pnglib/pngdebug.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/image_formats/pnglib/pngerror.c" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/image_formats/pnglib/pngget.c" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/image_formats/pnglib/pnginfo.h" PROPERTIES HEADER_FILE_ONLY TRUE)

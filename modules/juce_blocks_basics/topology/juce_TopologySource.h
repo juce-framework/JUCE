@@ -30,7 +30,7 @@ namespace juce
 class TopologySource
 {
 public:
-    //==========================================================================
+    //==============================================================================
     /** Destructor. */
     virtual ~TopologySource() = default;
 
@@ -43,7 +43,7 @@ public:
     /** Returns true, if the TopologySource is currently trying to connect the block devices */
     virtual bool isActive() const = 0;
 
-    //==========================================================================
+    //==============================================================================
     /** Used to receive callbacks for topology changes */
     struct Listener
     {
@@ -59,7 +59,7 @@ public:
         virtual void blockRemoved (const Block::Ptr) {}
 
         /** Called when a known block is updated.
-            This could be becasue details have been reveived asyncroniously. E.g. Block name.
+            This could be because details have been received asynchronously. E.g. Block name.
          */
         virtual void blockUpdated (const Block::Ptr) {}
     };
@@ -71,7 +71,7 @@ public:
     virtual void cancelAllActiveTouches() noexcept {}
 
 protected:
-    //==========================================================================
+    //==============================================================================
     ListenerList<Listener> listeners;
 };
 

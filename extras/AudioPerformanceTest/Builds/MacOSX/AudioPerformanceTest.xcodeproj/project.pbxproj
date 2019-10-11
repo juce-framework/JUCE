@@ -336,6 +336,13 @@
 			path = "../../JuceLibraryCode/include_juce_audio_utils.mm";
 			sourceTree = "SOURCE_ROOT";
 		};
+		C3BE13F50343166A30728D8A = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			name = AudioPerformanceTest.entitlements;
+			path = AudioPerformanceTest.entitlements;
+			sourceTree = "SOURCE_ROOT";
+		};
 		C8EE61FDD1F06817A014B881 = {
 			isa = PBXFileReference;
 			lastKnownFileType = file;
@@ -749,7 +756,7 @@
 		9CE2A44801B5B4BE7A9667DA = {
 			isa = PBXProject;
 			buildConfigurationList = 7097CF6AC086DAC346ACCCD9;
-			attributes = { LastUpgradeCheck = 1010; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { E9FD2656EC625C9C8DE30219 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
+			attributes = { LastUpgradeCheck = 1100; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { E9FD2656EC625C9C8DE30219 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
 			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 0;
 			mainGroup = 3BA1BA0CAFE969E99950C06B;

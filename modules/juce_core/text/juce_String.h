@@ -1065,7 +1065,7 @@ public:
 
     /** Returns a string containing a decimal with a set number of significant figures.
 
-        @param number                         the intput number
+        @param number                         the input number
         @param numberOfSignificantFigures     the number of significant figures to use
     */
     template <typename DecimalType>

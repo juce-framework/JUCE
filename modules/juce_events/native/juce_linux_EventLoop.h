@@ -25,31 +25,26 @@ namespace juce
 
 namespace LinuxEventLoop
 {
-    struct CallbackFunctionBase
-    {
-        virtual ~CallbackFunctionBase() {}
-        virtual bool operator()(int fd) = 0;
-        bool active = true;
-    };
+    /** Registers a callback that will be called when a file descriptor is ready for I/O.
 
-    template <typename FdCallbackFunction>
-    struct CallbackFunction : public CallbackFunctionBase
-    {
-        FdCallbackFunction callback;
+        This will add the given file descriptor to the internal set of file descriptors
+        that will be passed to the poll() call. When this file descriptor has data to read
+        the readCallback will be called.
 
-        CallbackFunction (FdCallbackFunction c) : callback (c) {}
+        @param fd            the file descriptor to be monitored
+        @param readCallback  a callback that will be called when the file descriptor has
+                             data to read. The file descriptor will be passed as an argument
+        @param eventMask     a bit mask specifying the events you are interested in for the
+                             file descriptor. The possible values for this are defined in
+                             <poll.h>
+    */
+    void registerFdCallback (int fd, std::function<void(int)> readCallback, short eventMask = 1 /*POLLIN*/);
 
-        bool operator() (int fd) override { return callback (fd); }
-    };
+    /** Unregisters a previously registered file descriptor.
 
-    template <typename FdCallbackFunction>
-    void setWindowSystemFd (int fd, FdCallbackFunction readCallback)
-    {
-        setWindowSystemFdInternal (fd, new CallbackFunction<FdCallbackFunction> (readCallback));
-    }
-    void removeWindowSystemFd() noexcept;
-
-    void setWindowSystemFdInternal (int fd, CallbackFunctionBase* readCallback) noexcept;
+        @see registerFdCallback
+    */
+    void unregisterFdCallback (int fd);
 }
 
 } // namespace juce

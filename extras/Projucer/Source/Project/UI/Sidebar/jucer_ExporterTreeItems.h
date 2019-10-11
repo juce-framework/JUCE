@@ -368,7 +368,7 @@ private:
     Project& project;
     ValueTree exportersTree;
 
-    //==========================================================================
+    //==============================================================================
     void valueTreeChildAdded (ValueTree& parentTree, ValueTree&) override         { refreshIfNeeded (parentTree); }
     void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&, int) override  { refreshIfNeeded (parentTree); }
     void valueTreeChildOrderChanged (ValueTree& parentTree, int, int) override    { refreshIfNeeded (parentTree); }

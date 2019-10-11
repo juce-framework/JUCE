@@ -1075,6 +1075,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\internal\juce_BlockImplementation.cpp">
       <Filter>JUCE Modules\juce_blocks_basics\topology\internal</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\internal\juce_BlockSerialReader.cpp">
+      <Filter>JUCE Modules\juce_blocks_basics\topology\internal</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\internal\juce_ConnectedDeviceGroup.cpp">
       <Filter>JUCE Modules\juce_blocks_basics\topology\internal</Filter>
     </ClCompile>
@@ -1488,6 +1491,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_data_structures\juce_data_structures.mm">
       <Filter>JUCE Modules\juce_data_structures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\containers\juce_AudioBlock_test.cpp">
+      <Filter>JUCE Modules\juce_dsp\containers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_dsp\containers\juce_SIMDRegister_test.cpp">
       <Filter>JUCE Modules\juce_dsp\containers</Filter>
@@ -3231,6 +3237,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\vst\ivstrepresentation.h">
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\vst\ivsttestplugprovider.h">
+      <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\vst</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\vst\ivstunits.h">
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
@@ -4242,6 +4251,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngconf.h">
       <Filter>JUCE Modules\juce_graphics\image_formats\pnglib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngdebug.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\pnglib</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pnginfo.h">
       <Filter>JUCE Modules\juce_graphics\image_formats\pnglib</Filter>
     </ClInclude>
@@ -4946,10 +4958,19 @@
     <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\base\LICENSE.txt">
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\base</Filter>
     </None>
+    <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\base\README.md">
+      <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\base</Filter>
+    </None>
     <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\LICENSE.txt">
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces</Filter>
     </None>
+    <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\README.md">
+      <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces</Filter>
+    </None>
     <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\LICENSE.txt">
+      <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\public.sdk</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\README.md">
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\public.sdk</Filter>
     </None>
     <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\LICENSE.txt">

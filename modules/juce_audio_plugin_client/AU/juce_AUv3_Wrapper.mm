@@ -29,10 +29,6 @@
 
 #if JucePlugin_Build_AUv3
 
-#import <CoreAudioKit/CoreAudioKit.h>
-#import <AudioToolbox/AudioToolbox.h>
-#import <AVFoundation/AVFoundation.h>
-
 #if JUCE_MAC
  #if (! defined MAC_OS_X_VERSION_MIN_REQUIRED) || (! defined MAC_OS_X_VERSION_10_11) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_11)
   #error AUv3 needs Deployment Target OS X 10.11 or higher to compile
@@ -61,8 +57,12 @@
 
 #include "../utility/juce_IncludeSystemHeaders.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
-#include "../../juce_graphics/native/juce_mac_CoreGraphicsHelpers.h"
 
+#import <CoreAudioKit/CoreAudioKit.h>
+#import <AudioToolbox/AudioToolbox.h>
+#import <AVFoundation/AVFoundation.h>
+
+#include "../../juce_graphics/native/juce_mac_CoreGraphicsHelpers.h"
 #include "../../juce_audio_basics/native/juce_mac_CoreAudioLayouts.h"
 #include "../../juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp"
 #include "../../juce_audio_processors/format_types/juce_AU_Shared.h"
@@ -131,7 +131,7 @@ public:
         initialiseJuce_GUI();
     }
 
-    virtual ~JuceAudioUnitv3Base() {}
+    virtual ~JuceAudioUnitv3Base() = default;
 
     //==============================================================================
     AUAudioUnit* getAudioUnit() noexcept                                   { return au; }
@@ -441,7 +441,7 @@ public:
         init();
     }
 
-    ~JuceAudioUnitv3()
+    ~JuceAudioUnitv3() override
     {
         auto& processor = getAudioProcessor();
         processor.removeListener (this);
@@ -1522,12 +1522,14 @@ private:
 
             // send MIDI
            #if JucePlugin_ProducesMidiOutput && JUCE_AUV3_MIDI_OUTPUT_SUPPORTED
-            auto midiOut = [au MIDIOutputEventBlock];
-            MidiMessage msg;
-            int samplePosition;
+            if (auto midiOut = [au MIDIOutputEventBlock])
+            {
+                MidiMessage msg;
+                int samplePosition;
 
-            for (MidiBuffer::Iterator it (midiMessages); it.getNextEvent (msg, samplePosition);)
-                midiOut (samplePosition, 0, msg.getRawDataSize(), msg.getRawData());
+                for (MidiBuffer::Iterator it (midiMessages); it.getNextEvent (msg, samplePosition);)
+                    midiOut (samplePosition, 0, msg.getRawDataSize(), msg.getRawData());
+            }
            #endif
 
             midiMessages.clear();

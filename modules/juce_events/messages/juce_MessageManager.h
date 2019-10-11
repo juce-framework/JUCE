@@ -94,12 +94,12 @@ public:
    #endif
 
     //==============================================================================
-    /** Asynchronously invokes a function or C++11 lambda on the message thread. */
-    template <typename FunctionType>
-    static void callAsync (FunctionType&& functionToCall)
-    {
-        new AsyncCallInvoker<FunctionType> (std::forward<FunctionType> (functionToCall));
-    }
+    /** Asynchronously invokes a function or C++11 lambda on the message thread.
+
+        @returns  true if the message was successfully posted to the message queue,
+                  or false otherwise.
+    */
+    static bool callAsync (std::function<void()> functionToCall);
 
     /** Calls a function using the message-thread.
 
@@ -339,16 +339,6 @@ private:
     static void doPlatformSpecificInitialisation();
     static void doPlatformSpecificShutdown();
     static bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
-
-    template <typename FunctionType>
-    struct AsyncCallInvoker  : public MessageBase
-    {
-        AsyncCallInvoker (FunctionType&& f) : callback (std::forward<FunctionType> (f)) { post(); }
-        void messageCallback() override                                                 { callback(); }
-        FunctionType callback;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AsyncCallInvoker)
-    };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MessageManager)
 };

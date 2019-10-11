@@ -62,8 +62,8 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
             if (listener != nullptr)
                 listener->progress (this, downloaded, contentLength);
 
-            auto max = jmin ((int) bufferSize, contentLength < 0 ? std::numeric_limits<int>::max()
-                                                                 : static_cast<int> (contentLength - downloaded));
+            auto max = (int) jmin ((int64) bufferSize, contentLength < 0 ? std::numeric_limits<int64>::max()
+                                                                         : static_cast<int64> (contentLength - downloaded));
 
             auto actual = stream->read (buffer.get(), max);
 
@@ -135,7 +135,7 @@ URL::DownloadTask::DownloadTask() {}
 URL::DownloadTask::~DownloadTask() {}
 
 //==============================================================================
-URL::URL() noexcept {}
+URL::URL() {}
 
 URL::URL (const String& u)  : url (u)
 {
@@ -170,7 +170,6 @@ URL::URL (File localFile)
         if (! url.startsWithChar (L'/'))
             url = "/" + url;
     }
-
 
     url = "file://" + url;
 
@@ -208,34 +207,6 @@ void URL::init()
 }
 
 URL::URL (const String& u, int)  : url (u) {}
-
-URL::URL (URL&& other)
-    : url             (std::move (other.url)),
-      postData        (std::move (other.postData)),
-      parameterNames  (std::move (other.parameterNames)),
-      parameterValues (std::move (other.parameterValues)),
-      filesToUpload   (std::move (other.filesToUpload))
-   #if JUCE_IOS
-    , bookmark        (std::move (other.bookmark))
-   #endif
-{
-}
-
-URL& URL::operator= (URL&& other)
-{
-    url             = std::move (other.url);
-    postData        = std::move (other.postData);
-    parameterNames  = std::move (other.parameterNames);
-    parameterValues = std::move (other.parameterValues);
-    filesToUpload   = std::move (other.filesToUpload);
-   #if JUCE_IOS
-    bookmark        = std::move (other.bookmark);
-   #endif
-
-    return *this;
-}
-
-URL::~URL() {}
 
 URL URL::createWithoutParsing (const String& u)
 {
@@ -315,6 +286,20 @@ namespace URLHelpers
         else
             path += suffix;
     }
+
+    static String removeLastPathSection (const String& url)
+    {
+        auto startOfPath = findStartOfPath (url);
+        auto lastSlash = url.lastIndexOfChar ('/');
+
+        if (lastSlash > startOfPath && lastSlash == url.length() - 1)
+            return removeLastPathSection (url.dropLastCharacters (1));
+
+        if (lastSlash < 0)
+            return url;
+
+        return url.substring (0, std::max (startOfPath, lastSlash));
+    }
 }
 
 void URL::addParameter (const String& name, const String& value)
@@ -372,10 +357,10 @@ String URL::getScheme() const
     return url.substring (0, URLHelpers::findEndOfScheme (url) - 1);
 }
 
-#ifndef JUCE_ANDROID
+#if ! JUCE_ANDROID
 bool URL::isLocalFile() const
 {
-    return (getScheme() == "file");
+    return getScheme() == "file";
 }
 
 File URL::getLocalFile() const
@@ -399,7 +384,7 @@ File URL::fileFromFileSchemeURL (const URL& fileURL)
 
     auto path = removeEscapeChars (fileURL.getDomainInternal (true)).replace ("+", "%2B");
 
-   #ifdef JUCE_WINDOWS
+   #if JUCE_WINDOWS
     bool isUncPath = (! fileURL.url.startsWith ("file:///"));
    #else
     path = File::getSeparatorString() + path;
@@ -410,7 +395,7 @@ File URL::fileFromFileSchemeURL (const URL& fileURL)
     for (auto urlElement : urlElements)
         path += File::getSeparatorString() + removeEscapeChars (urlElement.replace ("+", "%2B"));
 
-   #ifdef JUCE_WINDOWS
+   #if JUCE_WINDOWS
     if (isUncPath)
         path = "\\\\" + path;
    #endif
@@ -434,14 +419,21 @@ URL URL::withNewDomainAndPath (const String& newURL) const
 
 URL URL::withNewSubPath (const String& newPath) const
 {
-    const int startOfPath = URLHelpers::findStartOfPath (url);
-
     URL u (*this);
+
+    auto startOfPath = URLHelpers::findStartOfPath (url);
 
     if (startOfPath > 0)
         u.url = url.substring (0, startOfPath);
 
     URLHelpers::concatenatePaths (u.url, newPath);
+    return u;
+}
+
+URL URL::getParentURL() const
+{
+    URL u (*this);
+    u.url = URLHelpers::removeLastPathSection (u.url);
     return u;
 }
 
@@ -510,18 +502,15 @@ void URL::createHeadersAndPostData (String& headers, MemoryBlock& postDataToWrit
 //==============================================================================
 bool URL::isProbablyAWebsiteURL (const String& possibleURL)
 {
-    static const char* validProtocols[] = { "http:", "ftp:", "https:" };
-
-    for (auto* protocol : validProtocols)
+    for (auto* protocol : { "http:", "https:", "ftp:" })
         if (possibleURL.startsWithIgnoreCase (protocol))
             return true;
 
-    if (possibleURL.containsChar ('@')
-        || possibleURL.containsChar (' '))
+    if (possibleURL.containsChar ('@') || possibleURL.containsChar (' '))
         return false;
 
-    const String topLevelDomain (possibleURL.upToFirstOccurrenceOf ("/", false, false)
-                                 .fromLastOccurrenceOf (".", false, false));
+    auto topLevelDomain = possibleURL.upToFirstOccurrenceOf ("/", false, false)
+                                     .fromLastOccurrenceOf (".", false, false);
 
     return topLevelDomain.isNotEmpty() && topLevelDomain.length() <= 3;
 }
@@ -548,8 +537,7 @@ String URL::getDomainInternal (bool ignorePort) const
 }
 
 #if JUCE_IOS
-URL::Bookmark::Bookmark (void* bookmarkToUse)
-    : data (bookmarkToUse)
+URL::Bookmark::Bookmark (void* bookmarkToUse) : data (bookmarkToUse)
 {
 }
 
@@ -640,12 +628,10 @@ private:
 
                 return urlToUse.getLocalFile();
             }
-            else
-            {
-                auto desc = [error localizedDescription];
-                ignoreUnused (desc);
-                jassertfalse;
-            }
+
+            auto desc = [error localizedDescription];
+            ignoreUnused (desc);
+            jassertfalse;
         }
 
         return urlToUse.getLocalFile();
@@ -687,10 +673,9 @@ InputStream* URL::createInputStream (bool usePostCommand,
        #else
         return getLocalFile().createInputStream();
        #endif
-
     }
 
-    std::unique_ptr<WebInputStream> wi (new WebInputStream (*this, usePostCommand));
+    auto wi = std::make_unique<WebInputStream> (*this, usePostCommand);
 
     struct ProgressCallbackCaller  : public WebInputStream::Listener
     {
@@ -705,10 +690,6 @@ InputStream* URL::createInputStream (bool usePostCommand,
 
         OpenStreamProgressCallback* callback;
         void* const data;
-
-        // workaround a MSVC 2013 compiler warning
-        ProgressCallbackCaller (const ProgressCallbackCaller& o) : callback (o.callback), data (o.data) { jassertfalse; }
-        ProgressCallbackCaller& operator= (const ProgressCallbackCaller&) { jassertfalse; return *this; }
     };
 
     std::unique_ptr<ProgressCallbackCaller> callbackCaller
@@ -766,7 +747,7 @@ OutputStream* URL::createOutputStream() const
 bool URL::readEntireBinaryStream (MemoryBlock& destData, bool usePostCommand) const
 {
     const std::unique_ptr<InputStream> in (isLocalFile() ? getLocalFile().createInputStream()
-                                                         : static_cast<InputStream*> (createInputStream (usePostCommand)));
+                                                         : createInputStream (usePostCommand));
 
     if (in != nullptr)
     {
@@ -780,7 +761,7 @@ bool URL::readEntireBinaryStream (MemoryBlock& destData, bool usePostCommand) co
 String URL::readEntireTextStream (bool usePostCommand) const
 {
     const std::unique_ptr<InputStream> in (isLocalFile() ? getLocalFile().createInputStream()
-                                                         : static_cast<InputStream*> (createInputStream (usePostCommand)));
+                                                         : createInputStream (usePostCommand));
 
     if (in != nullptr)
         return in->readEntireStreamAsString();

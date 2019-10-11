@@ -2,8 +2,8 @@
 
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="AudioPluginHost\Source\Filters">
-      <UniqueIdentifier>{01436C03-42F4-5952-30EF-7F9E81D997C6}</UniqueIdentifier>
+    <Filter Include="AudioPluginHost\Source\Plugins">
+      <UniqueIdentifier>{346E906D-8A2B-A93A-4C90-BCD3C60D2FD0}</UniqueIdentifier>
     </Filter>
     <Filter Include="AudioPluginHost\Source\UI">
       <UniqueIdentifier>{8C61EB30-11E6-7029-4CC8-56C52EB1F1C3}</UniqueIdentifier>
@@ -430,14 +430,14 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Source\Filters\FilterGraph.cpp">
-      <Filter>AudioPluginHost\Source\Filters</Filter>
+    <ClCompile Include="..\..\Source\Plugins\InternalPlugins.cpp">
+      <Filter>AudioPluginHost\Source\Plugins</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Filters\FilterIOConfiguration.cpp">
-      <Filter>AudioPluginHost\Source\Filters</Filter>
+    <ClCompile Include="..\..\Source\Plugins\IOConfigurationWindow.cpp">
+      <Filter>AudioPluginHost\Source\Plugins</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Filters\InternalFilters.cpp">
-      <Filter>AudioPluginHost\Source\Filters</Filter>
+    <ClCompile Include="..\..\Source\Plugins\PluginGraph.cpp">
+      <Filter>AudioPluginHost\Source\Plugins</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\UI\GraphEditorPanel.cpp">
       <Filter>AudioPluginHost\Source\UI</Filter>
@@ -2376,14 +2376,14 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Source\Filters\FilterGraph.h">
-      <Filter>AudioPluginHost\Source\Filters</Filter>
+    <ClInclude Include="..\..\Source\Plugins\InternalPlugins.h">
+      <Filter>AudioPluginHost\Source\Plugins</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Filters\FilterIOConfiguration.h">
-      <Filter>AudioPluginHost\Source\Filters</Filter>
+    <ClInclude Include="..\..\Source\Plugins\IOConfigurationWindow.h">
+      <Filter>AudioPluginHost\Source\Plugins</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Filters\InternalFilters.h">
-      <Filter>AudioPluginHost\Source\Filters</Filter>
+    <ClInclude Include="..\..\Source\Plugins\PluginGraph.h">
+      <Filter>AudioPluginHost\Source\Plugins</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\UI\GraphEditorPanel.h">
       <Filter>AudioPluginHost\Source\UI</Filter>
@@ -2995,6 +2995,9 @@
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\vst\ivstrepresentation.h">
+      <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\vst</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\vst\ivsttestplugprovider.h">
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\vst</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\vst\ivstunits.h">
@@ -3831,6 +3834,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngconf.h">
       <Filter>JUCE Modules\juce_graphics\image_formats\pnglib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pngdebug.h">
+      <Filter>JUCE Modules\juce_graphics\image_formats\pnglib</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\pnginfo.h">
       <Filter>JUCE Modules\juce_graphics\image_formats\pnglib</Filter>
     </ClInclude>
@@ -4496,10 +4502,19 @@
     <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\base\LICENSE.txt">
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\base</Filter>
     </None>
+    <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\base\README.md">
+      <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\base</Filter>
+    </None>
     <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\LICENSE.txt">
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces</Filter>
     </None>
+    <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\README.md">
+      <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces</Filter>
+    </None>
     <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\LICENSE.txt">
+      <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\public.sdk</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\README.md">
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\public.sdk</Filter>
     </None>
     <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\LICENSE.txt">

@@ -188,10 +188,10 @@ namespace XmlOutputFunctions
         template <int tableIndex>
         struct Byte
         {
-            enum { v = Bit<tableIndex * 8 + 0>::v | Bit<tableIndex * 8 + 1>::v
-                     | Bit<tableIndex * 8 + 2>::v | Bit<tableIndex * 8 + 3>::v
-                     | Bit<tableIndex * 8 + 4>::v | Bit<tableIndex * 8 + 5>::v
-                     | Bit<tableIndex * 8 + 6>::v | Bit<tableIndex * 8 + 7>::v };
+            enum { v = (int) Bit<tableIndex * 8 + 0>::v | (int) Bit<tableIndex * 8 + 1>::v
+                     | (int) Bit<tableIndex * 8 + 2>::v | (int) Bit<tableIndex * 8 + 3>::v
+                     | (int) Bit<tableIndex * 8 + 4>::v | (int) Bit<tableIndex * 8 + 5>::v
+                     | (int) Bit<tableIndex * 8 + 6>::v | (int) Bit<tableIndex * 8 + 7>::v };
         };
 
         static bool isLegal (uint32 c) noexcept

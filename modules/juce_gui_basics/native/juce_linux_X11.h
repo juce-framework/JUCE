@@ -139,4 +139,39 @@ struct GetXProperty
     int actualFormat;
 };
 
+//==============================================================================
+enum
+{
+    maxXEmbedVersionToSupport = 0
+};
+
+enum
+{
+    XEMBED_MAPPED  = (1<<0)
+};
+
+enum
+{
+    XEMBED_EMBEDDED_NOTIFY        = 0,
+    XEMBED_WINDOW_ACTIVATE        = 1,
+    XEMBED_WINDOW_DEACTIVATE      = 2,
+    XEMBED_REQUEST_FOCUS          = 3,
+    XEMBED_FOCUS_IN               = 4,
+    XEMBED_FOCUS_OUT              = 5,
+    XEMBED_FOCUS_NEXT             = 6,
+    XEMBED_FOCUS_PREV             = 7,
+    XEMBED_MODALITY_ON            = 10,
+    XEMBED_MODALITY_OFF           = 11,
+    XEMBED_REGISTER_ACCELERATOR   = 12,
+    XEMBED_UNREGISTER_ACCELERATOR = 13,
+    XEMBED_ACTIVATE_ACCELERATOR   = 14
+};
+
+enum
+{
+    XEMBED_FOCUS_CURRENT = 0,
+    XEMBED_FOCUS_FIRST   = 1,
+    XEMBED_FOCUS_LAST    = 2
+};
+
 } // namespace juce

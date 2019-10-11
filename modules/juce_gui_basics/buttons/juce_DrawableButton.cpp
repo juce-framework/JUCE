@@ -96,7 +96,7 @@ Rectangle<float> DrawableButton::getImageBounds() const
         auto indentX = jmin (edgeIndent, proportionOfWidth  (0.3f));
         auto indentY = jmin (edgeIndent, proportionOfHeight (0.3f));
 
-        if (style == ImageOnButtonBackground)
+        if (shouldDrawButtonBackground())
         {
             indentX = jmax (getWidth()  / 4, indentX);
             indentY = jmax (getHeight() / 4, indentY);
@@ -118,12 +118,24 @@ void DrawableButton::resized()
 
     if (currentImage != nullptr)
     {
-        if (style == ImageRaw)
-            currentImage->setOriginWithOriginalSize (Point<float>());
-        else
-            currentImage->setTransformToFit (getImageBounds(),
-                                             style == ImageStretched ? RectanglePlacement::stretchToFit
-                                                                     : RectanglePlacement::centred);
+        if (style != ImageRaw)
+        {
+            int transformFlags = 0;
+
+            if (style == ImageStretched)
+            {
+                transformFlags |= RectanglePlacement::stretchToFit;
+            }
+            else
+            {
+                transformFlags |= RectanglePlacement::centred;
+
+                if (style == ImageOnButtonBackgroundOriginalSize)
+                    transformFlags |= RectanglePlacement::doNotResize;
+            }
+
+            currentImage->setTransformToFit (getImageBounds(), transformFlags);
+        }
     }
 }
 
@@ -184,7 +196,7 @@ void DrawableButton::paintButton (Graphics& g,
 {
     auto& lf = getLookAndFeel();
 
-    if (style == ImageOnButtonBackground)
+    if (shouldDrawButtonBackground())
         lf.drawButtonBackground (g, *this,
                                  findColour (getToggleState() ? TextButton::buttonOnColourId
                                                               : TextButton::buttonColourId),

@@ -42,7 +42,8 @@ namespace juce
     @tags{Audio}
 */
 class StandalonePluginHolder    : private AudioIODeviceCallback,
-                                  private Timer
+                                  private Timer,
+                                  private Value::Listener
 {
 public:
     //==============================================================================
@@ -78,9 +79,11 @@ public:
 
         : settings (settingsToUse, takeOwnershipOfSettings),
           channelConfiguration (channels),
-          shouldMuteInput (! isInterAppAudioConnected()),
           autoOpenMidiDevices (shouldAutoOpenMidiDevices)
     {
+        shouldMuteInput.addListener (this);
+        shouldMuteInput = ! isInterAppAudioConnected();
+
         createPlugin();
 
         auto inChannels = (channelConfiguration.size() > 0 ? channelConfiguration[0].numIns
@@ -158,6 +161,7 @@ public:
     //==============================================================================
     Value& getMuteInputValue()                           { return shouldMuteInput; }
     bool getProcessorHasPotentialFeedbackLoop() const    { return processorHasPotentialFeedbackLoop; }
+    void valueChanged (Value& value) override            { muteInput = (bool) value.getValue(); }
 
     //==============================================================================
     File getLastFile() const
@@ -406,6 +410,7 @@ public:
 
     // avoid feedback loop by default
     bool processorHasPotentialFeedbackLoop = true;
+    std::atomic<bool> muteInput { false };
     Value shouldMuteInput;
     AudioBuffer<float> emptyBuffer;
     bool autoOpenMidiDevices;
@@ -492,9 +497,7 @@ private:
                                 int numOutputChannels,
                                 int numSamples) override
     {
-        const bool inputMuted = shouldMuteInput.getValue();
-
-        if (inputMuted)
+        if (muteInput)
         {
             emptyBuffer.clear();
             inputChannelData = emptyBuffer.getArrayOfReadPointers();
@@ -730,7 +733,8 @@ private:
     public:
         MainContentComponent (StandaloneFilterWindow& filterWindow)
             : owner (filterWindow), notification (this),
-              editor (owner.getAudioProcessor()->createEditorIfNeeded())
+              editor (owner.getAudioProcessor()->hasEditor() ? owner.getAudioProcessor()->createEditorIfNeeded()
+                                                             : new GenericAudioProcessorEditor (*owner.getAudioProcessor()))
         {
             Value& inputMutedValue = owner.pluginHolder->getMuteInputValue();
 
@@ -770,7 +774,9 @@ private:
             if (shouldShowNotification)
                 notification.setBounds (r.removeFromTop (NotificationArea::height));
 
-            editor->setBounds (r);
+            if (editor != nullptr)
+                editor->setBounds (editor->getLocalArea (this, r)
+                                          .withPosition (r.getTopLeft().transformedBy (editor->getTransform().inverted())));
         }
 
     private:
@@ -830,9 +836,13 @@ private:
            #if JUCE_IOS || JUCE_ANDROID
             resized();
            #else
-            setSize (editor->getWidth(),
-                     editor->getHeight()
-                     + (shouldShowNotification ? NotificationArea::height : 0));
+            if (editor != nullptr)
+            {
+                auto rect = getSizeToContainEditor();
+
+                setSize (rect.getWidth(),
+                         rect.getHeight() + (shouldShowNotification ? NotificationArea::height : 0));
+            }
            #endif
         }
 
@@ -847,11 +857,23 @@ private:
         }
 
         //==============================================================================
-        void componentMovedOrResized (Component&, bool, bool wasResized) override
+        void componentMovedOrResized (Component&, bool, bool) override
         {
-            if (wasResized && editor != nullptr)
-                setSize (editor->getWidth(),
-                         editor->getHeight() + (shouldShowNotification ? NotificationArea::height : 0));
+            if (editor != nullptr)
+            {
+                auto rect = getSizeToContainEditor();
+
+                setSize (rect.getWidth(),
+                         rect.getHeight() + (shouldShowNotification ? NotificationArea::height : 0));
+            }
+        }
+
+        Rectangle<int> getSizeToContainEditor() const
+        {
+            if (editor != nullptr)
+                return getLocalArea (editor.get(), editor->getLocalBounds());
+
+            return {};
         }
 
         //==============================================================================

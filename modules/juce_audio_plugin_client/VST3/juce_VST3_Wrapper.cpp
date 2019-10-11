@@ -57,7 +57,9 @@ namespace Vst2
 #endif
 
 #ifndef JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
- #define JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS 1
+ #if JucePlugin_WantsMidiInput
+  #define JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS 1
+ #endif
 #endif
 
 #if JUCE_VST3_CAN_REPLACE_VST2
@@ -309,7 +311,7 @@ private:
 
        #if JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
         // studio one doesn't like negative parameters
-        paramHash &= ~(1 << (sizeof (Vst::ParamID) * 8 - 1));
+        paramHash &= ~(((Vst::ParamID) 1) << (sizeof (Vst::ParamID) * 8 - 1));
        #endif
 
         return paramHash;
@@ -317,7 +319,7 @@ private:
     }
 
     //==============================================================================
-    Atomic<int> refCount;
+    std::atomic<int> refCount { 0 };
     std::unique_ptr<AudioProcessor> audioProcessor;
 
     //==============================================================================
@@ -454,7 +456,7 @@ public:
             valueNormalized = info.defaultNormalizedValue;
         }
 
-        virtual ~Param() {}
+        virtual ~Param() override = default;
 
         bool setNormalized (Vst::ParamValue v) override
         {
@@ -467,7 +469,7 @@ public:
                 // Only update the AudioProcessor here if we're not playing,
                 // otherwise we get parallel streams of parameter value updates
                 // during playback
-                if (owner.vst3IsPlaying.get() == 0)
+                if (! owner.vst3IsPlaying)
                 {
                     auto value = static_cast<float> (v);
 
@@ -537,7 +539,7 @@ public:
             info.flags = Vst::ParameterInfo::kIsProgramChange | Vst::ParameterInfo::kCanAutomate;
         }
 
-        virtual ~ProgramChangeParameter() {}
+        virtual ~ProgramChangeParameter() override = default;
 
         bool setNormalized (Vst::ParamValue v) override
         {
@@ -558,7 +560,7 @@ public:
 
         void toString (Vst::ParamValue value, Vst::String128 result) const override
         {
-            toString128 (result, owner.getProgramName (static_cast<int> (value * info.stepCount)));
+            toString128 (result, owner.getProgramName (roundToInt (value * info.stepCount)));
         }
 
         bool fromString (const Vst::TChar* text, Vst::ParamValue& outValueNormalized) const override
@@ -886,7 +888,7 @@ public:
                                                                                          / static_cast<Vst::ParamValue> (pluginInstance->getNumPrograms() - 1));
         }
 
-        if (componentHandler != nullptr)
+        if (componentHandler != nullptr && ! inSetupProcessing)
             componentHandler->restartComponent (Vst::kLatencyChanged | Vst::kParamValuesChanged);
     }
 
@@ -926,11 +928,13 @@ private:
 
     enum { numMIDIChannels = 16 };
     Vst::ParamID parameterToMidiControllerOffset;
-    MidiController parameterToMidiController[numMIDIChannels * Vst::kCountCtrlNumber];
+    MidiController parameterToMidiController[(int) numMIDIChannels * (int) Vst::kCountCtrlNumber];
     Vst::ParamID midiControllerToParameter[numMIDIChannels][Vst::kCountCtrlNumber];
 
     //==============================================================================
-    Atomic<int> vst3IsPlaying { 0 };
+    std::atomic<bool> vst3IsPlaying     { false },
+                      inSetupProcessing { false };
+
     float lastScaleFactorReceived = 1.0f;
 
     void setupParameters()
@@ -991,7 +995,7 @@ private:
                 parameterToMidiController[p].ctrlNumber = i;
 
                 parameters.addParameter (new Vst::Parameter (toString ("MIDI CC " + String (c) + "|" + String (i)),
-                                         static_cast<Vst::ParamID> (p) + parameterToMidiControllerOffset, 0, 0, 0,
+                                         static_cast<Vst::ParamID> (p) + parameterToMidiControllerOffset, nullptr, 0, 0,
                                          0, Vst::kRootUnitId));
             }
         }
@@ -1195,10 +1199,12 @@ private:
                 {
                     if (auto* constrainer = editor->getConstrainer())
                     {
-                        auto minW = (double) constrainer->getMinimumWidth();
-                        auto maxW = (double) constrainer->getMaximumWidth();
-                        auto minH = (double) constrainer->getMinimumHeight();
-                        auto maxH = (double) constrainer->getMaximumHeight();
+                        auto scale = editor->getTransform().getScaleFactor();
+
+                        auto minW = (double) (constrainer->getMinimumWidth()  * scale);
+                        auto maxW = (double) (constrainer->getMaximumWidth()  * scale);
+                        auto minH = (double) (constrainer->getMinimumHeight() * scale);
+                        auto maxH = (double) (constrainer->getMaximumHeight() * scale);
 
                         auto width  = (double) (rectToCheck->right - rectToCheck->left);
                         auto height = (double) (rectToCheck->bottom - rectToCheck->top);
@@ -1342,7 +1348,7 @@ private:
                 ignoreUnused (fakeMouseGenerator);
             }
 
-            ~ContentWrapperComponent()
+            ~ContentWrapperComponent() override
             {
                 if (pluginEditor != nullptr)
                 {
@@ -1458,7 +1464,7 @@ private:
                        #if JUCE_MAC
                         if (host.isWavelab() || host.isReaper())
                        #else
-                        if (host.isWavelab())
+                        if (host.isWavelab() || host.isAbletonLive())
                        #endif
                             setBounds (0, 0, w, h);
                     }
@@ -1573,10 +1579,10 @@ public:
         pluginInstance->setPlayHead (this);
     }
 
-    ~JuceVST3Component()
+    ~JuceVST3Component() override
     {
         if (juceVST3EditController != nullptr)
-            juceVST3EditController->vst3IsPlaying = 0;
+            juceVST3EditController->vst3IsPlaying = false;
 
         if (pluginInstance != nullptr)
             if (pluginInstance->getPlayHead() == this)
@@ -1642,7 +1648,7 @@ public:
     tresult PLUGIN_API disconnect (IConnectionPoint*) override
     {
         if (juceVST3EditController != nullptr)
-            juceVST3EditController->vst3IsPlaying = 0;
+            juceVST3EditController->vst3IsPlaying = false;
 
         juceVST3EditController = nullptr;
         return kResultTrue;
@@ -2348,6 +2354,8 @@ public:
 
     tresult PLUGIN_API setupProcessing (Vst::ProcessSetup& newSetup) override
     {
+        ScopedInSetupProcessingSetter inSetupProcessingSetter (juceVST3EditController);
+
         if (canProcessSampleSize (newSetup.symbolicSampleSize) != kResultTrue)
             return kResultFalse;
 
@@ -2468,14 +2476,14 @@ public:
             processContext = *data.processContext;
 
             if (juceVST3EditController != nullptr)
-                juceVST3EditController->vst3IsPlaying = processContext.state & Vst::ProcessContext::kPlaying;
+                juceVST3EditController->vst3IsPlaying = (processContext.state & Vst::ProcessContext::kPlaying) != 0;
         }
         else
         {
             zerostruct (processContext);
 
             if (juceVST3EditController != nullptr)
-                juceVST3EditController->vst3IsPlaying = 0;
+                juceVST3EditController->vst3IsPlaying = false;
         }
 
         midiBuffer.clear();
@@ -2511,6 +2519,26 @@ public:
     }
 
 private:
+    //==============================================================================
+    struct ScopedInSetupProcessingSetter
+    {
+        ScopedInSetupProcessingSetter (JuceVST3EditController* c)
+            : controller (c)
+        {
+            if (controller != nullptr)
+                controller->inSetupProcessing = true;
+        }
+
+        ~ScopedInSetupProcessingSetter()
+        {
+            if (controller != nullptr)
+                controller->inSetupProcessing = false;
+        }
+
+    private:
+        JuceVST3EditController* controller = nullptr;
+    };
+
     //==============================================================================
     template <typename FloatType>
     void processAudio (Vst::ProcessData& data, Array<FloatType*>& channelList)
@@ -2730,7 +2758,7 @@ private:
     //==============================================================================
     ScopedJuceInitialiser_GUI libraryInitialiser;
 
-    Atomic<int> refCount { 1 };
+    std::atomic<int> refCount { 1 };
 
     AudioProcessor* pluginInstance;
     ComSmartPtr<Vst::IHostApplication> host;
@@ -3047,7 +3075,7 @@ struct JucePluginFactory  : public IPluginFactory3
 
 private:
     //==============================================================================
-    Atomic<int> refCount { 1 };
+    std::atomic<int> refCount { 1 };
     const PFactoryInfo factoryInfo;
     ComSmartPtr<Vst::IHostApplication> host;
 

@@ -156,7 +156,7 @@ void DemoContentComponent::setDemo (const String& category, int selectedDemoInde
 
 bool DemoContentComponent::isShowingHomeScreen() const noexcept
 {
-    return isComponentIntroDemo (demoContent->getComponent());
+    return isComponentIntroDemo (demoContent->getComponent()) && getCurrentTabIndex() == 0;
 }
 
 void DemoContentComponent::showHomeScreen()

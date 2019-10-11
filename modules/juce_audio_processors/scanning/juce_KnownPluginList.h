@@ -64,6 +64,9 @@ public:
     /** Returns a copy of the current list. */
     Array<PluginDescription> getTypes() const;
 
+    /** Returns the subset of plugin types for a given format. */
+    Array<PluginDescription> getTypesForFormat (AudioPluginFormat&) const;
+
     /** Looks for a type in the list which comes from this file. */
     std::unique_ptr<PluginDescription> getTypeForFile (const String& fileOrIdentifier) const;
 
@@ -135,21 +138,21 @@ public:
     };
 
     //==============================================================================
-    /** Adds all the plugin types to a popup menu so that the user can select one.
+    /** Adds the plug-in types to a popup menu so that the user can select one.
 
         Depending on the sort method, it may add sub-menus for categories,
         manufacturers, etc.
 
         Use getIndexChosenByMenu() to find out the type that was chosen.
     */
-    void addToMenu (PopupMenu& menu, SortMethod sortMethod,
-                    const String& currentlyTickedPluginID = {}) const;
+    static void addToMenu (PopupMenu& menu, const Array<PluginDescription>& types,
+                           SortMethod sortMethod, const String& currentlyTickedPluginID = {});
 
-    /** Converts a menu item index that has been chosen into its index in this list.
+    /** Converts a menu item index that has been chosen into its index in the list.
         Returns -1 if it's not an ID that was used.
         @see addToMenu
     */
-    int getIndexChosenByMenu (int menuResultCode) const;
+    static int getIndexChosenByMenu (const Array<PluginDescription>& types, int menuResultCode);
 
     //==============================================================================
     /** Sorts the list. */
@@ -173,8 +176,8 @@ public:
         Array<PluginDescription> plugins;
     };
 
-    /** Creates a PluginTree object containing all the known plugins. */
-    std::unique_ptr<PluginTree> createTree (const SortMethod sortMethod) const;
+    /** Creates a PluginTree object representing the list of plug-ins. */
+    static std::unique_ptr<PluginTree> createTree (const Array<PluginDescription>& types, SortMethod sortMethod);
 
     //==============================================================================
     /** Class to define a custom plugin scanner */
@@ -216,6 +219,12 @@ public:
     JUCE_DEPRECATED_WITH_BODY (PluginDescription* const* begin() const noexcept,            { jassertfalse; return nullptr; })
     JUCE_DEPRECATED_WITH_BODY (PluginDescription** end() noexcept,                          { jassertfalse; return nullptr; })
     JUCE_DEPRECATED_WITH_BODY (PluginDescription* const* end() const noexcept,              { jassertfalse; return nullptr; })
+
+    // These methods have been deprecated in favour of their static counterparts. You should call getTypes()
+    // to store the plug-in list at a point in time and use it when calling these methods.
+    JUCE_DEPRECATED (void addToMenu (PopupMenu& menu, SortMethod sortMethod, const String& currentlyTickedPluginID = {}) const);
+    JUCE_DEPRECATED (int getIndexChosenByMenu (int menuResultCode) const);
+    JUCE_DEPRECATED (std::unique_ptr<PluginTree> createTree (const SortMethod sortMethod) const);
 
 private:
     //==============================================================================

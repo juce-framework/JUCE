@@ -94,7 +94,16 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
     /** AppStore implementation of hosted content download. */
     struct DownloadImpl  : public Download
     {
-        DownloadImpl (SKDownload* downloadToUse)  : download (downloadToUse) {}
+        DownloadImpl (SKDownload* downloadToUse)
+            : download (downloadToUse)
+        {
+            [download retain];
+        }
+
+        ~DownloadImpl()
+        {
+            [download release];
+        }
 
         String getProductId()      const override  { return nsStringToJuce (download.contentIdentifier); }
         String getContentVersion() const override  { return nsStringToJuce (download.contentVersion); }

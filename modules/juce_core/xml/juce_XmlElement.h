@@ -184,15 +184,19 @@ public:
                          bool ignoreOrderOfAttributes) const noexcept;
 
     //==============================================================================
+    /** A struct containing options for formatting the text when representing an
+        XML element as a string.
+    */
     struct TextFormat
     {
+        /** Default constructor. */
         TextFormat();
 
         String dtd;                        /**< If supplied, this DTD will be added to the document. */
         String customHeader;               /**< If supplied, this header will be used (and customEncoding & addDefaultHeader will be ignored). */
         String customEncoding;             /**< If not empty and addDefaultHeader is true, this will be set as the encoding. Otherwise, a default of "UTF-8" will be used */
         bool addDefaultHeader = true;      /**< If true, a default header will be generated; otherwise just bare XML will be emitted. */
-        int lineWrapLength = 60;           /**< A maximum line length before wrapping is done. (If allOnOneLine is true, this is ignored) */
+        int lineWrapLength = 60;           /**< A maximum line length before wrapping is done. (If newLineChars is nullptr, this is ignored) */
         const char* newLineChars = "\r\n"; /**< Allows the newline characters to be set. If you set this to nullptr, then the whole XML document will be placed on a single line. */
 
         TextFormat singleLine() const;     /**< returns a copy of this format with newLineChars set to nullptr. */

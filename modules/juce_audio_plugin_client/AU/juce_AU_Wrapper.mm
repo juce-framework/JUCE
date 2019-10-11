@@ -33,7 +33,7 @@
  #define JUCE_SUPPORT_CARBON 0
 #endif
 
-#ifdef __clang__
+#ifdef JUCE_CLANG
  #pragma clang diagnostic push
  #pragma clang diagnostic ignored "-Wshorten-64-to-32"
  #pragma clang diagnostic ignored "-Wunused-parameter"
@@ -42,6 +42,14 @@
  #pragma clang diagnostic ignored "-Wconversion"
  #pragma clang diagnostic ignored "-Woverloaded-virtual"
  #pragma clang diagnostic ignored "-Wextra-semi"
+ #pragma clang diagnostic ignored "-Wcast-align"
+ #pragma clang diagnostic ignored "-Wshadow"
+ #if __has_warning("-Wzero-as-null-pointer-constant")
+  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+ #endif
+ #if __has_warning("-Wnullable-to-nonnull-conversion")
+  #pragma clang diagnostic ignored "-Wnullable-to-nonnull-conversion"
+ #endif
 #endif
 
 #include "../utility/juce_IncludeSystemHeaders.h"
@@ -69,7 +77,7 @@
  #include "CoreAudioUtilityClasses/AUCarbonViewBase.h"
 #endif
 
-#ifdef __clang__
+#ifdef JUCE_CLANG
  #pragma clang diagnostic pop
 #endif
 
@@ -179,7 +187,7 @@ public:
             jassertfalse;
     }
 
-    ~JuceAU()
+    ~JuceAU() override
     {
         if (bypassParam != nullptr)
             bypassParam->removeListener (this);
@@ -726,7 +734,7 @@ public:
         if (juceFilter != nullptr)
         {
             CFDictionaryRef dict = (CFDictionaryRef) inData;
-            CFDataRef data = 0;
+            CFDataRef data = nullptr;
 
             CFStringRef key = CFStringCreateWithCString (kCFAllocatorDefault, JUCE_STATE_DICTIONARY_KEY, kCFStringEncodingUTF8);
 
@@ -735,7 +743,7 @@ public:
 
             if (valuePresent)
             {
-                if (data != 0)
+                if (data != nullptr)
                 {
                     const int numBytes = (int) CFDataGetLength (data);
                     const juce::uint8* const rawBytes = CFDataGetBytePtr (data);
@@ -927,12 +935,8 @@ public:
                 {
                    #if ! JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
                     if (isParameterDiscrete)
-                    {
-                        outParameterInfo.unit = kAudioUnitParameterUnit_Indexed;
-
-                        if (param->isBoolean())
-                            outParameterInfo.unit = kAudioUnitParameterUnit_Boolean;
-                    }
+                        outParameterInfo.unit = param->isBoolean() ? kAudioUnitParameterUnit_Boolean
+                                                                   : kAudioUnitParameterUnit_Indexed;
                    #endif
                 }
 
@@ -968,10 +972,10 @@ public:
 
                     if (auto* valueStrings = parameterValueStringArrays[index])
                     {
-                        *outStrings = CFArrayCreate (NULL,
+                        *outStrings = CFArrayCreate (nullptr,
                                                      (const void **) valueStrings->getRawDataPointer(),
                                                      valueStrings->size(),
-                                                     NULL);
+                                                     nullptr);
 
                         return noErr;
                     }
@@ -1129,7 +1133,7 @@ public:
     {
         auEvent.mEventType = type;
         auEvent.mArgument.mParameter.mParameterID = getAUParameterIDForIndex (juceParamIndex);
-        AUEventListenerNotify (0, 0, &auEvent);
+        AUEventListenerNotify (nullptr, nullptr, &auEvent);
     }
 
     void audioProcessorParameterChanged (AudioProcessor*, int index, float /*newValue*/) override
@@ -1402,7 +1406,7 @@ public:
             clearPresetsArray();
             presetsArray.insertMultiple (0, AUPreset(), numPrograms);
 
-            CFMutableArrayRef presetsArrayRef = CFArrayCreateMutable (0, numPrograms, 0);
+            CFMutableArrayRef presetsArrayRef = CFArrayCreateMutable (nullptr, numPrograms, nullptr);
 
             for (int i = 0; i < numPrograms; ++i)
             {
@@ -1478,7 +1482,7 @@ public:
             setBounds (getSizeToContainChild());
         }
 
-        ~EditorCompHolder()
+        ~EditorCompHolder() override
         {
             deleteAllChildren(); // note that we can't use a std::unique_ptr because the editor may
                                  // have been transferred to another parent which takes over ownership.
@@ -1564,7 +1568,7 @@ public:
                     NSWindow* hostWindow = [hostView window];
 
                     [hostWindow makeFirstResponder: hostView];
-                    [hostView keyDown: [NSApp currentEvent]];
+                    [hostView keyDown: (NSEvent*) [NSApp currentEvent]];
                     [hostWindow makeFirstResponder: view];
                 }
             }
@@ -1905,7 +1909,7 @@ private:
             {
                 const AudioUnitParameterID auParamID = generateAUParameterID (param);
 
-                // Consider yourself very unlucky if you hit this assertion. The hash code of your
+                // Consider yourself very unlucky if you hit this assertion. The hash codes of your
                 // parameter ids are not unique.
                 jassert (! paramMap.contains (static_cast<int32> (auParamID)));
 
@@ -1976,7 +1980,7 @@ private:
 
        #if JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
         // studio one doesn't like negative parameters
-        paramHash &= ~(1 << (sizeof (AudioUnitParameterID) * 8 - 1));
+        paramHash &= ~(((AudioUnitParameterID) 1) << (sizeof (AudioUnitParameterID) * 8 - 1));
        #endif
 
         return forceUseLegacyParamIDs ? static_cast<AudioUnitParameterID> (juceParamID.getIntValue())
@@ -2487,7 +2491,19 @@ JUCE_FACTORY_ENTRY   (JuceAU, JucePlugin_AUExportPrefix)
 #endif
 
 #if ! JUCE_DISABLE_AU_FACTORY_ENTRY
+ #ifdef JUCE_CLANG
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wcast-align"
+  #if __has_warning("-Wzero-as-null-pointer-constant")
+   #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+  #endif
+ #endif
+
  #include "CoreAudioUtilityClasses/AUPlugInDispatch.cpp"
+
+ #ifdef JUCE_CLANG
+  #pragma clang diagnostic push
+ #endif
 #endif
 
 #endif

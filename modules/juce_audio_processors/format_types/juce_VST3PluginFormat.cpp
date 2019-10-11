@@ -82,12 +82,12 @@ static int warnOnFailureIfImplemented (int result) noexcept
 //==============================================================================
 static int getHashForTUID (const TUID& tuid) noexcept
 {
-    int value = 0;
+    uint32 value = 0;
 
     for (int i = 0; i < numElementsInArray (tuid); ++i)
-        value = (value * 31) + tuid[i];
+        value = (value * 31) + (uint32) tuid[i];
 
-    return value;
+    return (int) value;
 }
 
 template <typename ObjectType>
@@ -189,8 +189,8 @@ static void toProcessContext (Vst::ProcessContext& context, AudioPlayHead* playH
         AudioPlayHead::CurrentPositionInfo position;
         playHead->getCurrentPosition (position);
 
-        context.projectTimeSamples  = position.timeInSamples; //Must always be valid, as stated by the VST3 SDK
-        context.projectTimeMusic    = position.timeInSeconds; //Does not always need to be valid...
+        context.projectTimeSamples  = position.timeInSamples; // Must always be valid, as stated by the VST3 SDK
+        context.projectTimeMusic    = position.ppqPosition;   // Does not always need to be valid...
         context.tempo               = position.bpm;
         context.timeSigNumerator    = position.timeSigNumerator;
         context.timeSigDenominator  = position.timeSigDenominator;
@@ -2238,7 +2238,7 @@ public:
     {
         if (programNames.size() > 0 && editController != nullptr)
         {
-            auto value = static_cast<Vst::ParamValue> (program) / static_cast<Vst::ParamValue> (programNames.size());
+            auto value = static_cast<Vst::ParamValue> (program) / static_cast<Vst::ParamValue> (jmax (1, programNames.size() - 1));
 
             editController->setParamNormalized (programParameterID, value);
             Steinberg::int32 index;
@@ -3114,7 +3114,7 @@ void VST3PluginFormat::createPluginInstance (const PluginDescription& descriptio
     callback (std::move (result), errorMsg);
 }
 
-bool VST3PluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept
+bool VST3PluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const
 {
     return false;
 }

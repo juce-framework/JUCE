@@ -20,15 +20,6 @@
   ==============================================================================
 */
 
-#include <poll.h>
-
-enum FdType
-{
-    INTERNAL_QUEUE_FD,
-    WINDOW_SYSTEM_FD,
-    FD_COUNT,
-};
-
 namespace juce
 {
 
@@ -38,30 +29,28 @@ class InternalMessageQueue
 public:
     InternalMessageQueue()
     {
-        auto ret = ::socketpair (AF_LOCAL, SOCK_STREAM, 0, fd);
-        ignoreUnused (ret); jassert (ret == 0);
+        auto err = ::socketpair (AF_LOCAL, SOCK_STREAM, 0, msgpipe);
+        jassert (err == 0);
+        ignoreUnused (err);
 
-        auto internalQueueCb = [this] (int _fd)
-        {
-            if (const MessageManager::MessageBase::Ptr msg = this->popNextMessage (_fd))
-            {
-                JUCE_TRY
-                {
-                    msg->messageCallback();
-                    return true;
-                }
-                JUCE_CATCH_EXCEPTION
-            }
-            return false;
-        };
-
-        pfds[INTERNAL_QUEUE_FD].fd = getReadHandle();
-        pfds[INTERNAL_QUEUE_FD].events = POLLIN;
-        readCallback[INTERNAL_QUEUE_FD].reset (new LinuxEventLoop::CallbackFunction<decltype(internalQueueCb)> (internalQueueCb));
+        LinuxEventLoop::registerFdCallback (getReadHandle(),
+                                            [this] (int fd)
+                                            {
+                                                while (auto msg = popNextMessage (fd))
+                                                {
+                                                    JUCE_TRY
+                                                    {
+                                                        msg->messageCallback();
+                                                    }
+                                                    JUCE_CATCH_EXCEPTION
+                                                }
+                                            });
     }
 
     ~InternalMessageQueue()
     {
+        LinuxEventLoop::unregisterFdCallback (getReadHandle());
+
         close (getReadHandle());
         close (getWriteHandle());
 
@@ -74,80 +63,32 @@ public:
         ScopedLock sl (lock);
         queue.add (msg);
 
-        const int maxBytesInSocketQueue = 128;
-
         if (bytesInSocket < maxBytesInSocketQueue)
         {
             bytesInSocket++;
 
             ScopedUnlock ul (lock);
-            const unsigned char x = 0xff;
-            ssize_t bytesWritten = write (getWriteHandle(), &x, 1);
-            ignoreUnused (bytesWritten);
+            unsigned char x = 0xff;
+            auto numBytes = write (getWriteHandle(), &x, 1);
+            ignoreUnused (numBytes);
         }
-    }
-
-    void setWindowSystemFd (int _fd, LinuxEventLoop::CallbackFunctionBase* _readCallback)
-    {
-        jassert (fdCount == 1);
-
-        ScopedLock sl (lock);
-
-        fdCount = 2;
-        pfds[WINDOW_SYSTEM_FD].fd = _fd;
-        pfds[WINDOW_SYSTEM_FD].events = POLLIN;
-        readCallback[WINDOW_SYSTEM_FD].reset (_readCallback);
-        readCallback[WINDOW_SYSTEM_FD]->active = true;
-    }
-
-    void removeWindowSystemFd()
-    {
-        jassert (fdCount == FD_COUNT);
-
-        ScopedLock sl (lock);
-
-        fdCount = 1;
-        readCallback[WINDOW_SYSTEM_FD]->active = false;
-    }
-
-    bool dispatchNextEvent() noexcept
-    {
-        for (int counter = 0; counter < fdCount; counter++)
-        {
-            const int i = loopCount++;
-            loopCount %= fdCount;
-
-            if (readCallback[i] != nullptr && readCallback[i]->active)
-                if ((*readCallback[i]) (pfds[i].fd))
-                    return true;
-        }
-
-        return false;
-    }
-
-    bool sleepUntilEvent (const int timeoutMs)
-    {
-        const int pnum = poll (pfds, static_cast<nfds_t> (fdCount), timeoutMs);
-        return (pnum > 0);
     }
 
     //==============================================================================
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (InternalMessageQueue)
+    JUCE_DECLARE_SINGLETON (InternalMessageQueue, false)
 
 private:
     CriticalSection lock;
     ReferenceCountedArray <MessageManager::MessageBase> queue;
-    int fd[2];
-    pollfd pfds[FD_COUNT];
-    std::unique_ptr<LinuxEventLoop::CallbackFunctionBase> readCallback[FD_COUNT];
-    int fdCount = 1;
-    int loopCount = 0;
+
+    int msgpipe[2];
     int bytesInSocket = 0;
+    static constexpr int maxBytesInSocketQueue = 128;
 
-    int getWriteHandle() const noexcept     { return fd[0]; }
-    int getReadHandle() const noexcept      { return fd[1]; }
+    int getWriteHandle() const noexcept  { return msgpipe[0]; }
+    int getReadHandle() const noexcept   { return msgpipe[1]; }
 
-    MessageManager::MessageBase::Ptr popNextMessage (int _fd) noexcept
+    MessageManager::MessageBase::Ptr popNextMessage (int fd) noexcept
     {
         const ScopedLock sl (lock);
 
@@ -155,9 +96,9 @@ private:
         {
             --bytesInSocket;
 
-            const ScopedUnlock ul (lock);
+            ScopedUnlock ul (lock);
             unsigned char x;
-            ssize_t numBytes = read (_fd, &x, 1);
+            auto numBytes = read (fd, &x, 1);
             ignoreUnused (numBytes);
         }
 
@@ -167,13 +108,95 @@ private:
 
 JUCE_IMPLEMENT_SINGLETON (InternalMessageQueue)
 
+//==============================================================================
+struct InternalRunLoop
+{
+public:
+    InternalRunLoop()
+    {
+        fdReadCallbacks.reserve (8);
+    }
+
+    void registerFdCallback (int fd, std::function<void(int)>&& cb, short eventMask)
+    {
+        const ScopedLock sl (lock);
+
+        fdReadCallbacks.push_back ({ fd, std::move (cb) });
+        pfds.push_back ({ fd, eventMask, 0 });
+    }
+
+    void unregisterFdCallback (int fd)
+    {
+        const ScopedLock sl (lock);
+
+        {
+            auto removePredicate = [=] (const std::pair<int, std::function<void(int)>>& cb)  { return cb.first == fd; };
+
+            fdReadCallbacks.erase (std::remove_if (std::begin (fdReadCallbacks), std::end (fdReadCallbacks), removePredicate),
+                                   std::end (fdReadCallbacks));
+        }
+
+        {
+            auto removePredicate = [=] (const pollfd& pfd)  { return pfd.fd == fd; };
+
+            pfds.erase (std::remove_if (std::begin (pfds), std::end (pfds), removePredicate),
+                        std::end (pfds));
+        }
+    }
+
+    bool dispatchPendingEvents()
+    {
+        const ScopedLock sl (lock);
+
+        if (poll (&pfds.front(), static_cast<nfds_t> (pfds.size()), 0) == 0)
+            return false;
+
+        bool eventWasSent = false;
+
+        for (auto& pfd : pfds)
+        {
+            if (pfd.revents == 0)
+                continue;
+
+            pfd.revents = 0;
+
+            auto fd = pfd.fd;
+
+            for (auto& fdAndCallback : fdReadCallbacks)
+            {
+                if (fdAndCallback.first == fd)
+                {
+                    fdAndCallback.second (fd);
+                    eventWasSent = true;
+                }
+            }
+        }
+
+        return eventWasSent;
+    }
+
+    void sleepUntilNextEvent (int timeoutMs)
+    {
+        poll (&pfds.front(), static_cast<nfds_t> (pfds.size()), timeoutMs);
+    }
+
+    //==============================================================================
+    JUCE_DECLARE_SINGLETON (InternalRunLoop, false)
+
+private:
+    CriticalSection lock;
+
+    std::vector<std::pair<int, std::function<void(int)>>> fdReadCallbacks;
+    std::vector<pollfd> pfds;
+};
+
+JUCE_IMPLEMENT_SINGLETON (InternalRunLoop)
 
 //==============================================================================
 namespace LinuxErrorHandling
 {
     static bool keyboardBreakOccurred = false;
 
-    //==============================================================================
     void keyboardBreakSignalHandler (int sig)
     {
         if (sig == SIGINT)
@@ -198,14 +221,14 @@ void MessageManager::doPlatformSpecificInitialisation()
     if (JUCEApplicationBase::isStandaloneApp())
         LinuxErrorHandling::installKeyboardBreakHandler();
 
-    // Create the internal message queue
-    auto* queue = InternalMessageQueue::getInstance();
-    ignoreUnused (queue);
+    InternalRunLoop::getInstance();
+    InternalMessageQueue::getInstance();
 }
 
 void MessageManager::doPlatformSpecificShutdown()
 {
     InternalMessageQueue::deleteInstance();
+    InternalRunLoop::deleteInstance();
 }
 
 bool MessageManager::postMessageToSystemQueue (MessageManager::MessageBase* const message)
@@ -232,16 +255,15 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMes
         if (LinuxErrorHandling::keyboardBreakOccurred)
             JUCEApplicationBase::getInstance()->quit();
 
-        if (auto* queue = InternalMessageQueue::getInstanceWithoutCreating())
+        if (auto* runLoop = InternalRunLoop::getInstanceWithoutCreating())
         {
-            if (queue->dispatchNextEvent())
+            if (runLoop->dispatchPendingEvents())
                 break;
 
             if (returnIfNoPendingMessages)
                 return false;
 
-            // wait for 2000ms for next events if necessary
-            queue->sleepUntilEvent (2000);
+            runLoop->sleepUntilNextEvent (2000);
         }
     }
 
@@ -249,17 +271,16 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMes
 }
 
 //==============================================================================
-void LinuxEventLoop::setWindowSystemFdInternal (int fd, LinuxEventLoop::CallbackFunctionBase* readCallback) noexcept
+void LinuxEventLoop::registerFdCallback (int fd, std::function<void(int)> readCallback, short eventMask)
 {
-    if (auto* queue = InternalMessageQueue::getInstanceWithoutCreating())
-        queue->setWindowSystemFd (fd, readCallback);
+    if (auto* runLoop = InternalRunLoop::getInstanceWithoutCreating())
+        runLoop->registerFdCallback (fd, std::move (readCallback), eventMask);
 }
 
-void LinuxEventLoop::removeWindowSystemFd() noexcept
+void LinuxEventLoop::unregisterFdCallback (int fd)
 {
-    if (auto* queue = InternalMessageQueue::getInstanceWithoutCreating())
-        queue->removeWindowSystemFd();
+    if (auto* runLoop = InternalRunLoop::getInstanceWithoutCreating())
+        runLoop->unregisterFdCallback (fd);
 }
-
 
 } // namespace juce

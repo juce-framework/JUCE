@@ -27,32 +27,20 @@
 namespace juce
 {
 
-class MD5Generator
+struct MD5Generator
 {
-public:
-    MD5Generator() noexcept
-    {
-        state[0] = 0x67452301;
-        state[1] = 0xefcdab89;
-        state[2] = 0x98badcfe;
-        state[3] = 0x10325476;
-
-        count[0] = 0;
-        count[1] = 0;
-    }
-
     void processBlock (const void* data, size_t dataSize) noexcept
     {
-        int bufferPos = ((count[0] >> 3) & 0x3F);
+        auto bufferPos = ((count[0] >> 3) & 0x3f);
 
-        count[0] += (uint32) (dataSize << 3);
+        count[0] += (uint32_t) (dataSize << 3);
 
-        if (count[0] < ((uint32) dataSize << 3))
+        if (count[0] < ((uint32_t) dataSize << 3))
             count[1]++;
 
-        count[1] += (uint32) (dataSize >> 29);
+        count[1] += (uint32_t) (dataSize >> 29);
 
-        const size_t spaceLeft = 64 - (size_t) bufferPos;
+        auto spaceLeft = (size_t) 64 - (size_t) bufferPos;
         size_t i = 0;
 
         if (dataSize >= spaceLeft)
@@ -71,13 +59,13 @@ public:
 
     void transform (const void* bufferToTransform) noexcept
     {
-        uint32 a = state[0];
-        uint32 b = state[1];
-        uint32 c = state[2];
-        uint32 d = state[3];
-        uint32 x[16];
+        auto a = state[0];
+        auto b = state[1];
+        auto c = state[2];
+        auto d = state[3];
 
-        encode (x, bufferToTransform, 64);
+        uint32_t x[16];
+        copyWithEndiannessConversion (x, bufferToTransform, 64);
 
         enum Constants
         {
@@ -125,119 +113,103 @@ public:
         state[1] += b;
         state[2] += c;
         state[3] += d;
-
-        zerostruct (x);
     }
 
-    void finish (void* result) noexcept
+    void finish (uint8_t* result) noexcept
     {
-        unsigned char encodedLength[8];
-        encode (encodedLength, count, 8);
+        uint8_t encodedLength[8];
+        copyWithEndiannessConversion (encodedLength, count, 8);
 
         // Pad out to 56 mod 64.
-        const int index = (count[0] >> 3) & 0x3f;
+        auto index = (count[0] >> 3) & 0x3f;
+        auto paddingLength = (index < 56 ? 56 : 120) - index;
 
-        const int paddingLength = (index < 56) ? (56 - index)
-                                               : (120 - index);
+        uint8_t paddingBuffer[64] = { 0x80 }; // first byte is 0x80, remaining bytes are zero.
 
-        uint8 paddingBuffer[64] = { 0x80 }; // first byte is 0x80, remaining bytes are zero.
         processBlock (paddingBuffer, (size_t) paddingLength);
-
         processBlock (encodedLength, 8);
 
-        encode (result, state, 16);
-        zerostruct (buffer);
+        copyWithEndiannessConversion (result, state, 16);
     }
 
 private:
-    uint8 buffer [64];
-    uint32 state [4];
-    uint32 count [2];
+    uint8_t buffer[64] = {};
+    uint32_t state[4] = { 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476 };
+    uint32_t count[2] = {};
 
-    static void encode (void* const output, const void* const input, const int numBytes) noexcept
+    static void copyWithEndiannessConversion (void* output, const void* input, size_t numBytes) noexcept
     {
-        for (int i = 0; i < (numBytes >> 2); ++i)
-            static_cast<uint32*> (output)[i] = ByteOrder::swapIfBigEndian (static_cast<const uint32*> (input) [i]);
+       #if JUCE_LITTLE_ENDIAN
+        memcpy (output, input, numBytes);
+       #else
+        auto dst = static_cast<uint8_t*> (output);
+        auto src = static_cast<const uint8_t*> (input);
+
+        for (size_t i = 0; i < numBytes; i += 4)
+        {
+            dst[i + 0] = src[i + 3];
+            dst[i + 1] = src[i + 2];
+            dst[i + 2] = src[i + 1];
+            dst[i + 3] = src[i + 0];
+        }
+       #endif
     }
 
-    static inline uint32 rotateLeft (const uint32 x, const uint32 n) noexcept          { return (x << n) | (x >> (32 - n)); }
+    static inline uint32_t rotateLeft (uint32_t x, uint32_t n) noexcept     { return (x << n) | (x >> (32 - n)); }
 
-    static inline uint32 F (const uint32 x, const uint32 y, const uint32 z) noexcept   { return (x & y) | (~x & z); }
-    static inline uint32 G (const uint32 x, const uint32 y, const uint32 z) noexcept   { return (x & z) | (y & ~z); }
-    static inline uint32 H (const uint32 x, const uint32 y, const uint32 z) noexcept   { return x ^ y ^ z; }
-    static inline uint32 I (const uint32 x, const uint32 y, const uint32 z) noexcept   { return y ^ (x | ~z); }
+    static inline uint32_t F (uint32_t x, uint32_t y, uint32_t z) noexcept  { return (x & y) | (~x & z); }
+    static inline uint32_t G (uint32_t x, uint32_t y, uint32_t z) noexcept  { return (x & z) | (y & ~z); }
+    static inline uint32_t H (uint32_t x, uint32_t y, uint32_t z) noexcept  { return x ^ y ^ z; }
+    static inline uint32_t I (uint32_t x, uint32_t y, uint32_t z) noexcept  { return y ^ (x | ~z); }
 
-    static void FF (uint32& a, const uint32 b, const uint32 c, const uint32 d, const uint32 x, const uint32 s, const uint32 ac) noexcept
+    static void FF (uint32_t& a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint32_t s, uint32_t ac) noexcept
     {
-        a += F (b, c, d) + x + ac;
-        a = rotateLeft (a, s) + b;
+        a = rotateLeft (a + F (b, c, d) + x + ac, s) + b;
     }
 
-    static void GG (uint32& a, const uint32 b, const uint32 c, const uint32 d, const uint32 x, const uint32 s, const uint32 ac) noexcept
+    static void GG (uint32_t& a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint32_t s, uint32_t ac) noexcept
     {
-        a += G (b, c, d) + x + ac;
-        a = rotateLeft (a, s) + b;
+        a = rotateLeft (a + G (b, c, d) + x + ac, s) + b;
     }
 
-    static void HH (uint32& a, const uint32 b, const uint32 c, const uint32 d, const uint32 x, const uint32 s, const uint32 ac) noexcept
+    static void HH (uint32_t& a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint32_t s, uint32_t ac) noexcept
     {
-        a += H (b, c, d) + x + ac;
-        a = rotateLeft (a, s) + b;
+        a = rotateLeft (a + H (b, c, d) + x + ac, s) + b;
     }
 
-    static void II (uint32& a, const uint32 b, const uint32 c, const uint32 d, const uint32 x, const uint32 s, const uint32 ac) noexcept
+    static void II (uint32_t& a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint32_t s, uint32_t ac) noexcept
     {
-        a += I (b, c, d) + x + ac;
-        a = rotateLeft (a, s) + b;
+        a = rotateLeft (a + I (b, c, d) + x + ac, s) + b;
     }
 };
 
 //==============================================================================
-MD5::MD5() noexcept
+MD5::MD5() = default;
+MD5::~MD5() = default;
+MD5::MD5 (const MD5&) = default;
+MD5& MD5::operator= (const MD5&) = default;
+
+MD5::MD5 (const void* data, size_t numBytes) noexcept
 {
-    zerostruct (result);
+    MD5Generator generator;
+    generator.processBlock (data, numBytes);
+    generator.finish (result);
 }
 
-MD5::MD5 (const MD5& other) noexcept
-{
-    memcpy (result, other.result, sizeof (result));
-}
-
-MD5& MD5::operator= (const MD5& other) noexcept
-{
-    memcpy (result, other.result, sizeof (result));
-    return *this;
-}
-
-//==============================================================================
-MD5::MD5 (const MemoryBlock& data) noexcept
-{
-    processData (data.getData(), data.getSize());
-}
-
-MD5::MD5 (const void* data, const size_t numBytes) noexcept
-{
-    processData (data, numBytes);
-}
-
-MD5::MD5 (CharPointer_UTF8 utf8) noexcept
-{
-    jassert (utf8.getAddress() != nullptr);
-    processData (utf8.getAddress(), utf8.sizeInBytes() - 1);
-}
+MD5::MD5 (const MemoryBlock& data) noexcept : MD5 (data.getData(), data.getSize()) {}
+MD5::MD5 (CharPointer_UTF8 utf8) noexcept : MD5 (utf8.getAddress(), utf8.getAddress() != nullptr ? utf8.sizeInBytes() - 1 : 0) {}
 
 MD5 MD5::fromUTF32 (StringRef text)
 {
+    MD5 m;
     MD5Generator generator;
-    auto t = text.text;
 
-    while (! t.isEmpty())
+    for (auto t = text.text; t.isNotEmpty();)
     {
-        auto unicodeChar = ByteOrder::swapIfBigEndian ((uint32) t.getAndAdvance());
+        auto unicodeChar = ByteOrder::swapIfBigEndian ((uint32_t) t.getAndAdvance());
         generator.processBlock (&unicodeChar, sizeof (unicodeChar));
     }
 
-    MD5 m;
     generator.finish (m.result);
     return m;
 }
@@ -251,19 +223,8 @@ MD5::MD5 (const File& file)
 {
     FileInputStream fin (file);
 
-    if (fin.getStatus().wasOk())
+    if (fin.openedOk())
         processStream (fin, -1);
-    else
-        zerostruct (result);
-}
-
-MD5::~MD5() noexcept {}
-
-void MD5::processData (const void* data, size_t numBytes) noexcept
-{
-    MD5Generator generator;
-    generator.processBlock (data, numBytes);
-    generator.finish (result);
 }
 
 void MD5::processStream (InputStream& input, int64 numBytesToRead)
@@ -275,7 +236,7 @@ void MD5::processStream (InputStream& input, int64 numBytesToRead)
 
     while (numBytesToRead > 0)
     {
-        uint8 tempBuffer [512];
+        uint8_t tempBuffer[512];
         auto bytesRead = input.read (tempBuffer, (int) jmin (numBytesToRead, (int64) sizeof (tempBuffer)));
 
         if (bytesRead <= 0)
@@ -336,6 +297,8 @@ public:
         test ("", "d41d8cd98f00b204e9800998ecf8427e");
         test ("The quick brown fox jumps over the lazy dog",  "9e107d9d372bb6826bd81d3542a419d6");
         test ("The quick brown fox jumps over the lazy dog.", "e4d909c290d0fb1ca068ffaddf22cbd0");
+
+        expectEquals (MD5 (CharPointer_UTF8(nullptr)).toHexString(), String ("d41d8cd98f00b204e9800998ecf8427e"));
     }
 };
 

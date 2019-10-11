@@ -163,8 +163,8 @@ static inline Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set
         case AudioChannelSet::leftCentre:        return Steinberg::Vst::kSpeakerLc;
         case AudioChannelSet::rightCentre:       return Steinberg::Vst::kSpeakerRc;
         case AudioChannelSet::centreSurround:    return Steinberg::Vst::kSpeakerCs;
-        case AudioChannelSet::leftSurroundSide:  return Steinberg::Vst::kSpeakerLcs;
-        case AudioChannelSet::rightSurroundSide: return Steinberg::Vst::kSpeakerRcs;
+        case AudioChannelSet::leftSurroundSide:  return Steinberg::Vst::kSpeakerSl;
+        case AudioChannelSet::rightSurroundSide: return Steinberg::Vst::kSpeakerSr;
         case AudioChannelSet::topMiddle:         return (1ull << 11); /* kSpeakerTm */
         case AudioChannelSet::topFrontLeft:      return Steinberg::Vst::kSpeakerTfl;
         case AudioChannelSet::topFrontCentre:    return Steinberg::Vst::kSpeakerTfc;
@@ -173,8 +173,8 @@ static inline Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set
         case AudioChannelSet::topRearCentre:     return Steinberg::Vst::kSpeakerTrc;
         case AudioChannelSet::topRearRight:      return Steinberg::Vst::kSpeakerTrr;
         case AudioChannelSet::LFE2:              return Steinberg::Vst::kSpeakerLfe2;
-        case AudioChannelSet::leftSurroundRear:  return Steinberg::Vst::kSpeakerSl;
-        case AudioChannelSet::rightSurroundRear: return Steinberg::Vst::kSpeakerSr;
+        case AudioChannelSet::leftSurroundRear:  return Steinberg::Vst::kSpeakerLcs;
+        case AudioChannelSet::rightSurroundRear: return Steinberg::Vst::kSpeakerRcs;
         case AudioChannelSet::wideLeft:          return Steinberg::Vst::kSpeakerPl;
         case AudioChannelSet::wideRight:         return Steinberg::Vst::kSpeakerPr;
         case AudioChannelSet::ambisonicACN0:     return Steinberg::Vst::kSpeakerACN0;
@@ -227,8 +227,8 @@ static inline AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::Speak
         case Steinberg::Vst::kSpeakerLc:    return AudioChannelSet::leftCentre;
         case Steinberg::Vst::kSpeakerRc:    return AudioChannelSet::rightCentre;
         case Steinberg::Vst::kSpeakerCs:    return AudioChannelSet::centreSurround;
-        case Steinberg::Vst::kSpeakerSl:    return AudioChannelSet::leftSurroundRear;
-        case Steinberg::Vst::kSpeakerSr:    return AudioChannelSet::rightSurroundRear;
+        case Steinberg::Vst::kSpeakerSl:    return AudioChannelSet::leftSurroundSide;
+        case Steinberg::Vst::kSpeakerSr:    return AudioChannelSet::rightSurroundSide;
         case Steinberg::Vst::kSpeakerTc:    return AudioChannelSet::topMiddle;  /* kSpeakerTm */
         case Steinberg::Vst::kSpeakerTfl:   return AudioChannelSet::topFrontLeft;
         case Steinberg::Vst::kSpeakerTfc:   return AudioChannelSet::topFrontCentre;
@@ -256,8 +256,8 @@ static inline AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::Speak
         case Steinberg::Vst::kSpeakerACN15: return AudioChannelSet::ambisonicACN15;
         case Steinberg::Vst::kSpeakerTsl:   return AudioChannelSet::topSideLeft;
         case Steinberg::Vst::kSpeakerTsr:   return AudioChannelSet::topSideRight;
-        case Steinberg::Vst::kSpeakerLcs:   return AudioChannelSet::leftSurroundSide;
-        case Steinberg::Vst::kSpeakerRcs:   return AudioChannelSet::rightSurroundSide;
+        case Steinberg::Vst::kSpeakerLcs:   return AudioChannelSet::leftSurroundRear;
+        case Steinberg::Vst::kSpeakerRcs:   return AudioChannelSet::rightSurroundRear;
         case Steinberg::Vst::kSpeakerBfl:   return AudioChannelSet::bottomFrontLeft;
         case Steinberg::Vst::kSpeakerBfc:   return AudioChannelSet::bottomFrontCentre;
         case Steinberg::Vst::kSpeakerBfr:   return AudioChannelSet::bottomFrontRight;

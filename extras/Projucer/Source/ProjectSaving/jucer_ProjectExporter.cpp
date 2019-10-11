@@ -55,7 +55,6 @@ Array<ProjectExporter::ExporterTypeInfo> ProjectExporter::getExporterTypes()
     addType (types, MSVCProjectExporterVC2019::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
     addType (types, MSVCProjectExporterVC2017::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
     addType (types, MSVCProjectExporterVC2015::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
-    addType (types, MSVCProjectExporterVC2013::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
     addType (types, MakefileProjectExporter::getNameLinux(),     BinaryData::export_linux_svg,          BinaryData::export_linux_svgSize);
     addType (types, AndroidProjectExporter::getName(),           BinaryData::export_android_svg,        BinaryData::export_android_svgSize);
     addType (types, CodeBlocksProjectExporter::getNameWindows(), BinaryData::export_codeBlocks_svg,     BinaryData::export_codeBlocks_svgSize);
@@ -76,12 +75,11 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
         case 2:     exp = new MSVCProjectExporterVC2019    (project, ValueTree (MSVCProjectExporterVC2019    ::getValueTreeTypeName())); break;
         case 3:     exp = new MSVCProjectExporterVC2017    (project, ValueTree (MSVCProjectExporterVC2017    ::getValueTreeTypeName())); break;
         case 4:     exp = new MSVCProjectExporterVC2015    (project, ValueTree (MSVCProjectExporterVC2015    ::getValueTreeTypeName())); break;
-        case 5:     exp = new MSVCProjectExporterVC2013    (project, ValueTree (MSVCProjectExporterVC2013    ::getValueTreeTypeName())); break;
-        case 6:     exp = new MakefileProjectExporter      (project, ValueTree (MakefileProjectExporter      ::getValueTreeTypeName())); break;
-        case 7:     exp = new AndroidProjectExporter       (project, ValueTree (AndroidProjectExporter       ::getValueTreeTypeName())); break;
-        case 8:     exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::windowsTarget)), CodeBlocksProjectExporter::windowsTarget); break;
-        case 9:     exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::linuxTarget)),   CodeBlocksProjectExporter::linuxTarget); break;
-        case 10:    exp = new CLionProjectExporter         (project, ValueTree (CLionProjectExporter         ::getValueTreeTypeName())); break;
+        case 5:     exp = new MakefileProjectExporter      (project, ValueTree (MakefileProjectExporter      ::getValueTreeTypeName())); break;
+        case 6:     exp = new AndroidProjectExporter       (project, ValueTree (AndroidProjectExporter       ::getValueTreeTypeName())); break;
+        case 7:     exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::windowsTarget)), CodeBlocksProjectExporter::windowsTarget); break;
+        case 8:     exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::linuxTarget)),   CodeBlocksProjectExporter::linuxTarget); break;
+        case 9:     exp = new CLionProjectExporter         (project, ValueTree (CLionProjectExporter         ::getValueTreeTypeName())); break;
     }
 
     exp->createDefaultConfigs();
@@ -127,9 +125,6 @@ String ProjectExporter::getValueTreeNameForExporter (const String& exporterName)
     if (exporterName == MSVCProjectExporterVC2015::getName())
         return MSVCProjectExporterVC2015::getValueTreeTypeName();
 
-    if (exporterName == MSVCProjectExporterVC2013::getName())
-        return MSVCProjectExporterVC2013::getValueTreeTypeName();
-
     if (exporterName == MakefileProjectExporter::getNameLinux())
         return MakefileProjectExporter::getValueTreeTypeName();
 
@@ -155,7 +150,6 @@ String ProjectExporter::getTargetFolderForExporter (const String& exporterValueT
     if (exporterValueTreeName == "VS2019")                return "VisualStudio2019";
     if (exporterValueTreeName == "VS2017")                return "VisualStudio2017";
     if (exporterValueTreeName == "VS2015")                return "VisualStudio2015";
-    if (exporterValueTreeName == "VS2013")                return "VisualStudio2013";
     if (exporterValueTreeName == "LINUX_MAKE")            return "LinuxMakefile";
     if (exporterValueTreeName == "ANDROIDSTUDIO")         return "Android";
     if (exporterValueTreeName == "CODEBLOCKS_WINDOWS")    return "CodeBlocksWindows";
@@ -174,7 +168,6 @@ StringArray ProjectExporter::getAllDefaultBuildsFolders()
     folders.add (getDefaultBuildsRootFolder() + "VisualStudio2019");
     folders.add (getDefaultBuildsRootFolder() + "VisualStudio2017");
     folders.add (getDefaultBuildsRootFolder() + "VisualStudio2015");
-    folders.add (getDefaultBuildsRootFolder() + "VisualStudio2013");
     folders.add (getDefaultBuildsRootFolder() + "LinuxMakefile");
     folders.add (getDefaultBuildsRootFolder() + "CodeBlocksWindows");
     folders.add (getDefaultBuildsRootFolder() + "CodeBlocksLinux");
@@ -207,7 +200,6 @@ ProjectExporter* ProjectExporter::createExporter (Project& project, const ValueT
     ProjectExporter*       exp = MSVCProjectExporterVC2019    ::createForSettings (project, settings);
     if (exp == nullptr)    exp = MSVCProjectExporterVC2017    ::createForSettings (project, settings);
     if (exp == nullptr)    exp = MSVCProjectExporterVC2015    ::createForSettings (project, settings);
-    if (exp == nullptr)    exp = MSVCProjectExporterVC2013    ::createForSettings (project, settings);
     if (exp == nullptr)    exp = XcodeProjectExporter         ::createForSettings (project, settings);
     if (exp == nullptr)    exp = MakefileProjectExporter      ::createForSettings (project, settings);
     if (exp == nullptr)    exp = AndroidProjectExporter       ::createForSettings (project, settings);
@@ -231,7 +223,6 @@ bool ProjectExporter::canProjectBeLaunched (Project* project)
             MSVCProjectExporterVC2019::getValueTreeTypeName(),
             MSVCProjectExporterVC2017::getValueTreeTypeName(),
             MSVCProjectExporterVC2015::getValueTreeTypeName(),
-            MSVCProjectExporterVC2013::getValueTreeTypeName(),
            #elif JUCE_LINUX
             // (this doesn't currently launch.. not really sure what it would do on linux)
             //MakefileProjectExporter::getValueTreeTypeName(),
@@ -318,7 +309,7 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
                    "The location of the folder in which the " + name + " project will be created. "
                    "This path can be absolute, but it's much more sensible to make it relative to the jucer project directory.");
 
-        if ((shouldBuildTargetType (ProjectType::Target::VSTPlugIn) && project.shouldBuildVST()) || project.isVSTPluginHost())
+        if ((shouldBuildTargetType (ProjectType::Target::VSTPlugIn) && project.shouldBuildVST()) || (project.isVSTPluginHost() && supportsTargetType (ProjectType::Target::VSTPlugIn)))
         {
             props.add (new FilePathPropertyComponent (vstLegacyPathValueWrapper.wrappedValue, "VST (Legacy) SDK Folder", true,
                                                       getTargetOSForExporter() == TargetOS::getThisOS(), "*", project.getProjectFolder()),
@@ -326,7 +317,7 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
                        "This can be an absolute path, or a path relative to the Projucer project file.");
         }
 
-        if ((shouldBuildTargetType (ProjectType::Target::VST3PlugIn) && project.shouldBuildVST3()) || project.isVST3PluginHost())
+        if ((shouldBuildTargetType (ProjectType::Target::VST3PlugIn) && project.shouldBuildVST3()) || (project.isVST3PluginHost() && supportsTargetType (ProjectType::Target::VST3PlugIn)))
         {
             props.add (new FilePathPropertyComponent (vst3PathValueWrapper.wrappedValue, "VST3 SDK Folder", true,
                                                       getTargetOSForExporter() == TargetOS::getThisOS(), "*", project.getProjectFolder()),
@@ -923,6 +914,7 @@ ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const Value
      configNameValue           (config, Ids::name,                 getUndoManager(), "Build Configuration"),
      targetNameValue           (config, Ids::targetName,           getUndoManager(), project.getProjectFilenameRootString()),
      targetBinaryPathValue     (config, Ids::binaryPath,           getUndoManager()),
+     recommendedWarningsValue  (config, Ids::recommendedWarnings,  getUndoManager()),
      optimisationLevelValue    (config, Ids::optimisation,         getUndoManager()),
      linkTimeOptimisationValue (config, Ids::linkTimeOptimisation, getUndoManager(), ! isDebug()),
      ppDefinesValue            (config, Ids::defines,              getUndoManager()),
@@ -930,6 +922,18 @@ ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const Value
      librarySearchPathValue    (config, Ids::libraryPath,          getUndoManager()),
      userNotesValue            (config, Ids::userNotes,            getUndoManager())
 {
+    recommendedCompilerWarningFlags["LLVM"] = { "-Wall", "-Wshadow-all", "-Wshorten-64-to-32", "-Wstrict-aliasing", "-Wuninitialized", "-Wunused-parameter",
+        "-Wconversion", "-Wsign-compare", "-Wint-conversion", "-Wconditional-uninitialized", "-Woverloaded-virtual",
+        "-Wreorder", "-Wconstant-conversion", "-Wsign-conversion", "-Wunused-private-field", "-Wbool-conversion",
+        "-Wextra-semi", "-Wunreachable-code", "-Wzero-as-null-pointer-constant", "-Wcast-align",
+        "-Winconsistent-missing-destructor-override", "-Wshift-sign-overflow", "-Wnullable-to-nonnull-conversion",
+        "-Wno-missing-field-initializers", "-Wno-ignored-qualifiers" };
+    recommendedCompilerWarningFlags["GCC"] = { "-Wall", "-Wextra", "-Wstrict-aliasing", "-Wuninitialized", "-Wunused-parameter", "-Wsign-compare",
+        "-Woverloaded-virtual", "-Wreorder", "-Wsign-conversion", "-Wunreachable-code",
+        "-Wzero-as-null-pointer-constant", "-Wcast-align", "-Wno-implicit-fallthrough",
+        "-Wno-maybe-uninitialized", "-Wno-missing-field-initializers", "-Wno-ignored-qualifiers" };
+    recommendedCompilerWarningFlags["GCC-7"] = recommendedCompilerWarningFlags["GCC"];
+    recommendedCompilerWarningFlags["GCC-7"].add ("-Wno-strict-overflow");
 }
 
 ProjectExporter::BuildConfiguration::~BuildConfiguration()
@@ -959,6 +963,35 @@ void ProjectExporter::BuildConfiguration::addGCCOptimisationProperty (PropertyLi
                                               "-O3 (fastest with safe optimisations)", "-Ofast (uses aggressive optimisations)" },
                                             { gccO0, gccOs, gccO1, gccO2, gccO3, gccOfast }),
                "The optimisation level for this configuration");
+}
+
+void ProjectExporter::BuildConfiguration::addRecommendedLinuxCompilerWarningsProperty (PropertyListBuilder& props)
+{
+    props.add (new ChoicePropertyComponent (recommendedWarningsValue, "Add Recommended Compiler Warning Flags",
+                                            { "GCC", "GCC 7 and below", "LLVM", "Disabled" },
+                                            { "GCC", "GCC-7", "LLVM", "" }),
+               "Enable this to add a set of recommended compiler warning flags.");
+    recommendedWarningsValue.setDefault ("");
+}
+
+void ProjectExporter::BuildConfiguration::addRecommendedLLVMCompilerWarningsProperty (PropertyListBuilder& props)
+{
+    props.add (new ChoicePropertyComponent (recommendedWarningsValue, "Add Recommended Compiler Warning Flags",
+                                            { "Enabled", "Disabled" },
+                                            { "LLVM", "" }),
+               "Enable this to add a set of recommended compiler warning flags.");
+    recommendedWarningsValue.setDefault ("");
+}
+
+StringArray ProjectExporter::BuildConfiguration::getRecommendedCompilerWarningFlags() const
+{
+    auto label = recommendedWarningsValue.get().toString();
+    auto it = recommendedCompilerWarningFlags.find (label);
+
+    if (it != recommendedCompilerWarningFlags.end())
+        return it->second;
+
+    return {};
 }
 
 void ProjectExporter::BuildConfiguration::createPropertyEditors (PropertyListBuilder& props)

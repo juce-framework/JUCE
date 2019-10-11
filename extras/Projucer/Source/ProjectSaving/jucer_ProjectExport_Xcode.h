@@ -34,12 +34,12 @@ namespace
     static const char* const iOSDefaultVersion = "9.3";
     static const StringArray iOSVersions { "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4",
                                            "9.0", "9.1", "9.2", "9.3", "10.0", "10.1", "10.2", "10.3",
-                                           "11.0", "12.0" };
+                                           "11.0", "12.0", "13.0" };
 
     static const int oldestDeploymentTarget  = 7;
     static const int defaultDeploymentTarget = 11;
     static const int oldestSDKVersion        = 11;
-    static const int currentSDKVersion       = 14;
+    static const int currentSDKVersion       = 15;
     static const int minimumAUv3SDKVersion   = 11;
 
     static String getVersionName    (int version)  { return "10." + String (version); }
@@ -104,6 +104,9 @@ public:
           cameraPermissionNeededValue                  (settings, Ids::cameraPermissionNeeded,                  getUndoManager()),
           cameraPermissionTextValue                    (settings, Ids::cameraPermissionText,                    getUndoManager(),
                                                         "This app requires access to the camera to function correctly."),
+          iosBluetoothPermissionNeededValue            (settings, Ids::iosBluetoothPermissionNeeded,            getUndoManager()),
+          iosBluetoothPermissionTextValue              (settings, Ids::iosBluetoothPermissionText,              getUndoManager(),
+                                                        "This app requires access to Bluetooth to function correctly."),
           uiFileSharingEnabledValue                    (settings, Ids::UIFileSharingEnabled,                    getUndoManager()),
           uiSupportsDocumentBrowserValue               (settings, Ids::UISupportsDocumentBrowser,               getUndoManager()),
           uiStatusBarHiddenValue                       (settings, Ids::UIStatusBarHidden,                       getUndoManager()),
@@ -173,6 +176,9 @@ public:
     bool isCameraPermissionEnabled() const             { return cameraPermissionNeededValue.get(); }
     String getCameraPermissionTextString() const       { return cameraPermissionTextValue.get(); }
 
+    bool isBluetoothPermissionEnabled() const          { return iosBluetoothPermissionNeededValue.get(); }
+    String getBluetoothPermissionTextString() const    { return iosBluetoothPermissionTextValue.get(); }
+
     bool isInAppPurchasesEnabled() const               { return iosInAppPurchasesValue.get(); }
     bool isBackgroundAudioEnabled() const              { return iosBackgroundAudioValue.get(); }
     bool isBackgroundBleEnabled() const                { return iosBackgroundBleValue.get(); }
@@ -187,7 +193,7 @@ public:
 
     bool shouldKeepCustomXcodeSchemes() const          { return keepCustomXcodeSchemesValue.get(); }
 
-    String getIosDevelopmentTeamIDString() const       { return iosDevelopmentTeamIDValue.get(); }
+    String getDevelopmentTeamIDString() const          { return iosDevelopmentTeamIDValue.get(); }
     String getAppGroupIdString() const                 { return iosAppGroupsIDValue.get(); }
 
     String getDefaultLaunchStoryboardName() const      { jassert (iOS); return "LaunchScreen"; }
@@ -398,6 +404,17 @@ public:
                                                             "Camera Access Text", 1024, false),
                    "A short description of why your app requires camera access.");
 
+        if (iOS)
+        {
+            props.add (new ChoicePropertyComponent (iosBluetoothPermissionNeededValue, "Bluetooth Access"),
+                       "Enable this to allow your app to use Bluetooth on iOS 13.0 and above. "
+                       "The user of your app will be prompted to grant Bluetooth access permissions.");
+
+            props.add (new TextPropertyComponentWithEnablement (iosBluetoothPermissionTextValue, iosBluetoothPermissionNeededValue,
+                                                                "Bluetooth Access Text", 1024, false),
+                       "A short description of why your app requires Bluetooth access.");
+        }
+
         props.add (new ChoicePropertyComponent (iosInAppPurchasesValue, "In-App Purchases Capability"),
                    "Enable this to grant your app the capability for in-app purchases. "
                    "This option requires that you specify a valid Development Team ID.");
@@ -468,7 +485,7 @@ public:
                    "This is useful if you want to use different bundle identifiers for Mac and iOS exporters in the same project.");
 
         props.add (new TextPropertyComponent (iosDevelopmentTeamIDValue, "Development Team ID", 10, false),
-                   "The Development Team ID to be used for setting up code-signing your iOS app. This is a ten-character "
+                   "The Development Team ID to be used for setting up code-signing your app. This is a ten-character "
                    "string (for example, \"S7B6T5XJ2Q\") that describes the distribution certificate Apple issued to you. "
                    "You can find this string in the OS X app Keychain Access under \"Certificates\".");
 
@@ -610,7 +627,7 @@ protected:
               osxArchitecture              (config, Ids::osxArchitecture,              getUndoManager(), osxArch_Default),
               customXcodeFlags             (config, Ids::customXcodeFlags,             getUndoManager()),
               plistPreprocessorDefinitions (config, Ids::plistPreprocessorDefinitions, getUndoManager()),
-              codeSignIdentity             (config, Ids::codeSigningIdentity,          getUndoManager(), iOS ? "iPhone Developer" : "Mac Developer"),
+              codeSignIdentity             (config, Ids::codeSigningIdentity,          getUndoManager()),
               fastMathEnabled              (config, Ids::fastMath,                     getUndoManager()),
               stripLocalSymbolsEnabled     (config, Ids::stripLocalSymbols,            getUndoManager()),
               pluginBinaryCopyStepEnabled  (config, Ids::enablePluginBinaryCopyStep,   getUndoManager(), true),
@@ -627,10 +644,11 @@ protected:
             optimisationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
         }
 
-        //==========================================================================
+        //==============================================================================
         void createConfigProperties (PropertyListBuilder& props) override
         {
             addXcodePluginInstallPathProperties (props);
+            addRecommendedLLVMCompilerWarningsProperty (props);
             addGCCOptimisationProperty (props);
 
             if (iOS)
@@ -683,7 +701,7 @@ protected:
             return "${CURRENT_ARCH}";
         }
 
-        //==========================================================================
+        //==============================================================================
         String getOSXArchitectureString() const                 { return osxArchitecture.get(); }
         String getPListPreprocessorDefinitionsString() const    { return plistPreprocessorDefinitions.get(); }
 
@@ -697,7 +715,6 @@ protected:
         String getOSXDeploymentTargetString() const             { return osxDeploymentTarget.get(); }
 
         String getCodeSignIdentityString() const                { return codeSignIdentity.get(); }
-        bool isUsingDefaultCodeSignIdentity() const             { return codeSignIdentity.isUsingDefault(); }
 
         String getiOSDeploymentTargetString() const             { return iosDeploymentTarget.get(); }
 
@@ -710,7 +727,7 @@ protected:
         String getUnityPluginBinaryLocationString() const       { return unityPluginBinaryLocation.get(); }
 
     private:
-        //==========================================================================
+        //==============================================================================
         bool iOS;
 
         ValueWithDefault osxSDKVersion, osxDeploymentTarget, iosDeploymentTarget, osxArchitecture,
@@ -719,7 +736,7 @@ protected:
                          vstBinaryLocation, vst3BinaryLocation, auBinaryLocation, rtasBinaryLocation,
                          aaxBinaryLocation, unityPluginBinaryLocation;
 
-        //==========================================================================
+        //==============================================================================
         void addXcodePluginInstallPathProperties (PropertyListBuilder& props)
         {
             auto isBuildingAnyPlugins = (project.shouldBuildVST() || project.shouldBuildVST3() || project.shouldBuildAU()
@@ -980,7 +997,7 @@ public:
                 for (int i = 0; i < projectItem.getNumChildren(); ++i)
                     result.addArray (getSourceFilesInfo (projectItem.getChild (i)));
             }
-            else if (projectItem.shouldBeAddedToTargetProject()
+            else if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (owner)
                      && owner.getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType)
             {
                 SourceFileInfo info;
@@ -1069,7 +1086,7 @@ public:
         {
             auto attributes = getID() + " = { ";
 
-            auto developmentTeamID = owner.getIosDevelopmentTeamIDString();
+            auto developmentTeamID = owner.getDevelopmentTeamIDString();
 
             if (developmentTeamID.isNotEmpty())
             {
@@ -1244,10 +1261,13 @@ public:
             if (config.isFastMathEnabled())
                 s.set ("GCC_FAST_MATH", "YES");
 
-            auto extraFlags = owner.replacePreprocessorTokens (config, owner.getExtraCompilerFlagsString()).trim();
 
-            if (extraFlags.isNotEmpty())
-                s.set ("OTHER_CPLUSPLUSFLAGS", extraFlags.quoted());
+            auto flags = (config.getRecommendedCompilerWarningFlags().joinIntoString (" ")
+                             + " " + owner.getExtraCompilerFlagsString()).trim();
+            flags = owner.replacePreprocessorTokens (config, flags);
+
+            if (flags.isNotEmpty())
+                s.set ("OTHER_CPLUSPLUSFLAGS", flags.quoted());
 
             auto installPath = getInstallPathForConfiguration (config);
 
@@ -1304,7 +1324,9 @@ public:
             if (owner.iOS)
             {
                 s.set ("ASSETCATALOG_COMPILER_APPICON_NAME", "AppIcon");
-                s.set ("ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME", "LaunchImage");
+
+                if (! owner.shouldAddStoryboardToProject())
+                    s.set ("ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME", "LaunchImage");
             }
             else
             {
@@ -1319,15 +1341,15 @@ public:
             s.set ("GCC_VERSION", gccVersion);
             s.set ("CLANG_LINK_OBJC_RUNTIME", "NO");
 
-            if (isUsingCodeSigning (config))
-            {
-                s.set (owner.iOS ? "\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\"" : "CODE_SIGN_IDENTITY",
-                       config.getCodeSignIdentityString().quoted());
-                s.set ("PROVISIONING_PROFILE_SPECIFIER", "\"\"");
-            }
+            auto codeSigningIdentity = owner.getCodeSigningIdentity (config);
+            s.set (owner.iOS ? "\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\"" : "CODE_SIGN_IDENTITY",
+                   codeSigningIdentity.quoted());
 
-            if (owner.getIosDevelopmentTeamIDString().isNotEmpty())
-                s.set ("DEVELOPMENT_TEAM", owner.getIosDevelopmentTeamIDString());
+            if (codeSigningIdentity.isNotEmpty())
+                s.set ("PROVISIONING_PROFILE_SPECIFIER", "\"\"");
+
+            if (owner.getDevelopmentTeamIDString().isNotEmpty())
+                s.set ("DEVELOPMENT_TEAM", owner.getDevelopmentTeamIDString());
 
             if (shouldAddEntitlements())
                 s.set ("CODE_SIGN_ENTITLEMENTS", owner.getEntitlementsFileName().quoted());
@@ -1453,36 +1475,39 @@ public:
             if (getTargetFileType() == pluginBundle)
                 flags.add (owner.isiOS() ? "-bitcode_bundle" : "-bundle");
 
-            Array<RelativePath> extraLibs;
-
-            addExtraLibsForTargetType (config, extraLibs);
-
-            for (auto& lib : extraLibs)
+            if (type != Target::SharedCodeTarget)
             {
-                flags.add (getLinkerFlagForLib (lib.getFileNameWithoutExtension()));
-                librarySearchPaths.add (owner.getSearchPathForStaticLibrary (lib));
-            }
+                Array<RelativePath> extraLibs;
 
-            if (owner.project.getProjectType().isAudioPlugin() && type != Target::SharedCodeTarget)
-            {
-                if (owner.getTargetOfType (Target::SharedCodeTarget) != nullptr)
+                addExtraLibsForTargetType (config, extraLibs);
+
+                for (auto& lib : extraLibs)
                 {
-                    auto productName = getStaticLibbedFilename (owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString()));
-
-                    RelativePath sharedCodelib (productName, RelativePath::buildTargetFolder);
-                    flags.add (getLinkerFlagForLib (sharedCodelib.getFileNameWithoutExtension()));
+                    flags.add (getLinkerFlagForLib (lib.getFileNameWithoutExtension()));
+                    librarySearchPaths.add (owner.getSearchPathForStaticLibrary (lib));
                 }
+
+                if (owner.project.getProjectType().isAudioPlugin())
+                {
+                    if (owner.getTargetOfType (Target::SharedCodeTarget) != nullptr)
+                    {
+                        auto productName = getStaticLibbedFilename (owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString()));
+
+                        RelativePath sharedCodelib (productName, RelativePath::buildTargetFolder);
+                        flags.add (getLinkerFlagForLib (sharedCodelib.getFileNameWithoutExtension()));
+                    }
+                }
+
+                flags.add (owner.getExternalLibraryFlags (config));
+
+                auto libs = owner.xcodeLibs;
+                libs.addArray (xcodeLibs);
+
+                for (auto& l : libs)
+                    flags.add (getLinkerFlagForLib (l));
             }
 
             flags.add (owner.replacePreprocessorTokens (config, owner.getExtraLinkerFlagsString()));
-            flags.add (owner.getExternalLibraryFlags (config));
-
-            auto libs = owner.xcodeLibs;
-            libs.addArray (xcodeLibs);
-
-            for (auto& l : libs)
-                flags.add (getLinkerFlagForLib (l));
-
             flags = getCleanedStringArray (flags);
         }
 
@@ -1510,6 +1535,12 @@ public:
 
             if (owner.iOS)
             {
+                if (owner.isBluetoothPermissionEnabled())
+                {
+                    addPlistDictionaryKey (dict, "NSBluetoothAlwaysUsageDescription", owner.getBluetoothPermissionTextString());
+                    addPlistDictionaryKey (dict, "NSBluetoothPeripheralUsageDescription", owner.getBluetoothPermissionTextString()); // needed for pre iOS 13.0
+                }
+
                 addPlistDictionaryKeyBool (dict, "LSRequiresIPhoneOS", true);
 
                 if (type != AudioUnitv3PlugIn)
@@ -1734,7 +1765,8 @@ public:
         {
             xcodeOtherRezFlags = "-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64"
                                  " -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
-                                 " -I \\\"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\\\"";
+                                 " -I \\\"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\\\""
+                                 " -I \\\"$(DEVELOPER_DIR)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/AudioUnit.framework/Headers\\\"";
 
             xcodeFrameworks.addTokens ("AudioUnit CoreAudioKit", false);
 
@@ -1895,7 +1927,7 @@ public:
         {
             auto minVersion = (type == Target::AudioUnitv3PlugIn ? minimumAUv3SDKVersion : oldestDeploymentTarget);
 
-            for (int v = minVersion; v < currentSDKVersion; ++v)
+            for (int v = minVersion; v <= currentSDKVersion; ++v)
                 if (deploymentTarget == getSDKDisplayName (v))
                     return getVersionName (v);
 
@@ -1904,17 +1936,11 @@ public:
 
         String getOSXSDKVersion (const String& sdkVersion) const
         {
-            for (int v = oldestSDKVersion; v < currentSDKVersion; ++v)
+            for (int v = oldestSDKVersion; v <= currentSDKVersion; ++v)
                 if (sdkVersion == getSDKDisplayName (v))
                     return getSDKRootName (v);
 
             return {};
-        }
-
-        bool isUsingCodeSigning (const XcodeBuildConfiguration& config) const
-        {
-            return (! config.isUsingDefaultCodeSignIdentity())
-                     || owner.getIosDevelopmentTeamIDString().isNotEmpty();
         }
 
         //==============================================================================
@@ -1950,7 +1976,7 @@ private:
                      iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue,
                      appSandboxValue, appSandboxOptionsValue,
                      hardenedRuntimeValue, hardenedRuntimeOptionsValue,
-                     microphonePermissionNeededValue, microphonePermissionsTextValue, cameraPermissionNeededValue, cameraPermissionTextValue,
+                     microphonePermissionNeededValue, microphonePermissionsTextValue, cameraPermissionNeededValue, cameraPermissionTextValue, iosBluetoothPermissionNeededValue, iosBluetoothPermissionTextValue,
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
                      iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
                      iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
@@ -2107,10 +2133,7 @@ private:
 
     void addFilesAndGroupsToProject (StringArray& topLevelGroupIDs) const
     {
-        auto entitlements = getEntitlements();
-
-        if (entitlements.size() > 0)
-            topLevelGroupIDs.add (addEntitlementsFile (entitlements));
+        addEntitlementsFile();
 
         for (auto& group : getAllGroups())
         {
@@ -2518,6 +2541,16 @@ private:
         return sanitisePath (searchPath);
     }
 
+    String getCodeSigningIdentity (const XcodeBuildConfiguration& config) const
+    {
+        auto identity = config.getCodeSignIdentityString();
+
+        if (identity.isEmpty() && getDevelopmentTeamIDString().isNotEmpty())
+            return iOS ? "iPhone Developer" : "Mac Developer";
+
+        return identity;
+    }
+
     StringPairArray getProjectSettings (const XcodeBuildConfiguration& config) const
     {
         StringPairArray s;
@@ -2575,17 +2608,14 @@ private:
                 s.set ("ONLY_ACTIVE_ARCH", "YES");
         }
 
+        s.set (iOS ? "\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\"" : "CODE_SIGN_IDENTITY",
+               getCodeSigningIdentity (config).quoted());
+
         if (iOS)
         {
-            s.set ("\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\"", config.getCodeSignIdentityString().quoted());
             s.set ("SDKROOT", "iphoneos");
             s.set ("TARGETED_DEVICE_FAMILY", getDeviceFamilyString().quoted());
             s.set ("IPHONEOS_DEPLOYMENT_TARGET", config.getiOSDeploymentTargetString());
-        }
-        else
-        {
-            if (! config.isUsingDefaultCodeSignIdentity() || getIosDevelopmentTeamIDString().isNotEmpty())
-                s.set ("CODE_SIGN_IDENTITY", config.getCodeSignIdentityString().quoted());
         }
 
         s.set ("ZERO_LINK", "NO");
@@ -3120,7 +3150,7 @@ private:
         return entitlements;
     }
 
-    String addEntitlementsFile (StringPairArray entitlements) const
+    String addEntitlementsFile() const
     {
         String content =
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -3128,6 +3158,7 @@ private:
             "<plist version=\"1.0\">\n"
             "<dict>\n";
 
+        auto entitlements = getEntitlements();
         auto keys = entitlements.getAllKeys();
 
         for (auto& key : keys)
@@ -3169,7 +3200,7 @@ private:
             return addGroup (projectItem, childIDs);
         }
 
-        if (projectItem.shouldBeAddedToTargetProject())
+        if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (*this))
         {
             auto itemPath = projectItem.getFilePath();
             RelativePath path;
@@ -3478,7 +3509,7 @@ private:
     {
         String attributes;
 
-        attributes << "{ LastUpgradeCheck = 1010; "
+        attributes << "{ LastUpgradeCheck = 1100; "
                    << "ORGANIZATIONNAME = " << getProject().getCompanyNameString().quoted()
                    <<"; ";
 

@@ -209,6 +209,7 @@ private:
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
+            addRecommendedLinuxCompilerWarningsProperty (props);
             addGCCOptimisationProperty (props);
 
             props.add (new ChoicePropertyComponent (architectureTypeValue, "Architecture",
@@ -324,6 +325,7 @@ private:
         }
 
         if (project.getEnabledModules().isModuleEnabled ("juce_core")
+            && project.isConfigFlagEnabled ("JUCE_USE_CURL", true)
             && ! project.isConfigFlagEnabled ("JUCE_LOAD_CURL_SYMBOLS_LAZILY", false))
             result.add ("libcurl");
 
@@ -400,6 +402,9 @@ private:
 
         if (auto* codeBlocksConfig = dynamic_cast<const CodeBlocksBuildConfiguration*> (&config))
             flags.add (codeBlocksConfig->getArchitectureTypeString());
+
+        for (auto& recommended : config.getRecommendedCompilerWarningFlags())
+            flags.add (recommended);
 
         flags.add ("-O" + config.getGCCOptimisationFlag());
 
@@ -774,7 +779,7 @@ private:
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
                 addCompileUnits (projectItem.getChild(i), xml);
         }
-        else if (projectItem.shouldBeAddedToTargetProject())
+        else if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (*this))
         {
             RelativePath file (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
 

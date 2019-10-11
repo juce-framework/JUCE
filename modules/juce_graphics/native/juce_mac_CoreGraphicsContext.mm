@@ -623,9 +623,19 @@ void CoreGraphicsContext::setFont (const Font& newFont)
             CGContextSetFont (context, state->fontRef);
             CGContextSetFontSize (context, state->font.getHeight() * osxTypeface->fontHeightToPointsFactor);
 
-            state->fontTransform = osxTypeface->renderingTransform;
-            state->fontTransform.a *= state->font.getHorizontalScale();
-            CGContextSetTextMatrix (context, state->fontTransform);
+            auto fontTransform = osxTypeface->renderingTransform;
+            fontTransform.a *= state->font.getHorizontalScale();
+            CGContextSetTextMatrix (context, fontTransform);
+
+            auto cgTransformToJuceTransform = [](CGAffineTransform& t) -> AffineTransform
+            {
+                return { (float) t.a, (float) t.c, (float) t.tx,
+                         (float) t.b, (float) t.d, (float) t.ty };
+            };
+
+            state->fontTransform = cgTransformToJuceTransform (fontTransform);
+            auto inverseFontTransform = CGAffineTransformInvert (fontTransform);
+            state->inverseFontTransform = cgTransformToJuceTransform (inverseFontTransform);
         }
     }
 }
@@ -639,38 +649,29 @@ void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& tra
 {
     if (state->fontRef != nullptr && state->fillType.isColour())
     {
-       #if JUCE_CLANG
-        #pragma clang diagnostic push
-        #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-       #endif
-
-        if (transform.isOnlyTranslation())
+        if (transform.isOnlyTranslation() && state->fontTransform.isOnlyTranslation())
         {
-            CGContextSetTextMatrix (context, state->fontTransform); // have to set this each time, as it's not saved as part of the state
+            auto t = transform.followedBy (state->inverseFontTransform);
 
-            auto g = (CGGlyph) glyphNumber;
-            CGContextShowGlyphsAtPoint (context, transform.getTranslationX(),
-                                        flipHeight - roundToInt (transform.getTranslationY()), &g, 1);
+            CGGlyph glyphs[1] = { (CGGlyph) glyphNumber };
+            CGPoint positions[1] = { { t.getTranslationX(), flipHeight - roundToInt (t.getTranslationY()) } };
+            CGContextShowGlyphsAtPositions (context, glyphs, positions, 1);
         }
         else
         {
             CGContextSaveGState (context);
+
             flip();
-            applyTransform (transform);
+            auto fontTransform = state->fontTransform;
+            fontTransform.mat11 = -fontTransform.mat11;
+            applyTransform (fontTransform.followedBy (state->inverseFontTransform).followedBy (transform));
 
-            auto t = state->fontTransform;
-            t.d = -t.d;
-            CGContextSetTextMatrix (context, t);
-
-            auto g = (CGGlyph) glyphNumber;
-            CGContextShowGlyphsAtPoint (context, 0, 0, &g, 1);
+            CGGlyph glyphs[1] = { (CGGlyph) glyphNumber };
+            CGPoint positions[1] = { { 0.0f, 0.0f } };
+            CGContextShowGlyphsAtPositions (context, glyphs, positions, 1);
 
             CGContextRestoreGState (context);
         }
-
-       #if JUCE_CLANG
-        #pragma clang diagnostic pop
-       #endif
     }
     else
     {
@@ -690,13 +691,15 @@ bool CoreGraphicsContext::drawTextLayout (const AttributedString& text, const Re
 }
 
 CoreGraphicsContext::SavedState::SavedState()
-    : font (1.0f), fontTransform (CGAffineTransformIdentity)
+    : font (1.0f)
 {
 }
 
 CoreGraphicsContext::SavedState::SavedState (const SavedState& other)
     : fillType (other.fillType), font (other.font), fontRef (other.fontRef),
-      fontTransform (other.fontTransform), gradient (other.gradient)
+      fontTransform (other.fontTransform),
+      inverseFontTransform (other.inverseFontTransform),
+      gradient (other.gradient)
 {
     if (gradient != nullptr)
         CGGradientRetain (gradient);
@@ -752,13 +755,11 @@ void CoreGraphicsContext::drawGradient()
 
     auto& g = *state->fillType.gradient;
 
-    auto p1 = convertToCGPoint (g.point1);
-    auto p2 = convertToCGPoint (g.point2);
-
-    state->fillType.transform.transformPoints (p1.x, p1.y, p2.x, p2.y);
-
     if (state->gradient == nullptr)
         state->gradient = createGradient (g, rgbColourSpace);
+
+    auto p1 = convertToCGPoint (g.point1);
+    auto p2 = convertToCGPoint (g.point2);
 
     if (g.isRadial)
         CGContextDrawRadialGradient (context, state->gradient, p1, 0, p1, g.point1.getDistanceFrom (g.point2),

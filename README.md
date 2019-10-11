@@ -31,7 +31,7 @@ For further help getting started, please refer to the JUCE
 ## Minimum System Requirements
 #### Building JUCE Projects
 - __macOS__: macOS 10.11 and Xcode 7.3.1
-- __Windows__: Windows 8.1 and Visual Studio 2013 64-bit
+- __Windows__: Windows 8.1 and Visual Studio 2015 64-bit
 - __Linux__: GCC 4.8
 
 #### Deployment Targets

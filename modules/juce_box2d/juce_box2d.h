@@ -35,7 +35,7 @@
 
   ID:               juce_box2d
   vendor:           juce
-  version:          5.4.3
+  version:          5.4.4
   name:             JUCE wrapper for the Box2D physics engine
   description:      The Box2D physics engine and some utility classes.
   website:          http://www.juce.com/juce
@@ -57,7 +57,9 @@
 #ifdef JUCE_CLANG
  #pragma clang diagnostic push
  #pragma clang diagnostic ignored "-Wconversion"
- #pragma clang diagnostic ignored "-Wshadow-field"
+ #if __has_warning("-Wshadow-field")
+  #pragma clang diagnostic ignored "-Wshadow-field"
+ #endif
  #if __has_warning("-Wzero-as-null-pointer-constant")
   #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
  #endif

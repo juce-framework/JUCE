@@ -1036,7 +1036,7 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
                                              "Include BinaryData.h in the JuceHeader.h file");
 
     props.add (new TextPropertyComponent (binaryDataNamespaceValue, "BinaryData Namespace", 256, false),
-                                          "The namespace containing the binary assests.");
+                                          "The namespace containing the binary assets.");
 
     props.add (new ChoicePropertyComponent (cppStandardValue, "C++ Language Standard",
                                             { "C++11", "C++14", "C++17", "Use Latest" },
@@ -1295,6 +1295,14 @@ bool Project::Item::canContain (const Item& child) const
 }
 
 bool Project::Item::shouldBeAddedToTargetProject() const    { return isFile(); }
+
+bool Project::Item::shouldBeAddedToTargetExporter (const ProjectExporter& exporter) const
+{
+    if (shouldBeAddedToXcodeResources())
+        return exporter.isXcode() || shouldBeCompiled();
+
+    return true;
+}
 
 Value Project::Item::getShouldCompileValue()                { return state.getPropertyAsValue (Ids::compile, getUndoManager()); }
 bool Project::Item::shouldBeCompiled() const                { return state [Ids::compile]; }

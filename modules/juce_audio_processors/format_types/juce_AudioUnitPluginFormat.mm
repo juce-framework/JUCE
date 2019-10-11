@@ -1213,8 +1213,11 @@ public:
         if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_FactoryPresets,
                                   kAudioUnitScope_Global, 0, &presets, &sz) == noErr)
         {
-            num = (int) CFArrayGetCount (presets);
-            CFRelease (presets);
+            if (presets != nullptr)
+            {
+                num = (int) CFArrayGetCount (presets);
+                CFRelease (presets);
+            }
         }
 
         return num;
@@ -2754,7 +2757,7 @@ void AudioUnitPluginFormat::createPluginInstance (const PluginDescription& desc,
     }
 }
 
-bool AudioUnitPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription& desc) const noexcept
+bool AudioUnitPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription& desc) const
 {
    #if JUCE_SUPPORTS_AUv3
     String pluginName, version, manufacturer;

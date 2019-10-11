@@ -26,7 +26,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "MainHostWindow.h"
-#include "../Filters/InternalFilters.h"
+#include "../Plugins/InternalPlugins.h"
 
 
 //==============================================================================
@@ -119,8 +119,8 @@ MainHostWindow::MainHostWindow()
 
     knownPluginList.addChangeListener (this);
 
-    if (auto* filterGraph = graphHolder->graph.get())
-        filterGraph->addChangeListener (this);
+    if (auto* g = graphHolder->graph.get())
+        g->addChangeListener (this);
 
     addKeyListener (getCommandManager().getKeyMappings());
 
@@ -144,8 +144,8 @@ MainHostWindow::~MainHostWindow()
     pluginListWindow = nullptr;
     knownPluginList.removeChangeListener (this);
 
-    if (auto* filterGraph = graphHolder->graph.get())
-        filterGraph->removeChangeListener (this);
+    if (auto* g = graphHolder->graph.get())
+        g->removeChangeListener (this);
 
     getAppProperties().getUserSettings()->setValue ("mainWindowPos", getWindowStateAsString());
     clearContentComponent();
@@ -196,7 +196,7 @@ void MainHostWindow::tryToQuitApplication()
         new AsyncQuitRetrier();
     }
    #if JUCE_ANDROID || JUCE_IOS
-    else if (graphHolder == nullptr || graphHolder->graph->saveDocument (FilterGraph::getDefaultGraphDocumentOnMobile()))
+    else if (graphHolder == nullptr || graphHolder->graph->saveDocument (PluginGraph::getDefaultGraphDocumentOnMobile()))
    #else
     else if (graphHolder == nullptr || graphHolder->graph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
    #endif
@@ -346,7 +346,7 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
     }
     else
     {
-        if (knownPluginList.getIndexChosenByMenu (menuItemID) >= 0)
+        if (KnownPluginList::getIndexChosenByMenu (pluginDescriptions, menuItemID) >= 0)
             createPlugin (getChosenType (menuItemID), { proportionOfWidth  (0.3f + Random::getSystemRandom().nextFloat() * 0.6f),
                                                         proportionOfHeight (0.3f + Random::getSystemRandom().nextFloat() * 0.6f) });
     }
@@ -364,7 +364,7 @@ void MainHostWindow::createPlugin (const PluginDescription& desc, Point<int> pos
         graphHolder->createNewPlugin (desc, pos);
 }
 
-void MainHostWindow::addPluginsToMenu (PopupMenu& m) const
+void MainHostWindow::addPluginsToMenu (PopupMenu& m)
 {
     if (graphHolder != nullptr)
     {
@@ -377,7 +377,8 @@ void MainHostWindow::addPluginsToMenu (PopupMenu& m) const
 
     m.addSeparator();
 
-    knownPluginList.addToMenu (m, pluginSortMethod);
+    pluginDescriptions = knownPluginList.getTypes();
+    KnownPluginList::addToMenu (m, pluginDescriptions, pluginSortMethod);
 }
 
 PluginDescription MainHostWindow::getChosenType (const int menuID) const
@@ -385,7 +386,7 @@ PluginDescription MainHostWindow::getChosenType (const int menuID) const
     if (menuID >= 1 && menuID < 1 + internalTypes.size())
         return internalTypes [menuID - 1];
 
-    return knownPluginList.getTypes()[knownPluginList.getIndexChosenByMenu (menuID)];
+    return pluginDescriptions[KnownPluginList::getIndexChosenByMenu (pluginDescriptions, menuID)];
 }
 
 //==============================================================================
@@ -606,11 +607,11 @@ void MainHostWindow::filesDropped (const StringArray& files, int x, int y)
     if (graphHolder != nullptr)
     {
        #if ! (JUCE_ANDROID || JUCE_IOS)
-        if (files.size() == 1 && File (files[0]).hasFileExtension (FilterGraph::getFilenameSuffix()))
+        if (files.size() == 1 && File (files[0]).hasFileExtension (PluginGraph::getFilenameSuffix()))
         {
-            if (auto* filterGraph = graphHolder->graph.get())
-                if (filterGraph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
-                    filterGraph->loadFrom (File (files[0]), true);
+            if (auto* g = graphHolder->graph.get())
+                if (g->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
+                    g->loadFrom (File (files[0]), true);
         }
         else
        #endif

@@ -74,14 +74,14 @@ void AudioPluginFormatManager::addDefaultFormats()
    #endif
 }
 
-int AudioPluginFormatManager::getNumFormats()
-{
-    return formats.size();
-}
+int AudioPluginFormatManager::getNumFormats() const                         { return formats.size(); }
+AudioPluginFormat* AudioPluginFormatManager::getFormat (int index) const    { return formats[index]; }
 
-AudioPluginFormat* AudioPluginFormatManager::getFormat (int index)
+Array<AudioPluginFormat*> AudioPluginFormatManager::getFormats() const
 {
-    return formats[index];
+    Array<AudioPluginFormat*> a;
+    a.addArray (formats);
+    return a;
 }
 
 void AudioPluginFormatManager::addFormat (AudioPluginFormat* format)

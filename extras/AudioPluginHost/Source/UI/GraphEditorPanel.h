@@ -26,20 +26,20 @@
 
 #pragma once
 
-#include "../Filters/FilterGraph.h"
+#include "../Plugins/PluginGraph.h"
 
 class MainHostWindow;
 
 //==============================================================================
 /**
-    A panel that displays and edits a FilterGraph.
+    A panel that displays and edits a PluginGraph.
 */
 class GraphEditorPanel   : public Component,
                            public ChangeListener,
                            private Timer
 {
 public:
-    GraphEditorPanel (FilterGraph& graph);
+    GraphEditorPanel (PluginGraph& graph);
     ~GraphEditorPanel() override;
 
     void createNewPlugin (const PluginDescription&, Point<int> position);
@@ -67,19 +67,19 @@ public:
     void endDraggingConnector (const MouseEvent&);
 
     //==============================================================================
-    FilterGraph& graph;
+    PluginGraph& graph;
 
 private:
-    struct FilterComponent;
+    struct PluginComponent;
     struct ConnectorComponent;
     struct PinComponent;
 
-    OwnedArray<FilterComponent> nodes;
+    OwnedArray<PluginComponent> nodes;
     OwnedArray<ConnectorComponent> connectors;
     std::unique_ptr<ConnectorComponent> draggingConnector;
     std::unique_ptr<PopupMenu> menu;
 
-    FilterComponent* getComponentForFilter (AudioProcessorGraph::NodeID) const;
+    PluginComponent* getComponentForPlugin (AudioProcessorGraph::NodeID) const;
     ConnectorComponent* getComponentForConnection (const AudioProcessorGraph::Connection&) const;
     PinComponent* findPinAt (Point<float>) const;
 
@@ -115,7 +115,7 @@ public:
     bool closeAnyOpenPluginWindows();
 
     //==============================================================================
-    std::unique_ptr<FilterGraph> graph;
+    std::unique_ptr<PluginGraph> graph;
 
     void resized() override;
     void unfocusKeyboardComponent();

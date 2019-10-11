@@ -243,6 +243,13 @@
 			path = "../../../../modules/juce_audio_utils";
 			sourceTree = "SOURCE_ROOT";
 		};
+		0CCFDC1D1C7B8A12BF4822F1 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			name = DemoRunner.entitlements;
+			path = DemoRunner.entitlements;
+			sourceTree = "SOURCE_ROOT";
+		};
 		0ECB4FCD24794CE516792552 = {
 			isa = PBXFileReference;
 			lastKnownFileType = folder;
@@ -921,8 +928,8 @@
 					"JUCE_DEMO_RUNNER=1",
 					"JUCE_UNIT_TESTS=1",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=5.4.3",
-					"JUCE_APP_VERSION_HEX=0x50403",
+					"JUCE_APP_VERSION=5.4.4",
+					"JUCE_APP_VERSION_HEX=0x50404",
 					"JucePlugin_Build_VST=0",
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",
@@ -942,7 +949,7 @@
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				OTHER_CPLUSPLUSFLAGS = "-Wall -Wno-missing-field-initializers -Wshadow-all -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Wconditional-uninitialized -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion  -Wunused-private-field -Wbool-conversion -Wextra-semi -Wno-ignored-qualifiers -Wunreachable-code";
+				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow-all -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Wconditional-uninitialized -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion -Wunused-private-field -Wbool-conversion -Wextra-semi -Wunreachable-code -Wzero-as-null-pointer-constant -Wcast-align -Winconsistent-missing-destructor-override -Wshift-sign-overflow -Wnullable-to-nonnull-conversion -Wno-missing-field-initializers -Wno-ignored-qualifiers";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.demorunner;
 				PRODUCT_NAME = "DemoRunner";
 				USE_HEADERMAP = NO;
@@ -966,8 +973,8 @@
 					"JUCE_DEMO_RUNNER=1",
 					"JUCE_UNIT_TESTS=1",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=5.4.3",
-					"JUCE_APP_VERSION_HEX=0x50403",
+					"JUCE_APP_VERSION=5.4.4",
+					"JUCE_APP_VERSION_HEX=0x50404",
 					"JucePlugin_Build_VST=0",
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",
@@ -989,7 +996,7 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				OTHER_CPLUSPLUSFLAGS = "-Wall -Wno-missing-field-initializers -Wshadow-all -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Wconditional-uninitialized -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion  -Wunused-private-field -Wbool-conversion -Wextra-semi -Wno-ignored-qualifiers -Wunreachable-code";
+				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow-all -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Wconditional-uninitialized -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion -Wunused-private-field -Wbool-conversion -Wextra-semi -Wunreachable-code -Wzero-as-null-pointer-constant -Wcast-align -Winconsistent-missing-destructor-override -Wshift-sign-overflow -Wnullable-to-nonnull-conversion -Wno-missing-field-initializers -Wno-ignored-qualifiers";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.demorunner;
 				PRODUCT_NAME = "DemoRunner";
 				USE_HEADERMAP = NO;
@@ -1195,7 +1202,7 @@
 		AC6F0E9A0809A184B2C2B7DE = {
 			isa = PBXProject;
 			buildConfigurationList = 80E8AD1971F52B06F4D28891;
-			attributes = { LastUpgradeCheck = 1010; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { 291E01DCBE746A376DBFA4D1 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
+			attributes = { LastUpgradeCheck = 1100; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { 291E01DCBE746A376DBFA4D1 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
 			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 0;
 			mainGroup = 91A9A0FE9DF4F4E10009EEC7;

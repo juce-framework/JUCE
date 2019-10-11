@@ -359,8 +359,6 @@ enum
     recentProjectsBaseID = 100,
     openWindowsBaseID = 300,
     activeDocumentsBaseID = 400,
-    colourSchemeBaseID = 1000,
-    codeEditorColourSchemeBaseID = 1500,
     showPathsID = 1999,
     examplesBaseID = 2000
 };
@@ -496,16 +494,24 @@ void ProjucerApplication::createBuildMenu (PopupMenu& menu)
 
 void ProjucerApplication::createColourSchemeItems (PopupMenu& menu)
 {
-    PopupMenu colourSchemes;
+    PopupMenu colourSchemeMenu;
 
-    colourSchemes.addItem (colourSchemeBaseID + 0, "Dark", true, selectedColourSchemeIndex == 0);
-    colourSchemes.addItem (colourSchemeBaseID + 1, "Grey", true, selectedColourSchemeIndex == 1);
-    colourSchemes.addItem (colourSchemeBaseID + 2, "Light", true, selectedColourSchemeIndex == 2);
+    colourSchemeMenu.addItem (PopupMenu::Item ("Dark")
+                                .setTicked (selectedColourSchemeIndex == 0)
+                                .setAction ([this] { setColourScheme (0, true); updateEditorColourSchemeIfNeeded(); }));
 
-    menu.addSubMenu ("Colour Scheme", colourSchemes);
+    colourSchemeMenu.addItem (PopupMenu::Item ("Grey")
+                                .setTicked (selectedColourSchemeIndex == 1)
+                                .setAction ([this] { setColourScheme (1, true); updateEditorColourSchemeIfNeeded(); }));
 
-    //==========================================================================
-    PopupMenu editorColourSchemes;
+    colourSchemeMenu.addItem (PopupMenu::Item ("Light")
+                                .setTicked (selectedColourSchemeIndex == 2)
+                                .setAction ([this] { setColourScheme (2, true); updateEditorColourSchemeIfNeeded(); }));
+
+    menu.addSubMenu ("Colour Scheme", colourSchemeMenu);
+
+    //==============================================================================
+    PopupMenu editorColourSchemeMenu;
 
     auto& appearanceSettings = getAppSettings().appearance;
 
@@ -513,21 +519,22 @@ void ProjucerApplication::createColourSchemeItems (PopupMenu& menu)
     auto schemes = appearanceSettings.getPresetSchemes();
 
     auto i = 0;
-    for (auto s : schemes)
+
+    for (auto& s : schemes)
     {
-        editorColourSchemes.addItem (codeEditorColourSchemeBaseID + i, s,
-                                     editorColourSchemeWindow == nullptr,
-                                     selectedEditorColourSchemeIndex == i);
+        editorColourSchemeMenu.addItem (PopupMenu::Item (s)
+                                           .setEnabled (editorColourSchemeWindow == nullptr)
+                                           .setTicked (selectedEditorColourSchemeIndex == i)
+                                           .setAction ([this, i] { setEditorColourScheme (i, true); }));
         ++i;
     }
 
-    numEditorColourSchemes = i;
+    editorColourSchemeMenu.addSeparator();
+    editorColourSchemeMenu.addItem (PopupMenu::Item ("Create...")
+                                       .setEnabled (editorColourSchemeWindow == nullptr)
+                                       .setAction ([this] { showEditorColourSchemeWindow(); }));
 
-    editorColourSchemes.addSeparator();
-    editorColourSchemes.addItem (codeEditorColourSchemeBaseID + numEditorColourSchemes,
-                                 "Create...", editorColourSchemeWindow == nullptr);
-
-    menu.addSubMenu ("Editor Colour Scheme", editorColourSchemes);
+    menu.addSubMenu ("Editor Colour Scheme", editorColourSchemeMenu);
 }
 
 void ProjucerApplication::createWindowMenu (PopupMenu& menu)
@@ -538,14 +545,11 @@ void ProjucerApplication::createWindowMenu (PopupMenu& menu)
     menu.addSeparator();
 
     int counter = 0;
+
     for (auto* window : mainWindowList.windows)
-    {
         if (window != nullptr)
-        {
             if (auto* project = window->getProject())
                 menu.addItem (openWindowsBaseID + counter++, project->getProjectNameString());
-        }
-    }
 
     menu.addSeparator();
     menu.addCommandItem (commandManager.get(), CommandIDs::closeAllWindows);
@@ -621,7 +625,7 @@ void ProjucerApplication::createExamplesPopupMenu (PopupMenu& menu) noexcept
     }
 }
 
-//==========================================================================
+//==============================================================================
 static File getJUCEExamplesDirectoryPathFromGlobal()
 {
     auto globalPath = File::createFileWithoutCheckingPath (getAppSettings().getStoredPath (Ids::jucePath, TargetOS::getThisOS()).get().toString()
@@ -718,7 +722,7 @@ void ProjucerApplication::findAndLaunchExample (int selectedIndex)
     Analytics::getInstance()->logEvent ("Example Opened", data, ProjucerAnalyticsEvent::exampleEvent);
 }
 
-//==========================================================================
+//==============================================================================
 static String getPlatformSpecificFileExtension()
 {
    #if JUCE_MAC
@@ -936,7 +940,7 @@ void ProjucerApplication::launchDemoRunner()
     }
 }
 
-//==========================================================================
+//==============================================================================
 void ProjucerApplication::handleMainMenuCommand (int menuItemID)
 {
     if (menuItemID >= recentProjectsBaseID && menuItemID < (recentProjectsBaseID + 100))
@@ -955,19 +959,6 @@ void ProjucerApplication::handleMainMenuCommand (int menuItemID)
             mainWindowList.openDocument (doc, true);
         else
             jassertfalse;
-    }
-    else if (menuItemID >= colourSchemeBaseID && menuItemID < (colourSchemeBaseID + 3))
-    {
-        setColourScheme (menuItemID - colourSchemeBaseID, true);
-        updateEditorColourSchemeIfNeeded();
-    }
-    else if (menuItemID >= codeEditorColourSchemeBaseID && menuItemID < (codeEditorColourSchemeBaseID + numEditorColourSchemes))
-    {
-        setEditorColourScheme (menuItemID - codeEditorColourSchemeBaseID, true);
-    }
-    else if (menuItemID == (codeEditorColourSchemeBaseID + numEditorColourSchemes))
-    {
-        showEditorColourSchemeWindow();
     }
     else if (menuItemID == showPathsID)
     {

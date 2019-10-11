@@ -217,7 +217,7 @@ public:
 
         for (auto i = 0; i < steps; ++i)
         {
-            auto p = start + ((finish - start) * i) / steps;
+            auto p = start + ((finish - start) * i) / (int) steps;
 
             auto index = (bufferIndex + i) % wavetableSize;
             waveValues[1][index] = yToAmplitude (p.y);

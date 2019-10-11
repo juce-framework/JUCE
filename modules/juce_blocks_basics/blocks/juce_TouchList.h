@@ -137,7 +137,7 @@ public:
     void clear() noexcept                      { touches.clear(); }
 
 private:
-    //==========================================================================
+    //==============================================================================
     static bool matches (const TouchSurface::Touch& t1,
                          const TouchSurface::Touch& t2) noexcept
     {

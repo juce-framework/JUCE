@@ -22,10 +22,22 @@
 
 //==============================================================================
 /** These can be useful when debugging the topology. */
-#define LOG_BLOCKS_CONNECTIVITY 0
-#define LOG_BLOCKS_PINGS 0
-#define DUMP_BANDWIDTH_STATS 0
-#define DUMP_TOPOLOGY 0
+
+#ifndef LOG_BLOCKS_CONNECTIVITY
+  #define LOG_BLOCKS_CONNECTIVITY 0
+#endif
+
+#ifndef LOG_BLOCKS_PINGS
+  #define LOG_BLOCKS_PINGS 0
+#endif
+
+#ifndef DUMP_BANDWIDTH_STATS
+  #define DUMP_BANDWIDTH_STATS 0
+#endif
+
+#ifndef DUMP_TOPOLOGY
+  #define DUMP_TOPOLOGY 0
+#endif
 
 #define TOPOLOGY_LOG(text) \
  JUCE_BLOCK_WITH_FORCED_SEMICOLON (juce::String buf ("Topology Src:   "); \
@@ -51,6 +63,7 @@
 #include "internal/juce_MIDIDeviceDetector.cpp"
 #include "internal/juce_DeviceInfo.cpp"
 #include "internal/juce_DepreciatedVersionReader.cpp"
+#include "internal/juce_BlockSerialReader.cpp"
 #include "internal/juce_ConnectedDeviceGroup.cpp"
 #include "internal/juce_BlockImplementation.cpp"
 #include "internal/juce_Detector.cpp"

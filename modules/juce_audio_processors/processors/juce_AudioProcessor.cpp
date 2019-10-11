@@ -420,68 +420,94 @@ AudioProcessorListener* AudioProcessor::getListenerLocked (int index) const noex
 void AudioProcessor::updateHostDisplay()
 {
     for (int i = listeners.size(); --i >= 0;)
-        if (auto* l = getListenerLocked (i))
+        if (auto l = getListenerLocked (i))
             l->audioProcessorChanged (this);
 }
 
-const Array<AudioProcessorParameter*>& AudioProcessor::getParameters() const
+#if JUCE_DEBUG
+void AudioProcessor::checkDuplicateParamIDs()
 {
-    if (flatParamListNeedsRebuilding)
-    {
-        flatParamListNeedsRebuilding = false;
-        flatParameterList = parameterTree.getParameters (true);
+    duplicateParamIDCheck.reset();
 
-       #ifdef JUCE_DEBUG
-        StringArray usedIDs;
-        usedIDs.ensureStorageAllocated (flatParameterList.size());
-       #endif
+    StringArray usedIDs;
+    usedIDs.ensureStorageAllocated (flatParameterList.size());
 
-        int index = 0;
+    for (auto& p : flatParameterList)
+        if (auto* withID = dynamic_cast<AudioProcessorParameterWithID*> (p))
+            usedIDs.add (withID->paramID);
 
-        for (auto& p : flatParameterList)
-        {
-            p->processor = const_cast<AudioProcessor*> (this);
-            p->parameterIndex = index++;
+    usedIDs.sort (false);
 
-           #ifdef JUCE_DEBUG
-            if (auto* withID = dynamic_cast<AudioProcessorParameterWithID*> (p))
-                usedIDs.add (withID->paramID);
-           #endif
-        }
-
-       #ifdef JUCE_DEBUG
-        usedIDs.sort (false);
-
-        // This assertion checks whether you attempted to add two or more parameters with the same ID
-        for (int i = 1; i < usedIDs.size(); ++i)
-            jassert (usedIDs[i - 1] != usedIDs[i]);
-       #endif
-    }
-
-    return flatParameterList;
+    // This assertion checks whether you attempted to add two or more parameters with the same ID
+    for (int i = 1; i < usedIDs.size(); ++i)
+        jassert (usedIDs[i - 1] != usedIDs[i]);
 }
+
+struct AudioProcessor::DuplicateParamIDCheck  : private AsyncUpdater
+{
+    DuplicateParamIDCheck (AudioProcessor& p) : owner (p)   { triggerAsyncUpdate(); }
+    ~DuplicateParamIDCheck() override                       { cancelPendingUpdate(); }
+
+    void handleAsyncUpdate() override                       { owner.checkDuplicateParamIDs(); }
+
+    AudioProcessor& owner;
+};
+#endif
+
+void AudioProcessor::triggerDuplicateParamIDCheck()
+{
+   #if JUCE_DEBUG
+    if (MessageManager::getInstanceWithoutCreating() != nullptr)
+        duplicateParamIDCheck = std::make_unique<DuplicateParamIDCheck> (*this);
+   #endif
+}
+
+const Array<AudioProcessorParameter*>& AudioProcessor::getParameters() const   { return flatParameterList; }
+const AudioProcessorParameterGroup& AudioProcessor::getParameterTree() const   { return parameterTree; }
 
 void AudioProcessor::addParameter (AudioProcessorParameter* param)
 {
+    jassert (param != nullptr);
     parameterTree.addChild (std::unique_ptr<AudioProcessorParameter> (param));
-    flatParamListNeedsRebuilding = true;
+
+    param->processor = this;
+    param->parameterIndex = flatParameterList.size();
+    flatParameterList.add (param);
+
+    triggerDuplicateParamIDCheck();
 }
 
 void AudioProcessor::addParameterGroup (std::unique_ptr<AudioProcessorParameterGroup> group)
 {
-    parameterTree.addChild (std::move (group));
-    flatParamListNeedsRebuilding = true;
-}
+    jassert (group != nullptr);
 
-const AudioProcessorParameterGroup& AudioProcessor::getParameterTree() const
-{
-    return parameterTree;
+    auto oldSize = flatParameterList.size();
+    flatParameterList.addArray (group->getParameters (true));
+
+    for (int i = oldSize; i < flatParameterList.size(); ++i)
+    {
+        auto p = flatParameterList.getUnchecked (i);
+        p->processor = this;
+        p->parameterIndex = i;
+    }
+
+    parameterTree.addChild (std::move (group));
+    triggerDuplicateParamIDCheck();
 }
 
 void AudioProcessor::setParameterTree (AudioProcessorParameterGroup&& newTree)
 {
     parameterTree = std::move (newTree);
-    flatParamListNeedsRebuilding = true;
+    flatParameterList = parameterTree.getParameters (true);
+
+    for (int i = 0; i < flatParameterList.size(); ++i)
+    {
+        auto p = flatParameterList.getUnchecked (i);
+        p->processor = this;
+        p->parameterIndex = i;
+    }
+
+    triggerDuplicateParamIDCheck();
 }
 
 void AudioProcessor::refreshParameterList() {}

@@ -1110,16 +1110,33 @@ public:
             deleteEditor (true);
         }
 
-        if (chunkMemoryTime > 0
-             && chunkMemoryTime < juce::Time::getApproximateMillisecondCounter() - 2000
-             && ! recursionCheck)
         {
-            chunkMemory.reset();
-            chunkMemoryTime = 0;
+            ScopedLock lock (stateInformationLock);
+
+            if (chunkMemoryTime > 0
+                 && chunkMemoryTime < juce::Time::getApproximateMillisecondCounter() - 2000
+                 && ! recursionCheck)
+            {
+                chunkMemory.reset();
+                chunkMemoryTime = 0;
+            }
         }
 
         if (editorComp != nullptr)
             editorComp->checkVisibility();
+    }
+
+    void setHasEditorFlag (bool shouldSetHasEditor)
+    {
+        auto hasEditor = (vstEffect.flags & Vst2::effFlagsHasEditor) != 0;
+
+        if (shouldSetHasEditor == hasEditor)
+            return;
+
+        if (shouldSetHasEditor)
+            vstEffect.flags |= Vst2::effFlagsHasEditor;
+        else
+            vstEffect.flags &= ~Vst2::effFlagsHasEditor;
     }
 
     void createEditorComp()
@@ -1131,12 +1148,12 @@ public:
         {
             if (auto* ed = processor->createEditorIfNeeded())
             {
-                vstEffect.flags |= Vst2::effFlagsHasEditor;
+                setHasEditorFlag (true);
                 editorComp.reset (new EditorCompWrapper (*this, *ed));
             }
             else
             {
-                vstEffect.flags &= ~Vst2::effFlagsHasEditor;
+                setHasEditorFlag (false);
             }
         }
 
@@ -1331,22 +1348,22 @@ public:
         void detachHostWindow()
         {
            #if JUCE_MAC
-            if (hostWindow != 0)
+            if (hostWindow != nullptr)
             {
                 detachComponentFromWindowRefVST (this, hostWindow, wrapper.useNSView);
-                hostWindow = 0;
+                hostWindow = nullptr;
             }
            #endif
 
            #if JUCE_LINUX
-            hostWindow = 0;
+            hostWindow = {};
            #endif
         }
 
         void checkVisibility()
         {
            #if JUCE_MAC
-            if (hostWindow != 0)
+            if (hostWindow != nullptr)
                 checkWindowVisibilityVST (hostWindow, this, wrapper.useNSView);
            #endif
         }
@@ -1563,7 +1580,7 @@ public:
         bool shouldResizeEditor = true;
 
        #if JUCE_MAC
-        void* hostWindow = {};
+        void* hostWindow = nullptr;
        #elif JUCE_LINUX
         ScopedXDisplay display;
         Window hostWindow = {};
@@ -1702,10 +1719,7 @@ private:
     pointer_sized_int handleOpen (VstOpCodeArguments)
     {
         // Note: most hosts call this on the UI thread, but wavelab doesn't, so be careful in here.
-        if (processor->hasEditor())
-            vstEffect.flags |= Vst2::effFlagsHasEditor;
-        else
-            vstEffect.flags &= ~Vst2::effFlagsHasEditor;
+        setHasEditorFlag (processor->hasEditor());
 
         return 0;
     }
@@ -1857,7 +1871,9 @@ private:
         auto data = (void**) args.ptr;
         bool onlyStoreCurrentProgramData = (args.index != 0);
 
+        ScopedLock lock (stateInformationLock);
         chunkMemory.reset();
+
         if (onlyStoreCurrentProgramData)
             processor->getCurrentProgramStateInformation (chunkMemory);
         else
@@ -1880,15 +1896,19 @@ private:
             int32 byteSize = (int32) args.value;
             bool onlyRestoreCurrentProgramData = (args.index != 0);
 
-            chunkMemory.reset();
-            chunkMemoryTime = 0;
-
-            if (byteSize > 0 && data != nullptr)
             {
-                if (onlyRestoreCurrentProgramData)
-                    processor->setCurrentProgramStateInformation (data, byteSize);
-                else
-                    processor->setStateInformation (data, byteSize);
+                ScopedLock lock (stateInformationLock);
+
+                chunkMemory.reset();
+                chunkMemoryTime = 0;
+
+                if (byteSize > 0 && data != nullptr)
+                {
+                    if (onlyRestoreCurrentProgramData)
+                        processor->setCurrentProgramStateInformation (data, byteSize);
+                    else
+                        processor->setStateInformation (data, byteSize);
+                }
             }
         }
 
@@ -2272,8 +2292,9 @@ private:
     double sampleRate = 44100.0;
     int32 blockSize = 1024;
     Vst2::AEffect vstEffect;
+    CriticalSection stateInformationLock;
     juce::MemoryBlock chunkMemory;
-    juce::uint32 chunkMemoryTime = 0;
+    uint32 chunkMemoryTime = 0;
     std::unique_ptr<EditorCompWrapper> editorComp;
     Vst2::ERect editorBounds;
     MidiBuffer midiEvents;

@@ -76,16 +76,17 @@ public:
             stopTimer();
 
             // There's currently no good alternative to this...
-           #if defined __clang__ && defined (MAC_OS_X_VERSION_10_14) && MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_14
-            #define IGNORE_POPUP_DEPRECATION 1
+           #if JUCE_CLANG && ! (defined (MAC_OS_X_VERSION_10_16) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_16)
             #pragma clang diagnostic push
             #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+            #define JUCE_DEPRECATION_IGNORED 1
            #endif
 
             [statusItem.get() popUpStatusItemMenu: m];
 
-           #if IGNORE_POPUP_DEPRECATION
+           #if JUCE_DEPRECATION_IGNORED
             #pragma clang diagnostic pop
+            #undef JUCE_DEPRECATION_IGNORED
            #endif
 
             startTimer (1);

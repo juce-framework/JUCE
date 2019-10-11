@@ -99,8 +99,8 @@ public:
                      androidScreenOrientation, androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements, androidGradleSettingsContent, androidVersionCode,
                      androidMinimumSDK, androidTargetSDK, androidTheme, androidExtraAssetsFolder, androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded,
                      androidBluetoothNeeded, androidExternalReadPermission, androidExternalWritePermission, androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions,
-                     androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore, androidKeyStorePass, androidKeyAlias, androidKeyAliasPass,
-                     gradleVersion, gradleToolchain, androidPluginVersion;
+                     androidPushNotifications, androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore, androidKeyStorePass,
+                     androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion;
 
     //==============================================================================
     AndroidProjectExporter (Project& p, const ValueTree& t)
@@ -113,10 +113,10 @@ public:
           androidDependencies                  (settings, Ids::androidDependencies,                  getUndoManager()),
           androidCustomAppBuildGradleContent   (settings, Ids::androidCustomAppBuildGradleContent,   getUndoManager()),
           androidScreenOrientation             (settings, Ids::androidScreenOrientation,             getUndoManager(), "unspecified"),
-          androidCustomActivityClass           (settings, Ids::androidCustomActivityClass,           getUndoManager(), getDefaultActivityClass()),
+          androidCustomActivityClass           (settings, Ids::androidCustomActivityClass,           getUndoManager()),
           androidCustomApplicationClass        (settings, Ids::androidCustomApplicationClass,        getUndoManager(), getDefaultApplicationClass()),
           androidManifestCustomXmlElements     (settings, Ids::androidManifestCustomXmlElements,     getUndoManager()),
-          androidGradleSettingsContent         (settings, Ids::androidGradleSettingsContent,         getUndoManager(), isLibrary() ? "include ':lib'" : "include ':app'"),
+          androidGradleSettingsContent         (settings, Ids::androidGradleSettingsContent,         getUndoManager()),
           androidVersionCode                   (settings, Ids::androidVersionCode,                   getUndoManager(), "1"),
           androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "16"),
           androidTargetSDK                     (settings, Ids::androidTargetSDK,                     getUndoManager(), "28"),
@@ -132,6 +132,7 @@ public:
           androidInAppBillingPermission        (settings, Ids::androidInAppBilling,                  getUndoManager(), false),
           androidVibratePermission             (settings, Ids::androidVibratePermissionNeeded,       getUndoManager(), false),
           androidOtherPermissions              (settings, Ids::androidOtherPermissions,              getUndoManager()),
+          androidPushNotifications             (settings, Ids::androidPushNotifications,             getUndoManager(), ! isLibrary()),
           androidEnableRemoteNotifications     (settings, Ids::androidEnableRemoteNotifications,     getUndoManager(), false),
           androidRemoteNotificationsConfigFile (settings, Ids::androidRemoteNotificationsConfigFile, getUndoManager()),
           androidEnableContentSharing          (settings, Ids::androidEnableContentSharing,          getUndoManager(), false),
@@ -194,7 +195,7 @@ public:
         removeOldFiles (targetFolder);
         copyExtraResourceFiles();
 
-        writeFile (targetFolder, "settings.gradle",                          androidGradleSettingsContent.get().toString());
+        writeFile (targetFolder, "settings.gradle",                          getGradleSettingsFileContent());
         writeFile (targetFolder, "build.gradle",                             getProjectBuildGradleFileContent());
         writeFile (appFolder,    "build.gradle",                             getAppBuildGradleFileContent (modules));
         writeFile (targetFolder, "local.properties",                         getLocalPropertiesFileContent());
@@ -268,12 +269,12 @@ protected:
     public:
         AndroidBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
             : BuildConfiguration (p, settings, e),
-              androidArchitectures               (config, Ids::androidArchitectures,               getUndoManager(), isDebug() ? "armeabi-v7a x86 arm64-v8a x86_64" : ""),
+              androidArchitectures                     (config, Ids::androidArchitectures,                     getUndoManager(), isDebug() ? "armeabi-v7a x86 arm64-v8a x86_64" : ""),
               androidBuildConfigRemoteNotifsConfigFile (config, Ids::androidBuildConfigRemoteNotifsConfigFile, getUndoManager()),
-              androidAdditionalXmlValueResources (config, Ids::androidAdditionalXmlValueResources, getUndoManager()),
-              androidAdditionalDrawableResources (config, Ids::androidAdditionalDrawableResources, getUndoManager()),
-              androidAdditionalRawValueResources (config, Ids::androidAdditionalRawValueResources, getUndoManager()),
-              androidCustomStringXmlElements     (config, Ids::androidCustomStringXmlElements,     getUndoManager())
+              androidAdditionalXmlValueResources       (config, Ids::androidAdditionalXmlValueResources,       getUndoManager()),
+              androidAdditionalDrawableResources       (config, Ids::androidAdditionalDrawableResources,       getUndoManager()),
+              androidAdditionalRawValueResources       (config, Ids::androidAdditionalRawValueResources,       getUndoManager()),
+              androidCustomStringXmlElements           (config, Ids::androidCustomStringXmlElements,           getUndoManager())
         {
             linkTimeOptimisationValue.setDefault (false);
             optimisationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
@@ -288,6 +289,7 @@ protected:
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
+            addRecommendedLLVMCompilerWarningsProperty (props);
             addGCCOptimisationProperty (props);
 
             props.add (new TextPropertyComponent (androidArchitectures, "Architectures", 256, false),
@@ -548,6 +550,22 @@ private:
     }
 
     //==============================================================================
+    String getGradleSettingsFileContent() const
+    {
+        MemoryOutputStream mo;
+        mo.setNewLineString ("\n");
+
+        mo << "rootProject.name = " << "\'" << projectName << "\'" << newLine;
+        mo << (isLibrary() ? "include ':lib'" : "include ':app'");
+
+        auto extraContent = androidGradleSettingsContent.get().toString();
+
+        if (extraContent.isNotEmpty())
+            mo << newLine << extraContent << newLine;
+
+        return mo.toString();
+    }
+
     String getProjectBuildGradleFileContent() const
     {
         MemoryOutputStream mo;
@@ -561,7 +579,7 @@ private:
         mo << "   dependencies {"                                                                          << newLine;
         mo << "       classpath 'com.android.tools.build:gradle:" << androidPluginVersion.get().toString() << "'" << newLine;
 
-        if (androidEnableRemoteNotifications.get())
+        if (areRemoteNotificationsEnabled())
             mo << "       classpath 'com.google.gms:google-services:4.0.1'" << newLine;
 
         mo << "   }"                                                                                   << newLine;
@@ -634,11 +652,19 @@ private:
             if (getProject().getProjectType().isStaticLibrary())
                 mo << "                    targets \"" << getNativeModuleBinaryName (cfg) << "\"" << newLine;
 
-            mo << "                    arguments \"-DJUCE_BUILD_CONFIGURATION=" << cfg.getProductFlavourCMakeIdentifier() << "\""
-                                           << ", \"-DCMAKE_CXX_FLAGS_" << (cfg.isDebug() ? "DEBUG" : "RELEASE")
-                                           << "=-O" << cfg.getGCCOptimisationFlag() << "\""
-                                           << ", \"-DCMAKE_C_FLAGS_"   << (cfg.isDebug() ? "DEBUG" : "RELEASE")
-                                           << "=-O" << cfg.getGCCOptimisationFlag() << "\"" << newLine;
+            mo << "                    arguments "
+               << "\"-DJUCE_BUILD_CONFIGURATION=" << cfg.getProductFlavourCMakeIdentifier() << "\"";
+
+            mo << ", \"-DCMAKE_CXX_FLAGS_" << (cfg.isDebug() ? "DEBUG" : "RELEASE")
+               << "=-O" << cfg.getGCCOptimisationFlag();
+
+            for (auto& flag : cfg.getRecommendedCompilerWarningFlags())
+                mo << " " << flag;
+
+            mo << "\""
+               << ", \"-DCMAKE_C_FLAGS_"   << (cfg.isDebug() ? "DEBUG" : "RELEASE")
+               << "=-O" << cfg.getGCCOptimisationFlag()
+               << "\"" << newLine;
 
             mo << "                }"                   << newLine;
             mo << "            }"                       << newLine << newLine;
@@ -771,7 +797,7 @@ private:
 
         auto repositories = StringArray::fromLines (androidProjectRepositories.get().toString());
 
-        if (androidEnableRemoteNotifications.get())
+        if (areRemoteNotificationsEnabled())
             repositories.add ("maven { url \"https://maven.google.com\" }");
 
         mo << "   repositories {"                << newLine;
@@ -814,7 +840,7 @@ private:
         for (auto& d : StringArray::fromLines (androidJavaLibs.get().toString()))
             mo << "        implementation files('libs/" << File (d).getFileName() << "')" << newLine;
 
-        if (androidEnableRemoteNotifications.get())
+        if (areRemoteNotificationsEnabled())
         {
             mo << "        implementation 'com.google.firebase:firebase-core:16.0.1'" << newLine;
             mo << "        implementation 'com.google.firebase:firebase-messaging:17.6.0'" << newLine;
@@ -830,7 +856,7 @@ private:
         MemoryOutputStream mo;
         mo.setNewLineString ("\n");
 
-        if (androidEnableRemoteNotifications.get())
+        if (areRemoteNotificationsEnabled())
             mo << "apply plugin: 'com.google.gms.google-services'" << newLine;
 
         return mo.toString();
@@ -877,10 +903,10 @@ private:
                 addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile("app"));
         }
 
-        if (androidCustomActivityClass.get() == getDefaultActivityClass())
+        if (project.getEnabledModules().isModuleEnabled ("juce_gui_basics") && getActivityClassString() == getDefaultActivityClass())
             addOptJavaFolderToSourceSetsForModule (javaSourceSets, modules, "juce_gui_basics");
 
-        if (androidEnableRemoteNotifications.get())
+        if (areRemoteNotificationsEnabled())
             addOptJavaFolderToSourceSetsForModule (javaSourceSets, modules, "juce_gui_extra");
 
         MemoryOutputStream mo;
@@ -1007,7 +1033,7 @@ private:
 
         props.add (new TextPropertyComponent (androidCustomActivityClass, "Custom Android Activity", 256, false),
                    "If not empty, specifies the Android Activity class name stored in the app's manifest which "
-                   "should be used instead of default com.roli.juce.JuceActivity. If you specify a custom Activity "
+                   "should be used instead of Android's default Activity. If you specify a custom Activity "
                    "then you should implement onNewIntent() function like the one in com.roli.juce.JuceActivity, if "
                    "you wish to be able to handle push notification events.");
 
@@ -1066,9 +1092,13 @@ private:
         props.add (new TextPropertyComponent (androidOtherPermissions, "Custom Permissions", 2048, false),
                    "A space-separated list of other permission flags that should be added to the manifest.");
 
-        props.add (new ChoicePropertyComponent (androidEnableRemoteNotifications, "Remote Notifications"),
-                   "Enable to be able to send remote notifications to devices running your app (min API level 14). Provide Remote Notifications Config File, "
-                   "configure your app in Firebase Console and ensure you have the latest Google Repository in Android Studio's SDK Manager.");
+        props.add (new ChoicePropertyComponent (androidPushNotifications, "Push Notifications Capability"),
+                   "Enable this to grant your app the capability to receive push notifications.");
+
+        props.add (new ChoicePropertyComponentWithEnablement (androidEnableRemoteNotifications, androidPushNotifications, "Remote Notifications"),
+                   "Enable to be able to send remote notifications to devices running your app (min API level 14). Enable the \"Push Notifications Capability\" "
+                   "setting, provide Remote Notifications Config File, configure your app in Firebase Console and ensure you have the latest Google Repository "
+                   "in Android Studio's SDK Manager.");
 
         props.add (new TextPropertyComponent (androidRemoteNotificationsConfigFile.getPropertyAsValue(), "Remote Notifications Config File", 2048, false),
                    "Path to google-services.json file. This will be the file provided by Firebase when creating a new app in Firebase console.");
@@ -1135,7 +1165,7 @@ private:
             copyExtraResourceFiles (cfg.getAdditionalDrawableResources(), drawablesPath);
             copyExtraResourceFiles (cfg.getAdditionalRawResources(), rawPath);
 
-            if (androidEnableRemoteNotifications.get())
+            if (areRemoteNotificationsEnabled())
             {
                 auto remoteNotifsConfigFilePath = cfg.getRemoteNotifsConfigFile();
 
@@ -1170,12 +1200,24 @@ private:
         }
     }
 
-    String getActivityClass() const       { return androidCustomActivityClass.get(); }
-    String getApplicationClass() const    { return androidCustomApplicationClass.get(); }
+    String getActivityClassString() const
+    {
+        auto customActivityClass = androidCustomActivityClass.get().toString();
+
+        if (customActivityClass.isNotEmpty())
+            return customActivityClass;
+
+        return arePushNotificationsEnabled() ? getDefaultActivityClass() : "android.app.Activity";
+    }
+
+    String getApplicationClassString() const    { return androidCustomApplicationClass.get(); }
+
+    bool arePushNotificationsEnabled() const    { return androidPushNotifications.get(); }
+    bool areRemoteNotificationsEnabled() const  { return arePushNotificationsEnabled() && androidEnableRemoteNotifications.get(); }
 
     String getJNIActivityClassName() const
     {
-        return getActivityClass().replaceCharacter ('.', '/');
+        return getActivityClassString().replaceCharacter ('.', '/');
     }
 
     static LibraryModule* getCoreModule (const OwnedArray<LibraryModule>& modules)
@@ -1299,7 +1341,7 @@ private:
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
                 addCompileUnits (projectItem.getChild(i), mo, excludeFromBuild, extraCompilerFlags);
         }
-        else if (projectItem.shouldBeAddedToTargetProject())
+        else if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (*this))
         {
             auto f = projectItem.getFile();
             RelativePath file (f, getTargetFolder().getChildFile ("app"), RelativePath::buildTargetFolder);
@@ -1378,7 +1420,6 @@ private:
     StringArray getProjectCompilerFlags() const
     {
         auto cFlags = getAndroidCompilerFlags();
-
         cFlags.addArray (getEscapedFlags (StringArray::fromTokens (getExtraCompilerFlagsString(), true)));
         return cFlags;
     }
@@ -1397,8 +1438,12 @@ private:
 
         defines.set ("JUCE_ANDROID", "1");
         defines.set ("JUCE_ANDROID_API_VERSION", androidMinimumSDK.get());
-        defines.set ("JUCE_PUSH_NOTIFICATIONS", "1");
-        defines.set ("JUCE_PUSH_NOTIFICATIONS_ACTIVITY", String::formatted("\"%s\"", getJNIActivityClassName().toUTF8()));
+
+        if (arePushNotificationsEnabled())
+        {
+            defines.set ("JUCE_PUSH_NOTIFICATIONS", "1");
+            defines.set ("JUCE_PUSH_NOTIFICATIONS_ACTIVITY", String::formatted("\"%s\"", getJNIActivityClassName().toUTF8()));
+        }
 
         if (androidInAppBillingPermission.get())
             defines.set ("JUCE_IN_APP_PURCHASES", "1");
@@ -1406,7 +1451,7 @@ private:
         if (supportsGLv3())
             defines.set ("JUCE_ANDROID_GL_ES_VERSION_3_0", "1");
 
-        if (androidEnableRemoteNotifications.get())
+        if (areRemoteNotificationsEnabled())
         {
             defines.set ("JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME", "com_roli_juce_JuceFirebaseInstanceIdService");
             defines.set ("JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME", "com_roli_juce_JuceFirebaseMessagingService");
@@ -1612,7 +1657,7 @@ private:
     {
         auto* app = getOrCreateChildWithName (manifest, "application");
         setAttributeIfNotPresent (*app, "android:label", "@string/app_name");
-        setAttributeIfNotPresent (*app, "android:name", getApplicationClass());
+        setAttributeIfNotPresent (*app, "android:name", getApplicationClassString());
 
         if (androidTheme.get().toString().isNotEmpty())
             setAttributeIfNotPresent (*app, "android:theme", androidTheme.get());
@@ -1642,7 +1687,7 @@ private:
     {
         auto* act = getOrCreateChildWithName (application, "activity");
 
-        setAttributeIfNotPresent (*act, "android:name", getActivityClass());
+        setAttributeIfNotPresent (*act, "android:name", getActivityClassString());
         setAttributeIfNotPresent (*act, "android:label", "@string/app_name");
 
         if (! act->hasAttribute ("android:configChanges"))
@@ -1711,7 +1756,7 @@ private:
 
     void createServiceElements (XmlElement& application) const
     {
-        if (androidEnableRemoteNotifications.get())
+        if (areRemoteNotificationsEnabled())
         {
             auto* service = application.createNewChildElement ("service");
             service->setAttribute ("android:name", "com.roli.juce.JuceFirebaseMessagingService");

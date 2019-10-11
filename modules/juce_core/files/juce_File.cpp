@@ -1031,7 +1031,6 @@ public:
         expect (home.isDirectory());
         expect (home.exists());
         expect (! home.existsAsFile());
-        expect (File::getSpecialLocation (File::userDocumentsDirectory).isDirectory());
         expect (File::getSpecialLocation (File::userApplicationDataDirectory).isDirectory());
         expect (File::getSpecialLocation (File::currentExecutableFile).exists());
         expect (File::getSpecialLocation (File::currentApplicationFile).exists());
@@ -1198,6 +1197,28 @@ public:
 
         expect (demoFolder.deleteRecursively());
         expect (! demoFolder.exists());
+
+        {
+            URL url ("https://audio.dev/foo/bar/");
+            expectEquals (url.toString (false), String ("https://audio.dev/foo/bar/"));
+            expectEquals (url.getChildURL ("x").toString (false), String ("https://audio.dev/foo/bar/x"));
+            expectEquals (url.getParentURL().toString (false), String ("https://audio.dev/foo"));
+            expectEquals (url.getParentURL().getParentURL().toString (false), String ("https://audio.dev/"));
+            expectEquals (url.getParentURL().getParentURL().getParentURL().toString (false), String ("https://audio.dev/"));
+            expectEquals (url.getParentURL().getChildURL ("x").toString (false), String ("https://audio.dev/foo/x"));
+            expectEquals (url.getParentURL().getParentURL().getParentURL().getChildURL ("x").toString (false), String ("https://audio.dev/x"));
+        }
+
+        {
+            URL url ("https://audio.dev/foo/bar");
+            expectEquals (url.toString (false), String ("https://audio.dev/foo/bar"));
+            expectEquals (url.getChildURL ("x").toString (false), String ("https://audio.dev/foo/bar/x"));
+            expectEquals (url.getParentURL().toString (false), String ("https://audio.dev/foo"));
+            expectEquals (url.getParentURL().getParentURL().toString (false), String ("https://audio.dev/"));
+            expectEquals (url.getParentURL().getParentURL().getParentURL().toString (false), String ("https://audio.dev/"));
+            expectEquals (url.getParentURL().getChildURL ("x").toString (false), String ("https://audio.dev/foo/x"));
+            expectEquals (url.getParentURL().getParentURL().getParentURL().getChildURL ("x").toString (false), String ("https://audio.dev/x"));
+        }
     }
 };
 

@@ -58,7 +58,7 @@ struct HostPacketBuilder
     //==============================================================================
     bool deviceControlMessage (DeviceCommand command) noexcept
     {
-        if (! data.hasCapacity (MessageType::bits + DeviceCommand::bits))
+        if (! data.hasCapacity ((int) MessageType::bits + (int) DeviceCommand::bits))
             return false;
 
         writeMessageType (MessageFromHost::deviceCommandMessage);
@@ -69,7 +69,7 @@ struct HostPacketBuilder
     //==============================================================================
     bool beginDataChanges (PacketIndex packetIndex) noexcept
     {
-        if (! data.hasCapacity (MessageType::bits + PacketIndex::bits + DataChangeCommand::bits))
+        if (! data.hasCapacity ((int) MessageType::bits + (int) PacketIndex::bits + (int) DataChangeCommand::bits))
             return false;
 
         writeMessageType (MessageFromHost::sharedDataChange);
@@ -255,7 +255,7 @@ struct HostPacketBuilder
 
     bool addRequestFactorySyncMessage()
     {
-        if (! data.hasCapacity (MessageType::bits + ConfigCommand::bits))
+        if (! data.hasCapacity ((int) MessageType::bits + (int) ConfigCommand::bits))
             return false;
 
         writeMessageType (MessageFromHost::configMessage);
@@ -266,7 +266,7 @@ struct HostPacketBuilder
 
     bool addRequestUserSyncMessage()
     {
-        if (! data.hasCapacity (MessageType::bits + ConfigCommand::bits))
+        if (! data.hasCapacity ((int) MessageType::bits + (int) ConfigCommand::bits))
             return false;
 
         writeMessageType (MessageFromHost::configMessage);

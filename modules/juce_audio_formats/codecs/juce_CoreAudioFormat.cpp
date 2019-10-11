@@ -494,6 +494,15 @@ public:
             if (status != noErr)
                 return false;
 
+            if (numFramesToRead == 0)
+                break;
+
+            if ((int) numFramesToRead < numThisTime)
+            {
+                numThisTime = (int) numFramesToRead;
+                numBytes    = (size_t) numThisTime * sizeof (float);
+            }
+
             for (int i = numDestChannels; --i >= 0;)
             {
                 auto* dest = destSamples[(i < (int) numChannels ? channelMap[i] : i)];

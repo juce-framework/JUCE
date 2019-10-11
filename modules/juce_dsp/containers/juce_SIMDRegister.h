@@ -50,9 +50,9 @@ namespace dsp
     the individual elements.
 
     If you are using SIMDRegister as a pointer, then you must ensure that the
-    memory is suffeciently aligned for SIMD vector operations. Failing to do so
+    memory is sufficiently aligned for SIMD vector operations. Failing to do so
     will result in crashes or very slow code. Use SIMDRegister::isSIMDAligned
-    to query if a pointer is suffeciently aligned for SIMD vector operations.
+    to query if a pointer is sufficiently aligned for SIMD vector operations.
 
     Note that using SIMDRegister without enabling optimizations will result
     in code with very poor performance.
@@ -341,7 +341,7 @@ struct SIMDRegister
     }
 
     //==============================================================================
-    /** Checks if the given pointer is suffeciently aligned for using SIMD operations. */
+    /** Checks if the given pointer is sufficiently aligned for using SIMD operations. */
     static inline bool isSIMDAligned (const ElementType* ptr) noexcept
     {
         uintptr_t bitmask = SIMDRegisterSize - 1;
