@@ -241,10 +241,13 @@ void DocumentView::resized()
     // TODO JUCE_ARA getScrollBarThickness() should only be substracted if vertical scroll bar is actually visible
     minPixelsPerSecond = (getWidth() - trackHeaderWidth - playbackRegionsViewport.getScrollBarThickness()) / timeRange.getLength();
 
-    // enforce zoom in/out limits
+    // enforce zoom in/out limits and ensure the pixel width doesn't exceed INT_MAX
     const double validPixelsPerSecond = jlimit (minPixelsPerSecond, maxPixelsPerSecond, getPixelsPerSecond());
-    const int playbackRegionsWidth = roundToInt (timeRange.getLength() * validPixelsPerSecond);
-    const double pixPerSecond = playbackRegionsWidth / timeRange.getLength();
+    const double playbackRegionsPixelWidth = timeRange.getLength() * validPixelsPerSecond;
+    constexpr double playbackRegionsMaxWidth = std::numeric_limits<int>::max();
+    const int playbackRegionsViewWidth = roundToInt (jmin (playbackRegionsPixelWidth, playbackRegionsMaxWidth));
+    const double pixPerSecond = playbackRegionsViewWidth / timeRange.getLength();
+
     // TODO JUCE_ARA separate outsize zoom from track header resize from content zoom!
     //               changing the zoom triggers a resized(), so we're performing it twice..
     //               (same for track height handling below)
@@ -259,10 +262,10 @@ void DocumentView::resized()
 
     // update sizes and positions of all views
     playbackRegionsViewport.setBounds (trackHeaderWidth, rulersViewHeight, getWidth() - trackHeaderWidth, getHeight() - rulersViewHeight);
-    playbackRegionsView.setBounds (0, 0, playbackRegionsWidth, jmax (trackHeight * regionSequenceViews.size(), playbackRegionsViewport.getHeight() - playbackRegionsViewport.getScrollBarThickness()));
+    playbackRegionsView.setBounds (0, 0, playbackRegionsViewWidth, jmax (trackHeight * regionSequenceViews.size(), playbackRegionsViewport.getHeight() - playbackRegionsViewport.getScrollBarThickness()));
 
     rulersViewport.setBounds (trackHeaderWidth, 0, playbackRegionsViewport.getMaximumVisibleWidth(), rulersViewHeight);
-    rulersView->setBounds (0, 0, playbackRegionsWidth, rulersViewHeight);
+    rulersView->setBounds (0, 0, playbackRegionsViewWidth, rulersViewHeight);
 
     trackHeadersViewport.setBounds (0, rulersViewHeight, trackHeadersViewport.getWidth(), playbackRegionsViewport.getMaximumVisibleHeight());
     trackHeadersView.setBounds (0, 0, trackHeadersViewport.getWidth(), playbackRegionsView.getHeight());
