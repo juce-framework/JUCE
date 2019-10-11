@@ -163,7 +163,6 @@ public:
 
 private:
     void rebuildRegionSequenceViews();
-    void updatePlayHeadBounds();
 
 private:
     // simple utility class to show playhead position
