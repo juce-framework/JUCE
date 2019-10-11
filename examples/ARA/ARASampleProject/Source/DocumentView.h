@@ -119,9 +119,6 @@ public:
     bool isMaximumPixelsPerSecond() const { return pixelsPerSecond > minPixelsPerSecond; }
     bool isMinimumPixelsPerSecond() const { return pixelsPerSecond < maxPixelsPerSecond; }
 
-    void setTrackHeight (int newHeight);
-    int getTrackHeight() const { return trackHeight; }
-
     //==============================================================================
     void parentHierarchyChanged() override;
     void paint (Graphics&) override;
@@ -146,7 +143,6 @@ public:
         virtual ~Listener() {}
 
         virtual void visibleTimeRangeChanged (Range<double> newVisibleTimeRange, double pixelsPerSecond) = 0;
-        virtual void trackHeightChanged (int newTrackHeight) = 0;
     };
     void addListener (Listener* listener) { listeners.add (listener); }
     void removeListener (Listener* listener) { listeners.remove (listener); }
@@ -206,8 +202,6 @@ private:
 
     double pixelsPerSecond { 1.0 };
     double maxPixelsPerSecond { 192000.0 }, minPixelsPerSecond { 1.0 };
-
-    int trackHeight { 80 };
 
     bool regionSequenceViewsAreInvalid { true };
     Range<double> timeRange;

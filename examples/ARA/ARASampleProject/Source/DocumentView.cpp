@@ -8,6 +8,8 @@
 constexpr double kMinSecondDuration = 1.0;
 constexpr double kMinBorderSeconds = 1.0;
 
+constexpr int kTrackHeight = 80;
+
 //==============================================================================
 DocumentView::DocumentView (const AudioProcessorEditorARAExtension& extension, const AudioPlayHead::CurrentPositionInfo& posInfo)
     : araExtension (extension),
@@ -138,21 +140,6 @@ void DocumentView::setPixelsPerSecond (double newValue)
                                            });
 }
 
-void DocumentView::setTrackHeight (int newHeight)
-{
-    if (newHeight == trackHeight)
-        return;
-
-    trackHeight = newHeight;
-    if (getParentComponent() != nullptr)
-        resized();
-
-    listeners.callExpectingUnregistration ([&] (Listener& l)
-                                           {
-                                               l.trackHeightChanged (trackHeight);
-                                           });
-}
-
 //==============================================================================
 void DocumentView::parentHierarchyChanged()
 {
@@ -227,16 +214,9 @@ void DocumentView::resized()
     //               (same for track height handling below)
     setPixelsPerSecond (pixPerSecond);          // prevent potential rounding issues
 
-    // TODO JUCE_ARA quick'n'dirty, assumes visibility of vertical scroll bar and ignores any rounding issues.
-    const int minTrackHeight = (getHeight() - rulersViewHeight - playbackRegionsViewport.getScrollBarThickness()) / (regionSequenceViews.isEmpty() ? 1 : regionSequenceViews.size());
-    if (showOnlySelectedRegionSequences)
-        setTrackHeight (minTrackHeight);
-    else
-        setTrackHeight (jmax (trackHeight, minTrackHeight));
-
     // update sizes and positions of all views
     playbackRegionsViewport.setBounds (trackHeaderWidth, rulersViewHeight, getWidth() - trackHeaderWidth, getHeight() - rulersViewHeight);
-    playbackRegionsView.setBounds (0, 0, playbackRegionsViewWidth, jmax (trackHeight * regionSequenceViews.size(), playbackRegionsViewport.getHeight() - playbackRegionsViewport.getScrollBarThickness()));
+    playbackRegionsView.setBounds (0, 0, playbackRegionsViewWidth, jmax (kTrackHeight * regionSequenceViews.size(), playbackRegionsViewport.getHeight() - playbackRegionsViewport.getScrollBarThickness()));
 
     rulersViewport.setBounds (trackHeaderWidth, 0, playbackRegionsViewport.getMaximumVisibleWidth(), rulersViewHeight);
     rulersView->setBounds (0, 0, playbackRegionsViewWidth, rulersViewHeight);
@@ -247,8 +227,8 @@ void DocumentView::resized()
     int y = 0;
     for (auto v : regionSequenceViews)
     {
-        v->setRegionsViewBoundsByYRange (y, trackHeight);
-        y += trackHeight;
+        v->setRegionsViewBoundsByYRange (y, kTrackHeight);
+        y += kTrackHeight;
     }
 
     playHeadView.setBounds (playbackRegionsView.getBounds());
@@ -369,15 +349,14 @@ void DocumentView::TimeRangeSelectionView::paint (juce::Graphics& g)
         const int startPixel = documentView.getPlaybackRegionsViewsXForTime (selection.getTimeRange()->start);
         const int endPixel = documentView.getPlaybackRegionsViewsXForTime (selection.getTimeRange()->start + selection.getTimeRange()->duration);
         const int pixelDuration = endPixel - startPixel;
-        const int height = documentView.getTrackHeight();
         int y = 0;
         g.setColour (juce::Colours::white.withAlpha (0.7f));
         for (const auto regionSequenceView : documentView.regionSequenceViews)
         {
             const auto regionSequence = regionSequenceView->getRegionSequence();
             if (regionSequence != nullptr && ARA::contains (selection.getRegionSequences(), regionSequence))
-                g.fillRect (startPixel, y, pixelDuration, height);
-            y += height;
+                g.fillRect (startPixel, y, pixelDuration, kTrackHeight);
+            y += kTrackHeight;
         }
     }
 }

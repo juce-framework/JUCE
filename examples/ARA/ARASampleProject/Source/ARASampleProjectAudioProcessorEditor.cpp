@@ -9,7 +9,6 @@ constexpr int kMinHeight = 200;
 constexpr int kHeight = 600;
 
 static const Identifier pixelsPerSecondId = "pixels_per_second";
-static const Identifier trackHeightId = "track_height";
 static const Identifier trackHeadersVisibleId = "track_headers_visible";
 static const Identifier showOnlySelectedId = "show_only_selected";
 static const Identifier scrollFollowsPlayHeadId = "scroll_follows_playhead";
@@ -26,7 +25,6 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         documentView.reset (new DocumentView (*this, p.getLastKnownPositionInfo()));
 
         // if no defaults yet, construct defaults based on hard-coded defaults from DocumentView
-        documentView->setTrackHeight (editorDefaultSettings.getProperty (trackHeightId, documentView->getTrackHeight()));
         documentView->setShowOnlySelectedRegionSequences (editorDefaultSettings.getProperty (showOnlySelectedId, false));
         documentView->setScrollFollowsPlayHead (editorDefaultSettings.getProperty (scrollFollowsPlayHeadId, documentView->isScrollFollowingPlayHead()));
         documentView->setPixelsPerSecond (editorDefaultSettings.getProperty(pixelsPerSecondId, documentView->getPixelsPerSecond()));
@@ -44,9 +42,6 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         {
             const bool isOnlySelected = onlySelectedTracksButton.getToggleState();
             documentView->setShowOnlySelectedRegionSequences (isOnlySelected);
-            verticalZoomLabel.setVisible (! isOnlySelected);
-            verticalZoomInButton.setVisible (! isOnlySelected);
-            verticalZoomOutButton.setVisible (! isOnlySelected);
             editorDefaultSettings.setProperty (showOnlySelectedId, onlySelectedTracksButton.getToggleState(), nullptr);
         };
         addAndMakeVisible (onlySelectedTracksButton);
@@ -62,13 +57,10 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         addAndMakeVisible (followPlayHeadButton);
 
         horizontalZoomLabel.setText ("H:", dontSendNotification);
-        verticalZoomLabel.setText ("V:", dontSendNotification);
         addAndMakeVisible (horizontalZoomLabel);
 
         horizontalZoomInButton.setButtonText("+");
         horizontalZoomOutButton.setButtonText("-");
-        verticalZoomInButton.setButtonText("+");
-        verticalZoomOutButton.setButtonText("-");
         constexpr double zoomStepFactor = 1.5;
         horizontalZoomInButton.onClick = [this, zoomStepFactor]
         {
@@ -78,28 +70,8 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         {
             documentView->setPixelsPerSecond (documentView->getPixelsPerSecond() / zoomStepFactor);
         };
-        verticalZoomInButton.onClick = [this, zoomStepFactor]
-        {
-            documentView->setTrackHeight ((int) (documentView->getTrackHeight() * zoomStepFactor));
-        };
-        verticalZoomOutButton.onClick = [this, zoomStepFactor]
-        {
-            documentView->setTrackHeight ((int) (documentView->getTrackHeight () / zoomStepFactor));
-        };
         addAndMakeVisible (horizontalZoomInButton);
         addAndMakeVisible (horizontalZoomOutButton);
-        if (! documentView->isShowingOnlySelectedRegionSequences())
-        {
-            addAndMakeVisible (verticalZoomLabel);
-            addAndMakeVisible (verticalZoomInButton);
-            addAndMakeVisible (verticalZoomOutButton);
-        }
-        else
-        {
-            addChildComponent (verticalZoomLabel);
-            addChildComponent (verticalZoomInButton);
-            addChildComponent (verticalZoomOutButton);
-        }
 
         // show playhead position
         playheadLinearPositionLabel.setJustificationType (Justification::centred);
@@ -139,10 +111,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
         documentView->setBounds (0, 0, getWidth(), getHeight() - kStatusBarHeight);
         onlySelectedTracksButton.setBounds (0, getHeight() - kStatusBarHeight, 120, kStatusBarHeight);
         followPlayHeadButton.setBounds (onlySelectedTracksButton.getRight(), getHeight() - kStatusBarHeight, 120, kStatusBarHeight);
-        verticalZoomInButton.setBounds (getWidth() - kStatusBarHeight, getHeight() - kStatusBarHeight, kStatusBarHeight, kStatusBarHeight);
-        verticalZoomOutButton.setBounds (verticalZoomInButton.getBounds().translated (-kStatusBarHeight, 0));
-        verticalZoomLabel.setBounds (verticalZoomOutButton.getBounds().translated (-kStatusBarHeight, 0));
-        horizontalZoomInButton.setBounds (verticalZoomLabel.getBounds().translated (-kStatusBarHeight, 0));
+        horizontalZoomInButton.setBounds (getWidth() - kStatusBarHeight, getHeight() - kStatusBarHeight, kStatusBarHeight, kStatusBarHeight);
         horizontalZoomOutButton.setBounds (horizontalZoomInButton.getBounds().translated (-kStatusBarHeight, 0));
         horizontalZoomLabel.setBounds (horizontalZoomOutButton.getBounds().translated (-kStatusBarHeight, 0));
         playheadMusicalPositionLabel.setBounds ((horizontalZoomLabel.getX() + followPlayHeadButton.getRight()) / 2, horizontalZoomLabel.getY(), kPositionLabelWidth, kStatusBarHeight);
@@ -155,11 +124,6 @@ void ARASampleProjectAudioProcessorEditor::visibleTimeRangeChanged (Range<double
     horizontalZoomInButton.setEnabled (documentView->isMinimumPixelsPerSecond());
     horizontalZoomOutButton.setEnabled (documentView->isMaximumPixelsPerSecond());
     editorDefaultSettings.setProperty (pixelsPerSecondId, pixelsPerSecond, nullptr);
-}
-
-void ARASampleProjectAudioProcessorEditor::trackHeightChanged (int newTrackHeight)
-{
-    editorDefaultSettings.setProperty (trackHeightId, newTrackHeight, nullptr);
 }
 
 //==============================================================================

@@ -22,7 +22,6 @@ public:
 
     // DocumentView::Listener overrides
     void visibleTimeRangeChanged (Range<double> newVisibleTimeRange, double pixelsPerSecond) override;
-    void trackHeightChanged (int newTrackHeight) override;
 
     // juce::Timer
     void timerCallback() override;
@@ -32,10 +31,9 @@ private:
 
     TextButton followPlayHeadButton;
     TextButton onlySelectedTracksButton;
-    Label horizontalZoomLabel, verticalZoomLabel;
+    Label horizontalZoomLabel;
     Label playheadLinearPositionLabel, playheadMusicalPositionLabel;
     TextButton horizontalZoomInButton, horizontalZoomOutButton;
-    TextButton verticalZoomInButton, verticalZoomOutButton;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectAudioProcessorEditor)
 };
