@@ -133,11 +133,6 @@ void DocumentView::setPixelsPerSecond (double newValue)
     pixelsPerSecond = newValue;
     if (getParentComponent() != nullptr)
         resized();  // this will constrain pixelsPerSecond range, also it might call again after rounding.
-
-    listeners.callExpectingUnregistration ([&] (Listener& l)
-                                           {
-                                               l.visibleTimeRangeChanged (getVisibleTimeRange(), pixelsPerSecond);
-                                           });
 }
 
 //==============================================================================
@@ -196,11 +191,11 @@ void DocumentView::resized()
     const int rulersViewHeight = rulersViewport.isVisible() ? 3*20 : 0;
 
     // max zoom 1px : 1sample (this is a naive assumption as audio can be in different sample rate)
-    maxPixelsPerSecond = 192000.0; // TODO JUCE_ARA make configurabe from the outside, was: jmax (processor.getSampleRate(), 300.0);
+    constexpr auto maxPixelsPerSecond = 192000.0;
 
     // min zoom covers entire view range
     // TODO JUCE_ARA getScrollBarThickness() should only be substracted if vertical scroll bar is actually visible
-    minPixelsPerSecond = (getWidth() - trackHeaderWidth - playbackRegionsViewport.getScrollBarThickness()) / timeRange.getLength();
+    const auto minPixelsPerSecond = (getWidth() - trackHeaderWidth - playbackRegionsViewport.getScrollBarThickness()) / timeRange.getLength();
 
     // enforce zoom in/out limits and ensure the pixel width doesn't exceed INT_MAX
     const double validPixelsPerSecond = jlimit (minPixelsPerSecond, maxPixelsPerSecond, getPixelsPerSecond());

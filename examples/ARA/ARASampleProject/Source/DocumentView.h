@@ -111,8 +111,6 @@ public:
 
     void setPixelsPerSecond (double newValue);
     double getPixelsPerSecond() const { return pixelsPerSecond; }
-    bool isMaximumPixelsPerSecond() const { return pixelsPerSecond > minPixelsPerSecond; }
-    bool isMinimumPixelsPerSecond() const { return pixelsPerSecond < maxPixelsPerSecond; }
 
     //==============================================================================
     void parentHierarchyChanged() override;
@@ -132,16 +130,6 @@ public:
     void didReorderRegionSequencesInDocument (ARADocument* document) override;
 
     //==============================================================================
-    class Listener
-    {
-    public:
-        virtual ~Listener() {}
-
-        virtual void visibleTimeRangeChanged (Range<double> newVisibleTimeRange, double pixelsPerSecond) = 0;
-    };
-    void addListener (Listener* listener) { listeners.add (listener); }
-    void removeListener (Listener* listener) { listeners.remove (listener); }
-
 private:
     void rebuildRegionSequenceViews();
 
@@ -196,15 +184,12 @@ private:
     bool showOnlySelectedRegionSequences { true };
 
     double pixelsPerSecond { 1.0 };
-    double maxPixelsPerSecond { 192000.0 }, minPixelsPerSecond { 1.0 };
 
     bool regionSequenceViewsAreInvalid { true };
     Range<double> timeRange;
 
     juce::AudioPlayHead::CurrentPositionInfo lastReportedPosition;
     const juce::AudioPlayHead::CurrentPositionInfo& positionInfo;
-
-    ListenerList<Listener> listeners;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DocumentView)
 };

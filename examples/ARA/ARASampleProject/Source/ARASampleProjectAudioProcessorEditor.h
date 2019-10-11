@@ -10,18 +10,13 @@
 */
 class ARASampleProjectAudioProcessorEditor  : public AudioProcessorEditor,
                                               public AudioProcessorEditorARAExtension,
-                                              private DocumentView::Listener,
                                               private juce::Timer
 {
 public:
     ARASampleProjectAudioProcessorEditor (ARASampleProjectAudioProcessor&);
-    ~ARASampleProjectAudioProcessorEditor();
 
     void paint (Graphics&) override;
     void resized() override;
-
-    // DocumentView::Listener overrides
-    void visibleTimeRangeChanged (Range<double> newVisibleTimeRange, double pixelsPerSecond) override;
 
     // juce::Timer
     void timerCallback() override;

@@ -8,7 +8,6 @@ constexpr int kWidth = 1000;
 constexpr int kMinHeight = 200;
 constexpr int kHeight = 600;
 
-static const Identifier pixelsPerSecondId = "pixels_per_second";
 static const Identifier trackHeadersVisibleId = "track_headers_visible";
 static const Identifier showOnlySelectedId = "show_only_selected";
 static const Identifier scrollFollowsPlayHeadId = "scroll_follows_playhead";
@@ -27,12 +26,10 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         // if no defaults yet, construct defaults based on hard-coded defaults from DocumentView
         documentView->setShowOnlySelectedRegionSequences (editorDefaultSettings.getProperty (showOnlySelectedId, false));
         documentView->setScrollFollowsPlayHead (editorDefaultSettings.getProperty (scrollFollowsPlayHeadId, documentView->isScrollFollowingPlayHead()));
-        documentView->setPixelsPerSecond (editorDefaultSettings.getProperty(pixelsPerSecondId, documentView->getPixelsPerSecond()));
 
         // TODO JUCE_ARA hotfix for Unicode chord symbols, see https://forum.juce.com/t/embedding-unicode-string-literals-in-your-cpp-files/12600/7
         documentView->getLookAndFeel().setDefaultSansSerifTypefaceName("Arial Unicode MS");
         documentView->setIsRulersVisible (true);
-        documentView->addListener (this);
         addAndMakeVisible (documentView.get());
 
         onlySelectedTracksButton.setButtonText ("Selected Tracks Only");
@@ -86,12 +83,6 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     setResizable (true, false);
 }
 
-ARASampleProjectAudioProcessorEditor::~ARASampleProjectAudioProcessorEditor()
-{
-    if (isARAEditorView())
-        documentView->removeListener (this);
-}
-
 //==============================================================================
 void ARASampleProjectAudioProcessorEditor::paint (Graphics& g)
 {
@@ -117,13 +108,6 @@ void ARASampleProjectAudioProcessorEditor::resized()
         playheadMusicalPositionLabel.setBounds ((horizontalZoomLabel.getX() + followPlayHeadButton.getRight()) / 2, horizontalZoomLabel.getY(), kPositionLabelWidth, kStatusBarHeight);
         playheadLinearPositionLabel.setBounds (playheadMusicalPositionLabel.getBounds().translated (-kPositionLabelWidth, 0));
     }
-}
-
-void ARASampleProjectAudioProcessorEditor::visibleTimeRangeChanged (Range<double> /*newVisibleTimeRange*/, double pixelsPerSecond)
-{
-    horizontalZoomInButton.setEnabled (documentView->isMinimumPixelsPerSecond());
-    horizontalZoomOutButton.setEnabled (documentView->isMaximumPixelsPerSecond());
-    editorDefaultSettings.setProperty (pixelsPerSecondId, pixelsPerSecond, nullptr);
 }
 
 //==============================================================================
