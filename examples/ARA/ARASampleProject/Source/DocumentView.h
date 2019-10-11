@@ -111,13 +111,6 @@ public:
     void setIsRulersVisible (bool shouldBeVisible);
     bool isRulersVisible() const { return rulersViewport.isVisible(); }
 
-    int getTrackHeaderWidth() const { return trackHeadersViewport.getWidth(); }
-    int getTrackHeaderMaximumWidth () { return trackHeadersViewport.getMaximumWidth(); }
-    int getTrackHeaderMinimumWidth () { return trackHeadersViewport.getMinimumWidth(); }
-    void setTrackHeaderWidth (int newWidth);
-    void setTrackHeaderMaximumWidth (int newWidth);
-    void setTrackHeaderMinimumWidth (int newWidth);
-
     void setScrollFollowsPlayHead (bool followPlayHead) { scrollFollowsPlayHead = followPlayHead; }
     bool isScrollFollowingPlayHead() const { return scrollFollowsPlayHead; }
 
@@ -192,19 +185,6 @@ private:
         DocumentView& documentView;
     };
 
-    // resizable container of TrackHeaderViews
-    class TrackHeadersViewport    : public Viewport,
-                                    public ComponentBoundsConstrainer
-    {
-    public:
-        TrackHeadersViewport (DocumentView& documentView);
-        void setIsResizable (bool isResizable);
-        void resized() override;
-    private:
-        DocumentView& documentView;
-        ResizableEdgeComponent resizeBorder;
-    };
-
     const AudioProcessorEditorARAExtension& araExtension;
 
     OwnedArray<RegionSequenceView> regionSequenceViews;
@@ -213,7 +193,7 @@ private:
     Component playbackRegionsView;
     PlayHeadView playHeadView;
     TimeRangeSelectionView timeRangeSelectionView;
-    TrackHeadersViewport trackHeadersViewport;
+    Viewport trackHeadersViewport;
     Component trackHeadersView;
     Viewport rulersViewport;
     std::unique_ptr<RulersView> rulersView;

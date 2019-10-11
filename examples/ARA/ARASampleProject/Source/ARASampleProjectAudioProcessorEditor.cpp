@@ -10,7 +10,6 @@ constexpr int kHeight = 600;
 
 static const Identifier pixelsPerSecondId = "pixels_per_second";
 static const Identifier trackHeightId = "track_height";
-static const Identifier trackHeaderWidthId = "track_header_width";
 static const Identifier trackHeadersVisibleId = "track_headers_visible";
 static const Identifier showOnlySelectedId = "show_only_selected";
 static const Identifier scrollFollowsPlayHeadId = "scroll_follows_playhead";
@@ -28,7 +27,6 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
 
         // if no defaults yet, construct defaults based on hard-coded defaults from DocumentView
         documentView->setTrackHeight (editorDefaultSettings.getProperty (trackHeightId, documentView->getTrackHeight()));
-        documentView->setTrackHeaderWidth (editorDefaultSettings.getProperty (trackHeaderWidthId, documentView->getTrackHeaderWidth()));
         documentView->setShowOnlySelectedRegionSequences (editorDefaultSettings.getProperty (showOnlySelectedId, false));
         documentView->setScrollFollowsPlayHead (editorDefaultSettings.getProperty (scrollFollowsPlayHeadId, documentView->isScrollFollowingPlayHead()));
         documentView->setPixelsPerSecond (editorDefaultSettings.getProperty(pixelsPerSecondId, documentView->getPixelsPerSecond()));

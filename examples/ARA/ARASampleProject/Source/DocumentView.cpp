@@ -14,7 +14,6 @@ DocumentView::DocumentView (const AudioProcessorEditorARAExtension& extension, c
       playbackRegionsViewport (*this),
       playHeadView (*this),
       timeRangeSelectionView (*this),
-      trackHeadersViewport (*this),
       timeRange (-kMinBorderSeconds, kMinSecondDuration + kMinBorderSeconds),
       positionInfo (posInfo)
 {
@@ -36,6 +35,7 @@ DocumentView::DocumentView (const AudioProcessorEditorARAExtension& extension, c
     playbackRegionsViewport.setViewedComponent (&playbackRegionsView, false);
     addAndMakeVisible (playbackRegionsViewport);
 
+    trackHeadersViewport.setSize (120, getHeight());
     trackHeadersViewport.setScrollBarsShown (false, false, false, false);
     trackHeadersViewport.setViewedComponent (&trackHeadersView, false);
     addAndMakeVisible (trackHeadersViewport);
@@ -121,25 +121,6 @@ void DocumentView::setIsRulersVisible (bool shouldBeVisible)
     rulersViewport.setVisible (shouldBeVisible);
     if (getParentComponent() != nullptr)
         resized();
-}
-
-void DocumentView::setTrackHeaderWidth (int newWidth)
-{
-    trackHeadersViewport.setBoundsForComponent (&trackHeadersViewport, trackHeadersViewport.getBounds().withWidth (newWidth), false, false, false, true);
-}
-
-void DocumentView::setTrackHeaderMaximumWidth (int newWidth)
-{
-    trackHeadersViewport.setIsResizable (getTrackHeaderMinimumWidth() < newWidth);
-    trackHeadersViewport.setMaximumWidth (newWidth);
-    trackHeadersViewport.checkComponentBounds (&trackHeadersViewport);
-}
-
-void DocumentView::setTrackHeaderMinimumWidth (int newWidth)
-{
-    trackHeadersViewport.setIsResizable (newWidth < getTrackHeaderMaximumWidth());
-    trackHeadersViewport.setMinimumWidth (newWidth);
-    trackHeadersViewport.checkComponentBounds (&trackHeadersViewport);
 }
 
 void DocumentView::setPixelsPerSecond (double newValue)
@@ -399,30 +380,6 @@ void DocumentView::TimeRangeSelectionView::paint (juce::Graphics& g)
             y += height;
         }
     }
-}
-
-//==============================================================================
-DocumentView::TrackHeadersViewport::TrackHeadersViewport (DocumentView &docView)
-    : documentView (docView),
-      resizeBorder (this, this, ResizableEdgeComponent::Edge::rightEdge)
-{
-    setSize (120, getHeight());
-    setMinimumWidth (60);
-    setMaximumWidth (240);
-    addAndMakeVisible (resizeBorder);
-}
-
-void DocumentView::TrackHeadersViewport::setIsResizable (bool isResizable)
-{
-    resizeBorder.setVisible (isResizable);
-}
-
-void DocumentView::TrackHeadersViewport::resized()
-{
-    resizeBorder.setBounds (getWidth() - 1, 0, 1, getHeight());
-
-    if (isShowing())
-        documentView.resized();
 }
 
 //==============================================================================
