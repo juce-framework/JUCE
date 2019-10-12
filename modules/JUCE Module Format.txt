@@ -13,7 +13,7 @@ Each module may have dependencies on other modules, but should be otherwise self
                                     File structure
                                     ==============
 
-Each module lives inside a folder whose name is the same as the name of the module. The
+Each module lives inside a folder whose name is same as the name of the module. The
 JUCE convention for naming modules is lower-case with underscores, e.g.
 
 juce_core
