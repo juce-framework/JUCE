@@ -410,7 +410,7 @@ public:
 
     // avoid feedback loop by default
     bool processorHasPotentialFeedbackLoop = true;
-    std::atomic<bool> muteInput { false };
+    std::atomic<bool> muteInput { true };
     Value shouldMuteInput;
     AudioBuffer<float> emptyBuffer;
     bool autoOpenMidiDevices;
