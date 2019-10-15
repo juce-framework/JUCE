@@ -92,7 +92,7 @@ public:
 
         if (! enabled || context.isBypassed)
         {
-            outputBlock.copy (inputBlock);
+            outputBlock.copyFrom (inputBlock);
             return;
         }
 

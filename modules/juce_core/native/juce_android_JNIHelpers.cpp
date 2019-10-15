@@ -418,13 +418,27 @@ jobject ActivityLifecycleCallbacks::invoke (jobject proxy, jobject method, jobje
     auto activity = env->GetArrayLength (args) > 0 ? env->GetObjectArrayElement (args, 0) : (jobject) nullptr;
     auto bundle   = env->GetArrayLength (args) > 1 ? env->GetObjectArrayElement (args, 1) : (jobject) nullptr;
 
-    if      (methodName == "onActivityCreated")             { onActivityCreated (activity, bundle); return nullptr; }
-    else if (methodName == "onActivityDestroyed")           { onActivityDestroyed (activity); return nullptr; }
-    else if (methodName == "onActivityPaused")              { onActivityPaused (activity); return nullptr; }
-    else if (methodName == "onActivityResumed")             { onActivityResumed (activity); return nullptr; }
-    else if (methodName == "onActivitySaveInstanceState")   { onActivitySaveInstanceState (activity, bundle); return nullptr; }
-    else if (methodName == "onActivityStarted")             { onActivityStarted (activity); return nullptr; }
-    else if (methodName == "onActivityStopped")             { onActivityStopped (activity); return nullptr; }
+    if      (methodName == "onActivityPreCreated")             { onActivityPreCreated (activity, bundle);            return nullptr; }
+    else if (methodName == "onActivityPreDestroyed")           { onActivityPreDestroyed (activity);                  return nullptr; }
+    else if (methodName == "onActivityPrePaused")              { onActivityPrePaused (activity);                     return nullptr; }
+    else if (methodName == "onActivityPreResumed")             { onActivityPreResumed (activity);                    return nullptr; }
+    else if (methodName == "onActivityPreSaveInstanceState")   { onActivityPreSaveInstanceState (activity, bundle);  return nullptr; }
+    else if (methodName == "onActivityPreStarted")             { onActivityPreStarted (activity);                    return nullptr; }
+    else if (methodName == "onActivityPreStopped")             { onActivityPreStopped (activity);                    return nullptr; }
+    else if (methodName == "onActivityCreated")                { onActivityCreated (activity, bundle);               return nullptr; }
+    else if (methodName == "onActivityDestroyed")              { onActivityDestroyed (activity);                     return nullptr; }
+    else if (methodName == "onActivityPaused")                 { onActivityPaused (activity);                        return nullptr; }
+    else if (methodName == "onActivityResumed")                { onActivityResumed (activity);                       return nullptr; }
+    else if (methodName == "onActivitySaveInstanceState")      { onActivitySaveInstanceState (activity, bundle);     return nullptr; }
+    else if (methodName == "onActivityStarted")                { onActivityStarted (activity);                       return nullptr; }
+    else if (methodName == "onActivityStopped")                { onActivityStopped (activity);                       return nullptr; }
+    else if (methodName == "onActivityPostCreated")            { onActivityPostCreated (activity, bundle);           return nullptr; }
+    else if (methodName == "onActivityPostDestroyed")          { onActivityPostDestroyed (activity);                 return nullptr; }
+    else if (methodName == "onActivityPostPaused")             { onActivityPostPaused (activity);                    return nullptr; }
+    else if (methodName == "onActivityPostResumed")            { onActivityPostResumed (activity);                   return nullptr; }
+    else if (methodName == "onActivityPostSaveInstanceState")  { onActivityPostSaveInstanceState (activity, bundle); return nullptr; }
+    else if (methodName == "onActivityPostStarted")            { onActivityPostStarted (activity);                   return nullptr; }
+    else if (methodName == "onActivityPostStopped")            { onActivityPostStopped (activity);                   return nullptr; }
 
     return AndroidInterfaceImplementer::invoke (proxy, method, args);
 }

@@ -629,8 +629,8 @@ void CoreGraphicsContext::setFont (const Font& newFont)
 
             auto cgTransformToJuceTransform = [](CGAffineTransform& t) -> AffineTransform
             {
-                return { (float) t.a, (float) t.b, (float) t.tx,
-                         (float) t.c, (float) t.d, (float) t.ty };
+                return { (float) t.a, (float) t.c, (float) t.tx,
+                         (float) t.b, (float) t.d, (float) t.ty };
             };
 
             state->fontTransform = cgTransformToJuceTransform (fontTransform);
@@ -649,7 +649,7 @@ void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& tra
 {
     if (state->fontRef != nullptr && state->fillType.isColour())
     {
-        if (transform.isOnlyTranslation())
+        if (transform.isOnlyTranslation() && state->fontTransform.isOnlyTranslation())
         {
             auto t = transform.followedBy (state->inverseFontTransform);
 

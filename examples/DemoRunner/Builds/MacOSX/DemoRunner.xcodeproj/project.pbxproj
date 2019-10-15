@@ -243,6 +243,13 @@
 			path = "../../../../modules/juce_audio_utils";
 			sourceTree = "SOURCE_ROOT";
 		};
+		0CCFDC1D1C7B8A12BF4822F1 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			name = DemoRunner.entitlements;
+			path = DemoRunner.entitlements;
+			sourceTree = "SOURCE_ROOT";
+		};
 		0ECB4FCD24794CE516792552 = {
 			isa = PBXFileReference;
 			lastKnownFileType = folder;

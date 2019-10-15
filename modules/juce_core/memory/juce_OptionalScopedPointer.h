@@ -122,6 +122,8 @@ public:
     {
         if (! shouldDelete)
             object.release();
+        else
+            object.reset();
     }
 
     /** Does the same thing as reset(). */

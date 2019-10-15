@@ -205,16 +205,10 @@ public:
                 bytesToRead = static_cast<int> (chunkEnd - position);
         }
 
-        fd_set readbits;
-        FD_ZERO (&readbits);
-        FD_SET (socketHandle, &readbits);
+        pollfd pfd { socketHandle, POLLIN, 0 };
 
-        struct timeval tv;
-        tv.tv_sec = jmax (1, timeOutMs / 1000);
-        tv.tv_usec = 0;
-
-        if (select (socketHandle + 1, &readbits, 0, 0, &tv) <= 0)
-            return 0;   // (timeout)
+        if (poll (&pfd, 1, timeOutMs) <= 0)
+            return 0; // (timeout)
 
         auto bytesRead = jmax (0, (int) recv (socketHandle, buffer, (size_t) bytesToRead, MSG_WAITALL));
 

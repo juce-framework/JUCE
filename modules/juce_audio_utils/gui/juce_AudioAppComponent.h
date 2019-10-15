@@ -125,7 +125,7 @@ public:
     AudioDeviceManager& deviceManager;
 
 private:
-    //=============================================================================
+    //==============================================================================
     AudioDeviceManager defaultDeviceManager;
     AudioSourcePlayer audioSourcePlayer;
     bool usingCustomDeviceManager;

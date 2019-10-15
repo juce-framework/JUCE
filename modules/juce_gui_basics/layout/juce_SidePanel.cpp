@@ -219,7 +219,7 @@ void SidePanel::mouseUp (const MouseEvent&)
     }
 }
 
-//==========================================================================
+//==============================================================================
 void SidePanel::lookAndFeelChanged()
 {
     auto& lf = getLookAndFeel();

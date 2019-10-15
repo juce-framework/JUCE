@@ -527,6 +527,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_blocks_basics/protocol/Protocol Format.txt"
     "../../../../../modules/juce_blocks_basics/topology/internal/juce_BandwidthStatsLogger.cpp"
     "../../../../../modules/juce_blocks_basics/topology/internal/juce_BlockImplementation.cpp"
+    "../../../../../modules/juce_blocks_basics/topology/internal/juce_BlockSerialReader.cpp"
     "../../../../../modules/juce_blocks_basics/topology/internal/juce_ConnectedDeviceGroup.cpp"
     "../../../../../modules/juce_blocks_basics/topology/internal/juce_DepreciatedVersionReader.cpp"
     "../../../../../modules/juce_blocks_basics/topology/internal/juce_Detector.cpp"
@@ -926,6 +927,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_data_structures/juce_data_structures.mm"
     "../../../../../modules/juce_data_structures/juce_data_structures.h"
     "../../../../../modules/juce_dsp/containers/juce_AudioBlock.h"
+    "../../../../../modules/juce_dsp/containers/juce_AudioBlock_test.cpp"
     "../../../../../modules/juce_dsp/containers/juce_SIMDRegister.h"
     "../../../../../modules/juce_dsp/containers/juce_SIMDRegister_Impl.h"
     "../../../../../modules/juce_dsp/containers/juce_SIMDRegister_test.cpp"
@@ -2130,6 +2132,7 @@ set_source_files_properties("../../../../../modules/juce_blocks_basics/protocol/
 set_source_files_properties("../../../../../modules/juce_blocks_basics/protocol/Protocol Format.txt" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_BandwidthStatsLogger.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_BlockImplementation.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_BlockSerialReader.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_ConnectedDeviceGroup.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_DepreciatedVersionReader.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_blocks_basics/topology/internal/juce_Detector.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2529,6 +2532,7 @@ set_source_files_properties("../../../../../modules/juce_data_structures/juce_da
 set_source_files_properties("../../../../../modules/juce_data_structures/juce_data_structures.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_data_structures/juce_data_structures.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/containers/juce_AudioBlock.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_dsp/containers/juce_AudioBlock_test.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/containers/juce_SIMDRegister.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/containers/juce_SIMDRegister_Impl.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/containers/juce_SIMDRegister_test.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)

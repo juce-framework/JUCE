@@ -585,6 +585,13 @@
 			path = System/Library/Frameworks/CoreAudioKit.framework;
 			sourceTree = SDKROOT;
 		};
+		EC252E34CF52A70B4A836BDC = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			name = AudioPluginHost.entitlements;
+			path = AudioPluginHost.entitlements;
+			sourceTree = "SOURCE_ROOT";
+		};
 		F14CDB17EFE157DA3C3A5A91 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;

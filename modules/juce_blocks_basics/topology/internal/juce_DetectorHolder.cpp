@@ -47,13 +47,24 @@ struct PhysicalTopologySource::DetectorHolder  : private Timer
 
     void handleTimerTick()
     {
-        for (auto& b : detector->currentTopology.blocks)
-            if (auto bi = BlockImplementation<Detector>::getFrom (*b))
-                bi->handleTimerTick();
+        auto blocks = detector->currentTopology.blocks;
+
+        if (blocks.size() == 0)
+            return;
+
+        if (nextIndexToTick >= blocks.size())
+            nextIndexToTick = 0;
+
+        if (auto* bi = BlockImplementation<Detector>::getFrom (*blocks [nextIndexToTick]))
+            bi->handleTimerTick();
+
+        nextIndexToTick = (nextIndexToTick + 1) % blocks.size();
     }
 
     PhysicalTopologySource& topologySource;
     Detector::Ptr detector;
+
+    int nextIndexToTick {0};
 };
 
 } // namespace juce

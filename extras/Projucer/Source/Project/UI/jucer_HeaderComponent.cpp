@@ -35,7 +35,7 @@
 #include "../../LiveBuildEngine/jucer_DiagnosticMessage.h"
 #include "../../LiveBuildEngine/jucer_CompileEngineClient.h"
 
-//======================================================================
+//==============================================================================
 HeaderComponent::HeaderComponent()
 {
     addAndMakeVisible (configLabel);
@@ -66,13 +66,13 @@ HeaderComponent::~HeaderComponent()
     }
 }
 
-//======================================================================
+//==============================================================================
 void HeaderComponent::resized()
 {
     auto bounds = getLocalBounds();
     configLabel.setFont ({ bounds.getHeight() / 3.0f });
 
-    //======================================================================
+    //==============================================================================
     {
         auto headerBounds = bounds.removeFromLeft (tabsWidth);
 
@@ -87,7 +87,7 @@ void HeaderComponent::resized()
         projectNameLabel.setBounds (headerBounds);
     }
 
-    //======================================================================
+    //==============================================================================
     auto exporterWidth = jmin (400, bounds.getWidth() / 2);
     Rectangle<int> exporterBounds (0, 0, exporterWidth, bounds.getHeight());
 
@@ -114,7 +114,7 @@ void HeaderComponent::paint (Graphics& g)
                                                     runAppButton->getWidth(), runAppButton->getHeight());
 }
 
-//======================================================================
+//==============================================================================
 void HeaderComponent::setCurrentProject (Project* p) noexcept
 {
     project = p;
@@ -148,7 +148,7 @@ void HeaderComponent::setCurrentProject (Project* p) noexcept
     }
 }
 
-//======================================================================
+//==============================================================================
 void HeaderComponent::updateExporters() noexcept
 {
     auto selectedName = getSelectedExporterName();
@@ -203,7 +203,7 @@ bool HeaderComponent::canCurrentExporterLaunchProject() const noexcept
     return false;
 }
 
-//======================================================================
+//==============================================================================
 int HeaderComponent::getUserButtonWidth() const noexcept
 {
     return userSettingsButton->getWidth();
@@ -215,7 +215,7 @@ void HeaderComponent::sidebarTabsWidthChanged (int newWidth) noexcept
     resized();
 }
 
-//======================================================================
+//==============================================================================
 void HeaderComponent::showUserSettings() noexcept
 {
    #if JUCER_ENABLE_GPL_MODE
@@ -233,7 +233,7 @@ void HeaderComponent::showUserSettings() noexcept
     userSettingsWindow = &CallOutBox::launchAsynchronously (content, userSettingsButton->getScreenBounds(), nullptr);
 }
 
-//==========================================================================
+//==============================================================================
 void HeaderComponent::lookAndFeelChanged()
 {
     if (userSettingsWindow != nullptr)
@@ -261,7 +261,7 @@ void HeaderComponent::timerCallback()
     repaint();
 }
 
-//======================================================================
+//==============================================================================
 static void sendProjectButtonAnalyticsEvent (StringRef label)
 {
     StringPairArray data;
@@ -351,7 +351,7 @@ void HeaderComponent::updateUserAvatar() noexcept
     }
 }
 
-//======================================================================
+//==============================================================================
 void HeaderComponent::buildPing()
 {
     if (! isTimerRunning())

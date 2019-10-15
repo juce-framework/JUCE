@@ -57,7 +57,7 @@
 //==============================================================================
 #include <juce_gui_extra/juce_gui_extra.h>
 
-//=============================================================================
+//==============================================================================
 /** Config: JUCE_USE_CAMERA
     Enables camera support using the CameraDevice class (Mac, Windows, iOS, Android).
 */
@@ -79,7 +79,7 @@
  #undef JUCE_USE_CAMERA
 #endif
 
-//=============================================================================
+//==============================================================================
 /** Config: JUCE_SYNC_VIDEO_VOLUME_WITH_OS_MEDIA_VOLUME
     Enables synchronisation between video playback volume and OS media volume.
     Currently supported on Android only.
@@ -98,6 +98,6 @@
  #define JUCE_VIDEO_LOG(x) {}
 #endif
 
-//=============================================================================
+//==============================================================================
 #include "playback/juce_VideoComponent.h"
 #include "capture/juce_CameraDevice.h"

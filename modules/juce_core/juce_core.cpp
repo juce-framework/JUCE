@@ -111,7 +111,7 @@
 #endif
 
 #if JUCE_BELA
- #include <native/timer.h>
+ #include <alchemy/timer.h>
 #endif
 
 #undef check

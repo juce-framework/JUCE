@@ -171,6 +171,13 @@
 			path = ../../Source/SharedCanvas.h;
 			sourceTree = "SOURCE_ROOT";
 		};
+		280A781618BDE3AF9BE15495 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			name = NetworkGraphicsDemo.entitlements;
+			path = NetworkGraphicsDemo.entitlements;
+			sourceTree = "SOURCE_ROOT";
+		};
 		2E13A899F4E3C99054A3656F = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;

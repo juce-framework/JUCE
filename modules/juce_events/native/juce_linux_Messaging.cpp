@@ -20,8 +20,6 @@
   ==============================================================================
 */
 
-#include <poll.h>
-
 namespace juce
 {
 
@@ -119,12 +117,12 @@ public:
         fdReadCallbacks.reserve (8);
     }
 
-    void registerFdCallback (int fd, std::function<void(int)>&& cb)
+    void registerFdCallback (int fd, std::function<void(int)>&& cb, short eventMask)
     {
         const ScopedLock sl (lock);
 
         fdReadCallbacks.push_back ({ fd, std::move (cb) });
-        pfds.push_back ({ fd, POLLIN, 0 });
+        pfds.push_back ({ fd, eventMask, 0 });
     }
 
     void unregisterFdCallback (int fd)
@@ -273,10 +271,10 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMes
 }
 
 //==============================================================================
-void LinuxEventLoop::registerFdCallback (int fd, std::function<void(int)> readCallback)
+void LinuxEventLoop::registerFdCallback (int fd, std::function<void(int)> readCallback, short eventMask)
 {
     if (auto* runLoop = InternalRunLoop::getInstanceWithoutCreating())
-        runLoop->registerFdCallback (fd, std::move (readCallback));
+        runLoop->registerFdCallback (fd, std::move (readCallback), eventMask);
 }
 
 void LinuxEventLoop::unregisterFdCallback (int fd)
