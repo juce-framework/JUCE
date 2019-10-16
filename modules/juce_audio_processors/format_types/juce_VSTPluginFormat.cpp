@@ -1269,7 +1269,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
         if (getVstCategory() != Vst2::kPlugCategShell) // (workaround for Waves 5 plugins which crash during this call)
             updateStoredProgramNames();
 
-        wantsMidiMessages = pluginCanDo ("receiveVstMidiEvent") > 0;
+        wantsMidiMessages = (pluginCanDo ("receiveVstMidiEvent") > 0) || ((vstEffect != nullptr) && ((vstEffect->flags & Vst2::effFlagsIsSynth) != 0));
 
        #if JUCE_MAC && JUCE_SUPPORT_CARBON
         usesCocoaNSView = ((unsigned int) pluginCanDo ("hasCockosViewAsConfig") & 0xffff0000ul) == 0xbeef0000ul;
@@ -1369,7 +1369,9 @@ struct VSTPluginInstance     : public AudioPluginInstance,
 
         if (initialised)
         {
-            wantsMidiMessages = wantsMidiMessages || (pluginCanDo ("receiveVstMidiEvent") > 0);
+            wantsMidiMessages = wantsMidiMessages ||
+                                (pluginCanDo ("receiveVstMidiEvent") > 0) ||
+                                ((vstEffect != nullptr) && ((vstEffect->flags & Vst2::effFlagsIsSynth) != 0));
 
             if (wantsMidiMessages)
                 midiEventsToSend.ensureSize (256);
