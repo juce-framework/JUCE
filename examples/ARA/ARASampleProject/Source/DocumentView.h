@@ -36,6 +36,15 @@ public:
     virtual RegionSequenceView* createViewForRegionSequence (ARARegionSequence*);
     virtual TrackHeaderView* createHeaderViewForRegionSequence (ARARegionSequence*);
 
+    // ARAEditorView::Listener overrides
+    void onNewSelection (const ARA::PlugIn::ViewSelection& viewSelection) override;
+    void onHideRegionSequences (std::vector<ARARegionSequence*> const& regionSequences) override;
+
+    // ARADocument::Listener overrides
+    void didEndEditing (ARADocument* document) override;
+    void didAddRegionSequenceToDocument (ARADocument* document, ARARegionSequence* regionSequence) override;
+    void didReorderRegionSequencesInDocument (ARADocument* document) override;
+
     // ARA getters
     ARAEditorView* getARAEditorView() const noexcept { return araExtension.getARAEditorView<ARAEditorView>(); }
     ARADocumentController* getDocumentController() const noexcept { return getARAEditorView()->getDocumentController<ARADocumentController>(); }
@@ -57,16 +66,6 @@ public:
     // flag that our view needs to be rebuilt
     void invalidateRegionSequenceViews();
 
-    // misc. getters
-    Component& getPlaybackRegionsView() { return playbackRegionsView; }
-    Component& getTrackHeadersView() { return trackHeadersView; }
-    Viewport& getTrackHeadersViewport() { return trackHeadersViewport; }
-    Viewport& getRulersViewport() { return rulersViewport; }
-
-    AudioFormatManager& getAudioFormatManger() { return audioFormatManger; }
-
-    const AudioPlayHead::CurrentPositionInfo& getPlayHeadPositionInfo() const { return positionInfo; }
-
     // DocumentView states
     void setShowOnlySelectedRegionSequences (bool newVal);
     bool isShowingOnlySelectedRegionSequences() { return showOnlySelectedRegionSequences; }
@@ -80,6 +79,16 @@ public:
     void setPixelsPerSecond (double newValue);
     double getPixelsPerSecond() const { return pixelsPerSecond; }
 
+    // misc. getters
+    Component& getPlaybackRegionsView () { return playbackRegionsView; }
+    Component& getTrackHeadersView () { return trackHeadersView; }
+    Viewport& getTrackHeadersViewport () { return trackHeadersViewport; }
+    Viewport& getRulersViewport () { return rulersViewport; }
+
+    AudioFormatManager& getAudioFormatManger () { return audioFormatManger; }
+
+    const AudioPlayHead::CurrentPositionInfo& getPlayHeadPositionInfo () const { return positionInfo; }
+
     // juce::Component overrides
     void parentHierarchyChanged() override;
     void paint (Graphics&) override;
@@ -87,15 +96,6 @@ public:
 
     // juce::Timer overrides
     void timerCallback() override;
-
-    // ARAEditorView::Listener overrides
-    void onNewSelection (const ARA::PlugIn::ViewSelection& viewSelection) override;
-    void onHideRegionSequences (std::vector<ARARegionSequence*> const& regionSequences) override;
-
-    // ARADocument::Listener overrides
-    void didEndEditing (ARADocument* document) override;
-    void didAddRegionSequenceToDocument (ARADocument* document, ARARegionSequence* regionSequence) override;
-    void didReorderRegionSequencesInDocument (ARADocument* document) override;
 
     //==============================================================================
 private:

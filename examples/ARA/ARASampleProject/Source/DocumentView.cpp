@@ -81,6 +81,42 @@ RegionSequenceView* DocumentView::createViewForRegionSequence (ARARegionSequence
 }
 
 //==============================================================================
+void DocumentView::onNewSelection (const ARA::PlugIn::ViewSelection& /*viewSelection*/)
+{
+    if (showOnlySelectedRegionSequences)
+        invalidateRegionSequenceViews();
+    else
+        timeRangeSelectionView.repaint();
+}
+
+void DocumentView::onHideRegionSequences (std::vector<ARARegionSequence*> const& /*regionSequences*/)
+{
+    invalidateRegionSequenceViews();
+}
+
+void DocumentView::didEndEditing (ARADocument* document)
+{
+    jassert (document == getDocument());
+
+    if (regionSequenceViewsAreInvalid)
+        rebuildRegionSequenceViews();
+}
+
+void DocumentView::didAddRegionSequenceToDocument (ARADocument* document, ARARegionSequence* /*regionSequence*/)
+{
+    jassert (document == getDocument());
+
+    invalidateRegionSequenceViews();
+}
+
+void DocumentView::didReorderRegionSequencesInDocument (ARADocument* document)
+{
+    jassert (document == getDocument());
+
+    invalidateRegionSequenceViews();
+}
+
+//==============================================================================
 Range<double> DocumentView::getVisibleTimeRange() const
 {
     const double start = getPlaybackRegionsViewsTimeForX (playbackRegionsViewport.getViewArea().getX());
@@ -103,6 +139,7 @@ double DocumentView::getPlaybackRegionsViewsTimeForX (int x) const
     return timeRange.getStart() + ((double) x / (double) playbackRegionsView.getWidth()) * timeRange.getLength();
 }
 
+//==============================================================================
 void DocumentView::invalidateRegionSequenceViews()
 {
     if (getDocumentController()->isHostEditingDocument() || getParentComponent() == nullptr)
@@ -238,6 +275,25 @@ void DocumentView::resized()
     rulersViewport.setViewPosition (relativeViewportPosition.getX(), 0);
 }
 
+//==============================================================================
+void DocumentView::timerCallback ()
+{
+    if (lastReportedPosition.timeInSeconds != positionInfo.timeInSeconds)
+    {
+        lastReportedPosition = positionInfo;
+
+        if (scrollFollowsPlayHead)
+        {
+            const auto visibleRange = getVisibleTimeRange ();
+            if (lastReportedPosition.timeInSeconds < visibleRange.getStart () || lastReportedPosition.timeInSeconds > visibleRange.getEnd ())
+                playbackRegionsViewport.setViewPosition (playbackRegionsViewport.getViewPosition ().withX (getPlaybackRegionsViewsXForTime (lastReportedPosition.timeInSeconds)));
+        };
+
+        playHeadView.repaint ();
+    }
+}
+
+//==============================================================================
 void DocumentView::rebuildRegionSequenceViews()
 {
     // TODO JUCE_ARA always deleting the region sequence views and in turn their playback regions
@@ -264,59 +320,6 @@ void DocumentView::rebuildRegionSequenceViews()
     regionSequenceViewsAreInvalid = false;
 
     resized();
-}
-
-//==============================================================================
-void DocumentView::onNewSelection (const ARA::PlugIn::ViewSelection& /*viewSelection*/)
-{
-    if (showOnlySelectedRegionSequences)
-        invalidateRegionSequenceViews();
-    else
-        timeRangeSelectionView.repaint();
-}
-
-void DocumentView::onHideRegionSequences (std::vector<ARARegionSequence*> const& /*regionSequences*/)
-{
-    invalidateRegionSequenceViews();
-}
-
-void DocumentView::didEndEditing (ARADocument* document)
-{
-    jassert (document == getDocument());
-    
-    if (regionSequenceViewsAreInvalid)
-        rebuildRegionSequenceViews();
-}
-
-void DocumentView::didAddRegionSequenceToDocument (ARADocument* document, ARARegionSequence* /*regionSequence*/)
-{
-    jassert (document == getDocument());
-
-    invalidateRegionSequenceViews();
-}
-
-void DocumentView::didReorderRegionSequencesInDocument (ARADocument* document)
-{
-    jassert (document == getDocument());
-
-    invalidateRegionSequenceViews();
-}
-
-void DocumentView::timerCallback()
-{
-    if (lastReportedPosition.timeInSeconds != positionInfo.timeInSeconds)
-    {
-        lastReportedPosition = positionInfo;
-
-        if (scrollFollowsPlayHead)
-        {
-            const auto visibleRange = getVisibleTimeRange();
-            if (lastReportedPosition.timeInSeconds < visibleRange.getStart() || lastReportedPosition.timeInSeconds > visibleRange.getEnd())
-                playbackRegionsViewport.setViewPosition (playbackRegionsViewport.getViewPosition().withX (getPlaybackRegionsViewsXForTime (lastReportedPosition.timeInSeconds)));
-        };
-
-        playHeadView.repaint();
-    }
 }
 
 //==============================================================================
