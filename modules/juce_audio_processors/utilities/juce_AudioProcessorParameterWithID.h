@@ -42,7 +42,7 @@ public:
     */
     AudioProcessorParameterWithID (const String& parameterID,
                                    const String& parameterName,
-                                   const String& parameterLabel = String(),
+                                   const String& parameterLabel = {},
                                    Category parameterCategory = AudioProcessorParameter::genericParameter);
 
     /** Destructor. */
@@ -60,11 +60,11 @@ public:
     /** Provides access to the parameter's category. */
     const Category category;
 
-private:
     String getName (int) const override;
     String getLabel() const override;
     Category getCategory() const override;
 
+private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorParameterWithID)
 };
 

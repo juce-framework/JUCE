@@ -1,8 +1,8 @@
 JUCE breaking changes
 =====================
 
-Develop
-=======
+Version 5.4.5
+=============
 
 Change
 ------

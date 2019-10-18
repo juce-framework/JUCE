@@ -311,6 +311,9 @@ enum ConfigItemId
     zTrackingMode       = 32,
     // Graphics
     gammaCorrection     = 33,
+    globalKeyColour     = 34,
+    rootKeyColour       = 35,
+    brightness          = 36,
     // User
     user0               = 64,
     user1               = 65,
@@ -593,6 +596,14 @@ static constexpr const char* ledProgramLittleFootFunctions[] =
     "setButtonMinMaxDefault/viiii",
     "setButtonColours/viii",
     "setButtonTriState/vii",
+    "padControllerInitDefault/vb",
+    "padControllerReset/v",
+    "padControllerRegenDefault/v",
+    "padControllerRepaint/v",
+    "padControllerDrawPad/vi",
+    "setUseDefaultKeyHandler/vb",
+    "setUseDefaultKeyHandler/vbb",
+
     nullptr
 };
 
