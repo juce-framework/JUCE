@@ -1199,10 +1199,12 @@ private:
                 {
                     if (auto* constrainer = editor->getConstrainer())
                     {
-                        auto minW = (double) constrainer->getMinimumWidth();
-                        auto maxW = (double) constrainer->getMaximumWidth();
-                        auto minH = (double) constrainer->getMinimumHeight();
-                        auto maxH = (double) constrainer->getMaximumHeight();
+                        auto scale = editor->getTransform().getScaleFactor();
+
+                        auto minW = (double) (constrainer->getMinimumWidth()  * scale);
+                        auto maxW = (double) (constrainer->getMaximumWidth()  * scale);
+                        auto minH = (double) (constrainer->getMinimumHeight() * scale);
+                        auto maxH = (double) (constrainer->getMaximumHeight() * scale);
 
                         auto width  = (double) (rectToCheck->right - rectToCheck->left);
                         auto height = (double) (rectToCheck->bottom - rectToCheck->top);

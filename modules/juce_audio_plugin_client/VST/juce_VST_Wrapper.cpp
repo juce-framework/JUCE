@@ -1126,6 +1126,19 @@ public:
             editorComp->checkVisibility();
     }
 
+    void setHasEditorFlag (bool shouldSetHasEditor)
+    {
+        auto hasEditor = (vstEffect.flags & Vst2::effFlagsHasEditor) != 0;
+
+        if (shouldSetHasEditor == hasEditor)
+            return;
+
+        if (shouldSetHasEditor)
+            vstEffect.flags |= Vst2::effFlagsHasEditor;
+        else
+            vstEffect.flags &= ~Vst2::effFlagsHasEditor;
+    }
+
     void createEditorComp()
     {
         if (hasShutdown || processor == nullptr)
@@ -1135,12 +1148,12 @@ public:
         {
             if (auto* ed = processor->createEditorIfNeeded())
             {
-                vstEffect.flags |= Vst2::effFlagsHasEditor;
+                setHasEditorFlag (true);
                 editorComp.reset (new EditorCompWrapper (*this, *ed));
             }
             else
             {
-                vstEffect.flags &= ~Vst2::effFlagsHasEditor;
+                setHasEditorFlag (false);
             }
         }
 
@@ -1706,10 +1719,7 @@ private:
     pointer_sized_int handleOpen (VstOpCodeArguments)
     {
         // Note: most hosts call this on the UI thread, but wavelab doesn't, so be careful in here.
-        if (processor->hasEditor())
-            vstEffect.flags |= Vst2::effFlagsHasEditor;
-        else
-            vstEffect.flags &= ~Vst2::effFlagsHasEditor;
+        setHasEditorFlag (processor->hasEditor());
 
         return 0;
     }

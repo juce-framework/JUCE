@@ -47,7 +47,7 @@ struct BlockConfigManager
     void setDeviceIndex (TopologyIndex newDeviceIndex)                       { deviceIndex = newDeviceIndex; }
     void setDeviceComms (PhysicalTopologySource::DeviceConnection* newConn)  { deviceConnection = newConn; }
 
-    static constexpr uint32 numConfigItems = 66;
+    static constexpr uint32 numConfigItems = 69;
 
     /** Structure describing a configuration */
     struct ConfigDescription
@@ -100,6 +100,9 @@ struct BlockConfigManager
         { mode,                 4,      1,      5,      false,  "Mode",                 ConfigType::integer,    {},               "Play mode" },
         { volume,               100,    0,      127,    false,  "Volume",               ConfigType::integer,    {},               "Play mode" },
         { scale,                0,      0,      18,     false,  "Scale",                ConfigType::integer,    {},               "Play mode" }, // NOTE: Should be options
+        { key,                  0,      0,      11,     false,  "Key",                  ConfigType::options,    { "C", "C#", "D", "D#",
+                                                                                                                  "E", "F", "F#", "G",
+                                                                                                                  "G#", "A", "A#", "B"}, "Play mode" },
         { hideMode,             0,      0,      1,      false,  "Hide Mode",            ConfigType::boolean,    {},               "Play mode" },
         { chord,                0,      0,      127,    false,  "Chord",                ConfigType::integer,    {},               "Play mode" }, // NOTE: Should be options
         { arpPattern,           0,      0,      127,    false,  "Arp Pattern",          ConfigType::integer,    {},               "Play mode" },
@@ -126,6 +129,9 @@ struct BlockConfigManager
                                                                                                                   "Hardest" },    "Play mode" },
 
         { gammaCorrection,      0,      0,      1,      false,  "Gamma Correction",     ConfigType::boolean,    {},               {} },
+        { globalKeyColour,      INT32_MIN, INT32_MIN, INT32_MAX, false,  "Global Key Colour", ConfigType::colour, {},             "Colour" },
+        { rootKeyColour,        INT32_MIN, INT32_MIN, INT32_MAX, false,  "Root Key Colour"  , ConfigType::colour, {},             "Colour" },
+        { brightness,           100,    0,    100,      false,  "Brightness",           ConfigType::integer,    {},               "Colour" },
 
         // These can be defined for unique usage for a given Littlefoot script
         { user0,                0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
