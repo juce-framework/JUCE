@@ -10,12 +10,8 @@ class PlaybackRegionView;
 //==============================================================================
 /**
  DocumentView Class -
-    This class provides basic foundation to show the ARA Document as well as
-    their current selection state
-
-    It is currently work-in-progress, with the goal of making it a reusable base class
-    that is part of the JUCE_ARA framework module, not just example code.
-    Any JUCE-based ARA plug-in should be able to utilize this to ease its view implementation.
+    This class manages a visual representation of the ARA document as well as
+    the ARA host selection and playback state. 
 
  TODO JUCE_ARA:
     - limit zoom to avoid integer overflow with long documents and high zoom level.
@@ -31,39 +27,16 @@ class DocumentView  : public Component,
                       private juce::Timer
 {
 public:
-    /** Creation.
-
-     @param editorARAExtension  the editor extension used for viewing the document
-     @param positionInfo        the time info to be used for showing the playhead
-                                This needs to be updated from the processBlock() method of the
-                                audio processor showing the editor. The view code can deal with
-                                this struct being updated concurrently from the render thread.
-     */
     DocumentView (const AudioProcessorEditorARAExtension& editorARAExtension, const AudioPlayHead::CurrentPositionInfo& positionInfo);
 
     ~DocumentView();
 
-    /*
-     Creates a new PlaybackRegionView which will be owned.
-     This allows customizing PlaybackRegionView Component to desired behavior.
-     (for example: showing notes)
-     */
+    // child view creation functions
     virtual PlaybackRegionView* createViewForPlaybackRegion (ARAPlaybackRegion*);
-
-    /*
-     Creates a new RegionSequenceView which will be owned.
-     This allows customizing RegionSequenceView Component to desired behavior.
-     (for example: allow showing cross-fades or interaction between regions)
-     */
     virtual RegionSequenceView* createViewForRegionSequence (ARARegionSequence*);
-
-    /*
-     Creates a new TrackHeaderView which will be owned.
-     This allows customizing TrackHeaderView Component to desired behavior.
-     */
     virtual TrackHeaderView* createHeaderViewForRegionSequence (ARARegionSequence*);
 
-
+    // ARA getters
     ARAEditorView* getARAEditorView() const noexcept { return araExtension.getARAEditorView<ARAEditorView>(); }
     ARADocumentController* getDocumentController() const noexcept { return getARAEditorView()->getDocumentController<ARADocumentController>(); }
     ARADocument* getDocument() const noexcept { return getDocumentController()->getDocument<ARADocument>(); }
@@ -73,12 +46,6 @@ public:
 
     // currently visible time range
     Range<double> getVisibleTimeRange() const;
-// TODO JUCE_ARA if we want to make this into a reusable view, then zooming should use this primitive:
-//  void setVisibleTimeRange (double start, double end);
-//  It would limit the new visibile range to getTimeRange(), trying to keep requested duration unchanged.
-//  Another method zoomBy(float factor) can be added on top of this, which deals with keeping the relative
-//  playhead positon unchanged if it is visible while zooming, otherwise keeps current view centered.
-//  This will be easy to do since it is all in linear time now.
 
     // may return nullptr
     ARAMusicalContext* getCurrentMusicalContext() const;
@@ -90,6 +57,7 @@ public:
     // flag that our view needs to be rebuilt
     void invalidateRegionSequenceViews();
 
+    // misc. getters
     Component& getPlaybackRegionsView() { return playbackRegionsView; }
     Component& getTrackHeadersView() { return trackHeadersView; }
     Viewport& getTrackHeadersViewport() { return trackHeadersViewport; }
@@ -99,7 +67,7 @@ public:
 
     const AudioPlayHead::CurrentPositionInfo& getPlayHeadPositionInfo() const { return positionInfo; }
 
-    // DocumentView States
+    // DocumentView states
     void setShowOnlySelectedRegionSequences (bool newVal);
     bool isShowingOnlySelectedRegionSequences() { return showOnlySelectedRegionSequences; }
 
@@ -112,7 +80,7 @@ public:
     void setPixelsPerSecond (double newValue);
     double getPixelsPerSecond() const { return pixelsPerSecond; }
 
-    //==============================================================================
+    // juce::Component overrides
     void parentHierarchyChanged() override;
     void paint (Graphics&) override;
     void resized() override;
