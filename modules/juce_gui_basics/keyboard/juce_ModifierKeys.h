@@ -63,7 +63,7 @@ public:
     /** Checks whether the 'command' key flag is set (or 'ctrl' on Windows/Linux).
 
         This is a platform-agnostic way of checking for the operating system's
-        preferred command-key modifier - so on the Mac it tests for the Apple key, on
+        preferred command-key modifier - so on the Mac it tests for the cmd key, on
         Windows/Linux, it's actually checking for the CTRL key.
     */
     inline bool isCommandDown() const noexcept          { return testFlags (commandModifier); }
