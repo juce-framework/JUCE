@@ -1808,23 +1808,14 @@ private:
 
             default:
                 if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_ParameterList)
-                {
-                    refreshParameterList();
                     updateHostDisplay();
-                }
                 else if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_PresentPreset)
-                {
                     sendAllParametersChangedEvents();
-                }
                 else if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_Latency)
-                {
                     updateLatency();
-                }
                 else if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_BypassEffect)
-                {
                     if (bypassParam != nullptr)
                         bypassParam->setValueNotifyingHost (bypassParam->getValue());
-                }
 
                 break;
         }
