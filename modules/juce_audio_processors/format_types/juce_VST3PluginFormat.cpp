@@ -774,7 +774,8 @@ struct DescriptionFactory
                 }
             }
 
-            result = performOnDescription (desc);
+            if (desc.uid != 0)
+                result = performOnDescription (desc);
 
             if (result.failed())
                 break;
