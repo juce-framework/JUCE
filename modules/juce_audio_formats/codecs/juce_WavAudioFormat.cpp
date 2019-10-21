@@ -1052,8 +1052,15 @@ public:
                 }
                 else if (chunkType == chunkName ("data"))
                 {
-                    if (! isRF64) // data size is expected to be -1, actual data size is in ds64 chunk
+                    if (isRF64)
+                    {
+                        if (dataLength > 0)
+                            chunkEnd = input->getPosition() + dataLength + (dataLength & 1);
+                    }
+                    else
+                    {
                         dataLength = length;
+                    }
 
                     dataChunkStart = input->getPosition();
                     lengthInSamples = (bytesPerFrame > 0) ? (dataLength / bytesPerFrame) : 0;
