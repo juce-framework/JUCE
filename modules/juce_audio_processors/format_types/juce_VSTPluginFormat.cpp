@@ -1213,7 +1213,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
         desc.version = getVersion();
         desc.numInputChannels = getTotalNumInputChannels();
         desc.numOutputChannels = getTotalNumOutputChannels();
-        desc.isInstrument = (vstEffect != nullptr && (vstEffect->flags & Vst2::effFlagsIsSynth) != 0);
+        desc.isInstrument = isSynthPlugin();
     }
 
     bool initialiseEffect (double initialSampleRate, int initialBlockSize)
@@ -1269,7 +1269,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
         if (getVstCategory() != Vst2::kPlugCategShell) // (workaround for Waves 5 plugins which crash during this call)
             updateStoredProgramNames();
 
-        wantsMidiMessages = pluginCanDo ("receiveVstMidiEvent") > 0;
+        wantsMidiMessages = pluginCanDo ("receiveVstMidiEvent") > 0 || isSynthPlugin();
 
        #if JUCE_MAC && JUCE_SUPPORT_CARBON
         usesCocoaNSView = ((unsigned int) pluginCanDo ("hasCockosViewAsConfig") & 0xffff0000ul) == 0xbeef0000ul;
@@ -1338,7 +1338,9 @@ struct VSTPluginInstance     : public AudioPluginInstance,
 
     Vst2::VstPlugCategory getVstCategory() const noexcept     { return (Vst2::VstPlugCategory) dispatch (Vst2::effGetPlugCategory, 0, 0, nullptr, 0); }
 
-    int pluginCanDo (const char* text) const     { return (int) dispatch (Vst2::effCanDo, 0, 0, (void*) text,  0); }
+    bool isSynthPlugin() const  { return (vstEffect != nullptr && (vstEffect->flags & Vst2::effFlagsIsSynth) != 0); }
+
+    int pluginCanDo (const char* text) const  { return (int) dispatch (Vst2::effCanDo, 0, 0, (void*) text,  0); }
 
     //==============================================================================
     void prepareToPlay (double rate, int samplesPerBlockExpected) override
@@ -1369,7 +1371,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
 
         if (initialised)
         {
-            wantsMidiMessages = wantsMidiMessages || (pluginCanDo ("receiveVstMidiEvent") > 0);
+            wantsMidiMessages = wantsMidiMessages || (pluginCanDo ("receiveVstMidiEvent") > 0) || isSynthPlugin();
 
             if (wantsMidiMessages)
                 midiEventsToSend.ensureSize (256);
