@@ -994,7 +994,7 @@ private:
                     Callback<ITypedEventHandler<DeviceWatcher*, DeviceInformationUpdate*>> (
                         [handlerPtr](IDeviceWatcher*, IDeviceInformationUpdate* infoUpdate) { return handlerPtr->updateDevice (infoUpdate); }
                     ).Get(),
-                    &deviceRemovedToken);
+                    &deviceUpdatedToken);
 
                 watcher->Start();
             }
