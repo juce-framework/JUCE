@@ -236,35 +236,52 @@ namespace AudioUnitFormatHelpers
                 UseResFile (resFileId);
 
                 const OSType thngType = stringToOSType ("thng");
+                auto numResources = Count1Resources (thngType);
 
-                for (ResourceIndex i = 1; i <= Count1Resources (thngType); ++i)
+                if (numResources > 0)
                 {
-                    if (Handle h = Get1IndResource (thngType, i))
+                    for (ResourceIndex i = 1; i <= numResources; ++i)
                     {
-                        HLock (h);
-                        const uint32* const types = (const uint32*) *h;
-
-                        if (types[0] == kAudioUnitType_MusicDevice
-                             || types[0] == kAudioUnitType_MusicEffect
-                             || types[0] == kAudioUnitType_Effect
-                             || types[0] == kAudioUnitType_Generator
-                             || types[0] == kAudioUnitType_Panner
-                             || types[0] == kAudioUnitType_Mixer
-                             || types[0] == kAudioUnitType_MIDIProcessor)
+                        if (Handle h = Get1IndResource (thngType, i))
                         {
-                            desc.componentType = types[0];
-                            desc.componentSubType = types[1];
-                            desc.componentManufacturer = types[2];
+                            HLock (h);
+                            const uint32* const types = (const uint32*) *h;
 
-                            if (AudioComponent comp = AudioComponentFindNext (nullptr, &desc))
-                                getNameAndManufacturer (comp, name, manufacturer);
+                            if (types[0] == kAudioUnitType_MusicDevice
+                                 || types[0] == kAudioUnitType_MusicEffect
+                                 || types[0] == kAudioUnitType_Effect
+                                 || types[0] == kAudioUnitType_Generator
+                                 || types[0] == kAudioUnitType_Panner
+                                 || types[0] == kAudioUnitType_Mixer
+                                 || types[0] == kAudioUnitType_MIDIProcessor)
+                            {
+                                desc.componentType = types[0];
+                                desc.componentSubType = types[1];
+                                desc.componentManufacturer = types[2];
 
-                            break;
+                                if (AudioComponent comp = AudioComponentFindNext (nullptr, &desc))
+                                    getNameAndManufacturer (comp, name, manufacturer);
+
+                                break;
+                            }
+
+                            HUnlock (h);
+                            ReleaseResource (h);
                         }
-
-                        HUnlock (h);
-                        ReleaseResource (h);
                     }
+                }
+                else
+                {
+                    NSBundle* bundle = [[NSBundle alloc] initWithPath: (NSString*) fileOrIdentifier.toCFString()];
+
+                    NSArray* audioComponents = [bundle objectForInfoDictionaryKey: @"AudioComponents"];
+                    NSDictionary* dict = audioComponents[0];
+
+                    desc.componentManufacturer = stringToOSType (nsStringToJuce ((NSString*) [dict valueForKey: @"manufacturer"]));
+                    desc.componentType         = stringToOSType (nsStringToJuce ((NSString*) [dict valueForKey: @"type"]));
+                    desc.componentSubType      = stringToOSType (nsStringToJuce ((NSString*) [dict valueForKey: @"subtype"]));
+
+                    [bundle release];
                 }
 
                 CFBundleCloseBundleResourceMap (bundleRef, resFileId);
