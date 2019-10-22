@@ -71,9 +71,6 @@ public:
 
         sustainLevel = newParameters.sustain;
         calculateRates (newParameters);
-
-        if (currentState != State::idle)
-            checkCurrentState();
     }
 
     /** Returns the parameters currently being used by an ADSR object.
@@ -102,12 +99,6 @@ public:
     {
         envelopeVal = 0.0f;
         currentState = State::idle;
-
-        if (resetReleaseRate)
-        {
-            releaseRate = static_cast<float> (sustainLevel / (currentParameters.release * sr));
-            resetReleaseRate = false;
-        }
     }
 
     /** Starts the attack phase of the envelope. */
@@ -133,14 +124,9 @@ public:
     {
         if (currentState != State::idle)
         {
-            if (releaseRate > 0.0f)
+            if (currentParameters.release > 0.0f)
             {
-                if (currentState != State::sustain)
-                {
-                    releaseRate = static_cast<float> (envelopeVal / (currentParameters.release * sr));
-                    resetReleaseRate = true;
-                }
-
+                releaseRate = static_cast<float> (envelopeVal / (currentParameters.release * sr));
                 currentState = State::release;
             }
             else
@@ -231,16 +217,8 @@ private:
 
         attackRate  = (parameters.attack  > 0.0f ? static_cast<float> (1.0f                  / (parameters.attack * sr))  : -1.0f);
         decayRate   = (parameters.decay   > 0.0f ? static_cast<float> ((1.0f - sustainLevel) / (parameters.decay * sr))   : -1.0f);
-        releaseRate = (parameters.release > 0.0f ? static_cast<float> (sustainLevel          / (parameters.release * sr)) : -1.0f);
     }
-
-    void checkCurrentState()
-    {
-        if      (currentState == State::attack  && attackRate <= 0.0f)   currentState = decayRate > 0.0f ? State::decay : State::sustain;
-        else if (currentState == State::decay   && decayRate <= 0.0f)    currentState = State::sustain;
-        else if (currentState == State::release && releaseRate <= 0.0f)  reset();
-    }
-
+  
     //==============================================================================
     enum class State { idle, attack, decay, sustain, release };
 
@@ -249,7 +227,6 @@ private:
 
     double sr = 0.0;
     float envelopeVal = 0.0f, sustainLevel = 0.0f, attackRate = 0.0f, decayRate = 0.0f, releaseRate = 0.0f;
-    bool resetReleaseRate = false;
 };
 
 } // namespace juce
