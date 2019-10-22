@@ -1,0 +1,15 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: macOS-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build Projucer
+      run: | 
+        cd extras/Projucer/builds/MacOSX
+        xcodebuild -configuration Release GCC_PREPROCESSOR_DEFINITIONS='$GCC_PREPROCESSOR_DEFINITIONS JUCER_ENABLE_GPL_MODE=1'
