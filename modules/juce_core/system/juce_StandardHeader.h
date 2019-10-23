@@ -54,6 +54,7 @@
 #include <sstream>
 #include <iomanip>
 #include <map>
+#include <cstddef>
 
 //==============================================================================
 #include "juce_CompilerSupport.h"
