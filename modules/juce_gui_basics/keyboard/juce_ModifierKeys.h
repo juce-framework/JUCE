@@ -136,7 +136,7 @@ public:
         /** Middle mouse button flag. */
         middleButtonModifier                    = 64,
 
-       #if JUCE_MAC
+       #if JUCE_MAC || JUCE_IOS
         /** Command key flag - on windows this is the same as the CTRL key flag. */
         commandModifier                         = 8,
 
