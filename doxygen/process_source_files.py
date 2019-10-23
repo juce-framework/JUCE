@@ -75,8 +75,10 @@ if __name__ == "__main__":
                              "subdirectories")
     args = parser.parse_args()
 
-    try: 
+    try:
         shutil.rmtree(args.dest_dir)
+    except OSError:
+        pass
     except FileNotFoundError:
         pass
 

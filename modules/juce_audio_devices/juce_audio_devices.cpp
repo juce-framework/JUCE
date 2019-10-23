@@ -149,7 +149,6 @@
      installed, or you've not got your paths set up correctly to find its header
      files.
   */
-  #include <rtdk.h>
   #include <Bela.h>
   #include <Midi.h>
  #endif

@@ -442,12 +442,14 @@ struct GraphEditorPanel::PluginComponent   : public Component,
             case 10:  showWindow (PluginWindow::Type::normal); break;
             case 11:  showWindow (PluginWindow::Type::programs); break;
             case 12:  showWindow (PluginWindow::Type::generic)  ; break;
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
             case 13:
             {
                 if (auto* node = graph.graph.getNodeForId (pluginID))
                     node->properties.set ("DPIAware", ! node->properties ["DPIAware"]);
                 break;
             }
+           #endif
             case 14:  showWindow (PluginWindow::Type::debug); break;
             case 20:  showWindow (PluginWindow::Type::audioIO); break;
             case 21:  testStateSaveLoad(); break;

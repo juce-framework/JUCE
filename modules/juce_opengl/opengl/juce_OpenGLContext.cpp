@@ -296,6 +296,8 @@ public:
                 transform = AffineTransform::scale ((float) newArea.getWidth()  / (float) localBounds.getWidth(),
                                                     (float) newArea.getHeight() / (float) localBounds.getHeight());
 
+                nativeContext->updateWindowPosition (peer->getAreaCoveredBy (component));
+
                 if (canTriggerUpdate)
                     invalidateAll();
             }

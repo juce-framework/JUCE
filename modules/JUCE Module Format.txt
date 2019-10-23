@@ -108,7 +108,7 @@ OS X:
     "i386", for example).
 
 Visual Studio:
-    VisualStudio{year}/{arch}/{run-time}, where {year} is the four digit year of the Visual Studio
+    libs/VisualStudio{year}/{arch}/{run-time}, where {year} is the four digit year of the Visual Studio
     release, arch is the target architecture in Visual Studio ("x64" or "Win32", for example), and
     {runtime} is the type of the run-time library indicated by the corresponding compiler flag
     ("MD", "MDd", "MT", "MTd").

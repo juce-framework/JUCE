@@ -83,6 +83,20 @@ public:
         if (connectionTime == Time())
             connectionTime = Time::getCurrentTime();
 
+        updateDeviceInfo (deviceInfo);
+
+        remoteHeap.reset();
+
+        setProgram (nullptr);
+
+        if (auto surface = dynamic_cast<TouchSurfaceImplementation*> (touchSurface.get()))
+            surface->activateTouchSurface();
+
+        updateMidiConnectionListener();
+    }
+
+    void updateDeviceInfo (const DeviceInfo& deviceInfo)
+    {
         versionNumber = deviceInfo.version.asString();
         name = deviceInfo.name.asString();
         isMaster = deviceInfo.isMaster;
@@ -90,14 +104,6 @@ public:
         batteryCharging = deviceInfo.batteryCharging;
         batteryLevel = deviceInfo.batteryLevel;
         topologyIndex = deviceInfo.index;
-
-        setProgram (nullptr);
-        remoteHeap.resetDeviceStateToUnknown();
-
-        if (auto surface = dynamic_cast<TouchSurfaceImplementation*> (touchSurface.get()))
-            surface->activateTouchSurface();
-
-        updateMidiConnectionListener();
     }
 
     void setToMaster (bool shouldBeMaster)
@@ -289,7 +295,7 @@ public:
 
         if (program == nullptr)
         {
-            remoteHeap.clear();
+            remoteHeap.clearTargetData();
             return Result::ok();
         }
 
@@ -311,7 +317,7 @@ public:
         programSize = (uint32) size;
 
         remoteHeap.resetDataRangeToUnknown (0, remoteHeap.blockSize);
-        remoteHeap.clear();
+        remoteHeap.clearTargetData();
         remoteHeap.sendChanges (*this, true);
 
         remoteHeap.resetDataRangeToUnknown (0, (uint32) size);
@@ -504,8 +510,13 @@ public:
 
         remoteHeap.sendChanges (*this, false);
 
-        if (lastMessageSendTime < Time::getCurrentTime() - RelativeTime::milliseconds (pingIntervalMs))
+        if (lastMessageSendTime < Time::getCurrentTime() - getPingInterval())
             sendCommandMessage (BlocksProtocol::ping);
+    }
+
+    RelativeTime getPingInterval()
+    {
+        return RelativeTime::milliseconds (isMaster ? masterPingIntervalMs : dnaPingIntervalMs);
     }
 
     //==============================================================================
@@ -629,7 +640,8 @@ public:
 
     MIDIDeviceConnection* listenerToMidiConnection = nullptr;
 
-    static constexpr int pingIntervalMs = 400;
+    static constexpr int masterPingIntervalMs = 400;
+    static constexpr int dnaPingIntervalMs = 1666;
 
     static constexpr uint32 maxBlockSize = BlocksProtocol::padBlockProgramAndHeapSize;
     static constexpr uint32 maxPacketCounter = BlocksProtocol::PacketCounter::maxValue;

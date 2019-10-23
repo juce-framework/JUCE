@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
-              jucerVersion="5.4.4" version="5.4.4" bundleIdentifier="com.juce.theprojucer"
+              jucerVersion="5.4.5" version="5.4.5" bundleIdentifier="com.juce.theprojucer"
               splashScreenColour="Dark" displaySplashScreen="0" reportAppUsage="0"
               companyName="ROLI Ltd." companyCopyright="ROLI Ltd." cppLanguageStandard="11">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                documentExtensions=".jucer" objCExtraSuffix="zkVtji" bigIcon="rv1F4h"
                customPList="&lt;plist&gt;&#10;&lt;dict&gt;&#10;&#9;&lt;key&gt;NSAppTransportSecurity&lt;/key&gt;&#10;&#9;&lt;dict&gt;&#10;&#9;&#9;&lt;key&gt;NSAllowsArbitraryLoads&lt;/key&gt;&#10;&#9;&#9;&lt;true/&gt;&#10;&#9;&#9;&lt;key&gt;NSExceptionDomains&lt;/key&gt;&#10;&#9;&#9;&lt;dict&gt;&#10;&#9;&#9;&#9;&lt;key&gt;amazonaws.com&lt;/key&gt;&#10;&#9;&#9;&#9;&lt;dict&gt;&#10;&#9;&#9;&#9;&#9;&lt;key&gt;NSExceptionAllowsInsecureHTTPLoads&lt;/key&gt;&#10;&#9;&#9;&#9;&#9;&lt;true/&gt;&#10;&#9;&#9;&#9;&#9;&lt;key&gt;NSIncludesSubdomains&lt;/key&gt;&#10;&#9;&#9;&#9;&#9;&lt;true/&gt;&#10;&#9;&#9;&#9;&lt;/dict&gt;&#10;&#9;&#9;&lt;/dict&gt;&#10;&#9;&lt;/dict&gt;&#10;&lt;/dict&gt;&#10;&lt;/plist&gt;"
-               extraFrameworks="AudioUnit; Accelerate; AVFoundation; CoreAudio; CoreAudioKit; CoreMIDI; DiscRecording; QuartzCore; AudioToolbox; OpenGL; QTKit; QuickTime">
+               extraFrameworks="AudioUnit; Accelerate; AVFoundation; CoreAudio; CoreAudioKit; CoreMIDI; DiscRecording; QuartzCore; AudioToolbox; OpenGL; QTKit; QuickTime"
+               microphonePermissionNeeded="1" cameraPermissionNeeded="1">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" cppLibType="libc++"
                        recommendedWarnings="LLVM"/>

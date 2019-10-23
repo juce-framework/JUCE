@@ -50,7 +50,7 @@ public:
     JUCE_DECLARE_SINGLETON (PushNotifications, false)
    #endif
 
-    //==========================================================================
+    //==============================================================================
     /** Represents a notification that can be sent or received. */
     struct Notification
     {
@@ -107,7 +107,7 @@ public:
             /**@}*/
         };
 
-        //==========================================================================
+        //==============================================================================
         /** @name Common fields */
         /**@{*/
 
@@ -149,7 +149,7 @@ public:
 
         /**@}*/
 
-        //==========================================================================
+        //==============================================================================
         /** @name iOS only fields */
         /**@{*/
 
@@ -161,7 +161,7 @@ public:
 
         /**@}*/
 
-        //==========================================================================
+        //==============================================================================
         /** @name Android only fields */
         /**@{*/
 
@@ -323,7 +323,7 @@ public:
     };
 
 
-    //==========================================================================
+    //==============================================================================
     /** Describes settings we want to use for current device. Note that at the
         moment this is only used on iOS and partially on OSX.
 
@@ -438,7 +438,7 @@ public:
     */
     void requestSettingsUsed();
 
-    //==========================================================================
+    //==============================================================================
     /** Android API level 26 or higher only: Represents notification channel through which
         notifications will be sent. Starting from Android API level 26, you should call setupChannels()
         at the start of your application, before posting any notifications. Then, when sending notifications,
@@ -491,7 +491,7 @@ public:
     */
     void setupChannels (const Array<ChannelGroup>& groups, const Array<Channel>& channels);
 
-    //==========================================================================
+    //==============================================================================
     /** iOS only: sends an asynchronous request to retrieve a list of notifications that were
         scheduled and not yet delivered.
 
@@ -505,7 +505,7 @@ public:
     /** Unschedules all pending local notifications. iOS only. */
     void removeAllPendingLocalNotifications();
 
-    //==========================================================================
+    //==============================================================================
     /** Checks whether notifications are enabled for given application.
         On iOS and OSX this will always return true, use requestSettingsUsed() instead.
     */
@@ -535,7 +535,7 @@ public:
     /** Removes all notifications that were delivered. */
     void removeAllDeliveredNotifications();
 
-    //==========================================================================
+    //==============================================================================
     /** Retrieves current device token. Note, it is not a good idea to cache this token
         because it may change in the meantime. Always call this method to get the current
         token value.
@@ -587,7 +587,7 @@ public:
                               int timeToLive,
                               const StringPairArray& additionalData);
 
-    //==========================================================================
+    //==============================================================================
     /** Register a listener (ideally on application startup) to receive information about
         notifications received and any callbacks to async functions called.
     */

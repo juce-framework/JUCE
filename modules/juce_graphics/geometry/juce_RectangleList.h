@@ -386,7 +386,7 @@ public:
         destRegion.clear();
 
         if (! rect.isEmpty())
-            for (auto& r : rects)
+            for (auto r : rects)
                 if (rect.intersectRectangle (r))
                     destRegion.rects.add (r);
 

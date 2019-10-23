@@ -80,7 +80,10 @@ struct ItemComponent  : public Component
             customComp = *new HeaderItemComponent (item.text);
 
         if (customComp != nullptr)
+        {
+            setItem (*customComp, &item);
             addAndMakeVisible (*customComp);
+        }
 
         parent.addAndMakeVisible (this);
 
@@ -96,6 +99,9 @@ struct ItemComponent  : public Component
 
     ~ItemComponent() override
     {
+        if (customComp != nullptr)
+            setItem (*customComp, nullptr);
+
         removeChildComponent (customComp.get());
     }
 
@@ -1589,6 +1595,7 @@ void PopupMenu::addSeparator()
 void PopupMenu::addSectionHeader (String title)
 {
     Item i (std::move (title));
+    i.itemID = 0;
     i.isSectionHeader = true;
     addItem (std::move (i));
 }
@@ -1890,6 +1897,12 @@ bool PopupMenu::containsAnyActiveItems() const noexcept
 void PopupMenu::setLookAndFeel (LookAndFeel* const newLookAndFeel)
 {
     lookAndFeel = newLookAndFeel;
+}
+
+void PopupMenu::setItem (CustomComponent& c, const Item* itemToUse)
+{
+    c.item = itemToUse;
+    c.repaint();
 }
 
 //==============================================================================

@@ -104,6 +104,7 @@
  #include <objc/runtime.h>
  #include <objc/objc.h>
  #include <objc/message.h>
+ #include <poll.h>
 
 //==============================================================================
 #elif JUCE_WINDOWS
@@ -241,6 +242,7 @@
  #include <sys/vfs.h>
  #include <sys/wait.h>
  #include <utime.h>
+ #include <poll.h>
 
 //==============================================================================
 #elif JUCE_BSD
@@ -269,6 +271,7 @@
  #include <sys/types.h>
  #include <sys/wait.h>
  #include <utime.h>
+ #include <poll.h>
 
 //==============================================================================
 #elif JUCE_ANDROID
@@ -290,6 +293,7 @@
  #include <fnmatch.h>
  #include <sys/wait.h>
  #include <android/api-level.h>
+ #include <poll.h>
 
  // If you are getting include errors here, then you to re-build the Projucer
  // and re-save your .jucer file.

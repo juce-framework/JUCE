@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="IvabE4" name="WindowsDLL" projectType="library" juceLinkage="none"
-              bundleIdentifier="com.roli.jucedll" jucerVersion="5.4.4" defines="JUCE_DLL_BUILD=1"
+              bundleIdentifier="com.roli.jucedll" jucerVersion="5.4.5" defines="JUCE_DLL_BUILD=1"
               displaySplashScreen="0" reportAppUsage="0" companyName="ROLI Ltd."
               companyCopyright="ROLI Ltd.">
   <EXPORTFORMATS>

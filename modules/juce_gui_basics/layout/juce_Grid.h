@@ -67,35 +67,37 @@ public:
     {
         /** Creates a track with auto dimension. */
         TrackInfo() noexcept;
-        /** */
+
         TrackInfo (Px sizeInPixels) noexcept;
-        /** */
         TrackInfo (Fr fractionOfFreeSpace) noexcept;
 
-        /** */
-        TrackInfo (Px sizeInPixels, const juce::String& endLineNameToUse) noexcept;
-        /** */
-        TrackInfo (Fr fractionOfFreeSpace, const juce::String& endLineNameToUse) noexcept;
+        TrackInfo (Px sizeInPixels, const String& endLineNameToUse) noexcept;
+        TrackInfo (Fr fractionOfFreeSpace, const String& endLineNameToUse) noexcept;
 
-        /** */
-        TrackInfo (const juce::String& startLineNameToUse, Px sizeInPixels) noexcept;
-        /** */
-        TrackInfo (const juce::String& startLineNameToUse, Fr fractionOfFreeSpace) noexcept;
+        TrackInfo (const String& startLineNameToUse, Px sizeInPixels) noexcept;
+        TrackInfo (const String& startLineNameToUse, Fr fractionOfFreeSpace) noexcept;
 
-        /** */
-        TrackInfo (const juce::String& startLineNameToUse, Px sizeInPixels, const juce::String& endLineNameToUse) noexcept;
-        /** */
-        TrackInfo (const juce::String& startLineNameToUse, Fr fractionOfFreeSpace, const juce::String& endLineNameToUse) noexcept;
+        TrackInfo (const String& startLineNameToUse, Px sizeInPixels, const String& endLineNameToUse) noexcept;
+        TrackInfo (const String& startLineNameToUse, Fr fractionOfFreeSpace, const String& endLineNameToUse) noexcept;
+
+        bool isAuto() const noexcept { return hasKeyword; }
+        bool isFractional() const noexcept { return isFraction; }
+        bool isPixels() const noexcept { return ! isFraction; }
+        const String& getStartLineName() const noexcept { return startLineName; }
+        const String& getEndLineName() const noexcept { return endLineName; }
+
+        /** Get the track's size - which might mean an absolute pixels value or a fractional ratio. */
+        float getSize() const noexcept { return size; }
 
     private:
         friend class Grid;
-        friend class GridItem;
+        float getAbsoluteSize (float relativeFractionalUnit) const;
 
         float size = 0; // Either a fraction or an absolute size in pixels
         bool isFraction = false;
         bool hasKeyword = false;
 
-        juce::String startLineName, endLineName;
+        String startLineName, endLineName;
     };
 
     //==============================================================================
@@ -177,13 +179,13 @@ public:
 
     //==============================================================================
     /** The set of column tracks to lay out. */
-    juce::Array<TrackInfo> templateColumns;
+    Array<TrackInfo> templateColumns;
 
     /** The set of row tracks to lay out. */
-    juce::Array<TrackInfo> templateRows;
+    Array<TrackInfo> templateRows;
 
     /** Template areas */
-    juce::StringArray templateAreas;
+    StringArray templateAreas;
 
     /** The row track for auto dimension. */
     TrackInfo autoRows;
@@ -201,11 +203,11 @@ public:
 
     //==============================================================================
     /** The set of items to lay-out. */
-    juce::Array<GridItem> items;
+    Array<GridItem> items;
 
     //==============================================================================
     /** Lays-out the grid's items within the given rectangle. */
-    void performLayout (juce::Rectangle<int>);
+    void performLayout (Rectangle<int>);
 
     //==============================================================================
     /** Returns the number of columns. */

@@ -1075,6 +1075,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\internal\juce_BlockImplementation.cpp">
       <Filter>JUCE Modules\juce_blocks_basics\topology\internal</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\internal\juce_BlockSerialReader.cpp">
+      <Filter>JUCE Modules\juce_blocks_basics\topology\internal</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\internal\juce_ConnectedDeviceGroup.cpp">
       <Filter>JUCE Modules\juce_blocks_basics\topology\internal</Filter>
     </ClCompile>
@@ -1488,6 +1491,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_data_structures\juce_data_structures.mm">
       <Filter>JUCE Modules\juce_data_structures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\containers\juce_AudioBlock_test.cpp">
+      <Filter>JUCE Modules\juce_dsp\containers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_dsp\containers\juce_SIMDRegister_test.cpp">
       <Filter>JUCE Modules\juce_dsp\containers</Filter>

@@ -51,7 +51,7 @@ public:
             setBounds (bounds);
 
         toFront (true);
-        setOpaque (! bounds.isEmpty());
+        setOpaque (true);
 
         controller = [[CABTMIDICentralViewController alloc] init];
         nativeSelectorComponent.setView ([controller view]);

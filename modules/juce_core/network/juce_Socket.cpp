@@ -33,19 +33,22 @@ namespace juce
 #endif
 
 #if JUCE_WINDOWS
- typedef int       juce_socklen_t;
- typedef int       juce_recvsend_size_t;
- typedef SOCKET    SocketHandle;
+ using juce_socklen_t       = int;
+ using juce_recvsend_size_t = int;
+ using SocketHandle         = SOCKET;
+ #if ! JUCE_MINGW
+  using pollfd              = WSAPOLLFD;
+ #endif
  static const SocketHandle invalidSocket = INVALID_SOCKET;
 #elif JUCE_ANDROID
- typedef socklen_t juce_socklen_t;
- typedef size_t    juce_recvsend_size_t;
- typedef int       SocketHandle;
+ using juce_socklen_t       = socklen_t;
+ using juce_recvsend_size_t = size_t;
+ using SocketHandle         = int;
  static const SocketHandle invalidSocket = -1;
 #else
- typedef socklen_t juce_socklen_t;
- typedef socklen_t juce_recvsend_size_t;
- typedef int       SocketHandle;
+ using juce_socklen_t       = socklen_t;
+ using juce_recvsend_size_t = socklen_t;
+ using SocketHandle         = int;
  static const SocketHandle invalidSocket = -1;
 #endif
 
@@ -87,7 +90,7 @@ namespace SocketHelpers
 
     static bool resetSocketOptions (SocketHandle handle, bool isDatagram, bool allowBroadcast) noexcept
     {
-        return handle >= 0
+        return handle != invalidSocket
                 && setOption (handle, SO_RCVBUF, (int) 65536)
                 && setOption (handle, SO_SNDBUF, (int) 65536)
                 && (isDatagram ? ((! allowBroadcast) || setOption (handle, SO_BROADCAST, (int) 1))
@@ -147,7 +150,7 @@ namespace SocketHelpers
 
     static bool bindSocket (SocketHandle handle, int port, const String& address) noexcept
     {
-        if (handle < 0 || ! isValidPortNumber (port))
+        if (handle == invalidSocket || ! isValidPortNumber (port))
             return false;
 
         struct sockaddr_in addr;
@@ -163,7 +166,7 @@ namespace SocketHelpers
 
     static int getBoundPort (SocketHandle handle) noexcept
     {
-        if (handle >= 0)
+        if (handle != invalidSocket)
         {
             struct sockaddr_in addr;
             socklen_t len = sizeof (addr);
@@ -186,6 +189,33 @@ namespace SocketHelpers
         return "0.0.0.0";
     }
 
+    static bool setSocketBlockingState (SocketHandle handle, bool shouldBlock) noexcept
+    {
+       #if JUCE_WINDOWS
+        u_long nonBlocking = shouldBlock ? 0 : (u_long) 1;
+        return ioctlsocket (handle, FIONBIO, &nonBlocking) == 0;
+       #else
+        int socketFlags = fcntl (handle, F_GETFL, 0);
+
+        if (socketFlags == -1)
+            return false;
+
+        if (shouldBlock)
+            socketFlags &= ~O_NONBLOCK;
+        else
+            socketFlags |= O_NONBLOCK;
+
+        return fcntl (handle, F_SETFL, socketFlags) == 0;
+       #endif
+    }
+
+   #if ! JUCE_WINDOWS
+    static bool getSocketBlockingState (SocketHandle handle)
+    {
+        return (fcntl (handle, F_GETFL, 0) & O_NONBLOCK) == 0;
+    }
+   #endif
+
     static int readSocket (SocketHandle handle,
                            void* destBuffer, int maxBytesToRead,
                            std::atomic<bool>& connected,
@@ -194,6 +224,11 @@ namespace SocketHelpers
                            String* senderIP = nullptr,
                            int* senderPort = nullptr) noexcept
     {
+       #if ! JUCE_WINDOWS
+        if (blockUntilSpecifiedAmountHasArrived != getSocketBlockingState (handle))
+       #endif
+            setSocketBlockingState (handle, blockUntilSpecifiedAmountHasArrived);
+
         int bytesRead = 0;
 
         while (bytesRead < maxBytesToRead)
@@ -251,8 +286,9 @@ namespace SocketHelpers
         if (! lock.isLocked())
             return -1;
 
-        int h = handle.load();
+        auto h = handle.load();
 
+       #if JUCE_MINGW
         struct timeval timeout;
         struct timeval* timeoutp;
 
@@ -276,24 +312,36 @@ namespace SocketHelpers
         fd_set* const prset = forReading ? &rset : nullptr;
         fd_set* const pwset = forReading ? nullptr : &wset;
 
-       #if JUCE_WINDOWS
         if (select ((int) h + 1, prset, pwset, 0, timeoutp) < 0)
             return -1;
        #else
+        short eventsFlag = (forReading ? POLLIN : POLLOUT);
+        pollfd pfd { (SocketHandle) h, eventsFlag, 0 };
+
+        int result = 0;
+
+        for (;;)
         {
-            int result = 0;
+           #if JUCE_WINDOWS
+            result = WSAPoll (&pfd, 1, timeoutMsecs);
+           #else
+            result = poll (&pfd, 1, timeoutMsecs);
+           #endif
 
-            for (;;)
+            if (result >= 0
+               #if JUCE_WINDOWS
+                || result == SOCKET_ERROR
+               #else
+                || errno != EINTR
+               #endif
+                )
             {
-                result = select (h + 1, prset, pwset, nullptr, timeoutp);
-
-                if (result >= 0 || errno != EINTR)
-                    break;
+                break;
             }
-
-            if (result < 0)
-                return -1;
         }
+
+        if (result < 0)
+            return -1;
        #endif
 
         // we are closing
@@ -309,26 +357,10 @@ namespace SocketHelpers
                 return -1;
         }
 
+       #if JUCE_MINGW
         return FD_ISSET (h, forReading ? &rset : &wset) ? 1 : 0;
-    }
-
-    static bool setSocketBlockingState (SocketHandle handle, bool shouldBlock) noexcept
-    {
-       #if JUCE_WINDOWS
-        u_long nonBlocking = shouldBlock ? 0 : (u_long) 1;
-        return ioctlsocket (handle, FIONBIO, &nonBlocking) == 0;
        #else
-        int socketFlags = fcntl (handle, F_GETFL, 0);
-
-        if (socketFlags == -1)
-            return false;
-
-        if (shouldBlock)
-            socketFlags &= ~O_NONBLOCK;
-        else
-            socketFlags |= O_NONBLOCK;
-
-        return fcntl (handle, F_SETFL, socketFlags) == 0;
+        return (pfd.revents & eventsFlag) != 0;
        #endif
     }
 
@@ -688,8 +720,6 @@ int DatagramSocket::read (void* destBuffer, int maxBytesToRead, bool shouldBlock
         return -1;
 
     std::atomic<bool> connected { true };
-
-    SocketHelpers::setSocketBlockingState (handle, shouldBlock);
     return SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead,
                                       connected, shouldBlock, readLock);
 }
@@ -700,8 +730,6 @@ int DatagramSocket::read (void* destBuffer, int maxBytesToRead, bool shouldBlock
         return -1;
 
     std::atomic<bool> connected { true };
-
-    SocketHelpers::setSocketBlockingState (handle, shouldBlock);
     return SocketHelpers::readSocket (handle, destBuffer, maxBytesToRead, connected,
                                       shouldBlock, readLock, &senderIPAddress, &senderPort);
 }
