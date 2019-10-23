@@ -267,10 +267,10 @@ struct SIMDRegister
     inline SIMDRegister JUCE_VECTOR_CALLTYPE operator^ (MaskType s) const noexcept      { return { NativeOps::bit_xor (value, toVecType (s)) }; }
 
     //==============================================================================
-    /** Returns true if all elements-wise comparisons return true. */
+    /** Returns true if all element-wise comparisons return true. */
     inline bool JUCE_VECTOR_CALLTYPE operator== (SIMDRegister other) const noexcept    { return  NativeOps::allEqual (value, other.value); }
 
-    /** Returns true if any elements-wise comparisons return false. */
+    /** Returns true if any element-wise comparisons return false. */
     inline bool JUCE_VECTOR_CALLTYPE operator!= (SIMDRegister other) const noexcept    { return ! (*this == other); }
 
     /** Returns true if all elements are equal to the scalar. */
