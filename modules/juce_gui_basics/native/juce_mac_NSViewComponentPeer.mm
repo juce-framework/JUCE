@@ -85,6 +85,12 @@ public:
 
         [view setPostsFrameChangedNotifications: YES];
 
+       #if defined (MAC_OS_X_VERSION_10_8) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8) \
+            && USE_COREGRAPHICS_RENDERING && JUCE_COREGRAPHICS_DRAW_ASYNC
+        [view setWantsLayer: YES];
+        [[view layer] setDrawsAsynchronously: YES];
+       #endif
+
         if (isSharedWindow)
         {
             window = [viewToAttachTo window];
