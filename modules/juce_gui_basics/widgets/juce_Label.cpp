@@ -436,7 +436,7 @@ void Label::textEditorTextChanged (TextEditor& ed)
     {
         jassert (&ed == editor.get());
 
-        if (! (hasKeyboardFocus (true) || isCurrentlyBlockedByAnotherModalComponent()))
+        if (! (ed.hasKeyboardFocus (true) || isCurrentlyBlockedByAnotherModalComponent()))
         {
             if (lossOfFocusDiscardsChanges)
                 textEditorEscapeKeyPressed (ed);

@@ -248,7 +248,7 @@ public:
     bool doesLossOfFocusDiscardChanges() const noexcept                 { return lossOfFocusDiscardsChanges; }
 
 	/** Returns true if this option has been set in a call to setEditable(). */
-	bool isEditableOnFocusGainedByTabKey() const noexcept { return editFocusGainedByTabKey; }
+	bool isEditableOnFocusGainedByTabKey() const noexcept				{ return editFocusGainedByTabKey; }
 
 	/** Returns true if the user can edit this label's text. */
 	bool isEditable() const noexcept                                    { return editSingleClick || editDoubleClick; }
