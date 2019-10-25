@@ -78,6 +78,7 @@ struct BlockDataSheet
     Array<StatusLEDInfo> statusLEDs;
     Array<Block::ConnectionPort> ports;
     Array<const char*> dials;
+    Array<BlockConfigManager::ConfigDescription> defaultConfig;
 
 private:
     //==============================================================================

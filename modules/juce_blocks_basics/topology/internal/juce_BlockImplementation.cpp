@@ -40,7 +40,8 @@ public:
                  deviceInfo.name.asString()),
           modelData (deviceInfo.serial),
           remoteHeap (modelData.programAndHeapSize),
-          detector (&detectorToUse)
+          detector (&detectorToUse),
+          config (modelData.defaultConfig)
     {
         markReconnected (deviceInfo);
 
