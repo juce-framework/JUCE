@@ -46,6 +46,15 @@ namespace
     static String getSDKDisplayName (int version)  { return getVersionName (version) + " SDK"; }
     static String getSDKRootName    (int version)  { return "macosx" + getVersionName (version); }
 
+    static String getOSXSDKVersion (const String& sdkVersion)
+    {
+        for (int v = oldestSDKVersion; v <= currentSDKVersion; ++v)
+            if (sdkVersion == getSDKDisplayName (v))
+                return getSDKRootName (v);
+
+        return {};
+    }
+
     template<class ContainerType>
     static ContainerType getSDKChoiceList (int oldestVersion, bool displayName)
     {
@@ -1331,11 +1340,6 @@ public:
             else
             {
                 s.set ("MACOSX_DEPLOYMENT_TARGET", getOSXDeploymentTarget (config.getOSXDeploymentTargetString()));
-
-                auto sdkRoot = getOSXSDKVersion (config.getOSXSDKVersionString());
-
-                if (sdkRoot.isNotEmpty())
-                    s.set ("SDKROOT", sdkRoot);
             }
 
             s.set ("GCC_VERSION", gccVersion);
@@ -1932,15 +1936,6 @@ public:
                     return getVersionName (v);
 
             return getVersionName (minVersion);
-        }
-
-        String getOSXSDKVersion (const String& sdkVersion) const
-        {
-            for (int v = oldestSDKVersion; v <= currentSDKVersion; ++v)
-                if (sdkVersion == getSDKDisplayName (v))
-                    return getSDKRootName (v);
-
-            return {};
         }
 
         //==============================================================================
@@ -2616,6 +2611,13 @@ private:
             s.set ("SDKROOT", "iphoneos");
             s.set ("TARGETED_DEVICE_FAMILY", getDeviceFamilyString().quoted());
             s.set ("IPHONEOS_DEPLOYMENT_TARGET", config.getiOSDeploymentTargetString());
+        }
+        else
+        {
+            auto sdkRoot = getOSXSDKVersion (config.getOSXSDKVersionString());
+
+            if (sdkRoot.isNotEmpty())
+                s.set ("SDKROOT", sdkRoot);
         }
 
         s.set ("ZERO_LINK", "NO");

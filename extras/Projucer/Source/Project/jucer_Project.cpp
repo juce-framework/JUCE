@@ -326,6 +326,7 @@ void Project::removeDefunctExporters()
     oldExporters.set ("MSVC6",   "MSVC6");
     oldExporters.set ("VS2010",  "Visual Studio 2010");
     oldExporters.set ("VS2012",  "Visual Studio 2012");
+    oldExporters.set ("VS2013",  "Visual Studio 2013");
 
     for (auto& key : oldExporters.getAllKeys())
     {

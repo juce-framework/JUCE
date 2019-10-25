@@ -44,11 +44,6 @@ using ConfigType = Block::ConfigMetaData::ConfigType;
 */
 struct BlockConfigManager
 {
-    void setDeviceIndex (TopologyIndex newDeviceIndex)                       { deviceIndex = newDeviceIndex; }
-    void setDeviceComms (PhysicalTopologySource::DeviceConnection* newConn)  { deviceConnection = newConn; }
-
-    static constexpr uint32 numConfigItems = 69;
-
     /** Structure describing a configuration */
     struct ConfigDescription
     {
@@ -70,102 +65,122 @@ struct BlockConfigManager
         }
     };
 
+    BlockConfigManager (Array<ConfigDescription> defaultConfig)
+    {
+        for (auto c : defaultConfig)
+        {
+            uint32 itemIndex;
+
+            if (getIndexForItem (c.item, itemIndex))
+                configList[itemIndex] = c;
+        }
+    }
+
+    void setDeviceIndex (TopologyIndex newDeviceIndex)                       { deviceIndex = newDeviceIndex; }
+    void setDeviceComms (PhysicalTopologySource::DeviceConnection* newConn)  { deviceConnection = newConn; }
+
+    static constexpr uint32 numConfigItems = 69;
+
+    static constexpr const char* midiSettingsGroup = "MIDI Settings";
+    static constexpr const char* pitchGroup = "Pitch";
+    static constexpr const char* playGroup = "Play mode";
+    static constexpr const char* touchGroup = "5D Touch";
+    static constexpr const char* rhythmGroup = "Rhythm";
+    static constexpr const char* coloursGroup = "Colors";
+
     ConfigDescription configList[numConfigItems] =
     {
-        { midiStartChannel,     2,      1,      16,     false,  "MIDI Start Channel",   ConfigType::integer,    {},               "MIDI Settings" },
-        { midiEndChannel,       16,     1,      16,     false,  "MIDI End Channel",     ConfigType::integer,    {},               "MIDI Settings" },
-        { midiUseMPE,           1,      0,      2,      false,  "MIDI Mode",            ConfigType::options,    { "Multi Channel",
+        { midiStartChannel,     2,      1,      16,         false,  "MIDI Start Channel",   ConfigType::integer,    {},               midiSettingsGroup },
+        { midiEndChannel,       16,     1,      16,         false,  "MIDI End Channel",     ConfigType::integer,    {},               midiSettingsGroup },
+        { midiUseMPE,           1,      0,      2,          false,  "MIDI Mode",            ConfigType::options,    { "Multi Channel",
                                                                                                                   "MPE",
-                                                                                                                  "Single Channel" }, "MIDI Settings" },
-        { pitchBendRange,       48,     1,      96,     false,  "Pitch Bend Range",     ConfigType::integer,    {},               "MIDI Settings" },
-        { midiChannelRange,     15,     1,      15,     false,  "No. MIDI Channels",    ConfigType::integer,    {},               "MIDI Settings" },
-        { MPEZone,              0,      0,      1,      false,  "MPE Zone",             ConfigType::options,    { "Lower Zone",
-                                                                                                                  "Upper Zone"},  "MIDI Settings" },
-        { octave,               0,      -4,     6,      false,  "Octave",               ConfigType::integer,    {},               "Pitch" },
-        { transpose,            0,      -11,    11,     false,  "Transpose",            ConfigType::integer,    {},               "Pitch" },
-        { slideCC,              74,     0,      127,    false,  "Slide CC",             ConfigType::integer,    {},               "Play mode" },
-        { slideMode,            0,      0,      2,      false,  "Slide Mode",           ConfigType::options,    { "Absolute",
+                                                                                                                  "Single Channel" }, midiSettingsGroup },
+        { pitchBendRange,       48,     1,      96,         false,  "Pitch Bend Range",     ConfigType::integer,    {},               midiSettingsGroup },
+        { midiChannelRange,     15,     1,      15,         false,  "No. MIDI Channels",    ConfigType::integer,    {},               midiSettingsGroup },
+        { MPEZone,              0,      0,      1,          false,  "MPE Zone",             ConfigType::options,    { "Lower Zone",
+                                                                                                                  "Upper Zone"},      midiSettingsGroup },
+        { octave,               0,      -4,     6,          false,  "Octave",               ConfigType::integer,    {},               pitchGroup },
+        { transpose,            0,      -11,    11,         false,  "Transpose",            ConfigType::integer,    {},               pitchGroup },
+        { slideCC,              74,     0,      127,        false,  "Slide CC",             ConfigType::integer,    {},               playGroup },
+        { slideMode,            0,      0,      2,          false,  "Slide Mode",           ConfigType::options,    { "Absolute",
                                                                                                                   "Relative Unipolar",
-                                                                                                                  "Relative Bipolar" }, "Play mode" },
-        { velocitySensitivity,  100,    0,      127,    false,  "Strike Sensitivity",   ConfigType::integer,    {},               "5D Touch" },
-        { glideSensitivity,     100,    0,      127,    false,  "Glide Sensitivity",    ConfigType::integer,    {},               "5D Touch" },
-        { slideSensitivity,     100,    0,      127,    false,  "Slide Sensitivity",    ConfigType::integer,    {},               "5D Touch" },
-        { pressureSensitivity,  100,    0,      127,    false,  "Pressure Sensitivity", ConfigType::integer,    {},               "5D Touch" },
-        { liftSensitivity,      100,    0,      127,    false,  "Lift Sensitivity",     ConfigType::integer,    {},               "5D Touch" },
-        { fixedVelocity,        0,      0,      1,      false,  "Fixed Velocity",       ConfigType::boolean,    {},               "5D Touch" },
-        { fixedVelocityValue,   127,    1,      127,    false,  "Fixed Velocity Value", ConfigType::integer,    {},               "5D Touch" },
-        { pianoMode,            0,      0,      1,      false,  "Piano Mode",           ConfigType::boolean,    {},               "Play mode" },
-        { glideLock,            0,      0,      127,    false,  "Glide Rate",           ConfigType::integer,    {},               "Play mode" },
-        { glideLockEnable,      0,      0,      1,      false,  "Glide Lock Enable",    ConfigType::boolean,    {},               "Play mode" },
-        { mode,                 4,      1,      5,      false,  "Mode",                 ConfigType::integer,    {},               "Play mode" },
-        { volume,               100,    0,      127,    false,  "Volume",               ConfigType::integer,    {},               "Play mode" },
-        { scale,                0,      0,      18,     false,  "Scale",                ConfigType::integer,    {},               "Play mode" }, // NOTE: Should be options
-        { key,                  0,      0,      11,     false,  "Key",                  ConfigType::options,    { "C", "C#", "D", "D#",
+                                                                                                                  "Relative Bipolar" }, playGroup },
+        { velocitySensitivity,  100,    0,      127,        false,  "Strike Sensitivity",   ConfigType::integer,    {},               touchGroup },
+        { glideSensitivity,     100,    0,      127,        false,  "Glide Sensitivity",    ConfigType::integer,    {},               touchGroup },
+        { slideSensitivity,     100,    0,      127,        false,  "Slide Sensitivity",    ConfigType::integer,    {},               touchGroup },
+        { pressureSensitivity,  100,    0,      127,        false,  "Pressure Sensitivity", ConfigType::integer,    {},               touchGroup },
+        { liftSensitivity,      100,    0,      127,        false,  "Lift Sensitivity",     ConfigType::integer,    {},               touchGroup },
+        { fixedVelocity,        0,      0,      1,          false,  "Fixed Velocity",       ConfigType::boolean,    {},               touchGroup },
+        { fixedVelocityValue,   127,    1,      127,        false,  "Fixed Velocity Value", ConfigType::integer,    {},               touchGroup },
+        { pianoMode,            0,      0,      1,          false,  "Piano Mode",           ConfigType::boolean,    {},               playGroup },
+        { glideLock,            0,      0,      127,        false,  "Glide Rate",           ConfigType::integer,    {},               playGroup },
+        { glideLockEnable,      0,      0,      1,          false,  "Glide Lock Enable",    ConfigType::boolean,    {},               playGroup },
+        { mode,                 4,      1,      5,          false,  "Mode",                 ConfigType::integer,    {},               playGroup },
+        { volume,               100,    0,      127,        false,  "Volume",               ConfigType::integer,    {},               playGroup },
+        { scale,                0,      0,      18,         false,  "Scale",                ConfigType::integer,    {},               playGroup }, // NOTE: Should be options
+        { hideMode,             0,      0,      1,          false,  "Hide Mode",            ConfigType::boolean,    {},               playGroup },
+        { chord,                0,      0,      127,        false,  "Chord",                ConfigType::integer,    {},               playGroup }, // NOTE: Should be options
+        { arpPattern,           0,      0,      127,        false,  "Arp Pattern",          ConfigType::integer,    {},               playGroup },
+        { tempo,                120,    1,      300,        false,  "Tempo",                ConfigType::integer,    {},               rhythmGroup },
+        { key,                  0,      0,      11,         false,  "Key",                  ConfigType::options,    { "C", "C#", "D", "D#",
                                                                                                                   "E", "F", "F#", "G",
-                                                                                                                  "G#", "A", "A#", "B"}, "Play mode" },
-        { hideMode,             0,      0,      1,      false,  "Hide Mode",            ConfigType::boolean,    {},               "Play mode" },
-        { chord,                0,      0,      127,    false,  "Chord",                ConfigType::integer,    {},               "Play mode" }, // NOTE: Should be options
-        { arpPattern,           0,      0,      127,    false,  "Arp Pattern",          ConfigType::integer,    {},               "Play mode" },
-        { tempo,                120,    1,      300,    false,  "Tempo",                ConfigType::integer,    {},               "Rhythm" },
-        { key,                  0,      0,      11,     false,  "Key",                  ConfigType::options,    { "C", "C#", "D", "D#",
-                                                                                                                  "E", "F", "F#", "G",
-                                                                                                                  "G#", "A", "A#", "B"}, "Play mode" },
-        { autoTransposeToKey,   0,      0,      1,      false,  "Auto Transpose To Key",ConfigType::boolean,    {},               "Pitch" },
-        { xTrackingMode,        1,      1,      4,      false,  "Glide Tracking Mode",  ConfigType::options,    { "Multi-Channel",
+                                                                                                                  "G#", "A", "A#", "B"}, playGroup },
+        { autoTransposeToKey,   0,      0,      1,          false,  "Auto Transpose To Key",ConfigType::boolean,    {},               pitchGroup },
+        { xTrackingMode,        1,      1,      4,          false,  "Glide Tracking Mode",  ConfigType::options,    { "Multi-Channel",
                                                                                                                   "Last Played",
                                                                                                                   "Highest",
                                                                                                                   "Lowest",
-                                                                                                                  "Disabled" },   "Play mode" },
-        { yTrackingMode,        1,      1,      4,      false,  "Slide Tracking Mode",  ConfigType::options,    { "Multi-Channel",
+                                                                                                                  "Disabled" },   playGroup },
+        { yTrackingMode,        1,      1,      4,          false,  "Slide Tracking Mode",  ConfigType::options,    { "Multi-Channel",
                                                                                                                   "Last Played",
                                                                                                                   "Highest",
                                                                                                                   "Lowest",
-                                                                                                                  "Disabled" },   "Play mode" },
-        { zTrackingMode,        1,      0,      4,      false,  "Pressure Tracking Mode",  ConfigType::options, { "Multi-Channel",
+                                                                                                                  "Disabled" },   playGroup },
+        { zTrackingMode,        1,      0,      4,          false,  "Pressure Tracking Mode", ConfigType::options, { "Multi-Channel",
                                                                                                                   "Last Played",
                                                                                                                   "Highest",
                                                                                                                   "Lowest",
                                                                                                                   "Disabled",
-                                                                                                                  "Hardest" },    "Play mode" },
+                                                                                                                  "Hardest" },    playGroup },
 
-        { gammaCorrection,      0,      0,      1,      false,  "Gamma Correction",     ConfigType::boolean,    {},               {} },
-        { globalKeyColour,      INT32_MIN, INT32_MIN, INT32_MAX, false,  "Global Key Colour", ConfigType::colour, {},             "Colour" },
-        { rootKeyColour,        INT32_MIN, INT32_MIN, INT32_MAX, false,  "Root Key Colour"  , ConfigType::colour, {},             "Colour" },
-        { brightness,           100,    0,    100,      false,  "Brightness",           ConfigType::integer,    {},               "Colour" },
+        { gammaCorrection,      0,         0,         1,    false,  "Gamma Correction",     ConfigType::boolean,    {},             coloursGroup },
+        { globalKeyColour, INT32_MIN, INT32_MIN, INT32_MAX, false,  "Global Key Color",     ConfigType::colour,     {},             coloursGroup },
+        { rootKeyColour,   INT32_MIN, INT32_MIN, INT32_MAX, false,  "Root Key Color"  ,     ConfigType::colour,     {},             coloursGroup },
+        { brightness,           100,    0,    100,          false,  "Brightness",           ConfigType::integer,    {},             coloursGroup },
 
         // These can be defined for unique usage for a given Littlefoot script
-        { user0,                0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user1,                0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user2,                0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user3,                0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user4,                0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user5,                0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user6,                0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user7,                0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user8,                0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user9,                0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user10,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user11,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user12,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user13,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user14,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user15,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user16,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user17,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user18,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user19,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user20,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user21,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user22,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user23,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user24,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user25,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user26,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user27,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user28,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user29,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user30,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
-        { user31,               0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} }
+        { user0,                0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user1,                0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user2,                0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user3,                0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user4,                0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user5,                0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user6,                0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user7,                0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user8,                0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user9,                0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user10,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user11,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user12,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user13,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user14,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user15,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user16,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user17,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user18,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user19,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user20,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user21,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user22,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user23,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user24,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user25,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user26,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user27,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user28,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user29,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user30,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} },
+        { user31,               0,    0,      127,          false,  {},                     ConfigType::integer,    {},               {} }
     };
 
     //==============================================================================
