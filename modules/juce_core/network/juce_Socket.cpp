@@ -36,6 +36,9 @@ namespace juce
  using juce_socklen_t       = int;
  using juce_recvsend_size_t = int;
  using SocketHandle         = SOCKET;
+ #if ! JUCE_MINGW
+  using pollfd              = WSAPOLLFD;
+ #endif
  static const SocketHandle invalidSocket = INVALID_SOCKET;
 #elif JUCE_ANDROID
  using juce_socklen_t       = socklen_t;
@@ -283,8 +286,9 @@ namespace SocketHelpers
         if (! lock.isLocked())
             return -1;
 
-        int h = handle.load();
+        auto h = handle.load();
 
+       #if JUCE_MINGW
         struct timeval timeout;
         struct timeval* timeoutp;
 
@@ -308,24 +312,36 @@ namespace SocketHelpers
         fd_set* const prset = forReading ? &rset : nullptr;
         fd_set* const pwset = forReading ? nullptr : &wset;
 
-       #if JUCE_WINDOWS
         if (select ((int) h + 1, prset, pwset, 0, timeoutp) < 0)
             return -1;
        #else
+        short eventsFlag = (forReading ? POLLIN : POLLOUT);
+        pollfd pfd { (SocketHandle) h, eventsFlag, 0 };
+
+        int result = 0;
+
+        for (;;)
         {
-            int result = 0;
+           #if JUCE_WINDOWS
+            result = WSAPoll (&pfd, 1, timeoutMsecs);
+           #else
+            result = poll (&pfd, 1, timeoutMsecs);
+           #endif
 
-            for (;;)
+            if (result >= 0
+               #if JUCE_WINDOWS
+                || result == SOCKET_ERROR
+               #else
+                || errno != EINTR
+               #endif
+                )
             {
-                result = select (h + 1, prset, pwset, nullptr, timeoutp);
-
-                if (result >= 0 || errno != EINTR)
-                    break;
+                break;
             }
-
-            if (result < 0)
-                return -1;
         }
+
+        if (result < 0)
+            return -1;
        #endif
 
         // we are closing
@@ -341,7 +357,11 @@ namespace SocketHelpers
                 return -1;
         }
 
+       #if JUCE_MINGW
         return FD_ISSET (h, forReading ? &rset : &wset) ? 1 : 0;
+       #else
+        return (pfd.revents & eventsFlag) != 0;
+       #endif
     }
 
     static addrinfo* getAddressInfo (bool isDatagram, const String& hostName, int portNumber)

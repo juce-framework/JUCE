@@ -3,6 +3,18 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 5.4.5
+  - Improved message queue performance on Linux
+  - Added missing lifecycle callbacks on Android Q
+  - Refactored the AudioBlock class
+  - Fixed APVTS parameter update recursion
+  - Updated Bela code to support latest release
+  - Fixed issues drawing italicised text on macOS
+  - Fixed broken back button behaviour on Android
+  - Added Bluetooth permissions settings needed for iOS 13.0+ to the Projucer
+  - Replaced select() calls with poll()
+  - Various bug-fixes, improvements and documentation updates
+
 Version 5.4.4
   - Improvements to floating point number printing
   - Faster plug-in parameter indexing

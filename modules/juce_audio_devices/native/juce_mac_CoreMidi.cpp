@@ -499,7 +499,7 @@ std::unique_ptr<MidiInput> MidiInput::createNewDevice (const String& deviceName,
 
             if (CHECK_ERROR (MIDIObjectSetIntegerProperty (endpoint, kMIDIPropertyUniqueID, (SInt32) deviceIdentifier)))
             {
-                mpc->portAndEndpoint = std::make_unique<MidiPortAndEndpoint> (0, endpoint);
+                mpc->portAndEndpoint = std::make_unique<MidiPortAndEndpoint> ((UInt32) 0, endpoint);
 
                 std::unique_ptr<MidiInput> midiInput (new MidiInput (deviceName, String (deviceIdentifier)));
 

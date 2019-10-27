@@ -39,9 +39,8 @@ namespace juce
 #include "protocol/juce_BlocksProtocolDefinitions.h"
 #include "protocol/juce_HostPacketDecoder.h"
 #include "protocol/juce_HostPacketBuilder.h"
-#include "protocol/juce_BlockModels.h"
-
 #include "blocks/juce_BlockConfigManager.h"
+#include "protocol/juce_BlockModels.h"
 #include "blocks/juce_Block.cpp"
 #include "blocks/juce_BlocksVersion.cpp"
 #include "topology/juce_BlockGraph.cpp"

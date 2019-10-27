@@ -87,8 +87,6 @@ public:
     {
         if (browser != nullptr)
         {
-            LPSAFEARRAY sa = nullptr;
-
             VARIANT headerFlags, frame, postDataVar, headersVar;  // (_variant_t isn't available in all compilers)
             VariantInit (&headerFlags);
             VariantInit (&frame);
@@ -103,7 +101,7 @@ public:
 
             if (postData != nullptr && postData->getSize() > 0)
             {
-                sa = SafeArrayCreateVector (VT_UI1, 0, (ULONG) postData->getSize());
+                auto sa = SafeArrayCreateVector (VT_UI1, 0, (ULONG) postData->getSize());
 
                 if (sa != nullptr)
                 {
@@ -121,7 +119,12 @@ public:
                         V_VT (&postDataVar2) = VT_ARRAY | VT_UI1;
                         V_ARRAY (&postDataVar2) = sa;
 
+                        sa = nullptr;
                         postDataVar = postDataVar2;
+                    }
+                    else
+                    {
+                        SafeArrayDestroy (sa);
                     }
                 }
             }
@@ -129,9 +132,6 @@ public:
             auto urlBSTR = SysAllocString ((const OLECHAR*) url.toWideCharPointer());
             browser->Navigate (urlBSTR, &headerFlags, &frame, &postDataVar, &headersVar);
             SysFreeString (urlBSTR);
-
-            if (sa != nullptr)
-                SafeArrayDestroy (sa);
 
             VariantClear (&headerFlags);
             VariantClear (&frame);
