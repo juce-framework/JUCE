@@ -33,12 +33,13 @@ struct BlockDataSheet
 {
     BlockDataSheet (const BlocksProtocol::BlockSerialNumber& serial)  : serialNumber (serial)
     {
-        if (serialNumber.isPadBlock())      initialiseForPadBlock2x2();
-        if (serialNumber.isLiveBlock())     initialiseForControlBlockLive();
-        if (serialNumber.isLoopBlock())     initialiseForControlBlockLoop();
-        if (serialNumber.isDevCtrlBlock())  initialiseForControlBlockDeveloper();
-        if (serialNumber.isTouchBlock())    initialiseForControlBlockTouch();
-        if (serialNumber.isSeaboardBlock()) initialiseForSeaboardBlock();
+        if (serialNumber.isPadBlock())          initialiseForPadBlock2x2();
+        if (serialNumber.isLiveBlock())         initialiseForControlBlockLive();
+        if (serialNumber.isLoopBlock())         initialiseForControlBlockLoop();
+        if (serialNumber.isDevCtrlBlock())      initialiseForControlBlockDeveloper();
+        if (serialNumber.isTouchBlock())        initialiseForControlBlockTouch();
+        if (serialNumber.isSeaboardBlock())     initialiseForSeaboardBlock();
+        if (serialNumber.isLumiKeysBlock())     initialiseForLumiKeysBlock();
     }
 
     Block::ConnectionPort convertPortIndexToConnectorPort (BlocksProtocol::ConnectorPort port) const noexcept
@@ -223,6 +224,40 @@ private:
         programAndHeapSize = BlocksProtocol::padBlockProgramAndHeapSize;
 
         addModeButton();
+    }
+
+    void initialiseForLumiKeysBlock()
+    {
+        apiType = Block::Type::lumiKeysBlock;
+
+        description = "LUMI Keys BLOCK (6x3)";
+
+        widthUnits = 6;
+        heightUnits = 3;
+
+        lightGridWidth = 0;
+        lightGridHeight = 0;
+        numKeywaves = 24;
+
+        addButtons (ControlButton::ButtonFunction::mode, 0.2f, 0.2f,
+                    ControlButton::ButtonFunction::down, 0.6f, 0.2f,
+                    ControlButton::ButtonFunction::up, 1.0f, 0.2f);
+
+        addPortsSW (Block::ConnectionPort::DeviceEdge::west, 2);
+        addPortsNE (Block::ConnectionPort::DeviceEdge::north, 4);
+        addPortsNE (Block::ConnectionPort::DeviceEdge::east, 2);
+
+        hasTouchSurface = true;
+        programAndHeapSize = BlocksProtocol::padBlockProgramAndHeapSize;
+
+        defaultConfig.add ({ mode, 0, 0, 3, false,
+                           "Color Mode", ConfigType::options,
+                           { "Multi-color Mode",
+                             "Single Color Mode",
+                             "Piano Mode",
+                             "Night Mode"
+                           },
+                           BlockConfigManager::playGroup });
     }
 
     //==============================================================================

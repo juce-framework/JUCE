@@ -46,7 +46,8 @@ public:
         loopBlock,             /**< Loop control block type.      */
         developerControlBlock, /**< Developer control block type. */
         touchBlock,            /**< Touch control block type.     */
-        seaboardBlock          /**< Seaboard block type.          */
+        seaboardBlock,         /**< Seaboard block type.          */
+        lumiKeysBlock          /**< LUMI Keys block type          */
     };
 
     /** The Block class is reference-counted, so always use a Block::Ptr when
