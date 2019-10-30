@@ -63,8 +63,11 @@ public:
     int getPlaybackRegionsViewsXForTime (double time) const;
     double getPlaybackRegionsViewsTimeForX (int x) const;
 
-    // flag that our view needs to be rebuilt
+    // flag that our track list needs to be rebuilt
     void invalidateRegionSequenceViews();
+
+    // flag that the time range covered by the playback regions needs to be recalculated
+    void invalidateTimeRange();
 
     // DocumentView states
     void setShowOnlySelectedRegionSequences (bool newVal);
@@ -100,6 +103,7 @@ public:
     //==============================================================================
 private:
     void rebuildRegionSequenceViews();
+    void calculateTimeRange();
 
 private:
     // simple utility class to show playhead position
@@ -154,6 +158,7 @@ private:
     double pixelsPerSecond { 1.0 };
 
     bool regionSequenceViewsAreInvalid { true };
+    bool timeRangeIsInvalid { true };
     Range<double> timeRange;
 
     juce::AudioPlayHead::CurrentPositionInfo lastReportedPosition;

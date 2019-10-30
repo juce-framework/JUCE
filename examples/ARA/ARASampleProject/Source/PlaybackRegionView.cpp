@@ -100,7 +100,7 @@ void PlaybackRegionView::didEndEditing (ARADocument* document)
     if (playbackRegionReader ==  nullptr || ! playbackRegionReader->isValid())
     {
         recreatePlaybackRegionReader();
-        documentView.resized();
+        documentView.invalidateTimeRange();
         repaint();
     }
 }

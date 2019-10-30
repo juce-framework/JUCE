@@ -5,9 +5,6 @@
 #include "PlaybackRegionView.h"
 #include "RulersView.h"
 
-constexpr double kMinSecondDuration { 1.0 };
-constexpr double kMinBorderSeconds { 1.0 };
-
 constexpr int kTrackHeight { 80 };
 
 //==============================================================================
@@ -16,9 +13,10 @@ DocumentView::DocumentView (ARAEditorView* ev, const AudioPlayHead::CurrentPosit
       playbackRegionsViewport (*this),
       playHeadView (*this),
       timeRangeSelectionView (*this),
-      timeRange (-kMinBorderSeconds, kMinSecondDuration + kMinBorderSeconds),
       positionInfo (posInfo)
 {
+    calculateTimeRange();
+
     playHeadView.setAlwaysOnTop (true);
     playbackRegionsView.addAndMakeVisible (playHeadView);
     timeRangeSelectionView.setAlwaysOnTop (true);
@@ -88,6 +86,9 @@ void DocumentView::didEndEditing (ARADocument* document)
 
     if (regionSequenceViewsAreInvalid)
         rebuildRegionSequenceViews();
+
+    if (timeRangeIsInvalid)
+        calculateTimeRange();
 }
 
 void DocumentView::didAddRegionSequenceToDocument (ARADocument* document, ARARegionSequence* /*regionSequence*/)
@@ -136,6 +137,14 @@ void DocumentView::invalidateRegionSequenceViews()
         rebuildRegionSequenceViews();
 }
 
+void DocumentView::invalidateTimeRange()
+{
+    if (getDocumentController()->isHostEditingDocument() || getParentComponent() == nullptr)
+        timeRangeIsInvalid = true;
+    else
+        calculateTimeRange();
+}
+
 //==============================================================================
 void DocumentView::setShowOnlySelectedRegionSequences (bool newVal)
 {
@@ -177,40 +186,6 @@ void DocumentView::resized()
 {
     // store visible playhead postion (in main view coordinates)
     int previousPlayHeadX = getPlaybackRegionsViewsXForTime (lastReportedPosition.timeInSeconds) - playbackRegionsViewport.getViewPosition().getX();
-
-    // calculate maximum visible time range
-    timeRange = { 0.0, 0.0 };
-    if (! regionSequenceViews.isEmpty())
-    {
-        bool isFirst = true;
-        for (auto v : regionSequenceViews)
-        {
-            if (v->isEmpty())
-                continue;
-
-            const auto sequenceTimeRange = v->getTimeRange();
-            if (isFirst)
-            {
-                timeRange = sequenceTimeRange;
-                isFirst = false;
-                continue;
-            }
-
-            timeRange = timeRange.getUnionWith (sequenceTimeRange);
-        }
-    }
-
-    // ensure visible range covers kMinSecondDuration
-    if (timeRange.getLength() < kMinSecondDuration)
-    {
-        double startAdjustment = (kMinSecondDuration - timeRange.getLength()) / 2.0;
-        timeRange.setStart (timeRange.getStart() - startAdjustment);
-        timeRange.setEnd (timeRange.getStart() + kMinSecondDuration);
-    }
-
-    // apply kMinBorderSeconds offset to start and end
-    timeRange.setStart (timeRange.getStart() - kMinBorderSeconds);
-    timeRange.setEnd (timeRange.getEnd() + kMinBorderSeconds);
 
     const int trackHeaderWidth = trackHeadersViewport.isVisible() ? trackHeadersViewport.getWidth() : 0;
     const int rulersViewHeight = rulersViewport.isVisible() ? 3*20 : 0;
@@ -284,11 +259,8 @@ void DocumentView::timerCallback ()
 //==============================================================================
 void DocumentView::rebuildRegionSequenceViews()
 {
-    // TODO JUCE_ARA always deleting the region sequence views and in turn their playback regions
-    //               with their audio thumbs isn't particularly effective. we should optimized this
-    //               and preserve all views that can still be used. We could also try to build some
-    //               sort of LRU cache for the audio thumbs if that is easier...
-
+    // always deleting all region sequence views and in turn their playback regions including their
+    // audio thumbs isn't particularly effective - in an actual plug-in this would need to optimized.
     regionSequenceViews.clear();
 
     if (showOnlySelectedRegionSequences)
@@ -306,8 +278,43 @@ void DocumentView::rebuildRegionSequenceViews()
     }
 
     regionSequenceViewsAreInvalid = false;
+    repaint();
 
-    resized();
+    calculateTimeRange();
+}
+
+void DocumentView::calculateTimeRange()
+{
+    Range<double> newTimeRange;
+    if (! regionSequenceViews.isEmpty())
+    {
+        bool isFirst = true;
+        for (auto v : regionSequenceViews)
+        {
+            if (v->isEmpty())
+                continue;
+
+            const auto sequenceTimeRange = v->getTimeRange();
+            if (isFirst)
+            {
+                newTimeRange = sequenceTimeRange;
+                isFirst = false;
+                continue;
+            }
+
+            newTimeRange = newTimeRange.getUnionWith (sequenceTimeRange);
+        }
+    }
+
+    newTimeRange = newTimeRange.expanded (1.0);   // add a 1 second border left and right of first/last region
+
+    timeRangeIsInvalid = false;
+    if (timeRange != newTimeRange)
+    {
+        timeRange = newTimeRange;
+        if (getParentComponent() != nullptr)
+            resized();
+    }
 }
 
 //==============================================================================
