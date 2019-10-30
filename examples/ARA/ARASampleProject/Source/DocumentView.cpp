@@ -5,10 +5,10 @@
 #include "PlaybackRegionView.h"
 #include "RulersView.h"
 
-constexpr double kMinSecondDuration = 1.0;
-constexpr double kMinBorderSeconds = 1.0;
+constexpr double kMinSecondDuration { 1.0 };
+constexpr double kMinBorderSeconds { 1.0 };
 
-constexpr int kTrackHeight = 80;
+constexpr int kTrackHeight { 80 };
 
 //==============================================================================
 DocumentView::DocumentView (ARAEditorView* ev, const AudioPlayHead::CurrentPositionInfo& posInfo)
