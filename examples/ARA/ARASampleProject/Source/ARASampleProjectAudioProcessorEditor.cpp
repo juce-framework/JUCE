@@ -21,7 +21,7 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
 {
     if (isARAEditorView())
     {
-        documentView.reset (new DocumentView (*this, p.getLastKnownPositionInfo()));
+        documentView.reset (new DocumentView (getARAEditorView(), p.getLastKnownPositionInfo()));
 
         // if no defaults yet, construct defaults based on hard-coded defaults from DocumentView
         documentView->setShowOnlySelectedRegionSequences (editorDefaultSettings.getProperty (showOnlySelectedId, false));

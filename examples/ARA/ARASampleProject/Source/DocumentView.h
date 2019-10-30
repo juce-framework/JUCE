@@ -27,7 +27,7 @@ class DocumentView  : public Component,
                       private juce::Timer
 {
 public:
-    DocumentView (const AudioProcessorEditorARAExtension& editorARAExtension, const AudioPlayHead::CurrentPositionInfo& positionInfo);
+    DocumentView (ARAEditorView* editorView, const AudioPlayHead::CurrentPositionInfo& positionInfo);
 
     ~DocumentView();
 
@@ -46,7 +46,7 @@ public:
     void didReorderRegionSequencesInDocument (ARADocument* document) override;
 
     // ARA getters
-    ARAEditorView* getARAEditorView() const noexcept { return araExtension.getARAEditorView<ARAEditorView>(); }
+    ARAEditorView* getARAEditorView() const noexcept { return editorView; }
     ARADocumentController* getDocumentController() const noexcept { return getARAEditorView()->getDocumentController<ARADocumentController>(); }
     ARADocument* getDocument() const noexcept { return getDocumentController()->getDocument<ARADocument>(); }
 
@@ -132,7 +132,7 @@ private:
         DocumentView& documentView;
     };
 
-    const AudioProcessorEditorARAExtension& araExtension;
+    ARAEditorView* const editorView;
 
     OwnedArray<RegionSequenceView> regionSequenceViews;
 

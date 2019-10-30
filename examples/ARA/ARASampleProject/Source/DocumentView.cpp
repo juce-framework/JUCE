@@ -11,23 +11,14 @@ constexpr double kMinBorderSeconds = 1.0;
 constexpr int kTrackHeight = 80;
 
 //==============================================================================
-DocumentView::DocumentView (const AudioProcessorEditorARAExtension& extension, const AudioPlayHead::CurrentPositionInfo& posInfo)
-    : araExtension (extension),
+DocumentView::DocumentView (ARAEditorView* ev, const AudioPlayHead::CurrentPositionInfo& posInfo)
+    : editorView (ev),
       playbackRegionsViewport (*this),
       playHeadView (*this),
       timeRangeSelectionView (*this),
       timeRange (-kMinBorderSeconds, kMinSecondDuration + kMinBorderSeconds),
       positionInfo (posInfo)
 {
-    if (! araExtension.isARAEditorView())
-    {
-        // you shouldn't create a DocumentView if your instance can't support ARA.
-        // notify user on your AudioProcessorEditorView or provide your own capture
-        // alternative to ARA workflow.
-        jassertfalse;
-        return;
-    }
-
     playHeadView.setAlwaysOnTop (true);
     playbackRegionsView.addAndMakeVisible (playHeadView);
     timeRangeSelectionView.setAlwaysOnTop (true);
@@ -57,9 +48,6 @@ DocumentView::DocumentView (const AudioProcessorEditorARAExtension& extension, c
 
 DocumentView::~DocumentView()
 {
-    if (! araExtension.isARAEditorView())
-        return;
-
     getDocument()->removeListener (this);
     getARAEditorView()->removeListener (this);
 }
