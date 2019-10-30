@@ -5,7 +5,7 @@ namespace juce
 
 const ARA::ARAPlugInExtensionInstance* AudioProcessorARAExtension::bindToARA (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles)
 {
-    ARA::PlugIn::DocumentController* documentController = reinterpret_cast<ARA::PlugIn::DocumentController*> (documentControllerRef);
+    ARA::PlugIn::DocumentController* documentController = ARA::PlugIn::fromRef<ARA::PlugIn::DocumentController> (documentControllerRef);
     ARA_VALIDATE_API_ARGUMENT (documentControllerRef, ARA::PlugIn::DocumentController::isValidDocumentController (documentController));
 
     // verify this is only called once
