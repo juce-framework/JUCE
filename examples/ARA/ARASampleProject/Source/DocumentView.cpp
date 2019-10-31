@@ -159,14 +159,11 @@ void DocumentView::setIsRulersVisible (bool shouldBeVisible)
         resized();
 }
 
-void DocumentView::setPixelsPerSecond (double newValue)
+void DocumentView::zoomBy (double factor)
 {
-    if (newValue == pixelsPerSecond)
-        return;
-
-    pixelsPerSecond = newValue;
+    pixelsPerSecond *= factor;
     if (getParentComponent() != nullptr)
-        resized();  // this will constrain pixelsPerSecond range, also it might call again after rounding.
+        resized();  // this will both constrain pixelsPerSecond range properly and update all views
 }
 
 //==============================================================================
@@ -187,27 +184,23 @@ void DocumentView::resized()
     // store visible playhead postion (in main view coordinates)
     int previousPlayHeadX = getPlaybackRegionsViewsXForTime (lastReportedPosition.timeInSeconds) - playbackRegionsViewport.getViewPosition().getX();
 
-    const int trackHeaderWidth = trackHeadersViewport.isVisible() ? trackHeadersViewport.getWidth() : 0;
+    const int trackHeaderWidth = trackHeadersViewport.getWidth();
     const int rulersViewHeight = rulersViewport.isVisible() ? 3*20 : 0;
 
-    // max zoom 1px : 1sample (this is a naive assumption as audio can be in different sample rate)
-    constexpr auto maxPixelsPerSecond = 192000.0;
+    // update zoom
+    double playbackRegionsViewWidthDbl = timeRange.getLength() * pixelsPerSecond;
 
-    // min zoom covers entire view range
+    // limit max zoom by roughly 2 pixel per sample (we're just assuming some arbitrary high sample rate here),
+    // but we also must make sure playbackRegionsViewWidth does not exceed integer range (with additional safety margin for rounding)
+    playbackRegionsViewWidthDbl = jmin (playbackRegionsViewWidthDbl, timeRange.getLength() * 2.0 * 192000.0);
+    playbackRegionsViewWidthDbl = jmin (playbackRegionsViewWidthDbl, static_cast<double> (std::numeric_limits<int>::max() - 1));
+    int playbackRegionsViewWidth = roundToInt (floor (playbackRegionsViewWidthDbl));
+
+    // min zoom is limited by covering entire view range
     // TODO JUCE_ARA getScrollBarThickness() should only be substracted if vertical scroll bar is actually visible
-    const auto minPixelsPerSecond = (getWidth() - trackHeaderWidth - playbackRegionsViewport.getScrollBarThickness()) / timeRange.getLength();
-
-    // enforce zoom in/out limits and ensure the pixel width doesn't exceed INT_MAX
-    const double validPixelsPerSecond = jlimit (minPixelsPerSecond, maxPixelsPerSecond, getPixelsPerSecond());
-    const double playbackRegionsPixelWidth = timeRange.getLength() * validPixelsPerSecond;
-    constexpr double playbackRegionsMaxWidth = std::numeric_limits<int>::max();
-    const int playbackRegionsViewWidth = roundToInt (jmin (playbackRegionsPixelWidth, playbackRegionsMaxWidth));
-    const double pixPerSecond = playbackRegionsViewWidth / timeRange.getLength();
-
-    // TODO JUCE_ARA separate outsize zoom from track header resize from content zoom!
-    //               changing the zoom triggers a resized(), so we're performing it twice..
-    //               (same for track height handling below)
-    setPixelsPerSecond (pixPerSecond);          // prevent potential rounding issues
+    const int minPlaybackRegionsViewWidth = getWidth() - trackHeaderWidth - playbackRegionsViewport.getScrollBarThickness();
+    playbackRegionsViewWidth = jmax (minPlaybackRegionsViewWidth, playbackRegionsViewWidth);
+    pixelsPerSecond = playbackRegionsViewWidth / timeRange.getLength();
 
     // update sizes and positions of all views
     playbackRegionsViewport.setBounds (trackHeaderWidth, rulersViewHeight, getWidth() - trackHeaderWidth, getHeight() - rulersViewHeight);

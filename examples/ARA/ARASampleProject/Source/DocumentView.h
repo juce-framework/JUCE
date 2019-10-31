@@ -79,8 +79,7 @@ public:
     void setScrollFollowsPlayHead (bool followPlayHead) { scrollFollowsPlayHead = followPlayHead; }
     bool isScrollFollowingPlayHead() const { return scrollFollowsPlayHead; }
 
-    void setPixelsPerSecond (double newValue);
-    double getPixelsPerSecond() const { return pixelsPerSecond; }
+    void zoomBy (double factor);
 
     // misc. getters
     Component& getPlaybackRegionsView () { return playbackRegionsView; }

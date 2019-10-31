@@ -61,11 +61,11 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         constexpr double zoomStepFactor = 1.5;
         horizontalZoomInButton.onClick = [this, zoomStepFactor]
         {
-            documentView->setPixelsPerSecond (documentView->getPixelsPerSecond() * zoomStepFactor);
+            documentView->zoomBy (zoomStepFactor);
         };
         horizontalZoomOutButton.onClick = [this, zoomStepFactor]
         {
-            documentView->setPixelsPerSecond (documentView->getPixelsPerSecond() / zoomStepFactor);
+            documentView->zoomBy (1.0 / zoomStepFactor);
         };
         addAndMakeVisible (horizontalZoomInButton);
         addAndMakeVisible (horizontalZoomOutButton);
