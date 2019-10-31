@@ -154,7 +154,7 @@ private:
     bool scrollFollowsPlayHead { true };
     bool showOnlySelectedRegionSequences { true };
 
-    double pixelsPerSecond { 1.0 };
+    double pixelsPerSecond;
 
     bool regionSequenceViewsAreInvalid { true };
     bool timeRangeIsInvalid { true };

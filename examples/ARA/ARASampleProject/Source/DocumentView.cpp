@@ -7,12 +7,15 @@
 
 constexpr int kTrackHeight { 80 };
 
+static double lastPixelsPerSecond { 1.0 };
+
 //==============================================================================
 DocumentView::DocumentView (ARAEditorView* ev, const AudioPlayHead::CurrentPositionInfo& posInfo)
     : editorView (ev),
       playbackRegionsViewport (*this),
       playHeadView (*this),
       timeRangeSelectionView (*this),
+      pixelsPerSecond (lastPixelsPerSecond),
       positionInfo (posInfo)
 {
     calculateTimeRange();
@@ -201,6 +204,7 @@ void DocumentView::resized()
     const int minPlaybackRegionsViewWidth = getWidth() - trackHeaderWidth - playbackRegionsViewport.getScrollBarThickness();
     playbackRegionsViewWidth = jmax (minPlaybackRegionsViewWidth, playbackRegionsViewWidth);
     pixelsPerSecond = playbackRegionsViewWidth / timeRange.getLength();
+    lastPixelsPerSecond = pixelsPerSecond;
 
     // update sizes and positions of all views
     playbackRegionsViewport.setBounds (trackHeaderWidth, rulersViewHeight, getWidth() - trackHeaderWidth, getHeight() - rulersViewHeight);
