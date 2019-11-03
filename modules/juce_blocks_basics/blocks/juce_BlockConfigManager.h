@@ -136,7 +136,7 @@ struct BlockConfigManager
                                                                                                                   "Highest",
                                                                                                                   "Lowest",
                                                                                                                   "Disabled" },   playGroup },
-        { zTrackingMode,        1,      0,      4,          false,  "Pressure Tracking Mode", ConfigType::options, { "Multi-Channel",
+        { zTrackingMode,        1,      0,      4,          false,  "Pressure Tracking Mode", ConfigType::options, { "Poly Aftertouch",
                                                                                                                   "Last Played",
                                                                                                                   "Highest",
                                                                                                                   "Lowest",
