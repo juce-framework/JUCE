@@ -1399,7 +1399,7 @@ struct PushNotifications::Pimpl
             propertiesDynamicObject->setProperty ("titleLocalizationKey",  juceString (titleLocalizationKey.get()));
             propertiesDynamicObject->setProperty ("bodyLocalizationArgs",  javaStringArrayToJuce (bodyLocalizationArgs));
             propertiesDynamicObject->setProperty ("titleLocalizationArgs", javaStringArrayToJuce (titleLocalizationArgs));
-            propertiesDynamicObject->setProperty ("link",                  link.get() == nullptr ? juceString ((jstring) env->CallObjectMethod (link, AndroidUri.toString)) : String());
+            propertiesDynamicObject->setProperty ("link",                  link.get() != nullptr ? juceString ((jstring) env->CallObjectMethod (link, AndroidUri.toString)) : String());
         }
 
         n.properties = var (propertiesDynamicObject.get());
