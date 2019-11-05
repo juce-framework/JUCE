@@ -1561,7 +1561,7 @@ struct JuceFirebaseInstanceIdService
      DECLARE_JNI_CLASS (InstanceIdService, "com/roli/juce/JuceFirebaseInstanceIdService")
     #undef JNI_CLASS_MEMBERS
 
-    static void JNICALL tokenRefreshed (void* token)
+    static void JNICALL tokenRefreshed (JNIEnv*, jobject /*instanceIdService*/, void* token)
     {
         if (auto* instance = PushNotifications::getInstanceWithoutCreating())
             instance->pimpl->notifyListenersTokenRefreshed (juceString (static_cast<jstring> (token)));
@@ -1577,9 +1577,9 @@ struct JuceFirebaseMessagingService
 {
     #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
      CALLBACK (remoteNotificationReceived,  "firebaseRemoteMessageReceived",  "(Lcom/google/firebase/messaging/RemoteMessage;)V") \
-     CALLBACK (remoteMessagesDeleted,  "firebaseRemoteMessagesDeleted",  "()V") \
-     CALLBACK (remoteMessageSent,      "firebaseRemoteMessageSent",      "(Ljava/lang/String;)V") \
-     CALLBACK (remoteMessageSendError, "firebaseRemoteMessageSendError", "(Ljava/lang/String;Ljava/lang/String;)V")
+     CALLBACK (remoteMessagesDeleted,       "firebaseRemoteMessagesDeleted",  "()V") \
+     CALLBACK (remoteMessageSent,           "firebaseRemoteMessageSent",      "(Ljava/lang/String;)V") \
+     CALLBACK (remoteMessageSendError,      "firebaseRemoteMessageSendError", "(Ljava/lang/String;Ljava/lang/String;)V")
 
      DECLARE_JNI_CLASS (MessagingService, "com/roli/juce/JuceFirebaseMessagingService")
     #undef JNI_CLASS_MEMBERS
