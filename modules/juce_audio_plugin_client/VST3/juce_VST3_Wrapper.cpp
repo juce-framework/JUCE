@@ -2427,7 +2427,7 @@ public:
                             pluginInstance->setCurrentProgram (programValue);
                     }
                    #if JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
-                    else if (juceVST3EditController->isMidiControllerParamID (vstParamID))
+                    else if (juceVST3EditController != nullptr && juceVST3EditController->isMidiControllerParamID (vstParamID))
                         addParameterChangeToMidiBuffer (offsetSamples, vstParamID, value);
                    #endif
                     else
