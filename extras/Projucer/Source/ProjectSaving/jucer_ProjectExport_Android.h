@@ -1442,7 +1442,7 @@ private:
         if (arePushNotificationsEnabled())
         {
             defines.set ("JUCE_PUSH_NOTIFICATIONS", "1");
-            defines.set ("JUCE_PUSH_NOTIFICATIONS_ACTIVITY", String::formatted("\"%s\"", getJNIActivityClassName().toUTF8()));
+            defines.set ("JUCE_PUSH_NOTIFICATIONS_ACTIVITY", getJNIActivityClassName().quoted());
         }
 
         if (androidInAppBillingPermission.get())
