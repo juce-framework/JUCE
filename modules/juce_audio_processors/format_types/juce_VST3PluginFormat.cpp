@@ -2338,23 +2338,37 @@ public:
         JUCE_DECLARE_VST3_COM_REF_METHODS
         JUCE_DECLARE_VST3_COM_QUERY_METHODS
 
-        Steinberg::int32 PLUGIN_API getParameterCount() override                                { return numQueuesUsed; }
-        Vst::IParamValueQueue* PLUGIN_API getParameterData (Steinberg::int32 index) override    { return isPositiveAndBelow (static_cast<int> (index), numQueuesUsed.load()) ? queues[(int) index] : nullptr; }
+        Steinberg::int32 PLUGIN_API getParameterCount() override
+        {
+            const ScopedLock sl (queuesLock);
+            return numQueuesUsed;
+        }
+
+        Vst::IParamValueQueue* PLUGIN_API getParameterData (Steinberg::int32 index) override
+        {
+            const ScopedLock sl (queuesLock);
+            return isPositiveAndBelow (static_cast<int> (index), numQueuesUsed) ? queues[(int) index] : nullptr;
+        }
 
         Vst::IParamValueQueue* PLUGIN_API addParameterData (const Vst::ParamID& id, Steinberg::int32& index) override
         {
-            for (int i = numQueuesUsed.load(); --i >= 0;)
+            const ScopedLock sl (queuesLock);
+
+            for (int i = numQueuesUsed; --i >= 0;)
             {
-                if (queues.getUnchecked (i)->getParameterId() == id)
+                if (auto* q = queues.getUnchecked (i))
                 {
-                    index = (Steinberg::int32) i;
-                    return queues.getUnchecked (i);
+                    if (q->getParameterId() == id)
+                    {
+                        index = (Steinberg::int32) i;
+                        return q;
+                    }
                 }
             }
 
             index = numQueuesUsed++;
-            ParamValueQueue* valueQueue = (index < queues.size() ? queues[index]
-                                                                 : queues.add (new ParamValueQueue()));
+            auto* valueQueue = (index < queues.size() ? queues[index]
+                                                      : queues.add (new ParamValueQueue()));
 
             valueQueue->clear();
             valueQueue->setParamID (id);
@@ -2364,6 +2378,7 @@ public:
 
         void clearAllQueues() noexcept
         {
+            const ScopedLock sl (queuesLock);
             numQueuesUsed = 0;
         }
 
@@ -2388,6 +2403,8 @@ public:
                                                     Steinberg::int32& sampleOffset,
                                                     Steinberg::Vst::ParamValue& value) override
             {
+                const ScopedLock sl (points.getLock());
+
                 if (isPositiveAndBelow ((int) index, points.size()))
                 {
                     auto e = points.getUnchecked ((int) index);
@@ -2429,8 +2446,10 @@ public:
         };
 
         Atomic<int> refCount;
-        OwnedArray<ParamValueQueue, CriticalSection> queues;
-        std::atomic<int> numQueuesUsed { 0 };
+
+        OwnedArray<ParamValueQueue> queues;
+        int numQueuesUsed = 0;
+        CriticalSection queuesLock;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamValueQueueList)
     };
