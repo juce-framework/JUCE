@@ -2339,11 +2339,11 @@ public:
         JUCE_DECLARE_VST3_COM_QUERY_METHODS
 
         Steinberg::int32 PLUGIN_API getParameterCount() override                                { return numQueuesUsed; }
-        Vst::IParamValueQueue* PLUGIN_API getParameterData (Steinberg::int32 index) override    { return isPositiveAndBelow (static_cast<int> (index), numQueuesUsed) ? queues[(int) index] : nullptr; }
+        Vst::IParamValueQueue* PLUGIN_API getParameterData (Steinberg::int32 index) override    { return isPositiveAndBelow (static_cast<int> (index), numQueuesUsed.load()) ? queues[(int) index] : nullptr; }
 
         Vst::IParamValueQueue* PLUGIN_API addParameterData (const Vst::ParamID& id, Steinberg::int32& index) override
         {
-            for (int i = numQueuesUsed; --i >= 0;)
+            for (int i = numQueuesUsed.load(); --i >= 0;)
             {
                 if (queues.getUnchecked (i)->getParameterId() == id)
                 {
@@ -2388,18 +2388,18 @@ public:
                                                     Steinberg::int32& sampleOffset,
                                                     Steinberg::Vst::ParamValue& value) override
             {
-                const ScopedLock sl (pointLock);
-
                 if (isPositiveAndBelow ((int) index, points.size()))
                 {
-                    ParamPoint e (points.getUnchecked ((int) index));
+                    auto e = points.getUnchecked ((int) index);
                     sampleOffset = e.sampleOffset;
                     value = e.value;
+
                     return kResultTrue;
                 }
 
                 sampleOffset = -1;
                 value = 0.0;
+
                 return kResultFalse;
             }
 
@@ -2407,19 +2407,12 @@ public:
                                                     Steinberg::Vst::ParamValue value,
                                                     Steinberg::int32& index) override
             {
-                ParamPoint p = { sampleOffset, value };
-
-                const ScopedLock sl (pointLock);
                 index = (Steinberg::int32) points.size();
-                points.add (p);
+                points.add ({ sampleOffset, value });
                 return kResultTrue;
             }
 
-            void clear() noexcept
-            {
-                const ScopedLock sl (pointLock);
-                points.clearQuick();
-            }
+            void clear() noexcept  { points.clearQuick(); }
 
         private:
             struct ParamPoint
@@ -2430,15 +2423,14 @@ public:
 
             Atomic<int> refCount;
             Vst::ParamID paramID = static_cast<Vst::ParamID> (-1);
-            Array<ParamPoint> points;
-            CriticalSection pointLock;
+            Array<ParamPoint, CriticalSection> points;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamValueQueue)
         };
 
         Atomic<int> refCount;
-        OwnedArray<ParamValueQueue> queues;
-        int numQueuesUsed = 0;
+        OwnedArray<ParamValueQueue, CriticalSection> queues;
+        std::atomic<int> numQueuesUsed { 0 };
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamValueQueueList)
     };
