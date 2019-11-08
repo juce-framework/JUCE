@@ -92,7 +92,7 @@ public:
                                                    | ColourSelector::editableColour
                                                    | ColourSelector::showSliders
                                                    | ColourSelector::showColourspace);
-        
+
         colourSelector->setName ("background");
         colourSelector->setCurrentColour (findColour (TextButton::buttonColourId));
         colourSelector->addChangeListener (this);
