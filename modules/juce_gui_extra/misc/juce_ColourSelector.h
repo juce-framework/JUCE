@@ -39,7 +39,8 @@ namespace juce
     @tags{GUI}
 */
 class JUCE_API  ColourSelector  : public Component,
-                                  public ChangeBroadcaster
+                                  public ChangeBroadcaster,
+								  public Label::Listener
 {
 public:
     //==============================================================================
@@ -50,7 +51,9 @@ public:
 
         showColourAtTop     = 1 << 1,   /**< if set, a swatch of the colour is shown at the top of the component. */
         showSliders         = 1 << 2,   /**< if set, RGB sliders are shown at the bottom of the component. */
-        showColourspace     = 1 << 3    /**< if set, a big HSV selector is shown. */
+		showColourspace		= 1 << 3,  /**< if set, a big HSV selector is shown. */
+		showHexSliderValues	= 1 << 4,  /**< if set, slider values are shown in Hex instead of decimal. */
+		showHexColorValue   = 1 << 5   /**< if set, a field with the hex value of the colour is shown. */
     };
 
     //==============================================================================
@@ -64,7 +67,7 @@ public:
         gapAroundColourSpaceComponent indicates how much of a gap to put around the
         colourspace and hue selector components.
     */
-    ColourSelector (int flags = (showAlphaChannel | showColourAtTop | showSliders | showColourspace),
+    ColourSelector (int flags = (showAlphaChannel | showColourAtTop | showSliders | showColourspace | showHexSliderValues | showHexColorValue),
                     int edgeGap = 4,
                     int gapAroundColourSpaceComponent = 7);
 
@@ -136,7 +139,8 @@ public:
     //==============================================================================
     // These need to be public otherwise the Projucer's live-build engine will complain
     class ColourSpaceView;
-    class HueSelectorComp;
+	class HueSelectorComp;
+	class ValueSelectorComp;
 
 private:
     //==============================================================================
@@ -145,20 +149,26 @@ private:
     Colour colour;
     float h, s, v;
     std::unique_ptr<Slider> sliders[4];
+	std::unique_ptr<Label> hexColorLabel;
     std::unique_ptr<ColourSpaceView> colourSpace;
-    std::unique_ptr<HueSelectorComp> hueSelector;
-    OwnedArray<SwatchComponent> swatchComponents;
+    //std::unique_ptr<HueSelectorComp> hueSelector;
+	std::unique_ptr<ValueSelectorComp> valueSelector; 
+	OwnedArray<SwatchComponent> swatchComponents;
     const int flags;
     int edgeGap;
     Rectangle<int> previewArea;
 
-    void setHue (float newH);
-    void setSV (float newS, float newV);
+	void setHue(float newH);
+	void setValue (float newV);
+	void setSV(float newS, float newV);
+	void setSH (float newS, float newH);
     void updateHSV();
     void update (NotificationType);
     void changeColour();
     void paint (Graphics&) override;
     void resized() override;
+
+	void labelTextChanged(Label* label) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColourSelector)
 

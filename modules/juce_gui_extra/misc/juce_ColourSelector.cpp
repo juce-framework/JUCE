@@ -26,23 +26,25 @@
 
 namespace juce
 {
-
+	
 struct ColourComponentSlider  : public Slider
 {
-    ColourComponentSlider (const String& name)  : Slider (name)
+    ColourComponentSlider (const String& name, bool showHexValue = true)  : Slider (name), showHexValue(showHexValue)
     {
         setRange (0.0, 255.0, 1.0);
     }
 
     String getTextFromValue (double value) override
     {
-        return String::toHexString ((int) value).toUpperCase().paddedLeft ('0', 2);
+		return showHexValue ? String::toHexString((int)value).toUpperCase().paddedLeft('0', 2) : String((int)value);
     }
 
     double getValueFromText (const String& text) override
     {
-        return (double) text.getHexValue32();
+		return (double)(showHexValue ? text.getHexValue32() : text.getIntValue());
     }
+
+	bool showHexValue;
 };
 
 //==============================================================================
@@ -68,12 +70,12 @@ public:
 
             for (int y = 0; y < height; ++y)
             {
-                auto val = 1.0f - y / (float) height;
+                auto sat =  y / (float) height;
 
                 for (int x = 0; x < width; ++x)
                 {
-                    auto sat = x / (float) width;
-                    pixels.setPixelColour (x, y, Colour (h, sat, val, 1.0f));
+                    auto hue = x / (float) width;
+                    pixels.setPixelColour (x, y, Colour (hue, sat, v, 1.0f));
                 }
             }
         }
@@ -93,17 +95,17 @@ public:
 
     void mouseDrag (const MouseEvent& e) override
     {
-        auto sat =        (e.x - edge) / (float) (getWidth()  - edge * 2);
-        auto val = 1.0f - (e.y - edge) / (float) (getHeight() - edge * 2);
+        auto hue =        (e.x - edge) / (float) (getWidth()  - edge * 2);
+        auto sat = (e.y - edge) / (float) (getHeight() - edge * 2);
 
-        owner.setSV (sat, val);
+		owner.setSH(sat, hue);
     }
 
     void updateIfNeeded()
     {
-        if (lastHue != h)
+        if (lastValue != v)
         {
-            lastHue = h;
+            lastValue = v;
             colours = {};
             repaint();
         }
@@ -122,7 +124,7 @@ private:
     float& h;
     float& s;
     float& v;
-    float lastHue = 0;
+    float lastValue = 0;
     const int edge;
     Image colours;
 
@@ -150,7 +152,7 @@ private:
         auto area = getLocalBounds().reduced (edge);
 
         marker.setBounds (Rectangle<int> (markerSize, markerSize)
-                            .withCentre (area.getRelativePoint (s, 1.0f - v)));
+                            .withCentre (area.getRelativePoint (h, s)));
     }
 
     JUCE_DECLARE_NON_COPYABLE (ColourSpaceView)
@@ -243,106 +245,208 @@ private:
     JUCE_DECLARE_NON_COPYABLE (HueSelectorComp)
 };
 
+
+
+
+class ColourSelector::ValueSelectorComp : public Component
+{
+public:
+	ValueSelectorComp(ColourSelector& cs, float &hue, float &sat, float& value, int edgeSize)
+		: owner(cs),h(hue), v(value), s(sat),  edge(edgeSize)
+	{
+		addAndMakeVisible(marker);
+	}
+
+	void paint(Graphics& g) override
+	{
+		ColourGradient cg;
+		cg.isRadial = false;
+		cg.point1.setXY(0.0f, (float)edge);
+		cg.point2.setXY(0.0f, (float)getHeight());
+
+		for (float i = 0.0f; i <= 1.0f; i += 0.02f)
+			cg.addColour(i, Colour(h, s, 1-i, 1.0f));
+
+		g.setGradientFill(cg);
+		g.fillRect(getLocalBounds().reduced(edge));
+	}
+
+	void resized() override
+	{
+		auto markerSize = jmax(14, edge * 2);
+		auto area = getLocalBounds().reduced(edge);
+
+		marker.setBounds(Rectangle<int>(getWidth(), markerSize)
+			.withCentre(area.getRelativePoint(0.5f, 1-v)));
+	}
+
+	void mouseDown(const MouseEvent& e) override
+	{
+		mouseDrag(e);
+	}
+
+	void mouseDrag(const MouseEvent& e) override
+	{
+		owner.setValue(1-((e.y - edge) / (float)(getHeight() - edge * 2)));
+	}
+
+	void updateIfNeeded()
+	{
+		resized();
+	}
+
+private:
+	ColourSelector& owner;
+	float& v;
+	float& h;
+	float &s;
+	const int edge;
+
+	struct ValueSelectorMarker : public Component
+	{
+		ValueSelectorMarker()
+		{
+			setInterceptsMouseClicks(false, false);
+		}
+
+		void paint(Graphics& g) override
+		{
+			auto cw = (float)getWidth();
+			auto ch = (float)getHeight();
+
+			Path p;
+			p.addTriangle(1.0f, 1.0f,
+				cw * 0.3f, ch * 0.5f,
+				1.0f, ch - 1.0f);
+
+			p.addTriangle(cw - 1.0f, 1.0f,
+				cw * 0.7f, ch * 0.5f,
+				cw - 1.0f, ch - 1.0f);
+
+			g.setColour(Colours::white.withAlpha(0.75f));
+			g.fillPath(p);
+
+			g.setColour(Colours::black.withAlpha(0.75f));
+			g.strokePath(p, PathStrokeType(1.2f));
+		}
+	};
+
+	ValueSelectorMarker marker;
+
+	JUCE_DECLARE_NON_COPYABLE(ValueSelectorComp)
+};
+
 //==============================================================================
 class ColourSelector::SwatchComponent   : public Component
 {
 public:
-    SwatchComponent (ColourSelector& cs, int itemIndex)
-        : owner (cs), index (itemIndex)
-    {
-    }
+	SwatchComponent(ColourSelector& cs, int itemIndex)
+		: owner(cs), index(itemIndex)
+	{
+	}
 
-    void paint (Graphics& g) override
-    {
-        auto col = owner.getSwatchColour (index);
+	void paint(Graphics& g) override
+	{
+		auto col = owner.getSwatchColour(index);
 
-        g.fillCheckerBoard (getLocalBounds().toFloat(), 6.0f, 6.0f,
-                            Colour (0xffdddddd).overlaidWith (col),
-                            Colour (0xffffffff).overlaidWith (col));
-    }
+		g.fillCheckerBoard(getLocalBounds().toFloat(), 6.0f, 6.0f,
+			Colour(0xffdddddd).overlaidWith(col),
+			Colour(0xffffffff).overlaidWith(col));
+	}
 
-    void mouseDown (const MouseEvent&) override
-    {
-        PopupMenu m;
-        m.addItem (1, TRANS("Use this swatch as the current colour"));
-        m.addSeparator();
-        m.addItem (2, TRANS("Set this swatch to the current colour"));
+	void mouseDown(const MouseEvent&) override
+	{
+		PopupMenu m;
+		m.addItem(1, TRANS("Use this swatch as the current colour"));
+		m.addSeparator();
+		m.addItem(2, TRANS("Set this swatch to the current colour"));
 
-        m.showMenuAsync (PopupMenu::Options().withTargetComponent (this),
-                         ModalCallbackFunction::forComponent (menuStaticCallback, this));
-    }
+		m.showMenuAsync(PopupMenu::Options().withTargetComponent(this),
+			ModalCallbackFunction::forComponent(menuStaticCallback, this));
+	}
 
 private:
-    ColourSelector& owner;
-    const int index;
+	ColourSelector& owner;
+	const int index;
 
-    static void menuStaticCallback (int result, SwatchComponent* comp)
-    {
-        if (comp != nullptr)
-        {
-            if (result == 1)  comp->setColourFromSwatch();
-            if (result == 2)  comp->setSwatchFromColour();
-        }
-    }
+	static void menuStaticCallback(int result, SwatchComponent* comp)
+	{
+		if (comp != nullptr)
+		{
+			if (result == 1)  comp->setColourFromSwatch();
+			if (result == 2)  comp->setSwatchFromColour();
+		}
+	}
 
-    void setColourFromSwatch()
-    {
-        owner.setCurrentColour (owner.getSwatchColour (index));
-    }
+	void setColourFromSwatch()
+	{
+		owner.setCurrentColour(owner.getSwatchColour(index));
+	}
 
-    void setSwatchFromColour()
-    {
-        if (owner.getSwatchColour (index) != owner.getCurrentColour())
-        {
-            owner.setSwatchColour (index, owner.getCurrentColour());
-            repaint();
-        }
-    }
+	void setSwatchFromColour()
+	{
+		if (owner.getSwatchColour(index) != owner.getCurrentColour())
+		{
+			owner.setSwatchColour(index, owner.getCurrentColour());
+			repaint();
+		}
+	}
 
-    JUCE_DECLARE_NON_COPYABLE (SwatchComponent)
+	JUCE_DECLARE_NON_COPYABLE(SwatchComponent)
 };
 
 //==============================================================================
-ColourSelector::ColourSelector (int sectionsToShow, int edge, int gapAroundColourSpaceComponent)
-    : colour (Colours::white),
-      flags (sectionsToShow),
-      edgeGap (edge)
+ColourSelector::ColourSelector(int sectionsToShow, int edge, int gapAroundColourSpaceComponent)
+	: colour(Colours::white),
+	flags(sectionsToShow),
+	edgeGap(edge)
 {
-    // not much point having a selector with no components in it!
-    jassert ((flags & (showColourAtTop | showSliders | showColourspace)) != 0);
+	// not much point having a selector with no components in it!
+	jassert((flags & (showColourAtTop | showSliders | showColourspace | showHexColorValue)) != 0);
 
-    updateHSV();
+	updateHSV();
 
-    if ((flags & showSliders) != 0)
-    {
-        sliders[0].reset (new ColourComponentSlider (TRANS ("red")));
-        sliders[1].reset (new ColourComponentSlider (TRANS ("green")));
-        sliders[2].reset (new ColourComponentSlider (TRANS ("blue")));
-        sliders[3].reset (new ColourComponentSlider (TRANS ("alpha")));
+	if ((flags & showSliders) != 0)
+	{
+		sliders[0].reset(new ColourComponentSlider(TRANS("red"),	(flags & showHexSliderValues) != 0));
+		sliders[1].reset(new ColourComponentSlider(TRANS("green"),	(flags & showHexSliderValues) != 0));
+		sliders[2].reset(new ColourComponentSlider(TRANS("blue"),	(flags & showHexSliderValues) != 0));
+		sliders[3].reset(new ColourComponentSlider(TRANS("alpha"),	(flags & showHexSliderValues) != 0));
 
-        addAndMakeVisible (sliders[0].get());
-        addAndMakeVisible (sliders[1].get());
-        addAndMakeVisible (sliders[2].get());
-        addChildComponent (sliders[3].get());
+		addAndMakeVisible(sliders[0].get());
+		addAndMakeVisible(sliders[1].get());
+		addAndMakeVisible(sliders[2].get());
+		addChildComponent(sliders[3].get());
 
-        sliders[3]->setVisible ((flags & showAlphaChannel) != 0);
+		sliders[3]->setVisible((flags & showAlphaChannel) != 0);
 
-        // VS2015 needs some scoping braces around this if statement to
-        // avoid a compiler bug.
-        for (auto& slider : sliders)
-        {
-            slider->onValueChange = [this] { changeColour(); };
-        }
-    }
+		// VS2015 needs some scoping braces around this if statement to
+		// avoid a compiler bug.
+		for (auto& slider : sliders)
+		{
+			slider->onValueChange = [this] { changeColour(); };
+		}
+	}
 
-    if ((flags & showColourspace) != 0)
-    {
-        colourSpace.reset (new ColourSpaceView (*this, h, s, v, gapAroundColourSpaceComponent));
-        hueSelector.reset (new HueSelectorComp (*this, h, gapAroundColourSpaceComponent));
+	if ((flags & showColourspace) != 0)
+	{
+		colourSpace.reset  (new	ColourSpaceView		(*this, h, s, v, gapAroundColourSpaceComponent));
+		valueSelector.reset(new ValueSelectorComp	(*this, h, s, v, gapAroundColourSpaceComponent));
 
-        addAndMakeVisible (colourSpace.get());
-        addAndMakeVisible (hueSelector.get());
-    }
+		addAndMakeVisible(colourSpace.get());
+		addAndMakeVisible(valueSelector.get());
+	}
+
+	if ((flags & showHexColorValue) != 0)
+	{
+		hexColorLabel.reset(new Label("Colour value",getCurrentColour().toDisplayString((flags & showAlphaChannel) != 0)));
+		hexColorLabel->setEditable(true);
+		hexColorLabel->setColour(hexColorLabel->backgroundColourId, Colours::darkgrey);
+		hexColorLabel->setColour(hexColorLabel->backgroundWhenEditingColourId, Colours::black);
+		hexColorLabel->setColour(hexColorLabel->textWhenEditingColourId, Colours::white);
+		addAndMakeVisible(hexColorLabel.get());
+		hexColorLabel->addListener(this);
+	}
 
     update (dontSendNotification);
 }
@@ -382,15 +486,42 @@ void ColourSelector::setHue (float newH)
     }
 }
 
-void ColourSelector::setSV (float newS, float newV)
+void ColourSelector::setValue(float newV)
+{
+	newV = jlimit(0.0f, 1.0f, newV);
+
+	if (v != newV)
+	{
+		v = newV;
+		colour = Colour(h, s, v, colour.getFloatAlpha());
+		update(sendNotification);
+	}
+}
+
+
+void ColourSelector::setSV(float newS, float newV)
+{
+	newS = jlimit(0.0f, 1.0f, newS);
+	newV = jlimit(0.0f, 1.0f, newV);
+
+	if (s != newS || v != newV)
+	{
+		s = newS;
+		v = newV;
+		colour = Colour(h, s, v, colour.getFloatAlpha());
+		update(sendNotification);
+	}
+}
+
+void ColourSelector::setSH (float newS, float newH)
 {
     newS = jlimit (0.0f, 1.0f, newS);
-    newV = jlimit (0.0f, 1.0f, newV);
+    newH = jlimit (0.0f, 1.0f, newH);
 
-    if (s != newS || v != newV)
+    if (s != newS || h != newH)
     {
         s = newS;
-        v = newV;
+        h = newH;
         colour = Colour (h, s, v, colour.getFloatAlpha());
         update (sendNotification);
     }
@@ -415,11 +546,17 @@ void ColourSelector::update (NotificationType notification)
     if (colourSpace != nullptr)
     {
         colourSpace->updateIfNeeded();
-        hueSelector->updateIfNeeded();
+        valueSelector->updateIfNeeded();
     }
+
+	if ((flags & showHexColorValue) != 0)
+	{
+		hexColorLabel->setText(getCurrentColour().toDisplayString((flags & showAlphaChannel) != 0), dontSendNotification);
+	}
 
     if ((flags & showColourAtTop) != 0)
         repaint (previewArea);
+
 
     if (notification != dontSendNotification)
         sendChangeMessage();
@@ -474,6 +611,7 @@ void ColourSelector::resized()
     const int swatchSpace = numSwatches > 0 ? edgeGap + swatchHeight * ((numSwatches + 7) / swatchesPerRow) : 0;
     const int sliderSpace = ((flags & showSliders) != 0)  ? jmin (22 * numSliders + edgeGap, proportionOfHeight (0.3f)) : 0;
     const int topSpace = ((flags & showColourAtTop) != 0) ? jmin (30 + edgeGap * 2, proportionOfHeight (0.2f)) : edgeGap;
+	const int hexLabelSpace = ((flags & showHexColorValue) != 0) ? jmin(22 + edgeGap, proportionOfHeight(0.1f)) : 0;
 
     previewArea.setBounds (edgeGap, edgeGap, getWidth() - edgeGap * 2, topSpace - edgeGap * 2);
 
@@ -485,13 +623,13 @@ void ColourSelector::resized()
 
         colourSpace->setBounds (edgeGap, y,
                                 getWidth() - hueWidth - edgeGap - 4,
-                                getHeight() - topSpace - sliderSpace - swatchSpace - edgeGap);
+                                getHeight() - topSpace - sliderSpace - hexLabelSpace - swatchSpace - edgeGap);
 
-        hueSelector->setBounds (colourSpace->getRight() + 4, y,
+        valueSelector->setBounds (colourSpace->getRight() + 4, y,
                                 getWidth() - edgeGap - (colourSpace->getRight() + 4),
                                 colourSpace->getHeight());
 
-        y = getHeight() - sliderSpace - swatchSpace - edgeGap;
+        y = getHeight() - sliderSpace - hexLabelSpace - swatchSpace - edgeGap ;
     }
 
     if ((flags & showSliders) != 0)
@@ -506,6 +644,14 @@ void ColourSelector::resized()
             y += sliderHeight;
         }
     }
+
+	if ((flags & showHexColorValue) != 0)
+	{
+		hexColorLabel->setBounds(proportionOfWidth(0.48f), y,
+								 proportionOfWidth(0.42f), hexLabelSpace - 2);
+
+		y += hexLabelSpace;
+	}
 
     if (numSwatches > 0)
     {
@@ -549,6 +695,15 @@ void ColourSelector::resized()
             }
         }
     }
+}
+
+
+void ColourSelector::labelTextChanged(Label* label)
+{
+	if (label == hexColorLabel.get())
+	{
+		setCurrentColour(Colour::fromString(label->getText()));
+	}
 }
 
 void ColourSelector::changeColour()
