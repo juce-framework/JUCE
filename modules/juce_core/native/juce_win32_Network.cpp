@@ -633,20 +633,24 @@ IPAddress IPAddress::getInterfaceBroadcastAddress (const IPAddress& ip)
 					maskIpString = maskIpString.fromFirstOccurrenceOf(".", false, false);
 				}
 
-
+				//===============================================================
+				/*adapted from the example by Farzan Majdani over at
+				https://stackoverflow.com/questions/777617/calculate-broadcast-address-from-ip-and-subnet-mask
+				*/
 				StringArray arBroadCast;
 				for (int i = 0; i < 4; i++)
 				{
 					int nrBCOct = currentIpArray[i].getIntValue() | (ipNetMaskArray[i].getIntValue() ^ 255);
 					arBroadCast.add(String(nrBCOct));
 				}
-
+				
 
 				broadcastAddress = IPAddress(arBroadCast[0] + "." +
 					arBroadCast[1] + "." +
 					arBroadCast[2] + "." +
 					arBroadCast[3]);
 
+				//===============================================================
 				break;
 			}
 			else
