@@ -87,7 +87,12 @@ public:
 
     void clicked() override
     {
-        auto* colourSelector = new ColourSelector();
+        auto* colourSelector = new ColourSelector (ColourSelector::showAlphaChannel
+                                                   | ColourSelector::showColourAtTop
+                                                   | ColourSelector::editableColour
+                                                   | ColourSelector::showSliders
+                                                   | ColourSelector::showColourspace);
+        
         colourSelector->setName ("background");
         colourSelector->setCurrentColour (findColour (TextButton::buttonColourId));
         colourSelector->addChangeListener (this);
