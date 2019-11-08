@@ -619,20 +619,9 @@ IPAddress IPAddress::getInterfaceBroadcastAddress (const IPAddress& ip)
 
 			if (ipString == ipToLookFor)
 			{
-				StringArray currentIpArray;
-				while (ipString.contains("."))
-				{
-					currentIpArray.add(ipString.upToFirstOccurrenceOf(".", false, false));
-					ipString = ipString.fromFirstOccurrenceOf(".", false, false);
-				}
-
-				StringArray ipNetMaskArray;
-				while (maskIpString.contains("."))
-				{
-					ipNetMaskArray.add(maskIpString.upToFirstOccurrenceOf(".", false, false));
-					maskIpString = maskIpString.fromFirstOccurrenceOf(".", false, false);
-				}
-
+				StringArray currentIpArray = StringArray::fromTokens(ipString, ".", {});
+			
+				StringArray ipNetMaskArray = StringArray::fromTokens(maskIpString, ".", {});
 				//===============================================================
 				/*adapted from the example by Farzan Majdani over at
 				https://stackoverflow.com/questions/777617/calculate-broadcast-address-from-ip-and-subnet-mask
