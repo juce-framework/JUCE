@@ -53,8 +53,8 @@ public:
     /** Creates a KeyPress for a key and some modifiers.
 
         e.g.
-        CTRL+C would be: KeyPress ('c', ModifierKeys::ctrlModifier)
-        SHIFT+Escape would be: KeyPress (KeyPress::escapeKey, ModifierKeys::shiftModifier)
+        CTRL+C would be: KeyPress ('c', ModifierKeys::ctrlModifier, 0)
+        SHIFT+Escape would be: KeyPress (KeyPress::escapeKey, ModifierKeys::shiftModifier, 0)
 
         @param keyCode      a code that represents the key - this value must be
                             one of special constants listed in this class, or an
