@@ -258,6 +258,11 @@ private:
                              "Night Mode"
                            },
                            BlockConfigManager::playGroup });
+
+        defaultConfig.add ({ zTrackingMode, 1, 0, 1, false,
+                            "Pressure Tracking Mode", ConfigType::options,
+                            { "Poly Aftertouch", "Channel Pressure" },
+                            BlockConfigManager::playGroup });
     }
 
     //==============================================================================
