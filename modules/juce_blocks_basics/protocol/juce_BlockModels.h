@@ -259,7 +259,7 @@ private:
                            },
                            BlockConfigManager::playGroup });
 
-        defaultConfig.add ({ zTrackingMode, 1, 0, 1, false,
+        defaultConfig.add ({ zTrackingMode, 0, 0, 1, false,
                             "Pressure Tracking Mode", ConfigType::options,
                             { "Poly Aftertouch", "Channel Pressure" },
                             BlockConfigManager::playGroup });
