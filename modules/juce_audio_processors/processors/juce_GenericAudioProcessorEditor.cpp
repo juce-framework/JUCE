@@ -485,7 +485,7 @@ public:
             height += comp->getHeight();
         }
 
-        setSize (maxWidth, jmax (height, 100));
+        setSize (maxWidth, jmax (height, 125));
     }
 
     ~ParametersPanel() override
