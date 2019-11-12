@@ -1632,8 +1632,8 @@ public:
             scale = 1.0 / Desktop::getInstance().getDisplays().getMainDisplay().scale;
        #endif
 
-        const RECT r = { roundToInt (area.getX()     * scale), roundToInt (area.getY()      * scale),
-                         roundToInt (area.getRight() * scale), roundToInt (area.getBottom() * scale) };
+        auto scaled = area.toDouble() * scale;
+        auto r = RECTFromRectangle (scaled.getSmallestIntegerContainer());
 
         InvalidateRect (hwnd, &r, FALSE);
     }
