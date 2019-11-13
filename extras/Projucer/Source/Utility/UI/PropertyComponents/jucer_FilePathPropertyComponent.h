@@ -39,10 +39,10 @@ class FilePathPropertyComponent    : public PropertyComponent,
 {
 public:
     FilePathPropertyComponent (Value valueToControl, const String& propertyName, bool isDir, bool thisOS = true,
-                               const String& wildcardsToUse = "*", const File& relativeRoot = File(), bool multiPath = false)
+                               const String& wildcardsToUse = "*", const File& relativeRoot = File())
         : PropertyComponent (propertyName),
           text (valueToControl, propertyName, 1024, false),
-          isDirectory (isDir), isThisOS (thisOS), supportsMultiplePaths (multiPath), wildcards (wildcardsToUse), root (relativeRoot)
+          isDirectory (isDir), isThisOS (thisOS), wildcards (wildcardsToUse), root (relativeRoot)
     {
         textValue.referTo (valueToControl);
 
@@ -51,10 +51,10 @@ public:
 
     /** Displays a default value when no value is specified by the user. */
     FilePathPropertyComponent (ValueWithDefault& valueToControl, const String& propertyName, bool isDir, bool thisOS = true,
-                               const String& wildcardsToUse = "*", const File& relativeRoot = File(), bool multiPath = false)
+                               const String& wildcardsToUse = "*", const File& relativeRoot = File())
        : PropertyComponent (propertyName),
          text (valueToControl, propertyName, 1024, false),
-         isDirectory (isDir), isThisOS (thisOS), supportsMultiplePaths (multiPath), wildcards (wildcardsToUse), root (relativeRoot)
+         isDirectory (isDir), isThisOS (thisOS), wildcards (wildcardsToUse), root (relativeRoot)
     {
         textValue = valueToControl.getPropertyAsValue();
 
@@ -89,15 +89,7 @@ public:
 
     void filesDropped (const StringArray& selectedFiles, int, int) override
     {
-        if (supportsMultiplePaths)
-        {
-            for (auto& f : selectedFiles)
-                setTo (f);
-        }
-        else
-        {
-            setTo (selectedFiles[0]);
-        }
+        setTo (selectedFiles[0]);
 
         highlightForDragAndDrop = false;
         repaint();
@@ -128,9 +120,6 @@ private:
 
         auto currentPath = text.getText();
 
-        if (supportsMultiplePaths && currentPath.isNotEmpty())
-            pathName = currentPath.trimCharactersAtEnd (" ;") + "; " + pathName;
-
         text.setText (pathName);
         updateEditorColour();
     }
@@ -160,7 +149,7 @@ private:
 
     void updateEditorColour()
     {
-        if (supportsMultiplePaths || ! isThisOS)
+        if (! isThisOS)
             return;
 
         text.setColour (TextPropertyComponent::textColourId, findColour (widgetTextColourId));
@@ -200,7 +189,7 @@ private:
     TextPropertyComponent text;
     TextButton browseButton { "..." };
 
-    bool isDirectory, isThisOS, supportsMultiplePaths, highlightForDragAndDrop = false;
+    bool isDirectory, isThisOS, highlightForDragAndDrop = false;
     String wildcards;
     File root;
 
