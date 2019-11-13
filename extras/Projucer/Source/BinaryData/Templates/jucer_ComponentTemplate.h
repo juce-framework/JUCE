@@ -38,7 +38,7 @@
 public:
     //==============================================================================
     %%class_name%% (%%constructor_params%%);
-    ~%%class_name%%();
+    ~%%class_name%%() override;
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
