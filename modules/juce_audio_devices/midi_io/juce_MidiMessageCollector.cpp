@@ -34,9 +34,10 @@ MidiMessageCollector::~MidiMessageCollector()
 //==============================================================================
 void MidiMessageCollector::reset (const double newSampleRate)
 {
+    const ScopedLock sl (midiCallbackLock);
+
     jassert (newSampleRate > 0);
 
-    const ScopedLock sl (midiCallbackLock);
    #if JUCE_DEBUG
     hasCalledReset = true;
    #endif
@@ -47,6 +48,8 @@ void MidiMessageCollector::reset (const double newSampleRate)
 
 void MidiMessageCollector::addMessageToQueue (const MidiMessage& message)
 {
+    const ScopedLock sl (midiCallbackLock);
+
    #if JUCE_DEBUG
     jassert (hasCalledReset); // you need to call reset() to set the correct sample rate before using this object
    #endif
@@ -54,8 +57,6 @@ void MidiMessageCollector::addMessageToQueue (const MidiMessage& message)
     // the messages that come in here need to be time-stamped correctly - see MidiInput
     // for details of what the number should be.
     jassert (message.getTimeStamp() != 0);
-
-    const ScopedLock sl (midiCallbackLock);
 
     auto sampleNumber = (int) ((message.getTimeStamp() - 0.001 * lastCallbackTime) * sampleRate);
 
@@ -70,6 +71,8 @@ void MidiMessageCollector::addMessageToQueue (const MidiMessage& message)
 void MidiMessageCollector::removeNextBlockOfMessages (MidiBuffer& destBuffer,
                                                       const int numSamples)
 {
+    const ScopedLock sl (midiCallbackLock);
+
    #if JUCE_DEBUG
     jassert (hasCalledReset); // you need to call reset() to set the correct sample rate before using this object
    #endif
@@ -79,7 +82,6 @@ void MidiMessageCollector::removeNextBlockOfMessages (MidiBuffer& destBuffer,
     auto timeNow = Time::getMillisecondCounterHiRes();
     auto msElapsed = timeNow - lastCallbackTime;
 
-    const ScopedLock sl (midiCallbackLock);
     lastCallbackTime = timeNow;
 
     if (! incomingMessages.isEmpty())

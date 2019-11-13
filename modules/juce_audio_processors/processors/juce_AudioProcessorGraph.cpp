@@ -806,6 +806,8 @@ AudioProcessorGraph::Node::Node (NodeID n, std::unique_ptr<AudioProcessor> p) no
 void AudioProcessorGraph::Node::prepare (double newSampleRate, int newBlockSize,
                                          AudioProcessorGraph* graph, ProcessingPrecision precision)
 {
+    const ScopedLock lock (processorLock);
+
     if (! isPrepared)
     {
         isPrepared = true;
@@ -822,6 +824,8 @@ void AudioProcessorGraph::Node::prepare (double newSampleRate, int newBlockSize,
 
 void AudioProcessorGraph::Node::unprepare()
 {
+    const ScopedLock lock (processorLock);
+
     if (isPrepared)
     {
         isPrepared = false;
@@ -831,6 +835,8 @@ void AudioProcessorGraph::Node::unprepare()
 
 void AudioProcessorGraph::Node::setParentGraph (AudioProcessorGraph* const graph) const
 {
+    const ScopedLock lock (processorLock);
+
     if (auto* ioProc = dynamic_cast<AudioProcessorGraph::AudioGraphIOProcessor*> (processor.get()))
         ioProc->setParentGraph (graph);
 }
@@ -940,7 +946,12 @@ AudioProcessorGraph::Node::Ptr AudioProcessorGraph::addNode (std::unique_ptr<Aud
     newProcessor->setPlayHead (getPlayHead());
 
     Node::Ptr n (new Node (nodeID, std::move (newProcessor)));
-    nodes.add (n.get());
+
+    {
+        const ScopedLock sl (getCallbackLock());
+        nodes.add (n.get());
+    }
+
     n->setParentGraph (this);
     topologyChanged();
     return n;
@@ -1233,7 +1244,7 @@ void AudioProcessorGraph::buildRenderingSequence()
 
     const ScopedLock sl (getCallbackLock());
 
-    std::swap (renderSequenceFloat, newSequenceF);
+    std::swap (renderSequenceFloat,  newSequenceF);
     std::swap (renderSequenceDouble, newSequenceD);
 }
 
