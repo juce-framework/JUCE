@@ -143,13 +143,16 @@ public:
 
         const std::unique_ptr<AudioProcessor> processor;
         Array<Connection> inputs, outputs;
-        bool isPrepared = false, bypassed = false;
+        bool isPrepared = false;
+        std::atomic<bool> bypassed { false };
 
         Node (NodeID, std::unique_ptr<AudioProcessor>) noexcept;
 
         void setParentGraph (AudioProcessorGraph*) const;
         void prepare (double newSampleRate, int newBlockSize, AudioProcessorGraph*, ProcessingPrecision);
         void unprepare();
+
+        CriticalSection processorLock;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Node)
     };
