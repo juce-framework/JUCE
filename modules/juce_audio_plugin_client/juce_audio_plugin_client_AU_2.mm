@@ -24,6 +24,8 @@
   ==============================================================================
 */
 
+#if JucePlugin_Build_AU
+
 #ifdef __clang__
  #pragma clang diagnostic push
  #pragma clang diagnostic ignored "-Wparentheses"
@@ -87,4 +89,6 @@
 
 #ifdef __clang__
  #pragma clang diagnostic pop
+#endif
+
 #endif
