@@ -57,7 +57,9 @@ namespace Keys
         MiddleButton = 2,
         RightButton = 3,
         WheelUp = 4,
-        WheelDown = 5
+        WheelDown = 5,
+        HorizontalWheelUp = 6,
+        HorizontalWheelDown = 7
     };
 
     static int AltMask = 0;
@@ -1844,8 +1846,8 @@ public:
     void handleWheelEvent (const XButtonPressedEvent& buttonPressEvent, float amount)
     {
         MouseWheelDetails wheel;
-        wheel.deltaX = 0.0f;
-        wheel.deltaY = amount;
+        wheel.deltaX = buttonPressEvent.button == 6 || buttonPressEvent.button == 7 ? amount : 0.0;
+        wheel.deltaY = buttonPressEvent.button == 6 || buttonPressEvent.button == 7 ? 0.0 : amount;
         wheel.isReversed = false;
         wheel.isSmooth = false;
         wheel.isInertial = false;
@@ -1872,11 +1874,13 @@ public:
         {
             switch (pointerMap[mapIndex])
             {
-                case Keys::WheelUp:         handleWheelEvent (buttonPressEvent,  50.0f / 256.0f); break;
-                case Keys::WheelDown:       handleWheelEvent (buttonPressEvent, -50.0f / 256.0f); break;
-                case Keys::LeftButton:      handleButtonPressEvent (buttonPressEvent, ModifierKeys::leftButtonModifier); break;
-                case Keys::RightButton:     handleButtonPressEvent (buttonPressEvent, ModifierKeys::rightButtonModifier); break;
-                case Keys::MiddleButton:    handleButtonPressEvent (buttonPressEvent, ModifierKeys::middleButtonModifier); break;
+                case Keys::WheelUp:             handleWheelEvent (buttonPressEvent,  50.0f / 256.0f); break;
+                case Keys::WheelDown:           handleWheelEvent (buttonPressEvent, -50.0f / 256.0f); break;
+                case Keys::HorizontalWheelUp:   handleWheelEvent (buttonPressEvent,  50.0f / 256.0f); break;
+                case Keys::HorizontalWheelDown: handleWheelEvent (buttonPressEvent, -50.0f / 256.0f); break;
+                case Keys::LeftButton:          handleButtonPressEvent (buttonPressEvent, ModifierKeys::leftButtonModifier); break;
+                case Keys::RightButton:         handleButtonPressEvent (buttonPressEvent, ModifierKeys::rightButtonModifier); break;
+                case Keys::MiddleButton:        handleButtonPressEvent (buttonPressEvent, ModifierKeys::middleButtonModifier); break;
                 default: break;
             }
         }
@@ -3421,7 +3425,7 @@ private:
 
     Array<Atom> srcMimeTypeAtomList;
 
-    int pointerMap[5] = {};
+    int pointerMap[7] = {};
 
     void initialisePointerMap()
     {
@@ -3443,6 +3447,12 @@ private:
             {
                 pointerMap[3] = Keys::WheelUp;
                 pointerMap[4] = Keys::WheelDown;
+
+                if (numButtons >= 7)
+                {
+                  pointerMap[5] = Keys::HorizontalWheelUp;
+                  pointerMap[6] = Keys::HorizontalWheelDown;
+                }
             }
         }
     }
