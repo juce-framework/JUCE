@@ -301,11 +301,11 @@ private:
        #if JUCE_MAC
         if (hostPath.containsIgnoreCase       ("Final Cut Pro.app")) return FinalCut;
         if (hostPath.containsIgnoreCase       ("Final Cut Pro Trial.app")) return FinalCut;
-        if (hostPath.containsIgnoreCase       ("Live 6."))           return AbletonLive6;
-        if (hostPath.containsIgnoreCase       ("Live 7."))           return AbletonLive7;
-        if (hostPath.containsIgnoreCase       ("Live 8."))           return AbletonLive8;
-        if (hostPath.containsIgnoreCase       ("Live 9."))           return AbletonLive9;
-        if (hostPath.containsIgnoreCase       ("Live 10."))          return AbletonLive10;
+        if (hostPath.containsIgnoreCase       ("Live 6"))            return AbletonLive6;
+        if (hostPath.containsIgnoreCase       ("Live 7"))            return AbletonLive7;
+        if (hostPath.containsIgnoreCase       ("Live 8"))            return AbletonLive8;
+        if (hostPath.containsIgnoreCase       ("Live 9"))            return AbletonLive9;
+        if (hostPath.containsIgnoreCase       ("Live 10"))           return AbletonLive10;
         if (hostFilename.containsIgnoreCase   ("Live"))              return AbletonLiveGeneric;
         if (hostFilename.containsIgnoreCase   ("Adobe Premiere"))    return AdobePremierePro;
         if (hostFilename.containsIgnoreCase   ("GarageBand"))        return AppleGarageBand;
@@ -344,11 +344,11 @@ private:
         if (hostFilename.containsIgnoreCase   ("AudioPluginHost"))   return JUCEPluginHost;
 
        #elif JUCE_WINDOWS
-        if (hostFilename.containsIgnoreCase   ("Live 6."))           return AbletonLive6;
-        if (hostFilename.containsIgnoreCase   ("Live 7."))           return AbletonLive7;
-        if (hostFilename.containsIgnoreCase   ("Live 8."))           return AbletonLive8;
-        if (hostFilename.containsIgnoreCase   ("Live 9."))           return AbletonLive9;
-        if (hostFilename.containsIgnoreCase   ("Live 10."))          return AbletonLive10;
+        if (hostFilename.containsIgnoreCase   ("Live 6"))            return AbletonLive6;
+        if (hostFilename.containsIgnoreCase   ("Live 7"))            return AbletonLive7;
+        if (hostFilename.containsIgnoreCase   ("Live 8"))            return AbletonLive8;
+        if (hostFilename.containsIgnoreCase   ("Live 9"))            return AbletonLive9;
+        if (hostFilename.containsIgnoreCase   ("Live 10"))           return AbletonLive10;
         if (hostFilename.containsIgnoreCase   ("Live "))             return AbletonLiveGeneric;
         if (hostFilename.containsIgnoreCase   ("Audition"))          return AdobeAudition;
         if (hostFilename.containsIgnoreCase   ("Adobe Premiere"))    return AdobePremierePro;
