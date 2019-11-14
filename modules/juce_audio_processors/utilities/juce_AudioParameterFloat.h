@@ -106,7 +106,7 @@ private:
     String getText (float, int) const override;
     float getValueForText (const String&) const override;
 
-    float value;
+    std::atomic<float> value;
     const float defaultValue;
     std::function<String(float, int)> stringFromValueFunction;
     std::function<float(const String&)> valueFromStringFunction;

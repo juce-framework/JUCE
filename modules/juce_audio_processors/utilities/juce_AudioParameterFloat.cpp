@@ -76,7 +76,13 @@ AudioParameterFloat::AudioParameterFloat (String pid, String nm, float minValue,
 {
 }
 
-AudioParameterFloat::~AudioParameterFloat() {}
+AudioParameterFloat::~AudioParameterFloat()
+{
+    #if __cpp_lib_atomic_is_always_lock_free
+     static_assert (std::atomic<float>::is_always_lock_free,
+                    "AudioParameterFloat requires a lock-free std::atomic<float>");
+    #endif
+}
 
 float AudioParameterFloat::getValue() const                              { return convertTo0to1 (value); }
 void AudioParameterFloat::setValue (float newValue)                      { value = convertFrom0to1 (newValue); valueChanged (get()); }
