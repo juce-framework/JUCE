@@ -445,13 +445,15 @@ private:
             return r;
         }
 
-        r = applyAutoUpdaterFile (unzipTarget);
+       #if JUCE_LINUX || JUCE_MAC
+        r = setFilePermissions (unzipTarget, zip);
 
         if (r.failed())
         {
             unzipTarget.deleteRecursively();
             return r;
         }
+       #endif
 
         if (targetFolder.exists())
         {
@@ -477,29 +479,24 @@ private:
         return Result::ok();
     }
 
-    Result applyAutoUpdaterFile (const File& root)
+    Result setFilePermissions (const File& root, const ZipFile& zip)
     {
-        auto autoUpdaterFile = root.getChildFile (".autoupdater.xml");
+        constexpr uint32 executableFlag = (1 << 22);
 
-        if (autoUpdaterFile.existsAsFile())
+        for (int i = 0; i < zip.getNumEntries(); ++i)
         {
-           #if JUCE_LINUX || JUCE_MAC
-            if (auto parent = parseXML (autoUpdaterFile))
+            auto* entry = zip.getEntry (i);
+
+            if ((entry->externalFileAttributes & executableFlag) != 0 && entry->filename.getLastCharacter() != '/')
             {
-                if (auto* execElement = parent->getChildByName ("EXECUTABLE"))
-                {
-                    forEachXmlChildElementWithTagName (*execElement, e, "FILE")
-                    {
-                        auto file = root.getChildFile (e->getAllSubText());
+                auto exeFile = root.getChildFile (entry->filename);
 
-                        if (file.exists() && ! file.setExecutePermission (true))
-                            return Result::fail ("Failed to set executable file permission for " + file.getFileName());
-                    }
-                }
+                if (! exeFile.exists())
+                    return Result::fail ("Failed to find executable file when setting permissions " + exeFile.getFileName());
+
+                if (! exeFile.setExecutePermission (true))
+                    return Result::fail ("Failed to set executable file permission for " + exeFile.getFileName());
             }
-           #endif
-
-            autoUpdaterFile.deleteFile();
         }
 
         return Result::ok();
