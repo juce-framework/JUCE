@@ -20,9 +20,9 @@
 #include "../../juce_core/system/juce_TargetPlatform.h"
 
 //==============================================================================
-#if JucePlugin_Build_VST3 && (__APPLE_CPP__ || __APPLE_CC__ || _WIN32 || _WIN64)
+#if JucePlugin_Build_VST3 && (__APPLE_CPP__ || __APPLE_CC__ || _WIN32 || _WIN64 || LINUX || __linux__)
 
-#if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS)
+#if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
  #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
  #define JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY 1
 #endif
@@ -30,9 +30,11 @@
 #include "../../juce_audio_processors/format_types/juce_VST3Headers.h"
 
 #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
+#define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
 
 #include "../utility/juce_CheckSettingMacros.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
+#include "../utility/juce_IncludeSystemHeaders.h"
 #include "../utility/juce_WindowsHooks.h"
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../../juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp"
@@ -55,6 +57,10 @@ namespace Vst2
  #endif
 #endif
 
+#if JUCE_LINUX
+ std::vector<std::pair<int, std::function<void(int)>>> getFdReadCallbacks();
+#endif
+
 namespace juce
 {
 
@@ -62,14 +68,14 @@ using namespace Steinberg;
 
 //==============================================================================
 #if JUCE_MAC
-  extern void initialiseMacVST();
+ extern void initialiseMacVST();
 
  #if ! JUCE_64BIT
   extern void updateEditorCompBoundsVST (Component*);
  #endif
 
-  extern JUCE_API void* attachComponentToWindowRefVST (Component*, void* parentWindowOrView, bool isNSView);
-  extern JUCE_API void detachComponentFromWindowRefVST (Component*, void* nsWindow, bool isNSView);
+ extern JUCE_API void* attachComponentToWindowRefVST (Component*, void* parentWindowOrView, bool isNSView);
+ extern JUCE_API void detachComponentFromWindowRefVST (Component*, void* nsWindow, bool isNSView);
 #endif
 
 #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
@@ -426,7 +432,7 @@ public:
             jassert (info.defaultNormalizedValue >= 0 && info.defaultNormalizedValue <= 1.0f);
 
             // Is this a meter?
-            if (((param.getCategory() & 0xffff0000) >> 16) == 2)
+            if ((((unsigned int) param.getCategory() & 0xffff0000) >> 16) == 2)
                 info.flags = Vst::ParameterInfo::kIsReadOnly;
             else
                 info.flags = param.isAutomatable() ? Vst::ParameterInfo::kCanAutomate : 0;
@@ -1011,6 +1017,9 @@ private:
     //==============================================================================
     class JuceVST3Editor  : public Vst::EditorView,
                             public Steinberg::IPlugViewContentScaleSupport,
+                           #if JUCE_LINUX
+                            public Steinberg::Linux::IEventHandler,
+                           #endif
                             private Timer
     {
     public:
@@ -1038,14 +1047,27 @@ private:
         REFCOUNT_METHODS (Vst::EditorView)
 
         //==============================================================================
+       #if JUCE_LINUX
+        void PLUGIN_API onFDIsSet (Steinberg::Linux::FileDescriptor fd) override
+        {
+            auto it = fdCallbackMap.find (fd);
+
+            if (it != fdCallbackMap.end())
+                it->second (fd);
+        }
+       #endif
+
+        //==============================================================================
         tresult PLUGIN_API isPlatformTypeSupported (FIDString type) override
         {
             if (type != nullptr && pluginInstance.hasEditor())
             {
                #if JUCE_WINDOWS
                 if (strcmp (type, kPlatformTypeHWND) == 0)
-               #else
+               #elif JUCE_MAC
                 if (strcmp (type, kPlatformTypeNSView) == 0 || strcmp (type, kPlatformTypeHIView) == 0)
+               #elif JUCE_LINUX
+                if (strcmp (type, kPlatformTypeX11EmbedWindowID) == 0)
                #endif
                     return kResultTrue;
             }
@@ -1061,10 +1083,20 @@ private:
             if (component == nullptr)
                 component.reset (new ContentWrapperComponent (*this, pluginInstance));
 
-           #if JUCE_WINDOWS
+           #if JUCE_WINDOWS || JUCE_LINUX
             component->addToDesktop (0, parent);
             component->setOpaque (true);
             component->setVisible (true);
+            #if JUCE_LINUX
+             if (auto* runLoop = getHostRunLoop())
+             {
+                 for (auto& cb : getFdReadCallbacks())
+                 {
+                     fdCallbackMap[cb.first] = cb.second;
+                     runLoop->registerEventHandler (this, cb.first);
+                 }
+             }
+            #endif
            #else
             isNSView = (strcmp (type, kPlatformTypeNSView) == 0);
             macHostWindow = juce::attachComponentToWindowRefVST (component.get(), parent, isNSView);
@@ -1085,8 +1117,14 @@ private:
         {
             if (component != nullptr)
             {
-               #if JUCE_WINDOWS
+               #if JUCE_WINDOWS || JUCE_LINUX
                 component->removeFromDesktop();
+                #if JUCE_LINUX
+                 fdCallbackMap.clear();
+
+                 if (auto* runLoop = getHostRunLoop())
+                     runLoop->unregisterEventHandler (this);
+                #endif
                #else
                 if (macHostWindow != nullptr)
                 {
@@ -1465,6 +1503,8 @@ private:
         };
 
         //==============================================================================
+        ScopedJuceInitialiser_GUI libraryInitialiser;
+
         ComSmartPtr<JuceVST3EditController> owner;
         AudioProcessor& pluginInstance;
 
@@ -1497,7 +1537,22 @@ private:
 
         #if JUCE_WINDOWS
          WindowsHooks hooks;
+        #elif JUCE_LINUX
+         std::unordered_map<int, std::function<void(int)>> fdCallbackMap;
+
+         ::Display* display = XWindowSystem::getInstance()->getDisplay();
+
+         Steinberg::Linux::IRunLoop* getHostRunLoop()
+         {
+             Steinberg::Linux::IRunLoop* runLoop = nullptr;
+
+             if (plugFrame != nullptr)
+                 plugFrame->queryInterface (Steinberg::Linux::IRunLoop::iid, (void**) &runLoop);
+
+             return runLoop;
+         }
         #endif
+
        #endif
 
         //==============================================================================
@@ -1766,7 +1821,7 @@ public:
 
     void setStateInformation (const void* data, int sizeAsInt)
     {
-        int64 size = sizeAsInt;
+        auto size = (uint64) sizeAsInt;
 
         // Check if this data was written with a newer JUCE version
         // and if it has the JUCE private data magic code at the end
@@ -1798,7 +1853,7 @@ public:
             }
         }
 
-        if (size >= 0)
+        if (size > 0)
             pluginInstance->setStateInformation (data, static_cast<int> (size));
     }
 
@@ -2833,61 +2888,87 @@ bool shutdownModule()
 #undef JUCE_EXPORTED_FUNCTION
 
 #if JUCE_WINDOWS
-    extern "C" __declspec (dllexport) bool InitDll()   { return initModule(); }
-    extern "C" __declspec (dllexport) bool ExitDll()   { return shutdownModule(); }
-    #define JUCE_EXPORTED_FUNCTION
-
+ extern "C" __declspec (dllexport) bool InitDll()   { return initModule(); }
+ extern "C" __declspec (dllexport) bool ExitDll()   { return shutdownModule(); }
+ #define JUCE_EXPORTED_FUNCTION
 #else
-    #define JUCE_EXPORTED_FUNCTION extern "C" __attribute__ ((visibility ("default")))
+ #define JUCE_EXPORTED_FUNCTION extern "C" __attribute__ ((visibility ("default")))
+#endif
 
-    CFBundleRef globalBundleInstance = nullptr;
-    juce::uint32 numBundleRefs = 0;
-    juce::Array<CFBundleRef> bundleRefs;
+#if JUCE_LINUX
+ void* moduleHandle = nullptr;
+ int moduleEntryCounter = 0;
 
-    enum { MaxPathLength = 2048 };
-    char modulePath[MaxPathLength] = { 0 };
-    void* moduleHandle = nullptr;
+ JUCE_EXPORTED_FUNCTION bool ModuleEntry (void* sharedLibraryHandle)
+ {
+     if (++moduleEntryCounter == 1)
+     {
+         moduleHandle = sharedLibraryHandle;
+         return initModule();
+     }
 
-    JUCE_EXPORTED_FUNCTION bool bundleEntry (CFBundleRef ref)
-    {
-        if (ref != nullptr)
-        {
-            ++numBundleRefs;
-            CFRetain (ref);
+     return true;
+ }
 
-            bundleRefs.add (ref);
+ JUCE_EXPORTED_FUNCTION bool ModuleExit()
+ {
+     if (--moduleEntryCounter == 0)
+     {
+         moduleHandle = nullptr;
+         return shutdownModule();
+     }
 
-            if (moduleHandle == nullptr)
-            {
-                globalBundleInstance = ref;
-                moduleHandle = ref;
+     return true;
+ }
+#elif JUCE_MAC
+ CFBundleRef globalBundleInstance = nullptr;
+ juce::uint32 numBundleRefs = 0;
+ juce::Array<CFBundleRef> bundleRefs;
 
-                CFURLRef tempURL = CFBundleCopyBundleURL (ref);
-                CFURLGetFileSystemRepresentation (tempURL, true, (UInt8*) modulePath, MaxPathLength);
-                CFRelease (tempURL);
-            }
-        }
+ enum { MaxPathLength = 2048 };
+ char modulePath[MaxPathLength] = { 0 };
+ void* moduleHandle = nullptr;
 
-        return initModule();
-    }
+ JUCE_EXPORTED_FUNCTION bool bundleEntry (CFBundleRef ref)
+ {
+     if (ref != nullptr)
+     {
+         ++numBundleRefs;
+         CFRetain (ref);
 
-    JUCE_EXPORTED_FUNCTION bool bundleExit()
-    {
-        if (shutdownModule())
-        {
-            if (--numBundleRefs == 0)
-            {
-                for (int i = 0; i < bundleRefs.size(); ++i)
-                    CFRelease (bundleRefs.getUnchecked (i));
+         bundleRefs.add (ref);
 
-                bundleRefs.clear();
-            }
+         if (moduleHandle == nullptr)
+         {
+             globalBundleInstance = ref;
+             moduleHandle = ref;
 
-            return true;
-        }
+             CFURLRef tempURL = CFBundleCopyBundleURL (ref);
+             CFURLGetFileSystemRepresentation (tempURL, true, (UInt8*) modulePath, MaxPathLength);
+             CFRelease (tempURL);
+         }
+     }
 
-        return false;
-    }
+     return initModule();
+ }
+
+ JUCE_EXPORTED_FUNCTION bool bundleExit()
+ {
+     if (shutdownModule())
+     {
+         if (--numBundleRefs == 0)
+         {
+             for (int i = 0; i < bundleRefs.size(); ++i)
+                 CFRelease (bundleRefs.getUnchecked (i));
+
+             bundleRefs.clear();
+         }
+
+         return true;
+     }
+
+     return false;
+ }
 #endif
 
 //==============================================================================
@@ -3091,7 +3172,7 @@ private:
                 if (entry->isUnicode)
                     return kResultFalse;
 
-                memcpy (info, &entry->info2, sizeof (PClassInfoType));
+                memcpy (info, (PClassInfoType*) &entry->info2, sizeof (PClassInfoType));
                 return kResultOk;
             }
         }

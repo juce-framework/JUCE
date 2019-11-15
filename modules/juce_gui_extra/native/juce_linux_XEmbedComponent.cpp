@@ -345,6 +345,8 @@ private:
 
             X11Symbols::getInstance()->xReparentWindow (dpy, client, root, 0, 0);
             client = 0;
+
+            X11Symbols::getInstance()->xSync (dpy, False);
         }
     }
 
@@ -681,6 +683,7 @@ void XEmbedComponent::focusGained (FocusChangeType changeType)     { pimpl->focu
 void XEmbedComponent::focusLost   (FocusChangeType changeType)     { pimpl->focusLost   (changeType); }
 void XEmbedComponent::broughtToFront()                             { pimpl->broughtToFront(); }
 unsigned long XEmbedComponent::getHostWindowID()                   { return pimpl->getHostWindowID(); }
+void XEmbedComponent::removeClient()                               { pimpl->setClient (0, true); }
 
 //==============================================================================
 bool juce_handleXEmbedEvent (ComponentPeer* p, void* e)

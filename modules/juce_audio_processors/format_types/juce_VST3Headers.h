@@ -43,7 +43,11 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
                                      "-Winconsistent-missing-destructor-override",
                                      "-Wcast-align",
                                      "-Wignored-qualifiers",
-                                     "-Wmissing-field-initializers")
+                                     "-Wmissing-field-initializers",
+                                     "-Wformat=",
+                                     "-Wpedantic",
+                                     "-Wextra",
+                                     "-Wclass-memaccess")
 
 #undef DEVELOPMENT
 #define DEVELOPMENT 0  // This avoids a Clang warning in Steinberg code about unused values
@@ -93,12 +97,14 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
  #include <base/source/fobject.cpp>
  #include <base/source/fstreamer.cpp>
  #include <base/source/fstring.cpp>
-#if VST_VERSION >= 0x030608
- #include <base/thread/source/flock.cpp>
- #include <pluginterfaces/base/coreiids.cpp>
-#else
- #include <base/source/flock.cpp>
-#endif
+
+ #if VST_VERSION >= 0x030608
+  #include <base/thread/source/flock.cpp>
+  #include <pluginterfaces/base/coreiids.cpp>
+ #else
+  #include <base/source/flock.cpp>
+ #endif
+
  #include <base/source/updatehandler.cpp>
  #include <pluginterfaces/base/conststringtable.cpp>
  #include <pluginterfaces/base/funknown.cpp>
@@ -118,9 +124,10 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
  #include <public.sdk/source/vst/vstparameters.cpp>
  #include <public.sdk/source/vst/vstpresetfile.cpp>
  #include <public.sdk/source/vst/hosting/hostclasses.cpp>
-#if VST_VERSION >= 0x03060c   // 3.6.12
- #include <public.sdk/source/vst/hosting/pluginterfacesupport.cpp>
-#endif
+
+ #if VST_VERSION >= 0x03060c   // 3.6.12
+  #include <public.sdk/source/vst/hosting/pluginterfacesupport.cpp>
+ #endif
 
 //==============================================================================
 namespace Steinberg
@@ -138,8 +145,12 @@ namespace Steinberg
     DEF_CLASS_IID (IPlugView)
     DEF_CLASS_IID (IPlugFrame)
     DEF_CLASS_IID (IPlugViewContentScaleSupport)
+
+   #if JUCE_LINUX
+    DEF_CLASS_IID (Linux::IRunLoop)
+   #endif
 }
-#endif //JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
+#endif // JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
 
 JUCE_END_IGNORE_WARNINGS_MSVC
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE

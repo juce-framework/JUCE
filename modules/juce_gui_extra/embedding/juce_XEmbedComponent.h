@@ -86,6 +86,9 @@ public:
     */
     unsigned long getHostWindowID();
 
+    /** Removes the client window from the host. */
+    void removeClient();
+
 protected:
     //==============================================================================
     /** @internal */

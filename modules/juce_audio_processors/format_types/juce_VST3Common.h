@@ -85,8 +85,10 @@ inline Steinberg::Vst::TChar* toString (const juce::String& source) noexcept
 
 #if JUCE_WINDOWS
  static const Steinberg::FIDString defaultVST3WindowType = Steinberg::kPlatformTypeHWND;
-#else
+#elif JUCE_MAC
  static const Steinberg::FIDString defaultVST3WindowType = Steinberg::kPlatformTypeNSView;
+#elif JUCE_LINUX
+ static const Steinberg::FIDString defaultVST3WindowType = Steinberg::kPlatformTypeX11EmbedWindowID;
 #endif
 
 

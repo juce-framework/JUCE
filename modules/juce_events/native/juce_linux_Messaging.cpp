@@ -211,6 +211,12 @@ public:
         poll (&pfds.front(), static_cast<nfds_t> (pfds.size()), timeoutMs);
     }
 
+    std::vector<std::pair<int, std::function<void(int)>>> getFdReadCallbacks()
+    {
+        const ScopedLock sl (lock);
+        return fdReadCallbacks;
+    }
+
     //==============================================================================
     JUCE_DECLARE_SINGLETON (InternalRunLoop, false)
 
@@ -318,3 +324,14 @@ void LinuxEventLoop::unregisterFdCallback (int fd)
 }
 
 } // namespace juce
+
+JUCE_API std::vector<std::pair<int, std::function<void(int)>>> getFdReadCallbacks()
+{
+    using namespace juce;
+
+    if (auto* runLoop = InternalRunLoop::getInstanceWithoutCreating())
+        return runLoop->getFdReadCallbacks();
+
+    jassertfalse;
+    return {};
+}

@@ -1847,8 +1847,8 @@ private:
         if (handleManufacturerSpecificVST2Opcode (args.index, args.value, args.ptr, args.opt))
             return 1;
 
-        if (args.index == JUCE_MULTICHAR_CONSTANT ('P', 'r', 'e', 'S')
-             && args.value == JUCE_MULTICHAR_CONSTANT ('A', 'e', 'C', 's'))
+        if (args.index == (int32) JUCE_MULTICHAR_CONSTANT ('P', 'r', 'e', 'S')
+             && args.value == (int32) JUCE_MULTICHAR_CONSTANT ('A', 'e', 'C', 's'))
             return handleSetContentScaleFactor (args.opt);
 
         if (args.index == Vst2::effGetParamDisplay)

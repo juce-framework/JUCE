@@ -24,8 +24,6 @@
 #include "../utility/juce_CheckSettingMacros.h"
 #include "juce_IncludeModuleHeaders.h"
 
-using namespace juce;
-
 namespace juce
 {
 
@@ -40,7 +38,7 @@ std::function<bool(AudioProcessor&)> PluginHostType::jucePlugInIsRunningInAudioS
  #define JUCE_VST3_CAN_REPLACE_VST2 1
 #endif
 
-#if JucePlugin_Build_VST3 && (__APPLE_CPP__ || __APPLE_CC__ || _WIN32 || _WIN64) && JUCE_VST3_CAN_REPLACE_VST2
+#if JucePlugin_Build_VST3 && (__APPLE_CPP__ || __APPLE_CC__ || _WIN32 || _WIN64 || LINUX || __linux__) && JUCE_VST3_CAN_REPLACE_VST2
 #define VST3_REPLACEMENT_AVAILABLE 1
 
 // NB: Nasty old-fashioned code in here because it's copied from the Steinberg example code.
@@ -140,6 +138,8 @@ bool JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, pointer_sized_i
 #endif
 
 } // namespace juce
+
+using namespace juce;
 
 //==============================================================================
 #if JucePlugin_Enable_IAA && JucePlugin_Build_Standalone && JUCE_IOS && (! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP)
