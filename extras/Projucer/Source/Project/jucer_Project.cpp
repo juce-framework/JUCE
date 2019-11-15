@@ -515,7 +515,7 @@ static int getJuceVersion (const String& v)
          + getVersionElement (v, 0);
 }
 
-static int getBuiltJuceVersion()
+static constexpr int getBuiltJuceVersion()
 {
     return JUCE_MAJOR_VERSION * 100000
          + JUCE_MINOR_VERSION * 1000
@@ -524,11 +524,7 @@ static int getBuiltJuceVersion()
 
 static bool isModuleNewerThanProjucer (const ModuleDescription& module)
 {
-    if (module.getID().startsWith ("juce_")
-        && getJuceVersion (module.getVersion()) > getBuiltJuceVersion())
-        return true;
-
-    return false;
+    return module.getID().startsWith ("juce_") && getJuceVersion (module.getVersion()) > getBuiltJuceVersion();
 }
 
 void Project::warnAboutOldProjucerVersion()
@@ -537,7 +533,6 @@ void Project::warnAboutOldProjucerVersion()
     {
         if (isModuleNewerThanProjucer ({ juceModule.second }))
         {
-            // Projucer is out of date!
             if (ProjucerApplication::getApp().isRunningCommandLine)
                 std::cout <<  "WARNING! This version of the Projucer is out-of-date!" << std::endl;
             else
