@@ -630,7 +630,7 @@ std::unique_ptr<MidiOutput> MidiOutput::createNewDevice (const String& deviceNam
 
         if (CHECK_ERROR (err))
         {
-            auto deviceIdentifier = createUniqueIDForMidiPort (deviceName, true);
+            auto deviceIdentifier = createUniqueIDForMidiPort (deviceName, false);
 
             if (CHECK_ERROR (MIDIObjectSetIntegerProperty (endpoint, kMIDIPropertyUniqueID, (SInt32) deviceIdentifier)))
             {
