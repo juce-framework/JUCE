@@ -54,9 +54,7 @@ public:
         addAndMakeVisible (modulesLabel);
         modulesLabel.attachToComponent (&currentPathBox, true);
 
-        addAndMakeVisible (useGlobalPathsToggle);
-        useGlobalPathsToggle.setToggleState (true, sendNotification);
-        useGlobalPathsToggle.onClick = [this]
+        auto updateEnablement = [this]
         {
             isUsingGlobalPaths = useGlobalPathsToggle.getToggleState();
 
@@ -64,6 +62,12 @@ public:
             openFolderButton.setEnabled (! isUsingGlobalPaths);
             modulesLabel.setEnabled     (! isUsingGlobalPaths);
         };
+
+        addAndMakeVisible (useGlobalPathsToggle);
+        useGlobalPathsToggle.setToggleState (true, sendNotification);
+        useGlobalPathsToggle.onClick = [updateEnablement] { updateEnablement(); };
+
+        updateEnablement();
     }
 
     void resized() override
