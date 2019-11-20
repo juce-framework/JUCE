@@ -700,7 +700,7 @@ public:
         if (juceFilter != nullptr)
         {
             juce::MemoryBlock state;
-            juceFilter->getCurrentProgramStateInformation (state);
+            juceFilter->getStateInformation (state);
 
             if (state.getSize() > 0)
             {
@@ -747,7 +747,7 @@ public:
                     const juce::uint8* const rawBytes = CFDataGetBytePtr (data);
 
                     if (numBytes > 0)
-                        juceFilter->setCurrentProgramStateInformation (rawBytes, numBytes);
+                        juceFilter->setStateInformation (rawBytes, numBytes);
                 }
             }
         }
