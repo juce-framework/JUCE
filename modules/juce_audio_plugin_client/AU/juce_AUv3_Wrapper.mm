@@ -566,7 +566,7 @@ public:
         }
 
         juce::MemoryBlock state;
-        getAudioProcessor().getCurrentProgramStateInformation (state);
+        getAudioProcessor().getStateInformation (state);
 
         if (state.getSize() > 0)
         {
@@ -612,7 +612,7 @@ public:
                 const juce::uint8* const rawBytes = reinterpret_cast< const juce::uint8* const> ([data bytes]);
 
                 if (numBytes > 0)
-                    getAudioProcessor().setCurrentProgramStateInformation (rawBytes, numBytes);
+                    getAudioProcessor().setStateInformation (rawBytes, numBytes);
             }
         }
 
