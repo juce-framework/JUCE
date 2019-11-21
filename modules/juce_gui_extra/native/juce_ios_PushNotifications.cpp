@@ -841,12 +841,22 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
 
     void registeredForRemoteNotifications (NSData* deviceTokenToUse) override
     {
-        NSString* deviceTokenString = [[[[deviceTokenToUse description]
-                                          stringByReplacingOccurrencesOfString: nsStringLiteral ("<") withString: nsStringLiteral ("")]
-                                          stringByReplacingOccurrencesOfString: nsStringLiteral (">") withString: nsStringLiteral ("")]
-                                          stringByReplacingOccurrencesOfString: nsStringLiteral (" ") withString: nsStringLiteral ("")];
+        deviceToken = [deviceTokenToUse]() -> String
+        {
+            auto length = deviceTokenToUse.length;
 
-        deviceToken = nsStringToJuce (deviceTokenString);
+            if (auto* buffer = (const unsigned char*) deviceTokenToUse.bytes)
+            {
+                NSMutableString* hexString = [NSMutableString stringWithCapacity: (length * 2)];
+
+                for (int i = 0; i < length; ++i)
+                    [hexString appendFormat:@"%02x", buffer[i]];
+
+                return nsStringToJuce ([hexString copy]);
+            }
+
+            return {};
+        }();
 
         initialised = true;
 
