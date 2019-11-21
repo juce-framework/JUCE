@@ -424,41 +424,18 @@ void AudioProcessor::updateHostDisplay()
             l->audioProcessorChanged (this);
 }
 
-#if JUCE_DEBUG
-void AudioProcessor::checkDuplicateParamIDs()
+void AudioProcessor::checkForDuplicateParamID (AudioProcessorParameter* param)
 {
-    duplicateParamIDCheck.reset();
+    ignoreUnused (param);
 
-    StringArray usedIDs;
-    usedIDs.ensureStorageAllocated (flatParameterList.size());
-
-    for (auto& p : flatParameterList)
-        if (auto* withID = dynamic_cast<AudioProcessorParameterWithID*> (p))
-            usedIDs.add (withID->paramID);
-
-    usedIDs.sort (false);
-
-    // This assertion checks whether you attempted to add two or more parameters with the same ID
-    for (int i = 1; i < usedIDs.size(); ++i)
-        jassert (usedIDs[i - 1] != usedIDs[i]);
-}
-
-struct AudioProcessor::DuplicateParamIDCheck  : private AsyncUpdater
-{
-    DuplicateParamIDCheck (AudioProcessor& p) : owner (p)   { triggerAsyncUpdate(); }
-    ~DuplicateParamIDCheck() override                       { cancelPendingUpdate(); }
-
-    void handleAsyncUpdate() override                       { owner.checkDuplicateParamIDs(); }
-
-    AudioProcessor& owner;
-};
-#endif
-
-void AudioProcessor::triggerDuplicateParamIDCheck()
-{
    #if JUCE_DEBUG
-    if (MessageManager::getInstanceWithoutCreating() != nullptr && duplicateParamIDCheck == nullptr)
-        duplicateParamIDCheck = std::make_unique<DuplicateParamIDCheck> (*this);
+    if (auto* withID = dynamic_cast<AudioProcessorParameterWithID*> (param))
+    {
+        auto insertResult = paramIDs.insert (withID->paramID);
+
+        // If you hit this assertion then the parameter ID is not unique
+        jassert (insertResult.second);
+    }
    #endif
 }
 
@@ -474,7 +451,7 @@ void AudioProcessor::addParameter (AudioProcessorParameter* param)
     param->parameterIndex = flatParameterList.size();
     flatParameterList.add (param);
 
-    triggerDuplicateParamIDCheck();
+    checkForDuplicateParamID (param);
 }
 
 void AudioProcessor::addParameterGroup (std::unique_ptr<AudioProcessorParameterGroup> group)
@@ -489,14 +466,19 @@ void AudioProcessor::addParameterGroup (std::unique_ptr<AudioProcessorParameterG
         auto p = flatParameterList.getUnchecked (i);
         p->processor = this;
         p->parameterIndex = i;
+
+        checkForDuplicateParamID (p);
     }
 
     parameterTree.addChild (std::move (group));
-    triggerDuplicateParamIDCheck();
 }
 
 void AudioProcessor::setParameterTree (AudioProcessorParameterGroup&& newTree)
 {
+   #if JUCE_DEBUG
+    paramIDs.clear();
+   #endif
+
     parameterTree = std::move (newTree);
     flatParameterList = parameterTree.getParameters (true);
 
@@ -505,9 +487,9 @@ void AudioProcessor::setParameterTree (AudioProcessorParameterGroup&& newTree)
         auto p = flatParameterList.getUnchecked (i);
         p->processor = this;
         p->parameterIndex = i;
-    }
 
-    triggerDuplicateParamIDCheck();
+        checkForDuplicateParamID (p);
+    }
 }
 
 void AudioProcessor::refreshParameterList() {}

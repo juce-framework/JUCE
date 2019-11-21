@@ -1477,17 +1477,15 @@ private:
     #endif
 
     bool textRecursionCheck = false;
-
-    struct DuplicateParamIDCheck;
-    std::unique_ptr<DuplicateParamIDCheck> duplicateParamIDCheck;
-    void checkDuplicateParamIDs();
+    std::unordered_set<String> paramIDs;
    #endif
+
+    void checkForDuplicateParamID (AudioProcessorParameter*);
 
     AudioProcessorListener* getListenerLocked (int) const noexcept;
     void updateSpeakerFormatStrings();
     void audioIOChanged (bool busNumberChanged, bool channelNumChanged);
     void getNextBestLayout (const BusesLayout&, BusesLayout&) const;
-    void triggerDuplicateParamIDCheck();
 
     template <typename floatType>
     void processBypassed (AudioBuffer<floatType>&, MidiBuffer&);
