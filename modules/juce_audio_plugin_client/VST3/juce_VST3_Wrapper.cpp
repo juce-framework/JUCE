@@ -1074,6 +1074,9 @@ private:
             component->addToDesktop (0, parent);
             component->setOpaque (true);
             component->setVisible (true);
+            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+             component->checkScaleFactorIsCorrect();
+            #endif
            #else
             isNSView = (strcmp (type, kPlatformTypeNSView) == 0);
             macHostWindow = juce::attachComponentToWindowRefVST (component.get(), parent, isNSView);
