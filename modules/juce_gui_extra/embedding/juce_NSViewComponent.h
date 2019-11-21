@@ -30,7 +30,7 @@ namespace juce
     moved and resized to follow the movements of this component.
 
     Of course, since the view is a native object, it'll obliterate any
-    juce components that may overlap this component, but that's life.
+    JUCE components that may overlap this component, but that's life.
 
     @tags{GUI}
 */
@@ -50,7 +50,7 @@ public:
         it is needed. To remove the current view, just call setView (nullptr).
 
         Note: A void* is used here to avoid including the cocoa headers as
-        part of the juce.h, but the method expects an NSView*.
+        part of JuceHeader.h, but the method expects an NSView*.
     */
     void setView (void* nsView);
 
@@ -60,7 +60,6 @@ public:
         headers, so you should just cast the return value to an NSView*.
     */
     void* getView() const;
-
 
     /** Resizes this component to fit the view that it contains. */
     void resizeToFitView();

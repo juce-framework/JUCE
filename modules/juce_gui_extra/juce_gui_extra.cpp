@@ -165,6 +165,7 @@
 //==============================================================================
 #elif JUCE_WINDOWS
  #include "native/juce_win32_ActiveXComponent.cpp"
+ #include "native/juce_win32_HWNDComponent.cpp"
  #if JUCE_WEB_BROWSER
   #include "native/juce_win32_WebBrowserComponent.cpp"
  #endif

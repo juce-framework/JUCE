@@ -30,7 +30,7 @@ namespace juce
     moved and resized to follow the movements of this component.
 
     Of course, since the view is a native object, it'll obliterate any
-    juce components that may overlap this component, but that's life.
+    JUCE components that may overlap this component, but that's life.
 
     @tags{GUI}
 */
