@@ -55,6 +55,7 @@
 #include <iomanip>
 #include <map>
 #include <cstddef>
+#include <unordered_set>
 
 //==============================================================================
 #include "juce_CompilerSupport.h"
