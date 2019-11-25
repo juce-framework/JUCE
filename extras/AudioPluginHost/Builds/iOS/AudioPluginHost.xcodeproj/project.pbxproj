@@ -73,6 +73,10 @@
 			isa = PBXBuildFile;
 			fileRef = F9EDC54DFBCF3A63E0AA5D73;
 		};
+		4DB15177DDC357F4503F88CF = {
+			isa = PBXBuildFile;
+			fileRef = B457EE687507BF1DEEA7581F;
+		};
 		59F4F23BFFDAB414B4801F85 = {
 			isa = PBXBuildFile;
 			fileRef = 29E0972229FB44D969035B4E;
@@ -530,6 +534,13 @@
 			path = ../../Source/JUCEAppIcon.png;
 			sourceTree = "SOURCE_ROOT";
 		};
+		B457EE687507BF1DEEA7581F = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
+			name = WebKit.framework;
+			path = System/Library/Frameworks/WebKit.framework;
+			sourceTree = SDKROOT;
+		};
 		B86B918291E1090C6A720971 = {
 			isa = PBXFileReference;
 			lastKnownFileType = file;
@@ -763,6 +774,7 @@
 				D0026F0A29B486D87E92BB8B,
 				89309C0C5F3269BD06BE7F27,
 				F9EDC54DFBCF3A63E0AA5D73,
+				B457EE687507BF1DEEA7581F,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1129,6 +1141,7 @@
 				2AB9A26C9359C40CA0A937ED,
 				A02C9F4C4B840C27B6CAFEBD,
 				50AFD116DCA6EC228EFB322D,
+				4DB15177DDC357F4503F88CF,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

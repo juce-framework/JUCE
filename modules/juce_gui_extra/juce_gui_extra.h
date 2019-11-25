@@ -36,6 +36,7 @@
 
   dependencies:       juce_gui_basics
   OSXFrameworks:      WebKit
+  iOSFrameworks:      WebKit
 
  END_JUCE_MODULE_DECLARATION
 

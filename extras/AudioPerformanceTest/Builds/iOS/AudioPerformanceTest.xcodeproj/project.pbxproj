@@ -61,6 +61,10 @@
 			isa = PBXBuildFile;
 			fileRef = 60795BF638A7024B62C0DF09;
 		};
+		537E779F6008999191B2920A = {
+			isa = PBXBuildFile;
+			fileRef = 3058871156B921B9E5946C4F;
+		};
 		A783F6E198806332E7FB9744 = {
 			isa = PBXBuildFile;
 			fileRef = 8693552B5FA53C2003A66302;
@@ -193,6 +197,13 @@
 			name = JuceHeader.h;
 			path = ../../JuceLibraryCode/JuceHeader.h;
 			sourceTree = "SOURCE_ROOT";
+		};
+		3058871156B921B9E5946C4F = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
+			name = WebKit.framework;
+			path = System/Library/Frameworks/WebKit.framework;
+			sourceTree = SDKROOT;
 		};
 		322D3066DCD98A8D0542236A = {
 			isa = PBXFileReference;
@@ -491,6 +502,7 @@
 				418405DCE48C1B4926143469,
 				0A58FDDF6FB9253F51939A52,
 				60795BF638A7024B62C0DF09,
+				3058871156B921B9E5946C4F,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -807,6 +819,7 @@
 				FA27764C3CB8C061B1B787CC,
 				F8099BB77DC0D01DCCC6AFB9,
 				AA0C9E035BB509F01A09310B,
+				537E779F6008999191B2920A,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

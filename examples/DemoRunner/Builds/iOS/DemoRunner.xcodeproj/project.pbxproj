@@ -77,6 +77,10 @@
 			isa = PBXBuildFile;
 			fileRef = F90C8B0233A54F1445343F67;
 		};
+		89AD16514B1F4133FFEA1DF9 = {
+			isa = PBXBuildFile;
+			fileRef = 96D99A08027CA35D6A4E5CFD;
+		};
 		47ED2C78B05B8A6A00E36C46 = {
 			isa = PBXBuildFile;
 			fileRef = 685A261BE78585293F3EAD36;
@@ -547,6 +551,13 @@
 			path = "../../JuceLibraryCode/include_juce_opengl.mm";
 			sourceTree = "SOURCE_ROOT";
 		};
+		96D99A08027CA35D6A4E5CFD = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
+			name = WebKit.framework;
+			path = System/Library/Frameworks/WebKit.framework;
+			sourceTree = SDKROOT;
+		};
 		979F23EA9E5E76131299E886 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.objcpp;
@@ -866,6 +877,7 @@
 				34F1320BC5C23702C08DF9F0,
 				23CD1A3F9067C3A0ECE7BB67,
 				F90C8B0233A54F1445343F67,
+				96D99A08027CA35D6A4E5CFD,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1236,6 +1248,7 @@
 				AC783ECD84496E0B77911EEE,
 				B1981F62F6A91FD2F579A198,
 				ECA44A41DA8A935178C1A1F4,
+				89AD16514B1F4133FFEA1DF9,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
