@@ -151,7 +151,9 @@ namespace PushNotificationsDelegateDetailsOsx
         else
         {
             NSDate* dateNow = [NSDate date];
-            notif.triggerIntervalSec = [dateNow timeIntervalSinceDate: n.deliveryDate];
+            NSDate* deliveryDate = n.deliveryDate;
+
+            notif.triggerIntervalSec = [dateNow timeIntervalSinceDate: deliveryDate];
         }
 
         notif.soundToPlay = URL (nsStringToJuce (n.soundName));
@@ -367,7 +369,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         NSRemoteNotificationType types = NSUInteger ((bool) settings.allowBadge);
 
         if (isAtLeastMountainLion)
-            types |= ((bool) settings.allowSound << 1 | (bool) settings.allowAlert << 2);
+            types |= (NSUInteger) ((bool) settings.allowSound << 1 | (bool) settings.allowAlert << 2);
 
         [[NSApplication sharedApplication] registerForRemoteNotificationTypes: types];
     }
@@ -477,7 +479,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
             {
                 NSMutableString* hexString = [NSMutableString stringWithCapacity: (length * 2)];
 
-                for (int i = 0; i < length; ++i)
+                for (NSUInteger i = 0; i < length; ++i)
                     [hexString appendFormat:@"%02x", buffer[i]];
 
                 return nsStringToJuce ([hexString copy]);
@@ -530,7 +532,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         }
     }
 
-    bool shouldPresentNotification (NSUserNotification* notification) override { return true; }
+    bool shouldPresentNotification (NSUserNotification*) override { return true; }
 
     void subscribeToTopic (const String& topic)     { ignoreUnused (topic); }
     void unsubscribeFromTopic (const String& topic) { ignoreUnused (topic); }
