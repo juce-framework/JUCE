@@ -436,12 +436,6 @@ private:
 
         packages.addArray (linuxPackages);
 
-        if (isWebBrowserComponentEnabled())
-        {
-            packages.add ("webkit2gtk-4.0");
-            packages.add ("gtk+-x11-3.0");
-        }
-
         // don't add libcurl if curl symbols are loaded at runtime
         if (isCurlEnabled() && ! isLoadCurlSymbolsLazilyEnabled())
             packages.add ("libcurl");
@@ -454,6 +448,12 @@ private:
     String getPreprocessorPkgConfigFlags() const
     {
         auto packages = getPackages();
+
+        if (isWebBrowserComponentEnabled())
+        {
+            packages.add ("webkit2gtk-4.0");
+            packages.add ("gtk+-x11-3.0");
+        }
 
         if (packages.size() > 0)
             return "$(shell pkg-config --cflags " + packages.joinIntoString (" ") + ")";
