@@ -93,10 +93,6 @@
 			isa = PBXBuildFile;
 			fileRef = 9069981E414A631B036CC9AC;
 		};
-		98F9BB4612E82EE59689E15C = {
-			isa = PBXBuildFile;
-			fileRef = B6496F16ACE80CACC5721570;
-		};
 		09C4EDDF7F8B6E75EA3CE3A9 = {
 			isa = PBXBuildFile;
 			fileRef = BC3B310D42C489E8B8D93327;
@@ -292,10 +288,6 @@
 		3C5267E06A897B0DC0F7EA50 = {
 			isa = PBXBuildFile;
 			fileRef = 472F9A90F685220D730EBF6C;
-		};
-		202DC8CF15ACBE096CC327EA = {
-			isa = PBXBuildFile;
-			fileRef = 805A3A5FBA3B9E28363DD77B;
 		};
 		4C743A3DA8682EEE89BDBD28 = {
 			isa = PBXBuildFile;
@@ -938,13 +930,6 @@
 			path = ../../JuceLibraryCode/BinaryData.cpp;
 			sourceTree = "SOURCE_ROOT";
 		};
-		4818A05DE44ADA03D85E1083 = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			name = "jucer_ProjucerAnalytics.h";
-			path = "../../Source/Application/jucer_ProjucerAnalytics.h";
-			sourceTree = "SOURCE_ROOT";
-		};
 		486E8D02DAD2A0BF54A901C0 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.cpp;
@@ -1132,13 +1117,6 @@
 			lastKnownFileType = sourcecode.cpp.objcpp;
 			name = "include_juce_events.mm";
 			path = "../../JuceLibraryCode/include_juce_events.mm";
-			sourceTree = "SOURCE_ROOT";
-		};
-		58DE91CE6B05AFBACADDB251 = {
-			isa = PBXFileReference;
-			lastKnownFileType = file;
-			name = "juce_analytics";
-			path = "../../../../modules/juce_analytics";
 			sourceTree = "SOURCE_ROOT";
 		};
 		58F1FF52E887887A93E84FC2 = {
@@ -1440,13 +1418,6 @@
 			lastKnownFileType = sourcecode.c.h;
 			name = "jucer_ColourPropertyComponent.h";
 			path = "../../Source/ComponentEditor/Properties/jucer_ColourPropertyComponent.h";
-			sourceTree = "SOURCE_ROOT";
-		};
-		805A3A5FBA3B9E28363DD77B = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = "include_juce_analytics.cpp";
-			path = "../../JuceLibraryCode/include_juce_analytics.cpp";
 			sourceTree = "SOURCE_ROOT";
 		};
 		807049CA2D5B6DE18EA078F2 = {
@@ -1967,13 +1938,6 @@
 			path = "../../Source/Utility/Helpers/jucer_FileHelpers.cpp";
 			sourceTree = "SOURCE_ROOT";
 		};
-		B6496F16ACE80CACC5721570 = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = "jucer_ProjucerAnalytics.cpp";
-			path = "../../Source/Application/jucer_ProjucerAnalytics.cpp";
-			sourceTree = "SOURCE_ROOT";
-		};
 		B6F2905330EA5C560D527209 = {
 			isa = PBXFileReference;
 			lastKnownFileType = file;
@@ -1986,13 +1950,6 @@
 			lastKnownFileType = image.png;
 			name = "juce_icon.png";
 			path = "../../Source/BinaryData/Icons/juce_icon.png";
-			sourceTree = "SOURCE_ROOT";
-		};
-		B83DAADA1A871F21582FFB23 = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			name = "jucer_ApplicationUsageDataWindowComponent.h";
-			path = "../../Source/Application/Windows/jucer_ApplicationUsageDataWindowComponent.h";
 			sourceTree = "SOURCE_ROOT";
 		};
 		B97D60D2531CFD0D8555BA5C = {
@@ -2643,7 +2600,6 @@
 			isa = PBXGroup;
 			children = (
 				DE4A987B2D5529990A6AA9D4,
-				B83DAADA1A871F21582FFB23,
 				D91E7F8FEF9290195D56782C,
 				C736264708F3F68BA745BA29,
 				EB2E723DC3DB150A8A644D08,
@@ -2671,8 +2627,6 @@
 				8C52A3DDA62A746AA7A68535,
 				9069981E414A631B036CC9AC,
 				2CD34A70B4032C0426F7AA10,
-				B6496F16ACE80CACC5721570,
-				4818A05DE44ADA03D85E1083,
 			);
 			name = Application;
 			sourceTree = "<group>";
@@ -3155,7 +3109,6 @@
 		8A24D1B6925535A868974986 = {
 			isa = PBXGroup;
 			children = (
-				58DE91CE6B05AFBACADDB251,
 				EE12741389A87D1BF04AE795,
 				BA159A3B7D129771F5C15EA3,
 				AA1C44E89D792DDC4867B2C8,
@@ -3173,7 +3126,6 @@
 			children = (
 				472F9A90F685220D730EBF6C,
 				4F687965FBE86EAFDB3ACFEC,
-				805A3A5FBA3B9E28363DD77B,
 				E2687B099347B364D1919A9B,
 				DB9C8E35DF815B803CB4A9CF,
 				D766BB9D8C32B5560F0493F3,
@@ -3270,7 +3222,6 @@
 					"JUCE_REPORT_APP_USAGE=0",
 					"JUCE_USE_DARK_SPLASH_SCREEN=1",
 					"JUCE_PROJUCER_VERSION=0x60000",
-					"JUCE_MODULE_AVAILABLE_juce_analytics=1",
 					"JUCE_MODULE_AVAILABLE_juce_build_tools=1",
 					"JUCE_MODULE_AVAILABLE_juce_core=1",
 					"JUCE_MODULE_AVAILABLE_juce_cryptography=1",
@@ -3290,8 +3241,8 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
 					"../../JuceLibraryCode",
-					"../../../../modules",
 					"../../../Build",
+					"../../../../modules",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = Info-App.plist;
@@ -3335,7 +3286,6 @@
 					"JUCE_REPORT_APP_USAGE=0",
 					"JUCE_USE_DARK_SPLASH_SCREEN=1",
 					"JUCE_PROJUCER_VERSION=0x60000",
-					"JUCE_MODULE_AVAILABLE_juce_analytics=1",
 					"JUCE_MODULE_AVAILABLE_juce_build_tools=1",
 					"JUCE_MODULE_AVAILABLE_juce_core=1",
 					"JUCE_MODULE_AVAILABLE_juce_cryptography=1",
@@ -3355,8 +3305,8 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
 					"../../JuceLibraryCode",
-					"../../../../modules",
 					"../../../Build",
+					"../../../../modules",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = Info-App.plist;
@@ -3506,7 +3456,6 @@
 				954A036F5DDB375DB23FFB3E,
 				95B44E6C74B1DED31DBE37EB,
 				AA9D0B8E23F3D87A23DE9F8A,
-				98F9BB4612E82EE59689E15C,
 				09C4EDDF7F8B6E75EA3CE3A9,
 				71713DE4716DCEDB45A206E2,
 				940CE4E081E9E685243C07AA,
@@ -3556,7 +3505,6 @@
 				518DD443B6F17A5AFD707263,
 				B7EBA1A83575F48CD08140B9,
 				3C5267E06A897B0DC0F7EA50,
-				202DC8CF15ACBE096CC327EA,
 				4C743A3DA8682EEE89BDBD28,
 				5DD883699B85E4C492CAD065,
 				D5C9125F65493CA481F18E53,

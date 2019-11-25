@@ -198,20 +198,10 @@ void Project::initialiseProjectValues()
 
     displaySplashScreenValue.referTo (projectRoot, Ids::displaySplashScreen, getUndoManager(), ! ProjucerApplication::getApp().isPaidOrGPL());
     splashScreenColourValue.referTo  (projectRoot, Ids::splashScreenColour,  getUndoManager(), "Dark");
-    reportAppUsageValue.referTo      (projectRoot, Ids::reportAppUsage,      getUndoManager());
+    reportAppUsageValue.referTo      (projectRoot, Ids::reportAppUsage,      getUndoManager(), ! ProjucerApplication::getApp().isPaidOrGPL());
 
     useAppConfigValue.referTo             (projectRoot, Ids::useAppConfig,                  getUndoManager(), true);
     addUsingNamespaceToJuceHeader.referTo (projectRoot, Ids::addUsingNamespaceToJuceHeader, getUndoManager(), true);
-
-    if (ProjucerApplication::getApp().isPaidOrGPL())
-    {
-        reportAppUsageValue.setDefault (ProjucerApplication::getApp().licenseController->getState().applicationUsageDataState
-                                        == LicenseState::ApplicationUsageData::enabled);
-    }
-    else
-    {
-        reportAppUsageValue.setDefault (true);
-    }
 
     cppStandardValue.referTo       (projectRoot, Ids::cppLanguageStandard, getUndoManager(), "14");
 
@@ -703,23 +693,11 @@ bool Project::saveProjectRootToFile()
 }
 
 //==============================================================================
-static void sendProjectSettingAnalyticsEvent (StringRef label)
-{
-    StringPairArray data;
-    data.set ("label", label);
-
-    Analytics::getInstance()->logEvent ("Project Setting",  data, ProjucerAnalyticsEvent::projectEvent);
-}
-
 void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
 {
     if (tree.getRoot() == tree)
     {
-        if (property == Ids::projectType)
-        {
-            sendProjectSettingAnalyticsEvent ("Project Type = " + projectTypeValue.get().toString());
-        }
-        else if (property == Ids::name)
+        if (property == Ids::name)
         {
             updateTitleDependencies();
         }
@@ -730,10 +708,6 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
         else if (property == Ids::defines)
         {
             parsedPreprocessorDefs = parsePreprocessorDefs (preprocessorDefsValue.get());
-        }
-        else if (property == Ids::cppLanguageStandard)
-        {
-            sendProjectSettingAnalyticsEvent ("C++ Standard = " + cppStandardValue.get().toString());
         }
         else if (property == Ids::pluginFormats)
         {
@@ -2123,18 +2097,6 @@ String Project::getUniqueTargetFolderSuffixForExporter (const String& exporterNa
     }
 
     return "_" + String (num);
-}
-
-//==============================================================================
-bool Project::shouldSendGUIBuilderAnalyticsEvent() noexcept
-{
-    if (! hasSentGUIBuilderAnalyticsEvent)
-    {
-        hasSentGUIBuilderAnalyticsEvent = true;
-        return true;
-    }
-
-    return false;
 }
 
 //==============================================================================

@@ -111,14 +111,6 @@ public:
     }
 
 private:
-    void clicked() override
-    {
-        StringPairArray data;
-        data.set ("label", getName());
-
-        Analytics::getInstance()->logEvent ("Start Page Button", data, ProjucerAnalyticsEvent::startPageEvent);
-    }
-
     using DrawableButton::clicked;
 
     std::unique_ptr<Drawable> thumb, hoverBackground;

@@ -63,8 +63,8 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;..\..\..\Build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2017_78A5024=1;JUCE_APP_VERSION=6.0.0;JUCE_APP_VERSION_HEX=0x60000;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_REPORT_APP_USAGE=0;JUCE_USE_DARK_SPLASH_SCREEN=1;JUCE_PROJUCER_VERSION=0x60000;JUCE_MODULE_AVAILABLE_juce_analytics=1;JUCE_MODULE_AVAILABLE_juce_build_tools=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_cryptography=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;JUCE_LOG_ASSERTIONS=1;JUCE_USE_CURL=1;JUCE_LOAD_CURL_SYMBOLS_LAZILY=1;JUCE_ALLOW_STATIC_NULL_VARIABLES=0;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_STANDALONE_APPLICATION=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\Build;..\..\..\..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2017_78A5024=1;JUCE_APP_VERSION=6.0.0;JUCE_APP_VERSION_HEX=0x60000;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_REPORT_APP_USAGE=0;JUCE_USE_DARK_SPLASH_SCREEN=1;JUCE_PROJUCER_VERSION=0x60000;JUCE_MODULE_AVAILABLE_juce_build_tools=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_cryptography=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;JUCE_LOG_ASSERTIONS=1;JUCE_USE_CURL=1;JUCE_LOAD_CURL_SYMBOLS_LAZILY=1;JUCE_ALLOW_STATIC_NULL_VARIABLES=0;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_STANDALONE_APPLICATION=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
@@ -105,8 +105,8 @@
     </Midl>
     <ClCompile>
       <Optimization>Full</Optimization>
-      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;..\..\..\Build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCER_VS2017_78A5024=1;JUCE_APP_VERSION=6.0.0;JUCE_APP_VERSION_HEX=0x60000;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_REPORT_APP_USAGE=0;JUCE_USE_DARK_SPLASH_SCREEN=1;JUCE_PROJUCER_VERSION=0x60000;JUCE_MODULE_AVAILABLE_juce_analytics=1;JUCE_MODULE_AVAILABLE_juce_build_tools=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_cryptography=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;JUCE_LOG_ASSERTIONS=1;JUCE_USE_CURL=1;JUCE_LOAD_CURL_SYMBOLS_LAZILY=1;JUCE_ALLOW_STATIC_NULL_VARIABLES=0;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_STANDALONE_APPLICATION=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\Build;..\..\..\..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCER_VS2017_78A5024=1;JUCE_APP_VERSION=6.0.0;JUCE_APP_VERSION_HEX=0x60000;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_REPORT_APP_USAGE=0;JUCE_USE_DARK_SPLASH_SCREEN=1;JUCE_PROJUCER_VERSION=0x60000;JUCE_MODULE_AVAILABLE_juce_build_tools=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_cryptography=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;JUCE_LOG_ASSERTIONS=1;JUCE_USE_CURL=1;JUCE_LOAD_CURL_SYMBOLS_LAZILY=1;JUCE_ALLOW_STATIC_NULL_VARIABLES=0;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_STANDALONE_APPLICATION=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader/>
@@ -147,7 +147,6 @@
     <ClCompile Include="..\..\Source\Application\jucer_CommandLine.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_Main.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_MainWindow.cpp"/>
-    <ClCompile Include="..\..\Source\Application\jucer_ProjucerAnalytics.cpp"/>
     <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_AnimatedComponentTemplate.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -238,18 +237,6 @@
     <ClCompile Include="..\..\Source\Utility\UI\jucer_SlidingPanelComponent.cpp"/>
     <ClCompile Include="..\..\Source\Wizards\jucer_NewFileWizard.cpp"/>
     <ClCompile Include="..\..\Source\Wizards\jucer_NewProjectWizardClasses.cpp"/>
-    <ClCompile Include="..\..\..\..\modules\juce_analytics\analytics\juce_Analytics.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_analytics\analytics\juce_ButtonTracker.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_analytics\destinations\juce_ThreadedAnalyticsDestination.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_analytics\juce_analytics.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\Build\juce_build_tools\utils\juce_BinaryResourceFile.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1487,7 +1474,6 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\include_juce_analytics.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_build_tools.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_core.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_cryptography.cpp"/>
@@ -1499,7 +1485,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_AboutWindowComponent.h"/>
-    <ClInclude Include="..\..\Source\Application\Windows\jucer_ApplicationUsageDataWindowComponent.h"/>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_EditorColourSchemeWindowComponent.h"/>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_FloatingToolWindow.h"/>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_GlobalPathsWindowComponent.h"/>
@@ -1514,7 +1499,6 @@
     <ClInclude Include="..\..\Source\Application\jucer_CommonHeaders.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_Headers.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_MainWindow.h"/>
-    <ClInclude Include="..\..\Source\Application\jucer_ProjucerAnalytics.h"/>
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AnimatedComponentSimpleTemplate.h"/>
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AnimatedComponentTemplate.h"/>
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AudioComponentSimpleTemplate.h"/>
@@ -1685,11 +1669,6 @@
     <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_StaticLibrary.h"/>
     <ClInclude Include="..\..\Source\Wizards\jucer_StartPageComponent.h"/>
     <ClInclude Include="..\..\Source\Wizards\jucer_TemplateThumbnailsComponent.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_analytics\analytics\juce_Analytics.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_analytics\analytics\juce_ButtonTracker.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_analytics\destinations\juce_AnalyticsDestination.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_analytics\destinations\juce_ThreadedAnalyticsDestination.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_analytics\juce_analytics.h"/>
     <ClInclude Include="..\..\..\Build\juce_build_tools\utils\juce_BinaryResourceFile.h"/>
     <ClInclude Include="..\..\..\Build\juce_build_tools\utils\juce_BuildHelperFunctions.h"/>
     <ClInclude Include="..\..\..\Build\juce_build_tools\utils\juce_Entitlements.h"/>

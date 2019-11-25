@@ -171,12 +171,6 @@ void ProjucerApplication::handleAsyncUpdate()
     if (getGlobalProperties().getValue (Ids::dontQueryForUpdate, {}).isEmpty())
         LatestVersionCheckerAndUpdater::getInstance()->checkForNewVersion (false);
 
-    if (licenseController != nullptr)
-    {
-        setAnalyticsEnabled (licenseController->getState().applicationUsageDataState == LicenseState::ApplicationUsageData::enabled);
-        Analytics::getInstance()->logEvent ("Startup", {}, ProjucerAnalyticsEvent::appEvent);
-    }
-
     if (! isRunningCommandLine && settings->shouldAskUserToSetJUCEPath())
         showSetJUCEPathAlert();
 }
@@ -191,9 +185,6 @@ void ProjucerApplication::initialiseWindows (const String& commandLine)
         mainWindowList.reopenLastProjects();
 
     mainWindowList.createWindowIfNoneAreOpen();
-
-    if (licenseController->getState().applicationUsageDataState == LicenseState::ApplicationUsageData::notChosenYet)
-        showApplicationUsageDataAgreementPopup();
 }
 
 static void deleteTemporaryFiles()
@@ -249,8 +240,6 @@ void ProjucerApplication::shutdown()
         Logger::writeToLog ("Shutdown");
 
     deleteLogger();
-
-    Analytics::getInstance()->logEvent ("Shutdown", {}, ProjucerAnalyticsEvent::appEvent);
 }
 
 struct AsyncQuitRetrier  : private Timer
@@ -430,7 +419,6 @@ void ProjucerApplication::createFileMenu (PopupMenu& menu)
 
     #if ! JUCE_MAC
       menu.addCommandItem (commandManager.get(), CommandIDs::showAboutWindow);
-      menu.addCommandItem (commandManager.get(), CommandIDs::showAppUsageWindow);
       menu.addCommandItem (commandManager.get(), CommandIDs::checkForNewVersion);
       menu.addCommandItem (commandManager.get(), CommandIDs::showGlobalPathsWindow);
       menu.addSeparator();
@@ -588,7 +576,6 @@ void ProjucerApplication::createHelpMenu (PopupMenu& menu)
 void ProjucerApplication::createExtraAppleMenuItems (PopupMenu& menu)
 {
     menu.addCommandItem (commandManager.get(), CommandIDs::showAboutWindow);
-    menu.addCommandItem (commandManager.get(), CommandIDs::showAppUsageWindow);
     menu.addCommandItem (commandManager.get(), CommandIDs::checkForNewVersion);
     menu.addSeparator();
     menu.addCommandItem (commandManager.get(), CommandIDs::showGlobalPathsWindow);
@@ -708,11 +695,6 @@ void ProjucerApplication::findAndLaunchExample (int selectedIndex)
     jassert (example != File());
 
     findWindowAndOpenPIP (example);
-
-    StringPairArray data;
-    data.set ("label", example.getFileNameWithoutExtension());
-
-    Analytics::getInstance()->logEvent ("Example Opened", data, ProjucerAnalyticsEvent::exampleEvent);
 }
 
 //==============================================================================
@@ -879,18 +861,8 @@ void ProjucerApplication::launchDemoRunner()
 {
     auto demoRunnerFile = tryToFindDemoRunnerExecutable();
 
-    if (demoRunnerFile != File())
-    {
-        auto succeeded = demoRunnerFile.startAsProcess();
-
-        StringPairArray data;
-        data.set ("label", succeeded ? "Success" : "Failure");
-
-        Analytics::getInstance()->logEvent ("Launch DemoRunner", data, ProjucerAnalyticsEvent::exampleEvent);
-
-        if (succeeded)
-            return;
-    }
+    if (demoRunnerFile != File() && demoRunnerFile.startAsProcess())
+        return;
 
     demoRunnerFile = tryToFindDemoRunnerProject();
 
@@ -912,11 +884,6 @@ void ProjucerApplication::launchDemoRunner()
         demoRunnerAlert->enterModalState (true, ModalCallbackFunction::create ([this, demoRunnerFile] (int retVal)
                                                 {
                                                     demoRunnerAlert.reset (nullptr);
-
-                                                    StringPairArray data;
-                                                    data.set ("label", retVal == 1 ? "Opened" : "Cancelled");
-
-                                                    Analytics::getInstance()->logEvent ("Open DemoRunner Project", data, ProjucerAnalyticsEvent::exampleEvent);
 
                                                     if (retVal == 1)
                                                     {
@@ -985,7 +952,6 @@ void ProjucerApplication::getAllCommands (Array <CommandID>& commands)
                               CommandIDs::showUTF8Tool,
                               CommandIDs::showSVGPathTool,
                               CommandIDs::showAboutWindow,
-                              CommandIDs::showAppUsageWindow,
                               CommandIDs::checkForNewVersion,
                               CommandIDs::showForum,
                               CommandIDs::showAPIModules,
@@ -1073,10 +1039,6 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
         result.setInfo ("About Projucer", "Shows the Projucer's 'About' page.", CommandCategories::general, 0);
         break;
 
-    case CommandIDs::showAppUsageWindow:
-        result.setInfo ("Application Usage Data", "Shows the application usage data agreement window", CommandCategories::general, 0);
-        break;
-
     case CommandIDs::checkForNewVersion:
         result.setInfo ("Check for New Version...", "Checks the web server for a new version of JUCE", CommandCategories::general, 0);
         break;
@@ -1139,7 +1101,6 @@ bool ProjucerApplication::perform (const InvocationInfo& info)
         case CommandIDs::showSVGPathTool:           showSVGPathDataToolWindow(); break;
         case CommandIDs::showGlobalPathsWindow:     showPathsWindow (false); break;
         case CommandIDs::showAboutWindow:           showAboutWindow(); break;
-        case CommandIDs::showAppUsageWindow:        showApplicationUsageDataAgreementPopup(); break;
         case CommandIDs::checkForNewVersion:        LatestVersionCheckerAndUpdater::getInstance()->checkForNewVersion (true); break;
         case CommandIDs::showForum:                 launchForumBrowser(); break;
         case CommandIDs::showAPIModules:            launchModulesBrowser(); break;
@@ -1266,22 +1227,6 @@ void ProjucerApplication::showAboutWindow()
         new FloatingToolWindow ({}, {}, new AboutWindowComponent(),
                                 aboutWindow, false,
                                 500, 300, 500, 300, 500, 300);
-}
-
-void ProjucerApplication::showApplicationUsageDataAgreementPopup()
-{
-    if (applicationUsageDataWindow != nullptr)
-        applicationUsageDataWindow->toFront (true);
-    else
-        new FloatingToolWindow ("Application Usage Analytics", {},
-                                new ApplicationUsageDataWindowComponent (isPaidOrGPL()), applicationUsageDataWindow, false,
-                                400, 300, 400, 300, 400, 300);
-}
-
-void ProjucerApplication::dismissApplicationUsageDataAgreementPopup()
-{
-    if (applicationUsageDataWindow != nullptr)
-        applicationUsageDataWindow.reset();
 }
 
 void ProjucerApplication::showPathsWindow (bool highlightJUCEPath)
@@ -1427,42 +1372,6 @@ void ProjucerApplication::initCommandManager()
     registerGUIEditorCommands();
 }
 
-void ProjucerApplication::setAnalyticsEnabled (bool enabled)
-{
-    resetAnalytics();
-
-    if (enabled)
-        setupAnalytics();
-}
-
-void ProjucerApplication::resetAnalytics() noexcept
-{
-    auto analyticsInstance = Analytics::getInstance();
-
-    analyticsInstance->setUserId ({});
-    analyticsInstance->setUserProperties ({});
-    analyticsInstance->getDestinations().clear();
-}
-
-void ProjucerApplication::setupAnalytics()
-{
-    Analytics::getInstance()->addDestination (new ProjucerAnalyticsDestination());
-
-    auto deviceString = SystemStats::getDeviceIdentifiers().joinIntoString (":");
-    auto deviceIdentifier = String::toHexString (deviceString.hashCode64());
-
-    Analytics::getInstance()->setUserId (deviceIdentifier);
-
-    StringPairArray userData;
-    userData.set ("cd1", getApplicationName());
-    userData.set ("cd2", getApplicationVersion());
-    userData.set ("cd3", SystemStats::getDeviceDescription());
-    userData.set ("cd4", deviceString);
-    userData.set ("cd5", SystemStats::getOperatingSystemName());
-
-    Analytics::getInstance()->setUserProperties (userData);
-}
-
 void ProjucerApplication::showSetJUCEPathAlert()
 {
     auto& lf = Desktop::getInstance().getDefaultLookAndFeel();
@@ -1529,7 +1438,6 @@ void ProjucerApplication::setColourScheme (int index, bool saveSetting)
     if (utf8Window != nullptr)                  utf8Window->sendLookAndFeelChange();
     if (svgPathWindow != nullptr)               svgPathWindow->sendLookAndFeelChange();
     if (aboutWindow != nullptr)                 aboutWindow->sendLookAndFeelChange();
-    if (applicationUsageDataWindow != nullptr)  applicationUsageDataWindow->sendLookAndFeelChange();
     if (pathsWindow != nullptr)                 pathsWindow->sendLookAndFeelChange();
     if (editorColourSchemeWindow != nullptr)    editorColourSchemeWindow->sendLookAndFeelChange();
     if (pipCreatorWindow != nullptr)            pipCreatorWindow->sendLookAndFeelChange();

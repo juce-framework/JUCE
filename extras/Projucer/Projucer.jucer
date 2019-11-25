@@ -24,7 +24,6 @@
         <MODULEPATH id="juce_data_structures" path="../../modules"/>
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
-        <MODULEPATH id="juce_analytics" path="../../modules"/>
         <MODULEPATH id="juce_build_tools" path="../Build"/>
       </MODULEPATHS>
     </XCODE_MAC>
@@ -44,7 +43,6 @@
         <MODULEPATH id="juce_data_structures" path="../../modules"/>
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
-        <MODULEPATH id="juce_analytics" path="../../modules"/>
         <MODULEPATH id="juce_build_tools" path="../Build"/>
       </MODULEPATHS>
     </VS2015>
@@ -63,7 +61,6 @@
         <MODULEPATH id="juce_data_structures" path="../../modules"/>
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
-        <MODULEPATH id="juce_analytics" path="../../modules"/>
         <MODULEPATH id="juce_build_tools" path="../Build"/>
       </MODULEPATHS>
     </VS2017>
@@ -82,7 +79,6 @@
         <MODULEPATH id="juce_data_structures" path="../../modules"/>
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
-        <MODULEPATH id="juce_analytics" path="../../modules"/>
         <MODULEPATH id="juce_build_tools" path="../Build"/>
       </MODULEPATHS>
     </VS2019>
@@ -99,7 +95,6 @@
         <MODULEPATH id="juce_data_structures" path="../../modules"/>
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
-        <MODULEPATH id="juce_analytics" path="../../modules"/>
         <MODULEPATH id="juce_build_tools" path="../Build"/>
       </MODULEPATHS>
     </LINUX_MAKE>
@@ -109,8 +104,6 @@
       <GROUP id="{2F08ABDF-C7BB-5F54-55F5-0C2E27983930}" name="Windows">
         <FILE id="w1XB4w" name="jucer_AboutWindowComponent.h" compile="0" resource="0"
               file="Source/Application/Windows/jucer_AboutWindowComponent.h"/>
-        <FILE id="cWiY1u" name="jucer_ApplicationUsageDataWindowComponent.h"
-              compile="0" resource="0" file="Source/Application/Windows/jucer_ApplicationUsageDataWindowComponent.h"/>
         <FILE id="gAju2c" name="jucer_EditorColourSchemeWindowComponent.h"
               compile="0" resource="0" file="Source/Application/Windows/jucer_EditorColourSchemeWindowComponent.h"/>
         <FILE id="YO9U3v" name="jucer_FloatingToolWindow.h" compile="0" resource="0"
@@ -148,10 +141,6 @@
             file="Source/Application/jucer_MainWindow.cpp"/>
       <FILE id="HmkREh" name="jucer_MainWindow.h" compile="0" resource="0"
             file="Source/Application/jucer_MainWindow.h"/>
-      <FILE id="HcONni" name="jucer_ProjucerAnalytics.cpp" compile="1" resource="0"
-            file="Source/Application/jucer_ProjucerAnalytics.cpp"/>
-      <FILE id="spHBY0" name="jucer_ProjucerAnalytics.h" compile="0" resource="0"
-            file="Source/Application/jucer_ProjucerAnalytics.h"/>
     </GROUP>
     <GROUP id="{BFDB3102-5EB6-41E0-043A-05C0DFF7A34D}" name="BinaryData">
       <FILE id="QRvesq" name="LaunchScreen.storyboard" compile="0" resource="1"
@@ -730,7 +719,6 @@
   <JUCEOPTIONS JUCE_LOG_ASSERTIONS="1" JUCE_USE_CURL="1" JUCE_ALLOW_STATIC_NULL_VARIABLES="0"
                JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_LOAD_CURL_SYMBOLS_LAZILY="1"/>
   <MODULES>
-    <MODULE id="juce_analytics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_build_tools" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_core" showAllCode="1"/>
     <MODULE id="juce_cryptography" showAllCode="1"/>

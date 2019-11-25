@@ -36,23 +36,12 @@ struct LicenseState
         pro
     };
 
-    enum class ApplicationUsageData
-    {
-        notChosenYet,
-
-        enabled,
-        disabled
-    };
-
     Type type = Type::notLoggedIn;
-    ApplicationUsageData applicationUsageDataState = ApplicationUsageData::notChosenYet;
-    String username;
-    String email;
-    String authToken;
+    String username, email, authToken;
 
     static const char* licenseTypeToString (Type licenseType);
 
-    bool isPaidOrGPL() const noexcept     { return (type == Type::GPL || type == Type::indie || type == Type::pro); }
+    bool isPaidOrGPL() const noexcept  { return (type == Type::GPL || type == Type::indie || type == Type::pro); }
 
     Image avatar;
 };
@@ -78,7 +67,6 @@ public:
     LicenseState getState() const noexcept;
     void logout();
     void chooseNewLicense();
-    void setApplicationUsageDataState (LicenseState::ApplicationUsageData newState);
 
     //==============================================================================
     void addLicenseStatusChangedCallback    (StateChangedCallback* callback) { listeners.add    (callback); }

@@ -411,9 +411,6 @@ public:
     bool shouldOpenInIDEAfterSaving() const noexcept     { return openInIDEAfterSaving; }
 
     //==============================================================================
-    bool shouldSendGUIBuilderAnalyticsEvent() noexcept;
-
-    //==============================================================================
     CompileEngineSettings& getCompileEngineSettings()    { return *compileEngineSettings; }
 
 private:
@@ -458,9 +455,6 @@ private:
     void askUserWhereToSaveProject();
     void moveTemporaryDirectory (const File&);
     bool saveProjectRootToFile();
-
-    //==============================================================================
-    bool hasSentGUIBuilderAnalyticsEvent = false;
 
     //==============================================================================
     friend class Item;

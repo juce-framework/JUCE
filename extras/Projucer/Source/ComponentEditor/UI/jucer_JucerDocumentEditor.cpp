@@ -347,12 +347,6 @@ JucerDocumentEditor::JucerDocumentEditor (JucerDocument* const doc)
         refreshPropertiesPanel();
 
         changeListenerCallback (nullptr);
-
-        if (auto* project = document->getCppDocument().getProject())
-        {
-            if (project->shouldSendGUIBuilderAnalyticsEvent())
-                Analytics::getInstance()->logEvent ("GUI Builder", {}, ProjucerAnalyticsEvent::projectEvent);
-        }
     }
 }
 

@@ -254,14 +254,6 @@ void HeaderComponent::timerCallback()
 }
 
 //==============================================================================
-static void sendProjectButtonAnalyticsEvent (StringRef label)
-{
-    StringPairArray data;
-    data.set ("label", label);
-
-    Analytics::getInstance()->logEvent ("Project Button",  data, ProjucerAnalyticsEvent::projectEvent);
-}
-
 void HeaderComponent::initialiseButtons() noexcept
 {
     auto& icons = getIcons();
@@ -270,8 +262,6 @@ void HeaderComponent::initialiseButtons() noexcept
     addAndMakeVisible (projectSettingsButton.get());
     projectSettingsButton->onClick = [this]
     {
-        sendProjectButtonAnalyticsEvent ("Project Settings");
-
         if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
             pcc->showProjectSettings();
     };
@@ -281,8 +271,6 @@ void HeaderComponent::initialiseButtons() noexcept
     saveAndOpenInIDEButton->isIDEButton = true;
     saveAndOpenInIDEButton->onClick = [this]
     {
-        sendProjectButtonAnalyticsEvent ("Save and Open in IDE (" + exporterBox.getText() + ")");
-
         if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
             pcc->openInSelectedIDE (true);
     };
@@ -292,8 +280,6 @@ void HeaderComponent::initialiseButtons() noexcept
     userSettingsButton->isUserButton = true;
     userSettingsButton->onClick = [this]
     {
-        sendProjectButtonAnalyticsEvent ("User Settings");
-
         if (findParentComponentOfClass<ProjectContentComponent>() != nullptr)
             showUserSettings();
     };
@@ -302,8 +288,6 @@ void HeaderComponent::initialiseButtons() noexcept
     addAndMakeVisible (runAppButton.get());
     runAppButton->onClick = [this]
     {
-        sendProjectButtonAnalyticsEvent ("Run Application");
-
         if (childProcess != nullptr)
             childProcess->launchApp();
     };

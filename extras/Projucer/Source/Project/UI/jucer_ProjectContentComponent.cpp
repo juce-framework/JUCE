@@ -680,14 +680,7 @@ static void newExporterMenuCallback (int result, ProjectContentComponent* comp)
             auto exporterName= ProjectExporter::getExporterNames() [result - 1];
 
             if (exporterName.isNotEmpty())
-            {
                 p->addNewExporter (exporterName);
-
-                StringPairArray data;
-                data.set ("label", exporterName);
-
-                Analytics::getInstance()->logEvent ("Exporter Added", data, ProjucerAnalyticsEvent::projectEvent);
-            }
         }
     }
 }
@@ -1186,11 +1179,6 @@ void ProjectContentComponent::setBuildEnabled (bool isEnabled, bool displayError
         project->getCompileEngineSettings().setBuildEnabled (isEnabled);
         killChildProcess();
         refreshTabsIfBuildStatusChanged();
-
-        StringPairArray data;
-        data.set ("label", isEnabled ? "Enabled" : "Disabled");
-
-        Analytics::getInstance()->logEvent ("Live-Build", data, ProjucerAnalyticsEvent::projectEvent);
     }
 }
 
@@ -1214,11 +1202,6 @@ void ProjectContentComponent::handleCrash (const String& message)
         setBuildEnabled (false, true);
         showBuildTab();
     }
-
-    StringPairArray data;
-    data.set ("label", "Crash");
-
-    Analytics::getInstance()->logEvent ("Live-Build", data, ProjucerAnalyticsEvent::projectEvent);
 }
 
 bool ProjectContentComponent::isBuildEnabled() const

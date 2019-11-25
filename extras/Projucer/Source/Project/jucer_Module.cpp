@@ -708,7 +708,7 @@ bool EnabledModuleList::areMostModulesCopiedLocally() const
     return numYes > numNo;
 }
 
-void EnabledModuleList::addModule (const File& moduleFolder, bool copyLocally, bool useGlobalPath, bool sendAnalyticsEvent)
+void EnabledModuleList::addModule (const File& moduleFolder, bool copyLocally, bool useGlobalPath)
 {
     ModuleDescription info (moduleFolder);
 
@@ -737,14 +737,6 @@ void EnabledModuleList::addModule (const File& moduleFolder, bool copyLocally, b
 
             if (! useGlobalPath)
                 project.rescanExporterPathModules (false);
-
-            if (sendAnalyticsEvent)
-            {
-                StringPairArray data;
-                data.set ("label", moduleID);
-
-                Analytics::getInstance()->logEvent ("Module Added", data, ProjucerAnalyticsEvent::projectEvent);
-            }
         }
     }
 }
@@ -755,7 +747,7 @@ void EnabledModuleList::addModuleInteractive (const String& moduleID)
 
     if (f != File())
     {
-        addModule (f, areMostModulesCopiedLocally(), areMostModulesUsingGlobalPath(), true);
+        addModule (f, areMostModulesCopiedLocally(), areMostModulesUsingGlobalPath());
         return;
     }
 
@@ -794,8 +786,7 @@ void EnabledModuleList::addModuleOfferingToCopy (const File& f, bool isFromUserS
     }
 
     addModule (m.moduleFolder, areMostModulesCopiedLocally(),
-               isFromUserSpecifiedFolder ? false : areMostModulesUsingGlobalPath(),
-               true);
+               isFromUserSpecifiedFolder ? false : areMostModulesUsingGlobalPath());
 }
 
 void EnabledModuleList::removeModule (String moduleID) // must be pass-by-value, and not a const ref!

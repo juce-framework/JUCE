@@ -179,7 +179,7 @@ public:
     bool areMostModulesCopiedLocally() const;
 
     //==============================================================================
-    void addModule (const File& moduleManifestFile, bool copyLocally, bool useGlobalPath, bool sendAnalyticsEvent);
+    void addModule (const File& moduleManifestFile, bool copyLocally, bool useGlobalPath);
     void addModuleInteractive (const String& moduleID);
     void addModuleFromUserSelectedFile();
     void addModuleOfferingToCopy (const File&, bool isFromUserSpecifiedFolder);

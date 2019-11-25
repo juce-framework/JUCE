@@ -399,7 +399,7 @@ private:
                     auto mod = project.getModuleWithID (missingModule);
 
                     if (mod.second != File())
-                        enabledModules.addModule (mod.second, copyLocally, useGlobalPath, false);
+                        enabledModules.addModule (mod.second, copyLocally, useGlobalPath);
                     else
                         missing.add (missingModule);
                 }
@@ -541,8 +541,7 @@ public:
         for (int i = 0; i < modules.size(); ++i)
             project.getEnabledModules().addModule (modules.getReference(i).moduleFolder,
                                                    project.getEnabledModules().areMostModulesCopiedLocally(),
-                                                   project.getEnabledModules().areMostModulesUsingGlobalPath(),
-                                                   true);
+                                                   project.getEnabledModules().areMostModulesUsingGlobalPath());
     }
 
     void addSubItems() override

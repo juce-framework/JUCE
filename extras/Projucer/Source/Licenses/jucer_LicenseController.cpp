@@ -67,24 +67,6 @@ static LicenseState::Type getLicenseTypeFromValue (const String& d)
     return LicenseState::Type::noLicenseChosenYet;
 }
 
-static const char* getApplicationUsageDataStateValue (LicenseState::ApplicationUsageData type)
-{
-    switch (type)
-    {
-        case LicenseState::ApplicationUsageData::enabled:       return "enabled";
-        case LicenseState::ApplicationUsageData::disabled:      return "disabled";
-        case LicenseState::ApplicationUsageData::notChosenYet:
-        default:                                                return "notChosen";
-    }
-}
-
-static LicenseState::ApplicationUsageData getApplicationUsageDataTypeFromValue (const String& value)
-{
-    if (value == getApplicationUsageDataStateValue (LicenseState::ApplicationUsageData::enabled))   return LicenseState::ApplicationUsageData::enabled;
-    if (value == getApplicationUsageDataStateValue (LicenseState::ApplicationUsageData::disabled))  return LicenseState::ApplicationUsageData::disabled;
-    return LicenseState::ApplicationUsageData::notChosenYet;
-}
-
 #if ! JUCER_ENABLE_GPL_MODE
 struct LicenseController::ModalCompletionCallback : ModalComponentManager::Callback
 {
@@ -172,17 +154,6 @@ void LicenseController::chooseNewLicense()
    #endif
 }
 
-void LicenseController::setApplicationUsageDataState (LicenseState::ApplicationUsageData newState)
-{
-    if (state.applicationUsageDataState != newState)
-    {
-        state.applicationUsageDataState = newState;
-        ProjucerApplication::getApp().setAnalyticsEnabled (newState == LicenseState::ApplicationUsageData::enabled);
-
-        updateState (state);
-    }
-}
-
 //==============================================================================
 #if ! JUCER_ENABLE_GPL_MODE
 void LicenseController::closeWebview (int result)
@@ -254,27 +225,16 @@ void LicenseController::updateState (const LicenseState& newState)
 {
     auto& props = ProjucerApplication::getApp().settings->getGlobalProperties();
 
-    auto oldLicenseType = state.type;
-
     state = newState;
     licenseStateToSettings (state, props);
     auto stateParam = getState();
     listeners.call ([&] (StateChangedCallback& l) { l.licenseStateChanged (stateParam); });
-
-    if (oldLicenseType != state.type)
-    {
-        StringPairArray data;
-        data.set ("label", state.licenseTypeToString (state.type));
-
-        Analytics::getInstance()->logEvent ("License Type", data, ProjucerAnalyticsEvent::userEvent);
-    }
 }
 
 LicenseState LicenseController::licenseStateFromOldSettings (XmlElement* licenseXml)
 {
     LicenseState result;
     result.type                        = getLicenseTypeFromValue    (licenseXml->getChildElementAllSubText ("type", {}));
-    result.applicationUsageDataState   = getApplicationUsageDataTypeFromValue (licenseXml->getChildElementAllSubText ("applicationUsageData", {}));
     result.username                    = licenseXml->getChildElementAllSubText ("username", {});
     result.email                       = licenseXml->getChildElementAllSubText ("email", {});
     result.authToken                   = licenseXml->getChildElementAllSubText ("authToken", {});
@@ -302,7 +262,6 @@ LicenseState LicenseController::licenseStateFromSettings (PropertiesFile& props)
 
         LicenseState result;
         result.type                        = getLicenseTypeFromValue    (licenseXml->getStringAttribute ("type", {}));
-        result.applicationUsageDataState   = getApplicationUsageDataTypeFromValue (licenseXml->getStringAttribute ("applicationUsageData", {}));
         result.username                    = licenseXml->getStringAttribute ("username", {});
         result.email                       = licenseXml->getStringAttribute ("email", {});
         result.authToken                   = licenseXml->getStringAttribute ("authToken", {});
@@ -328,7 +287,6 @@ void LicenseController::licenseStateToSettings (const LicenseState& state, Prope
         if (auto* typeString = getLicenseStateValue (state.type))
             licenseXml.setAttribute ("type", typeString);
 
-        licenseXml.setAttribute ("applicationUsageData", getApplicationUsageDataStateValue (state.applicationUsageDataState));
         licenseXml.setAttribute ("username", state.username);
         licenseXml.setAttribute ("email", state.email);
         licenseXml.setAttribute ("authToken", state.authToken);

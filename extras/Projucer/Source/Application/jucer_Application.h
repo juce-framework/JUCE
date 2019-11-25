@@ -25,10 +25,6 @@
 #include "../Utility/UI/jucer_ProjucerLookAndFeel.h"
 #include "../Licenses/jucer_LicenseController.h"
 
-#if JUCE_MODULE_AVAILABLE_juce_analytics
- #include "jucer_ProjucerAnalytics.h"
-#endif
-
 struct ChildProcessCache;
 
 //==============================================================================
@@ -101,9 +97,6 @@ public:
     void showSVGPathDataToolWindow();
 
     void showAboutWindow();
-    void showApplicationUsageDataAgreementPopup();
-    void dismissApplicationUsageDataAgreementPopup();
-
     void showPathsWindow (bool highlightJUCEPath = false);
     void showEditorColourSchemeWindow();
 
@@ -128,9 +121,6 @@ public:
     static int getEditorColourSchemeForGUIColourScheme (const StringArray& schemes, int guiColourSchemeIndex);
 
     //==============================================================================
-    void setAnalyticsEnabled (bool);
-
-    //==============================================================================
     void rescanJUCEPathModules();
     void rescanUserPathModules();
 
@@ -150,8 +140,8 @@ public:
     OpenDocumentManager openDocumentManager;
     std::unique_ptr<ApplicationCommandManager> commandManager;
 
-    std::unique_ptr<Component> utf8Window, svgPathWindow, aboutWindow, applicationUsageDataWindow,
-                               pathsWindow, editorColourSchemeWindow, pipCreatorWindow;
+    std::unique_ptr<Component> utf8Window, svgPathWindow, aboutWindow, pathsWindow,
+                               editorColourSchemeWindow, pipCreatorWindow;
 
     std::unique_ptr<FileLogger> logger;
 
@@ -174,9 +164,6 @@ private:
     File tryToFindDemoRunnerExecutable();
     File tryToFindDemoRunnerProject();
     void launchDemoRunner();
-
-    void resetAnalytics() noexcept;
-    void setupAnalytics();
 
     void showSetJUCEPathAlert();
 

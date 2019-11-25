@@ -155,11 +155,6 @@ struct NewProjectWizard
             return nullptr;
         }
 
-        StringPairArray data;
-        data.set ("label", "Project Type = " + project->getProjectTypeString());
-
-        Analytics::getInstance()->logEvent ("Project Setting", data, ProjucerAnalyticsEvent::projectEvent);
-
         return project.release();
     }
 
@@ -184,7 +179,7 @@ struct NewProjectWizard
 
         for (auto& mod : list.getAllModules())
             if (defaultModules.contains (mod.first))
-                project.getEnabledModules().addModule (mod.second, false, useGlobalPath, false);
+                project.getEnabledModules().addModule (mod.second, false, useGlobalPath);
     }
 
     void addExporters (Project& project, WizardComp& wizardComp)

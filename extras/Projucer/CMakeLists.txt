@@ -32,7 +32,6 @@ target_sources(Projucer PRIVATE
     Source/Application/jucer_CommandLine.cpp
     Source/Application/jucer_Main.cpp
     Source/Application/jucer_MainWindow.cpp
-    Source/Application/jucer_ProjucerAnalytics.cpp
     Source/CodeEditor/jucer_DocumentEditorComponent.cpp
     Source/CodeEditor/jucer_OpenDocumentManager.cpp
     Source/CodeEditor/jucer_SourceCodeEditor.cpp
@@ -160,7 +159,6 @@ juce_add_binary_data(ProjucerData SOURCES
 
 target_link_libraries(Projucer PRIVATE
     ProjucerData
-    juce::juce_analytics
     juce::juce_build_tools
     juce::juce_cryptography
     juce::juce_gui_extra)

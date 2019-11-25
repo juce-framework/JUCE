@@ -35,7 +35,7 @@ ifeq ($(CONFIG),Debug)
     TARGET_ARCH := 
   endif
 
-  JUCE_CPPFLAGS := $(DEPFLAGS) "-DLINUX=1" "-DDEBUG=1" "-D_DEBUG=1" "-DJUCER_LINUX_MAKE_6D53C8B4=1" "-DJUCE_APP_VERSION=6.0.0" "-DJUCE_APP_VERSION_HEX=0x60000" "-DJUCE_DISPLAY_SPLASH_SCREEN=0" "-DJUCE_REPORT_APP_USAGE=0" "-DJUCE_USE_DARK_SPLASH_SCREEN=1" "-DJUCE_PROJUCER_VERSION=0x60000" "-DJUCE_MODULE_AVAILABLE_juce_analytics=1" "-DJUCE_MODULE_AVAILABLE_juce_build_tools=1" "-DJUCE_MODULE_AVAILABLE_juce_core=1" "-DJUCE_MODULE_AVAILABLE_juce_cryptography=1" "-DJUCE_MODULE_AVAILABLE_juce_data_structures=1" "-DJUCE_MODULE_AVAILABLE_juce_events=1" "-DJUCE_MODULE_AVAILABLE_juce_graphics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1" "-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1" "-DJUCE_LOG_ASSERTIONS=1" "-DJUCE_USE_CURL=1" "-DJUCE_LOAD_CURL_SYMBOLS_LAZILY=1" "-DJUCE_ALLOW_STATIC_NULL_VARIABLES=0" "-DJUCE_STRICT_REFCOUNTEDPOINTER=1" "-DJUCE_STANDALONE_APPLICATION=1" $(shell pkg-config --cflags freetype2 webkit2gtk-4.0 gtk+-x11-3.0) -pthread -I../../JuceLibraryCode -I../../../../modules -I../../../Build $(CPPFLAGS)
+  JUCE_CPPFLAGS := $(DEPFLAGS) "-DLINUX=1" "-DDEBUG=1" "-D_DEBUG=1" "-DJUCER_LINUX_MAKE_6D53C8B4=1" "-DJUCE_APP_VERSION=6.0.0" "-DJUCE_APP_VERSION_HEX=0x60000" "-DJUCE_DISPLAY_SPLASH_SCREEN=0" "-DJUCE_REPORT_APP_USAGE=0" "-DJUCE_USE_DARK_SPLASH_SCREEN=1" "-DJUCE_PROJUCER_VERSION=0x60000" "-DJUCE_MODULE_AVAILABLE_juce_build_tools=1" "-DJUCE_MODULE_AVAILABLE_juce_core=1" "-DJUCE_MODULE_AVAILABLE_juce_cryptography=1" "-DJUCE_MODULE_AVAILABLE_juce_data_structures=1" "-DJUCE_MODULE_AVAILABLE_juce_events=1" "-DJUCE_MODULE_AVAILABLE_juce_graphics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1" "-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1" "-DJUCE_LOG_ASSERTIONS=1" "-DJUCE_USE_CURL=1" "-DJUCE_LOAD_CURL_SYMBOLS_LAZILY=1" "-DJUCE_ALLOW_STATIC_NULL_VARIABLES=0" "-DJUCE_STRICT_REFCOUNTEDPOINTER=1" "-DJUCE_STANDALONE_APPLICATION=1" $(shell pkg-config --cflags freetype2 webkit2gtk-4.0 gtk+-x11-3.0) -pthread -I../../JuceLibraryCode -I../../../Build -I../../../../modules $(CPPFLAGS)
   JUCE_CPPFLAGS_APP :=  "-DJucePlugin_Build_VST=0" "-DJucePlugin_Build_VST3=0" "-DJucePlugin_Build_AU=0" "-DJucePlugin_Build_AUv3=0" "-DJucePlugin_Build_RTAS=0" "-DJucePlugin_Build_AAX=0" "-DJucePlugin_Build_Standalone=0" "-DJucePlugin_Build_Unity=0"
   JUCE_TARGET_APP := Projucer
 
@@ -56,7 +56,7 @@ ifeq ($(CONFIG),Release)
     TARGET_ARCH := 
   endif
 
-  JUCE_CPPFLAGS := $(DEPFLAGS) "-DLINUX=1" "-DNDEBUG=1" "-DJUCER_LINUX_MAKE_6D53C8B4=1" "-DJUCE_APP_VERSION=6.0.0" "-DJUCE_APP_VERSION_HEX=0x60000" "-DJUCE_DISPLAY_SPLASH_SCREEN=0" "-DJUCE_REPORT_APP_USAGE=0" "-DJUCE_USE_DARK_SPLASH_SCREEN=1" "-DJUCE_PROJUCER_VERSION=0x60000" "-DJUCE_MODULE_AVAILABLE_juce_analytics=1" "-DJUCE_MODULE_AVAILABLE_juce_build_tools=1" "-DJUCE_MODULE_AVAILABLE_juce_core=1" "-DJUCE_MODULE_AVAILABLE_juce_cryptography=1" "-DJUCE_MODULE_AVAILABLE_juce_data_structures=1" "-DJUCE_MODULE_AVAILABLE_juce_events=1" "-DJUCE_MODULE_AVAILABLE_juce_graphics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1" "-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1" "-DJUCE_LOG_ASSERTIONS=1" "-DJUCE_USE_CURL=1" "-DJUCE_LOAD_CURL_SYMBOLS_LAZILY=1" "-DJUCE_ALLOW_STATIC_NULL_VARIABLES=0" "-DJUCE_STRICT_REFCOUNTEDPOINTER=1" "-DJUCE_STANDALONE_APPLICATION=1" $(shell pkg-config --cflags freetype2 webkit2gtk-4.0 gtk+-x11-3.0) -pthread -I../../JuceLibraryCode -I../../../../modules -I../../../Build $(CPPFLAGS)
+  JUCE_CPPFLAGS := $(DEPFLAGS) "-DLINUX=1" "-DNDEBUG=1" "-DJUCER_LINUX_MAKE_6D53C8B4=1" "-DJUCE_APP_VERSION=6.0.0" "-DJUCE_APP_VERSION_HEX=0x60000" "-DJUCE_DISPLAY_SPLASH_SCREEN=0" "-DJUCE_REPORT_APP_USAGE=0" "-DJUCE_USE_DARK_SPLASH_SCREEN=1" "-DJUCE_PROJUCER_VERSION=0x60000" "-DJUCE_MODULE_AVAILABLE_juce_build_tools=1" "-DJUCE_MODULE_AVAILABLE_juce_core=1" "-DJUCE_MODULE_AVAILABLE_juce_cryptography=1" "-DJUCE_MODULE_AVAILABLE_juce_data_structures=1" "-DJUCE_MODULE_AVAILABLE_juce_events=1" "-DJUCE_MODULE_AVAILABLE_juce_graphics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1" "-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1" "-DJUCE_LOG_ASSERTIONS=1" "-DJUCE_USE_CURL=1" "-DJUCE_LOAD_CURL_SYMBOLS_LAZILY=1" "-DJUCE_ALLOW_STATIC_NULL_VARIABLES=0" "-DJUCE_STRICT_REFCOUNTEDPOINTER=1" "-DJUCE_STANDALONE_APPLICATION=1" $(shell pkg-config --cflags freetype2 webkit2gtk-4.0 gtk+-x11-3.0) -pthread -I../../JuceLibraryCode -I../../../Build -I../../../../modules $(CPPFLAGS)
   JUCE_CPPFLAGS_APP :=  "-DJucePlugin_Build_VST=0" "-DJucePlugin_Build_VST3=0" "-DJucePlugin_Build_AU=0" "-DJucePlugin_Build_AUv3=0" "-DJucePlugin_Build_RTAS=0" "-DJucePlugin_Build_AAX=0" "-DJucePlugin_Build_Standalone=0" "-DJucePlugin_Build_Unity=0"
   JUCE_TARGET_APP := Projucer
 
@@ -72,7 +72,6 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/jucer_CommandLine_f35de107.o \
   $(JUCE_OBJDIR)/jucer_Main_f8488f5b.o \
   $(JUCE_OBJDIR)/jucer_MainWindow_1e163aeb.o \
-  $(JUCE_OBJDIR)/jucer_ProjucerAnalytics_5740f336.o \
   $(JUCE_OBJDIR)/jucer_DocumentEditorComponent_bc853a2f.o \
   $(JUCE_OBJDIR)/jucer_OpenDocumentManager_ba866622.o \
   $(JUCE_OBJDIR)/jucer_SourceCodeEditor_55965985.o \
@@ -122,7 +121,6 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/jucer_NewFileWizard_fac97f47.o \
   $(JUCE_OBJDIR)/jucer_NewProjectWizardClasses_891f6fa2.o \
   $(JUCE_OBJDIR)/BinaryData_ce4232d4.o \
-  $(JUCE_OBJDIR)/include_juce_analytics_f8e9fa94.o \
   $(JUCE_OBJDIR)/include_juce_build_tools_f5069398.o \
   $(JUCE_OBJDIR)/include_juce_core_f26d17db.o \
   $(JUCE_OBJDIR)/include_juce_cryptography_8cb807a8.o \
@@ -163,11 +161,6 @@ $(JUCE_OBJDIR)/jucer_Main_f8488f5b.o: ../../Source/Application/jucer_Main.cpp
 $(JUCE_OBJDIR)/jucer_MainWindow_1e163aeb.o: ../../Source/Application/jucer_MainWindow.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling jucer_MainWindow.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/jucer_ProjucerAnalytics_5740f336.o: ../../Source/Application/jucer_ProjucerAnalytics.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling jucer_ProjucerAnalytics.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/jucer_DocumentEditorComponent_bc853a2f.o: ../../Source/CodeEditor/jucer_DocumentEditorComponent.cpp
@@ -413,11 +406,6 @@ $(JUCE_OBJDIR)/jucer_NewProjectWizardClasses_891f6fa2.o: ../../Source/Wizards/ju
 $(JUCE_OBJDIR)/BinaryData_ce4232d4.o: ../../JuceLibraryCode/BinaryData.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling BinaryData.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/include_juce_analytics_f8e9fa94.o: ../../JuceLibraryCode/include_juce_analytics.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling include_juce_analytics.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/include_juce_build_tools_f5069398.o: ../../JuceLibraryCode/include_juce_build_tools.cpp
