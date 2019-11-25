@@ -196,7 +196,7 @@ void Project::initialiseProjectValues()
     versionValue.referTo             (projectRoot, Ids::version,             getUndoManager(), "1.0.0");
     bundleIdentifierValue.referTo    (projectRoot, Ids::bundleIdentifier,    getUndoManager(), getDefaultBundleIdentifierString());
 
-    displaySplashScreenValue.referTo (projectRoot, Ids::displaySplashScreen, getUndoManager(), ! ProjucerApplication::getApp().isPaidOrGPL());
+    displaySplashScreenValue.referTo (projectRoot, Ids::displaySplashScreen, getUndoManager(), false);
     splashScreenColourValue.referTo  (projectRoot, Ids::splashScreenColour,  getUndoManager(), "Dark");
 
     useAppConfigValue.referTo             (projectRoot, Ids::useAppConfig,                  getUndoManager(), true);
@@ -897,16 +897,8 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
         StringPairArray description;
         description.set ("Display the JUCE splash screen", "This option controls the display of the standard JUCE splash screen.");
 
-        if (ProjucerApplication::getApp().isPaidOrGPL())
-        {
-            props.add (new ChoicePropertyComponent (displaySplashScreenValue, String ("Display the JUCE Splash Screen") + " (" + licenseRequiredTagline + ")"),
-                       description["Display the JUCE splash screen"] + " " + licenseRequiredInfo);
-        }
-        else
-        {
-            props.add (new ChoicePropertyComponent (Value(), "Display the JUCE Splash Screen", { licenseRequiredTagline }, {}),
-                       description["Display the JUCE splash screen"] + " " + licenseRequiredInfo);
-        }
+        props.add (new ChoicePropertyComponent (displaySplashScreenValue, String ("Display the JUCE Splash Screen") + " (" + licenseRequiredTagline + ")"),
+                   description["Display the JUCE splash screen"] + " " + licenseRequiredInfo);
     }
 
     props.add (new ChoicePropertyComponent (splashScreenColourValue, "Splash Screen Colour",

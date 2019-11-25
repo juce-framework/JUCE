@@ -87,7 +87,7 @@ target_compile_definitions(Projucer PRIVATE
     JUCE_LOG_ASSERTIONS=1
     JUCE_STRICT_REFCOUNTEDPOINTER=1
     JUCE_USE_CURL=1
-    JUCE_WEB_BROWSER=1)
+    JUCE_WEB_BROWSER=0)
 
 juce_add_binary_data(ProjucerData SOURCES
     Source/BinaryData/Icons/background_logo.svg
@@ -147,7 +147,6 @@ juce_add_binary_data(ProjucerData SOURCES
     Source/BinaryData/gradle/gradlew
     Source/BinaryData/gradle/gradlew.bat
     Source/BinaryData/nothingtoseehere.txt
-    Source/BinaryData/offlinepage.html
     Source/BinaryData/projucer_EULA.txt
 
     ../Build/CMake/LaunchScreen.storyboard

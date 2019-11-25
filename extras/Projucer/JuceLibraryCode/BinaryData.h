@@ -197,14 +197,11 @@ namespace BinaryData
     extern const char*   nothingtoseehere_txt;
     const int            nothingtoseehere_txtSize = 20;
 
-    extern const char*   offlinepage_html;
-    const int            offlinepage_htmlSize = 1155;
-
     extern const char*   projucer_EULA_txt;
     const int            projucer_EULA_txtSize = 14361;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 65;
+    const int namedResourceListSize = 64;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];

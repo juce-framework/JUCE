@@ -133,10 +133,7 @@ void ProjectContentComponent::resized()
         resizerBar->setBounds (r.withWidth (4));
 
     if (auto* h = dynamic_cast<HeaderComponent*> (header.get()))
-    {
         h->sidebarTabsWidthChanged (sidebarTabs.getWidth());
-        r.removeFromRight (h->getUserButtonWidth());
-    }
 
     if (contentView != nullptr)
     {
@@ -623,12 +620,6 @@ void ProjectContentComponent::showModule (const String& moduleID)
 void ProjectContentComponent::showLiveBuildSettings()
 {
     setEditorComponent (new LiveBuildSettingsComponent (*project), nullptr);
-}
-
-void ProjectContentComponent::showUserSettings()
-{
-    if (auto* headerComp = dynamic_cast<HeaderComponent*> (header.get()))
-        headerComp->showUserSettings();
 }
 
 StringArray ProjectContentComponent::getExportersWhichCanLaunch() const

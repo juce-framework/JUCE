@@ -18,6 +18,8 @@
 
 #include "jucer_HeaderComponent.h"
 
+#include "../../Application/jucer_Application.h"
+
 #include "../../ProjectSaving/jucer_ProjectExporter.h"
 #include "../../Project/UI/jucer_ProjectContentComponent.h"
 
@@ -48,9 +50,6 @@ HeaderComponent::HeaderComponent()
 
 HeaderComponent::~HeaderComponent()
 {
-    if (userSettingsWindow != nullptr)
-        userSettingsWindow->dismiss();
-
     if (childProcess != nullptr)
     {
         childProcess->activityList.removeChangeListener(this);
@@ -91,9 +90,6 @@ void HeaderComponent::resized()
     exporterBounds.removeFromRight (5);
     exporterBox.setBounds (exporterBounds.removeFromBottom (roundToInt (exporterBounds.getHeight() / 1.8f)));
     configLabel.setBounds (exporterBounds);
-
-    bounds.removeFromRight (5);
-    userSettingsButton->setBounds (bounds.removeFromRight (bounds.getHeight()).reduced (2));
 }
 
 void HeaderComponent::paint (Graphics& g)
@@ -196,11 +192,6 @@ bool HeaderComponent::canCurrentExporterLaunchProject() const noexcept
 }
 
 //==============================================================================
-int HeaderComponent::getUserButtonWidth() const noexcept
-{
-    return userSettingsButton->getWidth();
-}
-
 void HeaderComponent::sidebarTabsWidthChanged (int newWidth) noexcept
 {
     tabsWidth = newWidth;
@@ -208,30 +199,6 @@ void HeaderComponent::sidebarTabsWidthChanged (int newWidth) noexcept
 }
 
 //==============================================================================
-void HeaderComponent::showUserSettings() noexcept
-{
-   #if JUCER_ENABLE_GPL_MODE
-    auto settingsPopupHeight = 100;
-    auto settingsPopupWidth = 200;
-   #else
-    auto settingsPopupHeight = 150;
-    auto settingsPopupWidth = 250;
-   #endif
-
-    auto* content = new UserSettingsPopup (false);
-
-    content->setSize (settingsPopupWidth, settingsPopupHeight);
-
-    userSettingsWindow = &CallOutBox::launchAsynchronously (content, userSettingsButton->getScreenBounds(), nullptr);
-}
-
-//==============================================================================
-void HeaderComponent::lookAndFeelChanged()
-{
-    if (userSettingsWindow != nullptr)
-        userSettingsWindow->sendLookAndFeelChange();
-}
-
 void HeaderComponent::changeListenerCallback (ChangeBroadcaster*)
 {
     if (childProcess != nullptr)
@@ -275,15 +242,6 @@ void HeaderComponent::initialiseButtons() noexcept
             pcc->openInSelectedIDE (true);
     };
 
-    userSettingsButton.reset (new IconButton ("User Settings", &icons.user));
-    addAndMakeVisible (userSettingsButton.get());
-    userSettingsButton->isUserButton = true;
-    userSettingsButton->onClick = [this]
-    {
-        if (findParentComponentOfClass<ProjectContentComponent>() != nullptr)
-            showUserSettings();
-    };
-
     runAppButton.reset (new IconButton ("Run Application", &icons.play));
     addAndMakeVisible (runAppButton.get());
     runAppButton->onClick = [this]
@@ -293,7 +251,6 @@ void HeaderComponent::initialiseButtons() noexcept
     };
 
     updateExporterButton();
-    updateUserAvatar();
 }
 
 void HeaderComponent::updateName() noexcept
@@ -313,17 +270,6 @@ void HeaderComponent::updateExporterButton() noexcept
             saveAndOpenInIDEButton->repaint();
             saveAndOpenInIDEButton->setEnabled (canCurrentExporterLaunchProject());
         }
-    }
-}
-
-void HeaderComponent::updateUserAvatar() noexcept
-{
-    if (auto* controller = ProjucerApplication::getApp().licenseController.get())
-    {
-        auto state = controller->getState();
-
-        userSettingsButton->iconImage = state.avatar;
-        userSettingsButton->repaint();
     }
 }
 

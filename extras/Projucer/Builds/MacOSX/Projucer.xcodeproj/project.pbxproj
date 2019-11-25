@@ -193,10 +193,6 @@
 			isa = PBXBuildFile;
 			fileRef = C187718F7B9EBA88584B43F3;
 		};
-		6FD0752A5CADCF60D79FDBB7 = {
-			isa = PBXBuildFile;
-			fileRef = 51CBE59779A36D1B80B26974;
-		};
 		D25EBE02B55DB244BE0D5635 = {
 			isa = PBXBuildFile;
 			fileRef = DE3E6B2614229FAD56D50770;
@@ -685,13 +681,6 @@
 			path = "../../Source/ComponentEditor/jucer_JucerDocument.cpp";
 			sourceTree = "SOURCE_ROOT";
 		};
-		28D0199327887FFABF9C3F20 = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			name = "jucer_UserSettingsPopup.h";
-			path = "../../Source/Utility/UI/jucer_UserSettingsPopup.h";
-			sourceTree = "SOURCE_ROOT";
-		};
 		2BD9B4556479A8A41740BCAE = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -1056,13 +1045,6 @@
 			path = "../../Source/CodeEditor/jucer_DocumentEditorComponent.h";
 			sourceTree = "SOURCE_ROOT";
 		};
-		51CBE59779A36D1B80B26974 = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = "jucer_LicenseController.cpp";
-			path = "../../Source/Licenses/jucer_LicenseController.cpp";
-			sourceTree = "SOURCE_ROOT";
-		};
 		5432B7B9B2CF2EAEC8B66D5C = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -1378,13 +1360,6 @@
 			path = "../../Source/ComponentEditor/jucer_GeneratedCode.cpp";
 			sourceTree = "SOURCE_ROOT";
 		};
-		790F6302B9A0620F23F8A6C1 = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			name = "jucer_LicenseThread.h";
-			path = "../../Source/Licenses/jucer_LicenseThread.h";
-			sourceTree = "SOURCE_ROOT";
-		};
 		7AB7640968FAAC73072FBD10 = {
 			isa = PBXFileReference;
 			lastKnownFileType = file;
@@ -1495,13 +1470,6 @@
 			lastKnownFileType = sourcecode.c.h;
 			name = "jucer_NewProjectWizardComponent.h";
 			path = "../../Source/Wizards/jucer_NewProjectWizardComponent.h";
-			sourceTree = "SOURCE_ROOT";
-		};
-		8C281F2F8EA3AD614ADF7955 = {
-			isa = PBXFileReference;
-			lastKnownFileType = text.html;
-			name = offlinepage.html;
-			path = ../../Source/BinaryData/offlinepage.html;
 			sourceTree = "SOURCE_ROOT";
 		};
 		8C52A3DDA62A746AA7A68535 = {
@@ -1649,13 +1617,6 @@
 			lastKnownFileType = sourcecode.cpp.cpp;
 			name = "jucer_PaintElementGroup.cpp";
 			path = "../../Source/ComponentEditor/PaintElements/jucer_PaintElementGroup.cpp";
-			sourceTree = "SOURCE_ROOT";
-		};
-		98E6D61BFF7D85F0E00F0FBF = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			name = "jucer_LicenseWebview.h";
-			path = "../../Source/Licenses/jucer_LicenseWebview.h";
 			sourceTree = "SOURCE_ROOT";
 		};
 		9914F905BFCFBE5F76619670 = {
@@ -1985,13 +1946,6 @@
 			lastKnownFileType = sourcecode.cpp.cpp;
 			name = "jucer_Project.cpp";
 			path = "../../Source/Project/jucer_Project.cpp";
-			sourceTree = "SOURCE_ROOT";
-		};
-		BB187CD608EB6368B29EC335 = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			name = "jucer_LicenseController.h";
-			path = "../../Source/Licenses/jucer_LicenseController.h";
 			sourceTree = "SOURCE_ROOT";
 		};
 		BC3B310D42C489E8B8D93327 = {
@@ -2721,7 +2675,6 @@
 				41105E536155E394E54BDD35,
 				5F6584B675E30761521A9F42,
 				59B08C7B13B8EA5137ACA77A,
-				8C281F2F8EA3AD614ADF7955,
 				4073A12E196BDDADE211E19F,
 			);
 			name = BinaryData;
@@ -2873,17 +2826,6 @@
 				5432B7B9B2CF2EAEC8B66D5C,
 			);
 			name = ComponentEditor;
-			sourceTree = "<group>";
-		};
-		144B649D98AE8316058B8281 = {
-			isa = PBXGroup;
-			children = (
-				51CBE59779A36D1B80B26974,
-				BB187CD608EB6368B29EC335,
-				790F6302B9A0620F23F8A6C1,
-				98E6D61BFF7D85F0E00F0FBF,
-			);
-			name = Licenses;
 			sourceTree = "<group>";
 		};
 		9014CA5F3B8D23E883D6975E = {
@@ -3049,7 +2991,6 @@
 				FE20FE5805A02A4843048200,
 				0CECD562059DFD7FBFB37E3C,
 				3D6FD9C0065BF16568EC0AB7,
-				28D0199327887FFABF9C3F20,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -3095,7 +3036,6 @@
 				DC3A4B0AD79334BA8A7E0661,
 				F1B44F007A02A0FAE4DC8D79,
 				F6BD840F9A06F2DA891E2CB8,
-				144B649D98AE8316058B8281,
 				20B39D53B7DAAB53C7533532,
 				89E9055A179B4C2019B4E1AE,
 				4DCC5D64BBE8DE85360A3D57,
@@ -3219,7 +3159,6 @@
 					"JucePlugin_Build_Standalone=0",
 					"JucePlugin_Build_Unity=0",
 					"JUCE_DISPLAY_SPLASH_SCREEN=0",
-					"JUCE_REPORT_APP_USAGE=0",
 					"JUCE_USE_DARK_SPLASH_SCREEN=1",
 					"JUCE_PROJUCER_VERSION=0x60000",
 					"JUCE_MODULE_AVAILABLE_juce_build_tools=1",
@@ -3236,6 +3175,7 @@
 					"JUCE_LOAD_CURL_SYMBOLS_LAZILY=1",
 					"JUCE_ALLOW_STATIC_NULL_VARIABLES=0",
 					"JUCE_STRICT_REFCOUNTEDPOINTER=1",
+					"JUCE_WEB_BROWSER=0",
 					"JUCE_STANDALONE_APPLICATION=1",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -3283,7 +3223,6 @@
 					"JucePlugin_Build_Standalone=0",
 					"JucePlugin_Build_Unity=0",
 					"JUCE_DISPLAY_SPLASH_SCREEN=0",
-					"JUCE_REPORT_APP_USAGE=0",
 					"JUCE_USE_DARK_SPLASH_SCREEN=1",
 					"JUCE_PROJUCER_VERSION=0x60000",
 					"JUCE_MODULE_AVAILABLE_juce_build_tools=1",
@@ -3300,6 +3239,7 @@
 					"JUCE_LOAD_CURL_SYMBOLS_LAZILY=1",
 					"JUCE_ALLOW_STATIC_NULL_VARIABLES=0",
 					"JUCE_STRICT_REFCOUNTEDPOINTER=1",
+					"JUCE_WEB_BROWSER=0",
 					"JUCE_STANDALONE_APPLICATION=1",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -3481,7 +3421,6 @@
 				209FCCC2155A1FCB7E11E20D,
 				C93569F47B4AC1A8E37992ED,
 				1B988E139004D8E2850EB656,
-				6FD0752A5CADCF60D79FDBB7,
 				D25EBE02B55DB244BE0D5635,
 				85E7FCB0516EFF853FA7B380,
 				CC6C4D351BA9B473E5F95791,

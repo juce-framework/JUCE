@@ -41,9 +41,6 @@
     <Filter Include="Projucer\ComponentEditor">
       <UniqueIdentifier>{5F21E507-E5E8-0A74-F1AE-874BB67C26CC}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Projucer\Licenses">
-      <UniqueIdentifier>{E5D23B90-895E-EB0B-AC18-C7EBB25546AE}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Projucer\LiveBuildEngine\UI">
       <UniqueIdentifier>{E880260F-D9FB-64B6-244B-6F06B70FE9EE}</UniqueIdentifier>
     </Filter>
@@ -441,9 +438,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\ComponentEditor\jucer_PaintRoutine.cpp">
       <Filter>Projucer\ComponentEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Licenses\jucer_LicenseController.cpp">
-      <Filter>Projucer\Licenses</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineClient.cpp">
       <Filter>Projucer\LiveBuildEngine</Filter>
@@ -2166,15 +2160,6 @@
     <ClInclude Include="..\..\Source\ComponentEditor\jucer_UtilityFunctions.h">
       <Filter>Projucer\ComponentEditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Licenses\jucer_LicenseController.h">
-      <Filter>Projucer\Licenses</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Licenses\jucer_LicenseThread.h">
-      <Filter>Projucer\Licenses</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Licenses\jucer_LicenseWebview.h">
-      <Filter>Projucer\Licenses</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\LiveBuildEngine\UI\jucer_ActivityListComponent.h">
       <Filter>Projucer\LiveBuildEngine\UI</Filter>
     </ClInclude>
@@ -2368,9 +2353,6 @@
       <Filter>Projucer\Utility\UI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\UI\jucer_SlidingPanelComponent.h">
-      <Filter>Projucer\Utility\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\UI\jucer_UserSettingsPopup.h">
       <Filter>Projucer\Utility\UI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Wizards\jucer_NewFileWizard.h">
@@ -3783,9 +3765,6 @@
       <Filter>Projucer\BinaryData</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\nothingtoseehere.txt">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\offlinepage.html">
       <Filter>Projucer\BinaryData</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\projucer_EULA.txt">

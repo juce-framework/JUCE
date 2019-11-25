@@ -20,9 +20,9 @@
 
 #include "../../Application/jucer_Headers.h"
 #include "../../Utility/UI/jucer_IconButton.h"
-#include "../../Utility/UI/jucer_UserSettingsPopup.h"
 
 class Project;
+class CompileEngineChildProcess;
 
 //==============================================================================
 class HeaderComponent    : public Component,
@@ -42,21 +42,14 @@ public:
     //==============================================================================
     void setCurrentProject (Project*) noexcept;
 
-    //==============================================================================
     void updateExporters() noexcept;
     String getSelectedExporterName() const noexcept;
     bool canCurrentExporterLaunchProject() const noexcept;
 
-    //==============================================================================
-    int getUserButtonWidth() const noexcept;
     void sidebarTabsWidthChanged (int newWidth) noexcept;
-
-    //==============================================================================
-    void showUserSettings() noexcept;
 
 private:
     //==============================================================================
-    void lookAndFeelChanged() override;
     void changeListenerCallback (ChangeBroadcaster* source) override;
     void valueChanged (Value&) override;
     void timerCallback() override;
@@ -77,7 +70,6 @@ private:
 
     void updateName() noexcept;
     void updateExporterButton() noexcept;
-    void updateUserAvatar() noexcept;
 
     //==============================================================================
     void buildPing();
@@ -98,9 +90,7 @@ private:
     projectNameLabel;
 
     std::unique_ptr<ImageComponent> juceIcon;
-    std::unique_ptr<IconButton> projectSettingsButton, saveAndOpenInIDEButton, userSettingsButton, runAppButton;
-
-    SafePointer<CallOutBox> userSettingsWindow;
+    std::unique_ptr<IconButton> projectSettingsButton, saveAndOpenInIDEButton, runAppButton;
 
     ReferenceCountedObjectPtr<CompileEngineChildProcess> childProcess;
 

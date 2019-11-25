@@ -7525,55 +7525,8 @@ static const unsigned char temp_binary_data_62[] =
 
 const char* nothingtoseehere_txt = (const char*) temp_binary_data_62;
 
-//================== offlinepage.html ==================
-static const unsigned char temp_binary_data_63[] =
-"<html>\n"
-"  <head>\n"
-"    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=11\">\n"
-"    <style>\n"
-"      body {\n"
-"        background-color: #f1f1f1;\n"
-"        color: #101010;\n"
-"        font-family: Helvetica, Arial, sans-serif;\n"
-"        display: flex;\n"
-"        justify-content: center;\n"
-"        align-items: center;\n"
-"      }\n"
-"      .button {\n"
-"        display: block;\n"
-"        padding: 15px 20px 16px;\n"
-"        width: 200px;\n"
-"        border: 1px solid #c8c9cb;\n"
-"        border-radius: 6px;\n"
-"        margin: auto;\n"
-"        cursor: pointer;\n"
-"        font-size: 20px;\n"
-"        margin-top: 30px;\n"
-"        color: inherit;\n"
-"        text-decoration: none;\n"
-"      }\n"
-"      #offline {\n"
-"        display: block;\n"
-"        text-align: center;\n"
-"      }\n"
-"    </style>\n"
-"  </head>\n"
-"  <body>\n"
-"    <div id='offline'>\n"
-"      <h1>No internet connection</h1>\n"
-"\n"
-"      <p>You appear to be offline. An internet connection is required to login to the Projucer.</p>\n"
-"      <p>If you want to use JUCE under the GPL without signing-in, you can enable the pre-processor macro JUCER_ENABLE_GPL_MODE=1 and recompile the Projucer yourself.</p>\n"
-"\n"
-"      <a class='button' href='__URL_PLACEHOLDER__'>Try again</a>\n"
-"    </div>\n"
-"  </body>\n"
-"</html>";
-
-const char* offlinepage_html = (const char*) temp_binary_data_63;
-
 //================== projucer_EULA.txt ==================
-static const unsigned char temp_binary_data_64[] =
+static const unsigned char temp_binary_data_63[] =
 "\r\n"
 "IMPORTANT NOTICE: PLEASE READ CAREFULLY BEFORE INSTALLING THE SOFTWARE:\r\n"
 "\r\n"
@@ -7737,7 +7690,7 @@ static const unsigned char temp_binary_data_64[] =
 "\r\n"
 "10.6. Please note that this License, its subject matter and its formation, are governed by English law. You and we both agree to that the courts of England and Wales will have exclusive jurisdiction.\r\n";
 
-const char* projucer_EULA_txt = (const char*) temp_binary_data_64;
+const char* projucer_EULA_txt = (const char*) temp_binary_data_63;
 
 
 const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
@@ -7813,7 +7766,6 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
         case 0x938e96ec:  numBytes = 20; return nothingtoseehere_txt;
-        case 0xf11580d8:  numBytes = 1155; return offlinepage_html;
         case 0xd6bb7d1d:  numBytes = 14361; return projucer_EULA_txt;
         default: break;
     }
@@ -7887,7 +7839,6 @@ const char* namedResourceList[] =
     "colourscheme_dark_xml",
     "colourscheme_light_xml",
     "nothingtoseehere_txt",
-    "offlinepage_html",
     "projucer_EULA_txt"
 };
 
@@ -7956,7 +7907,6 @@ const char* originalFilenames[] =
     "colourscheme_dark.xml",
     "colourscheme_light.xml",
     "nothingtoseehere.txt",
-    "offlinepage.html",
     "projucer_EULA.txt"
 };
 

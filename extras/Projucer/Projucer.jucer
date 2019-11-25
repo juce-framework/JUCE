@@ -269,8 +269,6 @@
             file="Source/BinaryData/colourscheme_light.xml"/>
       <FILE id="lBlcfb" name="nothingtoseehere.txt" compile="0" resource="1"
             file="Source/BinaryData/nothingtoseehere.txt"/>
-      <FILE id="vb8G2I" name="offlinepage.html" compile="0" resource="1"
-            file="Source/BinaryData/offlinepage.html"/>
       <FILE id="tqxmy4" name="projucer_EULA.txt" compile="0" resource="1"
             file="Source/BinaryData/projucer_EULA.txt"/>
     </GROUP>
@@ -476,16 +474,6 @@
       <FILE id="pl4vjj" name="jucer_UtilityFunctions.h" compile="0" resource="0"
             file="Source/ComponentEditor/jucer_UtilityFunctions.h"/>
     </GROUP>
-    <GROUP id="{025B2596-DEB8-D8EF-367D-41C8D290229A}" name="Licenses">
-      <FILE id="KCuLAZ" name="jucer_LicenseController.cpp" compile="1" resource="0"
-            file="Source/Licenses/jucer_LicenseController.cpp"/>
-      <FILE id="zrVlbi" name="jucer_LicenseController.h" compile="0" resource="0"
-            file="Source/Licenses/jucer_LicenseController.h"/>
-      <FILE id="S3VWFZ" name="jucer_LicenseThread.h" compile="0" resource="0"
-            file="Source/Licenses/jucer_LicenseThread.h"/>
-      <FILE id="lHIbn4" name="jucer_LicenseWebview.h" compile="0" resource="0"
-            file="Source/Licenses/jucer_LicenseWebview.h"/>
-    </GROUP>
     <GROUP id="{1F4F21DC-6856-2C06-EEC5-39EE3B95C206}" name="LiveBuildEngine">
       <GROUP id="{A09CCB6F-E688-7D17-BF10-AE3C7916AACA}" name="UI">
         <FILE id="ESpwdA" name="jucer_ActivityListComponent.h" compile="0"
@@ -675,8 +663,6 @@
               resource="0" file="Source/Utility/UI/jucer_SlidingPanelComponent.cpp"/>
         <FILE id="cbUrIP" name="jucer_SlidingPanelComponent.h" compile="0"
               resource="0" file="Source/Utility/UI/jucer_SlidingPanelComponent.h"/>
-        <FILE id="xrwb6j" name="jucer_UserSettingsPopup.h" compile="0" resource="0"
-              file="Source/Utility/UI/jucer_UserSettingsPopup.h"/>
       </GROUP>
     </GROUP>
     <GROUP id="{ECF14F8E-E605-CFBF-7BAD-2CE0A360EDAA}" name="Wizards">
@@ -717,7 +703,8 @@
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_LOG_ASSERTIONS="1" JUCE_USE_CURL="1" JUCE_ALLOW_STATIC_NULL_VARIABLES="0"
-               JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_LOAD_CURL_SYMBOLS_LAZILY="1"/>
+               JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_LOAD_CURL_SYMBOLS_LAZILY="1"
+               JUCE_WEB_BROWSER="0"/>
   <MODULES>
     <MODULE id="juce_build_tools" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_core" showAllCode="1"/>

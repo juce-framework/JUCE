@@ -23,14 +23,12 @@
 #include "jucer_AutoUpdater.h"
 #include "../CodeEditor/jucer_SourceCodeEditor.h"
 #include "../Utility/UI/jucer_ProjucerLookAndFeel.h"
-#include "../Licenses/jucer_LicenseController.h"
 
 struct ChildProcessCache;
 
 //==============================================================================
 class ProjucerApplication   : public JUCEApplication,
-                              private AsyncUpdater,
-                              private LicenseController::StateChangedCallback
+                              private AsyncUpdater
 {
 public:
     ProjucerApplication();
@@ -40,10 +38,6 @@ public:
 
     //==============================================================================
     void initialise (const String& commandLine) override;
-    void initialiseBasics();
-    bool initialiseLogger (const char* filePrefix);
-    void initialiseWindows (const String& commandLine);
-
     void shutdown() override;
     void systemRequestedQuit() override;
     void deleteLogger();
@@ -110,12 +104,6 @@ public:
     void updateAllBuildTabs();
 
     //==============================================================================
-    void licenseStateChanged (const LicenseState&) override;
-    void doLogout();
-
-    bool isPaidOrGPL() const              { return licenseController == nullptr || licenseController->getState().isPaidOrGPL(); }
-
-    //==============================================================================
     void selectEditorColourSchemeWithName (const String& schemeName);
     static bool isEditorColourSchemeADefaultScheme (const StringArray& schemes, int editorColourSchemeIndex);
     static int getEditorColourSchemeForGUIColourScheme (const StringArray& schemes, int guiColourSchemeIndex);
@@ -147,12 +135,14 @@ public:
 
     bool isRunningCommandLine;
     std::unique_ptr<ChildProcessCache> childProcessCache;
-    std::unique_ptr<LicenseController> licenseController;
 
 private:
     //==============================================================================
     void handleAsyncUpdate() override;
     void initCommandManager();
+
+    bool initialiseLogger (const char* filePrefix);
+    void initialiseWindows (const String& commandLine);
 
     void createExamplesPopupMenu (PopupMenu&) noexcept;
     Array<File> getSortedExampleDirectories() noexcept;

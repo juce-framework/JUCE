@@ -91,12 +91,10 @@ namespace CommandIDs
         nextError               = 0x300080,
         prevError               = 0x300081,
 
-        loginLogout             = 0x300090,
-
-        showForum               = 0x300100,
-        showAPIModules          = 0x300101,
-        showAPIClasses          = 0x300102,
-        showTutorials           = 0x300103,
+        showForum               = 0x300090,
+        showAPIModules          = 0x300091,
+        showAPIClasses          = 0x300092,
+        showTutorials           = 0x300093,
 
         lastCommandIDEntry
     };

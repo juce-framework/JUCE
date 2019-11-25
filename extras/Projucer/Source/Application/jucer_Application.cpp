@@ -76,7 +76,7 @@ void ProjucerApplication::initialise (const String& commandLine)
         isRunningCommandLine = commandLine.isNotEmpty()
                                 && ! commandLine.startsWith ("-NSDocumentRevisionsDebugMode");
 
-        initialiseBasics();
+        settings = std::make_unique<StoredSettings>();
 
         if (isRunningCommandLine)
         {
@@ -120,14 +120,6 @@ void ProjucerApplication::initialise (const String& commandLine)
     }
 }
 
-void ProjucerApplication::initialiseBasics()
-{
-    settings = std::make_unique<StoredSettings>();
-
-    licenseController.reset (new LicenseController);
-    licenseController->addLicenseStatusChangedCallback (this);
-}
-
 bool ProjucerApplication::initialiseLogger (const char* filePrefix)
 {
     if (logger == nullptr)
@@ -147,6 +139,18 @@ bool ProjucerApplication::initialiseLogger (const char* filePrefix)
     return logger != nullptr;
 }
 
+void ProjucerApplication::initialiseWindows (const String& commandLine)
+{
+    const String commandLineWithoutNSDebug (commandLine.replace ("-NSDocumentRevisionsDebugMode YES", StringRef()));
+
+    if (commandLineWithoutNSDebug.trim().isNotEmpty() && ! commandLineWithoutNSDebug.trim().startsWithChar ('-'))
+        anotherInstanceStarted (commandLine);
+    else
+        mainWindowList.reopenLastProjects();
+
+    mainWindowList.createWindowIfNoneAreOpen();
+}
+
 void ProjucerApplication::handleAsyncUpdate()
 {
     LookAndFeel::setDefaultLookAndFeel (&lookAndFeel);
@@ -155,9 +159,6 @@ void ProjucerApplication::handleAsyncUpdate()
     icons = std::make_unique<Icons>();
 
     tooltipWindow = std::make_unique<TooltipWindow> (nullptr, 1200);
-
-    if (licenseController != nullptr)
-        licenseController->startWebviewIfNeeded();
 
    #if JUCE_MAC
     PopupMenu extraAppleMenuItems;
@@ -171,20 +172,10 @@ void ProjucerApplication::handleAsyncUpdate()
     if (getGlobalProperties().getValue (Ids::dontQueryForUpdate, {}).isEmpty())
         LatestVersionCheckerAndUpdater::getInstance()->checkForNewVersion (false);
 
+    initialiseWindows (getCommandLineParameters());
+
     if (! isRunningCommandLine && settings->shouldAskUserToSetJUCEPath())
         showSetJUCEPathAlert();
-}
-
-void ProjucerApplication::initialiseWindows (const String& commandLine)
-{
-    const String commandLineWithoutNSDebug (commandLine.replace ("-NSDocumentRevisionsDebugMode YES", StringRef()));
-
-    if (commandLineWithoutNSDebug.trim().isNotEmpty() && ! commandLineWithoutNSDebug.trim().startsWithChar ('-'))
-        anotherInstanceStarted (commandLine);
-    else
-        mainWindowList.reopenLastProjects();
-
-    mainWindowList.createWindowIfNoneAreOpen();
 }
 
 static void deleteTemporaryFiles()
@@ -209,12 +200,6 @@ void ProjucerApplication::shutdown()
     pathsWindow.reset();
     editorColourSchemeWindow.reset();
     pipCreatorWindow.reset();
-
-    if (licenseController != nullptr)
-    {
-        licenseController->removeLicenseStatusChangedCallback (this);
-        licenseController.reset();
-    }
 
     mainWindowList.forceCloseAllWindows();
     openDocumentManager.clear();
@@ -272,31 +257,6 @@ void ProjucerApplication::systemRequestedQuit()
     {
         if (closeAllMainWindows())
             quit();
-    }
-}
-
-//==============================================================================
-void ProjucerApplication::licenseStateChanged (const LicenseState& state)
-{
-   #if ! JUCER_ENABLE_GPL_MODE
-    if (state.type != LicenseState::Type::notLoggedIn
-     && state.type != LicenseState::Type::noLicenseChosenYet)
-   #else
-    ignoreUnused (state);
-   #endif
-    {
-        initialiseWindows (getCommandLineParameters());
-    }
-}
-
-void ProjucerApplication::doLogout()
-{
-    if (licenseController != nullptr)
-    {
-        const LicenseState& state = licenseController->getState();
-
-        if (state.type != LicenseState::Type::notLoggedIn && closeAllMainWindows())
-            licenseController->logout();
     }
 }
 
@@ -412,10 +372,6 @@ void ProjucerApplication::createFileMenu (PopupMenu& menu)
     menu.addCommandItem (commandManager.get(), CommandIDs::openInIDE);
     menu.addCommandItem (commandManager.get(), CommandIDs::saveAndOpenInIDE);
     menu.addSeparator();
-
-   #if ! JUCER_ENABLE_GPL_MODE
-    menu.addCommandItem (commandManager.get(), CommandIDs::loginLogout);
-   #endif
 
     #if ! JUCE_MAC
       menu.addCommandItem (commandManager.get(), CommandIDs::showAboutWindow);
@@ -956,8 +912,7 @@ void ProjucerApplication::getAllCommands (Array <CommandID>& commands)
                               CommandIDs::showForum,
                               CommandIDs::showAPIModules,
                               CommandIDs::showAPIClasses,
-                              CommandIDs::showTutorials,
-                              CommandIDs::loginLogout };
+                              CommandIDs::showTutorials };
 
     commands.addArray (ids, numElementsInArray (ids));
 }
@@ -1059,25 +1014,6 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
         result.setInfo ("JUCE Tutorials", "Shows the JUCE tutorials in a browser", CommandCategories::general, 0);
         break;
 
-    case CommandIDs::loginLogout:
-        {
-            bool isLoggedIn = false;
-            String username;
-
-            if (licenseController != nullptr)
-            {
-                const LicenseState state = licenseController->getState();
-                isLoggedIn = (state.type != LicenseState::Type::notLoggedIn && state.type != LicenseState::Type::GPL);
-                username = state.username;
-            }
-
-            result.setInfo (isLoggedIn
-                               ? String ("Sign out ") + username + "..."
-                               : String ("Sign in..."),
-                            "Log out of your JUCE account", CommandCategories::general, 0);
-        }
-        break;
-
     default:
         JUCEApplication::getCommandInfo (commandID, result);
         break;
@@ -1106,7 +1042,6 @@ bool ProjucerApplication::perform (const InvocationInfo& info)
         case CommandIDs::showAPIModules:            launchModulesBrowser(); break;
         case CommandIDs::showAPIClasses:            launchClassesBrowser(); break;
         case CommandIDs::showTutorials:             launchTutorialsBrowser(); break;
-        case CommandIDs::loginLogout:               doLogout(); break;
         default:                                    return JUCEApplication::perform (info);
     }
 

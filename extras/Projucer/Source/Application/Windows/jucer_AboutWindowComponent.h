@@ -25,14 +25,6 @@ class AboutWindowComponent    : public Component
 public:
     AboutWindowComponent()
     {
-        bool showPurchaseButton = false;
-
-       #if ! JUCER_ENABLE_GPL_MODE
-        if (auto* controller = ProjucerApplication::getApp().licenseController.get())
-            showPurchaseButton = (controller->getState().type != LicenseState::Type::indie
-                               && controller->getState().type != LicenseState::Type::pro);
-       #endif
-
         addAndMakeVisible (titleLabel);
         titleLabel.setJustificationType (Justification::centred);
         titleLabel.setFont (Font (35.0f, Font::FontStyleFlags::bold));
@@ -51,17 +43,6 @@ public:
 
         addAndMakeVisible (aboutButton);
         aboutButton.setTooltip ( {} );
-
-        if (showPurchaseButton)
-        {
-            addAndMakeVisible (licenseButton);
-
-            licenseButton.onClick = []
-            {
-                if (auto* controller = ProjucerApplication::getApp().licenseController.get())
-                    controller->chooseNewLicense();
-            };
-        }
     }
 
     void resized() override
@@ -96,10 +77,6 @@ public:
         versionLabel.setBounds (centreSlice.removeFromTop (40));
 
         centreSlice.removeFromTop (10);
-
-        if (licenseButton.isShowing())
-            licenseButton.setBounds (centreSlice.removeFromTop (25).reduced (25, 0));
-
         aboutButton.setBounds (centreSlice.removeFromBottom (20));
     }
 
@@ -120,7 +97,6 @@ private:
           copyrightLabel { "copyright", String (CharPointer_UTF8 ("\xc2\xa9")) + String (" 2017 ROLI Ltd.") };
 
     HyperlinkButton aboutButton { "About Us", URL ("https://juce.com") };
-    TextButton licenseButton { "Purchase License" };
 
     Rectangle<float> huckleberryLogoBounds, juceLogoBounds;
 
