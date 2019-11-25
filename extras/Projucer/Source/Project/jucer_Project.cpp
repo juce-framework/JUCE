@@ -198,18 +198,17 @@ void Project::initialiseProjectValues()
 
     displaySplashScreenValue.referTo (projectRoot, Ids::displaySplashScreen, getUndoManager(), ! ProjucerApplication::getApp().isPaidOrGPL());
     splashScreenColourValue.referTo  (projectRoot, Ids::splashScreenColour,  getUndoManager(), "Dark");
-    reportAppUsageValue.referTo      (projectRoot, Ids::reportAppUsage,      getUndoManager(), ! ProjucerApplication::getApp().isPaidOrGPL());
 
     useAppConfigValue.referTo             (projectRoot, Ids::useAppConfig,                  getUndoManager(), true);
     addUsingNamespaceToJuceHeader.referTo (projectRoot, Ids::addUsingNamespaceToJuceHeader, getUndoManager(), true);
 
     cppStandardValue.referTo       (projectRoot, Ids::cppLanguageStandard, getUndoManager(), "14");
 
-    headerSearchPathsValue.referTo (projectRoot, Ids::headerPath, getUndoManager());
-    preprocessorDefsValue.referTo  (projectRoot, Ids::defines,    getUndoManager());
-    userNotesValue.referTo         (projectRoot, Ids::userNotes,  getUndoManager());
+    headerSearchPathsValue.referTo   (projectRoot, Ids::headerPath, getUndoManager());
+    preprocessorDefsValue.referTo    (projectRoot, Ids::defines,    getUndoManager());
+    userNotesValue.referTo           (projectRoot, Ids::userNotes,  getUndoManager());
 
-    maxBinaryFileSizeValue.referTo (projectRoot, Ids::maxBinaryFileSize,         getUndoManager(), 10240 * 1024);
+    maxBinaryFileSizeValue.referTo   (projectRoot, Ids::maxBinaryFileSize,         getUndoManager(), 10240 * 1024);
 
     // this is here for backwards compatibility with old projects using the incorrect id
     if (projectRoot.hasProperty ("includeBinaryInAppConfig"))
@@ -896,29 +895,16 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
                                     "license, or are using JUCE under the GPL v3 license.");
 
         StringPairArray description;
-        description.set ("Report JUCE app usage", "This option controls the collection of usage data from users of this JUCE application.");
         description.set ("Display the JUCE splash screen", "This option controls the display of the standard JUCE splash screen.");
 
         if (ProjucerApplication::getApp().isPaidOrGPL())
         {
-            props.add (new ChoicePropertyComponent (reportAppUsageValue, String ("Report JUCE App Usage") + " (" + licenseRequiredTagline + ")"),
-                       description["Report JUCE app usage"] + " " + licenseRequiredInfo);
-
             props.add (new ChoicePropertyComponent (displaySplashScreenValue, String ("Display the JUCE Splash Screen") + " (" + licenseRequiredTagline + ")"),
                        description["Display the JUCE splash screen"] + " " + licenseRequiredInfo);
         }
         else
         {
-            StringArray options;
-            Array<var> vars;
-
-            options.add (licenseRequiredTagline);
-            vars.add (var());
-
-            props.add (new ChoicePropertyComponent (Value(), "Report JUCE App Usage", options, vars),
-                       description["Report JUCE app usage"] + " " + licenseRequiredInfo);
-
-            props.add (new ChoicePropertyComponent (Value(), "Display the JUCE Splash Screen", options, vars),
+            props.add (new ChoicePropertyComponent (Value(), "Display the JUCE Splash Screen", { licenseRequiredTagline }, {}),
                        description["Display the JUCE splash screen"] + " " + licenseRequiredInfo);
         }
     }

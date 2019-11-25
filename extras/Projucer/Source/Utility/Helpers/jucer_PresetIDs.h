@@ -43,7 +43,6 @@ namespace Ids
     DECLARE_ID (useAppConfig);
     DECLARE_ID (addUsingNamespaceToJuceHeader);
     DECLARE_ID (displaySplashScreen);
-    DECLARE_ID (reportAppUsage);
     DECLARE_ID (splashScreenColour);
     DECLARE_ID (position);
     DECLARE_ID (source);

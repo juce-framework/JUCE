@@ -114,7 +114,6 @@ public:
     String getBinaryDataNamespaceString() const          { return binaryDataNamespaceValue.get(); }
 
     bool shouldDisplaySplashScreen() const               { return displaySplashScreenValue.get(); }
-    bool shouldReportAppUsage() const                    { return reportAppUsageValue.get(); }
     String getSplashScreenColourString() const           { return splashScreenColourValue.get(); }
 
     String getCppStandardString() const                  { return cppStandardValue.get(); }
@@ -417,7 +416,7 @@ private:
     ValueTree projectRoot  { Ids::JUCERPROJECT };
 
     ValueWithDefault projectNameValue, projectUIDValue, projectLineFeedValue, projectTypeValue, versionValue, bundleIdentifierValue, companyNameValue,
-                     companyCopyrightValue, companyWebsiteValue, companyEmailValue, displaySplashScreenValue, reportAppUsageValue, splashScreenColourValue, cppStandardValue,
+                     companyCopyrightValue, companyWebsiteValue, companyEmailValue, displaySplashScreenValue, splashScreenColourValue, cppStandardValue,
                      headerSearchPathsValue, preprocessorDefsValue, userNotesValue, maxBinaryFileSizeValue, includeBinaryDataInJuceHeaderValue, binaryDataNamespaceValue,
                      compilerFlagSchemesValue, postExportShellCommandPosixValue, postExportShellCommandWinValue, useAppConfigValue, addUsingNamespaceToJuceHeader;
 

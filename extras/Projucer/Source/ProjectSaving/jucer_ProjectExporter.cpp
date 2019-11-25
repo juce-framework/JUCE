@@ -455,7 +455,6 @@ StringPairArray ProjectExporter::getAppConfigDefs() const
 {
     StringPairArray result;
     result.set ("JUCE_DISPLAY_SPLASH_SCREEN",  project.shouldDisplaySplashScreen()             ? "1" : "0");
-    result.set ("JUCE_REPORT_APP_USAGE",       project.shouldReportAppUsage()                  ? "1" : "0");
     result.set ("JUCE_USE_DARK_SPLASH_SCREEN", project.getSplashScreenColourString() == "Dark" ? "1" : "0");
     result.set ("JUCE_PROJUCER_VERSION",       "0x" + String::toHexString (ProjectInfo::versionNumber));
 

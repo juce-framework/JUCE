@@ -45,7 +45,6 @@ class JUCE_API  JUCESplashScreen  : public Component,
 {
 public:
     JUCESplashScreen (Component& parentToAddTo);
-    ~JUCESplashScreen() override;
 
     static std::unique_ptr<Drawable> getSplashScreenLogo();
 
@@ -58,7 +57,6 @@ private:
     void mouseUp (const MouseEvent&) override;
 
     std::unique_ptr<Drawable> content;
-    CriticalSection appUsageReporting;
     ComponentAnimator fader;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JUCESplashScreen)

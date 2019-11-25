@@ -452,11 +452,6 @@ private:
             << "#ifndef JUCE_DISPLAY_SPLASH_SCREEN" << newLine
             << " #define JUCE_DISPLAY_SPLASH_SCREEN "   << (project.shouldDisplaySplashScreen() ? "1" : "0") << newLine
             << "#endif" << newLine << newLine
-
-            << "#ifndef JUCE_REPORT_APP_USAGE" << newLine
-            << " #define JUCE_REPORT_APP_USAGE "        << (project.shouldReportAppUsage()      ? "1" : "0") << newLine
-            << "#endif" << newLine
-            << newLine
             << "// END SECTION A" << newLine
             << newLine
             << "#define JUCE_USE_DARK_SPLASH_SCREEN "  << (project.getSplashScreenColourString() == "Dark" ? "1" : "0") << newLine
