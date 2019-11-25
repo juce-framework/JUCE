@@ -100,7 +100,8 @@ public:
         @see loadDocument, loadFromUserSpecifiedFile
     */
     Result loadFrom (const File& fileToLoadFrom,
-                     bool showMessageOnFailure);
+                     bool showMessageOnFailure,
+                     bool showWaitCursor = true);
 
     /** Asks the user for a file and tries to load it.
 
@@ -175,12 +176,15 @@ public:
                                             filename
         @param showMessageOnFailure         if true and the write operation fails, it'll show
                                             a message box to warn the user
+        @param showWaitCursor               if true, the 'wait' mouse cursor will be showin during
+                                            saving
         @see saveIfNeededAndUserAgrees, save, saveAsInteractive
     */
     SaveResult saveAs (const File& newFile,
                        bool warnAboutOverwritingExistingFiles,
                        bool askUserForFileIfNotSpecified,
-                       bool showMessageOnFailure);
+                       bool showMessageOnFailure,
+                       bool showWaitCursor = true);
 
     /** Prompts the user for a filename and tries to save to it.
 
@@ -279,7 +283,7 @@ protected:
 private:
     //==============================================================================
     File documentFile;
-    bool changedSinceSave;
+    bool changedSinceSave = false;
     String fileExtension, fileWildcard, openFileDialogTitle, saveFileDialogTitle;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileBasedDocument)

@@ -187,7 +187,7 @@ private:
     //==============================================================================
     void* server = nullptr;
 
-    TooltipWindow tooltipWindow;
+    std::unique_ptr<TooltipWindow> tooltipWindow;
 
     AvailableModuleList jucePathModuleList, userPathsModuleList;
 

@@ -74,7 +74,7 @@ namespace
 
             project.reset (new Project (projectFile));
 
-            if (! project->loadFrom (projectFile, true))
+            if (! project->loadFrom (projectFile, true, false))
             {
                 project.reset();
                 ConsoleApplication::fail ("Failed to load the project file: " + projectFile.getFullPathName());
@@ -222,7 +222,6 @@ namespace
     //==============================================================================
     static void showStatus (const ArgumentList& args)
     {
-        hideDockIcon();
         args.checkMinNumArguments (2);
 
         LoadedProject proj (args[1]);

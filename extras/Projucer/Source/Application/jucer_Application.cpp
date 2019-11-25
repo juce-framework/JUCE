@@ -73,13 +73,10 @@ void ProjucerApplication::initialise (const String& commandLine)
                               + "MHz  Cores: " + String (SystemStats::getNumCpus())
                               + "  " + String (SystemStats::getMemorySizeInMegabytes()) + "MB");
 
-        initialiseBasics();
-
         isRunningCommandLine = commandLine.isNotEmpty()
                                 && ! commandLine.startsWith ("-NSDocumentRevisionsDebugMode");
 
-        licenseController.reset (new LicenseController);
-        licenseController->addLicenseStatusChangedCallback (this);
+        initialiseBasics();
 
         if (isRunningCommandLine)
         {
@@ -125,12 +122,10 @@ void ProjucerApplication::initialise (const String& commandLine)
 
 void ProjucerApplication::initialiseBasics()
 {
-    LookAndFeel::setDefaultLookAndFeel (&lookAndFeel);
+    settings = std::make_unique<StoredSettings>();
 
-    settings.reset (new StoredSettings());
-    ImageCache::setCacheTimeout (30 * 1000);
-    icons.reset (new Icons());
-    tooltipWindow.setMillisecondsBeforeTipAppears (1200);
+    licenseController.reset (new LicenseController);
+    licenseController->addLicenseStatusChangedCallback (this);
 }
 
 bool ProjucerApplication::initialiseLogger (const char* filePrefix)
@@ -154,6 +149,13 @@ bool ProjucerApplication::initialiseLogger (const char* filePrefix)
 
 void ProjucerApplication::handleAsyncUpdate()
 {
+    LookAndFeel::setDefaultLookAndFeel (&lookAndFeel);
+
+    ImageCache::setCacheTimeout (30 * 1000);
+    icons = std::make_unique<Icons>();
+
+    tooltipWindow = std::make_unique<TooltipWindow> (nullptr, 1200);
+
     if (licenseController != nullptr)
         licenseController->startWebviewIfNeeded();
 
@@ -236,7 +238,8 @@ void ProjucerApplication::shutdown()
     commandManager.reset();
     settings.reset();
 
-    LookAndFeel::setDefaultLookAndFeel (nullptr);
+    if (! isRunningCommandLine)
+        LookAndFeel::setDefaultLookAndFeel (nullptr);
 
     // clean up after ourselves and delete any temp project files that may have
     // been created from PIPs
