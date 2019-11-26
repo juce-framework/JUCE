@@ -1,6 +1,35 @@
 JUCE breaking changes
 =====================
 
+Develop
+=======
+
+Change
+------
+The default behaviour of the AU and AUv3 plug-in wrappers is now to call
+get/setStateInformation instead of get/setProgramStateInformation.
+
+Possible Issues
+---------------
+AudioProcessor subclasses which have overridden the default implementations of
+get/setProgramStateInformation (which simply call through to
+get/setStateInformation) may be unable to load previously saved state; state
+previously saved via a call to getProgramStateInformation will be presented
+to setStateInformation.
+
+Workaround
+----------
+Enable the JUCE_AU_WRAPPERS_SAVE_PROGRAM_STATES configuration option in the
+juce_audio_plugin_client module to preserve backwards compatibility if
+required.
+
+Rationale
+---------
+When using overridden get/setProgramStateInformation methods the previous
+behaviour of the AU and AUv3 wrappers does not correctly save and restore
+state.
+
+
 Version 5.4.5
 =============
 
