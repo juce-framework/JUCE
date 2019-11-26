@@ -1167,8 +1167,9 @@ private:
                                                   | kAudioUnitParameterFlag_HasCFNameString
                                                   | kAudioUnitParameterFlag_ValuesHaveStrings);
 
-        if (! forceLegacyParamIDs)
-            flags |= (UInt32) kAudioUnitParameterFlag_IsHighResolution;
+       #if ! JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
+        flags |= (UInt32) kAudioUnitParameterFlag_IsHighResolution;
+       #endif
 
         // Set whether the param is automatable (unnamed parameters aren't allowed to be automated).
         if (name.isEmpty() || ! parameter->isAutomatable())
@@ -1193,24 +1194,23 @@ private:
         }
         else
         {
-            if (! forceLegacyParamIDs)
+           #if ! JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
+            if (parameter->isDiscrete())
             {
-                if (parameter->isDiscrete())
-                {
-                    unit = parameter->isBoolean() ? kAudioUnitParameterUnit_Boolean : kAudioUnitParameterUnit_Indexed;
-                    auto maxValue = getMaximumParameterValue (parameter);
-                    auto numSteps = parameter->getNumSteps();
+                unit = parameter->isBoolean() ? kAudioUnitParameterUnit_Boolean : kAudioUnitParameterUnit_Indexed;
+                auto maxValue = getMaximumParameterValue (parameter);
+                auto numSteps = parameter->getNumSteps();
 
-                    // Some hosts can't handle the huge numbers of discrete parameter values created when
-                    // using the default number of steps.
-                    jassert (numSteps != AudioProcessor::getDefaultNumParameterSteps());
+                // Some hosts can't handle the huge numbers of discrete parameter values created when
+                // using the default number of steps.
+                jassert (numSteps != AudioProcessor::getDefaultNumParameterSteps());
 
-                    valueStrings.reset ([NSMutableArray new]);
+                valueStrings.reset ([NSMutableArray new]);
 
-                    for (int i = 0; i < numSteps; ++i)
-                        [valueStrings.get() addObject: juceStringToNS (parameter->getText ((float) i / maxValue, 0))];
-                }
+                for (int i = 0; i < numSteps; ++i)
+                    [valueStrings.get() addObject: juceStringToNS (parameter->getText ((float) i / maxValue, 0))];
             }
+           #endif
         }
 
         AUParameterAddress address = generateAUParameterAddress (parameter);

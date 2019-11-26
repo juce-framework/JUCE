@@ -454,7 +454,7 @@ public:
     {
         Param (JuceVST3EditController& editController, AudioProcessorParameter& p,
                Vst::ParamID vstParamID, Vst::UnitID vstUnitID,
-               bool isBypassParameter, bool forceLegacyParamIDs)
+               bool isBypassParameter)
             : owner (editController), param (p)
         {
             info.id = vstParamID;
@@ -466,7 +466,9 @@ public:
 
             info.stepCount = (Steinberg::int32) 0;
 
-            if (! forceLegacyParamIDs && param.isDiscrete())
+           #if ! JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
+            if (param.isDiscrete())
+           #endif
             {
                 const int numSteps = param.getNumSteps();
                 info.stepCount = (Steinberg::int32) (numSteps > 0 && numSteps < 0x7fffffff ? numSteps - 1 : 0);
@@ -985,12 +987,6 @@ private:
 
             if (parameters.getParameterCount() <= 0)
             {
-               #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
-                const bool forceLegacyParamIDs = true;
-               #else
-                const bool forceLegacyParamIDs = false;
-               #endif
-
                 auto n = audioProcessor->getNumParameters();
 
                 for (int i = 0; i < n; ++i)
@@ -1001,7 +997,7 @@ private:
                     auto unitID = JuceAudioProcessor::getUnitID (parameterGroup);
 
                     parameters.addParameter (new Param (*this, *juceParam, vstParamID, unitID,
-                                                        (vstParamID == audioProcessor->bypassParamID), forceLegacyParamIDs));
+                                                        (vstParamID == audioProcessor->bypassParamID)));
 
                     // is this a meter?
                     if (((juceParam->getCategory() & 0xffff0000) >> 16) == 2)
