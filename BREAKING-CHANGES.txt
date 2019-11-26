@@ -6,6 +6,29 @@ Develop
 
 Change
 ------
+Removed a workaround from the ASIOAudioIODevice::getOutputLatencyInSamples()
+and ASIOAudioIODevice::getInputLatencyInSamples() methods which was adding
+an arbitrary amount to the reported latencies to compensate for dodgy, old
+drivers.
+
+Possible Issues
+---------------
+Code which relied on these altered values may now behave differently.
+
+Workaround
+----------
+Update your code to deal with the new, correct values reported from the
+drivers directly.
+
+Rationale
+---------
+JUCE will now return the latency values as reported by the drivers without
+adding anything to them. The workaround was for old drivers and the current
+drivers should report the correct values without the need for the workaround.
+
+
+Change
+------
 The default behaviour of the AU and AUv3 plug-in wrappers is now to call
 get/setStateInformation instead of get/setProgramStateInformation.
 
