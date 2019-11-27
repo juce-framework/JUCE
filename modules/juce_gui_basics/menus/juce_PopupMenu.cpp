@@ -80,7 +80,10 @@ struct ItemComponent  : public Component
             customComp = *new HeaderItemComponent (item.text);
 
         if (customComp != nullptr)
+        {
+            setItem (*customComp, &item);
             addAndMakeVisible (*customComp);
+        }
 
         parent.addAndMakeVisible (this);
 
@@ -96,6 +99,9 @@ struct ItemComponent  : public Component
 
     ~ItemComponent() override
     {
+        if (customComp != nullptr)
+            setItem (*customComp, nullptr);
+
         removeChildComponent (customComp.get());
     }
 
@@ -1891,6 +1897,12 @@ bool PopupMenu::containsAnyActiveItems() const noexcept
 void PopupMenu::setLookAndFeel (LookAndFeel* const newLookAndFeel)
 {
     lookAndFeel = newLookAndFeel;
+}
+
+void PopupMenu::setItem (CustomComponent& c, const Item* itemToUse)
+{
+    c.item = itemToUse;
+    c.repaint();
 }
 
 //==============================================================================

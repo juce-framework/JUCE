@@ -457,6 +457,10 @@ public:
         }
 
         receiver.reset (new CommandReceiver (this, inChannel));
+
+        pfds.push_back ({ threadControl[0],  POLLIN, 0 });
+        pfds.push_back ({ receiver->getFd(), POLLIN, 0 });
+
         startThread();
 
         xembed.reset (new XEmbedComponent (windowHandle));
@@ -602,17 +606,10 @@ private:
 
             receiver->tryNextRead();
 
-            fd_set set;
-            FD_ZERO (&set);
-            FD_SET (threadControl[0],  &set);
-            FD_SET (receiver->getFd(), &set);
-
-            int max_fd = jmax (threadControl[0], receiver->getFd());
-
             int result = 0;
 
             while (result == 0 || (result < 0 && errno == EINTR))
-                result = select (max_fd + 1, &set, nullptr, nullptr, nullptr);
+                result = poll (&pfds.front(), static_cast<nfds_t> (pfds.size()), 0);
 
             if (result < 0)
                 break;
@@ -702,6 +699,7 @@ private:
     int threadControl[2];
     std::unique_ptr<XEmbedComponent> xembed;
     WaitableEvent threadBlocker;
+    std::vector<pollfd> pfds;
 };
 
 //==============================================================================

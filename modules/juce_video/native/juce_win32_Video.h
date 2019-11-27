@@ -26,7 +26,7 @@
 
 namespace VideoRenderers
 {
-    //======================================================================
+    //==============================================================================
     struct Base
     {
         virtual ~Base() {}
@@ -39,7 +39,7 @@ namespace VideoRenderers
         virtual HRESULT getVideoSize (long& videoWidth, long& videoHeight) = 0;
     };
 
-    //======================================================================
+    //==============================================================================
     struct VMR7  : public Base
     {
         VMR7() {}
@@ -99,7 +99,7 @@ namespace VideoRenderers
     };
 
 
-    //======================================================================
+    //==============================================================================
     struct EVR  : public Base
     {
         EVR() {}
@@ -390,7 +390,7 @@ private:
 
     std::unique_ptr<ComponentWatcher> componentWatcher;
 
-    //======================================================================
+    //==============================================================================
     struct DirectShowContext    : public AsyncUpdater
     {
         DirectShowContext (Pimpl& c)  : component (c)
@@ -404,7 +404,7 @@ private:
             CoUninitialize();
         }
 
-        //======================================================================
+        //==============================================================================
         void updateWindowPosition (const Rectangle<int>& newBounds)
         {
             nativeWindow->setWindowPosition (newBounds);
@@ -415,7 +415,7 @@ private:
             nativeWindow->showWindow (shouldBeVisible);
         }
 
-        //======================================================================
+        //==============================================================================
         void repaint()
         {
             if (hasVideo)
@@ -434,7 +434,7 @@ private:
                 videoRenderer->displayModeChanged();
         }
 
-        //======================================================================
+        //==============================================================================
         void peerChanged()
         {
             deleteNativeWindow();
@@ -489,7 +489,7 @@ private:
             triggerAsyncUpdate();
         }
 
-        //======================================================================
+        //==============================================================================
         Result loadFile (const String& fileOrURLPath)
         {
             jassert (state == uninitializedState);
@@ -668,7 +668,7 @@ private:
             }
         }
 
-        //======================================================================
+        //==============================================================================
         void play()
         {
             mediaControl->Run();
@@ -687,7 +687,7 @@ private:
             state = pausedState;
         }
 
-        //======================================================================
+        //==============================================================================
         Rectangle<int> getVideoSize() const noexcept
         {
             long width = 0, height = 0;
@@ -698,7 +698,7 @@ private:
             return { (int) width, (int) height };
         }
 
-        //======================================================================
+        //==============================================================================
         double getDuration() const
         {
             REFTIME duration;
@@ -744,7 +744,7 @@ private:
         State state = uninitializedState;
 
     private:
-        //======================================================================
+        //==============================================================================
         enum { graphEventID = WM_APP + 0x43f0 };
 
         Pimpl& component;
@@ -762,7 +762,7 @@ private:
 
         bool hasVideo = false, needToUpdateViewport = true, needToRecreateNativeWindow = false;
 
-        //======================================================================
+        //==============================================================================
         bool createNativeWindow()
         {
             jassert (nativeWindow == nullptr);
@@ -839,7 +839,7 @@ private:
             return false;
         }
 
-        //======================================================================
+        //==============================================================================
         struct NativeWindowClass   : private DeletedAtShutdown
         {
             bool isRegistered() const noexcept              { return atom != 0; }
@@ -899,7 +899,7 @@ private:
             JUCE_DECLARE_NON_COPYABLE (NativeWindowClass)
         };
 
-        //======================================================================
+        //==============================================================================
         struct NativeWindow
         {
             NativeWindow (HWND parentToAddTo, void* userData)

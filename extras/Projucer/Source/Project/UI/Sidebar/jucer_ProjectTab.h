@@ -27,7 +27,7 @@
 #pragma once
 
 
-//==========================================================================
+//==============================================================================
 struct ProjectSettingsComponent  : public Component,
                                    private ChangeListener
 {

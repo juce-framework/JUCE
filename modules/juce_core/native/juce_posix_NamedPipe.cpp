@@ -172,15 +172,8 @@ private:
 
     static void waitForInput (int handle, int timeoutMsecs) noexcept
     {
-        struct timeval timeout;
-        timeout.tv_sec = timeoutMsecs / 1000;
-        timeout.tv_usec = (timeoutMsecs % 1000) * 1000;
-
-        fd_set rset;
-        FD_ZERO (&rset);
-        FD_SET (handle, &rset);
-
-        select (handle + 1, &rset, nullptr, nullptr, &timeout);
+        pollfd pfd { handle, POLLIN, 0 };
+        poll (&pfd, 1, timeoutMsecs);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)

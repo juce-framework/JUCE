@@ -1248,10 +1248,12 @@ private:
                 {
                     if (auto* constrainer = editor->getConstrainer())
                     {
-                        auto minW = (double) constrainer->getMinimumWidth();
-                        auto maxW = (double) constrainer->getMaximumWidth();
-                        auto minH = (double) constrainer->getMinimumHeight();
-                        auto maxH = (double) constrainer->getMaximumHeight();
+                        auto scale = editor->getTransform().getScaleFactor();
+
+                        auto minW = (double) (constrainer->getMinimumWidth()  * scale);
+                        auto maxW = (double) (constrainer->getMaximumWidth()  * scale);
+                        auto minH = (double) (constrainer->getMinimumHeight() * scale);
+                        auto maxH = (double) (constrainer->getMaximumHeight() * scale);
 
                         auto width  = (double) (rectToCheck->right - rectToCheck->left);
                         auto height = (double) (rectToCheck->bottom - rectToCheck->top);
@@ -1517,7 +1519,7 @@ private:
                        #if JUCE_MAC
                         if (host.isWavelab() || host.isReaper())
                        #else
-                        if (host.isWavelab())
+                        if (host.isWavelab() || host.isAbletonLive())
                        #endif
                             setBounds (0, 0, w, h);
                     }
@@ -2581,7 +2583,7 @@ public:
             processContext = *data.processContext;
 
             if (juceVST3EditController != nullptr)
-                juceVST3EditController->vst3IsPlaying = (processContext.state & Vst::ProcessContext::kPlaying);
+                juceVST3EditController->vst3IsPlaying = (processContext.state & Vst::ProcessContext::kPlaying) != 0;
         }
         else
         {

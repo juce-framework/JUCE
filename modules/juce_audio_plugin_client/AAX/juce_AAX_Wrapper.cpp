@@ -1521,7 +1521,7 @@ namespace AAXClasses
                                                   : juceParameters.getParamID (audioProcessor, parameterIndex);
 
                 aaxParamIDs.add (paramID);
-                auto aaxParamID = aaxParamIDs.getReference (parameterIndex++).getCharPointer();
+                auto* aaxParamID = aaxParamIDs.getReference (parameterIndex++).toRawUTF8();
 
                 paramMap.set (AAXClasses::getAAXParamHash (aaxParamID), juceParam);
 
@@ -1910,7 +1910,7 @@ namespace AAXClasses
         inline AAX_CParamID getAAXParamIDFromJuceIndex (int index) const noexcept
         {
             if (isPositiveAndBelow (index, aaxParamIDs.size()))
-                return aaxParamIDs.getReference (index).getCharPointer();
+                return aaxParamIDs.getReference (index).toRawUTF8();
 
             return nullptr;
         }
