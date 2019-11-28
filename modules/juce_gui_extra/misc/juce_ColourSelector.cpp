@@ -250,7 +250,7 @@ class ColourSelector::ValueSelectorComp : public Component
 {
 public:
 	ValueSelectorComp(ColourSelector& cs, float &hue, float &sat, float& value, int edgeSize)
-		: owner(cs),h(hue), s(sat), v(value), edge(edgeSize)
+		: owner(cs),h(hue), s(sat), v(value),  edge(edgeSize)
 	{
 		addAndMakeVisible(marker);
 	}
