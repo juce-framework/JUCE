@@ -89,6 +89,7 @@ public:
         SteinbergCubase9,           /**< Represents Steinberg Cubase 9. */
         SteinbergCubase9_5,         /**< Represents Steinberg Cubase 9.5. */
         SteinbergCubase10,          /**< Represents Steinberg Cubase 10. */
+        SteinbergCubase10_5,        /**< Represents Steinberg Cubase 10.5. */
         SteinbergCubaseGeneric,     /**< Represents Steinberg Cubase. */
         SteinbergNuendo3,           /**< Represents Steinberg Nuendo 3. */
         SteinbergNuendo4,           /**< Represents Steinberg Nuendo 4. */
@@ -112,7 +113,8 @@ public:
 
     //==============================================================================
     /** Returns true if the host is any version of Ableton Live. */
-    bool isAbletonLive() const noexcept       { return type == AbletonLive6 || type == AbletonLive7 || type == AbletonLive8 || type == AbletonLive9 || type == AbletonLive10 || type == AbletonLiveGeneric; }
+    bool isAbletonLive() const noexcept       { return type == AbletonLive6 || type == AbletonLive7 || type == AbletonLive8
+                                                      || type == AbletonLive9 || type == AbletonLive10 || type == AbletonLiveGeneric; }
     /** Returns true if the host is Adobe Audition. */
     bool isAdobeAudition() const noexcept     { return type == AdobeAudition; }
     /** Returns true if the host is Ardour. */
@@ -120,7 +122,9 @@ public:
     /** Returns true if the host is Bitwig Studio. */
     bool isBitwigStudio() const noexcept      { return type == BitwigStudio; }
     /** Returns true if the host is any version of Steinberg Cubase. */
-    bool isCubase() const noexcept            { return type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase5Bridged || type == SteinbergCubase6 || type == SteinbergCubase7 || type == SteinbergCubase8 || type == SteinbergCubase8_5 || type == SteinbergCubase9 || type == SteinbergCubase9_5 || type == SteinbergCubase10 || type == SteinbergCubaseGeneric; }
+    bool isCubase() const noexcept            { return type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase5Bridged || type == SteinbergCubase6
+                                                      || type == SteinbergCubase7 || type == SteinbergCubase8 || type == SteinbergCubase8_5 || type == SteinbergCubase9
+                                                      || type == SteinbergCubase9_5 || type == SteinbergCubase10 || type == SteinbergCubase10_5 || type == SteinbergCubaseGeneric; }
     /** Returns true if the host is Steinberg Cubase 7 or later. */
     bool isCubase7orLater() const noexcept    { return isCubase() && ! (type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase6); }
     /** Returns true if the host is Steinberg Cubase 5 Bridged. */
@@ -230,6 +234,7 @@ public:
             case SteinbergCubase9:         return "Steinberg Cubase 9";
             case SteinbergCubase9_5:       return "Steinberg Cubase 9.5";
             case SteinbergCubase10:        return "Steinberg Cubase 10";
+            case SteinbergCubase10_5:      return "Steinberg Cubase 10.5";
             case SteinbergCubaseGeneric:   return "Steinberg Cubase";
             case SteinbergNuendo3:         return "Steinberg Nuendo 3";
             case SteinbergNuendo4:         return "Steinberg Nuendo 4";
@@ -325,6 +330,7 @@ private:
         if (hostPath.containsIgnoreCase       ("Cubase 9.app"))      return SteinbergCubase9;
         if (hostPath.containsIgnoreCase       ("Cubase 9.5.app"))    return SteinbergCubase9_5;
         if (hostPath.containsIgnoreCase       ("Cubase 10.app"))     return SteinbergCubase10;
+        if (hostPath.containsIgnoreCase       ("Cubase 10.5.app"))   return SteinbergCubase10_5;
         if (hostFilename.containsIgnoreCase   ("Cubase"))            return SteinbergCubaseGeneric;
         if (hostPath.containsIgnoreCase       ("Wavelab 7"))         return SteinbergWavelab7;
         if (hostPath.containsIgnoreCase       ("Wavelab 8"))         return SteinbergWavelab8;
@@ -374,6 +380,8 @@ private:
             || hostPath.containsIgnoreCase    ("Cubase 9.5"))        return SteinbergCubase9_5;
         if (hostFilename.containsIgnoreCase   ("Cubase9.exe")
             || hostPath.containsIgnoreCase    ("Cubase 9"))          return SteinbergCubase9;
+        if (hostFilename.containsIgnoreCase   ("Cubase10.5.exe")
+            || hostPath.containsIgnoreCase    ("Cubase 10.5"))       return SteinbergCubase10_5;
         if (hostFilename.containsIgnoreCase   ("Cubase10.exe")
             || hostPath.containsIgnoreCase    ("Cubase 10"))         return SteinbergCubase10;
         if (hostFilename.containsIgnoreCase   ("Cubase"))            return SteinbergCubaseGeneric;
