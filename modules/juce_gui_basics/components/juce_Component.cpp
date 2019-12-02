@@ -2440,8 +2440,20 @@ void Component::internalMouseExit (MouseInputSource source, Point<float> relativ
     MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseExit, me);
 }
 
+#ifdef IGNORE_MOUSE_WITH_PRO_TOOLS_AUTOMATION_MODIFIERS
+    static bool wasProToolsModifiersDownState = false;
+    bool JUCE_CALLTYPE Component::wasProToolsModifiersDown() noexcept
+    {
+        return wasProToolsModifiersDownState;
+    }
+#endif
+
 void Component::internalMouseDown (MouseInputSource source, Point<float> relativePos, Time time, float pressure)
 {
+#ifdef IGNORE_MOUSE_WITH_PRO_TOOLS_AUTOMATION_MODIFIERS
+    const auto curModifiers = ModifierKeys::getCurrentModifiers();
+    wasProToolsModifiersDownState = curModifiers.isCommandDown() && curModifiers.isCtrlDown();
+#endif
     Desktop& desktop = Desktop::getInstance();
     BailOutChecker checker (this);
 
@@ -2508,11 +2520,11 @@ void Component::internalMouseUp (MouseInputSource source, Point<float> relativeP
                                  Time time, const ModifierKeys oldModifiers, float pressure)
 {
 #ifdef IGNORE_MOUSE_WITH_PRO_TOOLS_AUTOMATION_MODIFIERS
-    // Under Pro Tools,
-    // Cmd+Ctrl+Click switch automation lane if component is enabled for automation
-    // Cmd+Ctrl+Alt+Click opens dialog for Enable/Disable automation of component.
-    if (oldModifiers.isCommandDown() && oldModifiers.isCtrlDown())
+    if (wasProToolsModifiersDown())
+    {
+        wasProToolsModifiersDownState = false;
         return;
+    }
 #endif
 
     if (flags.mouseDownWasBlocked && isCurrentlyBlockedByAnotherModalComponent())

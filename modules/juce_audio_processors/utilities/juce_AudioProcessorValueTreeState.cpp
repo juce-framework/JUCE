@@ -363,12 +363,20 @@ struct AttachedControlBase  : public AudioProcessorValueTreeState::Listener,
 
     void beginParameterChange()
     {
+#ifdef IGNORE_MOUSE_WITH_PRO_TOOLS_AUTOMATION_MODIFIERS
+        if (Component::wasProToolsModifiersDown())
+            return;
+#endif
         if (AudioProcessorParameter* p = state.getParameter (paramID))
             p->beginChangeGesture();
     }
 
     void endParameterChange()
     {
+#ifdef IGNORE_MOUSE_WITH_PRO_TOOLS_AUTOMATION_MODIFIERS
+        if (Component::wasProToolsModifiersDown())
+            return;
+#endif
         if (AudioProcessorParameter* p = state.getParameter (paramID))
             p->endChangeGesture();
     }

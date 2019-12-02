@@ -1783,6 +1783,13 @@ public:
     */
     Point<int> getMouseXYRelative() const;
 
+#ifdef IGNORE_MOUSE_WITH_PRO_TOOLS_AUTOMATION_MODIFIERS
+    // Under Pro Tools,
+    // Cmd+Ctrl+Click switch automation lane if component is enabled for automation
+    // Cmd+Ctrl+Alt+Click opens dialog for Enable/Disable automation of component.
+    static bool JUCE_CALLTYPE wasProToolsModifiersDown() noexcept;
+#endif
+
     //==============================================================================
     /** Called when this component's size has been changed.
 
