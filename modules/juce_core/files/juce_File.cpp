@@ -111,10 +111,17 @@ static String normaliseSeparators (const String& path)
     String separator (File::getSeparatorString());
     String doubleSeparator (separator + separator);
 
+    auto uncPath = normalisedPath.startsWith (doubleSeparator)
+                  && ! normalisedPath.fromFirstOccurrenceOf (doubleSeparator, false, false).startsWith (separator);
+
+    if (uncPath)
+        normalisedPath = normalisedPath.fromFirstOccurrenceOf (doubleSeparator, false, false);
+
     while (normalisedPath.contains (doubleSeparator))
          normalisedPath = normalisedPath.replace (doubleSeparator, separator);
 
-    return normalisedPath;
+    return uncPath ? doubleSeparator + normalisedPath
+                   : normalisedPath;
 }
 
 bool File::isRoot() const
