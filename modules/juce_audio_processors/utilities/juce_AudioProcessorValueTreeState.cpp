@@ -504,6 +504,10 @@ struct AttachedControlBase  : public AudioProcessorValueTreeState::Listener,
 
     void beginParameterChange()
     {
+#ifdef IGNORE_MOUSE_WITH_PRO_TOOLS_AUTOMATION_MODIFIERS
+        if (Component::wasProToolsModifiersDown())
+            return;
+#endif        
         if (auto* p = state.getParameter (paramID))
         {
             if (state.undoManager != nullptr)
@@ -515,6 +519,10 @@ struct AttachedControlBase  : public AudioProcessorValueTreeState::Listener,
 
     void endParameterChange()
     {
+#ifdef IGNORE_MOUSE_WITH_PRO_TOOLS_AUTOMATION_MODIFIERS
+        if (Component::wasProToolsModifiersDown())
+            return;
+#endif
         if (AudioProcessorParameter* p = state.getParameter (paramID))
             p->endChangeGesture();
     }
