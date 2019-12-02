@@ -1011,14 +1011,21 @@ public:
     /** Returns the group of parameters managed by this AudioProcessor. */
     const AudioProcessorParameterGroup& getParameterTree() const;
 
-    /** Sets the group of parameters managed by this AudioProcessor. */
+    /** Sets the group of parameters managed by this AudioProcessor.
+
+        Replacing the tree after your AudioProcessor has been constructed will
+        crash many hosts, so don't do it! You may, however, change parameter and
+        group names by iterating the tree returned by getParameterTree().
+        Afterwards, call updateHostDisplay() to inform the host of the changes.
+        Not all hosts support dynamic changes to parameters and group names.
+    */
     void setParameterTree (AudioProcessorParameterGroup&& newTree);
 
     /** A processor should implement this method so that the host can ask it to
         rebuild its parameter tree.
-        If a plugin never changes its parameters, it's enough to create its
-        parameters in its constructor and do nothing in this method, but some
-        may want to
+
+        For most plug-ins it's enough to simply add your parameters in the
+        constructor and leave this unimplemented.
     */
     virtual void refreshParameterList();
 
