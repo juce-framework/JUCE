@@ -1,83 +1,78 @@
 #include "juce_ARADocumentController.h"
 
-const ARA::ARAFactory* ARA::PlugIn::DocumentController::getARAFactory() noexcept
+const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFactoryConfig () noexcept
 {
     using namespace ARA;
+    using namespace PlugIn;
 
-    static ARAFactory* factory = nullptr;
-    if (factory == nullptr)
+    class JUCEARAFactoryConfig : public FactoryConfig
     {
-        factory = new SizedStruct<ARA_MEMBER_PTR_ARGS (ARAFactory, supportedPlaybackTransformationFlags)>(
-                                                        // Supported API generations
-                                                        kARAAPIGeneration_2_0_Draft, kARAAPIGeneration_2_0_Final,
-                                                        // Factory ID
-                                                        JucePlugin_ARAFactoryID,
-                                                        // ARA lifetime management functions
-                                                        ARAInitialize, ARAUninitialize,
-                                                        // Strings for user dialogs
-                                                        JucePlugin_Name, JucePlugin_Manufacturer,
-                                                        JucePlugin_ManufacturerWebsite, JucePlugin_VersionString,
-                                                        // DocumentController factory function
-                                                        ARACreateDocumentControllerWithDocumentInstance,
-                                                        // Document archive IDs
-                                                        JucePlugin_ARADocumentArchiveID,
-                                                        // Legacy document archive IDs - will be updated below
-                                                        0U, nullptr,
-                                                        // Analyzeable content types - will be updated below
-                                                        0U, nullptr,
-                                                        // Playback transformation flags - will be updated below
-                                                        0);
-
-        // Parse any legacy document archive IDs
-        String legacyDocumentArchiveIDString = JucePlugin_ARACompatibleArchiveIDs;
-        if (legacyDocumentArchiveIDString.isNotEmpty())
+    public:
+        JUCEARAFactoryConfig ()
         {
-            static StringArray legacyDocumentArchiveIDStrings = StringArray::fromLines (legacyDocumentArchiveIDString);
-            static std::vector<ARAPersistentID> legacyDocumentArchiveIDs;
-            for (auto& legacyID : legacyDocumentArchiveIDStrings)
-                legacyDocumentArchiveIDs.push_back (legacyID.toRawUTF8());
+            String legacyDocumentArchiveIDString = JucePlugin_ARACompatibleArchiveIDs;
+            if (legacyDocumentArchiveIDString.isNotEmpty ())
+            {
+                legacyDocumentArchiveIDStrings = StringArray::fromLines (legacyDocumentArchiveIDString);
+                for (auto& legacyID : legacyDocumentArchiveIDStrings)
+                    legacyDocumentArchiveIDs.push_back (legacyID.toRawUTF8 ());
+            }
+            
+            // Update analyzeable content types
+            static ARAContentType araContentVars[]{
+                kARAContentTypeNotes,
+                kARAContentTypeTempoEntries,
+                kARAContentTypeBarSignatures,
+                kARAContentTypeStaticTuning,
+                kARAContentTypeDynamicTuningOffsets,
+                kARAContentTypeKeySignatures,
+                kARAContentTypeSheetChords
+            };
+            for (size_t i = 0; i < sizeof (araContentVars) / sizeof (ARAContentType); ++i)
+            {
+                if (JucePlugin_ARAContentTypes & (1 << i))
+                    analyzeableContentTypes.push_back (araContentVars[i]);
+            }
 
-            factory->compatibleDocumentArchiveIDs = legacyDocumentArchiveIDs.data();
-            factory->compatibleDocumentArchiveIDsCount = legacyDocumentArchiveIDs.size();
+            // Update playback transformation flags
+            const static ARAPlaybackTransformationFlags araPlaybackTransformations[]{
+                kARAPlaybackTransformationTimestretch,
+                kARAPlaybackTransformationTimestretchReflectingTempo,
+                kARAPlaybackTransformationContentBasedFadeAtTail,
+                kARAPlaybackTransformationContentBasedFadeAtHead
+            };
+
+            supportedPlaybackTransformationFlags = 0;
+            for (size_t i = 0; i < sizeof (araPlaybackTransformations) / sizeof (ARAPlaybackTransformationFlags); ++i)
+            {
+                if (JucePlugin_ARATransformationFlags & (1 << i))
+                    supportedPlaybackTransformationFlags |= araPlaybackTransformations[i];
+            }
         }
 
-        // Update analyzeable content types
-        static std::vector<ARAContentType> contentTypes;
-        static ARAContentType araContentVars[]{
-            kARAContentTypeNotes,
-            kARAContentTypeTempoEntries,
-            kARAContentTypeBarSignatures,
-            kARAContentTypeStaticTuning,
-            kARAContentTypeDynamicTuningOffsets,
-            kARAContentTypeKeySignatures,
-            kARAContentTypeSheetChords
-        };
-        for (size_t i = 0; i < sizeof (araContentVars) / sizeof (ARAContentType); ++i)
-        {
-            if (JucePlugin_ARAContentTypes & (1 << i))
-                contentTypes.push_back (araContentVars[i]);
-        }
+        const char* getFactoryID () const noexcept override { return JucePlugin_ARAFactoryID; }
+        const char* getPlugInName () const noexcept override { return JucePlugin_Name; }
+        const char* getManufacturerName () const noexcept override { return JucePlugin_Manufacturer; }
+        const char* getInformationURL () const noexcept override { return JucePlugin_ManufacturerWebsite; }
+        const char* getVersion () const noexcept override { return JucePlugin_VersionString; }
 
-        factory->analyzeableContentTypesCount = (ARASize) contentTypes.size();
-        factory->analyzeableContentTypes = contentTypes.data();
+        virtual const char* getDocumentArchiveID () const noexcept override { return JucePlugin_ARADocumentArchiveID; }
+        virtual ARASize getCompatibleDocumentArchiveIDsCount () const noexcept override { return legacyDocumentArchiveIDs.size(); }
+        virtual const ARAPersistentID* getCompatibleDocumentArchiveIDs () const noexcept override { return legacyDocumentArchiveIDs.empty () ? nullptr : legacyDocumentArchiveIDs.data(); }
 
-        // Update playback transformation flags
-        static ARAPlaybackTransformationFlags araPlaybackTransformations[]{
-            kARAPlaybackTransformationTimestretch,
-            kARAPlaybackTransformationTimestretchReflectingTempo,
-            kARAPlaybackTransformationContentBasedFadeAtTail,
-            kARAPlaybackTransformationContentBasedFadeAtHead
-        };
+        virtual ARASize getAnalyzeableContentTypesCount () const noexcept override { return analyzeableContentTypes.size(); }
+        virtual const ARAContentType* getAnalyzeableContentTypes () const noexcept override { return analyzeableContentTypes.empty () ? nullptr : analyzeableContentTypes.data(); }
 
-        factory->supportedPlaybackTransformationFlags = 0;
-        for (size_t i = 0; i < sizeof (araPlaybackTransformations) / sizeof (ARAPlaybackTransformationFlags); ++i)
-        {
-            if (JucePlugin_ARATransformationFlags & (1 << i))
-                factory->supportedPlaybackTransformationFlags |= araPlaybackTransformations[i];
-        }
-    }
+        virtual ARAPlaybackTransformationFlags getSupportedPlaybackTransformationFlags () const noexcept override { return kARAPlaybackTransformationNoChanges; }
 
-    return factory;
+    private:
+        StringArray legacyDocumentArchiveIDStrings;
+        std::vector<ARAPersistentID> legacyDocumentArchiveIDs;
+        std::vector<ARAContentType> analyzeableContentTypes;
+        ARAPlaybackTransformationFlags supportedPlaybackTransformationFlags;
+    };
+
+    return new JUCEARAFactoryConfig ();
 }
 
 namespace juce
