@@ -24,7 +24,6 @@ const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFacto
                 kARAContentTypeTempoEntries,
                 kARAContentTypeBarSignatures,
                 kARAContentTypeStaticTuning,
-                kARAContentTypeDynamicTuningOffsets,
                 kARAContentTypeKeySignatures,
                 kARAContentTypeSheetChords
             };
