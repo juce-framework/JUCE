@@ -275,18 +275,18 @@ private:
                 tempBufferDouble.makeCopyOf (buffer, true);
 
                 if (node->isBypassed())
-                    processor.processBlockBypassed (tempBufferDouble, midiMessages);
+                    node->processBlockBypassed (tempBufferDouble, midiMessages);
                 else
-                    processor.processBlock (tempBufferDouble, midiMessages);
+                    node->processBlock (tempBufferDouble, midiMessages);
 
                 buffer.makeCopyOf (tempBufferDouble, true);
             }
             else
             {
                 if (node->isBypassed())
-                    processor.processBlockBypassed (buffer, midiMessages);
+                    node->processBlockBypassed (buffer, midiMessages);
                 else
-                    processor.processBlock (buffer, midiMessages);
+                    node->processBlock (buffer, midiMessages);
             }
         }
 
@@ -295,18 +295,18 @@ private:
             if (processor.isUsingDoublePrecision())
             {
                 if (node->isBypassed())
-                    processor.processBlockBypassed (buffer, midiMessages);
+                    node->processBlockBypassed (buffer, midiMessages);
                 else
-                    processor.processBlock (buffer, midiMessages);
+                    node->processBlock (buffer, midiMessages);
             }
             else
             {
                 tempBufferFloat.makeCopyOf (buffer, true);
 
                 if (node->isBypassed())
-                    processor.processBlockBypassed (tempBufferFloat, midiMessages);
+                    node->processBlockBypassed (tempBufferFloat, midiMessages);
                 else
-                    processor.processBlock (tempBufferFloat, midiMessages);
+                    node->processBlock (tempBufferFloat, midiMessages);
 
                 buffer.makeCopyOf (tempBufferFloat, true);
             }
@@ -810,7 +810,6 @@ void AudioProcessorGraph::Node::prepare (double newSampleRate, int newBlockSize,
 
     if (! isPrepared)
     {
-        isPrepared = true;
         setParentGraph (graph);
 
         // try to align the precision of the processor and the graph
@@ -819,6 +818,10 @@ void AudioProcessorGraph::Node::prepare (double newSampleRate, int newBlockSize,
 
         processor->setRateAndBufferSizeDetails (newSampleRate, newBlockSize);
         processor->prepareToPlay (newSampleRate, newBlockSize);
+
+        // This may be checked from other threads that haven't taken the processorLock,
+        // so we need to leave it until the processor has been completely prepared
+        isPrepared = true;
     }
 }
 
