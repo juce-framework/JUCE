@@ -15,6 +15,7 @@ DocumentView::DocumentView (ARAEditorView* ev, const AudioPlayHead::CurrentPosit
       playbackRegionsViewport (*this),
       playHeadView (*this),
       timeRangeSelectionView (*this),
+      rulersView (std::make_unique<RulersView> (*this)),
       pixelsPerSecond (lastPixelsPerSecond),
       positionInfo (posInfo)
 {
@@ -34,7 +35,6 @@ DocumentView::DocumentView (ARAEditorView* ev, const AudioPlayHead::CurrentPosit
     trackHeadersViewport.setViewedComponent (&trackHeadersView, false);
     addAndMakeVisible (trackHeadersViewport);
 
-    rulersView.reset (new RulersView (*this));
     rulersViewport.setScrollBarsShown (false, false, false, false);
     rulersViewport.setViewedComponent (rulersView.get(), false);
     addAndMakeVisible (rulersViewport);
