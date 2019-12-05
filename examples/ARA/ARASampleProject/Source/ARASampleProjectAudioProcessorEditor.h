@@ -26,7 +26,6 @@ private:
 
     TextButton followPlayHeadButton;
     TextButton onlySelectedTracksButton;
-    Label horizontalZoomLabel;
     Label playheadLinearPositionLabel, playheadMusicalPositionLabel;
     TextButton horizontalZoomInButton, horizontalZoomOutButton;
 

@@ -1,10 +1,8 @@
 #include "ARASampleProjectAudioProcessorEditor.h"
 #include "ARA_Library/Utilities/ARATimelineConversion.h"
 
-static const Identifier trackHeadersVisibleId = "track_headers_visible";
 static const Identifier showOnlySelectedId = "show_only_selected";
 static const Identifier scrollFollowsPlayHeadId = "scroll_follows_playhead";
-
 static ValueTree editorDefaultSettings (JucePlugin_Name "_defaultEditorSettings");
 
 //==============================================================================
@@ -15,11 +13,8 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
     if (isARAEditorView())
     {
         documentView.reset (new DocumentView (getARAEditorView(), p.getLastKnownPositionInfo()));
-
-        // if no defaults yet, construct defaults based on hard-coded defaults from DocumentView
         documentView->setShowOnlySelectedRegionSequences (editorDefaultSettings.getProperty (showOnlySelectedId, false));
         documentView->setScrollFollowsPlayHead (editorDefaultSettings.getProperty (scrollFollowsPlayHeadId, documentView->isScrollFollowingPlayHead()));
-
         // TODO JUCE_ARA hotfix for Unicode chord symbols, see https://forum.juce.com/t/embedding-unicode-string-literals-in-your-cpp-files/12600/7
         documentView->getLookAndFeel().setDefaultSansSerifTypefaceName("Arial Unicode MS");
         documentView->setIsRulersVisible (true);
@@ -46,9 +41,6 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         };
         addAndMakeVisible (followPlayHeadButton);
 
-        horizontalZoomLabel.setText ("H:", dontSendNotification);
-        addAndMakeVisible (horizontalZoomLabel);
-
         horizontalZoomInButton.setButtonText("+");
         horizontalZoomOutButton.setButtonText("-");
         constexpr double zoomStepFactor = 1.5;
@@ -63,7 +55,6 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         addAndMakeVisible (horizontalZoomInButton);
         addAndMakeVisible (horizontalZoomOutButton);
 
-        // show playhead position
         playheadLinearPositionLabel.setJustificationType (Justification::centred);
         playheadMusicalPositionLabel.setJustificationType (Justification::centred);
         addAndMakeVisible (playheadMusicalPositionLabel);
@@ -99,8 +90,7 @@ void ARASampleProjectAudioProcessorEditor::resized()
         followPlayHeadButton.setBounds (onlySelectedTracksButton.getRight(), getHeight() - kStatusBarHeight, 120, kStatusBarHeight);
         horizontalZoomInButton.setBounds (getWidth() - kStatusBarHeight, getHeight() - kStatusBarHeight, kStatusBarHeight, kStatusBarHeight);
         horizontalZoomOutButton.setBounds (horizontalZoomInButton.getBounds().translated (-kStatusBarHeight, 0));
-        horizontalZoomLabel.setBounds (horizontalZoomOutButton.getBounds().translated (-kStatusBarHeight, 0));
-        playheadMusicalPositionLabel.setBounds ((horizontalZoomLabel.getX() + followPlayHeadButton.getRight()) / 2, horizontalZoomLabel.getY(), kPositionLabelWidth, kStatusBarHeight);
+        playheadMusicalPositionLabel.setBounds ((horizontalZoomOutButton.getX() + followPlayHeadButton.getRight()) / 2, horizontalZoomOutButton.getY(), kPositionLabelWidth, kStatusBarHeight);
         playheadLinearPositionLabel.setBounds (playheadMusicalPositionLabel.getBounds().translated (-kPositionLabelWidth, 0));
     }
 }
