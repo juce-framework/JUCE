@@ -191,7 +191,7 @@ void RulersView::paint (juce::Graphics& g)
         const auto endInSeconds = tempoConverter.getTimeForQuarter (lastPaintedPosition.ppqLoopEnd);
         const int startX = documentView.getPlaybackRegionsViewsXForTime (startInSeconds);
         const int endX = documentView.getPlaybackRegionsViewsXForTime (endInSeconds);
-        g.setColour (lastPaintedPosition.isLooping ? Colours::skyblue.withAlpha (0.3f) : Colours::white.withAlpha (0.3f));
+        g.setColour (lastPaintedPosition.isLooping ? Colours::skyblue.withAlpha (0.3f) : Colours::grey.withAlpha (0.3f));
         g.fillRect (startX, bounds.getY(), endX - startX, bounds.getHeight());
     }
 

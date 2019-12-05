@@ -315,16 +315,8 @@ void DocumentView::TimeRangeSelectionView::paint (juce::Graphics& g)
     {
         const int startPixel = documentView.getPlaybackRegionsViewsXForTime (selection.getTimeRange()->start);
         const int endPixel = documentView.getPlaybackRegionsViewsXForTime (selection.getTimeRange()->start + selection.getTimeRange()->duration);
-        const int pixelDuration = endPixel - startPixel;
-        int y = 0;
-        g.setColour (juce::Colours::white.withAlpha (0.7f));
-        for (const auto regionSequenceView : documentView.regionSequenceViews)
-        {
-            const auto regionSequence = regionSequenceView->getRegionSequence();
-            if (regionSequence != nullptr && ARA::contains (selection.getRegionSequences(), regionSequence))
-                g.fillRect (startPixel, y, pixelDuration, kTrackHeight);
-            y += kTrackHeight;
-        }
+        g.setColour (juce::Colours::yellow.withAlpha (0.2f));
+        g.fillRect (startPixel, 0, endPixel - startPixel, getHeight());
     }
 }
 
