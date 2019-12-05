@@ -27,7 +27,6 @@ class DocumentView  : public Component,
 {
 public:
     DocumentView (ARAEditorView* editorView, const AudioPlayHead::CurrentPositionInfo& positionInfo);
-
     ~DocumentView();
 
     // ARAEditorView::Listener overrides
@@ -63,12 +62,9 @@ public:
     // flag that the time range covered by the playback regions needs to be recalculated
     void invalidateTimeRange();
 
-    // DocumentView states
+    // view configuration
     void setShowOnlySelectedRegionSequences (bool newVal);
     bool isShowingOnlySelectedRegionSequences() { return showOnlySelectedRegionSequences; }
-
-    void setIsRulersVisible (bool shouldBeVisible);
-    bool isRulersVisible() const { return rulersViewport.isVisible(); }
 
     void setScrollFollowsPlayHead (bool followPlayHead) { scrollFollowsPlayHead = followPlayHead; }
     bool isScrollFollowingPlayHead() const { return scrollFollowsPlayHead; }

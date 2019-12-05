@@ -17,7 +17,6 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         documentView->setScrollFollowsPlayHead (editorDefaultSettings.getProperty (scrollFollowsPlayHeadId, documentView->isScrollFollowingPlayHead()));
         // TODO JUCE_ARA hotfix for Unicode chord symbols, see https://forum.juce.com/t/embedding-unicode-string-literals-in-your-cpp-files/12600/7
         documentView->getLookAndFeel().setDefaultSansSerifTypefaceName("Arial Unicode MS");
-        documentView->setIsRulersVisible (true);
         addAndMakeVisible (documentView.get());
 
         onlySelectedTracksButton.setButtonText ("Selected Tracks Only");

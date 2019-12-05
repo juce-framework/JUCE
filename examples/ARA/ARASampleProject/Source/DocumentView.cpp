@@ -139,13 +139,6 @@ void DocumentView::setShowOnlySelectedRegionSequences (bool newVal)
     invalidateRegionSequenceViews();
 }
 
-void DocumentView::setIsRulersVisible (bool shouldBeVisible)
-{
-    rulersViewport.setVisible (shouldBeVisible);
-    if (getParentComponent() != nullptr)
-        resized();
-}
-
 void DocumentView::zoomBy (double factor)
 {
     pixelsPerSecond *= factor;
