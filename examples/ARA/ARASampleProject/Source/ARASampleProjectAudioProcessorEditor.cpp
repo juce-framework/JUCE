@@ -1,13 +1,6 @@
 #include "ARASampleProjectAudioProcessorEditor.h"
 #include "ARA_Library/Utilities/ARATimelineConversion.h"
 
-constexpr int kStatusBarHeight = 20;
-constexpr int kPositionLabelWidth = 100;
-constexpr int kMinWidth = 500;
-constexpr int kWidth = 1000;
-constexpr int kMinHeight = 200;
-constexpr int kHeight = 600;
-
 static const Identifier trackHeadersVisibleId = "track_headers_visible";
 static const Identifier showOnlySelectedId = "show_only_selected";
 static const Identifier scrollFollowsPlayHeadId = "scroll_follows_playhead";
@@ -78,8 +71,8 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
         startTimerHz (20);
     }
 
-    setSize (kWidth, kHeight);
-    setResizeLimits (kMinWidth, kMinHeight, 32768, 32768);
+    setSize (1000, 600);
+    setResizeLimits (500, 200, 32768, 32768);
     setResizable (true, false);
 }
 
@@ -99,6 +92,8 @@ void ARASampleProjectAudioProcessorEditor::resized()
 {
     if (isARAEditorView())
     {
+        constexpr int kStatusBarHeight = 20;
+        constexpr int kPositionLabelWidth = 100;
         documentView->setBounds (0, 0, getWidth(), getHeight() - kStatusBarHeight);
         onlySelectedTracksButton.setBounds (0, getHeight() - kStatusBarHeight, 120, kStatusBarHeight);
         followPlayHeadButton.setBounds (onlySelectedTracksButton.getRight(), getHeight() - kStatusBarHeight, 120, kStatusBarHeight);
