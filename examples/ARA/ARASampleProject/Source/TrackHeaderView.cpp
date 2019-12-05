@@ -51,8 +51,6 @@ void TrackHeaderView::paint (juce::Graphics& g)
 //==============================================================================
 void TrackHeaderView::onNewSelection (const ARA::PlugIn::ViewSelection& viewSelection)
 {
-    jassert (regionSequence != nullptr);
-
     bool selected = ARA::contains (viewSelection.getRegionSequences(), regionSequence);
     if (selected != isSelected)
     {
@@ -61,16 +59,12 @@ void TrackHeaderView::onNewSelection (const ARA::PlugIn::ViewSelection& viewSele
     }
 }
 
-void TrackHeaderView::didUpdateRegionSequenceProperties (ARARegionSequence* sequence)
+void TrackHeaderView::didUpdateRegionSequenceProperties (ARARegionSequence* /*regionSequence*/)
 {
-    jassert (regionSequence == sequence);
-
     repaint();
 }
 
-void TrackHeaderView::willDestroyRegionSequence (ARARegionSequence* sequence)
+void TrackHeaderView::willDestroyRegionSequence (ARARegionSequence* /*regionSequence*/)
 {
-    jassert (regionSequence == sequence);
-
     detachFromRegionSequence();
 }

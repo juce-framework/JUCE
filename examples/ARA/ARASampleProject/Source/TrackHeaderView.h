@@ -21,8 +21,8 @@ public:
     void onNewSelection (const ARA::PlugIn::ViewSelection& viewSelection) override;
 
     // ARARegionSequence::Listener overrides
-    void didUpdateRegionSequenceProperties (ARARegionSequence* sequence) override;
-    void willDestroyRegionSequence (ARARegionSequence* sequence) override;
+    void didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) override;
+    void willDestroyRegionSequence (ARARegionSequence* regionSequence) override;
 
 private:
     void detachFromRegionSequence();

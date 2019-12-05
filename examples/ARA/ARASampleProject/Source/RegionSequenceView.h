@@ -26,9 +26,9 @@ public:
     void setRegionsViewBoundsByYRange (int y, int height);
 
     // ARARegionSequence::Listener overrides
-    void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* sequence, ARAPlaybackRegion* playbackRegion) override;
-    void didAddPlaybackRegionToRegionSequence (ARARegionSequence* sequence, ARAPlaybackRegion* playbackRegion) override;
-    void willDestroyRegionSequence (ARARegionSequence* sequence) override;
+    void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) override;
+    void didAddPlaybackRegionToRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) override;
+    void willDestroyRegionSequence (ARARegionSequence* regionSequence) override;
     void willUpdateRegionSequenceProperties (ARARegionSequence* regionSequence, ARARegionSequence::PropertiesPtr newProperties) override;
 
 private:

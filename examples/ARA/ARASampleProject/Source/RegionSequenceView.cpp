@@ -54,10 +54,8 @@ void RegionSequenceView::setRegionsViewBoundsByYRange (int y, int height)
 }
 
 //==============================================================================
-void RegionSequenceView::willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* sequence, ARAPlaybackRegion* playbackRegion)
+void RegionSequenceView::willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* /*regionSequence*/, ARAPlaybackRegion* playbackRegion)
 {
-    jassert (regionSequence == sequence);
-
     for (int i = 0; i < playbackRegionViews.size(); ++i)
     {
         if (playbackRegionViews[i]->getPlaybackRegion() == playbackRegion)
@@ -70,27 +68,22 @@ void RegionSequenceView::willRemovePlaybackRegionFromRegionSequence (ARARegionSe
     documentView.invalidateRegionSequenceViews();
 }
 
-void RegionSequenceView::didAddPlaybackRegionToRegionSequence (ARARegionSequence* sequence, ARAPlaybackRegion* playbackRegion)
+void RegionSequenceView::didAddPlaybackRegionToRegionSequence (ARARegionSequence* /*regionSequence*/, ARAPlaybackRegion* playbackRegion)
 {
-    jassert (regionSequence == sequence);
-
     addRegionSequenceViewAndMakeVisible (playbackRegion);
 
     documentView.invalidateRegionSequenceViews();
 }
 
-void RegionSequenceView::willDestroyRegionSequence (ARARegionSequence* sequence)
+void RegionSequenceView::willDestroyRegionSequence (ARARegionSequence* /*regionSequence*/)
 {
-    jassert (regionSequence == sequence);
-
     detachFromRegionSequence();
 
     documentView.invalidateRegionSequenceViews();
 }
 
-void RegionSequenceView::willUpdateRegionSequenceProperties (ARARegionSequence* sequence, ARARegionSequence::PropertiesPtr newProperties)
+void RegionSequenceView::willUpdateRegionSequenceProperties (ARARegionSequence* /*regionSequence*/, ARARegionSequence::PropertiesPtr newProperties)
 {
-    jassert (regionSequence == sequence);
     if (newProperties->color != regionSequence->getColor())
     {
         // repaints any PlaybackRegion that should follow RegionSequence color

@@ -92,10 +92,8 @@ void PlaybackRegionView::onNewSelection (const ARA::PlugIn::ViewSelection& viewS
     }
 }
 
-void PlaybackRegionView::didEndEditing (ARADocument* document)
+void PlaybackRegionView::didEndEditing (ARADocument* /*document*/)
 {
-    jassert (document == playbackRegion->getRegionSequence()->getDocument());
-
     // our reader will pick up any changes in audio samples or region time range
     if (playbackRegionReader ==  nullptr || ! playbackRegionReader->isValid())
     {
@@ -105,19 +103,15 @@ void PlaybackRegionView::didEndEditing (ARADocument* document)
     }
 }
 
-void PlaybackRegionView::willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable)
+void PlaybackRegionView::willEnableAudioSourceSamplesAccess (ARAAudioSource* /*audioSource*/, bool enable)
 {
-    jassert (audioSource == playbackRegion->getAudioModification()->getAudioSource());
-
     // AudioThumbnail does not handle "pausing" access, so we clear it if any data is still pending, and recreate it when access is reenabled
     if (! enable && ! audioThumb.isFullyLoaded())
         destroyPlaybackRegionReader();
 }
 
-void PlaybackRegionView::didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable)
+void PlaybackRegionView::didEnableAudioSourceSamplesAccess (ARAAudioSource* /*audioSource*/, bool enable)
 {
-    jassert (audioSource == playbackRegion->getAudioModification()->getAudioSource());
-
     // check whether we need to recreate the thumb data because it hadn't been loaded completely when access was disabled
     // (if we're inside a host edit cycle, we'll wait until it has completed to catch all changes in one update)
     if (enable && playbackRegionReader == nullptr && ! playbackRegion->getDocumentController()->isHostEditingDocument())
@@ -128,32 +122,24 @@ void PlaybackRegionView::didEnableAudioSourceSamplesAccess (ARAAudioSource* audi
 
 void PlaybackRegionView::willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARAAudioSource::PropertiesPtr newProperties)
 {
-    jassert (audioSource == playbackRegion->getAudioModification()->getAudioSource());
-
     if (playbackRegion->getName() == nullptr && playbackRegion->getAudioModification()->getName() == nullptr && newProperties->name != audioSource->getName())
         repaint();
 }
 
 void PlaybackRegionView::willUpdateAudioModificationProperties (ARAAudioModification* audioModification, ARAAudioModification::PropertiesPtr newProperties)
 {
-    jassert (audioModification == playbackRegion->getAudioModification());
-
     if (playbackRegion->getName() == nullptr && newProperties->name != audioModification->getName())
         repaint();
 }
 
-void PlaybackRegionView::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* region, ARAPlaybackRegion::PropertiesPtr newProperties)
+void PlaybackRegionView::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* /*playbackRegion*/, ARAPlaybackRegion::PropertiesPtr newProperties)
 {
-    jassert (playbackRegion == region);
-
     if (playbackRegion->getName() != newProperties->name || playbackRegion->getColor() != newProperties->color)
         repaint();
 }
 
-void PlaybackRegionView::didUpdatePlaybackRegionContent (ARAPlaybackRegion* region, ARAContentUpdateScopes scopeFlags)
+void PlaybackRegionView::didUpdatePlaybackRegionContent (ARAPlaybackRegion* /*playbackRegion*/, ARAContentUpdateScopes scopeFlags)
 {
-    jassert (playbackRegion == region);
-
     // Our reader catches this too, but we only check for its validity after host edits.
     // If the update is triggered inside the plug-in, we need to update the view from this call
     // (unless we're within a host edit already).

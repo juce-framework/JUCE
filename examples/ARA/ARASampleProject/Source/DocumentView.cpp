@@ -67,10 +67,8 @@ void DocumentView::onHideRegionSequences (std::vector<ARARegionSequence*> const&
     invalidateRegionSequenceViews();
 }
 
-void DocumentView::didEndEditing (ARADocument* document)
+void DocumentView::didEndEditing (ARADocument* /*document*/)
 {
-    jassert (document == getDocument());
-
     if (regionSequenceViewsAreInvalid)
         rebuildRegionSequenceViews();
 
@@ -78,17 +76,13 @@ void DocumentView::didEndEditing (ARADocument* document)
         calculateTimeRange();
 }
 
-void DocumentView::didAddRegionSequenceToDocument (ARADocument* document, ARARegionSequence* /*regionSequence*/)
+void DocumentView::didAddRegionSequenceToDocument (ARADocument* /*document*/, ARARegionSequence* /*regionSequence*/)
 {
-    jassert (document == getDocument());
-
     invalidateRegionSequenceViews();
 }
 
-void DocumentView::didReorderRegionSequencesInDocument (ARADocument* document)
+void DocumentView::didReorderRegionSequencesInDocument (ARADocument* /*document*/)
 {
-    jassert (document == getDocument());
-
     invalidateRegionSequenceViews();
 }
 
@@ -213,7 +207,7 @@ void DocumentView::resized()
 }
 
 //==============================================================================
-void DocumentView::timerCallback ()
+void DocumentView::timerCallback()
 {
     if (lastReportedPosition.timeInSeconds != positionInfo.timeInSeconds)
     {
