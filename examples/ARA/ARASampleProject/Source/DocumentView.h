@@ -14,7 +14,6 @@ class PlaybackRegionView;
     the ARA host selection and playback state. 
 
  TODO JUCE_ARA:
-    - limit zoom to avoid integer overflow with long documents and high zoom level.
     - maybe add option to show regions including their head and tail?
       (for crossfades mostly, renderer will already provide proper samples,
        but time ranges must be adjusted for this and updated if head/tail change)
@@ -30,11 +29,6 @@ public:
     DocumentView (ARAEditorView* editorView, const AudioPlayHead::CurrentPositionInfo& positionInfo);
 
     ~DocumentView();
-
-    // child view creation functions
-    virtual PlaybackRegionView* createViewForPlaybackRegion (ARAPlaybackRegion*);
-    virtual RegionSequenceView* createViewForRegionSequence (ARARegionSequence*);
-    virtual TrackHeaderView* createHeaderViewForRegionSequence (ARARegionSequence*);
 
     // ARAEditorView::Listener overrides
     void onNewSelection (const ARA::PlugIn::ViewSelection& viewSelection) override;

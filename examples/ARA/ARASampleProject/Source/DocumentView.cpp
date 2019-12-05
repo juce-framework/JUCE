@@ -54,22 +54,6 @@ DocumentView::~DocumentView()
 }
 
 //==============================================================================
-PlaybackRegionView* DocumentView::createViewForPlaybackRegion (ARAPlaybackRegion* playbackRegion)
-{
-    return new PlaybackRegionView (*this, playbackRegion);
-}
-
-TrackHeaderView* DocumentView::createHeaderViewForRegionSequence (ARARegionSequence* regionSequence)
-{
-    return new TrackHeaderView (getARAEditorView(), regionSequence);
-}
-
-RegionSequenceView* DocumentView::createViewForRegionSequence (ARARegionSequence* regionSequence)
-{
-    return new RegionSequenceView (*this, regionSequence);
-}
-
-//==============================================================================
 void DocumentView::onNewSelection (const ARA::PlugIn::ViewSelection& /*viewSelection*/)
 {
     if (showOnlySelectedRegionSequences)
@@ -263,14 +247,14 @@ void DocumentView::rebuildRegionSequenceViews()
     if (showOnlySelectedRegionSequences)
     {
         for (auto selectedSequence : getARAEditorView()->getViewSelection().getEffectiveRegionSequences<ARARegionSequence>())
-            regionSequenceViews.add (createViewForRegionSequence (selectedSequence));
+            regionSequenceViews.add (new RegionSequenceView (*this, selectedSequence));
     }
     else    // show all RegionSequences of Document...
     {
         for (auto regionSequence : getDocument()->getRegionSequences<ARARegionSequence>())
         {
             if (! ARA::contains (getARAEditorView()->getHiddenRegionSequences(), regionSequence))
-                regionSequenceViews.add (createViewForRegionSequence (regionSequence));
+                regionSequenceViews.add (new RegionSequenceView (*this, regionSequence));
         }
     }
 

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "JuceHeader.h"
+#include "TrackHeaderView.h"
 
 class DocumentView;
-class TrackHeaderView;
 class PlaybackRegionView;
 
 //==============================================================================
@@ -39,7 +39,7 @@ private:
     DocumentView& documentView;
     ARARegionSequence* regionSequence;
 
-    std::unique_ptr<TrackHeaderView> trackHeaderView;
+    TrackHeaderView trackHeaderView;
     OwnedArray<PlaybackRegionView> playbackRegionViews;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RegionSequenceView)

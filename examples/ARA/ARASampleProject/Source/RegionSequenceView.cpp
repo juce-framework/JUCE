@@ -7,11 +7,11 @@
 RegionSequenceView::RegionSequenceView (DocumentView& docView, ARARegionSequence* sequence)
     : documentView (docView),
       regionSequence (sequence),
-      trackHeaderView (docView.createHeaderViewForRegionSequence (regionSequence))
+      trackHeaderView (docView.getARAEditorView(), regionSequence)
 {
     regionSequence->addListener (this);
 
-    documentView.getTrackHeadersView().addAndMakeVisible (*trackHeaderView);
+    documentView.getTrackHeadersView().addAndMakeVisible (trackHeaderView);
 
     for (auto playbackRegion : regionSequence->getPlaybackRegions<ARAPlaybackRegion>())
         addRegionSequenceViewAndMakeVisible (playbackRegion);
@@ -24,7 +24,7 @@ RegionSequenceView::~RegionSequenceView()
 
 void RegionSequenceView::addRegionSequenceViewAndMakeVisible (ARAPlaybackRegion* playbackRegion)
 {
-    auto view = documentView.createViewForPlaybackRegion (playbackRegion);
+    auto view = new PlaybackRegionView (documentView, playbackRegion);
     playbackRegionViews.add (view);
     documentView.getPlaybackRegionsView().addAndMakeVisible (view);
 }
@@ -42,7 +42,7 @@ void RegionSequenceView::detachFromRegionSequence()
 //==============================================================================
 void RegionSequenceView::setRegionsViewBoundsByYRange (int y, int height)
 {
-    trackHeaderView->setBounds (0, y, trackHeaderView->getParentWidth(), height);
+    trackHeaderView.setBounds (0, y, trackHeaderView.getParentWidth(), height);
 
     for (auto regionView : playbackRegionViews)
     {
