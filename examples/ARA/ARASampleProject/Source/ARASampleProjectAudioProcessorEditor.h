@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include "JuceHeader.h"
 #include "ARASampleProjectAudioProcessor.h"
 #include "DocumentView.h"
 
