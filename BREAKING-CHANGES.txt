@@ -6,9 +6,31 @@ Develop
 
 Change
 ------
+AudioProcessorValueTreeState::getRawParameterValue now returns a
+std::atomic<float>* instead of a float*.
+
+Possible Issues
+---------------
+Existing code which explicitly mentions the type of the returned value, or
+interacts with the dereferenced float in ways unsupported by the std::atomic
+wrapper, will fail to compile. Certain evaluation-reordering compiler
+optimisations may no longer be possible.
+
+Workaround
+----------
+Update your code to deal with a std::atomic<float>* instead of a float*.
+
+Rationale
+---------
+Returning a std::atomic<float>* allows the JUCE framework to have much stronger
+guarantees about thread safety.
+
+
+Change
+------
 Removed a workaround from the ASIOAudioIODevice::getOutputLatencyInSamples()
-and ASIOAudioIODevice::getInputLatencyInSamples() methods which was adding
-an arbitrary amount to the reported latencies to compensate for dodgy, old
+and ASIOAudioIODevice::getInputLatencyInSamples() methods which was adding an
+arbitrary amount to the reported latencies to compensate for dodgy, old
 drivers.
 
 Possible Issues
@@ -17,8 +39,8 @@ Code which relied on these altered values may now behave differently.
 
 Workaround
 ----------
-Update your code to deal with the new, correct values reported from the
-drivers directly.
+Update your code to deal with the new, correct values reported from the drivers
+directly.
 
 Rationale
 ---------
@@ -37,8 +59,8 @@ Possible Issues
 AudioProcessor subclasses which have overridden the default implementations of
 get/setProgramStateInformation (which simply call through to
 get/setStateInformation) may be unable to load previously saved state; state
-previously saved via a call to getProgramStateInformation will be presented
-to setStateInformation.
+previously saved via a call to getProgramStateInformation will be presented to
+setStateInformation.
 
 Workaround
 ----------

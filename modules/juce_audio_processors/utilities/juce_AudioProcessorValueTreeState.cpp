@@ -124,8 +124,8 @@ public:
         return parameter.getText (normalise (value), 0);
     }
 
-    float getDenormalisedValue() const   { return unnormalisedValue; }
-    float& getRawDenormalisedValue()     { return unnormalisedValue; }
+    float getDenormalisedValue() const                { return unnormalisedValue; }
+    std::atomic<float>& getRawDenormalisedValue()     { return unnormalisedValue; }
 
     bool flushToTree (const Identifier& key, UndoManager* um)
     {
@@ -139,12 +139,12 @@ public:
             if ((float) *valueProperty != unnormalisedValue)
             {
                 ScopedValueSetter<bool> svs (ignoreParameterChangedCallbacks, true);
-                tree.setProperty (key, unnormalisedValue, um);
+                tree.setProperty (key, unnormalisedValue.load(), um);
             }
         }
         else
         {
-            tree.setProperty (key, unnormalisedValue, nullptr);
+            tree.setProperty (key, unnormalisedValue.load(), nullptr);
         }
 
         return true;
@@ -188,7 +188,7 @@ private:
 
     RangedAudioParameter& parameter;
     ListenerList<Listener> listeners;
-    float unnormalisedValue{};
+    std::atomic<float> unnormalisedValue{};
     std::atomic<bool> needsUpdate { true };
     bool listenersNeedCalling { true }, ignoreParameterChangedCallbacks { false };
 };
@@ -355,7 +355,7 @@ RangedAudioParameter* AudioProcessorValueTreeState::getParameter (StringRef para
     return nullptr;
 }
 
-float* AudioProcessorValueTreeState::getRawParameterValue (StringRef paramID) const noexcept
+std::atomic<float>* AudioProcessorValueTreeState::getRawParameterValue (StringRef paramID) const noexcept
 {
     if (auto* p = getParameterAdapter (paramID))
         return &p->getRawDenormalisedValue();
@@ -791,7 +791,7 @@ struct ParameterAdapterTests  : public UnitTest
                 adapter.setDenormalisedValue (value);
 
                 expectEquals (adapter.getDenormalisedValue(), value);
-                expectEquals (adapter.getRawDenormalisedValue(), value);
+                expectEquals (adapter.getRawDenormalisedValue().load(), value);
             };
 
             test ({ -20, -10 }, -15);
@@ -1044,7 +1044,7 @@ public:
             const auto value = 0.5f;
             param->setValueNotifyingHost (value);
 
-            expectEquals (*proc.state.getRawParameterValue (key), value);
+            expectEquals (proc.state.getRawParameterValue (key)->load(), value);
         }
 
         beginTest ("After adding an APVTS::Parameter, its value is the default value");
@@ -1062,7 +1062,7 @@ public:
                 nullptr,
                 nullptr));
 
-            expectEquals (*proc.state.getRawParameterValue (key), value);
+            expectEquals (proc.state.getRawParameterValue (key)->load(), value);
         }
 
         beginTest ("Listeners receive notifications when parameters change");
@@ -1138,7 +1138,7 @@ public:
             value = newValue;
 
             expectEquals (param->getValue(), newValue);
-            expectEquals (*proc.state.getRawParameterValue (key), newValue);
+            expectEquals (proc.state.getRawParameterValue (key)->load(), newValue);
         }
 
         beginTest ("When the parameter value is changed, custom parameter values are updated");
@@ -1154,7 +1154,7 @@ public:
             value = newValue;
 
             expectEquals (paramPtr->getCurrentChoiceName(), choices[int (newValue)]);
-            expectEquals (*proc.state.getRawParameterValue (key), newValue);
+            expectEquals (proc.state.getRawParameterValue (key)->load(), newValue);
         }
 
         beginTest ("When the parameter value is changed, listeners are notified");
