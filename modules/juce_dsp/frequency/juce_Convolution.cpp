@@ -398,9 +398,15 @@ struct Convolution::Pimpl  : private Thread
         int start1, size1, start2, size2;
         abstractFifo.prepareToWrite (1, start1, size1, start2, size2);
 
-        // If you hit this assertion then you have requested more impulse response
-        // changes than the Convolution class can handle.
-        jassert (size1 + size2 > 0);
+        // Discard addition if stack already full. User likely required too many updates, 
+        // e.g. impulse response change, without time for processFifo() to empty the stack.
+        // That, or processSamples(), thus processFifo(), is no longer invoked (convolution 
+        // bypassed?) leading to update requests piling up in the stack.
+        if ( !(size1 + size2 > 0) )
+        {
+            DBG("Skipped dsp::convolution filter update, internal request stack full.");
+            return;
+        }
 
         if (size1 > 0)
         {
@@ -423,9 +429,15 @@ struct Convolution::Pimpl  : private Thread
         int start1, size1, start2, size2;
         abstractFifo.prepareToWrite (numEntries, start1, size1, start2, size2);
 
-        // If you hit this assertion then you have requested more impulse response
-        // changes than the Convolution class can handle.
-        jassert (numEntries > 0 && size1 + size2 > 0);
+        // Discard addition if stack already full. User likely required too many updates, 
+        // e.g. impulse response change, without time for processFifo() to empty the stack.
+        // That, or processSamples(), thus processFifo(), is no longer invoked (convolution 
+        // bypassed?) leading to update requests piling up in the stack.
+        if ( !(numEntries > 0 && size1 + size2 > 0) )
+        {
+            DBG("Skipped dsp::convolution filter update, internal request stack full.");
+            return;
+        }
 
         if (size1 > 0)
         {
