@@ -489,6 +489,8 @@ void ComboBox::showPopupIfNotActive()
         // showPopup asynchronously, we are giving the other popups a chance to properly
         // close themselves
         MessageManager::callAsync ([safePointer]() mutable { if (safePointer != nullptr) safePointer->showPopup(); });
+
+        repaint();
     }
 }
 

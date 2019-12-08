@@ -972,6 +972,8 @@ private:
     }
 
     //==============================================================================
+    TooltipWindow tooltipWindow;
+
     PhysicalTopologySource topologySource;
     OwnedArray<BlockComponent> blockComponents;
     BlockComponent* masterBlockComponent = nullptr;

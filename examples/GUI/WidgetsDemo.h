@@ -444,6 +444,8 @@ private:
     OwnedArray<Component> components;
     std::unique_ptr<BubbleMessageComponent> bubbleMessage;
 
+    TooltipWindow tooltipWindow;
+
     // This little function avoids a bit of code-duplication by adding a component to
     // our list as well as calling addAndMakeVisible on it..
     template <typename ComponentType>

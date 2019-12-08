@@ -230,16 +230,23 @@ private:
 
     void dispatchOverflowMessages()
     {
-        const ScopedLock sl (lock);
+        ReferenceCountedArray<MessageManager::MessageBase> messagesToDispatch;
 
-        for (int i = 0; i < overflowQueue.size(); ++i)
         {
-            auto message = overflowQueue.getUnchecked (i);
+            const ScopedLock sl (lock);
+
+            if (overflowQueue.isEmpty())
+                return;
+
+            messagesToDispatch.swapWith (overflowQueue);
+        }
+
+        for (int i = 0; i < messagesToDispatch.size(); ++i)
+        {
+            auto message = messagesToDispatch.getUnchecked (i);
             message->incReferenceCount();
             dispatchMessageFromLParam ((LPARAM) message.get());
         }
-
-        overflowQueue.clear();
     }
 
     //==============================================================================

@@ -30,12 +30,12 @@ namespace juce
 template <typename Type>
 D2D1_RECT_F rectangleToRectF (const Rectangle<Type>& r)
 {
-    return D2D1::RectF ((float) r.getX(), (float) r.getY(), (float) r.getRight(), (float) r.getBottom());
+    return { (float) r.getX(), (float) r.getY(), (float) r.getRight(), (float) r.getBottom() };
 }
 
 static D2D1_COLOR_F colourToD2D (Colour c)
 {
-    return D2D1::ColorF::ColorF (c.getFloatRed(), c.getFloatGreen(), c.getFloatBlue(), c.getFloatAlpha());
+    return { c.getFloatRed(), c.getFloatGreen(), c.getFloatBlue(), c.getFloatAlpha() };
 }
 
 static void pathToGeometrySink (const Path& path, ID2D1GeometrySink* sink, const AffineTransform& transform)
@@ -48,39 +48,26 @@ static void pathToGeometrySink (const Path& path, ID2D1GeometrySink* sink, const
         {
         case Path::Iterator::cubicTo:
         {
-            D2D1_BEZIER_SEGMENT seg;
+            transform.transformPoint (it.x1, it.y1);
+            transform.transformPoint (it.x2, it.y2);
+            transform.transformPoint (it.x3, it.y3);
 
-            transform.transformPoint   (it.x1, it.y1);
-            seg.point1 = D2D1::Point2F (it.x1, it.y1);
-
-            transform.transformPoint   (it.x2, it.y2);
-            seg.point2 = D2D1::Point2F (it.x2, it.y2);
-
-            transform.transformPoint   (it.x3, it.y3);
-            seg.point3 = D2D1::Point2F (it.x3, it.y3);
-
-            sink->AddBezier (seg);
+            sink->AddBezier ({ { it.x1, it.y1 }, { it.x2, it.y2 }, { it.x3, it.y3 } });
             break;
         }
 
         case Path::Iterator::lineTo:
         {
-            transform.transformPoint     (it.x1, it.y1);
-            sink->AddLine (D2D1::Point2F (it.x1, it.y1));
+            transform.transformPoint (it.x1, it.y1);
+            sink->AddLine ({ it.x1, it.y1 });
             break;
         }
 
         case Path::Iterator::quadraticTo:
         {
-            D2D1_QUADRATIC_BEZIER_SEGMENT seg;
-
-            transform.transformPoint   (it.x1, it.y1);
-            seg.point1 = D2D1::Point2F (it.x1, it.y1);
-
-            transform.transformPoint   (it.x2, it.y2);
-            seg.point2 = D2D1::Point2F (it.x2, it.y2);
-
-            sink->AddQuadraticBezier (seg);
+            transform.transformPoint (it.x1, it.y1);
+            transform.transformPoint (it.x2, it.y2);
+            sink->AddQuadraticBezier ({ { it.x1, it.y1 }, { it.x2, it.y2 } });
             break;
         }
 
@@ -92,8 +79,8 @@ static void pathToGeometrySink (const Path& path, ID2D1GeometrySink* sink, const
 
         case Path::Iterator::startNewSubPath:
         {
-            transform.transformPoint         (it.x1, it.y1);
-            sink->BeginFigure (D2D1::Point2F (it.x1, it.y1), D2D1_FIGURE_BEGIN_FILLED);
+            transform.transformPoint (it.x1, it.y1);
+            sink->BeginFigure ({ it.x1, it.y1 }, D2D1_FIGURE_BEGIN_FILLED);
             break;
         }
         }
@@ -102,20 +89,13 @@ static void pathToGeometrySink (const Path& path, ID2D1GeometrySink* sink, const
 
 static D2D1::Matrix3x2F transformToMatrix (const AffineTransform& transform)
 {
-    D2D1::Matrix3x2F matrix;
-    matrix._11 = transform.mat00;
-    matrix._12 = transform.mat10;
-    matrix._21 = transform.mat01;
-    matrix._22 = transform.mat11;
-    matrix._31 = transform.mat02;
-    matrix._32 = transform.mat12;
-    return matrix;
+    return { transform.mat00, transform.mat10, transform.mat01, transform.mat11, transform.mat02, transform.mat12 };
 }
 
 static D2D1_POINT_2F pointTransformed (int x, int y, const AffineTransform& transform)
 {
     transform.transformPoint (x, y);
-    return D2D1::Point2F ((FLOAT) x, (FLOAT) y);
+    return { (FLOAT) x, (FLOAT) y };
 }
 
 static void rectToGeometrySink (const Rectangle<int>& rect, ID2D1GeometrySink* sink, const AffineTransform& transform)
@@ -136,7 +116,7 @@ struct Direct2DLowLevelGraphicsContext::Pimpl
         factories->d2dFactory->CreatePathGeometry (&p);
 
         ComSmartPtr<ID2D1GeometrySink> sink;
-        HRESULT hr = p->Open (sink.resetAndGetPointerAddress()); // xxx handle error
+        auto hr = p->Open (sink.resetAndGetPointerAddress()); // xxx handle error
         sink->SetFillMode (D2D1_FILL_MODE_WINDING);
 
         for (int i = clipRegion.getNumRectangles(); --i >= 0;)
@@ -152,7 +132,7 @@ struct Direct2DLowLevelGraphicsContext::Pimpl
         factories->d2dFactory->CreatePathGeometry (&p);
 
         ComSmartPtr<ID2D1GeometrySink> sink;
-        HRESULT hr = p->Open (sink.resetAndGetPointerAddress());
+        auto hr = p->Open (sink.resetAndGetPointerAddress());
         sink->SetFillMode (D2D1_FILL_MODE_WINDING); // xxx need to check Path::isUsingNonZeroWinding()
 
         pathToGeometrySink (path, sink, transform);
@@ -188,7 +168,7 @@ public:
         }
         else
         {
-            const D2D1_SIZE_U size (owner.pimpl->renderingTarget->GetPixelSize());
+            const auto size = owner.pimpl->renderingTarget->GetPixelSize();
             clipRect.setSize (size.width, size.height);
             setFill (FillType (Colours::black));
         }
@@ -214,7 +194,7 @@ public:
     void clipToRectangle (const Rectangle<int>& r)
     {
         clearClip();
-        clipRect = r.toFloat().transformed (transform).getSmallestIntegerContainer();
+        clipRect = r.toFloat().transformedBy (transform).getSmallestIntegerContainer();
         shouldClipRect = true;
         pushClips();
     }
@@ -284,24 +264,17 @@ public:
         if (bitmapMaskLayer == nullptr)
             owner.pimpl->renderingTarget->CreateLayer (bitmapMaskLayer.resetAndGetPointerAddress());
 
-        D2D1_BRUSH_PROPERTIES brushProps;
-        brushProps.opacity = 1;
-        brushProps.transform = transformToMatrix (clipTransform);
-
-        D2D1_BITMAP_BRUSH_PROPERTIES bmProps = D2D1::BitmapBrushProperties (D2D1_EXTEND_MODE_WRAP, D2D1_EXTEND_MODE_WRAP);
-
-        D2D1_SIZE_U size;
-        size.width  = clipImage.getWidth();
-        size.height = clipImage.getHeight();
-
-        D2D1_BITMAP_PROPERTIES bp = D2D1::BitmapProperties();
+        D2D1_BRUSH_PROPERTIES brushProps = { 1, transformToMatrix (clipTransform) };
+        auto bmProps = D2D1::BitmapBrushProperties (D2D1_EXTEND_MODE_WRAP, D2D1_EXTEND_MODE_WRAP);
+        D2D1_SIZE_U size = { (UINT32) clipImage.getWidth(), (UINT32) clipImage.getHeight() };
+        auto bp = D2D1::BitmapProperties();
 
         maskImage = clipImage.convertedToFormat (Image::ARGB);
         Image::BitmapData bd (maskImage, Image::BitmapData::readOnly); // xxx should be maskImage?
         bp.pixelFormat = owner.pimpl->renderingTarget->GetPixelFormat();
         bp.pixelFormat.alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
 
-        HRESULT hr = owner.pimpl->renderingTarget->CreateBitmap (size, bd.data, bd.lineStride, bp, maskBitmap.resetAndGetPointerAddress());
+        auto hr = owner.pimpl->renderingTarget->CreateBitmap (size, bd.data, bd.lineStride, bp, maskBitmap.resetAndGetPointerAddress());
         hr = owner.pimpl->renderingTarget->CreateBitmapBrush (maskBitmap, bmProps, brushProps, bitmapMaskBrush.resetAndGetPointerAddress());
 
         imageMaskLayerParams = D2D1::LayerParameters();
@@ -348,7 +321,7 @@ public:
 
         if (shouldClipRectList && !clipsRectList)
         {
-            D2D1_LAYER_PARAMETERS layerParams = D2D1::LayerParameters();
+            auto layerParams = D2D1::LayerParameters();
             rectListGeometry->GetBounds (D2D1::IdentityMatrix(), &layerParams.contentBounds);
             layerParams.geometricMask = rectListGeometry;
             owner.pimpl->renderingTarget->PushLayer (layerParams, rectListLayer);
@@ -357,7 +330,7 @@ public:
 
         if (shouldClipComplex && !clipsComplex)
         {
-            D2D1_LAYER_PARAMETERS layerParams = D2D1::LayerParameters();
+            auto layerParams = D2D1::LayerParameters();
             complexClipGeometry->GetBounds (D2D1::IdentityMatrix(), &layerParams.contentBounds);
             layerParams.geometricMask = complexClipGeometry;
             owner.pimpl->renderingTarget->PushLayer (layerParams, complexClipLayer);
@@ -398,7 +371,7 @@ public:
     {
         if (currentFontFace == nullptr)
         {
-            WindowsDirectWriteTypeface* typeface = dynamic_cast<WindowsDirectWriteTypeface*> (font.getTypeface());
+            auto* typeface = dynamic_cast<WindowsDirectWriteTypeface*> (font.getTypeface());
             currentFontFace = typeface->getIDWriteFontFace();
             fontHeightToEmSizeFactor = typeface->getUnitsToHeightScaleFactor();
         }
@@ -428,32 +401,26 @@ public:
         {
             if (fillType.isColour())
             {
-                D2D1_COLOR_F colour = colourToD2D (fillType.colour);
+                auto colour = colourToD2D (fillType.colour);
                 owner.pimpl->colourBrush->SetColor (colour);
                 currentBrush = owner.pimpl->colourBrush;
             }
             else if (fillType.isTiledImage())
             {
-                D2D1_BRUSH_PROPERTIES brushProps;
-                brushProps.opacity = fillType.getOpacity();
-                brushProps.transform = transformToMatrix (fillType.transform);
-
-                D2D1_BITMAP_BRUSH_PROPERTIES bmProps = D2D1::BitmapBrushProperties (D2D1_EXTEND_MODE_WRAP, D2D1_EXTEND_MODE_WRAP);
+                D2D1_BRUSH_PROPERTIES brushProps = { fillType.getOpacity(), transformToMatrix (fillType.transform) };
+                auto bmProps = D2D1::BitmapBrushProperties (D2D1_EXTEND_MODE_WRAP, D2D1_EXTEND_MODE_WRAP);
 
                 image = fillType.image;
 
-                D2D1_SIZE_U size;
-                size.width = image.getWidth();
-                size.height = image.getHeight();
-
-                D2D1_BITMAP_PROPERTIES bp = D2D1::BitmapProperties();
+                D2D1_SIZE_U size = { (UINT32) image.getWidth(), (UINT32) image.getHeight() };
+                auto bp = D2D1::BitmapProperties();
 
                 this->image = image.convertedToFormat (Image::ARGB);
                 Image::BitmapData bd (this->image, Image::BitmapData::readOnly);
                 bp.pixelFormat = owner.pimpl->renderingTarget->GetPixelFormat();
                 bp.pixelFormat.alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
 
-                HRESULT hr = owner.pimpl->renderingTarget->CreateBitmap (size, bd.data, bd.lineStride, bp, bitmap.resetAndGetPointerAddress());
+                auto hr = owner.pimpl->renderingTarget->CreateBitmap (size, bd.data, bd.lineStride, bp, bitmap.resetAndGetPointerAddress());
                 hr = owner.pimpl->renderingTarget->CreateBitmapBrush (bitmap, bmProps, brushProps, bitmapBrush.resetAndGetPointerAddress());
 
                 currentBrush = bitmapBrush;
@@ -462,9 +429,7 @@ public:
             {
                 gradientStops = nullptr;
 
-                D2D1_BRUSH_PROPERTIES brushProps;
-                brushProps.opacity = fillType.getOpacity();
-                brushProps.transform = transformToMatrix (fillType.transform.followedBy (transform));
+                D2D1_BRUSH_PROPERTIES brushProps = { fillType.getOpacity(), transformToMatrix (fillType.transform.followedBy (transform)) };
 
                 const int numColors = fillType.gradient->getNumColours();
 
@@ -482,28 +447,21 @@ public:
                 {
                     radialGradient = nullptr;
 
-                    const Point<float> p1 = fillType.gradient->point1;
-                    const Point<float> p2 = fillType.gradient->point2;
-                    float r = p1.getDistanceFrom(p2);
+                    const auto p1 = fillType.gradient->point1;
+                    const auto p2 = fillType.gradient->point2;
+                    const auto r = p1.getDistanceFrom(p2);
+                    const auto props = D2D1::RadialGradientBrushProperties ({ p1.x, p1.y }, {}, r, r);
 
-                    D2D1_RADIAL_GRADIENT_BRUSH_PROPERTIES props =
-                        D2D1::RadialGradientBrushProperties(D2D1::Point2F(p1.x, p1.y),
-                            D2D1::Point2F(0, 0),
-                            r, r);
-
-                    owner.pimpl->renderingTarget->CreateRadialGradientBrush(props, brushProps, gradientStops, radialGradient.resetAndGetPointerAddress());
+                    owner.pimpl->renderingTarget->CreateRadialGradientBrush (props, brushProps, gradientStops, radialGradient.resetAndGetPointerAddress());
                     currentBrush = radialGradient;
                 }
                 else
                 {
                     linearGradient = 0;
 
-                    const Point<float> p1 = fillType.gradient->point1;
-                    const Point<float> p2 = fillType.gradient->point2;
-
-                    D2D1_LINEAR_GRADIENT_BRUSH_PROPERTIES props =
-                        D2D1::LinearGradientBrushProperties(D2D1::Point2F(p1.x, p1.y),
-                            D2D1::Point2F(p2.x, p2.y));
+                    const auto p1 = fillType.gradient->point1;
+                    const auto p2 = fillType.gradient->point2;
+                    const auto props = D2D1::LinearGradientBrushProperties ({ p1.x, p1.y }, { p2.x, p2.y });
 
                     owner.pimpl->renderingTarget->CreateLinearGradientBrush (props, brushProps, gradientStops, linearGradient.resetAndGetPointerAddress());
 
@@ -518,7 +476,7 @@ public:
     AffineTransform transform;
 
     Font font;
-    float fontHeightToEmSizeFactor = 1.0;
+    float fontHeightToEmSizeFactor = 1.0f;
 
     IDWriteFontFace* currentFontFace = nullptr;
     ComSmartPtr<IDWriteFontFace> localFontFace;
@@ -568,12 +526,9 @@ Direct2DLowLevelGraphicsContext::Direct2DLowLevelGraphicsContext (HWND hwnd_)
     D2D1_SIZE_U size = { (UINT32) (windowRect.right - windowRect.left), (UINT32) (windowRect.bottom - windowRect.top) };
     bounds.setSize (size.width, size.height);
 
-    D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties();
-    D2D1_HWND_RENDER_TARGET_PROPERTIES propsHwnd = D2D1::HwndRenderTargetProperties (hwnd, size);
-
     if (pimpl->factories->d2dFactory != nullptr)
     {
-        HRESULT hr = pimpl->factories->d2dFactory->CreateHwndRenderTarget (props, propsHwnd, pimpl->renderingTarget.resetAndGetPointerAddress());
+        auto hr = pimpl->factories->d2dFactory->CreateHwndRenderTarget ({}, { hwnd, size }, pimpl->renderingTarget.resetAndGetPointerAddress());
         jassert (SUCCEEDED (hr)); ignoreUnused (hr);
         hr = pimpl->renderingTarget->CreateSolidColorBrush (D2D1::ColorF::ColorF (0.0f, 0.0f, 0.0f, 1.0f), pimpl->colourBrush.resetAndGetPointerAddress());
     }
@@ -608,7 +563,7 @@ void Direct2DLowLevelGraphicsContext::start()
 void Direct2DLowLevelGraphicsContext::end()
 {
     states.clear();
-    currentState = 0;
+    currentState = nullptr;
     pimpl->renderingTarget->EndDraw();
     pimpl->renderingTarget->CheckWindowState();
 }
@@ -657,13 +612,13 @@ void Direct2DLowLevelGraphicsContext::clipToImageAlpha (const Image& sourceImage
 
 bool Direct2DLowLevelGraphicsContext::clipRegionIntersects (const Rectangle<int>& r)
 {
-    return currentState->clipRect.intersects (r.toFloat().transformed (currentState->transform).getSmallestIntegerContainer());
+    return currentState->clipRect.intersects (r.toFloat().transformedBy (currentState->transform).getSmallestIntegerContainer());
 }
 
 Rectangle<int> Direct2DLowLevelGraphicsContext::getClipBounds() const
 {
     // xxx could this take into account complex clip regions?
-    return currentState->clipRect.toFloat().transformed (currentState->transform.inverted()).getSmallestIntegerContainer();
+    return currentState->clipRect.toFloat().transformedBy (currentState->transform.inverted()).getSmallestIntegerContainer();
 }
 
 bool Direct2DLowLevelGraphicsContext::isClipEmpty() const
@@ -679,7 +634,7 @@ void Direct2DLowLevelGraphicsContext::saveState()
 
 void Direct2DLowLevelGraphicsContext::restoreState()
 {
-        jassert (states.size() > 1); //you should never pop the last state!
+    jassert (states.size() > 1); //you should never pop the last state!
     states.removeLast (1);
     currentState = states.getLast();
 }
@@ -740,11 +695,8 @@ void Direct2DLowLevelGraphicsContext::drawImage (const Image& image, const Affin
 {
     pimpl->renderingTarget->SetTransform (transformToMatrix (transform.followedBy (currentState->transform)));
 
-    D2D1_SIZE_U size;
-    size.width = image.getWidth();
-    size.height = image.getHeight();
-
-    D2D1_BITMAP_PROPERTIES bp = D2D1::BitmapProperties();
+    D2D1_SIZE_U size = { (UINT32) image.getWidth(), (UINT32) image.getHeight() };
+    auto bp = D2D1::BitmapProperties();
 
     Image img (image.convertedToFormat (Image::ARGB));
     Image::BitmapData bd (img, Image::BitmapData::readOnly);
@@ -788,17 +740,15 @@ void Direct2DLowLevelGraphicsContext::drawGlyph (int glyphNumber, const AffineTr
     currentState->createBrush();
     currentState->createFont();
 
-    float hScale = currentState->font.getHorizontalScale();
+    auto hScale = currentState->font.getHorizontalScale();
 
     pimpl->renderingTarget->SetTransform (transformToMatrix (AffineTransform::scale (hScale, 1.0f)
                                                                              .followedBy (transform)
                                                                              .followedBy (currentState->transform)));
 
-    const UINT16 glyphIndices = (UINT16) glyphNumber;
-    const FLOAT glyphAdvances = 0;
-    DWRITE_GLYPH_OFFSET offset;
-    offset.advanceOffset = 0;
-    offset.ascenderOffset = 0;
+    const auto glyphIndices = (UINT16) glyphNumber;
+    const auto glyphAdvances = 0.0f;
+    DWRITE_GLYPH_OFFSET offset = { 0.0f, 0.0f };
 
     DWRITE_GLYPH_RUN glyphRun;
     glyphRun.fontFace = currentState->currentFontFace;
@@ -810,7 +760,7 @@ void Direct2DLowLevelGraphicsContext::drawGlyph (int glyphNumber, const AffineTr
     glyphRun.isSideways = FALSE;
     glyphRun.bidiLevel = 0;
 
-    pimpl->renderingTarget->DrawGlyphRun (D2D1::Point2F (0, 0), &glyphRun, currentState->currentBrush);
+    pimpl->renderingTarget->DrawGlyphRun ({}, &glyphRun, currentState->currentBrush);
     pimpl->renderingTarget->SetTransform (D2D1::IdentityMatrix());
 }
 
