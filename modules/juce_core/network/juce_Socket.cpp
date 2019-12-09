@@ -36,9 +36,6 @@ namespace juce
  using juce_socklen_t       = int;
  using juce_recvsend_size_t = int;
  using SocketHandle         = SOCKET;
- #if ! JUCE_MINGW
-  using pollfd              = WSAPOLLFD;
- #endif
  static const SocketHandle invalidSocket = INVALID_SOCKET;
 #elif JUCE_ANDROID
  using juce_socklen_t       = socklen_t;
@@ -55,24 +52,6 @@ namespace juce
 //==============================================================================
 namespace SocketHelpers
 {
-   #if JUCE_WINDOWS
-    using WSAPollFunc = int (WSAAPI*) (LPWSAPOLLFD, ULONG, INT);
-    static WSAPollFunc wsaPollFunc = nullptr;
-
-    static void checkForWSAPoll()
-    {
-        static bool hasChecked = false;
-
-        if (! hasChecked)
-        {
-            hasChecked = true;
-
-            if (auto* moduleHandle = GetModuleHandleW (L"Ws2_32.dll"))
-                wsaPollFunc = (WSAPollFunc) GetProcAddress (moduleHandle, "WSAPoll");
-        }
-    }
-   #endif
-
     static void initSockets()
     {
        #if JUCE_WINDOWS
@@ -85,8 +64,6 @@ namespace SocketHelpers
             WSADATA wsaData;
             const WORD wVersionRequested = MAKEWORD (1, 1);
             WSAStartup (wVersionRequested, &wsaData);
-
-            checkForWSAPoll();
         }
        #endif
     }
@@ -324,43 +301,7 @@ namespace SocketHelpers
 
         auto h = handle.load();
 
-      #if ! JUCE_MINGW
-       #if JUCE_WINDOWS
-        if (wsaPollFunc != nullptr)
-       #endif
-        {
-            short eventsFlag = (forReading ? POLLIN : POLLOUT);
-            pollfd pfd { (SocketHandle) h, eventsFlag, 0 };
-
-            int result = 0;
-
-            for (;;)
-            {
-               #if JUCE_WINDOWS
-                result = SocketHelpers::wsaPollFunc (&pfd, 1, timeoutMsecs);
-               #else
-                result = poll (&pfd, 1, timeoutMsecs);
-               #endif
-
-                if (result >= 0
-                   #if JUCE_WINDOWS
-                    || result == SOCKET_ERROR
-                   #else
-                    || errno != EINTR
-                   #endif
-                    )
-                {
-                    break;
-                }
-            }
-
-            if (result < 0 || hasErrorOccured())
-                return -1;
-
-            return (pfd.revents & eventsFlag) != 0;
-        }
-       #endif
-
+       #if JUCE_WINDOWS || JUCE_MINGW
         struct timeval timeout;
         struct timeval* timeoutp;
 
@@ -384,10 +325,30 @@ namespace SocketHelpers
         fd_set* prset = forReading ? &rset : nullptr;
         fd_set* pwset = forReading ? nullptr : &wset;
 
+        // NB - need to use select() here as WSAPoll is broken on Windows
         if (select ((int) h + 1, prset, pwset, nullptr, timeoutp) < 0 || hasErrorOccured())
             return -1;
 
         return FD_ISSET (h, forReading ? &rset : &wset) ? 1 : 0;
+      #else
+        short eventsFlag = (forReading ? POLLIN : POLLOUT);
+        pollfd pfd { (SocketHandle) h, eventsFlag, 0 };
+
+        int result = 0;
+
+        for (;;)
+        {
+            result = poll (&pfd, 1, timeoutMsecs);
+
+            if (result >= 0 || errno != EINTR)
+                break;
+        }
+
+        if (result < 0 || hasErrorOccured())
+            return -1;
+
+        return (pfd.revents & eventsFlag) != 0;
+      #endif
     }
 
     static addrinfo* getAddressInfo (bool isDatagram, const String& hostName, int portNumber)
