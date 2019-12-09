@@ -77,6 +77,7 @@ public:
         MuseReceptorGeneric,        /**< Represents Muse Receptor. */
         pluginval,                  /**< Represents pluginval. */
         Reaper,                     /**< Represents Cockos Reaper. */
+        Reason,                     /**< Represents Reason. */
         Renoise,                    /**< Represents Renoise. */
         SADiE,                      /**< Represents SADiE. */
         SteinbergCubase4,           /**< Represents Steinberg Cubase 4. */
@@ -159,6 +160,8 @@ public:
     bool isReceptor() const noexcept          { return type == MuseReceptorGeneric; }
     /** Returns true if the host is Cockos Reaper. */
     bool isReaper() const noexcept            { return type == Reaper; }
+    /** Returns true if the host is Reason. */
+    bool isReason() const noexcept            { return type == Reason; }
     /** Returns true if the host is Renoise. */
     bool isRenoise() const noexcept           { return type == Renoise; }
     /** Returns true if the host is SADiE. */
@@ -222,6 +225,7 @@ public:
             case MergingPyramix:           return "Pyramix";
             case MuseReceptorGeneric:      return "Muse Receptor";
             case Reaper:                   return "Reaper";
+            case Reason:                   return "Reason";
             case Renoise:                  return "Renoise";
             case SADiE:                    return "SADiE";
             case SteinbergCubase4:         return "Steinberg Cubase 4";
@@ -338,6 +342,7 @@ private:
         if (hostFilename.containsIgnoreCase   ("WaveBurner"))        return WaveBurner;
         if (hostPath.containsIgnoreCase       ("Digital Performer")) return DigitalPerformer;
         if (hostFilename.containsIgnoreCase   ("reaper"))            return Reaper;
+        if (hostFilename.containsIgnoreCase   ("Reason"))            return Reason;
         if (hostPath.containsIgnoreCase       ("Studio One"))        return StudioOne;
         if (hostFilename.startsWithIgnoreCase ("Waveform"))          return TracktionWaveform;
         if (hostPath.containsIgnoreCase       ("Tracktion 3"))       return Tracktion3;
@@ -402,6 +407,7 @@ private:
         if (hostPath.containsIgnoreCase       ("Merging Technologies")) return MergingPyramix;
         if (hostFilename.startsWithIgnoreCase ("Sam"))               return MagixSamplitude;
         if (hostFilename.startsWithIgnoreCase ("Sequoia"))           return MagixSequoia;
+        if (hostFilename.containsIgnoreCase   ("Reason"))            return Reason;
         if (hostFilename.containsIgnoreCase   ("Renoise"))           return Renoise;
         if (hostFilename.containsIgnoreCase   ("Resolve"))           return DaVinciResolve;
         if (hostPath.containsIgnoreCase       ("Bitwig Studio"))     return BitwigStudio;
