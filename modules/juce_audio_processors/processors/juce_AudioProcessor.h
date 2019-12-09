@@ -1369,7 +1369,7 @@ protected:
 
     //==============================================================================
     /** @internal */
-    AudioPlayHead* playHead = nullptr;
+    std::atomic<AudioPlayHead*> playHead { nullptr };
 
     /** @internal */
     void sendParamChangeMessageToListeners (int parameterIndex, float newValue);

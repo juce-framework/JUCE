@@ -896,7 +896,7 @@ void AudioProcessorGraph::topologyChanged()
 {
     sendChangeMessage();
 
-    if (isPrepared.get() != 0)
+    if (isPrepared)
         triggerAsyncUpdate();
 }
 
@@ -1315,11 +1315,11 @@ template <typename FloatType, typename SequenceType>
 static void processBlockForBuffer (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages,
                                    AudioProcessorGraph& graph,
                                    std::unique_ptr<SequenceType>& renderSequence,
-                                   Atomic<int>& isPrepared)
+                                   std::atomic<bool>& isPrepared)
 {
     if (graph.isNonRealtime())
     {
-        while (isPrepared.get() == 0)
+        while (! isPrepared)
             Thread::sleep (1);
 
         const ScopedLock sl (graph.getCallbackLock());
@@ -1331,7 +1331,7 @@ static void processBlockForBuffer (AudioBuffer<FloatType>& buffer, MidiBuffer& m
     {
         const ScopedLock sl (graph.getCallbackLock());
 
-        if (isPrepared.get() == 1)
+        if (isPrepared)
         {
             if (renderSequence != nullptr)
                 renderSequence->perform (buffer, midiMessages, graph.getPlayHead());
@@ -1346,7 +1346,7 @@ static void processBlockForBuffer (AudioBuffer<FloatType>& buffer, MidiBuffer& m
 
 void AudioProcessorGraph::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
 {
-    if (isPrepared.get() == 0 && MessageManager::getInstance()->isThisTheMessageThread())
+    if ((! isPrepared) && MessageManager::getInstance()->isThisTheMessageThread())
         handleAsyncUpdate();
 
     processBlockForBuffer<float> (buffer, midiMessages, *this, renderSequenceFloat, isPrepared);
@@ -1354,7 +1354,7 @@ void AudioProcessorGraph::processBlock (AudioBuffer<float>& buffer, MidiBuffer& 
 
 void AudioProcessorGraph::processBlock (AudioBuffer<double>& buffer, MidiBuffer& midiMessages)
 {
-    if (isPrepared.get() == 0 && MessageManager::getInstance()->isThisTheMessageThread())
+    if ((! isPrepared) && MessageManager::getInstance()->isThisTheMessageThread())
         handleAsyncUpdate();
 
     processBlockForBuffer<double> (buffer, midiMessages, *this, renderSequenceDouble, isPrepared);
