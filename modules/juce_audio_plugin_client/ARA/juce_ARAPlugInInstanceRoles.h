@@ -19,12 +19,12 @@ class JUCE_API  ARAPlaybackRenderer     : public ARA::PlugIn::PlaybackRenderer
 public:
     using ARA::PlugIn::PlaybackRenderer::PlaybackRenderer;
 
-// TODO JUCE_ARA Should we add this here for subclasses? There is also didBindToARA(), which
+// TODO JUCE_ARA Should we keep this here for subclasses? There is also didBindToARA(), which
 //               can provide this if needed. We could get rid of both renderer subclasses otherwise,
 //               in fact we could even go further and hide the instance roles entirely behind
 //               AudioProcessor(Editor)ARAExtension, which is maybe a good way reduce complexity?
-//  void setAudioProcessor (AudioProcessor* processor) { audioProcessor = processor; }
-//  AudioProcessor* getAudioProcessor() const { return audioProcessor; };
+    void setAudioProcessor (AudioProcessor* processor) { audioProcessor = processor; }
+    AudioProcessor* getAudioProcessor() const { return audioProcessor; }
 
 // TODO JUCE_ARA see definition of these in .cpp
 //#if ARA_VALIDATE_API_CALLS
@@ -33,7 +33,7 @@ public:
 //#endif
 
 private:
-//  AudioProcessor* audioProcessor;
+    AudioProcessor* audioProcessor;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAPlaybackRenderer)
 };
@@ -52,12 +52,11 @@ class JUCE_API  ARAEditorRenderer   : public ARA::PlugIn::EditorRenderer
 public:
     using ARA::PlugIn::EditorRenderer::EditorRenderer;
 
-// TODO JUCE_ARA should we add this here for subclasses, even if it is currently unused?
-//  void setAudioProcessor (AudioProcessor* processor) { audioProcessor = processor; }
-//  AudioProcessor* getAudioProcessor() const { return audioProcessor; };
+    void setAudioProcessor (AudioProcessor* processor) { audioProcessor = processor; }
+    AudioProcessor* getAudioProcessor() const { return audioProcessor; }
 
 private:
-//  AudioProcessor* audioProcessor { nullptr };
+    AudioProcessor* audioProcessor { nullptr };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAEditorRenderer)
 };

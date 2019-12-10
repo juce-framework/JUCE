@@ -27,11 +27,10 @@ const ARA::ARAPlugInExtensionInstance* AudioProcessorARAExtension::bindToARA (AR
         jassert (dynamic_cast<ARAEditorView*> (getARAEditorView()) != nullptr);
    #endif
 
-// currently unused and disabled
-//  if (isARAPlaybackRenderer())
-//      getARAPlaybackRenderer()->setAudioProcessor (dynamic_cast<AudioProcessor*> (this));
-//  if (isARAEditorRenderer())
-//      getARAEditorRenderer()->setAudioProcessor (dynamic_cast<AudioProcessor*> (this));
+    if (isARAPlaybackRenderer())
+        getARAPlaybackRenderer()->setAudioProcessor (dynamic_cast<AudioProcessor*> (this));
+    if (isARAEditorRenderer())
+        getARAEditorRenderer()->setAudioProcessor (dynamic_cast<AudioProcessor*> (this));
 
     didBindToARA();
 
