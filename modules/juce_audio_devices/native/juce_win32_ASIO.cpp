@@ -640,8 +640,8 @@ public:
     BigInteger getActiveOutputChannels() const override    { return currentChansOut; }
     BigInteger getActiveInputChannels() const override     { return currentChansIn; }
 
-    int getOutputLatencyInSamples() override     { return outputLatency + currentBlockSizeSamples / 4; }
-    int getInputLatencyInSamples() override      { return inputLatency + currentBlockSizeSamples / 4; }
+    int getOutputLatencyInSamples() override     { return outputLatency; }
+    int getInputLatencyInSamples() override      { return inputLatency; }
 
     void start (AudioIODeviceCallback* callback) override
     {

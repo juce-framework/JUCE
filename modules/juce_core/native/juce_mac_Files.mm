@@ -415,10 +415,7 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& 
         NSWorkspace* workspace = [NSWorkspace sharedWorkspace];
 
         if (parameters.isEmpty())
-            // NB: the length check here is because of strange failures involving long filenames,
-            // probably due to filesystem name length limitations..
-            return (fileName.length() < 1024 && [workspace openFile: juceStringToNS (fileName)])
-                    || [workspace openURL: filenameAsURL];
+            return [workspace openURL: filenameAsURL];
 
         const File file (fileName);
 

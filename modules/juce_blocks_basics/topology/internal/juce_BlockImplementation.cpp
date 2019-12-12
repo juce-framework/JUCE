@@ -40,7 +40,8 @@ public:
                  deviceInfo.name.asString()),
           modelData (deviceInfo.serial),
           remoteHeap (modelData.programAndHeapSize),
-          detector (&detectorToUse)
+          detector (&detectorToUse),
+          config (modelData.defaultConfig)
     {
         markReconnected (deviceInfo);
 
@@ -219,10 +220,7 @@ public:
     bool sendMessageToDevice (const PacketBuilder& builder)
     {
         if (detector != nullptr)
-        {
-            lastMessageSendTime = Time::getCurrentTime();
             return detector->sendMessageToDevice (uid, builder);
-        }
 
         return false;
     }
@@ -456,7 +454,7 @@ public:
 
     void pingFromDevice()
     {
-        lastMessageReceiveTime = Time::getCurrentTime();
+        lastPingReceiveTime = Time::getCurrentTime();
     }
 
     MIDIDeviceConnection* getDeviceConnection()
@@ -510,8 +508,11 @@ public:
 
         remoteHeap.sendChanges (*this, false);
 
-        if (lastMessageSendTime < Time::getCurrentTime() - getPingInterval())
+        if (lastPingSendTime < Time::getCurrentTime() - getPingInterval())
+        {
+            lastPingSendTime = Time::getCurrentTime();
             sendCommandMessage (BlocksProtocol::ping);
+        }
     }
 
     RelativeTime getPingInterval()
@@ -653,7 +654,7 @@ public:
     RemoteHeapType remoteHeap;
 
     WeakReference<Detector> detector;
-    Time lastMessageSendTime, lastMessageReceiveTime;
+    Time lastPingSendTime, lastPingReceiveTime;
 
     BlockConfigManager config;
     std::function<void(Block&, const ConfigMetaData&, uint32)> configChangedCallback;

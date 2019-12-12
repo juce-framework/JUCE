@@ -87,7 +87,12 @@ public:
 
     void clicked() override
     {
-        auto* colourSelector = new ColourSelector();
+        auto* colourSelector = new ColourSelector (ColourSelector::showAlphaChannel
+                                                   | ColourSelector::showColourAtTop
+                                                   | ColourSelector::editableColour
+                                                   | ColourSelector::showSliders
+                                                   | ColourSelector::showColourspace);
+
         colourSelector->setName ("background");
         colourSelector->setCurrentColour (findColour (TextButton::buttonColourId));
         colourSelector->addChangeListener (this);
@@ -438,6 +443,8 @@ struct ButtonsPage   : public Component
 private:
     OwnedArray<Component> components;
     std::unique_ptr<BubbleMessageComponent> bubbleMessage;
+
+    TooltipWindow tooltipWindow;
 
     // This little function avoids a bit of code-duplication by adding a component to
     // our list as well as calling addAndMakeVisible on it..

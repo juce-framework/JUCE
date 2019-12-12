@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+#if JUCE_BELA
+extern "C" int cobalt_thread_mode();
+#endif
 
 namespace juce
 {
@@ -183,13 +186,18 @@ uint32 juce_millisecondsSinceStartup() noexcept
 
 int64 Time::getHighResolutionTicks() noexcept
 {
-   #if JUCE_BELA
-    return rt_timer_read() / 1000;
-   #else
     timespec t;
+
+   #if JUCE_BELA
+    if (cobalt_thread_mode() == 0x200 /*XNRELAX*/)
+        clock_gettime (CLOCK_MONOTONIC, &t);
+    else
+        __wrap_clock_gettime (CLOCK_MONOTONIC, &t);
+   #else
     clock_gettime (CLOCK_MONOTONIC, &t);
-    return (t.tv_sec * (int64) 1000000) + (t.tv_nsec / 1000);
    #endif
+
+    return (t.tv_sec * (int64) 1000000) + (t.tv_nsec / 1000);
 }
 
 int64 Time::getHighResolutionTicksPerSecond() noexcept

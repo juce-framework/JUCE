@@ -1391,6 +1391,12 @@ PopupMenu::Item& PopupMenu::Item::setCustomComponent (ReferenceCountedObjectPtr<
     return *this;
 }
 
+PopupMenu::Item& PopupMenu::Item::setImage (std::unique_ptr<Drawable> newImage) & noexcept
+{
+    image = std::move (newImage);
+    return *this;
+}
+
 PopupMenu::Item&& PopupMenu::Item::setTicked (bool shouldBeTicked) && noexcept
 {
     isTicked = shouldBeTicked;
@@ -1424,6 +1430,12 @@ PopupMenu::Item&& PopupMenu::Item::setColour (Colour newColour) && noexcept
 PopupMenu::Item&& PopupMenu::Item::setCustomComponent (ReferenceCountedObjectPtr<CustomComponent> comp) && noexcept
 {
     customComponent = comp;
+    return std::move (*this);
+}
+
+PopupMenu::Item&& PopupMenu::Item::setImage (std::unique_ptr<Drawable> newImage) && noexcept
+{
+    image = std::move (newImage);
     return std::move (*this);
 }
 

@@ -24,6 +24,23 @@
   ==============================================================================
 */
 
+//==============================================================================
+#if defined (MAC_OS_X_VERSION_10_8) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8) \
+  && USE_COREGRAPHICS_RENDERING && JUCE_COREGRAPHICS_DRAW_ASYNC
+static const juce::Identifier disableAsyncLayerBackedViewIdentifier { "disableAsyncLayerBackedView" };
+
+void setComponentAsyncLayerBackedViewDisabled (juce::Component& comp, bool shouldDisableAsyncLayerBackedView)
+{
+    comp.getProperties().set (disableAsyncLayerBackedViewIdentifier, shouldDisableAsyncLayerBackedView);
+}
+
+bool getComponentAsyncLayerBackedViewDisabled (juce::Component& comp)
+{
+    return comp.getProperties()[disableAsyncLayerBackedViewIdentifier];
+}
+#endif
+
+//==============================================================================
 namespace juce
 {
     typedef void (*AppFocusChangeCallback)();
@@ -85,6 +102,15 @@ public:
 
         [view setPostsFrameChangedNotifications: YES];
 
+       #if defined (MAC_OS_X_VERSION_10_8) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8) \
+        && USE_COREGRAPHICS_RENDERING && JUCE_COREGRAPHICS_DRAW_ASYNC
+        if (! getComponentAsyncLayerBackedViewDisabled (component))
+        {
+            [view setWantsLayer: YES];
+            [[view layer] setDrawsAsynchronously: YES];
+        }
+       #endif
+
         if (isSharedWindow)
         {
             window = [viewToAttachTo window];
@@ -106,13 +132,11 @@ public:
 
             [window setOpaque: component.isOpaque()];
 
-          #if defined (MAC_OS_X_VERSION_10_14) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_14)
             if (! [window isOpaque])
                 [window setBackgroundColor: [NSColor clearColor]];
 
-            #if defined (MAC_OS_X_VERSION_10_9) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9)
-             [view setAppearance: [NSAppearance appearanceNamed: NSAppearanceNameAqua]];
-            #endif
+           #if defined (MAC_OS_X_VERSION_10_9) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9)
+            [view setAppearance: [NSAppearance appearanceNamed: NSAppearanceNameAqua]];
            #endif
 
             [window setHasShadow: ((windowStyleFlags & windowHasDropShadow) != 0)];

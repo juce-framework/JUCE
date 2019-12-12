@@ -192,6 +192,8 @@ public:
         Item& setColour (Colour) & noexcept;
         /** Sets the customComponent property (and returns a reference to this item to allow chaining). */
         Item& setCustomComponent (ReferenceCountedObjectPtr<CustomComponent> customComponent) & noexcept;
+        /** Sets the image property (and returns a reference to this item to allow chaining). */
+        Item& setImage (std::unique_ptr<Drawable>) & noexcept;
 
         /** Sets the isTicked flag (and returns a reference to this item to allow chaining). */
         Item&& setTicked (bool shouldBeTicked = true) && noexcept;
@@ -205,6 +207,8 @@ public:
         Item&& setColour (Colour) && noexcept;
         /** Sets the customComponent property (and returns a reference to this item to allow chaining). */
         Item&& setCustomComponent (ReferenceCountedObjectPtr<CustomComponent> customComponent) && noexcept;
+        /** Sets the image property (and returns a reference to this item to allow chaining). */
+        Item&& setImage (std::unique_ptr<Drawable>) && noexcept;
     };
 
     /** Adds an item to the menu.

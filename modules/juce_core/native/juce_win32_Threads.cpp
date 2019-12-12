@@ -258,15 +258,8 @@ void JUCE_CALLTYPE Process::setCurrentModuleInstanceHandle (void* const newHandl
     currentModuleHandle = newHandle;
 }
 
-void JUCE_CALLTYPE Process::raisePrivilege()
-{
-    jassertfalse; // xxx not implemented
-}
-
-void JUCE_CALLTYPE Process::lowerPrivilege()
-{
-    jassertfalse; // xxx not implemented
-}
+void JUCE_CALLTYPE Process::raisePrivilege() {}
+void JUCE_CALLTYPE Process::lowerPrivilege() {}
 
 void JUCE_CALLTYPE Process::terminate()
 {

@@ -77,6 +77,7 @@ public:
         MuseReceptorGeneric,        /**< Represents Muse Receptor. */
         pluginval,                  /**< Represents pluginval. */
         Reaper,                     /**< Represents Cockos Reaper. */
+        Reason,                     /**< Represents Reason. */
         Renoise,                    /**< Represents Renoise. */
         SADiE,                      /**< Represents SADiE. */
         SteinbergCubase4,           /**< Represents Steinberg Cubase 4. */
@@ -89,6 +90,7 @@ public:
         SteinbergCubase9,           /**< Represents Steinberg Cubase 9. */
         SteinbergCubase9_5,         /**< Represents Steinberg Cubase 9.5. */
         SteinbergCubase10,          /**< Represents Steinberg Cubase 10. */
+        SteinbergCubase10_5,        /**< Represents Steinberg Cubase 10.5. */
         SteinbergCubaseGeneric,     /**< Represents Steinberg Cubase. */
         SteinbergNuendo3,           /**< Represents Steinberg Nuendo 3. */
         SteinbergNuendo4,           /**< Represents Steinberg Nuendo 4. */
@@ -112,7 +114,8 @@ public:
 
     //==============================================================================
     /** Returns true if the host is any version of Ableton Live. */
-    bool isAbletonLive() const noexcept       { return type == AbletonLive6 || type == AbletonLive7 || type == AbletonLive8 || type == AbletonLive9 || type == AbletonLive10 || type == AbletonLiveGeneric; }
+    bool isAbletonLive() const noexcept       { return type == AbletonLive6 || type == AbletonLive7 || type == AbletonLive8
+                                                      || type == AbletonLive9 || type == AbletonLive10 || type == AbletonLiveGeneric; }
     /** Returns true if the host is Adobe Audition. */
     bool isAdobeAudition() const noexcept     { return type == AdobeAudition; }
     /** Returns true if the host is Ardour. */
@@ -120,7 +123,9 @@ public:
     /** Returns true if the host is Bitwig Studio. */
     bool isBitwigStudio() const noexcept      { return type == BitwigStudio; }
     /** Returns true if the host is any version of Steinberg Cubase. */
-    bool isCubase() const noexcept            { return type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase5Bridged || type == SteinbergCubase6 || type == SteinbergCubase7 || type == SteinbergCubase8 || type == SteinbergCubase8_5 || type == SteinbergCubase9 || type == SteinbergCubase9_5 || type == SteinbergCubase10 || type == SteinbergCubaseGeneric; }
+    bool isCubase() const noexcept            { return type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase5Bridged || type == SteinbergCubase6
+                                                      || type == SteinbergCubase7 || type == SteinbergCubase8 || type == SteinbergCubase8_5 || type == SteinbergCubase9
+                                                      || type == SteinbergCubase9_5 || type == SteinbergCubase10 || type == SteinbergCubase10_5 || type == SteinbergCubaseGeneric; }
     /** Returns true if the host is Steinberg Cubase 7 or later. */
     bool isCubase7orLater() const noexcept    { return isCubase() && ! (type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase6); }
     /** Returns true if the host is Steinberg Cubase 5 Bridged. */
@@ -155,6 +160,8 @@ public:
     bool isReceptor() const noexcept          { return type == MuseReceptorGeneric; }
     /** Returns true if the host is Cockos Reaper. */
     bool isReaper() const noexcept            { return type == Reaper; }
+    /** Returns true if the host is Reason. */
+    bool isReason() const noexcept            { return type == Reason; }
     /** Returns true if the host is Renoise. */
     bool isRenoise() const noexcept           { return type == Renoise; }
     /** Returns true if the host is SADiE. */
@@ -218,6 +225,7 @@ public:
             case MergingPyramix:           return "Pyramix";
             case MuseReceptorGeneric:      return "Muse Receptor";
             case Reaper:                   return "Reaper";
+            case Reason:                   return "Reason";
             case Renoise:                  return "Renoise";
             case SADiE:                    return "SADiE";
             case SteinbergCubase4:         return "Steinberg Cubase 4";
@@ -230,6 +238,7 @@ public:
             case SteinbergCubase9:         return "Steinberg Cubase 9";
             case SteinbergCubase9_5:       return "Steinberg Cubase 9.5";
             case SteinbergCubase10:        return "Steinberg Cubase 10";
+            case SteinbergCubase10_5:      return "Steinberg Cubase 10.5";
             case SteinbergCubaseGeneric:   return "Steinberg Cubase";
             case SteinbergNuendo3:         return "Steinberg Nuendo 3";
             case SteinbergNuendo4:         return "Steinberg Nuendo 4";
@@ -301,11 +310,11 @@ private:
        #if JUCE_MAC
         if (hostPath.containsIgnoreCase       ("Final Cut Pro.app")) return FinalCut;
         if (hostPath.containsIgnoreCase       ("Final Cut Pro Trial.app")) return FinalCut;
-        if (hostPath.containsIgnoreCase       ("Live 6."))           return AbletonLive6;
-        if (hostPath.containsIgnoreCase       ("Live 7."))           return AbletonLive7;
-        if (hostPath.containsIgnoreCase       ("Live 8."))           return AbletonLive8;
-        if (hostPath.containsIgnoreCase       ("Live 9."))           return AbletonLive9;
-        if (hostPath.containsIgnoreCase       ("Live 10."))          return AbletonLive10;
+        if (hostPath.containsIgnoreCase       ("Live 6"))            return AbletonLive6;
+        if (hostPath.containsIgnoreCase       ("Live 7"))            return AbletonLive7;
+        if (hostPath.containsIgnoreCase       ("Live 8"))            return AbletonLive8;
+        if (hostPath.containsIgnoreCase       ("Live 9"))            return AbletonLive9;
+        if (hostPath.containsIgnoreCase       ("Live 10"))           return AbletonLive10;
         if (hostFilename.containsIgnoreCase   ("Live"))              return AbletonLiveGeneric;
         if (hostFilename.containsIgnoreCase   ("Adobe Premiere"))    return AdobePremierePro;
         if (hostFilename.containsIgnoreCase   ("GarageBand"))        return AppleGarageBand;
@@ -325,6 +334,7 @@ private:
         if (hostPath.containsIgnoreCase       ("Cubase 9.app"))      return SteinbergCubase9;
         if (hostPath.containsIgnoreCase       ("Cubase 9.5.app"))    return SteinbergCubase9_5;
         if (hostPath.containsIgnoreCase       ("Cubase 10.app"))     return SteinbergCubase10;
+        if (hostPath.containsIgnoreCase       ("Cubase 10.5.app"))   return SteinbergCubase10_5;
         if (hostFilename.containsIgnoreCase   ("Cubase"))            return SteinbergCubaseGeneric;
         if (hostPath.containsIgnoreCase       ("Wavelab 7"))         return SteinbergWavelab7;
         if (hostPath.containsIgnoreCase       ("Wavelab 8"))         return SteinbergWavelab8;
@@ -332,6 +342,7 @@ private:
         if (hostFilename.containsIgnoreCase   ("WaveBurner"))        return WaveBurner;
         if (hostPath.containsIgnoreCase       ("Digital Performer")) return DigitalPerformer;
         if (hostFilename.containsIgnoreCase   ("reaper"))            return Reaper;
+        if (hostFilename.containsIgnoreCase   ("Reason"))            return Reason;
         if (hostPath.containsIgnoreCase       ("Studio One"))        return StudioOne;
         if (hostFilename.startsWithIgnoreCase ("Waveform"))          return TracktionWaveform;
         if (hostPath.containsIgnoreCase       ("Tracktion 3"))       return Tracktion3;
@@ -344,11 +355,11 @@ private:
         if (hostFilename.containsIgnoreCase   ("AudioPluginHost"))   return JUCEPluginHost;
 
        #elif JUCE_WINDOWS
-        if (hostFilename.containsIgnoreCase   ("Live 6."))           return AbletonLive6;
-        if (hostFilename.containsIgnoreCase   ("Live 7."))           return AbletonLive7;
-        if (hostFilename.containsIgnoreCase   ("Live 8."))           return AbletonLive8;
-        if (hostFilename.containsIgnoreCase   ("Live 9."))           return AbletonLive9;
-        if (hostFilename.containsIgnoreCase   ("Live 10."))          return AbletonLive10;
+        if (hostFilename.containsIgnoreCase   ("Live 6"))            return AbletonLive6;
+        if (hostFilename.containsIgnoreCase   ("Live 7"))            return AbletonLive7;
+        if (hostFilename.containsIgnoreCase   ("Live 8"))            return AbletonLive8;
+        if (hostFilename.containsIgnoreCase   ("Live 9"))            return AbletonLive9;
+        if (hostFilename.containsIgnoreCase   ("Live 10"))           return AbletonLive10;
         if (hostFilename.containsIgnoreCase   ("Live "))             return AbletonLiveGeneric;
         if (hostFilename.containsIgnoreCase   ("Audition"))          return AdobeAudition;
         if (hostFilename.containsIgnoreCase   ("Adobe Premiere"))    return AdobePremierePro;
@@ -374,6 +385,8 @@ private:
             || hostPath.containsIgnoreCase    ("Cubase 9.5"))        return SteinbergCubase9_5;
         if (hostFilename.containsIgnoreCase   ("Cubase9.exe")
             || hostPath.containsIgnoreCase    ("Cubase 9"))          return SteinbergCubase9;
+        if (hostFilename.containsIgnoreCase   ("Cubase10.5.exe")
+            || hostPath.containsIgnoreCase    ("Cubase 10.5"))       return SteinbergCubase10_5;
         if (hostFilename.containsIgnoreCase   ("Cubase10.exe")
             || hostPath.containsIgnoreCase    ("Cubase 10"))         return SteinbergCubase10;
         if (hostFilename.containsIgnoreCase   ("Cubase"))            return SteinbergCubaseGeneric;
@@ -394,6 +407,7 @@ private:
         if (hostPath.containsIgnoreCase       ("Merging Technologies")) return MergingPyramix;
         if (hostFilename.startsWithIgnoreCase ("Sam"))               return MagixSamplitude;
         if (hostFilename.startsWithIgnoreCase ("Sequoia"))           return MagixSequoia;
+        if (hostFilename.containsIgnoreCase   ("Reason"))            return Reason;
         if (hostFilename.containsIgnoreCase   ("Renoise"))           return Renoise;
         if (hostFilename.containsIgnoreCase   ("Resolve"))           return DaVinciResolve;
         if (hostPath.containsIgnoreCase       ("Bitwig Studio"))     return BitwigStudio;

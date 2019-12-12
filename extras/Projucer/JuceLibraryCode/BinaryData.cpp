@@ -6192,7 +6192,7 @@ static const unsigned char temp_binary_data_35[] =
 "public:\r\n"
 "    //==============================================================================\r\n"
 "    %%class_name%% (%%constructor_params%%);\r\n"
-"    ~%%class_name%%();\r\n"
+"    ~%%class_name%%() override;\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
 "    //[UserMethods]     -- You can add your own custom methods in this section.\r\n"
@@ -7846,7 +7846,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x51b49ac5:  numBytes = 6036; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2272; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2126; return jucer_ComponentTemplate_cpp;
-        case 0xfc72fe86:  numBytes = 2042; return jucer_ComponentTemplate_h;
+        case 0xfc72fe86:  numBytes = 2051; return jucer_ComponentTemplate_h;
         case 0x1657b643:  numBytes = 1693; return jucer_ContentCompSimpleTemplate_h;
         case 0x0b66646c:  numBytes = 1190; return jucer_ContentCompTemplate_cpp;
         case 0x6fa10171:  numBytes = 1071; return jucer_ContentCompTemplate_h;

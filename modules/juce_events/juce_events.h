@@ -31,7 +31,7 @@
 
   ID:               juce_events
   vendor:           juce
-  version:          5.4.4
+  version:          5.4.5
   name:             JUCE message and event handling classes
   description:      Classes for running an application's main event loop and sending/receiving messages, timers, etc.
   website:          http://www.juce.com/juce
@@ -50,7 +50,7 @@
 #include <juce_core/juce_core.h>
 
 //==============================================================================
-/** Config: JUCE_EXECUTE_APP_SUSPEND_ON_IOS_BACKGROUND_TASK
+/** Config: JUCE_EXECUTE_APP_SUSPEND_ON_BACKGROUND_TASK
     Will execute your application's suspend method on an iOS background task, giving
     you extra time to save your applications state.
 */

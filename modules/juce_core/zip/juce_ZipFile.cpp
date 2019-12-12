@@ -46,10 +46,10 @@ struct ZipFile::ZipEntryHolder
         entry.uncompressedSize = (int64) readUnalignedLittleEndianInt (buffer + 24);
         streamOffset           = (int64) readUnalignedLittleEndianInt (buffer + 42);
 
-        auto externalFileAttributes = (int32) readUnalignedLittleEndianInt (buffer + 38);
-        auto fileType   = (externalFileAttributes >> 28) & 0xf;
-
+        entry.externalFileAttributes = readUnalignedLittleEndianInt (buffer + 38);
+        auto fileType = (entry.externalFileAttributes >> 28) & 0xf;
         entry.isSymbolicLink = (fileType == 0xA);
+
         entry.filename = String::fromUTF8 (buffer + 46, fileNameLen);
     }
 

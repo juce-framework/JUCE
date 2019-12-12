@@ -49,8 +49,9 @@ public:
         showAlphaChannel    = 1 << 0,   /**< if set, the colour's alpha channel can be changed as well as its RGB. */
 
         showColourAtTop     = 1 << 1,   /**< if set, a swatch of the colour is shown at the top of the component. */
-        showSliders         = 1 << 2,   /**< if set, RGB sliders are shown at the bottom of the component. */
-        showColourspace     = 1 << 3    /**< if set, a big HSV selector is shown. */
+        editableColour      = 1 << 2,   /**< if set, the colour shows at the top of the component is editable. */
+        showSliders         = 1 << 3,   /**< if set, RGB sliders are shown at the bottom of the component. */
+        showColourspace     = 1 << 4    /**< if set, a big HSV selector is shown. */
     };
 
     //==============================================================================
@@ -137,6 +138,7 @@ public:
     // These need to be public otherwise the Projucer's live-build engine will complain
     class ColourSpaceView;
     class HueSelectorComp;
+    class ColourPreviewComp;
 
 private:
     //==============================================================================
@@ -147,10 +149,10 @@ private:
     std::unique_ptr<Slider> sliders[4];
     std::unique_ptr<ColourSpaceView> colourSpace;
     std::unique_ptr<HueSelectorComp> hueSelector;
+    std::unique_ptr<ColourPreviewComp> previewComponent;
     OwnedArray<SwatchComponent> swatchComponents;
     const int flags;
     int edgeGap;
-    Rectangle<int> previewArea;
 
     void setHue (float newH);
     void setSV (float newS, float newV);

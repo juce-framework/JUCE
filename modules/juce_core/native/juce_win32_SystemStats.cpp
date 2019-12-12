@@ -185,32 +185,63 @@ static DebugFlagsInitialiser debugFlagsInitialiser;
 #endif
 
 //==============================================================================
-RTL_OSVERSIONINFOW getWindowsVersionInfo()
-{
-    RTL_OSVERSIONINFOW versionInfo = { 0 };
+#if JUCE_MINGW
+ static uint32 getWindowsVersion()
+ {
+     auto filename = _T("kernel32.dll");
+     DWORD handle = 0;
 
-    if (auto* moduleHandle = ::GetModuleHandleW (L"ntdll.dll"))
-    {
-        using RtlGetVersion = LONG (WINAPI*) (PRTL_OSVERSIONINFOW);
+     if (auto size = GetFileVersionInfoSize (filename, &handle))
+     {
+         HeapBlock<char> data (size);
 
-        if (auto* rtlGetVersion = (RtlGetVersion) ::GetProcAddress (moduleHandle, "RtlGetVersion"))
-        {
-            versionInfo.dwOSVersionInfoSize = sizeof (versionInfo);
-            LONG STATUS_SUCCESS = 0;
+         if (GetFileVersionInfo (filename, handle, size, data))
+         {
+             VS_FIXEDFILEINFO* info = nullptr;
+             UINT verSize = 0;
 
-            if (rtlGetVersion (&versionInfo) != STATUS_SUCCESS)
-                versionInfo = { 0 };
-        }
-    }
+             if (VerQueryValue (data, (LPCTSTR) _T("\\"), (void**) &info, &verSize))
+                 if (size > 0 && info != nullptr && info->dwSignature == 0xfeef04bd)
+                     return (uint32) info->dwFileVersionMS;
+         }
+     }
 
-    return versionInfo;
-}
+     return 0;
+ }
+#else
+ RTL_OSVERSIONINFOW getWindowsVersionInfo()
+ {
+     RTL_OSVERSIONINFOW versionInfo = { 0 };
+
+     if (auto* moduleHandle = ::GetModuleHandleW (L"ntdll.dll"))
+     {
+         using RtlGetVersion = LONG (WINAPI*) (PRTL_OSVERSIONINFOW);
+
+         if (auto* rtlGetVersion = (RtlGetVersion) ::GetProcAddress (moduleHandle, "RtlGetVersion"))
+         {
+             versionInfo.dwOSVersionInfoSize = sizeof (versionInfo);
+             LONG STATUS_SUCCESS = 0;
+
+             if (rtlGetVersion (&versionInfo) != STATUS_SUCCESS)
+                 versionInfo = { 0 };
+         }
+     }
+
+     return versionInfo;
+ }
+#endif
 
 SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
 {
+   #if JUCE_MINGW
+    auto v = getWindowsVersion();
+    auto major = (v >> 16) & 0xff;
+    auto minor = (v >> 0)  & 0xff;
+   #else
     auto versionInfo = getWindowsVersionInfo();
     auto major = versionInfo.dwMajorVersion;
     auto minor = versionInfo.dwMinorVersion;
+   #endif
 
     jassert (major <= 10); // need to add support for new version!
 

@@ -82,7 +82,7 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
                 break;
         }
 
-        fileStream->flush();
+        fileStream.reset();
 
         if (threadShouldExit() || stream->isError())
             error = true;
@@ -97,7 +97,7 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
     }
 
     //==============================================================================
-    const std::unique_ptr<FileOutputStream> fileStream;
+    std::unique_ptr<FileOutputStream> fileStream;
     const std::unique_ptr<WebInputStream> stream;
     const size_t bufferSize;
     HeapBlock<char> buffer;
