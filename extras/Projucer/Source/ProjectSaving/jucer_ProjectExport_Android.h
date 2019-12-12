@@ -1220,15 +1220,6 @@ private:
         return getActivityClassString().replaceCharacter ('.', '/');
     }
 
-    static LibraryModule* getCoreModule (const OwnedArray<LibraryModule>& modules)
-    {
-        for (int i = modules.size(); --i >= 0;)
-            if (modules.getUnchecked (i)->getID() == "juce_core")
-                return modules.getUnchecked (i);
-
-        return nullptr;
-    }
-
     //==============================================================================
     String getNativeModuleBinaryName (const AndroidBuildConfiguration& config) const
     {
