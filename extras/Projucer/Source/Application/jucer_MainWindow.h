@@ -50,14 +50,15 @@ public:
     //==============================================================================
     bool canOpenFile (const File& file) const;
     bool openFile (const File& file);
-    void setProject (Project* newProject);
-    Project* getProject() const                 { return currentProject.get(); }
+
+    void setProject (std::unique_ptr<Project> newProject);
+    Project* getProject() const  { return currentProject.get(); }
+
     bool tryToOpenPIP (const File& f);
 
     void makeVisible();
     void restoreWindowPosition();
-    bool closeProject (Project* project, bool askToSave = true);
-    bool closeCurrentProject();
+    bool closeCurrentProject (bool askToSave);
     void moveProject (File newProjectFile);
 
     void showStartPage();
@@ -118,7 +119,7 @@ public:
     void reopenLastProjects();
     void saveCurrentlyOpenProjectList();
 
-    void avoidSuperimposedWindows (MainWindow*);
+    void checkWindowBounds (MainWindow*);
 
     void sendLookAndFeelChange();
 

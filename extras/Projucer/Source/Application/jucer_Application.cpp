@@ -1165,7 +1165,7 @@ void ProjucerApplication::createNewProject()
     auto* mw = mainWindowList.getOrCreateEmptyWindow();
     mw->showStartPage();
 
-    mainWindowList.avoidSuperimposedWindows (mw);
+    mainWindowList.checkWindowBounds (mw);
 }
 
 void ProjucerApplication::createNewProjectFromClipboard()
