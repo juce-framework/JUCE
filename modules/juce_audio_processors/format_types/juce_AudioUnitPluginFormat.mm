@@ -1823,7 +1823,10 @@ private:
                 if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_ParameterList)
                     updateHostDisplay();
                 else if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_PresentPreset)
+                {
                     sendAllParametersChangedEvents();
+                    updateHostDisplay();
+                }
                 else if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_Latency)
                     updateLatency();
                 else if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_BypassEffect)
