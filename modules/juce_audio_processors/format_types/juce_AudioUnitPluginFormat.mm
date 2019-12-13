@@ -1270,7 +1270,20 @@ public:
         CFArrayRef presets;
         UInt32 sz = sizeof (CFArrayRef);
 
-        if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_FactoryPresets,
+        if (index == -1)
+        {
+            AUPreset current;
+            current.presetNumber = -1;
+            current.presetName = CFSTR("");
+            
+            UInt32 prstsz = sizeof (AUPreset);
+            
+            AudioUnitGetProperty (audioUnit, kAudioUnitProperty_PresentPreset,
+                                  kAudioUnitScope_Global, 0, &current, &prstsz);
+            
+            s = String::fromCFString (current.presetName);
+        }
+        else if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_FactoryPresets,
                                   kAudioUnitScope_Global, 0, &presets, &sz) == noErr)
         {
             for (CFIndex i = 0; i < CFArrayGetCount (presets); ++i)
