@@ -145,7 +145,8 @@ public:
 
         const std::unique_ptr<AudioProcessor> processor;
         Array<Connection> inputs, outputs;
-        std::atomic<bool> isPrepared { false }, bypassed { false };
+        bool isPrepared = false;
+        std::atomic<bool> bypassed { false };
 
         Node (NodeID, std::unique_ptr<AudioProcessor>) noexcept;
 
