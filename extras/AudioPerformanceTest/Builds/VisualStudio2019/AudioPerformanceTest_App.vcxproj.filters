@@ -1201,6 +1201,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\threads\juce_TimeSliceThread.cpp">
       <Filter>JUCE Modules\juce_core\threads</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\threads\juce_WaitableEvent.cpp">
+      <Filter>JUCE Modules\juce_core\threads</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\time\juce_PerformanceCounter.cpp">
       <Filter>JUCE Modules\juce_core\time</Filter>
     </ClCompile>

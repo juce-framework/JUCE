@@ -685,6 +685,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/threads/juce_ThreadPool.h"
     "../../../../../modules/juce_core/threads/juce_TimeSliceThread.cpp"
     "../../../../../modules/juce_core/threads/juce_TimeSliceThread.h"
+    "../../../../../modules/juce_core/threads/juce_WaitableEvent.cpp"
     "../../../../../modules/juce_core/threads/juce_WaitableEvent.h"
     "../../../../../modules/juce_core/time/juce_PerformanceCounter.cpp"
     "../../../../../modules/juce_core/time/juce_PerformanceCounter.h"
@@ -1975,6 +1976,7 @@ set_source_files_properties("../../../../../modules/juce_core/threads/juce_Threa
 set_source_files_properties("../../../../../modules/juce_core/threads/juce_ThreadPool.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/threads/juce_TimeSliceThread.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/threads/juce_TimeSliceThread.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/threads/juce_WaitableEvent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/threads/juce_WaitableEvent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/time/juce_PerformanceCounter.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/time/juce_PerformanceCounter.h" PROPERTIES HEADER_FILE_ONLY TRUE)
