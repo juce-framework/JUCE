@@ -1256,7 +1256,18 @@ public:
     {
         AUPreset current;
         current.presetNumber = newIndex;
-        current.presetName = CFSTR("");
+
+        CFArrayRef presets;
+        UInt32 sz = sizeof (CFArrayRef);
+
+        if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_FactoryPresets,
+                                  kAudioUnitScope_Global, 0, &presets, &sz) == noErr)
+        {
+            if (auto* p = (const AUPreset*) CFArrayGetValueAtIndex (presets, newIndex))
+                current.presetName = p->presetName;
+
+            CFRelease (presets);
+        }
 
         AudioUnitSetProperty (audioUnit, kAudioUnitProperty_PresentPreset,
                               kAudioUnitScope_Global, 0, &current, sizeof (AUPreset));
@@ -1270,12 +1281,25 @@ public:
         CFArrayRef presets;
         UInt32 sz = sizeof (CFArrayRef);
 
-        if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_FactoryPresets,
-                                  kAudioUnitScope_Global, 0, &presets, &sz) == noErr)
+        if (index == -1)
+        {
+            AUPreset current;
+            current.presetNumber = -1;
+            current.presetName = CFSTR("");
+
+            UInt32 prstsz = sizeof (AUPreset);
+
+            AudioUnitGetProperty (audioUnit, kAudioUnitProperty_PresentPreset,
+                                  kAudioUnitScope_Global, 0, &current, &prstsz);
+
+            s = String::fromCFString (current.presetName);
+        }
+        else if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_FactoryPresets,
+                                       kAudioUnitScope_Global, 0, &presets, &sz) == noErr)
         {
             for (CFIndex i = 0; i < CFArrayGetCount (presets); ++i)
             {
-                if (const AUPreset* p = (const AUPreset*) CFArrayGetValueAtIndex (presets, i))
+                if (auto* p = (const AUPreset*) CFArrayGetValueAtIndex (presets, i))
                 {
                     if (p->presetNumber == index)
                     {
@@ -1808,14 +1832,23 @@ private:
 
             default:
                 if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_ParameterList)
+                {
                     updateHostDisplay();
+                }
                 else if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_PresentPreset)
+                {
                     sendAllParametersChangedEvents();
+                    updateHostDisplay();
+                }
                 else if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_Latency)
+                {
                     updateLatency();
+                }
                 else if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_BypassEffect)
+                {
                     if (bypassParam != nullptr)
                         bypassParam->setValueNotifyingHost (bypassParam->getValue());
+                }
 
                 break;
         }
