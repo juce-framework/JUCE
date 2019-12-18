@@ -149,6 +149,8 @@ void CPUInformation::initialise() noexcept
     auto flags = getCpuInfo ("flags");
 
     hasMMX             = flags.contains ("mmx");
+    hasFMA3            = flags.contains ("fma");
+    hasFMA4            = flags.contains ("fma4");
     hasSSE             = flags.contains ("sse");
     hasSSE2            = flags.contains ("sse2");
     hasSSE3            = flags.contains ("sse3");
