@@ -243,13 +243,6 @@
 			path = "../../../../modules/juce_audio_utils";
 			sourceTree = "SOURCE_ROOT";
 		};
-		0CCFDC1D1C7B8A12BF4822F1 = {
-			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
-			name = DemoRunner.entitlements;
-			path = DemoRunner.entitlements;
-			sourceTree = "SOURCE_ROOT";
-		};
 		0ECB4FCD24794CE516792552 = {
 			isa = PBXFileReference;
 			lastKnownFileType = folder;
@@ -304,6 +297,13 @@
 			lastKnownFileType = sourcecode.cpp.cpp;
 			name = Main.cpp;
 			path = ../../Source/Main.cpp;
+			sourceTree = "SOURCE_ROOT";
+		};
+		2CDA0CB288452DA016E874BC = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			name = App.entitlements;
+			path = App.entitlements;
 			sourceTree = "SOURCE_ROOT";
 		};
 		346450C70C964FD9640B6086 = {
