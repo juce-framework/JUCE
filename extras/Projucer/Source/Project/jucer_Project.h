@@ -109,6 +109,9 @@ public:
     String getDefaultBundleIdentifierString() const;
     String getDefaultAAXIdentifierString() const         { return getDefaultBundleIdentifierString(); }
     String getDefaultPluginManufacturerString() const;
+    String getDefaultARAFactoryIDString() const;
+    String getDefaultARADocumentArchiveID() const;
+    String getDefaultARACompatibleArchiveIDs() const;
 
     String getCompanyNameString() const                  { return companyNameValue.get(); }
     String getCompanyCopyrightString() const             { return companyCopyrightValue.get(); }
@@ -144,7 +147,12 @@ public:
     String getPluginCodeString() const                { return pluginCodeValue.get(); }
     String getPluginChannelConfigsString() const      { return pluginChannelConfigsValue.get(); }
     String getAAXIdentifierString() const             { return pluginAAXIdentifierValue.get(); }
+    String getARAFactoryIDString () const { return pluginARAFactoryIDValue.get (); }
+    String getARADocumentArchiveIDString () const { return pluginARAArchiveIDValue.get (); }
     String getPluginAUExportPrefixString() const      { return pluginAUExportPrefixValue.get(); }
+
+    String getPluginAUMainTypeString() const          { return pluginAUMainTypeValue.get(); }
+    String getARACompatibleArchiveIDStrings () const        { return pluginARACompatibleArchiveIDsValue.get (); }
     String getVSTNumMIDIInputsString() const          { return pluginVSTNumMidiInputsValue.get(); }
     String getVSTNumMIDIOutputsString() const         { return pluginVSTNumMidiOutputsValue.get(); }
 
@@ -172,6 +180,7 @@ public:
     bool shouldBuildStandalonePlugin() const          { return checkMultiChoiceVar (pluginFormatsValue, Ids::buildStandalone); }
     bool shouldBuildUnityPlugin() const               { return checkMultiChoiceVar (pluginFormatsValue, Ids::buildUnity); }
     bool shouldEnableIAA() const                      { return checkMultiChoiceVar (pluginFormatsValue, Ids::enableIAA); }
+    bool shouldEnableARA() const                      { return checkMultiChoiceVar (pluginFormatsValue, Ids::enableARA) || getProjectType().isARAAudioPlugin(); }
 
     //==============================================================================
     bool isPluginSynth() const                        { return checkMultiChoiceVar (pluginCharacteristicsValue, Ids::pluginIsSynth); }
@@ -204,12 +213,23 @@ public:
     static Array<var> getAllRTASCategoryVars() noexcept;
     Array<var> getDefaultRTASCategories() const noexcept;
 
+    bool getDefaultEnableARA() const noexcept;
+    static StringArray getAllARAContentTypeStrings() noexcept;
+    static Array<var> getAllARAContentTypeVars() noexcept;
+    Array<var> getDefaultARAContentTypes() const noexcept;
+
+    static StringArray getAllARATransformationFlagStrings() noexcept;
+    static Array<var> getAllARATransformationFlagVars() noexcept;
+    Array<var> getDefaultARATransformationFlags() const noexcept;
+
     String getAUMainTypeString() const noexcept;
     bool isAUSandBoxSafe() const noexcept;
     String getVSTCategoryString() const noexcept;
     String getVST3CategoryString() const noexcept;
     int getAAXCategory() const noexcept;
     int getRTASCategory() const noexcept;
+    int getARAContentTypes() const noexcept;
+    int getARATransformationFlags() const noexcept;
 
     String getIAATypeCode();
     String getIAAPluginName();
@@ -227,6 +247,7 @@ public:
     bool isAUPluginHost();
     bool isVSTPluginHost();
     bool isVST3PluginHost();
+    bool isARAPluginHost();
 
     //==============================================================================
     bool shouldBuildTargetType (ProjectType::Target::Type targetType) const noexcept;
@@ -434,6 +455,7 @@ private:
     ValueWithDefault pluginFormatsValue, pluginNameValue, pluginDescriptionValue, pluginManufacturerValue, pluginManufacturerCodeValue,
                      pluginCodeValue, pluginChannelConfigsValue, pluginCharacteristicsValue, pluginAUExportPrefixValue, pluginAAXIdentifierValue,
                      pluginAUMainTypeValue, pluginAUSandboxSafeValue, pluginRTASCategoryValue, pluginVSTCategoryValue, pluginVST3CategoryValue, pluginAAXCategoryValue,
+                     pluginEnableARA, pluginARAAnalyzableContentValue, pluginARAFactoryIDValue, pluginARAArchiveIDValue, pluginARACompatibleArchiveIDsValue, pluginARATransformFlagsValue,
                      pluginVSTNumMidiInputsValue, pluginVSTNumMidiOutputsValue;
 
     //==============================================================================

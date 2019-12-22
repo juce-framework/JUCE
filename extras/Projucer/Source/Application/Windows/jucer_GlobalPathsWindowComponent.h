@@ -210,12 +210,14 @@ private:
         builder.add (new FilePathPropertyComponent (vst3PathValue, "VST3 SDK", true, isThisOS),
                      "This path can be set to use a custom VST3 SDK instead of the one which is embedded in JUCE.");
 
-        if (getSelectedOS() != TargetOS::linux)
+        if (getSelectedOS () != TargetOS::linux)
         {
             builder.add (new FilePathPropertyComponent (aaxPathValue, "AAX SDK", true, isThisOS),
                          "If you are building AAX plug-ins, this should be the path to the AAX SDK folder.");
             builder.add (new FilePathPropertyComponent (rtasPathValue, "RTAS SDK (deprecated)", true, isThisOS),
                          "If you are building RTAS plug-ins, this should be the path to the RTAS SDK folder.");
+            builder.add (new FilePathPropertyComponent (araPathValue, "ARA SDK", true, isThisOS),
+                         "If you are building ARA enabled plug-ins, this should be the path to the ARA SDK folder.");
         }
 
         builder.add (new FilePathPropertyComponent (androidSDKPathValue, "Android SDK", true, isThisOS),
@@ -264,6 +266,7 @@ private:
         vst3PathValue             = settings.getStoredPath (Ids::vst3Path, os);
         rtasPathValue             = settings.getStoredPath (Ids::rtasPath, os);
         aaxPathValue              = settings.getStoredPath (Ids::aaxPath, os);
+        araPathValue              = settings.getStoredPath (Ids::araPath, os);
         androidSDKPathValue       = settings.getStoredPath (Ids::androidSDKPath, os);
         androidNDKPathValue       = settings.getStoredPath (Ids::androidNDKPath, os);
         clionExePathValue         = settings.getStoredPath (Ids::clionExePath, os);
@@ -279,6 +282,7 @@ private:
         vst3PathValue            .resetToDefault();
         rtasPathValue            .resetToDefault();
         aaxPathValue             .resetToDefault();
+        araPathValue             .resetToDefault ();
         androidSDKPathValue      .resetToDefault();
         androidNDKPathValue      .resetToDefault();
         clionExePathValue        .resetToDefault();
@@ -293,7 +297,8 @@ private:
     ValueWithDefault jucePathValue, juceModulePathValue, userModulePathValue,
                      vst3PathValue, vstPathValue, rtasPathValue, aaxPathValue,
                      androidSDKPathValue, androidNDKPathValue,
-                     clionExePathValue, androidStudioExePathValue;
+                     clionExePathValue, androidStudioExePathValue,
+                     araPathValue;
 
     Viewport propertyViewport;
     PropertyGroupComponent propertyGroup  { "Global Paths", { getIcons().openFolder, Colours::transparentBlack } };

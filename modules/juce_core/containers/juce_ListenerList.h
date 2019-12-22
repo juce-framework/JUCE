@@ -173,6 +173,34 @@ public:
         }
     }
 
+    /** Same as the call function with the added feature of allowing listeners
+        to safely remove themselves from the listener list without bailing out
+    */
+    // TODO JUCE_ARA see discussion of the need for something like this here:
+    // https://forum.juce.com/t/listenerlist-issue-need-reliable-notifications-if-adding-removing-listeners-from-within-a-callback/30361
+    template <typename Callback>
+    void callExpectingUnregistration (Callback&& callback)
+    {
+        typename ArrayType::ScopedLockType lock (listeners.getLock());
+
+        if (listeners.isEmpty())
+            return;
+
+        if (listeners.size() == 1)
+        {
+            // if there's but one listener, we can skip copying the array
+            callback (*listeners.getFirst());
+            return;
+        }
+
+        auto listenersCopy (listeners);
+        for (auto l : listenersCopy)
+        {
+            if (contains (l))
+                callback (*l);
+        }
+    }
+
     //==============================================================================
     /** A dummy bail-out checker that always returns false.
         See the ListenerList notes for more info about bail-out checkers.

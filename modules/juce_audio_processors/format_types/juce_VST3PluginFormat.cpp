@@ -29,6 +29,19 @@
 #include "juce_VST3Headers.h"
 #include "juce_VST3Common.h"
 
+#if JUCE_PLUGINHOST_ARA
+#include "ARA_API/ARAVST3.h"
+#include "ARA_Library/Dispatch/ARAHostDispatch.h"
+
+namespace ARA
+{
+    DEF_CLASS_IID (IMainFactory)
+    DEF_CLASS_IID (IPlugInEntryPoint)
+    DEF_CLASS_IID (IPlugInEntryPoint2)
+}
+
+#endif
+
 namespace juce
 {
 
@@ -103,7 +116,8 @@ static void fillDescriptionWith (PluginDescription& description, ObjectType& obj
 static void createPluginDescription (PluginDescription& description,
                                      const File& pluginFile, const String& company, const String& name,
                                      const PClassInfo& info, PClassInfo2* info2, PClassInfoW* infoW,
-                                     int numInputs, int numOutputs)
+                                     int numInputs, int numOutputs, 
+                                     bool isARAEnabled)
 {
     description.fileOrIdentifier    = pluginFile.getFullPathName();
     description.lastFileModTime     = pluginFile.getLastModificationTime();
@@ -123,6 +137,42 @@ static void createPluginDescription (PluginDescription& description,
         description.category = toString (info.category).trim();
 
     description.isInstrument = description.category.containsIgnoreCase ("Instrument"); // This seems to be the only way to find that out! ARGH!
+
+    description.isARAEnabled = isARAEnabled;
+}
+
+static bool doesComponentHaveARAEntryPoint(Vst::IComponent* component)
+{
+    if (!component)
+        return false;
+
+    bool isARASupported = false;
+
+#if JUCE_PLUGINHOST_ARA
+    ARA::IPlugInEntryPoint * entry1 = nullptr;
+    if ((component->queryInterface (ARA::IPlugInEntryPoint::iid, (void**)&entry1) == kResultTrue) && (entry1 != nullptr))
+    {
+        auto araFactory = entry1->getFactory();
+        if (araFactory->highestSupportedApiGeneration >= ARA::kARAAPIGeneration_2_0_Draft)
+        {
+            ARA::IPlugInEntryPoint2 * entry2 = nullptr;
+            if ((component->queryInterface (ARA::IPlugInEntryPoint2::iid, (void**)&entry2) == kResultTrue) && (entry2 != nullptr))
+            {
+                entry2->release();
+                isARASupported = true;
+            }
+        }
+#if ARA_SUPPORT_VERSION_1
+        else
+        {
+            isARASupported = true;
+        }
+#endif
+        entry1->release();
+    }
+#endif
+
+    return isARASupported;
 }
 
 static int getNumSingleDirectionBusesFor (Vst::IComponent* component,
@@ -759,7 +809,8 @@ struct DescriptionFactory
                         auto numOutputs = getNumSingleDirectionChannelsFor (component, false, true);
 
                         createPluginDescription (desc, file, companyName, name,
-                                                 info, info2.get(), infoW.get(), numInputs, numOutputs);
+                                                 info, info2.get(), infoW.get(), numInputs, numOutputs,
+                                                 doesComponentHaveARAEntryPoint (component));
 
                         component->terminate();
                     }
@@ -1510,7 +1561,8 @@ struct VST3ComponentHolder
                                      factoryInfo.vendor, module->name,
                                      info, info2.get(), infoW.get(),
                                      totalNumInputChannels,
-                                     totalNumOutputChannels);
+                                     totalNumOutputChannels, 
+                                     doesComponentHaveARAEntryPoint (component));
 
             return;
         }
@@ -2253,9 +2305,16 @@ public:
         if (holder->component != nullptr && processor != nullptr)
         {
             processor->setProcessing (false);
-            holder->component->setActive (false);
 
-            holder->component->setActive (true);
+            // calling setActive() here is unnecessary, and kills ARA performance
+            // https://forum.juce.com/t/vst3-hosting-calling-setactive-in-reset-should-not-be-necessary-kills-performance/30723
+            // we keep it just for the non-ARA case, in order not to break old, misbehaving plug-ins
+            if (! doesComponentHaveARAEntryPoint (holder->component))
+            {
+                holder->component->setActive (false);
+                holder->component->setActive (true);
+            }
+
             processor->setProcessing (true);
         }
     }

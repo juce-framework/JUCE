@@ -128,3 +128,11 @@
 
 #include "utility/juce_PluginHostType.h"
 #include "VST/juce_VSTCallbackHandler.h"
+
+#if JucePlugin_Enable_ARA
+ #include "ARA/juce_ARAModelObjects.h"
+ #include "ARA/juce_ARADocumentController.h"
+ #include "ARA/juce_AudioProcessor_ARAExtensions.h"
+ #include "ARA/juce_ARAAudioReaders.h"
+ #include "ARA/juce_ARAPlugInInstanceRoles.h"
+#endif

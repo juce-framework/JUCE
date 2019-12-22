@@ -193,6 +193,12 @@
               file="Source/BinaryData/Icons/wizard_StaticLibrary.svg"/>
       </GROUP>
       <GROUP id="{D5514787-89A7-C727-422F-2BF9D9C6CF70}" name="Templates">
+        <GROUP id="{658A86BE-76D7-2939-FC1B-570246E9B968}" name="ARA">
+          <FILE id="VZpjwH" name="jucer_AudioPluginARADocumentControllerTemplate.cpp"
+                compile="0" resource="1" file="Source/BinaryData/Templates/ARA/jucer_AudioPluginARADocumentControllerTemplate.cpp"/>
+          <FILE id="tpUhjv" name="jucer_AudioPluginARADocumentControllerTemplate.h"
+                compile="0" resource="1" file="Source/BinaryData/Templates/ARA/jucer_AudioPluginARADocumentControllerTemplate.h"/>
+        </GROUP>
         <FILE id="thU560" name="jucer_AnimatedComponentSimpleTemplate.h" compile="0"
               resource="1" file="Source/BinaryData/Templates/jucer_AnimatedComponentSimpleTemplate.h"/>
         <FILE id="GCUpe7" name="jucer_AnimatedComponentTemplate.cpp" compile="0"

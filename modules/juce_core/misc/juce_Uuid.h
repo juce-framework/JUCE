@@ -80,6 +80,11 @@ public:
     */
     String toDashedString() const;
 
+    /** Returns a stringified version of this UUID, declared as a initializer-list array.
+    @returns a string in the format: { xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx }
+    */
+    String toArrayString() const;
+
     /** Creates an ID from an encoded string version.
         @see toString
     */
