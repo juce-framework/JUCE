@@ -210,7 +210,7 @@ private:
         builder.add (new FilePathPropertyComponent (vst3PathValue, "VST3 SDK", true, isThisOS),
                      "This path can be set to use a custom VST3 SDK instead of the one which is embedded in JUCE.");
 
-        if (getSelectedOS () != TargetOS::linux)
+        if (getSelectedOS() != TargetOS::linux)
         {
             builder.add (new FilePathPropertyComponent (aaxPathValue, "AAX SDK", true, isThisOS),
                          "If you are building AAX plug-ins, this should be the path to the AAX SDK folder.");
@@ -282,7 +282,7 @@ private:
         vst3PathValue            .resetToDefault();
         rtasPathValue            .resetToDefault();
         aaxPathValue             .resetToDefault();
-        araPathValue             .resetToDefault ();
+        araPathValue             .resetToDefault();
         androidSDKPathValue      .resetToDefault();
         androidNDKPathValue      .resetToDefault();
         clionExePathValue        .resetToDefault();

@@ -252,9 +252,9 @@ void Project::initialiseProjectValues()
 
 void Project::initialiseAudioPluginValues()
 {
-    // TODO JUCE_ARA this gets called before the project type has been set, 
+    // TODO JUCE_ARA this gets called before the project type has been set,
     // so we don't yet know if we're an ARA plug-in - should the Wizard fix this?
-    Array<var> defaultFormats (Ids::buildVST3.toString (), Ids::buildAU.toString ());
+    Array<var> defaultFormats (Ids::buildVST3.toString(), Ids::buildAU.toString());
     if (! shouldEnableARA())
         defaultFormats.add (Ids::buildStandalone.toString());
 
@@ -281,8 +281,8 @@ void Project::initialiseAudioPluginValues()
     pluginAAXCategoryValue.referTo           (projectRoot, Ids::pluginAAXCategory,          getUndoManager(), getDefaultAAXCategories(),  ",");
 
     pluginEnableARA.referTo                  (projectRoot, Ids::enableARA,                  getUndoManager(),  shouldEnableARA(), ",");
-    pluginARAAnalyzableContentValue.referTo  (projectRoot, Ids::pluginARAAnalyzableContent, getUndoManager (), getDefaultARAContentTypes(), ",");
-    pluginARATransformFlagsValue.referTo     (projectRoot, Ids::pluginARATransformFlags,    getUndoManager (), getDefaultARATransformationFlags(), ",");
+    pluginARAAnalyzableContentValue.referTo  (projectRoot, Ids::pluginARAAnalyzableContent, getUndoManager(), getDefaultARAContentTypes(), ",");
+    pluginARATransformFlagsValue.referTo     (projectRoot, Ids::pluginARATransformFlags,    getUndoManager(), getDefaultARATransformationFlags(), ",");
     pluginARACompatibleArchiveIDsValue.referTo (projectRoot, Ids::araCompatibleArchiveIDs,    getUndoManager(), getDefaultARACompatibleArchiveIDs());
 
     pluginVSTNumMidiInputsValue.referTo      (projectRoot, Ids::pluginVSTNumMidiInputs,     getUndoManager(), 16);
@@ -2203,7 +2203,7 @@ static StringArray getModulePathsFromExporters (Project& project, bool onlyThisO
 
     for (Project::ExporterIterator exporter (project); exporter.next();)
     {
-        if (onlyThisOS && !exporter->mayCompileOnCurrentOS ())
+        if (onlyThisOS && ! exporter->mayCompileOnCurrentOS())
             continue;
         auto& modules = project.getEnabledModules();
         auto n = modules.getNumModules();
