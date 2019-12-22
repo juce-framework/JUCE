@@ -536,7 +536,7 @@ public:
                 }
             }
 
-            Steinberg::Vst::Event e = { 0 };
+            Steinberg::Vst::Event e{};
 
             if (msg.isNoteOn())
             {

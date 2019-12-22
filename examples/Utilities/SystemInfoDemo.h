@@ -149,6 +149,8 @@ static String getAllSystemInfo()
       << "CPU model:               " << SystemStats::getCpuModel()  << newLine
       << "CPU speed:               " << SystemStats::getCpuSpeedInMegahertz() << " MHz" << newLine
       << "CPU has MMX:             " << (SystemStats::hasMMX()             ? "yes" : "no") << newLine
+      << "CPU has FMA3:            " << (SystemStats::hasFMA3()            ? "yes" : "no") << newLine
+      << "CPU has FMA4:            " << (SystemStats::hasFMA4()            ? "yes" : "no") << newLine
       << "CPU has SSE:             " << (SystemStats::hasSSE()             ? "yes" : "no") << newLine
       << "CPU has SSE2:            " << (SystemStats::hasSSE2()            ? "yes" : "no") << newLine
       << "CPU has SSE3:            " << (SystemStats::hasSSE3()            ? "yes" : "no") << newLine

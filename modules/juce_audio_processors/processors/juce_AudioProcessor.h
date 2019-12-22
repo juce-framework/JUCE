@@ -1456,7 +1456,7 @@ protected:
 
     //==============================================================================
     /** @internal */
-    AudioPlayHead* playHead = nullptr;
+    std::atomic<AudioPlayHead*> playHead { nullptr };
 
 #if RANDOM_AUDIO_ACCESS_SUPPORTED
     /** @internal */

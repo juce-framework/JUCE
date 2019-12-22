@@ -2561,7 +2561,7 @@ private:
 
             for (int i = 1; i < numUnits; ++i)
             {
-                Vst::UnitInfo ui = { 0 };
+                Vst::UnitInfo ui{};
                 unitInfo->getUnitInfo (i, ui);
                 infoMap[ui.id] = std::move (ui);
             }
@@ -2777,7 +2777,7 @@ private:
 
     Vst::ParameterInfo getParameterInfoForIndex (int index) const
     {
-        Vst::ParameterInfo paramInfo = { 0 };
+        Vst::ParameterInfo paramInfo{};
 
         if (processor != nullptr)
             editController->getParameterInfo (index, paramInfo);
@@ -2787,7 +2787,7 @@ private:
 
     Vst::ProgramListInfo getProgramListInfo (int index) const
     {
-        Vst::ProgramListInfo paramInfo = { 0 };
+        Vst::ProgramListInfo paramInfo{};
 
         if (unitInfo != nullptr)
             unitInfo->getProgramListInfo (index, paramInfo);
@@ -2803,7 +2803,7 @@ private:
             return;
 
         Vst::UnitID programUnitID;
-        Vst::ParameterInfo paramInfo = { 0 };
+        Vst::ParameterInfo paramInfo{};
 
         {
             int idx, num = editController->getParameterCount();
@@ -2822,7 +2822,7 @@ private:
 
         if (unitInfo != nullptr)
         {
-            Vst::UnitInfo uInfo = { 0 };
+            Vst::UnitInfo uInfo{};
             const int unitCount = unitInfo->getUnitCount();
 
             for (int idx = 0; idx < unitCount; ++idx)
@@ -2834,7 +2834,7 @@ private:
 
                     for (int j = 0; j < programListCount; ++j)
                     {
-                        Vst::ProgramListInfo programListInfo = { 0 };
+                        Vst::ProgramListInfo programListInfo{};
 
                         if (unitInfo->getProgramListInfo (j, programListInfo) == kResultOk
                               && programListInfo.id == uInfo.programListId)

@@ -1462,6 +1462,13 @@
 			path = "../../Source/BinaryData/Templates/jucer_NewComponentTemplate.cpp";
 			sourceTree = "SOURCE_ROOT";
 		};
+		834B0B0A61FE876871A9F311 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			name = App.entitlements;
+			path = App.entitlements;
+			sourceTree = "SOURCE_ROOT";
+		};
 		842427CFE565F3FCE5B99174 = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
@@ -1971,13 +1978,6 @@
 			lastKnownFileType = file;
 			name = "juce_graphics";
 			path = "../../../../modules/juce_graphics";
-			sourceTree = "SOURCE_ROOT";
-		};
-		B7017BD3427B46FBAAAE448A = {
-			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
-			name = Projucer.entitlements;
-			path = Projucer.entitlements;
 			sourceTree = "SOURCE_ROOT";
 		};
 		B8385E9A644BD3CD94876448 = {

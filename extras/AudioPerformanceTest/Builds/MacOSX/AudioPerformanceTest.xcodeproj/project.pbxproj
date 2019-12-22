@@ -336,13 +336,6 @@
 			path = "../../JuceLibraryCode/include_juce_audio_utils.mm";
 			sourceTree = "SOURCE_ROOT";
 		};
-		C3BE13F50343166A30728D8A = {
-			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
-			name = AudioPerformanceTest.entitlements;
-			path = AudioPerformanceTest.entitlements;
-			sourceTree = "SOURCE_ROOT";
-		};
 		C8EE61FDD1F06817A014B881 = {
 			isa = PBXFileReference;
 			lastKnownFileType = file;
@@ -384,6 +377,13 @@
 			name = DiscRecording.framework;
 			path = System/Library/Frameworks/DiscRecording.framework;
 			sourceTree = SDKROOT;
+		};
+		F9E591FD0A75BCD9F600120A = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			name = App.entitlements;
+			path = App.entitlements;
+			sourceTree = "SOURCE_ROOT";
 		};
 		FAAB4EAE4A57B642D3B9EC23 = {
 			isa = PBXFileReference;

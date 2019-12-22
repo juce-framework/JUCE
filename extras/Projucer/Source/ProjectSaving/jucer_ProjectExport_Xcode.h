@@ -977,6 +977,11 @@ public:
             return String ("Info-") + String (getName()).replace (" ", "_") + String (".plist");
         }
 
+        String getEntitlementsFilename() const
+        {
+            return String (getName()).replace (" ", "_") + String (".entitlements");
+        }
+
         String xcodePackageType, xcodeBundleSignature, xcodeBundleExtension;
         String xcodeProductType, xcodeFileType;
         String xcodeOtherRezFlags, xcodeBundleIDSubPath;
@@ -1360,7 +1365,7 @@ public:
                 s.set ("DEVELOPMENT_TEAM", owner.getDevelopmentTeamIDString());
 
             if (shouldAddEntitlements())
-                s.set ("CODE_SIGN_ENTITLEMENTS", owner.getEntitlementsFileName().quoted());
+                s.set ("CODE_SIGN_ENTITLEMENTS", getEntitlementsFilename().quoted());
 
             {
                 auto cppStandard = owner.project.getCppStandardString();
@@ -2140,7 +2145,8 @@ private:
 
     void addFilesAndGroupsToProject (StringArray& topLevelGroupIDs) const
     {
-        addEntitlementsFile();
+        for (auto* target : targets)
+            addEntitlementsFile (*target);
 
         for (auto& group : getAllGroups())
         {
@@ -3093,12 +3099,7 @@ private:
         return {};
     }
 
-    String getEntitlementsFileName() const
-    {
-        return project.getProjectFilenameRootString() + String (".entitlements");
-    }
-
-    StringPairArray getEntitlements() const
+    StringPairArray getEntitlements (XcodeTarget& target) const
     {
         StringPairArray entitlements;
 
@@ -3109,7 +3110,7 @@ private:
                 if (project.shouldEnableIAA())
                     entitlements.set ("inter-app-audio", "<true/>");
             }
-            else
+            else if (target.type == XcodeTarget::AudioUnitv3PlugIn)
             {
                 entitlements.set ("com.apple.security.app-sandbox", "<true/>");
             }
@@ -3164,7 +3165,7 @@ private:
         return entitlements;
     }
 
-    String addEntitlementsFile() const
+    String addEntitlementsFile (XcodeTarget& target) const
     {
         String content =
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -3172,7 +3173,7 @@ private:
             "<plist version=\"1.0\">\n"
             "<dict>\n";
 
-        auto entitlements = getEntitlements();
+        auto entitlements = getEntitlements (target);
         auto keys = entitlements.getAllKeys();
 
         for (auto& key : keys)
@@ -3183,11 +3184,11 @@ private:
         content += "</dict>\n"
                    "</plist>\n";
 
-        auto entitlementsFile = getTargetFolder().getChildFile (getEntitlementsFileName());
+        auto entitlementsFile = getTargetFolder().getChildFile (target.getEntitlementsFilename());
         overwriteFileIfDifferentOrThrow (entitlementsFile, content);
 
-        RelativePath plistPath (entitlementsFile, getTargetFolder(), RelativePath::buildTargetFolder);
-        return addFile (plistPath, false, false, false, false, nullptr, {});
+        RelativePath entitlementsPath (entitlementsFile, getTargetFolder(), RelativePath::buildTargetFolder);
+        return addFile (entitlementsPath, false, false, false, false, nullptr, {});
     }
 
     String addProjectItem (const Project::Item& projectItem) const

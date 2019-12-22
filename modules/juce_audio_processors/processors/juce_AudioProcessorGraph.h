@@ -132,6 +132,8 @@ public:
     private:
         //==============================================================================
         friend class AudioProcessorGraph;
+        template <typename Float>
+        friend struct GraphRenderSequence;
 
         struct Connection
         {
@@ -151,6 +153,20 @@ public:
         void setParentGraph (AudioProcessorGraph*) const;
         void prepare (double newSampleRate, int newBlockSize, AudioProcessorGraph*, ProcessingPrecision);
         void unprepare();
+
+        template <typename Sample>
+        void processBlock (AudioBuffer<Sample>& audio, MidiBuffer& midi)
+        {
+            const ScopedLock lock (processorLock);
+            processor->processBlock (audio, midi);
+        }
+
+        template <typename Sample>
+        void processBlockBypassed (AudioBuffer<Sample>& audio, MidiBuffer& midi)
+        {
+            const ScopedLock lock (processorLock);
+            processor->processBlockBypassed (audio, midi);
+        }
 
         CriticalSection processorLock;
 
@@ -399,7 +415,7 @@ private:
 
     friend class AudioGraphIOProcessor;
 
-    Atomic<int> isPrepared { 0 };
+    std::atomic<bool> isPrepared { false };
 
     void topologyChanged();
     void handleAsyncUpdate() override;
