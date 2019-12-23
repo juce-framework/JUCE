@@ -258,7 +258,10 @@ AudioProcessorValueTreeState::AudioProcessorValueTreeState (AudioProcessor& p, U
     state.addListener (this);
 }
 
-AudioProcessorValueTreeState::~AudioProcessorValueTreeState() {}
+AudioProcessorValueTreeState::~AudioProcessorValueTreeState()
+{
+    stopTimer();
+}
 
 //==============================================================================
 RangedAudioParameter* AudioProcessorValueTreeState::createAndAddParameter (const String& paramID,

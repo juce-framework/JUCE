@@ -45,6 +45,9 @@
  #if __has_warning("-Wnullable-to-nonnull-conversion")
   #pragma clang diagnostic ignored "-Wnullable-to-nonnull-conversion"
  #endif
+ #if __has_warning("-Wignored-qualifiers")
+  #pragma clang diagnostic ignored "-Wignored-qualifiers"
+ #endif
 #endif
 
 // From MacOS 10.13 and iOS 11 Apple has (sensibly!) stopped defining a whole

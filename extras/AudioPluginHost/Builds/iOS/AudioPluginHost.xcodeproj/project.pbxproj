@@ -463,6 +463,13 @@
 			path = ../../Source/UI/PluginWindow.h;
 			sourceTree = "SOURCE_ROOT";
 		};
+		9A92E8C5ECBBF926B5CF57BC = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			name = App.entitlements;
+			path = App.entitlements;
+			sourceTree = "SOURCE_ROOT";
+		};
 		9F9B445E6755CAA19E4344ED = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
@@ -581,13 +588,6 @@
 			name = CoreAudioKit.framework;
 			path = System/Library/Frameworks/CoreAudioKit.framework;
 			sourceTree = SDKROOT;
-		};
-		EC252E34CF52A70B4A836BDC = {
-			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
-			name = AudioPluginHost.entitlements;
-			path = AudioPluginHost.entitlements;
-			sourceTree = "SOURCE_ROOT";
 		};
 		F14CDB17EFE157DA3C3A5A91 = {
 			isa = PBXFileReference;

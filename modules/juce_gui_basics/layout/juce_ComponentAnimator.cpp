@@ -32,6 +32,11 @@ class ComponentAnimator::AnimationTask
 public:
     AnimationTask (Component* c) noexcept  : component (c) {}
 
+    ~AnimationTask()
+    {
+        proxy.deleteAndZero();
+    }
+
     void reset (const Rectangle<int>& finalBounds,
                 float finalAlpha,
                 int millisecondsToSpendMoving,
@@ -58,17 +63,17 @@ public:
         midSpeed = invTotalDistance;
         endSpeed = jmax (0.0, endSpd * invTotalDistance);
 
+        proxy.deleteAndZero();
+
         if (useProxyComponent)
-            proxy.reset (new ProxyComponent (*component));
-        else
-            proxy.reset();
+            proxy = new ProxyComponent (*component);
 
         component->setVisible (! useProxyComponent);
     }
 
     bool useTimeslice (const int elapsed)
     {
-        if (auto* c = proxy != nullptr ? proxy.get()
+        if (auto* c = proxy != nullptr ? proxy.getComponent()
                                        : component.get())
         {
             msElapsed += elapsed;
@@ -182,7 +187,7 @@ public:
     };
 
     WeakReference<Component> component;
-    std::unique_ptr<Component> proxy;
+    Component::SafePointer<Component> proxy;
 
     Rectangle<int> destination;
     double destAlpha;
