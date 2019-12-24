@@ -2422,6 +2422,7 @@ namespace AAXClasses
         return meterIdx;
     }
 
+#if JucePlugin_EnhancedAudioSuite
     static AAX_IPropertyMap* createAudioSuitePropertiesForLayout(AAX_IEffectDescriptor& descriptor, int32_t pluginId, int maxInputs, int maxOutputs, bool hasSidechain)
     {
         // Create a property map
@@ -2479,6 +2480,7 @@ namespace AAXClasses
 #endif
         return properties;
     }
+#endif // JucePlugin_EnhancedAudioSuite
 
     static void createDescriptor (AAX_IComponentDescriptor& desc,
                                   const AudioProcessor::BusesLayout& fullLayout,
