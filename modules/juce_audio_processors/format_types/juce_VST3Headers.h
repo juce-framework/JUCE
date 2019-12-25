@@ -76,6 +76,9 @@
 #undef DEVELOPMENT
 #define DEVELOPMENT 0  // This avoids a Clang warning in Steinberg code about unused values
 
+#include "pslextensions/ipslviewembedding.h"
+#include "pslextensions/ipslgainreduction.h"
+
 /*  These files come with the Steinberg VST3 SDK - to get them, you'll need to
     visit the Steinberg website and agree to whatever is currently required to
     get them.
@@ -112,7 +115,6 @@
  #include <public.sdk/source/vst/vsteditcontroller.h>
  #include <public.sdk/source/vst/vstpresetfile.h>
 
- #include "pslextensions/ipslviewembedding.h"
 #else
  // needed for VST_VERSION
  #include <pluginterfaces/vst/vsttypes.h>
@@ -152,8 +154,6 @@
  #include <public.sdk/source/vst/hosting/pluginterfacesupport.cpp>
 #endif
 
- #include "pslextensions/ipslviewembedding.h"
-
 //==============================================================================
 namespace Steinberg
 {
@@ -174,6 +174,7 @@ namespace Steinberg
 namespace Presonus
 {
     DEF_CLASS_IID (IPlugInViewEmbedding)
+    DEF_CLASS_IID (IGainReductionInfo)
 }
 #endif //JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
 

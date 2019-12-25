@@ -44,7 +44,6 @@
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../../juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp"
 #include "../../juce_audio_processors/format_types/juce_VST3Common.h"
-#include "../../juce_audio_processors/format_types/juce_VST3PreSonusExtensions.h"
 
 #ifndef JUCE_VST3_CAN_REPLACE_VST2
  #define JUCE_VST3_CAN_REPLACE_VST2 1
