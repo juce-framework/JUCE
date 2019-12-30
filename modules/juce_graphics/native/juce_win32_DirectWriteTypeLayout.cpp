@@ -218,6 +218,7 @@ namespace DirectWriteTypeLayout
 
         switch (text.getJustification().getOnlyHorizontalFlags())
         {
+            case 0:
             case Justification::left:                   break;
             case Justification::right:                  alignment = DWRITE_TEXT_ALIGNMENT_TRAILING; break;
             case Justification::horizontallyCentred:    alignment = DWRITE_TEXT_ALIGNMENT_CENTER; break;
@@ -241,6 +242,7 @@ namespace DirectWriteTypeLayout
 
             switch (text.getJustification().getOnlyHorizontalFlags())
             {
+                case 0:
                 case Justification::left:      alignment = DWRITE_TEXT_ALIGNMENT_TRAILING; break;
                 case Justification::right:     alignment = DWRITE_TEXT_ALIGNMENT_LEADING;  break;
                 default: break;
