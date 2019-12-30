@@ -292,18 +292,31 @@ namespace CoreTextTypeLayout
         return attribString;
     }
 
-    static CTFrameRef createCTFrame (const AttributedString& text, CGRect bounds)
+    static CTFramesetterRef createCTFramesetter (const AttributedString& text)
     {
         auto attribString = createCFAttributedString (text);
         auto framesetter = CTFramesetterCreateWithAttributedString (attribString);
         CFRelease (attribString);
 
+        return framesetter;
+    }
+
+    static CTFrameRef createCTFrame (CTFramesetterRef framesetter, CGRect bounds)
+    {
         auto path = CGPathCreateMutable();
         CGPathAddRect (path, nullptr, bounds);
 
         auto frame = CTFramesetterCreateFrame (framesetter, CFRangeMake (0, 0), path, nullptr);
-        CFRelease (framesetter);
         CGPathRelease (path);
+
+        return frame;
+    }
+
+    static CTFrameRef createCTFrame (const AttributedString& text, CGRect bounds)
+    {
+        auto framesetter = createCTFramesetter (text);
+        auto frame = createCTFrame (framesetter, bounds);
+        CFRelease (framesetter);
 
         return frame;
     }
@@ -335,20 +348,38 @@ namespace CoreTextTypeLayout
     static void drawToCGContext (const AttributedString& text, const Rectangle<float>& area,
                                  const CGContextRef& context, float flipHeight)
     {
-        Rectangle<float> ctFrameArea;
-        auto verticalJustification = text.getJustification().getOnlyVerticalFlags();
+        auto framesetter = createCTFramesetter (text);
 
         // Ugly hack to fix a bug in OS X Sierra where the CTFrame needs to be slightly
         // larger than the font height - otherwise the CTFrame will be invalid
-        if (verticalJustification == Justification::verticallyCentred)
-            ctFrameArea = area.withSizeKeepingCentre (area.getWidth(), area.getHeight() * 1.1f);
-        else if (verticalJustification == Justification::bottom)
-            ctFrameArea = area.withTop (area.getY() - (area.getHeight() * 0.1f));
-        else
-            ctFrameArea = area.withHeight (area.getHeight() * 1.1f);
 
-        auto frame = createCTFrame (text, CGRectMake ((CGFloat) ctFrameArea.getX(), flipHeight - (CGFloat) ctFrameArea.getBottom(),
-                                                      (CGFloat) ctFrameArea.getWidth(), (CGFloat) ctFrameArea.getHeight()));
+        CFRange fitrange;
+        auto suggestedSingleLineFrameSize =
+            CTFramesetterSuggestFrameSizeWithConstraints (framesetter, CFRangeMake (0, 0), nullptr,
+                                                          CGSizeMake (CGFLOAT_MAX, CGFLOAT_MAX), &fitrange);
+        auto minCTFrameHeight = (float) suggestedSingleLineFrameSize.height;
+
+        auto verticalJustification = text.getJustification().getOnlyVerticalFlags();
+
+        auto ctFrameArea = [area, minCTFrameHeight, verticalJustification]
+        {
+            if (minCTFrameHeight < area.getHeight())
+                return area;
+
+            if (verticalJustification == Justification::verticallyCentred)
+                return area.withSizeKeepingCentre (area.getWidth(), minCTFrameHeight);
+
+            auto frameArea = area.withHeight (minCTFrameHeight);
+
+            if (verticalJustification == Justification::bottom)
+                return frameArea.withBottomY (area.getBottom());
+
+            return frameArea;
+        }();
+
+        auto frame = createCTFrame (framesetter, CGRectMake ((CGFloat) ctFrameArea.getX(), flipHeight - (CGFloat) ctFrameArea.getBottom(),
+                                                             (CGFloat) ctFrameArea.getWidth(), (CGFloat) ctFrameArea.getHeight()));
+        CFRelease (framesetter);
 
         auto textMatrix = CGContextGetTextMatrix (context);
         CGContextSaveGState (context);
