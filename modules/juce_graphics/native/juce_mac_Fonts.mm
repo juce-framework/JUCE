@@ -276,10 +276,10 @@ namespace CoreTextTypeLayout
 
         CTParagraphStyleSetting settings[] =
         {
-            { kCTParagraphStyleSpecifierAlignment,              sizeof (CTTextAlignment), &ctTextAlignment },
-            { kCTParagraphStyleSpecifierLineBreakMode,          sizeof (CTLineBreakMode), &ctLineBreakMode },
+            { kCTParagraphStyleSpecifierAlignment,              sizeof (CTTextAlignment),    &ctTextAlignment },
+            { kCTParagraphStyleSpecifierLineBreakMode,          sizeof (CTLineBreakMode),    &ctLineBreakMode },
             { kCTParagraphStyleSpecifierBaseWritingDirection,   sizeof (CTWritingDirection), &ctWritingDirection},
-            { kCTParagraphStyleSpecifierLineSpacingAdjustment,  sizeof (CGFloat),         &ctLineSpacing }
+            { kCTParagraphStyleSpecifierLineSpacingAdjustment,  sizeof (CGFloat),            &ctLineSpacing }
         };
 
         auto ctParagraphStyleRef = CTParagraphStyleCreate (settings, (size_t) numElementsInArray (settings));
@@ -350,23 +350,24 @@ namespace CoreTextTypeLayout
         auto frame = createCTFrame (text, CGRectMake ((CGFloat) ctFrameArea.getX(), flipHeight - (CGFloat) ctFrameArea.getBottom(),
                                                       (CGFloat) ctFrameArea.getWidth(), (CGFloat) ctFrameArea.getHeight()));
 
+        auto textMatrix = CGContextGetTextMatrix (context);
+        CGContextSaveGState (context);
+
         if (verticalJustification == Justification::verticallyCentred
-             || verticalJustification == Justification::bottom)
+         || verticalJustification == Justification::bottom)
         {
             auto adjust = ctFrameArea.getHeight() - findCTFrameHeight (frame);
 
             if (verticalJustification == Justification::verticallyCentred)
                 adjust *= 0.5f;
 
-            CGContextSaveGState (context);
             CGContextTranslateCTM (context, 0, -adjust);
-            CTFrameDraw (frame, context);
-            CGContextRestoreGState (context);
         }
-        else
-        {
-            CTFrameDraw (frame, context);
-        }
+
+        CTFrameDraw (frame, context);
+
+        CGContextRestoreGState (context);
+        CGContextSetTextMatrix (context, textMatrix);
 
         CFRelease (frame);
     }
