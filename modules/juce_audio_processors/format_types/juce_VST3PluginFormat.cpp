@@ -1594,9 +1594,11 @@ public:
     struct VST3Parameter final  : public Parameter
     {
         VST3Parameter (VST3PluginInstance& parent,
+                       int vstParameterIndex,
                        Steinberg::Vst::ParamID parameterID,
                        bool parameterIsAutomatable)
             : pluginInstance (parent),
+              vstParamIndex (vstParameterIndex),
               paramID (parameterID),
               automatable (parameterIsAutomatable)
         {
@@ -1654,19 +1656,24 @@ public:
             return Parameter::getValueForText (text);
         }
 
+        Vst::ParameterInfo getParameterInfo() const
+        {
+            return pluginInstance.getParameterInfoForIndex (vstParamIndex);
+        }
+
         float getDefaultValue() const override
         {
-            return (float) pluginInstance.getParameterInfoForIndex (getParameterIndex()).defaultNormalizedValue;
+            return (float) getParameterInfo().defaultNormalizedValue;
         }
 
         String getName (int /*maximumStringLength*/) const override
         {
-            return toString (pluginInstance.getParameterInfoForIndex (getParameterIndex()).title);
+            return toString (getParameterInfo().title);
         }
 
         String getLabel() const override
         {
-            return toString (pluginInstance.getParameterInfoForIndex (getParameterIndex()).units);
+            return toString (getParameterInfo().units);
         }
 
         bool isAutomatable() const override
@@ -1681,7 +1688,7 @@ public:
 
         int getNumSteps() const override
         {
-            auto stepCount = pluginInstance.getParameterInfoForIndex (getParameterIndex()).stepCount;
+            auto stepCount = getParameterInfo().stepCount;
             return stepCount == 0 ? AudioProcessor::getDefaultNumParameterSteps()
                                   : stepCount + 1;
         }
@@ -1692,6 +1699,7 @@ public:
         }
 
         VST3PluginInstance& pluginInstance;
+        const int vstParamIndex;
         const Steinberg::Vst::ParamID paramID;
         const bool automatable;
     };
@@ -1700,7 +1708,7 @@ public:
     VST3PluginInstance (VST3ComponentHolder* componentHolder)
         : AudioPluginInstance (getBusProperties (componentHolder->component)),
           holder (componentHolder),
-          inputParameterChanges (new ParamValueQueueList()),
+          inputParameterChanges  (new ParamValueQueueList()),
           outputParameterChanges (new ParamValueQueueList()),
           midiInputs (new MidiEventList()),
           midiOutputs (new MidiEventList())
@@ -2571,6 +2579,7 @@ private:
         {
             auto paramInfo = getParameterInfoForIndex (i);
             auto* param = new VST3Parameter (*this,
+                                             i,
                                              paramInfo.id,
                                              (paramInfo.flags & Vst::ParameterInfo::kCanAutomate) != 0);
 
@@ -2578,7 +2587,6 @@ private:
                 bypassParam = param;
 
             std::function<AudioProcessorParameterGroup*(Vst::UnitID)> findOrCreateGroup;
-
             findOrCreateGroup = [&groupMap, &infoMap, &findOrCreateGroup](Vst::UnitID groupID)
             {
                 auto existingGroup = groupMap.find (groupID);
