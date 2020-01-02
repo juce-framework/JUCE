@@ -52,7 +52,7 @@ namespace
             if (sdkVersion == getSDKDisplayName (v))
                 return getSDKRootName (v);
 
-        return {};
+        return "macosx";
     }
 
     template<class ContainerType>
@@ -674,8 +674,7 @@ protected:
             {
                 props.add (new ChoicePropertyComponent (osxSDKVersion, "OSX Base SDK Version", getSDKChoiceList<StringArray> (oldestSDKVersion, true),
                                                                                                getSDKChoiceList<Array<var>>  (oldestSDKVersion, true)),
-                           "The version of OSX to link against in the Xcode build. If \"Default\" is selected then the field will be left "
-                           "empty and the Xcode default will be used.");
+                           "The version of the macOS SDK to link against. If \"Default\" is selected then the Xcode default will be used.");
 
                 props.add (new ChoicePropertyComponent (osxDeploymentTarget, "OSX Deployment Target", getSDKChoiceList<StringArray> (oldestDeploymentTarget, false),
                                                                                                       getSDKChoiceList<Array<var>>  (oldestDeploymentTarget, true)),
@@ -1210,11 +1209,7 @@ public:
                 // the aggregate target needs to have the deployment target set for
                 // pre-/post-build scripts
                 s.set ("MACOSX_DEPLOYMENT_TARGET", getOSXDeploymentTarget (config.getOSXDeploymentTargetString()));
-
-                auto sdkRoot = getOSXSDKVersion (config.getOSXSDKVersionString());
-
-                if (sdkRoot.isNotEmpty())
-                    s.set ("SDKROOT", sdkRoot);
+                s.set ("SDKROOT", getOSXSDKVersion (config.getOSXSDKVersionString()));
 
                 return s;
             }
@@ -2620,10 +2615,7 @@ private:
         }
         else
         {
-            auto sdkRoot = getOSXSDKVersion (config.getOSXSDKVersionString());
-
-            if (sdkRoot.isNotEmpty())
-                s.set ("SDKROOT", sdkRoot);
+            s.set ("SDKROOT", getOSXSDKVersion (config.getOSXSDKVersionString()));
         }
 
         s.set ("ZERO_LINK", "NO");
