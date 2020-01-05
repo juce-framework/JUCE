@@ -142,15 +142,6 @@ public:
             renderThread->addJob (this, false);
     }
 
-   #if JUCE_MAC
-    static CVReturn displayLinkCallback (CVDisplayLinkRef, const CVTimeStamp*, const CVTimeStamp*, CVOptionFlags, CVOptionFlags*, void* displayLinkContext)
-    {
-        CachedImage* self = (CachedImage*) displayLinkContext;
-        self->renderFrame();
-        return kCVReturnSuccess;
-    }
-   #endif
-
     //==============================================================================
     void paint (Graphics&) override
     {
@@ -473,14 +464,10 @@ public:
             if (shouldExit())
                 break;
 
-           #if JUCE_MAC
-            repaintEvent.wait (1000);
-           #else
             if (! renderFrame())
                 repaintEvent.wait (5); // failed to render, so avoid a tight fail-loop.
             else if (! context.continuousRepaint && ! shouldExit())
                 repaintEvent.wait (-1);
-           #endif
         }
 
         hasInitialised = false;
@@ -532,22 +519,11 @@ public:
         if (context.renderer != nullptr)
             context.renderer->newOpenGLContextCreated();
 
-       #if JUCE_MAC
-        CVDisplayLinkCreateWithActiveCGDisplays (&displayLink);
-        CVDisplayLinkSetOutputCallback (displayLink, &displayLinkCallback, this);
-        CVDisplayLinkStart (displayLink);
-       #endif
-
         return true;
     }
 
     void shutdownOnThread()
     {
-       #if JUCE_MAC
-        CVDisplayLinkStop (displayLink);
-        CVDisplayLinkRelease (displayLink);
-       #endif
-
         if (context.renderer != nullptr)
             context.renderer->openGLContextClosing();
 
@@ -674,9 +650,6 @@ public:
     Atomic<int> needsUpdate { 1 }, destroying;
     uint32 lastMMLockReleaseTime = 0;
 
-   #if JUCE_MAC
-    CVDisplayLinkRef displayLink;
-   #endif
     std::unique_ptr<ThreadPool> renderThread;
     ReferenceCountedArray<OpenGLContext::AsyncWorker, CriticalSection> workQueue;
     MessageManager::Lock messageManagerLock;
