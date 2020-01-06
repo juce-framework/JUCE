@@ -125,7 +125,7 @@ public:
 
             if (errors.size() == 0)
             {
-                // Workaround for a bug where Xcode thinks the project is invalid if opened immedietely
+                // Workaround for a bug where Xcode thinks the project is invalid if opened immediately
                 // after writing
                 if (waitAfterSaving)
                     Thread::sleep (2000);
