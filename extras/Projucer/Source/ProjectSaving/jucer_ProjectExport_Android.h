@@ -1804,7 +1804,10 @@ private:
         StringArray s = StringArray::fromTokens (androidOtherPermissions.get().toString(), ", ", {});
 
         if (androidInternetNeeded.get())
+        {
             s.add ("android.permission.INTERNET");
+            s.add ("android.permission.CHANGE_WIFI_MULTICAST_STATE");
+        }
 
         if (androidMicNeeded.get())
             s.add ("android.permission.RECORD_AUDIO");
