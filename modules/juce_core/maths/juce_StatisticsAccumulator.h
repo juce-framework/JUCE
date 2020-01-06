@@ -55,7 +55,7 @@ public:
     }
 
     /** Reset the accumulator.
-        This will reset all currently saved statistcs.
+        This will reset all currently saved statistics.
     */
     void reset() noexcept               { *this = StatisticsAccumulator<FloatType>(); }
 
