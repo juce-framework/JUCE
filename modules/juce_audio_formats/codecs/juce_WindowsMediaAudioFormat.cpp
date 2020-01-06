@@ -206,7 +206,7 @@ public:
                     if (hasJumped)
                         bufferedRange.setStart ((int64) ((sampleTime * (int64) sampleRate) / 10000000));
                     else
-                        bufferedRange.setStart (bufferedRange.getEnd()); // (because the positions returned often aren't continguous)
+                        bufferedRange.setStart (bufferedRange.getEnd()); // (because the positions returned often aren't contiguous)
 
                     bufferedRange.setLength ((int64) (dataLength / stride));
 
