@@ -283,7 +283,7 @@ namespace SocketHelpers
         if (! lock.isLocked())
             return -1;
 
-        auto hasErrorOccured = [&handle] () -> bool
+        auto hasErrorOccurred = [&handle] () -> bool
         {
             auto h = handle.load();
 
@@ -326,7 +326,7 @@ namespace SocketHelpers
         fd_set* pwset = forReading ? nullptr : &wset;
 
         // NB - need to use select() here as WSAPoll is broken on Windows
-        if (select ((int) h + 1, prset, pwset, nullptr, timeoutp) < 0 || hasErrorOccured())
+        if (select ((int) h + 1, prset, pwset, nullptr, timeoutp) < 0 || hasErrorOccurred())
             return -1;
 
         return FD_ISSET (h, forReading ? &rset : &wset) ? 1 : 0;
@@ -344,7 +344,7 @@ namespace SocketHelpers
                 break;
         }
 
-        if (result < 0 || hasErrorOccured())
+        if (result < 0 || hasErrorOccurred())
             return -1;
 
         return (pfd.revents & eventsFlag) != 0;

@@ -78,7 +78,7 @@ public:
         call, then it invokes it.
 
         This method is virtual to allow more dynamic invocation to used for objects
-        where the methods may not already be set as properies.
+        where the methods may not already be set as properties.
     */
     virtual var invokeMethod (Identifier methodName,
                               const var::NativeFunctionArgs& args);

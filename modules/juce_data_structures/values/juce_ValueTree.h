@@ -62,7 +62,7 @@ namespace juce
     will correspond to the order in which the property was added, or that it will remain
     constant when other properties are added or removed.
 
-    Listeners can be added to a ValueTree to be told when properies change and when
+    Listeners can be added to a ValueTree to be told when properties change and when
     sub-trees are added or removed.
 
     @see var, XmlElement

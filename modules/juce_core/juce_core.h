@@ -142,7 +142,7 @@
 
 /** Config: JUCE_LOAD_CURL_SYMBOLS_LAZILY
     If enabled, JUCE will load libcurl lazily when required (for example, when WebInputStream
-    is used). Enabling this flag may also help with library dependency erros as linking
+    is used). Enabling this flag may also help with library dependency errors as linking
     libcurl at compile-time may instruct the linker to hard depend on a specific version
     of libcurl. It's also useful if you want to limit the amount of JUCE dependencies and
     you are not using WebInputStream or the URL classes.
