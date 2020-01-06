@@ -95,7 +95,7 @@ public:
             button->removeListener (this);
     }
 
-    /** Called periodically to update the tooltip with inforamtion about the Block */
+    /** Called periodically to update the tooltip with information about the Block */
     void updateStatsAndTooltip()
     {
         // Get the battery level of this Block and inform any subclasses
