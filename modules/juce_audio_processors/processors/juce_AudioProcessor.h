@@ -964,10 +964,13 @@ public:
     virtual bool hasEditor() const = 0;
 
     //==============================================================================
-    /** Returns the active editor, if there is one.
-        Bear in mind this can return nullptr, even if an editor has previously been opened.
+    /** Returns the active editor, if there is one. Bear in mind this can return nullptr
+        even if an editor has previously been opened.
+
+        Note that you should only call this method from the message thread as the active
+        editor may be deleted by the message thread, causing a dangling pointer.
     */
-    AudioProcessorEditor* getActiveEditor() const noexcept             { return activeEditor; }
+    AudioProcessorEditor* getActiveEditor() const noexcept;
 
     /** Returns the active editor, or if there isn't one, it will create one.
         This may call createEditor() internally to create the component.
@@ -1465,7 +1468,7 @@ private:
     int blockSize = 0, latencySamples = 0;
     bool suspended = false, nonRealtime = false;
     ProcessingPrecision processingPrecision = singlePrecision;
-    CriticalSection callbackLock, listenerLock;
+    CriticalSection callbackLock, listenerLock, activeEditorLock;
 
     friend class Bus;
     mutable OwnedArray<Bus> inputBuses, outputBuses;
