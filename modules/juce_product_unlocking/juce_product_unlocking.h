@@ -41,7 +41,7 @@
   website:          http://www.juce.com/juce
   license:          GPL/Commercial
 
-  dependencies:     juce_cryptography juce_core
+  dependencies:     juce_cryptography juce_core, juce_events
 
  END_JUCE_MODULE_DECLARATION
 
@@ -68,6 +68,7 @@
 //==============================================================================
 #include <juce_core/juce_core.h>
 #include <juce_cryptography/juce_cryptography.h>
+#include <juce_events/juce_events.h>
 
 #if JUCE_MODULE_AVAILABLE_juce_data_structures
  #include <juce_data_structures/juce_data_structures.h>
