@@ -1608,7 +1608,7 @@ private:
 
                 // When exception occurs, CameraCaptureSession.close will never finish, so
                 // we should not wait for it. For fatal error an exception does occur, but
-                // it is catched internally in Java...
+                // it is caught internally in Java...
                 if (jniCheckHasExceptionOccurredAndClear() || scopedCameraDevice.fatalErrorOccurred.get())
                 {
                     JUCE_CAMERA_LOG ("Exception or fatal error occurred while closing Capture Session, closing by force");
