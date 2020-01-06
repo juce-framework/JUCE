@@ -194,7 +194,7 @@ public:
 
     /** Triggers a re-sort of the table according to the current sort-column.
 
-        If you modifiy the table's contents, you can call this to signal that the table needs
+        If you modify the table's contents, you can call this to signal that the table needs
         to be re-sorted.
 
         (This doesn't do any sorting synchronously - it just asynchronously sends a call to the
@@ -229,7 +229,7 @@ public:
 
         The index is an index from 0 to the number of columns that are currently visible (hidden
         ones are not counted). It returns a rectangle showing the position of the column relative
-        to this component's top-left. If the index is out-of-range, an empty rectangle is retrurned.
+        to this component's top-left. If the index is out-of-range, an empty rectangle is returned.
     */
     Rectangle<int> getColumnPosition (int index) const;
 
@@ -382,7 +382,7 @@ public:
         highlightColourId              = 0x1003830, /**< The colour of the table header background when
                                                          the mouse is over or down above the the table
                                                          header. It's up to the LookAndFeel to use a
-                                                         variant of this colour to destiuish between
+                                                         variant of this colour to distinguish between
                                                          the down and hover state. */
     };
 

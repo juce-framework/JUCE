@@ -107,7 +107,7 @@ public:
     {
         notDragging,            /**< Dragging is not active.  */
         absoluteDrag,           /**< The dragging corresponds directly to the value that is displayed.  */
-        velocityDrag            /**< The dragging value change is relative to the velocity of the mouse mouvement.  */
+        velocityDrag            /**< The dragging value change is relative to the velocity of the mouse movement.  */
     };
 
     //==============================================================================

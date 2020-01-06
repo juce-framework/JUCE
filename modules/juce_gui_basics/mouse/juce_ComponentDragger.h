@@ -85,7 +85,7 @@ public:
         @param e                    the current mouse-drag event
         @param constrainer          an optional constrainer object that should be used
                                     to apply limits to the component's position. Pass
-                                    null if you don't want to contrain the movement.
+                                    null if you don't want to constrain the movement.
         @see startDraggingComponent
     */
     void dragComponent (Component* componentToDrag,
