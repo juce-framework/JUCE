@@ -303,7 +303,7 @@ namespace DirectWriteTypeLayout
                                                               col.getFloatAlpha()),
                                                 d2dBrush.resetAndGetPointerAddress());
 
-            // We need to call SetDrawingEffect with a legimate brush to get DirectWrite to break text based on colours
+            // We need to call SetDrawingEffect with a legitimate brush to get DirectWrite to break text based on colours
             textLayout.SetDrawingEffect (d2dBrush, range);
         }
     }
