@@ -964,10 +964,13 @@ public:
     virtual bool hasEditor() const = 0;
 
     //==============================================================================
-    /** Returns the active editor, if there is one.
-        Bear in mind this can return nullptr, even if an editor has previously been opened.
+    /** Returns the active editor, if there is one. Bear in mind this can return nullptr
+        even if an editor has previously been opened.
+
+        Note that you should only call this method from the message thread as the active
+        editor may be deleted by the message thread, causing a dangling pointer.
     */
-    AudioProcessorEditor* getActiveEditor() const noexcept             { return activeEditor; }
+    AudioProcessorEditor* getActiveEditor() const noexcept;
 
     /** Returns the active editor, or if there isn't one, it will create one.
         This may call createEditor() internally to create the component.
@@ -1011,14 +1014,21 @@ public:
     /** Returns the group of parameters managed by this AudioProcessor. */
     const AudioProcessorParameterGroup& getParameterTree() const;
 
-    /** Sets the group of parameters managed by this AudioProcessor. */
+    /** Sets the group of parameters managed by this AudioProcessor.
+
+        Replacing the tree after your AudioProcessor has been constructed will
+        crash many hosts, so don't do it! You may, however, change parameter and
+        group names by iterating the tree returned by getParameterTree().
+        Afterwards, call updateHostDisplay() to inform the host of the changes.
+        Not all hosts support dynamic changes to parameters and group names.
+    */
     void setParameterTree (AudioProcessorParameterGroup&& newTree);
 
     /** A processor should implement this method so that the host can ask it to
         rebuild its parameter tree.
-        If a plugin never changes its parameters, it's enough to create its
-        parameters in its constructor and do nothing in this method, but some
-        may want to
+
+        For most plug-ins it's enough to simply add your parameters in the
+        constructor and leave this unimplemented.
     */
     virtual void refreshParameterList();
 
@@ -1362,7 +1372,7 @@ protected:
 
     //==============================================================================
     /** @internal */
-    AudioPlayHead* playHead = nullptr;
+    std::atomic<AudioPlayHead*> playHead { nullptr };
 
     /** @internal */
     void sendParamChangeMessageToListeners (int parameterIndex, float newValue);
@@ -1458,7 +1468,7 @@ private:
     int blockSize = 0, latencySamples = 0;
     bool suspended = false, nonRealtime = false;
     ProcessingPrecision processingPrecision = singlePrecision;
-    CriticalSection callbackLock, listenerLock;
+    CriticalSection callbackLock, listenerLock, activeEditorLock;
 
     friend class Bus;
     mutable OwnedArray<Bus> inputBuses, outputBuses;

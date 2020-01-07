@@ -300,7 +300,9 @@ namespace PushNotificationsDelegateDetails
         if (n.fireDate != nil)
         {
             NSDate* dateNow = [NSDate date];
-            notif.triggerIntervalSec = [dateNow timeIntervalSinceDate: n.fireDate];
+            NSDate* fireDate = n.fireDate;
+
+            notif.triggerIntervalSec = [dateNow timeIntervalSinceDate: fireDate];
         }
 
         notif.soundToPlay = URL (nsStringToJuce (n.soundName));
@@ -849,7 +851,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
             {
                 NSMutableString* hexString = [NSMutableString stringWithCapacity: (length * 2)];
 
-                for (int i = 0; i < length; ++i)
+                for (NSUInteger i = 0; i < length; ++i)
                     [hexString appendFormat:@"%02x", buffer[i]];
 
                 return nsStringToJuce ([hexString copy]);

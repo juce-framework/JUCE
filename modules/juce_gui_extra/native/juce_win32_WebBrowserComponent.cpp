@@ -187,7 +187,7 @@ private:
                 *pDispParams->rgvarg[0].pboolVal = VARIANT_FALSE;
 
                 // IWebBrowser2 also reports http status codes here, we need
-                // report only network erros
+                // report only network errors
                 if (statusCode < 0)
                 {
                     LPTSTR messageBuffer = nullptr;

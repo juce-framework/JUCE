@@ -30,7 +30,7 @@ namespace juce
     Examples of arrays are: Array<int>, Array<Rectangle> or Array<MyClass*>
 
     The Array class can be used to hold simple, non-polymorphic objects as well as primitive types - to
-    do so, the class must fulfil these requirements:
+    do so, the class must fulfill these requirements:
     - it must have a copy constructor and assignment operator
     - it must be able to be relocated in memory by a memcpy without this causing any problems - so
       objects whose functionality relies on external pointers or references to themselves can not be used.

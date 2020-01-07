@@ -36,13 +36,6 @@
 			path = RecentFilesMenuTemplate.nib;
 			sourceTree = "SOURCE_ROOT";
 		};
-		25C3A81567A43C28D8A9C143 = {
-			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
-			name = BinaryBuilder.entitlements;
-			path = BinaryBuilder.entitlements;
-			sourceTree = "SOURCE_ROOT";
-		};
 		50B7C64414A3E778021F5EC4 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.cpp;
@@ -56,6 +49,13 @@
 			name = Cocoa.framework;
 			path = System/Library/Frameworks/Cocoa.framework;
 			sourceTree = SDKROOT;
+		};
+		7871817598B12A73E708ABB7 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			name = ConsoleApp.entitlements;
+			path = ConsoleApp.entitlements;
+			sourceTree = "SOURCE_ROOT";
 		};
 		799073185F72F5FAD05253C3 = {
 			isa = PBXFileReference;
@@ -297,6 +297,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "BinaryBuilder";
+				SDKROOT = macosx;
 				WARNING_CFLAGS = "-Wreorder";
 				ZERO_LINK = NO;
 			};
@@ -342,6 +343,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PRODUCT_NAME = "BinaryBuilder";
+				SDKROOT = macosx;
 				WARNING_CFLAGS = "-Wreorder";
 				ZERO_LINK = NO;
 			};

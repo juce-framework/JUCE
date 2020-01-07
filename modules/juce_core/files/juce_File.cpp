@@ -104,6 +104,26 @@ static String removeEllipsis (const String& path)
     return path;
 }
 
+static String normaliseSeparators (const String& path)
+{
+    auto normalisedPath = path;
+
+    String separator (File::getSeparatorString());
+    String doubleSeparator (separator + separator);
+
+    auto uncPath = normalisedPath.startsWith (doubleSeparator)
+                  && ! normalisedPath.fromFirstOccurrenceOf (doubleSeparator, false, false).startsWith (separator);
+
+    if (uncPath)
+        normalisedPath = normalisedPath.fromFirstOccurrenceOf (doubleSeparator, false, false);
+
+    while (normalisedPath.contains (doubleSeparator))
+         normalisedPath = normalisedPath.replace (doubleSeparator, separator);
+
+    return uncPath ? doubleSeparator + normalisedPath
+                   : normalisedPath;
+}
+
 bool File::isRoot() const
 {
     return fullPath.isNotEmpty() && *this == getParentDirectory();
@@ -114,9 +134,9 @@ String File::parseAbsolutePath (const String& p)
     if (p.isEmpty())
         return {};
 
-#if JUCE_WINDOWS
+   #if JUCE_WINDOWS
     // Windows..
-    auto path = removeEllipsis (p.replaceCharacter ('/', '\\'));
+    auto path = normaliseSeparators (removeEllipsis (p.replaceCharacter ('/', '\\')));
 
     if (path.startsWithChar (getSeparatorChar()))
     {
@@ -147,7 +167,7 @@ String File::parseAbsolutePath (const String& p)
 
         return File::getCurrentWorkingDirectory().getChildFile (path).getFullPathName();
     }
-#else
+   #else
     // Mac or Linux..
 
     // Yes, I know it's legal for a unix pathname to contain a backslash, but this assertion is here
@@ -155,7 +175,7 @@ String File::parseAbsolutePath (const String& p)
     // If that's why you've ended up here, use File::getChildFile() to build your paths instead.
     jassert ((! p.containsChar ('\\')) || (p.indexOfChar ('/') >= 0 && p.indexOfChar ('/') < p.indexOfChar ('\\')));
 
-    auto path = removeEllipsis (p);
+    auto path = normaliseSeparators (removeEllipsis (p));
 
     if (path.startsWithChar ('~'))
     {
@@ -196,7 +216,7 @@ String File::parseAbsolutePath (const String& p)
 
         return File::getCurrentWorkingDirectory().getChildFile (path).getFullPathName();
     }
-#endif
+   #endif
 
     while (path.endsWithChar (getSeparatorChar()) && path != getSeparatorString()) // careful not to turn a single "/" into an empty string.
         path = path.dropLastCharacters (1);

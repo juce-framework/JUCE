@@ -52,8 +52,12 @@ AudioProcessor::AudioProcessor (const BusesProperties& ioConfig)
 
 AudioProcessor::~AudioProcessor()
 {
-    // ooh, nasty - the editor should have been deleted before its AudioProcessor.
-    jassert (activeEditor == nullptr);
+    {
+        const ScopedLock sl (activeEditorLock);
+
+        // ooh, nasty - the editor should have been deleted before its AudioProcessor.
+        jassert (activeEditor == nullptr);
+    }
 
    #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
     // This will fail if you've called beginParameterChangeGesture() for one
@@ -803,14 +807,22 @@ void AudioProcessor::audioIOChanged (bool busNumberChanged, bool channelNumChang
 //==============================================================================
 void AudioProcessor::editorBeingDeleted (AudioProcessorEditor* const editor) noexcept
 {
-    const ScopedLock sl (callbackLock);
+    const ScopedLock sl (activeEditorLock);
 
     if (activeEditor == editor)
         activeEditor = nullptr;
 }
 
+AudioProcessorEditor* AudioProcessor::getActiveEditor() const noexcept
+{
+    const ScopedLock sl (activeEditorLock);
+    return activeEditor;
+}
+
 AudioProcessorEditor* AudioProcessor::createEditorIfNeeded()
 {
+    const ScopedLock sl (activeEditorLock);
+
     if (activeEditor != nullptr)
         return activeEditor;
 
@@ -820,8 +832,6 @@ AudioProcessorEditor* AudioProcessor::createEditorIfNeeded()
     {
         // you must give your editor comp a size before returning it..
         jassert (ed->getWidth() > 0 && ed->getHeight() > 0);
-
-        const ScopedLock sl (callbackLock);
         activeEditor = ed;
     }
 

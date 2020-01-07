@@ -52,7 +52,7 @@ namespace
             if (sdkVersion == getSDKDisplayName (v))
                 return getSDKRootName (v);
 
-        return {};
+        return "macosx";
     }
 
     template<class ContainerType>
@@ -674,8 +674,7 @@ protected:
             {
                 props.add (new ChoicePropertyComponent (osxSDKVersion, "OSX Base SDK Version", getSDKChoiceList<StringArray> (oldestSDKVersion, true),
                                                                                                getSDKChoiceList<Array<var>>  (oldestSDKVersion, true)),
-                           "The version of OSX to link against in the Xcode build. If \"Default\" is selected then the field will be left "
-                           "empty and the Xcode default will be used.");
+                           "The version of the macOS SDK to link against. If \"Default\" is selected then the Xcode default will be used.");
 
                 props.add (new ChoicePropertyComponent (osxDeploymentTarget, "OSX Deployment Target", getSDKChoiceList<StringArray> (oldestDeploymentTarget, false),
                                                                                                       getSDKChoiceList<Array<var>>  (oldestDeploymentTarget, true)),
@@ -977,6 +976,11 @@ public:
             return String ("Info-") + String (getName()).replace (" ", "_") + String (".plist");
         }
 
+        String getEntitlementsFilename() const
+        {
+            return String (getName()).replace (" ", "_") + String (".entitlements");
+        }
+
         String xcodePackageType, xcodeBundleSignature, xcodeBundleExtension;
         String xcodeProductType, xcodeFileType;
         String xcodeOtherRezFlags, xcodeBundleIDSubPath;
@@ -1205,11 +1209,7 @@ public:
                 // the aggregate target needs to have the deployment target set for
                 // pre-/post-build scripts
                 s.set ("MACOSX_DEPLOYMENT_TARGET", getOSXDeploymentTarget (config.getOSXDeploymentTargetString()));
-
-                auto sdkRoot = getOSXSDKVersion (config.getOSXSDKVersionString());
-
-                if (sdkRoot.isNotEmpty())
-                    s.set ("SDKROOT", sdkRoot);
+                s.set ("SDKROOT", getOSXSDKVersion (config.getOSXSDKVersionString()));
 
                 return s;
             }
@@ -1356,7 +1356,7 @@ public:
                 s.set ("DEVELOPMENT_TEAM", owner.getDevelopmentTeamIDString());
 
             if (shouldAddEntitlements())
-                s.set ("CODE_SIGN_ENTITLEMENTS", owner.getEntitlementsFileName().quoted());
+                s.set ("CODE_SIGN_ENTITLEMENTS", getEntitlementsFilename().quoted());
 
             {
                 auto cppStandard = owner.project.getCppStandardString();
@@ -2128,7 +2128,8 @@ private:
 
     void addFilesAndGroupsToProject (StringArray& topLevelGroupIDs) const
     {
-        addEntitlementsFile();
+        for (auto* target : targets)
+            addEntitlementsFile (*target);
 
         for (auto& group : getAllGroups())
         {
@@ -2614,10 +2615,7 @@ private:
         }
         else
         {
-            auto sdkRoot = getOSXSDKVersion (config.getOSXSDKVersionString());
-
-            if (sdkRoot.isNotEmpty())
-                s.set ("SDKROOT", sdkRoot);
+            s.set ("SDKROOT", getOSXSDKVersion (config.getOSXSDKVersionString()));
         }
 
         s.set ("ZERO_LINK", "NO");
@@ -3081,12 +3079,7 @@ private:
         return {};
     }
 
-    String getEntitlementsFileName() const
-    {
-        return project.getProjectFilenameRootString() + String (".entitlements");
-    }
-
-    StringPairArray getEntitlements() const
+    StringPairArray getEntitlements (XcodeTarget& target) const
     {
         StringPairArray entitlements;
 
@@ -3097,7 +3090,7 @@ private:
                 if (project.shouldEnableIAA())
                     entitlements.set ("inter-app-audio", "<true/>");
             }
-            else
+            else if (target.type == XcodeTarget::AudioUnitv3PlugIn)
             {
                 entitlements.set ("com.apple.security.app-sandbox", "<true/>");
             }
@@ -3152,7 +3145,7 @@ private:
         return entitlements;
     }
 
-    String addEntitlementsFile() const
+    String addEntitlementsFile (XcodeTarget& target) const
     {
         String content =
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -3160,7 +3153,7 @@ private:
             "<plist version=\"1.0\">\n"
             "<dict>\n";
 
-        auto entitlements = getEntitlements();
+        auto entitlements = getEntitlements (target);
         auto keys = entitlements.getAllKeys();
 
         for (auto& key : keys)
@@ -3171,11 +3164,11 @@ private:
         content += "</dict>\n"
                    "</plist>\n";
 
-        auto entitlementsFile = getTargetFolder().getChildFile (getEntitlementsFileName());
+        auto entitlementsFile = getTargetFolder().getChildFile (target.getEntitlementsFilename());
         overwriteFileIfDifferentOrThrow (entitlementsFile, content);
 
-        RelativePath plistPath (entitlementsFile, getTargetFolder(), RelativePath::buildTargetFolder);
-        return addFile (plistPath, false, false, false, false, nullptr, {});
+        RelativePath entitlementsPath (entitlementsFile, getTargetFolder(), RelativePath::buildTargetFolder);
+        return addFile (entitlementsPath, false, false, false, false, nullptr, {});
     }
 
     String addProjectItem (const Project::Item& projectItem) const

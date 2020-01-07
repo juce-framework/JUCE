@@ -1594,9 +1594,11 @@ public:
     struct VST3Parameter final  : public Parameter
     {
         VST3Parameter (VST3PluginInstance& parent,
+                       int vstParameterIndex,
                        Steinberg::Vst::ParamID parameterID,
                        bool parameterIsAutomatable)
             : pluginInstance (parent),
+              vstParamIndex (vstParameterIndex),
               paramID (parameterID),
               automatable (parameterIsAutomatable)
         {
@@ -1654,19 +1656,24 @@ public:
             return Parameter::getValueForText (text);
         }
 
+        Vst::ParameterInfo getParameterInfo() const
+        {
+            return pluginInstance.getParameterInfoForIndex (vstParamIndex);
+        }
+
         float getDefaultValue() const override
         {
-            return (float) pluginInstance.getParameterInfoForIndex (getParameterIndex()).defaultNormalizedValue;
+            return (float) getParameterInfo().defaultNormalizedValue;
         }
 
         String getName (int /*maximumStringLength*/) const override
         {
-            return toString (pluginInstance.getParameterInfoForIndex (getParameterIndex()).title);
+            return toString (getParameterInfo().title);
         }
 
         String getLabel() const override
         {
-            return toString (pluginInstance.getParameterInfoForIndex (getParameterIndex()).units);
+            return toString (getParameterInfo().units);
         }
 
         bool isAutomatable() const override
@@ -1681,7 +1688,7 @@ public:
 
         int getNumSteps() const override
         {
-            auto stepCount = pluginInstance.getParameterInfoForIndex (getParameterIndex()).stepCount;
+            auto stepCount = getParameterInfo().stepCount;
             return stepCount == 0 ? AudioProcessor::getDefaultNumParameterSteps()
                                   : stepCount + 1;
         }
@@ -1692,6 +1699,7 @@ public:
         }
 
         VST3PluginInstance& pluginInstance;
+        const int vstParamIndex;
         const Steinberg::Vst::ParamID paramID;
         const bool automatable;
     };
@@ -1700,7 +1708,7 @@ public:
     VST3PluginInstance (VST3ComponentHolder* componentHolder)
         : AudioPluginInstance (getBusProperties (componentHolder->component)),
           holder (componentHolder),
-          inputParameterChanges (new ParamValueQueueList()),
+          inputParameterChanges  (new ParamValueQueueList()),
           outputParameterChanges (new ParamValueQueueList()),
           midiInputs (new MidiEventList()),
           midiOutputs (new MidiEventList())
@@ -2561,7 +2569,7 @@ private:
 
             for (int i = 1; i < numUnits; ++i)
             {
-                Vst::UnitInfo ui = { 0 };
+                Vst::UnitInfo ui{};
                 unitInfo->getUnitInfo (i, ui);
                 infoMap[ui.id] = std::move (ui);
             }
@@ -2571,6 +2579,7 @@ private:
         {
             auto paramInfo = getParameterInfoForIndex (i);
             auto* param = new VST3Parameter (*this,
+                                             i,
                                              paramInfo.id,
                                              (paramInfo.flags & Vst::ParameterInfo::kCanAutomate) != 0);
 
@@ -2578,7 +2587,6 @@ private:
                 bypassParam = param;
 
             std::function<AudioProcessorParameterGroup*(Vst::UnitID)> findOrCreateGroup;
-
             findOrCreateGroup = [&groupMap, &infoMap, &findOrCreateGroup](Vst::UnitID groupID)
             {
                 auto existingGroup = groupMap.find (groupID);
@@ -2777,7 +2785,7 @@ private:
 
     Vst::ParameterInfo getParameterInfoForIndex (int index) const
     {
-        Vst::ParameterInfo paramInfo = { 0 };
+        Vst::ParameterInfo paramInfo{};
 
         if (processor != nullptr)
             editController->getParameterInfo (index, paramInfo);
@@ -2787,7 +2795,7 @@ private:
 
     Vst::ProgramListInfo getProgramListInfo (int index) const
     {
-        Vst::ProgramListInfo paramInfo = { 0 };
+        Vst::ProgramListInfo paramInfo{};
 
         if (unitInfo != nullptr)
             unitInfo->getProgramListInfo (index, paramInfo);
@@ -2803,7 +2811,7 @@ private:
             return;
 
         Vst::UnitID programUnitID;
-        Vst::ParameterInfo paramInfo = { 0 };
+        Vst::ParameterInfo paramInfo{};
 
         {
             int idx, num = editController->getParameterCount();
@@ -2822,7 +2830,7 @@ private:
 
         if (unitInfo != nullptr)
         {
-            Vst::UnitInfo uInfo = { 0 };
+            Vst::UnitInfo uInfo{};
             const int unitCount = unitInfo->getUnitCount();
 
             for (int idx = 0; idx < unitCount; ++idx)
@@ -2834,7 +2842,7 @@ private:
 
                     for (int j = 0; j < programListCount; ++j)
                     {
-                        Vst::ProgramListInfo programListInfo = { 0 };
+                        Vst::ProgramListInfo programListInfo{};
 
                         if (unitInfo->getProgramListInfo (j, programListInfo) == kResultOk
                               && programListInfo.id == uInfo.programListId)
@@ -3026,7 +3034,19 @@ tresult VST3HostContext::ContextMenu::popup (Steinberg::UCoord x, Steinberg::UCo
     PopupMenu::Options options;
 
     if (auto* ed = owner.getActiveEditor())
+    {
+       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+        if (auto* peer = ed->getPeer())
+        {
+            auto scale = peer->getPlatformScaleFactor();
+
+            x = roundToInt (x / scale);
+            y = roundToInt (y / scale);
+        }
+       #endif
+
         options = options.withTargetScreenArea (ed->getScreenBounds().translated ((int) x, (int) y).withSize (1, 1));
+    }
 
    #if JUCE_MODAL_LOOPS_PERMITTED
     // Unfortunately, Steinberg's docs explicitly say this should be modal..

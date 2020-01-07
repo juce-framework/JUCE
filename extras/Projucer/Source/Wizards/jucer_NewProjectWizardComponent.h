@@ -433,7 +433,7 @@ public:
 
             if (project != nullptr)
             {
-                mw->setProject (project.release());
+                mw->setProject (std::move (project));
                 getAppSettings().lastWizardFolder = projectDir.getParentDirectory();
             }
         }

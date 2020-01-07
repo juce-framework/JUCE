@@ -200,19 +200,15 @@ public:
 
         @param productIdentifier               The product identifier.
 
-        @param isSubscription                  (Android only) defines if a product a user wants to buy is a subscription or a one-time purchase.
-                                               On iOS, type of the product is derived implicitly.
-
-        @param upgradeOrDowngradeFromSubscriptionsWithProductIdentifiers (Android only) specifies subscriptions that will be replaced by the
-                                                                         one being purchased now. Used only when buying a subscription
-                                                                         that is an upgrade or downgrade from other ones.
+        @param upgradeOrDowngradeFromSubscriptionsWithProductIdentifier (Android only) specifies the subscription that will be replaced by
+                                                                        the one being purchased now. Used only when buying a subscription
+                                                                        that is an upgrade or downgrade from another.
 
         @param creditForUnusedSubscription     (Android only) controls whether a user should be credited for any unused subscription time on
-                                               the products that are being upgraded or downgraded.
+                                               the product that is being upgraded or downgraded.
     */
     void purchaseProduct (const String& productIdentifier,
-                          bool isSubscription,
-                          const StringArray& upgradeOrDowngradeFromSubscriptionsWithProductIdentifiers = {},
+                          const String& upgradeOrDowngradeFromSubscriptionWithProductIdentifier = {},
                           bool creditForUnusedSubscription = true);
 
     /** Asynchronously asks about a list of products that a user has already bought. Upon completion, Listener::purchasesListReceived()
@@ -259,6 +255,22 @@ public:
 
     /** iOS only: Cancels downloads of hosted content from the store. */
     void cancelDownloads (const Array<Download*>& downloads);
+
+    //==============================================================================
+    // On Android, it is no longer necessary to specify whether the product being purchased is a subscription
+    // and only a single subscription can be upgraded/downgraded. Use the updated purchaseProduct() method
+    // which takes a single String argument.
+    JUCE_DEPRECATED_WITH_BODY (void purchaseProduct (const String& productIdentifier,
+                                                     bool isSubscription,
+                                                     const StringArray& upgradeOrDowngradeFromSubscriptionsWithProductIdentifiers = {},
+                                                     bool creditForUnusedSubscription = true),
+                               {
+
+                                   ignoreUnused (isSubscription);
+                                   purchaseProduct (productIdentifier,
+                                                    upgradeOrDowngradeFromSubscriptionsWithProductIdentifiers[0],
+                                                    creditForUnusedSubscription);
+                               })
 
 private:
     //==============================================================================
