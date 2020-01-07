@@ -10,12 +10,12 @@ const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFacto
     public:
         JUCEARAFactoryConfig ()
         {
-            String legacyDocumentArchiveIDString = JucePlugin_ARACompatibleArchiveIDs;
-            if (legacyDocumentArchiveIDString.isNotEmpty ())
+            String compatibleDocumentArchiveIDString = JucePlugin_ARACompatibleArchiveIDs;
+            if (compatibleDocumentArchiveIDString.isNotEmpty ())
             {
-                legacyDocumentArchiveIDStrings = StringArray::fromLines (legacyDocumentArchiveIDString);
-                for (auto& legacyID : legacyDocumentArchiveIDStrings)
-                    legacyDocumentArchiveIDs.push_back (legacyID.toRawUTF8 ());
+                compatibleDocumentArchiveIDStrings = StringArray::fromLines (compatibleDocumentArchiveIDString);
+                for (auto& compatibleID : compatibleDocumentArchiveIDStrings)
+                    compatibleDocumentArchiveIDs.push_back (compatibleID.toRawUTF8 ());
             }
             
             // Update analyzeable content types
@@ -56,8 +56,8 @@ const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFacto
         const char* getVersion () const noexcept override { return JucePlugin_VersionString; }
 
         virtual const char* getDocumentArchiveID () const noexcept override { return JucePlugin_ARADocumentArchiveID; }
-        virtual ARASize getCompatibleDocumentArchiveIDsCount () const noexcept override { return legacyDocumentArchiveIDs.size(); }
-        virtual const ARAPersistentID* getCompatibleDocumentArchiveIDs () const noexcept override { return legacyDocumentArchiveIDs.empty () ? nullptr : legacyDocumentArchiveIDs.data(); }
+        virtual ARASize getCompatibleDocumentArchiveIDsCount () const noexcept override { return compatibleDocumentArchiveIDs.size(); }
+        virtual const ARAPersistentID* getCompatibleDocumentArchiveIDs () const noexcept override { return compatibleDocumentArchiveIDs.empty () ? nullptr : compatibleDocumentArchiveIDs.data(); }
 
         virtual ARASize getAnalyzeableContentTypesCount () const noexcept override { return analyzeableContentTypes.size(); }
         virtual const ARAContentType* getAnalyzeableContentTypes () const noexcept override { return analyzeableContentTypes.empty () ? nullptr : analyzeableContentTypes.data(); }
@@ -65,8 +65,8 @@ const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFacto
         virtual ARAPlaybackTransformationFlags getSupportedPlaybackTransformationFlags () const noexcept override { return kARAPlaybackTransformationNoChanges; }
 
     private:
-        StringArray legacyDocumentArchiveIDStrings;
-        std::vector<ARAPersistentID> legacyDocumentArchiveIDs;
+        StringArray compatibleDocumentArchiveIDStrings;
+        std::vector<ARAPersistentID> compatibleDocumentArchiveIDs;
         std::vector<ARAContentType> analyzeableContentTypes;
         ARAPlaybackTransformationFlags supportedPlaybackTransformationFlags;
     };
