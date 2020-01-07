@@ -77,7 +77,7 @@ public:
         The components in the list will be owned by this object and will be automatically
         deleted later on when no longer needed.
 
-        To add properies without them being in a section, use addProperties().
+        To add properties without them being in a section, use addProperties().
     */
     void addSection (const String& sectionTitle,
                      const Array<PropertyComponent*>& newPropertyComponents,

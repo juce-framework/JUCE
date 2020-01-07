@@ -190,10 +190,10 @@ class JUCE_API WebInputStream : public InputStream
         The position is an absolute number of bytes from the stream's start.
 
         For a WebInputStream, this method will fail if wantedPos is smaller
-        than the curent position. If wantedPos is greater than the current
+        than the current position. If wantedPos is greater than the current
         position, then calling setPosition is the same as calling read, i.e.
         the skipped data will still be downloaded, although skipped bytes will
-        be discarded immedietely.
+        be discarded immediately.
 
         @returns  true if the stream manages to reposition itself correctly
         @see getPosition

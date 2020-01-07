@@ -87,6 +87,7 @@ android {
             ["../../../../../modules/juce_core/native/javacore/init",
              "../../../../../modules/juce_core/native/javacore/app",
              "../../../../../modules/juce_gui_basics/native/javacore/app",
+             "../../../../../modules/juce_product_unlocking/native/javacore/app",
              "../../../../../modules/juce_gui_basics/native/javaopt/app"]
 
         main.res.srcDirs +=
@@ -97,6 +98,7 @@ android {
     }
 
     dependencies {
+        implementation 'com.android.billingclient:billing:2.1.0'
     }
 
 

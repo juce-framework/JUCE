@@ -90,7 +90,8 @@
     <ANDROIDSTUDIO targetFolder="Builds/Android" androidMinimumSDK="23" microphonePermissionNeeded="1"
                    androidBluetoothNeeded="1" androidExternalReadNeeded="1" androidExternalWriteNeeded="1"
                    androidEnableContentSharing="1" androidExtraAssetsFolder="../Assets"
-                   smallIcon="YyqWd2" bigIcon="YyqWd2" cameraPermissionNeeded="1">
+                   smallIcon="YyqWd2" bigIcon="YyqWd2" cameraPermissionNeeded="1"
+                   androidInAppBilling="1">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" androidArchitectures="armeabi-v7a x86"
                        recommendedWarnings="LLVM"/>

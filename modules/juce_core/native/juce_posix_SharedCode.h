@@ -1153,7 +1153,7 @@ public:
                 if (numBytesRead > 0 || feof (readHandle))
                     return numBytesRead;
 
-                // signal occured during fread() so try again
+                // signal occurred during fread() so try again
                 if (ferror (readHandle) && errno == EINTR)
                     continue;
 

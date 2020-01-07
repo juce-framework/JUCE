@@ -161,7 +161,7 @@ public:
         countries: fr be mc ch lu
         @endcode
 
-        The country codes are supposed to be 2-character ISO complient codes.
+        The country codes are supposed to be 2-character ISO compliant codes.
     */
     const StringArray& getCountryCodes() const            { return countryCodes; }
 

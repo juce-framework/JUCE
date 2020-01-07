@@ -119,7 +119,7 @@ public:
     void reopenLastProjects();
     void saveCurrentlyOpenProjectList();
 
-    void checkWindowBounds (MainWindow*);
+    void checkWindowBounds (MainWindow&);
 
     void sendLookAndFeelChange();
 
