@@ -1220,47 +1220,28 @@ bool AudioProcessorGraph::anyNodesNeedPreparing() const noexcept
 
 void AudioProcessorGraph::buildRenderingSequence()
 {
-    std::unique_ptr<RenderSequenceFloat>  newSequenceF (new RenderSequenceFloat());
-    std::unique_ptr<RenderSequenceDouble> newSequenceD (new RenderSequenceDouble());
+    auto newSequenceF = std::make_unique<RenderSequenceFloat>();
+    auto newSequenceD = std::make_unique<RenderSequenceDouble>();
 
-    {
-        MessageManagerLock mml;
+    RenderSequenceBuilder<RenderSequenceFloat>  builderF (*this, *newSequenceF);
+    RenderSequenceBuilder<RenderSequenceDouble> builderD (*this, *newSequenceD);
 
-        RenderSequenceBuilder<RenderSequenceFloat>  builderF (*this, *newSequenceF);
-        RenderSequenceBuilder<RenderSequenceDouble> builderD (*this, *newSequenceD);
-    }
+    const ScopedLock sl (getCallbackLock());
 
-    struct SampleRateAndBlockSize final
-    {
-        double sampleRate;
-        int blockSize;
-    };
-
-    const auto blockDetails = [&]
-    {
-        const ScopedLock sl (getCallbackLock());
-        auto details = SampleRateAndBlockSize { getSampleRate(), getBlockSize() };
-        newSequenceF->prepareBuffers (details.blockSize);
-        newSequenceD->prepareBuffers (details.blockSize);
-        return details;
-    }();
+    const auto currentBlockSize = getBlockSize();
+    newSequenceF->prepareBuffers (currentBlockSize);
+    newSequenceD->prepareBuffers (currentBlockSize);
 
     if (anyNodesNeedPreparing())
     {
-        const ScopedLock sl (getCallbackLock());
         renderSequenceFloat.reset();
         renderSequenceDouble.reset();
 
         for (auto* node : nodes)
-            node->prepare (blockDetails.sampleRate,
-                           blockDetails.blockSize,
-                           this,
-                           getProcessingPrecision());
-
-        isPrepared = 1;
+            node->prepare (getSampleRate(), currentBlockSize, this, getProcessingPrecision());
     }
 
-    const ScopedLock sl (getCallbackLock());
+    isPrepared = 1;
 
     std::swap (renderSequenceFloat,  newSequenceF);
     std::swap (renderSequenceDouble, newSequenceD);
