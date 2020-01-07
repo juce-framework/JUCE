@@ -479,7 +479,7 @@ public:
 
         props.add (new TextPropertyComponent (subprojectsValue, "Xcode Subprojects", 8192, true),
                    "Paths to Xcode projects that should be added to the build (one per line). "
-                   "The names of the required build products can be specified after a colon, comma seperated, "
+                   "The names of the required build products can be specified after a colon, comma separated, "
                    "e.g. \"path/to/MySubProject.xcodeproj: MySubProject, OtherTarget\". "
                    "If no build products are specified, all build products associated with a subproject will be added.");
 

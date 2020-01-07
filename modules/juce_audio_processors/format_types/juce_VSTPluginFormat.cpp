@@ -2322,7 +2322,7 @@ private:
         // Workaround: unfortunately old JUCE VST-2 plug-ins had a bug and would crash if
         // you try to get the speaker arrangement when there are no input channels present.
         // Hopefully, one day (when there are no more old JUCE plug-ins around), we can
-        // commment out the next two lines.
+        // comment out the next two lines.
         if (effect->numInputs == 0)
             return false;
 

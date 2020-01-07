@@ -1356,7 +1356,7 @@ public:
         {
             // failed to write to disk, so let's try writing the header.
             // If it's just run out of disk space, then if it does manage
-            // to write the header, we'll still have a useable file..
+            // to write the header, we'll still have a usable file..
             writeHeader();
             writeFailed = true;
             return false;

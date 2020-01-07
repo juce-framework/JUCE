@@ -51,7 +51,7 @@ protected:
     //==============================================================================
     /** Constructor.
 
-        This constructor will create a main input and output bus which are diabled
+        This constructor will create a main input and output bus which are disabled
         by default. If you need more fine-grained control then use the other constructors.
     */
     AudioProcessor();
@@ -400,7 +400,7 @@ public:
         /** Return the number of channels of the current bus. */
         inline int getNumberOfChannels() const noexcept                 { return cachedChannelCount; }
 
-        /** Set the number of channles of this bus. This will return false if the AudioProcessor
+        /** Set the number of channels of this bus. This will return false if the AudioProcessor
             does not support this layout.
         */
         bool setNumberOfChannels (int channels);
@@ -627,7 +627,7 @@ public:
      */
     int getChannelIndexInProcessBlockBuffer (bool isInput, int busIndex, int channelIndex) const noexcept;
 
-    /** Returns the offset in a bus's buffer from an absolute channel indes.
+    /** Returns the offset in a bus's buffer from an absolute channel index.
 
         This method returns the offset in a bus's buffer given an absolute channel index.
         It also provides the bus index. For example, this method would return one
@@ -771,7 +771,7 @@ public:
 
     /** Returns the next best layout which is contained in a channel layout map.
 
-        You can use this mehtod to help you implement getNextBestLayout. For example:
+        You can use this method to help you implement getNextBestLayout. For example:
 
         @code
         BusesLayout getNextBestLayout (const BusesLayout& layouts) override
@@ -900,7 +900,7 @@ public:
         If this method returns a nullptr then you can still control the bypass by
         calling processBlockBypassed instead of processBlock. On the other hand,
         if this method returns a non-null value, you should never call
-        processBlockBypassed but use the returned parameter to conrol the bypass
+        processBlockBypassed but use the returned parameter to control the bypass
         state instead.
 
         A plug-in can override this function to return a parameter which control's your
@@ -1231,7 +1231,7 @@ public:
         AudioProcessor about which track the AudioProcessor is loaded on. This method
         may only be called on the message thread.
 
-        If you are implemeting an AudioProcessor then you can override this callback
+        If you are implementing an AudioProcessor then you can override this callback
         to do something useful with the track properties such as changing the colour
         of your AudioProcessor's editor. It's entirely up to the host when and how
         often this callback will be called.

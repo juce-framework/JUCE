@@ -1652,7 +1652,7 @@ namespace AAXClasses
 
             if (isInAudioSuite())
             {
-                // AudioSuite doesnt support multiple output buses
+                // AudioSuite doesn't support multiple output buses
                 for (int i = 1; i < newLayout.outputBuses.size(); ++i)
                     newLayout.outputBuses.getReference (i) = AudioChannelSet::disabled();
 
@@ -1823,7 +1823,7 @@ namespace AAXClasses
                 if (LegacyAudioParameter::getParamID (aaxMeters[idx], false) == paramID)
                     break;
 
-            // you sepecified a parameter id in your curve but the parameter does not have the meter
+            // you specified a parameter id in your curve but the parameter does not have the meter
             // category
             jassert (idx < aaxMeters.size());
             return 'Metr' + static_cast<AAX_CTypeID> (idx);

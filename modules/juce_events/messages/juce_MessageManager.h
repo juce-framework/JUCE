@@ -223,14 +223,14 @@ public:
             If another thread is currently using the MessageManager, this will wait until that
             thread releases the lock to the MessageManager.
 
-            This call will only exit if the lock was accquired by this thread. Calling abort while
+            This call will only exit if the lock was acquired by this thread. Calling abort while
             a thread is waiting for enter to finish, will have no effect.
 
             @see exit, abort
          */
          void enter() const noexcept;
 
-         /** Attempts to lock the meesage manager and exits if abort is called.
+         /** Attempts to lock the message manager and exits if abort is called.
 
             This method behaves identically to enter, except that it will abort waiting for
             the lock if the abort method is called.
@@ -270,7 +270,7 @@ public:
                  messageManagerLock.abort();
             }
 
-            @returns false if waiting for a lock was aborted, true if the lock was accquired.
+            @returns false if waiting for a lock was aborted, true if the lock was acquired.
             @see enter, abort, ScopedTryLock
         */
         bool tryEnter() const noexcept;
@@ -283,7 +283,7 @@ public:
         /** Unblocks a thread which is waiting in tryEnter
             Call this method if you want to unblock a thread which is waiting for the
             MessageManager lock in tryEnter.
-            This method does not have any effetc on a thread waiting for a lock in enter.
+            This method does not have any effect on a thread waiting for a lock in enter.
             @see tryEnter
         */
         void abort() const noexcept;

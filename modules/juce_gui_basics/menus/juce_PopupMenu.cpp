@@ -464,7 +464,7 @@ struct MenuWindow  : public Component
 
                 if (componentAttachedTo->reallyContains (mousePos, true))
                 {
-                    postCommandMessage (PopupMenuSettings::dismissCommandId); // dismiss asynchrounously
+                    postCommandMessage (PopupMenuSettings::dismissCommandId); // dismiss asynchronously
                     return;
                 }
             }
