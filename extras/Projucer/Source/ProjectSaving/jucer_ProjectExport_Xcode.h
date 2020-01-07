@@ -1772,7 +1772,7 @@ public:
                                  " -I \\\"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\\\""
                                  " -I \\\"$(DEVELOPER_DIR)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/AudioUnit.framework/Headers\\\"";
 
-            xcodeFrameworks.addTokens ("AudioUnit CoreAudioKit", false);
+            xcodeFrameworks.addArray ({ "AudioUnit", "CoreAudioKit" });
 
             XmlElement plistKey ("key");
             plistKey.addTextElement ("AudioComponents");
@@ -1819,10 +1819,10 @@ public:
 
         void addExtraAudioUnitv3PlugInTargetSettings()
         {
-            if (owner.isiOS())
-                xcodeFrameworks.addTokens ("CoreAudioKit AVFoundation", false);
-            else
-                xcodeFrameworks.addTokens ("AudioUnit CoreAudioKit AVFoundation", false);
+            xcodeFrameworks.addArray ({ "AVFoundation", "CoreAudioKit" });
+
+            if (owner.isOSX())
+                xcodeFrameworks.add ("AudioUnit");
 
             XmlElement plistKey ("key");
             plistKey.addTextElement ("NSExtension");
@@ -2655,6 +2655,16 @@ private:
             s.trim();
             s.removeDuplicates (true);
             s.sort (true);
+
+            // When building against the 10.15 SDK we need to make sure the
+            // AudioUnit framework is linked before the AudioToolbox framework.
+            auto audioUnitIndex = s.indexOf ("AudioUnit", false, 1);
+
+            if (audioUnitIndex != -1)
+            {
+                s.remove (audioUnitIndex);
+                s.insert (0, "AudioUnit");
+            }
 
             for (auto& framework : s)
             {
