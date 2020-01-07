@@ -219,19 +219,19 @@ struct InAppPurchases::Pimpl
 
 private:
     #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
-      METHOD (constructor,                      "<init>",                           "(Landroid/content/Context;J)V")                                              \
-      METHOD (endConnection,                    "endConnection",                    "()V")                                                                        \
-      METHOD (isReady,                          "isReady",                          "()Z")                                                                        \
-      METHOD (isBillingSupported,               "isBillingSupported",               "()Z")                                                                        \
-      METHOD (querySkuDetails,                  "querySkuDetails",                  "([Ljava/lang/String;)V")                                                     \
-      METHOD (launchBillingFlow,                "launchBillingFlow",                "(Landroid/app/Activity;Lcom/android/billingclient/api/BillingFlowParams;)V") \
-      METHOD (queryPurchases,                   "queryPurchases",                   "()V")                                                                        \
-      METHOD (consumePurchase,                  "consumePurchase",                  "(Ljava/lang/String;Ljava/lang/String;)V")                                    \
-                                                                                                                                                                  \
-      CALLBACK (InAppPurchases::Pimpl::skuDetailsQueryCallback,    "skuDetailsQueryCallback",    "(JLjava/util/List;)V")                                          \
-      CALLBACK (InAppPurchases::Pimpl::purchasesListQueryCallback, "purchasesListQueryCallback", "(JLjava/util/List;)V")                                          \
-      CALLBACK (InAppPurchases::Pimpl::purchaseCompletedCallback,  "purchaseCompletedCallback",  "(JLcom/android/billingclient/api/Purchase;I)V")                 \
-      CALLBACK (InAppPurchases::Pimpl::purchaseConsumedCallback,   "purchaseConsumedCallback",   "(JLjava/lang/String;I)V")
+      METHOD (constructor,                  "<init>",                     "(Landroid/content/Context;J)V")                                              \
+      METHOD (endConnection,                "endConnection",              "()V")                                                                        \
+      METHOD (isReady,                      "isReady",                    "()Z")                                                                        \
+      METHOD (isBillingSupported,           "isBillingSupported",         "()Z")                                                                        \
+      METHOD (querySkuDetails,              "querySkuDetails",            "([Ljava/lang/String;)V")                                                     \
+      METHOD (launchBillingFlow,            "launchBillingFlow",          "(Landroid/app/Activity;Lcom/android/billingclient/api/BillingFlowParams;)V") \
+      METHOD (queryPurchases,               "queryPurchases",             "()V")                                                                        \
+      METHOD (consumePurchase,              "consumePurchase",            "(Ljava/lang/String;Ljava/lang/String;)V")                                    \
+                                                                                                                                                        \
+      CALLBACK (skuDetailsQueryCallback,    "skuDetailsQueryCallback",    "(JLjava/util/List;)V")                                                       \
+      CALLBACK (purchasesListQueryCallback, "purchasesListQueryCallback", "(JLjava/util/List;)V")                                                       \
+      CALLBACK (purchaseCompletedCallback,  "purchaseCompletedCallback",  "(JLcom/android/billingclient/api/Purchase;I)V")                              \
+      CALLBACK (purchaseConsumedCallback,   "purchaseConsumedCallback",   "(JLjava/lang/String;I)V")
 
     DECLARE_JNI_CLASS (JuceBillingClient, "com/roli/juce/JuceBillingClient")
     #undef JNI_CLASS_MEMBERS

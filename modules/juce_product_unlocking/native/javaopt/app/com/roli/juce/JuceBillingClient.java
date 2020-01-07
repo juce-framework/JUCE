@@ -1,38 +1,14 @@
 package com.roli.juce;
 
-
-import android.content.Context;
-import android.app.Activity;
-import android.util.Log;
-
-import com.android.billingclient.api.BillingClient;
-import com.android.billingclient.api.BillingFlowParams;
-import com.android.billingclient.api.BillingResult;
-import com.android.billingclient.api.BillingClientStateListener;
-import com.android.billingclient.api.ConsumeResponseListener;
-import com.android.billingclient.api.Purchase;
-import com.android.billingclient.api.PurchasesUpdatedListener;
-import com.android.billingclient.api.SkuDetails;
-import com.android.billingclient.api.SkuDetailsParams;
-import com.android.billingclient.api.SkuDetailsResponseListener;
-import com.android.billingclient.api.AcknowledgePurchaseParams;
-import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
-import com.android.billingclient.api.ConsumeParams;
-
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.android.billingclient.api.*;
 
 public class JuceBillingClient implements PurchasesUpdatedListener {
-    private native void skuDetailsQueryCallback(long host, List<SkuDetails> skuDetails);
-    private native void purchasesListQueryCallback(long host, List<Purchase> purchases);
+    private native void skuDetailsQueryCallback(long host, java.util.List<SkuDetails> skuDetails);
+    private native void purchasesListQueryCallback(long host, java.util.List<Purchase> purchases);
     private native void purchaseCompletedCallback(long host, Purchase purchase, int responseCode);
     private native void purchaseConsumedCallback(long host, String productIdentifier, int responseCode);
 
-    public JuceBillingClient(Context context, long hostToUse) {
+    public JuceBillingClient(android.content.Context context, long hostToUse) {
         host = hostToUse;
 
         billingClient = BillingClient.newBuilder(context)
@@ -60,7 +36,7 @@ public class JuceBillingClient implements PurchasesUpdatedListener {
         executeOnBillingClientConnection(new Runnable() {
             @Override
             public void run() {
-                final List<String> skuList = Arrays.asList(skusToQuery);
+                final java.util.List<String> skuList = java.util.Arrays.asList(skusToQuery);
 
                 SkuDetailsParams.Builder params = SkuDetailsParams.newBuilder()
                         .setSkusList(skuList)
@@ -68,7 +44,7 @@ public class JuceBillingClient implements PurchasesUpdatedListener {
 
                 billingClient.querySkuDetailsAsync(params.build(), new SkuDetailsResponseListener() {
                     @Override
-                    public void onSkuDetailsResponse(BillingResult billingResult, final List<SkuDetails> inAppSkuDetails) {
+                    public void onSkuDetailsResponse(BillingResult billingResult, final java.util.List<SkuDetails> inAppSkuDetails) {
                         if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
                             SkuDetailsParams.Builder params = SkuDetailsParams.newBuilder()
                                     .setSkusList(skuList)
@@ -76,7 +52,7 @@ public class JuceBillingClient implements PurchasesUpdatedListener {
 
                             billingClient.querySkuDetailsAsync(params.build(), new SkuDetailsResponseListener() {
                                 @Override
-                                public void onSkuDetailsResponse(BillingResult billingResult, List<SkuDetails> subsSkuDetails) {
+                                public void onSkuDetailsResponse(BillingResult billingResult, java.util.List<SkuDetails> subsSkuDetails) {
                                     if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
                                         subsSkuDetails.addAll(inAppSkuDetails);
                                         skuDetailsQueryCallback(host, subsSkuDetails);
@@ -90,7 +66,7 @@ public class JuceBillingClient implements PurchasesUpdatedListener {
         });
     }
 
-    public void launchBillingFlow(final Activity activity, final BillingFlowParams params) {
+    public void launchBillingFlow(final android.app.Activity activity, final BillingFlowParams params) {
         executeOnBillingClientConnection(new Runnable() {
             @Override
             public void run() {
@@ -108,7 +84,7 @@ public class JuceBillingClient implements PurchasesUpdatedListener {
 
                 if (inAppPurchases.getResponseCode() == BillingClient.BillingResponseCode.OK
                         && subsPurchases.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-                    List<Purchase> purchaseList = inAppPurchases.getPurchasesList();
+                    java.util.List<Purchase> purchaseList = inAppPurchases.getPurchasesList();
                     purchaseList.addAll(subsPurchases.getPurchasesList());
 
                     purchasesListQueryCallback(host, purchaseList);
@@ -139,7 +115,7 @@ public class JuceBillingClient implements PurchasesUpdatedListener {
     }
 
     @Override
-    public void onPurchasesUpdated(BillingResult result, List<Purchase> purchases) {
+    public void onPurchasesUpdated(BillingResult result, java.util.List<Purchase> purchases) {
         int responseCode = result.getResponseCode();
 
         if (purchases != null) {
