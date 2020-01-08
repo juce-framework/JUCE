@@ -342,7 +342,18 @@ public:
                 { "File Access: Music Folder (Read Only)",          "assets.music.read-only" },
                 { "File Access: Music Folder (Read/Write)",         "assets.music.read-write" },
                 { "File Access: Movies Folder (Read Only)",         "assets.movies.read-only" },
-                { "File Access: Movies Folder (Read/Write)",        "assets.movies.read-write" }
+                { "File Access: Movies Folder (Read/Write)",        "assets.movies.read-write" },
+
+                { "Temporary Exception: Audio Unit Hosting",                       "temporary-exception.audio-unit-host" },
+                { "Temporary Exception: Global Mach Service",                      "temporary-exception.mach-lookup.global-name" },
+                { "Temporary Exception: Global Mach Service Dynamic Registration", "temporary-exception.mach-register.global-name" },
+                { "Temporary Exception: Home Directory File Access (Read Only)",   "temporary-exception.files.home-relative-path.read-only" },
+                { "Temporary Exception: Home Directory File Access (Read/Write)",  "temporary-exception.files.home-relative-path.read-write" },
+                { "Temporary Exception: Absolute Path File Access (Read Only)",    "temporary-exception.files.absolute-path.read-only" },
+                { "Temporary Exception: Absolute Path File Access (Read/Write)",   "temporary-exception.files.absolute-path.read-write" },
+                { "Temporary Exception: IOKit User Client Class",                  "temporary-exception.iokit-user-client-class" },
+                { "Temporary Exception: Shared Preference Domain (Read Only)",     "temporary-exception.shared-preference.read-only" },
+                { "Temporary Exception: Shared Preference Domain (Read/Write)",    "temporary-exception.shared-preference.read-write" }
             };
 
             StringArray sandboxKeys;
