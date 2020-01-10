@@ -2927,7 +2927,11 @@ public:
         if (auto* peer = getTopLevelComponent()->getPeer())
             setScaleFactorAndDispatchMessage (peer->getPlatformScaleFactor());
 
+       #if JUCE_LINUX
+        MessageManager::callAsync ([this] { componentMovedOrResized (true, true); });
+       #else
         componentMovedOrResized (true, true);
+       #endif
     }
 
     using ComponentMovementWatcher::componentVisibilityChanged;
