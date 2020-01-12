@@ -671,7 +671,7 @@ public:
    #else
     bool shadersAvailable = false;
    #endif
-    bool hasInitialised = false;
+    std::atomic_bool hasInitialised = false;
     Atomic<int> needsUpdate { 1 }, destroying;
     uint32 lastMMLockReleaseTime = 0;
 
