@@ -1,6 +1,5 @@
 #include "RegionSequenceView.h"
 #include "DocumentView.h"
-#include "TrackHeaderView.h"
 #include "PlaybackRegionView.h"
 
 //==============================================================================

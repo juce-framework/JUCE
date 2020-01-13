@@ -3,7 +3,6 @@
 #include "JuceHeader.h"
 
 class RulersView;
-class TrackHeaderView;
 class RegionSequenceView;
 class PlaybackRegionView;
 
