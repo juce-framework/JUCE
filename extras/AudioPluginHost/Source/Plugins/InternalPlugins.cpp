@@ -369,7 +369,7 @@ std::unique_ptr<AudioPluginInstance> InternalPluginFormat::createInstance (const
     if (name == audioOutDesc.name) return std::make_unique<AudioProcessorGraph::AudioGraphIOProcessor> (AudioProcessorGraph::AudioGraphIOProcessor::audioOutputNode);
     if (name == audioInDesc.name)  return std::make_unique<AudioProcessorGraph::AudioGraphIOProcessor> (AudioProcessorGraph::AudioGraphIOProcessor::audioInputNode);
     if (name == midiInDesc.name)   return std::make_unique<AudioProcessorGraph::AudioGraphIOProcessor> (AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode);
-    if (name == midiOutDesc.name)   return std::make_unique<AudioProcessorGraph::AudioGraphIOProcessor>(AudioProcessorGraph::AudioGraphIOProcessor::midiOutputNode);
+    if (name == midiOutDesc.name)  return std::make_unique<AudioProcessorGraph::AudioGraphIOProcessor>(AudioProcessorGraph::AudioGraphIOProcessor::midiOutputNode);
 
     if (name == SineWaveSynth::getIdentifier()) return std::make_unique<SineWaveSynth> (SineWaveSynth::getPluginDescription());
     if (name == ReverbPlugin::getIdentifier())  return std::make_unique<ReverbPlugin>  (ReverbPlugin::getPluginDescription());
