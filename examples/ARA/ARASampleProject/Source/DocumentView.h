@@ -1,8 +1,8 @@
 #pragma once
 
 #include "JuceHeader.h"
+#include "RulersView.h"
 
-class RulersView;
 class RegionSequenceViewController;
 class PlaybackRegionView;
 
@@ -135,7 +135,7 @@ private:
     Viewport trackHeadersViewport;
     Component trackHeadersView;
     Viewport rulersViewport;
-    std::unique_ptr<RulersView> rulersView;
+    RulersView rulersView;
 
     AudioFormatManager audioFormatManger;
 

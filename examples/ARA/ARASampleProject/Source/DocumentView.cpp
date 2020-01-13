@@ -14,7 +14,7 @@ DocumentView::DocumentView (ARAEditorView* ev, const AudioPlayHead::CurrentPosit
       playbackRegionsViewport (*this),
       playHeadView (*this),
       timeRangeSelectionView (*this),
-      rulersView (std::make_unique<RulersView> (*this)),
+      rulersView (*this),
       pixelsPerSecond (lastPixelsPerSecond),
       positionInfo (posInfo)
 {
@@ -35,7 +35,7 @@ DocumentView::DocumentView (ARAEditorView* ev, const AudioPlayHead::CurrentPosit
     addAndMakeVisible (trackHeadersViewport);
 
     rulersViewport.setScrollBarsShown (false, false, false, false);
-    rulersViewport.setViewedComponent (rulersView.get(), false);
+    rulersViewport.setViewedComponent (&rulersView, false);
     addAndMakeVisible (rulersViewport);
 
     getARAEditorView()->addListener (this);
@@ -95,7 +95,7 @@ Range<double> DocumentView::getVisibleTimeRange() const
 
 ARAMusicalContext* DocumentView::getCurrentMusicalContext() const
 {
-    return rulersView->getCurrentMusicalContext();
+    return rulersView.getCurrentMusicalContext();
 }
 
 int DocumentView::getPlaybackRegionsViewsXForTime (double time) const
@@ -181,7 +181,7 @@ void DocumentView::resized()
     playbackRegionsView.setBounds (0, 0, playbackRegionsViewWidth, jmax (kTrackHeight * regionSequenceViewControllers.size(), playbackRegionsViewport.getHeight() - playbackRegionsViewport.getScrollBarThickness()));
 
     rulersViewport.setBounds (trackHeaderWidth, 0, playbackRegionsViewport.getMaximumVisibleWidth(), rulersViewHeight);
-    rulersView->setBounds (0, 0, playbackRegionsViewWidth, rulersViewHeight);
+    rulersView.setBounds (0, 0, playbackRegionsViewWidth, rulersViewHeight);
 
     trackHeadersViewport.setBounds (0, rulersViewHeight, trackHeadersViewport.getWidth(), playbackRegionsViewport.getMaximumVisibleHeight());
     trackHeadersView.setBounds (0, 0, trackHeadersViewport.getWidth(), playbackRegionsView.getHeight());

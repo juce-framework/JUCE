@@ -1,4 +1,5 @@
 #include "RulersView.h"
+#include "DocumentView.h"
 
 #include "ARA_Library/Utilities/ARAPitchInterpretation.h"
 #include "ARA_Library/Utilities/ARATimelineConversion.h"
