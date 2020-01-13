@@ -1,9 +1,9 @@
-#include "RegionSequenceView.h"
+#include "RegionSequenceViewController.h"
 #include "DocumentView.h"
 #include "PlaybackRegionView.h"
 
 //==============================================================================
-RegionSequenceView::RegionSequenceView (DocumentView& docView, ARARegionSequence* sequence)
+RegionSequenceViewController::RegionSequenceViewController (DocumentView& docView, ARARegionSequence* sequence)
     : documentView (docView),
       regionSequence (sequence),
       trackHeaderView (docView.getARAEditorView(), regionSequence)
@@ -16,19 +16,19 @@ RegionSequenceView::RegionSequenceView (DocumentView& docView, ARARegionSequence
         addRegionSequenceViewAndMakeVisible (playbackRegion);
 }
 
-RegionSequenceView::~RegionSequenceView()
+RegionSequenceViewController::~RegionSequenceViewController()
 {
     detachFromRegionSequence();
 }
 
-void RegionSequenceView::addRegionSequenceViewAndMakeVisible (ARAPlaybackRegion* playbackRegion)
+void RegionSequenceViewController::addRegionSequenceViewAndMakeVisible (ARAPlaybackRegion* playbackRegion)
 {
     auto view = new PlaybackRegionView (documentView, playbackRegion);
     playbackRegionViews.add (view);
     documentView.getPlaybackRegionsView().addAndMakeVisible (view);
 }
 
-void RegionSequenceView::detachFromRegionSequence()
+void RegionSequenceViewController::detachFromRegionSequence()
 {
     if (regionSequence == nullptr)
         return;
@@ -39,7 +39,7 @@ void RegionSequenceView::detachFromRegionSequence()
 }
 
 //==============================================================================
-void RegionSequenceView::setRegionsViewBoundsByYRange (int y, int height)
+void RegionSequenceViewController::setRegionsViewBoundsByYRange (int y, int height)
 {
     trackHeaderView.setBounds (0, y, trackHeaderView.getParentWidth(), height);
 
@@ -53,7 +53,7 @@ void RegionSequenceView::setRegionsViewBoundsByYRange (int y, int height)
 }
 
 //==============================================================================
-void RegionSequenceView::willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* /*regionSequence*/, ARAPlaybackRegion* playbackRegion)
+void RegionSequenceViewController::willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* /*regionSequence*/, ARAPlaybackRegion* playbackRegion)
 {
     for (int i = 0; i < playbackRegionViews.size(); ++i)
     {
@@ -67,21 +67,21 @@ void RegionSequenceView::willRemovePlaybackRegionFromRegionSequence (ARARegionSe
     documentView.invalidateRegionSequenceViews();
 }
 
-void RegionSequenceView::didAddPlaybackRegionToRegionSequence (ARARegionSequence* /*regionSequence*/, ARAPlaybackRegion* playbackRegion)
+void RegionSequenceViewController::didAddPlaybackRegionToRegionSequence (ARARegionSequence* /*regionSequence*/, ARAPlaybackRegion* playbackRegion)
 {
     addRegionSequenceViewAndMakeVisible (playbackRegion);
 
     documentView.invalidateRegionSequenceViews();
 }
 
-void RegionSequenceView::willDestroyRegionSequence (ARARegionSequence* /*regionSequence*/)
+void RegionSequenceViewController::willDestroyRegionSequence (ARARegionSequence* /*regionSequence*/)
 {
     detachFromRegionSequence();
 
     documentView.invalidateRegionSequenceViews();
 }
 
-void RegionSequenceView::willUpdateRegionSequenceProperties (ARARegionSequence* /*regionSequence*/, ARARegionSequence::PropertiesPtr newProperties)
+void RegionSequenceViewController::willUpdateRegionSequenceProperties (ARARegionSequence* /*regionSequence*/, ARARegionSequence::PropertiesPtr newProperties)
 {
     if (newProperties->color != regionSequence->getColor())
     {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "JuceHeader.h"
-#include "RegionSequenceView.h"
+#include "RegionSequenceViewController.h"
 
 //==============================================================================
 /**

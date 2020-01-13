@@ -1,6 +1,6 @@
 #include "DocumentView.h"
 
-#include "RegionSequenceView.h"
+#include "RegionSequenceViewController.h"
 #include "PlaybackRegionView.h"
 #include "RulersView.h"
 
@@ -178,7 +178,7 @@ void DocumentView::resized()
 
     // update sizes and positions of all views
     playbackRegionsViewport.setBounds (trackHeaderWidth, rulersViewHeight, getWidth() - trackHeaderWidth, getHeight() - rulersViewHeight);
-    playbackRegionsView.setBounds (0, 0, playbackRegionsViewWidth, jmax (kTrackHeight * regionSequenceViews.size(), playbackRegionsViewport.getHeight() - playbackRegionsViewport.getScrollBarThickness()));
+    playbackRegionsView.setBounds (0, 0, playbackRegionsViewWidth, jmax (kTrackHeight * regionSequenceViewControllers.size(), playbackRegionsViewport.getHeight() - playbackRegionsViewport.getScrollBarThickness()));
 
     rulersViewport.setBounds (trackHeaderWidth, 0, playbackRegionsViewport.getMaximumVisibleWidth(), rulersViewHeight);
     rulersView->setBounds (0, 0, playbackRegionsViewWidth, rulersViewHeight);
@@ -187,7 +187,7 @@ void DocumentView::resized()
     trackHeadersView.setBounds (0, 0, trackHeadersViewport.getWidth(), playbackRegionsView.getHeight());
 
     int y = 0;
-    for (auto v : regionSequenceViews)
+    for (auto v : regionSequenceViewControllers)
     {
         v->setRegionsViewBoundsByYRange (y, kTrackHeight);
         y += kTrackHeight;
@@ -228,19 +228,19 @@ void DocumentView::rebuildRegionSequenceViews()
 {
     // always deleting all region sequence views and in turn their playback regions including their
     // audio thumbs isn't particularly effective - in an actual plug-in this would need to optimized.
-    regionSequenceViews.clear();
+    regionSequenceViewControllers.clear();
 
     if (showOnlySelectedRegionSequences)
     {
         for (auto selectedSequence : getARAEditorView()->getViewSelection().getEffectiveRegionSequences<ARARegionSequence>())
-            regionSequenceViews.add (new RegionSequenceView (*this, selectedSequence));
+            regionSequenceViewControllers.add (new RegionSequenceViewController (*this, selectedSequence));
     }
     else    // show all RegionSequences of Document...
     {
         for (auto regionSequence : getDocument()->getRegionSequences<ARARegionSequence>())
         {
             if (! ARA::contains (getARAEditorView()->getHiddenRegionSequences(), regionSequence))
-                regionSequenceViews.add (new RegionSequenceView (*this, regionSequence));
+                regionSequenceViewControllers.add (new RegionSequenceViewController (*this, regionSequence));
         }
     }
 
@@ -253,10 +253,10 @@ void DocumentView::rebuildRegionSequenceViews()
 void DocumentView::calculateTimeRange()
 {
     Range<double> newTimeRange;
-    if (! regionSequenceViews.isEmpty())
+    if (! regionSequenceViewControllers.isEmpty())
     {
         bool isFirst = true;
-        for (auto v : regionSequenceViews)
+        for (auto v : regionSequenceViewControllers)
         {
             if (v->isEmpty())
                 continue;

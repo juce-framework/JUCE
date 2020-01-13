@@ -8,16 +8,16 @@ class PlaybackRegionView;
 
 //==============================================================================
 /**
-    RegionSequenceView
-    JUCE component used to display all ARA playback regions in a region sequences
+    RegionSequenceViewController
+    Class used to manage all views associated with an ARA region sequence.
+    This includes a track header view containing ARA region sequence data
+    and views for all ARA playback regions in the given region sequence.
 */
-// TODO JUCE_ARA this is no longer a view, but rather some container/controller for all views
-//               associated with a given region sequence - must rename accordingly.
-class RegionSequenceView  : private ARARegionSequence::Listener
+class RegionSequenceViewController  : private ARARegionSequence::Listener
 {
 public:
-    RegionSequenceView (DocumentView& documentView, ARARegionSequence* sequence);
-    ~RegionSequenceView();
+    RegionSequenceViewController (DocumentView& documentView, ARARegionSequence* sequence);
+    ~RegionSequenceViewController();
 
     ARARegionSequence* getRegionSequence() const { return regionSequence; }     // careful: may return nullptr!
     Range<double> getTimeRange() const { return (regionSequence != nullptr) ? regionSequence->getTimeRange() : Range<double>(); }
@@ -42,5 +42,5 @@ private:
     TrackHeaderView trackHeaderView;
     OwnedArray<PlaybackRegionView> playbackRegionViews;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RegionSequenceView)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RegionSequenceViewController)
 };

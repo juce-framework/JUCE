@@ -13,10 +13,10 @@
         <FILE id="zyUNuy" name="DocumentView.cpp" compile="1" resource="0"
               file="Source/DocumentView.cpp"/>
         <FILE id="v4hOwL" name="DocumentView.h" compile="0" resource="0" file="Source/DocumentView.h"/>
-        <FILE id="EQ23gh" name="RegionSequenceView.cpp" compile="1" resource="0"
-              file="Source/RegionSequenceView.cpp"/>
-        <FILE id="bsc68x" name="RegionSequenceView.h" compile="0" resource="0"
-              file="Source/RegionSequenceView.h"/>
+        <FILE id="EQ23gh" name="RegionSequenceViewController.cpp" compile="1"
+              resource="0" file="Source/RegionSequenceViewController.cpp"/>
+        <FILE id="bsc68x" name="RegionSequenceViewController.h" compile="0"
+              resource="0" file="Source/RegionSequenceViewController.h"/>
         <FILE id="KZJTR6" name="PlaybackRegionView.cpp" compile="1" resource="0"
               file="Source/PlaybackRegionView.cpp"/>
         <FILE id="YRS0ck" name="PlaybackRegionView.h" compile="0" resource="0"

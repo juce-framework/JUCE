@@ -3,7 +3,7 @@
 #include "JuceHeader.h"
 
 class RulersView;
-class RegionSequenceView;
+class RegionSequenceViewController;
 class PlaybackRegionView;
 
 //==============================================================================
@@ -126,7 +126,7 @@ private:
 
     ARAEditorView* const editorView;
 
-    OwnedArray<RegionSequenceView> regionSequenceViews;
+    OwnedArray<RegionSequenceViewController> regionSequenceViewControllers;
 
     ScrollMasterViewport playbackRegionsViewport;
     Component playbackRegionsView;
