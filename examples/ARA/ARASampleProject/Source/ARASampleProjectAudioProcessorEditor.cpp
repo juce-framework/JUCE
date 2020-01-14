@@ -115,7 +115,7 @@ void ARASampleProjectAudioProcessorEditor::timerCallback()
     playheadLinearPositionLabel.setText (timeToTimecodeString (timePosition), dontSendNotification);
 
     String musicalPosition;
-    const auto musicalContext = documentView->getCurrentMusicalContext();
+    const auto musicalContext = documentView->getRulersView().getCurrentMusicalContext();
     if (musicalContext != nullptr)
     {
         const ARA::PlugIn::HostContentReader<ARA::kARAContentTypeTempoEntries> tempoReader (musicalContext);

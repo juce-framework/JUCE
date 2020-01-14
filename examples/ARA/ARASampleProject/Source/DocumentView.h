@@ -48,8 +48,8 @@ public:
     // currently visible time range
     Range<double> getVisibleTimeRange() const;
 
-    // may return nullptr
-    ARAMusicalContext* getCurrentMusicalContext() const;
+    // rulers view access
+    const RulersView& getRulersView () const { return rulersView; }
 
     // convert between time and x coordinate
     int getPlaybackRegionsViewsXForTime (double time) const;
