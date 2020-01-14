@@ -105,7 +105,7 @@ public:
         if (renderThread != nullptr)
         {
             // make sure everything has finished executing
-            destroying.set (1);
+            destroying = true;
 
             if (workQueue.size() > 0)
             {
@@ -224,7 +224,9 @@ public:
     bool renderFrame()
     {
         MessageManager::Lock::ScopedTryLockType mmLock (messageManagerLock, false);
-        const bool isUpdating = needsUpdate.compareAndSetBool (0, 1);
+
+        auto isUpdatingTestValue = true;
+        auto isUpdating = needsUpdate.compare_exchange_strong (isUpdatingTestValue, false);
 
         if (context.renderComponents && isUpdating)
         {
@@ -613,7 +615,7 @@ public:
 
     void execute (OpenGLContext::AsyncWorker::Ptr workerToUse, bool shouldBlock, bool calledFromDestructor = false)
     {
-        if (calledFromDestructor || destroying.get() == 0)
+        if (calledFromDestructor || ! destroying)
         {
             if (shouldBlock)
             {
@@ -671,8 +673,7 @@ public:
    #else
     bool shadersAvailable = false;
    #endif
-    bool hasInitialised = false;
-    Atomic<int> needsUpdate { 1 }, destroying;
+    std::atomic<bool> hasInitialised { false }, needsUpdate { true }, destroying { false };
     uint32 lastMMLockReleaseTime = 0;
 
    #if JUCE_MAC
