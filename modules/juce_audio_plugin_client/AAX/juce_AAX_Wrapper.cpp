@@ -1004,7 +1004,12 @@ namespace AAXClasses
             info.timeInSeconds = info.timeInSamples / sampleRate;
 
             int64_t ticks = 0;
-            check (transport.GetCurrentTickPosition (&ticks));
+
+            if (info.isPlaying)
+                check (transport.GetCustomTickPosition (&ticks, info.timeInSamples));
+            else
+                check (transport.GetCurrentTickPosition (&ticks));
+
             info.ppqPosition = ticks / 960000.0;
 
             info.isLooping = false;
