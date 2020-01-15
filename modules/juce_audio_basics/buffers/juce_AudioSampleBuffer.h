@@ -116,7 +116,7 @@ public:
     /** Copies another buffer.
 
         This buffer will make its own copy of the other's data, unless the buffer was created
-        using an external data buffer, in which case boths buffers will just point to the same
+        using an external data buffer, in which case both buffers will just point to the same
         shared block of data.
     */
     AudioBuffer (const AudioBuffer& other)

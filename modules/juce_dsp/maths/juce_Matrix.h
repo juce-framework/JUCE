@@ -198,7 +198,7 @@ public:
         with the coefficients of b. After the execution of the algorithm,
         the vector b will contain the solution.
 
-        Returns true if the linear system of euqations was successfully solved.
+        Returns true if the linear system of equations was successfully solved.
      */
     bool solve (Matrix& b) const noexcept;
 

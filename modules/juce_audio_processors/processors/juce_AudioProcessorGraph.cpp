@@ -885,6 +885,7 @@ AudioProcessorGraph::AudioProcessorGraph()
 
 AudioProcessorGraph::~AudioProcessorGraph()
 {
+    cancelPendingUpdate();
     clearRenderingSequence();
     clear();
 }
@@ -962,6 +963,8 @@ AudioProcessorGraph::Node::Ptr AudioProcessorGraph::addNode (std::unique_ptr<Aud
 
 bool AudioProcessorGraph::removeNode (NodeID nodeId)
 {
+    const ScopedLock sl (getCallbackLock());
+
     for (int i = nodes.size(); --i >= 0;)
     {
         if (nodes.getUnchecked(i)->nodeID == nodeId)
@@ -1217,35 +1220,28 @@ bool AudioProcessorGraph::anyNodesNeedPreparing() const noexcept
 
 void AudioProcessorGraph::buildRenderingSequence()
 {
-    std::unique_ptr<RenderSequenceFloat>  newSequenceF (new RenderSequenceFloat());
-    std::unique_ptr<RenderSequenceDouble> newSequenceD (new RenderSequenceDouble());
+    auto newSequenceF = std::make_unique<RenderSequenceFloat>();
+    auto newSequenceD = std::make_unique<RenderSequenceDouble>();
 
-    {
-        MessageManagerLock mml;
+    RenderSequenceBuilder<RenderSequenceFloat>  builderF (*this, *newSequenceF);
+    RenderSequenceBuilder<RenderSequenceDouble> builderD (*this, *newSequenceD);
 
-        RenderSequenceBuilder<RenderSequenceFloat>  builderF (*this, *newSequenceF);
-        RenderSequenceBuilder<RenderSequenceDouble> builderD (*this, *newSequenceD);
-    }
+    const ScopedLock sl (getCallbackLock());
 
-    {
-        const ScopedLock sl (getCallbackLock());
-        newSequenceF->prepareBuffers (getBlockSize());
-        newSequenceD->prepareBuffers (getBlockSize());
-    }
+    const auto currentBlockSize = getBlockSize();
+    newSequenceF->prepareBuffers (currentBlockSize);
+    newSequenceD->prepareBuffers (currentBlockSize);
 
     if (anyNodesNeedPreparing())
     {
-        {
-            const ScopedLock sl (getCallbackLock());
-            renderSequenceFloat.reset();
-            renderSequenceDouble.reset();
-        }
+        renderSequenceFloat.reset();
+        renderSequenceDouble.reset();
 
         for (auto* node : nodes)
-            node->prepare (getSampleRate(), getBlockSize(), this, getProcessingPrecision());
+            node->prepare (getSampleRate(), currentBlockSize, this, getProcessingPrecision());
     }
 
-    const ScopedLock sl (getCallbackLock());
+    isPrepared = 1;
 
     std::swap (renderSequenceFloat,  newSequenceF);
     std::swap (renderSequenceDouble, newSequenceD);
@@ -1254,13 +1250,16 @@ void AudioProcessorGraph::buildRenderingSequence()
 void AudioProcessorGraph::handleAsyncUpdate()
 {
     buildRenderingSequence();
-    isPrepared = 1;
 }
 
 //==============================================================================
 void AudioProcessorGraph::prepareToPlay (double sampleRate, int estimatedSamplesPerBlock)
 {
-    setRateAndBufferSizeDetails (sampleRate, estimatedSamplesPerBlock);
+    {
+        const ScopedLock sl (getCallbackLock());
+        setRateAndBufferSizeDetails (sampleRate, estimatedSamplesPerBlock);
+    }
+
     clearRenderingSequence();
 
     if (MessageManager::getInstance()->isThisTheMessageThread())
@@ -1277,6 +1276,8 @@ bool AudioProcessorGraph::supportsDoublePrecisionProcessing() const
 void AudioProcessorGraph::releaseResources()
 {
     const ScopedLock sl (getCallbackLock());
+
+    cancelPendingUpdate();
 
     isPrepared = 0;
 

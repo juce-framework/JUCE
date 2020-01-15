@@ -1167,10 +1167,13 @@ GraphDocumentComponent::GraphDocumentComponent (AudioPluginFormatManager& fm,
     deviceManager.addChangeListener (graphPanel.get());
     deviceManager.addAudioCallback (&graphPlayer);
     deviceManager.addMidiInputDeviceCallback ({}, &graphPlayer.getMidiMessageCollector());
+    deviceManager.addChangeListener (this);
 }
 
 void GraphDocumentComponent::init()
 {
+    updateMidiOutput();
+
     graphPanel.reset (new GraphEditorPanel (*graph));
     addAndMakeVisible (graphPanel.get());
     graphPlayer.setProcessor (&graph->graph);
@@ -1213,6 +1216,9 @@ void GraphDocumentComponent::init()
 
 GraphDocumentComponent::~GraphDocumentComponent()
 {
+    if (midiOutput != nullptr)
+        midiOutput->stopBackgroundThread();
+
     releaseGraph();
 
     keyState.removeListener (&graphPlayer.getMidiMessageCollector());
@@ -1325,4 +1331,24 @@ void GraphDocumentComponent::setDoublePrecision (bool doublePrecision)
 bool GraphDocumentComponent::closeAnyOpenPluginWindows()
 {
     return graphPanel->graph.closeAnyOpenPluginWindows();
+}
+
+void GraphDocumentComponent::changeListenerCallback (ChangeBroadcaster*)
+{
+    updateMidiOutput();
+}
+
+void GraphDocumentComponent::updateMidiOutput()
+{
+    auto* defaultMidiOutput = deviceManager.getDefaultMidiOutput();
+
+    if (midiOutput != defaultMidiOutput)
+    {
+        midiOutput = defaultMidiOutput;
+
+        if (midiOutput != nullptr)
+            midiOutput->startBackgroundThread();
+
+        graphPlayer.setMidiOutput (midiOutput);
+    }
 }

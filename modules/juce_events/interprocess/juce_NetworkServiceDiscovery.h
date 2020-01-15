@@ -103,7 +103,7 @@ struct NetworkServiceDiscovery
         /** Destructor */
         ~AvailableServiceList() override;
 
-        /** A lambda that can be set to recieve a callback when the list changes */
+        /** A lambda that can be set to receive a callback when the list changes */
         std::function<void()> onChange;
 
         /** Returns a list of the currently known services. */

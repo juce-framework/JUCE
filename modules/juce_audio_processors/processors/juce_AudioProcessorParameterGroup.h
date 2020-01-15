@@ -166,7 +166,7 @@ public:
     /** Returns the group's separator string. */
     String getSeparator() const;
 
-    /** Returns the parent of the group, or nullptr if this is a top-levle group. */
+    /** Returns the parent of the group, or nullptr if this is a top-level group. */
     const AudioProcessorParameterGroup* getParent() const noexcept;
 
     //==============================================================================

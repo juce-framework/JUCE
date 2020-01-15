@@ -458,7 +458,7 @@ public:
     /** Provides a callback that will be called when a config changes. */
     virtual void setConfigChangedCallback (std::function<void(Block&, const ConfigMetaData&, uint32)>) = 0;
 
-    /** Provides a callback that will be called when a prgoram has been loaded. */
+    /** Provides a callback that will be called when a program has been loaded. */
     virtual void setProgramLoadedCallback (std::function<void(Block&)> programLoaded) = 0;
 
     //==============================================================================

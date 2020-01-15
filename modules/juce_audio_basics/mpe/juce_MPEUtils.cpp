@@ -49,7 +49,7 @@ MPEChannelAssigner::MPEChannelAssigner (Range<int> channelRange)
 
 int MPEChannelAssigner::findMidiChannelForNewNote (int noteNumber) noexcept
 {
-    if (numChannels == 1)
+    if (numChannels <= 1)
         return firstChannel;
 
     for (auto ch = firstChannel; (isLegacy || zone->isLowerZone() ? ch <= lastChannel : ch >= lastChannel); ch += channelIncrement)

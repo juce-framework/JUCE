@@ -40,10 +40,10 @@ public:
     /** The release tag for this version, such as "beta", "alpha", "rc", etc */
     String releaseType;
 
-    /** A numberical value assosiated with the release tag, such as "beta 4" */
+    /** A numerical value associated with the release tag, such as "beta 4" */
     int releaseCount = 0;
 
-    /** The assosiated git commit that generated this firmware version */
+    /** The associated git commit that generated this firmware version */
     String commit;
 
     /** Identify "forced" firmware builds **/

@@ -130,7 +130,7 @@ public:
     TouchEntry* end() noexcept                 { return touches.end(); }
     const TouchEntry* end() const noexcept     { return touches.end(); }
 
-    /** Retrieve a reference to particular item in the list of touch entires. */
+    /** Retrieve a reference to particular item in the list of touch entries. */
     TouchEntry& operator[] (const int index)   { return touches.getReference (index); }
 
     /** Resets all contents, doest not generate any call-backs. */

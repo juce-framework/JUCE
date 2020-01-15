@@ -34,7 +34,7 @@ namespace juce
 // the dialog box. This means that the actual native FileChooser HWND may
 // not have been created yet when the user deletes JUCE's FileChooser class. If this
 // occurs the Win32NativeFileChooser will still have a reference count of 1 and will
-// simply delete itself immedietely once the HWND will have been created a while later.
+// simply delete itself immediately once the HWND will have been created a while later.
 class Win32NativeFileChooser  : public ReferenceCountedObject,
                                 private Thread
 {

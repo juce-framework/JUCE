@@ -132,7 +132,7 @@ public:
         auto&& outBlock = context.getOutputBlock();
         auto&& inBlock  = context.getInputBlock();
 
-        // this is an output-only processory
+        // this is an output-only processor
         jassert (outBlock.getNumSamples() <= static_cast<size_t> (rampBuffer.size()));
 
         auto len           = outBlock.getNumSamples();

@@ -230,7 +230,7 @@ void detachComponentFromWindowRefVST (Component* comp, void* window, bool isNSVi
             // The event loop needs to be run between closing the window and deleting the plugin,
             // presumably to let the cocoa objects get tidied up. Leaving out this line causes crashes
             // in Live when you delete the plugin with its window open.
-            // (Doing it this way rather than using a single longer timout means that we can guarantee
+            // (Doing it this way rather than using a single longer timeout means that we can guarantee
             // how many messages will be dispatched, which seems to be vital in Reaper)
             if (needToRunMessageLoop)
                 for (int i = 20; --i >= 0;)

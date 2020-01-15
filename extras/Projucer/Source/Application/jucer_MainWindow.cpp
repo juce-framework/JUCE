@@ -680,11 +680,12 @@ bool MainWindowList::openFile (const File& file, bool openInBackground)
         WeakReference<Component> previousFrontWindow (getFrontmostWindow());
 
         auto* w = getOrCreateEmptyWindow();
+        jassert (w != nullptr);
 
         if (w->openFile (file))
         {
             w->makeVisible();
-            checkWindowBounds (w);
+            checkWindowBounds (*w);
 
             if (openInBackground && previousFrontWindow != nullptr)
                 previousFrontWindow->toFront (true);
@@ -718,8 +719,10 @@ MainWindow* MainWindowList::getFrontmostWindow (bool createIfNotFound)
         if (createIfNotFound)
         {
             auto* w = createNewMainWindow();
+            jassert (w != nullptr);
+
             w->makeVisible();
-            checkWindowBounds (w);
+            checkWindowBounds (*w);
 
             return w;
         }
@@ -771,16 +774,16 @@ MainWindow* MainWindowList::getMainWindowForFile (const File& file)
     return nullptr;
 }
 
-void MainWindowList::checkWindowBounds (MainWindow* windowToCheck)
+void MainWindowList::checkWindowBounds (MainWindow& windowToCheck)
 {
     auto avoidSuperimposedWindows = [&]
     {
         for (auto* otherWindow : windows)
         {
-            if (otherWindow == windowToCheck)
+            if (otherWindow == nullptr || otherWindow == &windowToCheck)
                 continue;
 
-            auto boundsToCheck = windowToCheck->getScreenBounds();
+            auto boundsToCheck = windowToCheck.getScreenBounds();
             auto otherBounds = otherWindow->getScreenBounds();
 
             if (std::abs (boundsToCheck.getX() - otherBounds.getX()) < 3
@@ -793,15 +796,18 @@ void MainWindowList::checkWindowBounds (MainWindow* windowToCheck)
                 if (otherBounds.getCentreX() >= boundsToCheck.getCentreX())  dx = -dx;
                 if (otherBounds.getCentreY() >= boundsToCheck.getCentreY())  dy = -dy;
 
-                windowToCheck->setBounds (boundsToCheck.translated (dx, dy));
+                windowToCheck.setBounds (boundsToCheck.translated (dx, dy));
             }
         }
     };
 
     auto ensureWindowIsFullyOnscreen = [&]
     {
-        auto windowBounds = windowToCheck->getScreenBounds();
+        auto windowBounds = windowToCheck.getScreenBounds();
         auto screenLimits = Desktop::getInstance().getDisplays().findDisplayForRect (windowBounds).userArea;
+
+        if (auto* peer = windowToCheck.getPeer())
+            peer->getFrameSize().subtractFrom (screenLimits);
 
         auto constrainedX = jlimit (screenLimits.getX(), screenLimits.getRight()  - windowBounds.getWidth(),  windowBounds.getX());
         auto constrainedY = jlimit (screenLimits.getY(), screenLimits.getBottom() - windowBounds.getHeight(), windowBounds.getY());
@@ -809,7 +815,7 @@ void MainWindowList::checkWindowBounds (MainWindow* windowToCheck)
         Point<int> constrainedTopLeft (constrainedX, constrainedY);
 
         if (windowBounds.getPosition() != constrainedTopLeft)
-            windowToCheck->setTopLeftPosition (constrainedTopLeft);
+            windowToCheck.setTopLeftPosition (constrainedTopLeft);
     };
 
     avoidSuperimposedWindows();

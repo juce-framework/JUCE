@@ -1458,8 +1458,8 @@ private:
                 }
             ).Get());
 
-            // We need to use a timout here, rather than waiting indefinitely, as the
-            // WinRT API can occaisonally hang!
+            // We need to use a timeout here, rather than waiting indefinitely, as the
+            // WinRT API can occasionally hang!
             portOpened.wait (2000);
         }
 

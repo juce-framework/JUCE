@@ -398,7 +398,7 @@ public:
         // You need to use at least one thread when scanning plug-ins asynchronously
         jassert (! allowAsync || (numThreads > 0));
 
-        // If the filesOrIdentifiersToScan argumnent isn't empty, we should only scan these
+        // If the filesOrIdentifiersToScan argument isn't empty, we should only scan these
         // If the path is empty, then paths aren't used for this format.
         if (filesOrIdentifiersToScan.isEmpty() && path.getNumPaths() > 0)
         {

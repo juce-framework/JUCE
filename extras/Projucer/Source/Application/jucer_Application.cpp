@@ -1163,9 +1163,11 @@ bool ProjucerApplication::perform (const InvocationInfo& info)
 void ProjucerApplication::createNewProject()
 {
     auto* mw = mainWindowList.getOrCreateEmptyWindow();
+    jassert (mw != nullptr);
+
     mw->showStartPage();
 
-    mainWindowList.checkWindowBounds (mw);
+    mainWindowList.checkWindowBounds (*mw);
 }
 
 void ProjucerApplication::createNewProjectFromClipboard()

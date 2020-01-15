@@ -78,7 +78,7 @@ public:
         errorMessage string.
 
         If you intend to instantiate a AudioUnit v3 plug-in then you must either
-        use the non-blocking asynchrous version below - or call this method from a
+        use the non-blocking asynchronous version below - or call this method from a
         thread other than the message thread and without blocking the message
         thread.
     */
@@ -90,7 +90,7 @@ public:
         all the formats that this manager knows about.
 
         The caller must supply a callback object which will be called when
-        the instantantiation has completed.
+        the instantiation has completed.
 
         If it can't load the plugin then the callback function will be called
         passing a nullptr as the instance argument along with an error message.
@@ -105,7 +105,7 @@ public:
         the callback function.
 
         If you intend to instantiate a AudioUnit v3 plug-in then you must use
-        this non-blocking asynchrous version - or call the synchrous method
+        this non-blocking asynchronous version - or call the synchronous method
         from an auxiliary thread.
     */
     void createPluginInstanceAsync (const PluginDescription& description,
