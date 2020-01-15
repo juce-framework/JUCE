@@ -69,6 +69,10 @@
 			isa = PBXBuildFile;
 			fileRef = 96D99A08027CA35D6A4E5CFD;
 		};
+		47ED2C78B05B8A6A00E36C46 = {
+			isa = PBXBuildFile;
+			fileRef = 685A261BE78585293F3EAD36;
+		};
 		D3D8CDCE42E8BE31C7247E38 = {
 			isa = PBXBuildFile;
 			fileRef = 0ECB4FCD24794CE516792552;
@@ -467,6 +471,13 @@
 			path = "../../../../modules/juce_audio_basics";
 			sourceTree = "SOURCE_ROOT";
 		};
+		685A261BE78585293F3EAD36 = {
+			isa = PBXFileReference;
+			lastKnownFileType = folder;
+			name = Assets;
+			path = ../../../Assets;
+			sourceTree = "<group>";
+		};
 		6C198AF93E1F6E682189E2F6 = {
 			isa = PBXFileReference;
 			lastKnownFileType = file;
@@ -856,6 +867,7 @@
 		D87DCD5DA4EC8D78DFF37FCC = {
 			isa = PBXGroup;
 			children = (
+				685A261BE78585293F3EAD36,
 				0ECB4FCD24794CE516792552,
 				388A8209DBB1B08594266121,
 				5CD17151385A69F1E07FE85B,
@@ -1125,6 +1137,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				47ED2C78B05B8A6A00E36C46,
 				D3D8CDCE42E8BE31C7247E38,
 				3B3952A9A14320312EF890A5,
 				41BAB55E0D992708EF06E2C4,
