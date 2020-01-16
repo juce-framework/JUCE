@@ -409,12 +409,16 @@ static String getFallbackPathForOS (const Identifier& key, DependencyPathOS os)
     }
     else if (key == Ids::androidSDKPath)
     {
-        return (os == TargetOS::linux ? "${user.home}/Android/Sdk" :
-                                        "${user.home}/Library/Android/sdk");
+        if      (os == TargetOS::windows)  return "${user.home}\\AppData\\Local\\Android\\Sdk";
+        else if (os == TargetOS::osx)      return "${user.home}/Library/Android/sdk";
+        else if (os == TargetOS::linux)    return "${user.home}/Android/Sdk";
+
+        jassertfalse;
+        return {};
     }
     else if (key == Ids::androidNDKPath)
     {
-        return getFallbackPathForOS (Ids::androidSDKPath, os) + "/ndk-bundle";
+        return getFallbackPathForOS (Ids::androidSDKPath, os) + File::getSeparatorChar() + "ndk-bundle";
     }
     else if (key == Ids::clionExePath)
     {
