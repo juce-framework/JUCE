@@ -636,6 +636,10 @@
               file="Source/Utility/Helpers/jucer_TranslationHelpers.h"/>
         <FILE id="EuC4K4" name="jucer_ValueSourceHelpers.h" compile="0" resource="0"
               file="Source/Utility/Helpers/jucer_ValueSourceHelpers.h"/>
+        <FILE id="BPCoKV" name="jucer_VersionInfo.cpp" compile="1" resource="0"
+              file="Source/Utility/Helpers/jucer_VersionInfo.cpp"/>
+        <FILE id="TnBQtv" name="jucer_VersionInfo.h" compile="0" resource="0"
+              file="Source/Utility/Helpers/jucer_VersionInfo.h"/>
       </GROUP>
       <GROUP id="{A07C4A97-0855-5346-CAF2-A005580B6773}" name="PIPs">
         <FILE id="joAnDa" name="jucer_PIPGenerator.cpp" compile="1" resource="0"

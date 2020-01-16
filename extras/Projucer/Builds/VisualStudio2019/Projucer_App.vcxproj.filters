@@ -496,6 +496,9 @@
     <ClCompile Include="..\..\Source\Utility\Helpers\jucer_MiscUtilities.cpp">
       <Filter>Projucer\Utility\Helpers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Utility\Helpers\jucer_VersionInfo.cpp">
+      <Filter>Projucer\Utility\Helpers</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Utility\PIPs\jucer_PIPGenerator.cpp">
       <Filter>Projucer\Utility\PIPs</Filter>
     </ClCompile>
@@ -2323,6 +2326,9 @@
       <Filter>Projucer\Utility\Helpers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\Helpers\jucer_ValueSourceHelpers.h">
+      <Filter>Projucer\Utility\Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\Helpers\jucer_VersionInfo.h">
       <Filter>Projucer\Utility\Helpers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\PIPs\jucer_PIPGenerator.h">
