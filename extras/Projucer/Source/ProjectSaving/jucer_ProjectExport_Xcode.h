@@ -52,7 +52,7 @@ namespace
             if (sdkVersion == getSDKDisplayName (v))
                 return getSDKRootName (v);
 
-        return {};
+        return "macosx";
     }
 
     template<class ContainerType>
@@ -342,7 +342,18 @@ public:
                 { "File Access: Music Folder (Read Only)",          "assets.music.read-only" },
                 { "File Access: Music Folder (Read/Write)",         "assets.music.read-write" },
                 { "File Access: Movies Folder (Read Only)",         "assets.movies.read-only" },
-                { "File Access: Movies Folder (Read/Write)",        "assets.movies.read-write" }
+                { "File Access: Movies Folder (Read/Write)",        "assets.movies.read-write" },
+
+                { "Temporary Exception: Audio Unit Hosting",                       "temporary-exception.audio-unit-host" },
+                { "Temporary Exception: Global Mach Service",                      "temporary-exception.mach-lookup.global-name" },
+                { "Temporary Exception: Global Mach Service Dynamic Registration", "temporary-exception.mach-register.global-name" },
+                { "Temporary Exception: Home Directory File Access (Read Only)",   "temporary-exception.files.home-relative-path.read-only" },
+                { "Temporary Exception: Home Directory File Access (Read/Write)",  "temporary-exception.files.home-relative-path.read-write" },
+                { "Temporary Exception: Absolute Path File Access (Read Only)",    "temporary-exception.files.absolute-path.read-only" },
+                { "Temporary Exception: Absolute Path File Access (Read/Write)",   "temporary-exception.files.absolute-path.read-write" },
+                { "Temporary Exception: IOKit User Client Class",                  "temporary-exception.iokit-user-client-class" },
+                { "Temporary Exception: Shared Preference Domain (Read Only)",     "temporary-exception.shared-preference.read-only" },
+                { "Temporary Exception: Shared Preference Domain (Read/Write)",    "temporary-exception.shared-preference.read-write" }
             };
 
             StringArray sandboxKeys;
@@ -479,7 +490,7 @@ public:
 
         props.add (new TextPropertyComponent (subprojectsValue, "Xcode Subprojects", 8192, true),
                    "Paths to Xcode projects that should be added to the build (one per line). "
-                   "The names of the required build products can be specified after a colon, comma seperated, "
+                   "The names of the required build products can be specified after a colon, comma separated, "
                    "e.g. \"path/to/MySubProject.xcodeproj: MySubProject, OtherTarget\". "
                    "If no build products are specified, all build products associated with a subproject will be added.");
 
@@ -674,8 +685,7 @@ protected:
             {
                 props.add (new ChoicePropertyComponent (osxSDKVersion, "OSX Base SDK Version", getSDKChoiceList<StringArray> (oldestSDKVersion, true),
                                                                                                getSDKChoiceList<Array<var>>  (oldestSDKVersion, true)),
-                           "The version of OSX to link against in the Xcode build. If \"Default\" is selected then the field will be left "
-                           "empty and the Xcode default will be used.");
+                           "The version of the macOS SDK to link against. If \"Default\" is selected then the Xcode default will be used.");
 
                 props.add (new ChoicePropertyComponent (osxDeploymentTarget, "OSX Deployment Target", getSDKChoiceList<StringArray> (oldestDeploymentTarget, false),
                                                                                                       getSDKChoiceList<Array<var>>  (oldestDeploymentTarget, true)),
@@ -1210,11 +1220,7 @@ public:
                 // the aggregate target needs to have the deployment target set for
                 // pre-/post-build scripts
                 s.set ("MACOSX_DEPLOYMENT_TARGET", getOSXDeploymentTarget (config.getOSXDeploymentTargetString()));
-
-                auto sdkRoot = getOSXSDKVersion (config.getOSXSDKVersionString());
-
-                if (sdkRoot.isNotEmpty())
-                    s.set ("SDKROOT", sdkRoot);
+                s.set ("SDKROOT", getOSXSDKVersion (config.getOSXSDKVersionString()));
 
                 return s;
             }
@@ -1777,7 +1783,7 @@ public:
                                  " -I \\\"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\\\""
                                  " -I \\\"$(DEVELOPER_DIR)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/AudioUnit.framework/Headers\\\"";
 
-            xcodeFrameworks.addTokens ("AudioUnit CoreAudioKit", false);
+            xcodeFrameworks.addArray ({ "AudioUnit", "CoreAudioKit" });
 
             XmlElement plistKey ("key");
             plistKey.addTextElement ("AudioComponents");
@@ -1824,10 +1830,10 @@ public:
 
         void addExtraAudioUnitv3PlugInTargetSettings()
         {
-            if (owner.isiOS())
-                xcodeFrameworks.addTokens ("CoreAudioKit AVFoundation", false);
-            else
-                xcodeFrameworks.addTokens ("AudioUnit CoreAudioKit AVFoundation", false);
+            xcodeFrameworks.addArray ({ "AVFoundation", "CoreAudioKit" });
+
+            if (owner.isOSX())
+                xcodeFrameworks.add ("AudioUnit");
 
             XmlElement plistKey ("key");
             plistKey.addTextElement ("NSExtension");
@@ -2620,10 +2626,7 @@ private:
         }
         else
         {
-            auto sdkRoot = getOSXSDKVersion (config.getOSXSDKVersionString());
-
-            if (sdkRoot.isNotEmpty())
-                s.set ("SDKROOT", sdkRoot);
+            s.set ("SDKROOT", getOSXSDKVersion (config.getOSXSDKVersionString()));
         }
 
         s.set ("ZERO_LINK", "NO");
@@ -2663,6 +2666,16 @@ private:
             s.trim();
             s.removeDuplicates (true);
             s.sort (true);
+
+            // When building against the 10.15 SDK we need to make sure the
+            // AudioUnit framework is linked before the AudioToolbox framework.
+            auto audioUnitIndex = s.indexOf ("AudioUnit", false, 1);
+
+            if (audioUnitIndex != -1)
+            {
+                s.remove (audioUnitIndex);
+                s.insert (0, "AudioUnit");
+            }
 
             for (auto& framework : s)
             {

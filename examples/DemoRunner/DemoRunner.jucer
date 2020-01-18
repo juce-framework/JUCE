@@ -30,7 +30,7 @@
   </MAINGROUP>
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" smallIcon="YyqWd2" bigIcon="YyqWd2"
-               customXcodeResourceFolders="../Audio &#10;../BLOCKS &#10;../DSP &#10;../GUI &#10;../Utilities"
+               customXcodeResourceFolders="../Assets&#10;../Audio &#10;../BLOCKS &#10;../DSP &#10;../GUI &#10;../Utilities"
                microphonePermissionNeeded="1" cameraPermissionNeeded="1">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" recommendedWarnings="LLVM"/>

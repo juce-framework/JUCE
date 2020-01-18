@@ -39,7 +39,7 @@ class JUCE_API  ImageConvolutionKernel
 {
 public:
     //==============================================================================
-    /** Creates an empty convulution kernel.
+    /** Creates an empty convolution kernel.
 
         @param size     the length of each dimension of the kernel, so e.g. if the size
                         is 5, it will create a 5x5 kernel
@@ -73,7 +73,7 @@ public:
     /** Multiplies all values in the kernel by a value. */
     void rescaleAllValues (float multiplier);
 
-    /** Intialises the kernel for a gaussian blur.
+    /** Initialises the kernel for a gaussian blur.
 
         @param blurRadius   this may be larger or smaller than the kernel's actual
                             size but this will obviously be wasteful or clip at the

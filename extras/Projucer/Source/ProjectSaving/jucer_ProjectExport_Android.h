@@ -140,9 +140,9 @@ public:
           androidKeyStorePass                  (settings, Ids::androidKeyStorePass,                  getUndoManager(), "android"),
           androidKeyAlias                      (settings, Ids::androidKeyAlias,                      getUndoManager(), "androiddebugkey"),
           androidKeyAliasPass                  (settings, Ids::androidKeyAliasPass,                  getUndoManager(), "android"),
-          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "4.10"),
+          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "5.4.1"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
-          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "3.2.1"),
+          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "3.5.3"),
           AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
     {
         name = getName();
@@ -840,6 +840,9 @@ private:
         for (auto& d : StringArray::fromLines (androidJavaLibs.get().toString()))
             mo << "        implementation files('libs/" << File (d).getFileName() << "')" << newLine;
 
+        if (isInAppBillingEnabled())
+            mo << "        implementation 'com.android.billingclient:billing:2.1.0'" << newLine;
+
         if (areRemoteNotificationsEnabled())
         {
             mo << "        implementation 'com.google.firebase:firebase-core:16.0.1'" << newLine;
@@ -908,6 +911,9 @@ private:
 
         if (areRemoteNotificationsEnabled())
             addOptJavaFolderToSourceSetsForModule (javaSourceSets, modules, "juce_gui_extra");
+
+        if (project.getEnabledModules().isModuleEnabled ("juce_product_unlocking") && isInAppBillingEnabled())
+            addOptJavaFolderToSourceSetsForModule (javaSourceSets, modules, "juce_product_unlocking");
 
         MemoryOutputStream mo;
         mo.setNewLineString ("\n");
@@ -1215,6 +1221,8 @@ private:
     bool arePushNotificationsEnabled() const    { return androidPushNotifications.get(); }
     bool areRemoteNotificationsEnabled() const  { return arePushNotificationsEnabled() && androidEnableRemoteNotifications.get(); }
 
+    bool isInAppBillingEnabled() const          { return androidInAppBillingPermission.get(); }
+
     String getJNIActivityClassName() const
     {
         return getActivityClassString().replaceCharacter ('.', '/');
@@ -1436,7 +1444,7 @@ private:
             defines.set ("JUCE_PUSH_NOTIFICATIONS_ACTIVITY", getJNIActivityClassName().quoted());
         }
 
-        if (androidInAppBillingPermission.get())
+        if (isInAppBillingEnabled())
             defines.set ("JUCE_IN_APP_PURCHASES", "1");
 
         if (supportsGLv3())
@@ -1799,7 +1807,10 @@ private:
         StringArray s = StringArray::fromTokens (androidOtherPermissions.get().toString(), ", ", {});
 
         if (androidInternetNeeded.get())
+        {
             s.add ("android.permission.INTERNET");
+            s.add ("android.permission.CHANGE_WIFI_MULTICAST_STATE");
+        }
 
         if (androidMicNeeded.get())
             s.add ("android.permission.RECORD_AUDIO");
@@ -1820,7 +1831,7 @@ private:
         if (androidExternalWritePermission.get())
             s.add ("android.permission.WRITE_EXTERNAL_STORAGE");
 
-        if (androidInAppBillingPermission.get())
+        if (isInAppBillingEnabled())
             s.add ("com.android.vending.BILLING");
 
         if (androidVibratePermission.get())

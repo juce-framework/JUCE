@@ -947,7 +947,7 @@ public:
 
         // When windows are being resized, artificially throttling high-frequency repaints helps
         // to stop the event queue getting clogged, and keeps everything working smoothly.
-        // For some reason Logic also needs this throttling to recored parameter events correctly.
+        // For some reason Logic also needs this throttling to record parameter events correctly.
         if (msSinceLastRepaint < minimumRepaintInterval && shouldThrottleRepaint())
         {
             startTimer (static_cast<int> (minimumRepaintInterval - msSinceLastRepaint));

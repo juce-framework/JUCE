@@ -196,10 +196,6 @@ static const uint8 javaComponentPeerView[] =
  extern void juce_firebaseRemoteMessageSendError (void*, void*);
 #endif
 
-#if JUCE_IN_APP_PURCHASES && JUCE_MODULE_AVAILABLE_juce_product_unlocking
- extern void juce_inAppPurchaseCompleted (void*);
-#endif
-
 extern void juce_contentSharingCompleted (int);
 
 //==============================================================================

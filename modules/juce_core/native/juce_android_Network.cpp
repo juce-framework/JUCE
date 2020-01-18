@@ -214,6 +214,62 @@ DECLARE_JNI_CLASS (AndroidInputStream, "java/io/InputStream")
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+  METHOD (acquire, "acquire", "()V") \
+  METHOD (release, "release", "()V") \
+
+DECLARE_JNI_CLASS (AndroidMulticastLock, "android/net/wifi/WifiManager$MulticastLock")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+  METHOD (createMulticastLock, "createMulticastLock", "(Ljava/lang/String;)Landroid/net/wifi/WifiManager$MulticastLock;") \
+
+DECLARE_JNI_CLASS (AndroidWifiManager, "android/net/wifi/WifiManager")
+#undef JNI_CLASS_MEMBERS
+
+static LocalRef<jobject> getMulticastLock()
+{
+    static LocalRef<jobject> multicastLock;
+    static bool hasChecked = false;
+
+    if (! hasChecked)
+    {
+        hasChecked = true;
+
+        auto* env = getEnv();
+
+        LocalRef<jobject> wifiManager (env->CallObjectMethod (getAppContext().get(),
+                                                              AndroidContext.getSystemService,
+                                                              javaString ("wifi").get()));
+
+        if (wifiManager != nullptr)
+        {
+            multicastLock = LocalRef<jobject> (env->CallObjectMethod (wifiManager.get(),
+                                                                      AndroidWifiManager.createMulticastLock,
+                                                                      javaString ("JUCE_MulticastLock").get()));
+        }
+    }
+
+    return multicastLock;
+}
+
+JUCE_API void JUCE_CALLTYPE acquireMulticastLock()
+{
+    auto multicastLock = getMulticastLock();
+
+    if (multicastLock != nullptr)
+        getEnv()->CallVoidMethod (multicastLock.get(), AndroidMulticastLock.acquire);
+}
+
+JUCE_API void JUCE_CALLTYPE releaseMulticastLock()
+{
+    auto multicastLock = getMulticastLock();
+
+    if (multicastLock != nullptr)
+        getEnv()->CallVoidMethod (multicastLock.get(), AndroidMulticastLock.release);
+}
+
+//==============================================================================
 void MACAddress::findAllAddresses (Array<MACAddress>& /*result*/)
 {
     // TODO
