@@ -6,7 +6,7 @@
   ==============================================================================
 */
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 #include "%%filename%%"
 
 %%component_begin%%

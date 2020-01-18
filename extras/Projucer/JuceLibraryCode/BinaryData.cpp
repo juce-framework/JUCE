@@ -6174,7 +6174,7 @@ static const unsigned char temp_binary_data_35[] =
 "#pragma once\r\n"
 "\r\n"
 "//[Headers]     -- You can add your own extra header files here --\r\n"
-"%%include_juce_header%%\r\n"
+"#include <JuceHeader.h>\r\n"
 "//[/Headers]\r\n"
 "\r\n"
 "%%include_files_h%%\r\n"
@@ -7204,7 +7204,7 @@ static const unsigned char temp_binary_data_53[] =
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"#include \"../JuceLibraryCode/JuceHeader.h\"\r\n"
+"#include <JuceHeader.h>\r\n"
 "#include \"%%filename%%\"\r\n"
 "\r\n"
 "%%component_begin%%\r\n"
@@ -7864,7 +7864,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x7fbac252:  numBytes = 1665; return jucer_OpenGLComponentTemplate_cpp;
         case 0x491fa0d7:  numBytes = 1263; return jucer_OpenGLComponentTemplate_h;
         case 0xbc050edc:  numBytes = 4926; return jucer_PIPAudioProcessorTemplate_h;
-        case 0xf4ca9e9a:  numBytes = 2447; return jucer_PIPMain_cpp;
+        case 0xf4ca9e9a:  numBytes = 2428; return jucer_PIPMain_cpp;
         case 0x0b16e320:  numBytes = 517; return jucer_PIPTemplate_h;
         case 0xcd472557:  numBytes = 6433; return jucer_UnityPluginGUIScript_cs;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
