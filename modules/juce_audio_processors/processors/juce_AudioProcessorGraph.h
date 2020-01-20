@@ -229,8 +229,8 @@ public:
         added a processor to the graph, the graph owns it and will delete it later when
         it is no longer needed.
 
-        The optional nodeId parameter lets you specify an ID to use for the node, but
-        if the value is already in use, this new node will overwrite the old one.
+        The optional nodeId parameter lets you specify a unique ID to use for the node.
+        If the value is already in use, this method will fail and return an empty node.
 
         If this succeeds, it returns a pointer to the newly-created node.
     */
