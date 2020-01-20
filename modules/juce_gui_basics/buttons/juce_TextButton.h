@@ -54,7 +54,7 @@ public:
         @param buttonName           the text to put in the button (the component's name is also
                                     initially set to this string, but these can be changed later
                                     using the setName() and setButtonText() methods)
-        @param toolTip              an optional string to use as a toolip
+        @param toolTip              an optional string to use as a tooltip
     */
     TextButton (const String& buttonName, const String& toolTip);
 

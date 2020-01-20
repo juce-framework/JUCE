@@ -134,7 +134,7 @@ public:
 
         This may also be set to Font::getDefaultSansSerifFontName(), Font::getDefaultSerifFontName(),
         or Font::getDefaultMonospacedFontName(), which are not actual platform-specific font family names,
-        but are generic font familiy names that are used to represent the various default fonts.
+        but are generic font family names that are used to represent the various default fonts.
 
         If you need to know the exact typeface font family being used, you can call
         Font::getTypeface()->getName(), which will give you the platform-specific font family.

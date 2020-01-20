@@ -383,6 +383,8 @@ void CoreGraphicsContext::restoreState()
     if (auto* top = stateStack.getLast())
     {
         state.reset (top);
+        CGContextSetTextMatrix (context, state->textMatrix);
+
         stateStack.removeLast (1, false);
         lastClipRectIsValid = false;
     }
@@ -623,20 +625,11 @@ void CoreGraphicsContext::setFont (const Font& newFont)
             CGContextSetFont (context, state->fontRef);
             CGContextSetFontSize (context, state->font.getHeight() * osxTypeface->fontHeightToPointsFactor);
 
-            auto fontTransform = osxTypeface->renderingTransform;
-            fontTransform.a *= state->font.getHorizontalScale();
-            CGContextSetTextMatrix (context, fontTransform);
-
-            auto cgTransformToJuceTransform = [](CGAffineTransform& t) -> AffineTransform
-            {
-                return { (float) t.a, (float) t.c, (float) t.tx,
-                         (float) t.b, (float) t.d, (float) t.ty };
-            };
-
-            state->fontTransform = cgTransformToJuceTransform (fontTransform);
-            auto inverseFontTransform = CGAffineTransformInvert (fontTransform);
-            state->inverseFontTransform = cgTransformToJuceTransform (inverseFontTransform);
-        }
+            state->textMatrix = osxTypeface->renderingTransform;
+            state->textMatrix.a *= state->font.getHorizontalScale();
+            CGContextSetTextMatrix (context, state->textMatrix);
+            state->inverseTextMatrix = CGAffineTransformInvert (state->textMatrix);
+         }
     }
 }
 
@@ -649,12 +642,18 @@ void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& tra
 {
     if (state->fontRef != nullptr && state->fillType.isColour())
     {
-        if (transform.isOnlyTranslation() && state->fontTransform.isOnlyTranslation())
+        auto cgTransformIsOnlyTranslation = [](CGAffineTransform t)
         {
-            auto t = transform.followedBy (state->inverseFontTransform);
+            return t.a == 1.0f && t.d == 1.0f && t.b == 0.0f && t.c == 0.0f;
+        };
+
+        if (transform.isOnlyTranslation() && cgTransformIsOnlyTranslation (state->inverseTextMatrix))
+        {
+            auto x = transform.mat02 + state->inverseTextMatrix.tx;
+            auto y = transform.mat12 + state->inverseTextMatrix.ty;
 
             CGGlyph glyphs[1] = { (CGGlyph) glyphNumber };
-            CGPoint positions[1] = { { t.getTranslationX(), flipHeight - roundToInt (t.getTranslationY()) } };
+            CGPoint positions[1] = { { x, flipHeight - roundToInt (y) } };
             CGContextShowGlyphsAtPositions (context, glyphs, positions, 1);
         }
         else
@@ -662,9 +661,11 @@ void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& tra
             CGContextSaveGState (context);
 
             flip();
-            auto fontTransform = state->fontTransform;
-            fontTransform.mat11 = -fontTransform.mat11;
-            applyTransform (fontTransform.followedBy (state->inverseFontTransform).followedBy (transform));
+            applyTransform (transform);
+            CGContextConcatCTM (context, state->inverseTextMatrix);
+            auto cgTransform = state->textMatrix;
+            cgTransform.d = -cgTransform.d;
+            CGContextConcatCTM (context, cgTransform);
 
             CGGlyph glyphs[1] = { (CGGlyph) glyphNumber };
             CGPoint positions[1] = { { 0.0f, 0.0f } };
@@ -697,8 +698,7 @@ CoreGraphicsContext::SavedState::SavedState()
 
 CoreGraphicsContext::SavedState::SavedState (const SavedState& other)
     : fillType (other.fillType), font (other.font), fontRef (other.fontRef),
-      fontTransform (other.fontTransform),
-      inverseFontTransform (other.inverseFontTransform),
+      textMatrix (other.textMatrix), inverseTextMatrix (other.inverseTextMatrix),
       gradient (other.gradient)
 {
     if (gradient != nullptr)

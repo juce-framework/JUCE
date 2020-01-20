@@ -73,7 +73,7 @@ public:
         @param newValue a value between 0 and 1; higher values increase the resonance and can result in self oscillation! */
     void setResonance (Type newValue) noexcept;
 
-    /** Sets the amound of saturation in the filter.
+    /** Sets the amount of saturation in the filter.
         @param newValue saturation amount; it can be any number greater than or equal to one. Higher values result in more distortion.*/
     void setDrive (Type newValue) noexcept;
 

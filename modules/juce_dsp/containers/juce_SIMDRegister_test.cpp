@@ -195,7 +195,7 @@ public:
     }
 
     //==============================================================================
-    // Someuseful operations to test
+    // Some useful operations to test
     struct Addition
     {
         template <typename typeOne, typename typeTwo>

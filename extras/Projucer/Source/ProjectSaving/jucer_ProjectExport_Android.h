@@ -912,6 +912,9 @@ private:
         if (areRemoteNotificationsEnabled())
             addOptJavaFolderToSourceSetsForModule (javaSourceSets, modules, "juce_gui_extra");
 
+        if (project.getEnabledModules().isModuleEnabled ("juce_product_unlocking") && isInAppBillingEnabled())
+            addOptJavaFolderToSourceSetsForModule (javaSourceSets, modules, "juce_product_unlocking");
+
         MemoryOutputStream mo;
         mo.setNewLineString ("\n");
 

@@ -41,7 +41,7 @@ public:
     ~InternalPluginFormat() override {}
 
     //==============================================================================
-    PluginDescription audioInDesc, audioOutDesc, midiInDesc;
+    PluginDescription audioInDesc, audioOutDesc, midiInDesc, midiOutDesc;
     void getAllTypes (Array<PluginDescription>&);
 
     //==============================================================================

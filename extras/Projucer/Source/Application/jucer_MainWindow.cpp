@@ -809,8 +809,8 @@ void MainWindowList::checkWindowBounds (MainWindow& windowToCheck)
         if (auto* peer = windowToCheck.getPeer())
             peer->getFrameSize().subtractFrom (screenLimits);
 
-        auto constrainedX = jlimit (screenLimits.getX(), screenLimits.getRight()  - windowBounds.getWidth(),  windowBounds.getX());
-        auto constrainedY = jlimit (screenLimits.getY(), screenLimits.getBottom() - windowBounds.getHeight(), windowBounds.getY());
+        auto constrainedX = jlimit (screenLimits.getX(), jmax (screenLimits.getX(), screenLimits.getRight()  - windowBounds.getWidth()),  windowBounds.getX());
+        auto constrainedY = jlimit (screenLimits.getY(), jmax (screenLimits.getY(), screenLimits.getBottom() - windowBounds.getHeight()), windowBounds.getY());
 
         Point<int> constrainedTopLeft (constrainedX, constrainedY);
 

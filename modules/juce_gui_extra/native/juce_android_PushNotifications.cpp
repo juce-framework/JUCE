@@ -1303,7 +1303,7 @@ struct PushNotifications::Pimpl
                     auto classAsString  = LocalRef<jstring> ((jstring) env->CallObjectMethod (objectClass, JavaClass.getName));
 
                     // Note: It seems that Firebase delivers values as strings always, so this check is rather unnecessary,
-                    //       at least untill they change the behaviour.
+                    //       at least until they change the behaviour.
                     var value = juceString (classAsString) == "java.lang.Bundle" ? bundleToVar (object) : var (juceString (objectAsString.get()));
                     dynamicObject->setProperty (juceString (key.get()), value);
                 }

@@ -234,7 +234,7 @@ public:
         return AudioBlock (channels + channel, 1, startSample, numSamples);
     }
 
-    /** Returns a subset of continguous channels
+    /** Returns a subset of contiguous channels
         @param channelStart       First channel of the subset
         @param numChannelsToUse   Count of channels in the subset
     */

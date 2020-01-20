@@ -83,7 +83,7 @@ void ComboBox::addItem (const String& newItemText, int newItemId)
     // you can't add empty strings to the list..
     jassert (newItemText.isNotEmpty());
 
-    // IDs must be non-zero, as zero is used to indicate a lack of selecion.
+    // IDs must be non-zero, as zero is used to indicate a lack of selection.
     jassert (newItemId != 0);
 
     // you shouldn't use duplicate item IDs!
