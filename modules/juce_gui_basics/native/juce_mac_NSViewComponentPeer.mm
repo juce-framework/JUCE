@@ -1015,12 +1015,12 @@ public:
 
     bool canBecomeKeyWindow()
     {
-        return (getStyleFlags() & juce::ComponentPeer::windowIgnoresKeyPresses) == 0;
+        return component.isVisible() && (getStyleFlags() & juce::ComponentPeer::windowIgnoresKeyPresses) == 0;
     }
 
     bool canBecomeMainWindow()
     {
-        return dynamic_cast<ResizableWindow*> (&component) != nullptr;
+        return component.isVisible() && dynamic_cast<ResizableWindow*> (&component) != nullptr;
     }
 
     bool worksWhenModal() const
@@ -1881,9 +1881,15 @@ private:
     static BOOL becomeFirstResponder (id self, SEL)
     {
         if (auto* owner = getOwner (self))
-            owner->viewFocusGain();
+        {
+            if (owner->canBecomeKeyWindow())
+            {
+                owner->viewFocusGain();
+                return YES;
+            }
+        }
 
-        return YES;
+        return NO;
     }
 
     static BOOL resignFirstResponder (id self, SEL)
@@ -1999,7 +2005,17 @@ private:
         sendSuperclassMessage (self, @selector (becomeKeyWindow));
 
         if (auto* owner = getOwner (self))
-            owner->becomeKeyWindow();
+        {
+            if (owner->canBecomeKeyWindow())
+            {
+                owner->becomeKeyWindow();
+                return;
+            }
+
+            // this fixes a bug causing hidden windows to sometimes become visible when the app regains focus
+            if (! owner->getComponent().isVisible())
+                [(NSWindow*) self orderOut: nil];
+        }
     }
 
     static BOOL windowShouldClose (id self, SEL, id /*window*/)
