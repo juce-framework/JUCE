@@ -712,7 +712,10 @@ protected:
 
             props.add (new ChoicePropertyComponent (stripLocalSymbolsEnabled, "Strip Local Symbols"),
                        "Enable this to strip any locally defined symbols resulting in a smaller binary size. Enabling this "
-                       "will also remove any function names from crash logs. Must be disabled for static library projects.");
+                       "will also remove any function names from crash logs. Must be disabled for static library projects. "
+                       "Note that disabling this will not necessarily generate full debug symbols. For release configs, "
+                       "you will also need to add the following to the \"Custom Xcode Flags\" field: "
+                       "GCC_GENERATE_DEBUGGING_SYMBOLS = YES, STRIP_INSTALLED_PRODUCT = NO, COPY_PHASE_STRIP = NO");
         }
 
         String getModuleLibraryArchName() const override
