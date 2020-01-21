@@ -32,6 +32,8 @@ namespace juce
     main() function to parse.
 
     @see ConsoleApplication
+
+    @tags{Core}
 */
 struct ArgumentList
 {
@@ -50,6 +52,8 @@ struct ArgumentList
     //==============================================================================
     /**
         One of the arguments in an ArgumentList.
+
+        @tags{Core}
     */
     struct Argument
     {
@@ -226,13 +230,18 @@ struct ArgumentList
     @endcode
 
     @see ArgumentList
+
+    @tags{Core}
 */
 struct ConsoleApplication
 {
     //==============================================================================
     /**
         Represents a command that can be executed if its command-line arguments are matched.
+
         @see ConsoleApplication::addCommand(), ConsoleApplication::findAndRunCommand()
+
+        @tags{Core}
     */
     struct Command
     {
