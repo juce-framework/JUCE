@@ -24,7 +24,7 @@
   ==============================================================================
 */
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 #include "../UI/GraphEditorPanel.h"
 #include "InternalPlugins.h"
 #include "../UI/MainHostWindow.h"
