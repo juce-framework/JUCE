@@ -423,7 +423,10 @@ public:
                     return;
 
                 if (modulesPathBox.isUsingGlobalPaths)
+                {
                     getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS()).setValue (wizard->modulesFolder.getFullPathName(), nullptr);
+                    ProjucerApplication::getApp().rescanJUCEPathModules();
+                }
             }
 
             auto projectDir = fileBrowser.getSelectedFile (0);
