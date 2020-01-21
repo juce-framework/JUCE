@@ -41,11 +41,7 @@ public:
     ~GeneratedCode();
 
     //==============================================================================
-    void applyToCode (String& code,
-                      const File& targetFile,
-                      const String& oldFileWithUserData,
-                      Project* project) const;
-
+    void applyToCode (String& code, const File& targetFile, const String& oldFileWithUserData) const;
     int getUniqueSuffix();
 
     //==============================================================================

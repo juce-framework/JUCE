@@ -69,10 +69,9 @@ struct ConsoleAppWizard   : public NewProjectWizard
         if (createMainCpp)
         {
             File mainCppFile = getSourceFilesFolder().getChildFile ("Main.cpp");
-            String appHeaders (CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), mainCppFile));
 
             String mainCpp = project.getFileTemplate ("jucer_MainConsoleAppTemplate_cpp")
-                                .replace ("%%app_headers%%", appHeaders, false);
+                                .replace ("%%app_headers%%", CodeHelpers::createIncludePathIncludeStatement (Project::getJuceSourceHFilename()), false);
 
             if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
                 failedFiles.add (mainCppFile.getFullPathName());
