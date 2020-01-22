@@ -86,7 +86,7 @@ shifted downwards.
 
 Possible Issues
 ---------------
-Merticulously aligned text components of a GUI may now be misaligned.
+Meticulously aligned text components of a GUI may now be misaligned.
 
 Workaround
 ----------
