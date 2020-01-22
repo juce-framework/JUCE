@@ -80,6 +80,28 @@ Version 5.4.5
 
 Change
 ------
+The alignment of text rendered on macOS using CoreGraphics may have shifted
+slightly, depending on the font you have used. The default macOS font has
+shifted downwards.
+
+Possible Issues
+---------------
+Merticulously aligned text components of a GUI may now be misaligned.
+
+Workaround
+----------
+Use a custom LookAndFeel to change the location where text is drawn, or use a
+different font that matches the previous alignment of your original font.
+
+Rationale
+---------
+This was an unintentional change resulting from moving away from a deprecated
+macOS text API. The new alignment is consistent with other rendering engines
+(web browsers and text editors) and the software renderer.
+
+
+Change
+------
 The JUCEApplicationBase::backButtonPressed() method now returns a bool to
 indicate whether the back event was handled or not.
 
