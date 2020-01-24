@@ -187,6 +187,7 @@ namespace Ids
     DECLARE_ID (useLocalCopy);
     DECLARE_ID (overwriteOnSave);
     DECLARE_ID (appSandbox);
+    DECLARE_ID (appSandboxInheritance);
     DECLARE_ID (appSandboxOptions);
     DECLARE_ID (hardenedRuntime);
     DECLARE_ID (hardenedRuntimeOptions);

@@ -104,6 +104,7 @@ public:
           customXcodeResourceFoldersValue              (settings, Ids::customXcodeResourceFolders,              getUndoManager()),
           customXcassetsFolderValue                    (settings, Ids::customXcassetsFolder,                    getUndoManager()),
           appSandboxValue                              (settings, Ids::appSandbox,                              getUndoManager()),
+          appSandboxInheritanceValue                   (settings, Ids::appSandboxInheritance,                   getUndoManager()),
           appSandboxOptionsValue                       (settings, Ids::appSandboxOptions,                       getUndoManager(), Array<var>(), ","),
           hardenedRuntimeValue                         (settings, Ids::hardenedRuntime,                         getUndoManager()),
           hardenedRuntimeOptionsValue                  (settings, Ids::hardenedRuntimeOptions,                  getUndoManager(), Array<var>(), ","),
@@ -177,6 +178,7 @@ public:
     Array<var> getHardenedRuntimeOptions() const       { return *hardenedRuntimeOptionsValue.get().getArray(); }
 
     bool isAppSandboxEnabled() const                   { return appSandboxValue.get(); }
+    bool isAppSandboxInhertianceEnabled() const        { return appSandboxInheritanceValue.get(); }
     Array<var> getAppSandboxOptions() const            { return *appSandboxOptionsValue.get().getArray(); }
 
     bool isMicrophonePermissionEnabled() const         { return microphonePermissionNeededValue.get(); }
@@ -317,6 +319,11 @@ public:
         {
             props.add (new ChoicePropertyComponent (appSandboxValue, "Use App Sandbox"),
                        "Enable this to use the app sandbox.");
+
+            props.add (new ChoicePropertyComponentWithEnablement (appSandboxInheritanceValue, appSandboxValue, "App Sandbox Inheritance"),
+                       "If app sandbox is enabled, this setting will configure a child process to inherit the sandbox of its parent. "
+                       "Note that if you enable this and have specified any other app sandbox entitlements below, the child process "
+                       "will fail to launch.");
 
             std::vector<std::pair<String, String>> sandboxOptions
             {
@@ -1189,7 +1196,7 @@ public:
                 return true;
 
             if (owner.project.getProjectType().isAudioPlugin()
-                && (   (owner.isOSX() && type == Target::AudioUnitv3PlugIn)
+                && ((owner.isOSX() && type == Target::AudioUnitv3PlugIn)
                     || (owner.isiOS() && type == Target::StandalonePlugIn && owner.getProject().shouldEnableIAA())))
                 return true;
 
@@ -1983,7 +1990,7 @@ private:
                      postbuildCommandValue, prebuildCommandValue,
                      duplicateAppExResourcesFolderValue, iosDeviceFamilyValue, iPhoneScreenOrientationValue,
                      iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue,
-                     appSandboxValue, appSandboxOptionsValue,
+                     appSandboxValue, appSandboxInheritanceValue, appSandboxOptionsValue,
                      hardenedRuntimeValue, hardenedRuntimeOptionsValue,
                      microphonePermissionNeededValue, microphonePermissionsTextValue, cameraPermissionNeededValue, cameraPermissionTextValue, iosBluetoothPermissionNeededValue, iosBluetoothPermissionTextValue,
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
@@ -3109,15 +3116,8 @@ private:
 
         if (project.getProjectType().isAudioPlugin())
         {
-            if (isiOS())
-            {
-                if (project.shouldEnableIAA())
-                    entitlements.set ("inter-app-audio", "<true/>");
-            }
-            else if (target.type == XcodeTarget::AudioUnitv3PlugIn)
-            {
-                entitlements.set ("com.apple.security.app-sandbox", "<true/>");
-            }
+            if (isiOS() && project.shouldEnableIAA())
+                entitlements.set ("inter-app-audio", "<true/>");
         }
         else
         {
@@ -3144,9 +3144,22 @@ private:
             for (auto& option : getHardenedRuntimeOptions())
                 entitlements.set (option, "<true/>");
 
-        if (isAppSandboxEnabled())
-            for (auto& option : getAppSandboxOptions())
-                entitlements.set (option, "<true/>");
+        if (isAppSandboxEnabled() || (project.getProjectType().isAudioPlugin() && target.type == XcodeTarget::AudioUnitv3PlugIn))
+        {
+            entitlements.set ("com.apple.security.app-sandbox", "<true/>");
+
+            if (isAppSandboxInhertianceEnabled())
+            {
+                // no other sandbox options can be specified if sandbox inheritance is enabled!
+                jassert (getAppSandboxOptions().isEmpty());
+
+                entitlements.set ("com.apple.inherit", "<true/>");
+            }
+
+            if (isAppSandboxEnabled())
+                for (auto& option : getAppSandboxOptions())
+                    entitlements.set (option, "<true/>");
+        }
 
         if (isiOS() && isiCloudPermissionsEnabled())
         {
