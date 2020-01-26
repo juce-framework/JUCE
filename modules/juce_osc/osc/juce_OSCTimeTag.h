@@ -70,7 +70,7 @@ public:
     */
     Time toTime() const noexcept;
 
-    /** Returns true if the OSCTimeTag object has the special value representing "immedately". */
+    /** Returns true if the OSCTimeTag object has the special value representing "immediately". */
     bool isImmediately() const noexcept;
 
     /** Returns the raw binary OSC time tag representation. */

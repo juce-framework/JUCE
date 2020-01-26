@@ -337,7 +337,7 @@ public:
     */
     virtual void performPopupMenuAction (int menuItemID);
 
-    /** Specifies a commmand-manager which the editor will notify whenever the state
+    /** Specifies a command-manager which the editor will notify whenever the state
         of any of its commands changes.
         If you're making use of the editor's ApplicationCommandTarget interface, then
         you should also use this to tell it which command manager it should use. Make

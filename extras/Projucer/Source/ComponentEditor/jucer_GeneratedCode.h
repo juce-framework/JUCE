@@ -41,11 +41,7 @@ public:
     ~GeneratedCode();
 
     //==============================================================================
-    void applyToCode (String& code,
-                      const File& targetFile,
-                      const String& oldFileWithUserData,
-                      Project* project) const;
-
+    void applyToCode (String& code, const File& targetFile, const String& oldFileWithUserData) const;
     int getUniqueSuffix();
 
     //==============================================================================
@@ -54,7 +50,7 @@ public:
     String className;
     String componentName;
     String parentClassInitialiser;  // optional parent class initialiser to go before the items in the initialisers list
-    StringArray initialisers; // (a list of the member variables that need initalising after the constructor declaration)
+    StringArray initialisers; // (a list of the member variables that need initialising after the constructor declaration)
     String parentClasses;
     String constructorParams;
     String privateMemberDeclarations;

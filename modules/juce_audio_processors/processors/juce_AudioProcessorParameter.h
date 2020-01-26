@@ -205,7 +205,7 @@ public:
     /** Returns the current value of the parameter as a String.
 
         This function can be called when you are hosting plug-ins to get a
-        more specialsed textual represenation of the current value from the
+        more specialised textual representation of the current value from the
         plug-in, for example "On" rather than "1.0".
 
         If you are implementing a plug-in then you should ignore this function

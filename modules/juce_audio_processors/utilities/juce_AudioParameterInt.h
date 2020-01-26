@@ -64,7 +64,7 @@ public:
     ~AudioParameterInt() override;
 
     /** Returns the parameter's current value as an integer. */
-    int get() const noexcept                    { return roundToInt (value); }
+    int get() const noexcept                    { return roundToInt (value.load()); }
 
     /** Returns the parameter's current value as an integer. */
     operator int() const noexcept               { return get(); }
@@ -96,7 +96,7 @@ private:
     float getValueForText (const String&) const override;
 
     const NormalisableRange<float> range;
-    float value;
+    std::atomic<float> value;
     const float defaultValue;
     std::function<String(int, int)> stringFromIntFunction;
     std::function<int(const String&)> intFromStringFunction;

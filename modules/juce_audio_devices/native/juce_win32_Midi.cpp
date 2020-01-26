@@ -1458,8 +1458,8 @@ private:
                 }
             ).Get());
 
-            // We need to use a timout here, rather than waiting indefinitely, as the
-            // WinRT API can occaisonally hang!
+            // We need to use a timeout here, rather than waiting indefinitely, as the
+            // WinRT API can occasionally hang!
             portOpened.wait (2000);
         }
 
@@ -1794,13 +1794,15 @@ private:
 
 //==============================================================================
 //==============================================================================
-extern RTL_OSVERSIONINFOW getWindowsVersionInfo();
+#if ! JUCE_MINGW
+ extern RTL_OSVERSIONINFOW getWindowsVersionInfo();
+#endif
 
 struct MidiService :  public DeletedAtShutdown
 {
     MidiService()
     {
-      #if JUCE_USE_WINRT_MIDI
+      #if JUCE_USE_WINRT_MIDI && ! JUCE_MINGW
        #if ! JUCE_FORCE_WINRT_MIDI
         auto windowsVersionInfo = getWindowsVersionInfo();
         if (windowsVersionInfo.dwMajorVersion >= 10 && windowsVersionInfo.dwBuildNumber >= 17763)

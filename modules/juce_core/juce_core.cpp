@@ -110,10 +110,6 @@
  #include <android/log.h>
 #endif
 
-#if JUCE_BELA
- #include <alchemy/timer.h>
-#endif
-
 #undef check
 
 //==============================================================================
@@ -239,6 +235,7 @@
 
 #include "threads/juce_ChildProcess.cpp"
 #include "threads/juce_HighResolutionTimer.cpp"
+#include "threads/juce_WaitableEvent.cpp"
 #include "network/juce_URL.cpp"
 #include "network/juce_WebInputStream.cpp"
 #include "streams/juce_URLInputSource.cpp"

@@ -126,7 +126,7 @@ private:
         if (selectedFile.existsAsFile())
             imagePreview.setImage (ImageCache::getFromFile (selectedFile));
 
-        // the image cahce is a handly way to load images from files or directly from memory and
+        // the image cache is a handy way to load images from files or directly from memory and
         // will keep them hanging around for a few seconds in case they are requested elsewhere
     }
 

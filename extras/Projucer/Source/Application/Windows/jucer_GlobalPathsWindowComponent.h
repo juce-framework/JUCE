@@ -197,7 +197,7 @@ private:
         builder.add (new FilePathPropertyComponent (juceModulePathValue, "JUCE Modules", true, isThisOS),
                      String ("This should be the path to the folder containing the JUCE modules that you wish to use, typically the \"modules\" directory of your JUCE folder.")
                      + (isThisOS ? " Use the button below to re-scan a new path." : ""));
-        builder.add (new FilePathPropertyComponent (userModulePathValue, "User Modules", true, isThisOS, {}, {}, true),
+        builder.add (new FilePathPropertyComponent (userModulePathValue, "User Modules", true, isThisOS),
                      String ("A path to a folder containing any custom modules that you wish to use.")
                      + (isThisOS ? " Use the button below to re-scan new paths." : ""));
 

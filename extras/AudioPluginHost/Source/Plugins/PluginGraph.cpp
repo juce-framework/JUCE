@@ -24,7 +24,7 @@
   ==============================================================================
 */
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 #include "../UI/MainHostWindow.h"
 #include "PluginGraph.h"
 #include "InternalPlugins.h"
@@ -202,11 +202,13 @@ void PluginGraph::newDocument()
     addPlugin (internalFormat.audioInDesc,  { 0.5,  0.1 });
     addPlugin (internalFormat.midiInDesc,   { 0.25, 0.1 });
     addPlugin (internalFormat.audioOutDesc, { 0.5,  0.9 });
+    addPlugin (internalFormat.midiOutDesc,  { 0.25, 0.9 });
 
-    MessageManager::callAsync ([this] () {
+    MessageManager::callAsync ([this]
+    {
         setChangedFlag (false);
         graph.addChangeListener (this);
-    } );
+    });
 }
 
 Result PluginGraph::loadDocument (const File& file)

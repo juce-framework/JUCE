@@ -34,9 +34,11 @@ namespace CodeHelpers
     String unindent (const String& code, int numSpaces);
     String makeValidIdentifier (String s, bool capitalise, bool removeColons,
                                 bool allowTemplates, bool allowAsterisks = false);
+    String makeBinaryDataIdentifierName (const File& file);
+
     String createIncludeStatement (const File& includedFile, const File& targetFile);
     String createIncludeStatement (const String& includePath);
-    String makeBinaryDataIdentifierName (const File& file);
+    String createIncludePathIncludeStatement (const String& includedFilename);
 
     String stringLiteral (const String& text, int maxLineLength = -1);
     String floatLiteral (double value, int numDecPlaces);

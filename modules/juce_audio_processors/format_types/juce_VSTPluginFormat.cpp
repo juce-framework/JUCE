@@ -2052,7 +2052,8 @@ private:
     //==============================================================================
     String name;
     CriticalSection lock;
-    bool wantsMidiMessages = false, initialised = false, isPowerOn = false;
+    std::atomic<bool> wantsMidiMessages { false };
+    bool initialised = false, isPowerOn = false;
     bool lastProcessBlockCallWasBypass = false, vstSupportsBypass = false;
     mutable StringArray programNames;
     AudioBuffer<float> outOfPlaceBuffer;
@@ -2321,7 +2322,7 @@ private:
         // Workaround: unfortunately old JUCE VST-2 plug-ins had a bug and would crash if
         // you try to get the speaker arrangement when there are no input channels present.
         // Hopefully, one day (when there are no more old JUCE plug-ins around), we can
-        // commment out the next two lines.
+        // comment out the next two lines.
         if (effect->numInputs == 0)
             return false;
 
@@ -2926,7 +2927,11 @@ public:
         if (auto* peer = getTopLevelComponent()->getPeer())
             setScaleFactorAndDispatchMessage (peer->getPlatformScaleFactor());
 
+       #if JUCE_LINUX
+        MessageManager::callAsync ([this] { componentMovedOrResized (true, true); });
+       #else
         componentMovedOrResized (true, true);
+       #endif
     }
 
     using ComponentMovementWatcher::componentVisibilityChanged;

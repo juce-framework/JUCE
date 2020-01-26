@@ -62,7 +62,7 @@ struct AudioPluginAppWizard   : public NewProjectWizard
 
         setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
 
-        String appHeaders (CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), filterCppFile));
+        auto juceHeaderInclude = CodeHelpers::createIncludePathIncludeStatement (Project::getJuceSourceHFilename());
 
         String filterCpp = project.getFileTemplate ("jucer_AudioPluginFilterTemplate_cpp")
                             .replace ("%%filter_headers%%", CodeHelpers::createIncludeStatement (filterHFile, filterCppFile)
@@ -71,7 +71,7 @@ struct AudioPluginAppWizard   : public NewProjectWizard
                             .replace ("%%editor_class_name%%", editorClassName, false);
 
         String filterH = project.getFileTemplate ("jucer_AudioPluginFilterTemplate_h")
-                            .replace ("%%app_headers%%", appHeaders, false)
+                            .replace ("%%app_headers%%", juceHeaderInclude, false)
                             .replace ("%%filter_class_name%%", filterClassName, false);
 
         String editorCpp = project.getFileTemplate ("jucer_AudioPluginEditorTemplate_cpp")
@@ -81,7 +81,7 @@ struct AudioPluginAppWizard   : public NewProjectWizard
                             .replace ("%%editor_class_name%%", editorClassName, false);
 
         String editorH = project.getFileTemplate ("jucer_AudioPluginEditorTemplate_h")
-                            .replace ("%%editor_headers%%", appHeaders + newLine + CodeHelpers::createIncludeStatement (filterHFile, filterCppFile), false)
+                            .replace ("%%editor_headers%%", juceHeaderInclude + newLine + CodeHelpers::createIncludeStatement (filterHFile, filterCppFile), false)
                             .replace ("%%filter_class_name%%", filterClassName, false)
                             .replace ("%%editor_class_name%%", editorClassName, false);
 

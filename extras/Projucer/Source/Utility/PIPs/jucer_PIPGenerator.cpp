@@ -425,10 +425,16 @@ String PIPGenerator::getMainFileTextForType()
 {
     String mainTemplate (BinaryData::jucer_PIPMain_cpp);
 
-    mainTemplate = mainTemplate.replace ("%%filename%%", useLocalCopy ? pipFile.getFileName()
-                                                                      : isTemp ? pipFile.getFullPathName()
-                                                                               : RelativePath (pipFile, outputDirectory.getChildFile ("Source"),
-                                                                                               RelativePath::unknown).toUnixStyle());
+    auto includeFilename = [&]
+    {
+        if (useLocalCopy) return pipFile.getFileName();
+        if (isTemp)       return pipFile.getFullPathName();
+
+        return RelativePath (pipFile, outputDirectory.getChildFile ("Source"), RelativePath::unknown).toUnixStyle();
+    }();
+
+    mainTemplate = mainTemplate.replace ("%%filename%%", includeFilename)
+                               .replace ("%%include_juce%%", CodeHelpers::createIncludePathIncludeStatement (Project::getJuceSourceHFilename()));
 
     auto type = metadata[Ids::type].toString();
 

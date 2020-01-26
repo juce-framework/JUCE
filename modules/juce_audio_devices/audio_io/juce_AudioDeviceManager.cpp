@@ -105,7 +105,7 @@ void AudioDeviceManager::createDeviceTypesIfNeeded()
         createAudioDeviceTypes (types);
 
         for (auto* t : types)
-            addAudioDeviceType (t);
+            addAudioDeviceType (std::unique_ptr<AudioIODeviceType> (t));
 
         types.clear (false);
 
@@ -172,23 +172,40 @@ void AudioDeviceManager::createAudioDeviceTypes (OwnedArray<AudioIODeviceType>& 
     addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_ASIO());
     addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_CoreAudio());
     addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_iOSAudio());
+    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_Bela());
     addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_ALSA());
     addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_JACK());
-    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_Bela());
     addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_Oboe());
     addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_OpenSLES());
     addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_Android());
 }
 
-void AudioDeviceManager::addAudioDeviceType (AudioIODeviceType* newDeviceType)
+void AudioDeviceManager::addAudioDeviceType (std::unique_ptr<AudioIODeviceType> newDeviceType)
 {
     if (newDeviceType != nullptr)
     {
         jassert (lastDeviceTypeConfigs.size() == availableDeviceTypes.size());
-        availableDeviceTypes.add (newDeviceType);
+
+        availableDeviceTypes.add (newDeviceType.release());
         lastDeviceTypeConfigs.add (new AudioDeviceSetup());
 
-        newDeviceType->addListener (callbackHandler.get());
+        availableDeviceTypes.getLast()->addListener (callbackHandler.get());
+    }
+}
+
+void AudioDeviceManager::removeAudioDeviceType (AudioIODeviceType* deviceTypeToRemove)
+{
+    if (deviceTypeToRemove != nullptr)
+    {
+        jassert (lastDeviceTypeConfigs.size() == availableDeviceTypes.size());
+
+        auto index = availableDeviceTypes.indexOf (deviceTypeToRemove);
+
+        if (auto removed = std::unique_ptr<AudioIODeviceType> (availableDeviceTypes.removeAndReturn (index)))
+        {
+            removed->removeListener (callbackHandler.get());
+            lastDeviceTypeConfigs.remove (index, true);
+        }
     }
 }
 

@@ -537,6 +537,24 @@ private:
                     return 1;
                 }
             }
+            else if (block->getType() == Block::lumiKeysBlock)
+            {
+                if (edge == Block::ConnectionPort::DeviceEdge::north)
+                {
+                    switch (index)
+                    {
+                        case 0 : return 0;
+                        case 1 : return 2;
+                        case 2 : return 3;
+                        case 3 : return 5;
+                        default : jassertfalse;
+                    }
+                }
+                else if (edge == Block::ConnectionPort::DeviceEdge::south)
+                {
+                    jassertfalse;
+                }
+            }
 
             if (edge == Block::ConnectionPort::DeviceEdge::south)
                 return block->getWidth() - (index + 1);

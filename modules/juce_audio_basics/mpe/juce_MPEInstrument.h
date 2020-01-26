@@ -27,7 +27,7 @@ namespace juce
 /**
     This class represents an instrument handling MPE.
 
-    It has an MPE zone layout and maintans a state of currently
+    It has an MPE zone layout and maintains a state of currently
     active (playing) notes and the values of their dimensions of expression.
 
     You can trigger and modulate notes:

@@ -123,7 +123,7 @@ public:
     DrawableComposite* getParent() const;
 
     /** Sets a the clipping region of this drawable using another drawable.
-        The drawbale passed in will be deleted when no longer needed.
+        The drawable passed in will be deleted when no longer needed.
     */
     void setClipPath (std::unique_ptr<Drawable> drawableClipPath);
 
@@ -178,7 +178,7 @@ public:
     static Path parseSVGPath (const String& svgPath);
 
     //==============================================================================
-    /** Returns the area that this drawble covers.
+    /** Returns the area that this drawable covers.
         The result is expressed in this drawable's own coordinate space, and does not take
         into account any transforms that may be applied to the component.
     */

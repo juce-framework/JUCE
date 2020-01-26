@@ -159,7 +159,7 @@ public:
         A pointer to the object you pass in will be kept, but it won't be deleted
         by this object, so it's the caller's responsibility to manage it.
 
-        If you pass a nullptr, then no contraints will be placed on the positioning of the window.
+        If you pass a nullptr, then no constraints will be placed on the positioning of the window.
     */
     void setConstrainer (ComponentBoundsConstrainer* newConstrainer);
 

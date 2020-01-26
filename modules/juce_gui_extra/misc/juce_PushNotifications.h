@@ -276,7 +276,7 @@ public:
         bool localOnly = true;  /**< Optional: whether or not the notification should bridge to other devices.
                                                Available from Android API 20 or above. */
 
-        bool ongoing = false;   /**< Optional: If true, then it cannot be dismissed by the user and it must be dimissed manually.
+        bool ongoing = false;   /**< Optional: If true, then it cannot be dismissed by the user and it must be dismissed manually.
                                      Typically used for ongoing background tasks that the user is actively engaged with. To
                                      dismiss such notification, you need to call removeDeliveredNotification() or
                                      removeAllDeliveredNotifications(). */
@@ -389,7 +389,7 @@ public:
     {
         using Action = Notification::Action;
 
-        /** Describes a category of a notification. Each category has a unique idenfifier
+        /** Describes a category of a notification. Each category has a unique identifier
             and a list of associated actions.
             Note that the OS may allow only a limited number of actions to be presented, so
             always present most important actions first.
@@ -634,7 +634,7 @@ public:
 
             @param isLocalNotification If the notification is local
             @param notification        The notification
-            @param actionIdentifier    A String identifiing the action
+            @param actionIdentifier    A String identifying the action
             @param optionalResponse    Text response a user inputs for notifications with a text input.
                                        Empty for notifications without a text input option.
 
