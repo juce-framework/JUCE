@@ -20,7 +20,7 @@
 #pragma once
 
 //[Headers]     -- You can add your own extra header files here --
-%%include_juce_header%%
+%%include_juce%%
 //[/Headers]
 
 %%include_files_h%%
@@ -38,7 +38,7 @@
 public:
     //==============================================================================
     %%class_name%% (%%constructor_params%%);
-    ~%%class_name%%();
+    ~%%class_name%%() override;
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.

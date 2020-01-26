@@ -25,7 +25,7 @@
 */
 
 #define UseExtendedThingResource 1
-#include <AudioUnit/AudioUnit.r>
+#include <AudioUnit.r>
 
 //==============================================================================
 /*  The AppConfig.h file should be a file in your project, containing info to describe the

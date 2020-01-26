@@ -284,7 +284,7 @@ public:
     */
     Colour withBrightness (float newBrightness) const noexcept;
 
-    /** Returns a copy of this colour with it hue rotated.
+    /** Returns a copy of this colour with its hue rotated.
         The new colour's hue is ((this->getHue() + amountToRotate) % 1.0)
         @see brighter, darker, withMultipliedBrightness
     */

@@ -100,7 +100,8 @@ private:
 */
 class GraphDocumentComponent  : public Component,
                                 public DragAndDropTarget,
-                                public DragAndDropContainer
+                                public DragAndDropContainer,
+                                private ChangeListener
 {
 public:
     GraphDocumentComponent (AudioPluginFormatManager& formatManager,
@@ -142,6 +143,7 @@ private:
 
     AudioProcessorPlayer graphPlayer;
     MidiKeyboardState keyState;
+    MidiOutput* midiOutput = nullptr;
 
     struct TooltipBar;
     std::unique_ptr<TooltipBar> statusBar;
@@ -160,8 +162,11 @@ private:
     SidePanel* lastOpenedSidePanel = nullptr;
 
     //==============================================================================
+    void changeListenerCallback (ChangeBroadcaster*) override;
+
     void init();
     void checkAvailableWidth();
+    void updateMidiOutput();
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GraphDocumentComponent)

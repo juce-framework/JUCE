@@ -399,7 +399,7 @@ void Viewport::updateVisibleArea()
         auto oldContentBounds = contentComp->getBounds();
         contentHolder.setBounds (contentArea);
 
-        // If the content has changed its size, that might affect our scrollbars, so go round again and re-caclulate..
+        // If the content has changed its size, that might affect our scrollbars, so go round again and re-calculate..
         if (oldContentBounds == contentComp->getBounds())
             break;
     }
@@ -418,7 +418,6 @@ void Viewport::updateVisibleArea()
     hbar.setRangeLimits (0.0, contentBounds.getWidth());
     hbar.setCurrentRange (visibleOrigin.x, contentArea.getWidth());
     hbar.setSingleStepSize (singleStepX);
-    hbar.cancelPendingUpdate();
 
     if (canShowHBar && ! hBarVisible)
         visibleOrigin.setX (0);
@@ -427,7 +426,6 @@ void Viewport::updateVisibleArea()
     vbar.setRangeLimits (0.0, contentBounds.getHeight());
     vbar.setCurrentRange (visibleOrigin.y, contentArea.getHeight());
     vbar.setSingleStepSize (singleStepY);
-    vbar.cancelPendingUpdate();
 
     if (canShowVBar && ! vBarVisible)
         visibleOrigin.setY (0);

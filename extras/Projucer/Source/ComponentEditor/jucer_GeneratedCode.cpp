@@ -319,10 +319,7 @@ static void copyAcrossUserSections (String& dest, const String& src)
 }
 
 //==============================================================================
-void GeneratedCode::applyToCode (String& code,
-                                 const File& targetFile,
-                                 const String& oldFileWithUserData,
-                                 Project* project) const
+void GeneratedCode::applyToCode (String& code, const File& targetFile, const String& oldFileWithUserData) const
 {
     replaceTemplate (code, "version", JUCEApplicationBase::getInstance()->getApplicationVersion());
     replaceTemplate (code, "creationTime", Time::getCurrentTime().toString (true, true, true));
@@ -337,11 +334,8 @@ void GeneratedCode::applyToCode (String& code,
 
     replaceTemplate (code, "method_definitions", getCallbackDefinitions());
 
-    File juceHeaderFile = project != nullptr ? project->getAppIncludeFile()
-                                             : targetFile.getSiblingFile ("JuceHeader.h");
-
-    replaceTemplate (code, "include_juce_header", CodeHelpers::createIncludeStatement (juceHeaderFile, targetFile));
-
+    replaceTemplate (code, "include_juce", CodeHelpers::createIncludePathIncludeStatement (Project::getJuceSourceHFilename()));
+    
     replaceTemplate (code, "include_files_h", getIncludeFileCode (includeFilesH, targetFile));
     replaceTemplate (code, "include_files_cpp", getIncludeFileCode (includeFilesCPP, targetFile));
 

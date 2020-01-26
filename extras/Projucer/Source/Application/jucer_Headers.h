@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 #include "jucer_CommonHeaders.h"
 
 #if JUCE_DEBUG

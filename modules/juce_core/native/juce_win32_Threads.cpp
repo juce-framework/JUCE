@@ -49,20 +49,6 @@ void CriticalSection::exit() const noexcept         { LeaveCriticalSection ((CRI
 
 
 //==============================================================================
-WaitableEvent::WaitableEvent (const bool manualReset) noexcept
-    : handle (CreateEvent (0, manualReset ? TRUE : FALSE, FALSE, 0)) {}
-
-WaitableEvent::~WaitableEvent() noexcept        { CloseHandle (handle); }
-
-void WaitableEvent::signal() const noexcept     { SetEvent (handle); }
-void WaitableEvent::reset() const noexcept      { ResetEvent (handle); }
-
-bool WaitableEvent::wait (const int timeOutMs) const noexcept
-{
-    return WaitForSingleObject (handle, (DWORD) timeOutMs) == WAIT_OBJECT_0;
-}
-
-//==============================================================================
 void JUCE_API juce_threadEntryPoint (void*);
 
 static unsigned int __stdcall threadEntryProc (void* userData)

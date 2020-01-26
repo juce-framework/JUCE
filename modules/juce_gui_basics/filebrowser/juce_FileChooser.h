@@ -222,7 +222,7 @@ public:
         if the user pressed 'ok' rather than cancelling).
 
         On mobile platforms, the file browser may return a URL instead of a local file.
-        Therefore, om mobile platforms, you should call getURLResult() instead.
+        Therefore, on mobile platforms, you should call getURLResult() instead.
 
         If you're using a multiple-file select, then use the getResults() method instead,
         to obtain the list of all files chosen.
@@ -235,7 +235,7 @@ public:
         browse method.
 
         On mobile platforms, the file browser may return a URL instead of a local file.
-        Therefore, om mobile platforms, you should call getURLResults() instead.
+        Therefore, on mobile platforms, you should call getURLResults() instead.
 
         This array may be empty if no files were chosen, or can contain multiple entries
         if multiple files were chosen.
@@ -293,7 +293,7 @@ public:
         Note: On iOS this will only return true if you have iCloud permissions
         and code-signing enabled in the Projucer and have added iCloud containers
         to your app in Apple's online developer portal. Additionally, the user must
-        have installed the iCloud app on their device and used the app at leat once.
+        have installed the iCloud app on their device and used the app at least once.
     */
     static bool isPlatformDialogAvailable();
 

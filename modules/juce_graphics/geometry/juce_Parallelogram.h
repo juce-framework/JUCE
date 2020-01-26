@@ -162,7 +162,7 @@ public:
                 + (bottomLeft - topLeft) * relativePosition.y;
     }
 
-    /** Returns a transformed verstion of the parallelogram. */
+    /** Returns a transformed version of the parallelogram. */
     Parallelogram transformedBy (const AffineTransform& transform) const noexcept
     {
         auto p = *this;

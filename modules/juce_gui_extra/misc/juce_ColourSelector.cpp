@@ -396,15 +396,100 @@ private:
 };
 
 //==============================================================================
-ColourSelector::ColourSelector(int sectionsToShow, int edge, int gapAroundColourSpaceComponent)
-	: colour(Colours::white),
-	flags(sectionsToShow),
-	edgeGap(edge)
+class ColourSelector::ColourPreviewComp  : public Component
+{
+public:
+    ColourPreviewComp (ColourSelector& cs, bool isEditable)
+        : owner (cs)
+    {
+        colourLabel.setFont (labelFont);
+        colourLabel.setJustificationType (Justification::centred);
+
+        if (isEditable)
+        {
+            colourLabel.setEditable (true);
+
+            colourLabel.onEditorShow = [this]
+            {
+                if (auto* ed = colourLabel.getCurrentTextEditor())
+                    ed->setInputRestrictions ((owner.flags & showAlphaChannel) ? 8 : 6, "1234567890ABCDEFabcdef");
+            };
+
+            colourLabel.onEditorHide = [this]
+            {
+                updateColourIfNecessary (colourLabel.getText());
+            };
+        }
+
+        addAndMakeVisible (colourLabel);
+    }
+
+    void updateIfNeeded()
+    {
+        auto newColour = owner.getCurrentColour();
+
+        if (currentColour != newColour)
+        {
+            currentColour = newColour;
+            auto textColour = (Colours::white.overlaidWith (currentColour).contrasting());
+
+            colourLabel.setColour (Label::textColourId,            textColour);
+            colourLabel.setColour (Label::textWhenEditingColourId, textColour);
+            colourLabel.setText (currentColour.toDisplayString ((owner.flags & showAlphaChannel) != 0), dontSendNotification);
+
+            labelWidth = labelFont.getStringWidth (colourLabel.getText());
+
+            repaint();
+        }
+    }
+
+    void paint (Graphics& g) override
+    {
+        g.fillCheckerBoard (getLocalBounds().toFloat(), 10.0f, 10.0f,
+                            Colour (0xffdddddd).overlaidWith (currentColour),
+                            Colour (0xffffffff).overlaidWith (currentColour));
+    }
+
+    void resized() override
+    {
+        colourLabel.centreWithSize (labelWidth + 10, (int) labelFont.getHeight() + 10);
+    }
+
+private:
+    void updateColourIfNecessary (const String& newColourString)
+    {
+        auto newColour = Colour::fromString (newColourString);
+
+        if (newColour != currentColour)
+            owner.setCurrentColour (newColour);
+    }
+
+    ColourSelector& owner;
+
+    Colour currentColour;
+    Font labelFont { 14.0f, Font::bold };
+    int labelWidth = 0;
+    Label colourLabel;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColourPreviewComp)
+};
+
+//==============================================================================
+ColourSelector::ColourSelector (int sectionsToShow, int edge, int gapAroundColourSpaceComponent)
+    : colour (Colours::white),
+      flags (sectionsToShow),
+      edgeGap (edge)
 {
 	// not much point having a selector with no components in it!
 	jassert((flags & (showColourAtTop | showSliders | showColourspace | showHexColorValue)) != 0);
 
 	updateHSV();
+
+    if ((flags & showColourAtTop) != 0)
+    {
+        previewComponent.reset (new ColourPreviewComp (*this, (flags & editableColour) != 0));
+        addAndMakeVisible (previewComponent.get());
+    }
 
 	if ((flags & showSliders) != 0)
 	{
@@ -549,14 +634,8 @@ void ColourSelector::update (NotificationType notification)
         valueSelector->updateIfNeeded();
     }
 
-	if ((flags & showHexColorValue) != 0)
-	{
-		hexColorLabel->setText(getCurrentColour().toDisplayString((flags & showAlphaChannel) != 0), dontSendNotification);
-	}
-
-    if ((flags & showColourAtTop) != 0)
-        repaint (previewArea);
-
+	if (previewComponent != nullptr)
+		previewComponent->updateIfNeeded();
 
     if (notification != dontSendNotification)
         sendChangeMessage();
@@ -569,20 +648,6 @@ void ColourSelector::update (NotificationType notification)
 void ColourSelector::paint (Graphics& g)
 {
     g.fillAll (findColour (backgroundColourId));
-
-    if ((flags & showColourAtTop) != 0)
-    {
-        auto currentColour = getCurrentColour();
-
-        g.fillCheckerBoard (previewArea.toFloat(), 10.0f, 10.0f,
-                            Colour (0xffdddddd).overlaidWith (currentColour),
-                            Colour (0xffffffff).overlaidWith (currentColour));
-
-        g.setColour (Colours::white.overlaidWith (currentColour).contrasting());
-        g.setFont (Font (14.0f, Font::bold));
-        g.drawText (currentColour.toDisplayString ((flags & showAlphaChannel) != 0),
-                    previewArea, Justification::centred, false);
-    }
 
     if ((flags & showSliders) != 0)
     {
@@ -613,7 +678,8 @@ void ColourSelector::resized()
     const int topSpace = ((flags & showColourAtTop) != 0) ? jmin (30 + edgeGap * 2, proportionOfHeight (0.2f)) : edgeGap;
 	const int hexLabelSpace = ((flags & showHexColorValue) != 0) ? jmin(22 + edgeGap, proportionOfHeight(0.1f)) : 0;
 
-    previewArea.setBounds (edgeGap, edgeGap, getWidth() - edgeGap * 2, topSpace - edgeGap * 2);
+    if (previewComponent != nullptr)
+        previewComponent->setBounds (edgeGap, edgeGap, getWidth() - edgeGap * 2, topSpace - edgeGap * 2);
 
     int y = topSpace;
 

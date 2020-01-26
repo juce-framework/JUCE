@@ -135,6 +135,11 @@ namespace CodeHelpers
         return "#include \"" + includePath + "\"";
     }
 
+    String createIncludePathIncludeStatement (const String& includedFilename)
+    {
+        return "#include <" + includedFilename + ">";
+    }
+
     String makeBinaryDataIdentifierName (const File& file)
     {
         return makeValidIdentifier (file.getFileName()

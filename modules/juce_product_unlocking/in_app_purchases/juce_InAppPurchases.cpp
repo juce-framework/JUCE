@@ -61,13 +61,11 @@ void InAppPurchases::getProductsInformation (const StringArray& productIdentifie
 }
 
 void InAppPurchases::purchaseProduct (const String& productIdentifier,
-                                      bool isSubscription,
-                                      const StringArray& upgradeProductIdentifiers,
+                                      const String& upgradeProductIdentifier,
                                       bool creditForUnusedSubscription)
 {
    #if JUCE_ANDROID || JUCE_IOS || JUCE_MAC
-    pimpl->purchaseProduct (productIdentifier, isSubscription,
-                            upgradeProductIdentifiers, creditForUnusedSubscription);
+    pimpl->purchaseProduct (productIdentifier, upgradeProductIdentifier, creditForUnusedSubscription);
    #else
     Listener::PurchaseInfo purchaseInfo { Purchase { "", productIdentifier, {}, {}, {} }, {} };
 

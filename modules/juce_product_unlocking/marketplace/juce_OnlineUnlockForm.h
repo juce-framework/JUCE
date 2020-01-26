@@ -27,7 +27,7 @@
 namespace juce
 {
 
-/** Acts as a GUI which asks the user for their details, and calls the approriate
+/** Acts as a GUI which asks the user for their details, and calls the appropriate
     methods on your OnlineUnlockStatus object to attempt to register the app.
 
     You should create one of these components and add it to your parent window,

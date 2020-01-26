@@ -62,7 +62,7 @@ public:
 
     /** Performs an in-place forward transform on a block of real data.
 
-        As the coefficients of the negative frequences (frequencies higher than
+        As the coefficients of the negative frequencies (frequencies higher than
         N/2 or pi) are the complex conjugate of their positive counterparts,
         it may not be necessary to calculate them for your particular application.
         You can use dontCalculateNegativeFrequencies to let the FFT

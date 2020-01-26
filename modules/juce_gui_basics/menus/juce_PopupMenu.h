@@ -192,6 +192,8 @@ public:
         Item& setColour (Colour) & noexcept;
         /** Sets the customComponent property (and returns a reference to this item to allow chaining). */
         Item& setCustomComponent (ReferenceCountedObjectPtr<CustomComponent> customComponent) & noexcept;
+        /** Sets the image property (and returns a reference to this item to allow chaining). */
+        Item& setImage (std::unique_ptr<Drawable>) & noexcept;
 
         /** Sets the isTicked flag (and returns a reference to this item to allow chaining). */
         Item&& setTicked (bool shouldBeTicked = true) && noexcept;
@@ -205,6 +207,8 @@ public:
         Item&& setColour (Colour) && noexcept;
         /** Sets the customComponent property (and returns a reference to this item to allow chaining). */
         Item&& setCustomComponent (ReferenceCountedObjectPtr<CustomComponent> customComponent) && noexcept;
+        /** Sets the image property (and returns a reference to this item to allow chaining). */
+        Item&& setImage (std::unique_ptr<Drawable>) && noexcept;
     };
 
     /** Adds an item to the menu.
@@ -395,7 +399,7 @@ public:
 
     /** Appends a separator to the menu, to help break it up into sections.
         The menu class is smart enough not to display separators at the top or bottom
-        of the menu, and it will replace mutliple adjacent separators with a single
+        of the menu, and it will replace multiple adjacent separators with a single
         one, so your code can be quite free and easy about adding these, and it'll
         always look ok.
     */

@@ -1249,7 +1249,7 @@ private:
             snd_device_name_free_hint (hints);
         }
 
-        // sometimes the "default" device is not listed, but it is nice to see it explicitely in the list
+        // sometimes the "default" device is not listed, but it is nice to see it explicitly in the list
         if (! outputIds.contains ("default"))
             testDevice ("default", "Default ALSA Output", "Default ALSA Input");
 

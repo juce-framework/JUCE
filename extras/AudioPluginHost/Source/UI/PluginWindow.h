@@ -31,7 +31,7 @@
 class PluginGraph;
 
 /**
-    A window that shows a log of parameter change messagse sent by the plugin.
+    A window that shows a log of parameter change messages sent by the plugin.
 */
 class PluginDebugWindow : public AudioProcessorEditor,
                           public AudioProcessorParameter::Listener,
