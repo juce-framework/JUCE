@@ -462,6 +462,7 @@ private:
     StringArray getSystemIncludePaths()
     {
         StringArray paths;
+        paths.add (project.getGeneratedCodeFolder().getFullPathName());
         paths.addArray (getSearchPathsFromString (project.getCompileEngineSettings().getSystemHeaderPathString()));
 
         auto isVSTHost = project.getEnabledModules().isModuleEnabled ("juce_audio_processors")
