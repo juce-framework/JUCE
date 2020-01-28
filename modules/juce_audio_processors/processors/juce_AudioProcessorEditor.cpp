@@ -103,15 +103,9 @@ void AudioProcessorEditor::setResizable (const bool shouldBeResizable, const boo
     if (shouldHaveCornerResizer != (resizableCorner != nullptr))
     {
         if (shouldHaveCornerResizer)
-        {
-            resizableCorner.reset (new ResizableCornerComponent (this, constrainer));
-            Component::addChildComponent (resizableCorner.get());
-            resizableCorner->setAlwaysOnTop (true);
-        }
+            attachResizableCornerComponent();
         else
-        {
             resizableCorner.reset();
-        }
     }
 }
 
@@ -146,6 +140,9 @@ void AudioProcessorEditor::setConstrainer (ComponentBoundsConstrainer* newConstr
                       || newConstrainer->getMinimumHeight() != newConstrainer->getMaximumHeight());
 
         attachConstrainer (newConstrainer);
+
+        if (resizableCorner != nullptr)
+            attachResizableCornerComponent();
     }
 }
 
@@ -156,6 +153,14 @@ void AudioProcessorEditor::attachConstrainer (ComponentBoundsConstrainer* newCon
         constrainer = newConstrainer;
         updatePeer();
     }
+}
+
+void AudioProcessorEditor::attachResizableCornerComponent()
+{
+    resizableCorner.reset (new ResizableCornerComponent (this, constrainer));
+    Component::addChildComponent (resizableCorner.get());
+    resizableCorner->setAlwaysOnTop (true);
+    editorResized (true);
 }
 
 void AudioProcessorEditor::setBoundsConstrained (Rectangle<int> newBounds)
