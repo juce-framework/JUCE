@@ -336,7 +336,9 @@ public:
 
         close();
         JUCE_ASIO_LOG ("closed");
-        removeCurrentDriver();
+
+        if (! removeCurrentDriver())
+            JUCE_ASIO_LOG ("** Driver crashed while being closed");
     }
 
     void updateSampleRates()
@@ -451,7 +453,9 @@ public:
         if (needToReset)
         {
             JUCE_ASIO_LOG (" Resetting");
-            removeCurrentDriver();
+
+            if (! removeCurrentDriver())
+                JUCE_ASIO_LOG ("** Driver crashed while being closed");
 
             loadDriver();
             String initError = initDriver();
@@ -1075,28 +1079,32 @@ private:
         }
     }
 
-    static bool shouldReleaseObject (const String& driverName)
+    bool removeCurrentDriver()
     {
-        return driverName != "Yamaha Steinberg USB ASIO";
-    }
+        bool releasedOK = true;
 
-    void removeCurrentDriver()
-    {
         if (asioObject != nullptr)
         {
-            char buffer[512] = {};
-            asioObject->getDriverName (buffer);
-
-            if (shouldReleaseObject (buffer))
+           #if ! JUCE_MINGW
+            __try
+           #endif
+            {
                 asioObject->Release();
+            }
+           #if ! JUCE_MINGW
+            __except (EXCEPTION_EXECUTE_HANDLER) { releasedOK = false; }
+           #endif
 
             asioObject = nullptr;
         }
+
+        return releasedOK;
     }
 
     bool loadDriver()
     {
-        removeCurrentDriver();
+        if (! removeCurrentDriver())
+            JUCE_ASIO_LOG ("** Driver crashed while being closed");
 
         bool crashed = false;
         bool ok = tryCreatingDriver (crashed);
@@ -1256,7 +1264,9 @@ private:
         {
             JUCE_ASIO_LOG_ERROR (error, err);
             disposeBuffers();
-            removeCurrentDriver();
+
+            if (! removeCurrentDriver())
+                JUCE_ASIO_LOG ("** Driver crashed while being closed");
         }
         else
         {
