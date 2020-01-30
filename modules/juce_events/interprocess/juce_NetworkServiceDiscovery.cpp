@@ -67,11 +67,13 @@ void NetworkServiceDiscovery::Advertiser::run()
 
 void NetworkServiceDiscovery::Advertiser::sendBroadcast()
 {
-    auto localAddress = IPAddress::getLocalAddress();
-    message.setAttribute ("address", localAddress.toString());
-    auto broadcastAddress = IPAddress::getInterfaceBroadcastAddress (localAddress);
-    auto data = message.toString (XmlElement::TextFormat().singleLine().withoutHeader());
-    socket.write (broadcastAddress.toString(), broadcastPort, data.toRawUTF8(), (int) data.getNumBytesAsUTF8());
+    auto&& localAddresses = IPAddress::getAllAddresses();
+    for (auto& localAddress : localAddresses) {
+        message.setAttribute ("address", localAddress.toString());
+        auto broadcastAddress = IPAddress::getInterfaceBroadcastAddress (localAddress);
+        auto data = message.toString (XmlElement::TextFormat().singleLine().withoutHeader());
+        socket.write (broadcastAddress.toString(), broadcastPort, data.toRawUTF8(), (int) data.getNumBytesAsUTF8());
+    }
 }
 
 //==============================================================================
