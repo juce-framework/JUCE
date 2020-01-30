@@ -43,7 +43,9 @@ namespace ASIODebugging
     {
         message = "ASIO: " + message;
         DBG (message);
-        Logger::writeToLog (message);
+
+        if (Logger::getCurrentLogger() != nullptr)
+            Logger::writeToLog (message);
     }
 
     static void logError (const String& context, long error)
