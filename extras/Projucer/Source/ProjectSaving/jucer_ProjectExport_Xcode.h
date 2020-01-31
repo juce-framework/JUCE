@@ -3184,30 +3184,31 @@ private:
         return entitlements;
     }
 
-    String addEntitlementsFile (XcodeTarget& target) const
+    void addEntitlementsFile (XcodeTarget& target) const
     {
-        String content =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-            "<plist version=\"1.0\">\n"
-            "<dict>\n";
-
         auto entitlements = getEntitlements (target);
-        auto keys = entitlements.getAllKeys();
 
-        for (auto& key : keys)
+        if (entitlements.size() > 0)
         {
-            content += "\t<key>" + key + "</key>\n"
-                       "\t" + entitlements[key] + "\n";
+            String content =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+                "<plist version=\"1.0\">\n"
+                "<dict>\n";
+
+            for (auto& key : entitlements.getAllKeys())
+                content += "\t<key>" + key + "</key>\n"
+                           "\t" + entitlements[key] + "\n";
+
+            content += "</dict>\n"
+                       "</plist>\n";
+
+            auto entitlementsFile = getTargetFolder().getChildFile (target.getEntitlementsFilename());
+            overwriteFileIfDifferentOrThrow (entitlementsFile, content);
+
+            RelativePath entitlementsPath (entitlementsFile, getTargetFolder(), RelativePath::buildTargetFolder);
+            addFile (entitlementsPath, false, false, false, false, nullptr, {});
         }
-        content += "</dict>\n"
-                   "</plist>\n";
-
-        auto entitlementsFile = getTargetFolder().getChildFile (target.getEntitlementsFilename());
-        overwriteFileIfDifferentOrThrow (entitlementsFile, content);
-
-        RelativePath entitlementsPath (entitlementsFile, getTargetFolder(), RelativePath::buildTargetFolder);
-        return addFile (entitlementsPath, false, false, false, false, nullptr, {});
     }
 
     String addProjectItem (const Project::Item& projectItem) const
