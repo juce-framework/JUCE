@@ -1133,7 +1133,7 @@ public:
 
         String getPostBuildSteps (const MSVCBuildConfiguration& config) const
         {
-            auto postBuild = config.getPostbuildCommandString();
+            auto postBuild = config.getPostbuildCommandString().replace ("\n", "\r\n");;
             auto extraPostBuild = getExtraPostBuildSteps (config);
 
             return postBuild + String (postBuild.isNotEmpty() && extraPostBuild.isNotEmpty() ? "\r\n" : "") + extraPostBuild;
@@ -1141,7 +1141,7 @@ public:
 
         String getPreBuildSteps (const MSVCBuildConfiguration& config) const
         {
-            auto preBuild = config.getPrebuildCommandString();
+            auto preBuild = config.getPrebuildCommandString().replace ("\n", "\r\n");;
             auto extraPreBuild = getExtraPreBuildSteps (config);
 
             return preBuild + String (preBuild.isNotEmpty() && extraPreBuild.isNotEmpty() ? "\r\n" : "") + extraPreBuild;
