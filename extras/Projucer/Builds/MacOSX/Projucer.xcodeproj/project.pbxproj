@@ -1462,13 +1462,6 @@
 			path = "../../Source/BinaryData/Templates/jucer_NewComponentTemplate.cpp";
 			sourceTree = "SOURCE_ROOT";
 		};
-		834B0B0A61FE876871A9F311 = {
-			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
-			name = App.entitlements;
-			path = App.entitlements;
-			sourceTree = "SOURCE_ROOT";
-		};
 		842427CFE565F3FCE5B99174 = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;

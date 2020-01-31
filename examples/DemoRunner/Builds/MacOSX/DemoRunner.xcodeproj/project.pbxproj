@@ -303,13 +303,6 @@
 			path = ../../Source/Main.cpp;
 			sourceTree = "SOURCE_ROOT";
 		};
-		2CDA0CB288452DA016E874BC = {
-			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
-			name = App.entitlements;
-			path = App.entitlements;
-			sourceTree = "SOURCE_ROOT";
-		};
 		346450C70C964FD9640B6086 = {
 			isa = PBXFileReference;
 			lastKnownFileType = file;

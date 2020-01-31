@@ -459,13 +459,6 @@
 			path = System/Library/Frameworks/Cocoa.framework;
 			sourceTree = SDKROOT;
 		};
-		9A92E8C5ECBBF926B5CF57BC = {
-			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
-			name = App.entitlements;
-			path = App.entitlements;
-			sourceTree = "SOURCE_ROOT";
-		};
 		9F9B445E6755CAA19E4344ED = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
