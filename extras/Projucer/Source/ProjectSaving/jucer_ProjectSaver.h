@@ -95,7 +95,7 @@ public:
 
             auto projectRootHash = project.getProjectRoot().toXmlString().hashCode();
 
-            if (project.getProjectType().isAudioPlugin())
+            if (project.isAudioPluginProject())
             {
                 writePluginCharacteristicsFile();
 
@@ -157,7 +157,7 @@ public:
 
         if (errors.size() == 0)
         {
-            if (project.getProjectType().isAudioPlugin())
+            if (project.isAudioPluginProject())
                 writePluginCharacteristicsFile();
 
             writeAppConfigFile (modules, loadUserContentFromAppConfig());
