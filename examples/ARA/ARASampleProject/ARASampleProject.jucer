@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="v5FTSA" name="ARASampleProject" projectType="audioplug" jucerVersion="5.4.4"
+<JUCERPROJECT id="v5FTSA" name="ARASampleProject" projectType="audioplug" jucerVersion="5.4.5"
               pluginCode="AraT" pluginFormats="buildAU,buildVST3,enableARA"
               userNotes="Special thanks to SoundRadix for coming up with this example!"
               companyName="ARA Demo Company" companyWebsite="https://www.arademocompany.com"
@@ -13,10 +13,10 @@
         <FILE id="zyUNuy" name="DocumentView.cpp" compile="1" resource="0"
               file="Source/DocumentView.cpp"/>
         <FILE id="v4hOwL" name="DocumentView.h" compile="0" resource="0" file="Source/DocumentView.h"/>
-        <FILE id="EQ23gh" name="RegionSequenceView.cpp" compile="1" resource="0"
-              file="Source/RegionSequenceView.cpp"/>
-        <FILE id="bsc68x" name="RegionSequenceView.h" compile="0" resource="0"
-              file="Source/RegionSequenceView.h"/>
+        <FILE id="EQ23gh" name="RegionSequenceViewController.cpp" compile="1"
+              resource="0" file="Source/RegionSequenceViewController.cpp"/>
+        <FILE id="bsc68x" name="RegionSequenceViewController.h" compile="0"
+              resource="0" file="Source/RegionSequenceViewController.h"/>
         <FILE id="KZJTR6" name="PlaybackRegionView.cpp" compile="1" resource="0"
               file="Source/PlaybackRegionView.cpp"/>
         <FILE id="YRS0ck" name="PlaybackRegionView.h" compile="0" resource="0"

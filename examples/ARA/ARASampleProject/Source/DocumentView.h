@@ -1,10 +1,9 @@
 #pragma once
 
 #include "JuceHeader.h"
+#include "RulersView.h"
 
-class RulersView;
-class TrackHeaderView;
-class RegionSequenceView;
+class RegionSequenceViewController;
 class PlaybackRegionView;
 
 //==============================================================================
@@ -49,8 +48,8 @@ public:
     // currently visible time range
     Range<double> getVisibleTimeRange() const;
 
-    // may return nullptr
-    ARAMusicalContext* getCurrentMusicalContext() const;
+    // rulers view access
+    const RulersView& getRulersView () const { return rulersView; }
 
     // convert between time and x coordinate
     int getPlaybackRegionsViewsXForTime (double time) const;
@@ -127,7 +126,7 @@ private:
 
     ARAEditorView* const editorView;
 
-    OwnedArray<RegionSequenceView> regionSequenceViews;
+    OwnedArray<RegionSequenceViewController> regionSequenceViewControllers;
 
     ScrollMasterViewport playbackRegionsViewport;
     Component playbackRegionsView;
@@ -136,7 +135,7 @@ private:
     Viewport trackHeadersViewport;
     Component trackHeadersView;
     Viewport rulersViewport;
-    std::unique_ptr<RulersView> rulersView;
+    RulersView rulersView;
 
     AudioFormatManager audioFormatManger;
 

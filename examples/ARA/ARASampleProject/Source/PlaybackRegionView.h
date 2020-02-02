@@ -1,11 +1,11 @@
 #pragma once
 
 #include "JuceHeader.h"
-#include "RegionSequenceView.h"
+#include "RegionSequenceViewController.h"
 
 //==============================================================================
 /**
-    RegionSequenceView
+    PlaybackRegionView
     JUCE component used to display ARA playback regions
     along with their output waveform, name, color, and selection state
 */
