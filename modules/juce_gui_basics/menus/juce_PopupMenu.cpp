@@ -595,7 +595,7 @@ struct MenuWindow  : public Component
         if (relativeTo != nullptr)
             targetPoint = relativeTo->localPointToGlobal (targetPoint);
 
-        auto parentArea = Desktop::getInstance().getDisplays().findDisplayForPoint (targetPoint)
+        auto parentArea = Desktop::getInstance().getDisplays().findDisplayForPoint (targetPoint * scaleFactor)
                               #if JUCE_MAC || JUCE_ANDROID
                                .userArea;
                               #else

@@ -67,9 +67,8 @@ public:
     File getBinaryDataCppFile (int index) const;
     File getBinaryDataHeaderFile() const                        { return getBinaryDataCppFile (0).withFileExtension (".h"); }
 
-    String getAppConfigFilename() const                         { return "AppConfig.h"; }
-    String getJuceSourceFilenameRoot() const                    { return "JuceLibraryCode"; }
-    String getJuceSourceHFilename() const                       { return "JuceHeader.h"; }
+    static String getAppConfigFilename()                        { return "AppConfig.h"; }
+    static String getJuceSourceHFilename()                      { return "JuceHeader.h"; }
 
     //==============================================================================
     template <class FileType>

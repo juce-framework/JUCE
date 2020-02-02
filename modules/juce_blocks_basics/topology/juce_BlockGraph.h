@@ -27,6 +27,8 @@ namespace juce
 
 /**
     Represents traversal paths from master blocks and any connected blocks.
+
+    @tags{Blocks}
 */
 class BlockGraph
 {

@@ -20,7 +20,7 @@
 #pragma once
 
 //[Headers]     -- You can add your own extra header files here --
-%%include_juce_header%%
+%%include_juce%%
 //[/Headers]
 
 %%include_files_h%%

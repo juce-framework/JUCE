@@ -71,14 +71,13 @@ struct AnimatedAppWizard   : public NewProjectWizard
 
         setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
 
-        String appHeaders (CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), mainCppFile));
+        auto juceHeaderInclude = CodeHelpers::createIncludePathIncludeStatement (Project::getJuceSourceHFilename());
+        auto appHeaders = juceHeaderInclude + newLine + CodeHelpers::createIncludeStatement (contentCompH, mainCppFile);
 
         // create main window
-        appHeaders << newLine << CodeHelpers::createIncludeStatement (contentCompH, mainCppFile);
-
         String windowH = project.getFileTemplate (createCppFile ? "jucer_AnimatedComponentTemplate_h"
                                                                 : "jucer_AnimatedComponentSimpleTemplate_h")
-                            .replace ("%%include_juce%%", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompH), false)
+                            .replace ("%%include_juce%%", juceHeaderInclude)
                             .replace ("%%content_component_class%%", contentCompName, false);
 
         if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompH, windowH))
@@ -89,7 +88,7 @@ struct AnimatedAppWizard   : public NewProjectWizard
         if (createCppFile)
         {
             String windowCpp = project.getFileTemplate ("jucer_AnimatedComponentTemplate_cpp")
-                                  .replace ("%%include_juce%%", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompCpp), false)
+                                  .replace ("%%include_juce%%", juceHeaderInclude)
                                   .replace ("%%include_corresponding_header%%", CodeHelpers::createIncludeStatement (contentCompH, contentCompCpp), false)
                                   .replace ("%%content_component_class%%", contentCompName, false);
 

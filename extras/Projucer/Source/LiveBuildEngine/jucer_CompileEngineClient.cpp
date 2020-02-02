@@ -461,6 +461,7 @@ private:
     StringArray getSystemIncludePaths()
     {
         StringArray paths;
+        paths.add (project.getGeneratedCodeFolder().getFullPathName());
         paths.addArray (getSearchPathsFromString (project.getCompileEngineSettings().getSystemHeaderPathString()));
 
         auto isVSTHost = project.isVST3PluginHost() || project.isVSTPluginHost();
