@@ -418,13 +418,6 @@
 			path = System/Library/Frameworks/CoreImage.framework;
 			sourceTree = SDKROOT;
 		};
-		F9E591FD0A75BCD9F600120A = {
-			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
-			name = App.entitlements;
-			path = App.entitlements;
-			sourceTree = "SOURCE_ROOT";
-		};
 		9F54D12C977843F8FEFCF041 = {
 			isa = PBXGroup;
 			children = (

@@ -200,6 +200,7 @@ private:
     void editorResized (bool wasResized);
     void updatePeer();
     void attachConstrainer (ComponentBoundsConstrainer*);
+    void attachResizableCornerComponent();
 
     //==============================================================================
     std::unique_ptr<AudioProcessorEditorListener> resizeListener;

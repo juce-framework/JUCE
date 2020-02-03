@@ -428,13 +428,6 @@
 			path = "../../JuceLibraryCode/include_juce_audio_processors.mm";
 			sourceTree = "SOURCE_ROOT";
 		};
-		AF19F5DDEBA5587D0C92A662 = {
-			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
-			name = App.entitlements;
-			path = App.entitlements;
-			sourceTree = "SOURCE_ROOT";
-		};
 		AF330F41D1A4865108690E3C = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.objcpp;

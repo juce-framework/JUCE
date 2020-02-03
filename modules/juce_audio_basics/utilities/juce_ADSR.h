@@ -30,6 +30,8 @@ namespace juce
     To use it, call setSampleRate() with the current sample rate and give it some parameters
     with setParameters() then call getNextSample() to get the envelope value to be applied
     to each audio sample or applyEnvelopeToBuffer() to apply the envelope to a whole buffer.
+
+    @tags{Audio}
 */
 class ADSR
 {
@@ -42,7 +44,11 @@ public:
     }
 
     //==============================================================================
-    /** Holds the parameters being used by an ADSR object. */
+    /**
+        Holds the parameters being used by an ADSR object.
+
+        @tags{Audio}
+    */
     struct Parameters
     {
         /** Attack time in seconds. */
