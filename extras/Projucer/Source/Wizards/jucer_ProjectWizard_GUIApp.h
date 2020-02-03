@@ -75,7 +75,8 @@ struct GUIAppWizard   : public NewProjectWizard
 
         setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
 
-        String appHeaders (CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), mainCppFile));
+        auto juceHeaderInclude = CodeHelpers::createIncludePathIncludeStatement (Project::getJuceSourceHFilename());
+        auto appHeaders = juceHeaderInclude;
 
         if (createWindow)
         {
@@ -83,7 +84,7 @@ struct GUIAppWizard   : public NewProjectWizard
 
             String windowH = project.getFileTemplate (createCppFile ? "jucer_ContentCompTemplate_h"
                                                                     : "jucer_ContentCompSimpleTemplate_h")
-                                .replace ("%%include_juce%%", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompH), false)
+                                .replace ("%%include_juce%%", juceHeaderInclude)
                                 .replace ("%%content_component_class%%", contentCompName, false);
 
             if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompH, windowH))
@@ -94,7 +95,7 @@ struct GUIAppWizard   : public NewProjectWizard
             if (createCppFile)
             {
                 String windowCpp = project.getFileTemplate ("jucer_ContentCompTemplate_cpp")
-                                    .replace ("%%include_juce%%", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompCpp), false)
+                                    .replace ("%%include_juce%%", juceHeaderInclude)
                                     .replace ("%%include_corresponding_header%%", CodeHelpers::createIncludeStatement (contentCompH, contentCompCpp), false)
                                     .replace ("%%content_component_class%%", contentCompName, false);
 
