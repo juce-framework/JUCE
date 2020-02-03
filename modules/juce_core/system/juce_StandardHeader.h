@@ -54,6 +54,11 @@
 #include <sstream>
 #include <iomanip>
 #include <map>
+#include <cstddef>
+#include <unordered_set>
+#include <mutex>
+#include <condition_variable>
+#include <queue>
 
 //==============================================================================
 #include "juce_CompilerSupport.h"

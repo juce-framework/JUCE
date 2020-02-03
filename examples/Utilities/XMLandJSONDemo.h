@@ -345,7 +345,7 @@ private:
         resultsTree.setRootItem (rootItem.get());
     }
 
-    /** Parses the editors contects as XML. */
+    /** Parses the editor's contents as XML. */
     TreeViewItem* rebuildXml()
     {
         parsedXml.reset();
@@ -368,7 +368,7 @@ private:
         return new XmlTreeItem (*parsedXml);
     }
 
-    /** Parses the editors contects as JSON. */
+    /** Parses the editor's contents as JSON. */
     TreeViewItem* rebuildJson()
     {
         var parsedJson;

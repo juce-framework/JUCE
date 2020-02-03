@@ -711,7 +711,7 @@ void GlyphArrangement::draw (const Graphics& g, AffineTransform transform) const
 
     for (int i = 0; i < glyphs.size(); ++i)
     {
-        auto& pg = glyphs.getReference(i);
+        auto& pg = glyphs.getReference (i);
 
         if (pg.font.isUnderlined())
             drawGlyphUnderline (g, pg, i, transform);

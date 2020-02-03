@@ -65,20 +65,10 @@ JUCE_API void JUCE_CALLTYPE Process::hide()
     }
 }
 
-JUCE_API void JUCE_CALLTYPE Process::raisePrivilege()
-{
-    jassertfalse;
-}
+JUCE_API void JUCE_CALLTYPE Process::raisePrivilege() {}
+JUCE_API void JUCE_CALLTYPE Process::lowerPrivilege() {}
 
-JUCE_API void JUCE_CALLTYPE Process::lowerPrivilege()
-{
-    jassertfalse;
-}
-
-JUCE_API void JUCE_CALLTYPE Process::setPriority (ProcessPriority)
-{
-    // xxx
-}
+JUCE_API void JUCE_CALLTYPE Process::setPriority (ProcessPriority) {}
 
 //==============================================================================
 JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept

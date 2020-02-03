@@ -73,7 +73,7 @@ public:
     Represents a piano keyboard, keeping track of which keys are currently pressed.
 
     This object can parse a stream of midi events, using them to update its idea
-    of which keys are pressed for each individiual midi channel.
+    of which keys are pressed for each individual midi channel.
 
     When keys go up or down, it can broadcast these events to listener objects.
 
@@ -135,7 +135,7 @@ public:
         It will also trigger a synchronous callback to the listeners to tell them that the key has
         gone up.
 
-        But if the note isn't acutally down for the given channel, this method will in fact do nothing.
+        But if the note isn't actually down for the given channel, this method will in fact do nothing.
     */
     void noteOff (int midiChannel, int midiNoteNumber, float velocity);
 

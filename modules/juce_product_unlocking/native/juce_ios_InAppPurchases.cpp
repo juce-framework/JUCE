@@ -196,7 +196,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         [productsRequest start];
     }
 
-    void purchaseProduct (const String& productIdentifier, bool, const StringArray&, bool)
+    void purchaseProduct (const String& productIdentifier, const String&, bool)
     {
         if (! [SKPaymentQueue canMakePayments])
         {

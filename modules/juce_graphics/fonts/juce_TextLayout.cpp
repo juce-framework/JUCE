@@ -222,6 +222,8 @@ void TextLayout::draw (Graphics& g, Rectangle<float> area) const
     auto origin = justification.appliedToRectangle (Rectangle<float> (width, getHeight()), area).getPosition();
 
     auto& context   = g.getInternalContext();
+    context.saveState();
+
     auto clip       = context.getClipBounds();
     auto clipTop    = clip.getY()      - origin.y;
     auto clipBottom = clip.getBottom() - origin.y;
@@ -257,6 +259,8 @@ void TextLayout::draw (Graphics& g, Rectangle<float> area) const
             }
         }
     }
+
+    context.restoreState();
 }
 
 void TextLayout::createLayout (const AttributedString& text, float maxWidth)

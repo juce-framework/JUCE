@@ -240,8 +240,8 @@ public:
 
         The text passed-in will be set as the current text regardless of whether
         it is one of the items in the list. If the current text isn't one of the
-        items, then getSelectedId() will return 0, otherwise it wil return
-        the approriate ID.
+        items, then getSelectedId() will return 0, otherwise it will return
+        the appropriate ID.
 
         @param newText          the text to select
         @param notification     determines the type of change notification that will

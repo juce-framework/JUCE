@@ -42,7 +42,7 @@ public:
     //==============================================================================
     /**
         Creating one of these automatically sends analytics events to the Analytics
-        singeton when the corresponding button is clicked.
+        singleton when the corresponding button is clicked.
 
         The name and parameters of the analytics event will be populated from the
         variables supplied here. If clicking changes the button's state then the

@@ -151,6 +151,7 @@ private:
                 props.add (new CppStandardWarningComponent());
 
             group.properties.clear();
+            exporterModulePathDefaultValues.clear();
             exporterModulePathValues.clear();
 
             for (Project::ExporterIterator exporter (project); exporter.next();)
@@ -158,23 +159,32 @@ private:
                 if (exporter->isCLion())
                     continue;
 
-                exporterModulePathValues.add (exporter->getPathForModuleValue (moduleID));
+                exporterModulePathDefaultValues.add (exporter->getPathForModuleValue (moduleID));
+                auto& defaultValue = exporterModulePathDefaultValues.getReference (exporterModulePathDefaultValues.size() - 1);
 
-                auto& value = exporterModulePathValues.getReference (exporterModulePathValues.size() - 1);
-                value.onDefaultChange = [this] { startTimer (50); };
+                exporterModulePathValues.add (defaultValue.getPropertyAsValue());
 
-                auto* pathComponent = new FilePathPropertyComponent (value, "Path for " + exporter->getName().quoted(), true,
-                                                                     exporter->getTargetOSForExporter() == TargetOS::getThisOS(),
-                                                                     "*", project.getProjectFolder());
+                auto pathComponent = std::make_unique<FilePathPropertyComponent> (defaultValue,
+                                                                                  "Path for " + exporter->getName().quoted(),
+                                                                                  true,
+                                                                                  exporter->getTargetOSForExporter() == TargetOS::getThisOS(),
+                                                                                  "*",
+                                                                                  project.getProjectFolder());
 
-                props.add (pathComponent,
+                pathComponent->setEnabled (! modules.shouldUseGlobalPath (moduleID));
+
+                props.add (pathComponent.release(),
                            "A path to the folder that contains the " + moduleID + " module when compiling the "
                            + exporter->getName().quoted() + " target. "
                            "This can be an absolute path, or relative to the jucer project folder, but it "
                            "must be valid on the filesystem of the target machine that will be performing this build. If this "
                            "is empty then the global path will be used.");
+            }
 
-                pathComponent->setEnabled (! modules.shouldUseGlobalPath (moduleID));
+            for (int i = 0; i < exporterModulePathDefaultValues.size(); ++i)
+            {
+                exporterModulePathDefaultValues.getReference (i).onDefaultChange = [this] { startTimer (50); };
+                exporterModulePathValues.getReference (i).addListener (this);
             }
 
             globalPathValue.removeListener (this);
@@ -227,11 +237,32 @@ private:
         String getModuleID() const noexcept    { return moduleID; }
 
     private:
-        void valueChanged (Value&) override    { startTimer (50); }
-        void timerCallback() override          { stopTimer(); refresh(); }
+        void valueChanged (Value& v) override
+        {
+            auto isExporterPathValue = [&]
+            {
+                for (auto& exporterValue : exporterModulePathValues)
+                    if (exporterValue.refersToSameSourceAs (v))
+                        return true;
+
+                return false;
+            }();
+
+            if (isExporterPathValue)
+                project.rescanExporterPathModules();
+
+            startTimer (50);
+        }
+
+        void timerCallback() override
+        {
+            stopTimer();
+            refresh();
+        }
 
         //==============================================================================
-        Array<ValueWithDefault> exporterModulePathValues;
+        Array<ValueWithDefault> exporterModulePathDefaultValues;
+        Array<Value> exporterModulePathValues;
         Value globalPathValue;
 
         OwnedArray <Project::ConfigFlag> configFlags;

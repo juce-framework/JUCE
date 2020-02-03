@@ -757,7 +757,7 @@ public:
             // only the player or the recorder should enter this section at any time
             if (guard.compareAndSetBool (1, 0))
             {
-                // are there enough buffers avaialable to process some audio
+                // are there enough buffers available to process some audio
                 if ((inputChannels == 0 || recorder->isBufferAvailable()) && (outputChannels == 0 || player->isBufferAvailable()))
                 {
                     T* recorderBuffer = (inputChannels  > 0 ? recorder->getNextBuffer() : nullptr);
@@ -854,7 +854,7 @@ public:
                                         22050.0, 24000.0, 32000.0, 44100.0, 48000.0 };
         Array<double> retval (rates, numElementsInArray (rates));
 
-        // make sure the native sample rate is pafrt of the list
+        // make sure the native sample rate is part of the list
         double native = getNativeSampleRate();
 
         if (native != 0.0 && ! retval.contains (native))

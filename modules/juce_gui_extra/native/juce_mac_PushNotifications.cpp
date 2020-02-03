@@ -151,7 +151,9 @@ namespace PushNotificationsDelegateDetailsOsx
         else
         {
             NSDate* dateNow = [NSDate date];
-            notif.triggerIntervalSec = [dateNow timeIntervalSinceDate: n.deliveryDate];
+            NSDate* deliveryDate = n.deliveryDate;
+
+            notif.triggerIntervalSec = [dateNow timeIntervalSinceDate: deliveryDate];
         }
 
         notif.soundToPlay = URL (nsStringToJuce (n.soundName));
@@ -367,7 +369,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         NSRemoteNotificationType types = NSUInteger ((bool) settings.allowBadge);
 
         if (isAtLeastMountainLion)
-            types |= ((bool) settings.allowSound << 1 | (bool) settings.allowAlert << 2);
+            types |= (NSUInteger) ((bool) settings.allowSound << 1 | (bool) settings.allowAlert << 2);
 
         [[NSApplication sharedApplication] registerForRemoteNotificationTypes: types];
     }
@@ -469,12 +471,22 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
     //PushNotificationsDelegate
     void registeredForRemoteNotifications (NSData* deviceTokenToUse) override
     {
-        auto deviceTokenString = [[[[deviceTokenToUse description]
-                                     stringByReplacingOccurrencesOfString: nsStringLiteral ("<") withString: nsStringLiteral ("")]
-                                     stringByReplacingOccurrencesOfString: nsStringLiteral (">") withString: nsStringLiteral ("")]
-                                     stringByReplacingOccurrencesOfString: nsStringLiteral (" ") withString: nsStringLiteral ("")];
+        deviceToken = [deviceTokenToUse]() -> String
+        {
+            auto length = deviceTokenToUse.length;
 
-        deviceToken = nsStringToJuce (deviceTokenString);
+            if (auto* buffer = (const unsigned char*) deviceTokenToUse.bytes)
+            {
+                NSMutableString* hexString = [NSMutableString stringWithCapacity: (length * 2)];
+
+                for (NSUInteger i = 0; i < length; ++i)
+                    [hexString appendFormat:@"%02x", buffer[i]];
+
+                return nsStringToJuce ([hexString copy]);
+            }
+
+            return {};
+        }();
 
         initialised = true;
 
@@ -520,7 +532,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         }
     }
 
-    bool shouldPresentNotification (NSUserNotification* notification) override { return true; }
+    bool shouldPresentNotification (NSUserNotification*) override { return true; }
 
     void subscribeToTopic (const String& topic)     { ignoreUnused (topic); }
     void unsubscribeFromTopic (const String& topic) { ignoreUnused (topic); }

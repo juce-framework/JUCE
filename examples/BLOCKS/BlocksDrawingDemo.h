@@ -409,7 +409,7 @@ public:
                     setLEDProgram (*activeBlock);
                 }
 
-                // Make the on screen Lighpad component visible
+                // Make the on screen Lightpad component visible
                 lightpadComponent.setVisible (true);
                 infoLabel.setVisible (false);
 
@@ -566,7 +566,7 @@ private:
                 return;
             }
 
-            // If there is no ActiveLED obejct for this LED then create one,
+            // If there is no ActiveLED object for this LED then create one,
             // add it to the array, set the LED on the Block and return
             if (index < 0)
             {

@@ -46,13 +46,6 @@ public:
     */
     explicit WaitableEvent (bool manualReset = false) noexcept;
 
-    /** Destructor.
-
-        If other threads are waiting on this object when it gets deleted, this
-        can cause nasty errors, so be careful!
-    */
-    ~WaitableEvent() noexcept;
-
     //==============================================================================
     /** Suspends the calling thread until the event has been signalled.
 
@@ -68,9 +61,8 @@ public:
         @returns    true if the object has been signalled, false if the timeout expires first.
         @see signal, reset
     */
-    bool wait (int timeOutMilliseconds = -1) const noexcept;
+    bool wait (int timeOutMilliseconds = -1) const;
 
-    //==============================================================================
     /** Wakes up any threads that are currently waiting on this object.
 
         If signal() is called when nothing is waiting, the next thread to call wait()
@@ -86,24 +78,20 @@ public:
 
         @see wait, reset
     */
-    void signal() const noexcept;
+    void signal() const;
 
-    //==============================================================================
     /** Resets the event to an unsignalled state.
         If it's not already signalled, this does nothing.
     */
-    void reset() const noexcept;
-
+    void reset() const;
 
 private:
     //==============================================================================
-   #if JUCE_WINDOWS
-    void* handle;
-   #else
-    mutable pthread_cond_t condition;
-    mutable pthread_mutex_t mutex;
-    mutable bool triggered, manualReset;
-   #endif
+    bool useManualReset;
+
+    mutable std::mutex mutex;
+    mutable std::condition_variable condition;
+    mutable std::atomic<bool> triggered { false };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaitableEvent)
 };

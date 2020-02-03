@@ -492,7 +492,7 @@ public:
     /** Draws part of an image, rescaling it to fit in a given target region.
 
         The specified area of the source image is rescaled and drawn to fill the
-        specifed destination rectangle.
+        specified destination rectangle.
 
         Images are composited using the context's current opacity, so if you
         don't want it to be drawn semi-transparently, be sure to call setOpacity (1.0f)

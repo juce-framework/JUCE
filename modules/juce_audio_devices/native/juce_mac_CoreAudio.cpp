@@ -31,7 +31,7 @@ namespace juce
 
 #ifdef __clang__
  #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wnonnull" // aovid some spurious 10.11 SDK warnings
+ #pragma clang diagnostic ignored "-Wnonnull" // avoid some spurious 10.11 SDK warnings
 #endif
 
 //==============================================================================

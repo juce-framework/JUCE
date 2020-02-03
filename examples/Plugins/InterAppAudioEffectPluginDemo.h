@@ -180,7 +180,7 @@ public:
 
     void processBlock (AudioBuffer<float>& buffer, MidiBuffer&) override
     {
-        auto gain = *parameters.getRawParameterValue ("gain");
+        float gain = *parameters.getRawParameterValue ("gain");
 
         auto totalNumInputChannels  = getTotalNumInputChannels();
         auto totalNumOutputChannels = getTotalNumOutputChannels();

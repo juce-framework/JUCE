@@ -247,7 +247,7 @@ protected:
                              int numSamples) override;
 
     /** This will simply call renderNextBlock for each currently active
-        voice and fill the buffer with the sum. (souble-precision version)
+        voice and fill the buffer with the sum. (double-precision version)
         Override this method if you need to do more work to render your audio.
     */
     void renderNextSubBlock (AudioBuffer<double>& outputAudio,
