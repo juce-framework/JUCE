@@ -195,13 +195,6 @@
 			path = "../../JuceLibraryCode/include_juce_video.mm";
 			sourceTree = "SOURCE_ROOT";
 		};
-		11416532EEB177F4EFE69AF4 = {
-			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
-			name = ConsoleApp.entitlements;
-			path = ConsoleApp.entitlements;
-			sourceTree = "SOURCE_ROOT";
-		};
 		1932D54A7FAE13BADBA3E9B5 = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;

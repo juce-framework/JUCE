@@ -275,7 +275,7 @@ public:
                    "This way you can specify them for OS X and iOS separately, and modify the content of the resource folders "
                    "without re-saving the Projucer project.");
 
-        if (getProject().getProjectType().isAudioPlugin())
+        if (getProject().isAudioPluginProject())
             props.add (new ChoicePropertyComponent (duplicateAppExResourcesFolderValue, "Add Duplicate Resources Folder to App Extension"),
                        "Disable this to prevent the Projucer from creating a duplicate resources folder for AUv3 app extensions.");
 
@@ -677,7 +677,9 @@ protected:
         //==============================================================================
         void createConfigProperties (PropertyListBuilder& props) override
         {
-            addXcodePluginInstallPathProperties (props);
+            if (project.isAudioPluginProject())
+                addXcodePluginInstallPathProperties (props);
+
             addRecommendedLLVMCompilerWarningsProperty (props);
             addGCCOptimisationProperty (props);
 
@@ -1027,7 +1029,7 @@ public:
         {
             Array<SourceFileInfo> result;
 
-            auto targetType = (owner.getProject().getProjectType().isAudioPlugin() ? type : SharedCodeTarget);
+            auto targetType = (owner.getProject().isAudioPluginProject() ? type : SharedCodeTarget);
 
             if (projectItem.isGroup())
             {
@@ -1198,7 +1200,7 @@ public:
              || (owner.isiOS() && owner.isiCloudPermissionsEnabled()))
                 return true;
 
-            if (owner.project.getProjectType().isAudioPlugin()
+            if (owner.project.isAudioPluginProject()
                 && ((owner.isOSX() && type == Target::AudioUnitv3PlugIn)
                     || (owner.isiOS() && type == Target::StandalonePlugIn && owner.getProject().shouldEnableIAA())))
                 return true;
@@ -1523,7 +1525,7 @@ public:
                     librarySearchPaths.add (owner.getSearchPathForStaticLibrary (lib));
                 }
 
-                if (owner.project.getProjectType().isAudioPlugin())
+                if (owner.project.isAudioPluginProject())
                 {
                     if (owner.getTargetOfType (Target::SharedCodeTarget) != nullptr)
                     {
@@ -2248,7 +2250,7 @@ private:
                 auto sourceFiles = target->sourceIDs;
 
                 if (target->type == XcodeTarget::SharedCodeTarget
-                     || (! project.getProjectType().isAudioPlugin()))
+                     || (! project.isAudioPluginProject()))
                     sourceFiles.addArray (sourceIDs);
 
                 target->addBuildPhase ("PBXSourcesBuildPhase", sourceFiles);
@@ -2259,11 +2261,11 @@ private:
 
             target->addShellScriptBuildPhase ("Post-build script", getPostBuildScript());
 
-            if (project.getProjectType().isAudioPlugin() && project.shouldBuildAUv3()
+            if (project.isAudioPluginProject() && project.shouldBuildAUv3()
                 && project.shouldBuildStandalonePlugin() && target->type == XcodeTarget::StandalonePlugIn)
                 embedAppExtension();
 
-            if (project.getProjectType().isAudioPlugin() && project.shouldBuildUnityPlugin()
+            if (project.isAudioPluginProject() && project.shouldBuildUnityPlugin()
                 && target->type == XcodeTarget::UnityPlugIn)
                 embedUnityScript();
 
@@ -2370,7 +2372,7 @@ private:
     {
         StringArray dependencies;
 
-        if (project.getProjectType().isAudioPlugin())
+        if (project.isAudioPluginProject())
         {
             if (target.type == XcodeTarget::StandalonePlugIn) // depends on AUv3 and shared code
             {
@@ -3129,7 +3131,7 @@ private:
     {
         StringPairArray entitlements;
 
-        if (project.getProjectType().isAudioPlugin())
+        if (project.isAudioPluginProject())
         {
             if (isiOS() && project.shouldEnableIAA())
                 entitlements.set ("inter-app-audio", "<true/>");
@@ -3159,7 +3161,7 @@ private:
             for (auto& option : getHardenedRuntimeOptions())
                 entitlements.set (option, "<true/>");
 
-        if (isAppSandboxEnabled() || (project.getProjectType().isAudioPlugin() && target.type == XcodeTarget::AudioUnitv3PlugIn))
+        if (isAppSandboxEnabled() || (project.isAudioPluginProject() && target.type == XcodeTarget::AudioUnitv3PlugIn))
         {
             entitlements.set ("com.apple.security.app-sandbox", "<true/>");
 
@@ -3197,30 +3199,31 @@ private:
         return entitlements;
     }
 
-    String addEntitlementsFile (XcodeTarget& target) const
+    void addEntitlementsFile (XcodeTarget& target) const
     {
-        String content =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-            "<plist version=\"1.0\">\n"
-            "<dict>\n";
-
         auto entitlements = getEntitlements (target);
-        auto keys = entitlements.getAllKeys();
 
-        for (auto& key : keys)
+        if (entitlements.size() > 0)
         {
-            content += "\t<key>" + key + "</key>\n"
-                       "\t" + entitlements[key] + "\n";
+            String content =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+                "<plist version=\"1.0\">\n"
+                "<dict>\n";
+
+            for (auto& key : entitlements.getAllKeys())
+                content += "\t<key>" + key + "</key>\n"
+                           "\t" + entitlements[key] + "\n";
+
+            content += "</dict>\n"
+                       "</plist>\n";
+
+            auto entitlementsFile = getTargetFolder().getChildFile (target.getEntitlementsFilename());
+            overwriteFileIfDifferentOrThrow (entitlementsFile, content);
+
+            RelativePath entitlementsPath (entitlementsFile, getTargetFolder(), RelativePath::buildTargetFolder);
+            addFile (entitlementsPath, false, false, false, false, nullptr, {});
         }
-        content += "</dict>\n"
-                   "</plist>\n";
-
-        auto entitlementsFile = getTargetFolder().getChildFile (target.getEntitlementsFilename());
-        overwriteFileIfDifferentOrThrow (entitlementsFile, content);
-
-        RelativePath entitlementsPath (entitlementsFile, getTargetFolder(), RelativePath::buildTargetFolder);
-        return addFile (entitlementsPath, false, false, false, false, nullptr, {});
     }
 
     String addProjectItem (const Project::Item& projectItem) const

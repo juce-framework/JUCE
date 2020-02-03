@@ -304,7 +304,7 @@ private:
     template <class Target, class Exporter>
     void getFileInfoList (Target& target, Exporter& exporter, const Project::Item& projectItem, std::vector<std::tuple<String, bool, String>>& fileInfoList) const
     {
-        auto targetType = (getProject().getProjectType().isAudioPlugin() ? target.type : Target::Type::SharedCodeTarget);
+        auto targetType = (getProject().isAudioPluginProject() ? target.type : Target::Type::SharedCodeTarget);
 
         if (projectItem.isGroup())
         {

@@ -121,7 +121,7 @@ struct AudioPluginAppWizard   : public NewProjectWizard
                 .replace ("%%aradocumentcontroller_class_name%%", documentControllerClassName, false);
 
             String ARADocControllerH = project.getFileTemplate ("jucer_AudioPluginARADocumentControllerTemplate_h")
-                .replace ("%%app_headers%%", appHeaders, false)
+                .replace ("%%app_headers%%", juceHeaderInclude, false)
                 .replace ("%%aradocumentcontroller_class_name%%", documentControllerClassName, false);
 
             if (!FileHelpers::overwriteFileWithNewDataIfDifferent (documentControllerCppFile, ARADocControllerCpp))
