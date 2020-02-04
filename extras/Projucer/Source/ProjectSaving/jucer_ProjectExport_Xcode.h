@@ -3155,7 +3155,7 @@ private:
                 // no other sandbox options can be specified if sandbox inheritance is enabled!
                 jassert (getAppSandboxOptions().isEmpty());
 
-                entitlements.set ("com.apple.inherit", "<true/>");
+                entitlements.set ("com.apple.security.inherit", "<true/>");
             }
 
             if (isAppSandboxEnabled())
