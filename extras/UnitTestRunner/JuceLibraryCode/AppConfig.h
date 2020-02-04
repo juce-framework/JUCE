@@ -47,7 +47,7 @@
 
 #define JUCE_USE_DARK_SPLASH_SCREEN 1
 
-#define JUCE_PROJUCER_VERSION 0x50405
+#define JUCE_PROJUCER_VERSION 0x50406
 
 //==============================================================================
 #define JUCE_MODULE_AVAILABLE_juce_analytics              1
