@@ -34,17 +34,17 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_audio_utils
-  vendor:           juce
-  version:          5.4.5
-  name:             JUCE extra audio utility classes
-  description:      Classes for audio-related GUI and miscellaneous tasks.
-  website:          http://www.juce.com/juce
-  license:          GPL/Commercial
+  ID:                 juce_audio_utils
+  vendor:             juce
+  version:            5.4.6
+  name:               JUCE extra audio utility classes
+  description:        Classes for audio-related GUI and miscellaneous tasks.
+  website:            http://www.juce.com/juce
+  license:            GPL/Commercial
 
-  dependencies:     juce_gui_extra, juce_audio_processors, juce_audio_formats, juce_audio_devices
-  OSXFrameworks:    CoreAudioKit DiscRecording
-  iOSFrameworks:    CoreAudioKit
+  dependencies:       juce_gui_extra, juce_audio_processors, juce_audio_formats, juce_audio_devices
+  OSXFrameworks:      CoreAudioKit DiscRecording
+  iOSFrameworks:      CoreAudioKit
 
  END_JUCE_MODULE_DECLARATION
 

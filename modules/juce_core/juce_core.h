@@ -30,19 +30,19 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_core
-  vendor:           juce
-  version:          5.4.5
-  name:             JUCE core classes
-  description:      The essential set of basic JUCE classes, as required by all the other JUCE modules. Includes text, container, memory, threading and i/o functionality.
-  website:          http://www.juce.com/juce
-  license:          ISC
+  ID:                 juce_core
+  vendor:             juce
+  version:            5.4.6
+  name:               JUCE core classes
+  description:        The essential set of basic JUCE classes, as required by all the other JUCE modules. Includes text, container, memory, threading and i/o functionality.
+  website:            http://www.juce.com/juce
+  license:            ISC
 
   dependencies:
-  OSXFrameworks:    Cocoa IOKit
-  iOSFrameworks:    Foundation
-  linuxLibs:        rt dl pthread
-  mingwLibs:        uuid wsock32 wininet version ole32 ws2_32 oleaut32 imm32 comdlg32 shlwapi rpcrt4 winmm
+  OSXFrameworks:      Cocoa IOKit
+  iOSFrameworks:      Foundation
+  linuxLibs:          rt dl pthread
+  mingwLibs:          uuid wsock32 wininet version ole32 ws2_32 oleaut32 imm32 comdlg32 shlwapi rpcrt4 winmm
 
  END_JUCE_MODULE_DECLARATION
 

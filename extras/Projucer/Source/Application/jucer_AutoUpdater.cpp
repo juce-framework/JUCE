@@ -52,119 +52,65 @@ void LatestVersionCheckerAndUpdater::checkForNewVersion (bool showAlerts)
 //==============================================================================
 void LatestVersionCheckerAndUpdater::run()
 {
-    queryUpdateServer();
+    auto info = VersionInfo::fetchLatestFromUpdateServer();
 
-    if (! threadShouldExit())
-        MessageManager::callAsync ([this] { processResult(); });
-}
-
-//==============================================================================
-String getOSString()
-{
-   #if JUCE_MAC
-    return "OSX";
-   #elif JUCE_WINDOWS
-    return "Windows";
-   #elif JUCE_LINUX
-    return "Linux";
-   #else
-    jassertfalse;
-    return "Unknown";
-   #endif
-}
-
-namespace VersionHelpers
-{
-    String formatProductVersion (int versionNum)
+    if (info == nullptr)
     {
-        int major = (versionNum & 0xff0000) >> 16;
-        int minor = (versionNum & 0x00ff00) >> 8;
-        int build = (versionNum & 0x0000ff) >> 0;
+        if (showAlertWindows)
+            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                              "Update Server Communication Error",
+                                              "Failed to communicate with the JUCE update server.\n"
+                                              "Please try again in a few minutes.\n\n"
+                                              "If this problem persists you can download the latest version of JUCE from juce.com");
 
-        return String (major) + '.' + String (minor) + '.' + String (build);
-    }
-
-    String getProductVersionString()
-    {
-        return formatProductVersion (ProjectInfo::versionNumber);
-    }
-
-    bool isNewVersion (const String& current, const String& other)
-    {
-        auto currentTokens = StringArray::fromTokens (current, ".", {});
-        auto otherTokens   = StringArray::fromTokens (other, ".", {});
-
-        jassert (currentTokens.size() == 3 && otherTokens.size() == 3);
-
-        if (currentTokens[0].getIntValue() == otherTokens[0].getIntValue())
-        {
-            if (currentTokens[1].getIntValue() == otherTokens[1].getIntValue())
-                return currentTokens[2].getIntValue() < otherTokens[2].getIntValue();
-
-            return currentTokens[1].getIntValue() < otherTokens[1].getIntValue();
-        }
-
-        return currentTokens[0].getIntValue() < otherTokens[0].getIntValue();
-    }
-}
-
-void LatestVersionCheckerAndUpdater::queryUpdateServer()
-{
-    StringPairArray responseHeaders;
-
-    URL latestVersionURL ("https://my.roli.com/software_versions/update_to/Projucer/"
-                          + VersionHelpers::getProductVersionString() + '/' + getOSString()
-                          + "?language=" + SystemStats::getUserLanguage());
-
-    std::unique_ptr<InputStream> inStream (latestVersionURL.createInputStream (false, nullptr, nullptr,
-                                                                               "X-API-Key: 265441b-343403c-20f6932-76361d\nContent-Type: "
-                                                                               "application/json\nAccept: application/json; version=1",
-                                                                               0, &responseHeaders, &statusCode, 0));
-
-    if (threadShouldExit())
         return;
-
-    if (inStream.get() != nullptr && (statusCode == 303 || statusCode == 400))
-    {
-        if (statusCode == 303)
-            relativeDownloadPath = responseHeaders["Location"];
-
-        jassert (relativeDownloadPath.isNotEmpty());
-
-        jsonReply = JSON::parse (inStream->readEntireStreamAsString());
     }
-    else if (showAlertWindows)
-    {
-        if (statusCode == 204)
-            AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon, "No New Version Available", "Your JUCE version is up to date.");
-        else
-            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Network Error", "Could not connect to the web server.\n"
-                                                                                          "Please check your internet connection and try again.");
-    }
-}
 
-void LatestVersionCheckerAndUpdater::processResult()
-{
-    if (! jsonReply.isObject())
+    if (! info->isNewerVersionThanCurrent())
+    {
+        if (showAlertWindows)
+            AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+                                              "No New Version Available",
+                                              "Your JUCE version is up to date.");
         return;
+    }
 
-    if (statusCode == 400)
+    auto osString = []
     {
-        auto errorObject = jsonReply.getDynamicObject()->getProperty ("error");
+       #if JUCE_MAC
+        return "osx";
+       #elif JUCE_WINDOWS
+        return "windows";
+       #elif JUCE_LINUX
+        return "linux";
+       #else
+        jassertfalse;
+        return "Unknown";
+       #endif
+    }();
 
-        if (errorObject.isObject())
+    String requiredFilename ("juce-" + info->versionString + "-" + osString + ".zip");
+
+    for (auto& asset : info->assets)
+    {
+        if (asset.name == requiredFilename)
         {
-            auto message = errorObject.getProperty ("message", {}).toString();
+            auto versionString = info->versionString;
+            auto releaseNotes  = info->releaseNotes;
 
-            if (message.isNotEmpty())
-                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "JUCE Updater", message);
+            MessageManager::callAsync ([this, versionString, releaseNotes, asset]
+            {
+                askUserAboutNewVersion (versionString, releaseNotes, asset);
+            });
+
+            return;
         }
     }
-    else if (statusCode == 303)
-    {
-        askUserAboutNewVersion (jsonReply.getProperty ("version", {}).toString(),
-                                jsonReply.getProperty ("notes",   {}).toString());
-    }
+
+    if (showAlertWindows)
+        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                          "Failed to find any new downloads",
+                                          "Please try again in a few minutes.");
 }
 
 //==============================================================================
@@ -246,14 +192,15 @@ public:
                                   RectanglePlacement::stretchToFit, 1.0f);
     }
 
-    static std::unique_ptr<DialogWindow> launchDialog (const String& newVersion, const String& releaseNotes)
+    static std::unique_ptr<DialogWindow> launchDialog (const String& newVersionString,
+                                                       const String& releaseNotes)
     {
         DialogWindow::LaunchOptions options;
 
-        options.dialogTitle = "Download JUCE version " + newVersion + "?";
+        options.dialogTitle = "Download JUCE version " + newVersionString + "?";
         options.resizable = false;
 
-        auto* content = new UpdateDialog (newVersion, releaseNotes);
+        auto* content = new UpdateDialog (newVersionString, releaseNotes);
         options.content.set (content, true);
 
         std::unique_ptr<DialogWindow> dialog (options.create());
@@ -292,66 +239,83 @@ private:
     DialogWindow* parentWindow = nullptr;
 };
 
-void LatestVersionCheckerAndUpdater::askUserForLocationToDownload()
+void LatestVersionCheckerAndUpdater::askUserForLocationToDownload (const VersionInfo::Asset& asset)
 {
-    FileChooser chooser ("Please select the location into which you'd like to install the new version",
+    FileChooser chooser ("Please select the location into which you would like to install the new version",
                          { getAppSettings().getStoredPath (Ids::jucePath, TargetOS::getThisOS()).get() });
 
     if (chooser.browseForDirectory())
     {
         auto targetFolder = chooser.getResult();
 
-        if (isJUCEFolder (targetFolder))
+        // By default we will install into 'targetFolder/JUCE', but we should install into
+        // 'targetFolder' if that is an existing JUCE directory.
+        bool willOverwriteJuceFolder = [&targetFolder]
+        {
+            if (isJUCEFolder (targetFolder))
+                return true;
+
+            targetFolder = targetFolder.getChildFile ("JUCE");
+
+            return isJUCEFolder (targetFolder);
+        }();
+
+        auto targetFolderPath = targetFolder.getFullPathName();
+
+        if (willOverwriteJuceFolder)
         {
             if (targetFolder.getChildFile (".git").isDirectory())
             {
                 AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Downloading New JUCE Version",
-                                                  "This folder is a GIT repository!\n\nYou should use a \"git pull\" to update it to the latest version.");
+                                                  targetFolderPath + "\n\nis a GIT repository!\n\nYou should use a \"git pull\" to update it to the latest version.");
 
                 return;
             }
 
             if (! AlertWindow::showOkCancelBox (AlertWindow::WarningIcon, "Overwrite Existing JUCE Folder?",
-                                                String ("Do you want to overwrite the folder:\n\n" + targetFolder.getFullPathName() + "\n\n..with the latest version from juce.com?\n\n"
-                                                        "This will move the existing folder to " + targetFolder.getFullPathName() + "_old.")))
+                                                "Do you want to replace the folder\n\n" + targetFolderPath + "\n\nwith the latest version from juce.com?\n\n"
+                                                "This will move the existing folder to " + targetFolderPath + "_old."))
             {
                 return;
             }
         }
-        else
+        else if (targetFolder.exists())
         {
-            targetFolder = targetFolder.getChildFile ("JUCE").getNonexistentSibling();
+            if (! AlertWindow::showOkCancelBox (AlertWindow::WarningIcon, "Existing File Or Directory",
+                                                "Do you want to move\n\n" + targetFolderPath + "\n\nto\n\n" + targetFolderPath + "_old?"))
+            {
+                return;
+            }
         }
 
-        downloadAndInstall (targetFolder);
+        downloadAndInstall (asset, targetFolder);
     }
 }
 
-void LatestVersionCheckerAndUpdater::askUserAboutNewVersion (const String& newVersion, const String& releaseNotes)
+void LatestVersionCheckerAndUpdater::askUserAboutNewVersion (const String& newVersionString,
+                                                             const String& releaseNotes,
+                                                             const VersionInfo::Asset& asset)
 {
-    if (newVersion.isNotEmpty() && releaseNotes.isNotEmpty()
-        && VersionHelpers::isNewVersion (VersionHelpers::getProductVersionString(), newVersion))
-    {
-        dialogWindow = UpdateDialog::launchDialog (newVersion, releaseNotes);
+    dialogWindow = UpdateDialog::launchDialog (newVersionString, releaseNotes);
 
-        if (auto* mm = ModalComponentManager::getInstance())
-            mm->attachCallback (dialogWindow.get(), ModalCallbackFunction::create ([this] (int result)
-                                                                             {
-                                                                                 if (result == 1)
-                                                                                     askUserForLocationToDownload();
+    if (auto* mm = ModalComponentManager::getInstance())
+        mm->attachCallback (dialogWindow.get(),
+                            ModalCallbackFunction::create ([this, asset] (int result)
+                                                           {
+                                                               if (result == 1)
+                                                                    askUserForLocationToDownload (asset);
 
-                                                                                 dialogWindow.reset();
-                                                                             }));
-    }
+                                                                dialogWindow.reset();
+                                                            }));
 }
 
 //==============================================================================
 class DownloadAndInstallThread   : private ThreadWithProgressWindow
 {
 public:
-    DownloadAndInstallThread  (const URL& u, const File& t, std::function<void()>&& cb)
+    DownloadAndInstallThread  (const VersionInfo::Asset& a, const File& t, std::function<void()>&& cb)
         : ThreadWithProgressWindow ("Downloading New Version", true, true),
-          downloadURL (u), targetFolder (t), completionCallback (std::move (cb))
+          asset (a), targetFolder (t), completionCallback (std::move (cb))
     {
         launchThread (3);
     }
@@ -368,7 +332,9 @@ private:
             result = install (zipData);
 
         if (result.failed())
-            MessageManager::callAsync ([result] () { AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Installation Failed", result.getErrorMessage()); });
+            MessageManager::callAsync ([result] { AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                                                                    "Installation Failed",
+                                                                                    result.getErrorMessage()); });
         else
             MessageManager::callAsync (completionCallback);
     }
@@ -378,10 +344,7 @@ private:
         setStatusMessage ("Downloading...");
 
         int statusCode = 0;
-        StringPairArray responseHeaders;
-
-        std::unique_ptr<InputStream> inStream (downloadURL.createInputStream (false, nullptr, nullptr, {}, 0,
-                                                                              &responseHeaders, &statusCode, 0));
+        auto inStream = VersionInfo::createInputStreamForAsset (asset, statusCode);
 
         if (inStream != nullptr && statusCode == 200)
         {
@@ -406,53 +369,53 @@ private:
             return Result::ok();
         }
 
-        return Result::fail ("Failed to download from: " + downloadURL.toString (false));
+        return Result::fail ("Failed to download from: " + asset.url);
     }
 
-    Result install (MemoryBlock& data)
+    Result install (const MemoryBlock& data)
     {
         setStatusMessage ("Installing...");
 
-        auto result = unzipDownload (data);
-
-        if (threadShouldExit())
-            result = Result::fail ("Cancelled");
-
-        if (result.failed())
-            return result;
-
-        return Result::ok();
-    }
-
-    Result unzipDownload (const MemoryBlock& data)
-    {
         MemoryInputStream input (data, false);
         ZipFile zip (input);
 
         if (zip.getNumEntries() == 0)
             return Result::fail ("The downloaded file was not a valid JUCE file!");
 
-        auto unzipTarget = File::createTempFile ({});
+        struct ScopedDownloadFolder
+        {
+            ScopedDownloadFolder (const File& installTargetFolder)
+            {
+                folder = installTargetFolder.getSiblingFile (installTargetFolder.getFileNameWithoutExtension() + "_download").getNonexistentSibling();
+                jassert (folder.createDirectory());
+            }
 
-        if (! unzipTarget.createDirectory())
+            ~ScopedDownloadFolder()   { folder.deleteRecursively(); }
+
+            File folder;
+        };
+
+        ScopedDownloadFolder unzipTarget (targetFolder);
+
+        if (! unzipTarget.folder.isDirectory())
             return Result::fail ("Couldn't create a temporary folder to unzip the new version!");
 
-        auto r = zip.uncompressTo (unzipTarget);
+        auto r = zip.uncompressTo (unzipTarget.folder);
 
         if (r.failed())
-        {
-            unzipTarget.deleteRecursively();
             return r;
-        }
+
+        if (threadShouldExit())
+            return Result::fail ("Cancelled");
 
        #if JUCE_LINUX || JUCE_MAC
-        r = setFilePermissions (unzipTarget, zip);
+        r = setFilePermissions (unzipTarget.folder, zip);
 
         if (r.failed())
-        {
-            unzipTarget.deleteRecursively();
             return r;
-        }
+
+        if (threadShouldExit())
+            return Result::fail ("Cancelled");
        #endif
 
         if (targetFolder.exists())
@@ -460,21 +423,15 @@ private:
             auto oldFolder = targetFolder.getSiblingFile (targetFolder.getFileNameWithoutExtension() + "_old").getNonexistentSibling();
 
             if (! targetFolder.moveFileTo (oldFolder))
-            {
-                unzipTarget.deleteRecursively();
                 return Result::fail ("Could not remove the existing folder!\n\n"
                                      "This may happen if you are trying to download into a directory that requires administrator privileges to modify.\n"
                                      "Please select a folder that is writable by the current user.");
-            }
         }
 
-        if (! unzipTarget.moveFileTo (targetFolder))
-        {
-            unzipTarget.deleteRecursively();
+        if (! unzipTarget.folder.getChildFile ("JUCE").moveFileTo (targetFolder))
             return Result::fail ("Could not overwrite the existing folder!\n\n"
                                  "This may happen if you are trying to download into a directory that requires administrator privileges to modify.\n"
                                  "Please select a folder that is writable by the current user.");
-        }
 
         return Result::ok();
     }
@@ -502,7 +459,7 @@ private:
         return Result::ok();
     }
 
-    URL downloadURL;
+    VersionInfo::Asset asset;
     File targetFolder;
     std::function<void()> completionCallback;
 };
@@ -533,9 +490,9 @@ void restartProcess (const File& targetFolder)
     }
 }
 
-void LatestVersionCheckerAndUpdater::downloadAndInstall (const File& targetFolder)
+void LatestVersionCheckerAndUpdater::downloadAndInstall (const VersionInfo::Asset& asset, const File& targetFolder)
 {
-    installer.reset (new DownloadAndInstallThread ({ relativeDownloadPath }, targetFolder,
+    installer.reset (new DownloadAndInstallThread (asset, targetFolder,
                                                    [this, targetFolder]
                                                    {
                                                        installer.reset();

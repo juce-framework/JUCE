@@ -34,15 +34,15 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_product_unlocking
-  vendor:           juce
-  version:          5.4.5
-  name:             JUCE Online marketplace support
-  description:      Classes for online product authentication
-  website:          http://www.juce.com/juce
-  license:          GPL/Commercial
+  ID:                 juce_product_unlocking
+  vendor:             juce
+  version:            5.4.6
+  name:               JUCE Online marketplace support
+  description:        Classes for online product authentication
+  website:            http://www.juce.com/juce
+  license:            GPL/Commercial
 
-  dependencies:     juce_cryptography juce_core, juce_events
+  dependencies:       juce_cryptography juce_core, juce_events
 
  END_JUCE_MODULE_DECLARATION
 

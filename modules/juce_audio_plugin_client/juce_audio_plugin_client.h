@@ -34,15 +34,15 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_audio_plugin_client
-  vendor:           juce
-  version:          5.4.5
-  name:             JUCE audio plugin wrapper classes
-  description:      Classes for building VST, VST3, AudioUnit, AAX and RTAS plugins.
-  website:          http://www.juce.com/juce
-  license:          GPL/Commercial
+  ID:                 juce_audio_plugin_client
+  vendor:             juce
+  version:            5.4.6
+  name:               JUCE audio plugin wrapper classes
+  description:        Classes for building VST, VST3, AudioUnit, AAX and RTAS plugins.
+  website:            http://www.juce.com/juce
+  license:            GPL/Commercial
 
-  dependencies:     juce_gui_basics, juce_audio_basics, juce_audio_processors
+  dependencies:       juce_gui_basics, juce_audio_basics, juce_audio_processors
 
  END_JUCE_MODULE_DECLARATION
 

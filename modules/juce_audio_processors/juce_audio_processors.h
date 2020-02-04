@@ -34,17 +34,17 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_audio_processors
-  vendor:           juce
-  version:          5.4.5
-  name:             JUCE audio processor classes
-  description:      Classes for loading and playing VST, AU, LADSPA, or internally-generated audio processors.
-  website:          http://www.juce.com/juce
-  license:          GPL/Commercial
+  ID:                 juce_audio_processors
+  vendor:             juce
+  version:            5.4.6
+  name:               JUCE audio processor classes
+  description:        Classes for loading and playing VST, AU, LADSPA, or internally-generated audio processors.
+  website:            http://www.juce.com/juce
+  license:            GPL/Commercial
 
-  dependencies:     juce_gui_extra, juce_audio_basics
-  OSXFrameworks:    CoreAudio CoreMIDI AudioToolbox
-  iOSFrameworks:    AudioToolbox
+  dependencies:       juce_gui_extra, juce_audio_basics
+  OSXFrameworks:      CoreAudio CoreMIDI AudioToolbox
+  iOSFrameworks:      AudioToolbox
 
  END_JUCE_MODULE_DECLARATION
 

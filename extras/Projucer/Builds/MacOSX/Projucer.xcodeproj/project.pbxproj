@@ -257,6 +257,10 @@
 			isa = PBXBuildFile;
 			fileRef = 486E8D02DAD2A0BF54A901C0;
 		};
+		44AD0D81A65C5EAE3BE588FD = {
+			isa = PBXBuildFile;
+			fileRef = FF3A6A384D536E1AEF47CD54;
+		};
 		638C7247B6DBA67EFE46E124 = {
 			isa = PBXBuildFile;
 			fileRef = 191330B20DAC08B890656EA0;
@@ -2106,6 +2110,13 @@
 			path = "../../Source/Wizards/jucer_TemplateThumbnailsComponent.h";
 			sourceTree = "SOURCE_ROOT";
 		};
+		C16F9F479A3A5F6DAD7647A2 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = "jucer_VersionInfo.h";
+			path = "../../Source/Utility/Helpers/jucer_VersionInfo.h";
+			sourceTree = "SOURCE_ROOT";
+		};
 		C187718F7B9EBA88584B43F3 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.cpp;
@@ -2596,6 +2607,13 @@
 			path = "../../Source/Utility/UI/jucer_ProjucerLookAndFeel.h";
 			sourceTree = "SOURCE_ROOT";
 		};
+		FF3A6A384D536E1AEF47CD54 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = "jucer_VersionInfo.cpp";
+			path = "../../Source/Utility/Helpers/jucer_VersionInfo.cpp";
+			sourceTree = "SOURCE_ROOT";
+		};
 		FF68231DE2B395461009116C = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -3035,6 +3053,8 @@
 				A6C4AE13FB409DE414094CFA,
 				6FD8DBC0FF42C87D8BEE2452,
 				00515BA4EC5A7D4DC078ED37,
+				FF3A6A384D536E1AEF47CD54,
+				C16F9F479A3A5F6DAD7647A2,
 			);
 			name = Helpers;
 			sourceTree = "<group>";
@@ -3232,8 +3252,8 @@
 					"_DEBUG=1",
 					"DEBUG=1",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=5.4.5",
-					"JUCE_APP_VERSION_HEX=0x50405",
+					"JUCE_APP_VERSION=5.4.6",
+					"JUCE_APP_VERSION_HEX=0x50406",
 					"JucePlugin_Build_VST=0",
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",
@@ -3276,8 +3296,8 @@
 					"_NDEBUG=1",
 					"NDEBUG=1",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=5.4.5",
-					"JUCE_APP_VERSION_HEX=0x50405",
+					"JUCE_APP_VERSION=5.4.6",
+					"JUCE_APP_VERSION_HEX=0x50406",
 					"JucePlugin_Build_VST=0",
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",
@@ -3479,6 +3499,7 @@
 				8BE478303CDF061B72F219E2,
 				BF913199032B4CE970E82AA3,
 				25EF9B3FECB4C9F0F522DCAA,
+				44AD0D81A65C5EAE3BE588FD,
 				638C7247B6DBA67EFE46E124,
 				D0E26EB54B0087C8BE3D541E,
 				468548FB21D264DC12321327,

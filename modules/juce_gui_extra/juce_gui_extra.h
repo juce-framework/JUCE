@@ -34,16 +34,16 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_gui_extra
-  vendor:           juce
-  version:          5.4.5
-  name:             JUCE extended GUI classes
-  description:      Miscellaneous GUI classes for specialised tasks.
-  website:          http://www.juce.com/juce
-  license:          GPL/Commercial
+  ID:                 juce_gui_extra
+  vendor:             juce
+  version:            5.4.6
+  name:               JUCE extended GUI classes
+  description:        Miscellaneous GUI classes for specialised tasks.
+  website:            http://www.juce.com/juce
+  license:            GPL/Commercial
 
-  dependencies:     juce_gui_basics
-  OSXFrameworks:    WebKit
+  dependencies:       juce_gui_basics
+  OSXFrameworks:      WebKit
 
  END_JUCE_MODULE_DECLARATION
 
