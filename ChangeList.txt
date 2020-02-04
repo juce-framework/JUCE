@@ -3,6 +3,15 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 5.4.6
+  - Fixed compatibility with macOS versions below 10.11
+  - Multiple thread safety improvements
+  - Added dynamic parameter and parameter group names
+  - Updated to the latest Android In-App Purchases API
+  - Improvements to the Windows message queue under high load
+  - Replaced WaitableEvent internals with std::condition_variable
+  - Fixed some macOS text alignment issues
+
 Version 5.4.5
   - Improved message queue performance on Linux
   - Added missing lifecycle callbacks on Android Q

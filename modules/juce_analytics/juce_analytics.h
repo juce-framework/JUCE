@@ -34,15 +34,15 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_analytics
-  vendor:           juce
-  version:          5.4.5
-  name:             JUCE analytics classes
-  description:      Classes to collect analytics and send to destinations
-  website:          http://www.juce.com/juce
-  license:          GPL/Commercial
+  ID:                 juce_analytics
+  vendor:             juce
+  version:            5.4.6
+  name:               JUCE analytics classes
+  description:        Classes to collect analytics and send to destinations
+  website:            http://www.juce.com/juce
+  license:            GPL/Commercial
 
-  dependencies:     juce_gui_basics
+  dependencies:       juce_gui_basics
 
  END_JUCE_MODULE_DECLARATION
 

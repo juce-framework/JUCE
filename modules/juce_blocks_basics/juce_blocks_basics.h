@@ -32,14 +32,14 @@
 
   ID:                 juce_blocks_basics
   vendor:             juce
-  version:            5.4.5
+  version:            5.4.6
   name:               Provides low-level control over ROLI BLOCKS devices
   description:        JUCE wrapper for low-level control over ROLI BLOCKS devices.
   website:            http://developer.roli.com
   license:            ISC
   minimumCppStandard: 14
 
-  dependencies:     juce_events juce_audio_devices
+  dependencies:       juce_events juce_audio_devices
 
  END_JUCE_MODULE_DECLARATION
 

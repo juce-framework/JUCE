@@ -30,19 +30,19 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_audio_devices
-  vendor:           juce
-  version:          5.4.5
-  name:             JUCE audio and MIDI I/O device classes
-  description:      Classes to play and record from audio and MIDI I/O devices
-  website:          http://www.juce.com/juce
-  license:          ISC
+  ID:                 juce_audio_devices
+  vendor:             juce
+  version:            5.4.6
+  name:               JUCE audio and MIDI I/O device classes
+  description:        Classes to play and record from audio and MIDI I/O devices
+  website:            http://www.juce.com/juce
+  license:            ISC
 
-  dependencies:     juce_audio_basics, juce_events
-  OSXFrameworks:    CoreAudio CoreMIDI AudioToolbox
-  iOSFrameworks:    CoreAudio CoreMIDI AudioToolbox AVFoundation
-  linuxPackages:    alsa
-  mingwLibs:        winmm
+  dependencies:       juce_audio_basics, juce_events
+  OSXFrameworks:      CoreAudio CoreMIDI AudioToolbox
+  iOSFrameworks:      CoreAudio CoreMIDI AudioToolbox AVFoundation
+  linuxPackages:      alsa
+  mingwLibs:          winmm
 
  END_JUCE_MODULE_DECLARATION
 

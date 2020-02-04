@@ -30,17 +30,17 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_audio_basics
-  vendor:           juce
-  version:          5.4.5
-  name:             JUCE audio and MIDI data classes
-  description:      Classes for audio buffer manipulation, midi message handling, synthesis, etc.
-  website:          http://www.juce.com/juce
-  license:          ISC
+  ID:                 juce_audio_basics
+  vendor:             juce
+  version:            5.4.6
+  name:               JUCE audio and MIDI data classes
+  description:        Classes for audio buffer manipulation, midi message handling, synthesis, etc.
+  website:            http://www.juce.com/juce
+  license:            ISC
 
-  dependencies:     juce_core
-  OSXFrameworks:    Accelerate
-  iOSFrameworks:    Accelerate
+  dependencies:       juce_core
+  OSXFrameworks:      Accelerate
+  iOSFrameworks:      Accelerate
 
  END_JUCE_MODULE_DECLARATION
 

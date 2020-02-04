@@ -34,15 +34,15 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_osc
-  vendor:           juce
-  version:          5.4.5
-  name:             JUCE OSC classes
-  description:      Open Sound Control implementation.
-  website:          http://www.juce.com/juce
-  license:          GPL/Commercial
+  ID:                 juce_osc
+  vendor:             juce
+  version:            5.4.6
+  name:               JUCE OSC classes
+  description:        Open Sound Control implementation.
+  website:            http://www.juce.com/juce
+  license:            GPL/Commercial
 
-  dependencies:     juce_core, juce_events
+  dependencies:       juce_core, juce_events
 
  END_JUCE_MODULE_DECLARATION
 

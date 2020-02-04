@@ -34,18 +34,18 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_gui_basics
-  vendor:           juce
-  version:          5.4.5
-  name:             JUCE GUI core classes
-  description:      Basic user-interface components and related classes.
-  website:          http://www.juce.com/juce
-  license:          GPL/Commercial
+  ID:                 juce_gui_basics
+  vendor:             juce
+  version:            5.4.6
+  name:               JUCE GUI core classes
+  description:        Basic user-interface components and related classes.
+  website:            http://www.juce.com/juce
+  license:            GPL/Commercial
 
-  dependencies:     juce_graphics juce_data_structures
-  OSXFrameworks:    Cocoa Carbon QuartzCore
-  iOSFrameworks:    UIKit MobileCoreServices
-  linuxPackages:    x11 xinerama xext
+  dependencies:       juce_graphics juce_data_structures
+  OSXFrameworks:      Cocoa Carbon QuartzCore
+  iOSFrameworks:      UIKit MobileCoreServices
+  linuxPackages:      x11 xinerama xext
 
  END_JUCE_MODULE_DECLARATION
 

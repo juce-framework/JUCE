@@ -34,18 +34,18 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_graphics
-  vendor:           juce
-  version:          5.4.5
-  name:             JUCE graphics classes
-  description:      Classes for 2D vector graphics, image loading/saving, font handling, etc.
-  website:          http://www.juce.com/juce
-  license:          GPL/Commercial
+  ID:                 juce_graphics
+  vendor:             juce
+  version:            5.4.6
+  name:               JUCE graphics classes
+  description:        Classes for 2D vector graphics, image loading/saving, font handling, etc.
+  website:            http://www.juce.com/juce
+  license:            GPL/Commercial
 
-  dependencies:     juce_events
-  OSXFrameworks:    Cocoa QuartzCore
-  iOSFrameworks:    CoreGraphics CoreImage CoreText QuartzCore
-  linuxPackages:    x11 xinerama xext freetype2
+  dependencies:       juce_events
+  OSXFrameworks:      Cocoa QuartzCore
+  iOSFrameworks:      CoreGraphics CoreImage CoreText QuartzCore
+  linuxPackages:      x11 xinerama xext freetype2
 
  END_JUCE_MODULE_DECLARATION
 
