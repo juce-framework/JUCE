@@ -120,11 +120,6 @@
 #undef minor
 #undef KeyPress
 
-// Include a replacement for std::function
-#if JUCE_PROJUCER_LIVE_BUILD
- #include "../misc/juce_StdFunctionCompat.h"
-#endif
-
 //==============================================================================
 // DLL building settings on Windows
 #if JUCE_MSVC
