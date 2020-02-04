@@ -69,6 +69,7 @@ void NetworkServiceDiscovery::Advertiser::sendBroadcast()
 {
     auto&& localAddresses = IPAddress::getAllAddresses();
     for (auto& localAddress : localAddresses) {
+        if(localAddress == IPAddress::local()) continue;
         message.setAttribute ("address", localAddress.toString());
         auto broadcastAddress = IPAddress::getInterfaceBroadcastAddress (localAddress);
         auto data = message.toString (XmlElement::TextFormat().singleLine().withoutHeader());
