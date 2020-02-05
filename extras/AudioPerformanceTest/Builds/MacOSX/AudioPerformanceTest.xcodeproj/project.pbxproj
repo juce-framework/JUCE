@@ -378,13 +378,6 @@
 			path = System/Library/Frameworks/DiscRecording.framework;
 			sourceTree = SDKROOT;
 		};
-		F9E591FD0A75BCD9F600120A = {
-			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
-			name = App.entitlements;
-			path = App.entitlements;
-			sourceTree = "SOURCE_ROOT";
-		};
 		FAAB4EAE4A57B642D3B9EC23 = {
 			isa = PBXFileReference;
 			lastKnownFileType = file.nib;

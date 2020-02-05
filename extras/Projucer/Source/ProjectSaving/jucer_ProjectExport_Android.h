@@ -1350,7 +1350,7 @@ private:
             mo << "    \"" << file.toUnixStyle() << "\"" << newLine;
 
             if ((! projectItem.shouldBeCompiled()) || (! shouldFileBeCompiledByDefault (f))
-                || (getProject().getProjectType().isAudioPlugin()
+                || (getProject().isAudioPluginProject()
                     && targetType != ProjectType::Target::SharedCodeTarget
                     && targetType != ProjectType::Target::StandalonePlugIn))
             {

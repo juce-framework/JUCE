@@ -568,8 +568,6 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/misc/juce_Result.h"
     "../../../../../modules/juce_core/misc/juce_RuntimePermissions.cpp"
     "../../../../../modules/juce_core/misc/juce_RuntimePermissions.h"
-    "../../../../../modules/juce_core/misc/juce_StdFunctionCompat.cpp"
-    "../../../../../modules/juce_core/misc/juce_StdFunctionCompat.h"
     "../../../../../modules/juce_core/misc/juce_Uuid.cpp"
     "../../../../../modules/juce_core/misc/juce_Uuid.h"
     "../../../../../modules/juce_core/misc/juce_WindowsRegistry.h"
@@ -1859,8 +1857,6 @@ set_source_files_properties("../../../../../modules/juce_core/misc/juce_Result.c
 set_source_files_properties("../../../../../modules/juce_core/misc/juce_Result.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/misc/juce_RuntimePermissions.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/misc/juce_RuntimePermissions.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_core/misc/juce_StdFunctionCompat.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_core/misc/juce_StdFunctionCompat.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/misc/juce_Uuid.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/misc/juce_Uuid.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/misc/juce_WindowsRegistry.h" PROPERTIES HEADER_FILE_ONLY TRUE)

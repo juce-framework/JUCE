@@ -103,7 +103,7 @@ struct CodeContent    : public Component
 //==============================================================================
 DemoContentComponent::DemoContentComponent (Component& mainComponent, std::function<void(bool)> callback)
     : TabbedComponent (TabbedButtonBar::Orientation::TabsAtTop),
-      demoChangedCallback (callback)
+      demoChangedCallback (std::move (callback))
 {
     demoContent.reset (new DemoContent());
     addTab ("Demo",     Colours::transparentBlack, demoContent.get(), false);

@@ -26,6 +26,8 @@
 
 #pragma once
 
+#include "../Utility/Helpers/jucer_VersionInfo.h"
+
 class DownloadAndInstallThread;
 
 class LatestVersionCheckerAndUpdater   : public DeletedAtShutdown,
@@ -43,17 +45,12 @@ public:
 private:
     //==============================================================================
     void run() override;
-    void queryUpdateServer();
-    void processResult();
-    void askUserAboutNewVersion (const String&, const String&);
-    void askUserForLocationToDownload();
-    void downloadAndInstall (const File&);
+    void askUserAboutNewVersion (const String&, const String&, const VersionInfo::Asset&);
+    void askUserForLocationToDownload (const VersionInfo::Asset&);
+    void downloadAndInstall (const VersionInfo::Asset&, const File&);
 
     //==============================================================================
     bool showAlertWindows = false;
-    int statusCode = 0;
-    String relativeDownloadPath;
-    var jsonReply;
 
     std::unique_ptr<DownloadAndInstallThread> installer;
     std::unique_ptr<Component> dialogWindow;

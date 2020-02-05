@@ -303,13 +303,6 @@
 			path = ../../Source/Main.cpp;
 			sourceTree = "SOURCE_ROOT";
 		};
-		2CDA0CB288452DA016E874BC = {
-			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
-			name = App.entitlements;
-			path = App.entitlements;
-			sourceTree = "SOURCE_ROOT";
-		};
 		346450C70C964FD9640B6086 = {
 			isa = PBXFileReference;
 			lastKnownFileType = file;
@@ -941,8 +934,8 @@
 					"JUCE_DEMO_RUNNER=1",
 					"JUCE_UNIT_TESTS=1",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=5.4.5",
-					"JUCE_APP_VERSION_HEX=0x50405",
+					"JUCE_APP_VERSION=5.4.6",
+					"JUCE_APP_VERSION_HEX=0x50406",
 					"JucePlugin_Build_VST=0",
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",
@@ -987,8 +980,8 @@
 					"JUCE_DEMO_RUNNER=1",
 					"JUCE_UNIT_TESTS=1",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=5.4.5",
-					"JUCE_APP_VERSION_HEX=0x50405",
+					"JUCE_APP_VERSION=5.4.6",
+					"JUCE_APP_VERSION_HEX=0x50406",
 					"JucePlugin_Build_VST=0",
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",
