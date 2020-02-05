@@ -147,7 +147,6 @@ public:
     String getVSTNumMIDIInputsString() const          { return pluginVSTNumMidiInputsValue.get(); }
     String getVSTNumMIDIOutputsString() const         { return pluginVSTNumMidiOutputsValue.get(); }
 
-    //==============================================================================
     static bool checkMultiChoiceVar (const ValueWithDefault& valueToCheck, Identifier idToCheck) noexcept
     {
         if (! valueToCheck.get().isArray())
@@ -161,18 +160,18 @@ public:
         return false;
     }
 
-    //==============================================================================
-    bool shouldBuildVST() const                       { return checkMultiChoiceVar (pluginFormatsValue, Ids::buildVST); }
-    bool shouldBuildVST3() const                      { return checkMultiChoiceVar (pluginFormatsValue, Ids::buildVST3); }
-    bool shouldBuildAU() const                        { return checkMultiChoiceVar (pluginFormatsValue, Ids::buildAU); }
-    bool shouldBuildAUv3() const                      { return checkMultiChoiceVar (pluginFormatsValue, Ids::buildAUv3); }
-    bool shouldBuildRTAS() const                      { return checkMultiChoiceVar (pluginFormatsValue, Ids::buildRTAS); }
-    bool shouldBuildAAX() const                       { return checkMultiChoiceVar (pluginFormatsValue, Ids::buildAAX); }
-    bool shouldBuildStandalonePlugin() const          { return checkMultiChoiceVar (pluginFormatsValue, Ids::buildStandalone); }
-    bool shouldBuildUnityPlugin() const               { return checkMultiChoiceVar (pluginFormatsValue, Ids::buildUnity); }
-    bool shouldEnableIAA() const                      { return checkMultiChoiceVar (pluginFormatsValue, Ids::enableIAA); }
+    bool isAudioPluginProject() const                 { return getProjectType().isAudioPlugin(); }
 
-    //==============================================================================
+    bool shouldBuildVST() const                       { return isAudioPluginProject() && checkMultiChoiceVar (pluginFormatsValue, Ids::buildVST); }
+    bool shouldBuildVST3() const                      { return isAudioPluginProject() && checkMultiChoiceVar (pluginFormatsValue, Ids::buildVST3); }
+    bool shouldBuildAU() const                        { return isAudioPluginProject() && checkMultiChoiceVar (pluginFormatsValue, Ids::buildAU); }
+    bool shouldBuildAUv3() const                      { return isAudioPluginProject() && checkMultiChoiceVar (pluginFormatsValue, Ids::buildAUv3); }
+    bool shouldBuildRTAS() const                      { return isAudioPluginProject() && checkMultiChoiceVar (pluginFormatsValue, Ids::buildRTAS); }
+    bool shouldBuildAAX() const                       { return isAudioPluginProject() && checkMultiChoiceVar (pluginFormatsValue, Ids::buildAAX); }
+    bool shouldBuildStandalonePlugin() const          { return isAudioPluginProject() && checkMultiChoiceVar (pluginFormatsValue, Ids::buildStandalone); }
+    bool shouldBuildUnityPlugin() const               { return isAudioPluginProject() && checkMultiChoiceVar (pluginFormatsValue, Ids::buildUnity); }
+    bool shouldEnableIAA() const                      { return isAudioPluginProject() && checkMultiChoiceVar (pluginFormatsValue, Ids::enableIAA); }
+
     bool isPluginSynth() const                        { return checkMultiChoiceVar (pluginCharacteristicsValue, Ids::pluginIsSynth); }
     bool pluginWantsMidiInput() const                 { return checkMultiChoiceVar (pluginCharacteristicsValue, Ids::pluginWantsMidiIn); }
     bool pluginProducesMidiOutput() const             { return checkMultiChoiceVar (pluginCharacteristicsValue, Ids::pluginProducesMidiOut); }
@@ -183,7 +182,6 @@ public:
     bool isPluginAAXBypassDisabled() const            { return checkMultiChoiceVar (pluginCharacteristicsValue, Ids::pluginAAXDisableBypass); }
     bool isPluginAAXMultiMonoDisabled() const         { return checkMultiChoiceVar (pluginCharacteristicsValue, Ids::pluginAAXDisableMultiMono); }
 
-    //==============================================================================
     static StringArray getAllAUMainTypeStrings() noexcept;
     static Array<var> getAllAUMainTypeVars() noexcept;
     Array<var> getDefaultAUMainTypes() const noexcept;

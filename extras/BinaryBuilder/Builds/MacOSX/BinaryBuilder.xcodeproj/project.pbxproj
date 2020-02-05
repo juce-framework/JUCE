@@ -50,13 +50,6 @@
 			path = System/Library/Frameworks/Cocoa.framework;
 			sourceTree = SDKROOT;
 		};
-		7871817598B12A73E708ABB7 = {
-			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
-			name = ConsoleApp.entitlements;
-			path = ConsoleApp.entitlements;
-			sourceTree = "SOURCE_ROOT";
-		};
 		799073185F72F5FAD05253C3 = {
 			isa = PBXFileReference;
 			explicitFileType = "compiled.mach-o.executable";

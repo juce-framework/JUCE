@@ -1006,7 +1006,7 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
     props.add (new TextPropertyComponent (bundleIdentifierValue, "Bundle Identifier", 256, false),
                "A unique identifier for this product, mainly for use in OSX/iOS builds. It should be something like 'com.yourcompanyname.yourproductname'");
 
-    if (getProjectType().isAudioPlugin())
+    if (isAudioPluginProject())
         createAudioPluginPropertyEditors (props);
 
     {

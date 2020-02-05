@@ -571,7 +571,7 @@ bool EnabledModuleList::isModuleEnabled (const String& moduleID) const
 
 bool EnabledModuleList::isAudioPluginModuleMissing() const
 {
-    return project.getProjectType().isAudioPlugin()
+    return project.isAudioPluginProject()
             && ! isModuleEnabled ("juce_audio_plugin_client");
 }
 
