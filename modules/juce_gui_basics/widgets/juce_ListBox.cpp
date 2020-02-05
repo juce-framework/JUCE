@@ -723,7 +723,7 @@ bool ListBox::keyPressed (const KeyPress& key)
         if (multiple)
             selectRangeOfRows (lastRowSelected, lastRowSelected + 1);
         else
-            selectRow (jmin (totalItems - 1, jmax (0, lastRowSelected) + 1));
+            selectRow (jmin (totalItems - 1, jmax (0, lastRowSelected + 1)));
     }
     else if (key.isKeyCode (KeyPress::pageUpKey))
     {
