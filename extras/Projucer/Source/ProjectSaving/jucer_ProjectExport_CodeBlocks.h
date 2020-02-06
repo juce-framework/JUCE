@@ -432,7 +432,7 @@ private:
 
         if (config.exporter.isLinux())
         {
-            if (target.isDynamicLibrary() || getProject().getProjectType().isAudioPlugin())
+            if (target.isDynamicLibrary() || getProject().isAudioPluginProject())
                 flags.add ("-fPIC");
 
             auto packages = getPackages();
@@ -495,7 +495,7 @@ private:
     {
         auto librarySearchPaths = config.getLibrarySearchPaths();
 
-        if (getProject().getProjectType().isAudioPlugin() && target.type != ProjectType::Target::SharedCodeTarget)
+        if (getProject().isAudioPluginProject() && target.type != ProjectType::Target::SharedCodeTarget)
             librarySearchPaths.add (RelativePath (getSharedCodePath (config), RelativePath::buildTargetFolder).getParentDirectory().toUnixStyle().quoted());
 
         return librarySearchPaths;
@@ -601,7 +601,7 @@ private:
         xml.createNewChildElement ("Option")->setAttribute ("type", getTypeIndex (target.type));
         xml.createNewChildElement ("Option")->setAttribute ("compiler", "gcc");
 
-        if (getProject().getProjectType().isAudioPlugin() && target.type != ProjectType::Target::SharedCodeTarget)
+        if (getProject().isAudioPluginProject() && target.type != ProjectType::Target::SharedCodeTarget)
             xml.createNewChildElement ("Option")->setAttribute ("external_deps", getSharedCodePath (config));
 
         {
@@ -635,7 +635,7 @@ private:
         {
             auto* linker = xml.createNewChildElement ("Linker");
 
-            if (getProject().getProjectType().isAudioPlugin() && target.type != ProjectType::Target::SharedCodeTarget)
+            if (getProject().isAudioPluginProject() && target.type != ProjectType::Target::SharedCodeTarget)
                 setAddOption (*linker, "option", getSharedCodePath (config).quoted());
 
             for (auto& flag : getLinkerFlags (config, target))
@@ -747,7 +747,7 @@ private:
     // the single target
     CodeBlocksTarget& getMainTarget() const
     {
-        if (getProject().getProjectType().isAudioPlugin())
+        if (getProject().isAudioPluginProject())
             return getTargetWithType (ProjectType::Target::SharedCodeTarget);
 
         for (auto* target : targets)
@@ -761,7 +761,7 @@ private:
 
     CodeBlocksTarget& getTargetForProjectItem (const Project::Item& projectItem) const
     {
-        if (getProject().getProjectType().isAudioPlugin())
+        if (getProject().isAudioPluginProject())
         {
             if (! projectItem.shouldBeCompiled())
                 return getTargetWithType (ProjectType::Target::SharedCodeTarget);

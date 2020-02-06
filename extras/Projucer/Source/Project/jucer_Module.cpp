@@ -302,7 +302,12 @@ void LibraryModule::addSettingsForModuleToExporter (ProjectExporter& exporter, P
         auto& xcodeExporter = dynamic_cast<XcodeProjectExporter&> (exporter);
 
         if (project.isAUPluginHost())
-            xcodeExporter.xcodeFrameworks.addTokens (xcodeExporter.isOSX() ? "AudioUnit CoreAudioKit" : "CoreAudioKit", false);
+        {
+            xcodeExporter.xcodeFrameworks.add ("CoreAudioKit");
+
+            if (xcodeExporter.isOSX())
+                xcodeExporter.xcodeFrameworks.add ("AudioUnit");
+        }
 
         auto frameworks = moduleInfo.moduleInfo [xcodeExporter.isOSX() ? "OSXFrameworks" : "iOSFrameworks"].toString();
         xcodeExporter.xcodeFrameworks.addTokens (frameworks, ", ", {});
@@ -566,7 +571,7 @@ bool EnabledModuleList::isModuleEnabled (const String& moduleID) const
 
 bool EnabledModuleList::isAudioPluginModuleMissing() const
 {
-    return project.getProjectType().isAudioPlugin()
+    return project.isAudioPluginProject()
             && ! isModuleEnabled ("juce_audio_plugin_client");
 }
 

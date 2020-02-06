@@ -24,6 +24,8 @@
   ==============================================================================
 */
 
+#if JucePlugin_Build_AU
+
 #ifdef __clang__
  #pragma clang diagnostic push
  #pragma clang diagnostic ignored "-Wparentheses"
@@ -42,6 +44,9 @@
  #endif
  #if __has_warning("-Wnullable-to-nonnull-conversion")
   #pragma clang diagnostic ignored "-Wnullable-to-nonnull-conversion"
+ #endif
+ #if __has_warning("-Wignored-qualifiers")
+  #pragma clang diagnostic ignored "-Wignored-qualifiers"
  #endif
 #endif
 
@@ -80,4 +85,6 @@
 
 #ifdef __clang__
  #pragma clang diagnostic pop
+#endif
+
 #endif

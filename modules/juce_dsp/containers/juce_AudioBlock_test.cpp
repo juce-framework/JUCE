@@ -29,12 +29,32 @@ namespace juce
 namespace dsp
 {
 
+template <typename SampleType>
 class AudioBlockUnitTests   : public UnitTest
 {
 public:
+    //==============================================================================
+    using NumericType = typename SampleTypeHelpers::ElementType<SampleType>::Type;
+
     AudioBlockUnitTests()
         : UnitTest ("AudioBlock", UnitTestCategories::dsp)
-    {}
+    {
+        for (auto v : { &data, &otherData })
+            for (auto& channel : *v)
+                channel = allocateAlignedMemory (numSamples);
+
+        block      = { data.data(),      data.size(),      (size_t) numSamples };
+        otherBlock = { otherData.data(), otherData.size(), (size_t) numSamples };
+
+        resetBlocks();
+    }
+
+    ~AudioBlockUnitTests() override
+    {
+        for (auto v : { &data, &otherData })
+            for (auto channel : *v)
+                deallocateAlignedMemory (channel);
+    }
 
     void runTest() override
     {
@@ -46,13 +66,13 @@ public:
 
         beginTest ("Constructors");
         {
-            expect (block == AudioBlock<float> (data.getArrayOfWritePointers(), (size_t) data.getNumChannels(), (size_t) data.getNumSamples()));
-            expect (block == AudioBlock<float> (data.getArrayOfWritePointers(), (size_t) data.getNumChannels(), (size_t) 0, (size_t) data.getNumSamples()));
-            expect (block == AudioBlock<float> (block));
+            expect (block == AudioBlock<SampleType> (data.data(), data.size(), numSamples));
+            expect (block == AudioBlock<SampleType> (data.data(), data.size(), (size_t) 0, numSamples));
+            expect (block == AudioBlock<SampleType> (block));
 
-            expect (block == AudioBlock<const float> (data.getArrayOfWritePointers(), (size_t) data.getNumChannels(), (size_t) data.getNumSamples()));
-            expect (block == AudioBlock<const float> (data.getArrayOfWritePointers(), (size_t) data.getNumChannels(), (size_t) 0, (size_t) data.getNumSamples()));
-            expect (block == AudioBlock<const float> (block));
+            expect (block == AudioBlock<const SampleType> (data.data(), data.size(), numSamples));
+            expect (block == AudioBlock<const SampleType> (data.data(), data.size(), (size_t) 0, numSamples));
+            expect (block == AudioBlock<const SampleType> (block));
         }
 
         beginTest ("Swap");
@@ -60,188 +80,159 @@ public:
             resetBlocks();
 
             expect (block != otherBlock);
-            expectEquals (block.getSample (0, 0), 1.0f);
-            expectEquals (block.getSample (0, 4), 5.0f);
-            expectEquals (otherBlock.getSample (0, 0), -1.0f);
-            expectEquals (otherBlock.getSample (0, 3), -4.0f);
+            expect (block.getSample (0, 0) == SampleType (1.0));
+            expect (block.getSample (0, 4) == SampleType (5.0));
+            expect (otherBlock.getSample (0, 0) == SampleType (-1.0));
+            expect (otherBlock.getSample (0, 3) == SampleType (-4.0));
 
             block.swap (otherBlock);
 
             expect (block != otherBlock);
-            expectEquals (otherBlock.getSample (0, 0), 1.0f);
-            expectEquals (otherBlock.getSample (0, 4), 5.0f);
-            expectEquals (block.getSample (0, 0), -1.0f);
-            expectEquals (block.getSample (0, 3), -4.0f);
+            expect (otherBlock.getSample (0, 0) == SampleType (1.0));
+            expect (otherBlock.getSample (0, 4) == SampleType (5.0));
+            expect (block.getSample (0, 0) == SampleType (-1.0));
+            expect (block.getSample (0, 3) == SampleType (-4.0));
+
+            block.swap (otherBlock);
+
+            expect (block.getSample (0, 0) == SampleType (1.0));
+            expect (block.getSample (0, 4) == SampleType (5.0));
+            expect (otherBlock.getSample (0, 0) == SampleType (-1.0));
+            expect (otherBlock.getSample (0, 3) == SampleType (-4.0));
         }
 
         beginTest ("Getters and setters");
         {
             resetBlocks();
 
-            expectEquals ((int) block.getNumChannels(), data.getNumChannels());
-            expectEquals ((int) block.getNumSamples(),  data.getNumSamples());
+            expectEquals ((int) block.getNumChannels(), (int) data.size());
+            expectEquals ((int) block.getNumSamples(), numSamples);
 
-            expectEquals (block.getChannelPointer (0)[2], 3.0f);
-            block.getChannelPointer (0)[2] = 999.0f;
-            expectEquals (block.getChannelPointer (0)[2], 999.0f);
+            expect (block.getChannelPointer (0)[2] == SampleType (3.0));
+            block.getChannelPointer (0)[2] = SampleType (999.0);
+            expect (block.getChannelPointer (0)[2] == SampleType (999.0));
 
-            expectEquals (block.getSample (0, 4), 5.0f);
-            expectEquals (block.getSample (1, 4), 11.0f);
+            expect (block.getSample (0, 4) == SampleType (5.0));
+            expect (block.getSample (1, 4) == SampleType (11.0));
 
-            expectEquals (block.getSingleChannelBlock (1).getSample (0, 3), block.getSample (1, 3));
+            expect (block.getSingleChannelBlock (1).getSample (0, 3) == block.getSample (1, 3));
 
-            expectEquals (block.getSubsetChannelBlock (0, 2).getSample (1, 3), block.getSample (1, 3));
-            expectEquals (block.getSubsetChannelBlock (1, 1).getSample (0, 3), block.getSample (1, 3));
+            expect (block.getSubsetChannelBlock (0, 2).getSample (1, 3) == block.getSample (1, 3));
+            expect (block.getSubsetChannelBlock (1, 1).getSample (0, 3) == block.getSample (1, 3));
 
-            block.setSample (1, 1, 777.0f);
-            expectEquals (block.getSample (1, 1), 777.0f);
+            block.setSample (1, 1, SampleType (777.0));
+            expect (block.getSample (1, 1) == SampleType (777.0));
 
-            block.addSample (1, 1, 1.0f);
-            expectEquals (block.getSample (1, 1), 778.0f);
+            block.addSample (1, 1, SampleType (1.0));
+            expect (block.getSample (1, 1) == SampleType (778.0));
         }
 
-        beginTest ("Copying");
+        beginTest ("Basic copying");
         {
             block.clear();
-            expectEquals (block.getSample (0, 2), 0.0f);
-            expectEquals (block.getSample (1, 4), 0.0f);
+            expect (block.getSample (0, 2) == SampleType (0.0));
+            expect (block.getSample (1, 4) == SampleType (0.0));
 
-            block.fill (456.0f);
-            expectEquals (block.getSample (0, 2), 456.0f);
-            expectEquals (block.getSample (1, 4), 456.0f);
+            block.fill ((NumericType) 456.0);
+            expect (block.getSample (0, 2) == SampleType (456.0));
+            expect (block.getSample (1, 4) == SampleType (456.0));
 
             block.copyFrom (otherBlock);
             expect (block != otherBlock);
-            expectEquals (block.getSample (0, 2), otherBlock.getSample (0, 2));
-            expectEquals (block.getSample (1, 4), otherBlock.getSample (1, 4));
+            expect (block.getSample (0, 2) == otherBlock.getSample (0, 2));
+            expect (block.getSample (1, 4) == otherBlock.getSample (1, 4));
 
             resetBlocks();
 
-            AudioBuffer<float> otherBuffer ((int) block.getNumChannels(), (int) block.getNumSamples());
-            otherBlock.copyTo (otherBuffer);
-            expectEquals (otherBlock.getSample (0, 2), otherBuffer.getSample (0, 2));
-            expectEquals (otherBlock.getSample (1, 4), otherBuffer.getSample (1, 4));
-
-            block.copyFrom (otherBuffer);
-            expectEquals (block.getSample (0, 2), otherBlock.getSample (0, 2));
-            expectEquals (block.getSample (1, 4), otherBlock.getSample (1, 4));
-
-            float testSample1 = block.getSample (0, 2);
-            float testSample2 = block.getSample (1, 3);
+            SampleType testSample1 = block.getSample (0, 2);
+            SampleType testSample2 = block.getSample (1, 3);
             expect (testSample1 != block.getSample (0, 4));
             expect (testSample2 != block.getSample (1, 5));
             block.move (0, 2);
-            expectEquals (block.getSample (0, 4), testSample1);
-            expectEquals (block.getSample (1, 5), testSample2);
+            expect (block.getSample (0, 4) == testSample1);
+            expect (block.getSample (1, 5) == testSample2);
         }
 
         beginTest ("Addition");
         {
             resetBlocks();
 
-            block.add (15.0f);
-            expectEquals (block.getSample (0, 4), 20.0f);
-            expectEquals (block.getSample (1, 4), 26.0f);
+            block.add ((NumericType) 15.0);
+            expect (block.getSample (0, 4) == SampleType (20.0));
+            expect (block.getSample (1, 4) == SampleType (26.0));
 
             block.add (otherBlock);
-            expectEquals (block.getSample (0, 4), 15.0f);
-            expectEquals (block.getSample (1, 4), 15.0f);
+            expect (block.getSample (0, 4) == SampleType (15.0));
+            expect (block.getSample (1, 4) == SampleType (15.0));
 
-            block.replaceWithSumOf (otherBlock, 9.0f);
-            expectEquals (block.getSample (0, 4), 4.0f);
-            expectEquals (block.getSample (1, 4), -2.0f);
+            block.replaceWithSumOf (otherBlock, (NumericType) 9.0);
+            expect (block.getSample (0, 4) == SampleType (4.0));
+            expect (block.getSample (1, 4) == SampleType (-2.0));
 
             resetBlocks();
 
             block.replaceWithSumOf (block, otherBlock);
-            expectEquals (block.getSample (0, 4), 0.0f);
-            expectEquals (block.getSample (1, 4), 0.0f);
+            expect (block.getSample (0, 4) == SampleType (0.0));
+            expect (block.getSample (1, 4) == SampleType (0.0));
         }
 
         beginTest ("Subtraction");
         {
             resetBlocks();
 
-            block.subtract (15.0f);
-            expectEquals (block.getSample (0, 4), -10.0f);
-            expectEquals (block.getSample (1, 4), -4.0f);
+            block.subtract ((NumericType) 15.0);
+            expect (block.getSample (0, 4) == SampleType (-10.0));
+            expect (block.getSample (1, 4) == SampleType (-4.0));
 
             block.subtract (otherBlock);
-            expectEquals (block.getSample (0, 4), -5.0f);
-            expectEquals (block.getSample (1, 4), 7.0f);
+            expect (block.getSample (0, 4) == SampleType (-5.0));
+            expect (block.getSample (1, 4) == SampleType (7.0));
 
-            block.replaceWithDifferenceOf (otherBlock, 9.0f);
-            expectEquals (block.getSample (0, 4), -14.0f);
-            expectEquals (block.getSample (1, 4), -20.0f);
+            block.replaceWithDifferenceOf (otherBlock, (NumericType) 9.0);
+            expect (block.getSample (0, 4) == SampleType (-14.0));
+            expect (block.getSample (1, 4) == SampleType (-20.0));
 
             resetBlocks();
 
             block.replaceWithDifferenceOf (block, otherBlock);
-            expectEquals (block.getSample (0, 4), 10.0f);
-            expectEquals (block.getSample (1, 4), 22.0f);
+            expect (block.getSample (0, 4) == SampleType (10.0));
+            expect (block.getSample (1, 4) == SampleType (22.0));
         }
 
         beginTest ("Multiplication");
         {
             resetBlocks();
 
-            block.multiplyBy (10.0f);
-            expectEquals (block.getSample (0, 4), 50.0f);
-            expectEquals (block.getSample (1, 4), 110.0f);
+            block.multiplyBy ((NumericType) 10.0);
+            expect (block.getSample (0, 4) == SampleType (50.0));
+            expect (block.getSample (1, 4) == SampleType (110.0));
 
             block.multiplyBy (otherBlock);
-            expectEquals (block.getSample (0, 4), -250.0f);
-            expectEquals (block.getSample (1, 4), -1210.0f);
+            expect (block.getSample (0, 4) == SampleType (-250.0));
+            expect (block.getSample (1, 4) == SampleType (-1210.0));
 
-            block.replaceWithProductOf (otherBlock, 3.0f);
-            expectEquals (block.getSample (0, 4), -15.0f);
-            expectEquals (block.getSample (1, 4), -33.0f);
+            block.replaceWithProductOf (otherBlock, (NumericType) 3.0);
+            expect (block.getSample (0, 4) == SampleType (-15.0));
+            expect (block.getSample (1, 4) == SampleType (-33.0));
 
             resetBlocks();
 
             block.replaceWithProductOf (block, otherBlock);
-            expectEquals (block.getSample (0, 4), -25.0f);
-            expectEquals (block.getSample (1, 4), -121.0f);
-        }
-
-        beginTest ("Smoothing");
-        {
-            block.fill (1.0f);
-            SmoothedValue<float> sv { 1.0f };
-            sv.reset (1, 4);
-            sv.setTargetValue (0.0f);
-
-            block.multiplyBy (sv);
-            expect (block.getSample (0, 2) < 1.0f);
-            expect (block.getSample (1, 2) < 1.0f);
-            expect (block.getSample (0, 2) > 0.0f);
-            expect (block.getSample (1, 2) > 0.0f);
-            expectEquals (block.getSample (0, 5), 0.0f);
-            expectEquals (block.getSample (1, 5), 0.0f);
-
-            sv.setCurrentAndTargetValue (-1.0f);
-            sv.setTargetValue (0.0f);
-            otherBlock.fill (-1.0f);
-            block.replaceWithProductOf (otherBlock, sv);
-            expect (block.getSample (0, 2) < 1.0f);
-            expect (block.getSample (1, 2) < 1.0f);
-            expect (block.getSample (0, 2) > 0.0f);
-            expect (block.getSample (1, 2) > 0.0f);
-            expectEquals (block.getSample (0, 5), 0.0f);
-            expectEquals (block.getSample (1, 5), 0.0f);
+            expect (block.getSample (0, 4) == SampleType (-25.0));
+            expect (block.getSample (1, 4) == SampleType (-121.0));
         }
 
         beginTest ("Multiply add");
         {
             resetBlocks();
 
-            block.addProductOf (otherBlock, -1.0f);
-            expectEquals (block.getSample (0, 4), 10.0f);
-            expectEquals (block.getSample (1, 4), 22.0f);
+            block.addProductOf (otherBlock, (NumericType) -1.0);
+            expect (block.getSample (0, 4) == SampleType (10.0));
+            expect (block.getSample (1, 4) == SampleType (22.0));
 
             block.addProductOf (otherBlock, otherBlock);
-            expectEquals (block.getSample (0, 4), 35.0f);
-            expectEquals (block.getSample (1, 4), 143.0f);
+            expect (block.getSample (0, 4) == SampleType (35.0));
+            expect (block.getSample (1, 4) == SampleType (143.0));
         }
 
         beginTest ("Negative abs min max");
@@ -250,93 +241,259 @@ public:
             otherBlock.negate();
 
             block.add (otherBlock);
-            expectEquals (block.getSample (0, 4), 10.0f);
-            expectEquals (block.getSample (1, 4), 22.0f);
+            expect (block.getSample (0, 4) == SampleType (10.0));
+            expect (block.getSample (1, 4) == SampleType (22.0));
 
             block.replaceWithNegativeOf (otherBlock);
-            expectEquals (block.getSample (0, 4), -5.0f);
-            expectEquals (block.getSample (1, 4), -11.0f);
+            expect (block.getSample (0, 4) == SampleType (-5.0));
+            expect (block.getSample (1, 4) == SampleType (-11.0));
 
             block.clear();
             otherBlock.negate();
             block.replaceWithAbsoluteValueOf (otherBlock);
-            expectEquals (block.getSample (0, 4), 5.0f);
-            expectEquals (block.getSample (1, 4), 11.0f);
+            expect (block.getSample (0, 4) == SampleType (5.0));
+            expect (block.getSample (1, 4) == SampleType (11.0));
 
             resetBlocks();
             block.replaceWithMinOf (block, otherBlock);
-            expectEquals (block.getSample (0, 4), -5.0f);
-            expectEquals (block.getSample (1, 4), -11.0f);
+            expect (block.getSample (0, 4) == SampleType (-5.0));
+            expect (block.getSample (1, 4) == SampleType (-11.0));
 
             resetBlocks();
             block.replaceWithMaxOf (block, otherBlock);
-            expectEquals (block.getSample (0, 4), 5.0f);
-            expectEquals (block.getSample (1, 4), 11.0f);
+            expect (block.getSample (0, 4) == SampleType (5.0));
+            expect (block.getSample (1, 4) == SampleType (11.0));
 
             resetBlocks();
             auto range = block.findMinAndMax();
-            expectEquals (range.getStart(), 1.0f);
-            expectEquals (range.getEnd(), 12.0f);
+            expect (SampleType (range.getStart()) == SampleType (1.0));
+            expect (SampleType (range.getEnd()) == SampleType (12.0));
         }
 
         beginTest ("Operators");
         {
             resetBlocks();
-            block += 10.0f;
-            expectEquals (block.getSample (0, 4), 15.0f);
-            expectEquals (block.getSample (1, 4), 21.0f);
+            block += (NumericType) 10.0;
+            expect (block.getSample (0, 4) == SampleType (15.0));
+            expect (block.getSample (1, 4) == SampleType (21.0));
             block += otherBlock;
-            expectEquals (block.getSample (0, 4), 10.0f);
-            expectEquals (block.getSample (1, 4), 10.0f);
+            expect (block.getSample (0, 4) == SampleType (10.0));
+            expect (block.getSample (1, 4) == SampleType (10.0));
 
             resetBlocks();
-            block -= 10.0f;
-            expectEquals (block.getSample (0, 4), -5.0f);
-            expectEquals (block.getSample (1, 4), 1.0f);
+            block -= (NumericType) 10.0;
+            expect (block.getSample (0, 4) == SampleType (-5.0));
+            expect (block.getSample (1, 4) == SampleType (1.0));
             block -= otherBlock;
-            expectEquals (block.getSample (0, 4), 0.0f);
-            expectEquals (block.getSample (1, 4), 12.0f);
+            expect (block.getSample (0, 4) == SampleType (0.0));
+            expect (block.getSample (1, 4) == SampleType (12.0));
 
             resetBlocks();
-            block *= 10.0f;
-            expectEquals (block.getSample (0, 4), 50.0f);
-            expectEquals (block.getSample (1, 4), 110.0f);
+            block *= (NumericType) 10.0;
+            expect (block.getSample (0, 4) == SampleType (50.0));
+            expect (block.getSample (1, 4) == SampleType (110.0));
             block *= otherBlock;
-            expectEquals (block.getSample (0, 4), -250.0f);
-            expectEquals (block.getSample (1, 4), -1210.0f);
+            expect (block.getSample (0, 4) == SampleType (-250.0));
+            expect (block.getSample (1, 4) == SampleType (-1210.0));
         }
 
         beginTest ("Process");
         {
             resetBlocks();
-            AudioBlock<float>::process (block, otherBlock, [](float x) { return x + 1.0f; });
-            expectEquals (otherBlock.getSample (0, 4), 6.0f);
-            expectEquals (otherBlock.getSample (1, 4), 12.0f);
+            AudioBlock<SampleType>::process (block, otherBlock, [](SampleType x) { return x + (NumericType) 1.0; });
+            expect (otherBlock.getSample (0, 4) == SampleType (6.0));
+            expect (otherBlock.getSample (1, 4) == SampleType (12.0));
+        }
+
+        beginTest ("Copying");
+        {
+            resetBlocks();
+            copyingTests();
+        }
+
+        beginTest ("Smoothing");
+        {
+            resetBlocks();
+            smoothedValueTests();
         }
     }
 
 private:
-    AudioBuffer<float> data { 2, 6 }, otherData { 2, 6 };
-    AudioBlock<float> block { data }, otherBlock { otherData };
+    //==============================================================================
+    template <typename T>
+    using ScalarVoid = typename std::enable_if_t <  std::is_scalar <T>::value, void>;
 
+    template <typename T>
+    using SIMDVoid   = typename std::enable_if_t <! std::is_scalar <T>::value, void>;
+
+    //==============================================================================
+    template <typename T = SampleType>
+    ScalarVoid<T> copyingTests()
+    {
+        auto unchangedElement1 = block.getSample (0, 4);
+        auto unchangedElement2 = block.getSample (1, 1);
+
+        AudioBuffer<SampleType> otherBuffer (otherData.data(), (int) otherData.size(), numSamples);
+
+        block.copyFrom (otherBuffer, 1, 2, 2);
+
+        expectEquals (block.getSample (0, 4), unchangedElement1);
+        expectEquals (block.getSample (1, 1), unchangedElement2);
+        expectEquals (block.getSample (0, 2), otherBuffer.getSample (0, 1));
+        expectEquals (block.getSample (1, 3), otherBuffer.getSample (1, 2));
+
+        resetBlocks();
+
+        unchangedElement1 = otherBuffer.getSample (0, 4);
+        unchangedElement2 = otherBuffer.getSample (1, 3);
+
+        block.copyTo (otherBuffer, 2, 1, 2);
+
+        expectEquals (otherBuffer.getSample (0, 4), unchangedElement1);
+        expectEquals (otherBuffer.getSample (1, 3), unchangedElement2);
+        expectEquals (otherBuffer.getSample (0, 1), block.getSample (0, 2));
+        expectEquals (otherBuffer.getSample (1, 2), block.getSample (1, 3));
+    }
+
+    template <typename T = SampleType>
+    SIMDVoid<T> copyingTests()
+    {
+        auto numSIMDElements = SIMDRegister<NumericType>::SIMDNumElements;
+        AudioBuffer<NumericType> numericData ((int) block.getNumChannels(),
+                                              (int) (block.getNumSamples() * numSIMDElements));
+
+        for (int c = 0; c < numericData.getNumChannels(); ++c)
+            std::fill_n (numericData.getWritePointer (c), numericData.getNumSamples(), (NumericType) 1.0);
+
+        numericData.applyGainRamp (0, numericData.getNumSamples(), (NumericType) 0.127, (NumericType) 17.3);
+
+        auto lastUnchangedIndexBeforeCopiedRange = (int) ((numSIMDElements * 2) - 1);
+        auto firstUnchangedIndexAfterCopiedRange = (int) ((numSIMDElements * 4) + 1);
+        auto unchangedElement1 = numericData.getSample (0, lastUnchangedIndexBeforeCopiedRange);
+        auto unchangedElement2 = numericData.getSample (1, firstUnchangedIndexAfterCopiedRange);
+
+        block.copyTo (numericData, 1, 2, 2);
+
+        expectEquals (numericData.getSample (0, lastUnchangedIndexBeforeCopiedRange), unchangedElement1);
+        expectEquals (numericData.getSample (1, firstUnchangedIndexAfterCopiedRange), unchangedElement2);
+        expect (SampleType (numericData.getSample (0, 2 * (int) numSIMDElements)) == block.getSample (0, 1));
+        expect (SampleType (numericData.getSample (1, 3 * (int) numSIMDElements)) == block.getSample (1, 2));
+
+        numericData.applyGainRamp (0, numericData.getNumSamples(), (NumericType) 15.1, (NumericType) 0.7);
+
+        auto unchangedSIMDElement1 = block.getSample (0, 1);
+        auto unchangedSIMDElement2 = block.getSample (1, 4);
+
+        block.copyFrom (numericData, 1, 2, 2);
+
+        expect (block.getSample (0, 1) == unchangedSIMDElement1);
+        expect (block.getSample (1, 4) == unchangedSIMDElement2);
+        expectEquals (block.getSample (0, 2).get (0), numericData.getSample (0, (int) numSIMDElements));
+        expectEquals (block.getSample (1, 3).get (0), numericData.getSample (1, (int) (numSIMDElements * 2)));
+
+        if (numSIMDElements > 1)
+        {
+            expectEquals (block.getSample (0, 2).get (1), numericData.getSample (0, (int) (numSIMDElements + 1)));
+            expectEquals (block.getSample (1, 3).get (1), numericData.getSample (1, (int) ((numSIMDElements * 2) + 1)));
+        }
+    }
+
+    //==============================================================================
+    template <typename T = SampleType>
+    ScalarVoid<T> smoothedValueTests()
+    {
+        block.fill ((SampleType) 1.0);
+        SmoothedValue<SampleType> sv { (SampleType) 1.0 };
+        sv.reset (1, 4);
+        sv.setTargetValue ((SampleType) 0.0);
+
+        block.multiplyBy (sv);
+        expect (block.getSample (0, 2) < (SampleType) 1.0);
+        expect (block.getSample (1, 2) < (SampleType) 1.0);
+        expect (block.getSample (0, 2) > (SampleType) 0.0);
+        expect (block.getSample (1, 2) > (SampleType) 0.0);
+        expectEquals (block.getSample (0, 5), (SampleType) 0.0);
+        expectEquals (block.getSample (1, 5), (SampleType) 0.0);
+
+        sv.setCurrentAndTargetValue (-1.0f);
+        sv.setTargetValue (0.0f);
+        otherBlock.fill (-1.0f);
+        block.replaceWithProductOf (otherBlock, sv);
+        expect (block.getSample (0, 2) < (SampleType) 1.0);
+        expect (block.getSample (1, 2) < (SampleType) 1.0);
+        expect (block.getSample (0, 2) > (SampleType) 0.0);
+        expect (block.getSample (1, 2) > (SampleType) 0.0);
+        expectEquals (block.getSample (0, 5), (SampleType) 0.0);
+        expectEquals (block.getSample (1, 5), (SampleType) 0.0);
+    }
+
+    template <typename T = SampleType>
+    SIMDVoid<T> smoothedValueTests() {}
+
+    //==============================================================================
     void resetBlocks()
     {
-        auto value = 1.0f;
+        auto value = SampleType (1.0);
 
         for (size_t c = 0; c < block.getNumChannels(); ++c)
         {
             for (size_t i = 0; i < block.getNumSamples(); ++i)
             {
                 block.setSample ((int) c, (int) i, value);
-                value += 1.0f;
+                value += SampleType (1.0);
             }
         }
 
         otherBlock.replaceWithNegativeOf (block);
     }
+
+    //==============================================================================
+    static SampleType* allocateAlignedMemory (int numSamplesToAllocate)
+    {
+        auto alignmentLowerBound = std::alignment_of<SampleType>::value;
+       #if ! JUCE_WINDOWS
+        alignmentLowerBound = jmax (sizeof (void*), alignmentLowerBound);
+       #endif
+        auto alignmentOrder = std::ceil (std::log2 (alignmentLowerBound));
+        auto requiredAlignment = (size_t) std::pow (2, alignmentOrder);
+
+        auto size = (size_t) numSamplesToAllocate * sizeof (SampleType);
+
+       #if JUCE_WINDOWS
+        auto* memory = _aligned_malloc (size, requiredAlignment);
+       #else
+        void* memory;
+        auto result = posix_memalign (&memory, requiredAlignment, size);
+
+        if (result != 0)
+        {
+            jassertfalse;
+            return nullptr;
+        }
+       #endif
+
+        return static_cast<SampleType*> (memory);
+    }
+
+    void deallocateAlignedMemory (void* address)
+    {
+       #if JUCE_WINDOWS
+        _aligned_free (address);
+       #else
+        free (address);
+       #endif
+    }
+
+    //==============================================================================
+    static constexpr int numChannels = 2, numSamples = 6;
+    std::array<SampleType*, numChannels> data, otherData;
+    AudioBlock<SampleType> block, otherBlock;
 };
 
-static AudioBlockUnitTests audioBlockUnitTests;
+static AudioBlockUnitTests<float> audioBlockFloatUnitTests;
+static AudioBlockUnitTests<double> audioBlockDoubleUnitTests;
+static AudioBlockUnitTests<SIMDRegister<float>> audioBlockSIMDFloatUnitTests;
+static AudioBlockUnitTests<SIMDRegister<double>> audioBlockSIMDDoubleUnitTests;
 
 } // namespace dsp
 } // namespace juce

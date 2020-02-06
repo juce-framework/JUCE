@@ -196,7 +196,8 @@ public:
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
-            addVisualStudioPluginInstallPathProperties (props);
+            if (project.isAudioPluginProject())
+                addVisualStudioPluginInstallPathProperties (props);
 
             props.add (new ChoicePropertyComponent (architectureTypeValue, "Architecture",
                                                     { get32BitArchName(), get64BitArchName() },
@@ -741,7 +742,7 @@ public:
         //==============================================================================
         void addFilesToCompile (const Project::Item& projectItem, XmlElement& cpps, XmlElement& headers, XmlElement& otherFiles) const
         {
-            auto targetType = (getOwner().getProject().getProjectType().isAudioPlugin() ? type : SharedCodeTarget);
+            auto targetType = (getOwner().getProject().isAudioPluginProject() ? type : SharedCodeTarget);
 
             if (projectItem.isGroup())
             {
@@ -823,7 +824,7 @@ public:
         bool addFilesToFilter (const Project::Item& projectItem, const String& path,
                                XmlElement& cpps, XmlElement& headers, XmlElement& otherFiles, XmlElement& groups) const
         {
-            auto targetType = (getOwner().getProject().getProjectType().isAudioPlugin() ? type : SharedCodeTarget);
+            auto targetType = (getOwner().getProject().isAudioPluginProject() ? type : SharedCodeTarget);
 
             if (projectItem.isGroup())
             {
@@ -1133,7 +1134,7 @@ public:
 
         String getPostBuildSteps (const MSVCBuildConfiguration& config) const
         {
-            auto postBuild = config.getPostbuildCommandString();
+            auto postBuild = config.getPostbuildCommandString().replace ("\n", "\r\n");;
             auto extraPostBuild = getExtraPostBuildSteps (config);
 
             return postBuild + String (postBuild.isNotEmpty() && extraPostBuild.isNotEmpty() ? "\r\n" : "") + extraPostBuild;
@@ -1141,7 +1142,7 @@ public:
 
         String getPreBuildSteps (const MSVCBuildConfiguration& config) const
         {
-            auto preBuild = config.getPrebuildCommandString();
+            auto preBuild = config.getPrebuildCommandString().replace ("\n", "\r\n");;
             auto extraPreBuild = getExtraPreBuildSteps (config);
 
             return preBuild + String (preBuild.isNotEmpty() && extraPreBuild.isNotEmpty() ? "\r\n" : "") + extraPreBuild;

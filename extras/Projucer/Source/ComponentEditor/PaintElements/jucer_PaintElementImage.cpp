@@ -145,8 +145,8 @@ void PaintElementImage::fillInGeneratedCode (GeneratedCode& code, String& paintM
                 else
                     r << "    g.setColour (Colours::black.withAlpha (" << CodeHelpers::floatLiteral (opacity, 3) << "));\n";
 
-                r << "    jassert (" << imageVariable << " != 0);\n"
-                  << "    if (" << imageVariable << " != 0)\n"
+                r << "    jassert (" << imageVariable << " != nullptr);\n"
+                  << "    if (" << imageVariable << " != nullptr)\n"
                   << "        " << imageVariable  << "->drawWithin (g, Rectangle<int> (x, y, width, height).toFloat(),\n"
                   << "    " << String::repeatedString (" ", imageVariable.length() + 18)
                   << (mode == stretched ? "RectanglePlacement::stretchToFit"

@@ -99,7 +99,7 @@ public:
 
     /** Returns the sequence of MIDI messages that, if sent to an Expressive
         MIDI device, will reset the whole MPE zone layout of the
-        device to the laoyut passed in. This will first clear the current lower and upper
+        device to the layout passed in. This will first clear the current lower and upper
         zones, then then set the zones contained in the passed-in zone layout, and set their
         per-note and master pitchbend ranges to their current values.
     */

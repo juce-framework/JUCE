@@ -40,7 +40,7 @@ namespace dsp
     A wrapper around the platform's native SIMD register type.
 
     This class is only available on SIMD machines. Use JUCE_USE_SIMD to query
-    if SIMD is avaialble for your system.
+    if SIMD is available for your system.
 
     SIMDRegister<Type> is a templated class representing the native
     vectorized version of FloatingType. SIMDRegister supports all numerical
@@ -117,7 +117,7 @@ struct SIMDRegister
     /** Constructs an object from a scalar type by broadcasting it to all elements. */
     inline SIMDRegister (Type s) noexcept  { *this = s; }
 
-    /** Destrutor. */
+    /** Destructor. */
     inline ~SIMDRegister() noexcept = default;
 
     //==============================================================================
@@ -204,23 +204,23 @@ struct SIMDRegister
     inline SIMDRegister& JUCE_VECTOR_CALLTYPE operator*= (ElementType s) noexcept       { value = CmplxOps::mul (value, CmplxOps::expand (s)); return *this; }
 
     //==============================================================================
-    /** Bit-and the reciver with SIMDRegister v and store the result in the receiver. */
+    /** Bit-and the receiver with SIMDRegister v and store the result in the receiver. */
     inline SIMDRegister& JUCE_VECTOR_CALLTYPE operator&= (vMaskType v) noexcept         { value = NativeOps::bit_and (value, toVecType (v.value)); return *this; }
 
-    /** Bit-or the reciver with SIMDRegister v and store the result in the receiver. */
+    /** Bit-or the receiver with SIMDRegister v and store the result in the receiver. */
     inline SIMDRegister& JUCE_VECTOR_CALLTYPE operator|= (vMaskType v) noexcept         { value = NativeOps::bit_or  (value, toVecType (v.value)); return *this; }
 
-    /** Bit-xor the reciver with SIMDRegister v and store the result in the receiver. */
+    /** Bit-xor the receiver with SIMDRegister v and store the result in the receiver. */
     inline SIMDRegister& JUCE_VECTOR_CALLTYPE operator^= (vMaskType v) noexcept         { value = NativeOps::bit_xor (value, toVecType (v.value)); return *this; }
 
     //==============================================================================
-    /** Bit-and each element of the reciver with the scalar s and store the result in the receiver.*/
+    /** Bit-and each element of the receiver with the scalar s and store the result in the receiver.*/
     inline SIMDRegister& JUCE_VECTOR_CALLTYPE operator&= (MaskType s) noexcept           { value = NativeOps::bit_and (value, toVecType (s)); return *this; }
 
-    /** Bit-or each element of the reciver with the scalar s and store the result in the receiver.*/
+    /** Bit-or each element of the receiver with the scalar s and store the result in the receiver.*/
     inline SIMDRegister& JUCE_VECTOR_CALLTYPE operator|= (MaskType s) noexcept           { value = NativeOps::bit_or  (value, toVecType (s)); return *this; }
 
-    /** Bit-xor each element of the reciver with the scalar s and store the result in the receiver.*/
+    /** Bit-xor each element of the receiver with the scalar s and store the result in the receiver.*/
     inline SIMDRegister& JUCE_VECTOR_CALLTYPE operator^= (MaskType s) noexcept           { value = NativeOps::bit_xor (value, toVecType (s)); return *this; }
 
     //==============================================================================
@@ -267,10 +267,10 @@ struct SIMDRegister
     inline SIMDRegister JUCE_VECTOR_CALLTYPE operator^ (MaskType s) const noexcept      { return { NativeOps::bit_xor (value, toVecType (s)) }; }
 
     //==============================================================================
-    /** Returns true if all elements-wise comparisons return true. */
+    /** Returns true if all element-wise comparisons return true. */
     inline bool JUCE_VECTOR_CALLTYPE operator== (SIMDRegister other) const noexcept    { return  NativeOps::allEqual (value, other.value); }
 
-    /** Returns true if any elements-wise comparisons return false. */
+    /** Returns true if any element-wise comparisons return false. */
     inline bool JUCE_VECTOR_CALLTYPE operator!= (SIMDRegister other) const noexcept    { return ! (*this == other); }
 
     /** Returns true if all elements are equal to the scalar. */

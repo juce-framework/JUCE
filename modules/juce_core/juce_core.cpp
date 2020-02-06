@@ -110,10 +110,6 @@
  #include <android/log.h>
 #endif
 
-#if JUCE_BELA
- #include <alchemy/timer.h>
-#endif
-
 #undef check
 
 //==============================================================================
@@ -145,7 +141,6 @@
 #include "misc/juce_RuntimePermissions.cpp"
 #include "misc/juce_Result.cpp"
 #include "misc/juce_Uuid.cpp"
-#include "misc/juce_StdFunctionCompat.cpp"
 #include "misc/juce_ConsoleApplication.cpp"
 #include "network/juce_MACAddress.cpp"
 #include "network/juce_NamedPipe.cpp"
@@ -239,6 +234,7 @@
 
 #include "threads/juce_ChildProcess.cpp"
 #include "threads/juce_HighResolutionTimer.cpp"
+#include "threads/juce_WaitableEvent.cpp"
 #include "network/juce_URL.cpp"
 #include "network/juce_WebInputStream.cpp"
 #include "streams/juce_URLInputSource.cpp"

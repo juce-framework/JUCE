@@ -559,7 +559,7 @@ bool ProjectContentComponent::saveProject (bool shouldWait, bool openInIDE)
 void ProjectContentComponent::closeProject()
 {
     if (auto* mw = findParentComponentOfClass<MainWindow>())
-        mw->closeCurrentProject();
+        mw->closeCurrentProject (true);
 }
 
 void ProjectContentComponent::showProjectSettings()

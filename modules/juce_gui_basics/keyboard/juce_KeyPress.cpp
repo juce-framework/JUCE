@@ -146,7 +146,7 @@ namespace KeyPressHelpers
         return 0;
     }
 
-   #if JUCE_MAC
+   #if JUCE_MAC || JUCE_IOS
     struct OSXSymbolReplacement
     {
         const char* text;
@@ -241,7 +241,7 @@ String KeyPress::getTextDescription() const
         if (mods.isCtrlDown())      desc << "ctrl + ";
         if (mods.isShiftDown())     desc << "shift + ";
 
-       #if JUCE_MAC
+       #if JUCE_MAC || JUCE_IOS
         if (mods.isAltDown())       desc << "option + ";
         if (mods.isCommandDown())   desc << "command + ";
        #else
@@ -274,7 +274,7 @@ String KeyPress::getTextDescription() const
 
 String KeyPress::getTextDescriptionWithIcons() const
 {
-   #if JUCE_MAC
+   #if JUCE_MAC || JUCE_IOS
     auto s = getTextDescription();
 
     for (int i = 0; i < numElementsInArray (KeyPressHelpers::osxSymbols); ++i)

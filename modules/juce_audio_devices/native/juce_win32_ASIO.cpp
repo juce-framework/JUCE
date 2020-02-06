@@ -43,7 +43,9 @@ namespace ASIODebugging
     {
         message = "ASIO: " + message;
         DBG (message);
-        Logger::writeToLog (message);
+
+        if (Logger::getCurrentLogger() != nullptr)
+            Logger::writeToLog (message);
     }
 
     static void logError (const String& context, long error)
@@ -336,7 +338,9 @@ public:
 
         close();
         JUCE_ASIO_LOG ("closed");
-        removeCurrentDriver();
+
+        if (! removeCurrentDriver())
+            JUCE_ASIO_LOG ("** Driver crashed while being closed");
     }
 
     void updateSampleRates()
@@ -451,7 +455,9 @@ public:
         if (needToReset)
         {
             JUCE_ASIO_LOG (" Resetting");
-            removeCurrentDriver();
+
+            if (! removeCurrentDriver())
+                JUCE_ASIO_LOG ("** Driver crashed while being closed");
 
             loadDriver();
             String initError = initDriver();
@@ -640,8 +646,8 @@ public:
     BigInteger getActiveOutputChannels() const override    { return currentChansOut; }
     BigInteger getActiveInputChannels() const override     { return currentChansIn; }
 
-    int getOutputLatencyInSamples() override     { return outputLatency + currentBlockSizeSamples / 4; }
-    int getInputLatencyInSamples() override      { return inputLatency + currentBlockSizeSamples / 4; }
+    int getOutputLatencyInSamples() override     { return outputLatency; }
+    int getInputLatencyInSamples() override      { return inputLatency; }
 
     void start (AudioIODeviceCallback* callback) override
     {
@@ -1075,28 +1081,32 @@ private:
         }
     }
 
-    static bool shouldReleaseObject (const String& driverName)
+    bool removeCurrentDriver()
     {
-        return driverName != "Yamaha Steinberg USB ASIO";
-    }
+        bool releasedOK = true;
 
-    void removeCurrentDriver()
-    {
         if (asioObject != nullptr)
         {
-            char buffer[512] = {};
-            asioObject->getDriverName (buffer);
-
-            if (shouldReleaseObject (buffer))
+           #if ! JUCE_MINGW
+            __try
+           #endif
+            {
                 asioObject->Release();
+            }
+           #if ! JUCE_MINGW
+            __except (EXCEPTION_EXECUTE_HANDLER) { releasedOK = false; }
+           #endif
 
             asioObject = nullptr;
         }
+
+        return releasedOK;
     }
 
     bool loadDriver()
     {
-        removeCurrentDriver();
+        if (! removeCurrentDriver())
+            JUCE_ASIO_LOG ("** Driver crashed while being closed");
 
         bool crashed = false;
         bool ok = tryCreatingDriver (crashed);
@@ -1256,7 +1266,9 @@ private:
         {
             JUCE_ASIO_LOG_ERROR (error, err);
             disposeBuffers();
-            removeCurrentDriver();
+
+            if (! removeCurrentDriver())
+                JUCE_ASIO_LOG ("** Driver crashed while being closed");
         }
         else
         {

@@ -143,7 +143,7 @@ public:
     */
     void removeValue (StringRef keyName);
 
-    /** Returns true if the properies include the given key. */
+    /** Returns true if the properties include the given key. */
     bool containsKey (StringRef keyName) const noexcept;
 
     /** Removes all values. */
@@ -190,7 +190,7 @@ public:
     PropertySet* getFallbackPropertySet() const noexcept                { return fallbackProperties; }
 
 protected:
-    /** Subclasses can override this to be told when one of the properies has been changed. */
+    /** Subclasses can override this to be told when one of the properties has been changed. */
     virtual void propertyChanged();
 
 private:

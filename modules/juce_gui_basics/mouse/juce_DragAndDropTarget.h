@@ -76,7 +76,7 @@ public:
         dragged.
 
         @param dragSourceDetails    contains information about the source of the drag operation.
-        @returns                    true if this component wants to receive the other callbacks regarging this
+        @returns                    true if this component wants to receive the other callbacks regarding this
                                     type of object; if it returns false, no other callbacks will be made.
     */
     virtual bool isInterestedInDragSource (const SourceDetails& dragSourceDetails) = 0;

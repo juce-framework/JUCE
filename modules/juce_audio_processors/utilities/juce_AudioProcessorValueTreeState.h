@@ -285,7 +285,7 @@ public:
         Note that calling this method from within AudioProcessorValueTreeState::Listener::parameterChanged()
         is not guaranteed to return an up-to-date value for the parameter.
     */
-    float* getRawParameterValue (StringRef parameterID) const noexcept;
+    std::atomic<float>* getRawParameterValue (StringRef parameterID) const noexcept;
 
     //==============================================================================
     /** A listener class that can be attached to an AudioProcessorValueTreeState.

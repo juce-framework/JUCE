@@ -153,7 +153,7 @@ public:
     //==============================================================================
     /** Easy way of quickly showing a dialog box containing a given component.
 
-        Note: This method has been superceded by the DialogWindow::LaunchOptions structure,
+        Note: This method has been superseded by the DialogWindow::LaunchOptions structure,
         which does the same job with some extra flexibility. The showDialog method is here
         for backwards compatibility, but please use DialogWindow::LaunchOptions in new code.
 
@@ -199,7 +199,7 @@ public:
    #if JUCE_MODAL_LOOPS_PERMITTED || DOXYGEN
     /** Easy way of quickly showing a dialog box containing a given component.
 
-        Note: This method has been superceded by the DialogWindow::LaunchOptions structure,
+        Note: This method has been superseded by the DialogWindow::LaunchOptions structure,
         which does the same job with some extra flexibility. The showDialog method is here
         for backwards compatibility, but please use DialogWindow::LaunchOptions in new code.
 

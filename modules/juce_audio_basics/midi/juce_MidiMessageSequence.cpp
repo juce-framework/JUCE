@@ -378,7 +378,7 @@ struct MidiMessageSequenceTest  : public UnitTest
         expectEquals (s.getIndexOfMatchingKeyUp (0), 2);
         expectEquals (s.getIndexOfMatchingKeyUp (1), 3);
 
-        beginTest ("Time & indeces");
+        beginTest ("Time & indices");
         expectEquals (s.getNextIndexAtTime (0.5), 1);
         expectEquals (s.getNextIndexAtTime (2.5), 2);
         expectEquals (s.getNextIndexAtTime (9.0), 4);

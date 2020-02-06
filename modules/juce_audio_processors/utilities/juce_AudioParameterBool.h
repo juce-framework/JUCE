@@ -88,7 +88,7 @@ private:
     float getValueForText (const String&) const override;
 
     const NormalisableRange<float> range { 0.0f, 1.0f, 1.0f };
-    float value;
+    std::atomic<float> value;
     const float defaultValue;
     std::function<String(bool, int)> stringFromBoolFunction;
     std::function<bool(const String&)> boolFromStringFunction;

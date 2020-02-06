@@ -24,6 +24,7 @@
   ==============================================================================
 */
 
+
 /*******************************************************************************
  The block below describes the properties of this module, and is read by
  the Projucer to automatically generate project code that uses it.
@@ -33,15 +34,15 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_product_unlocking
-  vendor:           juce
-  version:          5.4.5
-  name:             JUCE Online marketplace support
-  description:      Classes for online product authentication
-  website:          http://www.juce.com/juce
-  license:          GPL/Commercial
+  ID:                 juce_product_unlocking
+  vendor:             juce
+  version:            5.4.6
+  name:               JUCE Online marketplace support
+  description:        Classes for online product authentication
+  website:            http://www.juce.com/juce
+  license:            GPL/Commercial
 
-  dependencies:     juce_cryptography juce_core
+  dependencies:       juce_cryptography juce_core, juce_events
 
  END_JUCE_MODULE_DECLARATION
 
@@ -68,6 +69,7 @@
 //==============================================================================
 #include <juce_core/juce_core.h>
 #include <juce_cryptography/juce_cryptography.h>
+#include <juce_events/juce_events.h>
 
 #if JUCE_MODULE_AVAILABLE_juce_data_structures
  #include <juce_data_structures/juce_data_structures.h>
