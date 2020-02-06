@@ -45,24 +45,24 @@
  #import <AVKit/AVKit.h>
 
 //==============================================================================
-#elif JUCE_MSVC
+#elif JUCE_WINDOWS && ! JUCE_MINGW
  /* If you're using the camera classes, you'll need access to a few DirectShow headers.
      These files are provided in the normal Windows SDK. */
  #include <dshow.h>
  #include <dshowasf.h>
  #include <evr.h>
 
- #if JUCE_USE_CAMERA && JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
-  #pragma comment (lib, "Strmiids.lib")
-  #pragma comment (lib, "wmvcore.lib")
- #endif
-
- #if JUCE_MEDIAFOUNDATION && JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
-  #pragma comment (lib, "mfuuid.lib")
- #endif
-
- #if JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+ #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
   #pragma comment (lib, "strmiids.lib")
+
+  #if JUCE_USE_CAMERA
+   #pragma comment (lib, "Strmiids.lib")
+   #pragma comment (lib, "wmvcore.lib")
+  #endif
+
+  #if JUCE_MEDIAFOUNDATION
+   #pragma comment (lib, "mfuuid.lib")
+  #endif
  #endif
 #endif
 

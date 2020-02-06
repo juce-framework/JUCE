@@ -107,7 +107,7 @@
 //==============================================================================
 /** Config: JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
 
-    In a Visual C++  build, this can be used to stop the required system libs being
+    In a Windows build, this can be used to stop the required system libs being
     automatically added to the link stage.
 */
 #ifndef JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES

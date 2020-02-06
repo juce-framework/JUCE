@@ -71,25 +71,21 @@
   #include <exdispid.h>
  #endif
 
- #if JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+ #if JUCE_MINGW
+  #include <imm.h>
+ #elif ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
   #pragma comment(lib, "vfw32.lib")
   #pragma comment(lib, "imm32.lib")
- #endif
 
- #if JUCE_OPENGL
-  #if JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+  #if JUCE_OPENGL
    #pragma comment(lib, "OpenGL32.Lib")
    #pragma comment(lib, "GlU32.Lib")
   #endif
- #endif
 
- #if JUCE_DIRECT2D && JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
-  #pragma comment (lib, "Dwrite.lib")
-  #pragma comment (lib, "D2d1.lib")
- #endif
-
- #if JUCE_MINGW
-  #include <imm.h>
+  #if JUCE_DIRECT2D
+   #pragma comment (lib, "Dwrite.lib")
+   #pragma comment (lib, "D2d1.lib")
+  #endif
  #endif
 
 //==============================================================================
