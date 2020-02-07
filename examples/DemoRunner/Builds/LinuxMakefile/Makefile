@@ -32,7 +32,7 @@ ifeq ($(CONFIG),Debug)
   JUCE_OUTDIR := build
 
   ifeq ($(TARGET_ARCH),)
-    TARGET_ARCH := -march=native
+    TARGET_ARCH := 
   endif
 
   JUCE_CPPFLAGS := $(DEPFLAGS) -DLINUX=1 -DDEBUG=1 -D_DEBUG=1 -DJUCE_DEMO_RUNNER=1 -DJUCE_UNIT_TESTS=1 -DJUCER_LINUX_MAKE_6D53C8B4=1 -DJUCE_APP_VERSION=5.4.6 -DJUCE_APP_VERSION_HEX=0x50406 $(shell pkg-config --cflags alsa x11 xinerama xext freetype2 webkit2gtk-4.0 gtk+-x11-3.0 libcurl) -pthread -I../../JuceLibraryCode -I../../../../modules $(CPPFLAGS)
@@ -53,7 +53,7 @@ ifeq ($(CONFIG),Release)
   JUCE_OUTDIR := build
 
   ifeq ($(TARGET_ARCH),)
-    TARGET_ARCH := -march=native
+    TARGET_ARCH := 
   endif
 
   JUCE_CPPFLAGS := $(DEPFLAGS) -DLINUX=1 -DNDEBUG=1 -DJUCE_DEMO_RUNNER=1 -DJUCE_UNIT_TESTS=1 -DJUCER_LINUX_MAKE_6D53C8B4=1 -DJUCE_APP_VERSION=5.4.6 -DJUCE_APP_VERSION_HEX=0x50406 $(shell pkg-config --cflags alsa x11 xinerama xext freetype2 webkit2gtk-4.0 gtk+-x11-3.0 libcurl) -pthread -I../../JuceLibraryCode -I../../../../modules $(CPPFLAGS)

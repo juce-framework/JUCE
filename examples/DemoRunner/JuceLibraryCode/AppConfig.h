@@ -40,7 +40,7 @@
 #endif
 
 #ifndef JUCE_REPORT_APP_USAGE
- #define JUCE_REPORT_APP_USAGE 0
+ #define JUCE_REPORT_APP_USAGE 1
 #endif
 
 // END SECTION A
