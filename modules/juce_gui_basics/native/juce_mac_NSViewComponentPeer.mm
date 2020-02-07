@@ -1887,15 +1887,9 @@ private:
     static BOOL becomeFirstResponder (id self, SEL)
     {
         if (auto* owner = getOwner (self))
-        {
-            if (owner->canBecomeKeyWindow())
-            {
-                owner->viewFocusGain();
-                return YES;
-            }
-        }
+            owner->viewFocusGain();
 
-        return NO;
+        return YES;
     }
 
     static BOOL resignFirstResponder (id self, SEL)
