@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT name="DemoRunner" projectType="guiapp" jucerVersion="5.4.6" defines="JUCE_DEMO_RUNNER=1&#10;JUCE_UNIT_TESTS=1"
+<JUCERPROJECT name="DemoRunner" projectType="guiapp" jucerVersion="5.4.7" defines="JUCE_DEMO_RUNNER=1&#10;JUCE_UNIT_TESTS=1"
               bundleIdentifier="com.juce.demorunner" version="5.4.7" companyName="ROLI Ltd."
               companyCopyright="Copyright (c) 2018 - ROLI Ltd." companyWebsite="https://www.juce.com/"
               companyEmail="info@juce.com" id="yj7xMM" reportAppUsage="0">
