@@ -774,7 +774,8 @@ struct DescriptionFactory
                 }
             }
 
-            result = performOnDescription (desc);
+            if (desc.uid != 0)
+                result = performOnDescription (desc);
 
             if (result.failed())
                 break;
@@ -1593,9 +1594,11 @@ public:
     struct VST3Parameter final  : public Parameter
     {
         VST3Parameter (VST3PluginInstance& parent,
+                       int vstParameterIndex,
                        Steinberg::Vst::ParamID parameterID,
                        bool parameterIsAutomatable)
             : pluginInstance (parent),
+              vstParamIndex (vstParameterIndex),
               paramID (parameterID),
               automatable (parameterIsAutomatable)
         {
@@ -1653,19 +1656,24 @@ public:
             return Parameter::getValueForText (text);
         }
 
+        Vst::ParameterInfo getParameterInfo() const
+        {
+            return pluginInstance.getParameterInfoForIndex (vstParamIndex);
+        }
+
         float getDefaultValue() const override
         {
-            return (float) pluginInstance.getParameterInfoForIndex (getParameterIndex()).defaultNormalizedValue;
+            return (float) getParameterInfo().defaultNormalizedValue;
         }
 
         String getName (int /*maximumStringLength*/) const override
         {
-            return toString (pluginInstance.getParameterInfoForIndex (getParameterIndex()).title);
+            return toString (getParameterInfo().title);
         }
 
         String getLabel() const override
         {
-            return toString (pluginInstance.getParameterInfoForIndex (getParameterIndex()).units);
+            return toString (getParameterInfo().units);
         }
 
         bool isAutomatable() const override
@@ -1680,7 +1688,7 @@ public:
 
         int getNumSteps() const override
         {
-            auto stepCount = pluginInstance.getParameterInfoForIndex (getParameterIndex()).stepCount;
+            auto stepCount = getParameterInfo().stepCount;
             return stepCount == 0 ? AudioProcessor::getDefaultNumParameterSteps()
                                   : stepCount + 1;
         }
@@ -1691,6 +1699,7 @@ public:
         }
 
         VST3PluginInstance& pluginInstance;
+        const int vstParamIndex;
         const Steinberg::Vst::ParamID paramID;
         const bool automatable;
     };
@@ -1699,7 +1708,7 @@ public:
     VST3PluginInstance (VST3ComponentHolder* componentHolder)
         : AudioPluginInstance (getBusProperties (componentHolder->component)),
           holder (componentHolder),
-          inputParameterChanges (new ParamValueQueueList()),
+          inputParameterChanges  (new ParamValueQueueList()),
           outputParameterChanges (new ParamValueQueueList()),
           midiInputs (new MidiEventList()),
           midiOutputs (new MidiEventList())
@@ -2337,23 +2346,37 @@ public:
         JUCE_DECLARE_VST3_COM_REF_METHODS
         JUCE_DECLARE_VST3_COM_QUERY_METHODS
 
-        Steinberg::int32 PLUGIN_API getParameterCount() override                                { return numQueuesUsed; }
-        Vst::IParamValueQueue* PLUGIN_API getParameterData (Steinberg::int32 index) override    { return isPositiveAndBelow (static_cast<int> (index), numQueuesUsed) ? queues[(int) index] : nullptr; }
+        Steinberg::int32 PLUGIN_API getParameterCount() override
+        {
+            const ScopedLock sl (queuesLock);
+            return numQueuesUsed;
+        }
+
+        Vst::IParamValueQueue* PLUGIN_API getParameterData (Steinberg::int32 index) override
+        {
+            const ScopedLock sl (queuesLock);
+            return isPositiveAndBelow (static_cast<int> (index), numQueuesUsed) ? queues[(int) index] : nullptr;
+        }
 
         Vst::IParamValueQueue* PLUGIN_API addParameterData (const Vst::ParamID& id, Steinberg::int32& index) override
         {
+            const ScopedLock sl (queuesLock);
+
             for (int i = numQueuesUsed; --i >= 0;)
             {
-                if (queues.getUnchecked (i)->getParameterId() == id)
+                if (auto* q = queues.getUnchecked (i))
                 {
-                    index = (Steinberg::int32) i;
-                    return queues.getUnchecked (i);
+                    if (q->getParameterId() == id)
+                    {
+                        index = (Steinberg::int32) i;
+                        return q;
+                    }
                 }
             }
 
             index = numQueuesUsed++;
-            ParamValueQueue* valueQueue = (index < queues.size() ? queues[index]
-                                                                 : queues.add (new ParamValueQueue()));
+            auto* valueQueue = (index < queues.size() ? queues[index]
+                                                      : queues.add (new ParamValueQueue()));
 
             valueQueue->clear();
             valueQueue->setParamID (id);
@@ -2363,6 +2386,7 @@ public:
 
         void clearAllQueues() noexcept
         {
+            const ScopedLock sl (queuesLock);
             numQueuesUsed = 0;
         }
 
@@ -2387,18 +2411,20 @@ public:
                                                     Steinberg::int32& sampleOffset,
                                                     Steinberg::Vst::ParamValue& value) override
             {
-                const ScopedLock sl (pointLock);
+                const ScopedLock sl (points.getLock());
 
                 if (isPositiveAndBelow ((int) index, points.size()))
                 {
-                    ParamPoint e (points.getUnchecked ((int) index));
+                    auto e = points.getUnchecked ((int) index);
                     sampleOffset = e.sampleOffset;
                     value = e.value;
+
                     return kResultTrue;
                 }
 
                 sampleOffset = -1;
                 value = 0.0;
+
                 return kResultFalse;
             }
 
@@ -2406,19 +2432,12 @@ public:
                                                     Steinberg::Vst::ParamValue value,
                                                     Steinberg::int32& index) override
             {
-                ParamPoint p = { sampleOffset, value };
-
-                const ScopedLock sl (pointLock);
                 index = (Steinberg::int32) points.size();
-                points.add (p);
+                points.add ({ sampleOffset, value });
                 return kResultTrue;
             }
 
-            void clear() noexcept
-            {
-                const ScopedLock sl (pointLock);
-                points.clearQuick();
-            }
+            void clear() noexcept  { points.clearQuick(); }
 
         private:
             struct ParamPoint
@@ -2429,15 +2448,16 @@ public:
 
             Atomic<int> refCount;
             Vst::ParamID paramID = static_cast<Vst::ParamID> (-1);
-            Array<ParamPoint> points;
-            CriticalSection pointLock;
+            Array<ParamPoint, CriticalSection> points;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamValueQueue)
         };
 
         Atomic<int> refCount;
+
         OwnedArray<ParamValueQueue> queues;
         int numQueuesUsed = 0;
+        CriticalSection queuesLock;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamValueQueueList)
     };
@@ -2549,7 +2569,7 @@ private:
 
             for (int i = 1; i < numUnits; ++i)
             {
-                Vst::UnitInfo ui = { 0 };
+                Vst::UnitInfo ui{};
                 unitInfo->getUnitInfo (i, ui);
                 infoMap[ui.id] = std::move (ui);
             }
@@ -2559,6 +2579,7 @@ private:
         {
             auto paramInfo = getParameterInfoForIndex (i);
             auto* param = new VST3Parameter (*this,
+                                             i,
                                              paramInfo.id,
                                              (paramInfo.flags & Vst::ParameterInfo::kCanAutomate) != 0);
 
@@ -2566,7 +2587,6 @@ private:
                 bypassParam = param;
 
             std::function<AudioProcessorParameterGroup*(Vst::UnitID)> findOrCreateGroup;
-
             findOrCreateGroup = [&groupMap, &infoMap, &findOrCreateGroup](Vst::UnitID groupID)
             {
                 auto existingGroup = groupMap.find (groupID);
@@ -2765,7 +2785,7 @@ private:
 
     Vst::ParameterInfo getParameterInfoForIndex (int index) const
     {
-        Vst::ParameterInfo paramInfo = { 0 };
+        Vst::ParameterInfo paramInfo{};
 
         if (processor != nullptr)
             editController->getParameterInfo (index, paramInfo);
@@ -2775,7 +2795,7 @@ private:
 
     Vst::ProgramListInfo getProgramListInfo (int index) const
     {
-        Vst::ProgramListInfo paramInfo = { 0 };
+        Vst::ProgramListInfo paramInfo{};
 
         if (unitInfo != nullptr)
             unitInfo->getProgramListInfo (index, paramInfo);
@@ -2791,7 +2811,7 @@ private:
             return;
 
         Vst::UnitID programUnitID;
-        Vst::ParameterInfo paramInfo = { 0 };
+        Vst::ParameterInfo paramInfo{};
 
         {
             int idx, num = editController->getParameterCount();
@@ -2810,7 +2830,7 @@ private:
 
         if (unitInfo != nullptr)
         {
-            Vst::UnitInfo uInfo = { 0 };
+            Vst::UnitInfo uInfo{};
             const int unitCount = unitInfo->getUnitCount();
 
             for (int idx = 0; idx < unitCount; ++idx)
@@ -2822,7 +2842,7 @@ private:
 
                     for (int j = 0; j < programListCount; ++j)
                     {
-                        Vst::ProgramListInfo programListInfo = { 0 };
+                        Vst::ProgramListInfo programListInfo{};
 
                         if (unitInfo->getProgramListInfo (j, programListInfo) == kResultOk
                               && programListInfo.id == uInfo.programListId)
@@ -3014,7 +3034,19 @@ tresult VST3HostContext::ContextMenu::popup (Steinberg::UCoord x, Steinberg::UCo
     PopupMenu::Options options;
 
     if (auto* ed = owner.getActiveEditor())
+    {
+       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+        if (auto* peer = ed->getPeer())
+        {
+            auto scale = peer->getPlatformScaleFactor();
+
+            x = roundToInt (x / scale);
+            y = roundToInt (y / scale);
+        }
+       #endif
+
         options = options.withTargetScreenArea (ed->getScreenBounds().translated ((int) x, (int) y).withSize (1, 1));
+    }
 
    #if JUCE_MODAL_LOOPS_PERMITTED
     // Unfortunately, Steinberg's docs explicitly say this should be modal..

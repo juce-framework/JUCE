@@ -398,13 +398,6 @@
 			path = System/Library/Frameworks/CoreMedia.framework;
 			sourceTree = SDKROOT;
 		};
-		911BC81C9C4E07C2E2FD68C1 = {
-			isa = PBXFileReference;
-			lastKnownFileType = text.plist.xml;
-			name = UnitTestRunner.entitlements;
-			path = UnitTestRunner.entitlements;
-			sourceTree = "SOURCE_ROOT";
-		};
 		9514F6D920549F8A44B2E332 = {
 			isa = PBXFileReference;
 			lastKnownFileType = file;
@@ -817,6 +810,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "UnitTestRunner";
+				SDKROOT = macosx;
 				WARNING_CFLAGS = "-Wreorder";
 				ZERO_LINK = NO;
 			};
@@ -862,6 +856,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PRODUCT_NAME = "UnitTestRunner";
+				SDKROOT = macosx;
 				WARNING_CFLAGS = "-Wreorder";
 				ZERO_LINK = NO;
 			};

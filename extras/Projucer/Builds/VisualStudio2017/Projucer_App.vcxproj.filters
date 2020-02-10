@@ -496,6 +496,9 @@
     <ClCompile Include="..\..\Source\Utility\Helpers\jucer_MiscUtilities.cpp">
       <Filter>Projucer\Utility\Helpers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Utility\Helpers\jucer_VersionInfo.cpp">
+      <Filter>Projucer\Utility\Helpers</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Utility\PIPs\jucer_PIPGenerator.cpp">
       <Filter>Projucer\Utility\PIPs</Filter>
     </ClCompile>
@@ -614,9 +617,6 @@
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\misc\juce_RuntimePermissions.cpp">
-      <Filter>JUCE Modules\juce_core\misc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\misc\juce_StdFunctionCompat.cpp">
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\misc\juce_Uuid.cpp">
@@ -782,6 +782,9 @@
       <Filter>JUCE Modules\juce_core\threads</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\threads\juce_TimeSliceThread.cpp">
+      <Filter>JUCE Modules\juce_core\threads</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\threads\juce_WaitableEvent.cpp">
       <Filter>JUCE Modules\juce_core\threads</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\time\juce_PerformanceCounter.cpp">
@@ -2322,6 +2325,9 @@
     <ClInclude Include="..\..\Source\Utility\Helpers\jucer_ValueSourceHelpers.h">
       <Filter>Projucer\Utility\Helpers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\Helpers\jucer_VersionInfo.h">
+      <Filter>Projucer\Utility\Helpers</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Utility\PIPs\jucer_PIPGenerator.h">
       <Filter>Projucer\Utility\PIPs</Filter>
     </ClInclude>
@@ -2575,9 +2581,6 @@
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_RuntimePermissions.h">
-      <Filter>JUCE Modules\juce_core\misc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_StdFunctionCompat.h">
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_Uuid.h">

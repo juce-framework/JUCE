@@ -1,8 +1,104 @@
 JUCE breaking changes
 =====================
 
+Version 5.4.6
+=============
+
+Change
+------
+AudioProcessorValueTreeState::getRawParameterValue now returns a
+std::atomic<float>* instead of a float*.
+
+Possible Issues
+---------------
+Existing code which explicitly mentions the type of the returned value, or
+interacts with the dereferenced float in ways unsupported by the std::atomic
+wrapper, will fail to compile. Certain evaluation-reordering compiler
+optimisations may no longer be possible.
+
+Workaround
+----------
+Update your code to deal with a std::atomic<float>* instead of a float*.
+
+Rationale
+---------
+Returning a std::atomic<float>* allows the JUCE framework to have much stronger
+guarantees about thread safety.
+
+
+Change
+------
+Removed a workaround from the ASIOAudioIODevice::getOutputLatencyInSamples()
+and ASIOAudioIODevice::getInputLatencyInSamples() methods which was adding an
+arbitrary amount to the reported latencies to compensate for dodgy, old
+drivers.
+
+Possible Issues
+---------------
+Code which relied on these altered values may now behave differently.
+
+Workaround
+----------
+Update your code to deal with the new, correct values reported from the drivers
+directly.
+
+Rationale
+---------
+JUCE will now return the latency values as reported by the drivers without
+adding anything to them. The workaround was for old drivers and the current
+drivers should report the correct values without the need for the workaround.
+
+
+Change
+------
+The default behaviour of the AU and AUv3 plug-in wrappers is now to call
+get/setStateInformation instead of get/setProgramStateInformation.
+
+Possible Issues
+---------------
+AudioProcessor subclasses which have overridden the default implementations of
+get/setProgramStateInformation (which simply call through to
+get/setStateInformation) may be unable to load previously saved state; state
+previously saved via a call to getProgramStateInformation will be presented to
+setStateInformation.
+
+Workaround
+----------
+Enable the JUCE_AU_WRAPPERS_SAVE_PROGRAM_STATES configuration option in the
+juce_audio_plugin_client module to preserve backwards compatibility if
+required.
+
+Rationale
+---------
+When using overridden get/setProgramStateInformation methods the previous
+behaviour of the AU and AUv3 wrappers does not correctly save and restore
+state.
+
+
 Version 5.4.5
 =============
+
+Change
+------
+The alignment of text rendered on macOS using CoreGraphics may have shifted
+slightly, depending on the font you have used. The default macOS font has
+shifted downwards.
+
+Possible Issues
+---------------
+Meticulously aligned text components of a GUI may now be misaligned.
+
+Workaround
+----------
+Use a custom LookAndFeel to change the location where text is drawn, or use a
+different font that matches the previous alignment of your original font.
+
+Rationale
+---------
+This was an unintentional change resulting from moving away from a deprecated
+macOS text API. The new alignment is consistent with other rendering engines
+(web browsers and text editors) and the software renderer.
+
 
 Change
 ------

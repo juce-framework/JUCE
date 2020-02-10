@@ -46,7 +46,7 @@ public:
         ParentCursor = 0,               /**< Indicates that the component's parent's cursor should be used. */
 
         NoCursor,                       /**< An invisible cursor. */
-        NormalCursor,                   /**< The stardard arrow cursor. */
+        NormalCursor,                   /**< The standard arrow cursor. */
 
         WaitCursor,                     /**< The normal hourglass or spinning-beachball 'busy' cursor. */
         IBeamCursor,                    /**< A vertical I-beam for positioning within text. */

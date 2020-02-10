@@ -51,7 +51,7 @@
 //==============================================================================
 /** The Note class contains text editor used to display and edit the note's contents and will
     also listen to changes in the text and mark the FileBasedDocument as 'dirty'. This 'dirty'
-    flag is used to promt the user to save the note when it is closed.
+    flag is used to prompt the user to save the note when it is closed.
  */
 class Note    : public Component,
                 public FileBasedDocument

@@ -52,6 +52,19 @@
 
 #include "../Assets/DemoUtilities.h"
 
+/*
+    To finish the setup of this demo, do the following in the Projucer project:
+
+    1. In the project settings, set the "Bundle Identifier" to com.roli.juceInAppPurchaseSample
+    2. In the Android exporter settings, change the following settings:
+         - "In-App Billing" - Enabled
+         - "Key Signing: key.store" - path to InAppPurchase.keystore file in examples/Assets/Signing
+         - "Key Signing: key.store.password" - amazingvoices
+         - "Key Signing: key-alias" - InAppPurchase
+         - "Key Signing: key.alias.password" - amazingvoices
+    3. Re-save the project
+*/
+
 //==============================================================================
 class VoicePurchases      : private InAppPurchases::Listener
 {
@@ -108,7 +121,7 @@ public:
                 purchaseInProgress = true;
 
                 product.purchaseInProgress = true;
-                InAppPurchases::getInstance()->purchaseProduct (product.identifier, false);
+                InAppPurchases::getInstance()->purchaseProduct (product.identifier);
 
                 guiUpdater.triggerAsyncUpdate();
             }

@@ -532,11 +532,8 @@ bool JucerDocument::flushChangesToDocuments (Project* project, bool isInitial)
         String existingHeader (header->getCodeDocument().getAllContent());
         String existingCpp (cpp->getCodeDocument().getAllContent());
 
-        generated.applyToCode (headerTemplate, headerFile,
-                               existingHeader, project);
-
-        generated.applyToCode (cppTemplate, headerFile.withFileExtension (".cpp"),
-                               existingCpp, project);
+        generated.applyToCode (headerTemplate, headerFile, existingHeader);
+        generated.applyToCode (cppTemplate, headerFile.withFileExtension (".cpp"), existingCpp);
 
         if (isInitial)
         {

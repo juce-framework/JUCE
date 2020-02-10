@@ -54,9 +54,7 @@ public:
         addAndMakeVisible (modulesLabel);
         modulesLabel.attachToComponent (&currentPathBox, true);
 
-        addAndMakeVisible (useGlobalPathsToggle);
-        useGlobalPathsToggle.setToggleState (true, sendNotification);
-        useGlobalPathsToggle.onClick = [this]
+        auto updateEnablement = [this]
         {
             isUsingGlobalPaths = useGlobalPathsToggle.getToggleState();
 
@@ -64,6 +62,12 @@ public:
             openFolderButton.setEnabled (! isUsingGlobalPaths);
             modulesLabel.setEnabled     (! isUsingGlobalPaths);
         };
+
+        addAndMakeVisible (useGlobalPathsToggle);
+        useGlobalPathsToggle.setToggleState (true, sendNotification);
+        useGlobalPathsToggle.onClick = [updateEnablement] { updateEnablement(); };
+
+        updateEnablement();
     }
 
     void resized() override
@@ -419,7 +423,10 @@ public:
                     return;
 
                 if (modulesPathBox.isUsingGlobalPaths)
+                {
                     getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS()).setValue (wizard->modulesFolder.getFullPathName(), nullptr);
+                    ProjucerApplication::getApp().rescanJUCEPathModules();
+                }
             }
 
             auto projectDir = fileBrowser.getSelectedFile (0);
@@ -429,7 +436,7 @@ public:
 
             if (project != nullptr)
             {
-                mw->setProject (project.release());
+                mw->setProject (std::move (project));
                 getAppSettings().lastWizardFolder = projectDir.getParentDirectory();
             }
         }

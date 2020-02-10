@@ -48,7 +48,11 @@
 #if JUCE_WINDOWS
  #include <ctime>
 
- #if ! JUCE_MINGW
+ #if JUCE_MINGW
+  #include <ws2spi.h>
+  #include <cstdio>
+  #include <locale.h>
+ #else
   #pragma warning (push)
   #pragma warning (disable: 4091)
   #include <Dbghelp.h>
@@ -57,12 +61,6 @@
   #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
    #pragma comment (lib, "DbgHelp.lib")
   #endif
- #endif
-
- #if JUCE_MINGW
-  #include <ws2spi.h>
-  #include <cstdio>
-  #include <locale.h>
  #endif
 
 #else
@@ -110,10 +108,6 @@
  #include <android/log.h>
 #endif
 
-#if JUCE_BELA
- #include <alchemy/timer.h>
-#endif
-
 #undef check
 
 //==============================================================================
@@ -145,7 +139,6 @@
 #include "misc/juce_RuntimePermissions.cpp"
 #include "misc/juce_Result.cpp"
 #include "misc/juce_Uuid.cpp"
-#include "misc/juce_StdFunctionCompat.cpp"
 #include "misc/juce_ConsoleApplication.cpp"
 #include "network/juce_MACAddress.cpp"
 #include "network/juce_NamedPipe.cpp"
@@ -239,6 +232,7 @@
 
 #include "threads/juce_ChildProcess.cpp"
 #include "threads/juce_HighResolutionTimer.cpp"
+#include "threads/juce_WaitableEvent.cpp"
 #include "network/juce_URL.cpp"
 #include "network/juce_WebInputStream.cpp"
 #include "streams/juce_URLInputSource.cpp"

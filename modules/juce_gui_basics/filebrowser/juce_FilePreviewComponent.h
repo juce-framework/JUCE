@@ -54,7 +54,7 @@ public:
     /** Called to indicate that the user's currently selected file has changed.
 
         @param newSelectedFile  the newly selected file or directory, which may be
-                                a defualt File() object if none is selected.
+                                a default File() object if none is selected.
     */
     virtual void selectedFileChanged (const File& newSelectedFile) = 0;
 

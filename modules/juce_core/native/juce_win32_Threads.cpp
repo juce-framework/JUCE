@@ -49,20 +49,6 @@ void CriticalSection::exit() const noexcept         { LeaveCriticalSection ((CRI
 
 
 //==============================================================================
-WaitableEvent::WaitableEvent (const bool manualReset) noexcept
-    : handle (CreateEvent (0, manualReset ? TRUE : FALSE, FALSE, 0)) {}
-
-WaitableEvent::~WaitableEvent() noexcept        { CloseHandle (handle); }
-
-void WaitableEvent::signal() const noexcept     { SetEvent (handle); }
-void WaitableEvent::reset() const noexcept      { ResetEvent (handle); }
-
-bool WaitableEvent::wait (const int timeOutMs) const noexcept
-{
-    return WaitForSingleObject (handle, (DWORD) timeOutMs) == WAIT_OBJECT_0;
-}
-
-//==============================================================================
 void JUCE_API juce_threadEntryPoint (void*);
 
 static unsigned int __stdcall threadEntryProc (void* userData)
@@ -258,15 +244,8 @@ void JUCE_CALLTYPE Process::setCurrentModuleInstanceHandle (void* const newHandl
     currentModuleHandle = newHandle;
 }
 
-void JUCE_CALLTYPE Process::raisePrivilege()
-{
-    jassertfalse; // xxx not implemented
-}
-
-void JUCE_CALLTYPE Process::lowerPrivilege()
-{
-    jassertfalse; // xxx not implemented
-}
+void JUCE_CALLTYPE Process::raisePrivilege() {}
+void JUCE_CALLTYPE Process::lowerPrivilege() {}
 
 void JUCE_CALLTYPE Process::terminate()
 {

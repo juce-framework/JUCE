@@ -126,14 +126,14 @@ public:
         Don't forget to set the sample rate of that processing to N times the original
         sample rate.
     */
-    dsp::AudioBlock<SampleType> processSamplesUp (const dsp::AudioBlock<SampleType>& inputBlock) noexcept;
+    AudioBlock<SampleType> processSamplesUp (const AudioBlock<const SampleType>& inputBlock) noexcept;
 
     /** Must be called to perform the downsampling, after the upsampling and the
         non-linear processing. The output signal is probably delayed by the internal
         latency of the whole oversampling behaviour, so don't forget to take this
         into account.
     */
-    void processSamplesDown (dsp::AudioBlock<SampleType>& outputBlock) noexcept;
+    void processSamplesDown (AudioBlock<SampleType>& outputBlock) noexcept;
 
     //==============================================================================
     /** Adds a new oversampling stage to the Oversampling class, multiplying the

@@ -746,7 +746,7 @@ private:
 
                 JUCE_CAMERA_LOG ("Available image codec types: " + typesString);
                 JUCE_CAMERA_LOG ("Still image stabilization supported: " + String ((int) stillImageOutput.stillImageStabilizationSupported));
-                JUCE_CAMERA_LOG ("Automatically enableds still image stabilization when available: " + String ((int) stillImageOutput.automaticallyEnablesStillImageStabilizationWhenAvailable));
+                JUCE_CAMERA_LOG ("Automatically enables still image stabilization when available: " + String ((int) stillImageOutput.automaticallyEnablesStillImageStabilizationWhenAvailable));
 
                 JUCE_CAMERA_LOG ("Output settings for image output: " + nsStringToJuce ([stillImageOutput.outputSettings description]));
             }

@@ -24,6 +24,8 @@
   ==============================================================================
 */
 
+#if JucePlugin_Build_Standalone
+
 #if ! JUCE_MODULE_AVAILABLE_juce_audio_utils
  #error To compile AudioUnitv3 and/or Standalone plug-ins, you need to add the juce_audio_utils and juce_audio_devices modules!
 #endif
@@ -42,3 +44,5 @@
 #endif
 
 JUCE_MAIN_FUNCTION_DEFINITION
+
+#endif

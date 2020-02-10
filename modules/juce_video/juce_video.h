@@ -34,17 +34,17 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_video
-  vendor:           juce
-  version:          5.4.5
-  name:             JUCE video playback and capture classes
-  description:      Classes for playing video and capturing camera input.
-  website:          http://www.juce.com/juce
-  license:          GPL/Commercial
+  ID:                 juce_video
+  vendor:             juce
+  version:            5.4.6
+  name:               JUCE video playback and capture classes
+  description:        Classes for playing video and capturing camera input.
+  website:            http://www.juce.com/juce
+  license:            GPL/Commercial
 
-  dependencies:     juce_gui_extra
-  OSXFrameworks:    AVKit AVFoundation CoreMedia
-  iOSFrameworks:    AVKit AVFoundation CoreMedia
+  dependencies:       juce_gui_extra
+  OSXFrameworks:      AVKit AVFoundation CoreMedia
+  iOSFrameworks:      AVKit AVFoundation CoreMedia
 
  END_JUCE_MODULE_DECLARATION
 

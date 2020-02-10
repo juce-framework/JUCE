@@ -45,7 +45,7 @@ public:
 
         Note that the destination block will always be larger than the amount of data
         that has been written to the stream, because the MemoryOutputStream keeps some
-        spare capactity at its end. To trim the block's size down to fit the actual
+        spare capacity at its end. To trim the block's size down to fit the actual
         data, call flush(), or delete the MemoryOutputStream.
 
         @param memoryBlockToWriteTo             the block into which new data will be written.

@@ -23,7 +23,7 @@
 namespace juce
 {
 
-/** Describes a phyiscal connection between two ports of two block devices.
+/** Describes a physical connection between two ports of two block devices.
 
     @tags{Blocks}
 */

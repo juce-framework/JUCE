@@ -248,7 +248,7 @@ public:
         This function can only be called if the context is attached to a component.
         Otherwise, this function will assert.
 
-        This function is useful when you need to excute house-keeping tasks such
+        This function is useful when you need to execute house-keeping tasks such
         as allocating, deallocating textures or framebuffers. As such, the functor
         will execute without locking the message thread. Therefore, it is not
         intended for any drawing commands or GUI code. Any GUI code should be
@@ -273,7 +273,7 @@ public:
     */
     unsigned int getFrameBufferID() const noexcept;
 
-    /** Returns an OS-dependent handle to some kind of underlting OS-provided GL context.
+    /** Returns an OS-dependent handle to some kind of underlying OS-provided GL context.
 
         The exact type of the value returned will depend on the OS and may change
         if the implementation changes. If you want to use this, digging around in the
