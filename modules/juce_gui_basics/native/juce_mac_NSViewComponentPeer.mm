@@ -997,7 +997,7 @@ public:
     }
 
     //==============================================================================
-    bool sendModalInputAttemptIfBlocked()
+    bool isBlockedByModalComponent()
     {
         if (auto* modal = Component::getCurrentlyModalComponent())
         {
@@ -1005,12 +1005,18 @@ public:
                  && (! getComponent().isParentOf (modal))
                  && getComponent().isCurrentlyBlockedByAnotherModalComponent())
             {
-                modal->inputAttemptWhenModal();
                 return true;
             }
         }
 
         return false;
+    }
+
+    void sendModalInputAttemptIfBlocked()
+    {
+        if (isBlockedByModalComponent())
+            if (auto* modal = Component::getCurrentlyModalComponent())
+                modal->inputAttemptWhenModal();
     }
 
     bool canBecomeKeyWindow()
@@ -1068,11 +1074,13 @@ public:
 
     void liveResizingStart()
     {
-        if (constrainer != nullptr)
-        {
-            constrainer->resizeStart();
-            isFirstLiveResize = true;
-        }
+        if (constrainer == nullptr)
+            return;
+
+        constrainer->resizeStart();
+        isFirstLiveResize = true;
+
+        setFullScreenSizeConstraints (*constrainer);
     }
 
     void liveResizingEnd()
@@ -1081,37 +1089,34 @@ public:
             constrainer->resizeEnd();
     }
 
-    NSRect constrainRect (NSRect r)
+    NSRect constrainRect (const NSRect r)
     {
-        if (constrainer != nullptr && ! isKioskMode())
+        if (constrainer == nullptr || isKioskMode())
+            return r;
+
+        const auto scale = getComponent().getDesktopScaleFactor();
+
+        auto pos            = ScalingHelpers::unscaledScreenPosToScaled (scale, convertToRectInt (flippedScreenRect (r)));
+        const auto original = ScalingHelpers::unscaledScreenPosToScaled (scale, convertToRectInt (flippedScreenRect ([window frame])));
+
+        const auto screenBounds = Desktop::getInstance().getDisplays().getTotalBounds (true);
+
+        const bool inLiveResize = [window inLiveResize];
+
+        if (! inLiveResize || isFirstLiveResize)
         {
-            auto scale = getComponent().getDesktopScaleFactor();
+            isFirstLiveResize = false;
 
-            auto pos      = ScalingHelpers::unscaledScreenPosToScaled (scale, convertToRectInt (flippedScreenRect (r)));
-            auto original = ScalingHelpers::unscaledScreenPosToScaled (scale, convertToRectInt (flippedScreenRect ([window frame])));
-
-            auto screenBounds = Desktop::getInstance().getDisplays().getTotalBounds (true);
-
-            const bool inLiveResize = [window inLiveResize];
-
-            if (! inLiveResize || isFirstLiveResize)
-            {
-                isFirstLiveResize = false;
-
-                isStretchingTop    = (pos.getY() != original.getY() && pos.getBottom() == original.getBottom());
-                isStretchingLeft   = (pos.getX() != original.getX() && pos.getRight()  == original.getRight());
-                isStretchingBottom = (pos.getY() == original.getY() && pos.getBottom() != original.getBottom());
-                isStretchingRight  = (pos.getX() == original.getX() && pos.getRight()  != original.getRight());
-            }
-
-            constrainer->checkBounds (pos, original, screenBounds,
-                                      isStretchingTop, isStretchingLeft, isStretchingBottom, isStretchingRight);
-
-            pos = ScalingHelpers::scaledScreenPosToUnscaled (scale, pos);
-            r = flippedScreenRect (makeNSRect (pos));
+            isStretchingTop    = (pos.getY() != original.getY() && pos.getBottom() == original.getBottom());
+            isStretchingLeft   = (pos.getX() != original.getX() && pos.getRight()  == original.getRight());
+            isStretchingBottom = (pos.getY() == original.getY() && pos.getBottom() != original.getBottom());
+            isStretchingRight  = (pos.getX() == original.getX() && pos.getRight()  != original.getRight());
         }
 
-        return r;
+        constrainer->checkBounds (pos, original, screenBounds,
+                                  isStretchingTop, isStretchingLeft, isStretchingBottom, isStretchingRight);
+
+        return flippedScreenRect (makeNSRect (ScalingHelpers::scaledScreenPosToUnscaled (scale, pos)));
     }
 
     static void showArrowCursorIfNeeded()
@@ -1557,6 +1562,13 @@ private:
         return true;
     }
 
+    void setFullScreenSizeConstraints (const ComponentBoundsConstrainer& c)
+    {
+        const auto minSize = NSMakeSize (static_cast<float> (c.getMinimumWidth()),
+                                         0.0f);
+        [window setMinFullScreenContentSize: minSize];
+    }
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponentPeer)
 };
 
@@ -1881,15 +1893,9 @@ private:
     static BOOL becomeFirstResponder (id self, SEL)
     {
         if (auto* owner = getOwner (self))
-        {
-            if (owner->canBecomeKeyWindow())
-            {
-                owner->viewFocusGain();
-                return YES;
-            }
-        }
+            owner->viewFocusGain();
 
-        return NO;
+        return YES;
     }
 
     static BOOL resignFirstResponder (id self, SEL)
@@ -1988,7 +1994,7 @@ private:
 
         return owner != nullptr
                 && owner->canBecomeKeyWindow()
-                && ! owner->sendModalInputAttemptIfBlocked();
+                && ! owner->isBlockedByModalComponent();
     }
 
     static BOOL canBecomeMainWindow (id self, SEL)
@@ -1997,7 +2003,7 @@ private:
 
         return owner != nullptr
                 && owner->canBecomeMainWindow()
-                && ! owner->sendModalInputAttemptIfBlocked();
+                && ! owner->isBlockedByModalComponent();
     }
 
     static void becomeKeyWindow (id self, SEL)

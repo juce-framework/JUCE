@@ -87,7 +87,6 @@ public:
 
     void filesDropped (const StringArray& selectedFiles, int, int) override
     {
-
         setTo (selectedFiles[0]);
 
         highlightForDragAndDrop = false;

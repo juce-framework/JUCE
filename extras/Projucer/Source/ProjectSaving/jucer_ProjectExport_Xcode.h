@@ -2152,7 +2152,8 @@ private:
     void addFilesAndGroupsToProject (StringArray& topLevelGroupIDs) const
     {
         for (auto* target : targets)
-            addEntitlementsFile (*target);
+            if (target->shouldAddEntitlements())
+                addEntitlementsFile (*target);
 
         for (auto& group : getAllGroups())
         {
@@ -3116,18 +3117,34 @@ private:
     {
         StringPairArray entitlements;
 
-        if (project.isAudioPluginProject())
+        if (isiOS())
         {
-            if (isiOS() && project.shouldEnableIAA())
+            if (project.isAudioPluginProject() && project.shouldEnableIAA())
                 entitlements.set ("inter-app-audio", "<true/>");
+
+            if (isiCloudPermissionsEnabled())
+            {
+                entitlements.set ("com.apple.developer.icloud-container-identifiers",
+                                  "<array>\n"
+                                  "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
+                                  "    </array>");
+
+                entitlements.set ("com.apple.developer.icloud-services",
+                                  "<array>\n"
+                                  "        <string>CloudDocuments</string>\n"
+                                  "    </array>");
+
+                entitlements.set ("com.apple.developer.ubiquity-container-identifiers",
+                                  "<array>\n"
+                                  "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
+                                  "    </array>");
+            }
         }
-        else
-        {
-            if (isPushNotificationsEnabled())
-                entitlements.set (isiOS() ? "aps-environment"
-                                          : "com.apple.developer.aps-environment",
-                                            "<string>development</string>");
-        }
+
+        if (isPushNotificationsEnabled())
+            entitlements.set (isiOS() ? "aps-environment"
+                                      : "com.apple.developer.aps-environment",
+                                        "<string>development</string>");
 
         if (isAppGroupsEnabled())
         {
@@ -3163,52 +3180,31 @@ private:
                     entitlements.set (option, "<true/>");
         }
 
-        if (isiOS() && isiCloudPermissionsEnabled())
-        {
-            entitlements.set ("com.apple.developer.icloud-container-identifiers",
-                              "<array>\n"
-                              "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
-                              "    </array>");
-
-            entitlements.set ("com.apple.developer.icloud-services",
-                              "<array>\n"
-                              "        <string>CloudDocuments</string>\n"
-                              "    </array>");
-
-            entitlements.set ("com.apple.developer.ubiquity-container-identifiers",
-                              "<array>\n"
-                              "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
-                              "    </array>");
-        }
-
         return entitlements;
     }
 
     void addEntitlementsFile (XcodeTarget& target) const
     {
+        String content =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+            "<plist version=\"1.0\">\n"
+            "<dict>\n";
+
         auto entitlements = getEntitlements (target);
 
-        if (entitlements.size() > 0)
-        {
-            String content =
-                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-                "<plist version=\"1.0\">\n"
-                "<dict>\n";
+        for (auto& key : entitlements.getAllKeys())
+            content += "\t<key>" + key + "</key>\n"
+                       "\t" + entitlements[key] + "\n";
 
-            for (auto& key : entitlements.getAllKeys())
-                content += "\t<key>" + key + "</key>\n"
-                           "\t" + entitlements[key] + "\n";
+        content += "</dict>\n"
+                   "</plist>\n";
 
-            content += "</dict>\n"
-                       "</plist>\n";
+        auto entitlementsFile = getTargetFolder().getChildFile (target.getEntitlementsFilename());
+        overwriteFileIfDifferentOrThrow (entitlementsFile, content);
 
-            auto entitlementsFile = getTargetFolder().getChildFile (target.getEntitlementsFilename());
-            overwriteFileIfDifferentOrThrow (entitlementsFile, content);
-
-            RelativePath entitlementsPath (entitlementsFile, getTargetFolder(), RelativePath::buildTargetFolder);
-            addFile (entitlementsPath, false, false, false, false, nullptr, {});
-        }
+        RelativePath entitlementsPath (entitlementsFile, getTargetFolder(), RelativePath::buildTargetFolder);
+        addFile (entitlementsPath, false, false, false, false, nullptr, {});
     }
 
     String addProjectItem (const Project::Item& projectItem) const
