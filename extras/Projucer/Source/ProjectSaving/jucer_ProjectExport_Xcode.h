@@ -497,6 +497,7 @@ public:
 
         props.add (new TextPropertyComponent (subprojectsValue, "Xcode Subprojects", 8192, true),
                    "Paths to Xcode projects that should be added to the build (one per line). "
+                   "These can be absolute or relative to the build directory. "
                    "The names of the required build products can be specified after a colon, comma separated, "
                    "e.g. \"path/to/MySubProject.xcodeproj: MySubProject, OtherTarget\". "
                    "If no build products are specified, all build products associated with a subproject will be added.");
@@ -2782,19 +2783,8 @@ private:
             if (! subprojectPath.endsWith (".xcodeproj"))
                 subprojectPath += ".xcodeproj";
 
-            File subprojectFile;
-
-            if (File::isAbsolutePath (subprojectPath))
-            {
-                subprojectFile = subprojectPath;
-            }
-            else
-            {
-                subprojectFile = getProject().getProjectFolder().getChildFile (subprojectPath);
-
-                RelativePath p (subprojectPath, RelativePath::projectFolder);
-                subprojectPath = p.rebased (getProject().getProjectFolder(), getTargetFolder(), RelativePath::buildTargetFolder).toUnixStyle();
-            }
+            File subprojectFile = File::isAbsolutePath (subprojectPath) ? subprojectPath
+                                                                        : getTargetFolder().getChildFile (subprojectPath);
 
             if (! subprojectFile.isDirectory())
                 continue;
@@ -2815,8 +2805,8 @@ private:
             if (availableBuildProducts.empty())
                 continue;
 
-            auto subprojectFileType = getFileType (RelativePath (subprojectPath, RelativePath::projectFolder));
-            auto subprojectFileID = addFileOrFolderReference (subprojectPath, "<group>", subprojectFileType);
+            auto subprojectFileType = getFileType (RelativePath (subprojectFile.getFullPathName(), RelativePath::buildTargetFolder));
+            auto subprojectFileID = addFileOrFolderReference (subprojectFile.getFullPathName(), "<group>", subprojectFileType);
             subprojectFileIDs.add (subprojectFileID);
 
             StringArray proxyIDs;
@@ -2851,7 +2841,7 @@ private:
                 }
             }
 
-            auto productGroupID = createFileRefID (subprojectPath + "_products");
+            auto productGroupID = createFileRefID (subprojectFile.getFullPathName() + "_products");
             addGroup (productGroupID, "Products", proxyIDs);
 
             subprojectReferences.add ({ productGroupID, subprojectFileID });
