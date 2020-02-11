@@ -2100,7 +2100,7 @@ void Project::rescanExporterPathModules (bool async)
         exporterPathsModuleList->scanPaths (getExporterModulePathsToScan (*this));
 }
 
-ModuleIDAndFolder Project::getModuleWithID (const String& id)
+AvailableModuleList::ModuleIDAndFolder Project::getModuleWithID (const String& id)
 {
     if (! getEnabledModules().shouldUseGlobalPath (id))
     {

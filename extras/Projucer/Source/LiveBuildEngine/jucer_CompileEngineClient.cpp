@@ -256,7 +256,7 @@ public:
         build.setGlobalDefs (getGlobalDefs());
         build.setCompileFlags (project.getCompileEngineSettings().getExtraCompilerFlagsString());
         build.setExtraDLLs (getExtraDLLs());
-        build.setJuceModulesFolder (EnabledModuleList::findDefaultModulesFolder (project).getFullPathName());
+        build.setJuceModulesFolder (project.getEnabledModules().getDefaultModulesFolder().getFullPathName());
 
         build.setUtilsCppInclude (project.getAppIncludeFile().getFullPathName());
 
@@ -388,10 +388,10 @@ private:
                 {
                     for (auto* m : modules)
                     {
-                        auto localModuleFolder = proj.getEnabledModules().shouldCopyModuleFilesLocally (m->moduleInfo.getID()).getValue()
-                                                        ? proj.getLocalModuleFolder (m->moduleInfo.getID())
-                                                        : m->moduleInfo.getFolder();
+                        auto copyLocally = proj.getEnabledModules().shouldCopyModuleFilesLocally (m->moduleInfo.getID());
 
+                        auto localModuleFolder = copyLocally ? proj.getLocalModuleFolder (m->moduleInfo.getID())
+                                                             : m->moduleInfo.getFolder();
 
                         m->findAndAddCompiledUnits (*exporter, nullptr, compileUnits,
                                                     isPluginProject || isVSTHost ? ProjectType::Target::SharedCodeTarget

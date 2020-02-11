@@ -835,17 +835,16 @@ public:
     void audioProcessorChanged (AudioProcessor*) override
     {
         vstEffect.initialDelay = processor->getLatencySamples();
-
-        if (hostCallback != nullptr)
-            hostCallback (&vstEffect, Vst2::audioMasterUpdateDisplay, 0, 0, nullptr, 0);
-
         triggerAsyncUpdate();
     }
 
     void handleAsyncUpdate() override
     {
         if (hostCallback != nullptr)
-            hostCallback (&vstEffect, Vst2::audioMasterIOChanged, 0, 0, nullptr, 0);
+        {
+            hostCallback (&vstEffect, Vst2::audioMasterUpdateDisplay, 0, 0, nullptr, 0);
+            hostCallback (&vstEffect, Vst2::audioMasterIOChanged,     0, 0, nullptr, 0);
+        }
     }
 
     bool getPinProperties (Vst2::VstPinProperties& properties, bool direction, int index) const

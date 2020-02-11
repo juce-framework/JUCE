@@ -36,7 +36,7 @@
 
   ID:                 juce_opengl
   vendor:             juce
-  version:            5.4.6
+  version:            5.4.7
   name:               JUCE OpenGL classes
   description:        Classes for rendering OpenGL in a JUCE window.
   website:            http://www.juce.com/juce

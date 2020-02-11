@@ -31,15 +31,10 @@ class ProjectExporter;
 class ProjectSaver;
 
 //==============================================================================
-bool isJUCEModulesFolder (const File&);
-bool isJUCEFolder (const File&);
-
-//==============================================================================
 struct ModuleDescription
 {
-    ModuleDescription() {}
+    ModuleDescription() = default;
     ModuleDescription (const File& folder);
-    ModuleDescription (const var& info) : moduleInfo (info) {}
 
     bool isValid() const                    { return getID().isNotEmpty(); }
 
@@ -56,8 +51,6 @@ struct ModuleDescription
 
     File getFolder() const                  { jassert (moduleFolder != File()); return moduleFolder; }
     File getHeader() const;
-
-    bool isPluginClient() const             { return getID() == "juce_audio_plugin_client"; }
 
     File moduleFolder;
     var moduleInfo;
@@ -91,7 +84,6 @@ public:
         File file;
         bool isCompiledForObjC, isCompiledForNonObjC;
 
-        void writeInclude (MemoryOutputStream&) const;
         bool isNeededForExporter (ProjectExporter&) const;
         String getFilenameForProxyFile() const;
         static bool hasSuffix (const File&, const char*);
@@ -104,20 +96,25 @@ public:
     ModuleDescription moduleInfo;
 
 private:
-    mutable Array<File> sourceFiles;
-    OwnedArray<Project::ConfigFlag> configFlags;
+    void addSearchPathsToExporter (ProjectExporter&) const;
+    void addDefinesToExporter (ProjectExporter&) const;
+    void addCompileUnitsToExporter (ProjectExporter&, ProjectSaver&) const;
+    void addLibsToExporter (ProjectExporter&) const;
 
     void addBrowseableCode (ProjectExporter&, const Array<File>& compiled, const File& localModuleFolder) const;
+
+    mutable Array<File> sourceFiles;
+    OwnedArray<Project::ConfigFlag> configFlags;
 };
 
 //==============================================================================
-using ModuleIDAndFolder     = std::pair<String, File>;
-using ModuleIDAndFolderList = std::vector<ModuleIDAndFolder>;
-
 class AvailableModuleList
 {
 public:
-    AvailableModuleList();
+    using ModuleIDAndFolder     = std::pair<String, File>;
+    using ModuleIDAndFolderList = std::vector<ModuleIDAndFolder>;
+
+    AvailableModuleList() = default;
 
     void scanPaths      (const Array<File>&);
     void scanPathsAsync (const Array<File>&);
@@ -157,46 +154,49 @@ class EnabledModuleList
 public:
     EnabledModuleList (Project&, const ValueTree&);
 
-    static File findDefaultModulesFolder (Project&);
+    //==============================================================================
+    ValueTree getState() const              { return state; }
 
-    bool isModuleEnabled (const String& moduleID) const;
+    StringArray getAllModules() const;
+    void createRequiredModules (OwnedArray<LibraryModule>& modules);
+    void sortAlphabetically();
 
-    bool shouldUseGlobalPath (const String& moduleID) const;
-    Value getShouldUseGlobalPathValue (const String& moduleID) const;
+    File getDefaultModulesFolder() const;
 
-    Value shouldShowAllModuleFilesInProject (const String& moduleID);
-    Value shouldCopyModuleFilesLocally (const String& moduleID) const;
-
-    void removeModule (String moduleID);
-    bool isAudioPluginModuleMissing() const;
+    int getNumModules() const               { return state.getNumChildren(); }
+    String getModuleID (int index) const    { return state.getChild (index) [Ids::ID].toString(); }
 
     ModuleDescription getModuleInfo (const String& moduleID);
 
+    bool isModuleEnabled (const String& moduleID) const;
+    StringArray getExtraDependenciesNeeded (const String& moduleID) const;
+    bool doesModuleHaveHigherCppStandardThanProject (const String& moduleID);
+
+    bool shouldUseGlobalPath (const String& moduleID) const;
+    Value shouldUseGlobalPathValue (const String& moduleID) const;
+
+    bool shouldShowAllModuleFilesInProject (const String& moduleID) const;
+    Value shouldShowAllModuleFilesInProjectValue (const String& moduleID) const;
+
+    bool shouldCopyModuleFilesLocally (const String& moduleID) const;
+    Value shouldCopyModuleFilesLocallyValue (const String& moduleID) const;
+
+    bool areMostModulesUsingGlobalPath() const;
+    bool areMostModulesCopiedLocally() const;
+
+    //==============================================================================
     void addModule (const File& moduleManifestFile, bool copyLocally, bool useGlobalPath, bool sendAnalyticsEvent);
     void addModuleInteractive (const String& moduleID);
     void addModuleFromUserSelectedFile();
     void addModuleOfferingToCopy (const File&, bool isFromUserSpecifiedFolder);
 
-    StringArray getAllModules() const;
-    StringArray getExtraDependenciesNeeded (const String& moduleID) const;
-    bool doesModuleHaveHigherCppStandardThanProject (const String& moduleID);
-    void createRequiredModules (OwnedArray<LibraryModule>& modules);
-
-    int getNumModules() const               { return state.getNumChildren(); }
-    String getModuleID (int index) const    { return state.getChild (index) [Ids::ID].toString(); }
-
-    bool areMostModulesUsingGlobalPath() const;
-    bool areMostModulesCopiedLocally() const;
-
-    void setLocalCopyModeForAllModules (bool copyLocally);
-
-    void sortAlphabetically();
-
-    Project& project;
-    ValueTree state;
+    void removeModule (String moduleID);
 
 private:
     UndoManager* getUndoManager() const     { return project.getUndoManagerFor (state); }
+
+    Project& project;
+    ValueTree state;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnabledModuleList)
 };

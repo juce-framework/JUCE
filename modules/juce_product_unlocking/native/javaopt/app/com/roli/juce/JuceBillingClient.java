@@ -2,7 +2,7 @@ package com.roli.juce;
 
 import com.android.billingclient.api.*;
 
-public class JuceBillingClient implements PurchasesUpdatedListener {
+public class JuceBillingClient implements PurchasesUpdatedListener, BillingClientStateListener {
     private native void skuDetailsQueryCallback(long host, java.util.List<SkuDetails> skuDetails);
     private native void purchasesListQueryCallback(long host, java.util.List<Purchase> purchases);
     private native void purchaseCompletedCallback(long host, Purchase purchase, int responseCode);
@@ -16,7 +16,7 @@ public class JuceBillingClient implements PurchasesUpdatedListener {
                 .setListener(this)
                 .build();
 
-        billingClient.startConnection(null);
+        billingClient.startConnection(this);
     }
 
     public void endConnection() {
@@ -127,6 +127,18 @@ public class JuceBillingClient implements PurchasesUpdatedListener {
         }
     }
 
+    @Override
+    public void onBillingServiceDisconnected()
+    {
+
+    }
+
+    @Override
+    public void onBillingSetupFinished(BillingResult billingResult)
+    {
+
+    }
+
     private void executeOnBillingClientConnection(Runnable runnable) {
         if (billingClient.isReady()) {
             runnable.run();
@@ -162,7 +174,12 @@ public class JuceBillingClient implements PurchasesUpdatedListener {
                 @Override
                 public void run() {
                     AcknowledgePurchaseParams acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder().setPurchaseToken(purchase.getPurchaseToken()).build();
-                    billingClient.acknowledgePurchase(acknowledgePurchaseParams, null);
+                    billingClient.acknowledgePurchase(acknowledgePurchaseParams, new AcknowledgePurchaseResponseListener() {
+                        @Override
+                        public void onAcknowledgePurchaseResponse(BillingResult billingResult) {
+
+                        }
+                    });
                 }
             });
         }

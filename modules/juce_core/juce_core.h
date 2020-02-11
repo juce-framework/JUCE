@@ -32,7 +32,7 @@
 
   ID:                 juce_core
   vendor:             juce
-  version:            5.4.6
+  version:            5.4.7
   name:               JUCE core classes
   description:        The essential set of basic JUCE classes, as required by all the other JUCE modules. Includes text, container, memory, threading and i/o functionality.
   website:            http://www.juce.com/juce
@@ -107,7 +107,7 @@
 //==============================================================================
 /** Config: JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
 
-    In a Visual C++  build, this can be used to stop the required system libs being
+    In a Windows build, this can be used to stop the required system libs being
     automatically added to the link stage.
 */
 #ifndef JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
