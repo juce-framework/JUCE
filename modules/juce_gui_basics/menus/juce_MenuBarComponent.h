@@ -97,6 +97,7 @@ public:
     /** @internal */
     void menuCommandInvoked (MenuBarModel*, const ApplicationCommandTarget::InvocationInfo&) override;
 
+    int getCurrentPopupIndex() const { return currentPopupIndex; }
 private:
     //==============================================================================
     MenuBarModel* model;
