@@ -21,8 +21,10 @@ DocumentView::DocumentView (ARAEditorView* ev, const AudioPlayHead::CurrentPosit
     calculateTimeRange();
 
     playHeadView.setAlwaysOnTop (true);
+    playHeadView.setInterceptsMouseClicks (false, false);
     playbackRegionsView.addAndMakeVisible (playHeadView);
     timeRangeSelectionView.setAlwaysOnTop (true);
+    timeRangeSelectionView.setInterceptsMouseClicks (false, false);
     playbackRegionsView.addAndMakeVisible (timeRangeSelectionView);
 
     playbackRegionsViewport.setScrollBarsShown (true, true, false, false);

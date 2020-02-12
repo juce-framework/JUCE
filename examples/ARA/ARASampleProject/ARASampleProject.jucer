@@ -28,6 +28,8 @@
         <FILE id="OC5DXa" name="TrackHeaderView.h" compile="0" resource="0"
               file="Source/TrackHeaderView.h"/>
       </GROUP>
+      <FILE id="azisMP" name="ARASampleProjectAudioModification.h" compile="0"
+            resource="0" file="Source/ARASampleProjectAudioModification.h"/>
       <FILE id="IE9maq" name="ARASampleProjectAudioProcessor.cpp" compile="1"
             resource="0" file="Source/ARASampleProjectAudioProcessor.cpp"/>
       <FILE id="EmX660" name="ARASampleProjectAudioProcessor.h" compile="0"

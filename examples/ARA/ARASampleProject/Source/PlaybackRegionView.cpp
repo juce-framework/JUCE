@@ -1,6 +1,7 @@
 #include "PlaybackRegionView.h"
 #include "DocumentView.h"
 #include "ARASampleProjectAudioProcessor.h"
+#include "ARASampleProjectAudioModification.h"
 
 //==============================================================================
 PlaybackRegionView::PlaybackRegionView (DocumentView& docView, ARAPlaybackRegion* region)
@@ -32,6 +33,13 @@ PlaybackRegionView::~PlaybackRegionView()
 
     destroyPlaybackRegionReader();
     audioThumb.removeChangeListener (this);
+}
+
+void PlaybackRegionView::mouseDoubleClick (const MouseEvent& /*event*/)
+{
+    auto audioModification = playbackRegion->getAudioModification<ARASampleProjectAudioModification> ();
+    audioModification->setReversePlayback (! audioModification->getReversePlayback ());
+    audioModification->notifyContentChanged (ARAContentUpdateScopes::samplesAreAffected (), true);
 }
 
 //==============================================================================

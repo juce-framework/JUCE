@@ -1,5 +1,6 @@
 #include "ARASampleProjectAudioProcessor.h"
 #include "ARASampleProjectAudioProcessorEditor.h"
+#include "ARASampleProjectAudioModification.h"
 
 //==============================================================================
 ARASampleProjectAudioProcessor::ARASampleProjectAudioProcessor()
@@ -250,13 +251,26 @@ void ARASampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
                         bufferingReader->setReadTimeout (isNonRealtime() ? 100 : 0);
                     }
 
+                    auto audioModification = playbackRegion->getAudioModification<ARASampleProjectAudioModification>();
+
                     // read samples
                     bool bufferSuccess;
                     if (didRenderFirstRegion)
                     {
-                        // target buffer is initialized, so read region samples into local buffer
-                        bufferSuccess = reader->read (tempBuffer.get(), 0, numSamplesToRead, startInSource, true, true);
-
+                        if (audioModification->getReversePlayback())
+                        {
+                            auto reverseStartInSource = audioSource->getSampleCount() - startInSource;
+                            auto reverseEndInSource = reverseStartInSource - numSamplesToRead;
+                            bufferSuccess = reader->read (tempBuffer.get(), 0, numSamplesToRead, reverseEndInSource, true, true);
+                            if (bufferSuccess)
+                                tempBuffer->reverse (0, numSamplesToRead);
+                        }
+                        else
+                        {
+                            // target buffer is initialized, so read region samples into local buffer
+                            bufferSuccess = reader->read (tempBuffer.get(), 0, numSamplesToRead, startInSource, true, true);
+                        }
+                        
                         // if successful, mix local buffer into the output buffer
                         if (bufferSuccess)
                         {
@@ -266,8 +280,19 @@ void ARASampleProjectAudioProcessor::processBlock (AudioBuffer<float>& buffer, M
                     }
                     else
                     {
-                        // this is the first region to hit the buffer, so initialize its samples
-                        bufferSuccess = reader->read (&buffer, startInDestBuffer, numSamplesToRead, startInSource, true, true);
+                        if (audioModification->getReversePlayback())
+                        {
+                            auto reverseStartInSource = audioSource->getSampleCount() - startInSource;
+                            auto reverseEndInSource = reverseStartInSource - numSamplesToRead;
+                            bufferSuccess = reader->read (&buffer, 0, numSamplesToRead, reverseEndInSource, true, true);
+                            if (bufferSuccess)
+                                buffer.reverse (0, numSamplesToRead);
+                        }
+                        else
+                        {
+                            // this is the first region to hit the buffer, so initialize its samples
+                            bufferSuccess = reader->read (&buffer, startInDestBuffer, numSamplesToRead, startInSource, true, true);
+                        }
 
                         // if successful, clear any excess at start or end of the region and mark successful buffer initialization
                         if (bufferSuccess)
