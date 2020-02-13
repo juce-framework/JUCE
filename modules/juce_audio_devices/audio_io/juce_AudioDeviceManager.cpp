@@ -128,7 +128,7 @@ void AudioDeviceManager::audioDeviceListChanged()
         {
             for (auto* dt : availableDeviceTypes)
                 if (currentAudioDevice->getTypeName() == dt->getTypeName())
-                    for (auto& dn : dt->getDeviceNames())
+                    for (auto& dn : dt->getDeviceNames (true))
                         if (currentAudioDevice->getName() == dn)
                             return true;
 
