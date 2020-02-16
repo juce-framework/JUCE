@@ -643,7 +643,7 @@ TargetOS::OS ProjectExporter::getTargetOSForExporter() const
 
 RelativePath ProjectExporter::getModuleFolderRelativeToProject (const String& moduleID) const
 {
-    if (project.getEnabledModules().shouldCopyModuleFilesLocally (moduleID).getValue())
+    if (project.getEnabledModules().shouldCopyModuleFilesLocally (moduleID))
         return RelativePath (project.getRelativePathForFile (project.getLocalModuleFolder (moduleID)),
                              RelativePath::projectFolder);
 
@@ -662,7 +662,7 @@ String ProjectExporter::getLegacyModulePath() const
 
 RelativePath ProjectExporter::getLegacyModulePath (const String& moduleID) const
 {
-    if (project.getEnabledModules().state.getChildWithProperty (Ids::ID, moduleID) ["useLocalCopy"])
+    if (project.getEnabledModules().shouldCopyModuleFilesLocally (moduleID))
         return RelativePath (project.getRelativePathForFile (project.getGeneratedCodeFolder()
                                                                 .getChildFile ("modules")
                                                                 .getChildFile (moduleID)), RelativePath::projectFolder);

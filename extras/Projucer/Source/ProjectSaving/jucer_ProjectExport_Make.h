@@ -37,7 +37,7 @@ protected:
     public:
         MakeBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
             : BuildConfiguration (p, settings, e),
-              architectureTypeValue (config, Ids::linuxArchitecture, getUndoManager(), "-march=native")
+              architectureTypeValue (config, Ids::linuxArchitecture, getUndoManager(), String())
         {
             linkTimeOptimisationValue.setDefault (false);
             optimisationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);

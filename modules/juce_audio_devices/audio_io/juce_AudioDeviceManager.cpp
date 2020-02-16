@@ -124,18 +124,29 @@ void AudioDeviceManager::audioDeviceListChanged()
 {
     if (currentAudioDevice != nullptr)
     {
-        auto isCurrentDeviceStillAvailable = [&]
+        auto currentDeviceStillAvailable = [&]
         {
-            for (auto* dt : availableDeviceTypes)
-                if (currentAudioDevice->getTypeName() == dt->getTypeName())
-                    for (auto& dn : dt->getDeviceNames())
-                        if (currentAudioDevice->getName() == dn)
+            auto currentTypeName = currentAudioDevice->getTypeName();
+            auto currentDeviceName = currentAudioDevice->getName();
+
+            for (auto* deviceType : availableDeviceTypes)
+            {
+                if (currentTypeName == deviceType->getTypeName())
+                {
+                    for (auto& deviceName : deviceType->getDeviceNames (true))
+                        if (currentDeviceName == deviceName)
                             return true;
 
-            return false;
-        };
+                    for (auto& deviceName : deviceType->getDeviceNames (false))
+                        if (currentDeviceName == deviceName)
+                            return true;
+                }
+            }
 
-        if (! isCurrentDeviceStillAvailable())
+            return false;
+        }();
+
+        if (! currentDeviceStillAvailable)
         {
             closeAudioDevice();
 

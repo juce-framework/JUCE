@@ -2241,7 +2241,7 @@ private:
         }
     }
 
-    void setIcon (const Image& newIcon)
+    void setIcon (const Image& newIcon) override
     {
         if (auto hicon = IconConverters::createHICONFromImage (newIcon, TRUE, 0, 0))
         {

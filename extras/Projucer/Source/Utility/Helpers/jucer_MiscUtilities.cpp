@@ -411,6 +411,16 @@ bool isValidJUCEExamplesDirectory (const File& directory) noexcept
     return directory.getChildFile ("Assets").getChildFile ("juce_icon.png").existsAsFile();
 }
 
+bool isJUCEFolder (const File& f)
+{
+    return isJUCEModulesFolder (f.getChildFile ("modules"));
+}
+
+bool isJUCEModulesFolder (const File& f)
+{
+    return f.isDirectory() && f.getChildFile ("juce_core").isDirectory();
+}
+
 //==============================================================================
 static var parseJUCEHeaderMetadata (const StringArray& lines)
 {
