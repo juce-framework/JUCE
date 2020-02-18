@@ -75,7 +75,7 @@ public:
 
         // If this is a Lightpad then set the grid program to be blank
         if (block->getLEDGrid() != nullptr)
-            block->setProgram (new BitmapLEDProgram (*block));
+            block->setProgram (std::make_unique<BitmapLEDProgram>(*block));
 
         // If this is a Lightpad then redraw it at 25Hz
         if (block->getType() == Block::lightPadBlock)

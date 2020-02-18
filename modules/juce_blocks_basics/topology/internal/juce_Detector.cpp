@@ -290,13 +290,10 @@ struct Detector   : public ReferenceCountedObject,
 
     void notifyBlockOfConfigChange (BlockImpl& bi, uint32 item)
     {
-        if (auto configChangedCallback = bi.configChangedCallback)
-        {
-            if (item >= bi.getMaxConfigIndex())
-                configChangedCallback (bi, {}, item);
-            else
-                configChangedCallback (bi, bi.getLocalConfigMetaData (item), item);
-        }
+        if (item >= bi.getMaxConfigIndex())
+            bi.handleConfigItemChanged ({}, item);
+        else
+            bi.handleConfigItemChanged (bi.getLocalConfigMetaData (item), item);
     }
 
     void handleConfigSetMessage (Block::UID deviceID, int32 item, int32 value)
@@ -311,7 +308,7 @@ struct Detector   : public ReferenceCountedObject,
     void handleConfigFactorySyncEndMessage (Block::UID deviceID)
     {
         if (auto* bi = getBlockImplementationWithUID (deviceID))
-            notifyBlockOfConfigChange (*bi, bi->getMaxConfigIndex());
+            bi->handleConfigSyncEnded();
     }
 
     void handleConfigFactorySyncResetMessage (Block::UID deviceID)

@@ -79,6 +79,8 @@ public:
     /** Returns true, if the TopologySource is currently trying to connect the block devices */
     bool isActive() const override;
 
+    bool isLockedFromOutside() const override { return false; }
+
 private:
     //==============================================================================
     struct Internal;
