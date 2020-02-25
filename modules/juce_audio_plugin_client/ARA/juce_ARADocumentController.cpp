@@ -158,25 +158,25 @@ void ARADocumentController::didEndEditing() noexcept
 
 //==============================================================================
 
-bool ARADocumentController::doRestoreObjectsFromStream (InputStream& /*input*/, const ARA::PlugIn::RestoreObjectsFilter* /*filter*/) noexcept
+bool ARADocumentController::doRestoreObjectsFromStream (ARAInputStream& /*input*/, const ARA::PlugIn::RestoreObjectsFilter* /*filter*/) noexcept
 {
     return true;
 }
 
-bool ARADocumentController::doStoreObjectsToStream (OutputStream& /*output*/, const ARA::PlugIn::StoreObjectsFilter* /*filter*/) noexcept
+bool ARADocumentController::doStoreObjectsToStream (ARAOutputStream& /*output*/, const ARA::PlugIn::StoreObjectsFilter* /*filter*/) noexcept
 {
     return true;
 }
 
 bool ARADocumentController::doRestoreObjectsFromArchive (ARA::PlugIn::HostArchiveReader* archiveReader, const ARA::PlugIn::RestoreObjectsFilter* filter) noexcept
 {
-    ArchiveReader reader (archiveReader);
+    ARAInputStream reader (archiveReader);
     return doRestoreObjectsFromStream (reader, filter);
 }
 
 bool ARADocumentController::doStoreObjectsToArchive (ARA::PlugIn::HostArchiveWriter* archiveWriter, const ARA::PlugIn::StoreObjectsFilter* filter) noexcept
 {
-    ArchiveWriter writer (archiveWriter);
+    ARAOutputStream writer (archiveWriter);
     return doStoreObjectsToStream (writer, filter);
 }
 
@@ -392,12 +392,12 @@ void ARADocumentController::timerCallback()
 
 //==============================================================================
 
-ARADocumentController::ArchiveReader::ArchiveReader (ARA::PlugIn::HostArchiveReader* reader)
+ARADocumentController::ARAInputStream::ARAInputStream (ARA::PlugIn::HostArchiveReader* reader)
 : archiveReader (reader), 
   size (reader->getArchiveSize())
 {}
 
-int ARADocumentController::ArchiveReader::read (void* destBuffer, int maxBytesToRead)
+int ARADocumentController::ARAInputStream::read (void* destBuffer, int maxBytesToRead)
 {
     const int bytesToRead = std::min (maxBytesToRead, (int) (size - position));
     if (! archiveReader->readBytesFromArchive (position, bytesToRead, (ARA::ARAByte*) destBuffer))
@@ -406,7 +406,7 @@ int ARADocumentController::ArchiveReader::read (void* destBuffer, int maxBytesTo
     return bytesToRead;
 }
 
-bool ARADocumentController::ArchiveReader::setPosition (int64 newPosition)
+bool ARADocumentController::ARAInputStream::setPosition (int64 newPosition)
 {
     if (newPosition >= (int64) size)
         return false;
@@ -414,16 +414,16 @@ bool ARADocumentController::ArchiveReader::setPosition (int64 newPosition)
     return true;
 }
 
-bool ARADocumentController::ArchiveReader::isExhausted()
+bool ARADocumentController::ARAInputStream::isExhausted()
 {
     return position >= size;
 }
 
-ARADocumentController::ArchiveWriter::ArchiveWriter (ARA::PlugIn::HostArchiveWriter* writer)
+ARADocumentController::ARAOutputStream::ARAOutputStream (ARA::PlugIn::HostArchiveWriter* writer)
 : archiveWriter (writer)
 {}
 
-bool ARADocumentController::ArchiveWriter::write (const void* dataToWrite, size_t numberOfBytes)
+bool ARADocumentController::ARAOutputStream::write (const void* dataToWrite, size_t numberOfBytes)
 {
     if (! archiveWriter->writeBytesToArchive (position, numberOfBytes, (const ARA::ARAByte*) dataToWrite))
         return false;
@@ -431,7 +431,7 @@ bool ARADocumentController::ArchiveWriter::write (const void* dataToWrite, size_
     return true;
 }
 
-bool ARADocumentController::ArchiveWriter::setPosition (int64 newPosition)
+bool ARADocumentController::ARAOutputStream::setPosition (int64 newPosition)
 {
     if (newPosition > (int64) std::numeric_limits<size_t>::max())
         return false;

@@ -35,18 +35,20 @@ protected:
     // implementations for any will/did method overridden here you're overriding again.
     // For do methods or for methods inherited directly from ARA::PlugIn::DocumentController
     // you do not need to call the ingerited when overriding.
+    class ARAInputStream;
+    class ARAOutputStream;
 
     /** Read an ARADocument archive from a juce::InputStream.
     @param input Data stream containing previously persisted data to be used when restoring the ARADocument
     @param filter A filter to be applied to the stream
     */
-    virtual bool doRestoreObjectsFromStream (InputStream& input, const ARA::PlugIn::RestoreObjectsFilter* filter) noexcept;
+    virtual bool doRestoreObjectsFromStream (ARAInputStream& input, const ARA::PlugIn::RestoreObjectsFilter* filter) noexcept;
 
     /** Write an ARADocument archive to a juce::OutputStream.
     @param output Data stream that should be used to write the persistent ARADocument data
     @param filter A filter to be applied to the stream
     */
-    virtual bool doStoreObjectsToStream (OutputStream& output, const ARA::PlugIn::StoreObjectsFilter* filter) noexcept;
+    virtual bool doStoreObjectsToStream (ARAOutputStream& output, const ARA::PlugIn::StoreObjectsFilter* filter) noexcept;
 
 #ifndef DOXYGEN
 
@@ -150,10 +152,10 @@ protected:
     
         @tags{ARA}
     */
-    class ArchiveReader     : public InputStream
+    class ARAInputStream     : public InputStream
     {
     public:
-        ArchiveReader (ARA::PlugIn::HostArchiveReader*);
+        ARAInputStream (ARA::PlugIn::HostArchiveReader*);
 
         int64 getPosition() override { return (int64) position; }
         int64 getTotalLength() override { return (int64) size; }
@@ -175,10 +177,10 @@ protected:
 
         @tags{ARA}
     */
-    class ArchiveWriter     : public OutputStream
+    class ARAOutputStream     : public OutputStream
     {
     public:
-        ArchiveWriter (ARA::PlugIn::HostArchiveWriter*);
+        ARAOutputStream (ARA::PlugIn::HostArchiveWriter*);
 
         int64 getPosition() override { return (int64) position; }
         void flush() override {}
