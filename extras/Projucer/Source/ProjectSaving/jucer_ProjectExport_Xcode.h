@@ -2663,8 +2663,12 @@ private:
             if (iOS && isPushNotificationsEnabled())
                 xcodeFrameworks.addIfNotAlreadyThere ("UserNotifications");
 
-            if (isiOS() && project.getConfigFlag ("JUCE_USE_CAMERA").get())
+            if (iOS
+                && project.getEnabledModules().isModuleEnabled ("juce_video")
+                && project.isConfigFlagEnabled ("JUCE_USE_CAMERA", false))
+            {
                 xcodeFrameworks.addIfNotAlreadyThere ("ImageIO");
+            }
 
             xcodeFrameworks.addTokens (getExtraFrameworksString(), ",;", "\"'");
             xcodeFrameworks.trim();
