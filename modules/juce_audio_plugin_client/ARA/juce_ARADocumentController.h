@@ -164,10 +164,13 @@ protected:
         bool isExhausted() override;
         int read (void*, int) override;
 
+        bool failed() const { return failure; }
+
     private:
         ARA::PlugIn::HostArchiveReader* archiveReader;
         size_t position { 0 };
         size_t size;
+        bool failure { false };
     };
 
 

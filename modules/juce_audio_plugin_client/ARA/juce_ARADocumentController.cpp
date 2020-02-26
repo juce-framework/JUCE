@@ -401,7 +401,11 @@ int ARADocumentController::ARAInputStream::read (void* destBuffer, int maxBytesT
 {
     const int bytesToRead = std::min (maxBytesToRead, (int) (size - position));
     if (! archiveReader->readBytesFromArchive (position, bytesToRead, (ARA::ARAByte*) destBuffer))
+    {
+        failure = true;
         return 0;
+    }
+
     position += bytesToRead;
     return bytesToRead;
 }
@@ -425,8 +429,9 @@ ARADocumentController::ARAOutputStream::ARAOutputStream (ARA::PlugIn::HostArchiv
 
 bool ARADocumentController::ARAOutputStream::write (const void* dataToWrite, size_t numberOfBytes)
 {
-    if (! archiveWriter->writeBytesToArchive (position, numberOfBytes, (const ARA::ARAByte*) dataToWrite))
+    if (!archiveWriter->writeBytesToArchive (position, numberOfBytes, (const ARA::ARAByte*) dataToWrite))
         return false;
+
     position += numberOfBytes;
     return true;
 }
