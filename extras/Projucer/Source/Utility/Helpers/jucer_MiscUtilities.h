@@ -73,6 +73,9 @@ bool isPIPFile (const File&) noexcept;
 
 bool isValidJUCEExamplesDirectory (const File&) noexcept;
 
+bool isJUCEModulesFolder (const File&);
+bool isJUCEFolder (const File&);
+
 //==============================================================================
 int indexOfLineStartingWith (const StringArray& lines, const String& text, int startIndex);
 

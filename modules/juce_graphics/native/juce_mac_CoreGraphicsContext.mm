@@ -60,11 +60,7 @@ public:
         CGColorSpaceRelease (colourSpace);
     }
 
-    ~CoreGraphicsPixelData() override
-    {
-        freeCachedImageRef();
-        CGContextRelease (context);
-    }
+    ~CoreGraphicsPixelData() override;
 
     std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
     {
@@ -188,6 +184,14 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreGraphicsPixelData)
 };
+
+// The following implementation is outside of the class definition to avoid spurious
+// warning messages when dynamically loading libraries at runtime on macOS
+CoreGraphicsPixelData::~CoreGraphicsPixelData()
+{
+    freeCachedImageRef();
+    CGContextRelease (context);
+}
 
 ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
 {

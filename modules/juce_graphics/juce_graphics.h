@@ -36,7 +36,7 @@
 
   ID:                 juce_graphics
   vendor:             juce
-  version:            5.4.6
+  version:            5.4.7
   name:               JUCE graphics classes
   description:        Classes for 2D vector graphics, image loading/saving, font handling, etc.
   website:            http://www.juce.com/juce

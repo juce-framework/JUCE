@@ -75,14 +75,8 @@ public:
         auto juceValue = getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS());
         auto userValue = getAppSettings().getStoredPath (Ids::defaultUserModulePath, TargetOS::getThisOS());
 
-        auto jucePathNeedsScanning = (! juceValue.isUsingDefault() && juceValue.get() != lastJUCEModulePath);
-        auto userPathNeedsScanning = (! userValue.isUsingDefault() && userValue.get() != lastUserModulePath);
-
-        if (jucePathNeedsScanning)
-            ProjucerApplication::getApp().rescanJUCEPathModules();
-
-        if (userPathNeedsScanning)
-            ProjucerApplication::getApp().rescanUserPathModules();
+        if (juceValue.get() != lastJUCEModulePath)  ProjucerApplication::getApp().rescanJUCEPathModules();
+        if (userValue.get() != lastUserModulePath)  ProjucerApplication::getApp().rescanUserPathModules();
     }
 
     void paint (Graphics& g) override

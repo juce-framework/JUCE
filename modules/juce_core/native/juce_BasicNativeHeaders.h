@@ -176,7 +176,7 @@
   #pragma warning (4: 4511 4512 4100)
  #endif
 
- #if JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+ #if ! JUCE_MINGW && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
   #pragma comment (lib, "kernel32.lib")
   #pragma comment (lib, "user32.lib")
   #pragma comment (lib, "wininet.lib")
