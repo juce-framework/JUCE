@@ -2239,8 +2239,15 @@ public:
 
     //==============================================================================
     int getNumPrograms() override                        { return programNames.size(); }
-    const String getProgramName (int index) override     { return programNames[index]; }
-
+    
+    const String getProgramName (int index) override     
+    { 
+        if (index >= 0)
+            return programNames[index]; 
+        else
+            return String();
+    }
+    
     int getCurrentProgram() override
     {
         if (programNames.size() > 0 && editController != nullptr)
