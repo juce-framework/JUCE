@@ -143,6 +143,15 @@
  #define JUCE_USE_ANDROID_OBOE 0
 #endif
 
+/** Config: JUCE_USE_OBOE_STABILIZED_CALLBACK
+    If JUCE_USE_ANDROID_OBOE is enabled, enabling this will wrap output audio
+    streams in the oboe::StabilizedCallback class. This class attempts to keep
+    the CPU spinning to avoid it being scaled down on certain devices.
+*/
+#ifndef JUCE_USE_ANDROID_OBOE_STABILIZED_CALLBACK
+ #define JUCE_USE_ANDROID_OBOE_STABILIZED_CALLBACK 0
+#endif
+
 /** Config: JUCE_USE_ANDROID_OPENSLES
     Enables OpenSLES devices (Android only).
 */

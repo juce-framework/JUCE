@@ -513,7 +513,16 @@ private:
             builder.setFormat (format);
             builder.setSampleRate (newSampleRate);
             builder.setPerformanceMode (oboe::PerformanceMode::LowLatency);
+
+           #if JUCE_USE_ANDROID_OBOE_STABILIZED_CALLBACK
+            if (newCallback != nullptr)
+            {
+                stabilizedCallback = std::make_unique<oboe::StabilizedCallback> (newCallback);
+                builder.setCallback (stabilizedCallback.get());
+            }
+           #else
             builder.setCallback (newCallback);
+           #endif
 
             JUCE_OBOE_LOG (String ("Preparing Oboe stream with params:")
                  + "\nAAudio supported = " + String (int (builder.isAAudioSupported()))
@@ -564,6 +573,9 @@ private:
         }
 
         oboe::AudioStream* stream = nullptr;
+       #if JUCE_USE_ANDROID_OBOE_STABILIZED_CALLBACK
+        std::unique_ptr<oboe::StabilizedCallback> stabilizedCallback;
+       #endif
         oboe::Result openResult;
     };
 
