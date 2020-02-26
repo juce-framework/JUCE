@@ -1,6 +1,6 @@
 #include "juce_ARADocumentController.h"
 
-const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFactoryConfig () noexcept
+const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFactoryConfig() noexcept
 {
     using namespace ARA;
     using namespace PlugIn;
@@ -8,14 +8,14 @@ const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFacto
     class JUCEARAFactoryConfig : public FactoryConfig
     {
     public:
-        JUCEARAFactoryConfig ()
+        JUCEARAFactoryConfig()
         {
             String compatibleDocumentArchiveIDString = JucePlugin_ARACompatibleArchiveIDs;
-            if (compatibleDocumentArchiveIDString.isNotEmpty ())
+            if (compatibleDocumentArchiveIDString.isNotEmpty())
             {
                 compatibleDocumentArchiveIDStrings = StringArray::fromLines (compatibleDocumentArchiveIDString);
                 for (auto& compatibleID : compatibleDocumentArchiveIDStrings)
-                    compatibleDocumentArchiveIDs.push_back (compatibleID.toRawUTF8 ());
+                    compatibleDocumentArchiveIDs.push_back (compatibleID.toRawUTF8());
             }
             
             // Update analyzeable content types
@@ -49,20 +49,20 @@ const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFacto
             }
         }
 
-        const char* getFactoryID () const noexcept override { return JucePlugin_ARAFactoryID; }
-        const char* getPlugInName () const noexcept override { return JucePlugin_Name; }
-        const char* getManufacturerName () const noexcept override { return JucePlugin_Manufacturer; }
-        const char* getInformationURL () const noexcept override { return JucePlugin_ManufacturerWebsite; }
-        const char* getVersion () const noexcept override { return JucePlugin_VersionString; }
+        const char* getFactoryID() const noexcept override { return JucePlugin_ARAFactoryID; }
+        const char* getPlugInName() const noexcept override { return JucePlugin_Name; }
+        const char* getManufacturerName() const noexcept override { return JucePlugin_Manufacturer; }
+        const char* getInformationURL() const noexcept override { return JucePlugin_ManufacturerWebsite; }
+        const char* getVersion() const noexcept override { return JucePlugin_VersionString; }
 
-        virtual const char* getDocumentArchiveID () const noexcept override { return JucePlugin_ARADocumentArchiveID; }
-        virtual ARASize getCompatibleDocumentArchiveIDsCount () const noexcept override { return compatibleDocumentArchiveIDs.size(); }
-        virtual const ARAPersistentID* getCompatibleDocumentArchiveIDs () const noexcept override { return compatibleDocumentArchiveIDs.empty () ? nullptr : compatibleDocumentArchiveIDs.data(); }
+        virtual const char* getDocumentArchiveID() const noexcept override { return JucePlugin_ARADocumentArchiveID; }
+        virtual ARASize getCompatibleDocumentArchiveIDsCount() const noexcept override { return compatibleDocumentArchiveIDs.size(); }
+        virtual const ARAPersistentID* getCompatibleDocumentArchiveIDs() const noexcept override { return compatibleDocumentArchiveIDs.empty() ? nullptr : compatibleDocumentArchiveIDs.data(); }
 
-        virtual ARASize getAnalyzeableContentTypesCount () const noexcept override { return analyzeableContentTypes.size(); }
-        virtual const ARAContentType* getAnalyzeableContentTypes () const noexcept override { return analyzeableContentTypes.empty () ? nullptr : analyzeableContentTypes.data(); }
+        virtual ARASize getAnalyzeableContentTypesCount() const noexcept override { return analyzeableContentTypes.size(); }
+        virtual const ARAContentType* getAnalyzeableContentTypes() const noexcept override { return analyzeableContentTypes.empty() ? nullptr : analyzeableContentTypes.data(); }
 
-        virtual ARAPlaybackTransformationFlags getSupportedPlaybackTransformationFlags () const noexcept override { return kARAPlaybackTransformationNoChanges; }
+        virtual ARAPlaybackTransformationFlags getSupportedPlaybackTransformationFlags() const noexcept override { return kARAPlaybackTransformationNoChanges; }
 
     private:
         StringArray compatibleDocumentArchiveIDStrings;
@@ -71,7 +71,7 @@ const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFacto
         ARAPlaybackTransformationFlags supportedPlaybackTransformationFlags;
     };
 
-    return new JUCEARAFactoryConfig ();
+    return new JUCEARAFactoryConfig();
 }
 
 namespace juce
@@ -141,7 +141,7 @@ void ARADocumentController::notifyAudioSourceAnalysisProgressCompleted (ARAAudio
 
 //==============================================================================
 
-ARA::PlugIn::Document* ARADocumentController::doCreateDocument () noexcept
+ARA::PlugIn::Document* ARADocumentController::doCreateDocument() noexcept
 {
     return new ARADocument (static_cast<ARADocumentController*> (this));
 }

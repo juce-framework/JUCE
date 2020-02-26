@@ -211,12 +211,12 @@ void DocumentView::timerCallback()
 
         if (scrollFollowsPlayHead)
         {
-            const auto visibleRange = getVisibleTimeRange ();
-            if (lastReportedPosition.timeInSeconds < visibleRange.getStart () || lastReportedPosition.timeInSeconds > visibleRange.getEnd ())
-                playbackRegionsViewport.setViewPosition (playbackRegionsViewport.getViewPosition ().withX (getPlaybackRegionsViewsXForTime (lastReportedPosition.timeInSeconds)));
+            const auto visibleRange = getVisibleTimeRange();
+            if (lastReportedPosition.timeInSeconds < visibleRange.getStart() || lastReportedPosition.timeInSeconds > visibleRange.getEnd())
+                playbackRegionsViewport.setViewPosition (playbackRegionsViewport.getViewPosition().withX (getPlaybackRegionsViewsXForTime (lastReportedPosition.timeInSeconds)));
         };
 
-        playHeadView.repaint ();
+        playHeadView.repaint();
     }
 }
 

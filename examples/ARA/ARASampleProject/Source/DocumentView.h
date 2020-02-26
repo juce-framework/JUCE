@@ -49,7 +49,7 @@ public:
     Range<double> getVisibleTimeRange() const;
 
     // rulers view access
-    const RulersView& getRulersView () const { return rulersView; }
+    const RulersView& getRulersView() const { return rulersView; }
 
     // convert between time and x coordinate
     int getPlaybackRegionsViewsXForTime (double time) const;
@@ -71,14 +71,14 @@ public:
     void zoomBy (double factor);
 
     // misc. getters
-    Component& getPlaybackRegionsView () { return playbackRegionsView; }
-    Component& getTrackHeadersView () { return trackHeadersView; }
-    Viewport& getTrackHeadersViewport () { return trackHeadersViewport; }
-    Viewport& getRulersViewport () { return rulersViewport; }
+    Component& getPlaybackRegionsView() { return playbackRegionsView; }
+    Component& getTrackHeadersView() { return trackHeadersView; }
+    Viewport& getTrackHeadersViewport() { return trackHeadersViewport; }
+    Viewport& getRulersViewport() { return rulersViewport; }
 
-    AudioFormatManager& getAudioFormatManger () { return audioFormatManger; }
+    AudioFormatManager& getAudioFormatManger() { return audioFormatManger; }
 
-    const AudioPlayHead::CurrentPositionInfo& getPlayHeadPositionInfo () const { return positionInfo; }
+    const AudioPlayHead::CurrentPositionInfo& getPlayHeadPositionInfo() const { return positionInfo; }
 
     // juce::Component overrides
     void parentHierarchyChanged() override;

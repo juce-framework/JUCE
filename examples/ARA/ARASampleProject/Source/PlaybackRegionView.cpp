@@ -37,9 +37,9 @@ PlaybackRegionView::~PlaybackRegionView()
 
 void PlaybackRegionView::mouseDoubleClick (const MouseEvent& /*event*/)
 {
-    auto audioModification = playbackRegion->getAudioModification<ARASampleProjectAudioModification> ();
-    audioModification->setReversePlayback (! audioModification->getReversePlayback ());
-    audioModification->notifyContentChanged (ARAContentUpdateScopes::samplesAreAffected (), true);
+    auto audioModification = playbackRegion->getAudioModification<ARASampleProjectAudioModification>();
+    audioModification->setReversePlayback (! audioModification->getReversePlayback());
+    audioModification->notifyContentChanged (ARAContentUpdateScopes::samplesAreAffected(), true);
 }
 
 //==============================================================================
