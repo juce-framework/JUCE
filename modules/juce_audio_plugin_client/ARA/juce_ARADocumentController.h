@@ -160,9 +160,9 @@ protected:
         int64 getPosition() override { return (int64) position; }
         int64 getTotalLength() override { return (int64) size; }
 
+        int read (void*, int) override;
         bool setPosition (int64) override;
         bool isExhausted() override;
-        int read (void*, int) override;
 
         bool failed() const { return failure; }
 
@@ -188,8 +188,8 @@ protected:
         int64 getPosition() override { return (int64) position; }
         void flush() override {}
 
-        bool setPosition (int64) override;
         bool write (const void*, size_t) override;
+        bool setPosition (int64) override;
 
     private:
         ARA::PlugIn::HostArchiveWriter* archiveWriter;
