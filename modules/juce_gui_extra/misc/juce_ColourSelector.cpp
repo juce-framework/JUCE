@@ -637,6 +637,9 @@ void ColourSelector::update (NotificationType notification)
 	if (previewComponent != nullptr)
 		previewComponent->updateIfNeeded();
 
+	if ((flags & showHexColorValue) != 0) hexColorLabel->setText(getCurrentColour().toDisplayString((flags & showAlphaChannel) != 0), dontSendNotification);
+
+
     if (notification != dontSendNotification)
         sendChangeMessage();
 
