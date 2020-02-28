@@ -164,7 +164,7 @@ namespace
                     break;  // encountered null terminator. list is complete.
 
                 if (! OSCTypes::isSupportedType (type))
-                    throw OSCFormatError ("OSC input stream format error: encountered unsupported type tag");
+                    throw OSCFormatError ("OSC input stream format error: encountered unsupported type tag \"" + String::charToString(type) + "\"");
 
                 typeList.add (type);
             }
@@ -439,10 +439,13 @@ struct OSCReceiver::Pimpl   : private Thread,
             if (listeners.size() > 0 || listenersWithAddress.size() > 0)
                 postMessage (new CallbackMessage (content));
         }
-        catch (const OSCFormatError&)
+        catch (const OSCFormatError& e)
         {
-            if (formatErrorHandler != nullptr)
-                formatErrorHandler (data, (int) dataSize);
+			if (formatErrorHandler != nullptr)
+			{
+				String errorMessage = String(e.description + " : " + String(data, dataSize));
+				formatErrorHandler(errorMessage.getCharPointer(), errorMessage.length());
+			}
         }
     }
 
