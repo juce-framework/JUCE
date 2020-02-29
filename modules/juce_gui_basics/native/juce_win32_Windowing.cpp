@@ -4451,7 +4451,7 @@ void Desktop::setKioskComponent (Component* kioskModeComp, bool enableOrDisable,
         tlw->setUsingNativeTitleBar (! enableOrDisable);
 
     if (enableOrDisable)
-        kioskModeComp->setBounds (getDisplays().getMainDisplay().totalArea);
+        kioskModeComp->setBounds (getDisplays().findDisplayForRect (kioskModeComp->getScreenBounds()).totalArea);
 }
 
 void Desktop::allowedOrientationsChanged() {}

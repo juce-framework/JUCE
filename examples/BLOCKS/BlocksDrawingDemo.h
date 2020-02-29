@@ -511,14 +511,14 @@ private:
     {
         if (currentMode == canvas)
         {
-            block.setProgram (new BitmapLEDProgram (block));
+            block.setProgram (std::make_unique<BitmapLEDProgram>(block));
 
             // Redraw any previously drawn LEDs
             redrawLEDs();
         }
         else if (currentMode == colourPalette)
         {
-            block.setProgram (new DrumPadGridProgram (block));
+            block.setProgram (std::make_unique <DrumPadGridProgram>(block));
 
             // Setup the grid layout
             if (auto* program = getPaletteProgram())

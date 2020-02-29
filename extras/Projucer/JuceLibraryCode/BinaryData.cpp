@@ -5519,7 +5519,7 @@ static const unsigned char temp_binary_data_27[] =
 "            && ! RuntimePermissions::isGranted (RuntimePermissions::recordAudio))\r\n"
 "        {\r\n"
 "            RuntimePermissions::request (RuntimePermissions::recordAudio,\r\n"
-"                                         [&] (bool granted) { if (granted)  setAudioChannels (2, 2); });\r\n"
+"                                         [&] (bool granted) { setAudioChannels (granted ? 2 : 0, 2); });\r\n"
 "        }\r\n"
 "        else\r\n"
 "        {\r\n"
@@ -5528,7 +5528,7 @@ static const unsigned char temp_binary_data_27[] =
 "        }\r\n"
 "    }\r\n"
 "\r\n"
-"    ~%%content_component_class%%()\r\n"
+"    ~%%content_component_class%%() override\r\n"
 "    {\r\n"
 "        // This shuts down the audio device and clears the audio source.\r\n"
 "        shutdownAudio();\r\n"
@@ -5616,7 +5616,7 @@ static const unsigned char temp_binary_data_28[] =
 "        && ! RuntimePermissions::isGranted (RuntimePermissions::recordAudio))\r\n"
 "    {\r\n"
 "        RuntimePermissions::request (RuntimePermissions::recordAudio,\r\n"
-"                                     [&] (bool granted) { if (granted)  setAudioChannels (2, 2); });\r\n"
+"                                     [&] (bool granted) { setAudioChannels (granted ? 2 : 0, 2); });\r\n"
 "    }\r\n"
 "    else\r\n"
 "    {\r\n"
@@ -5704,7 +5704,7 @@ static const unsigned char temp_binary_data_29[] =
 "public:\r\n"
 "    //==============================================================================\r\n"
 "    %%content_component_class%%();\r\n"
-"    ~%%content_component_class%%();\r\n"
+"    ~%%content_component_class%%() override;\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
 "    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;\r\n"
@@ -7838,9 +7838,9 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0xd11e6d35:  numBytes = 2085; return jucer_AnimatedComponentSimpleTemplate_h;
         case 0x6cf2645e:  numBytes = 1563; return jucer_AnimatedComponentTemplate_cpp;
         case 0x97b055e3:  numBytes = 1201; return jucer_AnimatedComponentTemplate_h;
-        case 0xfb6f6d96:  numBytes = 3693; return jucer_AudioComponentSimpleTemplate_h;
+        case 0xfb6f6d96:  numBytes = 3702; return jucer_AudioComponentSimpleTemplate_h;
         case 0xafccbd3f:  numBytes = 3094; return jucer_AudioComponentTemplate_cpp;
-        case 0x915d7304:  numBytes = 1374; return jucer_AudioComponentTemplate_h;
+        case 0x915d7304:  numBytes = 1383; return jucer_AudioComponentTemplate_h;
         case 0x27c5a93a:  numBytes = 1356; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 977; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 6036; return jucer_AudioPluginFilterTemplate_cpp;

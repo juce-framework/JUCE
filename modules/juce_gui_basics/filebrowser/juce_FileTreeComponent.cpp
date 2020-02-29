@@ -118,8 +118,7 @@ public:
     {
         removeSubContentsList();
 
-        OptionalScopedPointer<DirectoryContentsList> newPointer (newList, canDeleteList);
-        subContentsList = newPointer;
+        subContentsList = OptionalScopedPointer<DirectoryContentsList> (newList, canDeleteList);
         newList->addChangeListener (this);
     }
 

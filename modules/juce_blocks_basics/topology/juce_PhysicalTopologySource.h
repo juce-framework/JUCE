@@ -52,7 +52,7 @@ public:
     bool isActive() const override;
 
     /** This method will tell, if an other PhysicalTopologySource has locked the Midi connection */
-    bool isLockedFromOutside() const;
+    bool isLockedFromOutside() const override;
 
     //==============================================================================
     /** For custom transport systems, this represents a connected device */

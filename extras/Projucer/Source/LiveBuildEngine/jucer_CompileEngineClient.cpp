@@ -375,7 +375,7 @@ private:
 
         {
             auto isVSTHost = project.getEnabledModules().isModuleEnabled ("juce_audio_processors")
-                   && (project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3") || project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST"));
+                   && (project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3", false) || project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST", false));
 
             auto isPluginProject = proj.isAudioPluginProject();
 
@@ -463,8 +463,8 @@ private:
         paths.addArray (getSearchPathsFromString (project.getCompileEngineSettings().getSystemHeaderPathString()));
 
         auto isVSTHost = project.getEnabledModules().isModuleEnabled ("juce_audio_processors")
-                       && (project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3")
-                             || project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST"));
+                       && (project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3", false)
+                             || project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST", false));
 
         auto customVst3Path = getAppSettings().getStoredPath (Ids::vst3Path, TargetOS::getThisOS()).get().toString();
 

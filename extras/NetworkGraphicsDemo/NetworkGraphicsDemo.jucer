@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="gWI5Ir" name="NetworkGraphicsDemo" projectType="guiapp" bundleIdentifier="com.juce.NetworkGraphicsDemo"
-              jucerVersion="5.4.6" displaySplashScreen="0" reportAppUsage="0"
+              jucerVersion="5.4.7" displaySplashScreen="0" reportAppUsage="0"
               companyName="ROLI Ltd." companyCopyright="ROLI Ltd.">
   <MAINGROUP id="OT9rJ2" name="NetworkGraphicsDemo">
     <GROUP id="{48D54E6E-37F4-B20A-E038-C63E4EDFD4D9}" name="Source">

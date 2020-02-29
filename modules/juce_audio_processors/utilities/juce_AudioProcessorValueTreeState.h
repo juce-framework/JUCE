@@ -424,7 +424,7 @@ public:
 
         const float unsnappedDefault;
         const bool metaParameter, automatable, discrete, boolean;
-        float lastValue = -1.0f;
+        std::atomic<float> lastValue { -1.0f };
 
         friend class AudioProcessorValueTreeState::ParameterAdapter;
     };

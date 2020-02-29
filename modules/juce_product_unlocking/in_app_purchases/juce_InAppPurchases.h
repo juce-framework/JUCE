@@ -200,9 +200,9 @@ public:
 
         @param productIdentifier               The product identifier.
 
-        @param upgradeOrDowngradeFromSubscriptionsWithProductIdentifier (Android only) specifies the subscription that will be replaced by
-                                                                        the one being purchased now. Used only when buying a subscription
-                                                                        that is an upgrade or downgrade from another.
+        @param upgradeOrDowngradeFromSubscriptionWithProductIdentifier (Android only) specifies the subscription that will be replaced by
+                                                                       the one being purchased now. Used only when buying a subscription
+                                                                       that is an upgrade or downgrade from another.
 
         @param creditForUnusedSubscription     (Android only) controls whether a user should be credited for any unused subscription time on
                                                the product that is being upgraded or downgraded.

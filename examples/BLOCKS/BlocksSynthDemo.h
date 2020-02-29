@@ -643,7 +643,7 @@ public:
             detachActiveBlock();
 
         // Get the array of currently connected Block objects from the PhysicalTopologySource
-        auto blocks = topologySource.getCurrentTopology().blocks;
+        auto blocks = topologySource.getBlocks();
 
         // Iterate over the array of Block objects
         for (auto b : blocks)
@@ -785,7 +785,7 @@ private:
         if (currentMode == waveformSelectionMode)
         {
             // Set the LEDGrid program
-            block.setProgram (new WaveshapeProgram (block));
+            block.setProgram (std::make_unique<WaveshapeProgram>(block));
 
             // Initialise the program
             if (auto* waveshapeProgram = getWaveshapeProgram())
@@ -797,7 +797,7 @@ private:
         else if (currentMode == playMode)
         {
             // Set the LEDGrid program
-            auto error = block.setProgram (new DrumPadGridProgram (block));
+            auto error = block.setProgram (std::make_unique<DrumPadGridProgram>(block));
 
             if (error.failed())
             {
