@@ -592,67 +592,67 @@ IPAddress IPAddress::getInterfaceBroadcastAddress (const IPAddress& ip)
 {
 	IPAddress broadcastAddress;
 
-	PIP_ADAPTER_INFO pAdapterInfo;
-	PIP_ADAPTER_INFO pAdapter = NULL;
-	DWORD dwRetVal = 0;
-	ULONG ulOutBufLen = sizeof(IP_ADAPTER_INFO);
+	//PIP_ADAPTER_INFO pAdapterInfo;
+	//PIP_ADAPTER_INFO pAdapter = NULL;
+	//DWORD dwRetVal = 0;
+	//ULONG ulOutBufLen = sizeof(IP_ADAPTER_INFO);
 
-	pAdapterInfo = (IP_ADAPTER_INFO *)malloc(sizeof(IP_ADAPTER_INFO));
+	//pAdapterInfo = (IP_ADAPTER_INFO *)malloc(sizeof(IP_ADAPTER_INFO));
 
-	if (GetAdaptersInfo(pAdapterInfo, &ulOutBufLen) == ERROR_BUFFER_OVERFLOW)
-	{
-		free(pAdapterInfo);
+	//if (GetAdaptersInfo(pAdapterInfo, &ulOutBufLen) == ERROR_BUFFER_OVERFLOW)
+	//{
+	//	free(pAdapterInfo);
 
-		pAdapterInfo = (IP_ADAPTER_INFO *)malloc(ulOutBufLen);
-	}
+	//	pAdapterInfo = (IP_ADAPTER_INFO *)malloc(ulOutBufLen);
+	//}
 
-	if ((dwRetVal = GetAdaptersInfo(pAdapterInfo, &ulOutBufLen)) == NO_ERROR)
-	{
-		pAdapter = pAdapterInfo;
+	//if ((dwRetVal = GetAdaptersInfo(pAdapterInfo, &ulOutBufLen)) == NO_ERROR)
+	//{
+	//	pAdapter = pAdapterInfo;
 
-		String ipToLookFor = ip.toString();
+	//	String ipToLookFor = ip.toString();
 
-		while (pAdapter)
-		{
-			String ipString = pAdapter->IpAddressList.IpAddress.String;
-			String maskIpString = pAdapter->IpAddressList.IpMask.String;
+	//	while (pAdapter)
+	//	{
+	//		String ipString = pAdapter->IpAddressList.IpAddress.String;
+	//		String maskIpString = pAdapter->IpAddressList.IpMask.String;
 
-			if (ipString == ipToLookFor)
-			{
-				StringArray currentIpArray = StringArray::fromTokens(ipString, ".", {});
-			
-				StringArray ipNetMaskArray = StringArray::fromTokens(maskIpString, ".", {});
-				//===============================================================
-				/*adapted from the example by Farzan Majdani over at
-				https://stackoverflow.com/questions/777617/calculate-broadcast-address-from-ip-and-subnet-mask
-				*/
-				StringArray arBroadCast;
-				for (int i = 0; i < 4; i++)
-				{
-					int nrBCOct = currentIpArray[i].getIntValue() | (ipNetMaskArray[i].getIntValue() ^ 255);
-					arBroadCast.add(String(nrBCOct));
-				}
-				
+	//		if (ipString == ipToLookFor)
+	//		{
+	//			StringArray currentIpArray = StringArray::fromTokens(ipString, ".", {});
+	//		
+	//			StringArray ipNetMaskArray = StringArray::fromTokens(maskIpString, ".", {});
+	//			//===============================================================
+	//			/*adapted from the example by Farzan Majdani over at
+	//			https://stackoverflow.com/questions/777617/calculate-broadcast-address-from-ip-and-subnet-mask
+	//			*/
+	//			StringArray arBroadCast;
+	//			for (int i = 0; i < 4; i++)
+	//			{
+	//				int nrBCOct = currentIpArray[i].getIntValue() | (ipNetMaskArray[i].getIntValue() ^ 255);
+	//				arBroadCast.add(String(nrBCOct));
+	//			}
+	//			
 
-				broadcastAddress = IPAddress(arBroadCast[0] + "." +
-					arBroadCast[1] + "." +
-					arBroadCast[2] + "." +
-					arBroadCast[3]);
+	//			broadcastAddress = IPAddress(arBroadCast[0] + "." +
+	//				arBroadCast[1] + "." +
+	//				arBroadCast[2] + "." +
+	//				arBroadCast[3]);
 
-				//===============================================================
-				break;
-			}
-			else
-				pAdapter = pAdapter->Next;
+	//			//===============================================================
+	//			break;
+	//		}
+	//		else
+	//			pAdapter = pAdapter->Next;
 
-		}
+	//	}
 
-	}
+	//}
 
 
 
-	if (pAdapterInfo)
-		free(pAdapterInfo);
+	//if (pAdapterInfo)
+	//	free(pAdapterInfo);
 
 	return broadcastAddress;
 }
