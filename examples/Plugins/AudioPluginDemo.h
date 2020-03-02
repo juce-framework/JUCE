@@ -176,10 +176,10 @@ class JuceDemoPluginAudioProcessor  : public AudioProcessor
 public:
     //==============================================================================
     JuceDemoPluginAudioProcessor()
-        : AudioProcessor (getBusesProperties()),
-    state (*this, nullptr, "state",
-           { std::make_unique<AudioParameterFloat> ("gain", "Gain", NormalisableRange<float> (0.0f, 1.0f), 0.9f),
-             std::make_unique<AudioParameterFloat> ("delay", "Delay Feedback", NormalisableRange<float> (0.0f, 1.0f), 0.5f) })
+        : AudioProcessor (BusesProperties().withOutput ("Output", AudioChannelSet::stereo(), true)),
+          state (*this, nullptr, "state",
+                 { std::make_unique<AudioParameterFloat> ("gain",  "Gain",           NormalisableRange<float> (0.0f, 1.0f), 0.9f),
+                   std::make_unique<AudioParameterFloat> ("delay", "Delay Feedback", NormalisableRange<float> (0.0f, 1.0f), 0.5f) })
     {
         lastPosInfo.resetToDefault();
 
@@ -194,20 +194,10 @@ public:
     //==============================================================================
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
-        // Only mono/stereo and input/output must have same layout
         const auto& mainOutput = layouts.getMainOutputChannelSet();
-        const auto& mainInput  = layouts.getMainInputChannelSet();
 
-        // input and output layout must either be the same or the input must be disabled altogether
-        if (! mainInput.isDisabled() && mainInput != mainOutput)
-            return false;
-
-        // do not allow disabling the main buses
-        if (mainOutput.isDisabled())
-            return false;
-
-        // only allow stereo and mono
-        if (mainOutput.size() > 2)
+        // do not allow disabling the main output bus and only allow stereo and mono output
+        if (mainOutput.isDisabled() || mainOutput.size() > 2)
             return false;
 
         return true;
@@ -302,10 +292,22 @@ public:
     //==============================================================================
     void updateTrackProperties (const TrackProperties& properties) override
     {
-        trackProperties = properties;
+        {
+            const ScopedLock sl (trackPropertiesLock);
+            trackProperties = properties;
+        }
 
-        if (auto* editor = dynamic_cast<JuceDemoPluginAudioProcessorEditor*> (getActiveEditor()))
-            editor->updateTrackProperties ();
+        MessageManager::callAsync ([this]
+        {
+            if (auto* editor = dynamic_cast<JuceDemoPluginAudioProcessorEditor*> (getActiveEditor()))
+                 editor->updateTrackProperties();
+        });
+    }
+
+    TrackProperties getTrackProperties() const
+    {
+        const ScopedLock sl (trackPropertiesLock);
+        return trackProperties;
     }
 
     //==============================================================================
@@ -323,9 +325,6 @@ public:
 
     // Our plug-in's current state
     AudioProcessorValueTreeState state;
-
-    // Current track colour and name
-    TrackProperties trackProperties;
 
 private:
     //==============================================================================
@@ -430,7 +429,7 @@ private:
 
         void updateTrackProperties()
         {
-            auto trackColour = getProcessor().trackProperties.colour;
+            auto trackColour = getProcessor().getTrackProperties().colour;
             auto& lf = getLookAndFeel();
 
             backgroundColour = (trackColour == Colour() ? lf.findColour (ResizableWindow::backgroundColourId)
@@ -592,6 +591,9 @@ private:
 
     Synthesiser synth;
 
+    CriticalSection trackPropertiesLock;
+    TrackProperties trackProperties;
+
     void initialiseSynth()
     {
         auto numVoices = 8;
@@ -619,12 +621,6 @@ private:
 
         // If the host fails to provide the current time, we'll just reset our copy to a default..
         lastPosInfo.resetToDefault();
-    }
-
-    static BusesProperties getBusesProperties()
-    {
-        return BusesProperties().withInput  ("Input",  AudioChannelSet::stereo(), true)
-                                .withOutput ("Output", AudioChannelSet::stereo(), true);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceDemoPluginAudioProcessor)
