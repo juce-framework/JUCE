@@ -162,6 +162,10 @@ namespace juce
  #endif
  #endif
 
+#if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+  extern JUCE_API double getScaleFactorForWindow (HWND);
+#endif
+
   extern JUCE_API bool handleManufacturerSpecificVST2Opcode (int32, pointer_sized_int, void*, float);
 }
 
@@ -1268,6 +1272,9 @@ public:
     // A component to hold the AudioProcessorEditor, and cope with some housekeeping
     // chores when it changes or repaints.
     struct EditorCompWrapper  : public Component
+                             #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                              , public Timer
+                             #endif
     {
         EditorCompWrapper (JuceVSTWrapper& w, AudioProcessorEditor& editor)
             : wrapper (w)
@@ -1286,12 +1293,13 @@ public:
            #if JUCE_WINDOWS
             if (! getHostType().isReceptor())
                 addMouseListener (this, true);
-            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-             wrapper.editorScaleFactor = static_cast<float> (Desktop::getInstance().getDisplays().getMainDisplay().scale);
-            #endif
            #endif
 
             ignoreUnused (fakeMouseGenerator);
+
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+            startTimer (500);
+           #endif
         }
 
         ~EditorCompWrapper() override
@@ -1305,16 +1313,7 @@ public:
         void getEditorBounds (Vst2::ERect& bounds)
         {
             auto b = getSizeToContainChild();
-
-            bounds.top    = 0;
-            bounds.left   = 0;
-            bounds.bottom = (int16) b.getHeight();
-            bounds.right  = (int16) b.getWidth();
-
-           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-            bounds.bottom = (int16) roundToInt (bounds.bottom * wrapper.editorScaleFactor);
-            bounds.right  = (int16) roundToInt (bounds.right  * wrapper.editorScaleFactor);
-           #endif
+            bounds = convertToHostBounds ({ 0, 0, (int16) b.getHeight(), (int16) b.getWidth() });
         }
 
         void attachToHost (VstOpCodeArguments args)
@@ -1325,14 +1324,6 @@ public:
            #if JUCE_WINDOWS
             addToDesktop (0, args.ptr);
             hostWindow = (HWND) args.ptr;
-
-            if (auto* ed = getEditorComp())
-               #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-                if (auto* peer = ed->getPeer())
-                    wrapper.editorScaleFactor = (float) peer->getPlatformScaleFactor();
-               #else
-                ed->setScaleFactor (wrapper.editorScaleFactor);
-               #endif
            #elif JUCE_LINUX
             addToDesktop (0, args.ptr);
             hostWindow = (Window) args.ptr;
@@ -1369,34 +1360,28 @@ public:
 
         AudioProcessorEditor* getEditorComp() const noexcept
         {
-            return dynamic_cast<AudioProcessorEditor*> (getChildComponent(0));
+            return dynamic_cast<AudioProcessorEditor*> (getChildComponent (0));
         }
-
-       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-        void checkScaleFactorIsCorrect()
-        {
-            if (auto* peer = getEditorComp()->getPeer())
-            {
-                auto peerScaleFactor = (float) peer->getPlatformScaleFactor();
-
-                if (! approximatelyEqual (peerScaleFactor, wrapper.editorScaleFactor))
-                    wrapper.handleSetContentScaleFactor (peerScaleFactor);
-            }
-        }
-       #endif
 
         void resized() override
         {
             if (auto* ed = getEditorComp())
             {
-               #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                checkScaleFactorIsCorrect();
-               #endif
-
                 ed->setTopLeftPosition (0, 0);
 
                 if (shouldResizeEditor)
-                    ed->setBounds (ed->getLocalArea (this, getLocalBounds()));
+                {
+                    auto newBounds = getLocalBounds();
+
+                   #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                    if (! lastBounds.isEmpty() && isWithin (newBounds.toDouble().getAspectRatio(), lastBounds.toDouble().getAspectRatio(), 0.1))
+                        return;
+
+                    lastBounds = newBounds;
+                   #endif
+
+                    ed->setBounds (ed->getLocalArea (this, newBounds));
+                }
 
                 updateWindowSize (false);
             }
@@ -1445,9 +1430,15 @@ public:
                     shouldResizeEditor = true;
                    #else
                     ignoreUnused (resizeEditor);
+
+                    auto scale = Desktop::getInstance().getGlobalScaleFactor();
+
+                    if (auto* peer = ed->getPeer())
+                        scale *= (float) peer->getPlatformScaleFactor();
+
                     XResizeWindow (display.display, (Window) getWindowHandle(),
-                                   static_cast<unsigned int> (roundToInt (pos.getWidth()  * wrapper.editorScaleFactor)),
-                                   static_cast<unsigned int> (roundToInt (pos.getHeight() * wrapper.editorScaleFactor)));
+                                   static_cast<unsigned int> (roundToInt (pos.getWidth()  * scale)),
+                                   static_cast<unsigned int> (roundToInt (pos.getHeight() * scale)));
                    #endif
 
                    #if JUCE_MAC
@@ -1459,6 +1450,10 @@ public:
 
         void resizeHostWindow (int newWidth, int newHeight)
         {
+            auto rect = convertToHostBounds ({ 0, 0, (int16) newHeight, (int16) newWidth });
+            newWidth = rect.right - rect.left;
+            newHeight = rect.bottom - rect.top;
+
             bool sizeWasSuccessful = false;
 
             if (auto host = wrapper.hostCallback)
@@ -1467,11 +1462,6 @@ public:
 
                 if (status == (pointer_sized_int) 1 || getHostType().isAbletonLive())
                 {
-                   #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                    newWidth  = roundToInt (newWidth  * wrapper.editorScaleFactor);
-                    newHeight = roundToInt (newHeight * wrapper.editorScaleFactor);
-                   #endif
-
                     const ScopedValueSetter<bool> inSizeWindowSetter (isInSizeWindow, true);
 
                     sizeWasSuccessful = (host (wrapper.getAEffect(), Vst2::audioMasterSizeWindow,
@@ -1493,11 +1483,6 @@ public:
                 int dw = 0;
                 int dh = 0;
                 const int frameThickness = GetSystemMetrics (SM_CYFIXEDFRAME);
-
-               #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-                newWidth  = roundToInt (newWidth  * wrapper.editorScaleFactor);
-                newHeight = roundToInt (newHeight * wrapper.editorScaleFactor);
-               #endif
 
                 HWND w = (HWND) getWindowHandle();
 
@@ -1547,6 +1532,29 @@ public:
             }
         }
 
+        void setContentScaleFactor (float scale)
+        {
+            if (! approximatelyEqual (scale, editorScaleFactor))
+            {
+                editorScaleFactor = scale;
+
+                if (auto* ed = getEditorComp())
+                    ed->setScaleFactor (editorScaleFactor);
+
+                updateWindowSize (true);
+            }
+        }
+
+       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+        void timerCallback() override
+        {
+            auto hostWindowScale = (float) getScaleFactorForWindow (hostWindow);
+
+            if (hostWindowScale > 0.0f && ! approximatelyEqual (hostWindowScale, editorScaleFactor))
+                wrapper.handleSetContentScaleFactor (hostWindowScale);
+        }
+       #endif
+
        #if JUCE_WINDOWS
         void mouseDown (const MouseEvent&) override
         {
@@ -1573,19 +1581,38 @@ public:
        #endif
 
         //==============================================================================
+        static Vst2::ERect convertToHostBounds (const Vst2::ERect& rect)
+        {
+            auto desktopScale = Desktop::getInstance().getGlobalScaleFactor();
+
+            if (approximatelyEqual (desktopScale, 1.0f))
+                return rect;
+
+            return { (int16) roundToInt (rect.top    * desktopScale),
+                     (int16) roundToInt (rect.left   * desktopScale),
+                     (int16) roundToInt (rect.bottom * desktopScale),
+                     (int16) roundToInt (rect.right  * desktopScale)};
+        }
+
+        //==============================================================================
         JuceVSTWrapper& wrapper;
         FakeMouseMoveGenerator fakeMouseGenerator;
         bool isInSizeWindow = false;
         bool shouldResizeEditor = true;
+
+        float editorScaleFactor = 1.0f;
 
        #if JUCE_MAC
         void* hostWindow = nullptr;
        #elif JUCE_LINUX
         ScopedXDisplay display;
         Window hostWindow = {};
-       #else
+       #elif JUCE_WINDOWS
         HWND hostWindow = {};
         WindowsHooks hooks;
+        #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+         juce::Rectangle<int> lastBounds;
+        #endif
        #endif
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditorCompWrapper)
@@ -2219,18 +2246,10 @@ private:
     pointer_sized_int handleSetContentScaleFactor (float scale)
     {
        #if ! JUCE_MAC
-        if (! approximatelyEqual (scale, editorScaleFactor))
-        {
-            editorScaleFactor = scale;
+        if (editorComp != nullptr)
+            editorComp->setContentScaleFactor (scale);
 
-            if (editorComp != nullptr)
-               #if JUCE_WINDOWS && ! JUCE_WIN_PER_MONITOR_DPI_AWARE
-                if (auto* ed = editorComp->getEditorComp())
-                    ed->setScaleFactor (scale);
-               #else
-                editorComp->updateWindowSize (true);
-               #endif
-        }
+        lastScaleFactorReceived = scale;
        #else
         ignoreUnused (scale);
        #endif
@@ -2300,7 +2319,7 @@ private:
     VSTMidiEventList outgoingEvents;
 
    #if ! JUCE_MAC
-    float editorScaleFactor = 1.0f;
+    float lastScaleFactorReceived = 1.0f;
    #endif
 
     LegacyAudioParametersWrapper juceParameters;
