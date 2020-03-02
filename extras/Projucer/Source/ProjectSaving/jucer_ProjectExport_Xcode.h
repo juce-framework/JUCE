@@ -3157,7 +3157,7 @@ private:
             for (auto& option : getHardenedRuntimeOptions())
                 entitlements.set (option, "<true/>");
 
-        if (isAppSandboxEnabled() || (project.isAudioPluginProject() && target.type == XcodeTarget::AudioUnitv3PlugIn))
+        if (isAppSandboxEnabled() || (isOSX() && project.isAudioPluginProject() && target.type == XcodeTarget::AudioUnitv3PlugIn))
         {
             entitlements.set ("com.apple.security.app-sandbox", "<true/>");
 
