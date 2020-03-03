@@ -176,7 +176,7 @@ class JuceDemoPluginAudioProcessor  : public AudioProcessor
 public:
     //==============================================================================
     JuceDemoPluginAudioProcessor()
-        : AudioProcessor (BusesProperties().withOutput ("Output", AudioChannelSet::stereo(), true)),
+        : AudioProcessor (getBusesProperties()),
           state (*this, nullptr, "state",
                  { std::make_unique<AudioParameterFloat> ("gain",  "Gain",           NormalisableRange<float> (0.0f, 1.0f), 0.9f),
                    std::make_unique<AudioParameterFloat> ("delay", "Delay Feedback", NormalisableRange<float> (0.0f, 1.0f), 0.5f) })
@@ -194,10 +194,20 @@ public:
     //==============================================================================
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
+        // Only mono/stereo and input/output must have same layout
         const auto& mainOutput = layouts.getMainOutputChannelSet();
+        const auto& mainInput  = layouts.getMainInputChannelSet();
 
-        // do not allow disabling the main output bus and only allow stereo and mono output
-        if (mainOutput.isDisabled() || mainOutput.size() > 2)
+        // input and output layout must either be the same or the input must be disabled altogether
+        if (! mainInput.isDisabled() && mainInput != mainOutput)
+            return false;
+
+        // do not allow disabling the main buses
+        if (mainOutput.isDisabled())
+            return false;
+
+        // only allow stereo and mono
+        if (mainOutput.size() > 2)
             return false;
 
         return true;
@@ -621,6 +631,12 @@ private:
 
         // If the host fails to provide the current time, we'll just reset our copy to a default..
         lastPosInfo.resetToDefault();
+    }
+
+    static BusesProperties getBusesProperties()
+    {
+        return BusesProperties().withInput  ("Input",  AudioChannelSet::stereo(), true)
+                                .withOutput ("Output", AudioChannelSet::stereo(), true);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceDemoPluginAudioProcessor)
