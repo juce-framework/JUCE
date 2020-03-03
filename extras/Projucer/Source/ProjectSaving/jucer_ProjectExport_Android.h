@@ -887,7 +887,7 @@ private:
             if (m->getID() == moduleID)
             {
                 auto javaFolder = m->getFolder().getChildFile ("native").getChildFile ("javaopt");
-                addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile("app"));
+                addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile ("app"));
                 return;
             }
         }
@@ -902,13 +902,14 @@ private:
         {
             auto javaFolder = module->getFolder().getChildFile ("native").getChildFile ("javacore");
 
-            addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile("init"));
+            addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile ("init"));
 
             if (! isLibrary())
-                addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile("app"));
+                addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile ("app"));
         }
 
-        if (project.getEnabledModules().isModuleEnabled ("juce_gui_basics") && getActivityClassString() == getDefaultActivityClass())
+        if (project.getEnabledModules().isModuleEnabled ("juce_gui_basics")
+            && (getActivityClassString() == getDefaultActivityClass() || isContentSharingEnabled()))
             addOptJavaFolderToSourceSetsForModule (javaSourceSets, modules, "juce_gui_basics");
 
         if (areRemoteNotificationsEnabled())
@@ -1224,6 +1225,8 @@ private:
     bool areRemoteNotificationsEnabled() const  { return arePushNotificationsEnabled() && androidEnableRemoteNotifications.get(); }
 
     bool isInAppBillingEnabled() const          { return androidInAppBillingPermission.get(); }
+
+    bool isContentSharingEnabled() const        { return androidEnableContentSharing.get(); }
 
     String getJNIActivityClassName() const
     {
@@ -1777,14 +1780,14 @@ private:
 
     void createProviderElement (XmlElement& application) const
     {
-        if (androidEnableContentSharing.get())
+        if (isContentSharingEnabled())
         {
             auto* provider = application.createNewChildElement ("provider");
 
             provider->setAttribute ("android:name", "com.roli.juce.JuceSharingContentProvider");
             provider->setAttribute ("android:authorities", project.getBundleIdentifierString().toLowerCase() + ".sharingcontentprovider");
             provider->setAttribute ("android:grantUriPermissions", "true");
-            provider->setAttribute ("android:exported", "false");
+            provider->setAttribute ("android:exported", "true");
         }
     }
 
