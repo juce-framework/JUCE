@@ -1291,30 +1291,30 @@ private:
             onSize (&viewRect);
         }
 
-        static ViewRect convertToHostBounds (ViewRect rect)
+        static ViewRect convertToHostBounds (ViewRect pluginRect)
         {
             auto desktopScale = Desktop::getInstance().getGlobalScaleFactor();
 
             if (approximatelyEqual (desktopScale, 1.0f))
-                return rect;
+                return pluginRect;
 
-            return { roundToInt (rect.left   * desktopScale),
-                     roundToInt (rect.top    * desktopScale),
-                     roundToInt (rect.right  * desktopScale),
-                     roundToInt (rect.bottom * desktopScale) };
+            return { roundToInt (pluginRect.left   * desktopScale),
+                     roundToInt (pluginRect.top    * desktopScale),
+                     roundToInt (pluginRect.right  * desktopScale),
+                     roundToInt (pluginRect.bottom * desktopScale) };
         }
 
-        static ViewRect convertFromHostBounds (ViewRect rect)
+        static ViewRect convertFromHostBounds (ViewRect hostRect)
         {
             auto desktopScale = Desktop::getInstance().getGlobalScaleFactor();
 
             if (approximatelyEqual (desktopScale, 1.0f))
-                return rect;
+                return hostRect;
 
-            return { roundToInt (rect.left   / desktopScale),
-                     roundToInt (rect.top    / desktopScale),
-                     roundToInt (rect.right  / desktopScale),
-                     roundToInt (rect.bottom / desktopScale) };
+            return { roundToInt (hostRect.left   / desktopScale),
+                     roundToInt (hostRect.top    / desktopScale),
+                     roundToInt (hostRect.right  / desktopScale),
+                     roundToInt (hostRect.bottom / desktopScale) };
         }
 
         //==============================================================================
