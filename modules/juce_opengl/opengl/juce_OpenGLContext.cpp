@@ -66,6 +66,10 @@ private:
 
 #endif
 
+#if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+ extern JUCE_API double getScaleFactorForWindow (HWND);
+#endif
+
 //==============================================================================
 class OpenGLContext::CachedImage  : public CachedComponentImage,
                                     private ThreadPoolJob
@@ -292,7 +296,11 @@ public:
     {
         if (auto* peer = component.getPeer())
         {
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+            auto newScale = getScaleFactorForWindow (nativeContext->getNativeHandle());
+           #else
             auto newScale = Desktop::getInstance().getDisplays().findDisplayForRect (component.getTopLevelComponent()->getScreenBounds()).scale;
+           #endif
 
             auto localBounds = component.getLocalBounds();
             auto newArea = peer->getComponent().getLocalArea (&component, localBounds).withZeroOrigin() * newScale;

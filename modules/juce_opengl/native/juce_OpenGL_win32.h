@@ -150,6 +150,14 @@ public:
 
     struct Locker { Locker (NativeContext&) {} };
 
+    HWND getNativeHandle()
+    {
+        if (nativeWindow != nullptr)
+            return (HWND) nativeWindow->getNativeHandle();
+
+        return {};
+    }
+
 private:
     struct DummyComponent  : public Component
     {
