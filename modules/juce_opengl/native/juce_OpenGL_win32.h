@@ -155,7 +155,7 @@ public:
         if (nativeWindow != nullptr)
             return (HWND) nativeWindow->getNativeHandle();
 
-        return {};
+        return nullptr;
     }
 
 private:
