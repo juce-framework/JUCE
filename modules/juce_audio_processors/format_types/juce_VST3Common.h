@@ -468,45 +468,19 @@ public:
     //==============================================================================
     static void toMidiBuffer (MidiBuffer& result, Steinberg::Vst::IEventList& eventList)
     {
-        const int32 numEvents = eventList.getEventCount();
+        const auto numEvents = eventList.getEventCount();
 
         for (Steinberg::int32 i = 0; i < numEvents; ++i)
         {
             Steinberg::Vst::Event e;
 
-            if (eventList.getEvent (i, e) == Steinberg::kResultOk)
-            {
-                switch (e.type)
-                {
-                    case Steinberg::Vst::Event::kNoteOnEvent:
-                        result.addEvent (MidiMessage::noteOn (createSafeChannel (e.noteOn.channel),
-                                                              createSafeNote (e.noteOn.pitch),
-                                                              (Steinberg::uint8) denormaliseToMidiValue (e.noteOn.velocity)),
-                                         e.sampleOffset);
-                        break;
+            if (eventList.getEvent (i, e) != Steinberg::kResultOk)
+                continue;
 
-                    case Steinberg::Vst::Event::kNoteOffEvent:
-                        result.addEvent (MidiMessage::noteOff (createSafeChannel (e.noteOff.channel),
-                                                               createSafeNote (e.noteOff.pitch),
-                                                               (Steinberg::uint8) denormaliseToMidiValue (e.noteOff.velocity)),
-                                         e.sampleOffset);
-                        break;
+            const auto message = toMidiMessage (e);
 
-                    case Steinberg::Vst::Event::kPolyPressureEvent:
-                        result.addEvent (MidiMessage::channelPressureChange (createSafeChannel (e.polyPressure.channel),
-                                                                             denormaliseToMidiValue (e.polyPressure.pressure)),
-                                         e.sampleOffset);
-                        break;
-
-                    case Steinberg::Vst::Event::kDataEvent:
-                        result.addEvent (MidiMessage::createSysExMessage (e.data.bytes, (int) e.data.size),
-                                         e.sampleOffset);
-                        break;
-
-                    default:
-                        break;
-                }
-            }
+            if (message.isValid)
+                result.addEvent (message.item, e.sampleOffset);
         }
     }
 
@@ -546,49 +520,14 @@ public:
                 }
             }
 
-            Steinberg::Vst::Event e{};
+            auto maybeEvent = createVstEvent (msg, metadata.data);
 
-            if (msg.isNoteOn())
-            {
-                e.type              = Steinberg::Vst::Event::kNoteOnEvent;
-                e.noteOn.channel    = createSafeChannel (msg.getChannel());
-                e.noteOn.pitch      = createSafeNote (msg.getNoteNumber());
-                e.noteOn.velocity   = normaliseMidiValue (msg.getVelocity());
-                e.noteOn.length     = 0;
-                e.noteOn.tuning     = 0.0f;
-                e.noteOn.noteId     = -1;
-            }
-            else if (msg.isNoteOff())
-            {
-                e.type              = Steinberg::Vst::Event::kNoteOffEvent;
-                e.noteOff.channel   = createSafeChannel (msg.getChannel());
-                e.noteOff.pitch     = createSafeNote (msg.getNoteNumber());
-                e.noteOff.velocity  = normaliseMidiValue (msg.getVelocity());
-                e.noteOff.tuning    = 0.0f;
-                e.noteOff.noteId    = -1;
-            }
-            else if (msg.isSysEx())
-            {
-                e.type          = Steinberg::Vst::Event::kDataEvent;
-                e.data.bytes    = metadata.data + 1;
-                e.data.size     = (uint32) msg.getSysExDataSize();
-                e.data.type     = Steinberg::Vst::DataEvent::kMidiSysEx;
-            }
-            else if (msg.isChannelPressure())
-            {
-                e.type                   = Steinberg::Vst::Event::kPolyPressureEvent;
-                e.polyPressure.channel   = createSafeChannel (msg.getChannel());
-                e.polyPressure.pitch     = createSafeNote (msg.getNoteNumber());
-                e.polyPressure.pressure  = normaliseMidiValue (msg.getChannelPressureValue());
-            }
-            else
-            {
+            if (! maybeEvent.isValid)
                 continue;
-            }
 
+            auto& e = maybeEvent.item;
             e.busIndex = 0;
             e.sampleOffset = metadata.samplePosition;
-
             result.addEvent (e);
         }
     }
@@ -605,6 +544,216 @@ private:
 
     static float normaliseMidiValue (int value) noexcept              { return jlimit (0.0f, 1.0f, (float) value / 127.0f); }
     static int denormaliseToMidiValue (float value) noexcept          { return roundToInt (jlimit (0.0f, 127.0f, value * 127.0f)); }
+
+    static Steinberg::Vst::Event createNoteOnEvent (const MidiMessage& msg) noexcept
+    {
+        Steinberg::Vst::Event e{};
+        e.type              = Steinberg::Vst::Event::kNoteOnEvent;
+        e.noteOn.channel    = createSafeChannel (msg.getChannel());
+        e.noteOn.pitch      = createSafeNote (msg.getNoteNumber());
+        e.noteOn.velocity   = normaliseMidiValue (msg.getVelocity());
+        e.noteOn.length     = 0;
+        e.noteOn.tuning     = 0.0f;
+        e.noteOn.noteId     = -1;
+        return e;
+    }
+
+    static Steinberg::Vst::Event createNoteOffEvent (const MidiMessage& msg) noexcept
+    {
+        Steinberg::Vst::Event e{};
+        e.type              = Steinberg::Vst::Event::kNoteOffEvent;
+        e.noteOff.channel   = createSafeChannel (msg.getChannel());
+        e.noteOff.pitch     = createSafeNote (msg.getNoteNumber());
+        e.noteOff.velocity  = normaliseMidiValue (msg.getVelocity());
+        e.noteOff.tuning    = 0.0f;
+        e.noteOff.noteId    = -1;
+        return e;
+    }
+
+    static Steinberg::Vst::Event createSysExEvent (const MidiMessage& msg, const uint8* midiEventData) noexcept
+    {
+        Steinberg::Vst::Event e{};
+        e.type          = Steinberg::Vst::Event::kDataEvent;
+        e.data.bytes    = midiEventData + 1;
+        e.data.size     = (uint32) msg.getSysExDataSize();
+        e.data.type     = Steinberg::Vst::DataEvent::kMidiSysEx;
+        return e;
+    }
+
+    static Steinberg::Vst::Event createLegacyMIDIEvent (int channel, int controlNumber, int value, int value2 = 0)
+    {
+        Steinberg::Vst::Event e{};
+        e.type                      = Steinberg::Vst::Event::kLegacyMIDICCOutEvent;
+        e.midiCCOut.channel         = int8 (createSafeChannel (channel));
+        e.midiCCOut.controlNumber   = uint8 (jlimit (0, 255, controlNumber));
+        e.midiCCOut.value           = int8 (createSafeNote (value));
+        e.midiCCOut.value2          = int8 (createSafeNote (value2));
+        return e;
+    }
+
+    static Steinberg::Vst::Event createChannelPressureEvent (const MidiMessage& msg) noexcept
+    {
+        return createLegacyMIDIEvent (msg.getChannel(),
+                                      Steinberg::Vst::kAfterTouch,
+                                      msg.getChannelPressureValue());
+    }
+
+    static Steinberg::Vst::Event createControllerEvent (const MidiMessage& msg) noexcept
+    {
+        return createLegacyMIDIEvent (msg.getChannel(),
+                                      msg.getControllerNumber(),
+                                      msg.getControllerValue());
+    }
+
+    static Steinberg::Vst::Event createCtrlPolyPressureEvent (const MidiMessage& msg) noexcept
+    {
+        return createLegacyMIDIEvent (msg.getChannel(),
+                                      Steinberg::Vst::kCtrlPolyPressure,
+                                      msg.getNoteNumber(),
+                                      msg.getAfterTouchValue());
+    }
+
+    static Steinberg::Vst::Event createPitchWheelEvent (const MidiMessage& msg) noexcept
+    {
+        return createLegacyMIDIEvent (msg.getChannel(),
+                                      Steinberg::Vst::kPitchBend,
+                                      msg.getRawData()[1],
+                                      msg.getRawData()[2]);
+    }
+
+    static Steinberg::Vst::Event createProgramChangeEvent (const MidiMessage& msg) noexcept
+    {
+        return createLegacyMIDIEvent (msg.getChannel(),
+                                      Steinberg::Vst::kCtrlProgramChange,
+                                      msg.getProgramChangeNumber());
+    }
+
+    static Steinberg::Vst::Event createCtrlQuarterFrameEvent (const MidiMessage& msg) noexcept
+    {
+        return createLegacyMIDIEvent (msg.getChannel(),
+                                      Steinberg::Vst::kCtrlQuarterFrame,
+                                      msg.getQuarterFrameValue());
+    }
+
+    template <typename Item>
+    struct BasicOptional final
+    {
+        BasicOptional() noexcept = default;
+        BasicOptional (const Item& i) noexcept : item { i }, isValid { true } {}
+
+        Item item;
+        bool isValid{};
+    };
+
+    static BasicOptional<Steinberg::Vst::Event> createVstEvent (const MidiMessage& msg,
+                                                                const uint8* midiEventData) noexcept
+    {
+        if (msg.isNoteOn())
+            return createNoteOnEvent (msg);
+
+        if (msg.isNoteOff())
+            return createNoteOffEvent (msg);
+
+        if (msg.isSysEx())
+            return createSysExEvent (msg, midiEventData);
+
+        if (msg.isChannelPressure())
+            return createChannelPressureEvent (msg);
+
+        if (msg.isPitchWheel())
+            return createPitchWheelEvent (msg);
+
+        if (msg.isProgramChange())
+            return createProgramChangeEvent (msg);
+
+        if (msg.isController())
+            return createControllerEvent (msg);
+
+        if (msg.isQuarterFrame())
+            return createCtrlQuarterFrameEvent (msg);
+
+        // VST3 gives us two ways to communicate poly pressure changes.
+        // There's a dedicated PolyPressureEvent, and also a LegacyMIDICCOutEvent with a
+        // `controlNumber` of `kCtrlPolyPressure`. We're sending the LegacyMIDI version.
+        if (msg.isAftertouch())
+            return createCtrlPolyPressureEvent (msg);
+
+        return {};
+    }
+
+    static BasicOptional<MidiMessage> toMidiMessage (const Steinberg::Vst::LegacyMIDICCOutEvent& e)
+    {
+        if (e.controlNumber <= 127)
+            return MidiMessage::controllerEvent (createSafeChannel (int16 (e.channel)),
+                                                 createSafeNote (int16 (e.controlNumber)),
+                                                 createSafeNote (int16 (e.value)));
+
+        switch (e.controlNumber)
+        {
+            case Steinberg::Vst::kAfterTouch:
+                return MidiMessage::channelPressureChange (createSafeChannel (int16 (e.channel)),
+                                                           createSafeNote (int16 (e.value)));
+
+            case Steinberg::Vst::kPitchBend:
+                return MidiMessage::pitchWheel (createSafeChannel (int16 (e.channel)),
+                                                (e.value & 0x7f) | ((e.value2 & 0x7f) << 7));
+
+            case Steinberg::Vst::kCtrlProgramChange:
+                return MidiMessage::programChange (createSafeChannel (int16 (e.channel)),
+                                                   createSafeNote (int16 (e.value)));
+
+            case Steinberg::Vst::kCtrlQuarterFrame:
+                return MidiMessage::quarterFrame (createSafeChannel (int16 (e.channel)),
+                                                  createSafeNote (int16 (e.value)));
+
+            case Steinberg::Vst::kCtrlPolyPressure:
+                return MidiMessage::aftertouchChange (createSafeChannel (int16 (e.channel)),
+                                                      createSafeNote (int16 (e.value)),
+                                                      createSafeNote (int16 (e.value2)));
+
+            default:
+                // If this is hit, we're trying to convert a LegacyMIDICCOutEvent with an unknown controlNumber.
+                jassertfalse;
+                return {};
+        }
+    }
+
+    static BasicOptional<MidiMessage> toMidiMessage (const Steinberg::Vst::Event& e)
+    {
+        switch (e.type)
+        {
+            case Steinberg::Vst::Event::kNoteOnEvent:
+                return MidiMessage::noteOn (createSafeChannel (e.noteOn.channel),
+                                            createSafeNote (e.noteOn.pitch),
+                                            (Steinberg::uint8) denormaliseToMidiValue (e.noteOn.velocity));
+
+            case Steinberg::Vst::Event::kNoteOffEvent:
+                return MidiMessage::noteOff (createSafeChannel (e.noteOff.channel),
+                                             createSafeNote (e.noteOff.pitch),
+                                             (Steinberg::uint8) denormaliseToMidiValue (e.noteOff.velocity));
+
+            case Steinberg::Vst::Event::kPolyPressureEvent:
+                return MidiMessage::aftertouchChange (createSafeChannel (e.polyPressure.channel),
+                                                      createSafeNote (e.polyPressure.pitch),
+                                                      (Steinberg::uint8) denormaliseToMidiValue (e.polyPressure.pressure));
+
+            case Steinberg::Vst::Event::kDataEvent:
+                return MidiMessage::createSysExMessage (e.data.bytes, (int) e.data.size);
+
+            case Steinberg::Vst::Event::kLegacyMIDICCOutEvent:
+                return toMidiMessage (e.midiCCOut);
+
+            case Steinberg::Vst::Event::kNoteExpressionValueEvent:
+            case Steinberg::Vst::Event::kNoteExpressionTextEvent:
+            case Steinberg::Vst::Event::kChordEvent:
+            case Steinberg::Vst::Event::kScaleEvent:
+                return {};
+        }
+
+        // If this is hit, we've been sent an event type that doesn't exist in the VST3 spec.
+        jassertfalse;
+        return {};
+    }
 
     //==============================================================================
     struct Vst3MidiControlEvent

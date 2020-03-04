@@ -2531,17 +2531,16 @@ private:
         auto plugInOutputChannels = pluginInstance->getTotalNumOutputChannels();
 
         // Wavelab workaround: wave-lab lies on the number of inputs/outputs so re-count here
-        int vstInputs;
-        for (vstInputs = 0; vstInputs < data.numInputs; ++vstInputs)
-            if (getPointerForAudioBus<FloatType> (data.inputs[vstInputs]) == nullptr
-                  && data.inputs[vstInputs].numChannels > 0)
-                break;
+        const auto countValidChannels = [] (Vst::AudioBusBuffers* buffers, int32 num)
+        {
+            return int (std::distance (buffers, std::find_if (buffers, buffers + num, [] (Vst::AudioBusBuffers& buf)
+            {
+                return getPointerForAudioBus<FloatType> (buf) == nullptr && buf.numChannels > 0;
+            })));
+        };
 
-        int vstOutputs;
-        for (vstOutputs = 0; vstOutputs < data.numOutputs; ++vstOutputs)
-            if (getPointerForAudioBus<FloatType> (data.outputs[vstOutputs]) == nullptr
-                  && data.outputs[vstOutputs].numChannels > 0)
-                break;
+        const auto vstInputs  = countValidChannels (data.inputs,  data.numInputs);
+        const auto vstOutputs = countValidChannels (data.outputs, data.numOutputs);
 
         {
             auto n = jmax (vstOutputs, getNumAudioBuses (false));
