@@ -16,35 +16,32 @@
   ==============================================================================
 */
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-
 struct CameraDevice::Pimpl
 {
-    Pimpl (CameraDevice& ownerToUse, const String&, int /*index*/, int /*minWidth*/, int /*minHeight*/,
-           int /*maxWidth*/, int /*maxHeight*/, bool useHighQuality)
-        : owner (ownerToUse)
+    Pimpl (CameraDevice& ownerToUse, const String& deviceNameToUse, int /*index*/,
+           int /*minWidth*/, int /*minHeight*/,
+           int /*maxWidth*/, int /*maxHeight*/,
+           bool useHighQuality)
+        : owner (ownerToUse),
+          deviceName (deviceNameToUse)
     {
-        JUCE_AUTORELEASEPOOL
-        {
-            captureView = [[AVCaptureView alloc] init];
-            session = captureView.session;
+        session = [[AVCaptureSession alloc] init];
 
-            session.sessionPreset = useHighQuality ? AVCaptureSessionPresetHigh
-                                                   : AVCaptureSessionPresetMedium;
+        session.sessionPreset = useHighQuality ? AVCaptureSessionPresetHigh
+                                               : AVCaptureSessionPresetMedium;
 
-            refreshConnections();
+        refreshConnections();
 
-            static DelegateClass cls;
-            callbackDelegate = (id<AVCaptureFileOutputRecordingDelegate>) [cls.createInstance() init];
-            DelegateClass::setOwner (callbackDelegate, this);
+        static DelegateClass cls;
+        callbackDelegate = (id<AVCaptureFileOutputRecordingDelegate>) [cls.createInstance() init];
+        DelegateClass::setOwner (callbackDelegate, this);
 
-            SEL runtimeErrorSel = NSSelectorFromString (nsStringLiteral ("captureSessionRuntimeError:"));
+        SEL runtimeErrorSel = NSSelectorFromString (nsStringLiteral ("captureSessionRuntimeError:"));
 
-            [[NSNotificationCenter defaultCenter] addObserver: callbackDelegate
-                                                     selector: runtimeErrorSel
-                                                         name: AVCaptureSessionRuntimeErrorNotification
-                                                       object: session];
-        }
+        [[NSNotificationCenter defaultCenter] addObserver: callbackDelegate
+                                                 selector: runtimeErrorSel
+                                                     name: AVCaptureSessionRuntimeErrorNotification
+                                                   object: session];
     }
 
     ~Pimpl()
@@ -52,14 +49,126 @@ struct CameraDevice::Pimpl
         [[NSNotificationCenter defaultCenter] removeObserver: callbackDelegate];
 
         [session stopRunning];
+        removeInput();
         removeImageCapture();
         removeMovieCapture();
         [session release];
         [callbackDelegate release];
     }
 
+    //==============================================================================
     bool openedOk() const noexcept       { return openingError.isEmpty(); }
 
+    void takeStillPicture (std::function<void(const Image&)> pictureTakenCallbackToUse)
+    {
+        if (pictureTakenCallbackToUse == nullptr)
+        {
+            jassertfalse;
+            return;
+        }
+
+        pictureTakenCallback = std::move (pictureTakenCallbackToUse);
+
+        triggerImageCapture();
+    }
+
+    void startRecordingToFile (const File& file, int /*quality*/)
+    {
+        stopRecording();
+        refreshIfNeeded();
+        firstPresentationTime = Time::getCurrentTime();
+        file.deleteFile();
+
+        isRecording = true;
+        [fileOutput startRecordingToOutputFileURL: createNSURLFromFile (file)
+                                recordingDelegate: callbackDelegate];
+    }
+
+    void stopRecording()
+    {
+        if (isRecording)
+        {
+            [fileOutput stopRecording];
+            isRecording = false;
+        }
+    }
+
+    Time getTimeOfFirstRecordedFrame() const
+    {
+        return firstPresentationTime;
+    }
+
+    void addListener (CameraDevice::Listener* listenerToAdd)
+    {
+        const ScopedLock sl (listenerLock);
+        listeners.add (listenerToAdd);
+
+        if (listeners.size() == 1)
+            triggerImageCapture();
+    }
+
+    void removeListener (CameraDevice::Listener* listenerToRemove)
+    {
+        const ScopedLock sl (listenerLock);
+        listeners.remove (listenerToRemove);
+    }
+
+    static StringArray getAvailableDevices()
+    {
+        StringArray results;
+        NSArray* devices = [AVCaptureDevice devicesWithMediaType: AVMediaTypeVideo];
+
+        for (AVCaptureDevice* device : devices)
+            results.add (nsStringToJuce ([device localizedName]));
+
+        return results;
+    }
+
+    AVCaptureSession* getCaptureSession()
+    {
+        return session;
+    }
+
+private:
+    //==============================================================================
+    struct DelegateClass  : public ObjCClass<NSObject>
+    {
+        DelegateClass()  : ObjCClass<NSObject> ("JUCECameraDelegate_")
+        {
+            addIvar<Pimpl*> ("owner");
+            addProtocol (@protocol (AVCaptureFileOutputRecordingDelegate));
+
+            addMethod (@selector (captureOutput:didStartRecordingToOutputFileAtURL:  fromConnections:),       didStartRecordingToOutputFileAtURL,   "v@:@@@");
+            addMethod (@selector (captureOutput:didPauseRecordingToOutputFileAtURL:  fromConnections:),       didPauseRecordingToOutputFileAtURL,   "v@:@@@");
+            addMethod (@selector (captureOutput:didResumeRecordingToOutputFileAtURL: fromConnections:),       didResumeRecordingToOutputFileAtURL,  "v@:@@@");
+            addMethod (@selector (captureOutput:willFinishRecordingToOutputFileAtURL:fromConnections:error:), willFinishRecordingToOutputFileAtURL, "v@:@@@@");
+
+            SEL runtimeErrorSel = NSSelectorFromString (nsStringLiteral ("captureSessionRuntimeError:"));
+            addMethod (runtimeErrorSel, sessionRuntimeError, "v@:@");
+
+            registerClass();
+        }
+
+        static void setOwner (id self, Pimpl* owner)   { object_setInstanceVariable (self, "owner", owner); }
+        static Pimpl& getOwner (id self)               { return *getIvar<Pimpl*> (self, "owner"); }
+
+    private:
+        static void didStartRecordingToOutputFileAtURL (id, SEL, AVCaptureFileOutput*, NSURL*, NSArray*) {}
+        static void didPauseRecordingToOutputFileAtURL (id, SEL, AVCaptureFileOutput*, NSURL*, NSArray*) {}
+        static void didResumeRecordingToOutputFileAtURL (id, SEL, AVCaptureFileOutput*, NSURL*, NSArray*) {}
+        static void willFinishRecordingToOutputFileAtURL (id, SEL, AVCaptureFileOutput*, NSURL*, NSArray*, NSError*) {}
+
+        static void sessionRuntimeError (id self, SEL, NSNotification* notification)
+        {
+            JUCE_CAMERA_LOG (nsStringToJuce ([notification description]));
+
+            NSError* error = notification.userInfo[AVCaptureSessionErrorKey];
+            auto errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
+            getOwner (self).cameraSessionRuntimeError (errorString);
+        }
+    };
+
+    //==============================================================================
     void addImageCapture()
     {
         if (imageOutput == nil)
@@ -101,11 +210,70 @@ struct CameraDevice::Pimpl
         }
     }
 
+    void removeCurrentSessionVideoInputs()
+    {
+        if (session != nil)
+        {
+            NSArray<AVCaptureDeviceInput*>* inputs = session.inputs;
+
+            for (AVCaptureDeviceInput* input : inputs)
+                if ([input.device hasMediaType: AVMediaTypeVideo])
+                    [session removeInput:input];
+        }
+    }
+
+    void addInput()
+    {
+        if (currentInput == nil)
+        {
+            NSArray* availableDevices = [AVCaptureDevice devicesWithMediaType: AVMediaTypeVideo];
+
+            for (AVCaptureDevice* device : availableDevices)
+            {
+                if (deviceName == nsStringToJuce ([device localizedName]))
+                {
+                    removeCurrentSessionVideoInputs();
+
+                    NSError* err = nil;
+                    AVCaptureDeviceInput* inputDevice = [[AVCaptureDeviceInput alloc] initWithDevice: device
+                                                                                               error: &err];
+
+                    jassert (err == nil);
+
+                    if ([session canAddInput: inputDevice])
+                    {
+                        [session addInput: inputDevice];
+                        currentInput = inputDevice;
+                    }
+                    else
+                    {
+                        jassertfalse;
+                        [inputDevice release];
+                    }
+
+                    return;
+                }
+            }
+        }
+    }
+
+    void removeInput()
+    {
+        if (currentInput != nil)
+        {
+            [session removeInput: currentInput];
+            [currentInput release];
+            currentInput = nil;
+        }
+    }
+
     void refreshConnections()
     {
         [session beginConfiguration];
+        removeInput();
         removeImageCapture();
         removeMovieCapture();
+        addInput();
         addImageCapture();
         addMovieCapture();
         [session commitConfiguration];
@@ -115,45 +283,6 @@ struct CameraDevice::Pimpl
     {
         if (getVideoConnection() == nullptr)
             refreshConnections();
-    }
-
-    void takeStillPicture (std::function<void(const Image&)> pictureTakenCallbackToUse)
-    {
-        if (pictureTakenCallbackToUse == nullptr)
-        {
-            jassertfalse;
-            return;
-        }
-
-        pictureTakenCallback = std::move (pictureTakenCallbackToUse);
-
-        triggerImageCapture();
-    }
-
-    void startRecordingToFile (const File& file, int /*quality*/)
-    {
-        stopRecording();
-        refreshIfNeeded();
-        firstPresentationTime = Time::getCurrentTime();
-        file.deleteFile();
-
-        isRecording = true;
-        [fileOutput startRecordingToOutputFileURL: createNSURLFromFile (file)
-                                recordingDelegate: callbackDelegate];
-    }
-
-    void stopRecording()
-    {
-        if (isRecording)
-        {
-            [fileOutput stopRecording];
-            isRecording = false;
-        }
-    }
-
-    Time getTimeOfFirstRecordedFrame() const
-    {
-        return firstPresentationTime;
     }
 
     AVCaptureConnection* getVideoConnection() const
@@ -209,28 +338,6 @@ struct CameraDevice::Pimpl
         }
     }
 
-    void addListener (CameraDevice::Listener* listenerToAdd)
-    {
-        const ScopedLock sl (listenerLock);
-        listeners.add (listenerToAdd);
-
-        if (listeners.size() == 1)
-            triggerImageCapture();
-    }
-
-    void removeListener (CameraDevice::Listener* listenerToRemove)
-    {
-        const ScopedLock sl (listenerLock);
-        listeners.remove (listenerToRemove);
-    }
-
-    static StringArray getAvailableDevices()
-    {
-        StringArray results;
-        results.add ("default");
-        return results;
-    }
-
     void cameraSessionRuntimeError (const String& error)
     {
         JUCE_CAMERA_LOG ("cameraSessionRuntimeError(), error = " + error);
@@ -239,11 +346,14 @@ struct CameraDevice::Pimpl
             owner.onErrorOccurred (error);
     }
 
+    //==============================================================================
     CameraDevice& owner;
-    AVCaptureView* captureView = nil;
+    String deviceName;
+
     AVCaptureSession* session = nil;
     AVCaptureMovieFileOutput* fileOutput = nil;
     AVCaptureStillImageOutput* imageOutput = nil;
+    AVCaptureDeviceInput* currentInput = nil;
 
     id<AVCaptureFileOutputRecordingDelegate> callbackDelegate = nil;
     String openingError;
@@ -253,60 +363,31 @@ struct CameraDevice::Pimpl
     CriticalSection listenerLock;
     ListenerList<Listener> listeners;
 
-    std::function<void(const Image&)> pictureTakenCallback;
+    std::function<void(const Image&)> pictureTakenCallback = nullptr;
 
-    JUCE_DECLARE_WEAK_REFERENCEABLE (Pimpl)
-
-private:
     //==============================================================================
-    struct DelegateClass  : public ObjCClass<NSObject>
-    {
-        DelegateClass()  : ObjCClass<NSObject> ("JUCECameraDelegate_")
-        {
-            addIvar<Pimpl*> ("owner");
-            addProtocol (@protocol (AVCaptureFileOutputRecordingDelegate));
-
-            addMethod (@selector (captureOutput:didStartRecordingToOutputFileAtURL:  fromConnections:),       didStartRecordingToOutputFileAtURL,   "v@:@@@");
-            addMethod (@selector (captureOutput:didPauseRecordingToOutputFileAtURL:  fromConnections:),       didPauseRecordingToOutputFileAtURL,   "v@:@@@");
-            addMethod (@selector (captureOutput:didResumeRecordingToOutputFileAtURL: fromConnections:),       didResumeRecordingToOutputFileAtURL,  "v@:@@@");
-            addMethod (@selector (captureOutput:willFinishRecordingToOutputFileAtURL:fromConnections:error:), willFinishRecordingToOutputFileAtURL, "v@:@@@@");
-
-            SEL runtimeErrorSel = NSSelectorFromString (nsStringLiteral ("captureSessionRuntimeError:"));
-            addMethod (runtimeErrorSel, sessionRuntimeError, "v@:@");
-
-            registerClass();
-        }
-
-        static void setOwner (id self, Pimpl* owner)   { object_setInstanceVariable (self, "owner", owner); }
-        static Pimpl& getOwner (id self)               { return *getIvar<Pimpl*> (self, "owner"); }
-
-    private:
-        static void didStartRecordingToOutputFileAtURL (id, SEL, AVCaptureFileOutput*, NSURL*, NSArray*) {}
-        static void didPauseRecordingToOutputFileAtURL (id, SEL, AVCaptureFileOutput*, NSURL*, NSArray*) {}
-        static void didResumeRecordingToOutputFileAtURL (id, SEL, AVCaptureFileOutput*, NSURL*, NSArray*) {}
-        static void willFinishRecordingToOutputFileAtURL (id, SEL, AVCaptureFileOutput*, NSURL*, NSArray*, NSError*) {}
-
-        static void sessionRuntimeError (id self, SEL, NSNotification* notification)
-        {
-            JUCE_CAMERA_LOG (nsStringToJuce ([notification description]));
-
-            NSError* error = notification.userInfo[AVCaptureSessionErrorKey];
-            auto errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
-            getOwner (self).cameraSessionRuntimeError (errorString);
-        }
-    };
-
-    JUCE_DECLARE_NON_COPYABLE (Pimpl)
+    JUCE_DECLARE_WEAK_REFERENCEABLE (Pimpl)
+    JUCE_DECLARE_NON_COPYABLE       (Pimpl)
 };
 
+//==============================================================================
 struct CameraDevice::ViewerComponent  : public NSViewComponent
 {
-    ViewerComponent (CameraDevice& d)
+    ViewerComponent (CameraDevice& device)
     {
         JUCE_AUTORELEASEPOOL
         {
-            setSize (640, 480);
-            setView (d.pimpl->captureView);
+            AVCaptureVideoPreviewLayer* previewLayer = [[AVCaptureVideoPreviewLayer alloc] init];
+            AVCaptureSession* session = device.pimpl->getCaptureSession();
+
+            [session stopRunning];
+            [previewLayer setSession: session];
+            [session startRunning];
+
+            NSView* view = [[NSView alloc] init];
+            [view setLayer: previewLayer];
+
+            setView (view);
         }
     }
 
@@ -322,5 +403,3 @@ String CameraDevice::getFileExtension()
 {
     return ".mov";
 }
-
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
