@@ -169,12 +169,8 @@ void MPEZoneLayout::processPitchbendRangeRpnMessage (MidiRPNMessage rpn)
 
 void MPEZoneLayout::processNextMidiBuffer (const MidiBuffer& buffer)
 {
-    MidiBuffer::Iterator iter (buffer);
-    MidiMessage message;
-    int samplePosition; // not actually used, so no need to initialise.
-
-    while (iter.getNextEvent (message, samplePosition))
-        processNextMidiEvent (message);
+    for (const auto metadata : buffer)
+        processNextMidiEvent (metadata.getMessage());
 }
 
 //==============================================================================

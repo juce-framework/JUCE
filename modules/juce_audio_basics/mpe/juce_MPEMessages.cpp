@@ -216,14 +216,11 @@ private:
     void extractRawBinaryData (const MidiBuffer& midiBuffer, const uint8* bufferToCopyTo, std::size_t maxBytes)
     {
         std::size_t pos = 0;
-        MidiBuffer::Iterator iter (midiBuffer);
-        MidiMessage midiMessage;
-        int samplePosition; // Note: Not actually used, so no need to initialise.
 
-        while (iter.getNextEvent (midiMessage, samplePosition))
+        for (const auto metadata : midiBuffer)
         {
-            const uint8* data = midiMessage.getRawData();
-            std::size_t dataSize = (std::size_t) midiMessage.getRawDataSize();
+            const uint8* data = metadata.data;
+            std::size_t dataSize = (std::size_t) metadata.numBytes;
 
             if (pos + dataSize > maxBytes)
                 return;

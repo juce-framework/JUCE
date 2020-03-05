@@ -521,15 +521,11 @@ public:
             outgoingEvents.ensureSize (numEvents);
             outgoingEvents.clear();
 
-            const uint8* midiEventData;
-            int midiEventSize, midiEventPosition;
-            MidiBuffer::Iterator i (midiEvents);
-
-            while (i.getNextEvent (midiEventData, midiEventSize, midiEventPosition))
+            for (const auto metadata : midiEvents)
             {
-                jassert (midiEventPosition >= 0 && midiEventPosition < numSamples);
+                jassert (metadata.samplePosition >= 0 && metadata.samplePosition < numSamples);
 
-                outgoingEvents.addEvent (midiEventData, midiEventSize, midiEventPosition);
+                outgoingEvents.addEvent (metadata.data, metadata.numBytes, metadata.samplePosition);
             }
 
             // Send VST events to the host.

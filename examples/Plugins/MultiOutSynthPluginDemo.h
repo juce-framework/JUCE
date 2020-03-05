@@ -147,12 +147,15 @@ private:
     //==============================================================================
     static MidiBuffer filterMidiMessagesForChannel (const MidiBuffer& input, int channel)
     {
-        MidiMessage msg;
-        int samplePosition;
         MidiBuffer output;
 
-        for (MidiBuffer::Iterator it (input); it.getNextEvent (msg, samplePosition);)
-            if (msg.getChannel() == channel) output.addEvent (msg, samplePosition);
+        for (const auto metadata : input)
+        {
+            const auto message = metadata.getMessage();
+
+            if (message.getChannel() == channel)
+                output.addEvent (message, metadata.samplePosition);
+        }
 
         return output;
     }

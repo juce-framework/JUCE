@@ -1072,17 +1072,14 @@ public:
 
             if (wantsMidiMessages)
             {
-                const uint8* midiEventData;
-                int midiEventSize, midiEventPosition;
-
-                for (MidiBuffer::Iterator i (midiMessages); i.getNextEvent (midiEventData, midiEventSize, midiEventPosition);)
+                for (const auto metadata : midiMessages)
                 {
-                    if (midiEventSize <= 3)
+                    if (metadata.numBytes <= 3)
                         MusicDeviceMIDIEvent (audioUnit,
-                                              midiEventData[0], midiEventData[1], midiEventData[2],
-                                              (UInt32) midiEventPosition);
+                                              metadata.data[0], metadata.data[1], metadata.data[2],
+                                              (UInt32) metadata.samplePosition);
                     else
-                        MusicDeviceSysEx (audioUnit, midiEventData, (UInt32) midiEventSize);
+                        MusicDeviceSysEx (audioUnit, metadata.data, (UInt32) metadata.numBytes);
                 }
 
                 midiMessages.clear();

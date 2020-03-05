@@ -590,13 +590,9 @@ public:
         if (! midiEvents.isEmpty())
         {
            #if JucePlugin_ProducesMidiOutput
-            const juce::uint8* midiEventData;
-            int midiEventSize, midiEventPosition;
-            MidiBuffer::Iterator i (midiEvents);
-
-            while (i.getNextEvent (midiEventData, midiEventSize, midiEventPosition))
+            for (const auto metadata : midiEvents)
             {
-                //jassert (midiEventPosition >= 0 && midiEventPosition < (int) numSamples);
+                //jassert (metadata.samplePosition >= 0 && metadata.samplePosition < (int) numSamples);
             }
            #elif JUCE_DEBUG || JUCE_LOG_ASSERTIONS
             // if your plugin creates midi messages, you'll need to set

@@ -1834,12 +1834,8 @@ public:
             buffer.addEvents (MPEMessages::setLowerZone (5), 0, -1, 0);
             buffer.addEvents (MPEMessages::setUpperZone (6), 0, -1, 0);
 
-            MidiBuffer::Iterator iter (buffer);
-            MidiMessage message;
-            int samplePosition; // not actually used, so no need to initialise.
-
-            while (iter.getNextEvent (message, samplePosition))
-                test.processNextMidiEvent (message);
+            for (const auto metadata : buffer)
+                test.processNextMidiEvent (metadata.getMessage());
 
             expect (test.getZoneLayout().getLowerZone().isActive());
             expect (test.getZoneLayout().getUpperZone().isActive());

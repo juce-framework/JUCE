@@ -1528,11 +1528,8 @@ private:
            #if JucePlugin_ProducesMidiOutput && JUCE_AUV3_MIDI_OUTPUT_SUPPORTED
             if (auto midiOut = [au MIDIOutputEventBlock])
             {
-                MidiMessage msg;
-                int samplePosition;
-
-                for (MidiBuffer::Iterator it (midiMessages); it.getNextEvent (msg, samplePosition);)
-                    midiOut (samplePosition, 0, msg.getRawDataSize(), msg.getRawData());
+                for (const auto metadata : midiMessages)
+                    midiOut (metadata.samplePosition, 0, metadata.numBytes, metadata.data);
             }
            #endif
 

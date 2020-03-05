@@ -2384,13 +2384,9 @@ private:
                 midiEventsToSend.clear();
                 midiEventsToSend.ensureSize (1);
 
-                MidiBuffer::Iterator iter (midiMessages);
-                const uint8* midiData;
-                int numBytesOfMidiData, samplePosition;
-
-                while (iter.getNextEvent (midiData, numBytesOfMidiData, samplePosition))
-                    midiEventsToSend.addEvent (midiData, numBytesOfMidiData,
-                                               jlimit (0, numSamples - 1, samplePosition));
+                for (const auto metadata : midiMessages)
+                    midiEventsToSend.addEvent (metadata.data, metadata.numBytes,
+                                               jlimit (0, numSamples - 1, metadata.samplePosition));
 
                 vstEffect->dispatcher (vstEffect, Vst2::effProcessEvents, 0, 0, midiEventsToSend.events, 0);
             }

@@ -514,20 +514,15 @@ public:
                              Steinberg::Vst::IParameterChanges* parameterChanges = nullptr,
                              Steinberg::Vst::IMidiMapping* midiMapping = nullptr)
     {
-        MidiBuffer::Iterator iterator (midiBuffer);
-        const uint8* midiEventData = nullptr;
-        int midiEventSize = 0;
-        int midiEventPosition = 0;
-
         enum { maxNumEvents = 2048 }; // Steinberg's Host Checker states that no more than 2048 events are allowed at once
         int numEvents = 0;
 
-        while (iterator.getNextEvent (midiEventData, midiEventSize, midiEventPosition))
+        for (const auto metadata : midiBuffer)
         {
             if (++numEvents > maxNumEvents)
                 break;
 
-            MidiMessage msg (midiEventData, midiEventSize);
+            auto msg = metadata.getMessage();
 
             if (midiMapping != nullptr && parameterChanges != nullptr)
             {
@@ -544,7 +539,7 @@ public:
                         Steinberg::int32 ignore;
 
                         if (auto* queue = parameterChanges->addParameterData (controlParamID, ignore))
-                            queue->addPoint (midiEventPosition, controlEvent.paramValue, ignore);
+                            queue->addPoint (metadata.samplePosition, controlEvent.paramValue, ignore);
                     }
 
                     continue;
@@ -575,7 +570,7 @@ public:
             else if (msg.isSysEx())
             {
                 e.type          = Steinberg::Vst::Event::kDataEvent;
-                e.data.bytes    = midiEventData + 1;
+                e.data.bytes    = metadata.data + 1;
                 e.data.size     = (uint32) msg.getSysExDataSize();
                 e.data.type     = Steinberg::Vst::DataEvent::kMidiSysEx;
             }
@@ -592,7 +587,7 @@ public:
             }
 
             e.busIndex = 0;
-            e.sampleOffset = midiEventPosition;
+            e.sampleOffset = metadata.samplePosition;
 
             result.addEvent (e);
         }

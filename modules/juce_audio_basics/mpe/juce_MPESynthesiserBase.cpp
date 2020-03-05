@@ -110,48 +110,47 @@ void MPESynthesiserBase::renderNextBlock (AudioBuffer<floatType>& outputAudio,
     // you must set the sample rate before using this!
     jassert (sampleRate != 0);
 
-    MidiBuffer::Iterator midiIterator (inputMidi);
-    midiIterator.setNextSamplePosition (startSample);
+    const auto midiIterator = inputMidi.findNextSamplePosition (startSample);
 
     bool firstEvent = true;
-    int midiEventPos;
-    MidiMessage m;
 
     const ScopedLock sl (noteStateLock);
 
     while (numSamples > 0)
     {
-        if (! midiIterator.getNextEvent (m, midiEventPos))
+        if (midiIterator == inputMidi.cend())
         {
             renderNextSubBlock (outputAudio, startSample, numSamples);
             return;
         }
 
-        auto samplesToNextMidiMessage = midiEventPos - startSample;
+        const auto metadata = *midiIterator;
+        auto samplesToNextMidiMessage = metadata.samplePosition - startSample;
 
         if (samplesToNextMidiMessage >= numSamples)
         {
             renderNextSubBlock (outputAudio, startSample, numSamples);
-            handleMidiEvent (m);
+            handleMidiEvent (metadata.getMessage());
             break;
         }
 
         if (samplesToNextMidiMessage < ((firstEvent && ! subBlockSubdivisionIsStrict) ? 1 : minimumSubBlockSize))
         {
-            handleMidiEvent (m);
+            handleMidiEvent (metadata.getMessage());
             continue;
         }
 
         firstEvent = false;
 
         renderNextSubBlock (outputAudio, startSample, samplesToNextMidiMessage);
-        handleMidiEvent (m);
+        handleMidiEvent (metadata.getMessage());
         startSample += samplesToNextMidiMessage;
         numSamples  -= samplesToNextMidiMessage;
     }
 
-    while (midiIterator.getNextEvent (m, midiEventPos))
-        handleMidiEvent (m);
+    std::for_each (midiIterator,
+                   inputMidi.cend(),
+                   [&] (const MidiMessageMetadata& meta) { handleMidiEvent (meta.getMessage()); });
 }
 
 // explicit instantiation for supported float types:

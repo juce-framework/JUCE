@@ -1821,15 +1821,12 @@ private:
         UInt32 numPackets = 0;
         size_t dataSize = 0;
 
-        const juce::uint8* midiEventData;
-        int midiEventSize, midiEventPosition;
-
-        for (MidiBuffer::Iterator i (midiEvents); i.getNextEvent (midiEventData, midiEventSize, midiEventPosition);)
+        for (const auto metadata : midiEvents)
         {
-            jassert (isPositiveAndBelow (midiEventPosition, nFrames));
+            jassert (isPositiveAndBelow (metadata.samplePosition, nFrames));
             ignoreUnused (nFrames);
 
-            dataSize += (size_t) midiEventSize;
+            dataSize += (size_t) metadata.numBytes;
             ++numPackets;
         }
 
@@ -1843,11 +1840,11 @@ private:
 
         p = packetList->packet;
 
-        for (MidiBuffer::Iterator i (midiEvents); i.getNextEvent (midiEventData, midiEventSize, midiEventPosition);)
+        for (const auto metadata : midiEvents)
         {
-            p->timeStamp = (MIDITimeStamp) midiEventPosition;
-            p->length = (UInt16) midiEventSize;
-            memcpy (p->data, midiEventData, (size_t) midiEventSize);
+            p->timeStamp = (MIDITimeStamp) metadata.samplePosition;
+            p->length = (UInt16) metadata.numBytes;
+            memcpy (p->data, metadata.data, (size_t) metadata.numBytes);
             p = MIDIPacketNext (p);
         }
 

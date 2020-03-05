@@ -1418,22 +1418,18 @@ namespace AAXClasses
 
            #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
             {
-                const juce::uint8* midiEventData;
-                int midiEventSize, midiEventPosition;
-                MidiBuffer::Iterator i (midiBuffer);
-
                 AAX_CMidiPacket packet;
                 packet.mIsImmediate = false;
 
-                while (i.getNextEvent (midiEventData, midiEventSize, midiEventPosition))
+                for (const auto metadata : midiBuffer)
                 {
-                    jassert (isPositiveAndBelow (midiEventPosition, bufferSize));
+                    jassert (isPositiveAndBelow (metadata.samplePosition, bufferSize));
 
-                    if (midiEventSize <= 4)
+                    if (metadata.numBytes <= 4)
                     {
-                        packet.mTimestamp   = (uint32_t) midiEventPosition;
-                        packet.mLength      = (uint32_t) midiEventSize;
-                        memcpy (packet.mData, midiEventData, (size_t) midiEventSize);
+                        packet.mTimestamp   = (uint32_t) metadata.samplePosition;
+                        packet.mLength      = (uint32_t) metadata.numBytes;
+                        memcpy (packet.mData, metadata.data, (size_t) metadata.numBytes);
 
                         check (midiNodesOut->PostMIDIPacket (&packet));
                     }

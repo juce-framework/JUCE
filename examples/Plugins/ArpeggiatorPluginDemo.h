@@ -88,11 +88,9 @@ public:
         // get note duration
         auto noteDuration = static_cast<int> (std::ceil (rate * 0.25f * (0.1f + (1.0f - (*speed)))));
 
-        MidiMessage msg;
-        int ignore;
-
-        for (MidiBuffer::Iterator it (midi); it.getNextEvent (msg, ignore);)
+        for (const auto metadata : midi)
         {
+            const auto msg = metadata.getMessage();
             if      (msg.isNoteOn())  notes.add (msg.getNoteNumber());
             else if (msg.isNoteOff()) notes.removeValue (msg.getNoteNumber());
         }
