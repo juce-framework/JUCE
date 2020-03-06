@@ -3175,9 +3175,7 @@ StringArray VST3PluginFormat::searchPathsForPlugins (const FileSearchPath& direc
 
 void VST3PluginFormat::recursiveFileSearch (StringArray& results, const File& directory, const bool recursive)
 {
-    DirectoryIterator iter (directory, false, "*", File::findFilesAndDirectories);
-
-    while (iter.next())
+    for (const auto& iter : RangedDirectoryIterator (directory, false, "*", File::findFilesAndDirectories))
     {
         auto f = iter.getFile();
         bool isPlugin = false;

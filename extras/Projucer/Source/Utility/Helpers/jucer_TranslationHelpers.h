@@ -161,9 +161,9 @@ struct TranslationHelpers
 
     static void scanFolderForTranslations (StringArray& strings, const File& root)
     {
-        for (DirectoryIterator i (root, true); i.next();)
+        for (const auto& i : RangedDirectoryIterator (root, true))
         {
-            const auto file (i.getFile());
+            const auto file = i.getFile();
 
             if (file.hasFileExtension (sourceOrHeaderFileExtensions))
                 scanFileForTranslations(strings, file);

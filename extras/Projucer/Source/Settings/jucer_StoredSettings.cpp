@@ -173,8 +173,7 @@ void StoredSettings::updateOldProjectSettingsFiles()
     auto newProjectSettingsDir = projucerSettingsDirectory.getChildFile ("ProjectSettings");
     newProjectSettingsDir.createDirectory();
 
-    DirectoryIterator iter (projucerSettingsDirectory, false, "*.settings");
-    while (iter.next())
+    for (const auto& iter : RangedDirectoryIterator (projucerSettingsDirectory, false, "*.settings"))
     {
         auto f = iter.getFile();
         auto oldFileName = f.getFileName();

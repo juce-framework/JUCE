@@ -687,6 +687,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/files/juce_FileSearchPath.cpp"
     "../../../../../modules/juce_core/files/juce_FileSearchPath.h"
     "../../../../../modules/juce_core/files/juce_MemoryMappedFile.h"
+    "../../../../../modules/juce_core/files/juce_RangedDirectoryIterator.cpp"
+    "../../../../../modules/juce_core/files/juce_RangedDirectoryIterator.h"
     "../../../../../modules/juce_core/files/juce_TemporaryFile.cpp"
     "../../../../../modules/juce_core/files/juce_TemporaryFile.h"
     "../../../../../modules/juce_core/files/juce_WildcardFileFilter.cpp"
@@ -2293,6 +2295,8 @@ set_source_files_properties("../../../../../modules/juce_core/files/juce_FileOut
 set_source_files_properties("../../../../../modules/juce_core/files/juce_FileSearchPath.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/files/juce_FileSearchPath.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/files/juce_MemoryMappedFile.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/files/juce_RangedDirectoryIterator.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/files/juce_RangedDirectoryIterator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/files/juce_TemporaryFile.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/files/juce_TemporaryFile.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/files/juce_WildcardFileFilter.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)

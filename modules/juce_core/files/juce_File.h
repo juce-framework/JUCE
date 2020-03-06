@@ -574,7 +574,7 @@ public:
         @param wildCardPattern          the filename pattern to search for, e.g. "*.txt"
         @returns                        the set of files that were found
 
-        @see getNumberOfChildFiles, DirectoryIterator
+        @see getNumberOfChildFiles, RangedDirectoryIterator
     */
     Array<File> findChildFiles (int whatToLookFor,
                                 bool searchRecursively,
@@ -602,7 +602,8 @@ public:
                                 is also added to this value, hidden files won't be counted
         @param wildCardPattern  the filename pattern to search for, e.g. "*.txt"
         @returns                the number of matches found
-        @see findChildFiles, DirectoryIterator
+
+        @see findChildFiles, RangedDirectoryIterator
     */
     int getNumberOfChildFiles (int whatToLookFor,
                                const String& wildCardPattern = "*") const;

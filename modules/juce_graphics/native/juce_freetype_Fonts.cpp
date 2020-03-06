@@ -190,9 +190,7 @@ public:
     {
         for (auto& path : paths)
         {
-            DirectoryIterator iter (File::getCurrentWorkingDirectory().getChildFile (path), true);
-
-            while (iter.next())
+            for (const auto iter : RangedDirectoryIterator (File::getCurrentWorkingDirectory().getChildFile (path), true))
                 if (iter.getFile().hasFileExtension ("ttf;pfb;pcf;otf"))
                     scanFont (iter.getFile());
         }

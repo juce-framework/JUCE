@@ -638,8 +638,7 @@ Array<File> ProjucerApplication::getSortedExampleDirectories() noexcept
     if (! isValidJUCEExamplesDirectory (examplesPath))
         return {};
 
-    DirectoryIterator iter (examplesPath, false, "*", File::findDirectories);
-    while (iter.next())
+    for (const auto& iter : RangedDirectoryIterator (examplesPath, false, "*", File::findDirectories))
     {
         auto exampleDirectory = iter.getFile();
 
@@ -657,8 +656,7 @@ Array<File> ProjucerApplication::getSortedExampleFilesInDirectory (const File& d
 {
     Array<File> exampleFiles;
 
-    DirectoryIterator iter (directory, false, "*.h", File::findFiles);
-    while (iter.next())
+    for (const auto& iter : RangedDirectoryIterator (directory, false, "*.h", File::findFiles))
         exampleFiles.add (iter.getFile());
 
     exampleFiles.sort();

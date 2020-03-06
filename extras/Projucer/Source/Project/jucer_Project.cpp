@@ -1502,7 +1502,7 @@ bool Project::Item::addFileAtIndex (const File& file, int insertIndex, const boo
     {
         auto group = addNewSubGroup (file.getFileName(), insertIndex);
 
-        for (DirectoryIterator iter (file, false, "*", File::findFilesAndDirectories); iter.next();)
+        for (const auto& iter : RangedDirectoryIterator (file, false, "*", File::findFilesAndDirectories))
             if (! project.getMainGroup().findItemForFile (iter.getFile()).isValid())
                 group.addFileRetainingSortOrder (iter.getFile(), shouldCompile);
     }

@@ -24,9 +24,7 @@ namespace FileHelpers
 {
     bool containsAnyNonHiddenFiles (const File& folder)
     {
-        DirectoryIterator di (folder, false);
-
-        while (di.next())
+        for (const auto& di : RangedDirectoryIterator (folder, false))
             if (! di.getFile().isHidden())
                 return true;
 

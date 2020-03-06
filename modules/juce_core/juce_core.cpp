@@ -124,6 +124,7 @@
 #include "containers/juce_ReferenceCountedArray.cpp"
 #include "containers/juce_SparseSet.cpp"
 #include "files/juce_DirectoryIterator.cpp"
+#include "files/juce_RangedDirectoryIterator.cpp"
 #include "files/juce_File.cpp"
 #include "files/juce_FileInputStream.cpp"
 #include "files/juce_FileOutputStream.cpp"

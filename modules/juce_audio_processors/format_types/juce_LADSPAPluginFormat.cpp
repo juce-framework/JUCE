@@ -683,9 +683,8 @@ StringArray LADSPAPluginFormat::searchPathsForPlugins (const FileSearchPath& dir
 
 void LADSPAPluginFormat::recursiveFileSearch (StringArray& results, const File& dir, const bool recursive)
 {
-    DirectoryIterator iter (dir, false, "*", File::findFilesAndDirectories);
 
-    while (iter.next())
+    for (const auto& iter : RangedDirectoryIterator (dir, false, "*", File::findFilesAndDirectories))
     {
         auto f = iter.getFile();
         bool isPlugin = false;

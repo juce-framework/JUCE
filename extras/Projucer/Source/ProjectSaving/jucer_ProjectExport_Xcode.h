@@ -2221,9 +2221,9 @@ private:
     // Delete .rsrc files in folder but don't follow sym-links
     void deleteRsrcFiles (const File& folder) const
     {
-        for (DirectoryIterator di (folder, false, "*", File::findFilesAndDirectories); di.next();)
+        for (const auto& di : RangedDirectoryIterator (folder, false, "*", File::findFilesAndDirectories))
         {
-            auto& entry = di.getFile();
+            const auto& entry = di.getFile();
 
             if (! entry.isSymbolicLink())
             {

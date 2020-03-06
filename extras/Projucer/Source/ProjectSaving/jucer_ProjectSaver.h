@@ -262,11 +262,9 @@ private:
     bool deleteUnwantedFilesIn (const File& parent)
     {
         bool folderIsNowEmpty = true;
-        DirectoryIterator i (parent, false, "*", File::findFilesAndDirectories);
         Array<File> filesToDelete;
 
-        bool isFolder;
-        while (i.next (&isFolder, nullptr, nullptr, nullptr, nullptr, nullptr))
+        for (const auto& i : RangedDirectoryIterator (parent, false, "*", File::findFilesAndDirectories))
         {
             auto f = i.getFile();
 
@@ -274,7 +272,7 @@ private:
             {
                 folderIsNowEmpty = false;
             }
-            else if (isFolder)
+            else if (i.isDirectory())
             {
                 if (deleteUnwantedFilesIn (f))
                     filesToDelete.add (f);

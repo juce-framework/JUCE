@@ -81,14 +81,14 @@ void DirectoryContentsList::stopSearching()
 {
     shouldStop = true;
     thread.removeTimeSliceClient (this);
-    fileFindHandle.reset();
+    fileFindHandle = nullptr;
 }
 
 void DirectoryContentsList::clear()
 {
     stopSearching();
 
-    if (files.size() > 0)
+    if (! files.isEmpty())
     {
         files.clear();
         changed();
@@ -103,7 +103,7 @@ void DirectoryContentsList::refresh()
 
     if (root.isDirectory())
     {
-        fileFindHandle.reset (new DirectoryIterator (root, false, "*", fileTypeFlags));
+        fileFindHandle = std::make_unique<RangedDirectoryIterator> (root, false, "*", fileTypeFlags);
         shouldStop = false;
         thread.addTimeSliceClient (this);
     }
@@ -196,15 +196,16 @@ bool DirectoryContentsList::checkNextFile (bool& hasChanged)
 {
     if (fileFindHandle != nullptr)
     {
-        bool fileFoundIsDir, isHidden, isReadOnly;
-        int64 fileSize;
-        Time modTime, creationTime;
-
-        if (fileFindHandle->next (&fileFoundIsDir, &isHidden, &fileSize,
-                                  &modTime, &creationTime, &isReadOnly))
+        if (*fileFindHandle != RangedDirectoryIterator())
         {
-            if (addFile (fileFindHandle->getFile(), fileFoundIsDir,
-                         fileSize, modTime, creationTime, isReadOnly))
+            const auto entry = *(*fileFindHandle)++;
+
+            if (addFile (entry.getFile(),
+                         entry.isDirectory(),
+                         entry.getFileSize(),
+                         entry.getModificationTime(),
+                         entry.getCreationTime(),
+                         entry.isReadOnly()))
             {
                 hasChanged = true;
             }
@@ -212,7 +213,7 @@ bool DirectoryContentsList::checkNextFile (bool& hasChanged)
             return true;
         }
 
-        fileFindHandle.reset();
+        fileFindHandle = nullptr;
 
         if (! wasEmpty && files.isEmpty())
             hasChanged = true;

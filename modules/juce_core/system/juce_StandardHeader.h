@@ -43,22 +43,24 @@
 
 
 //==============================================================================
-#include <memory>
-#include <cmath>
-#include <vector>
-#include <iostream>
-#include <functional>
 #include <algorithm>
-#include <limits>
 #include <atomic>
-#include <sstream>
-#include <iomanip>
-#include <map>
-#include <cstddef>
-#include <unordered_set>
-#include <mutex>
+#include <cmath>
 #include <condition_variable>
+#include <cstddef>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <numeric>
 #include <queue>
+#include <sstream>
+#include <unordered_set>
+#include <vector>
 
 //==============================================================================
 #include "juce_CompilerSupport.h"

@@ -40,7 +40,7 @@ namespace
     {
         Array<File> files;
 
-        for (DirectoryIterator di (folder, true, "*.cpp;*.cxx;*.cc;*.c;*.h;*.hpp;*.hxx;*.hpp;*.mm;*.m;*.java;*.dox;*.soul;*.js", File::findFiles); di.next();)
+        for (const auto& di : RangedDirectoryIterator (folder, true, "*.cpp;*.cxx;*.cc;*.c;*.h;*.hpp;*.hxx;*.hpp;*.mm;*.m;*.java;*.dox;*.soul;*.js", File::findFiles))
             if (! di.getFile().isSymbolicLink())
                 files.add (di.getFile());
 
@@ -263,9 +263,7 @@ namespace
         ZipFile::Builder zip;
 
         {
-            DirectoryIterator i (moduleFolder, true, "*", File::findFiles);
-
-            while (i.next())
+            for (const auto& i : RangedDirectoryIterator (moduleFolder, true, "*", File::findFiles))
                 if (! i.getFile().isHidden())
                     zip.addFile (i.getFile(), 9, i.getFile().getRelativePathFrom (moduleFolderParent));
         }
@@ -298,10 +296,9 @@ namespace
         if (buildAllWithIndex)
         {
             auto folderToSearch = args[2].resolveAsFile();
-            DirectoryIterator i (folderToSearch, false, "*", File::findDirectories);
             var infoList;
 
-            while (i.next())
+            for (const auto& i : RangedDirectoryIterator (folderToSearch, false, "*", File::findDirectories))
             {
                 LibraryModule module (i.getFile());
 

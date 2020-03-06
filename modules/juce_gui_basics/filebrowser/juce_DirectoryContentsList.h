@@ -200,7 +200,7 @@ private:
     CriticalSection fileListLock;
     OwnedArray<FileInfo> files;
 
-    std::unique_ptr<DirectoryIterator> fileFindHandle;
+    std::unique_ptr<RangedDirectoryIterator> fileFindHandle;
     std::atomic<bool> shouldStop { true };
 
     bool wasEmpty = true;

@@ -73,7 +73,7 @@ static void addAllModulesInSubfoldersRecursively (const File& path, int depth, A
 {
     if (depth > 0)
     {
-        for (DirectoryIterator iter (path, false, "*", File::findDirectories); iter.next();)
+        for (const auto& iter : RangedDirectoryIterator (path, false, "*", File::findDirectories))
         {
             if (auto* job = ThreadPoolJob::getCurrentThreadPoolJob())
                 if (job->shouldExit())
@@ -415,11 +415,8 @@ void LibraryModule::findBrowseableFiles (const File& folder, Array<File>& filesF
     Array<File> tempList;
     FileSorter sorter;
 
-    DirectoryIterator iter (folder, true, "*", File::findFiles);
-    bool isHiddenFile;
-
-    while (iter.next (nullptr, &isHiddenFile, nullptr, nullptr, nullptr, nullptr))
-        if (! isHiddenFile && iter.getFile().hasFileExtension (browseableFileExtensions))
+    for (const auto& iter : RangedDirectoryIterator (folder, true, "*", File::findFiles))
+        if (! iter.isHidden() && iter.getFile().hasFileExtension (browseableFileExtensions))
             tempList.addSorted (sorter, iter.getFile());
 
     filesFound.addArray (tempList);
