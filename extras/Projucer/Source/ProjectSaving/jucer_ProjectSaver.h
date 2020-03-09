@@ -607,12 +607,24 @@ private:
                 mem << "*/" << newLine
                     << newLine
                     << "#include " << Project::getAppConfigFilename().quoted() << newLine
-                    << "#include <";
+                    << "#include ";
 
-                if (cu.file.getFileExtension() != ".r")   // .r files are included without the path
-                    mem << module->getID() << "/";
+                if (cu.file.getFileExtension() == ".metal")
+                {
+                    // the metal compiler does not take the include directory into account – a relative path is needed
+                    auto relativeMetalShaderPath = cu.file.getRelativePathFrom (generatedCodeFolder);
+                    mem << relativeMetalShaderPath.quoted() << newLine;
+                }
+                else
+                {
+                    mem << "<";
 
-                mem << cu.file.getFileName() << ">" << newLine;
+                    if (cu.file.getFileExtension() != ".r")   // .r files are included without the path
+                        mem << module->getID() << "/";
+
+                    mem << cu.file.getFileName() << ">" << newLine;
+                }
+
 
                 replaceFileIfDifferent (generatedCodeFolder.getChildFile (cu.getFilenameForProxyFile()), mem);
             }
