@@ -291,7 +291,7 @@ struct Detector   : public ReferenceCountedObject,
     void notifyBlockOfConfigChange (BlockImpl& bi, uint32 item)
     {
         if (item >= bi.getMaxConfigIndex())
-            bi.handleConfigItemChanged ({}, item);
+            bi.handleConfigItemChanged ({ item }, item);
         else
             bi.handleConfigItemChanged (bi.getLocalConfigMetaData (item), item);
     }

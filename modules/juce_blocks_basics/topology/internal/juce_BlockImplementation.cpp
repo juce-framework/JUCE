@@ -334,7 +334,8 @@ public:
 
         this->resetConfigListActiveStatus();
 
-        handleConfigItemChanged ({}, getMaxConfigIndex());
+        const auto legacyProgramChangeConfigIndex = getMaxConfigIndex();
+        handleConfigItemChanged ({ legacyProgramChangeConfigIndex }, legacyProgramChangeConfigIndex);
 
         shouldSaveProgramAsDefault = persistency == ProgramPersistency::setAsDefault;
         startTimer (20);
