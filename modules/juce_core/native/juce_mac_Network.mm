@@ -188,21 +188,15 @@ public:
 
     int read (char* dest, int numBytes)
     {
-        int numDone = 0, dataLength = 0;
-
-        {
-            const ScopedLock sl (dataLock);
-            dataLength = (int) [data length];
-        }
+        int numDone = 0;
 
         while (numBytes > 0)
         {
-            auto available = jmin (numBytes, dataLength);
+            const ScopedLock sl (dataLock);
+            auto available = jmin (numBytes, (int) [data length]);
 
             if (available > 0)
             {
-                const ScopedLock sl (dataLock);
-
                 [data getBytes: dest length: (NSUInteger) available];
                 [data replaceBytesInRange: NSMakeRange (0, (NSUInteger) available) withBytes: nil length: 0];
 
@@ -215,6 +209,7 @@ public:
                 if (hasFailed || hasFinished)
                     break;
 
+                const ScopedUnlock ul (dataLock);
                 Thread::sleep (1);
             }
         }
@@ -749,21 +744,15 @@ public:
 
     int read (char* dest, int numBytes)
     {
-        int numDone = 0, dataLength = 0;
-
-        {
-            const ScopedLock sl (dataLock);
-            dataLength = (int) [data length];
-        }
+        int numDone = 0;
 
         while (numBytes > 0)
         {
-            auto available = jmin (numBytes, dataLength);
+            const ScopedLock sl (dataLock);
+            auto available = jmin (numBytes, (int) [data length]);
 
             if (available > 0)
             {
-                const ScopedLock sl (dataLock);
-
                 [data getBytes: dest length: (NSUInteger) available];
                 [data replaceBytesInRange: NSMakeRange (0, (NSUInteger) available) withBytes: nil length: 0];
 
@@ -776,6 +765,7 @@ public:
                 if (hasFailed || hasFinished)
                     break;
 
+                const ScopedUnlock sul (dataLock);
                 Thread::sleep (1);
             }
         }
