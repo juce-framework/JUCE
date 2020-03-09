@@ -43,7 +43,8 @@ PerformanceCounter::PerformanceCounter (const String& name, int runsPerPrintout,
 
 PerformanceCounter::~PerformanceCounter()
 {
-    printStatistics();
+    if (stats.numRuns > 0)
+        printStatistics();
 }
 
 PerformanceCounter::Statistics::Statistics() noexcept
@@ -113,7 +114,7 @@ void PerformanceCounter::printStatistics()
 {
     const String desc (getStatisticsAndReset().toString());
 
-    Logger::outputDebugString (desc);
+    Logger::writeToLog (desc);
     appendToFile (outputFile, desc);
 }
 

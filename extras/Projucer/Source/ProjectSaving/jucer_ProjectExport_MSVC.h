@@ -196,7 +196,8 @@ public:
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
-            addVisualStudioPluginInstallPathProperties (props);
+            if (project.isAudioPluginProject())
+                addVisualStudioPluginInstallPathProperties (props);
 
             props.add (new ChoicePropertyComponent (architectureTypeValue, "Architecture",
                                                     { get32BitArchName(), get64BitArchName() },
@@ -570,8 +571,6 @@ public:
 
                     if (cppStandard == "11") // VS doesn't support the C++11 flag so we have to bump it to C++14
                         cppStandard = "14";
-                    else if (cppStandard == "17") // nor does it support the C++17 flag, so we'll just use latest for now until it's added
-                        cppStandard = "latest";
 
                     cl->createNewChildElement ("LanguageStandard")->addTextElement ("stdcpp" + cppStandard);
                 }
@@ -743,7 +742,7 @@ public:
         //==============================================================================
         void addFilesToCompile (const Project::Item& projectItem, XmlElement& cpps, XmlElement& headers, XmlElement& otherFiles) const
         {
-            auto targetType = (getOwner().getProject().getProjectType().isAudioPlugin() ? type : SharedCodeTarget);
+            auto targetType = (getOwner().getProject().isAudioPluginProject() ? type : SharedCodeTarget);
 
             if (projectItem.isGroup())
             {
@@ -825,7 +824,7 @@ public:
         bool addFilesToFilter (const Project::Item& projectItem, const String& path,
                                XmlElement& cpps, XmlElement& headers, XmlElement& otherFiles, XmlElement& groups) const
         {
-            auto targetType = (getOwner().getProject().getProjectType().isAudioPlugin() ? type : SharedCodeTarget);
+            auto targetType = (getOwner().getProject().isAudioPluginProject() ? type : SharedCodeTarget);
 
             if (projectItem.isGroup())
             {
@@ -1135,7 +1134,7 @@ public:
 
         String getPostBuildSteps (const MSVCBuildConfiguration& config) const
         {
-            auto postBuild = config.getPostbuildCommandString();
+            auto postBuild = config.getPostbuildCommandString().replace ("\n", "\r\n");;
             auto extraPostBuild = getExtraPostBuildSteps (config);
 
             return postBuild + String (postBuild.isNotEmpty() && extraPostBuild.isNotEmpty() ? "\r\n" : "") + extraPostBuild;
@@ -1143,7 +1142,7 @@ public:
 
         String getPreBuildSteps (const MSVCBuildConfiguration& config) const
         {
-            auto preBuild = config.getPrebuildCommandString();
+            auto preBuild = config.getPrebuildCommandString().replace ("\n", "\r\n");;
             auto extraPreBuild = getExtraPreBuildSteps (config);
 
             return preBuild + String (preBuild.isNotEmpty() && extraPreBuild.isNotEmpty() ? "\r\n" : "") + extraPreBuild;

@@ -44,14 +44,6 @@ std::function<bool(AudioProcessor&)> PluginHostType::jucePlugInIsRunningInAudioS
  bool juce_isRunningInUnity()    { return PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_Unity; }
 #endif
 
-#if JUCE_MODULE_AVAILABLE_juce_opengl && JucePlugin_Build_VST
- bool juce_shouldDoubleScaleNativeGLWindow()
- {
-     return PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_VST
-           && getHostType().type == PluginHostType::AbletonLive10;
- }
-#endif
-
 #ifndef JUCE_VST3_CAN_REPLACE_VST2
  #define JUCE_VST3_CAN_REPLACE_VST2 1
 #endif

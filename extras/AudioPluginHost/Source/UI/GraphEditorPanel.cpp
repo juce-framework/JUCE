@@ -24,7 +24,7 @@
   ==============================================================================
 */
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 #include "GraphEditorPanel.h"
 #include "../Plugins/InternalPlugins.h"
 #include "MainHostWindow.h"
@@ -442,12 +442,14 @@ struct GraphEditorPanel::PluginComponent   : public Component,
             case 10:  showWindow (PluginWindow::Type::normal); break;
             case 11:  showWindow (PluginWindow::Type::programs); break;
             case 12:  showWindow (PluginWindow::Type::generic)  ; break;
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
             case 13:
             {
                 if (auto* node = graph.graph.getNodeForId (pluginID))
                     node->properties.set ("DPIAware", ! node->properties ["DPIAware"]);
                 break;
             }
+           #endif
             case 14:  showWindow (PluginWindow::Type::debug); break;
             case 20:  showWindow (PluginWindow::Type::audioIO); break;
             case 21:  testStateSaveLoad(); break;
@@ -1165,10 +1167,13 @@ GraphDocumentComponent::GraphDocumentComponent (AudioPluginFormatManager& fm,
     deviceManager.addChangeListener (graphPanel.get());
     deviceManager.addAudioCallback (&graphPlayer);
     deviceManager.addMidiInputDeviceCallback ({}, &graphPlayer.getMidiMessageCollector());
+    deviceManager.addChangeListener (this);
 }
 
 void GraphDocumentComponent::init()
 {
+    updateMidiOutput();
+
     graphPanel.reset (new GraphEditorPanel (*graph));
     addAndMakeVisible (graphPanel.get());
     graphPlayer.setProcessor (&graph->graph);
@@ -1211,6 +1216,9 @@ void GraphDocumentComponent::init()
 
 GraphDocumentComponent::~GraphDocumentComponent()
 {
+    if (midiOutput != nullptr)
+        midiOutput->stopBackgroundThread();
+
     releaseGraph();
 
     keyState.removeListener (&graphPlayer.getMidiMessageCollector());
@@ -1323,4 +1331,24 @@ void GraphDocumentComponent::setDoublePrecision (bool doublePrecision)
 bool GraphDocumentComponent::closeAnyOpenPluginWindows()
 {
     return graphPanel->graph.closeAnyOpenPluginWindows();
+}
+
+void GraphDocumentComponent::changeListenerCallback (ChangeBroadcaster*)
+{
+    updateMidiOutput();
+}
+
+void GraphDocumentComponent::updateMidiOutput()
+{
+    auto* defaultMidiOutput = deviceManager.getDefaultMidiOutput();
+
+    if (midiOutput != defaultMidiOutput)
+    {
+        midiOutput = defaultMidiOutput;
+
+        if (midiOutput != nullptr)
+            midiOutput->startBackgroundThread();
+
+        graphPlayer.setMidiOutput (midiOutput);
+    }
 }

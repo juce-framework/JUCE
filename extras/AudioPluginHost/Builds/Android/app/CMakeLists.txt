@@ -585,8 +585,6 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/misc/juce_Result.h"
     "../../../../../modules/juce_core/misc/juce_RuntimePermissions.cpp"
     "../../../../../modules/juce_core/misc/juce_RuntimePermissions.h"
-    "../../../../../modules/juce_core/misc/juce_StdFunctionCompat.cpp"
-    "../../../../../modules/juce_core/misc/juce_StdFunctionCompat.h"
     "../../../../../modules/juce_core/misc/juce_Uuid.cpp"
     "../../../../../modules/juce_core/misc/juce_Uuid.h"
     "../../../../../modules/juce_core/misc/juce_WindowsRegistry.h"
@@ -702,6 +700,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/threads/juce_ThreadPool.h"
     "../../../../../modules/juce_core/threads/juce_TimeSliceThread.cpp"
     "../../../../../modules/juce_core/threads/juce_TimeSliceThread.h"
+    "../../../../../modules/juce_core/threads/juce_WaitableEvent.cpp"
     "../../../../../modules/juce_core/threads/juce_WaitableEvent.h"
     "../../../../../modules/juce_core/time/juce_PerformanceCounter.cpp"
     "../../../../../modules/juce_core/time/juce_PerformanceCounter.h"
@@ -1948,8 +1947,6 @@ set_source_files_properties("../../../../../modules/juce_core/misc/juce_Result.c
 set_source_files_properties("../../../../../modules/juce_core/misc/juce_Result.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/misc/juce_RuntimePermissions.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/misc/juce_RuntimePermissions.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_core/misc/juce_StdFunctionCompat.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_core/misc/juce_StdFunctionCompat.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/misc/juce_Uuid.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/misc/juce_Uuid.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/misc/juce_WindowsRegistry.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2065,6 +2062,7 @@ set_source_files_properties("../../../../../modules/juce_core/threads/juce_Threa
 set_source_files_properties("../../../../../modules/juce_core/threads/juce_ThreadPool.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/threads/juce_TimeSliceThread.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/threads/juce_TimeSliceThread.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/threads/juce_WaitableEvent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/threads/juce_WaitableEvent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/time/juce_PerformanceCounter.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/time/juce_PerformanceCounter.h" PROPERTIES HEADER_FILE_ONLY TRUE)

@@ -61,7 +61,7 @@ public:
 
         An AudioSource has two states: prepared and unprepared.
 
-        The prepareToPlay() method is guaranteed to be called at least once on an 'unpreprared'
+        The prepareToPlay() method is guaranteed to be called at least once on an 'unprepared'
         source to put it into a 'prepared' state before any calls will be made to getNextAudioBlock().
         This callback allows the source to initialise any resources it might need when playing.
 
@@ -125,7 +125,7 @@ public:
     AudioDeviceManager& deviceManager;
 
 private:
-    //=============================================================================
+    //==============================================================================
     AudioDeviceManager defaultDeviceManager;
     AudioSourcePlayer audioSourcePlayer;
     bool usingCustomDeviceManager;

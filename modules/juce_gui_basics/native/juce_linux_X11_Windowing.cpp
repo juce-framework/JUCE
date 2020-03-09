@@ -958,6 +958,8 @@ static double getScaleForDisplay (const String& name, double dpi)
 
                     if (scaleFactor > 0.0)
                         return scaleFactor;
+
+                    return 1.0;
                 }
             }
         }
@@ -1259,10 +1261,13 @@ public:
 
     Point<int> getScreenPosition (bool physical) const
     {
-        if (physical)
-            return Desktop::getInstance().getDisplays().logicalToPhysical (bounds.getTopLeft());
+        auto screenBounds = (parentWindow == 0 ? bounds
+                                               : bounds.translated (parentScreenPosition.x, parentScreenPosition.y));
 
-        return bounds.getTopLeft();
+        if (physical)
+            return Desktop::getInstance().getDisplays().logicalToPhysical (screenBounds.getTopLeft());
+
+        return screenBounds.getTopLeft();
     }
 
     Rectangle<int> getBounds() const override                            { return bounds; }
@@ -1520,6 +1525,9 @@ public:
         Window focusedWindow = 0;
         ScopedXLock xlock (display);
         XGetInputFocus (display, &focusedWindow, &revert);
+
+        if (focusedWindow == PointerRoot)
+            return false;
 
         return isParentWindowOf (focusedWindow);
     }
@@ -2397,6 +2405,7 @@ private:
     friend class LinuxRepaintManager;
     Window windowH = {}, parentWindow = {}, keyProxy = {};
     Rectangle<int> bounds;
+    Point<int> parentScreenPosition;
     Image taskbarImage;
     bool fullScreen = false, mapped = false, focused = false;
     Visual* visual = {};
@@ -2853,9 +2862,23 @@ private:
 
             ScopedXLock xlock (display);
 
-            if (XGetGeometry (display, (::Drawable) windowH, &root, &wx, &wy, &ww, &wh, &bw, &bitDepth) && parentWindow == 0)
-                if (! XTranslateCoordinates (display, windowH, root, 0, 0, &wx, &wy, &child))
-                    wx = wy = 0;
+            if (XGetGeometry (display, (::Drawable) windowH, &root, &wx, &wy, &ww, &wh, &bw, &bitDepth))
+            {
+                int rootX = 0, rootY = 0;
+
+                if (! XTranslateCoordinates (display, windowH, root, 0, 0, &rootX, &rootY, &child))
+                    rootX = rootY = 0;
+
+                if (parentWindow == 0)
+                {
+                    wx = rootX;
+                    wy = rootY;
+                }
+                else
+                {
+                    parentScreenPosition = Desktop::getInstance().getDisplays().physicalToLogical (Point<int> (rootX, rootY));
+                }
+            }
 
             Rectangle<int> physicalBounds (wx, wy, (int) ww, (int) wh);
 
@@ -3485,7 +3508,7 @@ JUCE_API void JUCE_CALLTYPE Process::hide() {}
 void Desktop::setKioskComponent (Component* comp, bool enableOrDisable, bool /* allowMenusAndBars */)
 {
     if (enableOrDisable)
-        comp->setBounds (getDisplays().getMainDisplay().totalArea);
+        comp->setBounds (getDisplays().findDisplayForRect (comp->getScreenBounds()).totalArea);
 }
 
 void Desktop::allowedOrientationsChanged() {}

@@ -24,7 +24,7 @@
   ==============================================================================
 */
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 #include "../UI/MainHostWindow.h"
 #include "PluginGraph.h"
 #include "InternalPlugins.h"
@@ -202,11 +202,13 @@ void PluginGraph::newDocument()
     addPlugin (internalFormat.audioInDesc,  { 0.5,  0.1 });
     addPlugin (internalFormat.midiInDesc,   { 0.25, 0.1 });
     addPlugin (internalFormat.audioOutDesc, { 0.5,  0.9 });
+    addPlugin (internalFormat.midiOutDesc,  { 0.25, 0.9 });
 
-    MessageManager::callAsync ([this] () {
+    MessageManager::callAsync ([this]
+    {
         setChangedFlag (false);
         graph.addChangeListener (this);
-    } );
+    });
 }
 
 Result PluginGraph::loadDocument (const File& file)
@@ -325,9 +327,13 @@ static XmlElement* createNodeXml (AudioProcessorGraph::Node* const node) noexcep
     if (auto* plugin = dynamic_cast<AudioPluginInstance*> (node->getProcessor()))
     {
         auto e = new XmlElement ("FILTER");
-        e->setAttribute ("uid", (int) node->nodeID.uid);
-        e->setAttribute ("x", node->properties ["x"].toString());
-        e->setAttribute ("y", node->properties ["y"].toString());
+
+        e->setAttribute ("uid",      (int) node->nodeID.uid);
+        e->setAttribute ("x",        node->properties ["x"].toString());
+        e->setAttribute ("y",        node->properties ["y"].toString());
+       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+        e->setAttribute ("DPIAware", node->properties["DPIAware"].toString());
+       #endif
 
         for (int i = 0; i < (int) PluginWindow::Type::numTypes; ++i)
         {
@@ -401,8 +407,11 @@ void PluginGraph::createNodeFromXml (const XmlElement& xml)
                 node->getProcessor()->setStateInformation (m.getData(), (int) m.getSize());
             }
 
-            node->properties.set ("x", xml.getDoubleAttribute ("x"));
-            node->properties.set ("y", xml.getDoubleAttribute ("y"));
+            node->properties.set ("x",        xml.getDoubleAttribute ("x"));
+            node->properties.set ("y",        xml.getDoubleAttribute ("y"));
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+            node->properties.set ("DPIAware", xml.getDoubleAttribute ("DPIAware"));
+           #endif
 
             for (int i = 0; i < (int) PluginWindow::Type::numTypes; ++i)
             {

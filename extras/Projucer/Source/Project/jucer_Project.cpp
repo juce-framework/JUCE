@@ -326,6 +326,7 @@ void Project::removeDefunctExporters()
     oldExporters.set ("MSVC6",   "MSVC6");
     oldExporters.set ("VS2010",  "Visual Studio 2010");
     oldExporters.set ("VS2012",  "Visual Studio 2012");
+    oldExporters.set ("VS2013",  "Visual Studio 2013");
 
     for (auto& key : oldExporters.getAllKeys())
     {
@@ -514,7 +515,7 @@ static int getJuceVersion (const String& v)
          + getVersionElement (v, 0);
 }
 
-static int getBuiltJuceVersion()
+static constexpr int getBuiltJuceVersion()
 {
     return JUCE_MAJOR_VERSION * 100000
          + JUCE_MINOR_VERSION * 1000
@@ -523,11 +524,7 @@ static int getBuiltJuceVersion()
 
 static bool isModuleNewerThanProjucer (const ModuleDescription& module)
 {
-    if (module.getID().startsWith ("juce_")
-        && getJuceVersion (module.getVersion()) > getBuiltJuceVersion())
-        return true;
-
-    return false;
+    return module.getID().startsWith ("juce_") && getJuceVersion (module.getVersion()) > getBuiltJuceVersion();
 }
 
 void Project::warnAboutOldProjucerVersion()
@@ -536,7 +533,6 @@ void Project::warnAboutOldProjucerVersion()
     {
         if (isModuleNewerThanProjucer ({ juceModule.second }))
         {
-            // Projucer is out of date!
             if (ProjucerApplication::getApp().isRunningCommandLine)
                 std::cout <<  "WARNING! This version of the Projucer is out-of-date!" << std::endl;
             else
@@ -1010,7 +1006,7 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
     props.add (new TextPropertyComponent (bundleIdentifierValue, "Bundle Identifier", 256, false),
                "A unique identifier for this product, mainly for use in OSX/iOS builds. It should be something like 'com.yourcompanyname.yourproductname'");
 
-    if (getProjectType().isAudioPlugin())
+    if (isAudioPluginProject())
         createAudioPluginPropertyEditors (props);
 
     {
@@ -1036,7 +1032,7 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
                                              "Include BinaryData.h in the JuceHeader.h file");
 
     props.add (new TextPropertyComponent (binaryDataNamespaceValue, "BinaryData Namespace", 256, false),
-                                          "The namespace containing the binary assests.");
+                                          "The namespace containing the binary assets.");
 
     props.add (new ChoicePropertyComponent (cppStandardValue, "C++ Language Standard",
                                             { "C++11", "C++14", "C++17", "Use Latest" },
@@ -1893,17 +1889,17 @@ String Project::getIAAPluginName()
 //==============================================================================
 bool Project::isAUPluginHost()
 {
-    return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_AU");
+    return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_AU", false);
 }
 
 bool Project::isVSTPluginHost()
 {
-    return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST");
+    return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST", false);
 }
 
 bool Project::isVST3PluginHost()
 {
-    return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3");
+    return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3", false);
 }
 
 //==============================================================================
@@ -2104,7 +2100,7 @@ void Project::rescanExporterPathModules (bool async)
         exporterPathsModuleList->scanPaths (getExporterModulePathsToScan (*this));
 }
 
-ModuleIDAndFolder Project::getModuleWithID (const String& id)
+AvailableModuleList::ModuleIDAndFolder Project::getModuleWithID (const String& id)
 {
     if (! getEnabledModules().shouldUseGlobalPath (id))
     {

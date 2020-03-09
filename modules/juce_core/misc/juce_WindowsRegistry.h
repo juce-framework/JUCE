@@ -90,7 +90,7 @@ public:
     static bool JUCE_CALLTYPE valueExists (const String& regValuePath, WoW64Mode mode = WoW64_Default);
 
     /** Returns true if the given key exists in the registry. */
-    static bool JUCE_CALLTYPE keyExists (const String& regValuePath, WoW64Mode mode = WoW64_Default);
+    static bool JUCE_CALLTYPE keyExists (const String& regKeyPath, WoW64Mode mode = WoW64_Default);
 
     /** Deletes a registry value. */
     static bool JUCE_CALLTYPE deleteValue (const String& regValuePath, WoW64Mode mode = WoW64_Default);

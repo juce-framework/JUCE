@@ -20,6 +20,7 @@
   ==============================================================================
 */
 
+
 /*******************************************************************************
  The block below describes the properties of this module, and is read by
  the Projucer to automatically generate project code that uses it.
@@ -29,15 +30,15 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_events
-  vendor:           juce
-  version:          5.4.3
-  name:             JUCE message and event handling classes
-  description:      Classes for running an application's main event loop and sending/receiving messages, timers, etc.
-  website:          http://www.juce.com/juce
-  license:          ISC
+  ID:                 juce_events
+  vendor:             juce
+  version:            5.4.7
+  name:               JUCE message and event handling classes
+  description:        Classes for running an application's main event loop and sending/receiving messages, timers, etc.
+  website:            http://www.juce.com/juce
+  license:            ISC
 
-  dependencies:     juce_core
+  dependencies:       juce_core
 
  END_JUCE_MODULE_DECLARATION
 
@@ -50,7 +51,7 @@
 #include <juce_core/juce_core.h>
 
 //==============================================================================
-/** Config: JUCE_EXECUTE_APP_SUSPEND_ON_IOS_BACKGROUND_TASK
+/** Config: JUCE_EXECUTE_APP_SUSPEND_ON_BACKGROUND_TASK
     Will execute your application's suspend method on an iOS background task, giving
     you extra time to save your applications state.
 */

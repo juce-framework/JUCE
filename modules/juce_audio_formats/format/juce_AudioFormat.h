@@ -132,9 +132,7 @@ public:
                                     to try to open a different format, etc
         @param sampleRateToUse      the sample rate for the file, which must be one of the ones
                                     returned by getPossibleSampleRates()
-        @param numberOfChannels     the number of channels - this must be either 1 or 2, and
-                                    the choice will depend on the results of canDoMono() and
-                                    canDoStereo()
+        @param numberOfChannels     the number of channels
         @param bitsPerSample        the bits per sample to use - this must be one of the values
                                     returned by getPossibleBitDepths()
         @param metadataValues       a set of metadata values that the writer should try to write

@@ -184,8 +184,12 @@ public:
                          bool ignoreOrderOfAttributes) const noexcept;
 
     //==============================================================================
+    /** A struct containing options for formatting the text when representing an
+        XML element as a string.
+    */
     struct TextFormat
     {
+        /** Default constructor. */
         TextFormat();
 
         String dtd;                        /**< If supplied, this DTD will be added to the document. */

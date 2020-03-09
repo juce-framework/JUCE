@@ -187,6 +187,7 @@ namespace Ids
     DECLARE_ID (useLocalCopy);
     DECLARE_ID (overwriteOnSave);
     DECLARE_ID (appSandbox);
+    DECLARE_ID (appSandboxInheritance);
     DECLARE_ID (appSandboxOptions);
     DECLARE_ID (hardenedRuntime);
     DECLARE_ID (hardenedRuntimeOptions);
@@ -252,6 +253,8 @@ namespace Ids
     DECLARE_ID (iCloudPermissions);
     DECLARE_ID (iosDevelopmentTeamID);
     DECLARE_ID (iosAppGroupsId);
+    DECLARE_ID (iosBluetoothPermissionNeeded);
+    DECLARE_ID (iosBluetoothPermissionText);
     DECLARE_ID (duplicateAppExResourcesFolder);
     DECLARE_ID (buildToolsVersion);
     DECLARE_ID (gradleVersion);

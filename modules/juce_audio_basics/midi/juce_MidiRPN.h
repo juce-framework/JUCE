@@ -142,7 +142,7 @@ public:
 
         @param use14BitValue     If true (default), the value will have 14-bit precision
                                  (two MIDI bytes). If false, instead the value will have
-                                 7-bit presision (a single MIDI byte).
+                                 7-bit precision (a single MIDI byte).
     */
     static MidiBuffer generate (int channel,
                                 int parameterNumber,

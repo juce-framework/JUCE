@@ -73,11 +73,11 @@ public:
         @param buffer       The message that should be encrypted. See bufferSize on size
                             requirements!
         @param sizeOfMsg    The size of the message that should be encrypted in bytes
-        @param bufferSize   The size of the buffer in bytes. To accommodate the encypted
+        @param bufferSize   The size of the buffer in bytes. To accommodate the encrypted
                             data, the buffer must be larger than the message: the size of
                             the buffer needs to be equal or greater than the size of the
-                            message in bytes rounded to the next integer which is divisable
-                            by eight. If the message size in bytes is already divisable by eight
+                            message in bytes rounded to the next integer which is divisible
+                            by eight. If the message size in bytes is already divisible by eight
                             then you need to add eight bytes to the buffer size. If in doubt
                             simply use bufferSize = sizeOfMsg + 8.
 

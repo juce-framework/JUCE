@@ -40,7 +40,11 @@ public:
 
     bool initialise()
     {
-        return frameBuffer.initialise (context, width, height);
+        if (! frameBuffer.initialise (context, width, height))
+            return false;
+
+        frameBuffer.clear (Colours::transparentBlack);
+        return true;
     }
 
     std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
@@ -53,7 +57,12 @@ public:
 
     ImagePixelData::Ptr clone() override
     {
-        Image newImage (*new OpenGLFrameBufferImage (context, width, height));
+        std::unique_ptr<OpenGLFrameBufferImage> im (new OpenGLFrameBufferImage (context, width, height));
+
+        if (! im->initialise())
+            return ImagePixelData::Ptr();
+
+        Image newImage (im.release());
         Graphics g (newImage);
         g.drawImageAt (Image (*this), 0, 0, false);
 
@@ -192,7 +201,6 @@ ImagePixelData::Ptr OpenGLImageType::create (Image::PixelFormat, int width, int 
     if (! im->initialise())
         return ImagePixelData::Ptr();
 
-    im->frameBuffer.clear (Colours::transparentBlack);
     return *im.release();
 }
 

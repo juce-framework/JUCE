@@ -30,6 +30,8 @@ namespace juce
     getDefaultDevice() methods of MidiInput and MidiOutput or by calling getDeviceInfo()
     on an instance of these classes. Devices can be opened by passing the identifier to
     the openDevice() method.
+
+    @tags{Audio}
 */
 struct MidiDeviceInfo
 {

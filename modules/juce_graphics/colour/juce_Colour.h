@@ -131,7 +131,7 @@ public:
      */
     Colour (PixelAlpha alpha) noexcept;
 
-    /** Creates a colour using floating point hue, saturation and brightness values, and an 8-bit alpha.
+    /** Creates a colour using floating point hue, saturation, brightness and alpha values.
 
         The floating point values must be between 0.0 and 1.0.
         An alpha of 0x00 is completely transparent, alpha of 0xff is opaque.
@@ -284,7 +284,7 @@ public:
     */
     Colour withBrightness (float newBrightness) const noexcept;
 
-    /** Returns a copy of this colour with it hue rotated.
+    /** Returns a copy of this colour with its hue rotated.
         The new colour's hue is ((this->getHue() + amountToRotate) % 1.0)
         @see brighter, darker, withMultipliedBrightness
     */

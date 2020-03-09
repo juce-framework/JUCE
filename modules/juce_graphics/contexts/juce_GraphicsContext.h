@@ -195,7 +195,7 @@ public:
     /** Tries to draw a text string inside a given space.
 
         This does its best to make the given text readable within the specified rectangle,
-        so it useful for labelling things.
+        so it's useful for labelling things.
 
         If the text is too big, it'll be squashed horizontally or broken over multiple lines
         if the maximumLinesToUse value allows this. If the text just won't fit into the space,
@@ -220,7 +220,7 @@ public:
     /** Tries to draw a text string inside a given space.
 
         This does its best to make the given text readable within the specified rectangle,
-        so it useful for labelling things.
+        so it's useful for labelling things.
 
         If the text is too big, it'll be squashed horizontally or broken over multiple lines
         if the maximumLinesToUse value allows this. If the text just won't fit into the space,
@@ -492,7 +492,7 @@ public:
     /** Draws part of an image, rescaling it to fit in a given target region.
 
         The specified area of the source image is rescaled and drawn to fill the
-        specifed destination rectangle.
+        specified destination rectangle.
 
         Images are composited using the context's current opacity, so if you
         don't want it to be drawn semi-transparently, be sure to call setOpacity (1.0f)

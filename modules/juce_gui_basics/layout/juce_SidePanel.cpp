@@ -219,7 +219,7 @@ void SidePanel::mouseUp (const MouseEvent&)
     }
 }
 
-//==========================================================================
+//==============================================================================
 void SidePanel::lookAndFeelChanged()
 {
     auto& lf = getLookAndFeel();
@@ -245,7 +245,7 @@ void SidePanel::componentMovedOrResized (Component& component, bool wasMoved, bo
 
 Rectangle<int> SidePanel::calculateBoundsInParent (Component& parentComp) const
 {
-    auto parentBounds = parentComp.getBounds();
+    auto parentBounds = parentComp.getLocalBounds();
 
     if (isOnLeft)
     {

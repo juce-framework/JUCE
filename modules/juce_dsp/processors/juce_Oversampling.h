@@ -29,7 +29,7 @@ namespace juce
 namespace dsp
 {
 
-//===============================================================================
+//==============================================================================
 /**
     A processing class performing multi-channel oversampling.
 
@@ -65,7 +65,7 @@ public:
         numFilterTypes
     };
 
-    //===============================================================================
+    //==============================================================================
     /**
         Constructor of the oversampling class. All the processing parameters must be
         provided at the creation of the oversampling object.
@@ -96,7 +96,7 @@ public:
     /** Destructor. */
     ~Oversampling();
 
-    //===============================================================================
+    //==============================================================================
     /** Returns the latency in samples of the whole processing. Use this information
         in your main processor to compensate the additional latency involved with
         the oversampling, for example with a dry / wet functionality, and to report
@@ -110,7 +110,7 @@ public:
     /** Returns the current oversampling factor. */
     size_t getOversamplingFactor() noexcept;
 
-    //===============================================================================
+    //==============================================================================
     /** Must be called before any processing, to set the buffer sizes of the internal
         buffers of the oversampling processing.
     */
@@ -126,16 +126,16 @@ public:
         Don't forget to set the sample rate of that processing to N times the original
         sample rate.
     */
-    dsp::AudioBlock<SampleType> processSamplesUp (const dsp::AudioBlock<SampleType>& inputBlock) noexcept;
+    AudioBlock<SampleType> processSamplesUp (const AudioBlock<const SampleType>& inputBlock) noexcept;
 
     /** Must be called to perform the downsampling, after the upsampling and the
         non-linear processing. The output signal is probably delayed by the internal
         latency of the whole oversampling behaviour, so don't forget to take this
         into account.
     */
-    void processSamplesDown (dsp::AudioBlock<SampleType>& outputBlock) noexcept;
+    void processSamplesDown (AudioBlock<SampleType>& outputBlock) noexcept;
 
-    //===============================================================================
+    //==============================================================================
     /** Adds a new oversampling stage to the Oversampling class, multiplying the
         current oversampling factor by two. This is used with the default constructor
         to create custom oversampling chains, requiring a call to the
@@ -179,7 +179,7 @@ public:
     */
     void clearOversamplingStages();
 
-    //===============================================================================
+    //==============================================================================
     size_t factorOversampling = 1;
     size_t numChannels = 1;
 
@@ -188,11 +188,11 @@ public:
    #endif
 
 private:
-    //===============================================================================
+    //==============================================================================
     OwnedArray<OversamplingStage> stages;
     bool isReady = false;
 
-    //===============================================================================
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Oversampling)
 };
 

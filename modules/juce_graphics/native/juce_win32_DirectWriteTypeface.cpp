@@ -285,7 +285,7 @@ private:
     {
         PathGeometrySink() : ComBaseClassHelper<IDWriteGeometrySink> (0) {}
 
-        void __stdcall AddBeziers (const D2D1_BEZIER_SEGMENT* beziers, UINT beziersCount) override
+        void __stdcall AddBeziers (const D2D1_BEZIER_SEGMENT* beziers, UINT beziersCount) noexcept override
         {
             for (UINT i = 0; i < beziersCount; ++i)
                 path.cubicTo (convertPoint (beziers[i].point1),
@@ -293,30 +293,30 @@ private:
                               convertPoint (beziers[i].point3));
         }
 
-        void __stdcall AddLines (const D2D1_POINT_2F* points, UINT pointsCount) override
+        void __stdcall AddLines (const D2D1_POINT_2F* points, UINT pointsCount) noexcept override
         {
             for (UINT i = 0; i < pointsCount; ++i)
                 path.lineTo (convertPoint (points[i]));
         }
 
-        void __stdcall BeginFigure (D2D1_POINT_2F startPoint, D2D1_FIGURE_BEGIN) override
+        void __stdcall BeginFigure (D2D1_POINT_2F startPoint, D2D1_FIGURE_BEGIN) noexcept override
         {
             path.startNewSubPath (convertPoint (startPoint));
         }
 
-        void __stdcall EndFigure (D2D1_FIGURE_END figureEnd) override
+        void __stdcall EndFigure (D2D1_FIGURE_END figureEnd) noexcept override
         {
             if (figureEnd == D2D1_FIGURE_END_CLOSED)
                 path.closeSubPath();
         }
 
-        void __stdcall SetFillMode (D2D1_FILL_MODE fillMode) override
+        void __stdcall SetFillMode (D2D1_FILL_MODE fillMode) noexcept override
         {
             path.setUsingNonZeroWinding (fillMode == D2D1_FILL_MODE_WINDING);
         }
 
-        void __stdcall SetSegmentFlags (D2D1_PATH_SEGMENT) override {}
-        JUCE_COMRESULT Close() override  { return S_OK; }
+        void __stdcall SetSegmentFlags (D2D1_PATH_SEGMENT) noexcept override {}
+        JUCE_COMRESULT Close() noexcept override  { return S_OK; }
 
         Path path;
 

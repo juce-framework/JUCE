@@ -41,95 +41,6 @@ bool CriticalSection::tryEnter() const noexcept     { return pthread_mutex_trylo
 void CriticalSection::exit() const noexcept         { pthread_mutex_unlock (&lock); }
 
 //==============================================================================
-WaitableEvent::WaitableEvent (bool useManualReset) noexcept
-    : triggered (false), manualReset (useManualReset)
-{
-    pthread_cond_init (&condition, {});
-
-    pthread_mutexattr_t atts;
-    pthread_mutexattr_init (&atts);
-   #if ! JUCE_ANDROID
-    pthread_mutexattr_setprotocol (&atts, PTHREAD_PRIO_INHERIT);
-   #endif
-    pthread_mutex_init (&mutex, &atts);
-    pthread_mutexattr_destroy (&atts);
-}
-
-WaitableEvent::~WaitableEvent() noexcept
-{
-    pthread_cond_destroy (&condition);
-    pthread_mutex_destroy (&mutex);
-}
-
-bool WaitableEvent::wait (int timeOutMillisecs) const noexcept
-{
-    pthread_mutex_lock (&mutex);
-
-    if (! triggered)
-    {
-        if (timeOutMillisecs < 0)
-        {
-            do
-            {
-                pthread_cond_wait (&condition, &mutex);
-            }
-            while (! triggered);
-        }
-        else
-        {
-            struct timeval now;
-            gettimeofday (&now, nullptr);
-
-            struct timespec time;
-            time.tv_sec  = now.tv_sec  + (timeOutMillisecs / 1000);
-            time.tv_nsec = (now.tv_usec + ((timeOutMillisecs % 1000) * 1000)) * 1000;
-
-            if (time.tv_nsec >= 1000000000)
-            {
-                time.tv_nsec -= 1000000000;
-                time.tv_sec++;
-            }
-
-            do
-            {
-                if (pthread_cond_timedwait (&condition, &mutex, &time) == ETIMEDOUT)
-                {
-                    pthread_mutex_unlock (&mutex);
-                    return false;
-                }
-            }
-            while (! triggered);
-        }
-    }
-
-    if (! manualReset)
-        triggered = false;
-
-    pthread_mutex_unlock (&mutex);
-    return true;
-}
-
-void WaitableEvent::signal() const noexcept
-{
-    pthread_mutex_lock (&mutex);
-
-    if (! triggered)
-    {
-        triggered = true;
-        pthread_cond_broadcast (&condition);
-    }
-
-    pthread_mutex_unlock (&mutex);
-}
-
-void WaitableEvent::reset() const noexcept
-{
-    pthread_mutex_lock (&mutex);
-    triggered = false;
-    pthread_mutex_unlock (&mutex);
-}
-
-//==============================================================================
 void JUCE_CALLTYPE Thread::sleep (int millisecs)
 {
     struct timespec time;
@@ -400,13 +311,19 @@ void File::getFileTimesInternal (int64& modificationTime, int64& accessTime, int
 
     if (juce_stat (fullPath, info))
     {
+      #if JUCE_MAC || (JUCE_IOS && __DARWIN_ONLY_64_BIT_INO_T)
+        modificationTime  = (int64) info.st_mtimespec.tv_sec * 1000 + info.st_mtimespec.tv_nsec / 1000000;
+        accessTime        = (int64) info.st_atimespec.tv_sec * 1000 + info.st_atimespec.tv_nsec / 1000000;
+        creationTime      = (int64) info.st_birthtimespec.tv_sec * 1000 + info.st_birthtimespec.tv_nsec / 1000000;
+      #else
         modificationTime  = (int64) info.st_mtime * 1000;
         accessTime        = (int64) info.st_atime * 1000;
-       #if JUCE_MAC || JUCE_IOS
+       #if JUCE_IOS
         creationTime      = (int64) info.st_birthtime * 1000;
        #else
         creationTime      = (int64) info.st_ctime * 1000;
        #endif
+      #endif
     }
 }
 
@@ -416,11 +333,32 @@ bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64
 
     if ((modificationTime != 0 || accessTime != 0) && juce_stat (fullPath, info))
     {
+       #if JUCE_MAC || (JUCE_IOS && __DARWIN_ONLY_64_BIT_INO_T)
+        struct timeval times[2];
+
+        bool setModificationTime = (modificationTime != 0);
+        bool setAccessTime       = (accessTime != 0);
+
+        times[0].tv_sec  = setAccessTime ? static_cast<__darwin_time_t> (accessTime / 1000)
+                                         : info.st_atimespec.tv_sec;
+
+        times[0].tv_usec = setAccessTime ? static_cast<__darwin_suseconds_t> ((accessTime % 1000) * 1000)
+                                         : static_cast<__darwin_suseconds_t> (info.st_atimespec.tv_nsec / 1000);
+
+        times[1].tv_sec  = setModificationTime ? static_cast<__darwin_time_t> (modificationTime / 1000)
+                                               : info.st_mtimespec.tv_sec;
+
+        times[1].tv_usec = setModificationTime ? static_cast<__darwin_suseconds_t> ((modificationTime % 1000) * 1000)
+                                               : static_cast<__darwin_suseconds_t> (info.st_mtimespec.tv_nsec / 1000);
+
+        return utimes (fullPath.toUTF8(), times) == 0;
+       #else
         struct utimbuf times;
         times.actime  = accessTime != 0       ? static_cast<time_t> (accessTime / 1000)       : static_cast<time_t> (info.st_atime);
         times.modtime = modificationTime != 0 ? static_cast<time_t> (modificationTime / 1000) : static_cast<time_t> (info.st_mtime);
 
         return utime (fullPath.toUTF8(), &times) == 0;
+       #endif
     }
 
     return false;
@@ -477,7 +415,7 @@ int64 juce_fileSetPosition (void* handle, int64 pos)
 
 void FileInputStream::openHandle()
 {
-    auto f = open (file.getFullPathName().toUTF8(), O_RDONLY, 00644);
+    auto f = open (file.getFullPathName().toUTF8(), O_CREAT | O_RDONLY, 00644);
 
     if (f != -1)
         fileHandle = fdToVoidPointer (f);
@@ -514,7 +452,7 @@ void FileOutputStream::openHandle()
 {
     if (file.exists())
     {
-        auto f = open (file.getFullPathName().toUTF8(), O_RDWR, 00644);
+        auto f = open (file.getFullPathName().toUTF8(), O_CREAT | O_RDWR, 00644);
 
         if (f != -1)
         {
@@ -537,7 +475,7 @@ void FileOutputStream::openHandle()
     }
     else
     {
-        auto f = open (file.getFullPathName().toUTF8(), O_RDWR + O_CREAT, 00644);
+        auto f = open (file.getFullPathName().toUTF8(), O_RDWR | O_CREAT, 00644);
 
         if (f != -1)
             fileHandle = fdToVoidPointer (f);
@@ -606,7 +544,7 @@ void MemoryMappedFile::openInternal (const File& file, AccessMode mode, bool exc
     }
 
     fileHandle = open (file.getFullPathName().toUTF8(),
-                       mode == readWrite ? (O_CREAT + O_RDWR) : O_RDONLY, 00644);
+                       (O_CREAT | (mode == readWrite ? O_RDWR : O_RDONLY)), 00644);
 
     if (fileHandle != -1)
     {
@@ -1215,7 +1153,7 @@ public:
                 if (numBytesRead > 0 || feof (readHandle))
                     return numBytesRead;
 
-                // signal occured during fread() so try again
+                // signal occurred during fread() so try again
                 if (ferror (readHandle) && errno == EINTR)
                     continue;
 

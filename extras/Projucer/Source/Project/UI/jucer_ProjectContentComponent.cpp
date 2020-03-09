@@ -255,7 +255,7 @@ void ProjectContentComponent::rebuildProjectTabs()
         addAndMakeVisible (sidebarTabs);
         createProjectTabs();
 
-        //======================================================================
+        //==============================================================================
         auto& settings = project->getStoredProperties();
 
         auto lastTreeWidth = settings.getValue ("projectPanelWidth").getIntValue();
@@ -271,7 +271,7 @@ void ProjectContentComponent::rebuildProjectTabs()
             projectTab->setPanelHeightProportion (i, settings.getValue ("projectTabPanelHeight" + String (i), "1")
                                                              .getFloatValue());
 
-        //======================================================================
+        //==============================================================================
         resizerBar.reset (new ResizableEdgeComponent (&sidebarTabs, &sidebarSizeConstrainer,
                                                       ResizableEdgeComponent::rightEdge));
         addAndMakeVisible (resizerBar.get());
@@ -559,7 +559,7 @@ bool ProjectContentComponent::saveProject (bool shouldWait, bool openInIDE)
 void ProjectContentComponent::closeProject()
 {
     if (auto* mw = findParentComponentOfClass<MainWindow>())
-        mw->closeCurrentProject();
+        mw->closeCurrentProject (true);
 }
 
 void ProjectContentComponent::showProjectSettings()

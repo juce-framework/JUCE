@@ -97,6 +97,8 @@ String AudioProcessorParameterGroup::getName() const                            
 String AudioProcessorParameterGroup::getSeparator() const                                      { return separator; }
 const AudioProcessorParameterGroup* AudioProcessorParameterGroup::getParent() const noexcept   { return parent; }
 
+void AudioProcessorParameterGroup::setName (String newName)                                    { name = std::move (newName); }
+
 const AudioProcessorParameterGroup::AudioProcessorParameterNode* const* AudioProcessorParameterGroup::begin() const noexcept  { return const_cast<const AudioProcessorParameterNode**> (children.begin()); }
 const AudioProcessorParameterGroup::AudioProcessorParameterNode* const* AudioProcessorParameterGroup::end()   const noexcept  { return const_cast<const AudioProcessorParameterNode**> (children.end()); }
 

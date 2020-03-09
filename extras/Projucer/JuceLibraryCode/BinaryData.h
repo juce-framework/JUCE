@@ -90,13 +90,13 @@ namespace BinaryData
     const int            jucer_AnimatedComponentTemplate_hSize = 1201;
 
     extern const char*   jucer_AudioComponentSimpleTemplate_h;
-    const int            jucer_AudioComponentSimpleTemplate_hSize = 3693;
+    const int            jucer_AudioComponentSimpleTemplate_hSize = 3702;
 
     extern const char*   jucer_AudioComponentTemplate_cpp;
     const int            jucer_AudioComponentTemplate_cppSize = 3094;
 
     extern const char*   jucer_AudioComponentTemplate_h;
-    const int            jucer_AudioComponentTemplate_hSize = 1374;
+    const int            jucer_AudioComponentTemplate_hSize = 1383;
 
     extern const char*   jucer_AudioPluginEditorTemplate_cpp;
     const int            jucer_AudioPluginEditorTemplate_cppSize = 1356;
@@ -114,7 +114,7 @@ namespace BinaryData
     const int            jucer_ComponentTemplate_cppSize = 2126;
 
     extern const char*   jucer_ComponentTemplate_h;
-    const int            jucer_ComponentTemplate_hSize = 2042;
+    const int            jucer_ComponentTemplate_hSize = 2044;
 
     extern const char*   jucer_ContentCompSimpleTemplate_h;
     const int            jucer_ContentCompSimpleTemplate_hSize = 1693;
@@ -168,7 +168,7 @@ namespace BinaryData
     const int            jucer_PIPAudioProcessorTemplate_hSize = 4926;
 
     extern const char*   jucer_PIPMain_cpp;
-    const int            jucer_PIPMain_cppSize = 2447;
+    const int            jucer_PIPMain_cppSize = 2421;
 
     extern const char*   jucer_PIPTemplate_h;
     const int            jucer_PIPTemplate_hSize = 517;

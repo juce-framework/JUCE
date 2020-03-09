@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 
 #ifndef PIP_DEMO_UTILITIES_INCLUDED
  #define PIP_DEMO_UTILITIES_INCLUDED 1

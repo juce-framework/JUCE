@@ -177,27 +177,41 @@ struct Detector   : public ReferenceCountedObject,
         triggerAsyncUpdate();
     }
 
-    void handleDeviceUpdated (const DeviceInfo& info)
+    void handleDevicesUpdated (const Array<DeviceInfo>& infos)
     {
-        if (containsBlockWithUID (blocksToRemove, info.uid))
-            return;
+        bool shouldTriggerUpdate { false };
 
-        const auto blockIt = std::find_if (currentTopology.blocks.begin(), currentTopology.blocks.end(),
-                                           [uid = info.uid] (Block::Ptr block) { return uid == block->uid; });
-
-        if (blockIt != currentTopology.blocks.end())
+        for (auto& info : infos)
         {
-            const Block::Ptr block { *blockIt };
+            if (containsBlockWithUID (blocksToRemove, info.uid))
+                continue;
 
-            if (auto blockImpl = BlockImpl::getFrom (block.get()))
-                blockImpl->markReconnected (info);
+            const auto blockIt = std::find_if (currentTopology.blocks.begin(), currentTopology.blocks.end(),
+                                               [uid = info.uid] (Block::Ptr block) { return uid == block->uid; });
 
-            if (! containsBlockWithUID (blocksToAdd, info.uid))
+
+            if (blockIt != currentTopology.blocks.end())
             {
-                blocksToUpdate.addIfNotAlreadyThere (block);
-                triggerAsyncUpdate();
+                const Block::Ptr block { *blockIt };
+
+                if (auto blockImpl = BlockImpl::getFrom (block.get()))
+                    blockImpl->updateDeviceInfo (info);
+
+                if (! containsBlockWithUID (blocksToAdd, info.uid))
+                {
+                    blocksToUpdate.addIfNotAlreadyThere (block);
+                    shouldTriggerUpdate = true;
+                }
             }
         }
+
+        if (shouldTriggerUpdate)
+            triggerAsyncUpdate();
+    }
+
+    void handleDeviceUpdated (const DeviceInfo& info)
+    {
+        handleDevicesUpdated ({ info });
     }
 
     void handleBatteryChargingChanged (Block::UID deviceID, const BlocksProtocol::BatteryCharging isCharging)
@@ -276,13 +290,10 @@ struct Detector   : public ReferenceCountedObject,
 
     void notifyBlockOfConfigChange (BlockImpl& bi, uint32 item)
     {
-        if (auto configChangedCallback = bi.configChangedCallback)
-        {
-            if (item >= bi.getMaxConfigIndex())
-                configChangedCallback (bi, {}, item);
-            else
-                configChangedCallback (bi, bi.getLocalConfigMetaData (item), item);
-        }
+        if (item >= bi.getMaxConfigIndex())
+            bi.handleConfigItemChanged ({}, item);
+        else
+            bi.handleConfigItemChanged (bi.getLocalConfigMetaData (item), item);
     }
 
     void handleConfigSetMessage (Block::UID deviceID, int32 item, int32 value)
@@ -297,7 +308,7 @@ struct Detector   : public ReferenceCountedObject,
     void handleConfigFactorySyncEndMessage (Block::UID deviceID)
     {
         if (auto* bi = getBlockImplementationWithUID (deviceID))
-            notifyBlockOfConfigChange (*bi, bi->getMaxConfigIndex());
+            bi->handleConfigSyncEnded();
     }
 
     void handleConfigFactorySyncResetMessage (Block::UID deviceID)
@@ -521,6 +532,24 @@ private:
                 else if (edge != Block::ConnectionPort::DeviceEdge::south)
                 {
                     return 1;
+                }
+            }
+            else if (block->getType() == Block::lumiKeysBlock)
+            {
+                if (edge == Block::ConnectionPort::DeviceEdge::north)
+                {
+                    switch (index)
+                    {
+                        case 0 : return 0;
+                        case 1 : return 2;
+                        case 2 : return 3;
+                        case 3 : return 5;
+                        default : jassertfalse;
+                    }
+                }
+                else if (edge == Block::ConnectionPort::DeviceEdge::south)
+                {
+                    jassertfalse;
                 }
             }
 

@@ -23,7 +23,7 @@
 namespace juce
 {
 
-#if ! JUCE_MINGW
+#if JUCE_MSVC
  #pragma intrinsic (__cpuid)
  #pragma intrinsic (__rdtsc)
 #endif
@@ -41,7 +41,7 @@ void Logger::outputDebugString (const String& text)
 
 //==============================================================================
 
-#if JUCE_MINGW
+#if JUCE_MINGW || JUCE_CLANG
 static void callCPUID (int result[4], uint32 type)
 {
   uint32 la = result[0], lb = result[1], lc = result[2], ld = result[3];
@@ -144,10 +144,14 @@ void CPUInformation::initialise() noexcept
     hasSSE2  = (info[3] & (1 << 26)) != 0;
     hasSSE3  = (info[2] & (1 <<  0)) != 0;
     hasAVX   = (info[2] & (1 << 28)) != 0;
+    hasFMA3  = (info[2] & (1 << 12)) != 0;
     hasSSSE3 = (info[2] & (1 <<  9)) != 0;
     hasSSE41 = (info[2] & (1 << 19)) != 0;
     hasSSE42 = (info[2] & (1 << 20)) != 0;
     has3DNow = (info[1] & (1 << 31)) != 0;
+
+    callCPUID (info, 0x80000001);
+    hasFMA4  = (info[2] & (1 << 16)) != 0;
 
     callCPUID (info, 7);
 
@@ -185,32 +189,63 @@ static DebugFlagsInitialiser debugFlagsInitialiser;
 #endif
 
 //==============================================================================
-RTL_OSVERSIONINFOW getWindowsVersionInfo()
-{
-    RTL_OSVERSIONINFOW versionInfo = { 0 };
+#if JUCE_MINGW
+ static uint32 getWindowsVersion()
+ {
+     auto filename = _T("kernel32.dll");
+     DWORD handle = 0;
 
-    if (auto* moduleHandle = ::GetModuleHandleW (L"ntdll.dll"))
-    {
-        using RtlGetVersion = LONG (WINAPI*) (PRTL_OSVERSIONINFOW);
+     if (auto size = GetFileVersionInfoSize (filename, &handle))
+     {
+         HeapBlock<char> data (size);
 
-        if (auto* rtlGetVersion = (RtlGetVersion) ::GetProcAddress (moduleHandle, "RtlGetVersion"))
-        {
-            versionInfo.dwOSVersionInfoSize = sizeof (versionInfo);
-            LONG STATUS_SUCCESS = 0;
+         if (GetFileVersionInfo (filename, handle, size, data))
+         {
+             VS_FIXEDFILEINFO* info = nullptr;
+             UINT verSize = 0;
 
-            if (rtlGetVersion (&versionInfo) != STATUS_SUCCESS)
-                versionInfo = { 0 };
-        }
-    }
+             if (VerQueryValue (data, (LPCTSTR) _T("\\"), (void**) &info, &verSize))
+                 if (size > 0 && info != nullptr && info->dwSignature == 0xfeef04bd)
+                     return (uint32) info->dwFileVersionMS;
+         }
+     }
 
-    return versionInfo;
-}
+     return 0;
+ }
+#else
+ RTL_OSVERSIONINFOW getWindowsVersionInfo()
+ {
+     RTL_OSVERSIONINFOW versionInfo = { 0 };
+
+     if (auto* moduleHandle = ::GetModuleHandleW (L"ntdll.dll"))
+     {
+         using RtlGetVersion = LONG (WINAPI*) (PRTL_OSVERSIONINFOW);
+
+         if (auto* rtlGetVersion = (RtlGetVersion) ::GetProcAddress (moduleHandle, "RtlGetVersion"))
+         {
+             versionInfo.dwOSVersionInfoSize = sizeof (versionInfo);
+             LONG STATUS_SUCCESS = 0;
+
+             if (rtlGetVersion (&versionInfo) != STATUS_SUCCESS)
+                 versionInfo = { 0 };
+         }
+     }
+
+     return versionInfo;
+ }
+#endif
 
 SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
 {
+   #if JUCE_MINGW
+    auto v = getWindowsVersion();
+    auto major = (v >> 16) & 0xff;
+    auto minor = (v >> 0)  & 0xff;
+   #else
     auto versionInfo = getWindowsVersionInfo();
     auto major = versionInfo.dwMajorVersion;
     auto minor = versionInfo.dwMinorVersion;
+   #endif
 
     jassert (major <= 10); // need to add support for new version!
 

@@ -149,7 +149,6 @@
      installed, or you've not got your paths set up correctly to find its header
      files.
   */
-  #include <rtdk.h>
   #include <Bela.h>
   #include <Midi.h>
  #endif
@@ -170,7 +169,10 @@
    #error "Oboe cannot be enabled at the same time as openSL! Please disable JUCE_USE_ANDROID_OPENSLES"
   #endif
 
-  #include <oboe/Oboe.h>
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wunused-parameter"
+   #include <oboe/Oboe.h>
+  #pragma clang diagnostic pop
  #endif
 
 #endif

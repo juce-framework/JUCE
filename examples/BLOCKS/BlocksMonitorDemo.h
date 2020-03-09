@@ -75,7 +75,7 @@ public:
 
         // If this is a Lightpad then set the grid program to be blank
         if (block->getLEDGrid() != nullptr)
-            block->setProgram (new BitmapLEDProgram (*block));
+            block->setProgram (std::make_unique<BitmapLEDProgram>(*block));
 
         // If this is a Lightpad then redraw it at 25Hz
         if (block->getType() == Block::lightPadBlock)
@@ -95,7 +95,7 @@ public:
             button->removeListener (this);
     }
 
-    /** Called periodically to update the tooltip with inforamtion about the Block */
+    /** Called periodically to update the tooltip with information about the Block */
     void updateStatsAndTooltip()
     {
         // Get the battery level of this Block and inform any subclasses
@@ -972,6 +972,8 @@ private:
     }
 
     //==============================================================================
+    TooltipWindow tooltipWindow;
+
     PhysicalTopologySource topologySource;
     OwnedArray<BlockComponent> blockComponents;
     BlockComponent* masterBlockComponent = nullptr;

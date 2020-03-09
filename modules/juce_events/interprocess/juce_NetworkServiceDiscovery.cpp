@@ -23,6 +23,11 @@
 namespace juce
 {
 
+#if JUCE_ANDROID
+ extern void acquireMulticastLock();
+ extern void releaseMulticastLock();
+#endif
+
 NetworkServiceDiscovery::Advertiser::Advertiser (const String& serviceTypeUID,
                                                  const String& serviceDescription,
                                                  int broadcastPortToUse, int connectionPort,
@@ -62,17 +67,30 @@ void NetworkServiceDiscovery::Advertiser::run()
 
 void NetworkServiceDiscovery::Advertiser::sendBroadcast()
 {
-    auto localAddress = IPAddress::getLocalAddress();
-    message.setAttribute ("address", localAddress.toString());
-    auto broadcastAddress = IPAddress::getInterfaceBroadcastAddress (localAddress);
-    auto data = message.toString (XmlElement::TextFormat().singleLine().withoutHeader());
-    socket.write (broadcastAddress.toString(), broadcastPort, data.toRawUTF8(), (int) data.getNumBytesAsUTF8());
+    static IPAddress local = IPAddress::local();
+
+    for (auto& address : IPAddress::getAllAddresses())
+    {
+        if (address == local)
+            continue;
+
+        message.setAttribute ("address", address.toString());
+
+        auto broadcastAddress = IPAddress::getInterfaceBroadcastAddress (address);
+        auto data = message.toString (XmlElement::TextFormat().singleLine().withoutHeader());
+
+        socket.write (broadcastAddress.toString(), broadcastPort, data.toRawUTF8(), (int) data.getNumBytesAsUTF8());
+    }
 }
 
 //==============================================================================
 NetworkServiceDiscovery::AvailableServiceList::AvailableServiceList (const String& serviceType, int broadcastPort)
     : Thread ("Discovery_listen"), serviceTypeUID (serviceType)
 {
+   #if JUCE_ANDROID
+    acquireMulticastLock();
+   #endif
+
     socket.bindToPort (broadcastPort);
     startThread (2);
 }
@@ -81,6 +99,10 @@ NetworkServiceDiscovery::AvailableServiceList::~AvailableServiceList()
 {
     socket.shutdown();
     stopThread (2000);
+
+    #if JUCE_ANDROID
+     releaseMulticastLock();
+    #endif
 }
 
 void NetworkServiceDiscovery::AvailableServiceList::run()

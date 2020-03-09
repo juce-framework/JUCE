@@ -51,7 +51,7 @@ private:
 //==============================================================================
 ActionBroadcaster::ActionBroadcaster()
 {
-    // are you trying to create this object before or after juce has been intialised??
+    // are you trying to create this object before or after juce has been initialised??
     JUCE_ASSERT_MESSAGE_MANAGER_EXISTS
 }
 

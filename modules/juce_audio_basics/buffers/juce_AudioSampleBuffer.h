@@ -116,7 +116,7 @@ public:
     /** Copies another buffer.
 
         This buffer will make its own copy of the other's data, unless the buffer was created
-        using an external data buffer, in which case boths buffers will just point to the same
+        using an external data buffer, in which case both buffers will just point to the same
         shared block of data.
     */
     AudioBuffer (const AudioBuffer& other)
@@ -1075,8 +1075,17 @@ private:
 
     void allocateData()
     {
+        static_assert (std::alignment_of<Type>::value <= std::alignment_of<std::max_align_t>::value,
+                       "AudioBuffer cannot hold types with alignment requirements larger than that guaranteed by malloc");
         jassert (size >= 0);
+
         auto channelListSize = (size_t) (numChannels + 1) * sizeof (Type*);
+        auto requiredSampleAlignment = std::alignment_of<Type>::value;
+        size_t alignmentOverflow = channelListSize % requiredSampleAlignment;
+
+        if (alignmentOverflow != 0)
+            channelListSize += requiredSampleAlignment - alignmentOverflow;
+
         allocatedBytes = (size_t) numChannels * (size_t) size * sizeof (Type) + channelListSize + 32;
         allocatedData.malloc (allocatedBytes);
         channels = reinterpret_cast<Type**> (allocatedData.get());

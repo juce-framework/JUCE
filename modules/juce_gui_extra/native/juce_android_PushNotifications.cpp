@@ -189,7 +189,7 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (RemoteInputBuilder, "android/app/RemoteInput$Bui
  DECLARE_JNI_CLASS_WITH_MIN_SDK (StatusBarNotification, "android/service/notification/StatusBarNotification", 23)
  #undef JNI_CLASS_MEMBERS
 
-//==========================================================================
+//==============================================================================
 #if defined(JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME)
  #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
    STATICMETHOD (getInstance, "getInstance", "()Lcom/google/firebase/iid/FirebaseInstanceId;") \
@@ -265,7 +265,7 @@ bool PushNotifications::Notification::isValid() const noexcept
     return isValidForPreApi26;
 }
 
-//==========================================================================
+//==============================================================================
 struct PushNotifications::Pimpl
 {
     Pimpl (PushNotifications& p)
@@ -287,7 +287,7 @@ struct PushNotifications::Pimpl
         return true;
     }
 
-    //==========================================================================
+    //==============================================================================
     void sendLocalNotification (const PushNotifications::Notification& n)
     {
         // All required fields have to be setup!
@@ -434,7 +434,7 @@ struct PushNotifications::Pimpl
         }
     }
 
-    //==========================================================================
+    //==============================================================================
     String getDeviceToken() const
     {
       #if defined(JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME)
@@ -460,7 +460,7 @@ struct PushNotifications::Pimpl
       #endif
     }
 
-    //==========================================================================
+    //==============================================================================
     void subscribeToTopic (const String& topic)
     {
       #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
@@ -1303,7 +1303,7 @@ struct PushNotifications::Pimpl
                     auto classAsString  = LocalRef<jstring> ((jstring) env->CallObjectMethod (objectClass, JavaClass.getName));
 
                     // Note: It seems that Firebase delivers values as strings always, so this check is rather unnecessary,
-                    //       at least untill they change the behaviour.
+                    //       at least until they change the behaviour.
                     var value = juceString (classAsString) == "java.lang.Bundle" ? bundleToVar (object) : var (juceString (objectAsString.get()));
                     dynamicObject->setProperty (juceString (key.get()), value);
                 }
@@ -1399,7 +1399,7 @@ struct PushNotifications::Pimpl
             propertiesDynamicObject->setProperty ("titleLocalizationKey",  juceString (titleLocalizationKey.get()));
             propertiesDynamicObject->setProperty ("bodyLocalizationArgs",  javaStringArrayToJuce (bodyLocalizationArgs));
             propertiesDynamicObject->setProperty ("titleLocalizationArgs", javaStringArrayToJuce (titleLocalizationArgs));
-            propertiesDynamicObject->setProperty ("link",                  link.get() == nullptr ? juceString ((jstring) env->CallObjectMethod (link, AndroidUri.toString)) : String());
+            propertiesDynamicObject->setProperty ("link",                  link.get() != nullptr ? juceString ((jstring) env->CallObjectMethod (link, AndroidUri.toString)) : String());
         }
 
         n.properties = var (propertiesDynamicObject.get());
@@ -1561,7 +1561,7 @@ struct JuceFirebaseInstanceIdService
      DECLARE_JNI_CLASS (InstanceIdService, "com/roli/juce/JuceFirebaseInstanceIdService")
     #undef JNI_CLASS_MEMBERS
 
-    static void JNICALL tokenRefreshed (void* token)
+    static void JNICALL tokenRefreshed (JNIEnv*, jobject /*instanceIdService*/, void* token)
     {
         if (auto* instance = PushNotifications::getInstanceWithoutCreating())
             instance->pimpl->notifyListenersTokenRefreshed (juceString (static_cast<jstring> (token)));
@@ -1577,9 +1577,9 @@ struct JuceFirebaseMessagingService
 {
     #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
      CALLBACK (remoteNotificationReceived,  "firebaseRemoteMessageReceived",  "(Lcom/google/firebase/messaging/RemoteMessage;)V") \
-     CALLBACK (remoteMessagesDeleted,  "firebaseRemoteMessagesDeleted",  "()V") \
-     CALLBACK (remoteMessageSent,      "firebaseRemoteMessageSent",      "(Ljava/lang/String;)V") \
-     CALLBACK (remoteMessageSendError, "firebaseRemoteMessageSendError", "(Ljava/lang/String;Ljava/lang/String;)V")
+     CALLBACK (remoteMessagesDeleted,       "firebaseRemoteMessagesDeleted",  "()V") \
+     CALLBACK (remoteMessageSent,           "firebaseRemoteMessageSent",      "(Ljava/lang/String;)V") \
+     CALLBACK (remoteMessageSendError,      "firebaseRemoteMessageSendError", "(Ljava/lang/String;Ljava/lang/String;)V")
 
      DECLARE_JNI_CLASS (MessagingService, "com/roli/juce/JuceFirebaseMessagingService")
     #undef JNI_CLASS_MEMBERS

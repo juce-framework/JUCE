@@ -1244,14 +1244,14 @@ public:
 
         while (! threadShouldExit())
         {
-            if (outputDevice != nullptr && outputDevice->shouldClose)
+            if ((outputDevice != nullptr && outputDevice->shouldClose)
+                || (inputDevice != nullptr && inputDevice->shouldClose))
+            {
                 deviceBecameInactive = true;
+            }
 
             if (inputDevice != nullptr && ! deviceBecameInactive)
             {
-                if (inputDevice->shouldClose)
-                    deviceBecameInactive = true;
-
                 if (outputDevice == nullptr)
                 {
                     if (WaitForSingleObject (inputDevice->clientEvent, 1000) == WAIT_TIMEOUT)
@@ -1372,8 +1372,11 @@ private:
             {
                 if (deviceBecameInactive)
                 {
-                    deviceBecameInactive = false;
-                    MessageManager::callAsync ([this] { reopenDevices(); });
+                    MessageManager::callAsync ([this]
+                    {
+                        close();
+                        reopenDevices();
+                    });
                 }
             };
 
@@ -1445,7 +1448,7 @@ public:
     }
 
     //==============================================================================
-    void scanForDevices()
+    void scanForDevices() override
     {
         hasScanned = true;
 
@@ -1458,7 +1461,7 @@ public:
               outputDeviceIds, inputDeviceIds);
     }
 
-    StringArray getDeviceNames (bool wantInputNames) const
+    StringArray getDeviceNames (bool wantInputNames) const override
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
@@ -1466,13 +1469,13 @@ public:
                               : outputDeviceNames;
     }
 
-    int getDefaultDeviceIndex (bool /*forInput*/) const
+    int getDefaultDeviceIndex (bool /*forInput*/) const override
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
         return 0;
     }
 
-    int getIndexOfDevice (AudioIODevice* device, bool asInput) const
+    int getIndexOfDevice (AudioIODevice* device, bool asInput) const override
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
@@ -1483,10 +1486,10 @@ public:
         return -1;
     }
 
-    bool hasSeparateInputsAndOutputs() const    { return true; }
+    bool hasSeparateInputsAndOutputs() const override    { return true; }
 
     AudioIODevice* createDevice (const String& outputDeviceName,
-                                 const String& inputDeviceName)
+                                 const String& inputDeviceName) override
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 

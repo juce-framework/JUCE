@@ -200,6 +200,7 @@ private:
     void editorResized (bool wasResized);
     void updatePeer();
     void attachConstrainer (ComponentBoundsConstrainer*);
+    void attachResizableCornerComponent();
 
     //==============================================================================
     std::unique_ptr<AudioProcessorEditorListener> resizeListener;
@@ -207,6 +208,7 @@ private:
     ComponentBoundsConstrainer defaultConstrainer;
     ComponentBoundsConstrainer* constrainer = {};
     Component::SafePointer<Component> splashScreen;
+    AffineTransform hostScaleTransform;
 
     JUCE_DECLARE_NON_COPYABLE (AudioProcessorEditor)
 };

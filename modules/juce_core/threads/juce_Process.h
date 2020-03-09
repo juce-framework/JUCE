@@ -133,7 +133,7 @@ public:
     static void JUCE_CALLTYPE setCurrentModuleInstanceHandle (void* newHandle) noexcept;
    #endif
 
-   #if JUCE_MAC || DOXYGEN
+   #if (JUCE_MAC && JUCE_MODULE_AVAILABLE_juce_gui_basics) || DOXYGEN
     //==============================================================================
     /** OSX ONLY - Shows or hides the OSX dock icon for this app. */
     static void setDockIconVisible (bool isVisible);

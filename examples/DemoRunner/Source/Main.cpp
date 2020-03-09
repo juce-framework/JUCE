@@ -24,7 +24,7 @@
   ==============================================================================
 */
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 #include "../../Assets/DemoUtilities.h"
 
 #include "UI/MainComponent.h"
@@ -108,7 +108,7 @@ public:
         mainWindow.reset (new MainAppWindow (getApplicationName()));
     }
 
-    void backButtonPressed() override    { mainWindow->getMainComponent().getSidePanel().showOrHide (false); }
+    bool backButtonPressed() override    { mainWindow->getMainComponent().getSidePanel().showOrHide (false); return true; }
     void shutdown() override             { mainWindow = nullptr; }
 
     //==============================================================================

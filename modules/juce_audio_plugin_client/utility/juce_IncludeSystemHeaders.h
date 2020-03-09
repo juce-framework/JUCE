@@ -31,7 +31,7 @@
  #define STRICT 1
  #include <windows.h>
  #include <float.h>
- #if ! JUCE_MINGW
+ #if JUCE_MSVC
   #pragma warning (disable : 4312 4355)
  #endif
  #ifdef __INTEL_COMPILER

@@ -172,6 +172,8 @@ public:
 
     static bool hasMMX() noexcept;             /**< Returns true if Intel MMX instructions are available. */
     static bool has3DNow() noexcept;           /**< Returns true if AMD 3DNOW instructions are available. */
+    static bool hasFMA3() noexcept;            /**< Returns true if AMD FMA3 instructions are available. */
+    static bool hasFMA4() noexcept;            /**< Returns true if AMD FMA4 instructions are available. */
     static bool hasSSE() noexcept;             /**< Returns true if Intel SSE instructions are available. */
     static bool hasSSE2() noexcept;            /**< Returns true if Intel SSE2 instructions are available. */
     static bool hasSSE3() noexcept;            /**< Returns true if Intel SSE3 instructions are available. */

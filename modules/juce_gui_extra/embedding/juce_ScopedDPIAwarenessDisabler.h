@@ -36,11 +36,13 @@ namespace juce
     when it goes out of scope.
 
     If you create one of these before creating a top-level window, the window
-    will be DPI unaware and bitmap strectched by the OS on a display with >100%
+    will be DPI unaware and bitmap stretched by the OS on a display with >100%
     scaling.
 
     You shouldn't use this unless you really know what you are doing and
     are dealing with native HWNDs.
+
+    @tags{GUI}
 */
 class JUCE_API  ScopedDPIAwarenessDisabler
 {

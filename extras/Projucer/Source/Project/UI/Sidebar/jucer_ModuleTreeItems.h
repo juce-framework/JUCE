@@ -151,52 +151,68 @@ private:
                 props.add (new CppStandardWarningComponent());
 
             group.properties.clear();
+            exporterModulePathDefaultValues.clear();
             exporterModulePathValues.clear();
+            globalPathValues.clear();
 
             for (Project::ExporterIterator exporter (project); exporter.next();)
             {
                 if (exporter->isCLion())
                     continue;
 
-                exporterModulePathValues.add (exporter->getPathForModuleValue (moduleID));
+                exporterModulePathDefaultValues.add (exporter->getPathForModuleValue (moduleID));
+                auto& defaultValue = exporterModulePathDefaultValues.getReference (exporterModulePathDefaultValues.size() - 1);
 
-                auto& value = exporterModulePathValues.getReference (exporterModulePathValues.size() - 1);
-                value.onDefaultChange = [this] { startTimer (50); };
+                exporterModulePathValues.add (defaultValue.getPropertyAsValue());
 
-                auto* pathComponent = new FilePathPropertyComponent (value, "Path for " + exporter->getName().quoted(), true,
-                                                                     exporter->getTargetOSForExporter() == TargetOS::getThisOS(),
-                                                                     "*", project.getProjectFolder());
+                auto pathComponent = std::make_unique<FilePathPropertyComponent> (defaultValue,
+                                                                                  "Path for " + exporter->getName().quoted(),
+                                                                                  true,
+                                                                                  exporter->getTargetOSForExporter() == TargetOS::getThisOS(),
+                                                                                  "*",
+                                                                                  project.getProjectFolder());
 
-                props.add (pathComponent,
+                pathComponent->setEnabled (! modules.shouldUseGlobalPath (moduleID));
+
+                props.add (pathComponent.release(),
                            "A path to the folder that contains the " + moduleID + " module when compiling the "
                            + exporter->getName().quoted() + " target. "
                            "This can be an absolute path, or relative to the jucer project folder, but it "
                            "must be valid on the filesystem of the target machine that will be performing this build. If this "
                            "is empty then the global path will be used.");
 
-                pathComponent->setEnabled (! modules.shouldUseGlobalPath (moduleID));
+                globalPathValues.add (getAppSettings().getStoredPath (isJUCEModule (moduleID) ? Ids::defaultJuceModulePath : Ids::defaultUserModulePath,
+                                                                      exporter->getTargetOSForExporter()).getPropertyAsValue());
             }
 
-            globalPathValue.removeListener (this);
-            globalPathValue.referTo (modules.getShouldUseGlobalPathValue (moduleID));
-            globalPathValue.addListener (this);
+            for (int i = 0; i < exporterModulePathDefaultValues.size(); ++i)
+            {
+                exporterModulePathDefaultValues.getReference (i).onDefaultChange = [this] { startTimer (50); };
+
+                exporterModulePathValues.getReference (i).addListener (this);
+                globalPathValues.getReference (i).addListener (this);
+            }
+
+            useGlobalPathValue.removeListener (this);
+            useGlobalPathValue.referTo (modules.shouldUseGlobalPathValue (moduleID));
+            useGlobalPathValue.addListener (this);
 
             auto menuItemString = (TargetOS::getThisOS() == TargetOS::osx ? "\"Projucer->Global Paths...\""
                                                                           : "\"File->Global Paths...\"");
 
-            props.add (new BooleanPropertyComponent (globalPathValue,
+            props.add (new BooleanPropertyComponent (useGlobalPathValue,
                                                      "Use global path", "Use global path for this module"),
                        String ("If this is enabled, then the locally-stored global path (set in the ") + menuItemString + " menu item) "
                        "will be used as the path to this module. "
                        "This means that if this Projucer project is opened on another machine it will use that machine's global path as the path to this module.");
 
-            props.add (new BooleanPropertyComponent (modules.shouldCopyModuleFilesLocally (moduleID),
+            props.add (new BooleanPropertyComponent (modules.shouldCopyModuleFilesLocallyValue (moduleID),
                                                      "Create local copy", "Copy the module into the project folder"),
                        "If this is enabled, then a local copy of the entire module will be made inside your project (in the auto-generated JuceLibraryFiles folder), "
                        "so that your project will be self-contained, and won't need to contain any references to files in other folders. "
                        "This also means that you can check the module into your source-control system to make sure it is always in sync with your own code.");
 
-            props.add (new BooleanPropertyComponent (modules.shouldShowAllModuleFilesInProject (moduleID),
+            props.add (new BooleanPropertyComponent (modules.shouldShowAllModuleFilesInProjectValue (moduleID),
                                                      "Add source to project", "Make module files browsable in projects"),
                        "If this is enabled, then the entire source tree from this module will be shown inside your project, "
                        "making it easy to browse/edit the module's classes. If disabled, then only the minimum number of files "
@@ -227,12 +243,33 @@ private:
         String getModuleID() const noexcept    { return moduleID; }
 
     private:
-        void valueChanged (Value&) override    { startTimer (50); }
-        void timerCallback() override          { stopTimer(); refresh(); }
+        void valueChanged (Value& v) override
+        {
+            auto isExporterPathValue = [&]
+            {
+                for (auto& exporterValue : exporterModulePathValues)
+                    if (exporterValue.refersToSameSourceAs (v))
+                        return true;
+
+                return false;
+            }();
+
+            if (isExporterPathValue)
+                project.rescanExporterPathModules();
+
+            startTimer (50);
+        }
+
+        void timerCallback() override
+        {
+            stopTimer();
+            refresh();
+        }
 
         //==============================================================================
-        Array<ValueWithDefault> exporterModulePathValues;
-        Value globalPathValue;
+        Array<ValueWithDefault> exporterModulePathDefaultValues;
+        Array<Value> exporterModulePathValues, globalPathValues;
+        Value useGlobalPathValue;
 
         OwnedArray <Project::ConfigFlag> configFlags;
 
@@ -444,7 +481,7 @@ class EnabledModulesItem   : public ProjectTreeItemBase,
 public:
     EnabledModulesItem (Project& p)
         : project (p),
-          moduleListTree (p.getEnabledModules().state)
+          moduleListTree (project.getEnabledModules().getState())
     {
         moduleListTree.addListener (this);
 
@@ -587,7 +624,7 @@ public:
         }
         else if (resultCode > 0)
         {
-            std::vector<ModuleIDAndFolder> list;
+            std::vector<AvailableModuleList::ModuleIDAndFolder> list;
             int offset = -1;
 
             if (resultCode < 200)

@@ -37,7 +37,7 @@ protected:
     public:
         MakeBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
             : BuildConfiguration (p, settings, e),
-              architectureTypeValue (config, Ids::linuxArchitecture, getUndoManager(), "-march=native")
+              architectureTypeValue (config, Ids::linuxArchitecture, getUndoManager(), String())
         {
             linkTimeOptimisationValue.setDefault (false);
             optimisationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
@@ -718,7 +718,7 @@ private:
                 }
                 else
                 {
-                    if (! getProject().getProjectType().isAudioPlugin())
+                    if (! getProject().isAudioPluginProject())
                         out << "all : " << target->getBuildProduct() << newLine << newLine;
 
                     target->writeTargetLine (out, packages);
@@ -903,7 +903,7 @@ private:
         {
             Array<std::pair<File, String>> targetFiles;
 
-            auto targetType = (p.getProjectType().isAudioPlugin() ? target->type : MakefileTarget::SharedCodeTarget);
+            auto targetType = (p.isAudioPluginProject() ? target->type : MakefileTarget::SharedCodeTarget);
 
             for (auto& f : files)
                 if (p.getTargetTypeFromFilePath (f.first, true) == targetType)
@@ -955,7 +955,7 @@ private:
 
         phonyTargetLine << ".PHONY: clean all strip";
 
-        if (! getProject().getProjectType().isAudioPlugin())
+        if (! getProject().isAudioPluginProject())
             return phonyTargetLine.toString();
 
         for (auto target : targets)

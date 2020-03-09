@@ -24,6 +24,23 @@
   ==============================================================================
 */
 
+//==============================================================================
+#if defined (MAC_OS_X_VERSION_10_8) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8) \
+  && USE_COREGRAPHICS_RENDERING && JUCE_COREGRAPHICS_DRAW_ASYNC
+static const juce::Identifier disableAsyncLayerBackedViewIdentifier { "disableAsyncLayerBackedView" };
+
+void setComponentAsyncLayerBackedViewDisabled (juce::Component& comp, bool shouldDisableAsyncLayerBackedView)
+{
+    comp.getProperties().set (disableAsyncLayerBackedViewIdentifier, shouldDisableAsyncLayerBackedView);
+}
+
+bool getComponentAsyncLayerBackedViewDisabled (juce::Component& comp)
+{
+    return comp.getProperties()[disableAsyncLayerBackedViewIdentifier];
+}
+#endif
+
+//==============================================================================
 namespace juce
 {
     typedef void (*AppFocusChangeCallback)();
@@ -85,6 +102,15 @@ public:
 
         [view setPostsFrameChangedNotifications: YES];
 
+       #if defined (MAC_OS_X_VERSION_10_8) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8) \
+        && USE_COREGRAPHICS_RENDERING && JUCE_COREGRAPHICS_DRAW_ASYNC
+        if (! getComponentAsyncLayerBackedViewDisabled (component))
+        {
+            [view setWantsLayer: YES];
+            [[view layer] setDrawsAsynchronously: YES];
+        }
+       #endif
+
         if (isSharedWindow)
         {
             window = [viewToAttachTo window];
@@ -106,13 +132,11 @@ public:
 
             [window setOpaque: component.isOpaque()];
 
-          #if defined (MAC_OS_X_VERSION_10_14) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_14)
             if (! [window isOpaque])
                 [window setBackgroundColor: [NSColor clearColor]];
 
-            #if defined (MAC_OS_X_VERSION_10_9) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9)
-             [view setAppearance: [NSAppearance appearanceNamed: NSAppearanceNameAqua]];
-            #endif
+           #if defined (MAC_OS_X_VERSION_10_9) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9)
+            [view setAppearance: [NSAppearance appearanceNamed: NSAppearanceNameAqua]];
            #endif
 
             [window setHasShadow: ((windowStyleFlags & windowHasDropShadow) != 0)];
@@ -923,7 +947,7 @@ public:
 
         // When windows are being resized, artificially throttling high-frequency repaints helps
         // to stop the event queue getting clogged, and keeps everything working smoothly.
-        // For some reason Logic also needs this throttling to recored parameter events correctly.
+        // For some reason Logic also needs this throttling to record parameter events correctly.
         if (msSinceLastRepaint < minimumRepaintInterval && shouldThrottleRepaint())
         {
             startTimer (static_cast<int> (minimumRepaintInterval - msSinceLastRepaint));
@@ -973,7 +997,7 @@ public:
     }
 
     //==============================================================================
-    bool sendModalInputAttemptIfBlocked()
+    bool isBlockedByModalComponent()
     {
         if (auto* modal = Component::getCurrentlyModalComponent())
         {
@@ -981,7 +1005,6 @@ public:
                  && (! getComponent().isParentOf (modal))
                  && getComponent().isCurrentlyBlockedByAnotherModalComponent())
             {
-                modal->inputAttemptWhenModal();
                 return true;
             }
         }
@@ -989,14 +1012,21 @@ public:
         return false;
     }
 
+    void sendModalInputAttemptIfBlocked()
+    {
+        if (isBlockedByModalComponent())
+            if (auto* modal = Component::getCurrentlyModalComponent())
+                modal->inputAttemptWhenModal();
+    }
+
     bool canBecomeKeyWindow()
     {
-        return (getStyleFlags() & juce::ComponentPeer::windowIgnoresKeyPresses) == 0;
+        return component.isVisible() && (getStyleFlags() & juce::ComponentPeer::windowIgnoresKeyPresses) == 0;
     }
 
     bool canBecomeMainWindow()
     {
-        return dynamic_cast<ResizableWindow*> (&component) != nullptr;
+        return component.isVisible() && dynamic_cast<ResizableWindow*> (&component) != nullptr;
     }
 
     bool worksWhenModal() const
@@ -1044,11 +1074,13 @@ public:
 
     void liveResizingStart()
     {
-        if (constrainer != nullptr)
-        {
-            constrainer->resizeStart();
-            isFirstLiveResize = true;
-        }
+        if (constrainer == nullptr)
+            return;
+
+        constrainer->resizeStart();
+        isFirstLiveResize = true;
+
+        setFullScreenSizeConstraints (*constrainer);
     }
 
     void liveResizingEnd()
@@ -1057,37 +1089,34 @@ public:
             constrainer->resizeEnd();
     }
 
-    NSRect constrainRect (NSRect r)
+    NSRect constrainRect (const NSRect r)
     {
-        if (constrainer != nullptr && ! isKioskMode())
+        if (constrainer == nullptr || isKioskMode())
+            return r;
+
+        const auto scale = getComponent().getDesktopScaleFactor();
+
+        auto pos            = ScalingHelpers::unscaledScreenPosToScaled (scale, convertToRectInt (flippedScreenRect (r)));
+        const auto original = ScalingHelpers::unscaledScreenPosToScaled (scale, convertToRectInt (flippedScreenRect ([window frame])));
+
+        const auto screenBounds = Desktop::getInstance().getDisplays().getTotalBounds (true);
+
+        const bool inLiveResize = [window inLiveResize];
+
+        if (! inLiveResize || isFirstLiveResize)
         {
-            auto scale = getComponent().getDesktopScaleFactor();
+            isFirstLiveResize = false;
 
-            auto pos      = ScalingHelpers::unscaledScreenPosToScaled (scale, convertToRectInt (flippedScreenRect (r)));
-            auto original = ScalingHelpers::unscaledScreenPosToScaled (scale, convertToRectInt (flippedScreenRect ([window frame])));
-
-            auto screenBounds = Desktop::getInstance().getDisplays().getTotalBounds (true);
-
-            const bool inLiveResize = [window inLiveResize];
-
-            if (! inLiveResize || isFirstLiveResize)
-            {
-                isFirstLiveResize = false;
-
-                isStretchingTop    = (pos.getY() != original.getY() && pos.getBottom() == original.getBottom());
-                isStretchingLeft   = (pos.getX() != original.getX() && pos.getRight()  == original.getRight());
-                isStretchingBottom = (pos.getY() == original.getY() && pos.getBottom() != original.getBottom());
-                isStretchingRight  = (pos.getX() == original.getX() && pos.getRight()  != original.getRight());
-            }
-
-            constrainer->checkBounds (pos, original, screenBounds,
-                                      isStretchingTop, isStretchingLeft, isStretchingBottom, isStretchingRight);
-
-            pos = ScalingHelpers::scaledScreenPosToUnscaled (scale, pos);
-            r = flippedScreenRect (makeNSRect (pos));
+            isStretchingTop    = (pos.getY() != original.getY() && pos.getBottom() == original.getBottom());
+            isStretchingLeft   = (pos.getX() != original.getX() && pos.getRight()  == original.getRight());
+            isStretchingBottom = (pos.getY() == original.getY() && pos.getBottom() != original.getBottom());
+            isStretchingRight  = (pos.getX() == original.getX() && pos.getRight()  != original.getRight());
         }
 
-        return r;
+        constrainer->checkBounds (pos, original, screenBounds,
+                                  isStretchingTop, isStretchingLeft, isStretchingBottom, isStretchingRight);
+
+        return flippedScreenRect (makeNSRect (ScalingHelpers::scaledScreenPosToUnscaled (scale, pos)));
     }
 
     static void showArrowCursorIfNeeded()
@@ -1533,6 +1562,13 @@ private:
         return true;
     }
 
+    void setFullScreenSizeConstraints (const ComponentBoundsConstrainer& c)
+    {
+        const auto minSize = NSMakeSize (static_cast<float> (c.getMinimumWidth()),
+                                         0.0f);
+        [window setMinFullScreenContentSize: minSize];
+    }
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponentPeer)
 };
 
@@ -1958,7 +1994,7 @@ private:
 
         return owner != nullptr
                 && owner->canBecomeKeyWindow()
-                && ! owner->sendModalInputAttemptIfBlocked();
+                && ! owner->isBlockedByModalComponent();
     }
 
     static BOOL canBecomeMainWindow (id self, SEL)
@@ -1967,7 +2003,7 @@ private:
 
         return owner != nullptr
                 && owner->canBecomeMainWindow()
-                && ! owner->sendModalInputAttemptIfBlocked();
+                && ! owner->isBlockedByModalComponent();
     }
 
     static void becomeKeyWindow (id self, SEL)
@@ -1975,7 +2011,17 @@ private:
         sendSuperclassMessage (self, @selector (becomeKeyWindow));
 
         if (auto* owner = getOwner (self))
-            owner->becomeKeyWindow();
+        {
+            if (owner->canBecomeKeyWindow())
+            {
+                owner->becomeKeyWindow();
+                return;
+            }
+
+            // this fixes a bug causing hidden windows to sometimes become visible when the app regains focus
+            if (! owner->getComponent().isVisible())
+                [(NSWindow*) self orderOut: nil];
+        }
     }
 
     static BOOL windowShouldClose (id self, SEL, id /*window*/)
@@ -2152,7 +2198,8 @@ void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, boo
 
             [NSApp setPresentationOptions: (allowMenusAndBars ? (NSApplicationPresentationAutoHideDock | NSApplicationPresentationAutoHideMenuBar)
                                                               : (NSApplicationPresentationHideDock | NSApplicationPresentationHideMenuBar))];
-            kioskComp->setBounds (Desktop::getInstance().getDisplays().getMainDisplay().totalArea);
+
+            kioskComp->setBounds (getDisplays().findDisplayForRect (kioskComp->getScreenBounds()).totalArea);
             peer->becomeKeyWindow();
         }
         else

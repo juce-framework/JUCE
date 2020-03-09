@@ -510,7 +510,7 @@ void ProjucerApplication::createColourSchemeItems (PopupMenu& menu)
 
     menu.addSubMenu ("Colour Scheme", colourSchemeMenu);
 
-    //==========================================================================
+    //==============================================================================
     PopupMenu editorColourSchemeMenu;
 
     auto& appearanceSettings = getAppSettings().appearance;
@@ -625,7 +625,7 @@ void ProjucerApplication::createExamplesPopupMenu (PopupMenu& menu) noexcept
     }
 }
 
-//==========================================================================
+//==============================================================================
 static File getJUCEExamplesDirectoryPathFromGlobal()
 {
     auto globalPath = File::createFileWithoutCheckingPath (getAppSettings().getStoredPath (Ids::jucePath, TargetOS::getThisOS()).get().toString()
@@ -722,7 +722,7 @@ void ProjucerApplication::findAndLaunchExample (int selectedIndex)
     Analytics::getInstance()->logEvent ("Example Opened", data, ProjucerAnalyticsEvent::exampleEvent);
 }
 
-//==========================================================================
+//==============================================================================
 static String getPlatformSpecificFileExtension()
 {
    #if JUCE_MAC
@@ -940,7 +940,7 @@ void ProjucerApplication::launchDemoRunner()
     }
 }
 
-//==========================================================================
+//==============================================================================
 void ProjucerApplication::handleMainMenuCommand (int menuItemID)
 {
     if (menuItemID >= recentProjectsBaseID && menuItemID < (recentProjectsBaseID + 100))
@@ -1163,9 +1163,11 @@ bool ProjucerApplication::perform (const InvocationInfo& info)
 void ProjucerApplication::createNewProject()
 {
     auto* mw = mainWindowList.getOrCreateEmptyWindow();
+    jassert (mw != nullptr);
+
     mw->showStartPage();
 
-    mainWindowList.avoidSuperimposedWindows (mw);
+    mainWindowList.checkWindowBounds (*mw);
 }
 
 void ProjucerApplication::createNewProjectFromClipboard()

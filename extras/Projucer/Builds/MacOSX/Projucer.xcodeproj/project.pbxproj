@@ -9,6 +9,10 @@
 			isa = PBXBuildFile;
 			fileRef = 09DE066936CF037E9709ADB1;
 		};
+		8B4A593B3869815BBAC3EF93 = {
+			isa = PBXBuildFile;
+			fileRef = 7B3F7ECF6DBF8C8EE5C2CB86;
+		};
 		A578EAD4BB55680E8097BE0F = {
 			isa = PBXBuildFile;
 			fileRef = 80D62B907248523E6943298B;
@@ -16,10 +20,6 @@
 		C1B9334AE849F93FB3C56B34 = {
 			isa = PBXBuildFile;
 			fileRef = 5A75806B34E4EA6598A6024A;
-		};
-		8B4A593B3869815BBAC3EF93 = {
-			isa = PBXBuildFile;
-			fileRef = 7B3F7ECF6DBF8C8EE5C2CB86;
 		};
 		A14C2C2725DA3CA7995D2815 = {
 			isa = PBXBuildFile;
@@ -256,6 +256,10 @@
 		25EF9B3FECB4C9F0F522DCAA = {
 			isa = PBXBuildFile;
 			fileRef = 486E8D02DAD2A0BF54A901C0;
+		};
+		44AD0D81A65C5EAE3BE588FD = {
+			isa = PBXBuildFile;
+			fileRef = FF3A6A384D536E1AEF47CD54;
 		};
 		638C7247B6DBA67EFE46E124 = {
 			isa = PBXBuildFile;
@@ -2092,6 +2096,13 @@
 			path = "../../Source/Wizards/jucer_TemplateThumbnailsComponent.h";
 			sourceTree = "SOURCE_ROOT";
 		};
+		C16F9F479A3A5F6DAD7647A2 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = "jucer_VersionInfo.h";
+			path = "../../Source/Utility/Helpers/jucer_VersionInfo.h";
+			sourceTree = "SOURCE_ROOT";
+		};
 		C187718F7B9EBA88584B43F3 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.cpp;
@@ -2582,6 +2593,13 @@
 			path = "../../Source/Utility/UI/jucer_ProjucerLookAndFeel.h";
 			sourceTree = "SOURCE_ROOT";
 		};
+		FF3A6A384D536E1AEF47CD54 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = "jucer_VersionInfo.cpp";
+			path = "../../Source/Utility/Helpers/jucer_VersionInfo.cpp";
+			sourceTree = "SOURCE_ROOT";
+		};
 		FF68231DE2B395461009116C = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -3011,6 +3029,8 @@
 				A6C4AE13FB409DE414094CFA,
 				6FD8DBC0FF42C87D8BEE2452,
 				00515BA4EC5A7D4DC078ED37,
+				FF3A6A384D536E1AEF47CD54,
+				C16F9F479A3A5F6DAD7647A2,
 			);
 			name = Helpers;
 			sourceTree = "<group>";
@@ -3152,9 +3172,9 @@
 		0FFEF043CA89142B18C79ABE = {
 			isa = PBXGroup;
 			children = (
+				7B3F7ECF6DBF8C8EE5C2CB86,
 				80D62B907248523E6943298B,
 				5A75806B34E4EA6598A6024A,
-				7B3F7ECF6DBF8C8EE5C2CB86,
 				210CD22F25F2C22F9CEEB025,
 				D00F311BFC3C2625C457CB9B,
 				D1F9B0E9F5D54FE48BEB46EA,
@@ -3198,6 +3218,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_LINK_OBJC_RUNTIME = NO;
+				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
 				COPY_PHASE_STRIP = NO;
@@ -3207,8 +3228,8 @@
 					"_DEBUG=1",
 					"DEBUG=1",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=5.4.3",
-					"JUCE_APP_VERSION_HEX=0x50403",
+					"JUCE_APP_VERSION=5.4.7",
+					"JUCE_APP_VERSION_HEX=0x50407",
 					"JucePlugin_Build_VST=0",
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",
@@ -3241,6 +3262,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_LINK_OBJC_RUNTIME = NO;
+				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
 				DEAD_CODE_STRIPPING = YES;
@@ -3250,8 +3272,8 @@
 					"_NDEBUG=1",
 					"NDEBUG=1",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=5.4.3",
-					"JUCE_APP_VERSION_HEX=0x50403",
+					"JUCE_APP_VERSION=5.4.7",
+					"JUCE_APP_VERSION_HEX=0x50407",
 					"JucePlugin_Build_VST=0",
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",
@@ -3301,6 +3323,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "";
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -3320,6 +3343,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "Projucer";
+				SDKROOT = macosx;
 				WARNING_CFLAGS = "-Wreorder";
 				ZERO_LINK = NO;
 			};
@@ -3347,6 +3371,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "";
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = c11;
@@ -3364,6 +3389,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PRODUCT_NAME = "Projucer";
+				SDKROOT = macosx;
 				WARNING_CFLAGS = "-Wreorder";
 				ZERO_LINK = NO;
 			};
@@ -3449,6 +3475,7 @@
 				8BE478303CDF061B72F219E2,
 				BF913199032B4CE970E82AA3,
 				25EF9B3FECB4C9F0F522DCAA,
+				44AD0D81A65C5EAE3BE588FD,
 				638C7247B6DBA67EFE46E124,
 				D0E26EB54B0087C8BE3D541E,
 				468548FB21D264DC12321327,
@@ -3472,9 +3499,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B4A593B3869815BBAC3EF93,
 				A578EAD4BB55680E8097BE0F,
 				C1B9334AE849F93FB3C56B34,
-				8B4A593B3869815BBAC3EF93,
 				A14C2C2725DA3CA7995D2815,
 				1E76E36772355E2A43CF4961,
 				241F29FCBB7A17BB44A0B10C,

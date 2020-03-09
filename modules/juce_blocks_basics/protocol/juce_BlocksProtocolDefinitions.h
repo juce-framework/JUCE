@@ -185,7 +185,7 @@ struct BlockSerialNumber : public BlockStringData<16>
             if (c == 0)
                 return false;
 
-        return isAnyControlBlock() || isPadBlock() || isSeaboardBlock();
+        return isAnyControlBlock() || isPadBlock() || isSeaboardBlock() || isLumiKeysBlock();
     }
 
     bool isPadBlock() const noexcept            { return hasPrefix ("LPB") || hasPrefix ("LPM"); }
@@ -194,6 +194,7 @@ struct BlockSerialNumber : public BlockStringData<16>
     bool isDevCtrlBlock() const noexcept        { return hasPrefix ("DCB"); }
     bool isTouchBlock() const noexcept          { return hasPrefix ("TCB"); }
     bool isSeaboardBlock() const noexcept       { return hasPrefix ("SBB"); }
+    bool isLumiKeysBlock() const noexcept       { return hasPrefix ("LKB"); }
 
     bool isAnyControlBlock() const noexcept     { return isLiveBlock() || isLoopBlock() || isDevCtrlBlock() || isTouchBlock(); }
 
@@ -303,12 +304,17 @@ enum ConfigItemId
     chord               = 24,
     arpPattern          = 25,
     tempo               = 26,
+    key                 = 27,
+    autoTransposeToKey  = 28,
     // Tracking
     xTrackingMode       = 30,
     yTrackingMode       = 31,
     zTrackingMode       = 32,
     // Graphics
     gammaCorrection     = 33,
+    globalKeyColour     = 34,
+    rootKeyColour       = 35,
+    brightness          = 36,
     // User
     user0               = 64,
     user1               = 65,
@@ -348,7 +354,7 @@ static constexpr uint8 numberOfUserConfigs = 32;
 static constexpr uint8 maxConfigIndex = uint8 (ConfigItemId::user0) + numberOfUserConfigs;
 
 static constexpr uint8 configUserConfigNameLength = 32;
-static constexpr uint8 configMaxOptions = 8;
+static constexpr uint8 configMaxOptions = 16;
 static constexpr uint8 configOptionNameLength = 16;
 
 //==============================================================================
@@ -591,6 +597,14 @@ static constexpr const char* ledProgramLittleFootFunctions[] =
     "setButtonMinMaxDefault/viiii",
     "setButtonColours/viii",
     "setButtonTriState/vii",
+    "padControllerInitDefault/vb",
+    "padControllerReset/v",
+    "padControllerRegenDefault/v",
+    "padControllerRepaint/v",
+    "padControllerDrawPad/vi",
+    "setUseDefaultKeyHandler/vb",
+    "setUseDefaultKeyHandler/vbb",
+
     nullptr
 };
 

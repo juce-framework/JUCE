@@ -56,7 +56,13 @@ AudioParameterInt::AudioParameterInt (const String& idToUse, const String& nameT
         intFromStringFunction = [] (const String& text) { return text.getIntValue(); };
 }
 
-AudioParameterInt::~AudioParameterInt() {}
+AudioParameterInt::~AudioParameterInt()
+{
+    #if __cpp_lib_atomic_is_always_lock_free
+     static_assert (std::atomic<float>::is_always_lock_free,
+                    "AudioParameterInt requires a lock-free std::atomic<float>");
+    #endif
+}
 
 float AudioParameterInt::getValue() const                                { return convertTo0to1 (value); }
 void AudioParameterInt::setValue (float newValue)                        { value = convertFrom0to1 (newValue); valueChanged (get()); }

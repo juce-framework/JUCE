@@ -49,6 +49,7 @@ MemoryInputStream::MemoryInputStream (MemoryBlock&& source)
     : internalCopy (std::move (source))
 {
     data = internalCopy.getData();
+    dataSize = internalCopy.getSize();
 }
 
 MemoryInputStream::~MemoryInputStream()

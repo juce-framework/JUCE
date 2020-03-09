@@ -176,18 +176,18 @@ public:
                        std::make_unique<AudioParameterInt> ("b", "Parameter B", 0, 5, 2) })
         @endcode
 
-        To add parameters programatically you can use the iterator-based ParameterLayout
-        constructor:
+        To add parameters programatically you can call `add` repeatedly on a
+        ParameterLayout instance:
 
         @code
         AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
         {
-            std::vector<std::unique_ptr<AudioParameterInt>> params;
+            AudioProcessorValueTreeState::ParameterLayout layout;
 
             for (int i = 1; i < 9; ++i)
-                params.push_back (std::make_unique<AudioParameterInt> (String (i), String (i), 0, i, 0));
+                layout.add (std::make_unique<AudioParameterInt> (String (i), String (i), 0, i, 0));
 
-            return { params.begin(), params.end() };
+            return layout;
         }
 
         YourAudioProcessor()
@@ -285,7 +285,7 @@ public:
         Note that calling this method from within AudioProcessorValueTreeState::Listener::parameterChanged()
         is not guaranteed to return an up-to-date value for the parameter.
     */
-    float* getRawParameterValue (StringRef parameterID) const noexcept;
+    std::atomic<float>* getRawParameterValue (StringRef parameterID) const noexcept;
 
     //==============================================================================
     /** A listener class that can be attached to an AudioProcessorValueTreeState.
@@ -362,6 +362,10 @@ public:
     UndoManager* const undoManager;
 
     //==============================================================================
+private:
+    class ParameterAdapter;
+
+public:
     /** A parameter class that maintains backwards compatibility with deprecated
         AudioProcessorValueTreeState functionality.
 
@@ -416,9 +420,13 @@ public:
     private:
         void valueChanged (float) override;
 
+        std::function<void()> onValueChanged;
+
         const float unsnappedDefault;
         const bool metaParameter, automatable, discrete, boolean;
-        float lastValue = 0.0f;
+        std::atomic<float> lastValue { -1.0f };
+
+        friend class AudioProcessorValueTreeState::ParameterAdapter;
     };
 
     //==============================================================================
@@ -523,8 +531,6 @@ private:
                                                                             bool, bool, bool, AudioProcessorParameter::Category, bool));
 
     //==============================================================================
-    class ParameterAdapter;
-
    #if JUCE_UNIT_TESTS
     friend struct ParameterAdapterTests;
    #endif

@@ -24,6 +24,7 @@
   ==============================================================================
 */
 
+
 /*******************************************************************************
  The block below describes the properties of this module, and is read by
  the Projucer to automatically generate project code that uses it.
@@ -33,15 +34,15 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_audio_plugin_client
-  vendor:           juce
-  version:          5.4.3
-  name:             JUCE audio plugin wrapper classes
-  description:      Classes for building VST, VST3, AudioUnit, AAX and RTAS plugins.
-  website:          http://www.juce.com/juce
-  license:          GPL/Commercial
+  ID:                 juce_audio_plugin_client
+  vendor:             juce
+  version:            5.4.7
+  name:               JUCE audio plugin wrapper classes
+  description:        Classes for building VST, VST3, AudioUnit, AAX and RTAS plugins.
+  website:            http://www.juce.com/juce
+  license:            GPL/Commercial
 
-  dependencies:     juce_gui_basics, juce_audio_basics, juce_audio_processors
+  dependencies:       juce_gui_basics, juce_audio_basics, juce_audio_processors
 
  END_JUCE_MODULE_DECLARATION
 
@@ -92,14 +93,28 @@
 /** Config: JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
 
     Enable this if you want JUCE to use parameter ids which are compatible
-    with Studio One. Studio One ignores any parameter ids which are negative.
+    with Studio One, as Studio One ignores any parameter ids which are negative.
     Enabling this option will make JUCE generate only positive parameter ids.
     Note that if you have already released a plug-in prior to JUCE 4.3.0 then
-    enabling this will change your parameter ids making your plug-in
-    incompatible to old automation data.
+    enabling this will change your parameter ids, making your plug-in
+    incompatible with old automation data.
 */
 #ifndef JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
  #define JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS 1
+#endif
+
+/** Config: JUCE_AU_WRAPPERS_SAVE_PROGRAM_STATES
+
+    Enable this if you want to receive get/setProgramStateInformation calls,
+    instead of get/setStateInformation calls, from the AU and AUv3 plug-in
+    wrappers. In JUCE version 5.4.5 and earlier this was the default behaviour,
+    so if you have modified the default implementations of get/setProgramStateInformation
+    (where the default implementations simply call through to get/setStateInformation)
+    then you may need to enable this configuration option to maintain backwards
+    compatibility with previously saved state.
+*/
+#ifndef JUCE_AU_WRAPPERS_SAVE_PROGRAM_STATES
+ #define JUCE_AU_WRAPPERS_SAVE_PROGRAM_STATES 0
 #endif
 
 /** Config: JUCE_STANDALONE_FILTER_WINDOW_USE_KIOSK_MODE

@@ -130,7 +130,7 @@ public:
     bool matches (const OSCAddress& address) const noexcept;
 
     /** Checks whether the OSCAddressPattern contains any of the allowed OSC
-        address patttern wildcards: ?, *, [], {}
+        address pattern wildcards: ?, *, [], {}
 
         @returns true if the OSCAddressPattern contains OSC wildcards, false otherwise.
     */

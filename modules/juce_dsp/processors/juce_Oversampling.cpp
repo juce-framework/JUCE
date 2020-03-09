@@ -38,7 +38,7 @@ struct Oversampling<SampleType>::OversamplingStage
     OversamplingStage (size_t numChans, size_t newFactor)  : numChannels (numChans), factor (newFactor) {}
     virtual ~OversamplingStage() {}
 
-    //===============================================================================
+    //==============================================================================
     virtual SampleType getLatencyInSamples() = 0;
 
     virtual void initProcessing (size_t maximumNumberOfSamplesBeforeOversampling)
@@ -53,20 +53,20 @@ struct Oversampling<SampleType>::OversamplingStage
         buffer.clear();
     }
 
-    dsp::AudioBlock<SampleType> getProcessedSamples (size_t numSamples)
+    AudioBlock<SampleType> getProcessedSamples (size_t numSamples)
     {
-        return dsp::AudioBlock<SampleType> (buffer).getSubBlock (0, numSamples);
+        return AudioBlock<SampleType> (buffer).getSubBlock (0, numSamples);
     }
 
-    virtual void processSamplesUp (dsp::AudioBlock<SampleType>&) = 0;
-    virtual void processSamplesDown (dsp::AudioBlock<SampleType>&) = 0;
+    virtual void processSamplesUp   (const AudioBlock<const SampleType>&) = 0;
+    virtual void processSamplesDown (AudioBlock<SampleType>&) = 0;
 
     AudioBuffer<SampleType> buffer;
     size_t numChannels, factor;
 };
 
 
-//===============================================================================
+//==============================================================================
 /** Dummy oversampling stage class which simply copies and pastes the input
     signal, which could be equivalent to a "one time" oversampling processing.
 */
@@ -77,13 +77,13 @@ struct OversamplingDummy   : public Oversampling<SampleType>::OversamplingStage
 
     OversamplingDummy (size_t numChans) : ParentType (numChans, 1) {}
 
-    //===============================================================================
+    //==============================================================================
     SampleType getLatencyInSamples() override
     {
         return 0;
     }
 
-    void processSamplesUp (dsp::AudioBlock<SampleType>& inputBlock) override
+    void processSamplesUp (const AudioBlock<const SampleType>& inputBlock) override
     {
         jassert (inputBlock.getNumChannels() <= static_cast<size_t> (ParentType::buffer.getNumChannels()));
         jassert (inputBlock.getNumSamples() * ParentType::factor <= static_cast<size_t> (ParentType::buffer.getNumSamples()));
@@ -93,18 +93,18 @@ struct OversamplingDummy   : public Oversampling<SampleType>::OversamplingStage
                 inputBlock.getChannelPointer (channel), static_cast<int> (inputBlock.getNumSamples()));
     }
 
-    void processSamplesDown (dsp::AudioBlock<SampleType>& outputBlock) override
+    void processSamplesDown (AudioBlock<SampleType>& outputBlock) override
     {
         jassert (outputBlock.getNumChannels() <= static_cast<size_t> (ParentType::buffer.getNumChannels()));
         jassert (outputBlock.getNumSamples() * ParentType::factor <= static_cast<size_t> (ParentType::buffer.getNumSamples()));
 
-        outputBlock.copy (ParentType::getProcessedSamples (outputBlock.getNumSamples()));
+        outputBlock.copyFrom (ParentType::getProcessedSamples (outputBlock.getNumSamples()));
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OversamplingDummy)
 };
 
-//===============================================================================
+//==============================================================================
 /** Oversampling stage class performing 2 times oversampling using the Filter
     Design FIR Equiripple method. The resulting filter is linear phase,
     symmetric, and has every two samples but the middle one equal to zero,
@@ -122,8 +122,8 @@ struct Oversampling2TimesEquirippleFIR  : public Oversampling<SampleType>::Overs
                                      SampleType stopbandAmplitudedBDown)
         : ParentType (numChans, 2)
     {
-        coefficientsUp   = *dsp::FilterDesign<SampleType>::designFIRLowpassHalfBandEquirippleMethod (normalisedTransitionWidthUp,   stopbandAmplitudedBUp);
-        coefficientsDown = *dsp::FilterDesign<SampleType>::designFIRLowpassHalfBandEquirippleMethod (normalisedTransitionWidthDown, stopbandAmplitudedBDown);
+        coefficientsUp   = *FilterDesign<SampleType>::designFIRLowpassHalfBandEquirippleMethod (normalisedTransitionWidthUp,   stopbandAmplitudedBUp);
+        coefficientsDown = *FilterDesign<SampleType>::designFIRLowpassHalfBandEquirippleMethod (normalisedTransitionWidthDown, stopbandAmplitudedBDown);
 
         auto N = coefficientsUp.getFilterOrder() + 1;
         stateUp.setSize (static_cast<int> (this->numChannels), static_cast<int> (N));
@@ -138,7 +138,7 @@ struct Oversampling2TimesEquirippleFIR  : public Oversampling<SampleType>::Overs
         position.resize (static_cast<int> (this->numChannels));
     }
 
-    //===============================================================================
+    //==============================================================================
     SampleType getLatencyInSamples() override
     {
         return static_cast<SampleType> (coefficientsUp.getFilterOrder() + coefficientsDown.getFilterOrder()) * 0.5f;
@@ -155,7 +155,7 @@ struct Oversampling2TimesEquirippleFIR  : public Oversampling<SampleType>::Overs
         position.fill (0);
     }
 
-    void processSamplesUp (dsp::AudioBlock<SampleType>& inputBlock) override
+    void processSamplesUp (const AudioBlock<const SampleType>& inputBlock) override
     {
         jassert (inputBlock.getNumChannels() <= static_cast<size_t> (ParentType::buffer.getNumChannels()));
         jassert (inputBlock.getNumSamples() * ParentType::factor <= static_cast<size_t> (ParentType::buffer.getNumSamples()));
@@ -195,7 +195,7 @@ struct Oversampling2TimesEquirippleFIR  : public Oversampling<SampleType>::Overs
         }
     }
 
-    void processSamplesDown (dsp::AudioBlock<SampleType>& outputBlock) override
+    void processSamplesDown (AudioBlock<SampleType>& outputBlock) override
     {
         jassert (outputBlock.getNumChannels() <= static_cast<size_t> (ParentType::buffer.getNumChannels()));
         jassert (outputBlock.getNumSamples() * ParentType::factor <= static_cast<size_t> (ParentType::buffer.getNumSamples()));
@@ -247,17 +247,17 @@ struct Oversampling2TimesEquirippleFIR  : public Oversampling<SampleType>::Overs
     }
 
 private:
-    //===============================================================================
-    dsp::FIR::Coefficients<SampleType> coefficientsUp, coefficientsDown;
+    //==============================================================================
+    FIR::Coefficients<SampleType> coefficientsUp, coefficientsDown;
     AudioBuffer<SampleType> stateUp, stateDown, stateDown2;
     Array<size_t> position;
 
-    //===============================================================================
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Oversampling2TimesEquirippleFIR)
 };
 
 
-//===============================================================================
+//==============================================================================
 /** Oversampling stage class performing 2 times oversampling using the Filter
     Design IIR Polyphase Allpass Cascaded method. The resulting filter is minimum
     phase, and provided with a method to get the exact resulting latency.
@@ -274,11 +274,11 @@ struct Oversampling2TimesPolyphaseIIR  : public Oversampling<SampleType>::Oversa
                                     SampleType stopbandAmplitudedBDown)
         : ParentType (numChans, 2)
     {
-        auto structureUp = dsp::FilterDesign<SampleType>::designIIRLowpassHalfBandPolyphaseAllpassMethod (normalisedTransitionWidthUp, stopbandAmplitudedBUp);
+        auto structureUp = FilterDesign<SampleType>::designIIRLowpassHalfBandPolyphaseAllpassMethod (normalisedTransitionWidthUp, stopbandAmplitudedBUp);
         auto coeffsUp = getCoefficients (structureUp);
         latency = static_cast<SampleType> (-(coeffsUp.getPhaseForFrequency (0.0001, 1.0)) / (0.0001 * MathConstants<double>::twoPi));
 
-        auto structureDown = dsp::FilterDesign<SampleType>::designIIRLowpassHalfBandPolyphaseAllpassMethod (normalisedTransitionWidthDown, stopbandAmplitudedBDown);
+        auto structureDown = FilterDesign<SampleType>::designIIRLowpassHalfBandPolyphaseAllpassMethod (normalisedTransitionWidthDown, stopbandAmplitudedBDown);
         auto coeffsDown = getCoefficients (structureDown);
         latency += static_cast<SampleType> (-(coeffsDown.getPhaseForFrequency (0.0001, 1.0)) / (0.0001 * MathConstants<double>::twoPi));
 
@@ -299,7 +299,7 @@ struct Oversampling2TimesPolyphaseIIR  : public Oversampling<SampleType>::Oversa
         delayDown.resize (static_cast<int> (this->numChannels));
     }
 
-    //===============================================================================
+    //==============================================================================
     SampleType getLatencyInSamples() override
     {
         return latency;
@@ -313,7 +313,7 @@ struct Oversampling2TimesPolyphaseIIR  : public Oversampling<SampleType>::Oversa
         delayDown.fill (0);
     }
 
-    void processSamplesUp (dsp::AudioBlock<SampleType>& inputBlock) override
+    void processSamplesUp (const AudioBlock<const SampleType>& inputBlock) override
     {
         jassert (inputBlock.getNumChannels() <= static_cast<size_t> (ParentType::buffer.getNumChannels()));
         jassert (inputBlock.getNumSamples() * ParentType::factor <= static_cast<size_t> (ParentType::buffer.getNumSamples()));
@@ -368,7 +368,7 @@ struct Oversampling2TimesPolyphaseIIR  : public Oversampling<SampleType>::Oversa
         snapToZero (true);
     }
 
-    void processSamplesDown (dsp::AudioBlock<SampleType>& outputBlock) override
+    void processSamplesDown (AudioBlock<SampleType>& outputBlock) override
     {
         jassert (outputBlock.getNumChannels() <= static_cast<size_t> (ParentType::buffer.getNumChannels()));
         jassert (outputBlock.getNumSamples() * ParentType::factor <= static_cast<size_t> (ParentType::buffer.getNumSamples()));
@@ -453,16 +453,16 @@ struct Oversampling2TimesPolyphaseIIR  : public Oversampling<SampleType>::Oversa
     }
 
 private:
-    //===============================================================================
+    //==============================================================================
     /** This function calculates the equivalent high order IIR filter of a given
         polyphase cascaded allpass filters structure.
     */
-    dsp::IIR::Coefficients<SampleType> getCoefficients (typename dsp::FilterDesign<SampleType>::IIRPolyphaseAllpassStructure& structure) const
+    IIR::Coefficients<SampleType> getCoefficients (typename FilterDesign<SampleType>::IIRPolyphaseAllpassStructure& structure) const
     {
         constexpr auto one = static_cast<SampleType> (1.0);
 
-        dsp::Polynomial<SampleType> numerator1 ({ one }), denominator1 ({ one }),
-                                    numerator2 ({ one }), denominator2 ({ one });
+        Polynomial<SampleType> numerator1 ({ one }), denominator1 ({ one }),
+                               numerator2 ({ one }), denominator2 ({ one });
 
         for (auto* i : structure.directPath)
         {
@@ -470,13 +470,13 @@ private:
 
             if (i->getFilterOrder() == 1)
             {
-                numerator1 = numerator1.getProductWith (dsp::Polynomial<SampleType> ({ coeffs[0], coeffs[1] }));
-                denominator1 = denominator1.getProductWith (dsp::Polynomial<SampleType> ({ one, coeffs[2] }));
+                numerator1   = numerator1  .getProductWith (Polynomial<SampleType> ({ coeffs[0], coeffs[1] }));
+                denominator1 = denominator1.getProductWith (Polynomial<SampleType> ({ one,       coeffs[2] }));
             }
             else
             {
-                numerator1 = numerator1.getProductWith (dsp::Polynomial<SampleType> ({ coeffs[0], coeffs[1], coeffs[2] }));
-                denominator1 = denominator1.getProductWith (dsp::Polynomial<SampleType> ({ one, coeffs[3], coeffs[4] }));
+                numerator1   = numerator1  .getProductWith (Polynomial<SampleType> ({ coeffs[0], coeffs[1], coeffs[2] }));
+                denominator1 = denominator1.getProductWith (Polynomial<SampleType> ({ one,       coeffs[3], coeffs[4] }));
             }
         }
 
@@ -486,13 +486,13 @@ private:
 
             if (i->getFilterOrder() == 1)
             {
-                numerator2 = numerator2.getProductWith (dsp::Polynomial<SampleType> ({ coeffs[0], coeffs[1] }));
-                denominator2 = denominator2.getProductWith (dsp::Polynomial<SampleType> ({ one, coeffs[2] }));
+                numerator2   = numerator2  .getProductWith (Polynomial<SampleType> ({ coeffs[0], coeffs[1] }));
+                denominator2 = denominator2.getProductWith (Polynomial<SampleType> ({ one,       coeffs[2] }));
             }
             else
             {
-                numerator2 = numerator2.getProductWith (dsp::Polynomial<SampleType> ({ coeffs[0], coeffs[1], coeffs[2] }));
-                denominator2 = denominator2.getProductWith (dsp::Polynomial<SampleType> ({ one, coeffs[3], coeffs[4] }));
+                numerator2   = numerator2  .getProductWith (Polynomial<SampleType> ({ coeffs[0], coeffs[1], coeffs[2] }));
+                denominator2 = denominator2.getProductWith (Polynomial<SampleType> ({ one,       coeffs[3], coeffs[4] }));
             }
         }
 
@@ -501,7 +501,7 @@ private:
         auto numerator   = numeratorf1.getSumWith (numeratorf2);
         auto denominator = denominator1.getProductWith (denominator2);
 
-        dsp::IIR::Coefficients<SampleType> coeffs;
+        IIR::Coefficients<SampleType> coeffs;
 
         coeffs.coefficients.clear();
         auto inversion = one / denominator[0];
@@ -515,19 +515,19 @@ private:
         return coeffs;
     }
 
-    //===============================================================================
+    //==============================================================================
     Array<SampleType> coefficientsUp, coefficientsDown;
     SampleType latency;
 
     AudioBuffer<SampleType> v1Up, v1Down;
     Array<SampleType> delayDown;
 
-    //===============================================================================
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Oversampling2TimesPolyphaseIIR)
 };
 
 
-//===============================================================================
+//==============================================================================
 template <typename SampleType>
 Oversampling<SampleType>::Oversampling (size_t newNumChannels)
     : numChannels (newNumChannels)
@@ -590,7 +590,7 @@ Oversampling<SampleType>::~Oversampling()
     stages.clear();
 }
 
-//===============================================================================
+//==============================================================================
 template <typename SampleType>
 void Oversampling<SampleType>::addDummyOversamplingStage()
 {
@@ -627,7 +627,7 @@ void Oversampling<SampleType>::clearOversamplingStages()
     factorOversampling = 1u;
 }
 
-//===============================================================================
+//==============================================================================
 template <typename SampleType>
 SampleType Oversampling<SampleType>::getLatencyInSamples() noexcept
 {
@@ -649,7 +649,7 @@ size_t Oversampling<SampleType>::getOversamplingFactor() noexcept
     return factorOversampling;
 }
 
-//===============================================================================
+//==============================================================================
 template <typename SampleType>
 void Oversampling<SampleType>::initProcessing (size_t maximumNumberOfSamplesBeforeOversampling)
 {
@@ -677,26 +677,28 @@ void Oversampling<SampleType>::reset() noexcept
 }
 
 template <typename SampleType>
-typename dsp::AudioBlock<SampleType> Oversampling<SampleType>::processSamplesUp (const dsp::AudioBlock<SampleType>& inputBlock) noexcept
+AudioBlock<SampleType> Oversampling<SampleType>::processSamplesUp (const AudioBlock<const SampleType>& inputBlock) noexcept
 {
     jassert (! stages.isEmpty());
 
     if (! isReady)
         return {};
 
-    auto audioBlock = inputBlock;
+    auto* firstStage = stages.getUnchecked (0);
+    firstStage->processSamplesUp (inputBlock);
+    auto block = firstStage->getProcessedSamples (inputBlock.getNumSamples() * firstStage->factor);
 
-    for (auto* stage : stages)
+    for (int i = 1; i < stages.size(); ++i)
     {
-        stage->processSamplesUp (audioBlock);
-        audioBlock = stage->getProcessedSamples (audioBlock.getNumSamples() * stage->factor);
+        stages[i]->processSamplesUp (block);
+        block = stages[i]->getProcessedSamples (block.getNumSamples() * stages[i]->factor);
     }
 
-    return audioBlock;
+    return block;
 }
 
 template <typename SampleType>
-void Oversampling<SampleType>::processSamplesDown (dsp::AudioBlock<SampleType>& outputBlock) noexcept
+void Oversampling<SampleType>::processSamplesDown (AudioBlock<SampleType>& outputBlock) noexcept
 {
     jassert (! stages.isEmpty());
 

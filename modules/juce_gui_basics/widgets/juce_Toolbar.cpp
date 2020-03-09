@@ -542,7 +542,8 @@ void Toolbar::showMissingItems()
     if (missingItemsButton->isShowing())
     {
         PopupMenu m;
-        m.addCustomItem (1, new MissingItemsComponent (*this, getThickness()));
+        auto comp = std::make_unique<MissingItemsComponent> (*this, getThickness());
+        m.addCustomItem (1, std::move (comp));
         m.showMenuAsync (PopupMenu::Options().withTargetComponent (missingItemsButton.get()));
     }
 }

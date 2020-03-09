@@ -23,8 +23,7 @@ the folder created in step 2 so you can debug your Java code this way.
 build/intermediates/javac/release_Release/compileRelease_ReleaseJavaWithJavac/classes. 
 Inside of that folder, you will find all your Java byte-code compiled classes.
 Remove any classes that you are not interested in (typically you'll find
-Java.class, JuceApp.class and JuceSharingContentProvider.class which you will
-probably want to remove).
+Java.class and JuceApp.class which you will probably want to remove).
 
 6. Inside of build/intermediates/javac/release_Release/compileRelease_ReleaseJavaWithJavac/classes
 execute the following dx command:

@@ -119,7 +119,7 @@ public:
     */
     virtual bool getOutlineForGlyph (int glyphNumber, Path& path) = 0;
 
-    /** Returns a new EdgeTable that contains the path for the givem glyph, with the specified transform applied. */
+    /** Returns a new EdgeTable that contains the path for the given glyph, with the specified transform applied. */
     virtual EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform, float fontHeight);
 
     /** Returns true if the typeface uses hinting. */

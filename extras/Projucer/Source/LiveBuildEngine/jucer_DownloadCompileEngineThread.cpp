@@ -27,6 +27,7 @@
 #include "../Application/jucer_Headers.h"
 #include "jucer_DownloadCompileEngineThread.h"
 #include "../LiveBuildEngine/jucer_CompileEngineDLL.h"
+#include "../Utility/Helpers/jucer_VersionInfo.h"
 
 //==============================================================================
 bool DownloadCompileEngineThread::downloadAndInstall()
@@ -83,38 +84,60 @@ void DownloadCompileEngineThread::run()
 
 Result DownloadCompileEngineThread::download (MemoryBlock& dest)
 {
-    int statusCode = 302;
-    const int timeoutMs = 10000;
-    StringPairArray responseHeaders;
+    auto info = VersionInfo::fetchFromUpdateServer (ProjectInfo::versionString);
 
-    URL url = getDownloadUrl();
-    std::unique_ptr<InputStream> in (url.createInputStream (false, nullptr, nullptr,
-                                                            String(), timeoutMs, &responseHeaders,
-                                                            &statusCode, 0));
+    if (info == nullptr)
+        return Result::fail ("Download error: cannot communicate with server");
 
-    if (in == nullptr || statusCode != 200)
-        return Result::fail ("Download error: cannot establish connection");
-
-    MemoryOutputStream mo (dest, true);
-
-    int64 size = in->getTotalLength();
-    int64 bytesReceived = -1;
-    String msg("Downloading...  (123)");
-
-    for (int64 pos = 0; pos < size; pos += bytesReceived)
+    auto requiredAssetName = []
     {
-        setStatusMessage (msg.replace ("123", File::descriptionOfSizeInBytes (pos)));
+        String name ("JUCECompileEngine_");
 
-        if (threadShouldExit())
-            return Result::fail ("Download error: operation interrupted");
+       #if JUCE_MAC
+        name << "osx_";
+       #elif JUCE_WINDOWS
+        name << "windows_";
+       #else
+        jassertfalse;
+       #endif
 
-        bytesReceived = mo.writeFromInputStream (*in, 8192);
+        return name + ProjectInfo::versionString + ".zip";
+    }();
 
-        if (bytesReceived == 0)
-            return Result::fail ("Download error: lost connection");
+    for (auto& asset : info->assets)
+    {
+        if (asset.name == requiredAssetName)
+        {
+            int statusCode = 0;
+            auto in = VersionInfo::createInputStreamForAsset (asset, statusCode);
+
+            if (in == nullptr || statusCode != 200)
+                return Result::fail ("Download error: cannot establish connection");
+
+            MemoryOutputStream mo (dest, true);
+
+            int64 size = in->getTotalLength();
+            int64 bytesReceived = -1;
+            String msg("Downloading...  (123)");
+
+            for (int64 pos = 0; pos < size; pos += bytesReceived)
+            {
+                setStatusMessage (msg.replace ("123", File::descriptionOfSizeInBytes (pos)));
+
+                if (threadShouldExit())
+                    return Result::fail ("Download error: operation interrupted");
+
+                bytesReceived = mo.writeFromInputStream (*in, 8192);
+
+                if (bytesReceived == 0)
+                    return Result::fail ("Download error: lost connection");
+            }
+
+            return Result::ok();
+        }
     }
 
-    return Result::ok();
+    return Result::fail ("Download error: no downloads available");
 }
 
 Result DownloadCompileEngineThread::install (const MemoryBlock& data, File& targetFolder)
@@ -129,21 +152,6 @@ Result DownloadCompileEngineThread::install (const MemoryBlock& data, File& targ
         return Result::fail ("Install error: operation interrupted");
 
     return zip.uncompressTo (targetFolder);
-}
-
-URL DownloadCompileEngineThread::getDownloadUrl()
-{
-    String urlStub ("http://assets.roli.com/juce/JUCECompileEngine_");
-
-   #if JUCE_MAC
-    urlStub << "osx_";
-   #elif JUCE_WINDOWS
-    urlStub << "windows_";
-   #else
-    jassertfalse;
-   #endif
-
-    return urlStub + ProjectInfo::versionString + ".zip";
 }
 
 File DownloadCompileEngineThread::getInstallFolder()

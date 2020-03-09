@@ -90,7 +90,7 @@ public:
     //==============================================================================
     /** Returns the result of processing a single sample. */
     template <typename SampleType>
-    SampleType processSample (SampleType inputSample) const noexcept
+    SampleType processSample (SampleType inputSample) noexcept
     {
         return inputSample + bias.getNextValue();
     }
@@ -114,7 +114,7 @@ public:
             bias.skip (static_cast<int> (len));
 
             if (context.usesSeparateInputAndOutputBlocks())
-                outBlock.copy (inBlock);
+                outBlock.copyFrom (inBlock);
 
             return;
         }

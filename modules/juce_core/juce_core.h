@@ -30,19 +30,19 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_core
-  vendor:           juce
-  version:          5.4.3
-  name:             JUCE core classes
-  description:      The essential set of basic JUCE classes, as required by all the other JUCE modules. Includes text, container, memory, threading and i/o functionality.
-  website:          http://www.juce.com/juce
-  license:          ISC
+  ID:                 juce_core
+  vendor:             juce
+  version:            5.4.7
+  name:               JUCE core classes
+  description:        The essential set of basic JUCE classes, as required by all the other JUCE modules. Includes text, container, memory, threading and i/o functionality.
+  website:            http://www.juce.com/juce
+  license:            ISC
 
   dependencies:
-  OSXFrameworks:    Cocoa IOKit
-  iOSFrameworks:    Foundation
-  linuxLibs:        rt dl pthread
-  mingwLibs:        uuid wsock32 wininet version ole32 ws2_32 oleaut32 imm32 comdlg32 shlwapi rpcrt4 winmm
+  OSXFrameworks:      Cocoa IOKit
+  iOSFrameworks:      Foundation
+  linuxLibs:          rt dl pthread
+  mingwLibs:          uuid wsock32 wininet version ole32 ws2_32 oleaut32 imm32 comdlg32 shlwapi rpcrt4 winmm
 
  END_JUCE_MODULE_DECLARATION
 
@@ -107,7 +107,7 @@
 //==============================================================================
 /** Config: JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
 
-    In a Visual C++  build, this can be used to stop the required system libs being
+    In a Windows build, this can be used to stop the required system libs being
     automatically added to the link stage.
 */
 #ifndef JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
@@ -142,7 +142,7 @@
 
 /** Config: JUCE_LOAD_CURL_SYMBOLS_LAZILY
     If enabled, JUCE will load libcurl lazily when required (for example, when WebInputStream
-    is used). Enabling this flag may also help with library dependency erros as linking
+    is used). Enabling this flag may also help with library dependency errors as linking
     libcurl at compile-time may instruct the linker to hard depend on a specific version
     of libcurl. It's also useful if you want to limit the amount of JUCE dependencies and
     you are not using WebInputStream or the URL classes.
