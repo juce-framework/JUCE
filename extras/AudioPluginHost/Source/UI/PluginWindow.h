@@ -227,6 +227,7 @@ private:
             case Type::programs:   return "Programs";
             case Type::audioIO:    return "IO";
             case Type::debug:      return "Debug";
+            case Type::numTypes:
             default:               return {};
         }
     }

@@ -1524,6 +1524,26 @@ private:
             case NSEventTypeTabletProximity:
                 break;
 
+            case NSEventTypeFlagsChanged:
+            case NSEventTypeAppKitDefined:
+            case NSEventTypeSystemDefined:
+            case NSEventTypeApplicationDefined:
+            case NSEventTypePeriodic:
+            case NSEventTypeGesture:
+            case NSEventTypeMagnify:
+            case NSEventTypeSwipe:
+            case NSEventTypeRotate:
+            case NSEventTypeBeginGesture:
+            case NSEventTypeEndGesture:
+            case NSEventTypeSmartMagnify:
+            case NSEventTypeQuickLook:
+            case NSEventTypePressure:
+          #if defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12
+            case NSEventTypeDirectTouch:
+           #if defined (MAC_OS_X_VERSION_10_15) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_15
+            case NSEventTypeChangeMode:
+           #endif
+          #endif
             default:
                 return false;
         }

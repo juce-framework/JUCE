@@ -571,6 +571,7 @@ private:
                 case Block::ConnectionPort::DeviceEdge::east:   return 1;
                 case Block::ConnectionPort::DeviceEdge::south:  return 2;
                 case Block::ConnectionPort::DeviceEdge::west:   return 3;
+                default: break;
             }
 
             jassertfalse;
@@ -629,6 +630,8 @@ private:
                             case 3: // left of me
                                 delta = { -theirBounds.width, (myBounds.height - (myOffset + 1)) - theirOffset };
                                 break;
+                            default:
+                                break;
                         }
 
                         {
@@ -671,6 +674,7 @@ private:
             case Block::ConnectionPort::DeviceEdge::south: return "south";
             case Block::ConnectionPort::DeviceEdge::east:  return "east";
             case Block::ConnectionPort::DeviceEdge::west:  return "west";
+            default: break;
         }
 
         return {};

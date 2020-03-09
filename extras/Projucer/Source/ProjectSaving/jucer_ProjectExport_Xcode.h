@@ -247,6 +247,7 @@ public:
             case ProjectType::Target::AudioUnitPlugIn:
             case ProjectType::Target::UnityPlugIn:
                 return ! iOS;
+            case ProjectType::Target::unspecified:
             default:
                 break;
         }
@@ -978,6 +979,7 @@ public:
                     xcodeCopyToProductInstallPathAfterBuild = false;
                     break;
 
+                case ProjectType::Target::unspecified:
                 default:
                     // unknown target type!
                     jassertfalse;
@@ -1493,6 +1495,12 @@ public:
                 case AAXPlugIn:         return config.isPluginBinaryCopyStepEnabled() ? config.getAAXBinaryLocationString() : String();
                 case UnityPlugIn:       return config.isPluginBinaryCopyStepEnabled() ? config.getUnityPluginBinaryLocationString() : String();
                 case SharedCodeTarget:  return owner.isiOS() ? "@executable_path/Frameworks" : "@executable_path/../Frameworks";
+                case StaticLibrary:
+                case DynamicLibrary:
+                case AudioUnitv3PlugIn:
+                case StandalonePlugIn:
+                case AggregateTarget:
+                case unspecified:
                 default:                return {};
             }
         }

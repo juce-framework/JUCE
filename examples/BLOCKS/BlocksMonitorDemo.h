@@ -175,7 +175,11 @@ public:
                         return { static_cast<float> (port.index), static_cast<float> (block->getHeight()) };
                     case e::west:
                         return { 0.0f, static_cast<float> (port.index) };
+                    default:
+                        break;
                 }
+
+                break;
             }
             case 90:
             {
@@ -189,7 +193,11 @@ public:
                         return { static_cast<float> (0.0f - block->getHeight()), static_cast<float> (port.index) };
                     case e::west:
                         return { static_cast<float> (-1.0f - port.index), 0.0f };
+                    default:
+                        break;
                 }
+
+                break;
             }
             case 180:
             {
@@ -203,7 +211,11 @@ public:
                         return { static_cast<float> (-1.0f - port.index), static_cast<float> (0.0f - block->getHeight()) };
                     case e::west:
                         return { 0.0f, static_cast<float> (-1.0f - port.index) };
+                    default:
+                        break;
                 }
+
+                break;
             }
             case 270:
             {
@@ -217,8 +229,15 @@ public:
                         return { static_cast<float> (block->getHeight()), static_cast<float> (-1.0f - port.index) };
                     case e::west:
                         return { static_cast<float> (port.index), 0.0f };
+                    default:
+                        break;
                 }
+
+                break;
             }
+
+            default:
+                break;
         }
 
         return {};
@@ -921,7 +940,11 @@ private:
                         return 90;
                     case edge::west:
                         return 270;
+                    default:
+                        break;
                 }
+
+                break;
             }
             case edge::south:
             {
@@ -935,7 +958,11 @@ private:
                         return 270;
                     case edge::west:
                         return 90;
+                    default:
+                        break;
                 }
+
+                break;
             }
             case edge::east:
             {
@@ -949,7 +976,11 @@ private:
                         return 180;
                     case edge::west:
                         return 0;
+                    default:
+                        break;
                 }
+
+                break;
             }
 
             case edge::west:
@@ -964,8 +995,15 @@ private:
                         return 0;
                     case edge::west:
                         return 180;
+                    default:
+                        break;
                 }
+
+                break;
             }
+
+            default:
+                break;
         }
 
         return 0;

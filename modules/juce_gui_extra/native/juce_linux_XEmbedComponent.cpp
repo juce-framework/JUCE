@@ -480,6 +480,9 @@ private:
                 if (wantsFocus)
                     owner.moveKeyboardFocusToSibling (false);
                 break;
+
+            default:
+                break;
         }
     }
 
@@ -500,6 +503,9 @@ private:
                         MessageManager::callAsync ([this] {componentMovedOrResized (owner, true, true);});
 
                     return true;
+
+                default:
+                    break;
             }
         }
         else if (e.xany.window == host && host != 0)
@@ -535,6 +541,9 @@ private:
 
                         return true;
                     }
+                    break;
+
+                default:
                     break;
             }
         }

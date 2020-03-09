@@ -237,7 +237,7 @@ namespace XmlOutputFunctions
                             outputStream << (char) character;
                             break;
                         }
-                        // Note: Deliberate fall-through here!
+                        JUCE_FALLTHROUGH
                     default:
                         outputStream << "&#" << ((int) character) << ';';
                         break;

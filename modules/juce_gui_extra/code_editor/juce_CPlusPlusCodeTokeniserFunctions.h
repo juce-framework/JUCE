@@ -616,8 +616,8 @@ struct CppTokeniserFunctions
                         charsOnLine += 2;
                         break;
                     }
-
                     // deliberate fall-through...
+                    JUCE_FALLTHROUGH
 
                 default:
                     if (c >= 32 && c < 127 && ! (lastWasHexEscapeCode  // (have to avoid following a hex escape sequence with a valid hex digit)
