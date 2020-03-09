@@ -928,11 +928,15 @@ ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const Value
         "-Wreorder", "-Wconstant-conversion", "-Wsign-conversion", "-Wunused-private-field", "-Wbool-conversion",
         "-Wextra-semi", "-Wunreachable-code", "-Wzero-as-null-pointer-constant", "-Wcast-align",
         "-Winconsistent-missing-destructor-override", "-Wshift-sign-overflow", "-Wnullable-to-nonnull-conversion",
-        "-Wno-missing-field-initializers", "-Wno-ignored-qualifiers" };
+        "-Wno-missing-field-initializers", "-Wno-ignored-qualifiers",
+        "-Wswitch-enum"
+    };
     recommendedCompilerWarningFlags["GCC"] = { "-Wall", "-Wextra", "-Wstrict-aliasing", "-Wuninitialized", "-Wunused-parameter", "-Wsign-compare",
         "-Woverloaded-virtual", "-Wreorder", "-Wsign-conversion", "-Wunreachable-code",
         "-Wzero-as-null-pointer-constant", "-Wcast-align", "-Wno-implicit-fallthrough",
-        "-Wno-maybe-uninitialized", "-Wno-missing-field-initializers", "-Wno-ignored-qualifiers" };
+        "-Wno-maybe-uninitialized", "-Wno-missing-field-initializers", "-Wno-ignored-qualifiers",
+        "-Wswitch-enum", "-Wswitch-default", "-Wredundant-decls"
+    };
     recommendedCompilerWarningFlags["GCC-7"] = recommendedCompilerWarningFlags["GCC"];
     recommendedCompilerWarningFlags["GCC-7"].add ("-Wno-strict-overflow");
 }
