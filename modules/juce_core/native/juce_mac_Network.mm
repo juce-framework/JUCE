@@ -188,15 +188,21 @@ public:
 
     int read (char* dest, int numBytes)
     {
-        int numDone = 0;
+        int numDone = 0, dataLength = 0;
+
+        {
+            const ScopedLock sl (dataLock);
+            dataLength = (int) [data length];
+        }
 
         while (numBytes > 0)
         {
-            const int available = jmin (numBytes, (int) [data length]);
+            auto available = jmin (numBytes, dataLength);
 
             if (available > 0)
             {
                 const ScopedLock sl (dataLock);
+
                 [data getBytes: dest length: (NSUInteger) available];
                 [data replaceBytesInRange: NSMakeRange (0, (NSUInteger) available) withBytes: nil length: 0];
 
@@ -743,15 +749,21 @@ public:
 
     int read (char* dest, int numBytes)
     {
-        int numDone = 0;
+        int numDone = 0, dataLength = 0;
+
+        {
+            const ScopedLock sl (dataLock);
+            dataLength = (int) [data length];
+        }
 
         while (numBytes > 0)
         {
-            const int available = jmin (numBytes, (int) [data length]);
+            auto available = jmin (numBytes, dataLength);
 
             if (available > 0)
             {
                 const ScopedLock sl (dataLock);
+
                 [data getBytes: dest length: (NSUInteger) available];
                 [data replaceBytesInRange: NSMakeRange (0, (NSUInteger) available) withBytes: nil length: 0];
 
