@@ -51,18 +51,8 @@ public:
 
     bool supportsTargetType (ProjectType::Target::Type type) const override
     {
-        switch (type)
-        {
-            case ProjectType::Target::GUIApp:
-            case ProjectType::Target::StaticLibrary:
-            case ProjectType::Target::DynamicLibrary:
-            case ProjectType::Target::StandalonePlugIn:
-                return true;
-            default:
-                break;
-        }
-
-        return false;
+        return type == ProjectType::Target::GUIApp || type == ProjectType::Target::StaticLibrary
+              || type == ProjectType::Target::DynamicLibrary || type == ProjectType::Target::StandalonePlugIn;
     }
 
     //==============================================================================

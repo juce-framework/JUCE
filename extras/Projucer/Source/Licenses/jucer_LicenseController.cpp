@@ -59,6 +59,8 @@ static const char* getLicenseStateValue (LicenseState::Type type)
         case LicenseState::Type::edu:       return "edu";
         case LicenseState::Type::indie:     return "indie";
         case LicenseState::Type::pro:       return "pro";
+        case LicenseState::Type::notLoggedIn:
+        case LicenseState::Type::noLicenseChosenYet:
         default:                            return nullptr;
     }
 }
@@ -77,9 +79,10 @@ static const char* getApplicationUsageDataStateValue (LicenseState::ApplicationU
 {
     switch (type)
     {
-        case LicenseState::ApplicationUsageData::enabled:   return "enabled";
-        case LicenseState::ApplicationUsageData::disabled:  return "disabled";
-        default:                                            return "notChosen";
+        case LicenseState::ApplicationUsageData::enabled:       return "enabled";
+        case LicenseState::ApplicationUsageData::disabled:      return "disabled";
+        case LicenseState::ApplicationUsageData::notChosenYet:
+        default:                                                return "notChosen";
     }
 }
 

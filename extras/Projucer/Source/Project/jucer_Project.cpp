@@ -855,6 +855,10 @@ bool Project::shouldBuildTargetType (ProjectType::Target::Type targetType) const
             return projectType.isAudioPlugin();
         case ProjectType::Target::unspecified:
             return false;
+        case ProjectType::Target::GUIApp:
+        case ProjectType::Target::ConsoleApp:
+        case ProjectType::Target::StaticLibrary:
+        case ProjectType::Target::DynamicLibrary:
         default:
             break;
     }
@@ -894,6 +898,7 @@ const char* ProjectType::Target::getName() const noexcept
         case UnityPlugIn:       return "Unity Plugin";
         case SharedCodeTarget:  return "Shared Code";
         case AggregateTarget:   return "All";
+        case unspecified:
         default:                return "undefined";
     }
 }
@@ -915,6 +920,8 @@ ProjectType::Target::TargetFileType ProjectType::Target::getTargetFileType() con
         case RTASPlugIn:        return pluginBundle;
         case UnityPlugIn:       return pluginBundle;
         case SharedCodeTarget:  return staticLibrary;
+        case AggregateTarget:
+        case unspecified:
         default:
             break;
     }

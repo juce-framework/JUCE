@@ -79,6 +79,7 @@ struct DiagnosticMessage
             case error:   res << "error: "; break;
             case warning: res << "warning: "; break;
             case note:    res << "note: "; break;
+            default:      break;
         };
 
         res << mainFile << ": ";

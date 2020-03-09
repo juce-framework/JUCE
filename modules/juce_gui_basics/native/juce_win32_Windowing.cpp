@@ -3731,6 +3731,7 @@ private:
             case WM_DISPLAYCHANGE:
                 InvalidateRect (h, 0, 0);
                 // intentional fall-through...
+                JUCE_FALLTHROUGH
             case WM_SETTINGCHANGE:  // note the fall-through in the previous case!
                 doSettingChange();
                 break;

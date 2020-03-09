@@ -2392,11 +2392,12 @@ private:
                         case AudioPlayHead::fps30:       setHostTimeFrameRate (Vst2::kVstSmpte30fps, 30.0, position.timeInSeconds); break;
                         case AudioPlayHead::fps60:       setHostTimeFrameRate (Vst2::kVstSmpte60fps, 60.0, position.timeInSeconds); break;
 
-                        case AudioPlayHead::fps23976:    setHostTimeFrameRateDrop (Vst2::kVstSmpte239fps,      24.0, position.timeInSeconds); break;
-                        case AudioPlayHead::fps2997:     setHostTimeFrameRateDrop (Vst2::kVstSmpte2997fps,     30.0, position.timeInSeconds); break;
+                        case AudioPlayHead::fps23976:    setHostTimeFrameRateDrop (Vst2::kVstSmpte239fps,   24.0, position.timeInSeconds); break;
+                        case AudioPlayHead::fps2997:     setHostTimeFrameRateDrop (Vst2::kVstSmpte2997fps,  30.0, position.timeInSeconds); break;
                         case AudioPlayHead::fps2997drop: setHostTimeFrameRateDrop (Vst2::kVstSmpte2997dfps, 30.0, position.timeInSeconds); break;
                         case AudioPlayHead::fps30drop:   setHostTimeFrameRateDrop (Vst2::kVstSmpte30dfps,   30.0, position.timeInSeconds); break;
-                        case AudioPlayHead::fps60drop:   setHostTimeFrameRateDrop (Vst2::kVstSmpte599fps,      60.0, position.timeInSeconds); break;
+                        case AudioPlayHead::fps60drop:   setHostTimeFrameRateDrop (Vst2::kVstSmpte599fps,   60.0, position.timeInSeconds); break;
+                        case AudioPlayHead::fpsUnknown:
                         default: break;
                     }
 
@@ -2715,16 +2716,20 @@ private:
     {
         switch (getVstCategory())
         {
-            case Vst2::kPlugCategEffect:       return "Effect";
-            case Vst2::kPlugCategSynth:        return "Synth";
-            case Vst2::kPlugCategAnalysis:     return "Analysis";
-            case Vst2::kPlugCategMastering:    return "Mastering";
-            case Vst2::kPlugCategSpacializer:  return "Spacial";
-            case Vst2::kPlugCategRoomFx:       return "Reverb";
-            case Vst2::kPlugSurroundFx:        return "Surround";
-            case Vst2::kPlugCategRestoration:  return "Restoration";
-            case Vst2::kPlugCategGenerator:    return "Tone generation";
-            default:                     break;
+            case Vst2::kPlugCategEffect:          return "Effect";
+            case Vst2::kPlugCategSynth:           return "Synth";
+            case Vst2::kPlugCategAnalysis:        return "Analysis";
+            case Vst2::kPlugCategMastering:       return "Mastering";
+            case Vst2::kPlugCategSpacializer:     return "Spacial";
+            case Vst2::kPlugCategRoomFx:          return "Reverb";
+            case Vst2::kPlugSurroundFx:           return "Surround";
+            case Vst2::kPlugCategRestoration:     return "Restoration";
+            case Vst2::kPlugCategGenerator:       return "Tone generation";
+            case Vst2::kPlugCategOfflineProcess:  return "Offline Process";
+            case Vst2::kPlugCategShell:           return "Shell";
+            case Vst2::kPlugCategUnknown:         return "Unknown";
+            case Vst2::kPlugCategMaxCount:
+            default:                              break;
         }
 
         return nullptr;

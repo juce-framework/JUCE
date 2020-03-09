@@ -643,6 +643,7 @@ struct Convolution::Pimpl  : private Thread
                 }
                 break;
 
+                case ChangeRequest::numChangeRequestTypes:
                 case ChangeRequest::changeIgnore:
                     break;
 

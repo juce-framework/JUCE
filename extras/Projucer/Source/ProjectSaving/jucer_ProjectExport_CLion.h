@@ -356,6 +356,8 @@ private:
                         properties.add ("MODULE");
 
                     break;
+                case ProjectType::Target::TargetFileType::macOSAppex:
+                case ProjectType::Target::TargetFileType::unknown:
                 default:
                     continue;
             }

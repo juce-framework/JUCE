@@ -24,10 +24,6 @@
   ==============================================================================
 */
 
-#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
-extern juce::AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (juce::AudioProcessor::WrapperType type);
-#endif
-
 namespace juce
 {
 
@@ -124,7 +120,7 @@ public:
     virtual void createPlugin()
     {
       #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
-        processor.reset (::createPluginFilterOfType (AudioProcessor::wrapperType_Standalone));
+        processor.reset (createPluginFilterOfType (AudioProcessor::wrapperType_Standalone));
       #else
         AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Standalone);
         processor.reset (createPluginFilter());

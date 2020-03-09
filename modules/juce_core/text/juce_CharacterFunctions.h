@@ -166,9 +166,12 @@ public:
                #else
                 *currentCharacter++ = '-';
                #endif
-                // Fall-through..
+                JUCE_FALLTHROUGH
             case '+':
                 c = *++text;
+                break;
+            default:
+                break;
         }
 
         switch (c)
@@ -183,6 +186,9 @@ public:
             case 'I':
                 if ((text[1] == 'n' || text[1] == 'N') && (text[2] == 'f' || text[2] == 'F'))
                     return std::numeric_limits<double>::infinity();
+                break;
+
+            default:
                 break;
         }
 
@@ -274,7 +280,7 @@ public:
 
             switch (*++text)
             {
-                case '-':   negativeExponent = true; // fall-through..
+                case '-':   negativeExponent = true; JUCE_FALLTHROUGH
                 case '+':   ++text;
             }
 
@@ -359,8 +365,9 @@ public:
 
             switch (*++text)
             {
-                case '-':   parsedExponentIsPositive = false; // Fall-through..
-                case '+':   ++text;
+                case '-':  parsedExponentIsPositive = false; JUCE_FALLTHROUGH
+                case '+':  ++text; break;
+                default:   break;
             }
 
             int exponent = 0;
