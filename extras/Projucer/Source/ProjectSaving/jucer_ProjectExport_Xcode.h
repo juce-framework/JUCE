@@ -1252,6 +1252,8 @@ public:
             else if (arch == osxArch_64Bit)            s.set ("ARCHS", "\"$(ARCHS_STANDARD_64_BIT)\"");
 
             StringArray headerPaths (getHeaderSearchPaths (config));
+            s.set ("MTL_HEADER_SEARCH_PATHS", indentParenthesisedList (headerPaths, 1));
+
             headerPaths.add ("\"$(inherited)\"");
             s.set ("HEADER_SEARCH_PATHS", indentParenthesisedList (headerPaths, 1));
             s.set ("USE_HEADERMAP", String (static_cast<bool> (config.exporter.settings.getProperty ("useHeaderMap")) ? "YES" : "NO"));
