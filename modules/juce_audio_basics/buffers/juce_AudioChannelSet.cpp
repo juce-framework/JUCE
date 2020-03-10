@@ -110,7 +110,7 @@ String AudioChannelSet::getChannelTypeName (AudioChannelSet::ChannelType type)
         case bottomFrontLeft:     return NEEDS_TRANS("Bottom Front Left");
         case bottomFrontCentre:   return NEEDS_TRANS("Bottom Front Centre");
         case bottomFrontRight:    return NEEDS_TRANS("Bottom Front Right");
-        case proxymityLeft:       return NEEDS_TRANS("Proximity Left");
+        case proximityLeft:       return NEEDS_TRANS("Proximity Left");
         case proximityRight:      return NEEDS_TRANS("Proximity Right");
         case bottomSideLeft:      return NEEDS_TRANS("Bottom Side Left");
         case bottomSideRight:     return NEEDS_TRANS("Bottom Side Right");
@@ -196,7 +196,7 @@ String AudioChannelSet::getAbbreviatedChannelTypeName (AudioChannelSet::ChannelT
         case bottomFrontLeft:     return "Bfl";
         case bottomFrontCentre:   return "Bfc";
         case bottomFrontRight:    return "Bfr";
-        case proxymityLeft:       return "Pl";
+        case proximityLeft:       return "Pl";
         case proximityRight:      return "Pr";
         case bottomSideLeft:      return "Bsl";
         case bottomSideRight:     return "Bsr";
