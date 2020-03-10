@@ -29,7 +29,11 @@ protected:
     public:
         MakeBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
             : BuildConfiguration (p, settings, e),
-              architectureTypeValue (config, Ids::linuxArchitecture, getUndoManager(), String())
+              architectureTypeValue     (config, Ids::linuxArchitecture,          getUndoManager(), String()),
+              pluginBinaryCopyStepValue (config, Ids::enablePluginBinaryCopyStep, getUndoManager(), true),
+              vstBinaryLocation         (config, Ids::vstBinaryLocation,          getUndoManager(), "$(HOME)/.vst"),
+              vst3BinaryLocation        (config, Ids::vst3BinaryLocation,         getUndoManager(), "$(HOME)/.vst3"),
+              unityPluginBinaryLocation (config, Ids::unityPluginBinaryLocation,  getUndoManager(), "$(HOME)/UnityPlugins")
         {
             linkTimeOptimisationValue.setDefault (false);
             optimisationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
@@ -44,6 +48,29 @@ protected:
                                                     { "<None>",     "Native",        "32-bit (-m32)", "64-bit (-m64)", "ARM v6",       "ARM v7" },
                                                     { { String() }, "-march=native", "-m32",          "-m64",          "-march=armv6", "-march=armv7" }),
                        "Specifies the 32/64-bit architecture to use.");
+
+            auto isBuildingAnyPlugins = (project.shouldBuildVST() || project.shouldBuildVST3() || project.shouldBuildUnityPlugin());
+
+            if (isBuildingAnyPlugins)
+            {
+                props.add (new ChoicePropertyComponent (pluginBinaryCopyStepValue, "Enable Plugin Copy Step"),
+                           "Enable this to copy plugin binaries to a specified folder after building.");
+
+                if (project.shouldBuildVST3())
+                    props.add (new TextPropertyComponentWithEnablement (vst3BinaryLocation, pluginBinaryCopyStepValue, "VST3 Binary Location",
+                                                                        1024, false),
+                               "The folder in which the compiled VST3 binary should be placed.");
+
+                if (project.shouldBuildUnityPlugin())
+                    props.add (new TextPropertyComponentWithEnablement (unityPluginBinaryLocation, pluginBinaryCopyStepValue, "Unity Binary Location",
+                                                                        1024, false),
+                               "The folder in which the compiled Unity plugin binary and associated C# GUI script should be placed.");
+
+                if (project.shouldBuildVST())
+                    props.add (new TextPropertyComponentWithEnablement (vstBinaryLocation, pluginBinaryCopyStepValue, "VST (Legacy) Binary Location",
+                                                                        1024, false),
+                               "The folder in which the compiled legacy VST binary should be placed.");
+            }
         }
 
         String getModuleLibraryArchName() const override
@@ -63,10 +90,16 @@ protected:
             return "${JUCE_ARCH_LABEL}";
         }
 
-        String getArchitectureTypeString() const    { return architectureTypeValue.get(); }
+        String getArchitectureTypeString() const           { return architectureTypeValue.get(); }
 
+        bool isPluginBinaryCopyStepEnabled() const         { return pluginBinaryCopyStepValue.get(); }
+        String getVSTBinaryLocationString() const          { return vstBinaryLocation.get(); }
+        String getVST3BinaryLocationString() const         { return vst3BinaryLocation.get(); }
+        String getUnityPluginBinaryLocationString() const  { return unityPluginBinaryLocation.get(); }
+
+    private:
         //==============================================================================
-        ValueWithDefault architectureTypeValue;
+        ValueWithDefault architectureTypeValue, pluginBinaryCopyStepValue, vstBinaryLocation, vst3BinaryLocation, unityPluginBinaryLocation;
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
@@ -154,14 +187,38 @@ public:
             else
                 targetName = targetName.upToLastOccurrenceOf (".", false, false) + getTargetFileSuffix();
 
+            if (type == VST3PlugIn)
+            {
+                s.add ("JUCE_VST3DIR := " + targetName.upToLastOccurrenceOf (".", false, false) + ".vst3");
+
+                auto is32Bit = config.getArchitectureTypeString().contains ("m32");
+                s.add (String ("JUCE_VST3SUBDIR := Contents/") + (is32Bit ? "i386" : "x86_64") + "-linux");
+
+                targetName = "$(JUCE_VST3DIR)/$(JUCE_VST3SUBDIR)/" + targetName;
+            }
+            else if (type == UnityPlugIn)
+            {
+                s.add ("JUCE_UNITYDIR := Unity");
+                targetName = "$(JUCE_UNITYDIR)/" + targetName;
+            }
+
             s.add ("JUCE_TARGET_" + getTargetVarName() + String (" := ") + escapeSpaces (targetName));
+
+            if (config.isPluginBinaryCopyStepEnabled() && (type == VST3PlugIn || type == VSTPlugIn || type == UnityPlugIn))
+            {
+                String copyCmd ("JUCE_COPYCMD_" + getTargetVarName() + String (" := $(JUCE_OUTDIR)/"));
+
+                if      (type == VST3PlugIn)   s.add (copyCmd + "$(JUCE_VST3DIR) "    + config.getVST3BinaryLocationString());
+                else if (type == VSTPlugIn)    s.add (copyCmd + targetName + " "      + config.getVSTBinaryLocationString());
+                else if (type == UnityPlugIn)  s.add (copyCmd + "$(JUCE_UNITYDIR)/. " + config.getUnityPluginBinaryLocationString());
+            }
 
             return s;
         }
 
         String getTargetFileSuffix() const
         {
-            if (type == VSTPlugIn || type == UnityPlugIn || type == DynamicLibrary)
+            if (type == VSTPlugIn || type == VST3PlugIn || type == UnityPlugIn || type == DynamicLibrary)
                 return ".so";
 
             if (type == SharedCodeTarget || type == StaticLibrary)
@@ -242,16 +299,10 @@ public:
                 << "\t-$(V_AT)mkdir -p $(JUCE_LIBDIR)" << newLine
                 << "\t-$(V_AT)mkdir -p $(JUCE_OUTDIR)" << newLine;
 
-            if (type == UnityPlugIn)
-            {
-                auto scriptName = owner.getProject().getUnityScriptName();
-
-                build_tools::RelativePath scriptPath (owner.getProject().getGeneratedCodeFolder().getChildFile (scriptName),
-                                                      owner.getTargetFolder(),
-                                                      build_tools::RelativePath::projectFolder);
-
-                out << "\t-$(V_AT)cp " + scriptPath.toUnixStyle() + " $(JUCE_OUTDIR)/" + scriptName << newLine;
-            }
+            if (type == VST3PlugIn)
+                out << "\t-$(V_AT)mkdir -p $(JUCE_OUTDIR)/$(JUCE_VST3DIR)/$(JUCE_VST3SUBDIR)" << newLine;
+            else if (type == UnityPlugIn)
+                out << "\t-$(V_AT)mkdir -p $(JUCE_OUTDIR)/$(JUCE_UNITYDIR)" << newLine;
 
             if (owner.projectType.isStaticLibrary() || type == SharedCodeTarget)
             {
@@ -273,6 +324,26 @@ public:
                     out << "$(JUCE_LDFLAGS_" << getTargetVarName() << ") ";
 
                 out << "$(RESOURCES) $(TARGET_ARCH)" << newLine;
+            }
+
+            if (type == VST3PlugIn)
+            {
+                out << "\t-$(V_AT)cp -R $(JUCE_COPYCMD_VST3)" << newLine;
+            }
+            else if (type == VSTPlugIn)
+            {
+                out << "\t-$(V_AT)cp $(JUCE_COPYCMD_VST)" << newLine;
+            }
+            else if (type == UnityPlugIn)
+            {
+                auto scriptName = owner.getProject().getUnityScriptName();
+
+                build_tools::RelativePath scriptPath (owner.getProject().getGeneratedCodeFolder().getChildFile (scriptName),
+                                                      owner.getTargetFolder(),
+                                                      build_tools::RelativePath::projectFolder);
+
+                out << "\t-$(V_AT)cp " + scriptPath.toUnixStyle() + " $(JUCE_OUTDIR)/$(JUCE_UNITYDIR)" << newLine
+                    << "\t-$(V_AT)cp -R $(JUCE_COPYCMD_UNITY_PLUGIN)" << newLine;
             }
 
             out << newLine;
@@ -335,11 +406,11 @@ public:
             case build_tools::ProjectType::Target::SharedCodeTarget:
             case build_tools::ProjectType::Target::AggregateTarget:
             case build_tools::ProjectType::Target::VSTPlugIn:
+            case build_tools::ProjectType::Target::VST3PlugIn:
             case build_tools::ProjectType::Target::StandalonePlugIn:
             case build_tools::ProjectType::Target::DynamicLibrary:
             case build_tools::ProjectType::Target::UnityPlugIn:
                 return true;
-            case build_tools::ProjectType::Target::VST3PlugIn:
             case build_tools::ProjectType::Target::AAXPlugIn:
             case build_tools::ProjectType::Target::RTASPlugIn:
             case build_tools::ProjectType::Target::AudioUnitPlugIn:
