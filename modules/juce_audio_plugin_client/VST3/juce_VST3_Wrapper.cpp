@@ -956,7 +956,9 @@ private:
     std::atomic<bool> vst3IsPlaying     { false },
                       inSetupProcessing { false };
 
+   #if ! JUCE_MAC
     float lastScaleFactorReceived = 1.0f;
+   #endif
 
     void setupParameters()
     {
@@ -1513,12 +1515,12 @@ private:
         };
 
         std::unique_ptr<Cubase10WindowResizeWorkaround> cubase10Workaround;
-       #endif
-
+       #else
         float editorScaleFactor = 1.0f;
 
-       #if JUCE_WINDOWS
-        WindowsHooks hooks;
+        #if JUCE_WINDOWS
+         WindowsHooks hooks;
+        #endif
        #endif
 
         //==============================================================================
