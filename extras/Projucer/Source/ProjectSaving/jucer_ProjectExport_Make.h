@@ -587,8 +587,7 @@ private:
     {
         auto result = makefileExtraLinkerFlags;
 
-        if (! config.isDebug())
-            result.add ("-fvisibility=hidden");
+        result.add ("-fvisibility=hidden");
 
         if (config.isLinkTimeOptimisationEnabled())
             result.add ("-flto");

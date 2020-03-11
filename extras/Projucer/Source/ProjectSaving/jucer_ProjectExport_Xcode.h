@@ -1435,7 +1435,6 @@ public:
                 defines.set ("_NDEBUG", "1");
                 defines.set ("NDEBUG", "1");
                 s.set ("GCC_GENERATE_DEBUGGING_SYMBOLS", "NO");
-                s.set ("GCC_SYMBOLS_PRIVATE_EXTERN", "YES");
                 s.set ("DEAD_CODE_STRIPPING", "YES");
             }
 
@@ -2618,21 +2617,14 @@ private:
         s.set ("CLANG_WARN_UNREACHABLE_CODE", "YES");
         s.set ("CLANG_WARN__DUPLICATE_METHOD_MATCH", "YES");
         s.set ("WARNING_CFLAGS", "\"-Wreorder\"");
+        s.set ("GCC_INLINES_ARE_PRIVATE_EXTERN", projectType.isStaticLibrary() ? "NO" : "YES");
 
-        if (projectType.isStaticLibrary())
-        {
-            s.set ("GCC_INLINES_ARE_PRIVATE_EXTERN", "NO");
-            s.set ("GCC_SYMBOLS_PRIVATE_EXTERN", "NO");
-        }
-        else
-        {
-            s.set ("GCC_INLINES_ARE_PRIVATE_EXTERN", "YES");
-        }
+        // GCC_SYMBOLS_PRIVATE_EXTERN only takes effect if ENABLE_TESTABILITY is off
+        s.set ("ENABLE_TESTABILITY", "NO");
+        s.set ("GCC_SYMBOLS_PRIVATE_EXTERN", "YES");
 
         if (config.isDebug())
         {
-            s.set ("ENABLE_TESTABILITY", "YES");
-
             if (config.getOSXArchitectureString() == osxArch_Default)
                 s.set ("ONLY_ACTIVE_ARCH", "YES");
         }
