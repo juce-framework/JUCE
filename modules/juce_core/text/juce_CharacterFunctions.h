@@ -149,8 +149,8 @@ public:
        #if JUCE_MINGW
         bool isNegative = false;
        #else
-        JUCE_CONSTEXPR const int maxSignificantDigits = 17 + 1; // An additional digit for rounding
-        JUCE_CONSTEXPR const int bufferSize = maxSignificantDigits + 7 + 1; // -.E-XXX and a trailing null-terminator
+        constexpr const int maxSignificantDigits = 17 + 1; // An additional digit for rounding
+        constexpr const int bufferSize = maxSignificantDigits + 7 + 1; // -.E-XXX and a trailing null-terminator
         char buffer[(size_t) bufferSize] = {};
         char* currentCharacter = &(buffer[0]);
        #endif
@@ -200,7 +200,7 @@ public:
         int exponent = 0, decPointIndex = 0, digit = 0;
         int lastDigit = 0, numSignificantDigits = 0;
         bool digitsFound = false;
-        JUCE_CONSTEXPR const int maxSignificantDigits = 17 + 1;
+        constexpr const int maxSignificantDigits = 17 + 1;
 
         for (;;)
         {

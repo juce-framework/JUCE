@@ -157,8 +157,8 @@ const char* const WavAudioFormat::tracktionLoopInfo    = "tracktion loop info";
 //==============================================================================
 namespace WavFileHelpers
 {
-    JUCE_CONSTEXPR inline int chunkName (const char* name) noexcept         { return (int) ByteOrder::littleEndianInt (name); }
-    JUCE_CONSTEXPR inline size_t roundUpSize (size_t sz) noexcept           { return (sz + 3) & ~3u; }
+    constexpr inline int chunkName (const char* name) noexcept         { return (int) ByteOrder::littleEndianInt (name); }
+    constexpr inline size_t roundUpSize (size_t sz) noexcept           { return (sz + 3) & ~3u; }
 
     #if JUCE_MSVC
      #pragma pack (push, 1)
