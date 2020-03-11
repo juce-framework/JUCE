@@ -111,8 +111,8 @@ private:
         list.scrollToEnsureRowIsOnscreen (log.size() - 1);
     }
 
-    JUCE_CONSTEXPR static const int maxLogSize = 300;
-    JUCE_CONSTEXPR static const int logSizeTrimThreshold = 400;
+    constexpr static const int maxLogSize = 300;
+    constexpr static const int logSizeTrimThreshold = 400;
 
     ListBox list { "Log", this };
 
