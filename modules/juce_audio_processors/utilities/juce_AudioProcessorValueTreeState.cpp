@@ -531,7 +531,7 @@ struct AttachedControlBase  : public AudioProcessorValueTreeState::Listener,
 
     AudioProcessorValueTreeState& state;
     String paramID;
-    float lastValue;
+    std::atomic<float> lastValue;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AttachedControlBase)
 };
