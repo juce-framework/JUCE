@@ -655,21 +655,21 @@ private:
 #endif
 
 //==============================================================================
-InputStream* URL::createInputStream (bool usePostCommand,
-                                     OpenStreamProgressCallback* progressCallback,
-                                     void* progressCallbackContext,
-                                     String headers,
-                                     int timeOutMs,
-                                     StringPairArray* responseHeaders,
-                                     int* statusCode,
-                                     int numRedirectsToFollow,
-                                     String httpRequestCmd) const
+std::unique_ptr<InputStream> URL::createInputStream (bool usePostCommand,
+                                                     OpenStreamProgressCallback* progressCallback,
+                                                     void* progressCallbackContext,
+                                                     String headers,
+                                                     int timeOutMs,
+                                                     StringPairArray* responseHeaders,
+                                                     int* statusCode,
+                                                     int numRedirectsToFollow,
+                                                     String httpRequestCmd) const
 {
     if (isLocalFile())
     {
        #if JUCE_IOS
         // We may need to refresh the embedded bookmark.
-        return new iOSFileStreamWrapper<FileInputStream> (const_cast<URL&>(*this));
+        return std::make_unique<iOSFileStreamWrapper<FileInputStream>> (const_cast<URL&>(*this));
        #else
         return getLocalFile().createInputStream();
        #endif
@@ -717,27 +717,29 @@ InputStream* URL::createInputStream (bool usePostCommand,
     if (! success || wi->isError())
         return nullptr;
 
-    return wi.release();
+    // Older GCCs complain about binding unique_ptr<WebInputStream>&& to unique_ptr<InputStream>
+    // if we just `return wi` here.
+    return std::unique_ptr<InputStream> (std::move (wi));
 }
 
 #if JUCE_ANDROID
 OutputStream* juce_CreateContentURIOutputStream (const URL&);
 #endif
 
-OutputStream* URL::createOutputStream() const
+std::unique_ptr<OutputStream> URL::createOutputStream() const
 {
     if (isLocalFile())
     {
        #if JUCE_IOS
         // We may need to refresh the embedded bookmark.
-        return new iOSFileStreamWrapper<FileOutputStream> (const_cast<URL&> (*this));
+        return std::make_unique<iOSFileStreamWrapper<FileOutputStream>> (const_cast<URL&> (*this));
        #else
-        return new FileOutputStream (getLocalFile());
+        return std::make_unique<FileOutputStream> (getLocalFile());
        #endif
     }
 
    #if JUCE_ANDROID
-    return juce_CreateContentURIOutputStream (*this);
+    return std::unique_ptr<OutputStream> (juce_CreateContentURIOutputStream (*this));
    #else
     return nullptr;
    #endif

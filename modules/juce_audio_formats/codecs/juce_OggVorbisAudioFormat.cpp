@@ -494,9 +494,9 @@ StringArray OggVorbisAudioFormat::getQualityOptions()
 
 int OggVorbisAudioFormat::estimateOggFileQuality (const File& source)
 {
-    if (auto* in = source.createInputStream())
+    if (auto in = source.createInputStream())
     {
-        if (auto r = std::unique_ptr<AudioFormatReader> (createReaderFor (in, true)))
+        if (auto r = std::unique_ptr<AudioFormatReader> (createReaderFor (in.release(), true)))
         {
             auto lengthSecs = r->lengthInSamples / r->sampleRate;
             auto approxBitsPerSecond = (int) (source.getSize() * 8 / lengthSecs);

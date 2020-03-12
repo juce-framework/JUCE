@@ -541,7 +541,7 @@ private:
     {
         if (stream == nullptr)
         {
-            stream.reset (file.createInputStream());
+            stream = file.createInputStream();
 
             if (stream == nullptr)
                 return false;

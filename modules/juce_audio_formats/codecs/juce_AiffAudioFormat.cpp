@@ -976,7 +976,7 @@ AudioFormatReader* AiffAudioFormat::createReaderFor (InputStream* sourceStream, 
 
 MemoryMappedAudioFormatReader* AiffAudioFormat::createMemoryMappedReader (const File& file)
 {
-    return createMemoryMappedReader (file.createInputStream());
+    return createMemoryMappedReader (file.createInputStream().release());
 }
 
 MemoryMappedAudioFormatReader* AiffAudioFormat::createMemoryMappedReader (FileInputStream* fin)

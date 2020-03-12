@@ -340,22 +340,22 @@ public:
         @returns    an input stream that the caller must delete, or a null pointer if there was an
                     error trying to open it.
      */
-    InputStream* createInputStream (bool doPostLikeRequest,
-                                    OpenStreamProgressCallback* progressCallback = nullptr,
-                                    void* progressCallbackContext = nullptr,
-                                    String extraHeaders = {},
-                                    int connectionTimeOutMs = 0,
-                                    StringPairArray* responseHeaders = nullptr,
-                                    int* statusCode = nullptr,
-                                    int numRedirectsToFollow = 5,
-                                    String httpRequestCmd = {}) const;
+    std::unique_ptr<InputStream> createInputStream (bool doPostLikeRequest,
+                                                    OpenStreamProgressCallback* progressCallback = nullptr,
+                                                    void* progressCallbackContext = nullptr,
+                                                    String extraHeaders = {},
+                                                    int connectionTimeOutMs = 0,
+                                                    StringPairArray* responseHeaders = nullptr,
+                                                    int* statusCode = nullptr,
+                                                    int numRedirectsToFollow = 5,
+                                                    String httpRequestCmd = {}) const;
 
     /** Attempts to open an output stream to a URL for writing
 
         This method can only be used for certain scheme types such as local files
         and content:// URIs on Android.
     */
-    OutputStream* createOutputStream() const;
+    std::unique_ptr<OutputStream> createOutputStream() const;
 
     //==============================================================================
     /** Represents a download task.

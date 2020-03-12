@@ -1703,7 +1703,7 @@ AudioFormatReader* WavAudioFormat::createReaderFor (InputStream* sourceStream, b
 
 MemoryMappedAudioFormatReader* WavAudioFormat::createMemoryMappedReader (const File& file)
 {
-    return createMemoryMappedReader (file.createInputStream());
+    return createMemoryMappedReader (file.createInputStream().release());
 }
 
 MemoryMappedAudioFormatReader* WavAudioFormat::createMemoryMappedReader (FileInputStream* fin)
@@ -1748,7 +1748,7 @@ namespace WavFileHelpers
         TemporaryFile tempFile (file);
         WavAudioFormat wav;
 
-        std::unique_ptr<AudioFormatReader> reader (wav.createReaderFor (file.createInputStream(), true));
+        std::unique_ptr<AudioFormatReader> reader (wav.createReaderFor (file.createInputStream().release(), true));
 
         if (reader != nullptr)
         {
@@ -1781,7 +1781,7 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
 {
     using namespace WavFileHelpers;
 
-    std::unique_ptr<WavAudioFormatReader> reader (static_cast<WavAudioFormatReader*> (createReaderFor (wavFile.createInputStream(), true)));
+    std::unique_ptr<WavAudioFormatReader> reader (static_cast<WavAudioFormatReader*> (createReaderFor (wavFile.createInputStream().release(), true)));
 
     if (reader != nullptr)
     {
