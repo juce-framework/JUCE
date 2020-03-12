@@ -1607,6 +1607,7 @@ private:
                 screens->setAttribute ("android:normalScreens", "true");
                 screens->setAttribute ("android:largeScreens", "true");
                 screens->setAttribute ("android:anyDensity", "true");
+                screens->setAttribute ("android:xlargeScreens", "true");
             }
         }
     }
