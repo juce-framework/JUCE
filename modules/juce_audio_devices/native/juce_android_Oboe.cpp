@@ -194,16 +194,7 @@ public:
 
     Array<int> getAvailableBufferSizes() override
     {
-        // we need to offer the lowest possible buffer size which
-        // is the native buffer size
-        const int defaultNumMultiples = 8;
-        const int nativeBufferSize = getNativeBufferSize();
-        Array<int> bufferSizes;
-
-        for (int i = 1; i < defaultNumMultiples; ++i)
-            bufferSizes.add (i * nativeBufferSize);
-
-        return bufferSizes;
+        return AndroidHighPerformanceAudioHelpers::getAvailableBufferSizes (getAvailableSampleRates());
     }
 
     String open (const BigInteger& inputChannels, const BigInteger& outputChannels,
@@ -212,9 +203,14 @@ public:
         close();
 
         lastError.clear();
-        sampleRate = (int) requestedSampleRate;
 
-        actualBufferSize = (bufferSize <= 0) ? getDefaultBufferSize() : bufferSize;
+        sampleRate = (int) (requestedSampleRate > 0 ? requestedSampleRate : AndroidHighPerformanceAudioHelpers::getNativeSampleRate());
+        auto preferredBufferSize = (bufferSize > 0) ? bufferSize : getDefaultBufferSize();
+
+        audioBuffersToEnqueue = AndroidHighPerformanceAudioHelpers::getNumBuffersToEnqueue (preferredBufferSize, sampleRate);
+        actualBufferSize = preferredBufferSize / audioBuffersToEnqueue;
+
+        jassert ((actualBufferSize * audioBuffersToEnqueue) == preferredBufferSize);
 
         // The device may report no max, claiming "no limits". Pick sensible defaults.
         int maxOutChans = maxNumOutputChannels > 0 ? maxNumOutputChannels : 2;
@@ -261,7 +257,7 @@ public:
     int getOutputLatencyInSamples() override            { return session->getOutputLatencyInSamples(); }
     int getInputLatencyInSamples() override             { return session->getInputLatencyInSamples(); }
     bool isOpen() override                              { return deviceOpen; }
-    int getCurrentBufferSizeSamples() override          { return actualBufferSize; }
+    int getCurrentBufferSizeSamples() override          { return actualBufferSize * audioBuffersToEnqueue; }
     int getCurrentBitDepth() override                   { return session->getCurrentBitDepth(); }
     BigInteger getActiveOutputChannels() const override { return activeOutputChans; }
     BigInteger getActiveInputChannels() const override  { return activeInputChans; }
@@ -271,16 +267,12 @@ public:
 
     int getDefaultBufferSize() override
     {
-        // Only on a Pro-Audio device will we set the lowest possible buffer size
-        // by default. We need to be more conservative on other devices
-        // as they may be low-latency, but still have a crappy CPU.
-        return (isProAudioDevice() ? 1 : 6)
-                 * getNativeBufferSize();
+        return AndroidHighPerformanceAudioHelpers::getDefaultBufferSize (getCurrentSampleRate());
     }
 
     double getCurrentSampleRate() override
     {
-        return (sampleRate == 0.0 ? getNativeSampleRate() : sampleRate);
+        return (sampleRate == 0.0 ? AndroidHighPerformanceAudioHelpers::getNativeSampleRate() : sampleRate);
     }
 
     void start (AudioIODeviceCallback* newCallback) override
@@ -372,10 +364,11 @@ private:
     {
         static const int standardRates[] = { 8000, 11025, 12000, 16000,
                                             22050, 24000, 32000, 44100, 48000 };
+
         Array<int> rates (standardRates, numElementsInArray (standardRates));
 
         // make sure the native sample rate is part of the list
-        int native = (int) getNativeSampleRate();
+        int native = (int) AndroidHighPerformanceAudioHelpers::getNativeSampleRate();
 
         if (native != 0 && ! rates.contains (native))
             rates.add (native);
@@ -511,7 +504,7 @@ private:
                    int32 newSampleRate, int32 newBufferSize,
                    oboe::AudioStreamCallback* newCallback = nullptr)
         {
-            oboe::DefaultStreamValues::FramesPerBurst = getDefaultFramesPerBurst();
+            oboe::DefaultStreamValues::FramesPerBurst = AndroidHighPerformanceAudioHelpers::getNativeBufferSize();
 
             oboe::AudioStreamBuilder builder;
 
@@ -962,7 +955,7 @@ private:
     friend class OboeRealtimeThread;
 
     //==============================================================================
-    int actualBufferSize = 0, sampleRate = 0;
+    int actualBufferSize = 0, sampleRate = 0, audioBuffersToEnqueue = 0;
     bool deviceOpen = false;
     String lastError;
     BigInteger activeOutputChans, activeInputChans;
@@ -978,31 +971,6 @@ private:
     std::unique_ptr<OboeSessionBase> session;
 
     bool running = false;
-
-    //==============================================================================
-    static double getNativeSampleRate()
-    {
-        return audioManagerGetProperty ("android.media.property.OUTPUT_SAMPLE_RATE").getDoubleValue();
-    }
-
-    static int getNativeBufferSize()
-    {
-        auto val = audioManagerGetProperty ("android.media.property.OUTPUT_FRAMES_PER_BUFFER").getIntValue();
-        return val > 0 ? val : 512;
-    }
-
-    static bool isProAudioDevice()
-    {
-        return androidHasSystemFeature ("android.hardware.audio.pro");
-    }
-
-    static int getDefaultFramesPerBurst()
-    {
-        // NB: this function only works for inbuilt speakers and headphones
-        auto framesPerBurstString = javaString (audioManagerGetProperty ("android.media.property.OUTPUT_FRAMES_PER_BUFFER"));
-
-        return framesPerBurstString != 0 ? getEnv()->CallStaticIntMethod (JavaInteger, JavaInteger.parseInt, framesPerBurstString.get(), 10) : 192;
-    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OboeAudioIODevice)
 };
@@ -1087,8 +1055,8 @@ public:
                                oboe::SharingMode::Shared,
                                forInput ? 1 : 2,
                                getAndroidSDKVersion() >= 21 ? oboe::AudioFormat::Float : oboe::AudioFormat::I16,
-                               (int) OboeAudioIODevice::getNativeSampleRate(),
-                               OboeAudioIODevice::getNativeBufferSize(),
+                               (int) AndroidHighPerformanceAudioHelpers::getNativeSampleRate(),
+                               AndroidHighPerformanceAudioHelpers::getNativeBufferSize(),
                                nullptr);
 
         if (auto* nativeStream = tempStream.getNativeStream())
@@ -1353,8 +1321,8 @@ public:
                                       oboe::SharingMode::Exclusive,
                                       1,
                                       oboe::AudioFormat::Float,
-                                      (int) OboeAudioIODevice::getNativeSampleRate(),
-                                      OboeAudioIODevice::getNativeBufferSize(),
+                                      (int) AndroidHighPerformanceAudioHelpers::getNativeSampleRate(),
+                                      AndroidHighPerformanceAudioHelpers::getNativeBufferSize(),
                                       this)),
           formatUsed (oboe::AudioFormat::Float)
     {
@@ -1366,8 +1334,8 @@ public:
                                               oboe::SharingMode::Exclusive,
                                               1,
                                               oboe::AudioFormat::I16,
-                                              (int) OboeAudioIODevice::getNativeSampleRate(),
-                                              OboeAudioIODevice::getNativeBufferSize(),
+                                              (int) AndroidHighPerformanceAudioHelpers::getNativeSampleRate(),
+                                              AndroidHighPerformanceAudioHelpers::getNativeBufferSize(),
                                               this));
 
             formatUsed = oboe::AudioFormat::I16;
@@ -1449,15 +1417,19 @@ private:
     oboe::AudioFormat formatUsed;
 };
 
+//==============================================================================
 pthread_t juce_createRealtimeAudioThread (void* (*entry) (void*), void* userPtr)
 {
-    std::unique_ptr<OboeRealtimeThread> thread (new OboeRealtimeThread());
+    auto thread = std::make_unique<OboeRealtimeThread>();
 
     if (! thread->isOk())
         return {};
 
     auto threadID = thread->startThread (entry, userPtr);
-    thread.release();  // the thread will de-allocate itself
+
+    // the thread will de-allocate itself
+    thread.release();
+
     return threadID;
 }
 
