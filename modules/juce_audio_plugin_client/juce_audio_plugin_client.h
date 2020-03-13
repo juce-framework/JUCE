@@ -129,5 +129,3 @@
 
 #include "utility/juce_PluginHostType.h"
 #include "VST/juce_VSTCallbackHandler.h"
-
-juce::AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (juce::AudioProcessor::WrapperType);
