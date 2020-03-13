@@ -2052,10 +2052,15 @@ public:
             outputArrangements.add (getVst3SpeakerArrangement (requested.isDisabled() ? getBus (false, i)->getLastEnabledLayout() : requested));
         }
 
-        if (processor->setBusArrangements (inputArrangements.getRawDataPointer(), inputArrangements.size(),
-                                           outputArrangements.getRawDataPointer(), outputArrangements.size()) != kResultTrue)
-            return false;
+        // Some plug-ins will crash if you pass a nullptr to setBusArrangements!
+        Vst::SpeakerArrangement nullArrangement = {};
+        auto* inputArrangementData = inputArrangements.isEmpty() ? &nullArrangement : inputArrangements.getRawDataPointer();
+        auto* outputArrangementData = outputArrangements.isEmpty() ? &nullArrangement : outputArrangements.getRawDataPointer();
 
+        if (processor->setBusArrangements(inputArrangementData, inputArrangements.size(),
+                                          outputArrangementData, outputArrangements.size()) != kResultTrue)
+                return false;
+            
         // check if the layout matches the request
         Array<Vst::SpeakerArrangement> actualIn, actualOut;
         repopulateArrangements (actualIn, actualOut);
