@@ -415,7 +415,7 @@ public:
 
     private:
         friend class URL;
-        static DownloadTask* createFallbackDownloader (const URL&, const File&, const String&, Listener*, bool);
+        static std::unique_ptr<DownloadTask> createFallbackDownloader (const URL&, const File&, const String&, Listener*, bool);
 
     public:
        #if JUCE_IOS
@@ -436,10 +436,10 @@ public:
         using a native OS background network task. Such tasks automatically deal with
         network re-connections and continuing your download while your app is suspended.
     */
-    DownloadTask* downloadToFile (const File& targetLocation,
-                                  String extraHeaders = String(),
-                                  DownloadTask::Listener* listener = nullptr,
-                                  bool usePostCommand = false);
+    std::unique_ptr<DownloadTask> downloadToFile (const File& targetLocation,
+                                                  String extraHeaders = String(),
+                                                  DownloadTask::Listener* listener = nullptr,
+                                                  bool usePostCommand = false);
 
     //==============================================================================
     /** Tries to download the entire contents of this URL into a binary data block.
