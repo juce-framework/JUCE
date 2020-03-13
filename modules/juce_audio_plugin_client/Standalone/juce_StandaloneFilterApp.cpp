@@ -41,7 +41,7 @@
 // set it then by default we'll just create a simple one as below.
 #if ! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP
 
-extern juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter();
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
 #include "juce_StandaloneFilterWindow.h"
 

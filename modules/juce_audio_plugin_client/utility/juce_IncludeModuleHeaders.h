@@ -42,5 +42,3 @@ namespace juce
         return hostType;
     }
 }
-
-extern juce::AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (juce::AudioProcessor::WrapperType);

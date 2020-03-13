@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+ #include <juce_audio_plugin_client/juce_audio_plugin_client.h>
+#endif
+
 namespace juce
 {
 
@@ -555,7 +559,7 @@ private:
     @tags{Audio}
 */
 class StandaloneFilterWindow    : public DocumentWindow,
-                                  public Button::Listener
+                                  private Button::Listener
 {
 public:
     //==============================================================================
@@ -662,20 +666,6 @@ public:
         JUCEApplicationBase::quit();
     }
 
-    void buttonClicked (Button*) override
-    {
-        PopupMenu m;
-        m.addItem (1, TRANS("Audio/MIDI Settings..."));
-        m.addSeparator();
-        m.addItem (2, TRANS("Save current state..."));
-        m.addItem (3, TRANS("Load a saved state..."));
-        m.addSeparator();
-        m.addItem (4, TRANS("Reset to default state"));
-
-        m.showMenuAsync (PopupMenu::Options(),
-                         ModalCallbackFunction::forComponent (menuCallback, this));
-    }
-
     void handleMenuResult (int result)
     {
         switch (result)
@@ -705,6 +695,20 @@ public:
     std::unique_ptr<StandalonePluginHolder> pluginHolder;
 
 private:
+    void buttonClicked (Button*) override
+    {
+        PopupMenu m;
+        m.addItem (1, TRANS("Audio/MIDI Settings..."));
+        m.addSeparator();
+        m.addItem (2, TRANS("Save current state..."));
+        m.addItem (3, TRANS("Load a saved state..."));
+        m.addSeparator();
+        m.addItem (4, TRANS("Reset to default state"));
+
+        m.showMenuAsync (PopupMenu::Options(),
+                         ModalCallbackFunction::forComponent (menuCallback, this));
+    }
+
     //==============================================================================
     class MainContentComponent  : public Component,
                                   private Value::Listener,
