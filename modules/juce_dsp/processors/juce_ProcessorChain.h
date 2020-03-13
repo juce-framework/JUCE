@@ -44,7 +44,7 @@ namespace detail
     }
 
     template <typename T>
-    using TupleIndexSequence = std::index_sequence_for<std::remove_cv_t<std::remove_reference_t<T>>>;
+    using TupleIndexSequence = std::make_index_sequence<std::tuple_size<std::remove_cv_t<std::remove_reference_t<T>>>::value>;
 
     template <typename Fn, typename Tuple>
     constexpr void forEachInTuple (Fn&& fn, Tuple&& tuple)
