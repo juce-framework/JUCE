@@ -63,6 +63,20 @@
 #define JUCE_ALLOW_SPECIAL_CHARS_IN_ADDRESS 0
 #endif
 
+/** Config: JUCE_ENABLE_BROADCAST_BY_DEFAULT
+	Automatically enables broadcast on bound port in OSCReceiver
+*/
+#ifndef JUCE_ENABLE_BROADCAST_BY_DEFAULT
+#define JUCE_ENABLE_BROADCAST_BY_DEFAULT 0
+#endif
+
+/** Config: JUCE_EXCLUSIVE_BINDING_BY_DEFAULT
+	If enabled, this will make the binding of this port exclusive, so no other process can bind it.
+*/
+#ifndef JUCE_EXCLUSIVE_BINDING_BY_DEFAULT
+#define JUCE_EXCLUSIVE_BINDING_BY_DEFAULT 0
+#endif
+
 //==============================================================================
 #include "osc/juce_OSCTypes.h"
 #include "osc/juce_OSCTimeTag.h"
