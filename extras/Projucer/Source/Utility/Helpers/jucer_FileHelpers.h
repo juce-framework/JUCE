@@ -39,15 +39,15 @@ namespace FileHelpers
 }
 
 //==============================================================================
-const char* const sourceFileExtensions          = "cpp;mm;m;c;cc;cxx;swift;s;asm;r";
+const char* const sourceFileExtensions          = "cpp;mm;m;metal;c;cc;cxx;swift;s;asm;r";
 const char* const headerFileExtensions          = "h;hpp;hxx;hh;inl";
 const char* const cOrCppFileExtensions          = "cpp;cc;cxx;c";
 const char* const cppFileExtensions             = "cpp;cc;cxx";
 const char* const objCFileExtensions            = "mm;m";
 const char* const asmFileExtensions             = "s;S;asm";
-const char* const sourceOrHeaderFileExtensions  = "cpp;mm;m;c;cc;cxx;swift;s;S;asm;h;hpp;hxx;hh;inl";
-const char* const browseableFileExtensions      = "cpp;mm;m;c;cc;cxx;swift;s;S;asm;h;hpp;hxx;hh;inl;txt;md;rtf";
-const char* const fileTypesToCompileByDefault   = "cpp;mm;c;m;cc;cxx;swift;s;S;asm;r";
+const char* const sourceOrHeaderFileExtensions  = "cpp;mm;m;metal;c;cc;cxx;swift;s;S;asm;h;hpp;hxx;hh;inl";
+const char* const browseableFileExtensions      = "cpp;mm;m;metal;c;cc;cxx;swift;s;S;asm;h;hpp;hxx;hh;inl;txt;md;rtf";
+const char* const fileTypesToCompileByDefault   = "cpp;mm;m;metal;c;cc;cxx;swift;s;S;asm;r";
 
 //==============================================================================
 struct FileModificationDetector

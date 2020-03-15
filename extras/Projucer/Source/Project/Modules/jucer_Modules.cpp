@@ -315,7 +315,7 @@ Array<LibraryModule::CompileUnit> LibraryModule::getAllCompileUnits (build_tools
     for (auto& cu : units)
     {
         cu.isCompiledForObjC = true;
-        cu.isCompiledForNonObjC = ! cu.file.hasFileExtension ("mm;m");
+        cu.isCompiledForNonObjC = ! cu.file.hasFileExtension ("mm;m;metal");
 
         if (cu.isCompiledForNonObjC)
             if (cu.file.withFileExtension ("mm").existsAsFile())
