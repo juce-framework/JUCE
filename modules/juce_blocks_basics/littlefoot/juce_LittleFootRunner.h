@@ -238,7 +238,7 @@ struct Program
         auto n = (uint16) size;
 
         for (uint32 i = 2; i < size; ++i)
-            n += (n * 2) + programStart[i];
+            n = static_cast<uint16> (n + (n * 2) + programStart[i]);
 
         return n;
     }
