@@ -2062,11 +2062,9 @@ public:
     SamplerAudioProcessor()
         : AudioProcessor (BusesProperties().withOutput ("Output", AudioChannelSet::stereo(), true))
     {
-        if (auto* asset = createAssetInputStream ("cello.wav"))
+        if (auto inputStream = createAssetInputStream ("cello.wav"))
         {
-            std::unique_ptr<InputStream> inputStream (asset);
             inputStream->readIntoMemoryBlock (mb);
-
             readerFactory.reset (new MemoryAudioFormatReaderFactory (mb.getData(), mb.getSize()));
         }
 
