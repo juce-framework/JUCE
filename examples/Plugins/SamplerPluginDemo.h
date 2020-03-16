@@ -492,9 +492,9 @@ inline std::unique_ptr<AudioFormatReader> makeAudioFormatReader (AudioFormatMana
                                                                  const void* sampleData,
                                                                  size_t dataSize)
 {
-    return std::unique_ptr<AudioFormatReader> (manager.createReaderFor (new MemoryInputStream (sampleData,
-                                                                                               dataSize,
-                                                                                               false)));
+    return std::unique_ptr<AudioFormatReader> (manager.createReaderFor (std::make_unique<MemoryInputStream> (sampleData,
+                                                                                                             dataSize,
+                                                                                                             false)));
 }
 
 inline std::unique_ptr<AudioFormatReader> makeAudioFormatReader (AudioFormatManager& manager,
