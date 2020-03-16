@@ -2382,6 +2382,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\juce_MidiMessageCollector.h">
       <Filter>JUCE Modules\juce_audio_devices\midi_io</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\juce_android_HighPerformanceAudioHelpers.h">
+      <Filter>JUCE Modules\juce_audio_devices\native</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\juce_ios_Audio.h">
       <Filter>JUCE Modules\juce_audio_devices\native</Filter>
     </ClInclude>
