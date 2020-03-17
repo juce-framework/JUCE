@@ -144,7 +144,7 @@ PluginWindow* PluginGraph::getOrCreateWindowFor (AudioProcessorGraph::Node* node
         {
             auto description = plugin->getPluginDescription();
 
-            if (description.pluginFormatName == "Internal")
+            if (! plugin->hasEditor() && description.pluginFormatName == "Internal")
             {
                 getCommandManager().invokeDirectly (CommandIDs::showAudioSettings, false);
                 return nullptr;

@@ -1377,8 +1377,8 @@ const String AudioProcessorGraph::AudioGraphIOProcessor::getName() const
     {
         case audioOutputNode:   return "Audio Output";
         case audioInputNode:    return "Audio Input";
-        case midiOutputNode:    return "Midi Output";
-        case midiInputNode:     return "Midi Input";
+        case midiOutputNode:    return "MIDI Output";
+        case midiInputNode:     return "MIDI Input";
         default:                break;
     }
 

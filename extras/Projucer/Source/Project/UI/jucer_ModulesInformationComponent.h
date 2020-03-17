@@ -29,9 +29,10 @@ public:
         : project (p),
           modulesValueTree (project.getEnabledModules().getState())
     {
-        listHeader = new ListBoxHeader ( { "Module", "Version", "Make Local Copy", "Paths" },
-                                        { 0.25f, 0.2f, 0.2f, 0.35f } );
-        list.setHeaderComponent (listHeader);
+        auto tempHeader = std::make_unique<ListBoxHeader> (Array<String> { "Module", "Version", "Make Local Copy", "Paths" },
+                                                           Array<float> { 0.25f, 0.2f, 0.2f, 0.35f });
+        listHeader = tempHeader.get();
+        list.setHeaderComponent (std::move (tempHeader));
         list.setModel (this);
         list.setColour (ListBox::backgroundColourId, Colours::transparentBlack);
         addAndMakeVisible (list);

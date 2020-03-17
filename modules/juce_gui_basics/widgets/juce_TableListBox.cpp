@@ -264,7 +264,7 @@ TableListBox::TableListBox (const String& name, TableListBoxModel* const m)
 {
     ListBox::model = this;
 
-    setHeader (new Header (*this));
+    setHeader (std::make_unique<Header> (*this));
 }
 
 TableListBox::~TableListBox()
@@ -280,19 +280,23 @@ void TableListBox::setModel (TableListBoxModel* newModel)
     }
 }
 
-void TableListBox::setHeader (TableHeaderComponent* newHeader)
+void TableListBox::setHeader (std::unique_ptr<TableHeaderComponent> newHeader)
 {
-    jassert (newHeader != nullptr); // you need to supply a real header for a table!
+    if (newHeader == nullptr)
+    {
+        jassertfalse; // you need to supply a real header for a table!
+        return;
+    }
 
     Rectangle<int> newBounds (100, 28);
 
     if (header != nullptr)
         newBounds = header->getBounds();
 
-    header = newHeader;
+    header = newHeader.get();
     header->setBounds (newBounds);
 
-    setHeaderComponent (header);
+    setHeaderComponent (std::move (newHeader));
 
     header->addListener (this);
 }

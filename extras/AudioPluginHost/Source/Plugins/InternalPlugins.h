@@ -30,11 +30,10 @@ class InternalPluginFormat   : public AudioPluginFormat
 public:
     //==============================================================================
     InternalPluginFormat();
-    ~InternalPluginFormat() override {}
 
     //==============================================================================
-    PluginDescription audioInDesc, audioOutDesc, midiInDesc, midiOutDesc;
-    void getAllTypes (Array<PluginDescription>&);
+    PluginDescription audioInDesc, audioOutDesc, midiInDesc, midiOutDesc, midiMonitorDesc;
+    Array<PluginDescription> getAllTypes() const;
 
     //==============================================================================
     String getName() const override                                                     { return "Internal"; }

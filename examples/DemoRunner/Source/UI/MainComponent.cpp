@@ -199,7 +199,7 @@ public:
 
         demos.deselectAllRows();
         demos.setHeaderComponent (categoryName.isEmpty() ? nullptr
-                                                         : new Header (*this));
+                                                         : std::make_unique<Header> (*this));
         demos.updateContent();
     }
 

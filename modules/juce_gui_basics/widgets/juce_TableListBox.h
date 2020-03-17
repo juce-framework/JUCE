@@ -238,7 +238,7 @@ public:
         when it's no longer needed.
         The pointer passed in may not be null.
     */
-    void setHeader (TableHeaderComponent* newHeader);
+    void setHeader (std::unique_ptr<TableHeaderComponent> newHeader);
 
     /** Changes the height of the table header component.
         @see getHeaderHeight

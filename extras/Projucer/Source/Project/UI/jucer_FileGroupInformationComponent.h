@@ -29,8 +29,8 @@ public:
         : item (group),
           header (item.getName(), { getIcons().openFolder, Colours::transparentBlack })
     {
-        list.setHeaderComponent (new ListBoxHeader ( { "File", "Binary Resource", "Xcode Resource", "Compile", "Compiler Flag Scheme" },
-                                                     { 0.3f, 0.15f, 0.15f, 0.15f, 0.25f } ));
+        list.setHeaderComponent (std::make_unique<ListBoxHeader> (Array<String> { "File", "Binary Resource", "Xcode Resource", "Compile", "Compiler Flag Scheme" },
+                                                                  Array<float> { 0.3f, 0.15f, 0.15f, 0.15f, 0.25f }));
         list.setModel (this);
         list.setColour (ListBox::backgroundColourId, Colours::transparentBlack);
         addAndMakeVisible (list);

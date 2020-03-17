@@ -98,7 +98,7 @@ MainHostWindow::MainHostWindow()
     setVisible (true);
 
     InternalPluginFormat internalFormat;
-    internalFormat.getAllTypes (internalTypes);
+    internalTypes = internalFormat.getAllTypes();
 
     if (auto savedPluginList = getAppProperties().getUserSettings()->getXmlValue ("pluginList"))
         knownPluginList.recreateFromXml (*savedPluginList);

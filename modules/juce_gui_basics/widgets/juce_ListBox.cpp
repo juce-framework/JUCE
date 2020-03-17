@@ -848,14 +848,11 @@ void ListBox::setOutlineThickness (int newThickness)
     resized();
 }
 
-void ListBox::setHeaderComponent (Component* newHeaderComponent)
+void ListBox::setHeaderComponent (std::unique_ptr<Component> newHeaderComponent)
 {
-    if (headerComponent.get() != newHeaderComponent)
-    {
-        headerComponent.reset (newHeaderComponent);
-        addAndMakeVisible (newHeaderComponent);
-        ListBox::resized();
-    }
+    headerComponent = std::move (newHeaderComponent);
+    addAndMakeVisible (headerComponent.get());
+    ListBox::resized();
 }
 
 void ListBox::repaintRow (const int rowNumber) noexcept

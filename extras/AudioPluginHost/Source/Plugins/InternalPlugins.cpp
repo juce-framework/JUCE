@@ -20,6 +20,8 @@
 #include "InternalPlugins.h"
 #include "PluginGraph.h"
 
+#include "../../../../examples/Plugins/MidiLoggerPluginDemo.h"
+
 //==============================================================================
 class InternalPlugin   : public AudioPluginInstance
 {
@@ -354,17 +356,23 @@ InternalPluginFormat::InternalPluginFormat()
         AudioProcessorGraph::AudioGraphIOProcessor p (AudioProcessorGraph::AudioGraphIOProcessor::midiOutputNode);
         p.fillInPluginDescription (midiOutDesc);
     }
+
+    {
+        MidiLoggerPluginDemoProcessor p;
+        p.fillInPluginDescription (midiMonitorDesc);
+    }
 }
 
 std::unique_ptr<AudioPluginInstance> InternalPluginFormat::createInstance (const String& name)
 {
-    if (name == audioOutDesc.name) return std::make_unique<AudioProcessorGraph::AudioGraphIOProcessor> (AudioProcessorGraph::AudioGraphIOProcessor::audioOutputNode);
-    if (name == audioInDesc.name)  return std::make_unique<AudioProcessorGraph::AudioGraphIOProcessor> (AudioProcessorGraph::AudioGraphIOProcessor::audioInputNode);
-    if (name == midiInDesc.name)   return std::make_unique<AudioProcessorGraph::AudioGraphIOProcessor> (AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode);
-    if (name == midiOutDesc.name)  return std::make_unique<AudioProcessorGraph::AudioGraphIOProcessor> (AudioProcessorGraph::AudioGraphIOProcessor::midiOutputNode);
+    if (name == audioOutDesc.name)    return std::make_unique<AudioProcessorGraph::AudioGraphIOProcessor> (AudioProcessorGraph::AudioGraphIOProcessor::audioOutputNode);
+    if (name == audioInDesc.name)     return std::make_unique<AudioProcessorGraph::AudioGraphIOProcessor> (AudioProcessorGraph::AudioGraphIOProcessor::audioInputNode);
+    if (name == midiInDesc.name)      return std::make_unique<AudioProcessorGraph::AudioGraphIOProcessor> (AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode);
+    if (name == midiOutDesc.name)     return std::make_unique<AudioProcessorGraph::AudioGraphIOProcessor> (AudioProcessorGraph::AudioGraphIOProcessor::midiOutputNode);
+    if (name == midiMonitorDesc.name) return std::make_unique<MidiLoggerPluginDemoProcessor>();
 
-    if (name == SineWaveSynth::getIdentifier()) return std::make_unique<SineWaveSynth> (SineWaveSynth::getPluginDescription());
-    if (name == ReverbPlugin::getIdentifier())  return std::make_unique<ReverbPlugin>  (ReverbPlugin::getPluginDescription());
+    if (name == SineWaveSynth::getIdentifier())     return std::make_unique<SineWaveSynth>     (SineWaveSynth::getPluginDescription());
+    if (name == ReverbPlugin::getIdentifier())      return std::make_unique<ReverbPlugin>      (ReverbPlugin::getPluginDescription());
 
     return {};
 }
@@ -384,8 +392,13 @@ bool InternalPluginFormat::requiresUnblockedMessageThreadDuringCreation (const P
     return false;
 }
 
-void InternalPluginFormat::getAllTypes (Array<PluginDescription>& results)
+Array<PluginDescription> InternalPluginFormat::getAllTypes() const
 {
-    results.add (audioInDesc, audioOutDesc, midiInDesc, midiOutDesc,
-                 SineWaveSynth::getPluginDescription(), ReverbPlugin::getPluginDescription());
+    return { audioInDesc,
+             audioOutDesc,
+             midiInDesc,
+             midiOutDesc,
+             midiMonitorDesc,
+             SineWaveSynth::getPluginDescription(),
+             ReverbPlugin::getPluginDescription() };
 }

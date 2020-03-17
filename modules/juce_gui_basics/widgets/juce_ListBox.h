@@ -484,7 +484,7 @@ public:
         The component will be deleted when setHeaderComponent() is called with a
         different component, or when the listbox is deleted.
     */
-    void setHeaderComponent (Component* newHeaderComponent);
+    void setHeaderComponent (std::unique_ptr<Component> newHeaderComponent);
 
     /** Returns whatever header component was set with setHeaderComponent(). */
     Component* getHeaderComponent() const noexcept      { return headerComponent.get(); }
