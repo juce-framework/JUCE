@@ -551,7 +551,7 @@ BigInteger& BigInteger::operator*= (const BigInteger& other)
         {
             auto uv = (uint64) totalValues[i + j] + (uint64) values[j] * (uint64) mValues[i] + (uint64) c;
             totalValues[i + j] = (uint32) uv;
-            c = uv >> 32;
+            c = static_cast<uint32> (uv >> 32);
         }
 
         totalValues[i + n + 1] = c;

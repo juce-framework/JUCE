@@ -33,7 +33,7 @@
                    juce_audio_plugin_client, juce_audio_processors,
                    juce_audio_utils, juce_core, juce_data_structures, juce_dsp,
                    juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
- exporters:        xcode_mac, vs2019
+ exporters:        xcode_mac, vs2019, linux_make
 
  moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
 
@@ -126,8 +126,6 @@ public:
 
         cabinetType.set (0);
     }
-
-    ~DspModulePluginDemoAudioProcessor() {}
 
     //==============================================================================
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override
@@ -274,9 +272,7 @@ public:
             auto maxSize = static_cast<size_t> (roundToInt (getSampleRate() * (8192.0 / 44100.0)));
             auto assetName = (type == 0 ? "Impulse1.wav" : "Impulse2.wav");
 
-            std::unique_ptr<InputStream> assetInputStream (createAssetInputStream (assetName));
-
-            if (assetInputStream != nullptr)
+            if (auto assetInputStream = createAssetInputStream (assetName))
             {
                 currentCabinetData.reset();
                 assetInputStream->readIntoMemoryBlock (currentCabinetData);
@@ -317,21 +313,21 @@ private:
         //==============================================================================
         DspModulePluginDemoAudioProcessorEditor (DspModulePluginDemoAudioProcessor& p)
             : AudioProcessorEditor    (&p),
-              processor               (p),
-              inputVolumeLabel        ({}, processor.inputVolumeParam->name),
-              outputVolumeLabel       ({}, processor.outputVolumeParam->name),
-              lowPassFilterFreqLabel  ({}, processor.lowPassFilterFreqParam->name),
-              highPassFilterFreqLabel ({}, processor.highPassFilterFreqParam->name),
-              stereoLabel             ({}, processor.stereoParam->name),
-              slopeLabel              ({}, processor.slopeParam->name),
-              waveshaperLabel         ({}, processor.waveshaperParam->name),
-              cabinetTypeLabel        ({}, processor.cabinetTypeParam->name)
+              dspProcessor            (p),
+              inputVolumeLabel        ({}, dspProcessor.inputVolumeParam->name),
+              outputVolumeLabel       ({}, dspProcessor.outputVolumeParam->name),
+              lowPassFilterFreqLabel  ({}, dspProcessor.lowPassFilterFreqParam->name),
+              highPassFilterFreqLabel ({}, dspProcessor.highPassFilterFreqParam->name),
+              stereoLabel             ({}, dspProcessor.stereoParam->name),
+              slopeLabel              ({}, dspProcessor.slopeParam->name),
+              waveshaperLabel         ({}, dspProcessor.waveshaperParam->name),
+              cabinetTypeLabel        ({}, dspProcessor.cabinetTypeParam->name)
         {
             //==============================================================================
-            inputVolumeSlider       .reset (new ParameterSlider (*processor.inputVolumeParam));
-            outputVolumeSlider      .reset (new ParameterSlider (*processor.outputVolumeParam));
-            lowPassFilterFreqSlider .reset (new ParameterSlider (*processor.lowPassFilterFreqParam));
-            highPassFilterFreqSlider.reset (new ParameterSlider (*processor.highPassFilterFreqParam));
+            inputVolumeSlider       .reset (new ParameterSlider (*dspProcessor.inputVolumeParam));
+            outputVolumeSlider      .reset (new ParameterSlider (*dspProcessor.outputVolumeParam));
+            lowPassFilterFreqSlider .reset (new ParameterSlider (*dspProcessor.lowPassFilterFreqParam));
+            highPassFilterFreqSlider.reset (new ParameterSlider (*dspProcessor.highPassFilterFreqParam));
 
             addAndMakeVisible (inputVolumeSlider       .get());
             addAndMakeVisible (outputVolumeSlider      .get());
@@ -358,11 +354,11 @@ private:
             addAndMakeVisible (stereoBox);
 
             auto i = 1;
-            for (auto choice : processor.stereoParam->choices)
+            for (auto choice : dspProcessor.stereoParam->choices)
                 stereoBox.addItem (choice, i++);
 
-            stereoBox.onChange = [this] { processor.stereoParam->operator= (stereoBox.getSelectedItemIndex()); };
-            stereoBox.setSelectedId (processor.stereoParam->getIndex() + 1);
+            stereoBox.onChange = [this] { dspProcessor.stereoParam->operator= (stereoBox.getSelectedItemIndex()); };
+            stereoBox.setSelectedId (dspProcessor.stereoParam->getIndex() + 1);
 
             addAndMakeVisible (stereoLabel);
             stereoLabel.setJustificationType (Justification::centredLeft);
@@ -372,11 +368,11 @@ private:
             addAndMakeVisible(slopeBox);
 
             i = 1;
-            for (auto choice : processor.slopeParam->choices)
+            for (auto choice : dspProcessor.slopeParam->choices)
                 slopeBox.addItem(choice, i++);
 
-            slopeBox.onChange = [this] { processor.slopeParam->operator= (slopeBox.getSelectedItemIndex()); };
-            slopeBox.setSelectedId(processor.slopeParam->getIndex() + 1);
+            slopeBox.onChange = [this] { dspProcessor.slopeParam->operator= (slopeBox.getSelectedItemIndex()); };
+            slopeBox.setSelectedId(dspProcessor.slopeParam->getIndex() + 1);
 
             addAndMakeVisible(slopeLabel);
             slopeLabel.setJustificationType(Justification::centredLeft);
@@ -386,11 +382,11 @@ private:
             addAndMakeVisible (waveshaperBox);
 
             i = 1;
-            for (auto choice : processor.waveshaperParam->choices)
+            for (auto choice : dspProcessor.waveshaperParam->choices)
                 waveshaperBox.addItem (choice, i++);
 
-            waveshaperBox.onChange = [this] { processor.waveshaperParam->operator= (waveshaperBox.getSelectedItemIndex()); };
-            waveshaperBox.setSelectedId (processor.waveshaperParam->getIndex() + 1);
+            waveshaperBox.onChange = [this] { dspProcessor.waveshaperParam->operator= (waveshaperBox.getSelectedItemIndex()); };
+            waveshaperBox.setSelectedId (dspProcessor.waveshaperParam->getIndex() + 1);
 
             addAndMakeVisible (waveshaperLabel);
             waveshaperLabel.setJustificationType (Justification::centredLeft);
@@ -400,11 +396,11 @@ private:
             addAndMakeVisible (cabinetTypeBox);
 
             i = 1;
-            for (auto choice : processor.cabinetTypeParam->choices)
+            for (auto choice : dspProcessor.cabinetTypeParam->choices)
                 cabinetTypeBox.addItem (choice, i++);
 
-            cabinetTypeBox.onChange = [this] { processor.cabinetTypeParam->operator= (cabinetTypeBox.getSelectedItemIndex()); };
-            cabinetTypeBox.setSelectedId (processor.cabinetTypeParam->getIndex() + 1);
+            cabinetTypeBox.onChange = [this] { dspProcessor.cabinetTypeParam->operator= (cabinetTypeBox.getSelectedItemIndex()); };
+            cabinetTypeBox.setSelectedId (dspProcessor.cabinetTypeParam->getIndex() + 1);
 
             addAndMakeVisible (cabinetTypeLabel);
             cabinetTypeLabel.setJustificationType (Justification::centredLeft);
@@ -412,20 +408,18 @@ private:
 
             //==============================================================================
             addAndMakeVisible (cabinetSimButton);
-            cabinetSimButton.onClick = [this] { processor.cabinetSimParam->operator= (cabinetSimButton.getToggleState()); };
-            cabinetSimButton.setButtonText  (processor.cabinetSimParam->name);
-            cabinetSimButton.setToggleState (processor.cabinetSimParam->get(), NotificationType::dontSendNotification);
+            cabinetSimButton.onClick = [this] { dspProcessor.cabinetSimParam->operator= (cabinetSimButton.getToggleState()); };
+            cabinetSimButton.setButtonText  (dspProcessor.cabinetSimParam->name);
+            cabinetSimButton.setToggleState (dspProcessor.cabinetSimParam->get(), NotificationType::dontSendNotification);
 
             addAndMakeVisible (oversamplingButton);
-            oversamplingButton.onClick = [this] { processor.oversamplingParam->operator= (oversamplingButton.getToggleState()); };
-            oversamplingButton.setButtonText  (processor.oversamplingParam->name);
-            oversamplingButton.setToggleState (processor.oversamplingParam->get(), NotificationType::dontSendNotification);
+            oversamplingButton.onClick = [this] { dspProcessor.oversamplingParam->operator= (oversamplingButton.getToggleState()); };
+            oversamplingButton.setButtonText  (dspProcessor.oversamplingParam->name);
+            oversamplingButton.setToggleState (dspProcessor.oversamplingParam->get(), NotificationType::dontSendNotification);
 
             //==============================================================================
             setSize (600, 400);
         }
-
-        ~DspModulePluginDemoAudioProcessorEditor() {}
 
         //==============================================================================
         void paint (Graphics& g) override
@@ -479,7 +473,7 @@ private:
 
     private:
         //==============================================================================
-        DspModulePluginDemoAudioProcessor& processor;
+        DspModulePluginDemoAudioProcessor& dspProcessor;
 
         std::unique_ptr<ParameterSlider> inputVolumeSlider, outputVolumeSlider,
                                          lowPassFilterFreqSlider, highPassFilterFreqSlider;

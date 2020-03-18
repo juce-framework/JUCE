@@ -166,6 +166,9 @@ public:
                 m_body->ApplyTorque(-50.0f);
             }
             break;
+
+        default:
+            break;
         }
     }
 

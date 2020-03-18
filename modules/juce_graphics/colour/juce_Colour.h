@@ -131,11 +131,10 @@ public:
      */
     Colour (PixelAlpha alpha) noexcept;
 
-    /** Creates a colour using floating point hue, saturation and brightness values, and an 8-bit alpha.
+    /** Creates a colour using floating point hue, saturation, brightness and alpha values.
 
-        The floating point values must be between 0.0 and 1.0.
-        An alpha of 0x00 is completely transparent, alpha of 0xff is opaque.
-        Values outside the valid range will be clipped.
+        All values must be between 0.0 and 1.0.
+        Numbers outside the valid range will be clipped.
     */
     static Colour fromHSV (float hue,
                            float saturation,

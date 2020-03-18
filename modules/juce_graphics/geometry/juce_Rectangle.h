@@ -751,10 +751,11 @@ public:
 
         switch (inside)
         {
-            case 1 + 2 + 8:     w = r - otherR; pos.x = otherR; return true;
-            case 1 + 2 + 4:     h = b - otherB; pos.y = otherB; return true;
-            case 2 + 4 + 8:     w = other.pos.x - pos.x; return true;
-            case 1 + 4 + 8:     h = other.pos.y - pos.y; return true;
+            case 1 + 2 + 8:  w = r - otherR; pos.x = otherR; return true;
+            case 1 + 2 + 4:  h = b - otherB; pos.y = otherB; return true;
+            case 2 + 4 + 8:  w = other.pos.x - pos.x;        return true;
+            case 1 + 4 + 8:  h = other.pos.y - pos.y;        return true;
+            default:         break;
         }
 
         return false;

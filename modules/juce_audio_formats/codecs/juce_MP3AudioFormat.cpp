@@ -1878,6 +1878,9 @@ private:
                             *in0++ = *in1++;
                     }
                     break;
+
+                    default:
+                        break;
                 }
             }
 

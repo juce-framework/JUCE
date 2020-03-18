@@ -622,7 +622,7 @@ public:
                     start of the file), or nullptr if the file can't be opened for some reason
         @see createOutputStream, loadFileAsData
     */
-    FileInputStream* createInputStream() const;
+    std::unique_ptr<FileInputStream> createInputStream() const;
 
     /** Creates a stream to write to this file.
 
@@ -655,7 +655,7 @@ public:
                     end of the file), or nullptr if the file can't be opened for some reason
         @see createInputStream, appendData, appendText
     */
-    FileOutputStream* createOutputStream (size_t bufferSize = 0x8000) const;
+    std::unique_ptr<FileOutputStream> createOutputStream (size_t bufferSize = 0x8000) const;
 
     //==============================================================================
     /** Loads a file's contents into memory as a block of binary data.

@@ -1757,7 +1757,7 @@ public:
                 case XK_Delete:
                 case XK_Insert:
                     keyPressed = true;
-                    keyCode = (keyCode & 0xff) | Keys::extendedKeyModifier;
+                    keyCode = static_cast<int> ((keyCode & 0xff) | Keys::extendedKeyModifier);
                     break;
 
                 case XK_Tab:
@@ -1777,7 +1777,7 @@ public:
                     if (sym >= XK_F1 && sym <= XK_F35)
                     {
                         keyPressed = true;
-                        keyCode = (sym & 0xff) | Keys::extendedKeyModifier;
+                        keyCode = static_cast<int> ((sym & 0xff) | Keys::extendedKeyModifier);
                     }
                     break;
             }
@@ -2436,9 +2436,9 @@ private:
         const int keybit = (1 << (keycode & 7));
 
         if (press)
-            Keys::keyStates [keybyte] |= keybit;
+            Keys::keyStates[keybyte] = static_cast<char> (Keys::keyStates[keybyte] | keybit);
         else
-            Keys::keyStates [keybyte] &= ~keybit;
+            Keys::keyStates[keybyte] = static_cast<char> (Keys::keyStates[keybyte] & ~keybit);
     }
 
     static void updateKeyModifiers (int status) noexcept
@@ -3508,7 +3508,7 @@ JUCE_API void JUCE_CALLTYPE Process::hide() {}
 void Desktop::setKioskComponent (Component* comp, bool enableOrDisable, bool /* allowMenusAndBars */)
 {
     if (enableOrDisable)
-        comp->setBounds (getDisplays().getMainDisplay().totalArea);
+        comp->setBounds (getDisplays().findDisplayForRect (comp->getScreenBounds()).totalArea);
 }
 
 void Desktop::allowedOrientationsChanged() {}
@@ -4096,6 +4096,7 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
             return CustomMouseCursorInfo (ImageFileFormat::loadFrom (copyCursorData, copyCursorSize), { 1, 3 }).create();
         }
 
+        case NumStandardCursorTypes:
         default:
             jassertfalse;
             return None;

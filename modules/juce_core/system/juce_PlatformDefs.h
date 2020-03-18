@@ -92,6 +92,26 @@ namespace juce
  #define JUCE_ANALYZER_NORETURN
 #endif
 
+/** Used to silence Wimplicit-fallthrough on Clang and GCC where available
+    as there are a few places in the codebase where we need to do this
+    deliberately and want to ignore the warning.
+*/
+#if JUCE_CLANG
+ #if __has_cpp_attribute(clang::fallthrough)
+  #define JUCE_FALLTHROUGH [[clang::fallthrough]];
+ #else
+  #define JUCE_FALLTHROUGH
+ #endif
+#elif JUCE_GCC
+ #if __GNUC__ >= 7
+  #define JUCE_FALLTHROUGH [[gnu::fallthrough]];
+ #else
+  #define JUCE_FALLTHROUGH
+ #endif
+#else
+ #define JUCE_FALLTHROUGH
+#endif
+
 //==============================================================================
 #if JUCE_MSVC && ! DOXYGEN
  #define JUCE_BLOCK_WITH_FORCED_SEMICOLON(x) \

@@ -20,7 +20,7 @@ class %%content_component_class%%   : public AudioAppComponent
 public:
     //==============================================================================
     %%content_component_class%%();
-    ~%%content_component_class%%();
+    ~%%content_component_class%%() override;
 
     //==============================================================================
     void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;

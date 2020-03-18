@@ -193,7 +193,7 @@ public:
 private:
     //==============================================================================
     CriticalSection lock;
-    uint16 noteStates [128];
+    uint16 noteStates[128];
     MidiBuffer eventsToAdd;
     Array <MidiKeyboardStateListener*> listeners;
 

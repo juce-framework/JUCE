@@ -247,6 +247,7 @@ public:
             case ProjectType::Target::AudioUnitPlugIn:
             case ProjectType::Target::UnityPlugIn:
                 return ! iOS;
+            case ProjectType::Target::unspecified:
             default:
                 break;
         }
@@ -981,6 +982,7 @@ public:
                     xcodeCopyToProductInstallPathAfterBuild = false;
                     break;
 
+                case ProjectType::Target::unspecified:
                 default:
                     // unknown target type!
                     jassertfalse;
@@ -1440,7 +1442,6 @@ public:
                 defines.set ("_NDEBUG", "1");
                 defines.set ("NDEBUG", "1");
                 s.set ("GCC_GENERATE_DEBUGGING_SYMBOLS", "NO");
-                s.set ("GCC_SYMBOLS_PRIVATE_EXTERN", "YES");
                 s.set ("DEAD_CODE_STRIPPING", "YES");
             }
 
@@ -1504,6 +1505,12 @@ public:
                 case AAXPlugIn:         return config.isPluginBinaryCopyStepEnabled() ? config.getAAXBinaryLocationString() : String();
                 case UnityPlugIn:       return config.isPluginBinaryCopyStepEnabled() ? config.getUnityPluginBinaryLocationString() : String();
                 case SharedCodeTarget:  return owner.isiOS() ? "@executable_path/Frameworks" : "@executable_path/../Frameworks";
+                case StaticLibrary:
+                case DynamicLibrary:
+                case AudioUnitv3PlugIn:
+                case StandalonePlugIn:
+                case AggregateTarget:
+                case unspecified:
                 default:                return {};
             }
         }
@@ -2625,21 +2632,14 @@ private:
         s.set ("CLANG_WARN_UNREACHABLE_CODE", "YES");
         s.set ("CLANG_WARN__DUPLICATE_METHOD_MATCH", "YES");
         s.set ("WARNING_CFLAGS", "\"-Wreorder\"");
+        s.set ("GCC_INLINES_ARE_PRIVATE_EXTERN", projectType.isStaticLibrary() ? "NO" : "YES");
 
-        if (projectType.isStaticLibrary())
-        {
-            s.set ("GCC_INLINES_ARE_PRIVATE_EXTERN", "NO");
-            s.set ("GCC_SYMBOLS_PRIVATE_EXTERN", "NO");
-        }
-        else
-        {
-            s.set ("GCC_INLINES_ARE_PRIVATE_EXTERN", "YES");
-        }
+        // GCC_SYMBOLS_PRIVATE_EXTERN only takes effect if ENABLE_TESTABILITY is off
+        s.set ("ENABLE_TESTABILITY", "NO");
+        s.set ("GCC_SYMBOLS_PRIVATE_EXTERN", "YES");
 
         if (config.isDebug())
         {
-            s.set ("ENABLE_TESTABILITY", "YES");
-
             if (config.getOSXArchitectureString() == osxArch_Default)
                 s.set ("ONLY_ACTIVE_ARCH", "YES");
         }
@@ -2678,8 +2678,12 @@ private:
             if (iOS && isPushNotificationsEnabled())
                 xcodeFrameworks.addIfNotAlreadyThere ("UserNotifications");
 
-            if (isiOS() && project.getConfigFlag ("JUCE_USE_CAMERA").get())
+            if (iOS
+                && project.getEnabledModules().isModuleEnabled ("juce_video")
+                && project.isConfigFlagEnabled ("JUCE_USE_CAMERA", false))
+            {
                 xcodeFrameworks.addIfNotAlreadyThere ("ImageIO");
+            }
 
             xcodeFrameworks.addTokens (getExtraFrameworksString(), ",;", "\"'");
             xcodeFrameworks.trim();
@@ -3168,7 +3172,7 @@ private:
             for (auto& option : getHardenedRuntimeOptions())
                 entitlements.set (option, "<true/>");
 
-        if (isAppSandboxEnabled() || (project.isAudioPluginProject() && target.type == XcodeTarget::AudioUnitv3PlugIn))
+        if (isAppSandboxEnabled() || (isOSX() && project.isAudioPluginProject() && target.type == XcodeTarget::AudioUnitv3PlugIn))
         {
             entitlements.set ("com.apple.security.app-sandbox", "<true/>");
 

@@ -87,6 +87,31 @@ struct Compiler
         return Program (compiledObjectCode.begin(), (uint32) compiledObjectCode.size());
     }
 
+    static File resolveIncludePath (String include, Array<File> searchPaths)
+    {
+        if (File::isAbsolutePath (include) && File (include).existsAsFile())
+            return { include };
+
+        auto fileName = include.fromLastOccurrenceOf ("/", false, false);
+
+        for (auto path : searchPaths)
+        {
+            if (path == File())
+                continue;
+
+            if (! path.isDirectory())
+                path = path.getParentDirectory();
+
+            if (path.getChildFile (include).existsAsFile())
+                return path.getChildFile (include);
+
+            if (path.getChildFile (fileName).existsAsFile())
+                return path.getChildFile (fileName);
+        }
+
+        return {};
+    }
+
     /** After a successful call to compile(), this contains the bytecode generated.
         A littlefoot::Program object can be created directly from this array.
     */
@@ -522,27 +547,12 @@ private:
                 return {};
             }
 
-            if (File::isAbsolutePath (include) && File (include).existsAsFile())
-                return { include };
+            auto path = Compiler::resolveIncludePath (include, searchPaths);
 
-            auto fileName = include.fromLastOccurrenceOf ("/", false, false);
+            if (! path.existsAsFile())
+                location.throwError ("File not found: " + include);
 
-            for (auto path : searchPaths)
-            {
-                if (path == File())
-                    continue;
-
-                if (! path.isDirectory())
-                    path = path.getParentDirectory();
-
-                if (path.getChildFile (include).existsAsFile())
-                    return path.getChildFile (include);
-
-                if (path.getChildFile (fileName).existsAsFile())
-                    return path.getChildFile (fileName);
-            }
-
-            location.throwError ("File not found: " + include);
+            return path;
         }
 
         //TODO:   should there be a max array size?

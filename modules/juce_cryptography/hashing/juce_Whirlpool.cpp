@@ -93,7 +93,7 @@ private:
                 bufferBits = bufferPos = 0;
             }
 
-            buffer[bufferPos] = (uint8_t) (b << (8 - bufferRem));
+            buffer[bufferPos] = static_cast<uint8_t> (b << (8 - bufferRem));
             bufferBits += bufferRem;
 
             numBits -= 8;
@@ -103,7 +103,7 @@ private:
         if (numBits > 0)
         {
             b = (source[sourcePos] << sourceGap) & 0xff;
-            buffer[bufferPos] |= (b >> bufferRem);
+            buffer[bufferPos] = static_cast<uint8_t> (buffer[bufferPos] | (b >> bufferRem));
         }
         else
         {
@@ -126,7 +126,7 @@ private:
                 bufferBits = bufferPos = 0;
             }
 
-            buffer[bufferPos] = (uint8_t) (b << (8 - bufferRem));
+            buffer[bufferPos] = static_cast<uint8_t> (b << (8 - bufferRem));
             bufferBits += numBits;
         }
     }
@@ -134,7 +134,8 @@ private:
     void finalize (uint8_t* result) noexcept
     {
         // append a '1'-bit
-        buffer[bufferPos++] |= 0x80u >> (bufferBits & 7);
+        buffer[bufferPos] = static_cast<uint8_t> (buffer[bufferPos] | (0x80u >> (bufferBits & 7)));
+        bufferPos++;
 
         // pad with zero bits to complete (N*(64*8) - (32*8)) bits
         if (bufferPos > 32)

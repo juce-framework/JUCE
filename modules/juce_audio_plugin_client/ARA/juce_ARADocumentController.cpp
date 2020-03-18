@@ -1,6 +1,6 @@
 #include "juce_ARADocumentController.h"
 
-const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFactoryConfig () noexcept
+const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFactoryConfig() noexcept
 {
     using namespace ARA;
     using namespace PlugIn;
@@ -8,14 +8,14 @@ const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFacto
     class JUCEARAFactoryConfig : public FactoryConfig
     {
     public:
-        JUCEARAFactoryConfig ()
+        JUCEARAFactoryConfig()
         {
             String compatibleDocumentArchiveIDString = JucePlugin_ARACompatibleArchiveIDs;
-            if (compatibleDocumentArchiveIDString.isNotEmpty ())
+            if (compatibleDocumentArchiveIDString.isNotEmpty())
             {
                 compatibleDocumentArchiveIDStrings = StringArray::fromLines (compatibleDocumentArchiveIDString);
                 for (auto& compatibleID : compatibleDocumentArchiveIDStrings)
-                    compatibleDocumentArchiveIDs.push_back (compatibleID.toRawUTF8 ());
+                    compatibleDocumentArchiveIDs.push_back (compatibleID.toRawUTF8());
             }
             
             // Update analyzeable content types
@@ -49,20 +49,20 @@ const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFacto
             }
         }
 
-        const char* getFactoryID () const noexcept override { return JucePlugin_ARAFactoryID; }
-        const char* getPlugInName () const noexcept override { return JucePlugin_Name; }
-        const char* getManufacturerName () const noexcept override { return JucePlugin_Manufacturer; }
-        const char* getInformationURL () const noexcept override { return JucePlugin_ManufacturerWebsite; }
-        const char* getVersion () const noexcept override { return JucePlugin_VersionString; }
+        const char* getFactoryID() const noexcept override { return JucePlugin_ARAFactoryID; }
+        const char* getPlugInName() const noexcept override { return JucePlugin_Name; }
+        const char* getManufacturerName() const noexcept override { return JucePlugin_Manufacturer; }
+        const char* getInformationURL() const noexcept override { return JucePlugin_ManufacturerWebsite; }
+        const char* getVersion() const noexcept override { return JucePlugin_VersionString; }
 
-        virtual const char* getDocumentArchiveID () const noexcept override { return JucePlugin_ARADocumentArchiveID; }
-        virtual ARASize getCompatibleDocumentArchiveIDsCount () const noexcept override { return compatibleDocumentArchiveIDs.size(); }
-        virtual const ARAPersistentID* getCompatibleDocumentArchiveIDs () const noexcept override { return compatibleDocumentArchiveIDs.empty () ? nullptr : compatibleDocumentArchiveIDs.data(); }
+        virtual const char* getDocumentArchiveID() const noexcept override { return JucePlugin_ARADocumentArchiveID; }
+        virtual ARASize getCompatibleDocumentArchiveIDsCount() const noexcept override { return compatibleDocumentArchiveIDs.size(); }
+        virtual const ARAPersistentID* getCompatibleDocumentArchiveIDs() const noexcept override { return compatibleDocumentArchiveIDs.empty() ? nullptr : compatibleDocumentArchiveIDs.data(); }
 
-        virtual ARASize getAnalyzeableContentTypesCount () const noexcept override { return analyzeableContentTypes.size(); }
-        virtual const ARAContentType* getAnalyzeableContentTypes () const noexcept override { return analyzeableContentTypes.empty () ? nullptr : analyzeableContentTypes.data(); }
+        virtual ARASize getAnalyzeableContentTypesCount() const noexcept override { return analyzeableContentTypes.size(); }
+        virtual const ARAContentType* getAnalyzeableContentTypes() const noexcept override { return analyzeableContentTypes.empty() ? nullptr : analyzeableContentTypes.data(); }
 
-        virtual ARAPlaybackTransformationFlags getSupportedPlaybackTransformationFlags () const noexcept override { return kARAPlaybackTransformationNoChanges; }
+        virtual ARAPlaybackTransformationFlags getSupportedPlaybackTransformationFlags() const noexcept override { return kARAPlaybackTransformationNoChanges; }
 
     private:
         StringArray compatibleDocumentArchiveIDStrings;
@@ -71,7 +71,7 @@ const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFacto
         ARAPlaybackTransformationFlags supportedPlaybackTransformationFlags;
     };
 
-    return new JUCEARAFactoryConfig ();
+    return new JUCEARAFactoryConfig();
 }
 
 namespace juce
@@ -141,7 +141,7 @@ void ARADocumentController::notifyAudioSourceAnalysisProgressCompleted (ARAAudio
 
 //==============================================================================
 
-ARA::PlugIn::Document* ARADocumentController::doCreateDocument () noexcept
+ARA::PlugIn::Document* ARADocumentController::doCreateDocument() noexcept
 {
     return new ARADocument (static_cast<ARADocumentController*> (this));
 }
@@ -158,25 +158,25 @@ void ARADocumentController::didEndEditing() noexcept
 
 //==============================================================================
 
-bool ARADocumentController::doRestoreObjectsFromStream (InputStream& /*input*/, const ARA::PlugIn::RestoreObjectsFilter* /*filter*/) noexcept
+bool ARADocumentController::doRestoreObjectsFromStream (ARAInputStream& /*input*/, const ARA::PlugIn::RestoreObjectsFilter* /*filter*/) noexcept
 {
     return true;
 }
 
-bool ARADocumentController::doStoreObjectsToStream (OutputStream& /*output*/, const ARA::PlugIn::StoreObjectsFilter* /*filter*/) noexcept
+bool ARADocumentController::doStoreObjectsToStream (ARAOutputStream& /*output*/, const ARA::PlugIn::StoreObjectsFilter* /*filter*/) noexcept
 {
     return true;
 }
 
 bool ARADocumentController::doRestoreObjectsFromArchive (ARA::PlugIn::HostArchiveReader* archiveReader, const ARA::PlugIn::RestoreObjectsFilter* filter) noexcept
 {
-    ArchiveReader reader (archiveReader);
+    ARAInputStream reader (archiveReader);
     return doRestoreObjectsFromStream (reader, filter);
 }
 
 bool ARADocumentController::doStoreObjectsToArchive (ARA::PlugIn::HostArchiveWriter* archiveWriter, const ARA::PlugIn::StoreObjectsFilter* filter) noexcept
 {
-    ArchiveWriter writer (archiveWriter);
+    ARAOutputStream writer (archiveWriter);
     return doStoreObjectsToStream (writer, filter);
 }
 
@@ -392,21 +392,25 @@ void ARADocumentController::timerCallback()
 
 //==============================================================================
 
-ARADocumentController::ArchiveReader::ArchiveReader (ARA::PlugIn::HostArchiveReader* reader)
+ARADocumentController::ARAInputStream::ARAInputStream (ARA::PlugIn::HostArchiveReader* reader)
 : archiveReader (reader), 
   size (reader->getArchiveSize())
 {}
 
-int ARADocumentController::ArchiveReader::read (void* destBuffer, int maxBytesToRead)
+int ARADocumentController::ARAInputStream::read (void* destBuffer, int maxBytesToRead)
 {
     const int bytesToRead = std::min (maxBytesToRead, (int) (size - position));
     if (! archiveReader->readBytesFromArchive (position, bytesToRead, (ARA::ARAByte*) destBuffer))
+    {
+        failure = true;
         return 0;
+    }
+
     position += bytesToRead;
     return bytesToRead;
 }
 
-bool ARADocumentController::ArchiveReader::setPosition (int64 newPosition)
+bool ARADocumentController::ARAInputStream::setPosition (int64 newPosition)
 {
     if (newPosition >= (int64) size)
         return false;
@@ -414,24 +418,25 @@ bool ARADocumentController::ArchiveReader::setPosition (int64 newPosition)
     return true;
 }
 
-bool ARADocumentController::ArchiveReader::isExhausted()
+bool ARADocumentController::ARAInputStream::isExhausted()
 {
     return position >= size;
 }
 
-ARADocumentController::ArchiveWriter::ArchiveWriter (ARA::PlugIn::HostArchiveWriter* writer)
+ARADocumentController::ARAOutputStream::ARAOutputStream (ARA::PlugIn::HostArchiveWriter* writer)
 : archiveWriter (writer)
 {}
 
-bool ARADocumentController::ArchiveWriter::write (const void* dataToWrite, size_t numberOfBytes)
+bool ARADocumentController::ARAOutputStream::write (const void* dataToWrite, size_t numberOfBytes)
 {
-    if (! archiveWriter->writeBytesToArchive (position, numberOfBytes, (const ARA::ARAByte*) dataToWrite))
+    if (!archiveWriter->writeBytesToArchive (position, numberOfBytes, (const ARA::ARAByte*) dataToWrite))
         return false;
+
     position += numberOfBytes;
     return true;
 }
 
-bool ARADocumentController::ArchiveWriter::setPosition (int64 newPosition)
+bool ARADocumentController::ARAOutputStream::setPosition (int64 newPosition)
 {
     if (newPosition > (int64) std::numeric_limits<size_t>::max())
         return false;

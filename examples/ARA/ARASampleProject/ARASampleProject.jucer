@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="v5FTSA" name="ARASampleProject" projectType="audioplug" jucerVersion="5.4.5"
+<JUCERPROJECT id="v5FTSA" name="ARASampleProject" projectType="audioplug" jucerVersion="5.4.7"
               pluginCode="AraT" pluginFormats="buildAU,buildVST3,enableARA"
               userNotes="Special thanks to SoundRadix for coming up with this example!"
               companyName="ARA Demo Company" companyWebsite="https://www.arademocompany.com"
@@ -28,6 +28,8 @@
         <FILE id="OC5DXa" name="TrackHeaderView.h" compile="0" resource="0"
               file="Source/TrackHeaderView.h"/>
       </GROUP>
+      <FILE id="azisMP" name="ARASampleProjectAudioModification.h" compile="0"
+            resource="0" file="Source/ARASampleProjectAudioModification.h"/>
       <FILE id="IE9maq" name="ARASampleProjectAudioProcessor.cpp" compile="1"
             resource="0" file="Source/ARASampleProjectAudioProcessor.cpp"/>
       <FILE id="EmX660" name="ARASampleProjectAudioProcessor.h" compile="0"

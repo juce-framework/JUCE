@@ -75,7 +75,7 @@ void MidiKeyboardState::noteOnInternal  (const int midiChannel, const int midiNo
 {
     if (isPositiveAndBelow (midiNoteNumber, 128))
     {
-        noteStates [midiNoteNumber] |= (1 << (midiChannel - 1));
+        noteStates[midiNoteNumber] = static_cast<uint16> (noteStates[midiNoteNumber] | (1 << (midiChannel - 1)));
 
         for (int i = listeners.size(); --i >= 0;)
             listeners.getUnchecked(i)->handleNoteOn (this, midiChannel, midiNoteNumber, velocity);
@@ -100,7 +100,7 @@ void MidiKeyboardState::noteOffInternal  (const int midiChannel, const int midiN
 {
     if (isNoteOn (midiChannel, midiNoteNumber))
     {
-        noteStates [midiNoteNumber] &= ~(1 << (midiChannel - 1));
+        noteStates[midiNoteNumber] = static_cast<uint16> (noteStates[midiNoteNumber] & ~(1 << (midiChannel - 1)));
 
         for (int i = listeners.size(); --i >= 0;)
             listeners.getUnchecked(i)->handleNoteOff (this, midiChannel, midiNoteNumber, velocity);

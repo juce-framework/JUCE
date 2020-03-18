@@ -21,8 +21,10 @@ DocumentView::DocumentView (ARAEditorView* ev, const AudioPlayHead::CurrentPosit
     calculateTimeRange();
 
     playHeadView.setAlwaysOnTop (true);
+    playHeadView.setInterceptsMouseClicks (false, false);
     playbackRegionsView.addAndMakeVisible (playHeadView);
     timeRangeSelectionView.setAlwaysOnTop (true);
+    timeRangeSelectionView.setInterceptsMouseClicks (false, false);
     playbackRegionsView.addAndMakeVisible (timeRangeSelectionView);
 
     playbackRegionsViewport.setScrollBarsShown (true, true, false, false);
@@ -209,12 +211,12 @@ void DocumentView::timerCallback()
 
         if (scrollFollowsPlayHead)
         {
-            const auto visibleRange = getVisibleTimeRange ();
-            if (lastReportedPosition.timeInSeconds < visibleRange.getStart () || lastReportedPosition.timeInSeconds > visibleRange.getEnd ())
-                playbackRegionsViewport.setViewPosition (playbackRegionsViewport.getViewPosition ().withX (getPlaybackRegionsViewsXForTime (lastReportedPosition.timeInSeconds)));
+            const auto visibleRange = getVisibleTimeRange();
+            if (lastReportedPosition.timeInSeconds < visibleRange.getStart() || lastReportedPosition.timeInSeconds > visibleRange.getEnd())
+                playbackRegionsViewport.setViewPosition (playbackRegionsViewport.getViewPosition().withX (getPlaybackRegionsViewsXForTime (lastReportedPosition.timeInSeconds)));
         };
 
-        playHeadView.repaint ();
+        playHeadView.repaint();
     }
 }
 

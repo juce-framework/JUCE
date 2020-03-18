@@ -229,6 +229,9 @@ bool ValueTreeSynchroniser::applyChange (ValueTree& root, const void* data, size
             break;
         }
 
+        case ValueTreeSynchroniserHelpers::fullSync:
+            break;
+
         default:
             jassertfalse; // Seem to have received some corrupt data?
             break;

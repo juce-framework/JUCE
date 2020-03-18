@@ -115,7 +115,7 @@ struct SIMDFallbackOps
         auto retval = static_cast<ScalarType> (0);
 
         for (size_t i = 0; i < n; ++i)
-            retval += a.s[i];
+            retval = static_cast<ScalarType> (retval + a.s[i]);
 
         return retval;
     }

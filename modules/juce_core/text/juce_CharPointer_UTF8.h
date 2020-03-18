@@ -124,7 +124,7 @@ public:
             while ((static_cast<uint8> (n) & bit) != 0 && bit > 0x8)
             {
                 ++data;
-                bit >>= 1;
+                bit = static_cast<uint8> (bit >> 1);
             }
         }
 

@@ -89,6 +89,7 @@ static const char* getDisplayOrientation()
         case Desktop::upsideDown:           return "Upside-down";
         case Desktop::rotatedClockwise:     return "Rotated Clockwise";
         case Desktop::rotatedAntiClockwise: return "Rotated Anti-clockwise";
+        case Desktop::allOrientations:      return "All";
         default: jassertfalse; break;
     }
 

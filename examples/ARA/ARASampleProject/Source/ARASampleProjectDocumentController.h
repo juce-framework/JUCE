@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JuceHeader.h"
+#include "ARASampleProjectAudioModification.h"
 
 //==============================================================================
 // The document controller is the central point of communication between the ARA host and our plug-in.
@@ -11,6 +11,11 @@ public:
     ARASampleProjectDocumentController (const ARA::ARADocumentControllerHostInstance* instance) noexcept
         :  ARADocumentController (instance)
     {}
+
+    ARA::PlugIn::AudioModification* doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, const ARA::PlugIn::AudioModification* optionalModificationToClone) noexcept override;
+
+    bool doRestoreObjectsFromStream (ARAInputStream& input, const ARA::PlugIn::RestoreObjectsFilter* filter) noexcept override;
+    bool doStoreObjectsToStream (ARAOutputStream& output, const ARA::PlugIn::StoreObjectsFilter* filter) noexcept override;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARASampleProjectDocumentController)

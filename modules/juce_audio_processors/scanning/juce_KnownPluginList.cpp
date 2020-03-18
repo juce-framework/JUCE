@@ -297,6 +297,8 @@ struct PluginSorter
             case KnownPluginList::sortByFormat:             diff = first.pluginFormatName.compare (second.pluginFormatName); break;
             case KnownPluginList::sortByFileSystemLocation: diff = lastPathPart (first.fileOrIdentifier).compare (lastPathPart (second.fileOrIdentifier)); break;
             case KnownPluginList::sortByInfoUpdateTime:     diff = compare (first.lastInfoUpdateTime, second.lastInfoUpdateTime); break;
+            case KnownPluginList::sortAlphabetically:
+            case KnownPluginList::defaultOrder:
             default: break;
         }
 

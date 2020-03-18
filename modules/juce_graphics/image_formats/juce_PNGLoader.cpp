@@ -66,6 +66,9 @@ namespace pnglibNamespace
   #if JUCE_CLANG
    #pragma clang diagnostic push
    #pragma clang diagnostic ignored "-Wsign-conversion"
+   #if __has_warning ("-Wimplicit-fallthrough")
+    #pragma clang diagnostic ignored "-Wimplicit-fallthrough"
+   #endif
    #if __has_warning("-Wzero-as-null-pointer-constant")
     #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
    #endif
@@ -78,6 +81,9 @@ namespace pnglibNamespace
    #pragma GCC diagnostic push
    #pragma GCC diagnostic ignored "-Wsign-conversion"
    #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+   #if __GNUC__ >= 7
+    #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+   #endif
   #endif
 
   #undef check

@@ -395,11 +395,8 @@ public:
 
                 setInterceptsMouseClicks (! hasBeenPurchased, ! hasBeenPurchased);
 
-                if (auto* assetStream = createAssetInputStream (String ("Purchases/" + String (imageResourceName)).toRawUTF8()))
-                {
-                    std::unique_ptr<InputStream> fileStream (assetStream);
+                if (auto fileStream = createAssetInputStream (String ("Purchases/" + String (imageResourceName)).toRawUTF8()))
                     avatar = PNGImageFormat().decodeImage (*fileStream);
-                }
             }
         }
     private:
@@ -569,10 +566,8 @@ private:
         {
             auto assetName = "Purchases/" + soundNames[idx] + String (phraseListBox.getSelectedRow()) + ".ogg";
 
-            if (auto* assetStream = createAssetInputStream (assetName.toRawUTF8()))
+            if (auto fileStream = createAssetInputStream (assetName.toRawUTF8()))
             {
-                std::unique_ptr<InputStream> fileStream (assetStream);
-
                 currentPhraseData.reset();
                 fileStream->readIntoMemoryBlock (currentPhraseData);
 

@@ -492,9 +492,9 @@ inline std::unique_ptr<AudioFormatReader> makeAudioFormatReader (AudioFormatMana
                                                                  const void* sampleData,
                                                                  size_t dataSize)
 {
-    return std::unique_ptr<AudioFormatReader> (manager.createReaderFor (new MemoryInputStream (sampleData,
-                                                                                               dataSize,
-                                                                                               false)));
+    return std::unique_ptr<AudioFormatReader> (manager.createReaderFor (std::make_unique<MemoryInputStream> (sampleData,
+                                                                                                             dataSize,
+                                                                                                             false)));
 }
 
 inline std::unique_ptr<AudioFormatReader> makeAudioFormatReader (AudioFormatManager& manager,
@@ -2062,11 +2062,9 @@ public:
     SamplerAudioProcessor()
         : AudioProcessor (BusesProperties().withOutput ("Output", AudioChannelSet::stereo(), true))
     {
-        if (auto* asset = createAssetInputStream ("cello.wav"))
+        if (auto inputStream = createAssetInputStream ("cello.wav"))
         {
-            std::unique_ptr<InputStream> inputStream (asset);
             inputStream->readIntoMemoryBlock (mb);
-
             readerFactory.reset (new MemoryAudioFormatReaderFactory (mb.getData(), mb.getSize()));
         }
 

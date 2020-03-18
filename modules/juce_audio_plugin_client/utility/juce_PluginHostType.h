@@ -260,6 +260,7 @@ public:
             case VBVSTScanner:             return "VBVSTScanner";
             case ViennaEnsemblePro:        return "Vienna Ensemble Pro";
             case WaveBurner:               return "WaveBurner";
+            case UnknownHost:
             default:                       break;
         }
 

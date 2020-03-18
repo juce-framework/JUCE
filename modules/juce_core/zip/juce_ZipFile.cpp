@@ -541,7 +541,7 @@ private:
     {
         if (stream == nullptr)
         {
-            stream.reset (file.createInputStream());
+            stream = file.createInputStream();
 
             if (stream == nullptr)
                 return false;
@@ -577,7 +577,7 @@ private:
         target.writeInt ((int) checksum);
         target.writeInt ((int) (uint32) compressedSize);
         target.writeInt ((int) (uint32) uncompressedSize);
-        target.writeShort ((short) storedPathname.toUTF8().sizeInBytes() - 1);
+        target.writeShort (static_cast<short> (storedPathname.toUTF8().sizeInBytes() - 1));
         target.writeShort (0); // extra field length
     }
 

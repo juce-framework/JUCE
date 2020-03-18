@@ -26,6 +26,8 @@ public:
 
     void paint (Graphics&) override;
 
+    void mouseDoubleClick (const MouseEvent& event) override;
+
     // ChangeListener overrides
     void changeListenerCallback (ChangeBroadcaster*) override;
 

@@ -36,6 +36,10 @@ namespace zlibNamespace
    #pragma clang diagnostic ignored "-Wconversion"
    #pragma clang diagnostic ignored "-Wshadow"
    #pragma clang diagnostic ignored "-Wdeprecated-register"
+   #pragma clang diagnostic ignored "-Wswitch-enum"
+   #if __has_warning ("-Wimplicit-fallthrough")
+    #pragma clang diagnostic ignored "-Wimplicit-fallthrough"
+   #endif
    #if __has_warning("-Wzero-as-null-pointer-constant")
     #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
    #endif
@@ -50,6 +54,12 @@ namespace zlibNamespace
    #pragma GCC diagnostic ignored "-Wsign-conversion"
    #pragma GCC diagnostic ignored "-Wshadow"
    #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+   #pragma GCC diagnostic ignored "-Wswitch-enum"
+   #pragma GCC diagnostic ignored "-Wswitch-default"
+   #pragma GCC diagnostic ignored "-Wredundant-decls"
+   #if __GNUC__ >= 7
+    #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+   #endif
   #endif
 
   #undef OS_CODE
@@ -151,7 +161,7 @@ public:
             {
             case Z_STREAM_END:
                 finished = true;
-                // deliberate fall-through
+                JUCE_FALLTHROUGH
             case Z_OK:
                 data += dataSize - stream.avail_in;
                 dataSize = (z_uInt) stream.avail_in;
@@ -166,7 +176,7 @@ public:
             case Z_DATA_ERROR:
             case Z_MEM_ERROR:
                 error = true;
-
+                JUCE_FALLTHROUGH
             default:
                 break;
             }
