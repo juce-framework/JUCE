@@ -411,7 +411,7 @@ public:
             }
             else
             {
-                if (squareWaveY[x - 1] == 1)
+                if (x > 0 && squareWaveY[x - 1] == 1)
                     squareWaveY[x - 1] = 255;
 
                 squareWaveY[x] = 13;

@@ -364,6 +364,7 @@ void AudioProcessor::setPlayConfigDetails (int newNumIns, int newNumOuts, double
     jassert (success && newNumIns == getTotalNumInputChannels() && newNumOuts == getTotalNumOutputChannels());
 
     setRateAndBufferSizeDetails (newSampleRate, newBlockSize);
+    ignoreUnused (success);
 }
 
 void AudioProcessor::setRateAndBufferSizeDetails (double newSampleRate, int newBlockSize) noexcept
