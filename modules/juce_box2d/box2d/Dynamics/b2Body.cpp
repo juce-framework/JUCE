@@ -224,6 +224,7 @@ void b2Body::DestroyFixture(b2Fixture* fixture)
 
 	// You tried to remove a shape that is not attached to this body.
 	b2Assert(found);
+    juce::ignoreUnused (found);
 
 	// Destroy any contacts associated with the fixture.
 	b2ContactEdge* edge = m_contactList;
