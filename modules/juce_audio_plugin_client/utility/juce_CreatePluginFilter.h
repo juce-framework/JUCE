@@ -24,22 +24,32 @@
   ==============================================================================
 */
 
-#include "../juce_audio_plugin_client.h"
-#include "juce_CreatePluginFilter.h"
+#pragma once
+
+#include <juce_audio_processors/juce_audio_processors.h>
+
+/** Somewhere in the codebase of your plugin, you need to implement this function
+    and make it return a new instance of the filter subclass that you're building.
+*/
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
 namespace juce
 {
-    #define Component juce::Component
 
-   #if JUCE_MAC
-    #define Point juce::Point
-    void repostCurrentNSEvent();
+inline AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType type)
+{
+    AudioProcessor::setTypeOfNextNewPlugin (type);
+    AudioProcessor* const pluginInstance = ::createPluginFilter();
+    AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Undefined);
+
+    // your createPluginFilter() method must return an object!
+    jassert (pluginInstance != nullptr && pluginInstance->wrapperType == type);
+
+   #if JucePlugin_Enable_ARA
+    jassert (dynamic_cast<AudioProcessorARAExtension*> (pluginInstance) != nullptr);
    #endif
 
-    //==============================================================================
-    inline const PluginHostType& getHostType()
-    {
-        static PluginHostType hostType;
-        return hostType;
-    }
+    return pluginInstance;
 }
+
+} // namespace juce

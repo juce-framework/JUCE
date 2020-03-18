@@ -138,7 +138,7 @@ public:
         If none of the registered formats can open the stream, it'll return nullptr.
         If it returns a reader, it's the caller's responsibility to delete the reader.
     */
-    AudioFormatReader* createReaderFor (InputStream* audioFileStream);
+    AudioFormatReader* createReaderFor (std::unique_ptr<InputStream> audioFileStream);
 
 private:
     //==============================================================================

@@ -531,8 +531,7 @@ StringArray PIPGenerator::getPluginCharacteristics() const
                  Ids::pluginEditorRequiresKeys.toString() };
     else if (name == "AUv3SynthPlugin" || name == "MultiOutSynthPlugin")
         return { Ids::pluginIsSynth.toString(),
-                 Ids::pluginWantsMidiIn.toString(),
-                 Ids::pluginIsSynth.toString() };
+                 Ids::pluginWantsMidiIn.toString() };
     else if (name == "ArpeggiatorPlugin")
         return { Ids::pluginWantsMidiIn.toString(),
                  Ids::pluginProducesMidiOut.toString(),

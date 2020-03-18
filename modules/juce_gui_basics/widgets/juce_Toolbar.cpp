@@ -728,9 +728,10 @@ private:
                 int selectedStyle = 0;
                 switch (bar.getStyle())
                 {
-                    case Toolbar::iconsOnly:        selectedStyle = 1; break;
-                    case Toolbar::iconsWithText:    selectedStyle = 2; break;
-                    case Toolbar::textOnly:         selectedStyle = 3; break;
+                    case Toolbar::iconsOnly:      selectedStyle = 1; break;
+                    case Toolbar::iconsWithText:  selectedStyle = 2; break;
+                    case Toolbar::textOnly:       selectedStyle = 3; break;
+                    default:                      break;
                 }
 
                 styleBox.setSelectedId (selectedStyle);
@@ -757,6 +758,7 @@ private:
                 case 1:   toolbar.setStyle (Toolbar::iconsOnly); break;
                 case 2:   toolbar.setStyle (Toolbar::iconsWithText); break;
                 case 3:   toolbar.setStyle (Toolbar::textOnly); break;
+                default:  break;
             }
 
             palette.resized(); // to make it update the styles

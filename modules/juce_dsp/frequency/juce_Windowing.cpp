@@ -145,6 +145,7 @@ void WindowingFunction<FloatType>::fillWindowingTables (FloatType* samples, size
         }
         break;
 
+        case numWindowingMethods:
         default:
             jassertfalse;
             break;
@@ -175,15 +176,16 @@ const char* WindowingFunction<FloatType>::getWindowingMethodName (WindowingMetho
 {
     switch (type)
     {
-        case rectangular:       return "Rectangular";
-        case triangular:        return "Triangular";
-        case hann:              return "Hann";
-        case hamming:           return "Hamming";
-        case blackman:          return "Blackman";
-        case blackmanHarris:    return "Blackman-Harris";
-        case flatTop:           return "Flat Top";
-        case kaiser:            return "Kaiser";
-        default: jassertfalse;  return "";
+        case rectangular:          return "Rectangular";
+        case triangular:           return "Triangular";
+        case hann:                 return "Hann";
+        case hamming:              return "Hamming";
+        case blackman:             return "Blackman";
+        case blackmanHarris:       return "Blackman-Harris";
+        case flatTop:              return "Flat Top";
+        case kaiser:               return "Kaiser";
+        case numWindowingMethods:
+        default: jassertfalse;     return "";
     }
 }
 

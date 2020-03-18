@@ -45,6 +45,10 @@ namespace ARA
 namespace juce
 {
 
+#if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+ extern void setThreadDPIAwarenessForWindow (HWND);
+#endif
+
 using namespace Steinberg;
 
 //==============================================================================
@@ -1147,7 +1151,6 @@ struct VST3PluginWindow : public AudioProcessorEditor,
                           public ComponentMovementWatcher,
                          #if ! JUCE_MAC
                           public ComponentPeer::ScaleFactorListener,
-                          public Timer,
                          #endif
                           public IPlugFrame
 {
@@ -1162,20 +1165,22 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
         warnOnFailure (view->setFrame (this));
 
-        Steinberg::IPlugViewContentScaleSupport* scaleInterface = nullptr;
+       #if ! JUCE_MAC
         view->queryInterface (Steinberg::IPlugViewContentScaleSupport::iid, (void**) &scaleInterface);
-
-        if (scaleInterface != nullptr)
-        {
-            pluginRespondsToDPIChanges = true;
-            scaleInterface->release();
-        }
+       #endif
 
         resizeToFit();
     }
 
     ~VST3PluginWindow() override
     {
+       #if ! JUCE_MAC
+        if (scaleInterface != nullptr)
+            scaleInterface->release();
+
+        removeScaleFactorListeners();
+       #endif
+
         warnOnFailure (view->removed());
         warnOnFailure (view->setFrame (nullptr));
 
@@ -1186,12 +1191,6 @@ struct VST3PluginWindow : public AudioProcessorEditor,
        #endif
 
         view = nullptr;
-
-       #if ! JUCE_MAC
-        for (int i = 0; i < ComponentPeer::getNumPeers(); ++i)
-            if (auto* p = ComponentPeer::getPeer (i))
-                p->removeScaleFactorListener (this);
-       #endif
     }
 
     JUCE_DECLARE_VST3_COM_REF_METHODS
@@ -1220,6 +1219,8 @@ struct VST3PluginWindow : public AudioProcessorEditor,
     void componentPeerChanged() override
     {
        #if ! JUCE_MAC
+        removeScaleFactorListeners();
+
         if (auto* topPeer = getTopLevelComponent()->getPeer())
             topPeer->addScaleFactorListener (this);
        #endif
@@ -1238,7 +1239,7 @@ struct VST3PluginWindow : public AudioProcessorEditor,
             auto pos = (topComp->getLocalPoint (this, Point<int>()) * nativeScaleFactor).roundToInt();
            #endif
 
-            recursiveResize = true;
+            const ScopedValueSetter<bool> recursiveResizeSetter (recursiveResize, true);
 
             ViewRect rect;
 
@@ -1251,9 +1252,14 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
                 auto w = roundToInt (rect.getWidth()  / nativeScaleFactor);
                 auto h = roundToInt (rect.getHeight() / nativeScaleFactor);
+
                 setSize (w, h);
 
                #if JUCE_WINDOWS
+                #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+                 setThreadDPIAwarenessForWindow (pluginHandle);
+                #endif
+
                 SetWindowPos (pluginHandle, 0,
                               pos.x, pos.y, rect.getWidth(), rect.getHeight(),
                               isVisible() ? SWP_SHOWWINDOW : SWP_HIDEWINDOW);
@@ -1268,6 +1274,10 @@ struct VST3PluginWindow : public AudioProcessorEditor,
                 warnOnFailure (view->getSize (&rect));
 
                #if JUCE_WINDOWS
+                #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+                 setThreadDPIAwarenessForWindow (pluginHandle);
+                #endif
+
                 SetWindowPos (pluginHandle, 0,
                               pos.x, pos.y, rect.getWidth(), rect.getHeight(),
                               isVisible() ? SWP_SHOWWINDOW : SWP_HIDEWINDOW);
@@ -1278,19 +1288,12 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
             // Some plugins don't update their cursor correctly when mousing out the window
             Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
-
-            recursiveResize = false;
         }
     }
 
     void componentVisibilityChanged() override
     {
         attachPluginWindow();
-
-       #if ! JUCE_MAC
-        if (auto* topPeer = getTopLevelComponent()->getPeer())
-            nativeScaleFactorChanged ((float) topPeer->getPlatformScaleFactor());
-       #endif
 
         if (! hasDoneInitialResize)
             resizeToFit();
@@ -1306,46 +1309,8 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
         nativeScaleFactor = (float) newScaleFactor;
 
-        if (pluginRespondsToDPIChanges)
-        {
-            Steinberg::IPlugViewContentScaleSupport* scaleInterface = nullptr;
-            view->queryInterface (Steinberg::IPlugViewContentScaleSupport::iid, (void**) &scaleInterface);
-
-            if (scaleInterface != nullptr)
-            {
-                scaleInterface->setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) nativeScaleFactor);
-                scaleInterface->release();
-            }
-        }
-        else
-        {
-            // If the plug-in doesn't respond to scale factor changes then we need to scale our window, but
-            // we can't do it immediately as it may cause a recursive resize loop so fire up a timer
-            startTimerHz (4);
-        }
-    }
-
-    bool willCauseRecursiveResize (int w, int h)
-    {
-        auto newScreenBounds = Rectangle<int> (w, h).withPosition (getScreenPosition());
-
-        return Desktop::getInstance().getDisplays().findDisplayForRect (newScreenBounds).scale != nativeScaleFactor;
-    }
-
-    void timerCallback() override
-    {
-        ViewRect rect;
-        warnOnFailure (view->getSize (&rect));
-
-        auto w = roundToInt ((rect.right - rect.left) / nativeScaleFactor);
-        auto h = roundToInt ((rect.bottom - rect.top) / nativeScaleFactor);
-
-        if (willCauseRecursiveResize (w, h))
-            return;
-
-        // window can be resized safely now
-        stopTimer();
-        setSize (w, h);
+        if (scaleInterface != nullptr)
+            scaleInterface->setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) nativeScaleFactor);
     }
    #endif
 
@@ -1360,12 +1325,11 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
     tresult PLUGIN_API resizeView (IPlugView* incomingView, ViewRect* newSize) override
     {
-        if (incomingView != nullptr
-             && newSize != nullptr
-             && incomingView == view)
+        if (incomingView != nullptr && newSize != nullptr && incomingView == view)
         {
             resizeWithRect (embeddedComponent, *newSize, nativeScaleFactor);
             setSize (embeddedComponent.getWidth(), embeddedComponent.getHeight());
+
             return kResultTrue;
         }
 
@@ -1374,6 +1338,56 @@ struct VST3PluginWindow : public AudioProcessorEditor,
     }
 
 private:
+    //==============================================================================
+    static void resizeWithRect (Component& comp, const ViewRect& rect, float scaleFactor)
+    {
+        comp.setBounds (roundToInt (rect.left / scaleFactor),
+                        roundToInt (rect.top  / scaleFactor),
+                        jmax (10, std::abs (roundToInt (rect.getWidth()  / scaleFactor))),
+                        jmax (10, std::abs (roundToInt (rect.getHeight() / scaleFactor))));
+    }
+
+    void attachPluginWindow()
+    {
+        if (pluginHandle == nullptr)
+        {
+           #if JUCE_WINDOWS
+            if (auto* topComp = getTopLevelComponent())
+            {
+                peer.reset (embeddedComponent.createNewPeer (0, topComp->getWindowHandle()));
+                pluginHandle = (HandleFormat) peer->getNativeHandle();
+                nativeScaleFactor = (float) peer->getPlatformScaleFactor();
+            }
+           #elif JUCE_MAC
+            embeddedComponent.setBounds (getLocalBounds());
+            addAndMakeVisible (embeddedComponent);
+            pluginHandle = (NSView*) embeddedComponent.getView();
+           #endif
+
+            if (pluginHandle != nullptr)
+                warnOnFailure (view->attached (pluginHandle, defaultVST3WindowType));
+            else
+                jassertfalse;
+
+           #if ! JUCE_MAC
+            if (auto* topPeer = getTopLevelComponent()->getPeer())
+            {
+                nativeScaleFactor = 1.0f; // force update
+                nativeScaleFactorChanged ((float) topPeer->getPlatformScaleFactor());
+            }
+           #endif
+        }
+    }
+
+   #if ! JUCE_MAC
+    void removeScaleFactorListeners()
+    {
+         for (int i = 0; i < ComponentPeer::getNumPeers(); ++i)
+             if (auto* p = ComponentPeer::getPeer (i))
+                 p->removeScaleFactorListener (this);
+    }
+   #endif
+
     //==============================================================================
     Atomic<int> refCount { 1 };
     ComSmartPtr<IPlugView> view;
@@ -1402,43 +1416,14 @@ private:
     HandleFormat pluginHandle = {};
     bool recursiveResize = false;
 
+   #if ! JUCE_MAC
+    Steinberg::IPlugViewContentScaleSupport* scaleInterface = nullptr;
+   #endif
+
     float nativeScaleFactor = 1.0f;
     bool hasDoneInitialResize = false;
-    bool pluginRespondsToDPIChanges = false;
 
     //==============================================================================
-    static void resizeWithRect (Component& comp, const ViewRect& rect, float scaleFactor)
-    {
-        comp.setBounds (roundToInt (rect.left / scaleFactor),
-                        roundToInt (rect.top  / scaleFactor),
-                        jmax (10, std::abs (roundToInt (rect.getWidth()  / scaleFactor))),
-                        jmax (10, std::abs (roundToInt (rect.getHeight() / scaleFactor))));
-    }
-
-    void attachPluginWindow()
-    {
-        if (pluginHandle == nullptr)
-        {
-           #if JUCE_WINDOWS
-            if (auto* topComp = getTopLevelComponent())
-                peer.reset (embeddedComponent.createNewPeer (0, topComp->getWindowHandle()));
-            else
-                peer = nullptr;
-
-            if (peer != nullptr)
-                pluginHandle = (HandleFormat) peer->getNativeHandle();
-           #elif JUCE_MAC
-            embeddedComponent.setBounds (getLocalBounds());
-            addAndMakeVisible (embeddedComponent);
-            pluginHandle = (NSView*) embeddedComponent.getView();
-            jassert (pluginHandle != nil);
-           #endif
-
-            if (pluginHandle != nullptr)
-                warnOnFailure (view->attached (pluginHandle, defaultVST3WindowType));
-        }
-    }
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3PluginWindow)
 };
 

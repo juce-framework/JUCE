@@ -203,6 +203,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
                 if (juce_argv != nullptr && juce_argc > 0)
                     return File::getCurrentWorkingDirectory().getChildFile (String (juce_argv[0]));
                 // deliberate fall-through...
+                JUCE_FALLTHROUGH
 
             case currentExecutableFile:
                 return juce_getExecutableFile();

@@ -118,6 +118,7 @@ struct DemoFlexPanel   : public juce::Component
             case 3:  flexItem.alignSelf = FlexItem::AlignSelf::flexEnd;   break;
             case 4:  flexItem.alignSelf = FlexItem::AlignSelf::center;    break;
             case 5:  flexItem.alignSelf = FlexItem::AlignSelf::stretch;   break;
+            default: break;
         }
 
         refreshLayout();

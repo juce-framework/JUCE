@@ -220,7 +220,7 @@ private:
     {
         if (reader == nullptr && source != nullptr)
             if (auto* audioFileStream = source->createInputStream())
-                reader.reset (owner.formatManagerToUse.createReaderFor (audioFileStream));
+                reader.reset (owner.formatManagerToUse.createReaderFor (std::unique_ptr<InputStream> (audioFileStream)));
     }
 
     bool readNextBlock()

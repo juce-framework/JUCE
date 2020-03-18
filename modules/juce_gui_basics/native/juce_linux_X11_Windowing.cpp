@@ -4093,6 +4093,7 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
             return CustomMouseCursorInfo (ImageFileFormat::loadFrom (copyCursorData, copyCursorSize), { 1, 3 }).create();
         }
 
+        case NumStandardCursorTypes:
         default:
             jassertfalse;
             return None;

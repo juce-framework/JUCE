@@ -2143,6 +2143,7 @@ void LookAndFeel_V2::createTabButtonShape (TabBarButton& button, Path& p, bool /
             p.lineTo (-overhang, -overhang);
             break;
 
+        case TabbedButtonBar::TabsAtTop:
         default:
             p.startNewSubPath (0.0f, h);
             p.lineTo (indent, 0.0f);
