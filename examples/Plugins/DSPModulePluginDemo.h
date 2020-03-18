@@ -198,6 +198,8 @@ public:
         }
     }
 
+    using AudioProcessor::processBlock;
+
     void reset() override
     {
         lowPassFilter .reset();
@@ -217,7 +219,7 @@ public:
     //==============================================================================
     bool acceptsMidi() const override                                     { return false; }
     bool producesMidi() const override                                    { return false; }
-    const String getName() const override                                 { return JucePlugin_Name; }
+    const String getName() const override                                 { return "DSPModulePluginDemo"; }
     double getTailLengthSeconds() const override                          { return 0.0; }
 
     //==============================================================================

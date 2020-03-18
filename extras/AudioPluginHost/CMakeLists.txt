@@ -48,5 +48,6 @@ target_compile_definitions(AudioPluginHost PRIVATE
 target_link_libraries(AudioPluginHost PRIVATE
     juce::juce_audio_utils
     juce::juce_cryptography
+    juce::juce_dsp
     juce::juce_opengl
     juce::juce_video)

@@ -191,10 +191,12 @@ void PluginGraph::newDocument()
 
     InternalPluginFormat internalFormat;
 
-    addPlugin (internalFormat.audioInDesc,  { 0.5,  0.1 });
-    addPlugin (internalFormat.midiInDesc,   { 0.25, 0.1 });
-    addPlugin (internalFormat.audioOutDesc, { 0.5,  0.9 });
-    addPlugin (internalFormat.midiOutDesc,  { 0.25, 0.9 });
+    jassert (internalFormat.getAllTypes().size() > 3);
+
+    addPlugin (internalFormat.getAllTypes()[0], { 0.5,  0.1 });
+    addPlugin (internalFormat.getAllTypes()[1], { 0.25, 0.1 });
+    addPlugin (internalFormat.getAllTypes()[2], { 0.5,  0.9 });
+    addPlugin (internalFormat.getAllTypes()[3], { 0.25, 0.9 });
 
     MessageManager::callAsync ([this]
     {

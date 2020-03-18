@@ -275,7 +275,7 @@ public:
     }
 
     //==============================================================================
-    const String getName() const override                             { return JucePlugin_Name; }
+    const String getName() const override                             { return "AudioPluginDemo"; }
     bool acceptsMidi() const override                                 { return true; }
     bool producesMidi() const override                                { return true; }
     double getTailLengthSeconds() const override                      { return 0.0; }

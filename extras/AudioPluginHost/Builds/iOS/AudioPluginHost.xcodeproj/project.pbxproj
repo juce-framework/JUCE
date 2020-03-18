@@ -145,6 +145,10 @@
 			isa = PBXBuildFile;
 			fileRef = 5EF1D381F42AA8764597F189;
 		};
+		A5F0B3B7175766C8AF1D6C3E = {
+			isa = PBXBuildFile;
+			fileRef = 36689CA4EFC2AF183A0848AE;
+		};
 		7DE202DC1D876F49266D9E7D = {
 			isa = PBXBuildFile;
 			fileRef = 8290D7BAC160B3A56B66891A;
@@ -245,6 +249,13 @@
 			name = CoreMedia.framework;
 			path = System/Library/Frameworks/CoreMedia.framework;
 			sourceTree = SDKROOT;
+		};
+		36689CA4EFC2AF183A0848AE = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.objcpp;
+			name = "include_juce_dsp.mm";
+			path = "../../JuceLibraryCode/include_juce_dsp.mm";
+			sourceTree = "SOURCE_ROOT";
 		};
 		37E4D5C341406B7072120006 = {
 			isa = PBXFileReference;
@@ -426,6 +437,13 @@
 			lastKnownFileType = sourcecode.cpp.objcpp;
 			name = "include_juce_gui_basics.mm";
 			path = "../../JuceLibraryCode/include_juce_gui_basics.mm";
+			sourceTree = "SOURCE_ROOT";
+		};
+		9320A145F2A8ACD687D6608E = {
+			isa = PBXFileReference;
+			lastKnownFileType = file;
+			name = "juce_dsp";
+			path = "../../../../modules/juce_dsp";
 			sourceTree = "SOURCE_ROOT";
 		};
 		938AE72315C6C93949F6220E = {
@@ -679,6 +697,7 @@
 				3D57FE2A8877F12A61054726,
 				FA21631C5536EA3DF55C7FA6,
 				B86B918291E1090C6A720971,
+				9320A145F2A8ACD687D6608E,
 				59842A98E5EBBC54B50C04CD,
 				94CB96C8E4B51F52776C2638,
 				938AE72315C6C93949F6220E,
@@ -702,6 +721,7 @@
 				683CEE986A2467C850FE99E6,
 				B8E24A5CEE6B7055537725CF,
 				5EF1D381F42AA8764597F189,
+				36689CA4EFC2AF183A0848AE,
 				8290D7BAC160B3A56B66891A,
 				82800DBA287EF4BAB13B42FB,
 				8FE7B37CDE0818DB27BDDEBD,
@@ -808,6 +828,7 @@
 					"JUCE_MODULE_AVAILABLE_juce_core=1",
 					"JUCE_MODULE_AVAILABLE_juce_cryptography=1",
 					"JUCE_MODULE_AVAILABLE_juce_data_structures=1",
+					"JUCE_MODULE_AVAILABLE_juce_dsp=1",
 					"JUCE_MODULE_AVAILABLE_juce_events=1",
 					"JUCE_MODULE_AVAILABLE_juce_graphics=1",
 					"JUCE_MODULE_AVAILABLE_juce_gui_basics=1",
@@ -819,7 +840,7 @@
 					"JUCE_DIRECTSOUND=1",
 					"JUCE_ALSA=1",
 					"JUCE_USE_FLAC=0",
-					"JUCE_USE_OGGVORBIS=0",
+					"JUCE_USE_OGGVORBIS=1",
 					"JUCE_PLUGINHOST_VST3=1",
 					"JUCE_PLUGINHOST_AU=1",
 					"JUCE_PLUGINHOST_LADSPA=1",
@@ -886,6 +907,7 @@
 					"JUCE_MODULE_AVAILABLE_juce_core=1",
 					"JUCE_MODULE_AVAILABLE_juce_cryptography=1",
 					"JUCE_MODULE_AVAILABLE_juce_data_structures=1",
+					"JUCE_MODULE_AVAILABLE_juce_dsp=1",
 					"JUCE_MODULE_AVAILABLE_juce_events=1",
 					"JUCE_MODULE_AVAILABLE_juce_graphics=1",
 					"JUCE_MODULE_AVAILABLE_juce_gui_basics=1",
@@ -897,7 +919,7 @@
 					"JUCE_DIRECTSOUND=1",
 					"JUCE_ALSA=1",
 					"JUCE_USE_FLAC=0",
-					"JUCE_USE_OGGVORBIS=0",
+					"JUCE_USE_OGGVORBIS=1",
 					"JUCE_PLUGINHOST_VST3=1",
 					"JUCE_PLUGINHOST_AU=1",
 					"JUCE_PLUGINHOST_LADSPA=1",
@@ -1077,6 +1099,7 @@
 				76A80851698FC773D2479B4E,
 				E4A926EF695823F0F13268FF,
 				A09E93F1B354E1FF8B3E9ABE,
+				A5F0B3B7175766C8AF1D6C3E,
 				7DE202DC1D876F49266D9E7D,
 				075C54DDDBDEA5AAD2F60154,
 				2C3D221D2AA87F07B3F1044D,

@@ -363,20 +363,26 @@ void MainHostWindow::addPluginsToMenu (PopupMenu& m)
         int i = 0;
 
         for (auto& t : internalTypes)
-            m.addItem (++i, t.name + " (" + t.pluginFormatName + ")",
-                       graphHolder->graph->getNodeForName (t.name) == nullptr);
+            m.addItem (++i, t.name + " (" + t.pluginFormatName + ")");
     }
 
     m.addSeparator();
 
-    pluginDescriptions = knownPluginList.getTypes();
-    KnownPluginList::addToMenu (m, pluginDescriptions, pluginSortMethod);
+    auto pluginDescriptionsToShow = knownPluginList.getTypes();
+
+    // This avoids showing the internal types again later on in the list
+    pluginDescriptionsToShow.removeIf ([] (PluginDescription& desc)
+    {
+        return desc.pluginFormatName == InternalPluginFormat::getIdentifier();
+    });
+
+    KnownPluginList::addToMenu (m, pluginDescriptionsToShow, pluginSortMethod);
 }
 
 PluginDescription MainHostWindow::getChosenType (const int menuID) const
 {
-    if (menuID >= 1 && menuID < 1 + internalTypes.size())
-        return internalTypes [menuID - 1];
+    if (menuID >= 1 && menuID < (int) (1 + internalTypes.size()))
+        return internalTypes[(size_t) (menuID - 1)];
 
     return pluginDescriptions[KnownPluginList::getIndexChosenByMenu (pluginDescriptions, menuID)];
 }

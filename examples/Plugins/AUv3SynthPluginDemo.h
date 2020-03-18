@@ -259,9 +259,9 @@ private:
     //==============================================================================
     AudioProcessorParameter* getParameter (const String& paramId)
     {
-        if (auto* processor = getAudioProcessor())
+        if (auto* audioProcessor = getAudioProcessor())
         {
-            auto& params = processor->getParameters();
+            auto& params = audioProcessor->getParameters();
 
             for (auto p : params)
             {
@@ -356,13 +356,14 @@ public:
             reverb.processStereo (buffer.getWritePointer (0), buffer.getWritePointer (1), buffer.getNumSamples());
     }
 
+    using AudioProcessor::processBlock;
+
     //==============================================================================
     void releaseResources() override                                            { currentRecording.setSize (1, 1); }
 
     //==============================================================================
     bool acceptsMidi() const override                                           { return true; }
     bool producesMidi() const override                                          { return false; }
-    bool silenceInProducesSilenceOut() const override                           { return false; }
     double getTailLengthSeconds() const override                                { return 0.0; }
 
     //==============================================================================
@@ -383,6 +384,7 @@ public:
             case 1:  return "Singing";
             case 2:  return "Pinched Balloon";
             case 3:  return "Gazeebo";
+            default: break;
         }
 
         return "<Unknown>";
@@ -408,6 +410,7 @@ public:
         roomSizeParam->setValueNotifyingHost    (stream.readFloat());
 
     }
+
 private:
     //==============================================================================
     void loadNewSampleBinary (const void* data, int dataSize, const char* format)

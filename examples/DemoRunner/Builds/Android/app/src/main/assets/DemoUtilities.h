@@ -67,10 +67,19 @@ inline File getExamplesDirectory() noexcept
     if (exampleDir.exists())
         return exampleDir;
 
-    int numTries = 0; // keep track of the number of parent directories so we don't go on endlessly
+    // keep track of the number of parent directories so we don't go on endlessly
+    for (int numTries = 0; numTries < 15; ++numTries)
+    {
+        if (currentFile.getFileName() == "examples")
+            return currentFile;
 
-    while (currentFile.getFileName() != "examples" && numTries++ < 15)
+        const auto sibling = currentFile.getSiblingFile ("examples");
+
+        if (sibling.exists())
+            return sibling;
+
         currentFile = currentFile.getParentDirectory();
+    }
 
     return currentFile;
    #endif

@@ -73,12 +73,49 @@ private:
     std::vector<MidiMessage> messages = std::vector<MidiMessage> (queueSize);
 };
 
+// Stores the last N messages. Safe to access from the message thread only.
+class MidiListModel
+{
+public:
+    template <typename It>
+    void addMessages (It begin, It end)
+    {
+        const auto numNewMessages = (int) std::distance (begin, end);
+        const auto numToAdd = juce::jmin (numToStore, numNewMessages);
+        const auto numToRemove = jmax (0, (int) messages.size() + numToAdd - numToStore);
+        messages.erase (messages.begin(), std::next (messages.begin(), numToRemove));
+        messages.insert (messages.end(), std::prev (end, numToAdd), end);
+
+        if (onChange != nullptr)
+            onChange();
+    }
+
+    void clear()
+    {
+        messages.clear();
+
+        if (onChange != nullptr)
+            onChange();
+    }
+
+    const MidiMessage& operator[] (size_t ind) const     { return messages[ind]; }
+
+    size_t size() const                                  { return messages.size(); }
+
+    std::function<void()> onChange;
+
+private:
+    static constexpr auto numToStore = 1000;
+    std::vector<MidiMessage> messages;
+};
+
 //==============================================================================
 class MidiTable  : public Component,
                    private TableListBoxModel
 {
 public:
-    MidiTable()
+    MidiTable (MidiListModel& m)
+        : messages (m)
     {
         addAndMakeVisible (table);
 
@@ -92,26 +129,13 @@ public:
             header->addColumn ("Data",    dataColumn,    200, 30, -1, TableHeaderComponent::notSortable);
             return header;
         }());
+
+        messages.onChange = [&] { table.updateContent(); };
     }
+
+    ~MidiTable() override { messages.onChange = nullptr; }
 
     void resized() override { table.setBounds (getLocalBounds()); }
-
-    template <typename It>
-    void addMessages (It begin, It end)
-    {
-        const auto numNewMessages = (int) std::distance (begin, end);
-        const auto numToAdd = juce::jmin (numToStore, numNewMessages);
-        const auto numToRemove = jmax (0, (int) messages.size() + numToAdd - numToStore);
-        messages.erase (messages.begin(), std::next (messages.begin(), numToRemove));
-        messages.insert (messages.end(), end - numToAdd, end);
-        table.updateContent();
-    }
-
-    void clear()
-    {
-        messages.clear();
-        table.updateContent();
-    }
 
 private:
     enum
@@ -185,21 +209,23 @@ private:
         return {};
     }
 
-    static constexpr auto numToStore = 1000;
-    std::vector<MidiMessage> messages;
-
+    MidiListModel& messages;
     TableListBox table;
 };
 
 //==============================================================================
-class MidiLoggerPluginDemoProcessor  : public AudioPluginInstance
+class MidiLoggerPluginDemoProcessor  : public AudioProcessor,
+                                       private Timer
 {
 public:
     MidiLoggerPluginDemoProcessor()
-        : AudioPluginInstance (BusesProperties())
+        : AudioProcessor (BusesProperties())
     {
         state.addChild ({ "uiState", { { "width",  500 }, { "height", 300 } }, {} }, -1, nullptr);
+        startTimerHz (60);
     }
+
+    ~MidiLoggerPluginDemoProcessor() override { stopTimer(); }
 
     void processBlock (AudioBuffer<float>& audio,  MidiBuffer& midi) override { process (audio, midi); }
     void processBlock (AudioBuffer<double>& audio, MidiBuffer& midi) override { process (audio, midi); }
@@ -211,7 +237,7 @@ public:
 
     const String getName() const override                                     { return "MIDILogger"; }
     bool acceptsMidi() const override                                         { return true; }
-    bool producesMidi() const override                                        { return false; }
+    bool producesMidi() const override                                        { return true; }
     double getTailLengthSeconds() const override                              { return 0.0; }
 
     int getNumPrograms() override                                             { return 0; }
@@ -235,28 +261,15 @@ public:
             state = ValueTree::fromXml (*xmlState);
     }
 
-    void fillInPluginDescription (PluginDescription& d) const override
-    {
-        d.name              = getName();
-        d.uid               = d.name.hashCode();
-        d.category          = "Utility";
-        d.pluginFormatName  = "Internal";
-        d.manufacturerName  = "JUCE";
-        d.version           = "1.0";
-        d.isInstrument      = false;
-        d.numInputChannels  = getTotalNumInputChannels();
-        d.numOutputChannels = getTotalNumOutputChannels();
-    }
-
 private:
     class Editor  : public AudioProcessorEditor,
-                    private Timer,
                     private Value::Listener
     {
     public:
         explicit Editor (MidiLoggerPluginDemoProcessor& ownerIn)
             : AudioProcessorEditor (ownerIn),
-              owner (ownerIn)
+              owner (ownerIn),
+              table (owner.model)
         {
             addAndMakeVisible (table);
             addAndMakeVisible (clearButton);
@@ -269,15 +282,7 @@ private:
             lastUIWidth. addListener (this);
             lastUIHeight.addListener (this);
 
-            clearButton.onClick = [&] { table.clear(); };
-
-            startTimerHz (60);
-        }
-
-        ~Editor() override
-        {
-            stopTimer();
-            owner.editorBeingDeleted (this);
+            clearButton.onClick = [&] { owner.model.clear(); };
         }
 
         void paint (Graphics& g) override
@@ -297,13 +302,6 @@ private:
         }
 
     private:
-        void timerCallback() override
-        {
-            std::vector<MidiMessage> messages;
-            owner.queue.pop (std::back_inserter (messages));
-            table.addMessages (messages.begin(), messages.end());
-        }
-
         void valueChanged (Value&) override
         {
             setSize (lastUIWidth.getValue(), lastUIHeight.getValue());
@@ -317,6 +315,13 @@ private:
         Value lastUIWidth, lastUIHeight;
     };
 
+    void timerCallback() override
+    {
+        std::vector<MidiMessage> messages;
+        queue.pop (std::back_inserter (messages));
+        model.addMessages (messages.begin(), messages.end());
+    }
+
     template <typename Element>
     void process (AudioBuffer<Element>& audio, MidiBuffer& midi)
     {
@@ -326,6 +331,8 @@ private:
 
     ValueTree state { "state" };
     MidiQueue queue;
+    MidiListModel model; // The data to show in the UI. We keep it around in the processor so that
+                         // the view is persistent even when the plugin UI is closed and reopened.
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiLoggerPluginDemoProcessor)
 };

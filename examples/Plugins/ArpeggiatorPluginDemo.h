@@ -71,7 +71,7 @@ public:
         notes.clear();
         currentNote = 0;
         lastNoteValue = -1;
-        time = 0.0;
+        time = 0;
         rate = static_cast<float> (sampleRate);
     }
 
@@ -118,6 +118,8 @@ public:
 
         time = (time + numSamples) % noteDuration;
     }
+
+    using AudioProcessor::processBlock;
 
     //==============================================================================
     bool isMidiEffect() const override                     { return true; }

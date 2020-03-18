@@ -270,6 +270,8 @@ public:
         }
     }
 
+    using AudioProcessor::processBlock;
+
     //==============================================================================
     AudioProcessorEditor* createEditor() override { return new SurroundEditor (*this); }
     bool hasEditor() const override               { return true; }

@@ -105,6 +105,8 @@ public:
         }
     }
 
+    using AudioProcessor::processBlock;
+
     //==============================================================================
     AudioProcessorEditor* createEditor() override            { return new GenericAudioProcessorEditor (*this); }
     bool hasEditor() const override                          { return true; }

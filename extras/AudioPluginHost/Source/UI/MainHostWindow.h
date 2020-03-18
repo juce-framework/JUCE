@@ -91,7 +91,7 @@ private:
     AudioDeviceManager deviceManager;
     AudioPluginFormatManager formatManager;
 
-    Array<PluginDescription> internalTypes;
+    std::vector<PluginDescription> internalTypes;
     KnownPluginList knownPluginList;
     KnownPluginList::SortMethod pluginSortMethod;
     Array<PluginDescription> pluginDescriptions;

@@ -79,8 +79,6 @@ public:
         g.fillRoundedRectangle (area.toFloat(), 6.0);
     }
 
-    void resized() override {}
-
     //==============================================================================
     // Called from the audio thread.
     void update (float newLevel)
@@ -215,7 +213,7 @@ public:
     bool hasEditor() const override                                    { return true; }
 
     //==============================================================================
-    const String getName() const override                              { return JucePlugin_Name; }
+    const String getName() const override                              { return "InterAppAudioEffectPlugin"; }
     bool acceptsMidi() const override                                  { return false; }
     bool producesMidi() const override                                 { return false; }
     double getTailLengthSeconds() const override                       { return 0.0; }
