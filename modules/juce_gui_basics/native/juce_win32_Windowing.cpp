@@ -56,7 +56,7 @@ extern void juce_repeatLastProcessPriority();
 extern void juce_checkCurrentlyFocusedTopLevelWindow();  // in juce_TopLevelWindow.cpp
 extern bool juce_isRunningInWine();
 
-using CheckEventBlockedByModalComps = bool (*)(const MSG&);
+using CheckEventBlockedByModalComps = bool (*) (const MSG&);
 extern CheckEventBlockedByModalComps isEventBlockedByModalComps;
 
 static bool shouldDeactivateTitleBar = true;
@@ -536,7 +536,7 @@ JUCE_API double getScaleFactorForWindow (HWND h)
         hasChecked = true;
 
         if (localGetDPIForWindow == nullptr)
-            localGetDPIForWindow = (GetDPIForWindowFunc)getUser32Function ("GetDpiForWindow");
+            localGetDPIForWindow = (GetDPIForWindowFunc) getUser32Function ("GetDpiForWindow");
     }
 
     if (localGetDPIForWindow != nullptr)

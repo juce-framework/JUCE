@@ -393,7 +393,7 @@ namespace NumberToStringConverters
 
         do
         {
-            *--t = '0' + (char) (v % 10);
+            *--t = static_cast<char> ('0' + (char) (v % 10));
             v /= 10;
 
         } while (v > 0);
@@ -1912,7 +1912,7 @@ static String hexToString (Type v)
     do
     {
         *--t = hexDigits [(int) (v & 15)];
-        v >>= 4;
+        v = static_cast<Type> (v >> 4);
 
     } while (v != 0);
 

@@ -2277,7 +2277,7 @@ public:
     //==============================================================================
     int getNumPrograms() override                        { return programNames.size(); }
     const String getProgramName (int index) override     { return programNames[index]; }
-    int getCurrentProgram() override                     { return jmax (0, (int) editController->getParamNormalized (programParameterID) * (programNames.size() - 1)); }
+    int getCurrentProgram() override                     { return jmax (0, roundToInt (editController->getParamNormalized (programParameterID) * (programNames.size() - 1))); }
     void changeProgramName (int, const String&) override {}
 
     void setCurrentProgram (int program) override

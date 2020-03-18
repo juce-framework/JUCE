@@ -265,7 +265,7 @@ namespace SocketHelpers
                 break;
             }
 
-            bytesRead += bytesThisTime;
+            bytesRead = static_cast<int> (bytesRead + bytesThisTime);
 
             if (! blockUntilSpecifiedAmountHasArrived)
                 break;
