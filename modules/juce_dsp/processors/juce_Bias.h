@@ -90,7 +90,7 @@ public:
     //==============================================================================
     /** Returns the result of processing a single sample. */
     template <typename SampleType>
-    SampleType processSample (SampleType inputSample) const noexcept
+    SampleType processSample (SampleType inputSample) noexcept
     {
         return inputSample + bias.getNextValue();
     }

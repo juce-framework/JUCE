@@ -360,7 +360,9 @@ private:
         if (! isLibrary())
             mo << "SET(BINARY_NAME \"juce_jni\")" << newLine << newLine;
 
-        if (project.getConfigFlag ("JUCE_USE_ANDROID_OBOE").get())
+        auto useOboe = project.getEnabledModules().isModuleEnabled ("juce_audio_devices") && project.isConfigFlagEnabled ("JUCE_USE_ANDROID_OBOE", false);
+
+        if (useOboe)
         {
             String oboePath (androidOboeRepositoryPath.get().toString().trim().quoted());
 
@@ -386,7 +388,7 @@ private:
 
             mo << "    \"${ANDROID_NDK}/sources/android/cpufeatures\"" << newLine;
 
-            if (project.getConfigFlag ("JUCE_USE_ANDROID_OBOE").get())
+            if (useOboe)
                 mo << "    \"${OBOE_DIR}/include\"" << newLine;
 
             mo << ")" << newLine << newLine;
@@ -541,7 +543,7 @@ private:
             mo << "    \"cpufeatures\"" << newLine;
         }
 
-        if (project.getConfigFlag ("JUCE_USE_ANDROID_OBOE").get())
+        if (useOboe)
             mo << "    \"oboe\"" << newLine;
 
         mo << ")" << newLine;

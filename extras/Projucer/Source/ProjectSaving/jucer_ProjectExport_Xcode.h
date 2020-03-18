@@ -497,6 +497,7 @@ public:
 
         props.add (new TextPropertyComponent (subprojectsValue, "Xcode Subprojects", 8192, true),
                    "Paths to Xcode projects that should be added to the build (one per line). "
+                   "These can be absolute or relative to the build directory. "
                    "The names of the required build products can be specified after a colon, comma separated, "
                    "e.g. \"path/to/MySubProject.xcodeproj: MySubProject, OtherTarget\". "
                    "If no build products are specified, all build products associated with a subproject will be added.");
@@ -2665,8 +2666,12 @@ private:
             if (iOS && isPushNotificationsEnabled())
                 xcodeFrameworks.addIfNotAlreadyThere ("UserNotifications");
 
-            if (isiOS() && project.getConfigFlag ("JUCE_USE_CAMERA").get())
+            if (iOS
+                && project.getEnabledModules().isModuleEnabled ("juce_video")
+                && project.isConfigFlagEnabled ("JUCE_USE_CAMERA", false))
+            {
                 xcodeFrameworks.addIfNotAlreadyThere ("ImageIO");
+            }
 
             xcodeFrameworks.addTokens (getExtraFrameworksString(), ",;", "\"'");
             xcodeFrameworks.trim();
@@ -2785,19 +2790,8 @@ private:
             if (! subprojectPath.endsWith (".xcodeproj"))
                 subprojectPath += ".xcodeproj";
 
-            File subprojectFile;
-
-            if (File::isAbsolutePath (subprojectPath))
-            {
-                subprojectFile = subprojectPath;
-            }
-            else
-            {
-                subprojectFile = getProject().getProjectFolder().getChildFile (subprojectPath);
-
-                RelativePath p (subprojectPath, RelativePath::projectFolder);
-                subprojectPath = p.rebased (getProject().getProjectFolder(), getTargetFolder(), RelativePath::buildTargetFolder).toUnixStyle();
-            }
+            File subprojectFile = File::isAbsolutePath (subprojectPath) ? subprojectPath
+                                                                        : getTargetFolder().getChildFile (subprojectPath);
 
             if (! subprojectFile.isDirectory())
                 continue;
@@ -2818,8 +2812,8 @@ private:
             if (availableBuildProducts.empty())
                 continue;
 
-            auto subprojectFileType = getFileType (RelativePath (subprojectPath, RelativePath::projectFolder));
-            auto subprojectFileID = addFileOrFolderReference (subprojectPath, "<group>", subprojectFileType);
+            auto subprojectFileType = getFileType (RelativePath (subprojectFile.getFullPathName(), RelativePath::buildTargetFolder));
+            auto subprojectFileID = addFileOrFolderReference (subprojectFile.getFullPathName(), "<group>", subprojectFileType);
             subprojectFileIDs.add (subprojectFileID);
 
             StringArray proxyIDs;
@@ -2854,7 +2848,7 @@ private:
                 }
             }
 
-            auto productGroupID = createFileRefID (subprojectPath + "_products");
+            auto productGroupID = createFileRefID (subprojectFile.getFullPathName() + "_products");
             addGroup (productGroupID, "Products", proxyIDs);
 
             subprojectReferences.add ({ productGroupID, subprojectFileID });
@@ -3120,18 +3114,34 @@ private:
     {
         StringPairArray entitlements;
 
-        if (project.isAudioPluginProject())
+        if (isiOS())
         {
-            if (isiOS() && project.shouldEnableIAA())
+            if (project.isAudioPluginProject() && project.shouldEnableIAA())
                 entitlements.set ("inter-app-audio", "<true/>");
+
+            if (isiCloudPermissionsEnabled())
+            {
+                entitlements.set ("com.apple.developer.icloud-container-identifiers",
+                                  "<array>\n"
+                                  "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
+                                  "    </array>");
+
+                entitlements.set ("com.apple.developer.icloud-services",
+                                  "<array>\n"
+                                  "        <string>CloudDocuments</string>\n"
+                                  "    </array>");
+
+                entitlements.set ("com.apple.developer.ubiquity-container-identifiers",
+                                  "<array>\n"
+                                  "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
+                                  "    </array>");
+            }
         }
-        else
-        {
-            if (isPushNotificationsEnabled())
-                entitlements.set (isiOS() ? "aps-environment"
-                                          : "com.apple.developer.aps-environment",
-                                            "<string>development</string>");
-        }
+
+        if (isPushNotificationsEnabled())
+            entitlements.set (isiOS() ? "aps-environment"
+                                      : "com.apple.developer.aps-environment",
+                                        "<string>development</string>");
 
         if (isAppGroupsEnabled())
         {
@@ -3165,24 +3175,6 @@ private:
             if (isAppSandboxEnabled())
                 for (auto& option : getAppSandboxOptions())
                     entitlements.set (option, "<true/>");
-        }
-
-        if (isiOS() && isiCloudPermissionsEnabled())
-        {
-            entitlements.set ("com.apple.developer.icloud-container-identifiers",
-                              "<array>\n"
-                              "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
-                              "    </array>");
-
-            entitlements.set ("com.apple.developer.icloud-services",
-                              "<array>\n"
-                              "        <string>CloudDocuments</string>\n"
-                              "    </array>");
-
-            entitlements.set ("com.apple.developer.ubiquity-container-identifiers",
-                              "<array>\n"
-                              "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
-                              "    </array>");
         }
 
         return entitlements;

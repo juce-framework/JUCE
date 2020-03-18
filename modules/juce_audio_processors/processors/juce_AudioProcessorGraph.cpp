@@ -27,6 +27,14 @@
 namespace juce
 {
 
+static void updateOnMessageThread (AsyncUpdater& updater)
+{
+    if (MessageManager::getInstance()->isThisTheMessageThread())
+        updater.handleAsyncUpdate();
+    else
+        updater.triggerAsyncUpdate();
+}
+
 template <typename FloatType>
 struct GraphRenderSequence
 {
@@ -901,7 +909,7 @@ void AudioProcessorGraph::topologyChanged()
     sendChangeMessage();
 
     if (isPrepared)
-        triggerAsyncUpdate();
+        updateOnMessageThread (*this);
 }
 
 void AudioProcessorGraph::clear()
@@ -1262,10 +1270,7 @@ void AudioProcessorGraph::prepareToPlay (double sampleRate, int estimatedSamples
 
     clearRenderingSequence();
 
-    if (MessageManager::getInstance()->isThisTheMessageThread())
-        handleAsyncUpdate();
-    else
-        triggerAsyncUpdate();
+    updateOnMessageThread (*this);
 }
 
 bool AudioProcessorGraph::supportsDoublePrecisionProcessing() const

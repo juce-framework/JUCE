@@ -1,6 +1,30 @@
 JUCE breaking changes
 =====================
 
+Develop
+=======
+
+Change
+------
+Relative Xcode subproject paths specified in the Projucer are now relative to
+the build directory rather than the project directory.
+
+Possible Issues
+---------------
+After being re-saved in the Projucer existing Xcode projects will fail to find
+any subprojects specified using a relative path.
+
+Workaround
+----------
+Update the subproject path in the Projucer.
+
+Rationale
+---------
+Most other Xcode specific paths are specified reltive to the build directory.
+This change brings the Xcode subproject path in line with the rest of the
+configuration.
+
+
 Version 5.4.6
 =============
 

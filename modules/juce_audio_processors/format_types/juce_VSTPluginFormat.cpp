@@ -2053,7 +2053,8 @@ private:
     String name;
     CriticalSection lock;
     std::atomic<bool> wantsMidiMessages { false };
-    bool initialised = false, isPowerOn = false;
+    bool initialised = false;
+    std::atomic<bool> isPowerOn { false };
     bool lastProcessBlockCallWasBypass = false, vstSupportsBypass = false;
     mutable StringArray programNames;
     AudioBuffer<float> outOfPlaceBuffer;

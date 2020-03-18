@@ -74,8 +74,14 @@ bool Block::isControlBlock (Block::Type type)
         || type == Block::Type::developerControlBlock;
 }
 
+void Block::addProgramLoadedListener (ProgramLoadedListener* listener)      { programLoadedListeners.add (listener); }
+void Block::removeProgramLoadedListener (ProgramLoadedListener* listener)   { programLoadedListeners.remove (listener); }
+
 void Block::addDataInputPortListener (DataInputPortListener* listener)      { dataInputPortListeners.add (listener); }
 void Block::removeDataInputPortListener (DataInputPortListener* listener)   { dataInputPortListeners.remove (listener); }
+
+void Block::addConfigItemListener (ConfigItemListener* listener)            { configItemListeners.add (listener); }
+void Block::removeConfigItemListener (ConfigItemListener* listener)         { configItemListeners.remove (listener); }
 
 void Block::addProgramEventListener (ProgramEventListener* listener)        { programEventListeners.add (listener); }
 void Block::removeProgramEventListener (ProgramEventListener* listener)     { programEventListeners.remove (listener); }
@@ -85,7 +91,6 @@ bool Block::ConnectionPort::operator== (const ConnectionPort& other) const noexc
 bool Block::ConnectionPort::operator!= (const ConnectionPort& other) const noexcept { return ! operator== (other); }
 
 Block::Program::Program (Block& b) : block (b) {}
-Block::Program::~Program() {}
 
 //==============================================================================
 TouchSurface::TouchSurface (Block& b) : block (b) {}

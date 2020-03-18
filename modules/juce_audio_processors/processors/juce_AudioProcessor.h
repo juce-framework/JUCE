@@ -1464,7 +1464,8 @@ private:
     Component::SafePointer<AudioProcessorEditor> activeEditor;
     double currentSampleRate = 0;
     int blockSize = 0, latencySamples = 0;
-    bool suspended = false, nonRealtime = false;
+    bool suspended = false;
+    std::atomic<bool> nonRealtime { false };
     ProcessingPrecision processingPrecision = singlePrecision;
     CriticalSection callbackLock, listenerLock, activeEditorLock;
 

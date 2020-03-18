@@ -419,7 +419,7 @@ private:
                 fileToSave.replaceWithText ("Make it fast!");
 
                 Array<URL> urls;
-                urls.add ({ fileToSave.getFullPathName() });
+                urls.add (URL (fileToSave));
 
                 ContentSharer::getInstance()->shareFiles (urls,
                     [] (bool success, const String& error)
