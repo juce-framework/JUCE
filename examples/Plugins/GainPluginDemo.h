@@ -62,8 +62,6 @@ public:
         addParameter (gain = new AudioParameterFloat ("gain", "Gain", 0.0f, 1.0f, 0.5f));
     }
 
-    ~GainProcessor() {}
-
     //==============================================================================
     void prepareToPlay (double, int) override {}
     void releaseResources() override {}

@@ -91,7 +91,7 @@ public:
                           VoiceProduct {"jb",     "JB",     false,  false, false, "Retrieving price..." } });
     }
 
-    ~VoicePurchases()
+    ~VoicePurchases() override
     {
         InAppPurchases::getInstance()->removeListener (this);
     }
@@ -516,7 +516,7 @@ public:
        #endif
     }
 
-    ~InAppPurchasesDemo()
+    ~InAppPurchasesDemo() override
     {
         dm.closeAudioDevice();
         dm.removeAudioCallback (&player);

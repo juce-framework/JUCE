@@ -94,8 +94,6 @@ public:
         loadNewSample (createAssetInputStream ("singing.ogg"), "ogg");
     }
 
-    ~MultiOutSynth() {}
-
     //==============================================================================
     bool canAddBus    (bool isInput) const override   { return (! isInput && getBusCount (false) < maxMidiChannel); }
     bool canRemoveBus (bool isInput) const override   { return (! isInput && getBusCount (false) > 1); }
