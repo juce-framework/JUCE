@@ -23,7 +23,7 @@ namespace dsp
 
 struct FFT::Instance
 {
-    virtual ~Instance() {}
+    virtual ~Instance() = default;
     virtual void perform (const Complex<float>* input, Complex<float>* output, bool inverse) const noexcept = 0;
     virtual void performRealOnlyForwardTransform (float*, bool) const noexcept = 0;
     virtual void performRealOnlyInverseTransform (float*) const noexcept = 0;
@@ -38,7 +38,7 @@ struct FFT::Engine
         std::sort (list.begin(), list.end(), [] (Engine* a, Engine* b) { return b->enginePriority < a->enginePriority; });
     }
 
-    virtual ~Engine() {}
+    virtual ~Engine() = default;
 
     virtual FFT::Instance* create (int order) const = 0;
 
@@ -794,6 +794,145 @@ struct IntelFFT  : public FFT::Instance
 };
 
 FFT::EngineImpl<IntelFFT> fftwEngine;
+#endif
+
+//==============================================================================
+//==============================================================================
+// Visual Studio should define no more than one of these, depending on the
+// setting at 'Project' > 'Properties' > 'Configuration Properties' > 'Intel
+// Performance Libraries' > 'Use Intel(R) IPP'
+#if _IPP_SEQUENTIAL_STATIC || _IPP_SEQUENTIAL_DYNAMIC || _IPP_PARALLEL_STATIC || _IPP_PARALLEL_DYNAMIC
+class IntelPerformancePrimitivesFFT : public FFT::Instance
+{
+public:
+    static constexpr auto priority = 9;
+
+    static IntelPerformancePrimitivesFFT* create (const int order)
+    {
+        auto complexContext = Context<ComplexTraits>::create (order);
+        auto realContext    = Context<RealTraits>   ::create (order);
+
+        if (complexContext.isValid() && realContext.isValid())
+            return new IntelPerformancePrimitivesFFT (std::move (complexContext), std::move (realContext), order);
+
+        return {};
+    }
+
+    void perform (const Complex<float>* input, Complex<float>* output, bool inverse) const noexcept override
+    {
+        if (inverse)
+        {
+            ippsFFTInv_CToC_32fc (reinterpret_cast<const Ipp32fc*> (input),
+                                  reinterpret_cast<Ipp32fc*> (output),
+                                  cplx.specPtr,
+                                  cplx.workBuf.get());
+        }
+        else
+        {
+            ippsFFTFwd_CToC_32fc (reinterpret_cast<const Ipp32fc*> (input),
+                                  reinterpret_cast<Ipp32fc*> (output),
+                                  cplx.specPtr,
+                                  cplx.workBuf.get());
+        }
+    }
+
+    void performRealOnlyForwardTransform (float* inoutData, bool ignoreNegativeFreqs) const noexcept override
+    {
+        ippsFFTFwd_RToCCS_32f_I (inoutData, real.specPtr, real.workBuf.get());
+
+        if (order == 0)
+            return;
+
+        auto* out = reinterpret_cast<Complex<float>*> (inoutData);
+        const auto size = (1 << order);
+
+        if (! ignoreNegativeFreqs)
+            for (auto i = size >> 1; i < size; ++i)
+                out[i] = std::conj (out[size - i]);
+    }
+
+    void performRealOnlyInverseTransform (float* inoutData) const noexcept override
+    {
+        ippsFFTInv_CCSToR_32f_I (inoutData, real.specPtr, real.workBuf.get());
+    }
+
+private:
+    static constexpr auto flag = IPP_FFT_DIV_INV_BY_N;
+    static constexpr auto hint = ippAlgHintFast;
+
+    struct IppFree
+    {
+        template <typename Ptr>
+        void operator() (Ptr* ptr) const noexcept { ippsFree (ptr); }
+    };
+
+    using IppPtr = std::unique_ptr<Ipp8u[], IppFree>;
+
+    template <typename Traits>
+    struct Context
+    {
+        using SpecPtr = typename Traits::Spec*;
+
+        static Context create (const int order)
+        {
+            int specSize = 0, initSize = 0, workSize = 0;
+
+            if (Traits::getSize (order, flag, hint, &specSize, &initSize, &workSize) != ippStsNoErr)
+                return {};
+
+            const auto initBuf = IppPtr (ippsMalloc_8u (initSize));
+            auto specBuf       = IppPtr (ippsMalloc_8u (specSize));
+            SpecPtr specPtr = nullptr;
+
+            if (Traits::init (&specPtr, order, flag, hint, specBuf.get(), initBuf.get()) != ippStsNoErr)
+                return {};
+
+            if (reinterpret_cast<const Ipp8u*> (specPtr) != specBuf.get())
+                return {};
+
+            return { std::move (specBuf), IppPtr (ippsMalloc_8u (workSize)), specPtr };
+        }
+
+        Context() noexcept = default;
+
+        Context (IppPtr&& spec, IppPtr&& work, typename Traits::Spec* ptr) noexcept
+            : specBuf (std::move (spec)), workBuf (std::move (work)), specPtr (ptr)
+        {}
+
+        bool isValid() const noexcept { return specPtr != nullptr; }
+
+        IppPtr specBuf, workBuf;
+        SpecPtr specPtr = nullptr;
+    };
+
+    struct ComplexTraits
+    {
+        static constexpr auto getSize = ippsFFTGetSize_C_32fc;
+        static constexpr auto init = ippsFFTInit_C_32fc;
+        using Spec = IppsFFTSpec_C_32fc;
+    };
+
+    struct RealTraits
+    {
+        static constexpr auto getSize = ippsFFTGetSize_R_32f;
+        static constexpr auto init = ippsFFTInit_R_32f;
+        using Spec = IppsFFTSpec_R_32f;
+    };
+
+    IntelPerformancePrimitivesFFT (Context<ComplexTraits>&& complexToUse,
+                                   Context<RealTraits>&& realToUse,
+                                   const int orderToUse)
+        : cplx (std::move (complexToUse)),
+          real (std::move (realToUse)),
+          order (orderToUse)
+    {}
+
+    Context<ComplexTraits> cplx;
+    Context<RealTraits> real;
+    int order = 0;
+};
+
+FFT::EngineImpl<IntelPerformancePrimitivesFFT> intelPerformancePrimitivesFFT;
 #endif
 
 //==============================================================================

@@ -41,6 +41,12 @@
  #include <mkl_dfti.h>
 #endif
 
+#if _IPP_SEQUENTIAL_STATIC || _IPP_SEQUENTIAL_DYNAMIC || _IPP_PARALLEL_STATIC || _IPP_PARALLEL_DYNAMIC
+ #include <ippcore.h>
+ #include <ipps.h>
+ #define JUCE_IPP_AVAILABLE 1
+#endif
+
 #include "processors/juce_FIRFilter.cpp"
 #include "processors/juce_IIRFilter.cpp"
 #include "processors/juce_LadderFilter.cpp"
