@@ -974,6 +974,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_dsp/processors/juce_Oversampling.h"
     "../../../../../modules/juce_dsp/processors/juce_ProcessContext.h"
     "../../../../../modules/juce_dsp/processors/juce_ProcessorChain.h"
+    "../../../../../modules/juce_dsp/processors/juce_ProcessorChain_test.cpp"
     "../../../../../modules/juce_dsp/processors/juce_ProcessorDuplicator.h"
     "../../../../../modules/juce_dsp/processors/juce_ProcessorWrapper.h"
     "../../../../../modules/juce_dsp/processors/juce_Reverb.h"
@@ -2579,6 +2580,7 @@ set_source_files_properties("../../../../../modules/juce_dsp/processors/juce_Ove
 set_source_files_properties("../../../../../modules/juce_dsp/processors/juce_Oversampling.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/processors/juce_ProcessContext.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/processors/juce_ProcessorChain.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_dsp/processors/juce_ProcessorChain_test.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/processors/juce_ProcessorDuplicator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/processors/juce_ProcessorWrapper.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/processors/juce_Reverb.h" PROPERTIES HEADER_FILE_ONLY TRUE)
