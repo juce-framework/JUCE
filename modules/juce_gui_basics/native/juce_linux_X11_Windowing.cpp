@@ -998,6 +998,7 @@ namespace PixmapHelpers
         GC gc = XCreateGC (display, pixmap, 0, nullptr);
         XPutImage (display, pixmap, gc, ximage, 0, 0, 0, 0, width, height);
         XFreeGC (display, gc);
+        XFree (ximage);
 
         return pixmap;
     }
@@ -4044,6 +4045,8 @@ void MouseCursor::deleteMouseCursor (void* cursorHandle, bool)
         if (auto display = xDisplay.display)
         {
             ScopedXLock xlock (display);
+
+            cursorMap.erase ((Cursor) cursorHandle);
             XFreeCursor (display, (Cursor) cursorHandle);
         }
     }
@@ -4113,16 +4116,18 @@ void MouseCursor::showInWindow (ComponentPeer* peer) const
     {
         ScopedXDisplay xDisplay;
 
-        if (cursorHandle != nullptr && xDisplay.display != cursorMap[(Cursor) getHandle()])
+        auto cursor = (Cursor) getHandle();
+        auto cursorDisplay = cursorMap[cursor];
+
+        if (cursorHandle != nullptr && xDisplay.display != cursorDisplay)
         {
-            auto oldHandle = (Cursor) getHandle();
+            cursorMap.erase (cursor);
+            XFreeCursor (cursorDisplay, cursor);
 
             if (auto* customInfo = cursorHandle->getCustomInfo())
                 cursorHandle->setHandle (customInfo->create());
             else
                 cursorHandle->setHandle (createStandardMouseCursor (cursorHandle->getType()));
-
-            cursorMap.erase (oldHandle);
         }
 
         lp->showMouseCursor ((Cursor) getHandle());
