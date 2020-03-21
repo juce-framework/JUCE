@@ -121,12 +121,7 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 
 } // namespace juce
 
-#if JUCE_CLANG
- #pragma clang diagnostic ignored "-Wdeprecated-declarations"
- #if __has_warning("-Wcast-align")
-  #pragma clang diagnostic ignored "-Wcast-align"
- #endif
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations", "-Wcast-align")
 
 #include "format/juce_AudioPluginFormat.cpp"
 #include "format/juce_AudioPluginFormatManager.cpp"

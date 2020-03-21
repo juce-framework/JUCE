@@ -23,44 +23,21 @@
 namespace juce
 {
 
-#if JUCE_MSVC
- #pragma warning (push)
- #pragma warning (disable: 4309 4305 4365)
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4309 4305 4365)
 
 namespace zlibNamespace
 {
  #if JUCE_INCLUDE_ZLIB_CODE
-  #if JUCE_CLANG
-   #pragma clang diagnostic push
-   #pragma clang diagnostic ignored "-Wconversion"
-   #pragma clang diagnostic ignored "-Wshadow"
-   #pragma clang diagnostic ignored "-Wdeprecated-register"
-   #pragma clang diagnostic ignored "-Wswitch-enum"
-   #if __has_warning ("-Wimplicit-fallthrough")
-    #pragma clang diagnostic ignored "-Wimplicit-fallthrough"
-   #endif
-   #if __has_warning("-Wzero-as-null-pointer-constant")
-    #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
-   #endif
-   #if __has_warning("-Wcomma")
-    #pragma clang diagnostic ignored "-Wcomma"
-   #endif
-  #endif
-
-  #if JUCE_GCC
-   #pragma GCC diagnostic push
-   #pragma GCC diagnostic ignored "-Wconversion"
-   #pragma GCC diagnostic ignored "-Wsign-conversion"
-   #pragma GCC diagnostic ignored "-Wshadow"
-   #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-   #pragma GCC diagnostic ignored "-Wswitch-enum"
-   #pragma GCC diagnostic ignored "-Wswitch-default"
-   #pragma GCC diagnostic ignored "-Wredundant-decls"
-   #if __GNUC__ >= 7
-    #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
-   #endif
-  #endif
+  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
+                                       "-Wsign-conversion",
+                                       "-Wshadow",
+                                       "-Wdeprecated-register",
+                                       "-Wswitch-enum",
+                                       "-Wswitch-default",
+                                       "-Wredundant-decls",
+                                       "-Wimplicit-fallthrough",
+                                       "-Wzero-as-null-pointer-constant",
+                                       "-Wcomma")
 
   #undef OS_CODE
   #undef fdopen
@@ -93,13 +70,7 @@ namespace zlibNamespace
   #undef Dad
   #undef Len
 
-  #if JUCE_CLANG
-   #pragma clang diagnostic pop
-  #endif
-
-  #if JUCE_GCC
-   #pragma GCC diagnostic pop
-  #endif
+  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
  #else
   #include JUCE_ZLIB_INCLUDE_PATH
 
@@ -114,9 +85,7 @@ namespace zlibNamespace
  #endif
 }
 
-#if JUCE_MSVC
- #pragma warning (pop)
-#endif
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 //==============================================================================
 // internal helper object that holds the zlib structures so they don't have to be

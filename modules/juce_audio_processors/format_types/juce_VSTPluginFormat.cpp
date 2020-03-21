@@ -21,24 +21,13 @@
 //==============================================================================
 #undef PRAGMA_ALIGN_SUPPORTED
 
-#if JUCE_MSVC
- #pragma warning (push)
- #pragma warning (disable: 4996)
-#elif ! JUCE_MINGW
+
+#if ! JUCE_MINGW && ! JUCE_MSVC
  #define __cdecl
 #endif
 
-#if JUCE_CLANG
- #if __has_warning("-Wzero-as-null-pointer-constant")
-  #pragma clang diagnostic push
-  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
- #endif
-#endif
-
-#if JUCE_GCC
- #pragma GCC diagnostic push
- #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant")
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
 
 #define VST_FORCE_DEPRECATED 0
 #define JUCE_VSTINTERFACE_H_INCLUDED 1
@@ -56,20 +45,10 @@ namespace Vst2
 
 #include "juce_VSTCommon.h"
 
-#if JUCE_MSVC
- #pragma warning (pop)
- #pragma warning (disable: 4355) // ("this" used in initialiser list warning)
-#endif
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+JUCE_END_IGNORE_WARNINGS_MSVC
 
-#if JUCE_CLANG
- #if __has_warning("-Wzero-as-null-pointer-constant")
-  #pragma clang diagnostic pop
- #endif
-#endif
-
-#if JUCE_GCC
- #pragma GCC diagnostic pop
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4355)
 
 #include "juce_VSTMidiEventList.h"
 
@@ -841,10 +820,7 @@ private:
 static const int defaultVSTSampleRateValue = 44100;
 static const int defaultVSTBlockSizeValue = 512;
 
-#if JUCE_MSVC
- #pragma warning (push)
- #pragma warning (disable: 4996) // warning about overriding deprecated methods
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
 
 //==============================================================================
 struct VSTPluginInstance     : public AudioPluginInstance,
@@ -2100,16 +2076,11 @@ private:
 
     pointer_sized_int getVSTTime() noexcept
     {
-       #if JUCE_MSVC
-        #pragma warning (push)
-        #pragma warning (disable: 4311)
-       #endif
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4311)
 
         return (pointer_sized_int) &vstHostTime;
 
-       #if JUCE_MSVC
-        #pragma warning (pop)
-       #endif
+        JUCE_END_IGNORE_WARNINGS_MSVC
     }
 
     void handleIdle()
@@ -3129,8 +3100,7 @@ private:
             return;
         }
 
-        #pragma warning (push)
-        #pragma warning (disable: 4244)
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4244)
 
         if (! pluginWantsKeys)
         {
@@ -3138,7 +3108,7 @@ private:
             SetWindowLongPtr (pluginHWND, GWLP_WNDPROC, (LONG_PTR) vstHookWndProc);
         }
 
-        #pragma warning (pop)
+        JUCE_END_IGNORE_WARNINGS_MSVC
 
         RECT r;
         GetWindowRect (pluginHWND, &r);
@@ -3237,11 +3207,10 @@ private:
             stopTimer();
 
            #if JUCE_WINDOWS
-            #pragma warning (push)
-            #pragma warning (disable: 4244)
+            JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4244)
             if (originalWndProc != 0 && pluginHWND != 0 && IsWindow (pluginHWND))
                 SetWindowLongPtr (pluginHWND, GWLP_WNDPROC, (LONG_PTR) originalWndProc);
-            #pragma warning (pop)
+            JUCE_END_IGNORE_WARNINGS_MSVC
 
             originalWndProc = 0;
             pluginHWND = 0;
@@ -3453,9 +3422,7 @@ private:
 };
 #endif
 
-#if JUCE_MSVC
- #pragma warning (pop)
-#endif
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 //==============================================================================
 AudioProcessorEditor* VSTPluginInstance::createEditor()
@@ -3776,5 +3743,7 @@ pointer_sized_int JUCE_CALLTYPE VSTPluginFormat::dispatcher (AudioPluginInstance
 void VSTPluginFormat::aboutToScanVSTShellPlugin (const PluginDescription&) {}
 
 } // namespace juce
+
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 #endif

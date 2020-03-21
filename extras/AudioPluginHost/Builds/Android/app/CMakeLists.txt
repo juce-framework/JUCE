@@ -651,6 +651,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/streams/juce_URLInputSource.cpp"
     "../../../../../modules/juce_core/streams/juce_URLInputSource.h"
     "../../../../../modules/juce_core/system/juce_CompilerSupport.h"
+    "../../../../../modules/juce_core/system/juce_CompilerWarnings.h"
     "../../../../../modules/juce_core/system/juce_PlatformDefs.h"
     "../../../../../modules/juce_core/system/juce_StandardHeader.h"
     "../../../../../modules/juce_core/system/juce_SystemStats.cpp"
@@ -2013,6 +2014,7 @@ set_source_files_properties("../../../../../modules/juce_core/streams/juce_Subre
 set_source_files_properties("../../../../../modules/juce_core/streams/juce_URLInputSource.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/streams/juce_URLInputSource.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/system/juce_CompilerSupport.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/system/juce_CompilerWarnings.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/system/juce_PlatformDefs.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/system/juce_StandardHeader.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/system/juce_SystemStats.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)

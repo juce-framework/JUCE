@@ -24,16 +24,11 @@ namespace juce
 #elif JUCE_WINDOWS
  #include "../native/juce_win32_CameraDevice.h"
 #elif JUCE_IOS
- #if JUCE_CLANG
-  #pragma clang diagnostic push
-  #pragma clang diagnostic ignored "-Wunguarded-availability-new"
- #endif
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability-new")
 
  #include "../native/juce_ios_CameraDevice.h"
 
- #if JUCE_CLANG
-  #pragma clang diagnostic pop
- #endif
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #elif JUCE_ANDROID
  #include "../native/juce_android_CameraDevice.h"
 #endif

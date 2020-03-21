@@ -19,13 +19,7 @@
 namespace juce
 {
 
-#if JUCE_MSVC
- #pragma warning (push)
- #pragma warning (disable: 4390 4611 4365 4267)
- #ifdef __INTEL_COMPILER
-  #pragma warning (disable: 2544 2545)
- #endif
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4390 4611 4365 4267 4616 2544 2545)
 
 namespace zlibNamespace
 {
@@ -55,28 +49,10 @@ namespace pnglibNamespace
    using std::free;
   #endif
 
-  #if JUCE_CLANG
-   #pragma clang diagnostic push
-   #pragma clang diagnostic ignored "-Wsign-conversion"
-   #if __has_warning ("-Wimplicit-fallthrough")
-    #pragma clang diagnostic ignored "-Wimplicit-fallthrough"
-   #endif
-   #if __has_warning("-Wzero-as-null-pointer-constant")
-    #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
-   #endif
-   #if __has_warning("-Wcomma")
-    #pragma clang diagnostic ignored "-Wcomma"
-   #endif
-  #endif
-
-  #if JUCE_GCC
-   #pragma GCC diagnostic push
-   #pragma GCC diagnostic ignored "-Wsign-conversion"
-   #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-   #if __GNUC__ >= 7
-    #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
-   #endif
-  #endif
+   JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wsign-conversion",
+                                        "-Wimplicit-fallthrough",
+                                        "-Wzero-as-null-pointer-constant",
+                                        "-Wcomma")
 
   #undef check
   using std::abs;
@@ -324,13 +300,7 @@ namespace pnglibNamespace
   #include "pnglib/pngwtran.c"
   #include "pnglib/pngwutil.c"
 
-  #if JUCE_CLANG
-   #pragma clang diagnostic pop
-  #endif
-
-  #if JUCE_GCC
-   #pragma GCC diagnostic pop
-  #endif
+  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #else
   extern "C"
@@ -345,9 +315,7 @@ namespace pnglibNamespace
 #undef min
 #undef fdopen
 
-#if JUCE_MSVC
- #pragma warning (pop)
-#endif
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 //==============================================================================
 namespace PNGHelpers
@@ -378,10 +346,7 @@ namespace PNGHelpers
 
     static void JUCE_CDECL warningCallback (png_structp, png_const_charp) {}
 
-   #if JUCE_MSVC
-    #pragma warning (push)
-    #pragma warning (disable: 4611) // (warning about setjmp)
-   #endif
+    JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4611)
 
     static bool readHeader (InputStream& in, png_structp pngReadStruct, png_infop pngInfoStruct, jmp_buf& errorJumpBuf,
                             png_uint_32& width, png_uint_32& height, int& bitDepth, int& colorType, int& interlaceType) noexcept
@@ -433,9 +398,7 @@ namespace PNGHelpers
         return false;
     }
 
-   #if JUCE_MSVC
-    #pragma warning (pop)
-   #endif
+    JUCE_END_IGNORE_WARNINGS_MSVC
 
     static Image createImageFromData (bool hasAlphaChan, int width, int height, png_bytepp rows)
     {

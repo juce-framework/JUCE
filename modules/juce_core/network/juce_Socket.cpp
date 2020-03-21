@@ -23,10 +23,7 @@
 namespace juce
 {
 
-#if JUCE_MSVC
- #pragma warning (push)
- #pragma warning (disable : 4127 4389 4018)
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4127 4389 4018)
 
 #ifndef AI_NUMERICSERV  // (missing in older Mac SDKs)
  #define AI_NUMERICSERV 0x1000
@@ -791,10 +788,7 @@ bool DatagramSocket::setEnablePortReuse (bool enabled)
     return false;
 }
 
-#if JUCE_MSVC
- #pragma warning (pop)
-#endif
-
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 //==============================================================================
 //==============================================================================

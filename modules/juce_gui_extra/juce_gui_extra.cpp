@@ -93,32 +93,11 @@
   #include <fcntl.h>
   #include <sys/wait.h>
 
-  #if JUCE_GCC
-   #pragma GCC diagnostic push
-   #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-   #if __GNUC__ > 7
-    #pragma GCC diagnostic ignored "-Wparentheses"
-   #endif
-  #endif
-
-  #if JUCE_CLANG
-   #if __has_warning("-Wzero-as-null-pointer-constant")
-    #pragma clang diagnostic push
-    #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
-   #endif
-  #endif
+  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant", "-Wparentheses")
 
   #include <gtk/gtk.h>
 
-  #if JUCE_GCC
-   #pragma GCC diagnostic pop
-  #endif
-
-  #if JUCE_CLANG
-   #if __has_warning("-Wzero-as-null-pointer-constant")
-    #pragma clang diagnostic pop
-   #endif
-  #endif
+  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
   #include <gtk/gtkx.h>
   #include <glib-unix.h>
@@ -147,10 +126,7 @@
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
 
- #if JUCE_CLANG
-  #pragma clang diagnostic push
-  #pragma clang diagnostic ignored "-Wundeclared-selector"
- #endif
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
 
  #if JUCE_MAC
   #include "native/juce_mac_NSViewComponent.mm"
@@ -166,9 +142,7 @@
   #include "native/juce_mac_WebBrowserComponent.mm"
  #endif
 
- #if JUCE_CLANG
-  #pragma clang diagnostic pop
- #endif
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
 #elif JUCE_WINDOWS
@@ -180,10 +154,7 @@
 
 //==============================================================================
 #elif JUCE_LINUX
- #if JUCE_GCC
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
- #endif
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant")
 
  #include "native/juce_linux_XEmbedComponent.cpp"
 
@@ -191,9 +162,7 @@
   #include "native/juce_linux_X11_WebBrowserComponent.cpp"
  #endif
 
- #if JUCE_GCC
-  #pragma GCC diagnostic pop
- #endif
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
  #include "native/juce_linux_X11_SystemTrayIcon.cpp"
 

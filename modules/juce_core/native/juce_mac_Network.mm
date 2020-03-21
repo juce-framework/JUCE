@@ -676,8 +676,7 @@ std::unique_ptr<URL::DownloadTask> URL::downloadToFile (const File& targetLocati
 // so we'll turn off deprecation warnings. This code will be removed at some point
 // in the future.
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated"
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated")
 
 //==============================================================================
 class URLConnectionState   : public Thread
@@ -935,7 +934,7 @@ std::unique_ptr<URL::DownloadTask> URL::downloadToFile (const File& targetLocati
     return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener, shouldUsePost);
 }
 
-#pragma clang diagnostic pop
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #endif
 

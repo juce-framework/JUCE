@@ -198,10 +198,9 @@ private:
         {
             JucePlayerStatusObserverClass()    : ObjCClass<NSObject> ("JucePlayerStatusObserverClass_")
             {
-               #pragma clang diagnostic push
-               #pragma clang diagnostic ignored "-Wundeclared-selector"
+                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
                 addMethod (@selector (observeValueForKeyPath:ofObject:change:context:), valueChanged, "v@:@@@?");
-               #pragma clang diagnostic pop
+                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
                 addIvar<PlayerAsyncInitialiser*> ("owner");
 
@@ -243,10 +242,9 @@ private:
         {
             JucePlayerItemPlaybackStatusObserverClass()    : ObjCClass<NSObject> ("JucePlayerItemPlaybackStatusObserverClass_")
             {
-               #pragma clang diagnostic push
-               #pragma clang diagnostic ignored "-Wundeclared-selector"
+                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
                 addMethod (@selector (processNotification:), notificationReceived, "v@:@");
-               #pragma clang diagnostic pop
+                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
                 addIvar<PlayerControllerBase*> ("owner");
 
@@ -299,10 +297,9 @@ private:
             {
                 JucePlayerItemPreparationStatusObserverClass()    : ObjCClass<NSObject> ("JucePlayerItemStatusObserverClass_")
                 {
-                   #pragma clang diagnostic push
-                   #pragma clang diagnostic ignored "-Wundeclared-selector"
+                    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
                     addMethod (@selector (observeValueForKeyPath:ofObject:change:context:), valueChanged, "v@:@@@?");
-                   #pragma clang diagnostic pop
+                    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
                     addIvar<PlayerAsyncInitialiser*> ("owner");
 
@@ -496,21 +493,19 @@ private:
 
         void attachPlaybackObserver()
         {
-           #pragma clang diagnostic push
-           #pragma clang diagnostic ignored "-Wundeclared-selector"
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             [[NSNotificationCenter defaultCenter] addObserver: playerItemPlaybackStatusObserver.get()
                                                      selector: @selector (processNotification:)
                                                          name: AVPlayerItemDidPlayToEndTimeNotification
                                                        object: [crtp().getPlayer() currentItem]];
-           #pragma clang diagnostic pop
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
 
         void detachPlaybackObserver()
         {
-           #pragma clang diagnostic push
-           #pragma clang diagnostic ignored "-Wundeclared-selector"
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             [[NSNotificationCenter defaultCenter] removeObserver: playerItemPlaybackStatusObserver.get()];
-           #pragma clang diagnostic pop
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
 
     private:

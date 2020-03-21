@@ -263,11 +263,7 @@ namespace juce
 #endif
 
 #if JUCE_MAC || JUCE_IOS
-
- #if JUCE_CLANG
-  #pragma clang diagnostic push
-  #pragma clang diagnostic ignored "-Wundeclared-selector"
- #endif
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
 
  #if JUCE_IOS
   #include "native/juce_ios_UIViewComponentPeer.mm"
@@ -285,9 +281,7 @@ namespace juce
   #include "native/juce_mac_FileChooser.mm"
  #endif
 
- #if JUCE_CLANG
-  #pragma clang diagnostic pop
- #endif
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
  #include "native/juce_mac_MouseCursor.mm"
 
@@ -300,16 +294,11 @@ namespace juce
  #include "native/juce_linux_X11.cpp"
  #include "native/juce_linux_X11_Clipboard.cpp"
 
- #if JUCE_GCC
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
- #endif
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant")
 
  #include "native/juce_linux_X11_Windowing.cpp"
 
- #if JUCE_GCC
-  #pragma GCC diagnostic pop
- #endif
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
  #include "native/juce_linux_FileChooser.cpp"
 

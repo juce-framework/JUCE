@@ -16,14 +16,13 @@
   ==============================================================================
 */
 
+#include "../../juce_core/system/juce_CompilerWarnings.h"
 #include "../../juce_core/system/juce_TargetPlatform.h"
 #include "../utility/juce_CheckSettingMacros.h"
 
 #if JucePlugin_Build_VST
 
-#ifdef _MSC_VER
- #pragma warning (disable : 4996 4100)
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996 4100)
 
 #include "../utility/juce_IncludeSystemHeaders.h"
 #include <juce_core/juce_core.h>
@@ -59,29 +58,14 @@
  #define __cdecl
 #endif
 
-#if JUCE_CLANG
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wconversion"
- #pragma clang diagnostic ignored "-Wshadow"
- #pragma clang diagnostic ignored "-Wdeprecated-register"
- #pragma clang diagnostic ignored "-Wunused-parameter"
- #pragma clang diagnostic ignored "-Wdeprecated-writable-strings"
- #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
- #if __has_warning("-Wzero-as-null-pointer-constant")
-  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
- #endif
-#endif
-
-#if JUCE_GCC
- #pragma GCC diagnostic push
- #pragma GCC diagnostic ignored "-Wshadow"
- #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#endif
-
-#ifdef _MSC_VER
- #pragma warning (push)
- #pragma warning (disable : 4458)
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
+                                     "-Wshadow",
+                                     "-Wdeprecated-register",
+                                     "-Wunused-parameter",
+                                     "-Wdeprecated-writable-strings",
+                                     "-Wnon-virtual-dtor",
+                                     "-Wzero-as-null-pointer-constant")
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4458)
 
 #define VST_FORCE_DEPRECATED 0
 
@@ -99,17 +83,8 @@ namespace Vst2
 
 using namespace juce;
 
-#ifdef _MSC_VER
- #pragma warning (pop)
-#endif
-
-#if JUCE_CLANG
- #pragma clang diagnostic pop
-#endif
-
-#if JUCE_GCC
- #pragma GCC diagnostic pop
-#endif
+JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
 #ifdef _MSC_VER
@@ -2255,5 +2230,7 @@ namespace
         return true;
     }
 #endif
+
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 #endif

@@ -4077,6 +4077,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\system\juce_CompilerSupport.h">
       <Filter>JUCE Modules\juce_core\system</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\system\juce_CompilerWarnings.h">
+      <Filter>JUCE Modules\juce_core\system</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\system\juce_PlatformDefs.h">
       <Filter>JUCE Modules\juce_core\system</Filter>
     </ClInclude>

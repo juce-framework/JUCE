@@ -15,7 +15,7 @@
 
   ==============================================================================
 */
-#include "../../juce_core/system/juce_TargetPlatform.h"
+#include "../../juce_core/system/juce_CompilerWarnings.h"
 #include "../utility/juce_CheckSettingMacros.h"
 
 #if JucePlugin_Build_AU
@@ -25,25 +25,18 @@
  #define JUCE_SUPPORT_CARBON 0
 #endif
 
-#ifdef JUCE_CLANG
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wshorten-64-to-32"
- #pragma clang diagnostic ignored "-Wunused-parameter"
- #pragma clang diagnostic ignored "-Wdeprecated-declarations"
- #pragma clang diagnostic ignored "-Wsign-conversion"
- #pragma clang diagnostic ignored "-Wconversion"
- #pragma clang diagnostic ignored "-Woverloaded-virtual"
- #pragma clang diagnostic ignored "-Wextra-semi"
- #pragma clang diagnostic ignored "-Wcast-align"
- #pragma clang diagnostic ignored "-Wshadow"
- #pragma clang diagnostic ignored "-Wswitch-enum"
- #if __has_warning("-Wzero-as-null-pointer-constant")
-  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
- #endif
- #if __has_warning("-Wnullable-to-nonnull-conversion")
-  #pragma clang diagnostic ignored "-Wnullable-to-nonnull-conversion"
- #endif
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wshorten-64-to-32",
+                                     "-Wunused-parameter",
+                                     "-Wdeprecated-declarations",
+                                     "-Wsign-conversion",
+                                     "-Wconversion",
+                                     "-Woverloaded-virtual",
+                                     "-Wextra-semi",
+                                     "-Wcast-align",
+                                     "-Wshadow",
+                                     "-Wswitch-enum",
+                                     "-Wzero-as-null-pointer-constant",
+                                     "-Wnullable-to-nonnull-conversion")
 
 #include "../utility/juce_IncludeSystemHeaders.h"
 
@@ -70,9 +63,7 @@
  #include "CoreAudioUtilityClasses/AUCarbonViewBase.h"
 #endif
 
-#ifdef JUCE_CLANG
- #pragma clang diagnostic pop
-#endif
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #define JUCE_MAC_WINDOW_VISIBITY_BODGE 1
 #define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
@@ -2498,19 +2489,11 @@ JUCE_FACTORY_ENTRY   (JuceAU, JucePlugin_AUExportPrefix)
 #endif
 
 #if ! JUCE_DISABLE_AU_FACTORY_ENTRY
- #ifdef JUCE_CLANG
-  #pragma clang diagnostic push
-  #pragma clang diagnostic ignored "-Wcast-align"
-  #if __has_warning("-Wzero-as-null-pointer-constant")
-   #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
-  #endif
- #endif
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-align", "-Wzero-as-null-pointer-constant")
 
  #include "CoreAudioUtilityClasses/AUPlugInDispatch.cpp"
 
- #ifdef JUCE_CLANG
-  #pragma clang diagnostic push
- #endif
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
 
 #endif

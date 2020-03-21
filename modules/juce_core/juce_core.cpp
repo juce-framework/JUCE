@@ -53,10 +53,9 @@
   #include <cstdio>
   #include <locale.h>
  #else
-  #pragma warning (push)
-  #pragma warning (disable: 4091)
+  JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4091)
   #include <Dbghelp.h>
-  #pragma warning (pop)
+  JUCE_END_IGNORE_WARNINGS_MSVC
 
   #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
    #pragma comment (lib, "DbgHelp.lib")

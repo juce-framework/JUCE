@@ -23,10 +23,7 @@
 namespace juce
 {
 
-#if JUCE_MSVC
- #pragma warning (push)
- #pragma warning (disable: 4514 4996)
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4514 4996)
 
 NewLine newLine;
 
@@ -2142,9 +2139,7 @@ String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
     return {};
 }
 
-#if JUCE_MSVC
- #pragma warning (pop)
-#endif
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 //==============================================================================
 StringRef::StringRef() noexcept  : text ((const String::CharPointerType::CharType*) "\0\0\0")

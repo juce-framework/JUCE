@@ -330,8 +330,7 @@ private:
             delegate.reset ([cls.createInstance() init]);
             SessionDelegateClass::setOwner (delegate.get(), this);
 
-          #pragma clang diagnostic push
-          #pragma clang diagnostic ignored "-Wundeclared-selector"
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             [[NSNotificationCenter defaultCenter] addObserver: delegate.get()
                                                      selector: @selector (sessionDidStartRunning:)
                                                          name: AVCaptureSessionDidStartRunningNotification
@@ -356,7 +355,7 @@ private:
                                                      selector: @selector (sessionInterruptionEnded:)
                                                          name: AVCaptureSessionInterruptionEndedNotification
                                                        object: captureSession.get()];
-           #pragma clang diagnostic pop
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             dispatch_async (captureSessionQueue,^
                             {
@@ -517,14 +516,13 @@ private:
         {
             SessionDelegateClass()  : ObjCClass<NSObject> ("SessionDelegateClass_")
             {
-               #pragma clang diagnostic push
-               #pragma clang diagnostic ignored "-Wundeclared-selector"
+                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
                 addMethod (@selector (sessionDidStartRunning:),   started,           "v@:@");
                 addMethod (@selector (sessionDidStopRunning:),    stopped,           "v@:@");
                 addMethod (@selector (sessionRuntimeError:),      runtimeError,      "v@:@");
                 addMethod (@selector (sessionWasInterrupted:),    interrupted,       "v@:@");
                 addMethod (@selector (sessionInterruptionEnded:), interruptionEnded, "v@:@");
-               #pragma clang diagnostic pop
+                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
                 addIvar<CaptureSession*> ("owner");
 

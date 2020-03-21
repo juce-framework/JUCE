@@ -1176,16 +1176,8 @@ const char* AudioProcessor::getWrapperTypeDescription (AudioProcessor::WrapperTy
 }
 
 //==============================================================================
-#if JUCE_GCC
- #pragma GCC diagnostic push
- #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#elif JUCE_CLANG
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#elif JUCE_MSVC
- #pragma warning (push, 0)
- #pragma warning (disable: 4996)
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
 
 void AudioProcessor::setParameterNotifyingHost (int parameterIndex, float newValue)
 {
@@ -1420,13 +1412,8 @@ AudioProcessorParameter* AudioProcessor::getParamChecked (int index) const
     return p;
 }
 
-#if JUCE_GCC
- #pragma GCC diagnostic pop
-#elif JUCE_CLANG
- #pragma clang diagnostic pop
-#elif JUCE_MSVC
- #pragma warning (pop)
-#endif
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 //==============================================================================
 void AudioProcessorListener::audioProcessorParameterChangeGestureBegin (AudioProcessor*, int) {}

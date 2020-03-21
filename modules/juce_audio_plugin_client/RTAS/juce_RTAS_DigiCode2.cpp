@@ -25,14 +25,11 @@
 
 #include "juce_RTAS_DigiCode_Header.h"
 
-#ifdef __clang__
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wcomment"
- #pragma clang diagnostic ignored "-Wextra-tokens"
- #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
- #pragma clang diagnostic ignored "-Wreorder"
- #pragma clang diagnostic ignored "-Wdeprecated"
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcomment",
+                                     "-Wextra-tokens",
+                                     "-Wnon-virtual-dtor",
+                                     "-Wreorder",
+                                     "-Wdeprecated")
 
 /*
     This file is used to include and build the required digidesign CPP files without your project
@@ -52,8 +49,6 @@
 #include <CEffectProcessMIDI.cpp>
 #include <PlugInUtils.cpp>
 
-#ifdef __clang__
- #pragma clang diagnostic pop
-#endif
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #endif

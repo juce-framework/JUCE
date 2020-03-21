@@ -69,8 +69,7 @@
 
 #define JUCE_AUDIOUNIT_OBJC_NAME(x) JUCE_JOIN_MACRO (x, AUv3)
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wnullability-completeness"
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnullability-completeness")
 
 using namespace juce;
 
@@ -108,13 +107,12 @@ public:
     JuceAudioUnitv3Base (const AudioComponentDescription& descr,
                          AudioComponentInstantiationOptions options,
                          NSError** error)
-       #pragma clang diagnostic push
-       #pragma clang diagnostic ignored "-Wobjc-method-access"
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wobjc-method-access")
         : au ([audioUnitObjCClass.createInstance() initWithComponentDescription: descr
                                                                         options: options
                                                                           error: error
                                                                       juceClass: this])
-       #pragma clang diagnostic pop
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     {}
 
     JuceAudioUnitv3Base (AUAudioUnit* audioUnit) : au (audioUnit)
@@ -213,13 +211,12 @@ private:
         {
             addIvar<JuceAudioUnitv3Base*> ("cppObject");
 
-           #pragma clang diagnostic push
-           #pragma clang diagnostic ignored "-Wundeclared-selector"
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             addMethod (@selector (initWithComponentDescription:options:error:juceClass:),
                        initWithComponentDescriptionAndJuceClass, "@@:",
                        @encode (AudioComponentDescription),
                        @encode (AudioComponentInstantiationOptions), "^@@");
-           #pragma clang diagnostic pop
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             addMethod (@selector (initWithComponentDescription:options:error:),
                        initWithComponentDescription, "@@:",
@@ -1945,5 +1942,5 @@ Image JUCE_CALLTYPE juce_getIAAHostIcon (int)      { return {}; }
 #endif
 #endif
 
-#pragma clang diagnostic pop
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif

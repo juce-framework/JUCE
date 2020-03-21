@@ -29,10 +29,7 @@ namespace juce
  #define JUCE_COREAUDIOLOG(a)
 #endif
 
-#ifdef __clang__
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wnonnull" // avoid some spurious 10.11 SDK warnings
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnonnull")
 
 //==============================================================================
 struct SystemVol
@@ -124,9 +121,7 @@ private:
     }
 };
 
-#ifdef __clang__
- #pragma clang diagnostic pop
-#endif
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #define JUCE_SYSTEMAUDIOVOL_IMPLEMENTED 1
 float JUCE_CALLTYPE SystemAudioVolume::getGain()              { return SystemVol (kAudioHardwareServiceDeviceProperty_VirtualMasterVolume).getGain(); }

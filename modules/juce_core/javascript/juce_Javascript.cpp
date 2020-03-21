@@ -54,10 +54,7 @@ namespace TokenTypes
     JUCE_DECLARE_JS_TOKEN (identifier, "$identifier")
 }
 
-#if JUCE_MSVC
- #pragma warning (push)
- #pragma warning (disable: 4702)
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4702)
 
 //==============================================================================
 struct JavascriptEngine::RootObject   : public DynamicObject
@@ -1913,8 +1910,6 @@ const NamedValueSet& JavascriptEngine::getRootObjectProperties() const noexcept
     return root->getProperties();
 }
 
-#if JUCE_MSVC
- #pragma warning (pop)
-#endif
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 } // namespace juce

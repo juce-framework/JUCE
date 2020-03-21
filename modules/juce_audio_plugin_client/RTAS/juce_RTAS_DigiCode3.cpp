@@ -26,12 +26,7 @@
  #include "../utility/juce_IncludeSystemHeaders.h"
  #include "juce_RTAS_DigiCode_Header.h"
 
- #ifdef __clang__
-  #pragma clang diagnostic push
-  #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
-  #pragma clang diagnostic ignored "-Wextra-tokens"
-  #pragma clang diagnostic ignored "-Wreorder"
- #endif
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor", "-Wextra-tokens", "-Wreorder")
 
  /*
     This file is used to include and build the required digidesign CPP files without your project
@@ -60,9 +55,7 @@
   #include <Dispatcher.cpp>
  #endif
 
- #ifdef __clang__
-  #pragma clang diagnostic pop
- #endif
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #else
 

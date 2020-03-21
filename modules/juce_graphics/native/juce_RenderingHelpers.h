@@ -19,10 +19,7 @@
 namespace juce
 {
 
-#if JUCE_MSVC
- #pragma warning (push)
- #pragma warning (disable: 4127) // "expression is constant" warning
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4127)
 
 namespace RenderingHelpers
 {
@@ -2732,8 +2729,6 @@ protected:
 
 }
 
-#if JUCE_MSVC
- #pragma warning (pop)
-#endif
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 } // namespace juce

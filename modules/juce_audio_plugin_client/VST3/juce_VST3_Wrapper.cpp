@@ -16,6 +16,7 @@
   ==============================================================================
 */
 
+#include "../../juce_core/system/juce_CompilerWarnings.h"
 #include "../../juce_core/system/juce_TargetPlatform.h"
 
 //==============================================================================
@@ -51,17 +52,6 @@ namespace Vst2
 #ifndef JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
  #if JucePlugin_WantsMidiInput
   #define JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS 1
- #endif
-#endif
-
-#if JUCE_VST3_CAN_REPLACE_VST2
- #if JUCE_MSVC
-  #pragma warning (push)
-  #pragma warning (disable: 4514 4996)
- #endif
-
- #if JUCE_MSVC
-  #pragma warning (pop)
  #endif
 #endif
 
@@ -351,16 +341,11 @@ public:
     static const FUID iid;
 
     //==============================================================================
-   #if JUCE_CLANG
-    #pragma clang diagnostic push
-    #pragma clang diagnostic ignored "-Winconsistent-missing-override"
-   #endif
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Winconsistent-missing-override")
 
     REFCOUNT_METHODS (ComponentBase)
 
-   #if JUCE_CLANG
-    #pragma clang diagnostic pop
-   #endif
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
     tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
     {
@@ -2804,13 +2789,8 @@ private:
 const char* JuceVST3Component::kJucePrivateDataIdentifier = "JUCEPrivateData";
 
 //==============================================================================
-#if JUCE_MSVC
- #pragma warning (push, 0)
- #pragma warning (disable: 4310)
-#elif JUCE_CLANG
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wall"
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4310)
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wall")
 
 DECLARE_CLASS_IID (JuceAudioProcessor, 0x0101ABAB, 0xABCDEF01, JucePlugin_ManufacturerCode, JucePlugin_PluginCode)
 DEF_CLASS_IID (JuceAudioProcessor)
@@ -2833,11 +2813,8 @@ DEF_CLASS_IID (JuceAudioProcessor)
  DEF_CLASS_IID (JuceVST3Component)
 #endif
 
-#if JUCE_MSVC
- #pragma warning (pop)
-#elif JUCE_CLANG
- #pragma clang diagnostic pop
-#endif
+JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
 bool initModule()

@@ -18,30 +18,23 @@
 
 #if JucePlugin_Build_AU
 
-#ifdef __clang__
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wparentheses"
- #pragma clang diagnostic ignored "-Wextra-tokens"
- #pragma clang diagnostic ignored "-Wcomment"
- #pragma clang diagnostic ignored "-Wconversion"
- #pragma clang diagnostic ignored "-Wunused-parameter"
- #pragma clang diagnostic ignored "-Wunused"
- #pragma clang diagnostic ignored "-Wextra-semi"
- #pragma clang diagnostic ignored "-Wformat-pedantic"
- #pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
- #pragma clang diagnostic ignored "-Wshadow-all"
- #pragma clang diagnostic ignored "-Wcast-align"
- #pragma clang diagnostic ignored "-Wswitch-enum"
- #if __has_warning("-Wzero-as-null-pointer-constant")
-  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
- #endif
- #if __has_warning("-Wnullable-to-nonnull-conversion")
-  #pragma clang diagnostic ignored "-Wnullable-to-nonnull-conversion"
- #endif
- #if __has_warning("-Wignored-qualifiers")
-  #pragma clang diagnostic ignored "-Wignored-qualifiers"
- #endif
-#endif
+#include "../juce_core/system/juce_CompilerWarnings.h"
+
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wparentheses",
+                                     "-Wextra-tokens",
+                                     "-Wcomment",
+                                     "-Wconversion",
+                                     "-Wunused-parameter",
+                                     "-Wunused",
+                                     "-Wextra-semi",
+                                     "-Wformat-pedantic",
+                                     "-Wgnu-zero-variadic-macro-arguments",
+                                     "-Wshadow-all",
+                                     "-Wcast-align",
+                                     "-Wswitch-enum",
+                                     "-Wzero-as-null-pointer-constant",
+                                     "-Wnullable-to-nonnull-conversion",
+                                     "-Wignored-qualifiers")
 
 // From MacOS 10.13 and iOS 11 Apple has (sensibly!) stopped defining a whole
 // set of functions with rather generic names. However, we still need a couple
@@ -76,8 +69,6 @@
 #undef verify
 #undef verify_noerr
 
-#ifdef __clang__
- #pragma clang diagnostic pop
-#endif
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #endif

@@ -217,19 +217,14 @@ namespace juce
 #include "memory/juce_Atomic.h"
 #include "text/juce_CharacterFunctions.h"
 
-#if JUCE_MSVC
- #pragma warning (push)
- #pragma warning (disable: 4514 4996)
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4514 4996)
 
 #include "text/juce_CharPointer_UTF8.h"
 #include "text/juce_CharPointer_UTF16.h"
 #include "text/juce_CharPointer_UTF32.h"
 #include "text/juce_CharPointer_ASCII.h"
 
-#if JUCE_MSVC
- #pragma warning (pop)
-#endif
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 #include "text/juce_String.h"
 #include "text/juce_StringRef.h"
@@ -375,11 +370,9 @@ namespace juce
 }
 #endif
 
-#if JUCE_MSVC
- #pragma warning (pop)
+JUCE_END_IGNORE_WARNINGS_MSVC
 
- // In DLL builds, need to disable this warnings for other modules
- #if defined (JUCE_DLL_BUILD) || defined (JUCE_DLL)
-  #pragma warning (disable: 4251)
- #endif
+// In DLL builds, need to disable this warnings for other modules
+#if defined (JUCE_DLL_BUILD) || defined (JUCE_DLL)
+ JUCE_IGNORE_MSVC (4251)
 #endif

@@ -27,12 +27,11 @@ struct AudioTrackProducerClass  : public ObjCClass <NSObject>
     {
         addIvar<AudioSourceHolder*> ("source");
 
-       #pragma clang diagnostic push
-       #pragma clang diagnostic ignored "-Wundeclared-selector"
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         addMethod (@selector (initWithAudioSourceHolder:),     initWithAudioSourceHolder,     "@@:^v");
         addMethod (@selector (verifyDataForTrack:intoBuffer:length:atAddress:blockSize:ioFlags:),
                    produceDataForTrack,           "I@:@^cIQI^I");
-       #pragma clang diagnostic pop
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
         addMethod (@selector (cleanupTrackAfterBurn:),         cleanupTrackAfterBurn,         "v@:@");
         addMethod (@selector (cleanupTrackAfterVerification:), cleanupTrackAfterVerification, "c@:@");
@@ -181,11 +180,10 @@ struct OpenDiskDevice
 
             static AudioTrackProducerClass cls;
 
-           #pragma clang diagnostic push
-           #pragma clang diagnostic ignored "-Wundeclared-selector"
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             NSObject* producer = [cls.createInstance()  performSelector: @selector (initWithAudioSourceHolder:)
                                                              withObject: (id) new AudioTrackProducerClass::AudioSourceHolder (source, numFrames)];
-           #pragma clang diagnostic pop
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
             DRTrack* track = [[DRTrack alloc] initWithProducer: producer];
 
             {

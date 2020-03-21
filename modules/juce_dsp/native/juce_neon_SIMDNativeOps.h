@@ -23,10 +23,7 @@ namespace dsp
 
 #ifndef DOXYGEN
 
-#if JUCE_GCC && (__GNUC__ >= 6)
- #pragma GCC diagnostic push
- #pragma GCC diagnostic ignored "-Wignored-attributes"
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wignored-attributes")
 
 #ifdef _MSC_VER
  #define DECLARE_NEON_SIMD_CONST(type, name) \
@@ -491,9 +488,7 @@ struct SIMDNativeOps<double>
 
 #endif
 
-#if JUCE_GCC && (__GNUC__ >= 6)
- #pragma GCC diagnostic pop
-#endif
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 } // namespace dsp
 } // namespace juce

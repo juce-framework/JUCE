@@ -39,10 +39,7 @@
 
 #elif JUCE_WINDOWS
   // get rid of some warnings in Window's own headers
- #ifdef JUCE_MSVC
-  #pragma warning (push)
-  #pragma warning (disable : 4458)
- #endif
+ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4458)
 
  #if JUCE_MINGW && JUCE_USE_DIRECTWRITE
   #warning "DirectWrite not currently implemented with mingw..."
@@ -65,9 +62,7 @@
 
  #include <unordered_map>
 
- #ifdef JUCE_MSVC
-  #pragma warning (pop)
- #endif
+ JUCE_END_IGNORE_WARNINGS_MSVC
 
 #elif JUCE_IOS
  #import <QuartzCore/QuartzCore.h>

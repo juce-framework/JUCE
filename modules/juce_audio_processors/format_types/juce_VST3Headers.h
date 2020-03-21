@@ -17,54 +17,33 @@
 */
 
 // Wow, those Steinberg guys really don't worry too much about compiler warnings.
-#if _MSC_VER
- #pragma warning (disable: 4505)
- #pragma warning (push, 0)
- #pragma warning (disable: 4702)
-#elif __clang__
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
- #pragma clang diagnostic ignored "-Wreorder"
- #pragma clang diagnostic ignored "-Wunsequenced"
- #pragma clang diagnostic ignored "-Wint-to-pointer-cast"
- #pragma clang diagnostic ignored "-Wunused-parameter"
- #pragma clang diagnostic ignored "-Wconversion"
- #pragma clang diagnostic ignored "-Woverloaded-virtual"
- #pragma clang diagnostic ignored "-Wshadow"
- #pragma clang diagnostic ignored "-Wdeprecated-register"
- #pragma clang diagnostic ignored "-Wunused-function"
- #pragma clang diagnostic ignored "-Wsign-conversion"
- #pragma clang diagnostic ignored "-Wsign-compare"
- #pragma clang diagnostic ignored "-Wdelete-non-virtual-dtor"
- #pragma clang diagnostic ignored "-Wdeprecated-declarations"
- #pragma clang diagnostic ignored "-Wextra-semi"
- #pragma clang diagnostic ignored "-Wmissing-braces"
- #pragma clang diagnostic ignored "-Wswitch-default"
- #if __has_warning("-Wshadow-field")
-  #pragma clang diagnostic ignored "-Wshadow-field"
- #endif
- #if __has_warning("-Wpragma-pack")
-  #pragma clang diagnostic ignored "-Wpragma-pack"
- #endif
- #if __has_warning("-Wcomma")
-  #pragma clang diagnostic ignored "-Wcomma"
- #endif
- #if __has_warning("-Wzero-as-null-pointer-constant")
-  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
- #endif
- #if __has_warning("-Winconsistent-missing-destructor-override")
-  #pragma clang diagnostic ignored "-Winconsistent-missing-destructor-override"
- #endif
- #if __has_warning("-Wcast-align")
-  #pragma clang diagnostic ignored "-Wcast-align"
- #endif
- #if __has_warning("-Wignored-qualifiers")
-  #pragma clang diagnostic ignored "-Wignored-qualifiers"
- #endif
- #if __has_warning("-Wmissing-field-initializers")
-  #pragma clang diagnostic ignored "-Wmissing-field-initializers"
- #endif
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_LEVEL_MSVC (0, 4505 4702)
+
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
+                                     "-Wreorder",
+                                     "-Wunsequenced",
+                                     "-Wint-to-pointer-cast",
+                                     "-Wunused-parameter",
+                                     "-Wconversion",
+                                     "-Woverloaded-virtual",
+                                     "-Wshadow",
+                                     "-Wdeprecated-register",
+                                     "-Wunused-function",
+                                     "-Wsign-conversion",
+                                     "-Wsign-compare",
+                                     "-Wdelete-non-virtual-dtor",
+                                     "-Wdeprecated-declarations",
+                                     "-Wextra-semi",
+                                     "-Wmissing-braces",
+                                     "-Wswitch-default",
+                                     "-Wshadow-field",
+                                     "-Wpragma-pack",
+                                     "-Wcomma",
+                                     "-Wzero-as-null-pointer-constant",
+                                     "-Winconsistent-missing-destructor-override",
+                                     "-Wcast-align",
+                                     "-Wignored-qualifiers",
+                                     "-Wmissing-field-initializers")
 
 #undef DEVELOPMENT
 #define DEVELOPMENT 0  // This avoids a Clang warning in Steinberg code about unused values
@@ -162,11 +141,8 @@ namespace Steinberg
 }
 #endif //JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
 
-#if _MSC_VER
- #pragma warning (pop)
-#elif __clang__
- #pragma clang diagnostic pop
-#endif
+JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #if JUCE_WINDOWS
  #include <windows.h>

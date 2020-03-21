@@ -255,10 +255,7 @@ private:
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
 
- #if JUCE_CLANG
-  #pragma clang diagnostic push
-  #pragma clang diagnostic ignored "-Wundeclared-selector"
- #endif
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
 
  #if JUCE_MAC
   #include "native/juce_OpenGL_osx.h"
@@ -266,9 +263,7 @@ private:
   #include "native/juce_OpenGL_ios.h"
  #endif
 
- #if JUCE_CLANG
-  #pragma clang diagnostic pop
- #endif
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #elif JUCE_WINDOWS
  #include "native/juce_OpenGL_win32.h"

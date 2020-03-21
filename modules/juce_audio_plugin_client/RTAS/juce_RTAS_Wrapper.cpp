@@ -37,12 +37,9 @@
  #include <Mac2Win.H>
 #endif
 
-#ifdef __clang__
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Widiomatic-parentheses"
- #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
- #pragma clang diagnostic ignored "-Wcomment"
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Widiomatic-parentheses",
+                                     "-Wnon-virtual-dtor",
+                                     "-Wcomment")
 
 /* Note about include paths
    ------------------------
@@ -91,15 +88,10 @@
 #include <FicProcessTokens.h>
 #include <ExternalVersionDefines.h>
 
-#ifdef __clang__
- #pragma clang diagnostic pop
-#endif
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
-#ifdef _MSC_VER
- #pragma pack (push, 8)
- #pragma warning (disable: 4263 4264 4250)
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4263 4264 4250)
 
 #include "../utility/juce_IncludeModuleHeaders.h"
 
@@ -1052,5 +1044,7 @@ CProcessGroupInterface* CProcessGroup::CreateProcessGroup()
 
     return new JucePlugInGroup();
 }
+
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 #endif

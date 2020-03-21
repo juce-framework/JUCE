@@ -47,35 +47,17 @@
 //==============================================================================
 #include <juce_graphics/juce_graphics.h>
 
-#ifdef JUCE_CLANG
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wconversion"
- #if __has_warning("-Wshadow-field")
-  #pragma clang diagnostic ignored "-Wshadow-field"
- #endif
- #if __has_warning("-Wzero-as-null-pointer-constant")
-  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
- #endif
-#endif
-
-#ifdef JUCE_GCC
- #pragma GCC diagnostic ignored "-Wconversion"
- #pragma GCC diagnostic ignored "-Wsign-conversion"
- #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
+                                     "-Wshadow-field",
+                                     "-Wzero-as-null-pointer-constant",
+                                     "-Wsign-conversion")
 
 #include <climits>
 #include <cfloat>
 
 #include "box2d/Box2D.h"
 
-#ifdef JUCE_CLANG
- #pragma clang diagnostic pop
-#endif
-
-#ifdef JUCE_GCC
- #pragma GCC diagnostic pop
-#endif
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #ifndef DOXYGEN // for some reason, Doxygen sees this as a re-definition of Box2DRenderer
  #include "utils/juce_Box2DRenderer.h"

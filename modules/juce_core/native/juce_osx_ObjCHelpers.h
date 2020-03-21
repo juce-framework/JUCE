@@ -323,10 +323,9 @@ struct ObjCLifetimeManagedClass : public ObjCClass<NSObject>
     {
         addIvar<JuceClass*> ("cppObject");
 
-       #pragma clang diagnostic push
-       #pragma clang diagnostic ignored "-Wundeclared-selector"
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         addMethod (@selector (initWithJuceObject:), initWithJuceObject, "@@:@");
-       #pragma clang diagnostic pop
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
         addMethod (@selector (dealloc),             dealloc,            "v@:");
 
@@ -370,10 +369,9 @@ ObjCLifetimeManagedClass<Class> ObjCLifetimeManagedClass<Class>::objCLifetimeMan
 template <typename Class>
 NSObject* createNSObjectFromJuceClass (Class* obj)
 {
-   #pragma clang diagnostic push
-   #pragma clang diagnostic ignored "-Wobjc-method-access"
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wobjc-method-access")
     return [ObjCLifetimeManagedClass<Class>::objCLifetimeManagedClass.createInstance() initWithJuceObject:obj];
-   #pragma clang diagnostic pop
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 }
 
 // Get the JUCE class instance that was tied to the life-time of an NSObject with the

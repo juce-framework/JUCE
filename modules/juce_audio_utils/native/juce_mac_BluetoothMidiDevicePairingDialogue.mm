@@ -36,12 +36,11 @@ public:
         addIvar<Callbacks*> ("callbacks");
         addIvar<CABTLEMIDIWindowController*> ("controller");
 
-       #pragma clang diagnostic push
-       #pragma clang diagnostic ignored "-Wundeclared-selector"
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         addMethod (@selector (initWithCallbacks:),       initWithCallbacks,       "@@:^v");
         addMethod (@selector (show:),                    show,                    "v@:^v");
         addMethod (@selector (receivedWindowWillClose:), receivedWindowWillClose, "v@:^v");
-       #pragma clang diagnostic pop
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
         addMethod (@selector (dealloc), dealloc, "v@:");
 
@@ -61,13 +60,12 @@ private:
         object_setInstanceVariable (self, "callbacks", cbs);
         object_setInstanceVariable (self, "controller", [CABTLEMIDIWindowController new]);
 
-       #pragma clang diagnostic push
-       #pragma clang diagnostic ignored "-Wundeclared-selector"
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         [[NSNotificationCenter defaultCenter] addObserver: self
                                                  selector: @selector (receivedWindowWillClose:)
                                                      name: @"NSWindowWillCloseNotification"
                                                    object: [getController (self) window]];
-       #pragma clang diagnostic pop
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
         return self;
     }
@@ -137,13 +135,12 @@ public:
         callbacks.reset (new BluetoothMidiPairingWindowClass::Callbacks { std::move (exitCB),
                                                                           std::move (deletionCB) });
 
-       #pragma clang diagnostic push
-       #pragma clang diagnostic ignored "-Wundeclared-selector"
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         [window.get() performSelector: @selector (initWithCallbacks:)
                            withObject: (id) callbacks.get()];
         [window.get() performSelector: @selector (show:)
                            withObject: (id) bounds];
-       #pragma clang diagnostic pop
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
 private:

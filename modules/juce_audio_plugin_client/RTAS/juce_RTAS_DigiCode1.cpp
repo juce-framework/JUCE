@@ -45,15 +45,12 @@
  #undef UNICODE
 #endif
 
-#ifdef __clang__
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
- #pragma clang diagnostic ignored "-Wcomment"
- #pragma clang diagnostic ignored "-Wreorder"
- #pragma clang diagnostic ignored "-Wextra-tokens"
- #pragma clang diagnostic ignored "-Wunused-variable"
- #pragma clang diagnostic ignored "-Wdeprecated"
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
+                                     "-Wcomment",
+                                     "-Wreorder",
+                                     "-Wextra-tokens",
+                                     "-Wunused-variable",
+                                     "-Wdeprecated")
 
 #include <CEffectGroup.cpp>
 #include <CEffectGroupMIDI.cpp>
@@ -64,8 +61,6 @@
 #include <CEffectTypeRTAS.cpp>
 #include <ChunkDataParser.cpp>
 
-#ifdef __clang__
- #pragma clang diagnostic pop
-#endif
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #endif

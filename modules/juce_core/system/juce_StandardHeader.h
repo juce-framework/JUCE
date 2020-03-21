@@ -62,15 +62,17 @@
 
 //==============================================================================
 #include "juce_CompilerSupport.h"
+#include "juce_CompilerWarnings.h"
 #include "juce_PlatformDefs.h"
 
 //==============================================================================
 // Now we'll include some common OS headers..
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4514 4245 4100)
+
 #if JUCE_MSVC
- #pragma warning (push)
- #pragma warning (disable: 4514 4245 4100)
  #include <intrin.h>
 #endif
+
 
 #if JUCE_MAC || JUCE_IOS
  #include <libkern/OSAtomic.h>
@@ -97,9 +99,7 @@
  #include <crtdbg.h>
 #endif
 
-#if JUCE_MSVC
- #pragma warning (pop)
-#endif
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 #if JUCE_MINGW
  #include <cstring>

@@ -19,11 +19,7 @@
 namespace juce
 {
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunguarded-availability"
-#if JUCE_CLANG && defined (MAC_OS_X_VERSION_10_14) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_14
- #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wdeprecated-declarations")
 
 extern NSMenu* createNSMenu (const PopupMenu&, const String& name, int topLevelMenuId,
                              int topLevelIndex, bool addDelegate);
@@ -431,6 +427,6 @@ void SystemTrayIconComponent::showDropdownMenu (const PopupMenu& menu)
         pimpl->statusItemHolder->showMenu (menu);
 }
 
-#pragma clang diagnostic pop
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 } // namespace juce

@@ -28,27 +28,14 @@
 
 #include "../../juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp"
 
-#ifdef __clang__
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
- #pragma clang diagnostic ignored "-Wsign-conversion"
- #pragma clang diagnostic ignored "-Wextra-semi"
- #pragma clang diagnostic ignored "-Wshift-sign-overflow"
- #if __has_warning("-Wpragma-pack")
-  #pragma clang diagnostic ignored "-Wpragma-pack"
- #endif
- #if __has_warning("-Wzero-as-null-pointer-constant")
-  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
- #endif
- #if __has_warning("-Winconsistent-missing-destructor-override")
-  #pragma clang diagnostic ignored "-Winconsistent-missing-destructor-override"
- #endif
-#endif
-
-#ifdef _MSC_VER
- #pragma warning (push)
- #pragma warning (disable : 4127 4512)
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4127 4512)
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
+                                     "-Wsign-conversion",
+                                     "-Wextra-semi",
+                                     "-Wshift-sign-overflow",
+                                     "-Wpragma-pack",
+                                     "-Wzero-as-null-pointer-constant",
+                                     "-Winconsistent-missing-destructor-override")
 
 #include <AAX_Version.h>
 
@@ -82,13 +69,8 @@ static_assert (AAX_SDK_CURRENT_REVISION >= AAX_SDK_2p3p0_REVISION, "JUCE require
  #endif
 #endif
 
-#ifdef _MSC_VER
- #pragma warning (pop)
-#endif
-
-#ifdef __clang__
- #pragma clang diagnostic pop
-#endif
+JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #if JUCE_WINDOWS
  #ifndef JucePlugin_AAXLibs_path

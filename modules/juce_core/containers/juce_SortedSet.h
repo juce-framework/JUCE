@@ -23,10 +23,7 @@
 namespace juce
 {
 
-#if JUCE_MSVC
- #pragma warning (push)
- #pragma warning (disable: 4512)
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4512)
 
 //==============================================================================
 /**
@@ -487,8 +484,6 @@ private:
     Array<ElementType, TypeOfCriticalSectionToUse> data;
 };
 
-#if JUCE_MSVC
- #pragma warning (pop)
-#endif
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 } // namespace juce
