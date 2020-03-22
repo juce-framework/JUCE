@@ -56,7 +56,15 @@ public:
     explicit WebBrowserComponent (bool unloadPageWhenBrowserIsHidden = true);
 
     /** Destructor. */
-    ~WebBrowserComponent() override;
+    ~WebBrowserComponent();
+
+    //==============================================================================
+    /** Sets the main page contents and base URL.
+
+        @param htmlString       The string to use as the main page for the document
+        @param baseUrlString    A file that is used to resolve relative URLs within the document.
+    */
+    void loadHTMLString (const String& htmlString, const String& baseURLString);
 
     //==============================================================================
     /** Sends the browser to a particular URL.
