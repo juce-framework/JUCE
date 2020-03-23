@@ -1395,11 +1395,8 @@ public:
 
         callForAllSupportedTargets ([this] (ProjectType::Target::Type targetType)
                                     {
-                                        if (MSVCTargetBase* target = new MSVCTargetBase (targetType, *this))
-                                        {
-                                            if (targetType != ProjectType::Target::AggregateTarget)
-                                                targets.add (target);
-                                        }
+                                        if (targetType != ProjectType::Target::AggregateTarget)
+                                            targets.add (new MSVCTargetBase (targetType, *this));
                                     });
 
         // If you hit this assert, you tried to generate a project for an exporter

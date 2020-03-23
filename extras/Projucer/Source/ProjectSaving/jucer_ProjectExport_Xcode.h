@@ -590,13 +590,8 @@ public:
     {
         callForAllSupportedTargets ([this] (ProjectType::Target::Type targetType)
                                     {
-                                        if (auto* target = new XcodeTarget (targetType, *this))
-                                        {
-                                            if (targetType == ProjectType::Target::AggregateTarget)
-                                                targets.insert (0, target);
-                                            else
-                                                targets.add (target);
-                                        }
+                                        targets.insert (targetType == ProjectType::Target::AggregateTarget ? 0 : -1,
+                                                        new XcodeTarget (targetType, *this));
                                     });
 
         // If you hit this assert, you tried to generate a project for an exporter
