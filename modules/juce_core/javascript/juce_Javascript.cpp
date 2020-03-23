@@ -1670,6 +1670,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 			setMethod("toUpperCase", toUpperCase);
 			setMethod("getFloat", getFloatValue);
 			setMethod("getInt", getIntValue);
+            setMethod("fromFloat", fromFloatValue);
 		}
 
 		static Identifier getClassName() { static const Identifier i("String"); return i; }
@@ -1689,7 +1690,8 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 		static var charCodeAt(Args a) { return (int)a.thisObject.toString()[getInt(a, 0)]; }
 		static var charAt(Args a) { int p = getInt(a, 0); return a.thisObject.toString().substring(p, p + 1); }
 		static var getFloatValue(Args a) { return a.thisObject.toString().getFloatValue(); }
-		static var getIntValue(Args a) { return a.thisObject.toString().getIntValue(); }
+        static var getIntValue(Args a) { return a.thisObject.toString().getIntValue(); }
+        static var fromFloatValue(Args a) { return a.numArguments < 1 ? "0" : String((double)a.arguments[0], a.numArguments >= 2 ? (int)a.arguments[1] : 0); }
 
         static var split (Args a)
         {
