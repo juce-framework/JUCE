@@ -1244,14 +1244,14 @@ public:
 
         while (! threadShouldExit())
         {
-            if (outputDevice != nullptr && outputDevice->shouldClose)
+            if ((outputDevice != nullptr && outputDevice->shouldClose)
+                || (inputDevice != nullptr && inputDevice->shouldClose))
+            {
                 deviceBecameInactive = true;
+            }
 
             if (inputDevice != nullptr && ! deviceBecameInactive)
             {
-                if (inputDevice->shouldClose)
-                    deviceBecameInactive = true;
-
                 if (outputDevice == nullptr)
                 {
                     if (WaitForSingleObject (inputDevice->clientEvent, 1000) == WAIT_TIMEOUT)
@@ -1372,8 +1372,11 @@ private:
             {
                 if (deviceBecameInactive)
                 {
-                    deviceBecameInactive = false;
-                    MessageManager::callAsync ([this] { reopenDevices(); });
+                    MessageManager::callAsync ([this]
+                    {
+                        close();
+                        reopenDevices();
+                    });
                 }
             };
 

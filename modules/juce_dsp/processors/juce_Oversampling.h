@@ -105,10 +105,10 @@ public:
         Note: The latency might not be integer, so you might need to round its value
         or to compensate it properly in your processing code.
     */
-    SampleType getLatencyInSamples() noexcept;
+    SampleType getLatencyInSamples() const noexcept;
 
     /** Returns the current oversampling factor. */
-    size_t getOversamplingFactor() noexcept;
+    size_t getOversamplingFactor() const noexcept;
 
     //==============================================================================
     /** Must be called before any processing, to set the buffer sizes of the internal

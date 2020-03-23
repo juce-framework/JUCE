@@ -2,7 +2,8 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="5.4.7"
           package="com.juce.demorunner">
-  <supports-screens android:smallScreens="true" android:normalScreens="true" android:largeScreens="true" android:anyDensity="true"/>
+  <supports-screens android:smallScreens="true" android:normalScreens="true" android:largeScreens="true" android:anyDensity="true"
+                    android:xlargeScreens="true"/>
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
@@ -22,6 +23,6 @@
       </intent-filter>
     </activity>
     <provider android:name="com.roli.juce.JuceSharingContentProvider" android:authorities="com.juce.demorunner.sharingcontentprovider"
-              android:grantUriPermissions="true" android:exported="false"/>
+              android:grantUriPermissions="true" android:exported="true"/>
   </application>
 </manifest>

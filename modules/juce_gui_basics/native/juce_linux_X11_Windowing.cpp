@@ -998,6 +998,7 @@ namespace PixmapHelpers
         GC gc = XCreateGC (display, pixmap, 0, nullptr);
         XPutImage (display, pixmap, gc, ximage, 0, 0, 0, 0, width, height);
         XFreeGC (display, gc);
+        XFree (ximage);
 
         return pixmap;
     }
@@ -1757,7 +1758,7 @@ public:
                 case XK_Delete:
                 case XK_Insert:
                     keyPressed = true;
-                    keyCode = (keyCode & 0xff) | Keys::extendedKeyModifier;
+                    keyCode = static_cast<int> ((keyCode & 0xff) | Keys::extendedKeyModifier);
                     break;
 
                 case XK_Tab:
@@ -1777,7 +1778,7 @@ public:
                     if (sym >= XK_F1 && sym <= XK_F35)
                     {
                         keyPressed = true;
-                        keyCode = (sym & 0xff) | Keys::extendedKeyModifier;
+                        keyCode = static_cast<int> ((sym & 0xff) | Keys::extendedKeyModifier);
                     }
                     break;
             }
@@ -2436,9 +2437,9 @@ private:
         const int keybit = (1 << (keycode & 7));
 
         if (press)
-            Keys::keyStates [keybyte] |= keybit;
+            Keys::keyStates[keybyte] = static_cast<char> (Keys::keyStates[keybyte] | keybit);
         else
-            Keys::keyStates [keybyte] &= ~keybit;
+            Keys::keyStates[keybyte] = static_cast<char> (Keys::keyStates[keybyte] & ~keybit);
     }
 
     static void updateKeyModifiers (int status) noexcept
@@ -3508,7 +3509,7 @@ JUCE_API void JUCE_CALLTYPE Process::hide() {}
 void Desktop::setKioskComponent (Component* comp, bool enableOrDisable, bool /* allowMenusAndBars */)
 {
     if (enableOrDisable)
-        comp->setBounds (getDisplays().getMainDisplay().totalArea);
+        comp->setBounds (getDisplays().findDisplayForRect (comp->getScreenBounds()).totalArea);
 }
 
 void Desktop::allowedOrientationsChanged() {}
@@ -4044,6 +4045,8 @@ void MouseCursor::deleteMouseCursor (void* cursorHandle, bool)
         if (auto display = xDisplay.display)
         {
             ScopedXLock xlock (display);
+
+            cursorMap.erase ((Cursor) cursorHandle);
             XFreeCursor (display, (Cursor) cursorHandle);
         }
     }
@@ -4093,6 +4096,7 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
             return CustomMouseCursorInfo (ImageFileFormat::loadFrom (copyCursorData, copyCursorSize), { 1, 3 }).create();
         }
 
+        case NumStandardCursorTypes:
         default:
             jassertfalse;
             return None;
@@ -4112,16 +4116,18 @@ void MouseCursor::showInWindow (ComponentPeer* peer) const
     {
         ScopedXDisplay xDisplay;
 
-        if (cursorHandle != nullptr && xDisplay.display != cursorMap[(Cursor) getHandle()])
+        auto cursor = (Cursor) getHandle();
+        auto cursorDisplay = cursorMap[cursor];
+
+        if (cursorHandle != nullptr && xDisplay.display != cursorDisplay)
         {
-            auto oldHandle = (Cursor) getHandle();
+            cursorMap.erase (cursor);
+            XFreeCursor (cursorDisplay, cursor);
 
             if (auto* customInfo = cursorHandle->getCustomInfo())
                 cursorHandle->setHandle (customInfo->create());
             else
                 cursorHandle->setHandle (createStandardMouseCursor (cursorHandle->getType()));
-
-            cursorMap.erase (oldHandle);
         }
 
         lp->showMouseCursor ((Cursor) getHandle());

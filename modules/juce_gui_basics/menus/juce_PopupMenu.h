@@ -82,7 +82,7 @@ class JUCE_API  PopupMenu
 public:
     //==============================================================================
     /** Creates an empty popup menu. */
-    PopupMenu();
+    PopupMenu() = default;
 
     /** Creates a copy of another menu. */
     PopupMenu (const PopupMenu&);
@@ -820,7 +820,7 @@ private:
     friend struct HelperClasses;
     friend class MenuBarComponent;
 
-    std::vector<Item> items;
+    Array<Item> items;
     WeakReference<LookAndFeel> lookAndFeel;
 
     Component* createWindow (const Options&, ApplicationCommandManager**) const;

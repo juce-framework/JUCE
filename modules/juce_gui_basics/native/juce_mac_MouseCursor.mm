@@ -144,6 +144,7 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
             case UpDownLeftRightResizeCursor:
                 return MouseCursorHelpers::fromHIServices ("move");
 
+            case NumStandardCursorTypes:
             default:
                 jassertfalse;
                 break;

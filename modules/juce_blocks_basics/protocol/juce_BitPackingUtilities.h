@@ -39,7 +39,7 @@ static uint8 calculatePacketChecksum (const uint8* data, uint32 size) noexcept
     uint8 checksum = (uint8) size;
 
     for (uint32 i = 0; i < size; ++i)
-        checksum += checksum * 2 + data[i];
+        checksum = static_cast<uint8> (checksum + (checksum * 2 + data[i]));
 
     return checksum & 0x7f;
 }
@@ -181,7 +181,7 @@ struct Packed7BitArrayBuilder
             {
                 const int bitsToDo = jmin (7 - bitsInCurrentByte, numBits);
 
-                data[bytesWritten] |= ((value & (uint32) ((1 << bitsToDo) - 1)) << bitsInCurrentByte);
+                data[bytesWritten] = static_cast<uint8> (data[bytesWritten] | ((value & (uint32) ((1 << bitsToDo) - 1)) << bitsInCurrentByte));
                 value >>= bitsToDo;
                 numBits -= bitsToDo;
                 bitsInCurrentByte += bitsToDo;

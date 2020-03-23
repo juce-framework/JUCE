@@ -31,7 +31,7 @@ namespace juce
 /**
     This class acts as a wrapper around a property inside a ValueTree.
 
-    If the property inside the ValueTree is missing or empty the ValueWithDefault will automatically
+    If the property inside the ValueTree is missing the ValueWithDefault will automatically
     return a default value, which can be specified when initialising the ValueWithDefault.
 
     @tags{DataStructures}
@@ -89,7 +89,7 @@ public:
     }
 
     //==============================================================================
-    /** Returns the current value of the property. If the property does not exist or is empty,
+    /** Returns the current value of the property. If the property does not exist this
         returns the default value.
     */
     var get() const noexcept

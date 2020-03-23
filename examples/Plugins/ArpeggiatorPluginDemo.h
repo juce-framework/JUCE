@@ -61,8 +61,6 @@ public:
         addParameter (speed = new AudioParameterFloat ("speed", "Arpeggiator Speed", 0.0, 1.0, 0.5));
     }
 
-    ~Arpeggiator() {}
-
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override
     {

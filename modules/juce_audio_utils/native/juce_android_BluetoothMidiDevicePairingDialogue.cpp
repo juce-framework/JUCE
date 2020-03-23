@@ -377,6 +377,7 @@ private:
                 case AndroidBluetoothMidiInterface::paired:
                     status = AndroidBluetoothMidiDevice::connected;
                     break;
+                case AndroidBluetoothMidiInterface::unpaired:
                 default:
                     status = AndroidBluetoothMidiDevice::disconnected;
             }

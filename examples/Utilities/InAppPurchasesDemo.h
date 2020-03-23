@@ -91,7 +91,7 @@ public:
                           VoiceProduct {"jb",     "JB",     false,  false, false, "Retrieving price..." } });
     }
 
-    ~VoicePurchases()
+    ~VoicePurchases() override
     {
         InAppPurchases::getInstance()->removeListener (this);
     }
@@ -395,11 +395,8 @@ public:
 
                 setInterceptsMouseClicks (! hasBeenPurchased, ! hasBeenPurchased);
 
-                if (auto* assetStream = createAssetInputStream (String ("Purchases/" + String (imageResourceName)).toRawUTF8()))
-                {
-                    std::unique_ptr<InputStream> fileStream (assetStream);
+                if (auto fileStream = createAssetInputStream (String ("Purchases/" + String (imageResourceName)).toRawUTF8()))
                     avatar = PNGImageFormat().decodeImage (*fileStream);
-                }
             }
         }
     private:
@@ -519,7 +516,7 @@ public:
        #endif
     }
 
-    ~InAppPurchasesDemo()
+    ~InAppPurchasesDemo() override
     {
         dm.closeAudioDevice();
         dm.removeAudioCallback (&player);
@@ -569,10 +566,8 @@ private:
         {
             auto assetName = "Purchases/" + soundNames[idx] + String (phraseListBox.getSelectedRow()) + ".ogg";
 
-            if (auto* assetStream = createAssetInputStream (assetName.toRawUTF8()))
+            if (auto fileStream = createAssetInputStream (assetName.toRawUTF8()))
             {
-                std::unique_ptr<InputStream> fileStream (assetStream);
-
                 currentPhraseData.reset();
                 fileStream->readIntoMemoryBlock (currentPhraseData);
 

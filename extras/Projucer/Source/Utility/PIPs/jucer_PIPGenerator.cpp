@@ -346,11 +346,17 @@ void PIPGenerator::addModules (ValueTree& jucerTree)
 
 Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
 {
-    jucerTree.setProperty (Ids::name, metadata[Ids::name], nullptr);
-    jucerTree.setProperty (Ids::companyName, metadata[Ids::vendor], nullptr);
-    jucerTree.setProperty (Ids::version, metadata[Ids::version], nullptr);
-    jucerTree.setProperty (Ids::userNotes, metadata[Ids::description], nullptr);
-    jucerTree.setProperty (Ids::companyWebsite, metadata[Ids::website], nullptr);
+    auto setPropertyIfNotEmpty = [&jucerTree] (const Identifier& name, const var& value)
+    {
+        if (value != var())
+            jucerTree.setProperty (name, value, nullptr);
+    };
+
+    setPropertyIfNotEmpty (Ids::name, metadata[Ids::name]);
+    setPropertyIfNotEmpty (Ids::companyName, metadata[Ids::vendor]);
+    setPropertyIfNotEmpty (Ids::version, metadata[Ids::version]);
+    setPropertyIfNotEmpty (Ids::userNotes, metadata[Ids::description]);
+    setPropertyIfNotEmpty (Ids::companyWebsite, metadata[Ids::website]);
 
     auto defines = metadata[Ids::defines].toString();
 
@@ -372,7 +378,7 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
         }
     }
 
-    jucerTree.setProperty (Ids::defines, defines, nullptr);
+    setPropertyIfNotEmpty (Ids::defines, defines);
 
     auto type = metadata[Ids::type].toString();
 
@@ -387,8 +393,9 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
     else if (type == "AudioProcessor")
     {
         jucerTree.setProperty (Ids::projectType, "audioplug", nullptr);
-        jucerTree.setProperty (Ids::pluginManufacturer, metadata[Ids::vendor], nullptr);
         jucerTree.setProperty (Ids::pluginAUIsSandboxSafe, "1", nullptr);
+
+        setPropertyIfNotEmpty (Ids::pluginManufacturer, metadata[Ids::vendor]);
 
         StringArray pluginFormatsToBuild (Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString());
         pluginFormatsToBuild.addArray (getExtraPluginFormatsToBuild());
@@ -531,8 +538,7 @@ StringArray PIPGenerator::getPluginCharacteristics() const
                  Ids::pluginEditorRequiresKeys.toString() };
     else if (name == "AUv3SynthPlugin" || name == "MultiOutSynthPlugin")
         return { Ids::pluginIsSynth.toString(),
-                 Ids::pluginWantsMidiIn.toString(),
-                 Ids::pluginIsSynth.toString() };
+                 Ids::pluginWantsMidiIn.toString() };
     else if (name == "ArpeggiatorPlugin")
         return { Ids::pluginWantsMidiIn.toString(),
                  Ids::pluginProducesMidiOut.toString(),

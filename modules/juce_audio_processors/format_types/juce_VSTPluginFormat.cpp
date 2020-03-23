@@ -104,6 +104,9 @@ namespace Vst2
 //==============================================================================
 namespace juce
 {
+#if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+ extern void setThreadDPIAwarenessForWindow (HWND);
+#endif
 
 //==============================================================================
 namespace
@@ -2053,7 +2056,8 @@ private:
     String name;
     CriticalSection lock;
     std::atomic<bool> wantsMidiMessages { false };
-    bool initialised = false, isPowerOn = false;
+    bool initialised = false;
+    std::atomic<bool> isPowerOn { false };
     bool lastProcessBlockCallWasBypass = false, vstSupportsBypass = false;
     mutable StringArray programNames;
     AudioBuffer<float> outOfPlaceBuffer;
@@ -2388,11 +2392,12 @@ private:
                         case AudioPlayHead::fps30:       setHostTimeFrameRate (Vst2::kVstSmpte30fps, 30.0, position.timeInSeconds); break;
                         case AudioPlayHead::fps60:       setHostTimeFrameRate (Vst2::kVstSmpte60fps, 60.0, position.timeInSeconds); break;
 
-                        case AudioPlayHead::fps23976:    setHostTimeFrameRateDrop (Vst2::kVstSmpte239fps,      24.0, position.timeInSeconds); break;
-                        case AudioPlayHead::fps2997:     setHostTimeFrameRateDrop (Vst2::kVstSmpte2997fps,     30.0, position.timeInSeconds); break;
+                        case AudioPlayHead::fps23976:    setHostTimeFrameRateDrop (Vst2::kVstSmpte239fps,   24.0, position.timeInSeconds); break;
+                        case AudioPlayHead::fps2997:     setHostTimeFrameRateDrop (Vst2::kVstSmpte2997fps,  30.0, position.timeInSeconds); break;
                         case AudioPlayHead::fps2997drop: setHostTimeFrameRateDrop (Vst2::kVstSmpte2997dfps, 30.0, position.timeInSeconds); break;
                         case AudioPlayHead::fps30drop:   setHostTimeFrameRateDrop (Vst2::kVstSmpte30dfps,   30.0, position.timeInSeconds); break;
-                        case AudioPlayHead::fps60drop:   setHostTimeFrameRateDrop (Vst2::kVstSmpte599fps,      60.0, position.timeInSeconds); break;
+                        case AudioPlayHead::fps60drop:   setHostTimeFrameRateDrop (Vst2::kVstSmpte599fps,   60.0, position.timeInSeconds); break;
+                        case AudioPlayHead::fpsUnknown:
                         default: break;
                     }
 
@@ -2711,16 +2716,20 @@ private:
     {
         switch (getVstCategory())
         {
-            case Vst2::kPlugCategEffect:       return "Effect";
-            case Vst2::kPlugCategSynth:        return "Synth";
-            case Vst2::kPlugCategAnalysis:     return "Analysis";
-            case Vst2::kPlugCategMastering:    return "Mastering";
-            case Vst2::kPlugCategSpacializer:  return "Spacial";
-            case Vst2::kPlugCategRoomFx:       return "Reverb";
-            case Vst2::kPlugSurroundFx:        return "Surround";
-            case Vst2::kPlugCategRestoration:  return "Restoration";
-            case Vst2::kPlugCategGenerator:    return "Tone generation";
-            default:                     break;
+            case Vst2::kPlugCategEffect:          return "Effect";
+            case Vst2::kPlugCategSynth:           return "Synth";
+            case Vst2::kPlugCategAnalysis:        return "Analysis";
+            case Vst2::kPlugCategMastering:       return "Mastering";
+            case Vst2::kPlugCategSpacializer:     return "Spacial";
+            case Vst2::kPlugCategRoomFx:          return "Reverb";
+            case Vst2::kPlugSurroundFx:           return "Surround";
+            case Vst2::kPlugCategRestoration:     return "Restoration";
+            case Vst2::kPlugCategGenerator:       return "Tone generation";
+            case Vst2::kPlugCategOfflineProcess:  return "Offline Process";
+            case Vst2::kPlugCategShell:           return "Shell";
+            case Vst2::kPlugCategUnknown:         return "Unknown";
+            case Vst2::kPlugCategMaxCount:
+            default:                              break;
         }
 
         return nullptr;
@@ -2777,7 +2786,6 @@ public:
         pluginWindow = None;
         display = XWindowSystem::getInstance()->displayRef();
         ignoreUnused (pluginRefusesToResize, alreadyInside);
-
        #elif JUCE_MAC
         ignoreUnused (recursiveResize, pluginRefusesToResize, alreadyInside);
 
@@ -2818,18 +2826,16 @@ public:
         carbonWrapper.reset();
         #endif
         cocoaWrapper.reset();
-       #elif JUCE_LINUX
-        display = XWindowSystem::getInstance()->displayUnref();
+       #else
+        #if JUCE_LINUX
+         display = XWindowSystem::getInstance()->displayUnref();
+        #endif
+
+        removeScaleFactorListeners();
        #endif
 
         activeVSTWindows.removeFirstMatchingValue (this);
         plugin.editorBeingDeleted (this);
-
-       #if ! JUCE_MAC
-        for (int i = 0; i < ComponentPeer::getNumPeers(); ++i)
-            if (auto* peer = ComponentPeer::getPeer (i))
-                peer->removeScaleFactorListener (this);
-       #endif
     }
 
     //==============================================================================
@@ -2897,7 +2903,16 @@ public:
 
            #if JUCE_WINDOWS
             if (pluginHWND != 0)
-                MoveWindow (pluginHWND, pos.getX(), pos.getY(), roundToInt (getWidth() * nativeScaleFactor), roundToInt (getHeight() * nativeScaleFactor), TRUE);
+            {
+               #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+                setThreadDPIAwarenessForWindow (pluginHWND);
+               #endif
+
+                MoveWindow (pluginHWND, pos.getX(), pos.getY(),
+                            roundToInt (getWidth()  * nativeScaleFactor),
+                            roundToInt (getHeight() * nativeScaleFactor),
+                            TRUE);
+            }
            #elif JUCE_LINUX
             if (pluginWindow != 0)
             {
@@ -2941,6 +2956,8 @@ public:
         closePluginWindow();
         openPluginWindow();
 
+        removeScaleFactorListeners();
+
         if (auto* peer = getTopLevelComponent()->getPeer())
             peer->addScaleFactorListener (this);
 
@@ -2950,16 +2967,6 @@ public:
     void nativeScaleFactorChanged (double newScaleFactor) override
     {
         setScaleFactorAndDispatchMessage (newScaleFactor);
-
-       #if JUCE_WINDOWS
-        Vst2::ERect* rect = nullptr;
-        dispatch (Vst2::effEditGetRect, 0, 0, &rect, 0);
-
-        if (! isWindowSizeCorrectForPlugin (roundToInt ((rect->right - rect->left) / nativeScaleFactor),
-                                            roundToInt ((rect->bottom - rect->top) / nativeScaleFactor)))
-            return;
-       #endif
-
         componentMovedOrResized (true, true);
     }
 
@@ -3037,26 +3044,7 @@ public:
     }
 
 private:
-    VSTPluginInstance& plugin;
-    bool isOpen = false, recursiveResize = false;
-    bool pluginWantsKeys = false, pluginRefusesToResize = false, alreadyInside = false;
-
-   #if ! JUCE_MAC
-    bool pluginRespondsToDPIChanges = false;
-   #endif
-
-   #if ! JUCE_MAC
-    float nativeScaleFactor = 1.0f;
-    #if JUCE_WINDOWS
-     HWND pluginHWND = {};
-     void* originalWndProc = {};
-     int sizeCheckCount = 0;
-    #elif JUCE_LINUX
-     ::Display* display;
-     Window pluginWindow;
-    #endif
-   #endif
-
+    //==============================================================================
     // This is a workaround for old Mackie plugins that crash if their
     // window is deleted more than once.
     bool shouldAvoidDeletingWindow() const
@@ -3129,33 +3117,13 @@ private:
         if (auto* peer = getTopLevelComponent()->getPeer())
             setScaleFactorAndDispatchMessage (peer->getPlatformScaleFactor());
 
-       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-        std::unique_ptr<ScopedDPIAwarenessDisabler> dpiDisabler;
-
-        if (! pluginRespondsToDPIChanges)
-            dpiDisabler.reset (new ScopedDPIAwarenessDisabler());
-       #endif
-
         Vst2::ERect* rect = nullptr;
+
         dispatch (Vst2::effEditGetRect, 0, 0, &rect, 0);
-
-       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-        // some plug-ins are fussy about this
-        dpiDisabler.reset (nullptr);
-       #endif
-
         dispatch (Vst2::effEditOpen, 0, 0, getWindowHandle(), 0);
-
-       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-        if (! pluginRespondsToDPIChanges)
-            dpiDisabler.reset (new ScopedDPIAwarenessDisabler());
-       #endif
-
-        // do this before and after like in the steinberg example
-        dispatch (Vst2::effEditGetRect, 0, 0, &rect, 0);
+        dispatch (Vst2::effEditGetRect, 0, 0, &rect, 0);  // do this before and after like in the steinberg example
         dispatch (Vst2::effGetProgram, 0, 0, nullptr, 0); // also in steinberg code
 
-        // Install keyboard hooks
         pluginWantsKeys = (dispatch (Vst2::effKeysRequired, 0, 0, nullptr, 0) == 0);
 
        #if JUCE_WINDOWS
@@ -3180,10 +3148,6 @@ private:
 
         #pragma warning (pop)
 
-       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-        dpiDisabler.reset (nullptr);
-       #endif
-
         RECT r;
         GetWindowRect (pluginHWND, &r);
         auto w = (int) (r.right - r.left);
@@ -3200,6 +3164,10 @@ private:
                 // very dodgy logic to decide which size is right.
                 if (std::abs (rw - w) > 350 || std::abs (rh - h) > 350)
                 {
+                   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+                    setThreadDPIAwarenessForWindow (pluginHWND);
+                   #endif
+
                     SetWindowPos (pluginHWND, 0,
                                   0, 0, roundToInt (rw * nativeScaleFactor), roundToInt (rh * nativeScaleFactor),
                                   SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
@@ -3253,6 +3221,13 @@ private:
         startTimer (18 + juce::Random::getSystemRandom().nextInt (5));
         repaint();
     }
+
+    void removeScaleFactorListeners()
+    {
+        for (int i = 0; i < ComponentPeer::getNumPeers(); ++i)
+            if (auto* peer = ComponentPeer::getPeer (i))
+                peer->removeScaleFactorListener (this);
+    }
    #endif
 
     //==============================================================================
@@ -3295,7 +3270,6 @@ private:
     bool willCauseRecursiveResize (int w, int h)
     {
         auto newScreenBounds = Rectangle<int> (w, h).withPosition (getScreenPosition());
-
         return Desktop::getInstance().getDisplays().findDisplayForRect (newScreenBounds).scale != nativeScaleFactor;
     }
 
@@ -3309,7 +3283,6 @@ private:
 
     void checkPluginWindowSize()
     {
-       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
         if (! pluginRespondsToDPIChanges)
         {
             Vst2::ERect* rect = nullptr;
@@ -3328,23 +3301,6 @@ private:
                 sizeCheckCount = 0;
             }
         }
-       #else
-        {
-            RECT r;
-            GetWindowRect (pluginHWND, &r);
-
-            auto w = r.right - r.left;
-            auto h = r.bottom - r.top;
-
-            if (isShowing() && w > 0 && h > 0
-                && (w != getWidth() || h != getHeight())
-                && !pluginRefusesToResize)
-            {
-                setSize (w, h);
-                sizeCheckCount = 0;
-            }
-        }
-       #endif
     }
 
     // hooks to get keyboard events from VST windows..
@@ -3386,104 +3342,126 @@ private:
    #endif
 
     //==============================================================================
-  #if JUCE_MAC
-   #if JUCE_SUPPORT_CARBON
-    struct CarbonWrapperComponent   : public CarbonViewWrapperComponent
-    {
-        CarbonWrapperComponent (VSTPluginWindow& w)  : owner (w)
-        {
-            keepPluginWindowWhenHidden = w.shouldAvoidDeletingWindow();
-            setRepaintsChildHIViewWhenCreated (w.shouldRepaintCarbonWindowWhenCreated());
-        }
+    #if JUCE_MAC
+     #if JUCE_SUPPORT_CARBON
+      struct CarbonWrapperComponent   : public CarbonViewWrapperComponent
+      {
+          CarbonWrapperComponent (VSTPluginWindow& w)  : owner (w)
+          {
+              keepPluginWindowWhenHidden = w.shouldAvoidDeletingWindow();
+              setRepaintsChildHIViewWhenCreated (w.shouldRepaintCarbonWindowWhenCreated());
+          }
 
-        ~CarbonWrapperComponent()
-        {
-            deleteWindow();
-        }
+          ~CarbonWrapperComponent()
+          {
+              deleteWindow();
+          }
 
-        HIViewRef attachView (WindowRef windowRef, HIViewRef /*rootView*/) override
-        {
-            owner.openPluginWindow (windowRef);
-            return {};
-        }
+          HIViewRef attachView (WindowRef windowRef, HIViewRef /*rootView*/) override
+          {
+              owner.openPluginWindow (windowRef);
+              return {};
+          }
 
-        void removeView (HIViewRef) override
-        {
-            if (owner.isOpen)
-            {
-                owner.isOpen = false;
-                owner.dispatch (Vst2::effEditClose, 0, 0, 0, 0);
-                owner.dispatch (Vst2::effEditSleep, 0, 0, 0, 0);
-            }
-        }
+          void removeView (HIViewRef) override
+          {
+              if (owner.isOpen)
+              {
+                  owner.isOpen = false;
+                  owner.dispatch (Vst2::effEditClose, 0, 0, 0, 0);
+                  owner.dispatch (Vst2::effEditSleep, 0, 0, 0, 0);
+              }
+          }
 
-        bool getEmbeddedViewSize (int& w, int& h) override
-        {
-            Vst2::ERect* rect = nullptr;
-            owner.dispatch (Vst2::effEditGetRect, 0, 0, &rect, 0);
-            w = rect->right - rect->left;
-            h = rect->bottom - rect->top;
-            return true;
-        }
+          bool getEmbeddedViewSize (int& w, int& h) override
+          {
+              Vst2::ERect* rect = nullptr;
+              owner.dispatch (Vst2::effEditGetRect, 0, 0, &rect, 0);
+              w = rect->right - rect->left;
+              h = rect->bottom - rect->top;
+              return true;
+          }
 
-        void handleMouseDown (int x, int y) override
-        {
-            if (! alreadyInside)
-            {
-                alreadyInside = true;
-                getTopLevelComponent()->toFront (true);
-                owner.dispatch (Vst2::effEditMouse, x, y, 0, 0);
-                alreadyInside = false;
-            }
-            else
-            {
-                PostEvent (::mouseDown, 0);
-            }
-        }
+          void handleMouseDown (int x, int y) override
+          {
+              if (! alreadyInside)
+              {
+                  alreadyInside = true;
+                  getTopLevelComponent()->toFront (true);
+                  owner.dispatch (Vst2::effEditMouse, x, y, 0, 0);
+                  alreadyInside = false;
+              }
+              else
+              {
+                  PostEvent (::mouseDown, 0);
+              }
+          }
 
-        void handlePaint() override
-        {
-            if (auto* peer = getPeer())
-            {
-                auto pos = peer->globalToLocal (getScreenPosition());
-                Vst2::ERect r;
-                r.left   = (int16) pos.getX();
-                r.top    = (int16) pos.getY();
-                r.right  = (int16) (r.left + getWidth());
-                r.bottom = (int16) (r.top + getHeight());
+          void handlePaint() override
+          {
+              if (auto* peer = getPeer())
+              {
+                  auto pos = peer->globalToLocal (getScreenPosition());
+                  Vst2::ERect r;
+                  r.left   = (int16) pos.getX();
+                  r.top    = (int16) pos.getY();
+                  r.right  = (int16) (r.left + getWidth());
+                  r.bottom = (int16) (r.top + getHeight());
 
-                owner.dispatch (Vst2::effEditDraw, 0, 0, &r, 0);
-            }
-        }
+                  owner.dispatch (Vst2::effEditDraw, 0, 0, &r, 0);
+              }
+          }
 
-    private:
-        VSTPluginWindow& owner;
-        bool alreadyInside = false;
+      private:
+          VSTPluginWindow& owner;
+          bool alreadyInside = false;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CarbonWrapperComponent)
-    };
+          JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CarbonWrapperComponent)
+      };
 
-    friend struct CarbonWrapperComponent;
-    std::unique_ptr<CarbonWrapperComponent> carbonWrapper;
+      friend struct CarbonWrapperComponent;
+      std::unique_ptr<CarbonWrapperComponent> carbonWrapper;
+     #endif
+
+      std::unique_ptr<AutoResizingNSViewComponentWithParent> cocoaWrapper;
+
+      void resized() override
+      {
+         #if JUCE_SUPPORT_CARBON
+          if (carbonWrapper != nullptr)
+              carbonWrapper->setSize (getWidth(), getHeight());
+         #endif
+
+          if (cocoaWrapper != nullptr)
+              cocoaWrapper->setSize (getWidth(), getHeight());
+      }
+    #endif
+
+    //==============================================================================
+    VSTPluginInstance& plugin;
+    bool isOpen = false, recursiveResize = false;
+    bool pluginWantsKeys = false, pluginRefusesToResize = false, alreadyInside = false;
+
+   #if ! JUCE_MAC
+    bool pluginRespondsToDPIChanges = false;
    #endif
 
-    std::unique_ptr<AutoResizingNSViewComponentWithParent> cocoaWrapper;
+    float nativeScaleFactor = 1.0f;
 
-    void resized() override
-    {
-       #if JUCE_SUPPORT_CARBON
-        if (carbonWrapper != nullptr)
-            carbonWrapper->setSize (getWidth(), getHeight());
-       #endif
+   #if JUCE_WINDOWS
+    HWND pluginHWND = {};
+    void* originalWndProc = {};
+    int sizeCheckCount = 0;
+   #elif JUCE_LINUX
+    ::Display* display;
+    Window pluginWindow;
+   #endif
 
-        if (cocoaWrapper != nullptr)
-            cocoaWrapper->setSize (getWidth(), getHeight());
-    }
-  #endif
-
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSTPluginWindow)
 };
 #endif
+
 #if JUCE_MSVC
  #pragma warning (pop)
 #endif

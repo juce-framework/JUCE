@@ -138,6 +138,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_devices/midi_io/juce_MidiMessageCollector.cpp"
     "../../../../../modules/juce_audio_devices/midi_io/juce_MidiMessageCollector.h"
     "../../../../../modules/juce_audio_devices/native/juce_android_Audio.cpp"
+    "../../../../../modules/juce_audio_devices/native/juce_android_HighPerformanceAudioHelpers.h"
     "../../../../../modules/juce_audio_devices/native/juce_android_Midi.cpp"
     "../../../../../modules/juce_audio_devices/native/juce_android_Oboe.cpp"
     "../../../../../modules/juce_audio_devices/native/juce_android_OpenSL.cpp"
@@ -973,6 +974,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_dsp/processors/juce_Oversampling.h"
     "../../../../../modules/juce_dsp/processors/juce_ProcessContext.h"
     "../../../../../modules/juce_dsp/processors/juce_ProcessorChain.h"
+    "../../../../../modules/juce_dsp/processors/juce_ProcessorChain_test.cpp"
     "../../../../../modules/juce_dsp/processors/juce_ProcessorDuplicator.h"
     "../../../../../modules/juce_dsp/processors/juce_ProcessorWrapper.h"
     "../../../../../modules/juce_dsp/processors/juce_Reverb.h"
@@ -1742,6 +1744,7 @@ set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/j
 set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/juce_MidiMessageCollector.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/juce_MidiMessageCollector.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_android_Audio.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_android_HighPerformanceAudioHelpers.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_android_Midi.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_android_Oboe.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_android_OpenSL.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2577,6 +2580,7 @@ set_source_files_properties("../../../../../modules/juce_dsp/processors/juce_Ove
 set_source_files_properties("../../../../../modules/juce_dsp/processors/juce_Oversampling.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/processors/juce_ProcessContext.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/processors/juce_ProcessorChain.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_dsp/processors/juce_ProcessorChain_test.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/processors/juce_ProcessorDuplicator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/processors/juce_ProcessorWrapper.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/processors/juce_Reverb.h" PROPERTIES HEADER_FILE_ONLY TRUE)

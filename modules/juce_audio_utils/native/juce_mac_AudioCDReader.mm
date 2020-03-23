@@ -140,7 +140,7 @@ AudioCDReader* AudioCDReader::createReaderForCD (const int index)
 }
 
 AudioCDReader::AudioCDReader (const File& volume)
-   : AudioFormatReader (0, "CD Audio"),
+   : AudioFormatReader (nullptr, "CD Audio"),
      volumeDir (volume),
      currentReaderTrack (-1)
 {
@@ -202,9 +202,9 @@ bool AudioCDReader::readSamples (int** destSamples, int numDestChannels, int sta
         {
             reader = nullptr;
 
-            if (FileInputStream* const in = tracks [track].createInputStream())
+            if (auto in = tracks [track].createInputStream())
             {
-                BufferedInputStream* const bin = new BufferedInputStream (in, 65536, true);
+                BufferedInputStream* const bin = new BufferedInputStream (in.release(), 65536, true);
 
                 AiffAudioFormat format;
                 reader.reset (format.createReaderFor (bin, true));

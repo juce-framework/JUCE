@@ -415,7 +415,7 @@ int64 juce_fileSetPosition (void* handle, int64 pos)
 
 void FileInputStream::openHandle()
 {
-    auto f = open (file.getFullPathName().toUTF8(), O_RDONLY, 00644);
+    auto f = open (file.getFullPathName().toUTF8(), O_RDONLY);
 
     if (f != -1)
         fileHandle = fdToVoidPointer (f);
@@ -452,7 +452,7 @@ void FileOutputStream::openHandle()
 {
     if (file.exists())
     {
-        auto f = open (file.getFullPathName().toUTF8(), O_RDWR, 00644);
+        auto f = open (file.getFullPathName().toUTF8(), O_RDWR);
 
         if (f != -1)
         {
@@ -475,7 +475,7 @@ void FileOutputStream::openHandle()
     }
     else
     {
-        auto f = open (file.getFullPathName().toUTF8(), O_RDWR + O_CREAT, 00644);
+        auto f = open (file.getFullPathName().toUTF8(), O_RDWR | O_CREAT, 00644);
 
         if (f != -1)
             fileHandle = fdToVoidPointer (f);
@@ -543,8 +543,12 @@ void MemoryMappedFile::openInternal (const File& file, AccessMode mode, bool exc
         range.setStart (range.getStart() - (range.getStart() % pageSize));
     }
 
-    fileHandle = open (file.getFullPathName().toUTF8(),
-                       mode == readWrite ? (O_CREAT + O_RDWR) : O_RDONLY, 00644);
+    auto filename = file.getFullPathName().toUTF8();
+
+    if (mode == readWrite)
+        fileHandle = open (filename, O_CREAT | O_RDWR, 00644);
+    else
+        fileHandle = open (filename, O_RDONLY);
 
     if (fileHandle != -1)
     {

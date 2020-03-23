@@ -175,15 +175,11 @@ public:
 
         String getTargetFileSuffix() const
         {
-            switch (type)
-            {
-                case VSTPlugIn:
-                case UnityPlugIn:
-                case DynamicLibrary:        return ".so";
-                case SharedCodeTarget:
-                case StaticLibrary:         return ".a";
-                default:                    break;
-            }
+            if (type == VSTPlugIn || type == UnityPlugIn || type == DynamicLibrary)
+                return ".so";
+
+            if (type == SharedCodeTarget || type == StaticLibrary)
+                return ".a";
 
             return {};
         }
@@ -357,6 +353,12 @@ public:
             case ProjectType::Target::DynamicLibrary:
             case ProjectType::Target::UnityPlugIn:
                 return true;
+            case ProjectType::Target::VST3PlugIn:
+            case ProjectType::Target::AAXPlugIn:
+            case ProjectType::Target::RTASPlugIn:
+            case ProjectType::Target::AudioUnitPlugIn:
+            case ProjectType::Target::AudioUnitv3PlugIn:
+            case ProjectType::Target::unspecified:
             default:
                 break;
         }
@@ -407,13 +409,8 @@ public:
     {
         callForAllSupportedTargets ([this] (ProjectType::Target::Type targetType)
                                     {
-                                        if (MakefileTarget* target = new MakefileTarget (targetType, *this))
-                                        {
-                                            if (targetType == ProjectType::Target::AggregateTarget)
-                                                targets.insert (0, target);
-                                            else
-                                                targets.add (target);
-                                        }
+                                        targets.insert (targetType == ProjectType::Target::AggregateTarget ? 0 : -1,
+                                                        new MakefileTarget (targetType, *this));
                                     });
 
         // If you hit this assert, you tried to generate a project for an exporter
@@ -585,8 +582,7 @@ private:
     {
         auto result = makefileExtraLinkerFlags;
 
-        if (! config.isDebug())
-            result.add ("-fvisibility=hidden");
+        result.add ("-fvisibility=hidden");
 
         if (config.isLinkTimeOptimisationEnabled())
             result.add ("-flto");

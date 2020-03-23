@@ -122,6 +122,13 @@ public:
             case ProjectType::Target::VSTPlugIn:
             case ProjectType::Target::DynamicLibrary:
                 return true;
+            case ProjectType::Target::AAXPlugIn:
+            case ProjectType::Target::RTASPlugIn:
+            case ProjectType::Target::UnityPlugIn:
+            case ProjectType::Target::VST3PlugIn:
+            case ProjectType::Target::AudioUnitPlugIn:
+            case ProjectType::Target::AudioUnitv3PlugIn:
+            case ProjectType::Target::unspecified:
             default:
                 break;
         }
@@ -167,13 +174,8 @@ public:
                                         if (targetType == ProjectType::Target::SharedCodeTarget)
                                             return;
 
-                                        if (auto* target = new CodeBlocksTarget (*this, targetType))
-                                        {
-                                            if (targetType == ProjectType::Target::AggregateTarget)
-                                                targets.insert (0, target);
-                                            else
-                                                targets.add (target);
-                                        }
+                                        targets.insert (targetType == ProjectType::Target::AggregateTarget ? 0 : -1,
+                                                        new CodeBlocksTarget (*this, targetType));
                                     });
 
         // If you hit this assert, you tried to generate a project for an exporter
@@ -274,6 +276,8 @@ private:
                     case staticLibrary:         return ".lib";
                     case sharedLibraryOrDLL:
                     case pluginBundle:          return ".dll";
+                    case macOSAppex:
+                    case unknown:
                     default:
                         break;
                 }
@@ -284,17 +288,10 @@ private:
                 {
                     case executable:            return {};
                     case staticLibrary:         return ".a";
-                    case sharedLibraryOrDLL:    return ".so";
-
                     case pluginBundle:
-                        switch (type)
-                        {
-                            case VSTPlugIn:     return ".so";
-                            default:            break;
-                        }
-
-                        return ".so";
-
+                    case sharedLibraryOrDLL:    return ".so";
+                    case macOSAppex:
+                    case unknown:
                     default:
                         break;
                 }
@@ -523,22 +520,10 @@ private:
 
     static int getTypeIndex (const ProjectType::Target::Type& type)
     {
-        switch (type)
-        {
-            case ProjectType::Target::GUIApp:
-            case ProjectType::Target::StandalonePlugIn:
-                return 0;
-            case ProjectType::Target::ConsoleApp:
-                return 1;
-            case ProjectType::Target::StaticLibrary:
-            case ProjectType::Target::SharedCodeTarget:
-                return 2;
-            case ProjectType::Target::DynamicLibrary:
-            case ProjectType::Target::VSTPlugIn:
-                return 3;
-            default:
-                break;
-        }
+        if (type == ProjectType::Target::GUIApp || type == ProjectType::Target::StandalonePlugIn)         return 0;
+        if (type == ProjectType::Target::ConsoleApp)                                                      return 1;
+        if (type == ProjectType::Target::StaticLibrary || type == ProjectType::Target::SharedCodeTarget)  return 2;
+        if (type == ProjectType::Target::DynamicLibrary || type == ProjectType::Target::VSTPlugIn)        return 3;
 
         return 0;
     }

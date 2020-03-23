@@ -263,10 +263,8 @@ namespace juce
 #include "misc/juce_JUCESplashScreen.cpp"
 
 #include "layout/juce_FlexBox.cpp"
-#if JUCE_HAS_CONSTEXPR
- #include "layout/juce_GridItem.cpp"
- #include "layout/juce_Grid.cpp"
-#endif
+#include "layout/juce_GridItem.cpp"
+#include "layout/juce_Grid.cpp"
 
 #if JUCE_IOS || JUCE_WINDOWS
  #include "native/juce_MultiTouchMapper.h"

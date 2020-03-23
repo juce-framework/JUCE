@@ -126,14 +126,14 @@ AudioFormatReader* AudioFormatManager::createReaderFor (const File& file)
 
     for (auto* af : knownFormats)
         if (af->canHandleFile (file))
-            if (auto* in = file.createInputStream())
-                if (auto* r = af->createReaderFor (in, true))
+            if (auto in = file.createInputStream())
+                if (auto* r = af->createReaderFor (in.release(), true))
                     return r;
 
     return nullptr;
 }
 
-AudioFormatReader* AudioFormatManager::createReaderFor (InputStream* audioFileStream)
+AudioFormatReader* AudioFormatManager::createReaderFor (std::unique_ptr<InputStream> audioFileStream)
 {
     // you need to actually register some formats before the manager can
     // use them to open a file!
@@ -141,22 +141,21 @@ AudioFormatReader* AudioFormatManager::createReaderFor (InputStream* audioFileSt
 
     if (audioFileStream != nullptr)
     {
-        std::unique_ptr<InputStream> in (audioFileStream);
-        auto originalStreamPos = in->getPosition();
+        auto originalStreamPos = audioFileStream->getPosition();
 
         for (auto* af : knownFormats)
         {
-            if (auto* r = af->createReaderFor (in.get(), false))
+            if (auto* r = af->createReaderFor (audioFileStream.get(), false))
             {
-                in.release();
+                audioFileStream.release();
                 return r;
             }
 
-            in->setPosition (originalStreamPos);
+            audioFileStream->setPosition (originalStreamPos);
 
             // the stream that is passed-in must be capable of being repositioned so
             // that all the formats can have a go at opening it.
-            jassert (in->getPosition() == originalStreamPos);
+            jassert (audioFileStream->getPosition() == originalStreamPos);
         }
     }
 

@@ -176,18 +176,18 @@ public:
                        std::make_unique<AudioParameterInt> ("b", "Parameter B", 0, 5, 2) })
         @endcode
 
-        To add parameters programatically you can use the iterator-based ParameterLayout
-        constructor:
+        To add parameters programatically you can call `add` repeatedly on a
+        ParameterLayout instance:
 
         @code
         AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
         {
-            std::vector<std::unique_ptr<AudioParameterInt>> params;
+            AudioProcessorValueTreeState::ParameterLayout layout;
 
             for (int i = 1; i < 9; ++i)
-                params.push_back (std::make_unique<AudioParameterInt> (String (i), String (i), 0, i, 0));
+                layout.add (std::make_unique<AudioParameterInt> (String (i), String (i), 0, i, 0));
 
-            return { params.begin(), params.end() };
+            return layout;
         }
 
         YourAudioProcessor()
@@ -424,7 +424,7 @@ public:
 
         const float unsnappedDefault;
         const bool metaParameter, automatable, discrete, boolean;
-        float lastValue = -1.0f;
+        std::atomic<float> lastValue { -1.0f };
 
         friend class AudioProcessorValueTreeState::ParameterAdapter;
     };

@@ -33,12 +33,10 @@ struct MarkerListScope  : public Expression::Scope
 
     Expression getSymbolValue (const String& symbol) const override
     {
-        switch (RelativeCoordinate::StandardStrings::getTypeOf (symbol))
-        {
-            case RelativeCoordinate::StandardStrings::width:  return Expression ((double) component.getWidth());
-            case RelativeCoordinate::StandardStrings::height: return Expression ((double) component.getHeight());
-            default: break;
-        }
+        auto type = RelativeCoordinate::StandardStrings::getTypeOf (symbol);
+
+        if (type == RelativeCoordinate::StandardStrings::width)   return Expression ((double) component.getWidth());
+        if (type == RelativeCoordinate::StandardStrings::height)  return Expression ((double) component.getHeight());
 
         MarkerList* list;
 
@@ -116,6 +114,8 @@ Expression RelativeCoordinatePositionerBase::ComponentScope::getSymbolValue (con
         case RelativeCoordinate::StandardStrings::height: return Expression ((double) component.getHeight());
         case RelativeCoordinate::StandardStrings::right:  return Expression ((double) component.getRight());
         case RelativeCoordinate::StandardStrings::bottom: return Expression ((double) component.getBottom());
+        case RelativeCoordinate::StandardStrings::parent:
+        case RelativeCoordinate::StandardStrings::unknown:
         default: break;
     }
 
@@ -180,6 +180,8 @@ public:
                 positioner.registerComponentListener (component);
                 break;
 
+            case RelativeCoordinate::StandardStrings::parent:
+            case RelativeCoordinate::StandardStrings::unknown:
             default:
                 if (auto* parent = component.getParentComponent())
                 {

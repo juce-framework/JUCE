@@ -42,7 +42,7 @@ struct OboeAudioIODeviceBufferHelpers<int16>
 
     static constexpr int bitDepth() { return 16; }
 
-    static void referAudioBufferDirectlyToOboeIfPossible (int16*, AudioBuffer<float>&, int) {}
+    static bool referAudioBufferDirectlyToOboeIfPossible (int16*, AudioBuffer<float>&, int)  { return false; }
 
     static void convertFromOboe (const int16* srcInterleaved, AudioBuffer<float>& audioBuffer, int numSamples)
     {
@@ -78,20 +78,21 @@ struct OboeAudioIODeviceBufferHelpers<float>
 
     static constexpr int bitDepth() { return 32; }
 
-    static void referAudioBufferDirectlyToOboeIfPossible (float* nativeBuffer, AudioBuffer<float>& audioBuffer, int numSamples)
+    static bool referAudioBufferDirectlyToOboeIfPossible (float* nativeBuffer, AudioBuffer<float>& audioBuffer, int numSamples)
     {
         if (audioBuffer.getNumChannels() == 1)
+        {
             audioBuffer.setDataToReferTo (&nativeBuffer, 1, numSamples);
+            return true;
+        }
+
+        return false;
     }
 
     static void convertFromOboe (const float* srcInterleaved, AudioBuffer<float>& audioBuffer, int numSamples)
     {
         // No need to convert, we instructed the buffer to point to the src data directly already
-        if (audioBuffer.getNumChannels() == 1)
-        {
-            jassert (audioBuffer.getWritePointer (0) == srcInterleaved);
-            return;
-        }
+        jassert (audioBuffer.getWritePointer (0) != srcInterleaved);
 
         for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
         {
@@ -107,11 +108,7 @@ struct OboeAudioIODeviceBufferHelpers<float>
     static void convertToOboe (const AudioBuffer<float>& audioBuffer, float* dstInterleaved, int numSamples)
     {
         // No need to convert, we instructed the buffer to point to the src data directly already
-        if (audioBuffer.getNumChannels() == 1)
-        {
-            jassert (audioBuffer.getReadPointer (0) == dstInterleaved);
-            return;
-        }
+        jassert (audioBuffer.getReadPointer (0) != dstInterleaved);
 
         for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
         {
@@ -197,16 +194,7 @@ public:
 
     Array<int> getAvailableBufferSizes() override
     {
-        // we need to offer the lowest possible buffer size which
-        // is the native buffer size
-        const int defaultNumMultiples = 8;
-        const int nativeBufferSize = getNativeBufferSize();
-        Array<int> bufferSizes;
-
-        for (int i = 1; i < defaultNumMultiples; ++i)
-            bufferSizes.add (i * nativeBufferSize);
-
-        return bufferSizes;
+        return AndroidHighPerformanceAudioHelpers::getAvailableBufferSizes (getAvailableSampleRates());
     }
 
     String open (const BigInteger& inputChannels, const BigInteger& outputChannels,
@@ -215,9 +203,14 @@ public:
         close();
 
         lastError.clear();
-        sampleRate = (int) requestedSampleRate;
 
-        actualBufferSize = (bufferSize <= 0) ? getDefaultBufferSize() : bufferSize;
+        sampleRate = (int) (requestedSampleRate > 0 ? requestedSampleRate : AndroidHighPerformanceAudioHelpers::getNativeSampleRate());
+        auto preferredBufferSize = (bufferSize > 0) ? bufferSize : getDefaultBufferSize();
+
+        audioBuffersToEnqueue = AndroidHighPerformanceAudioHelpers::getNumBuffersToEnqueue (preferredBufferSize, sampleRate);
+        actualBufferSize = preferredBufferSize / audioBuffersToEnqueue;
+
+        jassert ((actualBufferSize * audioBuffersToEnqueue) == preferredBufferSize);
 
         // The device may report no max, claiming "no limits". Pick sensible defaults.
         int maxOutChans = maxNumOutputChannels > 0 ? maxNumOutputChannels : 2;
@@ -264,7 +257,7 @@ public:
     int getOutputLatencyInSamples() override            { return session->getOutputLatencyInSamples(); }
     int getInputLatencyInSamples() override             { return session->getInputLatencyInSamples(); }
     bool isOpen() override                              { return deviceOpen; }
-    int getCurrentBufferSizeSamples() override          { return actualBufferSize; }
+    int getCurrentBufferSizeSamples() override          { return actualBufferSize * audioBuffersToEnqueue; }
     int getCurrentBitDepth() override                   { return session->getCurrentBitDepth(); }
     BigInteger getActiveOutputChannels() const override { return activeOutputChans; }
     BigInteger getActiveInputChannels() const override  { return activeInputChans; }
@@ -274,16 +267,12 @@ public:
 
     int getDefaultBufferSize() override
     {
-        // Only on a Pro-Audio device will we set the lowest possible buffer size
-        // by default. We need to be more conservative on other devices
-        // as they may be low-latency, but still have a crappy CPU.
-        return (isProAudioDevice() ? 1 : 6)
-                 * getNativeBufferSize();
+        return AndroidHighPerformanceAudioHelpers::getDefaultBufferSize (getCurrentSampleRate());
     }
 
     double getCurrentSampleRate() override
     {
-        return (sampleRate == 0.0 ? getNativeSampleRate() : sampleRate);
+        return (sampleRate == 0.0 ? AndroidHighPerformanceAudioHelpers::getNativeSampleRate() : sampleRate);
     }
 
     void start (AudioIODeviceCallback* newCallback) override
@@ -375,10 +364,11 @@ private:
     {
         static const int standardRates[] = { 8000, 11025, 12000, 16000,
                                             22050, 24000, 32000, 44100, 48000 };
+
         Array<int> rates (standardRates, numElementsInArray (standardRates));
 
         // make sure the native sample rate is part of the list
-        int native = (int) getNativeSampleRate();
+        int native = (int) AndroidHighPerformanceAudioHelpers::getNativeSampleRate();
 
         if (native != 0 && ! rates.contains (native))
             rates.add (native);
@@ -511,10 +501,10 @@ private:
         void open (int deviceId, oboe::Direction direction,
                    oboe::SharingMode sharingMode,
                    int channelCount, oboe::AudioFormat format,
-                   int32 sampleRate, int32 bufferSize,
-                   oboe::AudioStreamCallback* callback = nullptr)
+                   int32 newSampleRate, int32 newBufferSize,
+                   oboe::AudioStreamCallback* newCallback = nullptr)
         {
-            oboe::DefaultStreamValues::FramesPerBurst = getDefaultFramesPerBurst();
+            oboe::DefaultStreamValues::FramesPerBurst = AndroidHighPerformanceAudioHelpers::getNativeBufferSize();
 
             oboe::AudioStreamBuilder builder;
 
@@ -526,9 +516,9 @@ private:
             builder.setSharingMode (sharingMode);
             builder.setChannelCount (channelCount);
             builder.setFormat (format);
-            builder.setSampleRate (sampleRate);
+            builder.setSampleRate (newSampleRate);
             builder.setPerformanceMode (oboe::PerformanceMode::LowLatency);
-            builder.setCallback (callback);
+            builder.setCallback (newCallback);
 
             JUCE_OBOE_LOG (String ("Preparing Oboe stream with params:")
                  + "\nAAudio supported = " + String (int (builder.isAAudioSupported()))
@@ -538,17 +528,17 @@ private:
                  + "\nSharingMode = " + getOboeString (sharingMode)
                  + "\nChannelCount = " + String (channelCount)
                  + "\nFormat = " + getOboeString (format)
-                 + "\nSampleRate = " + String (sampleRate)
+                 + "\nSampleRate = " + String (newSampleRate)
                  + "\nPerformanceMode = " + getOboeString (oboe::PerformanceMode::LowLatency));
 
             openResult = builder.openStream (&stream);
             JUCE_OBOE_LOG ("Building Oboe stream with result: " + getOboeString (openResult)
                  + "\nStream state = " + (stream != nullptr ? getOboeString (stream->getState()) : String ("?")));
 
-            if (stream != nullptr && bufferSize != 0)
+            if (stream != nullptr && newBufferSize != 0)
             {
-                JUCE_OBOE_LOG ("Setting the bufferSizeInFrames to " + String (bufferSize));
-                stream->setBufferSizeInFrames (bufferSize);
+                JUCE_OBOE_LOG ("Setting the bufferSizeInFrames to " + String (newBufferSize));
+                stream->setBufferSizeInFrames (newBufferSize);
             }
 
             JUCE_OBOE_LOG (String ("Stream details:")
@@ -573,6 +563,7 @@ private:
             if (stream != nullptr)
             {
                 oboe::Result result = stream->close();
+                ignoreUnused (result);
                 JUCE_OBOE_LOG ("Requested Oboe stream close with result: " + getOboeString (result));
             }
         }
@@ -665,16 +656,16 @@ private:
         }
 
         // Not strictly required as these should not change, but recommended by Google anyway
-        void checkStreamSetup (OboeStream* stream, int deviceId, int numChannels, int sampleRate,
-                               int bufferSize, oboe::AudioFormat format)
+        void checkStreamSetup (OboeStream* stream, int deviceId, int numChannels, int expectedSampleRate,
+                               int expectedBufferSize, oboe::AudioFormat format)
         {
             if (auto* nativeStream = stream != nullptr ? stream->getNativeStream() : nullptr)
             {
-                ignoreUnused (deviceId, numChannels, sampleRate, bufferSize);
+                ignoreUnused (deviceId, numChannels, sampleRate, expectedBufferSize);
                 ignoreUnused (streamFormat, bitDepth);
 
                 jassert (numChannels == nativeStream->getChannelCount());
-                jassert (sampleRate == 0 || sampleRate == nativeStream->getSampleRate());
+                jassert (expectedSampleRate == 0 || expectedSampleRate == nativeStream->getSampleRate());
                 jassert (format == nativeStream->getFormat());
             }
         }
@@ -768,7 +759,6 @@ private:
                 // only output stream should be the master stream receiving callbacks
                 jassert (stream->getDirection() == oboe::Direction::Output && stream == outputStream->getNativeStream());
 
-                //-----------------
                 // Read input from Oboe
                 inputStreamSampleBuffer.clear();
                 inputStreamNativeBuffer.calloc (static_cast<size_t> (numInputChannels * bufferSize));
@@ -788,11 +778,13 @@ private:
 
                     if (result)
                     {
-                        OboeAudioIODeviceBufferHelpers<SampleType>::referAudioBufferDirectlyToOboeIfPossible (inputStreamNativeBuffer.get(),
-                                                                                                              inputStreamSampleBuffer,
-                                                                                                              result.value());
+                        auto referringDirectlyToOboeData = OboeAudioIODeviceBufferHelpers<SampleType>
+                                                             ::referAudioBufferDirectlyToOboeIfPossible (inputStreamNativeBuffer.get(),
+                                                                                                         inputStreamSampleBuffer,
+                                                                                                         result.value());
 
-                        OboeAudioIODeviceBufferHelpers<SampleType>::convertFromOboe (inputStreamNativeBuffer.get(), inputStreamSampleBuffer, result.value());
+                        if (! referringDirectlyToOboeData)
+                            OboeAudioIODeviceBufferHelpers<SampleType>::convertFromOboe (inputStreamNativeBuffer.get(), inputStreamSampleBuffer, result.value());
                     }
                     else
                     {
@@ -803,24 +795,24 @@ private:
                         inputLatency = getLatencyFor (*inputStream);
                 }
 
-                //-----------------
                 // Setup output buffer
-                outputStreamSampleBuffer.clear();
+                auto referringDirectlyToOboeData = OboeAudioIODeviceBufferHelpers<SampleType>
+                                                     ::referAudioBufferDirectlyToOboeIfPossible (static_cast<SampleType*> (audioData),
+                                                                                                 outputStreamSampleBuffer,
+                                                                                                 numFrames);
 
-                OboeAudioIODeviceBufferHelpers<SampleType>::referAudioBufferDirectlyToOboeIfPossible (static_cast<SampleType*> (audioData),
-                                                                                                      outputStreamSampleBuffer,
-                                                                                                      numFrames);
+                if (! referringDirectlyToOboeData)
+                    outputStreamSampleBuffer.clear();
 
-                //-----------------
                 // Process
                 // NB: the number of samples read from the input can potentially differ from numFrames.
                 owner.process (inputStreamSampleBuffer.getArrayOfReadPointers(), numInputChannels,
                                outputStreamSampleBuffer.getArrayOfWritePointers(), numOutputChannels,
                                numFrames);
 
-                //-----------------
                 // Write output to Oboe
-                OboeAudioIODeviceBufferHelpers<SampleType>::convertToOboe (outputStreamSampleBuffer, static_cast<SampleType*> (audioData), numFrames);
+                if (! referringDirectlyToOboeData)
+                    OboeAudioIODeviceBufferHelpers<SampleType>::convertToOboe (outputStreamSampleBuffer, static_cast<SampleType*> (audioData), numFrames);
 
                 if (isOutputLatencyDetectionSupported)
                     outputLatency = getLatencyFor (*outputStream);
@@ -874,9 +866,7 @@ private:
             const int64_t appFrameIndex = isOutput ? nativeStream.getFramesWritten() : nativeStream.getFramesRead();
 
             // Assume that the next frame will be processed at the current time
-            using namespace std::chrono;
-            int64_t appFrameAppTime = getCurrentTimeNanos();//duration_cast<nanoseconds> (steady_clock::now().time_since_epoch()).count();
-            int64_t appFrameAppTime2 = duration_cast<nanoseconds> (steady_clock::now().time_since_epoch()).count();
+            int64_t appFrameAppTime = getCurrentTimeNanos();
 
             // Calculate the number of frames between app and hardware
             int64_t frameIndexDelta = appFrameIndex - hardwareFrameIndex;
@@ -903,6 +893,8 @@ private:
 
         void onErrorBeforeClose (oboe::AudioStream* stream, oboe::Result error) override
         {
+            ignoreUnused (error);
+
             // only output stream should be the master stream receiving callbacks
             jassert (stream->getDirection() == oboe::Direction::Output);
 
@@ -963,7 +955,7 @@ private:
     friend class OboeRealtimeThread;
 
     //==============================================================================
-    int actualBufferSize = 0, sampleRate = 0;
+    int actualBufferSize = 0, sampleRate = 0, audioBuffersToEnqueue = 0;
     bool deviceOpen = false;
     String lastError;
     BigInteger activeOutputChans, activeInputChans;
@@ -979,31 +971,6 @@ private:
     std::unique_ptr<OboeSessionBase> session;
 
     bool running = false;
-
-    //==============================================================================
-    static double getNativeSampleRate()
-    {
-        return audioManagerGetProperty ("android.media.property.OUTPUT_SAMPLE_RATE").getDoubleValue();
-    }
-
-    static int getNativeBufferSize()
-    {
-        auto val = audioManagerGetProperty ("android.media.property.OUTPUT_FRAMES_PER_BUFFER").getIntValue();
-        return val > 0 ? val : 512;
-    }
-
-    static bool isProAudioDevice()
-    {
-        return androidHasSystemFeature ("android.hardware.audio.pro");
-    }
-
-    static int getDefaultFramesPerBurst()
-    {
-        // NB: this function only works for inbuilt speakers and headphones
-        auto framesPerBurstString = javaString (audioManagerGetProperty ("android.media.property.OUTPUT_FRAMES_PER_BUFFER"));
-
-        return framesPerBurstString != 0 ? getEnv()->CallStaticIntMethod (JavaInteger, JavaInteger.parseInt, framesPerBurstString.get(), 10) : 192;
-    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OboeAudioIODevice)
 };
@@ -1088,8 +1055,8 @@ public:
                                oboe::SharingMode::Shared,
                                forInput ? 1 : 2,
                                getAndroidSDKVersion() >= 21 ? oboe::AudioFormat::Float : oboe::AudioFormat::I16,
-                               (int) OboeAudioIODevice::getNativeSampleRate(),
-                               OboeAudioIODevice::getNativeBufferSize(),
+                               (int) AndroidHighPerformanceAudioHelpers::getNativeSampleRate(),
+                               AndroidHighPerformanceAudioHelpers::getNativeBufferSize(),
                                nullptr);
 
         if (auto* nativeStream = tempStream.getNativeStream())
@@ -1202,6 +1169,8 @@ public:
 
         for (auto& device : inputDevices)
         {
+            ignoreUnused (device);
+
             JUCE_OBOE_LOG ("name = " << device.name);
             JUCE_OBOE_LOG ("id = " << String (device.id));
             JUCE_OBOE_LOG ("sample rates size = " << String (device.sampleRates.size()));
@@ -1212,6 +1181,8 @@ public:
 
         for (auto& device : outputDevices)
         {
+            ignoreUnused (device);
+
             JUCE_OBOE_LOG ("name = " << device.name);
             JUCE_OBOE_LOG ("id = " << String (device.id));
             JUCE_OBOE_LOG ("sample rates size = " << String (device.sampleRates.size()));
@@ -1350,8 +1321,8 @@ public:
                                       oboe::SharingMode::Exclusive,
                                       1,
                                       oboe::AudioFormat::Float,
-                                      (int) OboeAudioIODevice::getNativeSampleRate(),
-                                      OboeAudioIODevice::getNativeBufferSize(),
+                                      (int) AndroidHighPerformanceAudioHelpers::getNativeSampleRate(),
+                                      AndroidHighPerformanceAudioHelpers::getNativeBufferSize(),
                                       this)),
           formatUsed (oboe::AudioFormat::Float)
     {
@@ -1363,8 +1334,8 @@ public:
                                               oboe::SharingMode::Exclusive,
                                               1,
                                               oboe::AudioFormat::I16,
-                                              (int) OboeAudioIODevice::getNativeSampleRate(),
-                                              OboeAudioIODevice::getNativeBufferSize(),
+                                              (int) AndroidHighPerformanceAudioHelpers::getNativeSampleRate(),
+                                              AndroidHighPerformanceAudioHelpers::getNativeBufferSize(),
                                               this));
 
             formatUsed = oboe::AudioFormat::I16;
@@ -1446,15 +1417,19 @@ private:
     oboe::AudioFormat formatUsed;
 };
 
+//==============================================================================
 pthread_t juce_createRealtimeAudioThread (void* (*entry) (void*), void* userPtr)
 {
-    std::unique_ptr<OboeRealtimeThread> thread (new OboeRealtimeThread());
+    auto thread = std::make_unique<OboeRealtimeThread>();
 
     if (! thread->isOk())
         return {};
 
     auto threadID = thread->startThread (entry, userPtr);
-    thread.release();  // the thread will de-allocate itself
+
+    // the thread will de-allocate itself
+    thread.release();
+
     return threadID;
 }
 

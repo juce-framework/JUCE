@@ -220,9 +220,9 @@ struct MenuWindow  : public Component
         setOpaque (lf.findColour (PopupMenu::backgroundColourId).isOpaque()
                      || ! Desktop::canUseSemiTransparentWindows());
 
-        for (size_t i = 0; i < menu.items.size(); ++i)
+        for (int i = 0; i < menu.items.size(); ++i)
         {
-            auto& item = menu.items[i];
+            auto& item = menu.items.getReference (i);
 
             if (i + 1 < menu.items.size() || ! item.isSeparator)
                 items.add (new ItemComponent (item, options.getStandardItemHeight(), *this));
@@ -1282,10 +1282,6 @@ void PopupMenu::HelperClasses::NormalComponentWrapper::getIdealSize (int& idealW
 }
 
 //==============================================================================
-PopupMenu::PopupMenu()
-{
-}
-
 PopupMenu::PopupMenu (const PopupMenu& other)
     : items (other.items),
       lookAndFeel (other.lookAndFeel)
@@ -1459,7 +1455,7 @@ void PopupMenu::addItem (Item newItem)
               || newItem.isSeparator || newItem.isSectionHeader
               || newItem.subMenu != nullptr);
 
-    items.push_back (std::move (newItem));
+    items.add (std::move (newItem));
 }
 
 void PopupMenu::addItem (String itemText, std::function<void()> action)
@@ -1608,7 +1604,7 @@ void PopupMenu::addSubMenu (String subMenuName, PopupMenu subMenu, bool isActive
 
 void PopupMenu::addSeparator()
 {
-    if (items.size() > 0 && ! items.back().isSeparator)
+    if (items.size() > 0 && ! items.getLast().isSeparator)
     {
         Item i;
         i.isSeparator = true;
@@ -1713,11 +1709,11 @@ PopupMenu::Options PopupMenu::Options::withPreferredPopupDirection (PopupDirecti
 Component* PopupMenu::createWindow (const Options& options,
                                     ApplicationCommandManager** managerOfChosenCommand) const
 {
-    return items.empty() ? nullptr
-                         : new HelperClasses::MenuWindow (*this, nullptr, options,
-                                                          ! options.getTargetScreenArea().isEmpty(),
-                                                          ModifierKeys::currentModifiers.isAnyMouseButtonDown(),
-                                                          managerOfChosenCommand);
+    return items.isEmpty() ? nullptr
+                           : new HelperClasses::MenuWindow (*this, nullptr, options,
+                                                            ! options.getTargetScreenArea().isEmpty(),
+                                                            ModifierKeys::currentModifiers.isAnyMouseButtonDown(),
+                                                            managerOfChosenCommand);
 }
 
 //==============================================================================
@@ -1985,7 +1981,7 @@ bool PopupMenu::MenuItemIterator::next()
     if (index.size() == 0 || menus.getLast()->items.size() == 0)
         return false;
 
-    currentItem = const_cast<PopupMenu::Item*> (&(menus.getLast()->items[(size_t) index.getLast()]));
+    currentItem = const_cast<PopupMenu::Item*> (&(menus.getLast()->items.getReference (index.getLast())));
 
     if (searchRecursively && currentItem->subMenu != nullptr)
     {

@@ -126,6 +126,8 @@ struct JSONParser
 
                         break;
                     }
+
+                    default:  break;
                 }
             }
 

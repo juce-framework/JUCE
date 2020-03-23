@@ -34,18 +34,18 @@ class LAMEEncoderAudioFormat::Writer   : public AudioFormatWriter
 public:
     Writer (OutputStream* destStream, const String& formatName,
             const File& appFile, int vbr, int cbr,
-            double sampleRate, unsigned int numberOfChannels,
-            int bitsPerSample, const StringPairArray& metadata)
-        : AudioFormatWriter (destStream, formatName, sampleRate,
-                             numberOfChannels, (unsigned int) bitsPerSample),
+            double sampleRateIn, unsigned int numberOfChannels,
+            int bitsPerSampleIn, const StringPairArray& metadata)
+        : AudioFormatWriter (destStream, formatName, sampleRateIn,
+                             numberOfChannels, (unsigned int) bitsPerSampleIn),
           vbrLevel (vbr), cbrBitrate (cbr)
     {
         WavAudioFormat wavFormat;
 
-        if (auto* out = tempWav.getFile().createOutputStream())
+        if (auto out = tempWav.getFile().createOutputStream())
         {
-            writer.reset (wavFormat.createWriterFor (out, sampleRate, numChannels,
-                                                     bitsPerSample, metadata, 0));
+            writer.reset (wavFormat.createWriterFor (out.release(), sampleRateIn, numChannels,
+                                                     bitsPerSampleIn, metadata, 0));
 
             args.add (appFile.getFullPathName());
 

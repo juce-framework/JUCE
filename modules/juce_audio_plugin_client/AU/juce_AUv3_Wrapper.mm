@@ -970,16 +970,19 @@ public:
 
         switch (lastTimeStamp.mSMPTETime.mType)
         {
-            case kSMPTETimeType2398:        info.frameRate = AudioPlayHead::fps23976; break;
-            case kSMPTETimeType24:          info.frameRate = AudioPlayHead::fps24; break;
-            case kSMPTETimeType25:          info.frameRate = AudioPlayHead::fps25; break;
-            case kSMPTETimeType2997:        info.frameRate = AudioPlayHead::fps2997; break;
+            case kSMPTETimeType2398:        info.frameRate = AudioPlayHead::fps23976;    break;
+            case kSMPTETimeType24:          info.frameRate = AudioPlayHead::fps24;       break;
+            case kSMPTETimeType25:          info.frameRate = AudioPlayHead::fps25;       break;
+            case kSMPTETimeType2997:        info.frameRate = AudioPlayHead::fps2997;     break;
             case kSMPTETimeType2997Drop:    info.frameRate = AudioPlayHead::fps2997drop; break;
-            case kSMPTETimeType30Drop:      info.frameRate = AudioPlayHead::fps30drop; break;
-            case kSMPTETimeType30:          info.frameRate = AudioPlayHead::fps30; break;
-            case kSMPTETimeType60Drop:      info.frameRate = AudioPlayHead::fps60drop; break;
-            case kSMPTETimeType60:          info.frameRate = AudioPlayHead::fps60; break;
-            default:                        info.frameRate = AudioPlayHead::fpsUnknown; break;
+            case kSMPTETimeType30Drop:      info.frameRate = AudioPlayHead::fps30drop;   break;
+            case kSMPTETimeType30:          info.frameRate = AudioPlayHead::fps30;       break;
+            case kSMPTETimeType60Drop:      info.frameRate = AudioPlayHead::fps60drop;   break;
+            case kSMPTETimeType60:          info.frameRate = AudioPlayHead::fps60;       break;
+            case kSMPTETimeType5994:
+            case kSMPTETimeType5994Drop:
+            case kSMPTETimeType50:
+            default:                        info.frameRate = AudioPlayHead::fpsUnknown;  break;
         }
 
         double num;
@@ -1427,6 +1430,7 @@ private:
                 }
                 break;
 
+                case AURenderEventMIDISysEx:
                 default:
                     break;
             }

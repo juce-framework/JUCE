@@ -1325,6 +1325,7 @@ private:
                             return (cameraSensorOrientation + 180) % 360;
                     }
                     break;
+                case Desktop::allOrientations:
                 default:
                     return 0;
             }
