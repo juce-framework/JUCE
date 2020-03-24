@@ -3444,9 +3444,8 @@ private:
 
    #if ! JUCE_MAC
     bool pluginRespondsToDPIChanges = false;
-   #endif
-
     float nativeScaleFactor = 1.0f;
+   #endif
 
    #if JUCE_WINDOWS
     HWND pluginHWND = {};
