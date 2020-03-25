@@ -400,7 +400,7 @@ struct MenuWindow  : public Component
             if (showSubMenuFor (currentChild))
             {
                 if (isSubMenuVisible())
-                    activeSubMenu->selectNextItem (1);
+                    activeSubMenu->selectNextItem (0);
             }
             else if (componentAttachedTo != nullptr)
             {
