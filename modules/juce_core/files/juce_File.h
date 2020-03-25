@@ -20,6 +20,10 @@
   ==============================================================================
 */
 
+#if JUCE_MAC || JUCE_IOS
+ using OSType = uint32_t;
+#endif
+
 namespace juce
 {
 
