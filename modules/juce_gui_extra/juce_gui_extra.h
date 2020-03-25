@@ -56,6 +56,21 @@
  #define JUCE_WEB_BROWSER 1
 #endif
 
+/** Config: JUCE_USE_WINRT_WEBVIEW
+    Enables the use of the EdgeHTML browser engine on Windows. This will use
+    the Windows Runtime API on Windows 10 version 1809 (October 2018 Update)
+    and later. If you enable this flag then older versions of Windows will
+    automatically fall back to using the regualar Win32 web view.
+
+    You will need version 10.0.14393.0 of the Windows Standalone SDK to compile
+    and you may need to add the path to the WinRT headers. The path to the
+    headers will be something similar to
+    "C:\Program Files (x86)\Windows Kits\10\Include\10.0.14393.0\winrt".
+*/
+#ifndef JUCE_USE_WINRT_WEBVIEW
+ #define JUCE_USE_WINRT_WEBVIEW 0
+#endif
+
 /** Config: JUCE_ENABLE_LIVE_CONSTANT_EDITOR
     This lets you turn on the JUCE_ENABLE_LIVE_CONSTANT_EDITOR support (desktop only). By default
     this will be enabled for debug builds and disabled for release builds. See the documentation

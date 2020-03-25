@@ -59,7 +59,7 @@
  #define JUCE_EXECUTE_APP_SUSPEND_ON_BACKGROUND_TASK 0
 #endif
 
-#if JUCE_EVENTS_INCLUDE_WINRT_WRAPPER && JUCE_WINDOWS
+#if JUCE_WINDOWS && JUCE_EVENTS_INCLUDE_WINRT_WRAPPER
  // If this header file is missing then you are probably attempting to use WinRT
  // functionality without the WinRT libraries installed on your system. Try installing
  // the latest Windows Standalone SDK and maybe also adding the path to the WinRT

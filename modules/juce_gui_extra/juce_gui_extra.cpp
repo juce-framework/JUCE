@@ -32,6 +32,10 @@
 #define JUCE_EVENTS_INCLUDE_WIN32_MESSAGE_WINDOW 1
 #define JUCE_GRAPHICS_INCLUDE_COREGRAPHICS_HELPERS 1
 
+#if JUCE_USE_WINRT_WEBVIEW
+ #define JUCE_EVENTS_INCLUDE_WINRT_WRAPPER 1
+#endif
+
 #ifndef JUCE_PUSH_NOTIFICATIONS
  #define JUCE_PUSH_NOTIFICATIONS 0
 #endif
@@ -78,6 +82,18 @@
  #if JUCE_WEB_BROWSER
   #include <exdisp.h>
   #include <exdispid.h>
+  #if JUCE_USE_WINRT_WEBVIEW
+   #include <windows.web.ui.h>
+   #include <windows.web.ui.interop.h>
+   #include <windows.foundation.h>
+   #include <windows.foundation.collections.h>
+
+   #pragma warning (push)
+   #pragma warning (disable: 4265)
+   #include <wrl.h>
+   #include <wrl/wrappers/corewrappers.h>
+   #pragma warning (pop)
+  #endif
  #endif
 
 //==============================================================================

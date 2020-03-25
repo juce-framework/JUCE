@@ -51,6 +51,7 @@ public:
         ~ComPtr() { release(); }
 
         operator ComClass*()   const noexcept { return p; }
+        ComClass* get()        const noexcept { return p; }
         ComClass& operator*()  const noexcept { return *p; }
         ComClass* operator->() const noexcept { return p; }
 

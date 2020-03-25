@@ -63,9 +63,8 @@
 /** Config: JUCE_USE_WINRT_MIDI
     Enables the use of the Windows Runtime API for MIDI, allowing connections
     to Bluetooth Low Energy devices on Windows 10 version 1809 (October 2018
-    Update) and later. If you enable this flag then older, unsupported,
-    versions of Windows will automatically fall back to using the regular
-    Win32 MIDI API.
+    Update) and later. If you enable this flag then older versions of Windows
+    will automatically fall back to using the regular Win32 MIDI API.
 
     You will need version 10.0.14393.0 of the Windows Standalone SDK to compile
     and you may need to add the path to the WinRT headers. The path to the
