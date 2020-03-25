@@ -116,12 +116,10 @@ public:
     /** Returns the shared object. */
     SharedObjectType& get() const noexcept              { return *sharedObject; }
 
-    /** Returns the object that this pointer references.
-        The pointer returned may be a nullptr, of course.
-    */
+    /** Returns the object that this pointer references. */
     SharedObjectType& getObject() const noexcept        { return *sharedObject; }
 
-    /** Returns the shared object. */
+    /** Returns the shared object pointer. */
     SharedObjectType* operator->() const noexcept       { return sharedObject; }
 
     /** Returns the number of SharedResourcePointers that are currently holding the shared object. */
