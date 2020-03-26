@@ -176,8 +176,8 @@ public:
         void paint (Graphics& g) override
         {
             g.setOpacity (1.0f);
-            g.drawImageTransformed (image, AffineTransform::scale (getWidth()  / (float) image.getWidth(),
-                                                                   getHeight() / (float) image.getHeight()), false);
+            g.drawImageTransformed (image, AffineTransform::scale (getWidth()  / (float) jmax (1, image.getWidth()),
+                                                                   getHeight() / (float) jmax (1, image.getHeight())), false);
         }
 
     private:

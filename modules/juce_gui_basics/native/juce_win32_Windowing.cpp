@@ -4641,8 +4641,8 @@ void* CustomMouseCursorInfo::create() const
     {
         im = im.rescaled (maxW, maxH);
 
-        hotspotX = (hotspotX * maxW) / image.getWidth();
-        hotspotY = (hotspotY * maxH) / image.getHeight();
+        hotspotX = (hotspotX * maxW) / juce::jmax (1, image.getWidth());
+        hotspotY = (hotspotY * maxH) / juce::jmax (1, image.getHeight());
     }
 
     return IconConverters::createHICONFromImage (im, FALSE, hotspotX, hotspotY);
