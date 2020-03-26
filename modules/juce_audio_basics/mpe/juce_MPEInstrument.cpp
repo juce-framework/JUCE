@@ -578,11 +578,9 @@ void MPEInstrument::handleSustainOrSostenuto (int midiChannel, bool isDown, bool
 
     if (! isSostenuto)
     {
-        if (legacyMode.isEnabled)
-        {
-            isMemberChannelSustained[midiChannel - 1] = isDown;
-        }
-        else
+        isMemberChannelSustained[midiChannel - 1] = isDown;
+
+        if (! legacyMode.isEnabled)
         {
             if (zone.isLowerZone())
                 for (auto i = zone.getFirstMemberChannel(); i <= zone.getLastMemberChannel(); ++i)
