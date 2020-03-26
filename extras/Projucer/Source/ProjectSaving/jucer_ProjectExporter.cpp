@@ -935,7 +935,7 @@ ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const Value
         "-Woverloaded-virtual", "-Wreorder", "-Wsign-conversion", "-Wunreachable-code",
         "-Wzero-as-null-pointer-constant", "-Wcast-align", "-Wno-implicit-fallthrough",
         "-Wno-maybe-uninitialized", "-Wno-missing-field-initializers", "-Wno-ignored-qualifiers",
-        "-Wswitch-enum", "-Wswitch-default", "-Wredundant-decls"
+        "-Wswitch-enum", "-Wredundant-decls"
     };
     recommendedCompilerWarningFlags["GCC-7"] = recommendedCompilerWarningFlags["GCC"];
     recommendedCompilerWarningFlags["GCC-7"].add ("-Wno-strict-overflow");
