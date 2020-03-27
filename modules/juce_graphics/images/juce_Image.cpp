@@ -663,7 +663,7 @@ void Image::moveImageSection (int dx, int dy,
         auto dst = destData.getPixelPointer (dx - minX, dy - minY);
         auto src = destData.getPixelPointer (sx - minX, sy - minY);
 
-        auto lineSize = (size_t) (destData.pixelStride * w);
+        auto lineSize = (size_t) destData.pixelStride * (size_t) w;
 
         if (dy > sy)
         {
