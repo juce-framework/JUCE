@@ -2229,9 +2229,16 @@ public:
 
     //==============================================================================
     int getNumPrograms() override                        { return programNames.size(); }
-    const String getProgramName (int index) override     { return programNames[index]; }
-    int getCurrentProgram() override                     { return jmax (0, roundToInt (editController->getParamNormalized (programParameterID) * (programNames.size() - 1))); }
+    const String getProgramName (int index) override     { return index >= 0 ? programNames[index] : String(); }
     void changeProgramName (int, const String&) override {}
+
+    int getCurrentProgram() override
+    {
+        if (programNames.size() > 0 && editController != nullptr)
+            return jmax (0, roundToInt (editController->getParamNormalized (programParameterID) * (programNames.size() - 1)));
+
+        return 0;
+    }
 
     void setCurrentProgram (int program) override
     {

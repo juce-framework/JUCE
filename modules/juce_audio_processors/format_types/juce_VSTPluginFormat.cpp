@@ -1596,7 +1596,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
             }
         }
 
-        return programNames [index];
+        return {};
     }
 
     void changeProgramName (int index, const String& newName) override
