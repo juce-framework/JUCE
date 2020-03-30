@@ -56,7 +56,10 @@ namespace TabbedComponentHelpers
 //==============================================================================
 struct TabbedComponent::ButtonBar  : public TabbedButtonBar
 {
-    ButtonBar (TabbedComponent& tabComp, TabbedButtonBar::Orientation o);
+    ButtonBar (TabbedComponent& tabComp, TabbedButtonBar::Orientation o)
+        : TabbedButtonBar (o), owner (tabComp)
+    {
+    }
 
     void currentTabChanged (int newCurrentTabIndex, const String& newTabName)
     {
@@ -82,13 +85,6 @@ struct TabbedComponent::ButtonBar  : public TabbedButtonBar
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonBar)
 };
-
-// The following implementation is outside of the class definition to avoid spurious
-// warning messages when dynamically loading libraries at runtime on macOS
-TabbedComponent::ButtonBar::ButtonBar (TabbedComponent& tabComp, TabbedButtonBar::Orientation o)
-    : TabbedButtonBar (o), owner (tabComp)
-{
-}
 
 //==============================================================================
 TabbedComponent::TabbedComponent (TabbedButtonBar::Orientation orientation)
