@@ -31,9 +31,8 @@
     </XCODE_MAC>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" smallIcon="c97aUr" bigIcon="c97aUr">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPluginHost" libraryPath="/usr/X11R6/lib/"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="AudioPluginHost"
-                       libraryPath="/usr/X11R6/lib/"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPluginHost"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="AudioPluginHost"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="../../modules"/>

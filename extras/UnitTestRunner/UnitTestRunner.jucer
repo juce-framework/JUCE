@@ -40,8 +40,8 @@
     </XCODE_MAC>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" targetName="UnitTestRunner"/>
-        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" targetName="UnitTestRunner"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="UnitTestRunner"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="UnitTestRunner"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
