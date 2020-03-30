@@ -264,11 +264,23 @@ public:
     */
     float getTranslationY() const noexcept                  { return mat12; }
 
-    /** Returns the approximate scale factor by which lengths will be transformed.
+    /** Returns the determinant of the transform. */
+    float getDeterminant() const noexcept;
+
+    /** This method has been deprecated.
+
+        You can calculate the scale factor using:
+        @code
+        std::sqrt (std::abs (AffineTransform::getDeterminant()))
+        @endcode
+
+        This method produces incorrect values for transforms containing rotations.
+
+        Returns the approximate scale factor by which lengths will be transformed.
         Obviously a length may be scaled by entirely different amounts depending on its
         direction, so this is only appropriate as a rough guide.
     */
-    float getScaleFactor() const noexcept;
+    JUCE_DEPRECATED (float getScaleFactor() const noexcept);
 
     /* A ready-to-use identity transform - now deprecated.
        @deprecated If you need an identity transform, just use AffineTransform() or {}.
