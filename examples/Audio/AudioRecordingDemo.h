@@ -348,7 +348,7 @@ private:
     {
         recorder.stop();
 
-       #if (JUCE_ANDROID || JUCE_IOS)
+       #if JUCE_CONTENT_SHARING
         SafePointer<AudioRecordingDemo> safeThis (this);
         File fileToShare = lastRecording;
 

@@ -1442,6 +1442,9 @@ private:
         if (isInAppBillingEnabled())
             defines.set ("JUCE_IN_APP_PURCHASES", "1");
 
+        if (isContentSharingEnabled())
+            defines.set ("JUCE_CONTENT_SHARING", "1");
+
         if (supportsGLv3())
             defines.set ("JUCE_ANDROID_GL_ES_VERSION_3_0", "1");
 

@@ -281,7 +281,11 @@ namespace juce
   #include "native/juce_ios_UIViewComponentPeer.mm"
   #include "native/juce_ios_Windowing.mm"
   #include "native/juce_ios_FileChooser.mm"
-  #include "native/juce_ios_ContentSharer.cpp"
+
+  #if JUCE_CONTENT_SHARING
+   #include "native/juce_ios_ContentSharer.cpp"
+  #endif
+
  #else
   #include "native/juce_mac_NSViewComponentPeer.mm"
   #include "native/juce_mac_Windowing.mm"
@@ -321,6 +325,9 @@ namespace juce
  #include "native/juce_android_Windowing.cpp"
  #include "native/juce_common_MimeTypes.cpp"
  #include "native/juce_android_FileChooser.cpp"
- #include "native/juce_android_ContentSharer.cpp"
+
+ #if JUCE_CONTENT_SHARING
+  #include "native/juce_android_ContentSharer.cpp"
+ #endif
 
 #endif

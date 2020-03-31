@@ -125,6 +125,7 @@ public:
           uiStatusBarHiddenValue                       (settings, Ids::UIStatusBarHidden,                       getUndoManager()),
           documentExtensionsValue                      (settings, Ids::documentExtensions,                      getUndoManager()),
           iosInAppPurchasesValue                       (settings, Ids::iosInAppPurchases,                       getUndoManager()),
+          iosContentSharingValue                       (settings, Ids::iosContentSharing,                       getUndoManager(), true),
           iosBackgroundAudioValue                      (settings, Ids::iosBackgroundAudio,                      getUndoManager()),
           iosBackgroundBleValue                        (settings, Ids::iosBackgroundBle,                        getUndoManager()),
           iosPushNotificationsValue                    (settings, Ids::iosPushNotifications,                    getUndoManager()),
@@ -197,6 +198,7 @@ public:
     String getSendAppleEventsPermissionTextString() const   { return sendAppleEventsPermissionTextValue.get(); }
 
     bool isInAppPurchasesEnabled() const                    { return iosInAppPurchasesValue.get(); }
+    bool isContentSharingEnabled() const                    { return iosContentSharingValue.get(); }
     bool isBackgroundAudioEnabled() const                   { return iosBackgroundAudioValue.get(); }
     bool isBackgroundBleEnabled() const                     { return iosBackgroundBleValue.get(); }
     bool isPushNotificationsEnabled() const                 { return iosPushNotificationsValue.get(); }
@@ -465,6 +467,9 @@ public:
 
         if (iOS)
         {
+            props.add (new ChoicePropertyComponent (iosContentSharingValue, "Content Sharing"),
+                       "Enable this to allow your app to share content with other apps.");
+
             props.add (new ChoicePropertyComponent (iosBackgroundAudioValue, "Audio Background Capability"),
                        "Enable this to grant your app the capability to access audio when in background mode. "
                        "This permission is required if your app creates a MIDI input or output device.");
@@ -1460,6 +1465,9 @@ public:
             if (owner.isInAppPurchasesEnabled())
                 defines.set ("JUCE_IN_APP_PURCHASES", "1");
 
+            if (owner.iOS && owner.isContentSharingEnabled())
+                defines.set ("JUCE_CONTENT_SHARING", "1");
+
             if (owner.isPushNotificationsEnabled())
                 defines.set ("JUCE_PUSH_NOTIFICATIONS", "1");
 
@@ -2023,7 +2031,7 @@ private:
                      iosBluetoothPermissionNeededValue, iosBluetoothPermissionTextValue,
                      sendAppleEventsPermissionNeededValue, sendAppleEventsPermissionTextValue,
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
-                     iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
+                     iosContentSharingValue, iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
                      iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
                      exporterBundleIdentifierValue;
 

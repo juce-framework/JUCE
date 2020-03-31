@@ -144,7 +144,7 @@ public:
         StringArray windowNames { "Plain Alert Window", "Alert Window With Warning Icon", "Alert Window With Info Icon", "Alert Window With Question Icon",
                                   "OK Cancel Alert Window", "Alert Window With Extra Components", "CalloutBox", "Thread With Progress Window",
                                   "'Load' File Browser", "'Load' File Browser With Image Preview", "'Choose Directory' File Browser", "'Save' File Browser",
-                                  "Share Text", "Share Files", "Share Images"  };
+                                  "Share Text", "Share Files", "Share Images" };
 
         // warn in case we add any windows
         jassert (windowNames.size() == numDialogs);

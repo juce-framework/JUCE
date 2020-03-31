@@ -196,8 +196,6 @@ static const uint8 javaComponentPeerView[] =
  extern void juce_firebaseRemoteMessageSendError (void*, void*);
 #endif
 
-extern void juce_contentSharingCompleted (int);
-
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  METHOD (create,                      "<init>",                      "(II)V")
