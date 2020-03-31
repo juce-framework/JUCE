@@ -845,6 +845,7 @@ struct DLLHandle
             if (auto exitFn = (ExitModuleFn) getFunction ("bundleExit"))
                 exitFn();
 
+            CFBundleUnloadExecutable (bundleRef);
             CFRelease (bundleRef);
             bundleRef = nullptr;
         }
