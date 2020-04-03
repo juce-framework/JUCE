@@ -127,14 +127,6 @@ namespace AndroidHighPerformanceAudioHelpers
         auto defaultBuffersToEnqueue = buffersToQueueForBufferDuration (defaultBufferLength, currentSampleRate);
         return defaultBuffersToEnqueue * getNativeBufferSize();
     }
-
-    static int getNumBuffersToEnqueue (int preferredBufferSize, int sampleRate)
-    {
-        if (canUseHighPerformanceAudioPath (preferredBufferSize, sampleRate))
-            return preferredBufferSize / getNativeBufferSize();
-
-        return 1;
-    }
 }
 
 } // namespace juce
