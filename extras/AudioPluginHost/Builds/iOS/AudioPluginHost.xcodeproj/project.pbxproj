@@ -239,13 +239,6 @@
 			path = System/Library/Frameworks/CoreGraphics.framework;
 			sourceTree = SDKROOT;
 		};
-		30F22843EFEBF7AA841EB4D6 = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			name = AppConfig.h;
-			path = ../../JuceLibraryCode/AppConfig.h;
-			sourceTree = "SOURCE_ROOT";
-		};
 		31D55A751C790CB81F58DDB7 = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
@@ -699,7 +692,6 @@
 		7E30376DDAD775FEFE64944C = {
 			isa = PBXGroup;
 			children = (
-				30F22843EFEBF7AA841EB4D6,
 				6D107D7946DC5976B766345B,
 				1DADAD8E34AAF4AFF1C69DC4,
 				4C7D82F9274A4F9DBF11235C,
@@ -804,6 +796,38 @@
 					"JucePlugin_Build_AAX=0",
 					"JucePlugin_Build_Standalone=0",
 					"JucePlugin_Build_Unity=0",
+					"JUCE_DISPLAY_SPLASH_SCREEN=0",
+					"JUCE_REPORT_APP_USAGE=0",
+					"JUCE_USE_DARK_SPLASH_SCREEN=1",
+					"JUCE_PROJUCER_VERSION=0x60000",
+					"JUCE_MODULE_AVAILABLE_juce_audio_basics=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_devices=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_formats=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_processors=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_utils=1",
+					"JUCE_MODULE_AVAILABLE_juce_core=1",
+					"JUCE_MODULE_AVAILABLE_juce_cryptography=1",
+					"JUCE_MODULE_AVAILABLE_juce_data_structures=1",
+					"JUCE_MODULE_AVAILABLE_juce_events=1",
+					"JUCE_MODULE_AVAILABLE_juce_graphics=1",
+					"JUCE_MODULE_AVAILABLE_juce_gui_basics=1",
+					"JUCE_MODULE_AVAILABLE_juce_gui_extra=1",
+					"JUCE_MODULE_AVAILABLE_juce_opengl=1",
+					"JUCE_MODULE_AVAILABLE_juce_video=1",
+					"JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1",
+					"JUCE_WASAPI=1",
+					"JUCE_DIRECTSOUND=1",
+					"JUCE_ALSA=1",
+					"JUCE_USE_FLAC=0",
+					"JUCE_USE_OGGVORBIS=0",
+					"JUCE_PLUGINHOST_VST3=1",
+					"JUCE_PLUGINHOST_AU=1",
+					"JUCE_PLUGINHOST_LADSPA=1",
+					"JUCE_USE_CDREADER=0",
+					"JUCE_USE_CDBURNER=0",
+					"JUCE_WEB_BROWSER=0",
+					"JUCE_USE_CAMERA=0",
+					"JUCE_STANDALONE_APPLICATION=1",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
@@ -850,6 +874,38 @@
 					"JucePlugin_Build_AAX=0",
 					"JucePlugin_Build_Standalone=0",
 					"JucePlugin_Build_Unity=0",
+					"JUCE_DISPLAY_SPLASH_SCREEN=0",
+					"JUCE_REPORT_APP_USAGE=0",
+					"JUCE_USE_DARK_SPLASH_SCREEN=1",
+					"JUCE_PROJUCER_VERSION=0x60000",
+					"JUCE_MODULE_AVAILABLE_juce_audio_basics=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_devices=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_formats=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_processors=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_utils=1",
+					"JUCE_MODULE_AVAILABLE_juce_core=1",
+					"JUCE_MODULE_AVAILABLE_juce_cryptography=1",
+					"JUCE_MODULE_AVAILABLE_juce_data_structures=1",
+					"JUCE_MODULE_AVAILABLE_juce_events=1",
+					"JUCE_MODULE_AVAILABLE_juce_graphics=1",
+					"JUCE_MODULE_AVAILABLE_juce_gui_basics=1",
+					"JUCE_MODULE_AVAILABLE_juce_gui_extra=1",
+					"JUCE_MODULE_AVAILABLE_juce_opengl=1",
+					"JUCE_MODULE_AVAILABLE_juce_video=1",
+					"JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1",
+					"JUCE_WASAPI=1",
+					"JUCE_DIRECTSOUND=1",
+					"JUCE_ALSA=1",
+					"JUCE_USE_FLAC=0",
+					"JUCE_USE_OGGVORBIS=0",
+					"JUCE_PLUGINHOST_VST3=1",
+					"JUCE_PLUGINHOST_AU=1",
+					"JUCE_PLUGINHOST_LADSPA=1",
+					"JUCE_USE_CDREADER=0",
+					"JUCE_USE_CDBURNER=0",
+					"JUCE_WEB_BROWSER=0",
+					"JUCE_USE_CAMERA=0",
+					"JUCE_STANDALONE_APPLICATION=1",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (

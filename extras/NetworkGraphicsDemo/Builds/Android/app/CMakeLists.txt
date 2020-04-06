@@ -19,9 +19,9 @@ include_directories( AFTER
 enable_language(ASM)
 
 IF(JUCE_BUILD_CONFIGURATION MATCHES "DEBUG")
-    add_definitions("-DJUCE_DEBUG=0" "-DDEBUG=1" "-D_DEBUG=1")
+    add_definitions("-DJUCE_DEBUG=0" "-DJUCER_ANDROIDSTUDIO_7F0E4A25=1" "-DJUCE_APP_VERSION=1.0.0" "-DJUCE_APP_VERSION_HEX=0x10000" "-DJUCE_DISPLAY_SPLASH_SCREEN=0" "-DJUCE_REPORT_APP_USAGE=0" "-DJUCE_USE_DARK_SPLASH_SCREEN=1" "-DJUCE_PROJUCER_VERSION=0x60000" "-DJUCE_MODULE_AVAILABLE_juce_audio_basics=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_devices=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_formats=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_processors=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_utils=1" "-DJUCE_MODULE_AVAILABLE_juce_core=1" "-DJUCE_MODULE_AVAILABLE_juce_cryptography=1" "-DJUCE_MODULE_AVAILABLE_juce_data_structures=1" "-DJUCE_MODULE_AVAILABLE_juce_events=1" "-DJUCE_MODULE_AVAILABLE_juce_graphics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1" "-DJUCE_MODULE_AVAILABLE_juce_opengl=1" "-DJUCE_MODULE_AVAILABLE_juce_osc=1" "-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1" "-DJUCE_STANDALONE_APPLICATION=1" "-DDEBUG=1" "-D_DEBUG=1")
 ELSEIF(JUCE_BUILD_CONFIGURATION MATCHES "RELEASE")
-    add_definitions("-DNDEBUG=1")
+    add_definitions("-DJUCER_ANDROIDSTUDIO_7F0E4A25=1" "-DJUCE_APP_VERSION=1.0.0" "-DJUCE_APP_VERSION_HEX=0x10000" "-DJUCE_DISPLAY_SPLASH_SCREEN=0" "-DJUCE_REPORT_APP_USAGE=0" "-DJUCE_USE_DARK_SPLASH_SCREEN=1" "-DJUCE_PROJUCER_VERSION=0x60000" "-DJUCE_MODULE_AVAILABLE_juce_audio_basics=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_devices=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_formats=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_processors=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_utils=1" "-DJUCE_MODULE_AVAILABLE_juce_core=1" "-DJUCE_MODULE_AVAILABLE_juce_cryptography=1" "-DJUCE_MODULE_AVAILABLE_juce_data_structures=1" "-DJUCE_MODULE_AVAILABLE_juce_events=1" "-DJUCE_MODULE_AVAILABLE_juce_graphics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1" "-DJUCE_MODULE_AVAILABLE_juce_opengl=1" "-DJUCE_MODULE_AVAILABLE_juce_osc=1" "-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1" "-DJUCE_STANDALONE_APPLICATION=1" "-DNDEBUG=1")
 ELSE(JUCE_BUILD_CONFIGURATION MATCHES "DEBUG")
     MESSAGE( FATAL_ERROR "No matching build-configuration found." )
 ENDIF(JUCE_BUILD_CONFIGURATION MATCHES "DEBUG")
@@ -1376,7 +1376,6 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_osc/osc/juce_OSCTypes.h"
     "../../../../../modules/juce_osc/juce_osc.cpp"
     "../../../../../modules/juce_osc/juce_osc.h"
-    "../../../JuceLibraryCode/AppConfig.h"
     "../../../JuceLibraryCode/BinaryData.cpp"
     "../../../JuceLibraryCode/BinaryData.h"
     "../../../JuceLibraryCode/include_juce_audio_basics.cpp"
@@ -2741,7 +2740,6 @@ set_source_files_properties("../../../../../modules/juce_osc/osc/juce_OSCTypes.c
 set_source_files_properties("../../../../../modules/juce_osc/osc/juce_OSCTypes.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_osc/juce_osc.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_osc/juce_osc.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../JuceLibraryCode/AppConfig.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../JuceLibraryCode/BinaryData.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../JuceLibraryCode/JuceHeader.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 

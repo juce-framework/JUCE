@@ -465,7 +465,54 @@ StringPairArray ProjectExporter::getAllPreprocessorDefs (const BuildConfiguratio
     addDefaultPreprocessorDefs (defs);
     addTargetSpecificPreprocessorDefs (defs, targetType);
 
+    if (! project.shouldUseAppConfig())
+        defs = mergePreprocessorDefs (defs, getAppConfigDefs());
+
     return defs;
+}
+
+StringPairArray ProjectExporter::getAppConfigDefs() const
+{
+    StringPairArray result;
+    result.set ("JUCE_DISPLAY_SPLASH_SCREEN",  project.shouldDisplaySplashScreen()             ? "1" : "0");
+    result.set ("JUCE_REPORT_APP_USAGE",       project.shouldReportAppUsage()                  ? "1" : "0");
+    result.set ("JUCE_USE_DARK_SPLASH_SCREEN", project.getSplashScreenColourString() == "Dark" ? "1" : "0");
+    result.set ("JUCE_PROJUCER_VERSION",       "0x" + String::toHexString (ProjectInfo::versionNumber));
+
+    OwnedArray<LibraryModule> modules;
+    project.getEnabledModules().createRequiredModules (modules);
+
+    for (auto& m : modules)
+        result.set ("JUCE_MODULE_AVAILABLE_" + m->getID(), "1");
+
+    result.set ("JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED", "1");
+
+    for (auto& m : modules)
+    {
+        OwnedArray<Project::ConfigFlag> flags;
+        m->getConfigFlags (project, flags);
+
+        for (auto* flag : flags)
+            if (! flag->value.isUsingDefault())
+                result.set (flag->symbol, flag->value.get() ? "1" : "0");
+    }
+
+    result.addArray (project.getAudioPluginFlags());
+
+    const auto& type = project.getProjectType();
+    const auto isStandaloneApplication = (! type.isAudioPlugin() && ! type.isDynamicLibrary());
+
+    const auto standaloneValue = [&]
+    {
+        if (result.containsKey ("JucePlugin_Name") && result.containsKey ("JucePlugin_Build_Standalone"))
+            return "JucePlugin_Build_Standalone";
+
+        return isStandaloneApplication ? "1" : "0";
+    }();
+
+    result.set ("JUCE_STANDALONE_APPLICATION", standaloneValue);
+
+    return result;
 }
 
 StringPairArray ProjectExporter::getAllPreprocessorDefs() const
@@ -473,6 +520,7 @@ StringPairArray ProjectExporter::getAllPreprocessorDefs() const
     auto defs = mergePreprocessorDefs (project.getPreprocessorDefs(),
                                        parsePreprocessorDefs (getExporterPreprocessorDefsString()));
     addDefaultPreprocessorDefs (defs);
+
     return defs;
 }
 

@@ -15,7 +15,7 @@ namespace BinaryData
     const int            PIPAudioProcessor_cpp_inSize = 477;
 
     extern const char*   PIPComponent_cpp_in;
-    const int            PIPComponent_cpp_inSize = 2162;
+    const int            PIPComponent_cpp_inSize = 2207;
 
     extern const char*   PIPConsole_cpp_in;
     const int            PIPConsole_cpp_inSize = 299;
@@ -99,34 +99,34 @@ namespace BinaryData
     const int            wizard_StaticLibrary_svgSize = 7488;
 
     extern const char*   jucer_AnimatedComponentSimpleTemplate_h;
-    const int            jucer_AnimatedComponentSimpleTemplate_hSize = 2085;
+    const int            jucer_AnimatedComponentSimpleTemplate_hSize = 1890;
 
     extern const char*   jucer_AnimatedComponentTemplate_cpp;
-    const int            jucer_AnimatedComponentTemplate_cppSize = 1563;
+    const int            jucer_AnimatedComponentTemplate_cppSize = 1362;
 
     extern const char*   jucer_AnimatedComponentTemplate_h;
-    const int            jucer_AnimatedComponentTemplate_hSize = 1201;
+    const int            jucer_AnimatedComponentTemplate_hSize = 1000;
 
     extern const char*   jucer_AudioComponentSimpleTemplate_h;
-    const int            jucer_AudioComponentSimpleTemplate_hSize = 3702;
+    const int            jucer_AudioComponentSimpleTemplate_hSize = 3555;
 
     extern const char*   jucer_AudioComponentTemplate_cpp;
-    const int            jucer_AudioComponentTemplate_cppSize = 3094;
+    const int            jucer_AudioComponentTemplate_cppSize = 2941;
 
     extern const char*   jucer_AudioComponentTemplate_h;
-    const int            jucer_AudioComponentTemplate_hSize = 1383;
+    const int            jucer_AudioComponentTemplate_hSize = 1188;
 
     extern const char*   jucer_AudioPluginEditorTemplate_cpp;
-    const int            jucer_AudioPluginEditorTemplate_cppSize = 1356;
+    const int            jucer_AudioPluginEditorTemplate_cppSize = 1350;
 
     extern const char*   jucer_AudioPluginEditorTemplate_h;
-    const int            jucer_AudioPluginEditorTemplate_hSize = 977;
+    const int            jucer_AudioPluginEditorTemplate_hSize = 959;
 
     extern const char*   jucer_AudioPluginFilterTemplate_cpp;
-    const int            jucer_AudioPluginFilterTemplate_cppSize = 6036;
+    const int            jucer_AudioPluginFilterTemplate_cppSize = 6090;
 
     extern const char*   jucer_AudioPluginFilterTemplate_h;
-    const int            jucer_AudioPluginFilterTemplate_hSize = 2272;
+    const int            jucer_AudioPluginFilterTemplate_hSize = 2290;
 
     extern const char*   jucer_ComponentTemplate_cpp;
     const int            jucer_ComponentTemplate_cppSize = 2126;
@@ -135,34 +135,34 @@ namespace BinaryData
     const int            jucer_ComponentTemplate_hSize = 2044;
 
     extern const char*   jucer_ContentCompSimpleTemplate_h;
-    const int            jucer_ContentCompSimpleTemplate_hSize = 1693;
+    const int            jucer_ContentCompSimpleTemplate_hSize = 1516;
 
     extern const char*   jucer_ContentCompTemplate_cpp;
-    const int            jucer_ContentCompTemplate_cppSize = 1190;
+    const int            jucer_ContentCompTemplate_cppSize = 1007;
 
     extern const char*   jucer_ContentCompTemplate_h;
-    const int            jucer_ContentCompTemplate_hSize = 1071;
+    const int            jucer_ContentCompTemplate_hSize = 870;
 
     extern const char*   jucer_InlineComponentTemplate_h;
-    const int            jucer_InlineComponentTemplate_hSize = 1233;
+    const int            jucer_InlineComponentTemplate_hSize = 1269;
 
     extern const char*   jucer_MainConsoleAppTemplate_cpp;
-    const int            jucer_MainConsoleAppTemplate_cppSize = 473;
+    const int            jucer_MainConsoleAppTemplate_cppSize = 443;
 
     extern const char*   jucer_MainTemplate_NoWindow_cpp;
-    const int            jucer_MainTemplate_NoWindow_cppSize = 2021;
+    const int            jucer_MainTemplate_NoWindow_cppSize = 2027;
 
     extern const char*   jucer_MainTemplate_SimpleWindow_cpp;
-    const int            jucer_MainTemplate_SimpleWindow_cppSize = 4127;
+    const int            jucer_MainTemplate_SimpleWindow_cppSize = 4115;
 
     extern const char*   jucer_MainTemplate_Window_cpp;
-    const int            jucer_MainTemplate_Window_cppSize = 4127;
+    const int            jucer_MainTemplate_Window_cppSize = 4109;
 
     extern const char*   jucer_NewComponentTemplate_cpp;
-    const int            jucer_NewComponentTemplate_cppSize = 1491;
+    const int            jucer_NewComponentTemplate_cppSize = 1521;
 
     extern const char*   jucer_NewComponentTemplate_h;
-    const int            jucer_NewComponentTemplate_hSize = 646;
+    const int            jucer_NewComponentTemplate_hSize = 658;
 
     extern const char*   jucer_NewCppFileTemplate_cpp;
     const int            jucer_NewCppFileTemplate_cppSize = 278;
@@ -171,19 +171,19 @@ namespace BinaryData
     const int            jucer_NewCppFileTemplate_hSize = 258;
 
     extern const char*   jucer_NewInlineComponentTemplate_h;
-    const int            jucer_NewInlineComponentTemplate_hSize = 1676;
+    const int            jucer_NewInlineComponentTemplate_hSize = 1712;
 
     extern const char*   jucer_OpenGLComponentSimpleTemplate_h;
-    const int            jucer_OpenGLComponentSimpleTemplate_hSize = 2174;
+    const int            jucer_OpenGLComponentSimpleTemplate_hSize = 1979;
 
     extern const char*   jucer_OpenGLComponentTemplate_cpp;
-    const int            jucer_OpenGLComponentTemplate_cppSize = 1665;
+    const int            jucer_OpenGLComponentTemplate_cppSize = 1470;
 
     extern const char*   jucer_OpenGLComponentTemplate_h;
-    const int            jucer_OpenGLComponentTemplate_hSize = 1263;
+    const int            jucer_OpenGLComponentTemplate_hSize = 1062;
 
     extern const char*   jucer_PIPAudioProcessorTemplate_h;
-    const int            jucer_PIPAudioProcessorTemplate_hSize = 4926;
+    const int            jucer_PIPAudioProcessorTemplate_hSize = 5046;
 
     extern const char*   jucer_PIPTemplate_h;
     const int            jucer_PIPTemplate_hSize = 517;

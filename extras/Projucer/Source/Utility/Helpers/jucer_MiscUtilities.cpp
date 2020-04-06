@@ -172,7 +172,7 @@ String createGCCPreprocessorFlags (const StringPairArray& defs)
         if (value.isNotEmpty())
             def << "=" << value;
 
-        s += " -D" + def;
+        s += " \"" + ("-D" + def).replace ("\"", "\\\"") + "\"";
     }
 
     return s;

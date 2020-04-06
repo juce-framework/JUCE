@@ -12,7 +12,6 @@
 
 #pragma once
 
-#include "AppConfig.h"
 
 #include <juce_analytics/juce_analytics.h>
 #include <juce_audio_basics/juce_audio_basics.h>

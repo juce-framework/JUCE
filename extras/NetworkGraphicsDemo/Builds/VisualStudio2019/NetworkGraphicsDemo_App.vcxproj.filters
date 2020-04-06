@@ -4458,9 +4458,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_osc\juce_osc.h">
       <Filter>JUCE Modules\juce_osc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\JuceLibraryCode\AppConfig.h">
-      <Filter>JUCE Library Code</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\JuceLibraryCode\BinaryData.h">
       <Filter>JUCE Library Code</Filter>
     </ClInclude>

@@ -89,16 +89,11 @@ public:
 
             if (project.isAudioPluginProject())
             {
-                writePluginCharacteristicsFile();
-
                 if (project.shouldBuildUnityPlugin())
                     writeUnityScriptFile();
             }
 
-            writeAppConfigFile (modules, appConfigUserContent);
-            writeBinaryDataFiles();
-            writeAppHeader (modules);
-            writeModuleCppWrappers (modules);
+            saveBasicProjectItems (modules, appConfigUserContent);
             writeProjects (modules, specifiedExporterToSave, ! showProgressBox);
             runPostExportScript();
 
@@ -140,6 +135,15 @@ public:
         return Result::ok();
     }
 
+    void saveBasicProjectItems (const OwnedArray<LibraryModule>& modules, const String& appConfigUserContent)
+    {
+        writePluginDefines();
+        writeAppConfigFile (modules, appConfigUserContent);
+        writeBinaryDataFiles();
+        writeAppHeader (modules);
+        writeModuleCppWrappers (modules);
+    }
+
     Result saveContentNeededForLiveBuild()
     {
         OwnedArray<LibraryModule> modules;
@@ -149,13 +153,7 @@ public:
 
         if (errors.size() == 0)
         {
-            if (project.isAudioPluginProject())
-                writePluginCharacteristicsFile();
-
-            writeAppConfigFile (modules, loadUserContentFromAppConfig());
-            writeBinaryDataFiles();
-            writeAppHeader (modules);
-            writeModuleCppWrappers (modules);
+            saveBasicProjectItems (modules, loadUserContentFromAppConfig());
 
             return Result::ok();
         }
@@ -188,11 +186,6 @@ public:
 
         generatedFilesGroup.addFileAtIndex (file, -1, true);
         return generatedFilesGroup.findItemForFile (file);
-    }
-
-    void setExtraAppConfigFileContent (const String& content)
-    {
-        extraAppConfigContent = content;
     }
 
     static void writeAutoGenWarningComment (OutputStream& out)
@@ -258,11 +251,9 @@ public:
 private:
     const File projectFile, generatedCodeFolder;
     Project::Item generatedFilesGroup;
-    String extraAppConfigContent;
     StringArray errors;
     CriticalSection errorLock;
 
-    File appConfigFile;
     bool hasBinaryData = false;
     String projectLineFeed = "\r\n";
 
@@ -340,7 +331,8 @@ private:
         return longest;
     }
 
-    File getAppConfigFile() const   { return generatedCodeFolder.getChildFile (Project::getAppConfigFilename()); }
+    File getAppConfigFile() const     { return generatedCodeFolder.getChildFile (Project::getAppConfigFilename()); }
+    File getPluginDefinesFile() const { return generatedCodeFolder.getChildFile (Project::getPluginDefinesFilename()); }
 
     String loadUserContentFromAppConfig() const
     {
@@ -405,8 +397,24 @@ private:
         }
     }
 
+    void writePluginDefines (MemoryOutputStream& out) const
+    {
+        const auto pluginDefines = getAudioPluginDefines();
+
+        if (pluginDefines.isEmpty())
+            return;
+
+        writeAutoGenWarningComment (out);
+        out << "*/" << newLine << newLine
+            << "#pragma once" << newLine << newLine
+            << pluginDefines << newLine;
+    }
+
     void writeAppConfig (MemoryOutputStream& out, const OwnedArray<LibraryModule>& modules, const String& userContent)
     {
+        if (! project.shouldUseAppConfig())
+            return;
+
         writeAutoGenWarningComment (out);
         out << "    There's a section below where you can add your own custom code safely, and the" << newLine
             << "    Projucer will preserve the contents of that block, but the best way to change" << newLine
@@ -423,6 +431,9 @@ private:
             << "// [BEGIN_USER_CODE_SECTION]" << newLine
             << userContent
             << "// [END_USER_CODE_SECTION]" << newLine;
+
+        if (getPluginDefinesFile().existsAsFile() && getAudioPluginDefines().isNotEmpty())
+            out << newLine << CodeHelpers::createIncludeStatement (Project::getPluginDefinesFilename()) << newLine;
 
         out << newLine
             << "/*" << newLine
@@ -489,9 +500,6 @@ private:
             }
         }
 
-        if (extraAppConfigContent.isNotEmpty())
-            out << newLine << extraAppConfigContent.trimEnd() << newLine;
-
         {
             auto& type = project.getProjectType();
 
@@ -509,15 +517,43 @@ private:
         }
     }
 
-    void writeAppConfigFile (const OwnedArray<LibraryModule>& modules, const String& userContent)
+    template <typename WriterCallback>
+    void writeOrRemoveGeneratedFile (const String& name, WriterCallback&& writerCallback)
     {
-        appConfigFile = getAppConfigFile();
-
         MemoryOutputStream mem;
         mem.setNewLineString (projectLineFeed);
 
-        writeAppConfig (mem, modules, userContent);
-        saveGeneratedFile (Project::getAppConfigFilename(), mem);
+        writerCallback (mem);
+
+        if (mem.getDataSize() != 0)
+        {
+            saveGeneratedFile (name, mem);
+            return;
+        }
+
+        const auto destFile = generatedCodeFolder.getChildFile (name);
+
+        if (destFile.existsAsFile())
+        {
+            if (! destFile.deleteFile())
+                addError ("Couldn't remove unnecessary file: " + destFile.getFullPathName());
+        }
+    }
+
+    void writePluginDefines()
+    {
+        writeOrRemoveGeneratedFile (Project::getPluginDefinesFilename(), [&] (MemoryOutputStream& mem)
+        {
+            writePluginDefines (mem);
+        });
+    }
+
+    void writeAppConfigFile (const OwnedArray<LibraryModule>& modules, const String& userContent)
+    {
+        writeOrRemoveGeneratedFile (Project::getAppConfigFilename(), [&] (MemoryOutputStream& mem)
+        {
+            writeAppConfig (mem, modules, userContent);
+        });
     }
 
     void writeAppHeader (MemoryOutputStream& out, const OwnedArray<LibraryModule>& modules)
@@ -533,7 +569,7 @@ private:
 
         out << "#pragma once" << newLine << newLine;
 
-        if (appConfigFile.exists())
+        if (getAppConfigFile().exists() && project.shouldUseAppConfig())
             out << CodeHelpers::createIncludeStatement (Project::getAppConfigFilename()) << newLine;
 
         if (modules.size() > 0)
@@ -547,7 +583,7 @@ private:
         }
 
         if (hasBinaryData && project.shouldIncludeBinaryInJuceHeader())
-            out << CodeHelpers::createIncludeStatement (project.getBinaryDataHeaderFile(), appConfigFile) << newLine;
+            out << CodeHelpers::createIncludeStatement (project.getBinaryDataHeaderFile(), getAppConfigFile()) << newLine;
 
         out << newLine
             << "#if defined (JUCE_PROJUCER_VERSION) && JUCE_PROJUCER_VERSION < JUCE_VERSION" << newLine
@@ -558,14 +594,17 @@ private:
             << " */" << newLine
             << " #error \"This project was last saved using an outdated version of the Projucer! Re-save this project with the latest version to fix this error.\"" << newLine
             << "#endif" << newLine
-            << newLine
-            << "#if ! DONT_SET_USING_JUCE_NAMESPACE" << newLine
-            << " // If your code uses a lot of JUCE classes, then this will obviously save you" << newLine
-            << " // a lot of typing, but can be disabled by setting DONT_SET_USING_JUCE_NAMESPACE." << newLine
-            << " using namespace juce;" << newLine
-            << "#endif" << newLine
-            << newLine
-            << "#if ! JUCE_DONT_DECLARE_PROJECTINFO" << newLine
+            << newLine;
+
+        if (project.shouldAddUsingNamespaceToJuceHeader())
+            out << "#if ! DONT_SET_USING_JUCE_NAMESPACE" << newLine
+                << " // If your code uses a lot of JUCE classes, then this will obviously save you" << newLine
+                << " // a lot of typing, but can be disabled by setting DONT_SET_USING_JUCE_NAMESPACE." << newLine
+                << " using namespace juce;" << newLine
+                << "#endif" << newLine
+                << newLine;
+
+        out << "#if ! JUCE_DONT_DECLARE_PROJECTINFO" << newLine
             << "namespace ProjectInfo" << newLine
             << "{" << newLine
             << "    const char* const  projectName    = " << CppTokeniserFunctions::addEscapeChars (project.getProjectNameString()).quoted() << ";" << newLine
@@ -596,10 +635,12 @@ private:
 
                 writeAutoGenWarningComment (mem);
 
-                mem << "*/" << newLine
-                    << newLine
-                    << "#include " << Project::getAppConfigFilename().quoted() << newLine
-                    << "#include <";
+                mem << "*/" << newLine << newLine;
+
+                if (project.shouldUseAppConfig())
+                    mem << "#include " << Project::getAppConfigFilename().quoted() << newLine;
+
+                mem << "#include <";
 
                 if (cu.file.getFileExtension() != ".r")   // .r files are included without the path
                     mem << module->getID() << "/";
@@ -684,7 +725,7 @@ private:
         errors.add (message);
     }
 
-    void writePluginCharacteristicsFile();
+    String getAudioPluginDefines() const;
 
     void writeUnityScriptFile()
     {

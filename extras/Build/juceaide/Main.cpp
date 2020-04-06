@@ -402,6 +402,9 @@ juce::String createDefineStatements (juce::StringRef definitions)
 
     for (const auto& def : split)
     {
+        if (! def.startsWith ("JucePlugin_"))
+            continue;
+
         const auto defineName  = def.upToFirstOccurrenceOf ("=", false, false);
         const auto defineValue = def.fromFirstOccurrenceOf ("=", false, false);
         defineStatements += "#define " + defineName + " " + defineValue + '\n';
@@ -410,7 +413,7 @@ juce::String createDefineStatements (juce::StringRef definitions)
     return defineStatements;
 }
 
-int writeAuAppConfig (juce::ArgumentList&& args)
+int writeAuPluginDefines (juce::ArgumentList&& args)
 {
     args.checkMinNumArguments (2);
     const auto input  = args.arguments.removeAndReturn (0);
@@ -483,16 +486,16 @@ int main (int argc, char** argv)
 
         const std::unordered_map<juce::String, Fn> commands
         {
-            { "auappconfig",  writeAuAppConfig },
-            { "binarydata",   writeBinaryData },
-            { "entitlements", writeEntitlements },
-            { "header",       writeHeader },
-            { "iosassets",    writeiOSAssets },
-            { "macicon",      writeMacIcon },
-            { "pkginfo",      writePkgInfo },
-            { "plist",        writePlist },
-            { "rcfile",       writeRcFile },
-            { "winicon",      writeWinIcon }
+            { "auplugindefines", writeAuPluginDefines },
+            { "binarydata",      writeBinaryData },
+            { "entitlements",    writeEntitlements },
+            { "header",          writeHeader },
+            { "iosassets",       writeiOSAssets },
+            { "macicon",         writeMacIcon },
+            { "pkginfo",         writePkgInfo },
+            { "plist",           writePlist },
+            { "rcfile",          writeRcFile },
+            { "winicon",         writeWinIcon }
         };
 
         argumentList.checkMinNumArguments (1);

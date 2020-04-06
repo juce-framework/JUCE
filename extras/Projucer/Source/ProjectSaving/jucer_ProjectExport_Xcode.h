@@ -1212,6 +1212,33 @@ public:
             return bundleIdentifier;
         }
 
+        StringPairArray getConfigPreprocessorDefs (const XcodeBuildConfiguration& config) const
+        {
+            StringPairArray defines;
+
+            if (config.isDebug())
+            {
+                defines.set ("_DEBUG", "1");
+                defines.set ("DEBUG", "1");
+            }
+            else
+            {
+                defines.set ("_NDEBUG", "1");
+                defines.set ("NDEBUG", "1");
+            }
+
+            if (owner.isInAppPurchasesEnabled())
+                defines.set ("JUCE_IN_APP_PURCHASES", "1");
+
+            if (owner.iOS && owner.isContentSharingEnabled())
+                defines.set ("JUCE_CONTENT_SHARING", "1");
+
+            if (owner.isPushNotificationsEnabled())
+                defines.set ("JUCE_PUSH_NOTIFICATIONS", "1");
+
+            return mergePreprocessorDefs (defines, owner.getAllPreprocessorDefs (config, type));
+        }
+
         //==============================================================================
         StringPairArray getTargetSettings (const XcodeBuildConfiguration& config) const
         {
@@ -1407,54 +1434,38 @@ public:
                         libPaths.add ("\"\\\"" + p + "\\\"\"");
 
                     s.set ("LIBRARY_SEARCH_PATHS", indentParenthesisedList (libPaths, 1));
-
                 }
             }
 
-            StringPairArray defines;
-
             if (config.isDebug())
             {
-                defines.set ("_DEBUG", "1");
-                defines.set ("DEBUG", "1");
                 s.set ("COPY_PHASE_STRIP", "NO");
                 s.set ("GCC_DYNAMIC_NO_PIC", "NO");
             }
             else
             {
-                defines.set ("_NDEBUG", "1");
-                defines.set ("NDEBUG", "1");
                 s.set ("GCC_GENERATE_DEBUGGING_SYMBOLS", "NO");
                 s.set ("DEAD_CODE_STRIPPING", "YES");
             }
 
             if (type != Target::SharedCodeTarget && type != Target::StaticLibrary && type != Target::DynamicLibrary
-                  && config.isStripLocalSymbolsEnabled())
+                && config.isStripLocalSymbolsEnabled())
             {
                 s.set ("STRIPFLAGS", "\"-x\"");
                 s.set ("DEPLOYMENT_POSTPROCESSING", "YES");
                 s.set ("SEPARATE_STRIP", "YES");
             }
 
-            if (owner.isInAppPurchasesEnabled())
-                defines.set ("JUCE_IN_APP_PURCHASES", "1");
-
-            if (owner.iOS && owner.isContentSharingEnabled())
-                defines.set ("JUCE_CONTENT_SHARING", "1");
-
-            if (owner.isPushNotificationsEnabled())
-                defines.set ("JUCE_PUSH_NOTIFICATIONS", "1");
-
-            defines = mergePreprocessorDefs (defines, owner.getAllPreprocessorDefs (config, type));
-
             StringArray defsList;
+
+            const auto defines = getConfigPreprocessorDefs (config);
 
             for (int i = 0; i < defines.size(); ++i)
             {
                 auto def = defines.getAllKeys()[i];
                 auto value = defines.getAllValues()[i];
                 if (value.isNotEmpty())
-                    def << "=" << value.replace ("\"", "\\\\\\\"");
+                    def << "=" << value.replace ("\"", "\\\\\\\"").replace (" ", "\\\\ ");
 
                 defsList.add ("\"" + def + "\"");
             }

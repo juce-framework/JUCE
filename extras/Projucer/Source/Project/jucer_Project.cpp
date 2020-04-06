@@ -186,26 +186,29 @@ void Project::initialiseMainGroup()
 
 void Project::initialiseProjectValues()
 {
-    projectNameValue.referTo         (projectRoot, Ids::name,             getUndoManager(), "JUCE Project");
-    projectUIDValue.referTo          (projectRoot, Ids::ID,               getUndoManager(), createAlphaNumericUID());
+    projectNameValue.referTo         (projectRoot, Ids::name,                getUndoManager(), "JUCE Project");
+    projectUIDValue.referTo          (projectRoot, Ids::ID,                  getUndoManager(), createAlphaNumericUID());
 
     if (projectUIDValue.isUsingDefault())
         projectUIDValue = projectUIDValue.getDefault();
 
-    projectLineFeedValue.referTo     (projectRoot, Ids::projectLineFeed,  getUndoManager(), "\r\n");
+    projectLineFeedValue.referTo     (projectRoot, Ids::projectLineFeed,     getUndoManager(), "\r\n");
 
-    companyNameValue.referTo         (projectRoot, Ids::companyName,      getUndoManager());
-    companyCopyrightValue.referTo    (projectRoot, Ids::companyCopyright, getUndoManager());
-    companyWebsiteValue.referTo      (projectRoot, Ids::companyWebsite,   getUndoManager());
-    companyEmailValue.referTo        (projectRoot, Ids::companyEmail,     getUndoManager());
+    companyNameValue.referTo         (projectRoot, Ids::companyName,         getUndoManager());
+    companyCopyrightValue.referTo    (projectRoot, Ids::companyCopyright,    getUndoManager());
+    companyWebsiteValue.referTo      (projectRoot, Ids::companyWebsite,      getUndoManager());
+    companyEmailValue.referTo        (projectRoot, Ids::companyEmail,        getUndoManager());
 
-    projectTypeValue.referTo         (projectRoot, Ids::projectType,      getUndoManager(), build_tools::ProjectType_GUIApp::getTypeName());
-    versionValue.referTo             (projectRoot, Ids::version,          getUndoManager(), "1.0.0");
-    bundleIdentifierValue.referTo    (projectRoot, Ids::bundleIdentifier, getUndoManager(), getDefaultBundleIdentifierString());
+    projectTypeValue.referTo         (projectRoot, Ids::projectType,         getUndoManager(), build_tools::ProjectType_GUIApp::getTypeName());
+    versionValue.referTo             (projectRoot, Ids::version,             getUndoManager(), "1.0.0");
+    bundleIdentifierValue.referTo    (projectRoot, Ids::bundleIdentifier,    getUndoManager(), getDefaultBundleIdentifierString());
 
     displaySplashScreenValue.referTo (projectRoot, Ids::displaySplashScreen, getUndoManager(), ! ProjucerApplication::getApp().isPaidOrGPL());
     splashScreenColourValue.referTo  (projectRoot, Ids::splashScreenColour,  getUndoManager(), "Dark");
     reportAppUsageValue.referTo      (projectRoot, Ids::reportAppUsage,      getUndoManager());
+
+    useAppConfigValue.referTo             (projectRoot, Ids::useAppConfig,                  getUndoManager(), true);
+    addUsingNamespaceToJuceHeader.referTo (projectRoot, Ids::addUsingNamespaceToJuceHeader, getUndoManager(), true);
 
     if (ProjucerApplication::getApp().isPaidOrGPL())
     {
@@ -897,6 +900,17 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 
     props.add (new TextPropertyComponent (companyEmailValue, "Company E-mail", 256, false),
                "Your company e-mail, which will be added to the properties of the binary where possible");
+
+    props.add (new ChoicePropertyComponent (useAppConfigValue, "Use Global AppConfig Header"),
+               "If enabled, the Projucer will generate module wrapper stubs which include AppConfig.h "
+               "and will include AppConfig.h in the JuceHeader.h. If disabled, all the settings that would "
+               "previously have been specified in the AppConfig.h will be injected via the build system instead, "
+               "which may simplify the includes in the project.");
+
+    props.add (new ChoicePropertyComponent (addUsingNamespaceToJuceHeader, "Add \"using namespace juce\" to JuceHeader.h"),
+               "If enabled, the JuceHeader.h will include a \"using namepace juce\" statement. If disabled, "
+               "no such statement will be included. This setting used to be enabled by default, but it "
+               "is recommended to leave it disabled for new projects.");
 
     {
         String licenseRequiredTagline ("Required for closed source applications without an Indie or Pro JUCE license");
@@ -1781,7 +1795,7 @@ int Project::getRTASCategory() const noexcept
     return res;
 }
 
-String Project::getIAATypeCode()
+String Project::getIAATypeCode() const
 {
     String s;
     if (pluginWantsMidiInput())
@@ -1801,7 +1815,7 @@ String Project::getIAATypeCode()
     return s;
 }
 
-String Project::getIAAPluginName()
+String Project::getIAAPluginName() const
 {
     auto s = getPluginManufacturerString();
     s << ": ";
@@ -2131,6 +2145,110 @@ String Project::getFileTemplate (const String& templateName)
     jassertfalse;
     return {};
 
+}
+
+StringPairArray Project::getAudioPluginFlags() const
+{
+    if (! isAudioPluginProject())
+        return {};
+
+    const auto boolToString = [] (bool b) { return b ? "1" : "0"; };
+
+    const auto toStringLiteral = [] (const String& v)
+    {
+        return CppTokeniserFunctions::addEscapeChars (v).quoted();
+    };
+
+    const auto countMaxPluginChannels = [] (const String& configString, bool isInput)
+    {
+        auto configs = StringArray::fromTokens (configString, ", {}", {});
+        configs.trim();
+        configs.removeEmptyStrings();
+        jassert ((configs.size() & 1) == 0);  // looks like a syntax error in the configs?
+
+        int maxVal = 0;
+
+        for (int i = (isInput ? 0 : 1); i < configs.size(); i += 2)
+            maxVal = jmax (maxVal, configs[i].getIntValue());
+
+        return maxVal;
+    };
+
+    const auto toCharLiteral = [] (const String& v)
+    {
+        auto fourCharCode = v.substring (0, 4);
+        uint32 hexRepresentation = 0;
+
+        for (int i = 0; i < 4; ++i)
+            hexRepresentation = (hexRepresentation << 8u)
+                                |  (static_cast<unsigned int> (fourCharCode[i]) & 0xffu);
+
+        return "0x" + String::toHexString (static_cast<int> (hexRepresentation));
+    };
+
+    StringPairArray flags;
+    flags.set ("JucePlugin_Build_VST",                   boolToString (shouldBuildVST()));
+    flags.set ("JucePlugin_Build_VST3",                  boolToString (shouldBuildVST3()));
+    flags.set ("JucePlugin_Build_AU",                    boolToString (shouldBuildAU()));
+    flags.set ("JucePlugin_Build_AUv3",                  boolToString (shouldBuildAUv3()));
+    flags.set ("JucePlugin_Build_RTAS",                  boolToString (shouldBuildRTAS()));
+    flags.set ("JucePlugin_Build_AAX",                   boolToString (shouldBuildAAX()));
+    flags.set ("JucePlugin_Build_Standalone",            boolToString (shouldBuildStandalonePlugin()));
+    flags.set ("JucePlugin_Build_Unity",                 boolToString (shouldBuildUnityPlugin()));
+    flags.set ("JucePlugin_Enable_IAA",                  boolToString (shouldEnableIAA()));
+    flags.set ("JucePlugin_Name",                        toStringLiteral (getPluginNameString()));
+    flags.set ("JucePlugin_Desc",                        toStringLiteral (getPluginDescriptionString()));
+    flags.set ("JucePlugin_Manufacturer",                toStringLiteral (getPluginManufacturerString()));
+    flags.set ("JucePlugin_ManufacturerWebsite",         toStringLiteral (getCompanyWebsiteString()));
+    flags.set ("JucePlugin_ManufacturerEmail",           toStringLiteral (getCompanyEmailString()));
+    flags.set ("JucePlugin_ManufacturerCode",            toCharLiteral (getPluginManufacturerCodeString()));
+    flags.set ("JucePlugin_PluginCode",                  toCharLiteral (getPluginCodeString()));
+    flags.set ("JucePlugin_IsSynth",                     boolToString (isPluginSynth()));
+    flags.set ("JucePlugin_WantsMidiInput",              boolToString (pluginWantsMidiInput()));
+    flags.set ("JucePlugin_ProducesMidiOutput",          boolToString (pluginProducesMidiOutput()));
+    flags.set ("JucePlugin_IsMidiEffect",                boolToString (isPluginMidiEffect()));
+    flags.set ("JucePlugin_EditorRequiresKeyboardFocus", boolToString (pluginEditorNeedsKeyFocus()));
+    flags.set ("JucePlugin_Version",                     getVersionString());
+    flags.set ("JucePlugin_VersionCode",                 getVersionAsHex());
+    flags.set ("JucePlugin_VersionString",               toStringLiteral (getVersionString()));
+    flags.set ("JucePlugin_VSTUniqueID",                 "JucePlugin_PluginCode");
+    flags.set ("JucePlugin_VSTCategory",                 getVSTCategoryString());
+    flags.set ("JucePlugin_Vst3Category",                toStringLiteral (getVST3CategoryString()));
+    flags.set ("JucePlugin_AUMainType",                  getAUMainTypeString());
+    flags.set ("JucePlugin_AUSubType",                   "JucePlugin_PluginCode");
+    flags.set ("JucePlugin_AUExportPrefix",              getPluginAUExportPrefixString());
+    flags.set ("JucePlugin_AUExportPrefixQuoted",        toStringLiteral (getPluginAUExportPrefixString()));
+    flags.set ("JucePlugin_AUManufacturerCode",          "JucePlugin_ManufacturerCode");
+    flags.set ("JucePlugin_CFBundleIdentifier",          getBundleIdentifierString());
+    flags.set ("JucePlugin_RTASCategory",                String (getRTASCategory()));
+    flags.set ("JucePlugin_RTASManufacturerCode",        "JucePlugin_ManufacturerCode");
+    flags.set ("JucePlugin_RTASProductId",               "JucePlugin_PluginCode");
+    flags.set ("JucePlugin_RTASDisableBypass",           boolToString (isPluginRTASBypassDisabled()));
+    flags.set ("JucePlugin_RTASDisableMultiMono",        boolToString (isPluginRTASMultiMonoDisabled()));
+    flags.set ("JucePlugin_AAXIdentifier",               getAAXIdentifierString());
+    flags.set ("JucePlugin_AAXManufacturerCode",         "JucePlugin_ManufacturerCode");
+    flags.set ("JucePlugin_AAXProductId",                "JucePlugin_PluginCode");
+    flags.set ("JucePlugin_AAXCategory",                 String (getAAXCategory()));
+    flags.set ("JucePlugin_AAXDisableBypass",            boolToString (isPluginAAXBypassDisabled()));
+    flags.set ("JucePlugin_AAXDisableMultiMono",         boolToString (isPluginAAXMultiMonoDisabled()));
+    flags.set ("JucePlugin_IAAType",                     toCharLiteral (getIAATypeCode()));
+    flags.set ("JucePlugin_IAASubType",                  "JucePlugin_PluginCode");
+    flags.set ("JucePlugin_IAAName",                     getIAAPluginName().quoted());
+    flags.set ("JucePlugin_VSTNumMidiInputs",            getVSTNumMIDIInputsString());
+    flags.set ("JucePlugin_VSTNumMidiOutputs",           getVSTNumMIDIOutputsString());
+
+    {
+        String plugInChannelConfig = getPluginChannelConfigsString();
+
+        if (plugInChannelConfig.isNotEmpty())
+        {
+            flags.set ("JucePlugin_MaxNumInputChannels",            String (countMaxPluginChannels (plugInChannelConfig, true)));
+            flags.set ("JucePlugin_MaxNumOutputChannels",           String (countMaxPluginChannels (plugInChannelConfig, false)));
+            flags.set ("JucePlugin_PreferredChannelConfigurations", plugInChannelConfig);
+        }
+    }
+
+    return flags;
 }
 
 //==============================================================================

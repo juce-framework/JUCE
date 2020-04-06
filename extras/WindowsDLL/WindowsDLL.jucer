@@ -3,7 +3,7 @@
 <JUCERPROJECT id="IvabE4" name="WindowsDLL" projectType="library" juceLinkage="none"
               bundleIdentifier="com.roli.jucedll" jucerVersion="6.0.0" defines="JUCE_DLL_BUILD=1"
               displaySplashScreen="0" reportAppUsage="0" companyName="ROLI Ltd."
-              companyCopyright="ROLI Ltd.">
+              companyCopyright="ROLI Ltd." useAppConfig="0" addUsingNamespaceToJuceHeader="1">
   <EXPORTFORMATS>
     <VS2019 targetFolder="Builds/VisualStudio2019">
       <CONFIGURATIONS>

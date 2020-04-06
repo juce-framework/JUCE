@@ -315,7 +315,7 @@ function(_juce_add_au_resource_fork shared_code_target au_target)
     get_target_property(juce_library_code ${shared_code_target} JUCE_GENERATED_SOURCES_DIRECTORY)
     # We don't want our AU AppConfig.h to end up on peoples' include paths if we can help it
     set(secret_au_resource_dir "${juce_library_code}/${au_target}/secret")
-    set(secret_au_appconfig "${secret_au_resource_dir}/AppConfig.h")
+    set(secret_au_plugindefines "${secret_au_resource_dir}/JucePluginDefines.h")
 
     set(au_rez_output "${secret_au_resource_dir}/${product_name}.rsrc")
 
@@ -334,8 +334,8 @@ function(_juce_add_au_resource_fork shared_code_target au_target)
     # in a custom command.
     # In the end, it's simplest to generate a special single-purpose appconfig just for the
     # resource compiler.
-    add_custom_command(OUTPUT "${secret_au_appconfig}"
-        COMMAND juce::juceaide auappconfig "${defs_file}" "${secret_au_appconfig}"
+    add_custom_command(OUTPUT "${secret_au_plugindefines}"
+        COMMAND juce::juceaide auplugindefines "${defs_file}" "${secret_au_plugindefines}"
         DEPENDS "${defs_file}"
         VERBATIM)
 
@@ -349,7 +349,7 @@ function(_juce_add_au_resource_fork shared_code_target au_target)
             -isysroot "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
             "${au_rez_sources}"
             -o "${au_rez_output}"
-        DEPENDS "${au_rez_input}" "${secret_au_appconfig}"
+        DEPENDS "${au_rez_input}" "${secret_au_plugindefines}"
         VERBATIM)
 endfunction()
 

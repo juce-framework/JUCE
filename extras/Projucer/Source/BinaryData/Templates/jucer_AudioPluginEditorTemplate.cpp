@@ -1,9 +1,7 @@
 /*
   ==============================================================================
 
-    This file was auto-generated!
-
-    It contains the basic framework code for a JUCE plugin editor.
+    This file contains the basic framework code for a JUCE plugin editor.
 
   ==============================================================================
 */
@@ -24,14 +22,14 @@
 }
 
 //==============================================================================
-void %%editor_class_name%%::paint (Graphics& g)
+void %%editor_class_name%%::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
 
-    g.setColour (Colours::white);
+    g.setColour (juce::Colours::white);
     g.setFont (15.0f);
-    g.drawFittedText ("Hello World!", getLocalBounds(), Justification::centred, 1);
+    g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
 }
 
 void %%editor_class_name%%::resized()

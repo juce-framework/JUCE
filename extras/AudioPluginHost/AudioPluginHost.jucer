@@ -3,7 +3,8 @@
 <JUCERPROJECT id="NTe0XB0ij" name="AudioPluginHost" projectType="guiapp" version="1.0.0"
               juceFolder="../../../juce" bundleIdentifier="com.roli.juce.pluginhost"
               jucerVersion="6.0.0" companyName="ROLI Ltd." displaySplashScreen="0"
-              reportAppUsage="0" companyCopyright="ROLI Ltd.">
+              reportAppUsage="0" companyCopyright="ROLI Ltd." useAppConfig="0"
+              addUsingNamespaceToJuceHeader="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" rtasFolder="~/SDKs/PT_80_SDK" objCExtraSuffix="M73TRi"
                smallIcon="c97aUr" bigIcon="c97aUr" microphonePermissionNeeded="1"

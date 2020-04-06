@@ -40,6 +40,8 @@ namespace Ids
     DECLARE_ID (companyCopyright);
     DECLARE_ID (companyWebsite);
     DECLARE_ID (companyEmail);
+    DECLARE_ID (useAppConfig);
+    DECLARE_ID (addUsingNamespaceToJuceHeader);
     DECLARE_ID (displaySplashScreen);
     DECLARE_ID (reportAppUsage);
     DECLARE_ID (splashScreenColour);

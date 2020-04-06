@@ -1,9 +1,7 @@
 /*
   ==============================================================================
 
-    This file was auto-generated!
-
-    It contains the basic framework code for a JUCE plugin editor.
+    This file contains the basic framework code for a JUCE plugin editor.
 
   ==============================================================================
 */
@@ -15,14 +13,14 @@
 //==============================================================================
 /**
 */
-class %%editor_class_name%%  : public AudioProcessorEditor
+class %%editor_class_name%%  : public juce::AudioProcessorEditor
 {
 public:
     %%editor_class_name%% (%%filter_class_name%%&);
     ~%%editor_class_name%%();
 
     //==============================================================================
-    void paint (Graphics&) override;
+    void paint (juce::Graphics&) override;
     void resized() override;
 
 private:

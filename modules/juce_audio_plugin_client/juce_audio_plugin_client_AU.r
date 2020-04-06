@@ -20,13 +20,13 @@
 #include <AudioUnit.r>
 
 //==============================================================================
-/*  The AppConfig.h file should be a file in your project, containing info to describe the
-    plugin's name, type, etc. The introjucer will generate this file automatically for you.
+/*  The JucePluginDefines file should be a file in your project, containing info to describe the
+    plugin's name, type, etc. The Projucer will generate this file automatically for you.
 
     You may need to adjust the include path of your project to make sure it can be
     found by this include statement. (Don't hack this file to change the include path)
 */
-#include "AppConfig.h"
+#include "JucePluginDefines.h"
 
 
 //==============================================================================

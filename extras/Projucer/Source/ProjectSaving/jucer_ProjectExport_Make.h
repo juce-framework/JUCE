@@ -129,17 +129,11 @@ public:
             if (type == AggregateTarget) // the aggregate target should not specify any settings at all!
                 return {};               // it just defines dependencies on the other targets.
 
-            StringArray defines;
-            auto defs = getDefines (config);
-
-            for (auto& key : defs.getAllKeys())
-                defines.add ("-D" + key + "=" + defs[key]);
-
             StringArray s;
 
             auto cppflagsVarName = "JUCE_CPPFLAGS_" + getTargetVarName();
 
-            s.add (cppflagsVarName + " := " + defines.joinIntoString (" "));
+            s.add (cppflagsVarName + " := " + createGCCPreprocessorFlags (getDefines (config)));
 
             auto cflags = getCompilerFlags();
 

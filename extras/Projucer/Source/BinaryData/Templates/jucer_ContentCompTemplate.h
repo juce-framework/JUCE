@@ -1,11 +1,3 @@
-/*
-  ==============================================================================
-
-    This file was auto-generated!
-
-  ==============================================================================
-*/
-
 #pragma once
 
 %%include_juce%%
@@ -15,7 +7,7 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class %%content_component_class%%   : public Component
+class %%content_component_class%%   : public juce::Component
 {
 public:
     //==============================================================================
@@ -23,7 +15,7 @@ public:
     ~%%content_component_class%%();
 
     //==============================================================================
-    void paint (Graphics&) override;
+    void paint (juce::Graphics&) override;
     void resized() override;
 
 private:

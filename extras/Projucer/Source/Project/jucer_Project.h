@@ -58,6 +58,7 @@ public:
     File getBinaryDataHeaderFile() const                        { return getBinaryDataCppFile (0).withFileExtension (".h"); }
 
     static String getAppConfigFilename()                        { return "AppConfig.h"; }
+    static String getPluginDefinesFilename()                    { return "JucePluginDefines.h"; }
     static String getJuceSourceHFilename()                      { return "JuceHeader.h"; }
 
     //==============================================================================
@@ -124,6 +125,9 @@ public:
 
     String getPostExportShellCommandPosixString() const     { return postExportShellCommandPosixValue.get(); }
     String getPostExportShellCommandWinString() const       { return postExportShellCommandWinValue.get(); }
+
+    bool shouldUseAppConfig() const                   { return useAppConfigValue.get(); }
+    bool shouldAddUsingNamespaceToJuceHeader() const  { return addUsingNamespaceToJuceHeader.get(); }
 
     //==============================================================================
     String getPluginNameString() const                { return pluginNameValue.get(); }
@@ -197,8 +201,8 @@ public:
     int getAAXCategory() const noexcept;
     int getRTASCategory() const noexcept;
 
-    String getIAATypeCode();
-    String getIAAPluginName();
+    String getIAATypeCode() const;
+    String getIAAPluginName() const;
 
     String getUnityScriptName() const    { return addUnityPluginPrefixIfNecessary (getProjectNameString()) + "_UnityScript.cs"; }
     static String addUnityPluginPrefixIfNecessary (const String& name)
@@ -221,6 +225,8 @@ public:
 
     //==============================================================================
     void updateDeprecatedProjectSettingsInteractively();
+
+    StringPairArray getAudioPluginFlags() const;
 
     //==============================================================================
     class Item
@@ -416,7 +422,7 @@ private:
     ValueWithDefault projectNameValue, projectUIDValue, projectLineFeedValue, projectTypeValue, versionValue, bundleIdentifierValue, companyNameValue,
                      companyCopyrightValue, companyWebsiteValue, companyEmailValue, displaySplashScreenValue, reportAppUsageValue, splashScreenColourValue, cppStandardValue,
                      headerSearchPathsValue, preprocessorDefsValue, userNotesValue, maxBinaryFileSizeValue, includeBinaryDataInJuceHeaderValue, binaryDataNamespaceValue,
-                     compilerFlagSchemesValue, postExportShellCommandPosixValue, postExportShellCommandWinValue;
+                     compilerFlagSchemesValue, postExportShellCommandPosixValue, postExportShellCommandWinValue, useAppConfigValue, addUsingNamespaceToJuceHeader;
 
     ValueWithDefault pluginFormatsValue, pluginNameValue, pluginDescriptionValue, pluginManufacturerValue, pluginManufacturerCodeValue,
                      pluginCodeValue, pluginChannelConfigsValue, pluginCharacteristicsValue, pluginAUExportPrefixValue, pluginAAXIdentifierValue,

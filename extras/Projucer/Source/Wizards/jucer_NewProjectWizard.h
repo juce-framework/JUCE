@@ -19,6 +19,8 @@
 #pragma once
 
 
+#include "../Utility/Helpers/jucer_PresetIDs.h"
+
 //==============================================================================
 static void setExecutableNameForAllTargets (Project& project, const String& exeName)
 {
@@ -131,6 +133,8 @@ struct NewProjectWizard
                 return nullptr;
 
             project->getConfigFlag ("JUCE_STRICT_REFCOUNTEDPOINTER") = true;
+            project->getProjectValue (Ids::useAppConfig) = false;
+            project->getProjectValue (Ids::addUsingNamespaceToJuceHeader) = false;
 
             addExporters (*project, wc);
             addDefaultModules (*project, useGlobalPath);

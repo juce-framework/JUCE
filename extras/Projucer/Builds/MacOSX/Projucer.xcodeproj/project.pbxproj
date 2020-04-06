@@ -1505,13 +1505,6 @@
 			path = "../../Source/ComponentEditor/Components/jucer_TextEditorHandler.h";
 			sourceTree = "SOURCE_ROOT";
 		};
-		8702F43110E4CCA5E5F827F5 = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			name = AppConfig.h;
-			path = ../../JuceLibraryCode/AppConfig.h;
-			sourceTree = "SOURCE_ROOT";
-		};
 		8A82061A978B03745485C3AC = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -3178,7 +3171,6 @@
 		2C6746F66EF4444F53B3221F = {
 			isa = PBXGroup;
 			children = (
-				8702F43110E4CCA5E5F827F5,
 				472F9A90F685220D730EBF6C,
 				4F687965FBE86EAFDB3ACFEC,
 				805A3A5FBA3B9E28363DD77B,
@@ -3274,6 +3266,26 @@
 					"JucePlugin_Build_AAX=0",
 					"JucePlugin_Build_Standalone=0",
 					"JucePlugin_Build_Unity=0",
+					"JUCE_DISPLAY_SPLASH_SCREEN=0",
+					"JUCE_REPORT_APP_USAGE=0",
+					"JUCE_USE_DARK_SPLASH_SCREEN=1",
+					"JUCE_PROJUCER_VERSION=0x60000",
+					"JUCE_MODULE_AVAILABLE_juce_analytics=1",
+					"JUCE_MODULE_AVAILABLE_juce_build_tools=1",
+					"JUCE_MODULE_AVAILABLE_juce_core=1",
+					"JUCE_MODULE_AVAILABLE_juce_cryptography=1",
+					"JUCE_MODULE_AVAILABLE_juce_data_structures=1",
+					"JUCE_MODULE_AVAILABLE_juce_events=1",
+					"JUCE_MODULE_AVAILABLE_juce_graphics=1",
+					"JUCE_MODULE_AVAILABLE_juce_gui_basics=1",
+					"JUCE_MODULE_AVAILABLE_juce_gui_extra=1",
+					"JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1",
+					"JUCE_LOG_ASSERTIONS=1",
+					"JUCE_USE_CURL=1",
+					"JUCE_LOAD_CURL_SYMBOLS_LAZILY=1",
+					"JUCE_ALLOW_STATIC_NULL_VARIABLES=0",
+					"JUCE_STRICT_REFCOUNTEDPOINTER=1",
+					"JUCE_STANDALONE_APPLICATION=1",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
@@ -3319,6 +3331,26 @@
 					"JucePlugin_Build_AAX=0",
 					"JucePlugin_Build_Standalone=0",
 					"JucePlugin_Build_Unity=0",
+					"JUCE_DISPLAY_SPLASH_SCREEN=0",
+					"JUCE_REPORT_APP_USAGE=0",
+					"JUCE_USE_DARK_SPLASH_SCREEN=1",
+					"JUCE_PROJUCER_VERSION=0x60000",
+					"JUCE_MODULE_AVAILABLE_juce_analytics=1",
+					"JUCE_MODULE_AVAILABLE_juce_build_tools=1",
+					"JUCE_MODULE_AVAILABLE_juce_core=1",
+					"JUCE_MODULE_AVAILABLE_juce_cryptography=1",
+					"JUCE_MODULE_AVAILABLE_juce_data_structures=1",
+					"JUCE_MODULE_AVAILABLE_juce_events=1",
+					"JUCE_MODULE_AVAILABLE_juce_graphics=1",
+					"JUCE_MODULE_AVAILABLE_juce_gui_basics=1",
+					"JUCE_MODULE_AVAILABLE_juce_gui_extra=1",
+					"JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1",
+					"JUCE_LOG_ASSERTIONS=1",
+					"JUCE_USE_CURL=1",
+					"JUCE_LOAD_CURL_SYMBOLS_LAZILY=1",
+					"JUCE_ALLOW_STATIC_NULL_VARIABLES=0",
+					"JUCE_STRICT_REFCOUNTEDPOINTER=1",
+					"JUCE_STANDALONE_APPLICATION=1",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (

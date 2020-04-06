@@ -4479,9 +4479,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_video\juce_video.h">
       <Filter>JUCE Modules\juce_video</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\JuceLibraryCode\AppConfig.h">
-      <Filter>JUCE Library Code</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\JuceLibraryCode\BinaryData.h">
       <Filter>JUCE Library Code</Filter>
     </ClInclude>

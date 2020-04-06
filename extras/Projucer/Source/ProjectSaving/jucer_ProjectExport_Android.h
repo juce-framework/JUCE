@@ -1457,7 +1457,7 @@ private:
 
     StringPairArray getConfigPreprocessorDefs (const BuildConfiguration& config) const
     {
-        auto cfgDefines = config.getUniquePreprocessorDefs();
+        auto cfgDefines = getAllPreprocessorDefs (config, build_tools::ProjectType::Target::unspecified);
 
         if (config.isDebug())
         {
@@ -1530,7 +1530,8 @@ private:
             if (value.isNotEmpty())
             {
                 value = value.replace ("\"", "\\\"");
-                if (value.containsChar (L' '))
+
+                if (value.containsChar (L' ') && ! value.startsWith ("\\\"") && ! value.endsWith ("\\\""))
                     value = "\\\"" + value + "\\\"";
 
                 escaped += ("=" + value);

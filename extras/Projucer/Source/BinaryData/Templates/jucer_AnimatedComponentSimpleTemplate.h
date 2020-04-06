@@ -1,11 +1,3 @@
-/*
-  ==============================================================================
-
-    This file was auto-generated!
-
-  ==============================================================================
-*/
-
 #pragma once
 
 %%include_juce%%
@@ -15,7 +7,7 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class %%content_component_class%%   : public AnimatedAppComponent
+class %%content_component_class%%   : public juce::AnimatedAppComponent
 {
 public:
     //==============================================================================
@@ -39,10 +31,10 @@ public:
     }
 
     //==============================================================================
-    void paint (Graphics& g) override
+    void paint (juce::Graphics& g) override
     {
         // (Our component is opaque, so we must completely fill the background with a solid colour)
-        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+        g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
 
         // You can add your drawing code here!
     }

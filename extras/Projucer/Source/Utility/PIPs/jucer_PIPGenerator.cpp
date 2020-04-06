@@ -391,6 +391,9 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
                                    nullptr);
     }
 
+    jucerTree.setProperty (Ids::useAppConfig, false, nullptr);
+    jucerTree.setProperty (Ids::addUsingNamespaceToJuceHeader, true, nullptr);
+
     return Result::ok();
 }
 

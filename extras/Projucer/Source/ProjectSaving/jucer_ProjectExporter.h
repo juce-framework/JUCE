@@ -327,8 +327,10 @@ public:
 
     // includes exporter, project + config defs
     StringPairArray getAllPreprocessorDefs (const BuildConfiguration& config, const build_tools::ProjectType::Target::Type targetType) const;
-    // includes exporter + project defs..
+    // includes exporter + project defs
     StringPairArray getAllPreprocessorDefs() const;
+    // just appconfig defs
+    StringPairArray getAppConfigDefs() const;
 
     void addTargetSpecificPreprocessorDefs (StringPairArray& defs, const build_tools::ProjectType::Target::Type targetType) const;
 
