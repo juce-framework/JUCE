@@ -536,7 +536,7 @@ public:
         if (jack_client_t* const client = juce::jack_client_open ("JuceJackDummy", JackNoStartServer, &status))
         {
             // scan for output devices
-            for (JackPortIterator i (client, false); i.next();)
+            for (JackPortIterator i (client, true); i.next();)
             {
                 if (i.clientName != (JUCE_JACK_CLIENT_NAME) && ! inputNames.contains (i.clientName))
                 {
@@ -546,7 +546,7 @@ public:
             }
 
             // scan for input devices
-            for (JackPortIterator i (client, true); i.next();)
+            for (JackPortIterator i (client, false); i.next();)
             {
                 if (i.clientName != (JUCE_JACK_CLIENT_NAME) && ! outputNames.contains (i.clientName))
                 {
