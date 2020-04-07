@@ -183,7 +183,8 @@ public:
                 inputName << "in_" << ++totalNumberOfInputChannels;
 
                 inputPorts.add (juce::jack_port_register (client, inputName.toUTF8(),
-                                                          JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0));
+                                                          JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0));
+                                                          // (NB: This looks like it's the wrong way round, but it is correct!)
             }
 
             // open output ports
@@ -194,7 +195,8 @@ public:
                 outputName << "out_" << ++totalNumberOfOutputChannels;
 
                 outputPorts.add (juce::jack_port_register (client, outputName.toUTF8(),
-                                                           JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0));
+                                                           JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0));
+                                                           // (NB: This looks like it's the wrong way round, but it is correct!)
             }
 
             inChans.calloc (totalNumberOfInputChannels + 2);
