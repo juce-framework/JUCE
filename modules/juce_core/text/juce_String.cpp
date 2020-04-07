@@ -2935,6 +2935,17 @@ public:
                 expectEquals (serialiseDouble (-test.first), "-" + test.second);
             }
         }
+
+        {
+            beginTest ("Loops");
+
+            String str (CharPointer_UTF8 ("\xc2\xaf\\_(\xe3\x83\x84)_/\xc2\xaf"));
+            std::vector<juce_wchar> parts { 175, 92, 95, 40, 12484, 41, 95, 47, 175 };
+            size_t index = 0;
+
+            for (auto c : str)
+                expectEquals (c, parts[index++]);
+        }
     }
 };
 
