@@ -1300,7 +1300,8 @@ float Component::getApproximateScaleFactorForComponent (Component* targetCompone
             transform = transform.scaled (target->getDesktopScaleFactor());
     }
 
-    return (transform.getScaleFactor() / Desktop::getInstance().getGlobalScaleFactor());
+    auto transformScale = std::sqrt (std::abs (transform.getDeterminant()));
+    return transformScale / Desktop::getInstance().getGlobalScaleFactor();
 }
 
 //==============================================================================

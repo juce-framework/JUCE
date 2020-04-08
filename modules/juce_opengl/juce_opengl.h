@@ -24,6 +24,7 @@
   ==============================================================================
 */
 
+
 /*******************************************************************************
  The block below describes the properties of this module, and is read by
  the Projucer to automatically generate project code that uses it.
@@ -33,19 +34,19 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_opengl
-  vendor:           juce
-  version:          5.4.5
-  name:             JUCE OpenGL classes
-  description:      Classes for rendering OpenGL in a JUCE window.
-  website:          http://www.juce.com/juce
-  license:          GPL/Commercial
+  ID:                 juce_opengl
+  vendor:             juce
+  version:            5.4.7
+  name:               JUCE OpenGL classes
+  description:        Classes for rendering OpenGL in a JUCE window.
+  website:            http://www.juce.com/juce
+  license:            GPL/Commercial
 
-  dependencies:     juce_gui_extra
-  OSXFrameworks:    OpenGL
-  iOSFrameworks:    OpenGLES
-  linuxLibs:        GL
-  mingwLibs:        opengl32
+  dependencies:       juce_gui_extra
+  OSXFrameworks:      OpenGL
+  iOSFrameworks:      OpenGLES
+  linuxLibs:          GL
+  mingwLibs:          opengl32
 
  END_JUCE_MODULE_DECLARATION
 

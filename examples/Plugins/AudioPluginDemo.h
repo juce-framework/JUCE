@@ -177,9 +177,9 @@ public:
     //==============================================================================
     JuceDemoPluginAudioProcessor()
         : AudioProcessor (getBusesProperties()),
-    state (*this, nullptr, "state",
-           { std::make_unique<AudioParameterFloat> ("gain", "Gain", NormalisableRange<float> (0.0f, 1.0f), 0.9f),
-             std::make_unique<AudioParameterFloat> ("delay", "Delay Feedback", NormalisableRange<float> (0.0f, 1.0f), 0.5f) })
+          state (*this, nullptr, "state",
+                 { std::make_unique<AudioParameterFloat> ("gain",  "Gain",           NormalisableRange<float> (0.0f, 1.0f), 0.9f),
+                   std::make_unique<AudioParameterFloat> ("delay", "Delay Feedback", NormalisableRange<float> (0.0f, 1.0f), 0.5f) })
     {
         lastPosInfo.resetToDefault();
 
@@ -302,10 +302,22 @@ public:
     //==============================================================================
     void updateTrackProperties (const TrackProperties& properties) override
     {
-        trackProperties = properties;
+        {
+            const ScopedLock sl (trackPropertiesLock);
+            trackProperties = properties;
+        }
 
-        if (auto* editor = dynamic_cast<JuceDemoPluginAudioProcessorEditor*> (getActiveEditor()))
-            editor->updateTrackProperties ();
+        MessageManager::callAsync ([this]
+        {
+            if (auto* editor = dynamic_cast<JuceDemoPluginAudioProcessorEditor*> (getActiveEditor()))
+                 editor->updateTrackProperties();
+        });
+    }
+
+    TrackProperties getTrackProperties() const
+    {
+        const ScopedLock sl (trackPropertiesLock);
+        return trackProperties;
     }
 
     //==============================================================================
@@ -323,9 +335,6 @@ public:
 
     // Our plug-in's current state
     AudioProcessorValueTreeState state;
-
-    // Current track colour and name
-    TrackProperties trackProperties;
 
 private:
     //==============================================================================
@@ -430,7 +439,7 @@ private:
 
         void updateTrackProperties()
         {
-            auto trackColour = getProcessor().trackProperties.colour;
+            auto trackColour = getProcessor().getTrackProperties().colour;
             auto& lf = getLookAndFeel();
 
             backgroundColour = (trackColour == Colour() ? lf.findColour (ResizableWindow::backgroundColourId)
@@ -591,6 +600,9 @@ private:
     int delayPosition = 0;
 
     Synthesiser synth;
+
+    CriticalSection trackPropertiesLock;
+    TrackProperties trackProperties;
 
     void initialiseSynth()
     {

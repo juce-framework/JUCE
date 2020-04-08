@@ -426,6 +426,7 @@ Colour Image::BitmapData::getPixelColour (int x, int y) const noexcept
         case Image::ARGB:           return Colour ( ((const PixelARGB*)  pixel)->getUnpremultiplied());
         case Image::RGB:            return Colour (*((const PixelRGB*)   pixel));
         case Image::SingleChannel:  return Colour (*((const PixelAlpha*) pixel));
+        case Image::UnknownFormat:
         default:                    jassertfalse; break;
     }
 
@@ -444,6 +445,7 @@ void Image::BitmapData::setPixelColour (int x, int y, Colour colour) const noexc
         case Image::ARGB:           ((PixelARGB*)  pixel)->set (col); break;
         case Image::RGB:            ((PixelRGB*)   pixel)->set (col); break;
         case Image::SingleChannel:  ((PixelAlpha*) pixel)->set (col); break;
+        case Image::UnknownFormat:
         default:                    jassertfalse; break;
     }
 }
@@ -521,6 +523,7 @@ static void performPixelOp (const Image::BitmapData& data, const PixelOperation&
         case Image::ARGB:           PixelIterator<PixelARGB> ::iterate (data, pixelOp); break;
         case Image::RGB:            PixelIterator<PixelRGB>  ::iterate (data, pixelOp); break;
         case Image::SingleChannel:  PixelIterator<PixelAlpha>::iterate (data, pixelOp); break;
+        case Image::UnknownFormat:
         default:                    jassertfalse; break;
     }
 }
@@ -660,7 +663,7 @@ void Image::moveImageSection (int dx, int dy,
         auto dst = destData.getPixelPointer (dx - minX, dy - minY);
         auto src = destData.getPixelPointer (sx - minX, sy - minY);
 
-        auto lineSize = (size_t) (destData.pixelStride * w);
+        auto lineSize = (size_t) destData.pixelStride * (size_t) w;
 
         if (dy > sy)
         {

@@ -29,13 +29,13 @@ namespace juce
 
 namespace PropertyFileConstants
 {
-    JUCE_CONSTEXPR static const int magicNumber            = (int) ByteOrder::makeInt ('P', 'R', 'O', 'P');
-    JUCE_CONSTEXPR static const int magicNumberCompressed  = (int) ByteOrder::makeInt ('C', 'P', 'R', 'P');
+    constexpr static const int magicNumber            = (int) ByteOrder::makeInt ('P', 'R', 'O', 'P');
+    constexpr static const int magicNumberCompressed  = (int) ByteOrder::makeInt ('C', 'P', 'R', 'P');
 
-    JUCE_CONSTEXPR static const char* const fileTag        = "PROPERTIES";
-    JUCE_CONSTEXPR static const char* const valueTag       = "VALUE";
-    JUCE_CONSTEXPR static const char* const nameAttribute  = "name";
-    JUCE_CONSTEXPR static const char* const valueAttribute = "val";
+    constexpr static const char* const fileTag        = "PROPERTIES";
+    constexpr static const char* const valueTag       = "VALUE";
+    constexpr static const char* const nameAttribute  = "name";
+    constexpr static const char* const valueAttribute = "val";
 }
 
 //==============================================================================

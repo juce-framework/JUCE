@@ -27,8 +27,6 @@
 namespace juce
 {
 
-Image juce_createIconForFile (const File&);
-
 //==============================================================================
 class FileListTreeItem   : public TreeViewItem,
                            private TimeSliceClient,
@@ -118,8 +116,7 @@ public:
     {
         removeSubContentsList();
 
-        OptionalScopedPointer<DirectoryContentsList> newPointer (newList, canDeleteList);
-        subContentsList = newPointer;
+        subContentsList = OptionalScopedPointer<DirectoryContentsList> (newList, canDeleteList);
         newList->addChangeListener (this);
     }
 

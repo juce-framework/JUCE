@@ -303,7 +303,7 @@ private:
                 snapshotButton.setEnabled (true);
                #endif
 
-               #if JUCE_ANDROID || JUCE_IOS
+               #if JUCE_CONTENT_SHARING
                 URL url (recordingFile);
 
                 snapshotButton   .setEnabled (false);
@@ -337,7 +337,7 @@ private:
 
         lastSnapshot.setImage (image);
 
-       #if JUCE_ANDROID || JUCE_IOS
+       #if JUCE_CONTENT_SHARING
         auto imageFile = File::getSpecialLocation (File::tempDirectory).getNonexistentChildFile ("JuceCameraPhotoDemo", ".jpg");
 
         FileOutputStream stream (imageFile);

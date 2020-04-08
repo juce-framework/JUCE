@@ -41,6 +41,8 @@ namespace juce
 
     You shouldn't use this unless you really know what you are doing and
     are dealing with native HWNDs.
+
+    @tags{GUI}
 */
 class JUCE_API  ScopedDPIAwarenessDisabler
 {

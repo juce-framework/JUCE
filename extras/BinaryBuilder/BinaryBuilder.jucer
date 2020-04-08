@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="3t6YqETY1" name="BinaryBuilder" projectType="consoleapp"
-              juceFolder="../../../juce" jucerVersion="5.4.5" bundleIdentifier="com.roli.binarybuilder"
+              juceFolder="../../../juce" jucerVersion="5.4.7" bundleIdentifier="com.roli.binarybuilder"
               displaySplashScreen="0" reportAppUsage="0" companyName="ROLI Ltd."
               companyCopyright="ROLI Ltd.">
   <EXPORTFORMATS>
@@ -17,9 +17,8 @@
     </XCODE_MAC>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" vstFolder="~/SDKs/vstsdk2.4">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" targetName="BinaryBuilder" libraryPath="/usr/X11R6/lib/"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="BinaryBuilder"
-                       libraryPath="/usr/X11R6/lib/"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="BinaryBuilder"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="BinaryBuilder"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>

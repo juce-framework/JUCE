@@ -170,7 +170,7 @@ public:
     {
         auto content = fillInBasicTemplateFields (newFile, parent, templateName)
                            .replace ("%%component_class%%", className)
-                           .replace ("%%include_juce%%", CodeHelpers::createIncludeStatement (parent.project.getAppIncludeFile(), newFile));
+                           .replace ("%%include_juce%%", CodeHelpers::createIncludePathIncludeStatement (Project::getJuceSourceHFilename()));
 
         content = replaceLineFeeds (content, parent.project.getProjectLineFeed());
 

@@ -188,9 +188,9 @@ private:
 
     RangedAudioParameter& parameter;
     ListenerList<Listener> listeners;
-    std::atomic<float> unnormalisedValue{};
-    std::atomic<bool> needsUpdate { true };
-    bool listenersNeedCalling { true }, ignoreParameterChangedCallbacks { false };
+    std::atomic<float> unnormalisedValue { 0.0f };
+    std::atomic<bool> needsUpdate { true }, listenersNeedCalling { true };
+    bool ignoreParameterChangedCallbacks { false };
 };
 
 //==============================================================================
@@ -531,7 +531,7 @@ struct AttachedControlBase  : public AudioProcessorValueTreeState::Listener,
 
     AudioProcessorValueTreeState& state;
     String paramID;
-    float lastValue;
+    std::atomic<float> lastValue;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AttachedControlBase)
 };

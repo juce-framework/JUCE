@@ -24,6 +24,7 @@
   ==============================================================================
 */
 
+
 /*******************************************************************************
  The block below describes the properties of this module, and is read by
  the Projucer to automatically generate project code that uses it.
@@ -33,16 +34,16 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_gui_extra
-  vendor:           juce
-  version:          5.4.5
-  name:             JUCE extended GUI classes
-  description:      Miscellaneous GUI classes for specialised tasks.
-  website:          http://www.juce.com/juce
-  license:          GPL/Commercial
+  ID:                 juce_gui_extra
+  vendor:             juce
+  version:            5.4.7
+  name:               JUCE extended GUI classes
+  description:        Miscellaneous GUI classes for specialised tasks.
+  website:            http://www.juce.com/juce
+  license:            GPL/Commercial
 
-  dependencies:     juce_gui_basics
-  OSXFrameworks:    WebKit
+  dependencies:       juce_gui_basics
+  OSXFrameworks:      WebKit
 
  END_JUCE_MODULE_DECLARATION
 

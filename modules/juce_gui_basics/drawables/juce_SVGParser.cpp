@@ -1024,7 +1024,8 @@ private:
 
     float getStrokeWidth (const String& strokeWidth) const noexcept
     {
-        return transform.getScaleFactor() * getCoordLength (strokeWidth, viewBoxW);
+        auto transformScale = std::sqrt (std::abs (transform.getDeterminant()));
+        return transformScale * getCoordLength (strokeWidth, viewBoxW);
     }
 
     PathStrokeType getStrokeFor (const XmlPath& xml) const
@@ -1197,7 +1198,7 @@ private:
             auto linkedFile = originalFile.getParentDirectory().getChildFile (link);
 
             if (linkedFile.existsAsFile())
-                inputStream.reset (linkedFile.createInputStream());
+                inputStream = linkedFile.createInputStream();
         }
 
         if (inputStream != nullptr)

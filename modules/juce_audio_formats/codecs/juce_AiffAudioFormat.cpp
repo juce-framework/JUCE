@@ -168,10 +168,11 @@ namespace AiffFileHelpers
 
             switch (key)
             {
-                case minor:     keyString = "minor";        break;
-                case major:     keyString = "major";        break;
-                case neither:   keyString = "neither";      break;
-                case both:      keyString = "both";         break;
+                case minor:     keyString = "minor";   break;
+                case major:     keyString = "major";   break;
+                case neither:   keyString = "neither"; break;
+                case both:      keyString = "both";    break;
+                default:                               break;
             }
 
             if (keyString != nullptr)
@@ -334,7 +335,7 @@ namespace AiffFileHelpers
                     out.writeIntBigEndian (offset);
 
                     auto labelLength = jmin ((size_t) 254, label.getNumBytesAsUTF8()); // seems to need null terminator even though it's a pstring
-                    out.writeByte ((char) labelLength + 1);
+                    out.writeByte (static_cast<char> (labelLength + 1));
                     out.write (label.toUTF8(), labelLength);
                     out.writeByte (0);
 
@@ -367,7 +368,7 @@ namespace AiffFileHelpers
                     auto comment = values.getValue (prefix + "Text", String());
                     auto commentLength = jmin (comment.getNumBytesAsUTF8(), (size_t) 65534);
 
-                    out.writeShortBigEndian ((short) commentLength + 1);
+                    out.writeShortBigEndian (static_cast<short> (commentLength + 1));
                     out.write (comment.toUTF8(), commentLength);
                     out.writeByte (0);
 
@@ -975,7 +976,7 @@ AudioFormatReader* AiffAudioFormat::createReaderFor (InputStream* sourceStream, 
 
 MemoryMappedAudioFormatReader* AiffAudioFormat::createMemoryMappedReader (const File& file)
 {
-    return createMemoryMappedReader (file.createInputStream());
+    return createMemoryMappedReader (file.createInputStream().release());
 }
 
 MemoryMappedAudioFormatReader* AiffAudioFormat::createMemoryMappedReader (FileInputStream* fin)

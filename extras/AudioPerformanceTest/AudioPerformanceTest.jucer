@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="AKfc5m" name="AudioPerformanceTest" projectType="guiapp"
-              bundleIdentifier="com.juce.AudioPerformanceTest" jucerVersion="5.4.5"
+              bundleIdentifier="com.juce.AudioPerformanceTest" jucerVersion="5.4.7"
               displaySplashScreen="0" reportAppUsage="0" companyName="ROLI Ltd."
               companyCopyright="ROLI Ltd.">
   <MAINGROUP id="b1eVTe" name="AudioPerformanceTest">
@@ -70,8 +70,8 @@
     </VS2019>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" targetName="AudioPerformanceTest"/>
-        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" targetName="AudioPerformanceTest"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPerformanceTest"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="AudioPerformanceTest"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>

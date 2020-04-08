@@ -144,7 +144,7 @@ public:
         StringArray windowNames { "Plain Alert Window", "Alert Window With Warning Icon", "Alert Window With Info Icon", "Alert Window With Question Icon",
                                   "OK Cancel Alert Window", "Alert Window With Extra Components", "CalloutBox", "Thread With Progress Window",
                                   "'Load' File Browser", "'Load' File Browser With Image Preview", "'Choose Directory' File Browser", "'Save' File Browser",
-                                  "Share Text", "Share Files", "Share Images"  };
+                                  "Share Text", "Share Files", "Share Images" };
 
         // warn in case we add any windows
         jassert (windowNames.size() == numDialogs);
@@ -219,13 +219,9 @@ private:
         {
             AlertWindow::AlertIconType icon = AlertWindow::NoIcon;
 
-            switch (type)
-            {
-                case warningAlertWindow:    icon = AlertWindow::WarningIcon;    break;
-                case infoAlertWindow:       icon = AlertWindow::InfoIcon;       break;
-                case questionAlertWindow:   icon = AlertWindow::QuestionIcon;   break;
-                default: break;
-            }
+            if (type == warningAlertWindow)   icon = AlertWindow::WarningIcon;
+            if (type == infoAlertWindow)      icon = AlertWindow::InfoIcon;
+            if (type == questionAlertWindow)  icon = AlertWindow::QuestionIcon;
 
             AlertWindow::showMessageBoxAsync (icon, "This is an AlertWindow",
                                               "And this is the AlertWindow's message. Blah blah blah blah blah blah blah blah blah blah blah blah blah.",
@@ -339,7 +335,7 @@ private:
                     FileOutputStream outStream (fileToSave);
 
                     if (outStream.openedOk())
-                        if (auto inStream = std::unique_ptr<InputStream> (createAssetInputStream ("juce_icon.png")))
+                        if (auto inStream = createAssetInputStream ("juce_icon.png"))
                             outStream.writeFromInputStream (*inStream, -1);
                 }
 
@@ -419,7 +415,7 @@ private:
                 fileToSave.replaceWithText ("Make it fast!");
 
                 Array<URL> urls;
-                urls.add ({ fileToSave.getFullPathName() });
+                urls.add (URL (fileToSave));
 
                 ContentSharer::getInstance()->shareFiles (urls,
                     [] (bool success, const String& error)

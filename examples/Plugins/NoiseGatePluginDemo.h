@@ -63,8 +63,6 @@ public:
         addParameter (alpha     = new AudioParameterFloat ("alpha",     "Alpha",     0.0f, 1.0f, 0.8f));
     }
 
-    ~NoiseGate() {}
-
     //==============================================================================
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {

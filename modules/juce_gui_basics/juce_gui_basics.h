@@ -24,6 +24,7 @@
   ==============================================================================
 */
 
+
 /*******************************************************************************
  The block below describes the properties of this module, and is read by
  the Projucer to automatically generate project code that uses it.
@@ -33,18 +34,18 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_gui_basics
-  vendor:           juce
-  version:          5.4.5
-  name:             JUCE GUI core classes
-  description:      Basic user-interface components and related classes.
-  website:          http://www.juce.com/juce
-  license:          GPL/Commercial
+  ID:                 juce_gui_basics
+  vendor:             juce
+  version:            5.4.7
+  name:               JUCE GUI core classes
+  description:        Basic user-interface components and related classes.
+  website:            http://www.juce.com/juce
+  license:            GPL/Commercial
 
-  dependencies:     juce_graphics juce_data_structures
-  OSXFrameworks:    Cocoa Carbon QuartzCore
-  iOSFrameworks:    UIKit MobileCoreServices
-  linuxPackages:    x11 xinerama xext
+  dependencies:       juce_graphics juce_data_structures
+  OSXFrameworks:      Cocoa Carbon QuartzCore
+  iOSFrameworks:      UIKit MobileCoreServices
+  linuxPackages:      x11 xinerama xext
 
  END_JUCE_MODULE_DECLARATION
 
@@ -158,9 +159,7 @@ namespace juce
     class Displays;
 
     class FlexBox;
-    #if JUCE_HAS_CONSTEXPR
-     class Grid;
-    #endif
+    class Grid;
 }
 
 #include "mouse/juce_MouseCursor.h"
@@ -304,7 +303,5 @@ namespace juce
 #include "layout/juce_FlexItem.h"
 #include "layout/juce_FlexBox.h"
 
-#if JUCE_HAS_CONSTEXPR
- #include "layout/juce_GridItem.h"
- #include "layout/juce_Grid.h"
-#endif
+#include "layout/juce_GridItem.h"
+#include "layout/juce_Grid.h"

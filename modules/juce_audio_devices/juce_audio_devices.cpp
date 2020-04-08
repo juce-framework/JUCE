@@ -169,7 +169,10 @@
    #error "Oboe cannot be enabled at the same time as openSL! Please disable JUCE_USE_ANDROID_OPENSLES"
   #endif
 
-  #include <oboe/Oboe.h>
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wunused-parameter"
+   #include <oboe/Oboe.h>
+  #pragma clang diagnostic pop
  #endif
 
 #endif
@@ -231,13 +234,18 @@
  #include "native/juce_android_Audio.cpp"
  #include "native/juce_android_Midi.cpp"
 
- #if JUCE_USE_ANDROID_OPENSLES
-  #include "native/juce_android_OpenSL.cpp"
+ #if JUCE_USE_ANDROID_OPENSLES || JUCE_USE_ANDROID_OBOE
+  #include "native/juce_android_HighPerformanceAudioHelpers.h"
+
+  #if JUCE_USE_ANDROID_OPENSLES
+   #include "native/juce_android_OpenSL.cpp"
+  #endif
+
+  #if JUCE_USE_ANDROID_OBOE
+   #include "native/juce_android_Oboe.cpp"
+  #endif
  #endif
 
- #if JUCE_USE_ANDROID_OBOE
-  #include "native/juce_android_Oboe.cpp"
- #endif
 #endif
 
 #if ! JUCE_SYSTEMAUDIOVOL_IMPLEMENTED

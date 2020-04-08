@@ -338,7 +338,7 @@ bool BlowFish::apply (void* data, size_t size, void (BlowFish::*op) (uint32&, ui
 int BlowFish::pad (void* data, size_t size, size_t bufferSize) noexcept
 {
     // add padding according to https://tools.ietf.org/html/rfc2898#section-6.1.1
-    const uint8 paddingSize = 8u - (size % 8u);
+    const uint8 paddingSize = static_cast<uint8> (8u - (size % 8u));
     auto n = size + paddingSize;
 
     if (n > bufferSize)

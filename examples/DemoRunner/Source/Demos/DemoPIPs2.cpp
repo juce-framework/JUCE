@@ -24,7 +24,7 @@
   ==============================================================================
 */
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 #include "../../../Assets/DemoUtilities.h"
 #include "JUCEDemos.h"
 
@@ -46,9 +46,7 @@
 #include "../../../GUI/FlexBoxDemo.h"
 #include "../../../GUI/FontsDemo.h"
 #include "../../../GUI/GraphicsDemo.h"
-#if JUCE_HAS_CONSTEXPR
- #include "../../../GUI/GridDemo.h"
-#endif
+#include "../../../GUI/GridDemo.h"
 #include "../../../GUI/ImagesDemo.h"
 #include "../../../GUI/KeyMappingsDemo.h"
 #include "../../../GUI/LookAndFeelDemo.h"
@@ -85,9 +83,7 @@ void registerDemos_Two() noexcept
     REGISTER_DEMO (FlexBoxDemo,               GUI, false)
     REGISTER_DEMO (FontsDemo,                 GUI, false)
     REGISTER_DEMO (GraphicsDemo,              GUI, false)
-   #if JUCE_HAS_CONSTEXPR
     REGISTER_DEMO (GridDemo,                  GUI, false)
-   #endif
     REGISTER_DEMO (ImagesDemo,                GUI, false)
     REGISTER_DEMO (KeyMappingsDemo,           GUI, false)
     REGISTER_DEMO (LookAndFeelDemo,           GUI, false)

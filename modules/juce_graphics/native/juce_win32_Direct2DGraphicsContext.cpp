@@ -580,7 +580,7 @@ void Direct2DLowLevelGraphicsContext::addTransform (const AffineTransform& trans
 
 float Direct2DLowLevelGraphicsContext::getPhysicalPixelScaleFactor()
 {
-    return currentState->transform.getScaleFactor();
+    return std::sqrt (std::abs (currentState->transform.getDeterminant()));
 }
 
 bool Direct2DLowLevelGraphicsContext::clipToRectangle (const Rectangle<int>& r)

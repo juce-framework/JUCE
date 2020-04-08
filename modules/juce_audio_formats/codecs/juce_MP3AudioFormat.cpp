@@ -1562,7 +1562,8 @@ struct MP3Stream
         }
 
         frameIndex = jmin (frameIndex & ~(storedStartPosInterval - 1),
-                           frameStreamPositions.size() * storedStartPosInterval - 1);
+                           (frameStreamPositions.size() - 1) * storedStartPosInterval);
+
         stream.setPosition (frameStreamPositions.getUnchecked (frameIndex / storedStartPosInterval));
         currentFrameIndex = frameIndex;
         reset();
@@ -1878,6 +1879,9 @@ private:
                             *in0++ = *in1++;
                     }
                     break;
+
+                    default:
+                        break;
                 }
             }
 

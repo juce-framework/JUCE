@@ -110,7 +110,7 @@ private:
 
     std::function<void(bool, String)> callback;
 
-  #if JUCE_IOS || JUCE_ANDROID
+  #if JUCE_CONTENT_SHARING
     struct Pimpl
     {
         virtual ~Pimpl() {}

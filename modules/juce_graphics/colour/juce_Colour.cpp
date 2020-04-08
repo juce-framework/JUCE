@@ -145,7 +145,10 @@ bool Colour::operator!= (const Colour& other) const noexcept    { return argb.ge
 
 //==============================================================================
 Colour::Colour (const uint32 col) noexcept
-    : argb ((col >> 24) & 0xff, (col >> 16) & 0xff, (col >> 8) & 0xff, col & 0xff)
+    : argb (static_cast<uint8> ((col >> 24) & 0xff),
+            static_cast<uint8> ((col >> 16) & 0xff),
+            static_cast<uint8> ((col >> 8) & 0xff),
+            static_cast<uint8> (col & 0xff))
 {
 }
 

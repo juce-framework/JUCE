@@ -492,9 +492,9 @@ inline std::unique_ptr<AudioFormatReader> makeAudioFormatReader (AudioFormatMana
                                                                  const void* sampleData,
                                                                  size_t dataSize)
 {
-    return std::unique_ptr<AudioFormatReader> (manager.createReaderFor (new MemoryInputStream (sampleData,
-                                                                                               dataSize,
-                                                                                               false)));
+    return std::unique_ptr<AudioFormatReader> (manager.createReaderFor (std::make_unique<MemoryInputStream> (sampleData,
+                                                                                                             dataSize,
+                                                                                                             false)));
 }
 
 inline std::unique_ptr<AudioFormatReader> makeAudioFormatReader (AudioFormatManager& manager,
@@ -516,9 +516,9 @@ public:
 class MemoryAudioFormatReaderFactory  : public AudioFormatReaderFactory
 {
 public:
-    MemoryAudioFormatReaderFactory (const void* sampleData, size_t dataSize)
-        : sampleData (sampleData),
-          dataSize (dataSize)
+    MemoryAudioFormatReaderFactory (const void* sampleDataIn, size_t dataSizeIn)
+        : sampleData (sampleDataIn),
+          dataSize (dataSizeIn)
     {}
 
     std::unique_ptr<AudioFormatReader> make (AudioFormatManager&manager ) const override
@@ -540,8 +540,8 @@ private:
 class FileAudioFormatReaderFactory  : public AudioFormatReaderFactory
 {
 public:
-    explicit FileAudioFormatReaderFactory (File file)
-        : file (std::move (file))
+    explicit FileAudioFormatReaderFactory (File fileIn)
+        : file (std::move (fileIn))
     {}
 
     std::unique_ptr<AudioFormatReader> make (AudioFormatManager& manager) const override
@@ -925,12 +925,12 @@ public:
         virtual void loopPointsSecondsChanged (Range<double>) {}
     };
 
-    explicit DataModel (AudioFormatManager& audioFormatManager)
-        : DataModel (audioFormatManager, ValueTree (IDs::DATA_MODEL))
+    explicit DataModel (AudioFormatManager& audioFormatManagerIn)
+        : DataModel (audioFormatManagerIn, ValueTree (IDs::DATA_MODEL))
     {}
 
-    DataModel (AudioFormatManager& audioFormatManager, const ValueTree& vt)
-        : audioFormatManager (&audioFormatManager),
+    DataModel (AudioFormatManager& audioFormatManagerIn, const ValueTree& vt)
+        : audioFormatManager (&audioFormatManagerIn),
           valueTree (vt),
           sampleReader      (valueTree, IDs::sampleReader,      nullptr),
           centreFrequencyHz (valueTree, IDs::centreFrequencyHz, nullptr),
@@ -1415,13 +1415,13 @@ public:
     using MouseCallback = std::function<void (LoopPointMarker&, const MouseEvent&)>;
 
     LoopPointMarker (String marker,
-                     MouseCallback onMouseDown,
-                     MouseCallback onMouseDrag,
-                     MouseCallback onMouseUp)
+                     MouseCallback onMouseDownIn,
+                     MouseCallback onMouseDragIn,
+                     MouseCallback onMouseUpIn)
         : text (std::move (marker)),
-          onMouseDown (move (onMouseDown)),
-          onMouseDrag (move (onMouseDrag)),
-          onMouseUp (move (onMouseUp))
+          onMouseDown (std::move (onMouseDownIn)),
+          onMouseDrag (std::move (onMouseDragIn)),
+          onMouseUp (std::move (onMouseUpIn))
     {
         setMouseCursor (MouseCursor::LeftRightResizeCursor);
     }
@@ -1585,7 +1585,7 @@ class LoopPointsOverlay  : public Component,
 public:
     LoopPointsOverlay (const DataModel& dModel,
                        const VisibleRangeDataModel& vModel,
-                       UndoManager& undoManager)
+                       UndoManager& undoManagerIn)
         : dataModel (dModel),
           visibleRange (vModel),
           beginMarker ("B",
@@ -1596,7 +1596,7 @@ public:
                        [this] (LoopPointMarker& m, const MouseEvent& e) { this->loopPointMouseDown (m, e); },
                        [this] (LoopPointMarker& m, const MouseEvent& e) { this->loopPointDragged   (m, e); },
                        [this] (LoopPointMarker& m, const MouseEvent& e) { this->loopPointMouseUp   (m, e); }),
-          undoManager (&undoManager)
+          undoManager (&undoManagerIn)
     {
         dataModel   .addListener (*this);
         visibleRange.addListener (*this);
@@ -1686,9 +1686,9 @@ class PlaybackPositionOverlay  : public Component,
 public:
     using Provider = std::function<std::vector<float>()>;
     PlaybackPositionOverlay (const VisibleRangeDataModel& model,
-                             Provider provider)
+                             Provider providerIn)
         : visibleRange (model),
-          provider (move (provider))
+          provider (std::move (providerIn))
     {
         visibleRange.addListener (*this);
         startTimer (16);
@@ -1853,7 +1853,7 @@ private:
         loopPoints.setVisible (value != LoopMode::none);
     }
 
-    void sampleReaderChanged (std::shared_ptr<AudioFormatReaderFactory> value) override
+    void sampleReaderChanged (std::shared_ptr<AudioFormatReaderFactory>) override
     {
         auto lengthInSeconds = dataModel.getSampleLengthSeconds();
         visibleRange.setTotalRange   (Range<double> (0, lengthInSeconds), nullptr);
@@ -2028,45 +2028,15 @@ struct ProcessorState
 };
 
 //==============================================================================
-// We store the current sampler sound in a shared_ptr. Although we never
-// call mutating member functions on this shared_ptr, we do read from it on
-// both the audio and gui threads. Such concurrent reads should be safe
-// without using atomic methods, but we use a tiny wrapper to enforce atomic
-// accesses anyway - if nothing else, this wrapper enforces and documents that
-// we never mutate the shared_ptr in a way which could cause a data race.
-template <typename Contents>
-class AtomicSharedPtr final
-{
-public:
-    AtomicSharedPtr() = default;
-    explicit AtomicSharedPtr (std::shared_ptr<Contents> contents)
-        : contents (move (contents))
-    {}
-
-    AtomicSharedPtr (const AtomicSharedPtr& other) = delete;
-    AtomicSharedPtr& operator= (const AtomicSharedPtr& other) = delete;
-
-    std::shared_ptr<Contents> load() const
-    {
-        return atomic_load (&contents);
-    }
-
-private:
-    std::shared_ptr<Contents> contents;
-};
-
-//==============================================================================
 class SamplerAudioProcessor  : public AudioProcessor
 {
 public:
     SamplerAudioProcessor()
         : AudioProcessor (BusesProperties().withOutput ("Output", AudioChannelSet::stereo(), true))
     {
-        if (auto* asset = createAssetInputStream ("cello.wav"))
+        if (auto inputStream = createAssetInputStream ("cello.wav"))
         {
-            std::unique_ptr<InputStream> inputStream (asset);
             inputStream->readIntoMemoryBlock (mb);
-
             readerFactory.reset (new MemoryAudioFormatReaderFactory (mb.getData(), mb.getSize()));
         }
 
@@ -2074,7 +2044,7 @@ public:
         AudioFormatManager manager;
         manager.registerBasicFormats();
         auto reader = readerFactory->make (manager);
-        auto sound = samplerSound.load();
+        auto sound = samplerSound;
         auto sample = std::unique_ptr<Sample> (new Sample (*reader, 10.0));
         auto lengthInSeconds = sample->getLength() / sample->getSampleRate();
         sound->setLoopPointsInSeconds ({lengthInSeconds * 0.1, lengthInSeconds * 0.9 });
@@ -2115,7 +2085,7 @@ public:
         state.mpeZoneLayout        = synthesiser.getZoneLayout();
         state.readerFactory        = readerFactory == nullptr ? nullptr : readerFactory->clone();
 
-        auto sound = samplerSound.load();
+        auto sound = samplerSound;
         state.loopPointsSeconds = sound->getLoopPointsInSeconds();
         state.centreFrequencyHz = sound->getCentreFrequencyInHz();
         state.loopMode          = sound->getLoopMode();
@@ -2170,7 +2140,7 @@ public:
 
         synthesiser.renderNextBlock (buffer, midiMessages, 0, buffer.getNumSamples());
 
-        auto loadedSamplerSound = samplerSound.load();
+        auto loadedSamplerSound = samplerSound;
 
         if (loadedSamplerSound->getSample() == nullptr)
             return;
@@ -2197,18 +2167,18 @@ public:
         {
         public:
             SetSampleCommand (std::unique_ptr<AudioFormatReaderFactory> r,
-                              std::unique_ptr<Sample> sample,
-                              std::vector<std::unique_ptr<MPESamplerVoice>> newVoices)
-                : readerFactory (move (r)),
-                  sample (move (sample)),
-                  newVoices (move (newVoices))
+                              std::unique_ptr<Sample> sampleIn,
+                              std::vector<std::unique_ptr<MPESamplerVoice>> newVoicesIn)
+                : readerFactory (std::move (r)),
+                  sample (std::move (sampleIn)),
+                  newVoices (std::move (newVoicesIn))
             {}
 
             void operator() (SamplerAudioProcessor& proc)
             {
                 proc.readerFactory = move (readerFactory);
-                auto sound = proc.samplerSound.load();
-                sound->setSample (move (sample));
+                auto sound = proc.samplerSound;
+                sound->setSample (std::move (sample));
                 auto numberOfVoices = proc.synthesiser.getNumVoices();
                 proc.synthesiser.clearVoices();
 
@@ -2226,7 +2196,7 @@ public:
 
         // Note that all allocation happens here, on the main message thread. Then,
         // we transfer ownership across to the audio thread.
-        auto loadedSamplerSound = samplerSound.load();
+        auto loadedSamplerSound = samplerSound;
         std::vector<std::unique_ptr<MPESamplerVoice>> newSamplerVoices;
         newSamplerVoices.reserve (maxVoices);
 
@@ -2252,7 +2222,7 @@ public:
     {
         pushCommand ([centreFrequency] (SamplerAudioProcessor& proc)
                      {
-                         auto loaded = proc.samplerSound.load();
+                         auto loaded = proc.samplerSound;
                          if (loaded != nullptr)
                              loaded->setCentreFrequencyInHz (centreFrequency);
                      });
@@ -2262,7 +2232,7 @@ public:
     {
         pushCommand ([loopMode] (SamplerAudioProcessor& proc)
                      {
-                         auto loaded = proc.samplerSound.load();
+                         auto loaded = proc.samplerSound;
                          if (loaded != nullptr)
                              loaded->setLoopMode (loopMode);
                      });
@@ -2272,7 +2242,7 @@ public:
     {
         pushCommand ([loopPoints] (SamplerAudioProcessor& proc)
                      {
-                         auto loaded = proc.samplerSound.load();
+                         auto loaded = proc.samplerSound;
                          if (loaded != nullptr)
                              loaded->setLoopPointsInSeconds (loopPoints);
                      });
@@ -2316,8 +2286,8 @@ public:
         class SetNumVoicesCommand
         {
         public:
-            SetNumVoicesCommand (std::vector<std::unique_ptr<MPESamplerVoice>> newVoices)
-                : newVoices (move (newVoices))
+            SetNumVoicesCommand (std::vector<std::unique_ptr<MPESamplerVoice>> newVoicesIn)
+                : newVoices (move (newVoicesIn))
             {}
 
             void operator() (SamplerAudioProcessor& proc)
@@ -2334,7 +2304,7 @@ public:
         };
 
         numberOfVoices = std::min (maxVoices, numberOfVoices);
-        auto loadedSamplerSound = samplerSound.load();
+        auto loadedSamplerSound = samplerSound;
         std::vector<std::unique_ptr<MPESamplerVoice>> newSamplerVoices;
         newSamplerVoices.reserve ((size_t) numberOfVoices);
 
@@ -2363,7 +2333,7 @@ private:
     public:
         SamplerAudioProcessorEditor (SamplerAudioProcessor& p, ProcessorState state)
             : AudioProcessorEditor (&p),
-              processor (p),
+              samplerAudioProcessor (p),
               mainSamplerView (dataModel,
                                [&p]
                                {
@@ -2453,33 +2423,33 @@ private:
 
         void sampleReaderChanged (std::shared_ptr<AudioFormatReaderFactory> value) override
         {
-            processor.setSample (value == nullptr ? nullptr : value->clone(),
-                                 dataModel.getAudioFormatManager());
+            samplerAudioProcessor.setSample (value == nullptr ? nullptr : value->clone(),
+                                             dataModel.getAudioFormatManager());
         }
 
         void centreFrequencyHzChanged (double value) override
         {
-            processor.setCentreFrequency (value);
+            samplerAudioProcessor.setCentreFrequency (value);
         }
 
         void loopPointsSecondsChanged (Range<double> value) override
         {
-            processor.setLoopPoints (value);
+            samplerAudioProcessor.setLoopPoints (value);
         }
 
         void loopModeChanged (LoopMode value) override
         {
-            processor.setLoopMode (value);
+            samplerAudioProcessor.setLoopMode (value);
         }
 
         void synthVoicesChanged (int value) override
         {
-            processor.setNumberOfVoices (value);
+            samplerAudioProcessor.setNumberOfVoices (value);
         }
 
         void voiceStealingEnabledChanged (bool value) override
         {
-            processor.setVoiceStealingEnabled (value);
+            samplerAudioProcessor.setVoiceStealingEnabled (value);
         }
 
         void legacyModeEnabledChanged (bool value) override
@@ -2512,17 +2482,17 @@ private:
 
         void setProcessorLegacyMode()
         {
-            processor.setLegacyModeEnabled (mpeSettings.getLegacyPitchbendRange(),
-                                            Range<int> (mpeSettings.getLegacyFirstChannel(),
-                                            mpeSettings.getLegacyLastChannel()));
+            samplerAudioProcessor.setLegacyModeEnabled (mpeSettings.getLegacyPitchbendRange(),
+                                                        Range<int> (mpeSettings.getLegacyFirstChannel(),
+                                                        mpeSettings.getLegacyLastChannel()));
         }
 
         void setProcessorMPEMode()
         {
-            processor.setMPEZoneLayout (mpeSettings.getMPEZoneLayout());
+            samplerAudioProcessor.setMPEZoneLayout (mpeSettings.getMPEZoneLayout());
         }
 
-        SamplerAudioProcessor& processor;
+        SamplerAudioProcessor& samplerAudioProcessor;
         AudioFormatManager formatManager;
         DataModel dataModel { formatManager };
         UndoManager undoManager;
@@ -2611,7 +2581,7 @@ private:
 
     MemoryBlock mb;
     std::unique_ptr<AudioFormatReaderFactory> readerFactory;
-    AtomicSharedPtr<MPESamplerSound> samplerSound { std::make_shared<MPESamplerSound>() };
+    std::shared_ptr<MPESamplerSound> samplerSound = std::make_shared<MPESamplerSound>();
     MPESynthesiser synthesiser;
 
     // This mutex is used to ensure we don't modify the processor state during

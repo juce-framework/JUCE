@@ -6,6 +6,55 @@ Develop
 
 Change
 ------
+The Windows DPI handling in the VST wrapper and hosting code has been
+refactored to be more stable.
+
+Possible Issues
+---------------
+The new code uses a top-level AffineTransform to scale the JUCE editor window
+instead of native methods. Therefore any AudioProcessorEditors which have their
+own AffineTransform applied will no longer work correctly.
+
+Workaround
+----------
+If you are using an AffineTransform to scale the entire plug-in window then
+consider using Desktop::setGlobalScaleFactor() instead, or, for applying other
+transforms, consider putting the component you want to transform in a child of
+the editor and transform that instead.
+
+Rationale
+---------
+The old code had some bugs when using OpenGL and when moving between monitors
+with different scale factors. The new code should fix these and DPI-aware
+plug-ins will scale correctly.
+
+
+Change
+------
+Relative Xcode subproject paths specified in the Projucer are now relative to
+the build directory rather than the project directory.
+
+Possible Issues
+---------------
+After being re-saved in the Projucer existing Xcode projects will fail to find
+any subprojects specified using a relative path.
+
+Workaround
+----------
+Update the subproject path in the Projucer.
+
+Rationale
+---------
+Most other Xcode specific paths are specified reltive to the build directory.
+This change brings the Xcode subproject path in line with the rest of the
+configuration.
+
+
+Version 5.4.6
+=============
+
+Change
+------
 AudioProcessorValueTreeState::getRawParameterValue now returns a
 std::atomic<float>* instead of a float*.
 
@@ -77,6 +126,28 @@ state.
 
 Version 5.4.5
 =============
+
+Change
+------
+The alignment of text rendered on macOS using CoreGraphics may have shifted
+slightly, depending on the font you have used. The default macOS font has
+shifted downwards.
+
+Possible Issues
+---------------
+Meticulously aligned text components of a GUI may now be misaligned.
+
+Workaround
+----------
+Use a custom LookAndFeel to change the location where text is drawn, or use a
+different font that matches the previous alignment of your original font.
+
+Rationale
+---------
+This was an unintentional change resulting from moving away from a deprecated
+macOS text API. The new alignment is consistent with other rendering engines
+(web browsers and text editors) and the software renderer.
+
 
 Change
 ------

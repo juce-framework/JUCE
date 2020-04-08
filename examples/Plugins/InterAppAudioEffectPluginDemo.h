@@ -157,8 +157,6 @@ public:
     {
     }
 
-    ~IAAEffectProcessor() {}
-
     //==============================================================================
     void prepareToPlay (double, int) override
     {
@@ -284,11 +282,11 @@ private:
         IAAEffectEditor (IAAEffectProcessor& p,
                          AudioProcessorValueTreeState& vts)
             : AudioProcessorEditor (p),
-              processor (p),
+              iaaEffectProcessor (p),
               parameters (vts)
         {
             // Register for meter value updates.
-            processor.addMeterListener (*this);
+            iaaEffectProcessor.addMeterListener (*this);
 
             gainSlider.setSliderStyle (Slider::SliderStyle::LinearVertical);
             gainSlider.setTextBoxStyle (Slider::TextEntryBoxPosition::TextBoxAbove, false, 60, 20);
@@ -310,7 +308,7 @@ private:
             rewindButton.onClick = [this]
             {
                 if (transportControllable())
-                    processor.getPlayHead()->transportRewind();
+                    iaaEffectProcessor.getPlayHead()->transportRewind();
             };
             addChildComponent (rewindButton);
 
@@ -320,7 +318,7 @@ private:
             playButton.onClick = [this]
             {
                 if (transportControllable())
-                    processor.getPlayHead()->transportPlay (! lastPosInfo.isPlaying);
+                    iaaEffectProcessor.getPlayHead()->transportPlay (! lastPosInfo.isPlaying);
             };
             addChildComponent (playButton);
 
@@ -330,7 +328,7 @@ private:
             recordButton.onClick = [this]
             {
                 if (transportControllable())
-                    processor.getPlayHead()->transportRecord (! lastPosInfo.isRecording);
+                    iaaEffectProcessor.getPlayHead()->transportRecord (! lastPosInfo.isRecording);
             };
             addChildComponent (recordButton);
 
@@ -359,9 +357,9 @@ private:
             startTimerHz (60);
         }
 
-        ~IAAEffectEditor()
+        ~IAAEffectEditor() override
         {
-            processor.removeMeterListener (*this);
+            iaaEffectProcessor.removeMeterListener (*this);
         }
 
         //==============================================================================
@@ -411,7 +409,7 @@ private:
         //==============================================================================
         void timerCallback () override
         {
-            auto timeInfoSuccess = processor.updateCurrentTimeInfoFromHost (lastPosInfo);
+            auto timeInfoSuccess = iaaEffectProcessor.updateCurrentTimeInfoFromHost (lastPosInfo);
             transportText.setVisible (timeInfoSuccess);
 
             if (timeInfoSuccess)
@@ -425,7 +423,7 @@ private:
         //==============================================================================
         bool transportControllable()
         {
-            auto playHead = processor.getPlayHead();
+            auto playHead = iaaEffectProcessor.getPlayHead();
             return playHead != nullptr && playHead->canControlTransport();
         }
 
@@ -481,8 +479,8 @@ private:
 
         void updateTransportButtonsDisplay()
         {
-            auto visible = processor.getPlayHead() != nullptr
-                        && processor.getPlayHead()->canControlTransport();
+            auto visible = iaaEffectProcessor.getPlayHead() != nullptr
+                        && iaaEffectProcessor.getPlayHead()->canControlTransport();
 
             if (rewindButton.isVisible() != visible)
             {
@@ -524,7 +522,7 @@ private:
             }
         }
 
-        IAAEffectProcessor& processor;
+        IAAEffectProcessor& iaaEffectProcessor;
         AudioProcessorValueTreeState& parameters;
 
         const int buttonSize = 30;
@@ -549,7 +547,6 @@ private:
     //==============================================================================
     AudioProcessorValueTreeState parameters;
     float previousGain = 0.0f;
-    std::array<float, 2> meterValues = { { 0, 0 } };
 
     // This keeps a copy of the last set of timing info that was acquired during an
     // audio callback - the UI component will display this.

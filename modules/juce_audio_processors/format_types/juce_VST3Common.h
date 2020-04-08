@@ -206,6 +206,29 @@ static inline Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set
 
         case AudioChannelSet::discreteChannel0:  return Steinberg::Vst::kSpeakerM;
 
+        case AudioChannelSet::ambisonicACN16:
+        case AudioChannelSet::ambisonicACN17:
+        case AudioChannelSet::ambisonicACN18:
+        case AudioChannelSet::ambisonicACN19:
+        case AudioChannelSet::ambisonicACN20:
+        case AudioChannelSet::ambisonicACN21:
+        case AudioChannelSet::ambisonicACN22:
+        case AudioChannelSet::ambisonicACN23:
+        case AudioChannelSet::ambisonicACN24:
+        case AudioChannelSet::ambisonicACN25:
+        case AudioChannelSet::ambisonicACN26:
+        case AudioChannelSet::ambisonicACN27:
+        case AudioChannelSet::ambisonicACN28:
+        case AudioChannelSet::ambisonicACN29:
+        case AudioChannelSet::ambisonicACN30:
+        case AudioChannelSet::ambisonicACN31:
+        case AudioChannelSet::ambisonicACN32:
+        case AudioChannelSet::ambisonicACN33:
+        case AudioChannelSet::ambisonicACN34:
+        case AudioChannelSet::ambisonicACN35:
+        case AudioChannelSet::proximityLeft:
+        case AudioChannelSet::proximityRight:
+        case AudioChannelSet::unknown:
         default:
             break;
     }

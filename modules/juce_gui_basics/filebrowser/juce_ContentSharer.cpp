@@ -27,7 +27,7 @@
 namespace juce
 {
 
-#if JUCE_IOS || JUCE_ANDROID
+#if JUCE_CONTENT_SHARING
 //==============================================================================
 class ContentSharer::PrepareImagesThread    : private Thread
 {
@@ -154,7 +154,7 @@ ContentSharer::~ContentSharer() { clearSingletonInstance(); }
 void ContentSharer::shareFiles (const Array<URL>& files,
                                 std::function<void(bool, const String&)> callbackToUse)
 {
-  #if JUCE_IOS || JUCE_ANDROID
+  #if JUCE_CONTENT_SHARING
     startNewShare (callbackToUse);
     pimpl->shareFiles (files);
   #else
@@ -168,7 +168,7 @@ void ContentSharer::shareFiles (const Array<URL>& files,
   #endif
 }
 
-#if JUCE_IOS || JUCE_ANDROID
+#if JUCE_CONTENT_SHARING
 void ContentSharer::startNewShare (std::function<void(bool, const String&)> callbackToUse)
 {
     // You should not start another sharing operation before the previous one is finished.
@@ -192,7 +192,7 @@ void ContentSharer::startNewShare (std::function<void(bool, const String&)> call
 void ContentSharer::shareText (const String& text,
                                std::function<void(bool, const String&)> callbackToUse)
 {
-  #if JUCE_IOS || JUCE_ANDROID
+  #if JUCE_CONTENT_SHARING
     startNewShare (callbackToUse);
     pimpl->shareText (text);
   #else
@@ -210,7 +210,7 @@ void ContentSharer::shareImages (const Array<Image>& images,
                                  std::function<void(bool, const String&)> callbackToUse,
                                  ImageFileFormat* imageFileFormatToUse)
 {
-  #if JUCE_IOS || JUCE_ANDROID
+  #if JUCE_CONTENT_SHARING
     startNewShare (callbackToUse);
     prepareImagesThread.reset (new PrepareImagesThread (*this, images, imageFileFormatToUse));
   #else
@@ -224,7 +224,7 @@ void ContentSharer::shareImages (const Array<Image>& images,
   #endif
 }
 
-#if JUCE_IOS || JUCE_ANDROID
+#if JUCE_CONTENT_SHARING
 void ContentSharer::filesToSharePrepared()
 {
     Array<URL> urls;
@@ -242,7 +242,7 @@ void ContentSharer::filesToSharePrepared()
 void ContentSharer::shareData (const MemoryBlock& mb,
                                std::function<void(bool, const String&)> callbackToUse)
 {
-  #if JUCE_IOS || JUCE_ANDROID
+  #if JUCE_CONTENT_SHARING
     startNewShare (callbackToUse);
     prepareDataThread.reset (new PrepareDataThread (*this, mb));
   #else
@@ -262,7 +262,7 @@ void ContentSharer::sharingFinished (bool succeeded, const String& errorDescript
 
     String error (errorDescription);
 
-  #if JUCE_IOS || JUCE_ANDROID
+  #if JUCE_CONTENT_SHARING
     pimpl.reset();
   #endif
 

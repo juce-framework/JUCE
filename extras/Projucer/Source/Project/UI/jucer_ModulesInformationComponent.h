@@ -35,7 +35,7 @@ class ModulesInformationComponent  : public Component,
 public:
     ModulesInformationComponent (Project& p)
         : project (p),
-          modulesValueTree (p.getEnabledModules().state)
+          modulesValueTree (project.getEnabledModules().getState())
     {
         listHeader = new ListBoxHeader ( { "Module", "Version", "Make Local Copy", "Paths" },
                                         { 0.25f, 0.2f, 0.2f, 0.35f } );
@@ -135,9 +135,8 @@ public:
         g.drawFittedText (version, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (1) * width)), Justification::centredLeft, 1);
 
         //==============================================================================
-        auto copyLocally = project.getEnabledModules().shouldCopyModuleFilesLocally (moduleID).getValue() ? "Yes" : "No";
-
-        g.drawFittedText (copyLocally, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (2) * width)), Justification::centredLeft, 1);
+        g.drawFittedText (String (project.getEnabledModules().shouldCopyModuleFilesLocally (moduleID) ? "Yes" : "No"),
+                          bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (2) * width)), Justification::centredLeft, 1);
 
         //==============================================================================
         String pathText;
@@ -215,33 +214,41 @@ private:
         repaint();
     }
 
+    static void setLocalCopyModeForAllModules (Project& project, bool copyLocally)
+    {
+        auto& modules = project.getEnabledModules();
+
+        for (auto i = modules.getNumModules(); --i >= 0;)
+           modules.shouldCopyModuleFilesLocallyValue (modules.getModuleID (i)) = copyLocally;
+    }
+
     void showCopyModeMenu()
     {
         PopupMenu m;
 
         m.addItem (PopupMenu::Item ("Set all modules to copy locally")
-                     .setAction ([&] { project.getEnabledModules().setLocalCopyModeForAllModules (true); }));
+                     .setAction ([&] { setLocalCopyModeForAllModules (project, true); }));
 
         m.addItem (PopupMenu::Item ("Set all modules to not copy locally")
-                     .setAction ([&] { project.getEnabledModules().setLocalCopyModeForAllModules (false); }));
+                     .setAction ([&] { setLocalCopyModeForAllModules (project, false); }));
 
         m.showMenuAsync (PopupMenu::Options().withTargetComponent (setCopyModeButton));
     }
 
     static void setAllModulesToUseGlobalPaths (Project& project, bool useGlobal)
     {
-        auto& moduleList = project.getEnabledModules();
+        auto& modules = project.getEnabledModules();
 
-        for (auto id : moduleList.getAllModules())
-            moduleList.getShouldUseGlobalPathValue (id).setValue (useGlobal);
+        for (auto moduleID : modules.getAllModules())
+            modules.shouldUseGlobalPathValue (moduleID) = useGlobal;
     }
 
     static void setSelectedModulesToUseGlobalPaths (Project& project, SparseSet<int> selected, bool useGlobal)
     {
-        auto& moduleList = project.getEnabledModules();
+        auto& modules = project.getEnabledModules();
 
         for (int i = 0; i < selected.size(); ++i)
-            moduleList.getShouldUseGlobalPathValue (moduleList.getModuleID (selected[i])).setValue (useGlobal);
+            modules.shouldUseGlobalPathValue (modules.getModuleID (selected[i])) = useGlobal;
     }
 
     void showGlobalPathsMenu()

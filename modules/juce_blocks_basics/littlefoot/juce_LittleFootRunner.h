@@ -238,7 +238,7 @@ struct Program
         auto n = (uint16) size;
 
         for (uint32 i = 2; i < size; ++i)
-            n += (n * 2) + programStart[i];
+            n = static_cast<uint16> (n + (n * 2) + programStart[i]);
 
         return n;
     }
@@ -336,7 +336,8 @@ struct Program
            #undef LITTLEFOOT_OP_INT16
            #undef LITTLEFOOT_OP_INT32
 
-            default:  s << "???"; break;
+            case OpCode::endOfOpcodes:
+            default:  s << "???";      break;
         }
 
         return s;
@@ -370,8 +371,11 @@ struct Program
            #undef LITTLEFOOT_OP_INT16
            #undef LITTLEFOOT_OP_INT32
 
-            default:  jassertfalse; return 0;
+            case OpCode::endOfOpcodes:
+            default: jassertfalse;     break;
         }
+
+        return 0;
     }
 
     //==============================================================================
@@ -676,6 +680,7 @@ struct Runner
                 switch (op)
                 {
                     LITTLEFOOT_OPCODES (LITTLEFOOT_PERFORM_OP, LITTLEFOOT_PERFORM_OP_INT8, LITTLEFOOT_PERFORM_OP_INT16, LITTLEFOOT_PERFORM_OP_INT32)
+                    case OpCode::endOfOpcodes:
                     default:  setError (ErrorCode::unknownInstruction); break;
                 }
 

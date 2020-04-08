@@ -2,11 +2,12 @@
 
 <JUCERPROJECT id="NTe0XB0ij" name="AudioPluginHost" projectType="guiapp" version="1.0.0"
               juceFolder="../../../juce" bundleIdentifier="com.roli.juce.pluginhost"
-              jucerVersion="5.4.5" companyName="ROLI Ltd." displaySplashScreen="0"
+              jucerVersion="5.4.7" companyName="ROLI Ltd." displaySplashScreen="0"
               reportAppUsage="0" companyCopyright="ROLI Ltd.">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" rtasFolder="~/SDKs/PT_80_SDK" objCExtraSuffix="M73TRi"
-               smallIcon="c97aUr" bigIcon="c97aUr" microphonePermissionNeeded="1">
+               smallIcon="c97aUr" bigIcon="c97aUr" microphonePermissionNeeded="1"
+               sendAppleEventsPermissionNeeded="1" sendAppleEventsPermissionText="This is required for some third-party plug-ins to function correctly.">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPluginHost" recommendedWarnings="LLVM"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="AudioPluginHost"
@@ -31,9 +32,8 @@
     </XCODE_MAC>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" smallIcon="c97aUr" bigIcon="c97aUr">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPluginHost" libraryPath="/usr/X11R6/lib/"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="AudioPluginHost"
-                       libraryPath="/usr/X11R6/lib/"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPluginHost"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="AudioPluginHost"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="../../modules"/>
@@ -205,10 +205,10 @@
       <FILE id="c97aUr" name="JUCEAppIcon.png" compile="0" resource="1" file="Source/JUCEAppIcon.png"/>
     </GROUP>
   </MAINGROUP>
-  <JUCEOPTIONS JUCE_WASAPI="1" JUCE_DIRECTSOUND="1" JUCE_ALSA="1" JUCE_QUICKTIME="disabled"
-               JUCE_USE_FLAC="0" JUCE_USE_OGGVORBIS="0" JUCE_USE_CDBURNER="0"
-               JUCE_USE_CDREADER="0" JUCE_USE_CAMERA="0" JUCE_PLUGINHOST_AU="1"
-               JUCE_WEB_BROWSER="0" JUCE_PLUGINHOST_VST3="1" JUCE_PLUGINHOST_LADSPA="1"/>
+  <JUCEOPTIONS JUCE_WASAPI="1" JUCE_DIRECTSOUND="1" JUCE_ALSA="1" JUCE_USE_FLAC="0"
+               JUCE_USE_OGGVORBIS="0" JUCE_USE_CDBURNER="0" JUCE_USE_CDREADER="0"
+               JUCE_USE_CAMERA="0" JUCE_PLUGINHOST_AU="1" JUCE_WEB_BROWSER="0"
+               JUCE_PLUGINHOST_VST3="1" JUCE_PLUGINHOST_LADSPA="1"/>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1"/>
     <MODULE id="juce_audio_devices" showAllCode="1"/>

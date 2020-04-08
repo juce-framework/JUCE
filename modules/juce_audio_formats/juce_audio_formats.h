@@ -24,6 +24,7 @@
   ==============================================================================
 */
 
+
 /*******************************************************************************
  The block below describes the properties of this module, and is read by
  the Projucer to automatically generate project code that uses it.
@@ -33,17 +34,17 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_audio_formats
-  vendor:           juce
-  version:          5.4.5
-  name:             JUCE audio file format codecs
-  description:      Classes for reading and writing various audio file formats.
-  website:          http://www.juce.com/juce
-  license:          GPL/Commercial
+  ID:                 juce_audio_formats
+  vendor:             juce
+  version:            5.4.7
+  name:               JUCE audio file format codecs
+  description:        Classes for reading and writing various audio file formats.
+  website:            http://www.juce.com/juce
+  license:            GPL/Commercial
 
-  dependencies:     juce_audio_basics
-  OSXFrameworks:    CoreAudio CoreMIDI QuartzCore AudioToolbox
-  iOSFrameworks:    AudioToolbox QuartzCore
+  dependencies:       juce_audio_basics
+  OSXFrameworks:      CoreAudio CoreMIDI QuartzCore AudioToolbox
+  iOSFrameworks:      AudioToolbox QuartzCore
 
  END_JUCE_MODULE_DECLARATION
 

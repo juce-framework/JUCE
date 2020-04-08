@@ -24,7 +24,7 @@
   ==============================================================================
 */
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 #include "../../../Assets/DemoUtilities.h"
 #include "JUCEDemos.h"
 
@@ -41,26 +41,23 @@
 #include "../../../Audio/MidiDemo.h"
 #include "../../../Audio/MPEDemo.h"
 #include "../../../Audio/PluckedStringsDemo.h"
+#include "../../../Audio/SimpleFFTDemo.h"
 
-#if JUCE_HAS_CONSTEXPR
- #include "../../../Audio/SimpleFFTDemo.h"
- #include "../../../BLOCKS/BlocksDrawingDemo.h"
- #include "../../../BLOCKS/BlocksMonitorDemo.h"
- #include "../../../BLOCKS/BlocksSynthDemo.h"
+#include "../../../BLOCKS/BlocksDrawingDemo.h"
+#include "../../../BLOCKS/BlocksMonitorDemo.h"
+#include "../../../BLOCKS/BlocksSynthDemo.h"
 
-
- #include "../../../DSP/ConvolutionDemo.h"
- #include "../../../DSP/FIRFilterDemo.h"
- #include "../../../DSP/GainDemo.h"
- #include "../../../DSP/IIRFilterDemo.h"
- #include "../../../DSP/OscillatorDemo.h"
- #include "../../../DSP/OverdriveDemo.h"
- #if JUCE_USE_SIMD
-  #include "../../../DSP/SIMDRegisterDemo.h"
- #endif
- #include "../../../DSP/StateVariableFilterDemo.h"
- #include "../../../DSP/WaveShaperTanhDemo.h"
+#include "../../../DSP/ConvolutionDemo.h"
+#include "../../../DSP/FIRFilterDemo.h"
+#include "../../../DSP/GainDemo.h"
+#include "../../../DSP/IIRFilterDemo.h"
+#include "../../../DSP/OscillatorDemo.h"
+#include "../../../DSP/OverdriveDemo.h"
+#if JUCE_USE_SIMD
+ #include "../../../DSP/SIMDRegisterDemo.h"
 #endif
+#include "../../../DSP/StateVariableFilterDemo.h"
+#include "../../../DSP/WaveShaperTanhDemo.h"
 
 #include "../../../Utilities/Box2DDemo.h"
 #if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX
@@ -90,7 +87,6 @@ void registerDemos_One() noexcept
     REGISTER_DEMO (MPEDemo,                 Audio,     false)
     REGISTER_DEMO (PluckedStringsDemo,      Audio,     false)
 
-   #if JUCE_HAS_CONSTEXPR
     REGISTER_DEMO (SimpleFFTDemo,           Audio,     false)
     REGISTER_DEMO (BlocksDrawingDemo,       BLOCKS,    false)
     REGISTER_DEMO (BlocksMonitorDemo,       BLOCKS,    false)
@@ -107,7 +103,6 @@ void registerDemos_One() noexcept
     #endif
     REGISTER_DEMO (StateVariableFilterDemo, DSP,       false)
     REGISTER_DEMO (WaveShaperTanhDemo,      DSP,       false)
-   #endif
 
     REGISTER_DEMO (Box2DDemo,               Utilities, false)
    #if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX

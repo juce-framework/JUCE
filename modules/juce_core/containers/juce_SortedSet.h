@@ -380,7 +380,7 @@ public:
         @param valueToRemove   the object to try to remove
         @see remove, removeRange
     */
-    void removeValue (const ElementType valueToRemove) noexcept
+    void removeValue (const ElementType& valueToRemove) noexcept
     {
         const ScopedLockType lock (getLock());
         data.remove (indexOf (valueToRemove));

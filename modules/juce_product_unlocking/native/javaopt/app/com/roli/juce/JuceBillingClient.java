@@ -1,8 +1,34 @@
+/*
+  ==============================================================================
+
+   This file is part of the JUCE library.
+   Copyright (c) 2017 - ROLI Ltd.
+
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
+
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
+
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
+
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
+
+  ==============================================================================
+*/
+
 package com.roli.juce;
 
 import com.android.billingclient.api.*;
 
-public class JuceBillingClient implements PurchasesUpdatedListener {
+public class JuceBillingClient implements PurchasesUpdatedListener, BillingClientStateListener {
     private native void skuDetailsQueryCallback(long host, java.util.List<SkuDetails> skuDetails);
     private native void purchasesListQueryCallback(long host, java.util.List<Purchase> purchases);
     private native void purchaseCompletedCallback(long host, Purchase purchase, int responseCode);
@@ -16,7 +42,7 @@ public class JuceBillingClient implements PurchasesUpdatedListener {
                 .setListener(this)
                 .build();
 
-        billingClient.startConnection(null);
+        billingClient.startConnection(this);
     }
 
     public void endConnection() {
@@ -127,6 +153,18 @@ public class JuceBillingClient implements PurchasesUpdatedListener {
         }
     }
 
+    @Override
+    public void onBillingServiceDisconnected()
+    {
+
+    }
+
+    @Override
+    public void onBillingSetupFinished(BillingResult billingResult)
+    {
+
+    }
+
     private void executeOnBillingClientConnection(Runnable runnable) {
         if (billingClient.isReady()) {
             runnable.run();
@@ -162,7 +200,12 @@ public class JuceBillingClient implements PurchasesUpdatedListener {
                 @Override
                 public void run() {
                     AcknowledgePurchaseParams acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder().setPurchaseToken(purchase.getPurchaseToken()).build();
-                    billingClient.acknowledgePurchase(acknowledgePurchaseParams, null);
+                    billingClient.acknowledgePurchase(acknowledgePurchaseParams, new AcknowledgePurchaseResponseListener() {
+                        @Override
+                        public void onAcknowledgePurchaseResponse(BillingResult billingResult) {
+
+                        }
+                    });
                 }
             });
         }

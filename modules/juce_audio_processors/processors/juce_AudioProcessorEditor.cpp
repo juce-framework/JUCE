@@ -103,15 +103,9 @@ void AudioProcessorEditor::setResizable (const bool shouldBeResizable, const boo
     if (shouldHaveCornerResizer != (resizableCorner != nullptr))
     {
         if (shouldHaveCornerResizer)
-        {
-            resizableCorner.reset (new ResizableCornerComponent (this, constrainer));
-            Component::addChildComponent (resizableCorner.get());
-            resizableCorner->setAlwaysOnTop (true);
-        }
+            attachResizableCornerComponent();
         else
-        {
             resizableCorner.reset();
-        }
     }
 }
 
@@ -146,6 +140,9 @@ void AudioProcessorEditor::setConstrainer (ComponentBoundsConstrainer* newConstr
                       || newConstrainer->getMinimumHeight() != newConstrainer->getMaximumHeight());
 
         attachConstrainer (newConstrainer);
+
+        if (resizableCorner != nullptr)
+            attachResizableCornerComponent();
     }
 }
 
@@ -158,6 +155,14 @@ void AudioProcessorEditor::attachConstrainer (ComponentBoundsConstrainer* newCon
     }
 }
 
+void AudioProcessorEditor::attachResizableCornerComponent()
+{
+    resizableCorner.reset (new ResizableCornerComponent (this, constrainer));
+    Component::addChildComponent (resizableCorner.get());
+    resizableCorner->setAlwaysOnTop (true);
+    editorResized (true);
+}
+
 void AudioProcessorEditor::setBoundsConstrained (Rectangle<int> newBounds)
 {
     if (constrainer != nullptr)
@@ -168,6 +173,12 @@ void AudioProcessorEditor::setBoundsConstrained (Rectangle<int> newBounds)
 
 void AudioProcessorEditor::editorResized (bool wasResized)
 {
+    // The host needs to be able to rescale the plug-in editor and applying your own transform will
+    // obliterate it! If you want to scale the whole of your UI use Desktop::setGlobalScaleFactor(),
+    // or, for applying other transforms, consider putting the component you want to transform
+    // in a child of the editor and transform that instead.
+    jassert (getTransform() == hostScaleTransform);
+
     if (wasResized)
     {
         bool resizerHidden = false;
@@ -201,7 +212,9 @@ void AudioProcessorEditor::updatePeer()
 
 void AudioProcessorEditor::setScaleFactor (float newScale)
 {
-    setTransform (AffineTransform::scale (newScale));
+    hostScaleTransform = AffineTransform::scale (newScale);
+    setTransform (hostScaleTransform);
+
     editorResized (true);
 }
 

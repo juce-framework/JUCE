@@ -28,6 +28,11 @@
 
 
 //==============================================================================
+// The GCC extensions define linux somewhere in the headers, so undef it here...
+#if JUCE_GCC
+ #undef linux
+#endif
+
 struct TargetOS
 {
     enum OS

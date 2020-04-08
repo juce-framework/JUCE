@@ -336,8 +336,8 @@ void MPEInstrument::noteOff (int midiChannel,
         note->keyState = (note->keyState == MPENote::keyDownAndSustained) ? MPENote::sustained : MPENote::off;
         note->noteOffVelocity = midiNoteOffVelocity;
 
-        // If no more notes are playing on this channel, reset the dimension values
-        if (getLastNotePlayedPtr (midiChannel) == nullptr)
+        // If no more notes are playing on this channel in mpe mode, reset the dimension values
+        if (! legacyMode.isEnabled && getLastNotePlayedPtr (midiChannel) == nullptr)
         {
             pressureDimension.lastValueReceivedOnChannel[midiChannel - 1] = MPEValue::minValue();
             pitchbendDimension.lastValueReceivedOnChannel[midiChannel - 1] = MPEValue::centreValue();
@@ -395,7 +395,7 @@ void MPEInstrument::polyAftertouch (int midiChannel, int midiNoteNumber, MPEValu
 
 MPEValue MPEInstrument::getInitialValueForNewNote (int midiChannel, MPEDimension& dimension) const
 {
-    if (getLastNotePlayedPtr (midiChannel) != nullptr)
+    if (! legacyMode.isEnabled && getLastNotePlayedPtr (midiChannel) != nullptr)
         return &dimension == &pressureDimension ? MPEValue::minValue() : MPEValue::centreValue();
 
     return dimension.lastValueReceivedOnChannel[midiChannel - 1];
@@ -497,11 +497,13 @@ void MPEInstrument::updateNoteTotalPitchbend (MPENote& note)
     {
         auto zone = zoneLayout.getLowerZone();
 
-        if (! zone.isUsing (note.midiChannel))
+        if (! zone.isActive() || ! zone.isUsing (note.midiChannel))
         {
-            if (zoneLayout.getUpperZone().isUsing (note.midiChannel))
+            auto upperZone = zoneLayout.getUpperZone();
+
+            if (upperZone.isActive() && upperZone.isUsing (note.midiChannel))
             {
-                zone = zoneLayout.getUpperZone();
+                zone = upperZone;
             }
             else
             {
@@ -576,11 +578,9 @@ void MPEInstrument::handleSustainOrSostenuto (int midiChannel, bool isDown, bool
 
     if (! isSostenuto)
     {
-        if (legacyMode.isEnabled)
-        {
-            isMemberChannelSustained[midiChannel - 1] = isDown;
-        }
-        else
+        isMemberChannelSustained[midiChannel - 1] = isDown;
+
+        if (! legacyMode.isEnabled)
         {
             if (zone.isLowerZone())
                 for (auto i = zone.getFirstMemberChannel(); i <= zone.getLastMemberChannel(); ++i)

@@ -135,7 +135,7 @@ public:
     //==============================================================================
     /** Converts a textual key description to a KeyPress.
 
-        This attempts to decode a textual version of a keypress, e.g. "CTRL + C" or "SPACE".
+        This attempts to decode a textual version of a keypress, e.g. "ctrl + c" or "spacebar".
 
         This isn't designed to cope with any kind of input, but should be given the
         strings that are created by the getTextDescription() method.
@@ -148,7 +148,7 @@ public:
 
     /** Creates a textual description of the key combination.
 
-        e.g. "CTRL + C" or "DELETE".
+        e.g. "ctrl + c" or "delete".
 
         To store a keypress in a file, use this method, along with createFromDescription()
         to retrieve it later.

@@ -35,12 +35,6 @@
 
 #include "juce_dsp.h"
 
-#if ! JUCE_HAS_CONSTEXPR
- #ifndef JUCE_DEMO_RUNNER
-  #error "The juce_dsp module requires a compiler that supports constexpr"
- #endif
-#else
-
 #ifndef JUCE_USE_VDSP_FRAMEWORK
  #define JUCE_USE_VDSP_FRAMEWORK 1
 #endif
@@ -92,6 +86,5 @@
  #include "containers/juce_AudioBlock_test.cpp"
  #include "frequency/juce_FFT_test.cpp"
  #include "processors/juce_FIRFilter_test.cpp"
-#endif
-
+ #include "processors/juce_ProcessorChain_test.cpp"
 #endif

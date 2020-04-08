@@ -45,48 +45,6 @@ static StringArray getMimeTypesForFileExtension (const String& fileExtension)
     return result;
 }
 
-static StringArray filterMimeTypes (const StringArray& mimeTypes, const String& filter)
-{
-    String filterToUse (filter.removeCharacters ("*"));
-
-    if (filterToUse.isEmpty() || filterToUse == "/")
-        return mimeTypes;
-
-    StringArray result;
-
-    for (const auto& type : mimeTypes)
-        if (String (type).contains (filterToUse))
-            result.add (type);
-
-    return result;
-}
-
-static String getCommonMimeType (const StringArray& mimeTypes)
-{
-    if (mimeTypes.isEmpty())
-        return "*/*";
-
-    auto commonMime = mimeTypes[0];
-    bool lookForCommonGroup = false;
-
-    for (int i = 1; i < mimeTypes.size(); ++i)
-    {
-        if (mimeTypes[i] == commonMime)
-            continue;
-
-        if (! lookForCommonGroup)
-        {
-            lookForCommonGroup = true;
-            commonMime = commonMime.upToFirstOccurrenceOf ("/", true, false);
-        }
-
-        if (! mimeTypes[i].startsWith (commonMime))
-            return "*/*";
-    }
-
-    return lookForCommonGroup ? commonMime + "*" : commonMime;
-}
-
 //==============================================================================
 MimeTypeTableEntry MimeTypeTableEntry::table[641] =
 {

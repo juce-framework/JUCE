@@ -100,7 +100,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
             [download retain];
         }
 
-        ~DownloadImpl()
+        ~DownloadImpl() override
         {
             [download release];
         }
@@ -112,7 +112,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         int64 getContentLength()   const override  { return download.contentLength; }
         Status getStatus()         const override  { return SKDownloadStateToDownloadStatus (download.downloadState); }
       #else
-        int64 getContentLength()   const override  { return [download.contentLength longLongValue]; }
+        int64 getContentLength()   const override  { return download.expectedContentLength; }
         Status getStatus()         const override  { return SKDownloadStateToDownloadStatus (download.state); }
       #endif
 
@@ -180,7 +180,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
 
     //==============================================================================
     Pimpl (InAppPurchases& p) : owner (p)  { [[SKPaymentQueue defaultQueue] addTransactionObserver:    delegate.get()]; }
-    ~Pimpl() noexcept                      { [[SKPaymentQueue defaultQueue] removeTransactionObserver: delegate.get()]; }
+    ~Pimpl() noexcept override             { [[SKPaymentQueue defaultQueue] removeTransactionObserver: delegate.get()]; }
 
     //==============================================================================
     bool isInAppPurchasesSupported() const     { return true; }
@@ -567,7 +567,8 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
        #endif
 
         // TODO: use juce URL here
-        auto storeRequest = [NSMutableURLRequest requestWithURL: [NSURL URLWithString: nsStringLiteral (storeURL)]];
+        auto* urlPtr = [NSURL URLWithString: nsStringLiteral (storeURL)];
+        auto storeRequest = [NSMutableURLRequest requestWithURL: urlPtr];
         [storeRequest setHTTPMethod: nsStringLiteral ("POST")];
         [storeRequest setHTTPBody: requestData];
 

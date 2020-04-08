@@ -125,8 +125,8 @@ namespace DragAndDropHelpers
     class JuceDataObject  : public ComBaseClassHelper <IDataObject>
     {
     public:
-        JuceDataObject (JuceDropSource* s, const FORMATETC* f, const STGMEDIUM* m)
-            : dropSource (s), format (f), medium (m)
+        JuceDataObject (const FORMATETC* f, const STGMEDIUM* m)
+            : format (f), medium (m)
         {
         }
 
@@ -203,7 +203,6 @@ namespace DragAndDropHelpers
         JUCE_COMRESULT EnumDAdvise (IEnumSTATDATA**)                         { return OLE_E_ADVISENOTSUPPORTED; }
 
     private:
-        JuceDropSource* const dropSource;
         const FORMATETC* const format;
         const STGMEDIUM* const medium;
 
@@ -255,7 +254,7 @@ namespace DragAndDropHelpers
             OleInitialize (0);
 
             auto source = new JuceDropSource();
-            auto data = new JuceDataObject (source, &format, &medium);
+            auto data = new JuceDataObject (&format, &medium);
 
             DWORD effect;
             DoDragDrop (data, source, whatToDo, &effect);

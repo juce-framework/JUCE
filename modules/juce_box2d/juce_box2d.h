@@ -24,6 +24,7 @@
   ==============================================================================
 */
 
+
 /*******************************************************************************
  The block below describes the properties of this module, and is read by
  the Projucer to automatically generate project code that uses it.
@@ -33,15 +34,15 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_box2d
-  vendor:           juce
-  version:          5.4.5
-  name:             JUCE wrapper for the Box2D physics engine
-  description:      The Box2D physics engine and some utility classes.
-  website:          http://www.juce.com/juce
-  license:          GPL/Commercial
+  ID:                 juce_box2d
+  vendor:             juce
+  version:            5.4.7
+  name:               JUCE wrapper for the Box2D physics engine
+  description:        The Box2D physics engine and some utility classes.
+  website:            http://www.juce.com/juce
+  license:            GPL/Commercial
 
-  dependencies:     juce_graphics
+  dependencies:       juce_graphics
 
  END_JUCE_MODULE_DECLARATION
 

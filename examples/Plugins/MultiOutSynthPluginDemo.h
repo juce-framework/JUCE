@@ -94,8 +94,6 @@ public:
         loadNewSample (createAssetInputStream ("singing.ogg"), "ogg");
     }
 
-    ~MultiOutSynth() {}
-
     //==============================================================================
     bool canAddBus    (bool isInput) const override   { return (! isInput && getBusCount (false) < maxMidiChannel); }
     bool canRemoveBus (bool isInput) const override   { return (! isInput && getBusCount (false) > 1); }
@@ -157,9 +155,9 @@ private:
         return output;
     }
 
-    void loadNewSample (InputStream* soundBuffer, const char* format)
+    void loadNewSample (std::unique_ptr<InputStream> soundBuffer, const char* format)
     {
-        std::unique_ptr<AudioFormatReader> formatReader (formatManager.findFormatForFileExtension (format)->createReaderFor (soundBuffer, true));
+        std::unique_ptr<AudioFormatReader> formatReader (formatManager.findFormatForFileExtension (format)->createReaderFor (soundBuffer.release(), true));
 
         BigInteger midiNotes;
         midiNotes.setRange (0, 126, true);

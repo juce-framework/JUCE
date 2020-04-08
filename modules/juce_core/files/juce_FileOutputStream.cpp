@@ -23,8 +23,6 @@
 namespace juce
 {
 
-int64 juce_fileSetPosition (void* handle, int64 pos);
-
 //==============================================================================
 FileOutputStream::FileOutputStream (const File& f, const size_t bufferSizeToUse)
     : file (f),
