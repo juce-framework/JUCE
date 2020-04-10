@@ -173,6 +173,12 @@ void AudioProcessorEditor::setBoundsConstrained (Rectangle<int> newBounds)
 
 void AudioProcessorEditor::editorResized (bool wasResized)
 {
+    // The host needs to be able to rescale the plug-in editor and applying your own transform will
+    // obliterate it! If you want to scale the whole of your UI use Desktop::setGlobalScaleFactor(),
+    // or, for applying other transforms, consider putting the component you want to transform
+    // in a child of the editor and transform that instead.
+    jassert (getTransform() == hostScaleTransform);
+
     if (wasResized)
     {
         bool resizerHidden = false;
@@ -206,7 +212,9 @@ void AudioProcessorEditor::updatePeer()
 
 void AudioProcessorEditor::setScaleFactor (float newScale)
 {
-    setTransform (AffineTransform::scale (newScale));
+    hostScaleTransform = AffineTransform::scale (newScale);
+    setTransform (hostScaleTransform);
+
     editorResized (true);
 }
 

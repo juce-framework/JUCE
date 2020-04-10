@@ -44,6 +44,7 @@ namespace OggVorbisNamespace
   #pragma clang diagnostic ignored "-Wconversion"
   #pragma clang diagnostic ignored "-Wshadow"
   #pragma clang diagnostic ignored "-Wdeprecated-register"
+  #pragma clang diagnostic ignored "-Wswitch-enum"
   #if __has_warning("-Wzero-as-null-pointer-constant")
    #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
   #endif
@@ -53,6 +54,9 @@ namespace OggVorbisNamespace
   #pragma GCC diagnostic ignored "-Wshadow"
   #pragma GCC diagnostic ignored "-Wsign-conversion"
   #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+  #pragma GCC diagnostic ignored "-Wswitch-enum"
+  #pragma GCC diagnostic ignored "-Wswitch-default"
+  #pragma GCC diagnostic ignored "-Wredundant-decls"
  #endif
 
  #include "oggvorbis/vorbisenc.h"
@@ -490,9 +494,9 @@ StringArray OggVorbisAudioFormat::getQualityOptions()
 
 int OggVorbisAudioFormat::estimateOggFileQuality (const File& source)
 {
-    if (auto* in = source.createInputStream())
+    if (auto in = source.createInputStream())
     {
-        if (auto r = std::unique_ptr<AudioFormatReader> (createReaderFor (in, true)))
+        if (auto r = std::unique_ptr<AudioFormatReader> (createReaderFor (in.release(), true)))
         {
             auto lengthSecs = r->lengthInSamples / r->sampleRate;
             auto approxBitsPerSecond = (int) (source.getSize() * 8 / lengthSecs);

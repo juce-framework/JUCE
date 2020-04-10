@@ -366,7 +366,9 @@ public:
             options
         };
 
-        ConfigMetaData() = default;
+        ConfigMetaData (uint32 itemIndex)
+          :  item (itemIndex)
+        {}
 
         // Constructor to work around VS2015 bugs...
         ConfigMetaData (uint32 itemIndex,

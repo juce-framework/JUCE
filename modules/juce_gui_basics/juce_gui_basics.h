@@ -159,9 +159,7 @@ namespace juce
     class Displays;
 
     class FlexBox;
-    #if JUCE_HAS_CONSTEXPR
-     class Grid;
-    #endif
+    class Grid;
 }
 
 #include "mouse/juce_MouseCursor.h"
@@ -305,7 +303,5 @@ namespace juce
 #include "layout/juce_FlexItem.h"
 #include "layout/juce_FlexBox.h"
 
-#if JUCE_HAS_CONSTEXPR
- #include "layout/juce_GridItem.h"
- #include "layout/juce_Grid.h"
-#endif
+#include "layout/juce_GridItem.h"
+#include "layout/juce_Grid.h"

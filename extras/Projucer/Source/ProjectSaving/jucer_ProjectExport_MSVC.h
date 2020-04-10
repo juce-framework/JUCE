@@ -726,15 +726,10 @@ public:
 
         String getProjectType() const
         {
-            switch (getTargetFileType())
-            {
-                case executable:
-                    return "Application";
-                case staticLibrary:
-                    return "StaticLibrary";
-                default:
-                    break;
-            }
+            auto targetFileType = getTargetFileType();
+
+            if (targetFileType == executable)     return "Application";
+            if (targetFileType == staticLibrary)  return "StaticLibrary";
 
             return "DynamicLibrary";
         }
@@ -977,25 +972,17 @@ public:
         {
             auto fileType = getTargetFileType();
 
-            switch (fileType)
+            if (fileType == executable)          return ".exe";
+            if (fileType == staticLibrary)       return ".lib";
+            if (fileType == sharedLibraryOrDLL)  return ".dll";
+
+            if (fileType == pluginBundle)
             {
-                case executable:            return ".exe";
-                case staticLibrary:         return ".lib";
-                case sharedLibraryOrDLL:    return ".dll";
+                if (type == VST3PlugIn)  return ".vst3";
+                if (type == AAXPlugIn)   return ".aaxdll";
+                if (type == RTASPlugIn)  return ".dpm";
 
-                case pluginBundle:
-                    switch (type)
-                    {
-                        case VST3PlugIn:    return ".vst3";
-                        case AAXPlugIn:     return ".aaxdll";
-                        case RTASPlugIn:    return ".dpm";
-                        default:            break;
-                    }
-
-                    return ".dll";
-
-                default:
-                    break;
+                return ".dll";
             }
 
             return {};
@@ -1150,22 +1137,15 @@ public:
 
         void addExtraPreprocessorDefines (StringPairArray& defines) const
         {
-            switch (type)
+            if (type == AAXPlugIn)
             {
-            case AAXPlugIn:
-                {
-                    auto aaxLibsFolder = RelativePath (owner.getAAXPathString(), RelativePath::projectFolder).getChildFile ("Libs");
-                    defines.set ("JucePlugin_AAXLibs_path", createRebasedPath (aaxLibsFolder));
-                }
-                break;
-            case RTASPlugIn:
-                {
-                    RelativePath rtasFolder (owner.getRTASPathString(), RelativePath::projectFolder);
-                    defines.set ("JucePlugin_WinBag_path", createRebasedPath (rtasFolder.getChildFile ("WinBag")));
-                }
-                break;
-            default:
-                break;
+                auto aaxLibsFolder = RelativePath (owner.getAAXPathString(), RelativePath::projectFolder).getChildFile ("Libs");
+                defines.set ("JucePlugin_AAXLibs_path", createRebasedPath (aaxLibsFolder));
+            }
+            else if (type == RTASPlugIn)
+            {
+                RelativePath rtasFolder (owner.getRTASPathString(), RelativePath::projectFolder);
+                defines.set ("JucePlugin_WinBag_path", createRebasedPath (rtasFolder.getChildFile ("WinBag")));
             }
         }
 
@@ -1353,6 +1333,9 @@ public:
         case ProjectType::Target::UnityPlugIn:
         case ProjectType::Target::DynamicLibrary:
             return true;
+        case ProjectType::Target::AudioUnitPlugIn:
+        case ProjectType::Target::AudioUnitv3PlugIn:
+        case ProjectType::Target::unspecified:
         default:
             break;
         }

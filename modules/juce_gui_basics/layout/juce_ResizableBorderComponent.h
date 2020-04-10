@@ -105,7 +105,7 @@ public:
         };
 
         //==============================================================================
-        /** Creates a Zone from a combination of the flags in \enum Zones. */
+        /** Creates a Zone from a combination of the flags in zoneFlags. */
         explicit Zone (int zoneFlags) noexcept;
 
         Zone() noexcept;

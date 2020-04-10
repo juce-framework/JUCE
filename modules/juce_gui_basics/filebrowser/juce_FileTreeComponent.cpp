@@ -27,8 +27,6 @@
 namespace juce
 {
 
-Image juce_createIconForFile (const File&);
-
 //==============================================================================
 class FileListTreeItem   : public TreeViewItem,
                            private TimeSliceClient,

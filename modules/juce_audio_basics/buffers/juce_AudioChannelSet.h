@@ -369,7 +369,7 @@ public:
         bottomFrontCentre   = 63, /**< Bottom Front Centre (Bfc) */
         bottomFrontRight    = 64, /**< Bottom Front Right (Bfr)  */
 
-        proxymityLeft       = 65, /**< Proximity Left (Pl)  */
+        proximityLeft       = 65, /**< Proximity Left (Pl)  */
         proximityRight      = 66, /**< Proximity Right (Pr) */
 
         bottomSideLeft      = 67, /**< Bottom Side Left (Bsl)   */

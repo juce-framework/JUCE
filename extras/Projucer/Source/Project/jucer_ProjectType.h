@@ -191,6 +191,11 @@ struct ProjectType_AudioPlugin  : public ProjectType
             case Target::SharedCodeTarget:
             case Target::AggregateTarget:
                 return true;
+            case Target::GUIApp:
+            case Target::ConsoleApp:
+            case Target::StaticLibrary:
+            case Target::DynamicLibrary:
+            case Target::unspecified:
             default:
                 break;
         }

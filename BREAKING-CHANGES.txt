@@ -6,6 +6,31 @@ Develop
 
 Change
 ------
+The Windows DPI handling in the VST wrapper and hosting code has been
+refactored to be more stable.
+
+Possible Issues
+---------------
+The new code uses a top-level AffineTransform to scale the JUCE editor window
+instead of native methods. Therefore any AudioProcessorEditors which have their
+own AffineTransform applied will no longer work correctly.
+
+Workaround
+----------
+If you are using an AffineTransform to scale the entire plug-in window then
+consider using Desktop::setGlobalScaleFactor() instead, or, for applying other
+transforms, consider putting the component you want to transform in a child of
+the editor and transform that instead.
+
+Rationale
+---------
+The old code had some bugs when using OpenGL and when moving between monitors
+with different scale factors. The new code should fix these and DPI-aware
+plug-ins will scale correctly.
+
+
+Change
+------
 Relative Xcode subproject paths specified in the Projucer are now relative to
 the build directory rather than the project directory.
 

@@ -279,7 +279,7 @@ struct BlockConfigManager
         if (getIndexForItem (item, itemIndex))
             return configList[itemIndex].toConfigMetaData();
 
-        return {};
+        return { static_cast<juce::uint32> (item) };
     }
 
     void resetConfigListActiveStatus()

@@ -175,6 +175,7 @@ namespace
                             break;
                         }
                         // else = special case: fall through to default and treat '!' as a non-special character.
+                        JUCE_FALLTHROUGH
 
                     default:
                         set.add (c);

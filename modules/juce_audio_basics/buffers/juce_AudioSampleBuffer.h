@@ -1075,8 +1075,10 @@ private:
 
     void allocateData()
     {
+       #if (! JUCE_GCC) || (__GNUC__ * 100 + __GNUC_MINOR__) >= 409
         static_assert (std::alignment_of<Type>::value <= std::alignment_of<std::max_align_t>::value,
                        "AudioBuffer cannot hold types with alignment requirements larger than that guaranteed by malloc");
+       #endif
         jassert (size >= 0);
 
         auto channelListSize = (size_t) (numChannels + 1) * sizeof (Type*);

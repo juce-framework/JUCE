@@ -394,8 +394,11 @@ private:
                             notifyOwnerPreparationFinished (url, Result::fail (errorMessage), nullptr);
                             return;
                         }
+
+                        case AVKeyValueStatusUnknown:
+                        case AVKeyValueStatusLoading:
                         default:
-                        {}
+                            break;
                     }
                 }
 

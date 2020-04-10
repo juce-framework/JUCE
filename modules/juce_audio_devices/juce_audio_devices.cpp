@@ -234,13 +234,18 @@
  #include "native/juce_android_Audio.cpp"
  #include "native/juce_android_Midi.cpp"
 
- #if JUCE_USE_ANDROID_OPENSLES
-  #include "native/juce_android_OpenSL.cpp"
+ #if JUCE_USE_ANDROID_OPENSLES || JUCE_USE_ANDROID_OBOE
+  #include "native/juce_android_HighPerformanceAudioHelpers.h"
+
+  #if JUCE_USE_ANDROID_OPENSLES
+   #include "native/juce_android_OpenSL.cpp"
+  #endif
+
+  #if JUCE_USE_ANDROID_OBOE
+   #include "native/juce_android_Oboe.cpp"
+  #endif
  #endif
 
- #if JUCE_USE_ANDROID_OBOE
-  #include "native/juce_android_Oboe.cpp"
- #endif
 #endif
 
 #if ! JUCE_SYSTEMAUDIOVOL_IMPLEMENTED

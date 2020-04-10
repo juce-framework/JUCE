@@ -52,6 +52,11 @@ namespace RelativeRectangleHelpers
                 case RelativeCoordinate::StandardStrings::right:
                 case RelativeCoordinate::StandardStrings::top:
                 case RelativeCoordinate::StandardStrings::bottom:   return false;
+                case RelativeCoordinate::StandardStrings::width:
+                case RelativeCoordinate::StandardStrings::height:
+                case RelativeCoordinate::StandardStrings::parent:
+                case RelativeCoordinate::StandardStrings::unknown:
+
                 default: break;
             }
 
@@ -127,6 +132,10 @@ public:
             case RelativeCoordinate::StandardStrings::top:      return rect.top.getExpression();
             case RelativeCoordinate::StandardStrings::right:    return rect.right.getExpression();
             case RelativeCoordinate::StandardStrings::bottom:   return rect.bottom.getExpression();
+            case RelativeCoordinate::StandardStrings::width:
+            case RelativeCoordinate::StandardStrings::height:
+            case RelativeCoordinate::StandardStrings::parent:
+            case RelativeCoordinate::StandardStrings::unknown:
             default: break;
         }
 

@@ -22,6 +22,6 @@
       </intent-filter>
     </activity>
     <provider android:name="com.roli.juce.JuceSharingContentProvider" android:authorities="com.juce.demorunner.sharingcontentprovider"
-              android:grantUriPermissions="true" android:exported="false"/>
+              android:grantUriPermissions="true" android:exported="true"/>
   </application>
 </manifest>

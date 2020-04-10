@@ -90,6 +90,10 @@ using namespace Steinberg;
   extern JUCE_API void detachComponentFromWindowRefVST (Component*, void* nsWindow, bool isNSView);
 #endif
 
+#if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+  extern JUCE_API double getScaleFactorForWindow (HWND);
+#endif
+
 //==============================================================================
 class JuceAudioProcessor   : public Vst::IUnitInfo
 {
@@ -952,7 +956,9 @@ private:
     std::atomic<bool> vst3IsPlaying     { false },
                       inSetupProcessing { false };
 
+   #if ! JUCE_MAC
     float lastScaleFactorReceived = 1.0f;
+   #endif
 
     void setupParameters()
     {
@@ -1035,13 +1041,14 @@ private:
           : Vst::EditorView (&ec, nullptr),
             owner (&ec), pluginInstance (p)
         {
-            editorScaleFactor = ec.lastScaleFactorReceived;
-
             component.reset (new ContentWrapperComponent (*this, p));
 
            #if JUCE_MAC
             if (getHostType().type == PluginHostType::SteinbergCubase10)
                 cubase10Workaround.reset (new Cubase10WindowResizeWorkaround (*this));
+           #else
+            if (! approximatelyEqual (editorScaleFactor, ec.lastScaleFactorReceived))
+                setContentScaleFactor (ec.lastScaleFactorReceived);
            #endif
         }
 
@@ -1081,16 +1088,9 @@ private:
             component->addToDesktop (0, parent);
             component->setOpaque (true);
             component->setVisible (true);
-            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-             component->checkScaleFactorIsCorrect();
-            #endif
            #else
             isNSView = (strcmp (type, kPlatformTypeNSView) == 0);
             macHostWindow = juce::attachComponentToWindowRefVST (component.get(), parent, isNSView);
-           #endif
-
-           #if ! JUCE_MAC
-            setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) editorScaleFactor);
            #endif
 
             component->resizeHostWindow();
@@ -1128,45 +1128,26 @@ private:
         {
             if (newSize != nullptr)
             {
-                rect = *newSize;
+                rect = convertFromHostBounds (*newSize);
 
                 if (component != nullptr)
                 {
                     auto w = rect.getWidth();
                     auto h = rect.getHeight();
 
-                   #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                    w = roundToInt (w / editorScaleFactor);
-                    h = roundToInt (h / editorScaleFactor);
-
-                    if (getHostType().type == PluginHostType::SteinbergCubase10)
-                    {
-                        auto integerScaleFactor = (int) std::round (editorScaleFactor);
-
-                        // Workaround for Cubase 10 sending double-scaled bounds when opening editor
-                        if (isWithin ((int) w, component->getWidth() * integerScaleFactor, 2)
-                            && isWithin ((int) h, component->getHeight() * integerScaleFactor, 2))
-                        {
-                            w /= integerScaleFactor;
-                            h /= integerScaleFactor;
-                        }
-                    }
-                   #endif
-
                     component->setSize (w, h);
 
                    #if JUCE_MAC
                     if (cubase10Workaround != nullptr)
+                    {
                         cubase10Workaround->triggerAsyncUpdate();
+                    }
                     else
                    #endif
-                    if (auto* peer = component->getPeer())
-                        peer->updateBounds();
-
-                   #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                    if (getHostType().type == PluginHostType::SteinbergCubase10)
-                        component->resizeHostWindow();
-                   #endif
+                    {
+                        if (auto* peer = component->getPeer())
+                            peer->updateBounds();
+                    }
                 }
 
                 return kResultTrue;
@@ -1180,16 +1161,9 @@ private:
         {
             if (size != nullptr && component != nullptr)
             {
-                auto w = component->getWidth();
-                auto h = component->getHeight();
+                auto editorBounds = component->getSizeToContainChild();
 
-               #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                w = roundToInt (w * editorScaleFactor);
-                h = roundToInt (h * editorScaleFactor);
-               #endif
-
-                *size = ViewRect (0, 0, w, h);
-
+                *size = convertToHostBounds ({ 0, 0, editorBounds.getWidth(), editorBounds.getHeight() });
                 return kResultTrue;
             }
 
@@ -1200,7 +1174,8 @@ private:
         {
             if (component != nullptr)
                 if (auto* editor = component->pluginEditor.get())
-                    return editor->isResizable() ? kResultTrue : kResultFalse;
+                    if (editor->isResizable())
+                        return kResultTrue;
 
             return kResultFalse;
         }
@@ -1213,6 +1188,8 @@ private:
                 {
                     if (auto* constrainer = editor->getConstrainer())
                     {
+                        *rectToCheck = convertFromHostBounds (*rectToCheck);
+
                         auto scale = editor->getTransform().getScaleFactor();
 
                         auto minW = (double) (constrainer->getMinimumWidth()  * scale);
@@ -1222,11 +1199,6 @@ private:
 
                         auto width  = (double) (rectToCheck->right - rectToCheck->left);
                         auto height = (double) (rectToCheck->bottom - rectToCheck->top);
-
-                       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                        width  /= editorScaleFactor;
-                        height /= editorScaleFactor;
-                       #endif
 
                         width  = jlimit (minW, maxW, width);
                         height = jlimit (minH, maxH, height);
@@ -1267,13 +1239,10 @@ private:
                             }
                         }
 
-                       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                        width  *= editorScaleFactor;
-                        height *= editorScaleFactor;
-                       #endif
-
                         rectToCheck->right  = rectToCheck->left + roundToInt (width);
                         rectToCheck->bottom = rectToCheck->top  + roundToInt (height);
+
+                        *rectToCheck = convertToHostBounds (*rectToCheck);
                     }
                 }
 
@@ -1287,33 +1256,24 @@ private:
         tresult PLUGIN_API setContentScaleFactor (Steinberg::IPlugViewContentScaleSupport::ScaleFactor factor) override
         {
            #if ! JUCE_MAC
-            auto hostType = getHostType().type;
-
-            if (hostType == PluginHostType::SteinbergCubase10 || hostType == PluginHostType::FruityLoops)
-            {
-                if (component.get() != nullptr)
-                    if (auto* peer = component->getPeer())
-                        factor = static_cast<Steinberg::IPlugViewContentScaleSupport::ScaleFactor> (peer->getPlatformScaleFactor());
-            }
-
             if (! approximatelyEqual ((float) factor, editorScaleFactor))
             {
                 editorScaleFactor = (float) factor;
 
-                if (auto* o = owner.get())
-                    o->lastScaleFactorReceived = editorScaleFactor;
+                if (owner != nullptr)
+                    owner->lastScaleFactorReceived = editorScaleFactor;
 
-                if (component == nullptr)
-                    return kResultFalse;
+                if (component != nullptr)
+                {
+                    if (auto* editor = component->pluginEditor.get())
+                    {
+                        editor->setScaleFactor (editorScaleFactor);
 
-               #if JUCE_WINDOWS && ! JUCE_WIN_PER_MONITOR_DPI_AWARE
-                if (auto* ed = component->pluginEditor.get())
-                    ed->setScaleFactor ((float) factor);
-               #endif
-
-                component->resizeHostWindow();
-                component->setTopLeftPosition (0, 0);
-                component->repaint();
+                        component->resizeHostWindow();
+                        component->setTopLeftPosition (0, 0);
+                        component->repaint();
+                    }
+                }
             }
 
             return kResultTrue;
@@ -1333,8 +1293,37 @@ private:
             onSize (&viewRect);
         }
 
+        static ViewRect convertToHostBounds (ViewRect pluginRect)
+        {
+            auto desktopScale = Desktop::getInstance().getGlobalScaleFactor();
+
+            if (approximatelyEqual (desktopScale, 1.0f))
+                return pluginRect;
+
+            return { roundToInt (pluginRect.left   * desktopScale),
+                     roundToInt (pluginRect.top    * desktopScale),
+                     roundToInt (pluginRect.right  * desktopScale),
+                     roundToInt (pluginRect.bottom * desktopScale) };
+        }
+
+        static ViewRect convertFromHostBounds (ViewRect hostRect)
+        {
+            auto desktopScale = Desktop::getInstance().getGlobalScaleFactor();
+
+            if (approximatelyEqual (desktopScale, 1.0f))
+                return hostRect;
+
+            return { roundToInt (hostRect.left   / desktopScale),
+                     roundToInt (hostRect.top    / desktopScale),
+                     roundToInt (hostRect.right  / desktopScale),
+                     roundToInt (hostRect.bottom / desktopScale) };
+        }
+
         //==============================================================================
         struct ContentWrapperComponent  : public Component
+                                       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                                        , private Timer
+                                       #endif
         {
             ContentWrapperComponent (JuceVST3Editor& editor, AudioProcessor& plugin)
                 : pluginEditor (plugin.createEditorIfNeeded()),
@@ -1349,15 +1338,21 @@ private:
                 if (pluginEditor != nullptr)
                 {
                     addAndMakeVisible (pluginEditor.get());
-
                     pluginEditor->setTopLeftPosition (0, 0);
+
                     lastBounds = getSizeToContainChild();
-                    isResizingParentToFitChild = true;
-                    setBounds (lastBounds);
-                    isResizingParentToFitChild = false;
+
+                    {
+                        const ScopedValueSetter<bool> resizingParentSetter (resizingParent, true);
+                        setBounds (lastBounds);
+                    }
 
                     resizeHostWindow();
                 }
+
+               #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                startTimer (500);
+               #endif
 
                 ignoreUnused (fakeMouseGenerator);
             }
@@ -1386,7 +1381,7 @@ private:
 
             void childBoundsChanged (Component*) override
             {
-                if (isResizingChildToFitParent)
+                if (resizingChild)
                     return;
 
                 auto b = getSizeToContainChild();
@@ -1394,46 +1389,38 @@ private:
                 if (lastBounds != b)
                 {
                     lastBounds = b;
-                    isResizingParentToFitChild = true;
+
+                    const ScopedValueSetter<bool> resizingParentSetter (resizingParent, true);
                     resizeHostWindow();
-                    isResizingParentToFitChild = false;
                 }
             }
-
-           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-            void checkScaleFactorIsCorrect()
-            {
-                if (auto* peer = pluginEditor->getPeer())
-                {
-                    auto peerScaleFactor = (float) peer->getPlatformScaleFactor();
-
-                    if (! approximatelyEqual (peerScaleFactor, owner.editorScaleFactor))
-                        owner.setContentScaleFactor (peerScaleFactor);
-                }
-            }
-           #endif
 
             void resized() override
             {
                 if (pluginEditor != nullptr)
                 {
-                   #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                    checkScaleFactorIsCorrect();
-                   #endif
-
-                    if (! isResizingParentToFitChild)
+                    if (! resizingParent)
                     {
-                        lastBounds = getLocalBounds();
-                        isResizingChildToFitParent = true;
+                        auto newBounds = getLocalBounds();
+
+                       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                        if (! lastBounds.isEmpty() && isWithin (newBounds.toDouble().getAspectRatio(), lastBounds.toDouble().getAspectRatio(), 0.1))
+                            return;
+                       #endif
+
+                        lastBounds = newBounds;
+
+                        const ScopedValueSetter<bool> resizingChildSetter (resizingChild, true);
 
                         if (auto* constrainer = pluginEditor->getConstrainer())
                         {
                             auto aspectRatio = constrainer->getFixedAspectRatio();
-                            auto width = (double) lastBounds.getWidth();
-                            auto height = (double) lastBounds.getHeight();
 
                             if (aspectRatio != 0)
                             {
+                                auto width = (double) lastBounds.getWidth();
+                                auto height = (double) lastBounds.getHeight();
+
                                 if (width / height > aspectRatio)
                                     setBounds ({ 0, 0, roundToInt (height * aspectRatio), lastBounds.getHeight() });
                                 else
@@ -1443,7 +1430,6 @@ private:
 
                         pluginEditor->setTopLeftPosition (0, 0);
                         pluginEditor->setBounds (pluginEditor->getLocalArea (this, getLocalBounds()));
-                        isResizingChildToFitParent = false;
                     }
                 }
             }
@@ -1463,15 +1449,10 @@ private:
 
                     if (owner.plugFrame != nullptr)
                     {
-                       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                        w = roundToInt (w * owner.editorScaleFactor);
-                        h = roundToInt (h * owner.editorScaleFactor);
-                       #endif
-
-                        ViewRect newSize (0, 0, w, h);
+                        auto newSize = convertToHostBounds ({ 0, 0, b.getWidth(), b.getHeight() });
 
                         {
-                            const ScopedValueSetter<bool> resizingParentSetter (isResizingParentToFitChild, true);
+                            const ScopedValueSetter<bool> resizingParentSetter (resizingParent, true);
                             owner.plugFrame->resizeView (&owner, &newSize);
                         }
 
@@ -1488,11 +1469,20 @@ private:
             std::unique_ptr<AudioProcessorEditor> pluginEditor;
 
         private:
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+            void timerCallback() override
+            {
+                auto hostWindowScale = (float) getScaleFactorForWindow ((HWND) owner.systemWindow);
+
+                if (hostWindowScale > 0.0 && ! approximatelyEqual (hostWindowScale, owner.editorScaleFactor))
+                    owner.setContentScaleFactor (hostWindowScale);
+            }
+           #endif
+
             JuceVST3Editor& owner;
             FakeMouseMoveGenerator fakeMouseGenerator;
             Rectangle<int> lastBounds;
-            bool isResizingChildToFitParent = false;
-            bool isResizingParentToFitChild = false;
+            bool resizingChild = false, resizingParent = false;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
         };
@@ -1525,12 +1515,12 @@ private:
         };
 
         std::unique_ptr<Cubase10WindowResizeWorkaround> cubase10Workaround;
-       #endif
-
+       #else
         float editorScaleFactor = 1.0f;
 
-       #if JUCE_WINDOWS
-        WindowsHooks hooks;
+        #if JUCE_WINDOWS
+         WindowsHooks hooks;
+        #endif
        #endif
 
         //==============================================================================

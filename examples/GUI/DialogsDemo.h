@@ -219,13 +219,9 @@ private:
         {
             AlertWindow::AlertIconType icon = AlertWindow::NoIcon;
 
-            switch (type)
-            {
-                case warningAlertWindow:    icon = AlertWindow::WarningIcon;    break;
-                case infoAlertWindow:       icon = AlertWindow::InfoIcon;       break;
-                case questionAlertWindow:   icon = AlertWindow::QuestionIcon;   break;
-                default: break;
-            }
+            if (type == warningAlertWindow)   icon = AlertWindow::WarningIcon;
+            if (type == infoAlertWindow)      icon = AlertWindow::InfoIcon;
+            if (type == questionAlertWindow)  icon = AlertWindow::QuestionIcon;
 
             AlertWindow::showMessageBoxAsync (icon, "This is an AlertWindow",
                                               "And this is the AlertWindow's message. Blah blah blah blah blah blah blah blah blah blah blah blah blah.",

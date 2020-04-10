@@ -95,7 +95,7 @@ struct ConvolutionEngine
 
         numInputSegments = (blockSize > 128 ? numSegments : 3 * numSegments);
 
-        FFTobject.reset (new FFT (roundToInt (std::log2 (FFTSize))));
+        FFTobject = std::make_unique<FFT> (roundToInt (std::log2 (FFTSize)));
 
         bufferInput.setSize      (1, static_cast<int> (FFTSize));
         bufferOutput.setSize     (1, static_cast<int> (FFTSize * 2));
@@ -643,6 +643,7 @@ struct Convolution::Pimpl  : private Thread
                 }
                 break;
 
+                case ChangeRequest::numChangeRequestTypes:
                 case ChangeRequest::changeIgnore:
                     break;
 
@@ -802,13 +803,11 @@ private:
     {
         if (currentInfo.sourceType == SourceType::sourceBinaryData)
         {
-            if (! (copyAudioStreamInAudioBuffer (new MemoryInputStream (currentInfo.sourceData, (size_t) currentInfo.sourceDataSize, false))))
-                return;
+            copyAudioStreamInAudioBuffer (std::make_unique<MemoryInputStream> (currentInfo.sourceData, (size_t) currentInfo.sourceDataSize, false));
         }
         else if (currentInfo.sourceType == SourceType::sourceAudioFile)
         {
-            if (! (copyAudioStreamInAudioBuffer (new FileInputStream (currentInfo.fileImpulseResponse))))
-                return;
+            copyAudioStreamInAudioBuffer (std::make_unique<FileInputStream> (currentInfo.fileImpulseResponse));
         }
         else if (currentInfo.sourceType == SourceType::sourceAudioBuffer)
         {
@@ -846,11 +845,11 @@ private:
     /** Converts the data from an audio file into a stereo audio buffer of floats, and
         performs resampling if necessary.
     */
-    bool copyAudioStreamInAudioBuffer (InputStream* stream)
+    bool copyAudioStreamInAudioBuffer (std::unique_ptr<InputStream> stream)
     {
         AudioFormatManager manager;
         manager.registerBasicFormats();
-        std::unique_ptr<AudioFormatReader> formatReader (manager.createReaderFor (stream));
+        std::unique_ptr<AudioFormatReader> formatReader (manager.createReaderFor (std::move (stream)));
 
         if (formatReader != nullptr)
         {

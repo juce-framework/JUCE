@@ -189,6 +189,7 @@ namespace CoreTextTypeLayout
         {
             case AttributedString::none:        return kCTLineBreakByClipping;
             case AttributedString::byChar:      return kCTLineBreakByCharWrapping;
+            case AttributedString::byWord:
             default:                            return kCTLineBreakByWordWrapping;
         }
     }
@@ -199,6 +200,7 @@ namespace CoreTextTypeLayout
         {
             case AttributedString::rightToLeft:   return kCTWritingDirectionRightToLeft;
             case AttributedString::leftToRight:   return kCTWritingDirectionLeftToRight;
+            case AttributedString::natural:
             default:                              return kCTWritingDirectionNatural;
         }
     }

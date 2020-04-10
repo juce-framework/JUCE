@@ -74,11 +74,11 @@ inline File getExamplesDirectory() noexcept
    #endif
 }
 
-inline InputStream* createAssetInputStream (const char* resourcePath)
+inline std::unique_ptr<InputStream> createAssetInputStream (const char* resourcePath)
 {
   #if JUCE_ANDROID
     ZipFile apkZip (File::getSpecialLocation (File::invokedExecutableFile));
-    return apkZip.createStreamForEntry (apkZip.getIndexOfFileName ("assets/" + String (resourcePath)));
+    return std::unique_ptr<InputStream> (apkZip.createStreamForEntry (apkZip.getIndexOfFileName ("assets/" + String (resourcePath))));
   #else
    #if JUCE_IOS
     auto assetsDir = File::getSpecialLocation (File::currentExecutableFile)

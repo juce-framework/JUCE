@@ -112,10 +112,7 @@ JUCE_IMPLEMENT_SINGLETON (InternalMessageQueue)
 struct InternalRunLoop
 {
 public:
-    InternalRunLoop()
-    {
-        fdReadCallbacks.reserve (8);
-    }
+    InternalRunLoop() = default;
 
     void registerFdCallback (int fd, std::function<void(int)>&& cb, short eventMask)
     {
@@ -186,7 +183,7 @@ public:
 private:
     CriticalSection lock;
 
-    std::vector<std::pair<int, std::function<void(int)>>> fdReadCallbacks;
+    std::list<std::pair<int, std::function<void(int)>>> fdReadCallbacks;
     std::vector<pollfd> pfds;
 };
 

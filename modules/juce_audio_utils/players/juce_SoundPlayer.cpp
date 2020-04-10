@@ -174,8 +174,8 @@ void SoundPlayer::play (const void* resourceData, size_t resourceSize)
 {
     if (resourceData != nullptr && resourceSize > 0)
     {
-        MemoryInputStream* mem = new MemoryInputStream (resourceData, resourceSize, false);
-        play (formatManager.createReaderFor (mem), true);
+        auto mem = std::make_unique<MemoryInputStream> (resourceData, resourceSize, false);
+        play (formatManager.createReaderFor (std::move (mem)), true);
     }
 }
 

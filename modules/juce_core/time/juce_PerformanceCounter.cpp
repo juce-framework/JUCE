@@ -114,7 +114,7 @@ void PerformanceCounter::printStatistics()
 {
     const String desc (getStatisticsAndReset().toString());
 
-    Logger::outputDebugString (desc);
+    Logger::writeToLog (desc);
     appendToFile (outputFile, desc);
 }
 

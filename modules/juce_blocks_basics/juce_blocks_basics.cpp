@@ -22,12 +22,6 @@
 
 #include "juce_blocks_basics.h"
 
-#if ! JUCE_HAS_CONSTEXPR
- #ifndef JUCE_DEMO_RUNNER
-  #error "The juce_blocks_basics module requires a compiler that supports constexpr"
- #endif
-#else
-
 #include <regex>
 
 namespace juce
@@ -48,5 +42,3 @@ namespace juce
 #include "topology/juce_RuleBasedTopologySource.cpp"
 #include "visualisers/juce_DrumPadLEDProgram.cpp"
 #include "visualisers/juce_BitmapLEDProgram.cpp"
-
-#endif

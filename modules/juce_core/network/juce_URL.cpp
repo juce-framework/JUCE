@@ -26,13 +26,13 @@ namespace juce
 struct FallbackDownloadTask  : public URL::DownloadTask,
                                public Thread
 {
-    FallbackDownloadTask (FileOutputStream* outputStreamToUse,
+    FallbackDownloadTask (std::unique_ptr<FileOutputStream> outputStreamToUse,
                           size_t bufferSizeToUse,
-                          WebInputStream* streamToUse,
+                          std::unique_ptr<WebInputStream> streamToUse,
                           URL::DownloadTask::Listener* listenerToUse)
         : Thread ("DownloadTask thread"),
-          fileStream (outputStreamToUse),
-          stream (streamToUse),
+          fileStream (std::move (outputStreamToUse)),
+          stream (std::move (streamToUse)),
           bufferSize (bufferSizeToUse),
           buffer (bufferSize),
           listener (listenerToUse)
@@ -110,22 +110,25 @@ void URL::DownloadTask::Listener::progress (DownloadTask*, int64, int64) {}
 URL::DownloadTask::Listener::~Listener() {}
 
 //==============================================================================
-URL::DownloadTask* URL::DownloadTask::createFallbackDownloader (const URL& urlToUse,
-                                                                const File& targetFileToUse,
-                                                                const String& extraHeadersToUse,
-                                                                Listener* listenerToUse,
-                                                                bool usePostRequest)
+std::unique_ptr<URL::DownloadTask> URL::DownloadTask::createFallbackDownloader (const URL& urlToUse,
+                                                                                const File& targetFileToUse,
+                                                                                const String& extraHeadersToUse,
+                                                                                Listener* listenerToUse,
+                                                                                bool usePostRequest)
 {
     const size_t bufferSize = 0x8000;
     targetFileToUse.deleteFile();
 
-    if (auto outputStream = std::unique_ptr<FileOutputStream> (targetFileToUse.createOutputStream (bufferSize)))
+    if (auto outputStream = targetFileToUse.createOutputStream (bufferSize))
     {
-        std::unique_ptr<WebInputStream> stream (new WebInputStream (urlToUse, usePostRequest));
+        auto stream = std::make_unique<WebInputStream> (urlToUse, usePostRequest);
         stream->withExtraHeaders (extraHeadersToUse);
 
         if (stream->connect (nullptr))
-            return new FallbackDownloadTask (outputStream.release(), bufferSize, stream.release(), listenerToUse);
+            return std::make_unique<FallbackDownloadTask> (std::move (outputStream),
+                                                           bufferSize,
+                                                           std::move (stream),
+                                                           listenerToUse);
     }
 
     return nullptr;
@@ -655,21 +658,21 @@ private:
 #endif
 
 //==============================================================================
-InputStream* URL::createInputStream (bool usePostCommand,
-                                     OpenStreamProgressCallback* progressCallback,
-                                     void* progressCallbackContext,
-                                     String headers,
-                                     int timeOutMs,
-                                     StringPairArray* responseHeaders,
-                                     int* statusCode,
-                                     int numRedirectsToFollow,
-                                     String httpRequestCmd) const
+std::unique_ptr<InputStream> URL::createInputStream (bool usePostCommand,
+                                                     OpenStreamProgressCallback* progressCallback,
+                                                     void* progressCallbackContext,
+                                                     String headers,
+                                                     int timeOutMs,
+                                                     StringPairArray* responseHeaders,
+                                                     int* statusCode,
+                                                     int numRedirectsToFollow,
+                                                     String httpRequestCmd) const
 {
     if (isLocalFile())
     {
        #if JUCE_IOS
         // We may need to refresh the embedded bookmark.
-        return new iOSFileStreamWrapper<FileInputStream> (const_cast<URL&>(*this));
+        return std::make_unique<iOSFileStreamWrapper<FileInputStream>> (const_cast<URL&>(*this));
        #else
         return getLocalFile().createInputStream();
        #endif
@@ -717,27 +720,29 @@ InputStream* URL::createInputStream (bool usePostCommand,
     if (! success || wi->isError())
         return nullptr;
 
-    return wi.release();
+    // Older GCCs complain about binding unique_ptr<WebInputStream>&& to unique_ptr<InputStream>
+    // if we just `return wi` here.
+    return std::unique_ptr<InputStream> (std::move (wi));
 }
 
 #if JUCE_ANDROID
 OutputStream* juce_CreateContentURIOutputStream (const URL&);
 #endif
 
-OutputStream* URL::createOutputStream() const
+std::unique_ptr<OutputStream> URL::createOutputStream() const
 {
     if (isLocalFile())
     {
        #if JUCE_IOS
         // We may need to refresh the embedded bookmark.
-        return new iOSFileStreamWrapper<FileOutputStream> (const_cast<URL&> (*this));
+        return std::make_unique<iOSFileStreamWrapper<FileOutputStream>> (const_cast<URL&> (*this));
        #else
-        return new FileOutputStream (getLocalFile());
+        return std::make_unique<FileOutputStream> (getLocalFile());
        #endif
     }
 
    #if JUCE_ANDROID
-    return juce_CreateContentURIOutputStream (*this);
+    return std::unique_ptr<OutputStream> (juce_CreateContentURIOutputStream (*this));
    #else
     return nullptr;
    #endif
