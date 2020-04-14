@@ -1749,7 +1749,7 @@ function(_juce_initialise_target target)
 
     # Overwrite any properties that might be inherited
     foreach(prop_string IN ITEMS ${inherited_properties})
-        if(${JUCE_ARG_${prop_string}} MATCHES ".+")
+        if(NOT ${JUCE_ARG_${prop_string}} STREQUAL "")
             set_target_properties(${target} PROPERTIES JUCE_${prop_string} "${JUCE_ARG_${prop_string}}")
         endif()
     endforeach()
