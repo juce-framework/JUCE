@@ -1437,7 +1437,13 @@ function(_juce_configure_plugin_targets target)
         if(kind IN_LIST enabled_formats)
             _juce_link_plugin_wrapper(${target} ${kind})
         endif()
+
+        if(TARGET ${target}_${kind})
+            list(APPEND active_plugin_targets ${target}_${kind})
+        endif()
     endforeach()
+
+    set_target_properties(${target} PROPERTIES JUCE_ACTIVE_PLUGIN_TARGETS "${active_plugin_targets}")
 
     if(TARGET ${target}_Standalone)
         _juce_configure_app_bundle(${target} ${target}_Standalone)
