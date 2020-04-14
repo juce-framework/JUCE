@@ -1735,6 +1735,25 @@ function(_juce_initialise_target target)
         _juce_make_absolute_and_check(JUCE_ARG_ICON_SMALL)
     endif()
 
+    set(inherited_properties
+        COMPANY_NAME
+        COMPANY_WEBSITE
+        COMPANY_EMAIL
+        COMPANY_COPYRIGHT
+        VST_COPY_DIR
+        VST3_COPY_DIR
+        AU_COPY_DIR
+        AAX_COPY_DIR
+        UNITY_COPY_DIR
+        COPY_PLUGIN_AFTER_BUILD)
+
+    # Overwrite any properties that might be inherited
+    foreach(prop_string IN ITEMS ${inherited_properties})
+        if(${JUCE_ARG_${prop_string}} MATCHES ".+")
+            set_target_properties(${target} PROPERTIES JUCE_${prop_string} "${JUCE_ARG_${prop_string}}")
+        endif()
+    endforeach()
+
     # Add each of the function arguments as target properties, so that it's easier to
     # extract them in other functions
     foreach(arg_string IN ITEMS ${one_value_args} ${multi_value_args})
