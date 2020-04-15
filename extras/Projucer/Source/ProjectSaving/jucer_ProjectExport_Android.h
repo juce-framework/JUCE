@@ -341,15 +341,32 @@ private:
             mo << "cmake_minimum_required(VERSION 3.4.1)" << newLine << newLine;
 
             if (! isLibrary())
-                mo << "SET(BINARY_NAME \"juce_jni\")" << newLine << newLine;
+                mo << "set(BINARY_NAME \"juce_jni\")" << newLine << newLine;
 
-            auto useOboe = project.getEnabledModules().isModuleEnabled ("juce_audio_devices") && project.isConfigFlagEnabled ("JUCE_USE_ANDROID_OBOE", false);
+            auto useOboe = project.getEnabledModules().isModuleEnabled ("juce_audio_devices")
+                          && project.isConfigFlagEnabled ("JUCE_USE_ANDROID_OBOE", true);
 
             if (useOboe)
             {
-                String oboePath (androidOboeRepositoryPath.get().toString().trim().quoted());
+                auto oboePath = [&]
+                {
+                    auto oboeDir = androidOboeRepositoryPath.get().toString().trim();
 
-                mo << "SET(OBOE_DIR " << oboePath << ")" << newLine << newLine;
+                    if (oboeDir.isEmpty())
+                        oboeDir = getModuleFolderRelativeToProject ("juce_audio_devices").getChildFile ("native")
+                                                                                         .getChildFile ("oboe")
+                                                                                         .rebased (getProject().getProjectFolder(), getTargetFolder(),
+                                                                                                   build_tools::RelativePath::buildTargetFolder)
+                                                                                         .toUnixStyle();
+
+                    // CMakeLists.txt is in the "app" subfolder
+                    if (! build_tools::isAbsolutePath (oboeDir))
+                        oboeDir = "../" + oboeDir;
+
+                    return expandHomeFolderToken (oboeDir);
+                }();
+
+                mo << "set(OBOE_DIR " << oboePath.quoted() << ")" << newLine << newLine;
                 mo << "add_subdirectory (${OBOE_DIR} ./oboe)" << newLine << newLine;
             }
 
@@ -371,17 +388,14 @@ private:
 
                 mo << "    \"${ANDROID_NDK}/sources/android/cpufeatures\"" << newLine;
 
-                if (useOboe)
-                    mo << "    \"${OBOE_DIR}/include\"" << newLine;
-
                 mo << ")" << newLine << newLine;
             }
 
             auto cfgExtraLinkerFlags = getExtraLinkerFlagsString();
             if (cfgExtraLinkerFlags.isNotEmpty())
             {
-                mo << "SET( JUCE_LDFLAGS \"" << cfgExtraLinkerFlags.replace ("\"", "\\\"") << "\")" << newLine;
-                mo << "SET( CMAKE_SHARED_LINKER_FLAGS  \"${CMAKE_EXE_LINKER_FLAGS} ${JUCE_LDFLAGS}\")" << newLine << newLine;
+                mo << "set( JUCE_LDFLAGS \"" << cfgExtraLinkerFlags.replace ("\"", "\\\"") << "\")" << newLine;
+                mo << "set( CMAKE_SHARED_LINKER_FLAGS  \"${CMAKE_EXE_LINKER_FLAGS} ${JUCE_LDFLAGS}\")" << newLine << newLine;
             }
 
             mo << "enable_language(ASM)" << newLine << newLine;
@@ -405,11 +419,11 @@ private:
                         && cfgHeaderPaths.size() == 0 && cfgLibraryPaths.size() == 0)
                         continue;
 
-                    mo << (first ? "IF" : "ELSEIF") << "(JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg.getProductFlavourCMakeIdentifier() <<"\")" << newLine;
+                    mo << (first ? "if" : "elseif") << "(JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg.getProductFlavourCMakeIdentifier() <<"\")" << newLine;
 
                     if (isLibrary())
                     {
-                        mo << "    SET(BINARY_NAME \"" << getNativeModuleBinaryName (cfg) << "\")" << newLine;
+                        mo << "    set(BINARY_NAME \"" << getNativeModuleBinaryName (cfg) << "\")" << newLine;
 
                         auto binaryLocation = cfg.getTargetBinaryRelativePathString();
 
@@ -419,7 +433,7 @@ private:
                                 .rebased (getProject().getFile().getParentDirectory(),
                                           file.getParentDirectory(), build_tools::RelativePath::buildTargetFolder);
 
-                            mo << "    SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY \"" << "../../../../" << locationRelativeToCmake.toUnixStyle() << "\")" << newLine;
+                            mo << "    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY \"" << "../../../../" << locationRelativeToCmake.toUnixStyle() << "\")" << newLine;
                         }
                     }
 
@@ -454,10 +468,10 @@ private:
                         for (auto& variable : cmakeVariables)
                         {
                             auto configVariable = variable + "_" + cfg.getProductFlavourCMakeIdentifier();
-                            mo << "        SET(" << configVariable << " \"${" << configVariable << "} -flto\")" << newLine;
+                            mo << "        set(" << configVariable << " \"${" << configVariable << "} -flto\")" << newLine;
                         }
 
-                        mo << "    ENDIF(" << mipsCondition << ")" << newLine;
+                        mo << "    endif()" << newLine;
                     }
 
                     first = false;
@@ -469,11 +483,11 @@ private:
 
                     if (config)
                     {
-                        if (auto* cfg = dynamic_cast<const AndroidBuildConfiguration*> (config.get()))
+                        if (dynamic_cast<const AndroidBuildConfiguration*> (config.get()) != nullptr)
                         {
-                            mo << "ELSE(JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg->getProductFlavourCMakeIdentifier() <<"\")" << newLine;
-                            mo << "    MESSAGE( FATAL_ERROR \"No matching build-configuration found.\" )" << newLine;
-                            mo << "ENDIF(JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg->getProductFlavourCMakeIdentifier() <<"\")" << newLine << newLine;
+                            mo << "else()" << newLine;
+                            mo << "    message( FATAL_ERROR \"No matching build-configuration found.\" )" << newLine;
+                            mo << "endif()" << newLine << newLine;
                         }
                     }
                 }
@@ -503,6 +517,25 @@ private:
                     mo << "set_source_files_properties(\"" << extra.first.toUnixStyle() << "\" PROPERTIES COMPILE_FLAGS " << extra.second << " )" << newLine;
 
                 mo << newLine;
+            }
+
+            auto flags = getProjectCompilerFlags();
+
+            if (flags.size() > 0)
+                mo << "target_compile_options( ${BINARY_NAME} PRIVATE " << flags.joinIntoString (" ") << " )" << newLine << newLine;
+
+            for (ConstConfigIterator config (*this); config.next();)
+            {
+                auto& cfg = dynamic_cast<const AndroidBuildConfiguration&> (*config);
+
+                mo << "if( JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg.getProductFlavourCMakeIdentifier() << "\" )" << newLine;
+                mo << "    target_compile_options( ${BINARY_NAME} PRIVATE";
+
+                for (auto& flag : cfg.getRecommendedCompilerWarningFlags())
+                    mo << " " << flag;
+
+                mo << ")" << newLine;
+                mo << "endif()" << newLine << newLine;
             }
 
             auto libraries = getAndroidLibraries();
@@ -642,9 +675,6 @@ private:
             mo << ", \"-DCMAKE_CXX_FLAGS_" << (cfg.isDebug() ? "DEBUG" : "RELEASE")
                << "=-O" << cfg.getGCCOptimisationFlag();
 
-            for (auto& flag : cfg.getRecommendedCompilerWarningFlags())
-                mo << " " << flag;
-
             mo << "\""
                << ", \"-DCMAKE_C_FLAGS_"   << (cfg.isDebug() ? "DEBUG" : "RELEASE")
                << "=-O" << cfg.getGCCOptimisationFlag()
@@ -686,8 +716,6 @@ private:
     {
         auto bundleIdentifier  = project.getBundleIdentifierString().toLowerCase();
         auto cmakeDefs         = getCmakeDefinitions();
-        auto cFlags            = getProjectCompilerFlags();
-        auto cxxFlags          = getProjectCxxCompilerFlags();
         auto minSdkVersion     = static_cast<int> (androidMinimumSDK.get());
         auto targetSdkVersion  = static_cast<int> (androidTargetSDK.get());
 
@@ -706,12 +734,6 @@ private:
         mo << "            cmake {"                                               << newLine;
 
         mo << "                arguments " << cmakeDefs.joinIntoString (", ")     << newLine;
-
-        if (cFlags.size() > 0)
-            mo << "                cFlags "   << cFlags.joinIntoString (", ")     << newLine;
-
-        if (cxxFlags.size() > 0)
-            mo << "                cppFlags " << cxxFlags.joinIntoString (", ")   << newLine;
 
         mo << "            }"                                                     << newLine;
         mo << "        }"                                                         << newLine;
@@ -1049,9 +1071,10 @@ private:
     //==============================================================================
     void createManifestExporterProperties (PropertyListBuilder& props)
     {
-        props.add (new TextPropertyComponent (androidOboeRepositoryPath, "Oboe Repository Path", 2048, false),
-                   "Path to the root of Oboe repository. Make sure to point Oboe repository to "
-                   "commit with SHA c5c3cc17f78974bf005bf33a2de1a093ac55cc07 before building.");
+        props.add (new TextPropertyComponent (androidOboeRepositoryPath, "Custom Oboe Repository", 2048, false),
+                   "Path to the root of Oboe repository. This path can be absolute, or relative to the build directory. "
+                   "Make sure to point Oboe repository to commit with SHA c5c3cc17f78974bf005bf33a2de1a093ac55cc07 before building. "
+                   "Leave blank to use the version of Oboe distributed with JUCE.");
 
         props.add (new ChoicePropertyComponent (androidInternetNeeded, "Internet Access"),
                    "If enabled, this will set the android.permission.INTERNET flag in the manifest.");
@@ -1374,6 +1397,19 @@ private:
         cmakeArgs.add ("\"-DANDROID_ARM_MODE=arm\"");
         cmakeArgs.add ("\"-DANDROID_ARM_NEON=TRUE\"");
 
+        auto cppStandard = [this]
+        {
+            auto projectStandard = project.getCppStandardString();
+
+            if (projectStandard == "latest")
+                return String ("17");
+
+            return projectStandard;
+        }();
+
+        cmakeArgs.add ("\"-DCMAKE_CXX_STANDARD=" + cppStandard + "\"");
+        cmakeArgs.add ("\"-DCMAKE_CXX_EXTENSIONS=" + String (shouldUseGNUExtensions() ? "ON" : "OFF") + "\"");
+
         return cmakeArgs;
     }
 
@@ -1386,34 +1422,11 @@ private:
         return cFlags;
     }
 
-    StringArray getAndroidCxxCompilerFlags() const
-    {
-        auto cxxFlags = getAndroidCompilerFlags();
-
-        auto cppStandard = project.getCppStandardString();
-
-        if (cppStandard == "latest" || cppStandard == "17") // C++17 flag isn't supported yet so use 1z for now
-            cppStandard = "1z";
-
-        cppStandard = "-std=" + String (shouldUseGNUExtensions() ? "gnu++" : "c++") + cppStandard;
-
-        cxxFlags.add (cppStandard.quoted());
-
-        return cxxFlags;
-    }
-
     StringArray getProjectCompilerFlags() const
     {
         auto cFlags = getAndroidCompilerFlags();
         cFlags.addArray (getEscapedFlags (StringArray::fromTokens (getExtraCompilerFlagsString(), true)));
         return cFlags;
-    }
-
-    StringArray getProjectCxxCompilerFlags() const
-    {
-        auto cxxFlags = getAndroidCxxCompilerFlags();
-        cxxFlags.addArray (getEscapedFlags (StringArray::fromTokens (getExtraCompilerFlagsString(), true)));
-        return cxxFlags;
     }
 
     //==============================================================================

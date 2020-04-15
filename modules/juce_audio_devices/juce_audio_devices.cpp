@@ -167,7 +167,11 @@
    #error "Oboe cannot be enabled at the same time as openSL! Please disable JUCE_USE_ANDROID_OPENSLES"
   #endif
 
-  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunused-parameter")
+  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunused-parameter",
+                                       "-Wzero-as-null-pointer-constant",
+                                       "-Winconsistent-missing-destructor-override",
+                                       "-Wshadow-field-in-constructor",
+                                       "-Wshadow-field")
    #include <oboe/Oboe.h>
   JUCE_END_IGNORE_WARNINGS_GCC_LIKE
  #endif

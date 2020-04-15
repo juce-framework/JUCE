@@ -152,7 +152,7 @@ public:
         jassert (inputDeviceId != -1 || outputDeviceId != -1);
     }
 
-    ~OboeAudioIODevice()
+    ~OboeAudioIODevice() override
     {
         close();
     }
@@ -420,11 +420,11 @@ private:
         OboeStream (int deviceId, oboe::Direction direction,
                     oboe::SharingMode sharingMode,
                     int channelCount, oboe::AudioFormat format,
-                    int32 sampleRate, int32 bufferSize,
-                    oboe::AudioStreamCallback* callback = nullptr)
+                    int32 sampleRateIn, int32 bufferSize,
+                    oboe::AudioStreamCallback* callbackIn = nullptr)
         {
             open (deviceId, direction, sharingMode, channelCount,
-                  format, sampleRate, bufferSize, callback);
+                  format, sampleRateIn, bufferSize, callbackIn);
         }
 
         ~OboeStream()
@@ -692,11 +692,11 @@ private:
     {
     public:
         OboeSessionImpl (OboeAudioIODevice& ownerToUse,
-                         int inputDeviceId, int outputDeviceId,
+                         int inputDeviceIdIn, int outputDeviceIdIn,
                          int numInputChannelsToUse, int numOutputChannelsToUse,
                          int sampleRateToUse, int bufferSizeToUse)
             : OboeSessionBase (ownerToUse,
-                               inputDeviceId, outputDeviceId,
+                               inputDeviceIdIn, outputDeviceIdIn,
                                numInputChannelsToUse, numOutputChannelsToUse,
                                sampleRateToUse, bufferSizeToUse,
                                OboeAudioIODeviceBufferHelpers<SampleType>::oboeAudioFormat(),
@@ -740,7 +740,7 @@ private:
             if (stream == nullptr || ! openedOk())
                 return false;
 
-            auto result = stream->getNativeStream()->getTimestamp (CLOCK_MONOTONIC, 0, 0);
+            auto result = stream->getNativeStream()->getTimestamp (CLOCK_MONOTONIC, nullptr, nullptr);
             return result != oboe::Result::ErrorUnimplemented;
         }
 
@@ -1135,9 +1135,9 @@ public:
         jclass audioManagerClass = env->FindClass ("android/media/AudioManager");
 
         // We should be really entering here only if API supports it.
-        jassert (audioManagerClass != 0);
+        jassert (audioManagerClass != nullptr);
 
-        if (audioManagerClass == 0)
+        if (audioManagerClass == nullptr)
             return;
 
         auto audioManager = LocalRef<jobject> (env->CallObjectMethod (getAppContext().get(),
@@ -1256,7 +1256,7 @@ public:
     {
         auto* env = getEnv();
 
-        jint* jArrayElems = env->GetIntArrayElements (jArray, 0);
+        jint* jArrayElems = env->GetIntArrayElements (jArray, nullptr);
         int numElems = env->GetArrayLength (jArray);
 
         Array<int> juceArray;

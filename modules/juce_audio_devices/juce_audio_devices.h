@@ -132,18 +132,10 @@
 #endif
 
 /** Config: JUCE_USE_ANDROID_OBOE
-    ***
-    DEVELOPER PREVIEW - Oboe is currently in developer preview and
-    is in active development. This preview allows for early access
-    and evaluation for developers targeting Android platform.
-    ***
-
-    Enables Oboe devices (Android only, API 16 or above). Requires
-    Oboe repository path to be specified in Android exporter.
+    Enables Oboe devices (Android only, API 16 or above).
 */
-
 #ifndef JUCE_USE_ANDROID_OBOE
- #define JUCE_USE_ANDROID_OBOE 0
+ #define JUCE_USE_ANDROID_OBOE 1
 #endif
 
 #if JUCE_USE_ANDROID_OBOE && JUCE_ANDROID_API_VERSION < 16
