@@ -96,8 +96,3 @@ install(FILES "${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/copyDir.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/JUCEUtils.cmake"
         DESTINATION "${JUCE_INSTALL_DESTINATION}")
-
-install(FILES "${JUCE_SOURCE_DIR}/LICENSE.md"
-    DESTINATION "${JUCE_INSTALL_DESTINATION}"
-    RENAME COPYRIGHT)
-
