@@ -637,7 +637,7 @@ function(_juce_write_configure_time_info target)
     _juce_append_target_property(file_content PLUGIN_MANUFACTURER                  ${target} JUCE_COMPANY_NAME)
     _juce_append_target_property(file_content PLUGIN_DESCRIPTION                   ${target} JUCE_DESCRIPTION)
     _juce_append_target_property(file_content PLUGIN_AU_EXPORT_PREFIX              ${target} JUCE_AU_EXPORT_PREFIX)
-    _juce_append_target_property(file_content PLUGIN_AU_MAIN_TYPE                  ${target} JUCE_AU_MAIN_TYPE)
+    _juce_append_target_property(file_content PLUGIN_AU_MAIN_TYPE                  ${target} JUCE_AU_MAIN_TYPE_CODE)
     _juce_append_target_property(file_content IS_AU_SANDBOX_SAFE                   ${target} JUCE_AU_SANDBOX_SAFE)
     _juce_append_target_property(file_content IS_PLUGIN_SYNTH                      ${target} JUCE_IS_SYNTH)
     _juce_append_target_property(file_content HARDENED_RUNTIME_ENABLED             ${target} JUCE_HARDENED_RUNTIME_ENABLED)
@@ -1405,7 +1405,7 @@ function(_juce_configure_plugin_targets target)
         JucePlugin_VSTUniqueID=JucePlugin_PluginCode
         JucePlugin_VSTCategory=$<TARGET_PROPERTY:${target},JUCE_VST2_CATEGORY>
         JucePlugin_Vst3Category="${vst3_category_string}"
-        JucePlugin_AUMainType=$<TARGET_PROPERTY:${target},JUCE_AU_MAIN_TYPE>
+        JucePlugin_AUMainType=$<TARGET_PROPERTY:${target},JUCE_AU_MAIN_TYPE_CODE>
         JucePlugin_AUSubType=JucePlugin_PluginCode
         JucePlugin_AUExportPrefix=$<TARGET_PROPERTY:${target},JUCE_AU_EXPORT_PREFIX>
         JucePlugin_AUExportPrefixQuoted="$<TARGET_PROPERTY:${target},JUCE_AU_EXPORT_PREFIX>"
@@ -1572,19 +1572,52 @@ function(_juce_set_fallback_properties target)
 
     # AU MAIN TYPE
     if(is_midi_effect)
-        _juce_set_property_if_not_set(${target} AU_MAIN_TYPE 'aumi')
+        _juce_set_property_if_not_set(${target} AU_MAIN_TYPE kAudioUnitType_MIDIProcessor)
     elseif(is_synth)
-        _juce_set_property_if_not_set(${target} AU_MAIN_TYPE 'aumu')
+        _juce_set_property_if_not_set(${target} AU_MAIN_TYPE kAudioUnitType_MusicDevice)
     elseif(needs_midi_input)
-        _juce_set_property_if_not_set(${target} AU_MAIN_TYPE 'aumf')
+        _juce_set_property_if_not_set(${target} AU_MAIN_TYPE kAudioUnitType_MusicEffect)
     else()
-        _juce_set_property_if_not_set(${target} AU_MAIN_TYPE 'aufx')
+        _juce_set_property_if_not_set(${target} AU_MAIN_TYPE kAudioUnitType_Effect)
     endif()
+
+    set(au_category_codes
+        'aufx'
+        'aufc'
+        'augn'
+        'aumi'
+        'aumx'
+        'aumu'
+        'aumf'
+        'auol'
+        'auou'
+        'aupn')
+
+    set(au_category_strings
+        kAudioUnitType_Effect
+        kAudioUnitType_FormatConverter
+        kAudioUnitType_Generator
+        kAudioUnitType_MIDIProcessor
+        kAudioUnitType_Mixer
+        kAudioUnitType_MusicDevice
+        kAudioUnitType_MusicEffect
+        kAudioUnitType_OfflineEffect
+        kAudioUnitType_Output
+        kAudioUnitType_Panner)
 
     # AU export prefix
     string(MAKE_C_IDENTIFIER ${output_name} au_prefix)
     set(au_prefix "${au_prefix}AU")
     _juce_set_property_if_not_set(${target} AU_EXPORT_PREFIX ${au_prefix})
+
+    # Find appropriate AU category code
+    get_target_property(actual_au_category ${target} JUCE_AU_MAIN_TYPE)
+    list(FIND au_category_strings ${actual_au_category} au_index)
+
+    if(au_index GREATER_EQUAL 0)
+        list(GET au_category_codes ${au_index} au_code_representation)
+        set_target_properties(${target} PROPERTIES JUCE_AU_MAIN_TYPE_CODE ${au_code_representation})
+    endif()
 
     # AAX category
     set(aax_category_ints
