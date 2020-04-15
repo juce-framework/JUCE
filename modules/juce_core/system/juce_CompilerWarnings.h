@@ -30,7 +30,8 @@
 */
 #define JUCE_NTH_ARG_(_00, _01, _02, _03, _04, _05, _06, _07, _08, _09,        \
                       _10, _11, _12, _13, _14, _15, _16, _17, _18, _19,        \
-                      _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, N, ...)\
+                      _20, _21, _22, _23, _24, _25, _26, _27, _28, _29,        \
+                      _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, N, ...)\
     N
 
 #define JUCE_EACH_00_(FN)
@@ -63,10 +64,30 @@
 #define JUCE_EACH_27_(FN, X, ...) FN(X) JUCE_EACH_26_(FN, __VA_ARGS__)
 #define JUCE_EACH_28_(FN, X, ...) FN(X) JUCE_EACH_27_(FN, __VA_ARGS__)
 #define JUCE_EACH_29_(FN, X, ...) FN(X) JUCE_EACH_28_(FN, __VA_ARGS__)
+#define JUCE_EACH_30_(FN, X, ...) FN(X) JUCE_EACH_29_(FN, __VA_ARGS__)
+#define JUCE_EACH_31_(FN, X, ...) FN(X) JUCE_EACH_30_(FN, __VA_ARGS__)
+#define JUCE_EACH_32_(FN, X, ...) FN(X) JUCE_EACH_31_(FN, __VA_ARGS__)
+#define JUCE_EACH_33_(FN, X, ...) FN(X) JUCE_EACH_32_(FN, __VA_ARGS__)
+#define JUCE_EACH_34_(FN, X, ...) FN(X) JUCE_EACH_33_(FN, __VA_ARGS__)
+#define JUCE_EACH_35_(FN, X, ...) FN(X) JUCE_EACH_34_(FN, __VA_ARGS__)
+#define JUCE_EACH_36_(FN, X, ...) FN(X) JUCE_EACH_35_(FN, __VA_ARGS__)
+#define JUCE_EACH_37_(FN, X, ...) FN(X) JUCE_EACH_36_(FN, __VA_ARGS__)
+#define JUCE_EACH_38_(FN, X, ...) FN(X) JUCE_EACH_37_(FN, __VA_ARGS__)
+#define JUCE_EACH_39_(FN, X, ...) FN(X) JUCE_EACH_38_(FN, __VA_ARGS__)
 
 /** Apply the macro FN to each of the other arguments. */
 #define JUCE_EACH(FN, ...)                                                     \
     JUCE_NTH_ARG_(, ##__VA_ARGS__,                                             \
+                  JUCE_EACH_39_,                                               \
+                  JUCE_EACH_38_,                                               \
+                  JUCE_EACH_37_,                                               \
+                  JUCE_EACH_36_,                                               \
+                  JUCE_EACH_35_,                                               \
+                  JUCE_EACH_34_,                                               \
+                  JUCE_EACH_33_,                                               \
+                  JUCE_EACH_32_,                                               \
+                  JUCE_EACH_31_,                                               \
+                  JUCE_EACH_30_,                                               \
                   JUCE_EACH_29_,                                               \
                   JUCE_EACH_28_,                                               \
                   JUCE_EACH_27_,                                               \
