@@ -158,7 +158,7 @@ function(juce_add_bundle_resources_directory target folder)
     get_filename_component(folder_parent_path "${folder}" DIRECTORY)
     file(GLOB_RECURSE resources RELATIVE "${folder_parent_path}" "${folder}/*")
 
-    foreach(file IN ITEMS ${resources})
+    foreach(file IN LISTS resources)
         target_sources(${target} PRIVATE "${folder_parent_path}/${file}")
         get_filename_component(resource_parent_path "${file}" DIRECTORY)
         set_source_files_properties("${folder_parent_path}/${file}" PROPERTIES
@@ -190,7 +190,7 @@ function(_juce_extract_metadata_block delim_str file_with_block out_dict)
     set(last_written_key)
     set(append NO)
 
-    foreach(line IN ITEMS ${module_header_contents})
+    foreach(line IN LISTS module_header_contents)
         if(NOT append)
             if(line MATCHES " *BEGIN_${delim_str} *")
                 set(append YES)
@@ -283,7 +283,7 @@ function(_juce_add_plugin_definitions target visibility)
     _juce_get_all_plugin_kinds(options)
     cmake_parse_arguments(JUCE_ARG "${options}" "" "" ${ARGN})
 
-    foreach(opt IN ITEMS ${options})
+    foreach(opt IN LISTS options)
         set(flag_value 0)
 
         if(JUCE_ARG_${opt})
@@ -410,7 +410,7 @@ function(juce_add_module module_path)
     if(${module_name} STREQUAL "juce_audio_plugin_client")
         _juce_get_platform_plugin_kinds(plugin_kinds)
 
-        foreach(kind IN ITEMS ${plugin_kinds})
+        foreach(kind IN LISTS plugin_kinds)
             _juce_add_plugin_wrapper_target(FORMAT ${kind}
                 PATH "${module_path}"
                 OUT_PATH "${base_path}"
@@ -475,14 +475,22 @@ function(juce_add_module module_path)
     if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         _juce_get_metadata("${metadata_dict}" OSXFrameworks module_osxframeworks)
 
-        foreach(module_framework IN ITEMS ${module_osxframeworks})
+        foreach(module_framework IN LISTS module_osxframeworks)
+            if(module_framework STREQUAL "")
+                continue()
+            endif()
+
             find_library("${module_name}_${module_framework}" ${module_framework} REQUIRED)
             target_link_libraries(${module_name} INTERFACE "${${module_name}_${module_framework}}")
         endforeach()
     elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
         _juce_get_metadata("${metadata_dict}" iOSFrameworks module_iosframeworks)
 
-        foreach(module_framework IN ITEMS ${module_iosframeworks})
+        foreach(module_framework IN LISTS module_iosframeworks)
+            if(module_framework STREQUAL "")
+                continue()
+            endif()
+
             find_library("${module_name}_${module_framework}" ${module_framework} REQUIRED)
             target_link_libraries(${module_name} INTERFACE "${${module_name}_${module_framework}}")
         endforeach()
@@ -523,7 +531,7 @@ function(juce_add_modules)
     set(one_value_args INSTALL_PATH INSTALL_EXPORT ALIAS_NAMESPACE)
     cmake_parse_arguments(JUCE_ARG "" "${one_value_args}" "" ${ARGN})
 
-    foreach(path IN ITEMS ${JUCE_ARG_UNPARSED_ARGUMENTS})
+    foreach(path IN LISTS JUCE_ARG_UNPARSED_ARGUMENTS)
         juce_add_module(${path}
             INSTALL_PATH "${JUCE_ARG_INSTALL_PATH}"
             INSTALL_EXPORT "${JUCE_ARG_INSTALL_EXPORT}"
@@ -1433,7 +1441,7 @@ function(_juce_configure_plugin_targets target)
 
     _juce_get_platform_plugin_kinds(plugin_kinds)
 
-    foreach(kind IN ITEMS ${plugin_kinds})
+    foreach(kind IN LISTS plugin_kinds)
         if(kind IN_LIST enabled_formats)
             _juce_link_plugin_wrapper(${target} ${kind})
         endif()
@@ -1781,7 +1789,7 @@ function(_juce_initialise_target target)
         COPY_PLUGIN_AFTER_BUILD)
 
     # Overwrite any properties that might be inherited
-    foreach(prop_string IN ITEMS ${inherited_properties})
+    foreach(prop_string IN LISTS inherited_properties)
         if(NOT ${JUCE_ARG_${prop_string}} STREQUAL "")
             set_target_properties(${target} PROPERTIES JUCE_${prop_string} "${JUCE_ARG_${prop_string}}")
         endif()
@@ -1789,7 +1797,7 @@ function(_juce_initialise_target target)
 
     # Add each of the function arguments as target properties, so that it's easier to
     # extract them in other functions
-    foreach(arg_string IN ITEMS ${one_value_args} ${multi_value_args})
+    foreach(arg_string IN LISTS one_value_args multi_value_args)
         _juce_set_property_if_not_set(${target} ${arg_string} "${JUCE_ARG_${arg_string}}")
     endforeach()
 
@@ -1845,7 +1853,7 @@ function(_juce_target_args_from_plugin_characteristics out_var)
 
     set(result)
 
-    foreach(pair IN ITEMS ${pairs})
+    foreach(pair IN LISTS pairs)
         list(GET pair 0 old_key)
 
         if("${old_key}" IN_LIST ARGN)
@@ -1864,7 +1872,7 @@ function(_juce_get_pip_targets pip out_var)
 
     _juce_get_all_plugin_kinds(plugin_kinds)
 
-    foreach(plugin_kind IN ITEMS ${plugin_kinds})
+    foreach(plugin_kind IN LISTS plugin_kinds)
         list(APPEND test_targets "${JUCE_PIP_NAME}_${plugin_kind}")
     endforeach()
 
@@ -1963,7 +1971,11 @@ function(juce_add_pip header)
 
     juce_generate_juce_header(${JUCE_PIP_NAME})
 
-    foreach(module IN ITEMS ${pip_dependencies})
+    foreach(module IN LISTS pip_dependencies)
+        if(module STREQUAL "")
+            continue()
+        endif()
+
         set(discovered_module)
 
         # If we're building a PIP from outside the current build tree, the JUCE modules
@@ -2009,7 +2021,7 @@ function(juce_add_pip header)
         target_include_directories(${JUCE_PIP_NAME} PRIVATE "${pip_parent_path}")
 
         if((CMAKE_SYSTEM_NAME STREQUAL "iOS") AND (header MATCHES "^${JUCE_SOURCE_DIR}"))
-            foreach(target_name IN ITEMS ${pip_targets})
+            foreach(target_name IN LISTS pip_targets)
                 if(TARGET "${target_name}")
                     juce_add_bundle_resources_directory("${target_name}" "${JUCE_SOURCE_DIR}/examples/Assets")
                 endif()
