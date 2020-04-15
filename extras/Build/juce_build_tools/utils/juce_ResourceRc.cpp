@@ -20,13 +20,6 @@ namespace juce
 {
 namespace build_tools
 {
-    static void writeRCValue (MemoryOutputStream& mo, const String& n, const String& value)
-    {
-        if (value.isNotEmpty())
-            mo << "      VALUE \"" << n << "\",  \""
-               << addEscapeChars (value) << "\\0\"" << newLine;
-    }
-
     static String getCommaSeparatedVersionNumber (const String& version)
     {
         auto versionParts = StringArray::fromTokens (version, ",.", "");
@@ -42,7 +35,9 @@ namespace build_tools
     {
         MemoryOutputStream mo;
 
-        mo << "#ifdef JUCE_USER_DEFINED_RC_FILE" << newLine
+        mo << "#pragma code_page(65001)" << newLine
+           << newLine
+           << "#ifdef JUCE_USER_DEFINED_RC_FILE" << newLine
            << " #include JUCE_USER_DEFINED_RC_FILE" << newLine
            << "#else" << newLine
            << newLine
@@ -58,12 +53,19 @@ namespace build_tools
            << "    BLOCK \"040904E4\"" << newLine
            << "    BEGIN" << newLine;
 
-        writeRCValue (mo, "CompanyName",     companyName);
-        writeRCValue (mo, "LegalCopyright",  companyCopyright);
-        writeRCValue (mo, "FileDescription", projectName);
-        writeRCValue (mo, "FileVersion",     version);
-        writeRCValue (mo, "ProductName",     projectName);
-        writeRCValue (mo, "ProductVersion",  version);
+        const auto writeRCValue = [&] (const String& n, const String& value)
+        {
+            if (value.isNotEmpty())
+                mo << "      VALUE \"" << n << "\",  \""
+                   << value.replace ("\"", "\"\"") << "\\0\"" << newLine;
+        };
+
+        writeRCValue ("CompanyName",     companyName);
+        writeRCValue ("LegalCopyright",  companyCopyright);
+        writeRCValue ("FileDescription", projectName);
+        writeRCValue ("FileVersion",     version);
+        writeRCValue ("ProductName",     projectName);
+        writeRCValue ("ProductVersion",  version);
 
         mo << "    END" << newLine
            << "  END" << newLine

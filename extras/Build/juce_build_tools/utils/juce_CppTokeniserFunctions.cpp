@@ -195,20 +195,5 @@ namespace build_tools
             }
         }
     }
-
-    /** Takes a string and returns a version of it where standard C++ escape sequences have been
-        used to replace any non-ascii bytes.
-
-        Although not strictly a tokenising function, this is still a function that often comes in
-        handy when working with C++ code!
-
-        @see writeEscapeChars
-    */
-    static String addEscapeChars (const String& s)
-    {
-        MemoryOutputStream mo;
-        writeEscapeChars (mo, s.toRawUTF8(), -1, -1, false, true, true);
-        return mo.toString();
-    }
 }
 }
