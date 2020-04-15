@@ -194,7 +194,7 @@ public:
 
     Array<int> getAvailableBufferSizes() override
     {
-        return AndroidHighPerformanceAudioHelpers::getAvailableBufferSizes (getAvailableSampleRates());
+        return AndroidHighPerformanceAudioHelpers::getAvailableBufferSizes (getNativeBufferSize(), getAvailableSampleRates());
     }
 
     String open (const BigInteger& inputChannels, const BigInteger& outputChannels,
@@ -262,7 +262,7 @@ public:
 
     int getDefaultBufferSize() override
     {
-        return AndroidHighPerformanceAudioHelpers::getDefaultBufferSize (getCurrentSampleRate());
+        return AndroidHighPerformanceAudioHelpers::getDefaultBufferSize (getNativeBufferSize(), getCurrentSampleRate());
     }
 
     double getCurrentSampleRate() override
@@ -369,6 +369,30 @@ private:
             rates.add (native);
 
         return rates;
+    }
+
+    static int getNativeBufferSize()
+    {
+        auto bufferSizeHint = AndroidHighPerformanceAudioHelpers::getNativeBufferSizeHint();
+
+        // NB: Exclusive mode could be rejected if a device is already opened in that mode, so to get
+        //     reliable results, only use this function when a device is closed.
+        //     We initially try to open a stream with a buffer size returned from
+        //     android.media.property.OUTPUT_FRAMES_PER_BUFFER property, but then we verify the actual
+        //     size after the stream is open.
+        OboeAudioIODevice::OboeStream tempStream (-1,
+                                                  oboe::Direction::Output,
+                                                  oboe::SharingMode::Exclusive,
+                                                  2,
+                                                  getAndroidSDKVersion() >= 21 ? oboe::AudioFormat::Float : oboe::AudioFormat::I16,
+                                                  (int) AndroidHighPerformanceAudioHelpers::getNativeSampleRate(),
+                                                  bufferSizeHint,
+                                                  nullptr);
+
+        if (auto* nativeStream = tempStream.getNativeStream())
+            return nativeStream->getFramesPerBurst();
+
+        return bufferSizeHint;
     }
 
     void setCallback (AudioIODeviceCallback* callbackToUse)
@@ -499,7 +523,7 @@ private:
                    int32 newSampleRate, int32 newBufferSize,
                    oboe::AudioStreamCallback* newCallback = nullptr)
         {
-            oboe::DefaultStreamValues::FramesPerBurst = AndroidHighPerformanceAudioHelpers::getNativeBufferSize();
+            oboe::DefaultStreamValues::FramesPerBurst = AndroidHighPerformanceAudioHelpers::getNativeBufferSizeHint();
 
             oboe::AudioStreamBuilder builder;
 
@@ -1063,7 +1087,7 @@ public:
                                forInput ? 1 : 2,
                                getAndroidSDKVersion() >= 21 ? oboe::AudioFormat::Float : oboe::AudioFormat::I16,
                                (int) AndroidHighPerformanceAudioHelpers::getNativeSampleRate(),
-                               AndroidHighPerformanceAudioHelpers::getNativeBufferSize(),
+                               AndroidHighPerformanceAudioHelpers::getNativeBufferSizeHint(),
                                nullptr);
 
         if (auto* nativeStream = tempStream.getNativeStream())
@@ -1329,7 +1353,7 @@ public:
                                       1,
                                       oboe::AudioFormat::Float,
                                       (int) AndroidHighPerformanceAudioHelpers::getNativeSampleRate(),
-                                      AndroidHighPerformanceAudioHelpers::getNativeBufferSize(),
+                                      OboeAudioIODevice::getNativeBufferSize(),
                                       this)),
           formatUsed (oboe::AudioFormat::Float)
     {
@@ -1342,7 +1366,7 @@ public:
                                               1,
                                               oboe::AudioFormat::I16,
                                               (int) AndroidHighPerformanceAudioHelpers::getNativeSampleRate(),
-                                              AndroidHighPerformanceAudioHelpers::getNativeBufferSize(),
+                                              OboeAudioIODevice::getNativeBufferSize(),
                                               this));
 
             formatUsed = oboe::AudioFormat::I16;

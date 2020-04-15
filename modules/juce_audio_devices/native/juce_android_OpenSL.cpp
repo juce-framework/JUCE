@@ -866,7 +866,8 @@ public:
 
     Array<int> getAvailableBufferSizes() override
     {
-        return AndroidHighPerformanceAudioHelpers::getAvailableBufferSizes (getAvailableSampleRates());
+        return AndroidHighPerformanceAudioHelpers::getAvailableBufferSizes (AndroidHighPerformanceAudioHelpers::getNativeBufferSizeHint(),
+                                                                            getAvailableSampleRates());
     }
 
     String open (const BigInteger& inputChannels,
@@ -883,8 +884,13 @@ public:
 
         audioBuffersToEnqueue = [this, preferredBufferSize]
         {
-            if (AndroidHighPerformanceAudioHelpers::canUseHighPerformanceAudioPath (preferredBufferSize, sampleRate))
-                return preferredBufferSize / AndroidHighPerformanceAudioHelpers::getNativeBufferSize();
+            using namespace AndroidHighPerformanceAudioHelpers;
+
+            auto nativeBufferSize = getNativeBufferSizeHint();
+
+            if (canUseHighPerformanceAudioPath (nativeBufferSize, preferredBufferSize, sampleRate))
+                return preferredBufferSize / nativeBufferSize;
+
 
             return 1;
         }();
@@ -930,7 +936,7 @@ public:
 
         DBG ("OpenSL: numInputChannels = " << numInputChannels
              << ", numOutputChannels = " << numOutputChannels
-             << ", nativeBufferSize = " << AndroidHighPerformanceAudioHelpers::getNativeBufferSize()
+             << ", nativeBufferSize = " << AndroidHighPerformanceAudioHelpers::getNativeBufferSizeHint()
              << ", nativeSampleRate = " << AndroidHighPerformanceAudioHelpers::getNativeSampleRate()
              << ", actualBufferSize = " << actualBufferSize
              << ", audioBuffersToEnqueue = " << audioBuffersToEnqueue
@@ -964,7 +970,8 @@ public:
 
     int getDefaultBufferSize() override
     {
-        return AndroidHighPerformanceAudioHelpers::getDefaultBufferSize (getCurrentSampleRate());
+        return AndroidHighPerformanceAudioHelpers::getDefaultBufferSize (AndroidHighPerformanceAudioHelpers::getNativeBufferSizeHint(),
+                                                                         getCurrentSampleRate());
     }
 
     double getCurrentSampleRate() override
@@ -1272,7 +1279,7 @@ private:
     SlRef<SLPlayItf_>      player;
     SlRef<SLAndroidSimpleBufferQueueItf_> queue;
 
-    int bufferSize = AndroidHighPerformanceAudioHelpers::getNativeBufferSize();
+    int bufferSize = AndroidHighPerformanceAudioHelpers::getNativeBufferSizeHint();
     HeapBlock<int16> buffer { HeapBlock<int16> (static_cast<size_t> (1 * bufferSize * numBuffers)) };
 
     void* (*threadEntryProc) (void*) = nullptr;
