@@ -368,15 +368,15 @@ void MainHostWindow::addPluginsToMenu (PopupMenu& m)
 
     m.addSeparator();
 
-    auto pluginDescriptionsToShow = knownPluginList.getTypes();
+    pluginDescriptions = knownPluginList.getTypes();
 
     // This avoids showing the internal types again later on in the list
-    pluginDescriptionsToShow.removeIf ([] (PluginDescription& desc)
+    pluginDescriptions.removeIf ([] (PluginDescription& desc)
     {
         return desc.pluginFormatName == InternalPluginFormat::getIdentifier();
     });
 
-    KnownPluginList::addToMenu (m, pluginDescriptionsToShow, pluginSortMethod);
+    KnownPluginList::addToMenu (m, pluginDescriptions, pluginSortMethod);
 }
 
 PluginDescription MainHostWindow::getChosenType (const int menuID) const
