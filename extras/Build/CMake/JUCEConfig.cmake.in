@@ -30,9 +30,11 @@ if(_IMPORT_PREFIX STREQUAL "/")
     set(_IMPORT_PREFIX "")
 endif()
 
-add_executable(juce::juceaide IMPORTED)
-set_target_properties(juce::juceaide PROPERTIES
-    IMPORTED_LOCATION "${_IMPORT_PREFIX}/@JUCE_CMAKE_BINARY_BUILDER_NAME@")
+if(NOT TARGET juce::juceaide)
+    add_executable(juce::juceaide IMPORTED)
+    set_target_properties(juce::juceaide PROPERTIES
+        IMPORTED_LOCATION "${_IMPORT_PREFIX}/@JUCE_CMAKE_BINARY_BUILDER_NAME@")
+endif()
 
 set(_IMPORT_PREFIX)
 
