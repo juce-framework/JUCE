@@ -2164,6 +2164,7 @@ public:
             q->clear();
         }
 
+        midiMessages.clear();
         MidiEventList::toMidiBuffer (midiMessages, *midiOutputs);
 
         inputParameterChanges->clearAllQueues();
