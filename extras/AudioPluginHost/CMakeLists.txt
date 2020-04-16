@@ -30,6 +30,7 @@ target_sources(AudioPluginHost PRIVATE
     Source/UI/MainHostWindow.cpp)
 
 target_compile_definitions(AudioPluginHost PRIVATE
+    PIP_JUCE_EXAMPLES_DIRECTORY_STRING="${JUCE_SOURCE_DIR}/examples"
     JUCE_ALSA=1
     JUCE_DIRECTSOUND=1
     JUCE_PLUGINHOST_AU=1
@@ -41,7 +42,7 @@ target_compile_definitions(AudioPluginHost PRIVATE
     JUCE_USE_CDREADER=0
     JUCE_USE_CURL=0
     JUCE_USE_FLAC=0
-    JUCE_USE_OGGVORBIS=0
+    JUCE_USE_OGGVORBIS=1
     JUCE_WASAPI=1
     JUCE_WEB_BROWSER=0)
 

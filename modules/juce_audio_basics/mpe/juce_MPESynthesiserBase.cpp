@@ -110,13 +110,13 @@ void MPESynthesiserBase::renderNextBlock (AudioBuffer<floatType>& outputAudio,
     // you must set the sample rate before using this!
     jassert (sampleRate != 0);
 
-    const auto midiIterator = inputMidi.findNextSamplePosition (startSample);
+    auto midiIterator = inputMidi.findNextSamplePosition (startSample);
 
     bool firstEvent = true;
 
     const ScopedLock sl (noteStateLock);
 
-    while (numSamples > 0)
+    for (; numSamples > 0; ++midiIterator)
     {
         if (midiIterator == inputMidi.cend())
         {

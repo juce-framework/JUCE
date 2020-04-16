@@ -169,7 +169,7 @@ void Synthesiser::processNextBlock (AudioBuffer<floatType>& outputAudio,
 
     const ScopedLock sl (lock);
 
-    while (numSamples > 0)
+    for (; numSamples > 0; ++midiIterator)
     {
         if (midiIterator == midiData.cend())
         {
