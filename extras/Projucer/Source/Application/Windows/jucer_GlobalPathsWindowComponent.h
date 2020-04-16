@@ -193,8 +193,6 @@ private:
                      "If you are building a legacy VST plug-in then this path should point to a VST2 SDK. "
                      "The VST2 SDK can be obtained from the vstsdk3610_11_06_2018_build_37 (or older) VST3 SDK or JUCE version 5.3.2. "
                      "You also need a VST2 license from Steinberg to distribute VST2 plug-ins.");
-        builder.add (new FilePathPropertyComponent (vst3PathValue, "VST3 SDK", true, isThisOS),
-                     "This path can be set to use a custom VST3 SDK instead of the one which is embedded in JUCE.");
 
         if (getSelectedOS() != TargetOS::linux)
         {
@@ -247,7 +245,6 @@ private:
         juceModulePathValue       = settings.getStoredPath (Ids::defaultJuceModulePath, os);
         userModulePathValue       = settings.getStoredPath (Ids::defaultUserModulePath, os);
         vstPathValue              = settings.getStoredPath (Ids::vstLegacyPath, os);
-        vst3PathValue             = settings.getStoredPath (Ids::vst3Path, os);
         rtasPathValue             = settings.getStoredPath (Ids::rtasPath, os);
         aaxPathValue              = settings.getStoredPath (Ids::aaxPath, os);
         androidSDKPathValue       = settings.getStoredPath (Ids::androidSDKPath, os);
@@ -262,7 +259,6 @@ private:
         juceModulePathValue      .resetToDefault();
         userModulePathValue      .resetToDefault();
         vstPathValue             .resetToDefault();
-        vst3PathValue            .resetToDefault();
         rtasPathValue            .resetToDefault();
         aaxPathValue             .resetToDefault();
         androidSDKPathValue      .resetToDefault();
@@ -277,8 +273,7 @@ private:
     Value selectedOSValue;
 
     ValueWithDefault jucePathValue, juceModulePathValue, userModulePathValue,
-                     vst3PathValue, vstPathValue, rtasPathValue, aaxPathValue,
-                     androidSDKPathValue, androidNDKPathValue,
+                     vstPathValue, rtasPathValue, aaxPathValue, androidSDKPathValue, androidNDKPathValue,
                      clionExePathValue, androidStudioExePathValue;
 
     Viewport propertyViewport;

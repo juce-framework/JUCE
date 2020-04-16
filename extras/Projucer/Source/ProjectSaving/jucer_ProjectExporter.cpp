@@ -308,14 +308,6 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
                        "This can be an absolute path, or a path relative to the Projucer project file.");
         }
 
-        if ((shouldBuildTargetType (build_tools::ProjectType::Target::VST3PlugIn) && project.shouldBuildVST3()) || (project.isVST3PluginHost() && supportsTargetType (build_tools::ProjectType::Target::VST3PlugIn)))
-        {
-            props.add (new FilePathPropertyComponent (vst3PathValueWrapper.wrappedValue, "VST3 SDK Folder", true,
-                                                      getTargetOSForExporter() == TargetOS::getThisOS(), "*", project.getProjectFolder()),
-                       "If you're building a VST3 plug-in or host, you can use this field to override the global VST3 SDK path with a project-specific path. "
-                       "This can be an absolute path, or a path relative to the Projucer project file.");
-        }
-
         if (shouldBuildTargetType (build_tools::ProjectType::Target::AAXPlugIn) && project.shouldBuildAAX())
         {
             props.add (new FilePathPropertyComponent (aaxPathValueWrapper.wrappedValue, "AAX SDK Folder", true,
@@ -404,7 +396,7 @@ void ProjectExporter::addVSTPathsIfPluginOrHost()
          || ((shouldBuildTargetType (build_tools::ProjectType::Target::VST3PlugIn) && project.shouldBuildVST3()) || project.isVST3PluginHost()))
     {
         addLegacyVSTFolderToPathIfSpecified();
-        addVST3FolderToPath();
+        addToExtraSearchPaths (getInternalVST3SDKPath(), 0);
     }
 }
 
@@ -429,16 +421,6 @@ build_tools::RelativePath ProjectExporter::getInternalVST3SDKPath()
     return getModuleFolderRelativeToProject ("juce_audio_processors")
                            .getChildFile ("format_types")
                            .getChildFile ("VST3_SDK");
-}
-
-void ProjectExporter::addVST3FolderToPath()
-{
-    auto vst3Folder = getVST3PathString();
-
-    if (vst3Folder.isNotEmpty())
-        addToExtraSearchPaths (build_tools::RelativePath (vst3Folder, build_tools::RelativePath::projectFolder), 0);
-    else
-        addToExtraSearchPaths (getInternalVST3SDKPath(), 0);
 }
 
 void ProjectExporter::addAAXFoldersToPath()

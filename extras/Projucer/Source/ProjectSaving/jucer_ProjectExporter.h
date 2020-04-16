@@ -147,7 +147,6 @@ public:
     bool shouldUseGNUExtensions() const                   { return gnuExtensionsValue.get(); }
 
     String getVSTLegacyPathString() const                 { return vstLegacyPathValueWrapper.wrappedValue.get(); }
-    String getVST3PathString() const                      { return vst3PathValueWrapper.wrappedValue.get(); }
     String getAAXPathString() const                       { return aaxPathValueWrapper.wrappedValue.get(); }
     String getRTASPathString() const                      { return rtasPathValueWrapper.wrappedValue.get(); }
 
@@ -359,7 +358,7 @@ protected:
 
     //==============================================================================
     // Wraps a ValueWithDefault object that has a default which depends on a global value.
-    // Used for the VST3, RTAS and AAX project-specific path options.
+    // Used for the VST, RTAS and AAX project-specific path options.
     struct ValueWithDefaultWrapper  : public Value::Listener
     {
         void init (const ValueWithDefault& vwd, ValueWithDefault global, TargetOS::OS targetOS)
@@ -388,7 +387,7 @@ protected:
         TargetOS::OS os;
     };
 
-    ValueWithDefaultWrapper vstLegacyPathValueWrapper, vst3PathValueWrapper, rtasPathValueWrapper, aaxPathValueWrapper;
+    ValueWithDefaultWrapper vstLegacyPathValueWrapper, rtasPathValueWrapper, aaxPathValueWrapper;
 
     ValueWithDefault targetLocationValue, extraCompilerFlagsValue, extraLinkerFlagsValue, externalLibrariesValue,
                      userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue;
@@ -454,7 +453,6 @@ private:
     void addCommonAudioPluginSettings();
     void addLegacyVSTFolderToPathIfSpecified();
     build_tools::RelativePath getInternalVST3SDKPath();
-    void addVST3FolderToPath();
     void addAAXFoldersToPath();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectExporter)

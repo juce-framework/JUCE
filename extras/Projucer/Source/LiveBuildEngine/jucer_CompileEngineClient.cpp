@@ -459,11 +459,6 @@ private:
                        && (project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3", false)
                              || project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST", false));
 
-        auto customVst3Path = getAppSettings().getStoredPath (Ids::vst3Path, TargetOS::getThisOS()).get().toString();
-
-        if (customVst3Path.isNotEmpty() && (project.isAudioPluginProject() || isVSTHost))
-            paths.add (customVst3Path);
-
         OwnedArray<LibraryModule> modules;
         project.getEnabledModules().createRequiredModules (modules);
 
@@ -471,9 +466,8 @@ private:
         {
             paths.addIfNotAlreadyThere (module->getFolder().getParentDirectory().getFullPathName());
 
-            if (customVst3Path.isEmpty() && (project.isAudioPluginProject() || isVSTHost))
-                if (module->getID() == "juce_audio_processors")
-                    paths.addIfNotAlreadyThere (module->getFolder().getChildFile ("format_types").getChildFile ("VST3_SDK").getFullPathName());
+            if (module->getID() == "juce_audio_processors" && (project.isAudioPluginProject() || isVSTHost))
+                paths.addIfNotAlreadyThere (module->getFolder().getChildFile ("format_types").getChildFile ("VST3_SDK").getFullPathName());
         }
 
         return convertSearchPathsToAbsolute (paths);
