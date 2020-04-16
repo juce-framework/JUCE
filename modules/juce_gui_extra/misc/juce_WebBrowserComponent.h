@@ -32,7 +32,7 @@ namespace juce
 
     @tags{GUI}
 */
-class JUCE_API  WebBrowserComponent      : public Component
+class JUCE_API  WebBrowserComponent  : public Component
 {
 public:
     //==============================================================================
@@ -88,10 +88,10 @@ public:
         tries to go to a particular URL. To allow the operation to carry on,
         return true, or return false to stop the navigation happening.
     */
-    virtual bool pageAboutToLoad (const String& newURL);
+    virtual bool pageAboutToLoad (const String& newURL)             { ignoreUnused (newURL); return true; }
 
     /** This callback happens when the browser has finished loading a page. */
-    virtual void pageFinishedLoading (const String& url);
+    virtual void pageFinishedLoading (const String& url)            { ignoreUnused (url); }
 
     /** This callback happens when a network error was encountered while
         trying to load a page.
@@ -103,18 +103,18 @@ public:
         The errorInfo contains some platform dependent string describing the
         error.
     */
-    virtual bool pageLoadHadNetworkError (const String& errorInfo);
+    virtual bool pageLoadHadNetworkError (const String& errorInfo)  { ignoreUnused (errorInfo); return true; }
 
     /** This callback occurs when a script or other activity in the browser asks for
         the window to be closed.
     */
-    virtual void windowCloseRequest();
+    virtual void windowCloseRequest()                               {}
 
     /** This callback occurs when the browser attempts to load a URL in a new window.
         This won't actually load the window but gives you a chance to either launch a
         new window yourself or just load the URL into the current window with goToURL().
      */
-    virtual void newWindowAttemptingToLoad (const String& newURL);
+    virtual void newWindowAttemptingToLoad (const String& newURL)   { ignoreUnused (newURL); }
 
     //==============================================================================
     /** @internal */
@@ -127,8 +127,10 @@ public:
     void visibilityChanged() override;
     /** @internal */
     void focusGained (FocusChangeType) override;
+
     /** @internal */
     class Pimpl;
+
 private:
     //==============================================================================
     std::unique_ptr<Pimpl> browser;
@@ -142,7 +144,6 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebBrowserComponent)
 };
-
 
 #endif
 
