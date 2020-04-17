@@ -188,12 +188,16 @@ attributes directly to these creation functions, rather than adding them later.
   - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's entitlements.
 
 - `IPHONE_SCREEN_ORIENTATIONS`
-  - May be, `portrait`, `landscape`, or both (separated by a space). Adds the appropriate entries to
-    an iPhone app's Info.plist.
+  - May be one or more of `UIInterfaceOrientationUnknown`, `UIInterfaceOrientationPortrait`,
+    `UIInterfaceOrientationPortraitUpsideDown`, `UIInterfaceOrientationLandscapeLeft`, or
+    `UIInterfaceOrientationLandscapeRight`. These should be surrounded in double-quotes and
+    separated by semi-colons (`;`). Adds appropriate entries to an iOS app's plist.
 
 - `IPAD_SCREEN_ORIENTATIONS`
-  - May be, `portrait`, `landscape`, or both (separated by a space). Adds the appropriate entries to
-    an iPad app's Info.plist.
+  - May be one or more of `UIInterfaceOrientationUnknown`, `UIInterfaceOrientationPortrait`,
+    `UIInterfaceOrientationPortraitUpsideDown`, `UIInterfaceOrientationLandscapeLeft`, or
+    `UIInterfaceOrientationLandscapeRight`. These should be surrounded in double-quotes and
+    separated by semi-colons (`;`). Adds appropriate entries to an iOS app's plist.
 
 - `LAUNCH_STORYBOARD_FILE`
   - A custom launch storyboard file to use on iOS. If not supplied, a default storyboard will be
