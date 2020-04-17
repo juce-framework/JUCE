@@ -23,9 +23,7 @@ android {
         targetSdkVersion 28
         externalNativeBuild {
             cmake {
-                arguments "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-23", "-DANDROID_STL=c++_static", "-DANDROID_CPP_FEATURES=exceptions rtti", "-DANDROID_ARM_MODE=arm", "-DANDROID_ARM_NEON=TRUE"
-                cFlags "-fsigned-char", "-mfpu=neon", "-mfloat-abi=hard", "-ffast-math", "-funroll-loops", "--param", "max-unroll-times=8", "-mhard-float", "-D_NDK_MATH_NO_SOFTFP=1", "-DJUCE_DISABLE_ASSERTIONS=1"
-                cppFlags "-fsigned-char", "-std=c++14", "-mfpu=neon", "-mfloat-abi=hard", "-ffast-math", "-funroll-loops", "--param", "max-unroll-times=8", "-mhard-float", "-D_NDK_MATH_NO_SOFTFP=1", "-DJUCE_DISABLE_ASSERTIONS=1"
+                arguments "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-23", "-DANDROID_STL=c++_static", "-DANDROID_CPP_FEATURES=exceptions rtti", "-DANDROID_ARM_MODE=arm", "-DANDROID_ARM_NEON=TRUE", "-DCMAKE_CXX_STANDARD=14", "-DCMAKE_CXX_EXTENSIONS=OFF"
             }
         }
     }
