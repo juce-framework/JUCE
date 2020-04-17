@@ -22,18 +22,22 @@
 //==============================================================================
 struct Icon
 {
-    Icon() : path (nullptr) {}
-    Icon (const Path& p, Colour c)  : path (&p), colour (c) {}
-    Icon (const Path* p, Colour c)  : path (p),  colour (c) {}
+    Icon() = default;
+
+    Icon (const Path& pathToUse, Colour pathColour)
+        : path (pathToUse),
+          colour (pathColour)
+    {
+    }
 
     void draw (Graphics& g, const juce::Rectangle<float>& area, bool isCrossedOut) const
     {
-        if (path != nullptr)
+        if (! path.isEmpty())
         {
             g.setColour (colour);
 
             const RectanglePlacement placement (RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize);
-            g.fillPath (*path, placement.getTransformToFit (path->getBounds(), area));
+            g.fillPath (path, placement.getTransformToFit (path.getBounds(), area));
 
             if (isCrossedOut)
             {
@@ -54,7 +58,7 @@ struct Icon
         return Icon (path, newColour);
     }
 
-    const Path* path;
+    Path path;
     Colour colour;
 };
 

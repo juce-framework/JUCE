@@ -2,6 +2,9 @@
 
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="Projucer\Application\UserAccount">
+      <UniqueIdentifier>{DA27985D-8427-CE70-CA06-EAF7009CCC60}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Projucer\Application\Windows">
       <UniqueIdentifier>{DC7E18A5-E854-3D99-627F-AAA88246B712}</UniqueIdentifier>
     </Filter>
@@ -46,6 +49,9 @@
     </Filter>
     <Filter Include="Projucer\LiveBuildEngine">
       <UniqueIdentifier>{0A3B9446-F50B-3D4E-230F-7ED493541A07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Projucer\Project\Modules">
+      <UniqueIdentifier>{F5C79836-30DE-9DC7-9392-DAAB3F04C18E}</UniqueIdentifier>
     </Filter>
     <Filter Include="Projucer\Project\UI\Sidebar">
       <UniqueIdentifier>{A0A94AE6-B447-151A-D0DA-FAE9B5410EBF}</UniqueIdentifier>
@@ -448,14 +454,14 @@
     <ClCompile Include="..\..\Source\LiveBuildEngine\jucer_DownloadCompileEngineThread.cpp">
       <Filter>Projucer\LiveBuildEngine</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Project\Modules\jucer_Modules.cpp">
+      <Filter>Projucer\Project\Modules</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Project\UI\jucer_HeaderComponent.cpp">
       <Filter>Projucer\Project\UI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Project\UI\jucer_ProjectContentComponent.cpp">
       <Filter>Projucer\Project\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Project\jucer_Module.cpp">
-      <Filter>Projucer\Project</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Project\jucer_Project.cpp">
       <Filter>Projucer\Project</Filter>
@@ -1857,6 +1863,18 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\Application\UserAccount\jucer_LicenseController.h">
+      <Filter>Projucer\Application\UserAccount</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Application\UserAccount\jucer_LicenseQueryThread.h">
+      <Filter>Projucer\Application\UserAccount</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Application\UserAccount\jucer_LicenseState.h">
+      <Filter>Projucer\Application\UserAccount</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Application\UserAccount\jucer_LoginFormComponent.h">
+      <Filter>Projucer\Application\UserAccount</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_AboutWindowComponent.h">
       <Filter>Projucer\Application\Windows</Filter>
     </ClInclude>
@@ -2217,6 +2235,15 @@
     <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_SourceCodeRange.h">
       <Filter>Projucer\LiveBuildEngine</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Project\Modules\jucer_AvailableModulesList.h">
+      <Filter>Projucer\Project\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\Modules\jucer_ModuleDescription.h">
+      <Filter>Projucer\Project\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\Modules\jucer_Modules.h">
+      <Filter>Projucer\Project\Modules</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_ExporterTreeItems.h">
       <Filter>Projucer\Project\UI\Sidebar</Filter>
     </ClInclude>
@@ -2256,8 +2283,11 @@
     <ClInclude Include="..\..\Source\Project\UI\jucer_ProjectContentComponent.h">
       <Filter>Projucer\Project\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_Module.h">
-      <Filter>Projucer\Project</Filter>
+    <ClInclude Include="..\..\Source\Project\UI\jucer_ProjectMessagesComponent.h">
+      <Filter>Projucer\Project\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\UI\jucer_UserAvatarComponent.h">
+      <Filter>Projucer\Project\UI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_Project.h">
       <Filter>Projucer\Project</Filter>
@@ -3719,7 +3749,7 @@
     <None Include="..\..\Source\BinaryData\Icons\export_xcode.svg">
       <Filter>Projucer\BinaryData\Icons</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\Icons\huckleberry_icon.svg">
+    <None Include="..\..\Source\BinaryData\Icons\gpl_logo.svg">
       <Filter>Projucer\BinaryData\Icons</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\Icons\juce-logo-with-text.svg">

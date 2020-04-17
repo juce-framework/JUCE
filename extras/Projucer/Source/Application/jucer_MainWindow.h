@@ -18,8 +18,11 @@
 
 #pragma once
 
-#include "../Project/UI/jucer_ProjectContentComponent.h"
 #include "../Utility/PIPs/jucer_PIPGenerator.h"
+#include "../Project/jucer_Project.h"
+#include "../CodeEditor/jucer_OpenDocumentManager.h"
+
+class ProjectContentComponent;
 
 //==============================================================================
 /**
@@ -36,6 +39,8 @@ public:
     MainWindow();
     ~MainWindow() override;
 
+    enum class OpenInIDE { no, yes };
+
     //==============================================================================
     void closeButtonPressed() override;
 
@@ -50,10 +55,14 @@ public:
 
     void makeVisible();
     void restoreWindowPosition();
-    bool closeCurrentProject (bool askToSave);
-    void moveProject (File newProjectFile);
+    bool closeCurrentProject (OpenDocumentManager::SaveIfNeeded askToSave);
+    void moveProject (File newProjectFile, OpenInIDE openInIDE);
 
     void showStartPage();
+
+    void showLoginFormOverlay();
+    void hideLoginFormOverlay();
+    bool isShowingLoginForm() const noexcept  { return loginFormOpen; }
 
     bool isInterestedInFileDrag (const StringArray& files) override;
     void filesDropped (const StringArray& filenames, int mouseX, int mouseY) override;
@@ -71,16 +80,18 @@ public:
     bool shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::SourceDetails& sourceDetails,
                                                StringArray& files, bool& canMoveFiles) override;
 private:
-    std::unique_ptr<Project> currentProject;
-    Value projectNameValue;
+    void valueChanged (Value&) override;
 
     static const char* getProjectWindowPosName()   { return "projectWindowPos"; }
     void createProjectContentCompIfNeeded();
     void setTitleBarIcon();
-
     void openPIP (PIPGenerator&);
 
-    void valueChanged (Value&) override;
+    std::unique_ptr<Project> currentProject;
+    Value projectNameValue;
+
+    std::unique_ptr<Component> blurOverlayComponent;
+    bool loginFormOpen = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
 };
@@ -105,6 +116,7 @@ public:
     MainWindow* getFrontmostWindow (bool createIfNotFound = true);
     MainWindow* getOrCreateEmptyWindow();
     MainWindow* getMainWindowForFile (const File&);
+    MainWindow* getMainWindowWithLoginFormOpen();
 
     Project* getFrontmostProject();
 

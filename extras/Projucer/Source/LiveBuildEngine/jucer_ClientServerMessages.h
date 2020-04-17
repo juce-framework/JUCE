@@ -81,13 +81,10 @@ namespace MessageTypes
 {
     inline bool send (MessageHandler& target, const ValueTree& v)
     {
-        //DBG ("Send: " << v.getType().toString());
         bool result = target.sendMessage (v);
 
         if (! result)
-        {
-            DBG ("*** Message failed: " << v.getType().toString());
-        }
+            Logger::outputDebugString ("*** Message failed: " + v.getType().toString());
 
         return result;
     }

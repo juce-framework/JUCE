@@ -55,9 +55,7 @@ public:
 
     //==============================================================================
     ValueWithDefault getStoredPath (const Identifier& key, DependencyPathOS os);
-
-    bool shouldAskUserToSetJUCEPath() noexcept;
-    void setDontAskAboutJUCEPathAgain() noexcept;
+    bool isJUCEPathIncorrect();
 
     //==============================================================================
     AppearanceSettings appearance;

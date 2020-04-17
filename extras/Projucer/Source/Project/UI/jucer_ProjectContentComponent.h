@@ -19,11 +19,12 @@
 #pragma once
 
 #include "../../CodeEditor/jucer_OpenDocumentManager.h"
+#include "jucer_HeaderComponent.h"
+#include "jucer_ProjectMessagesComponent.h"
 
 class CompileEngineChildProcess;
 class ProjectTab;
 class LiveBuildTab;
-class HeaderComponent;
 
 //==============================================================================
 class ProjectContentComponent  : public Component,
@@ -39,7 +40,7 @@ public:
     ~ProjectContentComponent() override;
 
     Project* getProject() const noexcept    { return project; }
-    virtual void setProject (Project*);
+    void setProject (Project*);
 
     void saveTreeViewState();
     void saveOpenDocumentList();
@@ -67,14 +68,14 @@ public:
     bool canGoToCounterpart() const;
     bool goToCounterpart();
 
-    bool saveProject (bool shouldWait = false, bool openInIDE = false);
+    bool saveProject();
     void closeProject();
     void openInSelectedIDE (bool saveFirst);
     void showNewExporterMenu();
 
-    void showProjectTab()       { sidebarTabs.setCurrentTabIndex (0); }
-    void showBuildTab()         { sidebarTabs.setCurrentTabIndex (1); }
-    int getCurrentTabIndex()    { return sidebarTabs.getCurrentTabIndex(); }
+    void showProjectTab()        { sidebarTabs.setCurrentTabIndex (0); }
+    void showBuildTab()          { sidebarTabs.setCurrentTabIndex (1); }
+    int getCurrentTabIndex()     { return sidebarTabs.getCurrentTabIndex(); }
 
     void showFilesPanel()        { showProjectPanel (0); }
     void showModulesPanel()      { showProjectPanel (1); }
@@ -99,6 +100,7 @@ public:
     void showNextError();
     void showPreviousError();
     void reinstantiateLivePreviewWindows();
+    void addNewGUIFile();
 
     void showBubbleMessage (Rectangle<int>, const String&);
 
@@ -129,28 +131,31 @@ public:
     void childBoundsChanged (Component*) override;
     void lookAndFeelChanged() override;
 
-    String lastCrashMessage;
+    ProjectMessagesComponent& getProjectMessagesComponent()  { return projectMessagesComponent; }
+
+    static String getProjectTabName()    { return "Project"; }
+    static String getBuildTabName()      { return "Build"; }
 
 private:
-    friend HeaderComponent;
-
     //==============================================================================
-    Project* project = nullptr;
-    OpenDocumentManager::Document* currentDocument = nullptr;
-    RecentDocumentList recentDocumentList;
-    std::unique_ptr<Component> logo, translationTool, contentView, header;
+    struct LogoComponent  : public Component
+    {
+        LogoComponent();
+        void paint (Graphics& g) override;
+        static String getVersionInfo();
 
-    TabbedComponent sidebarTabs  { TabbedButtonBar::TabsAtTop };
-    std::unique_ptr<ResizableEdgeComponent> resizerBar;
-    ComponentBoundsConstrainer sidebarSizeConstrainer;
+        std::unique_ptr<Drawable> logo;
+    };
 
-    BubbleMessageComponent bubbleMessage;
-    ReferenceCountedObjectPtr<CompileEngineChildProcess> childProcess;
-    bool isForeground = false;
+    struct ContentViewport  : public Component
+    {
+        ContentViewport (Component* content);
+        void resized() override;
 
-    std::unique_ptr<Label> fileNameLabel;
+        Viewport viewport;
 
-    int lastViewedTab = 0;
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentViewport)
+    };
 
     //==============================================================================
     bool documentAboutToClose (OpenDocumentManager::Document*) override;
@@ -159,6 +164,8 @@ private:
 
     void globalFocusChanged (Component*) override;
     void timerCallback() override;
+
+    void liveBuildEnablementChanged (bool isEnabled);
 
     bool isContinuousRebuildEnabled();
     void setContinuousRebuildEnabled (bool b);
@@ -178,23 +185,26 @@ private:
     bool canSelectedProjectBeLaunch();
 
     //==============================================================================
-    struct ContentViewport  : public Component
-    {
-        ContentViewport (Component* content)
-        {
-            addAndMakeVisible (viewport);
-            viewport.setViewedComponent (content, true);
-        }
+    Project* project = nullptr;
+    OpenDocumentManager::Document* currentDocument = nullptr;
+    RecentDocumentList recentDocumentList;
 
-        void resized() override
-        {
-            viewport.setBounds (getLocalBounds());
-        }
+    LogoComponent logoComponent;
+    HeaderComponent headerComponent { this };
+    ProjectMessagesComponent projectMessagesComponent;
+    Label fileNameLabel;
+    TabbedComponent sidebarTabs  { TabbedButtonBar::TabsAtTop };
+    std::unique_ptr<ResizableEdgeComponent> resizerBar;
+    ComponentBoundsConstrainer sidebarSizeConstrainer;
+    std::unique_ptr<Component> translationTool, contentView;
+    BubbleMessageComponent bubbleMessage;
 
-        Viewport viewport;
+    ReferenceCountedObjectPtr<CompileEngineChildProcess> childProcess;
+    String lastCrashMessage;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentViewport)
-    };
+    bool isForeground = false, isLiveBuildEnabled = false;
+    int lastViewedTab = 0;
 
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectContentComponent)
 };

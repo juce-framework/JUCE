@@ -275,13 +275,13 @@ private:
             m.addItem (PopupMenu::Item ("Copy the paths from the module '" + moduleToCopy + "' to all other modules")
                          .setAction ([this, moduleToCopy]
                                      {
-                                         auto& moduleList = project.getEnabledModules();
+                                         auto& modulesList = project.getEnabledModules();
 
                                          for (Project::ExporterIterator exporter (project); exporter.next();)
                                          {
-                                             for (int i = 0; i < moduleList.getNumModules(); ++i)
+                                             for (int i = 0; i < modulesList.getNumModules(); ++i)
                                              {
-                                                 auto modID = moduleList.getModuleID (i);
+                                                 auto modID = modulesList.getModuleID (i);
 
                                                  if (modID != moduleToCopy)
                                                      exporter->getPathForModuleValue (modID) = exporter->getPathForModuleValue (moduleToCopy).get();

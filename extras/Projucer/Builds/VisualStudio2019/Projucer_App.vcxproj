@@ -214,11 +214,11 @@
     <ClCompile Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineClient.cpp"/>
     <ClCompile Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineServer.cpp"/>
     <ClCompile Include="..\..\Source\LiveBuildEngine\jucer_DownloadCompileEngineThread.cpp"/>
+    <ClCompile Include="..\..\Source\Project\Modules\jucer_Modules.cpp"/>
     <ClCompile Include="..\..\Source\Project\UI\jucer_HeaderComponent.cpp"/>
     <ClCompile Include="..\..\Source\Project\UI\jucer_ProjectContentComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Project\jucer_Module.cpp"/>
     <ClCompile Include="..\..\Source\Project\jucer_Project.cpp"/>
     <ClCompile Include="..\..\Source\ProjectSaving\jucer_ProjectExporter.cpp"/>
     <ClCompile Include="..\..\Source\ProjectSaving\jucer_ProjectSaver.cpp"/>
@@ -1483,6 +1483,10 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_extra.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\Application\UserAccount\jucer_LicenseController.h"/>
+    <ClInclude Include="..\..\Source\Application\UserAccount\jucer_LicenseQueryThread.h"/>
+    <ClInclude Include="..\..\Source\Application\UserAccount\jucer_LicenseState.h"/>
+    <ClInclude Include="..\..\Source\Application\UserAccount\jucer_LoginFormComponent.h"/>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_AboutWindowComponent.h"/>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_EditorColourSchemeWindowComponent.h"/>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_FloatingToolWindow.h"/>
@@ -1603,6 +1607,9 @@
     <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_MessageIDs.h"/>
     <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_ProjectBuildInfo.h"/>
     <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_SourceCodeRange.h"/>
+    <ClInclude Include="..\..\Source\Project\Modules\jucer_AvailableModulesList.h"/>
+    <ClInclude Include="..\..\Source\Project\Modules\jucer_ModuleDescription.h"/>
+    <ClInclude Include="..\..\Source\Project\Modules\jucer_Modules.h"/>
     <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_ExporterTreeItems.h"/>
     <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_FileTreeItems.h"/>
     <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_LiveBuildTab.h"/>
@@ -1616,7 +1623,8 @@
     <ClInclude Include="..\..\Source\Project\UI\jucer_HeaderComponent.h"/>
     <ClInclude Include="..\..\Source\Project\UI\jucer_ModulesInformationComponent.h"/>
     <ClInclude Include="..\..\Source\Project\UI\jucer_ProjectContentComponent.h"/>
-    <ClInclude Include="..\..\Source\Project\jucer_Module.h"/>
+    <ClInclude Include="..\..\Source\Project\UI\jucer_ProjectMessagesComponent.h"/>
+    <ClInclude Include="..\..\Source\Project\UI\jucer_UserAvatarComponent.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_Project.h"/>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_Android.h"/>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_CLion.h"/>
@@ -2105,7 +2113,7 @@
     <None Include="..\..\Source\BinaryData\Icons\export_linux.svg"/>
     <None Include="..\..\Source\BinaryData\Icons\export_visualStudio.svg"/>
     <None Include="..\..\Source\BinaryData\Icons\export_xcode.svg"/>
-    <None Include="..\..\Source\BinaryData\Icons\huckleberry_icon.svg"/>
+    <None Include="..\..\Source\BinaryData\Icons\gpl_logo.svg"/>
     <None Include="..\..\Source\BinaryData\Icons\juce-logo-with-text.svg"/>
     <None Include="..\..\Source\BinaryData\Icons\juce_icon.png"/>
     <None Include="..\..\Source\BinaryData\Icons\wizard_AnimatedApp.svg"/>

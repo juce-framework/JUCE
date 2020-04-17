@@ -181,11 +181,11 @@ FileBasedDocument::SaveResult OpenDocumentManager::saveIfNeededAndUserAgrees (Op
 }
 
 
-bool OpenDocumentManager::closeDocument (int index, bool saveIfNeeded)
+bool OpenDocumentManager::closeDocument (int index, SaveIfNeeded saveIfNeeded)
 {
     if (Document* doc = documents [index])
     {
-        if (saveIfNeeded)
+        if (saveIfNeeded == SaveIfNeeded::yes)
             if (saveIfNeededAndUserAgrees (doc) != FileBasedDocument::savedOk)
                 return false;
 
@@ -206,12 +206,12 @@ bool OpenDocumentManager::closeDocument (int index, bool saveIfNeeded)
     return true;
 }
 
-bool OpenDocumentManager::closeDocument (Document* document, bool saveIfNeeded)
+bool OpenDocumentManager::closeDocument (Document* document, SaveIfNeeded saveIfNeeded)
 {
     return closeDocument (documents.indexOf (document), saveIfNeeded);
 }
 
-void OpenDocumentManager::closeFile (const File& f, bool saveIfNeeded)
+void OpenDocumentManager::closeFile (const File& f, SaveIfNeeded saveIfNeeded)
 {
     for (int i = documents.size(); --i >= 0;)
         if (Document* d = documents[i])
@@ -219,7 +219,7 @@ void OpenDocumentManager::closeFile (const File& f, bool saveIfNeeded)
                 closeDocument (i, saveIfNeeded);
 }
 
-bool OpenDocumentManager::closeAll (bool askUserToSave)
+bool OpenDocumentManager::closeAll (SaveIfNeeded askUserToSave)
 {
     for (int i = getNumOpenDocuments(); --i >= 0;)
         if (! closeDocument (i, askUserToSave))
@@ -228,7 +228,7 @@ bool OpenDocumentManager::closeAll (bool askUserToSave)
     return true;
 }
 
-bool OpenDocumentManager::closeAllDocumentsUsingProject (Project& project, bool saveIfNeeded)
+bool OpenDocumentManager::closeAllDocumentsUsingProject (Project& project, SaveIfNeeded saveIfNeeded)
 {
     for (int i = documents.size(); --i >= 0;)
         if (Document* d = documents[i])

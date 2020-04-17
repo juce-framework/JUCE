@@ -122,11 +122,10 @@ struct NewProjectWizard
         projectFile = targetFolder.getChildFile (File::createLegalFileName (appTitle))
                                   .withFileExtension (Project::projectFileExtension);
 
-        std::unique_ptr<Project> project (new Project (projectFile));
+        auto project = std::make_unique<Project> (projectFile);
 
         if (failedFiles.size() == 0)
         {
-            project->setFile (projectFile);
             project->setTitle (appTitle);
 
             if (! initialiseProject (*project))
@@ -135,6 +134,9 @@ struct NewProjectWizard
             project->getConfigFlag ("JUCE_STRICT_REFCOUNTEDPOINTER") = true;
             project->getProjectValue (Ids::useAppConfig) = false;
             project->getProjectValue (Ids::addUsingNamespaceToJuceHeader) = false;
+
+            if (! ProjucerApplication::getApp().getLicenseController().getCurrentState().isPaidOrGPL())
+                project->getProjectValue (Ids::displaySplashScreen) = true;
 
             addExporters (*project, wc);
             addDefaultModules (*project, useGlobalPath);
@@ -174,7 +176,7 @@ struct NewProjectWizard
     {
         auto defaultModules = getDefaultModules();
 
-        AvailableModuleList list;
+        AvailableModulesList list;
         list.scanPaths ({ modulesFolder });
 
         for (auto& mod : list.getAllModules())

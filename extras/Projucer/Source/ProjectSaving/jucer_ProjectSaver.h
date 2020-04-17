@@ -18,809 +18,127 @@
 
 #pragma once
 
+#include "../Application/jucer_Headers.h"
 #include "jucer_ResourceFile.h"
-#include "../Project/jucer_Module.h"
+#include "../Project/Modules/jucer_Modules.h"
 #include "jucer_ProjectExporter.h"
 
 //==============================================================================
 class ProjectSaver
 {
 public:
-    ProjectSaver (Project& p, const File& file)
-        : project (p),
-          projectFile (file),
-          generatedCodeFolder (project.getGeneratedCodeFolder()),
-          generatedFilesGroup (Project::Item::createGroup (project, getJuceCodeGroupName(), "__generatedcode__", true))
-    {
-        generatedFilesGroup.setID (getGeneratedGroupID());
-    }
+    ProjectSaver (Project& projectToSave);
 
-    struct SaveThread  : public ThreadWithProgressWindow
+    Result save (ProjectExporter* exporterToSave = nullptr);
+    Result saveResourcesOnly();
+    void saveBasicProjectItems (const OwnedArray<LibraryModule>& modules, const String& appConfigUserContent);
+    Result saveContentNeededForLiveBuild();
+
+    Project& getProject()  { return project; }
+
+    Project::Item addFileToGeneratedGroup (const File& file);
+    bool copyFolder (const File& source, const File& dest);
+
+    static String getJuceCodeGroupName()  { return "JUCE Library Code"; }
+
+private:
+    //==============================================================================
+    struct SaveThreadWithProgressWindow  : public ThreadWithProgressWindow
     {
     public:
-        SaveThread (ProjectSaver& ps, bool wait, const String& exp)
+        SaveThreadWithProgressWindow (ProjectSaver& ps, ProjectExporter* exporterToSave)
             : ThreadWithProgressWindow ("Saving...", true, false),
               saver (ps),
-              shouldWaitAfterSaving (wait),
-              specifiedExporterToSave (exp)
+              specifiedExporterToSave (exporterToSave)
         {}
 
         void run() override
         {
             setProgress (-1);
-            result = saver.save (false, shouldWaitAfterSaving, specifiedExporterToSave);
+            result = saver.saveProject (specifiedExporterToSave);
         }
 
         ProjectSaver& saver;
         Result result = Result::ok();
-        bool shouldWaitAfterSaving;
-        String specifiedExporterToSave;
+        ProjectExporter* specifiedExporterToSave;
 
-        JUCE_DECLARE_NON_COPYABLE (SaveThread)
+        JUCE_DECLARE_NON_COPYABLE (SaveThreadWithProgressWindow)
     };
-
-    Result save (bool showProgressBox, bool waitAfterSaving, const String& specifiedExporterToSave)
-    {
-        if (showProgressBox)
-        {
-            SaveThread thread (*this, waitAfterSaving, specifiedExporterToSave);
-            thread.runThread();
-            return thread.result;
-        }
-
-        projectLineFeed = project.getProjectLineFeed();
-
-        auto appConfigUserContent = loadUserContentFromAppConfig();
-
-        auto oldFile = project.getFile();
-        project.setFile (projectFile);
-
-        OwnedArray<LibraryModule> modules;
-        project.getEnabledModules().createRequiredModules (modules);
-
-        checkModuleValidity (modules);
-
-        if (errors.size() == 0)
-        {
-            writeMainProjectFile();
-            project.updateModificationTime();
-
-            auto projectRootHash = project.getProjectRoot().toXmlString().hashCode();
-
-            if (project.isAudioPluginProject())
-            {
-                if (project.shouldBuildUnityPlugin())
-                    writeUnityScriptFile();
-            }
-
-            saveBasicProjectItems (modules, appConfigUserContent);
-            writeProjects (modules, specifiedExporterToSave, ! showProgressBox);
-            runPostExportScript();
-
-            // if the project root has changed after writing the other files then re-save it
-            if (project.getProjectRoot().toXmlString().hashCode() != projectRootHash)
-            {
-                writeMainProjectFile();
-                project.updateModificationTime();
-            }
-
-            if (generatedCodeFolder.exists())
-            {
-                writeReadmeFile();
-                deleteUnwantedFilesIn (generatedCodeFolder);
-            }
-
-            if (errors.size() == 0)
-            {
-                // Workaround for a bug where Xcode thinks the project is invalid if opened immediately
-                // after writing
-                if (waitAfterSaving)
-                    Thread::sleep (2000);
-
-                return Result::ok();
-            }
-        }
-
-        project.setFile (oldFile);
-        return Result::fail (errors[0]);
-    }
-
-    Result saveResourcesOnly()
-    {
-        writeBinaryDataFiles();
-
-        if (errors.size() > 0)
-            return Result::fail (errors[0]);
-
-        return Result::ok();
-    }
-
-    void saveBasicProjectItems (const OwnedArray<LibraryModule>& modules, const String& appConfigUserContent)
-    {
-        writePluginDefines();
-        writeAppConfigFile (modules, appConfigUserContent);
-        writeBinaryDataFiles();
-        writeAppHeader (modules);
-        writeModuleCppWrappers (modules);
-    }
-
-    Result saveContentNeededForLiveBuild()
-    {
-        OwnedArray<LibraryModule> modules;
-        project.getEnabledModules().createRequiredModules (modules);
-
-        checkModuleValidity (modules);
-
-        if (errors.size() == 0)
-        {
-            saveBasicProjectItems (modules, loadUserContentFromAppConfig());
-
-            return Result::ok();
-        }
-
-        return Result::fail (errors[0]);
-    }
-
-    Project::Item saveGeneratedFile (const String& filePath, const MemoryOutputStream& newData)
-    {
-        if (! generatedCodeFolder.createDirectory())
-        {
-            addError ("Couldn't create folder: " + generatedCodeFolder.getFullPathName());
-            return Project::Item (project, ValueTree(), false);
-        }
-
-        auto file = generatedCodeFolder.getChildFile (filePath);
-
-        if (replaceFileIfDifferent (file, newData))
-            return addFileToGeneratedGroup (file);
-
-        return { project, {}, true };
-    }
-
-    Project::Item addFileToGeneratedGroup (const File& file)
-    {
-        auto item = generatedFilesGroup.findItemForFile (file);
-
-        if (item.isValid())
-            return item;
-
-        generatedFilesGroup.addFileAtIndex (file, -1, true);
-        return generatedFilesGroup.findItemForFile (file);
-    }
-
-    static void writeAutoGenWarningComment (OutputStream& out)
-    {
-        out << "/*" << newLine << newLine
-            << "    IMPORTANT! This file is auto-generated each time you save your" << newLine
-            << "    project - if you alter its contents, your changes may be overwritten!" << newLine
-            << newLine;
-    }
-
-    static const char* getGeneratedGroupID() noexcept               { return "__jucelibfiles"; }
-    Project::Item& getGeneratedCodeGroup()                          { return generatedFilesGroup; }
-
-    static String getJuceCodeGroupName()                            { return "JUCE Library Code"; }
-
-    File getGeneratedCodeFolder() const                             { return generatedCodeFolder; }
-
-    bool replaceFileIfDifferent (const File& f, const MemoryOutputStream& newData)
-    {
-        filesCreated.add (f);
-
-        if (!build_tools::overwriteFileWithNewDataIfDifferent (f, newData))
-        {
-            addError ("Can't write to file: " + f.getFullPathName());
-            return false;
-        }
-
-        return true;
-    }
-
-    static bool shouldFolderBeIgnoredWhenCopying (const File& f)
-    {
-        return f.getFileName() == ".git" || f.getFileName() == ".svn" || f.getFileName() == ".cvs";
-    }
-
-    bool copyFolder (const File& source, const File& dest)
-    {
-        if (source.isDirectory() && dest.createDirectory())
-        {
-            for (auto& f : source.findChildFiles (File::findFiles, false))
-            {
-                auto target = dest.getChildFile (f.getFileName());
-                filesCreated.add (target);
-
-                if (! f.copyFileTo (target))
-                    return false;
-            }
-
-            for (auto& f : source.findChildFiles (File::findDirectories, false))
-                if (! shouldFolderBeIgnoredWhenCopying (f))
-                    if (! copyFolder (f, dest.getChildFile (f.getFileName())))
-                        return false;
-
-            return true;
-        }
-
-        return false;
-    }
-
-    Project& project;
-    SortedSet<File> filesCreated;
-
-private:
-    const File projectFile, generatedCodeFolder;
-    Project::Item generatedFilesGroup;
-    StringArray errors;
-    CriticalSection errorLock;
-
-    bool hasBinaryData = false;
-    String projectLineFeed = "\r\n";
-
-    // Recursively clears out any files in a folder that we didn't create, but avoids
-    // any folders containing hidden files that might be used by version-control systems.
-    bool deleteUnwantedFilesIn (const File& parent)
-    {
-        bool folderIsNowEmpty = true;
-        Array<File> filesToDelete;
-
-        for (const auto& i : RangedDirectoryIterator (parent, false, "*", File::findFilesAndDirectories))
-        {
-            auto f = i.getFile();
-
-            if (filesCreated.contains (f) || shouldFileBeKept (f.getFileName()))
-            {
-                folderIsNowEmpty = false;
-            }
-            else if (i.isDirectory())
-            {
-                if (deleteUnwantedFilesIn (f))
-                    filesToDelete.add (f);
-                else
-                    folderIsNowEmpty = false;
-            }
-            else
-            {
-                filesToDelete.add (f);
-            }
-        }
-
-        for (int j = filesToDelete.size(); --j >= 0;)
-            filesToDelete.getReference(j).deleteRecursively();
-
-        return folderIsNowEmpty;
-    }
-
-    static bool shouldFileBeKept (const String& filename)
-    {
-        static const char* filesToKeep[] = { ".svn", ".cvs", "CMakeLists.txt" };
-
-        for (auto* f : filesToKeep)
-            if (filename == f)
-                return true;
-
-        return false;
-    }
-
-    void writeMainProjectFile()
-    {
-        if (auto xml = project.getProjectRoot().createXml())
-        {
-            XmlElement::TextFormat format;
-            format.newLineChars = projectLineFeed.toRawUTF8();
-
-            MemoryOutputStream mo (8192);
-            xml->writeTo (mo, format);
-            replaceFileIfDifferent (projectFile, mo);
-        }
-        else
-        {
-            jassertfalse;
-        }
-    }
-
-    static int findLongestModuleName (const OwnedArray<LibraryModule>& modules)
-    {
-        int longest = 0;
-
-        for (auto& m : modules)
-            longest = jmax (longest, m->getID().length());
-
-        return longest;
-    }
-
-    File getAppConfigFile() const     { return generatedCodeFolder.getChildFile (Project::getAppConfigFilename()); }
-    File getPluginDefinesFile() const { return generatedCodeFolder.getChildFile (Project::getPluginDefinesFilename()); }
-
-    String loadUserContentFromAppConfig() const
-    {
-        StringArray userContent;
-        bool foundCodeSection = false;
-        auto lines = StringArray::fromLines (getAppConfigFile().loadFileAsString());
-
-        for (int i = 0; i < lines.size(); ++i)
-        {
-            if (lines[i].contains ("[BEGIN_USER_CODE_SECTION]"))
-            {
-                for (int j = i + 1; j < lines.size() && ! lines[j].contains ("[END_USER_CODE_SECTION]"); ++j)
-                    userContent.add (lines[j]);
-
-                foundCodeSection = true;
-                break;
-            }
-        }
-
-        if (! foundCodeSection)
-        {
-            userContent.add ({});
-            userContent.add ("// (You can add your own code in this section, and the Projucer will not overwrite it)");
-            userContent.add ({});
-        }
-
-        return userContent.joinIntoString (projectLineFeed) + projectLineFeed;
-    }
-
-    void checkModuleValidity (OwnedArray<LibraryModule>& modules)
-    {
-        if (project.getNumExporters() == 0)
-        {
-            addError ("No exporters found!\n"
-                      "Please add an exporter before saving.");
-            return;
-        }
-
-        for (auto moduleIter = modules.begin(); moduleIter != modules.end(); ++moduleIter)
-        {
-            if (auto* module = *moduleIter)
-            {
-                if (! module->isValid())
-                {
-                    addError ("At least one of your JUCE module paths is invalid!\n"
-                              "Please go to the Modules settings page and ensure each path points to the correct JUCE modules folder.");
-                    return;
-                }
-
-                if (project.getEnabledModules().getExtraDependenciesNeeded (module->getID()).size() > 0)
-                {
-                    addError ("At least one of your modules has missing dependencies!\n"
-                              "Please go to the settings page of the highlighted modules and add the required dependencies.");
-                    return;
-                }
-            }
-            else
-            {
-                // this should never happen!
-                jassertfalse;
-            }
-        }
-    }
-
-    void writePluginDefines (MemoryOutputStream& out) const
-    {
-        const auto pluginDefines = getAudioPluginDefines();
-
-        if (pluginDefines.isEmpty())
-            return;
-
-        writeAutoGenWarningComment (out);
-        out << "*/" << newLine << newLine
-            << "#pragma once" << newLine << newLine
-            << pluginDefines << newLine;
-    }
-
-    void writeAppConfig (MemoryOutputStream& out, const OwnedArray<LibraryModule>& modules, const String& userContent)
-    {
-        if (! project.shouldUseAppConfig())
-            return;
-
-        writeAutoGenWarningComment (out);
-        out << "    There's a section below where you can add your own custom code safely, and the" << newLine
-            << "    Projucer will preserve the contents of that block, but the best way to change" << newLine
-            << "    any of these definitions is by using the Projucer's project settings." << newLine
-            << newLine
-            << "    Any commented-out settings will assume their default values." << newLine
-            << newLine
-            << "*/" << newLine
-            << newLine;
-
-        out << "#pragma once" << newLine
-            << newLine
-            << "//==============================================================================" << newLine
-            << "// [BEGIN_USER_CODE_SECTION]" << newLine
-            << userContent
-            << "// [END_USER_CODE_SECTION]" << newLine;
-
-        if (getPluginDefinesFile().existsAsFile() && getAudioPluginDefines().isNotEmpty())
-            out << newLine << CodeHelpers::createIncludeStatement (Project::getPluginDefinesFilename()) << newLine;
-
-        out << newLine
-            << "/*" << newLine
-            << "  ==============================================================================" << newLine
-            << newLine
-            << "   In accordance with the terms of the JUCE 5 End-Use License Agreement, the" << newLine
-            << "   JUCE Code in SECTION A cannot be removed, changed or otherwise rendered" << newLine
-            << "   ineffective unless you have a JUCE Indie or Pro license, or are using JUCE" << newLine
-            << "   under the GPL v3 license." << newLine
-            << newLine
-            << "   End User License Agreement: www.juce.com/juce-5-licence" << newLine
-            << newLine
-            << "  ==============================================================================" << newLine
-            << "*/" << newLine
-            << newLine
-            << "// BEGIN SECTION A" << newLine
-            << newLine
-            << "#ifndef JUCE_DISPLAY_SPLASH_SCREEN" << newLine
-            << " #define JUCE_DISPLAY_SPLASH_SCREEN "   << (project.shouldDisplaySplashScreen() ? "1" : "0") << newLine
-            << "#endif" << newLine << newLine
-            << "// END SECTION A" << newLine
-            << newLine
-            << "#define JUCE_USE_DARK_SPLASH_SCREEN "  << (project.getSplashScreenColourString() == "Dark" ? "1" : "0") << newLine
-            << newLine
-            << "#define JUCE_PROJUCER_VERSION 0x" << String::toHexString (ProjectInfo::versionNumber) << newLine;
-
-        out << newLine
-            << "//==============================================================================" << newLine;
-
-        auto longestName = findLongestModuleName (modules);
-
-        for (auto& m : modules)
-            out << "#define JUCE_MODULE_AVAILABLE_" << m->getID()
-                << String::repeatedString (" ", longestName + 5 - m->getID().length()) << " 1" << newLine;
-
-        out << newLine << "#define JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED 1" << newLine;
-
-        for (auto& m : modules)
-        {
-            OwnedArray<Project::ConfigFlag> flags;
-            m->getConfigFlags (project, flags);
-
-            if (flags.size() > 0)
-            {
-                out << newLine
-                    << "//==============================================================================" << newLine
-                    << "// " << m->getID() << " flags:" << newLine;
-
-                for (auto* flag : flags)
-                {
-                    out << newLine
-                    << "#ifndef    " << flag->symbol
-                    << newLine
-                    << (flag->value.isUsingDefault() ? " //#define " : " #define   ") << flag->symbol << " " << (flag->value.get() ? "1" : "0")
-                    << newLine
-                    << "#endif"
-                    << newLine;
-                }
-            }
-        }
-
-        {
-            auto& type = project.getProjectType();
-
-            auto isStandaloneApplication = (! type.isAudioPlugin() && ! type.isDynamicLibrary());
-
-            out << newLine
-                << "//==============================================================================" << newLine
-                << "#ifndef    JUCE_STANDALONE_APPLICATION" << newLine
-                << " #if defined(JucePlugin_Name) && defined(JucePlugin_Build_Standalone)" << newLine
-                << "  #define  JUCE_STANDALONE_APPLICATION JucePlugin_Build_Standalone" << newLine
-                << " #else" << newLine
-                << "  #define  JUCE_STANDALONE_APPLICATION " << (isStandaloneApplication ? "1" : "0") << newLine
-                << " #endif" << newLine
-                << "#endif" << newLine;
-        }
-    }
-
-    template <typename WriterCallback>
-    void writeOrRemoveGeneratedFile (const String& name, WriterCallback&& writerCallback)
-    {
-        MemoryOutputStream mem;
-        mem.setNewLineString (projectLineFeed);
-
-        writerCallback (mem);
-
-        if (mem.getDataSize() != 0)
-        {
-            saveGeneratedFile (name, mem);
-            return;
-        }
-
-        const auto destFile = generatedCodeFolder.getChildFile (name);
-
-        if (destFile.existsAsFile())
-        {
-            if (! destFile.deleteFile())
-                addError ("Couldn't remove unnecessary file: " + destFile.getFullPathName());
-        }
-    }
-
-    void writePluginDefines()
-    {
-        writeOrRemoveGeneratedFile (Project::getPluginDefinesFilename(), [&] (MemoryOutputStream& mem)
-        {
-            writePluginDefines (mem);
-        });
-    }
-
-    void writeAppConfigFile (const OwnedArray<LibraryModule>& modules, const String& userContent)
-    {
-        writeOrRemoveGeneratedFile (Project::getAppConfigFilename(), [&] (MemoryOutputStream& mem)
-        {
-            writeAppConfig (mem, modules, userContent);
-        });
-    }
-
-    void writeAppHeader (MemoryOutputStream& out, const OwnedArray<LibraryModule>& modules)
-    {
-        writeAutoGenWarningComment (out);
-
-        out << "    This is the header file that your files should include in order to get all the" << newLine
-            << "    JUCE library headers. You should avoid including the JUCE headers directly in" << newLine
-            << "    your own source files, because that wouldn't pick up the correct configuration" << newLine
-            << "    options for your app." << newLine
-            << newLine
-            << "*/" << newLine << newLine;
-
-        out << "#pragma once" << newLine << newLine;
-
-        if (getAppConfigFile().exists() && project.shouldUseAppConfig())
-            out << CodeHelpers::createIncludeStatement (Project::getAppConfigFilename()) << newLine;
-
-        if (modules.size() > 0)
-        {
-            out << newLine;
-
-            for (int i = 0; i < modules.size(); ++i)
-                modules.getUnchecked(i)->writeIncludes (*this, out);
-
-            out << newLine;
-        }
-
-        if (hasBinaryData && project.shouldIncludeBinaryInJuceHeader())
-            out << CodeHelpers::createIncludeStatement (project.getBinaryDataHeaderFile(), getAppConfigFile()) << newLine;
-
-        out << newLine
-            << "#if defined (JUCE_PROJUCER_VERSION) && JUCE_PROJUCER_VERSION < JUCE_VERSION" << newLine
-            << " /** If you've hit this error then the version of the Projucer that was used to generate this project is" << newLine
-            << "     older than the version of the JUCE modules being included. To fix this error, re-save your project" << newLine
-            << "     using the latest version of the Projucer or, if you aren't using the Projucer to manage your project," << newLine
-            << "     remove the JUCE_PROJUCER_VERSION define from the AppConfig.h file." << newLine
-            << " */" << newLine
-            << " #error \"This project was last saved using an outdated version of the Projucer! Re-save this project with the latest version to fix this error.\"" << newLine
-            << "#endif" << newLine
-            << newLine;
-
-        if (project.shouldAddUsingNamespaceToJuceHeader())
-            out << "#if ! DONT_SET_USING_JUCE_NAMESPACE" << newLine
-                << " // If your code uses a lot of JUCE classes, then this will obviously save you" << newLine
-                << " // a lot of typing, but can be disabled by setting DONT_SET_USING_JUCE_NAMESPACE." << newLine
-                << " using namespace juce;" << newLine
-                << "#endif" << newLine
-                << newLine;
-
-        out << "#if ! JUCE_DONT_DECLARE_PROJECTINFO" << newLine
-            << "namespace ProjectInfo" << newLine
-            << "{" << newLine
-            << "    const char* const  projectName    = " << CppTokeniserFunctions::addEscapeChars (project.getProjectNameString()).quoted() << ";" << newLine
-            << "    const char* const  companyName    = " << CppTokeniserFunctions::addEscapeChars (project.getCompanyNameString()).quoted() << ";" << newLine
-            << "    const char* const  versionString  = " << CppTokeniserFunctions::addEscapeChars (project.getVersionString()).quoted() << ";" << newLine
-            << "    const int          versionNumber  = " << project.getVersionAsHex() << ";" << newLine
-            << "}" << newLine
-            << "#endif" << newLine;
-    }
-
-    void writeAppHeader (const OwnedArray<LibraryModule>& modules)
-    {
-        MemoryOutputStream mem;
-        mem.setNewLineString (projectLineFeed);
-
-        writeAppHeader (mem, modules);
-        saveGeneratedFile (Project::getJuceSourceHFilename(), mem);
-    }
-
-    void writeModuleCppWrappers (const OwnedArray<LibraryModule>& modules)
-    {
-        for (auto* module : modules)
-        {
-            for (auto& cu : module->getAllCompileUnits())
-            {
-                MemoryOutputStream mem;
-                mem.setNewLineString (projectLineFeed);
-
-                writeAutoGenWarningComment (mem);
-
-                mem << "*/" << newLine << newLine;
-
-                if (project.shouldUseAppConfig())
-                    mem << "#include " << Project::getAppConfigFilename().quoted() << newLine;
-
-                mem << "#include <";
-
-                if (cu.file.getFileExtension() != ".r")   // .r files are included without the path
-                    mem << module->getID() << "/";
-
-                mem << cu.file.getFileName() << ">" << newLine;
-
-                replaceFileIfDifferent (generatedCodeFolder.getChildFile (cu.getFilenameForProxyFile()), mem);
-            }
-        }
-    }
-
-    void writeBinaryDataFiles()
-    {
-        auto binaryDataH = project.getBinaryDataHeaderFile();
-
-        JucerResourceFile resourceFile (project);
-
-        if (resourceFile.getNumFiles() > 0)
-        {
-            auto dataNamespace = project.getBinaryDataNamespaceString().trim();
-
-            if (dataNamespace.isEmpty())
-                dataNamespace = "BinaryData";
-
-            resourceFile.setClassName (dataNamespace);
-
-            auto maxSize = project.getMaxBinaryFileSize();
-
-            if (maxSize <= 0)
-                maxSize = 10 * 1024 * 1024;
-
-            auto r = resourceFile.write (maxSize);
-
-            if (r.result.wasOk())
-            {
-                hasBinaryData = true;
-
-                for (auto& f : r.filesCreated)
-                {
-                    filesCreated.add (f);
-                    generatedFilesGroup.addFileRetainingSortOrder (f, ! f.hasFileExtension (".h"));
-                }
-            }
-            else
-            {
-                addError (r.result.getErrorMessage());
-            }
-        }
-        else
-        {
-            for (int i = 20; --i >= 0;)
-                project.getBinaryDataCppFile (i).deleteFile();
-
-            binaryDataH.deleteFile();
-        }
-    }
-
-    void writeReadmeFile()
-    {
-        MemoryOutputStream out;
-        out.setNewLineString (projectLineFeed);
-
-        out << newLine
-            << " Important Note!!" << newLine
-            << " ================" << newLine
-            << newLine
-            << "The purpose of this folder is to contain files that are auto-generated by the Projucer," << newLine
-            << "and ALL files in this folder will be mercilessly DELETED and completely re-written whenever" << newLine
-            << "the Projucer saves your project." << newLine
-            << newLine
-            << "Therefore, it's a bad idea to make any manual changes to the files in here, or to" << newLine
-            << "put any of your own files in here if you don't want to lose them. (Of course you may choose" << newLine
-            << "to add the folder's contents to your version-control system so that you can re-merge your own" << newLine
-            << "modifications after the Projucer has saved its changes)." << newLine;
-
-        replaceFileIfDifferent (generatedCodeFolder.getChildFile ("ReadMe.txt"), out);
-    }
-
-    void addError (const String& message)
-    {
-        const ScopedLock sl (errorLock);
-        errors.add (message);
-    }
-
-    String getAudioPluginDefines() const;
-
-    void writeUnityScriptFile()
-    {
-        auto unityScriptContents = replaceLineFeeds (BinaryData::UnityPluginGUIScript_cs_in,
-                                                     projectLineFeed);
-
-        auto projectName = Project::addUnityPluginPrefixIfNecessary (project.getProjectNameString());
-
-        unityScriptContents = unityScriptContents.replace ("${plugin_class_name}",  projectName.replace (" ", "_"))
-                                                 .replace ("${plugin_name}",        projectName)
-                                                 .replace ("${plugin_vendor}",      project.getPluginManufacturerString())
-                                                 .replace ("${plugin_description}", project.getPluginDescriptionString());
-
-        auto f = getGeneratedCodeFolder().getChildFile (project.getUnityScriptName());
-
-        MemoryOutputStream out;
-        out << unityScriptContents;
-
-        replaceFileIfDifferent (f, out);
-    }
-
-    void writeProjects (const OwnedArray<LibraryModule>&, const String&, bool);
-
-    void runPostExportScript()
-    {
-       #if JUCE_WINDOWS
-        auto cmdString = project.getPostExportShellCommandWinString();
-       #else
-        auto cmdString = project.getPostExportShellCommandPosixString();
-       #endif
-
-        auto shellCommand = cmdString.replace ("%%1%%", project.getProjectFolder().getFullPathName());
-
-        if (shellCommand.isNotEmpty())
-        {
-           #if JUCE_WINDOWS
-            StringArray argList ("cmd.exe", "/c");
-           #else
-            StringArray argList ("/bin/sh", "-c");
-           #endif
-
-            argList.add (shellCommand);
-            ChildProcess shellProcess;
-
-            if (! shellProcess.start (argList))
-            {
-                addError ("Failed to run shell command: " + argList.joinIntoString (" "));
-                return;
-            }
-
-            if (! shellProcess.waitForProcessToFinish (10000))
-            {
-                addError ("Timeout running shell command: " + argList.joinIntoString (" "));
-                return;
-            }
-
-            auto exitCode = shellProcess.getExitCode();
-
-            if (exitCode != 0)
-                addError ("Shell command: " + argList.joinIntoString (" ") + " failed with exit code: " + String (exitCode));
-        }
-    }
-
-    void saveExporter (ProjectExporter* exporter, const OwnedArray<LibraryModule>& modules)
-    {
-        try
-        {
-            exporter->create (modules);
-
-            if (! exporter->isCLion())
-                std::cout << "Finished saving: " << exporter->getName() << std::endl;
-        }
-        catch (build_tools::SaveError& error)
-        {
-            addError (error.message);
-        }
-    }
 
     class ExporterJob   : public ThreadPoolJob
     {
     public:
-        ExporterJob (ProjectSaver& ps, ProjectExporter* pe,
-                     const OwnedArray<LibraryModule>& moduleList)
-            : ThreadPoolJob ("export"),
-              owner (ps), exporter (pe), modules (moduleList)
-        {
-        }
+       ExporterJob (ProjectSaver& ps, ProjectExporter& pe, const OwnedArray<LibraryModule>& modulesList)
+           : ThreadPoolJob ("export"),
+             owner (ps),
+             exporter (pe),
+             modules (modulesList)
+       {
+       }
 
-        JobStatus runJob() override
-        {
-            owner.saveExporter (exporter.get(), modules);
-            return jobHasFinished;
-        }
+       JobStatus runJob() override
+       {
+           owner.saveExporter (exporter, modules);
+           return jobHasFinished;
+       }
 
     private:
-        ProjectSaver& owner;
-        std::unique_ptr<ProjectExporter> exporter;
-        const OwnedArray<LibraryModule>& modules;
+       ProjectSaver& owner;
+       ProjectExporter& exporter;
+       const OwnedArray<LibraryModule>& modules;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExporterJob)
+       JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExporterJob)
     };
 
+    //==============================================================================
+    Project::Item saveGeneratedFile (const String& filePath, const MemoryOutputStream& newData);
+    bool replaceFileIfDifferent (const File& f, const MemoryOutputStream& newData);
+    bool deleteUnwantedFilesIn (const File& parent);
 
+    void addError (const String& message);
+
+    File getAppConfigFile() const;
+    File getPluginDefinesFile() const;
+
+    String loadUserContentFromAppConfig() const;
+    String getAudioPluginDefines() const;
+    OwnedArray<LibraryModule> getModules();
+
+    Result saveProject (ProjectExporter* specifiedExporterToSave);
+
+    template <typename WriterCallback>
+    void writeOrRemoveGeneratedFile (const String& name, WriterCallback&& writerCallback);
+
+    void writePluginDefines (MemoryOutputStream& outStream) const;
+    void writePluginDefines();
+    void writeAppConfigFile (const OwnedArray<LibraryModule>& modules, const String& userContent);
+
+    void writeMainProjectFile();
+    void writeAppConfig (MemoryOutputStream& outStream, const OwnedArray<LibraryModule>& modules, const String& userContent);
+    void writeAppHeader (MemoryOutputStream& outStream, const OwnedArray<LibraryModule>& modules);
+    void writeAppHeader (const OwnedArray<LibraryModule>& modules);
+    void writeModuleCppWrappers (const OwnedArray<LibraryModule>& modules);
+    void writeBinaryDataFiles();
+    void writeReadmeFile();
+    void writePluginCharacteristicsFile();
+    void writeUnityScriptFile();
+    void writeProjects (const OwnedArray<LibraryModule>&, ProjectExporter*);
+    void runPostExportScript();
+    void saveExporter (ProjectExporter& exporter, const OwnedArray<LibraryModule>& modules);
+
+    //==============================================================================
+    Project& project;
+
+    File generatedCodeFolder;
+    Project::Item generatedFilesGroup;
+    SortedSet<File> filesCreated;
+    String projectLineFeed;
+
+    CriticalSection errorLock;
+    StringArray errors;
+
+    bool hasBinaryData = false;
+
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectSaver)
 };

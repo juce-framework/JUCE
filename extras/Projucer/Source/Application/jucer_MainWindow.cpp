@@ -22,6 +22,90 @@
 #include "../Wizards/jucer_NewProjectWizardClasses.h"
 #include "../Utility/UI/jucer_JucerTreeViewBase.h"
 #include "../ProjectSaving/jucer_ProjectSaver.h"
+#include "UserAccount/jucer_LoginFormComponent.h"
+#include "../Project/UI/jucer_ProjectContentComponent.h"
+
+//==============================================================================
+class BlurOverlayWithComponent  : public Component,
+                                  private ComponentMovementWatcher,
+                                  private AsyncUpdater
+{
+public:
+    BlurOverlayWithComponent (MainWindow& window, std::unique_ptr<Component> comp)
+       : ComponentMovementWatcher (&window),
+         mainWindow (window),
+         componentToShow (std::move (comp))
+    {
+        kernel.createGaussianBlur (1.25f);
+
+        addAndMakeVisible (*componentToShow);
+
+        setAlwaysOnTop (true);
+        setOpaque (true);
+        setVisible (true);
+
+        static_cast<Component&> (mainWindow).addChildComponent (this);
+        componentMovedOrResized (true, true);
+    }
+
+    void resized() override
+    {
+        setBounds (mainWindow.getLocalBounds());
+        componentToShow->centreWithSize (componentToShow->getWidth(), componentToShow->getHeight());
+        refreshBackgroundImage();
+    }
+
+    void paint (Graphics& g) override
+    {
+        g.drawImage (componentImage, getLocalBounds().toFloat());
+    }
+
+private:
+    void componentPeerChanged() override                {}
+
+    void componentVisibilityChanged() override          {}
+    using ComponentMovementWatcher::componentVisibilityChanged;
+
+    void componentMovedOrResized (bool, bool) override  { triggerAsyncUpdate(); }
+    using ComponentMovementWatcher::componentMovedOrResized;
+
+    void handleAsyncUpdate() override                   { resized(); }
+
+    void mouseUp (const MouseEvent& event) override
+    {
+        if (event.eventComponent == this)
+            mainWindow.hideLoginFormOverlay();
+    }
+
+    void lookAndFeelChanged() override
+    {
+        refreshBackgroundImage();
+        repaint();
+    }
+
+    void refreshBackgroundImage()
+    {
+        setVisible (false);
+
+        auto parentBounds = mainWindow.getBounds();
+
+        componentImage = mainWindow.createComponentSnapshot (mainWindow.getLocalBounds())
+                                   .rescaled (roundToInt (parentBounds.getWidth() / 1.75f), roundToInt (parentBounds.getHeight() / 1.75f));
+
+        kernel.applyToImage (componentImage, componentImage, getLocalBounds());
+
+        setVisible (true);
+    }
+
+    //==============================================================================
+    MainWindow& mainWindow;
+    std::unique_ptr<Component> componentToShow;
+
+    ImageConvolutionKernel kernel { 3 };
+    Image componentImage;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BlurOverlayWithComponent)
+};
 
 //==============================================================================
 MainWindow::MainWindow()
@@ -32,15 +116,14 @@ MainWindow::MainWindow()
                       false)
 {
     setUsingNativeTitleBar (true);
+    setResizable (true, false);
+    setResizeLimits (600, 500, 32000, 32000);
 
    #if ! JUCE_MAC
     setMenuBar (ProjucerApplication::getApp().getMenuModel());
    #endif
 
     createProjectContentCompIfNeeded();
-
-    setResizable (true, false);
-    centreWithSize (800, 600);
 
     auto& commandManager = ProjucerApplication::getCommandManager();
 
@@ -65,9 +148,10 @@ MainWindow::MainWindow()
 
     setWantsKeyboardFocus (false);
     getLookAndFeel().setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
+
     projectNameValue.addListener (this);
 
-    setResizeLimits (600, 500, 32000, 32000);
+    centreWithSize (800, 600);
 }
 
 MainWindow::~MainWindow()
@@ -77,10 +161,11 @@ MainWindow::~MainWindow()
    #endif
 
     removeKeyListener (ProjucerApplication::getCommandManager().getKeyMappings());
+
+    // save the current size and position to our settings file..
     getGlobalProperties().setValue ("lastMainWindowPos", getWindowStateAsString());
 
     clearContentComponent();
-    currentProject.reset();
 }
 
 void MainWindow::createProjectContentCompIfNeeded()
@@ -127,7 +212,7 @@ void MainWindow::closeButtonPressed()
     ProjucerApplication::getApp().mainWindowList.closeWindow (this);
 }
 
-bool MainWindow::closeCurrentProject (bool askUserToSave)
+bool MainWindow::closeCurrentProject (OpenDocumentManager::SaveIfNeeded askUserToSave)
 {
     if (currentProject == nullptr)
         return true;
@@ -144,7 +229,8 @@ bool MainWindow::closeCurrentProject (bool askUserToSave)
     if (ProjucerApplication::getApp().openDocumentManager
          .closeAllDocumentsUsingProject (*currentProject, askUserToSave))
     {
-        if (! askUserToSave || (currentProject->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk))
+        if (askUserToSave == OpenDocumentManager::SaveIfNeeded::no
+            || (currentProject->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk))
         {
             setProject (nullptr);
             return true;
@@ -154,19 +240,16 @@ bool MainWindow::closeCurrentProject (bool askUserToSave)
     return false;
 }
 
-void MainWindow::moveProject (File newProjectFileToOpen)
+void MainWindow::moveProject (File newProjectFileToOpen, OpenInIDE openInIDE)
 {
-    auto openInIDE = currentProject->shouldOpenInIDEAfterSaving();
-
-    closeCurrentProject (false);
+    closeCurrentProject (OpenDocumentManager::SaveIfNeeded::no);
     openFile (newProjectFileToOpen);
 
     if (currentProject != nullptr)
-    {
-        ProjucerApplication::getApp().getCommandManager().invokeDirectly (openInIDE ? CommandIDs::saveAndOpenInIDE
-                                                                                    : CommandIDs::saveProject,
-                                                                          false);
-    }
+        ProjucerApplication::getApp().getCommandManager()
+                                     .invokeDirectly (openInIDE == OpenInIDE::yes ? CommandIDs::saveAndOpenInIDE
+                                                                                  : CommandIDs::saveProject,
+                                                      false);
 }
 
 void MainWindow::setProject (std::unique_ptr<Project> newProject)
@@ -174,7 +257,7 @@ void MainWindow::setProject (std::unique_ptr<Project> newProject)
     if (newProject == nullptr)
     {
         getProjectContentComponent()->setProject (nullptr);
-        projectNameValue.referTo (Value());
+        projectNameValue.referTo ({});
 
         currentProject.reset();
     }
@@ -222,7 +305,7 @@ bool MainWindow::openFile (const File& file)
         auto newDoc = std::make_unique<Project> (file);
         auto result = newDoc->loadFrom (file, true);
 
-        if (result.wasOk() && closeCurrentProject (true))
+        if (result.wasOk() && closeCurrentProject (OpenDocumentManager::SaveIfNeeded::yes))
         {
             setProject (std::move (newDoc));
             currentProject->setChangedFlag (false);
@@ -350,7 +433,7 @@ void MainWindow::openPIP (PIPGenerator& generator)
         {
             project->setTemporaryDirectory (generator.getOutputDirectory());
 
-            ProjectSaver liveBuildSaver (*project, project->getFile());
+            ProjectSaver liveBuildSaver (*project);
             liveBuildSaver.saveContentNeededForLiveBuild();
 
             if (auto* pcc = window->getProjectContentComponent())
@@ -440,49 +523,6 @@ void MainWindow::activeWindowStatusChanged()
         pcc->updateMissingFileStatuses();
 
     ProjucerApplication::getApp().openDocumentManager.reloadModifiedFiles();
-
-    if (auto* p = getProject())
-    {
-        if (p->hasProjectBeenModified())
-        {
-            Component::SafePointer<Component> safePointer (this);
-
-            MessageManager::callAsync ([=] ()
-            {
-                if (safePointer == nullptr)
-                    return; // bail out if the window has been deleted
-
-                auto result = AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
-                                                            TRANS ("The .jucer file has been modified since the last save."),
-                                                            TRANS ("Do you want to keep the current project or re-load from disk?"),
-                                                            TRANS ("Keep"),
-                                                            TRANS ("Re-load from disk"));
-
-                if (safePointer == nullptr)
-                    return;
-
-                if (result == 0)
-                {
-                    if (auto* project = getProject())
-                    {
-                        auto oldTemporaryDirectory = project->getTemporaryDirectory();
-
-                        auto projectFile = project->getFile();
-                        setProject (nullptr);
-                        openFile (projectFile);
-
-                        if (oldTemporaryDirectory != File())
-                            if (auto* newProject = getProject())
-                                newProject->setTemporaryDirectory (oldTemporaryDirectory);
-                    }
-                }
-                else
-                {
-                    ProjucerApplication::getApp().getCommandManager().invokeDirectly (CommandIDs::saveProject, true);
-                }
-            });
-        }
-    }
 }
 
 void MainWindow::showStartPage()
@@ -496,6 +536,18 @@ void MainWindow::showStartPage()
     addToDesktop();
 
     getContentComponent()->grabKeyboardFocus();
+}
+
+void MainWindow::showLoginFormOverlay()
+{
+    blurOverlayComponent = std::make_unique<BlurOverlayWithComponent> (*this, std::make_unique<LoginFormComponent> (*this));
+    loginFormOpen = true;
+}
+
+void MainWindow::hideLoginFormOverlay()
+{
+    blurOverlayComponent.reset();
+    loginFormOpen = false;
 }
 
 //==============================================================================
@@ -565,12 +617,11 @@ bool MainWindow::perform (const InvocationInfo& info)
     return true;
 }
 
-void MainWindow::valueChanged (Value&)
+void MainWindow::valueChanged (Value& value)
 {
-    if (currentProject != nullptr)
-        setName (currentProject->getProjectNameString() + " - Projucer");
-    else
-        setName ("Projucer");
+    if (value == projectNameValue)
+        setName (currentProject != nullptr ? currentProject->getProjectNameString() + " - Projucer"
+                                           : "Projucer");
 }
 
 //==============================================================================
@@ -589,7 +640,7 @@ bool MainWindowList::askAllWindowsToClose()
 
     while (windows.size() > 0)
     {
-        if (! windows[0]->closeCurrentProject (true))
+        if (! windows[0]->closeCurrentProject (OpenDocumentManager::SaveIfNeeded::yes))
             return false;
 
         windows.remove (0);
@@ -616,7 +667,7 @@ void MainWindowList::closeWindow (MainWindow* w)
     else
    #endif
     {
-        if (w->closeCurrentProject (true))
+        if (w->closeCurrentProject (OpenDocumentManager::SaveIfNeeded::yes))
         {
             windows.removeObject (w);
             saveCurrentlyOpenProjectList();
@@ -762,6 +813,15 @@ MainWindow* MainWindowList::getMainWindowForFile (const File& file)
             }
         }
     }
+
+    return nullptr;
+}
+
+MainWindow* MainWindowList::getMainWindowWithLoginFormOpen()
+{
+    for (auto* window : windows)
+        if (window->isShowingLoginForm())
+            return window;
 
     return nullptr;
 }

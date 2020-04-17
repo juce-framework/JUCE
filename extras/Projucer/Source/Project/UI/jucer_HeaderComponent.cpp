@@ -30,17 +30,19 @@
 #include "../../LiveBuildEngine/jucer_CompileEngineClient.h"
 
 //==============================================================================
-HeaderComponent::HeaderComponent()
+HeaderComponent::HeaderComponent (ProjectContentComponent* pcc)
+    : projectContentComponent (pcc)
 {
     addAndMakeVisible (configLabel);
     addAndMakeVisible (exporterBox);
 
     exporterBox.onChange = [this] { updateExporterButton(); };
 
-    juceIcon.reset (new ImageComponent ("icon"));
-    addAndMakeVisible (juceIcon.get());
-    juceIcon->setImage (ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize),
-                        RectanglePlacement::centred);
+    juceIcon.setImage (ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize), RectanglePlacement::centred);
+    addAndMakeVisible (juceIcon);
+
+    addAndMakeVisible (userAvatar);
+    userAvatar.addChangeListener (this);
 
     projectNameLabel.setText ({}, dontSendNotification);
     addAndMakeVisible (projectNameLabel);
@@ -52,7 +54,7 @@ HeaderComponent::~HeaderComponent()
 {
     if (childProcess != nullptr)
     {
-        childProcess->activityList.removeChangeListener(this);
+        childProcess->activityList.removeChangeListener (this);
         childProcess->errorList.removeChangeListener (this);
     }
 }
@@ -63,33 +65,36 @@ void HeaderComponent::resized()
     auto bounds = getLocalBounds();
     configLabel.setFont ({ bounds.getHeight() / 3.0f });
 
-    //==============================================================================
     {
         auto headerBounds = bounds.removeFromLeft (tabsWidth);
 
         const int buttonSize = 25;
         auto buttonBounds = headerBounds.removeFromRight (buttonSize);
 
-        projectSettingsButton->setBounds (buttonBounds.removeFromBottom (buttonSize).reduced (2));
+        projectSettingsButton.setBounds (buttonBounds.removeFromBottom (buttonSize).reduced (2));
 
-        juceIcon->setBounds (headerBounds.removeFromLeft (headerBounds.getHeight()).reduced (2));
+        juceIcon.setBounds (headerBounds.removeFromLeft (headerBounds.getHeight()).reduced (2));
 
         headerBounds.removeFromRight (5);
         projectNameLabel.setBounds (headerBounds);
     }
 
-    //==============================================================================
-    auto exporterWidth = jmin (400, bounds.getWidth() / 2);
-    Rectangle<int> exporterBounds (0, 0, exporterWidth, bounds.getHeight());
+    {
+        auto exporterWidth = jmin (400, bounds.getWidth() / 2);
+        Rectangle<int> exporterBounds (0, 0, exporterWidth, bounds.getHeight());
 
-    exporterBounds.setCentre (bounds.getCentre());
+        exporterBounds.setCentre (bounds.getCentre());
 
-    runAppButton->setBounds (exporterBounds.removeFromRight (exporterBounds.getHeight()).reduced (2));
-    saveAndOpenInIDEButton->setBounds (exporterBounds.removeFromRight (exporterBounds.getHeight()).reduced (2));
+        runAppButton.setBounds (exporterBounds.removeFromRight (exporterBounds.getHeight()).reduced (2));
+        saveAndOpenInIDEButton.setBounds (exporterBounds.removeFromRight (exporterBounds.getHeight()).reduced (2));
 
-    exporterBounds.removeFromRight (5);
-    exporterBox.setBounds (exporterBounds.removeFromBottom (roundToInt (exporterBounds.getHeight() / 1.8f)));
-    configLabel.setBounds (exporterBounds);
+        exporterBounds.removeFromRight (5);
+        exporterBox.setBounds (exporterBounds.removeFromBottom (roundToInt (exporterBounds.getHeight() / 1.8f)));
+        configLabel.setBounds (exporterBounds);
+    }
+
+    userAvatar.setBounds (bounds.removeFromRight (userAvatar.isDisplaingGPLLogo() ? roundToInt (bounds.getHeight() * 1.9f)
+                                                                                  : bounds.getHeight()).reduced (2));
 }
 
 void HeaderComponent::paint (Graphics& g)
@@ -98,48 +103,53 @@ void HeaderComponent::paint (Graphics& g)
 
     if (isBuilding)
         getLookAndFeel().drawSpinningWaitAnimation (g, findColour (treeIconColourId),
-                                                    runAppButton->getX(), runAppButton->getY(),
-                                                    runAppButton->getWidth(), runAppButton->getHeight());
+                                                    runAppButton.getX(), runAppButton.getY(),
+                                                    runAppButton.getWidth(), runAppButton.getHeight());
 }
 
 //==============================================================================
-void HeaderComponent::setCurrentProject (Project* p) noexcept
+void HeaderComponent::setCurrentProject (Project* newProject)
 {
-    project = p;
-
-    exportersTree = project->getExporters();
-    exportersTree.addListener (this);
-    updateExporters();
-
-    projectNameValue.referTo (project->getProjectValue (Ids::name));
-    projectNameValue.addListener (this);
-    updateName();
-
     isBuilding = false;
     stopTimer();
     repaint();
 
-    childProcess = ProjucerApplication::getApp().childProcessCache->getExisting (*project);
+    projectNameLabel.setText ({}, dontSendNotification);
 
-    if (childProcess != nullptr)
-    {
-        childProcess->activityList.addChangeListener (this);
-        childProcess->errorList.addChangeListener (this);
+    project = newProject;
 
-        runAppButton->setTooltip ({});
-        runAppButton->setEnabled (true);
-    }
-    else
+    if (project != nullptr)
     {
-        runAppButton->setTooltip ("Enable live-build engine to launch application");
-        runAppButton->setEnabled (false);
+        exportersTree = project->getExporters();
+        exportersTree.addListener (this);
+        updateExporters();
+
+        projectNameValue.referTo (project->getProjectValue (Ids::name));
+        projectNameValue.addListener (this);
+        updateName();
+
+        childProcess = ProjucerApplication::getApp().childProcessCache->getExisting (*project);
+
+        if (childProcess != nullptr)
+        {
+            childProcess->activityList.addChangeListener (this);
+            childProcess->errorList.addChangeListener (this);
+
+            runAppButton.setTooltip ({});
+            runAppButton.setEnabled (true);
+        }
+        else
+        {
+            runAppButton.setTooltip ("Enable live-build engine to launch application");
+            runAppButton.setEnabled (false);
+        }
     }
 }
 
 //==============================================================================
-void HeaderComponent::updateExporters() noexcept
+void HeaderComponent::updateExporters()
 {
-    auto selectedName = getSelectedExporterName();
+    auto selectedExporter = getSelectedExporter();
 
     exporterBox.clear();
     auto preferredExporterIndex = -1;
@@ -149,7 +159,7 @@ void HeaderComponent::updateExporters() noexcept
     {
         exporterBox.addItem (exporter->getName(), i + 1);
 
-        if (selectedName == exporter->getName())
+        if (selectedExporter != nullptr && exporter->getName() == selectedExporter->getName())
             exporterBox.setSelectedId (i + 1);
 
         if (exporter->getName().contains (ProjectExporter::getCurrentPlatformExporterName()) && preferredExporterIndex == -1)
@@ -177,31 +187,56 @@ void HeaderComponent::updateExporters() noexcept
     updateExporterButton();
 }
 
-String HeaderComponent::getSelectedExporterName() const noexcept
+std::unique_ptr<ProjectExporter> HeaderComponent::getSelectedExporter() const
 {
-    return exporterBox.getItemText (exporterBox.getSelectedItemIndex());
+    if (project != nullptr)
+    {
+        int i = 0;
+        auto selectedIndex = exporterBox.getSelectedItemIndex();
+
+        for (Project::ExporterIterator exporter (*project); exporter.next();)
+            if (i++ == selectedIndex)
+                return std::move (exporter.exporter);
+    }
+
+    return nullptr;
 }
 
-bool HeaderComponent::canCurrentExporterLaunchProject() const noexcept
+bool HeaderComponent::canCurrentExporterLaunchProject() const
 {
-    for (Project::ExporterIterator exporter (*project); exporter.next();)
-        if (exporter->getName() == getSelectedExporterName() && exporter->canLaunchProject())
-            return true;
+    if (project != nullptr)
+    {
+        if (auto selectedExporter = getSelectedExporter())
+        {
+            for (Project::ExporterIterator exporter (*project); exporter.next();)
+                if (exporter->canLaunchProject() && exporter->getName() == selectedExporter->getName())
+                    return true;
+        }
+    }
 
     return false;
 }
 
 //==============================================================================
-void HeaderComponent::sidebarTabsWidthChanged (int newWidth) noexcept
+void HeaderComponent::sidebarTabsWidthChanged (int newWidth)
 {
     tabsWidth = newWidth;
     resized();
 }
 
-//==============================================================================
-void HeaderComponent::changeListenerCallback (ChangeBroadcaster*)
+void HeaderComponent::liveBuildEnablementChanged (bool isEnabled)
 {
-    if (childProcess != nullptr)
+    runAppButton.setVisible (isEnabled);
+}
+
+//==============================================================================
+void HeaderComponent::changeListenerCallback (ChangeBroadcaster* source)
+{
+    if (source == &userAvatar)
+    {
+        resized();
+    }
+    else if (childProcess != nullptr && source == &childProcess->activityList)
     {
         if (childProcess->activityList.getNumActivities() > 0)
             buildPing();
@@ -221,30 +256,37 @@ void HeaderComponent::timerCallback()
 }
 
 //==============================================================================
-void HeaderComponent::initialiseButtons() noexcept
+void HeaderComponent::initialiseButtons()
 {
-    auto& icons = getIcons();
+    addAndMakeVisible (projectSettingsButton);
+    projectSettingsButton.onClick = [this] { projectContentComponent->showProjectSettings(); };
 
-    projectSettingsButton.reset (new IconButton ("Project Settings", &icons.settings));
-    addAndMakeVisible (projectSettingsButton.get());
-    projectSettingsButton->onClick = [this]
+    addAndMakeVisible (saveAndOpenInIDEButton);
+    saveAndOpenInIDEButton.setBackgroundColour (Colours::white);
+    saveAndOpenInIDEButton.setIconInset (7);
+    saveAndOpenInIDEButton.onClick = [this]
     {
-        if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
-            pcc->showProjectSettings();
+        if (project != nullptr)
+        {
+            if (project->hasIncompatibleLicenseTypeAndSplashScreenSetting())
+            {
+                auto child = project->getProjectMessages().getChildWithName (ProjectMessages::Ids::warning)
+                                                          .getChildWithName (ProjectMessages::Ids::incompatibleLicense);
+
+                if (child.isValid())
+                    child.setProperty (ProjectMessages::Ids::isVisible, true, nullptr);
+            }
+            else
+            {
+                if (auto exporter = getSelectedExporter())
+                    project->openProjectInIDE (*exporter, true);
+            }
+        }
     };
 
-    saveAndOpenInIDEButton.reset (new IconButton ("Save and Open in IDE", nullptr));
-    addAndMakeVisible (saveAndOpenInIDEButton.get());
-    saveAndOpenInIDEButton->isIDEButton = true;
-    saveAndOpenInIDEButton->onClick = [this]
-    {
-        if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
-            pcc->openInSelectedIDE (true);
-    };
-
-    runAppButton.reset (new IconButton ("Run Application", &icons.play));
-    addAndMakeVisible (runAppButton.get());
-    runAppButton->onClick = [this]
+    addAndMakeVisible (runAppButton);
+    runAppButton.setIconInset (7);
+    runAppButton.onClick = [this]
     {
         if (childProcess != nullptr)
             childProcess->launchApp();
@@ -253,22 +295,26 @@ void HeaderComponent::initialiseButtons() noexcept
     updateExporterButton();
 }
 
-void HeaderComponent::updateName() noexcept
+void HeaderComponent::updateName()
 {
-    projectNameLabel.setText (project->getDocumentTitle(), dontSendNotification);
+    if (project != nullptr)
+        projectNameLabel.setText (project->getDocumentTitle(), dontSendNotification);
 }
 
-void HeaderComponent::updateExporterButton() noexcept
+void HeaderComponent::updateExporterButton()
 {
-    auto currentExporterName = getSelectedExporterName();
-
-    for (auto info : ProjectExporter::getExporterTypes())
+    if (auto selectedExporter = getSelectedExporter())
     {
-        if (currentExporterName.contains (info.name))
+        auto selectedName = selectedExporter->getName();
+
+        for (auto info : ProjectExporter::getExporterTypes())
         {
-            saveAndOpenInIDEButton->iconImage = info.getIcon();
-            saveAndOpenInIDEButton->repaint();
-            saveAndOpenInIDEButton->setEnabled (canCurrentExporterLaunchProject());
+            if (selectedName.contains (info.name))
+            {
+                saveAndOpenInIDEButton.setImage (info.getIcon());
+                saveAndOpenInIDEButton.repaint();
+                saveAndOpenInIDEButton.setEnabled (canCurrentExporterLaunchProject());
+            }
         }
     }
 }
@@ -279,8 +325,8 @@ void HeaderComponent::buildPing()
     if (! isTimerRunning())
     {
         isBuilding = true;
-        runAppButton->setEnabled (false);
-        runAppButton->setTooltip ("Building...");
+        runAppButton.setEnabled (false);
+        runAppButton.setTooltip ("Building...");
 
         startTimer (50);
     }
@@ -306,23 +352,23 @@ void HeaderComponent::setRunAppButtonState (bool buildWasSuccessful)
         {
             if (childProcess->isAppRunning() || (! childProcess->isAppRunning() && childProcess->canLaunchApp()))
             {
-                runAppButton->setTooltip ("Launch application");
+                runAppButton.setTooltip ("Launch application");
                 shouldEnableButton = true;
             }
             else
             {
-                runAppButton->setTooltip ("Application can't be launched");
+                runAppButton.setTooltip ("Application can't be launched");
             }
         }
         else
         {
-            runAppButton->setTooltip ("Enable live-build engine to launch application");
+            runAppButton.setTooltip ("Enable live-build engine to launch application");
         }
     }
     else
     {
-        runAppButton->setTooltip ("Error building application");
+        runAppButton.setTooltip ("Error building application");
     }
 
-    runAppButton->setEnabled (shouldEnableButton);
+    runAppButton.setEnabled (shouldEnableButton);
 }

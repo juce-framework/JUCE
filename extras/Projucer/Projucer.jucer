@@ -101,6 +101,16 @@
   </EXPORTFORMATS>
   <MAINGROUP name="Projucer" id="NhrJq66R">
     <GROUP id="{9E4C4E0D-7BAB-EB6F-87DA-FB264EC2AE68}" name="Application">
+      <GROUP id="{70333C48-4F84-A180-24E1-0EC9EF223F3B}" name="UserAccount">
+        <FILE id="Rw7w0l" name="jucer_LicenseController.h" compile="0" resource="0"
+              file="Source/Application/UserAccount/jucer_LicenseController.h"/>
+        <FILE id="rUtPud" name="jucer_LicenseQueryThread.h" compile="0" resource="0"
+              file="Source/Application/UserAccount/jucer_LicenseQueryThread.h"/>
+        <FILE id="Dwndl3" name="jucer_LicenseState.h" compile="0" resource="0"
+              file="Source/Application/UserAccount/jucer_LicenseState.h"/>
+        <FILE id="d5kWEN" name="jucer_LoginFormComponent.h" compile="0" resource="0"
+              file="Source/Application/UserAccount/jucer_LoginFormComponent.h"/>
+      </GROUP>
       <GROUP id="{2F08ABDF-C7BB-5F54-55F5-0C2E27983930}" name="Windows">
         <FILE id="w1XB4w" name="jucer_AboutWindowComponent.h" compile="0" resource="0"
               file="Source/Application/Windows/jucer_AboutWindowComponent.h"/>
@@ -177,8 +187,7 @@
               file="Source/BinaryData/Icons/export_visualStudio.svg"/>
         <FILE id="G0oYd6" name="export_xcode.svg" compile="0" resource="1"
               file="Source/BinaryData/Icons/export_xcode.svg"/>
-        <FILE id="k4zzKu" name="huckleberry_icon.svg" compile="0" resource="1"
-              file="Source/BinaryData/Icons/huckleberry_icon.svg"/>
+        <FILE id="CfDTJ0" name="gpl_logo.svg" compile="0" resource="1" file="Source/BinaryData/Icons/gpl_logo.svg"/>
         <FILE id="Pk2LIn" name="juce-logo-with-text.svg" compile="0" resource="1"
               file="Source/BinaryData/Icons/juce-logo-with-text.svg"/>
         <FILE id="Zrx1Gl" name="juce_icon.png" compile="0" resource="1" file="Source/BinaryData/Icons/juce_icon.png"/>
@@ -523,6 +532,15 @@
             file="Source/LiveBuildEngine/jucer_SourceCodeRange.h"/>
     </GROUP>
     <GROUP id="{6653587F-C475-46AA-E7CF-1D0DFA0FEAA9}" name="Project">
+      <GROUP id="{F2E7D5CA-F002-2635-DA2C-898FA5EA2936}" name="Modules">
+        <FILE id="w7QIJd" name="jucer_AvailableModulesList.h" compile="0" resource="0"
+              file="Source/Project/Modules/jucer_AvailableModulesList.h"/>
+        <FILE id="fQrJvA" name="jucer_ModuleDescription.h" compile="0" resource="0"
+              file="Source/Project/Modules/jucer_ModuleDescription.h"/>
+        <FILE id="mOC0iL" name="jucer_Modules.cpp" compile="1" resource="0"
+              file="Source/Project/Modules/jucer_Modules.cpp"/>
+        <FILE id="TnngL4" name="jucer_Modules.h" compile="0" resource="0" file="Source/Project/Modules/jucer_Modules.h"/>
+      </GROUP>
       <GROUP id="{C37B7D1A-F059-9C82-9436-A2A94552BF90}" name="UI">
         <GROUP id="{19B83596-13BE-A80E-2722-BB5CCDA111FA}" name="Sidebar">
           <FILE id="bItg9o" name="jucer_ExporterTreeItems.h" compile="0" resource="0"
@@ -556,10 +574,11 @@
               resource="0" file="Source/Project/UI/jucer_ProjectContentComponent.cpp"/>
         <FILE id="z576fZ" name="jucer_ProjectContentComponent.h" compile="0"
               resource="0" file="Source/Project/UI/jucer_ProjectContentComponent.h"/>
+        <FILE id="itkVli" name="jucer_ProjectMessagesComponent.h" compile="0"
+              resource="0" file="Source/Project/UI/jucer_ProjectMessagesComponent.h"/>
+        <FILE id="UUlUDF" name="jucer_UserAvatarComponent.h" compile="0" resource="0"
+              file="Source/Project/UI/jucer_UserAvatarComponent.h"/>
       </GROUP>
-      <FILE id="kPwhZB" name="jucer_Module.cpp" compile="1" resource="0"
-            file="Source/Project/jucer_Module.cpp"/>
-      <FILE id="YlGT8P" name="jucer_Module.h" compile="0" resource="0" file="Source/Project/jucer_Module.h"/>
       <FILE id="JT1rMJ" name="jucer_Project.cpp" compile="1" resource="0"
             file="Source/Project/jucer_Project.cpp"/>
       <FILE id="bUjtVS" name="jucer_Project.h" compile="0" resource="0" file="Source/Project/jucer_Project.h"/>

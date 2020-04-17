@@ -48,6 +48,9 @@ namespace CommandIDs
         showSVGPathTool         = 0x300023,
         showAboutWindow         = 0x300024,
         checkForNewVersion      = 0x300025,
+        enableNewVersionCheck   = 0x300026,
+        enableLiveBuild         = 0x300027,
+        enableGUIEditor         = 0x300028,
 
         showProjectSettings     = 0x300030,
         showProjectTab          = 0x300031,
@@ -91,10 +94,14 @@ namespace CommandIDs
         nextError               = 0x300080,
         prevError               = 0x300081,
 
-        showForum               = 0x300090,
-        showAPIModules          = 0x300091,
-        showAPIClasses          = 0x300092,
-        showTutorials           = 0x300093,
+        loginLogout             = 0x300090,
+
+        showForum               = 0x300100,
+        showAPIModules          = 0x300101,
+        showAPIClasses          = 0x300102,
+        showTutorials           = 0x300103,
+
+        addNewGUIFile           = 0x300200,
 
         lastCommandIDEntry
     };

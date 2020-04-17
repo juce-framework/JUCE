@@ -50,23 +50,15 @@ public:
         auto bounds = getLocalBounds();
         bounds.removeFromBottom (20);
 
-        auto rightSlice  = bounds.removeFromRight (150);
         auto leftSlice   = bounds.removeFromLeft (150);
-        auto centreSlice = bounds;
+        auto centreSlice = bounds.withTrimmedRight (150);
 
-        //==============================================================================
-        rightSlice.removeFromRight (20);
-        auto iconSlice = rightSlice.removeFromRight (100);
-        huckleberryLogoBounds = iconSlice.removeFromBottom (100).toFloat();
-
-        //==============================================================================
         juceLogoBounds = leftSlice.removeFromTop (150).toFloat();
         juceLogoBounds.setWidth (juceLogoBounds.getWidth() + 100);
         juceLogoBounds.setHeight (juceLogoBounds.getHeight() + 100);
 
         copyrightLabel.setBounds (leftSlice.removeFromBottom (20));
 
-        //==============================================================================
         auto titleHeight = 40;
 
         centreSlice.removeFromTop ((centreSlice.getHeight() / 2) - (titleHeight / 2));
@@ -86,9 +78,6 @@ public:
 
         if (juceLogo != nullptr)
             juceLogo->drawWithin (g, juceLogoBounds.translated (-75, -75), RectanglePlacement::centred, 1.0);
-
-        if (huckleberryLogo != nullptr)
-            huckleberryLogo->drawWithin (g, huckleberryLogoBounds, RectanglePlacement::centred, 1.0);
     }
 
 private:
@@ -98,13 +87,10 @@ private:
 
     HyperlinkButton aboutButton { "About Us", URL ("https://juce.com") };
 
-    Rectangle<float> huckleberryLogoBounds, juceLogoBounds;
+    Rectangle<float> juceLogoBounds;
 
     std::unique_ptr<Drawable> juceLogo { Drawable::createFromImageData (BinaryData::juce_icon_png,
                                                                         BinaryData::juce_icon_pngSize) };
-
-    std::unique_ptr<Drawable> huckleberryLogo { Drawable::createFromImageData (BinaryData::huckleberry_icon_svg,
-                                                                               BinaryData::huckleberry_icon_svgSize) };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AboutWindowComponent)
 };

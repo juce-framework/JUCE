@@ -110,7 +110,7 @@ public:
             {
                 auto f = filesToTrash.getUnchecked(i);
 
-                om.closeFile (f, false);
+                om.closeFile (f, OpenDocumentManager::SaveIfNeeded::no);
 
                 if (! f.moveToTrash())
                 {
@@ -129,7 +129,7 @@ public:
                                 pcc->hideEditor();
                     }
 
-                    om.closeFile (itemToRemove->getFile(), false);
+                    om.closeFile (itemToRemove->getFile(), OpenDocumentManager::SaveIfNeeded::no);
                     itemToRemove->deleteItem();
                 }
             }

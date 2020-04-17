@@ -29,6 +29,7 @@
 #include "jucer_CompileEngineClient.h"
 #include "jucer_CompileEngineServer.h"
 #include "jucer_CompileEngineSettings.h"
+#include "../Project/UI/jucer_ProjectContentComponent.h"
 
 #ifndef RUN_CLANG_IN_CHILD_PROCESS
  #error
@@ -208,8 +209,6 @@ public:
 
         if (isRunningApp && server != nullptr)
             server->killServerWithoutMercy();
-
-        server.reset();
     }
 
     void restartServer()
@@ -511,9 +510,6 @@ CompileEngineChildProcess::CompileEngineChildProcess (Project& p)
 CompileEngineChildProcess::~CompileEngineChildProcess()
 {
     ProjucerApplication::getApp().openDocumentManager.removeListener (this);
-
-    process.reset();
-    lastComponentList.clear();
 }
 
 void CompileEngineChildProcess::createProcess()

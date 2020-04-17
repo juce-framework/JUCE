@@ -61,13 +61,15 @@ public:
     Document* getOpenDocument (int index) const;
     void clear();
 
+    enum class SaveIfNeeded { no, yes };
+
     bool canOpenFile (const File& file);
     Document* openFile (Project* project, const File& file);
-    bool closeDocument (int index, bool saveIfNeeded);
-    bool closeDocument (Document* document, bool saveIfNeeded);
-    bool closeAll (bool askUserToSave);
-    bool closeAllDocumentsUsingProject (Project& project, bool saveIfNeeded);
-    void closeFile (const File& f, bool saveIfNeeded);
+    bool closeDocument (int index, SaveIfNeeded saveIfNeeded);
+    bool closeDocument (Document* document, SaveIfNeeded saveIfNeeded);
+    bool closeAll (SaveIfNeeded askUserToSave);
+    bool closeAllDocumentsUsingProject (Project& project, SaveIfNeeded saveIfNeeded);
+    void closeFile (const File& f, SaveIfNeeded saveIfNeeded);
     bool anyFilesNeedSaving() const;
     bool saveAll();
     FileBasedDocument::SaveResult saveIfNeededAndUserAgrees (Document* doc);

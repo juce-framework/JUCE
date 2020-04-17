@@ -19,7 +19,7 @@
 #include "../Application/jucer_Headers.h"
 #include "jucer_DocumentEditorComponent.h"
 #include "../Application/jucer_Application.h"
-
+#include "../Project/UI/jucer_ProjectContentComponent.h"
 
 //==============================================================================
 DocumentEditorComponent::DocumentEditorComponent (OpenDocumentManager::Document* doc)

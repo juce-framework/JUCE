@@ -19,6 +19,7 @@
 #include "../../Application/jucer_Headers.h"
 #include "jucer_ProjucerLookAndFeel.h"
 #include "../../Application/jucer_Application.h"
+#include "../../Project/UI/jucer_ProjectContentComponent.h"
 
 //==============================================================================
 ProjucerLookAndFeel::ProjucerLookAndFeel()
@@ -40,24 +41,40 @@ void ProjucerLookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bool
     const auto alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
 
    #ifndef BUILDING_JUCE_COMPILEENGINE
+    auto textColour = findColour (defaultTextColourId).withMultipliedAlpha (alpha);
     auto iconColour = findColour (button.isFrontTab() ? activeTabIconColourId
                                                       : inactiveTabIconColourId);
 
-    if (button.getName() == "Project")
+    auto isProjectTab = button.getName() == ProjectContentComponent::getProjectTabName();
+    auto isBuildTab = button.getName() == ProjectContentComponent::getBuildTabName();
+
+    if (isProjectTab || isBuildTab)
     {
-        auto icon = Icon (getIcons().closedFolder, iconColour.withMultipliedAlpha (alpha));
-        icon.draw (g, button.getTextArea().reduced (8, 8).toFloat(), false);
-    }
-    else if (button.getName() == "Build")
-    {
-        auto icon = Icon (getIcons().buildTab, iconColour.withMultipliedAlpha (alpha));
-        icon.draw (g, button.getTextArea().reduced (8, 8).toFloat(), false);
+        auto icon = Icon (isProjectTab ? getIcons().closedFolder : getIcons().buildTab,
+                          iconColour.withMultipliedAlpha (alpha));
+
+        auto isSingleTab = (button.getTabbedButtonBar().getNumTabs() == 1);
+
+        if (isSingleTab)
+        {
+            auto activeArea = button.getActiveArea().reduced (5);
+
+            activeArea.removeFromLeft (15);
+            icon.draw (g, activeArea.removeFromLeft (activeArea.getHeight()).toFloat(), false);
+            activeArea.removeFromLeft (10);
+
+            g.setColour (textColour);
+            g.drawFittedText (isProjectTab ? ProjectContentComponent::getProjectTabName() : ProjectContentComponent::getBuildTabName(),
+                              activeArea, Justification::centredLeft, 1);
+        }
+        else
+        {
+            icon.draw (g, button.getTextArea().reduced (8, 8).toFloat(), false);
+        }
     }
     else
    #endif
     {
-        auto textColour = findColour (defaultTextColourId).withMultipliedAlpha (alpha);
-
         TextLayout textLayout;
         LookAndFeel_V3::createTabTextLayout (button, (float) area.getWidth(), (float) area.getHeight(), textColour, textLayout);
 

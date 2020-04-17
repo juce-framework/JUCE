@@ -18,6 +18,7 @@
 
 #pragma once
 
+
 //==============================================================================
 static String getWidthLimitedStringFromVarArray (const var& varArray) noexcept
 {

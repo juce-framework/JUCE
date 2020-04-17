@@ -57,12 +57,11 @@ target_sources(Projucer PRIVATE
     Source/ComponentEditor/jucer_JucerDocument.cpp
     Source/ComponentEditor/jucer_ObjectTypes.cpp
     Source/ComponentEditor/jucer_PaintRoutine.cpp
-    Source/Licenses/jucer_LicenseController.cpp
     Source/LiveBuildEngine/jucer_CompileEngineClient.cpp
     Source/LiveBuildEngine/jucer_CompileEngineServer.cpp
     Source/LiveBuildEngine/jucer_DownloadCompileEngineThread.cpp
+    Source/Project/Modules/jucer_Modules.cpp
     Source/Project/UI/jucer_HeaderComponent.cpp
-    Source/Project/jucer_Module.cpp
     Source/Project/jucer_Project.cpp
     Source/ProjectSaving/jucer_ProjectExporter.cpp
     Source/ProjectSaving/jucer_ProjectSaver.cpp
@@ -97,7 +96,7 @@ juce_add_binary_data(ProjucerData SOURCES
     Source/BinaryData/Icons/export_linux.svg
     Source/BinaryData/Icons/export_visualStudio.svg
     Source/BinaryData/Icons/export_xcode.svg
-    Source/BinaryData/Icons/huckleberry_icon.svg
+    Source/BinaryData/Icons/gpl_logo.svg
     Source/BinaryData/Icons/juce-logo-with-text.svg
     Source/BinaryData/Icons/juce_icon.png
     Source/BinaryData/Icons/wizard_AnimatedApp.svg

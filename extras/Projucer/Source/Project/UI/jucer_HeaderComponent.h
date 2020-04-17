@@ -20,8 +20,11 @@
 
 #include "../../Application/jucer_Headers.h"
 #include "../../Utility/UI/jucer_IconButton.h"
+#include "jucer_UserAvatarComponent.h"
 
 class Project;
+class ProjectContentComponent;
+class ProjectExporter;
 class CompileEngineChildProcess;
 
 //==============================================================================
@@ -32,7 +35,7 @@ class HeaderComponent    : public Component,
                            private Timer
 {
 public:
-    HeaderComponent();
+    HeaderComponent (ProjectContentComponent* projectContentComponent);
     ~HeaderComponent() override;
 
     //==============================================================================
@@ -40,13 +43,14 @@ public:
     void paint (Graphics&) override;
 
     //==============================================================================
-    void setCurrentProject (Project*) noexcept;
+    void setCurrentProject (Project*);
 
-    void updateExporters() noexcept;
-    String getSelectedExporterName() const noexcept;
-    bool canCurrentExporterLaunchProject() const noexcept;
+    void updateExporters();
+    std::unique_ptr<ProjectExporter> getSelectedExporter() const;
+    bool canCurrentExporterLaunchProject() const;
 
-    void sidebarTabsWidthChanged (int newWidth) noexcept;
+    void sidebarTabsWidthChanged (int newWidth);
+    void liveBuildEnablementChanged (bool isEnabled);
 
 private:
     //==============================================================================
@@ -59,17 +63,17 @@ private:
     void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&, int) override { updateIfNeeded (parentTree); }
     void valueTreeChildOrderChanged (ValueTree& parentTree, int, int) override   { updateIfNeeded (parentTree); }
 
-    void updateIfNeeded (ValueTree tree) noexcept
+    void updateIfNeeded (ValueTree tree)
     {
         if (tree == exportersTree)
             updateExporters();
     }
 
     //==============================================================================
-    void initialiseButtons() noexcept;
+    void initialiseButtons();
 
-    void updateName() noexcept;
-    void updateExporterButton() noexcept;
+    void updateName();
+    void updateExporterButton();
 
     //==============================================================================
     void buildPing();
@@ -80,17 +84,21 @@ private:
     int tabsWidth = 200;
     bool isBuilding = false;
 
+    ProjectContentComponent* projectContentComponent = nullptr;
     Project* project = nullptr;
     ValueTree exportersTree;
 
     Value projectNameValue;
 
     ComboBox exporterBox;
-    Label configLabel  { "Config Label", "Selected exporter" },
-    projectNameLabel;
+    Label configLabel  { "Config Label", "Selected exporter" }, projectNameLabel;
 
-    std::unique_ptr<ImageComponent> juceIcon;
-    std::unique_ptr<IconButton> projectSettingsButton, saveAndOpenInIDEButton, runAppButton;
+    ImageComponent juceIcon;
+    UserAvatarComponent userAvatar { true, true };
+
+    IconButton projectSettingsButton { "Project Settings", getIcons().settings },
+               saveAndOpenInIDEButton { "Save and Open in IDE", Image() },
+               runAppButton { "Run Application", getIcons().play };
 
     ReferenceCountedObjectPtr<CompileEngineChildProcess> childProcess;
 

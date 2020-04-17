@@ -23,7 +23,8 @@
 //==============================================================================
 class GlobalPathsWindowComponent    : public Component,
                                       private Timer,
-                                      private Value::Listener
+                                      private Value::Listener,
+                                      private ChangeListener
 {
 public:
     GlobalPathsWindowComponent()
@@ -41,6 +42,16 @@ public:
             ProjucerApplication::getApp().rescanUserPathModules();
             lastUserModulePath = getAppSettings().getStoredPath (Ids::defaultUserModulePath, TargetOS::getThisOS()).get();
         };
+
+        addChildComponent (warnAboutJUCEPathButton);
+        warnAboutJUCEPathButton.setToggleState (ProjucerApplication::getApp().shouldPromptUserAboutIncorrectJUCEPath(),
+                                                dontSendNotification);
+        warnAboutJUCEPathButton.onClick = [this]
+        {
+            ProjucerApplication::getApp().setShouldPromptUserAboutIncorrectJUCEPath (warnAboutJUCEPathButton.getToggleState());
+        };
+
+        getGlobalProperties().addChangeListener (this);
 
         addAndMakeVisible (resetToDefaultsButton);
         resetToDefaultsButton.onClick = [this] { resetCurrentOSPathsToDefaults(); };
@@ -64,6 +75,8 @@ public:
 
     ~GlobalPathsWindowComponent() override
     {
+        getGlobalProperties().removeChangeListener (this);
+
         auto juceValue = getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS());
         auto userValue = getAppSettings().getStoredPath (Ids::defaultUserModulePath, TargetOS::getThisOS());
 
@@ -86,12 +99,15 @@ public:
     {
         auto b = getLocalBounds().reduced (10);
 
-        auto buttonBounds = b.removeFromBottom (50);
+        auto bottomBounds = b.removeFromBottom (80);
+        auto buttonBounds = bottomBounds.removeFromBottom (50);
 
         rescanJUCEPathButton.setBounds (buttonBounds.removeFromLeft (150).reduced (5, 10));
         rescanUserPathButton.setBounds (buttonBounds.removeFromLeft (150).reduced (5, 10));
 
         resetToDefaultsButton.setBounds (buttonBounds.removeFromRight (150).reduced (5, 10));
+        warnAboutJUCEPathButton.setBounds (bottomBounds.reduced (0, 5));
+        warnAboutJUCEPathButton.changeWidthToFitText();
 
         propertyGroup.updateSize (0, 0, getWidth() - 20 - propertyViewport.getScrollBarThickness());
         propertyViewport.setBounds (b);
@@ -143,6 +159,12 @@ private:
     {
         buildProps();
         resized();
+    }
+
+    void changeListenerCallback (ChangeBroadcaster*) override
+    {
+        warnAboutJUCEPathButton.setToggleState (ProjucerApplication::getApp().shouldPromptUserAboutIncorrectJUCEPath(),
+                                                dontSendNotification);
     }
 
     //==============================================================================
@@ -223,15 +245,11 @@ private:
                          "This path will be used for the \"Save Project and Open in IDE...\" option of the CLion exporter.");
             builder.add (new FilePathPropertyComponent (androidStudioExePathValue, "Android Studio " + exeLabel, false, isThisOS),
                          "This path will be used for the \"Save Project and Open in IDE...\" option of the Android Studio exporter.");
+        }
 
-            rescanJUCEPathButton.setVisible (true);
-            rescanUserPathButton.setVisible (true);
-        }
-        else
-        {
-            rescanJUCEPathButton.setVisible (false);
-            rescanUserPathButton.setVisible (false);
-        }
+        rescanJUCEPathButton.setVisible (isThisOS);
+        rescanUserPathButton.setVisible (isThisOS);
+        warnAboutJUCEPathButton.setVisible (isThisOS);
 
         propertyGroup.setProperties (builder);
     }
@@ -279,6 +297,7 @@ private:
     Viewport propertyViewport;
     PropertyGroupComponent propertyGroup  { "Global Paths", { getIcons().openFolder, Colours::transparentBlack } };
 
+    ToggleButton warnAboutJUCEPathButton { "Warn about incorrect JUCE path" };
     TextButton rescanJUCEPathButton  { "Re-scan JUCE Modules" },
                rescanUserPathButton  { "Re-scan User Modules" },
                resetToDefaultsButton { "Reset to Defaults" };

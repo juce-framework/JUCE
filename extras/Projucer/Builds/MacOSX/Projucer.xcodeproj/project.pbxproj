@@ -205,13 +205,13 @@
 			isa = PBXBuildFile;
 			fileRef = ADA538034910F52FDD2DC88D;
 		};
+		0E783907C6214ADD59EC95DC = {
+			isa = PBXBuildFile;
+			fileRef = F58B23995765C9FDBE28F871;
+		};
 		05A08E366EBF8D650974E695 = {
 			isa = PBXBuildFile;
 			fileRef = 516D6D7C564DD5DF5C15CB06;
-		};
-		3FCA61C401007B243E2E9035 = {
-			isa = PBXBuildFile;
-			fileRef = F797071D88542C813CF7222A;
 		};
 		30B921C38DCEE787B294B746 = {
 			isa = PBXBuildFile;
@@ -548,13 +548,6 @@
 			path = "../../Source/Utility/PIPs/jucer_PIPGenerator.cpp";
 			sourceTree = "SOURCE_ROOT";
 		};
-		194457D806A26E793584AC0C = {
-			isa = PBXFileReference;
-			lastKnownFileType = file.svg;
-			name = "huckleberry_icon.svg";
-			path = "../../Source/BinaryData/Icons/huckleberry_icon.svg";
-			sourceTree = "SOURCE_ROOT";
-		};
 		1B0F18E1D96F727C062B05FA = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.cpp;
@@ -660,6 +653,13 @@
 			path = "../../Source/LiveBuildEngine/jucer_ActivityList.h";
 			sourceTree = "SOURCE_ROOT";
 		};
+		247768B490B9D759DDA79359 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = "jucer_UserAvatarComponent.h";
+			path = "../../Source/Project/UI/jucer_UserAvatarComponent.h";
+			sourceTree = "SOURCE_ROOT";
+		};
 		24EB4C2412821B8019D6F754 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.cpp;
@@ -707,6 +707,13 @@
 			lastKnownFileType = sourcecode.c.h;
 			name = "jucer_CommandLine.h";
 			path = "../../Source/Application/jucer_CommandLine.h";
+			sourceTree = "SOURCE_ROOT";
+		};
+		2F0A7CA808B2FCCC9ED68992 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = "jucer_LicenseQueryThread.h";
+			path = "../../Source/Application/UserAccount/jucer_LicenseQueryThread.h";
 			sourceTree = "SOURCE_ROOT";
 		};
 		2F373F97E30AC1A0BFC1FC61 = {
@@ -1094,6 +1101,13 @@
 			path = "../../Source/ComponentEditor/Properties/jucer_ComponentTextProperty.h";
 			sourceTree = "SOURCE_ROOT";
 		};
+		582F659B801F656C2B7C51B1 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = "jucer_Modules.h";
+			path = "../../Source/Project/Modules/jucer_Modules.h";
+			sourceTree = "SOURCE_ROOT";
+		};
 		5867DC4E39DF8539B54C0D59 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.objcpp;
@@ -1302,13 +1316,6 @@
 			lastKnownFileType = sourcecode.c.h;
 			name = "jucer_RelativePositionedRectangle.h";
 			path = "../../Source/ComponentEditor/UI/jucer_RelativePositionedRectangle.h";
-			sourceTree = "SOURCE_ROOT";
-		};
-		7211101FFA28400ADBB1D47A = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			name = "jucer_Module.h";
-			path = "../../Source/Project/jucer_Module.h";
 			sourceTree = "SOURCE_ROOT";
 		};
 		728FE25157E9874D50BBECB2 = {
@@ -1582,6 +1589,13 @@
 			lastKnownFileType = sourcecode.c.h;
 			name = "jucer_ProjectContentComponent.h";
 			path = "../../Source/Project/UI/jucer_ProjectContentComponent.h";
+			sourceTree = "SOURCE_ROOT";
+		};
+		94146B40B41BF0AACF4359DD = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = "jucer_LicenseState.h";
+			path = "../../Source/Application/UserAccount/jucer_LicenseState.h";
 			sourceTree = "SOURCE_ROOT";
 		};
 		951128CA33CCDEF570436B1C = {
@@ -1899,6 +1913,13 @@
 			path = "../../Source/Utility/Helpers/jucer_FileHelpers.cpp";
 			sourceTree = "SOURCE_ROOT";
 		};
+		B6444A4A8DFD6828FF6BD1CB = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = "jucer_LoginFormComponent.h";
+			path = "../../Source/Application/UserAccount/jucer_LoginFormComponent.h";
+			sourceTree = "SOURCE_ROOT";
+		};
 		B6F2905330EA5C560D527209 = {
 			isa = PBXFileReference;
 			lastKnownFileType = file;
@@ -2100,6 +2121,13 @@
 			lastKnownFileType = sourcecode.c.h;
 			name = "jucer_BuildTabStatusComponent.h";
 			path = "../../Source/LiveBuildEngine/UI/jucer_BuildTabStatusComponent.h";
+			sourceTree = "SOURCE_ROOT";
+		};
+		CD267A28C16C4E79EB749005 = {
+			isa = PBXFileReference;
+			lastKnownFileType = file.svg;
+			name = "gpl_logo.svg";
+			path = "../../Source/BinaryData/Icons/gpl_logo.svg";
 			sourceTree = "SOURCE_ROOT";
 		};
 		CF6C8BD0DA3D8CD4E99EBADA = {
@@ -2438,6 +2466,13 @@
 			path = "../../Source/Utility/Helpers/jucer_CodeHelpers.cpp";
 			sourceTree = "SOURCE_ROOT";
 		};
+		F30DF63DBEFA4BEEF7C369FC = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = "jucer_LicenseController.h";
+			path = "../../Source/Application/UserAccount/jucer_LicenseController.h";
+			sourceTree = "SOURCE_ROOT";
+		};
 		F313EE01ECE306DB2CFE011D = {
 			isa = PBXFileReference;
 			lastKnownFileType = file.in;
@@ -2459,6 +2494,13 @@
 			path = "../../Source/ComponentEditor/Properties/jucer_ComponentBooleanProperty.h";
 			sourceTree = "SOURCE_ROOT";
 		};
+		F58B23995765C9FDBE28F871 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = "jucer_Modules.cpp";
+			path = "../../Source/Project/Modules/jucer_Modules.cpp";
+			sourceTree = "SOURCE_ROOT";
+		};
 		F5DD97B45B8EA60C1ED0DD80 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.cpp;
@@ -2466,11 +2508,11 @@
 			path = "../../Source/Settings/jucer_StoredSettings.cpp";
 			sourceTree = "SOURCE_ROOT";
 		};
-		F797071D88542C813CF7222A = {
+		F63F46CA0A51C679867855A7 = {
 			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = "jucer_Module.cpp";
-			path = "../../Source/Project/jucer_Module.cpp";
+			lastKnownFileType = sourcecode.c.h;
+			name = "jucer_ProjectMessagesComponent.h";
+			path = "../../Source/Project/UI/jucer_ProjectMessagesComponent.h";
 			sourceTree = "SOURCE_ROOT";
 		};
 		F7C74E934C954F6F1A3BE4F9 = {
@@ -2501,6 +2543,13 @@
 			path = "../../Source/CodeEditor/jucer_OpenDocumentManager.cpp";
 			sourceTree = "SOURCE_ROOT";
 		};
+		F9A363BFBB6B1143C2E967C3 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = "jucer_ModuleDescription.h";
+			path = "../../Source/Project/Modules/jucer_ModuleDescription.h";
+			sourceTree = "SOURCE_ROOT";
+		};
 		FA790C59A304579F660F112F = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -2520,6 +2569,13 @@
 			lastKnownFileType = sourcecode.c.h;
 			name = "jucer_ComponentColourProperty.h";
 			path = "../../Source/ComponentEditor/Properties/jucer_ComponentColourProperty.h";
+			sourceTree = "SOURCE_ROOT";
+		};
+		FDABEE6B64546586368A4729 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = "jucer_AvailableModulesList.h";
+			path = "../../Source/Project/Modules/jucer_AvailableModulesList.h";
 			sourceTree = "SOURCE_ROOT";
 		};
 		FE20FE5805A02A4843048200 = {
@@ -2550,6 +2606,17 @@
 			path = "../../Source/ComponentEditor/UI/jucer_PaintRoutinePanel.cpp";
 			sourceTree = "SOURCE_ROOT";
 		};
+		9D43579A76E23FBCE6B36333 = {
+			isa = PBXGroup;
+			children = (
+				F30DF63DBEFA4BEEF7C369FC,
+				2F0A7CA808B2FCCC9ED68992,
+				94146B40B41BF0AACF4359DD,
+				B6444A4A8DFD6828FF6BD1CB,
+			);
+			name = UserAccount;
+			sourceTree = "<group>";
+		};
 		EB1D55A76652399EB81CC1F0 = {
 			isa = PBXGroup;
 			children = (
@@ -2568,6 +2635,7 @@
 		BC67FD952A6F210A11A1ECB8 = {
 			isa = PBXGroup;
 			children = (
+				9D43579A76E23FBCE6B36333,
 				EB1D55A76652399EB81CC1F0,
 				7CA44FF0BA319517C6E39651,
 				EE690110171E1648FF2118B8,
@@ -2606,7 +2674,7 @@
 				69B478C992FA0B8C885946A6,
 				EAC1731150A7F79D59BAA0B6,
 				8F4D281E98808204E2846A7D,
-				194457D806A26E793584AC0C,
+				CD267A28C16C4E79EB749005,
 				432EC251A122071809471804,
 				B83C9BD89F31EA9E5E12A3C6,
 				8FEF6F5EA676B824C021EB6F,
@@ -2865,6 +2933,17 @@
 			name = LiveBuildEngine;
 			sourceTree = "<group>";
 		};
+		5108FDF7F62E617332FB13B0 = {
+			isa = PBXGroup;
+			children = (
+				FDABEE6B64546586368A4729,
+				F9A363BFBB6B1143C2E967C3,
+				F58B23995765C9FDBE28F871,
+				582F659B801F656C2B7C51B1,
+			);
+			name = Modules;
+			sourceTree = "<group>";
+		};
 		236D186F5A6536C59D6E751C = {
 			isa = PBXGroup;
 			children = (
@@ -2891,6 +2970,8 @@
 				B3528C08B84CBC950252EA69,
 				1B0F18E1D96F727C062B05FA,
 				92A66A8BD87F98EB6B4FB6D0,
+				F63F46CA0A51C679867855A7,
+				247768B490B9D759DDA79359,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -2898,9 +2979,8 @@
 		89E9055A179B4C2019B4E1AE = {
 			isa = PBXGroup;
 			children = (
+				5108FDF7F62E617332FB13B0,
 				EBC037ECAAC8156B8B19DC69,
-				F797071D88542C813CF7222A,
-				7211101FFA28400ADBB1D47A,
 				BAC43B20E14A340CCF14119C,
 				BF3CEF080FA013E2778DCE90,
 			);
@@ -3424,8 +3504,8 @@
 				D25EBE02B55DB244BE0D5635,
 				85E7FCB0516EFF853FA7B380,
 				CC6C4D351BA9B473E5F95791,
+				0E783907C6214ADD59EC95DC,
 				05A08E366EBF8D650974E695,
-				3FCA61C401007B243E2E9035,
 				30B921C38DCEE787B294B746,
 				244567D3AE2E417A8CB2B95E,
 				26D6AEA321E80ABCC3CCCCD1,

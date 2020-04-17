@@ -23,7 +23,7 @@
 // Handy list of static Identifiers..
 namespace Ids
 {
-    #define DECLARE_ID(name)      const Identifier name (#name)
+    #define DECLARE_ID(name)  const Identifier name (#name)
 
     DECLARE_ID (name);
     DECLARE_ID (file);
@@ -359,8 +359,11 @@ namespace Ids
     DECLARE_ID (compilerFlagSchemes);
     DECLARE_ID (compilerFlagScheme);
     DECLARE_ID (dontQueryForUpdate);
+    DECLARE_ID (dontAskAboutJUCEPath);
     DECLARE_ID (postExportShellCommandPosix);
     DECLARE_ID (postExportShellCommandWin);
+    DECLARE_ID (liveBuildEnabled);
+    DECLARE_ID (guiEditorEnabled);
 
     const Identifier ID ("id");
     const Identifier ID_uppercase ("ID");

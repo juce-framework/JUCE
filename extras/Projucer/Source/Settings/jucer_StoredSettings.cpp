@@ -350,18 +350,9 @@ void StoredSettings::checkJUCEPaths()
         projectDefaults.getPropertyAsValue (Ids::defaultJuceModulePath, nullptr) = File (juceFolder).getChildFile ("modules").getFullPathName();
 }
 
-bool StoredSettings::shouldAskUserToSetJUCEPath() noexcept
+bool StoredSettings::isJUCEPathIncorrect()
 {
-    if (! isGlobalPathValid ({}, Ids::jucePath, getStoredPath (Ids::jucePath, TargetOS::getThisOS()).get().toString())
-        && getGlobalProperties().getValue ("dontAskAboutJUCEPath", {}).isEmpty())
-        return true;
-
-    return false;
-}
-
-void StoredSettings::setDontAskAboutJUCEPathAgain() noexcept
-{
-    getGlobalProperties().setValue ("dontAskAboutJUCEPath", 1);
+    return ! isGlobalPathValid ({}, Ids::jucePath, getStoredPath (Ids::jucePath, TargetOS::getThisOS()).get().toString());
 }
 
 static String getFallbackPathForOS (const Identifier& key, DependencyPathOS os)

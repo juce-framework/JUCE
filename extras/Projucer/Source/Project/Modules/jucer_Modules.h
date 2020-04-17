@@ -18,36 +18,10 @@
 
 #pragma once
 
-#include "jucer_Project.h"
+#include "../jucer_Project.h"
+
 class ProjectExporter;
 class ProjectSaver;
-
-//==============================================================================
-struct ModuleDescription
-{
-    ModuleDescription() = default;
-    ModuleDescription (const File& folder);
-
-    bool isValid() const                    { return getID().isNotEmpty(); }
-
-    String getID() const                    { return moduleInfo [Ids::ID_uppercase].toString(); }
-    String getVendor() const                { return moduleInfo [Ids::vendor].toString(); }
-    String getVersion() const               { return moduleInfo [Ids::version].toString(); }
-    String getName() const                  { return moduleInfo [Ids::name].toString(); }
-    String getDescription() const           { return moduleInfo [Ids::description].toString(); }
-    String getLicense() const               { return moduleInfo [Ids::license].toString(); }
-    String getMinimumCppStandard() const    { return moduleInfo [Ids::minimumCppStandard].toString(); }
-    String getPreprocessorDefs() const      { return moduleInfo [Ids::defines].toString(); }
-    String getExtraSearchPaths() const      { return moduleInfo [Ids::searchpaths].toString(); }
-    StringArray getDependencies() const;
-
-    File getFolder() const                  { jassert (moduleFolder != File()); return moduleFolder; }
-    File getHeader() const;
-
-    File moduleFolder;
-    var moduleInfo;
-    URL url;
-};
 
 //==============================================================================
 class LibraryModule
@@ -102,51 +76,10 @@ private:
 };
 
 //==============================================================================
-class AvailableModuleList
+class EnabledModulesList
 {
 public:
-    using ModuleIDAndFolder     = std::pair<String, File>;
-    using ModuleIDAndFolderList = std::vector<ModuleIDAndFolder>;
-
-    AvailableModuleList() = default;
-
-    void scanPaths      (const Array<File>&);
-    void scanPathsAsync (const Array<File>&);
-
-    ModuleIDAndFolderList getAllModules() const;
-    ModuleIDAndFolder getModuleWithID (const String&) const;
-
-    void removeDuplicates (const ModuleIDAndFolderList& other);
-
-    //==============================================================================
-    struct Listener
-    {
-        virtual ~Listener() {}
-
-        virtual void availableModulesChanged() = 0;
-    };
-
-    void addListener (Listener* listenerToAdd)          { listeners.add (listenerToAdd); }
-    void removeListener (Listener* listenerToRemove)    { listeners.remove (listenerToRemove); }
-
-private:
-    ThreadPoolJob* createScannerJob (const Array<File>&);
-    void removePendingAndAddJob (ThreadPoolJob*);
-
-    ThreadPool scanPool { 1 };
-
-    ModuleIDAndFolderList moduleList;
-    ListenerList<Listener> listeners;
-    CriticalSection lock;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AvailableModuleList)
-};
-
-//==============================================================================
-class EnabledModuleList
-{
-public:
-    EnabledModuleList (Project&, const ValueTree&);
+    EnabledModulesList (Project&, const ValueTree&);
 
     //==============================================================================
     ValueTree getState() const              { return state; }
@@ -160,11 +93,14 @@ public:
     int getNumModules() const               { return state.getNumChildren(); }
     String getModuleID (int index) const    { return state.getChild (index) [Ids::ID].toString(); }
 
-    ModuleDescription getModuleInfo (const String& moduleID);
+    ModuleDescription getModuleInfo (const String& moduleID) const;
 
     bool isModuleEnabled (const String& moduleID) const;
+
     StringArray getExtraDependenciesNeeded (const String& moduleID) const;
-    bool doesModuleHaveHigherCppStandardThanProject (const String& moduleID);
+    bool tryToFixMissingDependencies (const String& moduleID);
+
+    bool doesModuleHaveHigherCppStandardThanProject (const String& moduleID) const;
 
     bool shouldUseGlobalPath (const String& moduleID) const;
     Value shouldUseGlobalPathValue (const String& moduleID) const;
@@ -177,6 +113,11 @@ public:
 
     bool areMostModulesUsingGlobalPath() const;
     bool areMostModulesCopiedLocally() const;
+
+    StringArray getModulesWithHigherCppStandardThanProject() const;
+    StringArray getModulesWithMissingDependencies() const;
+
+    String getHighestModuleCppStandard() const;
 
     //==============================================================================
     void addModule (const File& moduleManifestFile, bool copyLocally, bool useGlobalPath);
@@ -192,5 +133,5 @@ private:
     Project& project;
     ValueTree state;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnabledModuleList)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnabledModulesList)
 };

@@ -61,9 +61,8 @@ class LiveBuildTab    : public Component,
 public:
     LiveBuildTab (const CompileEngineChildProcess::Ptr& child, String lastErrorMessage)
     {
-        settingsButton.reset (new IconButton ("Settings", &getIcons().settings));
-        addAndMakeVisible (settingsButton.get());
-        settingsButton->onClick = [this]
+        addAndMakeVisible (settingsButton);
+        settingsButton.onClick = [this]
         {
             if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
                 pcc->showLiveBuildSettings();
@@ -122,9 +121,9 @@ public:
     {
         auto bounds = getLocalBounds();
 
-        settingsButton->setBounds (bounds.removeFromBottom (25)
-                                         .removeFromRight  (25)
-                                         .reduced (3));
+        settingsButton.setBounds (bounds.removeFromBottom (25)
+                                        .removeFromRight  (25)
+                                        .reduced (3));
 
         if (errorMessageLabel != nullptr)
         {
@@ -155,7 +154,7 @@ public:
 private:
     OwnedArray<ConcertinaHeader> headers;
     ConcertinaPanel concertinaPanel;
-    std::unique_ptr<IconButton> settingsButton;
+    IconButton settingsButton { "Settings", getIcons().settings };
 
     std::unique_ptr<TextButton> downloadButton, enableButton;
     std::unique_ptr<Label> errorMessageLabel;

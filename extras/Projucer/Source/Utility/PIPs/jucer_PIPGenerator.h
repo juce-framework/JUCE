@@ -19,6 +19,7 @@
 #pragma once
 
 #include "../Helpers/jucer_MiscUtilities.h"
+#include "../../Project/Modules/jucer_AvailableModulesList.h"
 
 //==============================================================================
 class PIPGenerator
@@ -70,13 +71,9 @@ private:
 
     //==============================================================================
     File pipFile, outputDirectory, juceModulesPath, userModulesPath;
-
-    std::unique_ptr<AvailableModuleList> availableUserModules;
-
+    std::unique_ptr<AvailableModulesList> availableUserModules;
     var metadata;
-
-    bool isTemp = false;
-    bool useLocalCopy = false;
+    bool isTemp = false, useLocalCopy = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PIPGenerator)
 };

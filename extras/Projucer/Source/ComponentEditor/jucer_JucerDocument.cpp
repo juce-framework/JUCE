@@ -697,7 +697,7 @@ public:
         {
             if (header->save())
             {
-                odm.closeFile (getFile().withFileExtension(".h"), false);
+                odm.closeFile (getFile().withFileExtension(".h"), OpenDocumentManager::SaveIfNeeded::no);
                 return true;
             }
         }
@@ -707,10 +707,13 @@ public:
 
     Component* createEditor() override
     {
-        std::unique_ptr<JucerDocument> jucerDoc (JucerDocument::createForCppFile (getProject(), getFile()));
+        if (ProjucerApplication::getApp().isGUIEditorEnabled())
+        {
+            std::unique_ptr<JucerDocument> jucerDoc (JucerDocument::createForCppFile (getProject(), getFile()));
 
-        if (jucerDoc != nullptr)
-            return new JucerDocumentEditor (jucerDoc.release());
+            if (jucerDoc != nullptr)
+                return new JucerDocumentEditor (jucerDoc.release());
+        }
 
         return SourceCodeDocument::createEditor();
     }
@@ -766,8 +769,8 @@ struct NewGUIComponentWizard  : public NewFileWizard::Type
 
                         cpp->save();
                         header->save();
-                        odm.closeDocument (cpp, true);
-                        odm.closeDocument (header, true);
+                        odm.closeDocument (cpp, OpenDocumentManager::SaveIfNeeded::yes);
+                        odm.closeDocument (header, OpenDocumentManager::SaveIfNeeded::yes);
 
                         parent.addFileRetainingSortOrder (headerFile, true);
                         parent.addFileRetainingSortOrder (cppFile, true);

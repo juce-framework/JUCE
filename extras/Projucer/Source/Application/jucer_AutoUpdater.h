@@ -29,7 +29,7 @@ public:
     LatestVersionCheckerAndUpdater();
     ~LatestVersionCheckerAndUpdater() override;
 
-    void checkForNewVersion (bool showAlerts);
+    void checkForNewVersion (bool isBackgroundCheck);
 
     //==============================================================================
     JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (LatestVersionCheckerAndUpdater)
@@ -41,8 +41,11 @@ private:
     void askUserForLocationToDownload (const VersionInfo::Asset&);
     void downloadAndInstall (const VersionInfo::Asset&, const File&);
 
+    void showDialogWindow (const String&, const String&, const VersionInfo::Asset&);
+    void addNotificationToOpenProjects (const VersionInfo::Asset&);
+
     //==============================================================================
-    bool showAlertWindows = false;
+    bool backgroundCheck = false;
 
     std::unique_ptr<DownloadAndInstallThread> installer;
     std::unique_ptr<Component> dialogWindow;

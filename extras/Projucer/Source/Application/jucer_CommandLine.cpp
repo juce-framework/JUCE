@@ -90,8 +90,8 @@ namespace
                 if (! justSaveResources)
                     rescanModulePathsIfNecessary();
 
-                auto error = justSaveResources ? project->saveResourcesOnly (project->getFile())
-                                               : project->saveProject (project->getFile(), true);
+                auto error = justSaveResources ? project->saveResourcesOnly()
+                                               : project->saveProject();
 
                 project.reset();
 
@@ -230,7 +230,7 @@ namespace
                   << "Name: " << proj.project->getProjectNameString() << std::endl
                   << "UID: " << proj.project->getProjectUIDString() << std::endl;
 
-        EnabledModuleList& modules = proj.project->getEnabledModules();
+        auto& modules = proj.project->getEnabledModules();
 
         if (int numModules = modules.getNumModules())
         {
@@ -307,7 +307,7 @@ namespace
 
                     var moduleInfo (new DynamicObject());
                     moduleInfo.getDynamicObject()->setProperty ("file", getModulePackageName (module));
-                    moduleInfo.getDynamicObject()->setProperty ("info", module.moduleInfo.moduleInfo);
+                    moduleInfo.getDynamicObject()->setProperty ("info", module.moduleInfo.getModuleInfo());
                     infoList.append (moduleInfo);
                 }
             }

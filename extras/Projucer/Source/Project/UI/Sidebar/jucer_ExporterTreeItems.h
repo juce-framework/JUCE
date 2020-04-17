@@ -108,18 +108,11 @@ public:
     void handlePopupMenuResult (int resultCode) override
     {
         if (resultCode == 1)
-        {
             exporter->addNewConfiguration (false);
-        }
         else if (resultCode == 2)
-        {
-            const ScopedValueSetter<String> valueSetter (project.specifiedExporterToSave, exporter->getName(), {});
-            project.save (true, true);
-        }
+            project.saveProject (exporter.get());
         else if (resultCode == 3)
-        {
             deleteAllSelectedItems();
-        }
     }
 
     var getDragSourceDescription() override

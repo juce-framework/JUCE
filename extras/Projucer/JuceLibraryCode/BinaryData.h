@@ -59,8 +59,8 @@ namespace BinaryData
     extern const char*   export_xcode_svg;
     const int            export_xcode_svgSize = 12295;
 
-    extern const char*   huckleberry_icon_svg;
-    const int            huckleberry_icon_svgSize = 3375;
+    extern const char*   gpl_logo_svg;
+    const int            gpl_logo_svgSize = 27030;
 
     extern const char*   jucelogowithtext_svg;
     const int            jucelogowithtext_svgSize = 5312;

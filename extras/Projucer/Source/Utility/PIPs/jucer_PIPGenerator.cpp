@@ -19,7 +19,6 @@
 #include "../../Application/jucer_Headers.h"
 #include "../../ProjectSaving/jucer_ProjectExporter.h"
 #include "jucer_PIPGenerator.h"
-#include "../../Project/jucer_Module.h"
 
 //==============================================================================
 static void ensureSingleNewLineAfterIncludes (StringArray& lines)
@@ -105,7 +104,7 @@ PIPGenerator::PIPGenerator (const File& pip, const File& output, const File& juc
 
     if (userModulesPath != File())
     {
-        availableUserModules.reset (new AvailableModuleList());
+        availableUserModules.reset (new AvailableModulesList());
         availableUserModules->scanPaths ({ userModulesPath });
     }
 }
@@ -357,6 +356,8 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
                                                                          : "\"File->Global Paths...\"")
                                  + " menu item.");
         }
+
+        jucerTree.setProperty (Ids::displaySplashScreen, true, nullptr);
     }
 
     setPropertyIfNotEmpty (Ids::defines, defines);

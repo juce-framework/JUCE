@@ -21,44 +21,50 @@
 #include "../../LiveBuildEngine/jucer_DownloadCompileEngineThread.h"
 #include "../../LiveBuildEngine/jucer_CompileEngineSettings.h"
 
-#include "jucer_HeaderComponent.h"
 #include "Sidebar/jucer_TabComponents.h"
 #include "Sidebar/jucer_ProjectTab.h"
 #include "Sidebar/jucer_LiveBuildTab.h"
 
+NewFileWizard::Type* createGUIComponentWizard();
+
 //==============================================================================
-struct LogoComponent  : public Component
+ProjectContentComponent::LogoComponent::LogoComponent()
 {
-    LogoComponent()
-    {
-        if (auto svg = parseXML (BinaryData::background_logo_svg))
-            logo = Drawable::createFromSVG (*svg);
-        else
-            jassertfalse;
-    }
+    if (auto svg = parseXML (BinaryData::background_logo_svg))
+        logo = Drawable::createFromSVG (*svg);
+}
 
-    void paint (Graphics& g) override
-    {
-        g.setColour (findColour (defaultTextColourId));
+void ProjectContentComponent::LogoComponent::paint (Graphics& g)
+{
+    g.setColour (findColour (defaultTextColourId));
 
-        auto r = getLocalBounds();
+    auto r = getLocalBounds();
 
-        g.setFont (15.0f);
-        g.drawFittedText (getVersionInfo(), r.removeFromBottom (50), Justification::centredBottom, 3);
+    g.setFont (15.0f);
+    g.drawFittedText (getVersionInfo(), r.removeFromBottom (50), Justification::centredBottom, 3);
 
-        logo->drawWithin (g, r.withTrimmedBottom (r.getHeight() / 4).toFloat(),
-                          RectanglePlacement (RectanglePlacement::centred), 1.0f);
-    }
+    logo->drawWithin (g, r.withTrimmedBottom (r.getHeight() / 4).toFloat(),
+                      RectanglePlacement (RectanglePlacement::centred), 1.0f);
+}
 
-    static String getVersionInfo()
-    {
-        return SystemStats::getJUCEVersion()
-                + newLine
-                + ProjucerApplication::getApp().getVersionDescription();
-    }
+String ProjectContentComponent::LogoComponent::getVersionInfo()
+{
+    return SystemStats::getJUCEVersion()
+            + newLine
+            + ProjucerApplication::getApp().getVersionDescription();
+}
 
-    std::unique_ptr<Drawable> logo;
-};
+//==============================================================================
+ProjectContentComponent::ContentViewport::ContentViewport (Component* content)
+{
+    addAndMakeVisible (viewport);
+    viewport.setViewedComponent (content, true);
+}
+
+void ProjectContentComponent::ContentViewport::resized()
+{
+    viewport.setBounds (getLocalBounds());
+}
 
 //==============================================================================
 ProjectContentComponent::ProjectContentComponent()
@@ -66,15 +72,12 @@ ProjectContentComponent::ProjectContentComponent()
     setOpaque (true);
     setWantsKeyboardFocus (true);
 
-    logo.reset (new LogoComponent());
-    addAndMakeVisible (logo.get());
+    addAndMakeVisible (logoComponent);
+    addAndMakeVisible (headerComponent);
+    addAndMakeVisible (projectMessagesComponent);
 
-    header.reset (new HeaderComponent());
-    addAndMakeVisible (header.get());
-
-    fileNameLabel.reset (new Label());
-    addAndMakeVisible (fileNameLabel.get());
-    fileNameLabel->setJustificationType (Justification::centred);
+    addAndMakeVisible (fileNameLabel);
+    fileNameLabel.setJustificationType (Justification::centred);
 
     sidebarSizeConstrainer.setMinimumWidth (200);
     sidebarSizeConstrainer.setMaximumWidth (500);
@@ -83,6 +86,10 @@ ProjectContentComponent::ProjectContentComponent()
     sidebarTabs.getTabbedButtonBar().setMinimumTabScaleFactor (0.5);
 
     ProjucerApplication::getApp().openDocumentManager.addListener (this);
+
+    isLiveBuildEnabled = getGlobalProperties().getBoolValue (Ids::liveBuildEnabled);
+    getGlobalProperties().addChangeListener (this);
+    liveBuildEnablementChanged (isLiveBuildEnabled);
 
     Desktop::getInstance().addFocusChangeListener (this);
     startTimer (1600);
@@ -93,15 +100,11 @@ ProjectContentComponent::~ProjectContentComponent()
     Desktop::getInstance().removeFocusChangeListener (this);
     killChildProcess();
 
+    getGlobalProperties().removeChangeListener (this);
     ProjucerApplication::getApp().openDocumentManager.removeListener (this);
 
-    logo.reset();
-    header.reset();
     setProject (nullptr);
-    contentView.reset();
-    fileNameLabel.reset();
     removeChildComponent (&bubbleMessage);
-    jassert (getNumChildComponents() <= 1);
 }
 
 void ProjectContentComponent::paint (Graphics& g)
@@ -115,11 +118,10 @@ void ProjectContentComponent::resized()
 
     r.removeFromRight (10);
     r.removeFromLeft (15);
-    r.removeFromBottom (40);
     r.removeFromTop (5);
 
-    if (header != nullptr)
-        header->setBounds (r.removeFromTop (40));
+    projectMessagesComponent.setBounds (r.removeFromBottom (40).withWidth (100).reduced (0, 5));
+    headerComponent.setBounds (r.removeFromTop (40));
 
     r.removeFromTop (10);
 
@@ -132,19 +134,15 @@ void ProjectContentComponent::resized()
     if (resizerBar != nullptr)
         resizerBar->setBounds (r.withWidth (4));
 
-    if (auto* h = dynamic_cast<HeaderComponent*> (header.get()))
-        h->sidebarTabsWidthChanged (sidebarTabs.getWidth());
+    headerComponent.sidebarTabsWidthChanged (sidebarTabs.getWidth());
 
     if (contentView != nullptr)
     {
-        if (fileNameLabel != nullptr && fileNameLabel->isVisible())
-            fileNameLabel->setBounds (r.removeFromTop (15));
-
+        fileNameLabel.setBounds (r.removeFromTop (15));
         contentView->setBounds (r);
     }
 
-    if (logo != nullptr)
-        logo->setBounds (r.reduced (r.getWidth() / 6, r.getHeight() / 6));
+    logoComponent.setBounds (r.reduced (r.getWidth() / 6, r.getHeight() / 6));
 }
 
 void ProjectContentComponent::lookAndFeelChanged()
@@ -165,7 +163,7 @@ void ProjectContentComponent::setProject (Project* newProject)
 {
     if (project != newProject)
     {
-        lastCrashMessage = String();
+        lastCrashMessage = {};
         killChildProcess();
 
         if (project != nullptr)
@@ -179,6 +177,8 @@ void ProjectContentComponent::setProject (Project* newProject)
 
         if (project != nullptr)
             rebuildProjectTabs();
+
+        projectMessagesComponent.setProject (newProject);
     }
 }
 
@@ -201,20 +201,21 @@ void ProjectContentComponent::createProjectTabs()
 
     auto tabColour = Colours::transparentBlack;
 
-    auto* pTab = new ProjectTab (project);
-    sidebarTabs.addTab ("Project", tabColour, pTab, true);
+    sidebarTabs.addTab (getProjectTabName(), tabColour, new ProjectTab (project), true);
 
-    CompileEngineChildProcess::Ptr childProc (getChildProcess());
-
-    sidebarTabs.addTab ("Build", tabColour, new LiveBuildTab (childProc, lastCrashMessage), true);
-
-    if (childProc != nullptr)
+    if (isLiveBuildEnabled)
     {
-        childProc->crashHandler = [this] (const String& m) { this->handleCrash (m); };
+        CompileEngineChildProcess::Ptr childProc (getChildProcess());
+        sidebarTabs.addTab (getBuildTabName(), tabColour, new LiveBuildTab (childProc, lastCrashMessage), true);
 
-        sidebarTabs.getTabbedButtonBar().getTabButton (1)->setExtraComponent (new BuildStatusTabComp (childProc->errorList,
-                                                                                                      childProc->activityList),
-                                                                                                      TabBarButton::afterText);
+        if (childProc != nullptr)
+        {
+            childProc->crashHandler = [this] (const String& m) { this->handleCrash (m); };
+
+            sidebarTabs.getTabbedButtonBar().getTabButton (1)->setExtraComponent (new BuildStatusTabComp (childProc->errorList,
+                                                                                                          childProc->activityList),
+                                                                                                          TabBarButton::afterText);
+        }
     }
 }
 
@@ -255,7 +256,12 @@ void ProjectContentComponent::rebuildProjectTabs()
 
         sidebarTabs.setBounds (0, 0, lastTreeWidth, getHeight());
 
-        sidebarTabs.setCurrentTabIndex (settings.getValue ("lastViewedTabIndex", "0").getIntValue());
+        auto lastTabIndex = settings.getValue ("lastViewedTabIndex", "0").getIntValue();
+
+        if (lastTabIndex >= sidebarTabs.getNumTabs())
+            lastTabIndex = 0;
+
+        sidebarTabs.setCurrentTabIndex (lastTabIndex);
 
         auto* projectTab = getProjectTab();
         for (int i = 2; i >= 0; --i)
@@ -272,16 +278,13 @@ void ProjectContentComponent::rebuildProjectTabs()
 
         updateMissingFileStatuses();
 
-        if (auto* h = dynamic_cast<HeaderComponent*> (header.get()))
-        {
-            h->setVisible (true);
-            h->setCurrentProject (project);
-        }
+        headerComponent.setVisible (true);
+        headerComponent.setCurrentProject (project);
     }
     else
     {
         sidebarTabs.setVisible (false);
-        header->setVisible (false);
+        headerComponent.setVisible (false);
     }
 
     resized();
@@ -320,9 +323,19 @@ bool ProjectContentComponent::documentAboutToClose (OpenDocumentManager::Documen
     return true;
 }
 
-void ProjectContentComponent::changeListenerCallback (ChangeBroadcaster*)
+void ProjectContentComponent::changeListenerCallback (ChangeBroadcaster* broadcaster)
 {
-    updateMissingFileStatuses();
+    if (broadcaster == project)
+    {
+        updateMissingFileStatuses();
+    }
+    else if (broadcaster == &getGlobalProperties())
+    {
+        auto isEnabled = ProjucerApplication::getApp().isLiveBuildEnabled();
+
+        if (isLiveBuildEnabled != isEnabled)
+            liveBuildEnablementChanged (isEnabled);
+    }
 }
 
 void ProjectContentComponent::refreshProjectTreeFileStatuses()
@@ -344,8 +357,7 @@ bool ProjectContentComponent::showEditorForFile (const File& f, bool grabFocus)
     if (getCurrentFile() == f
             || showDocument (ProjucerApplication::getApp().openDocumentManager.openFile (project, f), grabFocus))
     {
-        fileNameLabel->setText (f.getFileName(), dontSendNotification);
-
+        fileNameLabel.setText (f.getFileName(), dontSendNotification);
         return true;
     }
 
@@ -394,8 +406,7 @@ void ProjectContentComponent::hideEditor()
     currentDocument = nullptr;
     contentView.reset();
 
-    if (fileNameLabel != nullptr)
-        fileNameLabel->setVisible (false);
+    fileNameLabel.setVisible (false);
 
     ProjucerApplication::getCommandManager().commandStatusChanged();
     resized();
@@ -425,7 +436,7 @@ bool ProjectContentComponent::setEditorComponent (Component* editor,
 
             contentView.reset (viewport);
             currentDocument = nullptr;
-            fileNameLabel->setVisible (false);
+            fileNameLabel.setVisible (false);
 
             addAndMakeVisible (viewport);
         }
@@ -433,8 +444,8 @@ bool ProjectContentComponent::setEditorComponent (Component* editor,
         {
             contentView.reset (editor);
             currentDocument = doc;
-            fileNameLabel->setText (doc->getFile().getFileName(), dontSendNotification);
-            fileNameLabel->setVisible (true);
+            fileNameLabel.setText (doc->getFile().getFileName(), dontSendNotification);
+            fileNameLabel.setVisible (true);
 
             addAndMakeVisible (editor);
         }
@@ -460,7 +471,8 @@ Component* ProjectContentComponent::getEditorComponentContent() const
 void ProjectContentComponent::closeDocument()
 {
     if (currentDocument != nullptr)
-        ProjucerApplication::getApp().openDocumentManager.closeDocument (currentDocument, true);
+        ProjucerApplication::getApp().openDocumentManager
+                                     .closeDocument (currentDocument, OpenDocumentManager::SaveIfNeeded::yes);
     else if (contentView != nullptr)
         if (! goToPreviousFile())
             hideEditor();
@@ -534,15 +546,10 @@ bool ProjectContentComponent::goToCounterpart()
     return false;
 }
 
-bool ProjectContentComponent::saveProject (bool shouldWait, bool openInIDE)
+bool ProjectContentComponent::saveProject()
 {
     if (project != nullptr)
-    {
-        const ScopedValueSetter<bool> valueSetter (project->shouldWaitAfterSaving, shouldWait, false);
-        project->setOpenInIDEAfterSaving (openInIDE);
-
         return (project->save (true, true) == FileBasedDocument::savedOk);
-    }
 
     return false;
 }
@@ -550,7 +557,7 @@ bool ProjectContentComponent::saveProject (bool shouldWait, bool openInIDE)
 void ProjectContentComponent::closeProject()
 {
     if (auto* mw = findParentComponentOfClass<MainWindow>())
-        mw->closeCurrentProject (true);
+        mw->closeCurrentProject (OpenDocumentManager::SaveIfNeeded::yes);
 }
 
 void ProjectContentComponent::showProjectSettings()
@@ -560,8 +567,8 @@ void ProjectContentComponent::showProjectSettings()
 
 void ProjectContentComponent::showCurrentExporterSettings()
 {
-    if (auto* h = dynamic_cast<HeaderComponent*> (header.get()))
-        showExporterSettings (h->getSelectedExporterName());
+    if (auto selected = headerComponent.getSelectedExporter())
+        showExporterSettings (selected->getName());
 }
 
 void ProjectContentComponent::showExporterSettings (const String& exporterName)
@@ -573,7 +580,7 @@ void ProjectContentComponent::showExporterSettings (const String& exporterName)
 
     if (auto* exportersPanel = getProjectTab()->getExportersTreePanel())
     {
-        if (auto* exporters = dynamic_cast<TreeItemTypes::ExportersTreeRoot*>(exportersPanel->rootItem.get()))
+        if (auto* exporters = dynamic_cast<TreeItemTypes::ExportersTreeRoot*> (exportersPanel->rootItem.get()))
         {
             for (auto i = exporters->getNumSubItems(); i >= 0; --i)
             {
@@ -637,29 +644,8 @@ StringArray ProjectContentComponent::getExportersWhichCanLaunch() const
 void ProjectContentComponent::openInSelectedIDE (bool saveFirst)
 {
     if (project != nullptr)
-    {
-        if (auto* headerComp = dynamic_cast<HeaderComponent*> (header.get()))
-        {
-            auto selectedIDE = headerComp->getSelectedExporterName();
-
-            for (Project::ExporterIterator exporter (*project); exporter.next();)
-            {
-                if (exporter->canLaunchProject() && exporter->getName().contains (selectedIDE))
-                {
-                    auto tempProject = project->isTemporaryProject(); // store this before saving as it will always be false after
-
-                    if (saveFirst && ! saveProject (exporter->isXcode(), true))
-                        return;
-
-                    if (tempProject)
-                        return;
-
-                    exporter->launchProject();
-                    return;
-                }
-            }
-        }
-    }
+        if (auto selectedExporter = headerComponent.getSelectedExporter())
+            project->openProjectInIDE (*selectedExporter, saveFirst);
 }
 
 static void newExporterMenuCallback (int result, ProjectContentComponent* comp)
@@ -801,7 +787,8 @@ void ProjectContentComponent::getAllCommands (Array <CommandID>& commands)
                          CommandIDs::reinstantiateComp,
                          CommandIDs::showWarnings,
                          CommandIDs::nextError,
-                         CommandIDs::prevError });
+                         CommandIDs::prevError,
+                         CommandIDs::addNewGUIFile });
 }
 
 void ProjectContentComponent::getCommandInfo (const CommandID commandID, ApplicationCommandInfo& result)
@@ -822,7 +809,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Save Project",
                         "Saves the current project",
                         CommandCategories::general, 0);
-        result.setActive (project != nullptr && ! project->isCurrentlySaving());
+        result.setActive (project != nullptr && ! project->isSaveAndExportDisabled() && ! project->isCurrentlySaving());
         result.defaultKeypresses.add ({ 'p', ModifierKeys::commandModifier, 0 });
         break;
 
@@ -901,7 +888,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Show Build Tab",
                         "Shows the tab containing the build panel",
                         CommandCategories::general, 0);
-        result.setActive (project != nullptr);
+        result.setActive (project != nullptr && isLiveBuildEnabled);
         result.defaultKeypresses.add ({ 'b', cmdCtrl, 0 });
         break;
 
@@ -941,14 +928,14 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Open in IDE...",
                         "Launches the project in an external IDE",
                         CommandCategories::general, 0);
-        result.setActive (ProjectExporter::canProjectBeLaunched (project));
+        result.setActive (ProjectExporter::canProjectBeLaunched (project) && ! project->isSaveAndExportDisabled());
         break;
 
     case CommandIDs::saveAndOpenInIDE:
         result.setInfo ("Save Project and Open in IDE...",
                         "Saves the project and launches it in an external IDE",
                         CommandCategories::general, 0);
-        result.setActive (ProjectExporter::canProjectBeLaunched (project) && ! project->isCurrentlySaving());
+        result.setActive (ProjectExporter::canProjectBeLaunched (project) && ! project->isSaveAndExportDisabled() && ! project->isCurrentlySaving());
         result.defaultKeypresses.add ({ 'l', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0 });
         break;
 
@@ -1055,6 +1042,13 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setActive (childProcess != nullptr && ! childProcess->errorList.isEmpty());
         break;
 
+    case CommandIDs::addNewGUIFile:
+        result.setInfo ("Add new GUI Component...",
+                        "Adds a new GUI Component file to the project",
+                        CommandCategories::general,
+                        (! ProjucerApplication::getApp().isGUIEditorEnabled() ? ApplicationCommandInfo::isDisabled : 0));
+        break;
+
     default:
         break;
     }
@@ -1131,6 +1125,8 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
         case CommandIDs::nextError:                 showNextError();                                              break;
         case CommandIDs::prevError:                 showPreviousError();                                          break;
 
+        case CommandIDs::addNewGUIFile:             addNewGUIFile();                                              break;
+
         default:
             return false;
     }
@@ -1175,7 +1171,7 @@ void ProjectContentComponent::setBuildEnabled (bool isEnabled, bool displayError
 
 void ProjectContentComponent::cleanAll()
 {
-    lastCrashMessage = String();
+    lastCrashMessage = {};
 
     if (childProcess != nullptr)
         childProcess->cleanAll();
@@ -1204,9 +1200,11 @@ bool ProjectContentComponent::isBuildEnabled() const
 void ProjectContentComponent::refreshTabsIfBuildStatusChanged()
 {
     if (project != nullptr
-         && (sidebarTabs.getNumTabs() < 2
-            || isBuildEnabled() != isBuildTabEnabled()))
+        && isLiveBuildEnabled
+        && (sidebarTabs.getNumTabs() < 2 || isBuildEnabled() != isBuildTabEnabled()))
+    {
         rebuildProjectTabs();
+    }
 }
 
 bool ProjectContentComponent::areWarningsEnabled() const
@@ -1261,6 +1259,15 @@ void ProjectContentComponent::reinstantiateLivePreviewWindows()
         childProcess->reinstantiatePreviews();
 }
 
+void ProjectContentComponent::addNewGUIFile()
+{
+    if (project != nullptr)
+    {
+        std::unique_ptr<NewFileWizard::Type> wizard (createGUIComponentWizard());
+        wizard->createNewFile (*project, project->getMainGroup());
+    }
+}
+
 void ProjectContentComponent::launchApp()
 {
     if (childProcess != nullptr)
@@ -1299,6 +1306,17 @@ void ProjectContentComponent::timerCallback()
         killChildProcess();
 
     refreshTabsIfBuildStatusChanged();
+}
+
+void ProjectContentComponent::liveBuildEnablementChanged (bool isEnabled)
+{
+    isLiveBuildEnabled = isEnabled;
+
+    if (! isLiveBuildEnabled)
+        killChildProcess();
+
+    rebuildProjectTabs();
+    headerComponent.liveBuildEnablementChanged (isLiveBuildEnabled);
 }
 
 bool ProjectContentComponent::isContinuousRebuildEnabled()

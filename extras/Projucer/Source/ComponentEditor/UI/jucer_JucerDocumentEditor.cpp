@@ -1210,10 +1210,13 @@ Image JucerDocumentEditor::createComponentLayerSnapshot() const
 const int gridSnapMenuItemBase = 0x8723620;
 const int snapSizes[] = { 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32 };
 
-void createGUIEditorMenu (PopupMenu&);
-void createGUIEditorMenu (PopupMenu& menu)
+PopupMenu createGUIEditorMenu()
 {
+    PopupMenu menu;
     auto* commandManager = &ProjucerApplication::getCommandManager();
+
+    menu.addCommandItem (commandManager, CommandIDs::addNewGUIFile);
+    menu.addSeparator();
 
     menu.addCommandItem (commandManager, JucerCommandIDs::editCompLayout);
     menu.addCommandItem (commandManager, JucerCommandIDs::editCompGraphics);
@@ -1283,6 +1286,7 @@ void createGUIEditorMenu (PopupMenu& menu)
 
         menu.addSubMenu ("Component Overlay", overlays, holder != nullptr);
     }
+    return menu;
 }
 
 void handleGUIEditorMenuCommand (int);

@@ -165,33 +165,25 @@ public:
     {
         if (hasAddButton)
         {
-            addButton.reset (new IconButton ("Add", &getIcons().plus));
+            addButton = std::make_unique<IconButton> ("Add", getIcons().plus);
             addAndMakeVisible (addButton.get());
             addButton->onClick = [this] { showAddMenu(); };
         }
 
         if (hasSettingsButton)
         {
-            settingsButton.reset (new IconButton ("Settings", &getIcons().settings));
+            settingsButton = std::make_unique<IconButton> ("Settings", getIcons().settings);
             addAndMakeVisible (settingsButton.get());
             settingsButton->onClick = [this] { showSettings(); };
         }
 
         if (hasFindPanel)
         {
-            findPanel.reset (new FindPanel ([this] (const String& filter) { treeToDisplay->rootItem->setSearchFilter (filter); }));
+            findPanel = std::make_unique<FindPanel> ([this] (const String& filter) { treeToDisplay->rootItem->setSearchFilter (filter); });
             addAndMakeVisible (findPanel.get());
         }
 
         addAndMakeVisible (treeToDisplay.get());
-    }
-
-    ~ConcertinaTreeComponent() override
-    {
-        treeToDisplay.reset();
-        addButton.reset();
-        findPanel.reset();
-        settingsButton.reset();
     }
 
     void resized() override

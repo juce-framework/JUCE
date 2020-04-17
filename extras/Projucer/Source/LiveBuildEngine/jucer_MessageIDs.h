@@ -18,10 +18,11 @@
 
 #pragma once
 
-#define DECLARE_ID(name)      static const Identifier name (#name)
 
 namespace MessageTypes
 {
+    #define DECLARE_ID(name)  const Identifier name (#name)
+
     DECLARE_ID (PING);
     DECLARE_ID (BUILDINFO);
     DECLARE_ID (COMPILEUNIT);
@@ -50,6 +51,6 @@ namespace MessageTypes
     DECLARE_ID (LAUNCH_APP);
     DECLARE_ID (FOREGROUND);
     DECLARE_ID (QUIT_SERVER);
-}
 
-#undef DECLARE_ID
+    #undef DECLARE_ID
+}
