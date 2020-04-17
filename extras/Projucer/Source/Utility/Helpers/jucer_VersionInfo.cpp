@@ -61,7 +61,7 @@ bool VersionInfo::isNewerVersionThanCurrent()
 
 std::unique_ptr<VersionInfo> VersionInfo::fetch (const String& endpoint)
 {
-    URL latestVersionURL ("https://api.github.com/repos/WeAreROLI/JUCE/releases/" + endpoint);
+    URL latestVersionURL ("https://api.github.com/repos/juce-framework/JUCE/releases/" + endpoint);
     std::unique_ptr<InputStream> inStream (latestVersionURL.createInputStream (false));
 
     if (inStream == nullptr)
