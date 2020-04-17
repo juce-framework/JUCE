@@ -219,7 +219,7 @@ bool MidiBuffer::Iterator::getNextEvent (const uint8*& midiData, int& numBytes, 
     if (iterator == buffer.cend())
         return false;
 
-    const auto metadata = *iterator;
+    const auto metadata = *iterator++;
     midiData = metadata.data;
     numBytes = metadata.numBytes;
     samplePosition = metadata.samplePosition;
@@ -231,7 +231,7 @@ bool MidiBuffer::Iterator::getNextEvent (MidiMessage& result, int& samplePositio
     if (iterator == buffer.cend())
         return false;
 
-    const auto metadata = *iterator;
+    const auto metadata = *iterator++;
     result = metadata.getMessage();
     samplePosition = metadata.samplePosition;
     return true;
