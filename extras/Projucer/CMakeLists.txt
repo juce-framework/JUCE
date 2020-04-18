@@ -160,3 +160,6 @@ target_link_libraries(Projucer PRIVATE
     juce::juce_build_tools
     juce::juce_cryptography
     juce::juce_gui_extra)
+
+target_compile_options(Projucer PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/MP>)
+target_compile_options(ProjucerData PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/MP>)
