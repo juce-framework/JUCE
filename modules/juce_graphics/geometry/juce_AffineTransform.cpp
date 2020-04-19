@@ -236,9 +236,46 @@ bool AffineTransform::isOnlyTranslation() const noexcept
         && mat11 == 1.0f;
 }
 
+float AffineTransform::getDeterminant() const noexcept
+{
+    return (mat00 * mat11) - (mat01 * mat10);
+}
+
 float AffineTransform::getScaleFactor() const noexcept
 {
     return (std::abs (mat00) + std::abs (mat11)) / 2.0f;
 }
+
+
+//==============================================================================
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class AffineTransformTests  : public UnitTest
+{
+public:
+    AffineTransformTests()
+        : UnitTest ("AffineTransform", UnitTestCategories::maths)
+    {}
+
+    void runTest() override
+    {
+        beginTest ("Determinant");
+        {
+            constexpr float scale1 = 1.5f, scale2 = 1.3f;
+
+            auto transform = AffineTransform::scale (scale1)
+                                             .followedBy (AffineTransform::rotation (degreesToRadians (72.0f)))
+                                             .followedBy (AffineTransform::translation (100.0f, 20.0f))
+                                             .followedBy (AffineTransform::scale (scale2));
+
+            expect (approximatelyEqual (std::sqrt (std::abs (transform.getDeterminant())), scale1 * scale2));
+        }
+    }
+};
+
+static AffineTransformTests timeTests;
+
+#endif
 
 } // namespace juce

@@ -86,7 +86,6 @@ struct TabbedComponent::ButtonBar  : public TabbedButtonBar
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonBar)
 };
 
-
 //==============================================================================
 TabbedComponent::TabbedComponent (TabbedButtonBar::Orientation orientation)
 {

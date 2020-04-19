@@ -70,8 +70,8 @@
     </VS2019>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" targetName="AudioPerformanceTest"/>
-        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" targetName="AudioPerformanceTest"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPerformanceTest"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="AudioPerformanceTest"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>

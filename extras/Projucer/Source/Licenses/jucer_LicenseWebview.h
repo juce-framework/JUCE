@@ -212,9 +212,7 @@ private:
                 return false;
             }
 
-            bool isValid = (url.getDomain().endsWith ("roli.com") || url.getDomain().endsWith ("juce.com"));
-
-            if (isValid)
+            if (isValidURL (url))
                 lastURL = page;
 
             return true;
@@ -235,9 +233,7 @@ private:
             URL url (page);
             bool isGitHub = url.getDomain().endsWith ("github.com");
 
-            if (url.getDomain().endsWith ("roli.com")
-             || url.getDomain().endsWith ("juce.com")
-             || isGitHub)
+            if (isValidURL (url) || isGitHub)
             {
                 url.launchInDefaultBrowser();
 

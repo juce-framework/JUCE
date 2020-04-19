@@ -881,7 +881,14 @@ public:
         sampleRate = (int) (requestedSampleRate > 0 ? requestedSampleRate : AndroidHighPerformanceAudioHelpers::getNativeSampleRate());
         auto preferredBufferSize = (bufferSize > 0) ? bufferSize : getDefaultBufferSize();
 
-        audioBuffersToEnqueue = AndroidHighPerformanceAudioHelpers::getNumBuffersToEnqueue (preferredBufferSize, sampleRate);
+        audioBuffersToEnqueue = [this, preferredBufferSize]
+        {
+            if (AndroidHighPerformanceAudioHelpers::canUseHighPerformanceAudioPath (preferredBufferSize, sampleRate))
+                return preferredBufferSize / AndroidHighPerformanceAudioHelpers::getNativeBufferSize();
+
+            return 1;
+        }();
+
         actualBufferSize = preferredBufferSize / audioBuffersToEnqueue;
 
         jassert ((actualBufferSize * audioBuffersToEnqueue) == preferredBufferSize);

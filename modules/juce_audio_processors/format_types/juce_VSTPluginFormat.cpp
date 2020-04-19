@@ -1596,7 +1596,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
             }
         }
 
-        return programNames [index];
+        return {};
     }
 
     void changeProgramName (int index, const String& newName) override
@@ -3444,9 +3444,8 @@ private:
 
    #if ! JUCE_MAC
     bool pluginRespondsToDPIChanges = false;
-   #endif
-
     float nativeScaleFactor = 1.0f;
+   #endif
 
    #if JUCE_WINDOWS
     HWND pluginHWND = {};

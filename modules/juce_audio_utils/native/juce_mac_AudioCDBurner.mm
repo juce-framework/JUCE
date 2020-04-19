@@ -275,7 +275,7 @@ struct OpenDiskDevice
 };
 
 //==============================================================================
-class AudioCDBurner::Pimpl  : public Timer
+class AudioCDBurner::Pimpl  : private Timer
 {
 public:
     Pimpl (AudioCDBurner& b, int deviceIndex)  : owner (b)
@@ -288,20 +288,9 @@ public:
         }
     }
 
-    ~Pimpl()
+    ~Pimpl() override
     {
         stopTimer();
-    }
-
-    void timerCallback() override
-    {
-        const DiskState state = getDiskState();
-
-        if (state != lastState)
-        {
-            lastState = state;
-            owner.sendChangeMessage();
-        }
     }
 
     DiskState getDiskState() const
@@ -364,6 +353,17 @@ public:
     std::unique_ptr<OpenDiskDevice> device;
 
 private:
+    void timerCallback() override
+    {
+        const DiskState state = getDiskState();
+
+        if (state != lastState)
+        {
+            lastState = state;
+            owner.sendChangeMessage();
+        }
+    }
+
     DiskState lastState;
     AudioCDBurner& owner;
 };

@@ -115,7 +115,7 @@ std::unique_ptr<XmlElement> PropertySet::getXmlValue (StringRef keyName) const
     return parseXML (getValue (keyName));
 }
 
-void PropertySet::setValue (const String& keyName, const var& v)
+void PropertySet::setValue (StringRef keyName, const var& v)
 {
     jassert (keyName.isNotEmpty()); // shouldn't use an empty key name!
 
@@ -148,7 +148,7 @@ void PropertySet::removeValue (StringRef keyName)
     }
 }
 
-void PropertySet::setValue (const String& keyName, const XmlElement* xml)
+void PropertySet::setValue (StringRef keyName, const XmlElement* xml)
 {
     setValue (keyName, xml == nullptr ? var()
                                       : var (xml->toString (XmlElement::TextFormat().singleLine().withoutHeader())));

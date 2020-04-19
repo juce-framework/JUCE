@@ -187,7 +187,9 @@ void ProjectContentComponent::setProject (Project* newProject)
 
         deleteProjectTabs();
         project = newProject;
-        rebuildProjectTabs();
+
+        if (project != nullptr)
+            rebuildProjectTabs();
     }
 }
 

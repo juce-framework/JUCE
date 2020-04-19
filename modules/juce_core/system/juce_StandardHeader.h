@@ -59,7 +59,6 @@
 #include <mutex>
 #include <condition_variable>
 #include <queue>
-#include <list>
 
 //==============================================================================
 #include "juce_CompilerSupport.h"

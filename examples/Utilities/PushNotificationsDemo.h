@@ -238,7 +238,7 @@ public:
        #endif
     }
 
-    ~PushNotificationsDemo()
+    ~PushNotificationsDemo() override
     {
         PushNotifications::getInstance()->removeListener (this);
 

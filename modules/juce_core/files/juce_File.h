@@ -20,6 +20,14 @@
   ==============================================================================
 */
 
+#if JUCE_MAC || JUCE_IOS
+ #if __LP64__
+  using OSType = unsigned int;
+ #else
+  using OSType = unsigned long;
+ #endif
+#endif
+
 namespace juce
 {
 

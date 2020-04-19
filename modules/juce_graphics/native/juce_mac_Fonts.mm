@@ -586,10 +586,24 @@ public:
         CFRelease (numberRef);
     }
 
-    // The implementation of at least one overridden function needs to be outside
-    // of the class definition to avoid spurious warning messages when dynamically
-    // loading libraries at runtime on macOS...
-    ~OSXTypeface() override;
+    ~OSXTypeface() override
+    {
+        if (attributedStringAtts != nullptr)
+            CFRelease (attributedStringAtts);
+
+        if (fontRef != nullptr)
+        {
+           #if JUCE_MAC && defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8
+            if (dataCopy.getSize() != 0)
+                CTFontManagerUnregisterGraphicsFont (fontRef, nullptr);
+           #endif
+
+            CGFontRelease (fontRef);
+        }
+
+        if (ctFontRef != nullptr)
+            CFRelease (ctFontRef);
+    }
 
     float getAscent() const override                 { return ascent; }
     float getDescent() const override                { return 1.0f - ascent; }
@@ -718,25 +732,6 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSXTypeface)
 };
-
-OSXTypeface::~OSXTypeface()
-{
-    if (attributedStringAtts != nullptr)
-        CFRelease (attributedStringAtts);
-
-    if (fontRef != nullptr)
-    {
-       #if JUCE_MAC && defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8
-        if (dataCopy.getSize() != 0)
-            CTFontManagerUnregisterGraphicsFont (fontRef, nullptr);
-       #endif
-
-        CGFontRelease (fontRef);
-    }
-
-    if (ctFontRef != nullptr)
-        CFRelease (ctFontRef);
-}
 
 CTFontRef getCTFontFromTypeface (const Font& f)
 {

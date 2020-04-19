@@ -67,7 +67,7 @@ public:
 
     //==============================================================================
     /** Destructor. */
-    ~AudioCDReader();
+    ~AudioCDReader() override;
 
     /** Implementation of the AudioFormatReader method. */
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,

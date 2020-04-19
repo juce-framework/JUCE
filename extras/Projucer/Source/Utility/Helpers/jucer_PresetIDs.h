@@ -200,6 +200,8 @@ namespace Ids
     DECLARE_ID (microphonePermissionsText);
     DECLARE_ID (cameraPermissionNeeded);
     DECLARE_ID (cameraPermissionText);
+    DECLARE_ID (sendAppleEventsPermissionNeeded);
+    DECLARE_ID (sendAppleEventsPermissionText);
     DECLARE_ID (androidJavaLibs);
     DECLARE_ID (androidAdditionalJavaFolders);
     DECLARE_ID (androidAdditionalResourceFolders);
@@ -251,6 +253,7 @@ namespace Ids
     DECLARE_ID (iPadScreenOrientation);
     DECLARE_ID (iosScreenOrientation);
     DECLARE_ID (iosInAppPurchases);
+    DECLARE_ID (iosContentSharing);
     DECLARE_ID (iosBackgroundAudio);
     DECLARE_ID (iosBackgroundBle);
     DECLARE_ID (iosPushNotifications);

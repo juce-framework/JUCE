@@ -9,7 +9,7 @@
 namespace BinaryData
 {
     extern const char*   JUCEAppIcon_png;
-    const int            JUCEAppIcon_pngSize = 45854;
+    const int            JUCEAppIcon_pngSize = 47266;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
     const int namedResourceListSize = 1;

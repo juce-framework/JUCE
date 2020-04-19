@@ -96,7 +96,7 @@ public:
 
     float getPhysicalPixelScaleFactor() const noexcept
     {
-        return isOnlyTranslated ? 1.0f : std::abs (complexTransform.getScaleFactor());
+        return isOnlyTranslated ? 1.0f : std::sqrt (std::abs (complexTransform.getDeterminant()));
     }
 
     void moveOriginInDeviceSpace (Point<int> delta) noexcept

@@ -174,13 +174,8 @@ public:
                                         if (targetType == ProjectType::Target::SharedCodeTarget)
                                             return;
 
-                                        if (auto* target = new CodeBlocksTarget (*this, targetType))
-                                        {
-                                            if (targetType == ProjectType::Target::AggregateTarget)
-                                                targets.insert (0, target);
-                                            else
-                                                targets.add (target);
-                                        }
+                                        targets.insert (targetType == ProjectType::Target::AggregateTarget ? 0 : -1,
+                                                        new CodeBlocksTarget (*this, targetType));
                                     });
 
         // If you hit this assert, you tried to generate a project for an exporter

@@ -180,9 +180,9 @@ class AUv3SynthEditor   : public AudioProcessorEditor,
 {
 public:
     //==============================================================================
-    AUv3SynthEditor (AudioProcessor& processor)
-        :   AudioProcessorEditor (processor),
-            roomSizeSlider (Slider::LinearHorizontal, Slider::NoTextBox)
+    AUv3SynthEditor (AudioProcessor& processorIn)
+        : AudioProcessorEditor (processorIn),
+          roomSizeSlider (Slider::LinearHorizontal, Slider::NoTextBox)
     {
         LookAndFeel::setDefaultLookAndFeel (&materialLookAndFeel);
 

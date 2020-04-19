@@ -5,6 +5,8 @@
   <dict>
     <key>NSMicrophoneUsageDescription</key>
     <string>This app requires audio input. If you do not have an audio interface connected it will use the built-in microphone.</string>
+    <key>NSAppleEventsUsageDescription</key>
+    <string>This is required for some third-party plug-ins to function correctly.</string>
     <key>CFBundleExecutable</key>
     <string>${EXECUTABLE_NAME}</string>
     <key>CFBundleIconFile</key>

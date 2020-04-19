@@ -896,6 +896,7 @@ struct DLLHandle
             if (auto exitFn = (ExitModuleFn) getFunction ("bundleExit"))
                 exitFn();
 
+            CFBundleUnloadExecutable (bundleRef);
             CFRelease (bundleRef);
             bundleRef = nullptr;
         }
@@ -2104,8 +2105,13 @@ public:
             outputArrangements.add (getVst3SpeakerArrangement (requested.isDisabled() ? getBus (false, i)->getLastEnabledLayout() : requested));
         }
 
-        if (processor->setBusArrangements (inputArrangements.getRawDataPointer(), inputArrangements.size(),
-                                           outputArrangements.getRawDataPointer(), outputArrangements.size()) != kResultTrue)
+        // Some plug-ins will crash if you pass a nullptr to setBusArrangements!
+        Vst::SpeakerArrangement nullArrangement = {};
+        auto* inputArrangementData  = inputArrangements.isEmpty()  ? &nullArrangement : inputArrangements.getRawDataPointer();
+        auto* outputArrangementData = outputArrangements.isEmpty() ? &nullArrangement : outputArrangements.getRawDataPointer();
+
+        if (processor->setBusArrangements (inputArrangementData, inputArrangements.size(),
+                                           outputArrangementData, outputArrangements.size()) != kResultTrue)
             return false;
 
         // check if the layout matches the request
@@ -2276,9 +2282,16 @@ public:
 
     //==============================================================================
     int getNumPrograms() override                        { return programNames.size(); }
-    const String getProgramName (int index) override     { return programNames[index]; }
-    int getCurrentProgram() override                     { return jmax (0, roundToInt (editController->getParamNormalized (programParameterID) * (programNames.size() - 1))); }
+    const String getProgramName (int index) override     { return index >= 0 ? programNames[index] : String(); }
     void changeProgramName (int, const String&) override {}
+
+    int getCurrentProgram() override
+    {
+        if (programNames.size() > 0 && editController != nullptr)
+            return jmax (0, roundToInt (editController->getParamNormalized (programParameterID) * (programNames.size() - 1)));
+
+        return 0;
+    }
 
     void setCurrentProgram (int program) override
     {
