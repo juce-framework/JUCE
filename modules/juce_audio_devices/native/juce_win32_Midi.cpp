@@ -576,7 +576,7 @@ private:
             {
                 MIDIHDR h = { 0 };
 
-                h.lpData = (char*) message.getRawData();
+                h.lpData = (char*) const_cast<uint8*>(message.getRawData());
                 h.dwBytesRecorded = h.dwBufferLength  = (DWORD) message.getRawDataSize();
 
                 if (midiOutPrepareHeader (han->handle, &h, sizeof (MIDIHDR)) == MMSYSERR_NOERROR)
@@ -606,7 +606,7 @@ private:
             {
                 for (int i = 0; i < 50; ++i)
                 {
-                    if (midiOutShortMsg (han->handle, *(unsigned int*) message.getRawData()) != MIDIERR_NOTREADY)
+                    if (midiOutShortMsg (han->handle, *(const unsigned int*) message.getRawData()) != MIDIERR_NOTREADY)
                         break;
 
                     Sleep (1);
