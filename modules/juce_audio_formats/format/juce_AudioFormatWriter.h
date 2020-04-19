@@ -106,7 +106,7 @@ public:
                                 to pass it into the method.
         @param numSamples       the number of samples to write
     */
-    virtual bool write (const int** samplesToWrite, int numSamples) = 0;
+    virtual bool write (const int* const* samplesToWrite, int numSamples) = 0;
 
     /** Some formats may support a flush operation that makes sure the file is in a
         valid state before carrying on.

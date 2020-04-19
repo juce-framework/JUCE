@@ -146,7 +146,7 @@ bool AudioFormatWriter::writeFromFloatArrays (const float* const* channels, int 
         return true;
 
     if (isFloatingPoint())
-        return write ((const int**) channels, numSamples);
+        return write ((const int* const*) channels, numSamples);
 
     int* chans[256];
     int scratch[4096];
@@ -167,7 +167,7 @@ bool AudioFormatWriter::writeFromFloatArrays (const float* const* channels, int 
         for (int i = 0; i < numSourceChannels; ++i)
             convertFloatsToInts (chans[i], channels[i] + startSample, numToDo);
 
-        if (! write ((const int**) chans, numToDo))
+        if (! write (chans, numToDo))
             return false;
 
         startSample += numToDo;

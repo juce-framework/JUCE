@@ -88,7 +88,7 @@ public:
         }
     }
 
-    bool write (const int** samplesToWrite, int numSamples)
+    bool write (const int* const* samplesToWrite, int numSamples)
     {
         return writer != nullptr && writer->write (samplesToWrite, numSamples);
     }

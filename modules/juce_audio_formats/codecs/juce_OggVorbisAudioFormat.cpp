@@ -330,7 +330,7 @@ public:
     }
 
     //==============================================================================
-    bool write (const int** samplesToWrite, int numSamples) override
+    bool write (const int* const* samplesToWrite, int numSamples) override
     {
         if (ok)
         {

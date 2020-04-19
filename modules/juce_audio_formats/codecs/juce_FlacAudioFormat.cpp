@@ -411,7 +411,7 @@ public:
     }
 
     //==============================================================================
-    bool write (const int** samplesToWrite, int numSamples) override
+    bool write (const int* const* samplesToWrite, int numSamples) override
     {
         if (! ok)
             return false;
@@ -437,10 +437,10 @@ public:
                     destData[j] = (samplesToWrite[i][j] >> bitsToShift);
             }
 
-            samplesToWrite = const_cast<const int**> (channels.get());
+            samplesToWrite = channels.get();
         }
 
-        return FLAC__stream_encoder_process (encoder, (const FlacNamespace::FLAC__int32**) samplesToWrite, (unsigned) numSamples) != 0;
+        return FLAC__stream_encoder_process (encoder, (const FlacNamespace::FLAC__int32* const*) samplesToWrite, (unsigned) numSamples) != 0;
     }
 
     bool writeData (const void* const data, const int size) const
