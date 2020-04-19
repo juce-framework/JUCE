@@ -53,7 +53,7 @@ struct BlockConfigManager
 
         Block::ConfigMetaData toConfigMetaData() const
         {
-            return Block::ConfigMetaData ((uint32) item, value, { min, max }, isActive, name, type, (const char**) optionNames, group);
+            return Block::ConfigMetaData ((uint32) item, value, { min, max }, isActive, name, type, optionNames, group);
         }
     };
 
