@@ -339,7 +339,7 @@ Image JPEGImageFormat::decodeImage (InputStream& in)
                     if (! hasFailed)
                         jpeg_finish_decompress (&jpegDecompStruct);
 
-                    in.setPosition (((char*) jpegDecompStruct.src->next_input_byte) - (char*) mb.getData());
+                    in.setPosition (((const char*) jpegDecompStruct.src->next_input_byte) - (const char*) mb.getData());
                 }
             }
         }
