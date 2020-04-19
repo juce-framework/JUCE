@@ -30,7 +30,8 @@ namespace OggVorbisNamespace
 #if JUCE_INCLUDE_OGGVORBIS_CODE || ! defined (JUCE_INCLUDE_OGGVORBIS_CODE)
  JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4267 4127 4244 4996 4100 4701 4702 4013 4133 4206 4305 4189 4706 4995 4365 4456 4457 4459)
 
- JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-qual",
+                                      "-Wconversion",
                                       "-Wshadow",
                                       "-Wfloat-conversion",
                                       "-Wdeprecated-register",
