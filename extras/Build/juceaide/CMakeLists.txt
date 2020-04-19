@@ -85,6 +85,5 @@ else()
     install(PROGRAMS "${imported_location}" DESTINATION "${JUCE_TOOL_INSTALL_DIR}")
 
     get_filename_component(binary_name "${imported_location}" NAME)
-    set(JUCE_CMAKE_BINARY_BUILDER_NAME "${JUCE_TOOL_INSTALL_DIR}/${binary_name}"
-        CACHE INTERNAL "The name of the juceaide program")
+    set(JUCE_JUCEAIDE_NAME "${binary_name}" CACHE INTERNAL "The name of the juceaide program")
 endif()

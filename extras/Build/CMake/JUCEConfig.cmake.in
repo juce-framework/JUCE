@@ -20,24 +20,14 @@
 
 @PACKAGE_INIT@
 
-include("${CMAKE_CURRENT_LIST_DIR}/JUCE.cmake")
-
-get_filename_component(_IMPORT_PREFIX "${CMAKE_CURRENT_LIST_FILE}" PATH)
-get_filename_component(_IMPORT_PREFIX "${_IMPORT_PREFIX}" PATH)
-get_filename_component(_IMPORT_PREFIX "${_IMPORT_PREFIX}" PATH)
-get_filename_component(_IMPORT_PREFIX "${_IMPORT_PREFIX}" PATH)
-if(_IMPORT_PREFIX STREQUAL "/")
-    set(_IMPORT_PREFIX "")
-endif()
+include("${CMAKE_CURRENT_LIST_DIR}/@JUCE_EXPORT_FILE_NAME@")
 
 if(NOT TARGET juce::juceaide)
     add_executable(juce::juceaide IMPORTED)
     set_target_properties(juce::juceaide PROPERTIES
-        IMPORTED_LOCATION "${_IMPORT_PREFIX}/@JUCE_CMAKE_BINARY_BUILDER_NAME@")
+        IMPORTED_LOCATION "@PACKAGE_JUCEAIDE_PATH@")
 endif()
-
-set(_IMPORT_PREFIX)
 
 check_required_components("@PROJECT_NAME@")
 
-include("${CMAKE_CURRENT_LIST_DIR}/JUCEUtils.cmake")
+include("@PACKAGE_UTILS_INSTALL_DIR@/JUCEUtils.cmake")

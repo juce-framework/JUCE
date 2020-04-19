@@ -80,10 +80,23 @@ set(JUCE_INSTALL_DESTINATION "lib/cmake/JUCE-${JUCE_VERSION}" CACHE STRING
     "The location, relative to the install prefix, where the JUCE config file will be installed")
 
 install(EXPORT JUCE NAMESPACE juce:: DESTINATION "${JUCE_INSTALL_DESTINATION}")
-
+set(JUCE_EXPORT_FILE_NAME "JUCE.cmake")
+set(UTILS_INSTALL_DIR "${JUCE_INSTALL_DESTINATION}")
+set(JUCEAIDE_PATH "${JUCE_TOOL_INSTALL_DIR}/${JUCE_JUCEAIDE_NAME}")
 configure_package_config_file("${JUCE_CMAKE_UTILS_DIR}/JUCEConfig.cmake.in"
     "${JUCE_BINARY_DIR}/JUCEConfig.cmake"
+    PATH_VARS UTILS_INSTALL_DIR JUCEAIDE_PATH
     INSTALL_DESTINATION "${JUCE_INSTALL_DESTINATION}")
+
+set(JUCE_EXPORT_FILE_NAME "JUCEBuildTree.cmake")
+export(EXPORT JUCE NAMESPACE juce:: FILE "${JUCE_EXPORT_FILE_NAME}")
+set(UTILS_INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extras/Build/CMake")
+get_target_property(JUCEAIDE_PATH juceaide IMPORTED_LOCATION)
+configure_package_config_file("${JUCE_CMAKE_UTILS_DIR}/JUCEConfig.cmake.in"
+    "${JUCE_BINARY_DIR}/JUCEExportConfig.cmake"
+    PATH_VARS UTILS_INSTALL_DIR JUCEAIDE_PATH
+    INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}"
+    INSTALL_DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
 install(FILES "${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
               "${JUCE_BINARY_DIR}/JUCEConfig.cmake"
