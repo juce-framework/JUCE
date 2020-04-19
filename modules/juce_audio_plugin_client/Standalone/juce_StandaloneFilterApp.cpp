@@ -149,7 +149,6 @@ void JUCE_CALLTYPE juce_switchToHostApplication()
         holder->switchToHostApplication();
 }
 
-#if JUCE_MODULE_AVAILABLE_juce_gui_basics
 Image JUCE_CALLTYPE juce_getIAAHostIcon (int size)
 {
     if (auto holder = StandalonePluginHolder::getInstance())
@@ -157,7 +156,6 @@ Image JUCE_CALLTYPE juce_getIAAHostIcon (int size)
 
     return Image();
 }
-#endif
 #endif
 
 #endif

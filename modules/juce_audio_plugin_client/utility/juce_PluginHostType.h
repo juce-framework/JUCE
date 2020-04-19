@@ -265,9 +265,7 @@ public:
     /** Switches to the host application when Inter-App Audio is used on iOS. */
     void switchToHostApplication() const;
 
-   #if JUCE_MODULE_AVAILABLE_juce_gui_basics
     Image getHostIcon (int size) const;
-   #endif
 
     //==============================================================================
     /** Returns the complete absolute path of the host application executable. */
