@@ -479,7 +479,7 @@ struct ZipFile::Builder::Item
 
             uncompressedSize = relativePath.length();
 
-            checksum = zlibNamespace::crc32 (0, (uint8_t*) relativePath.toRawUTF8(), (unsigned int) uncompressedSize);
+            checksum = zlibNamespace::crc32 (0, (const uint8_t*) relativePath.toRawUTF8(), (unsigned int) uncompressedSize);
             compressedData << relativePath;
         }
         else if (compressionLevel > 0)
