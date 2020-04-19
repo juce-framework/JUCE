@@ -71,7 +71,7 @@ struct SIMDNativeOps<float>
     static forcedinline __m128 JUCE_VECTOR_CALLTYPE bit_or  (__m128 a, __m128 b) noexcept                { return _mm_or_ps  (a, b); }
     static forcedinline __m128 JUCE_VECTOR_CALLTYPE bit_xor (__m128 a, __m128 b) noexcept                { return _mm_xor_ps (a, b); }
     static forcedinline __m128 JUCE_VECTOR_CALLTYPE bit_notand (__m128 a, __m128 b) noexcept             { return _mm_andnot_ps (a, b); }
-    static forcedinline __m128 JUCE_VECTOR_CALLTYPE bit_not (__m128 a) noexcept                          { return bit_notand (a, _mm_loadu_ps ((float*) kAllBitsSet)); }
+    static forcedinline __m128 JUCE_VECTOR_CALLTYPE bit_not (__m128 a) noexcept                          { return bit_notand (a, _mm_loadu_ps ((const float*) kAllBitsSet)); }
     static forcedinline __m128 JUCE_VECTOR_CALLTYPE min (__m128 a, __m128 b) noexcept                    { return _mm_min_ps (a, b); }
     static forcedinline __m128 JUCE_VECTOR_CALLTYPE max (__m128 a, __m128 b) noexcept                    { return _mm_max_ps (a, b); }
     static forcedinline __m128 JUCE_VECTOR_CALLTYPE equal (__m128 a, __m128 b) noexcept                  { return _mm_cmpeq_ps (a, b); }
@@ -93,7 +93,7 @@ struct SIMDNativeOps<float>
     {
         __m128 rr_ir = mul (a, dupeven (b));
         __m128 ii_ri = mul (swapevenodd (a), dupodd (b));
-        return add (rr_ir, bit_xor (ii_ri, _mm_loadu_ps ((float*) kEvenHighBit)));
+        return add (rr_ir, bit_xor (ii_ri, _mm_loadu_ps ((const float*) kEvenHighBit)));
     }
 
     static forcedinline float JUCE_VECTOR_CALLTYPE sum (__m128 a) noexcept
