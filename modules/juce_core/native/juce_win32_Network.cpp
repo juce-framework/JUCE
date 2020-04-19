@@ -609,15 +609,15 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailA
         return false;
 
     MapiMessage message = { 0 };
-    message.lpszSubject = (LPSTR) emailSubject.toRawUTF8();
-    message.lpszNoteText = (LPSTR) bodyText.toRawUTF8();
+    message.lpszSubject = (LPSTR) const_cast<char*>(emailSubject.toRawUTF8());
+    message.lpszNoteText = (LPSTR) const_cast<char*>(bodyText.toRawUTF8());
 
     MapiRecipDesc recip = { 0 };
     recip.ulRecipClass = MAPI_TO;
     String targetEmailAddress_ (targetEmailAddress);
     if (targetEmailAddress_.isEmpty())
         targetEmailAddress_ = " "; // (Windows Mail can't deal with a blank address)
-    recip.lpszName = (LPSTR) targetEmailAddress_.toRawUTF8();
+    recip.lpszName = (LPSTR) const_cast<char*>(targetEmailAddress_.toRawUTF8());
     message.nRecipCount = 1;
     message.lpRecips = &recip;
 
@@ -630,7 +630,7 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailA
     for (int i = 0; i < filesToAttach.size(); ++i)
     {
         files[i].nPosition = (ULONG) -1;
-        files[i].lpszPathName = (LPSTR) filesToAttach[i].toRawUTF8();
+        files[i].lpszPathName = (LPSTR) const_cast<char*>(filesToAttach[i].toRawUTF8());
     }
 
     return mapiSendMail (0, 0, &message, MAPI_DIALOG | MAPI_LOGON_UI, 0) == SUCCESS_SUCCESS;
