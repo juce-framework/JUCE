@@ -106,9 +106,9 @@ private:
     // a block of memory here that's big enough to be used internally as a windows
     // CRITICAL_SECTION structure.
     #if JUCE_64BIT
-     uint8 lock[44];
+     mutable uint8 lock[44];
     #else
-     uint8 lock[24];
+     mutable uint8 lock[24];
     #endif
    #else
     mutable pthread_mutex_t lock;
