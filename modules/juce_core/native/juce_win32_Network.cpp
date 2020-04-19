@@ -546,7 +546,7 @@ namespace MACAddressHelpers
 
     static IPAddress createAddress (const sockaddr_in* sa_in)
     {
-        return IPAddress ((uint8*) &sa_in->sin_addr.s_addr, false);
+        return IPAddress ((const uint8*) &sa_in->sin_addr.s_addr, false);
     }
 
     template <typename Type>
