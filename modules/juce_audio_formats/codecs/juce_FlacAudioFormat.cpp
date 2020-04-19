@@ -103,7 +103,8 @@ namespace FlacNamespace
   #define SIZE_MAX 0xffffffff
  #endif
 
- JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-qual",
+                                      "-Wconversion",
                                       "-Wshadow",
                                       "-Wdeprecated-register",
                                       "-Wswitch-enum",
