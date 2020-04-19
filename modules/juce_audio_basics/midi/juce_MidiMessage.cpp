@@ -109,7 +109,7 @@ MidiMessage::MidiMessage (const void* const d, const int dataSize, const double 
 {
     jassert (dataSize > 0);
     // this checks that the length matches the data..
-    jassert (dataSize > 3 || *(uint8*)d >= 0xf0 || getMessageLengthFromFirstByte (*(uint8*)d) == size);
+    jassert (dataSize > 3 || *(const uint8*)d >= 0xf0 || getMessageLengthFromFirstByte (*(const uint8*)d) == size);
 
     memcpy (allocateSpace (dataSize), d, (size_t) dataSize);
 }
