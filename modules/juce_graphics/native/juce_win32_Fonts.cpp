@@ -405,7 +405,7 @@ public:
             auto scaleX = 1.0f / tm.tmHeight;
             auto scaleY = -scaleX;
 
-            while ((char*) pheader < data + bufSize)
+            while ((const char*) pheader < data + bufSize)
             {
                 glyphPath.startNewSubPath (scaleX * pheader->pfxStart.x.value,
                                            scaleY * pheader->pfxStart.y.value);
