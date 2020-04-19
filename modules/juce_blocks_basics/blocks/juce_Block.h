@@ -377,7 +377,7 @@ public:
                         bool active,
                         const char* itemName,
                         ConfigType itemType,
-                        const char* options[ConfigMetaData::numOptionNames],
+                        const char* const (&options)[ConfigMetaData::numOptionNames],
                         const char* groupName)
           : item (itemIndex),
             value (itemValue),
