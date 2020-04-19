@@ -287,7 +287,7 @@ namespace WavFileHelpers
 
             for (int i = 0; i < (int) numSampleLoops; ++i)
             {
-                if ((uint8*) (loops + (i + 1)) > ((uint8*) this) + totalSize)
+                if ((const uint8*) (loops + (i + 1)) > ((const uint8*) this) + totalSize)
                     break;
 
                 setValue (values, i, "Identifier", loops[i].identifier);
@@ -426,7 +426,7 @@ namespace WavFileHelpers
 
             for (int i = 0; i < (int) numCues; ++i)
             {
-                if ((uint8*) (cues + (i + 1)) > ((uint8*) this) + totalSize)
+                if ((const uint8*) (cues + (i + 1)) > ((const uint8*) this) + totalSize)
                     break;
 
                 setValue (values, i, "Identifier",  cues[i].identifier);
