@@ -28,7 +28,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4309 4305 4365)
 namespace zlibNamespace
 {
  #if JUCE_INCLUDE_ZLIB_CODE
-  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
+  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-qual",
+                                       "-Wconversion",
                                        "-Wsign-conversion",
                                        "-Wshadow",
                                        "-Wdeprecated-register",
