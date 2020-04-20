@@ -186,8 +186,6 @@ public:
         This will produce a lump of XML that can be later reloaded using
         restoreFromXml() to recreate the current mapping state.
 
-        The object that is returned must be deleted by the caller.
-
         @param saveDifferencesFromDefaultSet    if this is false, then all keypresses
                             will be saved into the XML. If it's true, then the XML will
                             only store the differences between the current mappings and

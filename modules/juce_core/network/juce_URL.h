@@ -337,8 +337,7 @@ public:
                                  returning a response (ignored for Android which follows up to 5 redirects)
         @param httpRequestCmd    Specify which HTTP Request to use. If this is empty, then doPostRequest
                                  will determine the HTTP request.
-        @returns    an input stream that the caller must delete, or a null pointer if there was an
-                    error trying to open it.
+        @returns    a valid input stream, or nullptr if there was an error trying to open it.
      */
     std::unique_ptr<InputStream> createInputStream (bool doPostLikeRequest,
                                                     OpenStreamProgressCallback* progressCallback = nullptr,
@@ -478,9 +477,6 @@ public:
 
         If it fails, or if the text that it reads can't be parsed as XML, this will
         return nullptr.
-
-        When it returns a valid XmlElement object, the caller is responsible for deleting
-        this object when no longer needed.
 
         Note that on some platforms (Android, for example) it's not permitted to do any network
         action from the message thread, so you must only call it from a background thread.

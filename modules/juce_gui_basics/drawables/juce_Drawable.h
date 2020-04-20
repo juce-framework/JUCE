@@ -144,8 +144,7 @@ public:
     /** Attempts to parse an SVG (Scalable Vector Graphics) document, and to turn this
         into a Drawable tree.
 
-        The object returned must be deleted by the caller. If something goes wrong
-        while parsing, it may return nullptr.
+        If something goes wrong while parsing, it may return nullptr.
 
         SVG is a pretty large and complex spec, and this doesn't aim to be a full
         implementation, but it can return the basic vector objects.
@@ -155,8 +154,7 @@ public:
     /** Attempts to parse an SVG (Scalable Vector Graphics) document from a file,
         and to turn this into a Drawable tree.
 
-        The object returned must be deleted by the caller. If something goes wrong
-        while parsing, it may return nullptr.
+        If something goes wrong while parsing, it may return nullptr.
 
         SVG is a pretty large and complex spec, and this doesn't aim to be a full
         implementation, but it can return the basic vector objects.

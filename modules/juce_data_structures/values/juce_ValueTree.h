@@ -419,7 +419,6 @@ public:
     /** Creates an XmlElement that holds a complete image of this tree and all its children.
         If this tree is invalid, this may return nullptr. Otherwise, the XML that is produced can
         be used to recreate a similar tree by calling ValueTree::fromXml().
-        The caller must delete the object that is returned.
         @see fromXml, toXmlString
     */
     std::unique_ptr<XmlElement> createXml() const;

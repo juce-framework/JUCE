@@ -499,8 +499,6 @@ public:
         for a specific item, but this can be handy if you need to briefly save the state
         for a section of the tree.
 
-        The caller is responsible for deleting the object that is returned.
-
         Note that if all nodes of the tree are in their default state, then this may
         return a nullptr.
 
@@ -795,8 +793,6 @@ public:
         means that the same state of open/closed nodes can be restored to a
         completely different instance of the tree, as long as it contains nodes
         whose unique names are the same.
-
-        The caller is responsible for deleting the object that is returned.
 
         @param alsoIncludeScrollPosition    if this is true, the state will also
                                             include information about where the
