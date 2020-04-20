@@ -1526,16 +1526,18 @@ private:
 
         if (text.startsWithChar ('#'))
         {
-            uint32 hex[6] = { 0 };
+            uint32 hex[8] = { 0 };
+            hex[6] = hex[7] = 15;
+
             int numChars = 0;
             auto s = text.getCharPointer();
 
-            while (numChars < 6)
+            while (numChars < 8)
             {
                 auto hexValue = CharacterFunctions::getHexDigitValue (*++s);
 
                 if (hexValue >= 0)
-                    hex [numChars++] = (uint32) hexValue;
+                    hex[numChars++] = (uint32) hexValue;
                 else
                     break;
             }
@@ -1547,30 +1549,53 @@ private:
 
             return Colour ((uint8) ((hex[0] << 4) + hex[1]),
                            (uint8) ((hex[2] << 4) + hex[3]),
-                           (uint8) ((hex[4] << 4) + hex[5]));
+                           (uint8) ((hex[4] << 4) + hex[5]),
+                           (uint8) ((hex[6] << 4) + hex[7]));
         }
 
-        if (text.startsWith ("rgb"))
+        if (text.startsWith ("rgb") || text.startsWith ("hsl"))
         {
-            auto openBracket = text.indexOfChar ('(');
-            auto closeBracket = text.indexOfChar (openBracket, ')');
-
-            if (openBracket >= 3 && closeBracket > openBracket)
+            auto tokens = [&text]
             {
-                StringArray tokens;
-                tokens.addTokens (text.substring (openBracket + 1, closeBracket), ",", "");
-                tokens.trim();
-                tokens.removeEmptyStrings();
+                auto openBracket = text.indexOfChar ('(');
+                auto closeBracket = text.indexOfChar (openBracket, ')');
 
-                if (tokens[0].containsChar ('%'))
-                    return Colour ((uint8) roundToInt (2.55 * tokens[0].getDoubleValue()),
-                                   (uint8) roundToInt (2.55 * tokens[1].getDoubleValue()),
-                                   (uint8) roundToInt (2.55 * tokens[2].getDoubleValue()));
+                StringArray arr;
 
-                return Colour ((uint8) tokens[0].getIntValue(),
-                               (uint8) tokens[1].getIntValue(),
-                               (uint8) tokens[2].getIntValue());
-            }
+                if (openBracket >= 3 && closeBracket > openBracket)
+                {
+                    arr.addTokens (text.substring (openBracket + 1, closeBracket), ",", "");
+                    arr.trim();
+                    arr.removeEmptyStrings();
+                }
+
+                return arr;
+            }();
+
+            auto alpha = [&tokens, &text]
+            {
+                if ((text.startsWith ("rgba") || text.startsWith ("hsla")) && tokens.size() == 4)
+                    return tokens[3].getFloatValue();
+
+                return 1.0f;
+            }();
+
+            if (text.startsWith ("hsl"))
+                return Colour ((float) (tokens[0].getDoubleValue() / 360.0),
+                               (float) (tokens[1].getDoubleValue() / 100.0),
+                               (float) (tokens[2].getDoubleValue() / 100.0),
+                               alpha);
+
+            if (tokens[0].containsChar ('%'))
+                return Colour ((uint8) roundToInt (2.55 * tokens[0].getDoubleValue()),
+                               (uint8) roundToInt (2.55 * tokens[1].getDoubleValue()),
+                               (uint8) roundToInt (2.55 * tokens[2].getDoubleValue()),
+                               alpha);
+
+            return Colour ((uint8) tokens[0].getIntValue(),
+                           (uint8) tokens[1].getIntValue(),
+                           (uint8) tokens[2].getIntValue(),
+                           alpha);
         }
 
         if (text == "inherit")
