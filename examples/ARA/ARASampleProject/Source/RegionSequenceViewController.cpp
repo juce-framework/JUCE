@@ -48,7 +48,8 @@ void RegionSequenceViewController::setRegionsViewBoundsByYRange (int y, int heig
         const auto regionTimeRange = regionView->getTimeRange();
         const int startX = documentView.getPlaybackRegionsViewsXForTime (regionTimeRange.getStart());
         const int endX = documentView.getPlaybackRegionsViewsXForTime (regionTimeRange.getEnd());
-        regionView->setBounds (startX, y, endX - startX, height);
+        const int width = jmax (1, endX - startX);
+        regionView->setBounds (startX, y, width, height);
     }
 }
 

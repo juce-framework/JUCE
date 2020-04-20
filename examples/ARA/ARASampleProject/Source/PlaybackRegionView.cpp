@@ -46,9 +46,13 @@ void PlaybackRegionView::mouseDoubleClick (const MouseEvent& /*event*/)
 void PlaybackRegionView::paint (Graphics& g)
 {
     auto rect = getLocalBounds();
-    g.setColour (isSelected ? Colours::yellow : Colours::black);
-    g.drawRect (rect);
-    rect.reduce (1, 1);
+
+    if (rect.getWidth() > 2)
+    {
+        g.setColour (isSelected ? Colours::yellow : Colours::black);
+        g.drawRect (rect);
+        rect.reduce (1, 1);
+    }
 
     const Colour regionColour = convertOptionalARAColour (playbackRegion->getEffectiveColor());
     g.setColour (regionColour);
