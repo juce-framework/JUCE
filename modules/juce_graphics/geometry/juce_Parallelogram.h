@@ -158,7 +158,10 @@ public:
     Parallelogram transformedBy (const AffineTransform& transform) const noexcept
     {
         auto p = *this;
-        transform.transformPoints (p.topLeft, p.topRight, p.bottomLeft);
+        transform.transformPoints (p.topLeft.x, p.topLeft.y,
+                                   p.topRight.x, p.topRight.y,
+                                   p.bottomLeft.x, p.bottomLeft.y);
+
         return p;
     }
 
