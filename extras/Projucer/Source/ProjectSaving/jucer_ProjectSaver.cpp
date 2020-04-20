@@ -50,7 +50,7 @@ Result ProjectSaver::saveResourcesOnly()
 {
     writeBinaryDataFiles();
 
-    if (errors.size() > 0)
+    if (! errors.isEmpty())
         return Result::fail (errors[0]);
 
     return Result::ok();
@@ -69,7 +69,7 @@ Result ProjectSaver::saveContentNeededForLiveBuild()
 {
     auto modules = getModules();
 
-    if (errors.size() == 0)
+    if (errors.isEmpty())
     {
         saveBasicProjectItems (modules, loadUserContentFromAppConfig());
         return Result::ok();
@@ -275,13 +275,8 @@ Result ProjectSaver::saveProject (ProjectExporter* specifiedExporterToSave)
     auto oldProjectFile = project.getFile();
     auto modules = getModules();
 
-    if (errors.size() == 0)
+    if (errors.isEmpty())
     {
-        writeMainProjectFile();
-        project.updateModificationTime();
-
-        auto projectRootHash = project.getProjectRoot().toXmlString().hashCode();
-
         if (project.isAudioPluginProject())
         {
             if (project.shouldBuildUnityPlugin())
@@ -292,12 +287,7 @@ Result ProjectSaver::saveProject (ProjectExporter* specifiedExporterToSave)
         writeProjects (modules, specifiedExporterToSave);
         runPostExportScript();
 
-        // if the project root has changed after writing the other files then re-save it
-        if (project.getProjectRoot().toXmlString().hashCode() != projectRootHash)
-        {
-            writeMainProjectFile();
-            project.updateModificationTime();
-        }
+        project.writeProjectFile();
 
         if (generatedCodeFolder.exists())
         {
@@ -305,7 +295,7 @@ Result ProjectSaver::saveProject (ProjectExporter* specifiedExporterToSave)
             deleteUnwantedFilesIn (generatedCodeFolder);
         }
 
-        if (errors.size() == 0)
+        if (errors.isEmpty())
             return Result::ok();
     }
 
@@ -314,23 +304,6 @@ Result ProjectSaver::saveProject (ProjectExporter* specifiedExporterToSave)
 }
 
 //==============================================================================
-void ProjectSaver::writeMainProjectFile()
-{
-    if (auto xml = project.getProjectRoot().createXml())
-    {
-        XmlElement::TextFormat format;
-        format.newLineChars = projectLineFeed.toRawUTF8();
-
-        MemoryOutputStream mo (8192);
-        xml->writeTo (mo, format);
-        replaceFileIfDifferent (project.getFile(), mo);
-    }
-    else
-    {
-        addError ("Failed to write main project file: " + project.getFile().getFullPathName());
-    }
-}
-
 static void writeAutoGenWarningComment (OutputStream& out)
 {
     out << "/*" << newLine << newLine

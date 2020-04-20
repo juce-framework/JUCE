@@ -475,8 +475,8 @@ public:
     static const char* projectFileExtension;
 
     //==============================================================================
-    bool hasProjectBeenModified();
-    void updateModificationTime() { modificationTime = getFile().getLastModificationTime(); }
+    bool updateCachedFileState();
+    void writeProjectFile();
 
     //==============================================================================
     String getUniqueTargetFolderSuffixForExporter (const String& exporterName, const String& baseTargetFolder);
@@ -513,7 +513,7 @@ private:
         void timerCallback() override;
         void reset();
 
-        void keepProject();
+        void resaveProject();
         void reloadProjectFromDisk();
 
         Project& project;
@@ -556,15 +556,15 @@ private:
     void updatePluginCategories();
 
     //==============================================================================
-    File tempDirectory = {};
+    File tempDirectory;
+    std::pair<Time, String> cachedFileState;
 
     void saveAndMoveTemporaryProject (bool openInIDE);
-    bool saveProjectRootToFile();
+    String serialiseProjectXml (std::unique_ptr<XmlElement>) const;
 
     //==============================================================================
     friend class Item;
     bool isSaving = false;
-    Time modificationTime;
     StringPairArray parsedPreprocessorDefs;
 
     //==============================================================================

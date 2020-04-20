@@ -142,7 +142,6 @@ namespace Ids
     DECLARE_ID (msvcModuleDefinitionFile);
     DECLARE_ID (bigIcon);
     DECLARE_ID (smallIcon);
-    DECLARE_ID (jucerVersion);
     DECLARE_ID (prebuildCommand);
     DECLARE_ID (postbuildCommand);
     DECLARE_ID (generateManifest);

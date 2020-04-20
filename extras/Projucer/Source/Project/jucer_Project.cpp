@@ -39,18 +39,15 @@ void Project::ProjectFileModificationPoller::reset()
 
 void Project::ProjectFileModificationPoller::timerCallback()
 {
-    if (project.hasProjectBeenModified())
+    if (project.updateCachedFileState() && ! showingWarning)
     {
-        if (! showingWarning)
-        {
-            project.addProjectMessage (ProjectMessages::Ids::jucerFileModified,
-                                       { { "Keep", [this] { keepProject(); } },
-                                         { "Re-load from disk", [this] { reloadProjectFromDisk(); } },
-                                         { "Ignore", [this] { reset(); } } });
+         project.addProjectMessage (ProjectMessages::Ids::jucerFileModified,
+                                    { { "Save current state", [this] { resaveProject(); } },
+                                      { "Re-load from disk", [this] { reloadProjectFromDisk(); } },
+                                      { "Ignore", [this] { reset(); } } });
 
-            stopTimer();
-            showingWarning = true;
-        }
+         stopTimer();
+         showingWarning = true;
     }
 }
 
@@ -73,7 +70,7 @@ void Project::ProjectFileModificationPoller::reloadProjectFromDisk()
     });
 }
 
-void Project::ProjectFileModificationPoller::keepProject()
+void Project::ProjectFileModificationPoller::resaveProject()
 {
     project.saveProject();
     reset();
@@ -95,7 +92,7 @@ Project::Project (const File& f)
     initialiseAudioPluginValues();
 
     setChangedFlag (false);
-    modificationTime = getFile().getLastModificationTime();
+    updateCachedFileState();
 
     auto& app = ProjucerApplication::getApp();
 
@@ -166,7 +163,6 @@ void Project::updateCompanyNameDependencies()
 
 void Project::updateProjectSettings()
 {
-    projectRoot.setProperty (Ids::jucerVersion, ProjectInfo::versionString, nullptr);
     projectRoot.setProperty (Ids::name, getDocumentTitle(), nullptr);
 }
 
@@ -952,7 +948,7 @@ void Project::saveAndMoveTemporaryProject (bool openInIDE)
     auto newDirectory = newParentDirectory.getChildFile (tempDirectory.getFileName());
     auto oldJucerFileName = getFile().getFileName();
 
-    saveProjectRootToFile();
+    writeProjectFile();
 
     tempDirectory.copyDirectoryTo (newDirectory);
     tempDirectory.deleteRecursively();
@@ -971,19 +967,6 @@ void Project::saveAndMoveTemporaryProject (bool openInIDE)
                                                    : MainWindow::OpenInIDE::no);
         });
     }
-}
-
-bool Project::saveProjectRootToFile()
-{
-    if (auto xml = projectRoot.createXml())
-    {
-        MemoryOutputStream mo;
-        xml->writeTo (mo, {});
-        return build_tools::overwriteFileWithNewDataIfDifferent (getFile(), mo);
-    }
-
-    jassertfalse;
-    return false;
 }
 
 //==============================================================================
@@ -1058,12 +1041,46 @@ void Project::valueTreeChildOrderChanged (ValueTree&, int, int)
 }
 
 //==============================================================================
-bool Project::hasProjectBeenModified()
+String Project::serialiseProjectXml (std::unique_ptr<XmlElement> xml) const
 {
-    auto oldModificationTime = modificationTime;
-    modificationTime = getFile().getLastModificationTime();
+    if (xml == nullptr)
+        return {};
 
-    return (modificationTime.toMilliseconds() > (oldModificationTime.toMilliseconds() + 1000LL));
+    XmlElement::TextFormat format;
+    format.newLineChars = getProjectLineFeed().toRawUTF8();
+    return xml->toString (format);
+}
+
+bool Project::updateCachedFileState()
+{
+    auto lastModificationTime = getFile().getLastModificationTime();
+
+    if (lastModificationTime <= cachedFileState.first)
+        return false;
+
+    cachedFileState.first = lastModificationTime;
+
+    auto serialisedFileContent = serialiseProjectXml (XmlDocument (getFile()).getDocumentElement());
+
+    if (serialisedFileContent == cachedFileState.second)
+        return false;
+
+    cachedFileState.second = serialisedFileContent;
+    return true;
+}
+
+void Project::writeProjectFile()
+{
+    updateCachedFileState();
+
+    auto newSerialisedXml = serialiseProjectXml (getProjectRoot().createXml());
+    jassert (newSerialisedXml.isNotEmpty());
+
+    if (newSerialisedXml != cachedFileState.second)
+    {
+        getFile().replaceWithText (newSerialisedXml);
+        cachedFileState = { getFile().getLastModificationTime(), newSerialisedXml };
+    }
 }
 
 //==============================================================================
