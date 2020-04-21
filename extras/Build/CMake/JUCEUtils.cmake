@@ -84,8 +84,8 @@ endfunction()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(JUCE_CURL_LINUX_DEPS IMPORTED_TARGET libcurl)
-    pkg_check_modules(JUCE_BROWSER_LINUX_DEPS IMPORTED_TARGET webkit2gtk-4.0 gtk+-x11-3.0)
+    pkg_check_modules(JUCE_CURL_LINUX_DEPS IMPORTED_TARGET GLOBAL libcurl)
+    pkg_check_modules(JUCE_BROWSER_LINUX_DEPS IMPORTED_TARGET GLOBAL webkit2gtk-4.0 gtk+-x11-3.0)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_program(JUCE_RC_COMPILER Rez NO_DEFAULT_PATHS PATHS "/Applications/Xcode.app/Contents/Developer/usr/bin")
 
@@ -500,7 +500,7 @@ function(juce_add_module module_path)
         _juce_get_metadata("${metadata_dict}" linuxPackages module_linuxpackages)
 
         if(module_linuxpackages)
-            pkg_check_modules(${module_name}_LINUX_DEPS REQUIRED IMPORTED_TARGET
+            pkg_check_modules(${module_name}_LINUX_DEPS REQUIRED IMPORTED_TARGET GLOBAL
                 ${module_linuxpackages})
             target_link_libraries(${module_name} INTERFACE PkgConfig::${module_name}_LINUX_DEPS)
         endif()
