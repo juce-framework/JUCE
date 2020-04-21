@@ -190,14 +190,12 @@ attributes directly to these creation functions, rather than adding them later.
 - `IPHONE_SCREEN_ORIENTATIONS`
   - May be one or more of `UIInterfaceOrientationUnknown`, `UIInterfaceOrientationPortrait`,
     `UIInterfaceOrientationPortraitUpsideDown`, `UIInterfaceOrientationLandscapeLeft`, or
-    `UIInterfaceOrientationLandscapeRight`. These should be surrounded in double-quotes and
-    separated by semi-colons (`;`). Adds appropriate entries to an iOS app's plist.
+    `UIInterfaceOrientationLandscapeRight`. Adds appropriate entries to an iOS app's plist.
 
 - `IPAD_SCREEN_ORIENTATIONS`
   - May be one or more of `UIInterfaceOrientationUnknown`, `UIInterfaceOrientationPortrait`,
     `UIInterfaceOrientationPortraitUpsideDown`, `UIInterfaceOrientationLandscapeLeft`, or
-    `UIInterfaceOrientationLandscapeRight`. These should be surrounded in double-quotes and
-    separated by semi-colons (`;`). Adds appropriate entries to an iOS app's plist.
+    `UIInterfaceOrientationLandscapeRight`. Adds appropriate entries to an iOS app's plist.
 
 - `LAUNCH_STORYBOARD_FILE`
   - A custom launch storyboard file to use on iOS. If not supplied, a default storyboard will be
