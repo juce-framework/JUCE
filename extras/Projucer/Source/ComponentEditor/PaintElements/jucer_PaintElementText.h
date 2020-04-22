@@ -81,7 +81,7 @@ public:
             positionToCode (position, code.document->getComponentLayout(), x, y, w, h);
             r << "{\n"
               << "    int x = " << x << ", y = " << y << ", width = " << w << ", height = " << h << ";\n"
-              << "    String text (" << quotedString (text, code.shouldUseTransMacro()) << ");\n"
+              << "    juce::String text (" << quotedString (text, code.shouldUseTransMacro()) << ");\n"
               << "    " << fillType.generateVariablesCode ("fill")
               << "    //[UserPaintCustomArguments] Customize the painting arguments here..\n"
               << customPaintCode

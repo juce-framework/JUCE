@@ -968,7 +968,7 @@ void positionToCode (const RelativePositionedRectangle& position,
     if (position.rect.getWidthMode() == PositionedRectangle::proportionalSize)
     {
         if (wrw.isNotEmpty())
-            w << "roundToInt (" << bracketIfNeeded (wrw) << " * " << CodeHelpers::floatLiteral (position.rect.getWidth(), 4) << ")";
+            w << "juce::roundToInt (" << bracketIfNeeded (wrw) << " * " << CodeHelpers::floatLiteral (position.rect.getWidth(), 4) << ")";
         else
             w << "proportionOfWidth (" << CodeHelpers::floatLiteral (position.rect.getWidth(), 4) << ")";
     }
@@ -991,7 +991,7 @@ void positionToCode (const RelativePositionedRectangle& position,
     if (position.rect.getHeightMode() == PositionedRectangle::proportionalSize)
     {
         if (hrh.isNotEmpty())
-            h << "roundToInt (" << bracketIfNeeded (hrh) << " * " << CodeHelpers::floatLiteral (position.rect.getHeight(), 4) << ")";
+            h << "juce::roundToInt (" << bracketIfNeeded (hrh) << " * " << CodeHelpers::floatLiteral (position.rect.getHeight(), 4) << ")";
         else
             h << "proportionOfHeight (" << CodeHelpers::floatLiteral (position.rect.getHeight(), 4) << ")";
     }
@@ -1014,7 +1014,7 @@ void positionToCode (const RelativePositionedRectangle& position,
     if (position.rect.getPositionModeX() == PositionedRectangle::proportionOfParentSize)
     {
         if (xrx.isNotEmpty() && xrw.isNotEmpty())
-            x << bracketIfNeeded (xrx) << " + roundToInt (" << bracketIfNeeded (xrw) << " * " << CodeHelpers::floatLiteral (position.rect.getX(), 4) << ")";
+            x << bracketIfNeeded (xrx) << " + juce::roundToInt (" << bracketIfNeeded (xrw) << " * " << CodeHelpers::floatLiteral (position.rect.getX(), 4) << ")";
         else
             x << "proportionOfWidth (" << CodeHelpers::floatLiteral (position.rect.getX(), 4) << ")";
     }
@@ -1060,7 +1060,7 @@ void positionToCode (const RelativePositionedRectangle& position,
     if (position.rect.getPositionModeY() == PositionedRectangle::proportionOfParentSize)
     {
         if (yry.isNotEmpty() && yrh.isNotEmpty())
-            y << bracketIfNeeded (yry) << " + roundToInt (" << bracketIfNeeded (yrh) << " * " << CodeHelpers::floatLiteral (position.rect.getY(), 4) << ")";
+            y << bracketIfNeeded (yry) << " + juce::roundToInt (" << bracketIfNeeded (yrh) << " * " << CodeHelpers::floatLiteral (position.rect.getY(), 4) << ")";
         else
             y << "proportionOfHeight (" << CodeHelpers::floatLiteral (position.rect.getY(), 4) << ")";
     }

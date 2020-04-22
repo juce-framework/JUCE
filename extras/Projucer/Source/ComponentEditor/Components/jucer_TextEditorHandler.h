@@ -24,7 +24,7 @@ class TextEditorHandler  : public ComponentTypeHandler
 {
 public:
     TextEditorHandler()
-        : ComponentTypeHandler ("Text Editor", "TextEditor", typeid (TextEditor), 150, 24)
+        : ComponentTypeHandler ("Text Editor", "juce::TextEditor", typeid (TextEditor), 150, 24)
     {
         registerColour (TextEditor::textColourId, "text", "textcol");
         registerColour (TextEditor::backgroundColourId, "background", "bkgcol");

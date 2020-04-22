@@ -24,7 +24,7 @@ class ViewportHandler  : public ComponentTypeHandler
 {
 public:
     ViewportHandler()
-        : ComponentTypeHandler ("Viewport", "Viewport", typeid (UpdatingViewport), 150, 150)
+        : ComponentTypeHandler ("Viewport", "juce::Viewport", typeid (UpdatingViewport), 150, 150)
     {}
 
     Component* createNewComponent (JucerDocument*) override

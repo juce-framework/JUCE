@@ -106,16 +106,16 @@ public:
             StringArray flags;
 
             if (b->isConnectedOnLeft())
-                flags.add ("Button::ConnectedOnLeft");
+                flags.add ("juce::Button::ConnectedOnLeft");
 
             if (b->isConnectedOnRight())
-                flags.add ("Button::ConnectedOnRight");
+                flags.add ("juce::Button::ConnectedOnRight");
 
             if (b->isConnectedOnTop())
-                flags.add ("Button::ConnectedOnTop");
+                flags.add ("juce::Button::ConnectedOnTop");
 
             if (b->isConnectedOnBottom())
-                flags.add ("Button::ConnectedOnBottom");
+                flags.add ("juce::Button::ConnectedOnBottom");
 
             String s;
             s << memberVariableName << "->setConnectedEdges ("
@@ -138,9 +138,9 @@ public:
 
         if (needsButtonListener (component))
         {
-            String& callback = code.getCallbackCode ("public Button::Listener",
+            String& callback = code.getCallbackCode ("public juce::Button::Listener",
                                                      "void",
-                                                     "buttonClicked (Button* buttonThatWasClicked)",
+                                                     "buttonClicked (juce::Button* buttonThatWasClicked)",
                                                      true);
 
             if (callback.isNotEmpty())

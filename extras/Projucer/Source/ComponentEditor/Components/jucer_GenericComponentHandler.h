@@ -25,7 +25,7 @@ class GenericComponent  : public Component
 public:
     GenericComponent()
         : Component ("new component"),
-          actualClassName ("Component")
+          actualClassName ("juce::Component")
     {
     }
 
@@ -90,7 +90,7 @@ public:
         if (! ComponentTypeHandler::restoreFromXml (xml, comp, layout))
             return false;
 
-        ((GenericComponent*) comp)->actualClassName = xml.getStringAttribute ("class", "Component");
+        ((GenericComponent*) comp)->actualClassName = xml.getStringAttribute ("class", "juce::Component");
         ((GenericComponent*) comp)->constructorParams = xml.getStringAttribute ("params", String());
         return true;
     }

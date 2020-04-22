@@ -74,7 +74,7 @@ public:
             jucerCompClassName = tc->getDocument()->getClassName();
 
         if (jucerCompClassName.isEmpty())
-            jucerCompClassName = "Component";
+            jucerCompClassName = "juce::Component";
 
         return jucerCompClassName;
     }

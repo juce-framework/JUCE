@@ -369,7 +369,7 @@ void PaintElementPath::fillInGeneratedCode (GeneratedCode& code, String& paintMe
     const ComponentLayout* layout = code.document->getComponentLayout();
 
     code.privateMemberDeclarations
-        << "Path " << pathVariable << ";\n";
+        << "juce::Path " << pathVariable << ";\n";
 
     String r;
     bool somePointsAreRelative = false;
@@ -447,14 +447,14 @@ void PaintElementPath::fillInGeneratedCode (GeneratedCode& code, String& paintMe
     {
         s << "    ";
         fillType.fillInGeneratedCode ("fill", zero, code, s);
-        s << "    g.fillPath (" << pathVariable << ", AffineTransform::translation(x, y));\n";
+        s << "    g.fillPath (" << pathVariable << ", juce::AffineTransform::translation(x, y));\n";
     }
 
     if (isStrokePresent && ! strokeType.isInvisible())
     {
         s << "    ";
         strokeType.fill.fillInGeneratedCode ("stroke", zero, code, s);
-        s << "    g.strokePath (" << pathVariable << ", " << strokeType.getPathStrokeCode() << ", AffineTransform::translation(x, y));\n";
+        s << "    g.strokePath (" << pathVariable << ", " << strokeType.getPathStrokeCode() << ", juce::AffineTransform::translation(x, y));\n";
     }
 
     s << "}\n\n";

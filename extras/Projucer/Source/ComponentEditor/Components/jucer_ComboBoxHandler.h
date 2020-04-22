@@ -24,7 +24,7 @@ class ComboBoxHandler  : public ComponentTypeHandler
 {
 public:
     ComboBoxHandler()
-        : ComponentTypeHandler ("Combo Box", "ComboBox", typeid (ComboBox), 150, 24)
+        : ComponentTypeHandler ("Combo Box", "juce::ComboBox", typeid (ComboBox), 150, 24)
     {}
 
     Component* createNewComponent (JucerDocument*) override
@@ -132,9 +132,9 @@ public:
 
         if (needsCallback (component))
         {
-            String& callback = code.getCallbackCode ("public ComboBox::Listener",
+            String& callback = code.getCallbackCode ("public juce::ComboBox::Listener",
                                                      "void",
-                                                     "comboBoxChanged (ComboBox* comboBoxThatHasChanged)",
+                                                     "comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)",
                                                      true);
 
             if (callback.trim().isNotEmpty())

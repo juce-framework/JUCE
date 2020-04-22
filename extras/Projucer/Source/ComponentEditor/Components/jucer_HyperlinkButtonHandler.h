@@ -24,7 +24,7 @@ class HyperlinkButtonHandler  : public ButtonHandler
 {
 public:
     HyperlinkButtonHandler()
-        : ButtonHandler ("Hyperlink Button", "HyperlinkButton", typeid (HyperlinkButton), 150, 24)
+        : ButtonHandler ("Hyperlink Button", "juce::HyperlinkButton", typeid (HyperlinkButton), 150, 24)
     {
         registerColour (HyperlinkButton::textColourId, "text", "textCol");
     }

@@ -32,7 +32,7 @@ public:
 
     //==============================================================================
     ImageButtonHandler()
-        : ButtonHandler ("Image Button", "ImageButton", typeid (ImageButton), 150, 24)
+        : ButtonHandler ("Image Button", "juce::ImageButton", typeid (ImageButton), 150, 24)
     {
     }
 
@@ -156,9 +156,9 @@ public:
         const String resName (getImageResource (ib, role));
 
         if (resName.isEmpty())
-            return "Image()";
+            return "juce::Image()";
 
-        return "ImageCache::getFromMemory (" + resName + ", " + resName + "Size)";
+        return "juce::ImageCache::getFromMemory (" + resName + ", " + resName + "Size)";
     }
 
     //==============================================================================

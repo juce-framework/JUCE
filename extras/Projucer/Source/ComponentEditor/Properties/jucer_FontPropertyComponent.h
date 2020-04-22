@@ -92,33 +92,33 @@ public:
     static String getTypefaceNameCode (const String& typefaceName)
     {
         if (typefaceName == getDefaultFont())   return {};
-        if (typefaceName == getDefaultSans())   return "Font::getDefaultSansSerifFontName(), ";
-        if (typefaceName == getDefaultSerif())  return "Font::getDefaultSerifFontName(), ";
-        if (typefaceName == getDefaultMono())   return "Font::getDefaultMonospacedFontName(), ";
+        if (typefaceName == getDefaultSans())   return "juce::Font::getDefaultSansSerifFontName(), ";
+        if (typefaceName == getDefaultSerif())  return "juce::Font::getDefaultSerifFontName(), ";
+        if (typefaceName == getDefaultMono())   return "juce::Font::getDefaultMonospacedFontName(), ";
 
         return "\"" + typefaceName + "\", ";
     }
 
     static String getFontStyleCode (const Font& font)
     {
-        if (font.isBold() && font.isItalic())   return "Font::bold | Font::italic";
-        if (font.isBold())                      return "Font::bold";
-        if (font.isItalic())                    return "Font::italic";
+        if (font.isBold() && font.isItalic())   return "juce::Font::bold | juce::Font::italic";
+        if (font.isBold())                      return "juce::Font::bold";
+        if (font.isItalic())                    return "juce::Font::italic";
 
-        return "Font::plain";
+        return "juce::Font::plain";
     }
 
     static String getCompleteFontCode (const Font& font, const String& typefaceName)
     {
         String s;
 
-        s << "Font ("
+        s << "juce::Font ("
           << getTypefaceNameCode (typefaceName)
           << CodeHelpers::floatLiteral (font.getHeight(), 2)
           << ", ";
 
         if (font.getAvailableStyles().contains(font.getTypefaceStyle()))
-            s << "Font::plain).withTypefaceStyle ("
+            s << "juce::Font::plain).withTypefaceStyle ("
               << CodeHelpers::stringLiteral (font.getTypefaceStyle())
               << ")";
         else

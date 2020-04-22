@@ -35,7 +35,7 @@ public:
 
         String s;
 
-        s << "PathStrokeType (" << CodeHelpers::floatLiteral (stroke.getStrokeThickness(), 3);
+        s << "juce::PathStrokeType (" << CodeHelpers::floatLiteral (stroke.getStrokeThickness(), 3);
 
         if (stroke.getJointStyle() != defaultStroke.getJointStyle()
             || stroke.getEndStyle() != defaultStroke.getEndStyle())
@@ -44,9 +44,9 @@ public:
 
             switch (stroke.getJointStyle())
             {
-                case PathStrokeType::mitered:   s << "PathStrokeType::mitered"; break;
-                case PathStrokeType::curved:    s << "PathStrokeType::curved"; break;
-                case PathStrokeType::beveled:   s << "PathStrokeType::beveled"; break;
+                case PathStrokeType::mitered:   s << "juce::PathStrokeType::mitered"; break;
+                case PathStrokeType::curved:    s << "juce::PathStrokeType::curved"; break;
+                case PathStrokeType::beveled:   s << "juce::PathStrokeType::beveled"; break;
                 default:                        jassertfalse; break;
             }
 
@@ -56,9 +56,9 @@ public:
 
                 switch (stroke.getEndStyle())
                 {
-                    case PathStrokeType::butt:      s << "PathStrokeType::butt"; break;
-                    case PathStrokeType::square:    s << "PathStrokeType::square"; break;
-                    case PathStrokeType::rounded:   s << "PathStrokeType::rounded"; break;
+                    case PathStrokeType::butt:      s << "juce::PathStrokeType::butt"; break;
+                    case PathStrokeType::square:    s << "juce::PathStrokeType::square"; break;
+                    case PathStrokeType::rounded:   s << "juce::PathStrokeType::rounded"; break;
                     default:                        jassertfalse; break;
                 }
             }

@@ -24,7 +24,7 @@ class ToggleButtonHandler  : public ButtonHandler
 {
 public:
     ToggleButtonHandler()
-        : ButtonHandler ("Toggle Button", "ToggleButton", typeid (ToggleButton), 150, 24)
+        : ButtonHandler ("Toggle Button", "juce::ToggleButton", typeid (ToggleButton), 150, 24)
     {
         registerColour (ToggleButton::textColourId, "text colour", "txtcol");
     }

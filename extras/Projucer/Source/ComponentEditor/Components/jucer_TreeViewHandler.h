@@ -24,7 +24,7 @@ class TreeViewHandler  : public ComponentTypeHandler
 {
 public:
     TreeViewHandler()
-        : ComponentTypeHandler ("TreeView", "TreeView", typeid (DemoTreeView), 150, 150)
+        : ComponentTypeHandler ("TreeView", "juce::TreeView", typeid (DemoTreeView), 150, 150)
     {
         registerColour (TreeView::backgroundColourId, "background", "backgroundColour");
         registerColour (TreeView::linesColourId, "lines", "linecol");

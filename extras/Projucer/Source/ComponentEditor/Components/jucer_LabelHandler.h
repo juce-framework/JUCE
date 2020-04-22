@@ -24,7 +24,7 @@ class LabelHandler  : public ComponentTypeHandler
 {
 public:
     LabelHandler()
-        : ComponentTypeHandler ("Label", "Label", typeid (Label), 150, 24)
+        : ComponentTypeHandler ("Label", "juce::Label", typeid (Label), 150, 24)
     {
         registerColour (Label::backgroundColourId, "background", "bkgCol");
         registerColour (Label::textColourId, "text", "textCol");
@@ -148,9 +148,9 @@ public:
 
         if (needsCallback (component))
         {
-            String& callback = code.getCallbackCode ("public Label::Listener",
+            String& callback = code.getCallbackCode ("public juce::Label::Listener",
                                                      "void",
-                                                     "labelTextChanged (Label* labelThatHasChanged)",
+                                                     "labelTextChanged (juce::Label* labelThatHasChanged)",
                                                      true);
 
             if (callback.trim().isNotEmpty())

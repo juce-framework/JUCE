@@ -24,7 +24,7 @@ class GroupComponentHandler  : public ComponentTypeHandler
 {
 public:
     GroupComponentHandler()
-        : ComponentTypeHandler ("Group Box", "GroupComponent", typeid (GroupComponent), 200, 150)
+        : ComponentTypeHandler ("Group Box", "juce::GroupComponent", typeid (GroupComponent), 200, 150)
     {
         registerColour (GroupComponent::outlineColourId, "outline", "outlinecol");
         registerColour (GroupComponent::textColourId, "text", "textcol");

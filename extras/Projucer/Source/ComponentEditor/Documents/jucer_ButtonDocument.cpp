@@ -42,7 +42,7 @@ ButtonDocument::ButtonDocument (SourceCodeDocument* c)
     paintStatesEnabled [downOn] = false;
     paintStatesEnabled [background] = false;
 
-    parentClasses = "public Button";
+    parentClasses = "public juce::Button";
 
     for (int i = 7; --i >= 0;)
     {
@@ -209,8 +209,8 @@ void ButtonDocument::getOptionalMethods (StringArray& baseClasses,
 {
     JucerDocument::getOptionalMethods (baseClasses, returnValues, methods, initialContents);
 
-    addMethod ("Button", "void", "clicked()", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Button", "void", "buttonStateChanged()", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Button", "void", "clicked()", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Button", "void", "buttonStateChanged()", "", baseClasses, returnValues, methods, initialContents);
 }
 
 //==============================================================================
@@ -322,9 +322,9 @@ void ButtonDocument::fillInPaintCode (GeneratedCode& code) const
         if (paintStatesEnabled [i])
             paintRoutines[i]->fillInGeneratedCode (code, paintCode [i]);
 
-    String& s = code.getCallbackCode ("public Button",
+    String& s = code.getCallbackCode ("public juce::Button",
                                       "void",
-                                      "paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown)",
+                                      "paintButton (juce::Graphics& g, bool isMouseOverButton, bool isButtonDown)",
                                       false);
 
     int numPaintRoutines = getNumPaintRoutines();

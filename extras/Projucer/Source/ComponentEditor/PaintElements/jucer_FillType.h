@@ -116,12 +116,12 @@ public:
         switch (mode)
         {
             case solidColour:
-                s << "Colour " << type << "Colour = " << CodeHelpers::colourToCode (colour) << ";\n";
+                s << "juce::Colour " << type << "Colour = " << CodeHelpers::colourToCode (colour) << ";\n";
                 break;
 
             case linearGradient:
             case radialGradient:
-                s << "Colour " << type << "Colour1 = " << CodeHelpers::colourToCode (gradCol1) << ", " << type << "Colour2 = " << CodeHelpers::colourToCode (gradCol2) << ";\n";
+                s << "juce::Colour " << type << "Colour1 = " << CodeHelpers::colourToCode (gradCol1) << ", " << type << "Colour2 = " << CodeHelpers::colourToCode (gradCol2) << ";\n";
                 break;
 
             case imageBrush:
@@ -153,7 +153,7 @@ public:
                     positionToCode (gradPos1, code.document->getComponentLayout(), x1, y1, w, h);
                     positionToCode (gradPos2, code.document->getComponentLayout(), x2, y2, w, h);
 
-                    s << "g.setGradientFill (ColourGradient (";
+                    s << "g.setGradientFill (juce::ColourGradient (";
 
                     auto indent = String::repeatedString (" ", s.length());
 

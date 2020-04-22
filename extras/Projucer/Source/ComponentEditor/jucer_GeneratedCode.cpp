@@ -84,10 +84,10 @@ void GeneratedCode::removeCallback (const String& returnType, const String& prot
 void GeneratedCode::addImageResourceLoader (const String& imageMemberName, const String& resourceName)
 {
     privateMemberDeclarations
-        << "Image " << imageMemberName << ";\n";
+        << "juce::Image " << imageMemberName << ";\n";
 
     if (resourceName.isNotEmpty())
-        constructorCode << imageMemberName << " = ImageCache::getFromMemory ("
+        constructorCode << imageMemberName << " = juce::ImageCache::getFromMemory ("
                         << resourceName << ", " << resourceName << "Size);\n";
 }
 
@@ -160,8 +160,8 @@ String GeneratedCode::getClassDeclaration() const
 
     parentClassLines = getCleanedStringArray (parentClassLines);
 
-    if (parentClassLines.contains ("public Button", false))
-        parentClassLines.removeString ("public Component", false);
+    if (parentClassLines.contains ("public juce::Button", false))
+        parentClassLines.removeString ("public juce::Component", false);
 
     String r ("class ");
     r << className << "  : ";

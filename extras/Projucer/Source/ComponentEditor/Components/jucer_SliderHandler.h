@@ -50,7 +50,7 @@ static const Slider::TextEntryBoxPosition sliderTextBoxPositions[] =
 struct SliderHandler  : public ComponentTypeHandler
 {
     SliderHandler()
-        : ComponentTypeHandler ("Slider", "Slider", typeid (Slider), 150, 24)
+        : ComponentTypeHandler ("Slider", "juce::Slider", typeid (Slider), 150, 24)
     {
         registerColour (Slider::backgroundColourId, "background", "bkgcol");
         registerColour (Slider::thumbColourId, "thumb", "thumbcol");
@@ -127,9 +127,9 @@ struct SliderHandler  : public ComponentTypeHandler
         r << memberVariableName << "->setRange ("
           << s->getMinimum() << ", " << s->getMaximum() << ", " << s->getInterval()
           << ");\n"
-          << memberVariableName << "->setSliderStyle (Slider::"
+          << memberVariableName << "->setSliderStyle (juce::Slider::"
           << sliderStyleToString (s->getSliderStyle()) << ");\n"
-          << memberVariableName << "->setTextBoxStyle (Slider::"
+          << memberVariableName << "->setTextBoxStyle (juce::Slider::"
           << textBoxPosToString (s->getTextBoxPosition())
           << ", " << CodeHelpers::boolLiteral (! s->isTextBoxEditable())
           << ", " << s->getTextBoxWidth() << ", " << s->getTextBoxHeight() << ");\n"
@@ -151,9 +151,9 @@ struct SliderHandler  : public ComponentTypeHandler
 
         if (needsSliderListener (component))
         {
-            String& callback = code.getCallbackCode ("public Slider::Listener",
+            String& callback = code.getCallbackCode ("public juce::Slider::Listener",
                                                      "void",
-                                                     "sliderValueChanged (Slider* sliderThatWasMoved)",
+                                                     "sliderValueChanged (juce::Slider* sliderThatWasMoved)",
                                                      true);
 
             if (callback.isNotEmpty())

@@ -24,7 +24,7 @@ class TabbedComponentHandler  : public ComponentTypeHandler
 {
 public:
     TabbedComponentHandler()
-        : ComponentTypeHandler ("Tabbed Component", "TabbedComponent", typeid (TabbedComponent), 200, 150)
+        : ComponentTypeHandler ("Tabbed Component", "juce::TabbedComponent", typeid (TabbedComponent), 200, 150)
     {}
 
     Component* createNewComponent (JucerDocument*) override
@@ -144,10 +144,10 @@ public:
 
         switch (t->getOrientation())
         {
-            case TabbedButtonBar::TabsAtTop:        return "TabbedButtonBar::TabsAtTop";
-            case TabbedButtonBar::TabsAtBottom:     return "TabbedButtonBar::TabsAtBottom";
-            case TabbedButtonBar::TabsAtLeft:       return "TabbedButtonBar::TabsAtLeft";
-            case TabbedButtonBar::TabsAtRight:      return "TabbedButtonBar::TabsAtRight";
+            case TabbedButtonBar::TabsAtTop:        return "juce::TabbedButtonBar::TabsAtTop";
+            case TabbedButtonBar::TabsAtBottom:     return "juce::TabbedButtonBar::TabsAtBottom";
+            case TabbedButtonBar::TabsAtLeft:       return "juce::TabbedButtonBar::TabsAtLeft";
+            case TabbedButtonBar::TabsAtRight:      return "juce::TabbedButtonBar::TabsAtRight";
             default:                                jassertfalse; break;
         }
 

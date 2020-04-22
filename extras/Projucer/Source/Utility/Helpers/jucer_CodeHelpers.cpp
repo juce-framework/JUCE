@@ -82,7 +82,7 @@ namespace CodeHelpers
     String stringLiteral (const String& text, int maxLineLength)
     {
         if (text.isEmpty())
-            return "String()";
+            return "juce::String()";
 
         StringArray lines;
 
@@ -135,7 +135,7 @@ namespace CodeHelpers
         String result (lines.joinIntoString (newLine));
 
         if (! CharPointer_ASCII::isValidString (text.toUTF8(), std::numeric_limits<int>::max()))
-            result = "CharPointer_UTF8 (" + result + ")";
+            result = "juce::CharPointer_UTF8 (" + result + ")";
 
         return result;
     }
@@ -200,31 +200,31 @@ namespace CodeHelpers
 
         for (int i = 0; i < numElementsInArray (colourNames) - 1; ++i)
             if (col == colours[i])
-                return "Colours::" + String (colourNames[i]);
+                return "juce::Colours::" + String (colourNames[i]);
 
-        return "Colour (0x" + build_tools::hexString8Digits ((int) col.getARGB()) + ')';
+        return "juce::Colour (0x" + build_tools::hexString8Digits ((int) col.getARGB()) + ')';
     }
 
     String justificationToCode (Justification justification)
     {
         switch (justification.getFlags())
         {
-            case Justification::centred:                return "Justification::centred";
-            case Justification::centredLeft:            return "Justification::centredLeft";
-            case Justification::centredRight:           return "Justification::centredRight";
-            case Justification::centredTop:             return "Justification::centredTop";
-            case Justification::centredBottom:          return "Justification::centredBottom";
-            case Justification::topLeft:                return "Justification::topLeft";
-            case Justification::topRight:               return "Justification::topRight";
-            case Justification::bottomLeft:             return "Justification::bottomLeft";
-            case Justification::bottomRight:            return "Justification::bottomRight";
-            case Justification::left:                   return "Justification::left";
-            case Justification::right:                  return "Justification::right";
-            case Justification::horizontallyCentred:    return "Justification::horizontallyCentred";
-            case Justification::top:                    return "Justification::top";
-            case Justification::bottom:                 return "Justification::bottom";
-            case Justification::verticallyCentred:      return "Justification::verticallyCentred";
-            case Justification::horizontallyJustified:  return "Justification::horizontallyJustified";
+            case Justification::centred:                return "juce::Justification::centred";
+            case Justification::centredLeft:            return "juce::Justification::centredLeft";
+            case Justification::centredRight:           return "juce::Justification::centredRight";
+            case Justification::centredTop:             return "juce::Justification::centredTop";
+            case Justification::centredBottom:          return "juce::Justification::centredBottom";
+            case Justification::topLeft:                return "juce::Justification::topLeft";
+            case Justification::topRight:               return "juce::Justification::topRight";
+            case Justification::bottomLeft:             return "juce::Justification::bottomLeft";
+            case Justification::bottomRight:            return "juce::Justification::bottomRight";
+            case Justification::left:                   return "juce::Justification::left";
+            case Justification::right:                  return "juce::Justification::right";
+            case Justification::horizontallyCentred:    return "juce::Justification::horizontallyCentred";
+            case Justification::top:                    return "juce::Justification::top";
+            case Justification::bottom:                 return "juce::Justification::bottom";
+            case Justification::verticallyCentred:      return "juce::Justification::verticallyCentred";
+            case Justification::horizontallyJustified:  return "juce::Justification::horizontallyJustified";
             default:                                    break;
         }
 

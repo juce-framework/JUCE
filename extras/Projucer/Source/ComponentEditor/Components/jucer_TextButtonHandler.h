@@ -24,7 +24,7 @@ class TextButtonHandler  : public ButtonHandler
 {
 public:
     TextButtonHandler()
-        : ButtonHandler ("Text Button", "TextButton", typeid (TextButton), 150, 24)
+        : ButtonHandler ("Text Button", "juce::TextButton", typeid (TextButton), 150, 24)
     {
         registerColour (TextButton::buttonColourId, "background (normal)", "bgColOff");
         registerColour (TextButton::buttonOnColourId, "background (on)", "bgColOn");
