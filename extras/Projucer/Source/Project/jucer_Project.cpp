@@ -631,9 +631,8 @@ Result Project::loadDocument (const File& file)
 
     compileEngineSettings.reset (new CompileEngineSettings (projectRoot));
 
-    exporterPathsModulesList.reset (new AvailableModulesList());
     rescanExporterPathModules (! ProjucerApplication::getApp().isRunningCommandLine);
-    exporterPathsModulesList->addListener (this);
+    exporterPathsModulesList.addListener (this);
 
     setCppVersionFromOldExporterSettings();
     updateDeprecatedProjectSettings();
@@ -2313,25 +2312,19 @@ static Array<File> getExporterModulePathsToScan (Project& project)
     return files;
 }
 
-AvailableModulesList& Project::getExporterPathsModulesList()
-{
-    jassert (exporterPathsModulesList != nullptr);
-    return *exporterPathsModulesList;
-}
-
 void Project::rescanExporterPathModules (bool async)
 {
     if (async)
-        exporterPathsModulesList->scanPathsAsync (getExporterModulePathsToScan (*this));
+        exporterPathsModulesList.scanPathsAsync (getExporterModulePathsToScan (*this));
     else
-        exporterPathsModulesList->scanPaths (getExporterModulePathsToScan (*this));
+        exporterPathsModulesList.scanPaths (getExporterModulePathsToScan (*this));
 }
 
 AvailableModulesList::ModuleIDAndFolder Project::getModuleWithID (const String& id)
 {
     if (! getEnabledModules().shouldUseGlobalPath (id))
     {
-        const auto& mod = exporterPathsModulesList->getModuleWithID (id);
+        const auto& mod = exporterPathsModulesList.getModuleWithID (id);
 
         if (mod.second != File())
             return mod;
@@ -2344,7 +2337,7 @@ AvailableModulesList::ModuleIDAndFolder Project::getModuleWithID (const String& 
         if (m.first == id)
             return m;
 
-    return exporterPathsModulesList->getModuleWithID (id);
+    return exporterPathsModulesList.getModuleWithID (id);
 }
 
 //==============================================================================

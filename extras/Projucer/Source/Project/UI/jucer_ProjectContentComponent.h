@@ -94,7 +94,7 @@ public:
     void updateMissingFileStatuses();
     void createProjectTabs();
     void deleteProjectTabs();
-    void rebuildProjectTabs();
+    void rebuildProjectUI();
     void refreshTabsIfBuildStatusChanged();
     void toggleWarnings();
     void showNextError();

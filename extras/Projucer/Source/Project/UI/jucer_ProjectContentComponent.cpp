@@ -175,10 +175,7 @@ void ProjectContentComponent::setProject (Project* newProject)
         deleteProjectTabs();
         project = newProject;
 
-        if (project != nullptr)
-            rebuildProjectTabs();
-
-        projectMessagesComponent.setProject (newProject);
+        rebuildProjectUI();
     }
 }
 
@@ -238,7 +235,7 @@ void ProjectContentComponent::deleteProjectTabs()
     sidebarTabs.clearTabs();
 }
 
-void ProjectContentComponent::rebuildProjectTabs()
+void ProjectContentComponent::rebuildProjectUI()
 {
     deleteProjectTabs();
 
@@ -280,12 +277,17 @@ void ProjectContentComponent::rebuildProjectTabs()
 
         headerComponent.setVisible (true);
         headerComponent.setCurrentProject (project);
+
+        projectMessagesComponent.setVisible (true);
     }
     else
     {
         sidebarTabs.setVisible (false);
         headerComponent.setVisible (false);
+        projectMessagesComponent.setVisible (false);
     }
+
+    projectMessagesComponent.setProject (project);
 
     resized();
 }
@@ -1203,7 +1205,7 @@ void ProjectContentComponent::refreshTabsIfBuildStatusChanged()
         && isLiveBuildEnabled
         && (sidebarTabs.getNumTabs() < 2 || isBuildEnabled() != isBuildTabEnabled()))
     {
-        rebuildProjectTabs();
+        rebuildProjectUI();
     }
 }
 
@@ -1315,7 +1317,7 @@ void ProjectContentComponent::liveBuildEnablementChanged (bool isEnabled)
     if (! isLiveBuildEnabled)
         killChildProcess();
 
-    rebuildProjectTabs();
+    rebuildProjectUI();
     headerComponent.liveBuildEnablementChanged (isLiveBuildEnabled);
 }
 

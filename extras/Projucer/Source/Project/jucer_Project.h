@@ -450,7 +450,7 @@ public:
     //==============================================================================
     EnabledModulesList& getEnabledModules();
 
-    AvailableModulesList& getExporterPathsModulesList();
+    AvailableModulesList& getExporterPathsModulesList()  { return exporterPathsModulesList; }
     void rescanExporterPathModules (bool async = false);
 
     std::pair<String, File> getModuleWithID (const String&);
@@ -536,7 +536,8 @@ private:
     //==============================================================================
     std::unique_ptr<CompileEngineSettings> compileEngineSettings;
     std::unique_ptr<EnabledModulesList> enabledModulesList;
-    std::unique_ptr<AvailableModulesList> exporterPathsModulesList;
+
+    AvailableModulesList exporterPathsModulesList;
 
     //==============================================================================
     void updateDeprecatedProjectSettings();

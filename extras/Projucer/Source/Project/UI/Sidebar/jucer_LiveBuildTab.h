@@ -217,7 +217,7 @@ private:
             }
 
             if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
-                pcc->rebuildProjectTabs();
+                pcc->rebuildProjectUI();
         }
     }
 
