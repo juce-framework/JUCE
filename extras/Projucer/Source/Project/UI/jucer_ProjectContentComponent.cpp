@@ -103,9 +103,10 @@ ProjectContentComponent::~ProjectContentComponent()
 
     ProjucerApplication::getApp().openDocumentManager.removeListener (this);
 
+    setProject (nullptr);
+
     logo.reset();
     header.reset();
-    setProject (nullptr);
     contentView.reset();
     fileNameLabel.reset();
     removeChildComponent (&bubbleMessage);
@@ -187,9 +188,7 @@ void ProjectContentComponent::setProject (Project* newProject)
 
         deleteProjectTabs();
         project = newProject;
-
-        if (project != nullptr)
-            rebuildProjectTabs();
+        rebuildProjectTabs();
     }
 }
 
