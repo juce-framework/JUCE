@@ -125,7 +125,9 @@ private:
         setBounds (bounds);
 
         setAlwaysOnTop (true);
-        addToDesktop (0);
+      
+        auto rootView = [UIApplication sharedApplication].keyWindow.rootViewController.view;
+        addToDesktop (0, rootView);
 
         enterModalState (true,
                          ModalCallbackFunction::create ([this] (int)
@@ -162,7 +164,7 @@ private:
                 popoverController.delegate = popoverDelegate.get();
             }
 
-            if (auto* parentController = peer->controller)
+            if (auto* parentController = peer->window.rootViewController)
                 [parentController showViewController: controller.get() sender: parentController];
         }
     }
