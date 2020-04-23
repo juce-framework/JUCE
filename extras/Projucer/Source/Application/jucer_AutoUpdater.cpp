@@ -36,7 +36,7 @@ LatestVersionCheckerAndUpdater::LatestVersionCheckerAndUpdater()
 
 LatestVersionCheckerAndUpdater::~LatestVersionCheckerAndUpdater()
 {
-    stopThread (1000);
+    stopThread (6000);
     clearSingletonInstance();
 }
 
