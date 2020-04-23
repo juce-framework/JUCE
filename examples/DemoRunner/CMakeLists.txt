@@ -1,7 +1,7 @@
 # ==============================================================================
 #
 #  This file is part of the JUCE 6 technical preview.
-#  Copyright (c) 2020 - ROLI Ltd.
+#  Copyright (c) 2020 - Raw Material Software Limited
 #
 #  You may use this code under the terms of the GPL v3
 #  (see www.gnu.org/licenses).
