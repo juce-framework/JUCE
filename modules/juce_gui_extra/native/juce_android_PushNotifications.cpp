@@ -1558,7 +1558,7 @@ struct JuceFirebaseInstanceIdService
     #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
      CALLBACK (tokenRefreshed, "firebaseInstanceIdTokenRefreshed", "(Ljava/lang/String;)V")
 
-     DECLARE_JNI_CLASS (InstanceIdService, "com/roli/juce/JuceFirebaseInstanceIdService")
+     DECLARE_JNI_CLASS (InstanceIdService, "com/rmsl/juce/JuceFirebaseInstanceIdService")
     #undef JNI_CLASS_MEMBERS
 
     static void JNICALL tokenRefreshed (JNIEnv*, jobject /*instanceIdService*/, void* token)
@@ -1581,7 +1581,7 @@ struct JuceFirebaseMessagingService
      CALLBACK (remoteMessageSent,           "firebaseRemoteMessageSent",      "(Ljava/lang/String;)V") \
      CALLBACK (remoteMessageSendError,      "firebaseRemoteMessageSendError", "(Ljava/lang/String;Ljava/lang/String;)V")
 
-     DECLARE_JNI_CLASS (MessagingService, "com/roli/juce/JuceFirebaseMessagingService")
+     DECLARE_JNI_CLASS (MessagingService, "com/rmsl/juce/JuceFirebaseMessagingService")
     #undef JNI_CLASS_MEMBERS
 
     static void JNICALL remoteNotificationReceived (JNIEnv*, jobject /*messagingService*/, void* remoteMessage)

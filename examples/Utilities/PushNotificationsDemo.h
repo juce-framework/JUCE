@@ -96,7 +96,7 @@ The following steps are only necessary if you have a custom activity defined:
 
 6. Ensure that you override onNewIntent() function in the same way as it is done in JuceActivity.java:
 
-package com.roli.juce;
+package com.rmsl.juce;
 
 import android.app.Activity;
 import android.content.Intent;

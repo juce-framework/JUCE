@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="gWI5Ir" name="NetworkGraphicsDemo" projectType="guiapp" bundleIdentifier="com.juce.NetworkGraphicsDemo"
               jucerVersion="5.4.7" displaySplashScreen="0" reportAppUsage="0"
-              companyName="ROLI Ltd." companyCopyright="ROLI Ltd.">
+              companyName="Raw Material Software Limited" companyCopyright="Raw Material Software Limited">
   <MAINGROUP id="OT9rJ2" name="NetworkGraphicsDemo">
     <GROUP id="{48D54E6E-37F4-B20A-E038-C63E4EDFD4D9}" name="Source">
       <FILE id="BfclEZ" name="Demos.h" compile="0" resource="0" file="Source/Demos.h"/>

@@ -50,7 +50,7 @@
 namespace ProjectInfo
 {
     const char* const  projectName    = "AudioPluginHost";
-    const char* const  companyName    = "ROLI Ltd.";
+    const char* const  companyName    = "Raw Material Software Limited";
     const char* const  versionString  = "1.0.0";
     const int          versionNumber  = 0x10000;
 }

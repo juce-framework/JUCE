@@ -125,7 +125,7 @@ public:
 private:
     Label titleLabel { "title", "PROJUCER" },
           versionLabel { "version" },
-          copyrightLabel { "copyright", String (CharPointer_UTF8 ("\xc2\xa9")) + String (" 2017 ROLI Ltd.") };
+          copyrightLabel { "copyright", String (CharPointer_UTF8 ("\xc2\xa9")) + String (" 2020 Raw Material Software Limited") };
 
     HyperlinkButton aboutButton { "About Us", URL ("https://juce.com") };
     TextButton licenseButton { "Purchase License" };
