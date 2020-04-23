@@ -254,18 +254,25 @@ void MainWindow::moveProject (File newProjectFileToOpen, OpenInIDE openInIDE)
 
 void MainWindow::setProject (std::unique_ptr<Project> newProject)
 {
-    currentProject = std::move (newProject);
+    if (newProject == nullptr)
+    {
+        if (auto* content = getProjectContentComponent())
+            content->setProject (nullptr);
+
+        currentProject.reset();
+    }
+    else
+    {
+        currentProject = std::move (newProject);
+
+        createProjectContentCompIfNeeded();
+        getProjectContentComponent()->setProject (currentProject.get());
+    }
 
     projectNameValue.referTo (currentProject != nullptr ? currentProject->getProjectValue (Ids::name) : Value());
 
     if (auto* peer = getPeer())
         peer->setRepresentedFile (currentProject != nullptr ? currentProject->getFile() : File());
-
-    if (currentProject != nullptr)
-        createProjectContentCompIfNeeded();
-
-    if (auto* content = getProjectContentComponent())
-        content->setProject (currentProject.get());
 
     ProjucerApplication::getCommandManager().commandStatusChanged();
 }
