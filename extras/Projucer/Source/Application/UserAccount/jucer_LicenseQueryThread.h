@@ -36,7 +36,7 @@ public:
     ~LicenseQueryThread() override
     {
         signalThreadShouldExit();
-        waitForThreadToExit (-1);
+        waitForThreadToExit (6000);
     }
 
     void run() override
@@ -117,7 +117,7 @@ private:
             {
                 URL url (avatarURL);
 
-                if (auto stream = url.createInputStream (false))
+                if (auto stream = url.createInputStream (false, nullptr, nullptr, {}, 5000))
                 {
                     MemoryBlock mb;
                     stream->readIntoMemoryBlock (mb);
@@ -228,7 +228,7 @@ private:
             return "Cancelled.";
 
         int statusCode = 0;
-        auto urlStream = url.createInputStream (isPOST, nullptr, nullptr, extraHeaders, 0, nullptr, &statusCode);
+        auto urlStream = url.createInputStream (isPOST, nullptr, nullptr, extraHeaders, 5000, nullptr, &statusCode);
 
         if (urlStream == nullptr)
             return "Failed to connect to the web server.";
