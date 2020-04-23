@@ -1923,7 +1923,7 @@ function(juce_add_pip header)
 
     if("JUCE_IN_APP_PURCHASES=1" IN_LIST pip_moduleflags)
         list(APPEND extra_target_args
-            BUNDLE_ID "com.roli.juceInAppPurchaseSample"
+            BUNDLE_ID "com.rmsl.juceInAppPurchaseSample"
             NEEDS_STORE_KIT TRUE)
     endif()
 

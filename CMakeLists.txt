@@ -26,7 +26,7 @@ set_directory_properties(PROPERTIES
     JUCE_COMPANY_NAME       "JUCE"
     JUCE_COMPANY_WEBSITE    "juce.com"
     JUCE_COMPANY_EMAIL      "info@juce.com"
-    JUCE_COMPANY_COPYRIGHT  "Copyright (c) 2020 - ROLI Ltd.")
+    JUCE_COMPANY_COPYRIGHT  "Copyright (c) 2020 - Raw Material Software Limited")
 
 option(JUCE_COPY_PLUGIN_AFTER_BUILD
     "Whether or not plugins should be installed to the system after building" OFF)

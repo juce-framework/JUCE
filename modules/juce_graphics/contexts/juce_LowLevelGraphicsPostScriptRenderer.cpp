@@ -48,7 +48,7 @@ LowLevelGraphicsPostScriptRenderer::LowLevelGraphicsPostScriptRenderer (OutputSt
     out << "%!PS-Adobe-3.0 EPSF-3.0"
            "\n%%BoundingBox: 0 0 600 824"
            "\n%%Pages: 0"
-           "\n%%Creator: ROLI Ltd. JUCE"
+           "\n%%Creator: Raw Material Software Limited - JUCE"
            "\n%%Title: " << documentTitle <<
            "\n%%CreationDate: none"
            "\n%%LanguageLevel: 2"

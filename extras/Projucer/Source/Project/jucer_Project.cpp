@@ -724,7 +724,9 @@ Result Project::saveResourcesOnly()
 bool Project::hasIncompatibleLicenseTypeAndSplashScreenSetting() const
 {
     auto companyName = companyNameValue.get().toString();
-    auto isJUCEProject = (companyName == "ROLI Ltd." || companyName == "JUCE");
+    auto isJUCEProject = (companyName == "Raw Material Software Limited"
+                       || companyName == "JUCE"
+                       || companyName == "ROLI Ltd.");
 
     return ! ProjucerApplication::getApp().isRunningCommandLine && ! isJUCEProject && ! shouldDisplaySplashScreen()
           && ! ProjucerApplication::getApp().getLicenseController().getCurrentState().isPaidOrGPL();

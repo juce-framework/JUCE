@@ -20,9 +20,9 @@ namespace juce
 {
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
- STATICMETHOD (getAndroidBluetoothManager, "getAndroidBluetoothManager", "(Landroid/content/Context;)Lcom/roli/juce/JuceMidiSupport$BluetoothManager;")
+ STATICMETHOD (getAndroidBluetoothManager, "getAndroidBluetoothManager", "(Landroid/content/Context;)Lcom/rmsl/juce/JuceMidiSupport$BluetoothManager;")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidJuceMidiSupport, "com/roli/juce/JuceMidiSupport", 23)
+DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidJuceMidiSupport, "com/rmsl/juce/JuceMidiSupport", 23)
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -33,7 +33,7 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidJuceMidiSupport, "com/roli/juce/JuceMidiS
  METHOD (getBluetoothDeviceStatus, "getBluetoothDeviceStatus", "(Ljava/lang/String;)I") \
  METHOD (startStopScan, "startStopScan", "(Z)V")
 
-DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidBluetoothManager, "com/roli/juce/JuceMidiSupport$BluetoothManager", 23)
+DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidBluetoothManager, "com/rmsl/juce/JuceMidiSupport$BluetoothManager", 23)
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================

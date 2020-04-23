@@ -352,7 +352,7 @@ public:
         following java method:
 
         @code
-        com.roli.juce.Java.initialiseJUCE (myContext);
+        com.rmsl.juce.Java.initialiseJUCE (myContext);
         @endcode
 
         Note that the above java method is only available in Android Studio projects
@@ -361,7 +361,7 @@ public:
         your project:
 
         @code
-        package com.roli.juce;
+        package com.rmsl.juce;
 
         public class Java
         {

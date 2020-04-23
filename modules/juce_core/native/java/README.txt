@@ -9,8 +9,8 @@ required for the Java source code you wish to compile.
 2. If you are creating byte-code for new .java files, move the new files into
 the native/javacore/app folder of the module, or create one if it doesn't
 exist. Remember that .java files need to be in nested sub-folders which
-resemble their package, i.e. a Java class com.roli.juce.HelloWorld.java should
-be in the module's native/javacore/app/com/roli/juce folder.  If you wish to
+resemble their package, i.e. a Java class com.rmsl.juce.HelloWorld.java should
+be in the module's native/javacore/app/com/rmsl/juce folder.  If you wish to
 modify existing .java files in the JUCE modules then just rename native/java to
 native/javacore.
 

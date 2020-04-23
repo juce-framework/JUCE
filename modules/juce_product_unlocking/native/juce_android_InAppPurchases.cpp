@@ -225,7 +225,7 @@ private:
       CALLBACK (purchaseCompletedCallback,  "purchaseCompletedCallback",  "(JLcom/android/billingclient/api/Purchase;I)V")                              \
       CALLBACK (purchaseConsumedCallback,   "purchaseConsumedCallback",   "(JLjava/lang/String;I)V")
 
-    DECLARE_JNI_CLASS (JuceBillingClient, "com/roli/juce/JuceBillingClient")
+    DECLARE_JNI_CLASS (JuceBillingClient, "com/rmsl/juce/JuceBillingClient")
     #undef JNI_CLASS_MEMBERS
 
     static void JNICALL skuDetailsQueryCallback (JNIEnv*, jobject, jlong host, jobject skuDetailsList)

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="NTe0XB0ij" name="AudioPluginHost" projectType="guiapp" version="1.0.0"
-              juceFolder="../../../juce" bundleIdentifier="com.roli.juce.pluginhost"
-              jucerVersion="6.0.0" companyName="ROLI Ltd." displaySplashScreen="0"
-              reportAppUsage="0" companyCopyright="ROLI Ltd." useAppConfig="0"
-              addUsingNamespaceToJuceHeader="1">
+              juceFolder="../../../juce" bundleIdentifier="com.juce.pluginhost"
+              jucerVersion="6.0.0" companyName="Raw Material Software Limited"
+              displaySplashScreen="0" reportAppUsage="0" companyCopyright="Raw Material Software Limited"
+              useAppConfig="0" addUsingNamespaceToJuceHeader="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" rtasFolder="~/SDKs/PT_80_SDK" objCExtraSuffix="M73TRi"
                smallIcon="c97aUr" bigIcon="c97aUr" microphonePermissionNeeded="1"
@@ -127,8 +127,7 @@
         <MODULEPATH id="juce_dsp" path="../../modules"/>
       </MODULEPATHS>
     </VS2019>
-    <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="UIInterfaceOrientationPortrait,UIInterfaceOrientationLandscapeLeft,UIInterfaceOrientationLandscapeRight"
-                  iPadScreenOrientation="UIInterfaceOrientationPortrait,UIInterfaceOrientationLandscapeLeft,UIInterfaceOrientationLandscapeRight"
+    <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="" iPadScreenOrientation=""
                   iosDeviceFamily="1,2" microphonePermissionNeeded="1" iosBackgroundAudio="1"
                   iosBackgroundBle="1" smallIcon="c97aUr" bigIcon="c97aUr">
       <CONFIGURATIONS>
@@ -226,7 +225,7 @@
     <MODULE id="juce_core" showAllCode="1"/>
     <MODULE id="juce_cryptography" showAllCode="1"/>
     <MODULE id="juce_data_structures" showAllCode="1"/>
-    <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_dsp" showAllCode="1"/>
     <MODULE id="juce_events" showAllCode="1"/>
     <MODULE id="juce_graphics" showAllCode="1"/>
     <MODULE id="juce_gui_basics" showAllCode="1"/>

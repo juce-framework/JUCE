@@ -56,7 +56,7 @@
 /*
     To finish the setup of this demo, do the following in the Projucer project:
 
-    1. In the project settings, set the "Bundle Identifier" to com.roli.juceInAppPurchaseSample
+    1. In the project settings, set the "Bundle Identifier" to com.rmsl.juceInAppPurchaseSample
     2. In the Android exporter settings, change the following settings:
          - "In-App Billing" - Enabled
          - "Key Signing: key.store" - path to InAppPurchase.keystore file in examples/Assets/Signing
