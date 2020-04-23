@@ -105,7 +105,8 @@ Project::Project (const File& f)
     updateJUCEPathWarning();
     getGlobalProperties().addChangeListener (this);
 
-    LatestVersionCheckerAndUpdater::getInstance()->checkForNewVersion (true);
+    if (! app.isRunningCommandLine)
+        LatestVersionCheckerAndUpdater::getInstance()->checkForNewVersion (true);
 }
 
 Project::~Project()
