@@ -1534,6 +1534,14 @@ function(_juce_set_fallback_properties target)
 
     set_target_properties(${target} PROPERTIES JUCE_SHOULD_ADD_STORYBOARD ${needs_storyboard})
 
+    _juce_set_property_if_not_set(${target} IPHONE_SCREEN_ORIENTATIONS
+        UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft
+        UIInterfaceOrientationLandscapeRight)
+
+    _juce_set_property_if_not_set(${target} IPAD_SCREEN_ORIENTATIONS
+        UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft
+        UIInterfaceOrientationLandscapeRight)
+
     _juce_set_property_if_not_set(${target}
         LAUNCH_STORYBOARD_FILE "${JUCE_CMAKE_UTILS_DIR}/LaunchScreen.storyboard")
 

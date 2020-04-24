@@ -23,9 +23,7 @@ juce_add_gui_app(DemoRunner
     CAMERA_PERMISSION_ENABLED       TRUE
     BLUETOOTH_PERMISSION_ENABLED    TRUE
     FILE_SHARING_ENABLED            TRUE
-    DOCUMENT_BROWSER_ENABLED        TRUE
-    IPHONE_SCREEN_ORIENTATIONS      portrait landscape
-    IPAD_SCREEN_ORIENTATIONS        portrait landscape)
+    DOCUMENT_BROWSER_ENABLED        TRUE)
 
 juce_generate_juce_header(DemoRunner)
 
