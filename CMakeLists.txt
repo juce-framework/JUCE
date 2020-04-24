@@ -22,6 +22,8 @@ set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 
 include(extras/Build/CMake/JUCEUtils.cmake)
 
+juce_disable_default_flags()
+
 set_directory_properties(PROPERTIES
     JUCE_COMPANY_NAME       "JUCE"
     JUCE_COMPANY_WEBSITE    "juce.com"

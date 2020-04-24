@@ -29,7 +29,11 @@ if(JUCE_BUILD_HELPER_TOOLS)
         JUCE_DISABLE_JUCE_VERSION_PRINTING=1
         JUCE_USE_CURL=0)
 
-    target_link_libraries(juceaide PRIVATE juce::juce_build_tools)
+    target_link_libraries(juceaide PRIVATE
+        juce::juce_build_tools
+        juce::juce_recommended_config_flags
+        juce::juce_recommended_lto_flags
+        juce::juce_recommended_warning_flags)
 
     export(TARGETS juceaide
            NAMESPACE juce_tools::

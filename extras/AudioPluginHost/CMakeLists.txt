@@ -51,8 +51,9 @@ target_link_libraries(AudioPluginHost PRIVATE
     juce::juce_cryptography
     juce::juce_dsp
     juce::juce_opengl
-    juce::juce_video)
+    juce::juce_video
+    juce::juce_recommended_config_flags
+    juce::juce_recommended_lto_flags
+    juce::juce_recommended_warning_flags)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-    juce_add_bundle_resources_directory(AudioPluginHost ../../examples/Assets)
-endif()
+juce_add_bundle_resources_directory(AudioPluginHost ../../examples/Assets)

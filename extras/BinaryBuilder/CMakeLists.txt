@@ -22,4 +22,8 @@ target_sources(BinaryBuilder PRIVATE Source/Main.cpp)
 
 target_compile_definitions(BinaryBuilder PRIVATE JUCE_USE_CURL=0)
 
-target_link_libraries(BinaryBuilder PRIVATE juce::juce_core)
+target_link_libraries(BinaryBuilder PRIVATE
+    juce::juce_core
+    juce::juce_recommended_config_flags
+    juce::juce_recommended_lto_flags
+    juce::juce_recommended_warning_flags)

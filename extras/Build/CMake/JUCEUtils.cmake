@@ -1353,7 +1353,7 @@ function(_juce_get_iaa_type_code target out_var)
 endfunction()
 
 function(_juce_configure_plugin_targets target)
-    if(${CMAKE_VERSION} VERSION_LESS "3.15.0")
+    if(CMAKE_VERSION VERSION_LESS "3.15.0")
         message(FATAL_ERROR "Plugin targets require CMake 3.15 or higher")
     endif()
 
@@ -1466,7 +1466,7 @@ function(_juce_configure_plugin_targets target)
     endif()
 
     if(TARGET ${target}_AUv3)
-        target_link_options(${target}_AUv3 PUBLIC -fapplication-extension -e _NSExtensionMain)
+        target_link_libraries(${target}_AUv3 PUBLIC -fapplication-extension "-e _NSExtensionMain")
     endif()
 
     if((TARGET ${target}_AUv3) AND (TARGET ${target}_Standalone))
@@ -1480,7 +1480,7 @@ endfunction()
 
 # ==================================================================================================
 
-function(_juce_set_property_if_not_set target property)
+function(_juce_set_generic_property_if_not_set target property)
     list(LENGTH ARGN num_extra_args)
 
     if(num_extra_args EQUAL 0)
@@ -1488,11 +1488,15 @@ function(_juce_set_property_if_not_set target property)
     endif()
 
     set(existing_property)
-    get_target_property(existing_property ${target} JUCE_${property})
+    get_target_property(existing_property ${target} ${property})
 
     if(${existing_property} STREQUAL "existing_property-NOTFOUND")
-        set_target_properties(${target} PROPERTIES JUCE_${property} "${ARGN}")
+        set_target_properties(${target} PROPERTIES ${property} "${ARGN}")
     endif()
+endfunction()
+
+function(_juce_set_property_if_not_set target property)
+    _juce_set_generic_property_if_not_set(${target} JUCE_${property} ${ARGN})
 endfunction()
 
 function(_juce_make_valid_4cc out_var)
@@ -1958,6 +1962,10 @@ function(juce_add_pip header)
         message(FATAL_ERROR "PIP kind must be either AudioProcessor, Component, or Console")
     endif()
 
+    if(NOT ARGV1 STREQUAL "")
+        set("${ARGV1}" "${JUCE_PIP_NAME}" PARENT_SCOPE)
+    endif()
+
     # Generate Main.cpp
     _juce_get_metadata("${metadata_dict}" mainClass JUCE_PIP_MAIN_CLASS)
     get_target_property(juce_library_code ${JUCE_PIP_NAME} JUCE_GENERATED_SOURCES_DIRECTORY)
@@ -2082,3 +2090,83 @@ function(juce_set_vst2_sdk_path path)
         $<TARGET_PROPERTY:juce::juce_vst3_headers,INTERFACE_INCLUDE_DIRECTORIES>
         "${path}")
 endfunction()
+
+# ==================================================================================================
+
+function(juce_disable_default_flags)
+    set(langs C CXX)
+    set(modes DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
+
+    foreach(lang IN LISTS langs)
+        foreach(mode IN LISTS modes)
+            list(FILTER CMAKE_${lang}_FLAGS_${mode} INCLUDE REGEX "[/-]M[TD]d?")
+            set(CMAKE_${lang}_FLAGS_${mode} "${CMAKE_${lang}_FLAGS_${mode}}" PARENT_SCOPE)
+        endforeach()
+    endforeach()
+endfunction()
+
+# ==================================================================================================
+
+add_library(juce_recommended_warning_flags INTERFACE)
+add_library(juce::juce_recommended_warning_flags ALIAS juce_recommended_warning_flags)
+
+if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC"))
+    target_compile_options(juce_recommended_warning_flags INTERFACE "/W4")
+elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"))
+    target_compile_options(juce_recommended_warning_flags INTERFACE
+        -Wall -Wshadow-all -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized
+        -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion
+        -Wconditional-uninitialized -Woverloaded-virtual -Wreorder
+        -Wconstant-conversion -Wsign-conversion -Wunused-private-field
+        -Wbool-conversion -Wextra-semi -Wunreachable-code
+        -Wzero-as-null-pointer-constant -Wcast-align
+        -Winconsistent-missing-destructor-override -Wshift-sign-overflow
+        -Wnullable-to-nonnull-conversion -Wno-missing-field-initializers
+        -Wno-ignored-qualifiers -Wswitch-enum)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(juce_recommended_warning_flags INTERFACE
+        -Wall -Wextra -Wstrict-aliasing -Wuninitialized -Wunused-parameter
+        -Wsign-compare -Woverloaded-virtual -Wreorder -Wsign-conversion
+        -Wunreachable-code -Wzero-as-null-pointer-constant -Wcast-align
+        -Wno-implicit-fallthrough -Wno-maybe-uninitialized
+        -Wno-missing-field-initializers -Wno-ignored-qualifiers -Wswitch-enum
+        -Wswitch-default -Wredundant-decls)
+
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "7.0.0")
+        target_compile_options(juce_recommended_warning_flags INTERFACE "-Wno-strict-overflow")
+    endif()
+endif()
+
+install(TARGETS juce_recommended_warning_flags EXPORT JUCE)
+
+# ==================================================================================================
+
+add_library(juce_recommended_config_flags INTERFACE)
+add_library(juce::juce_recommended_config_flags ALIAS juce_recommended_config_flags)
+
+if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC"))
+    target_compile_options(juce_recommended_config_flags INTERFACE
+        $<$<CONFIG:Debug>:/Od /MP /EHsc>
+        $<$<CONFIG:Release>:/Ox /MP /EHsc>)
+elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+       OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+       OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
+    target_compile_options(juce_recommended_config_flags INTERFACE
+        $<$<CONFIG:Debug>:-g -O0>
+        $<$<CONFIG:Release>:-O3>)
+endif()
+
+# ==================================================================================================
+
+add_library(juce_recommended_lto_flags INTERFACE)
+add_library(juce::juce_recommended_lto_flags ALIAS juce_recommended_lto_flags)
+
+if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC"))
+    target_compile_options(juce_recommended_lto_flags INTERFACE $<$<CONFIG:Release>:/GL>)
+    target_link_libraries(juce_recommended_lto_flags INTERFACE $<$<CONFIG:Release>:-LTCG>)
+elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+       OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+       OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
+    target_compile_options(juce_recommended_lto_flags INTERFACE $<$<CONFIG:Release>:-flto>)
+    target_link_libraries(juce_recommended_lto_flags INTERFACE $<$<CONFIG:Release>:-flto>)
+endif()

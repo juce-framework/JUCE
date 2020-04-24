@@ -513,3 +513,40 @@ quick proof-of-concept demo apps with minimal set-up. For any use-case more comp
 proof-of-concept, you should prefer the `juce_add_gui_app`, `juce_add_plugin`, or
 `juce_add_console_app` functions, which provide more fine-grained control over the properties of
 your target.
+
+### `juce_disable_default_flags`
+
+```
+juce_disable_default_flags()
+```
+
+This function sets the `CMAKE_<LANG>_FLAGS_<MODE>` to empty in the current directory and below,
+allowing alternative optimisation/debug flags to be supplied without conflicting with the
+CMake-supplied defaults.
+
+### `juce::juce_recommended_warning_flags
+
+```
+target_link_libraries(myTarget PRIVATE juce::juce_recommended_warning_flags)
+```
+
+This is a target which can be linked to other targets using `target_link_libraries`, in order to
+enable the recommended JUCE warnings when building them.
+
+### `juce::juce_recommended_config_flags
+
+```
+target_link_libraries(myTarget PRIVATE juce::juce_recommended_config_flags)
+```
+
+This is a target which can be linked to other targets using `target_link_libraries`, in order to
+enable the recommended JUCE optimisation and debug flags.
+
+### `juce::juce_recommended_lto_flags
+
+```
+target_link_libraries(myTarget PRIVATE juce::juce_recommended_lto_flags)
+```
+
+This is a target which can be linked to other targets using `target_link_libraries`, in order to
+enable the recommended JUCE link time optimisation settings.
