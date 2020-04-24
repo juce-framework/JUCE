@@ -535,16 +535,19 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\synthesisers\juce_Synthesiser.cpp">
       <Filter>JUCE Modules\juce_audio_basics\synthesisers</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_CatmullRomInterpolator.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_IIRFilter.cpp">
       <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_IIRFilter.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_Interpolators.cpp">
       <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_LagrangeInterpolator.cpp">
       <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_SmoothedValue.cpp">
+      <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_WindowedSincInterpolator.cpp">
       <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\juce_audio_basics.cpp">
@@ -2637,16 +2640,16 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_ADSR.h">
       <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_CatmullRomInterpolator.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_Decibels.h">
       <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_Decibels.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_GenericInterpolator.h">
       <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_IIRFilter.h">
       <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_LagrangeInterpolator.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_Interpolators.h">
       <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_Reverb.h">

@@ -31,14 +31,21 @@ namespace StateVariableFilter
 
     /**
         An IIR filter that can perform low, band and high-pass filtering on an audio
-        signal, with 12 dB of attenuation / octave, using a TPT structure, designed
+        signal, with 12 dB of attenuation per octave, using a TPT structure, designed
         for fast modulation (see Vadim Zavalishin's documentation about TPT
         structures for more information). Its behaviour is based on the analog
         state variable filter circuit.
 
-        Note: The bandpass here is not the one in the RBJ CookBook, its gain can be
+        Note: The bandpass here is not the one in the RBJ CookBook as its gain can be
         higher than 0 dB. For the classic 0 dB bandpass, we need to multiply the
-        result with R2
+        result by R2.
+
+        Note 2: Using this class prevents some loud audio artefacts commonly encountered when
+        changing the cutoff frequency using other filter simulation structures and IIR
+        filter classes. However, this class may still require additional smoothing for
+        cutoff frequency changes.
+
+        see IIRFilter, SmoothedValue
 
         @tags{DSP}
     */
@@ -56,10 +63,19 @@ namespace StateVariableFilter
         using ParametersPtr = typename Parameters<NumericType>::Ptr;
 
         //==============================================================================
-        /** Creates a filter with default parameters. */
-        Filter()                               : parameters (new Parameters<NumericType>) { reset(); }
+        /** Creates a filter with default parameters.
 
-        Filter (ParametersPtr parametersToUse) : parameters (std::move (parametersToUse)) { reset(); }
+            The classes in the StateVariableFilter namespace are deprecated. you should
+            use the equivalent functionality in the StateVariableTPTFilter class.
+        */
+        JUCE_DEPRECATED_WITH_BODY (Filter(), : parameters (new Parameters<NumericType>) { reset(); })
+
+        /** Creates a filter using some parameters.
+
+            The classes in the StateVariableFilter namespace are deprecated. you should
+            use the equivalent functionality in the StateVariableTPTFilter class.
+        */
+        JUCE_DEPRECATED_WITH_BODY (Filter (ParametersPtr parametersToUse), : parameters (std::move (parametersToUse)) { reset(); })
 
         /** Creates a copy of another filter. */
         Filter (const Filter&) = default;
@@ -137,7 +153,10 @@ namespace StateVariableFilter
             for (size_t i = 0 ; i < n; ++i)
                 output[i] = processLoop<isBypassed, type> (input[i], state);
 
+           #if JUCE_SNAP_TO_ZERO
             snapToZero();
+           #endif
+
             *parameters = state;
         }
 
@@ -173,6 +192,13 @@ namespace StateVariableFilter
         JUCE_LEAK_DETECTOR (Filter)
     };
 
+    enum class StateVariableFilterType
+    {
+        lowPass,
+        bandPass,
+        highPass
+    };
+
     //==============================================================================
     /**
         Structure used for the state variable filter parameters.
@@ -183,12 +209,7 @@ namespace StateVariableFilter
     struct Parameters  : public ProcessorState
     {
         //==============================================================================
-        enum class Type
-        {
-            lowPass,
-            bandPass,
-            highPass
-        };
+        using Type = StateVariableFilterType;
 
         //==============================================================================
         /** The type of the IIR filter */

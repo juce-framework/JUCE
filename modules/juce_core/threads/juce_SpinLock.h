@@ -75,6 +75,9 @@ public:
     /** Provides the type of scoped unlocker to use with a SpinLock. */
     using ScopedUnlockType = GenericScopedUnlock<SpinLock>;
 
+    /** Provides the type of scoped try-lock to use for locking a SpinLock. */
+    using ScopedTryLockType = GenericScopedTryLock<SpinLock>;
+
 private:
     //==============================================================================
     mutable Atomic<int> lock;

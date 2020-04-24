@@ -52,3 +52,7 @@ target_link_libraries(AudioPluginHost PRIVATE
     juce::juce_dsp
     juce::juce_opengl
     juce::juce_video)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+    juce_add_bundle_resources_directory(AudioPluginHost ../../examples/Assets)
+endif()

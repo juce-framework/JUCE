@@ -223,16 +223,19 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\synthesisers\juce_Synthesiser.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_CatmullRomInterpolator.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_IIRFilter.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_IIRFilter.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_Interpolators.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_LagrangeInterpolator.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_SmoothedValue.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_WindowedSincInterpolator.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\juce_audio_basics.cpp">
@@ -2047,10 +2050,10 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_ToneGeneratorAudioSource.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\synthesisers\juce_Synthesiser.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_ADSR.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_CatmullRomInterpolator.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_Decibels.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_GenericInterpolator.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_IIRFilter.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_LagrangeInterpolator.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_Interpolators.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_Reverb.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_SmoothedValue.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\juce_audio_basics.h"/>

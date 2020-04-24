@@ -167,7 +167,7 @@ struct FFTFallback  : public FFT::Instance
     {
         auto* input = reinterpret_cast<Complex<float>*> (d);
 
-        for (auto i = size >> 1; i < size; ++i)
+        for (int i = size >> 1; i < size; ++i)
             input[i] = std::conj (input[size - i]);
 
         perform (input, scratch, true);
@@ -681,7 +681,7 @@ struct FFTWImpl  : public FFT::Instance
         auto size = (1 << order);
 
         if (! ignoreNegativeFreqs)
-            for (auto i = size >> 1; i < size; ++i)
+            for (int i = size >> 1; i < size; ++i)
                 out[i] = std::conj (out[size - i]);
     }
 
@@ -780,7 +780,7 @@ struct IntelFFT  : public FFT::Instance
         auto size = (1 << order);
 
         if (! ignoreNegativeFreqs)
-            for (auto i = size >> 1; i < size; ++i)
+            for (int i = size >> 1; i < size; ++i)
                 out[i] = std::conj (out[size - i]);
     }
 
@@ -971,7 +971,7 @@ void FFT::performFrequencyOnlyForwardTransform (float* inputOutputData) const no
     performRealOnlyForwardTransform (inputOutputData);
     auto* out = reinterpret_cast<Complex<float>*> (inputOutputData);
 
-    for (auto i = 0; i < size; ++i)
+    for (int i = 0; i < size; ++i)
         inputOutputData[i] = std::abs (out[i]);
 
     zeromem (&inputOutputData[size], static_cast<size_t> (size) * sizeof (float));

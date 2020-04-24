@@ -545,7 +545,7 @@ ReferenceCountedArray<IIR::Coefficients<FloatType>>
     {
         arrayFilters.add (*IIR::Coefficients<FloatType>::makeFirstOrderLowPass (sampleRate, frequency));
 
-        for (auto i = 0; i < order / 2; ++i)
+        for (int i = 0; i < order / 2; ++i)
         {
             auto Q = 1.0 / (2.0 * std::cos ((i + 1.0) * MathConstants<double>::pi / order));
             arrayFilters.add (*IIR::Coefficients<FloatType>::makeLowPass (sampleRate, frequency,
@@ -554,7 +554,7 @@ ReferenceCountedArray<IIR::Coefficients<FloatType>>
     }
     else
     {
-        for (auto i = 0; i < order / 2; ++i)
+        for (int i = 0; i < order / 2; ++i)
         {
             auto Q = 1.0 / (2.0 * std::cos ((2.0 * i + 1.0) * MathConstants<double>::pi / (order * 2.0)));
             arrayFilters.add (*IIR::Coefficients<FloatType>::makeLowPass (sampleRate, frequency,
@@ -580,7 +580,7 @@ ReferenceCountedArray<IIR::Coefficients<FloatType>>
     {
         arrayFilters.add (*IIR::Coefficients<FloatType>::makeFirstOrderHighPass (sampleRate, frequency));
 
-        for (auto i = 0; i < order / 2; ++i)
+        for (int i = 0; i < order / 2; ++i)
         {
             auto Q = 1.0 / (2.0 * std::cos ((i + 1.0) * MathConstants<double>::pi / order));
             arrayFilters.add (*IIR::Coefficients<FloatType>::makeHighPass (sampleRate, frequency,
@@ -589,7 +589,7 @@ ReferenceCountedArray<IIR::Coefficients<FloatType>>
     }
     else
     {
-        for (auto i = 0; i < order / 2; ++i)
+        for (int i = 0; i < order / 2; ++i)
         {
             auto Q = 1.0 / (2.0 * std::cos ((2.0 * i + 1.0) * MathConstants<double>::pi / (order * 2.0)));
             arrayFilters.add (*IIR::Coefficients<FloatType>::makeHighPass (sampleRate, frequency,

@@ -235,7 +235,7 @@ public:
     bool hasEditor() const override                                           { return true; }
     AudioProcessorEditor* createEditor() override                             { return new Editor (*this); }
 
-    const String getName() const override                                     { return "MIDILogger"; }
+    const String getName() const override                                     { return "MIDI Logger"; }
     bool acceptsMidi() const override                                         { return true; }
     bool producesMidi() const override                                        { return true; }
     double getTailLengthSeconds() const override                              { return 0.0; }

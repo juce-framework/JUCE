@@ -98,16 +98,17 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_basics/synthesisers/juce_Synthesiser.cpp"
     "../../../../../modules/juce_audio_basics/synthesisers/juce_Synthesiser.h"
     "../../../../../modules/juce_audio_basics/utilities/juce_ADSR.h"
-    "../../../../../modules/juce_audio_basics/utilities/juce_CatmullRomInterpolator.cpp"
-    "../../../../../modules/juce_audio_basics/utilities/juce_CatmullRomInterpolator.h"
     "../../../../../modules/juce_audio_basics/utilities/juce_Decibels.h"
+    "../../../../../modules/juce_audio_basics/utilities/juce_GenericInterpolator.h"
     "../../../../../modules/juce_audio_basics/utilities/juce_IIRFilter.cpp"
     "../../../../../modules/juce_audio_basics/utilities/juce_IIRFilter.h"
+    "../../../../../modules/juce_audio_basics/utilities/juce_Interpolators.cpp"
+    "../../../../../modules/juce_audio_basics/utilities/juce_Interpolators.h"
     "../../../../../modules/juce_audio_basics/utilities/juce_LagrangeInterpolator.cpp"
-    "../../../../../modules/juce_audio_basics/utilities/juce_LagrangeInterpolator.h"
     "../../../../../modules/juce_audio_basics/utilities/juce_Reverb.h"
     "../../../../../modules/juce_audio_basics/utilities/juce_SmoothedValue.cpp"
     "../../../../../modules/juce_audio_basics/utilities/juce_SmoothedValue.h"
+    "../../../../../modules/juce_audio_basics/utilities/juce_WindowedSincInterpolator.cpp"
     "../../../../../modules/juce_audio_basics/juce_audio_basics.cpp"
     "../../../../../modules/juce_audio_basics/juce_audio_basics.mm"
     "../../../../../modules/juce_audio_basics/juce_audio_basics.h"
@@ -1506,16 +1507,17 @@ set_source_files_properties("../../../../../modules/juce_audio_basics/sources/ju
 set_source_files_properties("../../../../../modules/juce_audio_basics/synthesisers/juce_Synthesiser.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/synthesisers/juce_Synthesiser.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_ADSR.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_CatmullRomInterpolator.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_CatmullRomInterpolator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_Decibels.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_GenericInterpolator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_IIRFilter.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_IIRFilter.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_Interpolators.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_Interpolators.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_LagrangeInterpolator.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_LagrangeInterpolator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_Reverb.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_SmoothedValue.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_SmoothedValue.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_WindowedSincInterpolator.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/juce_audio_basics.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/juce_audio_basics.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/juce_audio_basics.h" PROPERTIES HEADER_FILE_ONLY TRUE)

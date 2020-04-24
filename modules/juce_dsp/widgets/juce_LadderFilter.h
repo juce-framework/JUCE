@@ -21,62 +21,67 @@ namespace juce
 namespace dsp
 {
 
+enum class LadderFilterMode
+{
+    LPF12,  // low-pass  12 dB/octave
+    HPF12,  // high-pass 12 dB/octave
+    BPF12,  // band-pass 12 dB/octave
+    LPF24,  // low-pass  24 dB/octave
+    HPF24,  // high-pass 24 dB/octave
+    BPF24   // band-pass 24 dB/octave
+};
+
 /**
     Multi-mode filter based on the Moog ladder filter.
 
     @tags{DSP}
 */
-template <typename Type>
+template <typename SampleType>
 class LadderFilter
 {
 public:
-    enum class Mode
-    {
-        LPF12,  // low-pass  12 dB/octave
-        HPF12,  // high-pass 12 dB/octave
-        LPF24,  // low-pass  24 dB/octave
-        HPF24   // high-pass 24 dB/octave
-    };
+    //==============================================================================
+    using Mode = LadderFilterMode;
 
     //==============================================================================
     /** Creates an uninitialised filter. Call prepare() before first use. */
     LadderFilter();
 
     /** Enables or disables the filter. If disabled it will simply pass through the input signal. */
-    void setEnabled (bool newValue) noexcept    { enabled = newValue; }
+    void setEnabled (bool isEnabled) noexcept    { enabled = isEnabled; }
 
     /** Sets filter mode. */
-    void setMode (Mode newValue) noexcept;
+    void setMode (Mode newMode) noexcept;
 
     /** Initialises the filter. */
-    void prepare (const juce::dsp::ProcessSpec& spec);
+    void prepare (const ProcessSpec& spec);
 
     /** Returns the current number of channels. */
-    size_t getNumChannels() const noexcept      { return state.size(); }
+    size_t getNumChannels() const noexcept       { return state.size(); }
 
     /** Resets the internal state variables of the filter. */
     void reset() noexcept;
 
     /** Sets the cutoff frequency of the filter.
         @param newValue cutoff frequency in Hz */
-    void setCutoffFrequencyHz (Type newValue) noexcept;
+    void setCutoffFrequencyHz (SampleType newCutoff) noexcept;
 
     /** Sets the resonance of the filter.
         @param newValue a value between 0 and 1; higher values increase the resonance and can result in self oscillation! */
-    void setResonance (Type newValue) noexcept;
+    void setResonance (SampleType newResonance) noexcept;
 
     /** Sets the amount of saturation in the filter.
         @param newValue saturation amount; it can be any number greater than or equal to one. Higher values result in more distortion.*/
-    void setDrive (Type newValue) noexcept;
+    void setDrive (SampleType newDrive) noexcept;
 
     //==============================================================================
     template <typename ProcessContext>
     void process (const ProcessContext& context) noexcept
     {
         const auto& inputBlock = context.getInputBlock();
-        auto& outputBlock = context.getOutputBlock();
+        auto& outputBlock      = context.getOutputBlock();
         const auto numChannels = outputBlock.getNumChannels();
-        const auto numSamples = outputBlock.getNumSamples();
+        const auto numSamples  = outputBlock.getNumSamples();
 
         jassert (inputBlock.getNumChannels() <= getNumChannels());
         jassert (inputBlock.getNumChannels() == numChannels);
@@ -99,35 +104,36 @@ public:
 
 protected:
     //==============================================================================
-    Type processSample (Type inputValue, size_t channelToUse) noexcept;
+    SampleType processSample (SampleType inputValue, size_t channelToUse) noexcept;
     void updateSmoothers() noexcept;
 
 private:
     //==============================================================================
-    Type drive, drive2, gain, gain2, comp;
+    void setSampleRate (SampleType newValue) noexcept;
+    void setNumChannels (size_t newValue)   { state.resize (newValue); }
+    void updateCutoffFreq() noexcept        { cutoffTransformSmoother.setTargetValue (std::exp (cutoffFreqHz * cutoffFreqScaler)); }
+    void updateResonance() noexcept         { scaledResonanceSmoother.setTargetValue (jmap (resonance, SampleType (0.1), SampleType (1.0))); }
+
+    //==============================================================================
+    SampleType drive, drive2, gain, gain2, comp;
 
     static constexpr size_t numStates = 5;
-    std::vector<std::array<Type, numStates>> state;
-    std::array<Type, numStates> A;
+    std::vector<std::array<SampleType, numStates>> state;
+    std::array<SampleType, numStates> A;
 
-    SmoothedValue<Type> cutoffTransformSmoother, scaledResonanceSmoother;
-    Type cutoffTransformValue, scaledResonanceValue;
+    SmoothedValue<SampleType> cutoffTransformSmoother, scaledResonanceSmoother;
+    SampleType cutoffTransformValue, scaledResonanceValue;
 
-    LookupTableTransform<Type> saturationLUT { [] (Type x) { return std::tanh (x); }, Type (-5), Type (5), 128 };
+    LookupTableTransform<SampleType> saturationLUT { [] (SampleType x) { return std::tanh (x); },
+                                                     SampleType (-5), SampleType (5), 128 };
 
-    Type cutoffFreqHz { Type (200) };
-    Type resonance;
+    SampleType cutoffFreqHz { SampleType (200) };
+    SampleType resonance;
 
-    Type cutoffFreqScaler;
+    SampleType cutoffFreqScaler;
 
     Mode mode;
     bool enabled = true;
-
-    //==============================================================================
-    void setSampleRate (Type newValue) noexcept;
-    void setNumChannels (size_t newValue)   { state.resize (newValue); }
-    void updateCutoffFreq() noexcept        { cutoffTransformSmoother.setTargetValue (std::exp (cutoffFreqHz * cutoffFreqScaler)); }
-    void updateResonance() noexcept         { scaledResonanceSmoother.setTargetValue (jmap (resonance, Type (0.1), Type (1.0))); }
 };
 
 } // namespace dsp

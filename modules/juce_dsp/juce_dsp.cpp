@@ -49,8 +49,14 @@
 
 #include "processors/juce_FIRFilter.cpp"
 #include "processors/juce_IIRFilter.cpp"
-#include "processors/juce_LadderFilter.cpp"
+#include "processors/juce_FirstOrderTPTFilter.cpp"
+#include "processors/juce_Panner.cpp"
 #include "processors/juce_Oversampling.cpp"
+#include "processors/juce_BallisticsFilter.cpp"
+#include "processors/juce_LinkwitzRileyFilter.cpp"
+#include "processors/juce_DelayLine.cpp"
+#include "processors/juce_DryWetMixer.cpp"
+#include "processors/juce_StateVariableTPTFilter.cpp"
 #include "maths/juce_SpecialFunctions.cpp"
 #include "maths/juce_Matrix.cpp"
 #include "maths/juce_LookupTable.cpp"
@@ -58,6 +64,12 @@
 #include "frequency/juce_Convolution.cpp"
 #include "frequency/juce_Windowing.cpp"
 #include "filter_design/juce_FilterDesign.cpp"
+#include "widgets/juce_LadderFilter.cpp"
+#include "widgets/juce_Compressor.cpp"
+#include "widgets/juce_NoiseGate.cpp"
+#include "widgets/juce_Limiter.cpp"
+#include "widgets/juce_Phaser.cpp"
+#include "widgets/juce_Chorus.cpp"
 
 #if JUCE_USE_SIMD
  #if defined(__i386__) || defined(__amd64__) || defined(_M_X64) || defined(_X86_) || defined(_M_IX86)

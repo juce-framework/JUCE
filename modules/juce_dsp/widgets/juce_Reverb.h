@@ -53,7 +53,7 @@ public:
 
     //==============================================================================
     /** Initialises the reverb. */
-    void prepare (const juce::dsp::ProcessSpec& spec)
+    void prepare (const ProcessSpec& spec)
     {
         reverb.setSampleRate (spec.sampleRate);
     }

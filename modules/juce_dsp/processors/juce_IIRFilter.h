@@ -86,7 +86,7 @@ namespace IIR
             Note that this clears the processing state, but the type of filter and
             its coefficients aren't changed.
         */
-        void reset()            { reset (SampleType {0}); }
+        void reset()    { reset (SampleType {0}); }
 
         /** Resets the filter's processing pipeline to a specific value.
             @see reset
@@ -105,6 +105,10 @@ namespace IIR
                 processInternal<ProcessContext, true> (context);
             else
                 processInternal<ProcessContext, false> (context);
+
+           #if JUCE_SNAP_TO_ZERO
+            snapToZero();
+           #endif
         }
 
         /** Processes a single sample, without any locking.

@@ -685,7 +685,7 @@ struct Convolution::Pimpl  : private Thread
     /** This function copies a buffer to a temporary location, so that any external
         audio source can be processed then in the dedicated thread.
     */
-    void copyBufferToTemporaryLocation (dsp::AudioBlock<float> block)
+    void copyBufferToTemporaryLocation (AudioBlock<float> block)
     {
         const SpinLock::ScopedLockType sl (processLock);
 
@@ -725,7 +725,7 @@ struct Convolution::Pimpl  : private Thread
         }
         else
         {
-            auto interpolated = dsp::AudioBlock<float> (interpolationBuffer).getSubBlock (0, numSamples);
+            auto interpolated = AudioBlock<float> (interpolationBuffer).getSubBlock (0, numSamples);
 
             for (size_t channel = 0; channel < numChannels; ++channel)
             {

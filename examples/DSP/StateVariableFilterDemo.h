@@ -59,8 +59,6 @@ struct StateVariableFilterDemoDSP
     void prepare (const ProcessSpec& spec)
     {
         sampleRate = spec.sampleRate;
-
-        filter.state = new StateVariableFilter::Parameters<float>;
         filter.prepare (spec);
     }
 
@@ -78,18 +76,21 @@ struct StateVariableFilterDemoDSP
     {
         if (sampleRate != 0.0)
         {
-            auto cutoff    = static_cast<float> (cutoffParam.getCurrentValue());
-            auto resonance = static_cast<float> (qParam.getCurrentValue());
-            auto type      = static_cast<StateVariableFilter::Parameters<float>::Type> (typeParam.getCurrentSelectedID() - 1);
+            filter.setCutoffFrequency (static_cast<float> (cutoffParam.getCurrentValue()));
+            filter.setResonance       (static_cast<float> (qParam.getCurrentValue()));
 
-            filter.state->type = type;
-            filter.state->setCutOffFrequency (sampleRate, cutoff, resonance);
+            switch (typeParam.getCurrentSelectedID() - 1)
+            {
+                case 0:   filter.setType (StateVariableTPTFilterType::lowpass);  break;
+                case 1:   filter.setType (StateVariableTPTFilterType::bandpass); break;
+                case 2:   filter.setType (StateVariableTPTFilterType::highpass); break;
+                default:  jassertfalse;                                                   break;
+            };
         }
     }
 
     //==============================================================================
-    ProcessorDuplicator<StateVariableFilter::Filter<float>,
-                        StateVariableFilter::Parameters<float>> filter;
+    StateVariableTPTFilter<float> filter;
 
     ChoiceParameter typeParam {{ "Low-pass", "Band-pass", "High-pass" }, 1, "Type" };
     SliderParameter cutoffParam {{ 20.0, 20000.0 }, 0.5, 440.0f, "Cutoff", "Hz" };
