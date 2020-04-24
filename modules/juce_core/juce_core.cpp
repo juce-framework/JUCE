@@ -136,6 +136,7 @@
 #include "maths/juce_Expression.cpp"
 #include "maths/juce_Random.cpp"
 #include "memory/juce_MemoryBlock.cpp"
+#include "memory/juce_AllocationHooks.cpp"
 #include "misc/juce_RuntimePermissions.cpp"
 #include "misc/juce_Result.cpp"
 #include "misc/juce_Uuid.cpp"

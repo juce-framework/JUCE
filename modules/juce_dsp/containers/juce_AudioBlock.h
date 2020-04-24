@@ -149,6 +149,19 @@ public:
         throughout the life-time of the AudioBlock without being modified.
     */
     template <typename OtherSampleType>
+    constexpr AudioBlock (const AudioBuffer<OtherSampleType>& buffer) noexcept
+        : channels (buffer.getArrayOfReadPointers()),
+          numChannels (static_cast<ChannelCountType> (buffer.getNumChannels())),
+          numSamples (static_cast<size_t> (buffer.getNumSamples()))
+    {
+    }
+
+    /** Creates an AudioBlock that points to the data in an AudioBuffer.
+        AudioBlock does not copy nor own the memory pointed to by dataToUse.
+        Therefore it is the user's responsibility to ensure that the buffer is retained
+        throughout the life-time of the AudioBlock without being modified.
+    */
+    template <typename OtherSampleType>
     AudioBlock (AudioBuffer<OtherSampleType>& buffer, size_t startSampleIndex) noexcept
         : channels (buffer.getArrayOfWritePointers()),
           numChannels (static_cast<ChannelCountType> (buffer.getNumChannels())),
