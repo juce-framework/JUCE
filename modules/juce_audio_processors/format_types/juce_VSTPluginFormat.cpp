@@ -2943,7 +2943,13 @@ public:
             setScaleFactorAndDispatchMessage (peer->getPlatformScaleFactor());
 
        #if JUCE_LINUX
-        MessageManager::callAsync ([this] { componentMovedOrResized (true, true); });
+        SafePointer<VSTPluginWindow> safeThis (this);
+
+        MessageManager::callAsync ([this, safeThis]
+        {
+            if (safeThis != nullptr)
+                componentMovedOrResized (true, true);
+        });
        #else
         componentMovedOrResized (true, true);
        #endif
