@@ -59,6 +59,4 @@ target_link_libraries(DemoRunner PRIVATE
     juce::juce_product_unlocking
     juce::juce_video)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-    juce_add_bundle_resources_directory(DemoRunner ../Assets)
-endif()
+juce_add_bundle_resources_directory(DemoRunner ../Assets)
