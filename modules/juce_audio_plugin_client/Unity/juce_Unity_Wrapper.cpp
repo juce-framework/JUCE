@@ -316,6 +316,8 @@ public:
 
         jassert (numConfigs > 0 && (configs[0][0] > 0 || configs[0][1] > 0));
 
+        ignoreUnused (numConfigs);
+
         pluginInstance->setPlayConfigDetails (configs[0][0], configs[0][1], state->sampleRate, samplesPerBlock);
        #else
         pluginInstance->setRateAndBufferSizeDetails (state->sampleRate, samplesPerBlock);
