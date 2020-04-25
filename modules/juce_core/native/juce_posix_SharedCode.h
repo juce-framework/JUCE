@@ -532,6 +532,36 @@ String SystemStats::getEnvironmentVariable (const String& name, const String& de
     return defaultValue;
 }
 
+bool SystemStats::setEnvironmentVariable(const String& name, const String& value)
+{
+    return ::setenv (name.toUTF8(), value.toUTF8(), 1) ? true : false;
+}
+
+bool SystemStats::removeEnvironmentVariable(const String& name)
+{
+    return ::unsetenv (name.toUTF8()) ? true : false;
+}
+
+StringPairArray SystemStats::getEnvironmentVariables()
+{
+    static CriticalSection environmentMutex;
+    
+    const CriticalSection::ScopedLockType sl (environmentMutex);
+    
+    StringPairArray environmentVariables;
+
+    for (char** env = environ; *env; ++env)
+    {
+        const String variable (*env);
+
+        environmentVariables.set (
+            variable.upToFirstOccurrenceOf ("=", false, false),
+            variable.fromFirstOccurrenceOf ("=", false, false));
+    }
+
+    return environmentVariables;
+}
+
 //==============================================================================
 void MemoryMappedFile::openInternal (const File& file, AccessMode mode, bool exclusive)
 {

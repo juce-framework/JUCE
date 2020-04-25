@@ -90,10 +90,20 @@ public:
     /** Returns true if the OS is 64-bit, or false for a 32-bit OS. */
     static bool isOperatingSystem64Bit();
 
+    //==============================================================================
     /** Returns an environment variable.
         If the named value isn't set, this will return the defaultValue string instead.
     */
     static String getEnvironmentVariable (const String& name, const String& defaultValue);
+
+    /** Sets an environment variable. */
+    static bool setEnvironmentVariable (const String& name, const String& value);
+
+    /** Removes an environment variable. */
+    static bool removeEnvironmentVariable (const String& name);
+
+    /** Returns an array of all environment variables. */
+    static StringPairArray getEnvironmentVariables();
 
     //==============================================================================
     /** Returns the current user's name, if available.

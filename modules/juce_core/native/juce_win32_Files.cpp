@@ -951,6 +951,27 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& 
     return hInstance > (HINSTANCE) 32;
 }
 
+bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& parameters, const StringPairArray& environment)
+{
+    auto oldEnvironment = SystemStats::getEnvironmentVariables();
+    for (const auto& key : oldEnvironment.getAllKeys())
+        SystemStats::removeEnvironmentVariable (key);
+    
+    for (const auto& key : environment.getAllKeys())
+        SystemStats::setEnvironmentVariable (key, environment.getValue (key, {}));
+    
+    HINSTANCE hInstance = ShellExecute (0, 0, fileName.toWideCharPointer(),
+                                        parameters.toWideCharPointer(), 0, SW_SHOWDEFAULT);
+
+    for (const auto& key : environment.getAllKeys())
+        SystemStats::removeEnvironmentVariable (key);
+
+    for (const auto& key : oldEnvironment.getAllKeys())
+        SystemStats::setEnvironmentVariable (key, oldEnvironment.getValue (key, {}));
+
+    return hInstance > (HINSTANCE) 32;
+}
+
 void File::revealToUser() const
 {
     DynamicLibrary dll ("Shell32.dll");

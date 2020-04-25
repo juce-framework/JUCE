@@ -94,6 +94,8 @@
  #if ! JUCE_ANDROID
   #include <execinfo.h>
  #endif
+
+ extern char** environ;
 #endif
 
 #if JUCE_MAC || JUCE_IOS

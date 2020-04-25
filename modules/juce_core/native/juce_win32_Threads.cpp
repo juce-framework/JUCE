@@ -390,6 +390,58 @@ public:
     ActiveProcess (const String& command, int streamFlags)
         : ok (false), readPipe (0), writePipe (0)
     {
+        startProcess (command, streamFlags);
+    }
+
+    ActiveProcess (const String& command, const StringPairArray& environment, int streamFlags)
+        : ok (false), readPipe (0), writePipe (0)
+    {
+        StringArray envValues;
+
+        for (const auto& key : environment.getAllKeys())
+            envValues.add (key + "=" + environment.getValue (key, {}));
+
+        int totalStringSize = 1;
+        for (const auto& str : envValues)
+            totalStringSize += (int) str.length() + 1;
+
+        Array<TCHAR> envString;
+        envString.resize (totalStringSize);
+
+        int currentIndex = 0;
+        for (const auto& str : envValues)
+        {
+            const auto stringSize = (int) str.length();
+
+            ::memcpy (envString.getRawDataPointer() + currentIndex, str.toWideCharPointer(), stringSize * sizeof (TCHAR));
+
+            currentIndex += stringSize;
+
+            envString.set (currentIndex++, (TCHAR) 0);
+        }
+
+        envString.set (currentIndex++, (TCHAR) 0);
+
+        startProcess (command, streamFlags, envString.getRawDataPointer());
+    }
+    
+    ~ActiveProcess()
+    {
+        if (ok)
+        {
+            CloseHandle (processInfo.hThread);
+            CloseHandle (processInfo.hProcess);
+        }
+
+        if (readPipe != 0)
+            CloseHandle (readPipe);
+
+        if (writePipe != 0)
+            CloseHandle (writePipe);
+    }
+
+    void startProcess (const String& command, int streamFlags, void* environment = nullptr)
+    {
         SECURITY_ATTRIBUTES securityAtts = { 0 };
         securityAtts.nLength = sizeof (securityAtts);
         securityAtts.bInheritHandle = TRUE;
@@ -406,23 +458,8 @@ public:
 
             ok = CreateProcess (nullptr, const_cast<LPWSTR> (command.toWideCharPointer()),
                                 nullptr, nullptr, TRUE, CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT,
-                                nullptr, nullptr, &startupInfo, &processInfo) != FALSE;
+                                environment, nullptr, &startupInfo, &processInfo) != FALSE;
         }
-    }
-
-    ~ActiveProcess()
-    {
-        if (ok)
-        {
-            CloseHandle (processInfo.hThread);
-            CloseHandle (processInfo.hProcess);
-        }
-
-        if (readPipe != 0)
-            CloseHandle (readPipe);
-
-        if (writePipe != 0)
-            CloseHandle (writePipe);
     }
 
     bool isRunning() const noexcept
@@ -445,15 +482,15 @@ public:
 
             if (available == 0)
             {
-                if (! isRunning())
+                if (total != 0 || ! isRunning())
                     break;
-
+			
                 Thread::yield();
             }
             else
             {
                 DWORD numRead = 0;
-                if (! ReadFile ((HANDLE) readPipe, dest, numToDo, &numRead, nullptr))
+                if (! ReadFile ((HANDLE) readPipe, dest, numToDo, &numRead, nullptr) || numRead == 0)
                     break;
 
                 total += numRead;
@@ -496,6 +533,16 @@ bool ChildProcess::start (const String& command, int streamFlags)
     return activeProcess != nullptr;
 }
 
+bool ChildProcess::start (const String& command, const StringPairArray& environment, int streamFlags)
+{
+    activeProcess.reset (new ActiveProcess (command, environment, streamFlags));
+
+    if (! activeProcess->ok)
+        activeProcess = nullptr;
+
+    return activeProcess != nullptr;
+}
+
 bool ChildProcess::start (const StringArray& args, int streamFlags)
 {
     String escaped;
@@ -513,6 +560,25 @@ bool ChildProcess::start (const StringArray& args, int streamFlags)
     }
 
     return start (escaped.trim(), streamFlags);
+}
+
+bool ChildProcess::start (const StringArray& args, const StringPairArray& environment, int streamFlags)
+{
+    String escaped;
+
+    for (int i = 0; i < args.size(); ++i)
+    {
+        String arg (args[i]);
+
+        // If there are spaces, surround it with quotes. If there are quotes,
+        // replace them with \" so that CommandLineToArgv will correctly parse them.
+        if (arg.containsAnyOf ("\" "))
+            arg = arg.replace ("\"", "\\\"").quoted();
+
+        escaped << arg << ' ';
+    }
+
+    return start (escaped.trim(), environment, streamFlags);
 }
 
 //==============================================================================

@@ -64,6 +64,9 @@ public:
     */
     bool start (const String& command, int streamFlags = wantStdOut | wantStdErr);
 
+    /** Attempts to launch a child process command, using a custom environment. */
+    bool start (const String& command, const StringPairArray& environment, int streamFlags = wantStdOut | wantStdErr);
+
     /** Attempts to launch a child process command.
 
         The first argument should be the name of the executable file, followed by any other
@@ -74,6 +77,9 @@ public:
         streams should be read and returned by readProcessOutput().
     */
     bool start (const StringArray& arguments, int streamFlags = wantStdOut | wantStdErr);
+
+    /** Attempts to launch a child process command, using a custom environment. */
+    bool start (const StringArray& arguments, const StringPairArray& environment, int streamFlags = wantStdOut | wantStdErr);
 
     /** Returns true if the child process is alive. */
     bool isRunning() const;
