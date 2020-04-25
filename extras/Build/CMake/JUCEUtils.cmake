@@ -108,12 +108,14 @@ function(_juce_set_default_properties)
         set_property(GLOBAL PROPERTY JUCE_AU_COPY_DIR   "$ENV{HOME}/Library/Audio/Plug-Ins/Components")
         set_property(GLOBAL PROPERTY JUCE_AAX_COPY_DIR  "/Library/Application Support/Avid/Audio/Plug-Ins")
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-        set(is_x64 $<EQUAL:${CMAKE_SIZEOF_VOID_P},8>)
+        if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+            set_property(GLOBAL PROPERTY JUCE_VST_COPY_DIR "$ENV{ProgramW6432}/Steinberg/Vstplugins")
+            set(prefix "$ENV{CommonProgramW6432}")
+        else()
+            set_property(GLOBAL PROPERTY JUCE_VST_COPY_DIR "$ENV{programfiles\(x86\)}/Steinberg/Vstplugins")
+            set(prefix "$ENV{CommonProgramFiles\(x86\)}")
+        endif()
 
-        set_property(GLOBAL PROPERTY JUCE_VST_COPY_DIR
-            "$<IF:${is_x64},$ENV{ProgramW6432},$ENV{programfiles\(x86\)}>/Steinberg/Vstplugins")
-
-        set(prefix "$<IF:${is_x64},$ENV{CommonProgramW6432},$ENV{CommonProgramFiles\(x86\)}>")
         set_property(GLOBAL PROPERTY JUCE_VST3_COPY_DIR "${prefix}/VST3")
         set_property(GLOBAL PROPERTY JUCE_AAX_COPY_DIR  "${prefix}/Avid/Audio/Plug-Ins")
     endif()
@@ -1119,6 +1121,12 @@ function(_juce_copy_after_build shared_code target from to)
     get_target_property(wants_copy ${shared_code} JUCE_COPY_PLUGIN_AFTER_BUILD)
 
     if(wants_copy)
+        get_target_property(dest ${shared_code} ${to})
+
+        if(NOT dest)
+            message(FATAL_ERROR "Target '${target}' wants to be copied, but its property '${to}' is not set")
+        endif()
+
         _juce_copy_dir(${target} "${from}" "$<GENEX_EVAL:$<TARGET_PROPERTY:${shared_code},${to}>>")
     endif()
 endfunction()
