@@ -390,14 +390,14 @@ public:
     ActiveProcess (const String& command, int streamFlags)
         : ok (false), readPipe (0), writePipe (0)
     {
-        SECURITY_ATTRIBUTES securityAtts = { 0 };
+        SECURITY_ATTRIBUTES securityAtts = {};
         securityAtts.nLength = sizeof (securityAtts);
         securityAtts.bInheritHandle = TRUE;
 
         if (CreatePipe (&readPipe, &writePipe, &securityAtts, 0)
              && SetHandleInformation (readPipe, HANDLE_FLAG_INHERIT, 0))
         {
-            STARTUPINFOW startupInfo = { 0 };
+            STARTUPINFOW startupInfo = {};
             startupInfo.cb = sizeof (startupInfo);
 
             startupInfo.hStdOutput = (streamFlags & wantStdOut) != 0 ? writePipe : 0;

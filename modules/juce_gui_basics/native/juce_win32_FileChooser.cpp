@@ -168,7 +168,7 @@ private:
 
         if (selectsDirectories)
         {
-            BROWSEINFO bi = { 0 };
+            BROWSEINFO bi = {};
             bi.hwndOwner = (HWND) (async ? nullptr : owner->getWindowHandle());
             bi.pszDisplayName = files;
             bi.lpszTitle = title.toWideCharPointer();
@@ -205,7 +205,7 @@ private:
         }
         else
         {
-            OPENFILENAMEW of = { 0 };
+            OPENFILENAMEW of = {};
 
             #ifdef OPENFILENAME_SIZE_VERSION_400W
             of.lStructSize = OPENFILENAME_SIZE_VERSION_400W;

@@ -1847,11 +1847,16 @@ String String::formattedRaw (const char* pf, ...)
         HeapBlock<wchar_t> temp (bufferSize);
         const int num = (int)
        #if JUCE_WINDOWS
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
             _vsnwprintf
        #else
             vswprintf
        #endif
                 (temp.get(), bufferSize - 1, wideCharVersion.toWideCharPointer(), args);
+
+       #if JUCE_WINDOWS
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+       #endif
       #endif
         va_end (args);
 

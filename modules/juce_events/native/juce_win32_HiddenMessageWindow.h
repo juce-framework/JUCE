@@ -34,7 +34,7 @@ public:
 
         HMODULE moduleHandle = (HMODULE) Process::getCurrentModuleInstanceHandle();
 
-        WNDCLASSEX wc = { 0 };
+        WNDCLASSEX wc = {};
         wc.cbSize         = sizeof (wc);
         wc.lpfnWndProc    = wndProc;
         wc.cbWndExtra     = 4;

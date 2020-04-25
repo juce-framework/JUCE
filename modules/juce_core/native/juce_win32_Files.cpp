@@ -147,7 +147,7 @@ namespace WindowsFileHelpers
 
     Result getResultForLastError()
     {
-        TCHAR messageBuffer[256] = { 0 };
+        TCHAR messageBuffer[256] = {};
 
         FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
                        nullptr, GetLastError(), MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
@@ -239,7 +239,7 @@ bool File::moveToTrash() const
     doubleNullTermPath.calloc (numBytes, 1);
     fullPath.copyToUTF16 (doubleNullTermPath, numBytes);
 
-    SHFILEOPSTRUCT fos = { 0 };
+    SHFILEOPSTRUCT fos = {};
     fos.wFunc = FO_DELETE;
     fos.pFrom = doubleNullTermPath;
     fos.fFlags = FOF_ALLOWUNDO | FOF_NOERRORUI | FOF_SILENT | FOF_NOCONFIRMATION
@@ -486,7 +486,7 @@ bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64
 //==============================================================================
 void File::findFileSystemRoots (Array<File>& destArray)
 {
-    TCHAR buffer[2048] = { 0 };
+    TCHAR buffer[2048] = {};
     GetLogicalDriveStrings (2048, buffer);
 
     const TCHAR* n = buffer;

@@ -89,12 +89,12 @@ namespace TTFNameExtractor
     {
         input.setPosition (directoryOffset);
 
-        NamingTable namingTable = { 0 };
+        NamingTable namingTable = {};
         input.read (&namingTable, sizeof (namingTable));
 
         for (int i = 0; i < (int) ByteOrder::swapIfLittleEndian (namingTable.numberOfNameRecords); ++i)
         {
-            NameRecord nameRecord = { 0 };
+            NameRecord nameRecord = {};
             input.read (&nameRecord, sizeof (nameRecord));
 
             if (ByteOrder::swapIfLittleEndian (nameRecord.nameID) == 4)
@@ -112,7 +112,7 @@ namespace TTFNameExtractor
 
     static String getTypefaceNameFromFile (MemoryInputStream& input)
     {
-        OffsetTable offsetTable = { 0 };
+        OffsetTable offsetTable = {};
         input.read (&offsetTable, sizeof (offsetTable));
 
         for (int i = 0; i < (int) ByteOrder::swapIfLittleEndian (offsetTable.numTables); ++i)
@@ -146,7 +146,7 @@ namespace FontEnumerators
     {
         if (lpelfe != nullptr && (type & RASTER_FONTTYPE) == 0)
         {
-            LOGFONTW lf = { 0 };
+            LOGFONTW lf = {};
             lf.lfWeight = FW_DONTCARE;
             lf.lfOutPrecision = OUT_OUTLINE_PRECIS;
             lf.lfQuality = DEFAULT_QUALITY;
@@ -193,7 +193,7 @@ StringArray Font::findAllTypefaceNames()
         auto dc = CreateCompatibleDC (0);
 
         {
-            LOGFONTW lf = { 0 };
+            LOGFONTW lf = {};
             lf.lfWeight = FW_DONTCARE;
             lf.lfOutPrecision = OUT_OUTLINE_PRECIS;
             lf.lfQuality = DEFAULT_QUALITY;
@@ -473,7 +473,7 @@ private:
         SetMapperFlags (dc, 0);
         SetMapMode (dc, MM_TEXT);
 
-        LOGFONTW lf = { 0 };
+        LOGFONTW lf = {};
         lf.lfCharSet = DEFAULT_CHARSET;
         lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
         lf.lfOutPrecision = OUT_OUTLINE_PRECIS;

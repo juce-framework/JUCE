@@ -277,7 +277,7 @@ private:
             HeapBlock<TCHAR> file (fileNumChars), server (serverNumChars),
                              username (usernameNumChars), password (passwordNumChars);
 
-            URL_COMPONENTS uc = { 0 };
+            URL_COMPONENTS uc = {};
             uc.dwStructSize = sizeof (uc);
             uc.lpszUrlPath = file;
             uc.dwUrlPathLength = fileNumChars;
@@ -393,7 +393,7 @@ private:
 
         if (request != 0)
         {
-            INTERNET_BUFFERS buffers = { 0 };
+            INTERNET_BUFFERS buffers = {};
             buffers.dwStructSize    = sizeof (INTERNET_BUFFERS);
             buffers.lpcszHeader     = headers.toWideCharPointer();
             buffers.dwHeadersLength = (DWORD) headers.length();
@@ -478,10 +478,10 @@ namespace MACAddressHelpers
 
         if (NetbiosCall != 0)
         {
-            LANA_ENUM enums = { 0 };
+            LANA_ENUM enums = {};
 
             {
-                NCB ncb = { 0 };
+                NCB ncb = {};
                 ncb.ncb_command = NCBENUM;
                 ncb.ncb_buffer = (unsigned char*) &enums;
                 ncb.ncb_length = sizeof (LANA_ENUM);
@@ -490,13 +490,13 @@ namespace MACAddressHelpers
 
             for (int i = 0; i < enums.length; ++i)
             {
-                NCB ncb2 = { 0 };
+                NCB ncb2 = {};
                 ncb2.ncb_command = NCBRESET;
                 ncb2.ncb_lana_num = enums.lana[i];
 
                 if (NetbiosCall (&ncb2) == 0)
                 {
-                    NCB ncb = { 0 };
+                    NCB ncb = {};
                     memcpy (ncb.ncb_callname, "*                   ", NCBNAMSZ);
                     ncb.ncb_command = NCBASTAT;
                     ncb.ncb_lana_num = enums.lana[i];
@@ -608,11 +608,11 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailA
     if (mapiSendMail == nullptr)
         return false;
 
-    MapiMessage message = { 0 };
+    MapiMessage message = {};
     message.lpszSubject = (LPSTR) emailSubject.toRawUTF8();
     message.lpszNoteText = (LPSTR) bodyText.toRawUTF8();
 
-    MapiRecipDesc recip = { 0 };
+    MapiRecipDesc recip = {};
     recip.ulRecipClass = MAPI_TO;
     String targetEmailAddress_ (targetEmailAddress);
     if (targetEmailAddress_.isEmpty())

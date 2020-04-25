@@ -211,6 +211,8 @@ public:
         }
     }
 
+    using ActiveXControlComponent::focusGained;
+
     void setWebViewSize (int width, int height) override
     {
         setSize (width, height);

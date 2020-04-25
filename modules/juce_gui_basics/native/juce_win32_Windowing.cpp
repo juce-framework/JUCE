@@ -940,7 +940,7 @@ namespace IconConverters
         {
             if (auto* dc = ::CreateCompatibleDC (tempDC))
             {
-                BITMAPV5HEADER header = { 0 };
+                BITMAPV5HEADER header = {};
                 header.bV5Size = sizeof (BITMAPV5HEADER);
                 header.bV5Width = bm.bmWidth;
                 header.bV5Height = -bm.bmHeight;
@@ -1970,11 +1970,11 @@ private:
 
             auto moduleHandle = (HINSTANCE) Process::getCurrentModuleInstanceHandle();
 
-            TCHAR moduleFile[1024] = { 0 };
+            TCHAR moduleFile[1024] = {};
             GetModuleFileName (moduleHandle, moduleFile, 1024);
             WORD iconNum = 0;
 
-            WNDCLASSEX wcex = { 0 };
+            WNDCLASSEX wcex = {};
             wcex.cbSize         = sizeof (wcex);
             wcex.style          = CS_OWNDC;
             wcex.lpfnWndProc    = (WNDPROC) windowProc;
@@ -4361,7 +4361,7 @@ public:
     {
         if (Process::isForegroundProcess())
         {
-            INPUT input = { 0 };
+            INPUT input = {};
             input.type = INPUT_MOUSE;
             input.mi.mouseData = MOUSEEVENTF_MOVE;
 
@@ -4516,7 +4516,7 @@ struct MonitorInfo
 
 static BOOL CALLBACK enumMonitorsProc (HMONITOR hm, HDC, LPRECT r, LPARAM userInfo)
 {
-    MONITORINFO info = { 0 };
+    MONITORINFO info = {};
     info.cbSize = sizeof (info);
     GetMonitorInfo (hm, &info);
 

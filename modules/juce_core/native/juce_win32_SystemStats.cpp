@@ -215,7 +215,7 @@ static DebugFlagsInitialiser debugFlagsInitialiser;
 #else
  RTL_OSVERSIONINFOW getWindowsVersionInfo()
  {
-     RTL_OSVERSIONINFOW versionInfo = { 0 };
+     RTL_OSVERSIONINFOW versionInfo = {};
 
      if (auto* moduleHandle = ::GetModuleHandleW (L"ntdll.dll"))
      {
@@ -227,7 +227,7 @@ static DebugFlagsInitialiser debugFlagsInitialiser;
              LONG STATUS_SUCCESS = 0;
 
              if (rtlGetVersion (&versionInfo) != STATUS_SUCCESS)
-                 versionInfo = { 0 };
+                 versionInfo = {};
          }
      }
 

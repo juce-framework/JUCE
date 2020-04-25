@@ -284,7 +284,7 @@ namespace SocketHelpers
         {
             auto h = handle.load();
 
-            if (h == invalidSocket)
+            if (static_cast<SocketHandle> (h) == invalidSocket)
                 return true;
 
             int opt;
@@ -315,9 +315,9 @@ namespace SocketHelpers
 
         fd_set rset, wset;
         FD_ZERO (&rset);
-        FD_SET (h, &rset);
+        FD_SET (static_cast<SocketHandle> (h), &rset);
         FD_ZERO (&wset);
-        FD_SET (h, &wset);
+        FD_SET (static_cast<SocketHandle> (h), &wset);
 
         fd_set* prset = forReading ? &rset : nullptr;
         fd_set* pwset = forReading ? nullptr : &wset;
@@ -813,7 +813,7 @@ struct SocketTests : public UnitTest
             expect (socketServer.isConnected() == false);
             expect (socketServer.getHostName().isEmpty());
             expect (socketServer.getBoundPort() == -1);
-            expect (socketServer.getRawSocketHandle() == invalidSocket);
+            expect (static_cast<SocketHandle> (socketServer.getRawSocketHandle()) == invalidSocket);
 
             expect (socketServer.createListener (portNum, localHost.toString()));
 
@@ -824,14 +824,14 @@ struct SocketTests : public UnitTest
             expect (socket.isConnected() == true);
             expect (socket.getHostName() == localHost.toString());
             expect (socket.getBoundPort() != -1);
-            expect (socket.getRawSocketHandle() != invalidSocket);
+            expect (static_cast<SocketHandle> (socket.getRawSocketHandle()) != invalidSocket);
 
             socket.close();
 
             expect (socket.isConnected() == false);
             expect (socket.getHostName().isEmpty());
             expect (socket.getBoundPort() == -1);
-            expect (socket.getRawSocketHandle() == invalidSocket);
+            expect (static_cast<SocketHandle> (socket.getRawSocketHandle()) == invalidSocket);
         }
 
         beginTest ("DatagramSocket");
@@ -839,17 +839,17 @@ struct SocketTests : public UnitTest
             DatagramSocket socket;
 
             expect (socket.getBoundPort() == -1);
-            expect (socket.getRawSocketHandle() != invalidSocket);
+            expect (static_cast<SocketHandle> (socket.getRawSocketHandle()) != invalidSocket);
 
             expect (socket.bindToPort (portNum, localHost.toString()));
 
             expect (socket.getBoundPort() == portNum);
-            expect (socket.getRawSocketHandle() != invalidSocket);
+            expect (static_cast<SocketHandle> (socket.getRawSocketHandle()) != invalidSocket);
 
             socket.shutdown();
 
             expect (socket.getBoundPort() == -1);
-            expect (socket.getRawSocketHandle() == invalidSocket);
+            expect (static_cast<SocketHandle> (socket.getRawSocketHandle()) == invalidSocket);
         }
     }
 };

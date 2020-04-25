@@ -51,6 +51,7 @@ namespace pnglibNamespace
 
    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wsign-conversion",
                                         "-Wimplicit-fallthrough",
+                                        "-Wtautological-constant-out-of-range-compare",
                                         "-Wzero-as-null-pointer-constant",
                                         "-Wcomma")
 
