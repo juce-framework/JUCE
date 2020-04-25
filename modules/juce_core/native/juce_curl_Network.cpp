@@ -220,7 +220,7 @@ public:
     //==============================================================================
     bool setOptions()
     {
-        auto address = url.toString (! isPost);
+        auto address = url.toString (true);
 
         curl_version_info_data* data = symbols->curl_version_info (CURLVERSION_NOW);
         jassert (data != nullptr);

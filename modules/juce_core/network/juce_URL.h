@@ -296,7 +296,7 @@ public:
         It allows your app to receive progress updates during a lengthy POST operation. If you
         want to continue the operation, this should return true, or false to abort.
     */
-    using OpenStreamProgressCallback = bool (void* context, int bytesSent, int totalBytes);
+    using OpenStreamProgressCallback = std::function<bool(int bytesSent, int totalBytes)>;
 
     /** Attempts to open a stream that can read from this URL.
 
@@ -321,8 +321,6 @@ public:
         @param progressCallback  if this is not a nullptr, it lets you supply a callback function
                                  to keep track of the operation's progress. This can be useful
                                  for lengthy POST operations, so that you can provide user feedback.
-        @param progressCallbackContext  if a callback is specified, this value will be passed to
-                                 the function
         @param extraHeaders      if not empty, this string is appended onto the headers that
                                  are used for the request. It must therefore be a valid set of HTML
                                  header directives, separated by newlines.
@@ -340,8 +338,7 @@ public:
         @returns    a valid input stream, or nullptr if there was an error trying to open it.
      */
     std::unique_ptr<InputStream> createInputStream (bool doPostLikeRequest,
-                                                    OpenStreamProgressCallback* progressCallback = nullptr,
-                                                    void* progressCallbackContext = nullptr,
+                                                    OpenStreamProgressCallback progressCallback = nullptr,
                                                     String extraHeaders = {},
                                                     int connectionTimeOutMs = 0,
                                                     StringPairArray* responseHeaders = nullptr,

@@ -491,8 +491,7 @@ void URL::createHeadersAndPostData (String& headers, MemoryBlock& postDataToWrit
     }
     else
     {
-        data << URLHelpers::getMangledParameters (*this)
-             << postData;
+        data << postData;
 
         // if the user-supplied headers didn't contain a content-type, add one now..
         if (! headers.containsIgnoreCase ("Content-Type"))
@@ -659,8 +658,7 @@ private:
 
 //==============================================================================
 std::unique_ptr<InputStream> URL::createInputStream (bool usePostCommand,
-                                                     OpenStreamProgressCallback* progressCallback,
-                                                     void* progressCallbackContext,
+                                                     OpenStreamProgressCallback progressCallback,
                                                      String headers,
                                                      int timeOutMs,
                                                      StringPairArray* responseHeaders,
@@ -682,21 +680,20 @@ std::unique_ptr<InputStream> URL::createInputStream (bool usePostCommand,
 
     struct ProgressCallbackCaller  : public WebInputStream::Listener
     {
-        ProgressCallbackCaller (OpenStreamProgressCallback* progressCallbackToUse, void* progressCallbackContextToUse)
-            : callback (progressCallbackToUse), data (progressCallbackContextToUse)
+        ProgressCallbackCaller (OpenStreamProgressCallback progressCallbackToUse)
+            : callback (std::move(progressCallbackToUse))
         {}
 
         bool postDataSendProgress (WebInputStream&, int bytesSent, int totalBytes) override
         {
-            return callback (data, bytesSent, totalBytes);
+            return callback (bytesSent, totalBytes);
         }
 
-        OpenStreamProgressCallback* callback;
-        void* const data;
+        OpenStreamProgressCallback callback;
     };
 
     std::unique_ptr<ProgressCallbackCaller> callbackCaller
-        (progressCallback != nullptr ? new ProgressCallbackCaller (progressCallback, progressCallbackContext) : nullptr);
+        (progressCallback != nullptr ? new ProgressCallbackCaller (std::move(progressCallback)) : nullptr);
 
     if (headers.isNotEmpty())
         wi->withExtraHeaders (headers);
