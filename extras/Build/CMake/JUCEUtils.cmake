@@ -694,7 +694,7 @@ endfunction()
 # ==================================================================================================
 
 function(juce_add_binary_data target)
-    set(one_value_args NAMESPACE)
+    set(one_value_args NAMESPACE HEADER_NAME)
     set(multi_value_args SOURCES)
     cmake_parse_arguments(JUCE_ARG "" "${one_value_args}" "${multi_value_args}" ${ARGN})
 
@@ -716,19 +716,27 @@ function(juce_add_binary_data target)
 
     file(MAKE_DIRECTORY ${juce_binary_data_folder})
 
-    if(JUCE_ARG_NAMESPACE)
-        set(namespace_opt --namespace=${JUCE_ARG_NAMESPACE})
+    if(NOT JUCE_ARG_NAMESPACE)
+        set(JUCE_ARG_NAMESPACE BinaryData)
+    endif()
+
+    if(NOT JUCE_ARG_HEADER_NAME)
+        set(JUCE_ARG_HEADER_NAME BinaryData.h)
     endif()
 
     add_custom_command(OUTPUT ${binary_file_names}
-        COMMAND juce::juceaide binarydata ${namespace_opt} ${juce_binary_data_folder} ${JUCE_ARG_SOURCES}
+        COMMAND juce::juceaide binarydata "${JUCE_ARG_NAMESPACE}" "${JUCE_ARG_HEADER_NAME}"
+            ${juce_binary_data_folder} ${JUCE_ARG_SOURCES}
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
         VERBATIM)
 
     target_sources(${target} PRIVATE "${binary_file_names}")
-    target_compile_definitions(${target} INTERFACE JUCE_TARGET_HAS_BINARY_DATA=1)
     target_include_directories(${target} INTERFACE ${juce_binary_data_folder})
     target_compile_features(${target} PRIVATE cxx_std_11)
+
+    if(JUCE_ARG_HEADER_NAME STREQUAL "BinaryData.h")
+        target_compile_definitions(${target} INTERFACE JUCE_TARGET_HAS_BINARY_DATA=1)
+    endif()
 endfunction()
 
 # ==================================================================================================
@@ -805,8 +813,10 @@ function(juce_generate_juce_header target)
 
     set(defs_file $<GENEX_EVAL:$<TARGET_PROPERTY:${target},JUCE_DEFS_FILE>>)
 
+    set(extra_args)
+
     add_custom_command(OUTPUT "${juce_header}"
-        COMMAND juce::juceaide header "${defs_file}" "${juce_header}"
+        COMMAND juce::juceaide header "${defs_file}" "${juce_header}" ${extra_args}
         DEPENDS "${defs_file}"
         VERBATIM)
 endfunction()

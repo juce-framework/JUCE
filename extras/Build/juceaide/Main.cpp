@@ -40,7 +40,7 @@ constexpr auto headerTemplate = R"(/*
 ${JUCE_INCLUDES}
 
 #if JUCE_TARGET_HAS_BINARY_DATA
-#include "BinaryData.h"
+ #include "BinaryData.h"
 #endif
 
 #if ! DONT_SET_USING_JUCE_NAMESPACE
@@ -60,30 +60,24 @@ namespace ProjectInfo
 #endif
 )";
 
-juce::String getValueOr (juce::ArgumentList& args, juce::String option, juce::String fallback)
+int writeBinaryData (juce::ArgumentList&& args)
 {
-    const auto opt = args.removeValueForOption (option);
-    return opt.isNotEmpty() ? opt : fallback;
-}
+    args.checkMinNumArguments (3);
+    const auto namespaceName = args.arguments.removeAndReturn (0);
+    const auto headerName    = args.arguments.removeAndReturn (0);
+    const auto outFolder     = args.arguments.removeAndReturn (0).resolveAsExistingFolder();
 
-int writeBinaryData (juce::ArgumentList&& argumentList)
-{
     juce::build_tools::ResourceFile resourceFile;
 
-    resourceFile.setClassName (getValueOr (argumentList, "--namespace", "BinaryData"));
-    const auto lineEndings = argumentList.removeOptionIfFound ("--windows") ? "\r\n" : "\n";
+    resourceFile.setClassName (namespaceName.text);
+    const auto lineEndings = args.removeOptionIfFound ("--windows") ? "\r\n" : "\n";
 
-    if (argumentList.arguments.isEmpty())
-        juce::ConsoleApplication::fail ("No destination folder specified for binary data files", 1);
-
-    const auto outFolder = argumentList.arguments.removeAndReturn (0).resolveAsExistingFolder();
-
-    for (const auto& arg : argumentList.arguments)
+    for (const auto& arg : args.arguments)
         resourceFile.addFile (arg.resolveAsExistingFile());
 
     const auto result = resourceFile.write (0,
                                             lineEndings,
-                                            outFolder.getChildFile ("./BinaryData.h"),
+                                            outFolder.getChildFile (headerName.text),
                                             [&outFolder] (int index)
                                             {
                                                 return outFolder.getChildFile ("./BinaryData" + juce::String { index + 1 } + ".cpp");

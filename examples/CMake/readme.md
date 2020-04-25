@@ -418,17 +418,25 @@ attributes directly to these creation functions, rather than adding them later.
 
 ```
 juce_add_binary_data(<name>
+    [HEADER_NAME ...]
     [NAMESPACE ...]
     SOURCES ...)
 ```
 
 Create a static library that embeds the contents of the files passed as arguments to this function.
 Adds a library target called `<name>` which can be linked into other targets using
-`target_link_libraries`. The `NAMESPACE` argument is optional. If not provided, the generated files
-will use the default namespace `BinaryData`. Each of the files located at the paths following
-`SOURCES` will be encoded and embedded in the resulting static library. This library can be linked
-as normal using `target_link_libraries(<otherTarget> PRIVATE <name>)`, and the header can be
-included using `#include <BinaryData.h>`.
+`target_link_libraries`.
+
+The `HEADER_NAME` argument is optional. If provided, the generated header will be given the
+requested name, otherwise the generated header will be named "BinaryData.h". In completely new
+projects, you should provide a unique name here, so that projects containing more than one binary
+data target are able to include the binary data headers without ambiguity.
+
+The `NAMESPACE` argument is also optional. If not provided, the generated files will use the default
+namespace `BinaryData`. Each of the files located at the paths following `SOURCES` will be encoded
+and embedded in the resulting static library. This library can be linked as normal using
+`target_link_libraries(<otherTarget> PRIVATE <name>)`, and the header can be included using
+`#include <BinaryData.h>`.
 
 ### `juce_add_bundle_resources_directory`
 
