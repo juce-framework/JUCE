@@ -82,10 +82,39 @@ endfunction()
 
 # ==================================================================================================
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+function(_juce_create_pkgconfig_target name)
+    if(TARGET juce::pkgconfig_${name})
+        return()
+    endif()
+
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(JUCE_CURL_LINUX_DEPS IMPORTED_TARGET GLOBAL libcurl)
-    pkg_check_modules(JUCE_BROWSER_LINUX_DEPS IMPORTED_TARGET GLOBAL webkit2gtk-4.0 gtk+-x11-3.0)
+    pkg_check_modules(${name} ${ARGN})
+
+    add_library(pkgconfig_${name} INTERFACE)
+    add_library(juce::pkgconfig_${name} ALIAS pkgconfig_${name})
+    install(TARGETS pkgconfig_${name} EXPORT JUCE)
+
+    set(pairs
+        "INCLUDE_DIRECTORIES\;INCLUDE_DIRS"
+        "LINK_LIBRARIES\;LINK_LIBRARIES"
+        "LINK_OPTIONS\;LDFLAGS_OTHER"
+        "COMPILE_OPTIONS\;CFLAGS_OTHER")
+
+    foreach(pair IN LISTS pairs)
+        list(GET pair 0 key)
+        list(GET pair 1 value)
+
+        if(${name}_${value})
+            set_target_properties(pkgconfig_${name} PROPERTIES INTERFACE_${key} "${${name}_${value}}")
+        endif()
+    endforeach()
+endfunction()
+
+# ==================================================================================================
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    _juce_create_pkgconfig_target(JUCE_CURL_LINUX_DEPS libcurl)
+    _juce_create_pkgconfig_target(JUCE_BROWSER_LINUX_DEPS webkit2gtk-4.0 gtk+-x11-3.0)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_program(JUCE_RC_COMPILER Rez NO_DEFAULT_PATHS PATHS "/Applications/Xcode.app/Contents/Developer/usr/bin")
 
@@ -504,14 +533,11 @@ function(juce_add_module module_path)
             target_link_libraries(${module_name} INTERFACE "${${module_name}_${module_framework}}")
         endforeach()
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        find_package(PkgConfig REQUIRED)
-
         _juce_get_metadata("${metadata_dict}" linuxPackages module_linuxpackages)
 
         if(module_linuxpackages)
-            pkg_check_modules(${module_name}_LINUX_DEPS REQUIRED IMPORTED_TARGET GLOBAL
-                ${module_linuxpackages})
-            target_link_libraries(${module_name} INTERFACE PkgConfig::${module_name}_LINUX_DEPS)
+            _juce_create_pkgconfig_target(${module_name}_LINUX_DEPS ${module_linuxpackages})
+            target_link_libraries(${module_name} INTERFACE juce::pkgconfig_${module_name}_LINUX_DEPS)
         endif()
 
         _juce_get_metadata("${metadata_dict}" linuxLibs module_linuxlibs)
@@ -563,13 +589,13 @@ function(_juce_link_optional_libraries target)
         get_target_property(needs_curl ${target} JUCE_NEEDS_CURL)
 
         if(needs_curl)
-            target_link_libraries(${target} PRIVATE PkgConfig::JUCE_CURL_LINUX_DEPS)
+            target_link_libraries(${target} PRIVATE juce::pkgconfig_JUCE_CURL_LINUX_DEPS)
         endif()
 
         get_target_property(needs_browser ${target} JUCE_NEEDS_WEB_BROWSER)
 
         if(needs_browser)
-            target_link_libraries(${target} PRIVATE PkgConfig::JUCE_BROWSER_LINUX_DEPS)
+            target_link_libraries(${target} PRIVATE juce::pkgconfig_JUCE_BROWSER_LINUX_DEPS)
         endif()
     elseif(APPLE)
         get_target_property(needs_storekit ${target} JUCE_NEEDS_STORE_KIT)
