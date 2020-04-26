@@ -62,7 +62,7 @@ class ClientIPC  : public MessageHandler,
                    private Timer
 {
 public:
-    ClientIPC (CompileEngineChildProcess& cp)
+    explicit ClientIPC (CompileEngineChildProcess& cp)
        : InterprocessConnection (true), owner (cp)
     {
         launchServer();
@@ -705,7 +705,7 @@ private:
 
     struct TransactionTimer   : public Timer
     {
-        TransactionTimer (CodeDocument& doc) : document (doc) {}
+        explicit TransactionTimer (CodeDocument& doc) : document (doc) {}
 
         void timerCallback() override
         {

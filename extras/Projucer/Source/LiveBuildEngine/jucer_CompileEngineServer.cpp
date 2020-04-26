@@ -54,7 +54,7 @@ struct ZombiePatrol    : private Thread,
                          private AsyncUpdater,
                          private Timer
 {
-    ZombiePatrol (MessageHandler& mh)
+    explicit ZombiePatrol (MessageHandler& mh)
        : Thread ("Ping"), owner (mh)
     {
         startThread (2);
@@ -135,7 +135,7 @@ class ServerIPC  : public InterprocessConnection,
                    public MessageHandler
 {
 public:
-    ServerIPC (const StringArray& info)
+    explicit ServerIPC (const StringArray& info)
        : InterprocessConnection (true), liveCodeBuilder (nullptr)
     {
         if (! createPipe (info[0], -1))

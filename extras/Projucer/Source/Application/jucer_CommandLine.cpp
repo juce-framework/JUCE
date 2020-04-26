@@ -63,7 +63,7 @@ namespace
     //==============================================================================
     struct LoadedProject
     {
-        LoadedProject (const ArgumentList::Argument& fileToLoad)
+        explicit LoadedProject (const ArgumentList::Argument& fileToLoad)
         {
             hideDockIcon();
 

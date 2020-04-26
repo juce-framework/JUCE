@@ -58,7 +58,7 @@ public:
         startTimer (2000);
     }
 
-    ~SlaveCanvasComponent()
+    ~SlaveCanvasComponent() override
     {
         OSCReceiver::removeListener (this);
     }

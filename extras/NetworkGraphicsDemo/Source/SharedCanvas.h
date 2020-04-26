@@ -447,9 +447,9 @@ struct BlockPacketiser
 
         while (remaining > 0)
         {
-            auto num = (int) jmin (maxBlockSize, remaining);
-            blocks.add (MemoryBlock (addBytesToPointer (data.getData(), offset), (size_t) num));
-            offset += num;
+            auto num = (size_t) jmin (maxBlockSize, remaining);
+            blocks.add (MemoryBlock (addBytesToPointer (data.getData(), offset), num));
+            offset += (int) num;
             remaining -= num;
         }
 
@@ -459,7 +459,7 @@ struct BlockPacketiser
 
         for (int i = 0; i < blocks.size(); ++i)
         {
-            uint32 index = ByteOrder::swapIfBigEndian (i);
+            auto index = (uint32) ByteOrder::swapIfBigEndian (i);
             blocks.getReference(i).append (&index, sizeof (index));
         }
     }
@@ -497,9 +497,9 @@ struct BlockPacketiser
 
     static int compareElements (const MemoryBlock& b1, const MemoryBlock& b2)
     {
-        int i1 = ByteOrder::littleEndianInt (addBytesToPointer (b1.getData(), b1.getSize() - 4));
-        int i2 = ByteOrder::littleEndianInt (addBytesToPointer (b2.getData(), b2.getSize() - 4));
-        return i1 - i2;
+        auto i1 = ByteOrder::littleEndianInt (addBytesToPointer (b1.getData(), b1.getSize() - 4));
+        auto i2 = ByteOrder::littleEndianInt (addBytesToPointer (b2.getData(), b2.getSize() - 4));
+        return (int) (i1 - i2);
     }
 
     static const char* getLastPacketPrefix()   { return "**END_OF_PACKET_LIST** "; }

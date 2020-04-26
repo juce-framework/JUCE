@@ -83,7 +83,7 @@ struct BackgroundLogo  : public AnimatedContent
     void reset() override {}
     void handleTouch (Point<float>) override {}
 
-    void generateCanvas (Graphics& g, SharedCanvasDescription& canvas, Rectangle<float> activeArea) override
+    void generateCanvas (Graphics& g, SharedCanvasDescription& canvas, Rectangle<float>) override
     {
         logo->drawWithin (g, canvas.getLimits().reduced (3.0f), RectanglePlacement (RectanglePlacement::centred), 0.6f);
     }
@@ -465,7 +465,7 @@ struct MultiLogo  : public BackgroundLogo
 {
     String getName() const override      { return "Multi-Logo " + String ((int) numHorizontalLogos); }
 
-    void generateCanvas (Graphics& g, SharedCanvasDescription& canvas, Rectangle<float> activeArea) override
+    void generateCanvas (Graphics& g, SharedCanvasDescription& canvas, Rectangle<float>) override
     {
         float indent = 0.5f;
         float logoSize = canvas.getLimits().getWidth() / numHorizontalLogos;
