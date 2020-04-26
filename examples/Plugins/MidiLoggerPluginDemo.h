@@ -219,7 +219,7 @@ class MidiLoggerPluginDemoProcessor  : public AudioProcessor,
 {
 public:
     MidiLoggerPluginDemoProcessor()
-        : AudioProcessor (BusesProperties())
+        : AudioProcessor (getBusesLayout())
     {
         state.addChild ({ "uiState", { { "width",  500 }, { "height", 300 } }, {} }, -1, nullptr);
         startTimerHz (60);
@@ -327,6 +327,13 @@ private:
     {
         audio.clear();
         queue.push (midi);
+    }
+
+    static BusesProperties getBusesLayout()
+    {
+        // Live doesn't like to load midi-only plugins, so we add an audio output there.
+        return PluginHostType().isAbletonLive() ? BusesProperties().withOutput ("out", AudioChannelSet::stereo())
+                                                : BusesProperties();
     }
 
     ValueTree state { "state" };
