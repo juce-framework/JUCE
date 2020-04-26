@@ -398,10 +398,19 @@ function(juce_add_module module_path)
 
     set(installed_module_path "${JUCE_ARG_INSTALL_PATH}")
 
-    set(base_path "$<BUILD_INTERFACE:${module_parent_path}>$<INSTALL_INTERFACE:${installed_module_path}>")
-    set(module_header "${base_path}/${module_name}/${module_name}.h")
+    set(module_header_name "${module_name}.h")
 
-    list(APPEND all_module_sources ${module_header})
+    if(NOT EXISTS "${module_path}/${module_header_name}")
+        set(module_header_name "${module_header_name}pp")
+    endif()
+
+    if(NOT EXISTS "${module_path}/${module_header_name}")
+        message(FATAL_ERROR "Could not locate module header for module '${module_path}'")
+    endif()
+
+    set(base_path "$<BUILD_INTERFACE:${module_parent_path}>$<INSTALL_INTERFACE:${installed_module_path}>")
+
+    list(APPEND all_module_sources "${base_path}/${module_name}/${module_header_name}")
 
     set(install_export_args)
 
@@ -462,9 +471,7 @@ function(juce_add_module module_path)
         target_compile_definitions(${module_name} INTERFACE LINUX=1)
     endif()
 
-    _juce_extract_metadata_block(JUCE_MODULE_DECLARATION
-        "${module_path}/${module_name}.h"
-        metadata_dict)
+    _juce_extract_metadata_block(JUCE_MODULE_DECLARATION "${module_path}/${module_header_name}" metadata_dict)
 
     _juce_get_metadata("${metadata_dict}" minimumCppStandard module_cpp_standard)
 
