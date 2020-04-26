@@ -65,8 +65,20 @@ int main (int argc, char **argv)
 
     ConsoleUnitTestRunner runner;
 
-    auto seed = (args.containsOption ("--seed") ? args.getValueForOption ("--seed").getLargeIntValue()
-                                                : Random::getSystemRandom().nextInt64());
+    auto seed = [&args]
+    {
+        if (args.containsOption ("--seed"))
+        {
+            auto seedValueString = args.getValueForOption ("--seed");
+
+            if (seedValueString.startsWith ("0x"))
+                return seedValueString.getHexValue64();
+
+            return seedValueString.getLargeIntValue();
+        }
+
+        return Random::getSystemRandom().nextInt64();
+    }();
 
     if (args.containsOption ("--category"))
         runner.runTestsInCategory (args.getValueForOption ("--category"), seed);
