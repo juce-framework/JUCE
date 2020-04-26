@@ -149,7 +149,7 @@ private:
     //==============================================================================
     jobject obj = nullptr;
 
-    static inline jobject retain (jobject obj, JNIEnv* env)
+    static jobject retain (jobject obj, JNIEnv* env)
     {
         return obj == nullptr ? nullptr : env->NewGlobalRef (obj);
     }

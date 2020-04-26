@@ -1389,7 +1389,7 @@ private:
                 && (int32) hostCallback (&vstEffect, Vst2::audioMasterGetCurrentProcessLevel, 0, 0, nullptr, 0) == 4;
     }
 
-    static inline int32 convertHexVersionToDecimal (const unsigned int hexVersion)
+    static int32 convertHexVersionToDecimal (const unsigned int hexVersion)
     {
        #if JUCE_VST_RETURN_HEX_VERSION_NUMBER_DIRECTLY
         return (int32) hexVersion;

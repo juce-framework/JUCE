@@ -75,7 +75,7 @@ public:
 
         unlocker MyGreatApp Joe_Bloggs joebloggs@foobar.com 1234abcd,95432ff 22d9aec92d986dd1,923ad49e9e7ff294c
     */
-    static inline int keyGenerationAppMain (int argc, char* argv[])
+    static int keyGenerationAppMain (int argc, char* argv[])
     {
         StringArray args;
         for (int i = 1; i < argc; ++i)

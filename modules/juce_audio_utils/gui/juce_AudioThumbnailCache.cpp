@@ -147,7 +147,7 @@ void AudioThumbnailCache::removeThumb (const int64 hashCode)
             thumbs.remove (i);
 }
 
-static inline int getThumbnailCacheFileMagicHeader() noexcept
+static int getThumbnailCacheFileMagicHeader() noexcept
 {
     return (int) ByteOrder::littleEndianInt ("ThmC");
 }

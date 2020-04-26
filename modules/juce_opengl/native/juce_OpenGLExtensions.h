@@ -129,19 +129,19 @@ struct OpenGLExtensionFunctions
 
     //==============================================================================
    #else
-    #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      inline static returnType name params noexcept { return ::name callparams; }
+    #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      static returnType name params noexcept { return ::name callparams; }
     JUCE_GL_BASE_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
 
     #ifndef GL3_PROTOTYPES
      #undef JUCE_DECLARE_GL_FUNCTION
-     #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)     inline static returnType name params noexcept { return ::name ## EXT callparams; }
+     #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)     static returnType name params noexcept { return ::name ## EXT callparams; }
     #endif
      JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
 
     #if JUCE_OPENGL3
      #ifndef GL3_PROTOTYPES
       #undef JUCE_DECLARE_GL_FUNCTION
-      #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)    inline static returnType name params noexcept { return ::name ## APPLE callparams; }
+      #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)    static returnType name params noexcept { return ::name ## APPLE callparams; }
      #endif
      JUCE_GL_VERTEXBUFFER_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION)
     #endif

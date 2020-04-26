@@ -743,7 +743,7 @@ bool CodeDocument::hasChangedSinceSavePoint() const noexcept
 }
 
 //==============================================================================
-static inline int getCharacterType (juce_wchar character) noexcept
+static int getCharacterType (juce_wchar character) noexcept
 {
     return (CharacterFunctions::isLetterOrDigit (character) || character == '_')
                 ? 2 : (CharacterFunctions::isWhitespace (character) ? 0 : 1);

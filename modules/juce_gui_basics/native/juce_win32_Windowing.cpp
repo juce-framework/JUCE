@@ -396,7 +396,7 @@ static void setDPIAwareness()
         setProcessDPIAware();
 }
 
-static inline bool isPerMonitorDPIAwareProcess()
+static bool isPerMonitorDPIAwareProcess()
 {
    #if JUCE_WIN_PER_MONITOR_DPI_AWARE
     static bool dpiAware = []() -> bool
@@ -418,7 +418,7 @@ static inline bool isPerMonitorDPIAwareProcess()
    #endif
 }
 
-static inline bool isPerMonitorDPIAwareWindow (HWND h)
+static bool isPerMonitorDPIAwareWindow (HWND h)
 {
    #if JUCE_WIN_PER_MONITOR_DPI_AWARE
     jassert (h != nullptr);
@@ -435,7 +435,7 @@ static inline bool isPerMonitorDPIAwareWindow (HWND h)
    #endif
 }
 
-static inline bool isPerMonitorDPIAwareThread()
+static bool isPerMonitorDPIAwareThread()
 {
    #if JUCE_WIN_PER_MONITOR_DPI_AWARE
     setDPIAwareness();

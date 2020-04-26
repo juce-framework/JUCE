@@ -518,7 +518,7 @@ private:
     bool firstPlayTime;
     int64 lastPlayTime, ticksPerBuffer;
 
-    static inline int convertInputValues (const float l, const float r) noexcept
+    static int convertInputValues (const float l, const float r) noexcept
     {
         return jlimit (-32768, 32767, roundToInt (32767.0f * r)) << 16
                 | (0xffff & jlimit (-32768, 32767, roundToInt (32767.0f * l)));

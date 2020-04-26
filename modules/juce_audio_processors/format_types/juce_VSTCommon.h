@@ -271,7 +271,7 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
         return mappings;
     }
 
-    static inline int32 getSpeakerType (AudioChannelSet::ChannelType type) noexcept
+    static int32 getSpeakerType (AudioChannelSet::ChannelType type) noexcept
     {
         static const std::map<AudioChannelSet::ChannelType, int32> speakerTypeMap =
         {
@@ -302,7 +302,7 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
         return speakerTypeMap.at (type);
     }
 
-    static inline AudioChannelSet::ChannelType getChannelType (int32 type) noexcept
+    static AudioChannelSet::ChannelType getChannelType (int32 type) noexcept
     {
         switch (type)
         {

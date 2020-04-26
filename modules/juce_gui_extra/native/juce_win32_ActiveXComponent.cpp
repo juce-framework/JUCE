@@ -175,7 +175,7 @@ namespace ActiveXHelpers
     //==============================================================================
     static Array<ActiveXControlComponent*> activeXComps;
 
-    static inline HWND getHWND (const ActiveXControlComponent* const component)
+    static HWND getHWND (const ActiveXControlComponent* const component)
     {
         HWND hwnd = {};
         const IID iid = __uuidof (IOleWindow);
@@ -189,7 +189,7 @@ namespace ActiveXHelpers
         return hwnd;
     }
 
-    static inline void offerActiveXMouseEventToPeer (ComponentPeer* peer, HWND hwnd, UINT message, LPARAM lParam)
+    static void offerActiveXMouseEventToPeer (ComponentPeer* peer, HWND hwnd, UINT message, LPARAM lParam)
     {
         switch (message)
         {
