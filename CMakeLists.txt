@@ -72,11 +72,15 @@ endif()
 # ==================================================================================================
 # Install configuration
 
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.14")
+    set(extra_version_arg ARCH_INDEPENDENT)
+endif()
+
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file("${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
     VERSION ${JUCE_VERSION}
     COMPATIBILITY ExactVersion
-    ARCH_INDEPENDENT)
+    ${extra_version_arg})
 
 set(JUCE_INSTALL_DESTINATION "lib/cmake/JUCE-${JUCE_VERSION}" CACHE STRING
     "The location, relative to the install prefix, where the JUCE config file will be installed")

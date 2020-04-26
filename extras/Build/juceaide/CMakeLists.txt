@@ -49,6 +49,7 @@ else()
 
     # Looks like we're boostrapping, reinvoke CMake
     execute_process(COMMAND "${CMAKE_COMMAND}"
+            "."
             "-B${JUCE_BINARY_DIR}/tools"
             "-G${CMAKE_GENERATOR}"
             "-DCMAKE_BUILD_TYPE=Debug"
