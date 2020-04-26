@@ -507,6 +507,8 @@ private:
                     case 2: return dsp::LadderFilterMode::HPF12;
                     case 3: return dsp::LadderFilterMode::HPF24;
                     case 4: return dsp::LadderFilterMode::BPF12;
+
+                    default: break;
                 }
 
                 return dsp::LadderFilterMode::BPF24;
@@ -1181,6 +1183,9 @@ private:
                                 thiran.pushSample (int (channel), samplesIn[i]);
                                 thiran.setDelay ((float) delay);
                                 return thiran.popSample (int (channel));
+
+                            default:
+                                break;
                         }
 
                         jassertfalse;

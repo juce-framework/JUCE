@@ -2323,7 +2323,7 @@ public:
 
             void operator() (SamplerAudioProcessor& proc)
             {
-                if (newVoices.size() < (size_t) proc.synthesiser.getNumVoices())
+                if ((int) newVoices.size() < proc.synthesiser.getNumVoices())
                     proc.synthesiser.reduceNumVoices (int (newVoices.size()));
                 else
                     for (auto it = begin (newVoices); (size_t) proc.synthesiser.getNumVoices() < newVoices.size(); ++it)

@@ -750,6 +750,9 @@ private:
             case Steinberg::Vst::Event::kChordEvent:
             case Steinberg::Vst::Event::kScaleEvent:
                 return {};
+
+            default:
+                break;
         }
 
         // If this is hit, we've been sent an event type that doesn't exist in the VST3 spec.
