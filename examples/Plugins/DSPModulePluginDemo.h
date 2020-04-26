@@ -1282,6 +1282,9 @@ private:
                                 thiran.pushSample (int (channel), input);
                                 thiran.setDelay ((float) delay);
                                 return thiran.popSample (int (channel));
+
+                            default:
+                                break;
                         }
 
                         jassertfalse;

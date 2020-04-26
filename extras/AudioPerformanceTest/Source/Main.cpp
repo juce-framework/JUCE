@@ -19,8 +19,6 @@
 #include <JuceHeader.h>
 #include "MainComponent.h"
 
-Component* createMainContentComponent();
-
 //==============================================================================
 class AudioPerformanceTestApplication  : public JUCEApplication
 {
