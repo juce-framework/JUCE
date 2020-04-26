@@ -1420,6 +1420,7 @@ function(_juce_configure_plugin_targets target)
         message(FATAL_ERROR "Use juce_set_aax_sdk_path to set up the AAX sdk before adding AAX targets")
     endif()
 
+    _juce_add_standard_defs(${target})
     _juce_add_plugin_definitions(${target} PRIVATE ${enabled_formats})
 
     # The plugin wrappers need to know what other modules are available, especially
