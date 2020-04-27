@@ -76,6 +76,11 @@ inline juce::String toString (const Steinberg::char16* string) noexcept     { re
 inline juce::String toString (const Steinberg::UString128& string) noexcept { return toString (static_cast<const Steinberg::char16*> (string)); }
 inline juce::String toString (const Steinberg::UString256& string) noexcept { return toString (static_cast<const Steinberg::char16*> (string)); }
 
+inline Steinberg::Vst::TChar* toString (const juce::String& source) noexcept
+{
+    return reinterpret_cast<Steinberg::Vst::TChar*> (source.toUTF16().getAddress());
+}
+
 inline void toString128 (Steinberg::Vst::String128 result, const char* source)
 {
     Steinberg::UString (result, 128).fromAscii (source);
@@ -83,12 +88,7 @@ inline void toString128 (Steinberg::Vst::String128 result, const char* source)
 
 inline void toString128 (Steinberg::Vst::String128 result, const juce::String& source)
 {
-    Steinberg::UString (result, 128).assign (static_cast<Steinberg::char16*>(source.toUTF16().getAddress()));
-}
-
-inline Steinberg::Vst::TChar* toString (const juce::String& source) noexcept
-{
-    return reinterpret_cast<Steinberg::Vst::TChar*> (source.toUTF16().getAddress());
+    Steinberg::UString (result, 128).assign (toString(source));
 }
 
 #if JUCE_WINDOWS
