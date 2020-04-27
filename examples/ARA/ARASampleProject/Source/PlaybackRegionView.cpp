@@ -43,6 +43,16 @@ void PlaybackRegionView::mouseDoubleClick (const MouseEvent& /*event*/)
     audioModification->notifyContentChanged (ARAContentUpdateScopes::samplesAreAffected(), true);
 }
 
+void PlaybackRegionView::updateBounds()
+{
+    const auto regionTimeRange = getTimeRange();
+    const auto& trackHeaderView = regionSequenceViewController.getTrackHeaderView();
+    const int startX = documentView.getPlaybackRegionsViewsXForTime (regionTimeRange.getStart());
+    const int endX = documentView.getPlaybackRegionsViewsXForTime (regionTimeRange.getEnd());
+    const int width = jmax (1, endX - startX);
+    setBounds (startX, trackHeaderView.getY(), width, trackHeaderView.getHeight());
+}
+
 //==============================================================================
 void PlaybackRegionView::paint (Graphics& g)
 {

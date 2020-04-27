@@ -24,6 +24,8 @@ public:
     ARAPlaybackRegion* getPlaybackRegion() const { return playbackRegion; }
     Range<double> getTimeRange() const { return playbackRegion->getTimeRange(); }
 
+    void updateBounds();
+
     void paint (Graphics&) override;
 
     void mouseDoubleClick (const MouseEvent& event) override;

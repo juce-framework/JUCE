@@ -44,13 +44,7 @@ void RegionSequenceViewController::setRegionsViewBoundsByYRange (int y, int heig
     trackHeaderView.setBounds (0, y, trackHeaderView.getParentWidth(), height);
 
     for (auto regionView : playbackRegionViews)
-    {
-        const auto regionTimeRange = regionView->getTimeRange();
-        const int startX = documentView.getPlaybackRegionsViewsXForTime (regionTimeRange.getStart());
-        const int endX = documentView.getPlaybackRegionsViewsXForTime (regionTimeRange.getEnd());
-        const int width = jmax (1, endX - startX);
-        regionView->setBounds (startX, y, width, height);
-    }
+        regionView->updateBounds();
 }
 
 //==============================================================================
