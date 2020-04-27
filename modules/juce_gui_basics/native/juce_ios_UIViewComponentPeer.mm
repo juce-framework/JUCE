@@ -93,6 +93,23 @@ namespace Orientations
     }
 }
 
+struct AsyncBoundsUpdater  : public AsyncUpdater
+{
+    AsyncBoundsUpdater (UIViewController* vc)
+        : viewController (vc)
+    {
+    }
+
+    ~AsyncBoundsUpdater() override
+    {
+        cancelPendingUpdate();
+    }
+
+    void handleAsyncUpdate() override;
+
+    UIViewController* viewController;
+};
+
 //==============================================================================
 } // namespace juce
 
@@ -126,7 +143,11 @@ using namespace juce;
 //==============================================================================
 @interface JuceUIViewController : UIViewController
 {
+@public
+    std::unique_ptr<AsyncBoundsUpdater> boundsUpdater;
 }
+
+- (JuceUIViewController*) init;
 
 - (NSUInteger) supportedInterfaceOrientations;
 - (BOOL) shouldAutorotateToInterfaceOrientation: (UIInterfaceOrientation) interfaceOrientation;
@@ -334,6 +355,11 @@ static void sendScreenBoundsUpdate (JuceUIViewController* c)
         juceView->owner->updateTransformAndScreenBounds();
 }
 
+void AsyncBoundsUpdater::handleAsyncUpdate()
+{
+    sendScreenBoundsUpdate ((JuceUIViewController*) viewController);
+}
+
 static bool isKioskModeView (JuceUIViewController* c)
 {
     JuceUIView* juceView = (JuceUIView*) [c view];
@@ -349,6 +375,15 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 //==============================================================================
 //==============================================================================
 @implementation JuceUIViewController
+
+- (JuceUIViewController*) init
+{
+    self = [super init];
+
+    boundsUpdater = std::make_unique<AsyncBoundsUpdater> (self);
+
+    return self;
+}
 
 - (NSUInteger) supportedInterfaceOrientations
 {
@@ -382,7 +417,8 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 
     // On some devices the screen-size isn't yet updated at this point, so also trigger another
     // async update to double-check..
-    MessageManager::callAsync ([=] { sendScreenBoundsUpdate (self); });
+    if (boundsUpdater != nullptr)
+        boundsUpdater->triggerAsyncUpdate();
 }
 
 - (BOOL) prefersStatusBarHidden
@@ -620,6 +656,8 @@ UIViewComponentPeer::~UIViewComponentPeer()
 {
     currentTouches.deleteAllTouchesForPeer (this);
     Desktop::getInstance().removeFocusChangeListener (this);
+
+    ((JuceUIViewController*) controller)->boundsUpdater = nullptr;
 
     view->owner = nullptr;
     [view removeFromSuperview];
