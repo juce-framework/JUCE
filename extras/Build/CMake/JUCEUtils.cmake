@@ -2216,6 +2216,8 @@ elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         $<$<CONFIG:Release>:-O3>)
 endif()
 
+install(TARGETS juce_recommended_config_flags EXPORT JUCE)
+
 # ==================================================================================================
 
 add_library(juce_recommended_lto_flags INTERFACE)
@@ -2230,3 +2232,5 @@ elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     target_compile_options(juce_recommended_lto_flags INTERFACE $<$<CONFIG:Release>:-flto>)
     target_link_libraries(juce_recommended_lto_flags INTERFACE $<$<CONFIG:Release>:-flto>)
 endif()
+
+install(TARGETS juce_recommended_lto_flags EXPORT JUCE)
