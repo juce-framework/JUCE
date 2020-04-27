@@ -416,6 +416,16 @@ endfunction()
 
 # ==================================================================================================
 
+function(_juce_link_libs_from_metadata module_name dict key)
+    _juce_get_metadata("${dict}" "${key}" libs)
+
+    if(libs)
+        target_link_libraries(${module_name} INTERFACE ${libs})
+    endif()
+endfunction()
+
+# ==================================================================================================
+
 function(juce_add_module module_path)
     set(one_value_args INSTALL_PATH INSTALL_EXPORT ALIAS_NAMESPACE)
     cmake_parse_arguments(JUCE_ARG "" "${one_value_args}" "" ${ARGN})
@@ -521,6 +531,8 @@ function(juce_add_module module_path)
             find_library("${module_name}_${module_framework}" ${module_framework} REQUIRED)
             target_link_libraries(${module_name} INTERFACE "${${module_name}_${module_framework}}")
         endforeach()
+
+        _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" OSXLibs)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
         _juce_get_metadata("${metadata_dict}" iOSFrameworks module_iosframeworks)
 
@@ -532,6 +544,8 @@ function(juce_add_module module_path)
             find_library("${module_name}_${module_framework}" ${module_framework} REQUIRED)
             target_link_libraries(${module_name} INTERFACE "${${module_name}_${module_framework}}")
         endforeach()
+
+        _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" iOSLibs)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         _juce_get_metadata("${metadata_dict}" linuxPackages module_linuxpackages)
 
@@ -540,13 +554,11 @@ function(juce_add_module module_path)
             target_link_libraries(${module_name} INTERFACE juce::pkgconfig_${module_name}_LINUX_DEPS)
         endif()
 
-        _juce_get_metadata("${metadata_dict}" linuxLibs module_linuxlibs)
-
-        if(module_linuxlibs)
-            target_link_libraries(${module_name} INTERFACE ${module_linuxlibs})
-        endif()
+        _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" linuxLibs)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         target_compile_options(${module_name} INTERFACE /bigobj)
+
+        _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" windowsLibs)
     endif()
 
     _juce_get_metadata("${metadata_dict}" dependencies module_dependencies)
