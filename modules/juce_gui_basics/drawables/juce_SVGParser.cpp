@@ -1581,10 +1581,10 @@ private:
             }();
 
             if (text.startsWith ("hsl"))
-                return Colour ((float) (tokens[0].getDoubleValue() / 360.0),
-                               (float) (tokens[1].getDoubleValue() / 100.0),
-                               (float) (tokens[2].getDoubleValue() / 100.0),
-                               alpha);
+                return Colour::fromHSL ((float) (tokens[0].getDoubleValue() / 360.0),
+                                        (float) (tokens[1].getDoubleValue() / 100.0),
+                                        (float) (tokens[2].getDoubleValue() / 100.0),
+                                        alpha);
 
             if (tokens[0].containsChar ('%'))
                 return Colour ((uint8) roundToInt (2.55 * tokens[0].getDoubleValue()),
