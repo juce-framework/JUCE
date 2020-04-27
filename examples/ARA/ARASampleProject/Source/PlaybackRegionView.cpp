@@ -4,10 +4,11 @@
 #include "ARASampleProjectAudioModification.h"
 
 //==============================================================================
-PlaybackRegionView::PlaybackRegionView (DocumentView& docView, ARAPlaybackRegion* region)
-    : documentView (docView),
+PlaybackRegionView::PlaybackRegionView (RegionSequenceViewController& viewController, ARAPlaybackRegion* region)
+    : regionSequenceViewController (viewController),
+      documentView (regionSequenceViewController.getDocumentView()),
       playbackRegion (region),
-      audioThumb (128, docView.getAudioFormatManger(), *sharedAudioThumbnailCache)
+      audioThumb (128, documentView.getAudioFormatManger(), *sharedAudioThumbnailCache)
 {
     audioThumb.addChangeListener (this);
 

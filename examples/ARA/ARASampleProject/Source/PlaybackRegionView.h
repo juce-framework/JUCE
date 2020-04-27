@@ -18,7 +18,7 @@ class PlaybackRegionView    : public Component,
                               private ARAPlaybackRegion::Listener
 {
 public:
-    PlaybackRegionView (DocumentView& documentView, ARAPlaybackRegion* region);
+    PlaybackRegionView (RegionSequenceViewController& viewController, ARAPlaybackRegion* region);
     ~PlaybackRegionView();
 
     ARAPlaybackRegion* getPlaybackRegion() const { return playbackRegion; }
@@ -64,6 +64,7 @@ private:
     };
     SharedResourcePointer<SharedAudioThumbnailCache> sharedAudioThumbnailCache;
 
+    RegionSequenceViewController& regionSequenceViewController;
     DocumentView& documentView;
     ARAPlaybackRegion* playbackRegion;
     bool isSelected { false };

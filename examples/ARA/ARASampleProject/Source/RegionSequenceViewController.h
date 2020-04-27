@@ -31,6 +31,8 @@ public:
     void willDestroyRegionSequence (ARARegionSequence* regionSequence) override;
     void willUpdateRegionSequenceProperties (ARARegionSequence* regionSequence, ARARegionSequence::PropertiesPtr newProperties) override;
 
+    DocumentView& getDocumentView() const { return documentView; }
+
 private:
     void addRegionSequenceViewAndMakeVisible (ARAPlaybackRegion* playbackRegion);
     void detachFromRegionSequence();

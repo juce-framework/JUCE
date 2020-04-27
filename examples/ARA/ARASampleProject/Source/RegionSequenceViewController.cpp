@@ -23,7 +23,7 @@ RegionSequenceViewController::~RegionSequenceViewController()
 
 void RegionSequenceViewController::addRegionSequenceViewAndMakeVisible (ARAPlaybackRegion* playbackRegion)
 {
-    auto view = new PlaybackRegionView (documentView, playbackRegion);
+    auto view = new PlaybackRegionView (*this, playbackRegion);
     playbackRegionViews.add (view);
     documentView.getPlaybackRegionsView().addAndMakeVisible (view);
 }
