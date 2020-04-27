@@ -47,6 +47,7 @@ namespace Orientations
             case UIInterfaceOrientationPortraitUpsideDown:  return Desktop::upsideDown;
             case UIInterfaceOrientationLandscapeLeft:       return Desktop::rotatedClockwise;
             case UIInterfaceOrientationLandscapeRight:      return Desktop::rotatedAntiClockwise;
+            case UIInterfaceOrientationUnknown:
             default:                                        jassertfalse; // unknown orientation!
         }
 
@@ -61,6 +62,7 @@ namespace Orientations
             case Desktop::upsideDown:                       return UIInterfaceOrientationPortraitUpsideDown;
             case Desktop::rotatedClockwise:                 return UIInterfaceOrientationLandscapeLeft;
             case Desktop::rotatedAntiClockwise:             return UIInterfaceOrientationLandscapeRight;
+            case Desktop::allOrientations:
             default:                                        jassertfalse; // unknown orientation!
         }
 
@@ -76,7 +78,9 @@ namespace Orientations
                 case Desktop::upsideDown:             return CGAffineTransformMake (-1, 0,  0, -1, 0, 0);
                 case Desktop::rotatedClockwise:       return CGAffineTransformMake (0, -1,  1,  0, 0, 0);
                 case Desktop::rotatedAntiClockwise:   return CGAffineTransformMake (0,  1, -1,  0, 0, 0);
-                default: break;
+                case Desktop::upright:
+                case Desktop::allOrientations:
+                default:                              break;
             }
         }
 
@@ -267,6 +271,7 @@ public:
                     return Rectangle<int> (screen.getWidth() - r.getBottom(), r.getX(),
                                            r.getHeight(), r.getWidth());
 
+                case UIInterfaceOrientationUnknown:
                 default: jassertfalse; // unknown orientation!
             }
         }
@@ -297,6 +302,7 @@ public:
                     return Rectangle<int> (r.getY(), screen.getWidth() - r.getRight(),
                                            r.getHeight(), r.getWidth());
 
+                case UIInterfaceOrientationUnknown:
                 default: jassertfalse; // unknown orientation!
             }
         }
