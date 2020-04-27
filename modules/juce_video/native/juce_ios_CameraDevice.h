@@ -270,7 +270,8 @@ private:
             {
                 case AVCaptureAutoFocusSystemPhaseDetection:    autoFocusSystemString = "PhaseDetection";    break;
                 case AVCaptureAutoFocusSystemContrastDetection: autoFocusSystemString = "ContrastDetection"; break;
-                default: autoFocusSystemString = "None";
+                case AVCaptureAutoFocusSystemNone:
+                default:                                        autoFocusSystemString = "None";
             }
             JUCE_CAMERA_LOG ("Auto focus system: " + autoFocusSystemString);
 
@@ -859,6 +860,10 @@ private:
                             CGContextScaleCTM (context, targetSize.height / origHeight, -targetSize.width / origWidth);
                             CGContextTranslateCTM (context, -targetSize.width, -targetSize.height);
                             break;
+                        case kCGImagePropertyOrientationUpMirrored:
+                        case kCGImagePropertyOrientationDownMirrored:
+                        case kCGImagePropertyOrientationLeftMirrored:
+                        case kCGImagePropertyOrientationRightMirrored:
                         default:
                             // Not implemented.
                             jassertfalse;
