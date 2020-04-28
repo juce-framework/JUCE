@@ -208,9 +208,21 @@ public:
             {
                 String copyCmd ("JUCE_COPYCMD_" + getTargetVarName() + String (" := $(JUCE_OUTDIR)/"));
 
-                if      (type == VST3PlugIn)   s.add (copyCmd + "$(JUCE_VST3DIR) "    + config.getVST3BinaryLocationString());
-                else if (type == VSTPlugIn)    s.add (copyCmd + targetName + " "      + config.getVSTBinaryLocationString());
-                else if (type == UnityPlugIn)  s.add (copyCmd + "$(JUCE_UNITYDIR)/. " + config.getUnityPluginBinaryLocationString());
+                if (type == VST3PlugIn)
+                {
+                    s.add ("JUCE_VST3DESTDIR := " + config.getVST3BinaryLocationString());
+                    s.add (copyCmd + "$(JUCE_VST3DIR) $(JUCE_VST3DESTDIR)");
+                }
+                else if (type == VSTPlugIn)
+                {
+                    s.add ("JUCE_VSTDESTDIR := " + config.getVSTBinaryLocationString());
+                    s.add (copyCmd + targetName + " $(JUCE_VSTDESTDIR)");
+                }
+                else if (type == UnityPlugIn)
+                {
+                    s.add ("JUCE_UNITYDESTDIR := " + config.getUnityPluginBinaryLocationString());
+                    s.add (copyCmd + "$(JUCE_UNITYDIR)/. $(JUCE_UNITYDESTDIR)");
+                }
             }
 
             return s;
@@ -328,11 +340,13 @@ public:
 
             if (type == VST3PlugIn)
             {
-                out << "\t-$(V_AT)cp -R $(JUCE_COPYCMD_VST3)" << newLine;
+                out << "\t-$(V_AT)mkdir -p $(JUCE_VST3DESTDIR)" << newLine
+                    << "\t-$(V_AT)cp -R $(JUCE_COPYCMD_VST3)"   << newLine;
             }
             else if (type == VSTPlugIn)
             {
-                out << "\t-$(V_AT)cp $(JUCE_COPYCMD_VST)" << newLine;
+                out << "\t-$(V_AT)mkdir -p $(JUCE_VSTDESTDIR)" << newLine
+                    << "\t-$(V_AT)cp -R $(JUCE_COPYCMD_VST)"   << newLine;
             }
             else if (type == UnityPlugIn)
             {
@@ -343,7 +357,8 @@ public:
                                                       build_tools::RelativePath::projectFolder);
 
                 out << "\t-$(V_AT)cp " + scriptPath.toUnixStyle() + " $(JUCE_OUTDIR)/$(JUCE_UNITYDIR)" << newLine
-                    << "\t-$(V_AT)cp -R $(JUCE_COPYCMD_UNITY_PLUGIN)" << newLine;
+                    << "\t-$(V_AT)mkdir -p $(JUCE_UNITYDESTDIR)"                                       << newLine
+                    << "\t-$(V_AT)cp -R $(JUCE_COPYCMD_UNITY_PLUGIN)"                                  << newLine;
             }
 
             out << newLine;
