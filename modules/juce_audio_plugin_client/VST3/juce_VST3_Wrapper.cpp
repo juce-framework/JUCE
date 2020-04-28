@@ -1050,10 +1050,13 @@ private:
        #if JUCE_LINUX
         void PLUGIN_API onFDIsSet (Steinberg::Linux::FileDescriptor fd) override
         {
-            auto it = fdCallbackMap.find (fd);
+            if (plugFrame != nullptr)
+            {
+                auto it = fdCallbackMap.find (fd);
 
-            if (it != fdCallbackMap.end())
-                it->second (fd);
+                if (it != fdCallbackMap.end())
+                    it->second (fd);
+            }
         }
        #endif
 
