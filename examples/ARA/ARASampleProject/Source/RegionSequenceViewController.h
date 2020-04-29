@@ -32,6 +32,7 @@ public:
     void willUpdateRegionSequenceProperties (ARARegionSequence* regionSequence, ARARegionSequence::PropertiesPtr newProperties) override;
 
     DocumentView& getDocumentView() const { return documentView; }
+    const TrackHeaderView& getTrackHeaderView() const { return trackHeaderView; }
 
 private:
     void addRegionSequenceViewAndMakeVisible (ARAPlaybackRegion* playbackRegion);
