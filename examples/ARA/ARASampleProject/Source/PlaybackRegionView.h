@@ -43,6 +43,7 @@ public:
     void willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) override;
     void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) override;
     void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARAAudioSource::PropertiesPtr newProperties) override;
+
     // ARAAudioModification::Listener overrides
     void willUpdateAudioModificationProperties (ARAAudioModification* audioModification, ARAAudioModification::PropertiesPtr newProperties) override;
 
