@@ -384,10 +384,8 @@ public:
         Further, all listeners will be notified immediately.
 
         @param scopeFlags The scope of the content update.
-        @param notifyAllAudioModificationsAndPlaybackRegions A bool indicating whether all audio modifications and playback
-                                                             regions associated with this audio source should be notified too.
     */
-    void notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions = false);
+    void notifyContentChanged (ARAContentUpdateScopes scopeFlags);
 
 private:
     friend ARADocumentController;
@@ -473,10 +471,8 @@ public:
         Further, all listeners will be notified immediately.
 
         @param scopeFlags The scope of the content update.
-        @param notifyAllPlaybackRegions A bool indicating whether the audio modification's
-                                        playback regions should be notified of the content change.
     */
-    void notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllPlaybackRegions = false);
+    void notifyContentChanged (ARAContentUpdateScopes scopeFlags);
 };
 
 
