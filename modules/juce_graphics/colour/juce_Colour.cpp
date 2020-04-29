@@ -104,7 +104,7 @@ namespace ColourHelpers
             auto min = (2.0f * l) - v;
             auto sv = (v - min) / v;
 
-            h = jlimit (0.0f, 360.0f, h * 360.0f) / 60.0f;
+            h = jlimit (0.0f, 360.0f, std::fmod (h, 1.0f) * 360.0f) / 60.0f;
             auto f = h - std::floor (h);
             auto vsf = v * sv * f;
             auto mid1 = min + vsf;
@@ -160,7 +160,7 @@ namespace ColourHelpers
                 return PixelARGB (alpha, intV, intV, intV);
 
             s = jmin (1.0f, s);
-            h = jlimit (0.0f, 360.0f, h * 360.0f) / 60.0f;
+            h = jlimit (0.0f, 360.0f, std::fmod (h, 1.0f) * 360.0f) / 60.0f;
             auto f = h - std::floor (h);
             auto x = (uint8) roundToInt (v * (1.0f - s));
 
@@ -309,14 +309,14 @@ bool Colour::isOpaque() const noexcept
     return getAlpha() == 0xff;
 }
 
-Colour Colour::withAlpha (const uint8 newAlpha) const noexcept
+Colour Colour::withAlpha (uint8 newAlpha) const noexcept
 {
     PixelARGB newCol (argb);
     newCol.setAlpha (newAlpha);
     return Colour (newCol);
 }
 
-Colour Colour::withAlpha (const float newAlpha) const noexcept
+Colour Colour::withAlpha (float newAlpha) const noexcept
 {
     jassert (newAlpha >= 0 && newAlpha <= 1.0f);
 
@@ -325,7 +325,7 @@ Colour Colour::withAlpha (const float newAlpha) const noexcept
     return Colour (newCol);
 }
 
-Colour Colour::withMultipliedAlpha (const float alphaMultiplier) const noexcept
+Colour Colour::withMultipliedAlpha (float alphaMultiplier) const noexcept
 {
     jassert (alphaMultiplier >= 0);
 
@@ -399,13 +399,15 @@ float Colour::getHue() const noexcept           { return ColourHelpers::HSB (*th
 float Colour::getSaturation() const noexcept    { return ColourHelpers::HSB (*this).saturation; }
 float Colour::getBrightness() const noexcept    { return ColourHelpers::HSB (*this).brightness; }
 
+float Colour::getSaturationHSL() const noexcept { return ColourHelpers::HSL (*this).saturation; }
 float Colour::getLightness() const noexcept     { return ColourHelpers::HSL (*this).lightness; }
 
 Colour Colour::withHue (float h) const noexcept          { ColourHelpers::HSB hsb (*this); hsb.hue = h;        return hsb.toColour (*this); }
 Colour Colour::withSaturation (float s) const noexcept   { ColourHelpers::HSB hsb (*this); hsb.saturation = s; return hsb.toColour (*this); }
 Colour Colour::withBrightness (float v) const noexcept   { ColourHelpers::HSB hsb (*this); hsb.brightness = v; return hsb.toColour (*this); }
 
-Colour Colour::withLightness (float l) const noexcept    { ColourHelpers::HSL hsl (*this); hsl.lightness = l; return hsl.toColour (*this); }
+Colour Colour::withSaturationHSL (float s) const noexcept { ColourHelpers::HSL hsl (*this); hsl.saturation = s; return hsl.toColour (*this); }
+Colour Colour::withLightness (float l) const noexcept     { ColourHelpers::HSL hsl (*this); hsl.lightness = l;  return hsl.toColour (*this); }
 
 float Colour::getPerceivedBrightness() const noexcept
 {
@@ -415,28 +417,35 @@ float Colour::getPerceivedBrightness() const noexcept
 }
 
 //==============================================================================
-Colour Colour::withRotatedHue (const float amountToRotate) const noexcept
+Colour Colour::withRotatedHue (float amountToRotate) const noexcept
 {
     ColourHelpers::HSB hsb (*this);
     hsb.hue += amountToRotate;
     return hsb.toColour (*this);
 }
 
-Colour Colour::withMultipliedSaturation (const float amount) const noexcept
+Colour Colour::withMultipliedSaturation (float amount) const noexcept
 {
     ColourHelpers::HSB hsb (*this);
     hsb.saturation = jmin (1.0f, hsb.saturation * amount);
     return hsb.toColour (*this);
 }
 
-Colour Colour::withMultipliedBrightness (const float amount) const noexcept
+Colour Colour::withMultipliedSaturationHSL (float amount) const noexcept
+{
+    ColourHelpers::HSL hsl (*this);
+    hsl.saturation = jmin (1.0f, hsl.saturation * amount);
+    return hsl.toColour (*this);
+}
+
+Colour Colour::withMultipliedBrightness (float amount) const noexcept
 {
     ColourHelpers::HSB hsb (*this);
     hsb.brightness = jmin (1.0f, hsb.brightness * amount);
     return hsb.toColour (*this);
 }
 
-Colour Colour::withMultipliedLightness (const float amount) const noexcept
+Colour Colour::withMultipliedLightness (float amount) const noexcept
 {
     ColourHelpers::HSL hsl (*this);
     hsl.lightness = jmin (1.0f, hsl.lightness * amount);
@@ -465,14 +474,14 @@ Colour Colour::darker (float amount) const noexcept
 }
 
 //==============================================================================
-Colour Colour::greyLevel (const float brightness) noexcept
+Colour Colour::greyLevel (float brightness) noexcept
 {
     auto level = ColourHelpers::floatToUInt8 (brightness);
     return Colour (level, level, level);
 }
 
 //==============================================================================
-Colour Colour::contrasting (const float amount) const noexcept
+Colour Colour::contrasting (float amount) const noexcept
 {
    return overlaidWith ((getPerceivedBrightness() >= 0.5f
                            ? Colours::black
@@ -550,168 +559,137 @@ public:
 
     void runTest() override
     {
+        auto testColour = [this] (Colour colour,
+                                  uint8 expectedRed, uint8 expectedGreen, uint8 expectedBlue,
+                                  uint8 expectedAlpha = 255, float expectedFloatAlpha = 1.0f)
+        {
+            expectEquals (colour.getRed(),        expectedRed);
+            expectEquals (colour.getGreen(),      expectedGreen);
+            expectEquals (colour.getBlue(),       expectedBlue);
+            expectEquals (colour.getAlpha(),      expectedAlpha);
+            expectEquals (colour.getFloatAlpha(), expectedFloatAlpha);
+        };
+
         beginTest ("Constructors");
         {
             Colour c1;
-            expectEquals (c1.getRed(),        (uint8) 0);
-            expectEquals (c1.getGreen(),      (uint8) 0);
-            expectEquals (c1.getBlue(),       (uint8) 0);
-            expectEquals (c1.getAlpha(),      (uint8) 0);
-            expectEquals (c1.getFloatAlpha(), 0.0f);
+            testColour (c1, (uint8) 0, (uint8) 0, (uint8) 0, (uint8) 0, 0.0f);
 
             Colour c2 ((uint32) 0);
-            expectEquals (c2.getRed(),        (uint8) 0);
-            expectEquals (c2.getGreen(),      (uint8) 0);
-            expectEquals (c2.getBlue(),       (uint8) 0);
-            expectEquals (c2.getAlpha(),      (uint8) 0);
-            expectEquals (c2.getFloatAlpha(), 0.0f);
+            testColour (c2, (uint8) 0, (uint8) 0, (uint8) 0, (uint8) 0, 0.0f);
 
             Colour c3 ((uint32) 0xffffffff);
-            expectEquals (c3.getRed(),        (uint8) 255);
-            expectEquals (c3.getGreen(),      (uint8) 255);
-            expectEquals (c3.getBlue(),       (uint8) 255);
-            expectEquals (c3.getAlpha(),      (uint8) 255);
-            expectEquals (c3.getFloatAlpha(), 1.0f);
+            testColour (c3, (uint8) 255, (uint8) 255, (uint8) 255, (uint8) 255, 1.0f);
 
             Colour c4 (0, 0, 0);
-            expectEquals (c4.getRed(),        (uint8) 0);
-            expectEquals (c4.getGreen(),      (uint8) 0);
-            expectEquals (c4.getBlue(),       (uint8) 0);
-            expectEquals (c4.getAlpha(),      (uint8) 255);
-            expectEquals (c4.getFloatAlpha(), 1.0f);
+            testColour (c4, (uint8) 0, (uint8) 0, (uint8) 0, (uint8) 255, 1.0f);
 
             Colour c5 (255, 255, 255);
-            expectEquals (c5.getRed(),        (uint8) 255);
-            expectEquals (c5.getGreen(),      (uint8) 255);
-            expectEquals (c5.getBlue(),       (uint8) 255);
-            expectEquals (c5.getAlpha(),      (uint8) 255);
-            expectEquals (c5.getFloatAlpha(), 1.0f);
+            testColour (c5, (uint8) 255, (uint8) 255, (uint8) 255, (uint8) 255, 1.0f);
 
             Colour c6 ((uint8) 0, (uint8) 0, (uint8) 0, (uint8) 0);
-            expectEquals (c6.getRed(),        (uint8) 0);
-            expectEquals (c6.getGreen(),      (uint8) 0);
-            expectEquals (c6.getBlue(),       (uint8) 0);
-            expectEquals (c6.getAlpha(),      (uint8) 0);
-            expectEquals (c6.getFloatAlpha(), 0.0f);
+            testColour (c6, (uint8) 0, (uint8) 0, (uint8) 0, (uint8) 0, 0.0f);
 
             Colour c7 ((uint8) 255, (uint8) 255, (uint8) 255, (uint8) 255);
-            expectEquals (c7.getRed(),        (uint8) 255);
-            expectEquals (c7.getGreen(),      (uint8) 255);
-            expectEquals (c7.getBlue(),       (uint8) 255);
-            expectEquals (c7.getAlpha(),      (uint8) 255);
-            expectEquals (c7.getFloatAlpha(), 1.0f);
+            testColour (c7, (uint8) 255, (uint8) 255, (uint8) 255, (uint8) 255, 1.0f);
 
             Colour c8 ((uint8) 0, (uint8) 0, (uint8) 0, 0.0f);
-            expectEquals (c8.getRed(),        (uint8) 0);
-            expectEquals (c8.getGreen(),      (uint8) 0);
-            expectEquals (c8.getBlue(),       (uint8) 0);
-            expectEquals (c8.getAlpha(),      (uint8) 0);
-            expectEquals (c8.getFloatAlpha(), 0.0f);
+            testColour (c8, (uint8) 0, (uint8) 0, (uint8) 0, (uint8) 0, 0.0f);
 
             Colour c9 ((uint8) 255, (uint8) 255, (uint8) 255, 1.0f);
-            expectEquals (c9.getRed(),        (uint8) 255);
-            expectEquals (c9.getGreen(),      (uint8) 255);
-            expectEquals (c9.getBlue(),       (uint8) 255);
-            expectEquals (c9.getAlpha(),      (uint8) 255);
-            expectEquals (c9.getFloatAlpha(), 1.0f);
+            testColour (c9, (uint8) 255, (uint8) 255, (uint8) 255, (uint8) 255, 1.0f);
         }
 
         beginTest ("HSV");
         {
-            auto testHSV = [this] (int hueDegrees, int saturationPercentage, int brightnessPercentage,
-                                   uint8 expectedRed, uint8 expectedGreen, uint8 expectedBlue)
-            {
-                auto testColour = Colour::fromHSV (hueDegrees / 360.0f,
-                                                   saturationPercentage / 100.0f,
-                                                   brightnessPercentage / 100.0f,
-                                                   1.0f);
-
-                expectEquals (testColour.getRed(),   expectedRed);
-                expectEquals (testColour.getGreen(), expectedGreen);
-                expectEquals (testColour.getBlue(),  expectedBlue);
-            };
-
             // black
-            testHSV (0, 0, 0, 0, 0, 0);
+            testColour (Colour::fromHSV (0.0f, 0.0f, 0.0f, 1.0f), 0, 0, 0);
             // white
-            testHSV (0, 0, 100, 255, 255, 255);
+            testColour (Colour::fromHSV (0.0f, 0.0f, 1.0f, 1.0f), 255, 255, 255);
             // red
-            testHSV (0, 100, 100, 255, 0, 0);
+            testColour (Colour::fromHSV (0.0f, 1.0f, 1.0f, 1.0f), 255, 0, 0);
+            testColour (Colour::fromHSV (1.0f, 1.0f, 1.0f, 1.0f), 255, 0, 0);
             // lime
-            testHSV (120, 100, 100, 0, 255, 0);
+            testColour (Colour::fromHSV (120 / 360.0f, 1.0f, 1.0f, 1.0f), 0, 255, 0);
             // blue
-            testHSV (240, 100, 100, 0, 0, 255);
+            testColour (Colour::fromHSV (240 / 360.0f, 1.0f, 1.0f, 1.0f), 0, 0, 255);
             // yellow
-            testHSV (60, 100, 100, 255, 255, 0);
+            testColour (Colour::fromHSV (60 / 360.0f, 1.0f, 1.0f, 1.0f), 255, 255, 0);
             // cyan
-            testHSV (180, 100, 100, 0, 255, 255);
+            testColour (Colour::fromHSV (180 / 360.0f, 1.0f, 1.0f, 1.0f), 0, 255, 255);
             // magenta
-            testHSV (300, 100, 100, 255, 0, 255);
+            testColour (Colour::fromHSV (300 / 360.0f, 1.0f, 1.0f, 1.0f), 255, 0, 255);
             // silver
-            testHSV (0, 0, 75, 191, 191, 191);
+            testColour (Colour::fromHSV (0.0f, 0.0f, 0.75f, 1.0f), 191, 191, 191);
             // grey
-            testHSV (0, 0, 50, 128, 128, 128);
+            testColour (Colour::fromHSV (0.0f, 0.0f, 0.5f, 1.0f), 128, 128, 128);
             // maroon
-            testHSV (0, 100, 50, 128, 0, 0);
+            testColour (Colour::fromHSV (0.0f, 1.0f, 0.5f, 1.0f), 128, 0, 0);
             // olive
-            testHSV (60, 100, 50, 128, 128, 0);
+            testColour (Colour::fromHSV (60 / 360.0f, 1.0f, 0.5f, 1.0f), 128, 128, 0);
             // green
-            testHSV (120, 100, 50, 0, 128, 0);
+            testColour (Colour::fromHSV (120 / 360.0f, 1.0f, 0.5f, 1.0f), 0, 128, 0);
             // purple
-            testHSV (300, 100, 50, 128, 0, 128);
+            testColour (Colour::fromHSV (300 / 360.0f, 1.0f, 0.5f, 1.0f), 128, 0, 128);
             // teal
-            testHSV (180, 100, 50, 0, 128, 128);
+            testColour (Colour::fromHSV (180 / 360.0f, 1.0f, 0.5f, 1.0f), 0, 128, 128);
             // navy
-            testHSV (240, 100, 50, 0, 0, 128);
+            testColour (Colour::fromHSV (240 / 360.0f, 1.0f, 0.5f, 1.0f), 0, 0, 128);
         }
 
         beginTest ("HSL");
         {
-            auto testHSL = [this] (int hueDegrees, int saturationPercentage, int lightnessPercentage,
-                                   uint8 expectedRed, uint8 expectedGreen, uint8 expectedBlue)
-            {
-                auto testColour = Colour::fromHSL (hueDegrees / 360.0f,
-                                                   saturationPercentage / 100.0f,
-                                                   lightnessPercentage / 100.0f,
-                                                   1.0f);
-
-                expectEquals (testColour.getRed(),   expectedRed);
-                expectEquals (testColour.getGreen(), expectedGreen);
-                expectEquals (testColour.getBlue(),  expectedBlue);
-            };
-
             // black
-            testHSL (0, 0, 0, 0, 0, 0);
+            testColour (Colour::fromHSL (0.0f, 0.0f, 0.0f, 1.0f), 0, 0, 0);
             // white
-            testHSL (0, 0, 100, 255, 255, 255);
+            testColour (Colour::fromHSL (0.0f, 0.0f, 1.0f, 1.0f), 255, 255, 255);
             // red
-            testHSL (0, 100, 50, 255, 0, 0);
+            testColour (Colour::fromHSL (0.0f, 1.0f, 0.5f, 1.0f), 255, 0, 0);
+            testColour (Colour::fromHSL (1.0f, 1.0f, 0.5f, 1.0f), 255, 0, 0);
             // lime
-            testHSL (120, 100, 50, 0, 255, 0);
+            testColour (Colour::fromHSL (120 / 360.0f, 1.0f, 0.5f, 1.0f), 0, 255, 0);
             // blue
-            testHSL (240, 100, 50, 0, 0, 255);
+            testColour (Colour::fromHSL (240 / 360.0f, 1.0f, 0.5f, 1.0f), 0, 0, 255);
             // yellow
-            testHSL (60, 100, 50, 255, 255, 0);
+            testColour (Colour::fromHSL (60 / 360.0f, 1.0f, 0.5f, 1.0f), 255, 255, 0);
             // cyan
-            testHSL (180, 100, 50, 0, 255, 255);
+            testColour (Colour::fromHSL (180 / 360.0f, 1.0f, 0.5f, 1.0f), 0, 255, 255);
             // magenta
-            testHSL (300, 100, 50, 255, 0, 255);
+            testColour (Colour::fromHSL (300 / 360.0f, 1.0f, 0.5f, 1.0f), 255, 0, 255);
             // silver
-            testHSL (0, 0, 75, 191, 191, 191);
+            testColour (Colour::fromHSL (0.0f, 0.0f, 0.75f, 1.0f), 191, 191, 191);
             // grey
-            testHSL (0, 0, 50, 128, 128, 128);
+            testColour (Colour::fromHSL (0.0f, 0.0f, 0.5f, 1.0f), 128, 128, 128);
             // maroon
-            testHSL (0, 100, 25, 128, 0, 0);
+            testColour (Colour::fromHSL (0.0f, 1.0f, 0.25f, 1.0f), 128, 0, 0);
             // olive
-            testHSL (60, 100, 25, 128, 128, 0);
+            testColour (Colour::fromHSL (60 / 360.0f, 1.0f, 0.25f, 1.0f), 128, 128, 0);
             // green
-            testHSL (120, 100, 25, 0, 128, 0);
+            testColour (Colour::fromHSL (120 / 360.0f, 1.0f, 0.25f, 1.0f), 0, 128, 0);
             // purple
-            testHSL (300, 100, 25, 128, 0, 128);
+            testColour (Colour::fromHSL (300 / 360.0f, 1.0f, 0.25f, 1.0f), 128, 0, 128);
             // teal
-            testHSL (180, 100, 25, 0, 128, 128);
+            testColour (Colour::fromHSL (180 / 360.0f, 1.0f, 0.25f, 1.0f), 0, 128, 128);
             // navy
-            testHSL (240, 100, 25, 0, 0, 128);
+            testColour (Colour::fromHSL (240 / 360.0f, 1.0f, 0.25f, 1.0f), 0, 0, 128);
+        }
+
+        beginTest ("Modifiers");
+        {
+            Colour red (255, 0, 0);
+            testColour (red, 255, 0, 0);
+
+            testColour (red.withHue (120.0f / 360.0f), 0, 255, 0);
+            testColour (red.withSaturation (0.5f), 255, 128, 128);
+            testColour (red.withSaturationHSL (0.5f), 191, 64, 64);
+            testColour (red.withBrightness (0.5f), 128, 0, 0);
+            testColour (red.withLightness (1.0f), 255, 255, 255);
+            testColour (red.withRotatedHue (120.0f / 360.0f), 0, 255, 0);
+            testColour (red.withRotatedHue (480.0f / 360.0f), 0, 255, 0);
+            testColour (red.withMultipliedSaturation (0.0f), 255, 255, 255);
+            testColour (red.withMultipliedSaturationHSL (0.0f), 128, 128, 128);
+            testColour (red.withMultipliedBrightness (0.5f), 128, 0, 0);
+            testColour (red.withMultipliedLightness (2.0f), 255, 255, 255);
         }
     }
 };
