@@ -255,6 +255,11 @@ public:
     */
     float getSaturation() const noexcept;
 
+    /** Returns the colour's saturation component as represented in the HSL colour space.
+        The value returned is in the range 0.0 to 1.0
+    */
+    float getSaturationHSL() const noexcept;
+
     /** Returns the colour's brightness component.
         The value returned is in the range 0.0 to 1.0
     */
@@ -292,6 +297,9 @@ public:
     /** Returns a copy of this colour with a different saturation. */
     Colour withSaturation (float newSaturation) const noexcept;
 
+    /** Returns a copy of this colour with a different saturation in the HSL colour space. */
+    Colour withSaturationHSL (float newSaturation) const noexcept;
+
     /** Returns a copy of this colour with a different brightness.
         @see brighter, darker, withMultipliedBrightness
     */
@@ -313,6 +321,14 @@ public:
         (the result is clipped to legal limits).
     */
     Colour withMultipliedSaturation (float multiplier) const noexcept;
+
+    /** Returns a copy of this colour with its saturation multiplied by the given value.
+        The new colour's saturation is (this->getSaturation() * multiplier)
+        (the result is clipped to legal limits).
+
+        This will be in the HSL colour space.
+    */
+    Colour withMultipliedSaturationHSL (float multiplier) const noexcept;
 
     /** Returns a copy of this colour with its brightness multiplied by the given value.
         The new colour's brightness is (this->getBrightness() * multiplier)
