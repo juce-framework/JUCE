@@ -26,7 +26,16 @@ bool ARASampleProjectDocumentController::doRestoreObjectsFromStream (ARAInputStr
         if (!audioModification)
             continue;
 
+        bool reverseStateChanged = (reverse != audioModification->getReversePlayback());
         audioModification->setReversePlayback (reverse);
+
+        // if the reverse state changed, send a sample content change notification without notifying the host
+        if (reverseStateChanged)
+        {
+            audioModification->notifyContentChanged (ARAContentUpdateScopes::samplesAreAffected(), false);
+            for (auto araPlaybackRegion : audioModification->getPlaybackRegions<ARAPlaybackRegion>())
+                araPlaybackRegion->notifyContentChanged (ARAContentUpdateScopes::samplesAreAffected(), false);
+        }
     }
 
     getHostArchivingController()->notifyDocumentUnarchivingProgress (1.0f);

@@ -43,9 +43,9 @@ void PlaybackRegionView::mouseDoubleClick (const MouseEvent& /*event*/)
     audioModification->setReversePlayback (! audioModification->getReversePlayback());
 
     // send a content change notification for the modification and all associated playback regions
-    audioModification->notifyContentChanged (ARAContentUpdateScopes::samplesAreAffected());
+    audioModification->notifyContentChanged (ARAContentUpdateScopes::samplesAreAffected(), true);
     for (auto araPlaybackRegion : audioModification->getPlaybackRegions<ARAPlaybackRegion>())
-        araPlaybackRegion->notifyContentChanged (ARAContentUpdateScopes::samplesAreAffected());
+        araPlaybackRegion->notifyContentChanged (ARAContentUpdateScopes::samplesAreAffected(), true);
 }
 
 void PlaybackRegionView::updateBounds()

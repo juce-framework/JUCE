@@ -303,7 +303,7 @@ void ARADocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::Play
             scopes += ARAContentUpdateScopes::notesAreAffected();
         // other content such as tempo or key signatures are not exported at playback region level
         // because this would simply mirror the musical context content.
-        araPlaybackRegion->notifyContentChanged (scopes);
+        araPlaybackRegion->notifyContentChanged (scopes, true);
     }
 }
 

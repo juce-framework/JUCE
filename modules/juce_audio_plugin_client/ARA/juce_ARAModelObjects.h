@@ -377,15 +377,16 @@ public:
 
     /** Notify the ARA host and any listeners of a content update initiated by the plug-in.
         This must be called by the plug-in model management code on the message thread whenever updating
-        the internal content representation, such as after successfully analyzing a new tempo map,
-        but it must not be called if the change is made in response to a content update in the host.
-        A notification to the host will be enqueued, and send out the next time it polls for updates.
-        This host notification should not be send if the update was triggered by the host via doUpdateAudioSourceContent().
-        Further, all listeners will be notified immediately.
+        the internal content representation, such as after successfully analyzing a new tempo map.
+        Listeners will be notified immediately. If \p notifyARAHost is true, a notification to the host
+        will be enqueued and sent out the next time it polls for updates.
+        \p notifyARAHost must be false if the update was triggered by the host via doUpdateAudioSourceContent(). 
+        Furthermore, \p notifyARAHost must be false if the updated content is being restored from an archive. 
 
         @param scopeFlags The scope of the content update.
+        @param notifyARAHost If true, the ARA host will be notified of the content change.
     */
-    void notifyContentChanged (ARAContentUpdateScopes scopeFlags);
+    void notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyARAHost);
 
 private:
     friend ARADocumentController;
@@ -467,12 +468,14 @@ public:
     /** Notify the ARA host and any listeners of a content update initiated by the plug-in.
         This must be called by the plug-in model management code on the message thread whenever updating
         the internal content representation, such as after the user editing the pitch of a note.
-        A notification to the host will be enqueued, and send out the next time it polls for updates.
-        Further, all listeners will be notified immediately.
+        Listeners will be notified immediately. If \p notifyARAHost is true, a notification to the host 
+        will be enqueued and sent out the next time it polls for updates.
+        \p notifyARAHost must be false if the updated content is being restored from an archive. 
 
         @param scopeFlags The scope of the content update.
+        @param notifyARAHost If true, the ARA host will be notified of the content change.
     */
-    void notifyContentChanged (ARAContentUpdateScopes scopeFlags);
+    void notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyARAHost);
 };
 
 
@@ -533,12 +536,13 @@ public:
         This must be called by the plug-in model management code on the message thread whenever updating
         the internal content representation, such as after the user edited the pitch of a note in the
         underlying audio modification.
-        A notification to the host will be enqueued, and send out the next time it polls for updates.
-        Further, all listeners will be notified immediately.
+        Listeners will be notified immediately. If \p notifyARAHost is true, a notification to the host 
+        will be enqueued and sent out the next time it polls for updates.
 
         @param scopeFlags The scope of the content update.
+        @param notifyARAHost If true, the ARA host will be notified of the content change.
     */
-    void notifyContentChanged (ARAContentUpdateScopes scopeFlags);
+    void notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyARAHost);
 };
 
 
