@@ -116,10 +116,7 @@ void DocumentView::invalidateRegionSequenceViews()
 
 void DocumentView::invalidateTimeRange()
 {
-    if (getDocumentController()->isHostEditingDocument() || getParentComponent() == nullptr)
-        timeRangeIsInvalid = true;
-    else
-        calculateTimeRange();
+    timeRangeIsInvalid = true;
 }
 
 //==============================================================================

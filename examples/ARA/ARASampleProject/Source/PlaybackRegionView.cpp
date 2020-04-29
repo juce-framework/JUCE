@@ -121,7 +121,7 @@ void PlaybackRegionView::didEndEditing (ARADocument* /*document*/)
     if (playbackRegionReader ==  nullptr || ! playbackRegionReader->isValid())
     {
         recreatePlaybackRegionReader();
-        documentView.invalidateTimeRange();
+        updateBounds();
         repaint();
     }
 }
@@ -159,6 +159,9 @@ void PlaybackRegionView::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* 
 {
     if (playbackRegion->getName() != newProperties->name || playbackRegion->getColor() != newProperties->color)
         repaint();
+
+    if (! (approximatelyEqual (playbackRegion->getStartInPlaybackTime(), newProperties->startInPlaybackTime) &&  approximatelyEqual (playbackRegion->getDurationInPlaybackTime(), newProperties->durationInPlaybackTime)))
+        documentView.invalidateTimeRange();
 }
 
 void PlaybackRegionView::didUpdatePlaybackRegionContent (ARAPlaybackRegion* /*playbackRegion*/, ARAContentUpdateScopes scopeFlags)
