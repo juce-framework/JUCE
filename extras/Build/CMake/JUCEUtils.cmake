@@ -1217,6 +1217,7 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
             set(arch_string $<IF:${is_platform_x64},x86_64,i386>)
 
             set_target_properties(${target_name} PROPERTIES
+                SUFFIX .so
                 LIBRARY_OUTPUT_DIRECTORY "${output_path}/Contents/${arch_string}-linux")
         endif()
 
