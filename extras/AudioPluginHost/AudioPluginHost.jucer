@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="NTe0XB0ij" name="AudioPluginHost" projectType="guiapp" version="1.0.0"
-              juceFolder="../../../juce" bundleIdentifier="com.roli.juce.pluginhost"
-              jucerVersion="5.4.7" companyName="ROLI Ltd." displaySplashScreen="0"
-              reportAppUsage="0" companyCopyright="ROLI Ltd.">
+              juceFolder="../../../juce" bundleIdentifier="com.juce.pluginhost"
+              jucerVersion="5.4.7" companyName="Raw Material Software Limited"
+              displaySplashScreen="0" reportAppUsage="0" companyCopyright="Raw Material Software Limited">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" rtasFolder="~/SDKs/PT_80_SDK" objCExtraSuffix="M73TRi"
                smallIcon="c97aUr" bigIcon="c97aUr" microphonePermissionNeeded="1"

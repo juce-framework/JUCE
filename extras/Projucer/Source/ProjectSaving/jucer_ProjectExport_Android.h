@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -73,8 +73,8 @@ public:
 
     static const char* getName()                         { return "Android"; }
     static const char* getValueTreeTypeName()            { return "ANDROIDSTUDIO"; }
-    static const char* getDefaultActivityClass()         { return "com.roli.juce.JuceActivity"; }
-    static const char* getDefaultApplicationClass()      { return "com.roli.juce.JuceApp"; }
+    static const char* getDefaultActivityClass()         { return "com.rmsl.juce.JuceActivity"; }
+    static const char* getDefaultApplicationClass()      { return "com.rmsl.juce.JuceApp"; }
 
     static AndroidProjectExporter* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
@@ -1033,13 +1033,13 @@ private:
         props.add (new TextPropertyComponent (androidCustomActivityClass, "Custom Android Activity", 256, false),
                    "If not empty, specifies the Android Activity class name stored in the app's manifest which "
                    "should be used instead of Android's default Activity. If you specify a custom Activity "
-                   "then you should implement onNewIntent() function like the one in com.roli.juce.JuceActivity, if "
+                   "then you should implement onNewIntent() function like the one in com.rmsl.juce.JuceActivity, if "
                    "you wish to be able to handle push notification events.");
 
         props.add (new TextPropertyComponent (androidCustomApplicationClass, "Custom Android Application", 256, false),
                    "If not empty, specifies the Android Application class name stored in the app's manifest which "
                    "should be used instead of JUCE's default JuceApp class. If you specify a custom App then you must "
-                   "call com.roli.juce.Java.initialiseJUCE somewhere in your code before calling any JUCE functions.");
+                   "call com.rmsl.juce.Java.initialiseJUCE somewhere in your code before calling any JUCE functions.");
 
         props.add (new TextPropertyComponent (androidVersionCode, "Android Version Code", 32, false),
                    "An integer value that represents the version of the application code, relative to other versions.");
@@ -1450,8 +1450,8 @@ private:
 
         if (areRemoteNotificationsEnabled())
         {
-            defines.set ("JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME", "com_roli_juce_JuceFirebaseInstanceIdService");
-            defines.set ("JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME", "com_roli_juce_JuceFirebaseMessagingService");
+            defines.set ("JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME", "com_rmsl_juce_JuceFirebaseInstanceIdService");
+            defines.set ("JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME", "com_rmsl_juce_JuceFirebaseMessagingService");
         }
 
         return defines;
@@ -1757,12 +1757,12 @@ private:
         if (areRemoteNotificationsEnabled())
         {
             auto* service = application.createNewChildElement ("service");
-            service->setAttribute ("android:name", "com.roli.juce.JuceFirebaseMessagingService");
+            service->setAttribute ("android:name", "com.rmsl.juce.JuceFirebaseMessagingService");
             auto* intentFilter = service->createNewChildElement ("intent-filter");
             intentFilter->createNewChildElement ("action")->setAttribute ("android:name", "com.google.firebase.MESSAGING_EVENT");
 
             service = application.createNewChildElement ("service");
-            service->setAttribute ("android:name", "com.roli.juce.JuceFirebaseInstanceIdService");
+            service->setAttribute ("android:name", "com.rmsl.juce.JuceFirebaseInstanceIdService");
             intentFilter = service->createNewChildElement ("intent-filter");
             intentFilter->createNewChildElement ("action")->setAttribute ("android:name", "com.google.firebase.INSTANCE_ID_EVENT");
 
@@ -1778,7 +1778,7 @@ private:
         {
             auto* provider = application.createNewChildElement ("provider");
 
-            provider->setAttribute ("android:name", "com.roli.juce.JuceSharingContentProvider");
+            provider->setAttribute ("android:name", "com.rmsl.juce.JuceSharingContentProvider");
             provider->setAttribute ("android:authorities", project.getBundleIdentifierString().toLowerCase() + ".sharingcontentprovider");
             provider->setAttribute ("android:grantUriPermissions", "true");
             provider->setAttribute ("android:exported", "true");

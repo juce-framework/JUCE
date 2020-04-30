@@ -15,8 +15,8 @@ BEGIN
   BEGIN
     BLOCK "040904E4"
     BEGIN
-      VALUE "CompanyName",  "ROLI Ltd.\0"
-      VALUE "LegalCopyright",  "ROLI Ltd.\0"
+      VALUE "CompanyName",  "Raw Material Software Limited\0"
+      VALUE "LegalCopyright",  "Raw Material Software Limited\0"
       VALUE "FileDescription",  "Projucer\0"
       VALUE "FileVersion",  "5.4.7\0"
       VALUE "ProductName",  "Projucer\0"

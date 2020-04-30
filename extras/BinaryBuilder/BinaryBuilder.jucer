@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="3t6YqETY1" name="BinaryBuilder" projectType="consoleapp"
-              juceFolder="../../../juce" jucerVersion="5.4.7" bundleIdentifier="com.roli.binarybuilder"
-              displaySplashScreen="0" reportAppUsage="0" companyName="ROLI Ltd."
-              companyCopyright="ROLI Ltd.">
+              juceFolder="../../../juce" jucerVersion="5.4.7" bundleIdentifier="com.juce.binarybuilder"
+              displaySplashScreen="0" reportAppUsage="0" companyName="Raw Material Software Limited"
+              companyCopyright="Raw Material Software Limited">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                objCExtraSuffix="OeJtJb">

@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -1558,7 +1558,7 @@ struct JuceFirebaseInstanceIdService
     #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
      CALLBACK (tokenRefreshed, "firebaseInstanceIdTokenRefreshed", "(Ljava/lang/String;)V")
 
-     DECLARE_JNI_CLASS (InstanceIdService, "com/roli/juce/JuceFirebaseInstanceIdService")
+     DECLARE_JNI_CLASS (InstanceIdService, "com/rmsl/juce/JuceFirebaseInstanceIdService")
     #undef JNI_CLASS_MEMBERS
 
     static void JNICALL tokenRefreshed (JNIEnv*, jobject /*instanceIdService*/, void* token)
@@ -1581,7 +1581,7 @@ struct JuceFirebaseMessagingService
      CALLBACK (remoteMessageSent,           "firebaseRemoteMessageSent",      "(Ljava/lang/String;)V") \
      CALLBACK (remoteMessageSendError,      "firebaseRemoteMessageSendError", "(Ljava/lang/String;Ljava/lang/String;)V")
 
-     DECLARE_JNI_CLASS (MessagingService, "com/roli/juce/JuceFirebaseMessagingService")
+     DECLARE_JNI_CLASS (MessagingService, "com/rmsl/juce/JuceFirebaseMessagingService")
     #undef JNI_CLASS_MEMBERS
 
     static void JNICALL remoteNotificationReceived (JNIEnv*, jobject /*messagingService*/, void* remoteMessage)

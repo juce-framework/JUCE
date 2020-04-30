@@ -2,8 +2,8 @@
 
 <JUCERPROJECT id="AKfc5m" name="AudioPerformanceTest" projectType="guiapp"
               bundleIdentifier="com.juce.AudioPerformanceTest" jucerVersion="5.4.7"
-              displaySplashScreen="0" reportAppUsage="0" companyName="ROLI Ltd."
-              companyCopyright="ROLI Ltd.">
+              displaySplashScreen="0" reportAppUsage="0" companyName="Raw Material Software Limited"
+              companyCopyright="Raw Material Software Limited">
   <MAINGROUP id="b1eVTe" name="AudioPerformanceTest">
     <GROUP id="{AB66118C-9D88-1C3A-D95C-42892D828E4B}" name="Source">
       <FILE id="SqGU9p" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>

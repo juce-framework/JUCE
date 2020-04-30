@@ -3,7 +3,8 @@
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
               jucerVersion="5.4.7" version="5.4.7" bundleIdentifier="com.juce.theprojucer"
               splashScreenColour="Dark" displaySplashScreen="0" reportAppUsage="0"
-              companyName="ROLI Ltd." companyCopyright="ROLI Ltd." cppLanguageStandard="11">
+              companyName="Raw Material Software Limited" companyCopyright="Raw Material Software Limited"
+              cppLanguageStandard="11">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                documentExtensions=".jucer" objCExtraSuffix="zkVtji" bigIcon="rv1F4h"

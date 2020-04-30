@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -96,7 +96,7 @@ The following steps are only necessary if you have a custom activity defined:
 
 6. Ensure that you override onNewIntent() function in the same way as it is done in JuceActivity.java:
 
-package com.roli.juce;
+package com.rmsl.juce;
 
 import android.app.Activity;
 import android.content.Intent;
