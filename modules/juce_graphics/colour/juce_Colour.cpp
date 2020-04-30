@@ -96,7 +96,7 @@ namespace ColourHelpers
             auto min = (2.0f * l) - v;
             auto sv = (v - min) / v;
 
-            h = jlimit (0.0f, 360.0f, std::fmod (h, 1.0f) * 360.0f) / 60.0f;
+            h = ((h - std::floor (h)) * 360.0f) / 60.0f;
             auto f = h - std::floor (h);
             auto vsf = v * sv * f;
             auto mid1 = min + vsf;
@@ -152,7 +152,7 @@ namespace ColourHelpers
                 return PixelARGB (alpha, intV, intV, intV);
 
             s = jmin (1.0f, s);
-            h = jlimit (0.0f, 360.0f, std::fmod (h, 1.0f) * 360.0f) / 60.0f;
+            h = ((h - std::floor (h)) * 360.0f) / 60.0f;
             auto f = h - std::floor (h);
             auto x = (uint8) roundToInt (v * (1.0f - s));
 
@@ -678,6 +678,8 @@ public:
             testColour (red.withLightness (1.0f), 255, 255, 255);
             testColour (red.withRotatedHue (120.0f / 360.0f), 0, 255, 0);
             testColour (red.withRotatedHue (480.0f / 360.0f), 0, 255, 0);
+            testColour (red.withRotatedHue (-240.0f / 360.0f), 0, 255, 0);
+            testColour (red.withRotatedHue (-600.0f / 360.0f), 0, 255, 0);
             testColour (red.withMultipliedSaturation (0.0f), 255, 255, 255);
             testColour (red.withMultipliedSaturationHSL (0.0f), 128, 128, 128);
             testColour (red.withMultipliedBrightness (0.5f), 128, 0, 0);
