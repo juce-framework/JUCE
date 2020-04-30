@@ -839,29 +839,22 @@ public:
         // This option invokes a separate paint call for each rectangle of the clip region.
         // It's a long story, but this is a basically a workaround for a CGContext not having
         // a way of finding whether a rectangle falls within its clip region
-        if (usingCoreGraphics)
-        {
-            const NSRect* rects = nullptr;
-            NSInteger numRects = 0;
-            [view getRectsBeingDrawn: &rects count: &numRects];
-
-            if (numRects > 1)
+        repaintRects.consolidate();
+        if (usingCoreGraphics && repaintRects.getNumRectangles() > 1)
+            for (auto& i : repaintRects)
             {
-                for (int i = 0; i < numRects; ++i)
-                {
-                    NSRect rect = rects[i];
-                    CGContextSaveGState (cg);
-                    CGContextClipToRect (cg, CGRectMake (rect.origin.x, rect.origin.y, rect.size.width, rect.size.height));
-                    drawRect (cg, rect, displayScale);
-                    CGContextRestoreGState (cg);
-                }
-
-                return;
+                NSRect rect = convertToCGRect (i);
+                CGContextSaveGState (cg);
+                CGContextClipToRect (cg, rect);
+                drawRect (cg, rect, displayScale);
+                CGContextRestoreGState (cg);
             }
-        }
+        else
        #endif
-
-        drawRect (cg, r, displayScale);
+        {
+            drawRect (cg, r, displayScale);
+        }
+        repaintRects.clear();
     }
 
     void drawRect (CGContextRef cg, NSRect r, float displayScale)
@@ -881,7 +874,8 @@ public:
             auto clipH = (int) (r.size.height + 0.5f);
 
             RectangleList<int> clip;
-            getClipRects (clip, offset, clipW, clipH);
+            for (auto& i : repaintRects)
+                clip.add (i.getSmallestIntegerContainer());
 
             if (! clip.isEmpty())
             {
@@ -959,7 +953,10 @@ public:
     void setNeedsDisplayRectangles()
     {
         for (auto& i : deferredRepaints)
+        {
             [view setNeedsDisplayInRect: makeNSRect (i)];
+            repaintRects.add (i);
+        }
 
         lastRepaintTime = Time::getMillisecondCounter();
         deferredRepaints.clear();
@@ -1417,6 +1414,7 @@ public:
     NSNotificationCenter* notificationCenter = nil;
 
     RectangleList<float> deferredRepaints;
+    RectangleList<float> repaintRects;
     uint32 lastRepaintTime;
 
     static ComponentPeer* currentlyFocusedPeer;
@@ -1430,24 +1428,6 @@ private:
     static void setOwner (id viewOrWindow, NSViewComponentPeer* newOwner)
     {
         object_setInstanceVariable (viewOrWindow, "owner", newOwner);
-    }
-
-    void getClipRects (RectangleList<int>& clip, Point<int> offset, int clipW, int clipH)
-    {
-        const NSRect* rects = nullptr;
-        NSInteger numRects = 0;
-        [view getRectsBeingDrawn: &rects count: &numRects];
-
-        const Rectangle<int> clipBounds (clipW, clipH);
-        auto viewH = [view frame].size.height;
-
-        clip.ensureStorageAllocated ((int) numRects);
-
-        for (int i = 0; i < numRects; ++i)
-            clip.addWithoutMerging (clipBounds.getIntersection (Rectangle<int> (roundToInt (rects[i].origin.x) + offset.x,
-                                                                                roundToInt (viewH - (rects[i].origin.y + rects[i].size.height)) + offset.y,
-                                                                                roundToInt (rects[i].size.width),
-                                                                                roundToInt (rects[i].size.height))));
     }
 
     static void appFocusChanged()
