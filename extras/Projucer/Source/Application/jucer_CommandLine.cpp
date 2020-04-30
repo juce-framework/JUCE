@@ -334,8 +334,14 @@ namespace
     {
         auto content = file.loadFileAsString();
 
-        if (content.contains ("%""%") && content.contains ("//["))
-            return; // ignore projucer GUI template files
+        auto isProjucerTemplateFile = [file, content]
+        {
+            return file.getFullPathName().contains ("Templates")
+                  && content.contains ("%""%") && content.contains ("//[");
+        }();
+
+        if (isProjucerTemplateFile)
+            return;
 
         StringArray lines;
         lines.addLines (content);
@@ -409,7 +415,7 @@ namespace
                 files.add (target);
 
             for (int i = 0; i < files.size(); ++i)
-                cleanWhitespace (files.getReference(i), options);
+                cleanWhitespace (files.getReference (i), options);
         }
     }
 
