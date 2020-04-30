@@ -1195,6 +1195,7 @@ void ProjucerApplication::askUserToOpenFile()
 
 bool ProjucerApplication::openFile (const File& file)
 {
+    handleUpdateNowIfNeeded();
     return mainWindowList.openFile (file);
 }
 

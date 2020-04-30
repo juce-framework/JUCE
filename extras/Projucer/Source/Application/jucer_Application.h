@@ -74,7 +74,7 @@ public:
     AvailableModulesList& getJUCEPathModulesList()     { return jucePathModulesList; }
     AvailableModulesList& getUserPathsModulesList()    { return userPathsModulesList; }
 
-    LicenseController& getLicenseController()        { return *licenseController; }
+    LicenseController& getLicenseController()          { return *licenseController; }
 
     bool isAutomaticVersionCheckingEnabled() const;
     void setAutomaticVersionCheckingEnabled (bool shouldBeEnabled);
