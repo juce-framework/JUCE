@@ -71,7 +71,7 @@ public:
 
         if (multipleSelected)
             return;
-        
+
         props.add (new TextProperty (this));
         props.add (new FontNameProperty (this));
         props.add (new FontStyleProperty (this));
@@ -100,7 +100,7 @@ public:
               << "    g.drawText (text, x, y, width, height,\n"
               << "                " << CodeHelpers::justificationToCode (justification) << ", true);\n"
               << "}\n\n";
-            
+
             paintMethodCode += r;
         }
     }
@@ -108,7 +108,7 @@ public:
     void applyCustomPaintSnippets (StringArray& snippets) override
     {
         customPaintCode.clear();
-        
+
         if (! snippets.isEmpty() && ! fillType.isInvisible())
         {
             customPaintCode = snippets[0];
@@ -390,7 +390,7 @@ private:
     String typefaceName;
     Justification justification;
     String customPaintCode;
-    
+
     Array <Justification> justificationTypes;
 
     //==============================================================================
