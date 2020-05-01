@@ -3437,10 +3437,6 @@
 			};
 			name = Release;
 		};
-		50E3FDD15B8D8C9793DFABF9 = {
-			isa = PBXTargetDependency;
-			target = 0039FE1A254FE518518BF8B8;
-		};
 		F90407F24422C589DA251604 = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
