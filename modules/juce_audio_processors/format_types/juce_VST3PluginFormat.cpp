@@ -1566,11 +1566,6 @@ struct VST3ComponentHolder
     ~VST3ComponentHolder()
     {
         terminate();
-
-        component = nullptr;
-        host = nullptr;
-        factory = nullptr;
-        module = nullptr;
     }
 
     // transfers ownership to the plugin instance!
@@ -1680,7 +1675,8 @@ struct VST3ComponentHolder
     //==============================================================================
     bool initialise()
     {
-        if (isComponentInitialised) return true;
+        if (isComponentInitialised)
+            return true;
 
        #if JUCE_WINDOWS
         // On Windows it's highly advisable to create your plugins using the message thread,
@@ -1715,9 +1711,12 @@ struct VST3ComponentHolder
     void terminate()
     {
         if (isComponentInitialised)
+        {
             component->terminate();
+            isComponentInitialised = false;
+        }
 
-        isComponentInitialised = false;
+        component = nullptr;
     }
 
     //==============================================================================
@@ -1876,6 +1875,36 @@ public:
     }
 
     ~VST3PluginInstance() override
+    {
+        struct VST3Deleter : public CallbackMessage
+        {
+            VST3Deleter (VST3PluginInstance& inInstance, WaitableEvent& inEvent)
+                : vst3Instance (inInstance), completionSignal (inEvent)
+            {}
+
+            void messageCallback() override
+            {
+                vst3Instance.cleanup();
+                completionSignal.signal();
+            }
+
+            VST3PluginInstance& vst3Instance;
+            WaitableEvent& completionSignal;
+        };
+
+        if (MessageManager::getInstance()->isThisTheMessageThread())
+        {
+            cleanup();
+        }
+        else
+        {
+            WaitableEvent completionEvent;
+            (new VST3Deleter (*this, completionEvent))->post();
+            completionEvent.wait();
+        }
+    }
+
+    void cleanup()
     {
         jassert (getActiveEditor() == nullptr); // You must delete any editors before deleting the plugin instance!
 
