@@ -43,9 +43,12 @@ namespace juce
 namespace MP3Decoder
 {
 
-struct AllocationTable  { int16 bits, d; };
+struct AllocationTable
+{
+    int16 bits, d;
+};
 
-const struct AllocationTable allocTable0[] =
+constexpr AllocationTable allocTable0[] =
 {
     {4, 0}, {5, 3}, {3, -3}, {4, -7}, {5, -15}, {6, -31}, {7, -63}, {8, -127}, {9, -255}, {10, -511}, {11, -1023}, {12, -2047}, {13, -4095}, {14, -8191}, {15, -16383}, {16, -32767},
     {4, 0}, {5, 3}, {3, -3}, {4, -7}, {5, -15}, {6, -31}, {7, -63}, {8, -127}, {9, -255}, {10, -511}, {11, -1023}, {12, -2047}, {13, -4095}, {14, -8191}, {15, -16383}, {16, -32767},
@@ -67,7 +70,7 @@ const struct AllocationTable allocTable0[] =
     {2, 0}, {5, 3}, {7, 5}, {16, -32767}, {2, 0}, {5, 3}, {7, 5}, {16, -32767}, {2, 0}, {5, 3}, {7, 5}, {16, -32767}, {2, 0}, {5, 3}, {7, 5}, {16, -32767}
 };
 
-const struct AllocationTable allocTable1[] =
+constexpr AllocationTable allocTable1[] =
 {
     {4, 0}, {5, 3}, {3, -3}, {4, -7}, {5, -15}, {6, -31}, {7, -63}, {8, -127}, {9, -255}, {10, -511}, {11, -1023}, {12, -2047}, {13, -4095}, {14, -8191}, {15, -16383}, {16, -32767},
     {4, 0}, {5, 3}, {3, -3}, {4, -7}, {5, -15}, {6, -31}, {7, -63}, {8, -127}, {9, -255}, {10, -511}, {11, -1023}, {12, -2047}, {13, -4095}, {14, -8191}, {15, -16383}, {16, -32767},
@@ -90,7 +93,7 @@ const struct AllocationTable allocTable1[] =
     {2, 0}, {5, 3}, {7, 5}, {16, -32767}, {2, 0}, {5, 3}, {7, 5}, {16, -32767}, {2, 0}, {5, 3}, {7, 5}, {16, -32767}
 };
 
-const struct AllocationTable allocTable2[] =
+constexpr AllocationTable allocTable2[] =
 {
     {4, 0}, {5, 3}, {7, 5}, {10, 9}, {4, -7}, {5, -15}, {6, -31}, {7, -63}, {8, -127}, {9, -255}, {10, -511}, {11, -1023}, {12, -2047}, {13, -4095}, {14, -8191}, {15, -16383},
     {4, 0}, {5, 3}, {7, 5}, {10, 9}, {4, -7}, {5, -15}, {6, -31}, {7, -63}, {8, -127}, {9, -255}, {10, -511}, {11, -1023}, {12, -2047}, {13, -4095}, {14, -8191}, {15, -16383},
@@ -99,7 +102,7 @@ const struct AllocationTable allocTable2[] =
     {3, 0}, {5, 3}, {7, 5}, {10, 9}, {4, -7}, {5, -15}, {6, -31}, {7, -63}, {3, 0}, {5, 3}, {7, 5}, {10, 9}, {4, -7}, {5, -15}, {6, -31}, {7, -63}
 };
 
-const struct AllocationTable allocTable3[] =
+constexpr AllocationTable allocTable3[] =
 {
     {4, 0}, {5, 3}, {7, 5}, {10, 9}, {4, -7}, {5, -15}, {6, -31}, {7, -63}, {8, -127}, {9, -255}, {10, -511}, {11, -1023}, {12, -2047}, {13, -4095}, {14, -8191}, {15, -16383},
     {4, 0}, {5, 3}, {7, 5}, {10, 9}, {4, -7}, {5, -15}, {6, -31}, {7, -63}, {8, -127}, {9, -255}, {10, -511}, {11, -1023}, {12, -2047}, {13, -4095}, {14, -8191}, {15, -16383},
@@ -110,7 +113,7 @@ const struct AllocationTable allocTable3[] =
     {3, 0}, {5, 3}, {7, 5}, {10, 9}, {4, -7}, {5, -15}, {6, -31}, {7, -63}, {3, 0}, {5, 3}, {7, 5}, {10, 9}, {4, -7}, {5, -15}, {6, -31}, {7, -63}
 };
 
-const struct AllocationTable allocTable4[] =
+constexpr AllocationTable allocTable4[] =
 {
     {4, 0}, {5, 3}, {7, 5}, {3, -3}, {10, 9}, {4, -7}, {5, -15}, {6, -31}, {7, -63}, {8, -127}, {9, -255}, {10, -511}, {11, -1023}, {12, -2047}, {13, -4095}, {14, -8191},
     {4, 0}, {5, 3}, {7, 5}, {3, -3}, {10, 9}, {4, -7}, {5, -15}, {6, -31}, {7, -63}, {8, -127}, {9, -255}, {10, -511}, {11, -1023}, {12, -2047}, {13, -4095}, {14, -8191},
@@ -135,7 +138,7 @@ struct BandInfoStruct
     int16 shortDiff[13];
 };
 
-const BandInfoStruct bandInfo[9] =
+constexpr BandInfoStruct bandInfo[9] =
 {
   { {0, 4, 8, 12, 16, 20, 24, 30, 36, 44, 52, 62, 74, 90, 110, 134, 162, 196, 238, 288, 342, 418, 576},
     {4, 4, 4, 4, 4, 4, 6, 6, 8, 8, 10, 12, 16, 20, 24, 28, 34, 42, 50, 54, 76, 158},
@@ -183,7 +186,7 @@ const BandInfoStruct bandInfo[9] =
     {8, 8, 8, 12, 16, 20, 24, 28, 36, 2, 2, 2, 26} }
 };
 
-const double decodeWindow[] =
+constexpr double decodeWindow[] =
 {
     0.000000000, -0.000015259, -0.000015259, -0.000015259, -0.000015259, -0.000015259, -0.000015259, -0.000030518,
    -0.000030518, -0.000030518, -0.000030518, -0.000045776, -0.000045776, -0.000061035, -0.000061035, -0.000076294,
@@ -220,32 +223,32 @@ const double decodeWindow[] =
     1.144989014
 };
 
-const int16 huffmanTab0[] = { 0 };
-const int16 huffmanTab1[] = { -5,-3,-1,17,1,16,0 };
-const int16 huffmanTab2[] = { -15,-11,-9,-5,-3,-1,34,2,18,-1,33,32,17,-1,1,16,0 };
-const int16 huffmanTab3[] = { -13,-11,-9,-5,-3,-1,34,2,18,-1,33,32,16,17,-1,1,0 };
-const int16 huffmanTab5[] = { -29,-25,-23,-15,-7,-5,-3,-1,51,35,50,49,-3,-1,19,3,-1,48,34,-3,-1,18,33,-1,2,32,17,-1,1,16,0 };
-const int16 huffmanTab6[] = { -25,-19,-13,-9,-5,-3,-1,51,3,35,-1,50,48,-1,19,49,-3,-1,34,2,18,-3,-1,33,32,1,-1,17,-1,16,0 };
+constexpr int16 huffmanTab0[] = { 0 };
+constexpr int16 huffmanTab1[] = { -5,-3,-1,17,1,16,0 };
+constexpr int16 huffmanTab2[] = { -15,-11,-9,-5,-3,-1,34,2,18,-1,33,32,17,-1,1,16,0 };
+constexpr int16 huffmanTab3[] = { -13,-11,-9,-5,-3,-1,34,2,18,-1,33,32,16,17,-1,1,0 };
+constexpr int16 huffmanTab5[] = { -29,-25,-23,-15,-7,-5,-3,-1,51,35,50,49,-3,-1,19,3,-1,48,34,-3,-1,18,33,-1,2,32,17,-1,1,16,0 };
+constexpr int16 huffmanTab6[] = { -25,-19,-13,-9,-5,-3,-1,51,3,35,-1,50,48,-1,19,49,-3,-1,34,2,18,-3,-1,33,32,1,-1,17,-1,16,0 };
 
-const int16 huffmanTab7[] =
+constexpr int16 huffmanTab7[] =
 {
     -69,-65,-57,-39,-29,-17,-11,-7,-3,-1,85,69,-1,84,83,-1,53,68,-3,-1,37,82,21,-5,-1,81,-1,5,52,-1,80,-1,67,51,
     -5,-3,-1,36,66,20,-1,65,64,-11,-7,-3,-1,4,35,-1,50,3,-1,19,49,-3,-1,48,34,18,-5,-1,33,-1,2,32,17,-1,1,16,0
 };
 
-const int16 huffmanTab8[] =
+constexpr int16 huffmanTab8[] =
 {
     -65,-63,-59,-45,-31,-19,-13,-7,-5,-3,-1,85,84,69,83,-3,-1,53,68,37,-3,-1,82,5,21,-5,-1,81,-1,52,67,-3,-1,80,
     51,36,-5,-3,-1,66,20,65,-3,-1,4,64,-1,35,50,-9,-7,-3,-1,19,49,-1,3,48,34,-1,2,32,-1,18,33,17,-3,-1,1,16,0
 };
 
-const int16 huffmanTab9[] =
+constexpr int16 huffmanTab9[] =
 {
     -63,-53,-41,-29,-19,-11,-5,-3,-1,85,69,53,-1,83,-1,84,5,-3,-1,68,37,-1,82,21,-3,-1,81,52,-1,67,-1,80,4,-7,-3,
     -1,36,66,-1,51,64,-1,20,65,-5,-3,-1,35,50,19,-1,49,-1,3,48,-5,-3,-1,34,2,18,-1,33,32,-3,-1,17,1,-1,16,0
 };
 
-const int16 huffmanTab10[] =
+constexpr int16 huffmanTab10[] =
 {
     -125,-121,-111,-83,-55,-35,-21,-13,-7,-3,-1,119,103,-1,118,87,-3,-1,117,102,71,-3,-1,116,86,-1,101,55,-9,-3,
     -1,115,70,-3,-1,85,84,99,-1,39,114,-11,-5,-3,-1,100,7,112,-1,98,-1,69,53,-5,-1,6,-1,83,68,23,-17,-5,-1,113,
@@ -253,7 +256,7 @@ const int16 huffmanTab10[] =
     65,-3,-1,64,35,-1,50,3,-3,-1,19,49,-1,48,34,-7,-3,-1,18,33,-1,2,32,17,-1,1,16,0
 };
 
-const int16 huffmanTab11[] =
+constexpr int16 huffmanTab11[] =
 {
     -121,-113,-89,-59,-43,-27,-17,-7,-3,-1,119,103,-1,118,117,-3,-1,102,71,-1,116,-1,87,85,-5,-3,-1,86,101,55,
     -1,115,70,-9,-7,-3,-1,69,84,-1,53,83,39,-1,114,-1,100,7,-5,-1,113,-1,23,112,-3,-1,54,99,-1,96,-1,68,37,-13,
@@ -261,7 +264,7 @@ const int16 huffmanTab11[] =
     -1,4,64,-1,35,50,-1,19,49,-5,-3,-1,3,48,34,33,-5,-1,18,-1,2,32,17,-3,-1,1,16,0
 };
 
-const int16 huffmanTab12[] =
+constexpr int16 huffmanTab12[] =
 {
     -115,-99,-73,-45,-27,-17,-9,-5,-3,-1,119,103,118,-1,87,117,-3,-1,102,71,-1,116,101,-3,-1,86,55,-3,-1,115,
     85,39,-7,-3,-1,114,70,-1,100,23,-5,-1,113,-1,7,112,-1,54,99,-13,-9,-3,-1,69,84,-1,68,-1,6,5,-1,38,98,-5,
@@ -269,7 +272,7 @@ const int16 huffmanTab12[] =
     35,50,-11,-7,-5,-3,-1,64,3,48,19,-1,49,34,-1,18,33,-7,-5,-3,-1,2,32,0,17,-1,1,16
 };
 
-const int16 huffmanTab13[] =
+constexpr int16 huffmanTab13[] =
 {
     -509,-503,-475,-405,-333,-265,-205,-153,-115,-83,-53,-35,-21,-13,-9,-7,-5,-3,-1,254,252,253,237,255,-1,239,223,
     -3,-1,238,207,-1,222,191,-9,-3,-1,251,206,-1,220,-1,175,233,-1,236,221,-9,-5,-3,-1,250,205,190,-1,235,159,-3,
@@ -289,7 +292,7 @@ const int16 huffmanTab13[] =
     -5,-1,65,-1,4,64,-3,-1,35,50,19,-3,-1,49,3,-1,48,34,-3,-1,18,33,-1,2,32,-3,-1,17,1,16,0
 };
 
-const int16 huffmanTab15[] =
+constexpr int16 huffmanTab15[] =
 {
     -495,-445,-355,-263,-183,-115,-77,-43,-27,-13,-7,-3,-1,255,239,-1,254,223,-1,238,-1,253,207,-7,-3,-1,252,222,-1,
     237,191,-1,251,-1,206,236,-7,-3,-1,221,175,-1,250,190,-3,-1,235,205,-1,220,159,-15,-7,-3,-1,249,234,-1,189,219,
@@ -309,7 +312,7 @@ const int16 huffmanTab15[] =
     65,-1,20,4,-9,-3,-1,35,50,-3,-1,64,3,19,-3,-1,49,48,34,-9,-7,-3,-1,18,33,-1,2,32,17,-3,-1,1,16,0
 };
 
-const int16 huffmanTab16[] =
+constexpr int16 huffmanTab16[] =
 {
     -509,-503,-461,-323,-103,-37,-27,-15,-7,-3,-1,239,254,-1,223,253,-3,-1,207,252,-1,191,251,-5,-1,175,-1,250,159,
     -3,-1,249,248,143,-7,-3,-1,127,247,-1,111,246,255,-9,-5,-3,-1,95,245,79,-1,244,243,-53,-1,240,-1,63,-29,-19,
@@ -329,7 +332,7 @@ const int16 huffmanTab16[] =
     36,-3,-1,66,51,20,-5,-1,65,-1,4,64,-1,35,50,-3,-1,19,49,-3,-1,3,48,34,-3,-1,18,33,-1,2,32,-3,-1,17,1,16,0
 };
 
-const int16 huffmanTab24[] =
+constexpr int16 huffmanTab24[] =
 {
     -451,-117,-43,-25,-15,-7,-3,-1,239,254,-1,223,253,-3,-1,207,252,-1,191,251,-5,-1,250,-1,175,159,-1,249,248,-9,
     -5,-3,-1,143,127,247,-1,111,246,-3,-1,95,245,-1,79,244,-71,-7,-3,-1,63,243,-1,47,242,-5,-1,241,-1,31,240,-25,-9,
@@ -354,7 +357,7 @@ struct BitsToTableMap
     const int16* table;
 };
 
-const BitsToTableMap huffmanTables1[] =
+constexpr BitsToTableMap huffmanTables1[] =
 {
     { 0, huffmanTab0  }, { 0, huffmanTab1  }, { 0,  huffmanTab2  }, { 0,  huffmanTab3  },
     { 0, huffmanTab0  }, { 0, huffmanTab5  }, { 0,  huffmanTab6  }, { 0,  huffmanTab7  },
@@ -366,10 +369,10 @@ const BitsToTableMap huffmanTables1[] =
     { 8, huffmanTab24 }, { 9, huffmanTab24 }, { 11, huffmanTab24 }, { 13, huffmanTab24 }
 };
 
-const int16 huffmanTabC0[] = { -29,-21,-13,-7,-3,-1,11,15,-1,13,14,-3,-1,7,5,9,-3,-1,6,3,-1,10,12,-3,-1,2,1,-1,4,8,0 };
-const int16 huffmanTabC1[] = { -15,-7,-3,-1,15,14,-1,13,12,-3,-1,11,10,-1,9,8,-7,-3,-1,7,6,-1,5,4,-3,-1,3,2,-1,1,0 };
+constexpr int16 huffmanTabC0[] = { -29,-21,-13,-7,-3,-1,11,15,-1,13,14,-3,-1,7,5,9,-3,-1,6,3,-1,10,12,-3,-1,2,1,-1,4,8,0 };
+constexpr int16 huffmanTabC1[] = { -15,-7,-3,-1,15,14,-1,13,12,-3,-1,11,10,-1,9,8,-7,-3,-1,7,6,-1,5,4,-3,-1,3,2,-1,1,0 };
 
-const BitsToTableMap huffmanTables2[] = { { 0, huffmanTabC0 }, { 0, huffmanTabC1 } };
+constexpr BitsToTableMap huffmanTables2[] = { { 0, huffmanTabC0 }, { 0, huffmanTabC1 } };
 
 //==============================================================================
 struct VBRTagData
@@ -386,7 +389,7 @@ struct VBRTagData
         const int sampleRateIndex = (data[2] >> 2) & 3;
         const int mode = (data[3] >> 6) & 3;
 
-        static const short bitRates[3][16] =
+        static constexpr short bitRates[3][16] =
         {
             { 0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, -1 }, // MPEG2
             { 0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, -1 }, // MPEG1
@@ -469,7 +472,7 @@ struct MP3Frame
 
     void selectLayer2Table()
     {
-        static const int translate[3][2][16] =
+        static constexpr int translate[3][2][16] =
         {
             { { 0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 1, 1, 1, 1, 1, 0 }, { 0, 2, 2, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 } },
             { { 0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, { 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } },
@@ -477,7 +480,7 @@ struct MP3Frame
         };
 
         static const AllocationTable* const tables[] = { allocTable0, allocTable1, allocTable2, allocTable3, allocTable4 };
-        static const int8 limits[] = { 27, 30, 8, 12, 30 };
+        static constexpr int8 limits[] = { 27, 30, 8, 12, 30 };
 
         const int index = lsf ? 4 : translate[sampleRateIndex][2 - numChannels][bitrateIndex];
         layer2SubBandLimit = limits[index];
@@ -503,13 +506,13 @@ struct MP3Frame
         padding             = (header >> 9) & 1;
         mode                = (header >> 6) & 3;
         modeExt             = (header >> 4) & 3;
-        //extension           = (header >> 8) & 1;
+        //extension         = (header >> 8) & 1;
         //copyright         = (header >> 3) & 1;
         //original          = (header >> 2) & 1;
         //emphasis          = header & 3;
         numChannels         = (mode == 3) ? 1 : 2;
 
-        static const int frameSizes[2][3][16] =
+        static constexpr int frameSizes[2][3][16] =
         {
             { { 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448 },
               { 0, 32, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384 },
@@ -569,7 +572,7 @@ struct Constants
             default:  break;
         }
 
-        static const uint8 dummy[] = { 0, 0, 0 };
+        static constexpr uint8 dummy[] = { 0, 0, 0 };
         return dummy;
     }
 
@@ -643,7 +646,7 @@ private:
             { 21, 1, 22, 23, 0, 24, 25, 2, 26 }
         };
 
-        static const int tableLengths[] = { 3, 5, 9 };
+        static constexpr int tableLengths[] = { 3, 5, 9 };
         static uint8* tables[] = { group3tab, group5tab, group9tab };
 
         for (int i = 0; i < 3; ++i)
@@ -663,7 +666,7 @@ private:
 
         for (int k = 0; k < 27; ++k)
         {
-            static const double multipliers[] =
+            static constexpr double multipliers[] =
             {
                 0, -2.0 / 3.0, 2.0 / 3.0, 2.0 / 7.0, 2.0 / 15.0, 2.0 / 31.0, 2.0 / 63.0, 2.0 / 127.0, 2.0 / 255.0,
                 2.0 / 511.0, 2.0 / 1023.0, 2.0 / 2047.0, 2.0 / 4095.0, 2.0 / 8191.0, 2.0 / 16383.0, 2.0 / 32767.0, 2.0 / 65535.0,
@@ -688,7 +691,7 @@ private:
 
         for (i = 0; i < 8; ++i)
         {
-            static double Ci[] = { -0.6, -0.535, -0.33, -0.185, -0.095, -0.041, -0.0142, -0.0037 };
+            static constexpr double Ci[] = { -0.6, -0.535, -0.33, -0.185, -0.095, -0.041, -0.0142, -0.0037 };
             const double sq = sqrt (1.0 + Ci[i] * Ci[i]);
             antiAliasingCs[i] = (float) (1.0 / sq);
             antiAliasingCa[i] = (float) (Ci[i] / sq);
@@ -716,7 +719,7 @@ private:
 
         for (j = 0; j < 4; ++j)
         {
-            static const int len[4] = { 36, 36, 12, 36 };
+            static constexpr int len[4] = { 36, 36, 12, 36 };
             for (i = 0; i < len[j]; i += 2)   win1[j][i] =  win[j][i];
             for (i = 1; i < len[j]; i += 2)   win1[j][i] = -win[j][i];
         }
@@ -1069,11 +1072,11 @@ struct Layer3SideInfo
 namespace DCT
 {
     enum { subBandLimit = 32 };
-    static const float cos6_1  = 0.866025388f;
-    static const float cos6_2  = 0.5f;
-    static const float cos9[]  = { 1.0f, 0.98480773f, 0.939692616f, 0.866025388f, 0.766044438f, 0.642787635f, 0.5f, 0.342020154f, 0.173648179f };
-    static const float cos36[] = { 0.501909912f, 0.517638087f, 0.551688969f, 0.610387266f, 0.707106769f, 0.871723413f, 1.18310082f, 1.93185163f, 5.73685646f };
-    static const float cos12[] = { 0.517638087f, 0.707106769f, 1.93185163f };
+    static constexpr float cos6_1  = 0.866025388f;
+    static constexpr float cos6_2  = 0.5f;
+    static constexpr float cos9[]  = { 1.0f, 0.98480773f, 0.939692616f, 0.866025388f, 0.766044438f, 0.642787635f, 0.5f, 0.342020154f, 0.173648179f };
+    static constexpr float cos36[] = { 0.501909912f, 0.517638087f, 0.551688969f, 0.610387266f, 0.707106769f, 0.871723413f, 1.18310082f, 1.93185163f, 5.73685646f };
+    static constexpr float cos12[] = { 0.517638087f, 0.707106769f, 1.93185163f };
 
     inline void dct36_0 (int v, float* ts, float* out1, float* out2, const float* wintab, float sum0, float sum1) noexcept
     {
@@ -2002,8 +2005,8 @@ private:
     void layer2Step1 (SideInfoLayer2& si) noexcept
     {
         zerostruct (si);
-        const int sblimit = frame.layer2SubBandLimit;
-        const int jsbound = (frame.mode == 1) ? (frame.modeExt << 2) + 4 : frame.layer2SubBandLimit;
+        const auto sblimit = frame.layer2SubBandLimit;
+        const auto jsbound = (frame.mode == 1 ? jmin ((frame.modeExt << 2) + 4, sblimit) : sblimit);
         auto* allocTable = frame.allocationTable;
         uint8 scfsi[32][2];
 
@@ -2086,7 +2089,8 @@ private:
     void layer2Step2 (SideInfoLayer2& si, const int gr, float fraction[2][4][32]) noexcept
     {
         auto* allocTable = frame.allocationTable;
-        const int jsbound = (frame.mode == 1) ? (frame.modeExt << 2) + 4 : frame.layer2SubBandLimit;
+        auto sblimit = frame.layer2SubBandLimit;
+        const auto jsbound = (frame.mode == 1 ? jmin ((frame.modeExt << 2) + 4, sblimit) : sblimit);
 
         for (int i = 0; i < jsbound; ++i)
         {
