@@ -3202,11 +3202,15 @@ private:
 
                 if (settingsString.contains ("portrait"))   orientations.add ("UIInterfaceOrientationPortrait");
                 if (settingsString.contains ("landscape"))  orientations.addArray ({ "UIInterfaceOrientationLandscapeLeft",
-                                                                                    "UIInterfaceOrientationLandscapeRight" });
-                if (i == 0)
-                    iPhoneScreenOrientationValue = orientations;
-                else
-                    iPadScreenOrientationValue = orientations;
+                                                                                     "UIInterfaceOrientationLandscapeRight" });
+
+                if (! orientations.isEmpty())
+                {
+                    if (i == 0)
+                        iPhoneScreenOrientationValue = orientations;
+                    else
+                        iPadScreenOrientationValue = orientations;
+                }
             }
         }
     }
