@@ -101,6 +101,31 @@ provisioning profiles, which is achieved by passing the `-allowProvisioningUpdat
 cmake --build build-ios --target <targetName> -- -allowProvisioningUpdates
 ```
 
+### A note about compile definitions
+
+Module options and plugin options that would previously have been set in the Projucer can be set on
+a target-by-target basis in CMake, via `target_compile_definitions`. To find the options exposed by
+a particular module, check its module header for sections with the following structure:
+```
+/** Config: NAME_OF_KEY
+    Docs go here...
+*/
+#ifndef NAME_OF_KEY
+ #define NAME_OF_KEY ...
+#edif
+```
+
+To override the default config option, use the following CMake code, replacing `<value>` as
+appropriate:
+```
+target_compile_definitions(my_target PUBLIC NAME_OF_KEY=<value>)
+```
+
+The `JucePlugin_PreferredChannelConfig` preprocessor definition for plugins is difficult to specify
+in a portable way due to its use of curly braces, which may be misinterpreted in Linux/Mac builds
+using the Ninja/Makefile generators. It is recommended to avoid this option altogether, and to use
+the newer buses API to specify the desired plugin inputs and outputs.
+
 ## API Reference
 
 ### `juce_add_<target>`
