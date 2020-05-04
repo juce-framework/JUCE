@@ -21,7 +21,7 @@
 #include "jucer_ModuleDescription.h"
 
 //==============================================================================
-class AvailableModulesList
+class AvailableModulesList  : private AsyncUpdater
 {
 public:
     using ModuleIDAndFolder     = std::pair<String, File>;
@@ -164,6 +164,11 @@ private:
     };
 
     //==============================================================================
+    void handleAsyncUpdate() override
+    {
+        listeners.call ([this] (Listener& l) { l.availableModulesChanged (this); });
+    }
+
     std::unique_ptr<ThreadPoolJob> createScannerJob (const Array<File>& paths)
     {
         return std::make_unique<ModuleScannerJob> (paths, [this] (ModuleIDAndFolderList scannedModulesList)
@@ -173,7 +178,7 @@ private:
                 modulesList.swap (scannedModulesList);
             }
 
-            listeners.call ([this] (Listener& l) { MessageManager::callAsync ([&] { l.availableModulesChanged (this); }); });
+            triggerAsyncUpdate();
         });
     }
 

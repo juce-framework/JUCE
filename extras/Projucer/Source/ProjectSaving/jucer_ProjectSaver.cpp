@@ -805,7 +805,10 @@ void ProjectSaver::saveExporter (ProjectExporter& exporter, const OwnedArray<Lib
         exporter.create (modules);
 
         if (! exporter.isCLion())
-            std::cout << "Finished saving: " << exporter.getName() << std::endl;
+        {
+            auto exporterName = exporter.getName();
+            MessageManager::callAsync ([exporterName] { std::cout << "Finished saving: " << exporterName << std::endl; });
+        }
     }
     catch (build_tools::SaveError& error)
     {
