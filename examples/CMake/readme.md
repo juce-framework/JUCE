@@ -491,15 +491,11 @@ both to the target's `SOURCES` and `INTERFACE_SOURCES`, which may result in many
 module being built into a single target, which would cause build failures in the best case and
 silent ODR violations in the worst case. Scary stuff!
 
-This command has a few optional arguments: `INSTALL_PATH` and `INSTALL_EXPORT` should be provided if
-you want the module to be installable through the CMake installation mechanism. `INSTALL_PATH` is a
-path, relative to the install prefix, to which the module sources will be copied. `INSTALL_EXPORT`
-specifies the CMake export group for the installed module. ALIAS_NAMESPACE will add an alias for the
-target(s) with the provided namespace. For example, the following invocation will add a module
-target named `my_module`, along with an alias named `company::my_module`.
-```
-juce_add_module(my_module ALIAS_NAMESPACE company)`
-```
+This command has a few optional arguments: `INSTALL_PATH` is a path, relative to the install prefix,
+to which the module sources will be copied during installation of the module. ALIAS_NAMESPACE will
+add an alias for the module target(s) with the provided namespace. For example, the following
+invocation will add a module target named `my_module`, along with an alias named
+`company::my_module`. ``` juce_add_module(my_module ALIAS_NAMESPACE company)` ```
 
 `juce_add_modules` is a convenience function that can be used to add multiple JUCE modules at once.
 This version accepts many module paths, rather than just one. For an example of usage, see the

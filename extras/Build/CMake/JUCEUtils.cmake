@@ -431,7 +431,7 @@ endfunction()
 # ==================================================================================================
 
 function(juce_add_module module_path)
-    set(one_value_args INSTALL_PATH INSTALL_EXPORT ALIAS_NAMESPACE)
+    set(one_value_args INSTALL_PATH ALIAS_NAMESPACE)
     cmake_parse_arguments(JUCE_ARG "" "${one_value_args}" "" ${ARGN})
 
     _juce_make_absolute(module_path)
@@ -455,20 +455,13 @@ function(juce_add_module module_path)
 
     list(APPEND all_module_sources "${base_path}/${module_name}/${module_header_name}")
 
-    set(install_export_args)
-
-    if(JUCE_ARG_INSTALL_EXPORT)
-        set(install_export_args INSTALL_EXPORT "${JUCE_ARG_INSTALL_EXPORT}")
-    endif()
-
     if(${module_name} STREQUAL "juce_audio_plugin_client")
         _juce_get_platform_plugin_kinds(plugin_kinds)
 
         foreach(kind IN LISTS plugin_kinds)
             _juce_add_plugin_wrapper_target(FORMAT ${kind}
                 PATH "${module_path}"
-                OUT_PATH "${base_path}"
-                ${install_export_args})
+                OUT_PATH "${base_path}")
         endforeach()
 
         list(APPEND all_module_sources "${base_path}/${module_name}/juce_audio_plugin_client_utils.cpp")
@@ -496,10 +489,6 @@ function(juce_add_module module_path)
         target_include_directories(juce_vst3_headers INTERFACE
             "${base_path}/juce_audio_processors/format_types/VST3_SDK")
         target_link_libraries(juce_audio_processors INTERFACE juce_vst3_headers)
-
-        if(JUCE_ARG_INSTALL_EXPORT)
-            install(TARGETS juce_vst3_headers EXPORT "${JUCE_ARG_INSTALL_EXPORT}")
-        endif()
 
         if(JUCE_ARG_ALIAS_NAMESPACE)
             add_library(${JUCE_ARG_ALIAS_NAMESPACE}::juce_vst3_headers ALIAS juce_vst3_headers)
@@ -568,9 +557,8 @@ function(juce_add_module module_path)
     _juce_get_metadata("${metadata_dict}" dependencies module_dependencies)
     target_link_libraries(${module_name} INTERFACE ${module_dependencies})
 
-    if(JUCE_ARG_INSTALL_PATH OR JUCE_ARG_INSTALL_EXPORT)
+    if(installed_module_path)
         install(DIRECTORY "${module_path}" DESTINATION "${installed_module_path}")
-        install(TARGETS ${module_name} EXPORT "${JUCE_ARG_INSTALL_EXPORT}")
     endif()
 
     if(JUCE_ARG_ALIAS_NAMESPACE)
@@ -579,13 +567,12 @@ function(juce_add_module module_path)
 endfunction()
 
 function(juce_add_modules)
-    set(one_value_args INSTALL_PATH INSTALL_EXPORT ALIAS_NAMESPACE)
+    set(one_value_args INSTALL_PATH ALIAS_NAMESPACE)
     cmake_parse_arguments(JUCE_ARG "" "${one_value_args}" "" ${ARGN})
 
     foreach(path IN LISTS JUCE_ARG_UNPARSED_ARGUMENTS)
         juce_add_module(${path}
             INSTALL_PATH "${JUCE_ARG_INSTALL_PATH}"
-            INSTALL_EXPORT "${JUCE_ARG_INSTALL_EXPORT}"
             ALIAS_NAMESPACE "${JUCE_ARG_ALIAS_NAMESPACE}")
     endforeach()
 endfunction()
@@ -2063,13 +2050,8 @@ function(juce_add_pip header)
 
         set(discovered_module)
 
-        # If we're building a PIP from outside the current build tree, the JUCE modules
-        # might be namespaced, so we try adding a namespace if we can't find a target with
-        # the name given in the metadata block.
         if(TARGET "${module}")
             set(discovered_module "${module}")
-        elseif(TARGET "juce::${module}")
-            set(discovered_module "juce::${module}")
         else()
             message(FATAL_ERROR "No such module: ${module}")
         endif()
