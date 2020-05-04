@@ -20,6 +20,7 @@ project(JUCE VERSION 6.0.0 LANGUAGES C CXX)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 
+include(extras/Build/CMake/JUCEHelperTargets.cmake)
 include(extras/Build/CMake/JUCEUtils.cmake)
 
 juce_disable_default_flags()
