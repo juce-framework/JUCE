@@ -1088,7 +1088,7 @@ function(_juce_create_windows_package source_target dest_target extension defaul
         return()
     endif()
 
-    get_target_property(products_folder ${source_target} LIBRARY_OUTPUT_DIRECTORY)
+    get_target_property(products_folder ${dest_target} LIBRARY_OUTPUT_DIRECTORY)
 
     set(product_name $<TARGET_PROPERTY:${source_target},JUCE_PRODUCT_NAME>)
     set(output_folder "${products_folder}/${product_name}.${extension}")
@@ -1181,11 +1181,11 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
     set(target_name ${shared_code_target}_${kind})
 
     set_target_properties(${target_name} PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY "$<GENEX_EVAL:$<TARGET_PROPERTY:${shared_code_target},ARCHIVE_OUTPUT_DIRECTORY>>"
-        LIBRARY_OUTPUT_DIRECTORY "$<GENEX_EVAL:$<TARGET_PROPERTY:${shared_code_target},LIBRARY_OUTPUT_DIRECTORY>>"
-        RUNTIME_OUTPUT_DIRECTORY "$<GENEX_EVAL:$<TARGET_PROPERTY:${shared_code_target},RUNTIME_OUTPUT_DIRECTORY>>")
+        ARCHIVE_OUTPUT_DIRECTORY "$<GENEX_EVAL:$<TARGET_PROPERTY:${shared_code_target},ARCHIVE_OUTPUT_DIRECTORY>>/${kind}"
+        LIBRARY_OUTPUT_DIRECTORY "$<GENEX_EVAL:$<TARGET_PROPERTY:${shared_code_target},LIBRARY_OUTPUT_DIRECTORY>>/${kind}"
+        RUNTIME_OUTPUT_DIRECTORY "$<GENEX_EVAL:$<TARGET_PROPERTY:${shared_code_target},RUNTIME_OUTPUT_DIRECTORY>>/${kind}")
 
-    get_target_property(products_folder ${shared_code_target} LIBRARY_OUTPUT_DIRECTORY)
+    get_target_property(products_folder ${target_name} LIBRARY_OUTPUT_DIRECTORY)
     set(product_name $<TARGET_PROPERTY:${shared_code_target},JUCE_PRODUCT_NAME>)
 
     if(kind STREQUAL "VST3")
