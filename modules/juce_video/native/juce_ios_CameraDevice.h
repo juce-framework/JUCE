@@ -16,6 +16,11 @@
   ==============================================================================
 */
 
+#if (defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_10_0)
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+ #define JUCE_DEPRECATION_IGNORED 1
+#endif
+
 struct CameraDevice::Pimpl
 {
     using InternalOpenCameraResultCallback = std::function<void(const String& /*cameraId*/, const String& /*error*/)>;
@@ -1324,3 +1329,7 @@ String CameraDevice::getFileExtension()
 {
     return ".mov";
 }
+
+#if JUCE_DEPRECATION_IGNORED
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+#endif

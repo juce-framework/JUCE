@@ -29,6 +29,17 @@ static bool isUsingOldRotationMethod() noexcept
     return isPreV8;
 }
 
+static UIInterfaceOrientation getWindowOrientation()
+{
+    UIApplication* sharedApplication = [UIApplication sharedApplication];
+
+   #if (defined (__IPHONE_13_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0)
+    return [[[[sharedApplication windows] firstObject] windowScene] interfaceOrientation];
+   #else
+    return [sharedApplication statusBarOrientation];
+   #endif
+}
+
 namespace Orientations
 {
     static Desktop::DisplayOrientation convertToJuce (UIInterfaceOrientation orientation)
@@ -267,7 +278,7 @@ public:
         {
             const Rectangle<int> screen (convertToRectInt ([UIScreen mainScreen].bounds));
 
-            switch ([[UIApplication sharedApplication] statusBarOrientation])
+            switch (getWindowOrientation())
             {
                 case UIInterfaceOrientationPortrait:
                     return r;
@@ -298,7 +309,7 @@ public:
         {
             const Rectangle<int> screen (convertToRectInt ([UIScreen mainScreen].bounds));
 
-            switch ([[UIApplication sharedApplication] statusBarOrientation])
+            switch (getWindowOrientation())
             {
                 case UIInterfaceOrientationPortrait:
                     return r;
