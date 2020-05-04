@@ -52,6 +52,9 @@ public:
     Point<float> localToGlobal (Point<float> relativePosition) override    { return relativePosition + getBounds().getPosition().toFloat(); }
     Point<float> globalToLocal (Point<float> screenPosition) override      { return screenPosition - getBounds().getPosition().toFloat(); }
 
+    using ComponentPeer::localToGlobal;
+    using ComponentPeer::globalToLocal;
+
     StringArray getAvailableRenderingEngines() override                    { return StringArray ("Software Renderer"); }
 
     void setBounds (const Rectangle<int>& newBounds, bool) override
@@ -368,10 +371,13 @@ public:
                 auto* parameter = juceParameters.params[i];
                 auto& paramDef = parametersPtr.get()[i];
 
-                strncpy (paramDef.name, parameter->getName (15).toRawUTF8(), 15);
+                const auto nameLength = (size_t) numElementsInArray (paramDef.name);
+                const auto unitLength = (size_t) numElementsInArray (paramDef.unit);
+
+                parameter->getName ((int) nameLength - 1).copyToUTF8 (paramDef.name, nameLength);
 
                 if (parameter->getLabel().isNotEmpty())
-                    strncpy (paramDef.unit, parameter->getLabel().toRawUTF8(), 15);
+                    parameter->getLabel().copyToUTF8 (paramDef.unit, unitLength);
 
                 parameterDescriptions.add (parameter->getName (15));
                 paramDef.description = parameterDescriptions[i].toRawUTF8();
@@ -546,7 +552,7 @@ namespace UnityCallbacks
         auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
         *value = pluginInstance->getParameter (index);
 
-        strncpy (valueStr, pluginInstance->getParameterString (index).toRawUTF8(), 15);
+        pluginInstance->getParameterString (index).copyToUTF8 (valueStr, 15);
 
         return 0;
     }
@@ -630,7 +636,7 @@ static void declareEffect (UnityAudioEffectDefinition& definition)
     if (! name.startsWithIgnoreCase ("audioplugin"))
         name = "audioplugin_" + name;
 
-    strcpy (definition.name, name.toRawUTF8());
+    name.copyToUTF8 (definition.name, (size_t) numElementsInArray (definition.name));
 
     definition.structSize = sizeof (UnityAudioEffectDefinition);
     definition.parameterStructSize = sizeof (UnityAudioParameterDefinition);

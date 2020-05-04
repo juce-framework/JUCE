@@ -46,6 +46,8 @@ public:
     LeakedObjectDetector() noexcept                                 { ++(getCounter().numObjects); }
     LeakedObjectDetector (const LeakedObjectDetector&) noexcept     { ++(getCounter().numObjects); }
 
+    LeakedObjectDetector& operator= (const LeakedObjectDetector&) noexcept = default;
+
     ~LeakedObjectDetector()
     {
         if (--(getCounter().numObjects) < 0)

@@ -28,7 +28,7 @@
 
 #include "../../juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp"
 
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4127 4512)
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4127 4512 4996)
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
                                      "-Wsign-conversion",
                                      "-Wextra-semi",

@@ -1431,6 +1431,7 @@ public:
 
     Point<float> localToGlobal (Point<float> relativePosition) override  { return relativePosition + getScreenPosition().toFloat(); }
     Point<float> globalToLocal (Point<float> screenPosition) override    { return screenPosition   - getScreenPosition().toFloat(); }
+
     using ComponentPeer::localToGlobal;
     using ComponentPeer::globalToLocal;
 
