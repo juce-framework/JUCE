@@ -1,4 +1,5 @@
 #include "ARASampleProjectDocumentController.h"
+#include "ARASampleProjectAudioModification.h"
 
 ARA::PlugIn::AudioModification* ARASampleProjectDocumentController::doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, const ARA::PlugIn::AudioModification* optionalModificationToClone) noexcept
 {
