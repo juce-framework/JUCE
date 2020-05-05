@@ -64,13 +64,12 @@ For a more complete example of an ARA plugin see the [ARA Sample Project](https:
 
 As is the case in the ARA C++ library, the `juce::ARADocumentController` class must be subclassed by your
 ARA plugin. The ARA host will use your document controller to build a representation of the ARA document for
-your plugin - by default the `juce::ARADocumentController` will create the classes outlined below, but your plugin should override the `doCreate` functions in order to create objects that suit your purpose. 
+your plugin - by default the `juce::ARADocumentController` will create the ARA model object classes outlined below, 
+but your plugin should override the `doCreate` functions in order to create model objects that suit your purpose. 
 
-In the 
-[ARA Sample Project DocumentController class](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARASampleProject/Source/ARASampleProjectDocumentController.h)
-we override `doCreatePlaybackRenderer` in order to return a custom `ARAPlaybackRenderer` instance 
-(see the section below on plugin instance roles for information regarding `ARAPlaybackRenderer`.)
-
+For example, in the 
+[`ARASampleProjectDocumentController`](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARASampleProject/Source/ARASampleProjectDocumentController.h)
+we override `doCreateAudioModification` in order to return a [custom `juce::ARAAudioModification` subclass](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARASampleProject/Source/ARASampleProjectAudioModification.h). 
 
 ### ARA Model Objects
 
@@ -86,11 +85,14 @@ in the ARA SDK into counterparts in the `juce` namespace:
 These model objects can be subclassed further by overriding the `ARADocumentController::doCreate` 
 functions as needed, i.e
 ```
+// declare an ARAAudioSource subclass
 class MyCustomAudioSource : public juce::ARAAudioSource
 {
+    // inherit the juce::ARAAudioSource constructor
     using juce::ARAAudioSource::ARAAudioSource;
 };
 
+// override doCreateAudioSource() to return your custom subclass
 class MyCustomDocumentController : public juce::ARADocumentController
 {
     ARA::PlugIn::AudioSource* doCreateAudioSource (ARA::PlugIn::Document* document, ARA::ARAAudioSourceHostRef hostRef) 
@@ -106,7 +108,7 @@ class MyCustomDocumentController : public juce::ARADocumentController
 
 To make things feel more "JUCEy", we've given each JUCE model object a `Listener` base class 
 with virtual callbacks that can be overridden to receive notifications related to the ARA model graph 
-and host rendering / UI state. These callbacks meant to replace the `will/did` functions that would 
+and host rendering / UI state. These callbacks are meant to replace the `will/did` functions that would 
 be overridden by an `ARA::PlugIn::DocumentController` implementation using the ARA C++ library. 
 
 We've also added this `Listener` pattern to other classes, such as the 
@@ -121,7 +123,8 @@ via `addListener` and `removeListener`.
 class PlaybackRegionManager  : public ARAPlaybackRegion::Listener
 {
 public:
-    PlaybackRegionManager(ARAPlaybackRegion* region)
+    // use constructor/destructor to manage Listener subscription
+    PlaybackRegionManager (ARAPlaybackRegion* region)
         : myRegion (region)
     {
         myRegion->addListener (this);
@@ -131,6 +134,10 @@ public:
         myRegion->removeListener (this);
     }
 
+    // ARAPlaybackRegion::Listener overrides
+    void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) override {}
+    void didUpdatePlaybackRegionContent (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags) override {}
+    
 private:
     ARAPlaybackRegion* myRegion;
 };
@@ -139,7 +146,6 @@ private:
 See the [ARA Sample Project PlaybackRegionView class](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARASampleProject/Source/PlaybackRegionView.h)
 for an example of several `Listener` implementations in action. 
 
-
 ### ARA PlugIn Instance Roles
 
 When an ARA plug-in is instantiated by the host it will take on one or more instance roles 
@@ -147,51 +153,123 @@ as defined by the ARA API. To represent this concept in JUCE we've created two e
 
 The `AudioProcessorARAExtension` class, meant to be subclassed by the JUCE plugin's `AudioProcessor`
 implementation, allows access to all three plugin instance roles bound to the JUCE plugin instance.
-The two renderer roles (`ARAPlaybackRenderer` and `ARAEditorRenderer`) will be used by an `AudioProcessor`
-instance, so they've been given similar lifetime management functions:
-- `ARAPlaybackRenderer::prepareToPlay` - do any pre-playback preparation
-- `ARAPlaybackRenderer::processBlock` - render audio samples
-- `ARAPlaybackRenderer::releaseResources` - clean up resources while not playing
 
-An implementation of an `ARAPlaybackRenderer` can be found in the 
-[ARA Sample Project PlaybackRenderer class](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARASampleProject/Source/ARASampleProjectPlaybackRenderer.h). 
+Your plug-in can then fulfill its plug-in instance roles as needed, for example
+
+```
+class MyAudioProcessor    : public AudioProcessor,
+                            public AudioProcessorARAExtension
+{
+public:
+    // ...
+    
+    void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
+    {
+        // if this plug-in instance is bound to ARA
+        if (isBoundToARA())
+        {
+            // if this plug-in instance is an ARAPlaybackRenderer, render assigned playback regions
+            if (auto araPlaybackRenderer = getARAPlaybackRenderer())
+                for (auto playbackRegion : araPlaybackRenderer->getPlaybackRegions())
+                    renderPlaybackRegion (buffer, playbackRegion);
+
+            // if this plug-in instance is an ARAEditorRenderer, render assigned playback regions
+            if (auto araEditorRenderer = getARAEditorRenderer())
+                for (auto playbackRegion : araEditorRenderer->getPlaybackRegions())
+                    renderPlaybackRegion (buffer, playbackRegion);
+        }
+    }
+    
+private:
+    void renderPlaybackRegion (AudioBuffer<float>& buffer, ARAPlaybackRegion* playbackRegion) 
+    {
+        // perform your rendering here
+    }
+};
+```
 
 The `AudioProcessorEditorARAExtension` class, meant to be subclassed by the JUCE plugin's `AudioProcessorEditor`
 implementation, allows access to the `ARAEditorView` role and helps the plugin interact with host selection
-and UI state. 
+and UI state. Our `ARAEditorView` class also has a Listener class that can be used to recieve UI related callbacks. 
 
-Ultimately it's up to the host to decide when and where to instantiate your plugin and what roles its meant
-to fulfill. To query whether or not a given plugin instance is meant to fulfill a particular role, we've
-given these extension classes the following convenience functions:
 ```
-// if any isX returns false, the corresponding getX will return nullptr
-bool AudioProcessorARAExtension::isARAPlaybackRenderer() const noexcept;
-bool AudioProcessorARAExtension::getARAPlaybackRenderer() const noexcept;
+class MyAudioProcessorEditor  : public AudioProcessorEditor,
+                                public AudioProcessorEditorARAExtension,
+                                public ARAEditorView::Listener
+{
+public:
+    MyAudioProcessorEditor (MyAudioProcessor& p)
+        : AudioProcessorEditor (&p),
+          AudioProcessorEditorARAExtension (&p)
+    {
+        if (isARAEditorView())
+            getARAEditorView()->addListener (this);
+    }
+    ~MyAudioProcessorEditor()
+    {
+        if (isARAEditorView())
+            getARAEditorView()->removeListener (this);
+    }
+    
+    // ARAEditorView::Listener overrides
+    void onNewSelection (const ARA::PlugIn::ViewSelection& viewSelection) override
+    {
+        for (auto playbackRegion : viewSelection.getPlaybackRegions())
+            juce::Logger::writeToLog (playbackRegion->getName() + " is selected. ");
+    }
+};
+```
 
-bool AudioProcessorARAExtension::isARAEditorRenderer() const noexcept;
-bool AudioProcessorARAExtension::getARAEditorRenderer() const noexcept;
 ### Audio Readers
-
-bool AudioProcessorARAExtension::isARAEditorView() const noexcept;
-bool AudioProcessorARAExtension::getARAEditorView() const noexcept;
-
-bool AudioProcessorEditorARAExtension::isARAEditorView() const noexcept;
-bool AudioProcessorEditorARAExtension::getARAEditorView() const noexcept;
-```
-
-
 
 Reading large buffers of audio samples at will is a key component of the ARA API. Because the
 concept of audio readers already exists in JUCE, we've subclassed the existing `juce::AudioFormatReader` 
-to read audio samples via ARA in a class called `juce::ARAAudioSourceReader` that allows reading samples
-from a single `ARAAudioSource`. We can construct an `ARAAudioSourceReader` via the `ARADocumentController ` 
-using its `createAudioSourceReader` function. 
+to read audio samples via ARA in a class called `ARAAudioSourceReader` that allows reading samples
+from a single `ARAAudioSource`.
 
-We've also created reader classes that can use an `ARAPlaybackRenderer` instance to read samples as 
-if they were being output by the renderer instance. This is useful if you want to deal with playback regions
-instead of the original audio source samples. These readers can operate on a distinct group of
-`ARAPlaybackRegions` using an `ARAPlaybacRegionReader` as well as an entire `ARARegionSequence` using
-`ARARegionSequenceReader`. 
+```
+std::vector<float> readAudioSourceSamples (ARAAudioSource* audioSource)
+{
+    jassert (audioSource->isSampleAccessEnabled());
+
+    // prepare output buffer
+    ARA::ARASampleCount sampleCount = audioSource->getSampleCount();
+    std::vector<float> sampleBuffer (sampleCount);
+    float* sampleBufPointer = sampleBuffer.data ();
+
+    // read the first channel of audio source sample data
+    ARAAudioSourceReader sourceReader(audioSource);
+    sourceReader.read (&sampleBufPointer, 1, 0, sampleCount);
+    
+    return sampleBuffer;
+}
+```
+
+We've also created an `ARAPlaybackRegionReader` class that can read samples as if they were being output by 
+an `ARAPlaybackRenderer` instance. This is useful if you want to deal with playback regions instead of the original audio source samples. 
+
+```
+class MyAudioProcessor    : public AudioProcessor,
+                            public AudioProcessorARAExtension
+{
+    MyAudioProcessor();
+    // ...
+};
+
+std::vector<float> readPlaybackRegionSamples (ARAPlaybackRegion* playbackRegion)
+{
+    // prepare output buffer
+    ARA::ARASampleCount sampleCount = 1024;
+    std::vector<float> sampleBuffer (sampleCount);
+    float* sampleBufPointer = sampleBuffer.data();
+
+    // read the first channel of playback region sample data
+    ARAPlaybackRegionReader regionReader (std::make_unique<MyAudioProcessor>(), { playbackRegion });
+    regionReader.read (&sampleBufPointer, 1, 0, sampleCount);
+
+    return sampleBuffer;
+}
+```
 
 Once created, the our readers can be treated like any other `AudioFormatReader` - the 
 [ARA Sample Project PlaybackRegionView class](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARASampleProject/Source/PlaybackRegionView.h)
