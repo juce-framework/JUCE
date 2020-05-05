@@ -45,7 +45,7 @@
 
 */
 
-#include "../../../juce_core/native/juce_mac_ClangBugWorkaround.h"
+#include <juce_core/native/juce_mac_ClangBugWorkaround.h>
 #include "CarbonEventHandler.h"
 
 static pascal OSStatus TheEventHandler(EventHandlerCallRef inHandlerRef, EventRef inEvent, void *inUserData)

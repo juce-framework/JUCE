@@ -43,7 +43,7 @@
 #if JUCE_MAC
  #if JUCE_SUPPORT_CARBON && (JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_AU)
   #include <Carbon/Carbon.h>
-  #include "../juce_gui_extra/native/juce_mac_CarbonViewWrapperComponent.h"
+  #include <juce_gui_extra/native/juce_mac_CarbonViewWrapperComponent.h>
  #endif
 #endif
 

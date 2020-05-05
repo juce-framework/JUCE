@@ -52,8 +52,8 @@
  #include <CoreAudioKit/AUViewController.h>
 #endif
 
-#include "../../juce_audio_basics/native/juce_mac_CoreAudioLayouts.h"
-#include "../../juce_audio_devices/native/juce_MidiDataConcatenator.h"
+#include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
+#include <juce_audio_devices/native/juce_MidiDataConcatenator.h>
 #include "juce_AU_Shared.h"
 
 namespace juce

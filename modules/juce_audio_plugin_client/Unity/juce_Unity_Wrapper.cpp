@@ -26,9 +26,9 @@
 
 #if JucePlugin_Build_Unity
 
-#include "../../juce_core/system/juce_TargetPlatform.h"
+#include <juce_core/system/juce_TargetPlatform.h>
 #include "../utility/juce_IncludeModuleHeaders.h"
-#include "../../juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp"
+#include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 
 #if JUCE_WINDOWS
  #include "../utility/juce_IncludeSystemHeaders.h"
