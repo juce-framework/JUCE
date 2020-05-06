@@ -148,7 +148,7 @@ int BurgerMenuComponent::getNumRows()
 
 void BurgerMenuComponent::paint (Graphics& g)
 {
-    getLookAndFeel().drawPopupMenuBackground (g, getWidth(), getHeight());
+    getLookAndFeel().drawPopupMenuBackground (g, getWidth(), getHeight(), nullptr);
 }
 
 void BurgerMenuComponent::paintListBoxItem (int rowIndex, Graphics& g, int w, int h, bool highlight)
@@ -163,7 +163,7 @@ void BurgerMenuComponent::paintListBoxItem (int rowIndex, Graphics& g, int w, in
 
     if (row.isMenuHeader)
     {
-        lf.drawPopupMenuSectionHeader (g, r.reduced (20, 0), row.item.text);
+        lf.drawPopupMenuSectionHeader (g, r.reduced (20, 0), row.item.text, nullptr);
         g.setColour (Colours::grey);
         g.fillRect (r.withHeight (1));
     }
@@ -182,7 +182,8 @@ void BurgerMenuComponent::paintListBoxItem (int rowIndex, Graphics& g, int w, in
                                   item.text,
                                   item.shortcutKeyDescription,
                                   item.image.get(),
-                                  colour);
+                                  colour,
+                                  nullptr);
     }
 }
 

@@ -766,29 +766,30 @@ void LookAndFeel_V4::drawPopupMenuItem (Graphics& g, const Rectangle<int>& area,
                                         const bool isHighlighted, const bool isTicked,
                                         const bool hasSubMenu, const String& text,
                                         const String& shortcutKeyText,
-                                        const Drawable* icon, const Colour* const textColourToUse)
+                                        const Drawable* icon, const Colour* const textColourToUse,
+                                        Component* targetComponent)
 {
     if (isSeparator)
     {
         auto r  = area.reduced (5, 0);
         r.removeFromTop (roundToInt ((r.getHeight() * 0.5f) - 0.5f));
 
-        g.setColour (findColour (PopupMenu::textColourId).withAlpha (0.3f));
+        g.setColour (findColour (PopupMenu::textColourId, targetComponent).withAlpha (0.3f));
         g.fillRect (r.removeFromTop (1));
     }
     else
     {
-        auto textColour = (textColourToUse == nullptr ? findColour (PopupMenu::textColourId)
+        auto textColour = (textColourToUse == nullptr ? findColour (PopupMenu::textColourId, targetComponent)
                                                       : *textColourToUse);
 
         auto r  = area.reduced (1);
 
         if (isHighlighted && isActive)
         {
-            g.setColour (findColour (PopupMenu::highlightedBackgroundColourId));
+            g.setColour (findColour (PopupMenu::highlightedBackgroundColourId, targetComponent));
             g.fillRect (r);
 
-            g.setColour (findColour (PopupMenu::highlightedTextColourId));
+            g.setColour (findColour (PopupMenu::highlightedTextColourId, targetComponent));
         }
         else
         {

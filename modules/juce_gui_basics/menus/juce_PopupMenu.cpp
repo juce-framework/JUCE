@@ -50,14 +50,16 @@ static bool hasSubMenu (const PopupMenu::Item& item) noexcept            { retur
 //==============================================================================
 struct HeaderItemComponent  : public PopupMenu::CustomComponent
 {
-    HeaderItemComponent (const String& name)  : PopupMenu::CustomComponent (false)
+    HeaderItemComponent (const String& name, Component* targetComponentToUse)
+      : PopupMenu::CustomComponent (false),
+        targetComponent (targetComponentToUse)
     {
         setName (name);
     }
 
     void paint (Graphics& g) override
     {
-        getLookAndFeel().drawPopupMenuSectionHeader (g, getLocalBounds(), getName());
+        getLookAndFeel().drawPopupMenuSectionHeader (g, getLocalBounds(), getName(), targetComponent);
     }
 
     void getIdealSize (int& idealWidth, int& idealHeight) override
@@ -66,6 +68,8 @@ struct HeaderItemComponent  : public PopupMenu::CustomComponent
         idealHeight += idealHeight / 2;
         idealWidth += idealWidth / 4;
     }
+
+    Component::SafePointer<Component> targetComponent;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HeaderItemComponent)
 };
@@ -77,7 +81,7 @@ struct ItemComponent  : public Component
       : item (i), customComp (i.customComponent)
     {
         if (item.isSectionHeader)
-            customComp = *new HeaderItemComponent (item.text);
+            customComp = *new HeaderItemComponent (item.text, parent.options.getTargetComponent());
 
         if (customComp != nullptr)
         {
@@ -86,6 +90,8 @@ struct ItemComponent  : public Component
         }
 
         parent.addAndMakeVisible (this);
+
+        targetComponent = parent.options.getTargetComponent();
 
         updateShortcutKeyDescription();
 
@@ -128,7 +134,8 @@ struct ItemComponent  : public Component
                                                 item.text,
                                                 item.shortcutKeyDescription,
                                                 item.image.get(),
-                                                getColour (item));
+                                                getColour (item),
+                                                targetComponent);
     }
 
     void resized() override
@@ -158,6 +165,7 @@ private:
     // NB: we use a copy of the one from the item info in case we're using our own section comp
     ReferenceCountedObjectPtr<CustomComponent> customComp;
     bool isHighlighted = false;
+    Component::SafePointer<Component> targetComponent;
 
     void updateShortcutKeyDescription()
     {
@@ -287,7 +295,7 @@ struct MenuWindow  : public Component
         if (isOpaque())
             g.fillAll (Colours::white);
 
-        getLookAndFeel().drawPopupMenuBackground (g, getWidth(), getHeight());
+        getLookAndFeel().drawPopupMenuBackground (g, getWidth(), getHeight(), options.getTargetComponent());
     }
 
     void paintOverChildren (Graphics& g) override
@@ -301,12 +309,12 @@ struct MenuWindow  : public Component
         if (canScroll())
         {
             if (isTopScrollZoneActive())
-                lf.drawPopupMenuUpDownArrow (g, getWidth(), PopupMenuSettings::scrollZone, true);
+                lf.drawPopupMenuUpDownArrow (g, getWidth(), PopupMenuSettings::scrollZone, true, options.getTargetComponent());
 
             if (isBottomScrollZoneActive())
             {
                 g.setOrigin (0, getHeight() - PopupMenuSettings::scrollZone);
-                lf.drawPopupMenuUpDownArrow (g, getWidth(), PopupMenuSettings::scrollZone, false);
+                lf.drawPopupMenuUpDownArrow (g, getWidth(), PopupMenuSettings::scrollZone, false, options.getTargetComponent());
             }
         }
     }

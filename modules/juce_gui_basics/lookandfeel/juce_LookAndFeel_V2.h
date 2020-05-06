@@ -155,19 +155,19 @@ public:
     void drawLasso (Graphics&, Component&) override;
 
     //==============================================================================
-    void drawPopupMenuBackground (Graphics&, int width, int height) override;
+    void drawPopupMenuBackground (Graphics&, int width, int height, Component* targetComponent) override;
 
     void drawPopupMenuItem (Graphics&, const Rectangle<int>& area,
                             bool isSeparator, bool isActive, bool isHighlighted, bool isTicked, bool hasSubMenu,
                             const String& text, const String& shortcutKeyText,
-                            const Drawable* icon, const Colour* textColour) override;
+                            const Drawable* icon, const Colour* textColour, Component* targetComponent) override;
 
     void drawPopupMenuSectionHeader (Graphics&, const Rectangle<int>& area,
-                                     const String& sectionName) override;
+                                     const String& sectionName, Component* targetComponent) override;
 
     Font getPopupMenuFont() override;
 
-    void drawPopupMenuUpDownArrow (Graphics&, int width, int height, bool isScrollUpArrow) override;
+    void drawPopupMenuUpDownArrow (Graphics&, int width, int height, bool isScrollUpArrow, Component* targetComponent) override;
 
     void getIdealPopupMenuItemSize (const String& text, bool isSeparator, int standardMenuItemHeight,
                                     int& idealWidth, int& idealHeight) override;
