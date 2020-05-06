@@ -1837,6 +1837,10 @@ String String::formattedRaw (const char* pf, ...)
         va_list args;
         va_start (args, pf);
 
+       #if JUCE_WINDOWS
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+       #endif
+
       #if JUCE_ANDROID
         HeapBlock<char> temp (bufferSize);
         int num = (int) vsnprintf (temp.get(), bufferSize - 1, pf, args);
@@ -1847,17 +1851,16 @@ String String::formattedRaw (const char* pf, ...)
         HeapBlock<wchar_t> temp (bufferSize);
         const int num = (int)
        #if JUCE_WINDOWS
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
             _vsnwprintf
        #else
             vswprintf
        #endif
                 (temp.get(), bufferSize - 1, wideCharVersion.toWideCharPointer(), args);
+      #endif
 
        #if JUCE_WINDOWS
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
        #endif
-      #endif
         va_end (args);
 
         if (num > 0)
@@ -1894,7 +1897,7 @@ int String::getTrailingIntValue() const noexcept
             break;
         }
 
-        n += static_cast<juce_wchar> (mult) * (*t - '0');
+        n += (int) (((juce_wchar) mult) * (*t - '0'));
         mult *= 10;
     }
 

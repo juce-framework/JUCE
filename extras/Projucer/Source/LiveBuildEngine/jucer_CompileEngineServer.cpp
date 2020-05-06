@@ -283,7 +283,7 @@ void sendQuitMessageToIDE (void* server)
  #define WIN32_LEAN_AND_MEAN 1
  #include <windows.h>
 
- static HANDLE parentProcessHandle = 0;
+ static HANDLE parentProcessHandle = nullptr;
  static void setParentProcessID (int pid)  { parentProcessHandle = OpenProcess (SYNCHRONIZE, FALSE, (DWORD) pid); }
  static int getCurrentProcessID()          { return (int) GetCurrentProcessId(); }
 #endif

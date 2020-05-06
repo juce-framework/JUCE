@@ -21,7 +21,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         -Wunreachable-code -Wzero-as-null-pointer-constant -Wcast-align
         -Wno-implicit-fallthrough -Wno-maybe-uninitialized
         -Wno-missing-field-initializers -Wno-ignored-qualifiers -Wswitch-enum
-        -Wswitch-default -Wredundant-decls)
+        -Wredundant-decls)
 
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "7.0.0")
         target_compile_options(juce_recommended_warning_flags INTERFACE "-Wno-strict-overflow")

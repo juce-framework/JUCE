@@ -37,6 +37,8 @@ public:
         DestroyWindow (hwnd);
     }
 
+    using ComponentMovementWatcher::componentMovedOrResized;
+
     void componentMovedOrResized (bool wasMoved, bool wasResized) override
     {
         auto* topComponent = owner.getTopLevelComponent();
@@ -52,7 +54,7 @@ public:
             if (! wasMoved)    windowFlags |= SWP_NOMOVE;
             if (! wasResized)  windowFlags |= SWP_NOSIZE;
 
-            SetWindowPos (hwnd, 0, scaled.getX(), scaled.getY(), scaled.getWidth(), scaled.getHeight(), windowFlags);
+            SetWindowPos (hwnd, nullptr, scaled.getX(), scaled.getY(), scaled.getWidth(), scaled.getHeight(), windowFlags);
         }
     }
 
@@ -73,8 +75,10 @@ public:
         ShowWindow (hwnd, isShowing ? SW_SHOWNA : SW_HIDE);
 
         if (isShowing)
-            InvalidateRect (hwnd, 0, 0);
+            InvalidateRect (hwnd, nullptr, 0);
      }
+
+    using ComponentMovementWatcher::componentVisibilityChanged;
 
     void componentVisibilityChanged() override
     {

@@ -549,9 +549,19 @@ function(juce_add_module module_path)
 
         _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" linuxLibs)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-        target_compile_options(${module_name} INTERFACE /bigobj)
+        if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC"))
+            if(module_name STREQUAL "juce_gui_basics")
+                target_compile_options(${module_name} INTERFACE /bigobj)
+            endif()
 
-        _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" windowsLibs)
+            _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" windowsLibs)
+        elseif(MSYS OR MINGW)
+            if(module_name STREQUAL "juce_gui_basics")
+                target_compile_options(${module_name} INTERFACE "-Wa,-mbig-obj")
+            endif()
+
+            _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" mingwLibs)
+        endif()
     endif()
 
     _juce_get_metadata("${metadata_dict}" dependencies module_dependencies)

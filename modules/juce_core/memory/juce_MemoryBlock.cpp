@@ -321,7 +321,7 @@ void MemoryBlock::loadFromHexString (StringRef hex)
 
     for (;;)
     {
-        int byte = 0;
+        juce_wchar byte = 0;
 
         for (int loop = 2; --loop >= 0;)
         {

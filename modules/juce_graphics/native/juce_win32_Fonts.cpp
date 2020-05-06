@@ -157,7 +157,7 @@ namespace FontEnumerators
             const String fontName (lpelfe->elfLogFont.lfFaceName);
             fontName.copyToUTF16 (lf.lfFaceName, sizeof (lf.lfFaceName));
 
-            auto dc = CreateCompatibleDC (0);
+            auto dc = CreateCompatibleDC (nullptr);
             EnumFontFamiliesEx (dc, &lf, (FONTENUMPROCW) &fontEnum2, lParam, 0);
             DeleteDC (dc);
         }
@@ -190,7 +190,7 @@ StringArray Font::findAllTypefaceNames()
     else
    #endif
     {
-        auto dc = CreateCompatibleDC (0);
+        auto dc = CreateCompatibleDC (nullptr);
 
         {
             LOGFONTW lf = {};
@@ -332,10 +332,10 @@ public:
         SelectObject (dc, previousFontH); // Replacing the previous font before deleting the DC avoids a warning in BoundsChecker
         DeleteDC (dc);
 
-        if (fontH != 0)
+        if (fontH != nullptr)
             DeleteObject (fontH);
 
-        if (memoryFont != 0)
+        if (memoryFont != nullptr)
             RemoveFontMemResourceEx (memoryFont);
     }
 
@@ -392,13 +392,13 @@ public:
         GLYPHMETRICS gm;
         // (although GetGlyphOutline returns a DWORD, it may be -1 on failure, so treat it as signed int..)
         auto bufSize = (int) GetGlyphOutline (dc, (UINT) glyphNumber, GGO_NATIVE | GGO_GLYPH_INDEX,
-                                              &gm, 0, 0, &identityMatrix);
+                                              &gm, 0, nullptr, &identityMatrix);
 
         if (bufSize > 0)
         {
             HeapBlock<char> data (bufSize);
             GetGlyphOutline (dc, (UINT) glyphNumber, GGO_NATIVE | GGO_GLYPH_INDEX, &gm,
-                             bufSize, data, &identityMatrix);
+                             (DWORD) bufSize, data, &identityMatrix);
 
             auto pheader = reinterpret_cast<const TTPOLYGONHEADER*> (data.getData());
 
@@ -456,7 +456,7 @@ private:
     static const MAT2 identityMatrix;
     HFONT fontH = {};
     HGDIOBJ previousFontH = {};
-    HDC dc { CreateCompatibleDC (0) };
+    HDC dc { CreateCompatibleDC (nullptr) };
     TEXTMETRIC tm;
     HANDLE memoryFont = {};
     float ascent = 1.0f, heightToPointsFactor = 1.0f;
@@ -486,17 +486,17 @@ private:
 
         auto standardSizedFont = CreateFontIndirect (&lf);
 
-        if (standardSizedFont != 0)
+        if (standardSizedFont != nullptr)
         {
-            if ((previousFontH = SelectObject (dc, standardSizedFont)) != 0)
+            if ((previousFontH = SelectObject (dc, standardSizedFont)) != nullptr)
             {
                 fontH = standardSizedFont;
                 OUTLINETEXTMETRIC otm;
 
                 if (GetOutlineTextMetrics (dc, sizeof (otm), &otm) != 0)
                 {
-                    heightInPoints = otm.otmEMSquare;
-                    lf.lfHeight = -(int) heightInPoints;
+                    heightInPoints = (int) otm.otmEMSquare;
+                    lf.lfHeight = -heightInPoints;
                     fontH = CreateFontIndirect (&lf);
 
                     SelectObject (dc, fontH);
@@ -519,7 +519,7 @@ private:
     void createKerningPairs (HDC hdc, std::unordered_map<int, int>& glyphsForChars, float height)
     {
         HeapBlock<KERNINGPAIR> rawKerning;
-        auto numKPs = GetKerningPairs (hdc, 0, 0);
+        auto numKPs = GetKerningPairs (hdc, 0, nullptr);
         rawKerning.calloc (numKPs);
         GetKerningPairs (hdc, numKPs, rawKerning);
 
@@ -570,7 +570,7 @@ private:
     {
         GLYPHMETRICS gm;
         gm.gmCellIncX = 0;
-        GetGlyphOutline (dc, (UINT) glyphNumber, GGO_NATIVE | GGO_GLYPH_INDEX, &gm, 0, 0, &identityMatrix);
+        GetGlyphOutline (dc, (UINT) glyphNumber, GGO_NATIVE | GGO_GLYPH_INDEX, &gm, 0, nullptr, &identityMatrix);
         return gm.gmCellIncX;
     }
 

@@ -363,7 +363,7 @@ private:
                 auto scale = Desktop::getInstance().getDisplays().findDisplayForRect (screenRectangle, true).scale;
                 auto physicalComponentWidth = roundToInt (safeCustomComponent->getWidth() * scale);
 
-                SetWindowPos (hdlg, 0, screenRectangle.getX(), screenRectangle.getY(),
+                SetWindowPos (hdlg, nullptr, screenRectangle.getX(), screenRectangle.getY(),
                               physicalComponentWidth + jmax (150, screenRectangle.getWidth()),
                               jmax (150, screenRectangle.getHeight()),
                               SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
@@ -494,7 +494,7 @@ private:
 
         HWND dialogH = GetParent (hwnd);
 
-        if (dialogH == 0)
+        if (dialogH == nullptr)
             dialogH = hwnd;
 
         return dialogH;
