@@ -1161,23 +1161,21 @@ public:
 
         void resized() override
         {
+            auto newBounds = getLocalBounds();
+
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+            if (! lastBounds.isEmpty() && isWithin (newBounds.toDouble().getAspectRatio(), lastBounds.toDouble().getAspectRatio(), 0.1))
+                return;
+
+            lastBounds = newBounds;
+           #endif
+
             if (auto* ed = getEditorComp())
             {
                 ed->setTopLeftPosition (0, 0);
 
                 if (shouldResizeEditor)
-                {
-                    auto newBounds = getLocalBounds();
-
-                   #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                    if (! lastBounds.isEmpty() && isWithin (newBounds.toDouble().getAspectRatio(), lastBounds.toDouble().getAspectRatio(), 0.1))
-                        return;
-
-                    lastBounds = newBounds;
-                   #endif
-
                     ed->setBounds (ed->getLocalArea (this, newBounds));
-                }
 
                 updateWindowSize (false);
             }
@@ -1186,6 +1184,11 @@ public:
             if (! wrapper.useNSView)
                 updateEditorCompBoundsVST (this);
            #endif
+        }
+
+        void parentSizeChanged() override
+        {
+            updateWindowSize (true);
         }
 
         void childBoundsChanged (Component*) override
