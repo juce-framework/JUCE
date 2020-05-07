@@ -293,7 +293,7 @@ public:
 
             {
                 StringArray orientationStrings { "Portrait", "Portrait Upside Down",
-                                                 "Landscape Left", "Landsscape Right" };
+                                                 "Landscape Left", "Landscape Right" };
 
                 Array<var> orientationVars { "UIInterfaceOrientationPortrait", "UIInterfaceOrientationPortraitUpsideDown",
                                              "UIInterfaceOrientationLandscapeLeft", "UIInterfaceOrientationLandscapeRight" };
