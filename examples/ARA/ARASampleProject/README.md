@@ -54,6 +54,58 @@ bool doRestoreObjectsFromStream (ARAInputStream& input, const ARA::PlugIn::Resto
 bool doStoreObjectsToStream (ARAOutputStream& output, const ARA::PlugIn::StoreObjectsFilter* filter) noexcept override;
 ```
 
+#### `ARASampleProjectAudioProcessor`
+
+This is the implementation of our plug-in's `juce::AudioProcessor` class. Because the concept of a 
+`juce::AudioProcessor` is tightly linked to a plug-in instance, this class will take on any or all
+of the ARA plug-in instance roles as described by the API. 
+
+Our plug-in processor is very simple - if assigned the `ARAPlaybackRenderer` role, it renders all 
+assigned `ARAPlaybackRegions` by reading the region's underlying `ARAAudioSource`. 
+We allow reversing playback via our `ARASampleProjectAudioModification` class, 
+but do not modify the `ARAAudioSource` samples provided by the host.
+
+To accomplish this, we map the underlying audio source for each playback region assigned to the 
+`ARAPlaybackRenderer` to an `ARAAudioSourceReader`. For real-time playback, we wrap that reader inside a 
+`juce::BufferingAudioReader` so that we can pull samples on our rendering thread without blocking. For
+offline playback we use the `ARAAudioSourceReader` directly:
+
+```
+SharedResourcePointer<SharedTimeSliceThread> sharedTimesliceThread;
+std::map<ARAAudioSource*, std::unique_ptr<AudioFormatReader>> audioSourceReaders;
+
+void ARASampleProjectAudioProcessor::prepareToPlay (double newSampleRate, int /*samplesPerBlock*/)
+{
+    if (isARAPlaybackRenderer())
+    {
+        audioSourceReaders.clear();
+
+        for (auto playbackRegion : getARAPlaybackRenderer()->getPlaybackRegions())
+        {
+            auto audioSource = playbackRegion->getAudioModification()->getAudioSource<ARAAudioSource>();
+            if (audioSourceReaders.count (audioSource) == 0)
+            {
+                AudioFormatReader* sourceReader = new ARAAudioSourceReader (audioSource);
+
+                if (useBufferedAudioSourceReader)
+                {
+                    // if we're being used in real-time, wrap our source reader in a buffering
+                    // reader to avoid blocking while reading samples in processBlock()
+                    const int readAheadSize = roundToInt (2.0 * newSampleRate);
+                    sourceReader = new BufferingAudioReader (sourceReader, *sharedTimesliceThread, readAheadSize);
+                }
+
+                audioSourceReaders.emplace (audioSource, sourceReader);
+            }
+        }
+    }
+}
+```
+
+The `juce::BufferingAudioReader` will be constructed for all plug-in instances used as `ARAPlaybackRenderers`
+by the host. However, we can also use our processor class to render playback regions offline - the 
+[`ARAPlaybackRegionView`](#playbackregionview) does this to draw its waveform display using a `juce::AudioThumbnail`. 
+
 #### `TrackHeaderView`
 
 This view displays the "tracks" (or `ARARegionSequences`) in our ARA host's document. The track color, as
@@ -102,8 +154,10 @@ do the rest of the work, taking care to draw only the visible portion of the reg
 many samples per draw call. 
 
 ```
-// Create a playback region reader using this processor for our audio thumb
-playbackRegionReader = new ARAPlaybackRegionReader (std::make_unique<ARASampleProjectAudioProcessor>(), { playbackRegion });
+// Create a playback region reader using our non-buffered audio processor for our audio thumb
+bool useBufferedReader = false;
+auto audioProcessor = std::make_unique<ARASampleProjectAudioProcessor> (useBufferedReader);
+playbackRegionReader = new ARAPlaybackRegionReader (audioProcessor, { playbackRegion });
 audioThumb.setReader (playbackRegionReader, reinterpret_cast<intptr_t> (playbackRegionReader));
 ```
 	
