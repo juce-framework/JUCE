@@ -5,58 +5,11 @@ The fork is currently being maintained by [Celemony](https://www.celemony.com) a
 
 In order to use this branch you'll need access to the [ARA SDK](http://www.celemony.com/en/service1/about-celemony/technologies) - if you're a developer and would like access to the latest ARA SDK release, send an email to [ara@celemony.com](mailto:ara@celemony.com?Subject=JUCE%20ARA%20integration).
 
+You'll also need to use our ARA enabled build of the Projucer - see the [Getting Started](#getting-started) section of this document for instructions.
+
 Current ARA SDK compatibility version: 1.9.11.001
 
 For feedback and questions, please contact Celemony via [ara@celemony.com](mailto:ara@celemony.com?Subject=JUCE%20ARA%20integration).
-
-## Getting Started
-
-### Using the ARA enabled Projucer
-
-We've made modifications to the Projucer to enable it to work with the ARA 2.0 SDK. These modifications allow building VST3 and AudioUnit plugins that can be loaded as ARA plugins by a compatible host. 
-
-To create an ARA plugin, clone the develop branch of Celemony's [JUCE fork](https://github.com/Celemony/JUCE_ARA/tree/develop) build the [Projucer](https://github.com/Celemony/JUCE_ARA/tree/develop/extras/Projucer) (projects for Visual Studio and Xcode are checked in to the repository.)
-
-Once you have the ARA version of the Projucer built, you must specify your global `ARA SDK` path by navigating to `File->Global Paths...`:
-
-<img src="https://i.imgur.com/fRjU8kB.png"/>
-
-This will become the default path for new ARA plug-in projects, but like other SDK paths it can  be configured per project.
-
-### Creating an ARA enabled audio plug-in
-
-Once the SDK has been located we can create a new Audio Plug-In project like so
-
-<img src="https://i.imgur.com/cqsEA18.png"/>
-
-We specifically want to create an ARA plugin. This is not one of the main types in the template window but can be selected like so:
-
-<img src="https://i.imgur.com/mY6Z1XL.png"/>
-
-The generated plug-in will have, in addition to the standard `PluginProcessor` and `PluginEditor` classes, a `PluginARADocumentController` file containing a class that implements an `ARADocumentController`. 
-
-<img src="https://i.imgur.com/JqNIe2b.png"/>
-
-This version of the Projucer supports ARA for VST3 and AudioUnit, so make sure at least one of these plugin formats is checked. 
-
-<img src="https://i.imgur.com/TexUBqU.png"/>
-
-### Enabling ARA in an existing JUCE audio plug-in
-
-If you've already got a JUCE audio plug-in project that you'd like to convert to an ARA plug-in, you can enable ARA in our version of the Projucer using the `Enable ARA` checkbox. 
-
-However, you'll have to add your own document`ARADocumentController` implementation - referencing the `PluginARADocumentController` class generated for new ARA Audio Plug-In projects is a good starting point.
-
-<img src="https://i.imgur.com/VGcDWEc.png"/>
-
-### Configuring the ARA plug-in properties
-
-With ARA enabled we can edit various `ARAFactory` properties such as available content types and transformation flags as well as the plugin factory identifier.
-
-<img src="https://i.imgur.com/mJoXIxG.png"/>
-
-This should be enough to generate an empty ARA plugin that will appear in an ARA host, such as Studio One or SONAR. 
-For a more complete example of an ARA plugin see the [ARA Sample Project](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARASampleProject) checked in to this repository. 
 
 ## JUCE and the ARA API
 
@@ -275,6 +228,55 @@ Once created, the our readers can be treated like any other `AudioFormatReader` 
 [ARA Sample Project PlaybackRegionView class](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARASampleProject/Source/PlaybackRegionView.h)
 takes advantage of this by giving a `juce::AudioThubnail` instance an `ARAPlaybackRegionReader` to draw a
 visualization of playback region waveform. 
+
+## Getting Started
+
+### Using the ARA enabled Projucer
+
+We've made modifications to the Projucer to enable it to work with the ARA 2.0 SDK. These modifications allow building VST3 and AudioUnit plugins that can be loaded as ARA plugins by a compatible host. 
+
+To create an ARA plugin, clone the develop branch of Celemony's [JUCE fork](https://github.com/Celemony/JUCE_ARA/tree/develop) build the [Projucer](https://github.com/Celemony/JUCE_ARA/tree/develop/extras/Projucer) (projects for Visual Studio and Xcode are checked in to the repository.)
+
+Once you have the ARA version of the Projucer built, you must specify your global `ARA SDK` path by navigating to `File->Global Paths...`:
+
+<img src="https://i.imgur.com/fRjU8kB.png"/>
+
+This will become the default path for new ARA plug-in projects, but like other SDK paths it can  be configured per project.
+
+### Creating an ARA enabled audio plug-in
+
+Once the SDK has been located we can create a new Audio Plug-In project like so
+
+<img src="https://i.imgur.com/cqsEA18.png"/>
+
+We specifically want to create an ARA plugin. This is not one of the main types in the template window but can be selected like so:
+
+<img src="https://i.imgur.com/mY6Z1XL.png"/>
+
+The generated plug-in will have, in addition to the standard `PluginProcessor` and `PluginEditor` classes, a `PluginARADocumentController` file containing a class that implements an `ARADocumentController`. 
+
+<img src="https://i.imgur.com/JqNIe2b.png"/>
+
+This version of the Projucer supports ARA for VST3 and AudioUnit, so make sure at least one of these plugin formats is checked. 
+
+<img src="https://i.imgur.com/TexUBqU.png"/>
+
+### Enabling ARA in an existing JUCE audio plug-in
+
+If you've already got a JUCE audio plug-in project that you'd like to convert to an ARA plug-in, you can enable ARA in our version of the Projucer using the `Enable ARA` checkbox. 
+
+However, you'll have to add your own document`ARADocumentController` implementation - referencing the `PluginARADocumentController` class generated for new ARA Audio Plug-In projects is a good starting point.
+
+<img src="https://i.imgur.com/VGcDWEc.png"/>
+
+### Configuring the ARA plug-in properties
+
+With ARA enabled we can edit various `ARAFactory` properties such as available content types and transformation flags as well as the plugin factory identifier.
+
+<img src="https://i.imgur.com/mJoXIxG.png"/>
+
+This should be enough to generate an empty ARA plugin that will appear in an ARA host, such as Studio One or SONAR. 
+For a more complete example of an ARA plugin see the [ARA Sample Project](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARASampleProject) checked in to this repository. 
 
 ## Further Additions
 
