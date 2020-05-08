@@ -160,7 +160,8 @@ void PlaybackRegionView::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* 
     if (playbackRegion->getName() != newProperties->name || playbackRegion->getColor() != newProperties->color)
         repaint();
 
-    if (! (approximatelyEqual (playbackRegion->getStartInPlaybackTime(), newProperties->startInPlaybackTime) &&  approximatelyEqual (playbackRegion->getDurationInPlaybackTime(), newProperties->durationInPlaybackTime)))
+    if (playbackRegion->getStartInPlaybackTime() != newProperties->startInPlaybackTime ||
+        playbackRegion->getDurationInPlaybackTime() != newProperties->durationInPlaybackTime)
         documentView.invalidateTimeRange();
 }
 
