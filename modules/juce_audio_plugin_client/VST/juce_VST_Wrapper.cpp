@@ -913,7 +913,7 @@ public:
             if (auto* ed = processor->createEditorIfNeeded())
             {
                 setHasEditorFlag (true);
-                editorComp.reset (new EditorCompWrapper (*this, *ed));
+                editorComp.reset (new EditorCompWrapper (*this, *ed, lastScaleFactorReceived));
             }
             else
             {
@@ -1037,11 +1037,14 @@ public:
                               , public Timer
                              #endif
     {
-        EditorCompWrapper (JuceVSTWrapper& w, AudioProcessorEditor& editor)
-            : wrapper (w)
+        EditorCompWrapper (JuceVSTWrapper& w, AudioProcessorEditor& editor, float scaleFactor)
+            : wrapper (w),
+              editorScaleFactor (scaleFactor)
         {
             editor.setOpaque (true);
             editor.setVisible (true);
+            editor.setScaleFactor (scaleFactor);
+
             setOpaque (true);
 
             setTopLeftPosition (editor.getPosition());
@@ -1075,6 +1078,24 @@ public:
         {
             auto b = getSizeToContainChild();
             bounds = convertToHostBounds ({ 0, 0, (int16) b.getHeight(), (int16) b.getWidth() });
+
+           #if JUCE_LINUX
+            if (auto* ed = getEditorComp())
+            {
+                if (auto* peer = ed->getPeer())
+                {
+                    auto scale = (float) peer->getPlatformScaleFactor();
+
+                    if (approximatelyEqual (scale, 1.0f))
+                        return;
+
+                    bounds.upper     *= scale;
+                    bounds.leftmost  *= scale;
+                    bounds.lower     *= scale;
+                    bounds.rightmost *= scale;
+                }
+            }
+           #endif
         }
 
         void attachToHost (VstOpCodeArguments args)
@@ -1183,9 +1204,9 @@ public:
                         setTopLeftPosition (0, getHeight() - pos.getHeight());
                    #endif
 
+                   #if ! JUCE_LINUX // setSize() on linux causes renoise and energyxt to fail.
                     resizeHostWindow (pos.getWidth(), pos.getHeight());
 
-                   #if ! JUCE_LINUX // setSize() on linux causes renoise and energyxt to fail.
                     if (! resizeEditor) // this is needed to prevent an infinite resizing loop due to coordinate rounding
                         shouldResizeEditor = false;
 
@@ -1199,6 +1220,9 @@ public:
 
                     if (auto* peer = ed->getPeer())
                         scale *= (float) peer->getPlatformScaleFactor();
+
+                    resizeHostWindow (roundToInt (pos.getWidth() * scale),
+                                      roundToInt (pos.getHeight() * scale));
 
                     X11Symbols::getInstance()->xResizeWindow (display, (Window) getWindowHandle(),
                                                               static_cast<unsigned int> (roundToInt (pos.getWidth()  * scale)),
