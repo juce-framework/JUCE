@@ -1180,8 +1180,26 @@ private:
             if (size != nullptr && component != nullptr)
             {
                 auto editorBounds = component->getSizeToContainChild();
+                auto width = editorBounds.getWidth();
+                auto height = editorBounds.getHeight();
 
-                *size = convertToHostBounds ({ 0, 0, editorBounds.getWidth(), editorBounds.getHeight() });
+               #if JUCE_LINUX
+                if (component != nullptr)
+                {
+                    if (auto* peer = component->getPeer())
+                    {
+                        auto scale = (float) peer->getPlatformScaleFactor();
+
+                        if (! approximatelyEqual (scale, 1.0f))
+                        {
+                            width  *= scale;
+                            height *= scale;
+                        }
+                    }
+                }
+               #endif
+
+                *size = convertToHostBounds ({ 0, 0, width, height });
                 return kResultTrue;
             }
 
@@ -1476,7 +1494,19 @@ private:
 
                     if (owner.plugFrame != nullptr)
                     {
-                        auto newSize = convertToHostBounds ({ 0, 0, b.getWidth(), b.getHeight() });
+                       #if JUCE_LINUX
+                        if (auto* peer = getPeer())
+                        {
+                            auto scale = (float) peer->getPlatformScaleFactor();
+
+                            if (! approximatelyEqual (scale, 1.0f))
+                            {
+                                w *= scale;
+                                h *= scale;
+                            }
+                        }
+                       #endif
+                        auto newSize = convertToHostBounds ({ 0, 0, w, h });
 
                         {
                             const ScopedValueSetter<bool> resizingParentSetter (resizingParent, true);
