@@ -874,8 +874,33 @@ public:
             auto clipH = (int) (r.size.height + 0.5f);
 
             RectangleList<int> clip;
-            for (auto& i : repaintRects)
-                clip.add (i.getSmallestIntegerContainer());
+            {
+                const Rectangle<int> clipBounds (clipW, clipH);
+                auto viewH = [view frame].size.height;
+               #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+                clip.ensureStorageAllocated (repaintRects.getNumRectangles());
+                for (auto& r : repaintRects)
+                    clip.addWithoutMerging (clipBounds.getIntersection (Rectangle<int> (
+                        roundToInt (r.getX()) + offset.x,
+                        roundToInt (viewH - r.getBottom()) + offset.y,
+                        roundToInt (r.getWidth()),
+                        roundToInt (r.getHeight()))));
+               #else
+                const NSRect* rects;
+                NSInteger numRects;
+                [view getRectsBeingDrawn: &rects count: &numRects];
+                clip.ensureStorageAllocated ((int) numRects);
+                for (int i = 0; i < numRects; ++i)
+                {
+                    const auto& r = rects[i];
+                    clip.addWithoutMerging (clipBounds.getIntersection (Rectangle<int> (
+                        roundToInt (r.origin.x) + offset.x,
+                        roundToInt (viewH - (r.origin.y + r.size.height)) + offset.y,
+                        roundToInt (r.size.width),
+                        roundToInt (r.size.height))));
+                }
+               #endif
+            }
 
             if (! clip.isEmpty())
             {
