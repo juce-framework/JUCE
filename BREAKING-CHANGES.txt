@@ -6,6 +6,26 @@ Develop
 
 Change
 ------
+All references to ROLI Ltd. (ROLI) have been changed to Raw Material Software
+Limited.
+
+Possible Issues
+---------------
+Exising projects, particularly Android, may need to be resaved by the Projucer
+and have the old build artifacts deleted before they will build.
+
+Workaround
+----------
+In Android projects any explicit mention of paths with the from "com.roli.*"
+should be changed to the form "com.rmsl.*".
+
+Rationale
+---------
+This change reflects the change in ownership from ROLI to RMSL.
+
+
+Change
+------
 The Windows DPI handling in the VST wrapper and hosting code has been
 refactored to be more stable.
 
@@ -1115,7 +1135,7 @@ or
 2. Override the Look&Feel method
    PopupMenu::LookAndFeelMethods::shouldPopupMenuScaleWithTargetComponent and
    return false. See
-   https://github.com/WeAreROLI/JUCE/blob/c288c94c2914af20f36c03ca9c5401fcb555e4e9/modules/juce_gui_basics/menus/juce_PopupMenu.h#725
+   https://github.com/juce-framework/JUCE/blob/c288c94c2914af20f36c03ca9c5401fcb555e4e9/modules/juce_gui_basics/menus/juce_PopupMenu.h#725
 
 Rationale
 ---------

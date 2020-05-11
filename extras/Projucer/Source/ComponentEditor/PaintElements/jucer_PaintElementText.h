@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -71,7 +71,7 @@ public:
 
         if (multipleSelected)
             return;
-        
+
         props.add (new TextProperty (this));
         props.add (new FontNameProperty (this));
         props.add (new FontStyleProperty (this));
@@ -100,7 +100,7 @@ public:
               << "    g.drawText (text, x, y, width, height,\n"
               << "                " << CodeHelpers::justificationToCode (justification) << ", true);\n"
               << "}\n\n";
-            
+
             paintMethodCode += r;
         }
     }
@@ -108,7 +108,7 @@ public:
     void applyCustomPaintSnippets (StringArray& snippets) override
     {
         customPaintCode.clear();
-        
+
         if (! snippets.isEmpty() && ! fillType.isInvisible())
         {
             customPaintCode = snippets[0];
@@ -390,7 +390,7 @@ private:
     String typefaceName;
     Justification justification;
     String customPaintCode;
-    
+
     Array <Justification> justificationTypes;
 
     //==============================================================================

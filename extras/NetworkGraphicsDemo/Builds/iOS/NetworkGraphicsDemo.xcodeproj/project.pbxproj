@@ -676,6 +676,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"_DEBUG=1",
 					"DEBUG=1",
+					"JUCE_CONTENT_SHARING=1",
 					"JUCER_XCODE_IPHONE_5BC26AE3=1",
 					"JUCE_APP_VERSION=1.0.0",
 					"JUCE_APP_VERSION_HEX=0x10000",
@@ -719,6 +720,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"_NDEBUG=1",
 					"NDEBUG=1",
+					"JUCE_CONTENT_SHARING=1",
 					"JUCER_XCODE_IPHONE_5BC26AE3=1",
 					"JUCE_APP_VERSION=1.0.0",
 					"JUCE_APP_VERSION_HEX=0x10000",
@@ -942,7 +944,7 @@
 		A5398ADB6F5B128C00EB935C = {
 			isa = PBXProject;
 			buildConfigurationList = 02715337C584F3C721251428;
-			attributes = { LastUpgradeCheck = 1100; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { 4311FBCBD02948A0ED96C7DD = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
+			attributes = { LastUpgradeCheck = 1100; ORGANIZATIONNAME = "Raw Material Software Limited"; TargetAttributes = { 4311FBCBD02948A0ED96C7DD = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
 			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 0;
 			mainGroup = D2EB65517396C974F0415A7F;

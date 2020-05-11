@@ -199,7 +199,7 @@
 				);
 				INSTALL_PATH = "/usr/bin";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				PRODUCT_BUNDLE_IDENTIFIER = com.roli.binarybuilder;
+				PRODUCT_BUNDLE_IDENTIFIER = com.juce.binarybuilder;
 				PRODUCT_NAME = "BinaryBuilder";
 				USE_HEADERMAP = NO;
 			};
@@ -241,7 +241,7 @@
 				INSTALL_PATH = "/usr/bin";
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				PRODUCT_BUNDLE_IDENTIFIER = com.roli.binarybuilder;
+				PRODUCT_BUNDLE_IDENTIFIER = com.juce.binarybuilder;
 				PRODUCT_NAME = "BinaryBuilder";
 				USE_HEADERMAP = NO;
 			};
@@ -410,7 +410,7 @@
 		36B6F402BC83F21646259DEF = {
 			isa = PBXProject;
 			buildConfigurationList = E4C85B0464A93027D035AA1F;
-			attributes = { LastUpgradeCheck = 1100; ORGANIZATIONNAME = "ROLI Ltd."; };
+			attributes = { LastUpgradeCheck = 1100; ORGANIZATIONNAME = "Raw Material Software Limited"; };
 			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 0;
 			mainGroup = C18D022743CF5BD14D6A6A9E;

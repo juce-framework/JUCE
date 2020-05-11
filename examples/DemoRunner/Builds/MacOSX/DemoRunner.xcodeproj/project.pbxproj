@@ -1216,7 +1216,7 @@
 		AC6F0E9A0809A184B2C2B7DE = {
 			isa = PBXProject;
 			buildConfigurationList = 80E8AD1971F52B06F4D28891;
-			attributes = { LastUpgradeCheck = 1100; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { 291E01DCBE746A376DBFA4D1 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
+			attributes = { LastUpgradeCheck = 1100; ORGANIZATIONNAME = "Raw Material Software Limited"; TargetAttributes = { 291E01DCBE746A376DBFA4D1 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
 			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 0;
 			mainGroup = 91A9A0FE9DF4F4E10009EEC7;

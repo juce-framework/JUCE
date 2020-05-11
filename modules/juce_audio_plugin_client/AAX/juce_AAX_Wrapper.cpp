@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -325,6 +325,12 @@ namespace AAXClasses
                 case AAX_eStemFormat_Ambi_1_ACN: return AudioChannelSet::ambisonic (1);
                 case AAX_eStemFormat_Ambi_2_ACN: return AudioChannelSet::ambisonic (2);
                 case AAX_eStemFormat_Ambi_3_ACN: return AudioChannelSet::ambisonic (3);
+                case AAX_eStemFormat_Reserved_1:
+                case AAX_eStemFormat_Reserved_2:
+                case AAX_eStemFormat_Reserved_3:
+                case AAX_eStemFormatNum:
+                case AAX_eStemFormat_Any:
+                case AAX_eStemFormat_INT32_MAX:
                 default:                         return AudioChannelSet::disabled();
             }
         }
@@ -341,6 +347,10 @@ namespace AAXClasses
             case AudioProcessorParameter::compressorLimiterGainReductionMeter:  return AAX_eMeterType_CLGain;
             case AudioProcessorParameter::expanderGateGainReductionMeter:       return AAX_eMeterType_EGGain;
             case AudioProcessorParameter::analysisMeter:                        return AAX_eMeterType_Analysis;
+            case AudioProcessorParameter::genericParameter:
+            case AudioProcessorParameter::inputGain:
+            case AudioProcessorParameter::outputGain:
+            case AudioProcessorParameter::otherMeter:
             default:                                                            return AAX_eMeterType_Other;
         }
     }
@@ -353,6 +363,7 @@ namespace AAXClasses
             case AAX_eHighlightColor_Blue:      return Colours::blue;
             case AAX_eHighlightColor_Green:     return Colours::green;
             case AAX_eHighlightColor_Yellow:    return Colours::yellow;
+            case AAX_eHighlightColor_Num:
             default:                            jassertfalse; break;
         }
 

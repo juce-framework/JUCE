@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -60,7 +60,11 @@ public:
         CGColorSpaceRelease (colourSpace);
     }
 
-    ~CoreGraphicsPixelData() override;
+    ~CoreGraphicsPixelData() override
+    {
+        freeCachedImageRef();
+        CGContextRelease (context);
+    }
 
     std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
     {
@@ -184,14 +188,6 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreGraphicsPixelData)
 };
-
-// The following implementation is outside of the class definition to avoid spurious
-// warning messages when dynamically loading libraries at runtime on macOS
-CoreGraphicsPixelData::~CoreGraphicsPixelData()
-{
-    freeCachedImageRef();
-    CGContextRelease (context);
-}
 
 ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
 {

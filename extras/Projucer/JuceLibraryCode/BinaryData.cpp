@@ -6087,7 +6087,7 @@ static const unsigned char temp_binary_data_34[] =
 "  ------------------------------------------------------------------------------\r\n"
 "\r\n"
 "  The Projucer is part of the JUCE library.\r\n"
-"  Copyright (c) 2017 - ROLI Ltd.\r\n"
+"  Copyright (c) 2020 - Raw Material Software Limited.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
@@ -6166,7 +6166,7 @@ static const unsigned char temp_binary_data_35[] =
 "  ------------------------------------------------------------------------------\r\n"
 "\r\n"
 "  The Projucer is part of the JUCE library.\r\n"
-"  Copyright (c) 2017 - ROLI Ltd.\r\n"
+"  Copyright (c) 2020 - Raw Material Software Limited.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
@@ -7845,8 +7845,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x4d0721bf:  numBytes = 977; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 6036; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2272; return jucer_AudioPluginFilterTemplate_h;
-        case 0xabad7041:  numBytes = 2126; return jucer_ComponentTemplate_cpp;
-        case 0xfc72fe86:  numBytes = 2044; return jucer_ComponentTemplate_h;
+        case 0xabad7041:  numBytes = 2147; return jucer_ComponentTemplate_cpp;
+        case 0xfc72fe86:  numBytes = 2065; return jucer_ComponentTemplate_h;
         case 0x1657b643:  numBytes = 1693; return jucer_ContentCompSimpleTemplate_h;
         case 0x0b66646c:  numBytes = 1190; return jucer_ContentCompTemplate_cpp;
         case 0x6fa10171:  numBytes = 1071; return jucer_ContentCompTemplate_h;

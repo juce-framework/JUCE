@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -19,6 +19,20 @@
 
   ==============================================================================
 */
+
+#if JUCE_MAC || JUCE_IOS
+ // Annoyingly we can only forward-declare a typedef by forward-declaring the
+ // aliased type
+ #if __has_attribute(objc_bridge)
+  #define JUCE_CF_BRIDGED_TYPE(T) __attribute__((objc_bridge(T)))
+ #else
+  #define JUCE_CF_BRIDGED_TYPE(T)
+ #endif
+
+ typedef const struct JUCE_CF_BRIDGED_TYPE(NSString) __CFString * CFStringRef;
+
+ #undef JUCE_CF_BRIDGED_TYPE
+#endif
 
 namespace juce
 {

@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -118,6 +118,26 @@ public:
             float brightness,
             float alpha) noexcept;
 
+    /** Creates a colour using floating point hue, saturation, brightness and alpha values.
+
+        All values must be between 0.0 and 1.0.
+        Numbers outside the valid range will be clipped.
+    */
+    static Colour fromHSV (float hue,
+                           float saturation,
+                           float brightness,
+                           float alpha) noexcept;
+
+    /** Creates a colour using floating point hue, saturation, lightness and alpha values.
+
+        All values must be between 0.0 and 1.0.
+        Numbers outside the valid range will be clipped.
+    */
+    static Colour fromHSL (float hue,
+                           float saturation,
+                           float lightness,
+                           float alpha) noexcept;
+
     /** Creates a colour using a PixelARGB object. This function assumes that the argb pixel is
         not premultiplied.
      */
@@ -130,16 +150,6 @@ public:
     /** Creates a colour using a PixelAlpha object.
      */
     Colour (PixelAlpha alpha) noexcept;
-
-    /** Creates a colour using floating point hue, saturation, brightness and alpha values.
-
-        All values must be between 0.0 and 1.0.
-        Numbers outside the valid range will be clipped.
-    */
-    static Colour fromHSV (float hue,
-                           float saturation,
-                           float brightness,
-                           float alpha) noexcept;
 
     /** Destructor. */
     ~Colour() = default;
@@ -253,10 +263,20 @@ public:
     */
     float getSaturation() const noexcept;
 
+    /** Returns the colour's saturation component as represented in the HSL colour space.
+        The value returned is in the range 0.0 to 1.0
+    */
+    float getSaturationHSL() const noexcept;
+
     /** Returns the colour's brightness component.
         The value returned is in the range 0.0 to 1.0
     */
     float getBrightness() const noexcept;
+
+    /** Returns the colour's lightness component.
+        The value returned is in the range 0.0 to 1.0
+    */
+    float getLightness() const noexcept;
 
     /** Returns a skewed brightness value, adjusted to better reflect the way the human
         eye responds to different colour channels. This makes it better than getBrightness()
@@ -271,6 +291,13 @@ public:
                  float& saturation,
                  float& brightness) const noexcept;
 
+    /** Returns the colour's hue, saturation and lightness components all at once.
+        The values returned are in the range 0.0 to 1.0
+    */
+    void getHSL (float& hue,
+                 float& saturation,
+                 float& lightness) const noexcept;
+
     //==============================================================================
     /** Returns a copy of this colour with a different hue. */
     Colour withHue (float newHue) const noexcept;
@@ -278,10 +305,18 @@ public:
     /** Returns a copy of this colour with a different saturation. */
     Colour withSaturation (float newSaturation) const noexcept;
 
+    /** Returns a copy of this colour with a different saturation in the HSL colour space. */
+    Colour withSaturationHSL (float newSaturation) const noexcept;
+
     /** Returns a copy of this colour with a different brightness.
         @see brighter, darker, withMultipliedBrightness
     */
     Colour withBrightness (float newBrightness) const noexcept;
+
+    /** Returns a copy of this colour with a different lightness.
+        @see lighter, darker, withMultipliedLightness
+    */
+    Colour withLightness (float newLightness) const noexcept;
 
     /** Returns a copy of this colour with its hue rotated.
         The new colour's hue is ((this->getHue() + amountToRotate) % 1.0)
@@ -295,11 +330,25 @@ public:
     */
     Colour withMultipliedSaturation (float multiplier) const noexcept;
 
+    /** Returns a copy of this colour with its saturation multiplied by the given value.
+        The new colour's saturation is (this->getSaturation() * multiplier)
+        (the result is clipped to legal limits).
+
+        This will be in the HSL colour space.
+    */
+    Colour withMultipliedSaturationHSL (float multiplier) const noexcept;
+
     /** Returns a copy of this colour with its brightness multiplied by the given value.
         The new colour's brightness is (this->getBrightness() * multiplier)
         (the result is clipped to legal limits).
     */
     Colour withMultipliedBrightness (float amount) const noexcept;
+
+    /** Returns a copy of this colour with its lightness multiplied by the given value.
+        The new colour's lightness is (this->lightness() * multiplier)
+        (the result is clipped to legal limits).
+    */
+    Colour withMultipliedLightness (float amount) const noexcept;
 
     //==============================================================================
     /** Returns a brighter version of this colour.

@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -1190,12 +1190,12 @@ private:
                     {
                         *rectToCheck = convertFromHostBounds (*rectToCheck);
 
-                        auto scale = editor->getTransform().getScaleFactor();
+                        auto transformScale = std::sqrt (std::abs (editor->getTransform().getDeterminant()));
 
-                        auto minW = (double) (constrainer->getMinimumWidth()  * scale);
-                        auto maxW = (double) (constrainer->getMaximumWidth()  * scale);
-                        auto minH = (double) (constrainer->getMinimumHeight() * scale);
-                        auto maxH = (double) (constrainer->getMaximumHeight() * scale);
+                        auto minW = (double) (constrainer->getMinimumWidth()  * transformScale);
+                        auto maxW = (double) (constrainer->getMaximumWidth()  * transformScale);
+                        auto minH = (double) (constrainer->getMinimumHeight() * transformScale);
+                        auto maxH = (double) (constrainer->getMaximumHeight() * transformScale);
 
                         auto width  = (double) (rectToCheck->right - rectToCheck->left);
                         auto height = (double) (rectToCheck->bottom - rectToCheck->top);
@@ -1434,6 +1434,15 @@ private:
                 }
             }
 
+            void parentSizeChanged() override
+            {
+                if (pluginEditor != nullptr)
+                {
+                    resizeHostWindow();
+                    pluginEditor->repaint();
+                }
+            }
+
             void resizeHostWindow()
             {
                 if (pluginEditor != nullptr)
@@ -1459,7 +1468,7 @@ private:
                        #if JUCE_MAC
                         if (host.isWavelab() || host.isReaper())
                        #else
-                        if (host.isWavelab() || host.isAbletonLive())
+                        if (host.isWavelab() || host.isAbletonLive() || host.isBitwigStudio())
                        #endif
                             setBounds (0, 0, w, h);
                     }
