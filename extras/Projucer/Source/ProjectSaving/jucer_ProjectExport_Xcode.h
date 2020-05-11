@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -117,11 +117,15 @@ public:
           iosBluetoothPermissionNeededValue            (settings, Ids::iosBluetoothPermissionNeeded,            getUndoManager()),
           iosBluetoothPermissionTextValue              (settings, Ids::iosBluetoothPermissionText,              getUndoManager(),
                                                         "This app requires access to Bluetooth to function correctly."),
+          sendAppleEventsPermissionNeededValue         (settings, Ids::sendAppleEventsPermissionNeeded, getUndoManager()),
+          sendAppleEventsPermissionTextValue           (settings, Ids::sendAppleEventsPermissionText, getUndoManager(),
+                                                        "This app requires the ability to send Apple events to function correctly."),
           uiFileSharingEnabledValue                    (settings, Ids::UIFileSharingEnabled,                    getUndoManager()),
           uiSupportsDocumentBrowserValue               (settings, Ids::UISupportsDocumentBrowser,               getUndoManager()),
           uiStatusBarHiddenValue                       (settings, Ids::UIStatusBarHidden,                       getUndoManager()),
           documentExtensionsValue                      (settings, Ids::documentExtensions,                      getUndoManager()),
           iosInAppPurchasesValue                       (settings, Ids::iosInAppPurchases,                       getUndoManager()),
+          iosContentSharingValue                       (settings, Ids::iosContentSharing,                       getUndoManager(), true),
           iosBackgroundAudioValue                      (settings, Ids::iosBackgroundAudio,                      getUndoManager()),
           iosBackgroundBleValue                        (settings, Ids::iosBackgroundBle,                        getUndoManager()),
           iosPushNotificationsValue                    (settings, Ids::iosPushNotifications,                    getUndoManager()),
@@ -148,66 +152,70 @@ public:
     }
 
     //==============================================================================
-    String getPListToMergeString() const               { return customPListValue.get(); }
-    String getPListPrefixHeaderString() const          { return pListPrefixHeaderValue.get(); }
-    bool isPListPreprocessEnabled() const              { return pListPreprocessValue.get(); }
+    String getPListToMergeString() const                    { return customPListValue.get(); }
+    String getPListPrefixHeaderString() const               { return pListPrefixHeaderValue.get(); }
+    bool isPListPreprocessEnabled() const                   { return pListPreprocessValue.get(); }
 
-    String getSubprojectsString() const                { return subprojectsValue.get(); }
+    String getSubprojectsString() const                     { return subprojectsValue.get(); }
 
-    String getExtraFrameworksString() const            { return extraFrameworksValue.get(); }
-    String getFrameworkSearchPathsString() const       { return frameworkSearchPathsValue.get(); }
-    String getExtraCustomFrameworksString() const      { return extraCustomFrameworksValue.get(); }
-    String getEmbeddedFrameworksString() const         { return embeddedFrameworksValue.get(); }
+    String getExtraFrameworksString() const                 { return extraFrameworksValue.get(); }
+    String getFrameworkSearchPathsString() const            { return frameworkSearchPathsValue.get(); }
+    String getExtraCustomFrameworksString() const           { return extraCustomFrameworksValue.get(); }
+    String getEmbeddedFrameworksString() const              { return embeddedFrameworksValue.get(); }
 
-    String getPostBuildScript() const                  { return postbuildCommandValue.get(); }
-    String getPreBuildScript() const                   { return prebuildCommandValue.get(); }
+    String getPostBuildScript() const                       { return postbuildCommandValue.get(); }
+    String getPreBuildScript() const                        { return prebuildCommandValue.get(); }
 
-    bool shouldDuplicateAppExResourcesFolder() const   { return duplicateAppExResourcesFolderValue.get(); }
+    bool shouldDuplicateAppExResourcesFolder() const        { return duplicateAppExResourcesFolderValue.get(); }
 
-    String getDeviceFamilyString() const               { return iosDeviceFamilyValue.get(); }
+    String getDeviceFamilyString() const                    { return iosDeviceFamilyValue.get(); }
 
-    String getiPhoneScreenOrientationString() const    { return iPhoneScreenOrientationValue.get(); }
-    String getiPadScreenOrientationString() const      { return iPadScreenOrientationValue.get(); }
+    String getiPhoneScreenOrientationString() const         { return iPhoneScreenOrientationValue.get(); }
+    String getiPadScreenOrientationString() const           { return iPadScreenOrientationValue.get(); }
 
-    String getCustomResourceFoldersString() const      { return customXcodeResourceFoldersValue.get().toString().replaceCharacters ("\r\n", "::"); }
-    String getCustomXcassetsFolderString() const       { return customXcassetsFolderValue.get(); }
-    String getCustomLaunchStoryboardString() const     { return customLaunchStoryboardValue.get(); }
-    bool shouldAddStoryboardToProject() const          { return getCustomLaunchStoryboardString().isNotEmpty() || getCustomXcassetsFolderString().isEmpty(); }
+    String getCustomResourceFoldersString() const           { return customXcodeResourceFoldersValue.get().toString().replaceCharacters ("\r\n", "::"); }
+    String getCustomXcassetsFolderString() const            { return customXcassetsFolderValue.get(); }
+    String getCustomLaunchStoryboardString() const          { return customLaunchStoryboardValue.get(); }
+    bool shouldAddStoryboardToProject() const               { return getCustomLaunchStoryboardString().isNotEmpty() || getCustomXcassetsFolderString().isEmpty(); }
 
-    bool isHardenedRuntimeEnabled() const              { return hardenedRuntimeValue.get(); }
-    Array<var> getHardenedRuntimeOptions() const       { return *hardenedRuntimeOptionsValue.get().getArray(); }
+    bool isHardenedRuntimeEnabled() const                   { return hardenedRuntimeValue.get(); }
+    Array<var> getHardenedRuntimeOptions() const            { return *hardenedRuntimeOptionsValue.get().getArray(); }
 
-    bool isAppSandboxEnabled() const                   { return appSandboxValue.get(); }
-    bool isAppSandboxInhertianceEnabled() const        { return appSandboxInheritanceValue.get(); }
-    Array<var> getAppSandboxOptions() const            { return *appSandboxOptionsValue.get().getArray(); }
+    bool isAppSandboxEnabled() const                        { return appSandboxValue.get(); }
+    bool isAppSandboxInhertianceEnabled() const             { return appSandboxInheritanceValue.get(); }
+    Array<var> getAppSandboxOptions() const                 { return *appSandboxOptionsValue.get().getArray(); }
 
-    bool isMicrophonePermissionEnabled() const         { return microphonePermissionNeededValue.get(); }
-    String getMicrophonePermissionsTextString() const  { return microphonePermissionsTextValue.get(); }
+    bool isMicrophonePermissionEnabled() const              { return microphonePermissionNeededValue.get(); }
+    String getMicrophonePermissionsTextString() const       { return microphonePermissionsTextValue.get(); }
 
-    bool isCameraPermissionEnabled() const             { return cameraPermissionNeededValue.get(); }
-    String getCameraPermissionTextString() const       { return cameraPermissionTextValue.get(); }
+    bool isCameraPermissionEnabled() const                  { return cameraPermissionNeededValue.get(); }
+    String getCameraPermissionTextString() const            { return cameraPermissionTextValue.get(); }
 
-    bool isBluetoothPermissionEnabled() const          { return iosBluetoothPermissionNeededValue.get(); }
-    String getBluetoothPermissionTextString() const    { return iosBluetoothPermissionTextValue.get(); }
+    bool isBluetoothPermissionEnabled() const               { return iosBluetoothPermissionNeededValue.get(); }
+    String getBluetoothPermissionTextString() const         { return iosBluetoothPermissionTextValue.get(); }
 
-    bool isInAppPurchasesEnabled() const               { return iosInAppPurchasesValue.get(); }
-    bool isBackgroundAudioEnabled() const              { return iosBackgroundAudioValue.get(); }
-    bool isBackgroundBleEnabled() const                { return iosBackgroundBleValue.get(); }
-    bool isPushNotificationsEnabled() const            { return iosPushNotificationsValue.get(); }
-    bool isAppGroupsEnabled() const                    { return iosAppGroupsValue.get(); }
-    bool isiCloudPermissionsEnabled() const            { return iCloudPermissionsValue.get(); }
-    bool isFileSharingEnabled() const                  { return uiFileSharingEnabledValue.get(); }
-    bool isDocumentBrowserEnabled() const              { return uiSupportsDocumentBrowserValue.get(); }
-    bool isStatusBarHidden() const                     { return uiStatusBarHiddenValue.get(); }
+    bool isSendAppleEventsPermissionEnabled() const         { return sendAppleEventsPermissionNeededValue.get(); }
+    String getSendAppleEventsPermissionTextString() const   { return sendAppleEventsPermissionTextValue.get(); }
 
-    String getDocumentExtensionsString() const         { return documentExtensionsValue.get(); }
+    bool isInAppPurchasesEnabled() const                    { return iosInAppPurchasesValue.get(); }
+    bool isContentSharingEnabled() const                    { return iosContentSharingValue.get(); }
+    bool isBackgroundAudioEnabled() const                   { return iosBackgroundAudioValue.get(); }
+    bool isBackgroundBleEnabled() const                     { return iosBackgroundBleValue.get(); }
+    bool isPushNotificationsEnabled() const                 { return iosPushNotificationsValue.get(); }
+    bool isAppGroupsEnabled() const                         { return iosAppGroupsValue.get(); }
+    bool isiCloudPermissionsEnabled() const                 { return iCloudPermissionsValue.get(); }
+    bool isFileSharingEnabled() const                       { return uiFileSharingEnabledValue.get(); }
+    bool isDocumentBrowserEnabled() const                   { return uiSupportsDocumentBrowserValue.get(); }
+    bool isStatusBarHidden() const                          { return uiStatusBarHiddenValue.get(); }
 
-    bool shouldKeepCustomXcodeSchemes() const          { return keepCustomXcodeSchemesValue.get(); }
+    String getDocumentExtensionsString() const              { return documentExtensionsValue.get(); }
 
-    String getDevelopmentTeamIDString() const          { return iosDevelopmentTeamIDValue.get(); }
-    String getAppGroupIdString() const                 { return iosAppGroupsIDValue.get(); }
+    bool shouldKeepCustomXcodeSchemes() const               { return keepCustomXcodeSchemesValue.get(); }
 
-    String getDefaultLaunchStoryboardName() const      { jassert (iOS); return "LaunchScreen"; }
+    String getDevelopmentTeamIDString() const               { return iosDevelopmentTeamIDValue.get(); }
+    String getAppGroupIdString() const                      { return iosAppGroupsIDValue.get(); }
+
+    String getDefaultLaunchStoryboardName() const           { jassert (iOS); return "LaunchScreen"; }
 
     //==============================================================================
     bool usesMMFiles() const override                       { return true; }
@@ -247,6 +255,7 @@ public:
             case ProjectType::Target::AudioUnitPlugIn:
             case ProjectType::Target::UnityPlugIn:
                 return ! iOS;
+            case ProjectType::Target::unspecified:
             default:
                 break;
         }
@@ -441,6 +450,16 @@ public:
                                                                 "Bluetooth Access Text", 1024, false),
                        "A short description of why your app requires Bluetooth access.");
         }
+        else
+        {
+            props.add (new ChoicePropertyComponent (sendAppleEventsPermissionNeededValue, "Send Apple Events"),
+                       "Enable this to allow your app to send Apple events. "
+                       "The user of your app will be prompted to grant permissions to control other apps.");
+
+            props.add (new TextPropertyComponentWithEnablement (sendAppleEventsPermissionTextValue, sendAppleEventsPermissionNeededValue,
+                                                                "Send Apple Events Text", 1024, false),
+                       "A short description of why your app requires the ability to send Apple events.");
+        }
 
         props.add (new ChoicePropertyComponent (iosInAppPurchasesValue, "In-App Purchases Capability"),
                    "Enable this to grant your app the capability for in-app purchases. "
@@ -448,6 +467,9 @@ public:
 
         if (iOS)
         {
+            props.add (new ChoicePropertyComponent (iosContentSharingValue, "Content Sharing"),
+                       "Enable this to allow your app to share content with other apps.");
+
             props.add (new ChoicePropertyComponent (iosBackgroundAudioValue, "Audio Background Capability"),
                        "Enable this to grant your app the capability to access audio when in background mode. "
                        "This permission is required if your app creates a MIDI input or output device.");
@@ -497,6 +519,7 @@ public:
 
         props.add (new TextPropertyComponent (subprojectsValue, "Xcode Subprojects", 8192, true),
                    "Paths to Xcode projects that should be added to the build (one per line). "
+                   "These can be absolute or relative to the build directory. "
                    "The names of the required build products can be specified after a colon, comma separated, "
                    "e.g. \"path/to/MySubProject.xcodeproj: MySubProject, OtherTarget\". "
                    "If no build products are specified, all build products associated with a subproject will be added.");
@@ -588,13 +611,8 @@ public:
     {
         callForAllSupportedTargets ([this] (ProjectType::Target::Type targetType)
                                     {
-                                        if (auto* target = new XcodeTarget (targetType, *this))
-                                        {
-                                            if (targetType == ProjectType::Target::AggregateTarget)
-                                                targets.insert (0, target);
-                                            else
-                                                targets.add (target);
-                                        }
+                                        targets.insert (targetType == ProjectType::Target::AggregateTarget ? 0 : -1,
+                                                        new XcodeTarget (targetType, *this));
                                     });
 
         // If you hit this assert, you tried to generate a project for an exporter
@@ -977,6 +995,7 @@ public:
                     xcodeCopyToProductInstallPathAfterBuild = false;
                     break;
 
+                case ProjectType::Target::unspecified:
                 default:
                     // unknown target type!
                     jassertfalse;
@@ -1432,7 +1451,6 @@ public:
                 defines.set ("_NDEBUG", "1");
                 defines.set ("NDEBUG", "1");
                 s.set ("GCC_GENERATE_DEBUGGING_SYMBOLS", "NO");
-                s.set ("GCC_SYMBOLS_PRIVATE_EXTERN", "YES");
                 s.set ("DEAD_CODE_STRIPPING", "YES");
             }
 
@@ -1446,6 +1464,9 @@ public:
 
             if (owner.isInAppPurchasesEnabled())
                 defines.set ("JUCE_IN_APP_PURCHASES", "1");
+
+            if (owner.iOS && owner.isContentSharingEnabled())
+                defines.set ("JUCE_CONTENT_SHARING", "1");
 
             if (owner.isPushNotificationsEnabled())
                 defines.set ("JUCE_PUSH_NOTIFICATIONS", "1");
@@ -1492,6 +1513,12 @@ public:
                 case AAXPlugIn:         return config.isPluginBinaryCopyStepEnabled() ? config.getAAXBinaryLocationString() : String();
                 case UnityPlugIn:       return config.isPluginBinaryCopyStepEnabled() ? config.getUnityPluginBinaryLocationString() : String();
                 case SharedCodeTarget:  return owner.isiOS() ? "@executable_path/Frameworks" : "@executable_path/../Frameworks";
+                case StaticLibrary:
+                case DynamicLibrary:
+                case AudioUnitv3PlugIn:
+                case StandalonePlugIn:
+                case AggregateTarget:
+                case unspecified:
                 default:                return {};
             }
         }
@@ -1581,6 +1608,11 @@ public:
                                                                                                                            .upToLastOccurrenceOf (".storyboard", false, false)
                                                                                                          : owner.getDefaultLaunchStoryboardName());
                 }
+            }
+            else
+            {
+                if (owner.isSendAppleEventsPermissionEnabled())
+                    addPlistDictionaryKey (dict, "NSAppleEventsUsageDescription", owner.getSendAppleEventsPermissionTextString());
             }
 
             addPlistDictionaryKey (dict, "CFBundleExecutable",          "${EXECUTABLE_NAME}");
@@ -1994,9 +2026,12 @@ private:
                      iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue,
                      appSandboxValue, appSandboxInheritanceValue, appSandboxOptionsValue,
                      hardenedRuntimeValue, hardenedRuntimeOptionsValue,
-                     microphonePermissionNeededValue, microphonePermissionsTextValue, cameraPermissionNeededValue, cameraPermissionTextValue, iosBluetoothPermissionNeededValue, iosBluetoothPermissionTextValue,
+                     microphonePermissionNeededValue, microphonePermissionsTextValue,
+                     cameraPermissionNeededValue, cameraPermissionTextValue,
+                     iosBluetoothPermissionNeededValue, iosBluetoothPermissionTextValue,
+                     sendAppleEventsPermissionNeededValue, sendAppleEventsPermissionTextValue,
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
-                     iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
+                     iosContentSharingValue, iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
                      iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
                      exporterBundleIdentifierValue;
 
@@ -2152,7 +2187,8 @@ private:
     void addFilesAndGroupsToProject (StringArray& topLevelGroupIDs) const
     {
         for (auto* target : targets)
-            addEntitlementsFile (*target);
+            if (target->shouldAddEntitlements())
+                addEntitlementsFile (*target);
 
         for (auto& group : getAllGroups())
         {
@@ -2608,21 +2644,14 @@ private:
         s.set ("CLANG_WARN_UNREACHABLE_CODE", "YES");
         s.set ("CLANG_WARN__DUPLICATE_METHOD_MATCH", "YES");
         s.set ("WARNING_CFLAGS", "\"-Wreorder\"");
+        s.set ("GCC_INLINES_ARE_PRIVATE_EXTERN", projectType.isStaticLibrary() ? "NO" : "YES");
 
-        if (projectType.isStaticLibrary())
-        {
-            s.set ("GCC_INLINES_ARE_PRIVATE_EXTERN", "NO");
-            s.set ("GCC_SYMBOLS_PRIVATE_EXTERN", "NO");
-        }
-        else
-        {
-            s.set ("GCC_INLINES_ARE_PRIVATE_EXTERN", "YES");
-        }
+        // GCC_SYMBOLS_PRIVATE_EXTERN only takes effect if ENABLE_TESTABILITY is off
+        s.set ("ENABLE_TESTABILITY", "NO");
+        s.set ("GCC_SYMBOLS_PRIVATE_EXTERN", "YES");
 
         if (config.isDebug())
         {
-            s.set ("ENABLE_TESTABILITY", "YES");
-
             if (config.getOSXArchitectureString() == osxArch_Default)
                 s.set ("ONLY_ACTIVE_ARCH", "YES");
         }
@@ -2661,8 +2690,12 @@ private:
             if (iOS && isPushNotificationsEnabled())
                 xcodeFrameworks.addIfNotAlreadyThere ("UserNotifications");
 
-            if (isiOS() && project.getConfigFlag ("JUCE_USE_CAMERA").get())
+            if (iOS
+                && project.getEnabledModules().isModuleEnabled ("juce_video")
+                && project.isConfigFlagEnabled ("JUCE_USE_CAMERA", false))
+            {
                 xcodeFrameworks.addIfNotAlreadyThere ("ImageIO");
+            }
 
             xcodeFrameworks.addTokens (getExtraFrameworksString(), ",;", "\"'");
             xcodeFrameworks.trim();
@@ -2781,19 +2814,8 @@ private:
             if (! subprojectPath.endsWith (".xcodeproj"))
                 subprojectPath += ".xcodeproj";
 
-            File subprojectFile;
-
-            if (File::isAbsolutePath (subprojectPath))
-            {
-                subprojectFile = subprojectPath;
-            }
-            else
-            {
-                subprojectFile = getProject().getProjectFolder().getChildFile (subprojectPath);
-
-                RelativePath p (subprojectPath, RelativePath::projectFolder);
-                subprojectPath = p.rebased (getProject().getProjectFolder(), getTargetFolder(), RelativePath::buildTargetFolder).toUnixStyle();
-            }
+            File subprojectFile = File::isAbsolutePath (subprojectPath) ? subprojectPath
+                                                                        : getTargetFolder().getChildFile (subprojectPath);
 
             if (! subprojectFile.isDirectory())
                 continue;
@@ -2814,8 +2836,8 @@ private:
             if (availableBuildProducts.empty())
                 continue;
 
-            auto subprojectFileType = getFileType (RelativePath (subprojectPath, RelativePath::projectFolder));
-            auto subprojectFileID = addFileOrFolderReference (subprojectPath, "<group>", subprojectFileType);
+            auto subprojectFileType = getFileType (RelativePath (subprojectFile.getFullPathName(), RelativePath::buildTargetFolder));
+            auto subprojectFileID = addFileOrFolderReference (subprojectFile.getFullPathName(), "<group>", subprojectFileType);
             subprojectFileIDs.add (subprojectFileID);
 
             StringArray proxyIDs;
@@ -2850,7 +2872,7 @@ private:
                 }
             }
 
-            auto productGroupID = createFileRefID (subprojectPath + "_products");
+            auto productGroupID = createFileRefID (subprojectFile.getFullPathName() + "_products");
             addGroup (productGroupID, "Products", proxyIDs);
 
             subprojectReferences.add ({ productGroupID, subprojectFileID });
@@ -3116,18 +3138,34 @@ private:
     {
         StringPairArray entitlements;
 
-        if (project.isAudioPluginProject())
+        if (isiOS())
         {
-            if (isiOS() && project.shouldEnableIAA())
+            if (project.isAudioPluginProject() && project.shouldEnableIAA())
                 entitlements.set ("inter-app-audio", "<true/>");
+
+            if (isiCloudPermissionsEnabled())
+            {
+                entitlements.set ("com.apple.developer.icloud-container-identifiers",
+                                  "<array>\n"
+                                  "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
+                                  "    </array>");
+
+                entitlements.set ("com.apple.developer.icloud-services",
+                                  "<array>\n"
+                                  "        <string>CloudDocuments</string>\n"
+                                  "    </array>");
+
+                entitlements.set ("com.apple.developer.ubiquity-container-identifiers",
+                                  "<array>\n"
+                                  "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
+                                  "    </array>");
+            }
         }
-        else
-        {
-            if (isPushNotificationsEnabled())
-                entitlements.set (isiOS() ? "aps-environment"
-                                          : "com.apple.developer.aps-environment",
-                                            "<string>development</string>");
-        }
+
+        if (isPushNotificationsEnabled())
+            entitlements.set (isiOS() ? "aps-environment"
+                                      : "com.apple.developer.aps-environment",
+                                        "<string>development</string>");
 
         if (isAppGroupsEnabled())
         {
@@ -3146,7 +3184,7 @@ private:
             for (auto& option : getHardenedRuntimeOptions())
                 entitlements.set (option, "<true/>");
 
-        if (isAppSandboxEnabled() || (project.isAudioPluginProject() && target.type == XcodeTarget::AudioUnitv3PlugIn))
+        if (isAppSandboxEnabled() || (isOSX() && project.isAudioPluginProject() && target.type == XcodeTarget::AudioUnitv3PlugIn))
         {
             entitlements.set ("com.apple.security.app-sandbox", "<true/>");
 
@@ -3163,52 +3201,31 @@ private:
                     entitlements.set (option, "<true/>");
         }
 
-        if (isiOS() && isiCloudPermissionsEnabled())
-        {
-            entitlements.set ("com.apple.developer.icloud-container-identifiers",
-                              "<array>\n"
-                              "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
-                              "    </array>");
-
-            entitlements.set ("com.apple.developer.icloud-services",
-                              "<array>\n"
-                              "        <string>CloudDocuments</string>\n"
-                              "    </array>");
-
-            entitlements.set ("com.apple.developer.ubiquity-container-identifiers",
-                              "<array>\n"
-                              "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
-                              "    </array>");
-        }
-
         return entitlements;
     }
 
     void addEntitlementsFile (XcodeTarget& target) const
     {
+        String content =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+            "<plist version=\"1.0\">\n"
+            "<dict>\n";
+
         auto entitlements = getEntitlements (target);
 
-        if (entitlements.size() > 0)
-        {
-            String content =
-                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-                "<plist version=\"1.0\">\n"
-                "<dict>\n";
+        for (auto& key : entitlements.getAllKeys())
+            content += "\t<key>" + key + "</key>\n"
+                       "\t" + entitlements[key] + "\n";
 
-            for (auto& key : entitlements.getAllKeys())
-                content += "\t<key>" + key + "</key>\n"
-                           "\t" + entitlements[key] + "\n";
+        content += "</dict>\n"
+                   "</plist>\n";
 
-            content += "</dict>\n"
-                       "</plist>\n";
+        auto entitlementsFile = getTargetFolder().getChildFile (target.getEntitlementsFilename());
+        overwriteFileIfDifferentOrThrow (entitlementsFile, content);
 
-            auto entitlementsFile = getTargetFolder().getChildFile (target.getEntitlementsFilename());
-            overwriteFileIfDifferentOrThrow (entitlementsFile, content);
-
-            RelativePath entitlementsPath (entitlementsFile, getTargetFolder(), RelativePath::buildTargetFolder);
-            addFile (entitlementsPath, false, false, false, false, nullptr, {});
-        }
+        RelativePath entitlementsPath (entitlementsFile, getTargetFolder(), RelativePath::buildTargetFolder);
+        addFile (entitlementsPath, false, false, false, false, nullptr, {});
     }
 
     String addProjectItem (const Project::Item& projectItem) const

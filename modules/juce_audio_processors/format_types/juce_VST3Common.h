@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -206,6 +206,29 @@ static inline Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set
 
         case AudioChannelSet::discreteChannel0:  return Steinberg::Vst::kSpeakerM;
 
+        case AudioChannelSet::ambisonicACN16:
+        case AudioChannelSet::ambisonicACN17:
+        case AudioChannelSet::ambisonicACN18:
+        case AudioChannelSet::ambisonicACN19:
+        case AudioChannelSet::ambisonicACN20:
+        case AudioChannelSet::ambisonicACN21:
+        case AudioChannelSet::ambisonicACN22:
+        case AudioChannelSet::ambisonicACN23:
+        case AudioChannelSet::ambisonicACN24:
+        case AudioChannelSet::ambisonicACN25:
+        case AudioChannelSet::ambisonicACN26:
+        case AudioChannelSet::ambisonicACN27:
+        case AudioChannelSet::ambisonicACN28:
+        case AudioChannelSet::ambisonicACN29:
+        case AudioChannelSet::ambisonicACN30:
+        case AudioChannelSet::ambisonicACN31:
+        case AudioChannelSet::ambisonicACN32:
+        case AudioChannelSet::ambisonicACN33:
+        case AudioChannelSet::ambisonicACN34:
+        case AudioChannelSet::ambisonicACN35:
+        case AudioChannelSet::proximityLeft:
+        case AudioChannelSet::proximityRight:
+        case AudioChannelSet::unknown:
         default:
             break;
     }

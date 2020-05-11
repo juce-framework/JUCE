@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -51,18 +51,8 @@ public:
 
     bool supportsTargetType (ProjectType::Target::Type type) const override
     {
-        switch (type)
-        {
-            case ProjectType::Target::GUIApp:
-            case ProjectType::Target::StaticLibrary:
-            case ProjectType::Target::DynamicLibrary:
-            case ProjectType::Target::StandalonePlugIn:
-                return true;
-            default:
-                break;
-        }
-
-        return false;
+        return type == ProjectType::Target::GUIApp || type == ProjectType::Target::StaticLibrary
+              || type == ProjectType::Target::DynamicLibrary || type == ProjectType::Target::StandalonePlugIn;
     }
 
     //==============================================================================
@@ -83,8 +73,8 @@ public:
 
     static const char* getName()                         { return "Android"; }
     static const char* getValueTreeTypeName()            { return "ANDROIDSTUDIO"; }
-    static const char* getDefaultActivityClass()         { return "com.roli.juce.JuceActivity"; }
-    static const char* getDefaultApplicationClass()      { return "com.roli.juce.JuceApp"; }
+    static const char* getDefaultActivityClass()         { return "com.rmsl.juce.JuceActivity"; }
+    static const char* getDefaultApplicationClass()      { return "com.rmsl.juce.JuceApp"; }
 
     static AndroidProjectExporter* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
@@ -360,7 +350,9 @@ private:
         if (! isLibrary())
             mo << "SET(BINARY_NAME \"juce_jni\")" << newLine << newLine;
 
-        if (project.getConfigFlag ("JUCE_USE_ANDROID_OBOE").get())
+        auto useOboe = project.getEnabledModules().isModuleEnabled ("juce_audio_devices") && project.isConfigFlagEnabled ("JUCE_USE_ANDROID_OBOE", false);
+
+        if (useOboe)
         {
             String oboePath (androidOboeRepositoryPath.get().toString().trim().quoted());
 
@@ -386,7 +378,7 @@ private:
 
             mo << "    \"${ANDROID_NDK}/sources/android/cpufeatures\"" << newLine;
 
-            if (project.getConfigFlag ("JUCE_USE_ANDROID_OBOE").get())
+            if (useOboe)
                 mo << "    \"${OBOE_DIR}/include\"" << newLine;
 
             mo << ")" << newLine << newLine;
@@ -541,7 +533,7 @@ private:
             mo << "    \"cpufeatures\"" << newLine;
         }
 
-        if (project.getConfigFlag ("JUCE_USE_ANDROID_OBOE").get())
+        if (useOboe)
             mo << "    \"oboe\"" << newLine;
 
         mo << ")" << newLine;
@@ -885,7 +877,7 @@ private:
             if (m->getID() == moduleID)
             {
                 auto javaFolder = m->getFolder().getChildFile ("native").getChildFile ("javaopt");
-                addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile("app"));
+                addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile ("app"));
                 return;
             }
         }
@@ -900,13 +892,14 @@ private:
         {
             auto javaFolder = module->getFolder().getChildFile ("native").getChildFile ("javacore");
 
-            addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile("init"));
+            addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile ("init"));
 
             if (! isLibrary())
-                addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile("app"));
+                addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile ("app"));
         }
 
-        if (project.getEnabledModules().isModuleEnabled ("juce_gui_basics") && getActivityClassString() == getDefaultActivityClass())
+        if (project.getEnabledModules().isModuleEnabled ("juce_gui_basics")
+            && (getActivityClassString() == getDefaultActivityClass() || isContentSharingEnabled()))
             addOptJavaFolderToSourceSetsForModule (javaSourceSets, modules, "juce_gui_basics");
 
         if (areRemoteNotificationsEnabled())
@@ -1040,13 +1033,13 @@ private:
         props.add (new TextPropertyComponent (androidCustomActivityClass, "Custom Android Activity", 256, false),
                    "If not empty, specifies the Android Activity class name stored in the app's manifest which "
                    "should be used instead of Android's default Activity. If you specify a custom Activity "
-                   "then you should implement onNewIntent() function like the one in com.roli.juce.JuceActivity, if "
+                   "then you should implement onNewIntent() function like the one in com.rmsl.juce.JuceActivity, if "
                    "you wish to be able to handle push notification events.");
 
         props.add (new TextPropertyComponent (androidCustomApplicationClass, "Custom Android Application", 256, false),
                    "If not empty, specifies the Android Application class name stored in the app's manifest which "
                    "should be used instead of JUCE's default JuceApp class. If you specify a custom App then you must "
-                   "call com.roli.juce.Java.initialiseJUCE somewhere in your code before calling any JUCE functions.");
+                   "call com.rmsl.juce.Java.initialiseJUCE somewhere in your code before calling any JUCE functions.");
 
         props.add (new TextPropertyComponent (androidVersionCode, "Android Version Code", 32, false),
                    "An integer value that represents the version of the application code, relative to other versions.");
@@ -1222,6 +1215,8 @@ private:
     bool areRemoteNotificationsEnabled() const  { return arePushNotificationsEnabled() && androidEnableRemoteNotifications.get(); }
 
     bool isInAppBillingEnabled() const          { return androidInAppBillingPermission.get(); }
+
+    bool isContentSharingEnabled() const        { return androidEnableContentSharing.get(); }
 
     String getJNIActivityClassName() const
     {
@@ -1447,13 +1442,16 @@ private:
         if (isInAppBillingEnabled())
             defines.set ("JUCE_IN_APP_PURCHASES", "1");
 
+        if (isContentSharingEnabled())
+            defines.set ("JUCE_CONTENT_SHARING", "1");
+
         if (supportsGLv3())
             defines.set ("JUCE_ANDROID_GL_ES_VERSION_3_0", "1");
 
         if (areRemoteNotificationsEnabled())
         {
-            defines.set ("JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME", "com_roli_juce_JuceFirebaseInstanceIdService");
-            defines.set ("JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME", "com_roli_juce_JuceFirebaseMessagingService");
+            defines.set ("JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME", "com_rmsl_juce_JuceFirebaseInstanceIdService");
+            defines.set ("JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME", "com_rmsl_juce_JuceFirebaseMessagingService");
         }
 
         return defines;
@@ -1612,6 +1610,7 @@ private:
                 screens->setAttribute ("android:normalScreens", "true");
                 screens->setAttribute ("android:largeScreens", "true");
                 screens->setAttribute ("android:anyDensity", "true");
+                screens->setAttribute ("android:xlargeScreens", "true");
             }
         }
     }
@@ -1758,12 +1757,12 @@ private:
         if (areRemoteNotificationsEnabled())
         {
             auto* service = application.createNewChildElement ("service");
-            service->setAttribute ("android:name", "com.roli.juce.JuceFirebaseMessagingService");
+            service->setAttribute ("android:name", "com.rmsl.juce.JuceFirebaseMessagingService");
             auto* intentFilter = service->createNewChildElement ("intent-filter");
             intentFilter->createNewChildElement ("action")->setAttribute ("android:name", "com.google.firebase.MESSAGING_EVENT");
 
             service = application.createNewChildElement ("service");
-            service->setAttribute ("android:name", "com.roli.juce.JuceFirebaseInstanceIdService");
+            service->setAttribute ("android:name", "com.rmsl.juce.JuceFirebaseInstanceIdService");
             intentFilter = service->createNewChildElement ("intent-filter");
             intentFilter->createNewChildElement ("action")->setAttribute ("android:name", "com.google.firebase.INSTANCE_ID_EVENT");
 
@@ -1775,14 +1774,14 @@ private:
 
     void createProviderElement (XmlElement& application) const
     {
-        if (androidEnableContentSharing.get())
+        if (isContentSharingEnabled())
         {
             auto* provider = application.createNewChildElement ("provider");
 
-            provider->setAttribute ("android:name", "com.roli.juce.JuceSharingContentProvider");
+            provider->setAttribute ("android:name", "com.rmsl.juce.JuceSharingContentProvider");
             provider->setAttribute ("android:authorities", project.getBundleIdentifierString().toLowerCase() + ".sharingcontentprovider");
             provider->setAttribute ("android:grantUriPermissions", "true");
-            provider->setAttribute ("android:exported", "false");
+            provider->setAttribute ("android:exported", "true");
         }
     }
 

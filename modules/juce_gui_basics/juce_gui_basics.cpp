@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -71,25 +71,21 @@
   #include <exdispid.h>
  #endif
 
- #if JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+ #if JUCE_MINGW
+  #include <imm.h>
+ #elif ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
   #pragma comment(lib, "vfw32.lib")
   #pragma comment(lib, "imm32.lib")
- #endif
 
- #if JUCE_OPENGL
-  #if JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+  #if JUCE_OPENGL
    #pragma comment(lib, "OpenGL32.Lib")
    #pragma comment(lib, "GlU32.Lib")
   #endif
- #endif
 
- #if JUCE_DIRECT2D && JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
-  #pragma comment (lib, "Dwrite.lib")
-  #pragma comment (lib, "D2d1.lib")
- #endif
-
- #if JUCE_MINGW
-  #include <imm.h>
+  #if JUCE_DIRECT2D
+   #pragma comment (lib, "Dwrite.lib")
+   #pragma comment (lib, "D2d1.lib")
+  #endif
  #endif
 
 //==============================================================================
@@ -267,10 +263,8 @@ namespace juce
 #include "misc/juce_JUCESplashScreen.cpp"
 
 #include "layout/juce_FlexBox.cpp"
-#if JUCE_HAS_CONSTEXPR
- #include "layout/juce_GridItem.cpp"
- #include "layout/juce_Grid.cpp"
-#endif
+#include "layout/juce_GridItem.cpp"
+#include "layout/juce_Grid.cpp"
 
 #if JUCE_IOS || JUCE_WINDOWS
  #include "native/juce_MultiTouchMapper.h"
@@ -287,7 +281,11 @@ namespace juce
   #include "native/juce_ios_UIViewComponentPeer.mm"
   #include "native/juce_ios_Windowing.mm"
   #include "native/juce_ios_FileChooser.mm"
-  #include "native/juce_ios_ContentSharer.cpp"
+
+  #if JUCE_CONTENT_SHARING
+   #include "native/juce_ios_ContentSharer.cpp"
+  #endif
+
  #else
   #include "native/juce_mac_NSViewComponentPeer.mm"
   #include "native/juce_mac_Windowing.mm"
@@ -327,6 +325,9 @@ namespace juce
  #include "native/juce_android_Windowing.cpp"
  #include "native/juce_common_MimeTypes.cpp"
  #include "native/juce_android_FileChooser.cpp"
- #include "native/juce_android_ContentSharer.cpp"
+
+ #if JUCE_CONTENT_SHARING
+  #include "native/juce_android_ContentSharer.cpp"
+ #endif
 
 #endif

@@ -3,8 +3,8 @@
 **BY DOWNLOADING, INSTALLING OR USING ANY PART OF THE JUCE LIBRARY, YOU AGREE
 TO THE [JUCE 5 END-USER LICENSE AGREEMENT](https://www.juce.com/juce-5-licence)
 AND [JUCE 5 PRIVACY POLICY](https://www.juce.com/juce-5-privacy-policy), WHICH
-ARE BINDING AGREEMENTS BETWEEN YOU AND ROLI, LTD. IF YOU DO NOT AGREE TO THE
-TERMS, DO NOT USE THE JUCE LIBRARY.**
+ARE BINDING AGREEMENTS BETWEEN YOU AND RAW MATERIAL SOFTWARE LIMITED. IF YOU DO
+NOT AGREE TO THE TERMS, DO NOT USE THE JUCE LIBRARY.**
 
 We now have tier-leveled license terms for JUCE 5, with different terms for
 each available license: JUCE Personal (for developers or startup businesses

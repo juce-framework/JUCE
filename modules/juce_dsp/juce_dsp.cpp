@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -34,12 +34,6 @@
 #endif
 
 #include "juce_dsp.h"
-
-#if ! JUCE_HAS_CONSTEXPR
- #ifndef JUCE_DEMO_RUNNER
-  #error "The juce_dsp module requires a compiler that supports constexpr"
- #endif
-#else
 
 #ifndef JUCE_USE_VDSP_FRAMEWORK
  #define JUCE_USE_VDSP_FRAMEWORK 1
@@ -92,6 +86,5 @@
  #include "containers/juce_AudioBlock_test.cpp"
  #include "frequency/juce_FFT_test.cpp"
  #include "processors/juce_FIRFilter_test.cpp"
-#endif
-
+ #include "processors/juce_ProcessorChain_test.cpp"
 #endif

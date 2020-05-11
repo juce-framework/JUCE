@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -997,7 +997,7 @@ public:
     }
 
     //==============================================================================
-    bool sendModalInputAttemptIfBlocked()
+    bool isBlockedByModalComponent()
     {
         if (auto* modal = Component::getCurrentlyModalComponent())
         {
@@ -1005,12 +1005,18 @@ public:
                  && (! getComponent().isParentOf (modal))
                  && getComponent().isCurrentlyBlockedByAnotherModalComponent())
             {
-                modal->inputAttemptWhenModal();
                 return true;
             }
         }
 
         return false;
+    }
+
+    void sendModalInputAttemptIfBlocked()
+    {
+        if (isBlockedByModalComponent())
+            if (auto* modal = Component::getCurrentlyModalComponent())
+                modal->inputAttemptWhenModal();
     }
 
     bool canBecomeKeyWindow()
@@ -1068,11 +1074,13 @@ public:
 
     void liveResizingStart()
     {
-        if (constrainer != nullptr)
-        {
-            constrainer->resizeStart();
-            isFirstLiveResize = true;
-        }
+        if (constrainer == nullptr)
+            return;
+
+        constrainer->resizeStart();
+        isFirstLiveResize = true;
+
+        setFullScreenSizeConstraints (*constrainer);
     }
 
     void liveResizingEnd()
@@ -1081,37 +1089,34 @@ public:
             constrainer->resizeEnd();
     }
 
-    NSRect constrainRect (NSRect r)
+    NSRect constrainRect (const NSRect r)
     {
-        if (constrainer != nullptr && ! isKioskMode())
+        if (constrainer == nullptr || isKioskMode())
+            return r;
+
+        const auto scale = getComponent().getDesktopScaleFactor();
+
+        auto pos            = ScalingHelpers::unscaledScreenPosToScaled (scale, convertToRectInt (flippedScreenRect (r)));
+        const auto original = ScalingHelpers::unscaledScreenPosToScaled (scale, convertToRectInt (flippedScreenRect ([window frame])));
+
+        const auto screenBounds = Desktop::getInstance().getDisplays().getTotalBounds (true);
+
+        const bool inLiveResize = [window inLiveResize];
+
+        if (! inLiveResize || isFirstLiveResize)
         {
-            auto scale = getComponent().getDesktopScaleFactor();
+            isFirstLiveResize = false;
 
-            auto pos      = ScalingHelpers::unscaledScreenPosToScaled (scale, convertToRectInt (flippedScreenRect (r)));
-            auto original = ScalingHelpers::unscaledScreenPosToScaled (scale, convertToRectInt (flippedScreenRect ([window frame])));
-
-            auto screenBounds = Desktop::getInstance().getDisplays().getTotalBounds (true);
-
-            const bool inLiveResize = [window inLiveResize];
-
-            if (! inLiveResize || isFirstLiveResize)
-            {
-                isFirstLiveResize = false;
-
-                isStretchingTop    = (pos.getY() != original.getY() && pos.getBottom() == original.getBottom());
-                isStretchingLeft   = (pos.getX() != original.getX() && pos.getRight()  == original.getRight());
-                isStretchingBottom = (pos.getY() == original.getY() && pos.getBottom() != original.getBottom());
-                isStretchingRight  = (pos.getX() == original.getX() && pos.getRight()  != original.getRight());
-            }
-
-            constrainer->checkBounds (pos, original, screenBounds,
-                                      isStretchingTop, isStretchingLeft, isStretchingBottom, isStretchingRight);
-
-            pos = ScalingHelpers::scaledScreenPosToUnscaled (scale, pos);
-            r = flippedScreenRect (makeNSRect (pos));
+            isStretchingTop    = (pos.getY() != original.getY() && pos.getBottom() == original.getBottom());
+            isStretchingLeft   = (pos.getX() != original.getX() && pos.getRight()  == original.getRight());
+            isStretchingBottom = (pos.getY() == original.getY() && pos.getBottom() != original.getBottom());
+            isStretchingRight  = (pos.getX() == original.getX() && pos.getRight()  != original.getRight());
         }
 
-        return r;
+        constrainer->checkBounds (pos, original, screenBounds,
+                                  isStretchingTop, isStretchingLeft, isStretchingBottom, isStretchingRight);
+
+        return flippedScreenRect (makeNSRect (ScalingHelpers::scaledScreenPosToUnscaled (scale, pos)));
     }
 
     static void showArrowCursorIfNeeded()
@@ -1519,6 +1524,30 @@ private:
             case NSEventTypeTabletProximity:
                 break;
 
+            case NSEventTypeFlagsChanged:
+            case NSEventTypeAppKitDefined:
+            case NSEventTypeSystemDefined:
+            case NSEventTypeApplicationDefined:
+            case NSEventTypePeriodic:
+            case NSEventTypeGesture:
+            case NSEventTypeMagnify:
+            case NSEventTypeSwipe:
+            case NSEventTypeRotate:
+            case NSEventTypeBeginGesture:
+            case NSEventTypeEndGesture:
+            case NSEventTypeQuickLook:
+           #if JUCE_64BIT
+            case NSEventTypeSmartMagnify:
+            case NSEventTypePressure:
+           #endif
+          #if defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12
+           #if JUCE_64BIT
+            case NSEventTypeDirectTouch:
+           #endif
+           #if defined (MAC_OS_X_VERSION_10_15) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_15
+            case NSEventTypeChangeMode:
+           #endif
+          #endif
             default:
                 return false;
         }
@@ -1555,6 +1584,13 @@ private:
         }
 
         return true;
+    }
+
+    void setFullScreenSizeConstraints (const ComponentBoundsConstrainer& c)
+    {
+        const auto minSize = NSMakeSize (static_cast<float> (c.getMinimumWidth()),
+                                         0.0f);
+        [window setMinFullScreenContentSize: minSize];
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponentPeer)
@@ -1881,15 +1917,9 @@ private:
     static BOOL becomeFirstResponder (id self, SEL)
     {
         if (auto* owner = getOwner (self))
-        {
-            if (owner->canBecomeKeyWindow())
-            {
-                owner->viewFocusGain();
-                return YES;
-            }
-        }
+            owner->viewFocusGain();
 
-        return NO;
+        return YES;
     }
 
     static BOOL resignFirstResponder (id self, SEL)
@@ -1988,7 +2018,7 @@ private:
 
         return owner != nullptr
                 && owner->canBecomeKeyWindow()
-                && ! owner->sendModalInputAttemptIfBlocked();
+                && ! owner->isBlockedByModalComponent();
     }
 
     static BOOL canBecomeMainWindow (id self, SEL)
@@ -1997,7 +2027,7 @@ private:
 
         return owner != nullptr
                 && owner->canBecomeMainWindow()
-                && ! owner->sendModalInputAttemptIfBlocked();
+                && ! owner->isBlockedByModalComponent();
     }
 
     static void becomeKeyWindow (id self, SEL)
@@ -2192,7 +2222,8 @@ void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, boo
 
             [NSApp setPresentationOptions: (allowMenusAndBars ? (NSApplicationPresentationAutoHideDock | NSApplicationPresentationAutoHideMenuBar)
                                                               : (NSApplicationPresentationHideDock | NSApplicationPresentationHideMenuBar))];
-            kioskComp->setBounds (Desktop::getInstance().getDisplays().getMainDisplay().totalArea);
+
+            kioskComp->setBounds (getDisplays().findDisplayForRect (kioskComp->getScreenBounds()).totalArea);
             peer->becomeKeyWindow();
         }
         else

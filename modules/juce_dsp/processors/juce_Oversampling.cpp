@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -39,7 +39,7 @@ struct Oversampling<SampleType>::OversamplingStage
     virtual ~OversamplingStage() {}
 
     //==============================================================================
-    virtual SampleType getLatencyInSamples() = 0;
+    virtual SampleType getLatencyInSamples() const = 0;
 
     virtual void initProcessing (size_t maximumNumberOfSamplesBeforeOversampling)
     {
@@ -78,7 +78,7 @@ struct OversamplingDummy   : public Oversampling<SampleType>::OversamplingStage
     OversamplingDummy (size_t numChans) : ParentType (numChans, 1) {}
 
     //==============================================================================
-    SampleType getLatencyInSamples() override
+    SampleType getLatencyInSamples() const override
     {
         return 0;
     }
@@ -139,7 +139,7 @@ struct Oversampling2TimesEquirippleFIR  : public Oversampling<SampleType>::Overs
     }
 
     //==============================================================================
-    SampleType getLatencyInSamples() override
+    SampleType getLatencyInSamples() const override
     {
         return static_cast<SampleType> (coefficientsUp.getFilterOrder() + coefficientsDown.getFilterOrder()) * 0.5f;
     }
@@ -300,7 +300,7 @@ struct Oversampling2TimesPolyphaseIIR  : public Oversampling<SampleType>::Oversa
     }
 
     //==============================================================================
-    SampleType getLatencyInSamples() override
+    SampleType getLatencyInSamples() const override
     {
         return latency;
     }
@@ -629,7 +629,7 @@ void Oversampling<SampleType>::clearOversamplingStages()
 
 //==============================================================================
 template <typename SampleType>
-SampleType Oversampling<SampleType>::getLatencyInSamples() noexcept
+SampleType Oversampling<SampleType>::getLatencyInSamples() const noexcept
 {
     auto latency = static_cast<SampleType> (0);
     size_t order = 1;
@@ -644,7 +644,7 @@ SampleType Oversampling<SampleType>::getLatencyInSamples() noexcept
 }
 
 template <typename SampleType>
-size_t Oversampling<SampleType>::getOversamplingFactor() noexcept
+size_t Oversampling<SampleType>::getOversamplingFactor() const noexcept
 {
     return factorOversampling;
 }

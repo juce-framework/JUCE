@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -28,16 +28,9 @@ namespace juce
 {
 
 extern ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component&, void* parent);
-extern bool shouldScaleGLWindow (void* hwnd);
-
-#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && JucePlugin_Build_VST
- bool juce_shouldDoubleScaleNativeGLWindow();
-#else
- bool juce_shouldDoubleScaleNativeGLWindow()  { return false; }
-#endif
 
 #if JUCE_WIN_PER_MONITOR_DPI_AWARE
- void setProcessDPIAwarenessIfNecessary (void*);
+ extern void setThreadDPIAwarenessForWindow (HWND);
 #endif
 
 //==============================================================================
@@ -106,7 +99,7 @@ public:
     bool initialiseOnRenderThread (OpenGLContext& c)
     {
        #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-        setProcessDPIAwarenessIfNecessary (nativeWindow->getNativeHandle());
+        setThreadDPIAwarenessForWindow ((HWND) nativeWindow->getNativeHandle());
        #endif
 
         context = &c;
@@ -157,12 +150,12 @@ public:
 
     struct Locker { Locker (NativeContext&) {} };
 
-    double getWindowScaleFactor (const Rectangle<int>& screenBounds)
+    HWND getNativeHandle()
     {
-        if (nativeWindow != nullptr && shouldScaleGLWindow (nativeWindow->getNativeHandle()))
-            return Desktop::getInstance().getDisplays().findDisplayForRect (screenBounds).scale;
+        if (nativeWindow != nullptr)
+            return (HWND) nativeWindow->getNativeHandle();
 
-        return Desktop::getInstance().getGlobalScaleFactor();
+        return nullptr;
     }
 
 private:
@@ -205,9 +198,6 @@ private:
             {
                 auto newScale = peer->getPlatformScaleFactor();
 
-                if (juce_shouldDoubleScaleNativeGLWindow())
-                    newScale *= newScale;
-
                 if (! approximatelyEqual (newScale, nativeScaleFactor))
                 {
                     nativeScaleFactor = newScale;
@@ -237,9 +227,6 @@ private:
            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
             safeComponent = Component::SafePointer<Component> (&component);
             nativeScaleFactor = peer->getPlatformScaleFactor();
-
-            if (juce_shouldDoubleScaleNativeGLWindow())
-                nativeScaleFactor *= nativeScaleFactor;
 
             startTimer (50);
            #endif

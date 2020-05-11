@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -42,14 +42,6 @@ std::function<bool(AudioProcessor&)> PluginHostType::jucePlugInIsRunningInAudioS
 
 #if JucePlugin_Build_Unity
  bool juce_isRunningInUnity()    { return PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_Unity; }
-#endif
-
-#if JUCE_MODULE_AVAILABLE_juce_opengl && JucePlugin_Build_VST
- bool juce_shouldDoubleScaleNativeGLWindow()
- {
-     return PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_VST
-           && getHostType().type == PluginHostType::AbletonLive10;
- }
 #endif
 
 #ifndef JUCE_VST3_CAN_REPLACE_VST2
@@ -158,11 +150,6 @@ bool JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, pointer_sized_i
 } // namespace juce
 
 //==============================================================================
-/** Somewhere in the codebase of your plugin, you need to implement this function
-    and make it return a new instance of the filter subclass that you're building.
-*/
-extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
-
 #if JucePlugin_Enable_IAA && JucePlugin_Build_Standalone && JUCE_IOS && (! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP)
  extern bool JUCE_CALLTYPE juce_isInterAppAudioConnected();
  extern void JUCE_CALLTYPE juce_switchToHostApplication();
@@ -171,18 +158,6 @@ extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
  extern Image JUCE_CALLTYPE juce_getIAAHostIcon (int);
  #endif
 #endif
-
-AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType type)
-{
-    AudioProcessor::setTypeOfNextNewPlugin (type);
-    AudioProcessor* const pluginInstance = createPluginFilter();
-    AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Undefined);
-
-    // your createPluginFilter() method must return an object!
-    jassert (pluginInstance != nullptr && pluginInstance->wrapperType == type);
-
-    return pluginInstance;
-}
 
 bool PluginHostType::isInterAppAudioConnected() const
 {

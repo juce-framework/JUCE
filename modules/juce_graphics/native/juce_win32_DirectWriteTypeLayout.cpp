@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -48,13 +48,13 @@ namespace DirectWriteTypeLayout
             return ComBaseClassHelper<IDWriteTextRenderer>::QueryInterface (refId, result);
         }
 
-        JUCE_COMRESULT IsPixelSnappingDisabled (void* /*clientDrawingContext*/, BOOL* isDisabled) override
+        JUCE_COMRESULT IsPixelSnappingDisabled (void* /*clientDrawingContext*/, BOOL* isDisabled) noexcept override
         {
             *isDisabled = FALSE;
             return S_OK;
         }
 
-        JUCE_COMRESULT GetCurrentTransform (void*, DWRITE_MATRIX* matrix) override
+        JUCE_COMRESULT GetCurrentTransform (void*, DWRITE_MATRIX* matrix) noexcept override
         {
             matrix->m11 = 1.0f; matrix->m12 = 0.0f;
             matrix->m21 = 0.0f; matrix->m22 = 1.0f;
@@ -62,30 +62,30 @@ namespace DirectWriteTypeLayout
             return S_OK;
         }
 
-        JUCE_COMRESULT GetPixelsPerDip (void*, FLOAT* pixelsPerDip) override
+        JUCE_COMRESULT GetPixelsPerDip (void*, FLOAT* pixelsPerDip) noexcept override
         {
             *pixelsPerDip = 1.0f;
             return S_OK;
         }
 
-        JUCE_COMRESULT DrawUnderline (void*, FLOAT, FLOAT, DWRITE_UNDERLINE const*, IUnknown*) override
+        JUCE_COMRESULT DrawUnderline (void*, FLOAT, FLOAT, DWRITE_UNDERLINE const*, IUnknown*) noexcept override
         {
             return E_NOTIMPL;
         }
 
-        JUCE_COMRESULT DrawStrikethrough (void*, FLOAT, FLOAT, DWRITE_STRIKETHROUGH const*, IUnknown*) override
+        JUCE_COMRESULT DrawStrikethrough (void*, FLOAT, FLOAT, DWRITE_STRIKETHROUGH const*, IUnknown*) noexcept override
         {
             return E_NOTIMPL;
         }
 
-        JUCE_COMRESULT DrawInlineObject (void*, FLOAT, FLOAT, IDWriteInlineObject*, BOOL, BOOL, IUnknown*) override
+        JUCE_COMRESULT DrawInlineObject (void*, FLOAT, FLOAT, IDWriteInlineObject*, BOOL, BOOL, IUnknown*) noexcept override
         {
             return E_NOTIMPL;
         }
 
         JUCE_COMRESULT DrawGlyphRun (void* clientDrawingContext, FLOAT baselineOriginX, FLOAT baselineOriginY, DWRITE_MEASURING_MODE,
                                      DWRITE_GLYPH_RUN const* glyphRun, DWRITE_GLYPH_RUN_DESCRIPTION const* runDescription,
-                                     IUnknown* clientDrawingEffect) override
+                                     IUnknown* clientDrawingEffect) noexcept override
         {
             auto layout = static_cast<TextLayout*> (clientDrawingContext);
 
@@ -207,7 +207,7 @@ namespace DirectWriteTypeLayout
         DWRITE_FONT_METRICS dwFontMetrics;
         dwFontFace->GetMetrics (&dwFontMetrics);
 
-        const float totalHeight = (float) (std::abs (dwFontMetrics.ascent) + std::abs (dwFontMetrics.descent));
+        const float totalHeight = (float) (dwFontMetrics.ascent + dwFontMetrics.descent);
         return dwFontMetrics.designUnitsPerEm / totalHeight;
     }
 

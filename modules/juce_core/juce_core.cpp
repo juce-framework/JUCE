@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -48,7 +48,11 @@
 #if JUCE_WINDOWS
  #include <ctime>
 
- #if ! JUCE_MINGW
+ #if JUCE_MINGW
+  #include <ws2spi.h>
+  #include <cstdio>
+  #include <locale.h>
+ #else
   #pragma warning (push)
   #pragma warning (disable: 4091)
   #include <Dbghelp.h>
@@ -57,12 +61,6 @@
   #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
    #pragma comment (lib, "DbgHelp.lib")
   #endif
- #endif
-
- #if JUCE_MINGW
-  #include <ws2spi.h>
-  #include <cstdio>
-  #include <locale.h>
  #endif
 
 #else

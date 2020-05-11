@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -29,7 +29,7 @@
 */
 #define JUCE_MAJOR_VERSION      5
 #define JUCE_MINOR_VERSION      4
-#define JUCE_BUILDNUMBER        6
+#define JUCE_BUILDNUMBER        7
 
 /** Current JUCE version number.
 

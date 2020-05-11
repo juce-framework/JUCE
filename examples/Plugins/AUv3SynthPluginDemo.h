@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -180,9 +180,9 @@ class AUv3SynthEditor   : public AudioProcessorEditor,
 {
 public:
     //==============================================================================
-    AUv3SynthEditor (AudioProcessor& processor)
-        :   AudioProcessorEditor (processor),
-            roomSizeSlider (Slider::LinearHorizontal, Slider::NoTextBox)
+    AUv3SynthEditor (AudioProcessor& processorIn)
+        : AudioProcessorEditor (processorIn),
+          roomSizeSlider (Slider::LinearHorizontal, Slider::NoTextBox)
     {
         LookAndFeel::setDefaultLookAndFeel (&materialLookAndFeel);
 
@@ -195,10 +195,8 @@ public:
         roomSizeSlider.setRange (0.0, 1.0);
         addAndMakeVisible (roomSizeSlider);
 
-        if (auto* assetStream = createAssetInputStream ("proaudio.path"))
+        if (auto fileStream = createAssetInputStream ("proaudio.path"))
         {
-            std::unique_ptr<InputStream> fileStream (assetStream);
-
             Path proAudioPath;
             proAudioPath.loadPathFromStream (*fileStream);
             proAudioIcon.setPath (proAudioPath);
@@ -411,13 +409,13 @@ private:
     //==============================================================================
     void loadNewSampleBinary (const void* data, int dataSize, const char* format)
     {
-        auto* soundBuffer = new MemoryInputStream (data, static_cast<std::size_t> (dataSize), false);
-        loadNewSample (soundBuffer, format);
+        auto soundBuffer = std::make_unique<MemoryInputStream> (data, static_cast<std::size_t> (dataSize), false);
+        loadNewSample (std::move (soundBuffer), format);
     }
 
-    void loadNewSample (InputStream* soundBuffer, const char* format)
+    void loadNewSample (std::unique_ptr<InputStream> soundBuffer, const char* format)
     {
-        std::unique_ptr<AudioFormatReader> formatReader (formatManager.findFormatForFileExtension (format)->createReaderFor (soundBuffer, true));
+        std::unique_ptr<AudioFormatReader> formatReader (formatManager.findFormatForFileExtension (format)->createReaderFor (soundBuffer.release(), true));
 
         BigInteger midiNotes;
         midiNotes.setRange (0, 126, true);

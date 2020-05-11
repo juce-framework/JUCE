@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -114,12 +114,21 @@ struct InternalRunLoop
 public:
     InternalRunLoop()
     {
-        fdReadCallbacks.reserve (8);
+        fdReadCallbacks.reserve (16);
     }
 
     void registerFdCallback (int fd, std::function<void(int)>&& cb, short eventMask)
     {
         const ScopedLock sl (lock);
+
+        if (shouldDeferModifyingReadCallbacks)
+        {
+            deferredReadCallbackModifications.emplace_back ([this, fd, cb, eventMask]() mutable
+                                                            {
+                                                                registerFdCallback (fd, std::move (cb), eventMask);
+                                                            });
+            return;
+        }
 
         fdReadCallbacks.push_back ({ fd, std::move (cb) });
         pfds.push_back ({ fd, eventMask, 0 });
@@ -128,6 +137,12 @@ public:
     void unregisterFdCallback (int fd)
     {
         const ScopedLock sl (lock);
+
+        if (shouldDeferModifyingReadCallbacks)
+        {
+            deferredReadCallbackModifications.emplace_back ([this, fd] { unregisterFdCallback (fd); });
+            return;
+        }
 
         {
             auto removePredicate = [=] (const std::pair<int, std::function<void(int)>>& cb)  { return cb.first == fd; };
@@ -166,7 +181,23 @@ public:
             {
                 if (fdAndCallback.first == fd)
                 {
-                    fdAndCallback.second (fd);
+                    {
+                        ScopedValueSetter<bool> insideFdReadCallback (shouldDeferModifyingReadCallbacks, true);
+                        fdAndCallback.second (fd);
+                    }
+
+                    if (! deferredReadCallbackModifications.empty())
+                    {
+                        for (auto& deferredRegisterEvent : deferredReadCallbackModifications)
+                            deferredRegisterEvent();
+
+                        deferredReadCallbackModifications.clear();
+
+                        // elements may have been removed from the fdReadCallbacks/pfds array so we really need
+                        // to call poll again
+                        return true;
+                    }
+
                     eventWasSent = true;
                 }
             }
@@ -188,6 +219,9 @@ private:
 
     std::vector<std::pair<int, std::function<void(int)>>> fdReadCallbacks;
     std::vector<pollfd> pfds;
+
+    bool shouldDeferModifyingReadCallbacks = false;
+    std::vector<std::function<void()>> deferredReadCallbackModifications;
 };
 
 JUCE_IMPLEMENT_SINGLETON (InternalRunLoop)

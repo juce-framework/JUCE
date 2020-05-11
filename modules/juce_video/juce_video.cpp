@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -45,24 +45,24 @@
  #import <AVKit/AVKit.h>
 
 //==============================================================================
-#elif JUCE_MSVC
+#elif JUCE_WINDOWS && ! JUCE_MINGW
  /* If you're using the camera classes, you'll need access to a few DirectShow headers.
      These files are provided in the normal Windows SDK. */
  #include <dshow.h>
  #include <dshowasf.h>
  #include <evr.h>
 
- #if JUCE_USE_CAMERA && JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
-  #pragma comment (lib, "Strmiids.lib")
-  #pragma comment (lib, "wmvcore.lib")
- #endif
-
- #if JUCE_MEDIAFOUNDATION && JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
-  #pragma comment (lib, "mfuuid.lib")
- #endif
-
- #if JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+ #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
   #pragma comment (lib, "strmiids.lib")
+
+  #if JUCE_USE_CAMERA
+   #pragma comment (lib, "Strmiids.lib")
+   #pragma comment (lib, "wmvcore.lib")
+  #endif
+
+  #if JUCE_MEDIAFOUNDATION
+   #pragma comment (lib, "mfuuid.lib")
+  #endif
  #endif
 #endif
 

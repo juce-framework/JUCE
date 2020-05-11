@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -188,9 +188,9 @@ private:
 
     RangedAudioParameter& parameter;
     ListenerList<Listener> listeners;
-    std::atomic<float> unnormalisedValue{};
-    std::atomic<bool> needsUpdate { true };
-    bool listenersNeedCalling { true }, ignoreParameterChangedCallbacks { false };
+    std::atomic<float> unnormalisedValue { 0.0f };
+    std::atomic<bool> needsUpdate { true }, listenersNeedCalling { true };
+    bool ignoreParameterChangedCallbacks { false };
 };
 
 //==============================================================================
@@ -531,7 +531,7 @@ struct AttachedControlBase  : public AudioProcessorValueTreeState::Listener,
 
     AudioProcessorValueTreeState& state;
     String paramID;
-    float lastValue;
+    std::atomic<float> lastValue;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AttachedControlBase)
 };

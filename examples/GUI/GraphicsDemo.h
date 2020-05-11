@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -489,7 +489,7 @@ public:
     {
         lastSVGLoadTime = Time::getCurrentTime();
 
-        ZipFile icons (createAssetInputStream ("icons.zip"), true);
+        ZipFile icons (createAssetInputStream ("icons.zip").release(), true);
 
         // Load a random SVG file from our embedded icons.zip file.
         const std::unique_ptr<InputStream> svgFileStream (icons.createStreamForEntry (Random::getSystemRandom().nextInt (icons.getNumEntries())));

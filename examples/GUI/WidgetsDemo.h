@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -667,7 +667,7 @@ private:
             if (iconsFromZipFile.size() == 0)
             {
                 // If we've not already done so, load all the images from the zip file..
-                ZipFile icons (createAssetInputStream ("icons.zip"), true);
+                ZipFile icons (createAssetInputStream ("icons.zip").release(), true);
 
                 for (int i = 0; i < icons.getNumEntries(); ++i)
                 {

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -75,7 +75,7 @@ public:
 
         // If this is a Lightpad then set the grid program to be blank
         if (block->getLEDGrid() != nullptr)
-            block->setProgram (new BitmapLEDProgram (*block));
+            block->setProgram (std::make_unique<BitmapLEDProgram>(*block));
 
         // If this is a Lightpad then redraw it at 25Hz
         if (block->getType() == Block::lightPadBlock)
@@ -175,7 +175,11 @@ public:
                         return { static_cast<float> (port.index), static_cast<float> (block->getHeight()) };
                     case e::west:
                         return { 0.0f, static_cast<float> (port.index) };
+                    default:
+                        break;
                 }
+
+                break;
             }
             case 90:
             {
@@ -189,7 +193,11 @@ public:
                         return { static_cast<float> (0.0f - block->getHeight()), static_cast<float> (port.index) };
                     case e::west:
                         return { static_cast<float> (-1.0f - port.index), 0.0f };
+                    default:
+                        break;
                 }
+
+                break;
             }
             case 180:
             {
@@ -203,7 +211,11 @@ public:
                         return { static_cast<float> (-1.0f - port.index), static_cast<float> (0.0f - block->getHeight()) };
                     case e::west:
                         return { 0.0f, static_cast<float> (-1.0f - port.index) };
+                    default:
+                        break;
                 }
+
+                break;
             }
             case 270:
             {
@@ -217,8 +229,15 @@ public:
                         return { static_cast<float> (block->getHeight()), static_cast<float> (-1.0f - port.index) };
                     case e::west:
                         return { static_cast<float> (port.index), 0.0f };
+                    default:
+                        break;
                 }
+
+                break;
             }
+
+            default:
+                break;
         }
 
         return {};
@@ -626,7 +645,7 @@ public:
         auto numBlockComponents = blockComponents.size();
 
         // If there are no currently connected Blocks then display some text on the screen
-        if (numBlockComponents == 0)
+        if (masterBlockComponent == nullptr || numBlockComponents == 0)
         {
             noBlocksLabel.setVisible (true);
             noBlocksLabel.setBounds (0, (getHeight() / 2) - 50, getWidth(), 100);
@@ -776,6 +795,9 @@ private:
     /** Calculates the position and rotation of each connected Block relative to the master Block */
     void positionBlocks (BlockTopology topology)
     {
+        if (masterBlockComponent == nullptr)
+            return;
+
         Array<BlockComponent*> blocksConnectedToMaster;
 
         auto maxDelta = std::numeric_limits<float>::max();
@@ -921,7 +943,11 @@ private:
                         return 90;
                     case edge::west:
                         return 270;
+                    default:
+                        break;
                 }
+
+                break;
             }
             case edge::south:
             {
@@ -935,7 +961,11 @@ private:
                         return 270;
                     case edge::west:
                         return 90;
+                    default:
+                        break;
                 }
+
+                break;
             }
             case edge::east:
             {
@@ -949,7 +979,11 @@ private:
                         return 180;
                     case edge::west:
                         return 0;
+                    default:
+                        break;
                 }
+
+                break;
             }
 
             case edge::west:
@@ -964,8 +998,15 @@ private:
                         return 0;
                     case edge::west:
                         return 180;
+                    default:
+                        break;
                 }
+
+                break;
             }
+
+            default:
+                break;
         }
 
         return 0;

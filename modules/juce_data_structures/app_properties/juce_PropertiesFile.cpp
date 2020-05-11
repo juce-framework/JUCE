@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -29,13 +29,13 @@ namespace juce
 
 namespace PropertyFileConstants
 {
-    JUCE_CONSTEXPR static const int magicNumber            = (int) ByteOrder::makeInt ('P', 'R', 'O', 'P');
-    JUCE_CONSTEXPR static const int magicNumberCompressed  = (int) ByteOrder::makeInt ('C', 'P', 'R', 'P');
+    constexpr static const int magicNumber            = (int) ByteOrder::makeInt ('P', 'R', 'O', 'P');
+    constexpr static const int magicNumberCompressed  = (int) ByteOrder::makeInt ('C', 'P', 'R', 'P');
 
-    JUCE_CONSTEXPR static const char* const fileTag        = "PROPERTIES";
-    JUCE_CONSTEXPR static const char* const valueTag       = "VALUE";
-    JUCE_CONSTEXPR static const char* const nameAttribute  = "name";
-    JUCE_CONSTEXPR static const char* const valueAttribute = "val";
+    constexpr static const char* const fileTag        = "PROPERTIES";
+    constexpr static const char* const valueTag       = "VALUE";
+    constexpr static const char* const nameAttribute  = "name";
+    constexpr static const char* const valueAttribute = "val";
 }
 
 //==============================================================================

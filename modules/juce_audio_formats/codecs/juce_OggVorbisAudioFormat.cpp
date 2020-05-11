@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -43,7 +43,9 @@ namespace OggVorbisNamespace
   #pragma clang diagnostic push
   #pragma clang diagnostic ignored "-Wconversion"
   #pragma clang diagnostic ignored "-Wshadow"
+  #pragma clang diagnostic ignored "-Wfloat-conversion"
   #pragma clang diagnostic ignored "-Wdeprecated-register"
+  #pragma clang diagnostic ignored "-Wswitch-enum"
   #if __has_warning("-Wzero-as-null-pointer-constant")
    #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
   #endif
@@ -52,7 +54,11 @@ namespace OggVorbisNamespace
   #pragma GCC diagnostic ignored "-Wconversion"
   #pragma GCC diagnostic ignored "-Wshadow"
   #pragma GCC diagnostic ignored "-Wsign-conversion"
+  #pragma GCC diagnostic ignored "-Wfloat-conversion"
   #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+  #pragma GCC diagnostic ignored "-Wswitch-enum"
+  #pragma GCC diagnostic ignored "-Wswitch-default"
+  #pragma GCC diagnostic ignored "-Wredundant-decls"
  #endif
 
  #include "oggvorbis/vorbisenc.h"
@@ -208,7 +214,7 @@ public:
                 while (numToRead > 0)
                 {
                     float** dataIn = nullptr;
-                    auto samps = ov_read_float (&ovFile, &dataIn, numToRead, &bitStream);
+                    auto samps = static_cast<int> (ov_read_float (&ovFile, &dataIn, numToRead, &bitStream));
 
                     if (samps <= 0)
                         break;
@@ -490,9 +496,9 @@ StringArray OggVorbisAudioFormat::getQualityOptions()
 
 int OggVorbisAudioFormat::estimateOggFileQuality (const File& source)
 {
-    if (auto* in = source.createInputStream())
+    if (auto in = source.createInputStream())
     {
-        if (auto r = std::unique_ptr<AudioFormatReader> (createReaderFor (in, true)))
+        if (auto r = std::unique_ptr<AudioFormatReader> (createReaderFor (in.release(), true)))
         {
             auto lengthSecs = r->lengthInSamples / r->sampleRate;
             auto approxBitsPerSecond = (int) (source.getSize() * 8 / lengthSecs);

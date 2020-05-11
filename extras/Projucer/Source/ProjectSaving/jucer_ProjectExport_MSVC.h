@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -726,15 +726,10 @@ public:
 
         String getProjectType() const
         {
-            switch (getTargetFileType())
-            {
-                case executable:
-                    return "Application";
-                case staticLibrary:
-                    return "StaticLibrary";
-                default:
-                    break;
-            }
+            auto targetFileType = getTargetFileType();
+
+            if (targetFileType == executable)     return "Application";
+            if (targetFileType == staticLibrary)  return "StaticLibrary";
 
             return "DynamicLibrary";
         }
@@ -977,25 +972,17 @@ public:
         {
             auto fileType = getTargetFileType();
 
-            switch (fileType)
+            if (fileType == executable)          return ".exe";
+            if (fileType == staticLibrary)       return ".lib";
+            if (fileType == sharedLibraryOrDLL)  return ".dll";
+
+            if (fileType == pluginBundle)
             {
-                case executable:            return ".exe";
-                case staticLibrary:         return ".lib";
-                case sharedLibraryOrDLL:    return ".dll";
+                if (type == VST3PlugIn)  return ".vst3";
+                if (type == AAXPlugIn)   return ".aaxdll";
+                if (type == RTASPlugIn)  return ".dpm";
 
-                case pluginBundle:
-                    switch (type)
-                    {
-                        case VST3PlugIn:    return ".vst3";
-                        case AAXPlugIn:     return ".aaxdll";
-                        case RTASPlugIn:    return ".dpm";
-                        default:            break;
-                    }
-
-                    return ".dll";
-
-                default:
-                    break;
+                return ".dll";
             }
 
             return {};
@@ -1150,22 +1137,15 @@ public:
 
         void addExtraPreprocessorDefines (StringPairArray& defines) const
         {
-            switch (type)
+            if (type == AAXPlugIn)
             {
-            case AAXPlugIn:
-                {
-                    auto aaxLibsFolder = RelativePath (owner.getAAXPathString(), RelativePath::projectFolder).getChildFile ("Libs");
-                    defines.set ("JucePlugin_AAXLibs_path", createRebasedPath (aaxLibsFolder));
-                }
-                break;
-            case RTASPlugIn:
-                {
-                    RelativePath rtasFolder (owner.getRTASPathString(), RelativePath::projectFolder);
-                    defines.set ("JucePlugin_WinBag_path", createRebasedPath (rtasFolder.getChildFile ("WinBag")));
-                }
-                break;
-            default:
-                break;
+                auto aaxLibsFolder = RelativePath (owner.getAAXPathString(), RelativePath::projectFolder).getChildFile ("Libs");
+                defines.set ("JucePlugin_AAXLibs_path", createRebasedPath (aaxLibsFolder));
+            }
+            else if (type == RTASPlugIn)
+            {
+                RelativePath rtasFolder (owner.getRTASPathString(), RelativePath::projectFolder);
+                defines.set ("JucePlugin_WinBag_path", createRebasedPath (rtasFolder.getChildFile ("WinBag")));
             }
         }
 
@@ -1353,6 +1333,9 @@ public:
         case ProjectType::Target::UnityPlugIn:
         case ProjectType::Target::DynamicLibrary:
             return true;
+        case ProjectType::Target::AudioUnitPlugIn:
+        case ProjectType::Target::AudioUnitv3PlugIn:
+        case ProjectType::Target::unspecified:
         default:
             break;
         }
@@ -1412,11 +1395,8 @@ public:
 
         callForAllSupportedTargets ([this] (ProjectType::Target::Type targetType)
                                     {
-                                        if (MSVCTargetBase* target = new MSVCTargetBase (targetType, *this))
-                                        {
-                                            if (targetType != ProjectType::Target::AggregateTarget)
-                                                targets.add (target);
-                                        }
+                                        if (targetType != ProjectType::Target::AggregateTarget)
+                                            targets.add (new MSVCTargetBase (targetType, *this));
                                     });
 
         // If you hit this assert, you tried to generate a project for an exporter
@@ -1463,20 +1443,15 @@ public:
         }
     }
 
-    static void writeRCValue (MemoryOutputStream& mo, const String& n, const String& value)
-    {
-        if (value.isNotEmpty())
-            mo << "      VALUE \"" << n << "\",  \""
-            << CppTokeniserFunctions::addEscapeChars (value) << "\\0\"" << newLine;
-    }
-
     static void createRCFile (const Project& p, const File& iconFile, const File& rcFile)
     {
         auto version = p.getVersionString();
 
         MemoryOutputStream mo;
 
-        mo << "#ifdef JUCE_USER_DEFINED_RC_FILE" << newLine
+        mo << "#pragma code_page(65001)" << newLine
+           << newLine
+           << "#ifdef JUCE_USER_DEFINED_RC_FILE" << newLine
            << " #include JUCE_USER_DEFINED_RC_FILE" << newLine
            << "#else" << newLine
            << newLine
@@ -1492,12 +1467,19 @@ public:
            << "    BLOCK \"040904E4\"" << newLine
            << "    BEGIN" << newLine;
 
-        writeRCValue (mo, "CompanyName",     p.getCompanyNameString());
-        writeRCValue (mo, "LegalCopyright",  p.getCompanyCopyrightString());
-        writeRCValue (mo, "FileDescription", p.getProjectNameString());
-        writeRCValue (mo, "FileVersion",     version);
-        writeRCValue (mo, "ProductName",     p.getProjectNameString());
-        writeRCValue (mo, "ProductVersion",  version);
+        auto writeRCValue = [&mo] (const String& n, const String& value)
+        {
+            if (value.isNotEmpty())
+                mo << "      VALUE \"" << n << "\",  \""
+                   << value.replace ("\"", "\"\"") << "\\0\"" << newLine;
+        };
+
+        writeRCValue ("CompanyName",     p.getCompanyNameString());
+        writeRCValue ("LegalCopyright",  p.getCompanyCopyrightString());
+        writeRCValue ("FileDescription", p.getProjectNameString());
+        writeRCValue ("FileVersion",     version);
+        writeRCValue ("ProductName",     p.getProjectNameString());
+        writeRCValue ("ProductVersion",  version);
 
         mo << "    END" << newLine
            << "  END" << newLine

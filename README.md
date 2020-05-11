@@ -9,10 +9,10 @@ Code::Blocks, CLion and Linux Makefiles as well as containing a source code edit
 live-coding engine which can be used for rapid prototyping.
 
 ## Getting Started
-The JUCE repository contains a [master](https://github.com/weareroli/JUCE/tree/master)
-and [develop](https://github.com/weareroli/JUCE/tree/develop) branch. The develop branch
+The JUCE repository contains a [master](https://github.com/juce-framework/JUCE/tree/master)
+and [develop](https://github.com/juce-framework/JUCE/tree/develop) branch. The develop branch
 contains the latest bugfixes and features and is periodically merged into the master
-branch in stable [tagged releases](https://github.com/WeAreROLI/JUCE/releases)
+branch in stable [tagged releases](https://github.com/juce-framework/JUCE/releases)
 (the latest release containing pre-built binaries can be also downloaded from the
 [JUCE website](https://shop.juce.com/get-juce)).
 

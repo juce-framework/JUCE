@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -369,7 +369,7 @@ public:
         bottomFrontCentre   = 63, /**< Bottom Front Centre (Bfc) */
         bottomFrontRight    = 64, /**< Bottom Front Right (Bfr)  */
 
-        proxymityLeft       = 65, /**< Proximity Left (Pl)  */
+        proximityLeft       = 65, /**< Proximity Left (Pl)  */
         proximityRight      = 66, /**< Proximity Right (Pr) */
 
         bottomSideLeft      = 67, /**< Bottom Side Left (Bsl)   */

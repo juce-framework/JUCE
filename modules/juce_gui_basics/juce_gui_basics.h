@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -36,7 +36,7 @@
 
   ID:                 juce_gui_basics
   vendor:             juce
-  version:            5.4.6
+  version:            5.4.7
   name:               JUCE GUI core classes
   description:        Basic user-interface components and related classes.
   website:            http://www.juce.com/juce
@@ -159,9 +159,7 @@ namespace juce
     class Displays;
 
     class FlexBox;
-    #if JUCE_HAS_CONSTEXPR
-     class Grid;
-    #endif
+    class Grid;
 }
 
 #include "mouse/juce_MouseCursor.h"
@@ -305,7 +303,5 @@ namespace juce
 #include "layout/juce_FlexItem.h"
 #include "layout/juce_FlexBox.h"
 
-#if JUCE_HAS_CONSTEXPR
- #include "layout/juce_GridItem.h"
- #include "layout/juce_Grid.h"
-#endif
+#include "layout/juce_GridItem.h"
+#include "layout/juce_Grid.h"

@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -125,8 +125,8 @@ namespace DragAndDropHelpers
     class JuceDataObject  : public ComBaseClassHelper <IDataObject>
     {
     public:
-        JuceDataObject (JuceDropSource* s, const FORMATETC* f, const STGMEDIUM* m)
-            : dropSource (s), format (f), medium (m)
+        JuceDataObject (const FORMATETC* f, const STGMEDIUM* m)
+            : format (f), medium (m)
         {
         }
 
@@ -203,7 +203,6 @@ namespace DragAndDropHelpers
         JUCE_COMRESULT EnumDAdvise (IEnumSTATDATA**)                         { return OLE_E_ADVISENOTSUPPORTED; }
 
     private:
-        JuceDropSource* const dropSource;
         const FORMATETC* const format;
         const STGMEDIUM* const medium;
 
@@ -255,7 +254,7 @@ namespace DragAndDropHelpers
             OleInitialize (0);
 
             auto source = new JuceDropSource();
-            auto data = new JuceDataObject (source, &format, &medium);
+            auto data = new JuceDataObject (&format, &medium);
 
             DWORD effect;
             DoDragDrop (data, source, whatToDo, &effect);

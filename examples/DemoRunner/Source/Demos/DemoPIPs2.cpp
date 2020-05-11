@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -46,9 +46,7 @@
 #include "../../../GUI/FlexBoxDemo.h"
 #include "../../../GUI/FontsDemo.h"
 #include "../../../GUI/GraphicsDemo.h"
-#if JUCE_HAS_CONSTEXPR
- #include "../../../GUI/GridDemo.h"
-#endif
+#include "../../../GUI/GridDemo.h"
 #include "../../../GUI/ImagesDemo.h"
 #include "../../../GUI/KeyMappingsDemo.h"
 #include "../../../GUI/LookAndFeelDemo.h"
@@ -85,9 +83,7 @@ void registerDemos_Two() noexcept
     REGISTER_DEMO (FlexBoxDemo,               GUI, false)
     REGISTER_DEMO (FontsDemo,                 GUI, false)
     REGISTER_DEMO (GraphicsDemo,              GUI, false)
-   #if JUCE_HAS_CONSTEXPR
     REGISTER_DEMO (GridDemo,                  GUI, false)
-   #endif
     REGISTER_DEMO (ImagesDemo,                GUI, false)
     REGISTER_DEMO (KeyMappingsDemo,           GUI, false)
     REGISTER_DEMO (LookAndFeelDemo,           GUI, false)
