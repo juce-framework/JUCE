@@ -125,7 +125,7 @@ void DryWetMixer<SampleType>::update()
             break;
 
         case MixingRule::linear:
-            dryValue  = static_cast<SampleType> (1.0) - mix;
+            dryValue = static_cast<SampleType> (1.0) - mix;
             wetValue = mix;
             break;
 
