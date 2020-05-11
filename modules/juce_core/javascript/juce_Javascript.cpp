@@ -1777,7 +1777,8 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         {
             auto s = getString (a, 0).trim();
 
-            return s.startsWith("0x") ? s.substring(2).getHexValue64() : s.getLargeIntValue();
+            return (s[0] == '0' && !getInt(a, 1)) ? (s[1] == 'x' ? s.substring(2).getHexValue64() : getOctalValue(s))
+                : s.getLargeIntValue();
         }
     };
 
