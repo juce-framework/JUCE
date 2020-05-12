@@ -328,7 +328,8 @@ private:
     void* contextToShareWith = nullptr;
     OpenGLVersion versionRequired = defaultGLVersion;
     size_t imageCacheMaxSize = 8 * 1024 * 1024;
-    bool renderComponents = true, useMultisampling = false, continuousRepaint = false, overrideCanAttach = false;
+    bool renderComponents = true, useMultisampling = false, overrideCanAttach = false;
+    std::atomic<bool> continuousRepaint { false };
     TextureMagnificationFilter texMagFilter = linear;
 
     //==============================================================================
