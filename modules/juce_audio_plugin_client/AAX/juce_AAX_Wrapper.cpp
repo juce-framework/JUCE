@@ -35,7 +35,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
                                      "-Wshift-sign-overflow",
                                      "-Wpragma-pack",
                                      "-Wzero-as-null-pointer-constant",
-                                     "-Winconsistent-missing-destructor-override")
+                                     "-Winconsistent-missing-destructor-override",
+                                     "-Wfour-char-constants")
 
 #include <AAX_Version.h>
 
@@ -71,6 +72,8 @@ static_assert (AAX_SDK_CURRENT_REVISION >= AAX_SDK_2p3p0_REVISION, "JUCE require
 
 JUCE_END_IGNORE_WARNINGS_MSVC
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wfour-char-constants")
 
 #if JUCE_WINDOWS
  #ifndef JucePlugin_AAXLibs_path
@@ -2343,6 +2346,8 @@ AAX_Result JUCE_CDECL GetEffectDescriptions (AAX_ICollection* collection)
 
     return AAX_ERROR_NULL_OBJECT;
 }
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
 #if _MSC_VER || JUCE_MINGW

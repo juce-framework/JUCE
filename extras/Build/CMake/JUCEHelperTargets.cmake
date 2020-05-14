@@ -13,7 +13,7 @@ elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") OR (CMAKE_CXX_COMPILER_ID STREQU
         -Wzero-as-null-pointer-constant -Wcast-align
         -Winconsistent-missing-destructor-override -Wshift-sign-overflow
         -Wnullable-to-nonnull-conversion -Wno-missing-field-initializers
-        -Wno-ignored-qualifiers -Wswitch-enum)
+        -Wno-ignored-qualifiers -Wswitch-enum -Wpedantic)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(juce_recommended_warning_flags INTERFACE
         -Wall -Wextra -Wstrict-aliasing -Wuninitialized -Wunused-parameter
@@ -21,7 +21,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         -Wunreachable-code -Wzero-as-null-pointer-constant -Wcast-align
         -Wno-implicit-fallthrough -Wno-maybe-uninitialized
         -Wno-missing-field-initializers -Wno-ignored-qualifiers -Wswitch-enum
-        -Wredundant-decls)
+        -Wredundant-decls -Wpedantic)
 
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "7.0.0")
         target_compile_options(juce_recommended_warning_flags INTERFACE "-Wno-strict-overflow")
