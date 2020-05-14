@@ -1,7 +1,4 @@
-# CMake Template Projects
-
-This directory contains project templates which should help you get started using JUCE's CMake
-support.
+# The JUCE CMake API
 
 ## System Requirements
 
@@ -27,9 +24,7 @@ call to `find_package`.
 Once your project is set up, you can generate a build tree for it in the normal way. To get started,
 you might invoke CMake like this, from the new directory you created.
 
-```
-cmake -Bbuild (-GgeneratorName) (-DJUCE_BUILD_EXTRAS=ON) (-DJUCE_BUILD_EXAMPLES=ON)
-```
+    cmake -Bbuild (-GgeneratorName) (-DJUCE_BUILD_EXTRAS=ON) (-DJUCE_BUILD_EXAMPLES=ON)
 
 This will create a build tree in a directory named 'build', using the CMakeLists in the current
 working directory, using the default generator (makefiles on mac/linux, and the most recent Visual
@@ -41,9 +36,7 @@ these options are on, so you probably won't want to include them most of the tim
 
 Then, to build the project:
 
-```
-cmake --build build (--target targetNameFromCMakeLists) (--config Release/Debug/...)
-```
+    cmake --build build (--target targetNameFromCMakeLists) (--config Release/Debug/...)
 
 This tells cmake to build the target named `targetNameFromCMakeLists`, in the specified
 configuration, using the appropriate tool. Of course, if you generated makefiles or ninja files, you
@@ -58,9 +51,7 @@ fail to run certain parts of the build, such as compiling icons and processing t
 default, CMake will build for the same system that originally configured the project, so to enable
 cross-compilation for iOS, a few extra flags must be passed to the initial CMake invocation:
 
-```
-cmake -Bbuild-ios -GXcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_DEPLOYMENT_TARGET=9.3
-```
+    cmake -Bbuild-ios -GXcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_DEPLOYMENT_TARGET=9.3
 
 Here we create a build tree in the directory named 'build-ios', using the Xcode generator. The
 `-DCMAKE_SYSTEM_NAME=iOS` option tells CMake to enable cross-compiling for iOS. The
@@ -70,9 +61,7 @@ despite the 'OSX' in the variable name!).
 Once the project has generated, we can open it as normal in Xcode (look for the project file in the
 build directory). Alternatively, to build from the command-line, we could run this command:
 
-```
-cmake --build build-ios --target <targetName> -- -sdk iphonesimulator
-```
+    cmake --build build-ios --target <targetName> -- -sdk iphonesimulator
 
 Here, we're building the target named `<targetName>` from the build tree in the directory
 `build-ios`. All the arguments after `--` are ignored by CMake, and are passed through to the
@@ -83,11 +72,9 @@ require special code signing.
 If we wanted to build for a real device, we would need to pass some extra signing details to the
 initial CMake configuration command:
 
-```
-cmake -Bbuild-ios -GXcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_DEPLOYMENT_TARGET=9.3 \
-    -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY="iPhone Developer"
-    -DCMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM=<10 character id>
-```
+    cmake -Bbuild-ios -GXcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_DEPLOYMENT_TARGET=9.3 \
+        -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY="iPhone Developer"
+        -DCMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM=<10 character id>
 
 The `CODE_SIGN_IDENTITY` is the kind of certificate you want to use (iPhone Developer is appropriate
 for development) and `DEVELOPMENT_TEAM` is the 10-character ID that can be found by opening the
@@ -97,29 +84,25 @@ info field.
 When building the target, you may also need to tell Xcode that it can automatically update
 provisioning profiles, which is achieved by passing the `-allowProvisioningUpdates` flag:
 
-```
-cmake --build build-ios --target <targetName> -- -allowProvisioningUpdates
-```
+    cmake --build build-ios --target <targetName> -- -allowProvisioningUpdates
 
 ### A note about compile definitions
 
 Module options and plugin options that would previously have been set in the Projucer can be set on
 a target-by-target basis in CMake, via `target_compile_definitions`. To find the options exposed by
 a particular module, check its module header for sections with the following structure:
-```
-/** Config: NAME_OF_KEY
-    Docs go here...
-*/
-#ifndef NAME_OF_KEY
- #define NAME_OF_KEY ...
-#edif
-```
+
+    /** Config: NAME_OF_KEY
+        Docs go here...
+    */
+    #ifndef NAME_OF_KEY
+     #define NAME_OF_KEY ...
+    #endif
 
 To override the default config option, use the following CMake code, replacing `<value>` as
 appropriate:
-```
-target_compile_definitions(my_target PUBLIC NAME_OF_KEY=<value>)
-```
+
+    target_compile_definitions(my_target PUBLIC NAME_OF_KEY=<value>)
 
 The `JucePlugin_PreferredChannelConfig` preprocessor definition for plugins is difficult to specify
 in a portable way due to its use of curly braces, which may be misinterpreted in Linux/Mac builds
@@ -130,11 +113,9 @@ the newer buses API to specify the desired plugin inputs and outputs.
 
 ### `juce_add_<target>`
 
-```
-juce_add_gui_app(<target> [KEY value]...)
-juce_add_console_app(<target> [KEY value]...)
-juce_add_plugin(<target> [KEY value]...)
-```
+    juce_add_gui_app(<target> [KEY value]...)
+    juce_add_console_app(<target> [KEY value]...)
+    juce_add_plugin(<target> [KEY value]...)
 
 `juce_add_gui_app` and `juce_add_console_app` add an executable target with name `<target>`.
 `juce_add_plugin` adds a 'shared code' static library target with name `<target>`, along with extra
@@ -447,12 +428,10 @@ attributes directly to these creation functions, rather than adding them later.
 
 ### `juce_add_binary_data`
 
-```
-juce_add_binary_data(<name>
-    [HEADER_NAME ...]
-    [NAMESPACE ...]
-    SOURCES ...)
-```
+    juce_add_binary_data(<name>
+        [HEADER_NAME ...]
+        [NAMESPACE ...]
+        SOURCES ...)
 
 Create a static library that embeds the contents of the files passed as arguments to this function.
 Adds a library target called `<name>` which can be linked into other targets using
@@ -471,18 +450,14 @@ and embedded in the resulting static library. This library can be linked as norm
 
 ### `juce_add_bundle_resources_directory`
 
-```
-juce_add_bundle_resources_directory(<target> <folder>)
-```
+    juce_add_bundle_resources_directory(<target> <folder>)
 
 Copy the entire directory at the location `<folder>` into an Apple bundle's resource directory, i.e.
 the `Resources` directory for a macOS bundle, and the top-level directory of an iOS bundle.
 
 ### `juce_generate_juce_header`
 
-```
-juce_generate_juce_header(<target>)
-```
+    juce_generate_juce_header(<target>)
 
 Introspects the JUCE modules that have been linked to `<target>` and generates a `JuceHeader.h`
 which contains `#include` statements for each of the module headers. This header also contains an
@@ -495,10 +470,8 @@ require them.
 
 ### `juce_set_<kind>_sdk_path`
 
-```
-juce_set_aax_sdk_path(<absolute path>)
-juce_set_vst2_sdk_path(<absolute path>)
-```
+    juce_set_aax_sdk_path(<absolute path>)
+    juce_set_vst2_sdk_path(<absolute path>)
 
 Call these functions from your CMakeLists to set up your local AAX and/or VST2 SDKs. These functions
 should be called *before* adding any targets that may depend on the AAX/VST2 SDKs (plugin
@@ -506,10 +479,8 @@ hosts, VST2/AAX plugins etc.).
 
 ### `juce_add_module`
 
-```
-juce_add_module(<path to module>)
-juce_add_modules(<names of module>...)
-```
+    juce_add_module(<path to module>)
+    juce_add_modules(<names of module>...)
 
 `juce_add_module` adds a library target for the JUCE module located at the provided path. `<path>`
 must be the path to a module directory (e.g. /Users/me/JUCE/modules/juce_core). This will add an
@@ -534,9 +505,7 @@ CMakeLists in the `modules` directory.
 
 ### `juce_add_pip`
 
-```
-juce_add_pip(<header>)
-```
+    juce_add_pip(<header>)
 
 This function parses the PIP metadata block in the provided header, and adds appropriate build
 targets for a console app, GUI app, or audio plugin. For audio plugin targets, it builds as many
@@ -551,37 +520,29 @@ your target.
 
 ### `juce_disable_default_flags`
 
-```
-juce_disable_default_flags()
-```
+    juce_disable_default_flags()
 
 This function sets the `CMAKE_<LANG>_FLAGS_<MODE>` to empty in the current directory and below,
 allowing alternative optimisation/debug flags to be supplied without conflicting with the
 CMake-supplied defaults.
 
-### `juce::juce_recommended_warning_flags
+### `juce::juce_recommended_warning_flags`
 
-```
-target_link_libraries(myTarget PRIVATE juce::juce_recommended_warning_flags)
-```
+    target_link_libraries(myTarget PRIVATE juce::juce_recommended_warning_flags)
 
 This is a target which can be linked to other targets using `target_link_libraries`, in order to
 enable the recommended JUCE warnings when building them.
 
-### `juce::juce_recommended_config_flags
+### `juce::juce_recommended_config_flags`
 
-```
-target_link_libraries(myTarget PRIVATE juce::juce_recommended_config_flags)
-```
+    target_link_libraries(myTarget PRIVATE juce::juce_recommended_config_flags)
 
 This is a target which can be linked to other targets using `target_link_libraries`, in order to
 enable the recommended JUCE optimisation and debug flags.
 
-### `juce::juce_recommended_lto_flags
+### `juce::juce_recommended_lto_flags`
 
-```
-target_link_libraries(myTarget PRIVATE juce::juce_recommended_lto_flags)
-```
+    target_link_libraries(myTarget PRIVATE juce::juce_recommended_lto_flags)
 
 This is a target which can be linked to other targets using `target_link_libraries`, in order to
 enable the recommended JUCE link time optimisation settings.
