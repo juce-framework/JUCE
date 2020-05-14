@@ -1634,6 +1634,8 @@ function(_juce_set_fallback_properties target)
     _juce_set_property_if_not_set(${target} DISABLE_AAX_BYPASS FALSE)
     _juce_set_property_if_not_set(${target} DISABLE_AAX_MULTI_MONO FALSE)
 
+    _juce_set_property_if_not_set(${target} PLUGINHOST_AU FALSE)
+
     get_target_property(bundle_id ${target} JUCE_BUNDLE_ID)
     _juce_set_property_if_not_set(${target} AAX_IDENTIFIER ${bundle_id})
 
@@ -1824,6 +1826,7 @@ function(_juce_initialise_target target)
         AU_EXPORT_PREFIX
         AU_SANDBOX_SAFE
         AAX_CATEGORY
+        PLUGINHOST_AU                   # Set this true if you want to host AU plugins
 
         VST_COPY_DIR
         VST3_COPY_DIR
@@ -1893,6 +1896,22 @@ function(_juce_initialise_target target)
     target_include_directories(${target} PRIVATE
         $<TARGET_PROPERTY:${target},JUCE_GENERATED_SOURCES_DIRECTORY>)
     target_link_libraries(${target} PUBLIC $<$<TARGET_EXISTS:juce_vst2_sdk>:juce_vst2_sdk>)
+
+    get_target_property(is_pluginhost_au ${target} JUCE_PLUGINHOST_AU)
+
+    if(is_pluginhost_au)
+        target_compile_definitions(${target} PUBLIC JUCE_PLUGINHOST_AU=1)
+
+        if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
+            find_library(AU_CoreAudioKit CoreAudioKit REQUIRED)
+            target_link_libraries(${target} PRIVATE ${AU_CoreAudioKit})
+        endif()
+
+        if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+            find_library(AU_AudioUnit AudioUnit REQUIRED)
+            target_link_libraries(${target} PRIVATE ${AU_AudioUnit})
+        endif()
+    endif()
 
     _juce_write_generate_time_info(${target})
     _juce_link_optional_libraries(${target})

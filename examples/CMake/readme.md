@@ -399,6 +399,12 @@ attributes directly to these creation functions, rather than adding them later.
     `AAX_ePlugInCategory_SWGenerators`, `AAX_ePlugInCategory_WrappedPlugin`,
     `AAX_ePlugInCategory_Effect`
 
+- `PLUGINHOST_AU`
+  - May be either TRUE or FALSE (defaults to FALSE). If TRUE, will add the preprocessor definition
+    `JUCE_PLUGINHOST_AU=1` to the new target, and will link the macOS frameworks necessary for
+    hosting plugins. Using this parameter should be preferred over using
+    `target_compile_definitions` to manually set the `JUCE_PLUGINHOST_AU` preprocessor definition.
+
 - `COPY_PLUGIN_AFTER_BUILD`
   - Whether or not to install the plugin to the current system after building. False by default.
     If you want all of the plugins in a subdirectory to be installed automatically after building,
