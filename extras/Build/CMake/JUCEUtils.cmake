@@ -1340,6 +1340,10 @@ function(_juce_link_plugin_wrapper shared_code_target kind)
         add_library(${target_name} MODULE)
     endif()
 
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        target_link_libraries(${target_name} PRIVATE "-Wl,--no-undefined")
+    endif()
+
     # We re-export the shared code's private include dirs, because the wrapper targets need to
     # see the module headers. We don't just link publicly, because that would introduce
     # conflicting macro definitions.
