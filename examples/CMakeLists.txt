@@ -18,7 +18,7 @@ add_subdirectory(CMake)
 add_subdirectory(DemoRunner)
 
 function(_juce_add_pips)
-    file(GLOB_RECURSE headers
+    file(GLOB headers
         CONFIGURE_DEPENDS LIST_DIRECTORIES false
         "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 
