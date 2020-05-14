@@ -147,6 +147,9 @@ function(_juce_set_default_properties)
 
         set_property(GLOBAL PROPERTY JUCE_VST3_COPY_DIR "${prefix}/VST3")
         set_property(GLOBAL PROPERTY JUCE_AAX_COPY_DIR  "${prefix}/Avid/Audio/Plug-Ins")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        set_property(GLOBAL PROPERTY JUCE_VST_COPY_DIR  "$ENV{HOME}/.vst")
+        set_property(GLOBAL PROPERTY JUCE_VST3_COPY_DIR "$ENV{HOME}/.vst3")
     endif()
 endfunction()
 
