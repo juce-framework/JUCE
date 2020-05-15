@@ -30,14 +30,17 @@ For further help getting started, please refer to the JUCE
 
 ## Minimum System Requirements
 #### Building JUCE Projects
-- __macOS__: macOS 10.11 and Xcode 7.3.1
+- __macOS/iOS__: macOS 10.11 and Xcode 7.3.1
 - __Windows__: Windows 8.1 and Visual Studio 2015 64-bit
 - __Linux__: GCC 4.8
+- __Android__: Android Studio on Windows, macOS or Linux
 
 #### Deployment Targets
 - __macOS__: macOS 10.7
 - __Windows__: Windows Vista
 - __Linux__: Mainstream Linux distributions
+- __iOS__: iOS 9.0
+- __Android__: Jelly Bean (API 16)
 
 ## Contributing
 For bug reports and features requests, please visit the [JUCE Forum](https://forum.juce.com/) -
