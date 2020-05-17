@@ -63,15 +63,15 @@ public:
     void reset() noexcept;
 
     /** Sets the cutoff frequency of the filter.
-        @param newValue cutoff frequency in Hz */
+        @param newCutoff cutoff frequency in Hz */
     void setCutoffFrequencyHz (SampleType newCutoff) noexcept;
 
     /** Sets the resonance of the filter.
-        @param newValue a value between 0 and 1; higher values increase the resonance and can result in self oscillation! */
+        @param newResonance a value between 0 and 1; higher values increase the resonance and can result in self oscillation! */
     void setResonance (SampleType newResonance) noexcept;
 
     /** Sets the amount of saturation in the filter.
-        @param newValue saturation amount; it can be any number greater than or equal to one. Higher values result in more distortion.*/
+        @param newDrive saturation amount; it can be any number greater than or equal to one. Higher values result in more distortion.*/
     void setDrive (SampleType newDrive) noexcept;
 
     //==============================================================================
