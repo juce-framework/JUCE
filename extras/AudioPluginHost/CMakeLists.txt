@@ -17,7 +17,8 @@
 juce_add_gui_app(AudioPluginHost
     BUNDLE_ID                       com.juce.pluginhost
     ICON_BIG                        "${CMAKE_CURRENT_SOURCE_DIR}/Source/JUCEAppIcon.png"
-    MICROPHONE_PERMISSION_ENABLED   TRUE)
+    MICROPHONE_PERMISSION_ENABLED   TRUE
+    PLUGINHOST_AU                   TRUE)
 
 juce_generate_juce_header(AudioPluginHost)
 
@@ -33,7 +34,6 @@ target_compile_definitions(AudioPluginHost PRIVATE
     PIP_JUCE_EXAMPLES_DIRECTORY_STRING="${JUCE_SOURCE_DIR}/examples"
     JUCE_ALSA=1
     JUCE_DIRECTSOUND=1
-    JUCE_PLUGINHOST_AU=1
     JUCE_PLUGINHOST_LADSPA=1
     JUCE_PLUGINHOST_VST=0
     JUCE_PLUGINHOST_VST3=1
@@ -51,8 +51,9 @@ target_link_libraries(AudioPluginHost PRIVATE
     juce::juce_cryptography
     juce::juce_dsp
     juce::juce_opengl
-    juce::juce_video)
+    juce::juce_video
+    juce::juce_recommended_config_flags
+    juce::juce_recommended_lto_flags
+    juce::juce_recommended_warning_flags)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-    juce_add_bundle_resources_directory(AudioPluginHost ../../examples/Assets)
-endif()
+juce_add_bundle_resources_directory(AudioPluginHost ../../examples/Assets)

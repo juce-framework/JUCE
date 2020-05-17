@@ -51,7 +51,7 @@ public:
 
         renderContext = wglCreateContext (dc);
 
-        if (renderContext != 0)
+        if (renderContext != nullptr)
         {
             makeActive();
             initialiseGLExtensions();
@@ -100,7 +100,7 @@ public:
 
     void shutdownOnRenderThread()           { deactivateCurrentContext(); context = nullptr; }
 
-    static void deactivateCurrentContext()  { wglMakeCurrent (0, 0); }
+    static void deactivateCurrentContext()  { wglMakeCurrent (nullptr, nullptr); }
     bool makeActive() const noexcept        { return isActive() || wglMakeCurrent (dc, renderContext) != FALSE; }
     bool isActive() const noexcept          { return wglGetCurrentContext() == renderContext; }
     void swapBuffers() const noexcept       { SwapBuffers (dc); }
@@ -124,7 +124,7 @@ public:
             if (! approximatelyEqual (nativeScaleFactor, 1.0))
                 bounds = (bounds.toDouble() * nativeScaleFactor).toNearestInt();
 
-            SetWindowPos ((HWND) nativeWindow->getNativeHandle(), 0,
+            SetWindowPos ((HWND) nativeWindow->getNativeHandle(), nullptr,
                           bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
                           SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
         }
@@ -232,10 +232,10 @@ private:
 
     void deleteRenderContext()
     {
-        if (renderContext != 0)
+        if (renderContext != nullptr)
         {
             wglDeleteContext (renderContext);
-            renderContext = 0;
+            renderContext = nullptr;
         }
     }
 
@@ -322,7 +322,7 @@ private:
 //==============================================================================
 bool OpenGLHelpers::isContextActive()
 {
-    return wglGetCurrentContext() != 0;
+    return wglGetCurrentContext() != nullptr;
 }
 
 } // namespace juce

@@ -31,7 +31,7 @@ namespace
     static const String canvasStateOSCAddress = "/juce/nfd/canvasState";
     static const String newClientOSCAddress   = "/juce/nfd/newClient";
     static const String userInputOSCAddress   = "/juce/nfd/userInput";
-};
+}
 
 #include "SharedCanvas.h"
 #include "SlaveComponent.h"
@@ -84,7 +84,7 @@ public:
     //==============================================================================
     struct MainWindow    : public DocumentWindow
     {
-        MainWindow (PropertiesFile& props)
+        explicit MainWindow (PropertiesFile& props)
             : DocumentWindow ("JUCE Networked Graphics Demo - Master", Colours::white, DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar (true);
@@ -114,7 +114,7 @@ public:
            #endif
         }
 
-        ~MainWindow()
+        ~MainWindow() override
         {
             glContext.detach();
         }

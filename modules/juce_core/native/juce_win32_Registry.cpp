@@ -40,8 +40,8 @@ struct RegistryKeyWrapper
             DWORD result;
 
             if (createForWriting)
-                RegCreateKeyEx (rootKey, wideCharName, 0, 0, REG_OPTION_NON_VOLATILE,
-                                KEY_WRITE | KEY_QUERY_VALUE | wow64Flags, 0, &key, &result);
+                RegCreateKeyEx (rootKey, wideCharName, 0, nullptr, REG_OPTION_NON_VOLATILE,
+                                KEY_WRITE | KEY_QUERY_VALUE | wow64Flags, nullptr, &key, &result);
             else
                 RegOpenKeyEx (rootKey, wideCharName, 0, KEY_READ | wow64Flags, &key);
         }
@@ -65,7 +65,7 @@ struct RegistryKeyWrapper
         if (name.startsWithIgnoreCase ("HKU\\"))                return HKEY_USERS;
 
         jassertfalse; // The name starts with an unknown root key (or maybe an old Win9x type)
-        return 0;
+        return nullptr;
     }
 
     static bool setValue (const String& regValuePath, const DWORD type,
@@ -90,7 +90,7 @@ struct RegistryKeyWrapper
                 result.setSize (bufferSize, false);
                 DWORD type = REG_NONE;
 
-                auto err = RegQueryValueEx (key.key, key.wideCharValueName, 0, &type,
+                auto err = RegQueryValueEx (key.key, key.wideCharValueName, nullptr, &type,
                                             (LPBYTE) result.getData(), &bufferSize);
 
                 if (err == ERROR_SUCCESS)
@@ -138,7 +138,7 @@ struct RegistryKeyWrapper
         DWORD type = 0;
 
         auto result = RegQueryValueEx (key.key, key.wideCharValueName,
-                                       0, &type, buffer, &bufferSize);
+                                       nullptr, &type, buffer, &bufferSize);
 
         return result == ERROR_SUCCESS || result == ERROR_MORE_DATA;
     }

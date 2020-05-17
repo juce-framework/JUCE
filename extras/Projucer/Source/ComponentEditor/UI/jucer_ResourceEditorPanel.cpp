@@ -23,7 +23,7 @@
 class ResourceListButton  : public Component
 {
 public:
-    ResourceListButton (JucerDocument& doc)
+    explicit ResourceListButton (JucerDocument& doc)
         : document (doc), reloadButton ("Reload"), row (0)
     {
         setInterceptsMouseClicks (false, true);

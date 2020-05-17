@@ -147,12 +147,12 @@ private:
        #endif
     }
 
-    static inline uint32_t rotateLeft (uint32_t x, uint32_t n) noexcept     { return (x << n) | (x >> (32 - n)); }
+    static uint32_t rotateLeft (uint32_t x, uint32_t n) noexcept     { return (x << n) | (x >> (32 - n)); }
 
-    static inline uint32_t F (uint32_t x, uint32_t y, uint32_t z) noexcept  { return (x & y) | (~x & z); }
-    static inline uint32_t G (uint32_t x, uint32_t y, uint32_t z) noexcept  { return (x & z) | (y & ~z); }
-    static inline uint32_t H (uint32_t x, uint32_t y, uint32_t z) noexcept  { return x ^ y ^ z; }
-    static inline uint32_t I (uint32_t x, uint32_t y, uint32_t z) noexcept  { return y ^ (x | ~z); }
+    static uint32_t F (uint32_t x, uint32_t y, uint32_t z) noexcept  { return (x & y) | (~x & z); }
+    static uint32_t G (uint32_t x, uint32_t y, uint32_t z) noexcept  { return (x & z) | (y & ~z); }
+    static uint32_t H (uint32_t x, uint32_t y, uint32_t z) noexcept  { return x ^ y ^ z; }
+    static uint32_t I (uint32_t x, uint32_t y, uint32_t z) noexcept  { return y ^ (x | ~z); }
 
     static void FF (uint32_t& a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint32_t s, uint32_t ac) noexcept
     {

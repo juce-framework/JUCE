@@ -106,7 +106,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
             return;
 
         {
-            AM_MEDIA_TYPE mt = { 0 };
+            AM_MEDIA_TYPE mt = {};
             mt.majortype = MEDIATYPE_Video;
             mt.subtype = MEDIASUBTYPE_RGB24;
             mt.formattype = FORMAT_VideoInfo;
@@ -130,7 +130,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
         if (FAILED (hr))
             return;
 
-        AM_MEDIA_TYPE mt = { 0 };
+        AM_MEDIA_TYPE mt = {};
         hr = sampleGrabber->GetConnectedMediaType (&mt);
         VIDEOINFOHEADER* pVih = (VIDEOINFOHEADER*) (mt.pbFormat);
         width = pVih->bmiHeader.biWidth;
@@ -687,7 +687,7 @@ private:
 
             if (wantedDirection == dir)
             {
-                PIN_INFO info = { 0 };
+                PIN_INFO info = {};
                 pin->QueryPinInfo (&info);
 
                 if (pinName == nullptr || String (pinName).equalsIgnoreCase (String (info.achName)))

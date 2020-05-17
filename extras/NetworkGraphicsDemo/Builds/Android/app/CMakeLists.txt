@@ -671,6 +671,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/maths/juce_Random.h"
     "../../../../../modules/juce_core/maths/juce_Range.h"
     "../../../../../modules/juce_core/maths/juce_StatisticsAccumulator.h"
+    "../../../../../modules/juce_core/memory/juce_AllocationHooks.cpp"
+    "../../../../../modules/juce_core/memory/juce_AllocationHooks.h"
     "../../../../../modules/juce_core/memory/juce_Atomic.h"
     "../../../../../modules/juce_core/memory/juce_ByteOrder.h"
     "../../../../../modules/juce_core/memory/juce_ContainerDeletePolicy.h"
@@ -2155,6 +2157,8 @@ set_source_files_properties("../../../../../modules/juce_core/maths/juce_Random.
 set_source_files_properties("../../../../../modules/juce_core/maths/juce_Random.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/maths/juce_Range.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/maths/juce_StatisticsAccumulator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/memory/juce_AllocationHooks.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/memory/juce_AllocationHooks.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/memory/juce_Atomic.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/memory/juce_ByteOrder.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/memory/juce_ContainerDeletePolicy.h" PROPERTIES HEADER_FILE_ONLY TRUE)

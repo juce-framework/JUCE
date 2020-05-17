@@ -646,8 +646,12 @@ Array<File> ProjucerApplication::getSortedExampleDirectories() noexcept
         auto exampleDirectory = iter.getFile();
 
         if (exampleDirectory.getNumberOfChildFiles (File::findFiles | File::ignoreHiddenFiles) > 0
-            && exampleDirectory.getFileName() != "DemoRunner" && exampleDirectory.getFileName() != "Assets")
+            && exampleDirectory.getFileName() != "DemoRunner"
+            && exampleDirectory.getFileName() != "Assets"
+            && exampleDirectory.getFileName() != "CMake")
+        {
             exampleDirectories.add (exampleDirectory);
+        }
     }
 
     exampleDirectories.sort();
@@ -1191,6 +1195,7 @@ void ProjucerApplication::askUserToOpenFile()
 
 bool ProjucerApplication::openFile (const File& file)
 {
+    handleUpdateNowIfNeeded();
     return mainWindowList.openFile (file);
 }
 

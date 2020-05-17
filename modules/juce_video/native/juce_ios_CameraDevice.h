@@ -16,6 +16,11 @@
   ==============================================================================
 */
 
+#if (defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_10_0)
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+ #define JUCE_DEPRECATION_IGNORED 1
+#endif
+
 struct CameraDevice::Pimpl
 {
     using InternalOpenCameraResultCallback = std::function<void(const String& /*cameraId*/, const String& /*error*/)>;
@@ -270,7 +275,8 @@ private:
             {
                 case AVCaptureAutoFocusSystemPhaseDetection:    autoFocusSystemString = "PhaseDetection";    break;
                 case AVCaptureAutoFocusSystemContrastDetection: autoFocusSystemString = "ContrastDetection"; break;
-                default: autoFocusSystemString = "None";
+                case AVCaptureAutoFocusSystemNone:
+                default:                                        autoFocusSystemString = "None";
             }
             JUCE_CAMERA_LOG ("Auto focus system: " + autoFocusSystemString);
 
@@ -859,6 +865,10 @@ private:
                             CGContextScaleCTM (context, targetSize.height / origHeight, -targetSize.width / origWidth);
                             CGContextTranslateCTM (context, -targetSize.width, -targetSize.height);
                             break;
+                        case kCGImagePropertyOrientationUpMirrored:
+                        case kCGImagePropertyOrientationDownMirrored:
+                        case kCGImagePropertyOrientationLeftMirrored:
+                        case kCGImagePropertyOrientationRightMirrored:
                         default:
                             // Not implemented.
                             jassertfalse;
@@ -1319,3 +1329,7 @@ String CameraDevice::getFileExtension()
 {
     return ".mov";
 }
+
+#if JUCE_DEPRECATION_IGNORED
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+#endif

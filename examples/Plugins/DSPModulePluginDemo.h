@@ -65,6 +65,9 @@ namespace ID
     PARAMETER_ID (distortionInGain)
     PARAMETER_ID (distortionCompGain)
     PARAMETER_ID (distortionMix)
+    PARAMETER_ID (convolutionCabEnabled)
+    PARAMETER_ID (convolutionReverbEnabled)
+    PARAMETER_ID (convolutionReverbMix)
     PARAMETER_ID (multiBandEnabled)
     PARAMETER_ID (multiBandFreq)
     PARAMETER_ID (multiBandLowVolume)
@@ -146,23 +149,17 @@ class DspModulePluginDemo  : public AudioProcessor,
 {
 public:
     DspModulePluginDemo()
-    {
-        apvts.state.addListener (this);
-
-        forEach ([] (dsp::Gain<float>& gain) { gain.setRampDurationSeconds (0.05); },
-                 dsp::get<inputGainIndex>  (chain),
-                 dsp::get<outputGainIndex> (chain));
-
-        dsp::get<pannerIndex> (chain).setRule (dsp::PannerRule::linear);
-    }
+        : DspModulePluginDemo (AudioProcessorValueTreeState::ParameterLayout{}) {}
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override
     {
-        if (jmin (getTotalNumInputChannels(), getTotalNumOutputChannels()) == 0)
+        const auto channels = jmax (getTotalNumInputChannels(), getTotalNumOutputChannels());
+
+        if (channels == 0)
             return;
 
-        chain.prepare ({ sampleRate, (uint32) samplesPerBlock, (uint32) getTotalNumOutputChannels() });
+        chain.prepare ({ sampleRate, (uint32) samplesPerBlock, (uint32) channels });
 
         reset();
     }
@@ -177,7 +174,7 @@ public:
 
     void processBlock (AudioBuffer<float>& buffer, MidiBuffer&) override
     {
-        if (jmin (getTotalNumInputChannels(), getTotalNumOutputChannels()) == 0)
+        if (jmax (getTotalNumInputChannels(), getTotalNumOutputChannels()) == 0)
             return;
 
         ScopedNoDenormals noDenormals;
@@ -185,8 +182,13 @@ public:
         if (requiresUpdate.load())
             update();
 
+        irSize = dsp::get<convolutionIndex> (chain).reverb.getCurrentIRSize();
+
         const auto totalNumInputChannels  = getTotalNumInputChannels();
         const auto totalNumOutputChannels = getTotalNumOutputChannels();
+
+        setLatencySamples (dsp::get<convolutionIndex> (chain).getLatency()
+                           + (dsp::isBypassed<distortionIndex> (chain) ? 0 : roundToInt (dsp::get<distortionIndex> (chain).getLatency())));
 
         const auto numChannels = jmax (totalNumInputChannels, totalNumOutputChannels);
 
@@ -228,154 +230,570 @@ public:
         apvts.replaceState (ValueTree::fromXml (*getXmlFromBinary (data, sizeInBytes)));
     }
 
-    //==============================================================================
-    AudioProcessorValueTreeState apvts { *this, nullptr, "state", createParameters() };
+    int getCurrentIRSize() const { return irSize; }
 
+    using Parameter = AudioProcessorValueTreeState::Parameter;
+
+    // This struct holds references to the raw parameters, so that we don't have to search
+    // the APVTS (involving string comparisons and map lookups!) every time a parameter
+    // changes.
+    struct ParameterReferences
+    {
+        template <typename Param>
+        static Param& addToLayout (AudioProcessorValueTreeState::ParameterLayout& layout,
+                                   std::unique_ptr<Param> param)
+        {
+            auto& ref = *param;
+            layout.add (std::move (param));
+            return ref;
+        }
+
+        static String valueToTextFunction (float x) { return String (x, 2); }
+        static float textToValueFunction (const String& str) { return str.getFloatValue(); }
+
+        static String valueToTextPanFunction (float x) { return getPanningTextForValue ((x + 100.0f) / 200.0f); }
+        static float textToValuePanFunction (const String& str) { return getPanningValueForText (str) * 200.0f - 100.0f; }
+
+        // Creates parameters, adds them to the layout, and stores references to the parameters
+        // in this struct.
+        explicit ParameterReferences (AudioProcessorValueTreeState::ParameterLayout& layout)
+            : inputGain (addToLayout (layout,
+                                      std::make_unique<Parameter> (ID::inputGain,
+                                                                   "Input",
+                                                                   "dB",
+                                                                   NormalisableRange<float> (-40.0f, 40.0f),
+                                                                   0.0f,
+                                                                   valueToTextFunction,
+                                                                   textToValueFunction))),
+              outputGain (addToLayout (layout,
+                                       std::make_unique<Parameter> (ID::outputGain,
+                                                                    "Output",
+                                                                    "dB",
+                                                                    NormalisableRange<float> (-40.0f, 40.0f),
+                                                                    0.0f,
+                                                                    valueToTextFunction,
+                                                                    textToValueFunction))),
+              pan (addToLayout (layout,
+                                std::make_unique<Parameter> (ID::pan,
+                                                             "Panning",
+                                                             "",
+                                                             NormalisableRange<float> (-100.0f, 100.0f),
+                                                             0.0f,
+                                                             valueToTextPanFunction,
+                                                             textToValuePanFunction))),
+              distortionEnabled (addToLayout (layout,
+                                              std::make_unique<AudioParameterBool> (ID::distortionEnabled,
+                                                                                    "Distortion",
+                                                                                    true,
+                                                                                    ""))),
+              distortionType (addToLayout (layout,
+                                           std::make_unique<AudioParameterChoice> (ID::distortionType,
+                                                                                   "Waveshaper",
+                                                                                   StringArray { "std::tanh", "Approx. tanh" },
+                                                                                   0))),
+              distortionInGain (addToLayout (layout,
+                                             std::make_unique<Parameter> (ID::distortionInGain,
+                                                                          "Gain",
+                                                                          "dB",
+                                                                          NormalisableRange<float> (-40.0f, 40.0f),
+                                                                          0.0f,
+                                                                          valueToTextFunction,
+                                                                          textToValueFunction))),
+              distortionLowpass (addToLayout (layout,
+                                              std::make_unique<Parameter> (ID::distortionLowpass,
+                                                                           "Post Low-pass",
+                                                                           "Hz",
+                                                                           NormalisableRange<float> (20.0f, 22000.0f, 0.0f, 0.25f),
+                                                                           22000.0f,
+                                                                           valueToTextFunction,
+                                                                           textToValueFunction))),
+              distortionHighpass (addToLayout (layout,
+                                               std::make_unique<Parameter> (ID::distortionHighpass,
+                                                                            "Pre High-pass",
+                                                                            "Hz",
+                                                                            NormalisableRange<float> (20.0f, 22000.0f, 0.0f, 0.25f),
+                                                                            20.0f,
+                                                                            valueToTextFunction,
+                                                                            textToValueFunction))),
+              distortionCompGain (addToLayout (layout,
+                                               std::make_unique<Parameter> (ID::distortionCompGain,
+                                                                            "Compensat.",
+                                                                            "dB",
+                                                                            NormalisableRange<float> (-40.0f, 40.0f),
+                                                                            0.0f,
+                                                                            valueToTextFunction,
+                                                                            textToValueFunction))),
+              distortionMix (addToLayout (layout,
+                                          std::make_unique<Parameter> (ID::distortionMix,
+                                                                       "Mix",
+                                                                       "%",
+                                                                       NormalisableRange<float> (0.0f, 100.0f),
+                                                                       100.0f,
+                                                                       valueToTextFunction,
+                                                                       textToValueFunction))),
+              distortionOversampler (addToLayout (layout,
+                                                  std::make_unique<AudioParameterChoice> (ID::distortionOversampler,
+                                                                                          "Oversampling",
+                                                                                          StringArray { "2X", "4X", "8X", "2X compensated", "4X compensated", "8X compensated" },
+                                                                                          1))),
+              multiBandEnabled (addToLayout (layout,
+                                             std::make_unique<AudioParameterBool> (ID::multiBandEnabled,
+                                                                                   "Multi-band",
+                                                                                   false,
+                                                                                   ""))),
+              multiBandFreq (addToLayout (layout,
+                                          std::make_unique<Parameter> (ID::multiBandFreq,
+                                                                       "Sep. Freq.",
+                                                                       "Hz",
+                                                                       NormalisableRange<float> (20.0f, 22000.0f, 0.0f, 0.25f),
+                                                                       2000.0f,
+                                                                       valueToTextFunction,
+                                                                       textToValueFunction))),
+              multiBandLowVolume (addToLayout (layout,
+                                               std::make_unique<Parameter> (ID::multiBandLowVolume,
+                                                                            "Low volume",
+                                                                            "dB",
+                                                                            NormalisableRange<float> (-40.0f, 40.0f),
+                                                                            0.0f,
+                                                                            valueToTextFunction,
+                                                                            textToValueFunction))),
+              multiBandHighVolume (addToLayout (layout,
+                                                std::make_unique<Parameter> (ID::multiBandHighVolume,
+                                                                             "High volume",
+                                                                             "dB",
+                                                                             NormalisableRange<float> (-40.0f, 40.0f),
+                                                                             0.0f,
+                                                                             valueToTextFunction,
+                                                                             textToValueFunction))),
+              convolutionCabEnabled (addToLayout (layout,
+                                                  std::make_unique<AudioParameterBool> (ID::convolutionCabEnabled,
+                                                                                        "Cabinet",
+                                                                                        false,
+                                                                                        ""))),
+              convolutionReverbEnabled (addToLayout (layout,
+                                                     std::make_unique<AudioParameterBool> (ID::convolutionReverbEnabled,
+                                                                                           "Reverb",
+                                                                                           false,
+                                                                                           ""))),
+              convolutionReverbMix (addToLayout (layout,
+                                                 std::make_unique<Parameter> (ID::convolutionReverbMix,
+                                                                              "Reverb Mix",
+                                                                              "%",
+                                                                              NormalisableRange<float> (0.0f, 100.0f),
+                                                                              50.0f,
+                                                                              valueToTextFunction,
+                                                                              textToValueFunction))),
+              compressorEnabled (addToLayout (layout,
+                                              std::make_unique<AudioParameterBool> (ID::compressorEnabled,
+                                                                                    "Comp.",
+                                                                                    false,
+                                                                                    ""))),
+              compressorThreshold (addToLayout (layout,
+                                                std::make_unique<Parameter> (ID::compressorThreshold,
+                                                                             "Threshold",
+                                                                             "dB",
+                                                                             NormalisableRange<float> (-100.0f, 0.0f),
+                                                                             0.0f,
+                                                                             valueToTextFunction,
+                                                                             textToValueFunction))),
+              compressorRatio (addToLayout (layout,
+                                            std::make_unique<Parameter> (ID::compressorRatio,
+                                                                         "Ratio",
+                                                                         ":1",
+                                                                         NormalisableRange<float> (1.0f, 100.0f, 0.0f, 0.25f),
+                                                                         1.0f,
+                                                                         valueToTextFunction,
+                                                                         textToValueFunction))),
+              compressorAttack (addToLayout (layout,
+                                             std::make_unique<Parameter> (ID::compressorAttack,
+                                                                          "Attack",
+                                                                          "ms",
+                                                                          NormalisableRange<float> (0.01f, 1000.0f, 0.0f, 0.25f),
+                                                                          1.0f,
+                                                                          valueToTextFunction,
+                                                                          textToValueFunction))),
+              compressorRelease (addToLayout (layout,
+                                              std::make_unique<Parameter> (ID::compressorRelease,
+                                                                           "Release",
+                                                                           "ms",
+                                                                           NormalisableRange<float> (10.0f, 10000.0f, 0.0f, 0.25f),
+                                                                           100.0f,
+                                                                           valueToTextFunction,
+                                                                           textToValueFunction))),
+              noiseGateEnabled (addToLayout (layout,
+                                             std::make_unique<AudioParameterBool> (ID::noiseGateEnabled,
+                                                                                   "Gate",
+                                                                                   false,
+                                                                                   ""))),
+              noiseGateThreshold (addToLayout (layout,
+                                               std::make_unique<Parameter> (ID::noiseGateThreshold,
+                                                                            "Threshold",
+                                                                            "dB",
+                                                                            NormalisableRange<float> (-100.0f, 0.0f),
+                                                                            -100.0f,
+                                                                            valueToTextFunction,
+                                                                            textToValueFunction))),
+              noiseGateRatio (addToLayout (layout,
+                                           std::make_unique<Parameter> (ID::noiseGateRatio,
+                                                                        "Ratio",
+                                                                        ":1",
+                                                                        NormalisableRange<float> (1.0f, 100.0f, 0.0f, 0.25f),
+                                                                        10.0f,
+                                                                        valueToTextFunction,
+                                                                        textToValueFunction))),
+              noiseGateAttack (addToLayout (layout,
+                                            std::make_unique<Parameter> (ID::noiseGateAttack,
+                                                                         "Attack",
+                                                                         "ms",
+                                                                         NormalisableRange<float> (0.01f, 1000.0f, 0.0f, 0.25f),
+                                                                         1.0f,
+                                                                         valueToTextFunction,
+                                                                         textToValueFunction))),
+              noiseGateRelease (addToLayout (layout,
+                                             std::make_unique<Parameter> (ID::noiseGateRelease,
+                                                                          "Release",
+                                                                          "ms",
+                                                                          NormalisableRange<float> (10.0f, 10000.0f, 0.0f, 0.25f),
+                                                                          100.0f,
+                                                                          valueToTextFunction,
+                                                                          textToValueFunction))),
+              limiterEnabled (addToLayout (layout,
+                                           std::make_unique<AudioParameterBool> (ID::limiterEnabled,
+                                                                                 "Limiter",
+                                                                                 false,
+                                                                                 ""))),
+              limiterThreshold (addToLayout (layout,
+                                             std::make_unique<Parameter> (ID::limiterThreshold,
+                                                                          "Threshold",
+                                                                          "dB",
+                                                                          NormalisableRange<float> (-40.0f, 0.0f),
+                                                                          0.0f,
+                                                                          valueToTextFunction,
+                                                                          textToValueFunction))),
+              limiterRelease (addToLayout (layout,
+                                           std::make_unique<Parameter> (ID::limiterRelease,
+                                                                        "Release",
+                                                                        "ms",
+                                                                        NormalisableRange<float> (10.0f, 10000.0f, 0.0f, 0.25f),
+                                                                        100.0f,
+                                                                        valueToTextFunction,
+                                                                        textToValueFunction))),
+              directDelayEnabled (addToLayout (layout,
+                                               std::make_unique<AudioParameterBool> (ID::directDelayEnabled,
+                                                                                     "DL Dir.",
+                                                                                     false,
+                                                                                     ""))),
+              directDelayType (addToLayout (layout,
+                                            std::make_unique<AudioParameterChoice> (ID::directDelayType,
+                                                                                    "DL Type",
+                                                                                    StringArray { "None", "Linear", "Lagrange", "Thiran" },
+                                                                                    1))),
+              directDelayValue (addToLayout (layout,
+                                             std::make_unique<Parameter> (ID::directDelayValue,
+                                                                          "Delay",
+                                                                          "smps",
+                                                                          NormalisableRange<float> (0.0f, 44100.0f),
+                                                                          0.0f,
+                                                                          valueToTextFunction,
+                                                                          textToValueFunction))),
+              directDelaySmoothing (addToLayout (layout,
+                                                 std::make_unique<Parameter> (ID::directDelaySmoothing,
+                                                                              "Smooth",
+                                                                              "ms",
+                                                                              NormalisableRange<float> (20.0f, 10000.0f, 0.0f, 0.25f),
+                                                                              200.0f,
+                                                                              valueToTextFunction,
+                                                                              textToValueFunction))),
+              directDelayMix (addToLayout (layout,
+                                           std::make_unique<Parameter> (ID::directDelayMix,
+                                                                        "Delay Mix",
+                                                                        "%",
+                                                                        NormalisableRange<float> (0.0f, 100.0f),
+                                                                        50.0f,
+                                                                        valueToTextFunction,
+                                                                        textToValueFunction))),
+              delayEffectEnabled (addToLayout (layout,
+                                               std::make_unique<AudioParameterBool> (ID::delayEffectEnabled,
+                                                                                     "DL Effect",
+                                                                                     false,
+                                                                                     ""))),
+              delayEffectType (addToLayout (layout,
+                                            std::make_unique<AudioParameterChoice> (ID::delayEffectType,
+                                                                                    "DL Type",
+                                                                                    StringArray { "None", "Linear", "Lagrange", "Thiran" },
+                                                                                    1))),
+              delayEffectValue (addToLayout (layout,
+                                             std::make_unique<Parameter> (ID::delayEffectValue,
+                                                                          "Delay",
+                                                                          "ms",
+                                                                          NormalisableRange<float> (0.01f, 1000.0f),
+                                                                          100.0f,
+                                                                          valueToTextFunction,
+                                                                          textToValueFunction))),
+              delayEffectSmoothing (addToLayout (layout,
+                                                 std::make_unique<Parameter> (ID::delayEffectSmoothing,
+                                                                              "Smooth",
+                                                                              "ms",
+                                                                              NormalisableRange<float> (20.0f, 10000.0f, 0.0f, 0.25f),
+                                                                              400.0f,
+                                                                              valueToTextFunction,
+                                                                              textToValueFunction))),
+              delayEffectLowpass (addToLayout (layout,
+                                               std::make_unique<Parameter> (ID::delayEffectLowpass,
+                                                                            "Low-pass",
+                                                                            "Hz",
+                                                                            NormalisableRange<float> (20.0f, 22000.0f, 0.0f, 0.25f),
+                                                                            22000.0f,
+                                                                            valueToTextFunction,
+                                                                            textToValueFunction))),
+              delayEffectMix (addToLayout (layout,
+                                           std::make_unique<Parameter> (ID::delayEffectMix,
+                                                                        "Delay Mix",
+                                                                        "%",
+                                                                        NormalisableRange<float> (0.0f, 100.0f),
+                                                                        50.0f,
+                                                                        valueToTextFunction,
+                                                                        textToValueFunction))),
+              delayEffectFeedback (addToLayout (layout,
+                                                std::make_unique<Parameter> (ID::delayEffectFeedback,
+                                                                             "Feedback",
+                                                                             "dB",
+                                                                             NormalisableRange<float> (-100.0f, 0.0f),
+                                                                             -100.0f,
+                                                                             valueToTextFunction,
+                                                                             textToValueFunction))),
+              phaserEnabled (addToLayout (layout,
+                                          std::make_unique<AudioParameterBool> (ID::phaserEnabled,
+                                                                                "Phaser",
+                                                                                false,
+                                                                                ""))),
+              phaserRate (addToLayout (layout,
+                                       std::make_unique<Parameter> (ID::phaserRate,
+                                                                    "Rate",
+                                                                    "Hz",
+                                                                    NormalisableRange<float> (0.05f, 20.0f, 0.0f, 0.25f),
+                                                                    1.0f,
+                                                                    valueToTextFunction,
+                                                                    textToValueFunction))),
+              phaserDepth (addToLayout (layout,
+                                        std::make_unique<Parameter> (ID::phaserDepth,
+                                                                     "Depth",
+                                                                     "%",
+                                                                     NormalisableRange<float> (0.0f, 100.0f),
+                                                                     50.0f,
+                                                                     valueToTextFunction,
+                                                                     textToValueFunction))),
+              phaserCentreFrequency (addToLayout (layout,
+                                                  std::make_unique<Parameter> (ID::phaserCentreFrequency,
+                                                                               "Center",
+                                                                               "Hz",
+                                                                               NormalisableRange<float> (20.0f, 20000.0f, 0.0f, 0.25f),
+                                                                               600.0f,
+                                                                               valueToTextFunction,
+                                                                               textToValueFunction))),
+              phaserFeedback (addToLayout (layout,
+                                           std::make_unique<Parameter> (ID::phaserFeedback,
+                                                                        "Feedback",
+                                                                        "%",
+                                                                        NormalisableRange<float> (0.0f, 100.0f),
+                                                                        50.0f,
+                                                                        valueToTextFunction,
+                                                                        textToValueFunction))),
+              phaserMix (addToLayout (layout,
+                                      std::make_unique<Parameter> (ID::phaserMix,
+                                                                   "Mix",
+                                                                   "%",
+                                                                   NormalisableRange<float> (0.0f, 100.0f),
+                                                                   50.0f,
+                                                                   valueToTextFunction,
+                                                                   textToValueFunction))),
+              chorusEnabled (addToLayout (layout,
+                                          std::make_unique<AudioParameterBool> (ID::chorusEnabled,
+                                                                                "Chorus",
+                                                                                false,
+                                                                                ""))),
+              chorusRate (addToLayout (layout,
+                                       std::make_unique<Parameter> (ID::chorusRate,
+                                                                    "Rate",
+                                                                    "Hz",
+                                                                    NormalisableRange<float> (0.05f, 20.0f, 0.0f, 0.25f),
+                                                                    1.0f,
+                                                                    valueToTextFunction,
+                                                                    textToValueFunction))),
+              chorusDepth (addToLayout (layout,
+                                        std::make_unique<Parameter> (ID::chorusDepth,
+                                                                     "Depth",
+                                                                     "%",
+                                                                     NormalisableRange<float> (0.0f, 100.0f),
+                                                                     50.0f,
+                                                                     valueToTextFunction,
+                                                                     textToValueFunction))),
+              chorusCentreDelay (addToLayout (layout,
+                                              std::make_unique<Parameter> (ID::chorusCentreDelay,
+                                                                           "Center",
+                                                                           "ms",
+                                                                           NormalisableRange<float> (1.0f, 100.0f, 0.0f, 0.25f),
+                                                                           7.0f,
+                                                                           valueToTextFunction,
+                                                                           textToValueFunction))),
+              chorusFeedback (addToLayout (layout,
+                                           std::make_unique<Parameter> (ID::chorusFeedback,
+                                                                        "Feedback",
+                                                                        "%",
+                                                                        NormalisableRange<float> (0.0f, 100.0f),
+                                                                        50.0f,
+                                                                        valueToTextFunction,
+                                                                        textToValueFunction))),
+              chorusMix (addToLayout (layout,
+                                      std::make_unique<Parameter> (ID::chorusMix,
+                                                                   "Mix",
+                                                                   "%",
+                                                                   NormalisableRange<float> (0.0f, 100.0f),
+                                                                   50.0f,
+                                                                   valueToTextFunction,
+                                                                   textToValueFunction))),
+              ladderEnabled (addToLayout (layout,
+                                          std::make_unique<AudioParameterBool> (ID::ladderEnabled,
+                                                                                "Ladder",
+                                                                                false,
+                                                                                ""))),
+              ladderMode (addToLayout (layout,
+                                       std::make_unique<AudioParameterChoice> (ID::ladderMode,
+                                                                               "Mode",
+                                                                               StringArray { "LP12", "LP24", "HP12", "HP24", "BP12", "BP24" },
+                                                                               1))),
+              ladderCutoff (addToLayout (layout,
+                                         std::make_unique<Parameter> (ID::ladderCutoff,
+                                                                      "Frequency",
+                                                                      "Hz",
+                                                                      NormalisableRange<float> (10.0f, 22000.0f, 0.0f, 0.25f),
+                                                                      1000.0f,
+                                                                      valueToTextFunction,
+                                                                      textToValueFunction))),
+              ladderResonance (addToLayout (layout,
+                                            std::make_unique<Parameter> (ID::ladderResonance,
+                                                                         "Resonance",
+                                                                         "%",
+                                                                         NormalisableRange<float> (0.0f, 100.0f),
+                                                                         0.0f,
+                                                                         valueToTextFunction,
+                                                                         textToValueFunction))),
+              ladderDrive (addToLayout (layout,
+                                        std::make_unique<Parameter> (ID::ladderDrive,
+                                                                     "Drive",
+                                                                     "dB",
+                                                                     NormalisableRange<float> (0.0f, 40.0f),
+                                                                     0.0f,
+                                                                     valueToTextFunction,
+                                                                     textToValueFunction)))
+        {}
+
+        Parameter& inputGain;
+        Parameter& outputGain;
+        Parameter& pan;
+
+        AudioParameterBool& distortionEnabled;
+        AudioParameterChoice& distortionType;
+        Parameter& distortionInGain;
+        Parameter& distortionLowpass;
+        Parameter& distortionHighpass;
+        Parameter& distortionCompGain;
+        Parameter& distortionMix;
+        AudioParameterChoice& distortionOversampler;
+
+        AudioParameterBool& multiBandEnabled;
+        Parameter& multiBandFreq;
+        Parameter& multiBandLowVolume;
+        Parameter& multiBandHighVolume;
+
+        AudioParameterBool& convolutionCabEnabled;
+        AudioParameterBool& convolutionReverbEnabled;
+        Parameter& convolutionReverbMix;
+
+        AudioParameterBool& compressorEnabled;
+        Parameter& compressorThreshold;
+        Parameter& compressorRatio;
+        Parameter& compressorAttack;
+        Parameter& compressorRelease;
+
+        AudioParameterBool& noiseGateEnabled;
+        Parameter& noiseGateThreshold;
+        Parameter& noiseGateRatio;
+        Parameter& noiseGateAttack;
+        Parameter& noiseGateRelease;
+
+        AudioParameterBool& limiterEnabled;
+        Parameter& limiterThreshold;
+        Parameter& limiterRelease;
+
+        AudioParameterBool& directDelayEnabled;
+        AudioParameterChoice& directDelayType;
+        Parameter& directDelayValue;
+        Parameter& directDelaySmoothing;
+        Parameter& directDelayMix;
+
+        AudioParameterBool& delayEffectEnabled;
+        AudioParameterChoice& delayEffectType;
+        Parameter& delayEffectValue;
+        Parameter& delayEffectSmoothing;
+        Parameter& delayEffectLowpass;
+        Parameter& delayEffectMix;
+        Parameter& delayEffectFeedback;
+
+        AudioParameterBool& phaserEnabled;
+        Parameter& phaserRate;
+        Parameter& phaserDepth;
+        Parameter& phaserCentreFrequency;
+        Parameter& phaserFeedback;
+        Parameter& phaserMix;
+
+        AudioParameterBool& chorusEnabled;
+        Parameter& chorusRate;
+        Parameter& chorusDepth;
+        Parameter& chorusCentreDelay;
+        Parameter& chorusFeedback;
+        Parameter& chorusMix;
+
+        AudioParameterBool& ladderEnabled;
+        AudioParameterChoice& ladderMode;
+        Parameter& ladderCutoff;
+        Parameter& ladderResonance;
+        Parameter& ladderDrive;
+    };
+
+    const ParameterReferences& getParameterValues() const noexcept { return parameters; }
+
+    //==============================================================================
     // We store this here so that the editor retains its state if it is closed and reopened
     int indexTab = 0;
 
 private:
+    struct LayoutAndReferences
+    {
+        AudioProcessorValueTreeState::ParameterLayout layout;
+        ParameterReferences references;
+    };
+
+    explicit DspModulePluginDemo (AudioProcessorValueTreeState::ParameterLayout layout)
+        : AudioProcessor (BusesProperties().withInput ("In",   AudioChannelSet::stereo())
+                                           .withOutput ("Out", AudioChannelSet::stereo())),
+          parameters { layout },
+          apvts { *this, nullptr, "state", std::move (layout) }
+    {
+        apvts.state.addListener (this);
+
+        forEach ([] (dsp::Gain<float>& gain) { gain.setRampDurationSeconds (0.05); },
+                 dsp::get<inputGainIndex>  (chain),
+                 dsp::get<outputGainIndex> (chain));
+
+        dsp::get<pannerIndex> (chain).setRule (dsp::PannerRule::linear);
+    }
+
     //==============================================================================
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override
     {
         requiresUpdate.store (true);
     }
-
-    // This struct holds references to the raw parameter values, so that we don't have to look up
-    // the parameters (involving string comparisons and map lookups!) every time a parameter
-    // changes.
-    struct ParameterValues
-    {
-        explicit ParameterValues (AudioProcessorValueTreeState& state)
-            : inputGain                 (*state.getRawParameterValue (ID::inputGain)),
-              outputGain                (*state.getRawParameterValue (ID::outputGain)),
-              pan                       (*state.getRawParameterValue (ID::pan)),
-              distortionEnabled         (*state.getRawParameterValue (ID::distortionEnabled)),
-              distortionType            (*state.getRawParameterValue (ID::distortionType)),
-              distortionOversampler     (*state.getRawParameterValue (ID::distortionOversampler)),
-              distortionLowpass         (*state.getRawParameterValue (ID::distortionLowpass)),
-              distortionHighpass        (*state.getRawParameterValue (ID::distortionHighpass)),
-              distortionInGain          (*state.getRawParameterValue (ID::distortionInGain)),
-              distortionCompGain        (*state.getRawParameterValue (ID::distortionCompGain)),
-              distortionMix             (*state.getRawParameterValue (ID::distortionMix)),
-              multiBandEnabled          (*state.getRawParameterValue (ID::multiBandEnabled)),
-              multiBandFreq             (*state.getRawParameterValue (ID::multiBandFreq)),
-              multiBandLowVolume        (*state.getRawParameterValue (ID::multiBandLowVolume)),
-              multiBandHighVolume       (*state.getRawParameterValue (ID::multiBandHighVolume)),
-              compressorEnabled         (*state.getRawParameterValue (ID::compressorEnabled)),
-              compressorThreshold       (*state.getRawParameterValue (ID::compressorThreshold)),
-              compressorRatio           (*state.getRawParameterValue (ID::compressorRatio)),
-              compressorAttack          (*state.getRawParameterValue (ID::compressorAttack)),
-              compressorRelease         (*state.getRawParameterValue (ID::compressorRelease)),
-              noiseGateEnabled          (*state.getRawParameterValue (ID::noiseGateEnabled)),
-              noiseGateThreshold        (*state.getRawParameterValue (ID::noiseGateThreshold)),
-              noiseGateRatio            (*state.getRawParameterValue (ID::noiseGateRatio)),
-              noiseGateAttack           (*state.getRawParameterValue (ID::noiseGateAttack)),
-              noiseGateRelease          (*state.getRawParameterValue (ID::noiseGateRelease)),
-              limiterEnabled            (*state.getRawParameterValue (ID::limiterEnabled)),
-              limiterThreshold          (*state.getRawParameterValue (ID::limiterThreshold)),
-              limiterRelease            (*state.getRawParameterValue (ID::limiterRelease)),
-              directDelayEnabled        (*state.getRawParameterValue (ID::directDelayEnabled)),
-              directDelayType           (*state.getRawParameterValue (ID::directDelayType)),
-              directDelayValue          (*state.getRawParameterValue (ID::directDelayValue)),
-              directDelaySmoothing      (*state.getRawParameterValue (ID::directDelaySmoothing)),
-              directDelayMix            (*state.getRawParameterValue (ID::directDelayMix)),
-              delayEffectEnabled        (*state.getRawParameterValue (ID::delayEffectEnabled)),
-              delayEffectType           (*state.getRawParameterValue (ID::delayEffectType)),
-              delayEffectValue          (*state.getRawParameterValue (ID::delayEffectValue)),
-              delayEffectSmoothing      (*state.getRawParameterValue (ID::delayEffectSmoothing)),
-              delayEffectLowpass        (*state.getRawParameterValue (ID::delayEffectLowpass)),
-              delayEffectFeedback       (*state.getRawParameterValue (ID::delayEffectFeedback)),
-              delayEffectMix            (*state.getRawParameterValue (ID::delayEffectMix)),
-              phaserEnabled             (*state.getRawParameterValue (ID::phaserEnabled)),
-              phaserRate                (*state.getRawParameterValue (ID::phaserRate)),
-              phaserDepth               (*state.getRawParameterValue (ID::phaserDepth)),
-              phaserCentreFrequency     (*state.getRawParameterValue (ID::phaserCentreFrequency)),
-              phaserFeedback            (*state.getRawParameterValue (ID::phaserFeedback)),
-              phaserMix                 (*state.getRawParameterValue (ID::phaserMix)),
-              chorusEnabled             (*state.getRawParameterValue (ID::chorusEnabled)),
-              chorusRate                (*state.getRawParameterValue (ID::chorusRate)),
-              chorusDepth               (*state.getRawParameterValue (ID::chorusDepth)),
-              chorusCentreDelay         (*state.getRawParameterValue (ID::chorusCentreDelay)),
-              chorusFeedback            (*state.getRawParameterValue (ID::chorusFeedback)),
-              chorusMix                 (*state.getRawParameterValue (ID::chorusMix)),
-              ladderEnabled             (*state.getRawParameterValue (ID::ladderEnabled)),
-              ladderCutoff              (*state.getRawParameterValue (ID::ladderCutoff)),
-              ladderResonance           (*state.getRawParameterValue (ID::ladderResonance)),
-              ladderDrive               (*state.getRawParameterValue (ID::ladderDrive)),
-              ladderMode                (*state.getRawParameterValue (ID::ladderMode))
-        {}
-
-        std::atomic<float>& inputGain;
-        std::atomic<float>& outputGain;
-        std::atomic<float>& pan;
-
-        std::atomic<float>& distortionEnabled;
-        std::atomic<float>& distortionType;
-        std::atomic<float>& distortionOversampler;
-        std::atomic<float>& distortionLowpass;
-        std::atomic<float>& distortionHighpass;
-        std::atomic<float>& distortionInGain;
-        std::atomic<float>& distortionCompGain;
-        std::atomic<float>& distortionMix;
-
-        std::atomic<float>& multiBandEnabled;
-        std::atomic<float>& multiBandFreq;
-        std::atomic<float>& multiBandLowVolume;
-        std::atomic<float>& multiBandHighVolume;
-
-        std::atomic<float>& compressorEnabled;
-        std::atomic<float>& compressorThreshold;
-        std::atomic<float>& compressorRatio;
-        std::atomic<float>& compressorAttack;
-        std::atomic<float>& compressorRelease;
-
-        std::atomic<float>& noiseGateEnabled;
-        std::atomic<float>& noiseGateThreshold;
-        std::atomic<float>& noiseGateRatio;
-        std::atomic<float>& noiseGateAttack;
-        std::atomic<float>& noiseGateRelease;
-
-        std::atomic<float>& limiterEnabled;
-        std::atomic<float>& limiterThreshold;
-        std::atomic<float>& limiterRelease;
-
-        std::atomic<float>& directDelayEnabled;
-        std::atomic<float>& directDelayType;
-        std::atomic<float>& directDelayValue;
-        std::atomic<float>& directDelaySmoothing;
-        std::atomic<float>& directDelayMix;
-
-        std::atomic<float>& delayEffectEnabled;
-        std::atomic<float>& delayEffectType;
-        std::atomic<float>& delayEffectValue;
-        std::atomic<float>& delayEffectSmoothing;
-        std::atomic<float>& delayEffectLowpass;
-        std::atomic<float>& delayEffectFeedback;
-        std::atomic<float>& delayEffectMix;
-
-        std::atomic<float>& phaserEnabled;
-        std::atomic<float>& phaserRate;
-        std::atomic<float>& phaserDepth;
-        std::atomic<float>& phaserCentreFrequency;
-        std::atomic<float>& phaserFeedback;
-        std::atomic<float>& phaserMix;
-
-        std::atomic<float>& chorusEnabled;
-        std::atomic<float>& chorusRate;
-        std::atomic<float>& chorusDepth;
-        std::atomic<float>& chorusCentreDelay;
-        std::atomic<float>& chorusFeedback;
-        std::atomic<float>& chorusMix;
-
-        std::atomic<float>& ladderEnabled;
-        std::atomic<float>& ladderCutoff;
-        std::atomic<float>& ladderResonance;
-        std::atomic<float>& ladderDrive;
-        std::atomic<float>& ladderMode;
-    };
-
-    ParameterValues parameters { apvts };
 
     //==============================================================================
     void update()
@@ -383,136 +801,145 @@ private:
         {
             DistortionProcessor& distortion = dsp::get<distortionIndex> (chain);
 
-            if (distortion.currentIndexOversampling != parameters.distortionOversampler.load())
+            if (distortion.currentIndexOversampling != parameters.distortionOversampler.getIndex())
             {
-                distortion.currentIndexOversampling = roundToInt (parameters.distortionOversampler.load());
+                distortion.currentIndexOversampling = parameters.distortionOversampler.getIndex();
                 prepareToPlay (getSampleRate(), getBlockSize());
                 return;
             }
 
-            distortion.currentIndexWaveshaper = roundToInt (parameters.distortionType.load());
-            distortion.lowpass .setCutoffFrequency (parameters.distortionLowpass);
-            distortion.highpass.setCutoffFrequency (parameters.distortionHighpass);
-            distortion.distGain.setGainDecibels (parameters.distortionInGain);
-            distortion.compGain.setGainDecibels (parameters.distortionCompGain);
-            distortion.mixer.setWetMixProportion (parameters.distortionMix / 100.0f);
-            dsp::setBypassed<distortionIndex> (chain, parameters.distortionEnabled.load() == 0.0f);
+            distortion.currentIndexWaveshaper = parameters.distortionType.getIndex();
+            distortion.lowpass .setCutoffFrequency (parameters.distortionLowpass.get());
+            distortion.highpass.setCutoffFrequency (parameters.distortionHighpass.get());
+            distortion.distGain.setGainDecibels (parameters.distortionInGain.get());
+            distortion.compGain.setGainDecibels (parameters.distortionCompGain.get());
+            distortion.mixer.setWetMixProportion (parameters.distortionMix.get() / 100.0f);
+            dsp::setBypassed<distortionIndex> (chain, ! parameters.distortionEnabled);
         }
 
-        dsp::get<inputGainIndex>  (chain).setGainDecibels (parameters.inputGain);
-        dsp::get<outputGainIndex> (chain).setGainDecibels (parameters.outputGain);
-        dsp::get<pannerIndex> (chain).setPan (parameters.pan / 100.0f);
+        {
+            ConvolutionProcessor& convolution = dsp::get<convolutionIndex> (chain);
+            convolution.cabEnabled    = parameters.convolutionCabEnabled;
+            convolution.reverbEnabled = parameters.convolutionReverbEnabled;
+            convolution.mixer.setWetMixProportion (parameters.convolutionReverbMix.get() / 100.0f);
+        }
+
+        dsp::get<inputGainIndex>  (chain).setGainDecibels (parameters.inputGain.get());
+        dsp::get<outputGainIndex> (chain).setGainDecibels (parameters.outputGain.get());
+        dsp::get<pannerIndex> (chain).setPan (parameters.pan.get() / 100.0f);
 
         {
             MultiBandProcessor& multiband = dsp::get<multiBandIndex> (chain);
-            const auto multibandFreq = parameters.multiBandFreq.load();
+            const auto multibandFreq = parameters.multiBandFreq.get();
             multiband.lowpass .setCutoffFrequency (multibandFreq);
             multiband.highpass.setCutoffFrequency (multibandFreq);
-            const auto enabled = parameters.multiBandEnabled.load() != 0.0f;
-            multiband.lowVolume .setGainDecibels (enabled ? parameters.multiBandLowVolume .load() : 0.0f);
-            multiband.highVolume.setGainDecibels (enabled ? parameters.multiBandHighVolume.load() : 0.0f);
+            const bool enabled = parameters.multiBandEnabled;
+            multiband.lowVolume .setGainDecibels (enabled ? parameters.multiBandLowVolume .get() : 0.0f);
+            multiband.highVolume.setGainDecibels (enabled ? parameters.multiBandHighVolume.get() : 0.0f);
             dsp::setBypassed<multiBandIndex> (chain, ! enabled);
         }
 
         {
             dsp::Compressor<float>& compressor = dsp::get<compressorIndex> (chain);
-            compressor.setThreshold (parameters.compressorThreshold);
-            compressor.setRatio     (parameters.compressorRatio);
-            compressor.setAttack    (parameters.compressorAttack);
-            compressor.setRelease   (parameters.compressorRelease);
-            dsp::setBypassed<compressorIndex> (chain, parameters.compressorEnabled.load() == 0.0f);
+            compressor.setThreshold (parameters.compressorThreshold.get());
+            compressor.setRatio     (parameters.compressorRatio.get());
+            compressor.setAttack    (parameters.compressorAttack.get());
+            compressor.setRelease   (parameters.compressorRelease.get());
+            dsp::setBypassed<compressorIndex> (chain, ! parameters.compressorEnabled);
         }
 
         {
             dsp::NoiseGate<float>& noiseGate = dsp::get<noiseGateIndex> (chain);
-            noiseGate.setThreshold (parameters.noiseGateThreshold);
-            noiseGate.setRatio     (parameters.noiseGateRatio);
-            noiseGate.setAttack    (parameters.noiseGateAttack);
-            noiseGate.setRelease   (parameters.noiseGateRelease);
-            dsp::setBypassed<noiseGateIndex> (chain, parameters.noiseGateEnabled.load() == 0.0f);
+            noiseGate.setThreshold (parameters.noiseGateThreshold.get());
+            noiseGate.setRatio     (parameters.noiseGateRatio.get());
+            noiseGate.setAttack    (parameters.noiseGateAttack.get());
+            noiseGate.setRelease   (parameters.noiseGateRelease.get());
+            dsp::setBypassed<noiseGateIndex> (chain, ! parameters.noiseGateEnabled);
         }
 
         {
             dsp::Limiter<float>& limiter = dsp::get<limiterIndex> (chain);
-            limiter.setThreshold (parameters.limiterThreshold);
-            limiter.setRelease   (parameters.limiterRelease);
-            dsp::setBypassed<limiterIndex> (chain, parameters.limiterEnabled.load() == 0.0f);
+            limiter.setThreshold (parameters.limiterThreshold.get());
+            limiter.setRelease   (parameters.limiterRelease.get());
+            dsp::setBypassed<limiterIndex> (chain, ! parameters.limiterEnabled);
         }
 
         {
             DirectDelayProcessor& delay = dsp::get<directDelayIndex> (chain);
-            delay.delayLineDirectType = roundToInt (parameters.directDelayType.load());
+            delay.delayLineDirectType = parameters.directDelayType.getIndex();
 
             std::fill (delay.delayDirectValue.begin(),
                        delay.delayDirectValue.end(),
-                       (double) parameters.directDelayValue);
+                       (double) parameters.directDelayValue.get());
 
-            delay.smoothFilter.setCutoffFrequency (1000.0 / parameters.directDelaySmoothing);
-            delay.mixer.setWetMixProportion (parameters.directDelayMix / 100.0f);
-            dsp::setBypassed<directDelayIndex> (chain, parameters.directDelayEnabled.load() == 0.0f);
+            delay.smoothFilter.setCutoffFrequency (1000.0 / parameters.directDelaySmoothing.get());
+            delay.mixer.setWetMixProportion (parameters.directDelayMix.get() / 100.0f);
+            dsp::setBypassed<directDelayIndex> (chain, ! parameters.directDelayEnabled);
         }
 
         {
             DelayEffectProcessor& delay = dsp::get<delayEffectIndex> (chain);
-            delay.delayEffectType = roundToInt (parameters.delayEffectType.load());
+            delay.delayEffectType = parameters.delayEffectType.getIndex();
 
             std::fill (delay.delayEffectValue.begin(),
                        delay.delayEffectValue.end(),
-                       (double) parameters.delayEffectValue / 1000.0 * getSampleRate());
+                       (double) parameters.delayEffectValue.get() / 1000.0 * getSampleRate());
 
-            const auto feedbackGain = Decibels::decibelsToGain (parameters.delayEffectFeedback.load(), -100.0f);
+            const auto feedbackGain = Decibels::decibelsToGain (parameters.delayEffectFeedback.get(), -100.0f);
 
             for (auto& volume : delay.delayFeedbackVolume)
                 volume.setTargetValue (feedbackGain);
 
-            delay.smoothFilter.setCutoffFrequency (1000.0 / parameters.delayEffectSmoothing);
-            delay.lowpass.setCutoffFrequency (parameters.delayEffectLowpass);
-            delay.mixer.setWetMixProportion (parameters.delayEffectMix / 100.0f);
-            dsp::setBypassed<delayEffectIndex> (chain, parameters.delayEffectEnabled.load() == 0.0f);
+            delay.smoothFilter.setCutoffFrequency (1000.0 / parameters.delayEffectSmoothing.get());
+            delay.lowpass.setCutoffFrequency (parameters.delayEffectLowpass.get());
+            delay.mixer.setWetMixProportion (parameters.delayEffectMix.get() / 100.0f);
+            dsp::setBypassed<delayEffectIndex> (chain, ! parameters.delayEffectEnabled);
         }
 
         {
             dsp::Phaser<float>& phaser = dsp::get<phaserIndex> (chain);
-            phaser.setRate            (parameters.phaserRate);
-            phaser.setDepth           (parameters.phaserDepth / 100.0f);
-            phaser.setCentreFrequency (parameters.phaserCentreFrequency);
-            phaser.setFeedback        (parameters.phaserFeedback / 100.0f * 0.95f);
-            phaser.setMix             (parameters.phaserMix / 100.0f);
-            dsp::setBypassed<phaserIndex> (chain, parameters.phaserEnabled.load() == 0.0f);
+            phaser.setRate            (parameters.phaserRate.get());
+            phaser.setDepth           (parameters.phaserDepth.get() / 100.0f);
+            phaser.setCentreFrequency (parameters.phaserCentreFrequency.get());
+            phaser.setFeedback        (parameters.phaserFeedback.get() / 100.0f * 0.95f);
+            phaser.setMix             (parameters.phaserMix.get() / 100.0f);
+            dsp::setBypassed<phaserIndex> (chain, ! parameters.phaserEnabled);
         }
 
         {
             dsp::Chorus<float>& chorus = dsp::get<chorusIndex> (chain);
-            chorus.setRate        (parameters.chorusRate);
-            chorus.setDepth       (parameters.chorusDepth / 100.0f);
-            chorus.setCentreDelay (parameters.chorusCentreDelay);
-            chorus.setFeedback    (parameters.chorusFeedback / 100.0f * 0.95f);
-            chorus.setMix         (parameters.chorusMix / 100.0f);
-            dsp::setBypassed<chorusIndex> (chain, parameters.chorusEnabled.load() == 0.0f);
+            chorus.setRate        (parameters.chorusRate.get());
+            chorus.setDepth       (parameters.chorusDepth.get() / 100.0f);
+            chorus.setCentreDelay (parameters.chorusCentreDelay.get());
+            chorus.setFeedback    (parameters.chorusFeedback.get() / 100.0f * 0.95f);
+            chorus.setMix         (parameters.chorusMix.get() / 100.0f);
+            dsp::setBypassed<chorusIndex> (chain, ! parameters.chorusEnabled);
         }
 
         {
             dsp::LadderFilter<float>& ladder = dsp::get<ladderIndex> (chain);
 
-            ladder.setCutoffFrequencyHz (parameters.ladderCutoff);
-            ladder.setResonance         (parameters.ladderResonance / 100.0f);
-            ladder.setDrive (Decibels::decibelsToGain (parameters.ladderDrive.load()));
+            ladder.setCutoffFrequencyHz (parameters.ladderCutoff.get());
+            ladder.setResonance         (parameters.ladderResonance.get() / 100.0f);
+            ladder.setDrive (Decibels::decibelsToGain (parameters.ladderDrive.get()));
 
             ladder.setMode ([&]
             {
-                switch (roundToInt (parameters.ladderMode.load()))
+                switch (parameters.ladderMode.getIndex())
                 {
                     case 0: return dsp::LadderFilterMode::LPF12;
                     case 1: return dsp::LadderFilterMode::LPF24;
                     case 2: return dsp::LadderFilterMode::HPF12;
                     case 3: return dsp::LadderFilterMode::HPF24;
                     case 4: return dsp::LadderFilterMode::BPF12;
+
+                    default: break;
                 }
 
                 return dsp::LadderFilterMode::BPF24;
             }());
 
-            dsp::setBypassed<ladderIndex> (chain, parameters.ladderEnabled.load() == 0.0f);
+            dsp::setBypassed<ladderIndex> (chain, ! parameters.ladderEnabled);
         }
 
         requiresUpdate.store (false);
@@ -550,418 +977,6 @@ private:
         }
 
         return 0.5f;
-    }
-
-    static AudioProcessorValueTreeState::ParameterLayout createParameters()
-    {
-        using Parameter = AudioProcessorValueTreeState::Parameter;
-
-        auto valueToTextFunction = [] (float x) { return String (x, 2); };
-        auto textToValueFunction = [] (const String& str) { return str.getFloatValue(); };
-
-        auto valueToTextPanFunction = [] (float x) { return getPanningTextForValue ((x + 100.0f) / 200.0f); };
-        auto textToValuePanFunction = [] (const String& str) { return getPanningValueForText (str) * 200.0f - 100.0f; };
-
-        AudioProcessorValueTreeState::ParameterLayout layout;
-
-        layout.add (std::make_unique<Parameter> (ID::inputGain,
-                                                 "Input",
-                                                 "dB",
-                                                 NormalisableRange<float> (-40.0f, 40.0f),
-                                                 0.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::outputGain,
-                                                 "Output",
-                                                 "dB",
-                                                 NormalisableRange<float> (-40.0f, 40.0f),
-                                                 0.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::pan,
-                                                 "Panning",
-                                                 "",
-                                                 NormalisableRange<float> (-100.0f, 100.0f),
-                                                 0.0f,
-                                                 valueToTextPanFunction,
-                                                 textToValuePanFunction));
-
-        layout.add (std::make_unique<AudioParameterBool> (ID::distortionEnabled, "Distortion", true, ""));
-
-        layout.add (std::make_unique<AudioParameterChoice> (ID::distortionType,
-                                                            "Waveshaper",
-                                                            StringArray { "std::tanh", "Approx. tanh" },
-                                                            0));
-
-        layout.add (std::make_unique<Parameter> (ID::distortionInGain,
-                                                 "Gain",
-                                                 "dB",
-                                                 NormalisableRange<float> (-40.0f, 40.0f),
-                                                 0.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::distortionLowpass,
-                                                 "Post Low-pass",
-                                                 "Hz",
-                                                 NormalisableRange<float> (20.0f, 22000.0f, 0.0f, 0.25f),
-                                                 22000.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::distortionHighpass,
-                                                 "Pre High-pass",
-                                                 "Hz",
-                                                 NormalisableRange<float> (20.0f, 22000.0f, 0.0f, 0.25f),
-                                                 20.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::distortionCompGain,
-                                                 "Compensat.",
-                                                 "dB",
-                                                 NormalisableRange<float> (-40.0f, 40.0f),
-                                                 0.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::distortionMix,
-                                                 "Mix",
-                                                 "%",
-                                                 NormalisableRange<float> (0.0f, 100.0f),
-                                                 100.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<AudioParameterChoice> (ID::distortionOversampler,
-                                                            "Oversampling",
-                                                            StringArray { "2X",
-                                                                          "4X",
-                                                                          "8X",
-                                                                          "2X compensated",
-                                                                          "4X compensated",
-                                                                          "8X compensated" },
-                                                            1));
-
-        layout.add (std::make_unique<AudioParameterBool> (ID::multiBandEnabled, "Multi-band", false, ""));
-
-        layout.add (std::make_unique<Parameter> (ID::multiBandFreq,
-                                                 "Sep. Freq.",
-                                                 "Hz",
-                                                 NormalisableRange<float> (20.0f, 22000.0f, 0.0f, 0.25f),
-                                                 2000.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::multiBandLowVolume,
-                                                 "Low volume",
-                                                 "dB",
-                                                 NormalisableRange<float> (-40.0f, 40.0f),
-                                                 0.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::multiBandHighVolume,
-                                                 "High volume",
-                                                 "dB",
-                                                 NormalisableRange<float> (-40.0f, 40.0f),
-                                                 0.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<AudioParameterBool> (ID::compressorEnabled, "Comp.", false, ""));
-
-        layout.add (std::make_unique<Parameter> (ID::compressorThreshold,
-                                                 "Threshold",
-                                                 "dB",
-                                                 NormalisableRange<float> (-100.0f, 0.0f),
-                                                 0.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::compressorRatio,
-                                                 "Ratio",
-                                                 ":1",
-                                                 NormalisableRange<float> (1.0f, 100.0f, 0.0f, 0.25f),
-                                                 1.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::compressorAttack,
-                                                 "Attack",
-                                                 "ms",
-                                                 NormalisableRange<float> (0.01f, 1000.0f, 0.0f, 0.25f),
-                                                 1.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::compressorRelease,
-                                                 "Release",
-                                                 "ms",
-                                                 NormalisableRange<float> (10.0f, 10000.0f, 0.0f, 0.25f),
-                                                 100.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<AudioParameterBool> (ID::noiseGateEnabled, "Gate", false, ""));
-
-        layout.add (std::make_unique<Parameter> (ID::noiseGateThreshold,
-                                                 "Threshold",
-                                                 "dB",
-                                                 NormalisableRange<float> (-100.0f, 0.0f),
-                                                 -100.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::noiseGateRatio,
-                                                 "Ratio",
-                                                 ":1",
-                                                 NormalisableRange<float> (1.0f, 100.0f, 0.0f, 0.25f),
-                                                 10.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::noiseGateAttack,
-                                                 "Attack",
-                                                 "ms",
-                                                 NormalisableRange<float> (0.01f, 1000.0f, 0.0f, 0.25f),
-                                                 1.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::noiseGateRelease,
-                                                 "Release",
-                                                 "ms",
-                                                 NormalisableRange<float> (10.0f, 10000.0f, 0.0f, 0.25f),
-                                                 100.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<AudioParameterBool> (ID::limiterEnabled, "Limiter", false, ""));
-
-        layout.add (std::make_unique<Parameter> (ID::limiterThreshold,
-                                                 "Threshold",
-                                                 "dB",
-                                                 NormalisableRange<float> (-40.0f, 0.0f),
-                                                 0.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::limiterRelease,
-                                                 "Release",
-                                                 "ms",
-                                                 NormalisableRange<float> (10.0f, 10000.0f, 0.0f, 0.25f),
-                                                 100.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<AudioParameterBool> (ID::directDelayEnabled, "DL Dir.", false, ""));
-
-        layout.add (std::make_unique<AudioParameterChoice> (ID::directDelayType,
-                                                            "DL Type",
-                                                            StringArray { "None",
-                                                                          "Linear",
-                                                                          "Lagrange",
-                                                                          "Thiran" },
-                                                            1));
-
-        layout.add (std::make_unique<Parameter> (ID::directDelayValue,
-                                                 "Delay",
-                                                 "smps",
-                                                 NormalisableRange<float> (0.0f, 44100.0f),
-                                                 0.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::directDelaySmoothing,
-                                                 "Smooth",
-                                                 "ms",
-                                                 NormalisableRange<float> (20.0f, 10000.0f, 0.0f, 0.25f),
-                                                 200.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::directDelayMix,
-                                                 "Delay Mix",
-                                                 "%",
-                                                 NormalisableRange<float> (0.0f, 100.0f),
-                                                 50.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<AudioParameterBool> (ID::delayEffectEnabled, "DL Effect", false, ""));
-
-        layout.add (std::make_unique<AudioParameterChoice> (ID::delayEffectType,
-                                                            "DL Type",
-                                                            StringArray { "None",
-                                                                          "Linear",
-                                                                          "Lagrange",
-                                                                          "Thiran" },
-                                                            1));
-
-        layout.add (std::make_unique<Parameter> (ID::delayEffectValue,
-                                                 "Delay",
-                                                 "ms",
-                                                 NormalisableRange<float> (0.01f, 1000.0f),
-                                                 100.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::delayEffectSmoothing,
-                                                 "Smooth",
-                                                 "ms",
-                                                 NormalisableRange<float> (20.0f, 10000.0f, 0.0f, 0.25f),
-                                                 400.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::delayEffectLowpass,
-                                                 "Low-pass",
-                                                 "Hz",
-                                                 NormalisableRange<float> (20.0f, 22000.0f, 0.0f, 0.25f),
-                                                 22000.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::delayEffectMix,
-                                                 "Delay Mix",
-                                                 "%",
-                                                 NormalisableRange<float> (0.0f, 100.0f),
-                                                 50.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::delayEffectFeedback,
-                                                 "Feedback",
-                                                 "dB",
-                                                 NormalisableRange<float> (-100.0f, 0.0f),
-                                                 -100.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<AudioParameterBool> (ID::phaserEnabled, "Phaser", false, ""));
-
-        layout.add (std::make_unique<Parameter> (ID::phaserRate,
-                                                 "Rate",
-                                                 "Hz",
-                                                 NormalisableRange<float> (0.05f, 20.0f, 0.0f, 0.25f),
-                                                 1.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::phaserDepth,
-                                                 "Depth",
-                                                 "%",
-                                                 NormalisableRange<float> (0.0f, 100.0f),
-                                                 50.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::phaserCentreFrequency,
-                                                 "Center",
-                                                 "Hz",
-                                                 NormalisableRange<float> (20.0f, 20000.0f, 0.0f, 0.25f),
-                                                 600.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::phaserFeedback,
-                                                 "Feedback",
-                                                 "%",
-                                                 NormalisableRange<float> (0.0f, 100.0f),
-                                                 50.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::phaserMix,
-                                                 "Mix",
-                                                 "%",
-                                                 NormalisableRange<float> (0.0f, 100.0f),
-                                                 50.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<AudioParameterBool> (ID::chorusEnabled, "Chorus", false, ""));
-
-        layout.add (std::make_unique<Parameter> (ID::chorusRate,
-                                                 "Rate",
-                                                 "Hz",
-                                                 NormalisableRange<float> (0.05f, 20.0f, 0.0f, 0.25f),
-                                                 1.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::chorusDepth,
-                                                 "Depth",
-                                                 "%",
-                                                 NormalisableRange<float> (0.0f, 100.0f),
-                                                 50.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::chorusCentreDelay,
-                                                 "Center",
-                                                 "ms",
-                                                 NormalisableRange<float> (1.0f, 100.0f, 0.0f, 0.25f),
-                                                 7.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::chorusFeedback,
-                                                 "Feedback",
-                                                 "%",
-                                                 NormalisableRange<float> (0.0f, 100.0f),
-                                                 50.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::chorusMix,
-                                                 "Mix",
-                                                 "%",
-                                                 NormalisableRange<float> (0.0f, 100.0f),
-                                                 50.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<AudioParameterBool> (ID::ladderEnabled, "Ladder", false, ""));
-
-        layout.add (std::make_unique<AudioParameterChoice> (ID::ladderMode,
-                                                            "Mode",
-                                                            StringArray { "LP12",
-                                                                          "LP24",
-                                                                          "HP12",
-                                                                          "HP24",
-                                                                          "BP12",
-                                                                          "BP24" },
-                                                            1));
-
-        layout.add (std::make_unique<Parameter> (ID::ladderCutoff,
-                                                 "Frequency",
-                                                 "Hz",
-                                                 NormalisableRange<float> (10.0f, 22000.0f, 0.0f, 0.25f),
-                                                 1000.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::ladderResonance,
-                                                 "Resonance",
-                                                 "%",
-                                                 NormalisableRange<float> (0.0f, 100.0f),
-                                                 0.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        layout.add (std::make_unique<Parameter> (ID::ladderDrive,
-                                                 "Drive",
-                                                 "dB",
-                                                 NormalisableRange<float> (0.0f, 40.0f),
-                                                 0.0f,
-                                                 valueToTextFunction,
-                                                 textToValueFunction));
-
-        return layout;
     }
 
     //==============================================================================
@@ -1046,14 +1061,110 @@ private:
             { 2, 3, dsp::Oversampling<float>::filterHalfBandPolyphaseIIR, true, true },
         } };
 
+        static float clip (float in) { return juce::jlimit (-1.0f, 1.0f, in); }
+
         dsp::FirstOrderTPTFilter<float> lowpass, highpass;
         dsp::Gain<float> distGain, compGain;
         dsp::DryWetMixer<float> mixer { 10 };
         std::array<dsp::WaveShaper<float>, 2> waveShapers { { { std::tanh },
                                                               { dsp::FastMathApproximations::tanh } } };
-        dsp::WaveShaper<float> clipping;
+        dsp::WaveShaper<float> clipping { clip };
         int currentIndexOversampling = 0;
         int currentIndexWaveshaper   = 0;
+    };
+
+    struct ConvolutionProcessor
+    {
+        ConvolutionProcessor()
+        {
+            loadImpulseResponse (cabinet, "guitar_amp.wav");
+            loadImpulseResponse (reverb,  "reverb_ir.wav");
+            mixer.setMixingRule (dsp::DryWetMixingRule::balanced);
+        }
+
+        void prepare (const dsp::ProcessSpec& spec)
+        {
+            prepareAll (spec, cabinet, reverb, mixer);
+        }
+
+        void reset()
+        {
+            resetAll (cabinet, reverb, mixer);
+        }
+
+        template <typename Context>
+        void process (Context& context)
+        {
+            auto contextConv = context;
+            contextConv.isBypassed = (! cabEnabled) || context.isBypassed;
+            cabinet.process (contextConv);
+
+            if (cabEnabled)
+                context.getOutputBlock().multiplyBy (4.0f);
+
+            if (reverbEnabled)
+                mixer.pushDrySamples (context.getInputBlock());
+
+            contextConv.isBypassed = (! reverbEnabled) || context.isBypassed;
+            reverb.process (contextConv);
+
+            if (reverbEnabled)
+            {
+                const auto& outputBlock = context.getOutputBlock();
+                outputBlock.multiplyBy (4.0f);
+                mixer.mixWetSamples (outputBlock);
+            }
+        }
+
+        int getLatency() const
+        {
+            auto latency = 0;
+
+            if (cabEnabled)
+                latency += cabinet.getLatency();
+
+            if (reverbEnabled)
+                latency += reverb.getLatency();
+
+            return latency;
+        }
+
+        dsp::Convolution cabinet { dsp::Convolution::NonUniform { 512 } };
+        dsp::Convolution reverb { dsp::Convolution::NonUniform { 512 } };
+        dsp::DryWetMixer<float> mixer;
+        bool cabEnabled = false, reverbEnabled = false;
+
+    private:
+        static void loadImpulseResponse (dsp::Convolution& convolution, const char* filename)
+        {
+            auto stream = createAssetInputStream (filename);
+
+            if (stream == nullptr)
+            {
+                jassertfalse;
+                return;
+            }
+
+            AudioFormatManager manager;
+            manager.registerBasicFormats();
+            std::unique_ptr<AudioFormatReader> reader { manager.createReaderFor (std::move (stream)) };
+
+            if (reader == nullptr)
+            {
+                jassertfalse;
+                return;
+            }
+
+            AudioBuffer<float> buffer (static_cast<int> (reader->numChannels),
+                                       static_cast<int> (reader->lengthInSamples));
+            reader->read (buffer.getArrayOfWritePointers(), buffer.getNumChannels(), 0, buffer.getNumSamples());
+
+            convolution.loadImpulseResponse (std::move (buffer),
+                                             reader->sampleRate,
+                                             dsp::Convolution::Stereo::yes,
+                                             dsp::Convolution::Trim::yes,
+                                             dsp::Convolution::Normalise::yes);
+        }
     };
 
     struct MultiBandProcessor
@@ -1181,6 +1292,9 @@ private:
                                 thiran.pushSample (int (channel), samplesIn[i]);
                                 thiran.setDelay ((float) delay);
                                 return thiran.popSample (int (channel));
+
+                            default:
+                                break;
                         }
 
                         jassertfalse;
@@ -1277,6 +1391,9 @@ private:
                                 thiran.pushSample (int (channel), input);
                                 thiran.setDelay ((float) delay);
                                 return thiran.popSample (int (channel));
+
+                            default:
+                                break;
                         }
 
                         jassertfalse;
@@ -1312,6 +1429,9 @@ private:
         int delayEffectType = 1;
     };
 
+    ParameterReferences parameters;
+    AudioProcessorValueTreeState apvts;
+
     using Chain = dsp::ProcessorChain<dsp::NoiseGate<float>,
                                       dsp::Gain<float>,
                                       DirectDelayProcessor,
@@ -1322,6 +1442,7 @@ private:
                                       DistortionProcessor,
                                       dsp::LadderFilter<float>,
                                       DelayEffectProcessor,
+                                      ConvolutionProcessor,
                                       dsp::Limiter<float>,
                                       dsp::Gain<float>,
                                       dsp::Panner<float>>;
@@ -1340,6 +1461,7 @@ private:
         distortionIndex,
         ladderIndex,
         delayEffectIndex,
+        convolutionIndex,
         limiterIndex,
         outputGainIndex,
         pannerIndex
@@ -1347,6 +1469,7 @@ private:
 
     //==============================================================================
     std::atomic<bool> requiresUpdate { true };
+    std::atomic<int> irSize { 0 };
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DspModulePluginDemo)
@@ -1362,6 +1485,7 @@ public:
     {
         comboEffect.addSectionHeading ("Main");
         comboEffect.addItem ("Distortion", TabDistortion);
+        comboEffect.addItem ("Convolution", TabConvolution);
         comboEffect.addItem ("Multi-band", TabMultiBand);
 
         comboEffect.addSectionHeading ("Dynamics");
@@ -1390,6 +1514,7 @@ public:
                               labelEffect,
                               basicControls,
                               distortionControls,
+                              convolutionControls,
                               multibandControls,
                               compressorControls,
                               noiseGateControls,
@@ -1432,6 +1557,10 @@ public:
         g.setColour (Colours::white);
         g.setFont (Font (20.0f).italicised().withExtraKerningFactor (0.1f));
         g.drawFittedText ("DSP MODULE DEMO", rectTop.reduced (10, 0), Justification::centredLeft, 1);
+
+        g.setFont (Font (14.0f));
+        String strText = "IR length (reverb): " + String (proc.getCurrentIRSize()) + " samples";
+        g.drawFittedText (strText, rectBottom.reduced (10, 0), Justification::centredRight, 1);
     }
 
     void resized() override
@@ -1452,6 +1581,7 @@ public:
 
         forEach ([&] (Component& comp) { comp.setBounds (rectEffects); },
                  distortionControls,
+                 convolutionControls,
                  multibandControls,
                  compressorControls,
                  noiseGateControls,
@@ -1467,13 +1597,13 @@ private:
     class AttachedSlider  : public Component
     {
     public:
-        AttachedSlider (AudioProcessorValueTreeState& state, StringRef strID)
-            : label ("", state.getParameter (strID)->name),
-              attachment (state, strID, slider)
+        explicit AttachedSlider (RangedAudioParameter& param)
+            : label ("", param.name),
+              attachment (param, slider)
         {
             addAllAndMakeVisible (*this, slider, label);
 
-            slider.setTextValueSuffix (" " + state.getParameter (strID)->label);
+            slider.setTextValueSuffix (" " + param.label);
 
             label.attachToComponent (&slider, false);
             label.setJustificationType (Justification::centred);
@@ -1484,15 +1614,15 @@ private:
     private:
         Slider slider { Slider::RotaryVerticalDrag, Slider::TextBoxBelow };
         Label label;
-        AudioProcessorValueTreeState::SliderAttachment attachment;
+        SliderParameterAttachment attachment;
     };
 
     class AttachedToggle  : public Component
     {
     public:
-        AttachedToggle (AudioProcessorValueTreeState& state, StringRef strID)
-            : toggle (state.getParameter (strID)->name),
-              attachment (state, strID, toggle)
+        explicit AttachedToggle (RangedAudioParameter& param)
+            : toggle (param.name),
+              attachment (param, toggle)
         {
             addAndMakeVisible (toggle);
         }
@@ -1501,16 +1631,16 @@ private:
 
     private:
         ToggleButton toggle;
-        AudioProcessorValueTreeState::ButtonAttachment attachment;
+        ButtonParameterAttachment attachment;
     };
 
     class AttachedCombo  : public Component
     {
     public:
-        AttachedCombo (AudioProcessorValueTreeState& state, StringRef strID)
-            : combo (state, strID),
-              label ("", state.getParameter (strID)->name),
-              attachment (state, strID, combo)
+        explicit AttachedCombo (RangedAudioParameter& param)
+            : combo (param),
+              label ("", param.name),
+              attachment (param, combo)
         {
             addAllAndMakeVisible (*this, combo, label);
 
@@ -1526,17 +1656,17 @@ private:
     private:
         struct ComboWithItems : public ComboBox
         {
-            ComboWithItems (AudioProcessorValueTreeState& state, StringRef strID)
+            explicit ComboWithItems (RangedAudioParameter& param)
             {
                 // Adding the list here in the constructor means that the combo
                 // is already populated when we construct the attachment below
-                addItemList (dynamic_cast<AudioParameterChoice*> (state.getParameter (strID))->choices, 1);
+                addItemList (dynamic_cast<AudioParameterChoice&> (param).choices, 1);
             }
         };
 
         ComboWithItems combo;
         Label label;
-        AudioProcessorValueTreeState::ComboBoxAttachment attachment;
+        ComboBoxParameterAttachment attachment;
     };
 
     //==============================================================================
@@ -1553,6 +1683,7 @@ private:
 
         forEach (op,
                  std::forward_as_tuple (distortionControls,  TabDistortion),
+                 std::forward_as_tuple (convolutionControls, TabConvolution),
                  std::forward_as_tuple (multibandControls,   TabMultiBand),
                  std::forward_as_tuple (compressorControls,  TabCompressor),
                  std::forward_as_tuple (noiseGateControls,   TabNoiseGate),
@@ -1567,6 +1698,7 @@ private:
     enum EffectsTabs
     {
         TabDistortion = 1,
+        TabConvolution,
         TabMultiBand,
         TabCompressor,
         TabNoiseGate,
@@ -1614,10 +1746,10 @@ private:
 
     struct BasicControls : public Component
     {
-        explicit BasicControls (AudioProcessorValueTreeState& state)
-            : pan       (state, ID::pan),
-              input     (state, ID::inputGain),
-              output    (state, ID::outputGain)
+        explicit BasicControls (const DspModulePluginDemo::ParameterReferences& state)
+            : pan       (state.pan),
+              input     (state.inputGain),
+              output    (state.outputGain)
         {
             addAllAndMakeVisible (*this, pan, input, output);
         }
@@ -1632,15 +1764,15 @@ private:
 
     struct DistortionControls : public Component
     {
-        explicit DistortionControls (AudioProcessorValueTreeState& state)
-            : toggle       (state, ID::distortionEnabled),
-              lowpass      (state, ID::distortionLowpass),
-              highpass     (state, ID::distortionHighpass),
-              mix          (state, ID::distortionMix),
-              gain         (state, ID::distortionInGain),
-              compv        (state, ID::distortionCompGain),
-              type         (state, ID::distortionType),
-              oversampling (state, ID::distortionOversampler)
+        explicit DistortionControls (const DspModulePluginDemo::ParameterReferences& state)
+            : toggle       (state.distortionEnabled),
+              lowpass      (state.distortionLowpass),
+              highpass     (state.distortionHighpass),
+              mix          (state.distortionMix),
+              gain         (state.distortionInGain),
+              compv        (state.distortionCompGain),
+              type         (state.distortionType),
+              oversampling (state.distortionOversampler)
         {
             addAllAndMakeVisible (*this, toggle, type, lowpass, highpass, mix, gain, compv, oversampling);
         }
@@ -1655,13 +1787,32 @@ private:
         AttachedCombo type, oversampling;
     };
 
+    struct ConvolutionControls : public Component
+    {
+        explicit ConvolutionControls (const DspModulePluginDemo::ParameterReferences& state)
+            : cab    (state.convolutionCabEnabled),
+              reverb (state.convolutionReverbEnabled),
+              mix    (state.convolutionReverbMix)
+        {
+            addAllAndMakeVisible (*this, cab, reverb, mix);
+        }
+
+        void resized() override
+        {
+            performLayout (getLocalBounds(), cab, reverb, mix);
+        }
+
+        AttachedToggle cab, reverb;
+        AttachedSlider mix;
+    };
+
     struct MultiBandControls : public Component
     {
-        explicit MultiBandControls (AudioProcessorValueTreeState& state)
-            : toggle (state, ID::multiBandEnabled),
-              low    (state, ID::multiBandLowVolume),
-              high   (state, ID::multiBandHighVolume),
-              lRFreq (state, ID::multiBandFreq)
+        explicit MultiBandControls (const DspModulePluginDemo::ParameterReferences& state)
+            : toggle (state.multiBandEnabled),
+              low    (state.multiBandLowVolume),
+              high   (state.multiBandHighVolume),
+              lRFreq (state.multiBandFreq)
         {
             addAllAndMakeVisible (*this, toggle, low, high, lRFreq);
         }
@@ -1677,12 +1828,12 @@ private:
 
     struct CompressorControls : public Component
     {
-        explicit CompressorControls (AudioProcessorValueTreeState& state)
-            : toggle    (state, ID::compressorEnabled),
-              threshold (state, ID::compressorThreshold),
-              ratio     (state, ID::compressorRatio),
-              attack    (state, ID::compressorAttack),
-              release   (state, ID::compressorRelease)
+        explicit CompressorControls (const DspModulePluginDemo::ParameterReferences& state)
+            : toggle    (state.compressorEnabled),
+              threshold (state.compressorThreshold),
+              ratio     (state.compressorRatio),
+              attack    (state.compressorAttack),
+              release   (state.compressorRelease)
         {
             addAllAndMakeVisible (*this, toggle, threshold, ratio, attack, release);
         }
@@ -1698,12 +1849,12 @@ private:
 
     struct NoiseGateControls : public Component
     {
-        explicit NoiseGateControls (AudioProcessorValueTreeState& state)
-            : toggle    (state, ID::noiseGateEnabled),
-              threshold (state, ID::noiseGateThreshold),
-              ratio     (state, ID::noiseGateRatio),
-              attack    (state, ID::noiseGateAttack),
-              release   (state, ID::noiseGateRelease)
+        explicit NoiseGateControls (const DspModulePluginDemo::ParameterReferences& state)
+            : toggle    (state.noiseGateEnabled),
+              threshold (state.noiseGateThreshold),
+              ratio     (state.noiseGateRatio),
+              attack    (state.noiseGateAttack),
+              release   (state.noiseGateRelease)
         {
             addAllAndMakeVisible (*this, toggle, threshold, ratio, attack, release);
         }
@@ -1719,10 +1870,10 @@ private:
 
     struct LimiterControls : public Component
     {
-        explicit LimiterControls (AudioProcessorValueTreeState& state)
-            : toggle    (state, ID::limiterEnabled),
-              threshold (state, ID::limiterThreshold),
-              release   (state, ID::limiterRelease)
+        explicit LimiterControls (const DspModulePluginDemo::ParameterReferences& state)
+            : toggle    (state.limiterEnabled),
+              threshold (state.limiterThreshold),
+              release   (state.limiterRelease)
         {
             addAllAndMakeVisible (*this, toggle, threshold, release);
         }
@@ -1738,12 +1889,12 @@ private:
 
     struct DirectDelayControls : public Component
     {
-        explicit DirectDelayControls (AudioProcessorValueTreeState& state)
-            : toggle (state, ID::directDelayEnabled),
-              type   (state, ID::directDelayType),
-              delay  (state, ID::directDelayValue),
-              smooth (state, ID::directDelaySmoothing),
-              mix    (state, ID::directDelayMix)
+        explicit DirectDelayControls (const DspModulePluginDemo::ParameterReferences& state)
+            : toggle (state.directDelayEnabled),
+              type   (state.directDelayType),
+              delay  (state.directDelayValue),
+              smooth (state.directDelaySmoothing),
+              mix    (state.directDelayMix)
         {
             addAllAndMakeVisible (*this, toggle, type, delay, smooth, mix);
         }
@@ -1760,14 +1911,14 @@ private:
 
     struct DelayEffectControls : public Component
     {
-        explicit DelayEffectControls (AudioProcessorValueTreeState& state)
-            : toggle   (state, ID::delayEffectEnabled),
-              type     (state, ID::delayEffectType),
-              value    (state, ID::delayEffectValue),
-              smooth   (state, ID::delayEffectSmoothing),
-              lowpass  (state, ID::delayEffectLowpass),
-              feedback (state, ID::delayEffectFeedback),
-              mix      (state, ID::delayEffectMix)
+        explicit DelayEffectControls (const DspModulePluginDemo::ParameterReferences& state)
+            : toggle   (state.delayEffectEnabled),
+              type     (state.delayEffectType),
+              value    (state.delayEffectValue),
+              smooth   (state.delayEffectSmoothing),
+              lowpass  (state.delayEffectLowpass),
+              feedback (state.delayEffectFeedback),
+              mix      (state.delayEffectMix)
         {
             addAllAndMakeVisible (*this, toggle, type, value, smooth, lowpass, feedback, mix);
         }
@@ -1784,13 +1935,13 @@ private:
 
     struct PhaserControls : public Component
     {
-        explicit PhaserControls (AudioProcessorValueTreeState& state)
-            : toggle   (state, ID::phaserEnabled),
-              rate     (state, ID::phaserRate),
-              depth    (state, ID::phaserDepth),
-              centre   (state, ID::phaserCentreFrequency),
-              feedback (state, ID::phaserFeedback),
-              mix      (state, ID::phaserMix)
+        explicit PhaserControls (const DspModulePluginDemo::ParameterReferences& state)
+            : toggle   (state.phaserEnabled),
+              rate     (state.phaserRate),
+              depth    (state.phaserDepth),
+              centre   (state.phaserCentreFrequency),
+              feedback (state.phaserFeedback),
+              mix      (state.phaserMix)
         {
             addAllAndMakeVisible (*this, toggle, rate, depth, centre, feedback, mix);
         }
@@ -1806,13 +1957,13 @@ private:
 
     struct ChorusControls : public Component
     {
-        explicit ChorusControls (AudioProcessorValueTreeState& state)
-            : toggle   (state, ID::chorusEnabled),
-              rate     (state, ID::chorusRate),
-              depth    (state, ID::chorusDepth),
-              centre   (state, ID::chorusCentreDelay),
-              feedback (state, ID::chorusFeedback),
-              mix      (state, ID::chorusMix)
+        explicit ChorusControls (const DspModulePluginDemo::ParameterReferences& state)
+            : toggle   (state.chorusEnabled),
+              rate     (state.chorusRate),
+              depth    (state.chorusDepth),
+              centre   (state.chorusCentreDelay),
+              feedback (state.chorusFeedback),
+              mix      (state.chorusMix)
         {
             addAllAndMakeVisible (*this, toggle, rate, depth, centre, feedback, mix);
         }
@@ -1828,12 +1979,12 @@ private:
 
     struct LadderControls : public Component
     {
-        explicit LadderControls (AudioProcessorValueTreeState& state)
-            : toggle    (state, ID::ladderEnabled),
-              mode      (state, ID::ladderMode),
-              freq      (state, ID::ladderCutoff),
-              resonance (state, ID::ladderResonance),
-              drive     (state, ID::ladderDrive)
+        explicit LadderControls (const DspModulePluginDemo::ParameterReferences& state)
+            : toggle    (state.ladderEnabled),
+              mode      (state.ladderMode),
+              freq      (state.ladderCutoff),
+              resonance (state.ladderResonance),
+              drive     (state.ladderDrive)
         {
             addAllAndMakeVisible (*this, toggle, mode, freq, resonance, drive);
         }
@@ -1857,17 +2008,18 @@ private:
     //==============================================================================
     DspModulePluginDemo& proc;
 
-    BasicControls       basicControls       { proc.apvts };
-    DistortionControls  distortionControls  { proc.apvts };
-    MultiBandControls   multibandControls   { proc.apvts };
-    CompressorControls  compressorControls  { proc.apvts };
-    NoiseGateControls   noiseGateControls   { proc.apvts };
-    LimiterControls     limiterControls     { proc.apvts };
-    DirectDelayControls directDelayControls { proc.apvts };
-    DelayEffectControls delayEffectControls { proc.apvts };
-    PhaserControls      phaserControls      { proc.apvts };
-    ChorusControls      chorusControls      { proc.apvts };
-    LadderControls      ladderControls      { proc.apvts };
+    BasicControls       basicControls       { proc.getParameterValues() };
+    DistortionControls  distortionControls  { proc.getParameterValues() };
+    ConvolutionControls convolutionControls { proc.getParameterValues() };
+    MultiBandControls   multibandControls   { proc.getParameterValues() };
+    CompressorControls  compressorControls  { proc.getParameterValues() };
+    NoiseGateControls   noiseGateControls   { proc.getParameterValues() };
+    LimiterControls     limiterControls     { proc.getParameterValues() };
+    DirectDelayControls directDelayControls { proc.getParameterValues() };
+    DelayEffectControls delayEffectControls { proc.getParameterValues() };
+    PhaserControls      phaserControls      { proc.getParameterValues() };
+    ChorusControls      chorusControls      { proc.getParameterValues() };
+    LadderControls      ladderControls      { proc.getParameterValues() };
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DspModulePluginDemoEditor)

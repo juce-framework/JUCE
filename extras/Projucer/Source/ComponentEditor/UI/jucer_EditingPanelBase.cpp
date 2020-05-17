@@ -24,7 +24,7 @@
 class EditingPanelBase::MagnifierComponent  : public Component
 {
 public:
-    MagnifierComponent (Component* c) : content (c)
+    explicit MagnifierComponent (Component* c) : content (c)
     {
         addAndMakeVisible (content.get());
         childBoundsChanged (content.get());
@@ -53,7 +53,7 @@ private:
 class ZoomingViewport   : public Viewport
 {
 public:
-    ZoomingViewport (EditingPanelBase* p) : panel (p)
+    explicit ZoomingViewport (EditingPanelBase* p) : panel (p)
     {
     }
 

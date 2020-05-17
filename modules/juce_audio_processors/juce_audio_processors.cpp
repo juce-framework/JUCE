@@ -60,8 +60,10 @@
 namespace juce
 {
 
-static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
-                                        const PluginDescription& desc)
+#if JUCE_PLUGINHOST_VST || (JUCE_PLUGINHOST_LADSPA && JUCE_LINUX)
+
+static bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
+                                 const PluginDescription& desc)
 {
     for (auto* p : list)
         if (p->isDuplicateOf (desc))
@@ -69,6 +71,8 @@ static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& lis
 
     return false;
 }
+
+#endif
 
 #if JUCE_MAC || JUCE_IOS
 

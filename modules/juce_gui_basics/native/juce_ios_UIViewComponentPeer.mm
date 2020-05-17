@@ -29,6 +29,17 @@ static bool isUsingOldRotationMethod() noexcept
     return isPreV8;
 }
 
+static UIInterfaceOrientation getWindowOrientation()
+{
+    UIApplication* sharedApplication = [UIApplication sharedApplication];
+
+   #if (defined (__IPHONE_13_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0)
+    return [[[[sharedApplication windows] firstObject] windowScene] interfaceOrientation];
+   #else
+    return [sharedApplication statusBarOrientation];
+   #endif
+}
+
 namespace Orientations
 {
     static Desktop::DisplayOrientation convertToJuce (UIInterfaceOrientation orientation)
@@ -39,6 +50,7 @@ namespace Orientations
             case UIInterfaceOrientationPortraitUpsideDown:  return Desktop::upsideDown;
             case UIInterfaceOrientationLandscapeLeft:       return Desktop::rotatedClockwise;
             case UIInterfaceOrientationLandscapeRight:      return Desktop::rotatedAntiClockwise;
+            case UIInterfaceOrientationUnknown:
             default:                                        jassertfalse; // unknown orientation!
         }
 
@@ -53,6 +65,7 @@ namespace Orientations
             case Desktop::upsideDown:                       return UIInterfaceOrientationPortraitUpsideDown;
             case Desktop::rotatedClockwise:                 return UIInterfaceOrientationLandscapeLeft;
             case Desktop::rotatedAntiClockwise:             return UIInterfaceOrientationLandscapeRight;
+            case Desktop::allOrientations:
             default:                                        jassertfalse; // unknown orientation!
         }
 
@@ -68,7 +81,9 @@ namespace Orientations
                 case Desktop::upsideDown:             return CGAffineTransformMake (-1, 0,  0, -1, 0, 0);
                 case Desktop::rotatedClockwise:       return CGAffineTransformMake (0, -1,  1,  0, 0, 0);
                 case Desktop::rotatedAntiClockwise:   return CGAffineTransformMake (0,  1, -1,  0, 0, 0);
-                default: break;
+                case Desktop::upright:
+                case Desktop::allOrientations:
+                default:                              break;
             }
         }
 
@@ -88,6 +103,23 @@ namespace Orientations
         return allowed;
     }
 }
+
+struct AsyncBoundsUpdater  : public AsyncUpdater
+{
+    AsyncBoundsUpdater (UIViewController* vc)
+        : viewController (vc)
+    {
+    }
+
+    ~AsyncBoundsUpdater() override
+    {
+        cancelPendingUpdate();
+    }
+
+    void handleAsyncUpdate() override;
+
+    UIViewController* viewController;
+};
 
 //==============================================================================
 } // namespace juce
@@ -122,7 +154,11 @@ using namespace juce;
 //==============================================================================
 @interface JuceUIViewController : UIViewController
 {
+@public
+    std::unique_ptr<AsyncBoundsUpdater> boundsUpdater;
 }
+
+- (JuceUIViewController*) init;
 
 - (NSUInteger) supportedInterfaceOrientations;
 - (BOOL) shouldAutorotateToInterfaceOrientation: (UIInterfaceOrientation) interfaceOrientation;
@@ -186,8 +222,8 @@ public:
     Rectangle<int> getBounds() const override               { return getBounds (! isSharedWindow); }
     Rectangle<int> getBounds (bool global) const;
     Point<float> localToGlobal (Point<float> relativePosition) override;
-    using ComponentPeer::localToGlobal;
     Point<float> globalToLocal (Point<float> screenPosition) override;
+    using ComponentPeer::localToGlobal;
     using ComponentPeer::globalToLocal;
     void setAlpha (float newAlpha) override;
     void setMinimised (bool) override                       {}
@@ -242,7 +278,7 @@ public:
         {
             const Rectangle<int> screen (convertToRectInt ([UIScreen mainScreen].bounds));
 
-            switch ([[UIApplication sharedApplication] statusBarOrientation])
+            switch (getWindowOrientation())
             {
                 case UIInterfaceOrientationPortrait:
                     return r;
@@ -259,6 +295,7 @@ public:
                     return Rectangle<int> (screen.getWidth() - r.getBottom(), r.getX(),
                                            r.getHeight(), r.getWidth());
 
+                case UIInterfaceOrientationUnknown:
                 default: jassertfalse; // unknown orientation!
             }
         }
@@ -272,7 +309,7 @@ public:
         {
             const Rectangle<int> screen (convertToRectInt ([UIScreen mainScreen].bounds));
 
-            switch ([[UIApplication sharedApplication] statusBarOrientation])
+            switch (getWindowOrientation())
             {
                 case UIInterfaceOrientationPortrait:
                     return r;
@@ -289,6 +326,7 @@ public:
                     return Rectangle<int> (r.getY(), screen.getWidth() - r.getRight(),
                                            r.getHeight(), r.getWidth());
 
+                case UIInterfaceOrientationUnknown:
                 default: jassertfalse; // unknown orientation!
             }
         }
@@ -328,6 +366,11 @@ static void sendScreenBoundsUpdate (JuceUIViewController* c)
         juceView->owner->updateTransformAndScreenBounds();
 }
 
+void AsyncBoundsUpdater::handleAsyncUpdate()
+{
+    sendScreenBoundsUpdate ((JuceUIViewController*) viewController);
+}
+
 static bool isKioskModeView (JuceUIViewController* c)
 {
     JuceUIView* juceView = (JuceUIView*) [c view];
@@ -343,6 +386,15 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 //==============================================================================
 //==============================================================================
 @implementation JuceUIViewController
+
+- (JuceUIViewController*) init
+{
+    self = [super init];
+
+    boundsUpdater = std::make_unique<AsyncBoundsUpdater> (self);
+
+    return self;
+}
 
 - (NSUInteger) supportedInterfaceOrientations
 {
@@ -376,7 +428,8 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 
     // On some devices the screen-size isn't yet updated at this point, so also trigger another
     // async update to double-check..
-    MessageManager::callAsync ([=] { sendScreenBoundsUpdate (self); });
+    if (boundsUpdater != nullptr)
+        boundsUpdater->triggerAsyncUpdate();
 }
 
 - (BOOL) prefersStatusBarHidden
@@ -614,6 +667,8 @@ UIViewComponentPeer::~UIViewComponentPeer()
 {
     currentTouches.deleteAllTouchesForPeer (this);
     Desktop::getInstance().removeFocusChangeListener (this);
+
+    ((JuceUIViewController*) controller)->boundsUpdater = nullptr;
 
     view->owner = nullptr;
     [view removeFromSuperview];

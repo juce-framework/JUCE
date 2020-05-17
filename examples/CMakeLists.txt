@@ -18,12 +18,27 @@ add_subdirectory(CMake)
 add_subdirectory(DemoRunner)
 
 function(_juce_add_pips)
-    file(GLOB_RECURSE headers
+    file(GLOB headers
         CONFIGURE_DEPENDS LIST_DIRECTORIES false
         "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 
     foreach(header IN ITEMS ${headers})
-        juce_add_pip(${header})
+        juce_add_pip(${header} added_target)
+        target_link_libraries(${added_target} PRIVATE
+            juce::juce_recommended_config_flags
+            juce::juce_recommended_lto_flags
+            juce::juce_recommended_warning_flags)
+
+        get_target_property(active_targets ${added_target} JUCE_ACTIVE_PLUGIN_TARGETS)
+
+        if(active_targets)
+            foreach(plugin_target IN LISTS active_targets)
+                target_link_libraries(${plugin_target} PRIVATE
+                    juce::juce_recommended_config_flags
+                    juce::juce_recommended_lto_flags
+                    juce::juce_recommended_warning_flags)
+            endforeach()
+        endif()
     endforeach()
 endfunction()
 

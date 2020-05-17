@@ -37,7 +37,7 @@ public:
         startTimer (1000);
     }
 
-    ~MainContentComponent()
+    ~MainContentComponent() override
     {
         shutdownAudio();
     }
@@ -46,7 +46,7 @@ public:
     void prepareToPlay (int bufferSize, double sampleRate) override
     {
         currentSampleRate = sampleRate;
-        allocateBuffers (bufferSize);
+        allocateBuffers (static_cast<size_t> (bufferSize));
         printHeader();
     }
 

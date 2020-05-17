@@ -157,7 +157,7 @@ public:
     inline Matrix& hadarmard (const Matrix& other) noexcept             { return apply (other, [] (ElementType a, ElementType b) { return a * b; } ); }
 
     /** Does a hadarmard product with a and b returns the result. */
-    static inline Matrix hadarmard (const Matrix& a, const Matrix& b)   { Matrix result (a); result.hadarmard (b); return result; }
+    static Matrix hadarmard (const Matrix& a, const Matrix& b)          { Matrix result (a); result.hadarmard (b); return result; }
 
     //==============================================================================
     /** Compare to matrices with a given tolerance */

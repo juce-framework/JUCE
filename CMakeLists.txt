@@ -20,7 +20,10 @@ project(JUCE VERSION 6.0.0 LANGUAGES C CXX)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 
+include(extras/Build/CMake/JUCEHelperTargets.cmake)
 include(extras/Build/CMake/JUCEUtils.cmake)
+
+juce_disable_default_flags()
 
 set_directory_properties(PROPERTIES
     JUCE_COMPANY_NAME       "JUCE"
@@ -70,31 +73,37 @@ endif()
 # ==================================================================================================
 # Install configuration
 
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.14")
+    set(extra_version_arg ARCH_INDEPENDENT)
+endif()
+
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file("${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
     VERSION ${JUCE_VERSION}
     COMPATIBILITY ExactVersion
-    ARCH_INDEPENDENT)
+    ${extra_version_arg})
 
 set(JUCE_INSTALL_DESTINATION "lib/cmake/JUCE-${JUCE_VERSION}" CACHE STRING
     "The location, relative to the install prefix, where the JUCE config file will be installed")
 
 install(EXPORT JUCE NAMESPACE juce:: DESTINATION "${JUCE_INSTALL_DESTINATION}")
 set(JUCE_EXPORT_FILE_NAME "JUCE.cmake")
+set(JUCE_MODULE_PATH "include/JUCE-${JUCE_VERSION}/modules")
 set(UTILS_INSTALL_DIR "${JUCE_INSTALL_DESTINATION}")
 set(JUCEAIDE_PATH "${JUCE_TOOL_INSTALL_DIR}/${JUCE_JUCEAIDE_NAME}")
 configure_package_config_file("${JUCE_CMAKE_UTILS_DIR}/JUCEConfig.cmake.in"
     "${JUCE_BINARY_DIR}/JUCEConfig.cmake"
-    PATH_VARS UTILS_INSTALL_DIR JUCEAIDE_PATH
+    PATH_VARS UTILS_INSTALL_DIR JUCEAIDE_PATH JUCE_MODULE_PATH
     INSTALL_DESTINATION "${JUCE_INSTALL_DESTINATION}")
 
 set(JUCE_EXPORT_FILE_NAME "JUCEBuildTree.cmake")
+set(JUCE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/modules")
 export(EXPORT JUCE NAMESPACE juce:: FILE "${JUCE_EXPORT_FILE_NAME}")
 set(UTILS_INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extras/Build/CMake")
 get_target_property(JUCEAIDE_PATH juceaide IMPORTED_LOCATION)
 configure_package_config_file("${JUCE_CMAKE_UTILS_DIR}/JUCEConfig.cmake.in"
     "${JUCE_BINARY_DIR}/JUCEExportConfig.cmake"
-    PATH_VARS UTILS_INSTALL_DIR JUCEAIDE_PATH
+    PATH_VARS UTILS_INSTALL_DIR JUCEAIDE_PATH JUCE_MODULE_PATH
     INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}"
     INSTALL_DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 

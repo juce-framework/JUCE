@@ -67,7 +67,7 @@ namespace
     static PortIOStats inputStats { "Input" }, outputStats { "Output" };
     static uint32 startTime = 0;
 
-    static inline void resetOnSecondBoundary()
+    static void resetOnSecondBoundary()
     {
         auto now = Time::getMillisecondCounter();
         double elapsedSec = (now - startTime) / 1000.0;
@@ -80,13 +80,13 @@ namespace
         }
     }
 
-    static inline void registerBytesOut (int numBytes)
+    static void registerBytesOut (int numBytes)
     {
         outputStats.registerMessage (numBytes);
         resetOnSecondBoundary();
     }
 
-    static inline void registerBytesIn (int numBytes)
+    static void registerBytesIn (int numBytes)
     {
         inputStats.registerMessage (numBytes);
         resetOnSecondBoundary();

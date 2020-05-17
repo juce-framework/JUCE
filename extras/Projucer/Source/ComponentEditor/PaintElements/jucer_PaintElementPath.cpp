@@ -94,7 +94,7 @@ class PathWindingModeProperty    : public ChoicePropertyComponent,
                                    public ChangeListener
 {
 public:
-    PathWindingModeProperty (PaintElementPath* const owner_)
+    explicit PathWindingModeProperty (PaintElementPath* const owner_)
         : ChoicePropertyComponent ("winding rule"),
           owner (owner_)
     {

@@ -1050,10 +1050,13 @@ private:
        #if JUCE_LINUX
         void PLUGIN_API onFDIsSet (Steinberg::Linux::FileDescriptor fd) override
         {
-            auto it = fdCallbackMap.find (fd);
+            if (plugFrame != nullptr)
+            {
+                auto it = fdCallbackMap.find (fd);
 
-            if (it != fdCallbackMap.end())
-                it->second (fd);
+                if (it != fdCallbackMap.end())
+                    it->second (fd);
+            }
         }
        #endif
 
@@ -1449,6 +1452,15 @@ private:
                 }
             }
 
+            void parentSizeChanged() override
+            {
+                if (pluginEditor != nullptr)
+                {
+                    resizeHostWindow();
+                    pluginEditor->repaint();
+                }
+            }
+
             void resizeHostWindow()
             {
                 if (pluginEditor != nullptr)
@@ -1474,7 +1486,7 @@ private:
                        #if JUCE_MAC
                         if (host.isWavelab() || host.isReaper())
                        #else
-                        if (host.isWavelab() || host.isAbletonLive())
+                        if (host.isWavelab() || host.isAbletonLive() || host.isBitwigStudio())
                        #endif
                             setBounds (0, 0, w, h);
                     }
@@ -1565,12 +1577,12 @@ private:
 namespace
 {
     template <typename FloatType> struct AudioBusPointerHelper {};
-    template <> struct AudioBusPointerHelper<float>  { static inline float**  impl (Vst::AudioBusBuffers& data) noexcept { return data.channelBuffers32; } };
-    template <> struct AudioBusPointerHelper<double> { static inline double** impl (Vst::AudioBusBuffers& data) noexcept { return data.channelBuffers64; } };
+    template <> struct AudioBusPointerHelper<float>  { static float**  impl (Vst::AudioBusBuffers& data) noexcept { return data.channelBuffers32; } };
+    template <> struct AudioBusPointerHelper<double> { static double** impl (Vst::AudioBusBuffers& data) noexcept { return data.channelBuffers64; } };
 
     template <typename FloatType> struct ChooseBufferHelper {};
-    template <> struct ChooseBufferHelper<float>  { static inline AudioBuffer<float>&  impl (AudioBuffer<float>& f, AudioBuffer<double>&  ) noexcept { return f; } };
-    template <> struct ChooseBufferHelper<double> { static inline AudioBuffer<double>& impl (AudioBuffer<float>&  , AudioBuffer<double>& d) noexcept { return d; } };
+    template <> struct ChooseBufferHelper<float>  { static AudioBuffer<float>&  impl (AudioBuffer<float>& f, AudioBuffer<double>&  ) noexcept { return f; } };
+    template <> struct ChooseBufferHelper<double> { static AudioBuffer<double>& impl (AudioBuffer<float>&  , AudioBuffer<double>& d) noexcept { return d; } };
 }
 
 

@@ -77,7 +77,7 @@
 
 /** Apply the macro FN to each of the other arguments. */
 #define JUCE_EACH(FN, ...)                                                     \
-    JUCE_NTH_ARG_(, ##__VA_ARGS__,                                             \
+    JUCE_NTH_ARG_(, __VA_ARGS__,                                               \
                   JUCE_EACH_39_,                                               \
                   JUCE_EACH_38_,                                               \
                   JUCE_EACH_37_,                                               \
@@ -118,7 +118,7 @@
                   JUCE_EACH_02_,                                               \
                   JUCE_EACH_01_,                                               \
                   JUCE_EACH_00_)                                               \
-    (FN, ##__VA_ARGS__)
+    (FN, __VA_ARGS__)
 
 /** Concatenate two tokens to form a new token. */
 #define JUCE_CONCAT_(a, b) a##b
@@ -148,7 +148,7 @@
 
     #define JUCE_IGNORE_WARNINGS_GCC_LIKE(compiler, ...)                       \
         _Pragma(JUCE_TO_STRING(compiler diagnostic push))                      \
-        JUCE_EACH(JUCE_CONCAT(JUCE_IGNORE_, compiler), ##__VA_ARGS__)
+        JUCE_EACH(JUCE_CONCAT(JUCE_IGNORE_, compiler), __VA_ARGS__)
 
     /** Push a new warning scope, and then ignore each warning for either clang
         or gcc. If the compiler doesn't support __has_warning, we add -Wpragmas
@@ -157,10 +157,10 @@
     */
     #if defined (__has_warning)
         #define JUCE_PUSH_WARNINGS_GCC_LIKE(compiler, ...)                     \
-            JUCE_IGNORE_WARNINGS_GCC_LIKE(compiler, ##__VA_ARGS__)
+            JUCE_IGNORE_WARNINGS_GCC_LIKE(compiler, __VA_ARGS__)
     #else
         #define JUCE_PUSH_WARNINGS_GCC_LIKE(compiler, ...)                     \
-            JUCE_IGNORE_WARNINGS_GCC_LIKE(compiler, "-Wpragmas", ##__VA_ARGS__)
+            JUCE_IGNORE_WARNINGS_GCC_LIKE(compiler, "-Wpragmas", __VA_ARGS__)
     #endif
 
     /** Pop the current warning scope. */

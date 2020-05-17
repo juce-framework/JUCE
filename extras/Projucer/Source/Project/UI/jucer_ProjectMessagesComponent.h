@@ -81,6 +81,8 @@ public:
 
             setBounds (bounds);
         }
+
+        messagesListComponent.resized();
     }
 
 private:

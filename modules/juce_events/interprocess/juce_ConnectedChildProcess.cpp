@@ -30,7 +30,7 @@ static const char* killMessage  = "__ipc_k_";
 static const char* pingMessage  = "__ipc_p_";
 enum { specialMessageSize = 8, defaultTimeoutMs = 8000 };
 
-static inline bool isMessageType (const MemoryBlock& mb, const char* messageType) noexcept
+static bool isMessageType (const MemoryBlock& mb, const char* messageType) noexcept
 {
     return mb.matches (messageType, (size_t) specialMessageSize);
 }

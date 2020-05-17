@@ -47,6 +47,8 @@
  #define JUCE_IPP_AVAILABLE 1
 #endif
 
+#include "containers/juce_FixedSizeFunction.h"
+
 #include "processors/juce_FIRFilter.cpp"
 #include "processors/juce_IIRFilter.cpp"
 #include "processors/juce_FirstOrderTPTFilter.cpp"
@@ -94,6 +96,8 @@
  #endif
 
  #include "containers/juce_AudioBlock_test.cpp"
+ #include "containers/juce_FixedSizeFunction_test.cpp"
+ #include "frequency/juce_Convolution_test.cpp"
  #include "frequency/juce_FFT_test.cpp"
  #include "processors/juce_FIRFilter_test.cpp"
  #include "processors/juce_ProcessorChain_test.cpp"

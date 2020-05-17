@@ -130,7 +130,7 @@ class ClassPropertiesPanel  : public Component,
                               private ChangeListener
 {
 public:
-    ClassPropertiesPanel (JucerDocument& doc)
+    explicit ClassPropertiesPanel (JucerDocument& doc)
         : document (doc)
     {
         addAndMakeVisible (panel1);
@@ -188,7 +188,7 @@ private:
     class ComponentClassNameProperty    : public ComponentTextProperty <Component>
     {
     public:
-        ComponentClassNameProperty (JucerDocument& doc)
+        explicit ComponentClassNameProperty (JucerDocument& doc)
             : ComponentTextProperty<Component> ("Class name", 128, false, nullptr, doc)
         {}
 
@@ -200,7 +200,7 @@ private:
     class ComponentCompNameProperty    : public ComponentTextProperty <Component>
     {
     public:
-        ComponentCompNameProperty (JucerDocument& doc)
+        explicit ComponentCompNameProperty (JucerDocument& doc)
             : ComponentTextProperty<Component> ("Component name", 200, false, nullptr, doc)
         {}
 
@@ -212,7 +212,7 @@ private:
     class ComponentParentClassesProperty    : public ComponentTextProperty <Component>
     {
     public:
-        ComponentParentClassesProperty (JucerDocument& doc)
+        explicit ComponentParentClassesProperty (JucerDocument& doc)
             : ComponentTextProperty<Component> ("Parent classes", 512, false, nullptr, doc)
         {}
 
@@ -224,7 +224,7 @@ private:
     class ComponentConstructorParamsProperty    : public ComponentTextProperty <Component>
     {
     public:
-        ComponentConstructorParamsProperty (JucerDocument& doc)
+        explicit ComponentConstructorParamsProperty (JucerDocument& doc)
             : ComponentTextProperty<Component> ("Constructor params", 2048, false, nullptr, doc)
         {}
 
@@ -236,7 +236,7 @@ private:
     class ComponentInitialisersProperty   : public ComponentTextProperty <Component>
     {
     public:
-        ComponentInitialisersProperty (JucerDocument& doc)
+        explicit ComponentInitialisersProperty (JucerDocument& doc)
             : ComponentTextProperty <Component> ("Member initialisers", 16384, true, nullptr, doc)
         {
             preferredHeight = 24 * 3;
@@ -280,7 +280,7 @@ private:
     class FixedSizeProperty    : public ComponentChoiceProperty <Component>
     {
     public:
-        FixedSizeProperty (JucerDocument& doc)
+        explicit FixedSizeProperty (JucerDocument& doc)
             : ComponentChoiceProperty<Component> ("Fixed size", nullptr, doc)
         {
             choices.add ("Resize component to fit workspace");
@@ -295,7 +295,7 @@ private:
     class TemplateFileProperty    : public ComponentTextProperty <Component>
     {
     public:
-        TemplateFileProperty (JucerDocument& doc)
+        explicit TemplateFileProperty (JucerDocument& doc)
             : ComponentTextProperty<Component> ("Template file", 2048, false, nullptr, doc)
         {}
 

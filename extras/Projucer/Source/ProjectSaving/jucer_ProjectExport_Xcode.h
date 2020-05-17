@@ -24,8 +24,7 @@
 namespace
 {
     static const char* const iOSDefaultVersion = "9.3";
-    static const StringArray iOSVersions { "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4",
-                                           "9.0", "9.1", "9.2", "9.3", "10.0", "10.1", "10.2", "10.3",
+    static const StringArray iOSVersions { "9.0", "9.1", "9.2", "9.3", "10.0", "10.1", "10.2", "10.3",
                                            "11.0", "12.0", "13.0" };
 
     static const int oldestDeploymentTarget  = 7;
@@ -293,7 +292,7 @@ public:
 
             {
                 StringArray orientationStrings { "Portrait", "Portrait Upside Down",
-                                                 "Landscape Left", "Landsscape Right" };
+                                                 "Landscape Left", "Landscape Right" };
 
                 Array<var> orientationVars { "UIInterfaceOrientationPortrait", "UIInterfaceOrientationPortraitUpsideDown",
                                              "UIInterfaceOrientationLandscapeLeft", "UIInterfaceOrientationLandscapeRight" };
@@ -1007,9 +1006,9 @@ public:
         StringArray xcodeFrameworks, xcodeLibs;
         Array<XmlElement> xcodeExtraPListEntries;
 
-        StringArray frameworkIDs, buildPhaseIDs, configIDs, sourceIDs, rezFileIDs;
+        StringArray frameworkIDs, buildPhaseIDs, configIDs, sourceIDs, rezFileIDs, dependencyIDs;
         StringArray frameworkNames;
-        String dependencyID, mainBuildProductID;
+        String mainBuildProductID;
         File infoPlistFile;
 
         struct SourceFileInfo
@@ -1055,7 +1054,7 @@ public:
             jassert (xcodeFileType.isNotEmpty());
             jassert (xcodeBundleExtension.isEmpty() || xcodeBundleExtension.startsWithChar ('.'));
 
-            if (ProjectExporter::BuildConfiguration::Ptr config = owner.getConfiguration(0))
+            if (ProjectExporter::BuildConfiguration::Ptr config = owner.getConfiguration (0))
             {
                 auto productName = owner.replacePreprocessorTokens (*config, config->getTargetBinaryNameString (type == UnityPlugIn));
 
@@ -1081,24 +1080,42 @@ public:
         }
 
         //==============================================================================
-        void addDependency()
+        String addDependencyFor (const XcodeTarget& dependentTarget)
         {
-            jassert (dependencyID.isEmpty());
-
-            dependencyID = owner.createID (String ("__dependency") + getName());
+            auto dependencyID = owner.createID (String ("__dependency") + getName() + dependentTarget.getName());
             auto* v = new ValueTree (dependencyID);
 
             v->setProperty ("isa", "PBXTargetDependency", nullptr);
             v->setProperty ("target", getID(), nullptr);
 
-            owner.misc.add (v);
+            owner.pbxTargetDependencies.add (v);
+            return dependencyID;
         }
 
-        String getDependencyID() const
+        void addDependencies()
         {
-            jassert (dependencyID.isNotEmpty());
+            if (! owner.project.isAudioPluginProject())
+                return;
 
-            return dependencyID;
+            if (type == XcodeTarget::StandalonePlugIn) // depends on AUv3 and shared code
+            {
+                if (auto* auv3Target = owner.getTargetOfType (XcodeTarget::AudioUnitv3PlugIn))
+                    dependencyIDs.add (auv3Target->addDependencyFor (*this));
+
+                if (auto* sharedCodeTarget = owner.getTargetOfType (XcodeTarget::SharedCodeTarget))
+                    dependencyIDs.add (sharedCodeTarget->addDependencyFor (*this));
+            }
+            else if (type == XcodeTarget::AggregateTarget) // depends on all other targets
+            {
+                for (auto* target : owner.targets)
+                    if (target->type != XcodeTarget::AggregateTarget)
+                        dependencyIDs.add (target->addDependencyFor (*this));
+            }
+            else if (type != XcodeTarget::SharedCodeTarget) // shared code doesn't depend on anything; all other targets depend only on the shared code
+            {
+                if (auto* sharedCodeTarget = owner.getTargetOfType (XcodeTarget::SharedCodeTarget))
+                    dependencyIDs.add (sharedCodeTarget->addDependencyFor (*this));
+            }
         }
 
         //==============================================================================
@@ -1802,7 +1819,7 @@ private:
     bool xcodeCanUseDwarf;
     OwnedArray<XcodeTarget> targets;
 
-    mutable OwnedArray<ValueTree> pbxBuildFiles, pbxFileReferences, pbxGroups, misc, projectConfigs, targetConfigs;
+    mutable OwnedArray<ValueTree> pbxBuildFiles, pbxFileReferences, pbxGroups, pbxTargetDependencies, misc, projectConfigs, targetConfigs;
     mutable StringArray resourceIDs, sourceIDs, targetIDs;
     mutable StringArray frameworkFileIDs, embeddedFrameworkIDs, rezFileIDs, resourceFileRefs, subprojectFileIDs;
     mutable Array<std::pair<String, String>> subprojectReferences;
@@ -1903,6 +1920,8 @@ private:
     {
         for (auto* target : targets)
         {
+            target->addDependencies();
+
             if (target->type == XcodeTarget::AggregateTarget)
                 continue;
 
@@ -1919,7 +1938,6 @@ private:
             target->mainBuildProductID = fileID;
 
             pbxBuildFiles.add (v);
-            target->addDependency();
         }
     }
 
@@ -2142,7 +2160,7 @@ private:
         v->setProperty ("buildPhases", indentParenthesisedList (target.buildPhaseIDs), nullptr);
         v->setProperty ("buildRules", "( )", nullptr);
 
-        v->setProperty ("dependencies", indentParenthesisedList (getTargetDependencies (target)), nullptr);
+        v->setProperty ("dependencies", indentParenthesisedList (target.dependencyIDs), nullptr);
         v->setProperty (Ids::name, target.getXcodeSchemeName(), nullptr);
 
         v->setProperty ("productName", projectName, nullptr);
@@ -2157,35 +2175,6 @@ private:
 
         targetIDs.add (targetID);
         misc.add (v);
-    }
-
-    StringArray getTargetDependencies (const XcodeTarget& target) const
-    {
-        StringArray dependencies;
-
-        if (project.isAudioPluginProject())
-        {
-            if (target.type == XcodeTarget::StandalonePlugIn) // depends on AUv3 and shared code
-            {
-                if (auto* auv3Target = getTargetOfType (XcodeTarget::AudioUnitv3PlugIn))
-                    dependencies.add (auv3Target->getDependencyID());
-
-                if (auto* sharedCodeTarget = getTargetOfType (XcodeTarget::SharedCodeTarget))
-                    dependencies.add (sharedCodeTarget->getDependencyID());
-            }
-            else if (target.type == XcodeTarget::AggregateTarget) // depends on all other targets
-            {
-                for (int i = 1; i < targets.size(); ++i)
-                    dependencies.add (targets[i]->getDependencyID());
-            }
-            else if (target.type != XcodeTarget::SharedCodeTarget) // shared code doesn't depend on anything; all other targets depend only on the shared code
-            {
-                if (auto* sharedCodeTarget = getTargetOfType (XcodeTarget::SharedCodeTarget))
-                    dependencies.add (sharedCodeTarget->getDependencyID());
-            }
-        }
-
-        return dependencies;
     }
 
     void createIconFile() const
@@ -2588,6 +2577,7 @@ private:
         objects.addArray (pbxBuildFiles);
         objects.addArray (pbxFileReferences);
         objects.addArray (pbxGroups);
+        objects.addArray (pbxTargetDependencies);
         objects.addArray (targetConfigs);
         objects.addArray (projectConfigs);
         objects.addArray (misc);
@@ -3211,11 +3201,15 @@ private:
 
                 if (settingsString.contains ("portrait"))   orientations.add ("UIInterfaceOrientationPortrait");
                 if (settingsString.contains ("landscape"))  orientations.addArray ({ "UIInterfaceOrientationLandscapeLeft",
-                                                                                    "UIInterfaceOrientationLandscapeRight" });
-                if (i == 0)
-                    iPhoneScreenOrientationValue = orientations;
-                else
-                    iPadScreenOrientationValue = orientations;
+                                                                                     "UIInterfaceOrientationLandscapeRight" });
+
+                if (! orientations.isEmpty())
+                {
+                    if (i == 0)
+                        iPhoneScreenOrientationValue = orientations;
+                    else
+                        iPadScreenOrientationValue = orientations;
+                }
             }
         }
     }

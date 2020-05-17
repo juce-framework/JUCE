@@ -241,7 +241,7 @@ void BinaryResources::loadFromCpp (const File& cppFileLocation, const String& cp
 
                     if (c >= '0' && c <= '9')
                     {
-                        n = n * 10 + (c - '0');
+                        n = n * 10 + (int) (c - '0');
                     }
                     else if (c == ',')
                     {

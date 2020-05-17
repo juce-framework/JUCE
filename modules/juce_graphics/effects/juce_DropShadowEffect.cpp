@@ -19,7 +19,7 @@
 namespace juce
 {
 
-static inline void blurDataTriplets (uint8* d, int num, const int delta) noexcept
+static void blurDataTriplets (uint8* d, int num, const int delta) noexcept
 {
     uint32 last = d[0];
     d[0] = (uint8) ((d[0] + d[delta] + 1) / 3);

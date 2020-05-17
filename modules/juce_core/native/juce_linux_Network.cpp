@@ -333,7 +333,7 @@ private:
 
         struct addrinfo* result = nullptr;
 
-        if (getaddrinfo (serverName.toUTF8(), String (port).toUTF8(), &hints, &result) != 0 || result == 0)
+        if (getaddrinfo (serverName.toUTF8(), String (port).toUTF8(), &hints, &result) != 0 || result == nullptr)
             return 0;
 
         {
@@ -351,7 +351,7 @@ private:
 
         int receiveBufferSize = 16384;
         setsockopt (socketHandle, SOL_SOCKET, SO_RCVBUF, (char*) &receiveBufferSize, sizeof (receiveBufferSize));
-        setsockopt (socketHandle, SOL_SOCKET, SO_KEEPALIVE, 0, 0);
+        setsockopt (socketHandle, SOL_SOCKET, SO_KEEPALIVE, nullptr, 0);
 
       #if JUCE_MAC
         setsockopt (socketHandle, SOL_SOCKET, SO_NOSIGPIPE, 0, 0);
