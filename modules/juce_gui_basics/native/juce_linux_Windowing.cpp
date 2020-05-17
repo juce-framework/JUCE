@@ -113,17 +113,18 @@ public:
         return windowBorder;
     }
 
-    using ComponentPeer::localToGlobal;
     Point<float> localToGlobal (Point<float> relativePosition) override
     {
         return relativePosition + getScreenPosition (false).toFloat();
     }
 
-    using ComponentPeer::globalToLocal;
     Point<float> globalToLocal (Point<float> screenPosition) override
     {
         return screenPosition   - getScreenPosition (false).toFloat();
     }
+
+    using ComponentPeer::localToGlobal;
+    using ComponentPeer::globalToLocal;
 
     //==============================================================================
     StringArray getAvailableRenderingEngines() override

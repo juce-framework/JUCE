@@ -39,7 +39,7 @@ NewLine newLine;
  using CharPointer_wchar_t = CharPointer_UTF32;
 #endif
 
-static inline CharPointer_wchar_t castToCharPointer_wchar_t (const void* t) noexcept
+static CharPointer_wchar_t castToCharPointer_wchar_t (const void* t) noexcept
 {
     return CharPointer_wchar_t (static_cast<const CharPointer_wchar_t::CharType*> (t));
 }
@@ -157,7 +157,7 @@ public:
             ++(b->refCount);
     }
 
-    static inline void release (StringHolder* const b) noexcept
+    static void release (StringHolder* const b) noexcept
     {
         if (! isEmptyString (b))
             if (--(b->refCount) == -1)
@@ -169,7 +169,7 @@ public:
         release (bufferFromText (text));
     }
 
-    static inline int getReferenceCount (const CharPointerType text) noexcept
+    static int getReferenceCount (const CharPointerType text) noexcept
     {
         return bufferFromText (text)->refCount.get() + 1;
     }
@@ -207,14 +207,14 @@ public:
     CharType text[1];
 
 private:
-    static inline StringHolder* bufferFromText (const CharPointerType text) noexcept
+    static StringHolder* bufferFromText (const CharPointerType text) noexcept
     {
         // (Can't use offsetof() here because of warnings about this not being a POD)
         return reinterpret_cast<StringHolder*> (reinterpret_cast<char*> (text.getAddress())
                     - (reinterpret_cast<size_t> (reinterpret_cast<StringHolder*> (128)->text) - 128));
     }
 
-    static inline bool isEmptyString (StringHolder* other)
+    static bool isEmptyString (StringHolder* other)
     {
         return (other->refCount.get() & 0x30000000) != 0;
     }
@@ -1837,6 +1837,10 @@ String String::formattedRaw (const char* pf, ...)
         va_list args;
         va_start (args, pf);
 
+       #if JUCE_WINDOWS
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+       #endif
+
       #if JUCE_ANDROID
         HeapBlock<char> temp (bufferSize);
         int num = (int) vsnprintf (temp.get(), bufferSize - 1, pf, args);
@@ -1853,6 +1857,10 @@ String String::formattedRaw (const char* pf, ...)
        #endif
                 (temp.get(), bufferSize - 1, wideCharVersion.toWideCharPointer(), args);
       #endif
+
+       #if JUCE_WINDOWS
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+       #endif
         va_end (args);
 
         if (num > 0)
@@ -1889,7 +1897,7 @@ int String::getTrailingIntValue() const noexcept
             break;
         }
 
-        n += static_cast<juce_wchar> (mult) * (*t - '0');
+        n += (int) (((juce_wchar) mult) * (*t - '0'));
         mult *= 10;
     }
 

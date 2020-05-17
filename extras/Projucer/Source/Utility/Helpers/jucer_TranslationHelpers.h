@@ -117,7 +117,7 @@ struct TranslationHelpers
                         break;
 
                     ++p;
-                    c = (juce_wchar) ((c << 4) + digitValue);
+                    c = (c << 4) + (juce_wchar) digitValue;
                 }
 
                 break;
@@ -128,12 +128,12 @@ struct TranslationHelpers
 
                 for (int i = 4; --i >= 0;)
                 {
-                    const int digitValue = *p - '0';
+                    const auto digitValue = (int) (*p - '0');
                     if (digitValue < 0 || digitValue > 7)
                         break;
 
                     ++p;
-                    c = (juce_wchar) ((c << 3) + digitValue);
+                    c = (c << 3) + (juce_wchar) digitValue;
                 }
 
                 break;

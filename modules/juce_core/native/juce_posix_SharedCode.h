@@ -1063,7 +1063,8 @@ void* DynamicLibrary::getFunction (const String& functionName) noexcept
 
 
 //==============================================================================
-static inline String readPosixConfigFileValue (const char* file, const char* key)
+#if JUCE_LINUX || JUCE_ANDROID
+static String readPosixConfigFileValue (const char* file, const char* key)
 {
     StringArray lines;
     File (file).readLines (lines);
@@ -1074,6 +1075,7 @@ static inline String readPosixConfigFileValue (const char* file, const char* key
 
     return {};
 }
+#endif
 
 
 //==============================================================================

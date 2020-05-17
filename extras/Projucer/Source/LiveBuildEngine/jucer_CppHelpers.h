@@ -45,7 +45,7 @@ struct CppParserHelpers
 
             for (int i = 0; i < text.length(); ++i)
             {
-                const int digit = text[i] - '0';
+                const auto digit = (int) (text[i] - '0');
 
                 if (digit < 0 || digit > 7)
                     break;

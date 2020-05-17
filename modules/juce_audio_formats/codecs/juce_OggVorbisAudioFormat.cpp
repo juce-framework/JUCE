@@ -34,6 +34,7 @@ namespace OggVorbisNamespace
                                       "-Wshadow",
                                       "-Wfloat-conversion",
                                       "-Wdeprecated-register",
+                                      "-Wdeprecated-declarations",
                                       "-Wswitch-enum",
                                       "-Wzero-as-null-pointer-constant",
                                       "-Wsign-conversion",

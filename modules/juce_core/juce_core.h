@@ -177,6 +177,13 @@
  #define JUCE_STRICT_REFCOUNTEDPOINTER 0
 #endif
 
+/** Config: JUCE_ENABLE_ALLOCATION_HOOKS
+    If enabled, this will add global allocation functions with built-in assertions, which may
+    help when debugging allocations in unit tests.
+*/
+#ifndef JUCE_ENABLE_ALLOCATION_HOOKS
+ #define JUCE_ENABLE_ALLOCATION_HOOKS 0
+#endif
 
 #ifndef JUCE_STRING_UTF_TYPE
  #define JUCE_STRING_UTF_TYPE 8
@@ -330,6 +337,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "zip/juce_ZipFile.h"
 #include "containers/juce_PropertySet.h"
 #include "memory/juce_SharedResourcePointer.h"
+#include "memory/juce_AllocationHooks.h"
 
 #if JUCE_CORE_INCLUDE_OBJC_HELPERS && (JUCE_MAC || JUCE_IOS)
  #include "native/juce_osx_ObjCHelpers.h"

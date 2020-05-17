@@ -138,16 +138,6 @@ public:
             renderThread->addJob (this, false);
     }
 
-   #if JUCE_MAC
-    static CVReturn displayLinkCallback (CVDisplayLinkRef, const CVTimeStamp*, const CVTimeStamp*,
-                                         CVOptionFlags, CVOptionFlags*, void* displayLinkContext)
-    {
-        auto* self = (CachedImage*) displayLinkContext;
-        self->renderFrame();
-        return kCVReturnSuccess;
-    }
-   #endif
-
     //==============================================================================
     void paint (Graphics&) override
     {
@@ -475,13 +465,14 @@ public:
                 break;
 
            #if JUCE_MAC
-            repaintEvent.wait (1000);
-           #else
+            if (cvDisplayLinkWrapper != nullptr)
+                repaintEvent.wait (1000);
+            else
+           #endif
             if (! renderFrame())
                 repaintEvent.wait (5); // failed to render, so avoid a tight fail-loop.
             else if (! context.continuousRepaint && ! shouldExit())
                 repaintEvent.wait (-1);
-           #endif
         }
 
         hasInitialised = false;
@@ -534,9 +525,8 @@ public:
             context.renderer->newOpenGLContextCreated();
 
        #if JUCE_MAC
-        CVDisplayLinkCreateWithActiveCGDisplays (&displayLink);
-        CVDisplayLinkSetOutputCallback (displayLink, &displayLinkCallback, this);
-        CVDisplayLinkStart (displayLink);
+        if (context.continuousRepaint)
+            cvDisplayLinkWrapper = std::make_unique<CVDisplayLinkWrapper> (this);
        #endif
 
         return true;
@@ -545,8 +535,7 @@ public:
     void shutdownOnThread()
     {
        #if JUCE_MAC
-        CVDisplayLinkStop (displayLink);
-        CVDisplayLinkRelease (displayLink);
+        cvDisplayLinkWrapper = nullptr;
        #endif
 
         if (context.renderer != nullptr)
@@ -675,8 +664,35 @@ public:
     uint32 lastMMLockReleaseTime = 0;
 
    #if JUCE_MAC
-    CVDisplayLinkRef displayLink;
+    struct CVDisplayLinkWrapper
+    {
+        CVDisplayLinkWrapper (CachedImage* im)
+        {
+            CVDisplayLinkCreateWithActiveCGDisplays (&displayLink);
+            CVDisplayLinkSetOutputCallback (displayLink, &displayLinkCallback, im);
+            CVDisplayLinkStart (displayLink);
+        }
+
+        ~CVDisplayLinkWrapper()
+        {
+            CVDisplayLinkStop (displayLink);
+            CVDisplayLinkRelease (displayLink);
+        }
+
+        static CVReturn displayLinkCallback (CVDisplayLinkRef, const CVTimeStamp*, const CVTimeStamp*,
+                                             CVOptionFlags, CVOptionFlags*, void* displayLinkContext)
+        {
+            auto* self = (CachedImage*) displayLinkContext;
+            self->renderFrame();
+            return kCVReturnSuccess;
+        }
+
+        CVDisplayLinkRef displayLink;
+    };
+
+    std::unique_ptr<CVDisplayLinkWrapper> cvDisplayLinkWrapper;
    #endif
+
     std::unique_ptr<ThreadPool> renderThread;
     ReferenceCountedArray<OpenGLContext::AsyncWorker, CriticalSection> workQueue;
     MessageManager::Lock messageManagerLock;
@@ -880,6 +896,15 @@ void OpenGLContext::setComponentPaintingEnabled (bool shouldPaintComponent) noex
 void OpenGLContext::setContinuousRepainting (bool shouldContinuouslyRepaint) noexcept
 {
     continuousRepaint = shouldContinuouslyRepaint;
+
+    #if JUCE_MAC
+     if (auto* component = getTargetComponent())
+     {
+         detach();
+         attachment.reset (new Attachment (*this, *component));
+     }
+    #endif
+
     triggerRepaint();
 }
 

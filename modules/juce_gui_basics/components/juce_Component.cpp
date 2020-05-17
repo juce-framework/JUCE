@@ -278,7 +278,7 @@ struct Component::ComponentHelpers
     }
 
     //==============================================================================
-    static inline bool hitTest (Component& comp, Point<int> localPoint)
+    static bool hitTest (Component& comp, Point<int> localPoint)
     {
         return isPositiveAndBelow (localPoint.x, comp.getWidth())
             && isPositiveAndBelow (localPoint.y, comp.getHeight())

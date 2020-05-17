@@ -27,4 +27,7 @@ target_link_libraries(NetworkGraphicsDemo PRIVATE
     juce::juce_audio_utils
     juce::juce_cryptography
     juce::juce_opengl
-    juce::juce_osc)
+    juce::juce_osc
+    juce::juce_recommended_config_flags
+    juce::juce_recommended_lto_flags
+    juce::juce_recommended_warning_flags)

@@ -205,7 +205,7 @@ private:
 class EnableStrokeProperty : public BooleanPropertyComponent
 {
 public:
-    EnableStrokeProperty (ColouredElement* const owner_)
+    explicit EnableStrokeProperty (ColouredElement* const owner_)
         : BooleanPropertyComponent ("outline", "Outline enabled", "No outline"),
           listener (owner_)
     {
@@ -223,7 +223,7 @@ public:
 class StrokeThicknessProperty   : public SliderPropertyComponent
 {
 public:
-    StrokeThicknessProperty (ColouredElement* const owner_)
+    explicit StrokeThicknessProperty (ColouredElement* const owner_)
         : SliderPropertyComponent ("outline thickness", 0.1, 200.0, 0.1, 0.3),
           listener (owner_)
     {
@@ -249,7 +249,7 @@ public:
 class StrokeJointProperty : public ChoicePropertyComponent
 {
 public:
-    StrokeJointProperty (ColouredElement* const owner_)
+    explicit StrokeJointProperty (ColouredElement* const owner_)
         : ChoicePropertyComponent ("joint style"),
           listener (owner_)
     {
@@ -294,7 +294,7 @@ public:
 class StrokeEndCapProperty   : public ChoicePropertyComponent
 {
 public:
-    StrokeEndCapProperty (ColouredElement* const owner_)
+    explicit StrokeEndCapProperty (ColouredElement* const owner_)
         : ChoicePropertyComponent ("end-cap style"),
           listener (owner_)
     {

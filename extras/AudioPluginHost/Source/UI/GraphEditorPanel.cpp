@@ -502,7 +502,8 @@ struct GraphEditorPanel::PluginComponent   : public Component,
 struct GraphEditorPanel::ConnectorComponent   : public Component,
                                                 public SettableTooltipClient
 {
-    ConnectorComponent (GraphEditorPanel& p) : panel (p), graph (p.graph)
+    explicit ConnectorComponent (GraphEditorPanel& p)
+        : panel (p), graph (p.graph)
     {
         setAlwaysOnTop (true);
     }
@@ -986,7 +987,7 @@ class GraphDocumentComponent::TitleBarComponent    : public Component,
                                                      private Button::Listener
 {
 public:
-    TitleBarComponent (GraphDocumentComponent& graphDocumentComponent)
+    explicit TitleBarComponent (GraphDocumentComponent& graphDocumentComponent)
         : owner (graphDocumentComponent)
     {
         static const unsigned char burgerMenuPathData[]

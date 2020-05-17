@@ -36,7 +36,9 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wshorten-64-to-32",
                                      "-Wshadow",
                                      "-Wswitch-enum",
                                      "-Wzero-as-null-pointer-constant",
-                                     "-Wnullable-to-nonnull-conversion")
+                                     "-Wnullable-to-nonnull-conversion",
+                                     "-Wgnu-zero-variadic-macro-arguments",
+                                     "-Wformat-pedantic")
 
 #include "../utility/juce_IncludeSystemHeaders.h"
 

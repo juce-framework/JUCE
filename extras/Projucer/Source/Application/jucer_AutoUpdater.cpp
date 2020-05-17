@@ -412,7 +412,7 @@ private:
 
         struct ScopedDownloadFolder
         {
-            ScopedDownloadFolder (const File& installTargetFolder)
+            explicit ScopedDownloadFolder (const File& installTargetFolder)
             {
                 folder = installTargetFolder.getSiblingFile (installTargetFolder.getFileNameWithoutExtension() + "_download").getNonexistentSibling();
                 jassert (folder.createDirectory());

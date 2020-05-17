@@ -723,7 +723,7 @@ double Desktop::getDefaultMasterScale()
 Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 {
     UIInterfaceOrientation orientation = SystemStats::isRunningInAppExtensionSandbox() ? UIInterfaceOrientationPortrait
-                                                                                       : [[UIApplication sharedApplication] statusBarOrientation];
+                                                                                       : getWindowOrientation();
 
     return Orientations::convertToJuce (orientation);
 }

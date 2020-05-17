@@ -30,6 +30,7 @@ namespace jpeglibNamespace
 
      JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
                                           "-Wdeprecated-register",
+                                          "-Wdeprecated-declarations",
                                           "-Wsign-conversion",
                                           "-Wcast-align",
                                           "-Wswitch-enum",

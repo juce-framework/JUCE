@@ -157,7 +157,7 @@ PaintElement* PaintRoutine::addNewElement (PaintElement* e, const int index, con
 class DeleteElementAction   : public PaintElementUndoableAction <PaintElement>
 {
 public:
-    DeleteElementAction (PaintElement* const element)
+    explicit DeleteElementAction (PaintElement* const element)
         : PaintElementUndoableAction <PaintElement> (element),
           oldIndex (-1)
     {

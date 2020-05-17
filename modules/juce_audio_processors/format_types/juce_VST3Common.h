@@ -105,45 +105,7 @@ static inline Steinberg::Vst::SpeakerArrangement getArrangementForBus (Steinberg
     return arrangement;
 }
 
-/** For the sake of simplicity, there can only be 1 arrangement type per channel count.
-    i.e.: 4 channels == k31Cine OR k40Cine
-*/
-static inline Steinberg::Vst::SpeakerArrangement getArrangementForNumChannels (int numChannels) noexcept
-{
-    using namespace Steinberg::Vst::SpeakerArr;
-
-    switch (numChannels)
-    {
-        case 0:     return kEmpty;
-        case 1:     return kMono;
-        case 2:     return kStereo;
-        case 3:     return k30Cine;
-        case 4:     return k31Cine;
-        case 5:     return k50;
-        case 6:     return k51;
-        case 7:     return k61Cine;
-        case 8:     return k71CineFullFront;
-        case 9:     return k90;
-        case 10:    return k91;
-        case 11:    return k101;
-        case 12:    return k111;
-        case 13:    return k130;
-        case 14:    return k131;
-       #if VST_VERSION >= 0x030608
-        case 16:    return kAmbi3rdOrderACN;
-       #endif
-        case 24:    return (Steinberg::Vst::SpeakerArrangement) 1929904127; // k222
-        default:    break;
-    }
-
-    jassert (numChannels >= 0);
-
-    juce::BigInteger bi;
-    bi.setRange (0, jmin (numChannels, (int) (sizeof (Steinberg::Vst::SpeakerArrangement) * 8)), true);
-    return (Steinberg::Vst::SpeakerArrangement) bi.toInt64();
-}
-
-static inline Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set, AudioChannelSet::ChannelType type) noexcept
+static Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set, AudioChannelSet::ChannelType type) noexcept
 {
     switch (type)
     {
@@ -231,7 +193,7 @@ static inline Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set
     return (1ull << (channelIndex + 33ull /* last speaker in vst layout + 1 */));
 }
 
-static inline AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::SpeakerArrangement arr, Steinberg::Vst::Speaker type) noexcept
+static AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::SpeakerArrangement arr, Steinberg::Vst::Speaker type) noexcept
 {
     switch (type)
     {
@@ -296,7 +258,7 @@ static inline AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::Speak
     return static_cast<AudioChannelSet::ChannelType> (static_cast<int> (AudioChannelSet::discreteChannel0) + 6 + (channelType - 33));
 }
 
-static inline Steinberg::Vst::SpeakerArrangement getVst3SpeakerArrangement (const AudioChannelSet& channels) noexcept
+static Steinberg::Vst::SpeakerArrangement getVst3SpeakerArrangement (const AudioChannelSet& channels) noexcept
 {
     using namespace Steinberg::Vst::SpeakerArr;
 
@@ -337,7 +299,7 @@ static inline Steinberg::Vst::SpeakerArrangement getVst3SpeakerArrangement (cons
     return result;
 }
 
-static inline AudioChannelSet getChannelSetForSpeakerArrangement (Steinberg::Vst::SpeakerArrangement arr) noexcept
+static AudioChannelSet getChannelSetForSpeakerArrangement (Steinberg::Vst::SpeakerArrangement arr) noexcept
 {
     using namespace Steinberg::Vst::SpeakerArr;
 
@@ -750,6 +712,9 @@ private:
             case Steinberg::Vst::Event::kChordEvent:
             case Steinberg::Vst::Event::kScaleEvent:
                 return {};
+
+            default:
+                break;
         }
 
         // If this is hit, we've been sent an event type that doesn't exist in the VST3 spec.
@@ -785,8 +750,8 @@ struct VST3BufferExchange
     using Bus = Array<FloatType*>;
     using BusMap = Array<Bus>;
 
-    static inline void assignRawPointer (Steinberg::Vst::AudioBusBuffers& vstBuffers, float** raw)  { vstBuffers.channelBuffers32 = raw; }
-    static inline void assignRawPointer (Steinberg::Vst::AudioBusBuffers& vstBuffers, double** raw) { vstBuffers.channelBuffers64 = raw; }
+    static void assignRawPointer (Steinberg::Vst::AudioBusBuffers& vstBuffers, float** raw)  { vstBuffers.channelBuffers32 = raw; }
+    static void assignRawPointer (Steinberg::Vst::AudioBusBuffers& vstBuffers, double** raw) { vstBuffers.channelBuffers64 = raw; }
 
     /** Assigns a series of AudioBuffer's channels to an AudioBusBuffers'
         @warning For speed, does not check the channel count and offsets according to the AudioBuffer
@@ -830,9 +795,9 @@ struct VST3BufferExchange
         channelIndexOffset += numChansForBus;
     }
 
-    static inline void mapBufferToBuses (Array<Steinberg::Vst::AudioBusBuffers>& result, BusMap& busMapToUse,
-                                          const Array<AudioChannelSet>& arrangements,
-                                          AudioBuffer<FloatType>& source)
+    static void mapBufferToBuses (Array<Steinberg::Vst::AudioBusBuffers>& result, BusMap& busMapToUse,
+                                  const Array<AudioChannelSet>& arrangements,
+                                  AudioBuffer<FloatType>& source)
     {
         int channelIndexOffset = 0;
 
@@ -841,10 +806,10 @@ struct VST3BufferExchange
                                     arrangements.getUnchecked (i), source);
     }
 
-    static inline void mapBufferToBuses (Array<Steinberg::Vst::AudioBusBuffers>& result,
-                                          Steinberg::Vst::IAudioProcessor& processor,
-                                          BusMap& busMapToUse, bool isInput, int numBuses,
-                                          AudioBuffer<FloatType>& source)
+    static void mapBufferToBuses (Array<Steinberg::Vst::AudioBusBuffers>& result,
+                                  Steinberg::Vst::IAudioProcessor& processor,
+                                  BusMap& busMapToUse, bool isInput, int numBuses,
+                                  AudioBuffer<FloatType>& source)
     {
         int channelIndexOffset = 0;
 
@@ -871,12 +836,12 @@ struct VST3FloatAndDoubleBusMapComposite
 
 template <> struct VST3FloatAndDoubleBusMapCompositeHelper<float>
 {
-    static inline VST3BufferExchange<float>::BusMap& get (VST3FloatAndDoubleBusMapComposite& impl)  { return impl.floatVersion; }
+    static VST3BufferExchange<float>::BusMap& get (VST3FloatAndDoubleBusMapComposite& impl)  { return impl.floatVersion; }
 };
 
 template <> struct VST3FloatAndDoubleBusMapCompositeHelper<double>
 {
-    static inline VST3BufferExchange<double>::BusMap& get (VST3FloatAndDoubleBusMapComposite& impl) { return impl.doubleVersion; }
+    static VST3BufferExchange<double>::BusMap& get (VST3FloatAndDoubleBusMapComposite& impl) { return impl.doubleVersion; }
 };
 
 } // namespace juce

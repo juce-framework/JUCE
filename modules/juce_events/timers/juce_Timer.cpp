@@ -136,7 +136,7 @@ public:
         callTimers();
     }
 
-    static inline void add (Timer* tim) noexcept
+    static void add (Timer* tim) noexcept
     {
         if (instance == nullptr)
             instance = new TimerThread();
@@ -144,13 +144,13 @@ public:
         instance->addTimer (tim);
     }
 
-    static inline void remove (Timer* tim) noexcept
+    static void remove (Timer* tim) noexcept
     {
         if (instance != nullptr)
             instance->removeTimer (tim);
     }
 
-    static inline void resetCounter (Timer* tim) noexcept
+    static void resetCounter (Timer* tim) noexcept
     {
         if (instance != nullptr)
             instance->resetTimerCounter (tim);

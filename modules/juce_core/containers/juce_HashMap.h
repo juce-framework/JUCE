@@ -489,7 +489,7 @@ private:
         return hash;
     }
 
-    static inline HashEntry* getEntry (HashEntry* firstEntry, KeyType keyToLookFor) noexcept
+    static HashEntry* getEntry (HashEntry* firstEntry, KeyType keyToLookFor) noexcept
     {
         for (auto* entry = firstEntry; entry != nullptr; entry = entry->nextEntry)
             if (entry->key == keyToLookFor)

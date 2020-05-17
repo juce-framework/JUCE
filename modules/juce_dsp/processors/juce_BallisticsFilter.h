@@ -110,7 +110,7 @@ public:
             auto* outputSamples = outputBlock.getChannelPointer (channel);
 
             for (size_t i = 0; i < numSamples; ++i)
-                outputSamples[i] = processSample (inputSamples[i], (int) channel);
+                outputSamples[i] = processSample ((int) channel, inputSamples[i]);
         }
 
        #if JUCE_SNAP_TO_ZERO

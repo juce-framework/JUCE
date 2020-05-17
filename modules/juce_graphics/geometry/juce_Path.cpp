@@ -60,7 +60,7 @@ const float Path::closeSubPathMarker   = 100005.0f;
 const float Path::defaultToleranceForTesting = 1.0f;
 const float Path::defaultToleranceForMeasurement = 0.6f;
 
-static inline bool isMarker (float value, float marker) noexcept
+static bool isMarker (float value, float marker) noexcept
 {
     return value == marker;
 }

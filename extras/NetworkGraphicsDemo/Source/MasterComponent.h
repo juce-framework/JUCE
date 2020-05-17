@@ -48,7 +48,7 @@ struct MasterContentComponent  : public Component,
         startTimerHz (30);
     }
 
-    ~MasterContentComponent()
+    ~MasterContentComponent() override
     {
         OSCReceiver::removeListener (this);
     }

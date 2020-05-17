@@ -24,4 +24,8 @@ target_sources(AudioPerformanceTest PRIVATE
 target_compile_definitions(AudioPerformanceTest PRIVATE
     JUCE_USE_CURL=0 JUCE_WEB_BROWSER=0)
 
-target_link_libraries(AudioPerformanceTest PRIVATE juce::juce_audio_utils)
+target_link_libraries(AudioPerformanceTest PRIVATE
+    juce::juce_audio_utils
+    juce::juce_recommended_config_flags
+    juce::juce_recommended_lto_flags
+    juce::juce_recommended_warning_flags)

@@ -6,6 +6,40 @@ Develop
 
 Change
 ------
+The Convolution class interface was changed:
+- `loadImpulseResponse` member functions now take `enum class` parameters
+  instead of `bool`.
+- `copyAndLoadImpulseResponseFromBlock` and
+  `copyAndLoadImpulseResponseFromBuffer` were replaced by a new
+  `loadImpulseResponse` overload.
+
+Possible Issues
+---------------
+Code using the old interface will no longer compile, and will need to be
+updated.
+
+Workaround
+----------
+Code that was previously loading impulse responses from binary data or from
+files can substitute old `bool` parameters with the newer `enum class`
+equivalents. Code that was previously passing buffers or blocks will need
+reworking so that the Convolution instance can take ownership of the buffer
+containing the impulse response.
+
+Rationale
+---------
+The newer `enum class` parameters make user code much more readable, e.g.
+`loadImpulseResponse (file, Stereo::yes, Trim::yes, 0, Normalise::yes)` rather
+than `loadImpulseResponse (file, true, true, 0, true);`. By taking ownership of
+the passed buffer, the Convolution can avoid preallocating a large internal
+buffer, reducing memory usage when short impulse responses are used. Changing
+the ownership semantics of the buffer also makes it easier for users to avoid
+copies/allocations on the audio thread, and gives more flexibility to the
+implementation to run initialisation tasks on a background thread.
+
+
+Change
+------
 All references to ROLI Ltd. (ROLI) have been changed to Raw Material Software
 Limited.
 

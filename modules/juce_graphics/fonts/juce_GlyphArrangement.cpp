@@ -33,7 +33,7 @@ PositionedGlyph::PositionedGlyph (const Font& font_, juce_wchar character_, int 
 
 PositionedGlyph::~PositionedGlyph() {}
 
-static inline void drawGlyphWithFont (Graphics& g, int glyph, const Font& font, AffineTransform t)
+static void drawGlyphWithFont (Graphics& g, int glyph, const Font& font, AffineTransform t)
 {
     auto& context = g.getInternalContext();
     context.setFont (font);
@@ -536,7 +536,7 @@ void GlyphArrangement::spreadOutLine (int start, int num, float targetWidth)
     }
 }
 
-static inline bool isBreakableGlyph (const PositionedGlyph& g) noexcept
+static bool isBreakableGlyph (const PositionedGlyph& g) noexcept
 {
     return g.isWhitespace() || g.getCharacter() == '-';
 }

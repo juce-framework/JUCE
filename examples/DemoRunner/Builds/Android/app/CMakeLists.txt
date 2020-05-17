@@ -828,6 +828,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/maths/juce_Random.h"
     "../../../../../modules/juce_core/maths/juce_Range.h"
     "../../../../../modules/juce_core/maths/juce_StatisticsAccumulator.h"
+    "../../../../../modules/juce_core/memory/juce_AllocationHooks.cpp"
+    "../../../../../modules/juce_core/memory/juce_AllocationHooks.h"
     "../../../../../modules/juce_core/memory/juce_Atomic.h"
     "../../../../../modules/juce_core/memory/juce_ByteOrder.h"
     "../../../../../modules/juce_core/memory/juce_ContainerDeletePolicy.h"
@@ -1048,6 +1050,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_data_structures/juce_data_structures.h"
     "../../../../../modules/juce_dsp/containers/juce_AudioBlock.h"
     "../../../../../modules/juce_dsp/containers/juce_AudioBlock_test.cpp"
+    "../../../../../modules/juce_dsp/containers/juce_FixedSizeFunction.h"
+    "../../../../../modules/juce_dsp/containers/juce_FixedSizeFunction_test.cpp"
     "../../../../../modules/juce_dsp/containers/juce_SIMDRegister.h"
     "../../../../../modules/juce_dsp/containers/juce_SIMDRegister_Impl.h"
     "../../../../../modules/juce_dsp/containers/juce_SIMDRegister_test.cpp"
@@ -1055,6 +1059,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_dsp/filter_design/juce_FilterDesign.h"
     "../../../../../modules/juce_dsp/frequency/juce_Convolution.cpp"
     "../../../../../modules/juce_dsp/frequency/juce_Convolution.h"
+    "../../../../../modules/juce_dsp/frequency/juce_Convolution_test.cpp"
     "../../../../../modules/juce_dsp/frequency/juce_FFT.cpp"
     "../../../../../modules/juce_dsp/frequency/juce_FFT.h"
     "../../../../../modules/juce_dsp/frequency/juce_FFT_test.cpp"
@@ -2577,6 +2582,8 @@ set_source_files_properties("../../../../../modules/juce_core/maths/juce_Random.
 set_source_files_properties("../../../../../modules/juce_core/maths/juce_Random.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/maths/juce_Range.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/maths/juce_StatisticsAccumulator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/memory/juce_AllocationHooks.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/memory/juce_AllocationHooks.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/memory/juce_Atomic.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/memory/juce_ByteOrder.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/memory/juce_ContainerDeletePolicy.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2797,6 +2804,8 @@ set_source_files_properties("../../../../../modules/juce_data_structures/juce_da
 set_source_files_properties("../../../../../modules/juce_data_structures/juce_data_structures.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/containers/juce_AudioBlock.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/containers/juce_AudioBlock_test.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_dsp/containers/juce_FixedSizeFunction.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_dsp/containers/juce_FixedSizeFunction_test.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/containers/juce_SIMDRegister.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/containers/juce_SIMDRegister_Impl.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/containers/juce_SIMDRegister_test.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2804,6 +2813,7 @@ set_source_files_properties("../../../../../modules/juce_dsp/filter_design/juce_
 set_source_files_properties("../../../../../modules/juce_dsp/filter_design/juce_FilterDesign.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/frequency/juce_Convolution.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/frequency/juce_Convolution.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_dsp/frequency/juce_Convolution_test.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/frequency/juce_FFT.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/frequency/juce_FFT.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_dsp/frequency/juce_FFT_test.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)

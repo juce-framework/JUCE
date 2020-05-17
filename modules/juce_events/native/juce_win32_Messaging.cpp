@@ -51,7 +51,7 @@ public:
 
     ~InternalMessageQueue()
     {
-        juce_messageWindowHandle = 0;
+        juce_messageWindowHandle = nullptr;
         clearSingletonInstance();
     }
 
@@ -69,7 +69,7 @@ public:
         {
             COPYDATASTRUCT data;
             data.dwData = broadcastMessageMagicNumber;
-            data.cbData = (localCopy.length() + 1) * sizeof (CharPointer_UTF32::CharType);
+            data.cbData = ((size_t) localCopy.length() + 1) * sizeof (CharPointer_UTF32::CharType);
             data.lpData = (void*) localCopy.toUTF32().getAddress();
 
             DWORD_PTR result;
@@ -109,10 +109,10 @@ public:
     {
         MSG m;
 
-        if (returnIfNoPendingMessages && ! PeekMessage (&m, (HWND) 0, 0, 0, PM_NOREMOVE))
+        if (returnIfNoPendingMessages && ! PeekMessage (&m, nullptr, 0, 0, PM_NOREMOVE))
             return false;
 
-        if (GetMessage (&m, (HWND) 0, 0, 0) >= 0)
+        if (GetMessage (&m, nullptr, 0, 0) >= 0)
         {
            #if JUCE_MODULE_AVAILABLE_juce_gui_extra
             if (juce_offerEventToActiveXControl (m) != S_FALSE)
@@ -137,7 +137,7 @@ public:
                     // currently on a juce window, pass the kb focus over..
                     auto currentFocus = GetFocus();
 
-                    if (currentFocus == 0 || JuceWindowIdentifier::isJUCEWindow (currentFocus))
+                    if (currentFocus == nullptr || JuceWindowIdentifier::isJUCEWindow (currentFocus))
                         SetFocus (m.hwnd);
                 }
 
@@ -288,7 +288,7 @@ void MessageManager::broadcastMessage (const String& value)
 //==============================================================================
 void MessageManager::doPlatformSpecificInitialisation()
 {
-    OleInitialize (0);
+    OleInitialize (nullptr);
     InternalMessageQueue::getInstance();
 }
 

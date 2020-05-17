@@ -847,10 +847,10 @@ private:
 
                 HINSTANCE moduleHandle = (HINSTANCE) Process::getCurrentModuleInstanceHandle();
 
-                TCHAR moduleFile [1024] = { 0 };
+                TCHAR moduleFile [1024] = {};
                 GetModuleFileName (moduleHandle, moduleFile, 1024);
 
-                WNDCLASSEX wcex = { 0 };
+                WNDCLASSEX wcex = {};
                 wcex.cbSize         = sizeof (wcex);
                 wcex.style          = CS_OWNDC;
                 wcex.lpfnWndProc    = (WNDPROC) wndProc;

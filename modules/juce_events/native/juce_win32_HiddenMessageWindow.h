@@ -34,7 +34,7 @@ public:
 
         HMODULE moduleHandle = (HMODULE) Process::getCurrentModuleInstanceHandle();
 
-        WNDCLASSEX wc = { 0 };
+        WNDCLASSEX wc = {};
         wc.cbSize         = sizeof (wc);
         wc.lpfnWndProc    = wndProc;
         wc.cbWndExtra     = 4;
@@ -45,14 +45,15 @@ public:
         jassert (atom != 0);
 
         hwnd = CreateWindow (getClassNameFromAtom(), messageWindowName,
-                             0, 0, 0, 0, 0, 0, 0, moduleHandle, 0);
-        jassert (hwnd != 0);
+                             0, 0, 0, 0, 0,
+                             nullptr, nullptr, moduleHandle, nullptr);
+        jassert (hwnd != nullptr);
     }
 
     ~HiddenMessageWindow()
     {
         DestroyWindow (hwnd);
-        UnregisterClass (getClassNameFromAtom(), 0);
+        UnregisterClass (getClassNameFromAtom(), nullptr);
     }
 
     inline HWND getHWND() const noexcept     { return hwnd; }

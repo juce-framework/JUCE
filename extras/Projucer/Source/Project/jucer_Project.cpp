@@ -574,10 +574,14 @@ static constexpr int getBuiltJuceVersion()
 }
 
 //==============================================================================
-static File lastDocumentOpened;
+static File& lastDocumentOpenedSingleton()
+{
+    static File lastDocumentOpened;
+    return lastDocumentOpened;
+}
 
-File Project::getLastDocumentOpened()                   { return lastDocumentOpened; }
-void Project::setLastDocumentOpened (const File& file)  { lastDocumentOpened = file; }
+File Project::getLastDocumentOpened()                   { return lastDocumentOpenedSingleton(); }
+void Project::setLastDocumentOpened (const File& file)  { lastDocumentOpenedSingleton() = file; }
 
 static void registerRecentFile (const File& file)
 {

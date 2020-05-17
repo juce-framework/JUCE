@@ -22,7 +22,7 @@ namespace dsp
 {
 
 template <typename FloatType>
-static inline FloatType ncos (size_t order, size_t i, size_t size) noexcept
+static FloatType ncos (size_t order, size_t i, size_t size) noexcept
 {
     return std::cos (static_cast<FloatType> (order * i)
                       * MathConstants<FloatType>::pi / static_cast<FloatType> (size - 1));
