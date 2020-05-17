@@ -45,7 +45,7 @@ public:
         @param parameter                  The parameter to which this attachment will listen
         @param parameterChangedCallback   The function that will be called on the message thread in response
                                           to parameter changes
-        @param uundoManager               The UndoManager that will be used to begin transactions when the UI
+        @param undoManager                The UndoManager that will be used to begin transactions when the UI
                                           requests a parameter change.
     */
     ParameterAttachment (RangedAudioParameter& parameter,
@@ -209,7 +209,7 @@ public:
     /** Creates a connection between a plug-in parameter and a Button.
 
         @param parameter     The parameter to use
-        @param combo         The Button to use
+        @param button        The Button to use
         @param undoManager   An optional UndoManager
     */
     ButtonParameterAttachment (RangedAudioParameter& parameter, Button& button,
