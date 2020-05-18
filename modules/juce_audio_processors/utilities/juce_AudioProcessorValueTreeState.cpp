@@ -641,6 +641,14 @@ struct AudioProcessorValueTreeState::ComboBoxAttachment::Pimpl  : private Attach
     Pimpl (AudioProcessorValueTreeState& s, const String& p, ComboBox& c)
         : AttachedControlBase (s, p), combo (c), ignoreCallbacks (false)
     {
+        // We are going to add the choices from the parameter automatically. You seem to have added
+        // options already. That is fine, you can do so by moving the code adding your options
+        // AFTER creating the attachment and clear our automatically added ones before that.
+        jassert (combo.getNumItems() == 0);
+
+        if (auto* parameter = state.getParameter (paramID))
+            combo.addItemList (parameter->getAllValueStrings(), 1);
+
         sendInitialUpdate();
         combo.addListener (this);
     }
@@ -710,6 +718,7 @@ struct AudioProcessorValueTreeState::ButtonAttachment::Pimpl  : private Attached
     Pimpl (AudioProcessorValueTreeState& s, const String& p, Button& b)
         : AttachedControlBase (s, p), button (b), ignoreCallbacks (false)
     {
+        button.setClickingTogglesState (true);
         sendInitialUpdate();
         button.addListener (this);
     }
