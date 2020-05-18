@@ -471,7 +471,15 @@ function(juce_add_module module_path)
                 OUT_PATH "${base_path}")
         endforeach()
 
-        list(APPEND all_module_sources "${base_path}/${module_name}/juce_audio_plugin_client_utils.cpp")
+        set(utils_source
+            "${base_path}/${module_name}/juce_audio_plugin_client_utils.cpp")
+        add_library(juce_audio_plugin_client_utils INTERFACE)
+        target_sources(juce_audio_plugin_client_utils INTERFACE "${utils_source}")
+
+        if(JUCE_ARG_ALIAS_NAMESPACE)
+            add_library(${JUCE_ARG_ALIAS_NAMESPACE}::juce_audio_plugin_client_utils
+                ALIAS juce_audio_plugin_client_utils)
+        endif()
     else()
         _juce_module_sources("${module_path}" "${base_path}" globbed_sources)
         list(APPEND all_module_sources ${globbed_sources})
@@ -1434,9 +1442,9 @@ function(_juce_configure_plugin_targets target)
         message(FATAL_ERROR "Plugin targets require CMake 3.15 or higher")
     endif()
 
-    target_link_libraries(${target} PRIVATE juce::juce_audio_plugin_client)
-
     _juce_set_output_name(${target} $<TARGET_PROPERTY:${target},JUCE_PRODUCT_NAME>_SharedCode)
+
+    target_link_libraries(${target} PRIVATE juce::juce_audio_plugin_client_utils)
 
     get_target_property(enabled_formats ${target} JUCE_FORMATS)
 
