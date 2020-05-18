@@ -1089,6 +1089,16 @@ public:
             addToDesktop (0, args.ptr);
             hostWindow = (Window) args.ptr;
             X11Symbols::getInstance()->xReparentWindow (display, (Window) getWindowHandle(), hostWindow, 0, 0);
+
+            if (auto* peer = getPeer())
+            {
+                auto screenBounds = peer->localToGlobal (peer->getBounds());
+
+                auto scale = Desktop::getInstance().getDisplays().findDisplayForRect (screenBounds, false).scale
+                                         / Desktop::getInstance().getGlobalScaleFactor();
+
+                setContentScaleFactor ((float) scale);
+            }
            #else
             hostWindow = attachComponentToWindowRefVST (this, args.ptr, wrapper.useNSView);
            #endif
@@ -1196,9 +1206,6 @@ public:
                     ignoreUnused (resizeEditor);
 
                     auto scale = Desktop::getInstance().getGlobalScaleFactor();
-
-                    if (auto* peer = ed->getPeer())
-                        scale *= (float) peer->getPlatformScaleFactor();
 
                     X11Symbols::getInstance()->xResizeWindow (display, (Window) getWindowHandle(),
                                                               static_cast<unsigned int> (roundToInt (pos.getWidth()  * scale)),

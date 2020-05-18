@@ -120,7 +120,7 @@ public:
 
     Point<float> globalToLocal (Point<float> screenPosition) override
     {
-        return screenPosition   - getScreenPosition (false).toFloat();
+        return screenPosition - getScreenPosition (false).toFloat();
     }
 
     using ComponentPeer::localToGlobal;
@@ -412,6 +412,9 @@ private:
     //==============================================================================
     void updateScaleFactorFromNewBounds (const Rectangle<int>& newBounds, bool isPhysical)
     {
+        if (! JUCEApplicationBase::isStandaloneApp())
+            return;
+
         Point<int> translation = (parentWindow != 0 ? getScreenPosition (isPhysical) : Point<int>());
 
         auto newScaleFactor = Desktop::getInstance().getDisplays().findDisplayForRect (newBounds.translated (translation.x, translation.y), isPhysical).scale
