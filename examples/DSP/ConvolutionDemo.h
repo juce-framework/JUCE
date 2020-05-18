@@ -68,12 +68,14 @@ struct ConvolutionDemoDSP
         context.isBypassed = bypass;
 
         // Load a new IR if there's one available. Note that this doesn't lock or allocate!
-        if (auto buffer = bufferTransfer.get())
-            convolution.loadImpulseResponse (std::move (buffer->buffer),
-                                             buffer->sampleRate,
+        bufferTransfer.get ([this] (BufferWithSampleRate& buf)
+        {
+            convolution.loadImpulseResponse (std::move (buf.buffer),
+                                             buf.sampleRate,
                                              Convolution::Stereo::yes,
                                              Convolution::Trim::yes,
                                              Convolution::Normalise::yes);
+        });
 
         convolution.process (context);
     }
@@ -126,14 +128,15 @@ struct ConvolutionDemoDSP
                                        static_cast<int> (reader->lengthInSamples));
             reader->read (buffer.getArrayOfWritePointers(), buffer.getNumChannels(), 0, buffer.getNumSamples());
 
-            bufferTransfer.set (std::make_unique<BufferWithSampleRate> (std::move (buffer),
-                                                                        reader->sampleRate));
+            bufferTransfer.set (BufferWithSampleRate { std::move (buffer), reader->sampleRate });
         }
     }
 
     //==============================================================================
     struct BufferWithSampleRate
     {
+        BufferWithSampleRate() = default;
+
         BufferWithSampleRate (AudioBuffer<float>&& bufferIn, double sampleRateIn)
             : buffer (std::move (bufferIn)), sampleRate (sampleRateIn) {}
 
@@ -144,20 +147,29 @@ struct ConvolutionDemoDSP
     class BufferTransfer
     {
     public:
-        void set (std::unique_ptr<BufferWithSampleRate> p)
+        void set (BufferWithSampleRate&& p)
         {
             const SpinLock::ScopedLockType lock (mutex);
-            ptr = std::move (p);
+            buffer = std::move (p);
+            newBuffer = true;
         }
 
-        std::unique_ptr<BufferWithSampleRate> get()
+        // Call `fn` passing the new buffer, if there's one available
+        template <typename Fn>
+        void get (Fn&& fn)
         {
             const SpinLock::ScopedTryLockType lock (mutex);
-            return lock.isLocked() ? std::move (ptr) : nullptr;
+
+            if (lock.isLocked() && newBuffer)
+            {
+                fn (buffer);
+                newBuffer = false;
+            }
         }
 
     private:
-        std::unique_ptr<BufferWithSampleRate> ptr;
+        BufferWithSampleRate buffer;
+        bool newBuffer = false;
         SpinLock mutex;
     };
 
