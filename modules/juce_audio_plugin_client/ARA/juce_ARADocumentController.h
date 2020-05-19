@@ -141,6 +141,14 @@ public:
     /** @internal */
     void internalNotifyAudioSourceAnalysisProgressCompleted (ARAAudioSource* audioSource);
 
+    //==============================================================================
+    /** @internal */
+    void internalNotifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags, bool notifyARAHost);
+    /** @internal */
+    void internalNotifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags, bool notifyARAHost);
+    /** @internal */
+    void internalNotifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags, bool notifyARAHost);
+
 #endif
 
 protected:

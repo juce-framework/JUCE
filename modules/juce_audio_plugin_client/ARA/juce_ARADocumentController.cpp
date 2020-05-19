@@ -309,6 +309,29 @@ OVERRIDE_TO_NOTIFY_1 (willDestroyPlaybackRegion, PlaybackRegion*, playbackRegion
 
 //==============================================================================
 
+void ARADocumentController::internalNotifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags, bool notifyARAHost)
+{
+    if (notifyARAHost)
+        DocumentController::notifyAudioSourceContentChanged (audioSource, scopeFlags);
+    notify_listeners (didUpdateAudioSourceContent, ARAAudioSource*, audioSource, scopeFlags);
+}
+
+void ARADocumentController::internalNotifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags, bool notifyARAHost)
+{
+    if (notifyARAHost)
+        DocumentController::notifyAudioModificationContentChanged (audioModification, scopeFlags);
+    notify_listeners (didUpdateAudioModificationContent, ARAAudioModification*, audioModification, scopeFlags);
+}
+
+void ARADocumentController::internalNotifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags, bool notifyARAHost)
+{
+    if (notifyARAHost)
+        DocumentController::notifyPlaybackRegionContentChanged (playbackRegion, scopeFlags);
+    notify_listeners (didUpdatePlaybackRegionContent, ARAPlaybackRegion*, playbackRegion, scopeFlags);
+}
+
+//==============================================================================
+
 #undef notify_listeners
 #undef OVERRIDE_TO_NOTIFY_1
 #undef OVERRIDE_TO_NOTIFY_2

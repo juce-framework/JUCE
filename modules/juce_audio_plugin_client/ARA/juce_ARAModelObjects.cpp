@@ -74,10 +74,7 @@ void ARAAudioSource::notifyAnalysisProgressCompleted()
 
 void ARAAudioSource::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyARAHost)
 {
-    if (notifyARAHost)
-        getDocumentController()->notifyAudioSourceContentChanged (this, scopeFlags);
-
-    notifyListeners ([&] (Listener& l) { l.didUpdateAudioSourceContent (this, scopeFlags); });
+    getDocumentController<ARADocumentController>()->internalNotifyAudioSourceContentChanged (this, scopeFlags, notifyARAHost);
 }
 
 //==============================================================================
@@ -88,10 +85,7 @@ ARAAudioModification::ARAAudioModification (ARAAudioSource* audioSource, ARA::AR
 
 void ARAAudioModification::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyARAHost)
 {
-    if (notifyARAHost)
-        getDocumentController()->notifyAudioModificationContentChanged (this, scopeFlags);
-
-    notifyListeners ([&] (Listener& l) { l.didUpdateAudioModificationContent (this, scopeFlags); });
+    getDocumentController<ARADocumentController>()->internalNotifyAudioModificationContentChanged (this, scopeFlags, notifyARAHost);
 }
 
 //==============================================================================
@@ -118,10 +112,7 @@ Range<double> ARAPlaybackRegion::getTimeRange (bool includeHeadAndTail) const
 
 void ARAPlaybackRegion::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyARAHost)
 {
-    if (notifyARAHost)
-        getDocumentController()->notifyPlaybackRegionContentChanged (this, scopeFlags);
-
-    notifyListeners ([&] (Listener& l) { l.didUpdatePlaybackRegionContent (this, scopeFlags); });
+    getDocumentController<ARADocumentController>()->internalNotifyPlaybackRegionContentChanged (this, scopeFlags, notifyARAHost);
 }
 
 } // namespace juce
