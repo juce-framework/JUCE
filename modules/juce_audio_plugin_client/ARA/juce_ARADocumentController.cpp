@@ -284,14 +284,12 @@ void ARADocumentController::willUpdatePlaybackRegionProperties (ARA::PlugIn::Pla
         (playbackRegion->hasContentBasedFadeAtHead() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationContentBasedFadeAtHead) != 0)) ||
         (playbackRegion->hasContentBasedFadeAtTail() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationContentBasedFadeAtTail) != 0)));
 
-    auto araPlaybackRegion = static_cast<ARAPlaybackRegion*> (playbackRegion);
-    araPlaybackRegion->notifyListeners ([araPlaybackRegion, newProperties](ARAPlaybackRegion::Listener& l) { l.willUpdatePlaybackRegionProperties (araPlaybackRegion, newProperties); });
+    notify_listeners (willUpdatePlaybackRegionProperties, ARAPlaybackRegion*, playbackRegion, newProperties);
 }
 
 void ARADocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept 
 {
-    auto araPlaybackRegion = static_cast<ARAPlaybackRegion*> (playbackRegion);
-    araPlaybackRegion->notifyListeners ([araPlaybackRegion](ARAPlaybackRegion::Listener& l) { l.didUpdatePlaybackRegionProperties (araPlaybackRegion); });
+    notify_listeners (didUpdatePlaybackRegionProperties, ARAPlaybackRegion*, playbackRegion);
 
     // post a content update if the updated properties affect the playback region sample content
     if (currentPropertyUpdateAffectsContent)
@@ -303,7 +301,7 @@ void ARADocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::Play
             scopes += ARAContentUpdateScopes::notesAreAffected();
         // other content such as tempo or key signatures are not exported at playback region level
         // because this would simply mirror the musical context content.
-        araPlaybackRegion->notifyContentChanged (scopes, true);
+        static_cast<ARAPlaybackRegion*> (playbackRegion)->notifyContentChanged (scopes, true);
     }
 }
 
