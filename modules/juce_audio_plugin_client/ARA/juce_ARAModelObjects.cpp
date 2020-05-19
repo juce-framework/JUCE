@@ -59,17 +59,17 @@ ARAAudioSource::ARAAudioSource (ARADocument* document, ARA::ARAAudioSourceHostRe
 
 void ARAAudioSource::notifyAnalysisProgressStarted()
 {
-    getDocumentController()->notifyAudioSourceAnalysisProgressStarted (this);
+    getDocumentController<ARADocumentController>()->internalNotifyAudioSourceAnalysisProgressStarted (this);
 }
 
 void ARAAudioSource::notifyAnalysisProgressUpdated (float progress)
 {
-    getDocumentController()->notifyAudioSourceAnalysisProgressUpdated (this, progress);
+    getDocumentController<ARADocumentController>()->internalNotifyAudioSourceAnalysisProgressUpdated (this, progress);
 }
 
 void ARAAudioSource::notifyAnalysisProgressCompleted()
 {
-    getDocumentController()->notifyAudioSourceAnalysisProgressCompleted (this);
+    getDocumentController<ARADocumentController>()->internalNotifyAudioSourceAnalysisProgressCompleted (this);
 }
 
 void ARAAudioSource::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyARAHost)

@@ -134,13 +134,12 @@ protected:
 public:
 
     //==============================================================================
-    // Analysis progress notifications
-    // Internal helper - instead of calling these functions directly, rather use
-    // ARAAudioSource::notifyAnalysisProgress() which will forward here as appropriate.
-
-    void notifyAudioSourceAnalysisProgressStarted (ARAAudioSource* audioSource);
-    void notifyAudioSourceAnalysisProgressUpdated (ARAAudioSource* audioSource, float progress);
-    void notifyAudioSourceAnalysisProgressCompleted (ARAAudioSource* audioSource);
+    /** @internal */
+    void internalNotifyAudioSourceAnalysisProgressStarted (ARAAudioSource* audioSource);
+    /** @internal */
+    void internalNotifyAudioSourceAnalysisProgressUpdated (ARAAudioSource* audioSource, float progress);
+    /** @internal */
+    void internalNotifyAudioSourceAnalysisProgressCompleted (ARAAudioSource* audioSource);
 
 #endif
 

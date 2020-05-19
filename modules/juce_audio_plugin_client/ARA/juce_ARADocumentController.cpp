@@ -87,7 +87,7 @@ ARADocumentController::ARADocumentController (const ARA::ARADocumentControllerHo
 
 //==============================================================================
 
-void ARADocumentController::notifyAudioSourceAnalysisProgressStarted (ARAAudioSource* audioSource)
+void ARADocumentController::internalNotifyAudioSourceAnalysisProgressStarted (ARAAudioSource* audioSource)
 {
     if (audioSource->internalAnalysisProgressTracker.updateProgress (ARA::kARAAnalysisProgressStarted, 0.0f))
         internalAnalysisProgressIsSynced.clear (std::memory_order_release);
@@ -95,7 +95,7 @@ void ARADocumentController::notifyAudioSourceAnalysisProgressStarted (ARAAudioSo
     DocumentController::notifyAudioSourceAnalysisProgressStarted (audioSource);
 }
 
-void ARADocumentController::notifyAudioSourceAnalysisProgressUpdated (ARAAudioSource* audioSource, float progress)
+void ARADocumentController::internalNotifyAudioSourceAnalysisProgressUpdated (ARAAudioSource* audioSource, float progress)
 {
     if (audioSource->internalAnalysisProgressTracker.updateProgress (ARA::kARAAnalysisProgressUpdated,  progress))
         internalAnalysisProgressIsSynced.clear (std::memory_order_release);
@@ -103,7 +103,7 @@ void ARADocumentController::notifyAudioSourceAnalysisProgressUpdated (ARAAudioSo
     DocumentController::notifyAudioSourceAnalysisProgressUpdated (audioSource, progress);
 }
 
-void ARADocumentController::notifyAudioSourceAnalysisProgressCompleted (ARAAudioSource* audioSource)
+void ARADocumentController::internalNotifyAudioSourceAnalysisProgressCompleted (ARAAudioSource* audioSource)
 {
     if (audioSource->internalAnalysisProgressTracker.updateProgress (ARA::kARAAnalysisProgressCompleted, 1.0f))
         internalAnalysisProgressIsSynced.clear (std::memory_order_release);
