@@ -310,6 +310,7 @@ public:
     //==============================================================================
     void updateDeprecatedProjectSettingsInteractively();
 
+    StringPairArray getAppConfigDefs();
     StringPairArray getAudioPluginFlags() const;
 
     //==============================================================================

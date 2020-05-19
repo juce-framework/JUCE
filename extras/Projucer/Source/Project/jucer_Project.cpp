@@ -2425,6 +2425,49 @@ String Project::getFileTemplate (const String& templateName)
 
 }
 
+StringPairArray Project::getAppConfigDefs()
+{
+    StringPairArray result;
+    result.set ("JUCE_DISPLAY_SPLASH_SCREEN",  shouldDisplaySplashScreen()             ? "1" : "0");
+    result.set ("JUCE_USE_DARK_SPLASH_SCREEN", getSplashScreenColourString() == "Dark" ? "1" : "0");
+    result.set ("JUCE_PROJUCER_VERSION",       "0x" + String::toHexString (ProjectInfo::versionNumber));
+
+    OwnedArray<LibraryModule> modules;
+    getEnabledModules().createRequiredModules (modules);
+
+    for (auto& m : modules)
+        result.set ("JUCE_MODULE_AVAILABLE_" + m->getID(), "1");
+
+    result.set ("JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED", "1");
+
+    for (auto& m : modules)
+    {
+        OwnedArray<Project::ConfigFlag> flags;
+        m->getConfigFlags (*this, flags);
+
+        for (auto* flag : flags)
+            if (! flag->value.isUsingDefault())
+                result.set (flag->symbol, flag->value.get() ? "1" : "0");
+    }
+
+    result.addArray (getAudioPluginFlags());
+
+    const auto& type = getProjectType();
+    const auto isStandaloneApplication = (! type.isAudioPlugin() && ! type.isDynamicLibrary());
+
+    const auto standaloneValue = [&]
+    {
+        if (result.containsKey ("JucePlugin_Name") && result.containsKey ("JucePlugin_Build_Standalone"))
+            return "JucePlugin_Build_Standalone";
+
+        return isStandaloneApplication ? "1" : "0";
+    }();
+
+    result.set ("JUCE_STANDALONE_APPLICATION", standaloneValue);
+
+    return result;
+}
+
 StringPairArray Project::getAudioPluginFlags() const
 {
     if (! isAudioPluginProject())

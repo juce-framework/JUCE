@@ -304,24 +304,31 @@ private:
 
     String getGlobalDefs()
     {
-        StringArray defs;
-
-        defs.add (project.getCompileEngineSettings().getExtraPreprocessorDefsString());
-
+        auto mergeDefs = [] (const StringPairArray& inDefs) -> String
         {
-            auto projectDefines = project.getPreprocessorDefs();
+            StringArray outDefs;
 
-            for (int i = 0; i < projectDefines.size(); ++i)
+            for (int i = 0; i < inDefs.size(); ++i)
             {
-                auto def = projectDefines.getAllKeys()[i];
-                auto value = projectDefines.getAllValues()[i];
+                auto def = inDefs.getAllKeys()[i];
+                auto value = inDefs.getAllValues()[i];
 
                 if (value.isNotEmpty())
                     def << "=" << value;
 
-                 defs.add (def);
+                 outDefs.add (def);
             }
-        }
+
+            return outDefs.joinIntoString (" ");
+        };
+
+        StringArray defs;
+
+        if (! project.shouldUseAppConfig())
+            defs.add (mergeDefs (project.getAppConfigDefs()));
+
+        defs.add (project.getCompileEngineSettings().getExtraPreprocessorDefsString());
+        defs.add (mergeDefs (project.getPreprocessorDefs()));
 
         for (Project::ExporterIterator exporter (project); exporter.next();)
             if (exporter->canLaunchProject())
