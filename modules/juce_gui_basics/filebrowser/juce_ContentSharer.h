@@ -27,7 +27,7 @@ namespace juce
 
     @tags{GUI}
 */
-class JUCE_API ContentSharer
+class JUCE_API ContentSharer  : public DeletedAtShutdown
 {
 public:
     JUCE_DECLARE_SINGLETON (ContentSharer, false)
