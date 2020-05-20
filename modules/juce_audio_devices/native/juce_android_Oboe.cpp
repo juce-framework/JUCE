@@ -1284,6 +1284,8 @@ public:
             case 20:  return " IP";
             case 21:  return " BUS";
             case 22:  return " USB headset";
+            case 23:  return " hearing aid";
+            case 24:  return " built-in speaker safe";
             default:  jassertfalse; return ""; // type not supported yet, needs to be added!
         }
     }
