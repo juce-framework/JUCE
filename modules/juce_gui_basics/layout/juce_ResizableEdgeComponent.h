@@ -30,7 +30,7 @@ namespace juce
     edge. Make sure you reposition the resizer component each time the parent's size
     changes, to keep it in the correct position.
 
-    @see ResizbleBorderComponent, ResizableCornerComponent
+    @see ResizableBorderComponent, ResizableCornerComponent
 
     @tags{GUI}
 */
