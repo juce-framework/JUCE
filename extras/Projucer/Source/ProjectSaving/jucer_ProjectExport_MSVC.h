@@ -745,7 +745,7 @@ public:
                     addFilesToCompile (projectItem.getChild (i), cpps, headers, otherFiles);
             }
             else if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (getOwner())
-                     && getOwner().getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType)
+                     && (targetType == SharedCodeTarget || getOwner().getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType))
             {
                 RelativePath path (projectItem.getFile(), getOwner().getTargetFolder(), RelativePath::buildTargetFolder);
 
@@ -842,8 +842,8 @@ public:
 
                 jassert (relativePath.getRoot() == RelativePath::buildTargetFolder);
 
-                if (getOwner().getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType
-                    && (targetType == SharedCodeTarget || projectItem.shouldBeCompiled()))
+                if (targetType == SharedCodeTarget
+                    || (getOwner().getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType && projectItem.shouldBeCompiled()))
                 {
                     addFileToFilter (relativePath, path.upToLastOccurrenceOf ("\\", false, false), cpps, headers, otherFiles);
                     return true;
