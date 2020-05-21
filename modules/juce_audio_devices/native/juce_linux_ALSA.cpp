@@ -791,7 +791,7 @@ private:
     //==============================================================================
     const String inputId, outputId;
     std::unique_ptr<ALSADevice> outputDevice, inputDevice;
-    int numCallbacks = 0;
+    std::atomic<int> numCallbacks { 0 };
     bool audioIoInProgress = false;
 
     CriticalSection callbackLock;
