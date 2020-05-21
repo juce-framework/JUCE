@@ -34,7 +34,7 @@ std::unique_ptr<InputStream> VersionInfo::createInputStreamForAsset (const Asset
     URL downloadUrl (asset.url);
     StringPairArray responseHeaders;
 
-    return std::unique_ptr<InputStream> (downloadUrl.createInputStream (false, nullptr, nullptr,
+    return std::unique_ptr<InputStream> (downloadUrl.createInputStream (false, nullptr,
                                                                         "Accept: application/octet-stream",
                                                                         5000, &responseHeaders, &statusCode, 1));
 }
@@ -62,7 +62,7 @@ bool VersionInfo::isNewerVersionThanCurrent()
 std::unique_ptr<VersionInfo> VersionInfo::fetch (const String& endpoint)
 {
     URL latestVersionURL ("https://api.github.com/repos/juce-framework/JUCE/releases/" + endpoint);
-    std::unique_ptr<InputStream> inStream (latestVersionURL.createInputStream (false, nullptr, nullptr, {}, 5000));
+    std::unique_ptr<InputStream> inStream (latestVersionURL.createInputStream (false, nullptr, {}, 5000));
 
     if (inStream == nullptr)
         return nullptr;
