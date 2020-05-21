@@ -1027,7 +1027,7 @@ private:
           : Vst::EditorView (&ec, nullptr),
             owner (&ec), pluginInstance (p)
         {
-            component.reset (new ContentWrapperComponent (*this, p));
+            createContentWrapperComponentIfNeeded();
 
            #if JUCE_MAC
             if (getHostType().type == PluginHostType::SteinbergCubase10)
@@ -1083,13 +1083,20 @@ private:
             if (parent == nullptr || isPlatformTypeSupported (type) == kResultFalse)
                 return kResultFalse;
 
-            if (component == nullptr)
-                component.reset (new ContentWrapperComponent (*this, pluginInstance));
+            systemWindow = parent;
+
+            createContentWrapperComponentIfNeeded();
 
            #if JUCE_WINDOWS || JUCE_LINUX
             component->addToDesktop (0, parent);
             component->setOpaque (true);
             component->setVisible (true);
+
+            #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+             component->checkHostWindowScaleFactor();
+             component->startTimer (500);
+            #endif
+
             #if JUCE_LINUX
              if (auto* runLoop = getHostRunLoop())
              {
@@ -1100,13 +1107,13 @@ private:
                  }
              }
             #endif
+
            #else
             isNSView = (strcmp (type, kPlatformTypeNSView) == 0);
             macHostWindow = juce::attachComponentToWindowRefVST (component.get(), parent, isNSView);
            #endif
 
             component->resizeHostWindow();
-            systemWindow = parent;
             attachedToParent();
 
             // Life's too short to faff around with wave lab
@@ -1276,6 +1283,17 @@ private:
            #if ! JUCE_MAC
             if (! approximatelyEqual ((float) factor, editorScaleFactor))
             {
+               #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                // Cubase 10 only sends integer scale factors, so correct this for fractional scales
+                if (getHostType().type == PluginHostType::SteinbergCubase10)
+                {
+                    auto hostWindowScale = (Steinberg::IPlugViewContentScaleSupport::ScaleFactor) getScaleFactorForWindow ((HWND) systemWindow);
+
+                    if (hostWindowScale > 0.0 && ! approximatelyEqual (factor, hostWindowScale))
+                        factor = hostWindowScale;
+                }
+               #endif
+
                 editorScaleFactor = (float) factor;
 
                 if (owner != nullptr)
@@ -1340,18 +1358,29 @@ private:
         //==============================================================================
         struct ContentWrapperComponent  : public Component
                                        #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                                        , private Timer
+                                        , public Timer
                                        #endif
         {
-            ContentWrapperComponent (JuceVST3Editor& editor, AudioProcessor& plugin)
-                : pluginEditor (plugin.createEditorIfNeeded()),
-                  owner (editor)
+            ContentWrapperComponent (JuceVST3Editor& editor)  : owner (editor)
             {
                 setOpaque (true);
                 setBroughtToFrontOnMouseClick (true);
 
-                // if hasEditor() returns true then createEditorIfNeeded has to return a valid editor
-                jassert (pluginEditor != nullptr);
+                ignoreUnused (fakeMouseGenerator);
+            }
+
+            ~ContentWrapperComponent() override
+            {
+                if (pluginEditor != nullptr)
+                {
+                    PopupMenu::dismissAllActiveMenus();
+                    pluginEditor->processor.editorBeingDeleted (pluginEditor.get());
+                }
+            }
+
+            void createEditor (AudioProcessor& plugin)
+            {
+                pluginEditor.reset (plugin.createEditorIfNeeded());
 
                 if (pluginEditor != nullptr)
                 {
@@ -1367,20 +1396,10 @@ private:
 
                     resizeHostWindow();
                 }
-
-               #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                startTimer (500);
-               #endif
-
-                ignoreUnused (fakeMouseGenerator);
-            }
-
-            ~ContentWrapperComponent() override
-            {
-                if (pluginEditor != nullptr)
+                else
                 {
-                    PopupMenu::dismissAllActiveMenus();
-                    pluginEditor->processor.editorBeingDeleted (pluginEditor.get());
+                    // if hasEditor() returns true then createEditorIfNeeded has to return a valid editor
+                    jassertfalse;
                 }
             }
 
@@ -1493,19 +1512,24 @@ private:
                 }
             }
 
-            std::unique_ptr<AudioProcessorEditor> pluginEditor;
-
-        private:
            #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-            void timerCallback() override
+            void checkHostWindowScaleFactor()
             {
                 auto hostWindowScale = (float) getScaleFactorForWindow ((HWND) owner.systemWindow);
 
                 if (hostWindowScale > 0.0 && ! approximatelyEqual (hostWindowScale, owner.editorScaleFactor))
                     owner.setContentScaleFactor (hostWindowScale);
             }
+
+            void timerCallback() override
+            {
+                checkHostWindowScaleFactor();
+            }
            #endif
 
+            std::unique_ptr<AudioProcessorEditor> pluginEditor;
+
+        private:
             JuceVST3Editor& owner;
             FakeMouseMoveGenerator fakeMouseGenerator;
             Rectangle<int> lastBounds;
@@ -1513,6 +1537,15 @@ private:
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
         };
+
+        void createContentWrapperComponentIfNeeded()
+        {
+            if (component == nullptr)
+            {
+                component.reset (new ContentWrapperComponent (*this));
+                component->createEditor (pluginInstance);
+            }
+        }
 
         //==============================================================================
         ScopedJuceInitialiser_GUI libraryInitialiser;
