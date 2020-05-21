@@ -1084,6 +1084,63 @@ class ChildProcess::ActiveProcess
 public:
     ActiveProcess (const StringArray& arguments, int streamFlags)
     {
+        startProcess(arguments, streamFlags, {}, [](const String& exe, const Array<char*>& argv, const Array<char*>&)
+        {
+            execvp (exe.toRawUTF8(), argv.getRawDataPointer());
+        });
+    }
+
+    ActiveProcess (const StringArray& arguments, const StringPairArray& environment, int streamFlags)
+    {
+        StringArray envValues;
+
+        for (const auto& key : environment.getAllKeys())
+            envValues.add (key + "=" + environment.getValue(key, {}));
+
+        Array<char*> env;
+
+        for (auto& value : envValues)
+            if (value.isNotEmpty())
+                env.add (const_cast<char*> (value.toRawUTF8()));
+
+        env.add (nullptr);
+
+        StringArray args = arguments;
+
+        if (args.size() > 0 && !File::isAbsolutePath(args[0]))
+        {
+            const auto pathVariable = environment.getValue("PATH", SystemStats::getEnvironmentVariable("PATH", {}));
+
+            const auto pathArray = StringArray::fromTokens(pathVariable, ":", "\"");
+            for (const auto& path : pathArray)
+            {
+                auto pathFile = File::createFileWithoutCheckingPath(path).getChildFile(args[0]);
+                if (pathFile.existsAsFile())
+                {
+                    args.set(0, pathFile.getFullPathName());
+                    break;
+                }
+            }
+        }
+        
+        startProcess(args, streamFlags, env, [](const String& exe, const Array<char*>& argv, const Array<char*>& env)
+        {
+            execve (exe.toRawUTF8(), argv.getRawDataPointer(), env.getRawDataPointer());
+        });
+    }
+
+    ~ActiveProcess()
+    {
+        if (readHandle != nullptr)
+            fclose (readHandle);
+
+        if (pipeHandle != 0)
+            close (pipeHandle);
+    }
+
+    template <class Exec>
+    void startProcess (const StringArray& arguments, int streamFlags, const Array<char*>& environment, const Exec& execCallback)
+    {
         auto exe = arguments[0].unquoted();
 
         // Looks like you're trying to launch a non-existent exe or a folder (perhaps on OSX
@@ -1127,7 +1184,7 @@ public:
 
                 argv.add (nullptr);
 
-                execvp (exe.toRawUTF8(), argv.getRawDataPointer());
+                execCallback (exe.toRawUTF8(), argv, environment);
                 _exit (-1);
             }
             else
@@ -1138,15 +1195,6 @@ public:
                 close (pipeHandles[1]); // close the write handle
             }
         }
-    }
-
-    ~ActiveProcess()
-    {
-        if (readHandle != nullptr)
-            fclose (readHandle);
-
-        if (pipeHandle != 0)
-            close (pipeHandle);
     }
 
     bool isRunning() noexcept
@@ -1244,6 +1292,24 @@ bool ChildProcess::start (const StringArray& args, int streamFlags)
         return false;
 
     activeProcess.reset (new ActiveProcess (args, streamFlags));
+
+    if (activeProcess->childPID == 0)
+        activeProcess.reset();
+
+    return activeProcess != nullptr;
+}
+
+bool ChildProcess::start (const String& command, const StringPairArray& environment, int streamFlags)
+{
+    return start (StringArray::fromTokens (command, true), environment, streamFlags);
+}
+
+bool ChildProcess::start (const StringArray& args, const StringPairArray& environment, int streamFlags)
+{
+    if (args.size() == 0)
+        return false;
+
+    activeProcess.reset (new ActiveProcess (args, environment, streamFlags));
 
     if (activeProcess->childPID == 0)
         activeProcess.reset();
