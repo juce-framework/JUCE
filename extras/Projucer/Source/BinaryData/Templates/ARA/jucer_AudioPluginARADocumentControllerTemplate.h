@@ -18,8 +18,13 @@
 class %%aradocumentcontroller_class_name%%  : public ARADocumentController
 {
 public:
+    //==============================================================================
     %%aradocumentcontroller_class_name%%(const ARA::ARADocumentControllerHostInstance* instance);
     ~%%aradocumentcontroller_class_name%%();
+
+    //==============================================================================
+    bool doRestoreObjectsFromStream (ARAInputStream& input, const ARARestoreObjectsFilter* filter) noexcept override;
+    bool doStoreObjectsToStream (ARAOutputStream& output, const ARAStoreObjectsFilter* filter) noexcept override;
 
 //==============================================================================
 // Override document controller methods here

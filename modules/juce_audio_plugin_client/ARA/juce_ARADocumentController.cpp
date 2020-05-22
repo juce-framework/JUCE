@@ -167,11 +167,13 @@ void ARADocumentController::didEndEditing() noexcept
 
 bool ARADocumentController::doRestoreObjectsFromStream (ARAInputStream& /*input*/, const ARARestoreObjectsFilter* /*filter*/) noexcept
 {
+    ARA_WARN ("doRestoreObjectsFromStream() not implemented yet");
     return true;
 }
 
 bool ARADocumentController::doStoreObjectsToStream (ARAOutputStream& /*output*/, const ARAStoreObjectsFilter* /*filter*/) noexcept
 {
+    ARA_WARN ("doStoreObjectsToStream() not implemented yet");
     return true;
 }
 

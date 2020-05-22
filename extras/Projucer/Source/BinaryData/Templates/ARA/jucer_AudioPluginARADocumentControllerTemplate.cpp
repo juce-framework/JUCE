@@ -21,6 +21,23 @@
 }
 
 //==============================================================================
+bool %%aradocumentcontroller_class_name%%::doRestoreObjectsFromStream (ARAInputStream& input, const ARARestoreObjectsFilter* filter) noexcept
+{
+    // You should use this method to read any persistent data associated with
+    // your ARA model graph stored in an archive using the supplied ARAInputStream. 
+    // Be sure to check the ARARestoreObjectsFilter to determine which objects to restore.
+    return true;
+}
+
+bool %%aradocumentcontroller_class_name%%::doStoreObjectsToStream (ARAOutputStream& output, const ARAStoreObjectsFilter* filter) noexcept
+{
+    // You should use this method to write any persistent data associated with
+    // your ARA model graph into the an archive using the supplied ARAOutputStream. 
+    // Be sure to check the ARAStoreObjectsFilter to determine which objects to store.
+    return true;
+}
+
+//==============================================================================
 // This creates new instances of the document controller..
 ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController (const ARADocumentControllerHostInstance* instance) noexcept
 {

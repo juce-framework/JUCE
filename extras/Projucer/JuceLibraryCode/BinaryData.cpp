@@ -5348,6 +5348,23 @@ static const unsigned char temp_binary_data_24[] =
 "}\r\n"
 "\r\n"
 "//==============================================================================\r\n"
+"bool %%aradocumentcontroller_class_name%%::doRestoreObjectsFromStream (ARAInputStream& input, const ARARestoreObjectsFilter* filter) noexcept\r\n"
+"{\r\n"
+"    // You should use this method to read any persistent data associated with\r\n"
+"    // your ARA model graph stored in an archive using the supplied ARAInputStream. \r\n"
+"    // Be sure to check the ARARestoreObjectsFilter to determine which objects to restore.\r\n"
+"    return true;\r\n"
+"}\r\n"
+"\r\n"
+"bool %%aradocumentcontroller_class_name%%::doStoreObjectsToStream (ARAOutputStream& output, const ARAStoreObjectsFilter* filter) noexcept\r\n"
+"{\r\n"
+"    // You should use this method to write any persistent data associated with\r\n"
+"    // your ARA model graph into the an archive using the supplied ARAOutputStream. \r\n"
+"    // Be sure to check the ARAStoreObjectsFilter to determine which objects to store.\r\n"
+"    return true;\r\n"
+"}\r\n"
+"\r\n"
+"//==============================================================================\r\n"
 "// This creates new instances of the document controller..\r\n"
 "ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController (const ARADocumentControllerHostInstance* instance) noexcept\r\n"
 "{\r\n"
@@ -5378,8 +5395,13 @@ static const unsigned char temp_binary_data_25[] =
 "class %%aradocumentcontroller_class_name%%  : public ARADocumentController\r\n"
 "{\r\n"
 "public:\r\n"
+"    //==============================================================================\r\n"
 "    %%aradocumentcontroller_class_name%%(const ARA::ARADocumentControllerHostInstance* instance);\r\n"
 "    ~%%aradocumentcontroller_class_name%%();\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    bool doRestoreObjectsFromStream (ARAInputStream& input, const ARARestoreObjectsFilter* filter) noexcept override;\r\n"
+"    bool doStoreObjectsToStream (ARAOutputStream& output, const ARAStoreObjectsFilter* filter) noexcept override;\r\n"
 "\r\n"
 "//==============================================================================\r\n"
 "// Override document controller methods here\r\n"
@@ -7933,8 +7955,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x52a8dfdf:  numBytes = 1859; return wizard_Openfile_svg;
         case 0x58e2ae48:  numBytes = 4551; return wizard_OpenGL_svg;
         case 0xb1da6f9e:  numBytes = 7488; return wizard_StaticLibrary_svg;
-        case 0x744d44d6:  numBytes = 1060; return jucer_AudioPluginARADocumentControllerTemplate_cpp;
-        case 0x3eb8f45b:  numBytes = 999; return jucer_AudioPluginARADocumentControllerTemplate_h;
+        case 0x744d44d6:  numBytes = 1987; return jucer_AudioPluginARADocumentControllerTemplate_cpp;
+        case 0x3eb8f45b:  numBytes = 1407; return jucer_AudioPluginARADocumentControllerTemplate_h;
         case 0xd11e6d35:  numBytes = 2085; return jucer_AnimatedComponentSimpleTemplate_h;
         case 0x6cf2645e:  numBytes = 1563; return jucer_AnimatedComponentTemplate_cpp;
         case 0x97b055e3:  numBytes = 1201; return jucer_AnimatedComponentTemplate_h;
