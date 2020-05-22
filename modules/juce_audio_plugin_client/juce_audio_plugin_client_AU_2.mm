@@ -18,7 +18,7 @@
 
 #if JucePlugin_Build_AU
 
-#include "../juce_core/system/juce_CompilerWarnings.h"
+#include <juce_core/system/juce_CompilerWarnings.h>
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wparentheses",
                                      "-Wextra-tokens",

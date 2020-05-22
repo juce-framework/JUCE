@@ -15,7 +15,7 @@
 
   ==============================================================================
 */
-#include "../../juce_core/system/juce_CompilerWarnings.h"
+#include <juce_core/system/juce_CompilerWarnings.h>
 #include "../utility/juce_CheckSettingMacros.h"
 
 #if JucePlugin_Build_AU
@@ -74,9 +74,9 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_CarbonVisibility.h"
 
-#include "../../juce_audio_basics/native/juce_mac_CoreAudioLayouts.h"
-#include "../../juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp"
-#include "../../juce_audio_processors/format_types/juce_AU_Shared.h"
+#include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
+#include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
+#include <juce_audio_processors/format_types/juce_AU_Shared.h>
 
 //==============================================================================
 using namespace juce;

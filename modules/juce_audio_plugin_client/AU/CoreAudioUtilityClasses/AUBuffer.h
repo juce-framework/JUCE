@@ -47,7 +47,7 @@
 #ifndef __AUBuffer_h__
 #define __AUBuffer_h__
 
-#include "../../../juce_core/native/juce_mac_ClangBugWorkaround.h"
+#include <juce_core/native/juce_mac_ClangBugWorkaround.h>
 
 #include <TargetConditionals.h>
 #if !defined(__COREAUDIO_USE_FLAT_INCLUDES__)

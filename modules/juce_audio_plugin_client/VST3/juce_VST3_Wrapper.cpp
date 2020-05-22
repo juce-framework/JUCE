@@ -16,8 +16,8 @@
   ==============================================================================
 */
 
-#include "../../juce_core/system/juce_CompilerWarnings.h"
-#include "../../juce_core/system/juce_TargetPlatform.h"
+#include <juce_core/system/juce_CompilerWarnings.h>
+#include <juce_core/system/juce_TargetPlatform.h>
 
 //==============================================================================
 #if JucePlugin_Build_VST3 && (__APPLE_CPP__ || __APPLE_CC__ || _WIN32 || _WIN64 || LINUX || __linux__)
@@ -27,7 +27,7 @@
  #define JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY 1
 #endif
 
-#include "../../juce_audio_processors/format_types/juce_VST3Headers.h"
+#include <juce_audio_processors/format_types/juce_VST3Headers.h>
 
 #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
 #define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
@@ -37,8 +37,8 @@
 #include "../utility/juce_IncludeSystemHeaders.h"
 #include "../utility/juce_WindowsHooks.h"
 #include "../utility/juce_FakeMouseMoveGenerator.h"
-#include "../../juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp"
-#include "../../juce_audio_processors/format_types/juce_VST3Common.h"
+#include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
+#include <juce_audio_processors/format_types/juce_VST3Common.h>
 
 #ifndef JUCE_VST3_CAN_REPLACE_VST2
  #define JUCE_VST3_CAN_REPLACE_VST2 1

@@ -28,7 +28,7 @@ namespace zlibNamespace
   #undef fdopen
   #define ZLIB_INTERNAL
   #define NO_DUMMY_DECL
-  #include "../../juce_core/zip/zlib/zlib.h"
+  #include <juce_core/zip/zlib/zlib.h>
   #undef OS_CODE
 #else
   #include JUCE_ZLIB_INCLUDE_PATH
