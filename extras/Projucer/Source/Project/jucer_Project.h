@@ -191,6 +191,8 @@ public:
     bool isPluginAAXBypassDisabled() const            { return checkMultiChoiceVar (pluginCharacteristicsValue, Ids::pluginAAXDisableBypass); }
     bool isPluginAAXMultiMonoDisabled() const         { return checkMultiChoiceVar (pluginCharacteristicsValue, Ids::pluginAAXDisableMultiMono); }
 
+    void disableStandaloneForARAPlugIn();
+
     static StringArray getAllAUMainTypeStrings() noexcept;
     static Array<var> getAllAUMainTypeVars() noexcept;
     Array<var> getDefaultAUMainTypes() const noexcept;

@@ -252,13 +252,8 @@ void Project::initialiseProjectValues()
 
 void Project::initialiseAudioPluginValues()
 {
-    // TODO JUCE_ARA this gets called before the project type has been set, 
-    // so we don't yet know if we're an ARA plug-in - should the Wizard fix this?
-    Array<var> defaultFormats (Ids::buildVST3.toString (), Ids::buildAU.toString ());
-    if (! shouldEnableARA())
-        defaultFormats.add (Ids::buildStandalone.toString());
-
-    pluginFormatsValue.referTo               (projectRoot, Ids::pluginFormats,              getUndoManager(), defaultFormats , ",");
+    pluginFormatsValue.referTo               (projectRoot, Ids::pluginFormats,              getUndoManager(),
+                                              Array<var> (Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString()), ",");
     pluginCharacteristicsValue.referTo       (projectRoot, Ids::pluginCharacteristicsValue, getUndoManager(), Array<var> (), ",");
 
     pluginNameValue.referTo                  (projectRoot, Ids::pluginName,                 getUndoManager(), getProjectNameString());
@@ -2016,6 +2011,11 @@ bool Project::isVST3PluginHost()
 bool Project::isARAPluginHost()
 {
     return isVST3PluginHost() && isConfigFlagEnabled ("JUCE_PLUGINHOST_ARA");
+}
+
+void Project::disableStandaloneForARAPlugIn()
+{
+    pluginFormatsValue.referTo (projectRoot, Ids::pluginFormats, getUndoManager(), Array<var> (Ids::buildVST3.toString(), Ids::buildAU.toString()), ",");
 }
 
 //==============================================================================

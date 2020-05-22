@@ -132,6 +132,8 @@ struct AudioPluginAppWizard   : public NewProjectWizard
 
             sourceGroup.addFileAtIndex (documentControllerCppFile, -1, true);
             sourceGroup.addFileAtIndex (documentControllerHFile, -1, false);
+
+            project.disableStandaloneForARAPlugIn();
         }
 
         project.getConfigFlag ("JUCE_VST3_CAN_REPLACE_VST2") = 0;
