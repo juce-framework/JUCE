@@ -145,10 +145,7 @@ using namespace juce;
 #if JucePlugin_Enable_IAA && JucePlugin_Build_Standalone && JUCE_IOS && (! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP)
  extern bool JUCE_CALLTYPE juce_isInterAppAudioConnected();
  extern void JUCE_CALLTYPE juce_switchToHostApplication();
-
- #if JUCE_MODULE_AVAILABLE_juce_gui_basics
  extern Image JUCE_CALLTYPE juce_getIAAHostIcon (int);
- #endif
 #endif
 
 bool PluginHostType::isInterAppAudioConnected() const
@@ -183,7 +180,6 @@ bool PluginHostType::isInAAXAudioSuite (AudioProcessor& processor)
     return false;
 }
 
-#if JUCE_MODULE_AVAILABLE_juce_gui_basics
 namespace juce {
 
 extern Image JUCE_API getIconFromApplication (const String&, const int);
@@ -206,4 +202,3 @@ Image PluginHostType::getHostIcon (int size) const
 }
 
 }
-#endif

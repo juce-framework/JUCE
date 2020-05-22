@@ -29,11 +29,6 @@ class ActionListener;
 class ActionBroadcaster;
 
 //==============================================================================
-#if JUCE_MODULE_AVAILABLE_juce_opengl
-class OpenGLContext;
-#endif
-
-//==============================================================================
 /** See MessageManager::callFunctionOnMessageThread() for use of this function type. */
 using MessageCallbackFunction = void* (void* userData);
 
