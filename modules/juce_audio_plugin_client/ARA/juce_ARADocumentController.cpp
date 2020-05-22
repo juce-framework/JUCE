@@ -278,42 +278,8 @@ ARA::PlugIn::PlaybackRegion* ARADocumentController::doCreatePlaybackRegion (ARA:
     return new ARAPlaybackRegion (static_cast<ARAAudioModification*> (modification), hostRef);
 }
 
-void ARADocumentController::willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) noexcept 
-{
-    // if any playback region changes would affect the sample content, prepare to
-    // post a sample content update to any of our playback region listeners
-    jassert(! currentPropertyUpdateAffectsContent);
-    currentPropertyUpdateAffectsContent =
-        ((playbackRegion->getStartInAudioModificationTime() != newProperties->startInModificationTime) ||
-        (playbackRegion->getDurationInAudioModificationTime() != newProperties->durationInModificationTime) ||
-        (playbackRegion->getStartInPlaybackTime() != newProperties->startInPlaybackTime) ||
-        (playbackRegion->getDurationInPlaybackTime() != newProperties->durationInPlaybackTime)||
-        (playbackRegion->isTimestretchEnabled() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretch) != 0)) ||
-        (playbackRegion->isTimeStretchReflectingTempo() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretchReflectingTempo) != 0)) ||
-        (playbackRegion->hasContentBasedFadeAtHead() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationContentBasedFadeAtHead) != 0)) ||
-        (playbackRegion->hasContentBasedFadeAtTail() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationContentBasedFadeAtTail) != 0)));
-
-    notify_listeners (willUpdatePlaybackRegionProperties, ARAPlaybackRegion*, playbackRegion, newProperties);
-}
-
-void ARADocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept 
-{
-    notify_listeners (didUpdatePlaybackRegionProperties, ARAPlaybackRegion*, playbackRegion);
-
-    // post a content update if the updated properties affect the playback region sample content
-    if (currentPropertyUpdateAffectsContent)
-    {
-        currentPropertyUpdateAffectsContent = false;
-        auto scopes = ARAContentUpdateScopes::samplesAreAffected();
-        JUCE_CONSTEXPR auto areNotesAnalyzable = (bool) (JucePlugin_ARAContentTypes & 1);
-        if (areNotesAnalyzable)
-            scopes += ARAContentUpdateScopes::notesAreAffected();
-        // other content such as tempo or key signatures are not exported at playback region level
-        // because this would simply mirror the musical context content.
-        static_cast<ARAPlaybackRegion*> (playbackRegion)->notifyContentChanged (scopes, true);
-    }
-}
-
+OVERRIDE_TO_NOTIFY_3 (willUpdatePlaybackRegionProperties, PlaybackRegion*, playbackRegion, ARAPlaybackRegion::PropertiesPtr, newProperties)
+OVERRIDE_TO_NOTIFY_1 (didUpdatePlaybackRegionProperties, PlaybackRegion*, playbackRegion)
 OVERRIDE_TO_NOTIFY_1 (willDestroyPlaybackRegion, PlaybackRegion*, playbackRegion)
 
 //==============================================================================

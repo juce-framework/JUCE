@@ -212,9 +212,6 @@ protected:
     };
 
 private:
-    // this flag is used automatically trigger content update if a property change implies this
-    bool currentPropertyUpdateAffectsContent { false };
-
     std::atomic_flag internalAnalysisProgressIsSynced { true };
 
     ScopedJuceInitialiser_GUI libraryInitialiser;
