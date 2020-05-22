@@ -111,11 +111,18 @@ void ARADocumentController::internalNotifyAudioSourceAnalysisProgressCompleted (
     DocumentController::notifyAudioSourceAnalysisProgressCompleted (audioSource);
 }
 
+void ARADocumentController::internalDidUpdateAudioSourceAnalysisProgress (ARAAudioSource* audioSource, ARAAudioSource::ARAAnalysisProgressState state, float progress)
+{
+    // helper to forward listener callbacks from our ModelUpdateControllerProgressAdapter
+    didUpdateAudioSourceAnalyisProgress (audioSource, state, progress);
+}
+
 //==============================================================================
 
 // some helper macros to ease repeated declaration & implementation of notification functions below:
 
 #define notify_listeners(function, ModelObjectPtrType, modelObject,  ...) \
+    static_cast<std::remove_pointer<ModelObjectPtrType>::type::Listener*> (this)->function  (static_cast<ModelObjectPtrType> (modelObject), ##__VA_ARGS__); \
     static_cast<ModelObjectPtrType> (modelObject)->notifyListeners ([&] (std::remove_pointer<ModelObjectPtrType>::type::Listener& l) { l.function (static_cast<ModelObjectPtrType> (modelObject), ##__VA_ARGS__); })
 
 // no notification arguments
@@ -365,6 +372,7 @@ namespace ModelUpdateControllerProgressAdapter
                                                             ARAAudioSourceHostRef audioSourceHostRef, ARAAnalysisProgressState state, float value) noexcept
     {
         auto audioSource = reinterpret_cast<ARAAudioSource*> (audioSourceHostRef);
+        audioSource->getDocumentController<ARADocumentController>()->internalDidUpdateAudioSourceAnalysisProgress (audioSource, state, value);
         audioSource->notifyListeners ([&] (ARAAudioSource::Listener& l) { l.didUpdateAudioSourceAnalyisProgress (audioSource, state, value); });
     }
 

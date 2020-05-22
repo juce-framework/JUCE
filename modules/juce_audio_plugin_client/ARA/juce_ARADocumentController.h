@@ -22,6 +22,12 @@ namespace juce
     @tags{ARA}
 */
 class JUCE_API  ARADocumentController  : public ARA::PlugIn::DocumentController,
+                                         private ARADocument::Listener,
+                                         private ARAMusicalContext::Listener,
+                                         private ARARegionSequence::Listener,
+                                         private ARAAudioSource::Listener,
+                                         private ARAAudioModification::Listener,
+                                         private ARAPlaybackRegion::Listener,
                                          private juce::Timer
 {
 public:
@@ -140,6 +146,8 @@ public:
     void internalNotifyAudioSourceAnalysisProgressUpdated (ARAAudioSource* audioSource, float progress);
     /** @internal */
     void internalNotifyAudioSourceAnalysisProgressCompleted (ARAAudioSource* audioSource);
+    /** @internal */
+    void internalDidUpdateAudioSourceAnalysisProgress (ARAAudioSource* audioSource, ARAAudioSource::ARAAnalysisProgressState state, float progress);
 
     //==============================================================================
     /** @internal */
