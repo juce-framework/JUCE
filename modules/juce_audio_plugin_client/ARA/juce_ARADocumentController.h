@@ -48,13 +48,13 @@ protected:
     @param input Data stream containing previously persisted data to be used when restoring the ARADocument
     @param filter A filter to be applied to the stream
     */
-    virtual bool doRestoreObjectsFromStream (ARAInputStream& input, const ARA::PlugIn::RestoreObjectsFilter* filter) noexcept;
+    virtual bool doRestoreObjectsFromStream (ARAInputStream& input, const ARARestoreObjectsFilter* filter) noexcept;
 
     /** Write an ARADocument archive to a juce::OutputStream.
     @param output Data stream that should be used to write the persistent ARADocument data
     @param filter A filter to be applied to the stream
     */
-    virtual bool doStoreObjectsToStream (ARAOutputStream& output, const ARA::PlugIn::StoreObjectsFilter* filter) noexcept;
+    virtual bool doStoreObjectsToStream (ARAOutputStream& output, const ARAStoreObjectsFilter* filter) noexcept;
 
 #ifndef DOXYGEN
 

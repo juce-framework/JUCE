@@ -165,12 +165,12 @@ void ARADocumentController::didEndEditing() noexcept
 
 //==============================================================================
 
-bool ARADocumentController::doRestoreObjectsFromStream (ARAInputStream& /*input*/, const ARA::PlugIn::RestoreObjectsFilter* /*filter*/) noexcept
+bool ARADocumentController::doRestoreObjectsFromStream (ARAInputStream& /*input*/, const ARARestoreObjectsFilter* /*filter*/) noexcept
 {
     return true;
 }
 
-bool ARADocumentController::doStoreObjectsToStream (ARAOutputStream& /*output*/, const ARA::PlugIn::StoreObjectsFilter* /*filter*/) noexcept
+bool ARADocumentController::doStoreObjectsToStream (ARAOutputStream& /*output*/, const ARAStoreObjectsFilter* /*filter*/) noexcept
 {
     return true;
 }

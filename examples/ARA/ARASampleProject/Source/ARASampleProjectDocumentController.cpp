@@ -6,7 +6,7 @@ ARA::PlugIn::AudioModification* ARASampleProjectDocumentController::doCreateAudi
     return new ARASampleProjectAudioModification (static_cast<ARAAudioSource*> (audioSource), hostRef, static_cast<const ARAAudioModification*> (optionalModificationToClone));
 }
 
-bool ARASampleProjectDocumentController::doRestoreObjectsFromStream (ARAInputStream& input, const ARA::PlugIn::RestoreObjectsFilter* filter) noexcept
+bool ARASampleProjectDocumentController::doRestoreObjectsFromStream (ARAInputStream& input, const ARARestoreObjectsFilter* filter) noexcept
 {
     // start reading data from the archive, starting with the number of audio modifications in the archive
     const auto numAudioModifications = input.readInt64();
@@ -43,7 +43,7 @@ bool ARASampleProjectDocumentController::doRestoreObjectsFromStream (ARAInputStr
     return ! input.failed();
 }
 
-bool ARASampleProjectDocumentController::doStoreObjectsToStream (ARAOutputStream& output, const ARA::PlugIn::StoreObjectsFilter* filter) noexcept
+bool ARASampleProjectDocumentController::doStoreObjectsToStream (ARAOutputStream& output, const ARAStoreObjectsFilter* filter) noexcept
 {
     // this dummy implementation only deals with audio modification states
     const auto& audioModificationsToPersist{ filter->getAudioModificationsToStore<ARASampleProjectAudioModification>() };
