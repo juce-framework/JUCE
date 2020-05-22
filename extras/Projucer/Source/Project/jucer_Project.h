@@ -146,12 +146,12 @@ public:
     String getPluginCodeString() const                { return pluginCodeValue.get(); }
     String getPluginChannelConfigsString() const      { return pluginChannelConfigsValue.get(); }
     String getAAXIdentifierString() const             { return pluginAAXIdentifierValue.get(); }
-    String getARAFactoryIDString () const { return pluginARAFactoryIDValue.get (); }
-    String getARADocumentArchiveIDString () const { return pluginARAArchiveIDValue.get (); }
+    String getARAFactoryIDString() const              { return pluginARAFactoryIDValue.get(); }
+    String getARADocumentArchiveIDString() const      { return pluginARAArchiveIDValue.get(); }
     String getPluginAUExportPrefixString() const      { return pluginAUExportPrefixValue.get(); }
 
     String getPluginAUMainTypeString() const          { return pluginAUMainTypeValue.get(); }
-    String getARACompatibleArchiveIDStrings () const        { return pluginARACompatibleArchiveIDsValue.get (); }
+    String getARACompatibleArchiveIDStrings() const   { return pluginARACompatibleArchiveIDsValue.get(); }
     String getVSTNumMIDIInputsString() const          { return pluginVSTNumMidiInputsValue.get(); }
     String getVSTNumMIDIOutputsString() const         { return pluginVSTNumMidiOutputsValue.get(); }
 

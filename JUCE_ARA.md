@@ -188,7 +188,7 @@ std::vector<float> readAudioSourceSamples (ARAAudioSource* audioSource)
     // prepare output buffer
     ARA::ARASampleCount sampleCount = audioSource->getSampleCount();
     std::vector<float> sampleBuffer (sampleCount);
-    float* sampleBufPointer = sampleBuffer.data ();
+    float* sampleBufPointer = sampleBuffer.data();
 
     // read the first channel of audio source sample data
     ARAAudioSourceReader sourceReader(audioSource);
