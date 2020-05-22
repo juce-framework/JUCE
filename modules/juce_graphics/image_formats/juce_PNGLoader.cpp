@@ -40,7 +40,7 @@ namespace zlibNamespace
 #if JUCE_INCLUDE_ZLIB_CODE
   #undef OS_CODE
   #undef fdopen
-  #include "../../juce_core/zip/zlib/zlib.h"
+  #include <juce_core/zip/zlib/zlib.h>
   #undef OS_CODE
 #else
   #include JUCE_ZLIB_INCLUDE_PATH
