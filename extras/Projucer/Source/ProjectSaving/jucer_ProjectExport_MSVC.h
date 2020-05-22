@@ -872,22 +872,6 @@ public:
             return false;
         }
 
-        bool addFilesToFilter (const Array<build_tools::RelativePath>& files, const String& path,
-                               XmlElement& cpps, XmlElement& headers, XmlElement& otherFiles, XmlElement& groups)
-        {
-            if (files.size() > 0)
-            {
-                addFilterGroup (groups, path);
-
-                for (int i = 0; i < files.size(); ++i)
-                    addFileToFilter (files.getReference(i), path, cpps, headers, otherFiles);
-
-                return true;
-            }
-
-            return false;
-        }
-
         void fillInFiltersXml (XmlElement& filterXml) const
         {
             filterXml.setAttribute ("ToolsVersion", getOwner().getToolsVersion());
