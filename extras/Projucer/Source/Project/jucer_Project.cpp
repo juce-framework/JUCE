@@ -1184,16 +1184,31 @@ bool Project::shouldBuildTargetType (build_tools::ProjectType::Target::Type targ
     return true;
 }
 
+static bool hasParentDirectory (File f, StringRef parentName)
+{
+    for (int depth = 0; depth < 2; ++depth)
+    {
+        auto parent = f.getParentDirectory();
+
+        if (parent.getFileName() == parentName)
+            return true;
+
+        f = parent;
+    }
+
+    return false;
+}
+
 build_tools::ProjectType::Target::Type Project::getTargetTypeFromFilePath (const File& file, bool returnSharedTargetIfNoValidSuffix)
 {
-    if      (LibraryModule::CompileUnit::hasSuffix (file, "_AU"))         return build_tools::ProjectType::Target::AudioUnitPlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AUv3"))       return build_tools::ProjectType::Target::AudioUnitv3PlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AAX"))        return build_tools::ProjectType::Target::AAXPlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_RTAS"))       return build_tools::ProjectType::Target::RTASPlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST2"))       return build_tools::ProjectType::Target::VSTPlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST3"))       return build_tools::ProjectType::Target::VST3PlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Standalone")) return build_tools::ProjectType::Target::StandalonePlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Unity"))      return build_tools::ProjectType::Target::UnityPlugIn;
+    if      (LibraryModule::CompileUnit::hasSuffix (file, "_AU") || hasParentDirectory (file, "AU"))                 return build_tools::ProjectType::Target::AudioUnitPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AUv3") || hasParentDirectory (file, "AU"))               return build_tools::ProjectType::Target::AudioUnitv3PlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AAX") || hasParentDirectory (file, "AAX"))               return build_tools::ProjectType::Target::AAXPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_RTAS") || hasParentDirectory (file, "RTAS"))             return build_tools::ProjectType::Target::RTASPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST2") || hasParentDirectory (file, "VST"))              return build_tools::ProjectType::Target::VSTPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST3") || hasParentDirectory (file, "VST3"))             return build_tools::ProjectType::Target::VST3PlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Standalone") || hasParentDirectory (file, "Standalone")) return build_tools::ProjectType::Target::StandalonePlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Unity") || hasParentDirectory (file, "Unity"))           return build_tools::ProjectType::Target::UnityPlugIn;
 
     return (returnSharedTargetIfNoValidSuffix ? build_tools::ProjectType::Target::SharedCodeTarget : build_tools::ProjectType::Target::unspecified);
 }

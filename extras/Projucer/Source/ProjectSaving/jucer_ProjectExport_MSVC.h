@@ -770,25 +770,22 @@ public:
 
                 if (path.hasFileExtension (cOrCppFileExtensions) || path.hasFileExtension (asmFileExtensions))
                 {
-                    if (targetType == SharedCodeTarget || projectItem.shouldBeCompiled())
+                    auto* e = cpps.createNewChildElement ("ClCompile");
+                    e->setAttribute ("Include", path.toWindowsStyle());
+
+                    if (shouldUseStdCall (path))
+                        e->createNewChildElement ("CallingConvention")->addTextElement ("StdCall");
+
+                    if (projectItem.shouldBeCompiled())
                     {
-                        auto* e = cpps.createNewChildElement ("ClCompile");
-                        e->setAttribute ("Include", path.toWindowsStyle());
+                        auto extraCompilerFlags = owner.compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get().toString();
 
-                        if (shouldUseStdCall (path))
-                            e->createNewChildElement ("CallingConvention")->addTextElement ("StdCall");
-
-                        if (projectItem.shouldBeCompiled())
-                        {
-                            auto extraCompilerFlags = owner.compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get().toString();
-
-                            if (extraCompilerFlags.isNotEmpty())
-                                e->createNewChildElement ("AdditionalOptions")->addTextElement (extraCompilerFlags + " %(AdditionalOptions)");
-                        }
-                        else
-                        {
-                            e->createNewChildElement ("ExcludedFromBuild")->addTextElement ("true");
-                        }
+                        if (extraCompilerFlags.isNotEmpty())
+                            e->createNewChildElement ("AdditionalOptions")->addTextElement (extraCompilerFlags + " %(AdditionalOptions)");
+                    }
+                    else
+                    {
+                        e->createNewChildElement ("ExcludedFromBuild")->addTextElement ("true");
                     }
                 }
                 else if (path.hasFileExtension (headerFileExtensions))
@@ -853,7 +850,9 @@ public:
 
                 return filesWereAdded;
             }
-            else if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (getOwner()))
+            else if (projectItem.shouldBeAddedToTargetProject()
+                     && projectItem.shouldBeAddedToTargetExporter (getOwner())
+                     && getOwner().getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType)
             {
                 build_tools::RelativePath relativePath (projectItem.getFile(),
                                                         getOwner().getTargetFolder(),
@@ -861,12 +860,8 @@ public:
 
                 jassert (relativePath.getRoot() == build_tools::RelativePath::buildTargetFolder);
 
-                if (getOwner().getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType
-                    && (targetType == SharedCodeTarget || projectItem.shouldBeCompiled()))
-                {
-                    addFileToFilter (relativePath, path.upToLastOccurrenceOf ("\\", false, false), cpps, headers, otherFiles);
-                    return true;
-                }
+                addFileToFilter (relativePath, path.upToLastOccurrenceOf ("\\", false, false), cpps, headers, otherFiles);
+                return true;
             }
 
             return false;
