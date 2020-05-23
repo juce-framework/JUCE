@@ -1092,10 +1092,6 @@ public:
            #endif
 
             ignoreUnused (fakeMouseGenerator);
-
-           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-            startTimer (500);
-           #endif
         }
 
         ~EditorCompWrapper() override
@@ -1120,6 +1116,11 @@ public:
            #if JUCE_WINDOWS
             addToDesktop (0, args.ptr);
             hostWindow = (HWND) args.ptr;
+
+            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+             checkHostWindowScaleFactor();
+             startTimer (500);
+            #endif
            #elif JUCE_LINUX
             addToDesktop (0, args.ptr);
             hostWindow = (Window) args.ptr;
@@ -1345,12 +1346,17 @@ public:
         }
 
        #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-        void timerCallback() override
+        void checkHostWindowScaleFactor()
         {
             auto hostWindowScale = (float) getScaleFactorForWindow (hostWindow);
 
             if (hostWindowScale > 0.0f && ! approximatelyEqual (hostWindowScale, editorScaleFactor))
                 wrapper.handleSetContentScaleFactor (hostWindowScale);
+        }
+
+        void timerCallback() override
+        {
+            checkHostWindowScaleFactor();
         }
        #endif
 
