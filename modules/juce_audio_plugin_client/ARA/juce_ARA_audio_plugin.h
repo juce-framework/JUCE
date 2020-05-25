@@ -34,6 +34,7 @@ namespace juce
 
 namespace juce
 {
+    using ARAViewSelection = ARA::PlugIn::ViewSelection;
     using ARAContentUpdateScopes = ARA::ContentUpdateScopes;
     using ARARestoreObjectsFilter = ARA::PlugIn::RestoreObjectsFilter;
     using ARAStoreObjectsFilter = ARA::PlugIn::StoreObjectsFilter;

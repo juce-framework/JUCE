@@ -55,7 +55,7 @@ DocumentView::~DocumentView()
 }
 
 //==============================================================================
-void DocumentView::onNewSelection (const ARA::PlugIn::ViewSelection& /*viewSelection*/)
+void DocumentView::onNewSelection (const ARAViewSelection& /*viewSelection*/)
 {
     if (showOnlySelectedRegionSequences)
         invalidateRegionSequenceViews();

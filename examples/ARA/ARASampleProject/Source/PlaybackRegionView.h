@@ -34,7 +34,7 @@ public:
     void changeListenerCallback (ChangeBroadcaster*) override;
 
     // ARAEditorView::Listener overrides
-    void onNewSelection (const ARA::PlugIn::ViewSelection& viewSelection) override;
+    void onNewSelection (const ARAViewSelection& viewSelection) override;
 
     // ARADocument::Listener overrides: used to check if our reader has been invalidated
     void didEndEditing (ARADocument* document) override;

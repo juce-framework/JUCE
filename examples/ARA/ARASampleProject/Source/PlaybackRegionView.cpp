@@ -110,7 +110,7 @@ void PlaybackRegionView::changeListenerCallback (ChangeBroadcaster* /*broadcaste
     repaint();
 }
 
-void PlaybackRegionView::onNewSelection (const ARA::PlugIn::ViewSelection& viewSelection)
+void PlaybackRegionView::onNewSelection (const ARAViewSelection& viewSelection)
 {
     bool selected = ARA::contains (viewSelection.getPlaybackRegions(), playbackRegion);
     if (selected != isSelected)
