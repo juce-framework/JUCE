@@ -82,7 +82,6 @@ namespace juce
 ARADocumentController::ARADocumentController (const ARA::ARADocumentControllerHostInstance* instance)
   : DocumentController (instance)
 {
-    startTimerHz (20);  // TODO JUCE_ARA we could start the timer on demand when the first audio source is created or activated, stop when last is deleted or deactivated.
 }
 
 //==============================================================================
@@ -161,6 +160,11 @@ void ARADocumentController::willBeginEditing() noexcept
 void ARADocumentController::didEndEditing() noexcept
 {
     notify_listeners (didEndEditing, ARADocument*, getDocument());
+
+    if (isTimerRunning() && (activeAudioSourcesCount == 0))
+        stopTimer();
+    else if (! isTimerRunning() && (activeAudioSourcesCount > 0))
+        startTimerHz (20);
 }
 
 //==============================================================================
@@ -237,6 +241,7 @@ OVERRIDE_TO_NOTIFY_1 (willDestroyRegionSequence, RegionSequence*, regionSequence
 
 ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugIn::Document* document, ARA::ARAAudioSourceHostRef hostRef) noexcept
 {
+    ++activeAudioSourcesCount;
     return new ARAAudioSource (static_cast<ARADocument*> (document), hostRef);
 }
 
@@ -253,9 +258,19 @@ OVERRIDE_TO_NOTIFY_3 (didEnableAudioSourceSamplesAccess, AudioSource*, audioSour
 OVERRIDE_TO_NOTIFY_2 (didAddAudioModificationToAudioSource, AudioSource*, audioSource, AudioModification*, audioModification)
 OVERRIDE_TO_NOTIFY_2 (willRemoveAudioModificationFromAudioSource, AudioSource*, audioSource, AudioModification*, audioModification)
 OVERRIDE_TO_NOTIFY_3 (willDeactivateAudioSourceForUndoHistory, AudioSource*, audioSource, bool, deactivate)
-OVERRIDE_TO_NOTIFY_3 (didDeactivateAudioSourceForUndoHistory, AudioSource*, audioSource, bool, deactivate)
-OVERRIDE_TO_NOTIFY_1 (willDestroyAudioSource, AudioSource*, audioSource)
 
+void ARADocumentController::didDeactivateAudioSourceForUndoHistory (ARA::PlugIn::AudioSource* audioSource, bool deactivate) noexcept
+{
+    activeAudioSourcesCount += (deactivate ? -1 : 1);
+    notify_listeners (didDeactivateAudioSourceForUndoHistory, ARAAudioSource*, audioSource, deactivate);
+}
+
+void ARADocumentController::willDestroyAudioSource (ARA::PlugIn::AudioSource* audioSource) noexcept
+{
+    if (! audioSource->isDeactivatedForUndoHistory())
+        --activeAudioSourcesCount;
+    notify_listeners (willDestroyAudioSource, ARAAudioSource*, audioSource);
+}
 //==============================================================================
 
 ARA::PlugIn::AudioModification* ARADocumentController::doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, const ARA::PlugIn::AudioModification* optionalModificationToClone) noexcept
