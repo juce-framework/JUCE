@@ -81,7 +81,7 @@ protected:
     void updateMusicalContextContent (ARA::ARAMusicalContextRef musicalContextRef, const ARA::ARAContentTimeRange* range, ARA::ContentUpdateScopes flags) noexcept override;
     void updateAudioSourceContent (ARA::ARAAudioSourceRef audioSourceRef, const ARA::ARAContentTimeRange* range, ARA::ContentUpdateScopes flags) noexcept override;
 
-    // Document notifications, typically not overridden further
+    // Document notifications, typically not overridden further - instead, override the ARADocument::Listener callbacks below
     void willBeginEditing() noexcept override;
     void didEndEditing() noexcept override;
     void willUpdateDocumentProperties (ARA::PlugIn::Document* document, ARADocument::PropertiesPtr newProperties) noexcept override;
@@ -96,19 +96,46 @@ protected:
     void willRemoveAudioSourceFromDocument (ARA::PlugIn::Document* document, ARA::PlugIn::AudioSource* audioSource) noexcept override;
     void willDestroyDocument (ARA::PlugIn::Document* document) noexcept override;
 
-    // MusicalContext notifications, typically not overridden further
+    // ARADocument::Listener callbacks
+    using ARADocument::Listener::willBeginEditing;
+    using ARADocument::Listener::didEndEditing;
+    using ARADocument::Listener::willUpdateDocumentProperties;
+    using ARADocument::Listener::didUpdateDocumentProperties;
+    using ARADocument::Listener::didAddMusicalContextToDocument;
+    using ARADocument::Listener::willRemoveMusicalContextFromDocument;
+    using ARADocument::Listener::didReorderMusicalContextsInDocument;
+    using ARADocument::Listener::didAddRegionSequenceToDocument;
+    using ARADocument::Listener::willRemoveRegionSequenceFromDocument;
+    using ARADocument::Listener::didReorderRegionSequencesInDocument;
+    using ARADocument::Listener::didAddAudioSourceToDocument;
+    using ARADocument::Listener::willRemoveAudioSourceFromDocument;
+    using ARADocument::Listener::willDestroyDocument;
+
+    // MusicalContext notifications, typically not overridden further - instead, override the ARAMusicalContext::Listener callbacks below
     void willUpdateMusicalContextProperties (ARA::PlugIn::MusicalContext* musicalContext, ARAMusicalContext::PropertiesPtr newProperties) noexcept override;
     void didUpdateMusicalContextProperties (ARA::PlugIn::MusicalContext* musicalContext) noexcept override;
     void willDestroyMusicalContext (ARA::PlugIn::MusicalContext* musicalContext) noexcept override;
 
-    // RegionSequence notifications, typically not overridden further
+    // ARAMusicalContext::Listener callbacks
+    using ARAMusicalContext::Listener::willUpdateMusicalContextProperties;
+    using ARAMusicalContext::Listener::didUpdateMusicalContextProperties;
+    using ARAMusicalContext::Listener::willDestroyMusicalContext;
+
+    // RegionSequence notifications, typically not overridden further - instead, override the ARARegionSequence::Listener callbacks below
     void willUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence, ARARegionSequence::PropertiesPtr newProperties) noexcept override;
     void didUpdateRegionSequenceProperties (ARA::PlugIn::RegionSequence* regionSequence) noexcept override;
     void didAddPlaybackRegionToRegionSequence (ARA::PlugIn::RegionSequence* regionSequence, ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
     void willRemovePlaybackRegionFromRegionSequence (ARA::PlugIn::RegionSequence* regionSequence, ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
     void willDestroyRegionSequence (ARA::PlugIn::RegionSequence* regionSequence) noexcept override;
 
-    // AudioSource notifications, typically not overridden further
+    // ARARegionSequence::Listener callbacks
+    using ARARegionSequence::Listener::willUpdateRegionSequenceProperties;
+    using ARARegionSequence::Listener::didUpdateRegionSequenceProperties;
+    using ARARegionSequence::Listener::didAddPlaybackRegionToRegionSequence;
+    using ARARegionSequence::Listener::willRemovePlaybackRegionFromRegionSequence;
+    using ARARegionSequence::Listener::willDestroyRegionSequence;
+
+    // AudioSource notifications, typically not overridden further - instead, override the ARAAudioSource::Listener callbacks below
     void willUpdateAudioSourceProperties (ARA::PlugIn::AudioSource* audioSource, ARAAudioSource::PropertiesPtr newProperties) noexcept override;
     void didUpdateAudioSourceProperties (ARA::PlugIn::AudioSource* audioSource) noexcept override;
     void willEnableAudioSourceSamplesAccess (ARA::PlugIn::AudioSource* audioSource, bool enable) noexcept override;
@@ -119,7 +146,18 @@ protected:
     void didDeactivateAudioSourceForUndoHistory (ARA::PlugIn::AudioSource* audioSource, bool deactivate) noexcept override;
     void willDestroyAudioSource (ARA::PlugIn::AudioSource* audioSource) noexcept override;
 
-    // AudioModification notifications, typically not overridden further
+    // ARAAudioSource::Listener callbacks
+    using ARAAudioSource::Listener::willUpdateAudioSourceProperties;
+    using ARAAudioSource::Listener::didUpdateAudioSourceProperties;
+    using ARAAudioSource::Listener::willEnableAudioSourceSamplesAccess;
+    using ARAAudioSource::Listener::didEnableAudioSourceSamplesAccess;
+    using ARAAudioSource::Listener::didAddAudioModificationToAudioSource;
+    using ARAAudioSource::Listener::willRemoveAudioModificationFromAudioSource;
+    using ARAAudioSource::Listener::willDeactivateAudioSourceForUndoHistory;
+    using ARAAudioSource::Listener::didDeactivateAudioSourceForUndoHistory;
+    using ARAAudioSource::Listener::willDestroyAudioSource;
+
+    // AudioModification notifications, typically not overridden further - instead, override the ARAAudioModification::Listener callbacks below
     void willUpdateAudioModificationProperties (ARA::PlugIn::AudioModification* audioModification, ARAAudioModification::PropertiesPtr newProperties) noexcept override;
     void didUpdateAudioModificationProperties (ARA::PlugIn::AudioModification* audioModification) noexcept override;
     void didAddPlaybackRegionToAudioModification (ARA::PlugIn::AudioModification* audioModification, ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
@@ -128,10 +166,24 @@ protected:
     void didDeactivateAudioModificationForUndoHistory (ARA::PlugIn::AudioModification* audioModification, bool deactivate) noexcept override;
     void willDestroyAudioModification (ARA::PlugIn::AudioModification* audioModification) noexcept override;
 
-    // PlaybackRegion notifications, typically not overridden further
+    // ARAAudioModification::Listener callbacks
+    using ARAAudioModification::Listener::willUpdateAudioModificationProperties;
+    using ARAAudioModification::Listener::didUpdateAudioModificationProperties;
+    using ARAAudioModification::Listener::didAddPlaybackRegionToAudioModification;
+    using ARAAudioModification::Listener::willRemovePlaybackRegionFromAudioModification;
+    using ARAAudioModification::Listener::willDeactivateAudioModificationForUndoHistory;
+    using ARAAudioModification::Listener::didDeactivateAudioModificationForUndoHistory;
+    using ARAAudioModification::Listener::willDestroyAudioModification;
+
+    // PlaybackRegion notifications, typically not overridden further - instead, override the ARAPlaybackRegion::Listener callbacks below
     void willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) noexcept override;
     void didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
     void willDestroyPlaybackRegion (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept override;
+
+    // ARAPlaybackRegion::Listener callbacks
+    using ARAPlaybackRegion::Listener::willUpdatePlaybackRegionProperties;
+    using ARAPlaybackRegion::Listener::didUpdatePlaybackRegionProperties;
+    using ARAPlaybackRegion::Listener::willDestroyPlaybackRegion;
 
     //==============================================================================
     // juce::Timer overrides
