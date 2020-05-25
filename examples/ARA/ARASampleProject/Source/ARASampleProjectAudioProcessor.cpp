@@ -8,7 +8,7 @@ ARASampleProjectAudioProcessor::ARASampleProjectAudioProcessor()
 {
 }
 
-ARASampleProjectAudioProcessor::ARASampleProjectAudioProcessor (bool useBufferedAudioSourceReader)
+ARASampleProjectAudioProcessor::ARASampleProjectAudioProcessor (bool useBuffering)
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
@@ -21,7 +21,7 @@ ARASampleProjectAudioProcessor::ARASampleProjectAudioProcessor (bool useBuffered
 #else
      :
 #endif
-       useBufferedAudioSourceReader (useBufferedAudioSourceReader)
+       useBufferedAudioSourceReader (useBuffering)
 {
     lastPositionInfo.resetToDefault();
 }
