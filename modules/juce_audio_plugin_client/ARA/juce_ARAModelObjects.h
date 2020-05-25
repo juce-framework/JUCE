@@ -257,7 +257,7 @@ public:
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
 
-    /** Returns time range covered by the regions in this sequence. 
+    /** Returns the playback time range covered by the regions in this sequence. 
         @param includeHeadAndTail Whether or not the range includes the playback region's head and tail time. 
     */
     Range<double> getTimeRange (bool includeHeadAndTail = false) const;
@@ -526,7 +526,7 @@ public:
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
 
-    /** Returns time range covered by all playback regions in the region sequence
+    /** Returns the playback time range of this playback region.
         @param includeHeadAndTail Whether or not the range includes the head and tail 
                                   time of all playback regions in the sequence. 
     */
