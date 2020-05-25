@@ -532,6 +532,11 @@ public:
     */
     Range<double> getTimeRange (bool includeHeadAndTail = false) const;
 
+    /** Get the head length in seconds before the start of the region's playback time. */
+    double getHeadTime() const;
+    /** Get the tail length in seconds after the end of the region's playback time. */
+    double getTailTime() const;
+
     /** Notify the ARA host and any listeners of a content update initiated by the plug-in.
         This must be called by the plug-in model management code on the message thread whenever updating
         the internal content representation, such as after the user edited the pitch of a note in the

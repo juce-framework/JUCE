@@ -110,6 +110,21 @@ Range<double> ARAPlaybackRegion::getTimeRange (bool includeHeadAndTail) const
     return { startTime, endTime };
 }
 
+double ARAPlaybackRegion::getHeadTime() const
+{
+    ARA::ARATimeDuration headTime {}, tailTime {};
+    getDocumentController()->getPlaybackRegionHeadAndTailTime (toRef (this), &headTime, &tailTime);
+    return headTime;
+}
+
+double ARAPlaybackRegion::getTailTime() const
+{
+    
+    ARA::ARATimeDuration headTime {}, tailTime {};
+    getDocumentController()->getPlaybackRegionHeadAndTailTime (toRef (this), &headTime, &tailTime);
+    return tailTime;
+}
+
 void ARAPlaybackRegion::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyARAHost)
 {
     getDocumentController<ARADocumentController>()->internalNotifyPlaybackRegionContentChanged (this, scopeFlags, notifyARAHost);
