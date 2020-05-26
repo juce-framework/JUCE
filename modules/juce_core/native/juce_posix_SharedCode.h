@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -415,7 +415,7 @@ int64 juce_fileSetPosition (void* handle, int64 pos)
 
 void FileInputStream::openHandle()
 {
-    auto f = open (file.getFullPathName().toUTF8(), O_CREAT | O_RDONLY, 00644);
+    auto f = open (file.getFullPathName().toUTF8(), O_RDONLY);
 
     if (f != -1)
         fileHandle = fdToVoidPointer (f);
@@ -452,7 +452,7 @@ void FileOutputStream::openHandle()
 {
     if (file.exists())
     {
-        auto f = open (file.getFullPathName().toUTF8(), O_CREAT | O_RDWR, 00644);
+        auto f = open (file.getFullPathName().toUTF8(), O_RDWR);
 
         if (f != -1)
         {
@@ -543,8 +543,12 @@ void MemoryMappedFile::openInternal (const File& file, AccessMode mode, bool exc
         range.setStart (range.getStart() - (range.getStart() % pageSize));
     }
 
-    fileHandle = open (file.getFullPathName().toUTF8(),
-                       (O_CREAT | (mode == readWrite ? O_RDWR : O_RDONLY)), 00644);
+    auto filename = file.getFullPathName().toUTF8();
+
+    if (mode == readWrite)
+        fileHandle = open (filename, O_CREAT | O_RDWR, 00644);
+    else
+        fileHandle = open (filename, O_RDONLY);
 
     if (fileHandle != -1)
     {

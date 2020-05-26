@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -935,7 +935,7 @@ ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const Value
         "-Woverloaded-virtual", "-Wreorder", "-Wsign-conversion", "-Wunreachable-code",
         "-Wzero-as-null-pointer-constant", "-Wcast-align", "-Wno-implicit-fallthrough",
         "-Wno-maybe-uninitialized", "-Wno-missing-field-initializers", "-Wno-ignored-qualifiers",
-        "-Wswitch-enum", "-Wswitch-default", "-Wredundant-decls"
+        "-Wswitch-enum", "-Wredundant-decls"
     };
     recommendedCompilerWarningFlags["GCC-7"] = recommendedCompilerWarningFlags["GCC"];
     recommendedCompilerWarningFlags["GCC-7"].add ("-Wno-strict-overflow");

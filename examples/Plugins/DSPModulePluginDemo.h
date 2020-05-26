@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -272,9 +272,7 @@ public:
             auto maxSize = static_cast<size_t> (roundToInt (getSampleRate() * (8192.0 / 44100.0)));
             auto assetName = (type == 0 ? "Impulse1.wav" : "Impulse2.wav");
 
-            std::unique_ptr<InputStream> assetInputStream (createAssetInputStream (assetName));
-
-            if (assetInputStream != nullptr)
+            if (auto assetInputStream = createAssetInputStream (assetName))
             {
                 currentCabinetData.reset();
                 assetInputStream->readIntoMemoryBlock (currentCabinetData);

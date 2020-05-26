@@ -9,10 +9,10 @@ Code::Blocks, CLion and Linux Makefiles as well as containing a source code edit
 live-coding engine which can be used for rapid prototyping.
 
 ## Getting Started
-The JUCE repository contains a [master](https://github.com/weareroli/JUCE/tree/master)
-and [develop](https://github.com/weareroli/JUCE/tree/develop) branch. The develop branch
+The JUCE repository contains a [master](https://github.com/juce-framework/JUCE/tree/master)
+and [develop](https://github.com/juce-framework/JUCE/tree/develop) branch. The develop branch
 contains the latest bugfixes and features and is periodically merged into the master
-branch in stable [tagged releases](https://github.com/WeAreROLI/JUCE/releases)
+branch in stable [tagged releases](https://github.com/juce-framework/JUCE/releases)
 (the latest release containing pre-built binaries can be also downloaded from the
 [JUCE website](https://shop.juce.com/get-juce)).
 
@@ -30,14 +30,17 @@ For further help getting started, please refer to the JUCE
 
 ## Minimum System Requirements
 #### Building JUCE Projects
-- __macOS__: macOS 10.11 and Xcode 7.3.1
+- __macOS/iOS__: macOS 10.11 and Xcode 7.3.1
 - __Windows__: Windows 8.1 and Visual Studio 2015 64-bit
 - __Linux__: GCC 4.8
+- __Android__: Android Studio on Windows, macOS or Linux
 
 #### Deployment Targets
 - __macOS__: macOS 10.7
 - __Windows__: Windows Vista
 - __Linux__: Mainstream Linux distributions
+- __iOS__: iOS 9.0
+- __Android__: Jelly Bean (API 16)
 
 ## Contributing
 For bug reports and features requests, please visit the [JUCE Forum](https://forum.juce.com/) -

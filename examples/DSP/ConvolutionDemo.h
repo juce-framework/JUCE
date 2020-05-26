@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -90,8 +90,7 @@ struct ConvolutionDemoDSP
                 auto selectedType = cabinetTypeParameter->getCurrentSelectedID();
                 auto assetName = (selectedType == 2 ? "guitar_amp.wav" : "cassette_recorder.wav");
 
-                std::unique_ptr<InputStream> assetInputStream (createAssetInputStream (assetName));
-                if (assetInputStream != nullptr)
+                if (auto assetInputStream = createAssetInputStream (assetName))
                 {
                     currentCabinetData.reset();
                     assetInputStream->readIntoMemoryBlock (currentCabinetData);

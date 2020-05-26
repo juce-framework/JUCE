@@ -18,7 +18,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.roli.juce.pluginhost"
+        applicationId "com.juce.pluginhost"
         minSdkVersion    23
         targetSdkVersion 28
         externalNativeBuild {

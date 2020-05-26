@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -238,7 +238,7 @@ struct Program
         auto n = (uint16) size;
 
         for (uint32 i = 2; i < size; ++i)
-            n += (n * 2) + programStart[i];
+            n = static_cast<uint16> (n + (n * 2) + programStart[i]);
 
         return n;
     }

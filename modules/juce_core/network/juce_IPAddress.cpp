@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -90,10 +90,10 @@ IPAddress::IPAddress (uint16 a1, uint16 a2, uint16 a3, uint16 a4,
 
 IPAddress::IPAddress (uint32 n) noexcept : isIPv6 (false)
 {
-    address[0] = (n >> 24);
-    address[1] = (n >> 16) & 255;
-    address[2] = (n >> 8) & 255;
-    address[3] = (n & 255);
+    address[0] = static_cast<uint8> (n >> 24);
+    address[1] = static_cast<uint8> ((n >> 16) & 255);
+    address[2] = static_cast<uint8> ((n >> 8) & 255);
+    address[3] = static_cast<uint8> ((n & 255));
 
     zeroUnusedBytes (address);
 }

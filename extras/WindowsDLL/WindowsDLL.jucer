@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="IvabE4" name="WindowsDLL" projectType="library" juceLinkage="none"
-              bundleIdentifier="com.roli.jucedll" jucerVersion="5.4.7" defines="JUCE_DLL_BUILD=1"
-              displaySplashScreen="0" reportAppUsage="0" companyName="ROLI Ltd."
-              companyCopyright="ROLI Ltd.">
+              bundleIdentifier="com.juce.jucedll" jucerVersion="5.4.7" defines="JUCE_DLL_BUILD=1"
+              displaySplashScreen="0" reportAppUsage="0" companyName="Raw Material Software Limited"
+              companyCopyright="Raw Material Software Limited">
   <EXPORTFORMATS>
     <VS2019 targetFolder="Builds/VisualStudio2019">
       <CONFIGURATIONS>

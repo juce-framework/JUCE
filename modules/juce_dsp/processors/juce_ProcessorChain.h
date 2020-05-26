@@ -2,14 +2,14 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
    By using JUCE, you agree to the terms of both the JUCE 5 End-User License
    Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   22nd April 2020).
 
    End User License Agreement: www.juce.com/juce-5-licence
    Privacy Policy: www.juce.com/juce-5-privacy-policy
@@ -63,64 +63,58 @@ class ProcessorChain
 {
 public:
     /** Get a reference to the processor at index `Index`. */
-    template <int Index>       auto& get()       noexcept { return std::get<Index> (processors).processor; }
+    template <int Index>       auto& get()       noexcept { return std::get<Index> (processors); }
 
     /** Get a reference to the processor at index `Index`. */
-    template <int Index> const auto& get() const noexcept { return std::get<Index> (processors).processor; }
+    template <int Index> const auto& get() const noexcept { return std::get<Index> (processors); }
 
     /** Set the processor at index `Index` to be bypassed or enabled. */
     template <int Index>
-    void setBypassed (bool b) noexcept  { std::get<Index> (processors).isBypassed = b; }
+    void setBypassed (bool b) noexcept  { bypassed[(size_t) Index] = b; }
 
     /** Query whether the processor at index `Index` is bypassed. */
     template <int Index>
-    bool isBypassed() const noexcept    { return std::get<Index> (processors).isBypassed; }
+    bool isBypassed() const noexcept    { return bypassed[(size_t) Index]; }
 
     /** Prepare all inner processors with the provided `ProcessSpec`. */
     void prepare (const ProcessSpec& spec)
     {
-        detail::forEachInTuple ([&] (auto& item, size_t) { item.processor.prepare (spec); }, processors);
+        detail::forEachInTuple ([&] (auto& proc, size_t) { proc.prepare (spec); }, processors);
     }
 
     /** Reset all inner processors. */
     void reset()
     {
-        detail::forEachInTuple ([] (auto& item, size_t) { item.processor.reset(); }, processors);
+        detail::forEachInTuple ([] (auto& proc, size_t) { proc.reset(); }, processors);
     }
 
     /** Process `context` through all inner processors in sequence. */
     template <typename ProcessContext>
     void process (const ProcessContext& context) noexcept
     {
-        detail::forEachInTuple ([&] (auto& item, size_t index) noexcept
+        detail::forEachInTuple ([&] (auto& proc, size_t index) noexcept
         {
             if (context.usesSeparateInputAndOutputBlocks() && index != 0)
             {
                 jassert (context.getOutputBlock().getNumChannels() == context.getInputBlock().getNumChannels());
                 ProcessContextReplacing<typename ProcessContext::SampleType> replacingContext (context.getOutputBlock());
-                replacingContext.isBypassed = (item.isBypassed || context.isBypassed);
+                replacingContext.isBypassed = (bypassed[index] || context.isBypassed);
 
-                item.processor.process (replacingContext);
+                proc.process (replacingContext);
             }
             else
             {
                 ProcessContext contextCopy (context);
-                contextCopy.isBypassed = (item.isBypassed || context.isBypassed);
+                contextCopy.isBypassed = (bypassed[index] || context.isBypassed);
 
-                item.processor.process (contextCopy);
+                proc.process (contextCopy);
             }
         }, processors);
     }
 
 private:
-    template <typename Processor>
-    struct ProcessorWithBypass
-    {
-        Processor processor;
-        bool isBypassed = false;
-    };
-
-    std::tuple<ProcessorWithBypass<Processors>...> processors;
+    std::tuple<Processors...> processors;
+    std::array<bool, sizeof...(Processors)> bypassed { {} };
 };
 
 /** Non-member equivalent of ProcessorChain::get which avoids awkward

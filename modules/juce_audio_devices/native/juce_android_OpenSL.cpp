@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -881,7 +881,14 @@ public:
         sampleRate = (int) (requestedSampleRate > 0 ? requestedSampleRate : AndroidHighPerformanceAudioHelpers::getNativeSampleRate());
         auto preferredBufferSize = (bufferSize > 0) ? bufferSize : getDefaultBufferSize();
 
-        audioBuffersToEnqueue = AndroidHighPerformanceAudioHelpers::getNumBuffersToEnqueue (preferredBufferSize, sampleRate);
+        audioBuffersToEnqueue = [this, preferredBufferSize]
+        {
+            if (AndroidHighPerformanceAudioHelpers::canUseHighPerformanceAudioPath (preferredBufferSize, sampleRate))
+                return preferredBufferSize / AndroidHighPerformanceAudioHelpers::getNativeBufferSize();
+
+            return 1;
+        }();
+
         actualBufferSize = preferredBufferSize / audioBuffersToEnqueue;
 
         jassert ((actualBufferSize * audioBuffersToEnqueue) == preferredBufferSize);
