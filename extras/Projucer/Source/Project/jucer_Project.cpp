@@ -639,7 +639,9 @@ Result Project::loadDocument (const File& file)
     rescanExporterPathModules (! ProjucerApplication::getApp().isRunningCommandLine);
     exporterPathsModulesList.addListener (this);
 
-    setCppVersionFromOldExporterSettings();
+    if (cppStandardValue.isUsingDefault())
+        setCppVersionFromOldExporterSettings();
+
     updateDeprecatedProjectSettings();
 
     setChangedFlag (false);
