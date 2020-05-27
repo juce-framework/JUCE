@@ -501,8 +501,9 @@ public:
                         break;
 
                     case Steinberg::Vst::Event::kPolyPressureEvent:
-                        result.addEvent (MidiMessage::channelPressureChange (createSafeChannel (e.polyPressure.channel),
-                                                                             denormaliseToMidiValue (e.polyPressure.pressure)),
+                        result.addEvent (MidiMessage::aftertouchChange (createSafeChannel (e.polyPressure.channel),
+                                                                        createSafeNote(e.polyPressure.pitch),
+                                                                        denormaliseToMidiValue (e.polyPressure.pressure)),
                                          e.sampleOffset);
                         break;
 
@@ -587,12 +588,12 @@ public:
                 e.data.size     = (uint32) msg.getSysExDataSize();
                 e.data.type     = Steinberg::Vst::DataEvent::kMidiSysEx;
             }
-            else if (msg.isChannelPressure())
+            else if (msg.isAftertouch())
             {
                 e.type                   = Steinberg::Vst::Event::kPolyPressureEvent;
                 e.polyPressure.channel   = createSafeChannel (msg.getChannel());
                 e.polyPressure.pitch     = createSafeNote (msg.getNoteNumber());
-                e.polyPressure.pressure  = normaliseMidiValue (msg.getChannelPressureValue());
+                e.polyPressure.pressure  = normaliseMidiValue (msg.getAfterTouchValue());
             }
             else
             {
@@ -632,7 +633,7 @@ private:
 
         if      (msg.isController())        result = { (Steinberg::Vst::CtrlNumber) msg.getControllerNumber(), msg.getControllerValue() / 127.0};
         else if (msg.isPitchWheel())        result = { Steinberg::Vst::kPitchBend, msg.getPitchWheelValue() / 16383.0};
-        else if (msg.isAftertouch())        result = { Steinberg::Vst::kAfterTouch, msg.getAfterTouchValue() / 127.0};
+        else if (msg.isChannelPressure())        result = { Steinberg::Vst::kAfterTouch, msg.getChannelPressureValue() / 127.0};
 
         return (result.controllerNumber != -1);
     }
