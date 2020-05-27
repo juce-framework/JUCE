@@ -40,6 +40,7 @@
  #pragma clang diagnostic ignored "-Wshadow-all"
  #pragma clang diagnostic ignored "-Wcast-align"
  #pragma clang diagnostic ignored "-Wswitch-enum"
+ #pragma clang diagnostic ignored "-Wimplicit-fallthrough"
  #if __has_warning("-Wzero-as-null-pointer-constant")
   #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
  #endif
