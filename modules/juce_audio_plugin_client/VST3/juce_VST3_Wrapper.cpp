@@ -1870,16 +1870,16 @@ public:
    #if JUCE_VST3_CAN_REPLACE_VST2
     bool loadVST2VstWBlock (const char* data, int size)
     {
-        jassert ('VstW' == htonl (*(juce::int32*) data));
-        jassert (1 == htonl (*(juce::int32*) (data + 8))); // version should be 1 according to Steinberg's docs
+        jassert ('VstW' == htonl (readUnaligned<juce::int32> (data)));
+        jassert (1 == htonl (readUnaligned<juce::int32> (data + 8))); // version should be 1 according to Steinberg's docs
 
-        auto headerLen = (int) htonl (*(juce::int32*) (data + 4)) + 8;
+        auto headerLen = (int) htonl (readUnaligned<juce::int32> (data + 4)) + 8;
         return loadVST2CcnKBlock (data + headerLen, size - headerLen);
     }
 
     bool loadVST2CcnKBlock (const char* data, int size)
     {
-        auto bank = (const Vst2::fxBank*) data;
+        auto* bank = reinterpret_cast<const Vst2::fxBank*> (data);
 
         jassert ('CcnK' == htonl (bank->chunkMagic));
         jassert ('FBCh' == htonl (bank->fxMagic));
@@ -1935,7 +1935,7 @@ public:
         if (size < 4)
             return false;
 
-        auto header = htonl (*(juce::int32*) data);
+        auto header = htonl (readUnaligned<juce::int32> (data));
 
         if (header == 'VstW')
             return loadVST2VstWBlock (data, size);
