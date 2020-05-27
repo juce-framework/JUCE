@@ -56,9 +56,6 @@ public:
         This shows the bubble with its stem pointing to the given location
         (coordinates being relative to its parent component).
 
-        For details about exactly how it decides where to position itself, see
-        BubbleComponent::updatePosition().
-
         @param position                         the coords of the object to point to
         @param message                          the text to display
         @param numMillisecondsBeforeRemoving    how long to leave it on the screen before removing itself
@@ -78,9 +75,6 @@ public:
     /** Shows a message bubble next to a particular component.
 
         This shows the bubble with its stem pointing at the given component.
-
-        For details about exactly how it decides where to position itself, see
-        BubbleComponent::updatePosition().
 
         @param component                        the component that you want to point at
         @param message                          the text to display
