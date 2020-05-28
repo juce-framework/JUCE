@@ -211,7 +211,7 @@ private:
 
         NSArray<NSFileAccessIntent*>* intents = @[fileAccessIntent];
 
-        auto fileCoordinator = [[NSFileCoordinator alloc] initWithFilePresenter: nil];
+        auto fileCoordinator = [[[NSFileCoordinator alloc] initWithFilePresenter: nil] autorelease];
 
         [fileCoordinator coordinateAccessWithIntents: intents queue: [NSOperationQueue mainQueue] byAccessor: ^(NSError* err)
         {
