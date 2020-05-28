@@ -38,9 +38,10 @@ own AffineTransform applied will no longer work correctly.
 Workaround
 ----------
 If you are using an AffineTransform to scale the entire plug-in window then
-consider using Desktop::setGlobalScaleFactor() instead, or, for applying other
-transforms, consider putting the component you want to transform in a child of
-the editor and transform that instead.
+consider putting the component you want to transform in a child of
+the editor and transform that instead. Alternatively, if you don't need a
+separate scale factor for each plug-in instance you can use
+Desktop::setGlobalScaleFactor().
 
 Rationale
 ---------
