@@ -1368,7 +1368,7 @@ public:
             return { (int16) roundToInt (rect.top    * desktopScale),
                      (int16) roundToInt (rect.left   * desktopScale),
                      (int16) roundToInt (rect.bottom * desktopScale),
-                     (int16) roundToInt (rect.right  * desktopScale)};
+                     (int16) roundToInt (rect.right  * desktopScale) };
         }
 
         //==============================================================================
