@@ -293,6 +293,10 @@ public:
 
            #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
             auto newScale = getScaleFactorForWindow (nativeContext->getNativeHandle());
+            auto desktopScale = Desktop::getInstance().getGlobalScaleFactor();
+
+            if (! approximatelyEqual (1.0f, desktopScale))
+                newScale *= desktopScale;
            #else
             auto newScale = displayScale;
            #endif
