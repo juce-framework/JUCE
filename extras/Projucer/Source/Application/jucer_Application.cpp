@@ -1108,7 +1108,7 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
                 result.setInfo ("Disable GPL mode", "Disables GPL mode", CommandCategories::general, 0);
             else
                 result.setInfo (licenseState.isValid() ? String ("Sign out ") + licenseState.username + "..." : String ("Sign in..."),
-                                "Log out of your JUCE account",
+                                "Sign out of your JUCE account",
                                 CommandCategories::general, 0);
             break;
         }

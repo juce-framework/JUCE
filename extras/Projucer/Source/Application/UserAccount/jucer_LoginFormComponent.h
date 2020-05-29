@@ -257,7 +257,7 @@ private:
     MainWindow& mainWindow;
 
     TextEditor emailBox, passwordBox;
-    ProgressButton logInButton { "Log In" };
+    ProgressButton logInButton { "Sign In" };
     TextButton enableGPLButton { "Enable GPL Mode" };
     ShapeButton dismissButton { {},
                                 findColour (treeIconColourId),

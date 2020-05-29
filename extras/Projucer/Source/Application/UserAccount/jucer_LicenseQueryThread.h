@@ -97,7 +97,7 @@ private:
         {
             switch (errorCode)
             {
-                case 400:  return "Please enter your email and password to log in.";
+                case 400:  return "Please enter your email and password to sign in.";
                 case 401:  return "Your email and password are incorrect.";
                 case 451:  return "Access denied.";
                 default:   return "Something went wrong, please try again.";

@@ -748,7 +748,7 @@ void Project::updateLicenseWarning()
     if (hasIncompatibleLicenseTypeAndSplashScreenSetting())
     {
         addProjectMessage (ProjectMessages::Ids::incompatibleLicense,
-                           { { "Log in", [this] { ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (getFile())->showLoginFormOverlay(); } },
+                           { { "Sign in", [this] { ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (getFile())->showLoginFormOverlay(); } },
                              { "Enable splash screen", [this] { displaySplashScreenValue = true; } } });
     }
     else
