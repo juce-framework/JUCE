@@ -497,8 +497,9 @@ namespace AAXClasses
         {
             if (component != nullptr)
             {
-                viewSize->horz = (float) component->getWidth();
-                viewSize->vert = (float) component->getHeight();
+                *viewSize = convertToHostBounds ({ (float) component->getHeight(),
+                                                   (float) component->getWidth() });
+
                 return AAX_SUCCESS;
             }
 
@@ -552,6 +553,18 @@ namespace AAXClasses
         //==============================================================================
         int getParamIndexFromID (AAX_CParamID paramID) const noexcept;
         AAX_CParamID getAAXParamIDFromJuceIndex (int index) const noexcept;
+
+        //==============================================================================
+        static AAX_Point convertToHostBounds (AAX_Point pluginSize)
+        {
+            auto desktopScale = Desktop::getInstance().getGlobalScaleFactor();
+
+            if (approximatelyEqual (desktopScale, 1.0f))
+                return pluginSize;
+
+            return { pluginSize.vert * desktopScale,
+                     pluginSize.horz * desktopScale };
+        }
 
         //==============================================================================
         struct ContentWrapperComponent  : public Component
@@ -611,26 +624,39 @@ namespace AAXClasses
             void mouseUp   (const MouseEvent& e) override  { callMouseMethod (e, &AAX_IViewContainer::HandleParameterMouseUp); }
             void mouseDrag (const MouseEvent& e) override  { callMouseMethod (e, &AAX_IViewContainer::HandleParameterMouseDrag); }
 
+            void parentSizeChanged() override
+            {
+                resizeHostWindow();
+
+                if (pluginEditor != nullptr)
+                    pluginEditor->repaint();
+            }
+
             void childBoundsChanged (Component*) override
+            {
+                if (resizeHostWindow())
+                {
+                    setSize (pluginEditor->getWidth(), pluginEditor->getHeight());
+                    lastValidSize = getBounds();
+                }
+                else
+                {
+                    pluginEditor->setBoundsConstrained (pluginEditor->getBounds().withSize (lastValidSize.getWidth(),
+                                                                                            lastValidSize.getHeight()));
+                }
+            }
+
+            bool resizeHostWindow()
             {
                 if (pluginEditor != nullptr)
                 {
-                    auto w = pluginEditor->getWidth();
-                    auto h = pluginEditor->getHeight();
+                    auto newSize = convertToHostBounds ({ (float) pluginEditor->getHeight(),
+                                                          (float) pluginEditor->getWidth() });
 
-                    AAX_Point newSize ((float) h, (float) w);
-
-                    if (owner.GetViewContainer()->SetViewSize (newSize) == AAX_SUCCESS)
-                    {
-                        setSize (w, h);
-                        lastValidSize = getBounds();
-                    }
-                    else
-                    {
-                        auto validSize = pluginEditor->getBounds().withSize (lastValidSize.getWidth(), lastValidSize.getHeight());
-                        pluginEditor->setBoundsConstrained (validSize);
-                    }
+                    return owner.GetViewContainer()->SetViewSize (newSize) == AAX_SUCCESS;
                 }
+
+                return false;
             }
 
             std::unique_ptr<AudioProcessorEditor> pluginEditor;
