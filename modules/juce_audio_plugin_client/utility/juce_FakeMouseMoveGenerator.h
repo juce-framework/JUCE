@@ -67,8 +67,12 @@ public:
                         {
                             if (! peer->isFocused())
                             {
-                                peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, peer->globalToLocal (screenPos), mods,
-                                                        MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, Time::currentTimeMillis());
+                                peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse,
+                                                        peer->globalToLocal (Desktop::getInstance().getMainMouseSource().getRawScreenPosition()),
+                                                        mods,
+                                                        MouseInputSource::invalidPressure,
+                                                        MouseInputSource::invalidOrientation,
+                                                        Time::currentTimeMillis());
                             }
                         }
 
@@ -80,8 +84,12 @@ public:
                 {
                     if (auto* peer = safeOldComponent->getPeer())
                     {
-                        peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, MouseInputSource::offscreenMousePos, mods,
-                                                MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, Time::currentTimeMillis());
+                        peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse,
+                                                MouseInputSource::offscreenMousePos,
+                                                mods,
+                                                MouseInputSource::invalidPressure,
+                                                MouseInputSource::invalidOrientation,
+                                                Time::currentTimeMillis());
                     }
                 }
 
