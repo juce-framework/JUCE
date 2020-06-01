@@ -80,6 +80,14 @@ public:
     */
     void removeNextBlockOfMessages (MidiBuffer& destBuffer, int numSamples);
 
+    /** Preallocates storage for collected messages.
+
+        This can be called before audio processing begins to ensure that there
+        is sufficient space for the expected MIDI messages, in order to avoid
+        allocations within the audio callback.
+    */
+    void ensureStorageAllocated (size_t bytes);
+
 
     //==============================================================================
     /** @internal */
