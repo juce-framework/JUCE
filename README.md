@@ -9,7 +9,7 @@ JUCE forum to discuss the new features.__
 ## Getting Started with CMake
 
 For comprehensive documentation on JUCE's CMake API, see
-`examples/CMake/readme.md` in this repo.
+`docs/CMake API.txt` in this repo.
 
 ### Building Examples
 
