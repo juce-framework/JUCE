@@ -14,6 +14,7 @@
 #
 # ==============================================================================
 
+set(CMAKE_FOLDER extras)
 add_subdirectory(AudioPerformanceTest)
 add_subdirectory(AudioPluginHost)
 add_subdirectory(BinaryBuilder)

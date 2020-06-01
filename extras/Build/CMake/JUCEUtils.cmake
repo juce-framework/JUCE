@@ -497,8 +497,6 @@ function(juce_add_module module_path)
         endif()
     endif()
 
-    source_group(Modules FILES ${all_module_sources})
-
     if(${module_name} STREQUAL "juce_audio_processors")
         add_library(juce_vst3_headers INTERFACE)
         target_include_directories(juce_vst3_headers INTERFACE
@@ -1321,6 +1319,19 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
     endif()
 endfunction()
 
+# Place plugin wrapper targets alongside the shared code target in IDEs
+function(_juce_set_plugin_folder_property shared_target wrapper_target)
+    get_target_property(folder_to_use "${shared_target}" FOLDER)
+
+    if(folder_to_use STREQUAL "folder_to_use-NOTFOUND")
+        set(folder_to_use "${shared_target}")
+    else()
+        set(folder_to_use "${folder_to_use}/${shared_target}")
+    endif()
+
+    set_target_properties("${wrapper_target}" PROPERTIES FOLDER "${folder_to_use}")
+endfunction()
+
 # Convert the cmake plugin kind ids to strings understood by ProjectType::Target::typeFromName
 function(_juce_get_plugin_kind_name kind out_var)
     if(kind STREQUAL "AU")
@@ -1367,6 +1378,8 @@ function(_juce_link_plugin_wrapper shared_code_target kind)
 
     _juce_set_output_name(${target_name} $<TARGET_PROPERTY:${shared_code_target},JUCE_PRODUCT_NAME>)
 
+    _juce_set_plugin_folder_property("${shared_code_target}" "${target_name}")
+
     _juce_get_plugin_kind_name(${kind} juce_kind_string)
     set_target_properties(${target_name} PROPERTIES
         XCODE_ATTRIBUTE_CLANG_LINK_OBJC_RUNTIME NO
@@ -1375,7 +1388,6 @@ function(_juce_link_plugin_wrapper shared_code_target kind)
         VISIBILITY_INLINES_HIDDEN TRUE
         C_VISIBILITY_PRESET hidden
         CXX_VISIBILITY_PRESET hidden
-        FOLDER ${shared_code_target}
         JUCE_TARGET_KIND_STRING "${juce_kind_string}")
     add_dependencies(${shared_code_target}_All ${target_name})
 
@@ -1523,7 +1535,7 @@ function(_juce_configure_plugin_targets target)
 
     # A convenience target for building all plugin variations at once
     add_custom_target(${target}_All)
-    set_target_properties(${target}_All PROPERTIES FOLDER ${target})
+    _juce_set_plugin_folder_property("${target}" "${target}_All")
 
     _juce_get_platform_plugin_kinds(plugin_kinds)
 
@@ -1926,6 +1938,13 @@ function(_juce_initialise_target target)
 
     _juce_write_generate_time_info(${target})
     _juce_link_optional_libraries(${target})
+
+    file(GLOB juce_module_folders RELATIVE "${JUCE_MODULES_DIR}" "${JUCE_MODULES_DIR}/*")
+
+    foreach(module_folder IN LISTS juce_module_folders)
+        file(GLOB_RECURSE juce_module_files "${JUCE_MODULES_DIR}/${module_folder}/*")
+        source_group(TREE "${JUCE_MODULES_DIR}" PREFIX "Modules" FILES ${juce_module_files})
+    endforeach()
 endfunction()
 
 # ==================================================================================================

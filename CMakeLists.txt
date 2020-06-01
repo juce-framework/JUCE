@@ -20,6 +20,9 @@ project(JUCE VERSION 6.0.0 LANGUAGES C CXX)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 
+set(JUCE_MODULES_DIR "${JUCE_SOURCE_DIR}/modules" CACHE INTERNAL
+    "The path to JUCE modules")
+
 include(extras/Build/CMake/JUCEHelperTargets.cmake)
 include(extras/Build/CMake/JUCEUtils.cmake)
 
@@ -97,7 +100,7 @@ configure_package_config_file("${JUCE_CMAKE_UTILS_DIR}/JUCEConfig.cmake.in"
     INSTALL_DESTINATION "${JUCE_INSTALL_DESTINATION}")
 
 set(JUCE_EXPORT_FILE_NAME "JUCEBuildTree.cmake")
-set(JUCE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/modules")
+set(JUCE_MODULE_PATH "${JUCE_MODULES_DIR}")
 export(EXPORT JUCE NAMESPACE juce:: FILE "${JUCE_EXPORT_FILE_NAME}")
 set(UTILS_INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extras/Build/CMake")
 get_target_property(JUCEAIDE_PATH juceaide IMPORTED_LOCATION)
