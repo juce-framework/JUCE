@@ -231,12 +231,12 @@ public:
     /** Deletes a node within the graph which has the specified ID.
         This will also delete any connections that are attached to this node.
     */
-    std::unique_ptr<AudioProcessor> removeNode (NodeID);
+    Node::Ptr removeNode (NodeID);
 
     /** Deletes a node within the graph.
         This will also delete any connections that are attached to this node.
     */
-    std::unique_ptr<AudioProcessor> removeNode (Node*);
+    Node::Ptr removeNode (Node*);
 
     /** Returns the list of connections in the graph. */
     std::vector<Connection> getConnections() const;

@@ -961,7 +961,7 @@ AudioProcessorGraph::Node::Ptr AudioProcessorGraph::addNode (std::unique_ptr<Aud
     return n;
 }
 
-std::unique_ptr<AudioProcessor> AudioProcessorGraph::removeNode (NodeID nodeId)
+AudioProcessorGraph::Node::Ptr AudioProcessorGraph::removeNode (NodeID nodeId)
 {
     const ScopedLock sl (getCallbackLock());
 
@@ -970,23 +970,22 @@ std::unique_ptr<AudioProcessor> AudioProcessorGraph::removeNode (NodeID nodeId)
         if (nodes.getUnchecked (i)->nodeID == nodeId)
         {
             disconnectNode (nodeId);
-            auto internalProcessor = nodes[i] != nullptr ? std::move (nodes[i]->processor) : nullptr;
-            nodes.remove (i);
+            auto node = nodes.removeAndReturn (i);
             topologyChanged();
-            return internalProcessor;
+            return node;
         }
     }
 
-    return nullptr;
+    return {};
 }
 
-std::unique_ptr<AudioProcessor> AudioProcessorGraph::removeNode (Node* node)
+AudioProcessorGraph::Node::Ptr AudioProcessorGraph::removeNode (Node* node)
 {
     if (node != nullptr)
         return removeNode (node->nodeID);
 
     jassertfalse;
-    return nullptr;
+    return {};
 }
 
 //==============================================================================
