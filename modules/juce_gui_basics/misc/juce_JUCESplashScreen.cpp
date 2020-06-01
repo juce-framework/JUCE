@@ -34,10 +34,6 @@ namespace juce
 
 // BEGIN SECTION A
 
-#if ! defined (JUCE_REPORT_APP_USAGE)
- #define JUCE_REPORT_APP_USAGE 1
-#endif
-
 #if ! defined (JUCE_DISPLAY_SPLASH_SCREEN)
  #define JUCE_DISPLAY_SPLASH_SCREEN 1
 #endif
