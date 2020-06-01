@@ -92,7 +92,7 @@ public:
     using value_type        = MidiMessageMetadata;
     using reference         = MidiMessageMetadata;
     using pointer           = void;
-    using iterator_category = std::bidirectional_iterator_tag;
+    using iterator_category = std::input_iterator_tag;
 
     /** Make this iterator point to the next message in the buffer. */
     MidiBufferIterator& operator++() noexcept;
