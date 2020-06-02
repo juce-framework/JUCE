@@ -892,12 +892,12 @@ public:
                 clip.ensureStorageAllocated ((int) numRects);
                 for (int i = 0; i < numRects; ++i)
                 {
-                    const auto& r = rects[i];
+                    const auto& rect = rects[i];
                     clip.addWithoutMerging (clipBounds.getIntersection (Rectangle<int> (
-                        roundToInt (r.origin.x) + offset.x,
-                        roundToInt (viewH - (r.origin.y + r.size.height)) + offset.y,
-                        roundToInt (r.size.width),
-                        roundToInt (r.size.height))));
+                        roundToInt (rect.origin.x) + offset.x,
+                        roundToInt (viewH - (rect.origin.y + rect.size.height)) + offset.y,
+                        roundToInt (rect.size.width),
+                        roundToInt (rect.size.height))));
                 }
                #endif
             }
