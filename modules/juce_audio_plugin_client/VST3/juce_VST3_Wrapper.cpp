@@ -32,6 +32,10 @@
 #if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS)
  #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
  #define JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY 1
+
+ #if JUCE_MAC
+  #include <CoreFoundation/CoreFoundation.h>
+ #endif
 #endif
 
 #include "../../juce_audio_processors/format_types/juce_VST3Headers.h"
