@@ -10,7 +10,7 @@
 #include "${JUCE_PIP_HEADER}"
 
 //==============================================================================
-AudioProcessor* JUCE_CALLTYPE createPluginFilter()
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new ${JUCE_PIP_MAIN_CLASS}();
 }
