@@ -1513,13 +1513,8 @@ void AudioProcessorParameter::sendValueChangedMessageToListeners (float newValue
     }
 }
 
-bool AudioProcessorParameter::isOrientationInverted() const
-{
-    const auto orientation = getOrientation();
-    return orientation == fillFromRight || orientation == spreadFromMiddleAntiClockwise;
-}
-
-AudioProcessorParameter::Orientation AudioProcessorParameter::getOrientation() const { return fillFromLeft; }
+bool AudioProcessorParameter::isOrientationInverted() const                          { return false; }
+AudioProcessorParameter::Orientation AudioProcessorParameter::getOrientation() const { return isOrientationInverted() ? fillFromRight : fillFromLeft; }
 bool AudioProcessorParameter::isAutomatable() const                                  { return true; }
 bool AudioProcessorParameter::isMetaParameter() const                                { return false; }
 AudioProcessorParameter::Category AudioProcessorParameter::getCategory() const       { return genericParameter; }
