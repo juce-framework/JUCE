@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "../Project/jucer_Project.h"
+#include "../../Project/jucer_Project.h"
 
 //==============================================================================
 class NewFileWizard

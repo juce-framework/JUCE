@@ -69,9 +69,14 @@ class XcodeProjectExporter  : public ProjectExporter
 {
 public:
     //==============================================================================
-    static const char* getNameMac()                         { return "Xcode (MacOSX)"; }
-    static const char* getNameiOS()                         { return "Xcode (iOS)"; }
-    static const char* getValueTreeTypeName (bool iOS)      { return iOS ? "XCODE_IPHONE" : "XCODE_MAC"; }
+    static String getDisplayNameMac()        { return "Xcode (MacOSX)"; }
+    static String getDisplayNameiOS()        { return "Xcode (iOS)"; }
+
+    static String getTargetFolderNameMac()   { return "MacOSX"; }
+    static String getTargetFolderNameiOS()   { return "iOS"; }
+
+    static String getValueTreeTypeNameMac()  { return "XCODE_MAC"; }
+    static String getValueTreeTypeNameiOS()  { return "XCODE_IPHONE"; }
 
     //==============================================================================
     XcodeProjectExporter (Project& p, const ValueTree& t, const bool isIOS)
@@ -129,15 +134,22 @@ public:
           customLaunchStoryboardValue                  (settings, Ids::customLaunchStoryboard,                  getUndoManager()),
           exporterBundleIdentifierValue                (settings, Ids::bundleIdentifier,                        getUndoManager())
     {
-        name = iOS ? getNameiOS() : getNameMac();
-
-        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderForExporter (getValueTreeTypeName (isIOS)));
+        if (iOS)
+        {
+            name = getDisplayNameiOS();
+            targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderNameiOS());
+        }
+        else
+        {
+            name = getDisplayNameMac();
+            targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderNameMac());
+        }
     }
 
     static XcodeProjectExporter* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
-        if (settingsToUse.hasType (getValueTreeTypeName (false)))  return new XcodeProjectExporter (projectToUse, settingsToUse, false);
-        if (settingsToUse.hasType (getValueTreeTypeName (true)))   return new XcodeProjectExporter (projectToUse, settingsToUse, true);
+        if (settingsToUse.hasType (getValueTreeTypeNameMac()))  return new XcodeProjectExporter (projectToUse, settingsToUse, false);
+        if (settingsToUse.hasType (getValueTreeTypeNameiOS()))  return new XcodeProjectExporter (projectToUse, settingsToUse, true);
 
         return nullptr;
     }

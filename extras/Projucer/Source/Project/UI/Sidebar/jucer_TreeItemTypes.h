@@ -21,7 +21,7 @@
 #include "../../../ProjectSaving/jucer_ProjectExporter.h"
 #include "../../../Application/Windows/jucer_TranslationToolWindowComponent.h"
 #include "../../../Utility/UI/jucer_JucerTreeViewBase.h"
-#include "../../../Wizards/jucer_NewFileWizard.h"
+#include "../../../Utility/Helpers/jucer_NewFileWizard.h"
 #include "../jucer_ContentViewComponents.h"
 #include "../jucer_FileGroupInformationComponent.h"
 #include "../jucer_ModulesInformationComponent.h"

@@ -26,7 +26,7 @@
 //==============================================================================
 class JucerDocumentEditor   : public Component,
                               public ApplicationCommandTarget,
-                              public ChangeListener
+                              private ChangeListener
 {
 public:
     //==============================================================================
@@ -49,7 +49,6 @@ public:
     //==============================================================================
     void paint (Graphics& g) override;
     void resized() override;
-    void changeListenerCallback (ChangeBroadcaster*) override;
     bool keyPressed (const KeyPress&) override;
 
     //==============================================================================
@@ -61,6 +60,8 @@ public:
     static JucerDocumentEditor* getActiveDocumentHolder();
 
 private:
+    void changeListenerCallback (ChangeBroadcaster*) override;
+
     std::unique_ptr<JucerDocument> document;
     ComponentLayoutPanel* compLayoutPanel = nullptr;
 

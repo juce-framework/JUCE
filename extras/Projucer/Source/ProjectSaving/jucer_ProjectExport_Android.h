@@ -63,17 +63,19 @@ public:
         createOtherExporterProperties (props);
     }
 
-    static const char* getName()                         { return "Android"; }
-    static const char* getValueTreeTypeName()            { return "ANDROIDSTUDIO"; }
-    static const char* getDefaultActivityClass()         { return "com.rmsl.juce.JuceActivity"; }
-    static const char* getDefaultApplicationClass()      { return "com.rmsl.juce.JuceApp"; }
+    static String getDisplayName()        { return "Android"; }
+    static String getValueTreeTypeName()  { return "ANDROIDSTUDIO"; }
+    static String getTargetFolderName()   { return "Android"; }
+
+    static const char* getDefaultActivityClass()     { return "com.rmsl.juce.JuceActivity"; }
+    static const char* getDefaultApplicationClass()  { return "com.rmsl.juce.JuceApp"; }
 
     static AndroidProjectExporter* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
         if (settingsToUse.hasType (getValueTreeTypeName()))
             return new AndroidProjectExporter (projectToUse, settingsToUse);
 
-        return nullptr;
+        return {};
     }
 
     //==============================================================================
@@ -127,9 +129,8 @@ public:
           androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "3.5.3"),
           AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
     {
-        name = getName();
-
-        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderForExporter (getValueTreeTypeName()));
+        name = getDisplayName();
+        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderName());
     }
 
     //==============================================================================
@@ -1871,13 +1872,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (AndroidProjectExporter)
 };
-
-inline ProjectExporter* createAndroidExporter (Project& p, const ValueTree& t)
-{
-    return new AndroidProjectExporter (p, t);
-}
-
-inline ProjectExporter* createAndroidExporterForSetting (Project& p, const ValueTree& t)
-{
-    return AndroidProjectExporter::createForSettings (p, t);
-}

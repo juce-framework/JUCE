@@ -157,12 +157,14 @@ void HeaderComponent::updateExporters()
     int i = 0;
     for (Project::ExporterIterator exporter (*project); exporter.next(); ++i)
     {
-        exporterBox.addItem (exporter->getName(), i + 1);
+        auto exporterName = exporter->getUniqueName();
 
-        if (selectedExporter != nullptr && exporter->getName() == selectedExporter->getName())
+        exporterBox.addItem (exporterName, i + 1);
+
+        if (selectedExporter != nullptr && exporterName == selectedExporter->getUniqueName())
             exporterBox.setSelectedId (i + 1);
 
-        if (exporter->getName().contains (ProjectExporter::getCurrentPlatformExporterName()) && preferredExporterIndex == -1)
+        if (exporterName.contains (ProjectExporter::getCurrentPlatformExporterTypeInfo().displayName) && preferredExporterIndex == -1)
             preferredExporterIndex = i;
     }
 
@@ -209,7 +211,7 @@ bool HeaderComponent::canCurrentExporterLaunchProject() const
         if (auto selectedExporter = getSelectedExporter())
         {
             for (Project::ExporterIterator exporter (*project); exporter.next();)
-                if (exporter->canLaunchProject() && exporter->getName() == selectedExporter->getName())
+                if (exporter->canLaunchProject() && exporter->getUniqueName() == selectedExporter->getUniqueName())
                     return true;
         }
     }
@@ -305,13 +307,13 @@ void HeaderComponent::updateExporterButton()
 {
     if (auto selectedExporter = getSelectedExporter())
     {
-        auto selectedName = selectedExporter->getName();
+        auto selectedName = selectedExporter->getUniqueName();
 
-        for (auto info : ProjectExporter::getExporterTypes())
+        for (auto info : ProjectExporter::getExporterTypeInfos())
         {
-            if (selectedName.contains (info.name))
+            if (selectedName.contains (info.displayName))
             {
-                saveAndOpenInIDEButton.setImage (info.getIcon());
+                saveAndOpenInIDEButton.setImage (info.icon);
                 saveAndOpenInIDEButton.repaint();
                 saveAndOpenInIDEButton.setEnabled (canCurrentExporterLaunchProject());
             }

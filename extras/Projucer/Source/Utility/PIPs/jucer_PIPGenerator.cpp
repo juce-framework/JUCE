@@ -18,6 +18,8 @@
 
 #include "../../Application/jucer_Headers.h"
 #include "../../ProjectSaving/jucer_ProjectExporter.h"
+#include "../../ProjectSaving/jucer_ProjectExport_Xcode.h"
+#include "../../ProjectSaving/jucer_ProjectExport_Android.h"
 #include "jucer_PIPGenerator.h"
 
 //==============================================================================
@@ -67,15 +69,16 @@ static bool isJUCEExample (const File& pipFile)
     return false;
 }
 
-static bool isValidExporterName (StringRef exporterName)
+static bool isValidExporterIdentifier (const Identifier& exporterIdentifier)
 {
-    return ProjectExporter::getExporterValueTreeNames().contains (exporterName, true);
+    return ProjectExporter::getTypeInfoForExporter (exporterIdentifier).identifier.toString().isNotEmpty();
 }
 
-static bool exporterRequiresExampleAssets (const String& exporterName, const String& projectName)
+static bool exporterRequiresExampleAssets (const Identifier& exporterIdentifier, const String& projectName)
 {
-    return (exporterName == "XCODE_IPHONE" || exporterName == "ANDROIDSTUDIO")
-            || (exporterName == "XCODE_MAC" && projectName == "AUv3SynthPlugin");
+    return (exporterIdentifier.toString() == XcodeProjectExporter::getValueTreeTypeNameiOS()
+            || exporterIdentifier.toString() == AndroidProjectExporter::getValueTreeTypeName())
+            || (exporterIdentifier.toString() == XcodeProjectExporter::getValueTreeTypeNameMac() && projectName == "AUv3SynthPlugin");
 }
 
 //==============================================================================
@@ -99,7 +102,7 @@ PIPGenerator::PIPGenerator (const File& pip, const File& output, const File& juc
     auto isClipboard = (pip.getParentDirectory().getFileName() == "Clipboard"
                         && pip.getParentDirectory().getParentDirectory().getFileName() == "PIPs");
 
-    outputDirectory = outputDirectory.getChildFile (metadata[Ids::name].toString());
+    outputDirectory = outputDirectory.getChildFile (metadata[Ids::name].toString()).getNonexistentSibling();
     useLocalCopy = metadata[Ids::useLocalCopy].toString().trim().getIntValue() == 1 || isClipboard;
 
     if (userModulesPath != File())
@@ -225,13 +228,13 @@ ValueTree PIPGenerator::createBuildConfigChild (bool isDebug)
     return child;
 }
 
-ValueTree PIPGenerator::createExporterChild (const String& exporterName)
+ValueTree PIPGenerator::createExporterChild (const Identifier& exporterIdentifier)
 {
-    ValueTree exporter (exporterName);
+    ValueTree exporter (exporterIdentifier);
 
-    exporter.setProperty (Ids::targetFolder, "Builds/" + ProjectExporter::getTargetFolderForExporter (exporterName), nullptr);
+    exporter.setProperty (Ids::targetFolder, "Builds/" + ProjectExporter::getTypeInfoForExporter (exporterIdentifier).targetFolder, nullptr);
 
-    if (isJUCEExample (pipFile) && exporterRequiresExampleAssets (exporterName, metadata[Ids::name]))
+    if (isJUCEExample (pipFile) && exporterRequiresExampleAssets (exporterIdentifier, metadata[Ids::name]))
     {
         auto examplesDir = getExamplesDirectory();
 
@@ -239,8 +242,8 @@ ValueTree PIPGenerator::createExporterChild (const String& exporterName)
         {
             auto assetsDirectoryPath = examplesDir.getChildFile ("Assets").getFullPathName();
 
-            exporter.setProperty (exporterName == "ANDROIDSTUDIO" ? Ids::androidExtraAssetsFolder
-                                                                  : Ids::customXcodeResourceFolders,
+            exporter.setProperty (exporterIdentifier.toString() == AndroidProjectExporter::getValueTreeTypeName() ? Ids::androidExtraAssetsFolder
+                                                                                                                  : Ids::customXcodeResourceFolders,
                                   assetsDirectoryPath, nullptr);
         }
         else
@@ -295,7 +298,7 @@ void PIPGenerator::addExporters (ValueTree& jucerTree)
     {
         e = e.trim().toUpperCase();
 
-        if (isValidExporterName (e))
+        if (isValidExporterIdentifier (e))
             exportersTree.addChild (createExporterChild (e), -1, nullptr);
     }
 
@@ -366,15 +369,15 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
 
     if (type == "Console")
     {
-        jucerTree.setProperty (Ids::projectType, "consoleapp", nullptr);
+        jucerTree.setProperty (Ids::projectType, build_tools::ProjectType_ConsoleApp::getTypeName(), nullptr);
     }
     else if (type == "Component")
     {
-        jucerTree.setProperty (Ids::projectType, "guiapp", nullptr);
+        jucerTree.setProperty (Ids::projectType, build_tools::ProjectType_GUIApp::getTypeName(), nullptr);
     }
     else if (type == "AudioProcessor")
     {
-        jucerTree.setProperty (Ids::projectType, "audioplug", nullptr);
+        jucerTree.setProperty (Ids::projectType, build_tools::ProjectType_AudioPlugin::getTypeName(), nullptr);
         jucerTree.setProperty (Ids::pluginAUIsSandboxSafe, "1", nullptr);
 
         setPropertyIfNotEmpty (Ids::pluginManufacturer, metadata[Ids::vendor]);

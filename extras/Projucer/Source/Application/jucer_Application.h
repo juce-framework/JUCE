@@ -82,6 +82,10 @@ public:
     bool shouldPromptUserAboutIncorrectJUCEPath() const;
     void setShouldPromptUserAboutIncorrectJUCEPath (bool shouldPrompt);
 
+    static File getJUCEExamplesDirectoryPathFromGlobal() noexcept;
+    static Array<File> getSortedExampleDirectories() noexcept;
+    static Array<File> getSortedExampleFilesInDirectory (const File&) noexcept;
+
     //==============================================================================
     ProjucerLookAndFeel lookAndFeel;
 
@@ -131,9 +135,6 @@ private:
     void handleMainMenuCommand (int menuItemID);
     PopupMenu createExamplesPopupMenu() noexcept;
 
-    Array<File> getSortedExampleDirectories() noexcept;
-    Array<File> getSortedExampleFilesInDirectory (const File&) const noexcept;
-    bool findWindowAndOpenPIP (const File&);
     void findAndLaunchExample (int);
 
     void checkIfGlobalJUCEPathHasChanged();

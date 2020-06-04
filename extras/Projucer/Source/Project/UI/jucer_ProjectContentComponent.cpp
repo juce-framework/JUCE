@@ -570,7 +570,7 @@ void ProjectContentComponent::showProjectSettings()
 void ProjectContentComponent::showCurrentExporterSettings()
 {
     if (auto selected = headerComponent.getSelectedExporter())
-        showExporterSettings (selected->getName());
+        showExporterSettings (selected->getUniqueName());
 }
 
 void ProjectContentComponent::showExporterSettings (const String& exporterName)
@@ -638,7 +638,7 @@ StringArray ProjectContentComponent::getExportersWhichCanLaunch() const
     if (project != nullptr)
         for (Project::ExporterIterator exporter (*project); exporter.next();)
             if (exporter->canLaunchProject())
-                s.add (exporter->getName());
+                s.add (exporter->getUniqueName());
 
     return s;
 }
@@ -650,20 +650,6 @@ void ProjectContentComponent::openInSelectedIDE (bool saveFirst)
             project->openProjectInIDE (*selectedExporter, saveFirst);
 }
 
-static void newExporterMenuCallback (int result, ProjectContentComponent* comp)
-{
-    if (comp != nullptr && result > 0)
-    {
-        if (auto* p = comp->getProject())
-        {
-            auto exporterName= ProjectExporter::getExporterNames() [result - 1];
-
-            if (exporterName.isNotEmpty())
-                p->addNewExporter (exporterName);
-        }
-    }
-}
-
 void ProjectContentComponent::showNewExporterMenu()
 {
     if (project != nullptr)
@@ -672,17 +658,34 @@ void ProjectContentComponent::showNewExporterMenu()
 
         menu.addSectionHeader ("Create a new export target:");
 
-        auto exporters = ProjectExporter::getExporterTypes();
+        SafePointer<ProjectContentComponent> safeThis (this);
 
-        for (int i = 0; i < exporters.size(); ++i)
+        for (auto& exporterInfo : ProjectExporter::getExporterTypeInfos())
         {
-            auto& type = exporters.getReference(i);
+            PopupMenu::Item item;
 
-            menu.addItem (i + 1, type.name, true, false, type.getIcon());
+            item.itemID = -1;
+            item.text = exporterInfo.displayName;
+
+            item.image = [exporterInfo]
+            {
+                auto drawableImage = std::make_unique<DrawableImage>();
+                drawableImage->setImage (exporterInfo.icon);
+
+                return drawableImage;
+            }();
+
+            item.action = [safeThis, exporterInfo]
+            {
+                if (safeThis != nullptr)
+                    if (auto* p = safeThis->getProject())
+                        p->addNewExporter (exporterInfo.identifier);
+            };
+
+            menu.addItem (item);
         }
 
-        menu.showMenuAsync (PopupMenu::Options(),
-                            ModalCallbackFunction::forComponent (newExporterMenuCallback, this));
+        menu.showMenuAsync ({});
     }
 }
 

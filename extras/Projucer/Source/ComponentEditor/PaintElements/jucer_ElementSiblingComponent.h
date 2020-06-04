@@ -18,7 +18,6 @@
 
 #pragma once
 
-
 //==============================================================================
 class ElementSiblingComponent  : public Component,
                                  public ChangeListener
@@ -32,19 +31,18 @@ public:
         owner->getDocument()->addChangeListener (this);
     }
 
-    ~ElementSiblingComponent()
+    ~ElementSiblingComponent() override
     {
         owner->getDocument()->removeChangeListener (this);
     }
 
     virtual void updatePosition() = 0;
 
-
-protected:
-    void changeListenerCallback (ChangeBroadcaster*)
+    void changeListenerCallback (ChangeBroadcaster*) override
     {
         updatePosition();
     }
 
+protected:
     PaintElement* const owner;
 };

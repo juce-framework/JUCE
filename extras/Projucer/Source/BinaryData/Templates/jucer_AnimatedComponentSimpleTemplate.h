@@ -7,7 +7,7 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class %%content_component_class%%   : public juce::AnimatedAppComponent
+class %%content_component_class%%  : public juce::AnimatedAppComponent
 {
 public:
     //==============================================================================
@@ -19,7 +19,7 @@ public:
         setFramesPerSecond (60); // This sets the frequency of the update calls.
     }
 
-    ~%%content_component_class%%()
+    ~%%content_component_class%%() override
     {
     }
 

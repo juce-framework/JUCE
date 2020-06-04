@@ -43,7 +43,7 @@ private:
         a colour selector when you click it.
     */
     struct ColourEditorComponent    : public Component,
-                                      public Value::Listener
+                                      private Value::Listener
     {
         ColourEditorComponent (UndoManager* um, const Value& colour,
                                Colour defaultCol, const bool canReset)
@@ -115,6 +115,7 @@ private:
                                               getScreenBounds(), nullptr);
         }
 
+    private:
         void valueChanged (Value&) override
         {
             refresh();
@@ -131,8 +132,8 @@ private:
 
     //==============================================================================
     struct PopupColourSelector   : public Component,
-                                   public ChangeListener,
-                                   public Value::Listener
+                                   private ChangeListener,
+                                   private Value::Listener
     {
         PopupColourSelector (const Value& colour,
                              Colour defaultCol,
@@ -193,6 +194,7 @@ private:
             }
         }
 
+    private:
         void changeListenerCallback (ChangeBroadcaster*) override
         {
             if (selector.getCurrentColour() != getColour())
@@ -204,7 +206,6 @@ private:
             selector.setCurrentColour (getColour());
         }
 
-    private:
         StoredSettings::ColourSelectorWithSwatches selector;
         TextButton defaultButton;
         Value colourValue;

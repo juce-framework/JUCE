@@ -58,7 +58,7 @@ public:
 
 private:
     class LayoutPropsPanel  : public Component,
-                              public ChangeListener
+                              private ChangeListener
     {
     public:
         LayoutPropsPanel (JucerDocument& doc, ComponentLayout& l)
@@ -68,20 +68,15 @@ private:
             addAndMakeVisible (propsPanel);
         }
 
-        ~LayoutPropsPanel()
+        ~LayoutPropsPanel() override
         {
             layout.getSelectedSet().removeChangeListener (this);
             clear();
         }
 
-        void resized()
+        void resized() override
         {
             propsPanel.setBounds (4, 4, getWidth() - 8, getHeight() - 8);
-        }
-
-        void changeListenerCallback (ChangeBroadcaster*)
-        {
-            updateList();
         }
 
         void clear()
@@ -104,6 +99,11 @@ private:
         }
 
     private:
+        void changeListenerCallback (ChangeBroadcaster*) override
+        {
+            updateList();
+        }
+
         JucerDocument& document;
         ComponentLayout& layout;
         PropertyPanel propsPanel;

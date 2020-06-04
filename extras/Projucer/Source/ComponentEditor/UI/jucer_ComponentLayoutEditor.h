@@ -24,10 +24,10 @@
 
 //==============================================================================
 class ComponentLayoutEditor  : public Component,
-                               public ChangeListener,
                                public FileDragAndDropTarget,
                                public DragAndDropTarget,
-                               public LassoSource<Component*>
+                               public LassoSource<Component*>,
+                               private ChangeListener
 {
 public:
     //==============================================================================
@@ -38,7 +38,6 @@ public:
     void paint (Graphics&) override;
     void resized() override;
     void visibilityChanged() override;
-    void changeListenerCallback (ChangeBroadcaster*) override;
 
     void mouseDown (const MouseEvent&) override;
     void mouseDrag (const MouseEvent&) override;
@@ -68,6 +67,8 @@ public:
     Image createComponentLayerSnapshot() const;
 
 private:
+    void changeListenerCallback (ChangeBroadcaster*) override;
+
     JucerDocument& document;
     ComponentLayout& layout;
     Component* subCompHolder;

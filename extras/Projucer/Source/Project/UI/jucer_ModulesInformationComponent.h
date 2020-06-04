@@ -298,7 +298,7 @@ private:
                                          modulePathClipboard.clear();
 
                                          for (Project::ExporterIterator exporter (project); exporter.next();)
-                                             modulePathClipboard[exporter->getName()] = exporter->getPathForModuleValue (moduleToCopy).get();
+                                             modulePathClipboard[exporter->getUniqueName()] = exporter->getPathForModuleValue (moduleToCopy).get();
 
                                          list.repaint();
                                      }));
@@ -313,7 +313,7 @@ private:
                                              auto modID = project.getEnabledModules().getModuleID (rowNumber);
 
                                              for (Project::ExporterIterator exporter (project); exporter.next();)
-                                                 exporter->getPathForModuleValue (modID) = modulePathClipboard[exporter->getName()];
+                                                 exporter->getPathForModuleValue (modID) = modulePathClipboard[exporter->getUniqueName()];
                                          }
 
                                          list.repaint();

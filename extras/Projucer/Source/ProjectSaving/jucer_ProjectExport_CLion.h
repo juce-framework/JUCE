@@ -46,8 +46,9 @@ protected:
 
 public:
     //==============================================================================
-    static const char* getName()                { return "CLion (beta)"; }
-    static const char* getValueTreeTypeName()   { return "CLION"; }
+    static String getDisplayName()        { return "CLion (beta)"; }
+    static String getValueTreeTypeName()  { return "CLION"; }
+    static String getTargetFolderName()   { return "CLion"; }
 
     static CLionProjectExporter* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
@@ -67,9 +68,8 @@ public:
     //==============================================================================
     CLionProjectExporter (Project& p, const ValueTree& t)   : ProjectExporter (p, t)
     {
-        name = getName();
-
-        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderForExporter (getValueTreeTypeName()));
+        name = getDisplayName();
+        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderName());
     }
 
     //==============================================================================
@@ -98,11 +98,11 @@ public:
     bool canLaunchProject() override
     {
        #if JUCE_MAC
-        static Identifier exporterName ("XCODE_MAC");
+        static Identifier exporterName (XcodeProjectExporter::getValueTreeTypeNameMac());
        #elif JUCE_WINDOWS
-        static Identifier exporterName ("CODEBLOCKS_WINDOWS");
+        static Identifier exporterName (CodeBlocksProjectExporter::getValueTreeTypeNameWindows());
        #elif JUCE_LINUX
-        static Identifier exporterName ("LINUX_MAKE");
+        static Identifier exporterName (MakefileProjectExporter::getValueTreeTypeName());
        #else
         static Identifier exporterName;
        #endif
@@ -122,19 +122,19 @@ public:
     {
         String description;
 
-        description << "The " << getName() << " exporter produces a single CMakeLists.txt file with "
+        description << "The " << getDisplayName() << " exporter produces a single CMakeLists.txt file with "
                     << "multiple platform dependent sections, where the configuration for each section "
                     << "is inherited from other exporters added to this project." << newLine
                     << newLine
                     << "The exporters which provide the CLion configuration for the corresponding platform are:" << newLine
                     << newLine;
 
-        for (auto& exporterName : getExporterNames())
+        for (auto& exporterInfo : getExporterTypeInfos())
         {
-            std::unique_ptr<ProjectExporter> exporter (createNewExporter (getProject(), exporterName));
+            std::unique_ptr<ProjectExporter> exporter (createNewExporter (getProject(), exporterInfo.identifier));
 
             if (isExporterSupported (*exporter))
-                description << exporter->getName() << newLine;
+                description << exporterInfo.displayName << newLine;
         }
 
         description << newLine
@@ -151,7 +151,7 @@ public:
     {
         for (Project::ExporterIterator exporter (getProject()); exporter.next();)
             if (isExporterSupported (*exporter))
-                properties.add (new BooleanPropertyComponent (getExporterEnabledValue (*exporter), "Import settings from exporter", exporter->getName()),
+                properties.add (new BooleanPropertyComponent (getExporterEnabledValue (*exporter), "Import settings from exporter", exporter->getUniqueName()),
                                 "If this is enabled then settings from the corresponding exporter will "
                                 "be used in the generated CMakeLists.txt");
     }
@@ -195,7 +195,7 @@ public:
         out.setNewLineString ("\n");
 
         out << "###############################################################################" << newLine
-            << "# " << exporter->getName() << newLine
+            << "# " << exporter->getUniqueName() << newLine
             << "###############################################################################" << newLine
             << newLine;
 

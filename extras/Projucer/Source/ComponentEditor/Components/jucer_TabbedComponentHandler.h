@@ -523,7 +523,7 @@ private:
 
     //==============================================================================
     class TabDepthProperty  : public SliderPropertyComponent,
-                              public ChangeListener
+                              private ChangeListener
     {
     public:
         TabDepthProperty (TabbedComponent* comp, JucerDocument& doc)
@@ -534,12 +534,12 @@ private:
             document.addChangeListener (this);
         }
 
-        ~TabDepthProperty()
+        ~TabDepthProperty() override
         {
             document.removeChangeListener (this);
         }
 
-        void setValue (double newValue)
+        void setValue (double newValue) override
         {
             document.getUndoManager().undoCurrentTransactionOnly();
 
@@ -547,20 +547,20 @@ private:
                               "Change TabComponent tab depth");
         }
 
-        double getValue() const
+        double getValue() const override
         {
             return component->getTabBarDepth();
-        }
-
-        void changeListenerCallback (ChangeBroadcaster*)
-        {
-            refresh();
         }
 
         TabbedComponent* const component;
         JucerDocument& document;
 
     private:
+        void changeListenerCallback (ChangeBroadcaster*) override
+        {
+            refresh();
+        }
+
         class TabDepthChangeAction  : public ComponentUndoableAction<TabbedComponent>
         {
         public:
@@ -917,7 +917,7 @@ private:
 
     //==============================================================================
     class TabJucerFileProperty   : public FilePropertyComponent,
-                                   public ChangeListener
+                                   private ChangeListener
     {
     public:
         TabJucerFileProperty (TabbedComponent* const comp, JucerDocument& doc, const int tabIndex_)
@@ -929,13 +929,13 @@ private:
             document.addChangeListener (this);
         }
 
-        ~TabJucerFileProperty()
+        ~TabJucerFileProperty() override
         {
             document.removeChangeListener (this);
         }
 
         //==============================================================================
-        void setFile (const File& newFile)
+        void setFile (const File& newFile) override
         {
             document.perform (new JucerCompFileChangeAction (component, *document.getComponentLayout(), tabIndex,
                                                              newFile.getRelativePathFrom (document.getCppFile().getParentDirectory())
@@ -943,14 +943,14 @@ private:
                               "Change tab component file");
         }
 
-        File getFile() const
+        File getFile() const override
         {
             return document.getCppFile().getSiblingFile (getTabJucerFile (component, tabIndex));
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
-
     private:
+        void changeListenerCallback (ChangeBroadcaster*) override { refresh(); }
+
         TabbedComponent* const component;
         JucerDocument& document;
         int tabIndex;

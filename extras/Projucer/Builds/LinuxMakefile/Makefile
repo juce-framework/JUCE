@@ -68,6 +68,8 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS_APP := \
+  $(JUCE_OBJDIR)/jucer_NewProjectWizard_7817a7e4.o \
+  $(JUCE_OBJDIR)/jucer_StartPageComponent_de6b22ec.o \
   $(JUCE_OBJDIR)/jucer_AutoUpdater_ca658dc2.o \
   $(JUCE_OBJDIR)/jucer_CommandLine_f35de107.o \
   $(JUCE_OBJDIR)/jucer_Main_f8488f5b.o \
@@ -111,14 +113,13 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/jucer_CodeHelpers_1e797672.o \
   $(JUCE_OBJDIR)/jucer_FileHelpers_54f12f83.o \
   $(JUCE_OBJDIR)/jucer_MiscUtilities_31fc8dd8.o \
+  $(JUCE_OBJDIR)/jucer_NewFileWizard_b233dda1.o \
   $(JUCE_OBJDIR)/jucer_VersionInfo_46f3ed40.o \
   $(JUCE_OBJDIR)/jucer_PIPGenerator_fd3402c7.o \
   $(JUCE_OBJDIR)/jucer_Icons_d02d18f1.o \
   $(JUCE_OBJDIR)/jucer_JucerTreeViewBase_9b9f2ff0.o \
   $(JUCE_OBJDIR)/jucer_ProjucerLookAndFeel_3b20291d.o \
   $(JUCE_OBJDIR)/jucer_SlidingPanelComponent_4e7dc07e.o \
-  $(JUCE_OBJDIR)/jucer_NewFileWizard_fac97f47.o \
-  $(JUCE_OBJDIR)/jucer_NewProjectWizardClasses_891f6fa2.o \
   $(JUCE_OBJDIR)/BinaryData_ce4232d4.o \
   $(JUCE_OBJDIR)/include_juce_build_tools_f5069398.o \
   $(JUCE_OBJDIR)/include_juce_core_f26d17db.o \
@@ -141,6 +142,16 @@ $(JUCE_OUTDIR)/$(JUCE_TARGET_APP) : $(OBJECTS_APP) $(RESOURCES)
 	-$(V_AT)mkdir -p $(JUCE_LIBDIR)
 	-$(V_AT)mkdir -p $(JUCE_OUTDIR)
 	$(V_AT)$(CXX) -o $(JUCE_OUTDIR)/$(JUCE_TARGET_APP) $(OBJECTS_APP) $(JUCE_LDFLAGS) $(JUCE_LDFLAGS_APP) $(RESOURCES) $(TARGET_ARCH)
+
+$(JUCE_OBJDIR)/jucer_NewProjectWizard_7817a7e4.o: ../../Source/Application/StartPage/jucer_NewProjectWizard.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling jucer_NewProjectWizard.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/jucer_StartPageComponent_de6b22ec.o: ../../Source/Application/StartPage/jucer_StartPageComponent.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling jucer_StartPageComponent.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/jucer_AutoUpdater_ca658dc2.o: ../../Source/Application/jucer_AutoUpdater.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
@@ -357,6 +368,11 @@ $(JUCE_OBJDIR)/jucer_MiscUtilities_31fc8dd8.o: ../../Source/Utility/Helpers/juce
 	@echo "Compiling jucer_MiscUtilities.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
+$(JUCE_OBJDIR)/jucer_NewFileWizard_b233dda1.o: ../../Source/Utility/Helpers/jucer_NewFileWizard.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling jucer_NewFileWizard.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
 $(JUCE_OBJDIR)/jucer_VersionInfo_46f3ed40.o: ../../Source/Utility/Helpers/jucer_VersionInfo.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling jucer_VersionInfo.cpp"
@@ -385,16 +401,6 @@ $(JUCE_OBJDIR)/jucer_ProjucerLookAndFeel_3b20291d.o: ../../Source/Utility/UI/juc
 $(JUCE_OBJDIR)/jucer_SlidingPanelComponent_4e7dc07e.o: ../../Source/Utility/UI/jucer_SlidingPanelComponent.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling jucer_SlidingPanelComponent.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/jucer_NewFileWizard_fac97f47.o: ../../Source/Wizards/jucer_NewFileWizard.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling jucer_NewFileWizard.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/jucer_NewProjectWizardClasses_891f6fa2.o: ../../Source/Wizards/jucer_NewProjectWizardClasses.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling jucer_NewProjectWizardClasses.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/BinaryData_ce4232d4.o: ../../JuceLibraryCode/BinaryData.cpp

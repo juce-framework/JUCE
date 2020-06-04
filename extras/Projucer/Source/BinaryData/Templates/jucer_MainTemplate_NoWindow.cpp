@@ -17,7 +17,7 @@ public:
 
     const juce::String getApplicationName() override       { return ProjectInfo::projectName; }
     const juce::String getApplicationVersion() override    { return ProjectInfo::versionString; }
-    bool moreThanOneInstanceAllowed() override             { return %%allow_more_than_one_instance%%; }
+    bool moreThanOneInstanceAllowed() override             { return true; }
 
     //==============================================================================
     void initialise (const juce::String& commandLine) override

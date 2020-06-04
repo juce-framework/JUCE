@@ -61,7 +61,7 @@ protected:
 
 //==============================================================================
 class GraphicsPropsPanel  : public Component,
-                            public ChangeListener
+                            private ChangeListener
 {
 public:
     GraphicsPropsPanel (PaintRoutine& paintRoutine_,
@@ -75,7 +75,7 @@ public:
         addAndMakeVisible (propsPanel = new PropertyPanel());
     }
 
-    ~GraphicsPropsPanel()
+    ~GraphicsPropsPanel() override
     {
         paintRoutine.getSelectedPoints().removeChangeListener (this);
         paintRoutine.getSelectedElements().removeChangeListener (this);
@@ -84,14 +84,9 @@ public:
         deleteAllChildren();
     }
 
-    void resized()
+    void resized() override
     {
         propsPanel->setBounds (4, 4, getWidth() - 8, getHeight() - 8);
-    }
-
-    void changeListenerCallback (ChangeBroadcaster*)
-    {
-        updateList();
     }
 
     void clear()
@@ -145,6 +140,11 @@ public:
     }
 
 private:
+    void changeListenerCallback (ChangeBroadcaster*) override
+    {
+        updateList();
+    }
+
     PaintRoutine& paintRoutine;
     JucerDocument* document;
 

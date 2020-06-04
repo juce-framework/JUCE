@@ -51,10 +51,9 @@ public:
     void setProject (std::unique_ptr<Project> newProject);
     Project* getProject() const  { return currentProject.get(); }
 
-    bool tryToOpenPIP (const File& f);
-
     void makeVisible();
     void restoreWindowPosition();
+    void updateTitleBarIcon();
     bool closeCurrentProject (OpenDocumentManager::SaveIfNeeded askToSave);
     void moveProject (File newProjectFile, OpenInIDE openInIDE);
 
@@ -84,8 +83,11 @@ private:
 
     static const char* getProjectWindowPosName()   { return "projectWindowPos"; }
     void createProjectContentCompIfNeeded();
-    void setTitleBarIcon();
-    void openPIP (PIPGenerator&);
+
+    bool openPIP (PIPGenerator);
+    void setupTemporaryPIPProject (PIPGenerator&);
+
+    void initialiseProjectWindow();
 
     std::unique_ptr<Project> currentProject;
     Value projectNameValue;

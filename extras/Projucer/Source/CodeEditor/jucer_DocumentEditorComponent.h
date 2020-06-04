@@ -22,7 +22,7 @@
 
 //==============================================================================
 class DocumentEditorComponent  : public Component,
-                                 public OpenDocumentManager::DocumentCloseListener
+                                 private OpenDocumentManager::DocumentCloseListener
 {
 public:
     //==============================================================================
@@ -31,8 +31,6 @@ public:
 
     OpenDocumentManager::Document* getDocument() const              { return document; }
 
-    bool documentAboutToClose (OpenDocumentManager::Document*) override;
-
 protected:
     OpenDocumentManager::Document* document;
     bool lastEditedState = false;
@@ -40,5 +38,7 @@ protected:
     void setEditedState (bool hasBeenEdited);
 
 private:
+    bool documentAboutToClose (OpenDocumentManager::Document*) override;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DocumentEditorComponent)
 };

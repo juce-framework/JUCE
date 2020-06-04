@@ -80,7 +80,10 @@ public:
     /** Returns true if the list of options is expanded. */
     bool isExpanded() const noexcept    { return expanded; }
 
-    /** Expands or shrinks the list of options.
+    /** Returns true if the list of options has been truncated and can be expanded. */
+    bool isExpandable() const noexcept  { return expandable; }
+
+    /** Expands or shrinks the list of options if they are not all visible.
 
         N.B. This will just set the preferredHeight value of the PropertyComponent and attempt to
         call PropertyPanel::resized(), so if you are not displaying this object in a PropertyPanel
@@ -107,14 +110,18 @@ private:
     class MultiChoiceRemapperSourceWithDefault;
 
     //==============================================================================
+    static int getTotalButtonsHeight (int);
     void lookAndFeelChanged() override;
 
     //==============================================================================
     WeakReference<ValueWithDefault> valueWithDefault;
 
-    int maxHeight = 0;
-    int numHidden = 0;
-    bool expanded = false;
+    static constexpr int collapsedHeight = 125;
+    static constexpr int buttonHeight = 25;
+    static constexpr int expandAreaHeight = 20;
+
+    int maxHeight = 0, numHidden = 0;
+    bool expandable = false, expanded = false;
 
     OwnedArray<ToggleButton> choiceButtons;
     ShapeButton expandButton { "Expand", Colours::transparentBlack, Colours::transparentBlack, Colours::transparentBlack };

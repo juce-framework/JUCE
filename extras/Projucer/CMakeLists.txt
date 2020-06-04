@@ -32,6 +32,8 @@ target_sources(Projucer PRIVATE
     Source/Application/jucer_CommandLine.cpp
     Source/Application/jucer_Main.cpp
     Source/Application/jucer_MainWindow.cpp
+    Source/Application/StartPage/jucer_StartPageComponent.cpp
+    Source/Application/StartPage/jucer_NewProjectWizard.cpp
     Source/CodeEditor/jucer_DocumentEditorComponent.cpp
     Source/CodeEditor/jucer_OpenDocumentManager.cpp
     Source/CodeEditor/jucer_SourceCodeEditor.cpp
@@ -71,14 +73,13 @@ target_sources(Projucer PRIVATE
     Source/Utility/Helpers/jucer_CodeHelpers.cpp
     Source/Utility/Helpers/jucer_FileHelpers.cpp
     Source/Utility/Helpers/jucer_MiscUtilities.cpp
+    Source/Utility/Helpers/jucer_NewFileWizard.cpp
     Source/Utility/Helpers/jucer_VersionInfo.cpp
     Source/Utility/PIPs/jucer_PIPGenerator.cpp
     Source/Utility/UI/jucer_Icons.cpp
     Source/Utility/UI/jucer_JucerTreeViewBase.cpp
     Source/Utility/UI/jucer_ProjucerLookAndFeel.cpp
-    Source/Utility/UI/jucer_SlidingPanelComponent.cpp
-    Source/Wizards/jucer_NewFileWizard.cpp
-    Source/Wizards/jucer_NewProjectWizardClasses.cpp)
+    Source/Utility/UI/jucer_SlidingPanelComponent.cpp)
 
 target_compile_definitions(Projucer PRIVATE
     JUCE_ALLOW_STATIC_NULL_VARIABLES=0
@@ -127,7 +128,6 @@ juce_add_binary_data(ProjucerData SOURCES
     Source/BinaryData/Templates/jucer_InlineComponentTemplate.h
     Source/BinaryData/Templates/jucer_MainConsoleAppTemplate.cpp
     Source/BinaryData/Templates/jucer_MainTemplate_NoWindow.cpp
-    Source/BinaryData/Templates/jucer_MainTemplate_SimpleWindow.cpp
     Source/BinaryData/Templates/jucer_MainTemplate_Window.cpp
     Source/BinaryData/Templates/jucer_NewComponentTemplate.cpp
     Source/BinaryData/Templates/jucer_NewComponentTemplate.h

@@ -39,7 +39,7 @@ public:
     bool mightContainSubItems() override      { return exporter->getNumConfigurations() > 0; }
     String getUniqueName() const override     { return "exporter_" + String (exporterIndex); }
     String getRenamingName() const override   { return getDisplayName(); }
-    String getDisplayName() const override    { return exporter->getName(); }
+    String getDisplayName() const override    { return exporter->getUniqueName(); }
     void setName (const String&) override     {}
     bool isMissing() const override           { return false; }
     String getTooltip() override              { return getDisplayName(); }
@@ -172,7 +172,7 @@ private:
     struct SettingsComp  : public Component
     {
         SettingsComp (ProjectExporter& exp)
-            : group (exp.getName(),
+            : group (exp.getUniqueName(),
                      ExporterItem::getIconForExporter (&exp),
                      exp.getDescription())
         {
@@ -269,7 +269,7 @@ private:
     {
     public:
         SettingsComp (ProjectExporter::BuildConfiguration& conf)
-            : group (conf.exporter.getName() + " - " + conf.getName(), Icon (getIcons().config, Colours::transparentBlack))
+            : group (conf.exporter.getUniqueName() + " - " + conf.getName(), Icon (getIcons().config, Colours::transparentBlack))
         {
             addAndMakeVisible (group);
 

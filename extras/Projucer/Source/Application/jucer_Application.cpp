@@ -621,7 +621,7 @@ PopupMenu ProjucerApplication::createExamplesPopupMenu() noexcept
 #endif
 
 //==============================================================================
-static File getJUCEExamplesDirectoryPathFromGlobal()
+File ProjucerApplication::getJUCEExamplesDirectoryPathFromGlobal() noexcept
 {
     auto globalPath = File::createFileWithoutCheckingPath (getAppSettings().getStoredPath (Ids::jucePath, TargetOS::getThisOS()).get().toString()
                                                                            .replace ("~", File::getSpecialLocation (File::userHomeDirectory).getFullPathName()));
@@ -659,7 +659,7 @@ Array<File> ProjucerApplication::getSortedExampleDirectories() noexcept
     return exampleDirectories;
 }
 
-Array<File> ProjucerApplication::getSortedExampleFilesInDirectory (const File& directory) const noexcept
+Array<File> ProjucerApplication::getSortedExampleFilesInDirectory (const File& directory) noexcept
 {
     Array<File> exampleFiles;
 
@@ -669,26 +669,6 @@ Array<File> ProjucerApplication::getSortedExampleFilesInDirectory (const File& d
     exampleFiles.sort();
 
     return exampleFiles;
-}
-
-bool ProjucerApplication::findWindowAndOpenPIP (const File& pip)
-{
-    auto* window = mainWindowList.getFrontmostWindow();
-    bool shouldCloseWindow = false;
-
-    if (window == nullptr)
-    {
-        window = mainWindowList.getOrCreateEmptyWindow();
-        shouldCloseWindow = true;
-    }
-
-    if (window->tryToOpenPIP (pip))
-        return true;
-
-    if (shouldCloseWindow)
-        mainWindowList.closeWindow (window);
-
-    return false;
 }
 
 void ProjucerApplication::findAndLaunchExample (int selectedIndex)
@@ -711,7 +691,7 @@ void ProjucerApplication::findAndLaunchExample (int selectedIndex)
     // example doesn't exist?
     jassert (example != File());
 
-    findWindowAndOpenPIP (example);
+    mainWindowList.openFile (example);
 }
 
 //==============================================================================
@@ -731,7 +711,7 @@ static String getPlatformSpecificFileExtension()
 
 static File getPlatformSpecificProjectFolder()
 {
-    auto examplesDir = getJUCEExamplesDirectoryPathFromGlobal();
+    auto examplesDir = ProjucerApplication::getJUCEExamplesDirectoryPathFromGlobal();
 
     if (examplesDir == File())
         return {};
@@ -1165,7 +1145,8 @@ void ProjucerApplication::createNewProject()
 void ProjucerApplication::createNewProjectFromClipboard()
 {
     auto tempFile = File::getSpecialLocation (File::SpecialLocationType::tempDirectory).getChildFile ("PIPs").getChildFile ("Clipboard")
-                                                                                       .getChildFile ("PIPFile_" + String (std::abs (Random::getSystemRandom().nextInt())) + ".h");
+                                                                                       .getChildFile ("PIPFile_" + String (std::abs (Random::getSystemRandom().nextInt())) + ".h")
+                                                                                       .getNonexistentSibling();
 
     if (tempFile.existsAsFile())
         tempFile.deleteFile();
@@ -1173,10 +1154,11 @@ void ProjucerApplication::createNewProjectFromClipboard()
     tempFile.create();
     tempFile.appendText (SystemClipboard::getTextFromClipboard());
 
-    if (! findWindowAndOpenPIP (tempFile))
+    if (! mainWindowList.openFile (tempFile))
     {
         AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Error", "Couldn't create project from clipboard contents.");
         tempFile.deleteFile();
+        mainWindowList.closeWindow (mainWindowList.windows.getLast());
     }
 }
 

@@ -55,6 +55,7 @@ StringArray getModulesRequiredForComponent() noexcept;
 StringArray getModulesRequiredForAudioProcessor() noexcept;
 
 bool isPIPFile (const File&) noexcept;
+int findBestLineToScrollToForClass (StringArray, StringRef, bool isPlugin = false);
 
 bool isValidJUCEExamplesDirectory (const File&) noexcept;
 
@@ -105,7 +106,7 @@ struct PropertyListBuilder
 // A ValueSource which takes an input source, and forwards any changes in it.
 // This class is a handy way to create sources which re-map a value.
 class ValueSourceFilter   : public Value::ValueSource,
-                            public Value::Listener
+                            private Value::Listener
 {
 public:
     ValueSourceFilter (const Value& source)  : sourceValue (source)
@@ -113,10 +114,11 @@ public:
         sourceValue.addListener (this);
     }
 
-    void valueChanged (Value&) override      { sendChangeMessage (true); }
-
 protected:
     Value sourceValue;
+
+private:
+    void valueChanged (Value&) override      { sendChangeMessage (true); }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueSourceFilter)
 };

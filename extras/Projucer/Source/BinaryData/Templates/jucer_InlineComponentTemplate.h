@@ -1,5 +1,5 @@
 //==============================================================================
-class %%component_class%%    : public juce::Component
+class %%component_class%%  : public juce::Component
 {
 public:
     %%component_class%%()
@@ -9,7 +9,7 @@ public:
 
     }
 
-    ~%%component_class%%()
+    ~%%component_class%%() override
     {
     }
 

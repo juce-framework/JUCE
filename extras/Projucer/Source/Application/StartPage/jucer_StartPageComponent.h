@@ -18,35 +18,26 @@
 
 #pragma once
 
+struct ContentComponent;
+struct ProjectTemplatesAndExamples;
 
 //==============================================================================
-class StartPageComponent    : public Component
+class StartPageComponent  : public Component
 {
 public:
-    StartPageComponent()
-    {
-        setSize (900, 650);
+    StartPageComponent (std::function<void(std::unique_ptr<Project>&&)>&& newProjectCb,
+                        std::function<void(const File&)>&& exampleCb);
 
-        WizardComp* projectWizard = new WizardComp();
-
-        panel.addTab ("Create New Project", new TemplateTileBrowser (projectWizard), true);
-        panel.addTab ("New Project Options", projectWizard, true);
-
-        addAndMakeVisible (panel);
-    }
-
-    void paint (Graphics& g) override
-    {
-        g.fillAll (findColour (backgroundColourId));
-    }
-
-    void resized() override
-    {
-        panel.setBounds (getLocalBounds());
-    }
+    void paint (Graphics& g) override;
+    void resized() override;
 
 private:
-    SlidingPanelComponent panel;
+    //==============================================================================
+    std::unique_ptr<ContentComponent> content;
+    std::unique_ptr<ProjectTemplatesAndExamples> tabs;
 
+    TextButton openExistingButton { "Open Existing Project..." };
+
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StartPageComponent)
 };

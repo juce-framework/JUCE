@@ -41,7 +41,7 @@ public:
     }
 
     class ColourEditorComponent    : public Component,
-                                     public ChangeListener
+                                     private ChangeListener
     {
     public:
         ColourEditorComponent (const bool canReset)
@@ -84,14 +84,6 @@ public:
         {
             CallOutBox::launchAsynchronously (new ColourSelectorComp (this, canResetToDefault),
                                               getScreenBounds(), nullptr);
-        }
-
-        void changeListenerCallback (ChangeBroadcaster* source) override
-        {
-            const ColourSelector* const cs = (const ColourSelector*) source;
-
-            if (cs->getCurrentColour() != getColour())
-                setColour (cs->getCurrentColour());
         }
 
         class ColourSelectorComp   : public Component
@@ -166,6 +158,14 @@ public:
         };
 
     private:
+        void changeListenerCallback (ChangeBroadcaster* source) override
+        {
+            const ColourSelector* const cs = (const ColourSelector*) source;
+
+            if (cs->getCurrentColour() != getColour())
+                setColour (cs->getCurrentColour());
+        }
+
         Colour colour;
         bool canResetToDefault;
     };

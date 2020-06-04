@@ -158,7 +158,7 @@ private:
                 exporterModulePathValues.add (defaultValue.getPropertyAsValue());
 
                 auto pathComponent = std::make_unique<FilePathPropertyComponent> (defaultValue,
-                                                                                  "Path for " + exporter->getName().quoted(),
+                                                                                  "Path for " + exporter->getUniqueName().quoted(),
                                                                                   true,
                                                                                   exporter->getTargetOSForExporter() == TargetOS::getThisOS(),
                                                                                   "*",
@@ -168,7 +168,7 @@ private:
 
                 props.add (pathComponent.release(),
                            "A path to the folder that contains the " + moduleID + " module when compiling the "
-                           + exporter->getName().quoted() + " target. "
+                           + exporter->getUniqueName().quoted() + " target. "
                            "This can be an absolute path, or relative to the jucer project folder, but it "
                            "must be valid on the filesystem of the target machine that will be performing this build. If this "
                            "is empty then the global path will be used.");

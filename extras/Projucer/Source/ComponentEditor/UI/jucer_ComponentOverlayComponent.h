@@ -22,9 +22,9 @@
 
 //==============================================================================
 class ComponentOverlayComponent  : public Component,
-                                   public ComponentListener,
-                                   public ChangeListener,
-                                   public ComponentBoundsConstrainer
+                                   private ComponentBoundsConstrainer,
+                                   private ComponentListener,
+                                   private ChangeListener
 {
 public:
     //==============================================================================
@@ -44,14 +44,15 @@ public:
     void mouseDrag (const MouseEvent&) override;
     void mouseUp (const MouseEvent&) override;
 
-    void componentMovedOrResized (Component&, bool wasMoved, bool wasResized) override;
+    void updateBoundsToMatchTarget();
 
-    void changeListenerCallback (ChangeBroadcaster*) override;
+    //==============================================================================
+    Component::SafePointer<Component> target;
+    const int borderThickness;
 
+private:
     void resizeStart() override;
     void resizeEnd() override;
-
-    void updateBoundsToMatchTarget();
 
     void checkBounds (Rectangle<int>& bounds,
                       const Rectangle<int>& previousBounds,
@@ -63,11 +64,10 @@ public:
 
     void applyBoundsToComponent (Component&, Rectangle<int>) override;
 
-    //==============================================================================
-    Component::SafePointer<Component> target;
-    const int borderThickness;
+    void componentMovedOrResized (Component&, bool wasMoved, bool wasResized) override;
 
-private:
+    void changeListenerCallback (ChangeBroadcaster*) override;
+
     std::unique_ptr<ResizableBorderComponent> border;
 
     ComponentLayout& layout;

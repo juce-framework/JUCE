@@ -18,5 +18,14 @@
 
 #pragma once
 
+#include "jucer_NewProjectTemplates.h"
 
-Component* createNewProjectWizardComponent();
+//==============================================================================
+namespace NewProjectWizard
+{
+    File getLastWizardFolder();
+
+    std::unique_ptr<Project> createNewProject (const NewProjectTemplates::ProjectTemplate& projectTemplate,
+                                               const File& targetFolder, const String& name, var modules, var exporters, var fileOptions,
+                                               const String& modulePath, bool useGlobalModulePath);
+}

@@ -7,7 +7,7 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class %%content_component_class%%   : public juce::Component
+class %%content_component_class%%  : public juce::Component
 {
 public:
     //==============================================================================
@@ -16,7 +16,7 @@ public:
         setSize (600, 400);
     }
 
-    ~%%content_component_class%%()
+    ~%%content_component_class%%() override
     {
     }
 

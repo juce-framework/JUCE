@@ -21,7 +21,7 @@
 
 //==============================================================================
 class FilePropertyComponent  : public PropertyComponent,
-                               public FilenameComponentListener
+                               private FilenameComponentListener
 {
 public:
     FilePropertyComponent (const String& name,
@@ -40,17 +40,17 @@ public:
     virtual void setFile (const File& newFile) = 0;
     virtual File getFile() const = 0;
 
-    void refresh()
+    void refresh() override
     {
         filenameComp.setCurrentFile (getFile(), false);
     }
 
-    void filenameComponentChanged (FilenameComponent*)
+private:
+    void filenameComponentChanged (FilenameComponent*) override
     {
         if (getFile() != filenameComp.getCurrentFile())
             setFile (filenameComp.getCurrentFile());
     }
 
-private:
     FilenameComponent filenameComp;
 };

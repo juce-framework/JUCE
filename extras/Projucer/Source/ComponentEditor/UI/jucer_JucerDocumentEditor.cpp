@@ -32,7 +32,7 @@
 //==============================================================================
 class ExtraMethodsList  : public PropertyComponent,
                           public ListBoxModel,
-                          public ChangeListener
+                          private ChangeListener
 {
 public:
     ExtraMethodsList (JucerDocument& doc)
@@ -112,12 +112,12 @@ public:
         listBox->repaint();
     }
 
+private:
     void changeListenerCallback (ChangeBroadcaster*) override
     {
         refresh();
     }
 
-private:
     JucerDocument& document;
     std::unique_ptr<ListBox> listBox;
 

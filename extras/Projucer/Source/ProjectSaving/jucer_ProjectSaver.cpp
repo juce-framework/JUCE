@@ -697,7 +697,7 @@ void ProjectSaver::writeProjects (const OwnedArray<LibraryModule>& modules, Proj
     {
         for (Project::ExporterIterator exp (project); exp.next();)
         {
-            if (specifiedExporterToSave != nullptr && exp->getName() != specifiedExporterToSave->getName())
+            if (specifiedExporterToSave != nullptr && exp->getUniqueName() != specifiedExporterToSave->getUniqueName())
                 continue;
 
             exporters.push_back (std::move (exp.exporter));
@@ -754,7 +754,7 @@ void ProjectSaver::writeProjects (const OwnedArray<LibraryModule>& modules, Proj
         for (auto& exporter : exporters)
             clionExporter->writeCMakeListsExporterSection (exporter.get());
 
-        std::cout << "Finished saving: " << clionExporter->getName() << std::endl;
+        std::cout << "Finished saving: " << clionExporter->getUniqueName() << std::endl;
     }
 }
 
@@ -806,7 +806,7 @@ void ProjectSaver::saveExporter (ProjectExporter& exporter, const OwnedArray<Lib
 
         if (! exporter.isCLion())
         {
-            auto exporterName = exporter.getName();
+            auto exporterName = exporter.getUniqueName();
             MessageManager::callAsync ([exporterName] { std::cout << "Finished saving: " << exporterName << std::endl; });
         }
     }

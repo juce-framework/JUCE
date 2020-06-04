@@ -104,7 +104,7 @@ namespace ProjectMessages
 
 //==============================================================================
 class Project  : public FileBasedDocument,
-                 public ValueTree::Listener,
+                 private ValueTree::Listener,
                  private LicenseController::LicenseStateListener,
                  private ChangeListener,
                  private AvailableModulesList::Listener
@@ -416,8 +416,8 @@ public:
     //==============================================================================
     ValueTree getExporters();
     int getNumExporters();
-    ProjectExporter* createExporter (int index);
-    void addNewExporter (const String& exporterName);
+    std::unique_ptr<ProjectExporter> createExporter (int index);
+    void addNewExporter (const Identifier& exporterIdentifier);
     void createExporterForCurrentPlatform();
 
     struct ExporterIterator
@@ -457,16 +457,7 @@ public:
     std::pair<String, File> getModuleWithID (const String&);
 
     //==============================================================================
-    String getFileTemplate (const String& templateName);
-
-    //==============================================================================
     PropertiesFile& getStoredProperties() const;
-
-    //==============================================================================
-    void valueTreePropertyChanged (ValueTree&, const Identifier&) override;
-    void valueTreeChildAdded (ValueTree&, ValueTree&) override;
-    void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override;
-    void valueTreeChildOrderChanged (ValueTree&, int, int) override;
 
     //==============================================================================
     UndoManager* getUndoManagerFor (const ValueTree&) const             { return nullptr; }
@@ -480,7 +471,7 @@ public:
     void writeProjectFile();
 
     //==============================================================================
-    String getUniqueTargetFolderSuffixForExporter (const String& exporterName, const String& baseTargetFolder);
+    String getUniqueTargetFolderSuffixForExporter (const Identifier& exporterIdentifier, const String& baseTargetFolder);
 
     //==============================================================================
     bool isCurrentlySaving() const noexcept              { return isSaving; }
@@ -505,6 +496,12 @@ public:
     bool isSaveAndExportDisabled() const;
 
 private:
+    //==============================================================================
+    void valueTreePropertyChanged (ValueTree&, const Identifier&) override;
+    void valueTreeChildAdded (ValueTree&, ValueTree&) override;
+    void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override;
+    void valueTreeChildOrderChanged (ValueTree&, int, int) override;
+
     //==============================================================================
     struct ProjectFileModificationPoller  : private Timer
     {

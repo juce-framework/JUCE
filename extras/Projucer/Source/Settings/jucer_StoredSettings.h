@@ -22,7 +22,7 @@
 #include "jucer_AppearanceSettings.h"
 
 //==============================================================================
-class StoredSettings   : public ValueTree::Listener
+class StoredSettings   : private ValueTree::Listener
 {
 public:
     StoredSettings();

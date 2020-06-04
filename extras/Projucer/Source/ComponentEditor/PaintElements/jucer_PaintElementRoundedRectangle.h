@@ -204,7 +204,7 @@ private:
 
     //==============================================================================
     class CornerSizeProperty  : public SliderPropertyComponent,
-                                public ChangeListener
+                                private juce::ChangeListener
     {
     public:
         CornerSizeProperty (PaintElementRoundedRectangle* const owner_)
@@ -214,23 +214,23 @@ private:
             owner->getDocument()->addChangeListener (this);
         }
 
-        ~CornerSizeProperty()
+        ~CornerSizeProperty() override
         {
             owner->getDocument()->removeChangeListener (this);
         }
 
-        void setValue (double newValue)
+        void setValue (double newValue) override
         {
             owner->getDocument()->getUndoManager().undoCurrentTransactionOnly();
 
             owner->setCornerSize (newValue, true);
         }
 
-        double getValue() const                 { return owner->getCornerSize(); }
-
-        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
+        double getValue() const override { return owner->getCornerSize(); }
 
     private:
+        void changeListenerCallback (ChangeBroadcaster*) override { refresh(); }
+
         PaintElementRoundedRectangle* const owner;
     };
 

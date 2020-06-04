@@ -470,7 +470,7 @@ public:
 private:
     //==============================================================================
     struct MessageCountComponent  : public Component,
-                                    public ValueTree::Listener
+                                    private ValueTree::Listener
     {
         MessageCountComponent (ProjectMessagesComponent& o, Path pathToUse)
           : owner (o),
@@ -500,14 +500,15 @@ private:
             updateNumMessages();
         }
 
-        void valueTreeChildAdded   (ValueTree&, ValueTree&)        override  { updateNumMessages(); }
-        void valueTreeChildRemoved (ValueTree&, ValueTree&, int)   override  { updateNumMessages(); }
-
         void updateNumMessages()
         {
             numMessages = messagesTree.getNumChildren();
             repaint();
         }
+
+    private:
+        void valueTreeChildAdded   (ValueTree&, ValueTree&)        override  { updateNumMessages(); }
+        void valueTreeChildRemoved (ValueTree&, ValueTree&, int)   override  { updateNumMessages(); }
 
         ProjectMessagesComponent& owner;
         ValueTree messagesTree;

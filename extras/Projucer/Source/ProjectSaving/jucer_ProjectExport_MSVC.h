@@ -1615,16 +1615,18 @@ class MSVCProjectExporterVC2015  : public MSVCProjectExporterBase
 {
 public:
     MSVCProjectExporterVC2015 (Project& p, const ValueTree& t)
-        : MSVCProjectExporterBase (p, t, getTargetFolderForExporter (getValueTreeTypeName()))
+        : MSVCProjectExporterBase (p, t, getTargetFolderName())
     {
-        name = getName();
+        name = getDisplayName();
 
         targetPlatformVersion.setDefault (getDefaultWindowsTargetPlatformVersion());
         platformToolsetValue.setDefault (getDefaultToolset());
     }
 
-    static const char* getName()                                     { return "Visual Studio 2015"; }
-    static const char* getValueTreeTypeName()                        { return "VS2015"; }
+    static String getDisplayName()        { return "Visual Studio 2015"; }
+    static String getValueTreeTypeName()  { return "VS2015"; }
+    static String getTargetFolderName()   { return "VisualStudio2015"; }
+
     int getVisualStudioVersion() const override                      { return 14; }
     String getSolutionComment() const override                       { return "# Visual Studio 2015"; }
     String getToolsVersion() const override                          { return "14.0"; }
@@ -1660,16 +1662,18 @@ class MSVCProjectExporterVC2017  : public MSVCProjectExporterBase
 {
 public:
     MSVCProjectExporterVC2017 (Project& p, const ValueTree& t)
-        : MSVCProjectExporterBase (p, t, getTargetFolderForExporter (getValueTreeTypeName()))
+        : MSVCProjectExporterBase (p, t, getTargetFolderName())
     {
-        name = getName();
+        name = getDisplayName();
 
         targetPlatformVersion.setDefault (getDefaultWindowsTargetPlatformVersion());
         platformToolsetValue.setDefault (getDefaultToolset());
     }
 
-    static const char* getName()                                     { return "Visual Studio 2017"; }
-    static const char* getValueTreeTypeName()                        { return "VS2017"; }
+    static String getDisplayName()        { return "Visual Studio 2017"; }
+    static String getValueTreeTypeName()  { return "VS2017"; }
+    static String getTargetFolderName()   { return "VisualStudio2017"; }
+
     int getVisualStudioVersion() const override                      { return 15; }
     String getSolutionComment() const override                       { return "# Visual Studio 2017"; }
     String getToolsVersion() const override                          { return "15.0"; }
@@ -1705,16 +1709,18 @@ class MSVCProjectExporterVC2019  : public MSVCProjectExporterBase
 {
 public:
     MSVCProjectExporterVC2019 (Project& p, const ValueTree& t)
-        : MSVCProjectExporterBase (p, t, getTargetFolderForExporter (getValueTreeTypeName()))
+        : MSVCProjectExporterBase (p, t, getTargetFolderName())
     {
-        name = getName();
+        name = getDisplayName();
 
         targetPlatformVersion.setDefault (getDefaultWindowsTargetPlatformVersion());
         platformToolsetValue.setDefault (getDefaultToolset());
     }
 
-    static const char* getName()                                     { return "Visual Studio 2019"; }
-    static const char* getValueTreeTypeName()                        { return "VS2019"; }
+    static String getDisplayName()        { return "Visual Studio 2019"; }
+    static String getValueTreeTypeName()  { return "VS2019"; }
+    static String getTargetFolderName()   { return "VisualStudio2019"; }
+
     int getVisualStudioVersion() const override                      { return 16; }
     String getSolutionComment() const override                       { return "# Visual Studio 2019"; }
     String getToolsVersion() const override                          { return "16.0"; }

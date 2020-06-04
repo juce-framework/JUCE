@@ -21,7 +21,7 @@
 
 //==============================================================================
 class FileTreeItemBase   : public JucerTreeViewBase,
-                           public ValueTree::Listener
+                           private ValueTree::Listener
 {
 public:
     FileTreeItemBase (const Project::Item& projectItem)
@@ -228,17 +228,6 @@ public:
     }
 
     //==============================================================================
-    void valueTreePropertyChanged (ValueTree& tree, const Identifier&) override
-    {
-        if (tree == item.state)
-            repaintItem();
-    }
-
-    void valueTreeChildAdded (ValueTree& parentTree, ValueTree&) override         { treeChildrenChanged (parentTree); }
-    void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&, int) override  { treeChildrenChanged (parentTree); }
-    void valueTreeChildOrderChanged (ValueTree& parentTree, int, int) override    { treeChildrenChanged (parentTree); }
-
-    //==============================================================================
     bool mightContainSubItems() override                { return item.getNumChildren() > 0; }
     String getUniqueName() const override               { jassert (item.getID().isNotEmpty()); return item.getID(); }
     bool canBeSelected() const override                 { return true; }
@@ -340,6 +329,17 @@ public:
     Project::Item item;
 
 protected:
+    //==============================================================================
+    void valueTreePropertyChanged (ValueTree& tree, const Identifier&) override
+    {
+        if (tree == item.state)
+            repaintItem();
+    }
+
+    void valueTreeChildAdded (ValueTree& parentTree, ValueTree&) override         { treeChildrenChanged (parentTree); }
+    void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&, int) override  { treeChildrenChanged (parentTree); }
+    void valueTreeChildOrderChanged (ValueTree& parentTree, int, int) override    { treeChildrenChanged (parentTree); }
+
     bool isFileMissing;
 
     virtual FileTreeItemBase* createSubItem (const Project::Item& node) = 0;

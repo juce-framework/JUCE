@@ -351,7 +351,7 @@ private:
 
     //==============================================================================
     class ViewportScrollbarSizeProperty  : public SliderPropertyComponent,
-                                           public ChangeListener
+                                           private ChangeListener
     {
     public:
         ViewportScrollbarSizeProperty (Viewport* comp, JucerDocument& doc)
@@ -362,12 +362,12 @@ private:
             document.addChangeListener (this);
         }
 
-        ~ViewportScrollbarSizeProperty()
+        ~ViewportScrollbarSizeProperty() override
         {
             document.removeChangeListener (this);
         }
 
-        void setValue (double newValue)
+        void setValue (double newValue) override
         {
             document.getUndoManager().undoCurrentTransactionOnly();
 
@@ -375,12 +375,13 @@ private:
                               "Change Viewport scrollbar size");
         }
 
-        double getValue() const
+        double getValue() const override
         {
             return component->getScrollBarThickness();
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)
+    private:
+        void changeListenerCallback (ChangeBroadcaster*) override
         {
             refresh();
         }
@@ -477,7 +478,7 @@ private:
 
     //==============================================================================
     class ViewportJucerFileProperty   : public FilePropertyComponent,
-                                        public ChangeListener
+                                        private ChangeListener
     {
     public:
         ViewportJucerFileProperty (Viewport* const comp, JucerDocument& doc)
@@ -488,12 +489,12 @@ private:
             document.addChangeListener (this);
         }
 
-        ~ViewportJucerFileProperty()
+        ~ViewportJucerFileProperty() override
         {
             document.removeChangeListener (this);
         }
 
-        void setFile (const File& newFile)
+        void setFile (const File& newFile) override
         {
             document.perform (new JucerCompFileChangeAction (component, *document.getComponentLayout(),
                                                              newFile.getRelativePathFrom (document.getCppFile().getParentDirectory())
@@ -501,7 +502,7 @@ private:
                               "Change Projucer component file");
         }
 
-        File getFile() const
+        File getFile() const override
         {
             auto filename = getViewportJucerComponentFile (component);
 
@@ -511,12 +512,12 @@ private:
             return document.getCppFile().getSiblingFile (filename);
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)
+    private:
+        void changeListenerCallback (ChangeBroadcaster*) override
         {
             refresh();
         }
 
-    private:
         Viewport* const component;
         JucerDocument& document;
 

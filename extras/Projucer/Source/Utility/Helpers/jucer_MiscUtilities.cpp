@@ -350,7 +350,72 @@ bool isJUCEModulesFolder (const File& f)
 }
 
 //==============================================================================
-static var parseJUCEHeaderMetadata (const StringArray& lines)
+bool isDivider (const String& line)
+{
+    auto afterIndent = line.trim();
+
+    if (afterIndent.startsWith ("//") && afterIndent.length() > 20)
+    {
+        afterIndent = afterIndent.substring (5);
+
+        if (afterIndent.containsOnly ("=")
+            || afterIndent.containsOnly ("/")
+            || afterIndent.containsOnly ("-"))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+int getIndexOfCommentBlockStart (const StringArray& lines, int endIndex)
+{
+    auto endLine = lines[endIndex];
+
+    if (endLine.contains ("*/"))
+    {
+        for (int i = endIndex; i >= 0; --i)
+            if (lines[i].contains ("/*"))
+                return i;
+    }
+
+     if (endLine.trim().startsWith ("//") && ! isDivider (endLine))
+     {
+         for (int i = endIndex; i >= 0; --i)
+             if (! lines[i].startsWith ("//") || isDivider (lines[i]))
+                 return i + 1;
+     }
+
+    return -1;
+}
+
+int findBestLineToScrollToForClass (StringArray lines, StringRef className, bool isPlugin)
+{
+    for (auto line : lines)
+    {
+        if (line.contains ("struct " + className) || line.contains ("class " + className)
+            || (isPlugin && line.contains ("public AudioProcessor") && ! line.contains ("AudioProcessorEditor")))
+        {
+            auto index = lines.indexOf (line);
+
+            auto commentBlockStartIndex = getIndexOfCommentBlockStart (lines, index - 1);
+
+            if (commentBlockStartIndex != -1)
+                index = commentBlockStartIndex;
+
+            if (isDivider (lines[index - 1]))
+                index -= 1;
+
+            return index;
+        }
+    }
+
+    return 0;
+}
+
+//==============================================================================
+var parseJUCEHeaderMetadata (const StringArray& lines)
 {
     auto* o = new DynamicObject();
     var result (o);
@@ -373,7 +438,7 @@ static var parseJUCEHeaderMetadata (const StringArray& lines)
     return result;
 }
 
-static String parseMetadataItem (const StringArray& lines, int& index)
+String parseMetadataItem (const StringArray& lines, int& index)
 {
     String result = lines[index++];
 

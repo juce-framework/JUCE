@@ -165,7 +165,7 @@ private:
 
     //==============================================================================
     class GroupJustificationProperty  : public JustificationProperty,
-                                        public ChangeListener
+                                        private ChangeListener
     {
     public:
         GroupJustificationProperty (GroupComponent* const group_, JucerDocument& doc)
@@ -176,25 +176,25 @@ private:
             document.addChangeListener (this);
         }
 
-        ~GroupJustificationProperty()
+        ~GroupJustificationProperty() override
         {
             document.removeChangeListener (this);
         }
 
-        void setJustification (Justification newJustification)
+        void setJustification (Justification newJustification) override
         {
             document.perform (new GroupJustifyChangeAction (group, *document.getComponentLayout(), newJustification),
                               "Change text label position");
         }
 
-        Justification getJustification() const
+        Justification getJustification() const override
         {
             return group->getTextLabelPosition();
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
-
     private:
+        void changeListenerCallback (ChangeBroadcaster*) override { refresh(); }
+
         GroupComponent* const group;
         JucerDocument& document;
 

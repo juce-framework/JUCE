@@ -31,8 +31,8 @@ class ElementSiblingComponent;
 
 */
 class PaintElement  : public Component,
-                      public ChangeListener,
-                      public ComponentBoundsConstrainer
+                      public ComponentBoundsConstrainer,
+                      private ChangeListener
 {
 public:
     //==============================================================================
@@ -131,7 +131,7 @@ private:
 
 //==============================================================================
 template <typename ElementType>
-class ElementListener   : public ChangeListener
+class ElementListener   : private ChangeListener
 {
 public:
     ElementListener (ElementType* e)
@@ -141,7 +141,7 @@ public:
         broadcaster.addChangeListener (this);
     }
 
-    ~ElementListener()
+    ~ElementListener() override
     {
         jassert (propToRefresh != nullptr);
         broadcaster.removeChangeListener (this);
@@ -152,16 +152,17 @@ public:
         propToRefresh = &pc;
     }
 
-    void changeListenerCallback (ChangeBroadcaster*)
+    mutable Component::SafePointer<ElementType> owner;
+    ChangeBroadcaster& broadcaster;
+    PropertyComponent* propToRefresh;
+
+private:
+    void changeListenerCallback (ChangeBroadcaster*) override
     {
         jassert (propToRefresh != nullptr);
         if (propToRefresh != nullptr && owner != nullptr)
             propToRefresh->refresh();
     }
-
-    mutable Component::SafePointer<ElementType> owner;
-    ChangeBroadcaster& broadcaster;
-    PropertyComponent* propToRefresh;
 
     JUCE_DECLARE_NON_COPYABLE (ElementListener)
 };

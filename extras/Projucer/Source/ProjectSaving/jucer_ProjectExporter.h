@@ -20,6 +20,8 @@
 
 #include "../Project/jucer_Project.h"
 #include "../Utility/UI/PropertyComponents/jucer_PropertyComponentsWithEnablement.h"
+#include "../Utility/Helpers/jucer_ValueWithDefaultWrapper.h"
+#include "../Project/Modules/jucer_Modules.h"
 
 class ProjectSaver;
 
@@ -28,40 +30,26 @@ class ProjectExporter  : private Value::Listener
 {
 public:
     ProjectExporter (Project&, const ValueTree& settings);
-    virtual ~ProjectExporter() override;
+    virtual ~ProjectExporter() override = default;
 
+    //==============================================================================
     struct ExporterTypeInfo
     {
-        String name;
-        const void* iconData;
-        int iconDataSize;
+        Identifier identifier;
+        String displayName;
+        String targetFolder;
 
-        Image getIcon() const
-        {
-            Image image (Image::ARGB, 200, 200, true);
-            Graphics g (image);
-
-            std::unique_ptr<Drawable> svgDrawable (Drawable::createFromImageData (iconData, (size_t) iconDataSize));
-
-            svgDrawable->drawWithin (g, image.getBounds().toFloat(), RectanglePlacement::fillDestination, 1.0f);
-
-            return image;
-        }
+        Image icon;
     };
 
-    static StringArray getExporterNames();
-    static StringArray getExporterValueTreeNames();
-    static Array<ExporterTypeInfo> getExporterTypes();
-    static String getValueTreeNameForExporter (const String& exporterName);
-    static String getTargetFolderForExporter (const String& exporterValueTreeName);
-    static StringArray getAllDefaultBuildsFolders();
+    static std::vector<ExporterTypeInfo> getExporterTypeInfos();
+    static ExporterTypeInfo getTypeInfoForExporter (const Identifier& exporterIdentifier);
+    static ExporterTypeInfo getCurrentPlatformExporterTypeInfo();
 
-    static ProjectExporter* createNewExporter (Project&, const int index);
-    static ProjectExporter* createNewExporter (Project&, const String& name);
-    static ProjectExporter* createExporter (Project&, const ValueTree& settings);
+    static std::unique_ptr<ProjectExporter> createNewExporter (Project&, const Identifier& exporterIdentifier);
+    static std::unique_ptr<ProjectExporter> createExporterFromSettings (Project&, const ValueTree& settings);
+
     static bool canProjectBeLaunched (Project*);
-
-    static String getCurrentPlatformExporterName();
 
     //==============================================================================
     // capabilities of exporter
@@ -125,7 +113,7 @@ public:
     }
 
     //==============================================================================
-    String getName() const;
+    String getUniqueName() const;
     File getTargetFolder() const;
 
     Project& getProject() noexcept                        { return project; }
@@ -146,9 +134,9 @@ public:
 
     bool shouldUseGNUExtensions() const                   { return gnuExtensionsValue.get(); }
 
-    String getVSTLegacyPathString() const                 { return vstLegacyPathValueWrapper.wrappedValue.get(); }
-    String getAAXPathString() const                       { return aaxPathValueWrapper.wrappedValue.get(); }
-    String getRTASPathString() const                      { return rtasPathValueWrapper.wrappedValue.get(); }
+    String getVSTLegacyPathString() const                 { return vstLegacyPathValueWrapper.getCurrentValue(); }
+    String getAAXPathString() const                       { return aaxPathValueWrapper.getCurrentValue(); }
+    String getRTASPathString() const                      { return rtasPathValueWrapper.getCurrentValue(); }
 
     // NB: this is the path to the parent "modules" folder that contains the named module, not the
     // module folder itself.
@@ -355,36 +343,6 @@ protected:
     const File projectFolder;
 
     //==============================================================================
-    // Wraps a ValueWithDefault object that has a default which depends on a global value.
-    // Used for the VST, RTAS and AAX project-specific path options.
-    struct ValueWithDefaultWrapper  : public Value::Listener
-    {
-        void init (const ValueWithDefault& vwd, ValueWithDefault global, TargetOS::OS targetOS)
-        {
-            wrappedValue = vwd;
-            globalValue = global.getPropertyAsValue();
-            globalIdentifier = global.getPropertyID();
-            os = targetOS;
-
-            if (wrappedValue.get() == var())
-                wrappedValue.resetToDefault();
-
-            globalValue.addListener (this);
-            valueChanged (globalValue);
-        }
-
-        void valueChanged (Value&) override
-        {
-            wrappedValue.setDefault (getAppSettings().getStoredPath (globalIdentifier, os).get());
-        }
-
-        ValueWithDefault wrappedValue;
-        Value globalValue;
-
-        Identifier globalIdentifier;
-        TargetOS::OS os;
-    };
-
     ValueWithDefaultWrapper vstLegacyPathValueWrapper, rtasPathValueWrapper, aaxPathValueWrapper;
 
     ValueWithDefault targetLocationValue, extraCompilerFlagsValue, extraLinkerFlagsValue, externalLibrariesValue,

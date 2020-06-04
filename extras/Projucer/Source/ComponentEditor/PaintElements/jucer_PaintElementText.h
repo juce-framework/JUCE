@@ -387,7 +387,7 @@ private:
 
     //==============================================================================
     class TextProperty  : public TextPropertyComponent,
-                          public ChangeListener
+                          private juce::ChangeListener
     {
     public:
         TextProperty (PaintElementText* const e)
@@ -405,15 +405,15 @@ private:
         void setText (const String& newText) override    { element->setText (newText, true); }
         String getText() const override                  { return element->getText(); }
 
+    private:
         void changeListenerCallback (ChangeBroadcaster*) override     { refresh(); }
 
-    private:
         PaintElementText* const element;
     };
 
     //==============================================================================
     class FontNameProperty  : public FontPropertyComponent,
-                              public ChangeListener
+                              private juce::ChangeListener
     {
     public:
         FontNameProperty (PaintElementText* const e)
@@ -431,15 +431,15 @@ private:
         void setTypefaceName (const String& newFontName)    { element->setTypefaceName (newFontName, true); }
         String getTypefaceName() const                      { return element->getTypefaceName(); }
 
+    private:
         void changeListenerCallback (ChangeBroadcaster*)                 { refresh(); }
 
-    private:
         PaintElementText* const element;
     };
 
     //==============================================================================
     class FontStyleProperty  : public ChoicePropertyComponent,
-                               public ChangeListener
+                               private juce::ChangeListener
     {
     public:
         FontStyleProperty (PaintElementText* const e)
@@ -518,18 +518,18 @@ private:
             return typefaceIndex;
         }
 
+    private:
         void changeListenerCallback (ChangeBroadcaster*)
         {
             updateStylesList (element->getTypefaceName());
         }
 
-    private:
         PaintElementText* const element;
     };
 
     //==============================================================================
     class FontSizeProperty  : public SliderPropertyComponent,
-                              public ChangeListener
+                              private juce::ChangeListener
     {
     public:
         FontSizeProperty (PaintElementText* const e)
@@ -539,12 +539,12 @@ private:
             element->getDocument()->addChangeListener (this);
         }
 
-        ~FontSizeProperty()
+        ~FontSizeProperty() override
         {
             element->getDocument()->removeChangeListener (this);
         }
 
-        void setValue (double newValue)
+        void setValue (double newValue) override
         {
             element->getDocument()->getUndoManager().undoCurrentTransactionOnly();
 
@@ -554,20 +554,20 @@ private:
             element->setFont (f, true);
         }
 
-        double getValue() const
+        double getValue() const override
         {
             return element->getFont().getHeight();
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
-
     private:
+        void changeListenerCallback (ChangeBroadcaster*) override { refresh(); }
+
         PaintElementText* const element;
     };
 
     //==============================================================================
     class FontKerningProperty  : public SliderPropertyComponent,
-                                 public ChangeListener
+                                 private juce::ChangeListener
     {
     public:
         FontKerningProperty (PaintElementText* const e)
@@ -577,12 +577,12 @@ private:
             element->getDocument()->addChangeListener (this);
         }
 
-        ~FontKerningProperty()
+        ~FontKerningProperty() override
         {
             element->getDocument()->removeChangeListener (this);
         }
 
-        void setValue (double newValue)
+        void setValue (double newValue) override
         {
             element->getDocument()->getUndoManager().undoCurrentTransactionOnly();
 
@@ -592,23 +592,23 @@ private:
             element->setFont (f, true);
         }
 
-        double getValue() const
+        double getValue() const override
         {
             return element->getFont().getExtraKerningFactor();
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)
+    private:
+        void changeListenerCallback (ChangeBroadcaster*) override
         {
             refresh();
         }
 
-    private:
         PaintElementText* const element;
     };
 
     //==============================================================================
     class TextJustificationProperty  : public JustificationProperty,
-                                       public ChangeListener
+                                       private juce::ChangeListener
     {
     public:
         TextJustificationProperty (PaintElementText* const e)
@@ -618,24 +618,24 @@ private:
             element->getDocument()->addChangeListener (this);
         }
 
-        ~TextJustificationProperty()
+        ~TextJustificationProperty() override
         {
             element->getDocument()->removeChangeListener (this);
         }
 
-        void setJustification (Justification newJustification)
+        void setJustification (Justification newJustification) override
         {
             element->setJustification (newJustification, true);
         }
 
-        Justification getJustification() const
+        Justification getJustification() const override
         {
             return element->getJustification();
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
-
     private:
+        void changeListenerCallback (ChangeBroadcaster*) override { refresh(); }
+
         PaintElementText* const element;
     };
 

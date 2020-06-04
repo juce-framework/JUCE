@@ -693,7 +693,7 @@ Result Project::openProjectInIDE (ProjectExporter& exporterToOpen, bool saveFirs
 {
     for (ExporterIterator exporter (*this); exporter.next();)
     {
-        if (exporter->canLaunchProject() && exporter->getName() == exporterToOpen.getName())
+        if (exporter->canLaunchProject() && exporter->getUniqueName() == exporterToOpen.getUniqueName())
         {
             if (isTemporaryProject())
             {
@@ -2375,18 +2375,18 @@ int Project::getNumExporters()
     return getExporters().getNumChildren();
 }
 
-ProjectExporter* Project::createExporter (int index)
+std::unique_ptr<ProjectExporter> Project::createExporter (int index)
 {
     jassert (index >= 0 && index < getNumExporters());
-    return ProjectExporter::createExporter (*this, getExporters().getChild (index));
+    return ProjectExporter::createExporterFromSettings (*this, getExporters().getChild (index));
 }
 
-void Project::addNewExporter (const String& exporterName)
+void Project::addNewExporter (const Identifier& exporterIdentifier)
 {
-    std::unique_ptr<ProjectExporter> exp (ProjectExporter::createNewExporter (*this, exporterName));
+    std::unique_ptr<ProjectExporter> exp (ProjectExporter::createNewExporter (*this, exporterIdentifier));
 
     exp->getTargetLocationValue() = exp->getTargetLocationString()
-                                       + getUniqueTargetFolderSuffixForExporter (exp->getName(), exp->getTargetLocationString());
+                                       + getUniqueTargetFolderSuffixForExporter (exporterIdentifier, exp->getTargetLocationString());
 
     auto exportersTree = getExporters();
     exportersTree.appendChild (exp->settings, getUndoManagerFor (exportersTree));
@@ -2394,21 +2394,20 @@ void Project::addNewExporter (const String& exporterName)
 
 void Project::createExporterForCurrentPlatform()
 {
-    addNewExporter (ProjectExporter::getCurrentPlatformExporterName());
+    addNewExporter (ProjectExporter::getCurrentPlatformExporterTypeInfo().identifier);
 }
 
-String Project::getUniqueTargetFolderSuffixForExporter (const String& exporterName, const String& base)
+String Project::getUniqueTargetFolderSuffixForExporter (const Identifier& exporterIdentifier, const String& base)
 {
     StringArray buildFolders;
 
     auto exportersTree = getExporters();
-    auto type = ProjectExporter::getValueTreeNameForExporter (exporterName);
 
     for (int i = 0; i < exportersTree.getNumChildren(); ++i)
     {
         auto exporterNode = exportersTree.getChild (i);
 
-        if (exporterNode.getType() == Identifier (type))
+        if (exporterNode.getType() == exporterIdentifier)
             buildFolders.add (exporterNode.getProperty ("targetFolder").toString());
     }
 
@@ -2430,18 +2429,6 @@ String Project::getUniqueTargetFolderSuffixForExporter (const String& exporterNa
 }
 
 //==============================================================================
-String Project::getFileTemplate (const String& templateName)
-{
-    int dataSize;
-
-    if (auto* data = BinaryData::getNamedResource (templateName.toUTF8(), dataSize))
-        return String::fromUTF8 (data, dataSize);
-
-    jassertfalse;
-    return {};
-
-}
-
 StringPairArray Project::getAppConfigDefs()
 {
     StringPairArray result;
@@ -2598,7 +2585,7 @@ bool Project::ExporterIterator::next()
     if (++index >= project.getNumExporters())
         return false;
 
-    exporter.reset (project.createExporter (index));
+    exporter = project.createExporter (index);
 
     if (exporter == nullptr)
     {

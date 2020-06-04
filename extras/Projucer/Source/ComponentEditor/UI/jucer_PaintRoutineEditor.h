@@ -25,9 +25,9 @@ class JucerDocumentEditor;
 
 //==============================================================================
 class PaintRoutineEditor  : public Component,
-                            public ChangeListener,
                             public LassoSource <PaintElement*>,
-                            public FileDragAndDropTarget
+                            public FileDragAndDropTarget,
+                            private ChangeListener
 {
 public:
     //==============================================================================

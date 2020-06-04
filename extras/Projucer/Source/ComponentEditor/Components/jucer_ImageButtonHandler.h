@@ -457,7 +457,7 @@ public:
     }
 
     class ImageButtonColourProperty    : public JucerColourPropertyComponent,
-                                         public ChangeListener
+                                         private ChangeListener
     {
     public:
         ImageButtonColourProperty (ComponentLayout& layout_, ImageButton* const owner_,
@@ -470,29 +470,29 @@ public:
             layout_.getDocument()->addChangeListener (this);
         }
 
-        ~ImageButtonColourProperty()
+        ~ImageButtonColourProperty() override
         {
             layout.getDocument()->removeChangeListener (this);
         }
 
-        void setColour (Colour newColour)
+        void setColour (Colour newColour) override
         {
             setImageColour (layout, owner, role, newColour, true);
         }
 
-        Colour getColour() const
+        Colour getColour() const override
         {
             return getImageColour (owner, role);
         }
 
-        void resetToDefault() {}
+        void resetToDefault() override {}
 
-        void changeListenerCallback (ChangeBroadcaster*)
+    private:
+        void changeListenerCallback (ChangeBroadcaster*) override
         {
             refresh();
         }
 
-    private:
         ImageButton* const owner;
         ComponentLayout& layout;
         const ImageRole role;

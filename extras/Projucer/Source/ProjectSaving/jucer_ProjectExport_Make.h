@@ -368,8 +368,9 @@ public:
     };
 
     //==============================================================================
-    static const char* getNameLinux()           { return "Linux Makefile"; }
-    static const char* getValueTreeTypeName()   { return "LINUX_MAKE"; }
+    static String getDisplayName()        { return "Linux Makefile"; }
+    static String getValueTreeTypeName()  { return "LINUX_MAKE"; }
+    static String getTargetFolderName()   { return "LinuxMakefile"; }
 
     String getExtraPkgConfigString() const      { return extraPkgConfigValue.get(); }
 
@@ -386,9 +387,8 @@ public:
         : ProjectExporter (p, t),
           extraPkgConfigValue (settings, Ids::linuxExtraPkgConfig, getUndoManager())
     {
-        name = getNameLinux();
-
-        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderForExporter (getValueTreeTypeName()));
+        name = getDisplayName();
+        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderName());
     }
 
     //==============================================================================

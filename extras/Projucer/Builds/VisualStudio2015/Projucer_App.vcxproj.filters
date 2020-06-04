@@ -2,6 +2,9 @@
 
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="Projucer\Application\StartPage">
+      <UniqueIdentifier>{1E1D2D75-0ADA-6E9E-105F-2F87632B55AF}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Projucer\Application\UserAccount">
       <UniqueIdentifier>{DA27985D-8427-CE70-CA06-EAF7009CCC60}</UniqueIdentifier>
     </Filter>
@@ -82,9 +85,6 @@
     </Filter>
     <Filter Include="Projucer\Utility">
       <UniqueIdentifier>{F77CA057-8DE4-E076-7EB6-D2646794864B}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Projucer\Wizards">
-      <UniqueIdentifier>{4BBA3556-B2A1-3008-8BE1-F82DE6666552}</UniqueIdentifier>
     </Filter>
     <Filter Include="Projucer">
       <UniqueIdentifier>{7DBEF27C-2AFE-DA02-1DBF-E80FAAC99EA7}</UniqueIdentifier>
@@ -316,6 +316,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\Application\StartPage\jucer_NewProjectWizard.cpp">
+      <Filter>Projucer\Application\StartPage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Application\StartPage\jucer_StartPageComponent.cpp">
+      <Filter>Projucer\Application\StartPage</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Application\jucer_Application.cpp">
       <Filter>Projucer\Application</Filter>
     </ClCompile>
@@ -353,9 +359,6 @@
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_MainTemplate_NoWindow.cpp">
-      <Filter>Projucer\BinaryData\Templates</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_MainTemplate_SimpleWindow.cpp">
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_MainTemplate_Window.cpp">
@@ -490,6 +493,9 @@
     <ClCompile Include="..\..\Source\Utility\Helpers\jucer_MiscUtilities.cpp">
       <Filter>Projucer\Utility\Helpers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Utility\Helpers\jucer_NewFileWizard.cpp">
+      <Filter>Projucer\Utility\Helpers</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Utility\Helpers\jucer_VersionInfo.cpp">
       <Filter>Projucer\Utility\Helpers</Filter>
     </ClCompile>
@@ -507,12 +513,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Utility\UI\jucer_SlidingPanelComponent.cpp">
       <Filter>Projucer\Utility\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Wizards\jucer_NewFileWizard.cpp">
-      <Filter>Projucer\Wizards</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Wizards\jucer_NewProjectWizardClasses.cpp">
-      <Filter>Projucer\Wizards</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\Build\juce_build_tools\utils\juce_BinaryResourceFile.cpp">
       <Filter>JUCE Modules\juce_build_tools\utils</Filter>
@@ -1866,6 +1866,21 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\Application\StartPage\jucer_ContentComponents.h">
+      <Filter>Projucer\Application\StartPage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Application\StartPage\jucer_NewProjectTemplates.h">
+      <Filter>Projucer\Application\StartPage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Application\StartPage\jucer_NewProjectWizard.h">
+      <Filter>Projucer\Application\StartPage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Application\StartPage\jucer_StartPageComponent.h">
+      <Filter>Projucer\Application\StartPage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Application\StartPage\jucer_StartPageTreeHolder.h">
+      <Filter>Projucer\Application\StartPage</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Application\UserAccount\jucer_LicenseController.h">
       <Filter>Projucer\Application\UserAccount</Filter>
     </ClInclude>
@@ -2343,16 +2358,19 @@
     <ClInclude Include="..\..\Source\Utility\Helpers\jucer_MiscUtilities.h">
       <Filter>Projucer\Utility\Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\Helpers\jucer_PresetIDs.h">
+    <ClInclude Include="..\..\Source\Utility\Helpers\jucer_NewFileWizard.h">
       <Filter>Projucer\Utility\Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\Helpers\jucer_RelativePath.h">
+    <ClInclude Include="..\..\Source\Utility\Helpers\jucer_PresetIDs.h">
       <Filter>Projucer\Utility\Helpers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\Helpers\jucer_TranslationHelpers.h">
       <Filter>Projucer\Utility\Helpers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\Helpers\jucer_ValueSourceHelpers.h">
+      <Filter>Projucer\Utility\Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\Helpers\jucer_ValueWithDefaultWrapper.h">
       <Filter>Projucer\Utility\Helpers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\Helpers\jucer_VersionInfo.h">
@@ -2387,51 +2405,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\UI\jucer_SlidingPanelComponent.h">
       <Filter>Projucer\Utility\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_NewFileWizard.h">
-      <Filter>Projucer\Wizards</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_NewProjectWizard.h">
-      <Filter>Projucer\Wizards</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_NewProjectWizardClasses.h">
-      <Filter>Projucer\Wizards</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_NewProjectWizardComponent.h">
-      <Filter>Projucer\Wizards</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_Animated.h">
-      <Filter>Projucer\Wizards</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_AudioApp.h">
-      <Filter>Projucer\Wizards</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_AudioPlugin.h">
-      <Filter>Projucer\Wizards</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_Blank.h">
-      <Filter>Projucer\Wizards</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_Console.h">
-      <Filter>Projucer\Wizards</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_DLL.h">
-      <Filter>Projucer\Wizards</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_GUIApp.h">
-      <Filter>Projucer\Wizards</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_openGL.h">
-      <Filter>Projucer\Wizards</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_ProjectWizard_StaticLibrary.h">
-      <Filter>Projucer\Wizards</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_StartPageComponent.h">
-      <Filter>Projucer\Wizards</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Wizards\jucer_TemplateThumbnailsComponent.h">
-      <Filter>Projucer\Wizards</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\Build\juce_build_tools\utils\juce_BinaryResourceFile.h">
       <Filter>JUCE Modules\juce_build_tools\utils</Filter>

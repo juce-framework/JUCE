@@ -140,11 +140,15 @@ private:
 
         {
             Array<var> exporterVars;
-            for (auto& e : ProjectExporter::getExporterValueTreeNames())
-                exporterVars.add (e.toLowerCase());
+            StringArray exporterNames;
 
-            builder.add (new MultiChoicePropertyComponent (exportersValue, "Exporters",
-                                                           ProjectExporter::getExporterNames(), exporterVars),
+            for (auto& exporterTypeInfo : ProjectExporter::getExporterTypeInfos())
+            {
+                exporterVars.add (exporterTypeInfo.identifier.toString());
+                exporterNames.add (exporterTypeInfo.displayName);
+            }
+
+            builder.add (new MultiChoicePropertyComponent (exportersValue, "Exporters", exporterNames, exporterVars),
                          "The exporters that should be added to your project.");
         }
 
@@ -169,9 +173,9 @@ private:
     }
 
     //==============================================================================
-    void valueTreePropertyChanged (ValueTree&, const Identifier& id) override
+    void valueTreePropertyChanged (ValueTree&, const Identifier& identifier) override
     {
-        if (id == Ids::type)
+        if (identifier == Ids::type)
         {
             auto type = typeValue.get().toString();
 
@@ -308,8 +312,7 @@ private:
                      websiteValue       { pipTree, Ids::website,       nullptr },
                      descriptionValue   { pipTree, Ids::description,   nullptr },
                      dependenciesValue  { pipTree, Ids::dependencies_, nullptr, getModulesRequiredForComponent(), "," },
-                     exportersValue     { pipTree, Ids::exporters,     nullptr,
-                                          StringArray (ProjectExporter::getValueTreeNameForExporter (ProjectExporter::getCurrentPlatformExporterName()).toLowerCase()), "," },
+                     exportersValue     { pipTree, Ids::exporters,     nullptr, StringArray (ProjectExporter::getCurrentPlatformExporterTypeInfo().identifier.toString()), "," },
                      moduleFlagsValue   { pipTree, Ids::moduleFlags,   nullptr, "JUCE_STRICT_REFCOUNTEDPOINTER=1" },
                      definesValue       { pipTree, Ids::defines,       nullptr },
                      typeValue          { pipTree, Ids::type,          nullptr, "Component" },

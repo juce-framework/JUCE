@@ -152,7 +152,7 @@ public:
 private:
     //==============================================================================
     class JucerCompFileProperty  : public FilePropertyComponent,
-                                   public ChangeListener
+                                   private ChangeListener
     {
     public:
         JucerCompFileProperty (TestComponent* const comp, JucerDocument& doc)
@@ -163,29 +163,29 @@ private:
             document.addChangeListener (this);
         }
 
-        ~JucerCompFileProperty()
+        ~JucerCompFileProperty() override
         {
             document.removeChangeListener (this);
         }
 
-        void setFile (const File& newFile)
+        void setFile (const File& newFile) override
         {
             setJucerComponentFile (document, component,
                                    newFile.getRelativePathFrom (document.getCppFile().getParentDirectory())
                                           .replaceCharacter ('\\', '/'));
         }
 
-        File getFile() const
+        File getFile() const override
         {
             return component->findFile();
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)
+    private:
+        void changeListenerCallback (ChangeBroadcaster*) override
         {
             refresh();
         }
 
-    private:
         TestComponent* const component;
         JucerDocument& document;
     };
