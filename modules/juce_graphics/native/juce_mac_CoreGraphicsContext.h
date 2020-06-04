@@ -23,7 +23,7 @@ namespace juce
 class CoreGraphicsContext   : public LowLevelGraphicsContext
 {
 public:
-    CoreGraphicsContext (CGContextRef context, float flipHeight, float targetScale);
+    CoreGraphicsContext (CGContextRef context, float flipHeight);
     ~CoreGraphicsContext() override;
 
     //==============================================================================
@@ -69,7 +69,6 @@ public:
 private:
     CGContextRef context;
     const CGFloat flipHeight;
-    float targetScale;
     CGColorSpaceRef rgbColourSpace, greyColourSpace;
     mutable Rectangle<int> lastClipRect;
     mutable bool lastClipRectIsValid = false;
