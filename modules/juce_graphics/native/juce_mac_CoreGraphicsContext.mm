@@ -70,7 +70,7 @@ public:
     {
         freeCachedImageRef();
         sendDataChangeMessage();
-        return std::make_unique<CoreGraphicsContext> (context, height, 1.0f);
+        return std::make_unique<CoreGraphicsContext> (context, height);
     }
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
@@ -195,10 +195,9 @@ ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int widt
 }
 
 //==============================================================================
-CoreGraphicsContext::CoreGraphicsContext (CGContextRef c, float h, float scale)
+CoreGraphicsContext::CoreGraphicsContext (CGContextRef c, float h)
     : context (c),
       flipHeight (h),
-      targetScale (scale),
       state (new SavedState())
 {
     CGContextRetain (context);
@@ -246,14 +245,14 @@ void CoreGraphicsContext::addTransform (const AffineTransform& transform)
     lastClipRectIsValid = false;
 
     jassert (getPhysicalPixelScaleFactor() > 0.0f);
-    jassert (getPhysicalPixelScaleFactor() > 0.0f);
 }
 
 float CoreGraphicsContext::getPhysicalPixelScaleFactor()
 {
-    auto t = CGContextGetCTM (context);
+    auto t = CGContextGetUserSpaceToDeviceSpaceTransform (context);
+    auto determinant = (t.a * t.d) - (t.c * t.b);
 
-    return targetScale * (float) (juce_hypot (t.a, t.c) + juce_hypot (t.b, t.d)) / 2.0f;
+    return (float) std::sqrt (std::abs (determinant));
 }
 
 bool CoreGraphicsContext::clipToRectangle (const Rectangle<int>& r)

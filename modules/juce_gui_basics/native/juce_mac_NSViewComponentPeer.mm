@@ -881,7 +881,7 @@ public:
        #if USE_COREGRAPHICS_RENDERING
         if (usingCoreGraphics)
         {
-            CoreGraphicsContext context (cg, (float) [view frame].size.height, displayScale);
+            CoreGraphicsContext context (cg, (float) [view frame].size.height);
             invokePaint (context);
         }
         else
