@@ -1084,7 +1084,7 @@ void UIViewComponentPeer::drawRect (CGRect r)
 
     // NB the CTM on iOS already includes a factor for the display scale, so
     // we'll tell the context that the scale is 1.0 to avoid it using it twice
-    CoreGraphicsContext g (cg, getComponent().getHeight(), 1.0f);
+    CoreGraphicsContext g (cg, getComponent().getHeight());
 
     insideDrawRect = true;
     handlePaint (g);
