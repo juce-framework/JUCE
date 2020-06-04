@@ -179,9 +179,9 @@ AffineTransform AffineTransform::verticalFlip (float height) noexcept
 
 AffineTransform AffineTransform::inverted() const noexcept
 {
-    double determinant = (mat00 * mat11 - mat10 * mat01);
+    double determinant = getDeterminant();
 
-    if (determinant != 0)
+    if (! approximatelyEqual (determinant, 0.0))
     {
         determinant = 1.0 / determinant;
 
