@@ -4114,15 +4114,13 @@ void MouseCursor::showInWindow (ComponentPeer* peer) const
 {
     if (auto* lp = dynamic_cast<LinuxComponentPeer*> (peer))
     {
+        auto cursor = (Cursor) getHandle();
+
         ScopedXDisplay xDisplay;
 
-        auto cursor = (Cursor) getHandle();
-        auto cursorDisplay = cursorMap[cursor];
-
-        if (cursorHandle != nullptr && xDisplay.display != cursorDisplay)
+        if (cursorHandle != nullptr && xDisplay.display != cursorMap[cursor])
         {
             cursorMap.erase (cursor);
-            XFreeCursor (cursorDisplay, cursor);
 
             if (auto* customInfo = cursorHandle->getCustomInfo())
                 cursorHandle->setHandle (customInfo->create());
