@@ -145,7 +145,13 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
         for (int i = numInputChannels; i < numOutputChannels; ++i)
         {
             channels[totalNumChans] = outputChannelData[i];
-            zeromem (channels[totalNumChans], sizeof (float) * (size_t) numSamples);
+            // copy them from the last input instead
+            if (numInputChannels > 0) {
+                memcpy (channels[totalNumChans], inputChannelData[numInputChannels-1], sizeof (float) * (size_t) numSamples);
+            } else 
+            {
+                zeromem (channels[totalNumChans], sizeof (float) * (size_t) numSamples);                
+            }
             ++totalNumChans;
         }
     }
