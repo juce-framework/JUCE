@@ -152,7 +152,7 @@ void RulersView::paint (juce::Graphics& g)
     if (tempoReader)
     {
         RectangleList<int> rects;
-        const ARA::ChordInterpreter interpreter;
+        const ARA::ChordInterpreter interpreter (true);
         const ARA::PlugIn::HostContentReader<ARA::kARAContentTypeSheetChords> chordsReader (musicalContext);
         for (auto itChord = chordsReader.begin(); itChord != chordsReader.end(); ++itChord)
         {
