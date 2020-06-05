@@ -1479,8 +1479,9 @@ private:
             player.pause();
             abandonAudioFocus();
 
-            pendingSeekRequest = true;
-            player.setPlayPosition (0);
+            // JLC do not seek to beginning 
+            //pendingSeekRequest = true;
+            //player.setPlayPosition (0);
             updatePlaybackState();
         }
 

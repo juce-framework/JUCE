@@ -630,6 +630,12 @@ private:
 
         void setPlayer (AVPlayer* player)
         {
+            if (getPlayer() != nil && player != getPlayer()) {
+                // must detach from this player properly
+                detachPlayerStatusObserver();
+                detachPlaybackObserver();                
+            }
+            
            #if ! JUCE_32BIT
             if (useNativeControls)
             {
@@ -718,6 +724,12 @@ private:
 
         void setPlayer (AVPlayer* playerToUse)
         {
+            if (getPlayer() != nil && playerToUse != getPlayer()) {
+                // must detach from this player properly
+                detachPlayerStatusObserver();
+                detachPlaybackObserver();                
+            }
+            
             if (useNativeControls)
                 [playerViewController.get() setPlayer: playerToUse];
             else
@@ -812,7 +824,7 @@ private:
     void playbackReachedEndTime()
     {
         stop();
-        setPosition (0.0);
+       // setPosition (0.0);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
