@@ -194,6 +194,67 @@ namespace juce
     _pushNotificationsDelegate = delegate;
 }
 
+- (BOOL) application:(UIApplication *)application openURL:(NSURL *)
+        url sourceApplication:(NSString *)sourceApplication annotation:(id)
+        annotation
+{
+    if(!JUCEApplicationBase::getInstance())
+    {
+        [self applicationDidFinishLaunching:application];
+    }
+
+    // mostly stolen from didPickDocumentAtURL
+    NSUInteger accessOptions = NSFileCoordinatorReadingWithoutChanges;
+
+    auto *fileAccessIntent = [NSFileAccessIntent readingIntentWithURL:url options:accessOptions];
+
+    NSArray<NSFileAccessIntent *> *intents = @[fileAccessIntent];
+
+    auto *fileCoordinator = [[NSFileCoordinator alloc] initWithFilePresenter:nil];
+
+    [fileCoordinator coordinateAccessWithIntents:intents queue:[NSOperationQueue mainQueue] byAccessor:^(NSError *err) {
+        if (err == nil) {
+            [url startAccessingSecurityScopedResource];
+
+            NSError *error = nil;
+
+            NSData *bookmark = [url bookmarkDataWithOptions:0
+                             includingResourceValuesForKeys:nil
+                                              relativeToURL:nil
+                                                      error:&error];
+
+            [bookmark retain];
+
+            [url stopAccessingSecurityScopedResource];
+
+            URL juceUrl(nsStringToJuce([url absoluteString]));
+
+            if (error == nil) {
+                setURLBookmark(juceUrl, (void *) bookmark);
+            } else {
+                auto *desc = [error localizedDescription];
+                ignoreUnused(desc);
+                jassertfalse;
+            }
+
+            if (auto *app = JUCEApplicationBase::getInstance())
+            {
+                app->urlOpened(juceUrl);
+            }
+            else
+            {
+                jassertfalse;
+            }
+        } else {
+            auto *desc = [err localizedDescription];
+            ignoreUnused(desc);
+            jassertfalse;
+        }
+    }];
+
+    return YES;
+}
+
 #if JUCE_PUSH_NOTIFICATIONS
 - (void) application: (UIApplication*) application didRegisterUserNotificationSettings: (UIUserNotificationSettings*) notificationSettings
 {
