@@ -1821,7 +1821,7 @@ private:
 
         JUCE_VIDEO_LOG ("App resumed, restoring media player...");
 
-        loadAsync (currentURL, [this](const URL&, Result r)
+        loadAsync (currentURL, [this] (const URL&, Result r)
                    {
                        if (r.wasOk())
                            mediaSession.restoreState();

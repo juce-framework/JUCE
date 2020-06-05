@@ -522,8 +522,8 @@ public:
                 return result;
             };
 
-            auto compareData = [this](const AudioBuffer<float>& test,
-                                      const AudioBuffer<float>& reference)
+            auto compareData = [this] (const AudioBuffer<float>& test,
+                                       const AudioBuffer<float>& reference)
             {
                 for (int i = 0; i < test.getNumSamples(); ++i)
                     expectWithinAbsoluteError (test.getSample (0, i),

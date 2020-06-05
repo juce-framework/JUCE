@@ -39,7 +39,7 @@ AudioProcessorValueTreeState::Parameter::Parameter (const String& parameterID,
                            labelText,
                            parameterCategory,
                            valueToTextFunction == nullptr ? std::function<String (float v, int)>()
-                                                          : [valueToTextFunction](float v, int) { return valueToTextFunction (v); },
+                                                          : [valueToTextFunction] (float v, int) { return valueToTextFunction (v); },
                            std::move (textToValueFunction)),
       unsnappedDefault (valueRange.convertTo0to1 (defaultParameterValue)),
       metaParameter (isMetaParameter),
@@ -155,7 +155,7 @@ private:
             return;
 
         unnormalisedValue = newValue;
-        listeners.call ([=](Listener& l) { l.parameterChanged (parameter.paramID, unnormalisedValue); });
+        listeners.call ([=] (Listener& l) { l.parameterChanged (parameter.paramID, unnormalisedValue); });
         listenersNeedCalling = false;
         needsUpdate = true;
     }
@@ -512,7 +512,7 @@ struct ParameterAdapterTests  : public UnitTest
 
         beginTest ("Denormalised parameter values can be retrieved");
         {
-            const auto test = [&](NormalisableRange<float> range, float value)
+            const auto test = [&] (NormalisableRange<float> range, float value)
             {
                 AudioParameterFloat param ({}, {}, range, {}, {});
                 AudioProcessorValueTreeState::ParameterAdapter adapter (param);
@@ -529,7 +529,7 @@ struct ParameterAdapterTests  : public UnitTest
 
         beginTest ("Floats can be converted to text");
         {
-            const auto test = [&](NormalisableRange<float> range, float value, String expected)
+            const auto test = [&] (NormalisableRange<float> range, float value, String expected)
             {
                 AudioParameterFloat param ({}, {}, range, {}, {});
                 AudioProcessorValueTreeState::ParameterAdapter adapter (param);
@@ -545,7 +545,7 @@ struct ParameterAdapterTests  : public UnitTest
 
         beginTest ("Text can be converted to floats");
         {
-            const auto test = [&](NormalisableRange<float> range, String text, float expected)
+            const auto test = [&] (NormalisableRange<float> range, String text, float expected)
             {
                 AudioParameterFloat param ({}, {}, range, {}, {});
                 AudioProcessorValueTreeState::ParameterAdapter adapter (param);

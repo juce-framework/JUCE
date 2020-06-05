@@ -69,7 +69,7 @@ private:
 
     void finish()
     {
-        MessageManager::callAsync ([this] () { owner.filesToSharePrepared(); });
+        MessageManager::callAsync ([this]() { owner.filesToSharePrepared(); });
     }
 
     ContentSharer& owner;
@@ -129,7 +129,7 @@ private:
 
     void finish()
     {
-        MessageManager::callAsync ([this] () { owner.filesToSharePrepared(); });
+        MessageManager::callAsync ([this]() { owner.filesToSharePrepared(); });
     }
 
     ContentSharer& owner;

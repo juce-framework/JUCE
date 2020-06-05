@@ -451,7 +451,7 @@ private:
 
     static File getCacheDirectory()
     {
-        static File result = [] ()
+        static File result = []()
         {
             auto appContext = getAppContext();
 

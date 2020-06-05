@@ -1439,7 +1439,7 @@ public:
                                         || info.unit == kAudioUnitParameterUnit_Boolean);
                         bool isBoolean = info.unit == kAudioUnitParameterUnit_Boolean;
 
-                        auto label = [info] () -> String
+                        auto label = [info]() -> String
                         {
                             if (info.unit == kAudioUnitParameterUnit_Percent)       return "%";
                             if (info.unit == kAudioUnitParameterUnit_Seconds)       return "s";

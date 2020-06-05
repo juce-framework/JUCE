@@ -2499,7 +2499,7 @@ private:
             if (! subprojectInfo.second.isEmpty())
             {
                 auto newEnd = std::remove_if (availableBuildProducts.begin(), availableBuildProducts.end(),
-                                              [&subprojectInfo](const std::pair<String, String> &item)
+                                              [&subprojectInfo] (const std::pair<String, String> &item)
                                               {
                                                   return ! subprojectInfo.second.contains (item.first);
                                               });

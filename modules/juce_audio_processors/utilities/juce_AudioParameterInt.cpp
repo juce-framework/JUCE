@@ -28,9 +28,9 @@ AudioParameterInt::AudioParameterInt (const String& idToUse, const String& nameT
      range ([minValue, maxValue]
             {
                 NormalisableRange<float> rangeWithInterval { (float) minValue, (float) maxValue,
-                                                             [](float start, float end, float v) { return jlimit (start, end, v * (end - start) + start); },
-                                                             [](float start, float end, float v) { return jlimit (0.0f, 1.0f, (v - start) / (end - start)); },
-                                                             [](float start, float end, float v) { return (float) roundToInt (juce::jlimit (start, end, v)); } };
+                                                             [] (float start, float end, float v) { return jlimit (start, end, v * (end - start) + start); },
+                                                             [] (float start, float end, float v) { return jlimit (0.0f, 1.0f, (v - start) / (end - start)); },
+                                                             [] (float start, float end, float v) { return (float) roundToInt (juce::jlimit (start, end, v)); } };
                  rangeWithInterval.interval = 1.0f;
                  return rangeWithInterval;
             }()),

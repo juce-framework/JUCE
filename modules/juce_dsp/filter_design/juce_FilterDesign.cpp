@@ -146,8 +146,8 @@ typename FIR::Coefficients<FloatType>::Ptr
         Matrix<double> b (M + 1, 1),
                        q (2 * M + 1, 1);
 
-        auto sinc = [](double x) { return x == 0 ? 1 : std::sin (x * MathConstants<double>::pi)
-                                                         / (MathConstants<double>::pi * x); };
+        auto sinc = [] (double x) { return x == 0 ? 1 : std::sin (x * MathConstants<double>::pi)
+                                                          / (MathConstants<double>::pi * x); };
 
         auto factorp = wp / MathConstants<double>::pi;
         auto factors = ws / MathConstants<double>::pi;
@@ -184,8 +184,8 @@ typename FIR::Coefficients<FloatType>::Ptr
         Matrix<double> qp (2 * M, 1);
         Matrix<double> qs (2 * M, 1);
 
-        auto sinc = [](double x) { return x == 0 ? 1 : std::sin (x * MathConstants<double>::pi)
-                                                         / (MathConstants<double>::pi * x); };
+        auto sinc = [] (double x) { return x == 0 ? 1 : std::sin (x * MathConstants<double>::pi)
+                                                          / (MathConstants<double>::pi * x); };
 
         auto factorp = wp / MathConstants<double>::pi;
         auto factors = ws / MathConstants<double>::pi;

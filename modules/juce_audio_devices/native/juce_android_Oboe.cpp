@@ -1415,7 +1415,7 @@ public:
             threadEntryProc (threadUserPtr);
             threadEntryProc = nullptr;
 
-            MessageManager::callAsync ([this] () { delete this; });
+            MessageManager::callAsync ([this]() { delete this; });
 
             return oboe::DataCallbackResult::Stop;
         }

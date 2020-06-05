@@ -773,7 +773,7 @@ void AudioProcessor::audioIOChanged (bool busNumberChanged, bool channelNumChang
                 bus->updateChannelCount();
     }
 
-    auto countTotalChannels = [](const OwnedArray<AudioProcessor::Bus>& buses) noexcept
+    auto countTotalChannels = [] (const OwnedArray<AudioProcessor::Bus>& buses) noexcept
     {
         int n = 0;
 

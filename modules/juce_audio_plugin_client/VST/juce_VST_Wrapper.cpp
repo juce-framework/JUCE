@@ -1881,7 +1881,7 @@ private:
     pointer_sized_int handleCanPlugInDo (VstOpCodeArguments args)
     {
         auto text = (const char*) args.ptr;
-        auto matches = [=](const char* s) { return strcmp (text, s) == 0; };
+        auto matches = [=] (const char* s) { return strcmp (text, s) == 0; };
 
         if (matches ("receiveVstEvents")
          || matches ("receiveVstMidiEvent")
@@ -2148,7 +2148,7 @@ namespace
 
                     if (auto* callbackHandler = dynamic_cast<VSTCallbackHandler*> (processor))
                     {
-                        callbackHandler->handleVstHostCallbackAvailable ([audioMaster, aEffect](int32 opcode, int32 index, pointer_sized_int value, void* ptr, float opt)
+                        callbackHandler->handleVstHostCallbackAvailable ([audioMaster, aEffect] (int32 opcode, int32 index, pointer_sized_int value, void* ptr, float opt)
                         {
                             return audioMaster (aEffect, opcode, index, value, ptr, opt);
                         });

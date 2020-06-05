@@ -180,7 +180,7 @@ private:
                 licenseTypes.removeEmptyStrings();
                 licenseTypes.removeDuplicates (false);
 
-                licenseState.type = [licenseTypes] ()
+                licenseState.type = [licenseTypes]()
                 {
                     if      (licenseTypes.contains ("juce-pro"))       return LicenseState::Type::pro;
                     else if (licenseTypes.contains ("juce-indie"))     return LicenseState::Type::indie;

@@ -847,9 +847,9 @@ struct Grid::AutoPlacement
                                         Array<Grid::TrackInfo>& rows,
                                         const ItemPlacementArray& itemPlacementArray)
     {
-        auto isSpan = [](Grid::PlacementHelpers::LineRange r) -> bool { return std::abs (r.end - r.start) > 1; };
+        auto isSpan = [] (Grid::PlacementHelpers::LineRange r) -> bool { return std::abs (r.end - r.start) > 1; };
 
-        auto getHighestItemOnRow = [isSpan](int rowNumber, const ItemPlacementArray& itemPlacementArrayToUse) -> float
+        auto getHighestItemOnRow = [isSpan] (int rowNumber, const ItemPlacementArray& itemPlacementArrayToUse) -> float
         {
             float highestRowSize = 0.0f;
 
@@ -860,7 +860,7 @@ struct Grid::AutoPlacement
             return highestRowSize;
         };
 
-        auto getHighestItemOnColumn = [isSpan](int rowNumber, const ItemPlacementArray& itemPlacementArrayToUse) -> float
+        auto getHighestItemOnColumn = [isSpan] (int rowNumber, const ItemPlacementArray& itemPlacementArrayToUse) -> float
         {
             float highestColumnSize = 0.0f;
             for (const auto& i : itemPlacementArrayToUse)

@@ -66,7 +66,7 @@ public:
 
         auto& pendingOpen = camerasToOpen.getReference (camerasToOpen.size() - 1);
 
-        pendingOpen.device->pimpl->open ([this](const String& deviceId, const String& error)
+        pendingOpen.device->pimpl->open ([this] (const String& deviceId, const String& error)
                                          {
                                              int cIndex = getCameraIndex (deviceId);
 

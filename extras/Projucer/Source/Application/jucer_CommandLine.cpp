@@ -868,7 +868,7 @@ namespace
 //==============================================================================
 int performCommandLine (const ArgumentList& args)
 {
-    return ConsoleApplication::invokeCatchingFailures ([&] () -> int
+    return ConsoleApplication::invokeCatchingFailures ([&]() -> int
     {
         if (args.containsOption ("--lf"))
             preferredLineFeed = "\n";

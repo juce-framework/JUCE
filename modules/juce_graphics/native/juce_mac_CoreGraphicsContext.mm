@@ -120,7 +120,7 @@ public:
         }
         else
         {
-            auto* imageDataContainer = [](const Image& img) -> HeapBlockContainer::Ptr*
+            auto* imageDataContainer = [] (const Image& img) -> HeapBlockContainer::Ptr*
             {
                 if (auto* cgim = dynamic_cast<CoreGraphicsPixelData*> (img.getPixelData()))
                     return new HeapBlockContainer::Ptr (cgim->imageDataHolder);
@@ -637,7 +637,7 @@ void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& tra
 {
     if (state->fontRef != nullptr && state->fillType.isColour())
     {
-        auto cgTransformIsOnlyTranslation = [](CGAffineTransform t)
+        auto cgTransformIsOnlyTranslation = [] (CGAffineTransform t)
         {
             return t.a == 1.0f && t.d == 1.0f && t.b == 0.0f && t.c == 0.0f;
         };

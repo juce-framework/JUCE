@@ -2726,7 +2726,7 @@ void XWindowSystem::initialiseXDisplay()
 
     // Setup input event handler
     LinuxEventLoop::registerFdCallback (X11Symbols::getInstance()->xConnectionNumber (display),
-                                        [this](int)
+                                        [this] (int)
                                         {
                                             do
                                             {

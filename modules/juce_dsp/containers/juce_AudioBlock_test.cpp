@@ -292,7 +292,7 @@ public:
         beginTest ("Process");
         {
             resetBlocks();
-            AudioBlock<SampleType>::process (block, otherBlock, [](SampleType x) { return x + (NumericType) 1.0; });
+            AudioBlock<SampleType>::process (block, otherBlock, [] (SampleType x) { return x + (NumericType) 1.0; });
             expect (otherBlock.getSample (0, 4) == SampleType (6.0));
             expect (otherBlock.getSample (1, 4) == SampleType (12.0));
         }

@@ -27,9 +27,9 @@ AudioParameterChoice::AudioParameterChoice (const String& idToUse, const String&
      range ([this]
             {
                 NormalisableRange<float> rangeWithInterval { 0.0f, choices.size() - 1.0f,
-                                                             [](float, float end, float v) { return jlimit (0.0f, end, v * end); },
-                                                             [](float, float end, float v) { return jlimit (0.0f, 1.0f, v / end); },
-                                                             [](float start, float end, float v) { return (float) roundToInt (juce::jlimit (start, end, v)); } };
+                                                             [] (float, float end, float v) { return jlimit (0.0f, end, v * end); },
+                                                             [] (float, float end, float v) { return jlimit (0.0f, 1.0f, v / end); },
+                                                             [] (float start, float end, float v) { return (float) roundToInt (juce::jlimit (start, end, v)); } };
                 rangeWithInterval.interval = 1.0f;
                 return rangeWithInterval;
             }()),

@@ -376,7 +376,7 @@ private:
             if (isCMakeBundle)
                 out << "    " << pkgInfoPath << newLine;
 
-            auto xcodeIcnsFilePath = [&] () -> String
+            auto xcodeIcnsFilePath = [&]() -> String
             {
                 if (exporter.isXcode()
                  && target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::executable)

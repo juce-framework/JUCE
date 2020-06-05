@@ -33,7 +33,7 @@
 //==============================================================================
 std::vector<ProjectExporter::ExporterTypeInfo> ProjectExporter::getExporterTypeInfos()
 {
-    auto createIcon = [](const void* iconData, size_t iconDataSize)
+    auto createIcon = [] (const void* iconData, size_t iconDataSize)
     {
         Image image (Image::ARGB, 200, 200, true);
         Graphics g (image);
