@@ -73,7 +73,7 @@ namespace CoreMidiHelpers
     {
        #if TARGET_OS_SIMULATOR
         static bool hasEnabledNetworkSession = false;
-
+        return; // JLC
         if (! hasEnabledNetworkSession)
         {
             MIDINetworkSession* session = [MIDINetworkSession defaultSession];
