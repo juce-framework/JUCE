@@ -769,7 +769,9 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         for (AVAudioSessionPortDescription* port in route.outputs)
         {           
             if ([[port portType] isEqualToString:AVAudioSessionPortHeadphones] 
-                || [[port portType] isEqualToString:AVAudioSessionPortHeadsetMic]) { 
+                || [[port portType] isEqualToString:AVAudioSessionPortHeadsetMic]
+                || [[port portType] isEqualToString:AVAudioSessionPortLineOut]
+                || [[port portType] isEqualToString:AVAudioSessionPortUSBAudio]) { 
                 headphonesConnected = true;
             }
         }
@@ -1099,7 +1101,9 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
             }
             
             if ([[port portType] isEqualToString:AVAudioSessionPortHeadphones] 
-                || [[port portType] isEqualToString:AVAudioSessionPortHeadsetMic]) { 
+                || [[port portType] isEqualToString:AVAudioSessionPortHeadsetMic]
+                || [[port portType] isEqualToString:AVAudioSessionPortLineOut]
+                || [[port portType] isEqualToString:AVAudioSessionPortUSBAudio]) { 
                 headphonesConnected = true;
             }
         }
