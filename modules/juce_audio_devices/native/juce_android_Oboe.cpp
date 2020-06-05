@@ -199,7 +199,7 @@ public:
     {
         // we need to offer the lowest possible buffer size which
         // is the native buffer size
-        const int defaultNumMultiples = 8;
+        const int defaultNumMultiples = 18; // JLC
         const int nativeBufferSize = getNativeBufferSize();
         Array<int> bufferSizes;
 
@@ -528,8 +528,22 @@ private:
             builder.setFormat (format);
             builder.setSampleRate (sampleRate);
             builder.setPerformanceMode (oboe::PerformanceMode::LowLatency);
-            builder.setCallback (callback);
+            //builder.setCallback (callback);
+            
+            if ( callback != NULL ) 
+            { 
+                asc = new oboe::StabilizedCallback(callback); 
+                builder.setCallback (asc); 
+            } 
+            else 
+            { 
+                builder.setCallback (callback); 
+            } 
+            
+            //builder.setInputPreset(oboe::InputPreset::Unprocessed); // jlc
+            //builder.setInputPreset(oboe::InputPreset::VoiceRecognition); // jlc
 
+            
             JUCE_OBOE_LOG (String ("Preparing Oboe stream with params:")
                  + "\nAAudio supported = " + String (int (builder.isAAudioSupported()))
                  + "\nAPI = " + getOboeString (builder.getAudioApi())
@@ -565,6 +579,7 @@ private:
                  + "\nFramesPerCallback = " + (stream != nullptr ? String (stream->getFramesPerCallback()) : String ("?"))
                  + "\nBytesPerFrame = " + (stream != nullptr ? String (stream->getBytesPerFrame()) : String ("?"))
                  + "\nBytesPerSample = " + (stream != nullptr ? String (stream->getBytesPerSample()) : String ("?"))
+                 + "\nInputPreset = " + (stream != nullptr ? String (stream->getInputPreset()) : String ("?"))
                  + "\nPerformanceMode = " + getOboeString (oboe::PerformanceMode::LowLatency));
         }
 
@@ -578,6 +593,7 @@ private:
         }
 
         oboe::AudioStream* stream = nullptr;
+        oboe::AudioStreamCallback * asc = nullptr;
         oboe::Result openResult;
     };
 
@@ -653,7 +669,7 @@ private:
                 {
                     // Input & output sample rates should match!
                     jassert (inputStream->getNativeStream()->getSampleRate()
-                               == outputStream->getNativeStream()->getSampleRate());
+                               == outputStream->getNativeStream()->getSampleRate());                    
                 }
 
                 checkStreamSetup (inputStream.get(), inputDeviceId, numInputChannels,
@@ -941,6 +957,8 @@ private:
 
                     audioCallbackGuard.set (0);
                     streamRestartGuard.set (0);
+                    
+                    //owner.lastError = "Disconnected";
                 }
             }
         }
