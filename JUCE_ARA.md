@@ -7,7 +7,7 @@ In order to use this branch you'll need access to the [ARA SDK](http://www.celem
 
 You'll also need to use our ARA enabled build of the Projucer - see the [Getting Started](#getting-started) section of this document for instructions.
 
-Current ARA SDK compatibility version: 1.9.11.001
+Current ARA SDK compatibility version: 1.9.12.003
 
 For feedback and questions, please contact Celemony via [ara@celemony.com](mailto:ara@celemony.com?Subject=JUCE%20ARA%20integration).
 
