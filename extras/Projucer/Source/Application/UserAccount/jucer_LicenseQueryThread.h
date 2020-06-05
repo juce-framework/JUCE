@@ -24,7 +24,7 @@ class LicenseQueryThread  : public Thread
 {
 public:
     LicenseQueryThread (const String& userEmail, const String& userPassword,
-                        std::function<void(LicenseState, String)>&& cb)
+                        std::function<void (LicenseState, String)>&& cb)
         : Thread ("LicenseQueryThread"),
           email (userEmail),
           password (userPassword),
@@ -266,7 +266,7 @@ private:
 
     //==============================================================================
     const String email, password;
-    const std::function<void(LicenseState, String)> completionCallback;
+    const std::function<void (LicenseState, String)> completionCallback;
 
     //==============================================================================
     JUCE_DECLARE_WEAK_REFERENCEABLE (LicenseQueryThread)

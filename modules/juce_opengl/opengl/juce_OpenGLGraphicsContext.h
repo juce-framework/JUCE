@@ -78,7 +78,7 @@ struct JUCE_API  OpenGLGraphicsContextCustomShader
     /** Optional lambda that will be called when the shader is activated, to allow
         user code to do setup tasks.
     */
-    std::function<void(OpenGLShaderProgram&)> onShaderActivated;
+    std::function<void (OpenGLShaderProgram&)> onShaderActivated;
 
 private:
     String code, hashName;

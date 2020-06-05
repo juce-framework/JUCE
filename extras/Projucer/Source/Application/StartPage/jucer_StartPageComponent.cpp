@@ -57,7 +57,7 @@ static File findExampleFile (int dirIndex, int index)
     return ProjucerApplication::getSortedExampleFilesInDirectory (dir)[index];
 }
 
-static std::unique_ptr<Component> createExampleProjectsTab (ContentComponent& content, std::function<void(const File&)> cb)
+static std::unique_ptr<Component> createExampleProjectsTab (ContentComponent& content, std::function<void (const File&)> cb)
 {
     StringArray exampleCategories;
     std::vector<StringArray> examples;
@@ -120,7 +120,7 @@ static StringArray getAllTemplateNamesForCategory (const String& category)
 }
 
 static std::unique_ptr<Component> createProjectTemplatesTab (ContentComponent& content,
-                                                             std::function<void(std::unique_ptr<Project>&&)>&& cb)
+                                                             std::function<void (std::unique_ptr<Project>&&)>&& cb)
 {
     auto categories = getAllTemplateCategoryStrings();
 
@@ -150,8 +150,8 @@ static std::unique_ptr<Component> createProjectTemplatesTab (ContentComponent& c
 struct ProjectTemplatesAndExamples  : public TabbedComponent
 {
     ProjectTemplatesAndExamples (ContentComponent& c,
-                                 std::function<void(std::unique_ptr<Project>&&)>&& newProjectCb,
-                                 std::function<void(const File&)>&& exampleCb)
+                                 std::function<void (std::unique_ptr<Project>&&)>&& newProjectCb,
+                                 std::function<void (const File&)>&& exampleCb)
         : TabbedComponent (TabbedButtonBar::Orientation::TabsAtTop),
           content (c),
           exampleSelectedCallback (std::move (exampleCb))
@@ -222,12 +222,12 @@ private:
     };
 
     ContentComponent& content;
-    std::function<void(const File&)> exampleSelectedCallback;
+    std::function<void (const File&)> exampleSelectedCallback;
 };
 
 //==============================================================================
-StartPageComponent::StartPageComponent (std::function<void(std::unique_ptr<Project>&&)>&& newProjectCb,
-                                        std::function<void(const File&)>&& exampleCb)
+StartPageComponent::StartPageComponent (std::function<void (std::unique_ptr<Project>&&)>&& newProjectCb,
+                                        std::function<void (const File&)>&& exampleCb)
     : content (std::make_unique<ContentComponent>()),
       tabs (std::make_unique<ProjectTemplatesAndExamples> (*content, std::move (newProjectCb), std::move (exampleCb)))
 {

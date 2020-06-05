@@ -144,7 +144,7 @@ ContentSharer::ContentSharer() {}
 ContentSharer::~ContentSharer() { clearSingletonInstance(); }
 
 void ContentSharer::shareFiles (const Array<URL>& files,
-                                std::function<void(bool, const String&)> callbackToUse)
+                                std::function<void (bool, const String&)> callbackToUse)
 {
   #if JUCE_CONTENT_SHARING
     startNewShare (callbackToUse);
@@ -161,7 +161,7 @@ void ContentSharer::shareFiles (const Array<URL>& files,
 }
 
 #if JUCE_CONTENT_SHARING
-void ContentSharer::startNewShare (std::function<void(bool, const String&)> callbackToUse)
+void ContentSharer::startNewShare (std::function<void (bool, const String&)> callbackToUse)
 {
     // You should not start another sharing operation before the previous one is finished.
     // Forcibly stopping a previous sharing operation is rarely a good idea!
@@ -182,7 +182,7 @@ void ContentSharer::startNewShare (std::function<void(bool, const String&)> call
 #endif
 
 void ContentSharer::shareText (const String& text,
-                               std::function<void(bool, const String&)> callbackToUse)
+                               std::function<void (bool, const String&)> callbackToUse)
 {
   #if JUCE_CONTENT_SHARING
     startNewShare (callbackToUse);
@@ -199,7 +199,7 @@ void ContentSharer::shareText (const String& text,
 }
 
 void ContentSharer::shareImages (const Array<Image>& images,
-                                 std::function<void(bool, const String&)> callbackToUse,
+                                 std::function<void (bool, const String&)> callbackToUse,
                                  ImageFileFormat* imageFileFormatToUse)
 {
   #if JUCE_CONTENT_SHARING
@@ -232,7 +232,7 @@ void ContentSharer::filesToSharePrepared()
 #endif
 
 void ContentSharer::shareData (const MemoryBlock& mb,
-                               std::function<void(bool, const String&)> callbackToUse)
+                               std::function<void (bool, const String&)> callbackToUse)
 {
   #if JUCE_CONTENT_SHARING
     startNewShare (callbackToUse);
@@ -249,7 +249,7 @@ void ContentSharer::sharingFinished (bool succeeded, const String& errorDescript
 {
     deleteTemporaryFiles();
 
-    std::function<void(bool, String)> cb;
+    std::function<void (bool, String)> cb;
     std::swap (cb, callback);
 
     String error (errorDescription);

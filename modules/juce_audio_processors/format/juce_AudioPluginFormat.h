@@ -67,7 +67,7 @@ public:
                                                                         String& errorMessage);
 
     /** A callback lambda that is passed to createPluginInstanceAsync() */
-    using PluginCreationCallback = std::function<void(std::unique_ptr<AudioPluginInstance>, const String&)>;
+    using PluginCreationCallback = std::function<void (std::unique_ptr<AudioPluginInstance>, const String&)>;
 
     /** Tries to recreate a type from a previously generated PluginDescription.
         When the plugin has been created, it will be passed to the caller via an

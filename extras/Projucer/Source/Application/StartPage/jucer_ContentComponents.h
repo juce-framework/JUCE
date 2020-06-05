@@ -85,7 +85,7 @@ class TemplateComponent  : public Component
 {
 public:
     TemplateComponent (const NewProjectTemplates::ProjectTemplate& temp,
-                       std::function<void(std::unique_ptr<Project>)>&& createdCallback)
+                       std::function<void (std::unique_ptr<Project>)>&& createdCallback)
         : projectTemplate (temp),
           projectCreatedCallback (std::move (createdCallback)),
           header (projectTemplate.displayName, projectTemplate.description, projectTemplate.icon)
@@ -143,7 +143,7 @@ public:
 private:
     NewProjectTemplates::ProjectTemplate projectTemplate;
 
-    std::function<void(std::unique_ptr<Project>)> projectCreatedCallback;
+    std::function<void (std::unique_ptr<Project>)> projectCreatedCallback;
 
     ItemHeader header;
     TextButton createProjectButton { "Create Project..." };
@@ -240,7 +240,7 @@ private:
 class ExampleComponent  : public Component
 {
 public:
-    ExampleComponent (const File& f, std::function<void(const File&)> selectedCallback)
+    ExampleComponent (const File& f, std::function<void (const File&)> selectedCallback)
         : exampleFile (f),
           metadata (parseJUCEHeaderMetadata (exampleFile)),
           exampleSelectedCallback (std::move (selectedCallback)),
@@ -290,7 +290,7 @@ private:
     File exampleFile;
     var metadata;
 
-    std::function<void(const File&)> exampleSelectedCallback;
+    std::function<void (const File&)> exampleSelectedCallback;
 
     ItemHeader header;
 

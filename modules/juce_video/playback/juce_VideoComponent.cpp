@@ -51,7 +51,7 @@ Result VideoComponent::load (const URL& url)
     return loadInternal (url, false);
 }
 
-void VideoComponent::loadAsync (const URL& url, std::function<void(const URL&, Result)> callback)
+void VideoComponent::loadAsync (const URL& url, std::function<void (const URL&, Result)> callback)
 {
     if (callback == nullptr)
     {

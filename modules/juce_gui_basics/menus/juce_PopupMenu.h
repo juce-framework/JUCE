@@ -564,7 +564,7 @@ public:
 
     /** Runs the menu asynchronously, with a user-provided callback that will receive the result. */
     void showMenuAsync (const Options& options,
-                        std::function<void(int)> callback);
+                        std::function<void (int)> callback);
 
     //==============================================================================
     /** Closes any menus that are currently open.

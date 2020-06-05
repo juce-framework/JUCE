@@ -22,8 +22,8 @@ namespace juce
 AudioParameterInt::AudioParameterInt (const String& idToUse, const String& nameToUse,
                                       int minValue, int maxValue, int def,
                                       const String& labelToUse,
-                                      std::function<String(int, int)> stringFromInt,
-                                      std::function<int(const String&)> intFromString)
+                                      std::function<String (int, int)> stringFromInt,
+                                      std::function<int (const String&)> intFromString)
    : RangedAudioParameter (idToUse, nameToUse, labelToUse),
      range ([minValue, maxValue]
             {

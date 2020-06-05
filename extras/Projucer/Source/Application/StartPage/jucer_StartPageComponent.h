@@ -25,8 +25,8 @@ struct ProjectTemplatesAndExamples;
 class StartPageComponent  : public Component
 {
 public:
-    StartPageComponent (std::function<void(std::unique_ptr<Project>&&)>&& newProjectCb,
-                        std::function<void(const File&)>&& exampleCb);
+    StartPageComponent (std::function<void (std::unique_ptr<Project>&&)>&& newProjectCb,
+                        std::function<void (const File&)>&& exampleCb);
 
     void paint (Graphics& g) override;
     void resized() override;

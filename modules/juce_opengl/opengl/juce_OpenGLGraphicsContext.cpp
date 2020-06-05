@@ -428,7 +428,7 @@ struct ShaderPrograms  : public ReferenceCountedObject
 
         OpenGLShaderProgram::Attribute positionAttribute, colourAttribute;
         OpenGLShaderProgram::Uniform screenBounds;
-        std::function<void(OpenGLShaderProgram&)> onShaderActivated;
+        std::function<void (OpenGLShaderProgram&)> onShaderActivated;
     };
 
     struct MaskedShaderParams

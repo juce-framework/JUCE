@@ -162,7 +162,7 @@ public:
 
         @see ModalComponentManager::Callback
     */
-    static ModalComponentManager::Callback* create (std::function<void(int)>);
+    static ModalComponentManager::Callback* create (std::function<void (int)>);
 
     //==============================================================================
     /** This is a utility function to create a ModalComponentManager::Callback that will

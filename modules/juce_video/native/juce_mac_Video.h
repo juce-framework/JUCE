@@ -76,7 +76,7 @@ struct VideoComponent::Pimpl   : public Base
         return Result::fail ("Couldn't open movie");
     }
 
-    void loadAsync (const URL& url, std::function<void(const URL&, Result)> callback)
+    void loadAsync (const URL& url, std::function<void (const URL&, Result)> callback)
     {
         if (url.isEmpty())
         {
@@ -770,7 +770,7 @@ private:
 
     PlayerController playerController;
 
-    std::function<void(const URL&, Result)> loadFinishedCallback;
+    std::function<void (const URL&, Result)> loadFinishedCallback;
 
     double playSpeedMult = 1.0;
 

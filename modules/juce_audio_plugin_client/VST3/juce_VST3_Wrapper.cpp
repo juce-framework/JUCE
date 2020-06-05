@@ -62,7 +62,7 @@ namespace Vst2
 #endif
 
 #if JUCE_LINUX
- std::vector<std::pair<int, std::function<void(int)>>> getFdReadCallbacks();
+ std::vector<std::pair<int, std::function<void (int)>>> getFdReadCallbacks();
 #endif
 
 namespace juce
@@ -1587,7 +1587,7 @@ private:
         #if JUCE_WINDOWS
          WindowsHooks hooks;
         #elif JUCE_LINUX
-         std::unordered_map<int, std::function<void(int)>> fdCallbackMap;
+         std::unordered_map<int, std::function<void (int)>> fdCallbackMap;
 
          ::Display* display = XWindowSystem::getInstance()->getDisplay();
 

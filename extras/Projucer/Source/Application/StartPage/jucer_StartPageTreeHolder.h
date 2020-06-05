@@ -25,7 +25,7 @@ public:
     enum class Open { no, yes };
 
     StartPageTreeHolder (const StringArray& headerNames, const std::vector<StringArray>& itemNames,
-                         std::function<void(int, int)>&& selectedCallback, Open shouldBeOpen)
+                         std::function<void (int, int)>&& selectedCallback, Open shouldBeOpen)
         : headers (headerNames),
           items (itemNames),
           itemSelectedCallback (std::move (selectedCallback))
@@ -160,7 +160,7 @@ private:
     StringArray headers;
     std::vector<StringArray> items;
 
-    std::function<void(int, int)> itemSelectedCallback;
+    std::function<void (int, int)> itemSelectedCallback;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StartPageTreeHolder)

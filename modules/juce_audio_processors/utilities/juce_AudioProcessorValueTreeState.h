@@ -254,8 +254,8 @@ public:
                                                                   const String& labelText,
                                                                   NormalisableRange<float> valueRange,
                                                                   float defaultValue,
-                                                                  std::function<String(float)> valueToTextFunction,
-                                                                  std::function<float(const String&)> textToValueFunction,
+                                                                  std::function<String (float)> valueToTextFunction,
+                                                                  std::function<float (const String&)> textToValueFunction,
                                                                   bool isMetaParameter = false,
                                                                   bool isAutomatableParameter = true,
                                                                   bool isDiscrete = false,
@@ -394,8 +394,8 @@ public:
                    const String& labelText,
                    NormalisableRange<float> valueRange,
                    float defaultValue,
-                   std::function<String(float)> valueToTextFunction,
-                   std::function<float(const String&)> textToValueFunction,
+                   std::function<String (float)> valueToTextFunction,
+                   std::function<float (const String&)> textToValueFunction,
                    bool isMetaParameter = false,
                    bool isAutomatableParameter = true,
                    bool isDiscrete = false,
@@ -514,7 +514,7 @@ private:
         @endcode
     */
     JUCE_DEPRECATED (std::unique_ptr<RangedAudioParameter> createParameter (const String&, const String&, const String&, NormalisableRange<float>,
-                                                                            float, std::function<String(float)>, std::function<float(const String&)>,
+                                                                            float, std::function<String (float)>, std::function<float (const String&)>,
                                                                             bool, bool, bool, AudioProcessorParameter::Category, bool));
 
     //==============================================================================

@@ -501,8 +501,8 @@ private:
     InAppPurchases& owner;
     GlobalRef billingClient;
 
-    std::queue<std::function<void(LocalRef<jobject>)>> skuDetailsQueryCallbackQueue,
-                                                       purchasesListQueryCallbackQueue;
+    std::queue<std::function<void (LocalRef<jobject>)>> skuDetailsQueryCallbackQueue,
+                                                        purchasesListQueryCallbackQueue;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)

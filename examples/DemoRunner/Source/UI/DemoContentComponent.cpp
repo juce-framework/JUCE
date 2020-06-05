@@ -93,7 +93,7 @@ struct CodeContent    : public Component
 #endif
 
 //==============================================================================
-DemoContentComponent::DemoContentComponent (Component& mainComponent, std::function<void(bool)> callback)
+DemoContentComponent::DemoContentComponent (Component& mainComponent, std::function<void (bool)> callback)
     : TabbedComponent (TabbedButtonBar::Orientation::TabsAtTop),
       demoChangedCallback (std::move (callback))
 {

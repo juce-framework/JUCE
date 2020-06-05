@@ -28,7 +28,7 @@ struct CodeContent;
 class DemoContentComponent  : public TabbedComponent
 {
 public:
-    DemoContentComponent (Component& mainComponent, std::function<void(bool)> demoChangedCallback);
+    DemoContentComponent (Component& mainComponent, std::function<void (bool)> demoChangedCallback);
     ~DemoContentComponent() override;
 
     void resized() override;
@@ -43,7 +43,7 @@ public:
     void setTabBarIndent (int indent) noexcept    { tabBarIndent = indent; }
 
 private:
-    std::function<void(bool)> demoChangedCallback;
+    std::function<void (bool)> demoChangedCallback;
 
     std::unique_ptr<DemoContent> demoContent;
 

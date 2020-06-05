@@ -49,7 +49,7 @@ public:
                                           requests a parameter change.
     */
     ParameterAttachment (RangedAudioParameter& parameter,
-                         std::function<void(float)> parameterChangedCallback,
+                         std::function<void (float)> parameterChangedCallback,
                          UndoManager* undoManager = nullptr);
 
     /** Destructor. */
@@ -105,7 +105,7 @@ private:
     RangedAudioParameter& parameter;
     std::atomic<float> lastValue { 0.0f };
     UndoManager* undoManager = nullptr;
-    std::function<void(float)> setValue;
+    std::function<void (float)> setValue;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParameterAttachment)
 };

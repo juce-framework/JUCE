@@ -64,7 +64,7 @@ struct CameraDevice::Pimpl
     //==============================================================================
     bool openedOk() const noexcept       { return openingError.isEmpty(); }
 
-    void takeStillPicture (std::function<void(const Image&)> pictureTakenCallbackToUse)
+    void takeStillPicture (std::function<void (const Image&)> pictureTakenCallbackToUse)
     {
         if (pictureTakenCallbackToUse == nullptr)
         {
@@ -368,7 +368,7 @@ private:
     CriticalSection listenerLock;
     ListenerList<Listener> listeners;
 
-    std::function<void(const Image&)> pictureTakenCallback = nullptr;
+    std::function<void (const Image&)> pictureTakenCallback = nullptr;
 
     //==============================================================================
     JUCE_DECLARE_WEAK_REFERENCEABLE (Pimpl)

@@ -261,9 +261,9 @@ public:
     }
 
     //==============================================================================
-    std::function<void(const Block& block, const String&)> logger;
+    std::function<void (const Block& block, const String&)> logger;
 
-    void setLogger (std::function<void(const Block& block, const String&)> newLogger) override
+    void setLogger (std::function<void (const Block& block, const String&)> newLogger) override
     {
         logger = std::move (newLogger);
     }
@@ -447,7 +447,7 @@ public:
         remoteHeap.handleACKFromDevice (*this, packetCounter);
     }
 
-    bool sendFirmwareUpdatePacket (const uint8* data, uint8 size, std::function<void(uint8, uint32)> callback) override
+    bool sendFirmwareUpdatePacket (const uint8* data, uint8 size, std::function<void (uint8, uint32)> callback) override
     {
         firmwarePacketAckCallback = nullptr;
 
@@ -694,7 +694,7 @@ private:
     std::unique_ptr<Program> program;
     uint32 programSize = 0;
 
-    std::function<void(uint8, uint32)> firmwarePacketAckCallback;
+    std::function<void (uint8, uint32)> firmwarePacketAckCallback;
 
     bool isMaster = false;
     Block::UID masterUID = {};

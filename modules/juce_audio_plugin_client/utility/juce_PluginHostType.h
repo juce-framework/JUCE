@@ -293,7 +293,7 @@ public:
    #ifndef DOXYGEN
     // @internal
     static AudioProcessor::WrapperType jucePlugInClientCurrentWrapperType;
-    static std::function<bool(AudioProcessor&)> jucePlugInIsRunningInAudioSuiteFn;
+    static std::function<bool (AudioProcessor&)> jucePlugInIsRunningInAudioSuiteFn;
    #endif
 
 private:

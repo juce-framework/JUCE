@@ -1167,7 +1167,7 @@ public:
             Unknown = -1
         };
 
-        std::function<float(float)> curve;    // a function which represents your curve (such as an eq)
+        std::function<float (float)> curve;   // a function which represents your curve (such as an eq)
         Range<float> xRange, yRange;          // the data range of your curve
 
         // For some curve types, your plug-in may already measure the current input and output values.
