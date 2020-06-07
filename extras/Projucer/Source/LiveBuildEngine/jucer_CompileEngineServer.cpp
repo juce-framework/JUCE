@@ -52,6 +52,8 @@
 #if JUCE_WINDOWS
  static void setParentProcessID (int);
  static int getCurrentProcessID();
+#else
+ #include <unistd.h>
 #endif
 
 //==============================================================================

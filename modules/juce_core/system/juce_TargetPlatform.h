@@ -68,7 +68,8 @@
 #elif defined (LINUX) || defined (__linux__)
   #define     JUCE_LINUX 1
 #elif defined (__APPLE_CPP__) || defined (__APPLE_CC__)
-  #include <CoreFoundation/CoreFoundation.h> // (needed to find out what platform we're using)
+  #include <TargetConditionals.h> // (needed to find out what platform we're using)
+  #include <AvailabilityMacros.h>
   #include "../native/juce_mac_ClangBugWorkaround.h"
 
   #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
