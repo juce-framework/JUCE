@@ -753,7 +753,13 @@ public:
         virtual ~LookAndFeelMethods() = default;
 
         /** Fills the background of a popup menu component. */
-        virtual void drawPopupMenuBackground (Graphics&, int width, int height) = 0;
+        virtual void drawPopupMenuBackground (Graphics&, int width, int height);
+
+        /** Fills the background of a popup menu component. */
+        virtual void drawPopupMenuBackgroundWithOptions (Graphics&,
+                                                         int width,
+                                                         int height,
+                                                         const Options&) = 0;
 
         /** Draws one of the items in a popup menu. */
         virtual void drawPopupMenuItem (Graphics&, const Rectangle<int>& area,
@@ -762,24 +768,47 @@ public:
                                         const String& text,
                                         const String& shortcutKeyText,
                                         const Drawable* icon,
-                                        const Colour* textColour) = 0;
+                                        const Colour* textColour);
 
-        virtual void drawPopupMenuSectionHeader (Graphics&, const Rectangle<int>& area,
-                                                 const String& sectionName) = 0;
+        /** Draws one of the items in a popup menu. */
+        virtual void drawPopupMenuItemWithOptions (Graphics&, const Rectangle<int>& area,
+                                                   bool isHighlighted,
+                                                   const Item& item,
+                                                   const Options&) = 0;
+
+        virtual void drawPopupMenuSectionHeader (Graphics&, const Rectangle<int>&,
+                                                 const String&);
+
+        virtual void drawPopupMenuSectionHeaderWithOptions (Graphics&, const Rectangle<int>& area,
+                                                            const String& sectionName,
+                                                            const Options&) = 0;
 
         /** Returns the size and style of font to use in popup menus. */
         virtual Font getPopupMenuFont() = 0;
 
         virtual void drawPopupMenuUpDownArrow (Graphics&,
                                                int width, int height,
-                                               bool isScrollUpArrow) = 0;
+                                               bool isScrollUpArrow);
+
+        virtual void drawPopupMenuUpDownArrowWithOptions (Graphics&,
+                                                          int width, int height,
+                                                          bool isScrollUpArrow,
+                                                          const Options&) = 0;
 
         /** Finds the best size for an item in a popup menu. */
         virtual void getIdealPopupMenuItemSize (const String& text,
                                                 bool isSeparator,
                                                 int standardMenuItemHeight,
                                                 int& idealWidth,
-                                                int& idealHeight) = 0;
+                                                int& idealHeight);
+
+        /** Finds the best size for an item in a popup menu. */
+        virtual void getIdealPopupMenuItemSizeWithOptions (const String& text,
+                                                           bool isSeparator,
+                                                           int standardMenuItemHeight,
+                                                           int& idealWidth,
+                                                           int& idealHeight,
+                                                           const Options&) = 0;
 
         virtual int getMenuWindowFlags() = 0;
 
@@ -801,15 +830,17 @@ public:
                                       bool isMouseOverBar,
                                       MenuBarComponent&) = 0;
 
-        virtual Component* getParentComponentForMenuOptions (const PopupMenu::Options& options) = 0;
+        virtual Component* getParentComponentForMenuOptions (const Options& options) = 0;
 
         virtual void preparePopupMenuWindow (Component& newWindow) = 0;
 
         /** Return true if you want your popup menus to scale with the target component's AffineTransform
             or scale factor */
-        virtual bool shouldPopupMenuScaleWithTargetComponent (const PopupMenu::Options& options) = 0;
+        virtual bool shouldPopupMenuScaleWithTargetComponent (const Options& options) = 0;
 
-        virtual int getPopupMenuBorderSize() = 0;
+        virtual int getPopupMenuBorderSize();
+
+        virtual int getPopupMenuBorderSizeWithOptions (const Options&) = 0;
     };
 
 private:

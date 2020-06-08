@@ -890,6 +890,20 @@ void LookAndFeel_V2::getIdealPopupMenuItemSize (const String& text, const bool i
     }
 }
 
+void LookAndFeel_V2::getIdealPopupMenuItemSizeWithOptions (const String& text,
+                                                           bool isSeparator,
+                                                           int standardMenuItemHeight,
+                                                           int& idealWidth,
+                                                           int& idealHeight,
+                                                           const PopupMenu::Options&)
+{
+    getIdealPopupMenuItemSize (text,
+                               isSeparator,
+                               standardMenuItemHeight,
+                               idealWidth,
+                               idealHeight);
+}
+
 void LookAndFeel_V2::drawPopupMenuBackground (Graphics& g, int width, int height)
 {
     auto background = findColour (PopupMenu::backgroundColourId);
@@ -904,6 +918,14 @@ void LookAndFeel_V2::drawPopupMenuBackground (Graphics& g, int width, int height
     g.setColour (findColour (PopupMenu::textColourId).withAlpha (0.6f));
     g.drawRect (0, 0, width, height);
    #endif
+}
+
+void LookAndFeel_V2::drawPopupMenuBackgroundWithOptions (Graphics& g,
+                                                         int width,
+                                                         int height,
+                                                         const PopupMenu::Options&)
+{
+    drawPopupMenuBackground (g, width, height);
 }
 
 void LookAndFeel_V2::drawPopupMenuUpDownArrow (Graphics& g, int width, int height, bool isScrollUpArrow)
@@ -929,6 +951,14 @@ void LookAndFeel_V2::drawPopupMenuUpDownArrow (Graphics& g, int width, int heigh
 
     g.setColour (findColour (PopupMenu::textColourId).withAlpha (0.5f));
     g.fillPath (p);
+}
+
+void LookAndFeel_V2::drawPopupMenuUpDownArrowWithOptions (Graphics& g,
+                                                          int width, int height,
+                                                          bool isScrollUpArrow,
+                                                          const PopupMenu::Options&)
+{
+    drawPopupMenuUpDownArrow (g, width, height, isScrollUpArrow);
 }
 
 void LookAndFeel_V2::drawPopupMenuItem (Graphics& g, const Rectangle<int>& area,
@@ -1024,7 +1054,31 @@ void LookAndFeel_V2::drawPopupMenuItem (Graphics& g, const Rectangle<int>& area,
     }
 }
 
-void LookAndFeel_V2::drawPopupMenuSectionHeader (Graphics& g, const Rectangle<int>& area, const String& sectionName)
+void LookAndFeel_V2::drawPopupMenuItemWithOptions (Graphics& g, const Rectangle<int>& area,
+                                                   bool isHighlighted,
+                                                   const PopupMenu::Item& item,
+                                                   const PopupMenu::Options&)
+{
+    const auto colour = item.colour != Colour() ? &item.colour : nullptr;
+    const auto hasSubMenu = item.subMenu != nullptr
+                            && (item.itemID == 0 || item.subMenu->getNumItems() > 0);
+
+    drawPopupMenuItem (g,
+                       area,
+                       item.isSeparator,
+                       item.isEnabled,
+                       isHighlighted,
+                       item.isTicked,
+                       hasSubMenu,
+                       item.text,
+                       item.shortcutKeyDescription,
+                       item.image.get(),
+                       colour);
+}
+
+void LookAndFeel_V2::drawPopupMenuSectionHeader (Graphics& g,
+                                                 const Rectangle<int>& area,
+                                                 const String& sectionName)
 {
     g.setFont (getPopupMenuFont().boldened());
     g.setColour (findColour (PopupMenu::headerTextColourId));
@@ -1032,6 +1086,13 @@ void LookAndFeel_V2::drawPopupMenuSectionHeader (Graphics& g, const Rectangle<in
     g.drawFittedText (sectionName,
                       area.getX() + 12, area.getY(), area.getWidth() - 16, (int) ((float) area.getHeight() * 0.8f),
                       Justification::bottomLeft, 1);
+}
+
+void LookAndFeel_V2::drawPopupMenuSectionHeaderWithOptions (Graphics& g, const Rectangle<int>& area,
+                                                            const String& sectionName,
+                                                            const PopupMenu::Options&)
+{
+    drawPopupMenuSectionHeader (g, area, sectionName);
 }
 
 //==============================================================================
@@ -1097,6 +1158,11 @@ void LookAndFeel_V2::preparePopupMenuWindow (Component&) {}
 bool LookAndFeel_V2::shouldPopupMenuScaleWithTargetComponent (const PopupMenu::Options&)    { return true; }
 
 int LookAndFeel_V2::getPopupMenuBorderSize()    { return 2; }
+
+int LookAndFeel_V2::getPopupMenuBorderSizeWithOptions (const PopupMenu::Options&)
+{
+    return getPopupMenuBorderSize();
+}
 
 //==============================================================================
 void LookAndFeel_V2::fillTextEditorBackground (Graphics& g, int /*width*/, int /*height*/, TextEditor& textEditor)

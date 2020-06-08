@@ -43,28 +43,37 @@ struct MenuWindow;
 
 static bool canBeTriggered (const PopupMenu::Item& item) noexcept        { return item.isEnabled && item.itemID != 0 && ! item.isSectionHeader; }
 static bool hasActiveSubMenu (const PopupMenu::Item& item) noexcept      { return item.isEnabled && item.subMenu != nullptr && item.subMenu->items.size() > 0; }
-static const Colour* getColour (const PopupMenu::Item& item) noexcept    { return item.colour != Colour() ? &item.colour : nullptr; }
-static bool hasSubMenu (const PopupMenu::Item& item) noexcept            { return item.subMenu != nullptr && (item.itemID == 0 || item.subMenu->getNumItems() > 0); }
 
 //==============================================================================
 struct HeaderItemComponent  : public PopupMenu::CustomComponent
 {
-    HeaderItemComponent (const String& name)  : PopupMenu::CustomComponent (false)
+    HeaderItemComponent (const String& name, const Options& opts)
+        : CustomComponent (false), options (opts)
     {
         setName (name);
     }
 
     void paint (Graphics& g) override
     {
-        getLookAndFeel().drawPopupMenuSectionHeader (g, getLocalBounds(), getName());
+        getLookAndFeel().drawPopupMenuSectionHeaderWithOptions (g,
+                                                                getLocalBounds(),
+                                                                getName(),
+                                                                options);
     }
 
     void getIdealSize (int& idealWidth, int& idealHeight) override
     {
-        getLookAndFeel().getIdealPopupMenuItemSize (getName(), false, -1, idealWidth, idealHeight);
+        getLookAndFeel().getIdealPopupMenuItemSizeWithOptions (getName(),
+                                                               false,
+                                                               -1,
+                                                               idealWidth,
+                                                               idealHeight,
+                                                               options);
         idealHeight += idealHeight / 2;
         idealWidth += idealWidth / 4;
     }
+
+    const Options& options;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HeaderItemComponent)
 };
@@ -72,11 +81,13 @@ struct HeaderItemComponent  : public PopupMenu::CustomComponent
 //==============================================================================
 struct ItemComponent  : public Component
 {
-    ItemComponent (const PopupMenu::Item& i, int standardItemHeight, MenuWindow& parent)
-      : item (i), customComp (i.customComponent)
+    ItemComponent (const PopupMenu::Item& i,
+                   const PopupMenu::Options& o,
+                   MenuWindow& parent)
+        : item (i), options (o), customComp (i.customComponent)
     {
         if (item.isSectionHeader)
-            customComp = *new HeaderItemComponent (item.text);
+            customComp = *new HeaderItemComponent (item.text, options);
 
         if (customComp != nullptr)
         {
@@ -90,7 +101,7 @@ struct ItemComponent  : public Component
 
         int itemW = 80;
         int itemH = 16;
-        getIdealSize (itemW, itemH, standardItemHeight);
+        getIdealSize (itemW, itemH, options.getStandardItemHeight());
         setSize (itemW, jlimit (1, 600, itemH));
 
         addMouseListener (&parent, false);
@@ -109,31 +120,29 @@ struct ItemComponent  : public Component
         if (customComp != nullptr)
             customComp->getIdealSize (idealWidth, idealHeight);
         else
-            getLookAndFeel().getIdealPopupMenuItemSize (getTextForMeasurement(),
-                                                        item.isSeparator,
-                                                        standardItemHeight,
-                                                        idealWidth, idealHeight);
+            getLookAndFeel().getIdealPopupMenuItemSizeWithOptions (getTextForMeasurement(),
+                                                                   item.isSeparator,
+                                                                   standardItemHeight,
+                                                                   idealWidth, idealHeight,
+                                                                   options);
     }
 
     void paint (Graphics& g) override
     {
         if (customComp == nullptr)
-            getLookAndFeel().drawPopupMenuItem (g, getLocalBounds(),
-                                                item.isSeparator,
-                                                item.isEnabled,
-                                                isHighlighted,
-                                                item.isTicked,
-                                                hasSubMenu (item),
-                                                item.text,
-                                                item.shortcutKeyDescription,
-                                                item.image.get(),
-                                                getColour (item));
+            getLookAndFeel().drawPopupMenuItemWithOptions (g, getLocalBounds(),
+                                                           isHighlighted,
+                                                           item,
+                                                           options);
     }
 
     void resized() override
     {
         if (auto* child = getChildComponent (0))
-            child->setBounds (getLocalBounds().reduced (getLookAndFeel().getPopupMenuBorderSize(), 0));
+        {
+            const auto border = getLookAndFeel().getPopupMenuBorderSizeWithOptions (options);
+            child->setBounds (getLocalBounds().reduced (border, 0));
+        }
     }
 
     void setHighlighted (bool shouldBeHighlighted)
@@ -154,6 +163,7 @@ struct ItemComponent  : public Component
     PopupMenu::Item item;
 
 private:
+    const PopupMenu::Options& options;
     // NB: we use a copy of the one from the item info in case we're using our own section comp
     ReferenceCountedObjectPtr<CustomComponent> customComp;
     bool isHighlighted = false;
@@ -233,7 +243,7 @@ struct MenuWindow  : public Component
             auto& item = menu.items.getReference (i);
 
             if (i + 1 < menu.items.size() || ! item.isSeparator)
-                items.add (new ItemComponent (item, options.getStandardItemHeight(), *this));
+                items.add (new ItemComponent (item, options, *this));
         }
 
         auto targetArea = options.getTargetScreenArea() / scaleFactor;
@@ -286,7 +296,7 @@ struct MenuWindow  : public Component
         if (isOpaque())
             g.fillAll (Colours::white);
 
-        getLookAndFeel().drawPopupMenuBackground (g, getWidth(), getHeight());
+        getLookAndFeel().drawPopupMenuBackgroundWithOptions (g, getWidth(), getHeight(), options);
     }
 
     void paintOverChildren (Graphics& g) override
@@ -295,17 +305,27 @@ struct MenuWindow  : public Component
 
         if (parentComponent != nullptr)
             lf.drawResizableFrame (g, getWidth(), getHeight(),
-                                   BorderSize<int> (getLookAndFeel().getPopupMenuBorderSize()));
+                                   BorderSize<int> (getLookAndFeel().getPopupMenuBorderSizeWithOptions (options)));
 
         if (canScroll())
         {
             if (isTopScrollZoneActive())
-                lf.drawPopupMenuUpDownArrow (g, getWidth(), PopupMenuSettings::scrollZone, true);
+            {
+                lf.drawPopupMenuUpDownArrowWithOptions (g,
+                                                        getWidth(),
+                                                        PopupMenuSettings::scrollZone,
+                                                        true,
+                                                        options);
+            }
 
             if (isBottomScrollZoneActive())
             {
                 g.setOrigin (0, getHeight() - PopupMenuSettings::scrollZone);
-                lf.drawPopupMenuUpDownArrow (g, getWidth(), PopupMenuSettings::scrollZone, false);
+                lf.drawPopupMenuUpDownArrowWithOptions (g,
+                                                        getWidth(),
+                                                        PopupMenuSettings::scrollZone,
+                                                        false,
+                                                        options);
             }
         }
     }
@@ -621,7 +641,7 @@ struct MenuWindow  : public Component
 
         return parentComponent->getLocalArea (nullptr,
                                               parentComponent->getScreenBounds()
-                                                    .reduced (getLookAndFeel().getPopupMenuBorderSize())
+                                                    .reduced (getLookAndFeel().getPopupMenuBorderSizeWithOptions (options))
                                                     .getIntersection (parentArea));
     }
 
@@ -690,7 +710,7 @@ struct MenuWindow  : public Component
             x = tendTowardsRight ? jmin (parentArea.getRight() - widthToUse - 4, target.getRight())
                                  : jmax (parentArea.getX() + 4, target.getX() - widthToUse);
 
-            if (getLookAndFeel().getPopupMenuBorderSize() == 0) // workaround for dismissing the window on mouse up when border size is 0
+            if (getLookAndFeel().getPopupMenuBorderSizeWithOptions (options) == 0) // workaround for dismissing the window on mouse up when border size is 0
                 x += tendTowardsRight ? 1 : -1;
 
             y = target.getCentreY() > parentArea.getCentreY() ? jmax (parentArea.getY(), target.getBottom() - heightToUse)
@@ -738,7 +758,7 @@ struct MenuWindow  : public Component
         needsToScroll = contentHeight > actualH;
 
         width = updateYPositions();
-        height = actualH + getLookAndFeel().getPopupMenuBorderSize() * 2;
+        height = actualH + getLookAndFeel().getPopupMenuBorderSizeWithOptions (options) * 2;
     }
 
     int workOutBestSize (const int maxMenuW)
@@ -760,7 +780,8 @@ struct MenuWindow  : public Component
                 colH += items.getUnchecked (childNum + i)->getHeight();
             }
 
-            colW = jmin (maxMenuW / jmax (1, numColumns - 2), colW + getLookAndFeel().getPopupMenuBorderSize() * 2);
+            colW = jmin (maxMenuW / jmax (1, numColumns - 2),
+                         colW + getLookAndFeel().getPopupMenuBorderSizeWithOptions (options) * 2);
 
             columnWidths.set (col, colW);
             totalW += colW;
@@ -854,11 +875,21 @@ struct MenuWindow  : public Component
         {
             childYOffset += delta;
 
-            if (delta < 0)
-                childYOffset = jmax (childYOffset, 0);
-            else if (delta > 0)
-                childYOffset = jmin (childYOffset,
-                                     contentHeight - windowPos.getHeight() + getLookAndFeel().getPopupMenuBorderSize());
+            childYOffset = [&]
+            {
+                if (delta < 0)
+                    return jmax (childYOffset, 0);
+
+                if (delta > 0)
+                {
+                    const auto limit = contentHeight
+                                        - windowPos.getHeight()
+                                        + getLookAndFeel().getPopupMenuBorderSizeWithOptions (options);
+                    return jmin (childYOffset, limit);
+                }
+
+                return childYOffset;
+            }();
 
             updateYPositions();
         }
@@ -882,7 +913,8 @@ struct MenuWindow  : public Component
                                      (items.size() + numColumns - 1) / numColumns);
 
             auto colW = columnWidths[col];
-            auto y = getLookAndFeel().getPopupMenuBorderSize() - (childYOffset + (getY() - windowPos.getY()));
+            auto y = getLookAndFeel().getPopupMenuBorderSizeWithOptions (options)
+                      - (childYOffset + (getY() - windowPos.getY()));
 
             for (int i = 0; i < numChildren; ++i)
             {
@@ -2019,5 +2051,24 @@ PopupMenu::Item& PopupMenu::MenuItemIterator::getItem() const
     jassert (currentItem != nullptr);
     return *(currentItem);
 }
+
+void PopupMenu::LookAndFeelMethods::drawPopupMenuBackground (Graphics&, int, int) {}
+
+void PopupMenu::LookAndFeelMethods::drawPopupMenuItem (Graphics&, const Rectangle<int>&,
+                                                       bool, bool, bool,
+                                                       bool, bool,
+                                                       const String&,
+                                                       const String&,
+                                                       const Drawable*,
+                                                       const Colour*) {}
+
+void PopupMenu::LookAndFeelMethods::drawPopupMenuSectionHeader (Graphics&, const Rectangle<int>&,
+                                                                const String&) {}
+
+void PopupMenu::LookAndFeelMethods::drawPopupMenuUpDownArrow (Graphics&, int, int, bool) {}
+
+void PopupMenu::LookAndFeelMethods::getIdealPopupMenuItemSize (const String&, bool, int, int&, int&) {}
+
+int PopupMenu::LookAndFeelMethods::getPopupMenuBorderSize() { return 0; }
 
 } // namespace juce

@@ -155,21 +155,47 @@ public:
 
     //==============================================================================
     void drawPopupMenuBackground (Graphics&, int width, int height) override;
+    void drawPopupMenuBackgroundWithOptions (Graphics&,
+                                             int width,
+                                             int height,
+                                             const PopupMenu::Options&) override;
 
     void drawPopupMenuItem (Graphics&, const Rectangle<int>& area,
                             bool isSeparator, bool isActive, bool isHighlighted, bool isTicked, bool hasSubMenu,
                             const String& text, const String& shortcutKeyText,
                             const Drawable* icon, const Colour* textColour) override;
 
+    void drawPopupMenuItemWithOptions (Graphics&, const Rectangle<int>& area,
+                                       bool isHighlighted,
+                                       const PopupMenu::Item& item,
+                                       const PopupMenu::Options&) override;
+
     void drawPopupMenuSectionHeader (Graphics&, const Rectangle<int>& area,
                                      const String& sectionName) override;
+
+    void drawPopupMenuSectionHeaderWithOptions (Graphics&, const Rectangle<int>& area,
+                                                const String& sectionName,
+                                                const PopupMenu::Options&) override;
 
     Font getPopupMenuFont() override;
 
     void drawPopupMenuUpDownArrow (Graphics&, int width, int height, bool isScrollUpArrow) override;
 
+    void drawPopupMenuUpDownArrowWithOptions (Graphics&,
+                                              int width, int height,
+                                              bool isScrollUpArrow,
+                                              const PopupMenu::Options&) override;
+
     void getIdealPopupMenuItemSize (const String& text, bool isSeparator, int standardMenuItemHeight,
                                     int& idealWidth, int& idealHeight) override;
+
+    void getIdealPopupMenuItemSizeWithOptions (const String& text,
+                                               bool isSeparator,
+                                               int standardMenuItemHeight,
+                                               int& idealWidth,
+                                               int& idealHeight,
+                                               const PopupMenu::Options&) override;
+
     int getMenuWindowFlags() override;
     void preparePopupMenuWindow (Component&) override;
 
@@ -188,6 +214,8 @@ public:
     bool shouldPopupMenuScaleWithTargetComponent (const PopupMenu::Options& options) override;
 
     int getPopupMenuBorderSize() override;
+
+    int getPopupMenuBorderSizeWithOptions (const PopupMenu::Options&) override;
 
     //==============================================================================
     void drawComboBox (Graphics&, int width, int height, bool isMouseButtonDown,

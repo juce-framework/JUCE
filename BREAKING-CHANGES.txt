@@ -6,6 +6,32 @@ Develop
 
 Change
 ------
+New pure virtual methods accepting `PopupMenu::Options` arguments have been
+added to `PopupMenu::LookAndFeelMethods`.
+
+Possible Issues
+---------------
+Classes derived from `PopupMenu::LookAndFeelMethods`, such as custom
+LookAndFeel classes, will not compile unless these pure virtual methods are
+implemented.
+
+Workaround
+----------
+The old LookAndFeel methods still exist, so if the new Options parameter is not
+useful in your application, your implementation of
+`PopupMenu::LookAndFeelMethods` can simply forward to the old methods. For
+example, your implementation of `drawPopupMenuBackgroundWithOptions` can
+internally call your existing `drawPopupMenuBackground` implementation.
+
+Rationale
+---------
+Allowing the LookAndFeelMethods to access the popup menu's options allows for
+more flexible styling. For example, a theme may wish to query the menu's target
+component or parent for colours to use.
+
+
+Change
+------
 A typo in the JUCEUtils CMake script that caused the wrong manufacturer code to
 be set in the compile definitions for a plugin was fixed.
 
