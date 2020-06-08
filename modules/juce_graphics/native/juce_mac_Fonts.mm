@@ -201,7 +201,7 @@ namespace CoreTextTypeLayout
     static CFAttributedStringRef createCFAttributedString (const AttributedString& text)
     {
        #if JUCE_IOS
-        auto rgbColourSpace = CGColorSpaceCreateDeviceRGB();
+        auto rgbColourSpace = CGColorSpaceCreateWithName (kCGColorSpaceSRGB);
        #endif
 
         auto attribString = CFAttributedStringCreateMutable (kCFAllocatorDefault, 0);
