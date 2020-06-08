@@ -66,7 +66,7 @@ struct WaveShaper
 //==============================================================================
 // Although clang supports C++17, their standard library still has no invoke_result
 // support. Remove the "|| JUCE_CLANG" once clang supports this properly!
-#if (! JUCE_CXX17_IS_AVAILABLE) || JUCE_CLANG
+#if (! JUCE_CXX17_IS_AVAILABLE) || (JUCE_CLANG && ! JUCE_WINDOWS)
 template <typename Functor>
 static WaveShaper<typename std::result_of<Functor>, Functor> CreateWaveShaper (Functor functionToUse)   { return {functionToUse}; }
 #else

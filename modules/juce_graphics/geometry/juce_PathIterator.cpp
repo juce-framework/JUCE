@@ -64,7 +64,7 @@ bool PathFlatteningIterator::next()
     {
         float type;
 
-        if (stackPos == stackBase)
+        if (stackPos == stackBase.get())
         {
             if (source == path.data.end())
                 return false;
@@ -129,7 +129,7 @@ bool PathFlatteningIterator::next()
         {
             ++subPathIndex;
 
-            closesSubPath = stackPos == stackBase
+            closesSubPath = stackPos == stackBase.get()
                              && source != path.data.end()
                              && *source == Path::closeSubPathMarker
                              && x2 == subPathCloseX
