@@ -1154,11 +1154,22 @@ void ProjucerApplication::createNewProjectFromClipboard()
     tempFile.create();
     tempFile.appendText (SystemClipboard::getTextFromClipboard());
 
-    if (! mainWindowList.openFile (tempFile))
+    String errorString;
+
+    if (! isPIPFile (tempFile))
     {
-        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Error", "Couldn't create project from clipboard contents.");
-        tempFile.deleteFile();
+        errorString = "Clipboard does not contain a valid PIP.";
+    }
+    else if (! mainWindowList.openFile (tempFile))
+    {
+        errorString = "Couldn't create project from clipboard contents.";
         mainWindowList.closeWindow (mainWindowList.windows.getLast());
+    }
+
+    if (errorString.isNotEmpty())
+    {
+        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Error", errorString);
+        tempFile.deleteFile();
     }
 }
 
