@@ -815,9 +815,10 @@ namespace StringHelpers
     }
 }
 
-String& String::operator+= (const int number)          { return StringHelpers::operationAddAssign<int>          (*this, number); }
-String& String::operator+= (const int64 number)        { return StringHelpers::operationAddAssign<int64>        (*this, number); }
-String& String::operator+= (const uint64 number)       { return StringHelpers::operationAddAssign<uint64>       (*this, number); }
+String& String::operator+= (const int number)     { return StringHelpers::operationAddAssign<int>    (*this, number); }
+String& String::operator+= (const long number)    { return StringHelpers::operationAddAssign<long>   (*this, number); }
+String& String::operator+= (const int64 number)   { return StringHelpers::operationAddAssign<int64>  (*this, number); }
+String& String::operator+= (const uint64 number)  { return StringHelpers::operationAddAssign<uint64> (*this, number); }
 
 //==============================================================================
 JUCE_API String JUCE_CALLTYPE operator+ (const char* s1, const String& s2)    { String s (s1); return s += s2; }
