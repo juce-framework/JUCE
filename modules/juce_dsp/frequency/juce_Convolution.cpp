@@ -21,6 +21,105 @@ namespace juce
 namespace dsp
 {
 
+template <typename Element>
+class Queue
+{
+public:
+    explicit Queue (int size)
+        : fifo (size), storage (static_cast<size_t> (size)) {}
+
+    bool push (Element& element) noexcept
+    {
+        if (fifo.getFreeSpace() == 0)
+            return false;
+
+        const auto writer = fifo.write (1);
+
+        if (writer.blockSize1 != 0)
+            storage[static_cast<size_t> (writer.startIndex1)] = std::move (element);
+        else if (writer.blockSize2 != 0)
+            storage[static_cast<size_t> (writer.startIndex2)] = std::move (element);
+
+        return true;
+    }
+
+    template <typename Fn>
+    void pop (Fn&& fn) { popN (1, std::forward<Fn> (fn)); }
+
+    template <typename Fn>
+    void popAll (Fn&& fn) { popN (fifo.getNumReady(), std::forward<Fn> (fn)); }
+
+    bool hasPendingMessages() const noexcept { return fifo.getNumReady() > 0; }
+
+private:
+    template <typename Fn>
+    void popN (int n, Fn&& fn)
+    {
+        fifo.read (n).forEach ([&] (int index)
+                               {
+                                   fn (storage[static_cast<size_t> (index)]);
+                               });
+    }
+
+    AbstractFifo fifo;
+    std::vector<Element> storage;
+};
+
+class BackgroundMessageQueue  : private Thread
+{
+public:
+    explicit BackgroundMessageQueue (int entries)
+        : Thread ("Convolution background loader"), queue (entries)
+    {
+        startThread();
+    }
+
+    ~BackgroundMessageQueue() override
+    {
+        stopThread (-1);
+    }
+
+    using IncomingCommand = FixedSizeFunction<400, void()>;
+
+    // Push functions here, and they'll be called later on a background thread.
+    // This function is wait-free.
+    // This function is only safe to call from a single thread at a time.
+    bool push (IncomingCommand& command) { return queue.push (command); }
+
+private:
+    void run() override
+    {
+        while (! threadShouldExit())
+        {
+            if (queue.hasPendingMessages())
+                queue.pop ([] (IncomingCommand& command) { command(); command = nullptr;});
+            else
+                sleep (10);
+        }
+    }
+
+    Queue<IncomingCommand> queue;
+};
+
+struct ConvolutionMessageQueue::Impl  : public BackgroundMessageQueue
+{
+    using BackgroundMessageQueue::BackgroundMessageQueue;
+};
+
+ConvolutionMessageQueue::ConvolutionMessageQueue()
+    : ConvolutionMessageQueue (1000)
+{}
+
+ConvolutionMessageQueue::ConvolutionMessageQueue (int entries)
+    : pimpl (std::make_unique<Impl> (entries))
+{}
+
+ConvolutionMessageQueue::~ConvolutionMessageQueue() noexcept = default;
+
+ConvolutionMessageQueue::ConvolutionMessageQueue (ConvolutionMessageQueue&&) noexcept = default;
+ConvolutionMessageQueue& ConvolutionMessageQueue::operator= (ConvolutionMessageQueue&&) noexcept = default;
+
+//==============================================================================
 struct ConvolutionEngine
 {
     ConvolutionEngine (const float* samples,
@@ -315,51 +414,6 @@ struct ConvolutionEngine
 };
 
 //==============================================================================
-template <typename Element>
-class Queue
-{
-public:
-    explicit Queue (int size)
-        : fifo (size), storage (static_cast<size_t> (size)) {}
-
-    bool push (Element& element) noexcept
-    {
-        if (fifo.getFreeSpace() == 0)
-            return false;
-
-        const auto writer = fifo.write (1);
-
-        if (writer.blockSize1 != 0)
-            storage[static_cast<size_t> (writer.startIndex1)] = std::move (element);
-        else if (writer.blockSize2 != 0)
-            storage[static_cast<size_t> (writer.startIndex2)] = std::move (element);
-
-        return true;
-    }
-
-    template <typename Fn>
-    void pop (Fn&& fn) { popN (1, std::forward<Fn> (fn)); }
-
-    template <typename Fn>
-    void popAll (Fn&& fn) { popN (fifo.getNumReady(), std::forward<Fn> (fn)); }
-
-    bool hasPendingMessages() const noexcept { return fifo.getNumReady() > 0; }
-
-private:
-    template <typename Fn>
-    void popN (int n, Fn&& fn)
-    {
-        fifo.read (n).forEach ([&] (int index)
-        {
-            fn (storage[static_cast<size_t> (index)]);
-        });
-    }
-
-    AbstractFifo fifo;
-    std::vector<Element> storage;
-};
-
-//==============================================================================
 class MultichannelEngine
 {
 public:
@@ -414,7 +468,7 @@ public:
 
     void processSamples (const AudioBlock<const float>& input, AudioBlock<float>& output)
     {
-        const auto numChannels = juce::jmin (head.size(), input.getNumChannels(), output.getNumChannels());
+        const auto numChannels = jmin (head.size(), input.getNumChannels(), output.getNumChannels());
         const auto numSamples  = jmin (input.getNumSamples(), output.getNumSamples());
 
         const AudioBlock<float> fullTailBlock (tailBuffer);
@@ -518,7 +572,7 @@ static AudioBuffer<float> trimImpulseResponse (const AudioBuffer<float>& buf)
         return result;
     }
 
-    const auto newLength = juce::jmax (1, numSamples - static_cast<int> (offsetBegin + offsetEnd));
+    const auto newLength = jmax (1, numSamples - static_cast<int> (offsetBegin + offsetEnd));
 
     AudioBuffer<float> result (numChannels, newLength);
 
@@ -549,7 +603,7 @@ static void normaliseImpulseResponse (AudioBuffer<float>& buf)
 
     const auto maxSumSquaredMag = std::accumulate (channelPtrs, channelPtrs + numChannels, 0.0f, [&] (auto max, auto* channel)
     {
-        return juce::jmax (max, std::accumulate (channel, channel + numSamples, 0.0f, [] (auto sum, auto samp)
+        return jmax (max, std::accumulate (channel, channel + numSamples, 0.0f, [] (auto sum, auto samp)
         {
             return sum + (samp * samp);
         }));
@@ -576,7 +630,7 @@ static AudioBuffer<float> resampleImpulseResponse (const AudioBuffer<float>& buf
     MemoryAudioSource memorySource (original, false);
     ResamplingAudioSource resamplingSource (&memorySource, false, buf.getNumChannels());
 
-    const auto finalSize = roundToInt (juce::jmax (1.0, buf.getNumSamples() / factorReading));
+    const auto finalSize = roundToInt (jmax (1.0, buf.getNumSamples() / factorReading));
     resamplingSource.setResamplingRatio (factorReading);
     resamplingSource.prepareToPlay (finalSize, srcSampleRate);
 
@@ -587,42 +641,6 @@ static AudioBuffer<float> resampleImpulseResponse (const AudioBuffer<float>& buf
 }
 
 //==============================================================================
-class BackgroundMessageQueue  : private Thread
-{
-public:
-    BackgroundMessageQueue()
-        : Thread ("Convolution background loader"), queue (1000)
-    {
-        startThread();
-    }
-
-    ~BackgroundMessageQueue() override
-    {
-        stopThread (-1);
-    }
-
-    using IncomingCommand = FixedSizeFunction<400, void()>;
-
-    // Push functions here, and they'll be called later on a background thread.
-    // This function is wait-free.
-    // This function is only safe to call from a single thread at a time.
-    bool push (IncomingCommand& command) { return queue.push (command); }
-
-private:
-    void run() override
-    {
-        while (! threadShouldExit())
-        {
-            if (queue.hasPendingMessages())
-                queue.pop ([] (IncomingCommand& command) { command(); command = nullptr;});
-            else
-                sleep (10);
-        }
-    }
-
-    Queue<IncomingCommand> queue;
-};
-
 template <typename Element>
 class TryLockedPtr
 {
@@ -963,11 +981,18 @@ private:
     AudioBuffer<float> mixBuffer;
 };
 
+using OptionalQueue = OptionalScopedPointer<ConvolutionMessageQueue>;
+
 class Convolution::Impl
 {
 public:
-    Impl (Latency requiredLatency, NonUniform requiredHeadSize)
-        : engineQueue (std::make_shared<ConvolutionEngineQueue> (messageQueue, requiredLatency, requiredHeadSize))
+    Impl (Latency requiredLatency,
+          NonUniform requiredHeadSize,
+          OptionalQueue&& queue)
+        : messageQueue (std::move (queue)),
+          engineQueue (std::make_shared<ConvolutionEngineQueue> (*messageQueue->pimpl,
+                                                                 requiredLatency,
+                                                                 requiredHeadSize))
     {}
 
     void reset()
@@ -1048,7 +1073,7 @@ private:
     {
         // If the queue is full, we'll destroy this straight away
         BackgroundMessageQueue::IncomingCommand command = [p = std::move (previousEngine)]() mutable { p = nullptr; };
-        messageQueue.push (command);
+        messageQueue->pimpl->push (command);
     }
 
     void installNewEngine (std::unique_ptr<MultichannelEngine> newEngine)
@@ -1065,7 +1090,7 @@ private:
             installNewEngine (std::move (newEngine));
     }
 
-    BackgroundMessageQueue messageQueue;
+    OptionalQueue messageQueue;
     std::shared_ptr<ConvolutionEngineQueue> engineQueue;
     std::unique_ptr<MultichannelEngine> previousEngine, currentEngine;
     CrossoverMixer mixer;
@@ -1140,14 +1165,37 @@ void Convolution::Mixer::reset() { dryBlock.clear(); }
 
 //==============================================================================
 Convolution::Convolution()
-    : Convolution (Latency { 0 }) {}
+    : Convolution (Latency { 0 })
+{}
+
+Convolution::Convolution (ConvolutionMessageQueue& queue)
+    : Convolution (Latency { 0 }, queue)
+{}
 
 Convolution::Convolution (const Latency& requiredLatency)
-    : pimpl (std::make_unique<Impl> (requiredLatency, NonUniform{}))
+    : Convolution (requiredLatency,
+                   {},
+                   OptionalQueue { std::make_unique<ConvolutionMessageQueue>() })
 {}
 
 Convolution::Convolution (const NonUniform& nonUniform)
-    : pimpl (std::make_unique<Impl> (Latency{}, nonUniform))
+    : Convolution ({},
+                   nonUniform,
+                   OptionalQueue { std::make_unique<ConvolutionMessageQueue>() })
+{}
+
+Convolution::Convolution (const Latency& requiredLatency, ConvolutionMessageQueue& queue)
+    : Convolution (requiredLatency, {}, OptionalQueue { queue })
+{}
+
+Convolution::Convolution (const NonUniform& nonUniform, ConvolutionMessageQueue& queue)
+    : Convolution ({}, nonUniform, OptionalQueue { queue })
+{}
+
+Convolution::Convolution (const Latency& latency,
+                          const NonUniform& nonUniform,
+                          OptionalQueue&& queue)
+    : pimpl (std::make_unique<Impl> (latency, nonUniform, std::move (queue)))
 {}
 
 Convolution::~Convolution() noexcept = default;

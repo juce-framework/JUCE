@@ -22,6 +22,45 @@ namespace dsp
 {
 
 /**
+    Used by the Convolution to dispatch engine-update messages on a background
+    thread.
+
+    May be shared between multiple Convolution instances.
+*/
+class JUCE_API ConvolutionMessageQueue
+{
+public:
+    /** Initialises the queue to a default size.
+
+        If your Convolution is updated very frequently, or you are sharing
+        this queue between multiple Convolutions, consider using the alternative
+        constructor taking an explicit size argument.
+    */
+    ConvolutionMessageQueue();
+    ~ConvolutionMessageQueue() noexcept;
+
+    /** Initialises the queue with the specified number of entries.
+
+        In general, the number of required entries scales with the number
+        of Convolutions sharing the same Queue, and the frequency of updates
+        to those Convolutions.
+    */
+    explicit ConvolutionMessageQueue (int numEntries);
+
+    ConvolutionMessageQueue (ConvolutionMessageQueue&&) noexcept;
+    ConvolutionMessageQueue& operator= (ConvolutionMessageQueue&&) noexcept;
+
+    ConvolutionMessageQueue (const ConvolutionMessageQueue&) = delete;
+    ConvolutionMessageQueue& operator= (const ConvolutionMessageQueue&) = delete;
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> pimpl;
+
+    friend class Convolution;
+};
+
+/**
     Performs stereo partitioned convolution of an input signal with an
     impulse response in the frequency domain, using the JUCE FFT class.
 
@@ -60,6 +99,13 @@ public:
     /** Initialises an object for performing convolution in the frequency domain. */
     Convolution();
 
+    /** Initialises a convolution engine using a shared background message queue.
+
+        IMPORTANT: the queue *must* remain alive throughout the lifetime of the
+        Convolution.
+    */
+    explicit Convolution (ConvolutionMessageQueue& queue);
+
     /** Contains configuration information for a convolution with a fixed latency. */
     struct Latency { int latencyInSamples; };
 
@@ -90,6 +136,22 @@ public:
      */
     explicit Convolution (const NonUniform& requiredHeadSize);
 
+    /** Behaves the same as the constructor taking a single Latency argument,
+        but with a shared background message queue.
+
+        IMPORTANT: the queue *must* remain alive throughout the lifetime of the
+        Convolution.
+    */
+    Convolution (const Latency&, ConvolutionMessageQueue&);
+
+    /** Behaves the same as the constructor taking a single NonUniform argument,
+        but with a shared background message queue.
+
+        IMPORTANT: the queue *must* remain alive throughout the lifetime of the
+        Convolution.
+    */
+    Convolution (const NonUniform&, ConvolutionMessageQueue&);
+
     ~Convolution() noexcept;
 
     //==============================================================================
@@ -112,9 +174,9 @@ public:
     }
 
     //==============================================================================
-    enum class Stereo    { yes, no };
-    enum class Trim      { yes, no };
-    enum class Normalise { yes, no };
+    enum class Stereo    { no, yes };
+    enum class Trim      { no, yes };
+    enum class Normalise { no, yes };
 
     //==============================================================================
     /** This function loads an impulse response audio file from memory, added in a
@@ -188,6 +250,10 @@ public:
 
 private:
     //==============================================================================
+    Convolution (const Latency&,
+                 const NonUniform&,
+                 OptionalScopedPointer<ConvolutionMessageQueue>&&);
+
     void processSamples (const AudioBlock<const float>&, AudioBlock<float>&, bool isBypassed) noexcept;
 
     class Mixer
