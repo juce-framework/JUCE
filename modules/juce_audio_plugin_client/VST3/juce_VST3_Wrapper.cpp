@@ -1529,6 +1529,15 @@ private:
                 }
             }
 
+            void parentSizeChanged() override
+            {
+                if (pluginEditor != nullptr)
+                {
+                    resizeHostWindow();
+                    pluginEditor->repaint();
+                }
+            }
+
             void resizeHostWindow()
             {
                 if (pluginEditor != nullptr)
@@ -1554,7 +1563,7 @@ private:
                        #if JUCE_MAC
                         if (host.isWavelab() || host.isReaper())
                        #else
-                        if (host.isWavelab() || host.isAbletonLive())
+                        if (host.isWavelab() || host.isAbletonLive() || host.isBitwigStudio())
                        #endif
                             setBounds (0, 0, w, h);
                     }

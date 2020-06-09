@@ -335,7 +335,7 @@ void GeneratedCode::applyToCode (String& code, const File& targetFile, const Str
     replaceTemplate (code, "method_definitions", getCallbackDefinitions());
 
     replaceTemplate (code, "include_juce", CodeHelpers::createIncludePathIncludeStatement (Project::getJuceSourceHFilename()));
-    
+
     replaceTemplate (code, "include_files_h", getIncludeFileCode (includeFilesH, targetFile));
     replaceTemplate (code, "include_files_cpp", getIncludeFileCode (includeFilesCPP, targetFile));
 
