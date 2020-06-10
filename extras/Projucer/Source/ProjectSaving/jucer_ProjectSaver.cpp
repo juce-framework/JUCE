@@ -733,7 +733,7 @@ void ProjectSaver::writeProjects (const OwnedArray<LibraryModule>& modules, Proj
                 if (ProjucerApplication::getApp().isRunningCommandLine)
                     saveExporter (*exporter, modules);
                 else
-                    threadPool.addJob (new ExporterJob (*this, *exporter, modules), true);
+                    threadPool.addJob ([this, &exporter, &modules] { saveExporter (*exporter, modules); });
             }
             else
             {
@@ -806,8 +806,12 @@ void ProjectSaver::saveExporter (ProjectExporter& exporter, const OwnedArray<Lib
 
         if (! exporter.isCLion())
         {
-            auto exporterName = exporter.getUniqueName();
-            MessageManager::callAsync ([exporterName] { std::cout << "Finished saving: " << exporterName << std::endl; });
+            auto outputString = "Finished saving: " + exporter.getUniqueName();
+
+            if (MessageManager::getInstance()->isThisTheMessageThread())
+                std::cout <<  outputString << std::endl;
+            else
+                MessageManager::callAsync ([outputString] { std::cout <<  outputString << std::endl; });
         }
     }
     catch (build_tools::SaveError& error)

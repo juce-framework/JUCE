@@ -65,31 +65,6 @@ private:
         JUCE_DECLARE_NON_COPYABLE (SaveThreadWithProgressWindow)
     };
 
-    class ExporterJob   : public ThreadPoolJob
-    {
-    public:
-       ExporterJob (ProjectSaver& ps, ProjectExporter& pe, const OwnedArray<LibraryModule>& modulesList)
-           : ThreadPoolJob ("export"),
-             owner (ps),
-             exporter (pe),
-             modules (modulesList)
-       {
-       }
-
-       JobStatus runJob() override
-       {
-           owner.saveExporter (exporter, modules);
-           return jobHasFinished;
-       }
-
-    private:
-       ProjectSaver& owner;
-       ProjectExporter& exporter;
-       const OwnedArray<LibraryModule>& modules;
-
-       JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExporterJob)
-    };
-
     //==============================================================================
     Project::Item saveGeneratedFile (const String& filePath, const MemoryOutputStream& newData);
     bool replaceFileIfDifferent (const File& f, const MemoryOutputStream& newData);
