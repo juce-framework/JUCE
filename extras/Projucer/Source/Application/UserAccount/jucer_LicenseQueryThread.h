@@ -68,6 +68,7 @@ private:
         virtual bool isPOSTLikeRequest() const = 0;
         virtual String getEndpointURLSuffix() const = 0;
         virtual StringPairArray getParameterNamesAndValues() const = 0;
+        virtual String getExtraHeaders() const = 0;
         virtual int getSuccessCode() const = 0;
         virtual String errorCodeToString (int) const = 0;
         virtual bool parseServerResponse (const String&, LicenseState&) = 0;
@@ -91,6 +92,11 @@ private:
             namesAndValues.set ("password", userPassword);
 
             return namesAndValues;
+        }
+
+        String getExtraHeaders() const override
+        {
+            return "Content-Type: application/json";
         }
 
         String errorCodeToString (int errorCode) const override
@@ -145,10 +151,12 @@ private:
 
         StringPairArray getParameterNamesAndValues() const override
         {
-            StringPairArray namesAndValues;
-            namesAndValues.set ("token", userAuthToken);
+            return {};
+        }
 
-            return namesAndValues;
+        String getExtraHeaders() const override
+        {
+            return "x-access-token: " + userAuthToken;
         }
 
         String errorCodeToString (int errorCode) const override
@@ -213,7 +221,6 @@ private:
     String runJob (std::unique_ptr<AccountEnquiryBase> accountEnquiryJob, LicenseState& state)
     {
         const String endpointURL = "https://api.roli.com/api/v1";
-        const String extraHeaders = "Content-Type: application/json";
 
         auto url = URL (endpointURL + accountEnquiryJob->getEndpointURLSuffix());
 
@@ -221,14 +228,14 @@ private:
 
         if (isPOST)
             url = url.withPOSTData (postDataStringAsJSON (accountEnquiryJob->getParameterNamesAndValues()));
-        else
-            url = url.withParameters (accountEnquiryJob->getParameterNamesAndValues());
 
         if (threadShouldExit())
             return "Cancelled.";
 
         int statusCode = 0;
-        auto urlStream = url.createInputStream (isPOST, nullptr, nullptr, extraHeaders, 5000, nullptr, &statusCode);
+        auto urlStream = url.createInputStream (isPOST, nullptr, nullptr,
+                                                accountEnquiryJob->getExtraHeaders(),
+                                                5000, nullptr, &statusCode);
 
         if (urlStream == nullptr)
             return "Failed to connect to the web server.";

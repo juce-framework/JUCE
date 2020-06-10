@@ -106,7 +106,7 @@ private:
             setTooltip (formattedUserString);
         }
 
-        userAvatarImage = state.isValid() ? state.avatar : defaultAvatarImage;
+        userAvatarImage = state.isValid() && state.avatar.isValid() ? state.avatar : defaultAvatarImage;
         repaint();
         sendChangeMessage();
     }
