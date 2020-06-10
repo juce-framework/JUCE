@@ -1069,36 +1069,8 @@ public:
         return names;
     }
 
-    int getDefaultDeviceIndex (bool forInput) const override
+    int getDefaultDeviceIndex (bool) const override
     {
-        // No need to create a stream when only one default device is created.
-        if (! supportsDevicesInfo())
-            return 0;
-
-        if (forInput && (! RuntimePermissions::isGranted (RuntimePermissions::recordAudio)))
-            return 0;
-
-        // Create stream with a default device ID and query the stream for its device ID
-        using OboeStream = OboeAudioIODevice::OboeStream;
-
-        OboeStream tempStream (-1,
-                               forInput ? oboe::Direction::Input : oboe::Direction::Output,
-                               oboe::SharingMode::Shared,
-                               forInput ? 1 : 2,
-                               getAndroidSDKVersion() >= 21 ? oboe::AudioFormat::Float : oboe::AudioFormat::I16,
-                               (int) AndroidHighPerformanceAudioHelpers::getNativeSampleRate(),
-                               AndroidHighPerformanceAudioHelpers::getNativeBufferSizeHint(),
-                               nullptr);
-
-        if (auto* nativeStream = tempStream.getNativeStream())
-        {
-            auto& devices = forInput ? inputDevices : outputDevices;
-
-            for (int i = 0; i < devices.size(); ++i)
-                if (devices.getReference (i).id == nativeStream->getDeviceId())
-                    return i;
-        }
-
         return 0;
     }
 
@@ -1156,15 +1128,13 @@ public:
  private:
     void checkAvailableDevices()
     {
+        auto sampleRates = OboeAudioIODevice::getDefaultSampleRates();
+
+        inputDevices .add ({ OboeAudioIODevice::oboeTypeName, -1, sampleRates, 1 });
+        outputDevices.add ({ OboeAudioIODevice::oboeTypeName, -1, sampleRates, 2 });
+
         if (! supportsDevicesInfo())
-        {
-            auto sampleRates = OboeAudioIODevice::getDefaultSampleRates();
-
-            inputDevices .add ({ OboeAudioIODevice::oboeTypeName, -1, sampleRates, 1 });
-            outputDevices.add ({ OboeAudioIODevice::oboeTypeName, -1, sampleRates, 2 });
-
             return;
-        }
 
         auto* env = getEnv();
 
