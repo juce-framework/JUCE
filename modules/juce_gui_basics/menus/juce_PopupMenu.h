@@ -835,12 +835,25 @@ public:
         virtual void preparePopupMenuWindow (Component& newWindow) = 0;
 
         /** Return true if you want your popup menus to scale with the target component's AffineTransform
-            or scale factor */
+            or scale factor
+        */
         virtual bool shouldPopupMenuScaleWithTargetComponent (const Options& options) = 0;
 
         virtual int getPopupMenuBorderSize();
 
         virtual int getPopupMenuBorderSizeWithOptions (const Options&) = 0;
+
+        /** Implement this to draw some custom decoration between the columns of the popup menu.
+
+            `getPopupMenuColumnSeparatorWidthWithOptions` must return a positive value in order
+            to display the separator.
+        */
+        virtual void drawPopupMenuColumnSeparatorWithOptions (Graphics& g,
+                                                              const Rectangle<int>& bounds,
+                                                              const Options&) = 0;
+
+        /** Return the amount of space that should be left between popup menu columns. */
+        virtual int getPopupMenuColumnSeparatorWidthWithOptions (const Options&) = 0;
     };
 
 private:

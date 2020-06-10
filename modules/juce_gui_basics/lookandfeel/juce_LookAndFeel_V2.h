@@ -217,6 +217,12 @@ public:
 
     int getPopupMenuBorderSizeWithOptions (const PopupMenu::Options&) override;
 
+    void drawPopupMenuColumnSeparatorWithOptions (Graphics& g,
+                                                  const Rectangle<int>& bounds,
+                                                  const PopupMenu::Options&) override;
+
+    int getPopupMenuColumnSeparatorWidthWithOptions (const PopupMenu::Options&) override;
+
     //==============================================================================
     void drawComboBox (Graphics&, int width, int height, bool isMouseButtonDown,
                        int buttonX, int buttonY, int buttonW, int buttonH,

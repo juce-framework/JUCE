@@ -1164,6 +1164,15 @@ int LookAndFeel_V2::getPopupMenuBorderSizeWithOptions (const PopupMenu::Options&
     return getPopupMenuBorderSize();
 }
 
+void LookAndFeel_V2::drawPopupMenuColumnSeparatorWithOptions (Graphics&,
+                                                              const Rectangle<int>&,
+                                                              const PopupMenu::Options&) {}
+
+int LookAndFeel_V2::getPopupMenuColumnSeparatorWidthWithOptions (const PopupMenu::Options&)
+{
+    return 0;
+}
+
 //==============================================================================
 void LookAndFeel_V2::fillTextEditorBackground (Graphics& g, int /*width*/, int /*height*/, TextEditor& textEditor)
 {

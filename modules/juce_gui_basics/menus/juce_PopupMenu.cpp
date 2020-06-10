@@ -226,10 +226,24 @@ struct MenuWindow  : public Component
 
         setLookAndFeel (parent != nullptr ? &(parent->getLookAndFeel())
                                           : menu.lookAndFeel.get());
+
         auto& lf = getLookAndFeel();
 
         parentComponent = lf.getParentComponentForMenuOptions (options);
         const_cast<Options&>(options) = options.withParentComponent (parentComponent);
+
+        if (parentComponent != nullptr)
+        {
+            parentComponent->addChildComponent (this);
+        }
+        else
+        {
+            addToDesktop (ComponentPeer::windowIsTemporary
+                          | ComponentPeer::windowIgnoresKeyPresses
+                          | lf.getMenuWindowFlags());
+
+            Desktop::getInstance().addGlobalMouseListener (this);
+        }
 
         if (parentComponent == nullptr && parentWindow == nullptr && lf.shouldPopupMenuScaleWithTargetComponent (options))
             if (auto* targetComponent = options.getTargetComponent())
@@ -263,19 +277,6 @@ struct MenuWindow  : public Component
 
         resizeToBestWindowPos();
 
-        if (parentComponent != nullptr)
-        {
-            parentComponent->addChildComponent (this);
-        }
-        else
-        {
-            addToDesktop (ComponentPeer::windowIsTemporary
-                          | ComponentPeer::windowIgnoresKeyPresses
-                          | lf.getMenuWindowFlags());
-
-            Desktop::getInstance().addGlobalMouseListener (this);
-        }
-
         getActiveWindows().add (this);
         lf.preparePopupMenuWindow (*this);
 
@@ -296,7 +297,26 @@ struct MenuWindow  : public Component
         if (isOpaque())
             g.fillAll (Colours::white);
 
-        getLookAndFeel().drawPopupMenuBackgroundWithOptions (g, getWidth(), getHeight(), options);
+        auto& theme = getLookAndFeel();
+        theme.drawPopupMenuBackgroundWithOptions (g, getWidth(), getHeight(), options);
+
+        if (columnWidths.isEmpty())
+            return;
+
+        const auto separatorWidth = theme.getPopupMenuColumnSeparatorWidthWithOptions (options);
+        const auto border = theme.getPopupMenuBorderSizeWithOptions (options);
+
+        auto currentX = 0;
+
+        std::for_each (columnWidths.begin(), std::prev (columnWidths.end()), [&] (int width)
+        {
+            const Rectangle<int> separator (currentX + width,
+                                            border,
+                                            separatorWidth,
+                                            getHeight() - border * 2);
+            theme.drawPopupMenuColumnSeparatorWithOptions (g, separator, options);
+            currentX += width + separatorWidth;
+        });
     }
 
     void paintOverChildren (Graphics& g) override
@@ -907,6 +927,8 @@ struct MenuWindow  : public Component
         int x = 0;
         int childNum = 0;
 
+        const auto separatorWidth = getLookAndFeel().getPopupMenuColumnSeparatorWidthWithOptions (options);
+
         for (int col = 0; col < numColumns; ++col)
         {
             auto numChildren = jmin (items.size() - childNum,
@@ -923,9 +945,11 @@ struct MenuWindow  : public Component
                 y += c->getHeight();
             }
 
-            x += colW;
+            x += colW + separatorWidth;
             childNum += numChildren;
         }
+
+        x -= separatorWidth;
 
         return x;
     }
