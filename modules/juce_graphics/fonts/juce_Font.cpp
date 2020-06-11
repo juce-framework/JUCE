@@ -80,24 +80,26 @@ public:
 
     Typeface::Ptr findTypefaceFor (const Font& font)
     {
-        const ScopedReadLock slr (lock);
-
-        auto faceName = font.getTypefaceName();
-        auto faceStyle = font.getTypefaceStyle();
+        const auto faceName = font.getTypefaceName();
+        const auto faceStyle = font.getTypefaceStyle();
 
         jassert (faceName.isNotEmpty());
 
-        for (int i = faces.size(); --i >= 0;)
         {
-            CachedFace& face = faces.getReference(i);
+            const ScopedReadLock slr (lock);
 
-            if (face.typefaceName == faceName
-                 && face.typefaceStyle == faceStyle
-                 && face.typeface != nullptr
-                 && face.typeface->isSuitableForFont (font))
+            for (int i = faces.size(); --i >= 0;)
             {
-                face.lastUsageCount = ++counter;
-                return face.typeface;
+                CachedFace& face = faces.getReference(i);
+
+                if (face.typefaceName == faceName
+                     && face.typefaceStyle == faceStyle
+                     && face.typeface != nullptr
+                     && face.typeface->isSuitableForFont (font))
+                {
+                    face.lastUsageCount = ++counter;
+                    return face.typeface;
+                }
             }
         }
 
