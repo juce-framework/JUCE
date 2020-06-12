@@ -105,15 +105,14 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     addAndMakeVisible (fileLabel);
     fileLabel.attachToComponent (&filenameBox, true);
 
-    goUpButton.reset (getLookAndFeel().createFileBrowserGoUpButton());
-    addAndMakeVisible (goUpButton.get());
-    goUpButton->onClick = [this] { goUp(); };
-    goUpButton->setTooltip (TRANS ("Go up to parent directory"));
-
     if (previewComp != nullptr)
         addAndMakeVisible (previewComp);
 
     lookAndFeelChanged();
+
+    addAndMakeVisible (goUpButton.get());
+    goUpButton->onClick = [this] { goUp(); };
+    goUpButton->setTooltip (TRANS ("Go up to parent directory"));
 
     setRoot (currentRoot);
 
@@ -351,12 +350,17 @@ void FileBrowserComponent::resized()
 //==============================================================================
 void FileBrowserComponent::lookAndFeelChanged()
 {
+    goUpButton.reset (getLookAndFeel().createFileBrowserGoUpButton());
+
     currentPathBox.setColour (ComboBox::backgroundColourId,    findColour (currentPathBoxBackgroundColourId));
     currentPathBox.setColour (ComboBox::textColourId,          findColour (currentPathBoxTextColourId));
     currentPathBox.setColour (ComboBox::arrowColourId,         findColour (currentPathBoxArrowColourId));
 
     filenameBox.setColour (TextEditor::backgroundColourId,     findColour (filenameBoxBackgroundColourId));
     filenameBox.setColour (TextEditor::textColourId,           findColour (filenameBoxTextColourId));
+
+    resized();
+    repaint();
 }
 
 //==============================================================================

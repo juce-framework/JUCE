@@ -159,6 +159,8 @@ public:
     void handleCommandMessage (int) override;
     /** @internal */
     int getBorderSize() const noexcept;
+    /** @internal */
+    void lookAndFeelChanged() override;
 
 private:
     //==============================================================================

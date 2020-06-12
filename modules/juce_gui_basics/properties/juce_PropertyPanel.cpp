@@ -25,9 +25,10 @@ struct PropertyPanel::SectionComponent  : public Component
                       const Array<PropertyComponent*>& newProperties,
                       bool sectionIsOpen)
         : Component (sectionTitle),
-          titleHeight (getLookAndFeel().getPropertyPanelSectionHeaderHeight (sectionTitle)),
           isOpen (sectionIsOpen)
     {
+        lookAndFeelChanged();
+
         propertyComps.addArray (newProperties);
 
         for (auto* propertyComponent : propertyComps)
@@ -57,6 +58,13 @@ struct PropertyPanel::SectionComponent  : public Component
             propertyComponent->setBounds (1, y, getWidth() - 2, propertyComponent->getPreferredHeight());
             y = propertyComponent->getBottom();
         }
+    }
+
+    void lookAndFeelChanged() override
+    {
+        titleHeight = getLookAndFeel().getPropertyPanelSectionHeaderHeight (getName());
+        resized();
+        repaint();
     }
 
     int getPreferredHeight() const

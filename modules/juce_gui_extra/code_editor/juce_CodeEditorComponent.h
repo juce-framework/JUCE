@@ -371,6 +371,8 @@ public:
     void getCommandInfo (CommandID, ApplicationCommandInfo&) override;
     /** @internal */
     bool perform (const InvocationInfo&) override;
+    /** @internal */
+    void lookAndFeelChanged() override;
 
 private:
     //==============================================================================

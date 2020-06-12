@@ -56,9 +56,7 @@ struct CustomMenuBarItemHolder    : public Component
 //==============================================================================
 BurgerMenuComponent::BurgerMenuComponent (MenuBarModel* modelToUse)
 {
-    auto& lf = getLookAndFeel();
-
-    listBox.setRowHeight (roundToInt (lf.getPopupMenuFont().getHeight() * 2.0f));
+    lookAndFeelChanged();
     listBox.addMouseListener (this, true);
 
     setModel (modelToUse);
@@ -281,6 +279,11 @@ void BurgerMenuComponent::handleCommandMessage (int commandID)
         refresh();
         listBox.updateContent();
     }
+}
+
+void BurgerMenuComponent::lookAndFeelChanged()
+{
+    listBox.setRowHeight (roundToInt (getLookAndFeel().getPopupMenuFont().getHeight() * 2.0f));
 }
 
 } // namespace juce

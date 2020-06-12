@@ -296,6 +296,8 @@ public:
     /** @internal */
     void itemDropped (const SourceDetails&) override;
     /** @internal */
+    void lookAndFeelChanged() override;
+    /** @internal */
     void updateAllItemPositions (bool animate);
     /** @internal */
     static ToolbarItemComponent* createItem (ToolbarItemFactory&, int itemId);

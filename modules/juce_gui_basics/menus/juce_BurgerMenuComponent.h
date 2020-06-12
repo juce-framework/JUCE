@@ -62,6 +62,9 @@ public:
     /** Returns the current burger menu model being used. */
     MenuBarModel* getModel() const noexcept;
 
+    /** @internal */
+    void lookAndFeelChanged() override;
+
 private:
     //==============================================================================
     struct Row

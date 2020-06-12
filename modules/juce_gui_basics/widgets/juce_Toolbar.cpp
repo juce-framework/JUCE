@@ -235,7 +235,7 @@ private:
 //==============================================================================
 Toolbar::Toolbar()
 {
-    missingItemsButton.reset (getLookAndFeel().createToolbarMissingItemsButton (*this));
+    lookAndFeelChanged();
     addChildComponent (missingItemsButton.get());
 
     missingItemsButton->setAlwaysOnTop (true);
@@ -631,6 +631,11 @@ void Toolbar::itemDropped (const SourceDetails& dragSourceDetails)
 {
     if (auto* tc = dynamic_cast<ToolbarItemComponent*> (dragSourceDetails.sourceComponent.get()))
         tc->setState (Button::buttonNormal);
+}
+
+void Toolbar::lookAndFeelChanged()
+{
+    missingItemsButton.reset (getLookAndFeel().createToolbarMissingItemsButton (*this));
 }
 
 void Toolbar::mouseDown (const MouseEvent&) {}

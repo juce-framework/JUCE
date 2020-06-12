@@ -44,9 +44,7 @@ CallOutBox::CallOutBox (Component& c, Rectangle<int> area, Component* const pare
     creationTime = Time::getCurrentTime();
 }
 
-CallOutBox::~CallOutBox()
-{
-}
+CallOutBox::~CallOutBox() = default;
 
 //==============================================================================
 class CallOutBoxCallback  : public ModalComponentManager::Callback,
@@ -93,6 +91,8 @@ int CallOutBox::getBorderSize() const noexcept
 {
     return jmax (getLookAndFeel().getCallOutBoxBorderSize (*this), (int) arrowSize);
 }
+
+void CallOutBox::lookAndFeelChanged() { resized(); repaint(); }
 
 void CallOutBox::paint (Graphics& g)
 {

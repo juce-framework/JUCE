@@ -341,7 +341,7 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& doc, CodeTokeniser* cons
     setMouseCursor (MouseCursor::IBeamCursor);
     setWantsKeyboardFocus (true);
 
-    caret.reset (getLookAndFeel().createCaretComponent (this));
+    lookAndFeelChanged();
     addAndMakeVisible (caret.get());
 
     addAndMakeVisible (verticalScrollBar);
@@ -1306,6 +1306,11 @@ void CodeEditorComponent::getCommandInfo (const CommandID commandID, Application
 bool CodeEditorComponent::perform (const InvocationInfo& info)
 {
     return performCommand (info.commandID);
+}
+
+void CodeEditorComponent::lookAndFeelChanged()
+{
+    caret.reset (getLookAndFeel().createCaretComponent (this));
 }
 
 bool CodeEditorComponent::performCommand (const CommandID commandID)
