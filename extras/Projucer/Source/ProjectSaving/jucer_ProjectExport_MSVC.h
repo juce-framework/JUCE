@@ -53,27 +53,10 @@ public:
                    "Specifies the version of the platform toolset that will be used when building this project.");
     }
 
-    void addIPPLibraryProperty (PropertyListBuilder& props)
-    {
-        props.add (new ChoicePropertyComponent (IPPLibraryValue, "Use IPP Library",
-                                                { "No",  "Yes (Default Linking)",  "Multi-Threaded Static Library", "Single-Threaded Static Library", "Multi-Threaded DLL", "Single-Threaded DLL" },
-                                                { var(), "true",                   "Parallel_Static",               "Sequential",                     "Parallel_Dynamic",   "Sequential_Dynamic" }),
-                   "Enable this to use Intel's Integrated Performance Primitives library.");
-    }
-
-    void addWindowsTargetPlatformProperties (PropertyListBuilder& props)
-    {
-        auto isWindows10SDK = getVisualStudioVersion() > 14;
-
-        props.add (new TextPropertyComponent (targetPlatformVersion, "Windows Target Platform", 20, false),
-                   String ("Specifies the version of the Windows SDK that will be used when building this project. ")
-                   + (isWindows10SDK ? "Leave this field empty to use the latest Windows 10 SDK installed on the build machine."
-                                     : "The default value for this exporter is " + getDefaultWindowsTargetPlatformVersion()));
-    }
-
     void create (const OwnedArray<LibraryModule>&) const override
     {
         createResourcesAndIcon();
+        createPackagesConfigFile();
 
         for (int i = 0; i < targets.size(); ++i)
             if (auto* target = targets[i])
@@ -720,6 +703,12 @@ public:
                 e->setAttribute ("Include", prependDot (getOwner().iconFile.getFileName()));
             }
 
+            if (getOwner().packagesConfigFile.existsAsFile())
+            {
+                auto* e = otherFilesGroup->createNewChildElement ("None");
+                e->setAttribute ("Include", getOwner().packagesConfigFile.getFileName());
+            }
+
             if (otherFilesGroup->getFirstChildElement() != nullptr)
                 projectXml.addChildElement (otherFilesGroup.release());
 
@@ -736,8 +725,18 @@ public:
             }
 
             {
-                auto* e = projectXml.createNewChildElement ("ImportGroup");
-                e->setAttribute ("Label", "ExtensionTargets");
+                auto* importGroup = projectXml.createNewChildElement ("ImportGroup");
+                importGroup->setAttribute ("Label", "ExtensionTargets");
+
+                if (owner.shouldAddWebView2Package())
+                {
+                    auto packageTargetsPath = "packages\\" + getWebView2PackageName() + "." + getWebView2PackageVersion()
+                                            + "\\build\\native\\" + getWebView2PackageName() + ".targets";
+
+                    auto* e = importGroup->createNewChildElement ("Import");
+                    e->setAttribute ("Project", packageTargetsPath);
+                    e->setAttribute ("Condition", "Exists('" + packageTargetsPath + "')");
+                }
             }
         }
 
@@ -890,6 +889,12 @@ public:
                 auto* e = otherFilesGroup->createNewChildElement ("None");
                 e->setAttribute ("Include", prependDot (getOwner().iconFile.getFileName()));
                 e->createNewChildElement ("Filter")->addTextElement (ProjectSaver::getJuceCodeGroupName());
+            }
+
+            if (getOwner().packagesConfigFile.existsAsFile())
+            {
+                auto* e = otherFilesGroup->createNewChildElement ("None");
+                e->setAttribute ("Include", getOwner().packagesConfigFile.getFileName());
             }
 
             if (otherFilesGroup->getFirstChildElement() != nullptr)
@@ -1375,6 +1380,20 @@ public:
     {
         props.add (new TextPropertyComponent (manifestFileValue, "Manifest file", 8192, false),
             "Path to a manifest input file which should be linked into your binary (path is relative to jucer file).");
+
+        props.add (new ChoicePropertyComponent (IPPLibraryValue, "Use IPP Library",
+                                                { "No",  "Yes (Default Linking)",  "Multi-Threaded Static Library", "Single-Threaded Static Library", "Multi-Threaded DLL", "Single-Threaded DLL" },
+                                                { var(), "true",                   "Parallel_Static",               "Sequential",                     "Parallel_Dynamic",   "Sequential_Dynamic" }),
+                   "Enable this to use Intel's Integrated Performance Primitives library.");
+
+        {
+            auto isWindows10SDK = getVisualStudioVersion() > 14;
+
+            props.add (new TextPropertyComponent (targetPlatformVersion, "Windows Target Platform", 20, false),
+                       String ("Specifies the version of the Windows SDK that will be used when building this project. ")
+                       + (isWindows10SDK ? "Leave this field empty to use the latest Windows 10 SDK installed on the build machine."
+                                         : "The default value for this exporter is " + getDefaultWindowsTargetPlatformVersion()));
+        }
     }
 
     enum OptimisationLevel
@@ -1447,7 +1466,7 @@ private:
 
 protected:
     //==============================================================================
-    mutable File rcFile, iconFile;
+    mutable File rcFile, iconFile, packagesConfigFile;
     OwnedArray<MSVCTargetBase> targets;
 
     ValueWithDefault IPPLibraryValue, platformToolsetValue, targetPlatformVersion, manifestFileValue;
@@ -1586,6 +1605,35 @@ protected:
         }
     }
 
+    bool shouldAddWebView2Package() const
+    {
+        return project.getEnabledModules().isModuleEnabled ("juce_gui_extra")
+              && project.isConfigFlagEnabled ("JUCE_USE_WIN_WEBVIEW2", false);
+    }
+
+    static String getWebView2PackageName()     { return "Microsoft.Web.WebView2"; }
+    static String getWebView2PackageVersion()  { return "0.9.488"; }
+
+    void createPackagesConfigFile() const
+    {
+        if (shouldAddWebView2Package())
+        {
+            packagesConfigFile = getTargetFolder().getChildFile ("packages.config");
+
+            build_tools::writeStreamToFile (packagesConfigFile, [] (MemoryOutputStream& mo)
+            {
+                mo.setNewLineString ("\r\n");
+
+                mo << "<?xml version=\"1.0\" encoding=\"utf-8\"?>"                   << newLine
+                   << "<packages>"                                                   << newLine
+                   << "\t" << "<package id=" << getWebView2PackageName().quoted()
+                           << " version="    << getWebView2PackageVersion().quoted()
+                           << " />"                                                  << newLine
+                   << "</packages>"                                                  << newLine;
+            });
+        }
+    }
+
     static String prependDot (const String& filename)
     {
         return build_tools::isAbsolutePath (filename) ? filename
@@ -1643,15 +1691,11 @@ public:
 
     void createExporterProperties (PropertyListBuilder& props) override
     {
-        MSVCProjectExporterBase::createExporterProperties (props);
-
         static const char* toolsetNames[] = { "v140", "v140_xp", "CTP_Nov2013" };
         const var toolsets[]              = { "v140", "v140_xp", "CTP_Nov2013" };
         addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
 
-        addIPPLibraryProperty (props);
-
-        addWindowsTargetPlatformProperties (props);
+        MSVCProjectExporterBase::createExporterProperties (props);
     }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2015)
@@ -1690,15 +1734,11 @@ public:
 
     void createExporterProperties (PropertyListBuilder& props) override
     {
-        MSVCProjectExporterBase::createExporterProperties (props);
-
         static const char* toolsetNames[] = { "v140", "v140_xp", "v141", "v141_xp" };
         const var toolsets[]              = { "v140", "v140_xp", "v141", "v141_xp" };
         addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
 
-        addIPPLibraryProperty (props);
-
-        addWindowsTargetPlatformProperties (props);
+        MSVCProjectExporterBase::createExporterProperties (props);
     }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2017)
@@ -1737,15 +1777,11 @@ public:
 
     void createExporterProperties (PropertyListBuilder& props) override
     {
-        MSVCProjectExporterBase::createExporterProperties (props);
-
         static const char* toolsetNames[] = { "v140", "v140_xp", "v141", "v141_xp", "v142" };
         const var toolsets[]              = { "v140", "v140_xp", "v141", "v141_xp", "v142" };
         addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
 
-        addIPPLibraryProperty (props);
-
-        addWindowsTargetPlatformProperties (props);
+        MSVCProjectExporterBase::createExporterProperties (props);
     }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2019)

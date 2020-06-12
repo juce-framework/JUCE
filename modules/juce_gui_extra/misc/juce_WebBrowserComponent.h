@@ -26,9 +26,10 @@ namespace juce
     A component that displays an embedded web browser.
 
     The browser itself will be platform-dependent. On Mac and iOS it will be
-    WebKit, if you have enabled JUCE_USE_WINRT_WEBVIEW on Windows 10 it will be
-    EdgeHTML otherwise IE, on Android it will be Chrome, and on Linux it will be
-    WebKit.
+    WebKit, on Android it will be Chrome, and on Linux it will be WebKit. On
+    Windows, if the JUCE_USE_WIN_WEBVIEW2 flag is enabled, it will either be
+    Microsoft Edge (Chromium) or IE depending on availability of the Edge
+    runtime.
 
     @tags{GUI}
 */

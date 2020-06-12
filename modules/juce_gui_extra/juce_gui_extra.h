@@ -57,19 +57,20 @@
  #define JUCE_WEB_BROWSER 1
 #endif
 
-/** Config: JUCE_USE_WINRT_WEBVIEW
-    Enables the use of the EdgeHTML browser engine on Windows. This will use
-    the Windows Runtime API on Windows 10 version 1809 (October 2018 Update)
-    and later. If you enable this flag then older versions of Windows will
-    automatically fall back to using the regualar Win32 web view.
+/** Config: JUCE_USE_WIN_WEBVIEW2
+    Enables the use of the Microsoft Edge (Chromium) WebView2 browser on Windows,
+    currently in developer preview. This requires Microsoft Edge (minimum version
+    82.0.488.0) to be installed on the user's machine at runtime.
 
-    You will need version 10.0.14393.0 of the Windows Standalone SDK to compile
-    and you may need to add the path to the WinRT headers. The path to the
-    headers will be something similar to
-    "C:\Program Files (x86)\Windows Kits\10\Include\10.0.14393.0\winrt".
+    If using the Projucer, the Microsoft.Web.WebView2 package will be added to the
+    project solution if this flag is enabled. If you are building using CMake you
+    will need to manually add the package via the Visual Studio package manager.
+
+    If the required components are not available at runtime it will fall back to the
+    IE-based Win32 web view.
 */
-#ifndef JUCE_USE_WINRT_WEBVIEW
- #define JUCE_USE_WINRT_WEBVIEW 0
+#ifndef JUCE_USE_WIN_WEBVIEW2
+ #define JUCE_USE_WIN_WEBVIEW2 0
 #endif
 
 /** Config: JUCE_ENABLE_LIVE_CONSTANT_EDITOR

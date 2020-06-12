@@ -33,7 +33,7 @@
 #define JUCE_GRAPHICS_INCLUDE_COREGRAPHICS_HELPERS 1
 #define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
 
-#if JUCE_USE_WINRT_WEBVIEW
+#if JUCE_USE_WIN_WEBVIEW2
  #define JUCE_EVENTS_INCLUDE_WINRT_WRAPPER 1
 #endif
 
@@ -85,9 +85,8 @@
  #if JUCE_WEB_BROWSER
   #include <exdisp.h>
   #include <exdispid.h>
-  #if JUCE_USE_WINRT_WEBVIEW
-   #include <windows.web.ui.h>
-   #include <windows.web.ui.interop.h>
+
+  #if JUCE_USE_WIN_WEBVIEW2
    #include <windows.foundation.h>
    #include <windows.foundation.collections.h>
 
@@ -96,7 +95,15 @@
    #include <wrl.h>
    #include <wrl/wrappers/corewrappers.h>
    #pragma warning (pop)
+
+   #include "WebView2.h"
+
+   #pragma warning (push)
+   #pragma warning (disable: 4458)
+   #include "WebView2EnvironmentOptions.h"
+   #pragma warning (pop)
   #endif
+
  #endif
 
 //==============================================================================
