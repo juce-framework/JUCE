@@ -28,14 +28,14 @@ namespace juce
     Collects incoming realtime MIDI messages and turns them into blocks suitable for
     processing by a block-based audio callback.
 
-    The class can also be used as either a MidiKeyboardStateListener or a MidiInputCallback
+    The class can also be used as either a MidiKeyboardState::Listener or a MidiInputCallback
     so it can easily use a midi input or keyboard component as its source.
 
     @see MidiMessage, MidiInput
 
     @tags{Audio}
 */
-class JUCE_API  MidiMessageCollector    : public MidiKeyboardStateListener,
+class JUCE_API  MidiMessageCollector    : public MidiKeyboardState::Listener,
                                           public MidiInputCallback
 {
 public:
