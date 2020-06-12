@@ -76,9 +76,7 @@ void MidiKeyboardState::noteOnInternal  (const int midiChannel, const int midiNo
     if (isPositiveAndBelow (midiNoteNumber, 128))
     {
         noteStates[midiNoteNumber] = static_cast<uint16> (noteStates[midiNoteNumber] | (1 << (midiChannel - 1)));
-
-        for (int i = listeners.size(); --i >= 0;)
-            listeners.getUnchecked(i)->handleNoteOn (this, midiChannel, midiNoteNumber, velocity);
+        listeners.call ([&] (Listener& l) { l.handleNoteOn (this, midiChannel, midiNoteNumber, velocity); });
     }
 }
 
@@ -101,9 +99,7 @@ void MidiKeyboardState::noteOffInternal  (const int midiChannel, const int midiN
     if (isNoteOn (midiChannel, midiNoteNumber))
     {
         noteStates[midiNoteNumber] = static_cast<uint16> (noteStates[midiNoteNumber] & ~(1 << (midiChannel - 1)));
-
-        for (int i = listeners.size(); --i >= 0;)
-            listeners.getUnchecked(i)->handleNoteOff (this, midiChannel, midiNoteNumber, velocity);
+        listeners.call ([&] (Listener& l) { l.handleNoteOff (this, midiChannel, midiNoteNumber, velocity); });
     }
 }
 
@@ -171,16 +167,16 @@ void MidiKeyboardState::processNextMidiBuffer (MidiBuffer& buffer,
 }
 
 //==============================================================================
-void MidiKeyboardState::addListener (MidiKeyboardStateListener* const listener)
+void MidiKeyboardState::addListener (Listener* listener)
 {
     const ScopedLock sl (lock);
-    listeners.addIfNotAlreadyThere (listener);
+    listeners.add (listener);
 }
 
-void MidiKeyboardState::removeListener (MidiKeyboardStateListener* const listener)
+void MidiKeyboardState::removeListener (Listener* listener)
 {
     const ScopedLock sl (lock);
-    listeners.removeFirstMatchingValue (listener);
+    listeners.remove (listener);
 }
 
 } // namespace juce

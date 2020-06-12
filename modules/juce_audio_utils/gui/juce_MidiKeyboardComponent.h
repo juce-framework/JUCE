@@ -48,7 +48,7 @@ namespace juce
     @tags{Audio}
 */
 class JUCE_API  MidiKeyboardComponent  : public Component,
-                                         public MidiKeyboardStateListener,
+                                         public MidiKeyboardState::Listener,
                                          public ChangeBroadcaster,
                                          private Timer
 {

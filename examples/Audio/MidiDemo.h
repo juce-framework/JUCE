@@ -65,7 +65,7 @@ struct MidiDeviceListEntry : ReferenceCountedObject
 //==============================================================================
 class MidiDemo  : public Component,
                   private Timer,
-                  private MidiKeyboardStateListener,
+                  private MidiKeyboardState::Listener,
                   private MidiInputCallback,
                   private AsyncUpdater
 {
