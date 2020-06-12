@@ -165,7 +165,18 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
                 }
 
                 if (midiOutput != nullptr)
-                    midiOutput->sendBlockOfMessagesNow (incomingMidi);
+                {
+                    if (midiOutput->isBackgroundThreadRunning())
+                    {
+                        midiOutput->sendBlockOfMessages (incomingMidi,
+                                                         Time::getMillisecondCounterHiRes(),
+                                                         sampleRate);
+                    }
+                    else
+                    {
+                        midiOutput->sendBlockOfMessagesNow (incomingMidi);
+                    }
+                }
 
                 return;
             }
