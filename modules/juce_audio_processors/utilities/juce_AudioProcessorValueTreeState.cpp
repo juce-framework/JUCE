@@ -186,8 +186,35 @@ private:
         parameter.setValueNotifyingHost (value);
     }
 
+    class LockedListeners
+    {
+    public:
+        template <typename Fn>
+        void call (Fn&& fn)
+        {
+            const CriticalSection::ScopedLockType lock (mutex);
+            listeners.call (std::forward<Fn> (fn));
+        }
+
+        void add (Listener* l)
+        {
+            const CriticalSection::ScopedLockType lock (mutex);
+            listeners.add (l);
+        }
+
+        void remove (Listener* l)
+        {
+            const CriticalSection::ScopedLockType lock (mutex);
+            listeners.remove (l);
+        }
+
+    private:
+        CriticalSection mutex;
+        ListenerList<Listener> listeners;
+    };
+
     RangedAudioParameter& parameter;
-    ListenerList<Listener> listeners;
+    LockedListeners listeners;
     std::atomic<float> unnormalisedValue { 0.0f };
     std::atomic<bool> needsUpdate { true }, listenersNeedCalling { true };
     bool ignoreParameterChangedCallbacks { false };
