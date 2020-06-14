@@ -1456,7 +1456,6 @@ public:
             {
                 defines.set ("_NDEBUG", "1");
                 defines.set ("NDEBUG", "1");
-                s.set ("GCC_GENERATE_DEBUGGING_SYMBOLS", "NO");
                 s.set ("DEAD_CODE_STRIPPING", "YES");
             }
 
