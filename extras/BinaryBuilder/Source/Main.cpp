@@ -109,7 +109,7 @@ int main (int argc, char* argv[])
                      " resultant class, but #ifdef'ed out using the name of the sub-directory (hard to\n"
                      " explain, but obvious when you try it...)\n";
 
-        return 0;
+        return 2; // USAGE
     }
 
     const File sourceDirectory (File::getCurrentWorkingDirectory()
@@ -121,7 +121,7 @@ int main (int argc, char* argv[])
                   << sourceDirectory.getFullPathName()
                   << std::endl << std::endl;
 
-        return 0;
+        return 1; // General ERROR
     }
 
     const File destDirectory (File::getCurrentWorkingDirectory()
@@ -132,7 +132,7 @@ int main (int argc, char* argv[])
         std::cout << "Destination directory doesn't exist: "
                   << destDirectory.getFullPathName() << std::endl << std::endl;
 
-        return 0;
+        return 1; // General ERROR
     }
 
     String className (argv[3]);
@@ -153,7 +153,7 @@ int main (int argc, char* argv[])
     {
         std::cout << "Didn't find any source files in: "
                   << sourceDirectory.getFullPathName() << std::endl << std::endl;
-        return 0;
+        return 1; // General ERROR
     }
 
     headerFile.deleteFile();
@@ -165,7 +165,7 @@ int main (int argc, char* argv[])
     {
         std::cout << "Couldn't open "
                   << headerFile.getFullPathName() << " for writing" << std::endl << std::endl;
-        return 0;
+        return 126; // NO_PERM
     }
 
     std::unique_ptr<OutputStream> cpp (cppFile.createOutputStream());
@@ -174,7 +174,7 @@ int main (int argc, char* argv[])
     {
         std::cout << "Couldn't open "
                   << cppFile.getFullPathName() << " for writing" << std::endl << std::endl;
-        return 0;
+        return 126; // NO_PERM
     }
 
     *header << "/* (Auto-generated binary data file). */\r\n\r\n"
