@@ -39,7 +39,7 @@ class JUCE_API  X11Symbols
 {
 public:
     //==============================================================================
-    bool areXFunctionsAvailable()   { return functionsAreAvailable; }
+    bool loadAllSymbols();
 
     //==============================================================================
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XAllocSizeHints, xAllocSizeHints,
@@ -571,9 +571,6 @@ private:
     }
 
     //==============================================================================
-    bool loadAllSymbols();
-
-    //==============================================================================
     DynamicLibrary xLib { "libX11.so" }, xextLib { "libXext.so" };
 
    #if JUCE_USE_XCURSOR
@@ -588,8 +585,6 @@ private:
    #if JUCE_USE_XRANDR
     DynamicLibrary xrandrLib   { "libXrandr.so" };
    #endif
-
-    const bool functionsAreAvailable = loadAllSymbols();
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (X11Symbols)

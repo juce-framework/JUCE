@@ -24,7 +24,7 @@ class WebKitSymbols  : public DeletedAtShutdown
 {
 public:
     //==============================================================================
-    bool isWebKitAvailable()    { return webKitIsAvailable; }
+    bool isWebKitAvailable() const noexcept  { return webKitIsAvailable; }
 
     //==============================================================================
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_settings_new, juce_webkit_settings_new,

@@ -73,12 +73,14 @@ public:
                                                     32, PropModeReplace, (unsigned char*) &windowH, 1);
 
         // A minimum size must be specified for GNOME and Xfce, otherwise the icon is displayed with a width of 1
-        auto* hints = X11Symbols::getInstance()->xAllocSizeHints();
-        hints->flags = PMinSize;
-        hints->min_width = 22;
-        hints->min_height = 22;
-        X11Symbols::getInstance()->xSetWMNormalHints (display, windowH, hints);
-        X11Symbols::getInstance()->xFree (hints);
+        if (auto* hints = X11Symbols::getInstance()->xAllocSizeHints())
+        {
+            hints->flags = PMinSize;
+            hints->min_width = 22;
+            hints->min_height = 22;
+            X11Symbols::getInstance()->xSetWMNormalHints (display, windowH, hints);
+            X11Symbols::getInstance()->xFree (hints);
+        }
     }
 
     Image image;

@@ -1225,13 +1225,10 @@ static std::unordered_map<LinuxComponentPeer<::Window>*, X11DragState> dragAndDr
 
 XWindowSystem::XWindowSystem()
 {
-    xIsAvailable = X11Symbols::getInstance()->areXFunctionsAvailable();
+    xIsAvailable = X11Symbols::getInstance()->loadAllSymbols();
 
     if (! xIsAvailable)
-    {
-        X11Symbols::deleteInstance();
         return;
-    }
 
     if (JUCEApplicationBase::isStandaloneApp())
     {
@@ -1255,7 +1252,14 @@ XWindowSystem::XWindowSystem()
         X11ErrorHandling::installXErrorHandlers();
     }
 
-    initialiseXDisplay();
+    if (! initialiseXDisplay())
+    {
+        if (JUCEApplicationBase::isStandaloneApp())
+            X11ErrorHandling::removeXErrorHandlers();
+
+        X11Symbols::deleteInstance();
+        xIsAvailable = false;
+    }
 }
 
 XWindowSystem::~XWindowSystem()
@@ -1266,10 +1270,9 @@ XWindowSystem::~XWindowSystem()
 
         if (JUCEApplicationBase::isStandaloneApp())
             X11ErrorHandling::removeXErrorHandlers();
-
-        X11Symbols::deleteInstance();
     }
 
+    X11Symbols::deleteInstance();
     clearSingletonInstance();
 }
 
@@ -1284,10 +1287,14 @@ static int getAllEventsMask (bool ignoresMouseClicks)
 
 ::Window XWindowSystem::createWindow (::Window parentToAddTo, LinuxComponentPeer<::Window>* peer) const
 {
-    auto styleFlags = peer->getStyleFlags();
+    if (! xIsAvailable)
+    {
+        // can't open a window on a system that doesn't have X11 installed!
+        jassertfalse;
+        return 0;
+    }
 
-    // can't open a window on a system that doesn't have X11 installed!
-    jassert (X11Symbols::getInstance()->areXFunctionsAvailable());
+    auto styleFlags = peer->getStyleFlags();
 
     XWindowSystemUtilities::ScopedXLock xLock;
 
@@ -1338,21 +1345,21 @@ static int getAllEventsMask (bool ignoresMouseClicks)
 
     // Associate the PID, allowing to be shut down when something goes wrong
     auto pid = (unsigned long) getpid();
-    xchangeProperty (windowH, atoms->pid, XA_CARDINAL, 32, &pid, 1);
+    xchangeProperty (windowH, atoms.pid, XA_CARDINAL, 32, &pid, 1);
 
     // Set window manager protocols
-    xchangeProperty (windowH, atoms->protocols, XA_ATOM, 32, atoms->protocolList, 2);
+    xchangeProperty (windowH, atoms.protocols, XA_ATOM, 32, atoms.protocolList, 2);
 
     // Set drag and drop flags
-    xchangeProperty (windowH, atoms->XdndTypeList, XA_ATOM, 32, atoms->allowedMimeTypes, numElementsInArray (atoms->allowedMimeTypes));
-    xchangeProperty (windowH, atoms->XdndActionList, XA_ATOM, 32, atoms->allowedActions, numElementsInArray (atoms->allowedActions));
-    xchangeProperty (windowH, atoms->XdndActionDescription, XA_STRING, 8, "", 0);
+    xchangeProperty (windowH, atoms.XdndTypeList, XA_ATOM, 32, atoms.allowedMimeTypes, numElementsInArray (atoms.allowedMimeTypes));
+    xchangeProperty (windowH, atoms.XdndActionList, XA_ATOM, 32, atoms.allowedActions, numElementsInArray (atoms.allowedActions));
+    xchangeProperty (windowH, atoms.XdndActionDescription, XA_STRING, 8, "", 0);
 
     auto dndVersion = XWindowSystemUtilities::Atoms::DndVersion;
-    xchangeProperty (windowH, atoms->XdndAware, XA_ATOM, 32, &dndVersion, 1);
+    xchangeProperty (windowH, atoms.XdndAware, XA_ATOM, 32, &dndVersion, 1);
 
     unsigned long info[2] = { 0, 1 };
-    xchangeProperty (windowH, atoms->XembedInfo, atoms->XembedInfo, 32, (unsigned char*) info, 2);
+    xchangeProperty (windowH, atoms.XembedInfo, atoms.XembedInfo, 32, (unsigned char*) info, 2);
 
     return windowH;
 }
@@ -1360,7 +1367,12 @@ static int getAllEventsMask (bool ignoresMouseClicks)
 void XWindowSystem::destroyWindow (::Window windowH)
 {
     auto* peer = dynamic_cast<LinuxComponentPeer<::Window>*> (getPeerFor (windowH));
-    jassert (peer != nullptr);
+
+    if (peer == nullptr)
+    {
+        jassertfalse;
+        return;
+    }
 
    #if JUCE_X11_SUPPORTS_XEMBED
     juce_handleXEmbedEvent (peer, nullptr);
@@ -1480,7 +1492,7 @@ void XWindowSystem::setBounds (::Window windowH, Rectangle<int> newBounds, bool 
                 clientMsg.window = windowH;
                 clientMsg.type = ClientMessage;
                 clientMsg.format = 32;
-                clientMsg.message_type = atoms->windowState;
+                clientMsg.message_type = atoms.windowState;
                 clientMsg.data.l[0] = 0;  // Remove
                 clientMsg.data.l[1] = (long) fs;
                 clientMsg.data.l[2] = 0;
@@ -1613,7 +1625,7 @@ void XWindowSystem::setMinimised (::Window windowH, bool shouldBeMinimised) cons
         clientMsg.window = windowH;
         clientMsg.type = ClientMessage;
         clientMsg.format = 32;
-        clientMsg.message_type = atoms->changeState;
+        clientMsg.message_type = atoms.changeState;
         clientMsg.data.l[0] = IconicState;
 
         XWindowSystemUtilities::ScopedXLock xLock;
@@ -1626,9 +1638,9 @@ bool XWindowSystem::isMinimised (::Window windowH) const
     jassert (windowH != 0);
 
     XWindowSystemUtilities::ScopedXLock xLock;
-    XWindowSystemUtilities::GetXProperty prop (windowH, atoms->state, 0, 64, false, atoms->state);
+    XWindowSystemUtilities::GetXProperty prop (windowH, atoms.state, 0, 64, false, atoms.state);
 
-    if (prop.success && prop.actualType == atoms->state
+    if (prop.success && prop.actualType == atoms.state
         && prop.actualFormat == 32 && prop.numItems > 0)
     {
         unsigned long state;
@@ -1649,7 +1661,7 @@ void XWindowSystem::toFront (::Window windowH, bool) const
     ev.xclient.type = ClientMessage;
     ev.xclient.serial = 0;
     ev.xclient.send_event = True;
-    ev.xclient.message_type = atoms->activeWin;
+    ev.xclient.message_type = atoms.activeWin;
     ev.xclient.window = windowH;
     ev.xclient.format = 32;
     ev.xclient.data.l[0] = 2;
@@ -2324,7 +2336,7 @@ void XWindowSystem::copyTextToClipboard (const String& clipText)
     localClipboardContent = clipText;
 
     X11Symbols::getInstance()->xSetSelectionOwner (display, XA_PRIMARY,       juce_messageWindowHandle, CurrentTime);
-    X11Symbols::getInstance()->xSetSelectionOwner (display, atoms->clipboard, juce_messageWindowHandle, CurrentTime);
+    X11Symbols::getInstance()->xSetSelectionOwner (display, atoms.clipboard, juce_messageWindowHandle, CurrentTime);
 }
 
 String XWindowSystem::getTextFromClipboard() const
@@ -2345,7 +2357,7 @@ String XWindowSystem::getTextFromClipboard() const
 
     if ((selectionOwner = X11Symbols::getInstance()->xGetSelectionOwner (display, selection)) == None)
     {
-        selection = atoms->clipboard;
+        selection = atoms.clipboard;
         selectionOwner = X11Symbols::getInstance()->xGetSelectionOwner (display, selection);
     }
 
@@ -2353,7 +2365,7 @@ String XWindowSystem::getTextFromClipboard() const
     {
         if (selectionOwner == juce_messageWindowHandle)
             content = localClipboardContent;
-        else if (! ClipboardHelpers::requestSelectionContent (display, content, selection, atoms->utf8String))
+        else if (! ClipboardHelpers::requestSelectionContent (display, content, selection, atoms.utf8String))
             ClipboardHelpers::requestSelectionContent (display, content, selection, XA_STRING);
     }
 
@@ -2468,7 +2480,7 @@ void XWindowSystem::removeWindowDecorations (::Window windowH) const
     if (hints != None)
     {
         XWindowSystemUtilities::ScopedXLock xLock;
-        xchangeProperty (windowH, atoms->windowType, XA_ATOM, 32, &hints, 1);
+        xchangeProperty (windowH, atoms.windowType, XA_ATOM, 32, &hints, 1);
     }
 }
 
@@ -2548,7 +2560,7 @@ void XWindowSystem::setWindowType (::Window windowH, int styleFlags) const
     else
         netHints [0] = XWindowSystemUtilities::Atoms::getIfExists (display, "_NET_WM_WINDOW_TYPE_NORMAL");
 
-    xchangeProperty (windowH, atoms->windowType, XA_ATOM, 32, &netHints, 1);
+    xchangeProperty (windowH, atoms.windowType, XA_ATOM, 32, &netHints, 1);
 
     int numHints = 0;
 
@@ -2559,7 +2571,7 @@ void XWindowSystem::setWindowType (::Window windowH, int styleFlags) const
         netHints [numHints++] = XWindowSystemUtilities::Atoms::getIfExists (display, "_NET_WM_STATE_ABOVE");
 
     if (numHints > 0)
-        xchangeProperty (windowH, atoms->windowState, XA_ATOM, 32, &netHints, numHints);
+        xchangeProperty (windowH, atoms.windowState, XA_ATOM, 32, &netHints, numHints);
 }
 
 void XWindowSystem::initialisePointerMap()
@@ -2644,7 +2656,7 @@ long XWindowSystem::getUserTime (::Window windowH) const
 {
     jassert (windowH != 0);
 
-    XWindowSystemUtilities::GetXProperty prop (windowH, atoms->userTime, 0, 65536, false, XA_CARDINAL);
+    XWindowSystemUtilities::GetXProperty prop (windowH, atoms.userTime, 0, 65536, false, XA_CARDINAL);
 
     if (! prop.success)
         return 0;
@@ -2656,7 +2668,7 @@ long XWindowSystem::getUserTime (::Window windowH) const
 }
 
 //==============================================================================
-void XWindowSystem::initialiseXDisplay()
+bool XWindowSystem::initialiseXDisplay()
 {
     jassert (display == nullptr);
 
@@ -2675,12 +2687,9 @@ void XWindowSystem::initialiseXDisplay()
             break;
     }
 
-    // This is fatal!  Print error and closedown
+    // No X Server running
     if (display == nullptr)
-    {
-        Logger::outputDebugString ("Failed to connect to the X Server.");
-        Process::terminate();
-    }
+        return false;
 
     // Create a context to store user data associated with Windows we create
     windowHandleXContext = (XContext) X11Symbols::getInstance()->xrmUniqueQuark();
@@ -2698,7 +2707,7 @@ void XWindowSystem::initialiseXDisplay()
 
     X11Symbols::getInstance()->xSync (display, False);
 
-    atoms = std::make_unique<XWindowSystemUtilities::Atoms> (display);
+    atoms = XWindowSystemUtilities::Atoms (display);
 
     // Get defaults for various properties
     auto root = X11Symbols::getInstance()->xRootWindow (display, screen);
@@ -2754,6 +2763,8 @@ void XWindowSystem::initialiseXDisplay()
 
                                             } while (display != nullptr);
                                         });
+
+    return true;
 }
 
 void XWindowSystem::destroyXDisplay()
@@ -3235,11 +3246,11 @@ void XWindowSystem::handleMappingNotify (XMappingEvent& mappingEvent) const
 
 void XWindowSystem::handleClientMessageEvent (LinuxComponentPeer<::Window>* peer, XClientMessageEvent& clientMsg, XEvent& event) const
 {
-    if (clientMsg.message_type == atoms->protocols && clientMsg.format == 32)
+    if (clientMsg.message_type == atoms.protocols && clientMsg.format == 32)
     {
         auto atom = (Atom) clientMsg.data.l[0];
 
-        if (atom == atoms->protocolList [XWindowSystemUtilities::Atoms::PING])
+        if (atom == atoms.protocolList [XWindowSystemUtilities::Atoms::PING])
         {
             auto root = X11Symbols::getInstance()->xRootWindow (display, X11Symbols::getInstance()->xDefaultScreen (display));
 
@@ -3248,7 +3259,7 @@ void XWindowSystem::handleClientMessageEvent (LinuxComponentPeer<::Window>* peer
             X11Symbols::getInstance()->xSendEvent (display, root, False, NoEventMask, &event);
             X11Symbols::getInstance()->xFlush (display);
         }
-        else if (atom == atoms->protocolList [XWindowSystemUtilities::Atoms::TAKE_FOCUS])
+        else if (atom == atoms.protocolList [XWindowSystemUtilities::Atoms::TAKE_FOCUS])
         {
             if ((peer->getStyleFlags() & ComponentPeer::windowIgnoresKeyPresses) == 0)
             {
@@ -3269,37 +3280,37 @@ void XWindowSystem::handleClientMessageEvent (LinuxComponentPeer<::Window>* peer
                 }
             }
         }
-        else if (atom == atoms->protocolList [XWindowSystemUtilities::Atoms::DELETE_WINDOW])
+        else if (atom == atoms.protocolList [XWindowSystemUtilities::Atoms::DELETE_WINDOW])
         {
             peer->handleUserClosingWindow();
         }
     }
-    else if (clientMsg.message_type == atoms->XdndEnter)
+    else if (clientMsg.message_type == atoms.XdndEnter)
     {
         dragAndDropStateMap[peer].handleDragAndDropEnter (clientMsg, peer);
     }
-    else if (clientMsg.message_type == atoms->XdndLeave)
+    else if (clientMsg.message_type == atoms.XdndLeave)
     {
         dragAndDropStateMap[peer].handleDragAndDropExit();
         dragAndDropStateMap.erase (peer);
     }
-    else if (clientMsg.message_type == atoms->XdndPosition)
+    else if (clientMsg.message_type == atoms.XdndPosition)
     {
         dragAndDropStateMap[peer].handleDragAndDropPosition (clientMsg, peer);
     }
-    else if (clientMsg.message_type == atoms->XdndDrop)
+    else if (clientMsg.message_type == atoms.XdndDrop)
     {
         dragAndDropStateMap[peer].handleDragAndDropDrop (clientMsg, peer);
     }
-    else if (clientMsg.message_type == atoms->XdndStatus)
+    else if (clientMsg.message_type == atoms.XdndStatus)
     {
         dragAndDropStateMap[peer].handleExternalDragAndDropStatus (clientMsg);
     }
-    else if (clientMsg.message_type == atoms->XdndFinished)
+    else if (clientMsg.message_type == atoms.XdndFinished)
     {
         dragAndDropStateMap[peer].externalResetDragAndDrop();
     }
-    else if (clientMsg.message_type == atoms->XembedMsgType && clientMsg.format == 32)
+    else if (clientMsg.message_type == atoms.XembedMsgType && clientMsg.format == 32)
     {
         handleXEmbedMessage (peer, clientMsg);
     }

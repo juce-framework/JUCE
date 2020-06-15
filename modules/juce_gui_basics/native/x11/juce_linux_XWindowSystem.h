@@ -67,7 +67,8 @@ namespace XWindowSystemUtilities
             PING = 2
         };
 
-        Atoms (::Display*);
+        Atoms() = default;
+        explicit Atoms (::Display*);
 
         static Atom getIfExists (::Display*, const char* name);
         static Atom getCreating (::Display*, const char* name);
@@ -150,7 +151,7 @@ public:
     String getLocalClipboardContent() const    { return localClipboardContent; }
 
     ::Display* getDisplay()                    { return display; }
-    XWindowSystemUtilities::Atoms& getAtoms()  { jassert (atoms.get() != nullptr); return *atoms; }
+    XWindowSystemUtilities::Atoms& getAtoms()  { return atoms; }
 
     //==============================================================================
     void handleWindowMessage (LinuxComponentPeer<::Window>* peer, XEvent& event) const;
@@ -163,7 +164,7 @@ private:
     ~XWindowSystem();
 
     //==============================================================================
-    void initialiseXDisplay();
+    bool initialiseXDisplay();
     void destroyXDisplay();
 
     //==============================================================================
@@ -207,7 +208,7 @@ private:
     //==============================================================================
     bool xIsAvailable = false;
 
-    std::unique_ptr<XWindowSystemUtilities::Atoms> atoms;
+    XWindowSystemUtilities::Atoms atoms;
     ::Display* display = nullptr;
     Colormap colormap = {};
     Visual* visual = nullptr;
