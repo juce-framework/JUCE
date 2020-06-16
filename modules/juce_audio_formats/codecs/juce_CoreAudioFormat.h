@@ -43,12 +43,10 @@ namespace juce
 class JUCE_API  CoreAudioFormat     : public AudioFormat
 {
 public:
-    //==============================================================================
-    /** Creates a format object. */
-    CoreAudioFormat();
-
     /** Destructor. */
     ~CoreAudioFormat() override;
+
+    static void registerFormats (AudioFormatManager&);
 
     //==============================================================================
     /** Metadata property name used when reading a caf file with a MIDI chunk. */
@@ -79,6 +77,10 @@ public:
     using AudioFormat::createWriterFor;
 
 private:
+    CoreAudioFormat (uint32, StringArray);
+
+    uint32 fileTypeID;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreAudioFormat)
 };
 

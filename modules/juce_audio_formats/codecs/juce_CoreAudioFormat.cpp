@@ -561,9 +561,129 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreAudioReader)
 };
 
+static AudioFormatID formatForFileType (AudioFileTypeID fileType)
+{
+    AudioFormatID formatIds[10];
+    UInt32 sizeOfArray = sizeof (formatIds);
+    AudioFileGetGlobalInfo (
+        kAudioFileGlobalInfo_AvailableFormatIDs, sizeof (fileType), (void*) &fileType, &sizeOfArray, &formatIds);
+    jassert (sizeOfArray != 0);
+    return formatIds[0];
+}
+
+static void fillAudioStreamBasicDescription (AudioStreamBasicDescription* fmt)
+{
+    UInt32 sz = sizeof (AudioStreamBasicDescription);
+    OSStatus e = AudioFormatGetProperty (kAudioFormatProperty_FormatInfo, 0, nullptr, &sz, fmt);
+    jassert (e == noErr);
+}
+
+class CoreAudioWriter : public AudioFormatWriter
+{
+public:
+    CoreAudioWriter (
+        OutputStream* out, AudioFileTypeID fileType, double sr, unsigned int numberOfChannels, int bitsPerSamp)
+    : AudioFormatWriter (out, coreAudioFormatName, sr, numberOfChannels, bitsPerSamp)
+    {
+        usesFloatingPointData = true;
+        {
+            AudioStreamBasicDescription fmt;
+            memset (&fmt, 0, sizeof (fmt));
+            fmt.mSampleRate = sr;
+            fmt.mChannelsPerFrame = numberOfChannels;
+            fmt.mFormatID = formatForFileType (fileType);
+            OSStatus e = AudioFileInitializeWithCallbacks (
+                this,
+                &readCallback,
+                &writeCallback,
+                &getSizeCallback,
+                &setSizeCallback,
+                fileType,
+                &fmt,
+                0,
+                &audioFileID);
+            jassert (e == noErr);
+        }
+        ExtAudioFileWrapAudioFileID (audioFileID, true, &audioFileRef);
+        {
+            AudioStreamBasicDescription fmt;
+            memset (&fmt, 0, sizeof (fmt));
+            fmt.mSampleRate = sr;
+            fmt.mChannelsPerFrame = numberOfChannels;
+            fmt.mFormatID = kAudioFormatLinearPCM;
+            fmt.mFormatFlags =
+                kLinearPCMFormatFlagIsFloat | kLinearPCMFormatFlagIsNonInterleaved | kAudioFormatFlagsNativeEndian;
+            fmt.mBitsPerChannel = sizeof (float) * 8;
+            fmt.mBytesPerFrame = sizeof (float);
+            fillAudioStreamBasicDescription (&fmt);
+            OSStatus e =
+                ExtAudioFileSetProperty (audioFileRef, kExtAudioFileProperty_ClientDataFormat, sizeof (fmt), &fmt);
+            jassert (e == noErr);
+        }
+        bufferList.malloc (1, sizeof (AudioBufferList) + numChannels * sizeof (::AudioBuffer));
+        bufferList->mNumberBuffers = numChannels;
+        srcPos = 0;
+    }
+
+    ~CoreAudioWriter()
+    {
+        ExtAudioFileDispose (audioFileRef);
+        AudioFileClose (audioFileID);
+    }
+
+    bool write (const int** samplesToWrite, int numSamples) override
+    {
+        for (int j = (int) numChannels; --j >= 0;)
+        {
+            bufferList->mBuffers[j].mNumberChannels = 1;
+            bufferList->mBuffers[j].mDataByteSize = (UInt32) numSamples * sizeof (float);
+            bufferList->mBuffers[j].mData = (void*) samplesToWrite[j];
+        }
+        return ExtAudioFileWrite (audioFileRef, numSamples, bufferList) == noErr;
+    }
+
+    bool flush() override
+    {
+        output->flush();
+        return true;
+    }
+
+private:
+    AudioFileID audioFileID;
+    ExtAudioFileRef audioFileRef;
+    HeapBlock<AudioBufferList> bufferList;
+    SInt64 srcPos;
+
+    static OSStatus writeCallback (
+        void* inClientData, SInt64 inPosition, UInt32 requestCount, const void* buffer, UInt32* actualCount)
+    {
+        auto* self = static_cast<CoreAudioWriter*> (inClientData);
+        self->output->setPosition (inPosition);
+        if (! self->output->write (buffer, requestCount))
+            return -1;
+        *actualCount = requestCount;
+        return noErr;
+    }
+
+    // These callbacks unnecessary and we could just use nullptr except Xcode gives a warning!
+    static OSStatus readCallback (void*, SInt64, UInt32, void*, UInt32*)
+    {
+        jassertfalse;
+        return -1;
+    }
+    static SInt64 getSizeCallback (void*)
+    {
+        jassertfalse;
+        return 0;
+    }
+    static OSStatus setSizeCallback (void*, SInt64) { return noErr; }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreAudioWriter)
+};
+
 //==============================================================================
-CoreAudioFormat::CoreAudioFormat()
-    : AudioFormat (coreAudioFormatName, findFileExtensionsForCoreAudioCodecs())
+CoreAudioFormat::CoreAudioFormat (AudioFileTypeID fileType, StringArray exts)
+: AudioFormat (coreAudioFormatName + String (" for ") + exts[0], exts), fileTypeID (fileType)
 {
 }
 
@@ -590,17 +710,40 @@ AudioFormatReader* CoreAudioFormat::createReaderFor (InputStream* sourceStream,
     return nullptr;
 }
 
-AudioFormatWriter* CoreAudioFormat::createWriterFor (OutputStream*,
-                                                     double /*sampleRateToUse*/,
-                                                     unsigned int /*numberOfChannels*/,
-                                                     int /*bitsPerSample*/,
-                                                     const StringPairArray& /*metadataValues*/,
-                                                     int /*qualityOptionIndex*/)
+AudioFormatWriter* CoreAudioFormat::createWriterFor (
+    OutputStream* output,
+    double sampleRateToUse,
+    unsigned int numberOfChannels,
+    int bitsPerSample,
+    const StringPairArray& /*metadataValues*/,
+    int /*qualityOptionIndex*/)
 {
-    jassertfalse; // not yet implemented!
-    return nullptr;
+    return new CoreAudioWriter (output, fileTypeID, sampleRateToUse, numberOfChannels, bitsPerSample);
 }
 
+static AudioFileTypeID audioFileTypeForExtension (String extension)
+{
+    jassert (extension.startsWith ("."));
+    AudioFileTypeID types[10];
+    UInt32 sizeOfArray = sizeof (types);
+    {
+        CFStringRef extCFStr = extension.substring (1).toCFString();
+        AudioFileGetGlobalInfo (
+            kAudioFileGlobalInfo_TypesForExtension, sizeof (extCFStr), (void*) &extCFStr, &sizeOfArray, &types);
+        CFRelease (extCFStr);
+    }
+    jassert (sizeOfArray != 0);
+    return types[0];
+}
+
+void CoreAudioFormat::registerFormats (AudioFormatManager& formats)
+{
+    std::map<AudioFileTypeID, StringArray> extensions;
+    for (auto ext : findFileExtensionsForCoreAudioCodecs())
+        extensions[audioFileTypeForExtension (ext)].add (ext);
+    for (const auto& i : extensions)
+        formats.registerFormat (new CoreAudioFormat (i.first, i.second), false);
+}
 
 //==============================================================================
 //==============================================================================
