@@ -543,6 +543,13 @@ WebBrowserComponent::WebBrowserComponent (bool unloadWhenHidden)
     addAndMakeVisible (browser.get());
 }
 
+WebBrowserComponent::WebBrowserComponent (bool unloadWhenHidden,
+                                          const File&,
+                                          const File&)
+    : WebBrowserComponent (unloadWhenHidden)
+{
+}
+
 WebBrowserComponent::~WebBrowserComponent()
 {
 }

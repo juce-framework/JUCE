@@ -59,15 +59,15 @@
 
 /** Config: JUCE_USE_WIN_WEBVIEW2
     Enables the use of the Microsoft Edge (Chromium) WebView2 browser on Windows,
-    currently in developer preview. This requires Microsoft Edge (minimum version
-    82.0.488.0) to be installed on the user's machine at runtime.
+    currently in developer preview.
 
     If using the Projucer, the Microsoft.Web.WebView2 package will be added to the
     project solution if this flag is enabled. If you are building using CMake you
     will need to manually add the package via the Visual Studio package manager.
 
-    If the required components are not available at runtime it will fall back to the
-    IE-based Win32 web view.
+    In addition to enabling this macro, you will need to use the
+    WindowsWebView2WebBrowserComponent wrapper - see the documentation of that
+    class for more details.
 */
 #ifndef JUCE_USE_WIN_WEBVIEW2
  #define JUCE_USE_WIN_WEBVIEW2 0

@@ -898,9 +898,9 @@ private:
 };
 
 //==============================================================================
-WebBrowserComponent::WebBrowserComponent (const bool unloadPageWhenBrowserIsHidden_)
+WebBrowserComponent::WebBrowserComponent (const bool unloadWhenHidden)
     : browser (new Pimpl (*this)),
-      unloadPageWhenBrowserIsHidden (unloadPageWhenBrowserIsHidden_)
+      unloadPageWhenBrowserIsHidden (unloadWhenHidden)
 {
     ignoreUnused (blankPageShown);
     ignoreUnused (unloadPageWhenBrowserIsHidden);
@@ -908,6 +908,13 @@ WebBrowserComponent::WebBrowserComponent (const bool unloadPageWhenBrowserIsHidd
     setOpaque (true);
 
     browser->init();
+}
+
+WebBrowserComponent::WebBrowserComponent (bool unloadWhenHidden,
+                                          const File&,
+                                          const File&)
+    : WebBrowserComponent (unloadWhenHidden)
+{
 }
 
 WebBrowserComponent::~WebBrowserComponent()

@@ -26,10 +26,12 @@ namespace juce
     A component that displays an embedded web browser.
 
     The browser itself will be platform-dependent. On Mac and iOS it will be
-    WebKit, on Android it will be Chrome, and on Linux it will be WebKit. On
-    Windows, if the JUCE_USE_WIN_WEBVIEW2 flag is enabled, it will either be
-    Microsoft Edge (Chromium) or IE depending on availability of the Edge
-    runtime.
+    WebKit, on Android it will be Chrome, and on Linux it will be WebKit.
+
+    On Windows it will be IE, but if JUCE_USE_WIN_WEBVIEW2 is enabled then using
+    the WindowsWebView2WebBrowserComponent wrapper instead of this class directly
+    will attempt to use the Microsoft Edge (Chromium) WebView2. See the documentation
+    of that class for more information about its requirements.
 
     @tags{GUI}
 */
@@ -134,6 +136,13 @@ public:
 
 private:
     //==============================================================================
+    friend class WindowsWebView2WebBrowserComponent;
+
+    explicit WebBrowserComponent (bool unloadPageWhenBrowserIsHidden,
+                                  const File& dllLocation,
+                                  const File& userDataFolder);
+
+    //==============================================================================
     std::unique_ptr<Pimpl> browser;
     bool blankPageShown = false, unloadPageWhenBrowserIsHidden;
     String lastURL;
@@ -144,6 +153,50 @@ private:
     void checkWindowAssociation();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebBrowserComponent)
+};
+
+//==============================================================================
+/**
+    If you have enabled the JUCE_USE_WIN_WEBVIEW2 flag then this wrapper will attempt to
+    use the Microsoft Edge (Chromium) WebView2 control instead of IE on Windows. It will
+    behave the same as WebBrowserComponent on all other platforms and will fall back to
+    IE on Windows if the WebView2 requirements are not met.
+
+    This requires Microsoft Edge (minimum version 82.0.488.0) to be installed at runtime.
+
+    Currently this also requires that WebView2Loader.dll, which can be found in the
+    Microsoft.Web.WebView package, is installed at runtime. As this is not a standard
+    system DLL, we can't rely on it being found via the normal system DLL search paths.
+    Therefore in order to use WebView2 you need to ensure that WebView2Loader.dll is
+    installed either to a location covered by the Windows DLL system search paths or
+    to the folder specified in the constructor of this class.
+*/
+class WindowsWebView2WebBrowserComponent  : public WebBrowserComponent
+{
+public:
+    /** Creates a WebBrowserComponent that is compatible with the WebView2 control
+        on Windows.
+
+        This allows you to specify a custom location for the WebView2Loader.dll as
+        well as a non-default location for storing user data for the browser instance.
+
+        @param unloadPageWhenBrowserIsHidden  if this is true, then when the browser
+                               component is taken offscreen, it'll clear the current page
+                               and replace it with a blank page - this can be handy to stop
+                               the browser using resources in the background when it's not
+                               actually being used.
+        @param dllLocation     the path to WebView2Loader.dll, if this is empty then the default
+                               system DLL search paths will be used
+        @param userDataFolder  a directory in which the WebView2 user data will be stored, if
+                               this is empty then a directory will be created next to the
+                               executable
+    */
+    explicit WindowsWebView2WebBrowserComponent (bool unloadPageWhenBrowserIsHidden = true,
+                                                 const File& dllLocation = {},
+                                                 const File& userDataFolder = {})
+        : WebBrowserComponent (unloadPageWhenBrowserIsHidden, dllLocation, userDataFolder)
+    {
+    }
 };
 
 #endif

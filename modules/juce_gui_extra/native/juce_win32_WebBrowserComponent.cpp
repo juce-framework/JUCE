@@ -324,14 +324,14 @@ class WebView2  : public InternalWebViewType,
                   public ComponentMovementWatcher
 {
 public:
-    WebView2 (WebBrowserComponent& o)
+    WebView2 (WebBrowserComponent& o, const File& dllLocation, const File& userDataFolder)
          : ComponentMovementWatcher (&o),
            owner (o)
     {
         if (! WinRTWrapper::getInstance()->isInitialised())
             throw std::runtime_error ("Failed to initialise the WinRT wrapper");
 
-        if (! createWebViewEnvironment())
+        if (! createWebViewEnvironment (dllLocation, userDataFolder))
             throw std::runtime_error ("Failed to create the CoreWebView2Environemnt");
 
         owner.addAndMakeVisible (this);
@@ -586,11 +586,32 @@ private:
         }
     }
 
-    bool createWebViewEnvironment()
+    bool createWebViewEnvironment (const File& dllLocation, const File& userDataFolder)
     {
+        using CreateWebViewEnvironmentWithOptionsFunc = HRESULT (*) (PCWSTR, PCWSTR,
+                                                                     ICoreWebView2EnvironmentOptions*,
+                                                                     ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler*);
+
+        auto dllPath = dllLocation.getFullPathName();
+
+        if (dllPath.isEmpty())
+            dllPath = "WebView2Loader.dll";
+
+        auto loaderModule = LoadLibraryA (dllPath.toUTF8());
+        auto* createWebViewEnvironmentWithOptions = (CreateWebViewEnvironmentWithOptionsFunc) GetProcAddress (loaderModule,
+                                                                                                              "CreateCoreWebView2EnvironmentWithOptions");
+        if (createWebViewEnvironmentWithOptions == nullptr)
+        {
+            // failed to load WebView2Loader.dll
+            jassertfalse;
+            return false;
+        }
+
         auto options = Microsoft::WRL::Make<CoreWebView2EnvironmentOptions>();
 
-        auto hr = CreateCoreWebView2EnvironmentWithOptions (nullptr, nullptr, options.Get(),
+        auto hr = createWebViewEnvironmentWithOptions (nullptr,
+                                                       userDataFolder != File() ? userDataFolder.getFullPathName().toWideCharPointer() : nullptr,
+                                                       options.Get(),
             Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
                 [this] (HRESULT, ICoreWebView2Environment* env) -> HRESULT
                 {
@@ -611,8 +632,15 @@ private:
                 Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler> (
                     [this] (HRESULT, ICoreWebView2Controller* controller) -> HRESULT
                     {
-                        webViewController = controller;
-                        controller->get_CoreWebView2 (webView.resetAndGetPointerAddress());
+                        if (controller != nullptr)
+                        {
+                            webViewController = controller;
+                            controller->get_CoreWebView2(webView.resetAndGetPointerAddress());
+                        }
+                        else
+                        {
+                            jassertfalse;
+                        }
 
                         isCreating = false;
 
@@ -693,15 +721,20 @@ private:
 class WebBrowserComponent::Pimpl
 {
 public:
-    Pimpl (WebBrowserComponent& owner)
+    Pimpl (WebBrowserComponent& owner, const File& dllLocation, const File& userDataFolder, bool useWebView2)
     {
-       #if JUCE_USE_WIN_WEBVIEW2
-        try
+        if (useWebView2)
         {
-            internal.reset (new WebView2 (owner));
+           #if JUCE_USE_WIN_WEBVIEW2
+            try
+            {
+                internal.reset (new WebView2 (owner, dllLocation, userDataFolder));
+            }
+            catch (std::runtime_error&) {}
+           #endif
         }
-        catch (std::runtime_error&) {}
-       #endif
+
+        ignoreUnused (dllLocation, userDataFolder);
 
         if (internal == nullptr)
             internal.reset (new Win32WebView (owner));
@@ -718,7 +751,16 @@ private:
 
 //==============================================================================
 WebBrowserComponent::WebBrowserComponent (bool unloadWhenHidden)
-    : browser (new Pimpl (*this)),
+    : browser (new Pimpl (*this, {}, {}, false)),
+      unloadPageWhenBrowserIsHidden (unloadWhenHidden)
+{
+    setOpaque (true);
+}
+
+WebBrowserComponent::WebBrowserComponent (bool unloadWhenHidden,
+                                          const File& dllLocation,
+                                          const File& userDataFolder)
+    : browser (new Pimpl (*this, dllLocation, userDataFolder, true)),
       unloadPageWhenBrowserIsHidden (unloadWhenHidden)
 {
     setOpaque (true);
