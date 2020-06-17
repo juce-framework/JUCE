@@ -341,6 +341,9 @@ public:
     {
         removeEventHandlers();
         closeWebView();
+
+        if (webView2LoaderHandle != nullptr)
+            ::FreeLibrary (webView2LoaderHandle);
     }
 
     void createBrowser() override
@@ -597,8 +600,12 @@ private:
         if (dllPath.isEmpty())
             dllPath = "WebView2Loader.dll";
 
-        auto loaderModule = LoadLibraryA (dllPath.toUTF8());
-        auto* createWebViewEnvironmentWithOptions = (CreateWebViewEnvironmentWithOptionsFunc) GetProcAddress (loaderModule,
+        webView2LoaderHandle = LoadLibraryA (dllPath.toUTF8());
+
+        if (webView2LoaderHandle == nullptr)
+            return false;
+
+        auto* createWebViewEnvironmentWithOptions = (CreateWebViewEnvironmentWithOptionsFunc) GetProcAddress (webView2LoaderHandle,
                                                                                                               "CreateCoreWebView2EnvironmentWithOptions");
         if (createWebViewEnvironmentWithOptions == nullptr)
         {
@@ -609,13 +616,16 @@ private:
 
         auto options = Microsoft::WRL::Make<CoreWebView2EnvironmentOptions>();
 
+        WeakReference<WebView2> weakThis (this);
         auto hr = createWebViewEnvironmentWithOptions (nullptr,
                                                        userDataFolder != File() ? userDataFolder.getFullPathName().toWideCharPointer() : nullptr,
                                                        options.Get(),
             Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
-                [this] (HRESULT, ICoreWebView2Environment* env) -> HRESULT
+                [this, weakThis] (HRESULT, ICoreWebView2Environment* env) -> HRESULT
                 {
-                    webViewEnvironment = env;
+                    if (weakThis != nullptr)
+                        webViewEnvironment = env;
+
                     return S_OK;
                 }).Get());
 
@@ -624,31 +634,32 @@ private:
 
     void createWebView()
     {
-        isCreating = true;
-
         if (auto* peer = getPeer())
         {
+            isCreating = true;
+
+            WeakReference<WebView2> weakThis (this);
+
             webViewEnvironment->CreateCoreWebView2Controller ((HWND) peer->getNativeHandle(),
                 Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler> (
-                    [this] (HRESULT, ICoreWebView2Controller* controller) -> HRESULT
+                    [this, weakThis] (HRESULT, ICoreWebView2Controller* controller) -> HRESULT
                     {
-                        if (controller != nullptr)
+                        if (weakThis != nullptr)
                         {
-                            webViewController = controller;
-                            controller->get_CoreWebView2(webView.resetAndGetPointerAddress());
+                            isCreating = false;
+
+                            if (controller != nullptr)
+                            {
+                                webViewController = controller;
+                                controller->get_CoreWebView2 (webView.resetAndGetPointerAddress());
+
+                                addEventHandlers();
+                                componentMovedOrResized (true, true);
+
+                                if (webView != nullptr && urlRequest.url.isNotEmpty())
+                                    webView->Navigate (urlRequest.url.toWideCharPointer());
+                            }
                         }
-                        else
-                        {
-                            jassertfalse;
-                        }
-
-                        isCreating = false;
-
-                        addEventHandlers();
-                        componentMovedOrResized (true, true);
-
-                        if (webView != nullptr && urlRequest.url.isNotEmpty())
-                            webView->Navigate (urlRequest.url.toWideCharPointer());
 
                         return S_OK;
                     }).Get());
@@ -691,6 +702,8 @@ private:
     //==============================================================================
     WebBrowserComponent& owner;
 
+    HMODULE webView2LoaderHandle = nullptr;
+
     WinRTWrapper::ComPtr<ICoreWebView2Environment> webViewEnvironment;
     WinRTWrapper::ComPtr<ICoreWebView2Controller> webViewController;
     WinRTWrapper::ComPtr<ICoreWebView2> webView;
@@ -712,6 +725,7 @@ private:
     bool isCreating = false;
 
     //==============================================================================
+    JUCE_DECLARE_WEAK_REFERENCEABLE (WebView2)
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebView2)
 };
 
