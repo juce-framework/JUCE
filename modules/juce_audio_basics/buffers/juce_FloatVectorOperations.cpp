@@ -1033,9 +1033,11 @@ intptr_t JUCE_CALLTYPE FloatVectorOperations::getFpStatusRegister() noexcept
     intptr_t fpsr = 0;
   #if JUCE_INTEL && JUCE_USE_SSE_INTRINSICS
     fpsr = static_cast<intptr_t> (_mm_getcsr());
-  #elif defined (__arm64__) || defined (__aarch64__) || JUCE_USE_ARM_NEON
+  #elif defined (__arm64__) || defined (__aarch64__) || defined (_M_ARM64) || JUCE_USE_ARM_NEON
    #if defined (__arm64__) || defined (__aarch64__)
     asm volatile("mrs %0, fpcr" : "=r" (fpsr));
+   #elif defined (_M_ARM64)
+    fpsr = _ReadStatusReg(ARM64_FPSR);
    #elif JUCE_USE_ARM_NEON
     asm volatile("vmrs %0, fpscr" : "=r" (fpsr));
    #endif
@@ -1053,9 +1055,11 @@ void JUCE_CALLTYPE FloatVectorOperations::setFpStatusRegister (intptr_t fpsr) no
   #if JUCE_INTEL && JUCE_USE_SSE_INTRINSICS
     auto fpsr_w = static_cast<uint32_t> (fpsr);
     _mm_setcsr (fpsr_w);
-  #elif defined (__arm64__) || defined (__aarch64__) || JUCE_USE_ARM_NEON
+  #elif defined (__arm64__) || defined (__aarch64__) || defined (_M_ARM64) || JUCE_USE_ARM_NEON
    #if defined (__arm64__) || defined (__aarch64__)
     asm volatile("msr fpcr, %0" : : "ri" (fpsr));
+   #elif defined (_M_ARM64)
+    _WriteStatusReg(ARM64_FPSR, fpsr);
    #elif JUCE_USE_ARM_NEON
     asm volatile("vmsr fpscr, %0" : : "ri" (fpsr));
    #endif
@@ -1069,7 +1073,7 @@ void JUCE_CALLTYPE FloatVectorOperations::setFpStatusRegister (intptr_t fpsr) no
 
 void JUCE_CALLTYPE FloatVectorOperations::enableFlushToZeroMode (bool shouldEnable) noexcept
 {
-  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined (__arm64__) || defined (__aarch64__))
+  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined (__arm64__) || defined (__aarch64__) || defined (_M_ARM64))
    #if JUCE_USE_SSE_INTRINSICS
     intptr_t mask = _MM_FLUSH_ZERO_MASK;
    #else /*JUCE_USE_ARM_NEON*/
@@ -1086,7 +1090,7 @@ void JUCE_CALLTYPE FloatVectorOperations::enableFlushToZeroMode (bool shouldEnab
 
 void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport (bool shouldDisable) noexcept
 {
-  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined (__arm64__) || defined (__aarch64__))
+  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined (__arm64__) || defined (__aarch64__) || defined (_M_ARM64))
    #if JUCE_USE_SSE_INTRINSICS
     intptr_t mask = 0x8040;
    #else /*JUCE_USE_ARM_NEON*/
@@ -1105,7 +1109,7 @@ void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport (bool
 
 bool JUCE_CALLTYPE FloatVectorOperations::areDenormalsDisabled() noexcept
 {
-  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined (__arm64__) || defined (__aarch64__))
+  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined (__arm64__) || defined (__aarch64__) || defined (_M_ARM64))
    #if JUCE_USE_SSE_INTRINSICS
     intptr_t mask = 0x8040;
    #else /*JUCE_USE_ARM_NEON*/
@@ -1120,7 +1124,7 @@ bool JUCE_CALLTYPE FloatVectorOperations::areDenormalsDisabled() noexcept
 
 ScopedNoDenormals::ScopedNoDenormals() noexcept
 {
-  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined (__arm64__) || defined (__aarch64__))
+  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined (__arm64__) || defined (__aarch64__) || defined (_M_ARM64))
    #if JUCE_USE_SSE_INTRINSICS
     intptr_t mask = 0x8040;
    #else /*JUCE_USE_ARM_NEON*/
@@ -1134,7 +1138,7 @@ ScopedNoDenormals::ScopedNoDenormals() noexcept
 
 ScopedNoDenormals::~ScopedNoDenormals() noexcept
 {
-  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined (__arm64__) || defined (__aarch64__))
+  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined (__arm64__) || defined (__aarch64__) || defined (_M_ARM64))
     FloatVectorOperations::setFpStatusRegister (fpsr);
   #endif
 }

@@ -492,8 +492,10 @@ private:
 
 static AudioBlockUnitTests<float> audioBlockFloatUnitTests;
 static AudioBlockUnitTests<double> audioBlockDoubleUnitTests;
+#if JUCE_USE_SIMD
 static AudioBlockUnitTests<SIMDRegister<float>> audioBlockSIMDFloatUnitTests;
 static AudioBlockUnitTests<SIMDRegister<double>> audioBlockSIMDDoubleUnitTests;
+#endif
 
 } // namespace dsp
 } // namespace juce

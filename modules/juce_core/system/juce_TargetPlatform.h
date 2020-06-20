@@ -57,7 +57,7 @@
 #endif
 
 //==============================================================================
-#if defined (_WIN32) || defined (_WIN64)
+#if defined (_WIN32) || defined (_WIN64) || defined (_M_ARM) || defined (_M_ARM64)
   #define       JUCE_WIN32 1
   #define       JUCE_WINDOWS 1
 #elif defined (JUCE_ANDROID)
@@ -86,8 +86,9 @@
 //==============================================================================
 #if JUCE_WINDOWS
   #ifdef _MSC_VER
-    #ifdef _WIN64
+    #if defined (_WIN64) || defined (_M_ARM64)
       #define JUCE_64BIT 1
+      #define JUCE_USE_ARM_NEON 1
     #else
       #define JUCE_32BIT 1
     #endif
@@ -109,7 +110,18 @@
   /** If defined, this indicates that the processor is little-endian. */
   #define JUCE_LITTLE_ENDIAN 1
 
+  #if defined (_M_ARM) || defined (_M_ARM64)
+    #define JUCE_ARM 1
+    #if defined (__LITTLE_ENDIAN__) || ! defined (JUCE_BIG_ENDIAN)
+        #define JUCE_LITTLE_ENDIAN 1
+        #undef JUCE_BIG_ENDIAN
+    #else
+        #undef JUCE_LITTLE_ENDIAN
+        #define JUCE_BIG_ENDIAN 1
+    #endif
+  #else
   #define JUCE_INTEL 1
+  #endif
 #endif
 
 //==============================================================================

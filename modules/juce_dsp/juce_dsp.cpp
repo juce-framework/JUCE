@@ -68,7 +68,7 @@
   #else
    #include "native/juce_sse_SIMDNativeOps.cpp"
   #endif
- #elif defined(__arm__) || defined(_M_ARM) || defined (__arm64__) || defined (__aarch64__)
+ #elif defined(__arm__) || defined(_M_ARM) || defined (__arm64__) || defined (__aarch64__) || defined(_M_ARM64)
   #include "native/juce_neon_SIMDNativeOps.cpp"
  #else
   #error "SIMD register support not implemented for this platform"

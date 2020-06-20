@@ -23,7 +23,7 @@
 namespace juce
 {
 
-#if JUCE_MSVC
+#if JUCE_MSVC && ! defined (_M_ARM) && ! defined (_M_ARM64)
  #pragma intrinsic (__cpuid)
  #pragma intrinsic (__rdtsc)
 #endif
@@ -60,7 +60,8 @@ static void callCPUID (int result[4], uint32 type)
 #else
 static void callCPUID (int result[4], int infoType)
 {
-   #if JUCE_PROJUCER_LIVE_BUILD
+   #if JUCE_PROJUCER_LIVE_BUILD || defined(_M_ARM) || defined(_M_ARM64)
+    (void)infoType;
     std::fill (result, result + 4, 0);
    #else
     __cpuid (result, infoType);
@@ -135,6 +136,7 @@ static int findNumberOfPhysicalCores() noexcept
 //==============================================================================
 void CPUInformation::initialise() noexcept
 {
+#if JUCE_INTEL
     int info[4] = { 0 };
     callCPUID (info, 1);
 
@@ -166,6 +168,30 @@ void CPUInformation::initialise() noexcept
     hasAVX512VL        = (info[1] & (1u << 31)) != 0;
     hasAVX512VBMI      = (info[2] & (1u <<  1)) != 0;
     hasAVX512VPOPCNTDQ = (info[2] & (1u << 14)) != 0;
+#else
+    hasMMX = FALSE;
+    hasSSE = FALSE;
+    hasSSE2 = FALSE;
+    hasSSE3 = FALSE;
+    hasAVX = FALSE;
+    hasFMA3 = FALSE;
+    hasSSSE3 = FALSE;
+    hasSSE41 = FALSE;
+    hasSSE42 = FALSE;
+    has3DNow = FALSE;
+    hasFMA4 = FALSE;
+    hasAVX2 = FALSE;
+    hasAVX512F = FALSE;
+    hasAVX512DQ = FALSE;
+    hasAVX512IFMA = FALSE;
+    hasAVX512PF = FALSE;
+    hasAVX512ER = FALSE;
+    hasAVX512CD = FALSE;
+    hasAVX512BW = FALSE;
+    hasAVX512VL = FALSE;
+    hasAVX512VBMI = FALSE;
+    hasAVX512VPOPCNTDQ = FALSE;
+#endif
 
     SYSTEM_INFO systemInfo;
     GetNativeSystemInfo (&systemInfo);
@@ -408,7 +434,11 @@ static int64 juce_getClockCycleCounter() noexcept
 {
    #if JUCE_MSVC
     // MS intrinsics version...
+    #if defined(_M_ARM64)
+        return _ReadStatusReg(ARM64_PMCCNTR_EL0);
+    #else
     return (int64) __rdtsc();
+    #endif
 
    #elif JUCE_GCC || JUCE_CLANG
     // GNU inline asm version...
