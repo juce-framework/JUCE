@@ -123,8 +123,8 @@ Type LadderFilter<Type>::processSample (Type inputValue, size_t channelToUse) no
     const auto b0 = g * Type (0.76923076923);
     const auto b1 = g * Type (0.23076923076);
 
-    const auto dx = gain * saturationLUT (drive * inputValue);
-    const auto a = dx + scaledResonanceValue * Type (-4) * (gain2 * saturationLUT (drive2 * s[4]) - dx * comp);
+    const auto dx = gain * FastMathApproximations::tanh (drive * inputValue);
+    const auto a = dx + scaledResonanceValue * Type (-4) * (gain2 * FastMathApproximations::tanh (drive2 * s[4]) - dx * comp);
 
     const auto b = b1 * s[0] + a1 * s[1] + b0 * a;
     const auto c = b1 * s[1] + a1 * s[2] + b0 * b;
