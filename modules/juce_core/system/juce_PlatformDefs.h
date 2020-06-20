@@ -20,6 +20,13 @@
   ==============================================================================
 */
 
+#if JUCE_USE_CASSERT_ASSERT && JUCE_DEBUG
+#include <cassert>
+#define JUCE_CASSERT_FALSE assert(false)
+#else
+#define JUCE_CASSERT_FALSE
+#endif
+
 namespace juce
 {
 
@@ -145,7 +152,7 @@ namespace juce
       It is only compiled in a debug build, (unless JUCE_LOG_ASSERTIONS is enabled for your build).
       @see jassert
   */
-  #define jassertfalse              JUCE_BLOCK_WITH_FORCED_SEMICOLON (JUCE_LOG_CURRENT_ASSERTION; if (juce::juce_isRunningUnderDebugger()) JUCE_BREAK_IN_DEBUGGER; JUCE_ANALYZER_NORETURN)
+  #define jassertfalse              JUCE_BLOCK_WITH_FORCED_SEMICOLON (JUCE_LOG_CURRENT_ASSERTION; if (juce::juce_isRunningUnderDebugger()) {JUCE_BREAK_IN_DEBUGGER;} else {JUCE_CASSERT_FALSE;} JUCE_ANALYZER_NORETURN)
 
   //==============================================================================
   /** Platform-independent assertion macro.
