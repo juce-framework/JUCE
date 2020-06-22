@@ -82,7 +82,7 @@ private:
         }
 
         bool isPOSTLikeRequest() const override       { return true; }
-        String getEndpointURLSuffix() const override  { return "/authenticate"; }
+        String getEndpointURLSuffix() const override  { return "/authenticate/projucer"; }
         int getSuccessCode() const override           { return 200; }
 
         StringPairArray getParameterNamesAndValues() const override
@@ -146,7 +146,7 @@ private:
         }
 
         bool isPOSTLikeRequest() const override       { return false; }
-        String getEndpointURLSuffix() const override  { return "/user/licences"; }
+        String getEndpointURLSuffix() const override  { return "/user/licences/projucer"; }
         int getSuccessCode() const override           { return 200; }
 
         StringPairArray getParameterNamesAndValues() const override
@@ -178,10 +178,9 @@ private:
 
                 for (auto& license : *licensesJson)
                 {
-                    auto name = license.getProperty ("product_name", {}).toString();
                     auto status = license.getProperty ("status", {}).toString();
 
-                    if (name == "Projucer" && status == "active")
+                    if (status == "active")
                         licenseTypes.add (license.getProperty ("licence_type", {}).toString());
                 }
 
@@ -220,7 +219,7 @@ private:
 
     String runJob (std::unique_ptr<AccountEnquiryBase> accountEnquiryJob, LicenseState& state)
     {
-        const String endpointURL = "https://api.roli.com/api/v1";
+        const String endpointURL = "https://api.juce.com/api/v1";
 
         auto url = URL (endpointURL + accountEnquiryJob->getEndpointURLSuffix());
 

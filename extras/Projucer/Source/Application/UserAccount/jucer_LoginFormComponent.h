@@ -113,7 +113,7 @@ public:
     void mouseUp (const MouseEvent& event) override
     {
         if (event.eventComponent == &createAccountLabel)
-            URL ("https://auth.roli.com/register").launchInDefaultBrowser();
+            URL ("https://juce.com/verification/register").launchInDefaultBrowser();
     }
 
     void lookAndFeelChanged() override
