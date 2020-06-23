@@ -245,12 +245,12 @@ private:
         };
 
         //==============================================================================
-        void valueTreePropertyChanged   (ValueTree&, const Identifier&) override  { triggerAsyncUpdate(); }
-        void valueTreeChildAdded        (ValueTree&, ValueTree&)        override  { triggerAsyncUpdate(); }
-        void valueTreeChildRemoved      (ValueTree&, ValueTree&, int)   override  { triggerAsyncUpdate(); }
-        void valueTreeChildOrderChanged (ValueTree&, int, int)          override  { triggerAsyncUpdate(); }
-        void valueTreeParentChanged     (ValueTree&)                    override  { triggerAsyncUpdate(); }
-        void valueTreeRedirected        (ValueTree&)                    override  { triggerAsyncUpdate(); }
+        void valueTreePropertyChanged   (ValueTree&, const Identifier&) override  { messagesChanged(); }
+        void valueTreeChildAdded        (ValueTree&, ValueTree&)        override  { messagesChanged(); }
+        void valueTreeChildRemoved      (ValueTree&, ValueTree&, int)   override  { messagesChanged(); }
+        void valueTreeChildOrderChanged (ValueTree&, int, int)          override  { messagesChanged(); }
+        void valueTreeParentChanged     (ValueTree&)                    override  { messagesChanged(); }
+        void valueTreeRedirected        (ValueTree&)                    override  { messagesChanged(); }
 
         void handleAsyncUpdate() override
         {

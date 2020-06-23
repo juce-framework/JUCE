@@ -19,14 +19,23 @@
 #pragma once
 
 #include "jucer_LicenseState.h"
+#include "jucer_LicenseQueryThread.h"
 
 //==============================================================================
-class LicenseController
+class LicenseController  : private Timer
 {
 public:
-    LicenseController() = default;
+    LicenseController()
+    {
+        checkLicense();
+    }
 
     //==============================================================================
+    static LicenseState getGPLState()
+    {
+        return { LicenseState::Type::gpl, projucerMajorVersion, {}, {} };
+    }
+
     LicenseState getCurrentState() const noexcept
     {
         return state;
@@ -34,10 +43,13 @@ public:
 
     void setState (const LicenseState& newState)
     {
-        state = newState;
-        licenseStateToSettings (state, getGlobalProperties());
+        if (state != newState)
+        {
+            state = newState;
+            licenseStateToSettings (state, getGlobalProperties());
 
-        stateListeners.call ([] (LicenseStateListener& l) { l.licenseStateChanged(); });
+            stateListeners.call ([] (LicenseStateListener& l) { l.licenseStateChanged(); });
+        }
     }
 
     void resetState()
@@ -45,26 +57,21 @@ public:
         setState ({});
     }
 
-    static LicenseState getGPLState()
+    void signIn (const String& email, const String& password,
+                 std::function<void (const String&)> completionCallback)
     {
-        static auto logoImage = []() -> Image
-        {
-            if (auto logo = Drawable::createFromImageData (BinaryData::gpl_logo_svg, BinaryData::gpl_logo_svgSize))
-            {
-                auto bounds = logo->getDrawableBounds();
+        licenseQueryThread.doSignIn (email, password,
+                                     [this, completionCallback] (LicenseQueryThread::ErrorMessageAndType error,
+                                                                 LicenseState newState)
+                                     {
+                                         completionCallback (error.first);
+                                         setState (newState);
+                                     });
+    }
 
-                Image image (Image::ARGB, roundToInt (bounds.getWidth()), roundToInt (bounds.getHeight()), true);
-                Graphics g (image);
-                logo->draw (g, 1.0f);
-
-                return image;
-            }
-
-            jassertfalse;
-            return {};
-        }();
-
-        return { LicenseState::Type::gpl, {}, {}, logoImage };
+    void cancelSignIn()
+    {
+        licenseQueryThread.cancelRunningJobs();
     }
 
     //==============================================================================
@@ -112,24 +119,6 @@ private:
         return LicenseState::Type::none;
     }
 
-    static Image avatarFromLicenseState (const String& licenseState)
-    {
-        MemoryOutputStream imageData;
-        Base64::convertFromBase64 (imageData, licenseState);
-
-        return ImageFileFormat::loadFrom (imageData.getData(), imageData.getDataSize());
-    }
-
-    static String avatarToLicenseState (Image avatarImage)
-    {
-        MemoryOutputStream imageData;
-
-        if (avatarImage.isValid() && PNGImageFormat().writeImageToStream (avatarImage, imageData))
-            return Base64::toBase64 (imageData.getData(), imageData.getDataSize());
-
-        return {};
-    }
-
     static LicenseState licenseStateFromSettings (PropertiesFile& props)
     {
         if (auto licenseXml = props.getXmlValue ("license"))
@@ -140,9 +129,9 @@ private:
                 auto stateFromOldSettings = [&licenseXml]() -> LicenseState
                 {
                     return { getLicenseTypeFromValue (licenseXml->getChildElementAllSubText ("type", {})),
-                             licenseXml->getChildElementAllSubText ("authToken", {}),
+                             licenseXml->getChildElementAllSubText ("version", "-1").getIntValue(),
                              licenseXml->getChildElementAllSubText ("username", {}),
-                             avatarFromLicenseState (licenseXml->getStringAttribute ("avatar", {})) };
+                             licenseXml->getChildElementAllSubText ("authToken", {}) };
                 }();
 
                 licenseStateToSettings (stateFromOldSettings, props);
@@ -151,9 +140,9 @@ private:
             }
 
             return { getLicenseTypeFromValue (licenseXml->getStringAttribute ("type", {})),
-                     licenseXml->getStringAttribute ("authToken", {}),
+                     licenseXml->getIntAttribute ("version", -1),
                      licenseXml->getStringAttribute ("username", {}),
-                     avatarFromLicenseState (licenseXml->getStringAttribute ("avatar", {})) };
+                     licenseXml->getStringAttribute ("authToken", {}) };
         }
 
         return {};
@@ -163,21 +152,53 @@ private:
     {
         props.removeValue ("license");
 
-        if (state.isValid())
+        if (state.isSignedIn())
         {
             XmlElement licenseXml ("license");
 
             if (auto* typeString = getLicenseStateValue (state.type))
                 licenseXml.setAttribute ("type", typeString);
 
-            licenseXml.setAttribute ("authToken", state.authToken);
+            licenseXml.setAttribute ("version",   state.version);
             licenseXml.setAttribute ("username",  state.username);
-            licenseXml.setAttribute ("avatar",    avatarToLicenseState (state.avatar));
+            licenseXml.setAttribute ("authToken", state.authToken);
 
             props.setValue ("license", &licenseXml);
         }
 
         props.saveIfNeeded();
+    }
+
+    //==============================================================================
+    void checkLicense()
+    {
+        if (state.isSignedIn() && ! state.isGPL())
+        {
+            auto completionCallback = [this] (LicenseQueryThread::ErrorMessageAndType error,
+                                              LicenseState updatedState)
+            {
+                if (error == LicenseQueryThread::ErrorMessageAndType())
+                {
+                    setState (updatedState);
+                }
+                else if ((error.second == LicenseQueryThread::ErrorType::busy
+                         || error.second == LicenseQueryThread::ErrorType::cancelled
+                         || error.second == LicenseQueryThread::ErrorType::connectionError)
+                           && ! hasRetriedLicenseCheck)
+                {
+                    hasRetriedLicenseCheck = true;
+                    startTimer (10000);
+                }
+            };
+
+            licenseQueryThread.checkLicenseValidity (state, std::move (completionCallback));
+        }
+    }
+
+    void timerCallback() override
+    {
+        stopTimer();
+        checkLicense();
     }
 
     //==============================================================================
@@ -188,6 +209,8 @@ private:
    #endif
 
     ListenerList<LicenseStateListener> stateListeners;
+    LicenseQueryThread licenseQueryThread;
+    bool hasRetriedLicenseCheck = false;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LicenseController)

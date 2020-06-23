@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "jucer_LicenseQueryThread.h"
+
 #include "../../Project/UI/jucer_UserAvatarComponent.h"
 
 //==============================================================================
@@ -72,6 +72,11 @@ public:
         lookAndFeelChanged();
 
         setSize (300, 350);
+    }
+
+    ~LoginFormComponent() override
+    {
+        ProjucerApplication::getApp().getLicenseController().cancelSignIn();
     }
 
     void resized() override
@@ -185,9 +190,6 @@ private:
 
     void submitDetails()
     {
-        if ((licenseQueryThread != nullptr && licenseQueryThread->isThreadRunning()))
-            return;
-
         auto loginFormError = checkLoginFormsAreValid();
 
         if (loginFormError.isNotEmpty())
@@ -199,29 +201,27 @@ private:
         updateLoginButtonStates (true);
 
         WeakReference<Component> weakThis (this);
-        licenseQueryThread.reset (new LicenseQueryThread (emailBox.getText(), passwordBox.getText(),
-                                                          [this, weakThis] (LicenseState newState, String errorMessage)
-                                                          {
-                                                              if (weakThis == nullptr)
-                                                                  return;
+        auto completionCallback = [this, weakThis] (const String& errorMessage)
+        {
+            if (weakThis == nullptr)
+                return;
 
-                                                              updateLoginButtonStates (false);
+            updateLoginButtonStates (false);
 
-                                                              if (errorMessage.isNotEmpty())
-                                                              {
-                                                                  showErrorMessage (errorMessage);
-                                                              }
-                                                              else
-                                                              {
-                                                                  hideErrorMessage();
+            if (errorMessage.isNotEmpty())
+            {
+                showErrorMessage (errorMessage);
+            }
+            else
+            {
+                hideErrorMessage();
+                mainWindow.hideLoginFormOverlay();
+                ProjucerApplication::getApp().getCommandManager().commandStatusChanged();
+            }
+        };
 
-                                                                  auto& licenseController = ProjucerApplication::getApp().getLicenseController();
-                                                                  licenseController.setState (newState);
-                                                                  mainWindow.hideLoginFormOverlay();
-
-                                                                  ProjucerApplication::getApp().getCommandManager().commandStatusChanged();
-                                                              }
-                                                          }));
+        ProjucerApplication::getApp().getLicenseController().signIn (emailBox.getText(), passwordBox.getText(),
+                                                                     std::move (completionCallback));
     }
 
     String checkLoginFormsAreValid() const
@@ -263,11 +263,9 @@ private:
                                 findColour (treeIconColourId),
                                 findColour (treeIconColourId).overlaidWith (findColour (defaultHighlightedTextColourId).withAlpha (0.2f)),
                                 findColour (treeIconColourId).overlaidWith (findColour (defaultHighlightedTextColourId).withAlpha (0.4f)) };
-    UserAvatarComponent userAvatar { false, false };
+    UserAvatarComponent userAvatar { false };
     Label createAccountLabel { {}, "Create an account" },
           errorMessageLabel { {}, {} };
-
-    std::unique_ptr<LicenseQueryThread> licenseQueryThread;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LoginFormComponent)
 };

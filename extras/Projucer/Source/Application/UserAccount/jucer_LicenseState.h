@@ -34,16 +34,32 @@ struct LicenseState
 
     LicenseState() = default;
 
-    LicenseState (Type t, String token, String user, Image avatarImage)
-        : type (t), authToken (token), username (user), avatar (avatarImage)
+    LicenseState (Type t, int v, String user, String token)
+        : type (t), version (v), username (user), authToken (token)
     {
     }
 
-    bool isValid() const noexcept      { return isGPL() || (type != Type::none && authToken.isNotEmpty() && username.isNotEmpty()); }
+    bool operator== (const LicenseState& other) const noexcept
+    {
+        return type == other.type
+              && version == other.version
+              && username == other.username
+              && authToken == other.authToken;
+    }
 
-    bool isPaid()      const noexcept  { return type == Type::indie || type == Type::pro; }
-    bool isGPL()       const noexcept  { return type == Type::gpl; }
-    bool isPaidOrGPL() const noexcept  { return isPaid() || isGPL(); }
+    bool operator != (const LicenseState& other) const noexcept
+    {
+        return ! operator== (other);
+    }
+
+    bool isSignedIn() const noexcept    { return isGPL() || (version > 0 && username.isNotEmpty()); }
+    bool isOldLicense() const noexcept  { return isSignedIn() && version < projucerMajorVersion; }
+    bool isGPL()       const noexcept   { return type == Type::gpl; }
+
+    bool canUnlockFullFeatures() const noexcept
+    {
+        return isGPL() || (isSignedIn() && ! isOldLicense() && (type == Type::indie || type == Type::pro));
+    }
 
     String getLicenseTypeString() const
     {
@@ -63,6 +79,6 @@ struct LicenseState
     }
 
     Type type = Type::none;
-    String authToken, username;
-    Image avatar;
+    int version = -1;
+    String username, authToken;
 };

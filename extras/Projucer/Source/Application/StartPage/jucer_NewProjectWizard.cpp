@@ -59,7 +59,7 @@ static void doBasicProjectSetup (Project& project, const NewProjectTemplates::Pr
     project.getProjectValue (Ids::useAppConfig) = false;
     project.getProjectValue (Ids::addUsingNamespaceToJuceHeader) = false;
 
-    if (! ProjucerApplication::getApp().getLicenseController().getCurrentState().isPaidOrGPL())
+    if (! ProjucerApplication::getApp().getLicenseController().getCurrentState().canUnlockFullFeatures())
         project.getProjectValue (Ids::displaySplashScreen) = true;
 
     if (NewProjectTemplates::isPlugin (projectTemplate))

@@ -735,7 +735,7 @@ bool Project::hasIncompatibleLicenseTypeAndSplashScreenSetting() const
                        || companyName == "ROLI Ltd.");
 
     return ! ProjucerApplication::getApp().isRunningCommandLine && ! isJUCEProject && ! shouldDisplaySplashScreen()
-          && ! ProjucerApplication::getApp().getLicenseController().getCurrentState().isPaidOrGPL();
+          && ! ProjucerApplication::getApp().getLicenseController().getCurrentState().canUnlockFullFeatures();
 }
 
 bool Project::isSaveAndExportDisabled() const
@@ -747,9 +747,15 @@ void Project::updateLicenseWarning()
 {
     if (hasIncompatibleLicenseTypeAndSplashScreenSetting())
     {
+        ProjectMessages::MessageAction action;
+
+        if (ProjucerApplication::getApp().getLicenseController().getCurrentState().isOldLicense())
+            action = { "Upgrade", [] { URL ("https://juce.com/get-juce").launchInDefaultBrowser(); } };
+        else
+            action = { "Sign in", [this] { ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (getFile())->showLoginFormOverlay(); } };
+
         addProjectMessage (ProjectMessages::Ids::incompatibleLicense,
-                           { { "Sign in", [this] { ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (getFile())->showLoginFormOverlay(); } },
-                             { "Enable splash screen", [this] { displaySplashScreenValue = true; } } });
+                           { std::move (action), { "Enable splash screen", [this] { displaySplashScreenValue = true; } } });
     }
     else
     {

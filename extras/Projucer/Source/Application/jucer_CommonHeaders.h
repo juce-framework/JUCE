@@ -87,3 +87,6 @@ enum ColourIds
     widgetBackgroundColourId          = 0x2340010,
     secondaryWidgetBackgroundColourId = 0x2340011,
 };
+
+//==============================================================================
+static constexpr int projucerMajorVersion = 5;

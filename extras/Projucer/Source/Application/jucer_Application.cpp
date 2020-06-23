@@ -1087,7 +1087,7 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
             if (licenseState.isGPL())
                 result.setInfo ("Disable GPL mode", "Disables GPL mode", CommandCategories::general, 0);
             else
-                result.setInfo (licenseState.isValid() ? String ("Sign out ") + licenseState.username + "..." : String ("Sign in..."),
+                result.setInfo (licenseState.isSignedIn() ? String ("Sign out ") + licenseState.username + "..." : String ("Sign in..."),
                                 "Sign out of your JUCE account",
                                 CommandCategories::general, 0);
             break;
@@ -1349,7 +1349,11 @@ void ProjucerApplication::launchTutorialsBrowser()
 
 void ProjucerApplication::doLoginOrLogout()
 {
-    if (licenseController->getCurrentState().type == LicenseState::Type::none)
+    if (licenseController->getCurrentState().isSignedIn())
+    {
+        licenseController->resetState();
+    }
+    else
     {
         if (auto* window = mainWindowList.getMainWindowWithLoginFormOpen())
         {
@@ -1360,10 +1364,6 @@ void ProjucerApplication::doLoginOrLogout()
             mainWindowList.createWindowIfNoneAreOpen();
             mainWindowList.getFrontmostWindow()->showLoginFormOverlay();
         }
-    }
-    else
-    {
-        licenseController->resetState();
     }
 }
 

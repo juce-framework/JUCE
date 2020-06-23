@@ -94,7 +94,7 @@ private:
     Label configLabel  { "Config Label", "Selected exporter" }, projectNameLabel;
 
     ImageComponent juceIcon;
-    UserAvatarComponent userAvatar { true, true };
+    UserAvatarComponent userAvatar { true };
 
     IconButton projectSettingsButton { "Project Settings", getIcons().settings },
                saveAndOpenInIDEButton { "Save and Open in IDE", Image() },
