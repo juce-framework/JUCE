@@ -18,8 +18,10 @@
 
 #include "../../Application/jucer_Headers.h"
 #include "jucer_ProjucerLookAndFeel.h"
-#include "../../Application/jucer_Application.h"
-#include "../../Project/UI/jucer_ProjectContentComponent.h"
+
+#ifndef BUILDING_JUCE_COMPILEENGINE
+ #include "../../Project/UI/jucer_ProjectContentComponent.h"
+#endif
 
 //==============================================================================
 ProjucerLookAndFeel::ProjucerLookAndFeel()
@@ -39,9 +41,9 @@ void ProjucerLookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bool
     g.fillRect (area);
 
     const auto alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
+    auto textColour = findColour (defaultTextColourId).withMultipliedAlpha (alpha);
 
    #ifndef BUILDING_JUCE_COMPILEENGINE
-    auto textColour = findColour (defaultTextColourId).withMultipliedAlpha (alpha);
     auto iconColour = findColour (button.isFrontTab() ? activeTabIconColourId
                                                       : inactiveTabIconColourId);
 

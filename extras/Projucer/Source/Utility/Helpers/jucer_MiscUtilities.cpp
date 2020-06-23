@@ -390,7 +390,7 @@ int getIndexOfCommentBlockStart (const StringArray& lines, int endIndex)
     return -1;
 }
 
-int findBestLineToScrollToForClass (StringArray lines, StringRef className, bool isPlugin)
+int findBestLineToScrollToForClass (StringArray lines, const String& className, bool isPlugin)
 {
     for (auto line : lines)
     {

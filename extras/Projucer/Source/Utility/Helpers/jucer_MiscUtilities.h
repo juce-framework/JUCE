@@ -55,7 +55,7 @@ StringArray getModulesRequiredForComponent() noexcept;
 StringArray getModulesRequiredForAudioProcessor() noexcept;
 
 bool isPIPFile (const File&) noexcept;
-int findBestLineToScrollToForClass (StringArray, StringRef, bool isPlugin = false);
+int findBestLineToScrollToForClass (StringArray, const String&, bool isPlugin = false);
 
 bool isValidJUCEExamplesDirectory (const File&) noexcept;
 
