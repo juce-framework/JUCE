@@ -449,11 +449,22 @@ public:
 
         virtual ~Param() override = default;
 
-        void updateParameterInfo()
+        bool updateParameterInfo()
         {
-            toString128 (info.title,      param.getName (128));
-            toString128 (info.shortTitle, param.getName (8));
-            toString128 (info.units,      param.getLabel());
+            auto updateParamIfChanged = [] (Vst::String128& paramToUpdate, const String& newValue)
+            {
+                if (juce::toString (paramToUpdate) == newValue)
+                    return false;
+
+                toString128 (paramToUpdate, newValue);
+                return true;
+            };
+
+            auto anyUpdated = updateParamIfChanged (info.title,      param.getName (128));
+            anyUpdated     |= updateParamIfChanged (info.shortTitle, param.getName (8));
+            anyUpdated     |= updateParamIfChanged (info.units,      param.getLabel());
+
+            return anyUpdated;
         }
 
         bool setNormalized (Vst::ParamValue v) override
@@ -883,21 +894,42 @@ public:
 
     void audioProcessorChanged (AudioProcessor*) override
     {
-        auto numParameters = parameters.getParameterCount();
+        int32 flags = 0;
 
-        for (int32 i = 0; i < numParameters; ++i)
+        for (int32 i = 0; i < parameters.getParameterCount(); ++i)
             if (auto* param = dynamic_cast<Param*> (parameters.getParameterByIndex (i)))
-                param->updateParameterInfo();
+                if (param->updateParameterInfo() && (flags & Vst::kParamTitlesChanged) == 0)
+                    flags |= Vst::kParamTitlesChanged;
 
         if (auto* pluginInstance = getPluginInstance())
         {
-            if (pluginInstance->getNumPrograms() > 1)
-                EditController::setParamNormalized (JuceAudioProcessor::paramPreset, static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram())
-                                                                                         / static_cast<Vst::ParamValue> (pluginInstance->getNumPrograms() - 1));
+            auto newNumPrograms = pluginInstance->getNumPrograms();
+
+            if (newNumPrograms != lastNumPrograms)
+            {
+                if (newNumPrograms > 1)
+                {
+                    auto paramValue = static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram())
+                                      / static_cast<Vst::ParamValue> (pluginInstance->getNumPrograms() - 1);
+
+                    EditController::setParamNormalized (JuceAudioProcessor::paramPreset, paramValue);
+                    flags |= Vst::kParamValuesChanged;
+                }
+
+                lastNumPrograms = newNumPrograms;
+            }
+
+            auto newLatencySamples = pluginInstance->getLatencySamples();
+
+            if (newLatencySamples != lastLatencySamples)
+            {
+                flags |= Vst::kLatencyChanged;
+                lastLatencySamples = newLatencySamples;
+            }
         }
 
-        if (componentHandler != nullptr && ! inSetupProcessing)
-            componentHandler->restartComponent (Vst::kLatencyChanged | Vst::kParamValuesChanged | Vst::kParamTitlesChanged);
+        if (flags != 0 && componentHandler != nullptr && ! inSetupProcessing)
+            componentHandler->restartComponent (flags);
     }
 
     void parameterValueChanged (int, float newValue) override
@@ -942,6 +974,8 @@ private:
     //==============================================================================
     std::atomic<bool> vst3IsPlaying     { false },
                       inSetupProcessing { false };
+
+    int lastNumPrograms = 0, lastLatencySamples = 0;
 
    #if ! JUCE_MAC
     float lastScaleFactorReceived = 1.0f;
