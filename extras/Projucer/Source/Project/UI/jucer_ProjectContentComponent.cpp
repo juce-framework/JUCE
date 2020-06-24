@@ -92,7 +92,6 @@ ProjectContentComponent::ProjectContentComponent()
     liveBuildEnablementChanged (isLiveBuildEnabled);
 
     Desktop::getInstance().addFocusChangeListener (this);
-    startTimer (1600);
 }
 
 ProjectContentComponent::~ProjectContentComponent()
@@ -1198,8 +1197,10 @@ void ProjectContentComponent::handleCrash (const String& message)
 
 bool ProjectContentComponent::isBuildEnabled() const
 {
-    return project != nullptr && project->getCompileEngineSettings().isBuildEnabled()
-            && CompileEngineDLL::getInstance()->isLoaded();
+    return isLiveBuildEnabled
+          && project != nullptr
+          && project->getCompileEngineSettings().isBuildEnabled()
+          && CompileEngineDLL::getInstance()->isLoaded();
 }
 
 void ProjectContentComponent::refreshTabsIfBuildStatusChanged()
@@ -1317,8 +1318,15 @@ void ProjectContentComponent::liveBuildEnablementChanged (bool isEnabled)
 {
     isLiveBuildEnabled = isEnabled;
 
-    if (! isLiveBuildEnabled)
+    if (isLiveBuildEnabled)
+    {
+        startTimer (1600);
+    }
+    else
+    {
+        stopTimer();
         killChildProcess();
+    }
 
     rebuildProjectUI();
     headerComponent.liveBuildEnablementChanged (isLiveBuildEnabled);
