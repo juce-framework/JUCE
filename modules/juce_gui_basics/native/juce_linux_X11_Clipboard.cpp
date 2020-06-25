@@ -154,9 +154,9 @@ namespace ClipboardHelpers
             if (evt.target == XA_STRING || evt.target == ClipboardHelpers::atom_UTF8_STRING)
             {
                 // translate to utf8
-                numDataItems = ClipboardHelpers::localClipboardContent.getNumBytesAsUTF8() + 1;
+                numDataItems = ClipboardHelpers::localClipboardContent.getNumBytesAsUTF8();
                 data.calloc (numDataItems + 1);
-                ClipboardHelpers::localClipboardContent.copyToUTF8 (data, numDataItems);
+                ClipboardHelpers::localClipboardContent.copyToUTF8 (data, numDataItems + 1);
                 propertyFormat = 8; // bits/item
             }
             else if (evt.target == ClipboardHelpers::atom_TARGETS)
