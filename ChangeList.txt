@@ -3,6 +3,32 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 6.0.0
+  - Added support for building JUCE projects with CMake
+  - Revamped the DSP module
+  - Added VST3 support on Linux
+  - Added support for the latest webview components on macOS/iOS and Windows
+  - Removed the sign-in requirement, app reporting and analytics from the Projucer
+  - Added support for running headlessly on Linux
+  - Bundled Oboe source in JUCE and made it the default audio device on Android
+  - Various Oboe stability improvements
+  - Various Projucer UI improvements
+  - Added HWNDComponent for embedding native HWNDs on Windows
+  - Added support for all camera names on macOS
+  - Added support for building with Clang on Windows
+  - Modified MidiMessageCollector to preallocate storage
+  - Modified AudioProcessorGraph to allow extracting nodes
+  - Refactored the APVTS parameter attachment classes and added a new ParameterAttachment class
+  - Added IPP FFT implementation
+  - Added all example plugins as internal nodes in AudioPluginHost project
+  - Removed JuceHeader requirement from Projucer projects
+  - Added support for legacy CC output events
+  - Added MidiBuffer::Iterator class compatible with C++11 range-for
+  - Added RangedDirectoryIterator class compatible with C++11 range-for
+  - Provided range-for comaptibility for String class
+  - Windows and Linux hiDPI scaling improvements
+  - Various bug-fixes, improvements and documentation updates
+
 Version 5.4.7
   - Fixed a macOS focus bug causing Components to not receive mouse events
   - Fixed a potential NullPointerException in the Android IAP code
