@@ -574,7 +574,7 @@ static AudioFormatID formatForFileType (AudioFileTypeID fileType)
 static void fillAudioStreamBasicDescription (AudioStreamBasicDescription* fmt)
 {
     UInt32 sz = sizeof (AudioStreamBasicDescription);
-    OSStatus e = AudioFormatGetProperty (kAudioFormatProperty_FormatInfo, 0, nullptr, &sz, fmt);
+    OSStatus e [[maybe_unused]] = AudioFormatGetProperty (kAudioFormatProperty_FormatInfo, 0, nullptr, &sz, fmt);
     jassert (e == noErr);
 }
 
@@ -592,7 +592,7 @@ public:
             fmt.mSampleRate = sr;
             fmt.mChannelsPerFrame = numberOfChannels;
             fmt.mFormatID = formatForFileType (fileType);
-            OSStatus e = AudioFileInitializeWithCallbacks (
+            OSStatus e [[maybe_unused]] = AudioFileInitializeWithCallbacks (
                 this,
                 &readCallback,
                 &writeCallback,
@@ -616,7 +616,7 @@ public:
             fmt.mBitsPerChannel = sizeof (float) * 8;
             fmt.mBytesPerFrame = sizeof (float);
             fillAudioStreamBasicDescription (&fmt);
-            OSStatus e =
+            OSStatus e [[maybe_unused]] =
                 ExtAudioFileSetProperty (audioFileRef, kExtAudioFileProperty_ClientDataFormat, sizeof (fmt), &fmt);
             jassert (e == noErr);
         }
