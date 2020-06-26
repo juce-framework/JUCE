@@ -491,7 +491,7 @@ Array<LibraryModule::CompileUnit> LibraryModule::getAllCompileUnits (ProjectType
     for (auto& cu : units)
     {
         cu.isCompiledForObjC = true;
-        cu.isCompiledForNonObjC = ! cu.file.hasFileExtension ("mm;m");
+        cu.isCompiledForNonObjC = ! cu.file.hasFileExtension ("mm;m;metal");
 
         if (cu.isCompiledForNonObjC)
             if (files.contains (cu.file.withFileExtension ("mm")))
