@@ -89,4 +89,4 @@ enum ColourIds
 };
 
 //==============================================================================
-static constexpr int projucerMajorVersion = 5;
+static constexpr int projucerMajorVersion = ProjectInfo::versionNumber >> 16;
