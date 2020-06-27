@@ -57,6 +57,8 @@ namespace detail
 
 /** This variadically-templated class lets you join together any number of processor
     classes into a single processor which will call process() on them all in sequence.
+
+    @tags{DSP}
 */
 template <typename... Processors>
 class ProcessorChain
