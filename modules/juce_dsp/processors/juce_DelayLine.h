@@ -32,6 +32,8 @@ namespace DelayLineInterpolationTypes
         No interpolation between successive samples in the delay line will be
         performed. This is useful when the delay is a constant integer or to
         create lo-fi audio effects.
+
+        @tags{DSP}
     */
     struct None {};
 
@@ -40,6 +42,8 @@ namespace DelayLineInterpolationTypes
         type of interpolation has a low compuational cost where the delay can be
         modulated in real time, but it also introduces a low-pass filtering effect
         into your audio signal.
+
+        @tags{DSP}
     */
     struct Linear {};
 
@@ -48,6 +52,8 @@ namespace DelayLineInterpolationTypes
         Lagrange interpolator. This method incurs more computational overhead than
         linear interpolation but reduces the low-pass filtering effect whilst
         remaining amenable to real time delay modulation.
+
+        @tags{DSP}
     */
     struct Lagrange3rd {};
 
@@ -57,6 +63,8 @@ namespace DelayLineInterpolationTypes
         amplitude frequency response in exchange for less accuracy in the phase
         response. This interpolation method is stateful so is unsuitable for
         applications requiring fast delay modulation.
+
+        @tags{DSP}
     */
     struct Thiran {};
 }

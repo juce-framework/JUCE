@@ -170,6 +170,8 @@ private:
     Therefore in order to use WebView2 you need to ensure that WebView2Loader.dll is
     installed either to a location covered by the Windows DLL system search paths or
     to the folder specified in the constructor of this class.
+
+    @tags{GUI}
 */
 class WindowsWebView2WebBrowserComponent  : public WebBrowserComponent
 {

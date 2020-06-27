@@ -30,6 +30,8 @@ namespace juce
     Instances of this class do *not* own the midi data bytes that they point to.
     Instead, they expect the midi data to live in a separate buffer that outlives
     the MidiMessageMetadata instance.
+
+    @tags{Audio}
 */
 struct MidiMessageMetadata final
 {
@@ -70,6 +72,8 @@ struct MidiMessageMetadata final
                 Logger::writeToLog (metadata.getMessage().getDescription());
     }
     @endcode
+
+    @tags{Audio}
 */
 class JUCE_API MidiBufferIterator
 {

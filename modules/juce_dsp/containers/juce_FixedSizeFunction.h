@@ -88,6 +88,8 @@ class FixedSizeFunction;
     a buffer of size `len` that is internal to the FixedSizeFunction instance.
     This in turn means that creating a FixedSizeFunction instance will never allocate,
     making FixedSizeFunctions suitable for use in realtime contexts.
+
+    @tags{DSP}
 */
 template <size_t len, typename Ret, typename... Args>
 class FixedSizeFunction<len, Ret (Args...)>

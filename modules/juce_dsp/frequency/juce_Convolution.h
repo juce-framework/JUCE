@@ -26,6 +26,8 @@ namespace dsp
     thread.
 
     May be shared between multiple Convolution instances.
+
+    @tags{DSP}
 */
 class JUCE_API ConvolutionMessageQueue
 {

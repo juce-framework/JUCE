@@ -24,7 +24,11 @@ namespace juce
 {
 
 //==============================================================================
-/** Describes the attributes of a file or folder. */
+/**
+    Describes the attributes of a file or folder.
+
+    @tags{Core}
+*/
 class DirectoryEntry final
 {
 public:
@@ -80,6 +84,8 @@ inline const DirectoryEntry& operator* (const DirectoryEntry& e) noexcept { retu
         if (entry.isHidden())
             hiddenFiles.push_back (entry.getFile());
     @endcode
+
+    @tags{Core}
 */
 class RangedDirectoryIterator final
 {

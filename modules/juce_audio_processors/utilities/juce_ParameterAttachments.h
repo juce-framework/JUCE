@@ -33,6 +33,8 @@ namespace juce
 
     Make sure to call `sendInitialUpdate` at the end of your new attachment's
     constructor, so that the UI immediately reflects the state of the parameter.
+
+    @tags{Audio}
 */
 class ParameterAttachment   : private AudioProcessorParameter::Listener,
                               private AsyncUpdater
@@ -118,6 +120,8 @@ private:
     it easy to connect a slider to a parameter. When this object is deleted, the
     connection is broken. Make sure that your parameter and Slider are not
     deleted before this object!
+
+    @tags{Audio}
 */
 class SliderParameterAttachment   : private Slider::Listener
 {
@@ -164,6 +168,8 @@ private:
     easy to connect a combo box to a parameter. When this object is deleted, the
     connection is broken. Make sure that your parameter and ComboBox are not deleted
     before this object!
+
+    @tags{Audio}
 */
 class ComboBoxParameterAttachment   : private ComboBox::Listener
 {
@@ -202,6 +208,8 @@ private:
     easy to connect a button to a parameter. When this object is deleted, the
     connection is broken. Make sure that your parameter and Button are not deleted
     before this object!
+
+    @tags{Audio}
 */
 class ButtonParameterAttachment   : private Button::Listener
 {
