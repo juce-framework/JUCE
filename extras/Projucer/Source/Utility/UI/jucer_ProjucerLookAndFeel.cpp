@@ -128,11 +128,16 @@ void ProjucerLookAndFeel::drawButtonBackground (Graphics& g,
                                   ! button.isConnectedOnRight());
 
         g.fillPath (path);
+        g.setColour (button.findColour (TextButton::outlineColourId));
+        g.strokePath (path, PathStrokeType (1.0f));
     }
     else
     {
         g.fillRoundedRectangle (bounds, cornerSize);
+        g.setColour (button.findColour (TextButton::outlineColourId));
+        g.drawRoundedRectangle (bounds, cornerSize, 1.0f);
     }
+    
 }
 
 void ProjucerLookAndFeel::drawButtonText (Graphics& g, TextButton& button, bool isMouseOverButton, bool isButtonDown)
