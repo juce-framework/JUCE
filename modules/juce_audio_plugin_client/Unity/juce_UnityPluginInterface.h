@@ -79,6 +79,8 @@ enum UnityEventModifiers
 };
 
 //==============================================================================
+#ifndef DOXYGEN
+
 struct UnityAudioSpatializerData
 {
     float                          listenerMatrix[16];
@@ -164,6 +166,8 @@ struct UnityAudioEffectDefinition
     getFloatParameterCallback      getFloatParameter;
     getFloatBufferCallback         getFloatBuffer;
 };
+
+#endif
 
 //==============================================================================
 // Unity callback

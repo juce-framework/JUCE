@@ -19,6 +19,14 @@
 namespace juce
 {
 
+/**
+    A collection of different interpolators for resampling streams of floats.
+
+    @see GenericInterpolator, WindowedSincInterpolator, LagrangeInterpolator,
+         CatmullRomInterpolator, LinearInterpolator, ZeroOrderHoldInterpolator
+
+    @tags{Audio}
+*/
 class Interpolators
 {
 private:
