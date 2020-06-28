@@ -30,7 +30,7 @@ project(CONSOLE_APP_EXAMPLE VERSION 0.0.1)
 # `juce_add_console_app` adds an executable target with the name passed as the first argument
 # (ConsoleAppExample here). This target is a normal CMake target, but has a lot of extra properties
 # set up by default. This function accepts many optional arguments. Check the readme at
-# `docs/CMake API.txt` in the JUCE repo for the full list.
+# `docs/CMake API.md` in the JUCE repo for the full list.
 
 juce_add_console_app(ConsoleAppExample
     PRODUCT_NAME "Console App Example")     # The name of the final executable, which can differ from the target name

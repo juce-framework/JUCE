@@ -21,7 +21,7 @@
 # Functions beginning with an underscore should be considered private and susceptible to
 # change, so don't call them directly.
 #
-# See the readme at `docs/CMake API.txt` for more information about CMake usage,
+# See the readme at `docs/CMake API.md` for more information about CMake usage,
 # including documentation of the public functions in this file.
 # ==================================================================================================
 
