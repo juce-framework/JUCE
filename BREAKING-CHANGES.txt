@@ -1,9 +1,6 @@
 JUCE breaking changes
 =====================
 
-Develop
-=======
-
 Change
 ------
 All references to ROLI Ltd. (ROLI) have been changed to Raw Material Software
