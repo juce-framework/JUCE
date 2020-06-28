@@ -3773,12 +3773,6 @@
     <None Include="..\..\Source\BinaryData\colourscheme_light.xml">
       <Filter>Projucer\BinaryData</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\nothingtoseehere.txt">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\projucer_EULA.txt">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
     <None Include="..\..\..\..\modules\juce_core\native\java\README.txt">
       <Filter>JUCE Modules\juce_core\native\java</Filter>
     </None>

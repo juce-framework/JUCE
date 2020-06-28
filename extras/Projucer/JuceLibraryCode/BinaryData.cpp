@@ -43,7 +43,7 @@ static const unsigned char temp_binary_data_1[] =
 "#include \"${JUCE_PIP_HEADER}\"\n"
 "\n"
 "//==============================================================================\n"
-"AudioProcessor* JUCE_CALLTYPE createPluginFilter()\n"
+"juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()\n"
 "{\n"
 "    return new ${JUCE_PIP_MAIN_CLASS}();\n"
 "}\n";
@@ -63,16 +63,16 @@ static const unsigned char temp_binary_data_2[] =
 "#include <JuceHeader.h>\r\n"
 "#include \"${JUCE_PIP_HEADER}\"\r\n"
 "\r\n"
-"class Application    : public JUCEApplication\r\n"
+"class Application    : public juce::JUCEApplication\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
-"    Application() {}\r\n"
+"    Application() = default;\r\n"
 "\r\n"
-"    const String getApplicationName() override       { return \"${JUCE_PIP_NAME}\"; }\r\n"
-"    const String getApplicationVersion() override    { return \"${PROJECT_VERSION}\"; }\r\n"
+"    const juce::String getApplicationName() override       { return \"${JUCE_PIP_NAME}\"; }\r\n"
+"    const juce::String getApplicationVersion() override    { return \"${PROJECT_VERSION}\"; }\r\n"
 "\r\n"
-"    void initialise (const String&) override\r\n"
+"    void initialise (const juce::String&) override\r\n"
 "    {\r\n"
 "        mainWindow.reset (new MainWindow (\"${JUCE_PIP_NAME}\", new ${JUCE_PIP_MAIN_CLASS}, *this));\r\n"
 "    }\r\n"
@@ -80,13 +80,13 @@ static const unsigned char temp_binary_data_2[] =
 "    void shutdown() override                         { mainWindow = nullptr; }\r\n"
 "\r\n"
 "private:\r\n"
-"    class MainWindow    : public DocumentWindow\r\n"
+"    class MainWindow    : public juce::DocumentWindow\r\n"
 "    {\r\n"
 "    public:\r\n"
-"        MainWindow (const String& name, Component* c, JUCEApplication& a)\r\n"
-"            : DocumentWindow (name, Desktop::getInstance().getDefaultLookAndFeel()\r\n"
-"                                                          .findColour (ResizableWindow::backgroundColourId),\r\n"
-"                              DocumentWindow::allButtons),\r\n"
+"        MainWindow (const juce::String& name, juce::Component* c, JUCEApplication& a)\r\n"
+"            : DocumentWindow (name, juce::Desktop::getInstance().getDefaultLookAndFeel()\r\n"
+"                                                                .findColour (ResizableWindow::backgroundColourId),\r\n"
+"                              juce::DocumentWindow::allButtons),\r\n"
 "              app (a)\r\n"
 "        {\r\n"
 "            setUsingNativeTitleBar (true);\r\n"
@@ -7481,179 +7481,6 @@ static const unsigned char temp_binary_data_60[] =
 
 const char* colourscheme_light_xml = (const char*) temp_binary_data_60;
 
-//================== nothingtoseehere.txt ==================
-static const unsigned char temp_binary_data_61[] =
-"VUEtMTk3NTkzMTgtNA==";
-
-const char* nothingtoseehere_txt = (const char*) temp_binary_data_61;
-
-//================== projucer_EULA.txt ==================
-static const unsigned char temp_binary_data_62[] =
-"\r\n"
-"IMPORTANT NOTICE: PLEASE READ CAREFULLY BEFORE INSTALLING THE SOFTWARE:\r\n"
-"\r\n"
-"This license agreement (License) is a legal agreement between you (Licensee or you) and Raw Material Software Limited (Licensor, us or we) for:\r\n"
-"\r\n"
-"- The Projucer software and the associated media and, save where expressly specified through subsequent license terms notified to you in writing, any and all new releases, derivatives of and updates thereto supplied by us to you for a period of one ("
-"1) month from the date of your installation of the software (the Software);\r\n"
-"\r\n"
-"- printed materials and online and electronic documentation (Documentation).\r\n"
-"\r\n"
-"The Software is comprised of numerous components that may be licensed under separate license terms. The Software is a collective work of the Licensor and we license the use of the Software and Documentation to you on the basis of this License and any"
-" applicable license terms for any third party software components which make up the Software. Where you deal with a copy of any software component independent from the Software, you must remove all our trade marks, trade dress and logos from that cop"
-"y.\r\n"
-"\r\n"
-"We do not sell the Software or Documentation to you. We and/or our licensors remain the owners of the Software and Documentation at all times. If you are accepting the terms of this License on behalf of a company or other legal entity, you represent "
-"and warrant that you have the authority to bind that company or other legal entity to the terms of this License and, in such event, \"you\" and \"Licensee\" will refer to that company or other legal entity.\r\n"
-"\r\n"
-"The Software may be downloaded from the Licensor website - www.juce.com - (the \"Website\").\r\n"
-"\r\n"
-"OPERATING SYSTEM REQUIREMENTS: The Software requires a Windows or MAC OS X operating system.\r\n"
-"\r\n"
-"IMPORTANT NOTICE TO ALL USERS:\r\n"
-"\r\n"
-"- BY CLICKING ON THE \"ACCEPT\" BUTTON BELOW YOU AGREE TO THE TERMS OF THIS LICENCE WHICH WILL BIND YOU AND YOUR EMPLOYEES.\r\n"
-"\r\n"
-"- IF YOU DO NOT AGREE TO THE TERMS OF THIS LICENCE, WE WILL NOT LICENSE THE SOFTWARE AND DOCUMENTATION TO YOU AND YOU MUST DISCONTINUE THE INSTALLATION PROCESS.\r\n"
-"\r\n"
-"\r\n"
-"You should print a copy of this License for future reference.\r\n"
-"\r\n"
-"1. Grant and scope of license\r\n"
-"\r\n"
-"1.1. In consideration of you agreeing to abide by the terms of this License the Licensor hereby grants to you a non-exclusive, non-transferable license to use the Software and the Documentation on the terms of this License.\r\n"
-"\r\n"
-"1.2. You may:\r\n"
-"   (a) install and use the Software for your internal business purposes on one central processing unit (CPU) per single user license granted through this License;\r\n"
-"   (b) provided it is used on only one computer at any one time, transfer the Software from one computer to another;\r\n"
-"   (c) provided you comply with the provisions in clause 2, make a single copy of the Software for back-up purposes, provided that you reproduce on it all copyright and other proprietary notices that are on the original copy of the Software;\r\n"
-"   (d) receive and use any free supplementary software code or update of the Software incorporating \"patches\", corrections of errors and software updates as may be provided by the Licensor from time to time;\r\n"
-"   (e) use any Documentation in support of the use permitted under condition 1.2 and make a single copy of the Documentation as is reasonably necessary for its lawful use.\r\n"
-"\r\n"
-"2. Restrictions\r\n"
-"   Except as expressly set out in this License or as permitted by any local law, you undertake:\r\n"
-"   (a) not, in whole or in part, to copy the Software or Documentation except where such copying is incidental to normal use of  the Software or where it is necessary for the purpose of back-up or operational security;\r\n"
-"   (b) not to rent, lease, sub-license, loan, translate, merge, adapt, vary or modify the Software or Documentation;\r\n"
-"   (c) not to make alterations to, or modifications of, the whole or any part of the Software nor permit the Software or any part of it to be combined with, or become incorporated in, any other programs;\r\n"
-"   (d) not to disassemble, de-compile, reverse engineer or create derivative works based on the whole or any part of the Software nor attempt to do any such things except to the extent that (by virtue of section 296A of the Copyright, Designs and Pat"
-"ents Act 1988) such actions cannot be prohibited because they are essential for the purpose of achieving inter-operability of the Software with another software program, and provided that the information obtained by you during such activities:\r\n"
-"      (i) is used only for the purpose of achieving inter-operability of the Software with another software program;\r\n"
-"      (ii) is not disclosed or communicated without the Licensor's prior written consent to any third party to whom it is not necessary to disclose or communicate it; and\r\n"
-"      (iii) is not used to create any software which is substantially similar to the Software;\r\n"
-"   (e) to keep all copies of the Software secure and to maintain accurate and up-to-date records of the number and locations of all copies of the Software;\r\n"
-"   (f) not to provide, or otherwise make available, the Software in any form, in whole or in part (including, but not limited to, program listings, object and source program listings, object code and source code) to any person other than your employe"
-"es without prior written consent from us;\r\n"
-"   (g) to comply with all applicable technology control or export laws and regulations.\r\n"
-"   (h) to supervise and control use of the Software and ensure that the Software is used by your employees and representatives in accordance with the terms of this License;\r\n"
-"   (i) not to charge or otherwise deal in the Software or any part or interest therein except as expressly provided herein;\r\n"
-"   (j) not to use the Software for any illegal or immoral purposes;\r\n"
-"   (k) not otherwise use, copy, transfer or distribute the Software or part of it, except as expressly permitted by this License, in any manner which is inconsistent with this License.\r\n"
-"\r\n"
-"3. Fee\r\n"
-"\r\n"
-"3.1. You may install and use a limited version of the Software (Demo Mode).\r\n"
-"\r\n"
-"3.2.  Where you have purchased the JUCE 4 software on or after 1 November 2015 you shall be entitled to use the Software for free subject to your continued payment of the JUCE 4 software license fee and the JUCE 4 license terms.\r\n"
-"\r\n"
-"3.3. Save as set out above, your right to use the Software shall be subject to payment of the Projucer Software license fee.\r\n"
-"\r\n"
-"3.4. Where you have purchased a perpetual license you agree to pay the license fee as notified to you on the Website at the time you purchase the License.\r\n"
-"\r\n"
-"3.5. Where you have purchased an educational license the fee shall be the fee as notified to you on the Website at the time you purchase the License and shall be payable for each academic year from the first day of the first full calendar month after"
-" the grant of the License and thereafter on the anniversary of that initial payment date.\r\n"
-"\r\n"
-"4. Intellectual property rights\r\n"
-"\r\n"
-"4.1. You acknowledge that all intellectual property rights in the Software and the Documentation and all copies thereof throughout the world belong to us, that rights in the Software are licensed (not sold) to you, and that you have no rights in, or "
-"to, the Software or the Documentation other than the right to use them in accordance with the terms of this License.\r\n"
-"\r\n"
-"4.2. You acknowledge that you have no right to have access to the Software in source code form or in unlocked coding or with comments.\r\n"
-"\r\n"
-"4.3. The Software may contain certain third party licensed materials and our licensors may act to protect their rights in the event of any violation of this License.\r\n"
-"\r\n"
-"5. Limited warranty\r\n"
-"\r\n"
-"5.1. We warrant that, save as already set out above in relation to component parts of the Software, we own the Software and have the right to convey this License.\r\n"
-"\r\n"
-"5.2. We shall have no obligation to provide support and maintenance services to you. You may participate in our online support forum in accordance with our forum policies in place from time to time.\r\n"
-"\r\n"
-"5.3. We do not warrant that your use of the Software will be uninterrupted or error free.\r\n"
-"\r\n"
-"6. Limitation of liability\r\n"
-"\r\n"
-"6.1. You acknowledge that the Software has not been developed to meet your individual requirements, and that it is therefore your responsibility to ensure that the facilities and functions of the Software as described in the Documentation meet your r"
-"equirements.\r\n"
-"\r\n"
-"6.2. Without prejudice to clause 5.4 below, you acknowledge that the Software is not designed or intended for use with on-line control equipment in hazardous environments requiring fail safe performance, such as in the operation of nuclear facilities"
-", aircraft navigation, communication, or control systems, direct life support machines, weapons systems, or other uses in which failure of the Software could lead directly to death, personal injury or severe physical or environmental damage.\r\n"
-"\r\n"
-"6.3. Neither the Licensor nor its parent company, subsidiaries or employees shall in any circumstances whatsoever be liable to you, whether in contract, tort (including negligence), breach of statutory duty, or otherwise, arising under or in connecti"
-"on with this License for any indirect, consequential or special loss or damage, including but not limited to, for:\r\n"
-"   (a) loss of profits, sales, business, or revenue;\r\n"
-"   (b) business interruption;\r\n"
-"   (c) loss of anticipated savings;\r\n"
-"   (d) loss or corruption of data or information;\r\n"
-"   (e) loss of business opportunity, goodwill or reputation;\r\n"
-"   (f) any indirect or consequential loss or damage; or\r\n"
-"   (g) any computer failure or malfunction, corruption to or loss of data or files, or any and all other commercial damage or loss.\r\n"
-"\r\n"
-"6.4. Nothing in this License shall limit or exclude our liability for:\r\n"
-"   (a) death or personal injury resulting from our negligence;\r\n"
-"   (b) fraud or fraudulent misrepresentation;\r\n"
-"   (c) any other liability that cannot be excluded or limited by English law.\r\n"
-"\r\n"
-"6.5. This License sets out the full extent of our obligations and liabilities in respect of the supply of the Software and Documentation. Except as expressly stated in this License, there are no conditions, warranties, representations or other terms,"
-" express or implied, that are binding on us.  Any condition, warranty, representation or other term concerning the supply of the Software and Documentation which might otherwise be implied into, or incorporated in, this License whether by statute, co"
-"mmon law or otherwise, is excluded to the fullest extent permitted by law.\r\n"
-"\r\n"
-"6.6. Subject to clause 5.2 and 5.3, our maximum aggregate liability under or in connection with this License whether in contract, tort (including negligence) or otherwise, shall in all circumstances be limited to a sum equal to $49.\r\n"
-"\r\n"
-"6.7. You agree to indemnify, defend and hold us and our licensors, partners, affiliates, contractors, officers, directors, employees and agents harmless from any claims, costs and expenses (including legal expenses) arising directly or indirectly fro"
-"m your use, handling or operation of the Software otherwise than in accordance with this Agreement.\r\n"
-"\r\n"
-"6.8. This clause 5 shall survive and shall not be rendered ineffective by the termination or expiry of this agreement for whatever reason.\r\n"
-"\r\n"
-"7. Termination\r\n"
-"\r\n"
-"7.1. We may terminate this License immediately by written notice to you if you commit a material or persistent breach of this License which you fail to remedy (if remediable) within 14 days after the service of written notice requiring you to do so.\r"
-"\n"
-"\r\n"
-"7.2. Upon termination for any reason:\r\n"
-"   (a) all rights granted to you under this License shall cease;\r\n"
-"   (b) you must cease all activities authorised by this License;\r\n"
-"   (c) you must immediately delete or remove the Software from all computer equipment in your possession and immediately destroy or return to us (at our option) all copies of the Software then in your possession, custody or control and, in the case o"
-"f destruction, certify to us that you have done so.\r\n"
-"\r\n"
-"8. Communications between us\r\n"
-"\r\n"
-"8.1. If you wish to contact us in writing, or if any condition in this License requires you to give us notice in writing, you can send this to us by e-mail or by pre-paid post to us at support@juce.com. We will confirm receipt of this by contacting y"
-"ou in writing, normally by e-mail.\r\n"
-"\r\n"
-"8.2. If we have to contact you or give you notice in writing, we will do so by e-mail or by pre-paid post to the address you provide to us in your order for the Software.\r\n"
-"\r\n"
-"9. Data\r\n"
-"\r\n"
-"9.1. We may collect and process information about your use of or Software through the Software, some of which may amount to your personal data. Personal data will be collected and processed in accordance with our Privacy Policy which can be reviewed "
-"at https://www.juce.com/privacy-policy.\r\n"
-"\r\n"
-"10. Other important terms\r\n"
-"\r\n"
-"10.1. We may transfer our rights and obligations under this License to another organisation, but this will not affect your rights or our obligations under this License.\r\n"
-"\r\n"
-"10.2. You may only transfer your rights or your obligations under this License to another person if we agree in writing.\r\n"
-"\r\n"
-"10.3. This License and any document expressly referred to in it constitutes the entire agreement between you and us. You acknowledge that you have not relied on any statement, promise or representation made or given by or on behalf of us which is not"
-" set out in this License or any document expressly referred to in it.\r\n"
-"\r\n"
-"10.4. If we fail to insist that you perform any of your obligations under this License, or if we do not enforce our rights against you, or if we delay in doing so, that will not mean that we have waived our rights against you and will not mean that y"
-"ou do not have to comply with those obligations. If we do waive a default by you, we will only do so in writing, and that will not mean that we will automatically waive any later default by you.\r\n"
-"\r\n"
-"10.5. Each of the conditions of this License operates separately. If any court or competent authority decides that any of them are unlawful or unenforceable, the remaining conditions will remain in full force and effect.\r\n"
-"\r\n"
-"10.6. Please note that this License, its subject matter and its formation, are governed by English law. You and we both agree to that the courts of England and Wales will have exclusive jurisdiction.\r\n";
-
-const char* projucer_EULA_txt = (const char*) temp_binary_data_62;
-
 
 const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
 {
@@ -7666,8 +7493,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
     switch (hash)
     {
         case 0x31d21131:  numBytes = 1042; return LaunchScreen_storyboard;
-        case 0x24e5a04d:  numBytes = 477; return PIPAudioProcessor_cpp_in;
-        case 0xd572ce5a:  numBytes = 2207; return PIPComponent_cpp_in;
+        case 0x24e5a04d:  numBytes = 483; return PIPAudioProcessor_cpp_in;
+        case 0xd572ce5a:  numBytes = 2275; return PIPComponent_cpp_in;
         case 0x1a77c680:  numBytes = 299; return PIPConsole_cpp_in;
         case 0xa41e649d:  numBytes = 2842; return RecentFilesMenuTemplate_nib;
         case 0x667fbbb3:  numBytes = 6424; return UnityPluginGUIScript_cs_in;
@@ -7726,8 +7553,6 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x0b16e320:  numBytes = 517; return jucer_PIPTemplate_h;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
-        case 0x938e96ec:  numBytes = 20; return nothingtoseehere_txt;
-        case 0xd6bb7d1d:  numBytes = 14361; return projucer_EULA_txt;
         default: break;
     }
 
@@ -7797,9 +7622,7 @@ const char* namedResourceList[] =
     "jucer_PIPAudioProcessorTemplate_h",
     "jucer_PIPTemplate_h",
     "colourscheme_dark_xml",
-    "colourscheme_light_xml",
-    "nothingtoseehere_txt",
-    "projucer_EULA_txt"
+    "colourscheme_light_xml"
 };
 
 const char* originalFilenames[] =
@@ -7864,9 +7687,7 @@ const char* originalFilenames[] =
     "jucer_PIPAudioProcessorTemplate.h",
     "jucer_PIPTemplate.h",
     "colourscheme_dark.xml",
-    "colourscheme_light.xml",
-    "nothingtoseehere.txt",
-    "projucer_EULA.txt"
+    "colourscheme_light.xml"
 };
 
 const char* getNamedResourceOriginalFilename (const char* resourceNameUTF8)

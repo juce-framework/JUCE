@@ -12,10 +12,10 @@ namespace BinaryData
     const int            LaunchScreen_storyboardSize = 1042;
 
     extern const char*   PIPAudioProcessor_cpp_in;
-    const int            PIPAudioProcessor_cpp_inSize = 477;
+    const int            PIPAudioProcessor_cpp_inSize = 483;
 
     extern const char*   PIPComponent_cpp_in;
-    const int            PIPComponent_cpp_inSize = 2207;
+    const int            PIPComponent_cpp_inSize = 2275;
 
     extern const char*   PIPConsole_cpp_in;
     const int            PIPConsole_cpp_inSize = 299;
@@ -191,14 +191,8 @@ namespace BinaryData
     extern const char*   colourscheme_light_xml;
     const int            colourscheme_light_xmlSize = 1050;
 
-    extern const char*   nothingtoseehere_txt;
-    const int            nothingtoseehere_txtSize = 20;
-
-    extern const char*   projucer_EULA_txt;
-    const int            projucer_EULA_txtSize = 14361;
-
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 63;
+    const int namedResourceListSize = 61;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];

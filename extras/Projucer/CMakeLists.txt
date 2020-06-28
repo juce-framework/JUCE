@@ -145,8 +145,6 @@ juce_add_binary_data(ProjucerData SOURCES
     Source/BinaryData/gradle/gradle-wrapper.jar
     Source/BinaryData/gradle/gradlew
     Source/BinaryData/gradle/gradlew.bat
-    Source/BinaryData/nothingtoseehere.txt
-    Source/BinaryData/projucer_EULA.txt
 
     ../Build/CMake/LaunchScreen.storyboard
     ../Build/CMake/PIPAudioProcessor.cpp.in

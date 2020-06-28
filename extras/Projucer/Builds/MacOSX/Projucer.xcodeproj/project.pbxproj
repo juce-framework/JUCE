@@ -853,13 +853,6 @@
 			path = "../../Source/ComponentEditor/jucer_ComponentLayout.h";
 			sourceTree = "SOURCE_ROOT";
 		};
-		4073A12E196BDDADE211E19F = {
-			isa = PBXFileReference;
-			lastKnownFileType = text.txt;
-			name = "projucer_EULA.txt";
-			path = "../../Source/BinaryData/projucer_EULA.txt";
-			sourceTree = "SOURCE_ROOT";
-		};
 		409C636B96A9AC1D732B96F8 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -1117,13 +1110,6 @@
 			lastKnownFileType = sourcecode.c.h;
 			name = "jucer_ProjectExport_Make.h";
 			path = "../../Source/ProjectSaving/jucer_ProjectExport_Make.h";
-			sourceTree = "SOURCE_ROOT";
-		};
-		59B08C7B13B8EA5137ACA77A = {
-			isa = PBXFileReference;
-			lastKnownFileType = text.txt;
-			name = nothingtoseehere.txt;
-			path = ../../Source/BinaryData/nothingtoseehere.txt;
 			sourceTree = "SOURCE_ROOT";
 		};
 		59F8A47C0020D62C8836A1E7 = {
@@ -2697,8 +2683,6 @@
 				86B4069D904AB46AC86FB383,
 				41105E536155E394E54BDD35,
 				5F6584B675E30761521A9F42,
-				59B08C7B13B8EA5137ACA77A,
-				4073A12E196BDDADE211E19F,
 			);
 			name = BinaryData;
 			sourceTree = "<group>";
