@@ -303,7 +303,7 @@ private:
 
             Path rewindShape;
             rewindShape.addRectangle (0.0, 0.0, 5.0, buttonSize);
-            rewindShape.addTriangle (0.0, buttonSize / 2, buttonSize, 0.0, buttonSize, buttonSize);
+            rewindShape.addTriangle (0.0, buttonSize * 0.5f, buttonSize, 0.0, buttonSize, buttonSize);
             rewindButton.setShape (rewindShape, true, true, false);
             rewindButton.onClick = [this]
             {
@@ -383,19 +383,19 @@ private:
             area.removeFromLeft (20);
             transportText.setBounds (area.removeFromTop (120));
 
-            auto navigationArea = area.removeFromTop (buttonSize);
+            auto navigationArea = area.removeFromTop ((int) buttonSize);
             rewindButton.setTopLeftPosition (navigationArea.getPosition());
-            navigationArea.removeFromLeft (buttonSize + 10);
+            navigationArea.removeFromLeft ((int) buttonSize + 10);
             playButton.setTopLeftPosition (navigationArea.getPosition());
-            navigationArea.removeFromLeft (buttonSize + 10);
+            navigationArea.removeFromLeft ((int) buttonSize + 10);
             recordButton.setTopLeftPosition (navigationArea.getPosition());
 
             area.removeFromTop (30);
 
-            auto appSwitchArea = area.removeFromTop (buttonSize);
+            auto appSwitchArea = area.removeFromTop ((int) buttonSize);
             switchToHostButtonLabel.setBounds (appSwitchArea.removeFromLeft (100));
             appSwitchArea.removeFromLeft (5);
-            switchToHostButton.setBounds (appSwitchArea.removeFromLeft (buttonSize));
+            switchToHostButton.setBounds (appSwitchArea.removeFromLeft ((int) buttonSize));
         }
 
     private:
@@ -513,7 +513,7 @@ private:
 
                 if (visible)
                 {
-                    auto icon = hostType.getHostIcon (buttonSize);
+                    auto icon = hostType.getHostIcon ((int) buttonSize);
                     switchToHostButton.setImages(false, true, true,
                                                  icon, 1.0, Colours::transparentBlack,
                                                  icon, 1.0, Colours::transparentBlack,
@@ -525,7 +525,7 @@ private:
         IAAEffectProcessor& iaaEffectProcessor;
         AudioProcessorValueTreeState& parameters;
 
-        const int buttonSize = 30;
+        const float buttonSize = 30.0f;
         const Colour defaultButtonColour = Colours::darkgrey;
         ShapeButton rewindButton {"Rewind", defaultButtonColour, defaultButtonColour, defaultButtonColour};
         ShapeButton playButton   {"Play",   defaultButtonColour, defaultButtonColour, defaultButtonColour};

@@ -105,7 +105,7 @@ bool Random::nextBool() noexcept
 
 float Random::nextFloat() noexcept
 {
-    auto result = static_cast<uint32> (nextInt())
+    auto result = static_cast<float> (static_cast<uint32> (nextInt()))
                   / (static_cast<float> (std::numeric_limits<uint32>::max()) + 1.0f);
     return result == 1.0f ? 1.0f - std::numeric_limits<float>::epsilon() : result;
 }

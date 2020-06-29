@@ -159,10 +159,10 @@ float DirectoryIterator::getEstimatedProgress() const
     if (totalNumFiles <= 0)
         return 0.0f;
 
-    auto detailedIndex = (subIterator != nullptr) ? index + subIterator->getEstimatedProgress()
+    auto detailedIndex = (subIterator != nullptr) ? (float) index + subIterator->getEstimatedProgress()
                                                   : (float) index;
 
-    return jlimit (0.0f, 1.0f, detailedIndex / totalNumFiles);
+    return jlimit (0.0f, 1.0f, detailedIndex / (float) totalNumFiles);
 }
 
 } // namespace juce

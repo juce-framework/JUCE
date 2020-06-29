@@ -1359,13 +1359,13 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
             if (wasResized && view->canResize() == kResultTrue)
             {
-                rect.right  = (Steinberg::int32) roundToInt (getWidth()  * nativeScaleFactor);
-                rect.bottom = (Steinberg::int32) roundToInt (getHeight() * nativeScaleFactor);
+                rect.right  = (Steinberg::int32) roundToInt ((float) getWidth()  * nativeScaleFactor);
+                rect.bottom = (Steinberg::int32) roundToInt ((float) getHeight() * nativeScaleFactor);
 
                 view->checkSizeConstraint (&rect);
 
-                auto w = roundToInt (rect.getWidth()  / nativeScaleFactor);
-                auto h = roundToInt (rect.getHeight() / nativeScaleFactor);
+                auto w = roundToInt ((float) rect.getWidth()  / nativeScaleFactor);
+                auto h = roundToInt ((float) rect.getHeight() / nativeScaleFactor);
 
                 setSize (w, h);
 
@@ -1459,10 +1459,10 @@ private:
     //==============================================================================
     static void resizeWithRect (Component& comp, const ViewRect& rect, float scaleFactor)
     {
-        comp.setBounds (roundToInt (rect.left / scaleFactor),
-                        roundToInt (rect.top  / scaleFactor),
-                        jmax (10, std::abs (roundToInt (rect.getWidth()  / scaleFactor))),
-                        jmax (10, std::abs (roundToInt (rect.getHeight() / scaleFactor))));
+        comp.setBounds (roundToInt ((float) rect.left / scaleFactor),
+                        roundToInt ((float) rect.top  / scaleFactor),
+                        jmax (10, std::abs (roundToInt ((float) rect.getWidth()  / scaleFactor))),
+                        jmax (10, std::abs (roundToInt ((float) rect.getHeight() / scaleFactor))));
     }
 
     void attachPluginWindow()

@@ -78,7 +78,7 @@ public:
             g.setColour (findColour (defaultTextColourId));
         }
 
-        g.setFont (height * 0.6f);
+        g.setFont ((float) height * 0.6f);
         g.drawText (returnValues [row] + " " + baseClasses [row] + "::" + methods [row],
                     30, 0, width - 32, height,
                     Justification::centredLeft, true);
@@ -1037,7 +1037,7 @@ bool JucerDocumentEditor::perform (const InvocationInfo& info)
                 else if (info.commandID == JucerCommandIDs::compOverlay100)
                     amount = 100;
 
-                document->setComponentOverlayOpacity (amount * 0.01f);
+                document->setComponentOverlayOpacity ((float) amount * 0.01f);
             }
             break;
 

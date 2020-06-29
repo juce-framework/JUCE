@@ -31,23 +31,19 @@ function(_juce_add_pips)
         CONFIGURE_DEPENDS LIST_DIRECTORIES false
         "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        list(REMOVE_ITEM headers
+            "${CMAKE_CURRENT_SOURCE_DIR}/CameraDemo.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/PushNotificationsDemo.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/VideoDemo.h")
+        endif()
+
     foreach(header IN ITEMS ${headers})
         juce_add_pip(${header} added_target)
-        target_link_libraries(${added_target} PRIVATE
+        target_link_libraries(${added_target} PUBLIC
             juce::juce_recommended_config_flags
             juce::juce_recommended_lto_flags
             juce::juce_recommended_warning_flags)
-
-        get_target_property(active_targets ${added_target} JUCE_ACTIVE_PLUGIN_TARGETS)
-
-        if(active_targets)
-            foreach(plugin_target IN LISTS active_targets)
-                target_link_libraries(${plugin_target} PRIVATE
-                    juce::juce_recommended_config_flags
-                    juce::juce_recommended_lto_flags
-                    juce::juce_recommended_warning_flags)
-            endforeach()
-        endif()
     endforeach()
 endfunction()
 

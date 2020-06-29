@@ -538,8 +538,8 @@ private:
         bool canBePartOfMultipleClickWith (const RecentMouseDown& other, int maxTimeBetweenMs) const noexcept
         {
             return time - other.time < RelativeTime::milliseconds (maxTimeBetweenMs)
-                    && std::abs (position.x - other.position.x) < getPositionToleranceForInputType()
-                    && std::abs (position.y - other.position.y) < getPositionToleranceForInputType()
+                    && std::abs (position.x - other.position.x) < (float) getPositionToleranceForInputType()
+                    && std::abs (position.y - other.position.y) < (float) getPositionToleranceForInputType()
                     && buttons == other.buttons
                     && peerID == other.peerID;
         }

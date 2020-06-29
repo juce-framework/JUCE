@@ -201,7 +201,7 @@ void CallOutBox::updatePosition (const Rectangle<int>& newAreaToPointTo, const R
     auto hh = newBounds.getHeight() / 2;
     auto hwReduced = (float) (hw - borderSpace * 2);
     auto hhReduced = (float) (hh - borderSpace * 2);
-    auto arrowIndent = borderSpace - arrowSize;
+    auto arrowIndent = (float) borderSpace - arrowSize;
 
     Point<float> targets[4] = { { (float) targetArea.getCentreX(), (float) targetArea.getBottom() },
                                 { (float) targetArea.getRight(),   (float) targetArea.getCentreY() },
@@ -234,8 +234,8 @@ void CallOutBox::updatePosition (const Rectangle<int>& newAreaToPointTo, const R
             nearest = distanceFromCentre;
             targetPoint = targets[i];
 
-            newBounds.setPosition ((int) (centre.x - hw),
-                                   (int) (centre.y - hh));
+            newBounds.setPosition ((int) (centre.x - (float) hw),
+                                   (int) (centre.y - (float) hh));
         }
     }
 

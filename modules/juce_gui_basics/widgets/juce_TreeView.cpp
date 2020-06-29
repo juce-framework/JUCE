@@ -993,7 +993,7 @@ public:
     void paint (Graphics& g) override
     {
         g.setColour (findColour (TreeView::dragAndDropIndicatorColourId, true));
-        g.drawRoundedRectangle (1.0f, 1.0f, getWidth() - 2.0f, getHeight() - 2.0f, 3.0f, 2.0f);
+        g.drawRoundedRectangle (1.0f, 1.0f, (float) getWidth() - 2.0f, (float) getHeight() - 2.0f, 3.0f, 2.0f);
     }
 
 private:
@@ -1552,13 +1552,13 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
         }
     }
 
-    auto halfH = itemHeight * 0.5f;
+    auto halfH = (float) itemHeight * 0.5f;
     auto indentWidth = ownerView->getIndentSize();
     auto depth = TreeViewHelpers::calculateDepth (this, ownerView->rootItemVisible);
 
     if (depth >= 0 && ownerView->openCloseButtonsVisible)
     {
-        auto x = (depth + 0.5f) * indentWidth;
+        auto x = ((float) depth + 0.5f) * (float) indentWidth;
 
         const bool parentLinesDrawn = parentItem != nullptr && parentItem->areLinesDrawn();
 
@@ -1566,7 +1566,7 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
             paintVerticalConnectingLine (g, Line<float> (x, 0, x, isLastOfSiblings() ? halfH : (float) itemHeight));
 
         if (parentLinesDrawn || (parentItem == nullptr && areLinesDrawn()))
-            paintHorizontalConnectingLine (g, Line<float> (x, halfH, x + indentWidth / 2, halfH));
+            paintHorizontalConnectingLine (g, Line<float> (x, halfH, x + (float) indentWidth * 0.5f, halfH));
 
         {
             auto* p = parentItem;

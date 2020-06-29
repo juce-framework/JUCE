@@ -33,7 +33,7 @@ AudioParameterChoice::AudioParameterChoice (const String& idToUse, const String&
    : RangedAudioParameter (idToUse, nameToUse, labelToUse), choices (c),
      range ([this]
             {
-                NormalisableRange<float> rangeWithInterval { 0.0f, choices.size() - 1.0f,
+                NormalisableRange<float> rangeWithInterval { 0.0f, (float) choices.size() - 1.0f,
                                                              [] (float, float end, float v) { return jlimit (0.0f, end, v * end); },
                                                              [] (float, float end, float v) { return jlimit (0.0f, 1.0f, v / end); },
                                                              [] (float start, float end, float v) { return (float) roundToInt (juce::jlimit (start, end, v)); } };

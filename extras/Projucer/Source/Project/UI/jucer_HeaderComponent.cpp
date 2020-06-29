@@ -70,7 +70,7 @@ HeaderComponent::~HeaderComponent()
 void HeaderComponent::resized()
 {
     auto bounds = getLocalBounds();
-    configLabel.setFont ({ bounds.getHeight() / 3.0f });
+    configLabel.setFont ({ (float) bounds.getHeight() / 3.0f });
 
     {
         auto headerBounds = bounds.removeFromLeft (tabsWidth);
@@ -96,11 +96,11 @@ void HeaderComponent::resized()
         saveAndOpenInIDEButton.setBounds (exporterBounds.removeFromRight (exporterBounds.getHeight()).reduced (2));
 
         exporterBounds.removeFromRight (5);
-        exporterBox.setBounds (exporterBounds.removeFromBottom (roundToInt (exporterBounds.getHeight() / 1.8f)));
+        exporterBox.setBounds (exporterBounds.removeFromBottom (roundToInt ((float) exporterBounds.getHeight() / 1.8f)));
         configLabel.setBounds (exporterBounds);
     }
 
-    userAvatar.setBounds (bounds.removeFromRight (userAvatar.isDisplaingGPLLogo() ? roundToInt (bounds.getHeight() * 1.9f)
+    userAvatar.setBounds (bounds.removeFromRight (userAvatar.isDisplaingGPLLogo() ? roundToInt ((float) bounds.getHeight() * 1.9f)
                                                                                   : bounds.getHeight()).reduced (2));
 }
 

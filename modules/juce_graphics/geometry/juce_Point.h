@@ -121,11 +121,11 @@ public:
 
     /** Returns a point whose coordinates are multiplied by a given scalar value. */
     template <typename FloatType>
-    constexpr Point operator* (FloatType multiplier) const noexcept    { return Point ((ValueType) (x * multiplier), (ValueType) (y * multiplier)); }
+    constexpr Point operator* (FloatType multiplier) const noexcept    { return Point ((ValueType) ((FloatType) x * multiplier), (ValueType) ((FloatType) y * multiplier)); }
 
     /** Returns a point whose coordinates are divided by a given scalar value. */
     template <typename FloatType>
-    constexpr Point operator/ (FloatType divisor) const noexcept       { return Point ((ValueType) (x / divisor), (ValueType) (y / divisor)); }
+    constexpr Point operator/ (FloatType divisor) const noexcept       { return Point ((ValueType) ((FloatType) x / divisor), (ValueType) ((FloatType) y / divisor)); }
 
     /** Multiplies the point's coordinates by a scalar value. */
     template <typename FloatType>
@@ -212,8 +212,8 @@ public:
     /** Returns the position of this point, if it is transformed by a given AffineTransform. */
     Point transformedBy (const AffineTransform& transform) const noexcept
     {
-        return Point (static_cast<ValueType> (transform.mat00 * x + transform.mat01 * y + transform.mat02),
-                      static_cast<ValueType> (transform.mat10 * x + transform.mat11 * y + transform.mat12));
+        return Point (static_cast<ValueType> (transform.mat00 * (float) x + transform.mat01 * (float) y + transform.mat02),
+                      static_cast<ValueType> (transform.mat10 * (float) x + transform.mat11 * (float) y + transform.mat12));
     }
 
     //==============================================================================

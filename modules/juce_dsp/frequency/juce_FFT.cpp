@@ -113,7 +113,7 @@ struct FFTFallback  : public FFT::Instance
         {
             configInverse->perform (input, output);
 
-            const float scaleFactor = 1.0f / size;
+            const float scaleFactor = 1.0f / (float) size;
 
             for (int i = 0; i < size; ++i)
                 output[i] *= scaleFactor;

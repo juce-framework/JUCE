@@ -146,7 +146,7 @@ private:
                     g.fillAll (Colours::lightblue);
 
                 g.setColour (Colours::black);
-                g.setFont (height * 0.7f);
+                g.setFont ((float) height * 0.7f);
                 g.drawText (name, 4, 0, width - 4, height, Justification::centredLeft, true);
             }
 

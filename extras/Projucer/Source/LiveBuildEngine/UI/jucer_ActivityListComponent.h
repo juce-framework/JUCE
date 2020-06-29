@@ -65,7 +65,7 @@ public:
         {
             g.setColour (findColour (defaultTextColourId));
 
-            g.setFont (height * 0.7f);
+            g.setFont ((float) height * 0.7f);
             g.drawText (activities [rowNumber],
                         4, 0, width - 5, height, Justification::centredLeft, true);
         }

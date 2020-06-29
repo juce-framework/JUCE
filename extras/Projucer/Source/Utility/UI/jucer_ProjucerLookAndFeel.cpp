@@ -206,7 +206,7 @@ void ProjucerLookAndFeel::drawToggleButton (Graphics& g, ToggleButton& button, b
     {
         bounds.removeFromLeft (5);
 
-        const auto fontSize = jmin (15.0f, button.getHeight() * 0.75f);
+        const auto fontSize = jmin (15.0f, (float) button.getHeight() * 0.75f);
 
         g.setFont (fontSize);
         g.setColour (isPropertyComponentChild ? findColour (widgetTextColourId)
@@ -475,7 +475,7 @@ Path ProjucerLookAndFeel::getArrowPath (Rectangle<float> arrowZone, const int di
     if (filled)
         path.closeSubPath();
 
-    path.applyTransform (AffineTransform::rotation (direction * MathConstants<float>::halfPi,
+    path.applyTransform (AffineTransform::rotation ((float) direction * MathConstants<float>::halfPi,
                                                     arrowZone.getCentreX(), arrowZone.getCentreY()));
 
     return path;

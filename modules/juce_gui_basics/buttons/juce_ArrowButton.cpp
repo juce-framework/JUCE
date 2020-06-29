@@ -40,7 +40,7 @@ void ArrowButton::paintButton (Graphics& g, bool /*shouldDrawButtonAsHighlighted
     Path p (path);
 
     const float offset = shouldDrawButtonAsDown ? 1.0f : 0.0f;
-    p.applyTransform (path.getTransformToScaleToFit (offset, offset, getWidth() - 3.0f, getHeight() - 3.0f, false));
+    p.applyTransform (path.getTransformToScaleToFit (offset, offset, (float) getWidth() - 3.0f, (float) getHeight() - 3.0f, false));
 
     DropShadow (Colours::black.withAlpha (0.3f), shouldDrawButtonAsDown ? 2 : 4, Point<int>()).drawForPath (g, p);
 

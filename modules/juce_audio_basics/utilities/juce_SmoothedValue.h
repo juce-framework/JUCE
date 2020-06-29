@@ -369,7 +369,7 @@ private:
     template <typename T = SmoothingType>
     MultiplicativeVoid<T> setStepSize()
     {
-        step = std::exp ((std::log (std::abs (this->target)) - std::log (std::abs (this->currentValue))) / this->countdown);
+        step = std::exp ((std::log (std::abs (this->target)) - std::log (std::abs (this->currentValue))) / (FloatType) this->countdown);
     }
 
     //==============================================================================

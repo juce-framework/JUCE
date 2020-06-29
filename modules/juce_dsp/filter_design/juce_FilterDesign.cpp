@@ -45,7 +45,7 @@ typename FIR::Coefficients<FloatType>::Ptr
 
     for (size_t i = 0; i <= order; ++i)
     {
-        if (i == order * 0.5)
+        if (i == order / 2)
         {
             c[i] = static_cast<FloatType> (normalisedFrequency * 2);
         }
@@ -113,8 +113,8 @@ typename FIR::Coefficients<FloatType>::Ptr
         }
         else
         {
-            auto indice  = MathConstants<double>::pi * (i - 0.5 * order);
-            auto indice2 = MathConstants<double>::pi * normalisedTransitionWidth * (i - 0.5 * order) / spline;
+            auto indice  = MathConstants<double>::pi * ((double) i - 0.5 * (double) order);
+            auto indice2 = MathConstants<double>::pi * normalisedTransitionWidth * ((double) i - 0.5 * (double) order) / spline;
             c[i] = static_cast<FloatType> (std::sin (2 * indice * normalisedFrequency)
                                             / indice * std::pow (std::sin (indice2) / indice2, spline));
         }
@@ -160,12 +160,12 @@ typename FIR::Coefficients<FloatType>::Ptr
         auto factors = ws / MathConstants<double>::pi;
 
         for (size_t i = 0; i <= M; ++i)
-            b (i, 0) = factorp * sinc (factorp * i);
+            b (i, 0) = factorp * sinc (factorp * (double) i);
 
         q (0, 0) = factorp + stopBandWeight * (1.0 - factors);
 
         for (size_t i = 1; i <= 2 * M; ++i)
-            q (i, 0) = factorp * sinc (factorp * i) - stopBandWeight * factors * sinc (factors * i);
+            q (i, 0) = factorp * sinc (factorp * (double) i) - stopBandWeight * factors * sinc (factors * (double) i);
 
         auto Q1 = Matrix<double>::toeplitz (q, M + 1);
         auto Q2 = Matrix<double>::hankel (q, M + 1, 0);
@@ -198,12 +198,12 @@ typename FIR::Coefficients<FloatType>::Ptr
         auto factors = ws / MathConstants<double>::pi;
 
         for (size_t i = 0; i < M; ++i)
-            b (i, 0) = factorp * sinc (factorp * (i + 0.5));
+            b (i, 0) = factorp * sinc (factorp * ((double) i + 0.5));
 
         for (size_t i = 0; i < 2 * M; ++i)
         {
-            qp (i, 0) = 0.25 * factorp * sinc (factorp * i);
-            qs (i, 0) = -0.25 * stopBandWeight * factors * sinc (factors * i);
+            qp (i, 0) = 0.25 * factorp * sinc (factorp * (double) i);
+            qs (i, 0) = -0.25 * stopBandWeight * factors * sinc (factors * (double) i);
         }
 
         auto Q1p = Matrix<double>::toeplitz (qp, M);

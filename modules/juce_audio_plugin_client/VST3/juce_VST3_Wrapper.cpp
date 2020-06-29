@@ -1262,10 +1262,10 @@ private:
 
                         auto transformScale = std::sqrt (std::abs (editor->getTransform().getDeterminant()));
 
-                        auto minW = (double) (constrainer->getMinimumWidth()  * transformScale);
-                        auto maxW = (double) (constrainer->getMaximumWidth()  * transformScale);
-                        auto minH = (double) (constrainer->getMinimumHeight() * transformScale);
-                        auto maxH = (double) (constrainer->getMaximumHeight() * transformScale);
+                        auto minW = (double) ((float) constrainer->getMinimumWidth()  * transformScale);
+                        auto maxW = (double) ((float) constrainer->getMaximumWidth()  * transformScale);
+                        auto minH = (double) ((float) constrainer->getMinimumHeight() * transformScale);
+                        auto maxH = (double) ((float) constrainer->getMaximumHeight() * transformScale);
 
                         auto width  = (double) (rectToCheck->right - rectToCheck->left);
                         auto height = (double) (rectToCheck->bottom - rectToCheck->top);
@@ -1381,10 +1381,10 @@ private:
             if (approximatelyEqual (desktopScale, 1.0f))
                 return pluginRect;
 
-            return { roundToInt (pluginRect.left   * desktopScale),
-                     roundToInt (pluginRect.top    * desktopScale),
-                     roundToInt (pluginRect.right  * desktopScale),
-                     roundToInt (pluginRect.bottom * desktopScale) };
+            return { roundToInt ((float) pluginRect.left   * desktopScale),
+                     roundToInt ((float) pluginRect.top    * desktopScale),
+                     roundToInt ((float) pluginRect.right  * desktopScale),
+                     roundToInt ((float) pluginRect.bottom * desktopScale) };
         }
 
         static ViewRect convertFromHostBounds (ViewRect hostRect)
@@ -1394,10 +1394,10 @@ private:
             if (approximatelyEqual (desktopScale, 1.0f))
                 return hostRect;
 
-            return { roundToInt (hostRect.left   / desktopScale),
-                     roundToInt (hostRect.top    / desktopScale),
-                     roundToInt (hostRect.right  / desktopScale),
-                     roundToInt (hostRect.bottom / desktopScale) };
+            return { roundToInt ((float) hostRect.left   / desktopScale),
+                     roundToInt ((float) hostRect.top    / desktopScale),
+                     roundToInt ((float) hostRect.right  / desktopScale),
+                     roundToInt ((float) hostRect.bottom / desktopScale) };
         }
 
         //==============================================================================

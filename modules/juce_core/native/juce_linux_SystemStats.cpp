@@ -209,7 +209,7 @@ int64 Time::getHighResolutionTicksPerSecond() noexcept
 
 double Time::getMillisecondCounterHiRes() noexcept
 {
-    return getHighResolutionTicks() * 0.001;
+    return (double) getHighResolutionTicks() * 0.001;
 }
 
 bool Time::setSystemTimeToThisTime() const

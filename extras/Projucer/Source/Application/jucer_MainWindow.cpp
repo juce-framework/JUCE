@@ -97,7 +97,8 @@ private:
         auto parentBounds = mainWindow.getBounds();
 
         componentImage = mainWindow.createComponentSnapshot (mainWindow.getLocalBounds())
-                                   .rescaled (roundToInt (parentBounds.getWidth() / 1.75f), roundToInt (parentBounds.getHeight() / 1.75f));
+                                   .rescaled (roundToInt ((float) parentBounds.getWidth() / 1.75f),
+                                              roundToInt ((float) parentBounds.getHeight() / 1.75f));
 
         kernel.applyToImage (componentImage, componentImage, getLocalBounds());
 

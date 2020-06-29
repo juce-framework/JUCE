@@ -1545,7 +1545,7 @@ StringArray AudioProcessorParameter::getAllValueStrings() const
         auto maxIndex = getNumSteps() - 1;
 
         for (int i = 0; i < getNumSteps(); ++i)
-            valueStrings.add (getText ((float) i / maxIndex, 1024));
+            valueStrings.add (getText ((float) i / (float) maxIndex, 1024));
     }
 
     return valueStrings;

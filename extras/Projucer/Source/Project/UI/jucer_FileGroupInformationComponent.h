@@ -155,7 +155,7 @@ private:
         {
             if (header != nullptr)
             {
-                auto textBounds = getLocalBounds().removeFromLeft (roundToInt (header->getProportionAtIndex (0) * getWidth()));
+                auto textBounds = getLocalBounds().removeFromLeft (roundToInt (header->getProportionAtIndex (0) * (float) getWidth()));
 
                 auto iconBounds = textBounds.removeFromLeft (25);
 
@@ -175,7 +175,7 @@ private:
             if (header != nullptr)
             {
                 auto bounds = getLocalBounds();
-                auto width = getWidth();
+                auto width = (float) getWidth();
 
                 bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (0) * width));
 

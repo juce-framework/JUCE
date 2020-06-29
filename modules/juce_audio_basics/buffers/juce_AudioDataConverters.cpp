@@ -319,7 +319,7 @@ void AudioDataConverters::convertInt32LEToFloat (const void* source, float* dest
     {
         for (int i = 0; i < numSamples; ++i)
         {
-            dest[i] = scale * (int) ByteOrder::swapIfBigEndian (*reinterpret_cast<const uint32*> (intData));
+            dest[i] = scale * (float) ByteOrder::swapIfBigEndian (*reinterpret_cast<const uint32*> (intData));
             intData += srcBytesPerSample;
         }
     }
@@ -330,7 +330,7 @@ void AudioDataConverters::convertInt32LEToFloat (const void* source, float* dest
         for (int i = numSamples; --i >= 0;)
         {
             intData -= srcBytesPerSample;
-            dest[i] = scale * (int) ByteOrder::swapIfBigEndian (*reinterpret_cast<const uint32*> (intData));
+            dest[i] = scale * (float) ByteOrder::swapIfBigEndian (*reinterpret_cast<const uint32*> (intData));
         }
     }
 }
@@ -344,7 +344,7 @@ void AudioDataConverters::convertInt32BEToFloat (const void* source, float* dest
     {
         for (int i = 0; i < numSamples; ++i)
         {
-            dest[i] = scale * (int) ByteOrder::swapIfLittleEndian (*reinterpret_cast<const uint32*> (intData));
+            dest[i] = scale * (float) ByteOrder::swapIfLittleEndian (*reinterpret_cast<const uint32*> (intData));
             intData += srcBytesPerSample;
         }
     }
@@ -355,7 +355,7 @@ void AudioDataConverters::convertInt32BEToFloat (const void* source, float* dest
         for (int i = numSamples; --i >= 0;)
         {
             intData -= srcBytesPerSample;
-            dest[i] = scale * (int) ByteOrder::swapIfLittleEndian (*reinterpret_cast<const uint32*> (intData));
+            dest[i] = scale * (float) ByteOrder::swapIfLittleEndian (*reinterpret_cast<const uint32*> (intData));
         }
     }
 }

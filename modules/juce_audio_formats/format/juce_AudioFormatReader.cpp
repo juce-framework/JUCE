@@ -235,8 +235,8 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile, int64 numSamples
             {
                 auto intRange = Range<int>::findMinAndMax (intBuffer[i], numToDo);
 
-                r = Range<float> (intRange.getStart() / (float) std::numeric_limits<int>::max(),
-                                  intRange.getEnd()   / (float) std::numeric_limits<int>::max());
+                r = Range<float> ((float) intRange.getStart() / (float) std::numeric_limits<int>::max(),
+                                  (float) intRange.getEnd()   / (float) std::numeric_limits<int>::max());
             }
 
             results[i] = isFirstBlock ? r : results[i].getUnionWith (r);

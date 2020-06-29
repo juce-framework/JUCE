@@ -47,7 +47,7 @@ public:
     const std::vector<Asset> assets;
 
 private:
-    VersionInfo() = default;
+    VersionInfo() = delete;
 
     static std::unique_ptr<VersionInfo> fetch (const String&);
 };
