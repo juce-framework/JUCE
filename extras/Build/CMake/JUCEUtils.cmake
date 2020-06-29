@@ -1595,7 +1595,7 @@ function(_juce_set_generic_property_if_not_set target property)
     set(existing_property)
     get_target_property(existing_property ${target} ${property})
 
-    if(${existing_property} STREQUAL "existing_property-NOTFOUND")
+    if(existing_property STREQUAL "existing_property-NOTFOUND")
         set_target_properties(${target} PROPERTIES ${property} "${ARGN}")
     endif()
 endfunction()
