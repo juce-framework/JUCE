@@ -50,8 +50,10 @@ add_library(juce_recommended_lto_flags INTERFACE)
 add_library(juce::juce_recommended_lto_flags ALIAS juce_recommended_lto_flags)
 
 if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC"))
-    target_compile_options(juce_recommended_lto_flags INTERFACE $<$<CONFIG:Release>:/GL>)
-    target_link_libraries(juce_recommended_lto_flags INTERFACE $<$<CONFIG:Release>:-LTCG>)
+    target_compile_options(juce_recommended_lto_flags INTERFACE
+        $<$<CONFIG:Release>:$<IF:$<STREQUAL:"${CMAKE_CXX_COMPILER_ID}","MSVC">,-GL,-flto>>)
+    target_link_libraries(juce_recommended_lto_flags INTERFACE
+        $<$<CONFIG:Release>:$<$<STREQUAL:"${CMAKE_CXX_COMPILER_ID}","MSVC">:-LTCG>>)
 elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
        OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
        OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
