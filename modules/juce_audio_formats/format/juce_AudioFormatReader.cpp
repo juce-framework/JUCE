@@ -38,9 +38,11 @@ AudioFormatReader::~AudioFormatReader()
 
 static void convertFixedToFloat (int* const* channels, int numChannels, int numSamples)
 {
+    constexpr auto scaleFactor = 1.0f / static_cast<float> (0x7fffffff);
+
     for (int i = 0; i < numChannels; ++i)
         if (auto d = channels[i])
-            FloatVectorOperations::convertFixedToFloat (reinterpret_cast<float*> (d), d, 1.0f / 0x7fffffff, numSamples);
+            FloatVectorOperations::convertFixedToFloat (reinterpret_cast<float*> (d), d, scaleFactor, numSamples);
 }
 
 bool AudioFormatReader::read (float* const* destChannels, int numDestChannels,

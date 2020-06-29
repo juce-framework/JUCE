@@ -46,7 +46,8 @@ namespace OggVorbisNamespace
                                       "-Wzero-as-null-pointer-constant",
                                       "-Wsign-conversion",
                                       "-Wswitch-default",
-                                      "-Wredundant-decls")
+                                      "-Wredundant-decls",
+                                      "-Wmisleading-indentation")
 
  #include "oggvorbis/vorbisenc.h"
  #include "oggvorbis/codec.h"
