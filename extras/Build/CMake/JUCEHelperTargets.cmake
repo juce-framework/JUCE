@@ -28,8 +28,6 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     endif()
 endif()
 
-install(TARGETS juce_recommended_warning_flags EXPORT JUCE)
-
 # ==================================================================================================
 
 add_library(juce_recommended_config_flags INTERFACE)
@@ -37,8 +35,7 @@ add_library(juce::juce_recommended_config_flags ALIAS juce_recommended_config_fl
 
 if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC"))
     target_compile_options(juce_recommended_config_flags INTERFACE
-        $<$<CONFIG:Debug>:/Od /MP /EHsc>
-        $<$<CONFIG:Release>:/Ox /MP /EHsc>)
+        $<IF:$<CONFIG:Debug>,/Od,/Ox> $<$<STREQUAL:"${CMAKE_CXX_COMPILER_ID}","MSVC">:/MP> /EHsc)
 elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
        OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
        OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
@@ -46,8 +43,6 @@ elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         $<$<CONFIG:Debug>:-g -O0>
         $<$<CONFIG:Release>:-O3>)
 endif()
-
-install(TARGETS juce_recommended_config_flags EXPORT JUCE)
 
 # ==================================================================================================
 
@@ -63,5 +58,3 @@ elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     target_compile_options(juce_recommended_lto_flags INTERFACE $<$<CONFIG:Release>:-flto>)
     target_link_libraries(juce_recommended_lto_flags INTERFACE $<$<CONFIG:Release>:-flto>)
 endif()
-
-install(TARGETS juce_recommended_lto_flags EXPORT JUCE)

@@ -20,8 +20,6 @@
 
 @PACKAGE_INIT@
 
-include("${CMAKE_CURRENT_LIST_DIR}/@JUCE_EXPORT_FILE_NAME@")
-
 if(NOT TARGET juce::juceaide)
     add_executable(juce::juceaide IMPORTED)
     set_target_properties(juce::juceaide PROPERTIES

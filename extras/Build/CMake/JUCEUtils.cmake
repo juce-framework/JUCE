@@ -133,6 +133,8 @@ endif()
 set(JUCE_CMAKE_UTILS_DIR ${CMAKE_CURRENT_LIST_DIR}
     CACHE INTERNAL "The path to the folder holding this file and other resources")
 
+include("${JUCE_CMAKE_UTILS_DIR}/JUCEHelperTargets.cmake")
+
 # We set up default/fallback copy dirs here. If you need different copy dirs, use
 # set_directory_properties or set_target_properties to adjust the values of `JUCE_*_COPY_DIR` at
 # the appropriate scope.
