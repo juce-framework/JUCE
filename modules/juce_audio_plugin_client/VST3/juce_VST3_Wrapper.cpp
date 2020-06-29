@@ -3311,10 +3311,10 @@ JUCE_EXPORTED_FUNCTION IPluginFactory* PLUGIN_API GetPluginFactory()
 {
     PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST3;
 
-   #if JUCE_MSVC
+   #if JUCE_MSVC || (JUCE_WINDOWS && JUCE_CLANG)
     // Cunning trick to force this function to be exported. Life's too short to
     // faff around creating .def files for this kind of thing.
-    #pragma comment(linker, "/EXPORT:" __FUNCTION__ "=" __FUNCDNAME__)
+    #pragma comment(linker, "/EXPORT:GetPluginFactory=GetPluginFactory")
    #endif
 
     if (globalFactory == nullptr)
