@@ -755,8 +755,9 @@ void Project::updateLicenseWarning()
     if (hasIncompatibleLicenseTypeAndSplashScreenSetting())
     {
         ProjectMessages::MessageAction action;
+        auto currentLicenseState = ProjucerApplication::getApp().getLicenseController().getCurrentState();
 
-        if (ProjucerApplication::getApp().getLicenseController().getCurrentState().isOldLicense())
+        if (! currentLicenseState.canUnlockFullFeatures() || currentLicenseState.isOldLicense())
             action = { "Upgrade", [] { URL ("https://juce.com/get-juce").launchInDefaultBrowser(); } };
         else
             action = { "Sign in", [this] { ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (getFile())->showLoginFormOverlay(); } };
