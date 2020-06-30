@@ -1268,7 +1268,7 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 
     props.add (new ChoicePropertyComponent (displaySplashScreenValue, "Display the JUCE Splash Screen (required for closed source applications without an Indie or Pro JUCE license)"),
                                             "This option controls the display of the standard JUCE splash screen. "
-                                            "In accordance with the terms of the JUCE 5 End-Use License Agreement (www.juce.com/juce-5-licence), "
+                                            "In accordance with the terms of the JUCE 6 End-Use License Agreement (www.juce.com/juce-6-licence), "
                                             "this option can only be disabled for closed source applications if you have a JUCE Indie or Pro "
                                             "license, or are using JUCE under the GPL v3 license.");
 

@@ -362,12 +362,12 @@ void ProjectSaver::writeAppConfig (MemoryOutputStream& out, const OwnedArray<Lib
         << "/*" << newLine
         << "  ==============================================================================" << newLine
         << newLine
-        << "   In accordance with the terms of the JUCE 5 End-Use License Agreement, the" << newLine
+        << "   In accordance with the terms of the JUCE 6 End-Use License Agreement, the" << newLine
         << "   JUCE Code in SECTION A cannot be removed, changed or otherwise rendered" << newLine
         << "   ineffective unless you have a JUCE Indie or Pro license, or are using JUCE" << newLine
         << "   under the GPL v3 license." << newLine
         << newLine
-        << "   End User License Agreement: www.juce.com/juce-5-licence" << newLine
+        << "   End User License Agreement: www.juce.com/juce-6-licence" << newLine
         << newLine
         << "  ==============================================================================" << newLine
         << "*/" << newLine
