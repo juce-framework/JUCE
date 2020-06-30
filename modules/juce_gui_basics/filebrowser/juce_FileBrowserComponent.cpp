@@ -117,10 +117,6 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
 
     lookAndFeelChanged();
 
-    addAndMakeVisible (goUpButton.get());
-    goUpButton->onClick = [this] { goUp(); };
-    goUpButton->setTooltip (TRANS ("Go up to parent directory"));
-
     setRoot (currentRoot);
 
     if (filename.isNotEmpty())
@@ -358,6 +354,13 @@ void FileBrowserComponent::resized()
 void FileBrowserComponent::lookAndFeelChanged()
 {
     goUpButton.reset (getLookAndFeel().createFileBrowserGoUpButton());
+
+    if (auto* buttonPtr = goUpButton.get())
+    {
+        addAndMakeVisible (*buttonPtr);
+        buttonPtr->onClick = [this] { goUp(); };
+        buttonPtr->setTooltip (TRANS ("Go up to parent directory"));
+    }
 
     currentPathBox.setColour (ComboBox::backgroundColourId,    findColour (currentPathBoxBackgroundColourId));
     currentPathBox.setColour (ComboBox::textColourId,          findColour (currentPathBoxTextColourId));
