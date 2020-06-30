@@ -208,11 +208,6 @@ ReturnValue ObjCMsgSendSuper (struct objc_super* s, SEL sel, Params... params)
 // These hacks are a workaround for newer Xcode builds which by default prevent calls to these objc functions..
 typedef id (*MsgSendSuperFn) (struct objc_super*, SEL, ...);
 inline MsgSendSuperFn getMsgSendSuperFn() noexcept   { return (MsgSendSuperFn) (void*) objc_msgSendSuper; }
-
-#if ! JUCE_IOS
-typedef double (*MsgSendFPRetFn) (id, SEL op, ...);
-inline MsgSendFPRetFn getMsgSendFPRetFn() noexcept   { return (MsgSendFPRetFn) (void*) objc_msgSend_fpret; }
-#endif
 #endif
 
 //==============================================================================
