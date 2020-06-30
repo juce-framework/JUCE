@@ -2076,6 +2076,8 @@ public:
         setLatencySamples (jmax (0, (int) processor->getLatencySamples()));
         cachedBusLayouts = getBusesLayout();
 
+        setStateForAllMidiBuses (true);
+
         warnOnFailure (holder->component->setActive (true));
         warnOnFailureIfImplemented (processor->setProcessing (true));
 
