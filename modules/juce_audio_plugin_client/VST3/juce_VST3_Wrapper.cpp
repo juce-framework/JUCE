@@ -2281,11 +2281,15 @@ public:
 
         if (type == Vst::kEvent)
         {
+           #if JucePlugin_WantsMidiInput
             if (dir == Vst::kInput)
-                return isMidiInputBusEnabled ? 1 : 0;
+                return 1;
+           #endif
 
+           #if JucePlugin_ProducesMidiOutput
             if (dir == Vst::kOutput)
-                return isMidiOutputBusEnabled ? 1 : 0;
+                return 1;
+           #endif
         }
 
         return 0;
@@ -2366,15 +2370,23 @@ public:
     {
         if (type == Vst::kEvent)
         {
-            if (index != 0)
-                return kResultFalse;
-
-            if (dir == Vst::kInput)
+           #if JucePlugin_WantsMidiInput
+            if (index == 0 && dir == Vst::kInput)
+            {
                 isMidiInputBusEnabled = (state != 0);
-            else
-                isMidiOutputBusEnabled = (state != 0);
+                return kResultTrue;
+            }
+           #endif
 
-            return kResultTrue;
+           #if JucePlugin_ProducesMidiOutput
+            if (index == 0 && dir == Vst::kOutput)
+            {
+                isMidiOutputBusEnabled = (state != 0);
+                return kResultTrue;
+            }
+           #endif
+
+            return kResultFalse;
         }
 
         if (type == Vst::kAudio)
@@ -2618,7 +2630,7 @@ public:
             processParameterChanges (*data.inputParameterChanges);
 
        #if JucePlugin_WantsMidiInput
-        if (data.inputEvents != nullptr)
+        if (isMidiInputBusEnabled && data.inputEvents != nullptr)
             MidiEventList::toMidiBuffer (midiBuffer, *data.inputEvents);
        #endif
 
@@ -2637,7 +2649,7 @@ public:
         else jassertfalse;
 
        #if JucePlugin_ProducesMidiOutput
-        if (data.outputEvents != nullptr)
+        if (isMidiOutputBusEnabled && data.outputEvents != nullptr)
             MidiEventList::toEventList (*data.outputEvents, midiBuffer);
        #endif
 
@@ -2914,15 +2926,10 @@ private:
     AudioBuffer<double> emptyBufferDouble;
 
    #if JucePlugin_WantsMidiInput
-    bool isMidiInputBusEnabled = true;
-   #else
-    bool isMidiInputBusEnabled = false;
+    std::atomic<bool> isMidiInputBusEnabled { true };
    #endif
-
    #if JucePlugin_ProducesMidiOutput
-    bool isMidiOutputBusEnabled = true;
-   #else
-    bool isMidiOutputBusEnabled = false;
+    std::atomic<bool> isMidiOutputBusEnabled { true };
    #endif
 
     static const char* kJucePrivateDataIdentifier;
