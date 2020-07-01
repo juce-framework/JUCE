@@ -463,11 +463,11 @@ private:
             nextSamplePos = begin;
             nextDirection = Direction::forward;
 
-            return { nextSamplePos, nextDirection };
+            return std::tuple<double, Direction> (nextSamplePos, nextDirection);
         }
 
         if (samplerSound->getLoopMode() == LoopMode::none)
-            return { nextSamplePos, nextDirection };
+            return std::tuple<double, Direction> (nextSamplePos, nextDirection);
 
         if (nextDirection == Direction::forward && end < nextSamplePos && !isTailingOff())
         {
@@ -479,7 +479,7 @@ private:
                 nextDirection = Direction::backward;
             }
         }
-        return { nextSamplePos, nextDirection };
+        return std::tuple<double, Direction> (nextSamplePos, nextDirection);
     }
 
     std::shared_ptr<const MPESamplerSound> samplerSound;

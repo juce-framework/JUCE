@@ -608,7 +608,7 @@ static void normaliseImpulseResponse (AudioBuffer<float>& buf)
     const auto numSamples  = buf.getNumSamples();
     const auto channelPtrs = buf.getArrayOfWritePointers();
 
-    const auto maxSumSquaredMag = std::accumulate (channelPtrs, channelPtrs + numChannels, 0.0f, [&] (auto max, auto* channel)
+    const auto maxSumSquaredMag = std::accumulate (channelPtrs, channelPtrs + numChannels, 0.0f, [numSamples] (auto max, auto* channel)
     {
         return jmax (max, std::accumulate (channel, channel + numSamples, 0.0f, [] (auto sum, auto samp)
         {
@@ -618,7 +618,7 @@ static void normaliseImpulseResponse (AudioBuffer<float>& buf)
 
     const auto normalisationFactor = calculateNormalisationFactor (maxSumSquaredMag);
 
-    std::for_each (channelPtrs, channelPtrs + numChannels, [&] (auto* channel)
+    std::for_each (channelPtrs, channelPtrs + numChannels, [normalisationFactor, numSamples] (auto* channel)
     {
         FloatVectorOperations::multiply (channel, normalisationFactor, numSamples);
     });
