@@ -311,7 +311,8 @@ void JucerDocument::setOptionalMethodEnabled (const String& methodSignature, con
 
 bool JucerDocument::isOptionalMethodEnabled (const String& sig) const noexcept
 {
-    return activeExtraMethods.contains (sig);
+    return activeExtraMethods.contains (sig)
+          || activeExtraMethods.contains (sig.replace ("juce::", {}));
 }
 
 void JucerDocument::addExtraClassProperties (PropertyPanel&)
