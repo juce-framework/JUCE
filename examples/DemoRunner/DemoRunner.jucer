@@ -2,9 +2,9 @@
 
 <JUCERPROJECT name="DemoRunner" projectType="guiapp" jucerVersion="6.0.0" defines="JUCE_DEMO_RUNNER=1&#10;JUCE_UNIT_TESTS=1"
               bundleIdentifier="com.juce.demorunner" version="6.0.0" companyName="Raw Material Software Limited"
-              companyCopyright="Copyright (c) 2020 - Raw Material Software Limited" companyWebsite="https://www.juce.com/"
-              companyEmail="info@juce.com" id="yj7xMM" reportAppUsage="0" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="1">
+              companyCopyright="Copyright (c) 2020 - Raw Material Software Limited"
+              companyWebsite="https://www.juce.com/" companyEmail="info@juce.com"
+              id="yj7xMM" reportAppUsage="0" useAppConfig="0" addUsingNamespaceToJuceHeader="1">
   <MAINGROUP id="G8kbr7" name="DemoRunner">
     <GROUP id="{20E3F84A-29E9-D5FF-4559-1A9E4A70CD60}" name="Source">
       <GROUP id="{272A692A-6AFE-68BD-C8E8-63B3D62245B1}" name="Demos">
@@ -93,8 +93,7 @@
                    androidEnableContentSharing="1" androidExtraAssetsFolder="../Assets"
                    smallIcon="YyqWd2" bigIcon="YyqWd2" cameraPermissionNeeded="1">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" androidArchitectures="armeabi-v7a x86"
-                       recommendedWarnings="LLVM"/>
+        <CONFIGURATION isDebug="1" name="Debug" recommendedWarnings="LLVM"/>
         <CONFIGURATION isDebug="0" name="Release" recommendedWarnings="LLVM"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
