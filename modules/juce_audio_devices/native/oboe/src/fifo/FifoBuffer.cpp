@@ -40,8 +40,6 @@ FifoBuffer::FifoBuffer(uint32_t bytesPerFrame, uint32_t capacityInFrames)
     int32_t bytesPerBuffer = bytesPerFrame * capacityInFrames;
     mStorage = new uint8_t[bytesPerBuffer];
     mStorageOwned = true;
-    LOGD("%s() capacityInFrames = %d, bytesPerFrame = %d",
-         __func__, capacityInFrames, bytesPerFrame);
 }
 
 FifoBuffer::FifoBuffer( uint32_t  bytesPerFrame,
@@ -60,8 +58,6 @@ FifoBuffer::FifoBuffer( uint32_t  bytesPerFrame,
                                        writeCounterAddress);
     mStorage = dataStorageAddress;
     mStorageOwned = false;
-    LOGD("%s(*) capacityInFrames = %d, bytesPerFrame = %d",
-         __func__, capacityInFrames, bytesPerFrame);
 }
 
 FifoBuffer::~FifoBuffer() {

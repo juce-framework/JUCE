@@ -198,7 +198,7 @@ Result AudioInputStreamOpenSLES::open() {
         goto error;
     }
 
-    oboeResult = configureBufferSizes();
+    oboeResult = configureBufferSizes(mSampleRate);
     if (Result::OK != oboeResult) {
         goto error;
     }
@@ -340,7 +340,7 @@ Result AudioInputStreamOpenSLES::updateServiceFrameCounter() {
         SLmillisecond msec = 0;
         SLresult slResult = (*mRecordInterface)->GetPosition(mRecordInterface, &msec);
         if (SL_RESULT_SUCCESS != slResult) {
-            LOGD("%s(): GetPosition() returned %s", __func__, getSLErrStr(slResult));
+            LOGW("%s(): GetPosition() returned %s", __func__, getSLErrStr(slResult));
             // set result based on SLresult
             result = Result::ErrorInternal;
         } else {

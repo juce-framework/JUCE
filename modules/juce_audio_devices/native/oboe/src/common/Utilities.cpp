@@ -266,18 +266,40 @@ const char *convertToText<ChannelCount>(ChannelCount channelCount) {
     }
 }
 
-int getSdkVersion() {
+std::string getPropertyString(const char * name) {
+    std::string result;
 #ifdef __ANDROID__
-    static int sCachedSdkVersion = -1;
-    if (sCachedSdkVersion == -1) {
-        char sdk[PROP_VALUE_MAX] = {0};
-        if (__system_property_get("ro.build.version.sdk", sdk) != 0) {
-            sCachedSdkVersion = atoi(sdk);
-        }
+    char valueText[PROP_VALUE_MAX] = {0};
+    if (__system_property_get(name, valueText) != 0) {
+        result = valueText;
     }
-    return sCachedSdkVersion;
+#else
+    (void) name;
 #endif
-    return -1;
+    return result;
+}
+
+int getPropertyInteger(const char * name, int defaultValue) {
+    int result = defaultValue;
+#ifdef __ANDROID__
+    char valueText[PROP_VALUE_MAX] = {0};
+    if (__system_property_get(name, valueText) != 0) {
+        result = atoi(valueText);
+    }
+#else
+    (void) name;
+#endif
+    return result;
+}
+
+int getSdkVersion() {
+    static int sCachedSdkVersion = -1;
+#ifdef __ANDROID__
+    if (sCachedSdkVersion == -1) {
+        sCachedSdkVersion = getPropertyInteger("ro.build.version.sdk", -1);
+    }
+#endif
+    return sCachedSdkVersion;
 }
 
 }// namespace oboe

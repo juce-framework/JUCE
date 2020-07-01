@@ -27,6 +27,7 @@ namespace oboe {
  * Base class containing parameters for audio streams and builders.
  **/
 class AudioStreamBase {
+
 public:
 
     AudioStreamBase() {}
