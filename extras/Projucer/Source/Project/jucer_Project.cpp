@@ -757,7 +757,7 @@ void Project::updateLicenseWarning()
         ProjectMessages::MessageAction action;
         auto currentLicenseState = ProjucerApplication::getApp().getLicenseController().getCurrentState();
 
-        if (! currentLicenseState.canUnlockFullFeatures() || currentLicenseState.isOldLicense())
+        if (currentLicenseState.isSignedIn() && (! currentLicenseState.canUnlockFullFeatures() || currentLicenseState.isOldLicense()))
             action = { "Upgrade", [] { URL ("https://juce.com/get-juce").launchInDefaultBrowser(); } };
         else
             action = { "Sign in", [this] { ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (getFile())->showLoginFormOverlay(); } };
