@@ -33,8 +33,8 @@ public:
     TreeViewHandler()
         : ComponentTypeHandler ("TreeView", "juce::TreeView", typeid (DemoTreeView), 150, 150)
     {
-        registerColour (TreeView::backgroundColourId, "background", "backgroundColour");
-        registerColour (TreeView::linesColourId, "lines", "linecol");
+        registerColour (juce::TreeView::backgroundColourId, "background", "backgroundColour");
+        registerColour (juce::TreeView::linesColourId, "lines", "linecol");
     }
 
     Component* createNewComponent (JucerDocument*) override

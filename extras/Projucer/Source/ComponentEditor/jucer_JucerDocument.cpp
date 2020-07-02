@@ -292,9 +292,9 @@ void JucerDocument::getOptionalMethods (StringArray& baseClasses,
     addMethod ("juce::Component", "bool", "keyStateChanged (bool isKeyDown)", "return false;  // Return true if your handler uses this key event, or false to allow it to be passed-on.", baseClasses, returnValues, methods, initialContents);
     addMethod ("juce::Component", "void", "modifierKeysChanged (const juce::ModifierKeys& modifiers)", "", baseClasses, returnValues, methods, initialContents);
 
-    addMethod ("juce::Component", "void", "focusGained (juce::FocusChangeType cause)", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("juce::Component", "void", "focusLost (juce::FocusChangeType cause)", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("juce::Component", "void", "focusOfChildComponentChanged (juce::FocusChangeType cause)", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "focusGained (FocusChangeType cause)", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "focusLost (FocusChangeType cause)", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "focusOfChildComponentChanged (FocusChangeType cause)", "", baseClasses, returnValues, methods, initialContents);
     addMethod ("juce::Component", "void", "modifierKeysChanged (const juce::ModifierKeys& modifiers)", "", baseClasses, returnValues, methods, initialContents);
     addMethod ("juce::Component", "void", "inputAttemptWhenModal()", "", baseClasses, returnValues, methods, initialContents);
 }
