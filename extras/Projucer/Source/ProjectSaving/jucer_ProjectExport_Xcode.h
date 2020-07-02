@@ -34,32 +34,55 @@ namespace
     static const StringArray iOSVersions { "9.0", "9.1", "9.2", "9.3", "10.0", "10.1", "10.2", "10.3",
                                            "11.0", "12.0", "13.0" };
 
-    static const int oldestDeploymentTarget  = 7;
-    static const int defaultDeploymentTarget = 11;
-    static const int oldestSDKVersion        = 11;
-    static const int currentSDKVersion       = 15;
-    static const int minimumAUv3SDKVersion   = 11;
+    static const char* const macOSVersions[] { "10.7", "10.8", "10.9", "10.10", "10.11", "10.12", "10.13",
+                                               "10.14", "10.15", "10.16", "11.0" };
 
-    static String getVersionName    (int version)  { return "10." + String (version); }
-    static String getSDKDisplayName (int version)  { return getVersionName (version) + " SDK"; }
-    static String getSDKRootName    (int version)  { return "macosx" + getVersionName (version); }
+    class MacOSVersion
+    {
+    public:
+        MacOSVersion() = default;
+        explicit MacOSVersion (int i) : index (i) {}
+
+        bool operator<  (const MacOSVersion& other) const { return index <  other.index; }
+        bool operator== (const MacOSVersion& other) const { return index == other.index; }
+        bool operator!= (const MacOSVersion& other) const { return index != other.index; }
+
+        MacOSVersion& operator++()
+        {
+            ++index;
+            return *this;
+        }
+
+        String getName()        const { return macOSVersions[index]; }
+        String getDisplayName() const { return getName() + " SDK"; }
+        String getRootName()    const { return "macosx" + getName(); }
+
+    private:
+        int index{};
+    };
+
+    static const MacOSVersion nextMacOSVersion       { numElementsInArray (macOSVersions) };
+    static const MacOSVersion oldestDeploymentTarget { 0 };
+    static const MacOSVersion macOSDefaultVersion    { 4 };
+    static const MacOSVersion oldestSDKVersion       { 4 };
+    static const MacOSVersion minimumAUv3SDKVersion  { 4 };
 
     static String getOSXSDKVersion (const String& sdkVersion)
     {
-        for (int v = oldestSDKVersion; v <= currentSDKVersion; ++v)
-            if (sdkVersion == getSDKDisplayName (v))
-                return getSDKRootName (v);
+        for (auto v = oldestSDKVersion; v < nextMacOSVersion; ++v)
+            if (sdkVersion == v.getDisplayName())
+                return v.getRootName();
 
         return "macosx";
     }
 
-    template<class ContainerType>
-    static ContainerType getSDKChoiceList (int oldestVersion, bool displayName)
+    template <class ContainerType>
+    static ContainerType getSDKChoiceList (MacOSVersion oldestVersion, bool displayName)
     {
         ContainerType container;
 
-        for (int v = oldestVersion; v <= currentSDKVersion; ++v)
-            container.add (displayName ? getSDKDisplayName (v) : getVersionName (v));
+        for (auto v = oldestVersion; v < nextMacOSVersion; ++v)
+            container.add (displayName ? v.getDisplayName() : v.getName());
 
         return container;
     }
@@ -680,7 +703,7 @@ protected:
             : BuildConfiguration (p, t, e),
               iOS (isIOS),
               osxSDKVersion                (config, Ids::osxSDK,                       getUndoManager()),
-              osxDeploymentTarget          (config, Ids::osxCompatibility,             getUndoManager(), getSDKDisplayName (defaultDeploymentTarget)),
+              osxDeploymentTarget          (config, Ids::osxCompatibility,             getUndoManager(), macOSDefaultVersion.getDisplayName()),
               iosDeploymentTarget          (config, Ids::iosCompatibility,             getUndoManager(), iOSDefaultVersion),
               osxArchitecture              (config, Ids::osxArchitecture,              getUndoManager(), osxArch_Default),
               customXcodeFlags             (config, Ids::customXcodeFlags,             getUndoManager()),
@@ -732,7 +755,7 @@ protected:
                            "The minimum version of OSX that the target binary will be compatible with.");
 
                 props.add (new ChoicePropertyComponent (osxArchitecture, "OSX Architecture",
-                                                        { "Native architecture of build machine", "Universal Binary (32-bit)", "Universal Binary (32/64-bit)", "64-bit Intel" },
+                                                        { "Native architecture of build machine", "Universal Binary (32-bit)", "Universal Binary (32/64-bit)", "Universal Binary (64-bit)" },
                                                         { osxArch_Native,                          osxArch_32BitUniversal,      osxArch_64BitUniversal,         osxArch_64Bit }),
                            "The type of OSX binary that will be produced.");
             }
@@ -1813,13 +1836,14 @@ public:
 
         String getOSXDeploymentTarget (const String& deploymentTarget) const
         {
-            auto minVersion = (type == Target::AudioUnitv3PlugIn ? minimumAUv3SDKVersion : oldestDeploymentTarget);
+            auto minVersion = (type == Target::AudioUnitv3PlugIn ? minimumAUv3SDKVersion
+                                                                 : oldestDeploymentTarget);
 
-            for (int v = minVersion; v <= currentSDKVersion; ++v)
-                if (deploymentTarget == getSDKDisplayName (v))
-                    return getVersionName (v);
+            for (auto v = minVersion; v < nextMacOSVersion; ++v)
+                if (deploymentTarget == v.getDisplayName())
+                    return v.getName();
 
-            return getVersionName (minVersion);
+            return minVersion.getName();
         }
 
         //==============================================================================
