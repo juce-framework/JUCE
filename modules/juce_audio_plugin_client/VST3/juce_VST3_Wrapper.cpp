@@ -3314,7 +3314,11 @@ JUCE_EXPORTED_FUNCTION IPluginFactory* PLUGIN_API GetPluginFactory()
    #if JUCE_MSVC || (JUCE_WINDOWS && JUCE_CLANG)
     // Cunning trick to force this function to be exported. Life's too short to
     // faff around creating .def files for this kind of thing.
-    #pragma comment(linker, "/EXPORT:GetPluginFactory=GetPluginFactory")
+    #if JUCE_32BIT
+     #pragma comment(linker, "/EXPORT:GetPluginFactory=_GetPluginFactory@0")
+    #else
+     #pragma comment(linker, "/EXPORT:GetPluginFactory=GetPluginFactory")
+    #endif
    #endif
 
     if (globalFactory == nullptr)
