@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -855,9 +854,9 @@ struct Grid::AutoPlacement
                                         Array<Grid::TrackInfo>& rows,
                                         const ItemPlacementArray& itemPlacementArray)
     {
-        auto isSpan = [](Grid::PlacementHelpers::LineRange r) -> bool { return std::abs (r.end - r.start) > 1; };
+        auto isSpan = [] (Grid::PlacementHelpers::LineRange r) -> bool { return std::abs (r.end - r.start) > 1; };
 
-        auto getHighestItemOnRow = [isSpan](int rowNumber, const ItemPlacementArray& itemPlacementArrayToUse) -> float
+        auto getHighestItemOnRow = [isSpan] (int rowNumber, const ItemPlacementArray& itemPlacementArrayToUse) -> float
         {
             float highestRowSize = 0.0f;
 
@@ -868,7 +867,7 @@ struct Grid::AutoPlacement
             return highestRowSize;
         };
 
-        auto getHighestItemOnColumn = [isSpan](int rowNumber, const ItemPlacementArray& itemPlacementArrayToUse) -> float
+        auto getHighestItemOnColumn = [isSpan] (int rowNumber, const ItemPlacementArray& itemPlacementArrayToUse) -> float
         {
             float highestColumnSize = 0.0f;
             for (const auto& i : itemPlacementArrayToUse)

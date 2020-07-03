@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -522,8 +522,8 @@ public:
                 return result;
             };
 
-            auto compareData = [this](const AudioBuffer<float>& test,
-                                      const AudioBuffer<float>& reference)
+            auto compareData = [this] (const AudioBuffer<float>& test,
+                                       const AudioBuffer<float>& reference)
             {
                 for (int i = 0; i < test.getNumSamples(); ++i)
                     expectWithinAbsoluteError (test.getSample (0, i),

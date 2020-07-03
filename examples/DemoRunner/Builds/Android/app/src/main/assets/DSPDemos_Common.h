@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -312,8 +312,8 @@ struct DSPDemo  : public AudioSource,
 
         inputSource->getNextAudioBlock (bufferToFill);
 
-        dsp::AudioBlock<float> block (*bufferToFill.buffer,
-                                      (size_t) bufferToFill.startSample);
+        AudioBlock<float> block (*bufferToFill.buffer,
+                                 (size_t) bufferToFill.startSample);
 
         ScopedLock audioLock (audioCallbackLock);
         this->process (ProcessContextReplacing<float> (block));

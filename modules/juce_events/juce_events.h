@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -25,14 +25,14 @@
  The block below describes the properties of this module, and is read by
  the Projucer to automatically generate project code that uses it.
  For details about the syntax and how to create or use a module, see the
- JUCE Module Format.txt file.
+ JUCE Module Format.md file.
 
 
  BEGIN_JUCE_MODULE_DECLARATION
 
   ID:                 juce_events
   vendor:             juce
-  version:            5.4.7
+  version:            6.0.0
   name:               JUCE message and event handling classes
   description:        Classes for running an application's main event loop and sending/receiving messages, timers, etc.
   website:            http://www.juce.com/juce
@@ -59,7 +59,7 @@
  #define JUCE_EXECUTE_APP_SUSPEND_ON_BACKGROUND_TASK 0
 #endif
 
-#if JUCE_EVENTS_INCLUDE_WINRT_WRAPPER && JUCE_WINDOWS
+#if JUCE_WINDOWS && JUCE_EVENTS_INCLUDE_WINRT_WRAPPER
  // If this header file is missing then you are probably attempting to use WinRT
  // functionality without the WinRT libraries installed on your system. Try installing
  // the latest Windows Standalone SDK and maybe also adding the path to the WinRT

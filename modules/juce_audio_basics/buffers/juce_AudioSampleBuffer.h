@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -22,6 +22,53 @@
 
 namespace juce
 {
+
+#ifndef DOXYGEN
+/** The contents of this namespace are used to implement AudioBuffer and should
+    not be used elsewhere. Their interfaces (and existence) are liable to change!
+*/
+namespace detail
+{
+    /** On iOS/arm7 the alignment of `double` is greater than the alignment of
+        `std::max_align_t`, so we can't trust max_align_t. Instead, we query
+        lots of primitive types and use the maximum alignment of all of them.
+
+        We're putting this stuff outside AudioBuffer itself to avoid creating
+        unnecessary copies for each distinct template instantiation of
+        AudioBuffer.
+
+        MSVC 2015 doesn't like when we write getMaxAlignment as a loop which
+        accumulates the max alignment (declarations not allowed in constexpr
+        function body) so instead we use this recursive version which
+        instantiates a zillion templates.
+    */
+
+    template <typename> struct Type {};
+
+    constexpr size_t getMaxAlignment() noexcept { return 0; }
+
+    template <typename Head, typename... Tail>
+    constexpr size_t getMaxAlignment (Type<Head>, Type<Tail>... tail) noexcept
+    {
+        return jmax (alignof (Head), getMaxAlignment (tail...));
+    }
+
+    constexpr size_t maxAlignment = getMaxAlignment (Type<std::max_align_t>{},
+                                                     Type<void*>{},
+                                                     Type<float>{},
+                                                     Type<double>{},
+                                                     Type<long double>{},
+                                                     Type<short int>{},
+                                                     Type<int>{},
+                                                     Type<long int>{},
+                                                     Type<long long int>{},
+                                                     Type<bool>{},
+                                                     Type<char>{},
+                                                     Type<char16_t>{},
+                                                     Type<char32_t>{},
+                                                     Type<wchar_t>{});
+} // namespace detail
+#endif
 
 //==============================================================================
 /**
@@ -1075,8 +1122,10 @@ private:
 
     void allocateData()
     {
-        static_assert (std::alignment_of<Type>::value <= std::alignment_of<std::max_align_t>::value,
+       #if (! JUCE_GCC) || (__GNUC__ * 100 + __GNUC_MINOR__) >= 409
+        static_assert (alignof (Type) <= detail::maxAlignment,
                        "AudioBuffer cannot hold types with alignment requirements larger than that guaranteed by malloc");
+       #endif
         jassert (size >= 0);
 
         auto channelListSize = (size_t) (numChannels + 1) * sizeof (Type*);

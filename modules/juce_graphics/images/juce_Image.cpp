@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -426,6 +425,7 @@ Colour Image::BitmapData::getPixelColour (int x, int y) const noexcept
         case Image::ARGB:           return Colour ( ((const PixelARGB*)  pixel)->getUnpremultiplied());
         case Image::RGB:            return Colour (*((const PixelRGB*)   pixel));
         case Image::SingleChannel:  return Colour (*((const PixelAlpha*) pixel));
+        case Image::UnknownFormat:
         default:                    jassertfalse; break;
     }
 
@@ -444,6 +444,7 @@ void Image::BitmapData::setPixelColour (int x, int y, Colour colour) const noexc
         case Image::ARGB:           ((PixelARGB*)  pixel)->set (col); break;
         case Image::RGB:            ((PixelRGB*)   pixel)->set (col); break;
         case Image::SingleChannel:  ((PixelAlpha*) pixel)->set (col); break;
+        case Image::UnknownFormat:
         default:                    jassertfalse; break;
     }
 }
@@ -521,6 +522,7 @@ static void performPixelOp (const Image::BitmapData& data, const PixelOperation&
         case Image::ARGB:           PixelIterator<PixelARGB> ::iterate (data, pixelOp); break;
         case Image::RGB:            PixelIterator<PixelRGB>  ::iterate (data, pixelOp); break;
         case Image::SingleChannel:  PixelIterator<PixelAlpha>::iterate (data, pixelOp); break;
+        case Image::UnknownFormat:
         default:                    jassertfalse; break;
     }
 }
@@ -660,7 +662,7 @@ void Image::moveImageSection (int dx, int dy,
         auto dst = destData.getPixelPointer (dx - minX, dy - minY);
         auto src = destData.getPixelPointer (sx - minX, sy - minY);
 
-        auto lineSize = (size_t) (destData.pixelStride * w);
+        auto lineSize = (size_t) destData.pixelStride * (size_t) w;
 
         if (dy > sy)
         {

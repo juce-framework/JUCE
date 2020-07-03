@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -63,6 +63,9 @@ bool DirectoryIterator::next()
 {
     return next (nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 }
+
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
 
 bool DirectoryIterator::next (bool* isDirResult, bool* isHiddenResult, int64* fileSize,
                               Time* modTime, Time* creationTime, bool* isReadOnly)
@@ -133,6 +136,9 @@ bool DirectoryIterator::next (bool* isDirResult, bool* isHiddenResult, int64* fi
             return false;
     }
 }
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 const File& DirectoryIterator::getFile() const
 {

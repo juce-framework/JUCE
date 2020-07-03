@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -62,8 +62,6 @@ public:
         addParameter (gain = new AudioParameterFloat ("gain", "Gain", 0.0f, 1.0f, 0.5f));
     }
 
-    ~GainProcessor() {}
-
     //==============================================================================
     void prepareToPlay (double, int) override {}
     void releaseResources() override {}
@@ -71,6 +69,11 @@ public:
     void processBlock (AudioBuffer<float>& buffer, MidiBuffer&) override
     {
         buffer.applyGain (*gain);
+    }
+
+    void processBlock (AudioBuffer<double>& buffer, MidiBuffer&) override
+    {
+        buffer.applyGain ((float) *gain);
     }
 
     //==============================================================================

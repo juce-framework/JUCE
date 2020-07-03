@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -118,6 +118,7 @@ struct DemoFlexPanel   : public juce::Component
             case 3:  flexItem.alignSelf = FlexItem::AlignSelf::flexEnd;   break;
             case 4:  flexItem.alignSelf = FlexItem::AlignSelf::center;    break;
             case 5:  flexItem.alignSelf = FlexItem::AlignSelf::stretch;   break;
+            default: break;
         }
 
         refreshLayout();

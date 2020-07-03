@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -34,12 +34,12 @@ FileInputSource::~FileInputSource()
 
 InputStream* FileInputSource::createInputStream()
 {
-    return file.createInputStream();
+    return file.createInputStream().release();
 }
 
 InputStream* FileInputSource::createInputStreamFor (const String& relatedItemPath)
 {
-    return file.getSiblingFile (relatedItemPath).createInputStream();
+    return file.getSiblingFile (relatedItemPath).createInputStream().release();
 }
 
 int64 FileInputSource::hashCode() const

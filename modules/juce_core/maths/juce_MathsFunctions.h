@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -91,33 +91,33 @@ using uint32    = unsigned int;
 
 /** Returns the larger of two values. */
 template <typename Type>
-JUCE_CONSTEXPR Type jmax (Type a, Type b)                                   { return a < b ? b : a; }
+constexpr Type jmax (Type a, Type b)                                   { return a < b ? b : a; }
 
 /** Returns the larger of three values. */
 template <typename Type>
-JUCE_CONSTEXPR Type jmax (Type a, Type b, Type c)                           { return a < b ? (b < c ? c : b) : (a < c ? c : a); }
+constexpr Type jmax (Type a, Type b, Type c)                           { return a < b ? (b < c ? c : b) : (a < c ? c : a); }
 
 /** Returns the larger of four values. */
 template <typename Type>
-JUCE_CONSTEXPR Type jmax (Type a, Type b, Type c, Type d)                   { return jmax (a, jmax (b, c, d)); }
+constexpr Type jmax (Type a, Type b, Type c, Type d)                   { return jmax (a, jmax (b, c, d)); }
 
 /** Returns the smaller of two values. */
 template <typename Type>
-JUCE_CONSTEXPR Type jmin (Type a, Type b)                                   { return b < a ? b : a; }
+constexpr Type jmin (Type a, Type b)                                   { return b < a ? b : a; }
 
 /** Returns the smaller of three values. */
 template <typename Type>
-JUCE_CONSTEXPR Type jmin (Type a, Type b, Type c)                           { return b < a ? (c < b ? c : b) : (c < a ? c : a); }
+constexpr Type jmin (Type a, Type b, Type c)                           { return b < a ? (c < b ? c : b) : (c < a ? c : a); }
 
 /** Returns the smaller of four values. */
 template <typename Type>
-JUCE_CONSTEXPR Type jmin (Type a, Type b, Type c, Type d)                   { return jmin (a, jmin (b, c, d)); }
+constexpr Type jmin (Type a, Type b, Type c, Type d)                   { return jmin (a, jmin (b, c, d)); }
 
 /** Remaps a normalised value (between 0 and 1) to a target range.
     This effectively returns (targetRangeMin + value0To1 * (targetRangeMax - targetRangeMin)).
 */
 template <typename Type>
-JUCE_CONSTEXPR Type jmap (Type value0To1, Type targetRangeMin, Type targetRangeMax)
+constexpr Type jmap (Type value0To1, Type targetRangeMin, Type targetRangeMax)
 {
     return targetRangeMin + value0To1 * (targetRangeMax - targetRangeMin);
 }
@@ -128,6 +128,50 @@ Type jmap (Type sourceValue, Type sourceRangeMin, Type sourceRangeMax, Type targ
 {
     jassert (sourceRangeMax != sourceRangeMin); // mapping from a range of zero will produce NaN!
     return targetRangeMin + ((targetRangeMax - targetRangeMin) * (sourceValue - sourceRangeMin)) / (sourceRangeMax - sourceRangeMin);
+}
+
+/** Remaps a normalised value (between 0 and 1) to a logarithmic target range.
+
+    The entire target range must be greater than zero.
+
+    @see mapFromLog10
+
+    @code
+    mapToLog10 (0.5, 0.4, 40.0) == 4.0
+    @endcode
+*/
+template <typename Type>
+Type mapToLog10 (Type value0To1, Type logRangeMin, Type logRangeMax)
+{
+    jassert (logRangeMin > 0);
+    jassert (logRangeMax > 0);
+
+    auto logMin = std::log10 (logRangeMin);
+    auto logMax = std::log10 (logRangeMax);
+
+    return std::pow ((Type) 10.0, value0To1 * (logMax - logMin) + logMin);
+}
+
+/** Remaps a logarithmic value in a target range to a normalised value (between 0 and 1).
+
+    The entire target range must be greater than zero.
+
+    @see mapToLog10
+
+    @code
+    mapFromLog10 (4.0, 0.4, 40.0) == 0.5
+    @endcode
+*/
+template <typename Type>
+Type mapFromLog10 (Type valueInLogRange, Type logRangeMin, Type logRangeMax)
+{
+    jassert (logRangeMin > 0);
+    jassert (logRangeMax > 0);
+
+    auto logMin = std::log10 (logRangeMin);
+    auto logMax = std::log10 (logRangeMax);
+
+    return (std::log10 (valueInLogRange) - logMin) / (logMax - logMin);
 }
 
 /** Scans an array of values, returning the minimum value that it contains. */
@@ -297,7 +341,7 @@ void ignoreUnused (Types&&...) noexcept {}
     @endcode
 */
 template <typename Type, size_t N>
-JUCE_CONSTEXPR int numElementsInArray (Type (&)[N]) noexcept     { return N; }
+constexpr int numElementsInArray (Type (&)[N]) noexcept     { return N; }
 
 //==============================================================================
 // Some useful maths functions that aren't always present with all compilers and build settings.
@@ -327,8 +371,6 @@ inline float juce_hypot (float a, float b) noexcept
 #endif
 
 //==============================================================================
-#if JUCE_HAS_CONSTEXPR
-
 /** Commonly used mathematical constants
 
     @tags{Core}
@@ -352,71 +394,29 @@ struct MathConstants
     static constexpr FloatType sqrt2 = static_cast<FloatType> (1.4142135623730950488L);
 };
 
-#else
-
-/** Commonly used mathematical constants
-
-    @tags{Core}
-*/
-template <typename FloatType>
-struct MathConstants
-{
-    /** A predefined value for Pi */
-    static const FloatType pi;
-
-    /** A predefined value for 2 * Pi */
-    static const FloatType twoPi;
-
-    /** A predefined value for Pi / 2 */
-    static const FloatType halfPi;
-
-    /** A predefined value for Euler's number */
-    static const FloatType euler;
-
-    /** A predefined value for sqrt(2) */
-    static const FloatType sqrt2;
-};
-
-template <typename FloatType>
-const FloatType MathConstants<FloatType>::pi = static_cast<FloatType> (3.141592653589793238L);
-
-template <typename FloatType>
-const FloatType MathConstants<FloatType>::twoPi = static_cast<FloatType> (2 * 3.141592653589793238L);
-
-template <typename FloatType>
-const FloatType MathConstants<FloatType>::halfPi = static_cast<FloatType> (3.141592653589793238L / 2);
-
-template <typename FloatType>
-const FloatType MathConstants<FloatType>::euler = static_cast<FloatType> (2.71828182845904523536L);
-
-template <typename FloatType>
-const FloatType MathConstants<FloatType>::sqrt2 = static_cast<FloatType> (1.4142135623730950488L);
-
-#endif
-
 #ifndef DOXYGEN
 /** A double-precision constant for pi.
     @deprecated This is deprecated in favour of MathConstants<double>::pi.
     The reason is that "double_Pi" was a confusing name, and many people misused it,
     wrongly thinking it meant 2 * pi !
 */
-const JUCE_CONSTEXPR double  double_Pi  = MathConstants<double>::pi;
+const constexpr double  double_Pi  = MathConstants<double>::pi;
 
 /** A single-precision constant for pi.
     @deprecated This is deprecated in favour of MathConstants<float>::pi.
     The reason is that "double_Pi" was a confusing name, and many people misused it,
     wrongly thinking it meant 2 * pi !
 */
-const JUCE_CONSTEXPR float   float_Pi   = MathConstants<float>::pi;
+const constexpr float   float_Pi   = MathConstants<float>::pi;
 #endif
 
 /** Converts an angle in degrees to radians. */
 template <typename FloatType>
-JUCE_CONSTEXPR FloatType degreesToRadians (FloatType degrees) noexcept     { return degrees * (MathConstants<FloatType>::pi / FloatType (180)); }
+constexpr FloatType degreesToRadians (FloatType degrees) noexcept     { return degrees * (MathConstants<FloatType>::pi / FloatType (180)); }
 
 /** Converts an angle in radians to degrees. */
 template <typename FloatType>
-JUCE_CONSTEXPR FloatType radiansToDegrees (FloatType radians) noexcept     { return radians * (FloatType (180) / MathConstants<FloatType>::pi); }
+constexpr FloatType radiansToDegrees (FloatType radians) noexcept     { return radians * (FloatType (180) / MathConstants<FloatType>::pi); }
 
 
 //==============================================================================
@@ -529,7 +529,7 @@ unsigned int truncatePositiveToUnsignedInt (FloatType value) noexcept
 //==============================================================================
 /** Returns true if the specified integer is a power-of-two. */
 template <typename IntegerType>
-JUCE_CONSTEXPR bool isPowerOfTwo (IntegerType value)
+constexpr bool isPowerOfTwo (IntegerType value)
 {
    return (value & (value - 1)) == 0;
 }
@@ -582,7 +582,7 @@ IntegerType negativeAwareModulo (IntegerType dividend, const IntegerType divisor
 
 /** Returns the square of its argument. */
 template <typename NumericType>
-inline JUCE_CONSTEXPR NumericType square (NumericType n) noexcept
+inline constexpr NumericType square (NumericType n) noexcept
 {
     return n * n;
 }

@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -507,7 +506,7 @@ public:
         by the specified amount and returning the section that was removed.
 
         E.g. if this rectangle is (100, 100, 300, 300) and amountToRemove is 50, this will
-        return (250, 100, 50, 300) and leave this rectangle as (100, 100, 250, 300).
+        return (350, 100, 50, 300) and leave this rectangle as (100, 100, 250, 300).
 
         If amountToRemove is greater than the width of this rectangle, it'll be clipped to
         that value.
@@ -524,7 +523,7 @@ public:
         by the specified amount and returning the section that was removed.
 
         E.g. if this rectangle is (100, 100, 300, 300) and amountToRemove is 50, this will
-        return (100, 250, 300, 50) and leave this rectangle as (100, 100, 300, 250).
+        return (100, 350, 300, 50) and leave this rectangle as (100, 100, 300, 250).
 
         If amountToRemove is greater than the height of this rectangle, it'll be clipped to
         that value.
@@ -751,10 +750,11 @@ public:
 
         switch (inside)
         {
-            case 1 + 2 + 8:     w = r - otherR; pos.x = otherR; return true;
-            case 1 + 2 + 4:     h = b - otherB; pos.y = otherB; return true;
-            case 2 + 4 + 8:     w = other.pos.x - pos.x; return true;
-            case 1 + 4 + 8:     h = other.pos.y - pos.y; return true;
+            case 1 + 2 + 8:  w = r - otherR; pos.x = otherR; return true;
+            case 1 + 2 + 4:  h = b - otherB; pos.y = otherB; return true;
+            case 2 + 4 + 8:  w = other.pos.x - pos.x;        return true;
+            case 1 + 4 + 8:  h = other.pos.y - pos.y;        return true;
+            default:         break;
         }
 
         return false;

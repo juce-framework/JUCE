@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -24,7 +23,7 @@
   ==============================================================================
 */
 
-#include "../../juce_core/system/juce_TargetPlatform.h"
+#include <juce_core/system/juce_TargetPlatform.h>
 #include "../utility/juce_CheckSettingMacros.h"
 
 #if JucePlugin_Build_AUv3
@@ -62,10 +61,10 @@
 #import <AudioToolbox/AudioToolbox.h>
 #import <AVFoundation/AVFoundation.h>
 
-#include "../../juce_graphics/native/juce_mac_CoreGraphicsHelpers.h"
-#include "../../juce_audio_basics/native/juce_mac_CoreAudioLayouts.h"
-#include "../../juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp"
-#include "../../juce_audio_processors/format_types/juce_AU_Shared.h"
+#include <juce_graphics/native/juce_mac_CoreGraphicsHelpers.h>
+#include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
+#include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
+#include <juce_audio_processors/format_types/juce_AU_Shared.h>
 
 #define JUCE_VIEWCONTROLLER_OBJC_NAME(x) JUCE_JOIN_MACRO (x, FactoryAUv3)
 
@@ -77,8 +76,7 @@
 
 #define JUCE_AUDIOUNIT_OBJC_NAME(x) JUCE_JOIN_MACRO (x, AUv3)
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wnullability-completeness"
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnullability-completeness")
 
 using namespace juce;
 
@@ -116,13 +114,12 @@ public:
     JuceAudioUnitv3Base (const AudioComponentDescription& descr,
                          AudioComponentInstantiationOptions options,
                          NSError** error)
-       #pragma clang diagnostic push
-       #pragma clang diagnostic ignored "-Wobjc-method-access"
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wobjc-method-access")
         : au ([audioUnitObjCClass.createInstance() initWithComponentDescription: descr
                                                                         options: options
                                                                           error: error
                                                                       juceClass: this])
-       #pragma clang diagnostic pop
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     {}
 
     JuceAudioUnitv3Base (AUAudioUnit* audioUnit) : au (audioUnit)
@@ -221,13 +218,12 @@ private:
         {
             addIvar<JuceAudioUnitv3Base*> ("cppObject");
 
-           #pragma clang diagnostic push
-           #pragma clang diagnostic ignored "-Wundeclared-selector"
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             addMethod (@selector (initWithComponentDescription:options:error:juceClass:),
                        initWithComponentDescriptionAndJuceClass, "@@:",
                        @encode (AudioComponentDescription),
                        @encode (AudioComponentInstantiationOptions), "^@@");
-           #pragma clang diagnostic pop
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             addMethod (@selector (initWithComponentDescription:options:error:),
                        initWithComponentDescription, "@@:",
@@ -970,16 +966,19 @@ public:
 
         switch (lastTimeStamp.mSMPTETime.mType)
         {
-            case kSMPTETimeType2398:        info.frameRate = AudioPlayHead::fps23976; break;
-            case kSMPTETimeType24:          info.frameRate = AudioPlayHead::fps24; break;
-            case kSMPTETimeType25:          info.frameRate = AudioPlayHead::fps25; break;
-            case kSMPTETimeType2997:        info.frameRate = AudioPlayHead::fps2997; break;
+            case kSMPTETimeType2398:        info.frameRate = AudioPlayHead::fps23976;    break;
+            case kSMPTETimeType24:          info.frameRate = AudioPlayHead::fps24;       break;
+            case kSMPTETimeType25:          info.frameRate = AudioPlayHead::fps25;       break;
+            case kSMPTETimeType2997:        info.frameRate = AudioPlayHead::fps2997;     break;
             case kSMPTETimeType2997Drop:    info.frameRate = AudioPlayHead::fps2997drop; break;
-            case kSMPTETimeType30Drop:      info.frameRate = AudioPlayHead::fps30drop; break;
-            case kSMPTETimeType30:          info.frameRate = AudioPlayHead::fps30; break;
-            case kSMPTETimeType60Drop:      info.frameRate = AudioPlayHead::fps60drop; break;
-            case kSMPTETimeType60:          info.frameRate = AudioPlayHead::fps60; break;
-            default:                        info.frameRate = AudioPlayHead::fpsUnknown; break;
+            case kSMPTETimeType30Drop:      info.frameRate = AudioPlayHead::fps30drop;   break;
+            case kSMPTETimeType30:          info.frameRate = AudioPlayHead::fps30;       break;
+            case kSMPTETimeType60Drop:      info.frameRate = AudioPlayHead::fps60drop;   break;
+            case kSMPTETimeType60:          info.frameRate = AudioPlayHead::fps60;       break;
+            case kSMPTETimeType5994:
+            case kSMPTETimeType5994Drop:
+            case kSMPTETimeType50:
+            default:                        info.frameRate = AudioPlayHead::fpsUnknown;  break;
         }
 
         double num;
@@ -1127,7 +1126,7 @@ private:
         AudioBufferList* bufferList = nullptr;
         int maxFrames, numberOfChannels;
         bool isInterleaved;
-        AudioBuffer<float> scratchBuffer;
+        juce::AudioBuffer<float> scratchBuffer;
     };
 
     //==============================================================================
@@ -1427,6 +1426,7 @@ private:
                 }
                 break;
 
+                case AURenderEventMIDISysEx:
                 default:
                     break;
             }
@@ -1535,11 +1535,8 @@ private:
            #if JucePlugin_ProducesMidiOutput && JUCE_AUV3_MIDI_OUTPUT_SUPPORTED
             if (auto midiOut = [au MIDIOutputEventBlock])
             {
-                MidiMessage msg;
-                int samplePosition;
-
-                for (MidiBuffer::Iterator it (midiMessages); it.getNextEvent (msg, samplePosition);)
-                    midiOut (samplePosition, 0, msg.getRawDataSize(), msg.getRawData());
+                for (const auto metadata : midiMessages)
+                    midiOut (metadata.samplePosition, 0, metadata.numBytes, metadata.data);
             }
            #endif
 
@@ -1553,7 +1550,7 @@ private:
         return noErr;
     }
 
-    void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiBuffer) noexcept
+    void processBlock (juce::AudioBuffer<float>& buffer, MidiBuffer& midiBuffer) noexcept
     {
         auto& processor = getAudioProcessor();
         const ScopedLock sl (processor.getCallbackLock());
@@ -1944,10 +1941,8 @@ private:
 #if JUCE_IOS
 bool JUCE_CALLTYPE juce_isInterAppAudioConnected() { return false; }
 void JUCE_CALLTYPE juce_switchToHostApplication()  {}
-#if JUCE_MODULE_AVAILABLE_juce_gui_basics
 Image JUCE_CALLTYPE juce_getIAAHostIcon (int)      { return {}; }
 #endif
-#endif
 
-#pragma clang diagnostic pop
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif

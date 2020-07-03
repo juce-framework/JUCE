@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -43,48 +42,6 @@ static StringArray getMimeTypesForFileExtension (const String& fileExtension)
             result.add (type.mimeType);
 
     return result;
-}
-
-static StringArray filterMimeTypes (const StringArray& mimeTypes, const String& filter)
-{
-    String filterToUse (filter.removeCharacters ("*"));
-
-    if (filterToUse.isEmpty() || filterToUse == "/")
-        return mimeTypes;
-
-    StringArray result;
-
-    for (const auto& type : mimeTypes)
-        if (String (type).contains (filterToUse))
-            result.add (type);
-
-    return result;
-}
-
-static String getCommonMimeType (const StringArray& mimeTypes)
-{
-    if (mimeTypes.isEmpty())
-        return "*/*";
-
-    auto commonMime = mimeTypes[0];
-    bool lookForCommonGroup = false;
-
-    for (int i = 1; i < mimeTypes.size(); ++i)
-    {
-        if (mimeTypes[i] == commonMime)
-            continue;
-
-        if (! lookForCommonGroup)
-        {
-            lookForCommonGroup = true;
-            commonMime = commonMime.upToFirstOccurrenceOf ("/", true, false);
-        }
-
-        if (! mimeTypes[i].startsWith (commonMime))
-            return "*/*";
-    }
-
-    return lookForCommonGroup ? commonMime + "*" : commonMime;
 }
 
 //==============================================================================

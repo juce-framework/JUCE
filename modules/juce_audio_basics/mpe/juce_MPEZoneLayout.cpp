@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -169,12 +169,8 @@ void MPEZoneLayout::processPitchbendRangeRpnMessage (MidiRPNMessage rpn)
 
 void MPEZoneLayout::processNextMidiBuffer (const MidiBuffer& buffer)
 {
-    MidiBuffer::Iterator iter (buffer);
-    MidiMessage message;
-    int samplePosition; // not actually used, so no need to initialise.
-
-    while (iter.getNextEvent (message, samplePosition))
-        processNextMidiEvent (message);
+    for (const auto metadata : buffer)
+        processNextMidiEvent (metadata.getMessage());
 }
 
 //==============================================================================

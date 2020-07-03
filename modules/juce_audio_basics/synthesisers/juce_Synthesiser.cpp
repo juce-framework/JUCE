@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -163,18 +163,15 @@ void Synthesiser::processNextBlock (AudioBuffer<floatType>& outputAudio,
     jassert (sampleRate != 0);
     const int targetChannels = outputAudio.getNumChannels();
 
-    MidiBuffer::Iterator midiIterator (midiData);
-    midiIterator.setNextSamplePosition (startSample);
+    auto midiIterator = midiData.findNextSamplePosition (startSample);
 
     bool firstEvent = true;
-    int midiEventPos;
-    MidiMessage m;
 
     const ScopedLock sl (lock);
 
-    while (numSamples > 0)
+    for (; numSamples > 0; ++midiIterator)
     {
-        if (! midiIterator.getNextEvent (m, midiEventPos))
+        if (midiIterator == midiData.cend())
         {
             if (targetChannels > 0)
                 renderVoices (outputAudio, startSample, numSamples);
@@ -182,20 +179,21 @@ void Synthesiser::processNextBlock (AudioBuffer<floatType>& outputAudio,
             return;
         }
 
-        const int samplesToNextMidiMessage = midiEventPos - startSample;
+        const auto metadata = *midiIterator;
+        const int samplesToNextMidiMessage = metadata.samplePosition - startSample;
 
         if (samplesToNextMidiMessage >= numSamples)
         {
             if (targetChannels > 0)
                 renderVoices (outputAudio, startSample, numSamples);
 
-            handleMidiEvent (m);
+            handleMidiEvent (metadata.getMessage());
             break;
         }
 
         if (samplesToNextMidiMessage < ((firstEvent && ! subBlockSubdivisionIsStrict) ? 1 : minimumSubBlockSize))
         {
-            handleMidiEvent (m);
+            handleMidiEvent (metadata.getMessage());
             continue;
         }
 
@@ -204,13 +202,14 @@ void Synthesiser::processNextBlock (AudioBuffer<floatType>& outputAudio,
         if (targetChannels > 0)
             renderVoices (outputAudio, startSample, samplesToNextMidiMessage);
 
-        handleMidiEvent (m);
+        handleMidiEvent (metadata.getMessage());
         startSample += samplesToNextMidiMessage;
         numSamples  -= samplesToNextMidiMessage;
     }
 
-    while (midiIterator.getNextEvent (m, midiEventPos))
-        handleMidiEvent (m);
+    std::for_each (midiIterator,
+                   midiData.cend(),
+                   [&] (const MidiMessageMetadata& meta) { handleMidiEvent (meta.getMessage()); });
 }
 
 // explicit template instantiation

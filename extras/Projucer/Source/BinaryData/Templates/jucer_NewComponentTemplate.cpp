@@ -23,7 +23,7 @@
 {
 }
 
-void %%component_class%%::paint (Graphics& g)
+void %%component_class%%::paint (juce::Graphics& g)
 {
     /* This demo code just fills the component's background and
        draws some placeholder text to get you started.
@@ -32,15 +32,15 @@ void %%component_class%%::paint (Graphics& g)
        drawing code..
     */
 
-    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));   // clear the background
+    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
 
-    g.setColour (Colours::grey);
+    g.setColour (juce::Colours::grey);
     g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
 
-    g.setColour (Colours::white);
+    g.setColour (juce::Colours::white);
     g.setFont (14.0f);
     g.drawText ("%%component_class%%", getLocalBounds(),
-                Justification::centred, true);   // draw some placeholder text
+                juce::Justification::centred, true);   // draw some placeholder text
 }
 
 void %%component_class%%::resized()

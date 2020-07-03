@@ -45,7 +45,7 @@
 
 */
 
-#include "../../../juce_core/native/juce_mac_ClangBugWorkaround.h"
+#include <juce_core/native/juce_mac_ClangBugWorkaround.h>
 #include "CAAUParameter.h"
 
 CAAUParameter::CAAUParameter()

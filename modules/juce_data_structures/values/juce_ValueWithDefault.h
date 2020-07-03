@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -31,7 +30,7 @@ namespace juce
 /**
     This class acts as a wrapper around a property inside a ValueTree.
 
-    If the property inside the ValueTree is missing or empty the ValueWithDefault will automatically
+    If the property inside the ValueTree is missing the ValueWithDefault will automatically
     return a default value, which can be specified when initialising the ValueWithDefault.
 
     @tags{DataStructures}
@@ -89,7 +88,7 @@ public:
     }
 
     //==============================================================================
-    /** Returns the current value of the property. If the property does not exist or is empty,
+    /** Returns the current value of the property. If the property does not exist this
         returns the default value.
     */
     var get() const noexcept

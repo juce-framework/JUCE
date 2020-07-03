@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -176,7 +175,7 @@ private:
 
         if (selectsDirectories)
         {
-            BROWSEINFO bi = { 0 };
+            BROWSEINFO bi = {};
             bi.hwndOwner = (HWND) (async ? nullptr : owner->getWindowHandle());
             bi.pszDisplayName = files;
             bi.lpszTitle = title.toWideCharPointer();
@@ -213,7 +212,7 @@ private:
         }
         else
         {
-            OPENFILENAMEW of = { 0 };
+            OPENFILENAMEW of = {};
 
             #ifdef OPENFILENAME_SIZE_VERSION_400W
             of.lStructSize = OPENFILENAME_SIZE_VERSION_400W;
@@ -371,7 +370,7 @@ private:
                 auto scale = Desktop::getInstance().getDisplays().findDisplayForRect (screenRectangle, true).scale;
                 auto physicalComponentWidth = roundToInt (safeCustomComponent->getWidth() * scale);
 
-                SetWindowPos (hdlg, 0, screenRectangle.getX(), screenRectangle.getY(),
+                SetWindowPos (hdlg, nullptr, screenRectangle.getX(), screenRectangle.getY(),
                               physicalComponentWidth + jmax (150, screenRectangle.getWidth()),
                               jmax (150, screenRectangle.getHeight()),
                               SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
@@ -502,7 +501,7 @@ private:
 
         HWND dialogH = GetParent (hwnd);
 
-        if (dialogH == 0)
+        if (dialogH == nullptr)
             dialogH = hwnd;
 
         return dialogH;

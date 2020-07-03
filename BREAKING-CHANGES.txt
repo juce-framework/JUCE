@@ -1,6 +1,110 @@
 JUCE breaking changes
 =====================
 
+Version 6.0.0
+=======
+
+Change
+------
+The Convolution class interface was changed:
+- `loadImpulseResponse` member functions now take `enum class` parameters
+  instead of `bool`.
+- `copyAndLoadImpulseResponseFromBlock` and
+  `copyAndLoadImpulseResponseFromBuffer` were replaced by a new
+  `loadImpulseResponse` overload.
+
+Possible Issues
+---------------
+Code using the old interface will no longer compile, and will need to be
+updated.
+
+Workaround
+----------
+Code that was previously loading impulse responses from binary data or from
+files can substitute old `bool` parameters with the newer `enum class`
+equivalents. Code that was previously passing buffers or blocks will need
+reworking so that the Convolution instance can take ownership of the buffer
+containing the impulse response.
+
+Rationale
+---------
+The newer `enum class` parameters make user code much more readable, e.g.
+`loadImpulseResponse (file, Stereo::yes, Trim::yes, 0, Normalise::yes)` rather
+than `loadImpulseResponse (file, true, true, 0, true);`. By taking ownership of
+the passed buffer, the Convolution can avoid preallocating a large internal
+buffer, reducing memory usage when short impulse responses are used. Changing
+the ownership semantics of the buffer also makes it easier for users to avoid
+copies/allocations on the audio thread, and gives more flexibility to the
+implementation to run initialisation tasks on a background thread.
+
+
+Change
+------
+All references to ROLI Ltd. (ROLI) have been changed to Raw Material Software
+Limited.
+
+Possible Issues
+---------------
+Exising projects, particularly Android, may need to be resaved by the Projucer
+and have the old build artifacts deleted before they will build.
+
+Workaround
+----------
+In Android projects any explicit mention of paths with the from "com.roli.*"
+should be changed to the form "com.rmsl.*".
+
+Rationale
+---------
+This change reflects the change in ownership from ROLI to RMSL.
+
+
+Change
+------
+The Windows DPI handling in the VST wrapper and hosting code has been
+refactored to be more stable.
+
+Possible Issues
+---------------
+The new code uses a top-level AffineTransform to scale the JUCE editor window
+instead of native methods. Therefore any AudioProcessorEditors which have their
+own AffineTransform applied will no longer work correctly.
+
+Workaround
+----------
+If you are using an AffineTransform to scale the entire plug-in window then
+consider putting the component you want to transform in a child of
+the editor and transform that instead. Alternatively, if you don't need a
+separate scale factor for each plug-in instance you can use
+Desktop::setGlobalScaleFactor().
+
+Rationale
+---------
+The old code had some bugs when using OpenGL and when moving between monitors
+with different scale factors. The new code should fix these and DPI-aware
+plug-ins will scale correctly.
+
+
+Change
+------
+Relative Xcode subproject paths specified in the Projucer are now relative to
+the build directory rather than the project directory.
+
+Possible Issues
+---------------
+After being re-saved in the Projucer existing Xcode projects will fail to find
+any subprojects specified using a relative path.
+
+Workaround
+----------
+Update the subproject path in the Projucer.
+
+Rationale
+---------
+Most other Xcode specific paths are specified reltive to the build directory.
+This change brings the Xcode subproject path in line with the rest of the
+configuration.
+
+
 Version 5.4.6
 =============
 
@@ -1066,7 +1170,7 @@ or
 2. Override the Look&Feel method
    PopupMenu::LookAndFeelMethods::shouldPopupMenuScaleWithTargetComponent and
    return false. See
-   https://github.com/WeAreROLI/JUCE/blob/c288c94c2914af20f36c03ca9c5401fcb555e4e9/modules/juce_gui_basics/menus/juce_PopupMenu.h#725
+   https://github.com/juce-framework/JUCE/blob/c288c94c2914af20f36c03ca9c5401fcb555e4e9/modules/juce_gui_basics/menus/juce_PopupMenu.h#725
 
 Rationale
 ---------

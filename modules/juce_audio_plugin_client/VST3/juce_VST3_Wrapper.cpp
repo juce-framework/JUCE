@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -24,26 +23,33 @@
   ==============================================================================
 */
 
-#include "../../juce_core/system/juce_TargetPlatform.h"
+#include <juce_core/system/juce_CompilerWarnings.h>
+#include <juce_core/system/juce_TargetPlatform.h>
 
 //==============================================================================
-#if JucePlugin_Build_VST3 && (__APPLE_CPP__ || __APPLE_CC__ || _WIN32 || _WIN64)
+#if JucePlugin_Build_VST3 && (__APPLE_CPP__ || __APPLE_CC__ || _WIN32 || _WIN64 || LINUX || __linux__)
 
-#if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS)
+#if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
+ #if JUCE_MAC
+  #include <CoreFoundation/CoreFoundation.h>
+ #endif
+
  #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
  #define JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY 1
 #endif
 
-#include "../../juce_audio_processors/format_types/juce_VST3Headers.h"
+#include <juce_audio_processors/format_types/juce_VST3Headers.h>
 
 #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
+#define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
 
 #include "../utility/juce_CheckSettingMacros.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
+#include "../utility/juce_IncludeSystemHeaders.h"
 #include "../utility/juce_WindowsHooks.h"
 #include "../utility/juce_FakeMouseMoveGenerator.h"
-#include "../../juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp"
-#include "../../juce_audio_processors/format_types/juce_VST3Common.h"
+#include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
+#include <juce_audio_processors/format_types/juce_VST3Common.h>
 
 #ifndef JUCE_VST3_CAN_REPLACE_VST2
  #define JUCE_VST3_CAN_REPLACE_VST2 1
@@ -62,15 +68,8 @@ namespace Vst2
  #endif
 #endif
 
-#if JUCE_VST3_CAN_REPLACE_VST2
- #if JUCE_MSVC
-  #pragma warning (push)
-  #pragma warning (disable: 4514 4996)
- #endif
-
- #if JUCE_MSVC
-  #pragma warning (pop)
- #endif
+#if JUCE_LINUX
+ std::vector<std::pair<int, std::function<void (int)>>> getFdReadCallbacks();
 #endif
 
 namespace juce
@@ -80,14 +79,18 @@ using namespace Steinberg;
 
 //==============================================================================
 #if JUCE_MAC
-  extern void initialiseMacVST();
+ extern void initialiseMacVST();
 
  #if ! JUCE_64BIT
   extern void updateEditorCompBoundsVST (Component*);
  #endif
 
-  extern JUCE_API void* attachComponentToWindowRefVST (Component*, void* parentWindowOrView, bool isNSView);
-  extern JUCE_API void detachComponentFromWindowRefVST (Component*, void* nsWindow, bool isNSView);
+ extern JUCE_API void* attachComponentToWindowRefVST (Component*, void* parentWindowOrView, bool isNSView);
+ extern JUCE_API void detachComponentFromWindowRefVST (Component*, void* nsWindow, bool isNSView);
+#endif
+
+#if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+  extern JUCE_API double getScaleFactorForWindow (HWND);
 #endif
 
 //==============================================================================
@@ -355,16 +358,11 @@ public:
     static const FUID iid;
 
     //==============================================================================
-   #if JUCE_CLANG
-    #pragma clang diagnostic push
-    #pragma clang diagnostic ignored "-Winconsistent-missing-override"
-   #endif
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Winconsistent-missing-override")
 
     REFCOUNT_METHODS (ComponentBase)
 
-   #if JUCE_CLANG
-    #pragma clang diagnostic pop
-   #endif
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
     tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
     {
@@ -445,7 +443,7 @@ public:
             jassert (info.defaultNormalizedValue >= 0 && info.defaultNormalizedValue <= 1.0f);
 
             // Is this a meter?
-            if (((param.getCategory() & 0xffff0000) >> 16) == 2)
+            if ((((unsigned int) param.getCategory() & 0xffff0000) >> 16) == 2)
                 info.flags = Vst::ParameterInfo::kIsReadOnly;
             else
                 info.flags = param.isAutomatable() ? Vst::ParameterInfo::kCanAutomate : 0;
@@ -458,11 +456,22 @@ public:
 
         virtual ~Param() override = default;
 
-        void updateParameterInfo()
+        bool updateParameterInfo()
         {
-            toString128 (info.title,      param.getName (128));
-            toString128 (info.shortTitle, param.getName (8));
-            toString128 (info.units,      param.getLabel());
+            auto updateParamIfChanged = [] (Vst::String128& paramToUpdate, const String& newValue)
+            {
+                if (juce::toString (paramToUpdate) == newValue)
+                    return false;
+
+                toString128 (paramToUpdate, newValue);
+                return true;
+            };
+
+            auto anyUpdated = updateParamIfChanged (info.title,      param.getName (128));
+            anyUpdated     |= updateParamIfChanged (info.shortTitle, param.getName (8));
+            anyUpdated     |= updateParamIfChanged (info.units,      param.getLabel());
+
+            return anyUpdated;
         }
 
         bool setNormalized (Vst::ParamValue v) override
@@ -892,21 +901,42 @@ public:
 
     void audioProcessorChanged (AudioProcessor*) override
     {
-        auto numParameters = parameters.getParameterCount();
+        int32 flags = 0;
 
-        for (int32 i = 0; i < numParameters; ++i)
+        for (int32 i = 0; i < parameters.getParameterCount(); ++i)
             if (auto* param = dynamic_cast<Param*> (parameters.getParameterByIndex (i)))
-                param->updateParameterInfo();
+                if (param->updateParameterInfo() && (flags & Vst::kParamTitlesChanged) == 0)
+                    flags |= Vst::kParamTitlesChanged;
 
         if (auto* pluginInstance = getPluginInstance())
         {
-            if (pluginInstance->getNumPrograms() > 1)
-                EditController::setParamNormalized (JuceAudioProcessor::paramPreset, static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram())
-                                                                                         / static_cast<Vst::ParamValue> (pluginInstance->getNumPrograms() - 1));
+            auto newNumPrograms = pluginInstance->getNumPrograms();
+
+            if (newNumPrograms != lastNumPrograms)
+            {
+                if (newNumPrograms > 1)
+                {
+                    auto paramValue = static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram())
+                                      / static_cast<Vst::ParamValue> (pluginInstance->getNumPrograms() - 1);
+
+                    EditController::setParamNormalized (JuceAudioProcessor::paramPreset, paramValue);
+                    flags |= Vst::kParamValuesChanged;
+                }
+
+                lastNumPrograms = newNumPrograms;
+            }
+
+            auto newLatencySamples = pluginInstance->getLatencySamples();
+
+            if (newLatencySamples != lastLatencySamples)
+            {
+                flags |= Vst::kLatencyChanged;
+                lastLatencySamples = newLatencySamples;
+            }
         }
 
-        if (componentHandler != nullptr && ! inSetupProcessing)
-            componentHandler->restartComponent (Vst::kLatencyChanged | Vst::kParamValuesChanged | Vst::kParamTitlesChanged);
+        if (flags != 0 && componentHandler != nullptr && ! inSetupProcessing)
+            componentHandler->restartComponent (flags);
     }
 
     void parameterValueChanged (int, float newValue) override
@@ -952,7 +982,11 @@ private:
     std::atomic<bool> vst3IsPlaying     { false },
                       inSetupProcessing { false };
 
+    int lastNumPrograms = 0, lastLatencySamples = 0;
+
+   #if ! JUCE_MAC
     float lastScaleFactorReceived = 1.0f;
+   #endif
 
     void setupParameters()
     {
@@ -1028,6 +1062,9 @@ private:
     //==============================================================================
     class JuceVST3Editor  : public Vst::EditorView,
                             public Steinberg::IPlugViewContentScaleSupport,
+                           #if JUCE_LINUX
+                            public Steinberg::Linux::IEventHandler,
+                           #endif
                             private Timer
     {
     public:
@@ -1035,13 +1072,14 @@ private:
           : Vst::EditorView (&ec, nullptr),
             owner (&ec), pluginInstance (p)
         {
-            editorScaleFactor = ec.lastScaleFactorReceived;
-
-            component.reset (new ContentWrapperComponent (*this, p));
+            createContentWrapperComponentIfNeeded();
 
            #if JUCE_MAC
             if (getHostType().type == PluginHostType::SteinbergCubase10)
                 cubase10Workaround.reset (new Cubase10WindowResizeWorkaround (*this));
+           #else
+            if (! approximatelyEqual (editorScaleFactor, ec.lastScaleFactorReceived))
+                setContentScaleFactor (ec.lastScaleFactorReceived);
            #endif
         }
 
@@ -1054,14 +1092,30 @@ private:
         REFCOUNT_METHODS (Vst::EditorView)
 
         //==============================================================================
+       #if JUCE_LINUX
+        void PLUGIN_API onFDIsSet (Steinberg::Linux::FileDescriptor fd) override
+        {
+            if (plugFrame != nullptr)
+            {
+                auto it = fdCallbackMap.find (fd);
+
+                if (it != fdCallbackMap.end())
+                    it->second (fd);
+            }
+        }
+       #endif
+
+        //==============================================================================
         tresult PLUGIN_API isPlatformTypeSupported (FIDString type) override
         {
             if (type != nullptr && pluginInstance.hasEditor())
             {
                #if JUCE_WINDOWS
                 if (strcmp (type, kPlatformTypeHWND) == 0)
-               #else
+               #elif JUCE_MAC
                 if (strcmp (type, kPlatformTypeNSView) == 0 || strcmp (type, kPlatformTypeHIView) == 0)
+               #elif JUCE_LINUX
+                if (strcmp (type, kPlatformTypeX11EmbedWindowID) == 0)
                #endif
                     return kResultTrue;
             }
@@ -1074,27 +1128,37 @@ private:
             if (parent == nullptr || isPlatformTypeSupported (type) == kResultFalse)
                 return kResultFalse;
 
-            if (component == nullptr)
-                component.reset (new ContentWrapperComponent (*this, pluginInstance));
+            systemWindow = parent;
 
-           #if JUCE_WINDOWS
+            createContentWrapperComponentIfNeeded();
+
+           #if JUCE_WINDOWS || JUCE_LINUX
             component->addToDesktop (0, parent);
             component->setOpaque (true);
             component->setVisible (true);
-            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-             component->checkScaleFactorIsCorrect();
+
+            #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+             component->checkHostWindowScaleFactor();
+             component->startTimer (500);
             #endif
+
+            #if JUCE_LINUX
+             if (auto* runLoop = getHostRunLoop())
+             {
+                 for (auto& cb : getFdReadCallbacks())
+                 {
+                     fdCallbackMap[cb.first] = cb.second;
+                     runLoop->registerEventHandler (this, cb.first);
+                 }
+             }
+            #endif
+
            #else
             isNSView = (strcmp (type, kPlatformTypeNSView) == 0);
             macHostWindow = juce::attachComponentToWindowRefVST (component.get(), parent, isNSView);
            #endif
 
-           #if ! JUCE_MAC
-            setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) editorScaleFactor);
-           #endif
-
             component->resizeHostWindow();
-            systemWindow = parent;
             attachedToParent();
 
             // Life's too short to faff around with wave lab
@@ -1108,8 +1172,14 @@ private:
         {
             if (component != nullptr)
             {
-               #if JUCE_WINDOWS
+               #if JUCE_WINDOWS || JUCE_LINUX
                 component->removeFromDesktop();
+                #if JUCE_LINUX
+                 fdCallbackMap.clear();
+
+                 if (auto* runLoop = getHostRunLoop())
+                     runLoop->unregisterEventHandler (this);
+                #endif
                #else
                 if (macHostWindow != nullptr)
                 {
@@ -1128,45 +1198,26 @@ private:
         {
             if (newSize != nullptr)
             {
-                rect = *newSize;
+                rect = convertFromHostBounds (*newSize);
 
                 if (component != nullptr)
                 {
                     auto w = rect.getWidth();
                     auto h = rect.getHeight();
 
-                   #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                    w = roundToInt (w / editorScaleFactor);
-                    h = roundToInt (h / editorScaleFactor);
-
-                    if (getHostType().type == PluginHostType::SteinbergCubase10)
-                    {
-                        auto integerScaleFactor = (int) std::round (editorScaleFactor);
-
-                        // Workaround for Cubase 10 sending double-scaled bounds when opening editor
-                        if (isWithin ((int) w, component->getWidth() * integerScaleFactor, 2)
-                            && isWithin ((int) h, component->getHeight() * integerScaleFactor, 2))
-                        {
-                            w /= integerScaleFactor;
-                            h /= integerScaleFactor;
-                        }
-                    }
-                   #endif
-
                     component->setSize (w, h);
 
                    #if JUCE_MAC
                     if (cubase10Workaround != nullptr)
+                    {
                         cubase10Workaround->triggerAsyncUpdate();
+                    }
                     else
                    #endif
-                    if (auto* peer = component->getPeer())
-                        peer->updateBounds();
-
-                   #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                    if (getHostType().type == PluginHostType::SteinbergCubase10)
-                        component->resizeHostWindow();
-                   #endif
+                    {
+                        if (auto* peer = component->getPeer())
+                            peer->updateBounds();
+                    }
                 }
 
                 return kResultTrue;
@@ -1180,16 +1231,9 @@ private:
         {
             if (size != nullptr && component != nullptr)
             {
-                auto w = component->getWidth();
-                auto h = component->getHeight();
+                auto editorBounds = component->getSizeToContainChild();
 
-               #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                w = roundToInt (w * editorScaleFactor);
-                h = roundToInt (h * editorScaleFactor);
-               #endif
-
-                *size = ViewRect (0, 0, w, h);
-
+                *size = convertToHostBounds ({ 0, 0, editorBounds.getWidth(), editorBounds.getHeight() });
                 return kResultTrue;
             }
 
@@ -1200,7 +1244,8 @@ private:
         {
             if (component != nullptr)
                 if (auto* editor = component->pluginEditor.get())
-                    return editor->isResizable() ? kResultTrue : kResultFalse;
+                    if (editor->isResizable())
+                        return kResultTrue;
 
             return kResultFalse;
         }
@@ -1213,20 +1258,17 @@ private:
                 {
                     if (auto* constrainer = editor->getConstrainer())
                     {
-                        auto scale = editor->getTransform().getScaleFactor();
+                        *rectToCheck = convertFromHostBounds (*rectToCheck);
 
-                        auto minW = (double) (constrainer->getMinimumWidth()  * scale);
-                        auto maxW = (double) (constrainer->getMaximumWidth()  * scale);
-                        auto minH = (double) (constrainer->getMinimumHeight() * scale);
-                        auto maxH = (double) (constrainer->getMaximumHeight() * scale);
+                        auto transformScale = std::sqrt (std::abs (editor->getTransform().getDeterminant()));
+
+                        auto minW = (double) (constrainer->getMinimumWidth()  * transformScale);
+                        auto maxW = (double) (constrainer->getMaximumWidth()  * transformScale);
+                        auto minH = (double) (constrainer->getMinimumHeight() * transformScale);
+                        auto maxH = (double) (constrainer->getMaximumHeight() * transformScale);
 
                         auto width  = (double) (rectToCheck->right - rectToCheck->left);
                         auto height = (double) (rectToCheck->bottom - rectToCheck->top);
-
-                       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                        width  /= editorScaleFactor;
-                        height /= editorScaleFactor;
-                       #endif
 
                         width  = jlimit (minW, maxW, width);
                         height = jlimit (minH, maxH, height);
@@ -1267,13 +1309,10 @@ private:
                             }
                         }
 
-                       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                        width  *= editorScaleFactor;
-                        height *= editorScaleFactor;
-                       #endif
-
                         rectToCheck->right  = rectToCheck->left + roundToInt (width);
                         rectToCheck->bottom = rectToCheck->top  + roundToInt (height);
+
+                        *rectToCheck = convertToHostBounds (*rectToCheck);
                     }
                 }
 
@@ -1287,33 +1326,35 @@ private:
         tresult PLUGIN_API setContentScaleFactor (Steinberg::IPlugViewContentScaleSupport::ScaleFactor factor) override
         {
            #if ! JUCE_MAC
-            auto hostType = getHostType().type;
-
-            if (hostType == PluginHostType::SteinbergCubase10 || hostType == PluginHostType::FruityLoops)
-            {
-                if (component.get() != nullptr)
-                    if (auto* peer = component->getPeer())
-                        factor = static_cast<Steinberg::IPlugViewContentScaleSupport::ScaleFactor> (peer->getPlatformScaleFactor());
-            }
-
             if (! approximatelyEqual ((float) factor, editorScaleFactor))
             {
-                editorScaleFactor = (float) factor;
+               #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                // Cubase 10 only sends integer scale factors, so correct this for fractional scales
+                if (getHostType().type == PluginHostType::SteinbergCubase10)
+                {
+                    auto hostWindowScale = (Steinberg::IPlugViewContentScaleSupport::ScaleFactor) getScaleFactorForWindow ((HWND) systemWindow);
 
-                if (auto* o = owner.get())
-                    o->lastScaleFactorReceived = editorScaleFactor;
-
-                if (component == nullptr)
-                    return kResultFalse;
-
-               #if JUCE_WINDOWS && ! JUCE_WIN_PER_MONITOR_DPI_AWARE
-                if (auto* ed = component->pluginEditor.get())
-                    ed->setScaleFactor ((float) factor);
+                    if (hostWindowScale > 0.0 && ! approximatelyEqual (factor, hostWindowScale))
+                        factor = hostWindowScale;
+                }
                #endif
 
-                component->resizeHostWindow();
-                component->setTopLeftPosition (0, 0);
-                component->repaint();
+                editorScaleFactor = (float) factor;
+
+                if (owner != nullptr)
+                    owner->lastScaleFactorReceived = editorScaleFactor;
+
+                if (component != nullptr)
+                {
+                    if (auto* editor = component->pluginEditor.get())
+                    {
+                        editor->setScaleFactor (editorScaleFactor);
+
+                        component->resizeHostWindow();
+                        component->setTopLeftPosition (0, 0);
+                        component->repaint();
+                    }
+                }
             }
 
             return kResultTrue;
@@ -1333,31 +1374,42 @@ private:
             onSize (&viewRect);
         }
 
+        static ViewRect convertToHostBounds (ViewRect pluginRect)
+        {
+            auto desktopScale = Desktop::getInstance().getGlobalScaleFactor();
+
+            if (approximatelyEqual (desktopScale, 1.0f))
+                return pluginRect;
+
+            return { roundToInt (pluginRect.left   * desktopScale),
+                     roundToInt (pluginRect.top    * desktopScale),
+                     roundToInt (pluginRect.right  * desktopScale),
+                     roundToInt (pluginRect.bottom * desktopScale) };
+        }
+
+        static ViewRect convertFromHostBounds (ViewRect hostRect)
+        {
+            auto desktopScale = Desktop::getInstance().getGlobalScaleFactor();
+
+            if (approximatelyEqual (desktopScale, 1.0f))
+                return hostRect;
+
+            return { roundToInt (hostRect.left   / desktopScale),
+                     roundToInt (hostRect.top    / desktopScale),
+                     roundToInt (hostRect.right  / desktopScale),
+                     roundToInt (hostRect.bottom / desktopScale) };
+        }
+
         //==============================================================================
         struct ContentWrapperComponent  : public Component
+                                       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                                        , public Timer
+                                       #endif
         {
-            ContentWrapperComponent (JuceVST3Editor& editor, AudioProcessor& plugin)
-                : pluginEditor (plugin.createEditorIfNeeded()),
-                  owner (editor)
+            ContentWrapperComponent (JuceVST3Editor& editor)  : owner (editor)
             {
                 setOpaque (true);
                 setBroughtToFrontOnMouseClick (true);
-
-                // if hasEditor() returns true then createEditorIfNeeded has to return a valid editor
-                jassert (pluginEditor != nullptr);
-
-                if (pluginEditor != nullptr)
-                {
-                    addAndMakeVisible (pluginEditor.get());
-
-                    pluginEditor->setTopLeftPosition (0, 0);
-                    lastBounds = getSizeToContainChild();
-                    isResizingParentToFitChild = true;
-                    setBounds (lastBounds);
-                    isResizingParentToFitChild = false;
-
-                    resizeHostWindow();
-                }
 
                 ignoreUnused (fakeMouseGenerator);
             }
@@ -1368,6 +1420,31 @@ private:
                 {
                     PopupMenu::dismissAllActiveMenus();
                     pluginEditor->processor.editorBeingDeleted (pluginEditor.get());
+                }
+            }
+
+            void createEditor (AudioProcessor& plugin)
+            {
+                pluginEditor.reset (plugin.createEditorIfNeeded());
+
+                if (pluginEditor != nullptr)
+                {
+                    addAndMakeVisible (pluginEditor.get());
+                    pluginEditor->setTopLeftPosition (0, 0);
+
+                    lastBounds = getSizeToContainChild();
+
+                    {
+                        const ScopedValueSetter<bool> resizingParentSetter (resizingParent, true);
+                        setBounds (lastBounds);
+                    }
+
+                    resizeHostWindow();
+                }
+                else
+                {
+                    // if hasEditor() returns true then createEditorIfNeeded has to return a valid editor
+                    jassertfalse;
                 }
             }
 
@@ -1386,7 +1463,7 @@ private:
 
             void childBoundsChanged (Component*) override
             {
-                if (isResizingChildToFitParent)
+                if (resizingChild)
                     return;
 
                 auto b = getSizeToContainChild();
@@ -1394,46 +1471,38 @@ private:
                 if (lastBounds != b)
                 {
                     lastBounds = b;
-                    isResizingParentToFitChild = true;
+
+                    const ScopedValueSetter<bool> resizingParentSetter (resizingParent, true);
                     resizeHostWindow();
-                    isResizingParentToFitChild = false;
                 }
             }
-
-           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-            void checkScaleFactorIsCorrect()
-            {
-                if (auto* peer = pluginEditor->getPeer())
-                {
-                    auto peerScaleFactor = (float) peer->getPlatformScaleFactor();
-
-                    if (! approximatelyEqual (peerScaleFactor, owner.editorScaleFactor))
-                        owner.setContentScaleFactor (peerScaleFactor);
-                }
-            }
-           #endif
 
             void resized() override
             {
                 if (pluginEditor != nullptr)
                 {
-                   #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                    checkScaleFactorIsCorrect();
-                   #endif
-
-                    if (! isResizingParentToFitChild)
+                    if (! resizingParent)
                     {
-                        lastBounds = getLocalBounds();
-                        isResizingChildToFitParent = true;
+                        auto newBounds = getLocalBounds();
+
+                       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                        if (! lastBounds.isEmpty() && isWithin (newBounds.toDouble().getAspectRatio(), lastBounds.toDouble().getAspectRatio(), 0.1))
+                            return;
+                       #endif
+
+                        lastBounds = newBounds;
+
+                        const ScopedValueSetter<bool> resizingChildSetter (resizingChild, true);
 
                         if (auto* constrainer = pluginEditor->getConstrainer())
                         {
                             auto aspectRatio = constrainer->getFixedAspectRatio();
-                            auto width = (double) lastBounds.getWidth();
-                            auto height = (double) lastBounds.getHeight();
 
                             if (aspectRatio != 0)
                             {
+                                auto width = (double) lastBounds.getWidth();
+                                auto height = (double) lastBounds.getHeight();
+
                                 if (width / height > aspectRatio)
                                     setBounds ({ 0, 0, roundToInt (height * aspectRatio), lastBounds.getHeight() });
                                 else
@@ -1443,8 +1512,16 @@ private:
 
                         pluginEditor->setTopLeftPosition (0, 0);
                         pluginEditor->setBounds (pluginEditor->getLocalArea (this, getLocalBounds()));
-                        isResizingChildToFitParent = false;
                     }
+                }
+            }
+
+            void parentSizeChanged() override
+            {
+                if (pluginEditor != nullptr)
+                {
+                    resizeHostWindow();
+                    pluginEditor->repaint();
                 }
             }
 
@@ -1463,27 +1540,37 @@ private:
 
                     if (owner.plugFrame != nullptr)
                     {
-                       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                        w = roundToInt (w * owner.editorScaleFactor);
-                        h = roundToInt (h * owner.editorScaleFactor);
-                       #endif
-
-                        ViewRect newSize (0, 0, w, h);
+                        auto newSize = convertToHostBounds ({ 0, 0, b.getWidth(), b.getHeight() });
 
                         {
-                            const ScopedValueSetter<bool> resizingParentSetter (isResizingParentToFitChild, true);
+                            const ScopedValueSetter<bool> resizingParentSetter (resizingParent, true);
                             owner.plugFrame->resizeView (&owner, &newSize);
                         }
 
                        #if JUCE_MAC
                         if (host.isWavelab() || host.isReaper())
                        #else
-                        if (host.isWavelab() || host.isAbletonLive())
+                        if (host.isWavelab() || host.isAbletonLive() || host.isBitwigStudio())
                        #endif
                             setBounds (0, 0, w, h);
                     }
                 }
             }
+
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+            void checkHostWindowScaleFactor()
+            {
+                auto hostWindowScale = (float) getScaleFactorForWindow ((HWND) owner.systemWindow);
+
+                if (hostWindowScale > 0.0 && ! approximatelyEqual (hostWindowScale, owner.editorScaleFactor))
+                    owner.setContentScaleFactor (hostWindowScale);
+            }
+
+            void timerCallback() override
+            {
+                checkHostWindowScaleFactor();
+            }
+           #endif
 
             std::unique_ptr<AudioProcessorEditor> pluginEditor;
 
@@ -1491,13 +1578,23 @@ private:
             JuceVST3Editor& owner;
             FakeMouseMoveGenerator fakeMouseGenerator;
             Rectangle<int> lastBounds;
-            bool isResizingChildToFitParent = false;
-            bool isResizingParentToFitChild = false;
+            bool resizingChild = false, resizingParent = false;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
         };
 
+        void createContentWrapperComponentIfNeeded()
+        {
+            if (component == nullptr)
+            {
+                component.reset (new ContentWrapperComponent (*this));
+                component->createEditor (pluginInstance);
+            }
+        }
+
         //==============================================================================
+        ScopedJuceInitialiser_GUI libraryInitialiser;
+
         ComSmartPtr<JuceVST3EditController> owner;
         AudioProcessor& pluginInstance;
 
@@ -1525,12 +1622,27 @@ private:
         };
 
         std::unique_ptr<Cubase10WindowResizeWorkaround> cubase10Workaround;
-       #endif
-
+       #else
         float editorScaleFactor = 1.0f;
 
-       #if JUCE_WINDOWS
-        WindowsHooks hooks;
+        #if JUCE_WINDOWS
+         WindowsHooks hooks;
+        #elif JUCE_LINUX
+         std::unordered_map<int, std::function<void (int)>> fdCallbackMap;
+
+         ::Display* display = XWindowSystem::getInstance()->getDisplay();
+
+         Steinberg::Linux::IRunLoop* getHostRunLoop()
+         {
+             Steinberg::Linux::IRunLoop* runLoop = nullptr;
+
+             if (plugFrame != nullptr)
+                 plugFrame->queryInterface (Steinberg::Linux::IRunLoop::iid, (void**) &runLoop);
+
+             return runLoop;
+         }
+        #endif
+
        #endif
 
         //==============================================================================
@@ -1543,12 +1655,12 @@ private:
 namespace
 {
     template <typename FloatType> struct AudioBusPointerHelper {};
-    template <> struct AudioBusPointerHelper<float>  { static inline float**  impl (Vst::AudioBusBuffers& data) noexcept { return data.channelBuffers32; } };
-    template <> struct AudioBusPointerHelper<double> { static inline double** impl (Vst::AudioBusBuffers& data) noexcept { return data.channelBuffers64; } };
+    template <> struct AudioBusPointerHelper<float>  { static float**  impl (Vst::AudioBusBuffers& data) noexcept { return data.channelBuffers32; } };
+    template <> struct AudioBusPointerHelper<double> { static double** impl (Vst::AudioBusBuffers& data) noexcept { return data.channelBuffers64; } };
 
     template <typename FloatType> struct ChooseBufferHelper {};
-    template <> struct ChooseBufferHelper<float>  { static inline AudioBuffer<float>&  impl (AudioBuffer<float>& f, AudioBuffer<double>&  ) noexcept { return f; } };
-    template <> struct ChooseBufferHelper<double> { static inline AudioBuffer<double>& impl (AudioBuffer<float>&  , AudioBuffer<double>& d) noexcept { return d; } };
+    template <> struct ChooseBufferHelper<float>  { static AudioBuffer<float>&  impl (AudioBuffer<float>& f, AudioBuffer<double>&  ) noexcept { return f; } };
+    template <> struct ChooseBufferHelper<double> { static AudioBuffer<double>& impl (AudioBuffer<float>&  , AudioBuffer<double>& d) noexcept { return d; } };
 }
 
 
@@ -1799,7 +1911,7 @@ public:
 
     void setStateInformation (const void* data, int sizeAsInt)
     {
-        int64 size = sizeAsInt;
+        auto size = (uint64) sizeAsInt;
 
         // Check if this data was written with a newer JUCE version
         // and if it has the JUCE private data magic code at the end
@@ -1831,7 +1943,7 @@ public:
             }
         }
 
-        if (size >= 0)
+        if (size > 0)
             pluginInstance->setStateInformation (data, static_cast<int> (size));
     }
 
@@ -1839,16 +1951,16 @@ public:
    #if JUCE_VST3_CAN_REPLACE_VST2
     bool loadVST2VstWBlock (const char* data, int size)
     {
-        jassert ('VstW' == htonl (*(juce::int32*) data));
-        jassert (1 == htonl (*(juce::int32*) (data + 8))); // version should be 1 according to Steinberg's docs
+        jassert ('VstW' == htonl (readUnaligned<juce::int32> (data)));
+        jassert (1 == htonl (readUnaligned<juce::int32> (data + 8))); // version should be 1 according to Steinberg's docs
 
-        auto headerLen = (int) htonl (*(juce::int32*) (data + 4)) + 8;
+        auto headerLen = (int) htonl (readUnaligned<juce::int32> (data + 4)) + 8;
         return loadVST2CcnKBlock (data + headerLen, size - headerLen);
     }
 
     bool loadVST2CcnKBlock (const char* data, int size)
     {
-        auto bank = (const Vst2::fxBank*) data;
+        auto* bank = reinterpret_cast<const Vst2::fxBank*> (data);
 
         jassert ('CcnK' == htonl (bank->chunkMagic));
         jassert ('FBCh' == htonl (bank->fxMagic));
@@ -1904,7 +2016,7 @@ public:
         if (size < 4)
             return false;
 
-        auto header = htonl (*(juce::int32*) data);
+        auto header = htonl (readUnaligned<juce::int32> (data));
 
         if (header == 'VstW')
             return loadVST2VstWBlock (data, size);
@@ -2564,17 +2676,16 @@ private:
         auto plugInOutputChannels = pluginInstance->getTotalNumOutputChannels();
 
         // Wavelab workaround: wave-lab lies on the number of inputs/outputs so re-count here
-        int vstInputs;
-        for (vstInputs = 0; vstInputs < data.numInputs; ++vstInputs)
-            if (getPointerForAudioBus<FloatType> (data.inputs[vstInputs]) == nullptr
-                  && data.inputs[vstInputs].numChannels > 0)
-                break;
+        const auto countValidChannels = [] (Vst::AudioBusBuffers* buffers, int32 num)
+        {
+            return int (std::distance (buffers, std::find_if (buffers, buffers + num, [] (Vst::AudioBusBuffers& buf)
+            {
+                return getPointerForAudioBus<FloatType> (buf) == nullptr && buf.numChannels > 0;
+            })));
+        };
 
-        int vstOutputs;
-        for (vstOutputs = 0; vstOutputs < data.numOutputs; ++vstOutputs)
-            if (getPointerForAudioBus<FloatType> (data.outputs[vstOutputs]) == nullptr
-                  && data.outputs[vstOutputs].numChannels > 0)
-                break;
+        const auto vstInputs  = countValidChannels (data.inputs,  data.numInputs);
+        const auto vstOutputs = countValidChannels (data.outputs, data.numOutputs);
 
         {
             auto n = jmax (vstOutputs, getNumAudioBuses (false));
@@ -2822,13 +2933,8 @@ private:
 const char* JuceVST3Component::kJucePrivateDataIdentifier = "JUCEPrivateData";
 
 //==============================================================================
-#if JUCE_MSVC
- #pragma warning (push, 0)
- #pragma warning (disable: 4310)
-#elif JUCE_CLANG
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wall"
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4310)
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wall")
 
 DECLARE_CLASS_IID (JuceAudioProcessor, 0x0101ABAB, 0xABCDEF01, JucePlugin_ManufacturerCode, JucePlugin_PluginCode)
 DEF_CLASS_IID (JuceAudioProcessor)
@@ -2851,11 +2957,8 @@ DEF_CLASS_IID (JuceAudioProcessor)
  DEF_CLASS_IID (JuceVST3Component)
 #endif
 
-#if JUCE_MSVC
- #pragma warning (pop)
-#elif JUCE_CLANG
- #pragma clang diagnostic pop
-#endif
+JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
 bool initModule()
@@ -2875,61 +2978,87 @@ bool shutdownModule()
 #undef JUCE_EXPORTED_FUNCTION
 
 #if JUCE_WINDOWS
-    extern "C" __declspec (dllexport) bool InitDll()   { return initModule(); }
-    extern "C" __declspec (dllexport) bool ExitDll()   { return shutdownModule(); }
-    #define JUCE_EXPORTED_FUNCTION
-
+ extern "C" __declspec (dllexport) bool InitDll()   { return initModule(); }
+ extern "C" __declspec (dllexport) bool ExitDll()   { return shutdownModule(); }
+ #define JUCE_EXPORTED_FUNCTION
 #else
-    #define JUCE_EXPORTED_FUNCTION extern "C" __attribute__ ((visibility ("default")))
+ #define JUCE_EXPORTED_FUNCTION extern "C" __attribute__ ((visibility ("default")))
+#endif
 
-    CFBundleRef globalBundleInstance = nullptr;
-    juce::uint32 numBundleRefs = 0;
-    juce::Array<CFBundleRef> bundleRefs;
+#if JUCE_LINUX
+ void* moduleHandle = nullptr;
+ int moduleEntryCounter = 0;
 
-    enum { MaxPathLength = 2048 };
-    char modulePath[MaxPathLength] = { 0 };
-    void* moduleHandle = nullptr;
+ JUCE_EXPORTED_FUNCTION bool ModuleEntry (void* sharedLibraryHandle)
+ {
+     if (++moduleEntryCounter == 1)
+     {
+         moduleHandle = sharedLibraryHandle;
+         return initModule();
+     }
 
-    JUCE_EXPORTED_FUNCTION bool bundleEntry (CFBundleRef ref)
-    {
-        if (ref != nullptr)
-        {
-            ++numBundleRefs;
-            CFRetain (ref);
+     return true;
+ }
 
-            bundleRefs.add (ref);
+ JUCE_EXPORTED_FUNCTION bool ModuleExit()
+ {
+     if (--moduleEntryCounter == 0)
+     {
+         moduleHandle = nullptr;
+         return shutdownModule();
+     }
 
-            if (moduleHandle == nullptr)
-            {
-                globalBundleInstance = ref;
-                moduleHandle = ref;
+     return true;
+ }
+#elif JUCE_MAC
+ CFBundleRef globalBundleInstance = nullptr;
+ juce::uint32 numBundleRefs = 0;
+ juce::Array<CFBundleRef> bundleRefs;
 
-                CFURLRef tempURL = CFBundleCopyBundleURL (ref);
-                CFURLGetFileSystemRepresentation (tempURL, true, (UInt8*) modulePath, MaxPathLength);
-                CFRelease (tempURL);
-            }
-        }
+ enum { MaxPathLength = 2048 };
+ char modulePath[MaxPathLength] = { 0 };
+ void* moduleHandle = nullptr;
 
-        return initModule();
-    }
+ JUCE_EXPORTED_FUNCTION bool bundleEntry (CFBundleRef ref)
+ {
+     if (ref != nullptr)
+     {
+         ++numBundleRefs;
+         CFRetain (ref);
 
-    JUCE_EXPORTED_FUNCTION bool bundleExit()
-    {
-        if (shutdownModule())
-        {
-            if (--numBundleRefs == 0)
-            {
-                for (int i = 0; i < bundleRefs.size(); ++i)
-                    CFRelease (bundleRefs.getUnchecked (i));
+         bundleRefs.add (ref);
 
-                bundleRefs.clear();
-            }
+         if (moduleHandle == nullptr)
+         {
+             globalBundleInstance = ref;
+             moduleHandle = ref;
 
-            return true;
-        }
+             CFURLRef tempURL = CFBundleCopyBundleURL (ref);
+             CFURLGetFileSystemRepresentation (tempURL, true, (UInt8*) modulePath, MaxPathLength);
+             CFRelease (tempURL);
+         }
+     }
 
-        return false;
-    }
+     return initModule();
+ }
+
+ JUCE_EXPORTED_FUNCTION bool bundleExit()
+ {
+     if (shutdownModule())
+     {
+         if (--numBundleRefs == 0)
+         {
+             for (int i = 0; i < bundleRefs.size(); ++i)
+                 CFRelease (bundleRefs.getUnchecked (i));
+
+             bundleRefs.clear();
+         }
+
+         return true;
+     }
+
+     return false;
+ }
 #endif
 
 //==============================================================================
@@ -3133,7 +3262,7 @@ private:
                 if (entry->isUnicode)
                     return kResultFalse;
 
-                memcpy (info, &entry->info2, sizeof (PClassInfoType));
+                memcpy (info, (PClassInfoType*) &entry->info2, sizeof (PClassInfoType));
                 return kResultOk;
             }
         }

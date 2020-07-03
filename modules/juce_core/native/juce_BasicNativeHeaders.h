@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -82,6 +82,12 @@
    #define NSAlertStyleInformational        NSInformationalAlertStyle
    #define NSEventTypeTabletPoint           NSTabletPoint
    #define NSEventTypeTabletProximity       NSTabletProximity
+   #define NSEventTypeFlagsChanged          NSFlagsChanged
+   #define NSEventTypeAppKitDefined         NSAppKitDefined
+   #define NSEventTypeSystemDefined         NSSystemDefined
+   #define NSEventTypeApplicationDefined    NSApplicationDefined
+   #define NSEventTypePeriodic              NSPeriodic
+   #define NSEventTypeSmartMagnify          NSEventTypeSmartMagnify
   #endif
   #import <CoreAudio/HostTime.h>
   #include <sys/dir.h>

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -19,6 +19,20 @@
 
   ==============================================================================
 */
+
+#if JUCE_MAC || JUCE_IOS
+ // Annoyingly we can only forward-declare a typedef by forward-declaring the
+ // aliased type
+ #if __has_attribute(objc_bridge)
+  #define JUCE_CF_BRIDGED_TYPE(T) __attribute__((objc_bridge(T)))
+ #else
+  #define JUCE_CF_BRIDGED_TYPE(T)
+ #endif
+
+ typedef const struct JUCE_CF_BRIDGED_TYPE(NSString) __CFString * CFStringRef;
+
+ #undef JUCE_CF_BRIDGED_TYPE
+#endif
 
 namespace juce
 {
@@ -293,13 +307,13 @@ public:
         Note that there's also an isNotEmpty() method to help write readable code.
         @see containsNonWhitespaceChars()
     */
-    inline bool isEmpty() const noexcept                    { return text.isEmpty(); }
+    bool isEmpty() const noexcept                           { return text.isEmpty(); }
 
     /** Returns true if the string contains at least one character.
         Note that there's also an isEmpty() method to help write readable code.
         @see containsNonWhitespaceChars()
     */
-    inline bool isNotEmpty() const noexcept                 { return ! text.isEmpty(); }
+    bool isNotEmpty() const noexcept                        { return ! text.isEmpty(); }
 
     /** Resets this string to be empty. */
     void clear() noexcept;
@@ -905,6 +919,35 @@ public:
     template <typename... Args>
     static String formatted (const String& formatStr, Args... args)      { return formattedRaw (formatStr.toRawUTF8(), args...); }
 
+    /** Returns an iterator pointing at the beginning of the string. */
+    CharPointerType begin() const                                        { return getCharPointer(); }
+
+    /** Returns an iterator pointing at the terminating null of the string.
+
+        Note that this has to find the terminating null before returning it, so prefer to
+        call this once before looping and then reuse the result, rather than calling 'end()'
+        each time through the loop.
+
+        @code
+        String str = ...;
+
+        // BEST
+        for (auto c : str)
+            DBG (c);
+
+        // GOOD
+        for (auto ptr = str.begin(), end = str.end(); ptr != end; ++ptr)
+            DBG (*ptr);
+
+        std::for_each (str.begin(), str.end(), [] (juce_wchar c) { DBG (c); });
+
+        // BAD
+        for (auto ptr = str.begin(); ptr != str.end(); ++ptr)
+            DBG (*ptr);
+        @endcode
+    */
+    CharPointerType end() const                                          { return begin().findTerminatingNull(); }
+
     //==============================================================================
     // Numeric conversions..
 
@@ -1195,7 +1238,7 @@ public:
         that is returned must not be stored anywhere, as it can be deleted whenever the
         string changes.
     */
-    inline CharPointerType getCharPointer() const noexcept      { return text; }
+    CharPointerType getCharPointer() const noexcept             { return text; }
 
     /** Returns a pointer to a UTF-8 version of this string.
 

@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -154,8 +153,8 @@ typename FIR::Coefficients<FloatType>::Ptr
         Matrix<double> b (M + 1, 1),
                        q (2 * M + 1, 1);
 
-        auto sinc = [](double x) { return x == 0 ? 1 : std::sin (x * MathConstants<double>::pi)
-                                                         / (MathConstants<double>::pi * x); };
+        auto sinc = [] (double x) { return x == 0 ? 1 : std::sin (x * MathConstants<double>::pi)
+                                                          / (MathConstants<double>::pi * x); };
 
         auto factorp = wp / MathConstants<double>::pi;
         auto factors = ws / MathConstants<double>::pi;
@@ -192,8 +191,8 @@ typename FIR::Coefficients<FloatType>::Ptr
         Matrix<double> qp (2 * M, 1);
         Matrix<double> qs (2 * M, 1);
 
-        auto sinc = [](double x) { return x == 0 ? 1 : std::sin (x * MathConstants<double>::pi)
-                                                         / (MathConstants<double>::pi * x); };
+        auto sinc = [] (double x) { return x == 0 ? 1 : std::sin (x * MathConstants<double>::pi)
+                                                          / (MathConstants<double>::pi * x); };
 
         auto factorp = wp / MathConstants<double>::pi;
         auto factors = ws / MathConstants<double>::pi;
@@ -553,7 +552,7 @@ ReferenceCountedArray<IIR::Coefficients<FloatType>>
     {
         arrayFilters.add (*IIR::Coefficients<FloatType>::makeFirstOrderLowPass (sampleRate, frequency));
 
-        for (auto i = 0; i < order / 2; ++i)
+        for (int i = 0; i < order / 2; ++i)
         {
             auto Q = 1.0 / (2.0 * std::cos ((i + 1.0) * MathConstants<double>::pi / order));
             arrayFilters.add (*IIR::Coefficients<FloatType>::makeLowPass (sampleRate, frequency,
@@ -562,7 +561,7 @@ ReferenceCountedArray<IIR::Coefficients<FloatType>>
     }
     else
     {
-        for (auto i = 0; i < order / 2; ++i)
+        for (int i = 0; i < order / 2; ++i)
         {
             auto Q = 1.0 / (2.0 * std::cos ((2.0 * i + 1.0) * MathConstants<double>::pi / (order * 2.0)));
             arrayFilters.add (*IIR::Coefficients<FloatType>::makeLowPass (sampleRate, frequency,
@@ -588,7 +587,7 @@ ReferenceCountedArray<IIR::Coefficients<FloatType>>
     {
         arrayFilters.add (*IIR::Coefficients<FloatType>::makeFirstOrderHighPass (sampleRate, frequency));
 
-        for (auto i = 0; i < order / 2; ++i)
+        for (int i = 0; i < order / 2; ++i)
         {
             auto Q = 1.0 / (2.0 * std::cos ((i + 1.0) * MathConstants<double>::pi / order));
             arrayFilters.add (*IIR::Coefficients<FloatType>::makeHighPass (sampleRate, frequency,
@@ -597,7 +596,7 @@ ReferenceCountedArray<IIR::Coefficients<FloatType>>
     }
     else
     {
-        for (auto i = 0; i < order / 2; ++i)
+        for (int i = 0; i < order / 2; ++i)
         {
             auto Q = 1.0 / (2.0 * std::cos ((2.0 * i + 1.0) * MathConstants<double>::pi / (order * 2.0)));
             arrayFilters.add (*IIR::Coefficients<FloatType>::makeHighPass (sampleRate, frequency,

@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -29,21 +28,21 @@
  The block below describes the properties of this module, and is read by
  the Projucer to automatically generate project code that uses it.
  For details about the syntax and how to create or use a module, see the
- JUCE Module Format.txt file.
+ JUCE Module Format.md file.
 
 
  BEGIN_JUCE_MODULE_DECLARATION
 
   ID:                 juce_dsp
   vendor:             juce
-  version:            5.4.7
+  version:            6.0.0
   name:               JUCE DSP classes
   description:        Classes for audio buffer manipulation, digital audio processing, filtering, oversampling, fast math functions etc.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
   minimumCppStandard: 14
 
-  dependencies:       juce_audio_basics, juce_audio_formats
+  dependencies:       juce_audio_formats
   OSXFrameworks:      Accelerate
   iOSFrameworks:      Accelerate
 
@@ -58,12 +57,6 @@
 
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_audio_formats/juce_audio_formats.h>
-
-#if ! JUCE_HAS_CONSTEXPR
- #ifndef JUCE_DEMO_RUNNER
-  #error "The juce_dsp module requires a compiler that supports constexpr"
- #endif
-#else
 
 #if defined(_M_X64) || defined(__amd64__) || defined(__SSE2__) || (defined(_M_IX86_FP) && _M_IX86_FP == 2)
 
@@ -257,19 +250,29 @@ namespace juce
 #include "processors/juce_ProcessorWrapper.h"
 #include "processors/juce_ProcessorChain.h"
 #include "processors/juce_ProcessorDuplicator.h"
-#include "processors/juce_Bias.h"
-#include "processors/juce_Gain.h"
-#include "processors/juce_WaveShaper.h"
 #include "processors/juce_IIRFilter.h"
 #include "processors/juce_FIRFilter.h"
-#include "processors/juce_Oscillator.h"
-#include "processors/juce_LadderFilter.h"
 #include "processors/juce_StateVariableFilter.h"
+#include "processors/juce_FirstOrderTPTFilter.h"
+#include "processors/juce_Panner.h"
+#include "processors/juce_DelayLine.h"
 #include "processors/juce_Oversampling.h"
-#include "processors/juce_Reverb.h"
+#include "processors/juce_BallisticsFilter.h"
+#include "processors/juce_LinkwitzRileyFilter.h"
+#include "processors/juce_DryWetMixer.h"
+#include "processors/juce_StateVariableTPTFilter.h"
 #include "frequency/juce_FFT.h"
 #include "frequency/juce_Convolution.h"
 #include "frequency/juce_Windowing.h"
 #include "filter_design/juce_FilterDesign.h"
-
-#endif
+#include "widgets/juce_Reverb.h"
+#include "widgets/juce_Bias.h"
+#include "widgets/juce_Gain.h"
+#include "widgets/juce_WaveShaper.h"
+#include "widgets/juce_Oscillator.h"
+#include "widgets/juce_LadderFilter.h"
+#include "widgets/juce_Compressor.h"
+#include "widgets/juce_NoiseGate.h"
+#include "widgets/juce_Limiter.h"
+#include "widgets/juce_Phaser.h"
+#include "widgets/juce_Chorus.h"

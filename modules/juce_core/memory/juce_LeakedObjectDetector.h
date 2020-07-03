@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -45,6 +45,8 @@ public:
     //==============================================================================
     LeakedObjectDetector() noexcept                                 { ++(getCounter().numObjects); }
     LeakedObjectDetector (const LeakedObjectDetector&) noexcept     { ++(getCounter().numObjects); }
+
+    LeakedObjectDetector& operator= (const LeakedObjectDetector&) noexcept = default;
 
     ~LeakedObjectDetector()
     {

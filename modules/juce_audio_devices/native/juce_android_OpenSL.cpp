@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -852,10 +852,11 @@ public:
 
         static const double rates[] = { 8000.0, 11025.0, 12000.0, 16000.0,
                                         22050.0, 24000.0, 32000.0, 44100.0, 48000.0 };
+
         Array<double> retval (rates, numElementsInArray (rates));
 
         // make sure the native sample rate is part of the list
-        double native = getNativeSampleRate();
+        double native = AndroidHighPerformanceAudioHelpers::getNativeSampleRate();
 
         if (native != 0.0 && ! retval.contains (native))
             retval.add (native);
@@ -865,17 +866,8 @@ public:
 
     Array<int> getAvailableBufferSizes() override
     {
-        // we need to offer the lowest possible buffer size which
-        // is the native buffer size
-        auto nativeBufferSize  = getNativeBufferSize();
-        auto minBuffersToQueue = getMinimumBuffersToEnqueue();
-        auto maxBuffersToQueue = getMaximumBuffersToEnqueue();
-
-        Array<int> retval;
-        for (int i = minBuffersToQueue; i <= maxBuffersToQueue; ++i)
-            retval.add (i * nativeBufferSize);
-
-        return retval;
+        return AndroidHighPerformanceAudioHelpers::getAvailableBufferSizes (AndroidHighPerformanceAudioHelpers::getNativeBufferSizeHint(),
+                                                                            getAvailableSampleRates());
     }
 
     String open (const BigInteger& inputChannels,
@@ -887,15 +879,25 @@ public:
 
         lastError.clear();
 
-        sampleRate = (int) (requestedSampleRate > 0 ? requestedSampleRate : getNativeSampleRate());
+        sampleRate = (int) (requestedSampleRate > 0 ? requestedSampleRate : AndroidHighPerformanceAudioHelpers::getNativeSampleRate());
+        auto preferredBufferSize = (bufferSize > 0) ? bufferSize : getDefaultBufferSize();
 
-        auto totalPreferredBufferSize    = (bufferSize <= 0) ? getDefaultBufferSize() : bufferSize;
-        auto nativeBufferSize            = getNativeBufferSize();
-        bool useHighPerformanceAudioPath = canUseHighPerformanceAudioPath (totalPreferredBufferSize, sampleRate);
+        audioBuffersToEnqueue = [this, preferredBufferSize]
+        {
+            using namespace AndroidHighPerformanceAudioHelpers;
 
-        audioBuffersToEnqueue = useHighPerformanceAudioPath ? (totalPreferredBufferSize / nativeBufferSize) : 1;
-        actualBufferSize = totalPreferredBufferSize / audioBuffersToEnqueue;
-        jassert ((actualBufferSize * audioBuffersToEnqueue) == totalPreferredBufferSize);
+            auto nativeBufferSize = getNativeBufferSizeHint();
+
+            if (canUseHighPerformanceAudioPath (nativeBufferSize, preferredBufferSize, sampleRate))
+                return preferredBufferSize / nativeBufferSize;
+
+
+            return 1;
+        }();
+
+        actualBufferSize = preferredBufferSize / audioBuffersToEnqueue;
+
+        jassert ((actualBufferSize * audioBuffersToEnqueue) == preferredBufferSize);
 
         activeOutputChans = outputChannels;
         activeOutputChans.setRange (2, activeOutputChans.getHighestBit(), false);
@@ -934,8 +936,8 @@ public:
 
         DBG ("OpenSL: numInputChannels = " << numInputChannels
              << ", numOutputChannels = " << numOutputChannels
-             << ", nativeBufferSize = " << getNativeBufferSize()
-             << ", nativeSampleRate = " << getNativeSampleRate()
+             << ", nativeBufferSize = " << AndroidHighPerformanceAudioHelpers::getNativeBufferSizeHint()
+             << ", nativeSampleRate = " << AndroidHighPerformanceAudioHelpers::getNativeSampleRate()
              << ", actualBufferSize = " << actualBufferSize
              << ", audioBuffersToEnqueue = " << audioBuffersToEnqueue
              << ", sampleRate = " << sampleRate
@@ -968,16 +970,13 @@ public:
 
     int getDefaultBufferSize() override
     {
-        auto defaultBufferLength = (hasLowLatencyAudioPath() ? defaultBufferSizeForLowLatencyDeviceMs
-                                                             : defaultBufferSizeForStandardLatencyDeviceMs);
-
-        auto defaultBuffersToEnqueue = buffersToQueueForBufferDuration (defaultBufferLength, getCurrentSampleRate());
-        return defaultBuffersToEnqueue * getNativeBufferSize();
+        return AndroidHighPerformanceAudioHelpers::getDefaultBufferSize (AndroidHighPerformanceAudioHelpers::getNativeBufferSizeHint(),
+                                                                         getCurrentSampleRate());
     }
 
     double getCurrentSampleRate() override
     {
-        return (sampleRate == 0.0 ? getNativeSampleRate() : sampleRate);
+        return (sampleRate == 0.0 ? AndroidHighPerformanceAudioHelpers::getNativeSampleRate() : sampleRate);
     }
 
     void start (AudioIODeviceCallback* newCallback) override
@@ -1047,91 +1046,6 @@ private:
     AudioIODeviceCallback* callback = nullptr;
 
     std::unique_ptr<OpenSLSession> session;
-
-    enum
-    {
-        defaultBufferSizeForLowLatencyDeviceMs = 40,
-        defaultBufferSizeForStandardLatencyDeviceMs = 100
-    };
-
-    static int getMinimumBuffersToEnqueue (double sampleRateToCheck = getNativeSampleRate())
-    {
-        if (canUseHighPerformanceAudioPath (getNativeBufferSize(), (int) sampleRateToCheck))
-        {
-            // see https://developer.android.com/ndk/guides/audio/opensl/opensl-prog-notes.html#sandp
-            // "For Android 4.2 (API level 17) and earlier, a buffer count of two or more is required
-            //  for lower latency. Beginning with Android 4.3 (API level 18), a buffer count of one
-            //  is sufficient for lower latency."
-            return (getAndroidSDKVersion() >= 18 ? 1 : 2);
-        }
-
-        // we will not use the low-latency path so we can use the absolute minimum number of buffers
-        // to queue
-        return 1;
-    }
-
-    int getMaximumBuffersToEnqueue() noexcept
-    {
-        constexpr auto maxBufferSizeMs = 200;
-
-        auto availableSampleRates = getAvailableSampleRates();
-        auto maximumSampleRate = findMaximum(availableSampleRates.getRawDataPointer(), availableSampleRates.size());
-
-        // ensure we don't return something crazy small
-        return jmax (8, buffersToQueueForBufferDuration (maxBufferSizeMs, maximumSampleRate));
-    }
-
-    static int buffersToQueueForBufferDuration (int bufferDurationInMs, double sampleRate) noexcept
-    {
-        auto maxBufferFrames = static_cast<int> (std::ceil (bufferDurationInMs * sampleRate / 1000.0));
-        auto maxNumBuffers   = static_cast<int> (std::ceil (static_cast<double> (maxBufferFrames)
-                                                  / static_cast<double> (getNativeBufferSize())));
-
-        return jmax (getMinimumBuffersToEnqueue (sampleRate), maxNumBuffers);
-    }
-
-    //==============================================================================
-    static double getNativeSampleRate()
-    {
-        return audioManagerGetProperty ("android.media.property.OUTPUT_SAMPLE_RATE").getDoubleValue();
-    }
-
-    static int getNativeBufferSize()
-    {
-        const int val = audioManagerGetProperty ("android.media.property.OUTPUT_FRAMES_PER_BUFFER").getIntValue();
-        return val > 0 ? val : 512;
-    }
-
-    static bool isProAudioDevice()
-    {
-        return androidHasSystemFeature ("android.hardware.audio.pro") || isSapaSupported();
-    }
-
-    static bool hasLowLatencyAudioPath()
-    {
-        return androidHasSystemFeature ("android.hardware.audio.low_latency");
-    }
-
-    static bool canUseHighPerformanceAudioPath (int requestedBufferSize, int requestedSampleRate)
-    {
-        return ((requestedBufferSize % getNativeBufferSize()) == 0)
-             && (requestedSampleRate == getNativeSampleRate())
-             && isProAudioDevice();
-    }
-
-    //==============================================================================
-    // Some minimum Sapa support to check if this device supports pro audio
-    static bool isSamsungDevice()
-    {
-        return SystemStats::getDeviceManufacturer().containsIgnoreCase ("SAMSUNG");
-    }
-
-    static bool isSapaSupported()
-    {
-        static bool supported = isSamsungDevice() && DynamicLibrary().open ("libapa_jni.so");
-
-        return supported;
-    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenSLAudioIODevice)
 };
@@ -1263,7 +1177,7 @@ public:
             SLDataLocator_OutputMix outputMixLocator = {SL_DATALOCATOR_OUTPUTMIX, outputMix};
 
             PCMDataFormatEx dataFormat;
-            BufferHelpers<int16>::initPCMDataFormat (dataFormat, 1, OpenSLAudioIODevice::getNativeSampleRate());
+            BufferHelpers<int16>::initPCMDataFormat (dataFormat, 1, AndroidHighPerformanceAudioHelpers::getNativeSampleRate());
 
             SLDataSource source = { &queueLocator, &dataFormat };
             SLDataSink   sink   = { &outputMixLocator, nullptr };
@@ -1306,7 +1220,7 @@ public:
         }
     }
 
-    bool isOK() const      { return queue != nullptr; }
+    bool isOk() const      { return queue != nullptr; }
 
     pthread_t startThread (void* (*entry) (void*), void* userPtr)
     {
@@ -1346,7 +1260,7 @@ public:
             threadEntryProc = nullptr;
 
             (*player)->SetPlayState (player, SL_PLAYSTATE_STOPPED);
-            MessageManager::callAsync ([this] () { delete this; });
+            MessageManager::callAsync ([this]() { delete this; });
         }
     }
 
@@ -1365,7 +1279,7 @@ private:
     SlRef<SLPlayItf_>      player;
     SlRef<SLAndroidSimpleBufferQueueItf_> queue;
 
-    int bufferSize = OpenSLAudioIODevice::getNativeBufferSize();
+    int bufferSize = AndroidHighPerformanceAudioHelpers::getNativeBufferSizeHint();
     HeapBlock<int16> buffer { HeapBlock<int16> (static_cast<size_t> (1 * bufferSize * numBuffers)) };
 
     void* (*threadEntryProc) (void*) = nullptr;
@@ -1376,14 +1290,15 @@ private:
     pthread_t       threadID;
 };
 
+//==============================================================================
 pthread_t juce_createRealtimeAudioThread (void* (*entry) (void*), void* userPtr)
 {
-    std::unique_ptr<SLRealtimeThread> thread (new SLRealtimeThread);
+    auto thread = std::make_unique<SLRealtimeThread>();
 
-    if (! thread->isOK())
-        return 0;
+    if (! thread->isOk())
+        return {};
 
-    pthread_t threadID = thread->startThread (entry, userPtr);
+    auto threadID = thread->startThread (entry, userPtr);
 
     // the thread will de-allocate itself
     thread.release();

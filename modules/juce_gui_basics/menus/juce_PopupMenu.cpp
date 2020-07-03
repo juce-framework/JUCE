@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -55,7 +54,10 @@ struct HeaderItemComponent  : public PopupMenu::CustomComponent
         setName (name);
     }
 
-    void paint (Graphics& g) override;
+    void paint (Graphics& g) override
+    {
+        getLookAndFeel().drawPopupMenuSectionHeader (g, getLocalBounds(), getName());
+    }
 
     void getIdealSize (int& idealWidth, int& idealHeight) override
     {
@@ -94,7 +96,13 @@ struct ItemComponent  : public Component
         addMouseListener (&parent, false);
     }
 
-    ~ItemComponent() override;
+    ~ItemComponent() override
+    {
+        if (customComp != nullptr)
+            setItem (*customComp, nullptr);
+
+        removeChildComponent (customComp.get());
+    }
 
     void getIdealSize (int& idealWidth, int& idealHeight, const int standardItemHeight)
     {
@@ -220,9 +228,9 @@ struct MenuWindow  : public Component
         setOpaque (lf.findColour (PopupMenu::backgroundColourId).isOpaque()
                      || ! Desktop::canUseSemiTransparentWindows());
 
-        for (size_t i = 0; i < menu.items.size(); ++i)
+        for (int i = 0; i < menu.items.size(); ++i)
         {
-            auto& item = menu.items[i];
+            auto& item = menu.items.getReference (i);
 
             if (i + 1 < menu.items.size() || ! item.isSeparator)
                 items.add (new ItemComponent (item, options.getStandardItemHeight(), *this));
@@ -264,7 +272,13 @@ struct MenuWindow  : public Component
         getMouseState (Desktop::getInstance().getMainMouseSource()); // forces creation of a mouse source watcher for the main mouse
     }
 
-    ~MenuWindow() override;
+    ~MenuWindow() override
+    {
+        getActiveWindows().removeFirstMatchingValue (this);
+        Desktop::getInstance().removeGlobalMouseListener (this);
+        activeSubMenu.reset();
+        items.clear();
+    }
 
     //==============================================================================
     void paint (Graphics& g) override
@@ -400,7 +414,7 @@ struct MenuWindow  : public Component
             if (showSubMenuFor (currentChild))
             {
                 if (isSubMenuVisible())
-                    activeSubMenu->selectNextItem (1);
+                    activeSubMenu->selectNextItem (0);
             }
             else if (componentAttachedTo != nullptr)
             {
@@ -998,7 +1012,14 @@ public:
         startTimerHz (20);
     }
 
-    void handleMouseEvent (const MouseEvent& e);
+    void handleMouseEvent (const MouseEvent& e)
+    {
+        if (! window.windowIsStillValid())
+            return;
+
+        startTimerHz (20);
+        handleMousePosition (e.getScreenPosition());
+    }
 
     void timerCallback() override
     {
@@ -1228,7 +1249,11 @@ struct NormalComponentWrapper : public PopupMenu::CustomComponent
         addAndMakeVisible (comp);
     }
 
-    void getIdealSize (int& idealWidth, int& idealHeight) override;
+    void getIdealSize (int& idealWidth, int& idealHeight) override
+    {
+        idealWidth = width;
+        idealHeight = height;
+    }
 
     void resized() override
     {
@@ -1243,49 +1268,7 @@ struct NormalComponentWrapper : public PopupMenu::CustomComponent
 
 };
 
-// The following implementations are outside of the class definitions to avoid spurious
-// warning messages when dynamically loading libraries at runtime on macOS
-void PopupMenu::HelperClasses::HeaderItemComponent::paint (Graphics& g)
-{
-    getLookAndFeel().drawPopupMenuSectionHeader (g, getLocalBounds(), getName());
-}
-
-PopupMenu::HelperClasses::ItemComponent::~ItemComponent()
-{
-    if (customComp != nullptr)
-        setItem (*customComp, nullptr);
-
-    removeChildComponent (customComp.get());
-}
-
-PopupMenu::HelperClasses::MenuWindow::~MenuWindow()
-{
-    getActiveWindows().removeFirstMatchingValue (this);
-    Desktop::getInstance().removeGlobalMouseListener (this);
-    activeSubMenu.reset();
-    items.clear();
-}
-
-void PopupMenu::HelperClasses::MouseSourceState::handleMouseEvent (const MouseEvent& e)
-{
-    if (! window.windowIsStillValid())
-        return;
-
-    startTimerHz (20);
-    handleMousePosition (e.getScreenPosition());
-}
-
-void PopupMenu::HelperClasses::NormalComponentWrapper::getIdealSize (int& idealWidth, int& idealHeight)
-{
-    idealWidth = width;
-    idealHeight = height;
-}
-
 //==============================================================================
-PopupMenu::PopupMenu()
-{
-}
-
 PopupMenu::PopupMenu (const PopupMenu& other)
     : items (other.items),
       lookAndFeel (other.lookAndFeel)
@@ -1459,7 +1442,7 @@ void PopupMenu::addItem (Item newItem)
               || newItem.isSeparator || newItem.isSectionHeader
               || newItem.subMenu != nullptr);
 
-    items.push_back (std::move (newItem));
+    items.add (std::move (newItem));
 }
 
 void PopupMenu::addItem (String itemText, std::function<void()> action)
@@ -1608,7 +1591,7 @@ void PopupMenu::addSubMenu (String subMenuName, PopupMenu subMenu, bool isActive
 
 void PopupMenu::addSeparator()
 {
-    if (items.size() > 0 && ! items.back().isSeparator)
+    if (items.size() > 0 && ! items.getLast().isSeparator)
     {
         Item i;
         i.isSeparator = true;
@@ -1713,11 +1696,11 @@ PopupMenu::Options PopupMenu::Options::withPreferredPopupDirection (PopupDirecti
 Component* PopupMenu::createWindow (const Options& options,
                                     ApplicationCommandManager** managerOfChosenCommand) const
 {
-    return items.empty() ? nullptr
-                         : new HelperClasses::MenuWindow (*this, nullptr, options,
-                                                          ! options.getTargetScreenArea().isEmpty(),
-                                                          ModifierKeys::currentModifiers.isAnyMouseButtonDown(),
-                                                          managerOfChosenCommand);
+    return items.isEmpty() ? nullptr
+                           : new HelperClasses::MenuWindow (*this, nullptr, options,
+                                                            ! options.getTargetScreenArea().isEmpty(),
+                                                            ModifierKeys::currentModifiers.isAnyMouseButtonDown(),
+                                                            managerOfChosenCommand);
 }
 
 //==============================================================================
@@ -1813,7 +1796,7 @@ void PopupMenu::showMenuAsync (const Options& options, ModalComponentManager::Ca
     showWithOptionalCallback (options, userCallback, false);
 }
 
-void PopupMenu::showMenuAsync (const Options& options, std::function<void(int)> userCallback)
+void PopupMenu::showMenuAsync (const Options& options, std::function<void (int)> userCallback)
 {
     showWithOptionalCallback (options, ModalCallbackFunction::create (userCallback), false);
 }
@@ -1985,7 +1968,7 @@ bool PopupMenu::MenuItemIterator::next()
     if (index.size() == 0 || menus.getLast()->items.size() == 0)
         return false;
 
-    currentItem = const_cast<PopupMenu::Item*> (&(menus.getLast()->items[(size_t) index.getLast()]));
+    currentItem = const_cast<PopupMenu::Item*> (&(menus.getLast()->items.getReference (index.getLast())));
 
     if (searchRecursively && currentItem->subMenu != nullptr)
     {

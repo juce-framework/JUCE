@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -135,7 +134,7 @@ public:
     //==============================================================================
     /** Converts a textual key description to a KeyPress.
 
-        This attempts to decode a textual version of a keypress, e.g. "CTRL + C" or "SPACE".
+        This attempts to decode a textual version of a keypress, e.g. "ctrl + c" or "spacebar".
 
         This isn't designed to cope with any kind of input, but should be given the
         strings that are created by the getTextDescription() method.
@@ -148,7 +147,7 @@ public:
 
     /** Creates a textual description of the key combination.
 
-        e.g. "CTRL + C" or "DELETE".
+        e.g. "ctrl + c" or "delete".
 
         To store a keypress in a file, use this method, along with createFromDescription()
         to retrieve it later.

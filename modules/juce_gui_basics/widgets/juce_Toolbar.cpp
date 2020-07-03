@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -243,7 +242,7 @@ private:
 //==============================================================================
 Toolbar::Toolbar()
 {
-    missingItemsButton.reset (getLookAndFeel().createToolbarMissingItemsButton (*this));
+    lookAndFeelChanged();
     addChildComponent (missingItemsButton.get());
 
     missingItemsButton->setAlwaysOnTop (true);
@@ -641,6 +640,11 @@ void Toolbar::itemDropped (const SourceDetails& dragSourceDetails)
         tc->setState (Button::buttonNormal);
 }
 
+void Toolbar::lookAndFeelChanged()
+{
+    missingItemsButton.reset (getLookAndFeel().createToolbarMissingItemsButton (*this));
+}
+
 void Toolbar::mouseDown (const MouseEvent&) {}
 
 //==============================================================================
@@ -728,9 +732,10 @@ private:
                 int selectedStyle = 0;
                 switch (bar.getStyle())
                 {
-                    case Toolbar::iconsOnly:        selectedStyle = 1; break;
-                    case Toolbar::iconsWithText:    selectedStyle = 2; break;
-                    case Toolbar::textOnly:         selectedStyle = 3; break;
+                    case Toolbar::iconsOnly:      selectedStyle = 1; break;
+                    case Toolbar::iconsWithText:  selectedStyle = 2; break;
+                    case Toolbar::textOnly:       selectedStyle = 3; break;
+                    default:                      break;
                 }
 
                 styleBox.setSelectedId (selectedStyle);
@@ -757,6 +762,7 @@ private:
                 case 1:   toolbar.setStyle (Toolbar::iconsOnly); break;
                 case 2:   toolbar.setStyle (Toolbar::iconsWithText); break;
                 case 3:   toolbar.setStyle (Toolbar::textOnly); break;
+                default:  break;
             }
 
             palette.resized(); // to make it update the styles

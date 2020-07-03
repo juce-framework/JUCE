@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -574,7 +574,7 @@ int File::findChildFiles (Array<File>& results, int whatToLookFor, bool searchRe
 {
     int total = 0;
 
-    for (DirectoryIterator di (*this, searchRecursively, wildcard, whatToLookFor); di.next();)
+    for (const auto& di : RangedDirectoryIterator (*this, searchRecursively, wildcard, whatToLookFor))
     {
         results.add (di.getFile());
         ++total;
@@ -585,12 +585,10 @@ int File::findChildFiles (Array<File>& results, int whatToLookFor, bool searchRe
 
 int File::getNumberOfChildFiles (const int whatToLookFor, const String& wildCardPattern) const
 {
-    int total = 0;
-
-    for (DirectoryIterator di (*this, false, wildCardPattern, whatToLookFor); di.next();)
-        ++total;
-
-    return total;
+    return std::accumulate (RangedDirectoryIterator (*this, false, wildCardPattern, whatToLookFor),
+                            RangedDirectoryIterator(),
+                            0,
+                            [] (int acc, const DirectoryEntry&) { return acc + 1; });
 }
 
 bool File::containsSubDirectories() const
@@ -598,8 +596,7 @@ bool File::containsSubDirectories() const
     if (! isDirectory())
         return false;
 
-    DirectoryIterator di (*this, false, "*", findDirectories);
-    return di.next();
+    return RangedDirectoryIterator (*this, false, "*", findDirectories) != RangedDirectoryIterator();
 }
 
 //==============================================================================
@@ -726,22 +723,24 @@ bool File::startAsProcess (const String& parameters) const
 }
 
 //==============================================================================
-FileInputStream* File::createInputStream() const
+std::unique_ptr<FileInputStream> File::createInputStream() const
 {
-    std::unique_ptr<FileInputStream> fin (new FileInputStream (*this));
+    auto fin = std::make_unique<FileInputStream> (*this);
 
     if (fin->openedOk())
-        return fin.release();
+        return fin;
 
     return nullptr;
 }
 
-FileOutputStream* File::createOutputStream (size_t bufferSize) const
+std::unique_ptr<FileOutputStream> File::createOutputStream (size_t bufferSize) const
 {
-    std::unique_ptr<FileOutputStream> out (new FileOutputStream (*this, bufferSize));
+    auto fout = std::make_unique<FileOutputStream> (*this, bufferSize);
 
-    return out->failedToOpen() ? nullptr
-                               : out.release();
+    if (fout->openedOk())
+        return fout;
+
+    return nullptr;
 }
 
 //==============================================================================
@@ -753,8 +752,8 @@ bool File::appendData (const void* const dataToAppend,
     if (numberOfBytes == 0)
         return true;
 
-    FileOutputStream out (*this, 8192);
-    return out.openedOk() && out.write (dataToAppend, numberOfBytes);
+    FileOutputStream fout (*this, 8192);
+    return fout.openedOk() && fout.write (dataToAppend, numberOfBytes);
 }
 
 bool File::replaceWithData (const void* const dataToWrite,
@@ -770,12 +769,12 @@ bool File::replaceWithData (const void* const dataToWrite,
 
 bool File::appendText (const String& text, bool asUnicode, bool writeHeaderBytes, const char* lineFeed) const
 {
-    FileOutputStream out (*this);
+    FileOutputStream fout (*this);
 
-    if (out.failedToOpen())
+    if (fout.failedToOpen())
         return false;
 
-    return out.writeText (text, asUnicode, writeHeaderBytes, lineFeed);
+    return fout.writeText (text, asUnicode, writeHeaderBytes, lineFeed);
 }
 
 bool File::replaceWithText (const String& textToWrite, bool asUnicode, bool writeHeaderBytes, const char* lineFeed) const

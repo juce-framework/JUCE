@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -333,7 +333,7 @@ private:
 
         struct addrinfo* result = nullptr;
 
-        if (getaddrinfo (serverName.toUTF8(), String (port).toUTF8(), &hints, &result) != 0 || result == 0)
+        if (getaddrinfo (serverName.toUTF8(), String (port).toUTF8(), &hints, &result) != 0 || result == nullptr)
             return 0;
 
         {
@@ -351,7 +351,7 @@ private:
 
         int receiveBufferSize = 16384;
         setsockopt (socketHandle, SOL_SOCKET, SO_RCVBUF, (char*) &receiveBufferSize, sizeof (receiveBufferSize));
-        setsockopt (socketHandle, SOL_SOCKET, SO_KEEPALIVE, 0, 0);
+        setsockopt (socketHandle, SOL_SOCKET, SO_KEEPALIVE, nullptr, 0);
 
       #if JUCE_MAC
         setsockopt (socketHandle, SOL_SOCKET, SO_NOSIGPIPE, 0, 0);
@@ -576,7 +576,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
 
-URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener, bool shouldUsePost)
+std::unique_ptr<URL::DownloadTask> URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener, bool shouldUsePost)
 {
     return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener, shouldUsePost);
 }
