@@ -192,7 +192,7 @@ private:
 
         if (isMac)
             if (osType < SystemStats::MacOSX_10_9)
-                return "Live-build features are available only on MacOSX 10.9 or higher.";
+                return "Live-build features are available only on macOS 10.9 or higher.";
 
         if (isWin)
             if (! SystemStats::isOperatingSystem64Bit() || osType < SystemStats::Windows8_0)

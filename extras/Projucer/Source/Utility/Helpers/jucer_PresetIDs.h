@@ -162,6 +162,7 @@ namespace Ids
     DECLARE_ID (noWarnings);
     DECLARE_ID (resource);
     DECLARE_ID (xcodeResource);
+    DECLARE_ID (xcodeValidArchs);
     DECLARE_ID (className);
     DECLARE_ID (classDesc);
     DECLARE_ID (controlPoint);
