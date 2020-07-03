@@ -367,7 +367,7 @@ void FileBrowserComponent::lookAndFeelChanged()
     currentPathBox.setColour (ComboBox::arrowColourId,         findColour (currentPathBoxArrowColourId));
 
     filenameBox.setColour (TextEditor::backgroundColourId,     findColour (filenameBoxBackgroundColourId));
-    filenameBox.setColour (TextEditor::textColourId,           findColour (filenameBoxTextColourId));
+    filenameBox.applyColourToAllText (findColour (filenameBoxTextColourId));
 
     resized();
     repaint();
