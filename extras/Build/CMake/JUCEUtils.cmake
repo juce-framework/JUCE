@@ -941,15 +941,12 @@ function(_juce_generate_icon source_target dest_target)
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         set(generated_icon "${juce_library_code}/Icon.icns")
-        add_custom_command(OUTPUT "${generated_icon}"
-            COMMAND juce::juceaide macicon "${generated_icon}" ${icon_args}
-            VERBATIM)
+        # To get compiled properly, we need the icon before the plist is generated!
+        _juce_execute_juceaide(macicon "${generated_icon}" ${icon_args})
         set_source_files_properties(${generated_icon} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         set(generated_icon "${juce_library_code}/icon.ico")
-        add_custom_command(OUTPUT ${generated_icon}
-            COMMAND juce::juceaide winicon "${generated_icon}" ${icon_args}
-            VERBATIM)
+        _juce_execute_juceaide(winicon "${generated_icon}" ${icon_args})
     elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
         get_target_property(generated_icon ${source_target} JUCE_CUSTOM_XCASSETS_FOLDER)
 
