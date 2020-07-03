@@ -196,7 +196,7 @@ public:
 
             if (type == VST3PlugIn)
             {
-                s.add ("JUCE_VST3DIR := " + targetName.upToLastOccurrenceOf (".", false, false) + ".vst3");
+                s.add ("JUCE_VST3DIR := " + escapeSpaces (targetName).upToLastOccurrenceOf (".", false, false) + ".vst3");
 
                 auto is32Bit = config.getArchitectureTypeString().contains ("m32");
                 s.add (String ("JUCE_VST3SUBDIR := Contents/") + (is32Bit ? "i386" : "x86_64") + "-linux");
@@ -223,7 +223,7 @@ public:
                 else if (type == VSTPlugIn)
                 {
                     s.add ("JUCE_VSTDESTDIR := " + config.getVSTBinaryLocationString());
-                    s.add (copyCmd + targetName + " $(JUCE_VSTDESTDIR)");
+                    s.add (copyCmd + escapeSpaces (targetName) + " $(JUCE_VSTDESTDIR)");
                 }
                 else if (type == UnityPlugIn)
                 {
