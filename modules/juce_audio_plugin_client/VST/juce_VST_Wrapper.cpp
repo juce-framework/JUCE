@@ -61,7 +61,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996 4100)
  #define PRAGMA_ALIGN_SUPPORTED 1
 #endif
 
-#ifndef _MSC_VER
+#if ! JUCE_MSVC
  #define __cdecl
 #endif
 
@@ -92,7 +92,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
-#ifdef _MSC_VER
+#if JUCE_MSVC
  #pragma pack (push, 8)
 #endif
 
@@ -109,13 +109,7 @@ using namespace juce;
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/format_types/juce_VSTCommon.h>
 
-#if JUCE_BIG_ENDIAN
- #define JUCE_MULTICHAR_CONSTANT(a, b, c, d) (a | (((uint32) b) << 8) | (((uint32) c) << 16) | (((uint32) d) << 24))
-#else
- #define JUCE_MULTICHAR_CONSTANT(a, b, c, d) (d | (((uint32) c) << 8) | (((uint32) b) << 16) | (((uint32) a) << 24))
-#endif
-
-#ifdef _MSC_VER
+#ifdef JUCE_MSVC
  #pragma pack (pop)
 #endif
 
@@ -1872,8 +1866,8 @@ private:
         if (handleManufacturerSpecificVST2Opcode (args.index, args.value, args.ptr, args.opt))
             return 1;
 
-        if (args.index == (int32) JUCE_MULTICHAR_CONSTANT ('P', 'r', 'e', 'S')
-             && args.value == (int32) JUCE_MULTICHAR_CONSTANT ('A', 'e', 'C', 's'))
+        if (args.index == (int32) ByteOrder::bigEndianInt ("PreS")
+             && args.value == (int32) ByteOrder::bigEndianInt ("AeCs"))
             return handleSetContentScaleFactor (args.opt);
 
         if (args.index == Vst2::effGetParamDisplay)
