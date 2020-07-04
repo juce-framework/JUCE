@@ -582,7 +582,7 @@ class CoreAudioWriter : public AudioFormatWriter
 {
 public:
     CoreAudioWriter (
-        OutputStream* out, AudioFileTypeID fileType, double sr, unsigned int numberOfChannels, int bitsPerSamp)
+        FileOutputStream* out, AudioFileTypeID fileType, double sr, unsigned int numberOfChannels, int bitsPerSamp)
     : AudioFormatWriter (out, coreAudioFormatName, sr, numberOfChannels, bitsPerSamp)
     {
         usesFloatingPointData = true;
@@ -648,6 +648,8 @@ public:
         return true;
     }
 
+    SInt64 size = 0;
+
 private:
     AudioFileID audioFileID;
     ExtAudioFileRef audioFileRef;
@@ -660,23 +662,51 @@ private:
         auto* self = static_cast<CoreAudioWriter*> (inClientData);
         self->output->setPosition (inPosition);
         if (! self->output->write (buffer, requestCount))
+        {
+            jassertfalse;
             return -1;
+        }
         *actualCount = requestCount;
+        self->size += requestCount;
         return noErr;
     }
 
-    // These callbacks unnecessary and we could just use nullptr except Xcode gives a warning!
-    static OSStatus readCallback (void*, SInt64, UInt32, void*, UInt32*)
+    static OSStatus
+    readCallback (void* inClientData, SInt64 inPosition, UInt32 requestCount, void* buffer, UInt32* actualCount)
     {
-        jassertfalse;
-        return -1;
+        auto* self = static_cast<CoreAudioWriter*> (inClientData);
+        FileOutputStream* out = static_cast<FileOutputStream*> (self->output);
+        auto in = FileInputStream (out->getFile());
+        jassert (in.openedOk());
+        {
+            bool setPositionOK [[maybe_unused]] = in.setPosition (inPosition);
+            jassert (setPositionOK);
+        }
+        *actualCount = in.read (buffer, requestCount);
+        return noErr;
     }
-    static SInt64 getSizeCallback (void*)
+    static SInt64 getSizeCallback (void* inClientData)
     {
-        jassertfalse;
-        return 0;
+        auto* self = static_cast<CoreAudioWriter*> (inClientData);
+        return self->size;
     }
-    static OSStatus setSizeCallback (void*, SInt64) { return noErr; }
+    static OSStatus setSizeCallback (void* inClientData, SInt64 size)
+    {
+        auto* self = static_cast<CoreAudioWriter*> (inClientData);
+        if (self->size == size)
+            return noErr;
+
+        FileOutputStream* out = static_cast<FileOutputStream*> (self->output);
+        {
+            bool setPositionOK [[maybe_unused]] = out->setPosition (size);
+            jassert (setPositionOK);
+        }
+        {
+            Result truncatedOK [[maybe_unused]] = out->truncate();
+            jassert (truncatedOK);
+        }
+        return noErr;
+    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreAudioWriter)
 };
@@ -718,7 +748,13 @@ AudioFormatWriter* CoreAudioFormat::createWriterFor (
     const StringPairArray& /*metadataValues*/,
     int /*qualityOptionIndex*/)
 {
-    return new CoreAudioWriter (output, fileTypeID, sampleRateToUse, numberOfChannels, bitsPerSample);
+    FileOutputStream* out = dynamic_cast<FileOutputStream*> (output);
+    if (out == nullptr)
+    {
+        jassertfalse;
+        return nullptr;
+    }
+    return new CoreAudioWriter (out, fileTypeID, sampleRateToUse, numberOfChannels, bitsPerSample);
 }
 
 static AudioFileTypeID audioFileTypeForExtension (String extension)
