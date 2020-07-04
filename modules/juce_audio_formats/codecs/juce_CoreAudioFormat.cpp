@@ -582,7 +582,7 @@ class CoreAudioWriter : public AudioFormatWriter
 {
 public:
     CoreAudioWriter (
-        FileOutputStream* out, AudioFileTypeID fileType, double sr, unsigned int numberOfChannels, int bitsPerSamp)
+        OutputStream* out, AudioFileTypeID fileType, double sr, unsigned int numberOfChannels, int bitsPerSamp)
     : AudioFormatWriter (out, coreAudioFormatName, sr, numberOfChannels, bitsPerSamp)
     {
         usesFloatingPointData = true;
@@ -675,7 +675,9 @@ private:
     readCallback (void* inClientData, SInt64 inPosition, UInt32 requestCount, void* buffer, UInt32* actualCount)
     {
         auto* self = static_cast<CoreAudioWriter*> (inClientData);
-        FileOutputStream* out = static_cast<FileOutputStream*> (self->output);
+        auto* out = dynamic_cast<FileOutputStream*> (self->output);
+        if (out == nullptr)
+            return -1;
         auto in = FileInputStream (out->getFile());
         jassert (in.openedOk());
         {
@@ -696,12 +698,10 @@ private:
         if (self->size == size)
             return noErr;
 
-        FileOutputStream* out = static_cast<FileOutputStream*> (self->output);
+        if (auto* out = dynamic_cast<FileOutputStream*> (self->output))
         {
             bool setPositionOK [[maybe_unused]] = out->setPosition (size);
             jassert (setPositionOK);
-        }
-        {
             Result truncatedOK [[maybe_unused]] = out->truncate();
             jassert (truncatedOK);
         }
@@ -748,13 +748,7 @@ AudioFormatWriter* CoreAudioFormat::createWriterFor (
     const StringPairArray& /*metadataValues*/,
     int /*qualityOptionIndex*/)
 {
-    FileOutputStream* out = dynamic_cast<FileOutputStream*> (output);
-    if (out == nullptr)
-    {
-        jassertfalse;
-        return nullptr;
-    }
-    return new CoreAudioWriter (out, fileTypeID, sampleRateToUse, numberOfChannels, bitsPerSample);
+    return new CoreAudioWriter (output, fileTypeID, sampleRateToUse, numberOfChannels, bitsPerSample);
 }
 
 static AudioFileTypeID audioFileTypeForExtension (String extension)

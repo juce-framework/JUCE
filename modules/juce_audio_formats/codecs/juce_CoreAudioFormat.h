@@ -68,7 +68,7 @@ public:
     AudioFormatReader* createReaderFor (InputStream*,
                                         bool deleteStreamIfOpeningFails) override;
 
-    // Note: Currently only supports FileOutputStreams
+    // Note: For some formats the output streams needs to be a FileOutputStreams
     AudioFormatWriter* createWriterFor (OutputStream*,
                                         double sampleRateToUse,
                                         unsigned int numberOfChannels,
