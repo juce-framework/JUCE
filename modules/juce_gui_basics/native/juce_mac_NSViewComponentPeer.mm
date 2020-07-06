@@ -1773,7 +1773,7 @@ private:
             if (! (owner->textWasInserted || owner->redirectKeyDown (ev)))
             {
                 objc_super s = { self, [NSView class] };
-                getMsgSendSuperFn() (&s, @selector (keyDown:), ev);
+                ObjCMsgSendSuper<void> (&s, @selector (keyDown:), ev);
             }
         }
     }
@@ -1785,7 +1785,7 @@ private:
         if (owner == nullptr || ! owner->redirectKeyUp (ev))
         {
             objc_super s = { self, [NSView class] };
-            getMsgSendSuperFn() (&s, @selector (keyUp:), ev);
+            ObjCMsgSendSuper<void> (&s, @selector (keyDown:), ev);
         }
     }
 
@@ -2036,7 +2036,7 @@ private:
 
     static void becomeKeyWindow (id self, SEL)
     {
-        sendSuperclassMessage (self, @selector (becomeKeyWindow));
+        sendSuperclassMessage<void> (self, @selector (becomeKeyWindow));
 
         if (auto* owner = getOwner (self))
         {
@@ -2107,7 +2107,7 @@ private:
         {
             owner->isZooming = true;
             objc_super s = { self, [NSWindow class] };
-            getMsgSendSuperFn() (&s, @selector (zoom:), sender);
+            ObjCMsgSendSuper<void> (&s, @selector (zoom:), sender);
             owner->isZooming = false;
 
             owner->redirectMovedOrResized();

@@ -1642,7 +1642,7 @@ public:
             if (activeUIs.contains (self))
                 shutdown (self);
 
-            sendSuperclassMessage (self, @selector (dealloc));
+            sendSuperclassMessage<void> (self, @selector (dealloc));
         }
 
         static void applicationWillTerminate (id self, SEL, NSNotification*)

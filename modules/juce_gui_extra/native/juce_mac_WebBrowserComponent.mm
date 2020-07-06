@@ -294,7 +294,7 @@ private:
         }
 
         objc_super s = { self, [WebView class] };
-        return ObjCMsgSendSuper<BOOL, NSEvent*> (&s, selector, event);
+        return ObjCMsgSendSuper<BOOL> (&s, selector, event);
     }
 };
 

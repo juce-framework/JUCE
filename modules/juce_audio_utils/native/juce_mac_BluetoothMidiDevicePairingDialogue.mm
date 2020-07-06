@@ -62,7 +62,7 @@ private:
 
     static id initWithCallbacks (id self, SEL, Callbacks* cbs)
     {
-        self = sendSuperclassMessage (self, @selector (init));
+        self = sendSuperclassMessage<id> (self, @selector (init));
 
         object_setInstanceVariable (self, "callbacks", cbs);
         object_setInstanceVariable (self, "controller", [CABTLEMIDIWindowController new]);
@@ -81,7 +81,7 @@ private:
     {
         [getController (self) release];
 
-        sendSuperclassMessage (self, @selector (dealloc));
+        sendSuperclassMessage<void> (self, @selector (dealloc));
     }
 
     static void show (id self, SEL, Rectangle<int>* bounds)

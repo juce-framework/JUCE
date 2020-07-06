@@ -194,7 +194,7 @@ NSRect makeNSRect (const RectangleType& r) noexcept
 #endif
 #if JUCE_MAC || JUCE_IOS
 
-// This is necessary as on iOS builds, some arguments may be passed on registers
+// This is necessary as on iOS/ARM builds, some arguments may be passed on registers
 // depending on the argument type. The re-cast objc_msgSendSuper to a function
 // take the same arguments as the target method.
 template <typename ReturnValue, typename... Params>
@@ -205,9 +205,6 @@ ReturnValue ObjCMsgSendSuper (struct objc_super* s, SEL sel, Params... params)
     return fn (s, sel, params...);
 }
 
-// These hacks are a workaround for newer Xcode builds which by default prevent calls to these objc functions..
-typedef id (*MsgSendSuperFn) (struct objc_super*, SEL, ...);
-inline MsgSendSuperFn getMsgSendSuperFn() noexcept   { return (MsgSendSuperFn) (void*) objc_msgSendSuper; }
 #endif
 
 //==============================================================================
@@ -282,10 +279,11 @@ struct ObjCClass
     }
 
    #if JUCE_MAC || JUCE_IOS
-    static id sendSuperclassMessage (id self, SEL selector)
+    template <typename Result>
+    static Result sendSuperclassMessage (id self, SEL selector)
     {
         objc_super s = { self, [SuperclassType class] };
-        return getMsgSendSuperFn() (&s, selector);
+        return ObjCMsgSendSuper<Result> (&s, selector);
     }
    #endif
 
