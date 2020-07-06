@@ -833,7 +833,7 @@ private:
 
                 if (targetAttributeKeys.contains ("GCC_PREPROCESSOR_DEFINITIONS"))
                 {
-                    defines.addTokens (targetAttributes["GCC_PREPROCESSOR_DEFINITIONS"], "() ,\t", {});
+                    defines.addTokens (targetAttributes["GCC_PREPROCESSOR_DEFINITIONS"], "(),\t", {});
                     defines.removeEmptyStrings();
                     targetAttributeKeys.removeString ("GCC_PREPROCESSOR_DEFINITIONS");
                 }
@@ -841,7 +841,7 @@ private:
                 out << "target_compile_definitions (" << targetVarName << " PRIVATE" << newLine;
 
                 for (auto& def : defines)
-                    out << "    " << def << newLine;
+                    out << "    " << def.replace ("\\\\\\\"", "\\\"").replace ("\\\\ ", " ") << newLine;
 
                 out << ")" << newLine << newLine;
 
