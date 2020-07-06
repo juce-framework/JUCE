@@ -1180,14 +1180,13 @@ private:
         {
             if (component != nullptr)
             {
-               #if JUCE_WINDOWS || JUCE_LINUX
+               #if JUCE_WINDOWS
                 component->removeFromDesktop();
-                #if JUCE_LINUX
-                 fdCallbackMap.clear();
+               #elif JUCE_LINUX
+                fdCallbackMap.clear();
 
-                 if (auto* runLoop = getHostRunLoop())
-                     runLoop->unregisterEventHandler (this);
-                #endif
+                if (auto* runLoop = getHostRunLoop())
+                    runLoop->unregisterEventHandler (this);
                #else
                 if (macHostWindow != nullptr)
                 {
