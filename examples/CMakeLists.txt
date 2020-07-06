@@ -36,7 +36,10 @@ function(_juce_add_pips)
             "${CMAKE_CURRENT_SOURCE_DIR}/CameraDemo.h"
             "${CMAKE_CURRENT_SOURCE_DIR}/PushNotificationsDemo.h"
             "${CMAKE_CURRENT_SOURCE_DIR}/VideoDemo.h")
-        endif()
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        list(REMOVE_ITEM headers
+            "${CMAKE_CURRENT_SOURCE_DIR}/PushNotificationsDemo.h")
+    endif()
 
     foreach(header IN ITEMS ${headers})
         juce_add_pip(${header} added_target)

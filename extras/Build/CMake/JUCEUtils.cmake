@@ -1961,6 +1961,11 @@ endfunction()
 function(juce_add_console_app target)
     add_executable(${target})
     target_compile_definitions(${target} PRIVATE JUCE_STANDALONE_APPLICATION=1)
+
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        target_compile_definitions(${target} PRIVATE _CONSOLE=1)
+    endif()
+
     _juce_initialise_target(${target} ${ARGN})
 endfunction()
 
