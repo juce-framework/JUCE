@@ -1780,16 +1780,16 @@ public:
     private:
         Point<float> getMousePos (POINTL mousePos) const
         {
-            Point<float> screenPos;
+            auto screenPos = pointFromPOINT ({ mousePos.x, mousePos.y }).toFloat();
 
            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
             auto h = (HWND) peer.getNativeHandle();
 
             if (isPerMonitorDPIAwareWindow (h))
-                screenPos = convertPhysicalScreenPointToLogical (pointFromPOINT ({ mousePos.x, mousePos.y }), h).toFloat();
-            else
+                screenPos = convertPhysicalScreenPointToLogical (screenPos.roundToInt(), h).toFloat();
+           #else
+             screenPos /= static_cast<float> (getGlobalDPI() / USER_DEFAULT_SCREEN_DPI);
            #endif
-                screenPos = pointFromPOINT ({ mousePos.x, mousePos.y }).toFloat() / static_cast<float> (getGlobalDPI() / USER_DEFAULT_SCREEN_DPI);
 
             return peer.getComponent().getLocalPoint (nullptr, screenPos);
         }
