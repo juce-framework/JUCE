@@ -1788,7 +1788,8 @@ public:
             if (isPerMonitorDPIAwareWindow (h))
                 screenPos = convertPhysicalScreenPointToLogical (screenPos.roundToInt(), h).toFloat();
            #else
-             screenPos /= static_cast<float> (getGlobalDPI() / USER_DEFAULT_SCREEN_DPI);
+            if (JUCEApplication::isStandaloneApp())
+                screenPos /= static_cast<float> (getGlobalDPI() / USER_DEFAULT_SCREEN_DPI);
            #endif
 
             return peer.getComponent().getLocalPoint (nullptr, screenPos);
