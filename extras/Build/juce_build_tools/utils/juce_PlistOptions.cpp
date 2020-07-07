@@ -125,13 +125,13 @@ namespace build_tools
         if (cameraPermissionEnabled)
             addPlistDictionaryKey (*dict, "NSCameraUsageDescription", cameraPermissionText);
 
+        if (bluetoothPermissionEnabled)
+            addPlistDictionaryKey (*dict, "NSBluetoothAlwaysUsageDescription", bluetoothPermissionText);
+
         if (iOS)
         {
             if (bluetoothPermissionEnabled)
-            {
-                addPlistDictionaryKey (*dict, "NSBluetoothAlwaysUsageDescription", bluetoothPermissionText);
                 addPlistDictionaryKey (*dict, "NSBluetoothPeripheralUsageDescription", bluetoothPermissionText); // needed for pre iOS 13.0
-            }
 
             addPlistDictionaryKey (*dict, "LSRequiresIPhoneOS", true);
 

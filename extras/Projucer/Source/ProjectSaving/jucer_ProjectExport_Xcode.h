@@ -159,8 +159,8 @@ public:
           cameraPermissionNeededValue                  (settings, Ids::cameraPermissionNeeded,                  getUndoManager()),
           cameraPermissionTextValue                    (settings, Ids::cameraPermissionText,                    getUndoManager(),
                                                         "This app requires access to the camera to function correctly."),
-          iosBluetoothPermissionNeededValue            (settings, Ids::iosBluetoothPermissionNeeded,            getUndoManager()),
-          iosBluetoothPermissionTextValue              (settings, Ids::iosBluetoothPermissionText,              getUndoManager(),
+          bluetoothPermissionNeededValue               (settings, Ids::iosBluetoothPermissionNeeded,            getUndoManager()),
+          bluetoothPermissionTextValue                 (settings, Ids::iosBluetoothPermissionText,              getUndoManager(),
                                                         "This app requires access to Bluetooth to function correctly."),
           sendAppleEventsPermissionNeededValue         (settings, Ids::sendAppleEventsPermissionNeeded, getUndoManager()),
           sendAppleEventsPermissionTextValue           (settings, Ids::sendAppleEventsPermissionText, getUndoManager(),
@@ -251,8 +251,8 @@ public:
     bool isCameraPermissionEnabled() const                  { return cameraPermissionNeededValue.get(); }
     String getCameraPermissionTextString() const            { return cameraPermissionTextValue.get(); }
 
-    bool isBluetoothPermissionEnabled() const               { return iosBluetoothPermissionNeededValue.get(); }
-    String getBluetoothPermissionTextString() const         { return iosBluetoothPermissionTextValue.get(); }
+    bool isBluetoothPermissionEnabled() const               { return bluetoothPermissionNeededValue.get(); }
+    String getBluetoothPermissionTextString() const         { return bluetoothPermissionTextValue.get(); }
 
     bool isSendAppleEventsPermissionEnabled() const         { return sendAppleEventsPermissionNeededValue.get(); }
     String getSendAppleEventsPermissionTextString() const   { return sendAppleEventsPermissionTextValue.get(); }
@@ -505,17 +505,15 @@ public:
                                                             "Camera Access Text", 1024, false),
                    "A short description of why your app requires camera access.");
 
-        if (iOS)
-        {
-            props.add (new ChoicePropertyComponent (iosBluetoothPermissionNeededValue, "Bluetooth Access"),
-                       "Enable this to allow your app to use Bluetooth on iOS 13.0 and above. "
-                       "The user of your app will be prompted to grant Bluetooth access permissions.");
+        props.add (new ChoicePropertyComponent (bluetoothPermissionNeededValue, "Bluetooth Access"),
+                   "Enable this to allow your app to use Bluetooth on iOS 13.0 and above, and macOS 11.0 and above. "
+                   "The user of your app will be prompted to grant Bluetooth access permissions.");
 
-            props.add (new TextPropertyComponentWithEnablement (iosBluetoothPermissionTextValue, iosBluetoothPermissionNeededValue,
-                                                                "Bluetooth Access Text", 1024, false),
-                       "A short description of why your app requires Bluetooth access.");
-        }
-        else
+        props.add (new TextPropertyComponentWithEnablement (bluetoothPermissionTextValue, bluetoothPermissionNeededValue,
+                                                            "Bluetooth Access Text", 1024, false),
+                   "A short description of why your app requires Bluetooth access.");
+
+        if (! iOS)
         {
             props.add (new ChoicePropertyComponent (sendAppleEventsPermissionNeededValue, "Send Apple Events"),
                        "Enable this to allow your app to send Apple events. "
@@ -1924,7 +1922,7 @@ private:
                      hardenedRuntimeValue, hardenedRuntimeOptionsValue,
                      microphonePermissionNeededValue, microphonePermissionsTextValue,
                      cameraPermissionNeededValue, cameraPermissionTextValue,
-                     iosBluetoothPermissionNeededValue, iosBluetoothPermissionTextValue,
+                     bluetoothPermissionNeededValue, bluetoothPermissionTextValue,
                      sendAppleEventsPermissionNeededValue, sendAppleEventsPermissionTextValue,
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
                      iosContentSharingValue, iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,

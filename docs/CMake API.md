@@ -196,10 +196,10 @@ attributes directly to these creation functions, rather than adding them later.
   - The text your app will display when it requests camera permissions.
 
 - `BLUETOOTH_PERMISSION_ENABLED`
-  - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
+  - May be either TRUE or FALSE. Adds the appropriate entries to an app's Info.plist.
 
 - `BLUETOOTH_PERMISSION_TEXT`
-  - The text your iOS app will display when it requests bluetooth permissions.
+  - The text your app will display when it requests bluetooth permissions.
 
 - `SEND_APPLE_EVENTS_PERMISSION_ENABLED`
   - May be either TRUE or FALSE. Enable this to allow your app to send Apple events.
