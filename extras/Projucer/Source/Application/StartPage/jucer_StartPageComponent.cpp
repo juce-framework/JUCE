@@ -150,7 +150,9 @@ static std::unique_ptr<Component> createProjectTemplatesTab (ContentComponent& c
                                                          StartPageTreeHolder::Open::yes);
     holder->setSelectedItem (categories[0], 1);
 
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wredundant-move")
     return std::move (holder);
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 }
 
 //==============================================================================
