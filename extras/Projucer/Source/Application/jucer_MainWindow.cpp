@@ -253,11 +253,8 @@ void MainWindow::moveProject (File newProjectFileToOpen, OpenInIDE openInIDE)
     closeCurrentProject (OpenDocumentManager::SaveIfNeeded::no);
     openFile (newProjectFileToOpen);
 
-    if (currentProject != nullptr)
-        ProjucerApplication::getApp().getCommandManager()
-                                     .invokeDirectly (openInIDE == OpenInIDE::yes ? CommandIDs::saveAndOpenInIDE
-                                                                                  : CommandIDs::saveProject,
-                                                      false);
+    if (currentProject != nullptr && openInIDE == OpenInIDE::yes)
+        ProjucerApplication::getApp().getCommandManager().invokeDirectly (CommandIDs::openInIDE, false);
 }
 
 void MainWindow::setProject (std::unique_ptr<Project> newProject)

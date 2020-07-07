@@ -30,6 +30,8 @@
 static constexpr const char* generatedGroupID = "__jucelibfiles";
 static constexpr const char* generatedGroupUID = "__generatedcode__";
 
+constexpr int jucerFormatVersion = 1;
+
 //==============================================================================
 ProjectSaver::ProjectSaver (Project& p)
     : project (p),
@@ -294,7 +296,7 @@ Result ProjectSaver::saveProject (ProjectExporter* specifiedExporterToSave)
         writeProjects (modules, specifiedExporterToSave);
         runPostExportScript();
 
-        project.writeProjectFile();
+        writeProjectFile();
 
         if (generatedCodeFolder.exists())
         {
@@ -330,6 +332,25 @@ void ProjectSaver::writePluginDefines (MemoryOutputStream& out) const
     out << "*/" << newLine << newLine
         << "#pragma once" << newLine << newLine
         << pluginDefines << newLine;
+}
+
+void ProjectSaver::writeProjectFile()
+{
+    auto root = project.getProjectRoot();
+
+    root.removeProperty ("jucerVersion", nullptr);
+    root.setProperty (Ids::jucerFormatVersion, jucerFormatVersion, nullptr);
+
+    project.updateCachedFileState();
+
+    auto newSerialisedXml = project.serialiseProjectXml (root.createXml());
+    jassert (newSerialisedXml.isNotEmpty());
+
+    if (newSerialisedXml != project.getCachedFileStateContent())
+    {
+        project.getFile().replaceWithText (newSerialisedXml);
+        project.updateCachedFileState();
+    }
 }
 
 void ProjectSaver::writeAppConfig (MemoryOutputStream& out, const OwnedArray<LibraryModule>& modules, const String& userContent)

@@ -475,7 +475,9 @@ public:
 
     //==============================================================================
     bool updateCachedFileState();
-    void writeProjectFile();
+    String getCachedFileStateContent() const noexcept  { return cachedFileState.second; }
+
+    String serialiseProjectXml (std::unique_ptr<XmlElement>) const;
 
     //==============================================================================
     String getUniqueTargetFolderSuffixForExporter (const Identifier& exporterIdentifier, const String& baseTargetFolder);
@@ -566,7 +568,6 @@ private:
     std::pair<Time, String> cachedFileState;
 
     void saveAndMoveTemporaryProject (bool openInIDE);
-    String serialiseProjectXml (std::unique_ptr<XmlElement>) const;
 
     //==============================================================================
     friend class Item;

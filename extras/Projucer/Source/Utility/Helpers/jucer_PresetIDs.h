@@ -370,6 +370,7 @@ namespace Ids
     DECLARE_ID (postExportShellCommandWin);
     DECLARE_ID (liveBuildEnabled);
     DECLARE_ID (guiEditorEnabled);
+    DECLARE_ID (jucerFormatVersion);
 
     const Identifier ID ("id");
     const Identifier ID_uppercase ("ID");

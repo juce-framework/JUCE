@@ -970,7 +970,8 @@ void Project::saveAndMoveTemporaryProject (bool openInIDE)
     auto newDirectory = newParentDirectory.getChildFile (tempDirectory.getFileName());
     auto oldJucerFileName = getFile().getFileName();
 
-    writeProjectFile();
+    ProjectSaver saver (*this);
+    saver.save();
 
     tempDirectory.copyDirectoryTo (newDirectory);
     tempDirectory.deleteRecursively();
@@ -1089,20 +1090,6 @@ bool Project::updateCachedFileState()
 
     cachedFileState.second = serialisedFileContent;
     return true;
-}
-
-void Project::writeProjectFile()
-{
-    updateCachedFileState();
-
-    auto newSerialisedXml = serialiseProjectXml (getProjectRoot().createXml());
-    jassert (newSerialisedXml.isNotEmpty());
-
-    if (newSerialisedXml != cachedFileState.second)
-    {
-        getFile().replaceWithText (newSerialisedXml);
-        cachedFileState = { getFile().getLastModificationTime(), newSerialisedXml };
-    }
 }
 
 //==============================================================================

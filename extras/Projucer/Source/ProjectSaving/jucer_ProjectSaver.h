@@ -95,7 +95,7 @@ private:
     void writePluginDefines();
     void writeAppConfigFile (const OwnedArray<LibraryModule>& modules, const String& userContent);
 
-    void writeMainProjectFile();
+    void writeProjectFile();
     void writeAppConfig (MemoryOutputStream& outStream, const OwnedArray<LibraryModule>& modules, const String& userContent);
     void writeAppHeader (MemoryOutputStream& outStream, const OwnedArray<LibraryModule>& modules);
     void writeAppHeader (const OwnedArray<LibraryModule>& modules);
