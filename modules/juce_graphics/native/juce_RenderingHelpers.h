@@ -553,6 +553,46 @@ namespace GradientPixelIterators
 
         JUCE_DECLARE_NON_COPYABLE (TransformedRadial)
     };
+
+    //==============================================================================
+    /** Iterates the colour of pixels in a conical gradient */
+    struct Conical
+    {
+        Conical (const ColourGradient& gradient, const AffineTransform&,
+                 const PixelARGB* colours, int numColours)
+            : lookupTable (colours),
+              numEntries (numColours),
+              centre (gradient.point1),
+              offsetAngle (gradient.point1.getAngleToPoint(gradient.point2))
+        {
+            jassert (numColours >= 0);
+        }
+
+        forcedinline void setY (int newY) noexcept
+        {
+            y = static_cast<float>(newY);
+        }
+
+        inline PixelARGB getPixel (int px) const noexcept
+        {
+            auto angle = centre.getAngleToPoint({ static_cast<float>(px), y });
+            angle -= offsetAngle;
+
+            if (angle < 0.f)
+                angle += twoPi;
+
+            return lookupTable[jlimit(0, numEntries, roundToInt(numEntries * angle / twoPi))];
+        }
+
+        const PixelARGB* const lookupTable;
+        const int numEntries;
+        const Point<float> centre;
+        const float offsetAngle;
+        float y;
+        const float twoPi = MathConstants<float>::twoPi;
+
+        JUCE_DECLARE_NON_COPYABLE (Conical)
+    };
 }
 
 #define JUCE_PERFORM_PIXEL_OP_LOOP(op) \
@@ -1577,6 +1617,11 @@ namespace EdgeTableFillers
                 EdgeTableFillers::Gradient<DestPixelType, GradientPixelIterators::TransformedRadial> renderer (destData, g, transform, lookupTable, numLookupEntries);
                 iter.iterate (renderer);
             }
+        }
+        else if (g.isConical)
+        {
+            EdgeTableFillers::Gradient<DestPixelType, GradientPixelIterators::Conical> renderer (destData, g, transform, lookupTable, numLookupEntries);
+            iter.iterate (renderer);
         }
         else
         {

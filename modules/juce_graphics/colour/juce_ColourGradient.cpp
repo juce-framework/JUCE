@@ -37,12 +37,13 @@ ColourGradient::ColourGradient() noexcept  : isRadial (false)
 }
 
 ColourGradient::ColourGradient (const ColourGradient& other)
-    : point1 (other.point1), point2 (other.point2), isRadial (other.isRadial), colours (other.colours)
+    : point1 (other.point1), point2 (other.point2), isRadial (other.isRadial),
+      isConical (other.isConical), colours (other.colours)
 {}
 
 ColourGradient::ColourGradient (ColourGradient&& other) noexcept
     : point1 (other.point1), point2 (other.point2), isRadial (other.isRadial),
-      colours (std::move (other.colours))
+      isConical (other.isConical), colours (std::move (other.colours))
 {}
 
 ColourGradient& ColourGradient::operator= (const ColourGradient& other)
@@ -50,6 +51,7 @@ ColourGradient& ColourGradient::operator= (const ColourGradient& other)
     point1 = other.point1;
     point2 = other.point2;
     isRadial = other.isRadial;
+    isConical = other.isConical;
     colours = other.colours;
     return *this;
 }
@@ -59,23 +61,34 @@ ColourGradient& ColourGradient::operator= (ColourGradient&& other) noexcept
     point1 = other.point1;
     point2 = other.point2;
     isRadial = other.isRadial;
+    isConical = other.isConical;
     colours = std::move (other.colours);
     return *this;
 }
 
 ColourGradient::ColourGradient (Colour colour1, float x1, float y1,
-                                Colour colour2, float x2, float y2, bool radial)
+                                Colour colour2, float x2, float y2,
+                                bool radial, bool conical)
     : ColourGradient (colour1, Point<float> (x1, y1),
-                      colour2, Point<float> (x2, y2), radial)
+                      colour2, Point<float> (x2, y2),
+                      radial, conical)
 {
 }
 
 ColourGradient::ColourGradient (Colour colour1, Point<float> p1,
-                                Colour colour2, Point<float> p2, bool radial)
+                                Colour colour2, Point<float> p2,
+                                bool radial, bool conical)
     : point1 (p1),
       point2 (p2),
-      isRadial (radial)
+      isRadial (radial),
+      isConical (conical)
 {
+    /** A gradient can't be radial AND conical.
+        Either isRadial or isConical can be set to true (or neither) but not
+        both!
+    */
+    jassert(!(isRadial && isConical));
+
     colours.add (ColourPoint { 0.0, colour1 },
                  ColourPoint { 1.0, colour2 });
 }

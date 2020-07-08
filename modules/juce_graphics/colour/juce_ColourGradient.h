@@ -58,6 +58,9 @@ public:
         If isRadial is true, the colours form a circular gradient with (x1, y1) at
         its centre.
 
+        If instead isConical is true, the colours form a conical gradient with
+        (x1, y1) at its centre and (x2, y2) as the start/end position.
+
         The alpha transparencies of the colours are used, so note that
         if you blend from transparent to a solid colour, the RGB of the transparent
         colour will become visible in parts of the gradient. e.g. blending
@@ -69,7 +72,7 @@ public:
     */
     ColourGradient (Colour colour1, float x1, float y1,
                     Colour colour2, float x2, float y2,
-                    bool isRadial);
+                    bool isRadial, bool isConical = false);
 
     /** Creates a gradient object.
 
@@ -78,6 +81,9 @@ public:
 
         If isRadial is true, the colours form a circular gradient with point1 at
         its centre.
+
+        If instead isConical is true, the colours form a conical gradient with
+        point1 at its centre and point2 as the start/end position.
 
         The alpha transparencies of the colours are used, so note that
         if you blend from transparent to a solid colour, the RGB of the transparent
@@ -90,7 +96,7 @@ public:
     */
     ColourGradient (Colour colour1, Point<float> point1,
                     Colour colour2, Point<float> point2,
-                    bool isRadial);
+                    bool isRadial, bool isConical = false);
 
     //==============================================================================
     /** Creates a vertical linear gradient between two Y coordinates */
@@ -197,9 +203,18 @@ public:
     /** If true, the gradient should be filled circularly, centred around
         point1, with point2 defining a point on the circumference.
 
-        If false, the gradient is linear between the two points.
+        If false and isConical is also false, the gradient is linear between the
+        two points.
     */
     bool isRadial;
+
+    /** If true, the gradient should be filled conically, centred around point1,
+        with point2 defining the start/end position.
+
+        If false and isRadial is also false, the gradient is linear between the
+        two points.
+    */
+    bool isConical;
 
     bool operator== (const ColourGradient&) const noexcept;
     bool operator!= (const ColourGradient&) const noexcept;
