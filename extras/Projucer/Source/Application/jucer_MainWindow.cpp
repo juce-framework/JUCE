@@ -666,7 +666,8 @@ bool MainWindowList::openFile (const File& file, bool openInBackground)
         }
     }
 
-    if (file.hasFileExtension (Project::projectFileExtension))
+    if (file.hasFileExtension (Project::projectFileExtension)
+        || isPIPFile (file))
     {
         WeakReference<Component> previousFrontWindow (getFrontmostWindow());
 

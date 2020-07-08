@@ -707,7 +707,7 @@ void ProjucerApplication::findAndLaunchExample (int selectedIndex)
     // example doesn't exist?
     jassert (example != File());
 
-    mainWindowList.openFile (example);
+    openFile (example);
 }
 
 //==============================================================================
@@ -1176,7 +1176,7 @@ void ProjucerApplication::createNewProjectFromClipboard()
     {
         errorString = "Clipboard does not contain a valid PIP.";
     }
-    else if (! mainWindowList.openFile (tempFile))
+    else if (! openFile (tempFile))
     {
         errorString = "Couldn't create project from clipboard contents.";
         mainWindowList.closeWindow (mainWindowList.windows.getLast());
