@@ -216,6 +216,22 @@ struct ScalingHelpers
                                                roundToInt ((float) pos.getHeight() * scale)) : pos;
     }
 
+    static Rectangle<float> unscaledScreenPosToScaled (float scale, Rectangle<float> pos) noexcept
+    {
+        return scale != 1.0f ? Rectangle<float> (pos.getX() / scale,
+                                                 pos.getY() / scale,
+                                                 pos.getWidth() / scale,
+                                                 pos.getHeight() / scale) : pos;
+    }
+
+    static Rectangle<float> scaledScreenPosToUnscaled (float scale, Rectangle<float> pos) noexcept
+    {
+        return scale != 1.0f ? Rectangle<float> (pos.getX() * scale,
+                                                 pos.getY() * scale,
+                                                 pos.getWidth() * scale,
+                                                 pos.getHeight() * scale) : pos;
+    }
+
     template <typename PointOrRect>
     static PointOrRect unscaledScreenPosToScaled (PointOrRect pos) noexcept
     {
@@ -1051,13 +1067,15 @@ int Component::getScreenY() const                       { return getScreenPositi
 Point<int>     Component::getScreenPosition() const     { return localPointToGlobal (Point<int>()); }
 Rectangle<int> Component::getScreenBounds() const       { return localAreaToGlobal (getLocalBounds()); }
 
-Point<int>     Component::getLocalPoint (const Component* source, Point<int> point) const     { return ComponentHelpers::convertCoordinate (this, source, point); }
-Point<float>   Component::getLocalPoint (const Component* source, Point<float> point) const   { return ComponentHelpers::convertCoordinate (this, source, point); }
-Rectangle<int> Component::getLocalArea  (const Component* source, Rectangle<int> area) const  { return ComponentHelpers::convertCoordinate (this, source, area); }
+Point<int>       Component::getLocalPoint (const Component* source, Point<int> point) const       { return ComponentHelpers::convertCoordinate (this, source, point); }
+Point<float>     Component::getLocalPoint (const Component* source, Point<float> point) const     { return ComponentHelpers::convertCoordinate (this, source, point); }
+Rectangle<int>   Component::getLocalArea  (const Component* source, Rectangle<int> area) const    { return ComponentHelpers::convertCoordinate (this, source, area); }
+Rectangle<float> Component::getLocalArea  (const Component* source, Rectangle<float> area) const  { return ComponentHelpers::convertCoordinate (this, source, area); }
 
-Point<int>     Component::localPointToGlobal (Point<int> point) const     { return ComponentHelpers::convertCoordinate (nullptr, this, point); }
-Point<float>   Component::localPointToGlobal (Point<float> point) const   { return ComponentHelpers::convertCoordinate (nullptr, this, point); }
-Rectangle<int> Component::localAreaToGlobal  (Rectangle<int> area) const  { return ComponentHelpers::convertCoordinate (nullptr, this, area); }
+Point<int>       Component::localPointToGlobal (Point<int> point) const       { return ComponentHelpers::convertCoordinate (nullptr, this, point); }
+Point<float>     Component::localPointToGlobal (Point<float> point) const     { return ComponentHelpers::convertCoordinate (nullptr, this, point); }
+Rectangle<int>   Component::localAreaToGlobal  (Rectangle<int> area) const    { return ComponentHelpers::convertCoordinate (nullptr, this, area); }
+Rectangle<float> Component::localAreaToGlobal  (Rectangle<float> area) const  { return ComponentHelpers::convertCoordinate (nullptr, this, area); }
 
 //==============================================================================
 void Component::setBounds (int x, int y, int w, int h)
