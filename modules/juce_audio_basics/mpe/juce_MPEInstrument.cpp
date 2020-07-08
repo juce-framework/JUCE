@@ -491,7 +491,7 @@ void MPEInstrument::updateNoteTotalPitchbend (MPENote& note)
 {
     if (legacyMode.isEnabled)
     {
-        note.totalPitchbendInSemitones = note.pitchbend.asSignedFloat() * legacyMode.pitchbendRange;
+        note.totalPitchbendInSemitones = note.pitchbend.asSignedFloat() * (float) legacyMode.pitchbendRange;
     }
     else
     {
@@ -516,11 +516,11 @@ void MPEInstrument::updateNoteTotalPitchbend (MPENote& note)
         auto notePitchbendInSemitones = 0.0f;
 
         if (zone.isUsingChannelAsMemberChannel (note.midiChannel))
-            notePitchbendInSemitones = note.pitchbend.asSignedFloat() * zone.perNotePitchbendRange;
+            notePitchbendInSemitones = note.pitchbend.asSignedFloat() * (float) zone.perNotePitchbendRange;
 
         auto masterPitchbendInSemitones = pitchbendDimension.lastValueReceivedOnChannel[zone.getMasterChannel() - 1]
                                                             .asSignedFloat()
-                                          * zone.masterPitchbendRange;
+                                          * (float) zone.masterPitchbendRange;
 
         note.totalPitchbendInSemitones = notePitchbendInSemitones + masterPitchbendInSemitones;
     }

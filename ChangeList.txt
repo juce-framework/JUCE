@@ -3,6 +3,20 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 6.0.1
+  - Fixed a bug in the Projucer GUI editor causing existing code to be overwritten
+  - Updated Android Oboe to 1.4.2
+  - Bumped default Android Studio gradle and plugin versions to the latest
+  - Fixed some Android Oboe and OpenSL issues
+  - Fixed some Doxygen parsing issues
+  - Fixed MIDI input/output bus enablement in VST3 plug-ins
+  - Improved Windows Clang compatibility
+  - Fixed GCC 4.8 and 5.0 compatibility
+  - Fixed some VST3 build errors and warnings on Linux
+  - Fixed dynamically loaded X11 library names on Linux
+  - Fixed Projucer CLion exporter generated CMakeLists.txt
+  - Fixed drag and drop for non-DPI aware plug-ins on Windows
+
 Version 6.0.0
   - Added support for building JUCE projects with CMake
   - Revamped the DSP module

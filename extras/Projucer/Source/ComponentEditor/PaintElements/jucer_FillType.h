@@ -407,7 +407,7 @@ private:
 
                     Graphics g (image);
                     g.fillCheckerBoard (image.getBounds().toFloat(),
-                                        image.getWidth() * 0.5f, image.getHeight() * 0.5f,
+                                        (float) image.getWidth() * 0.5f, (float) image.getHeight() * 0.5f,
                                         Colours::white, Colours::lightgrey);
 
                     g.setFont (12.0f);

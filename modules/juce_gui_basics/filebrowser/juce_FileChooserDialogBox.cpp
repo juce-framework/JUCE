@@ -63,7 +63,7 @@ public:
         auto area = getLocalBounds();
 
         text.createLayout (getLookAndFeel().createFileChooserHeaderText (getName(), instructions),
-                           getWidth() - 12.0f);
+                           (float) getWidth() - 12.0f);
 
         area.removeFromTop (roundToInt (text.getHeight()) + 10);
 

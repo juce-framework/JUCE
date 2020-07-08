@@ -33,7 +33,7 @@ public:
     HyperlinkButtonHandler()
         : ButtonHandler ("Hyperlink Button", "juce::HyperlinkButton", typeid (HyperlinkButton), 150, 24)
     {
-        registerColour (HyperlinkButton::textColourId, "text", "textCol");
+        registerColour (juce::HyperlinkButton::textColourId, "text", "textCol");
     }
 
     Component* createNewComponent (JucerDocument*) override

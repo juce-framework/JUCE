@@ -28,8 +28,8 @@ RelativeTime::RelativeTime (const RelativeTime& other) noexcept   : numSeconds (
 RelativeTime::~RelativeTime() noexcept {}
 
 //==============================================================================
-RelativeTime RelativeTime::milliseconds (int milliseconds) noexcept         { return RelativeTime (milliseconds * 0.001); }
-RelativeTime RelativeTime::milliseconds (int64 milliseconds) noexcept       { return RelativeTime (milliseconds * 0.001); }
+RelativeTime RelativeTime::milliseconds (int milliseconds) noexcept         { return RelativeTime ((double) milliseconds * 0.001); }
+RelativeTime RelativeTime::milliseconds (int64 milliseconds) noexcept       { return RelativeTime ((double) milliseconds * 0.001); }
 RelativeTime RelativeTime::seconds (double s) noexcept                      { return RelativeTime (s); }
 RelativeTime RelativeTime::minutes (double numberOfMinutes) noexcept        { return RelativeTime (numberOfMinutes * 60.0); }
 RelativeTime RelativeTime::hours (double numberOfHours) noexcept            { return RelativeTime (numberOfHours * (60.0 * 60.0)); }

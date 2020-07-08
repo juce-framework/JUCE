@@ -256,8 +256,8 @@ private:
     {
         auto total = currentCanvas.getLimits();
 
-        return { getWidth()  * (p.x - total.getX()) / total.getWidth(),
-                 getHeight() * (p.y - total.getY()) / total.getHeight() };
+        return { (float) getWidth()  * (p.x - total.getX()) / total.getWidth(),
+                 (float) getHeight() * (p.y - total.getY()) / total.getHeight() };
     }
 
     Rectangle<float> virtualSpaceToLocal (Rectangle<float> p) const
@@ -270,8 +270,8 @@ private:
     {
         auto total = currentCanvas.getLimits();
 
-        return { total.getX() + total.getWidth() * (p.x / getWidth()),
-                 total.getY() + total.getHeight() * (p.y / getHeight()) };
+        return { total.getX() + total.getWidth()  * (p.x / (float) getWidth()),
+                 total.getY() + total.getHeight() * (p.y / (float) getHeight()) };
     }
 
     //==============================================================================

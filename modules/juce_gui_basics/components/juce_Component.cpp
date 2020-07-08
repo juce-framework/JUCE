@@ -202,18 +202,18 @@ struct ScalingHelpers
     // judder when moving windows
     static Rectangle<int> unscaledScreenPosToScaled (float scale, Rectangle<int> pos) noexcept
     {
-        return scale != 1.0f ? Rectangle<int> (roundToInt (pos.getX() / scale),
-                                               roundToInt (pos.getY() / scale),
-                                               roundToInt (pos.getWidth() / scale),
-                                               roundToInt (pos.getHeight() / scale)) : pos;
+        return scale != 1.0f ? Rectangle<int> (roundToInt ((float) pos.getX() / scale),
+                                               roundToInt ((float) pos.getY() / scale),
+                                               roundToInt ((float) pos.getWidth() / scale),
+                                               roundToInt ((float) pos.getHeight() / scale)) : pos;
     }
 
     static Rectangle<int> scaledScreenPosToUnscaled (float scale, Rectangle<int> pos) noexcept
     {
-        return scale != 1.0f ? Rectangle<int> (roundToInt (pos.getX() * scale),
-                                               roundToInt (pos.getY() * scale),
-                                               roundToInt (pos.getWidth() * scale),
-                                               roundToInt (pos.getHeight() * scale)) : pos;
+        return scale != 1.0f ? Rectangle<int> (roundToInt ((float) pos.getX() * scale),
+                                               roundToInt ((float) pos.getY() * scale),
+                                               roundToInt ((float) pos.getWidth() * scale),
+                                               roundToInt ((float) pos.getHeight() * scale)) : pos;
     }
 
     template <typename PointOrRect>
@@ -808,8 +808,8 @@ struct StandardCachedComponentImage  : public CachedComponentImage
         validArea = compBounds;
 
         g.setColour (Colours::black.withAlpha (owner.getAlpha()));
-        g.drawImageTransformed (image, AffineTransform::scale (compBounds.getWidth()  / (float) imageBounds.getWidth(),
-                                                               compBounds.getHeight() / (float) imageBounds.getHeight()), false);
+        g.drawImageTransformed (image, AffineTransform::scale ((float) compBounds.getWidth()  / (float) imageBounds.getWidth(),
+                                                               (float) compBounds.getHeight() / (float) imageBounds.getHeight()), false);
     }
 
     bool invalidateAll() override                            { validArea.clear(); return true; }
@@ -1026,8 +1026,8 @@ bool Component::isAlwaysOnTop() const noexcept
 }
 
 //==============================================================================
-int Component::proportionOfWidth  (float proportion) const noexcept   { return roundToInt (proportion * boundsRelativeToParent.getWidth()); }
-int Component::proportionOfHeight (float proportion) const noexcept   { return roundToInt (proportion * boundsRelativeToParent.getHeight()); }
+int Component::proportionOfWidth  (float proportion) const noexcept   { return roundToInt (proportion * (float) boundsRelativeToParent.getWidth()); }
+int Component::proportionOfHeight (float proportion) const noexcept   { return roundToInt (proportion * (float) boundsRelativeToParent.getHeight()); }
 
 int Component::getParentWidth() const noexcept
 {
@@ -1179,8 +1179,8 @@ void Component::setCentrePosition (int x, int y)        { setCentrePosition ({ x
 
 void Component::setCentreRelative (float x, float y)
 {
-    setCentrePosition (roundToInt (getParentWidth() * x),
-                       roundToInt (getParentHeight() * y));
+    setCentrePosition (roundToInt ((float) getParentWidth()  * x),
+                       roundToInt ((float) getParentHeight() * y));
 }
 
 void Component::setBoundsRelative (Rectangle<float> target)
@@ -1854,8 +1854,8 @@ void Component::internalRepaintUnchecked (Rectangle<int> area, bool isEntireComp
             {
                 // Tweak the scaling so that the component's integer size exactly aligns with the peer's scaled size
                 auto peerBounds = peer->getBounds();
-                auto scaled = area * Point<float> (peerBounds.getWidth()  / (float) getWidth(),
-                                                   peerBounds.getHeight() / (float) getHeight());
+                auto scaled = area * Point<float> ((float) peerBounds.getWidth()  / (float) getWidth(),
+                                                   (float) peerBounds.getHeight() / (float) getHeight());
 
                 peer->repaint (affineTransform != nullptr ? scaled.transformedBy (*affineTransform) : scaled);
             }
@@ -1981,8 +1981,8 @@ void Component::paintEntireComponent (Graphics& g, bool ignoreAlphaLevel)
                            scaledBounds.getWidth(), scaledBounds.getHeight(), ! flags.opaqueFlag);
         {
             Graphics g2 (effectImage);
-            g2.addTransform (AffineTransform::scale (scaledBounds.getWidth()  / (float) getWidth(),
-                                                     scaledBounds.getHeight() / (float) getHeight()));
+            g2.addTransform (AffineTransform::scale ((float) scaledBounds.getWidth()  / (float) getWidth(),
+                                                     (float) scaledBounds.getHeight() / (float) getHeight()));
             paintComponentAndChildren (g2);
         }
 
@@ -2032,16 +2032,16 @@ Image Component::createComponentSnapshot (Rectangle<int> areaToGrab,
     if (r.isEmpty())
         return {};
 
-    auto w = roundToInt (scaleFactor * r.getWidth());
-    auto h = roundToInt (scaleFactor * r.getHeight());
+    auto w = roundToInt (scaleFactor * (float) r.getWidth());
+    auto h = roundToInt (scaleFactor * (float) r.getHeight());
 
     Image image (flags.opaqueFlag ? Image::RGB : Image::ARGB, w, h, true);
 
     Graphics g (image);
 
     if (w != getWidth() || h != getHeight())
-        g.addTransform (AffineTransform::scale (w / (float) r.getWidth(),
-                                                h / (float) r.getHeight()));
+        g.addTransform (AffineTransform::scale ((float) w / (float) r.getWidth(),
+                                                (float) h / (float) r.getHeight()));
     g.setOrigin (-r.getPosition());
 
     paintEntireComponent (g, true);

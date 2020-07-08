@@ -755,8 +755,9 @@ void Project::updateLicenseWarning()
     if (hasIncompatibleLicenseTypeAndSplashScreenSetting())
     {
         ProjectMessages::MessageAction action;
+        auto currentLicenseState = ProjucerApplication::getApp().getLicenseController().getCurrentState();
 
-        if (ProjucerApplication::getApp().getLicenseController().getCurrentState().isOldLicense())
+        if (currentLicenseState.isSignedIn() && (! currentLicenseState.canUnlockFullFeatures() || currentLicenseState.isOldLicense()))
             action = { "Upgrade", [] { URL ("https://juce.com/get-juce").launchInDefaultBrowser(); } };
         else
             action = { "Sign in", [this] { ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (getFile())->showLoginFormOverlay(); } };
@@ -969,7 +970,8 @@ void Project::saveAndMoveTemporaryProject (bool openInIDE)
     auto newDirectory = newParentDirectory.getChildFile (tempDirectory.getFileName());
     auto oldJucerFileName = getFile().getFileName();
 
-    writeProjectFile();
+    ProjectSaver saver (*this);
+    saver.save();
 
     tempDirectory.copyDirectoryTo (newDirectory);
     tempDirectory.deleteRecursively();
@@ -1088,20 +1090,6 @@ bool Project::updateCachedFileState()
 
     cachedFileState.second = serialisedFileContent;
     return true;
-}
-
-void Project::writeProjectFile()
-{
-    updateCachedFileState();
-
-    auto newSerialisedXml = serialiseProjectXml (getProjectRoot().createXml());
-    jassert (newSerialisedXml.isNotEmpty());
-
-    if (newSerialisedXml != cachedFileState.second)
-    {
-        getFile().replaceWithText (newSerialisedXml);
-        cachedFileState = { getFile().getLastModificationTime(), newSerialisedXml };
-    }
 }
 
 //==============================================================================
@@ -1267,7 +1255,7 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 
     props.add (new ChoicePropertyComponent (displaySplashScreenValue, "Display the JUCE Splash Screen (required for closed source applications without an Indie or Pro JUCE license)"),
                                             "This option controls the display of the standard JUCE splash screen. "
-                                            "In accordance with the terms of the JUCE 5 End-Use License Agreement (www.juce.com/juce-5-licence), "
+                                            "In accordance with the terms of the JUCE 6 End-Use License Agreement (www.juce.com/juce-6-licence), "
                                             "this option can only be disabled for closed source applications if you have a JUCE Indie or Pro "
                                             "license, or are using JUCE under the GPL v3 license.");
 

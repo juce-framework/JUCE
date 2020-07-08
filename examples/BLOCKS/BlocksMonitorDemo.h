@@ -188,11 +188,11 @@ public:
                     case e::north:
                         return { 0.0f, static_cast<float> (port.index) };
                     case e::east:
-                        return { static_cast<float> (-1.0f - port.index), static_cast<float> (block->getWidth()) };
+                        return { static_cast<float> (-1.0f - (float) port.index), static_cast<float> (block->getWidth()) };
                     case e::south:
-                        return { static_cast<float> (0.0f - block->getHeight()), static_cast<float> (port.index) };
+                        return { static_cast<float> (0.0f - (float) block->getHeight()), static_cast<float> (port.index) };
                     case e::west:
-                        return { static_cast<float> (-1.0f - port.index), 0.0f };
+                        return { static_cast<float> (-1.0f - (float) port.index), 0.0f };
                     default:
                         break;
                 }
@@ -204,13 +204,13 @@ public:
                 switch (port.edge)
                 {
                     case e::north:
-                        return { static_cast<float> (-1.0f - port.index), 0.0f };
+                        return { static_cast<float> (-1.0f - (float) port.index), 0.0f };
                     case e::east:
-                        return { static_cast<float> (0.0f - block->getWidth()), static_cast<float> (-1.0f - port.index) };
+                        return { static_cast<float> (0.0f - (float) block->getWidth()), static_cast<float> (-1.0f - (float) port.index) };
                     case e::south:
-                        return { static_cast<float> (-1.0f - port.index), static_cast<float> (0.0f - block->getHeight()) };
+                        return { static_cast<float> (-1.0f - (float) port.index), static_cast<float> (0.0f - (float) block->getHeight()) };
                     case e::west:
-                        return { 0.0f, static_cast<float> (-1.0f - port.index) };
+                        return { 0.0f, static_cast<float> (-1.0f - (float) port.index) };
                     default:
                         break;
                 }
@@ -222,11 +222,11 @@ public:
                 switch (port.edge)
                 {
                     case e::north:
-                        return { 0.0f, static_cast<float> (-1.0f - port.index) };
+                        return { 0.0f, static_cast<float> (-1.0f - (float) port.index) };
                     case e::east:
-                        return { static_cast<float> (port.index), static_cast<float> (0 - block->getWidth()) };
+                        return { static_cast<float> (port.index), static_cast<float> (0 - (float) block->getWidth()) };
                     case e::south:
-                        return { static_cast<float> (block->getHeight()), static_cast<float> (-1.0f - port.index) };
+                        return { static_cast<float> (block->getHeight()), static_cast<float> (-1.0f - (float) port.index) };
                     case e::west:
                         return { static_cast<float> (port.index), 0.0f };
                     default:
@@ -309,10 +309,10 @@ public:
         g.fillAll (Colours::black);
 
         // size ration between physical and on-screen blocks
-        Point<float> ratio (r.getWidth()  / block->getWidth(),
-                            r.getHeight() / block->getHeight());
+        Point<float> ratio (r.getWidth()  / (float) block->getWidth(),
+                            r.getHeight() / (float) block->getHeight());
 
-        auto maxCircleSize = block->getWidth() / 3.0f;
+        auto maxCircleSize = (float) block->getWidth() / 3.0f;
 
         // iterate over the list of current touches and draw them on the onscreen Block
         for (auto touch : touches)
@@ -367,7 +367,7 @@ public:
         addAndMakeVisible (roundedRectangleButton);
 
         // Display the battery level on the LEDRow
-        auto numLedsToTurnOn = static_cast<int> (numLeds * block->getBatteryLevel());
+        auto numLedsToTurnOn = static_cast<int> ((float) numLeds * block->getBatteryLevel());
 
         // add LEDs
         for (auto i = 0; i < numLeds; ++i)
@@ -442,7 +442,7 @@ public:
     void handleBatteryLevelUpdate (float batteryLevel) override
     {
         // Update the number of LEDs that are on to represent the battery level
-        auto numLedsOn = static_cast<int> (numLeds * batteryLevel);
+        auto numLedsOn = static_cast<int> ((float) numLeds * batteryLevel);
 
         if (numLedsOn != previousNumLedsOn)
             for (auto i = 0; i < numLeds; ++i)
@@ -600,11 +600,11 @@ public:
         noBlocksLabel.setJustificationType (Justification::centred);
 
         zoomOutButton.setButtonText ("+");
-        zoomOutButton.onClick = [this] { blockUnitInPixels = (int) (blockUnitInPixels * 1.05f); resized(); };
+        zoomOutButton.onClick = [this] { blockUnitInPixels = (int) ((float) blockUnitInPixels * 1.05f); resized(); };
         zoomOutButton.setAlwaysOnTop (true);
 
         zoomInButton.setButtonText ("-");
-        zoomInButton.onClick = [this] { blockUnitInPixels = (int) (blockUnitInPixels * 0.95f); resized(); };
+        zoomInButton.onClick = [this] { blockUnitInPixels = (int) ((float) blockUnitInPixels * 0.95f); resized(); };
         zoomInButton.setAlwaysOnTop (true);
 
         // Register BlocksMonitorDemo as a listener to the PhysicalTopologySource object
@@ -670,8 +670,8 @@ public:
                 else if (rotation == 90)
                     blockSize = blockComponent->block->getHeight();
 
-                if (topLeft.x - blockSize < maxArea.getX())
-                    maxArea.setX (topLeft.x - blockSize);
+                if (topLeft.x - (float) blockSize < maxArea.getX())
+                    maxArea.setX (topLeft.x - (float) blockSize);
 
                 blockSize = 0;
                 if (rotation == 0)
@@ -679,8 +679,8 @@ public:
                 else if (rotation == 270)
                     blockSize = blockComponent->block->getHeight();
 
-                if (topLeft.x + blockSize > maxArea.getRight())
-                    maxArea.setWidth (topLeft.x + blockSize);
+                if (topLeft.x + (float) blockSize > maxArea.getRight())
+                    maxArea.setWidth (topLeft.x + (float) blockSize);
 
                 blockSize = 0;
                 if (rotation == 180)
@@ -688,8 +688,8 @@ public:
                 else if (rotation == 270)
                     blockSize = blockComponent->block->getWidth();
 
-                if (topLeft.y - blockSize < maxArea.getY())
-                    maxArea.setY (topLeft.y - blockSize);
+                if (topLeft.y - (float) blockSize < maxArea.getY())
+                    maxArea.setY (topLeft.y - (float) blockSize);
 
                 blockSize = 0;
                 if (rotation == 0)
@@ -697,14 +697,14 @@ public:
                 else if (rotation == 90)
                     blockSize = blockComponent->block->getWidth();
 
-                if (topLeft.y + blockSize > maxArea.getBottom())
-                    maxArea.setHeight (topLeft.y + blockSize);
+                if (topLeft.y + (float) blockSize > maxArea.getBottom())
+                    maxArea.setHeight (topLeft.y + (float) blockSize);
             }
 
             auto totalWidth  = std::abs (maxArea.getX()) + maxArea.getWidth();
             auto totalHeight = std::abs (maxArea.getY()) + maxArea.getHeight();
 
-            blockUnitInPixels = static_cast<int> (jmin ((getHeight() / totalHeight) - 50, (getWidth() / totalWidth) - 50));
+            blockUnitInPixels = static_cast<int> (jmin (((float) getHeight() / totalHeight) - 50, ((float) getWidth() / totalWidth) - 50));
 
             masterBlockComponent->centreWithSize (masterBlockComponent->block->getWidth()  * blockUnitInPixels,
                                                   masterBlockComponent->block->getHeight() * blockUnitInPixels);
@@ -721,8 +721,8 @@ public:
             if (blockComponent == masterBlockComponent)
                 continue;
 
-            blockComponent->setBounds (masterBlockComponent->getX() + static_cast<int> (blockComponent->topLeft.x * blockUnitInPixels),
-                                       masterBlockComponent->getY() + static_cast<int> (blockComponent->topLeft.y * blockUnitInPixels),
+            blockComponent->setBounds (masterBlockComponent->getX() + static_cast<int> (blockComponent->topLeft.x * (float) blockUnitInPixels),
+                                       masterBlockComponent->getY() + static_cast<int> (blockComponent->topLeft.y * (float) blockUnitInPixels),
                                        blockComponent->block->getWidth()  * blockUnitInPixels,
                                        blockComponent->block->getHeight() * blockUnitInPixels);
 

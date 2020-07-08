@@ -1474,7 +1474,7 @@ private:
 
         output->writeShort ((short) numChannels);
         output->writeInt ((int) sampleRate);
-        output->writeInt ((int) (bytesPerFrame * sampleRate)); // nAvgBytesPerSec
+        output->writeInt ((int) ((double) bytesPerFrame * sampleRate)); // nAvgBytesPerSec
         output->writeShort ((short) bytesPerFrame); // nBlockAlign
         output->writeShort ((short) bitsPerSample); // wBitsPerSample
 

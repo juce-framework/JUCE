@@ -35,7 +35,7 @@
 
   ID:                 juce_osc
   vendor:             juce
-  version:            6.0.0
+  version:            6.0.1
   name:               JUCE OSC classes
   description:        Open Sound Control implementation.
   website:            http://www.juce.com/juce

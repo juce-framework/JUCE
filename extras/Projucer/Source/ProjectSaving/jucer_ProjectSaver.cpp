@@ -30,6 +30,8 @@
 static constexpr const char* generatedGroupID = "__jucelibfiles";
 static constexpr const char* generatedGroupUID = "__generatedcode__";
 
+constexpr int jucerFormatVersion = 1;
+
 //==============================================================================
 ProjectSaver::ProjectSaver (Project& p)
     : project (p),
@@ -294,7 +296,7 @@ Result ProjectSaver::saveProject (ProjectExporter* specifiedExporterToSave)
         writeProjects (modules, specifiedExporterToSave);
         runPostExportScript();
 
-        project.writeProjectFile();
+        writeProjectFile();
 
         if (generatedCodeFolder.exists())
         {
@@ -332,6 +334,25 @@ void ProjectSaver::writePluginDefines (MemoryOutputStream& out) const
         << pluginDefines << newLine;
 }
 
+void ProjectSaver::writeProjectFile()
+{
+    auto root = project.getProjectRoot();
+
+    root.removeProperty ("jucerVersion", nullptr);
+    root.setProperty (Ids::jucerFormatVersion, jucerFormatVersion, nullptr);
+
+    project.updateCachedFileState();
+
+    auto newSerialisedXml = project.serialiseProjectXml (root.createXml());
+    jassert (newSerialisedXml.isNotEmpty());
+
+    if (newSerialisedXml != project.getCachedFileStateContent())
+    {
+        project.getFile().replaceWithText (newSerialisedXml);
+        project.updateCachedFileState();
+    }
+}
+
 void ProjectSaver::writeAppConfig (MemoryOutputStream& out, const OwnedArray<LibraryModule>& modules, const String& userContent)
 {
     if (! project.shouldUseAppConfig())
@@ -362,12 +383,12 @@ void ProjectSaver::writeAppConfig (MemoryOutputStream& out, const OwnedArray<Lib
         << "/*" << newLine
         << "  ==============================================================================" << newLine
         << newLine
-        << "   In accordance with the terms of the JUCE 5 End-Use License Agreement, the" << newLine
+        << "   In accordance with the terms of the JUCE 6 End-Use License Agreement, the" << newLine
         << "   JUCE Code in SECTION A cannot be removed, changed or otherwise rendered" << newLine
         << "   ineffective unless you have a JUCE Indie or Pro license, or are using JUCE" << newLine
         << "   under the GPL v3 license." << newLine
         << newLine
-        << "   End User License Agreement: www.juce.com/juce-5-licence" << newLine
+        << "   End User License Agreement: www.juce.com/juce-6-licence" << newLine
         << newLine
         << "  ==============================================================================" << newLine
         << "*/" << newLine

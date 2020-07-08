@@ -48,7 +48,6 @@ public:
         : Thread ("Native Win32 FileChooser"),
           owner (parent), title (titleToUse), filtersString (filtersToUse),
           selectsDirectories ((flags & FileBrowserComponent::canSelectDirectories)   != 0),
-          selectsFiles       ((flags & FileBrowserComponent::canSelectFiles)         != 0),
           isSave             ((flags & FileBrowserComponent::saveMode)               != 0),
           warnAboutOverwrite ((flags & FileBrowserComponent::warnAboutOverwriting)   != 0),
           selectMultiple     ((flags & FileBrowserComponent::canSelectMultipleItems) != 0),
@@ -160,7 +159,7 @@ private:
     WaitableEvent threadHasReference;
     CriticalSection deletingDialog;
 
-    bool selectsDirectories, selectsFiles, isSave, warnAboutOverwrite, selectMultiple;
+    bool selectsDirectories, isSave, warnAboutOverwrite, selectMultiple;
 
     HeapBlock<WCHAR> files;
     HeapBlock<WCHAR> filters;

@@ -75,6 +75,7 @@ Result DataConversionFlowGraph::configure(AudioStream *sourceStream, AudioStream
     FlowGraphPortFloatOutput *lastOutput = nullptr;
 
     bool isOutput = sourceStream->getDirection() == Direction::Output;
+    bool isInput = !isOutput;
     mFilterStream = isOutput ? sourceStream : sinkStream;
 
     AudioFormat sourceFormat = sourceStream->getFormat();
@@ -85,7 +86,7 @@ Result DataConversionFlowGraph::configure(AudioStream *sourceStream, AudioStream
     int32_t sinkChannelCount = sinkStream->getChannelCount();
     int32_t sinkSampleRate = sinkStream->getSampleRate();
 
-    LOGD("%s() flowgraph converts channels: %d to %d, format: %d to %d, rate: %d to %d, qual = %d",
+    LOGI("%s() flowgraph converts channels: %d to %d, format: %d to %d, rate: %d to %d, qual = %d",
             __func__,
             sourceChannelCount, sinkChannelCount,
             sourceFormat, sinkFormat,
@@ -96,8 +97,10 @@ Result DataConversionFlowGraph::configure(AudioStream *sourceStream, AudioStream
                                 ? sourceStream->getFramesPerBurst()
                                 : sourceStream->getFramesPerCallback();
     // Source
+    // If OUTPUT and using a callback then call back to the app using a SourceCaller.
+    // If INPUT and NOT using a callback then read from the child stream using a SourceCaller.
     if ((sourceStream->getCallback() != nullptr && isOutput)
-        || (sourceStream->getCallback() == nullptr && !isOutput)) {
+        || (sourceStream->getCallback() == nullptr && isInput)) {
         switch (sourceFormat) {
             case AudioFormat::Float:
                 mSourceCaller = std::make_unique<SourceFloatCaller>(sourceChannelCount,
@@ -114,6 +117,8 @@ Result DataConversionFlowGraph::configure(AudioStream *sourceStream, AudioStream
         mSourceCaller->setStream(sourceStream);
         lastOutput = &mSourceCaller->output;
     } else {
+        // If OUTPUT and NOT using a callback then write to the child stream using a BlockWriter.
+        // If INPUT and using a callback then write to the app using a BlockWriter.
         switch (sourceFormat) {
             case AudioFormat::Float:
                 mSource = std::make_unique<SourceFloat>(sourceChannelCount);
@@ -125,7 +130,7 @@ Result DataConversionFlowGraph::configure(AudioStream *sourceStream, AudioStream
                 LOGE("%s() Unsupported source format = %d", __func__, sourceFormat);
                 return Result::ErrorIllegalArgument;
         }
-        if (!isOutput) {
+        if (isInput) {
             // The BlockWriter is after the Sink so use the SinkStream size.
             mBlockWriter.open(framesPerCallback * sinkStream->getBytesPerFrame());
             mAppBuffer = std::make_unique<uint8_t[]>(
@@ -187,14 +192,14 @@ int32_t DataConversionFlowGraph::read(void *buffer, int32_t numFrames, int64_t t
 
 // This is similar to pushing data through the flowgraph.
 int32_t DataConversionFlowGraph::write(void *inputBuffer, int32_t numFrames) {
-    // Put the data from the Source at the head of the flowgraph.
+    // Put the data from the input at the head of the flowgraph.
     mSource->setData(inputBuffer, numFrames);
     while (true) {
         // Pull and read some data in app format into a small buffer.
         int32_t framesRead = mSink->read(mFramePosition, mAppBuffer.get(), flowgraph::kDefaultBufferSize);
         mFramePosition += framesRead;
         if (framesRead <= 0) break;
-        // Write to a block adapter, which will call the app whenever it has enough data.
+        // Write to a block adapter, which will call the destination whenever it has enough data.
         int32_t bytesRead = mBlockWriter.write(mAppBuffer.get(),
                                                framesRead * mFilterStream->getBytesPerFrame());
         if (bytesRead < 0) return bytesRead; // TODO review

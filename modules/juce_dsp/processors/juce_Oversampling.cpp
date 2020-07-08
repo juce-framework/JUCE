@@ -563,8 +563,8 @@ Oversampling<SampleType>::Oversampling (size_t newNumChannels, size_t newFactor,
             auto gaindBFactorDown = (isMaximumQuality ? 10.0f  : 8.0f);
 
             addOversamplingStage (FilterType::filterHalfBandPolyphaseIIR,
-                                  twUp, gaindBStartUp + gaindBFactorUp * n,
-                                  twDown, gaindBStartDown + gaindBFactorDown * n);
+                                  twUp, gaindBStartUp + gaindBFactorUp * (float) n,
+                                  twDown, gaindBStartDown + gaindBFactorDown * (float) n);
         }
     }
     else if (newType == FilterType::filterHalfBandFIREquiripple)
@@ -580,8 +580,8 @@ Oversampling<SampleType>::Oversampling (size_t newNumChannels, size_t newFactor,
             auto gaindBFactorDown = (isMaximumQuality ? 10.0f  : 8.0f);
 
             addOversamplingStage (FilterType::filterHalfBandFIREquiripple,
-                                  twUp, gaindBStartUp + gaindBFactorUp * n,
-                                  twDown, gaindBStartDown + gaindBFactorDown * n);
+                                  twUp, gaindBStartUp + gaindBFactorUp * (float) n,
+                                  twDown, gaindBStartDown + gaindBFactorDown * (float) n);
         }
     }
 }

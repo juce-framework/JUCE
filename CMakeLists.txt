@@ -30,7 +30,6 @@ set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 set(JUCE_MODULES_DIR "${JUCE_SOURCE_DIR}/modules" CACHE INTERNAL
     "The path to JUCE modules")
 
-include(extras/Build/CMake/JUCEHelperTargets.cmake)
 include(extras/Build/CMake/JUCEUtils.cmake)
 
 juce_disable_default_flags()
@@ -96,8 +95,6 @@ write_basic_package_version_file("${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
 set(JUCE_INSTALL_DESTINATION "lib/cmake/JUCE-${JUCE_VERSION}" CACHE STRING
     "The location, relative to the install prefix, where the JUCE config file will be installed")
 
-install(EXPORT JUCE NAMESPACE juce:: DESTINATION "${JUCE_INSTALL_DESTINATION}")
-set(JUCE_EXPORT_FILE_NAME "JUCE.cmake")
 set(JUCE_MODULE_PATH "include/JUCE-${JUCE_VERSION}/modules")
 set(UTILS_INSTALL_DIR "${JUCE_INSTALL_DESTINATION}")
 set(JUCEAIDE_PATH "${JUCE_TOOL_INSTALL_DIR}/${JUCE_JUCEAIDE_NAME}")
@@ -106,9 +103,7 @@ configure_package_config_file("${JUCE_CMAKE_UTILS_DIR}/JUCEConfig.cmake.in"
     PATH_VARS UTILS_INSTALL_DIR JUCEAIDE_PATH JUCE_MODULE_PATH
     INSTALL_DESTINATION "${JUCE_INSTALL_DESTINATION}")
 
-set(JUCE_EXPORT_FILE_NAME "JUCEBuildTree.cmake")
 set(JUCE_MODULE_PATH "${JUCE_MODULES_DIR}")
-export(EXPORT JUCE NAMESPACE juce:: FILE "${JUCE_EXPORT_FILE_NAME}")
 set(UTILS_INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extras/Build/CMake")
 get_target_property(JUCEAIDE_PATH juceaide IMPORTED_LOCATION)
 configure_package_config_file("${JUCE_CMAKE_UTILS_DIR}/JUCEConfig.cmake.in"
@@ -126,5 +121,6 @@ install(FILES "${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/RecentFilesMenuTemplate.nib"
               "${JUCE_CMAKE_UTILS_DIR}/UnityPluginGUIScript.cs.in"
               "${JUCE_CMAKE_UTILS_DIR}/copyDir.cmake"
+              "${JUCE_CMAKE_UTILS_DIR}/JUCEHelperTargets.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/JUCEUtils.cmake"
         DESTINATION "${JUCE_INSTALL_DESTINATION}")

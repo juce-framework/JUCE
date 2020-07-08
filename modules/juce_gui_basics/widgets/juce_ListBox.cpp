@@ -890,7 +890,10 @@ Image ListBox::createSnapshotOfRows (const SparseSet<int>& rows, int& imageX, in
     imageY = imageArea.getY();
 
     auto listScale = Component::getApproximateScaleFactorForComponent (this);
-    Image snapshot (Image::ARGB, roundToInt (imageArea.getWidth() * listScale), roundToInt (imageArea.getHeight() * listScale), true);
+    Image snapshot (Image::ARGB,
+                    roundToInt ((float) imageArea.getWidth() * listScale),
+                    roundToInt ((float) imageArea.getHeight() * listScale),
+                    true);
 
     for (int i = getNumRowsOnScreen() + 2; --i >= 0;)
     {

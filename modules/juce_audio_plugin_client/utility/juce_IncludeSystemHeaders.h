@@ -39,6 +39,7 @@
 #elif JUCE_LINUX
  #include <float.h>
  #include <sys/time.h>
+ #include <arpa/inet.h>
 #elif JUCE_MAC || JUCE_IOS
  #if ! (defined (JUCE_SUPPORT_CARBON) || defined (__LP64__))
   #define JUCE_SUPPORT_CARBON 1

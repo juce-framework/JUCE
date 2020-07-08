@@ -115,8 +115,8 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
 
     if (peerBounds.getWidth() != componentBounds.getWidth() || peerBounds.getHeight() != componentBounds.getHeight())
         // Tweak the scaling so that the component's integer size exactly aligns with the peer's scaled size
-        g.addTransform (AffineTransform::scale (peerBounds.getWidth()  / (float) componentBounds.getWidth(),
-                                                peerBounds.getHeight() / (float) componentBounds.getHeight()));
+        g.addTransform (AffineTransform::scale ((float) peerBounds.getWidth()  / (float) componentBounds.getWidth(),
+                                                (float) peerBounds.getHeight() / (float) componentBounds.getHeight()));
 
   #if JUCE_ENABLE_REPAINT_DEBUGGING
    #ifdef JUCE_IS_REPAINT_DEBUGGING_ACTIVE

@@ -20,7 +20,7 @@
   ==============================================================================
 */
 
-#if JUCE_MAC || JUCE_IOS
+#if ! DOXYGEN && (JUCE_MAC || JUCE_IOS)
  // Annoyingly we can only forward-declare a typedef by forward-declaring the
  // aliased type
  #if __has_attribute(objc_bridge)

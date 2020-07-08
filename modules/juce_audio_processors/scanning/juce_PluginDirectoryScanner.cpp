@@ -77,7 +77,7 @@ String PluginDirectoryScanner::getNextPluginFileThatWillBeScanned() const
 
 void PluginDirectoryScanner::updateProgress()
 {
-    progress = (1.0f - nextIndex.get() / (float) filesOrIdentifiersToScan.size());
+    progress = (1.0f - (float) nextIndex.get() / (float) filesOrIdentifiersToScan.size());
 }
 
 bool PluginDirectoryScanner::scanNextFile (bool dontRescanIfAlreadyInList,

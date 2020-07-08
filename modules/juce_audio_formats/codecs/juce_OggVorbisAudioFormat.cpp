@@ -46,7 +46,8 @@ namespace OggVorbisNamespace
                                       "-Wzero-as-null-pointer-constant",
                                       "-Wsign-conversion",
                                       "-Wswitch-default",
-                                      "-Wredundant-decls")
+                                      "-Wredundant-decls",
+                                      "-Wmisleading-indentation")
 
  #include "oggvorbis/vorbisenc.h"
  #include "oggvorbis/codec.h"
@@ -134,7 +135,7 @@ public:
             lengthInSamples = (uint32) ov_pcm_total (&ovFile, -1);
             numChannels = (unsigned int) info->channels;
             bitsPerSample = 16;
-            sampleRate = info->rate;
+            sampleRate = (double) info->rate;
 
             reservoir.setSize ((int) numChannels, (int) jmin (lengthInSamples, (int64) 4096));
         }
@@ -275,7 +276,7 @@ public:
         vorbis_info_init (&vi);
 
         if (vorbis_encode_init_vbr (&vi, (int) numChans, (int) rate,
-                                    jlimit (0.0f, 1.0f, qualityIndex * 0.1f)) == 0)
+                                    jlimit (0.0f, 1.0f, (float) qualityIndex * 0.1f)) == 0)
         {
             vorbis_comment_init (&vc);
 
@@ -482,8 +483,8 @@ int OggVorbisAudioFormat::estimateOggFileQuality (const File& source)
     {
         if (auto r = std::unique_ptr<AudioFormatReader> (createReaderFor (in.release(), true)))
         {
-            auto lengthSecs = r->lengthInSamples / r->sampleRate;
-            auto approxBitsPerSecond = (int) (source.getSize() * 8 / lengthSecs);
+            auto lengthSecs = (double) r->lengthInSamples / r->sampleRate;
+            auto approxBitsPerSecond = (int) ((double) source.getSize() * 8 / lengthSecs);
 
             auto qualities = getQualityOptions();
             int bestIndex = 0;

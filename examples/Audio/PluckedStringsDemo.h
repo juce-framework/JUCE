@@ -201,11 +201,11 @@ public:
 
     Path generateStringPath() const
     {
-        auto y = height / 2.0f;
+        auto y = (float) height / 2.0f;
 
         Path stringPath;
         stringPath.startNewSubPath (0, y);
-        stringPath.quadraticTo (length / 2.0f, y + (std::sin (phase) * amplitude), (float) length, y);
+        stringPath.quadraticTo ((float) length / 2.0f, y + (std::sin (phase) * amplitude), (float) length, y);
         return stringPath;
     }
 
@@ -227,7 +227,7 @@ public:
     {
         // this determines the visible vibration frequency.
         // just an arbitrary number chosen to look OK:
-        auto phaseStep = 400.0f / length;
+        auto phaseStep = 400.0f / (float) length;
 
         phase += phaseStep;
 
@@ -337,7 +337,7 @@ private:
 
             if (stringLine->getBounds().contains (e.getPosition()))
             {
-                auto position = (e.position.x - stringLine->getX()) / stringLine->getWidth();
+                auto position = (e.position.x - (float) stringLine->getX()) / (float) stringLine->getWidth();
 
                 stringLine->stringPlucked (position);
                 stringSynths.getUnchecked (i)->stringPlucked (position);

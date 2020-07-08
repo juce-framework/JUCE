@@ -273,7 +273,7 @@ private:
 
 
             g.setColour (textColour);
-            g.setFont (height * 0.7f);
+            g.setFont ((float) height * 0.7f);
 
             if (isInput)
             {

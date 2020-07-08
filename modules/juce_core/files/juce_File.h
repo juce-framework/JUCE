@@ -20,7 +20,7 @@
   ==============================================================================
 */
 
-#if JUCE_MAC || JUCE_IOS
+#if ! DOXYGEN && (JUCE_MAC || JUCE_IOS)
  #if __LP64__
   using OSType = unsigned int;
  #else

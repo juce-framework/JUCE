@@ -16,9 +16,75 @@
 
 #include <oboe/AudioStreamBuilder.h>
 #include <oboe/Oboe.h>
+
 #include "QuirksManager.h"
 
 using namespace oboe;
+
+int32_t QuirksManager::DeviceQuirks::clipBufferSize(AudioStream &stream,
+            int32_t requestedSize) {
+    if (!OboeGlobals::areWorkaroundsEnabled()) {
+        return requestedSize;
+    }
+    int bottomMargin = kDefaultBottomMarginInBursts;
+    int topMargin = kDefaultTopMarginInBursts;
+    if (isMMapUsed(stream)) {
+        if (stream.getSharingMode() == SharingMode::Exclusive) {
+            bottomMargin = getExclusiveBottomMarginInBursts();
+            topMargin = getExclusiveTopMarginInBursts();
+        }
+    } else {
+        bottomMargin = kLegacyBottomMarginInBursts;
+    }
+
+    int32_t burst = stream.getFramesPerBurst();
+    int32_t minSize = bottomMargin * burst;
+    int32_t adjustedSize = requestedSize;
+    if (adjustedSize < minSize ) {
+        adjustedSize = minSize;
+    } else {
+        int32_t maxSize = stream.getBufferCapacityInFrames() - (topMargin * burst);
+        if (adjustedSize > maxSize ) {
+            adjustedSize = maxSize;
+        }
+    }
+    return adjustedSize;
+}
+
+class SamsungDeviceQuirks : public  QuirksManager::DeviceQuirks {
+public:
+    SamsungDeviceQuirks() {
+        std::string arch = getPropertyString("ro.arch");
+        isExynos = (arch.rfind("exynos", 0) == 0); // starts with?
+    }
+
+    virtual ~SamsungDeviceQuirks() = default;
+
+    int32_t getExclusiveBottomMarginInBursts() const override {
+        // TODO Make this conditional on build version when MMAP timing improves.
+        return isExynos ? kBottomMarginExynos : kBottomMarginOther;
+    }
+
+    int32_t getExclusiveTopMarginInBursts() const override {
+        return kTopMargin;
+    }
+
+private:
+    // Stay farther away from DSP position on Exynos devices.
+    static constexpr int32_t kBottomMarginExynos = 2;
+    static constexpr int32_t kBottomMarginOther = 1;
+    static constexpr int32_t kTopMargin = 1;
+    bool isExynos = false;
+};
+
+QuirksManager::QuirksManager() {
+    std::string manufacturer = getPropertyString("ro.product.manufacturer");
+    if (manufacturer == "samsung") {
+        mDeviceQuirks = std::make_unique<SamsungDeviceQuirks>();
+    } else {
+        mDeviceQuirks = std::make_unique<DeviceQuirks>();
+    }
+}
 
 bool QuirksManager::isConversionNeeded(
         const AudioStreamBuilder &builder,
@@ -54,11 +120,13 @@ bool QuirksManager::isConversionNeeded(
     // Channel Count
     if (builder.getChannelCount() != oboe::Unspecified
             && builder.isChannelConversionAllowed()) {
-        if (builder.getChannelCount() == 2 // stereo?
+        if (OboeGlobals::areWorkaroundsEnabled()
+                && builder.getChannelCount() == 2 // stereo?
                 && isInput
                 && isLowLatency
                 && (!builder.willUseAAudio() && (getSdkVersion() == __ANDROID_API_O__))) {
-            // workaround for temporary heap size regression, b/66967812
+            // Workaround for heap size regression in O.
+            // b/66967812 AudioRecord does not allow FAST track for stereo capture in O
             childBuilder.setChannelCount(1);
             conversionNeeded = true;
         }

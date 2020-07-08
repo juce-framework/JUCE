@@ -2,9 +2,9 @@
 
 <JUCERPROJECT id="NTe0XB0ij" name="AudioPluginHost" projectType="guiapp" version="1.0.0"
               juceFolder="../../../juce" bundleIdentifier="com.juce.pluginhost"
-              jucerVersion="6.0.0" companyName="Raw Material Software Limited"
-              displaySplashScreen="0" reportAppUsage="0" companyCopyright="Raw Material Software Limited"
-              useAppConfig="0" addUsingNamespaceToJuceHeader="1">
+              companyName="Raw Material Software Limited" displaySplashScreen="0"
+              reportAppUsage="0" companyCopyright="Raw Material Software Limited"
+              useAppConfig="0" addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" rtasFolder="~/SDKs/PT_80_SDK" objCExtraSuffix="M73TRi"
                smallIcon="c97aUr" bigIcon="c97aUr" microphonePermissionNeeded="1"

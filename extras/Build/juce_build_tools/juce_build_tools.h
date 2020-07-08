@@ -34,7 +34,7 @@
 
   ID:                 juce_build_tools
   vendor:             juce
-  version:            6.0.0
+  version:            6.0.1
   name:               JUCE Build Tools
   description:        Classes for generating intermediate files for JUCE projects.
   website:            http://www.juce.com/juce

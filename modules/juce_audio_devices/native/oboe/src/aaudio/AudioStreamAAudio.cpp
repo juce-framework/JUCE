@@ -26,6 +26,8 @@
 
 #ifdef __ANDROID__
 #include <sys/system_properties.h>
+#include <common/QuirksManager.h>
+
 #endif
 
 #ifndef OBOE_FIX_FORCE_STARTING_TO_STARTED
@@ -72,6 +74,15 @@ static void oboe_aaudio_error_thread_proc(AudioStreamAAudio *oboeStream,
     LOGD("%s() - exiting <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<", __func__);
 }
 
+// This runs in its own thread.
+// Only one of these threads will be launched from internalErrorCallback().
+// Prevents deletion of the stream if the app is using AudioStreamBuilder::openSharedStream()
+static void oboe_aaudio_error_thread_proc_shared(std::shared_ptr<AudioStream> sharedStream,
+                                          Result error) {
+    AudioStreamAAudio *oboeStream = reinterpret_cast<AudioStreamAAudio*>(sharedStream.get());
+    oboe_aaudio_error_thread_proc(oboeStream, error);
+}
+
 namespace oboe {
 
 /*
@@ -81,7 +92,6 @@ AudioStreamAAudio::AudioStreamAAudio(const AudioStreamBuilder &builder)
     : AudioStream(builder)
     , mAAudioStream(nullptr) {
     mCallbackThreadEnabled.store(false);
-    LOGD("AudioStreamAAudio() call isSupported()");
     isSupported();
 }
 
@@ -99,12 +109,21 @@ void AudioStreamAAudio::internalErrorCallback(
         void *userData,
         aaudio_result_t error) {
     AudioStreamAAudio *oboeStream = reinterpret_cast<AudioStreamAAudio*>(userData);
+
+    // Prevents deletion of the stream if the app is using AudioStreamBuilder::openSharedStream()
+    std::shared_ptr<AudioStream> sharedStream = oboeStream->lockWeakThis();
+
     // These checks should be enough because we assume that the stream close()
     // will join() any active callback threads and will not allow new callbacks.
     if (oboeStream->wasErrorCallbackCalled()) { // block extra error callbacks
         LOGE("%s() multiple error callbacks called!", __func__);
     } else if (stream != oboeStream->getUnderlyingStream()) {
-        LOGD("%s() stream already closed", __func__); // can happen if there are bugs
+        LOGW("%s() stream already closed", __func__); // can happen if there are bugs
+    } else if (sharedStream) {
+        // Handle error on a separate thread using shared pointer.
+        std::thread t(oboe_aaudio_error_thread_proc_shared, sharedStream,
+                      static_cast<Result>(error));
+        t.detach();
     } else {
         // Handle error on a separate thread.
         std::thread t(oboe_aaudio_error_thread_proc, oboeStream,
@@ -161,7 +180,8 @@ Result AudioStreamAAudio::open() {
     // does not increase latency.
     int32_t capacity = mBufferCapacityInFrames;
     constexpr int kCapacityRequiredForFastLegacyTrack = 4096; // matches value in AudioFinger
-    if (mDirection == oboe::Direction::Input
+    if (OboeGlobals::areWorkaroundsEnabled()
+            && mDirection == oboe::Direction::Input
             && capacity != oboe::Unspecified
             && capacity < kCapacityRequiredForFastLegacyTrack
             && mPerformanceMode == oboe::PerformanceMode::LowLatency) {
@@ -250,15 +270,14 @@ Result AudioStreamAAudio::open() {
         mSessionId = SessionId::None;
     }
 
-    LOGD("AudioStreamAAudio.open() app    format = %d", static_cast<int>(mFormat));
-    LOGD("AudioStreamAAudio.open() sample rate   = %d", static_cast<int>(mSampleRate));
-    LOGD("AudioStreamAAudio.open() capacity      = %d", static_cast<int>(mBufferCapacityInFrames));
+    LOGD("AudioStreamAAudio.open() format=%d, sampleRate=%d, capacity = %d",
+            static_cast<int>(mFormat), static_cast<int>(mSampleRate),
+            static_cast<int>(mBufferCapacityInFrames));
 
 error2:
     mLibLoader->builder_delete(aaudioBuilder);
-    LOGD("AudioStreamAAudio.open: AAudioStream_Open() returned %s, mAAudioStream = %p",
-         mLibLoader->convertResultToText(static_cast<aaudio_result_t>(result)),
-         mAAudioStream.load());
+    LOGD("AudioStreamAAudio.open: AAudioStream_Open() returned %s",
+         mLibLoader->convertResultToText(static_cast<aaudio_result_t>(result)));
     return result;
 }
 
@@ -288,7 +307,7 @@ DataCallbackResult AudioStreamAAudio::callOnAudioReady(AAudioStream *stream,
         return result;
     } else {
         if (result == DataCallbackResult::Stop) {
-            LOGE("Oboe callback returned DataCallbackResult::Stop");
+            LOGD("Oboe callback returned DataCallbackResult::Stop");
         } else {
             LOGE("Oboe callback returned unexpected value = %d", result);
         }
@@ -445,7 +464,8 @@ Result AudioStreamAAudio::waitForStateChange(StreamState currentState,
             break;
         }
 #if OBOE_FIX_FORCE_STARTING_TO_STARTED
-        if (aaudioNextState == static_cast<aaudio_stream_state_t >(StreamState::Starting)) {
+        if (OboeGlobals::areWorkaroundsEnabled()
+            && aaudioNextState == static_cast<aaudio_stream_state_t >(StreamState::Starting)) {
             aaudioNextState = static_cast<aaudio_stream_state_t >(StreamState::Started);
         }
 #endif // OBOE_FIX_FORCE_STARTING_TO_STARTED
@@ -481,11 +501,13 @@ ResultWithValue<int32_t> AudioStreamAAudio::setBufferSizeInFrames(int32_t reques
     AAudioStream *stream = mAAudioStream.load();
 
     if (stream != nullptr) {
-
-        if (requestedFrames > mBufferCapacityInFrames) {
-            requestedFrames = mBufferCapacityInFrames;
+        int32_t adjustedFrames = requestedFrames;
+        if (adjustedFrames > mBufferCapacityInFrames) {
+            adjustedFrames = mBufferCapacityInFrames;
         }
-        int32_t newBufferSize = mLibLoader->stream_setBufferSize(mAAudioStream, requestedFrames);
+        adjustedFrames = QuirksManager::getInstance().clipBufferSize(*this, adjustedFrames);
+
+        int32_t newBufferSize = mLibLoader->stream_setBufferSize(mAAudioStream, adjustedFrames);
 
         // Cache the result if it's valid
         if (newBufferSize > 0) mBufferSizeInFrames = newBufferSize;
@@ -502,7 +524,8 @@ StreamState AudioStreamAAudio::getState() const {
     if (stream != nullptr) {
         aaudio_stream_state_t aaudioState = mLibLoader->stream_getState(stream);
 #if OBOE_FIX_FORCE_STARTING_TO_STARTED
-        if (aaudioState == AAUDIO_STREAM_STATE_STARTING) {
+        if (OboeGlobals::areWorkaroundsEnabled()
+            && aaudioState == AAUDIO_STREAM_STATE_STARTING) {
             aaudioState = AAUDIO_STREAM_STATE_STARTED;
         }
 #endif // OBOE_FIX_FORCE_STARTING_TO_STARTED

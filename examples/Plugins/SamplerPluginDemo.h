@@ -463,11 +463,11 @@ private:
             nextSamplePos = begin;
             nextDirection = Direction::forward;
 
-            return { nextSamplePos, nextDirection };
+            return std::tuple<double, Direction> (nextSamplePos, nextDirection);
         }
 
         if (samplerSound->getLoopMode() == LoopMode::none)
-            return { nextSamplePos, nextDirection };
+            return std::tuple<double, Direction> (nextSamplePos, nextDirection);
 
         if (nextDirection == Direction::forward && end < nextSamplePos && !isTailingOff())
         {
@@ -479,7 +479,7 @@ private:
                 nextDirection = Direction::backward;
             }
         }
-        return { nextSamplePos, nextDirection };
+        return std::tuple<double, Direction> (nextSamplePos, nextDirection);
     }
 
     std::shared_ptr<const MPESamplerSound> samplerSound;
@@ -1005,7 +1005,7 @@ public:
     double getSampleLengthSeconds() const
     {
         if (auto r = getSampleReader())
-            return r->lengthInSamples / r->sampleRate;
+            return (double) r->lengthInSamples / r->sampleRate;
 
         return 1.0;
     }
@@ -1538,7 +1538,7 @@ private:
     void paint (Graphics& g) override
     {
         auto minDivisionWidth = 50.0f;
-        auto maxDivisions     = getWidth() / minDivisionWidth;
+        auto maxDivisions     = (float) getWidth() / minDivisionWidth;
 
         auto lookFeel = dynamic_cast<LookAndFeel_V4*> (&getLookAndFeel());
         auto bg = lookFeel->getCurrentColourScheme()
@@ -1593,7 +1593,7 @@ private:
     {
         // Work out the scale of the new range
         auto unitDistance = 100.0f;
-        auto scaleFactor  = 1.0 / std::pow (2, e.getDistanceFromDragStartY() / unitDistance);
+        auto scaleFactor  = 1.0 / std::pow (2, (float) e.getDistanceFromDragStartY() / unitDistance);
 
         // Now position it so that the mouse continues to point at the same
         // place on the ruler.

@@ -119,8 +119,8 @@ private:
             graphicsTitleLabel.setBounds (bounds.removeFromTop (30));
             bounds.removeFromTop (space);
 
-            auto xPos = bounds.getX() + (bounds.getWidth() * 0.35f);
-            auto width = bounds.getWidth() * 0.6f;
+            auto xPos = (float) bounds.getX() + ((float) bounds.getWidth() * 0.35f);
+            auto width = (float) bounds.getWidth() * 0.6f;
 
             lookAndFeelSelector.setBounds (bounds.removeFromTop (itemHeight).withWidth ((int) width).withX ((int) xPos));
 

@@ -59,15 +59,15 @@ struct SliderHandler  : public ComponentTypeHandler
     SliderHandler()
         : ComponentTypeHandler ("Slider", "juce::Slider", typeid (Slider), 150, 24)
     {
-        registerColour (Slider::backgroundColourId, "background", "bkgcol");
-        registerColour (Slider::thumbColourId, "thumb", "thumbcol");
-        registerColour (Slider::trackColourId, "track", "trackcol");
-        registerColour (Slider::rotarySliderFillColourId, "rotary fill", "rotarysliderfill");
-        registerColour (Slider::rotarySliderOutlineColourId, "rotary outln", "rotaryslideroutline");
-        registerColour (Slider::textBoxTextColourId, "textbox text", "textboxtext");
-        registerColour (Slider::textBoxBackgroundColourId, "textbox bkgd", "textboxbkgd");
-        registerColour (Slider::textBoxHighlightColourId, "textbox highlt", "textboxhighlight");
-        registerColour (Slider::textBoxOutlineColourId, "textbox outln", "textboxoutline");
+        registerColour (juce::Slider::backgroundColourId, "background", "bkgcol");
+        registerColour (juce::Slider::thumbColourId, "thumb", "thumbcol");
+        registerColour (juce::Slider::trackColourId, "track", "trackcol");
+        registerColour (juce::Slider::rotarySliderFillColourId, "rotary fill", "rotarysliderfill");
+        registerColour (juce::Slider::rotarySliderOutlineColourId, "rotary outln", "rotaryslideroutline");
+        registerColour (juce::Slider::textBoxTextColourId, "textbox text", "textboxtext");
+        registerColour (juce::Slider::textBoxBackgroundColourId, "textbox bkgd", "textboxbkgd");
+        registerColour (juce::Slider::textBoxHighlightColourId, "textbox highlt", "textboxhighlight");
+        registerColour (juce::Slider::textBoxOutlineColourId, "textbox outln", "textboxoutline");
     }
 
     Component* createNewComponent (JucerDocument*) override

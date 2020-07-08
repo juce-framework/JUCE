@@ -115,7 +115,7 @@ public:
 
         sliderPos = (sliderPos - minSliderPos) / static_cast<float> (width);
 
-        auto knobPos = static_cast<int> (sliderPos * r.getWidth());
+        auto knobPos = static_cast<int> (sliderPos * (float) r.getWidth());
 
         g.setColour (sliderActivePart);
         g.fillRect (backgroundBar.removeFromLeft (knobPos));

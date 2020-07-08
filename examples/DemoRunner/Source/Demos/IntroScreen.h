@@ -80,13 +80,13 @@ private:
             Path wavePath;
 
             auto waveStep = 10.0f;
-            auto waveY = getHeight() * 0.44f;
+            auto waveY = (float) getHeight() * 0.44f;
             int i = 0;
 
-            for (auto x = waveStep * 0.5f; x < getWidth(); x += waveStep)
+            for (auto x = waveStep * 0.5f; x < (float) getWidth(); x += waveStep)
             {
-                auto y1 = waveY + getHeight() * 0.05f * std::sin (i * 0.38f + elapsed);
-                auto y2 = waveY + getHeight() * 0.10f * std::sin (i * 0.20f + elapsed * 2.0f);
+                auto y1 = waveY + (float) getHeight() * 0.05f * std::sin ((float) i * 0.38f + elapsed);
+                auto y2 = waveY + (float) getHeight() * 0.10f * std::sin ((float) i * 0.20f + elapsed * 2.0f);
 
                 wavePath.addLineSegment ({ x, y1, x, y2 }, 2.0f);
                 wavePath.addEllipse (x - waveStep * 0.3f, y1 - waveStep * 0.3f, waveStep * 0.6f, waveStep * 0.6f);

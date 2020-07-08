@@ -309,8 +309,8 @@ Image Image::rescaled (int newWidth, int newHeight, Graphics::ResamplingQuality 
 
     Graphics g (newImage);
     g.setImageResamplingQuality (quality);
-    g.drawImageTransformed (*this, AffineTransform::scale (newWidth  / (float) image->width,
-                                                           newHeight / (float) image->height), false);
+    g.drawImageTransformed (*this, AffineTransform::scale ((float) newWidth  / (float) image->width,
+                                                           (float) newHeight / (float) image->height), false);
     return newImage;
 }
 

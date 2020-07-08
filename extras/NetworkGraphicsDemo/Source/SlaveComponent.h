@@ -80,8 +80,8 @@ private:
             OSCMessage message (userInputOSCAddress);
 
             message.addString (clientName);
-            message.addFloat32 (e.position.x * clientArea.getWidth()  / getWidth()  + clientArea.getX());
-            message.addFloat32 (e.position.y * clientArea.getHeight() / getHeight() + clientArea.getY());
+            message.addFloat32 (e.position.x * clientArea.getWidth()  / (float) getWidth()  + clientArea.getX());
+            message.addFloat32 (e.position.y * clientArea.getHeight() / (float) getHeight() + clientArea.getY());
 
             send (message);
         }

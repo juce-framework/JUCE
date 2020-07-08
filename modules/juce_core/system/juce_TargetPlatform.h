@@ -58,7 +58,6 @@
 
 //==============================================================================
 #if defined (_WIN32) || defined (_WIN64)
-  #define       JUCE_WIN32 1
   #define       JUCE_WINDOWS 1
 #elif defined (JUCE_ANDROID)
   #undef        JUCE_ANDROID
