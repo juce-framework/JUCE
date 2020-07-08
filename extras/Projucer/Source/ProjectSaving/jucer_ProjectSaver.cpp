@@ -339,7 +339,9 @@ void ProjectSaver::writeProjectFile()
     auto root = project.getProjectRoot();
 
     root.removeProperty ("jucerVersion", nullptr);
-    root.setProperty (Ids::jucerFormatVersion, jucerFormatVersion, nullptr);
+
+    if ((int) root.getProperty (Ids::jucerFormatVersion, -1) != jucerFormatVersion)
+        root.setProperty (Ids::jucerFormatVersion, jucerFormatVersion, nullptr);
 
     project.updateCachedFileState();
 
