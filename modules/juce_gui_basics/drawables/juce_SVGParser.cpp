@@ -887,7 +887,8 @@ private:
 
         jassert (gradient.getNumColours() > 0);
 
-        gradient.isRadial = fillXml->hasTagNameIgnoringNamespace ("radialGradient");
+        gradient.gradientType = fillXml->hasTagNameIgnoringNamespace ("radialGradient") ? ColourGradient::Radial :
+                                                                                          ColourGradient::Linear;
 
         float gradientWidth = viewBoxW;
         float gradientHeight = viewBoxH;
@@ -905,7 +906,7 @@ private:
             gradientHeight = bounds.getHeight();
         }
 
-        if (gradient.isRadial)
+        if (gradient.gradientType == ColourGradient::Radial)
         {
             if (userSpace)
                 gradient.point1.setXY (dx + getCoordLength (fillXml->getStringAttribute ("cx", "50%"), gradientWidth),
@@ -946,7 +947,7 @@ private:
 
         auto gradientTransform = parseTransform (fillXml->getStringAttribute ("gradientTransform"));
 
-        if (gradient.isRadial)
+        if (gradient.gradientType == ColourGradient::Radial)
         {
             type.transform = gradientTransform;
         }

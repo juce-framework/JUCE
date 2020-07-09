@@ -132,7 +132,7 @@ void JUCESplashScreen::paint (Graphics& g)
 
     ColourGradient cg (Colour (0x00000000), Line<float> (0.0f, r.getHeight(), r.getWidth(), 0.0f)
                                               .findNearestPointTo (bottomRight),
-                       Colour (0xff000000), bottomRight, false);
+                       Colour (0xff000000), bottomRight, ColourGradient::Linear);
     cg.addColour (0.25f, Colour (0x10000000));
     cg.addColour (0.50f, Colour (0x30000000));
     cg.addColour (0.75f, Colour (0x70000000));

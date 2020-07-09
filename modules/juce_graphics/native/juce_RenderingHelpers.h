@@ -746,10 +746,10 @@ namespace EdgeTableFillers
         {
         }
 
-        forcedinline void setEdgeTableYPos (int y) noexcept
+        forcedinline void setEdgeTableYPos (int newY) noexcept
         {
-            linePixels = (PixelType*) destData.getLinePointer (y);
-            GradientType::setY (y);
+            linePixels = (PixelType*) destData.getLinePointer (newY);
+            GradientType::setY (newY);
         }
 
         forcedinline void handleEdgeTablePixel (int x, int alphaLevel) const noexcept
@@ -1605,7 +1605,12 @@ namespace EdgeTableFillers
     void renderGradient (Iterator& iter, const Image::BitmapData& destData, const ColourGradient& g, const AffineTransform& transform,
                          const PixelARGB* lookupTable, int numLookupEntries, bool isIdentity, DestPixelType*)
     {
-        if (g.isRadial)
+        if (g.gradientType == ColourGradient::Linear)
+        {
+            EdgeTableFillers::Gradient<DestPixelType, GradientPixelIterators::Linear> renderer (destData, g, transform, lookupTable, numLookupEntries);
+            iter.iterate (renderer);
+        }
+        else if (g.gradientType == ColourGradient::Radial)
         {
             if (isIdentity)
             {
@@ -1618,15 +1623,17 @@ namespace EdgeTableFillers
                 iter.iterate (renderer);
             }
         }
-        else if (g.isConical)
+        else if (g.gradientType == ColourGradient::Conical)
         {
             EdgeTableFillers::Gradient<DestPixelType, GradientPixelIterators::Conical> renderer (destData, g, transform, lookupTable, numLookupEntries);
             iter.iterate (renderer);
         }
         else
         {
-            EdgeTableFillers::Gradient<DestPixelType, GradientPixelIterators::Linear> renderer (destData, g, transform, lookupTable, numLookupEntries);
-            iter.iterate (renderer);
+            /** The GradientType of the given ColourGradient has an unsupported
+                value.
+            */
+            jassertfalse;
         }
     }
 }

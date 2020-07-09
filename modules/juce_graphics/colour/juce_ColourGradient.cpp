@@ -26,7 +26,7 @@
 namespace juce
 {
 
-ColourGradient::ColourGradient() noexcept  : isRadial (false)
+ColourGradient::ColourGradient() noexcept  : gradientType (Linear)
 {
    #if JUCE_DEBUG
     point1.setX (987654.0f);
@@ -37,21 +37,20 @@ ColourGradient::ColourGradient() noexcept  : isRadial (false)
 }
 
 ColourGradient::ColourGradient (const ColourGradient& other)
-    : point1 (other.point1), point2 (other.point2), isRadial (other.isRadial),
-      isConical (other.isConical), colours (other.colours)
+    : point1 (other.point1), point2 (other.point2),
+      gradientType (other.gradientType), colours (other.colours)
 {}
 
 ColourGradient::ColourGradient (ColourGradient&& other) noexcept
-    : point1 (other.point1), point2 (other.point2), isRadial (other.isRadial),
-      isConical (other.isConical), colours (std::move (other.colours))
+    : point1 (other.point1), point2 (other.point2),
+      gradientType (other.gradientType), colours (std::move (other.colours))
 {}
 
 ColourGradient& ColourGradient::operator= (const ColourGradient& other)
 {
     point1 = other.point1;
     point2 = other.point2;
-    isRadial = other.isRadial;
-    isConical = other.isConical;
+    gradientType = other.gradientType;
     colours = other.colours;
     return *this;
 }
@@ -60,55 +59,65 @@ ColourGradient& ColourGradient::operator= (ColourGradient&& other) noexcept
 {
     point1 = other.point1;
     point2 = other.point2;
-    isRadial = other.isRadial;
-    isConical = other.isConical;
+    gradientType = other.gradientType;
     colours = std::move (other.colours);
     return *this;
 }
 
 ColourGradient::ColourGradient (Colour colour1, float x1, float y1,
                                 Colour colour2, float x2, float y2,
-                                bool radial, bool conical)
+                                GradientType type)
     : ColourGradient (colour1, Point<float> (x1, y1),
                       colour2, Point<float> (x2, y2),
-                      radial, conical)
+                      type)
 {
 }
 
 ColourGradient::ColourGradient (Colour colour1, Point<float> p1,
                                 Colour colour2, Point<float> p2,
-                                bool radial, bool conical)
+                                GradientType type)
     : point1 (p1),
       point2 (p2),
-      isRadial (radial),
-      isConical (conical)
+      gradientType (type),
+      isRadial (gradientType == Radial)
 {
-    /** A gradient can't be radial AND conical.
-        Either isRadial or isConical can be set to true (or neither) but not
-        both!
-    */
-    jassert(!(isRadial && isConical));
-
     colours.add (ColourPoint { 0.0, colour1 },
                  ColourPoint { 1.0, colour2 });
+}
+
+ColourGradient::ColourGradient (Colour colour1, float x1, float y1,
+                                Colour colour2, float x2, float y2,
+                                bool radial)
+    : ColourGradient (colour1, Point<float> (x1, y1),
+                      colour2, Point<float> (x2, y2),
+                      radial ? GradientType::Radial : GradientType::Linear)
+{
+}
+
+ColourGradient::ColourGradient (Colour colour1, Point<float> p1,
+                                Colour colour2, Point<float> p2,
+                                bool radial)
+    : ColourGradient (colour1, p1, colour2, p2,
+                      radial ? GradientType::Radial : GradientType::Linear)
+{
 }
 
 ColourGradient::~ColourGradient() {}
 
 ColourGradient ColourGradient::vertical (Colour c1, float y1, Colour c2, float y2)
 {
-    return { c1, 0, y1, c2, 0, y2, false };
+    return { c1, 0, y1, c2, 0, y2, Linear };
 }
 
 ColourGradient ColourGradient::horizontal (Colour c1, float x1, Colour c2, float x2)
 {
-    return { c1, x1, 0, c2, x2, 0, false };
+    return { c1, x1, 0, c2, x2, 0, Linear };
 }
 
 bool ColourGradient::operator== (const ColourGradient& other) const noexcept
 {
     return point1 == other.point1 && point2 == other.point2
-            && isRadial == other.isRadial
+            && gradientType == other.gradientType
             && colours == other.colours;
 }
 

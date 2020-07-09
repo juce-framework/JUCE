@@ -1209,7 +1209,7 @@ void LookAndFeel_V4::paintToolbarBackground (Graphics& g, int w, int h, Toolbar&
                          background.darker (0.2f),
                          toolbar.isVertical() ? (float) w - 1.0f : 0.0f,
                          toolbar.isVertical() ? 0.0f : (float) h - 1.0f,
-                         false });
+                         ColourGradient::Linear });
     g.fillAll();
 }
 

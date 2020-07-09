@@ -37,6 +37,16 @@ namespace juce
 class JUCE_API  ColourGradient  final
 {
 public:
+    //==============================================================================
+    /** The available gradient types. */
+    enum GradientType
+    {
+        Linear, // Colours transition along a straight line.
+        Radial, // Colours radiate from an origin.
+        Conical // Colours rotate around a centre point.
+    };
+
+    //==============================================================================
     /** Creates an uninitialised gradient.
 
         If you use this constructor instead of the other one, be sure to set all the
@@ -51,52 +61,56 @@ public:
 
     //==============================================================================
     /** Creates a gradient object.
-
+        
         (x1, y1) is the location to draw with colour1. Likewise (x2, y2) is where
-        colour2 should be. In between them there's a gradient.
+        colour2 should be. In between them there's a gradient of the type specified
+        by typeOfGradientToUse.
 
-        If isRadial is true, the colours form a circular gradient with (x1, y1) at
-        its centre.
+        The alpha transparencies of the colours are used, so note that if you blend
+        from transparent to a solid colour, the RGB of the transparent colour will
+        become visible in parts of the gradient. e.g. blending from
+        Colour::transparentBlack to Colours::white will produce a muddy grey colour
+        midway, but Colour::transparentWhite to Colours::white will be white all
+        the way across.
 
-        If instead isConical is true, the colours form a conical gradient with
-        (x1, y1) at its centre and (x2, y2) as the start/end position.
-
-        The alpha transparencies of the colours are used, so note that
-        if you blend from transparent to a solid colour, the RGB of the transparent
-        colour will become visible in parts of the gradient. e.g. blending
-        from Colour::transparentBlack to Colours::white will produce a
-        muddy grey colour midway, but Colour::transparentWhite to Colours::white
-        will be white all the way across.
-
-        @see ColourGradient
+        @see ColourGradient, GradientType
     */
     ColourGradient (Colour colour1, float x1, float y1,
                     Colour colour2, float x2, float y2,
-                    bool isRadial, bool isConical = false);
+                    GradientType typeOfGradientToUse);
 
     /** Creates a gradient object.
 
         point1 is the location to draw with colour1. Likewise point2 is where
-        colour2 should be. In between them there's a gradient.
+        colour2 should be. In between them there's a gradient of the type specified
+        by typeOfGradientToUse.
 
-        If isRadial is true, the colours form a circular gradient with point1 at
-        its centre.
+        The alpha transparencies of the colours are used, so note that if you blend
+        from transparent to a solid colour, the RGB of the transparent colour will
+        become visible in parts of the gradient. e.g. blending from
+        Colour::transparentBlack to Colours::white will produce a muddy grey colour
+        midway, but Colour::transparentWhite to Colours::white will be white all
+        the way across.
 
-        If instead isConical is true, the colours form a conical gradient with
-        point1 at its centre and point2 as the start/end position.
-
-        The alpha transparencies of the colours are used, so note that
-        if you blend from transparent to a solid colour, the RGB of the transparent
-        colour will become visible in parts of the gradient. e.g. blending
-        from Colour::transparentBlack to Colours::white will produce a
-        muddy grey colour midway, but Colour::transparentWhite to Colours::white
-        will be white all the way across.
-
-        @see ColourGradient
+        @see ColourGradient, GradientType
     */
     ColourGradient (Colour colour1, Point<float> point1,
                     Colour colour2, Point<float> point2,
-                    bool isRadial, bool isConical = false);
+                    GradientType typeOfGradientToUse);
+
+    /** The isRadial boolean argument is no longer used in favour of the
+        GradientType argument for defining the type of gradient to use.
+    */
+    JUCE_DEPRECATED (ColourGradient (Colour colour1, float x1, float y1,
+                                     Colour colour2, float x2, float y2,
+                                     bool isRadial);)
+
+    /** The isRadial boolean argument is no longer used in favour of the
+        GradientType argument for defining the type of gradient to use.
+    */
+    JUCE_DEPRECATED (ColourGradient (Colour colour1, Point<float> point1,
+                                     Colour colour2, Point<float> point2,
+                                     bool isRadial);)
 
     //==============================================================================
     /** Creates a vertical linear gradient between two Y coordinates */
@@ -200,21 +214,13 @@ public:
     //==============================================================================
     Point<float> point1, point2;
 
-    /** If true, the gradient should be filled circularly, centred around
-        point1, with point2 defining a point on the circumference.
+    /** Defines which of the available gradient types should be used. */
+    GradientType gradientType;
 
-        If false and isConical is also false, the gradient is linear between the
-        two points.
+    /** isRadial has been deprecated in favour of the gradientType property.
+        See ColourGradient::GradientType.
     */
-    bool isRadial;
-
-    /** If true, the gradient should be filled conically, centred around point1,
-        with point2 defining the start/end position.
-
-        If false and isRadial is also false, the gradient is linear between the
-        two points.
-    */
-    bool isConical;
+    JUCE_DEPRECATED (bool isRadial;)
 
     bool operator== (const ColourGradient&) const noexcept;
     bool operator!= (const ColourGradient&) const noexcept;

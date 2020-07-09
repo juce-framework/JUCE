@@ -214,7 +214,8 @@ void LookAndFeel_V3::drawTabButton (TabBarButton& button, Graphics& g, bool isMo
         }
 
         g.setGradientFill (ColourGradient (bkg.brighter (0.2f), p1.toFloat(),
-                                           bkg.darker (0.1f),   p2.toFloat(), false));
+                                           bkg.darker (0.1f),   p2.toFloat(),
+                                           ColourGradient::Linear));
     }
 
     g.fillRect (activeArea);
@@ -275,7 +276,7 @@ void LookAndFeel_V3::drawTabAreaBehindFrontButton (TabbedButtonBar& bar, Graphic
 
     Rectangle<int> shadowRect, line;
     ColourGradient gradient (Colours::black.withAlpha (bar.isEnabled() ? 0.08f : 0.04f), 0, 0,
-                             Colours::transparentBlack, 0, 0, false);
+                             Colours::transparentBlack, 0, 0, ColourGradient::Linear);
 
     switch (bar.getOrientation())
     {

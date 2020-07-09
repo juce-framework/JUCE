@@ -120,7 +120,7 @@ static void drawShadowSection (Graphics& g, ColourGradient& cg, Rectangle<float>
 {
     cg.point1 = area.getRelativePoint (centreX, centreY);
     cg.point2 = area.getRelativePoint (edgeX, edgeY);
-    cg.isRadial = isCorner;
+    cg.gradientType = isCorner ? ColourGradient::Radial : ColourGradient::Linear;
 
     g.setGradientFill (cg);
     g.fillRect (area);
@@ -128,7 +128,7 @@ static void drawShadowSection (Graphics& g, ColourGradient& cg, Rectangle<float>
 
 void DropShadow::drawForRectangle (Graphics& g, const Rectangle<int>& targetArea) const
 {
-    ColourGradient cg (colour, 0, 0, colour.withAlpha (0.0f), 0, 0, false);
+    ColourGradient cg (colour, 0, 0, colour.withAlpha (0.0f), 0, 0, ColourGradient::Linear);
 
     for (float i = 0.05f; i < 1.0f; i += 0.1f)
         cg.addColour (1.0 - i, colour.withMultipliedAlpha (i * i));

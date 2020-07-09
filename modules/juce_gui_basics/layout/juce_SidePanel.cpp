@@ -148,7 +148,8 @@ void SidePanel::paint (Graphics& g)
     g.setGradientFill (ColourGradient (shadowColour.withAlpha (0.7f), (isOnLeft ? shadowArea.getTopLeft()
                                                                                 : shadowArea.getTopRight()).toFloat(),
                                        shadowColour.withAlpha (0.0f), (isOnLeft ? shadowArea.getTopRight()
-                                                                                : shadowArea.getTopLeft()).toFloat(), false));
+                                                                                : shadowArea.getTopLeft()).toFloat(),
+                                       ColourGradient::Linear));
     g.fillRect (shadowArea);
 
     g.excludeClipRegion (shadowArea);
