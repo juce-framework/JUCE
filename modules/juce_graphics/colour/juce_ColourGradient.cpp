@@ -26,7 +26,7 @@
 namespace juce
 {
 
-ColourGradient::ColourGradient() noexcept  : gradientType (Linear)
+ColourGradient::ColourGradient() noexcept
 {
    #if JUCE_DEBUG
     point1.setX (987654.0f);

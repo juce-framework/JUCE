@@ -215,7 +215,7 @@ public:
     Point<float> point1, point2;
 
     /** Defines which of the available gradient types should be used. */
-    GradientType gradientType;
+    GradientType gradientType = GradientType::Linear;
 
     /** isRadial has been deprecated in favour of the gradientType property.
         See ColourGradient::GradientType.
