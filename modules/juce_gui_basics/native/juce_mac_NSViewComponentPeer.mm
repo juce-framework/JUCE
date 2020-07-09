@@ -1785,7 +1785,7 @@ private:
         if (owner == nullptr || ! owner->redirectKeyUp (ev))
         {
             objc_super s = { self, [NSView class] };
-            ObjCMsgSendSuper<void> (&s, @selector (keyDown:), ev);
+            ObjCMsgSendSuper<void> (&s, @selector (keyUp:), ev);
         }
     }
 
