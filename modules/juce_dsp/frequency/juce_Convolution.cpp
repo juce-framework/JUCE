@@ -77,14 +77,7 @@ class BackgroundMessageQueue  : private Thread
 public:
     explicit BackgroundMessageQueue (int entries)
         : Thread ("Convolution background loader"), queue (entries)
-    {
-        startThread();
-    }
-
-    ~BackgroundMessageQueue() override
-    {
-        stopThread (-1);
-    }
+    {}
 
     using IncomingCommand = FixedSizeFunction<400, void()>;
 
@@ -92,6 +85,9 @@ public:
     // This function is wait-free.
     // This function is only safe to call from a single thread at a time.
     bool push (IncomingCommand& command) { return queue.push (command); }
+
+    using Thread::startThread;
+    using Thread::stopThread;
 
 private:
     void run() override
@@ -119,9 +115,14 @@ ConvolutionMessageQueue::ConvolutionMessageQueue()
 
 ConvolutionMessageQueue::ConvolutionMessageQueue (int entries)
     : pimpl (std::make_unique<Impl> (entries))
-{}
+{
+    pimpl->startThread();
+}
 
-ConvolutionMessageQueue::~ConvolutionMessageQueue() noexcept = default;
+ConvolutionMessageQueue::~ConvolutionMessageQueue() noexcept
+{
+    pimpl->stopThread (-1);
+}
 
 ConvolutionMessageQueue::ConvolutionMessageQueue (ConvolutionMessageQueue&&) noexcept = default;
 ConvolutionMessageQueue& ConvolutionMessageQueue::operator= (ConvolutionMessageQueue&&) noexcept = default;
@@ -1016,7 +1017,8 @@ public:
     {
         mixer.prepare (spec);
         engineQueue->prepare (spec);
-        installPendingEngine();
+        currentEngine = engineQueue->getEngine();
+        previousEngine = nullptr;
         jassert (currentEngine != nullptr);
     }
 
