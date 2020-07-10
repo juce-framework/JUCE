@@ -2055,7 +2055,12 @@ private:
     static NSRect constrainFrameRect (id self, SEL, NSRect frameRect, NSScreen* screen)
     {
         if (auto* owner = getOwner (self))
+        {
+            frameRect = sendSuperclassMessage<NSRect, NSRect, NSScreen*> (self, @selector (constrainFrameRect:toScreen:),
+                                                                          frameRect, screen);
+
             frameRect = owner->constrainRect (frameRect);
+        }
 
         return frameRect;
     }
