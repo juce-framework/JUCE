@@ -80,7 +80,6 @@ private:
     static void dealloc (id self, SEL)
     {
         [getController (self) release];
-
         sendSuperclassMessage<void> (self, @selector (dealloc));
     }
 

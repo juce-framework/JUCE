@@ -1771,10 +1771,7 @@ private:
                 owner->stringBeingComposed.clear();
 
             if (! (owner->textWasInserted || owner->redirectKeyDown (ev)))
-            {
-                objc_super s = { self, [NSView class] };
-                ObjCMsgSendSuper<void> (&s, @selector (keyDown:), ev);
-            }
+                sendSuperclassMessage<void> (self, @selector (keyDown:), ev);
         }
     }
 
@@ -1782,11 +1779,8 @@ private:
     {
         auto* owner = getOwner (self);
 
-        if (owner == nullptr || ! owner->redirectKeyUp (ev))
-        {
-            objc_super s = { self, [NSView class] };
-            ObjCMsgSendSuper<void> (&s, @selector (keyUp:), ev);
-        }
+        if (! owner->redirectKeyUp (ev))
+            sendSuperclassMessage<void> (self, @selector (keyUp:), ev);
     }
 
     //==============================================================================
@@ -2058,7 +2052,7 @@ private:
         return owner == nullptr || owner->windowShouldClose();
     }
 
-    static NSRect constrainFrameRect (id self, SEL, NSRect frameRect, NSScreen*)
+    static NSRect constrainFrameRect (id self, SEL, NSRect frameRect, NSScreen* screen)
     {
         if (auto* owner = getOwner (self))
             frameRect = owner->constrainRect (frameRect);
@@ -2105,10 +2099,10 @@ private:
     {
         if (auto* owner = getOwner (self))
         {
-            owner->isZooming = true;
-            objc_super s = { self, [NSWindow class] };
-            ObjCMsgSendSuper<void> (&s, @selector (zoom:), sender);
-            owner->isZooming = false;
+            {
+                const ScopedValueSetter<bool> svs (owner->isZooming, true);
+                sendSuperclassMessage<void> (self, @selector (zoom:), sender);
+            }
 
             owner->redirectMovedOrResized();
         }

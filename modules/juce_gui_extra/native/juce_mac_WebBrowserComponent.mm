@@ -276,11 +276,17 @@ struct WebViewKeyEquivalentResponder : public ObjCClass<WebView>
 {
     WebViewKeyEquivalentResponder() : ObjCClass<WebView> ("WebViewKeyEquivalentResponder_")
     {
+        addIvar<WebViewKeyEquivalentResponder*> ("owner");
         addMethod (@selector (performKeyEquivalent:), performKeyEquivalent, @encode (BOOL), "@:@");
         registerClass();
     }
 
 private:
+    static WebViewKeyEquivalentResponder* getOwner (id self)
+    {
+        return getIvar<WebViewKeyEquivalentResponder*> (self, "owner");
+    }
+
     static BOOL performKeyEquivalent (id self, SEL selector, NSEvent* event)
     {
         NSResponder* first = [[self window] firstResponder];
@@ -293,8 +299,7 @@ private:
             if ([[event charactersIgnoringModifiers] isEqualToString:@"a"]) return [NSApp sendAction:@selector(selectAll:) to:first from:self];
         }
 
-        objc_super s = { self, [WebView class] };
-        return ObjCMsgSendSuper<BOOL> (&s, selector, event);
+        return sendSuperclassMessage<BOOL> (self, selector, event);
     }
 };
 

@@ -192,20 +192,32 @@ NSRect makeNSRect (const RectangleType& r) noexcept
                        static_cast<CGFloat> (r.getHeight()));
 }
 #endif
-#if JUCE_MAC || JUCE_IOS
 
-// This is necessary as on iOS/ARM builds, some arguments may be passed on registers
-// depending on the argument type. The re-cast objc_msgSendSuper to a function
-// take the same arguments as the target method.
-template <typename ReturnValue, typename... Params>
-ReturnValue ObjCMsgSendSuper (struct objc_super* s, SEL sel, Params... params)
-{
-    using SuperFn = ReturnValue (*)(struct objc_super*, SEL, Params...);
-    SuperFn fn = reinterpret_cast<SuperFn> (objc_msgSendSuper);
-    return fn (s, sel, params...);
-}
+#if JUCE_INTEL
+ template <typename T>
+ struct NeedsStret { static constexpr auto value = sizeof (T) > 16; };
+ template<>
+ struct NeedsStret<void> { static constexpr auto value = false; };
 
+ template <typename T, bool b = NeedsStret<T>::value>
+ struct MetaSuperFn { static constexpr auto value = objc_msgSendSuper_stret; };
+
+ template <typename T>
+ struct MetaSuperFn<T, false> { static constexpr auto value = objc_msgSendSuper; };
+#else
+ template <typename>
+ struct MetaSuperFn { static constexpr auto value = objc_msgSendSuper; };
 #endif
+
+template <typename SuperType, typename ReturnType, typename... Params>
+static ReturnType ObjCMsgSendSuper (id self, SEL sel, Params... params)
+{
+    using SuperFn = ReturnType (*) (struct objc_super*, SEL, Params...);
+    const auto fn = reinterpret_cast<SuperFn> (MetaSuperFn<ReturnType>::value);
+
+    objc_super s = { self, [SuperType class] };
+    return fn (&s, sel, params...);
+}
 
 //==============================================================================
 struct NSObjectDeleter
@@ -278,14 +290,11 @@ struct ObjCClass
         jassert (b); ignoreUnused (b);
     }
 
-   #if JUCE_MAC || JUCE_IOS
-    template <typename Result>
-    static Result sendSuperclassMessage (id self, SEL selector)
+    template <typename ReturnType, typename... Params>
+    static ReturnType sendSuperclassMessage (id self, SEL sel, Params... params)
     {
-        objc_super s = { self, [SuperclassType class] };
-        return ObjCMsgSendSuper<Result> (&s, selector);
+        return ObjCMsgSendSuper<SuperclassType, ReturnType, Params...> (self, sel, params...);
     }
-   #endif
 
     template <typename Type>
     static Type getIvar (id self, const char* name)
@@ -322,18 +331,14 @@ struct ObjCLifetimeManagedClass : public ObjCClass<NSObject>
 
         addMethod (@selector (dealloc),             dealloc,            "v@:");
 
-
         registerClass();
     }
 
     static id initWithJuceObject (id _self, SEL, JuceClass* obj)
     {
-        NSObject* self = _self;
-
-        objc_super s = { self, [NSObject class] };
-        self = ObjCMsgSendSuper<NSObject*> (&s, @selector(init));
-
+        NSObject* self = sendSuperclassMessage<NSObject*> (_self, @selector (init));
         object_setInstanceVariable (self, "cppObject", obj);
+
         return self;
     }
 
@@ -345,10 +350,8 @@ struct ObjCLifetimeManagedClass : public ObjCClass<NSObject>
             object_setInstanceVariable (_self, "cppObject", nullptr);
         }
 
-        objc_super s = { _self, [NSObject class] };
-        ObjCMsgSendSuper<void> (&s, @selector(dealloc));
+        sendSuperclassMessage<void> (_self, @selector (dealloc));
     }
-
 
     static ObjCLifetimeManagedClass objCLifetimeManagedClass;
 };
