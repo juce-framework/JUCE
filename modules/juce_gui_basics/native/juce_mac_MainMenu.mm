@@ -534,30 +534,7 @@ private:
             auto owner = getIvar<JuceMainMenuHandler*> (self, "owner");
 
             if (auto* juceItem = getJuceClassFromNSObject<PopupMenu::Item> ([item representedObject]))
-            {
-                // If the menu is being triggered by a keypress, the OS will have picked it up before we had a chance to offer it to
-                // our own components, which may have wanted to intercept it. So, rather than dispatching directly, we'll feed it back
-                // into the focused component and let it trigger the menu item indirectly.
-                NSEvent* e = [NSApp currentEvent];
-
-                if ([e type] == NSEventTypeKeyDown || [e type] == NSEventTypeKeyUp)
-                {
-                    if (auto* focused = juce::Component::getCurrentlyFocusedComponent())
-                    {
-                        if (auto peer = dynamic_cast<juce::NSViewComponentPeer*> (focused->getPeer()))
-                        {
-                            if ([e type] == NSEventTypeKeyDown)
-                                peer->redirectKeyDown (e);
-                            else
-                                peer->redirectKeyUp (e);
-
-                            return;
-                        }
-                    }
-                }
-
                 owner->invoke (*juceItem, static_cast<int> ([item tag]));
-            }
         }
 
         static void menuNeedsUpdate (id self, SEL, NSMenu* menu)

@@ -1,8 +1,34 @@
 JUCE breaking changes
 =====================
 
-Version 6.0.0
+Develop
 =======
+
+Change
+------
+Space, return and escape key events on the native macOS menu bar are no longer
+passed to the currently focused JUCE Component.
+
+Possible Issues
+---------------
+Code relying on receiving these keyboard events will no longer work.
+
+Workaround
+----------
+There is no workaround.
+
+Rationale
+---------
+It should be possible for users with a keyboard or assistive device to navigate
+the menu, invoking the currently highlighted menu item with the space or return
+key and dismissing the menu with the escape key. These key events should not be
+passed to the application and doing so interferes with the accessibility of
+JUCE apps. Only passing these events to the native macOS menu means that JUCE
+apps behave as expected for users.
+
+
+Version 6.0.0
+=============
 
 Change
 ------
