@@ -752,7 +752,8 @@ private:
 
             if (editor != nullptr)
                 editor->setBounds (editor->getLocalArea (this, r.toFloat())
-                                          .withPosition (editor->getLocalPoint (this, r.getTopLeft().toFloat())).toNearestInt());
+                                          .withPosition (r.getTopLeft().toFloat().transformedBy (editor->getTransform().inverted()))
+                                     .toNearestInt());
         }
 
     private:
