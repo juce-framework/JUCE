@@ -625,7 +625,7 @@ public:
         srcPos = 0;
     }
 
-    ~CoreAudioWriter()
+    ~CoreAudioWriter() override
     {
         ExtAudioFileDispose (audioFileRef);
         AudioFileClose (audioFileID);

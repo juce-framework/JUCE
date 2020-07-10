@@ -479,7 +479,7 @@ public:
     StickyMidiKeyboardComponent (MidiKeyboardState& state,
                                  Orientation orientation);
     /** Destructor. */
-    ~StickyMidiKeyboardComponent();
+    ~StickyMidiKeyboardComponent() override;
 
 protected:
     //==============================================================================
