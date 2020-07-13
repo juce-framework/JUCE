@@ -39,9 +39,6 @@
 #endif
 
 #if JUCE_IOS
- #if (! defined __IPHONE_OS_VERSION_MIN_REQUIRED) || (! defined __IPHONE_9_0) || (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_9_0)
-  #error AUv3 needs Deployment Target iOS 9.0 or higher to compile
- #endif
  #if (defined __IPHONE_11_0) && (__IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_11_0)
   #define JUCE_AUV3_MIDI_OUTPUT_SUPPORTED 1
   #define JUCE_AUV3_VIEW_CONFIG_SUPPORTED 1
