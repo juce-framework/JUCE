@@ -777,7 +777,7 @@ struct MenuWindow  : public Component
             totalW = minWidth;
 
             for (int col = 0; col < numColumns; ++col)
-                columnWidths.set (0, totalW / numColumns);
+                columnWidths.set (col, totalW / numColumns);
         }
 
         return totalW;
