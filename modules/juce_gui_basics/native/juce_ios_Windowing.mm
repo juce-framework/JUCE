@@ -29,7 +29,7 @@ namespace juce
 
     struct AppInactivityCallback // NB: careful, this declaration is duplicated in other modules
     {
-        virtual ~AppInactivityCallback() {}
+        virtual ~AppInactivityCallback() = default;
         virtual void appBecomingInactive() = 0;
     };
 
@@ -668,13 +668,9 @@ void Displays::findDisplays (float masterScale)
         UIScreen* s = [UIScreen mainScreen];
 
         Display d;
-        d.userArea = d.totalArea = UIViewComponentPeer::realScreenPosToRotated (convertToRectInt ([s bounds])) / masterScale;
+        d.userArea = d.totalArea = convertToRectInt ([s bounds]) / masterScale;
         d.isMain = true;
-        d.scale = masterScale;
-
-        if ([s respondsToSelector: @selector (scale)])
-            d.scale *= s.scale;
-
+        d.scale = masterScale * s.scale;
         d.dpi = 160 * d.scale;
 
         displays.add (d);
