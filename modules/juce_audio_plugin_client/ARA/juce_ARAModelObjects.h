@@ -80,6 +80,16 @@ public:
         */
         virtual void didEndEditing (ARADocument* document) {}
 
+        /** Called before sending model updates do the host. 
+            @param document The document whose model updates are about to be sent. 
+        */
+        virtual void willNotifyModelUpdates (ARADocument* document) {}
+
+        /** Called after sending model updates do the host.
+            @param document The document whose model updates have just been sent.
+        */
+        virtual void didNotifyModelUpdates (ARADocument* document) {}
+
         /** Called before the document's properties are updated.
             @param document The document whose properties will be updated. 
             @param newProperties The document properties that will be assigned to \p document. 

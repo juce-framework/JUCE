@@ -80,6 +80,8 @@ protected:
     // Document notifications, typically not overridden further - instead, override the ARADocument::Listener callbacks below
     void willBeginEditing() noexcept override;
     void didEndEditing() noexcept override;
+    void willNotifyModelUpdates() noexcept override;
+    void didNotifyModelUpdates() noexcept override;
     void willUpdateDocumentProperties (ARA::PlugIn::Document* document, ARADocument::PropertiesPtr newProperties) noexcept override;
     void didUpdateDocumentProperties (ARA::PlugIn::Document* document) noexcept override;
     void didAddMusicalContextToDocument (ARA::PlugIn::Document* document, ARA::PlugIn::MusicalContext* musicalContext) noexcept override;
@@ -95,6 +97,8 @@ protected:
     // ARADocument::Listener callbacks
     using ARADocument::Listener::willBeginEditing;
     using ARADocument::Listener::didEndEditing;
+    using ARADocument::Listener::willNotifyModelUpdates;
+    using ARADocument::Listener::didNotifyModelUpdates;
     using ARADocument::Listener::willUpdateDocumentProperties;
     using ARADocument::Listener::didUpdateDocumentProperties;
     using ARADocument::Listener::didAddMusicalContextToDocument;

@@ -167,6 +167,16 @@ void ARADocumentController::didEndEditing() noexcept
         startTimerHz (20);
 }
 
+void ARADocumentController::willNotifyModelUpdates() noexcept
+{
+    notify_listeners (willNotifyModelUpdates, ARADocument*, getDocument());
+}
+
+void ARADocumentController::didNotifyModelUpdates() noexcept
+{
+    notify_listeners (didNotifyModelUpdates, ARADocument*, getDocument());
+}
+
 //==============================================================================
 
 bool ARADocumentController::doRestoreObjectsFromStream (ARAInputStream& /*input*/, const ARARestoreObjectsFilter* /*filter*/) noexcept
