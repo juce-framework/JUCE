@@ -1189,22 +1189,24 @@ bool Project::shouldBuildTargetType (build_tools::ProjectType::Target::Type targ
 
 build_tools::ProjectType::Target::Type Project::getTargetTypeFromFilePath (const File& file, bool returnSharedTargetIfNoValidSuffix)
 {
-    auto isInPluginClientSubdir = [file] (StringRef subDir)
+    auto path = file.getFullPathName();
+
+    auto isInPluginClientSubdir = [&path] (StringRef subDir)
     {
-        return file.getFullPathName().contains ("juce_audio_plugin_client"
-                                                + File::getSeparatorString()
-                                                + subDir
-                                                + File::getSeparatorString());
+        return path.contains ("juce_audio_plugin_client"
+                             + File::getSeparatorString()
+                             + subDir
+                             + File::getSeparatorString());
     };
 
-    if      (LibraryModule::CompileUnit::hasSuffix (file, "_AU") || isInPluginClientSubdir ("AU"))                  return build_tools::ProjectType::Target::AudioUnitPlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AUv3") || isInPluginClientSubdir ("AU"))                return build_tools::ProjectType::Target::AudioUnitv3PlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AAX") || isInPluginClientSubdir ("AAX"))                return build_tools::ProjectType::Target::AAXPlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_RTAS") || isInPluginClientSubdir ("RTAS"))              return build_tools::ProjectType::Target::RTASPlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST2") || isInPluginClientSubdir ("VST"))               return build_tools::ProjectType::Target::VSTPlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST3") || isInPluginClientSubdir ("VST3"))              return build_tools::ProjectType::Target::VST3PlugIn;
+    if      (LibraryModule::CompileUnit::hasSuffix (file, "_AU")         || isInPluginClientSubdir ("AU"))          return build_tools::ProjectType::Target::AudioUnitPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AUv3")       || isInPluginClientSubdir ("AU"))          return build_tools::ProjectType::Target::AudioUnitv3PlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AAX")        || isInPluginClientSubdir ("AAX"))         return build_tools::ProjectType::Target::AAXPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_RTAS")       || isInPluginClientSubdir ("RTAS"))        return build_tools::ProjectType::Target::RTASPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST2")       || isInPluginClientSubdir ("VST"))         return build_tools::ProjectType::Target::VSTPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST3")       || isInPluginClientSubdir ("VST3"))        return build_tools::ProjectType::Target::VST3PlugIn;
     else if (LibraryModule::CompileUnit::hasSuffix (file, "_Standalone") || isInPluginClientSubdir ("Standalone"))  return build_tools::ProjectType::Target::StandalonePlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Unity") || isInPluginClientSubdir ("Unity"))            return build_tools::ProjectType::Target::UnityPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Unity")      || isInPluginClientSubdir ("Unity"))       return build_tools::ProjectType::Target::UnityPlugIn;
 
     return (returnSharedTargetIfNoValidSuffix ? build_tools::ProjectType::Target::SharedCodeTarget : build_tools::ProjectType::Target::unspecified);
 }

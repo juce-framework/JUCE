@@ -310,8 +310,7 @@ public:
     bool isVST3PluginHost();
 
     //==============================================================================
-    bool shouldBuildTargetType (
-        build_tools::ProjectType::Target::Type targetType) const noexcept;
+    bool shouldBuildTargetType (build_tools::ProjectType::Target::Type targetType) const noexcept;
     static build_tools::ProjectType::Target::Type getTargetTypeFromFilePath (const File& file, bool returnSharedTargetIfNoValidSuffix);
 
     //==============================================================================
