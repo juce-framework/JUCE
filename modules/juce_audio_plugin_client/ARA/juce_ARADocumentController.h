@@ -185,6 +185,31 @@ protected:
     using ARAPlaybackRegion::Listener::didUpdatePlaybackRegionProperties;
     using ARAPlaybackRegion::Listener::willDestroyPlaybackRegion;
 
+    // ARAAudioSource content access
+    using ARA::PlugIn::DocumentController::doIsAudioSourceContentAvailable;
+    using ARA::PlugIn::DocumentController::doGetAudioSourceContentGrade;
+    using ARA::PlugIn::DocumentController::doCreateAudioSourceContentReader;
+
+    // ARAAudioModification content access
+    using ARA::PlugIn::DocumentController::doIsAudioModificationContentAvailable;
+    using ARA::PlugIn::DocumentController::doGetAudioModificationContentGrade;
+    using ARA::PlugIn::DocumentController::doCreateAudioModificationContentReader;
+
+    // ARAPlaybackRegion content access
+    using ARA::PlugIn::DocumentController::doIsPlaybackRegionContentAvailable;
+    using ARA::PlugIn::DocumentController::doGetPlaybackRegionContentGrade;
+    using ARA::PlugIn::DocumentController::doCreatePlaybackRegionContentReader;
+
+    // ARAAudioSource analysis
+    using ARA::PlugIn::DocumentController::doIsAudioSourceContentAnalysisIncomplete;
+    using ARA::PlugIn::DocumentController::doRequestAudioSourceContentAnalysis;
+
+    // Analysis Algorithm selection
+    using ARA::PlugIn::DocumentController::doGetProcessingAlgorithmsCount;
+    using ARA::PlugIn::DocumentController::doGetProcessingAlgorithmProperties;
+    using ARA::PlugIn::DocumentController::doGetProcessingAlgorithmForAudioSource;
+    using ARA::PlugIn::DocumentController::doRequestProcessingAlgorithmForAudioSource;
+
     //==============================================================================
     // juce::Timer overrides
     void timerCallback() override;
