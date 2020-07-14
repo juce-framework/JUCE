@@ -1055,7 +1055,8 @@ class LinuxComponentPeer  : public ComponentPeer
 public:
     LinuxComponentPeer (Component& comp, int windowStyleFlags, Window parentToAddTo)
         : ComponentPeer (comp, windowStyleFlags),
-          isAlwaysOnTop (comp.isAlwaysOnTop())
+          isAlwaysOnTop (comp.isAlwaysOnTop()),
+          componentName (component.getName().toStdString())
     {
         // it's dangerous to create a window on a thread other than the message thread..
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
@@ -2402,6 +2403,7 @@ private:
 
     std::unique_ptr<Atoms> atoms;
     std::unique_ptr<LinuxRepaintManager> repainter;
+    std::string componentName;
 
     friend class LinuxRepaintManager;
     Window windowH = {}, parentWindow = {}, keyProxy = {};
@@ -2721,6 +2723,13 @@ private:
         wmHints->initial_state = NormalState;
         XSetWMHints (display, windowH, wmHints);
         XFree (wmHints);
+
+        // Set WM_CLASS property
+        XClassHint* classHint = XAllocClassHint();
+        classHint->res_name = &componentName[0];
+        classHint->res_class = &componentName[0];
+        XSetClassHint (display, windowH, classHint);
+        XFree (classHint);
 
         // Set the window type
         setWindowType();
