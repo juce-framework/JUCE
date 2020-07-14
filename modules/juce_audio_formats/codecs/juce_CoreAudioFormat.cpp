@@ -675,17 +675,35 @@ private:
     readCallback (void* inClientData, SInt64 inPosition, UInt32 requestCount, void* buffer, UInt32* actualCount)
     {
         auto* self = static_cast<CoreAudioWriter*> (inClientData);
-        auto* out = dynamic_cast<FileOutputStream*> (self->output);
-        if (out == nullptr)
-            return -1;
-        auto in = FileInputStream (out->getFile());
-        jassert (in.openedOk());
+
+        // For formats that require the read callback,
+        // CoreAudioWriter supports it for specific output stream types: FileOutputStream and MemoryOutputStream.
+        // These are the built-in JUCE output streams that conceptually support reading.
+        // A more robust solution would have been if JUCE OutputStreams had the option (not implemented by all) to also
+        // support reads.
+
+        if (auto* out = dynamic_cast<FileOutputStream*> (self->output); out != nullptr)
         {
-            bool setPositionOK [[maybe_unused]] = in.setPosition (inPosition);
-            jassert (setPositionOK);
+            auto in = FileInputStream (out->getFile());
+            jassert (in.openedOk());
+            {
+                bool setPositionOK [[maybe_unused]] = in.setPosition (inPosition);
+                jassert (setPositionOK);
+            }
+            *actualCount = in.read (buffer, requestCount);
+            return noErr;
         }
-        *actualCount = in.read (buffer, requestCount);
-        return noErr;
+
+        if (auto* out = dynamic_cast<MemoryOutputStream*> (self->output); out != nullptr)
+        {
+            const int remain = jmax (0, (int) out->getDataSize() - (int) inPosition);
+            const int count = jmin (requestCount, (UInt32) remain);
+            *actualCount = count;
+            memcpy (buffer, (char*) out->getData() + inPosition, count);
+            return noErr;
+        }
+
+        return -1;
     }
     static SInt64 getSizeCallback (void* inClientData)
     {
