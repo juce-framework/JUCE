@@ -346,7 +346,7 @@ private:
                         }
                         else if (newStatus == AVPlayerItemStatusReadyToPlay)
                         {
-                            owner.notifyOwnerPreparationFinished (url, Result::ok(), owner.player.release());
+                            owner.notifyOwnerPreparationFinished (url, Result::ok(), owner.player.get());
                         }
                         else
                         {
