@@ -216,7 +216,7 @@ ARA::PlugIn::MusicalContext* ARADocumentController::doCreateMusicalContext (ARA:
 
 void ARADocumentController::doUpdateMusicalContextContent (ARA::PlugIn::MusicalContext* musicalContext, const ARA::ARAContentTimeRange* /*range*/, ARA::ContentUpdateScopes flags) noexcept
 {
-    notify_listeners (didUpdateMusicalContextContent, ARAMusicalContext*, musicalContext, flags);
+    notify_listeners (doUpdateMusicalContextContent, ARAMusicalContext*, musicalContext, flags);
 }
 
 OVERRIDE_TO_NOTIFY_3 (willUpdateMusicalContextProperties, MusicalContext*, musicalContext, ARAMusicalContext::PropertiesPtr, newProperties)
@@ -246,7 +246,7 @@ ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugI
 
 void ARADocumentController::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* /*range*/, ARA::ContentUpdateScopes flags) noexcept
 {
-    notify_listeners (didUpdateAudioSourceContent, ARAAudioSource*, audioSource, flags);
+    notify_listeners (doUpdateAudioSourceContent, ARAAudioSource*, audioSource, flags);
 }
 
 OVERRIDE_TO_NOTIFY_3 (willUpdateAudioSourceProperties, AudioSource*, audioSource, ARAAudioSource::PropertiesPtr, newProperties)
@@ -301,7 +301,7 @@ void ARADocumentController::internalNotifyAudioSourceContentChanged (ARAAudioSou
 {
     if (notifyARAHost)
         DocumentController::notifyAudioSourceContentChanged (audioSource, scopeFlags);
-    notify_listeners (didUpdateAudioSourceContent, ARAAudioSource*, audioSource, scopeFlags);
+    notify_listeners (doUpdateAudioSourceContent, ARAAudioSource*, audioSource, scopeFlags);
 }
 
 void ARADocumentController::internalNotifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags, bool notifyARAHost)

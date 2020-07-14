@@ -252,7 +252,7 @@ void RulersView::didReorderMusicalContextsInDocument (ARADocument* /*document*/)
     detachFromDocument();
 }
 
-void RulersView::didUpdateMusicalContextContent (ARAMusicalContext* /*musicalContext*/, ARAContentUpdateScopes /*scopeFlags*/)
+void RulersView::doUpdateMusicalContextContent (ARAMusicalContext* /*musicalContext*/, ARAContentUpdateScopes /*scopeFlags*/)
 {
     repaint();
 }

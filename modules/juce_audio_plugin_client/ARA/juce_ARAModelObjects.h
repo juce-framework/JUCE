@@ -192,7 +192,7 @@ public:
             @param musicalContext The musical context with updated content.
             @param scopeFlags The scope of the content update indicating what has changed.
         */
-        virtual void didUpdateMusicalContextContent (ARAMusicalContext* musicalContext, ARAContentUpdateScopes scopeFlags) {}
+        virtual void doUpdateMusicalContextContent (ARAMusicalContext* musicalContext, ARAContentUpdateScopes scopeFlags) {}
 
         /** Called before the musical context is destroyed.
             @param musicalContext The musical context that will be destoyed. 
@@ -307,7 +307,7 @@ public:
             @param audioSource The audio source with updated content.
             @param scopeFlags The scope of the content update.
         */
-        virtual void didUpdateAudioSourceContent (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags) {}
+        virtual void doUpdateAudioSourceContent (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags) {}
 
         /** Called to notify progress when an audio source is being analyzed.
             @param audioSource The audio source being analyzed.

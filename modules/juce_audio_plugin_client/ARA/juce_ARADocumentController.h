@@ -116,7 +116,7 @@ protected:
     // ARAMusicalContext::Listener callbacks
     using ARAMusicalContext::Listener::willUpdateMusicalContextProperties;
     using ARAMusicalContext::Listener::didUpdateMusicalContextProperties;
-    using ARAMusicalContext::Listener::didUpdateMusicalContextContent;
+    using ARAMusicalContext::Listener::doUpdateMusicalContextContent;
     using ARAMusicalContext::Listener::willDestroyMusicalContext;
 
     // RegionSequence notifications, typically not overridden further - instead, override the ARARegionSequence::Listener callbacks below
@@ -148,7 +148,7 @@ protected:
     // ARAAudioSource::Listener callbacks
     using ARAAudioSource::Listener::willUpdateAudioSourceProperties;
     using ARAAudioSource::Listener::didUpdateAudioSourceProperties;
-    using ARAAudioSource::Listener::didUpdateAudioSourceContent;
+    using ARAAudioSource::Listener::doUpdateAudioSourceContent;
     using ARAAudioSource::Listener::willEnableAudioSourceSamplesAccess;
     using ARAAudioSource::Listener::didEnableAudioSourceSamplesAccess;
     using ARAAudioSource::Listener::didAddAudioModificationToAudioSource;
