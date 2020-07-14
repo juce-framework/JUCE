@@ -214,7 +214,7 @@ ARA::PlugIn::MusicalContext* ARADocumentController::doCreateMusicalContext (ARA:
     return new ARAMusicalContext (static_cast<ARADocument*> (document), hostRef);
 }
 
-void ARADocumentController::doUpdateMusicalContextContent (ARA::PlugIn::MusicalContext* musicalContext, const ARA::ARAContentTimeRange* range, ARA::ContentUpdateScopes flags) noexcept
+void ARADocumentController::doUpdateMusicalContextContent (ARA::PlugIn::MusicalContext* musicalContext, const ARA::ARAContentTimeRange* /*range*/, ARA::ContentUpdateScopes flags) noexcept
 {
     notify_listeners (didUpdateMusicalContextContent, ARAMusicalContext*, musicalContext, flags);
 }
@@ -244,7 +244,7 @@ ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugI
     return new ARAAudioSource (static_cast<ARADocument*> (document), hostRef);
 }
 
-void ARADocumentController::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* range, ARA::ContentUpdateScopes flags) noexcept
+void ARADocumentController::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* /*range*/, ARA::ContentUpdateScopes flags) noexcept
 {
     notify_listeners (didUpdateAudioSourceContent, ARAAudioSource*, audioSource, flags);
 }
