@@ -970,9 +970,6 @@ void UIViewComponentPeer::drawRect (CGRect r)
         CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
 
     CGContextConcatCTM (cg, CGAffineTransformMake (1, 0, 0, -1, 0, getComponent().getHeight()));
-
-    // NB the CTM on iOS already includes a factor for the display scale, so
-    // we'll tell the context that the scale is 1.0 to avoid it using it twice
     CoreGraphicsContext g (cg, getComponent().getHeight());
 
     insideDrawRect = true;

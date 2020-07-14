@@ -782,7 +782,7 @@ bool Component::isOpaque() const noexcept
 //==============================================================================
 struct StandardCachedComponentImage  : public CachedComponentImage
 {
-    StandardCachedComponentImage (Component& c) noexcept : owner (c), scale (1.0f) {}
+    StandardCachedComponentImage (Component& c) noexcept : owner (c)  {}
 
     void paint (Graphics& g) override
     {
@@ -836,7 +836,7 @@ private:
     Image image;
     RectangleList<int> validArea;
     Component& owner;
-    float scale;
+    float scale = 1.0f;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandardCachedComponentImage)
 };

@@ -6,6 +6,26 @@ Develop
 
 Change
 ------
+The JUCE_DISABLE_COREGRAPHICS_FONT_SMOOTHING flag in juce_graphics is no
+longer used on iOS.
+
+Possible Issues
+---------------
+Projects with this flag enabled may render differently on iOS.
+
+Workaround
+----------
+There is no workaround.
+
+Rationale
+---------
+When using a cached image to render Components with `setBufferedToImage (true)`
+the result now matches the default behaviour on iOS where fonts are not
+smoothed.
+
+
+Change
+------
 Space, return and escape key events on the native macOS menu bar are no longer
 passed to the currently focused JUCE Component.
 
