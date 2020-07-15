@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -697,7 +704,7 @@ void ProjectSaver::writeProjects (const OwnedArray<LibraryModule>& modules, Proj
     {
         for (Project::ExporterIterator exp (project); exp.next();)
         {
-            if (specifiedExporterToSave != nullptr && exp->getName() != specifiedExporterToSave->getName())
+            if (specifiedExporterToSave != nullptr && exp->getUniqueName() != specifiedExporterToSave->getUniqueName())
                 continue;
 
             exporters.push_back (std::move (exp.exporter));
@@ -733,7 +740,7 @@ void ProjectSaver::writeProjects (const OwnedArray<LibraryModule>& modules, Proj
                 if (ProjucerApplication::getApp().isRunningCommandLine)
                     saveExporter (*exporter, modules);
                 else
-                    threadPool.addJob (new ExporterJob (*this, *exporter, modules), true);
+                    threadPool.addJob ([this, &exporter, &modules] { saveExporter (*exporter, modules); });
             }
             else
             {
@@ -754,7 +761,7 @@ void ProjectSaver::writeProjects (const OwnedArray<LibraryModule>& modules, Proj
         for (auto& exporter : exporters)
             clionExporter->writeCMakeListsExporterSection (exporter.get());
 
-        std::cout << "Finished saving: " << clionExporter->getName() << std::endl;
+        std::cout << "Finished saving: " << clionExporter->getUniqueName() << std::endl;
     }
 }
 
@@ -806,8 +813,12 @@ void ProjectSaver::saveExporter (ProjectExporter& exporter, const OwnedArray<Lib
 
         if (! exporter.isCLion())
         {
-            auto exporterName = exporter.getName();
-            MessageManager::callAsync ([exporterName] { std::cout << "Finished saving: " << exporterName << std::endl; });
+            auto outputString = "Finished saving: " + exporter.getUniqueName();
+
+            if (MessageManager::getInstance()->isThisTheMessageThread())
+                std::cout <<  outputString << std::endl;
+            else
+                MessageManager::callAsync ([outputString] { std::cout <<  outputString << std::endl; });
         }
     }
     catch (build_tools::SaveError& error)

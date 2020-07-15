@@ -1,12 +1,19 @@
 # ==============================================================================
 #
-#  This file is part of the JUCE 6 technical preview.
+#  This file is part of the JUCE library.
 #  Copyright (c) 2020 - Raw Material Software Limited
 #
-#  You may use this code under the terms of the GPL v3
-#  (see www.gnu.org/licenses).
+#  JUCE is an open source library subject to commercial or open-source
+#  licensing.
 #
-#  For this technical preview, this file is not subject to commercial licensing.
+#  By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+#  Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+#
+#  End User License Agreement: www.juce.com/juce-6-licence
+#  Privacy Policy: www.juce.com/juce-privacy-policy
+#
+#  Or: You may also use this code under the terms of the GPL v3 (see
+#  www.gnu.org/licenses).
 #
 #  JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
 #  EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -32,6 +39,8 @@ target_sources(Projucer PRIVATE
     Source/Application/jucer_CommandLine.cpp
     Source/Application/jucer_Main.cpp
     Source/Application/jucer_MainWindow.cpp
+    Source/Application/StartPage/jucer_StartPageComponent.cpp
+    Source/Application/StartPage/jucer_NewProjectWizard.cpp
     Source/CodeEditor/jucer_DocumentEditorComponent.cpp
     Source/CodeEditor/jucer_OpenDocumentManager.cpp
     Source/CodeEditor/jucer_SourceCodeEditor.cpp
@@ -71,14 +80,13 @@ target_sources(Projucer PRIVATE
     Source/Utility/Helpers/jucer_CodeHelpers.cpp
     Source/Utility/Helpers/jucer_FileHelpers.cpp
     Source/Utility/Helpers/jucer_MiscUtilities.cpp
+    Source/Utility/Helpers/jucer_NewFileWizard.cpp
     Source/Utility/Helpers/jucer_VersionInfo.cpp
     Source/Utility/PIPs/jucer_PIPGenerator.cpp
     Source/Utility/UI/jucer_Icons.cpp
     Source/Utility/UI/jucer_JucerTreeViewBase.cpp
     Source/Utility/UI/jucer_ProjucerLookAndFeel.cpp
-    Source/Utility/UI/jucer_SlidingPanelComponent.cpp
-    Source/Wizards/jucer_NewFileWizard.cpp
-    Source/Wizards/jucer_NewProjectWizardClasses.cpp)
+    Source/Utility/UI/jucer_SlidingPanelComponent.cpp)
 
 target_compile_definitions(Projucer PRIVATE
     JUCE_ALLOW_STATIC_NULL_VARIABLES=0
@@ -127,7 +135,6 @@ juce_add_binary_data(ProjucerData SOURCES
     Source/BinaryData/Templates/jucer_InlineComponentTemplate.h
     Source/BinaryData/Templates/jucer_MainConsoleAppTemplate.cpp
     Source/BinaryData/Templates/jucer_MainTemplate_NoWindow.cpp
-    Source/BinaryData/Templates/jucer_MainTemplate_SimpleWindow.cpp
     Source/BinaryData/Templates/jucer_MainTemplate_Window.cpp
     Source/BinaryData/Templates/jucer_NewComponentTemplate.cpp
     Source/BinaryData/Templates/jucer_NewComponentTemplate.h
@@ -145,8 +152,6 @@ juce_add_binary_data(ProjucerData SOURCES
     Source/BinaryData/gradle/gradle-wrapper.jar
     Source/BinaryData/gradle/gradlew
     Source/BinaryData/gradle/gradlew.bat
-    Source/BinaryData/nothingtoseehere.txt
-    Source/BinaryData/projucer_EULA.txt
 
     ../Build/CMake/LaunchScreen.storyboard
     ../Build/CMake/PIPAudioProcessor.cpp.in

@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -16,18 +23,22 @@
   ==============================================================================
 */
 
-#include "../../juce_core/system/juce_CompilerWarnings.h"
-#include "../../juce_core/system/juce_TargetPlatform.h"
+#include <juce_core/system/juce_CompilerWarnings.h>
+#include <juce_core/system/juce_TargetPlatform.h>
 
 //==============================================================================
 #if JucePlugin_Build_VST3 && (__APPLE_CPP__ || __APPLE_CC__ || _WIN32 || _WIN64 || LINUX || __linux__)
 
 #if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
+ #if JUCE_MAC
+  #include <CoreFoundation/CoreFoundation.h>
+ #endif
+
  #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
  #define JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY 1
 #endif
 
-#include "../../juce_audio_processors/format_types/juce_VST3Headers.h"
+#include <juce_audio_processors/format_types/juce_VST3Headers.h>
 
 #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
 #define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
@@ -37,8 +48,8 @@
 #include "../utility/juce_IncludeSystemHeaders.h"
 #include "../utility/juce_WindowsHooks.h"
 #include "../utility/juce_FakeMouseMoveGenerator.h"
-#include "../../juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp"
-#include "../../juce_audio_processors/format_types/juce_VST3Common.h"
+#include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
+#include <juce_audio_processors/format_types/juce_VST3Common.h>
 
 #ifndef JUCE_VST3_CAN_REPLACE_VST2
  #define JUCE_VST3_CAN_REPLACE_VST2 1
@@ -58,7 +69,7 @@ namespace Vst2
 #endif
 
 #if JUCE_LINUX
- std::vector<std::pair<int, std::function<void(int)>>> getFdReadCallbacks();
+ std::vector<std::pair<int, std::function<void (int)>>> getFdReadCallbacks();
 #endif
 
 namespace juce
@@ -445,11 +456,22 @@ public:
 
         virtual ~Param() override = default;
 
-        void updateParameterInfo()
+        bool updateParameterInfo()
         {
-            toString128 (info.title,      param.getName (128));
-            toString128 (info.shortTitle, param.getName (8));
-            toString128 (info.units,      param.getLabel());
+            auto updateParamIfChanged = [] (Vst::String128& paramToUpdate, const String& newValue)
+            {
+                if (juce::toString (paramToUpdate) == newValue)
+                    return false;
+
+                toString128 (paramToUpdate, newValue);
+                return true;
+            };
+
+            auto anyUpdated = updateParamIfChanged (info.title,      param.getName (128));
+            anyUpdated     |= updateParamIfChanged (info.shortTitle, param.getName (8));
+            anyUpdated     |= updateParamIfChanged (info.units,      param.getLabel());
+
+            return anyUpdated;
         }
 
         bool setNormalized (Vst::ParamValue v) override
@@ -879,21 +901,42 @@ public:
 
     void audioProcessorChanged (AudioProcessor*) override
     {
-        auto numParameters = parameters.getParameterCount();
+        int32 flags = 0;
 
-        for (int32 i = 0; i < numParameters; ++i)
+        for (int32 i = 0; i < parameters.getParameterCount(); ++i)
             if (auto* param = dynamic_cast<Param*> (parameters.getParameterByIndex (i)))
-                param->updateParameterInfo();
+                if (param->updateParameterInfo() && (flags & Vst::kParamTitlesChanged) == 0)
+                    flags |= Vst::kParamTitlesChanged;
 
         if (auto* pluginInstance = getPluginInstance())
         {
-            if (pluginInstance->getNumPrograms() > 1)
-                EditController::setParamNormalized (JuceAudioProcessor::paramPreset, static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram())
-                                                                                         / static_cast<Vst::ParamValue> (pluginInstance->getNumPrograms() - 1));
+            auto newNumPrograms = pluginInstance->getNumPrograms();
+
+            if (newNumPrograms != lastNumPrograms)
+            {
+                if (newNumPrograms > 1)
+                {
+                    auto paramValue = static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram())
+                                      / static_cast<Vst::ParamValue> (pluginInstance->getNumPrograms() - 1);
+
+                    EditController::setParamNormalized (JuceAudioProcessor::paramPreset, paramValue);
+                    flags |= Vst::kParamValuesChanged;
+                }
+
+                lastNumPrograms = newNumPrograms;
+            }
+
+            auto newLatencySamples = pluginInstance->getLatencySamples();
+
+            if (newLatencySamples != lastLatencySamples)
+            {
+                flags |= Vst::kLatencyChanged;
+                lastLatencySamples = newLatencySamples;
+            }
         }
 
-        if (componentHandler != nullptr && ! inSetupProcessing)
-            componentHandler->restartComponent (Vst::kLatencyChanged | Vst::kParamValuesChanged | Vst::kParamTitlesChanged);
+        if (flags != 0 && componentHandler != nullptr && ! inSetupProcessing)
+            componentHandler->restartComponent (flags);
     }
 
     void parameterValueChanged (int, float newValue) override
@@ -938,6 +981,8 @@ private:
     //==============================================================================
     std::atomic<bool> vst3IsPlaying     { false },
                       inSetupProcessing { false };
+
+    int lastNumPrograms = 0, lastLatencySamples = 0;
 
    #if ! JUCE_MAC
     float lastScaleFactorReceived = 1.0f;
@@ -1027,7 +1072,7 @@ private:
           : Vst::EditorView (&ec, nullptr),
             owner (&ec), pluginInstance (p)
         {
-            component.reset (new ContentWrapperComponent (*this, p));
+            createContentWrapperComponentIfNeeded();
 
            #if JUCE_MAC
             if (getHostType().type == PluginHostType::SteinbergCubase10)
@@ -1083,13 +1128,20 @@ private:
             if (parent == nullptr || isPlatformTypeSupported (type) == kResultFalse)
                 return kResultFalse;
 
-            if (component == nullptr)
-                component.reset (new ContentWrapperComponent (*this, pluginInstance));
+            systemWindow = parent;
+
+            createContentWrapperComponentIfNeeded();
 
            #if JUCE_WINDOWS || JUCE_LINUX
             component->addToDesktop (0, parent);
             component->setOpaque (true);
             component->setVisible (true);
+
+            #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+             component->checkHostWindowScaleFactor();
+             component->startTimer (500);
+            #endif
+
             #if JUCE_LINUX
              if (auto* runLoop = getHostRunLoop())
              {
@@ -1100,13 +1152,13 @@ private:
                  }
              }
             #endif
+
            #else
             isNSView = (strcmp (type, kPlatformTypeNSView) == 0);
             macHostWindow = juce::attachComponentToWindowRefVST (component.get(), parent, isNSView);
            #endif
 
             component->resizeHostWindow();
-            systemWindow = parent;
             attachedToParent();
 
             // Life's too short to faff around with wave lab
@@ -1276,6 +1328,17 @@ private:
            #if ! JUCE_MAC
             if (! approximatelyEqual ((float) factor, editorScaleFactor))
             {
+               #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                // Cubase 10 only sends integer scale factors, so correct this for fractional scales
+                if (getHostType().type == PluginHostType::SteinbergCubase10)
+                {
+                    auto hostWindowScale = (Steinberg::IPlugViewContentScaleSupport::ScaleFactor) getScaleFactorForWindow ((HWND) systemWindow);
+
+                    if (hostWindowScale > 0.0 && ! approximatelyEqual (factor, hostWindowScale))
+                        factor = hostWindowScale;
+                }
+               #endif
+
                 editorScaleFactor = (float) factor;
 
                 if (owner != nullptr)
@@ -1340,18 +1403,29 @@ private:
         //==============================================================================
         struct ContentWrapperComponent  : public Component
                                        #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                                        , private Timer
+                                        , public Timer
                                        #endif
         {
-            ContentWrapperComponent (JuceVST3Editor& editor, AudioProcessor& plugin)
-                : pluginEditor (plugin.createEditorIfNeeded()),
-                  owner (editor)
+            ContentWrapperComponent (JuceVST3Editor& editor)  : owner (editor)
             {
                 setOpaque (true);
                 setBroughtToFrontOnMouseClick (true);
 
-                // if hasEditor() returns true then createEditorIfNeeded has to return a valid editor
-                jassert (pluginEditor != nullptr);
+                ignoreUnused (fakeMouseGenerator);
+            }
+
+            ~ContentWrapperComponent() override
+            {
+                if (pluginEditor != nullptr)
+                {
+                    PopupMenu::dismissAllActiveMenus();
+                    pluginEditor->processor.editorBeingDeleted (pluginEditor.get());
+                }
+            }
+
+            void createEditor (AudioProcessor& plugin)
+            {
+                pluginEditor.reset (plugin.createEditorIfNeeded());
 
                 if (pluginEditor != nullptr)
                 {
@@ -1367,20 +1441,10 @@ private:
 
                     resizeHostWindow();
                 }
-
-               #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                startTimer (500);
-               #endif
-
-                ignoreUnused (fakeMouseGenerator);
-            }
-
-            ~ContentWrapperComponent() override
-            {
-                if (pluginEditor != nullptr)
+                else
                 {
-                    PopupMenu::dismissAllActiveMenus();
-                    pluginEditor->processor.editorBeingDeleted (pluginEditor.get());
+                    // if hasEditor() returns true then createEditorIfNeeded has to return a valid editor
+                    jassertfalse;
                 }
             }
 
@@ -1493,19 +1557,24 @@ private:
                 }
             }
 
-            std::unique_ptr<AudioProcessorEditor> pluginEditor;
-
-        private:
            #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-            void timerCallback() override
+            void checkHostWindowScaleFactor()
             {
                 auto hostWindowScale = (float) getScaleFactorForWindow ((HWND) owner.systemWindow);
 
                 if (hostWindowScale > 0.0 && ! approximatelyEqual (hostWindowScale, owner.editorScaleFactor))
                     owner.setContentScaleFactor (hostWindowScale);
             }
+
+            void timerCallback() override
+            {
+                checkHostWindowScaleFactor();
+            }
            #endif
 
+            std::unique_ptr<AudioProcessorEditor> pluginEditor;
+
+        private:
             JuceVST3Editor& owner;
             FakeMouseMoveGenerator fakeMouseGenerator;
             Rectangle<int> lastBounds;
@@ -1513,6 +1582,15 @@ private:
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
         };
+
+        void createContentWrapperComponentIfNeeded()
+        {
+            if (component == nullptr)
+            {
+                component.reset (new ContentWrapperComponent (*this));
+                component->createEditor (pluginInstance);
+            }
+        }
 
         //==============================================================================
         ScopedJuceInitialiser_GUI libraryInitialiser;
@@ -1550,7 +1628,7 @@ private:
         #if JUCE_WINDOWS
          WindowsHooks hooks;
         #elif JUCE_LINUX
-         std::unordered_map<int, std::function<void(int)>> fdCallbackMap;
+         std::unordered_map<int, std::function<void (int)>> fdCallbackMap;
 
          ::Display* display = XWindowSystem::getInstance()->getDisplay();
 
@@ -1873,16 +1951,16 @@ public:
    #if JUCE_VST3_CAN_REPLACE_VST2
     bool loadVST2VstWBlock (const char* data, int size)
     {
-        jassert ('VstW' == htonl (*(juce::int32*) data));
-        jassert (1 == htonl (*(juce::int32*) (data + 8))); // version should be 1 according to Steinberg's docs
+        jassert ('VstW' == htonl (readUnaligned<juce::int32> (data)));
+        jassert (1 == htonl (readUnaligned<juce::int32> (data + 8))); // version should be 1 according to Steinberg's docs
 
-        auto headerLen = (int) htonl (*(juce::int32*) (data + 4)) + 8;
+        auto headerLen = (int) htonl (readUnaligned<juce::int32> (data + 4)) + 8;
         return loadVST2CcnKBlock (data + headerLen, size - headerLen);
     }
 
     bool loadVST2CcnKBlock (const char* data, int size)
     {
-        auto bank = (const Vst2::fxBank*) data;
+        auto* bank = reinterpret_cast<const Vst2::fxBank*> (data);
 
         jassert ('CcnK' == htonl (bank->chunkMagic));
         jassert ('FBCh' == htonl (bank->fxMagic));
@@ -1938,7 +2016,7 @@ public:
         if (size < 4)
             return false;
 
-        auto header = htonl (*(juce::int32*) data);
+        auto header = htonl (readUnaligned<juce::int32> (data));
 
         if (header == 'VstW')
             return loadVST2VstWBlock (data, size);

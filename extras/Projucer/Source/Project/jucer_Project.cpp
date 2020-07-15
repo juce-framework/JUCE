@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -639,7 +646,9 @@ Result Project::loadDocument (const File& file)
     rescanExporterPathModules (! ProjucerApplication::getApp().isRunningCommandLine);
     exporterPathsModulesList.addListener (this);
 
-    setCppVersionFromOldExporterSettings();
+    if (cppStandardValue.isUsingDefault())
+        setCppVersionFromOldExporterSettings();
+
     updateDeprecatedProjectSettings();
 
     setChangedFlag (false);
@@ -691,7 +700,7 @@ Result Project::openProjectInIDE (ProjectExporter& exporterToOpen, bool saveFirs
 {
     for (ExporterIterator exporter (*this); exporter.next();)
     {
-        if (exporter->canLaunchProject() && exporter->getName() == exporterToOpen.getName())
+        if (exporter->canLaunchProject() && exporter->getUniqueName() == exporterToOpen.getUniqueName())
         {
             if (isTemporaryProject())
             {
@@ -733,7 +742,7 @@ bool Project::hasIncompatibleLicenseTypeAndSplashScreenSetting() const
                        || companyName == "ROLI Ltd.");
 
     return ! ProjucerApplication::getApp().isRunningCommandLine && ! isJUCEProject && ! shouldDisplaySplashScreen()
-          && ! ProjucerApplication::getApp().getLicenseController().getCurrentState().isPaidOrGPL();
+          && ! ProjucerApplication::getApp().getLicenseController().getCurrentState().canUnlockFullFeatures();
 }
 
 bool Project::isSaveAndExportDisabled() const
@@ -745,9 +754,15 @@ void Project::updateLicenseWarning()
 {
     if (hasIncompatibleLicenseTypeAndSplashScreenSetting())
     {
+        ProjectMessages::MessageAction action;
+
+        if (ProjucerApplication::getApp().getLicenseController().getCurrentState().isOldLicense())
+            action = { "Upgrade", [] { URL ("https://juce.com/get-juce").launchInDefaultBrowser(); } };
+        else
+            action = { "Sign in", [this] { ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (getFile())->showLoginFormOverlay(); } };
+
         addProjectMessage (ProjectMessages::Ids::incompatibleLicense,
-                           { { "Log in", [this] { ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (getFile())->showLoginFormOverlay(); } },
-                             { "Enable splash screen", [this] { displaySplashScreenValue = true; } } });
+                           { std::move (action), { "Enable splash screen", [this] { displaySplashScreenValue = true; } } });
     }
     else
     {
@@ -1184,16 +1199,31 @@ bool Project::shouldBuildTargetType (build_tools::ProjectType::Target::Type targ
     return true;
 }
 
+static bool hasParentDirectory (File f, StringRef parentName)
+{
+    for (int depth = 0; depth < 2; ++depth)
+    {
+        auto parent = f.getParentDirectory();
+
+        if (parent.getFileName() == parentName)
+            return true;
+
+        f = parent;
+    }
+
+    return false;
+}
+
 build_tools::ProjectType::Target::Type Project::getTargetTypeFromFilePath (const File& file, bool returnSharedTargetIfNoValidSuffix)
 {
-    if      (LibraryModule::CompileUnit::hasSuffix (file, "_AU"))         return build_tools::ProjectType::Target::AudioUnitPlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AUv3"))       return build_tools::ProjectType::Target::AudioUnitv3PlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AAX"))        return build_tools::ProjectType::Target::AAXPlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_RTAS"))       return build_tools::ProjectType::Target::RTASPlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST2"))       return build_tools::ProjectType::Target::VSTPlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST3"))       return build_tools::ProjectType::Target::VST3PlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Standalone")) return build_tools::ProjectType::Target::StandalonePlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Unity"))      return build_tools::ProjectType::Target::UnityPlugIn;
+    if      (LibraryModule::CompileUnit::hasSuffix (file, "_AU") || hasParentDirectory (file, "AU"))                 return build_tools::ProjectType::Target::AudioUnitPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AUv3") || hasParentDirectory (file, "AU"))               return build_tools::ProjectType::Target::AudioUnitv3PlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AAX") || hasParentDirectory (file, "AAX"))               return build_tools::ProjectType::Target::AAXPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_RTAS") || hasParentDirectory (file, "RTAS"))             return build_tools::ProjectType::Target::RTASPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST2") || hasParentDirectory (file, "VST"))              return build_tools::ProjectType::Target::VSTPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST3") || hasParentDirectory (file, "VST3"))             return build_tools::ProjectType::Target::VST3PlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Standalone") || hasParentDirectory (file, "Standalone")) return build_tools::ProjectType::Target::StandalonePlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Unity") || hasParentDirectory (file, "Unity"))           return build_tools::ProjectType::Target::UnityPlugIn;
 
     return (returnSharedTargetIfNoValidSuffix ? build_tools::ProjectType::Target::SharedCodeTarget : build_tools::ProjectType::Target::unspecified);
 }
@@ -2358,18 +2388,18 @@ int Project::getNumExporters()
     return getExporters().getNumChildren();
 }
 
-ProjectExporter* Project::createExporter (int index)
+std::unique_ptr<ProjectExporter> Project::createExporter (int index)
 {
     jassert (index >= 0 && index < getNumExporters());
-    return ProjectExporter::createExporter (*this, getExporters().getChild (index));
+    return ProjectExporter::createExporterFromSettings (*this, getExporters().getChild (index));
 }
 
-void Project::addNewExporter (const String& exporterName)
+void Project::addNewExporter (const Identifier& exporterIdentifier)
 {
-    std::unique_ptr<ProjectExporter> exp (ProjectExporter::createNewExporter (*this, exporterName));
+    std::unique_ptr<ProjectExporter> exp (ProjectExporter::createNewExporter (*this, exporterIdentifier));
 
     exp->getTargetLocationValue() = exp->getTargetLocationString()
-                                       + getUniqueTargetFolderSuffixForExporter (exp->getName(), exp->getTargetLocationString());
+                                       + getUniqueTargetFolderSuffixForExporter (exporterIdentifier, exp->getTargetLocationString());
 
     auto exportersTree = getExporters();
     exportersTree.appendChild (exp->settings, getUndoManagerFor (exportersTree));
@@ -2377,21 +2407,20 @@ void Project::addNewExporter (const String& exporterName)
 
 void Project::createExporterForCurrentPlatform()
 {
-    addNewExporter (ProjectExporter::getCurrentPlatformExporterName());
+    addNewExporter (ProjectExporter::getCurrentPlatformExporterTypeInfo().identifier);
 }
 
-String Project::getUniqueTargetFolderSuffixForExporter (const String& exporterName, const String& base)
+String Project::getUniqueTargetFolderSuffixForExporter (const Identifier& exporterIdentifier, const String& base)
 {
     StringArray buildFolders;
 
     auto exportersTree = getExporters();
-    auto type = ProjectExporter::getValueTreeNameForExporter (exporterName);
 
     for (int i = 0; i < exportersTree.getNumChildren(); ++i)
     {
         auto exporterNode = exportersTree.getChild (i);
 
-        if (exporterNode.getType() == Identifier (type))
+        if (exporterNode.getType() == exporterIdentifier)
             buildFolders.add (exporterNode.getProperty ("targetFolder").toString());
     }
 
@@ -2413,16 +2442,47 @@ String Project::getUniqueTargetFolderSuffixForExporter (const String& exporterNa
 }
 
 //==============================================================================
-String Project::getFileTemplate (const String& templateName)
+StringPairArray Project::getAppConfigDefs()
 {
-    int dataSize;
+    StringPairArray result;
+    result.set ("JUCE_DISPLAY_SPLASH_SCREEN",  shouldDisplaySplashScreen()             ? "1" : "0");
+    result.set ("JUCE_USE_DARK_SPLASH_SCREEN", getSplashScreenColourString() == "Dark" ? "1" : "0");
+    result.set ("JUCE_PROJUCER_VERSION",       "0x" + String::toHexString (ProjectInfo::versionNumber));
 
-    if (auto* data = BinaryData::getNamedResource (templateName.toUTF8(), dataSize))
-        return String::fromUTF8 (data, dataSize);
+    OwnedArray<LibraryModule> modules;
+    getEnabledModules().createRequiredModules (modules);
 
-    jassertfalse;
-    return {};
+    for (auto& m : modules)
+        result.set ("JUCE_MODULE_AVAILABLE_" + m->getID(), "1");
 
+    result.set ("JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED", "1");
+
+    for (auto& m : modules)
+    {
+        OwnedArray<Project::ConfigFlag> flags;
+        m->getConfigFlags (*this, flags);
+
+        for (auto* flag : flags)
+            if (! flag->value.isUsingDefault())
+                result.set (flag->symbol, flag->value.get() ? "1" : "0");
+    }
+
+    result.addArray (getAudioPluginFlags());
+
+    const auto& type = getProjectType();
+    const auto isStandaloneApplication = (! type.isAudioPlugin() && ! type.isDynamicLibrary());
+
+    const auto standaloneValue = [&]
+    {
+        if (result.containsKey ("JucePlugin_Name") && result.containsKey ("JucePlugin_Build_Standalone"))
+            return "JucePlugin_Build_Standalone";
+
+        return isStandaloneApplication ? "1" : "0";
+    }();
+
+    result.set ("JUCE_STANDALONE_APPLICATION", standaloneValue);
+
+    return result;
 }
 
 StringPairArray Project::getAudioPluginFlags() const
@@ -2538,7 +2598,7 @@ bool Project::ExporterIterator::next()
     if (++index >= project.getNumExporters())
         return false;
 
-    exporter.reset (project.createExporter (index));
+    exporter = project.createExporter (index);
 
     if (exporter == nullptr)
     {

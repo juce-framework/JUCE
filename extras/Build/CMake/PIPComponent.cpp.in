@@ -9,16 +9,16 @@
 #include <JuceHeader.h>
 #include "${JUCE_PIP_HEADER}"
 
-class Application    : public JUCEApplication
+class Application    : public juce::JUCEApplication
 {
 public:
     //==============================================================================
-    Application() {}
+    Application() = default;
 
-    const String getApplicationName() override       { return "${JUCE_PIP_NAME}"; }
-    const String getApplicationVersion() override    { return "${PROJECT_VERSION}"; }
+    const juce::String getApplicationName() override       { return "${JUCE_PIP_NAME}"; }
+    const juce::String getApplicationVersion() override    { return "${PROJECT_VERSION}"; }
 
-    void initialise (const String&) override
+    void initialise (const juce::String&) override
     {
         mainWindow.reset (new MainWindow ("${JUCE_PIP_NAME}", new ${JUCE_PIP_MAIN_CLASS}, *this));
     }
@@ -26,13 +26,13 @@ public:
     void shutdown() override                         { mainWindow = nullptr; }
 
 private:
-    class MainWindow    : public DocumentWindow
+    class MainWindow    : public juce::DocumentWindow
     {
     public:
-        MainWindow (const String& name, Component* c, JUCEApplication& a)
-            : DocumentWindow (name, Desktop::getInstance().getDefaultLookAndFeel()
-                                                          .findColour (ResizableWindow::backgroundColourId),
-                              DocumentWindow::allButtons),
+        MainWindow (const juce::String& name, juce::Component* c, JUCEApplication& a)
+            : DocumentWindow (name, juce::Desktop::getInstance().getDefaultLookAndFeel()
+                                                                .findColour (ResizableWindow::backgroundColourId),
+                              juce::DocumentWindow::allButtons),
               app (a)
         {
             setUsingNativeTitleBar (true);

@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -69,9 +76,14 @@ class XcodeProjectExporter  : public ProjectExporter
 {
 public:
     //==============================================================================
-    static const char* getNameMac()                         { return "Xcode (MacOSX)"; }
-    static const char* getNameiOS()                         { return "Xcode (iOS)"; }
-    static const char* getValueTreeTypeName (bool iOS)      { return iOS ? "XCODE_IPHONE" : "XCODE_MAC"; }
+    static String getDisplayNameMac()        { return "Xcode (MacOSX)"; }
+    static String getDisplayNameiOS()        { return "Xcode (iOS)"; }
+
+    static String getTargetFolderNameMac()   { return "MacOSX"; }
+    static String getTargetFolderNameiOS()   { return "iOS"; }
+
+    static String getValueTreeTypeNameMac()  { return "XCODE_MAC"; }
+    static String getValueTreeTypeNameiOS()  { return "XCODE_IPHONE"; }
 
     //==============================================================================
     XcodeProjectExporter (Project& p, const ValueTree& t, const bool isIOS)
@@ -129,15 +141,22 @@ public:
           customLaunchStoryboardValue                  (settings, Ids::customLaunchStoryboard,                  getUndoManager()),
           exporterBundleIdentifierValue                (settings, Ids::bundleIdentifier,                        getUndoManager())
     {
-        name = iOS ? getNameiOS() : getNameMac();
-
-        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderForExporter (getValueTreeTypeName (isIOS)));
+        if (iOS)
+        {
+            name = getDisplayNameiOS();
+            targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderNameiOS());
+        }
+        else
+        {
+            name = getDisplayNameMac();
+            targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderNameMac());
+        }
     }
 
     static XcodeProjectExporter* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
-        if (settingsToUse.hasType (getValueTreeTypeName (false)))  return new XcodeProjectExporter (projectToUse, settingsToUse, false);
-        if (settingsToUse.hasType (getValueTreeTypeName (true)))   return new XcodeProjectExporter (projectToUse, settingsToUse, true);
+        if (settingsToUse.hasType (getValueTreeTypeNameMac()))  return new XcodeProjectExporter (projectToUse, settingsToUse, false);
+        if (settingsToUse.hasType (getValueTreeTypeNameiOS()))  return new XcodeProjectExporter (projectToUse, settingsToUse, true);
 
         return nullptr;
     }
@@ -2487,7 +2506,7 @@ private:
             if (! subprojectInfo.second.isEmpty())
             {
                 auto newEnd = std::remove_if (availableBuildProducts.begin(), availableBuildProducts.end(),
-                                              [&subprojectInfo](const std::pair<String, String> &item)
+                                              [&subprojectInfo] (const std::pair<String, String> &item)
                                               {
                                                   return ! subprojectInfo.second.contains (item.first);
                                               });

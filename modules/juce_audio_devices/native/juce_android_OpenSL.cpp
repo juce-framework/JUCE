@@ -1260,7 +1260,7 @@ public:
             threadEntryProc = nullptr;
 
             (*player)->SetPlayState (player, SL_PLAYSTATE_STOPPED);
-            MessageManager::callAsync ([this] () { delete this; });
+            MessageManager::callAsync ([this]() { delete this; });
         }
     }
 

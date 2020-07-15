@@ -1,5 +1,4 @@
-The JUCE Module Format
-======================
+# The JUCE Module Format
 
 A JUCE module is a collection of header and source files which can be added to a project
 to provide a set of classes and libraries or related functionality.
@@ -9,8 +8,7 @@ user projects on many platforms, either via automated tools, or by manual inclus
 
 Each module may have dependencies on other modules, but should be otherwise self-contained.
 
-File structure
-==============
+## File structure
 
 Each module lives inside a folder whose name is the same as the name of the module. The
 JUCE convention for naming modules is lower-case with underscores, e.g.
@@ -26,8 +24,7 @@ the user's' project will include. The module may have as many other internal sou
 it needs, but these must all be inside sub-folders!
 
 
-Master header file
-------------------
+### Master header file
 
 In this root folder there must be ONE master header file, which includes all the necessary
 header files for the module. This header must have the same name as the module, with
@@ -46,8 +43,7 @@ This master header file must also contain a comment with a BEGIN_JUCE_MODULE_DEC
 block which defines the module's requirements - the syntax for this is described later on..
 
 
-Module CPP files
-----------------
+### Module CPP files
 
 A module consists of a single header file and zero or more .cpp files. Fewer is better!
 
@@ -94,8 +90,7 @@ both a .mm and a .cpp file whose names are otherwise identical, then on OSX/iOS 
 will be used and the cpp ignored. (And vice-versa for other platforms, of course).
 
 
-Precompiled libraries
----------------------
+### Precompiled libraries
 
 Precompiled libraries can be included in a module by placing them in a libs/ subdirectory.
 The following directories are automatically added to the library search paths, and libraries
@@ -128,11 +123,10 @@ section).
   - libs/Android/{arch}, where {arch} is the architecture provided by the Android Studio variable
     "${ANDROID_ABI}" ("x86", "armeabi-v7a", "mips", for example).
 
-The BEGIN_JUCE_MODULE_DECLARATION block
-=======================================
+## The BEGIN_JUCE_MODULE_DECLARATION block
 
 This block of text needs to go inside the module's main header file. It should be commented-out
-and perhaps inside an #if 0 block too, but the Introjucer will just scan the whole file for the
+and perhaps inside an `#if 0` block too, but the Introjucer will just scan the whole file for the
 string BEGIN_JUCE_MODULE_DECLARATION, and doesn't care about its context in terms of C++ syntax.
 
 The block needs a corresponding END_JUCE_MODULE_DECLARATION to finish the block.

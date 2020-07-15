@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -39,7 +46,7 @@ class JUCE_API  X11Symbols
 {
 public:
     //==============================================================================
-    bool areXFunctionsAvailable()   { return functionsAreAvailable; }
+    bool loadAllSymbols();
 
     //==============================================================================
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XAllocSizeHints, xAllocSizeHints,
@@ -571,9 +578,6 @@ private:
     }
 
     //==============================================================================
-    bool loadAllSymbols();
-
-    //==============================================================================
     DynamicLibrary xLib { "libX11.so" }, xextLib { "libXext.so" };
 
    #if JUCE_USE_XCURSOR
@@ -588,8 +592,6 @@ private:
    #if JUCE_USE_XRANDR
     DynamicLibrary xrandrLib   { "libXrandr.so" };
    #endif
-
-    const bool functionsAreAvailable = loadAllSymbols();
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (X11Symbols)

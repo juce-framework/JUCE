@@ -7,7 +7,7 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class %%content_component_class%%   : public juce::OpenGLAppComponent
+class %%content_component_class%%  : public juce::OpenGLAppComponent
 {
 public:
     //==============================================================================
@@ -18,7 +18,7 @@ public:
         setSize (800, 600);
     }
 
-    ~%%content_component_class%%()
+    ~%%content_component_class%%() override
     {
         // This shuts down the GL system and stops the rendering calls.
         shutdownOpenGL();

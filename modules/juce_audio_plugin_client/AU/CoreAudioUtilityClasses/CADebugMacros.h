@@ -48,7 +48,7 @@
 #define __CADebugMacros_h__
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#include "../../../juce_core/native/juce_mac_ClangBugWorkaround.h"
+#include <juce_core/native/juce_mac_ClangBugWorkaround.h>
 
 
 //=============================================================================

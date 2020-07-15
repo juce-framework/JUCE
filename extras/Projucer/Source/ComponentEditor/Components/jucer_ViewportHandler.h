@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -351,7 +358,7 @@ private:
 
     //==============================================================================
     class ViewportScrollbarSizeProperty  : public SliderPropertyComponent,
-                                           public ChangeListener
+                                           private ChangeListener
     {
     public:
         ViewportScrollbarSizeProperty (Viewport* comp, JucerDocument& doc)
@@ -362,12 +369,12 @@ private:
             document.addChangeListener (this);
         }
 
-        ~ViewportScrollbarSizeProperty()
+        ~ViewportScrollbarSizeProperty() override
         {
             document.removeChangeListener (this);
         }
 
-        void setValue (double newValue)
+        void setValue (double newValue) override
         {
             document.getUndoManager().undoCurrentTransactionOnly();
 
@@ -375,12 +382,13 @@ private:
                               "Change Viewport scrollbar size");
         }
 
-        double getValue() const
+        double getValue() const override
         {
             return component->getScrollBarThickness();
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)
+    private:
+        void changeListenerCallback (ChangeBroadcaster*) override
         {
             refresh();
         }
@@ -477,7 +485,7 @@ private:
 
     //==============================================================================
     class ViewportJucerFileProperty   : public FilePropertyComponent,
-                                        public ChangeListener
+                                        private ChangeListener
     {
     public:
         ViewportJucerFileProperty (Viewport* const comp, JucerDocument& doc)
@@ -488,12 +496,12 @@ private:
             document.addChangeListener (this);
         }
 
-        ~ViewportJucerFileProperty()
+        ~ViewportJucerFileProperty() override
         {
             document.removeChangeListener (this);
         }
 
-        void setFile (const File& newFile)
+        void setFile (const File& newFile) override
         {
             document.perform (new JucerCompFileChangeAction (component, *document.getComponentLayout(),
                                                              newFile.getRelativePathFrom (document.getCppFile().getParentDirectory())
@@ -501,7 +509,7 @@ private:
                               "Change Projucer component file");
         }
 
-        File getFile() const
+        File getFile() const override
         {
             auto filename = getViewportJucerComponentFile (component);
 
@@ -511,12 +519,12 @@ private:
             return document.getCppFile().getSiblingFile (filename);
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)
+    private:
+        void changeListenerCallback (ChangeBroadcaster*) override
         {
             refresh();
         }
 
-    private:
         Viewport* const component;
         JucerDocument& document;
 

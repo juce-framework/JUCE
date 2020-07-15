@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -16,8 +23,8 @@
   ==============================================================================
 */
 
-#include "../../juce_core/system/juce_CompilerWarnings.h"
-#include "../../juce_core/system/juce_TargetPlatform.h"
+#include <juce_core/system/juce_CompilerWarnings.h>
+#include <juce_core/system/juce_TargetPlatform.h>
 #include "../utility/juce_CheckSettingMacros.h"
 
 #if JucePlugin_Build_VST
@@ -99,8 +106,8 @@ using namespace juce;
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_WindowsHooks.h"
 
-#include "../../juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp"
-#include "../../juce_audio_processors/format_types/juce_VSTCommon.h"
+#include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
+#include <juce_audio_processors/format_types/juce_VSTCommon.h>
 
 #if JUCE_BIG_ENDIAN
  #define JUCE_MULTICHAR_CONSTANT(a, b, c, d) (a | (((uint32) b) << 8) | (((uint32) c) << 16) | (((uint32) d) << 24))
@@ -1057,10 +1064,6 @@ public:
            #endif
 
             ignoreUnused (fakeMouseGenerator);
-
-           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-            startTimer (500);
-           #endif
         }
 
         ~EditorCompWrapper() override
@@ -1085,10 +1088,25 @@ public:
            #if JUCE_WINDOWS
             addToDesktop (0, args.ptr);
             hostWindow = (HWND) args.ptr;
+
+            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+             checkHostWindowScaleFactor();
+             startTimer (500);
+            #endif
            #elif JUCE_LINUX
             addToDesktop (0, args.ptr);
             hostWindow = (Window) args.ptr;
             X11Symbols::getInstance()->xReparentWindow (display, (Window) getWindowHandle(), hostWindow, 0, 0);
+
+            if (auto* peer = getPeer())
+            {
+                auto screenBounds = peer->localToGlobal (peer->getBounds());
+
+                auto scale = Desktop::getInstance().getDisplays().findDisplayForRect (screenBounds, false).scale
+                                         / Desktop::getInstance().getGlobalScaleFactor();
+
+                setContentScaleFactor ((float) scale);
+            }
            #else
             hostWindow = attachComponentToWindowRefVST (this, args.ptr, wrapper.useNSView);
            #endif
@@ -1196,9 +1214,6 @@ public:
                     ignoreUnused (resizeEditor);
 
                     auto scale = Desktop::getInstance().getGlobalScaleFactor();
-
-                    if (auto* peer = ed->getPeer())
-                        scale *= (float) peer->getPlatformScaleFactor();
 
                     X11Symbols::getInstance()->xResizeWindow (display, (Window) getWindowHandle(),
                                                               static_cast<unsigned int> (roundToInt (pos.getWidth()  * scale)),
@@ -1310,12 +1325,17 @@ public:
         }
 
        #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-        void timerCallback() override
+        void checkHostWindowScaleFactor()
         {
             auto hostWindowScale = (float) getScaleFactorForWindow (hostWindow);
 
             if (hostWindowScale > 0.0f && ! approximatelyEqual (hostWindowScale, editorScaleFactor))
                 wrapper.handleSetContentScaleFactor (hostWindowScale);
+        }
+
+        void timerCallback() override
+        {
+            checkHostWindowScaleFactor();
         }
        #endif
 
@@ -1355,7 +1375,7 @@ public:
             return { (int16) roundToInt (rect.top    * desktopScale),
                      (int16) roundToInt (rect.left   * desktopScale),
                      (int16) roundToInt (rect.bottom * desktopScale),
-                     (int16) roundToInt (rect.right  * desktopScale)};
+                     (int16) roundToInt (rect.right  * desktopScale) };
         }
 
         //==============================================================================
@@ -1868,7 +1888,7 @@ private:
     pointer_sized_int handleCanPlugInDo (VstOpCodeArguments args)
     {
         auto text = (const char*) args.ptr;
-        auto matches = [=](const char* s) { return strcmp (text, s) == 0; };
+        auto matches = [=] (const char* s) { return strcmp (text, s) == 0; };
 
         if (matches ("receiveVstEvents")
          || matches ("receiveVstMidiEvent")
@@ -2135,7 +2155,7 @@ namespace
 
                     if (auto* callbackHandler = dynamic_cast<VSTCallbackHandler*> (processor))
                     {
-                        callbackHandler->handleVstHostCallbackAvailable ([audioMaster, aEffect](int32 opcode, int32 index, pointer_sized_int value, void* ptr, float opt)
+                        callbackHandler->handleVstHostCallbackAvailable ([audioMaster, aEffect] (int32 opcode, int32 index, pointer_sized_int value, void* ptr, float opt)
                         {
                             return audioMaster (aEffect, opcode, index, value, ptr, opt);
                         });

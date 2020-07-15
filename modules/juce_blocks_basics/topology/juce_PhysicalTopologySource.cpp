@@ -113,7 +113,7 @@ void PhysicalTopologySource::setActive (bool shouldBeActive)
         detector.reset();
     }
 
-    listeners.call ([](TopologySource::Listener& l){ l.topologyChanged(); });
+    listeners.call ([] (TopologySource::Listener& l){ l.topologyChanged(); });
 }
 
 bool PhysicalTopologySource::isActive() const

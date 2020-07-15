@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -31,202 +38,152 @@
 #include "../Utility/UI/PropertyComponents/jucer_FilePathPropertyComponent.h"
 
 //==============================================================================
-static void addType (Array<ProjectExporter::ExporterTypeInfo>& list,
-                     const char* name, const void* iconData, int iconDataSize)
+std::vector<ProjectExporter::ExporterTypeInfo> ProjectExporter::getExporterTypeInfos()
 {
-    ProjectExporter::ExporterTypeInfo type = { name, iconData, iconDataSize };
-    list.add (type);
-}
-
-Array<ProjectExporter::ExporterTypeInfo> ProjectExporter::getExporterTypes()
-{
-    Array<ProjectExporter::ExporterTypeInfo> types;
-
-    addType (types, XcodeProjectExporter::getNameMac(),          BinaryData::export_xcode_svg,          BinaryData::export_xcode_svgSize);
-    addType (types, XcodeProjectExporter::getNameiOS(),          BinaryData::export_xcode_svg,          BinaryData::export_xcode_svgSize);
-    addType (types, MSVCProjectExporterVC2019::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
-    addType (types, MSVCProjectExporterVC2017::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
-    addType (types, MSVCProjectExporterVC2015::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
-    addType (types, MakefileProjectExporter::getNameLinux(),     BinaryData::export_linux_svg,          BinaryData::export_linux_svgSize);
-    addType (types, AndroidProjectExporter::getName(),           BinaryData::export_android_svg,        BinaryData::export_android_svgSize);
-    addType (types, CodeBlocksProjectExporter::getNameWindows(), BinaryData::export_codeBlocks_svg,     BinaryData::export_codeBlocks_svgSize);
-    addType (types, CodeBlocksProjectExporter::getNameLinux(),   BinaryData::export_codeBlocks_svg,     BinaryData::export_codeBlocks_svgSize);
-    addType (types, CLionProjectExporter::getName(),             BinaryData::export_clion_svg,          BinaryData::export_clion_svgSize);
-
-    return types;
-}
-
-ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int index)
-{
-    ProjectExporter* exp = nullptr;
-
-    switch (index)
+    auto createIcon = [] (const void* iconData, size_t iconDataSize)
     {
-        case 0:     exp = new XcodeProjectExporter         (project, ValueTree (XcodeProjectExporter         ::getValueTreeTypeName (false)), false); break;
-        case 1:     exp = new XcodeProjectExporter         (project, ValueTree (XcodeProjectExporter         ::getValueTreeTypeName (true)), true); break;
-        case 2:     exp = new MSVCProjectExporterVC2019    (project, ValueTree (MSVCProjectExporterVC2019    ::getValueTreeTypeName())); break;
-        case 3:     exp = new MSVCProjectExporterVC2017    (project, ValueTree (MSVCProjectExporterVC2017    ::getValueTreeTypeName())); break;
-        case 4:     exp = new MSVCProjectExporterVC2015    (project, ValueTree (MSVCProjectExporterVC2015    ::getValueTreeTypeName())); break;
-        case 5:     exp = new MakefileProjectExporter      (project, ValueTree (MakefileProjectExporter      ::getValueTreeTypeName())); break;
-        case 6:     exp = new AndroidProjectExporter       (project, ValueTree (AndroidProjectExporter       ::getValueTreeTypeName())); break;
-        case 7:     exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::windowsTarget)), CodeBlocksProjectExporter::windowsTarget); break;
-        case 8:     exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::linuxTarget)),   CodeBlocksProjectExporter::linuxTarget); break;
-        case 9:     exp = new CLionProjectExporter         (project, ValueTree (CLionProjectExporter         ::getValueTreeTypeName())); break;
-        default:    break;
-    }
+        Image image (Image::ARGB, 200, 200, true);
+        Graphics g (image);
 
-    exp->createDefaultConfigs();
-    exp->createDefaultModulePaths();
+        std::unique_ptr<Drawable> svgDrawable (Drawable::createFromImageData (iconData, iconDataSize));
 
-    return exp;
+        svgDrawable->drawWithin (g, image.getBounds().toFloat(), RectanglePlacement::fillDestination, 1.0f);
+
+        return image;
+    };
+
+    using namespace BinaryData;
+
+    static std::vector<ProjectExporter::ExporterTypeInfo> infos
+    {
+        { XcodeProjectExporter::getValueTreeTypeNameMac(),
+          XcodeProjectExporter::getDisplayNameMac(),
+          XcodeProjectExporter::getTargetFolderNameMac(),
+          createIcon (export_xcode_svg, (size_t) export_xcode_svgSize) },
+        { XcodeProjectExporter::getValueTreeTypeNameiOS(),
+          XcodeProjectExporter::getDisplayNameiOS(),
+          XcodeProjectExporter::getTargetFolderNameiOS(),
+          createIcon (export_xcode_svg, (size_t) export_xcode_svgSize) },
+
+        { MSVCProjectExporterVC2019::getValueTreeTypeName(),
+          MSVCProjectExporterVC2019::getDisplayName(),
+          MSVCProjectExporterVC2019::getTargetFolderName(),
+          createIcon (export_visualStudio_svg, export_visualStudio_svgSize) },
+        { MSVCProjectExporterVC2017::getValueTreeTypeName(),
+          MSVCProjectExporterVC2017::getDisplayName(),
+          MSVCProjectExporterVC2017::getTargetFolderName(),
+          createIcon (export_visualStudio_svg, export_visualStudio_svgSize) },
+        { MSVCProjectExporterVC2015::getValueTreeTypeName(),
+          MSVCProjectExporterVC2015::getDisplayName(),
+          MSVCProjectExporterVC2015::getTargetFolderName(),
+          createIcon (export_visualStudio_svg, export_visualStudio_svgSize) },
+
+        { MakefileProjectExporter::getValueTreeTypeName(),
+          MakefileProjectExporter::getDisplayName(),
+          MakefileProjectExporter::getTargetFolderName(),
+          createIcon (export_linux_svg, export_linux_svgSize) },
+
+        { AndroidProjectExporter::getValueTreeTypeName(),
+          AndroidProjectExporter::getDisplayName(),
+          AndroidProjectExporter::getTargetFolderName(),
+          createIcon (export_android_svg, export_android_svgSize) },
+
+        { CodeBlocksProjectExporter::getValueTreeTypeNameWindows(),
+          CodeBlocksProjectExporter::getDisplayNameWindows(),
+          CodeBlocksProjectExporter::getTargetFolderNameWindows(),
+          createIcon (export_codeBlocks_svg, export_codeBlocks_svgSize) },
+        { CodeBlocksProjectExporter::getValueTreeTypeNameLinux(),
+          CodeBlocksProjectExporter::getDisplayNameLinux(),
+          CodeBlocksProjectExporter::getTargetFolderNameLinux(),
+          createIcon (export_codeBlocks_svg, export_codeBlocks_svgSize) },
+
+        { CLionProjectExporter::getValueTreeTypeName(),
+          CLionProjectExporter::getDisplayName(),
+          CLionProjectExporter::getTargetFolderName(),
+          createIcon (export_clion_svg, export_clion_svgSize) }
+    };
+
+    return infos;
 }
 
-StringArray ProjectExporter::getExporterNames()
+ProjectExporter::ExporterTypeInfo ProjectExporter::getTypeInfoForExporter (const Identifier& exporterIdentifier)
 {
-    StringArray s;
+    auto typeInfos = getExporterTypeInfos();
 
-    for (auto& e : getExporterTypes())
-        s.add (e.name);
+    auto predicate = [exporterIdentifier] (const ProjectExporter::ExporterTypeInfo& info)
+    {
+        return info.identifier == exporterIdentifier;
+    };
 
-    return s;
-}
+    auto iter = std::find_if (typeInfos.begin(), typeInfos.end(),
+                              std::move (predicate));
 
-StringArray ProjectExporter::getExporterValueTreeNames()
-{
-    StringArray s;
-
-    for (auto& n : getExporterNames())
-        s.add (getValueTreeNameForExporter (n));
-
-    return s;
-}
-
-String ProjectExporter::getValueTreeNameForExporter (const String& exporterName)
-{
-    if (exporterName == XcodeProjectExporter::getNameMac())
-        return XcodeProjectExporter::getValueTreeTypeName (false);
-
-    if (exporterName == XcodeProjectExporter::getNameiOS())
-        return XcodeProjectExporter::getValueTreeTypeName (true);
-
-    if (exporterName == MSVCProjectExporterVC2019::getName())
-        return MSVCProjectExporterVC2019::getValueTreeTypeName();
-
-    if (exporterName == MSVCProjectExporterVC2017::getName())
-        return MSVCProjectExporterVC2017::getValueTreeTypeName();
-
-    if (exporterName == MSVCProjectExporterVC2015::getName())
-        return MSVCProjectExporterVC2015::getValueTreeTypeName();
-
-    if (exporterName == MakefileProjectExporter::getNameLinux())
-        return MakefileProjectExporter::getValueTreeTypeName();
-
-    if (exporterName == AndroidProjectExporter::getName())
-        return AndroidProjectExporter::getValueTreeTypeName();
-
-    if (exporterName == CodeBlocksProjectExporter::getNameLinux())
-        return CodeBlocksProjectExporter::getValueTreeTypeName (CodeBlocksProjectExporter::CodeBlocksOS::linuxTarget);
-
-    if (exporterName == CodeBlocksProjectExporter::getNameWindows())
-        return CodeBlocksProjectExporter::getValueTreeTypeName (CodeBlocksProjectExporter::CodeBlocksOS::windowsTarget);
-
-    if (exporterName == CLionProjectExporter::getName())
-        return CLionProjectExporter::getValueTreeTypeName();
+    if (iter != typeInfos.end())
+        return *iter;
 
     return {};
 }
 
-String ProjectExporter::getTargetFolderForExporter (const String& exporterValueTreeName)
+ProjectExporter::ExporterTypeInfo ProjectExporter::getCurrentPlatformExporterTypeInfo()
 {
-    if (exporterValueTreeName == "XCODE_MAC")             return "MacOSX";
-    if (exporterValueTreeName == "XCODE_IPHONE")          return "iOS";
-    if (exporterValueTreeName == "VS2019")                return "VisualStudio2019";
-    if (exporterValueTreeName == "VS2017")                return "VisualStudio2017";
-    if (exporterValueTreeName == "VS2015")                return "VisualStudio2015";
-    if (exporterValueTreeName == "LINUX_MAKE")            return "LinuxMakefile";
-    if (exporterValueTreeName == "ANDROIDSTUDIO")         return "Android";
-    if (exporterValueTreeName == "CODEBLOCKS_WINDOWS")    return "CodeBlocksWindows";
-    if (exporterValueTreeName == "CODEBLOCKS_LINUX")      return "CodeBlocksLinux";
-    if (exporterValueTreeName == "CLION")                 return "CLion";
-
-    return {};
+    #if JUCE_MAC
+     return ProjectExporter::getTypeInfoForExporter (XcodeProjectExporter::getValueTreeTypeNameMac());
+    #elif JUCE_WINDOWS
+     return ProjectExporter::getTypeInfoForExporter (MSVCProjectExporterVC2019::getValueTreeTypeName());
+    #elif JUCE_LINUX
+     return ProjectExporter::getTypeInfoForExporter (MakefileProjectExporter::getValueTreeTypeName());
+    #else
+     #error "unknown platform!"
+    #endif
 }
 
-StringArray ProjectExporter::getAllDefaultBuildsFolders()
+std::unique_ptr<ProjectExporter> ProjectExporter::createNewExporter (Project& project, const Identifier& exporterIdentifier)
 {
-    StringArray folders;
+    auto exporter = createExporterFromSettings (project, ValueTree (exporterIdentifier));
+    jassert (exporter != nullptr);
 
-    folders.add (getDefaultBuildsRootFolder() + "iOS");
-    folders.add (getDefaultBuildsRootFolder() + "MacOSX");
-    folders.add (getDefaultBuildsRootFolder() + "VisualStudio2019");
-    folders.add (getDefaultBuildsRootFolder() + "VisualStudio2017");
-    folders.add (getDefaultBuildsRootFolder() + "VisualStudio2015");
-    folders.add (getDefaultBuildsRootFolder() + "LinuxMakefile");
-    folders.add (getDefaultBuildsRootFolder() + "CodeBlocksWindows");
-    folders.add (getDefaultBuildsRootFolder() + "CodeBlocksLinux");
-    folders.add (getDefaultBuildsRootFolder() + "Android");
-    folders.add (getDefaultBuildsRootFolder() + "CLion");
+    exporter->createDefaultConfigs();
+    exporter->createDefaultModulePaths();
 
-    return folders;
+    return exporter;
 }
 
-String ProjectExporter::getCurrentPlatformExporterName()
+std::unique_ptr<ProjectExporter> ProjectExporter::createExporterFromSettings (Project& project, const ValueTree& settings)
 {
-   #if JUCE_MAC
-    return XcodeProjectExporter::getNameMac();
-   #elif JUCE_WINDOWS
-    return MSVCProjectExporterVC2019::getName();
-   #elif JUCE_LINUX
-    return MakefileProjectExporter::getNameLinux();
-   #else
-    #error // huh?
-   #endif
-}
+    std::unique_ptr<ProjectExporter> exporter;
 
-ProjectExporter* ProjectExporter::createNewExporter (Project& project, const String& name)
-{
-    return createNewExporter (project, getExporterNames().indexOf (name));
-}
+    exporter.reset (XcodeProjectExporter::createForSettings (project, settings));
+    if (exporter == nullptr) exporter.reset (MSVCProjectExporterVC2019::createForSettings (project, settings));
+    if (exporter == nullptr) exporter.reset (MSVCProjectExporterVC2017::createForSettings (project, settings));
+    if (exporter == nullptr) exporter.reset (MSVCProjectExporterVC2015::createForSettings (project, settings));
+    if (exporter == nullptr) exporter.reset (MakefileProjectExporter::createForSettings (project, settings));
+    if (exporter == nullptr) exporter.reset (AndroidProjectExporter::createForSettings (project, settings));
+    if (exporter == nullptr) exporter.reset (CodeBlocksProjectExporter::createForSettings (project, settings));
+    if (exporter == nullptr) exporter.reset (CLionProjectExporter::createForSettings (project, settings));
 
-ProjectExporter* ProjectExporter::createExporter (Project& project, const ValueTree& settings)
-{
-    ProjectExporter*       exp = MSVCProjectExporterVC2019    ::createForSettings (project, settings);
-    if (exp == nullptr)    exp = MSVCProjectExporterVC2017    ::createForSettings (project, settings);
-    if (exp == nullptr)    exp = MSVCProjectExporterVC2015    ::createForSettings (project, settings);
-    if (exp == nullptr)    exp = XcodeProjectExporter         ::createForSettings (project, settings);
-    if (exp == nullptr)    exp = MakefileProjectExporter      ::createForSettings (project, settings);
-    if (exp == nullptr)    exp = AndroidProjectExporter       ::createForSettings (project, settings);
-    if (exp == nullptr)    exp = CodeBlocksProjectExporter    ::createForSettings (project, settings);
-    if (exp == nullptr)    exp = CLionProjectExporter         ::createForSettings (project, settings);
-
-    jassert (exp != nullptr);
-    return exp;
+    jassert (exporter != nullptr);
+    return exporter;
 }
 
 bool ProjectExporter::canProjectBeLaunched (Project* project)
 {
     if (project != nullptr)
     {
-        const char* types[] =
+        static Identifier types[]
         {
-           #if JUCE_MAC
-            XcodeProjectExporter::getValueTreeTypeName (false),
-            XcodeProjectExporter::getValueTreeTypeName (true),
-           #elif JUCE_WINDOWS
-            MSVCProjectExporterVC2019::getValueTreeTypeName(),
-            MSVCProjectExporterVC2017::getValueTreeTypeName(),
-            MSVCProjectExporterVC2015::getValueTreeTypeName(),
-           #elif JUCE_LINUX
-            // (this doesn't currently launch.. not really sure what it would do on linux)
-            //MakefileProjectExporter::getValueTreeTypeName(),
-           #endif
-            AndroidProjectExporter::getValueTreeTypeName(),
-
-            nullptr
+            #if JUCE_MAC
+             XcodeProjectExporter::getValueTreeTypeNameMac(),
+             XcodeProjectExporter::getValueTreeTypeNameiOS(),
+            #elif JUCE_WINDOWS
+             MSVCProjectExporterVC2019::getValueTreeTypeName(),
+             MSVCProjectExporterVC2017::getValueTreeTypeName(),
+             MSVCProjectExporterVC2015::getValueTreeTypeName(),
+            #endif
+             AndroidProjectExporter::getValueTreeTypeName()
         };
 
-        for (const char** type = types; *type != nullptr; ++type)
-            if (project->getExporters().getChildWithName (*type).isValid())
+        for (auto& exporterIdentifier : types)
+            if (project->getExporters().getChildWithName (exporterIdentifier).isValid())
                 return true;
     }
 
@@ -255,14 +212,23 @@ ProjectExporter::ProjectExporter (Project& p, const ValueTree& state)
     updateCompilerFlagValues();
 }
 
-ProjectExporter::~ProjectExporter()
+String ProjectExporter::getUniqueName() const
 {
-}
+    auto targetLocationString = getTargetLocationString();
+    auto defaultBuildsRootFolder = getDefaultBuildsRootFolder();
 
-String ProjectExporter::getName() const
-{
-    if (! getAllDefaultBuildsFolders().contains (getTargetLocationString()))
-        return name + " - " + getTargetLocationString();
+    auto typeInfos = getExporterTypeInfos();
+
+    auto predicate = [targetLocationString, defaultBuildsRootFolder] (const ProjectExporter::ExporterTypeInfo& info)
+    {
+        return defaultBuildsRootFolder + info.targetFolder == targetLocationString;
+    };
+
+    auto iter = std::find_if (typeInfos.begin(), typeInfos.end(),
+                              std::move (predicate));
+
+    if (iter == typeInfos.end())
+        return name + " - " + targetLocationString;
 
     return name;
 }
@@ -302,7 +268,7 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
 
         if ((shouldBuildTargetType (build_tools::ProjectType::Target::VSTPlugIn) && project.shouldBuildVST()) || (project.isVSTPluginHost() && supportsTargetType (build_tools::ProjectType::Target::VSTPlugIn)))
         {
-            props.add (new FilePathPropertyComponent (vstLegacyPathValueWrapper.wrappedValue, "VST (Legacy) SDK Folder", true,
+            props.add (new FilePathPropertyComponent (vstLegacyPathValueWrapper.getWrappedValueWithDefault(), "VST (Legacy) SDK Folder", true,
                                                       getTargetOSForExporter() == TargetOS::getThisOS(), "*", project.getProjectFolder()),
                        "If you're building a VST plug-in or host, you can use this field to override the global VST (Legacy) SDK path with a project-specific path. "
                        "This can be an absolute path, or a path relative to the Projucer project file.");
@@ -310,14 +276,14 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
 
         if (shouldBuildTargetType (build_tools::ProjectType::Target::AAXPlugIn) && project.shouldBuildAAX())
         {
-            props.add (new FilePathPropertyComponent (aaxPathValueWrapper.wrappedValue, "AAX SDK Folder", true,
+            props.add (new FilePathPropertyComponent (aaxPathValueWrapper.getWrappedValueWithDefault(), "AAX SDK Folder", true,
                                                       getTargetOSForExporter() == TargetOS::getThisOS(), "*", project.getProjectFolder()),
                        "If you're building an AAX plug-in, this must be the folder containing the AAX SDK. This can be an absolute path, or a path relative to the Projucer project file.");
         }
 
         if (shouldBuildTargetType (build_tools::ProjectType::Target::RTASPlugIn) && project.shouldBuildRTAS())
         {
-            props.add (new FilePathPropertyComponent (rtasPathValueWrapper.wrappedValue, "RTAS SDK Folder", true,
+            props.add (new FilePathPropertyComponent (rtasPathValueWrapper.getWrappedValueWithDefault(), "RTAS SDK Folder", true,
                                                       getTargetOSForExporter() == TargetOS::getThisOS(), "*", project.getProjectFolder()),
                        "If you're building an RTAS plug-in, this must be the folder containing the RTAS SDK. This can be an absolute path, or a path relative to the Projucer project file.");
         }
@@ -448,52 +414,9 @@ StringPairArray ProjectExporter::getAllPreprocessorDefs (const BuildConfiguratio
     addTargetSpecificPreprocessorDefs (defs, targetType);
 
     if (! project.shouldUseAppConfig())
-        defs = mergePreprocessorDefs (defs, getAppConfigDefs());
+        defs = mergePreprocessorDefs (defs, project.getAppConfigDefs());
 
     return defs;
-}
-
-StringPairArray ProjectExporter::getAppConfigDefs() const
-{
-    StringPairArray result;
-    result.set ("JUCE_DISPLAY_SPLASH_SCREEN",  project.shouldDisplaySplashScreen()             ? "1" : "0");
-    result.set ("JUCE_USE_DARK_SPLASH_SCREEN", project.getSplashScreenColourString() == "Dark" ? "1" : "0");
-    result.set ("JUCE_PROJUCER_VERSION",       "0x" + String::toHexString (ProjectInfo::versionNumber));
-
-    OwnedArray<LibraryModule> modules;
-    project.getEnabledModules().createRequiredModules (modules);
-
-    for (auto& m : modules)
-        result.set ("JUCE_MODULE_AVAILABLE_" + m->getID(), "1");
-
-    result.set ("JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED", "1");
-
-    for (auto& m : modules)
-    {
-        OwnedArray<Project::ConfigFlag> flags;
-        m->getConfigFlags (project, flags);
-
-        for (auto* flag : flags)
-            if (! flag->value.isUsingDefault())
-                result.set (flag->symbol, flag->value.get() ? "1" : "0");
-    }
-
-    result.addArray (project.getAudioPluginFlags());
-
-    const auto& type = project.getProjectType();
-    const auto isStandaloneApplication = (! type.isAudioPlugin() && ! type.isDynamicLibrary());
-
-    const auto standaloneValue = [&]
-    {
-        if (result.containsKey ("JucePlugin_Name") && result.containsKey ("JucePlugin_Build_Standalone"))
-            return "JucePlugin_Build_Standalone";
-
-        return isStandaloneApplication ? "1" : "0";
-    }();
-
-    result.set ("JUCE_STANDALONE_APPLICATION", standaloneValue);
-
-    return result;
 }
 
 StringPairArray ProjectExporter::getAllPreprocessorDefs() const

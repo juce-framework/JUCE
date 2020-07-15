@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -20,18 +27,18 @@
 
 #include "../../Application/jucer_Application.h"
 
+//==============================================================================
 class UserAvatarComponent  : public Component,
                              public SettableTooltipClient,
                              public ChangeBroadcaster,
                              private LicenseController::LicenseStateListener
 {
 public:
-    UserAvatarComponent (bool tooltip, bool signIn)
-        : displayTooltip (tooltip),
-          signInOnClick (signIn)
+    UserAvatarComponent (bool isInteractive)
+        : interactive (isInteractive)
     {
         ProjucerApplication::getApp().getLicenseController().addListener (this);
-        licenseStateChanged();
+        lookAndFeelChanged();
     }
 
     ~UserAvatarComponent() override
@@ -53,12 +60,12 @@ public:
             g.reduceClipRegion (ellipse);
         }
 
-        g.drawImage (userAvatarImage, bounds.toFloat(), RectanglePlacement::fillDestination);
+        g.drawImage (currentAvatar, bounds.toFloat(), RectanglePlacement::fillDestination);
     }
 
     void mouseUp (const MouseEvent&) override
     {
-        if (signInOnClick)
+        if (interactive)
         {
             PopupMenu menu;
             menu.addCommandItem (ProjucerApplication::getApp().commandManager.get(), CommandIDs::loginLogout);
@@ -70,7 +77,25 @@ public:
     bool isDisplaingGPLLogo() const noexcept  { return isGPL; }
 
 private:
-    Image createDefaultAvatarImage()
+    //==============================================================================
+    static Image createGPLAvatarImage()
+    {
+        if (auto logo = Drawable::createFromImageData (BinaryData::gpl_logo_svg, BinaryData::gpl_logo_svgSize))
+        {
+            auto bounds = logo->getDrawableBounds();
+
+            Image image (Image::ARGB, roundToInt (bounds.getWidth()), roundToInt (bounds.getHeight()), true);
+            Graphics g (image);
+            logo->draw (g, 1.0f);
+
+            return image;
+        }
+
+        jassertfalse;
+        return {};
+    }
+
+    Image createStandardAvatarImage()
     {
         Image image (Image::ARGB, 250, 250, true);
         Graphics g (image);
@@ -87,17 +112,18 @@ private:
         return image;
     }
 
+    //==============================================================================
     void licenseStateChanged() override
     {
         auto state = ProjucerApplication::getApp().getLicenseController().getCurrentState();
 
         isGPL = ProjucerApplication::getApp().getLicenseController().getCurrentState().isGPL();
 
-        if (displayTooltip)
+        if (interactive)
         {
             auto formattedUserString = [state]() -> String
             {
-                if (state.isValid())
+                if (state.isSignedIn())
                     return (state.isGPL() ? "" : (state.username + " - ")) + state.getLicenseTypeString();
 
                 return "Not logged in";
@@ -106,18 +132,26 @@ private:
             setTooltip (formattedUserString);
         }
 
-        userAvatarImage = state.isValid() ? state.avatar : defaultAvatarImage;
+        currentAvatar = isGPL ? gplAvatarImage
+                              : state.isSignedIn() ? standardAvatarImage : signedOutAvatarImage;
+
         repaint();
         sendChangeMessage();
     }
 
     void lookAndFeelChanged() override
     {
-        defaultAvatarImage = createDefaultAvatarImage();
+        standardAvatarImage = createStandardAvatarImage();
+        signedOutAvatarImage = createStandardAvatarImage();
+
+        if (interactive)
+            signedOutAvatarImage.multiplyAllAlphas (0.4f);
+
         licenseStateChanged();
         repaint();
     }
 
-    Image userAvatarImage, defaultAvatarImage { createDefaultAvatarImage() };
-    bool isGPL = false, displayTooltip = false, signInOnClick = false;
+    //==============================================================================
+    Image standardAvatarImage, signedOutAvatarImage, gplAvatarImage { createGPLAvatarImage() }, currentAvatar;
+    bool isGPL = false, interactive = false;
 };

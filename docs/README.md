@@ -1,5 +1,4 @@
-JUCE Documentation
-==================
+# JUCE Documentation
 
 This directory contains files documenting the JUCE Module Format, and the JUCE
 CMake API.
@@ -15,11 +14,9 @@ online](https://juce.com/learn/documentation), or you can generate a local copy
 which can be used without an internet connection. For instructions on generating
 offline docs, see below.
 
-Generating Offline HTML Documentation
-=====================================
+# Generating Offline HTML Documentation
 
-Dependencies
-------------
+## Dependencies
 
 - doxygen
 - python
@@ -28,8 +25,7 @@ Dependencies
 
 Make sure that all the dependencies can be found on your PATH.
 
-Building
---------
+## Building
 
 - cd into the `doxygen` directory on the command line
 - run `make`

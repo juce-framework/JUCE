@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -92,7 +99,6 @@ ProjectContentComponent::ProjectContentComponent()
     liveBuildEnablementChanged (isLiveBuildEnabled);
 
     Desktop::getInstance().addFocusChangeListener (this);
-    startTimer (1600);
 }
 
 ProjectContentComponent::~ProjectContentComponent()
@@ -570,7 +576,7 @@ void ProjectContentComponent::showProjectSettings()
 void ProjectContentComponent::showCurrentExporterSettings()
 {
     if (auto selected = headerComponent.getSelectedExporter())
-        showExporterSettings (selected->getName());
+        showExporterSettings (selected->getUniqueName());
 }
 
 void ProjectContentComponent::showExporterSettings (const String& exporterName)
@@ -638,7 +644,7 @@ StringArray ProjectContentComponent::getExportersWhichCanLaunch() const
     if (project != nullptr)
         for (Project::ExporterIterator exporter (*project); exporter.next();)
             if (exporter->canLaunchProject())
-                s.add (exporter->getName());
+                s.add (exporter->getUniqueName());
 
     return s;
 }
@@ -650,20 +656,6 @@ void ProjectContentComponent::openInSelectedIDE (bool saveFirst)
             project->openProjectInIDE (*selectedExporter, saveFirst);
 }
 
-static void newExporterMenuCallback (int result, ProjectContentComponent* comp)
-{
-    if (comp != nullptr && result > 0)
-    {
-        if (auto* p = comp->getProject())
-        {
-            auto exporterName= ProjectExporter::getExporterNames() [result - 1];
-
-            if (exporterName.isNotEmpty())
-                p->addNewExporter (exporterName);
-        }
-    }
-}
-
 void ProjectContentComponent::showNewExporterMenu()
 {
     if (project != nullptr)
@@ -672,17 +664,34 @@ void ProjectContentComponent::showNewExporterMenu()
 
         menu.addSectionHeader ("Create a new export target:");
 
-        auto exporters = ProjectExporter::getExporterTypes();
+        SafePointer<ProjectContentComponent> safeThis (this);
 
-        for (int i = 0; i < exporters.size(); ++i)
+        for (auto& exporterInfo : ProjectExporter::getExporterTypeInfos())
         {
-            auto& type = exporters.getReference(i);
+            PopupMenu::Item item;
 
-            menu.addItem (i + 1, type.name, true, false, type.getIcon());
+            item.itemID = -1;
+            item.text = exporterInfo.displayName;
+
+            item.image = [exporterInfo]
+            {
+                auto drawableImage = std::make_unique<DrawableImage>();
+                drawableImage->setImage (exporterInfo.icon);
+
+                return drawableImage;
+            }();
+
+            item.action = [safeThis, exporterInfo]
+            {
+                if (safeThis != nullptr)
+                    if (auto* p = safeThis->getProject())
+                        p->addNewExporter (exporterInfo.identifier);
+            };
+
+            menu.addItem (item);
         }
 
-        menu.showMenuAsync (PopupMenu::Options(),
-                            ModalCallbackFunction::forComponent (newExporterMenuCallback, this));
+        menu.showMenuAsync ({});
     }
 }
 
@@ -1195,8 +1204,10 @@ void ProjectContentComponent::handleCrash (const String& message)
 
 bool ProjectContentComponent::isBuildEnabled() const
 {
-    return project != nullptr && project->getCompileEngineSettings().isBuildEnabled()
-            && CompileEngineDLL::getInstance()->isLoaded();
+    return isLiveBuildEnabled
+          && project != nullptr
+          && project->getCompileEngineSettings().isBuildEnabled()
+          && CompileEngineDLL::getInstance()->isLoaded();
 }
 
 void ProjectContentComponent::refreshTabsIfBuildStatusChanged()
@@ -1314,8 +1325,15 @@ void ProjectContentComponent::liveBuildEnablementChanged (bool isEnabled)
 {
     isLiveBuildEnabled = isEnabled;
 
-    if (! isLiveBuildEnabled)
+    if (isLiveBuildEnabled)
+    {
+        startTimer (1600);
+    }
+    else
+    {
+        stopTimer();
         killChildProcess();
+    }
 
     rebuildProjectUI();
     headerComponent.liveBuildEnablementChanged (isLiveBuildEnabled);

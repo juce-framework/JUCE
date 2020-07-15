@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -310,114 +317,100 @@ private:
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EventHandler)
     };
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Win32WebView)
 };
 
-#if JUCE_USE_WINRT_WEBVIEW
-
-extern RTL_OSVERSIONINFOW getWindowsVersionInfo();
+#if JUCE_USE_WIN_WEBVIEW2
 
 using namespace Microsoft::WRL;
 
-using namespace ABI::Windows::Foundation;
-using namespace ABI::Windows::Storage::Streams;
-using namespace ABI::Windows::Web;
-using namespace ABI::Windows::Web::UI;
-using namespace ABI::Windows::Web::UI::Interop;
-using namespace ABI::Windows::Web::Http;
-using namespace ABI::Windows::Web::Http::Headers;
-
-//==============================================================================
-class WinRTWebView  : public InternalWebViewType,
-                      public Component,
-                      public ComponentMovementWatcher
+class WebView2  : public InternalWebViewType,
+                  public Component,
+                  public ComponentMovementWatcher
 {
 public:
-    WinRTWebView (WebBrowserComponent& o)
-        : ComponentMovementWatcher (&o),
-          owner (o)
+    WebView2 (WebBrowserComponent& o, const File& dllLocation, const File& userDataFolder)
+         : ComponentMovementWatcher (&o),
+           owner (o)
     {
         if (! WinRTWrapper::getInstance()->isInitialised())
             throw std::runtime_error ("Failed to initialise the WinRT wrapper");
 
-        if (! createWebViewProcess())
-            throw std::runtime_error ("Failed to create the WebViewControlProcess");
+        if (! createWebViewEnvironment (dllLocation, userDataFolder))
+            throw std::runtime_error ("Failed to create the CoreWebView2Environemnt");
 
         owner.addAndMakeVisible (this);
     }
 
-    ~WinRTWebView() override
+    ~WebView2() override
     {
-        if (webViewControl != nullptr)
-            webViewControl->Stop();
-
         removeEventHandlers();
+        closeWebView();
 
-        webViewProcess->Terminate();
+        if (webView2LoaderHandle != nullptr)
+            ::FreeLibrary (webView2LoaderHandle);
     }
 
     void createBrowser() override
     {
-        if (webViewControl == nullptr)
-            createWebViewControl();
+        if (webView == nullptr)
+        {
+            jassert (webViewEnvironment != nullptr);
+            createWebView();
+        }
     }
 
     bool hasBrowserBeenCreated() override
     {
-        return webViewControl != nullptr || isCreating;
+        return webView != nullptr || isCreating;
     }
 
     void goToURL (const String& url, const StringArray* headers, const MemoryBlock* postData) override
     {
-        if (webViewControl != nullptr)
-        {
-            if ((headers != nullptr && ! headers->isEmpty())
-                || (postData != nullptr && postData->getSize() > 0))
-            {
-                auto requestMessage = createHttpRequestMessage (url, headers, postData);
-                webViewControl->NavigateWithHttpRequestMessage (requestMessage.get());
-            }
-            else
-            {
-                auto uri = createURI (url);
-                webViewControl->Navigate (uri.get());
-            }
-        }
+        urlRequest = { url,
+                       headers != nullptr ? *headers : StringArray(),
+                       postData != nullptr && postData->getSize() > 0 ? *postData : MemoryBlock() };
+
+        if (webView != nullptr)
+            webView->Navigate (urlRequest.url.toWideCharPointer());
     }
 
     void stop() override
     {
-        if (webViewControl != nullptr)
-            webViewControl->Stop();
+        if (webView != nullptr)
+            webView->Stop();
     }
 
     void goBack() override
     {
-        if (webViewControl != nullptr)
+        if (webView != nullptr)
         {
-            boolean canGoBack = false;
-            webViewControl->get_CanGoBack (&canGoBack);
+            BOOL canGoBack = false;
+            webView->get_CanGoBack (&canGoBack);
 
             if (canGoBack)
-                webViewControl->GoBack();
+                webView->GoBack();
         }
     }
 
     void goForward() override
     {
-        if (webViewControl != nullptr)
+        if (webView != nullptr)
         {
-            boolean canGoForward = false;
-            webViewControl->get_CanGoForward (&canGoForward);
+            BOOL canGoForward = false;
+            webView->get_CanGoForward (&canGoForward);
 
             if (canGoForward)
-                webViewControl->GoForward();
+                webView->GoForward();
         }
     }
 
     void refresh() override
     {
-        if (webViewControl != nullptr)
-            webViewControl->Refresh();
+        if (webView != nullptr)
+            webView->Reload();
     }
 
     void setWebViewSize (int width, int height) override
@@ -446,117 +439,40 @@ public:
 
 private:
     //==============================================================================
-    template<typename OperationResultType, typename ResultsType>
-    static HRESULT waitForCompletion (IAsyncOperation<OperationResultType>* op, ResultsType* results)
+    template<class ArgType>
+    static String getUriStringFromArgs (ArgType* args)
     {
-        using OperationType = IAsyncOperation<OperationResultType>;
-        using DelegateType  = IAsyncOperationCompletedHandler<OperationResultType>;
-
-        struct EventDelegate : public RuntimeClass<RuntimeClassFlags<RuntimeClassType::Delegate>,
-                                                   DelegateType,
-                                                   FtmBase>
+        if (args != nullptr)
         {
-            EventDelegate() = default;
+            LPWSTR uri;
+            args->get_Uri (&uri);
 
-            ~EventDelegate()
-            {
-                CloseHandle (eventCompleted);
-            }
-
-            HRESULT RuntimeClassInitialize()
-            {
-                eventCompleted = CreateEventEx (nullptr, nullptr, 0, EVENT_ALL_ACCESS);
-                return eventCompleted == nullptr ? HRESULT_FROM_WIN32 (GetLastError()) : S_OK;
-            }
-
-            HRESULT Invoke (OperationType*, AsyncStatus newStatus)
-            {
-                status = newStatus;
-                SetEvent (eventCompleted);
-
-                return S_OK;
-            }
-
-            AsyncStatus status = AsyncStatus::Started;
-            HANDLE eventCompleted = nullptr;
-        };
-
-        WinRTWrapper::ComPtr<OperationType> operation = op;
-        WinRTWrapper::ComPtr<EventDelegate> eventCallback;
-
-        auto hr = MakeAndInitialize<EventDelegate> (eventCallback.resetAndGetPointerAddress());
-
-        if (SUCCEEDED (hr))
-        {
-            hr = operation->put_Completed (eventCallback.get());
-
-            if (SUCCEEDED (hr))
-            {
-                HANDLE waitForEvents[1] { eventCallback->eventCompleted };
-                auto handleCount = (ULONG) ARRAYSIZE (waitForEvents);
-                DWORD handleIndex = 0;
-
-                hr = CoWaitForMultipleHandles (COWAIT_DISPATCH_WINDOW_MESSAGES | COWAIT_DISPATCH_CALLS | COWAIT_INPUTAVAILABLE,
-                                               INFINITE, handleCount, waitForEvents, &handleIndex);
-
-                if (SUCCEEDED (hr))
-                {
-                    if (eventCallback->status == AsyncStatus::Completed)
-                    {
-                        hr = operation->GetResults (results);
-                    }
-                    else
-                    {
-                        WinRTWrapper::ComPtr<IAsyncInfo> asyncInfo;
-
-                        if (SUCCEEDED (operation->QueryInterface (asyncInfo.resetAndGetPointerAddress())))
-                            asyncInfo->get_ErrorCode (&hr);
-                    }
-                }
-            }
-        }
-
-        return hr;
-    }
-
-    //==============================================================================
-    template<class ArgsType>
-    String getURIStringFromArgs (ArgsType& args)
-    {
-        WinRTWrapper::ComPtr<IUriRuntimeClass> uri;
-        args.get_Uri (uri.resetAndGetPointerAddress());
-
-        if (uri != nullptr)
-        {
-            HSTRING uriString;
-            uri->get_AbsoluteUri (&uriString);
-
-            return WinRTWrapper::getInstance()->hStringToString (uriString);
+            return uri;
         }
 
         return {};
     }
 
+    //==============================================================================
     void addEventHandlers()
     {
-        if (webViewControl != nullptr)
+        if (webView != nullptr)
         {
-            webViewControl->add_NavigationStarting (Callback<ITypedEventHandler<IWebViewControl*, WebViewControlNavigationStartingEventArgs*>> (
-                [this] (IWebViewControl*, IWebViewControlNavigationStartingEventArgs* args)
+            webView->add_NavigationStarting (Callback<ICoreWebView2NavigationStartingEventHandler> (
+                [this] (ICoreWebView2*, ICoreWebView2NavigationStartingEventArgs* args) -> HRESULT
                 {
-                    auto uriString = getURIStringFromArgs (*args);
+                    auto uriString = getUriStringFromArgs (args);
 
-                    if (uriString.isNotEmpty())
-                        args->put_Cancel (! owner.pageAboutToLoad (uriString));
+                    if (uriString.isNotEmpty() && ! owner.pageAboutToLoad (uriString))
+                        args->put_Cancel (true);
 
                     return S_OK;
-                }
-            ).Get(), &navigationStartingToken);
+                }).Get(), &navigationStartingToken);
 
-            webViewControl->add_NewWindowRequested (Callback<ITypedEventHandler<IWebViewControl*, WebViewControlNewWindowRequestedEventArgs*>> (
-                [this] (IWebViewControl*, IWebViewControlNewWindowRequestedEventArgs* args)
+            webView->add_NewWindowRequested (Callback<ICoreWebView2NewWindowRequestedEventHandler> (
+                [this] (ICoreWebView2*, ICoreWebView2NewWindowRequestedEventArgs* args) -> HRESULT
                 {
-                    auto uriString = getURIStringFromArgs (*args);
+                    auto uriString = getUriStringFromArgs (args);
 
                     if (uriString.isNotEmpty())
                     {
@@ -565,237 +481,259 @@ private:
                     }
 
                     return S_OK;
-                }
-            ).Get(), &newWindowRequestedToken);
+                }).Get(), &newWindowRequestedToken);
 
-            webViewControl->add_NavigationCompleted (Callback<ITypedEventHandler<IWebViewControl*, WebViewControlNavigationCompletedEventArgs*>> (
-                [this] (IWebViewControl*, IWebViewControlNavigationCompletedEventArgs* args)
+            webView->add_WindowCloseRequested (Callback<ICoreWebView2WindowCloseRequestedEventHandler> (
+                [this] (ICoreWebView2*, IUnknown*) -> HRESULT
                 {
-                    auto uriString = getURIStringFromArgs (*args);
+                    owner.windowCloseRequest();
+                    return S_OK;
+                }).Get(), &windowCloseRequestedToken);
+
+            webView->add_NavigationCompleted (Callback<ICoreWebView2NavigationCompletedEventHandler> (
+                [this] (ICoreWebView2* sender, ICoreWebView2NavigationCompletedEventArgs* args) -> HRESULT
+                {
+                    LPWSTR uri;
+                    sender->get_Source (&uri);
+
+                    String uriString (uri);
 
                     if (uriString.isNotEmpty())
                     {
-                        boolean success;
+                        BOOL success = false;
                         args->get_IsSuccess (&success);
 
-                        if (success)
+                        COREWEBVIEW2_WEB_ERROR_STATUS errorStatus;
+                        args->get_WebErrorStatus (&errorStatus);
+
+                        if (success
+                            || errorStatus == COREWEBVIEW2_WEB_ERROR_STATUS_OPERATION_CANCELED) // this error seems to happen erroneously so ignore
                         {
                             owner.pageFinishedLoading (uriString);
                         }
                         else
                         {
-                            WebErrorStatus status;
-                            args->get_WebErrorStatus (&status);
+                            auto errorString = "Error code: " + String (errorStatus);
 
-                            owner.pageLoadHadNetworkError ("Error code: " + String (status));
+                            if (owner.pageLoadHadNetworkError (errorString))
+                                owner.goToURL ("data:text/plain;charset=UTF-8," + errorString);
                         }
                     }
 
                     return S_OK;
-                }
-            ).Get(), &navigationCompletedToken);
+                }).Get(), &navigationCompletedToken);
+
+            webView->AddWebResourceRequestedFilter (L"*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_DOCUMENT);
+
+            webView->add_WebResourceRequested (Callback<ICoreWebView2WebResourceRequestedEventHandler> (
+                [this] (ICoreWebView2*, ICoreWebView2WebResourceRequestedEventArgs* args) -> HRESULT
+                {
+                    if (urlRequest.url.isEmpty())
+                        return S_OK;
+
+                    WinRTWrapper::ComPtr<ICoreWebView2WebResourceRequest> request;
+                    args->get_Request (request.resetAndGetPointerAddress());
+
+                    auto uriString = getUriStringFromArgs (request.get());
+
+                    if (uriString == urlRequest.url
+                        || (uriString.endsWith ("/") && uriString.upToLastOccurrenceOf ("/", false, false) == urlRequest.url))
+                    {
+                        String method ("GET");
+
+                        if (urlRequest.postData.getSize() > 0)
+                        {
+                            method = "POST";
+
+                            WinRTWrapper::ComPtr<IStream> content (SHCreateMemStream ((BYTE*) urlRequest.postData.getData(),
+                                                                                      (UINT) urlRequest.postData.getSize()));
+                            request->put_Content (content.get());
+                        }
+
+                        if (! urlRequest.headers.isEmpty())
+                        {
+                            WinRTWrapper::ComPtr<ICoreWebView2HttpRequestHeaders> headers;
+                            request->get_Headers (headers.resetAndGetPointerAddress());
+
+                            for (auto& header : urlRequest.headers)
+                            {
+                                headers->SetHeader (header.upToFirstOccurrenceOf (":", false, false).trim().toWideCharPointer(),
+                                                    header.fromFirstOccurrenceOf (":", false, false).trim().toWideCharPointer());
+                            }
+                        }
+
+                        request->put_Method (method.toWideCharPointer());
+
+                        urlRequest = {};
+                    }
+
+                    return S_OK;
+                }).Get(), &webResourceRequestedToken);
         }
     }
 
     void removeEventHandlers()
     {
-        if (webViewControl != nullptr)
+        if (webView != nullptr)
         {
             if (navigationStartingToken.value != 0)
-                webViewControl->remove_NavigationStarting (navigationStartingToken);
+                webView->remove_NavigationStarting (navigationStartingToken);
 
             if (newWindowRequestedToken.value != 0)
-                webViewControl->remove_NewWindowRequested (newWindowRequestedToken);
+                webView->remove_NewWindowRequested (newWindowRequestedToken);
+
+            if (windowCloseRequestedToken.value != 0)
+                webView->remove_WindowCloseRequested (windowCloseRequestedToken);
 
             if (navigationCompletedToken.value != 0)
-                webViewControl->remove_NavigationCompleted (navigationCompletedToken);
+                webView->remove_NavigationCompleted (navigationCompletedToken);
+
+            if (webResourceRequestedToken.value != 0)
+            {
+                webView->RemoveWebResourceRequestedFilter (L"*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_DOCUMENT);
+                webView->remove_WebResourceRequested (webResourceRequestedToken);
+            }
         }
     }
 
-    bool createWebViewProcess()
+    bool createWebViewEnvironment (const File& dllLocation, const File& userDataFolder)
     {
-        auto webViewControlProcessFactory
-            = WinRTWrapper::getInstance()->getWRLFactory<IWebViewControlProcessFactory> (RuntimeClass_Windows_Web_UI_Interop_WebViewControlProcess);
+        using CreateWebViewEnvironmentWithOptionsFunc = HRESULT (*) (PCWSTR, PCWSTR,
+                                                                     ICoreWebView2EnvironmentOptions*,
+                                                                     ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler*);
 
-        if (webViewControlProcessFactory == nullptr)
+        auto dllPath = dllLocation.getFullPathName();
+
+        if (dllPath.isEmpty())
+            dllPath = "WebView2Loader.dll";
+
+        webView2LoaderHandle = LoadLibraryA (dllPath.toUTF8());
+
+        if (webView2LoaderHandle == nullptr)
+            return false;
+
+        auto* createWebViewEnvironmentWithOptions = (CreateWebViewEnvironmentWithOptionsFunc) GetProcAddress (webView2LoaderHandle,
+                                                                                                              "CreateCoreWebView2EnvironmentWithOptions");
+        if (createWebViewEnvironmentWithOptions == nullptr)
         {
+            // failed to load WebView2Loader.dll
             jassertfalse;
             return false;
         }
 
-        auto webViewProcessOptions
-            = WinRTWrapper::getInstance()->activateInstance<IWebViewControlProcessOptions> (RuntimeClass_Windows_Web_UI_Interop_WebViewControlProcessOptions,
-                                                                                            __uuidof (IWebViewControlProcessOptions));
+        auto options = Microsoft::WRL::Make<CoreWebView2EnvironmentOptions>();
 
-        webViewProcessOptions->put_PrivateNetworkClientServerCapability (WebViewControlProcessCapabilityState_Enabled);
-        webViewControlProcessFactory->CreateWithOptions (webViewProcessOptions.get(), webViewProcess.resetAndGetPointerAddress());
+        WeakReference<WebView2> weakThis (this);
+        auto hr = createWebViewEnvironmentWithOptions (nullptr,
+                                                       userDataFolder != File() ? userDataFolder.getFullPathName().toWideCharPointer() : nullptr,
+                                                       options.Get(),
+            Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
+                [this, weakThis] (HRESULT, ICoreWebView2Environment* env) -> HRESULT
+                {
+                    if (weakThis != nullptr)
+                        webViewEnvironment = env;
 
-        return webViewProcess != nullptr;
+                    return S_OK;
+                }).Get());
+
+        return SUCCEEDED (hr);
     }
 
-    void createWebViewControl()
+    void createWebView()
     {
         if (auto* peer = getPeer())
         {
-            ScopedValueSetter<bool> svs (isCreating, true);
+            isCreating = true;
 
-            WinRTWrapper::ComPtr<IAsyncOperation<WebViewControl*>> createWebViewAsyncOperation;
+            WeakReference<WebView2> weakThis (this);
 
-            webViewProcess->CreateWebViewControlAsync ((INT64) peer->getNativeHandle(), {},
-                                                       createWebViewAsyncOperation.resetAndGetPointerAddress());
+            webViewEnvironment->CreateCoreWebView2Controller ((HWND) peer->getNativeHandle(),
+                Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler> (
+                    [this, weakThis] (HRESULT, ICoreWebView2Controller* controller) -> HRESULT
+                    {
+                        if (weakThis != nullptr)
+                        {
+                            isCreating = false;
 
-            waitForCompletion (createWebViewAsyncOperation.get(), webViewControl.resetAndGetPointerAddress());
+                            if (controller != nullptr)
+                            {
+                                webViewController = controller;
+                                controller->get_CoreWebView2 (webView.resetAndGetPointerAddress());
 
-            addEventHandlers();
-            componentMovedOrResized (true, true);
+                                addEventHandlers();
+                                componentMovedOrResized (true, true);
+
+                                if (webView != nullptr && urlRequest.url.isNotEmpty())
+                                    webView->Navigate (urlRequest.url.toWideCharPointer());
+                            }
+                        }
+
+                        return S_OK;
+                    }).Get());
         }
     }
 
-    //==============================================================================
-    WinRTWrapper::ComPtr<IUriRuntimeClass> createURI (const String& url)
+    void closeWebView()
     {
-        auto uriRuntimeFactory
-            = WinRTWrapper::getInstance()->getWRLFactory <IUriRuntimeClassFactory> (RuntimeClass_Windows_Foundation_Uri);
-
-        if (uriRuntimeFactory == nullptr)
+        if (webViewController.get() != nullptr)
         {
-            jassertfalse;
-            return {};
+            webViewController->Close();
+            webViewController = nullptr;
+            webView = nullptr;
         }
 
-        WinRTWrapper::ScopedHString hstr (url);
-        WinRTWrapper::ComPtr<IUriRuntimeClass> uriRuntimeClass;
-        uriRuntimeFactory->CreateUri (hstr.get(), uriRuntimeClass.resetAndGetPointerAddress());
-
-        return uriRuntimeClass;
-    }
-
-    WinRTWrapper::ComPtr<IHttpContent> getPOSTContent (const MemoryBlock& postData)
-    {
-        auto factory = WinRTWrapper::getInstance()->getWRLFactory<IHttpStringContentFactory> (RuntimeClass_Windows_Web_Http_HttpStringContent);
-
-        if (factory == nullptr)
-        {
-            jassertfalse;
-            return {};
-        }
-
-        WinRTWrapper::ScopedHString hStr (postData.toString());
-
-        WinRTWrapper::ComPtr<IHttpContent> content;
-        factory->CreateFromString (hStr.get(), content.resetAndGetPointerAddress());
-
-        return content;
-    }
-
-    WinRTWrapper::ComPtr<IHttpMethod> getMethod (bool isPOST)
-    {
-        auto methodFactory = WinRTWrapper::getInstance()->getWRLFactory<IHttpMethodStatics> (RuntimeClass_Windows_Web_Http_HttpMethod);
-
-        if (methodFactory == nullptr)
-        {
-            jassertfalse;
-            return {};
-        }
-
-        WinRTWrapper::ComPtr<IHttpMethod> method;
-
-        if (isPOST)
-            methodFactory->get_Post (method.resetAndGetPointerAddress());
-        else
-            methodFactory->get_Get (method.resetAndGetPointerAddress());
-
-        return method;
-    }
-
-    void addHttpHeaders (WinRTWrapper::ComPtr<IHttpRequestMessage>& requestMessage, const StringArray& headers)
-    {
-        WinRTWrapper::ComPtr<IHttpRequestHeaderCollection> headerCollection;
-        requestMessage->get_Headers (headerCollection.resetAndGetPointerAddress());
-
-        for (int i = 0; i < headers.size(); ++i)
-        {
-            WinRTWrapper::ScopedHString headerName  (headers[i].upToFirstOccurrenceOf (":", false, false).trim());
-            WinRTWrapper::ScopedHString headerValue (headers[i].fromFirstOccurrenceOf (":", false, false).trim());
-
-            headerCollection->Append (headerName.get(), headerValue.get());
-        }
-    }
-
-    WinRTWrapper::ComPtr<IHttpRequestMessage> createHttpRequestMessage (const String& url,
-                                                                        const StringArray* headers,
-                                                                        const MemoryBlock* postData)
-    {
-        auto requestFactory
-            = WinRTWrapper::getInstance()->getWRLFactory<IHttpRequestMessageFactory> (RuntimeClass_Windows_Web_Http_HttpRequestMessage);
-
-        if (requestFactory == nullptr)
-        {
-            jassertfalse;
-            return {};
-        }
-
-        bool isPOSTRequest = (postData != nullptr && postData->getSize() > 0);
-        auto method = getMethod (isPOSTRequest);
-
-        auto uri = createURI (url);
-
-        WinRTWrapper::ComPtr<IHttpRequestMessage> requestMessage;
-        requestFactory->Create (method.get(), uri.get(), requestMessage.resetAndGetPointerAddress());
-
-        if (isPOSTRequest)
-        {
-            auto content = getPOSTContent (*postData);
-            requestMessage->put_Content (content.get());
-        }
-
-        if (headers != nullptr && ! headers->isEmpty())
-            addHttpHeaders (requestMessage, *headers);
-
-        return requestMessage;
+        webViewEnvironment = nullptr;
     }
 
     //==============================================================================
     void setControlBounds (Rectangle<int> newBounds) const
     {
-        if (webViewControl != nullptr)
+        if (webViewController != nullptr)
         {
            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
             if (auto* peer = owner.getTopLevelComponent()->getPeer())
                 newBounds = (newBounds.toDouble() * peer->getPlatformScaleFactor()).toNearestInt();
            #endif
 
-            WinRTWrapper::ComPtr<IWebViewControlSite> site;
-
-            if (SUCCEEDED (webViewControl->QueryInterface (site.resetAndGetPointerAddress())))
-                site->put_Bounds ({ static_cast<FLOAT> (newBounds.getX()), static_cast<FLOAT> (newBounds.getY()),
-                                    static_cast<FLOAT> (newBounds.getWidth()), static_cast<FLOAT> (newBounds.getHeight()) });
+            webViewController->put_Bounds({ newBounds.getX(), newBounds.getY(),
+                                            newBounds.getRight(), newBounds.getBottom() });
         }
-
     }
 
     void setControlVisible (bool shouldBeVisible) const
     {
-        if (webViewControl != 0)
-        {
-            WinRTWrapper::ComPtr<IWebViewControlSite> site;
-
-            if (SUCCEEDED (webViewControl->QueryInterface (site.resetAndGetPointerAddress())))
-                site->put_IsVisible (shouldBeVisible);
-        }
+        if (webViewController != nullptr)
+            webViewController->put_IsVisible (shouldBeVisible);
     }
 
     //==============================================================================
     WebBrowserComponent& owner;
 
-    WinRTWrapper::ComPtr<IWebViewControlProcess> webViewProcess;
-    WinRTWrapper::ComPtr<IWebViewControl> webViewControl;
+    HMODULE webView2LoaderHandle = nullptr;
 
-    EventRegistrationToken navigationStartingToken  { 0 },
-                           newWindowRequestedToken  { 0 },
-                           navigationCompletedToken { 0 };
+    WinRTWrapper::ComPtr<ICoreWebView2Environment> webViewEnvironment;
+    WinRTWrapper::ComPtr<ICoreWebView2Controller> webViewController;
+    WinRTWrapper::ComPtr<ICoreWebView2> webView;
+
+    EventRegistrationToken navigationStartingToken   { 0 },
+                           newWindowRequestedToken   { 0 },
+                           windowCloseRequestedToken { 0 },
+                           navigationCompletedToken  { 0 },
+                           webResourceRequestedToken { 0 };
+
+    struct URLRequest
+    {
+        String url;
+        StringArray headers;
+        MemoryBlock postData;
+    };
+    URLRequest urlRequest;
 
     bool isCreating = false;
+
+    //==============================================================================
+    JUCE_DECLARE_WEAK_REFERENCEABLE (WebView2)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebView2)
 };
 
 #endif
@@ -804,20 +742,20 @@ private:
 class WebBrowserComponent::Pimpl
 {
 public:
-    Pimpl (WebBrowserComponent& owner)
+    Pimpl (WebBrowserComponent& owner, const File& dllLocation, const File& userDataFolder, bool useWebView2)
     {
-        #if JUCE_USE_WINRT_WEBVIEW
-         auto windowsVersionInfo = getWindowsVersionInfo();
+        if (useWebView2)
+        {
+           #if JUCE_USE_WIN_WEBVIEW2
+            try
+            {
+                internal.reset (new WebView2 (owner, dllLocation, userDataFolder));
+            }
+            catch (std::runtime_error&) {}
+           #endif
+        }
 
-         if (windowsVersionInfo.dwMajorVersion >= 10 && windowsVersionInfo.dwBuildNumber >= 17763)
-         {
-             try
-             {
-                 internal.reset (new WinRTWebView (owner));
-             }
-             catch (std::runtime_error&) {}
-         }
-        #endif
+        ignoreUnused (dllLocation, userDataFolder);
 
         if (internal == nullptr)
             internal.reset (new Win32WebView (owner));
@@ -834,7 +772,16 @@ private:
 
 //==============================================================================
 WebBrowserComponent::WebBrowserComponent (bool unloadWhenHidden)
-    : browser (new Pimpl (*this)),
+    : browser (new Pimpl (*this, {}, {}, false)),
+      unloadPageWhenBrowserIsHidden (unloadWhenHidden)
+{
+    setOpaque (true);
+}
+
+WebBrowserComponent::WebBrowserComponent (bool unloadWhenHidden,
+                                          const File& dllLocation,
+                                          const File& userDataFolder)
+    : browser (new Pimpl (*this, dllLocation, userDataFolder, true)),
       unloadPageWhenBrowserIsHidden (unloadWhenHidden)
 {
     setOpaque (true);

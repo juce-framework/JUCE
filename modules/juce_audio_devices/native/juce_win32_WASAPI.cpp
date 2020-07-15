@@ -1430,7 +1430,7 @@ private:
             closeDevices();
             initialise();
 
-            auto changedSampleRate = [this, sampleRateChangedByInput] ()
+            auto changedSampleRate = [this, sampleRateChangedByInput]()
             {
                 if (inputDevice != nullptr && sampleRateChangedByInput)
                     return inputDevice->defaultSampleRate;

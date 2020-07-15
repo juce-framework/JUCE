@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -368,7 +375,7 @@ private:
 
     //==============================================================================
     class LabelJustificationProperty  : public JustificationProperty,
-                                        public ChangeListener
+                                        private ChangeListener
     {
     public:
         LabelJustificationProperty (Label* const label_, JucerDocument& doc)
@@ -379,25 +386,25 @@ private:
             document.addChangeListener (this);
         }
 
-        ~LabelJustificationProperty()
+        ~LabelJustificationProperty() override
         {
             document.removeChangeListener (this);
         }
 
-        void setJustification (Justification newJustification)
+        void setJustification (Justification newJustification) override
         {
             document.perform (new LabelJustifyChangeAction (label, *document.getComponentLayout(), newJustification),
                               "Change Label justification");
         }
 
-        Justification getJustification() const
+        Justification getJustification() const override
         {
             return label->getJustificationType();
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
-
     private:
+        void changeListenerCallback (ChangeBroadcaster*) override { refresh(); }
+
         Label* const label;
         JucerDocument& document;
 
@@ -433,7 +440,7 @@ private:
 
     //==============================================================================
     class FontNameProperty  : public FontPropertyComponent,
-                              public ChangeListener
+                              private ChangeListener
     {
     public:
         FontNameProperty (Label* const label_, JucerDocument& doc)
@@ -444,25 +451,25 @@ private:
             document.addChangeListener (this);
         }
 
-        ~FontNameProperty()
+        ~FontNameProperty() override
         {
             document.removeChangeListener (this);
         }
 
-        void setTypefaceName (const String& newFontName)
+        void setTypefaceName (const String& newFontName) override
         {
             document.perform (new FontNameChangeAction (label, *document.getComponentLayout(), newFontName),
                               "Change Label typeface");
         }
 
-        String getTypefaceName() const
+        String getTypefaceName() const override
         {
             return label->getProperties().getWithDefault ("typefaceName", FontPropertyComponent::getDefaultFont());
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)                     { refresh(); }
-
     private:
+        void changeListenerCallback (ChangeBroadcaster*) override { refresh(); }
+
         Label* const label;
         JucerDocument& document;
 
@@ -500,7 +507,7 @@ private:
 
     //==============================================================================
     class FontSizeProperty  : public SliderPropertyComponent,
-                              public ChangeListener
+                              private ChangeListener
     {
     public:
         FontSizeProperty (Label* const label_, JucerDocument& doc)
@@ -511,12 +518,12 @@ private:
             document.addChangeListener (this);
         }
 
-        ~FontSizeProperty()
+        ~FontSizeProperty() override
         {
             document.removeChangeListener (this);
         }
 
-        void setValue (double newValue)
+        void setValue (double newValue) override
         {
             document.getUndoManager().undoCurrentTransactionOnly();
 
@@ -524,14 +531,14 @@ private:
                               "Change Label font size");
         }
 
-        double getValue() const
+        double getValue() const override
         {
             return label->getFont().getHeight();
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
-
     private:
+        void changeListenerCallback (ChangeBroadcaster*) override { refresh(); }
+
         Label* const label;
         JucerDocument& document;
 
@@ -571,7 +578,7 @@ private:
 
     //==============================================================================
     class FontStyleProperty  : public ChoicePropertyComponent,
-                               public ChangeListener
+                               private ChangeListener
     {
     public:
         FontStyleProperty (Label* const label_, JucerDocument& doc)
@@ -584,7 +591,7 @@ private:
             updateStylesList (label->getFont());
         }
 
-        ~FontStyleProperty()
+        ~FontStyleProperty() override
         {
             document.removeChangeListener (this);
         }
@@ -611,7 +618,7 @@ private:
             refresh();
         }
 
-        void setIndex (int newIndex)
+        void setIndex (int newIndex) override
         {
             Font f (label->getFont());
 
@@ -632,7 +639,7 @@ private:
                               "Change Label font style");
         }
 
-        int getIndex() const
+        int getIndex() const override
         {
             auto f = label->getFont();
 
@@ -652,12 +659,12 @@ private:
             return typefaceIndex;
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)
+    private:
+        void changeListenerCallback (ChangeBroadcaster*) override
         {
             updateStylesList (label->getFont());
         }
 
-    private:
         Label* const label;
         JucerDocument& document;
 
@@ -693,7 +700,7 @@ private:
 
     //==============================================================================
     class FontKerningProperty  : public SliderPropertyComponent,
-                                 public ChangeListener
+                                 private ChangeListener
     {
     public:
         FontKerningProperty (Label* const label_, JucerDocument& doc)
@@ -704,12 +711,12 @@ private:
             document.addChangeListener (this);
         }
 
-        ~FontKerningProperty()
+        ~FontKerningProperty() override
         {
             document.removeChangeListener (this);
         }
 
-        void setValue (double newValue)
+        void setValue (double newValue) override
         {
             document.getUndoManager().undoCurrentTransactionOnly();
 
@@ -717,17 +724,17 @@ private:
                               "Change Label font kerning");
         }
 
-        double getValue() const
+        double getValue() const override
         {
             return label->getFont().getExtraKerningFactor();
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)
+    private:
+        void changeListenerCallback (ChangeBroadcaster*) override
         {
             refresh();
         }
 
-    private:
         Label* const label;
         JucerDocument& document;
 

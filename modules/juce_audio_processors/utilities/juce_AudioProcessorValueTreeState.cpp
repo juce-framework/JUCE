@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -25,8 +32,8 @@ AudioProcessorValueTreeState::Parameter::Parameter (const String& parameterID,
                                                     const String& labelText,
                                                     NormalisableRange<float> valueRange,
                                                     float defaultParameterValue,
-                                                    std::function<String(float)> valueToTextFunction,
-                                                    std::function<float(const String&)> textToValueFunction,
+                                                    std::function<String (float)> valueToTextFunction,
+                                                    std::function<float (const String&)> textToValueFunction,
                                                     bool isMetaParameter,
                                                     bool isAutomatableParameter,
                                                     bool isDiscrete,
@@ -38,8 +45,8 @@ AudioProcessorValueTreeState::Parameter::Parameter (const String& parameterID,
                            defaultParameterValue,
                            labelText,
                            parameterCategory,
-                           valueToTextFunction == nullptr ? std::function<String(float v, int)>()
-                                                          : [valueToTextFunction](float v, int) { return valueToTextFunction (v); },
+                           valueToTextFunction == nullptr ? std::function<String (float v, int)>()
+                                                          : [valueToTextFunction] (float v, int) { return valueToTextFunction (v); },
                            std::move (textToValueFunction)),
       unsnappedDefault (valueRange.convertTo0to1 (defaultParameterValue)),
       metaParameter (isMetaParameter),
@@ -155,7 +162,7 @@ private:
             return;
 
         unnormalisedValue = newValue;
-        listeners.call ([=](Listener& l) { l.parameterChanged (parameter.paramID, unnormalisedValue); });
+        listeners.call ([=] (Listener& l) { l.parameterChanged (parameter.paramID, unnormalisedValue); });
         listenersNeedCalling = false;
         needsUpdate = true;
     }
@@ -178,8 +185,35 @@ private:
         parameter.setValueNotifyingHost (value);
     }
 
+    class LockedListeners
+    {
+    public:
+        template <typename Fn>
+        void call (Fn&& fn)
+        {
+            const CriticalSection::ScopedLockType lock (mutex);
+            listeners.call (std::forward<Fn> (fn));
+        }
+
+        void add (Listener* l)
+        {
+            const CriticalSection::ScopedLockType lock (mutex);
+            listeners.add (l);
+        }
+
+        void remove (Listener* l)
+        {
+            const CriticalSection::ScopedLockType lock (mutex);
+            listeners.remove (l);
+        }
+
+    private:
+        CriticalSection mutex;
+        ListenerList<Listener> listeners;
+    };
+
     RangedAudioParameter& parameter;
-    ListenerList<Listener> listeners;
+    LockedListeners listeners;
     std::atomic<float> unnormalisedValue { 0.0f };
     std::atomic<bool> needsUpdate { true }, listenersNeedCalling { true };
     bool ignoreParameterChangedCallbacks { false };
@@ -261,8 +295,8 @@ RangedAudioParameter* AudioProcessorValueTreeState::createAndAddParameter (const
                                                                            const String& labelText,
                                                                            NormalisableRange<float> range,
                                                                            float defaultVal,
-                                                                           std::function<String(float)> valueToTextFunction,
-                                                                           std::function<float(const String&)> textToValueFunction,
+                                                                           std::function<String (float)> valueToTextFunction,
+                                                                           std::function<float (const String&)> textToValueFunction,
                                                                            bool isMetaParameter,
                                                                            bool isAutomatableParameter,
                                                                            bool isDiscreteParameter,
@@ -512,7 +546,7 @@ struct ParameterAdapterTests  : public UnitTest
 
         beginTest ("Denormalised parameter values can be retrieved");
         {
-            const auto test = [&](NormalisableRange<float> range, float value)
+            const auto test = [&] (NormalisableRange<float> range, float value)
             {
                 AudioParameterFloat param ({}, {}, range, {}, {});
                 AudioProcessorValueTreeState::ParameterAdapter adapter (param);
@@ -529,7 +563,7 @@ struct ParameterAdapterTests  : public UnitTest
 
         beginTest ("Floats can be converted to text");
         {
-            const auto test = [&](NormalisableRange<float> range, float value, String expected)
+            const auto test = [&] (NormalisableRange<float> range, float value, String expected)
             {
                 AudioParameterFloat param ({}, {}, range, {}, {});
                 AudioProcessorValueTreeState::ParameterAdapter adapter (param);
@@ -545,7 +579,7 @@ struct ParameterAdapterTests  : public UnitTest
 
         beginTest ("Text can be converted to floats");
         {
-            const auto test = [&](NormalisableRange<float> range, String text, float expected)
+            const auto test = [&] (NormalisableRange<float> range, String text, float expected)
             {
                 AudioParameterFloat param ({}, {}, range, {}, {});
                 AudioProcessorValueTreeState::ParameterAdapter adapter (param);

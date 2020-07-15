@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -27,7 +34,7 @@ namespace juce
 
     @tags{GUI}
 */
-class JUCE_API ContentSharer
+class JUCE_API ContentSharer  : public DeletedAtShutdown
 {
 public:
     JUCE_DECLARE_SINGLETON (ContentSharer, false)
@@ -45,7 +52,7 @@ public:
         succeeded. Also, the optional error message is always empty on Android.
     */
     void shareFiles (const Array<URL>& files,
-                     std::function<void(bool /*success*/, const String& /*error*/)> callback);
+                     std::function<void (bool /*success*/, const String& /*error*/)> callback);
 
     /** Shares the given text.
 
@@ -55,7 +62,7 @@ public:
         succeeded. Also, the optional error message is always empty on Android.
     */
     void shareText (const String& text,
-                    std::function<void(bool /*success*/, const String& /*error*/)> callback);
+                    std::function<void (bool /*success*/, const String& /*error*/)> callback);
 
     /** A convenience function to share an image. This is useful when you have images
         loaded in memory. The images will be written to temporary files first, so if
@@ -79,7 +86,7 @@ public:
         succeeded. Also, the optional error message is always empty on Android.
     */
     void shareImages (const Array<Image>& images,
-                      std::function<void(bool /*success*/, const String& /*error*/)> callback,
+                      std::function<void (bool /*success*/, const String& /*error*/)> callback,
                       ImageFileFormat* imageFileFormatToUse = nullptr);
 
     /** A convenience function to share arbitrary data. The data will be written
@@ -92,7 +99,7 @@ public:
         succeeded. Also, the optional error message is always empty on Android.
     */
     void shareData (const MemoryBlock& mb,
-                    std::function<void(bool /*success*/, const String& /*error*/)> callback);
+                    std::function<void (bool /*success*/, const String& /*error*/)> callback);
 
 private:
     ContentSharer();
@@ -100,7 +107,7 @@ private:
 
     Array<File> temporaryFiles;
 
-    std::function<void(bool, String)> callback;
+    std::function<void (bool, String)> callback;
 
   #if JUCE_CONTENT_SHARING
     struct Pimpl
@@ -113,7 +120,7 @@ private:
     std::unique_ptr<Pimpl> pimpl;
     Pimpl* createPimpl();
 
-    void startNewShare (std::function<void(bool, const String&)>);
+    void startNewShare (std::function<void (bool, const String&)>);
 
     class ContentSharerNativeImpl;
     friend class ContentSharerNativeImpl;

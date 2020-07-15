@@ -1,12 +1,19 @@
 # ==============================================================================
 #
-#  This file is part of the JUCE 6 technical preview.
+#  This file is part of the JUCE library.
 #  Copyright (c) 2020 - Raw Material Software Limited
 #
-#  You may use this code under the terms of the GPL v3
-#  (see www.gnu.org/licenses).
+#  JUCE is an open source library subject to commercial or open-source
+#  licensing.
 #
-#  For this technical preview, this file is not subject to commercial licensing.
+#  By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+#  Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+#
+#  End User License Agreement: www.juce.com/juce-6-licence
+#  Privacy Policy: www.juce.com/juce-privacy-policy
+#
+#  Or: You may also use this code under the terms of the GPL v3 (see
+#  www.gnu.org/licenses).
 #
 #  JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
 #  EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -21,7 +28,7 @@
 # Functions beginning with an underscore should be considered private and susceptible to
 # change, so don't call them directly.
 #
-# See the readme at `examples/CMake` for more information about CMake usage,
+# See the readme at `docs/CMake API.md` for more information about CMake usage,
 # including documentation of the public functions in this file.
 # ==================================================================================================
 
@@ -471,7 +478,15 @@ function(juce_add_module module_path)
                 OUT_PATH "${base_path}")
         endforeach()
 
-        list(APPEND all_module_sources "${base_path}/${module_name}/juce_audio_plugin_client_utils.cpp")
+        set(utils_source
+            "${base_path}/${module_name}/juce_audio_plugin_client_utils.cpp")
+        add_library(juce_audio_plugin_client_utils INTERFACE)
+        target_sources(juce_audio_plugin_client_utils INTERFACE "${utils_source}")
+
+        if(JUCE_ARG_ALIAS_NAMESPACE)
+            add_library(${JUCE_ARG_ALIAS_NAMESPACE}::juce_audio_plugin_client_utils
+                ALIAS juce_audio_plugin_client_utils)
+        endif()
     else()
         _juce_module_sources("${module_path}" "${base_path}" globbed_sources)
         list(APPEND all_module_sources ${globbed_sources})
@@ -488,8 +503,6 @@ function(juce_add_module module_path)
             target_link_libraries(juce_core INTERFACE android log)
         endif()
     endif()
-
-    source_group(Modules FILES ${all_module_sources})
 
     if(${module_name} STREQUAL "juce_audio_processors")
         add_library(juce_vst3_headers INTERFACE)
@@ -1313,6 +1326,19 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
     endif()
 endfunction()
 
+# Place plugin wrapper targets alongside the shared code target in IDEs
+function(_juce_set_plugin_folder_property shared_target wrapper_target)
+    get_target_property(folder_to_use "${shared_target}" FOLDER)
+
+    if(folder_to_use STREQUAL "folder_to_use-NOTFOUND")
+        set(folder_to_use "${shared_target}")
+    else()
+        set(folder_to_use "${folder_to_use}/${shared_target}")
+    endif()
+
+    set_target_properties("${wrapper_target}" PROPERTIES FOLDER "${folder_to_use}")
+endfunction()
+
 # Convert the cmake plugin kind ids to strings understood by ProjectType::Target::typeFromName
 function(_juce_get_plugin_kind_name kind out_var)
     if(kind STREQUAL "AU")
@@ -1359,6 +1385,8 @@ function(_juce_link_plugin_wrapper shared_code_target kind)
 
     _juce_set_output_name(${target_name} $<TARGET_PROPERTY:${shared_code_target},JUCE_PRODUCT_NAME>)
 
+    _juce_set_plugin_folder_property("${shared_code_target}" "${target_name}")
+
     _juce_get_plugin_kind_name(${kind} juce_kind_string)
     set_target_properties(${target_name} PROPERTIES
         XCODE_ATTRIBUTE_CLANG_LINK_OBJC_RUNTIME NO
@@ -1367,7 +1395,6 @@ function(_juce_link_plugin_wrapper shared_code_target kind)
         VISIBILITY_INLINES_HIDDEN TRUE
         C_VISIBILITY_PRESET hidden
         CXX_VISIBILITY_PRESET hidden
-        FOLDER ${shared_code_target}
         JUCE_TARGET_KIND_STRING "${juce_kind_string}")
     add_dependencies(${shared_code_target}_All ${target_name})
 
@@ -1434,9 +1461,9 @@ function(_juce_configure_plugin_targets target)
         message(FATAL_ERROR "Plugin targets require CMake 3.15 or higher")
     endif()
 
-    target_link_libraries(${target} PRIVATE juce::juce_audio_plugin_client)
-
     _juce_set_output_name(${target} $<TARGET_PROPERTY:${target},JUCE_PRODUCT_NAME>_SharedCode)
+
+    target_link_libraries(${target} PRIVATE juce::juce_audio_plugin_client_utils)
 
     get_target_property(enabled_formats ${target} JUCE_FORMATS)
 
@@ -1515,7 +1542,7 @@ function(_juce_configure_plugin_targets target)
 
     # A convenience target for building all plugin variations at once
     add_custom_target(${target}_All)
-    set_target_properties(${target}_All PROPERTIES FOLDER ${target})
+    _juce_set_plugin_folder_property("${target}" "${target}_All")
 
     _juce_get_platform_plugin_kinds(plugin_kinds)
 
@@ -1918,6 +1945,13 @@ function(_juce_initialise_target target)
 
     _juce_write_generate_time_info(${target})
     _juce_link_optional_libraries(${target})
+
+    file(GLOB juce_module_folders RELATIVE "${JUCE_MODULES_DIR}" "${JUCE_MODULES_DIR}/*")
+
+    foreach(module_folder IN LISTS juce_module_folders)
+        file(GLOB_RECURSE juce_module_files "${JUCE_MODULES_DIR}/${module_folder}/*")
+        source_group(TREE "${JUCE_MODULES_DIR}" PREFIX "Modules" FILES ${juce_module_files})
+    endforeach()
 endfunction()
 
 # ==================================================================================================

@@ -343,7 +343,7 @@ public:
 
         c = *text;
 
-        auto writeExponentDigits = [](int exponent, char* destination)
+        auto writeExponentDigits = [] (int exponent, char* destination)
         {
             auto exponentDivisor = 100;
 

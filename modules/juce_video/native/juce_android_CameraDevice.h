@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -477,7 +484,7 @@ private:
 struct CameraDevice::Pimpl
     : private ActivityLifecycleCallbacks
 {
-    using InternalOpenCameraResultCallback = std::function<void(const String& /*cameraId*/, const String& /*error*/)>;
+    using InternalOpenCameraResultCallback = std::function<void (const String& /*cameraId*/, const String& /*error*/)>;
 
     Pimpl (CameraDevice& ownerToUse, const String& cameraIdToUse, int /*index*/,
            int minWidthToUse, int minHeightToUse, int maxWidthToUse, int maxHeightToUse,
@@ -553,7 +560,7 @@ struct CameraDevice::Pimpl
 
     bool openedOk() const noexcept { return scopedCameraDevice->openedOk(); }
 
-    void takeStillPicture (std::function<void(const Image&)> pictureTakenCallbackToUse)
+    void takeStillPicture (std::function<void (const Image&)> pictureTakenCallbackToUse)
     {
         if (pictureTakenCallbackToUse == nullptr || currentCaptureSessionMode == nullptr)
         {
@@ -2926,7 +2933,7 @@ private:
     CriticalSection listenerLock;
     ListenerList<Listener> listeners;
 
-    std::function<void(const Image&)> pictureTakenCallback;
+    std::function<void (const Image&)> pictureTakenCallback;
 
     Time firstRecordedFrameTimeMs;
     bool notifiedOfCameraOpening = false;

@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -39,7 +46,7 @@ public:
     bool mightContainSubItems() override      { return exporter->getNumConfigurations() > 0; }
     String getUniqueName() const override     { return "exporter_" + String (exporterIndex); }
     String getRenamingName() const override   { return getDisplayName(); }
-    String getDisplayName() const override    { return exporter->getName(); }
+    String getDisplayName() const override    { return exporter->getUniqueName(); }
     void setName (const String&) override     {}
     bool isMissing() const override           { return false; }
     String getTooltip() override              { return getDisplayName(); }
@@ -172,7 +179,7 @@ private:
     struct SettingsComp  : public Component
     {
         SettingsComp (ProjectExporter& exp)
-            : group (exp.getName(),
+            : group (exp.getUniqueName(),
                      ExporterItem::getIconForExporter (&exp),
                      exp.getDescription())
         {
@@ -269,7 +276,7 @@ private:
     {
     public:
         SettingsComp (ProjectExporter::BuildConfiguration& conf)
-            : group (conf.exporter.getName() + " - " + conf.getName(), Icon (getIcons().config, Colours::transparentBlack))
+            : group (conf.exporter.getUniqueName() + " - " + conf.getName(), Icon (getIcons().config, Colours::transparentBlack))
         {
             addAndMakeVisible (group);
 

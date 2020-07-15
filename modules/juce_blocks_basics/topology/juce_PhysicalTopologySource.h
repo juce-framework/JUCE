@@ -62,7 +62,7 @@ public:
         virtual ~DeviceConnection();
 
         virtual bool sendMessageToDevice (const void* data, size_t dataSize) = 0;
-        std::function<void(const void* data, size_t dataSize)> handleMessageFromDevice;
+        std::function<void (const void* data, size_t dataSize)> handleMessageFromDevice;
     };
 
     /** For custom transport systems, this represents a connected device */

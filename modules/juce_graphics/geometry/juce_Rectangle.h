@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -499,7 +506,7 @@ public:
         by the specified amount and returning the section that was removed.
 
         E.g. if this rectangle is (100, 100, 300, 300) and amountToRemove is 50, this will
-        return (250, 100, 50, 300) and leave this rectangle as (100, 100, 250, 300).
+        return (350, 100, 50, 300) and leave this rectangle as (100, 100, 250, 300).
 
         If amountToRemove is greater than the width of this rectangle, it'll be clipped to
         that value.
@@ -516,7 +523,7 @@ public:
         by the specified amount and returning the section that was removed.
 
         E.g. if this rectangle is (100, 100, 300, 300) and amountToRemove is 50, this will
-        return (100, 250, 300, 50) and leave this rectangle as (100, 100, 300, 250).
+        return (100, 350, 300, 50) and leave this rectangle as (100, 100, 300, 250).
 
         If amountToRemove is greater than the height of this rectangle, it'll be clipped to
         that value.

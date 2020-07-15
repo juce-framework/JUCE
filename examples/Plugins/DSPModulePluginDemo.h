@@ -1129,8 +1129,9 @@ private:
             return latency;
         }
 
-        dsp::Convolution cabinet { dsp::Convolution::NonUniform { 512 } };
-        dsp::Convolution reverb { dsp::Convolution::NonUniform { 512 } };
+        dsp::ConvolutionMessageQueue queue;
+        dsp::Convolution cabinet { dsp::Convolution::NonUniform { 512 }, queue };
+        dsp::Convolution reverb { dsp::Convolution::NonUniform { 512 }, queue };
         dsp::DryWetMixer<float> mixer;
         bool cabEnabled = false, reverbEnabled = false;
 
