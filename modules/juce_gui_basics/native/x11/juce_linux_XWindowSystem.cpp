@@ -1334,12 +1334,28 @@ static int getAllEventsMask (bool ignoresMouseClicks)
     }
 
     // Set window manager hints
-    auto* wmHints = X11Symbols::getInstance()->xAllocWMHints();
-    wmHints->flags = InputHint | StateHint;
-    wmHints->input = True;
-    wmHints->initial_state = NormalState;
-    X11Symbols::getInstance()->xSetWMHints (display, windowH, wmHints);
-    X11Symbols::getInstance()->xFree (wmHints);
+    if (auto* wmHints = X11Symbols::getInstance()->xAllocWMHints())
+    {
+        wmHints->flags = InputHint | StateHint;
+        wmHints->input = True;
+        wmHints->initial_state = NormalState;
+        X11Symbols::getInstance()->xSetWMHints (display, windowH, wmHints);
+        X11Symbols::getInstance()->xFree (wmHints);
+    }
+
+    // Set class hint
+    if (auto* app = JUCEApplicationBase::getInstance())
+    {
+        if (auto* classHint = X11Symbols::getInstance()->xAllocClassHint())
+        {
+            auto appName = app->getApplicationName();
+            classHint->res_name  = (char*) appName.getCharPointer().getAddress();
+            classHint->res_class = (char*) appName.getCharPointer().getAddress();
+
+            X11Symbols::getInstance()->xSetClassHint (display, windowH, classHint);
+            X11Symbols::getInstance()->xFree (classHint);
+        }
+    }
 
     // Set the window type
     setWindowType (windowH, styleFlags);
@@ -1456,12 +1472,15 @@ void XWindowSystem::setIcon (::Window windowH, const Image& newIcon) const
     if (wmHints == nullptr)
         wmHints = X11Symbols::getInstance()->xAllocWMHints();
 
-    wmHints->flags |= IconPixmapHint | IconMaskHint;
-    wmHints->icon_pixmap = PixmapHelpers::createColourPixmapFromImage (display, newIcon);
-    wmHints->icon_mask = PixmapHelpers::createMaskPixmapFromImage (display, newIcon);
+    if (wmHints != nullptr)
+    {
+        wmHints->flags |= IconPixmapHint | IconMaskHint;
+        wmHints->icon_pixmap = PixmapHelpers::createColourPixmapFromImage (display, newIcon);
+        wmHints->icon_mask = PixmapHelpers::createMaskPixmapFromImage (display, newIcon);
 
-    X11Symbols::getInstance()->xSetWMHints (display, windowH, wmHints);
-    X11Symbols::getInstance()->xFree (wmHints);
+        X11Symbols::getInstance()->xSetWMHints (display, windowH, wmHints);
+        X11Symbols::getInstance()->xFree (wmHints);
+    }
 
     X11Symbols::getInstance()->xSync (display, False);
 }
@@ -1514,22 +1533,24 @@ void XWindowSystem::setBounds (::Window windowH, Rectangle<int> newBounds, bool 
 
         XWindowSystemUtilities::ScopedXLock xLock;
 
-        auto* hints = X11Symbols::getInstance()->xAllocSizeHints();
-        hints->flags  = USSize | USPosition;
-        hints->x      = newBounds.getX();
-        hints->y      = newBounds.getY();
-        hints->width  = newBounds.getWidth();
-        hints->height = newBounds.getHeight();
-
-        if ((peer->getStyleFlags() & ComponentPeer::windowIsResizable) == 0)
+        if (auto* hints = X11Symbols::getInstance()->xAllocSizeHints())
         {
-            hints->min_width  = hints->max_width  = hints->width;
-            hints->min_height = hints->max_height = hints->height;
-            hints->flags |= PMinSize | PMaxSize;
-        }
+            hints->flags  = USSize | USPosition;
+            hints->x      = newBounds.getX();
+            hints->y      = newBounds.getY();
+            hints->width  = newBounds.getWidth();
+            hints->height = newBounds.getHeight();
 
-        X11Symbols::getInstance()->xSetWMNormalHints (display, windowH, hints);
-        X11Symbols::getInstance()->xFree (hints);
+            if ((peer->getStyleFlags() & ComponentPeer::windowIsResizable) == 0)
+            {
+                hints->min_width  = hints->max_width  = hints->width;
+                hints->min_height = hints->max_height = hints->height;
+                hints->flags |= PMinSize | PMaxSize;
+            }
+
+            X11Symbols::getInstance()->xSetWMNormalHints (display, windowH, hints);
+            X11Symbols::getInstance()->xFree (hints);
+        }
 
         auto windowBorder = peer->getFrameSize();
 

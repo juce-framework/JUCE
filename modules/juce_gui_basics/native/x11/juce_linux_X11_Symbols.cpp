@@ -80,6 +80,7 @@ bool X11Symbols::loadAllSymbols()
     using namespace X11SymbolHelpers;
 
     if (! loadSymbols (xLib, xextLib,
+                       makeSymbolBinding (xAllocClassHint,             "XAllocClassHint"),
                        makeSymbolBinding (xAllocSizeHints,             "XAllocSizeHints"),
                        makeSymbolBinding (xAllocWMHints,               "XAllocWMHints"),
                        makeSymbolBinding (xBitmapBitOrder,             "XBitmapBitOrder"),
@@ -169,6 +170,7 @@ bool X11Symbols::loadAllSymbols()
                        makeSymbolBinding (xScreenNumberOfScreen,       "XScreenNumberOfScreen"),
                        makeSymbolBinding (xSelectInput,                "XSelectInput"),
                        makeSymbolBinding (xSendEvent,                  "XSendEvent"),
+                       makeSymbolBinding (xSetClassHint,               "XSetClassHint"),
                        makeSymbolBinding (xSetErrorHandler,            "XSetErrorHandler"),
                        makeSymbolBinding (xSetIOErrorHandler,          "XSetIOErrorHandler"),
                        makeSymbolBinding (xSetInputFocus,              "XSetInputFocus"),

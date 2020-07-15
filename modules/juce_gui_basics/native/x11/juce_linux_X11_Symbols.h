@@ -49,6 +49,10 @@ public:
     bool loadAllSymbols();
 
     //==============================================================================
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XAllocClassHint, xAllocClassHint,
+                                         (),
+                                         XClassHint*)
+
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XAllocSizeHints, xAllocSizeHints,
                                          (),
                                          XSizeHints*)
@@ -404,6 +408,10 @@ public:
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XSendEvent, xSendEvent,
                                          (::Display*, ::Window, Bool, long, XEvent*),
                                          Status)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XSetClassHint, xSetClassHint,
+                                         (::Display*, ::Window, XClassHint*),
+                                         void)
 
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XSetErrorHandler, xSetErrorHandler,
                                          (XErrorHandler),
