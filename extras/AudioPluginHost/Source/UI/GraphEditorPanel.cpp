@@ -1189,11 +1189,8 @@ void GraphDocumentComponent::init()
 
     if (isOnTouchDevice())
     {
-        if (isOnTouchDevice())
-        {
-            titleBarComponent.reset (new TitleBarComponent (*this));
-            addAndMakeVisible (titleBarComponent.get());
-        }
+        titleBarComponent.reset (new TitleBarComponent (*this));
+        addAndMakeVisible (titleBarComponent.get());
 
         pluginListBoxModel.reset (new PluginListBoxModel (pluginListBox, pluginList));
 
@@ -1206,11 +1203,8 @@ void GraphDocumentComponent::init()
                                                                               0, 2, 0, 2,
                                                                               true, true, true, false));
 
-        if (isOnTouchDevice())
-        {
-            addAndMakeVisible (pluginListSidePanel);
-            addAndMakeVisible (mobileSettingsSidePanel);
-        }
+        addAndMakeVisible (pluginListSidePanel);
+        addAndMakeVisible (mobileSettingsSidePanel);
     }
 }
 
