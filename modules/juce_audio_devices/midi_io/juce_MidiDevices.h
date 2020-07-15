@@ -337,6 +337,11 @@ public:
     */
     void stopBackgroundThread();
 
+    /** Returns true if the background thread used to send blocks of data is running.
+        @see startBackgroundThread, stopBackgroundThread
+    */
+    bool isBackgroundThreadRunning() const noexcept  { return isThreadRunning(); }
+
     //==============================================================================
     /** Deprecated. */
     static StringArray getDevices();

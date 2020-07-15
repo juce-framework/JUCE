@@ -10,7 +10,7 @@
 
 //==============================================================================
 %%editor_class_name%%::%%editor_class_name%% (%%filter_class_name%%& p)
-    : AudioProcessorEditor (&p), processor (p)
+    : AudioProcessorEditor (&p), audioProcessor (p)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.

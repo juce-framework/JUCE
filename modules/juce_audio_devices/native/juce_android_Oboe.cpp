@@ -91,33 +91,43 @@ struct OboeAudioIODeviceBufferHelpers<float>
 
     static void convertFromOboe (const float* srcInterleaved, AudioBuffer<float>& audioBuffer, int numSamples)
     {
-        // No need to convert, we instructed the buffer to point to the src data directly already
-        jassert (audioBuffer.getWritePointer (0) != srcInterleaved);
+        auto numChannels = audioBuffer.getNumChannels();
 
-        for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
+        if (numChannels > 0)
         {
-            using DstSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst>;
-            using SrcSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::Interleaved,    AudioData::Const>;
+            // No need to convert, we instructed the buffer to point to the src data directly already
+            jassert (audioBuffer.getWritePointer (0) != srcInterleaved);
 
-            DstSampleType dstData (audioBuffer.getWritePointer (i));
-            SrcSampleType srcData (srcInterleaved + i, audioBuffer.getNumChannels());
-            dstData.convertSamples (srcData, numSamples);
+            for (int i = 0; i < numChannels; ++i)
+            {
+                using DstSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst>;
+                using SrcSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::Interleaved,    AudioData::Const>;
+
+                DstSampleType dstData (audioBuffer.getWritePointer (i));
+                SrcSampleType srcData (srcInterleaved + i, audioBuffer.getNumChannels());
+                dstData.convertSamples (srcData, numSamples);
+            }
         }
     }
 
     static void convertToOboe (const AudioBuffer<float>& audioBuffer, float* dstInterleaved, int numSamples)
     {
-        // No need to convert, we instructed the buffer to point to the src data directly already
-        jassert (audioBuffer.getReadPointer (0) != dstInterleaved);
+        auto numChannels = audioBuffer.getNumChannels();
 
-        for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
+        if (numChannels > 0)
         {
-            using DstSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::Interleaved,    AudioData::NonConst>;
-            using SrcSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>;
+            // No need to convert, we instructed the buffer to point to the src data directly already
+            jassert (audioBuffer.getReadPointer (0) != dstInterleaved);
 
-            DstSampleType dstData (dstInterleaved + i, audioBuffer.getNumChannels());
-            SrcSampleType srcData (audioBuffer.getReadPointer (i));
-            dstData.convertSamples (srcData, numSamples);
+            for (int i = 0; i < numChannels; ++i)
+            {
+                using DstSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::Interleaved,    AudioData::NonConst>;
+                using SrcSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>;
+
+                DstSampleType dstData (dstInterleaved + i, audioBuffer.getNumChannels());
+                SrcSampleType srcData (audioBuffer.getReadPointer (i));
+                dstData.convertSamples (srcData, numSamples);
+            }
         }
     }
 };
@@ -148,8 +158,6 @@ public:
           supportedOutputSampleRates (supportedOutputSampleRatesToUse),
           maxNumOutputChannels (maxNumOutputChannelsToUse)
     {
-        // At least an input or an output has to be supported by the device!
-        jassert (inputDeviceId != -1 || outputDeviceId != -1);
     }
 
     ~OboeAudioIODevice() override
@@ -380,7 +388,7 @@ private:
         //     We initially try to open a stream with a buffer size returned from
         //     android.media.property.OUTPUT_FRAMES_PER_BUFFER property, but then we verify the actual
         //     size after the stream is open.
-        OboeAudioIODevice::OboeStream tempStream (-1,
+        OboeAudioIODevice::OboeStream tempStream (oboe::kUnspecified,
                                                   oboe::Direction::Output,
                                                   oboe::SharingMode::Exclusive,
                                                   2,
@@ -695,7 +703,7 @@ private:
                 ignoreUnused (deviceId, numChannels, sampleRate, expectedBufferSize);
                 ignoreUnused (streamFormat, bitDepth);
 
-                jassert (numChannels == nativeStream->getChannelCount());
+                jassert (numChannels == 0 || numChannels == nativeStream->getChannelCount());
                 jassert (expectedSampleRate == 0 || expectedSampleRate == nativeStream->getSampleRate());
                 jassert (format == nativeStream->getFormat());
             }
@@ -951,7 +959,7 @@ private:
                         Thread::sleep (1);
 
                     outputStream = nullptr;
-                    outputStream.reset (new OboeStream (-1,
+                    outputStream.reset (new OboeStream (oboe::kUnspecified,
                                                         oboe::Direction::Output,
                                                         oboe::SharingMode::Exclusive,
                                                         numOutputChannels,
@@ -1058,9 +1066,6 @@ public:
 
     StringArray getDeviceNames (bool wantInputNames) const override
     {
-        if (inputDevices.isEmpty() && outputDevices.isEmpty())
-            return StringArray (OboeAudioIODevice::oboeTypeName);
-
         StringArray names;
 
         for (auto& device : wantInputNames ? inputDevices : outputDevices)
@@ -1069,36 +1074,8 @@ public:
         return names;
     }
 
-    int getDefaultDeviceIndex (bool forInput) const override
+    int getDefaultDeviceIndex (bool) const override
     {
-        // No need to create a stream when only one default device is created.
-        if (! supportsDevicesInfo())
-            return 0;
-
-        if (forInput && (! RuntimePermissions::isGranted (RuntimePermissions::recordAudio)))
-            return 0;
-
-        // Create stream with a default device ID and query the stream for its device ID
-        using OboeStream = OboeAudioIODevice::OboeStream;
-
-        OboeStream tempStream (-1,
-                               forInput ? oboe::Direction::Input : oboe::Direction::Output,
-                               oboe::SharingMode::Shared,
-                               forInput ? 1 : 2,
-                               getAndroidSDKVersion() >= 21 ? oboe::AudioFormat::Float : oboe::AudioFormat::I16,
-                               (int) AndroidHighPerformanceAudioHelpers::getNativeSampleRate(),
-                               AndroidHighPerformanceAudioHelpers::getNativeBufferSizeHint(),
-                               nullptr);
-
-        if (auto* nativeStream = tempStream.getNativeStream())
-        {
-            auto& devices = forInput ? inputDevices : outputDevices;
-
-            for (int i = 0; i < devices.size(); ++i)
-                if (devices.getReference (i).id == nativeStream->getDeviceId())
-                    return i;
-        }
-
         return 0;
     }
 
@@ -1127,12 +1104,8 @@ public:
         auto outputDeviceInfo = getDeviceInfoForName (outputDeviceName, false);
         auto inputDeviceInfo  = getDeviceInfoForName (inputDeviceName, true);
 
-        if (outputDeviceInfo.name.isEmpty() && inputDeviceInfo.name.isEmpty())
-        {
-            // Invalid device name passed. It must be one of the names returned by getDeviceNames().
-            jassertfalse;
+        if (outputDeviceInfo.id < 0 && inputDeviceInfo.id < 0)
             return nullptr;
-        }
 
         auto& name = outputDeviceInfo.name.isNotEmpty() ? outputDeviceInfo.name
                                                         : inputDeviceInfo.name;
@@ -1156,15 +1129,13 @@ public:
  private:
     void checkAvailableDevices()
     {
+        auto sampleRates = OboeAudioIODevice::getDefaultSampleRates();
+
+        inputDevices .add ({ "System Default (Input)",  oboe::kUnspecified, sampleRates, 1 });
+        outputDevices.add ({ "System Default (Output)", oboe::kUnspecified, sampleRates, 2 });
+
         if (! supportsDevicesInfo())
-        {
-            auto sampleRates = OboeAudioIODevice::getDefaultSampleRates();
-
-            inputDevices .add ({ OboeAudioIODevice::oboeTypeName, -1, sampleRates, 1 });
-            outputDevices.add ({ OboeAudioIODevice::oboeTypeName, -1, sampleRates, 2 });
-
             return;
-        }
 
         auto* env = getEnv();
 
@@ -1284,6 +1255,8 @@ public:
             case 20:  return " IP";
             case 21:  return " BUS";
             case 22:  return " USB headset";
+            case 23:  return " hearing aid";
+            case 24:  return " built-in speaker safe";
             default:  jassertfalse; return ""; // type not supported yet, needs to be added!
         }
     }
@@ -1307,19 +1280,21 @@ public:
     struct DeviceInfo
     {
         String name;
-        int id;
+        int id = -1;
         Array<int> sampleRates;
         int numChannels;
     };
 
     DeviceInfo getDeviceInfoForName (const String& name, bool isInput)
     {
-        if (name.isEmpty())
-            return {};
-
-        for (auto& device : isInput ? inputDevices : outputDevices)
-            if (device.name == name)
-                return device;
+        if (name.isNotEmpty())
+        {
+            for (auto& device : isInput ? inputDevices : outputDevices)
+            {
+                if (device.name == name)
+                    return device;
+            }
+        }
 
         return {};
     }
@@ -1347,7 +1322,7 @@ class OboeRealtimeThread    : private oboe::AudioStreamCallback
 
 public:
     OboeRealtimeThread()
-        : testStream (new OboeStream (-1,
+        : testStream (new OboeStream (oboe::kUnspecified,
                                       oboe::Direction::Output,
                                       oboe::SharingMode::Exclusive,
                                       1,
@@ -1360,7 +1335,7 @@ public:
         // Fallback to I16 stream format if Float has not worked
         if (! testStream->openedOk())
         {
-            testStream.reset (new OboeStream (-1,
+            testStream.reset (new OboeStream (oboe::kUnspecified,
                                               oboe::Direction::Output,
                                               oboe::SharingMode::Exclusive,
                                               1,
@@ -1413,7 +1388,7 @@ public:
             threadEntryProc (threadUserPtr);
             threadEntryProc = nullptr;
 
-            MessageManager::callAsync ([this] () { delete this; });
+            MessageManager::callAsync ([this]() { delete this; });
 
             return oboe::DataCallbackResult::Stop;
         }

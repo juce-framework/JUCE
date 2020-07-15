@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -304,24 +311,31 @@ private:
 
     String getGlobalDefs()
     {
-        StringArray defs;
-
-        defs.add (project.getCompileEngineSettings().getExtraPreprocessorDefsString());
-
+        auto mergeDefs = [] (const StringPairArray& inDefs) -> String
         {
-            auto projectDefines = project.getPreprocessorDefs();
+            StringArray outDefs;
 
-            for (int i = 0; i < projectDefines.size(); ++i)
+            for (int i = 0; i < inDefs.size(); ++i)
             {
-                auto def = projectDefines.getAllKeys()[i];
-                auto value = projectDefines.getAllValues()[i];
+                auto def = inDefs.getAllKeys()[i];
+                auto value = inDefs.getAllValues()[i];
 
                 if (value.isNotEmpty())
                     def << "=" << value;
 
-                 defs.add (def);
+                 outDefs.add (def);
             }
-        }
+
+            return outDefs.joinIntoString (" ");
+        };
+
+        StringArray defs;
+
+        if (! project.shouldUseAppConfig())
+            defs.add (mergeDefs (project.getAppConfigDefs()));
+
+        defs.add (project.getCompileEngineSettings().getExtraPreprocessorDefsString());
+        defs.add (mergeDefs (project.getPreprocessorDefs()));
 
         for (Project::ExporterIterator exporter (project); exporter.next();)
             if (exporter->canLaunchProject())

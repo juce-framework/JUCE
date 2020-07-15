@@ -3,8 +3,8 @@
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
               jucerVersion="6.0.0" version="6.0.0" bundleIdentifier="com.juce.theprojucer"
               splashScreenColour="Dark" displaySplashScreen="0" reportAppUsage="0"
-              companyName="Raw Material Software Limited" companyCopyright="Raw Material Software Limited" cppLanguageStandard="11"
-              useAppConfig="0" addUsingNamespaceToJuceHeader="1">
+              companyName="Raw Material Software Limited" companyCopyright="Raw Material Software Limited"
+              cppLanguageStandard="11" useAppConfig="0" addUsingNamespaceToJuceHeader="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                documentExtensions=".jucer" objCExtraSuffix="zkVtji" bigIcon="Zrx1Gl"
@@ -101,6 +101,22 @@
   </EXPORTFORMATS>
   <MAINGROUP name="Projucer" id="NhrJq66R">
     <GROUP id="{9E4C4E0D-7BAB-EB6F-87DA-FB264EC2AE68}" name="Application">
+      <GROUP id="{2F6B47CF-F27B-0D18-331F-533DE3F89310}" name="StartPage">
+        <FILE id="PewFno" name="jucer_ContentComponents.h" compile="0" resource="0"
+              file="Source/Application/StartPage/jucer_ContentComponents.h"/>
+        <FILE id="ApAD9d" name="jucer_NewProjectTemplates.h" compile="0" resource="0"
+              file="Source/Application/StartPage/jucer_NewProjectTemplates.h"/>
+        <FILE id="t8pBCG" name="jucer_NewProjectWizard.cpp" compile="1" resource="0"
+              file="Source/Application/StartPage/jucer_NewProjectWizard.cpp"/>
+        <FILE id="eoPkbr" name="jucer_NewProjectWizard.h" compile="0" resource="0"
+              file="Source/Application/StartPage/jucer_NewProjectWizard.h"/>
+        <FILE id="OuSOwU" name="jucer_StartPageComponent.cpp" compile="1" resource="0"
+              file="Source/Application/StartPage/jucer_StartPageComponent.cpp"/>
+        <FILE id="gLig4M" name="jucer_StartPageComponent.h" compile="0" resource="0"
+              file="Source/Application/StartPage/jucer_StartPageComponent.h"/>
+        <FILE id="dsxevB" name="jucer_StartPageTreeHolder.h" compile="0" resource="0"
+              file="Source/Application/StartPage/jucer_StartPageTreeHolder.h"/>
+      </GROUP>
       <GROUP id="{70333C48-4F84-A180-24E1-0EC9EF223F3B}" name="UserAccount">
         <FILE id="Rw7w0l" name="jucer_LicenseController.h" compile="0" resource="0"
               file="Source/Application/UserAccount/jucer_LicenseController.h"/>
@@ -247,8 +263,6 @@
               resource="1" file="Source/BinaryData/Templates/jucer_MainConsoleAppTemplate.cpp"/>
         <FILE id="IW9dIW" name="jucer_MainTemplate_NoWindow.cpp" compile="0"
               resource="1" file="Source/BinaryData/Templates/jucer_MainTemplate_NoWindow.cpp"/>
-        <FILE id="SOsB1w" name="jucer_MainTemplate_SimpleWindow.cpp" compile="0"
-              resource="1" file="Source/BinaryData/Templates/jucer_MainTemplate_SimpleWindow.cpp"/>
         <FILE id="Zx5T5B" name="jucer_MainTemplate_Window.cpp" compile="0"
               resource="1" file="Source/BinaryData/Templates/jucer_MainTemplate_Window.cpp"/>
         <FILE id="jCBXcQ" name="jucer_NewComponentTemplate.cpp" compile="0"
@@ -276,10 +290,6 @@
             file="Source/BinaryData/colourscheme_dark.xml"/>
       <FILE id="bvFank" name="colourscheme_light.xml" compile="0" resource="1"
             file="Source/BinaryData/colourscheme_light.xml"/>
-      <FILE id="lBlcfb" name="nothingtoseehere.txt" compile="0" resource="1"
-            file="Source/BinaryData/nothingtoseehere.txt"/>
-      <FILE id="tqxmy4" name="projucer_EULA.txt" compile="0" resource="1"
-            file="Source/BinaryData/projucer_EULA.txt"/>
     </GROUP>
     <GROUP id="{A5AE7471-B900-FD9D-8DE7-2FB68D11AE30}" name="CodeEditor">
       <FILE id="w3ka6n" name="jucer_DocumentEditorComponent.cpp" compile="1"
@@ -636,14 +646,18 @@
               file="Source/Utility/Helpers/jucer_MiscUtilities.cpp"/>
         <FILE id="ilDiWE" name="jucer_MiscUtilities.h" compile="0" resource="0"
               file="Source/Utility/Helpers/jucer_MiscUtilities.h"/>
+        <FILE id="BICStH" name="jucer_NewFileWizard.cpp" compile="1" resource="0"
+              file="Source/Utility/Helpers/jucer_NewFileWizard.cpp"/>
+        <FILE id="laRrOn" name="jucer_NewFileWizard.h" compile="0" resource="0"
+              file="Source/Utility/Helpers/jucer_NewFileWizard.h"/>
         <FILE id="rCaPHQ" name="jucer_PresetIDs.h" compile="0" resource="0"
               file="Source/Utility/Helpers/jucer_PresetIDs.h"/>
-        <FILE id="I1mt4g" name="jucer_RelativePath.h" compile="0" resource="0"
-              file="Source/Utility/Helpers/jucer_RelativePath.h"/>
         <FILE id="gOrmP5" name="jucer_TranslationHelpers.h" compile="0" resource="0"
               file="Source/Utility/Helpers/jucer_TranslationHelpers.h"/>
         <FILE id="EuC4K4" name="jucer_ValueSourceHelpers.h" compile="0" resource="0"
               file="Source/Utility/Helpers/jucer_ValueSourceHelpers.h"/>
+        <FILE id="W5a5Fy" name="jucer_ValueWithDefaultWrapper.h" compile="0"
+              resource="0" file="Source/Utility/Helpers/jucer_ValueWithDefaultWrapper.h"/>
         <FILE id="BPCoKV" name="jucer_VersionInfo.cpp" compile="1" resource="0"
               file="Source/Utility/Helpers/jucer_VersionInfo.cpp"/>
         <FILE id="TnBQtv" name="jucer_VersionInfo.h" compile="0" resource="0"
@@ -683,42 +697,6 @@
         <FILE id="cbUrIP" name="jucer_SlidingPanelComponent.h" compile="0"
               resource="0" file="Source/Utility/UI/jucer_SlidingPanelComponent.h"/>
       </GROUP>
-    </GROUP>
-    <GROUP id="{ECF14F8E-E605-CFBF-7BAD-2CE0A360EDAA}" name="Wizards">
-      <FILE id="ICGT7i" name="jucer_NewFileWizard.cpp" compile="1" resource="0"
-            file="Source/Wizards/jucer_NewFileWizard.cpp"/>
-      <FILE id="fg6m0u" name="jucer_NewFileWizard.h" compile="0" resource="0"
-            file="Source/Wizards/jucer_NewFileWizard.h"/>
-      <FILE id="OA9jot" name="jucer_NewProjectWizard.h" compile="0" resource="0"
-            file="Source/Wizards/jucer_NewProjectWizard.h"/>
-      <FILE id="fIFyt2" name="jucer_NewProjectWizardClasses.cpp" compile="1"
-            resource="0" file="Source/Wizards/jucer_NewProjectWizardClasses.cpp"/>
-      <FILE id="xSc6Lz" name="jucer_NewProjectWizardClasses.h" compile="0"
-            resource="0" file="Source/Wizards/jucer_NewProjectWizardClasses.h"/>
-      <FILE id="k0Y8ph" name="jucer_NewProjectWizardComponent.h" compile="0"
-            resource="0" file="Source/Wizards/jucer_NewProjectWizardComponent.h"/>
-      <FILE id="YnByBt" name="jucer_ProjectWizard_Animated.h" compile="0"
-            resource="0" file="Source/Wizards/jucer_ProjectWizard_Animated.h"/>
-      <FILE id="n4Mwbm" name="jucer_ProjectWizard_AudioApp.h" compile="0"
-            resource="0" file="Source/Wizards/jucer_ProjectWizard_AudioApp.h"/>
-      <FILE id="ItaszP" name="jucer_ProjectWizard_AudioPlugin.h" compile="0"
-            resource="0" file="Source/Wizards/jucer_ProjectWizard_AudioPlugin.h"/>
-      <FILE id="t0ntRv" name="jucer_ProjectWizard_Blank.h" compile="0" resource="0"
-            file="Source/Wizards/jucer_ProjectWizard_Blank.h"/>
-      <FILE id="dm6mDO" name="jucer_ProjectWizard_Console.h" compile="0"
-            resource="0" file="Source/Wizards/jucer_ProjectWizard_Console.h"/>
-      <FILE id="FlLyrJ" name="jucer_ProjectWizard_DLL.h" compile="0" resource="0"
-            file="Source/Wizards/jucer_ProjectWizard_DLL.h"/>
-      <FILE id="mzzOny" name="jucer_ProjectWizard_GUIApp.h" compile="0" resource="0"
-            file="Source/Wizards/jucer_ProjectWizard_GUIApp.h"/>
-      <FILE id="l7EQOJ" name="jucer_ProjectWizard_openGL.h" compile="0" resource="0"
-            file="Source/Wizards/jucer_ProjectWizard_openGL.h"/>
-      <FILE id="qik3Jx" name="jucer_ProjectWizard_StaticLibrary.h" compile="0"
-            resource="0" file="Source/Wizards/jucer_ProjectWizard_StaticLibrary.h"/>
-      <FILE id="bMgfxz" name="jucer_StartPageComponent.h" compile="0" resource="0"
-            file="Source/Wizards/jucer_StartPageComponent.h"/>
-      <FILE id="aX8eVH" name="jucer_TemplateThumbnailsComponent.h" compile="0"
-            resource="0" file="Source/Wizards/jucer_TemplateThumbnailsComponent.h"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_LOG_ASSERTIONS="1" JUCE_USE_CURL="1" JUCE_ALLOW_STATIC_NULL_VARIABLES="0"

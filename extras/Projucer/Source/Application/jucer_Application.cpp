@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -621,7 +628,7 @@ PopupMenu ProjucerApplication::createExamplesPopupMenu() noexcept
 #endif
 
 //==============================================================================
-static File getJUCEExamplesDirectoryPathFromGlobal()
+File ProjucerApplication::getJUCEExamplesDirectoryPathFromGlobal() noexcept
 {
     auto globalPath = File::createFileWithoutCheckingPath (getAppSettings().getStoredPath (Ids::jucePath, TargetOS::getThisOS()).get().toString()
                                                                            .replace ("~", File::getSpecialLocation (File::userHomeDirectory).getFullPathName()));
@@ -659,7 +666,7 @@ Array<File> ProjucerApplication::getSortedExampleDirectories() noexcept
     return exampleDirectories;
 }
 
-Array<File> ProjucerApplication::getSortedExampleFilesInDirectory (const File& directory) const noexcept
+Array<File> ProjucerApplication::getSortedExampleFilesInDirectory (const File& directory) noexcept
 {
     Array<File> exampleFiles;
 
@@ -669,26 +676,6 @@ Array<File> ProjucerApplication::getSortedExampleFilesInDirectory (const File& d
     exampleFiles.sort();
 
     return exampleFiles;
-}
-
-bool ProjucerApplication::findWindowAndOpenPIP (const File& pip)
-{
-    auto* window = mainWindowList.getFrontmostWindow();
-    bool shouldCloseWindow = false;
-
-    if (window == nullptr)
-    {
-        window = mainWindowList.getOrCreateEmptyWindow();
-        shouldCloseWindow = true;
-    }
-
-    if (window->tryToOpenPIP (pip))
-        return true;
-
-    if (shouldCloseWindow)
-        mainWindowList.closeWindow (window);
-
-    return false;
 }
 
 void ProjucerApplication::findAndLaunchExample (int selectedIndex)
@@ -711,7 +698,7 @@ void ProjucerApplication::findAndLaunchExample (int selectedIndex)
     // example doesn't exist?
     jassert (example != File());
 
-    findWindowAndOpenPIP (example);
+    mainWindowList.openFile (example);
 }
 
 //==============================================================================
@@ -731,7 +718,7 @@ static String getPlatformSpecificFileExtension()
 
 static File getPlatformSpecificProjectFolder()
 {
-    auto examplesDir = getJUCEExamplesDirectoryPathFromGlobal();
+    auto examplesDir = ProjucerApplication::getJUCEExamplesDirectoryPathFromGlobal();
 
     if (examplesDir == File())
         return {};
@@ -1107,8 +1094,8 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
             if (licenseState.isGPL())
                 result.setInfo ("Disable GPL mode", "Disables GPL mode", CommandCategories::general, 0);
             else
-                result.setInfo (licenseState.isValid() ? String ("Sign out ") + licenseState.username + "..." : String ("Sign in..."),
-                                "Log out of your JUCE account",
+                result.setInfo (licenseState.isSignedIn() ? String ("Sign out ") + licenseState.username + "..." : String ("Sign in..."),
+                                "Sign out of your JUCE account",
                                 CommandCategories::general, 0);
             break;
         }
@@ -1165,7 +1152,8 @@ void ProjucerApplication::createNewProject()
 void ProjucerApplication::createNewProjectFromClipboard()
 {
     auto tempFile = File::getSpecialLocation (File::SpecialLocationType::tempDirectory).getChildFile ("PIPs").getChildFile ("Clipboard")
-                                                                                       .getChildFile ("PIPFile_" + String (std::abs (Random::getSystemRandom().nextInt())) + ".h");
+                                                                                       .getChildFile ("PIPFile_" + String (std::abs (Random::getSystemRandom().nextInt())) + ".h")
+                                                                                       .getNonexistentSibling();
 
     if (tempFile.existsAsFile())
         tempFile.deleteFile();
@@ -1173,9 +1161,21 @@ void ProjucerApplication::createNewProjectFromClipboard()
     tempFile.create();
     tempFile.appendText (SystemClipboard::getTextFromClipboard());
 
-    if (! findWindowAndOpenPIP (tempFile))
+    String errorString;
+
+    if (! isPIPFile (tempFile))
     {
-        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Error", "Couldn't create project from clipboard contents.");
+        errorString = "Clipboard does not contain a valid PIP.";
+    }
+    else if (! mainWindowList.openFile (tempFile))
+    {
+        errorString = "Couldn't create project from clipboard contents.";
+        mainWindowList.closeWindow (mainWindowList.windows.getLast());
+    }
+
+    if (errorString.isNotEmpty())
+    {
+        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Error", errorString);
         tempFile.deleteFile();
     }
 }
@@ -1356,7 +1356,11 @@ void ProjucerApplication::launchTutorialsBrowser()
 
 void ProjucerApplication::doLoginOrLogout()
 {
-    if (licenseController->getCurrentState().type == LicenseState::Type::none)
+    if (licenseController->getCurrentState().isSignedIn())
+    {
+        licenseController->resetState();
+    }
+    else
     {
         if (auto* window = mainWindowList.getMainWindowWithLoginFormOpen())
         {
@@ -1367,10 +1371,6 @@ void ProjucerApplication::doLoginOrLogout()
             mainWindowList.createWindowIfNoneAreOpen();
             mainWindowList.getFrontmostWindow()->showLoginFormOverlay();
         }
-    }
-    else
-    {
-        licenseController->resetState();
     }
 }
 

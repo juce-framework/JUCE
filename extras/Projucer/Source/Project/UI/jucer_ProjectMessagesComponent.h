@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -245,12 +252,12 @@ private:
         };
 
         //==============================================================================
-        void valueTreePropertyChanged   (ValueTree&, const Identifier&) override  { triggerAsyncUpdate(); }
-        void valueTreeChildAdded        (ValueTree&, ValueTree&)        override  { triggerAsyncUpdate(); }
-        void valueTreeChildRemoved      (ValueTree&, ValueTree&, int)   override  { triggerAsyncUpdate(); }
-        void valueTreeChildOrderChanged (ValueTree&, int, int)          override  { triggerAsyncUpdate(); }
-        void valueTreeParentChanged     (ValueTree&)                    override  { triggerAsyncUpdate(); }
-        void valueTreeRedirected        (ValueTree&)                    override  { triggerAsyncUpdate(); }
+        void valueTreePropertyChanged   (ValueTree&, const Identifier&) override  { messagesChanged(); }
+        void valueTreeChildAdded        (ValueTree&, ValueTree&)        override  { messagesChanged(); }
+        void valueTreeChildRemoved      (ValueTree&, ValueTree&, int)   override  { messagesChanged(); }
+        void valueTreeChildOrderChanged (ValueTree&, int, int)          override  { messagesChanged(); }
+        void valueTreeParentChanged     (ValueTree&)                    override  { messagesChanged(); }
+        void valueTreeRedirected        (ValueTree&)                    override  { messagesChanged(); }
 
         void handleAsyncUpdate() override
         {
@@ -470,7 +477,7 @@ public:
 private:
     //==============================================================================
     struct MessageCountComponent  : public Component,
-                                    public ValueTree::Listener
+                                    private ValueTree::Listener
     {
         MessageCountComponent (ProjectMessagesComponent& o, Path pathToUse)
           : owner (o),
@@ -500,14 +507,15 @@ private:
             updateNumMessages();
         }
 
-        void valueTreeChildAdded   (ValueTree&, ValueTree&)        override  { updateNumMessages(); }
-        void valueTreeChildRemoved (ValueTree&, ValueTree&, int)   override  { updateNumMessages(); }
-
         void updateNumMessages()
         {
             numMessages = messagesTree.getNumChildren();
             repaint();
         }
+
+    private:
+        void valueTreeChildAdded   (ValueTree&, ValueTree&)        override  { updateNumMessages(); }
+        void valueTreeChildRemoved (ValueTree&, ValueTree&, int)   override  { updateNumMessages(); }
 
         ProjectMessagesComponent& owner;
         ValueTree messagesTree;

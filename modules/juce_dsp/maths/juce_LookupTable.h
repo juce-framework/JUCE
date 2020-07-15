@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -60,7 +67,7 @@ public:
                                      mapping from the integer range [0, numPointsToUse - 1].
         @param numPointsToUse        The number of pre-calculated values stored.
     */
-    LookupTable (const std::function<FloatType(size_t)>& functionToApproximate, size_t numPointsToUse);
+    LookupTable (const std::function<FloatType (size_t)>& functionToApproximate, size_t numPointsToUse);
 
     /** Initialises or changes the parameters of a LookupTable object.
 
@@ -72,7 +79,7 @@ public:
                                      mapping from the integer range [0, numPointsToUse - 1].
         @param numPointsToUse        The number of pre-calculated values stored.
     */
-    void initialise (const std::function<FloatType(size_t)>& functionToApproximate, size_t numPointsToUse);
+    void initialise (const std::function<FloatType (size_t)>& functionToApproximate, size_t numPointsToUse);
 
     //==============================================================================
     /** Calculates the approximated value for the given index without range checking.
@@ -188,7 +195,7 @@ public:
                                      fail for values higher than this.
         @param numPoints             The number of pre-calculated values stored.
     */
-    LookupTableTransform (const std::function<FloatType(FloatType)>& functionToApproximate,
+    LookupTableTransform (const std::function<FloatType (FloatType)>& functionToApproximate,
                           FloatType minInputValueToUse,
                           FloatType maxInputValueToUse,
                           size_t numPoints)
@@ -207,7 +214,7 @@ public:
                                      fail for values higher than this.
         @param numPoints             The number of pre-calculated values stored.
     */
-    void initialise (const std::function<FloatType(FloatType)>& functionToApproximate,
+    void initialise (const std::function<FloatType (FloatType)>& functionToApproximate,
                      FloatType minInputValueToUse,
                      FloatType maxInputValueToUse,
                      size_t numPoints);
@@ -301,7 +308,7 @@ public:
                                      accuracy of the error calculation. If it's zero
                                      then 100 * numPoints will be used.
     */
-    static double calculateMaxRelativeError (const std::function<FloatType(FloatType)>& functionToApproximate,
+    static double calculateMaxRelativeError (const std::function<FloatType (FloatType)>& functionToApproximate,
                                              FloatType minInputValue,
                                              FloatType maxInputValue,
                                              size_t numPoints,

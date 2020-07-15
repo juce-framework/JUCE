@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -15,7 +22,7 @@
 
   ==============================================================================
 */
-#include "../../juce_core/system/juce_CompilerWarnings.h"
+#include <juce_core/system/juce_CompilerWarnings.h>
 #include "../utility/juce_CheckSettingMacros.h"
 
 #if JucePlugin_Build_AU
@@ -74,9 +81,9 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_CarbonVisibility.h"
 
-#include "../../juce_audio_basics/native/juce_mac_CoreAudioLayouts.h"
-#include "../../juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp"
-#include "../../juce_audio_processors/format_types/juce_AU_Shared.h"
+#include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
+#include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
+#include <juce_audio_processors/format_types/juce_AU_Shared.h>
 
 //==============================================================================
 using namespace juce;
@@ -115,12 +122,11 @@ class JuceAU   : public AudioProcessorHolder,
                  public MusicDeviceBase,
                  public AudioProcessorListener,
                  public AudioPlayHead,
-                 public ComponentListener,
                  public AudioProcessorParameter::Listener
 {
 public:
     JuceAU (AudioUnit component)
-        : AudioProcessorHolder(activePlugins.size() + activeUIs.size() == 0),
+        : AudioProcessorHolder (activePlugins.size() + activeUIs.size() == 0),
           MusicDeviceBase (component,
                            (UInt32) AudioUnitHelpers::getBusCount (juceFilter.get(), true),
                            (UInt32) AudioUnitHelpers::getBusCount (juceFilter.get(), false)),
@@ -1445,25 +1451,6 @@ public:
         return noErr;
     }
 
-    void componentMovedOrResized (Component& component, bool /*wasMoved*/, bool /*wasResized*/) override
-    {
-        NSView* view = (NSView*) component.getWindowHandle();
-        NSRect r = [[view superview] frame];
-        r.origin.y = r.origin.y + r.size.height - component.getHeight();
-        r.size.width = component.getWidth();
-        r.size.height = component.getHeight();
-
-        [CATransaction begin];
-        [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
-
-        [[view superview] setFrame: r];
-        [view setFrame: makeNSRect (component.getLocalBounds())];
-
-        [CATransaction commit];
-
-        [view setNeedsDisplay: YES];
-    }
-
     //==============================================================================
     class EditorCompHolder  : public Component
     {
@@ -1480,6 +1467,8 @@ public:
 
             ignoreUnused (fakeMouseGenerator);
             setBounds (getSizeToContainChild());
+
+            lastBounds = getBounds();
         }
 
         ~EditorCompHolder() override
@@ -1499,7 +1488,7 @@ public:
         static NSView* createViewFor (AudioProcessor* filter, JuceAU* au, AudioProcessorEditor* const editor)
         {
             auto* editorCompHolder = new EditorCompHolder (editor);
-            auto r = makeNSRect (editorCompHolder->getSizeToContainChild());
+            auto r = convertToHostBounds (makeNSRect (editorCompHolder->getSizeToContainChild()));
 
             static JuceUIViewClass cls;
             auto* view = [[cls.createInstance() initWithFrame: r] autorelease];
@@ -1523,6 +1512,14 @@ public:
             return view;
         }
 
+        void parentSizeChanged() override
+        {
+            resizeHostWindow();
+
+            if (auto* editor = getChildComponent (0))
+                editor->repaint();
+        }
+
         void childBoundsChanged (Component*) override
         {
             auto b = getSizeToContainChild();
@@ -1530,25 +1527,9 @@ public:
             if (lastBounds != b)
             {
                 lastBounds = b;
+                setSize (jmax (32, b.getWidth()), jmax (32, b.getHeight()));
 
-                auto w = jmax (32, b.getWidth());
-                auto h = jmax (32, b.getHeight());
-
-                setSize (w, h);
-
-                auto* view = (NSView*) getWindowHandle();
-                auto r = [[view superview] frame];
-                r.size.width  = w;
-                r.size.height = h;
-
-                [CATransaction begin];
-                [CATransaction setValue:(id) kCFBooleanTrue forKey:kCATransactionDisableActions];
-
-                [[view superview] setFrame: r];
-                [view setFrame: makeNSRect (b)];
-                [CATransaction commit];
-
-                [view setNeedsDisplay: YES];
+                resizeHostWindow();
             }
         }
 
@@ -1574,6 +1555,25 @@ public:
             }
 
             return false;
+        }
+
+        void resizeHostWindow()
+        {
+            [CATransaction begin];
+            [CATransaction setValue:(id) kCFBooleanTrue forKey:kCATransactionDisableActions];
+
+            auto rect = convertToHostBounds (makeNSRect (lastBounds));
+            auto* view = (NSView*) getWindowHandle();
+
+            auto superRect = [[view superview] frame];
+            superRect.size.width  = rect.size.width;
+            superRect.size.height = rect.size.height;
+
+            [[view superview] setFrame: superRect];
+            [view setFrame: rect];
+            [CATransaction commit];
+
+            [view setNeedsDisplay: YES];
         }
 
     private:
@@ -1767,6 +1767,33 @@ private:
 
     //==============================================================================
     AudioProcessorParameter* bypassParam = nullptr;
+
+    //==============================================================================
+    static NSRect convertToHostBounds (NSRect pluginRect)
+    {
+        auto desktopScale = Desktop::getInstance().getGlobalScaleFactor();
+
+        if (approximatelyEqual (desktopScale, 1.0f))
+            return pluginRect;
+
+        return NSMakeRect (static_cast<CGFloat> (pluginRect.origin.x    * desktopScale),
+                           static_cast<CGFloat> (pluginRect.origin.y    * desktopScale),
+                           static_cast<CGFloat> (pluginRect.size.width  * desktopScale),
+                           static_cast<CGFloat> (pluginRect.size.height * desktopScale));
+    }
+
+    static NSRect convertFromHostBounds (NSRect hostRect)
+    {
+        auto desktopScale = Desktop::getInstance().getGlobalScaleFactor();
+
+        if (approximatelyEqual (desktopScale, 1.0f))
+            return hostRect;
+
+        return NSMakeRect (static_cast<CGFloat> (hostRect.origin.x    / desktopScale),
+                           static_cast<CGFloat> (hostRect.origin.y    / desktopScale),
+                           static_cast<CGFloat> (hostRect.size.width  / desktopScale),
+                           static_cast<CGFloat> (hostRect.size.height / desktopScale));
+    }
 
     //==============================================================================
     void pullInputAudio (AudioUnitRenderActionFlags& flags, const AudioTimeStamp& timestamp, const UInt32 nFrames) noexcept

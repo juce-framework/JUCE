@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -72,24 +79,26 @@ public:
 
     Typeface::Ptr findTypefaceFor (const Font& font)
     {
-        const ScopedReadLock slr (lock);
-
-        auto faceName = font.getTypefaceName();
-        auto faceStyle = font.getTypefaceStyle();
+        const auto faceName = font.getTypefaceName();
+        const auto faceStyle = font.getTypefaceStyle();
 
         jassert (faceName.isNotEmpty());
 
-        for (int i = faces.size(); --i >= 0;)
         {
-            CachedFace& face = faces.getReference(i);
+            const ScopedReadLock slr (lock);
 
-            if (face.typefaceName == faceName
-                 && face.typefaceStyle == faceStyle
-                 && face.typeface != nullptr
-                 && face.typeface->isSuitableForFont (font))
+            for (int i = faces.size(); --i >= 0;)
             {
-                face.lastUsageCount = ++counter;
-                return face.typeface;
+                CachedFace& face = faces.getReference(i);
+
+                if (face.typefaceName == faceName
+                     && face.typefaceStyle == faceStyle
+                     && face.typeface != nullptr
+                     && face.typeface->isSuitableForFont (font))
+                {
+                    face.lastUsageCount = ++counter;
+                    return face.typeface;
+                }
             }
         }
 

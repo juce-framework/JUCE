@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -21,7 +28,7 @@
  The block below describes the properties of this module, and is read by
  the Projucer to automatically generate project code that uses it.
  For details about the syntax and how to create or use a module, see the
- JUCE Module Format.txt file.
+ JUCE Module Format.md file.
 
 
  BEGIN_JUCE_MODULE_DECLARATION
@@ -57,19 +64,20 @@
  #define JUCE_WEB_BROWSER 1
 #endif
 
-/** Config: JUCE_USE_WINRT_WEBVIEW
-    Enables the use of the EdgeHTML browser engine on Windows. This will use
-    the Windows Runtime API on Windows 10 version 1809 (October 2018 Update)
-    and later. If you enable this flag then older versions of Windows will
-    automatically fall back to using the regualar Win32 web view.
+/** Config: JUCE_USE_WIN_WEBVIEW2
+    Enables the use of the Microsoft Edge (Chromium) WebView2 browser on Windows,
+    currently in developer preview.
 
-    You will need version 10.0.14393.0 of the Windows Standalone SDK to compile
-    and you may need to add the path to the WinRT headers. The path to the
-    headers will be something similar to
-    "C:\Program Files (x86)\Windows Kits\10\Include\10.0.14393.0\winrt".
+    If using the Projucer, the Microsoft.Web.WebView2 package will be added to the
+    project solution if this flag is enabled. If you are building using CMake you
+    will need to manually add the package via the Visual Studio package manager.
+
+    In addition to enabling this macro, you will need to use the
+    WindowsWebView2WebBrowserComponent wrapper - see the documentation of that
+    class for more details.
 */
-#ifndef JUCE_USE_WINRT_WEBVIEW
- #define JUCE_USE_WINRT_WEBVIEW 0
+#ifndef JUCE_USE_WIN_WEBVIEW2
+ #define JUCE_USE_WIN_WEBVIEW2 0
 #endif
 
 /** Config: JUCE_ENABLE_LIVE_CONSTANT_EDITOR

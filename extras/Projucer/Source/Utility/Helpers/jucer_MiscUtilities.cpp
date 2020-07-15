@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -350,7 +357,72 @@ bool isJUCEModulesFolder (const File& f)
 }
 
 //==============================================================================
-static var parseJUCEHeaderMetadata (const StringArray& lines)
+bool isDivider (const String& line)
+{
+    auto afterIndent = line.trim();
+
+    if (afterIndent.startsWith ("//") && afterIndent.length() > 20)
+    {
+        afterIndent = afterIndent.substring (5);
+
+        if (afterIndent.containsOnly ("=")
+            || afterIndent.containsOnly ("/")
+            || afterIndent.containsOnly ("-"))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+int getIndexOfCommentBlockStart (const StringArray& lines, int endIndex)
+{
+    auto endLine = lines[endIndex];
+
+    if (endLine.contains ("*/"))
+    {
+        for (int i = endIndex; i >= 0; --i)
+            if (lines[i].contains ("/*"))
+                return i;
+    }
+
+     if (endLine.trim().startsWith ("//") && ! isDivider (endLine))
+     {
+         for (int i = endIndex; i >= 0; --i)
+             if (! lines[i].startsWith ("//") || isDivider (lines[i]))
+                 return i + 1;
+     }
+
+    return -1;
+}
+
+int findBestLineToScrollToForClass (StringArray lines, const String& className, bool isPlugin)
+{
+    for (auto line : lines)
+    {
+        if (line.contains ("struct " + className) || line.contains ("class " + className)
+            || (isPlugin && line.contains ("public AudioProcessor") && ! line.contains ("AudioProcessorEditor")))
+        {
+            auto index = lines.indexOf (line);
+
+            auto commentBlockStartIndex = getIndexOfCommentBlockStart (lines, index - 1);
+
+            if (commentBlockStartIndex != -1)
+                index = commentBlockStartIndex;
+
+            if (isDivider (lines[index - 1]))
+                index -= 1;
+
+            return index;
+        }
+    }
+
+    return 0;
+}
+
+//==============================================================================
+var parseJUCEHeaderMetadata (const StringArray& lines)
 {
     auto* o = new DynamicObject();
     var result (o);
@@ -373,7 +445,7 @@ static var parseJUCEHeaderMetadata (const StringArray& lines)
     return result;
 }
 
-static String parseMetadataItem (const StringArray& lines, int& index)
+String parseMetadataItem (const StringArray& lines, int& index)
 {
     String result = lines[index++];
 

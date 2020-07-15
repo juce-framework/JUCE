@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -19,7 +26,7 @@
 #include "../Application/jucer_Headers.h"
 #include "jucer_Application.h"
 #include "jucer_MainWindow.h"
-#include "../Wizards/jucer_NewProjectWizardClasses.h"
+#include "StartPage/jucer_StartPageComponent.h"
 #include "../Utility/UI/jucer_JucerTreeViewBase.h"
 #include "../ProjectSaving/jucer_ProjectSaver.h"
 #include "UserAccount/jucer_LoginFormComponent.h"
@@ -177,7 +184,7 @@ void MainWindow::createProjectContentCompIfNeeded()
     }
 }
 
-void MainWindow::setTitleBarIcon()
+void MainWindow::updateTitleBarIcon()
 {
     if (auto* peer = getPeer())
     {
@@ -198,7 +205,7 @@ void MainWindow::makeVisible()
     setVisible (true);
     addToDesktop();
     restoreWindowPosition();
-    setTitleBarIcon();
+    updateTitleBarIcon();
     getContentComponent()->grabKeyboardFocus();
 }
 
@@ -270,9 +277,7 @@ void MainWindow::setProject (std::unique_ptr<Project> newProject)
     }
 
     projectNameValue.referTo (currentProject != nullptr ? currentProject->getProjectValue (Ids::name) : Value());
-
-    if (auto* peer = getPeer())
-        peer->setRepresentedFile (currentProject != nullptr ? currentProject->getFile() : File());
+    initialiseProjectWindow();
 
     ProjucerApplication::getCommandManager().commandStatusChanged();
 }
@@ -299,8 +304,6 @@ bool MainWindow::canOpenFile (const File& file) const
 
 bool MainWindow::openFile (const File& file)
 {
-    createProjectContentCompIfNeeded();
-
     if (file.hasFileExtension (Project::projectFileExtension))
     {
         auto newDoc = std::make_unique<Project> (file);
@@ -311,7 +314,9 @@ bool MainWindow::openFile (const File& file)
             setProject (std::move (newDoc));
             currentProject->setChangedFlag (false);
 
+            createProjectContentCompIfNeeded();
             getProjectContentComponent()->reloadLastOpenDocuments();
+
             currentProject->updateDeprecatedProjectSettingsInteractively();
 
             return true;
@@ -319,16 +324,18 @@ bool MainWindow::openFile (const File& file)
     }
     else if (file.exists())
     {
+        if (isPIPFile (file) && openPIP ({ file }))
+            return true;
+
+        createProjectContentCompIfNeeded();
         return getProjectContentComponent()->showEditorForFile (file, true);
     }
 
     return false;
 }
 
-bool MainWindow::tryToOpenPIP (const File& pipFile)
+bool MainWindow::openPIP (PIPGenerator generator)
 {
-    PIPGenerator generator (pipFile);
-
     if (! generator.hasValidPIP())
         return false;
 
@@ -343,7 +350,6 @@ bool MainWindow::tryToOpenPIP (const File& pipFile)
         return false;
     }
 
-
     if (! generator.createMainCpp())
     {
         AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
@@ -353,110 +359,43 @@ bool MainWindow::tryToOpenPIP (const File& pipFile)
         return false;
     }
 
-    if (! ProjucerApplication::getApp().mainWindowList.openFile (generator.getJucerFile()))
-        return false;
+    if (! openFile (generator.getJucerFile()))
+    {
+        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                          "PIP Error.",
+                                          "Failed to open .jucer file.");
 
-    openPIP (generator);
+        return false;
+    }
+
+    setupTemporaryPIPProject (generator);
     return true;
 }
 
-static bool isDivider (const String& line)
+void MainWindow::setupTemporaryPIPProject (PIPGenerator& generator)
 {
-    auto afterIndent = line.trim();
+    jassert (currentProject != nullptr);
 
-    if (afterIndent.startsWith ("//") && afterIndent.length() > 20)
+    currentProject->setTemporaryDirectory (generator.getOutputDirectory());
+
+    ProjectSaver liveBuildSaver (*currentProject);
+    liveBuildSaver.saveContentNeededForLiveBuild();
+
+    if (auto* pcc = getProjectContentComponent())
     {
-        afterIndent = afterIndent.substring (2);
+        pcc->invokeDirectly (CommandIDs::toggleBuildEnabled, true);
+        pcc->invokeDirectly (CommandIDs::buildNow, true);
+        pcc->invokeDirectly (CommandIDs::toggleContinuousBuild, true);
 
-        if (afterIndent.containsOnly ("=")
-            || afterIndent.containsOnly ("/")
-            || afterIndent.containsOnly ("-"))
+        auto fileToDisplay = generator.getPIPFile();
+
+        if (fileToDisplay != File())
         {
-            return true;
-        }
-    }
+            pcc->showEditorForFile (fileToDisplay, true);
 
-    return false;
-}
-
-static bool isEndOfCommentBlock (const String& line)
-{
-    if (line.contains ("*/"))
-        return true;
-
-    return false;
-}
-
-static int getIndexOfCommentBlockStart (const StringArray& lines, int blockEndIndex)
-{
-    for (int i = blockEndIndex; i >= 0; --i)
-    {
-        if (lines[i].contains ("/*"))
-            return i;
-    }
-
-    return  0;
-}
-
-static int findBestLineToScrollTo (StringArray lines, StringRef className)
-{
-    for (auto line : lines)
-    {
-        if (line.contains ("struct " + className) || line.contains ("class " + className))
-        {
-            auto index = lines.indexOf (line);
-
-            if (isDivider (lines[index - 1]))
-                return index - 1;
-
-            if (isEndOfCommentBlock (lines[index - 1]))
-            {
-                auto blockStartIndex = getIndexOfCommentBlockStart (lines, index - 1);
-
-                if (blockStartIndex > 0 && isDivider (lines [blockStartIndex - 1]))
-                    return blockStartIndex - 1;
-
-                return blockStartIndex;
-            }
-
-            return lines.indexOf (line);
-        }
-    }
-
-    return 0;
-}
-
-void MainWindow::openPIP (PIPGenerator& generator)
-{
-    if (auto* window = ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (generator.getJucerFile()))
-    {
-        if (auto* project = window->getProject())
-        {
-            project->setTemporaryDirectory (generator.getOutputDirectory());
-
-            ProjectSaver liveBuildSaver (*project);
-            liveBuildSaver.saveContentNeededForLiveBuild();
-
-            if (auto* pcc = window->getProjectContentComponent())
-            {
-                pcc->invokeDirectly (CommandIDs::toggleBuildEnabled, true);
-                pcc->invokeDirectly (CommandIDs::buildNow, true);
-                pcc->invokeDirectly (CommandIDs::toggleContinuousBuild, true);
-
-                auto fileToDisplay = generator.getPIPFile();
-
-                if (fileToDisplay != File())
-                {
-                    pcc->showEditorForFile (fileToDisplay, true);
-
-                    if (auto* sourceCodeEditor = dynamic_cast <SourceCodeEditor*> (pcc->getEditorComponent()))
-                    {
-                        sourceCodeEditor->editor->scrollToLine (findBestLineToScrollTo (StringArray::fromLines (fileToDisplay.loadFileAsString()),
-                                                                                        generator.getMainClassName()));
-                    }
-                }
-
-            }
+            if (auto* sourceCodeEditor = dynamic_cast <SourceCodeEditor*> (pcc->getEditorComponent()))
+                sourceCodeEditor->editor->scrollToLine (findBestLineToScrollToForClass (StringArray::fromLines (fileToDisplay.loadFileAsString()),
+                                                                                        generator.getMainClassName(), currentProject->getProjectType().isAudioPlugin()));
         }
     }
 }
@@ -476,10 +415,7 @@ void MainWindow::filesDropped (const StringArray& filenames, int /*mouseX*/, int
     {
         const File f (filename);
 
-        if (tryToOpenPIP (f))
-            continue;
-
-        if (! isPIPFile (f) && (canOpenFile (f) && openFile (f)))
+        if (canOpenFile (f) && openFile (f))
             break;
     }
 }
@@ -526,16 +462,26 @@ void MainWindow::activeWindowStatusChanged()
     ProjucerApplication::getApp().openDocumentManager.reloadModifiedFiles();
 }
 
+void MainWindow::initialiseProjectWindow()
+{
+    setResizable (true, false);
+    updateTitleBarIcon();
+}
+
 void MainWindow::showStartPage()
 {
     jassert (currentProject == nullptr);
 
-    setContentOwned (createNewProjectWizardComponent(), true);
+    setContentOwned (new StartPageComponent ([this] (std::unique_ptr<Project>&& newProject) { setProject (std::move (newProject)); },
+                                             [this] (const File& exampleFile) { openFile (exampleFile); }),
+                     true);
 
-    centreWithSize (900, 630);
-    setVisible (true);
+    setResizable (false, false);
+    setName ("New Project");
     addToDesktop();
+    centreWithSize (getContentComponent()->getWidth(), getContentComponent()->getHeight());
 
+    setVisible (true);
     getContentComponent()->grabKeyboardFocus();
 }
 
@@ -710,6 +656,9 @@ void MainWindowList::openDocument (OpenDocumentManager::Document* doc, bool grab
 
 bool MainWindowList::openFile (const File& file, bool openInBackground)
 {
+    if (! file.exists())
+        return false;
+
     for (auto* w : windows)
     {
         if (w->getProject() != nullptr && w->getProject()->getFile() == file)
@@ -729,6 +678,7 @@ bool MainWindowList::openFile (const File& file, bool openInBackground)
         if (w->openFile (file))
         {
             w->makeVisible();
+            w->setResizable (true, false);
             checkWindowBounds (*w);
 
             if (openInBackground && previousFrontWindow != nullptr)
@@ -741,13 +691,7 @@ bool MainWindowList::openFile (const File& file, bool openInBackground)
         return false;
     }
 
-    if (getFrontmostWindow()->tryToOpenPIP (file))
-        return true;
-
-    if (! isPIPFile (file) && file.exists())
-        return getFrontmostWindow()->openFile (file);
-
-    return false;
+    return getFrontmostWindow()->openFile (file);
 }
 
 MainWindow* MainWindowList::createNewMainWindow()

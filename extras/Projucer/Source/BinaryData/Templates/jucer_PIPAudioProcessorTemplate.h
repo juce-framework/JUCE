@@ -8,7 +8,7 @@ public:
     {
     }
 
-    ~%%class_name%%()
+    ~%%class_name%%() override
     {
     }
 

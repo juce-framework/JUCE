@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -63,15 +70,21 @@ public:
     void reset() noexcept;
 
     /** Sets the cutoff frequency of the filter.
-        @param newValue cutoff frequency in Hz */
+
+        @param newCutoff cutoff frequency in Hz
+    */
     void setCutoffFrequencyHz (SampleType newCutoff) noexcept;
 
     /** Sets the resonance of the filter.
-        @param newValue a value between 0 and 1; higher values increase the resonance and can result in self oscillation! */
+
+        @param newResonance a value between 0 and 1; higher values increase the resonance and can result in self oscillation!
+    */
     void setResonance (SampleType newResonance) noexcept;
 
     /** Sets the amount of saturation in the filter.
-        @param newValue saturation amount; it can be any number greater than or equal to one. Higher values result in more distortion.*/
+
+        @param newDrive saturation amount; it can be any number greater than or equal to one. Higher values result in more distortion.
+    */
     void setDrive (SampleType newDrive) noexcept;
 
     //==============================================================================

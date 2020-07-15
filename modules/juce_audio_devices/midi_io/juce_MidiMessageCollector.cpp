@@ -128,6 +128,11 @@ void MidiMessageCollector::removeNextBlockOfMessages (MidiBuffer& destBuffer,
     }
 }
 
+void MidiMessageCollector::ensureStorageAllocated (size_t bytes)
+{
+    incomingMessages.ensureSize (bytes);
+}
+
 //==============================================================================
 void MidiMessageCollector::handleNoteOn (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity)
 {

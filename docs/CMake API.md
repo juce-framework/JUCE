@@ -6,6 +6,7 @@
 - Plugin projects require CMake 3.15 or higher.
 - All iOS targets require CMake 3.14 or higher (3.15 or higher for plugins targeting iOS).
 - Android targets are not currently supported.
+- WebView2 on Windows via JUCE_USE_WIN_WEBVIEW2 flag in juce_gui_extra is not currently supported.
 
 Most system package managers have packages for CMake, but we recommend using the most recent release
 from https://cmake.org/download. You should always use a CMake that's newer than your build
@@ -15,11 +16,43 @@ In addition to CMake you'll need a build toolchain for your platform, such as Xc
 
 ## Getting Started
 
-In this directory, you'll find example projects for a GUI app, a console app, and an audio plugin.
-You can simply copy one of these subdirectories out of the JUCE repo, add JUCE as a submodule, and
-uncomment the call to `add_subdirectory` where indicated in the CMakeLists.txt. Alternatively, if
-you've installed JUCE using a package manager or the CMake install target, you can uncomment the
-call to `find_package`.
+### Using `add_subdirectory`
+
+The simplest way to include JUCE in your project is to add JUCE as a
+subdirectory of your project, and to include the line `add_subdirectory(JUCE)`
+in your project CMakeLists.txt. This will make the JUCE targets and helper
+functions available for use by your custom targets.
+
+### Using `find_package`
+
+To install JUCE globally on your system, you'll need to tell CMake where to
+place the installed files.
+
+    # Go to JUCE directory
+    cd /path/to/clone/JUCE
+    # Configure build with library components only
+    cmake -B cmake-build-install -DCMAKE_INSTALL_PREFIX=/path/to/JUCE/install
+    # Run the installation
+    cmake --build cmake-build-install --target install
+
+In your project which consumes JUCE, make sure the project CMakeLists.txt contains the line
+`find_package(JUCE CONFIG REQUIRED)`. This will make the JUCE modules and CMake helper functions
+available for use in the rest of your build. Then, run the build like so:
+
+    # Go to project directory
+    cd /path/to/my/project
+    # Configure build, passing the JUCE install path you used earlier
+    cmake -B cmake-build -DCMAKE_PREFIX_PATH=/path/to/JUCE/install
+    # Build the project
+    cmake --build cmake-build
+
+### Example projects
+
+In the JUCE/examples/CMake directory, you'll find example projects for a GUI app, a console app,
+and an audio plugin. You can simply copy one of these subdirectories out of the JUCE repo, add JUCE
+as a submodule, and uncomment the call to `add_subdirectory` where indicated in the CMakeLists.txt.
+Alternatively, if you've installed JUCE using a package manager or the CMake install target, you can
+uncomment the call to `find_package`.
 
 Once your project is set up, you can generate a build tree for it in the normal way. To get started,
 you might invoke CMake like this, from the new directory you created.

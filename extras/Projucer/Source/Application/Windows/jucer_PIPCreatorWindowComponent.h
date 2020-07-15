@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -140,11 +147,15 @@ private:
 
         {
             Array<var> exporterVars;
-            for (auto& e : ProjectExporter::getExporterValueTreeNames())
-                exporterVars.add (e.toLowerCase());
+            StringArray exporterNames;
 
-            builder.add (new MultiChoicePropertyComponent (exportersValue, "Exporters",
-                                                           ProjectExporter::getExporterNames(), exporterVars),
+            for (auto& exporterTypeInfo : ProjectExporter::getExporterTypeInfos())
+            {
+                exporterVars.add (exporterTypeInfo.identifier.toString());
+                exporterNames.add (exporterTypeInfo.displayName);
+            }
+
+            builder.add (new MultiChoicePropertyComponent (exportersValue, "Exporters", exporterNames, exporterVars),
                          "The exporters that should be added to your project.");
         }
 
@@ -169,9 +180,9 @@ private:
     }
 
     //==============================================================================
-    void valueTreePropertyChanged (ValueTree&, const Identifier& id) override
+    void valueTreePropertyChanged (ValueTree&, const Identifier& identifier) override
     {
-        if (id == Ids::type)
+        if (identifier == Ids::type)
         {
             auto type = typeValue.get().toString();
 
@@ -308,8 +319,7 @@ private:
                      websiteValue       { pipTree, Ids::website,       nullptr },
                      descriptionValue   { pipTree, Ids::description,   nullptr },
                      dependenciesValue  { pipTree, Ids::dependencies_, nullptr, getModulesRequiredForComponent(), "," },
-                     exportersValue     { pipTree, Ids::exporters,     nullptr,
-                                          StringArray (ProjectExporter::getValueTreeNameForExporter (ProjectExporter::getCurrentPlatformExporterName()).toLowerCase()), "," },
+                     exportersValue     { pipTree, Ids::exporters,     nullptr, StringArray (ProjectExporter::getCurrentPlatformExporterTypeInfo().identifier.toString()), "," },
                      moduleFlagsValue   { pipTree, Ids::moduleFlags,   nullptr, "JUCE_STRICT_REFCOUNTEDPOINTER=1" },
                      definesValue       { pipTree, Ids::defines,       nullptr },
                      typeValue          { pipTree, Ids::type,          nullptr, "Component" },

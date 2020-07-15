@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -49,8 +56,8 @@ public:
                        int minValue, int maxValue,
                        int defaultValue,
                        const String& parameterLabel = String(),
-                       std::function<String(int value, int maximumStringLength)> stringFromInt = nullptr,
-                       std::function<int(const String& text)> intFromString = nullptr);
+                       std::function<String (int value, int maximumStringLength)> stringFromInt = nullptr,
+                       std::function<int (const String& text)> intFromString = nullptr);
 
     /** Destructor. */
     ~AudioParameterInt() override;
@@ -90,8 +97,8 @@ private:
     const NormalisableRange<float> range;
     std::atomic<float> value;
     const float defaultValue;
-    std::function<String(int, int)> stringFromIntFunction;
-    std::function<int(const String&)> intFromStringFunction;
+    std::function<String (int, int)> stringFromIntFunction;
+    std::function<int (const String&)> intFromStringFunction;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioParameterInt)
 };

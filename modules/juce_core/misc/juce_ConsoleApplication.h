@@ -264,7 +264,7 @@ struct ConsoleApplication
         String longDescription;
 
         /** The actual command that should be invoked to perform this action. */
-        std::function<void(const ArgumentList&)> command;
+        std::function<void (const ArgumentList&)> command;
     };
 
     //==============================================================================

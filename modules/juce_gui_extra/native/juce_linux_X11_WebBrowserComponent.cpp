@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -24,7 +31,7 @@ class WebKitSymbols  : public DeletedAtShutdown
 {
 public:
     //==============================================================================
-    bool isWebKitAvailable()    { return webKitIsAvailable; }
+    bool isWebKitAvailable() const noexcept  { return webKitIsAvailable; }
 
     //==============================================================================
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_settings_new, juce_webkit_settings_new,
@@ -898,9 +905,9 @@ private:
 };
 
 //==============================================================================
-WebBrowserComponent::WebBrowserComponent (const bool unloadPageWhenBrowserIsHidden_)
+WebBrowserComponent::WebBrowserComponent (const bool unloadWhenHidden)
     : browser (new Pimpl (*this)),
-      unloadPageWhenBrowserIsHidden (unloadPageWhenBrowserIsHidden_)
+      unloadPageWhenBrowserIsHidden (unloadWhenHidden)
 {
     ignoreUnused (blankPageShown);
     ignoreUnused (unloadPageWhenBrowserIsHidden);
@@ -908,6 +915,13 @@ WebBrowserComponent::WebBrowserComponent (const bool unloadPageWhenBrowserIsHidd
     setOpaque (true);
 
     browser->init();
+}
+
+WebBrowserComponent::WebBrowserComponent (bool unloadWhenHidden,
+                                          const File&,
+                                          const File&)
+    : WebBrowserComponent (unloadWhenHidden)
+{
 }
 
 WebBrowserComponent::~WebBrowserComponent()

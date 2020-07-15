@@ -7,7 +7,7 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class %%content_component_class%%   : public juce::AudioAppComponent
+class %%content_component_class%%  : public juce::AudioAppComponent
 {
 public:
     //==============================================================================

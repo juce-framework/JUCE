@@ -23,7 +23,7 @@
 namespace juce
 {
 
-BlockGraph::BlockGraph (const BlockTopology t, std::function<bool(Block::Ptr)> filterIn)
+BlockGraph::BlockGraph (const BlockTopology t, std::function<bool (Block::Ptr)> filterIn)
     : topology (t), filter (std::move (filterIn))
 {
     buildGraph();

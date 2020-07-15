@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -31,39 +38,24 @@ public:
     };
 
     //==============================================================================
-    static const char* getNameWindows() noexcept    { return "Code::Blocks (Windows)"; }
-    static const char* getNameLinux() noexcept      { return "Code::Blocks (Linux)"; }
+    static String getDisplayNameWindows()        { return "Code::Blocks (Windows)"; }
+    static String getDisplayNameLinux()          { return "Code::Blocks (Linux)"; }
 
-    static const char* getName (CodeBlocksOS os) noexcept
-    {
-        if (os == windowsTarget) return getNameWindows();
-        if (os == linuxTarget)   return getNameLinux();
+    static String getValueTreeTypeNameWindows()  { return "CODEBLOCKS_WINDOWS"; }
+    static String getValueTreeTypeNameLinux()    { return "CODEBLOCKS_LINUX"; }
 
-        // currently no other OSes supported by Codeblocks exporter!
-        jassertfalse;
-        return "Code::Blocks (Unknown OS)";
-    }
-
-    //==============================================================================
-    static const char* getValueTreeTypeName (CodeBlocksOS os)
-    {
-        if (os == windowsTarget)  return "CODEBLOCKS_WINDOWS";
-        if (os == linuxTarget)    return "CODEBLOCKS_LINUX";
-
-        // currently no other OSes supported by Codeblocks exporter!
-        jassertfalse;
-        return "CODEBLOCKS_UNKNOWN_OS";
-    }
+    static String getTargetFolderNameWindows()   { return "CodeBlocksWindows"; }
+    static String getTargetFolderNameLinux()     { return "CodeBlocksLinux"; }
 
     //==============================================================================
     static CodeBlocksProjectExporter* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
         // this will also import legacy jucer files where CodeBlocks only worked for Windows,
         // had valueTreetTypeName "CODEBLOCKS", and there was no OS distinction
-        if (settingsToUse.hasType (getValueTreeTypeName (windowsTarget)) || settingsToUse.hasType ("CODEBLOCKS"))
+        if (settingsToUse.hasType (getValueTreeTypeNameWindows()) || settingsToUse.hasType ("CODEBLOCKS"))
             return new CodeBlocksProjectExporter (projectToUse, settingsToUse, windowsTarget);
 
-        if (settingsToUse.hasType (getValueTreeTypeName (linuxTarget)))
+        if (settingsToUse.hasType (getValueTreeTypeNameLinux()))
             return new CodeBlocksProjectExporter (projectToUse, settingsToUse, linuxTarget);
 
         return nullptr;
@@ -73,12 +65,17 @@ public:
     CodeBlocksProjectExporter (Project& p, const ValueTree& t, CodeBlocksOS codeBlocksOs)
         : ProjectExporter (p, t), os (codeBlocksOs)
     {
-        name = getName (os);
-
-        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderForExporter (getValueTreeTypeName (os)));
-
         if (isWindows())
+        {
+            name = getDisplayNameWindows();
+            targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderNameWindows());
             targetPlatformValue.referTo (settings, Ids::codeBlocksWindowsTarget, getUndoManager());
+        }
+        else
+        {
+            name = getDisplayNameLinux();
+            targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderNameLinux());
+        }
     }
 
     //==============================================================================

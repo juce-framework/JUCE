@@ -280,7 +280,7 @@ namespace SocketHelpers
         if (! lock.isLocked())
             return -1;
 
-        auto hasErrorOccurred = [&handle] () -> bool
+        auto hasErrorOccurred = [&handle]() -> bool
         {
             auto h = (SocketHandle) handle.load();
 

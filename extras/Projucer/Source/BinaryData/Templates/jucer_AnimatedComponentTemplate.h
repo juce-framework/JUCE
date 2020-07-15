@@ -7,12 +7,12 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class %%content_component_class%%   : public juce::AnimatedAppComponent
+class %%content_component_class%%  : public juce::AnimatedAppComponent
 {
 public:
     //==============================================================================
     %%content_component_class%%();
-    ~%%content_component_class%%();
+    ~%%content_component_class%%() override;
 
     //==============================================================================
     void update() override;

@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -18,7 +25,7 @@
 
 #pragma once
 
-#include "jucer_LicenseQueryThread.h"
+
 #include "../../Project/UI/jucer_UserAvatarComponent.h"
 
 //==============================================================================
@@ -74,6 +81,11 @@ public:
         setSize (300, 350);
     }
 
+    ~LoginFormComponent() override
+    {
+        ProjucerApplication::getApp().getLicenseController().cancelSignIn();
+    }
+
     void resized() override
     {
         auto bounds = getLocalBounds().reduced (20);
@@ -113,7 +125,7 @@ public:
     void mouseUp (const MouseEvent& event) override
     {
         if (event.eventComponent == &createAccountLabel)
-            URL ("https://auth.roli.com/register").launchInDefaultBrowser();
+            URL ("https://juce.com/verification/register").launchInDefaultBrowser();
     }
 
     void lookAndFeelChanged() override
@@ -185,9 +197,6 @@ private:
 
     void submitDetails()
     {
-        if ((licenseQueryThread != nullptr && licenseQueryThread->isThreadRunning()))
-            return;
-
         auto loginFormError = checkLoginFormsAreValid();
 
         if (loginFormError.isNotEmpty())
@@ -199,29 +208,27 @@ private:
         updateLoginButtonStates (true);
 
         WeakReference<Component> weakThis (this);
-        licenseQueryThread.reset (new LicenseQueryThread (emailBox.getText(), passwordBox.getText(),
-                                                          [this, weakThis] (LicenseState newState, String errorMessage)
-                                                          {
-                                                              if (weakThis == nullptr)
-                                                                  return;
+        auto completionCallback = [this, weakThis] (const String& errorMessage)
+        {
+            if (weakThis == nullptr)
+                return;
 
-                                                              updateLoginButtonStates (false);
+            updateLoginButtonStates (false);
 
-                                                              if (errorMessage.isNotEmpty())
-                                                              {
-                                                                  showErrorMessage (errorMessage);
-                                                              }
-                                                              else
-                                                              {
-                                                                  hideErrorMessage();
+            if (errorMessage.isNotEmpty())
+            {
+                showErrorMessage (errorMessage);
+            }
+            else
+            {
+                hideErrorMessage();
+                mainWindow.hideLoginFormOverlay();
+                ProjucerApplication::getApp().getCommandManager().commandStatusChanged();
+            }
+        };
 
-                                                                  auto& licenseController = ProjucerApplication::getApp().getLicenseController();
-                                                                  licenseController.setState (newState);
-                                                                  mainWindow.hideLoginFormOverlay();
-
-                                                                  ProjucerApplication::getApp().getCommandManager().commandStatusChanged();
-                                                              }
-                                                          }));
+        ProjucerApplication::getApp().getLicenseController().signIn (emailBox.getText(), passwordBox.getText(),
+                                                                     std::move (completionCallback));
     }
 
     String checkLoginFormsAreValid() const
@@ -257,17 +264,15 @@ private:
     MainWindow& mainWindow;
 
     TextEditor emailBox, passwordBox;
-    ProgressButton logInButton { "Log In" };
+    ProgressButton logInButton { "Sign In" };
     TextButton enableGPLButton { "Enable GPL Mode" };
     ShapeButton dismissButton { {},
                                 findColour (treeIconColourId),
                                 findColour (treeIconColourId).overlaidWith (findColour (defaultHighlightedTextColourId).withAlpha (0.2f)),
                                 findColour (treeIconColourId).overlaidWith (findColour (defaultHighlightedTextColourId).withAlpha (0.4f)) };
-    UserAvatarComponent userAvatar { false, false };
+    UserAvatarComponent userAvatar { false };
     Label createAccountLabel { {}, "Create an account" },
           errorMessageLabel { {}, {} };
-
-    std::unique_ptr<LicenseQueryThread> licenseQueryThread;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LoginFormComponent)
 };

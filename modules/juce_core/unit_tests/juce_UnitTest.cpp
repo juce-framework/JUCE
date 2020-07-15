@@ -199,15 +199,11 @@ void UnitTestRunner::beginNewTest (UnitTest* const test, const String& subCatego
     endTest();
     currentTest = test;
 
-    auto* r = new TestResult();
-    results.add (r);
-    r->unitTestName = test->getName();
-    r->subcategoryName = subCategory;
-    r->passes = 0;
-    r->failures = 0;
+    auto testName = test->getName();
+    results.add (new TestResult (testName, subCategory));
 
     logMessage ("-----------------------------------------------------------------");
-    logMessage ("Starting test: " + r->unitTestName + " / " + subCategory + "...");
+    logMessage ("Starting test: " + testName + " / " + subCategory + "...");
 
     resultsUpdated();
 }
@@ -216,6 +212,8 @@ void UnitTestRunner::endTest()
 {
     if (auto* r = results.getLast())
     {
+        r->endTime = Time::getCurrentTime();
+
         if (r->failures > 0)
         {
             String m ("FAILED!!  ");

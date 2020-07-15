@@ -17,7 +17,7 @@ class %%editor_class_name%%  : public juce::AudioProcessorEditor
 {
 public:
     %%editor_class_name%% (%%filter_class_name%%&);
-    ~%%editor_class_name%%();
+    ~%%editor_class_name%%() override;
 
     //==============================================================================
     void paint (juce::Graphics&) override;
@@ -26,7 +26,7 @@ public:
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
-    %%filter_class_name%%& processor;
+    %%filter_class_name%%& audioProcessor;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%editor_class_name%%)
 };

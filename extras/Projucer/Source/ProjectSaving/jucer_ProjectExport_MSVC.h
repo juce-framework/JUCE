@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -53,27 +60,10 @@ public:
                    "Specifies the version of the platform toolset that will be used when building this project.");
     }
 
-    void addIPPLibraryProperty (PropertyListBuilder& props)
-    {
-        props.add (new ChoicePropertyComponent (IPPLibraryValue, "Use IPP Library",
-                                                { "No",  "Yes (Default Linking)",  "Multi-Threaded Static Library", "Single-Threaded Static Library", "Multi-Threaded DLL", "Single-Threaded DLL" },
-                                                { var(), "true",                   "Parallel_Static",               "Sequential",                     "Parallel_Dynamic",   "Sequential_Dynamic" }),
-                   "Enable this to use Intel's Integrated Performance Primitives library.");
-    }
-
-    void addWindowsTargetPlatformProperties (PropertyListBuilder& props)
-    {
-        auto isWindows10SDK = getVisualStudioVersion() > 14;
-
-        props.add (new TextPropertyComponent (targetPlatformVersion, "Windows Target Platform", 20, false),
-                   String ("Specifies the version of the Windows SDK that will be used when building this project. ")
-                   + (isWindows10SDK ? "Leave this field empty to use the latest Windows 10 SDK installed on the build machine."
-                                     : "The default value for this exporter is " + getDefaultWindowsTargetPlatformVersion()));
-    }
-
     void create (const OwnedArray<LibraryModule>&) const override
     {
         createResourcesAndIcon();
+        createPackagesConfigFile();
 
         for (int i = 0; i < targets.size(); ++i)
             if (auto* target = targets[i])
@@ -720,6 +710,12 @@ public:
                 e->setAttribute ("Include", prependDot (getOwner().iconFile.getFileName()));
             }
 
+            if (getOwner().packagesConfigFile.existsAsFile())
+            {
+                auto* e = otherFilesGroup->createNewChildElement ("None");
+                e->setAttribute ("Include", getOwner().packagesConfigFile.getFileName());
+            }
+
             if (otherFilesGroup->getFirstChildElement() != nullptr)
                 projectXml.addChildElement (otherFilesGroup.release());
 
@@ -736,8 +732,18 @@ public:
             }
 
             {
-                auto* e = projectXml.createNewChildElement ("ImportGroup");
-                e->setAttribute ("Label", "ExtensionTargets");
+                auto* importGroup = projectXml.createNewChildElement ("ImportGroup");
+                importGroup->setAttribute ("Label", "ExtensionTargets");
+
+                if (owner.shouldAddWebView2Package())
+                {
+                    auto packageTargetsPath = "packages\\" + getWebView2PackageName() + "." + getWebView2PackageVersion()
+                                            + "\\build\\native\\" + getWebView2PackageName() + ".targets";
+
+                    auto* e = importGroup->createNewChildElement ("Import");
+                    e->setAttribute ("Project", packageTargetsPath);
+                    e->setAttribute ("Condition", "Exists('" + packageTargetsPath + "')");
+                }
             }
         }
 
@@ -770,25 +776,22 @@ public:
 
                 if (path.hasFileExtension (cOrCppFileExtensions) || path.hasFileExtension (asmFileExtensions))
                 {
-                    if (targetType == SharedCodeTarget || projectItem.shouldBeCompiled())
+                    auto* e = cpps.createNewChildElement ("ClCompile");
+                    e->setAttribute ("Include", path.toWindowsStyle());
+
+                    if (shouldUseStdCall (path))
+                        e->createNewChildElement ("CallingConvention")->addTextElement ("StdCall");
+
+                    if (projectItem.shouldBeCompiled())
                     {
-                        auto* e = cpps.createNewChildElement ("ClCompile");
-                        e->setAttribute ("Include", path.toWindowsStyle());
+                        auto extraCompilerFlags = owner.compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get().toString();
 
-                        if (shouldUseStdCall (path))
-                            e->createNewChildElement ("CallingConvention")->addTextElement ("StdCall");
-
-                        if (projectItem.shouldBeCompiled())
-                        {
-                            auto extraCompilerFlags = owner.compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get().toString();
-
-                            if (extraCompilerFlags.isNotEmpty())
-                                e->createNewChildElement ("AdditionalOptions")->addTextElement (extraCompilerFlags + " %(AdditionalOptions)");
-                        }
-                        else
-                        {
-                            e->createNewChildElement ("ExcludedFromBuild")->addTextElement ("true");
-                        }
+                        if (extraCompilerFlags.isNotEmpty())
+                            e->createNewChildElement ("AdditionalOptions")->addTextElement (extraCompilerFlags + " %(AdditionalOptions)");
+                    }
+                    else
+                    {
+                        e->createNewChildElement ("ExcludedFromBuild")->addTextElement ("true");
                     }
                 }
                 else if (path.hasFileExtension (headerFileExtensions))
@@ -853,7 +856,9 @@ public:
 
                 return filesWereAdded;
             }
-            else if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (getOwner()))
+            else if (projectItem.shouldBeAddedToTargetProject()
+                     && projectItem.shouldBeAddedToTargetExporter (getOwner())
+                     && getOwner().getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType)
             {
                 build_tools::RelativePath relativePath (projectItem.getFile(),
                                                         getOwner().getTargetFolder(),
@@ -861,27 +866,7 @@ public:
 
                 jassert (relativePath.getRoot() == build_tools::RelativePath::buildTargetFolder);
 
-                if (getOwner().getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType
-                    && (targetType == SharedCodeTarget || projectItem.shouldBeCompiled()))
-                {
-                    addFileToFilter (relativePath, path.upToLastOccurrenceOf ("\\", false, false), cpps, headers, otherFiles);
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        bool addFilesToFilter (const Array<build_tools::RelativePath>& files, const String& path,
-                               XmlElement& cpps, XmlElement& headers, XmlElement& otherFiles, XmlElement& groups)
-        {
-            if (files.size() > 0)
-            {
-                addFilterGroup (groups, path);
-
-                for (int i = 0; i < files.size(); ++i)
-                    addFileToFilter (files.getReference(i), path, cpps, headers, otherFiles);
-
+                addFileToFilter (relativePath, path.upToLastOccurrenceOf ("\\", false, false), cpps, headers, otherFiles);
                 return true;
             }
 
@@ -911,6 +896,12 @@ public:
                 auto* e = otherFilesGroup->createNewChildElement ("None");
                 e->setAttribute ("Include", prependDot (getOwner().iconFile.getFileName()));
                 e->createNewChildElement ("Filter")->addTextElement (ProjectSaver::getJuceCodeGroupName());
+            }
+
+            if (getOwner().packagesConfigFile.existsAsFile())
+            {
+                auto* e = otherFilesGroup->createNewChildElement ("None");
+                e->setAttribute ("Include", getOwner().packagesConfigFile.getFileName());
             }
 
             if (otherFilesGroup->getFirstChildElement() != nullptr)
@@ -1396,6 +1387,20 @@ public:
     {
         props.add (new TextPropertyComponent (manifestFileValue, "Manifest file", 8192, false),
             "Path to a manifest input file which should be linked into your binary (path is relative to jucer file).");
+
+        props.add (new ChoicePropertyComponent (IPPLibraryValue, "Use IPP Library",
+                                                { "No",  "Yes (Default Linking)",  "Multi-Threaded Static Library", "Single-Threaded Static Library", "Multi-Threaded DLL", "Single-Threaded DLL" },
+                                                { var(), "true",                   "Parallel_Static",               "Sequential",                     "Parallel_Dynamic",   "Sequential_Dynamic" }),
+                   "Enable this to use Intel's Integrated Performance Primitives library.");
+
+        {
+            auto isWindows10SDK = getVisualStudioVersion() > 14;
+
+            props.add (new TextPropertyComponent (targetPlatformVersion, "Windows Target Platform", 20, false),
+                       String ("Specifies the version of the Windows SDK that will be used when building this project. ")
+                       + (isWindows10SDK ? "Leave this field empty to use the latest Windows 10 SDK installed on the build machine."
+                                         : "The default value for this exporter is " + getDefaultWindowsTargetPlatformVersion()));
+        }
     }
 
     enum OptimisationLevel
@@ -1468,7 +1473,7 @@ private:
 
 protected:
     //==============================================================================
-    mutable File rcFile, iconFile;
+    mutable File rcFile, iconFile, packagesConfigFile;
     OwnedArray<MSVCTargetBase> targets;
 
     ValueWithDefault IPPLibraryValue, platformToolsetValue, targetPlatformVersion, manifestFileValue;
@@ -1607,6 +1612,35 @@ protected:
         }
     }
 
+    bool shouldAddWebView2Package() const
+    {
+        return project.getEnabledModules().isModuleEnabled ("juce_gui_extra")
+              && project.isConfigFlagEnabled ("JUCE_USE_WIN_WEBVIEW2", false);
+    }
+
+    static String getWebView2PackageName()     { return "Microsoft.Web.WebView2"; }
+    static String getWebView2PackageVersion()  { return "0.9.488"; }
+
+    void createPackagesConfigFile() const
+    {
+        if (shouldAddWebView2Package())
+        {
+            packagesConfigFile = getTargetFolder().getChildFile ("packages.config");
+
+            build_tools::writeStreamToFile (packagesConfigFile, [] (MemoryOutputStream& mo)
+            {
+                mo.setNewLineString ("\r\n");
+
+                mo << "<?xml version=\"1.0\" encoding=\"utf-8\"?>"                   << newLine
+                   << "<packages>"                                                   << newLine
+                   << "\t" << "<package id=" << getWebView2PackageName().quoted()
+                           << " version="    << getWebView2PackageVersion().quoted()
+                           << " />"                                                  << newLine
+                   << "</packages>"                                                  << newLine;
+            });
+        }
+    }
+
     static String prependDot (const String& filename)
     {
         return build_tools::isAbsolutePath (filename) ? filename
@@ -1636,16 +1670,18 @@ class MSVCProjectExporterVC2015  : public MSVCProjectExporterBase
 {
 public:
     MSVCProjectExporterVC2015 (Project& p, const ValueTree& t)
-        : MSVCProjectExporterBase (p, t, getTargetFolderForExporter (getValueTreeTypeName()))
+        : MSVCProjectExporterBase (p, t, getTargetFolderName())
     {
-        name = getName();
+        name = getDisplayName();
 
         targetPlatformVersion.setDefault (getDefaultWindowsTargetPlatformVersion());
         platformToolsetValue.setDefault (getDefaultToolset());
     }
 
-    static const char* getName()                                     { return "Visual Studio 2015"; }
-    static const char* getValueTreeTypeName()                        { return "VS2015"; }
+    static String getDisplayName()        { return "Visual Studio 2015"; }
+    static String getValueTreeTypeName()  { return "VS2015"; }
+    static String getTargetFolderName()   { return "VisualStudio2015"; }
+
     int getVisualStudioVersion() const override                      { return 14; }
     String getSolutionComment() const override                       { return "# Visual Studio 2015"; }
     String getToolsVersion() const override                          { return "14.0"; }
@@ -1662,15 +1698,11 @@ public:
 
     void createExporterProperties (PropertyListBuilder& props) override
     {
-        MSVCProjectExporterBase::createExporterProperties (props);
-
         static const char* toolsetNames[] = { "v140", "v140_xp", "CTP_Nov2013" };
         const var toolsets[]              = { "v140", "v140_xp", "CTP_Nov2013" };
         addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
 
-        addIPPLibraryProperty (props);
-
-        addWindowsTargetPlatformProperties (props);
+        MSVCProjectExporterBase::createExporterProperties (props);
     }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2015)
@@ -1681,16 +1713,18 @@ class MSVCProjectExporterVC2017  : public MSVCProjectExporterBase
 {
 public:
     MSVCProjectExporterVC2017 (Project& p, const ValueTree& t)
-        : MSVCProjectExporterBase (p, t, getTargetFolderForExporter (getValueTreeTypeName()))
+        : MSVCProjectExporterBase (p, t, getTargetFolderName())
     {
-        name = getName();
+        name = getDisplayName();
 
         targetPlatformVersion.setDefault (getDefaultWindowsTargetPlatformVersion());
         platformToolsetValue.setDefault (getDefaultToolset());
     }
 
-    static const char* getName()                                     { return "Visual Studio 2017"; }
-    static const char* getValueTreeTypeName()                        { return "VS2017"; }
+    static String getDisplayName()        { return "Visual Studio 2017"; }
+    static String getValueTreeTypeName()  { return "VS2017"; }
+    static String getTargetFolderName()   { return "VisualStudio2017"; }
+
     int getVisualStudioVersion() const override                      { return 15; }
     String getSolutionComment() const override                       { return "# Visual Studio 2017"; }
     String getToolsVersion() const override                          { return "15.0"; }
@@ -1707,15 +1741,11 @@ public:
 
     void createExporterProperties (PropertyListBuilder& props) override
     {
-        MSVCProjectExporterBase::createExporterProperties (props);
-
         static const char* toolsetNames[] = { "v140", "v140_xp", "v141", "v141_xp" };
         const var toolsets[]              = { "v140", "v140_xp", "v141", "v141_xp" };
         addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
 
-        addIPPLibraryProperty (props);
-
-        addWindowsTargetPlatformProperties (props);
+        MSVCProjectExporterBase::createExporterProperties (props);
     }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2017)
@@ -1726,16 +1756,18 @@ class MSVCProjectExporterVC2019  : public MSVCProjectExporterBase
 {
 public:
     MSVCProjectExporterVC2019 (Project& p, const ValueTree& t)
-        : MSVCProjectExporterBase (p, t, getTargetFolderForExporter (getValueTreeTypeName()))
+        : MSVCProjectExporterBase (p, t, getTargetFolderName())
     {
-        name = getName();
+        name = getDisplayName();
 
         targetPlatformVersion.setDefault (getDefaultWindowsTargetPlatformVersion());
         platformToolsetValue.setDefault (getDefaultToolset());
     }
 
-    static const char* getName()                                     { return "Visual Studio 2019"; }
-    static const char* getValueTreeTypeName()                        { return "VS2019"; }
+    static String getDisplayName()        { return "Visual Studio 2019"; }
+    static String getValueTreeTypeName()  { return "VS2019"; }
+    static String getTargetFolderName()   { return "VisualStudio2019"; }
+
     int getVisualStudioVersion() const override                      { return 16; }
     String getSolutionComment() const override                       { return "# Visual Studio 2019"; }
     String getToolsVersion() const override                          { return "16.0"; }
@@ -1752,15 +1784,11 @@ public:
 
     void createExporterProperties (PropertyListBuilder& props) override
     {
-        MSVCProjectExporterBase::createExporterProperties (props);
-
         static const char* toolsetNames[] = { "v140", "v140_xp", "v141", "v141_xp", "v142" };
         const var toolsets[]              = { "v140", "v140_xp", "v141", "v141_xp", "v142" };
         addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
 
-        addIPPLibraryProperty (props);
-
-        addWindowsTargetPlatformProperties (props);
+        MSVCProjectExporterBase::createExporterProperties (props);
     }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2019)

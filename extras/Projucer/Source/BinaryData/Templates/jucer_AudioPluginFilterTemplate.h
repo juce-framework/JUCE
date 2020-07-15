@@ -18,7 +18,7 @@ class %%filter_class_name%%  : public juce::AudioProcessor
 public:
     //==============================================================================
     %%filter_class_name%%();
-    ~%%filter_class_name%%();
+    ~%%filter_class_name%%() override;
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;

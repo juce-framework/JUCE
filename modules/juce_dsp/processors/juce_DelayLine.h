@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -32,6 +39,8 @@ namespace DelayLineInterpolationTypes
         No interpolation between successive samples in the delay line will be
         performed. This is useful when the delay is a constant integer or to
         create lo-fi audio effects.
+
+        @tags{DSP}
     */
     struct None {};
 
@@ -40,6 +49,8 @@ namespace DelayLineInterpolationTypes
         type of interpolation has a low compuational cost where the delay can be
         modulated in real time, but it also introduces a low-pass filtering effect
         into your audio signal.
+
+        @tags{DSP}
     */
     struct Linear {};
 
@@ -48,6 +59,8 @@ namespace DelayLineInterpolationTypes
         Lagrange interpolator. This method incurs more computational overhead than
         linear interpolation but reduces the low-pass filtering effect whilst
         remaining amenable to real time delay modulation.
+
+        @tags{DSP}
     */
     struct Lagrange3rd {};
 
@@ -57,6 +70,8 @@ namespace DelayLineInterpolationTypes
         amplitude frequency response in exchange for less accuracy in the phase
         response. This interpolation method is stateful so is unsuitable for
         applications requiring fast delay modulation.
+
+        @tags{DSP}
     */
     struct Thiran {};
 }

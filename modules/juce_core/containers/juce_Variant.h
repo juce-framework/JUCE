@@ -54,7 +54,7 @@ public:
         int numArguments;
     };
 
-    using NativeFunction = std::function<var(const NativeFunctionArgs&)>;
+    using NativeFunction = std::function<var (const NativeFunctionArgs&)>;
 
     //==============================================================================
     /** Creates a void variant. */
