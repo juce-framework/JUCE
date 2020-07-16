@@ -48,13 +48,13 @@ protected:
     @param input Data stream containing previously persisted data to be used when restoring the ARADocument
     @param filter A filter to be applied to the stream
     */
-    virtual bool doRestoreObjectsFromStream (ARAInputStream& input, const ARARestoreObjectsFilter* filter) noexcept;
+    virtual bool doRestoreObjectsFromStream (ARAInputStream& input, const ARARestoreObjectsFilter* filter) noexcept = 0;
 
     /** Write an ARADocument archive to a juce::OutputStream.
     @param output Data stream that should be used to write the persistent ARADocument data
     @param filter A filter to be applied to the stream
     */
-    virtual bool doStoreObjectsToStream (ARAOutputStream& output, const ARAStoreObjectsFilter* filter) noexcept;
+    virtual bool doStoreObjectsToStream (ARAOutputStream& output, const ARAStoreObjectsFilter* filter) noexcept = 0;
 
     // Model object creation
     // these are typically overridden with custom types which are inherit from our ARA model classes
