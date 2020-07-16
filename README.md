@@ -1,5 +1,8 @@
-This repository is a fork of the [JUCE 5 develop branch](https://github.com/WeAreROLI/JUCE) with additions that enable it to generate [ARA plugins](https://www.celemony.com/en/service1/about-celemony/technologies) in the VST3 or AudioUnit format.
-It is currently being maintained by [Celemony](https://www.celemony.com) and [SoundRadix](https://www.soundradix.com), with the goal of being picked up eventually by [ROLI](https://www.juce.com) for main line JUCE.
+This repository is an experimental fork of the [JUCE 5 develop branch](https://github.com/WeAreROLI/JUCE)
+with additions that enable it to generate [ARA plugins](https://www.celemony.com/en/service1/about-celemony/technologies)
+in the VST3 or AudioUnit format.
+It is currently being maintained by [Celemony](https://www.celemony.com) and [SoundRadix](https://www.soundradix.com),
+with the goal of being picked up eventually for main line [JUCE](https://www.juce.com) once the code is stable.
 
 The ARA related changes are described in detail [here](https://github.com/Celemony/JUCE_ARA/blob/develop/JUCE_ARA.md).
 For feedback and questions, please contact Celemony via [ara@celemony.com](mailto:ara@celemony.com?Subject=JUCE%20ARA%20integration).
