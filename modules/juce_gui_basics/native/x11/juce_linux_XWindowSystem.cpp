@@ -1155,7 +1155,7 @@ namespace ClipboardHelpers
 
                 // translate to utf8
                 numDataItems = localContent.getNumBytesAsUTF8() + 1;
-                data.calloc (numDataItems + 1);
+                data.calloc (numDataItems);
                 localContent.copyToUTF8 (data, numDataItems);
                 propertyFormat = 8; // bits/item
             }
