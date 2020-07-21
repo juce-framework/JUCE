@@ -379,8 +379,6 @@ public:
     static String getValueTreeTypeName()  { return "LINUX_MAKE"; }
     static String getTargetFolderName()   { return "LinuxMakefile"; }
 
-    String getExtraPkgConfigString() const      { return extraPkgConfigValue.get(); }
-
     static MakefileProjectExporter* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
         if (settingsToUse.hasType (getValueTreeTypeName()))
@@ -521,45 +519,46 @@ private:
         return result;
     }
 
-    StringArray getPackages() const
+    StringArray getExtraPkgConfigPackages() const
     {
-        StringArray packages;
-        packages.addTokens (getExtraPkgConfigString(), " ", "\"'");
+        auto packages = StringArray::fromTokens (extraPkgConfigValue.get().toString(), " ", "\"'");
         packages.removeEmptyStrings();
 
-        packages.addArray (linuxPackages);
+        return packages;
+    }
 
-        // don't add libcurl if curl symbols are loaded at runtime
-        if (isCurlEnabled() && ! isLoadCurlSymbolsLazilyEnabled())
-            packages.add ("libcurl");
+    StringArray getCompilePackages() const
+    {
+        auto packages = getLinuxPackages (PackageDependencyType::compile);
+        packages.addArray (getExtraPkgConfigPackages());
 
-        packages.removeDuplicates (false);
+        return packages;
+    }
+
+    StringArray getLinkPackages() const
+    {
+        auto packages = getLinuxPackages (PackageDependencyType::link);
+        packages.addArray (getExtraPkgConfigPackages());
 
         return packages;
     }
 
     String getPreprocessorPkgConfigFlags() const
     {
-        auto packages = getPackages();
+        auto compilePackages = getCompilePackages();
 
-        if (isWebBrowserComponentEnabled())
-        {
-            packages.add ("webkit2gtk-4.0");
-            packages.add ("gtk+-x11-3.0");
-        }
-
-        if (packages.size() > 0)
-            return "$(shell pkg-config --cflags " + packages.joinIntoString (" ") + ")";
+        if (compilePackages.size() > 0)
+            return "$(shell pkg-config --cflags " + compilePackages.joinIntoString (" ") + ")";
 
         return {};
     }
 
     String getLinkerPkgConfigFlags() const
     {
-        auto packages = getPackages();
+        auto linkPackages = getLinkPackages();
 
-        if (packages.size() > 0)
-            return "$(shell pkg-config --libs " + packages.joinIntoString (" ") + ")";
+        if (linkPackages.size() > 0)
+            return "$(shell pkg-config --libs " + linkPackages.joinIntoString (" ") + ")";
 
         return {};
     }
@@ -568,7 +567,7 @@ private:
     {
         StringArray result;
 
-        if (linuxLibs.contains("pthread"))
+        if (linuxLibs.contains ("pthread"))
             result.add ("-pthread");
 
         return result;
@@ -671,30 +670,6 @@ private:
             result.add (replacePreprocessorTokens (config, extraFlags));
 
         return result;
-    }
-
-    bool isWebBrowserComponentEnabled() const
-    {
-        static String guiExtrasModule ("juce_gui_extra");
-
-        return (project.getEnabledModules().isModuleEnabled (guiExtrasModule)
-                && project.isConfigFlagEnabled ("JUCE_WEB_BROWSER", true));
-    }
-
-    bool isCurlEnabled() const
-    {
-        static String juceCoreModule ("juce_core");
-
-        return (project.getEnabledModules().isModuleEnabled (juceCoreModule)
-                && project.isConfigFlagEnabled ("JUCE_USE_CURL", true));
-    }
-
-    bool isLoadCurlSymbolsLazilyEnabled() const
-    {
-        static String juceCoreModule ("juce_core");
-
-        return (project.getEnabledModules().isModuleEnabled (juceCoreModule)
-                && project.isConfigFlagEnabled ("JUCE_LOAD_CURL_SYMBOLS_LAZILY", false));
     }
 
     //==============================================================================
@@ -991,7 +966,7 @@ private:
 
         out << getPhonyTargetLine() << newLine << newLine;
 
-        writeTargetLines (out, getPackages());
+        writeTargetLines (out, getLinkPackages());
 
         for (auto target : targets)
             target->addFiles (out, getFilesForTarget (filesToCompile, target, project));

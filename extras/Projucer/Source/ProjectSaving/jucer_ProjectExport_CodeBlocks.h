@@ -299,28 +299,6 @@ private:
     };
 
     //==============================================================================
-
-    StringArray getPackages() const
-    {
-        auto result = linuxPackages;
-
-        if (project.getEnabledModules().isModuleEnabled ("juce_gui_extra")
-            && project.isConfigFlagEnabled ("JUCE_WEB_BROWSER", true))
-        {
-            result.add ("webkit2gtk-4.0");
-            result.add ("gtk+-x11-3.0");
-        }
-
-        if (project.getEnabledModules().isModuleEnabled ("juce_core")
-            && project.isConfigFlagEnabled ("JUCE_USE_CURL", true)
-            && ! project.isConfigFlagEnabled ("JUCE_LOAD_CURL_SYMBOLS_LAZILY", false))
-            result.add ("libcurl");
-
-        result.removeDuplicates (false);
-
-        return result;
-    }
-
     void addVersion (XmlElement& xml) const
     {
         auto* fileVersion = xml.createNewChildElement ("FileVersion");
@@ -422,19 +400,20 @@ private:
             if (target.isDynamicLibrary() || getProject().isAudioPluginProject())
                 flags.add ("-fPIC");
 
-            auto packages = getPackages();
+            auto packages = config.exporter.getLinuxPackages (PackageDependencyType::compile);
 
-            if (packages.size() > 0)
+            if (! packages.isEmpty())
             {
                 auto pkgconfigFlags = String ("`pkg-config --cflags");
-                for (auto p : packages)
+
+                for (auto& p : packages)
                     pkgconfigFlags << " " << p;
 
                 pkgconfigFlags << "`";
                 flags.add (pkgconfigFlags);
             }
 
-            if (linuxLibs.contains("pthread"))
+            if (linuxLibs.contains ("pthread"))
                 flags.add ("-pthread");
         }
 
@@ -456,14 +435,14 @@ private:
 
         flags.addTokens (replacePreprocessorTokens (config, getExtraLinkerFlagsString()).trim(), " \n", "\"'");
 
-        auto packages = getPackages();
-
         if (config.exporter.isLinux())
         {
             if (target.isDynamicLibrary())
                 flags.add ("-shared");
 
-            if (packages.size() > 0)
+            auto packages = config.exporter.getLinuxPackages (PackageDependencyType::link);
+
+            if (! packages.isEmpty())
             {
                 String pkgconfigLibs ("`pkg-config --libs");
 

@@ -189,6 +189,14 @@ public:
     //==============================================================================
     StringArray linuxLibs, linuxPackages, makefileExtraLinkerFlags;
 
+    enum class PackageDependencyType
+    {
+        compile,
+        link
+    };
+
+    StringArray getLinuxPackages (PackageDependencyType type) const;
+
     //==============================================================================
     StringPairArray msvcExtraPreprocessorDefs;
     String msvcDelayLoadedDLLs;

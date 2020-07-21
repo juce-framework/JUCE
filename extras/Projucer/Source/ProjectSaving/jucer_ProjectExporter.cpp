@@ -487,6 +487,51 @@ Project::Item& ProjectExporter::getModulesGroup()
     return *modulesGroup;
 }
 
+//==============================================================================
+static bool isWebBrowserComponentEnabled (Project& project)
+{
+    static String guiExtrasModule ("juce_gui_extra");
+
+    return (project.getEnabledModules().isModuleEnabled (guiExtrasModule)
+            && project.isConfigFlagEnabled ("JUCE_WEB_BROWSER", true));
+}
+
+static bool isCurlEnabled (Project& project)
+{
+    static String juceCoreModule ("juce_core");
+
+    return (project.getEnabledModules().isModuleEnabled (juceCoreModule)
+            && project.isConfigFlagEnabled ("JUCE_USE_CURL", true));
+}
+
+static bool isLoadCurlSymbolsLazilyEnabled (Project& project)
+{
+    static String juceCoreModule ("juce_core");
+
+    return (project.getEnabledModules().isModuleEnabled (juceCoreModule)
+            && project.isConfigFlagEnabled ("JUCE_LOAD_CURL_SYMBOLS_LAZILY", false));
+}
+
+StringArray ProjectExporter::getLinuxPackages (PackageDependencyType type) const
+{
+    auto packages = linuxPackages;
+
+    // don't add libcurl if curl symbols are loaded at runtime
+    if (isCurlEnabled (project) && ! isLoadCurlSymbolsLazilyEnabled (project))
+        packages.add ("libcurl");
+
+    if (isWebBrowserComponentEnabled (project) && type == PackageDependencyType::compile)
+    {
+        packages.add ("webkit2gtk-4.0");
+        packages.add ("gtk+-x11-3.0");
+    }
+
+    packages.removeEmptyStrings();
+    packages.removeDuplicates (false);
+
+    return packages;
+}
+
 void ProjectExporter::addProjectPathToBuildPathList (StringArray& pathList,
                                                      const build_tools::RelativePath& pathFromProjectFolder,
                                                      int index) const
