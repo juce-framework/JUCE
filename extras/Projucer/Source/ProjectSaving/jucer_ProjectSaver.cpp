@@ -294,9 +294,9 @@ Result ProjectSaver::saveProject (ProjectExporter* specifiedExporterToSave)
 
         saveBasicProjectItems (modules, loadUserContentFromAppConfig());
         writeProjects (modules, specifiedExporterToSave);
-        runPostExportScript();
-
         writeProjectFile();
+
+        runPostExportScript();
 
         if (generatedCodeFolder.exists())
         {
