@@ -462,7 +462,7 @@ public:
         if (! componentScreenBounds.contains (lastScreenPos))
         {
             auto componentCentre = current.getScreenBounds().toFloat().getCentre();
-            unboundedMouseOffset +=(lastScreenPos - ScalingHelpers::scaledScreenPosToUnscaled(componentCentre));
+            unboundedMouseOffset += (lastScreenPos - ScalingHelpers::scaledScreenPosToUnscaled (componentCentre));
             setScreenPosition (componentCentre);
         }
         else if (isCursorVisibleUntilOffscreen
