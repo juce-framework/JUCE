@@ -764,9 +764,9 @@ struct MouseInputSource::SourceList  : public Timer
             // because on some OSes the queue can get overloaded with messages so that mouse-events don't get through..
             if (s->isDragging() && ComponentPeer::getCurrentModifiersRealtime().isAnyMouseButtonDown())
             {
-              s->lastScreenPos = s->getRawScreenPosition() - s->unboundedMouseOffset;
-              s->triggerFakeMove();
-              anyDragging = true;
+                s->lastScreenPos = s->getRawScreenPosition() - s->unboundedMouseOffset;
+                s->triggerFakeMove();
+                anyDragging = true;
             }
         }
 
