@@ -958,9 +958,7 @@ XmlElement* XmlElement::createTextElement (const String& text)
 
 bool XmlElement::isValidXmlName (StringRef text) noexcept
 {
-    auto currentChar = text.text.getAndAdvance();
-
-    if (text.isEmpty() || ! isValidXmlNameStartCharacter (currentChar))
+    if (text.isEmpty() || ! isValidXmlNameStartCharacter (text.text.getAndAdvance()))
         return false;
 
     for (;;)
@@ -968,12 +966,7 @@ bool XmlElement::isValidXmlName (StringRef text) noexcept
         if (text.isEmpty())
             return true;
 
-        auto validationFunction = (currentChar == ':') ? &isValidXmlNameStartCharacter
-                                                       : &isValidXmlNameBodyCharacter;
-
-        currentChar = text.text.getAndAdvance();
-
-        if (! validationFunction (currentChar))
+        if (! isValidXmlNameBodyCharacter (text.text.getAndAdvance()))
             return false;
     }
 }
