@@ -462,10 +462,7 @@ public:
         if (! componentScreenBounds.contains (lastScreenPos))
         {
             auto componentCentre = current.getScreenBounds().toFloat().getCentre();
-            Point<float> moduloP (
-                (int)lastScreenPos.x%(int)componentScreenBounds.getWidth(),
-                (int)lastScreenPos.y%(int)componentScreenBounds.getHeight());
-            unboundedMouseOffset += (moduloP - ScalingHelpers::scaledScreenPosToUnscaled (componentCentre));
+            unboundedMouseOffset +=(lastScreenPos - ScalingHelpers::scaledScreenPosToUnscaled(componentCentre));
             setScreenPosition (componentCentre);
         }
         else if (isCursorVisibleUntilOffscreen
@@ -767,9 +764,9 @@ struct MouseInputSource::SourceList  : public Timer
             // because on some OSes the queue can get overloaded with messages so that mouse-events don't get through..
             if (s->isDragging() && ComponentPeer::getCurrentModifiersRealtime().isAnyMouseButtonDown())
             {
-                s->lastScreenPos = s->getRawScreenPosition();
-                s->triggerFakeMove();
-                anyDragging = true;
+              s->lastScreenPos = s->getRawScreenPosition() - s->unboundedMouseOffset;
+              s->triggerFakeMove();
+              anyDragging = true;
             }
         }
 
