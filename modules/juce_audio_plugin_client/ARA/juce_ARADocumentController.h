@@ -56,8 +56,7 @@ protected:
     */
     virtual bool doStoreObjectsToStream (ARAOutputStream& output, const ARAStoreObjectsFilter* filter) noexcept = 0;
 
-    // Model object creation
-    // these are typically overridden with custom types which are inherit from our ARA model classes
+    // Model object creation - override as needed to return custom subclasses of the base ARA model types.
     ARA::PlugIn::Document* doCreateDocument () noexcept override;
     ARA::PlugIn::MusicalContext* doCreateMusicalContext (ARA::PlugIn::Document* document, ARA::ARAMusicalContextHostRef hostRef) noexcept override;
     ARA::PlugIn::RegionSequence* doCreateRegionSequence (ARA::PlugIn::Document* document, ARA::ARARegionSequenceHostRef hostRef) noexcept override;
@@ -65,8 +64,7 @@ protected:
     ARA::PlugIn::AudioModification* doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, const ARA::PlugIn::AudioModification* optionalModificationToClone) noexcept override;
     ARA::PlugIn::PlaybackRegion* doCreatePlaybackRegion (ARA::PlugIn::AudioModification* modification, ARA::ARAPlaybackRegionHostRef hostRef) noexcept override;
 
-    // PlugIn instance role creation
-    // these are typically overridden with custom types which are inherit from our ARA instance role classes
+    // PlugIn instance role creation - override as needed to return custom subclasses of the base ARA plug-in instance roles.
     ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer() noexcept override;
     ARA::PlugIn::EditorRenderer* doCreateEditorRenderer() noexcept override;
     ARA::PlugIn::EditorView* doCreateEditorView() noexcept override;
