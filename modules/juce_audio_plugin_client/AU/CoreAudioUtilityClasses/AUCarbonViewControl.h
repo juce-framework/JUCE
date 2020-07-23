@@ -47,7 +47,7 @@
 #ifndef __AUCarbonViewControl_h__
 #define __AUCarbonViewControl_h__
 
-#include "../../../juce_core/native/juce_mac_ClangBugWorkaround.h"
+#include <juce_core/native/juce_mac_ClangBugWorkaround.h>
 #include <Carbon/Carbon.h>
 #include <AudioUnit/AudioUnitCarbonView.h>
 #include <AudioToolbox/AudioUnitUtilities.h>

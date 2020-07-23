@@ -5,6 +5,9 @@
 namespace juce
 {
 
+class ARAInputStream;
+class ARAOutputStream;
+
 //==============================================================================
 /**
     Base class for implementing an ARA DocumentController in JUCE - refer to the 
@@ -41,8 +44,6 @@ protected:
     // implementations for any will/did method overridden here you're overriding again.
     // For do methods or for methods inherited directly from ARA::PlugIn::DocumentController
     // you do not need to call the ingerited when overriding.
-    class ARAInputStream;
-    class ARAOutputStream;
 
     /** Read an ARADocument archive from a juce::InputStream.
     @param input Data stream containing previously persisted data to be used when restoring the ARADocument
@@ -238,58 +239,6 @@ public:
 
 #endif
 
-protected:
-
-    //==============================================================================
-    /**
-        Used to read persisted ARA archives - see doRestoreObjectsFromStream() for details. 
-    
-        @tags{ARA}
-    */
-    class ARAInputStream     : public InputStream
-    {
-    public:
-        ARAInputStream (ARA::PlugIn::HostArchiveReader*);
-
-        int64 getPosition() override { return (int64) position; }
-        int64 getTotalLength() override { return (int64) size; }
-
-        int read (void*, int) override;
-        bool setPosition (int64) override;
-        bool isExhausted() override;
-
-        bool failed() const { return failure; }
-
-    private:
-        ARA::PlugIn::HostArchiveReader* archiveReader;
-        size_t position { 0 };
-        size_t size;
-        bool failure { false };
-    };
-
-
-    //==============================================================================
-    /**
-        Used to write persistent ARA archives - see doStoreObjectsToStream() for details.
-
-        @tags{ARA}
-    */
-    class ARAOutputStream     : public OutputStream
-    {
-    public:
-        ARAOutputStream (ARA::PlugIn::HostArchiveWriter*);
-
-        int64 getPosition() override { return (int64) position; }
-        void flush() override {}
-
-        bool write (const void*, size_t) override;
-        bool setPosition (int64) override;
-
-    private:
-        ARA::PlugIn::HostArchiveWriter* archiveWriter;
-        size_t position { 0 };
-    };
-
 private:
     std::atomic_flag internalAnalysisProgressIsSynced { true };
 
@@ -300,4 +249,54 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARADocumentController)
 };
 
+
+//==============================================================================
+/**
+    Used to read persisted ARA archives - see doRestoreObjectsFromStream() for details. 
+    
+    @tags{ARA}
+*/
+class ARAInputStream     : public InputStream
+{
+public:
+    ARAInputStream (ARA::PlugIn::HostArchiveReader*);
+
+    int64 getPosition() override { return (int64) position; }
+    int64 getTotalLength() override { return (int64) size; }
+
+    int read (void*, int) override;
+    bool setPosition (int64) override;
+    bool isExhausted() override;
+
+    bool failed() const { return failure; }
+
+private:
+    ARA::PlugIn::HostArchiveReader* archiveReader;
+    size_t position { 0 };
+    size_t size;
+    bool failure { false };
+};
+
+
+//==============================================================================
+/**
+    Used to write persistent ARA archives - see doStoreObjectsToStream() for details.
+
+    @tags{ARA}
+*/
+class ARAOutputStream     : public OutputStream
+{
+public:
+    ARAOutputStream (ARA::PlugIn::HostArchiveWriter*);
+
+    int64 getPosition() override { return (int64) position; }
+    void flush() override {}
+
+    bool write (const void*, size_t) override;
+    bool setPosition (int64) override;
+
+private:
+    ARA::PlugIn::HostArchiveWriter* archiveWriter;
+    size_t position { 0 };
+};
 } // namespace juce

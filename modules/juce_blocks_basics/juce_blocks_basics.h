@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -25,21 +25,21 @@
  The block below describes the properties of this module, and is read by
  the Projucer to automatically generate project code that uses it.
  For details about the syntax and how to create or use a module, see the
- JUCE Module Format.txt file.
+ JUCE Module Format.md file.
 
 
  BEGIN_JUCE_MODULE_DECLARATION
 
   ID:                 juce_blocks_basics
   vendor:             juce
-  version:            5.4.7
+  version:            6.0.1
   name:               Provides low-level control over ROLI BLOCKS devices
   description:        JUCE wrapper for low-level control over ROLI BLOCKS devices.
   website:            http://developer.roli.com
   license:            ISC
   minimumCppStandard: 14
 
-  dependencies:       juce_events juce_audio_devices
+  dependencies:       juce_audio_devices
 
  END_JUCE_MODULE_DECLARATION
 

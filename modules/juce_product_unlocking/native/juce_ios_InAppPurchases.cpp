@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -100,7 +99,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
             [download retain];
         }
 
-        ~DownloadImpl()
+        ~DownloadImpl() override
         {
             [download release];
         }
@@ -112,7 +111,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         int64 getContentLength()   const override  { return download.contentLength; }
         Status getStatus()         const override  { return SKDownloadStateToDownloadStatus (download.downloadState); }
       #else
-        int64 getContentLength()   const override  { return [download.contentLength longLongValue]; }
+        int64 getContentLength()   const override  { return download.expectedContentLength; }
         Status getStatus()         const override  { return SKDownloadStateToDownloadStatus (download.state); }
       #endif
 
@@ -180,7 +179,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
 
     //==============================================================================
     Pimpl (InAppPurchases& p) : owner (p)  { [[SKPaymentQueue defaultQueue] addTransactionObserver:    delegate.get()]; }
-    ~Pimpl() noexcept                      { [[SKPaymentQueue defaultQueue] removeTransactionObserver: delegate.get()]; }
+    ~Pimpl() noexcept override             { [[SKPaymentQueue defaultQueue] removeTransactionObserver: delegate.get()]; }
 
     //==============================================================================
     bool isInAppPurchasesSupported() const     { return true; }
@@ -567,7 +566,8 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
        #endif
 
         // TODO: use juce URL here
-        auto storeRequest = [NSMutableURLRequest requestWithURL: [NSURL URLWithString: nsStringLiteral (storeURL)]];
+        auto* urlPtr = [NSURL URLWithString: nsStringLiteral (storeURL)];
+        auto storeRequest = [NSMutableURLRequest requestWithURL: urlPtr];
         [storeRequest setHTTPMethod: nsStringLiteral ("POST")];
         [storeRequest setHTTPBody: requestData];
 

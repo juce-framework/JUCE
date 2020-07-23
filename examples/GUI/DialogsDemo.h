@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -144,7 +144,7 @@ public:
         StringArray windowNames { "Plain Alert Window", "Alert Window With Warning Icon", "Alert Window With Info Icon", "Alert Window With Question Icon",
                                   "OK Cancel Alert Window", "Alert Window With Extra Components", "CalloutBox", "Thread With Progress Window",
                                   "'Load' File Browser", "'Load' File Browser With Image Preview", "'Choose Directory' File Browser", "'Save' File Browser",
-                                  "Share Text", "Share Files", "Share Images"  };
+                                  "Share Text", "Share Files", "Share Images" };
 
         // warn in case we add any windows
         jassert (windowNames.size() == numDialogs);

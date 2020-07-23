@@ -1,11 +1,3 @@
-/*
-  ==============================================================================
-
-    This file was auto-generated!
-
-  ==============================================================================
-*/
-
 %%include_corresponding_header%%
 
 //==============================================================================
@@ -36,13 +28,13 @@ void %%content_component_class%%::shutdown()
 void %%content_component_class%%::render()
 {
     // This clears the context with a black background.
-    OpenGLHelpers::clear (Colours::black);
+    juce::OpenGLHelpers::clear (juce::Colours::black);
 
     // Add your rendering code here...
 }
 
 //==============================================================================
-void %%content_component_class%%::paint (Graphics& g)
+void %%content_component_class%%::paint (juce::Graphics& g)
 {
     // You can add your component specific drawing code here!
     // This will draw over the top of the openGL background.

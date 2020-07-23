@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -791,7 +791,7 @@ private:
     //==============================================================================
     const String inputId, outputId;
     std::unique_ptr<ALSADevice> outputDevice, inputDevice;
-    int numCallbacks = 0;
+    std::atomic<int> numCallbacks { 0 };
     bool audioIoInProgress = false;
 
     CriticalSection callbackLock;

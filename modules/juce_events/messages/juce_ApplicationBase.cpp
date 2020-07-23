@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -175,7 +175,7 @@ StringArray JUCE_CALLTYPE JUCEApplicationBase::getCommandLineParameterArray()
 
 #else
 
-#if JUCE_IOS
+#if JUCE_IOS && JUCE_MODULE_AVAILABLE_juce_gui_basics
  extern int juce_iOSMain (int argc, const char* argv[], void* classPtr);
 #endif
 
@@ -233,7 +233,7 @@ int JUCEApplicationBase::main (int argc, const char* argv[])
             return juce_gtkWebkitMain (argc, argv);
        #endif
 
-       #if JUCE_IOS
+       #if JUCE_IOS && JUCE_MODULE_AVAILABLE_juce_gui_basics
         return juce_iOSMain (argc, argv, iOSCustomDelegate);
        #else
 

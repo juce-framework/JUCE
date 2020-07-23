@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -43,12 +43,9 @@ DeletedAtShutdown::~DeletedAtShutdown()
     getDeletedAtShutdownObjects().removeFirstMatchingValue (this);
 }
 
-#if JUCE_MSVC
- // Disable unreachable code warning, in case the compiler manages to figure out that
- // you have no classes of DeletedAtShutdown that could throw an exception in their destructor.
- #pragma warning (push)
- #pragma warning (disable: 4702)
-#endif
+// Disable unreachable code warning, in case the compiler manages to figure out that
+// you have no classes of DeletedAtShutdown that could throw an exception in their destructor.
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4702)
 
 void DeletedAtShutdown::deleteAll()
 {
@@ -87,8 +84,6 @@ void DeletedAtShutdown::deleteAll()
     getDeletedAtShutdownObjects().clear(); // just to make sure the array doesn't have any memory still allocated
 }
 
-#if JUCE_MSVC
- #pragma warning (pop)
-#endif
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 } // namespace juce

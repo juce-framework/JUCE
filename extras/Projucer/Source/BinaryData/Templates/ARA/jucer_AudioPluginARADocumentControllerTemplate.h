@@ -15,7 +15,7 @@
 //==============================================================================
 /**
 */
-class %%aradocumentcontroller_class_name%%  : public ARADocumentController
+class %%aradocumentcontroller_class_name%%  : public juce::ARADocumentController
 {
 public:
     //==============================================================================
@@ -23,8 +23,8 @@ public:
     ~%%aradocumentcontroller_class_name%%();
 
     //==============================================================================
-    bool doRestoreObjectsFromStream (ARAInputStream& input, const ARARestoreObjectsFilter* filter) noexcept override;
-    bool doStoreObjectsToStream (ARAOutputStream& output, const ARAStoreObjectsFilter* filter) noexcept override;
+    bool doRestoreObjectsFromStream (juce::ARAInputStream& input, const juce::ARARestoreObjectsFilter* filter) noexcept override;
+    bool doStoreObjectsToStream (juce::ARAOutputStream& output, const juce::ARAStoreObjectsFilter* filter) noexcept override;
 
 //==============================================================================
 // Override document controller methods here

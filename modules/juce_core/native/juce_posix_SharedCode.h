@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -1033,7 +1033,8 @@ void* DynamicLibrary::getFunction (const String& functionName) noexcept
 
 
 //==============================================================================
-static inline String readPosixConfigFileValue (const char* file, const char* key)
+#if JUCE_LINUX || JUCE_ANDROID
+static String readPosixConfigFileValue (const char* file, const char* key)
 {
     StringArray lines;
     File (file).readLines (lines);
@@ -1044,6 +1045,7 @@ static inline String readPosixConfigFileValue (const char* file, const char* key
 
     return {};
 }
+#endif
 
 
 //==============================================================================

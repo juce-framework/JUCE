@@ -12,7 +12,6 @@
 
 #pragma once
 
-#include "AppConfig.h"
 
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_audio_devices/juce_audio_devices.h>
@@ -50,7 +49,7 @@
 namespace ProjectInfo
 {
     const char* const  projectName    = "NetworkGraphicsDemo";
-    const char* const  companyName    = "ROLI Ltd.";
+    const char* const  companyName    = "Raw Material Software Limited";
     const char* const  versionString  = "1.0.0";
     const int          versionNumber  = 0x10000;
 }

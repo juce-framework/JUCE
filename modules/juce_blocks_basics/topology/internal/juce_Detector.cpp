@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -350,10 +350,10 @@ struct Detector   : public ReferenceCountedObject,
             {
                 TouchSurface::Touch scaledEvent (touchEvent);
 
-                scaledEvent.x      *= block->getWidth();
-                scaledEvent.y      *= block->getHeight();
-                scaledEvent.startX *= block->getWidth();
-                scaledEvent.startY *= block->getHeight();
+                scaledEvent.x      *= (float) block->getWidth();
+                scaledEvent.y      *= (float) block->getHeight();
+                scaledEvent.startX *= (float) block->getWidth();
+                scaledEvent.startY *= (float) block->getHeight();
 
                 surface->broadcastTouchChange (scaledEvent);
             }

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -303,7 +303,7 @@ private:
                 snapshotButton.setEnabled (true);
                #endif
 
-               #if JUCE_ANDROID || JUCE_IOS
+               #if JUCE_CONTENT_SHARING
                 URL url (recordingFile);
 
                 snapshotButton   .setEnabled (false);
@@ -337,7 +337,7 @@ private:
 
         lastSnapshot.setImage (image);
 
-       #if JUCE_ANDROID || JUCE_IOS
+       #if JUCE_CONTENT_SHARING
         auto imageFile = File::getSpecialLocation (File::tempDirectory).getNonexistentChildFile ("JuceCameraPhotoDemo", ".jpg");
 
         FileOutputStream stream (imageFile);

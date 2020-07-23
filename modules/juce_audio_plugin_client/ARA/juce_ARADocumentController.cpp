@@ -10,10 +10,10 @@ const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFacto
     public:
         JUCEARAFactoryConfig()
         {
-            String compatibleDocumentArchiveIDString = JucePlugin_ARACompatibleArchiveIDs;
+            juce::String compatibleDocumentArchiveIDString = JucePlugin_ARACompatibleArchiveIDs;
             if (compatibleDocumentArchiveIDString.isNotEmpty())
             {
-                compatibleDocumentArchiveIDStrings = StringArray::fromLines (compatibleDocumentArchiveIDString);
+                compatibleDocumentArchiveIDStrings = juce::StringArray::fromLines (compatibleDocumentArchiveIDString);
                 for (auto& compatibleID : compatibleDocumentArchiveIDStrings)
                     compatibleDocumentArchiveIDs.push_back (compatibleID.toRawUTF8());
             }
@@ -65,7 +65,7 @@ const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFacto
         virtual ARAPlaybackTransformationFlags getSupportedPlaybackTransformationFlags() const noexcept override { return kARAPlaybackTransformationNoChanges; }
 
     private:
-        StringArray compatibleDocumentArchiveIDStrings;
+        juce::StringArray compatibleDocumentArchiveIDStrings;
         std::vector<ARAPersistentID> compatibleDocumentArchiveIDs;
         std::vector<ARAContentType> analyzeableContentTypes;
         ARAPlaybackTransformationFlags supportedPlaybackTransformationFlags;
@@ -400,12 +400,12 @@ void ARADocumentController::timerCallback()
 
 //==============================================================================
 
-ARADocumentController::ARAInputStream::ARAInputStream (ARA::PlugIn::HostArchiveReader* reader)
+ARAInputStream::ARAInputStream (ARA::PlugIn::HostArchiveReader* reader)
 : archiveReader (reader), 
   size (reader->getArchiveSize())
 {}
 
-int ARADocumentController::ARAInputStream::read (void* destBuffer, int maxBytesToRead)
+int ARAInputStream::read (void* destBuffer, int maxBytesToRead)
 {
     const int bytesToRead = std::min (maxBytesToRead, (int) (size - position));
     if (! archiveReader->readBytesFromArchive (position, bytesToRead, (ARA::ARAByte*) destBuffer))
@@ -418,7 +418,7 @@ int ARADocumentController::ARAInputStream::read (void* destBuffer, int maxBytesT
     return bytesToRead;
 }
 
-bool ARADocumentController::ARAInputStream::setPosition (int64 newPosition)
+bool ARAInputStream::setPosition (int64 newPosition)
 {
     if (newPosition >= (int64) size)
         return false;
@@ -426,16 +426,16 @@ bool ARADocumentController::ARAInputStream::setPosition (int64 newPosition)
     return true;
 }
 
-bool ARADocumentController::ARAInputStream::isExhausted()
+bool ARAInputStream::isExhausted()
 {
     return position >= size;
 }
 
-ARADocumentController::ARAOutputStream::ARAOutputStream (ARA::PlugIn::HostArchiveWriter* writer)
+ARAOutputStream::ARAOutputStream (ARA::PlugIn::HostArchiveWriter* writer)
 : archiveWriter (writer)
 {}
 
-bool ARADocumentController::ARAOutputStream::write (const void* dataToWrite, size_t numberOfBytes)
+bool ARAOutputStream::write (const void* dataToWrite, size_t numberOfBytes)
 {
     if (!archiveWriter->writeBytesToArchive (position, numberOfBytes, (const ARA::ARAByte*) dataToWrite))
         return false;
@@ -444,7 +444,7 @@ bool ARADocumentController::ARAOutputStream::write (const void* dataToWrite, siz
     return true;
 }
 
-bool ARADocumentController::ARAOutputStream::setPosition (int64 newPosition)
+bool ARAOutputStream::setPosition (int64 newPosition)
 {
     if (newPosition > (int64) std::numeric_limits<size_t>::max())
         return false;

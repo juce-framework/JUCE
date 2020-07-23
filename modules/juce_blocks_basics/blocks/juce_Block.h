@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -503,11 +503,11 @@ public:
 
     //==============================================================================
     /** Allows the user to provide a function that will receive log messages from the block. */
-    virtual void setLogger (std::function<void(const Block& block, const String&)> loggingCallback) = 0;
+    virtual void setLogger (std::function<void (const Block& block, const String&)> loggingCallback) = 0;
 
     /** Sends a firmware update packet to a block, and waits for a reply. Returns an error code. */
     virtual bool sendFirmwareUpdatePacket (const uint8* data, uint8 size,
-                                           std::function<void(uint8, uint32)> packetAckCallback) = 0;
+                                           std::function<void (uint8, uint32)> packetAckCallback) = 0;
 
     //==============================================================================
     /** Interface for objects listening to input data port. */

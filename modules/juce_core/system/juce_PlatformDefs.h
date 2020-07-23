@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -19,6 +19,8 @@
 
   ==============================================================================
 */
+
+#pragma once
 
 namespace juce
 {
@@ -37,7 +39,7 @@ namespace juce
 #endif
 
 /** This macro defines the C calling convention used as the standard for JUCE calls. */
-#if JUCE_MSVC
+#if JUCE_WINDOWS
  #define JUCE_CALLTYPE   __stdcall
  #define JUCE_CDECL      __cdecl
 #else

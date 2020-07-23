@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -115,7 +114,7 @@ namespace ActiveXHelpers
             if (lplpDoc != nullptr)   *lplpDoc = nullptr;
             lpFrameInfo->fMDIApp = FALSE;
             lpFrameInfo->hwndFrame = window;
-            lpFrameInfo->haccel = 0;
+            lpFrameInfo->haccel = nullptr;
             lpFrameInfo->cAccelEntries = 0;
             return S_OK;
         }
@@ -183,7 +182,7 @@ namespace ActiveXHelpers
     //==============================================================================
     static Array<ActiveXControlComponent*> activeXComps;
 
-    static inline HWND getHWND (const ActiveXControlComponent* const component)
+    static HWND getHWND (const ActiveXControlComponent* const component)
     {
         HWND hwnd = {};
         const IID iid = __uuidof (IOleWindow);
@@ -197,7 +196,7 @@ namespace ActiveXHelpers
         return hwnd;
     }
 
-    static inline void offerActiveXMouseEventToPeer (ComponentPeer* peer, HWND hwnd, UINT message, LPARAM lParam)
+    static void offerActiveXMouseEventToPeer (ComponentPeer* peer, HWND hwnd, UINT message, LPARAM lParam)
     {
         switch (message)
         {
@@ -264,7 +263,7 @@ public:
 
     void setControlBounds (Rectangle<int> newBounds) const
     {
-        if (controlHWND != 0)
+        if (controlHWND != nullptr)
         {
            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
             if (auto* peer = owner.getTopLevelComponent()->getPeer())
@@ -278,11 +277,13 @@ public:
 
     void setControlVisible (bool shouldBeVisible) const
     {
-        if (controlHWND != 0)
+        if (controlHWND != nullptr)
             ShowWindow (controlHWND, shouldBeVisible ? SW_SHOWNA : SW_HIDE);
     }
 
     //==============================================================================
+    using ComponentMovementWatcher::componentMovedOrResized;
+
     void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
     {
         if (auto* peer = owner.getTopLevelComponent()->getPeer())
@@ -298,6 +299,8 @@ public:
             peer->addScaleFactorListener (this);
        #endif
     }
+
+    using ComponentMovementWatcher::componentVisibilityChanged;
 
     void componentVisibilityChanged() override
     {
@@ -359,7 +362,7 @@ public:
     IStorage* storage = nullptr;
     ActiveXHelpers::JuceIOleClientSite* clientSite = nullptr;
     IOleObject* control = nullptr;
-    WNDPROC originalWndProc = 0;
+    WNDPROC originalWndProc = nullptr;
 };
 
 //==============================================================================
@@ -391,13 +394,13 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
 
         std::unique_ptr<Pimpl> newControl (new Pimpl (hwnd, *this));
 
-        HRESULT hr = OleCreate (*(const IID*) controlIID, __uuidof (IOleObject), 1 /*OLERENDER_DRAW*/, 0,
+        HRESULT hr = OleCreate (*(const IID*) controlIID, __uuidof (IOleObject), 1 /*OLERENDER_DRAW*/, nullptr,
                                 newControl->clientSite, newControl->storage,
                                 (void**) &(newControl->control));
 
         if (hr == S_OK)
         {
-            newControl->control->SetHostNames (L"JUCE", 0);
+            newControl->control->SetHostNames (L"JUCE", nullptr);
 
             if (OleSetContainedObject (newControl->control, TRUE) == S_OK)
             {
@@ -407,12 +410,12 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
                 rect.right  = controlBounds.getRight();
                 rect.bottom = controlBounds.getBottom();
 
-                if (newControl->control->DoVerb (OLEIVERB_SHOW, 0, newControl->clientSite, 0, hwnd, &rect) == S_OK)
+                if (newControl->control->DoVerb (OLEIVERB_SHOW, nullptr, newControl->clientSite, 0, hwnd, &rect) == S_OK)
                 {
                     control.reset (newControl.release());
                     control->controlHWND = ActiveXHelpers::getHWND (this);
 
-                    if (control->controlHWND != 0)
+                    if (control->controlHWND != nullptr)
                     {
                         control->setControlBounds (controlBounds);
 

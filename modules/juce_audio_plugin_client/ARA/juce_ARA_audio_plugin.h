@@ -1,7 +1,7 @@
 #pragma once
 
 // Include juce preamble
-#include "AppConfig.h"
+#include "JucePluginDefines.h"
 #include <juce_core/juce_core.h>
 
 #if JucePlugin_Enable_ARA

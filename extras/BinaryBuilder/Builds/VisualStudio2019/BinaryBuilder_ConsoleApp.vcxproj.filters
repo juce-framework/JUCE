@@ -127,6 +127,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_FileSearchPath.cpp">
       <Filter>JUCE Modules\juce_core\files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_RangedDirectoryIterator.cpp">
+      <Filter>JUCE Modules\juce_core\files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_TemporaryFile.cpp">
       <Filter>JUCE Modules\juce_core\files</Filter>
     </ClCompile>
@@ -153,6 +156,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\maths\juce_Random.cpp">
       <Filter>JUCE Modules\juce_core\maths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\memory\juce_AllocationHooks.cpp">
+      <Filter>JUCE Modules\juce_core\memory</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\memory\juce_MemoryBlock.cpp">
       <Filter>JUCE Modules\juce_core\memory</Filter>
@@ -477,6 +483,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_MemoryMappedFile.h">
       <Filter>JUCE Modules\juce_core\files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_RangedDirectoryIterator.h">
+      <Filter>JUCE Modules\juce_core\files</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_TemporaryFile.h">
       <Filter>JUCE Modules\juce_core\files</Filter>
     </ClInclude>
@@ -515,6 +524,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_StatisticsAccumulator.h">
       <Filter>JUCE Modules\juce_core\maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_AllocationHooks.h">
+      <Filter>JUCE Modules\juce_core\memory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_Atomic.h">
       <Filter>JUCE Modules\juce_core\memory</Filter>
@@ -640,6 +652,9 @@
       <Filter>JUCE Modules\juce_core\streams</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\system\juce_CompilerSupport.h">
+      <Filter>JUCE Modules\juce_core\system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\system\juce_CompilerWarnings.h">
       <Filter>JUCE Modules\juce_core\system</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\system\juce_PlatformDefs.h">
@@ -812,9 +827,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\juce_core.h">
       <Filter>JUCE Modules\juce_core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\JuceLibraryCode\AppConfig.h">
-      <Filter>JUCE Library Code</Filter>
     </ClInclude>
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h">
       <Filter>JUCE Library Code</Filter>

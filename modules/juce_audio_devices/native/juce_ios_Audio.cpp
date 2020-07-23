@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -671,6 +671,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
 
     //==============================================================================
    #if JUCE_MODULE_AVAILABLE_juce_graphics
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
     Image getIcon (int size)
     {
         if (interAppAudioConnected)
@@ -681,6 +682,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         }
         return Image();
     }
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
    #endif
 
     void switchApplication()

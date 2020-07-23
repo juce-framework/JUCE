@@ -1,5 +1,5 @@
 //==============================================================================
-class %%component_class%%    : public Component
+class %%component_class%%  : public juce::Component
 {
 public:
     %%component_class%%()
@@ -9,23 +9,23 @@ public:
 
     }
 
-    ~%%component_class%%()
+    ~%%component_class%%() override
     {
     }
 
-    void paint (Graphics& g) override
+    void paint (juce::Graphics& g) override
     {
         // You should replace everything in this method with your own drawing code..
 
-        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));   // clear the background
+        g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
 
-        g.setColour (Colours::grey);
+        g.setColour (juce::Colours::grey);
         g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
 
-        g.setColour (Colours::white);
+        g.setColour (juce::Colours::white);
         g.setFont (14.0f);
         g.drawText ("%%component_class%%", getLocalBounds(),
-                    Justification::centred, true);   // draw some placeholder text
+                    juce::Justification::centred, true);   // draw some placeholder text
     }
 
     void resized() override

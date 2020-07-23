@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -145,16 +144,6 @@ public:
         if (renderThread != nullptr)
             renderThread->addJob (this, false);
     }
-
-   #if JUCE_MAC
-    static CVReturn displayLinkCallback (CVDisplayLinkRef, const CVTimeStamp*, const CVTimeStamp*,
-                                         CVOptionFlags, CVOptionFlags*, void* displayLinkContext)
-    {
-        auto* self = (CachedImage*) displayLinkContext;
-        self->renderFrame();
-        return kCVReturnSuccess;
-    }
-   #endif
 
     //==============================================================================
     void paint (Graphics&) override
@@ -303,6 +292,10 @@ public:
 
            #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
             auto newScale = getScaleFactorForWindow (nativeContext->getNativeHandle());
+            auto desktopScale = Desktop::getInstance().getGlobalScaleFactor();
+
+            if (! approximatelyEqual (1.0f, desktopScale))
+                newScale *= desktopScale;
            #else
             auto newScale = displayScale;
            #endif
@@ -483,13 +476,17 @@ public:
                 break;
 
            #if JUCE_MAC
-            repaintEvent.wait (1000);
-           #else
+            if (cvDisplayLinkWrapper != nullptr)
+            {
+                repaintEvent.wait (-1);
+                renderFrame();
+            }
+            else
+           #endif
             if (! renderFrame())
                 repaintEvent.wait (5); // failed to render, so avoid a tight fail-loop.
             else if (! context.continuousRepaint && ! shouldExit())
                 repaintEvent.wait (-1);
-           #endif
         }
 
         hasInitialised = false;
@@ -542,9 +539,8 @@ public:
             context.renderer->newOpenGLContextCreated();
 
        #if JUCE_MAC
-        CVDisplayLinkCreateWithActiveCGDisplays (&displayLink);
-        CVDisplayLinkSetOutputCallback (displayLink, &displayLinkCallback, this);
-        CVDisplayLinkStart (displayLink);
+        if (context.continuousRepaint)
+            cvDisplayLinkWrapper = std::make_unique<CVDisplayLinkWrapper> (this);
        #endif
 
         return true;
@@ -553,8 +549,7 @@ public:
     void shutdownOnThread()
     {
        #if JUCE_MAC
-        CVDisplayLinkStop (displayLink);
-        CVDisplayLinkRelease (displayLink);
+        cvDisplayLinkWrapper = nullptr;
        #endif
 
         if (context.renderer != nullptr)
@@ -683,8 +678,35 @@ public:
     uint32 lastMMLockReleaseTime = 0;
 
    #if JUCE_MAC
-    CVDisplayLinkRef displayLink;
+    struct CVDisplayLinkWrapper
+    {
+        CVDisplayLinkWrapper (CachedImage* im)
+        {
+            CVDisplayLinkCreateWithActiveCGDisplays (&displayLink);
+            CVDisplayLinkSetOutputCallback (displayLink, &displayLinkCallback, im);
+            CVDisplayLinkStart (displayLink);
+        }
+
+        ~CVDisplayLinkWrapper()
+        {
+            CVDisplayLinkStop (displayLink);
+            CVDisplayLinkRelease (displayLink);
+        }
+
+        static CVReturn displayLinkCallback (CVDisplayLinkRef, const CVTimeStamp*, const CVTimeStamp*,
+                                             CVOptionFlags, CVOptionFlags*, void* displayLinkContext)
+        {
+            auto* self = (CachedImage*) displayLinkContext;
+            self->repaintEvent.signal();
+            return kCVReturnSuccess;
+        }
+
+        CVDisplayLinkRef displayLink;
+    };
+
+    std::unique_ptr<CVDisplayLinkWrapper> cvDisplayLinkWrapper;
    #endif
+
     std::unique_ptr<ThreadPool> renderThread;
     ReferenceCountedArray<OpenGLContext::AsyncWorker, CriticalSection> workQueue;
     MessageManager::Lock messageManagerLock;
@@ -888,6 +910,15 @@ void OpenGLContext::setComponentPaintingEnabled (bool shouldPaintComponent) noex
 void OpenGLContext::setContinuousRepainting (bool shouldContinuouslyRepaint) noexcept
 {
     continuousRepaint = shouldContinuouslyRepaint;
+
+    #if JUCE_MAC
+     if (auto* component = getTargetComponent())
+     {
+         detach();
+         attachment.reset (new Attachment (*this, *component));
+     }
+    #endif
+
     triggerRepaint();
 }
 

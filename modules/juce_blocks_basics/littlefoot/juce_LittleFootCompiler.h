@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -20,10 +20,7 @@
   ==============================================================================
 */
 
-#if JUCE_MSVC
- #pragma warning (push)
- #pragma warning (disable: 4702)
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4702)
 
 namespace littlefoot
 {
@@ -2454,6 +2451,4 @@ private:
 
 }
 
-#if JUCE_MSVC
- #pragma warning (pop)
-#endif
+JUCE_END_IGNORE_WARNINGS_MSVC

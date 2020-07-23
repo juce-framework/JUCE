@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -162,7 +161,7 @@ String BinaryResources::browseForResource (const String& title,
 
 String BinaryResources::findUniqueName (const String& rootName) const
 {
-    auto nameRoot = CodeHelpers::makeValidIdentifier (rootName, true, true, false);
+    auto nameRoot = build_tools::makeValidIdentifier (rootName, true, true, false);
     auto name = nameRoot;
 
     auto names = getResourceNames();
@@ -249,7 +248,7 @@ void BinaryResources::loadFromCpp (const File& cppFileLocation, const String& cp
 
                     if (c >= '0' && c <= '9')
                     {
-                        n = n * 10 + (c - '0');
+                        n = n * 10 + (int) (c - '0');
                     }
                     else if (c == ',')
                     {
