@@ -24,7 +24,7 @@
   ==============================================================================
 */
 
-#if JUCE_PLUGINHOST_VST
+#if (JUCE_PLUGINHOST_VST && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)) || DOXYGEN
 
 //==============================================================================
 #undef PRAGMA_ALIGN_SUPPORTED

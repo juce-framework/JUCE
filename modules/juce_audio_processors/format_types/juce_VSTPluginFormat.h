@@ -24,7 +24,7 @@
   ==============================================================================
 */
 
-#if (JUCE_PLUGINHOST_VST || DOXYGEN)
+#if (JUCE_PLUGINHOST_VST && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)) || DOXYGEN
 
 namespace juce
 {
