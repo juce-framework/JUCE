@@ -567,7 +567,7 @@ void AudioProcessor::prepareToAnalyse (double sampleRate, int maximumExpectedSam
     ignoreUnused (sampleRate, maximumExpectedSamplesPerBlock, numOfExpectedInputs);
     // If you hit this assertion then you've got analysis called but you haven't implement required callbacks.
     jassertfalse;
-};
+}
 
 #if JucePlugin_EnhancedAudioSuite
 void AudioProcessor::getOfflineRenderOffset (int& startOffset, int& endOffset)
@@ -580,7 +580,7 @@ void AudioProcessor::analysisFinished ()
 {
     // If you hit this assertion then you've got analysis called but you haven't implement required callbacks.
     jassertfalse;
-};
+}
 
 void AudioProcessor::processBlock (AudioBuffer<double>& buffer, MidiBuffer& midiMessages)
 {
@@ -1230,6 +1230,7 @@ const char* AudioProcessor::getWrapperTypeDescription (AudioProcessor::WrapperTy
         case AudioProcessor::wrapperType_AudioUnitv3:   return "AUv3";
         case AudioProcessor::wrapperType_RTAS:          return "RTAS";
         case AudioProcessor::wrapperType_AAX:           return "AAX";
+        case AudioProcessor::wrapperType_AudioSuite:    return "AudioSuite";
         case AudioProcessor::wrapperType_Standalone:    return "Standalone";
         case AudioProcessor::wrapperType_Unity:         return "Unity";
         default:                                        jassertfalse; return {};

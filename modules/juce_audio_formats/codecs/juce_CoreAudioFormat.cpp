@@ -582,7 +582,7 @@ class CoreAudioWriter : public AudioFormatWriter
 {
 public:
     CoreAudioWriter (
-        OutputStream* out, AudioFileTypeID fileType, double sr, unsigned int numberOfChannels, int bitsPerSamp)
+        OutputStream* out, AudioFileTypeID fileType, double sr, unsigned int numberOfChannels, unsigned int bitsPerSamp)
     : AudioFormatWriter (out, coreAudioFormatName, sr, numberOfChannels, bitsPerSamp)
     {
         usesFloatingPointData = true;
@@ -639,7 +639,7 @@ public:
             bufferList->mBuffers[j].mDataByteSize = (UInt32) numSamples * sizeof (float);
             bufferList->mBuffers[j].mData = (void*) samplesToWrite[j];
         }
-        return ExtAudioFileWrite (audioFileRef, numSamples, bufferList) == noErr;
+        return ExtAudioFileWrite (audioFileRef, (UInt32) numSamples, bufferList) == noErr;
     }
 
     bool flush() override
@@ -684,21 +684,21 @@ private:
 
         if (auto* out = dynamic_cast<FileOutputStream*> (self->output); out != nullptr)
         {
-            auto in = FileInputStream (out->getFile());
+            FileInputStream in (out->getFile());
             jassert (in.openedOk());
             {
                 bool setPositionOK [[maybe_unused]] = in.setPosition (inPosition);
                 jassert (setPositionOK);
             }
-            *actualCount = in.read (buffer, requestCount);
+            *actualCount = (UInt32) in.read (buffer, (int) requestCount);
             return noErr;
         }
 
         if (auto* out = dynamic_cast<MemoryOutputStream*> (self->output); out != nullptr)
         {
             const int remain = jmax (0, (int) out->getDataSize() - (int) inPosition);
-            const int count = jmin (requestCount, (UInt32) remain);
-            *actualCount = count;
+            const size_t count = (size_t) jmin (requestCount, (UInt32) remain);
+            *actualCount = (UInt32) count;
             memcpy (buffer, (char*) out->getData() + inPosition, count);
             return noErr;
         }
@@ -766,7 +766,7 @@ AudioFormatWriter* CoreAudioFormat::createWriterFor (
     const StringPairArray& /*metadataValues*/,
     int /*qualityOptionIndex*/)
 {
-    return new CoreAudioWriter (output, fileTypeID, sampleRateToUse, numberOfChannels, bitsPerSample);
+    return new CoreAudioWriter (output, fileTypeID, sampleRateToUse, numberOfChannels, (unsigned int) bitsPerSample);
 }
 
 static AudioFileTypeID audioFileTypeForExtension (String extension)
