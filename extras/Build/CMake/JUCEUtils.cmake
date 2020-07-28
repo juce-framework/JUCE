@@ -776,7 +776,7 @@ function(juce_add_binary_data target)
 
     set(juce_binary_data_folder "${CMAKE_CURRENT_BINARY_DIR}/juce_binarydata_${target}/JuceLibraryCode")
 
-    list(APPEND binary_file_names "${juce_binary_data_folder}/BinaryData.h")
+    set(binary_file_names)
 
     foreach(index RANGE 1 ${num_binary_files})
         list(APPEND binary_file_names "${juce_binary_data_folder}/BinaryData${index}.cpp")
@@ -791,6 +791,8 @@ function(juce_add_binary_data target)
     if(NOT JUCE_ARG_HEADER_NAME)
         set(JUCE_ARG_HEADER_NAME BinaryData.h)
     endif()
+
+    list(APPEND binary_file_names "${juce_binary_data_folder}/${JUCE_ARG_HEADER_NAME}")
 
     add_custom_command(OUTPUT ${binary_file_names}
         COMMAND juce::juceaide binarydata "${JUCE_ARG_NAMESPACE}" "${JUCE_ARG_HEADER_NAME}"
