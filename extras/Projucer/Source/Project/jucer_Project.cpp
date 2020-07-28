@@ -39,22 +39,22 @@ Project::ProjectFileModificationPoller::ProjectFileModificationPoller (Project& 
 void Project::ProjectFileModificationPoller::reset()
 {
     project.removeProjectMessage (ProjectMessages::Ids::jucerFileModified);
-    showingWarning = false;
+    pending = false;
 
     startTimer (250);
 }
 
 void Project::ProjectFileModificationPoller::timerCallback()
 {
-    if (project.updateCachedFileState() && ! showingWarning)
+    if (project.updateCachedFileState() && ! pending)
     {
          project.addProjectMessage (ProjectMessages::Ids::jucerFileModified,
                                     { { "Save current state", [this] { resaveProject(); } },
-                                      { "Re-load from disk", [this] { reloadProjectFromDisk(); } },
-                                      { "Ignore", [this] { reset(); } } });
+                                      { "Re-load from disk",  [this] { reloadProjectFromDisk(); } },
+                                      { "Ignore",             [this] { reset(); } } });
 
          stopTimer();
-         showingWarning = true;
+         pending = true;
     }
 }
 
@@ -79,8 +79,8 @@ void Project::ProjectFileModificationPoller::reloadProjectFromDisk()
 
 void Project::ProjectFileModificationPoller::resaveProject()
 {
-    project.saveProject();
     reset();
+    project.saveProject();
 }
 
 //==============================================================================
@@ -745,9 +745,15 @@ bool Project::hasIncompatibleLicenseTypeAndSplashScreenSetting() const
           && ! ProjucerApplication::getApp().getLicenseController().getCurrentState().canUnlockFullFeatures();
 }
 
+bool Project::isFileModificationCheckPending() const
+{
+    return fileModificationPoller.isCheckPending();
+}
+
 bool Project::isSaveAndExportDisabled() const
 {
-    return ! ProjucerApplication::getApp().isRunningCommandLine && hasIncompatibleLicenseTypeAndSplashScreenSetting();
+    return ! ProjucerApplication::getApp().isRunningCommandLine
+           && (hasIncompatibleLicenseTypeAndSplashScreenSetting() || isFileModificationCheckPending());
 }
 
 void Project::updateLicenseWarning()
