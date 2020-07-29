@@ -783,7 +783,7 @@ private:
             const auto iconFile = getTargetFolder().getChildFile ("icon.ico");
 
             if (! build_tools::asArray (getIcons()).isEmpty())
-                build_tools::writeMacIcon (getIcons(), iconFile);
+                build_tools::writeWinIcon (getIcons(), iconFile);
 
             auto rcFile = getTargetFolder().getChildFile ("resources.rc");
             MSVCProjectExporterBase::createRCFile (project, iconFile, rcFile);
