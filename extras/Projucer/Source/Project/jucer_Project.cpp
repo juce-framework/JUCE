@@ -168,6 +168,8 @@ void Project::updateCompanyNameDependencies()
     bundleIdentifierValue.setDefault    (getDefaultBundleIdentifierString());
     companyWebsiteValue.setDefault      (getDefaultCompanyWebsiteString());
     pluginAAXIdentifierValue.setDefault (getDefaultAAXIdentifierString());
+    pluginARAFactoryIDValue.setDefault  (getDefaultARAFactoryIDString());
+    pluginARAArchiveIDValue.setDefault  (getDefaultARADocumentArchiveID());
     pluginManufacturerValue.setDefault  (getDefaultPluginManufacturerString());
 
     updateLicenseWarning();
