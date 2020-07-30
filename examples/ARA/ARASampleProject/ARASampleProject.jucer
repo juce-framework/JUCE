@@ -3,7 +3,7 @@
 <JUCERPROJECT id="v5FTSA" name="ARASampleProject" projectType="audioplug" pluginCode="AraT"
               pluginFormats="buildAU,buildVST3,enableARA" userNotes="Special thanks to SoundRadix for coming up with this example!"
               companyName="ARA Demo Company" companyWebsite="https://www.arademocompany.com"
-              companyCopyright="Copyright (c) 2012-2019, ARA Demo Company, All Rights Reserved."
+              companyCopyright="Copyright (c) 2012-2020, ARA Demo Company, All Rights Reserved."
               companyEmail="info@arademocompany.com" pluginVST3Category="Tools"
               pluginAUIsSandboxSafe="1" pluginManufacturerCode="ADeC" displaySplashScreen="1"
               jucerFormatVersion="1">
