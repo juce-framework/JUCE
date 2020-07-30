@@ -2072,12 +2072,12 @@ String Project::getDefaultPluginManufacturerString() const
 
 String Project::getDefaultARAFactoryIDString() const
 { 
-    return "com.yourcompany." + build_tools::makeValidIdentifier (getProjectNameString(), false, true, false) + ".factory";
+    return getDefaultBundleIdentifierString() + ".factory";
 }
 
 String Project::getDefaultARADocumentArchiveID() const
 { 
-    return "com.yourcompany." + build_tools::makeValidIdentifier (getProjectNameString(), false, true, false) + ".aradocumentarchive." + getVersionString();
+    return getDefaultBundleIdentifierString() + ".aradocumentarchive." + getVersionString();
 }
 
 String Project::getDefaultARACompatibleArchiveIDs() const
