@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -27,11 +26,7 @@
 namespace juce
 {
 
-#if JUCE_CLANG && ! (defined (MAC_OS_X_VERSION_10_16) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_16)
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wdeprecated-declarations"
- #define JUCE_DEPRECATION_IGNORED 1
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
 
 class OpenGLContext::NativeContext
 {
@@ -266,9 +261,6 @@ bool OpenGLHelpers::isContextActive()
     return CGLGetCurrentContext() != CGLContextObj();
 }
 
-#if JUCE_DEPRECATION_IGNORED
- #pragma clang diagnostic pop
- #undef JUCE_DEPRECATION_IGNORED
-#endif
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 } // namespace juce

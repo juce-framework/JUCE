@@ -125,13 +125,13 @@ public:
 
         auto nextPos = pos + delta;
 
-        if (nextPos.x < 10 || nextPos.x + 10 > getWidth())
+        if (nextPos.x < 10 || nextPos.x + 10 > (float) getWidth())
         {
             delta.x = -delta.x;
             nextPos.x = pos.x + delta.x;
         }
 
-        if (nextPos.y < 50 || nextPos.y + 10 > getHeight())
+        if (nextPos.y < 50 || nextPos.y + 10 > (float) getHeight())
         {
             delta.y = -delta.y;
             nextPos.y = pos.y + delta.y;
@@ -234,17 +234,17 @@ public:
 
     float amplitudeToY (float amp) const noexcept
     {
-        return getHeight() - (amp + 1.0f) * getHeight() / 2.0f;
+        return (float) getHeight() - (amp + 1.0f) * (float) getHeight() / 2.0f;
     }
 
     float xToAmplitude (float x) const noexcept
     {
-        return jlimit (-1.0f, 1.0f, 2.0f * (getWidth() - x) / getWidth() - 1.0f);
+        return jlimit (-1.0f, 1.0f, 2.0f * ((float) getWidth() - x) / (float) getWidth() - 1.0f);
     }
 
     float yToAmplitude (float y) const noexcept
     {
-        return jlimit (-1.0f, 1.0f, 2.0f * (getHeight() - y) / getHeight() - 1.0f);
+        return jlimit (-1.0f, 1.0f, 2.0f * ((float) getHeight() - y) / (float) getHeight() - 1.0f);
     }
 
     void timerCallback() override

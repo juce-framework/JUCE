@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -33,14 +32,6 @@ class AboutWindowComponent    : public Component
 public:
     AboutWindowComponent()
     {
-        bool showPurchaseButton = false;
-
-       #if ! JUCER_ENABLE_GPL_MODE
-        if (auto* controller = ProjucerApplication::getApp().licenseController.get())
-            showPurchaseButton = (controller->getState().type != LicenseState::Type::indie
-                               && controller->getState().type != LicenseState::Type::pro);
-       #endif
-
         addAndMakeVisible (titleLabel);
         titleLabel.setJustificationType (Justification::centred);
         titleLabel.setFont (Font (35.0f, Font::FontStyleFlags::bold));
@@ -59,17 +50,6 @@ public:
 
         addAndMakeVisible (aboutButton);
         aboutButton.setTooltip ( {} );
-
-        if (showPurchaseButton)
-        {
-            addAndMakeVisible (licenseButton);
-
-            licenseButton.onClick = []
-            {
-                if (auto* controller = ProjucerApplication::getApp().licenseController.get())
-                    controller->chooseNewLicense();
-            };
-        }
     }
 
     void resized() override
@@ -77,23 +57,15 @@ public:
         auto bounds = getLocalBounds();
         bounds.removeFromBottom (20);
 
-        auto rightSlice  = bounds.removeFromRight (150);
         auto leftSlice   = bounds.removeFromLeft (150);
-        auto centreSlice = bounds;
+        auto centreSlice = bounds.withTrimmedRight (150);
 
-        //==============================================================================
-        rightSlice.removeFromRight (20);
-        auto iconSlice = rightSlice.removeFromRight (100);
-        huckleberryLogoBounds = iconSlice.removeFromBottom (100).toFloat();
-
-        //==============================================================================
         juceLogoBounds = leftSlice.removeFromTop (150).toFloat();
         juceLogoBounds.setWidth (juceLogoBounds.getWidth() + 100);
         juceLogoBounds.setHeight (juceLogoBounds.getHeight() + 100);
 
         copyrightLabel.setBounds (leftSlice.removeFromBottom (20));
 
-        //==============================================================================
         auto titleHeight = 40;
 
         centreSlice.removeFromTop ((centreSlice.getHeight() / 2) - (titleHeight / 2));
@@ -104,10 +76,6 @@ public:
         versionLabel.setBounds (centreSlice.removeFromTop (40));
 
         centreSlice.removeFromTop (10);
-
-        if (licenseButton.isShowing())
-            licenseButton.setBounds (centreSlice.removeFromTop (25).reduced (25, 0));
-
         aboutButton.setBounds (centreSlice.removeFromBottom (20));
     }
 
@@ -117,9 +85,6 @@ public:
 
         if (juceLogo != nullptr)
             juceLogo->drawWithin (g, juceLogoBounds.translated (-75, -75), RectanglePlacement::centred, 1.0);
-
-        if (huckleberryLogo != nullptr)
-            huckleberryLogo->drawWithin (g, huckleberryLogoBounds, RectanglePlacement::centred, 1.0);
     }
 
 private:
@@ -128,15 +93,11 @@ private:
           copyrightLabel { "copyright", String (CharPointer_UTF8 ("\xc2\xa9")) + String (" 2020 Raw Material Software Limited") };
 
     HyperlinkButton aboutButton { "About Us", URL ("https://juce.com") };
-    TextButton licenseButton { "Purchase License" };
 
-    Rectangle<float> huckleberryLogoBounds, juceLogoBounds;
+    Rectangle<float> juceLogoBounds;
 
     std::unique_ptr<Drawable> juceLogo { Drawable::createFromImageData (BinaryData::juce_icon_png,
                                                                         BinaryData::juce_icon_pngSize) };
-
-    std::unique_ptr<Drawable> huckleberryLogo { Drawable::createFromImageData (BinaryData::huckleberry_icon_svg,
-                                                                               BinaryData::huckleberry_icon_svgSize) };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AboutWindowComponent)
 };

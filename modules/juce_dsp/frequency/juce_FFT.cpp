@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -31,7 +30,7 @@ namespace dsp
 
 struct FFT::Instance
 {
-    virtual ~Instance() {}
+    virtual ~Instance() = default;
     virtual void perform (const Complex<float>* input, Complex<float>* output, bool inverse) const noexcept = 0;
     virtual void performRealOnlyForwardTransform (float*, bool) const noexcept = 0;
     virtual void performRealOnlyInverseTransform (float*) const noexcept = 0;
@@ -46,7 +45,7 @@ struct FFT::Engine
         std::sort (list.begin(), list.end(), [] (Engine* a, Engine* b) { return b->enginePriority < a->enginePriority; });
     }
 
-    virtual ~Engine() {}
+    virtual ~Engine() = default;
 
     virtual FFT::Instance* create (int order) const = 0;
 
@@ -114,7 +113,7 @@ struct FFTFallback  : public FFT::Instance
         {
             configInverse->perform (input, output);
 
-            const float scaleFactor = 1.0f / size;
+            const float scaleFactor = 1.0f / (float) size;
 
             for (int i = 0; i < size; ++i)
                 output[i] *= scaleFactor;
@@ -175,7 +174,7 @@ struct FFTFallback  : public FFT::Instance
     {
         auto* input = reinterpret_cast<Complex<float>*> (d);
 
-        for (auto i = size >> 1; i < size; ++i)
+        for (int i = size >> 1; i < size; ++i)
             input[i] = std::conj (input[size - i]);
 
         perform (input, scratch, true);
@@ -689,7 +688,7 @@ struct FFTWImpl  : public FFT::Instance
         auto size = (1 << order);
 
         if (! ignoreNegativeFreqs)
-            for (auto i = size >> 1; i < size; ++i)
+            for (int i = size >> 1; i < size; ++i)
                 out[i] = std::conj (out[size - i]);
     }
 
@@ -788,7 +787,7 @@ struct IntelFFT  : public FFT::Instance
         auto size = (1 << order);
 
         if (! ignoreNegativeFreqs)
-            for (auto i = size >> 1; i < size; ++i)
+            for (int i = size >> 1; i < size; ++i)
                 out[i] = std::conj (out[size - i]);
     }
 
@@ -802,6 +801,145 @@ struct IntelFFT  : public FFT::Instance
 };
 
 FFT::EngineImpl<IntelFFT> fftwEngine;
+#endif
+
+//==============================================================================
+//==============================================================================
+// Visual Studio should define no more than one of these, depending on the
+// setting at 'Project' > 'Properties' > 'Configuration Properties' > 'Intel
+// Performance Libraries' > 'Use Intel(R) IPP'
+#if _IPP_SEQUENTIAL_STATIC || _IPP_SEQUENTIAL_DYNAMIC || _IPP_PARALLEL_STATIC || _IPP_PARALLEL_DYNAMIC
+class IntelPerformancePrimitivesFFT : public FFT::Instance
+{
+public:
+    static constexpr auto priority = 9;
+
+    static IntelPerformancePrimitivesFFT* create (const int order)
+    {
+        auto complexContext = Context<ComplexTraits>::create (order);
+        auto realContext    = Context<RealTraits>   ::create (order);
+
+        if (complexContext.isValid() && realContext.isValid())
+            return new IntelPerformancePrimitivesFFT (std::move (complexContext), std::move (realContext), order);
+
+        return {};
+    }
+
+    void perform (const Complex<float>* input, Complex<float>* output, bool inverse) const noexcept override
+    {
+        if (inverse)
+        {
+            ippsFFTInv_CToC_32fc (reinterpret_cast<const Ipp32fc*> (input),
+                                  reinterpret_cast<Ipp32fc*> (output),
+                                  cplx.specPtr,
+                                  cplx.workBuf.get());
+        }
+        else
+        {
+            ippsFFTFwd_CToC_32fc (reinterpret_cast<const Ipp32fc*> (input),
+                                  reinterpret_cast<Ipp32fc*> (output),
+                                  cplx.specPtr,
+                                  cplx.workBuf.get());
+        }
+    }
+
+    void performRealOnlyForwardTransform (float* inoutData, bool ignoreNegativeFreqs) const noexcept override
+    {
+        ippsFFTFwd_RToCCS_32f_I (inoutData, real.specPtr, real.workBuf.get());
+
+        if (order == 0)
+            return;
+
+        auto* out = reinterpret_cast<Complex<float>*> (inoutData);
+        const auto size = (1 << order);
+
+        if (! ignoreNegativeFreqs)
+            for (auto i = size >> 1; i < size; ++i)
+                out[i] = std::conj (out[size - i]);
+    }
+
+    void performRealOnlyInverseTransform (float* inoutData) const noexcept override
+    {
+        ippsFFTInv_CCSToR_32f_I (inoutData, real.specPtr, real.workBuf.get());
+    }
+
+private:
+    static constexpr auto flag = IPP_FFT_DIV_INV_BY_N;
+    static constexpr auto hint = ippAlgHintFast;
+
+    struct IppFree
+    {
+        template <typename Ptr>
+        void operator() (Ptr* ptr) const noexcept { ippsFree (ptr); }
+    };
+
+    using IppPtr = std::unique_ptr<Ipp8u[], IppFree>;
+
+    template <typename Traits>
+    struct Context
+    {
+        using SpecPtr = typename Traits::Spec*;
+
+        static Context create (const int order)
+        {
+            int specSize = 0, initSize = 0, workSize = 0;
+
+            if (Traits::getSize (order, flag, hint, &specSize, &initSize, &workSize) != ippStsNoErr)
+                return {};
+
+            const auto initBuf = IppPtr (ippsMalloc_8u (initSize));
+            auto specBuf       = IppPtr (ippsMalloc_8u (specSize));
+            SpecPtr specPtr = nullptr;
+
+            if (Traits::init (&specPtr, order, flag, hint, specBuf.get(), initBuf.get()) != ippStsNoErr)
+                return {};
+
+            if (reinterpret_cast<const Ipp8u*> (specPtr) != specBuf.get())
+                return {};
+
+            return { std::move (specBuf), IppPtr (ippsMalloc_8u (workSize)), specPtr };
+        }
+
+        Context() noexcept = default;
+
+        Context (IppPtr&& spec, IppPtr&& work, typename Traits::Spec* ptr) noexcept
+            : specBuf (std::move (spec)), workBuf (std::move (work)), specPtr (ptr)
+        {}
+
+        bool isValid() const noexcept { return specPtr != nullptr; }
+
+        IppPtr specBuf, workBuf;
+        SpecPtr specPtr = nullptr;
+    };
+
+    struct ComplexTraits
+    {
+        static constexpr auto getSize = ippsFFTGetSize_C_32fc;
+        static constexpr auto init = ippsFFTInit_C_32fc;
+        using Spec = IppsFFTSpec_C_32fc;
+    };
+
+    struct RealTraits
+    {
+        static constexpr auto getSize = ippsFFTGetSize_R_32f;
+        static constexpr auto init = ippsFFTInit_R_32f;
+        using Spec = IppsFFTSpec_R_32f;
+    };
+
+    IntelPerformancePrimitivesFFT (Context<ComplexTraits>&& complexToUse,
+                                   Context<RealTraits>&& realToUse,
+                                   const int orderToUse)
+        : cplx (std::move (complexToUse)),
+          real (std::move (realToUse)),
+          order (orderToUse)
+    {}
+
+    Context<ComplexTraits> cplx;
+    Context<RealTraits> real;
+    int order = 0;
+};
+
+FFT::EngineImpl<IntelPerformancePrimitivesFFT> intelPerformancePrimitivesFFT;
 #endif
 
 //==============================================================================
@@ -840,7 +978,7 @@ void FFT::performFrequencyOnlyForwardTransform (float* inputOutputData) const no
     performRealOnlyForwardTransform (inputOutputData);
     auto* out = reinterpret_cast<Complex<float>*> (inputOutputData);
 
-    for (auto i = 0; i < size; ++i)
+    for (int i = 0; i < size; ++i)
         inputOutputData[i] = std::abs (out[i]);
 
     zeromem (&inputOutputData[size], static_cast<size_t> (size) * sizeof (float));

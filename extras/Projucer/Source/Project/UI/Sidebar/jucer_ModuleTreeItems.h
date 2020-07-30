@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -166,7 +165,7 @@ private:
                 exporterModulePathValues.add (defaultValue.getPropertyAsValue());
 
                 auto pathComponent = std::make_unique<FilePathPropertyComponent> (defaultValue,
-                                                                                  "Path for " + exporter->getName().quoted(),
+                                                                                  "Path for " + exporter->getUniqueName().quoted(),
                                                                                   true,
                                                                                   exporter->getTargetOSForExporter() == TargetOS::getThisOS(),
                                                                                   "*",
@@ -176,7 +175,7 @@ private:
 
                 props.add (pathComponent.release(),
                            "A path to the folder that contains the " + moduleID + " module when compiling the "
-                           + exporter->getName().quoted() + " target. "
+                           + exporter->getUniqueName().quoted() + " target. "
                            "This can be an absolute path, or relative to the jucer project folder, but it "
                            "must be valid on the filesystem of the target machine that will be performing this build. If this "
                            "is empty then the global path will be used.");
@@ -369,17 +368,21 @@ private:
 
             void fixDependencies()
             {
-                if (! tryToFix())
+                auto& enabledModules = project.getEnabledModules();
+
+                if (enabledModules.tryToFixMissingDependencies (moduleID))
                 {
+                    missingDependencies.clear();
+                }
+                else
+                {
+                    missingDependencies = enabledModules.getExtraDependenciesNeeded (moduleID);
+
                     AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
                                                       "Adding Missing Dependencies",
                                                       "Couldn't locate some of these modules - you'll need to find their "
                                                       "folders manually and add them to the list.");
-
-                    return;
                 }
-
-                refreshAndReselectItem();
             }
 
             void resized() override
@@ -389,58 +392,10 @@ private:
 
         private:
             Project& project;
+
             String moduleID;
             StringArray missingDependencies;
             TextButton fixButton { "Add Required Modules" };
-
-            bool tryToFix()
-            {
-                auto& enabledModules   = project.getEnabledModules();
-
-                auto copyLocally       = enabledModules.areMostModulesCopiedLocally();
-                auto useGlobalPath     = enabledModules.areMostModulesUsingGlobalPath();
-
-                StringArray missing;
-
-                for (auto missingModule : missingDependencies)
-                {
-                    auto mod = project.getModuleWithID (missingModule);
-
-                    if (mod.second != File())
-                        enabledModules.addModule (mod.second, copyLocally, useGlobalPath, false);
-                    else
-                        missing.add (missingModule);
-                }
-
-                missingDependencies.swapWith (missing);
-                return (missingDependencies.size() == 0);
-            }
-
-            void refreshAndReselectItem()
-            {
-                if (auto* settingsPanel = findParentComponentOfClass<ModuleSettingsPanel>())
-                {
-                    if (settingsPanel->modulesTree == nullptr)
-                        return;
-
-                    auto* rootItem = settingsPanel->modulesTree->getRootItem();
-
-                    if (rootItem == nullptr)
-                        return;
-
-                    for (int i = 0; i < rootItem->getNumSubItems(); ++i)
-                    {
-                        if (auto* subItem = dynamic_cast<ProjectTreeItemBase*> (rootItem->getSubItem (i)))
-                        {
-                            if (subItem->getDisplayName() == moduleID)
-                            {
-                                subItem->setSelected (true, true);
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MissingDependenciesComponent)
         };
@@ -476,28 +431,30 @@ private:
 //==============================================================================
 class EnabledModulesItem   : public ProjectTreeItemBase,
                              private Value::Listener,
-                             private AvailableModuleList::Listener
+                             private AvailableModulesList::Listener
 {
 public:
     EnabledModulesItem (Project& p)
         : project (p),
-          moduleListTree (project.getEnabledModules().getState())
+          modulesListTree (project.getEnabledModules().getState())
     {
-        moduleListTree.addListener (this);
+        modulesListTree.addListener (this);
 
         projectCppStandardValue.referTo (project.getProjectValue (Ids::cppLanguageStandard));
         projectCppStandardValue.addListener (this);
 
-        ProjucerApplication::getApp().getJUCEPathModuleList().addListener (this);
-        ProjucerApplication::getApp().getUserPathsModuleList().addListener (this);
-        project.getExporterPathsModuleList().addListener (this);
+        ProjucerApplication::getApp().getJUCEPathModulesList().addListener (this);
+        ProjucerApplication::getApp().getUserPathsModulesList().addListener (this);
+
+        project.getExporterPathsModulesList().addListener (this);
     }
 
     ~EnabledModulesItem() override
     {
-        ProjucerApplication::getApp().getJUCEPathModuleList().removeListener (this);
-        ProjucerApplication::getApp().getUserPathsModuleList().removeListener (this);
-        project.getExporterPathsModuleList().removeListener (this);
+        ProjucerApplication::getApp().getJUCEPathModulesList().removeListener (this);
+        ProjucerApplication::getApp().getUserPathsModulesList().removeListener (this);
+
+        project.getExporterPathsModulesList().removeListener (this);
     }
 
     int getItemHeight() const override      { return 22; }
@@ -547,10 +504,9 @@ public:
         }
 
         for (int i = 0; i < modules.size(); ++i)
-            project.getEnabledModules().addModule (modules.getReference(i).moduleFolder,
+            project.getEnabledModules().addModule (modules.getReference (i).getModuleFolder(),
                                                    project.getEnabledModules().areMostModulesCopiedLocally(),
-                                                   project.getEnabledModules().areMostModulesUsingGlobalPath(),
-                                                   true);
+                                                   project.getEnabledModules().areMostModulesUsingGlobalPath());
     }
 
     void addSubItems() override
@@ -569,7 +525,7 @@ public:
         // JUCE path
         PopupMenu jucePathModules;
 
-        for (auto& mod : ProjucerApplication::getApp().getJUCEPathModuleList().getAllModules())
+        for (auto& mod : ProjucerApplication::getApp().getJUCEPathModulesList().getAllModules())
             jucePathModules.addItem (index++, mod.first, ! enabledModules.isModuleEnabled (mod.first));
 
         jucePathModules.addSeparator();
@@ -581,7 +537,7 @@ public:
         index = 200;
         PopupMenu userPathModules;
 
-        for (auto& mod : ProjucerApplication::getApp().getUserPathsModuleList().getAllModules())
+        for (auto& mod : ProjucerApplication::getApp().getUserPathsModulesList().getAllModules())
             userPathModules.addItem (index++, mod.first, ! enabledModules.isModuleEnabled (mod.first));
 
         userPathModules.addSeparator();
@@ -593,7 +549,7 @@ public:
         index = 300;
         PopupMenu exporterPathModules;
 
-        for (auto& mod : project.getExporterPathsModuleList().getAllModules())
+        for (auto& mod : project.getExporterPathsModulesList().getAllModules())
             exporterPathModules.addItem (index++, mod.first, ! enabledModules.isModuleEnabled (mod.first));
 
         exporterPathModules.addSeparator();
@@ -624,22 +580,22 @@ public:
         }
         else if (resultCode > 0)
         {
-            std::vector<AvailableModuleList::ModuleIDAndFolder> list;
+            std::vector<AvailableModulesList::ModuleIDAndFolder> list;
             int offset = -1;
 
             if (resultCode < 200)
             {
-                list = ProjucerApplication::getApp().getJUCEPathModuleList().getAllModules();
+                list = ProjucerApplication::getApp().getJUCEPathModulesList().getAllModules();
                 offset = 100;
             }
             else if (resultCode < 300)
             {
-                list = ProjucerApplication::getApp().getUserPathsModuleList().getAllModules();
+                list = ProjucerApplication::getApp().getUserPathsModulesList().getAllModules();
                 offset = 200;
             }
             else if (resultCode < 400)
             {
-                list = project.getExporterPathsModuleList().getAllModules();
+                list = project.getExporterPathsModulesList().getAllModules();
                 offset = 300;
             }
 
@@ -655,13 +611,20 @@ public:
 
     void refreshIfNeeded (ValueTree& changedTree)
     {
-        if (changedTree == moduleListTree)
+        if (changedTree == modulesListTree)
+        {
+            auto selectedID = getSelectedItemID();
+
             refreshSubItems();
+
+            if (selectedID.isNotEmpty())
+                setSelectedItem (selectedID);
+        }
     }
 
 private:
     Project& project;
-    ValueTree moduleListTree;
+    ValueTree modulesListTree;
     Value projectCppStandardValue;
 
     //==============================================================================
@@ -685,20 +648,45 @@ private:
 
     void removeDuplicateModules()
     {
-        auto jucePathModuleList = ProjucerApplication::getApp().getJUCEPathModuleList().getAllModules();
+        auto jucePathModulesList = ProjucerApplication::getApp().getJUCEPathModulesList().getAllModules();
 
-        auto& userPathModules = ProjucerApplication::getApp().getUserPathsModuleList();
-        userPathModules.removeDuplicates (jucePathModuleList);
+        auto& userPathModules = ProjucerApplication::getApp().getUserPathsModulesList();
+        userPathModules.removeDuplicates (jucePathModulesList);
 
-        auto& exporterPathModules = project.getExporterPathsModuleList();
-        exporterPathModules.removeDuplicates (jucePathModuleList);
+        auto& exporterPathModules = project.getExporterPathsModulesList();
+        exporterPathModules.removeDuplicates (jucePathModulesList);
         exporterPathModules.removeDuplicates (userPathModules.getAllModules());
     }
 
-    void availableModulesChanged() override
+    void availableModulesChanged (AvailableModulesList*) override
     {
         removeDuplicateModules();
         refreshSubItems();
+    }
+
+    String getSelectedItemID() const
+    {
+        for (int i = 0; i < getNumSubItems(); ++i)
+            if (auto* item = getSubItem (i))
+                if (item->isSelected())
+                    return item->getUniqueName();
+
+        return {};
+    }
+
+    void setSelectedItem (const String& itemID)
+    {
+        for (int i = 0; i < getNumSubItems(); ++i)
+        {
+            if (auto* item = getSubItem (i))
+            {
+                if (item->getUniqueName() == itemID)
+                {
+                    item->setSelected (true, true);
+                    return;
+                }
+            }
+        }
     }
 
     //==============================================================================

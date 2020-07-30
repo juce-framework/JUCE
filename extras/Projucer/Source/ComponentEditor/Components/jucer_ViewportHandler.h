@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -32,7 +31,7 @@ class ViewportHandler  : public ComponentTypeHandler
 {
 public:
     ViewportHandler()
-        : ComponentTypeHandler ("Viewport", "Viewport", typeid (UpdatingViewport), 150, 150)
+        : ComponentTypeHandler ("Viewport", "juce::Viewport", typeid (UpdatingViewport), 150, 150)
     {}
 
     Component* createNewComponent (JucerDocument*) override
@@ -359,7 +358,7 @@ private:
 
     //==============================================================================
     class ViewportScrollbarSizeProperty  : public SliderPropertyComponent,
-                                           public ChangeListener
+                                           private ChangeListener
     {
     public:
         ViewportScrollbarSizeProperty (Viewport* comp, JucerDocument& doc)
@@ -370,12 +369,12 @@ private:
             document.addChangeListener (this);
         }
 
-        ~ViewportScrollbarSizeProperty()
+        ~ViewportScrollbarSizeProperty() override
         {
             document.removeChangeListener (this);
         }
 
-        void setValue (double newValue)
+        void setValue (double newValue) override
         {
             document.getUndoManager().undoCurrentTransactionOnly();
 
@@ -383,12 +382,13 @@ private:
                               "Change Viewport scrollbar size");
         }
 
-        double getValue() const
+        double getValue() const override
         {
             return component->getScrollBarThickness();
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)
+    private:
+        void changeListenerCallback (ChangeBroadcaster*) override
         {
             refresh();
         }
@@ -485,7 +485,7 @@ private:
 
     //==============================================================================
     class ViewportJucerFileProperty   : public FilePropertyComponent,
-                                        public ChangeListener
+                                        private ChangeListener
     {
     public:
         ViewportJucerFileProperty (Viewport* const comp, JucerDocument& doc)
@@ -496,12 +496,12 @@ private:
             document.addChangeListener (this);
         }
 
-        ~ViewportJucerFileProperty()
+        ~ViewportJucerFileProperty() override
         {
             document.removeChangeListener (this);
         }
 
-        void setFile (const File& newFile)
+        void setFile (const File& newFile) override
         {
             document.perform (new JucerCompFileChangeAction (component, *document.getComponentLayout(),
                                                              newFile.getRelativePathFrom (document.getCppFile().getParentDirectory())
@@ -509,7 +509,7 @@ private:
                               "Change Projucer component file");
         }
 
-        File getFile() const
+        File getFile() const override
         {
             auto filename = getViewportJucerComponentFile (component);
 
@@ -519,12 +519,12 @@ private:
             return document.getCppFile().getSiblingFile (filename);
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)
+    private:
+        void changeListenerCallback (ChangeBroadcaster*) override
         {
             refresh();
         }
 
-    private:
         Viewport* const component;
         JucerDocument& document;
 

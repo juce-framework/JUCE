@@ -655,7 +655,10 @@ struct OpenGLUtils
                 g.drawRect (0, 0, size, size, 2);
 
                 g.setColour (Colours::green);
-                g.fillEllipse (x.getValue() * size * 0.9f, y.getValue() * size * 0.9f, size * 0.1f, size * 0.1f);
+                g.fillEllipse (x.getValue() * (float) size * 0.9f,
+                               y.getValue() * (float) size * 0.9f,
+                               (float) size * 0.1f,
+                               (float) size * 0.1f);
 
                 g.setColour (Colours::black);
                 g.setFont (40);
@@ -827,7 +830,7 @@ public:
         openGLContext.extensions.glActiveTexture (GL_TEXTURE0);
         glEnable (GL_TEXTURE_2D);
 
-        glViewport (0, 0, roundToInt (desktopScale * getWidth()), roundToInt (desktopScale * getHeight()));
+        glViewport (0, 0, roundToInt (desktopScale * (float) getWidth()), roundToInt (desktopScale * (float) getHeight()));
 
         texture.bind();
 
@@ -913,8 +916,8 @@ private:
     {
         // Create an OpenGLGraphicsContext that will draw into this GL window..
         std::unique_ptr<LowLevelGraphicsContext> glRenderer (createOpenGLGraphicsContext (openGLContext,
-                                                                                          roundToInt (desktopScale * getWidth()),
-                                                                                          roundToInt (desktopScale * getHeight())));
+                                                                                          roundToInt (desktopScale * (float) getWidth()),
+                                                                                          roundToInt (desktopScale * (float) getHeight())));
 
         if (glRenderer.get() != nullptr)
         {
@@ -927,11 +930,11 @@ private:
 
                 // This stuff just creates a spinning star shape and fills it..
                 Path p;
-                p.addStar ({ getWidth()  * s.x.getValue(),
-                             getHeight() * s.y.getValue() },
+                p.addStar ({ (float) getWidth()  * s.x.getValue(),
+                             (float) getHeight() * s.y.getValue() },
                            7,
-                           getHeight() * size * 0.5f,
-                           getHeight() * size,
+                           (float) getHeight() * size * 0.5f,
+                           (float) getHeight() * size,
                            s.angle.getValue());
 
                 auto hue = s.hue.getValue();

@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -39,9 +38,11 @@ AudioFormatReader::~AudioFormatReader()
 
 static void convertFixedToFloat (int* const* channels, int numChannels, int numSamples)
 {
+    constexpr auto scaleFactor = 1.0f / static_cast<float> (0x7fffffff);
+
     for (int i = 0; i < numChannels; ++i)
         if (auto d = channels[i])
-            FloatVectorOperations::convertFixedToFloat (reinterpret_cast<float*> (d), d, 1.0f / 0x7fffffff, numSamples);
+            FloatVectorOperations::convertFixedToFloat (reinterpret_cast<float*> (d), d, scaleFactor, numSamples);
 }
 
 bool AudioFormatReader::read (float* const* destChannels, int numDestChannels,
@@ -234,8 +235,8 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile, int64 numSamples
             {
                 auto intRange = Range<int>::findMinAndMax (intBuffer[i], numToDo);
 
-                r = Range<float> (intRange.getStart() / (float) std::numeric_limits<int>::max(),
-                                  intRange.getEnd()   / (float) std::numeric_limits<int>::max());
+                r = Range<float> ((float) intRange.getStart() / (float) std::numeric_limits<int>::max(),
+                                  (float) intRange.getEnd()   / (float) std::numeric_limits<int>::max());
             }
 
             results[i] = isFirstBlock ? r : results[i].getUnionWith (r);

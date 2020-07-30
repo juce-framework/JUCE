@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -26,7 +25,10 @@
 
 #include "../../Application/jucer_Headers.h"
 #include "jucer_ProjucerLookAndFeel.h"
-#include "../../Application/jucer_Application.h"
+
+#ifndef BUILDING_JUCE_COMPILEENGINE
+ #include "../../Project/UI/jucer_ProjectContentComponent.h"
+#endif
 
 //==============================================================================
 ProjucerLookAndFeel::ProjucerLookAndFeel()
@@ -46,26 +48,42 @@ void ProjucerLookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bool
     g.fillRect (area);
 
     const auto alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
+    auto textColour = findColour (defaultTextColourId).withMultipliedAlpha (alpha);
 
    #ifndef BUILDING_JUCE_COMPILEENGINE
     auto iconColour = findColour (button.isFrontTab() ? activeTabIconColourId
                                                       : inactiveTabIconColourId);
 
-    if (button.getName() == "Project")
+    auto isProjectTab = button.getName() == ProjectContentComponent::getProjectTabName();
+    auto isBuildTab = button.getName() == ProjectContentComponent::getBuildTabName();
+
+    if (isProjectTab || isBuildTab)
     {
-        auto icon = Icon (getIcons().closedFolder, iconColour.withMultipliedAlpha (alpha));
-        icon.draw (g, button.getTextArea().reduced (8, 8).toFloat(), false);
-    }
-    else if (button.getName() == "Build")
-    {
-        auto icon = Icon (getIcons().buildTab, iconColour.withMultipliedAlpha (alpha));
-        icon.draw (g, button.getTextArea().reduced (8, 8).toFloat(), false);
+        auto icon = Icon (isProjectTab ? getIcons().closedFolder : getIcons().buildTab,
+                          iconColour.withMultipliedAlpha (alpha));
+
+        auto isSingleTab = (button.getTabbedButtonBar().getNumTabs() == 1);
+
+        if (isSingleTab)
+        {
+            auto activeArea = button.getActiveArea().reduced (5);
+
+            activeArea.removeFromLeft (15);
+            icon.draw (g, activeArea.removeFromLeft (activeArea.getHeight()).toFloat(), false);
+            activeArea.removeFromLeft (10);
+
+            g.setColour (textColour);
+            g.drawFittedText (isProjectTab ? ProjectContentComponent::getProjectTabName() : ProjectContentComponent::getBuildTabName(),
+                              activeArea, Justification::centredLeft, 1);
+        }
+        else
+        {
+            icon.draw (g, button.getTextArea().reduced (8, 8).toFloat(), false);
+        }
     }
     else
    #endif
     {
-        auto textColour = findColour (defaultTextColourId).withMultipliedAlpha (alpha);
-
         TextLayout textLayout;
         LookAndFeel_V3::createTabTextLayout (button, (float) area.getWidth(), (float) area.getHeight(), textColour, textLayout);
 
@@ -188,7 +206,7 @@ void ProjucerLookAndFeel::drawToggleButton (Graphics& g, ToggleButton& button, b
     {
         bounds.removeFromLeft (5);
 
-        const auto fontSize = jmin (15.0f, button.getHeight() * 0.75f);
+        const auto fontSize = jmin (15.0f, (float) button.getHeight() * 0.75f);
 
         g.setFont (fontSize);
         g.setColour (isPropertyComponentChild ? findColour (widgetTextColourId)
@@ -457,7 +475,7 @@ Path ProjucerLookAndFeel::getArrowPath (Rectangle<float> arrowZone, const int di
     if (filled)
         path.closeSubPath();
 
-    path.applyTransform (AffineTransform::rotation (direction * MathConstants<float>::halfPi,
+    path.applyTransform (AffineTransform::rotation ((float) direction * MathConstants<float>::halfPi,
                                                     arrowZone.getCentreX(), arrowZone.getCentreY()));
 
     return path;

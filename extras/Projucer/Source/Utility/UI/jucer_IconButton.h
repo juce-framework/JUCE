@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -28,19 +27,52 @@
 
 
 //==============================================================================
-struct IconButton    : public Button
+class IconButton  : public Button
 {
-    IconButton (String name, const Path* p)
-        : Button (name),
-          icon (p, Colours::transparentBlack)
+public:
+    IconButton (String buttonName, Image imageToDisplay)
+        : Button (buttonName),
+          iconImage (imageToDisplay)
     {
-        lookAndFeelChanged();
-        setTooltip (name);
+        setTooltip (buttonName);
+    }
+
+    IconButton (String buttonName, Path pathToDisplay)
+        : Button (buttonName),
+          iconPath (pathToDisplay),
+          iconImage (createImageFromPath (iconPath))
+    {
+        setTooltip (buttonName);
+    }
+
+    void setImage (Image newImage)
+    {
+        iconImage = newImage;
+        repaint();
+    }
+
+    void setPath (Path newPath)
+    {
+        iconImage = createImageFromPath (newPath);
+        repaint();
+    }
+
+    void setBackgroundColour (Colour backgroundColourToUse)
+    {
+        backgroundColour = backgroundColourToUse;
+        usingNonDefaultBackgroundColour = true;
+    }
+
+    void setIconInset (int newIconInset)
+    {
+        iconInset = newIconInset;
+        repaint();
     }
 
     void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown) override
     {
-        auto alpha = 1.0f;
+        float alpha = 1.0f;
+
         if (! isEnabled())
         {
             isMouseOverButton = false;
@@ -49,43 +81,56 @@ struct IconButton    : public Button
             alpha = 0.2f;
         }
 
-        auto backgroundColour = isIDEButton ? Colours::white
-                                            : isUserButton ? findColour (userButtonBackgroundColourId)
-                                                           : findColour (defaultButtonBackgroundColourId);
+        auto fill = isButtonDown ? backgroundColour.darker (0.5f)
+                                 : isMouseOverButton ? backgroundColour.darker (0.2f)
+                                                     : backgroundColour;
 
-        backgroundColour = isButtonDown ? backgroundColour.darker (0.5f)
-                                        : isMouseOverButton ? backgroundColour.darker (0.2f)
-                                                            : backgroundColour;
-
-        auto bounds = getLocalBounds().toFloat();
+        auto bounds = getLocalBounds();
 
         if (isButtonDown)
             bounds.reduce (2, 2);
 
         Path ellipse;
-        ellipse.addEllipse (bounds);
-        g.reduceClipRegion(ellipse);
+        ellipse.addEllipse (bounds.toFloat());
+        g.reduceClipRegion (ellipse);
 
-        g.setColour (backgroundColour.withAlpha (alpha));
+        g.setColour (fill.withAlpha (alpha));
         g.fillAll();
 
-        if (iconImage != Image())
-        {
-            if (isIDEButton)
-                bounds.reduce (7, 7);
-
-            g.setOpacity (alpha);
-            g.drawImage (iconImage, bounds, RectanglePlacement::fillDestination, false);
-        }
-        else
-        {
-            icon.withColour (findColour (defaultIconColourId).withAlpha (alpha)).draw (g, bounds.reduced (2, 2), false);
-        }
+        g.setOpacity (alpha);
+        g.drawImage (iconImage, bounds.reduced (iconInset).toFloat(), RectanglePlacement::fillDestination, false);
     }
 
-    Icon icon;
-    Image iconImage;
+private:
+    void lookAndFeelChanged() override
+    {
+        if (! usingNonDefaultBackgroundColour)
+            backgroundColour = findColour (defaultButtonBackgroundColourId);
 
-    bool isIDEButton = false;
-    bool isUserButton = false;
+        if (iconPath != Path())
+            iconImage = createImageFromPath (iconPath);
+
+        repaint();
+    }
+
+    Image createImageFromPath (Path path)
+    {
+        Image image (Image::ARGB, 250, 250, true);
+        Graphics g (image);
+
+        g.setColour (findColour (defaultIconColourId));
+
+        g.fillPath (path, RectanglePlacement (RectanglePlacement::centred)
+                            .getTransformToFit (path.getBounds(), image.getBounds().toFloat()));
+
+        return image;
+    }
+
+    Path iconPath;
+    Image iconImage;
+    Colour backgroundColour { findColour (defaultButtonBackgroundColourId) };
+    bool usingNonDefaultBackgroundColour = false;
+    int iconInset = 2;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IconButton)
 };

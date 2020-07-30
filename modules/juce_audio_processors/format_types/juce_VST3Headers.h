@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -25,54 +24,38 @@
 */
 
 // Wow, those Steinberg guys really don't worry too much about compiler warnings.
-#if _MSC_VER
- #pragma warning (disable: 4505)
- #pragma warning (push, 0)
- #pragma warning (disable: 4702)
-#elif __clang__
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
- #pragma clang diagnostic ignored "-Wreorder"
- #pragma clang diagnostic ignored "-Wunsequenced"
- #pragma clang diagnostic ignored "-Wint-to-pointer-cast"
- #pragma clang diagnostic ignored "-Wunused-parameter"
- #pragma clang diagnostic ignored "-Wconversion"
- #pragma clang diagnostic ignored "-Woverloaded-virtual"
- #pragma clang diagnostic ignored "-Wshadow"
- #pragma clang diagnostic ignored "-Wdeprecated-register"
- #pragma clang diagnostic ignored "-Wunused-function"
- #pragma clang diagnostic ignored "-Wsign-conversion"
- #pragma clang diagnostic ignored "-Wsign-compare"
- #pragma clang diagnostic ignored "-Wdelete-non-virtual-dtor"
- #pragma clang diagnostic ignored "-Wdeprecated-declarations"
- #pragma clang diagnostic ignored "-Wextra-semi"
- #pragma clang diagnostic ignored "-Wmissing-braces"
- #pragma clang diagnostic ignored "-Wswitch-default"
- #if __has_warning("-Wshadow-field")
-  #pragma clang diagnostic ignored "-Wshadow-field"
- #endif
- #if __has_warning("-Wpragma-pack")
-  #pragma clang diagnostic ignored "-Wpragma-pack"
- #endif
- #if __has_warning("-Wcomma")
-  #pragma clang diagnostic ignored "-Wcomma"
- #endif
- #if __has_warning("-Wzero-as-null-pointer-constant")
-  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
- #endif
- #if __has_warning("-Winconsistent-missing-destructor-override")
-  #pragma clang diagnostic ignored "-Winconsistent-missing-destructor-override"
- #endif
- #if __has_warning("-Wcast-align")
-  #pragma clang diagnostic ignored "-Wcast-align"
- #endif
- #if __has_warning("-Wignored-qualifiers")
-  #pragma clang diagnostic ignored "-Wignored-qualifiers"
- #endif
- #if __has_warning("-Wmissing-field-initializers")
-  #pragma clang diagnostic ignored "-Wmissing-field-initializers"
- #endif
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_LEVEL_MSVC (0, 4505 4702)
+
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
+                                     "-Wreorder",
+                                     "-Wunsequenced",
+                                     "-Wint-to-pointer-cast",
+                                     "-Wunused-parameter",
+                                     "-Wconversion",
+                                     "-Woverloaded-virtual",
+                                     "-Wshadow",
+                                     "-Wdeprecated-register",
+                                     "-Wunused-function",
+                                     "-Wsign-conversion",
+                                     "-Wsign-compare",
+                                     "-Wdelete-non-virtual-dtor",
+                                     "-Wdeprecated-declarations",
+                                     "-Wextra-semi",
+                                     "-Wmissing-braces",
+                                     "-Wswitch-default",
+                                     "-Wshadow-field",
+                                     "-Wpragma-pack",
+                                     "-Wcomma",
+                                     "-Wzero-as-null-pointer-constant",
+                                     "-Winconsistent-missing-destructor-override",
+                                     "-Wcast-align",
+                                     "-Wignored-qualifiers",
+                                     "-Wmissing-field-initializers",
+                                     "-Wformat=",
+                                     "-Wformat",
+                                     "-Wpedantic",
+                                     "-Wextra",
+                                     "-Wclass-memaccess")
 
 #undef DEVELOPMENT
 #define DEVELOPMENT 0  // This avoids a Clang warning in Steinberg code about unused values
@@ -122,12 +105,14 @@
  #include <base/source/fobject.cpp>
  #include <base/source/fstreamer.cpp>
  #include <base/source/fstring.cpp>
-#if VST_VERSION >= 0x030608
- #include <base/thread/source/flock.cpp>
- #include <pluginterfaces/base/coreiids.cpp>
-#else
- #include <base/source/flock.cpp>
-#endif
+
+ #if VST_VERSION >= 0x030608
+  #include <base/thread/source/flock.cpp>
+  #include <pluginterfaces/base/coreiids.cpp>
+ #else
+  #include <base/source/flock.cpp>
+ #endif
+
  #include <base/source/updatehandler.cpp>
  #include <pluginterfaces/base/conststringtable.cpp>
  #include <pluginterfaces/base/funknown.cpp>
@@ -147,9 +132,10 @@
  #include <public.sdk/source/vst/vstparameters.cpp>
  #include <public.sdk/source/vst/vstpresetfile.cpp>
  #include <public.sdk/source/vst/hosting/hostclasses.cpp>
-#if VST_VERSION >= 0x03060c   // 3.6.12
- #include <public.sdk/source/vst/hosting/pluginterfacesupport.cpp>
-#endif
+
+ #if VST_VERSION >= 0x03060c   // 3.6.12
+  #include <public.sdk/source/vst/hosting/pluginterfacesupport.cpp>
+ #endif
 
 //==============================================================================
 namespace Steinberg
@@ -167,14 +153,15 @@ namespace Steinberg
     DEF_CLASS_IID (IPlugView)
     DEF_CLASS_IID (IPlugFrame)
     DEF_CLASS_IID (IPlugViewContentScaleSupport)
-}
-#endif //JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
 
-#if _MSC_VER
- #pragma warning (pop)
-#elif __clang__
- #pragma clang diagnostic pop
-#endif
+   #if JUCE_LINUX
+    DEF_CLASS_IID (Linux::IRunLoop)
+   #endif
+}
+#endif // JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
+
+JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #if JUCE_WINDOWS
  #include <windows.h>

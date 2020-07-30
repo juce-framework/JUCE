@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -31,7 +30,7 @@
 // Handy list of static Identifiers..
 namespace Ids
 {
-    #define DECLARE_ID(name)      const Identifier name (#name)
+    #define DECLARE_ID(name)  const Identifier name (#name)
 
     DECLARE_ID (name);
     DECLARE_ID (file);
@@ -48,8 +47,9 @@ namespace Ids
     DECLARE_ID (companyCopyright);
     DECLARE_ID (companyWebsite);
     DECLARE_ID (companyEmail);
+    DECLARE_ID (useAppConfig);
+    DECLARE_ID (addUsingNamespaceToJuceHeader);
     DECLARE_ID (displaySplashScreen);
-    DECLARE_ID (reportAppUsage);
     DECLARE_ID (splashScreenColour);
     DECLARE_ID (position);
     DECLARE_ID (source);
@@ -73,7 +73,6 @@ namespace Ids
     DECLARE_ID (rtasFolder);
     DECLARE_ID (auFolder);
     DECLARE_ID (vstLegacyPath);
-    DECLARE_ID (vst3Path);
     DECLARE_ID (rtasPath);
     DECLARE_ID (aaxPath);
     DECLARE_ID (flags);
@@ -150,7 +149,6 @@ namespace Ids
     DECLARE_ID (msvcModuleDefinitionFile);
     DECLARE_ID (bigIcon);
     DECLARE_ID (smallIcon);
-    DECLARE_ID (jucerVersion);
     DECLARE_ID (prebuildCommand);
     DECLARE_ID (postbuildCommand);
     DECLARE_ID (generateManifest);
@@ -164,6 +162,7 @@ namespace Ids
     DECLARE_ID (noWarnings);
     DECLARE_ID (resource);
     DECLARE_ID (xcodeResource);
+    DECLARE_ID (xcodeValidArchs);
     DECLARE_ID (className);
     DECLARE_ID (classDesc);
     DECLARE_ID (controlPoint);
@@ -336,6 +335,8 @@ namespace Ids
     DECLARE_ID (pluginCode);
     DECLARE_ID (pluginChannelConfigs);
     DECLARE_ID (pluginCharacteristicsValue);
+    DECLARE_ID (pluginCharacteristics);
+    DECLARE_ID (extraPluginFormats);
     DECLARE_ID (pluginIsSynth);
     DECLARE_ID (pluginWantsMidiIn);
     DECLARE_ID (pluginProducesMidiOut);
@@ -365,8 +366,12 @@ namespace Ids
     DECLARE_ID (compilerFlagSchemes);
     DECLARE_ID (compilerFlagScheme);
     DECLARE_ID (dontQueryForUpdate);
+    DECLARE_ID (dontAskAboutJUCEPath);
     DECLARE_ID (postExportShellCommandPosix);
     DECLARE_ID (postExportShellCommandWin);
+    DECLARE_ID (liveBuildEnabled);
+    DECLARE_ID (guiEditorEnabled);
+    DECLARE_ID (jucerFormatVersion);
 
     const Identifier ID ("id");
     const Identifier ID_uppercase ("ID");

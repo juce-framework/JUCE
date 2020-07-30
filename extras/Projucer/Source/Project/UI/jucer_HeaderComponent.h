@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -28,9 +27,12 @@
 
 #include "../../Application/jucer_Headers.h"
 #include "../../Utility/UI/jucer_IconButton.h"
-#include "../../Utility/UI/jucer_UserSettingsPopup.h"
+#include "jucer_UserAvatarComponent.h"
 
 class Project;
+class ProjectContentComponent;
+class ProjectExporter;
+class CompileEngineChildProcess;
 
 //==============================================================================
 class HeaderComponent    : public Component,
@@ -40,7 +42,7 @@ class HeaderComponent    : public Component,
                            private Timer
 {
 public:
-    HeaderComponent();
+    HeaderComponent (ProjectContentComponent* projectContentComponent);
     ~HeaderComponent() override;
 
     //==============================================================================
@@ -48,23 +50,17 @@ public:
     void paint (Graphics&) override;
 
     //==============================================================================
-    void setCurrentProject (Project*) noexcept;
+    void setCurrentProject (Project*);
 
-    //==============================================================================
-    void updateExporters() noexcept;
-    String getSelectedExporterName() const noexcept;
-    bool canCurrentExporterLaunchProject() const noexcept;
+    void updateExporters();
+    std::unique_ptr<ProjectExporter> getSelectedExporter() const;
+    bool canCurrentExporterLaunchProject() const;
 
-    //==============================================================================
-    int getUserButtonWidth() const noexcept;
-    void sidebarTabsWidthChanged (int newWidth) noexcept;
-
-    //==============================================================================
-    void showUserSettings() noexcept;
+    void sidebarTabsWidthChanged (int newWidth);
+    void liveBuildEnablementChanged (bool isEnabled);
 
 private:
     //==============================================================================
-    void lookAndFeelChanged() override;
     void changeListenerCallback (ChangeBroadcaster* source) override;
     void valueChanged (Value&) override;
     void timerCallback() override;
@@ -74,18 +70,17 @@ private:
     void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&, int) override { updateIfNeeded (parentTree); }
     void valueTreeChildOrderChanged (ValueTree& parentTree, int, int) override   { updateIfNeeded (parentTree); }
 
-    void updateIfNeeded (ValueTree tree) noexcept
+    void updateIfNeeded (ValueTree tree)
     {
         if (tree == exportersTree)
             updateExporters();
     }
 
     //==============================================================================
-    void initialiseButtons() noexcept;
+    void initialiseButtons();
 
-    void updateName() noexcept;
-    void updateExporterButton() noexcept;
-    void updateUserAvatar() noexcept;
+    void updateName();
+    void updateExporterButton();
 
     //==============================================================================
     void buildPing();
@@ -96,19 +91,21 @@ private:
     int tabsWidth = 200;
     bool isBuilding = false;
 
+    ProjectContentComponent* projectContentComponent = nullptr;
     Project* project = nullptr;
     ValueTree exportersTree;
 
     Value projectNameValue;
 
     ComboBox exporterBox;
-    Label configLabel  { "Config Label", "Selected exporter" },
-    projectNameLabel;
+    Label configLabel  { "Config Label", "Selected exporter" }, projectNameLabel;
 
-    std::unique_ptr<ImageComponent> juceIcon;
-    std::unique_ptr<IconButton> projectSettingsButton, saveAndOpenInIDEButton, userSettingsButton, runAppButton;
+    ImageComponent juceIcon;
+    UserAvatarComponent userAvatar { true };
 
-    SafePointer<CallOutBox> userSettingsWindow;
+    IconButton projectSettingsButton { "Project Settings", getIcons().settings },
+               saveAndOpenInIDEButton { "Save and Open in IDE", Image() },
+               runAppButton { "Run Application", getIcons().play };
 
     ReferenceCountedObjectPtr<CompileEngineChildProcess> childProcess;
 

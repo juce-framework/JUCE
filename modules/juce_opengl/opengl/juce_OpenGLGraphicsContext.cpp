@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -120,8 +119,8 @@ struct CachedImageList  : public ReferenceCountedObject,
             t.textureID = texture.getTextureID();
             t.imageWidth = pixelData->width;
             t.imageHeight = pixelData->height;
-            t.fullWidthProportion  = t.imageWidth  / (float) texture.getWidth();
-            t.fullHeightProportion = t.imageHeight / (float) texture.getHeight();
+            t.fullWidthProportion  = (float) t.imageWidth  / (float) texture.getWidth();
+            t.fullHeightProportion = (float) t.imageHeight / (float) texture.getHeight();
 
             lastUsed = Time::getCurrentTime();
             return t;
@@ -436,7 +435,7 @@ struct ShaderPrograms  : public ReferenceCountedObject
 
         OpenGLShaderProgram::Attribute positionAttribute, colourAttribute;
         OpenGLShaderProgram::Uniform screenBounds;
-        std::function<void(OpenGLShaderProgram&)> onShaderActivated;
+        std::function<void (OpenGLShaderProgram&)> onShaderActivated;
     };
 
     struct MaskedShaderParams
@@ -647,16 +646,16 @@ struct ShaderPrograms  : public ReferenceCountedObject
                         float targetX, float targetY, bool isForTiling) const
         {
             auto t = trans.translated (-targetX, -targetY)
-                          .inverted().scaled (fullWidthProportion / imageWidth,
-                                              fullHeightProportion / imageHeight);
+                          .inverted().scaled (fullWidthProportion  / (float) imageWidth,
+                                              fullHeightProportion / (float) imageHeight);
 
             const GLfloat m[] = { t.mat00, t.mat01, t.mat02, t.mat10, t.mat11, t.mat12 };
             matrix.set (m, 6);
 
             if (isForTiling)
             {
-                fullWidthProportion -= 0.5f / imageWidth;
-                fullHeightProportion -= 0.5f / imageHeight;
+                fullWidthProportion  -= 0.5f / (float) imageWidth;
+                fullHeightProportion -= 0.5f / (float) imageHeight;
             }
 
             imageLimits.set (fullWidthProportion, fullHeightProportion);
@@ -1423,8 +1422,8 @@ struct GLState
             textureCache.bindTextureForGradient (activeTextures, g);
         }
 
-        auto t = transform.translated (0.5f - target.bounds.getX(),
-                                       0.5f - target.bounds.getY());
+        auto t = transform.translated (0.5f - (float) target.bounds.getX(),
+                                       0.5f - (float) target.bounds.getY());
         auto p1 = g.point1.transformedBy (t);
         auto p2 = g.point2.transformedBy (t);
         auto p3 = Point<float> (g.point1.x + (g.point2.y - g.point1.y),

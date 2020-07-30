@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -32,7 +31,7 @@ class TabbedComponentHandler  : public ComponentTypeHandler
 {
 public:
     TabbedComponentHandler()
-        : ComponentTypeHandler ("Tabbed Component", "TabbedComponent", typeid (TabbedComponent), 200, 150)
+        : ComponentTypeHandler ("Tabbed Component", "juce::TabbedComponent", typeid (TabbedComponent), 200, 150)
     {}
 
     Component* createNewComponent (JucerDocument*) override
@@ -152,10 +151,10 @@ public:
 
         switch (t->getOrientation())
         {
-            case TabbedButtonBar::TabsAtTop:        return "TabbedButtonBar::TabsAtTop";
-            case TabbedButtonBar::TabsAtBottom:     return "TabbedButtonBar::TabsAtBottom";
-            case TabbedButtonBar::TabsAtLeft:       return "TabbedButtonBar::TabsAtLeft";
-            case TabbedButtonBar::TabsAtRight:      return "TabbedButtonBar::TabsAtRight";
+            case TabbedButtonBar::TabsAtTop:        return "juce::TabbedButtonBar::TabsAtTop";
+            case TabbedButtonBar::TabsAtBottom:     return "juce::TabbedButtonBar::TabsAtBottom";
+            case TabbedButtonBar::TabsAtLeft:       return "juce::TabbedButtonBar::TabsAtLeft";
+            case TabbedButtonBar::TabsAtRight:      return "juce::TabbedButtonBar::TabsAtRight";
             default:                                jassertfalse; break;
         }
 
@@ -531,7 +530,7 @@ private:
 
     //==============================================================================
     class TabDepthProperty  : public SliderPropertyComponent,
-                              public ChangeListener
+                              private ChangeListener
     {
     public:
         TabDepthProperty (TabbedComponent* comp, JucerDocument& doc)
@@ -542,12 +541,12 @@ private:
             document.addChangeListener (this);
         }
 
-        ~TabDepthProperty()
+        ~TabDepthProperty() override
         {
             document.removeChangeListener (this);
         }
 
-        void setValue (double newValue)
+        void setValue (double newValue) override
         {
             document.getUndoManager().undoCurrentTransactionOnly();
 
@@ -555,20 +554,20 @@ private:
                               "Change TabComponent tab depth");
         }
 
-        double getValue() const
+        double getValue() const override
         {
             return component->getTabBarDepth();
-        }
-
-        void changeListenerCallback (ChangeBroadcaster*)
-        {
-            refresh();
         }
 
         TabbedComponent* const component;
         JucerDocument& document;
 
     private:
+        void changeListenerCallback (ChangeBroadcaster*) override
+        {
+            refresh();
+        }
+
         class TabDepthChangeAction  : public ComponentUndoableAction<TabbedComponent>
         {
         public:
@@ -925,7 +924,7 @@ private:
 
     //==============================================================================
     class TabJucerFileProperty   : public FilePropertyComponent,
-                                   public ChangeListener
+                                   private ChangeListener
     {
     public:
         TabJucerFileProperty (TabbedComponent* const comp, JucerDocument& doc, const int tabIndex_)
@@ -937,13 +936,13 @@ private:
             document.addChangeListener (this);
         }
 
-        ~TabJucerFileProperty()
+        ~TabJucerFileProperty() override
         {
             document.removeChangeListener (this);
         }
 
         //==============================================================================
-        void setFile (const File& newFile)
+        void setFile (const File& newFile) override
         {
             document.perform (new JucerCompFileChangeAction (component, *document.getComponentLayout(), tabIndex,
                                                              newFile.getRelativePathFrom (document.getCppFile().getParentDirectory())
@@ -951,14 +950,14 @@ private:
                               "Change tab component file");
         }
 
-        File getFile() const
+        File getFile() const override
         {
             return document.getCppFile().getSiblingFile (getTabJucerFile (component, tabIndex));
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
-
     private:
+        void changeListenerCallback (ChangeBroadcaster*) override { refresh(); }
+
         TabbedComponent* const component;
         JucerDocument& document;
         int tabIndex;

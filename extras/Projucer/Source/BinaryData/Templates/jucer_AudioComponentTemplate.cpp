@@ -1,11 +1,3 @@
-/*
-  ==============================================================================
-
-    This file was auto-generated!
-
-  ==============================================================================
-*/
-
 %%include_corresponding_header%%
 
 //==============================================================================
@@ -16,11 +8,11 @@
     setSize (800, 600);
 
     // Some platforms require permissions to open input channels so request that here
-    if (RuntimePermissions::isRequired (RuntimePermissions::recordAudio)
-        && ! RuntimePermissions::isGranted (RuntimePermissions::recordAudio))
+    if (juce::RuntimePermissions::isRequired (juce::RuntimePermissions::recordAudio)
+        && ! juce::RuntimePermissions::isGranted (juce::RuntimePermissions::recordAudio))
     {
-        RuntimePermissions::request (RuntimePermissions::recordAudio,
-                                     [&] (bool granted) { setAudioChannels (granted ? 2 : 0, 2); });
+        juce::RuntimePermissions::request (juce::RuntimePermissions::recordAudio,
+                                           [&] (bool granted) { setAudioChannels (granted ? 2 : 0, 2); });
     }
     else
     {
@@ -47,7 +39,7 @@ void %%content_component_class%%::prepareToPlay (int samplesPerBlockExpected, do
     // For more details, see the help for AudioProcessor::prepareToPlay()
 }
 
-void %%content_component_class%%::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill)
+void %%content_component_class%%::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
 {
     // Your audio-processing code goes here!
 
@@ -67,10 +59,10 @@ void %%content_component_class%%::releaseResources()
 }
 
 //==============================================================================
-void %%content_component_class%%::paint (Graphics& g)
+void %%content_component_class%%::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
 
     // You can add your drawing code here!
 }

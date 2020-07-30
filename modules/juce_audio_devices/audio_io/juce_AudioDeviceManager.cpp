@@ -517,7 +517,7 @@ AudioIODeviceType* AudioDeviceManager::getCurrentDeviceTypeObject() const
 
 static void updateSetupChannels (AudioDeviceManager::AudioDeviceSetup& setup, int defaultNumIns, int defaultNumOuts)
 {
-    auto updateChannels = [](const String& deviceName, BigInteger& channels, int defaultNumChannels)
+    auto updateChannels = [] (const String& deviceName, BigInteger& channels, int defaultNumChannels)
     {
         if (deviceName.isEmpty())
         {
@@ -544,6 +544,8 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
     else if (currentAudioDevice != nullptr)
         return {};
 
+    stopDevice();
+
     if (getCurrentDeviceTypeObject() == nullptr
         || (newSetup.inputDeviceName.isEmpty() && newSetup.outputDeviceName.isEmpty()))
     {
@@ -554,8 +556,6 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
 
         return {};
     }
-
-    stopDevice();
 
     String error;
 

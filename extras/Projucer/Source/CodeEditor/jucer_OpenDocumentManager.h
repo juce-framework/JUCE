@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -69,13 +68,15 @@ public:
     Document* getOpenDocument (int index) const;
     void clear();
 
+    enum class SaveIfNeeded { no, yes };
+
     bool canOpenFile (const File& file);
     Document* openFile (Project* project, const File& file);
-    bool closeDocument (int index, bool saveIfNeeded);
-    bool closeDocument (Document* document, bool saveIfNeeded);
-    bool closeAll (bool askUserToSave);
-    bool closeAllDocumentsUsingProject (Project& project, bool saveIfNeeded);
-    void closeFile (const File& f, bool saveIfNeeded);
+    bool closeDocument (int index, SaveIfNeeded saveIfNeeded);
+    bool closeDocument (Document* document, SaveIfNeeded saveIfNeeded);
+    bool closeAll (SaveIfNeeded askUserToSave);
+    bool closeAllDocumentsUsingProject (Project& project, SaveIfNeeded saveIfNeeded);
+    void closeFile (const File& f, SaveIfNeeded saveIfNeeded);
     bool anyFilesNeedSaving() const;
     bool saveAll();
     FileBasedDocument::SaveResult saveIfNeededAndUserAgrees (Document* doc);

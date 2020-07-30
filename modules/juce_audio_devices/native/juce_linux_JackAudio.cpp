@@ -50,26 +50,26 @@ static void* juce_loadJackFunction (const char* const name)
   }
 
 //==============================================================================
-JUCE_DECL_JACK_FUNCTION (jack_client_t*, jack_client_open, (const char* client_name, jack_options_t options, jack_status_t* status, ...), (client_name, options, status));
-JUCE_DECL_JACK_FUNCTION (int, jack_client_close, (jack_client_t *client), (client));
-JUCE_DECL_JACK_FUNCTION (int, jack_activate, (jack_client_t* client), (client));
-JUCE_DECL_JACK_FUNCTION (int, jack_deactivate, (jack_client_t* client), (client));
-JUCE_DECL_JACK_FUNCTION (jack_nframes_t, jack_get_buffer_size, (jack_client_t* client), (client));
-JUCE_DECL_JACK_FUNCTION (jack_nframes_t, jack_get_sample_rate, (jack_client_t* client), (client));
-JUCE_DECL_VOID_JACK_FUNCTION (jack_on_shutdown, (jack_client_t* client, void (*function)(void* arg), void* arg), (client, function, arg));
-JUCE_DECL_JACK_FUNCTION (void* , jack_port_get_buffer, (jack_port_t* port, jack_nframes_t nframes), (port, nframes));
-JUCE_DECL_JACK_FUNCTION (jack_nframes_t, jack_port_get_total_latency, (jack_client_t* client, jack_port_t* port), (client, port));
-JUCE_DECL_JACK_FUNCTION (jack_port_t* , jack_port_register, (jack_client_t* client, const char* port_name, const char* port_type, unsigned long flags, unsigned long buffer_size), (client, port_name, port_type, flags, buffer_size));
-JUCE_DECL_VOID_JACK_FUNCTION (jack_set_error_function, (void (*func)(const char*)), (func));
-JUCE_DECL_JACK_FUNCTION (int, jack_set_process_callback, (jack_client_t* client, JackProcessCallback process_callback, void* arg), (client, process_callback, arg));
-JUCE_DECL_JACK_FUNCTION (const char**, jack_get_ports, (jack_client_t* client, const char* port_name_pattern, const char* type_name_pattern, unsigned long flags), (client, port_name_pattern, type_name_pattern, flags));
-JUCE_DECL_JACK_FUNCTION (int, jack_connect, (jack_client_t* client, const char* source_port, const char* destination_port), (client, source_port, destination_port));
-JUCE_DECL_JACK_FUNCTION (const char*, jack_port_name, (const jack_port_t* port), (port));
-JUCE_DECL_JACK_FUNCTION (void*, jack_set_port_connect_callback, (jack_client_t* client, JackPortConnectCallback connect_callback, void* arg), (client, connect_callback, arg));
-JUCE_DECL_JACK_FUNCTION (jack_port_t* , jack_port_by_id, (jack_client_t* client, jack_port_id_t port_id), (client, port_id));
-JUCE_DECL_JACK_FUNCTION (int, jack_port_connected, (const jack_port_t* port), (port));
-JUCE_DECL_JACK_FUNCTION (int, jack_port_connected_to, (const jack_port_t* port, const char* port_name), (port, port_name));
-JUCE_DECL_JACK_FUNCTION (int, jack_set_xrun_callback, (jack_client_t* client, JackXRunCallback xrun_callback, void* arg), (client, xrun_callback, arg));
+JUCE_DECL_JACK_FUNCTION (jack_client_t*, jack_client_open, (const char* client_name, jack_options_t options, jack_status_t* status, ...), (client_name, options, status))
+JUCE_DECL_JACK_FUNCTION (int, jack_client_close, (jack_client_t *client), (client))
+JUCE_DECL_JACK_FUNCTION (int, jack_activate, (jack_client_t* client), (client))
+JUCE_DECL_JACK_FUNCTION (int, jack_deactivate, (jack_client_t* client), (client))
+JUCE_DECL_JACK_FUNCTION (jack_nframes_t, jack_get_buffer_size, (jack_client_t* client), (client))
+JUCE_DECL_JACK_FUNCTION (jack_nframes_t, jack_get_sample_rate, (jack_client_t* client), (client))
+JUCE_DECL_VOID_JACK_FUNCTION (jack_on_shutdown, (jack_client_t* client, void (*function)(void* arg), void* arg), (client, function, arg))
+JUCE_DECL_JACK_FUNCTION (void* , jack_port_get_buffer, (jack_port_t* port, jack_nframes_t nframes), (port, nframes))
+JUCE_DECL_JACK_FUNCTION (jack_nframes_t, jack_port_get_total_latency, (jack_client_t* client, jack_port_t* port), (client, port))
+JUCE_DECL_JACK_FUNCTION (jack_port_t* , jack_port_register, (jack_client_t* client, const char* port_name, const char* port_type, unsigned long flags, unsigned long buffer_size), (client, port_name, port_type, flags, buffer_size))
+JUCE_DECL_VOID_JACK_FUNCTION (jack_set_error_function, (void (*func)(const char*)), (func))
+JUCE_DECL_JACK_FUNCTION (int, jack_set_process_callback, (jack_client_t* client, JackProcessCallback process_callback, void* arg), (client, process_callback, arg))
+JUCE_DECL_JACK_FUNCTION (const char**, jack_get_ports, (jack_client_t* client, const char* port_name_pattern, const char* type_name_pattern, unsigned long flags), (client, port_name_pattern, type_name_pattern, flags))
+JUCE_DECL_JACK_FUNCTION (int, jack_connect, (jack_client_t* client, const char* source_port, const char* destination_port), (client, source_port, destination_port))
+JUCE_DECL_JACK_FUNCTION (const char*, jack_port_name, (const jack_port_t* port), (port))
+JUCE_DECL_JACK_FUNCTION (void*, jack_set_port_connect_callback, (jack_client_t* client, JackPortConnectCallback connect_callback, void* arg), (client, connect_callback, arg))
+JUCE_DECL_JACK_FUNCTION (jack_port_t* , jack_port_by_id, (jack_client_t* client, jack_port_id_t port_id), (client, port_id))
+JUCE_DECL_JACK_FUNCTION (int, jack_port_connected, (const jack_port_t* port), (port))
+JUCE_DECL_JACK_FUNCTION (int, jack_port_connected_to, (const jack_port_t* port, const char* port_name), (port, port_name))
+JUCE_DECL_JACK_FUNCTION (int, jack_set_xrun_callback, (jack_client_t* client, JackXRunCallback xrun_callback, void* arg), (client, xrun_callback, arg))
 
 #if JUCE_DEBUG
  #define JACK_LOGGING_ENABLED 1
@@ -241,14 +241,14 @@ public:
         Array<int> sizes;
 
         if (client != nullptr)
-            sizes.add (juce::jack_get_buffer_size (client));
+            sizes.add (static_cast<int> (juce::jack_get_buffer_size (client)));
 
         return sizes;
     }
 
     int getDefaultBufferSize() override             { return getCurrentBufferSizeSamples(); }
-    int getCurrentBufferSizeSamples() override      { return client != nullptr ? juce::jack_get_buffer_size (client) : 0; }
-    double getCurrentSampleRate() override          { return client != nullptr ? juce::jack_get_sample_rate (client) : 0; }
+    int getCurrentBufferSizeSamples() override      { return client != nullptr ? static_cast<int> (juce::jack_get_buffer_size (client)) : 0; }
+    double getCurrentSampleRate() override          { return client != nullptr ? static_cast<int> (juce::jack_get_sample_rate (client)) : 0; }
 
 
     String open (const BigInteger& inputChannels, const BigInteger& outputChannels,
@@ -383,7 +383,7 @@ private:
         {
             if (activeInputChannels[i])
                 if (jack_default_audio_sample_t* in
-                        = (jack_default_audio_sample_t*) juce::jack_port_get_buffer ((jack_port_t*) inputPorts.getUnchecked(i), numSamples))
+                        = (jack_default_audio_sample_t*) juce::jack_port_get_buffer ((jack_port_t*) inputPorts.getUnchecked(i), static_cast<jack_nframes_t> (numSamples)))
                     inChans [numActiveInChans++] = (float*) in;
         }
 
@@ -391,7 +391,7 @@ private:
         {
             if (activeOutputChannels[i])
                 if (jack_default_audio_sample_t* out
-                        = (jack_default_audio_sample_t*) juce::jack_port_get_buffer ((jack_port_t*) outputPorts.getUnchecked(i), numSamples))
+                        = (jack_default_audio_sample_t*) juce::jack_port_get_buffer ((jack_port_t*) outputPorts.getUnchecked(i), static_cast<jack_nframes_t> (numSamples)))
                     outChans [numActiveOutChans++] = (float*) out;
         }
 
@@ -406,14 +406,14 @@ private:
         else
         {
             for (int i = 0; i < numActiveOutChans; ++i)
-                zeromem (outChans[i], sizeof (float) * numSamples);
+                zeromem (outChans[i], sizeof (float) * static_cast<size_t> (numSamples));
         }
     }
 
     static int processCallback (jack_nframes_t nframes, void* callbackArgument)
     {
         if (callbackArgument != nullptr)
-            ((JackAudioIODevice*) callbackArgument)->process (nframes);
+            ((JackAudioIODevice*) callbackArgument)->process (static_cast<int> (nframes));
 
         return 0;
     }
@@ -480,6 +480,7 @@ private:
     static void errorCallback (const char* msg)
     {
         JUCE_JACK_LOG ("JackAudioIODevice::errorCallback " + String (msg));
+        ignoreUnused (msg);
     }
 
     static void sendDeviceChangedCallback();

@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -89,7 +88,7 @@ public:
         if (keyNum < 0)
             setSize (h, h);
         else
-            setSize (jlimit (h * 4, h * 8, 6 + Font (h * 0.6f).getStringWidth (getName())), h);
+            setSize (jlimit (h * 4, h * 8, 6 + Font ((float) h * 0.6f).getStringWidth (getName())), h);
     }
 
     //==============================================================================
@@ -241,7 +240,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.setFont (getHeight() * 0.7f);
+        g.setFont ((float) getHeight() * 0.7f);
         g.setColour (owner.findColour (KeyMappingEditorComponent::textColourId));
 
         g.drawFittedText (TRANS (owner.getCommandManager().getNameOfCommand (commandID)),
@@ -308,7 +307,7 @@ public:
 
     void paintItem (Graphics& g, int width, int height) override
     {
-        g.setFont (Font (height * 0.7f, Font::bold));
+        g.setFont (Font ((float) height * 0.7f, Font::bold));
         g.setColour (owner.findColour (KeyMappingEditorComponent::textColourId));
 
         g.drawText (TRANS (categoryName), 2, 0, width - 2, height, Justification::centredLeft, true);

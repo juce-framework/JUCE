@@ -25,6 +25,11 @@
 namespace juce
 {
 
+/**
+    Represents the version number of a block device.
+
+    @tags{Blocks}
+*/
 struct BlocksVersion
 {
 public:

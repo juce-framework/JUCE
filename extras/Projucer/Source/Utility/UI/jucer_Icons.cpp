@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -1522,29 +1521,6 @@ const uint8 clion[] = { 110,109,0,0,0,0,0,0,0,0,98,0,0,0,0,170,170,38,67,0,0,0,0
     67,98,0,32,133,67,88,85,75,67,0,32,133,67,174,42,6,67,0,32,133,67,4,0,130,66,99,109,0,0,62,66,254,31,203,67,98,0,0,220,66,254,31,203,67,0,128,44,67,254,31,203,67,0,0,107,67,254,31,203,67,98,0,0,107,67,84,85,208,67,0,0,107,67,170,138,213,67,0,0,107,67,
     0,192,218,67,98,0,128,44,67,0,192,218,67,0,0,220,66,0,192,218,67,252,255,61,66,0,192,218,67,98,252,255,61,66,170,138,213,67,252,255,61,66,84,85,208,67,252,255,61,66,254,31,203,67,99,101,0,0 };
 }
-
-/*static void convertSVGPathToCppData (const String& pathString)
-{
-    XmlElement svg ("svg");
-    XmlElement* path = svg.createNewChildElement ("path");
-    path->setAttribute ("d", pathString);
-
-    std::unique_ptr<Drawable> d (Drawable::createFromSVG (svg));
-    DrawablePath* dp = dynamic_cast<DrawablePath*> (d->getChildComponent(0));
-    jassert (dp != nullptr);
-    Path p (dp->getPath());
-
-    p.applyTransform (RectanglePlacement (RectanglePlacement::centred).getTransformToFit (p.getBounds(),
-                                                                                          Rectangle<float> (500.0f, 500.0f)));
-
-    MemoryOutputStream data;
-    p.writePathToStream (data);
-
-    MemoryOutputStream out;
-    CodeHelpers::writeDataAsCppLiteral (data.getMemoryBlock(), out, false, true);
-
-    DBG (out.toString() << newLine);
-}*/
 
 Icons::Icons()
 {

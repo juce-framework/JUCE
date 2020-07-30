@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -23,6 +22,11 @@
 
   ==============================================================================
 */
+
+@interface NSEvent (DeviceDelta)
+- (float)deviceDeltaX;
+- (float)deviceDeltaY;
+@end
 
 //==============================================================================
 #if defined (MAC_OS_X_VERSION_10_8) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8) \
@@ -681,8 +685,8 @@ public:
             }
             else if ([ev respondsToSelector: @selector (deviceDeltaX)])
             {
-                wheel.deltaX = checkDeviceDeltaReturnValue ((float) getMsgSendFPRetFn() (ev, @selector (deviceDeltaX)));
-                wheel.deltaY = checkDeviceDeltaReturnValue ((float) getMsgSendFPRetFn() (ev, @selector (deviceDeltaY)));
+                wheel.deltaX = checkDeviceDeltaReturnValue ([ev deviceDeltaX]);
+                wheel.deltaY = checkDeviceDeltaReturnValue ([ev deviceDeltaY]);
             }
         }
         @catch (...)
@@ -881,7 +885,7 @@ public:
        #if USE_COREGRAPHICS_RENDERING
         if (usingCoreGraphics)
         {
-            CoreGraphicsContext context (cg, (float) [view frame].size.height, displayScale);
+            CoreGraphicsContext context (cg, (float) [view frame].size.height);
             invokePaint (context);
         }
         else
@@ -917,7 +921,7 @@ public:
                     invokePaint (*context);
                 }
 
-                CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
+                CGColorSpaceRef colourSpace = CGColorSpaceCreateWithName (kCGColorSpaceSRGB);
                 CGImageRef image = juce_createCoreGraphicsImage (temp, colourSpace, false);
                 CGColorSpaceRelease (colourSpace);
                 CGContextDrawImage (cg, CGRectMake (r.origin.x, r.origin.y, clipW, clipH), image);
@@ -1767,10 +1771,7 @@ private:
                 owner->stringBeingComposed.clear();
 
             if (! (owner->textWasInserted || owner->redirectKeyDown (ev)))
-            {
-                objc_super s = { self, [NSView class] };
-                getMsgSendSuperFn() (&s, @selector (keyDown:), ev);
-            }
+                sendSuperclassMessage<void> (self, @selector (keyDown:), ev);
         }
     }
 
@@ -1778,11 +1779,8 @@ private:
     {
         auto* owner = getOwner (self);
 
-        if (owner == nullptr || ! owner->redirectKeyUp (ev))
-        {
-            objc_super s = { self, [NSView class] };
-            getMsgSendSuperFn() (&s, @selector (keyUp:), ev);
-        }
+        if (! owner->redirectKeyUp (ev))
+            sendSuperclassMessage<void> (self, @selector (keyUp:), ev);
     }
 
     //==============================================================================
@@ -2032,7 +2030,7 @@ private:
 
     static void becomeKeyWindow (id self, SEL)
     {
-        sendSuperclassMessage (self, @selector (becomeKeyWindow));
+        sendSuperclassMessage<void> (self, @selector (becomeKeyWindow));
 
         if (auto* owner = getOwner (self))
         {
@@ -2054,10 +2052,15 @@ private:
         return owner == nullptr || owner->windowShouldClose();
     }
 
-    static NSRect constrainFrameRect (id self, SEL, NSRect frameRect, NSScreen*)
+    static NSRect constrainFrameRect (id self, SEL, NSRect frameRect, NSScreen* screen)
     {
         if (auto* owner = getOwner (self))
+        {
+            frameRect = sendSuperclassMessage<NSRect, NSRect, NSScreen*> (self, @selector (constrainFrameRect:toScreen:),
+                                                                          frameRect, screen);
+
             frameRect = owner->constrainRect (frameRect);
+        }
 
         return frameRect;
     }
@@ -2101,10 +2104,10 @@ private:
     {
         if (auto* owner = getOwner (self))
         {
-            owner->isZooming = true;
-            objc_super s = { self, [NSWindow class] };
-            getMsgSendSuperFn() (&s, @selector (zoom:), sender);
-            owner->isZooming = false;
+            {
+                const ScopedValueSetter<bool> svs (owner->isZooming, true);
+                sendSuperclassMessage<void> (self, @selector (zoom:), sender);
+            }
 
             owner->redirectMovedOrResized();
         }

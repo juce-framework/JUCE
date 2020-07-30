@@ -88,9 +88,14 @@ public:
 
         Call this to make sound. This will chop up the AudioBuffer into subBlock
         pieces separated by events in the MIDI buffer, and then call
-        processNextSubBlock on each one of them. In between you will get calls
+        renderNextSubBlock on each one of them. In between you will get calls
         to noteAdded/Changed/Finished, where you can update parameters that
         depend on those notes to use for your audio rendering.
+
+        @param outputAudio      Buffer into which audio will be rendered
+        @param inputMidi        MIDI events to process
+        @param startSample      The first sample to process in both buffers
+        @param numSamples       The number of samples to process
     */
     template <typename floatType>
     void renderNextBlock (AudioBuffer<floatType>& outputAudio,

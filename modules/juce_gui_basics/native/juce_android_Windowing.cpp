@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -1289,7 +1288,7 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (AlertWindow::AlertIconType /*i
 }
 
 //==============================================================================
-static bool androidScreenSaverEnabled = false;
+static bool androidScreenSaverEnabled = true;
 
 void Desktop::setScreenSaverEnabled (bool shouldEnable)
 {
@@ -1304,7 +1303,7 @@ void Desktop::setScreenSaverEnabled (bool shouldEnable)
             auto* env = getEnv();
 
             LocalRef<jobject> mainWindow (env->CallObjectMethod (activity.get(), AndroidActivity.getWindow));
-            env->CallVoidMethod(mainWindow.get(), AndroidWindow.setFlags, shouldEnable ? FLAG_KEEP_SCREEN_ON : 0, FLAG_KEEP_SCREEN_ON);
+            env->CallVoidMethod (mainWindow.get(), AndroidWindow.setFlags, shouldEnable ? 0 : FLAG_KEEP_SCREEN_ON, FLAG_KEEP_SCREEN_ON);
         }
 
         androidScreenSaverEnabled = shouldEnable;

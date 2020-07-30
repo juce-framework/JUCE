@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -36,30 +35,19 @@ namespace juce
 namespace OggVorbisNamespace
 {
 #if JUCE_INCLUDE_OGGVORBIS_CODE || ! defined (JUCE_INCLUDE_OGGVORBIS_CODE)
- #if JUCE_MSVC
-  #pragma warning (push)
-  #pragma warning (disable: 4267 4127 4244 4996 4100 4701 4702 4013 4133 4206 4305 4189 4706 4995 4365 4456 4457 4459)
- #elif JUCE_CLANG
-  #pragma clang diagnostic push
-  #pragma clang diagnostic ignored "-Wconversion"
-  #pragma clang diagnostic ignored "-Wshadow"
-  #pragma clang diagnostic ignored "-Wfloat-conversion"
-  #pragma clang diagnostic ignored "-Wdeprecated-register"
-  #pragma clang diagnostic ignored "-Wswitch-enum"
-  #if __has_warning("-Wzero-as-null-pointer-constant")
-   #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
-  #endif
- #elif JUCE_GCC
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wconversion"
-  #pragma GCC diagnostic ignored "-Wshadow"
-  #pragma GCC diagnostic ignored "-Wsign-conversion"
-  #pragma GCC diagnostic ignored "-Wfloat-conversion"
-  #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-  #pragma GCC diagnostic ignored "-Wswitch-enum"
-  #pragma GCC diagnostic ignored "-Wswitch-default"
-  #pragma GCC diagnostic ignored "-Wredundant-decls"
- #endif
+ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4267 4127 4244 4996 4100 4701 4702 4013 4133 4206 4305 4189 4706 4995 4365 4456 4457 4459)
+
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
+                                      "-Wshadow",
+                                      "-Wfloat-conversion",
+                                      "-Wdeprecated-register",
+                                      "-Wdeprecated-declarations",
+                                      "-Wswitch-enum",
+                                      "-Wzero-as-null-pointer-constant",
+                                      "-Wsign-conversion",
+                                      "-Wswitch-default",
+                                      "-Wredundant-decls",
+                                      "-Wmisleading-indentation")
 
  #include "oggvorbis/vorbisenc.h"
  #include "oggvorbis/codec.h"
@@ -89,13 +77,8 @@ namespace OggVorbisNamespace
  #include "oggvorbis/libvorbis-1.3.2/lib/vorbisfile.c"
  #include "oggvorbis/libvorbis-1.3.2/lib/window.c"
 
- #if JUCE_MSVC
-  #pragma warning (pop)
- #elif JUCE_CLANG
-  #pragma clang diagnostic pop
- #elif JUCE_GCC
-  #pragma GCC diagnostic pop
- #endif
+ JUCE_END_IGNORE_WARNINGS_MSVC
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #else
  #include <vorbis/vorbisenc.h>
  #include <vorbis/codec.h>
@@ -152,7 +135,7 @@ public:
             lengthInSamples = (uint32) ov_pcm_total (&ovFile, -1);
             numChannels = (unsigned int) info->channels;
             bitsPerSample = 16;
-            sampleRate = info->rate;
+            sampleRate = (double) info->rate;
 
             reservoir.setSize ((int) numChannels, (int) jmin (lengthInSamples, (int64) 4096));
         }
@@ -293,7 +276,7 @@ public:
         vorbis_info_init (&vi);
 
         if (vorbis_encode_init_vbr (&vi, (int) numChans, (int) rate,
-                                    jlimit (0.0f, 1.0f, qualityIndex * 0.1f)) == 0)
+                                    jlimit (0.0f, 1.0f, (float) qualityIndex * 0.1f)) == 0)
         {
             vorbis_comment_init (&vc);
 
@@ -500,8 +483,8 @@ int OggVorbisAudioFormat::estimateOggFileQuality (const File& source)
     {
         if (auto r = std::unique_ptr<AudioFormatReader> (createReaderFor (in.release(), true)))
         {
-            auto lengthSecs = r->lengthInSamples / r->sampleRate;
-            auto approxBitsPerSecond = (int) (source.getSize() * 8 / lengthSecs);
+            auto lengthSecs = (double) r->lengthInSamples / r->sampleRate;
+            auto approxBitsPerSecond = (int) ((double) source.getSize() * 8 / lengthSecs);
 
             auto qualities = getQualityOptions();
             int bestIndex = 0;

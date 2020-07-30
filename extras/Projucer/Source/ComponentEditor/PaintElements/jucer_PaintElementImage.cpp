@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -98,9 +97,9 @@ void PaintElementImage::fillInGeneratedCode (GeneratedCode& code, String& paintM
             code.addImageResourceLoader (imageVariable, resourceName);
 
             if (opacity >= 254.0 / 255.0)
-                r << "    g.setColour (Colours::black);\n";
+                r << "    g.setColour (juce::Colours::black);\n";
             else
-                r << "    g.setColour (Colours::black.withAlpha (" << CodeHelpers::floatLiteral (opacity, 3) << "));\n";
+                r << "    g.setColour (juce::Colours::black.withAlpha (" << CodeHelpers::floatLiteral (opacity, 3) << "));\n";
 
             if (mode == stretched)
             {
@@ -115,9 +114,9 @@ void PaintElementImage::fillInGeneratedCode (GeneratedCode& code, String& paintM
                   << "                       ";
 
                 if (mode == proportionalReducingOnly)
-                    r << "RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize";
+                    r << "juce::RectanglePlacement::centred | juce::RectanglePlacement::onlyReduceInSize";
                 else
-                    r << "RectanglePlacement::centred";
+                    r << "juce::RectanglePlacement::centred";
 
                 r << ",\n"
                   << "                       false);\n";
@@ -131,27 +130,27 @@ void PaintElementImage::fillInGeneratedCode (GeneratedCode& code, String& paintM
                 const String imageVariable ("drawable" + String (code.getUniqueSuffix()));
 
                 code.privateMemberDeclarations
-                    << "std::unique_ptr<Drawable> " << imageVariable << ";\n";
+                    << "std::unique_ptr<juce::Drawable> " << imageVariable << ";\n";
 
                 code.constructorCode
-                    << imageVariable << " = Drawable::createFromImageData ("
+                    << imageVariable << " = juce::Drawable::createFromImageData ("
                     << resourceName << ", " << resourceName << "Size);\n";
 
                 code.destructorCode
                     << imageVariable << " = nullptr;\n";
 
                 if (opacity >= 254.0 / 255.0)
-                    r << "    g.setColour (Colours::black);\n";
+                    r << "    g.setColour (juce::Colours::black);\n";
                 else
-                    r << "    g.setColour (Colours::black.withAlpha (" << CodeHelpers::floatLiteral (opacity, 3) << "));\n";
+                    r << "    g.setColour (juce::Colours::black.withAlpha (" << CodeHelpers::floatLiteral (opacity, 3) << "));\n";
 
                 r << "    jassert (" << imageVariable << " != nullptr);\n"
                   << "    if (" << imageVariable << " != nullptr)\n"
-                  << "        " << imageVariable  << "->drawWithin (g, Rectangle<int> (x, y, width, height).toFloat(),\n"
+                  << "        " << imageVariable  << "->drawWithin (g, juce::Rectangle<int> (x, y, width, height).toFloat(),\n"
                   << "    " << String::repeatedString (" ", imageVariable.length() + 18)
-                  << (mode == stretched ? "RectanglePlacement::stretchToFit"
-                                        : (mode == proportionalReducingOnly ? "RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize"
-                                                                            : "RectanglePlacement::centred"))
+                  << (mode == stretched ? "juce::RectanglePlacement::stretchToFit"
+                                        : (mode == proportionalReducingOnly ? "juce::RectanglePlacement::centred | juce::RectanglePlacement::onlyReduceInSize"
+                                                                            : "juce::RectanglePlacement::centred"))
                   << ", " << CodeHelpers::floatLiteral (opacity, 3) << ");\n";
             }
         }

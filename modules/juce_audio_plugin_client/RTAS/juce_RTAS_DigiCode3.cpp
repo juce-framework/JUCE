@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -34,12 +33,7 @@
  #include "../utility/juce_IncludeSystemHeaders.h"
  #include "juce_RTAS_DigiCode_Header.h"
 
- #ifdef __clang__
-  #pragma clang diagnostic push
-  #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
-  #pragma clang diagnostic ignored "-Wextra-tokens"
-  #pragma clang diagnostic ignored "-Wreorder"
- #endif
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor", "-Wextra-tokens", "-Wreorder")
 
  /*
     This file is used to include and build the required digidesign CPP files without your project
@@ -68,9 +62,7 @@
   #include <Dispatcher.cpp>
  #endif
 
- #ifdef __clang__
-  #pragma clang diagnostic pop
- #endif
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #else
 

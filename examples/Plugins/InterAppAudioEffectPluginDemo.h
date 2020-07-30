@@ -23,24 +23,26 @@
 
  BEGIN_JUCE_PIP_METADATA
 
- name:             InterAppAudioEffectPlugin
- version:          1.0.0
- vendor:           JUCE
- website:          http://juce.com
- description:      Inter-app audio effect plugin.
+ name:               InterAppAudioEffectPlugin
+ version:            1.0.0
+ vendor:             JUCE
+ website:            http://juce.com
+ description:        Inter-app audio effect plugin.
 
- dependencies:     juce_audio_basics, juce_audio_devices, juce_audio_formats,
-                   juce_audio_plugin_client, juce_audio_processors,
-                   juce_audio_utils, juce_core, juce_data_structures,
-                   juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
- exporters:        xcode_iphone
+ dependencies:       juce_audio_basics, juce_audio_devices, juce_audio_formats,
+                     juce_audio_plugin_client, juce_audio_processors,
+                     juce_audio_utils, juce_core, juce_data_structures,
+                     juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
+ exporters:          xcode_iphone
 
- moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+ moduleFlags:        JUCE_STRICT_REFCOUNTEDPOINTER=1
 
- type:             AudioProcessor
- mainClass:        IAAEffectProcessor
+ type:               AudioProcessor
+ mainClass:          IAAEffectProcessor
 
- useLocalCopy:     1
+ useLocalCopy:       1
+
+ extraPluginFormats: IAA
 
  END_JUCE_PIP_METADATA
 
@@ -76,8 +78,6 @@ public:
         g.setColour (getLookAndFeel().findColour (Slider::trackColourId));
         g.fillRoundedRectangle (area.toFloat(), 6.0);
     }
-
-    void resized() override {}
 
     //==============================================================================
     // Called from the audio thread.
@@ -213,7 +213,7 @@ public:
     bool hasEditor() const override                                    { return true; }
 
     //==============================================================================
-    const String getName() const override                              { return JucePlugin_Name; }
+    const String getName() const override                              { return "InterAppAudioEffectPlugin"; }
     bool acceptsMidi() const override                                  { return false; }
     bool producesMidi() const override                                 { return false; }
     double getTailLengthSeconds() const override                       { return 0.0; }
@@ -303,7 +303,7 @@ private:
 
             Path rewindShape;
             rewindShape.addRectangle (0.0, 0.0, 5.0, buttonSize);
-            rewindShape.addTriangle (0.0, buttonSize / 2, buttonSize, 0.0, buttonSize, buttonSize);
+            rewindShape.addTriangle (0.0, buttonSize * 0.5f, buttonSize, 0.0, buttonSize, buttonSize);
             rewindButton.setShape (rewindShape, true, true, false);
             rewindButton.onClick = [this]
             {
@@ -383,19 +383,19 @@ private:
             area.removeFromLeft (20);
             transportText.setBounds (area.removeFromTop (120));
 
-            auto navigationArea = area.removeFromTop (buttonSize);
+            auto navigationArea = area.removeFromTop ((int) buttonSize);
             rewindButton.setTopLeftPosition (navigationArea.getPosition());
-            navigationArea.removeFromLeft (buttonSize + 10);
+            navigationArea.removeFromLeft ((int) buttonSize + 10);
             playButton.setTopLeftPosition (navigationArea.getPosition());
-            navigationArea.removeFromLeft (buttonSize + 10);
+            navigationArea.removeFromLeft ((int) buttonSize + 10);
             recordButton.setTopLeftPosition (navigationArea.getPosition());
 
             area.removeFromTop (30);
 
-            auto appSwitchArea = area.removeFromTop (buttonSize);
+            auto appSwitchArea = area.removeFromTop ((int) buttonSize);
             switchToHostButtonLabel.setBounds (appSwitchArea.removeFromLeft (100));
             appSwitchArea.removeFromLeft (5);
-            switchToHostButton.setBounds (appSwitchArea.removeFromLeft (buttonSize));
+            switchToHostButton.setBounds (appSwitchArea.removeFromLeft ((int) buttonSize));
         }
 
     private:
@@ -513,7 +513,7 @@ private:
 
                 if (visible)
                 {
-                    auto icon = hostType.getHostIcon (buttonSize);
+                    auto icon = hostType.getHostIcon ((int) buttonSize);
                     switchToHostButton.setImages(false, true, true,
                                                  icon, 1.0, Colours::transparentBlack,
                                                  icon, 1.0, Colours::transparentBlack,
@@ -525,7 +525,7 @@ private:
         IAAEffectProcessor& iaaEffectProcessor;
         AudioProcessorValueTreeState& parameters;
 
-        const int buttonSize = 30;
+        const float buttonSize = 30.0f;
         const Colour defaultButtonColour = Colours::darkgrey;
         ShapeButton rewindButton {"Rewind", defaultButtonColour, defaultButtonColour, defaultButtonColour};
         ShapeButton playButton   {"Play",   defaultButtonColour, defaultButtonColour, defaultButtonColour};

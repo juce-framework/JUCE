@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -41,7 +40,7 @@ PositionedGlyph::PositionedGlyph (const Font& font_, juce_wchar character_, int 
 
 PositionedGlyph::~PositionedGlyph() {}
 
-static inline void drawGlyphWithFont (Graphics& g, int glyph, const Font& font, AffineTransform t)
+static void drawGlyphWithFont (Graphics& g, int glyph, const Font& font, AffineTransform t)
 {
     auto& context = g.getInternalContext();
     context.setFont (font);
@@ -544,7 +543,7 @@ void GlyphArrangement::spreadOutLine (int start, int num, float targetWidth)
     }
 }
 
-static inline bool isBreakableGlyph (const PositionedGlyph& g) noexcept
+static bool isBreakableGlyph (const PositionedGlyph& g) noexcept
 {
     return g.isWhitespace() || g.getCharacter() == '-';
 }
@@ -582,7 +581,7 @@ void GlyphArrangement::splitLines (const String& text, Font font, int startIndex
         // allowing for unevenness in the lengths due to differently sized words.
         const float lineLengthUnevennessAllowance = 80.0f;
 
-        if (numLines > (lineWidth + lineLengthUnevennessAllowance) / width || newFontHeight < 8.0f)
+        if ((float) numLines > (lineWidth + lineLengthUnevennessAllowance) / width || newFontHeight < 8.0f)
             break;
     }
 
@@ -592,7 +591,7 @@ void GlyphArrangement::splitLines (const String& text, Font font, int startIndex
     int lineIndex = 0;
     auto lineY = y;
     auto widthPerLine = jmin (width / minimumHorizontalScale,
-                              lineWidth / numLines);
+                              lineWidth / (float) numLines);
 
     while (lineY < y + height)
     {

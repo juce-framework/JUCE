@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -85,11 +84,6 @@ String createAlphaNumericUID()
     }
 
     return uid;
-}
-
-String hexString8Digits (int value)
-{
-    return String::toHexString (value).paddedLeft ('0', 8);
 }
 
 String createGUID (const String& seed)
@@ -185,23 +179,10 @@ String createGCCPreprocessorFlags (const StringPairArray& defs)
         if (value.isNotEmpty())
             def << "=" << value;
 
-        s += " -D" + def;
+        s += " \"" + ("-D" + def).replace ("\"", "\\\"") + "\"";
     }
 
     return s;
-}
-
-String replacePreprocessorDefs (const StringPairArray& definitions, String sourceString)
-{
-    for (int i = 0; i < definitions.size(); ++i)
-    {
-        const String key (definitions.getAllKeys()[i]);
-        const String value (definitions.getAllValues()[i]);
-
-        sourceString = sourceString.replace ("${" + key + "}", value);
-    }
-
-    return sourceString;
 }
 
 StringArray getSearchPathsFromString (const String& searchPath)
@@ -223,58 +204,6 @@ StringArray getCleanedStringArray (StringArray s)
     s.trim();
     s.removeEmptyStrings();
     return s;
-}
-
-//==============================================================================
-static bool keyFoundAndNotSequentialDuplicate (XmlElement* xml, const String& key)
-{
-    forEachXmlChildElementWithTagName (*xml, element, "key")
-    {
-        if (element->getAllSubText().trim().equalsIgnoreCase (key))
-        {
-            if (element->getNextElement() != nullptr && element->getNextElement()->hasTagName ("key"))
-            {
-                // found broken plist format (sequential duplicate), fix by removing
-                xml->removeChildElement (element, true);
-                return false;
-            }
-
-            // key found (not sequential duplicate)
-            return true;
-        }
-    }
-
-     // key not found
-    return false;
-}
-
-static bool addKeyIfNotFound (XmlElement* xml, const String& key)
-{
-    if (! keyFoundAndNotSequentialDuplicate (xml, key))
-    {
-        xml->createNewChildElement ("key")->addTextElement (key);
-        return true;
-    }
-
-    return false;
-}
-
-void addPlistDictionaryKey (XmlElement* xml, const String& key, const String& value)
-{
-    if (addKeyIfNotFound (xml, key))
-        xml->createNewChildElement ("string")->addTextElement (value);
-}
-
-void addPlistDictionaryKeyBool (XmlElement* xml, const String& key, const bool value)
-{
-    if (addKeyIfNotFound (xml, key))
-        xml->createNewChildElement (value ? "true" : "false");
-}
-
-void addPlistDictionaryKeyInt (XmlElement* xml, const String& key, int value)
-{
-    if (addKeyIfNotFound (xml, key))
-        xml->createNewChildElement ("integer")->addTextElement (String (value));
 }
 
 //==============================================================================
@@ -357,37 +286,43 @@ bool isJUCEModule (const String& moduleID) noexcept
 
 StringArray getModulesRequiredForConsole() noexcept
 {
-    return { "juce_core",
-             "juce_data_structures",
-             "juce_events"
-           };
+    return
+    {
+        "juce_core",
+        "juce_data_structures",
+        "juce_events"
+    };
 }
 
 StringArray getModulesRequiredForComponent() noexcept
 {
-    return { "juce_core",
-             "juce_data_structures",
-             "juce_events",
-             "juce_graphics",
-             "juce_gui_basics"
-           };
+    return
+    {
+        "juce_core",
+        "juce_data_structures",
+        "juce_events",
+        "juce_graphics",
+        "juce_gui_basics"
+    };
 }
 
 StringArray getModulesRequiredForAudioProcessor() noexcept
 {
-    return { "juce_audio_basics",
-             "juce_audio_devices",
-             "juce_audio_formats",
-             "juce_audio_plugin_client",
-             "juce_audio_processors",
-             "juce_audio_utils",
-             "juce_core",
-             "juce_data_structures",
-             "juce_events",
-             "juce_graphics",
-             "juce_gui_basics",
-             "juce_gui_extra"
-           };
+    return
+    {
+        "juce_audio_basics",
+        "juce_audio_devices",
+        "juce_audio_formats",
+        "juce_audio_plugin_client",
+        "juce_audio_processors",
+        "juce_audio_utils",
+        "juce_core",
+        "juce_data_structures",
+        "juce_events",
+        "juce_graphics",
+        "juce_gui_basics",
+        "juce_gui_extra"
+    };
 }
 
 bool isPIPFile (const File& file) noexcept
@@ -422,7 +357,72 @@ bool isJUCEModulesFolder (const File& f)
 }
 
 //==============================================================================
-static var parseJUCEHeaderMetadata (const StringArray& lines)
+bool isDivider (const String& line)
+{
+    auto afterIndent = line.trim();
+
+    if (afterIndent.startsWith ("//") && afterIndent.length() > 20)
+    {
+        afterIndent = afterIndent.substring (5);
+
+        if (afterIndent.containsOnly ("=")
+            || afterIndent.containsOnly ("/")
+            || afterIndent.containsOnly ("-"))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+int getIndexOfCommentBlockStart (const StringArray& lines, int endIndex)
+{
+    auto endLine = lines[endIndex];
+
+    if (endLine.contains ("*/"))
+    {
+        for (int i = endIndex; i >= 0; --i)
+            if (lines[i].contains ("/*"))
+                return i;
+    }
+
+     if (endLine.trim().startsWith ("//") && ! isDivider (endLine))
+     {
+         for (int i = endIndex; i >= 0; --i)
+             if (! lines[i].startsWith ("//") || isDivider (lines[i]))
+                 return i + 1;
+     }
+
+    return -1;
+}
+
+int findBestLineToScrollToForClass (StringArray lines, const String& className, bool isPlugin)
+{
+    for (auto line : lines)
+    {
+        if (line.contains ("struct " + className) || line.contains ("class " + className)
+            || (isPlugin && line.contains ("public AudioProcessor") && ! line.contains ("AudioProcessorEditor")))
+        {
+            auto index = lines.indexOf (line);
+
+            auto commentBlockStartIndex = getIndexOfCommentBlockStart (lines, index - 1);
+
+            if (commentBlockStartIndex != -1)
+                index = commentBlockStartIndex;
+
+            if (isDivider (lines[index - 1]))
+                index -= 1;
+
+            return index;
+        }
+    }
+
+    return 0;
+}
+
+//==============================================================================
+var parseJUCEHeaderMetadata (const StringArray& lines)
 {
     auto* o = new DynamicObject();
     var result (o);
@@ -445,7 +445,7 @@ static var parseJUCEHeaderMetadata (const StringArray& lines)
     return result;
 }
 
-static String parseMetadataItem (const StringArray& lines, int& index)
+String parseMetadataItem (const StringArray& lines, int& index)
 {
     String result = lines[index++];
 

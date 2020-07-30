@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -88,7 +87,10 @@ public:
     /** Returns true if the list of options is expanded. */
     bool isExpanded() const noexcept    { return expanded; }
 
-    /** Expands or shrinks the list of options.
+    /** Returns true if the list of options has been truncated and can be expanded. */
+    bool isExpandable() const noexcept  { return expandable; }
+
+    /** Expands or shrinks the list of options if they are not all visible.
 
         N.B. This will just set the preferredHeight value of the PropertyComponent and attempt to
         call PropertyPanel::resized(), so if you are not displaying this object in a PropertyPanel
@@ -115,14 +117,18 @@ private:
     class MultiChoiceRemapperSourceWithDefault;
 
     //==============================================================================
+    static int getTotalButtonsHeight (int);
     void lookAndFeelChanged() override;
 
     //==============================================================================
     WeakReference<ValueWithDefault> valueWithDefault;
 
-    int maxHeight = 0;
-    int numHidden = 0;
-    bool expanded = false;
+    static constexpr int collapsedHeight = 125;
+    static constexpr int buttonHeight = 25;
+    static constexpr int expandAreaHeight = 20;
+
+    int maxHeight = 0, numHidden = 0;
+    bool expandable = false, expanded = false;
 
     OwnedArray<ToggleButton> choiceButtons;
     ShapeButton expandButton { "Expand", Colours::transparentBlack, Colours::transparentBlack, Colours::transparentBlack };

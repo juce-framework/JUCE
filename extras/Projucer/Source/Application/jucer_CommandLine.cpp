@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -48,7 +47,7 @@ namespace
     {
         Array<File> files;
 
-        for (DirectoryIterator di (folder, true, "*.cpp;*.cxx;*.cc;*.c;*.h;*.hpp;*.hxx;*.hpp;*.mm;*.m;*.java;*.dox;*.soul;*.js", File::findFiles); di.next();)
+        for (const auto& di : RangedDirectoryIterator (folder, true, "*.cpp;*.cxx;*.cc;*.c;*.h;*.hpp;*.hxx;*.hpp;*.mm;*.m;*.java;*.dox;*.soul;*.js", File::findFiles))
             if (! di.getFile().isSymbolicLink())
                 files.add (di.getFile());
 
@@ -71,7 +70,7 @@ namespace
     //==============================================================================
     struct LoadedProject
     {
-        LoadedProject (const ArgumentList::Argument& fileToLoad)
+        explicit LoadedProject (const ArgumentList::Argument& fileToLoad)
         {
             hideDockIcon();
 
@@ -82,7 +81,7 @@ namespace
 
             project.reset (new Project (projectFile));
 
-            if (! project->loadFrom (projectFile, true))
+            if (! project->loadFrom (projectFile, true, false))
             {
                 project.reset();
                 ConsoleApplication::fail ("Failed to load the project file: " + projectFile.getFullPathName());
@@ -98,8 +97,8 @@ namespace
                 if (! justSaveResources)
                     rescanModulePathsIfNecessary();
 
-                auto error = justSaveResources ? project->saveResourcesOnly (project->getFile())
-                                               : project->saveProject (project->getFile(), true);
+                auto error = justSaveResources ? project->saveResourcesOnly()
+                                               : project->saveProject();
 
                 project.reset();
 
@@ -230,7 +229,6 @@ namespace
     //==============================================================================
     static void showStatus (const ArgumentList& args)
     {
-        hideDockIcon();
         args.checkMinNumArguments (2);
 
         LoadedProject proj (args[1]);
@@ -239,7 +237,7 @@ namespace
                   << "Name: " << proj.project->getProjectNameString() << std::endl
                   << "UID: " << proj.project->getProjectUIDString() << std::endl;
 
-        EnabledModuleList& modules = proj.project->getEnabledModules();
+        auto& modules = proj.project->getEnabledModules();
 
         if (int numModules = modules.getNumModules())
         {
@@ -271,9 +269,7 @@ namespace
         ZipFile::Builder zip;
 
         {
-            DirectoryIterator i (moduleFolder, true, "*", File::findFiles);
-
-            while (i.next())
+            for (const auto& i : RangedDirectoryIterator (moduleFolder, true, "*", File::findFiles))
                 if (! i.getFile().isHidden())
                     zip.addFile (i.getFile(), 9, i.getFile().getRelativePathFrom (moduleFolderParent));
         }
@@ -306,10 +302,9 @@ namespace
         if (buildAllWithIndex)
         {
             auto folderToSearch = args[2].resolveAsFile();
-            DirectoryIterator i (folderToSearch, false, "*", File::findDirectories);
             var infoList;
 
-            while (i.next())
+            for (const auto& i : RangedDirectoryIterator (folderToSearch, false, "*", File::findDirectories))
             {
                 LibraryModule module (i.getFile());
 
@@ -319,7 +314,7 @@ namespace
 
                     var moduleInfo (new DynamicObject());
                     moduleInfo.getDynamicObject()->setProperty ("file", getModulePackageName (module));
-                    moduleInfo.getDynamicObject()->setProperty ("info", module.moduleInfo.moduleInfo);
+                    moduleInfo.getDynamicObject()->setProperty ("info", module.moduleInfo.getModuleInfo());
                     infoList.append (moduleInfo);
                 }
             }
@@ -643,11 +638,11 @@ namespace
             MemoryBlock data;
             FileInputStream input (source);
             input.readIntoMemoryBlock (data);
-            CodeHelpers::writeDataAsCppLiteral (data, literal, true, true);
+            build_tools::writeDataAsCppLiteral (data, literal, true, true);
             dataSize = data.getSize();
         }
 
-        auto variableName = CodeHelpers::makeBinaryDataIdentifierName (source);
+        auto variableName = build_tools::makeBinaryDataIdentifierName (source);
 
         MemoryOutputStream header, cpp;
 
@@ -704,7 +699,7 @@ namespace
 
     static bool isValidPathIdentifier (const String& id, const String& os)
     {
-        return id == "vst3Path" || id == "vstLegacyPath" || (id == "aaxPath" && os != "linux") || (id == "rtasPath" && os != "linux")
+        return id == "vstLegacyPath" || (id == "aaxPath" && os != "linux") || (id == "rtasPath" && os != "linux")
             || id == "androidSDKPath" || id == "androidNDKPath" || id == "defaultJuceModulePath" || id == "defaultUserModulePath";
     }
 
@@ -866,7 +861,7 @@ namespace
                   << std::endl
                   << " " << appName << " --set-global-search-path os identifier_to_set new_path" << std::endl
                   << "    Sets the global path for a specified os and identifier. The os should be either osx, windows or linux and the identifiers can be any of the following: "
-                  << "defaultJuceModulePath, defaultUserModulePath, vst3Path, vstLegacyPath, aaxPath (not valid on linux), rtasPath (not valid on linux), androidSDKPath or androidNDKPath. " << std::endl
+                  << "defaultJuceModulePath, defaultUserModulePath, vstLegacyPath, aaxPath (not valid on linux), rtasPath (not valid on linux), androidSDKPath or androidNDKPath. " << std::endl
                   << std::endl
                   << " " << appName << " --create-project-from-pip path/to/PIP path/to/output path/to/JUCE/modules (optional) path/to/user/modules (optional)" << std::endl
                   << "    Generates a folder containing a JUCE project in the specified output path using the specified PIP file. Use the optional JUCE and user module paths to override "
@@ -880,7 +875,7 @@ namespace
 //==============================================================================
 int performCommandLine (const ArgumentList& args)
 {
-    return ConsoleApplication::invokeCatchingFailures ([&] () -> int
+    return ConsoleApplication::invokeCatchingFailures ([&]() -> int
     {
         if (args.containsOption ("--lf"))
             preferredLineFeed = "\n";

@@ -23,10 +23,7 @@
 namespace juce
 {
 
-#if JUCE_MSVC
- #pragma warning (push)
- #pragma warning (disable: 4514 4996)
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4514 4996)
 
 juce_wchar CharacterFunctions::toUpperCase (const juce_wchar character) noexcept
 {
@@ -56,9 +53,7 @@ bool CharacterFunctions::isLowerCase (const juce_wchar character) noexcept
    #endif
 }
 
-#if JUCE_MSVC
- #pragma warning (pop)
-#endif
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 //==============================================================================
 bool CharacterFunctions::isWhitespace (const char character) noexcept

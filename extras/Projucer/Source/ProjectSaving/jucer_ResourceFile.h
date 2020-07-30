@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -29,38 +28,40 @@
 #include "../Project/jucer_Project.h"
 
 //==============================================================================
-class ResourceFile
+class JucerResourceFile
 {
 public:
     //==============================================================================
-    ResourceFile (Project& project);
-    ~ResourceFile();
+    explicit JucerResourceFile (Project& project);
+    ~JucerResourceFile();
 
     //==============================================================================
-    void setClassName (const String& className);
-    String getClassName() const       { return className; }
+    void setClassName (const String& className)         { resourceFile.setClassName (className); }
+    String getClassName() const                         { return resourceFile.getClassName(); }
 
-    void addFile (const File& file);
-    String getDataVariableFor (const File& file) const;
-    String getSizeVariableFor (const File& file) const;
+    void addFile (const File& file)                     { resourceFile.addFile (file); }
+    String getDataVariableFor (const File& file) const  { return resourceFile.getDataVariableFor (file); }
+    String getSizeVariableFor (const File& file) const  { return resourceFile.getSizeVariableFor (file); }
 
-    int getNumFiles() const                 { return files.size(); }
-    const File& getFile (int index) const   { return files.getReference (index); }
+    int getNumFiles() const                             { return resourceFile.getNumFiles(); }
+    const File& getFile (int index) const               { return resourceFile.getFile (index); }
 
-    int64 getTotalDataSize() const;
+    int64 getTotalDataSize() const                      { return resourceFile.getTotalDataSize(); }
 
-    Result write (Array<File>& filesCreated, int maxFileSize);
+    build_tools::ResourceFile::WriteResult write (int maxFileSize)
+    {
+        return resourceFile.write (maxFileSize,
+                                   project.getProjectLineFeed(),
+                                   project.getBinaryDataHeaderFile(),
+                                   [this] (int index) { return project.getBinaryDataCppFile (index); });
+    }
 
     //==============================================================================
 private:
-    Array<File> files;
-    StringArray variableNames;
-    Project& project;
-    String className  { "BinaryData" };
-
-    Result writeHeader (MemoryOutputStream&);
-    Result writeCpp (MemoryOutputStream&, const File& headerFile, int& index, int maxFileSize);
     void addResourcesFromProjectItem (const Project::Item& node);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResourceFile)
+    Project& project;
+    build_tools::ResourceFile resourceFile;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JucerResourceFile)
 };

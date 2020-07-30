@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -94,7 +93,7 @@ namespace IIR
             Note that this clears the processing state, but the type of filter and
             its coefficients aren't changed.
         */
-        void reset()            { reset (SampleType {0}); }
+        void reset()    { reset (SampleType {0}); }
 
         /** Resets the filter's processing pipeline to a specific value.
             @see reset
@@ -113,6 +112,10 @@ namespace IIR
                 processInternal<ProcessContext, true> (context);
             else
                 processInternal<ProcessContext, false> (context);
+
+           #if JUCE_SNAP_TO_ZERO
+            snapToZero();
+           #endif
         }
 
         /** Processes a single sample, without any locking.

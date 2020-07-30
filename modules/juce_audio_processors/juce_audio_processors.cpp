@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -35,6 +34,7 @@
 
 #define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
 #define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
+#define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
 
 #include "juce_audio_processors.h"
 #include <juce_gui_extra/juce_gui_extra.h>
@@ -47,13 +47,14 @@
  #endif
 #endif
 
-#if JUCE_PLUGINHOST_VST && JUCE_LINUX
+#if (JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_VST3) && JUCE_LINUX
  #include <X11/Xlib.h>
  #include <X11/Xutil.h>
+ #include <sys/utsname.h>
  #undef KeyPress
 #endif
 
-#if ! JUCE_WINDOWS && ! JUCE_MAC
+#if ! JUCE_WINDOWS && ! JUCE_MAC && ! JUCE_LINUX
  #undef JUCE_PLUGINHOST_VST3
  #define JUCE_PLUGINHOST_VST3 0
 #endif
@@ -66,8 +67,10 @@
 namespace juce
 {
 
-static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
-                                        const PluginDescription& desc)
+#if JUCE_PLUGINHOST_VST || (JUCE_PLUGINHOST_LADSPA && JUCE_LINUX)
+
+static bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
+                                 const PluginDescription& desc)
 {
     for (auto* p : list)
         if (p->isDuplicateOf (desc))
@@ -75,6 +78,8 @@ static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& lis
 
     return false;
 }
+
+#endif
 
 #if JUCE_MAC || JUCE_IOS
 
@@ -129,12 +134,7 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 
 } // namespace juce
 
-#if JUCE_CLANG
- #pragma clang diagnostic ignored "-Wdeprecated-declarations"
- #if __has_warning("-Wcast-align")
-  #pragma clang diagnostic ignored "-Wcast-align"
- #endif
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations", "-Wcast-align")
 
 #include "format/juce_AudioPluginFormat.cpp"
 #include "format/juce_AudioPluginFormatManager.cpp"
@@ -159,4 +159,5 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 #include "utilities/juce_AudioParameterInt.cpp"
 #include "utilities/juce_AudioParameterBool.cpp"
 #include "utilities/juce_AudioParameterChoice.cpp"
+#include "utilities/juce_ParameterAttachments.cpp"
 #include "utilities/juce_AudioProcessorValueTreeState.cpp"

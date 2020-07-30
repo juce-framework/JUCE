@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -82,7 +81,7 @@ public:
             jucerCompClassName = tc->getDocument()->getClassName();
 
         if (jucerCompClassName.isEmpty())
-            jucerCompClassName = "Component";
+            jucerCompClassName = "juce::Component";
 
         return jucerCompClassName;
     }
@@ -160,7 +159,7 @@ public:
 private:
     //==============================================================================
     class JucerCompFileProperty  : public FilePropertyComponent,
-                                   public ChangeListener
+                                   private ChangeListener
     {
     public:
         JucerCompFileProperty (TestComponent* const comp, JucerDocument& doc)
@@ -171,29 +170,29 @@ private:
             document.addChangeListener (this);
         }
 
-        ~JucerCompFileProperty()
+        ~JucerCompFileProperty() override
         {
             document.removeChangeListener (this);
         }
 
-        void setFile (const File& newFile)
+        void setFile (const File& newFile) override
         {
             setJucerComponentFile (document, component,
                                    newFile.getRelativePathFrom (document.getCppFile().getParentDirectory())
                                           .replaceCharacter ('\\', '/'));
         }
 
-        File getFile() const
+        File getFile() const override
         {
             return component->findFile();
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)
+    private:
+        void changeListenerCallback (ChangeBroadcaster*) override
         {
             refresh();
         }
 
-    private:
         TestComponent* const component;
         JucerDocument& document;
     };

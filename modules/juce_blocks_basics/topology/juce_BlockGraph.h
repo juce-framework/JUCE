@@ -36,7 +36,7 @@ public:
     /** Creates a BlockGraph object from a BlockTopology with an optional filter function. This
         will build a block graph of traversal paths for each master.
     */
-    BlockGraph (const BlockTopology topology, std::function<bool(Block::Ptr block)> filter = nullptr);
+    BlockGraph (const BlockTopology topology, std::function<bool (Block::Ptr block)> filter = nullptr);
     BlockGraph (BlockGraph&&);
 
     using BlockTraversalPaths = Array<Block::Array, CriticalSection>;
@@ -58,7 +58,7 @@ private:
 
     BlockTraversalPaths traversalPaths; // one path for each master block
     BlockTopology topology;
-    std::function<bool(Block::Ptr)> filter;
+    std::function<bool (Block::Ptr)> filter;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BlockGraph)
 };

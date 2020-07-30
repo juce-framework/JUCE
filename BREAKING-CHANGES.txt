@@ -6,6 +6,86 @@ Develop
 
 Change
 ------
+The JUCE_DISABLE_COREGRAPHICS_FONT_SMOOTHING flag in juce_graphics is no
+longer used on iOS.
+
+Possible Issues
+---------------
+Projects with this flag enabled may render differently on iOS.
+
+Workaround
+----------
+There is no workaround.
+
+Rationale
+---------
+When using a cached image to render Components with `setBufferedToImage (true)`
+the result now matches the default behaviour on iOS where fonts are not
+smoothed.
+
+
+Change
+------
+Space, return and escape key events on the native macOS menu bar are no longer
+passed to the currently focused JUCE Component.
+
+Possible Issues
+---------------
+Code relying on receiving these keyboard events will no longer work.
+
+Workaround
+----------
+There is no workaround.
+
+Rationale
+---------
+It should be possible for users with a keyboard or assistive device to navigate
+the menu, invoking the currently highlighted menu item with the space or return
+key and dismissing the menu with the escape key. These key events should not be
+passed to the application and doing so interferes with the accessibility of
+JUCE apps. Only passing these events to the native macOS menu means that JUCE
+apps behave as expected for users.
+
+
+Version 6.0.0
+=============
+
+Change
+------
+The Convolution class interface was changed:
+- `loadImpulseResponse` member functions now take `enum class` parameters
+  instead of `bool`.
+- `copyAndLoadImpulseResponseFromBlock` and
+  `copyAndLoadImpulseResponseFromBuffer` were replaced by a new
+  `loadImpulseResponse` overload.
+
+Possible Issues
+---------------
+Code using the old interface will no longer compile, and will need to be
+updated.
+
+Workaround
+----------
+Code that was previously loading impulse responses from binary data or from
+files can substitute old `bool` parameters with the newer `enum class`
+equivalents. Code that was previously passing buffers or blocks will need
+reworking so that the Convolution instance can take ownership of the buffer
+containing the impulse response.
+
+Rationale
+---------
+The newer `enum class` parameters make user code much more readable, e.g.
+`loadImpulseResponse (file, Stereo::yes, Trim::yes, 0, Normalise::yes)` rather
+than `loadImpulseResponse (file, true, true, 0, true);`. By taking ownership of
+the passed buffer, the Convolution can avoid preallocating a large internal
+buffer, reducing memory usage when short impulse responses are used. Changing
+the ownership semantics of the buffer also makes it easier for users to avoid
+copies/allocations on the audio thread, and gives more flexibility to the
+implementation to run initialisation tasks on a background thread.
+
+
+Change
+------
 All references to ROLI Ltd. (ROLI) have been changed to Raw Material Software
 Limited.
 
@@ -38,9 +118,10 @@ own AffineTransform applied will no longer work correctly.
 Workaround
 ----------
 If you are using an AffineTransform to scale the entire plug-in window then
-consider using Desktop::setGlobalScaleFactor() instead, or, for applying other
-transforms, consider putting the component you want to transform in a child of
-the editor and transform that instead.
+consider putting the component you want to transform in a child of
+the editor and transform that instead. Alternatively, if you don't need a
+separate scale factor for each plug-in instance you can use
+Desktop::setGlobalScaleFactor().
 
 Rationale
 ---------

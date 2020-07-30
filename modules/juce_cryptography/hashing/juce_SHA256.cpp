@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -139,14 +138,14 @@ private:
                           0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 };
     uint64_t length = 0;
 
-    static inline uint32_t rotate (uint32_t x, uint32_t y) noexcept            { return (x >> y) | (x << (32 - y)); }
-    static inline uint32_t ch  (uint32_t x, uint32_t y, uint32_t z) noexcept   { return z ^ ((y ^ z) & x); }
-    static inline uint32_t maj (uint32_t x, uint32_t y, uint32_t z) noexcept   { return y ^ ((y ^ z) & (x ^ y)); }
+    static uint32_t rotate (uint32_t x, uint32_t y) noexcept            { return (x >> y) | (x << (32 - y)); }
+    static uint32_t ch  (uint32_t x, uint32_t y, uint32_t z) noexcept   { return z ^ ((y ^ z) & x); }
+    static uint32_t maj (uint32_t x, uint32_t y, uint32_t z) noexcept   { return y ^ ((y ^ z) & (x ^ y)); }
 
-    static inline uint32_t s0 (uint32_t x) noexcept     { return rotate (x, 7)  ^ rotate (x, 18) ^ (x >> 3); }
-    static inline uint32_t s1 (uint32_t x) noexcept     { return rotate (x, 17) ^ rotate (x, 19) ^ (x >> 10); }
-    static inline uint32_t S0 (uint32_t x) noexcept     { return rotate (x, 2)  ^ rotate (x, 13) ^ rotate (x, 22); }
-    static inline uint32_t S1 (uint32_t x) noexcept     { return rotate (x, 6)  ^ rotate (x, 11) ^ rotate (x, 25); }
+    static uint32_t s0 (uint32_t x) noexcept     { return rotate (x, 7)  ^ rotate (x, 18) ^ (x >> 3); }
+    static uint32_t s1 (uint32_t x) noexcept     { return rotate (x, 17) ^ rotate (x, 19) ^ (x >> 10); }
+    static uint32_t S0 (uint32_t x) noexcept     { return rotate (x, 2)  ^ rotate (x, 13) ^ rotate (x, 22); }
+    static uint32_t S1 (uint32_t x) noexcept     { return rotate (x, 6)  ^ rotate (x, 11) ^ rotate (x, 25); }
 };
 
 //==============================================================================

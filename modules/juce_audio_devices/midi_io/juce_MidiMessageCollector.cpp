@@ -90,33 +90,28 @@ void MidiMessageCollector::removeNextBlockOfMessages (MidiBuffer& destBuffer,
         int startSample = 0;
         int scale = 1 << 16;
 
-        const uint8* midiData;
-        int numBytes, samplePosition;
-
-        MidiBuffer::Iterator iter (incomingMessages);
-
         if (numSourceSamples > numSamples)
         {
             // if our list of events is longer than the buffer we're being
             // asked for, scale them down to squeeze them all in..
             const int maxBlockLengthToUse = numSamples << 5;
 
+            auto iter = incomingMessages.cbegin();
+
             if (numSourceSamples > maxBlockLengthToUse)
             {
                 startSample = numSourceSamples - maxBlockLengthToUse;
                 numSourceSamples = maxBlockLengthToUse;
-                iter.setNextSamplePosition (startSample);
+                iter = incomingMessages.findNextSamplePosition (startSample);
             }
 
             scale = (numSamples << 10) / numSourceSamples;
 
-            while (iter.getNextEvent (midiData, numBytes, samplePosition))
+            std::for_each (iter, incomingMessages.cend(), [&] (const MidiMessageMetadata& meta)
             {
-                samplePosition = ((samplePosition - startSample) * scale) >> 10;
-
-                destBuffer.addEvent (midiData, numBytes,
-                                     jlimit (0, numSamples - 1, samplePosition));
-            }
+                const auto pos = ((meta.samplePosition - startSample) * scale) >> 10;
+                destBuffer.addEvent (meta.data, meta.numBytes, jlimit (0, numSamples - 1, pos));
+            });
         }
         else
         {
@@ -124,15 +119,18 @@ void MidiMessageCollector::removeNextBlockOfMessages (MidiBuffer& destBuffer,
             // towards the end of the buffer
             startSample = numSamples - numSourceSamples;
 
-            while (iter.getNextEvent (midiData, numBytes, samplePosition))
-            {
-                destBuffer.addEvent (midiData, numBytes,
-                                     jlimit (0, numSamples - 1, samplePosition + startSample));
-            }
+            for (const auto metadata : incomingMessages)
+                destBuffer.addEvent (metadata.data, metadata.numBytes,
+                                     jlimit (0, numSamples - 1, metadata.samplePosition + startSample));
         }
 
         incomingMessages.clear();
     }
+}
+
+void MidiMessageCollector::ensureStorageAllocated (size_t bytes)
+{
+    incomingMessages.ensureSize (bytes);
 }
 
 //==============================================================================

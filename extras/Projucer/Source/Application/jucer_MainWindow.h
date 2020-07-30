@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -26,8 +25,11 @@
 
 #pragma once
 
-#include "../Project/UI/jucer_ProjectContentComponent.h"
 #include "../Utility/PIPs/jucer_PIPGenerator.h"
+#include "../Project/jucer_Project.h"
+#include "../CodeEditor/jucer_OpenDocumentManager.h"
+
+class ProjectContentComponent;
 
 //==============================================================================
 /**
@@ -44,6 +46,8 @@ public:
     MainWindow();
     ~MainWindow() override;
 
+    enum class OpenInIDE { no, yes };
+
     //==============================================================================
     void closeButtonPressed() override;
 
@@ -54,14 +58,17 @@ public:
     void setProject (std::unique_ptr<Project> newProject);
     Project* getProject() const  { return currentProject.get(); }
 
-    bool tryToOpenPIP (const File& f);
-
     void makeVisible();
     void restoreWindowPosition();
-    bool closeCurrentProject (bool askToSave);
-    void moveProject (File newProjectFile);
+    void updateTitleBarIcon();
+    bool closeCurrentProject (OpenDocumentManager::SaveIfNeeded askToSave);
+    void moveProject (File newProjectFile, OpenInIDE openInIDE);
 
     void showStartPage();
+
+    void showLoginFormOverlay();
+    void hideLoginFormOverlay();
+    bool isShowingLoginForm() const noexcept  { return loginFormOpen; }
 
     bool isInterestedInFileDrag (const StringArray& files) override;
     void filesDropped (const StringArray& filenames, int mouseX, int mouseY) override;
@@ -79,16 +86,21 @@ public:
     bool shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::SourceDetails& sourceDetails,
                                                StringArray& files, bool& canMoveFiles) override;
 private:
-    std::unique_ptr<Project> currentProject;
-    Value projectNameValue;
+    void valueChanged (Value&) override;
 
     static const char* getProjectWindowPosName()   { return "projectWindowPos"; }
     void createProjectContentCompIfNeeded();
-    void setTitleBarIcon();
 
-    void openPIP (PIPGenerator&);
+    bool openPIP (PIPGenerator);
+    void setupTemporaryPIPProject (PIPGenerator&);
 
-    void valueChanged (Value&) override;
+    void initialiseProjectWindow();
+
+    std::unique_ptr<Project> currentProject;
+    Value projectNameValue;
+
+    std::unique_ptr<Component> blurOverlayComponent;
+    bool loginFormOpen = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
 };
@@ -113,6 +125,7 @@ public:
     MainWindow* getFrontmostWindow (bool createIfNotFound = true);
     MainWindow* getOrCreateEmptyWindow();
     MainWindow* getMainWindowForFile (const File&);
+    MainWindow* getMainWindowWithLoginFormOpen();
 
     Project* getFrontmostProject();
 

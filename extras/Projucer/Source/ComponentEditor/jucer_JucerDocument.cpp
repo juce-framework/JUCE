@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -26,7 +25,7 @@
 
 #include "../Application/jucer_Headers.h"
 #include "../Application/jucer_Application.h"
-#include "../Wizards/jucer_NewFileWizard.h"
+#include "../Utility/Helpers/jucer_NewFileWizard.h"
 #include "jucer_JucerDocument.h"
 #include "jucer_ObjectTypes.h"
 #include "UI/jucer_JucerDocumentEditor.h"
@@ -36,7 +35,7 @@
 #include "Documents/jucer_ButtonDocument.h"
 
 const char* const defaultClassName = "NewComponent";
-const char* const defaultParentClasses = "public Component";
+const char* const defaultParentClasses = "public juce::Component";
 
 //==============================================================================
 JucerDocument::JucerDocument (SourceCodeDocument* c)
@@ -67,7 +66,7 @@ void JucerDocument::changed()
 
 struct UserDocChangeTimer  : public Timer
 {
-    UserDocChangeTimer (JucerDocument& d) : doc (d) {}
+    explicit UserDocChangeTimer (JucerDocument& d) : doc (d) {}
     void timerCallback() override       { doc.reloadFromDocument(); }
 
     JucerDocument& doc;
@@ -126,9 +125,9 @@ void JucerDocument::refreshAllPropertyComps()
 void JucerDocument::setClassName (const String& newName)
 {
     if (newName != className
-         && CodeHelpers::makeValidIdentifier (newName, false, false, true).isNotEmpty())
+        && build_tools::makeValidIdentifier (newName, false, false, true).isNotEmpty())
     {
-        className = CodeHelpers::makeValidIdentifier (newName, false, false, true);
+        className = build_tools::makeValidIdentifier (newName, false, false, true);
         changed();
     }
 }
@@ -164,7 +163,7 @@ void JucerDocument::setParentClasses (const String& classes)
                     type = s = String();
             }
 
-            s = type + CodeHelpers::makeValidIdentifier (s.trim(), false, false, true, true);
+            s = type + build_tools::makeValidIdentifier (s.trim(), false, false, true, true);
 
             parentClassLines.set (i, s);
         }
@@ -268,36 +267,36 @@ void JucerDocument::getOptionalMethods (StringArray& baseClasses,
                                         StringArray& methods,
                                         StringArray& initialContents) const
 {
-    addMethod ("Component", "void", "visibilityChanged()", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "moved()", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "parentHierarchyChanged()", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "parentSizeChanged()", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "lookAndFeelChanged()", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "bool", "hitTest (int x, int y)", "return true;", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "broughtToFront()", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "filesDropped (const StringArray& filenames, int mouseX, int mouseY)", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "handleCommandMessage (int commandId)", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "childrenChanged()", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "enablementChanged()", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "visibilityChanged()", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "moved()", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "parentHierarchyChanged()", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "parentSizeChanged()", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "lookAndFeelChanged()", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "bool", "hitTest (int x, int y)", "return true;", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "broughtToFront()", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "filesDropped (const juce::StringArray& filenames, int mouseX, int mouseY)", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "handleCommandMessage (int commandId)", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "childrenChanged()", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "enablementChanged()", "", baseClasses, returnValues, methods, initialContents);
 
-    addMethod ("Component", "void", "mouseMove (const MouseEvent& e)", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "mouseEnter (const MouseEvent& e)", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "mouseExit (const MouseEvent& e)", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "mouseDown (const MouseEvent& e)", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "mouseDrag (const MouseEvent& e)", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "mouseUp (const MouseEvent& e)", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "mouseDoubleClick (const MouseEvent& e)", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "mouseMove (const juce::MouseEvent& e)", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "mouseEnter (const juce::MouseEvent& e)", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "mouseExit (const juce::MouseEvent& e)", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "mouseDown (const juce::MouseEvent& e)", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "mouseDrag (const juce::MouseEvent& e)", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "mouseUp (const juce::MouseEvent& e)", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "mouseDoubleClick (const juce::MouseEvent& e)", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "mouseWheelMove (const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel)", "", baseClasses, returnValues, methods, initialContents);
 
-    addMethod ("Component", "bool", "keyPressed (const KeyPress& key)", "return false;  // Return true if your handler uses this key event, or false to allow it to be passed-on.", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "bool", "keyStateChanged (bool isKeyDown)", "return false;  // Return true if your handler uses this key event, or false to allow it to be passed-on.", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "modifierKeysChanged (const ModifierKeys& modifiers)", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "bool", "keyPressed (const juce::KeyPress& key)", "return false;  // Return true if your handler uses this key event, or false to allow it to be passed-on.", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "bool", "keyStateChanged (bool isKeyDown)", "return false;  // Return true if your handler uses this key event, or false to allow it to be passed-on.", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "modifierKeysChanged (const juce::ModifierKeys& modifiers)", "", baseClasses, returnValues, methods, initialContents);
 
-    addMethod ("Component", "void", "focusGained (FocusChangeType cause)", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "focusLost (FocusChangeType cause)", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "focusOfChildComponentChanged (FocusChangeType cause)", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "modifierKeysChanged (const ModifierKeys& modifiers)", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "void", "inputAttemptWhenModal()", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "focusGained (FocusChangeType cause)", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "focusLost (FocusChangeType cause)", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "focusOfChildComponentChanged (FocusChangeType cause)", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "modifierKeysChanged (const juce::ModifierKeys& modifiers)", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Component", "void", "inputAttemptWhenModal()", "", baseClasses, returnValues, methods, initialContents);
 }
 
 void JucerDocument::setOptionalMethodEnabled (const String& methodSignature, const bool enable)
@@ -312,7 +311,8 @@ void JucerDocument::setOptionalMethodEnabled (const String& methodSignature, con
 
 bool JucerDocument::isOptionalMethodEnabled (const String& sig) const noexcept
 {
-    return activeExtraMethods.contains (sig);
+    return activeExtraMethods.contains (sig)
+          || activeExtraMethods.contains (sig.replace ("juce::", {}));
 }
 
 void JucerDocument::addExtraClassProperties (PropertyPanel&)
@@ -413,7 +413,7 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
         code.constructorCode << "setName (" + quotedString (componentName, false) + ");\n";
 
     // call these now, just to make sure they're the first two methods in the list.
-    code.getCallbackCode (String(), "void", "paint (Graphics& g)", false)
+    code.getCallbackCode (String(), "void", "paint (juce::Graphics& g)", false)
         << "//[UserPrePaint] Add your own custom painting code here..\n//[/UserPrePaint]\n\n";
 
     code.getCallbackCode (String(), "void", "resized()", false)
@@ -437,7 +437,7 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
     if (initialWidth > 0 || initialHeight > 0)
         code.constructorCode << "\nsetSize (" << initialWidth << ", " << initialHeight << ");\n";
 
-    code.getCallbackCode (String(), "void", "paint (Graphics& g)", false)
+    code.getCallbackCode (String(), "void", "paint (juce::Graphics& g)", false)
         << "//[UserPaint] Add your own custom painting code here..\n//[/UserPaint]";
 
     code.getCallbackCode (String(), "void", "resized()", false)
@@ -453,7 +453,7 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
         {
             String baseClassToAdd (baseClasses[i]);
 
-            if (baseClassToAdd == "Component" || baseClassToAdd == "Button")
+            if (baseClassToAdd == "juce::Component" || baseClassToAdd == "juce::Button")
                 baseClassToAdd.clear();
 
             String& s = code.getCallbackCode (baseClassToAdd, returnValues[i], methods[i], false);
@@ -479,7 +479,7 @@ void JucerDocument::fillInPaintCode (GeneratedCode& code) const
 {
     for (int i = 0; i < getNumPaintRoutines(); ++i)
         getPaintRoutine (i)
-            ->fillInGeneratedCode (code, code.getCallbackCode (String(), "void", "paint (Graphics& g)", false));
+            ->fillInGeneratedCode (code, code.getCallbackCode (String(), "void", "paint (juce::Graphics& g)", false));
 }
 
 void JucerDocument::setTemplateFile (const String& newFile)
@@ -705,7 +705,7 @@ public:
         {
             if (header->save())
             {
-                odm.closeFile (getFile().withFileExtension(".h"), false);
+                odm.closeFile (getFile().withFileExtension(".h"), OpenDocumentManager::SaveIfNeeded::no);
                 return true;
             }
         }
@@ -715,10 +715,13 @@ public:
 
     Component* createEditor() override
     {
-        std::unique_ptr<JucerDocument> jucerDoc (JucerDocument::createForCppFile (getProject(), getFile()));
+        if (ProjucerApplication::getApp().isGUIEditorEnabled())
+        {
+            std::unique_ptr<JucerDocument> jucerDoc (JucerDocument::createForCppFile (getProject(), getFile()));
 
-        if (jucerDoc != nullptr)
-            return new JucerDocumentEditor (jucerDoc.release());
+            if (jucerDoc != nullptr)
+                return new JucerDocumentEditor (jucerDoc.release());
+        }
 
         return SourceCodeDocument::createEditor();
     }
@@ -774,8 +777,8 @@ struct NewGUIComponentWizard  : public NewFileWizard::Type
 
                         cpp->save();
                         header->save();
-                        odm.closeDocument (cpp, true);
-                        odm.closeDocument (header, true);
+                        odm.closeDocument (cpp, OpenDocumentManager::SaveIfNeeded::yes);
+                        odm.closeDocument (header, OpenDocumentManager::SaveIfNeeded::yes);
 
                         parent.addFileRetainingSortOrder (headerFile, true);
                         parent.addFileRetainingSortOrder (cppFile, true);

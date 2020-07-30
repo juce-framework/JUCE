@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -110,12 +109,12 @@ public:
             bool enabled = deviceManager.isMidiInputDeviceEnabled (item.identifier);
 
             auto x = getTickX();
-            auto tickW = height * 0.75f;
+            auto tickW = (float) height * 0.75f;
 
-            getLookAndFeel().drawTickBox (g, *this, x - tickW, (height - tickW) / 2, tickW, tickW,
+            getLookAndFeel().drawTickBox (g, *this, (float) x - tickW, ((float) height - tickW) * 0.5f, tickW, tickW,
                                           enabled, true, true, false);
 
-            g.setFont (height * 0.6f);
+            g.setFont ((float) height * 0.6f);
             g.setColour (findColour (ListBox::textColourId, true).withMultipliedAlpha (enabled ? 1.0f : 0.6f));
             g.drawText (item.name, x + 5, 0, width - x - 5, height, Justification::centredLeft, true);
         }
@@ -146,7 +145,7 @@ public:
         if (items.isEmpty())
         {
             g.setColour (Colours::grey);
-            g.setFont (0.5f * getRowHeight());
+            g.setFont (0.5f * (float) getRowHeight());
             g.drawText (noItemsMessage,
                         0, 0, getWidth(), getHeight() / 2,
                         Justification::centred, true);
@@ -801,12 +800,12 @@ public:
                 }
 
                 auto x = getTickX();
-                auto tickW = height * 0.75f;
+                auto tickW = (float) height * 0.75f;
 
-                getLookAndFeel().drawTickBox (g, *this, x - tickW, (height - tickW) / 2, tickW, tickW,
+                getLookAndFeel().drawTickBox (g, *this, (float) x - tickW, ((float) height - tickW) * 0.5f, tickW, tickW,
                                               enabled, true, true, false);
 
-                g.setFont (height * 0.6f);
+                g.setFont ((float) height * 0.6f);
                 g.setColour (findColour (ListBox::textColourId, true).withMultipliedAlpha (enabled ? 1.0f : 0.6f));
                 g.drawText (item, x + 5, 0, width - x - 5, height, Justification::centredLeft, true);
             }
@@ -837,7 +836,7 @@ public:
             if (items.isEmpty())
             {
                 g.setColour (Colours::grey);
-                g.setFont (0.5f * getRowHeight());
+                g.setFont (0.5f * (float) getRowHeight());
                 g.drawText (noItemsMessage,
                             0, 0, getWidth(), getHeight() / 2,
                             Justification::centred, true);

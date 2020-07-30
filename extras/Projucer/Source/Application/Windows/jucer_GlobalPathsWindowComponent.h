@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -31,7 +30,8 @@
 //==============================================================================
 class GlobalPathsWindowComponent    : public Component,
                                       private Timer,
-                                      private Value::Listener
+                                      private Value::Listener,
+                                      private ChangeListener
 {
 public:
     GlobalPathsWindowComponent()
@@ -49,6 +49,16 @@ public:
             ProjucerApplication::getApp().rescanUserPathModules();
             lastUserModulePath = getAppSettings().getStoredPath (Ids::defaultUserModulePath, TargetOS::getThisOS()).get();
         };
+
+        addChildComponent (warnAboutJUCEPathButton);
+        warnAboutJUCEPathButton.setToggleState (ProjucerApplication::getApp().shouldPromptUserAboutIncorrectJUCEPath(),
+                                                dontSendNotification);
+        warnAboutJUCEPathButton.onClick = [this]
+        {
+            ProjucerApplication::getApp().setShouldPromptUserAboutIncorrectJUCEPath (warnAboutJUCEPathButton.getToggleState());
+        };
+
+        getGlobalProperties().addChangeListener (this);
 
         addAndMakeVisible (resetToDefaultsButton);
         resetToDefaultsButton.onClick = [this] { resetCurrentOSPathsToDefaults(); };
@@ -72,6 +82,8 @@ public:
 
     ~GlobalPathsWindowComponent() override
     {
+        getGlobalProperties().removeChangeListener (this);
+
         auto juceValue = getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS());
         auto userValue = getAppSettings().getStoredPath (Ids::defaultUserModulePath, TargetOS::getThisOS());
 
@@ -94,12 +106,15 @@ public:
     {
         auto b = getLocalBounds().reduced (10);
 
-        auto buttonBounds = b.removeFromBottom (50);
+        auto bottomBounds = b.removeFromBottom (80);
+        auto buttonBounds = bottomBounds.removeFromBottom (50);
 
         rescanJUCEPathButton.setBounds (buttonBounds.removeFromLeft (150).reduced (5, 10));
         rescanUserPathButton.setBounds (buttonBounds.removeFromLeft (150).reduced (5, 10));
 
         resetToDefaultsButton.setBounds (buttonBounds.removeFromRight (150).reduced (5, 10));
+        warnAboutJUCEPathButton.setBounds (bottomBounds.reduced (0, 5));
+        warnAboutJUCEPathButton.changeWidthToFitText();
 
         propertyGroup.updateSize (0, 0, getWidth() - 20 - propertyViewport.getScrollBarThickness());
         propertyViewport.setBounds (b);
@@ -153,6 +168,12 @@ private:
         resized();
     }
 
+    void changeListenerCallback (ChangeBroadcaster*) override
+    {
+        warnAboutJUCEPathButton.setToggleState (ProjucerApplication::getApp().shouldPromptUserAboutIncorrectJUCEPath(),
+                                                dontSendNotification);
+    }
+
     //==============================================================================
     bool isSelectedOSThisOS()    { return TargetOS::getThisOS() == getSelectedOS(); }
 
@@ -201,8 +222,6 @@ private:
                      "If you are building a legacy VST plug-in then this path should point to a VST2 SDK. "
                      "The VST2 SDK can be obtained from the vstsdk3610_11_06_2018_build_37 (or older) VST3 SDK or JUCE version 5.3.2. "
                      "You also need a VST2 license from Steinberg to distribute VST2 plug-ins.");
-        builder.add (new FilePathPropertyComponent (vst3PathValue, "VST3 SDK", true, isThisOS),
-                     "This path can be set to use a custom VST3 SDK instead of the one which is embedded in JUCE.");
 
         if (getSelectedOS() != TargetOS::linux)
         {
@@ -233,15 +252,11 @@ private:
                          "This path will be used for the \"Save Project and Open in IDE...\" option of the CLion exporter.");
             builder.add (new FilePathPropertyComponent (androidStudioExePathValue, "Android Studio " + exeLabel, false, isThisOS),
                          "This path will be used for the \"Save Project and Open in IDE...\" option of the Android Studio exporter.");
+        }
 
-            rescanJUCEPathButton.setVisible (true);
-            rescanUserPathButton.setVisible (true);
-        }
-        else
-        {
-            rescanJUCEPathButton.setVisible (false);
-            rescanUserPathButton.setVisible (false);
-        }
+        rescanJUCEPathButton.setVisible (isThisOS);
+        rescanUserPathButton.setVisible (isThisOS);
+        warnAboutJUCEPathButton.setVisible (isThisOS);
 
         propertyGroup.setProperties (builder);
     }
@@ -255,7 +270,6 @@ private:
         juceModulePathValue       = settings.getStoredPath (Ids::defaultJuceModulePath, os);
         userModulePathValue       = settings.getStoredPath (Ids::defaultUserModulePath, os);
         vstPathValue              = settings.getStoredPath (Ids::vstLegacyPath, os);
-        vst3PathValue             = settings.getStoredPath (Ids::vst3Path, os);
         rtasPathValue             = settings.getStoredPath (Ids::rtasPath, os);
         aaxPathValue              = settings.getStoredPath (Ids::aaxPath, os);
         androidSDKPathValue       = settings.getStoredPath (Ids::androidSDKPath, os);
@@ -270,7 +284,6 @@ private:
         juceModulePathValue      .resetToDefault();
         userModulePathValue      .resetToDefault();
         vstPathValue             .resetToDefault();
-        vst3PathValue            .resetToDefault();
         rtasPathValue            .resetToDefault();
         aaxPathValue             .resetToDefault();
         androidSDKPathValue      .resetToDefault();
@@ -285,13 +298,13 @@ private:
     Value selectedOSValue;
 
     ValueWithDefault jucePathValue, juceModulePathValue, userModulePathValue,
-                     vst3PathValue, vstPathValue, rtasPathValue, aaxPathValue,
-                     androidSDKPathValue, androidNDKPathValue,
+                     vstPathValue, rtasPathValue, aaxPathValue, androidSDKPathValue, androidNDKPathValue,
                      clionExePathValue, androidStudioExePathValue;
 
     Viewport propertyViewport;
     PropertyGroupComponent propertyGroup  { "Global Paths", { getIcons().openFolder, Colours::transparentBlack } };
 
+    ToggleButton warnAboutJUCEPathButton { "Warn about incorrect JUCE path" };
     TextButton rescanJUCEPathButton  { "Re-scan JUCE Modules" },
                rescanUserPathButton  { "Re-scan User Modules" },
                resetToDefaultsButton { "Reset to Defaults" };

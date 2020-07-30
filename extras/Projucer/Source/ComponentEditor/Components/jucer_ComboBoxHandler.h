@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -32,7 +31,7 @@ class ComboBoxHandler  : public ComponentTypeHandler
 {
 public:
     ComboBoxHandler()
-        : ComponentTypeHandler ("Combo Box", "ComboBox", typeid (ComboBox), 150, 24)
+        : ComponentTypeHandler ("Combo Box", "juce::ComboBox", typeid (ComboBox), 150, 24)
     {}
 
     Component* createNewComponent (JucerDocument*) override
@@ -140,9 +139,9 @@ public:
 
         if (needsCallback (component))
         {
-            String& callback = code.getCallbackCode ("public ComboBox::Listener",
+            String& callback = code.getCallbackCode ("public juce::ComboBox::Listener",
                                                      "void",
-                                                     "comboBoxChanged (ComboBox* comboBoxThatHasChanged)",
+                                                     "comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)",
                                                      true);
 
             if (callback.trim().isNotEmpty())

@@ -29,9 +29,9 @@ import android.app.Application;
 public class JuceApp extends Application
 {
     @Override
-    public void onCreate ()
+    public void onCreate()
     {
-        super.onCreate ();
+        super.onCreate();
         Java.initialiseJUCE (this);
     }
 }

@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -98,9 +97,8 @@ namespace FlacNamespace
 
  #define FLAC__NO_DLL 1
 
- #if JUCE_MSVC
-  #pragma warning (disable: 4267 4127 4244 4996 4100 4701 4702 4013 4133 4206 4312 4505 4365 4005 4334 181 111)
- #else
+ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4267 4127 4244 4996 4100 4701 4702 4013 4133 4206 4312 4505 4365 4005 4334 181 111)
+ #if ! JUCE_MSVC
   #define HAVE_LROUND 1
  #endif
 
@@ -112,32 +110,15 @@ namespace FlacNamespace
   #define SIZE_MAX 0xffffffff
  #endif
 
- #if JUCE_CLANG
-  #pragma clang diagnostic push
-  #pragma clang diagnostic ignored "-Wconversion"
-  #pragma clang diagnostic ignored "-Wshadow"
-  #pragma clang diagnostic ignored "-Wdeprecated-register"
-  #pragma clang diagnostic ignored "-Wswitch-enum"
-  #if __has_warning ("-Wimplicit-fallthrough")
-   #pragma clang diagnostic ignored "-Wimplicit-fallthrough"
-  #endif
-  #if __has_warning("-Wzero-as-null-pointer-constant")
-   #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
-  #endif
- #endif
-
- #if JUCE_GCC
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-  #pragma GCC diagnostic ignored "-Wconversion"
-  #pragma GCC diagnostic ignored "-Wsign-conversion"
-  #pragma GCC diagnostic ignored "-Wswitch-enum"
-  #pragma GCC diagnostic ignored "-Wswitch-default"
-  #pragma GCC diagnostic ignored "-Wredundant-decls"
-  #if __GNUC__ >= 7
-   #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
-  #endif
- #endif
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
+                                      "-Wshadow",
+                                      "-Wdeprecated-register",
+                                      "-Wswitch-enum",
+                                      "-Wswitch-default",
+                                      "-Wimplicit-fallthrough",
+                                      "-Wzero-as-null-pointer-constant",
+                                      "-Wsign-conversion",
+                                      "-Wredundant-decls")
 
  #if JUCE_INTEL
   #if JUCE_32BIT
@@ -175,13 +156,8 @@ namespace FlacNamespace
  #include <FLAC/all.h>
 #endif
 
- #if JUCE_CLANG
-  #pragma clang diagnostic pop
- #endif
-
- #if JUCE_GCC
-  #pragma GCC diagnostic pop
- #endif
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+ JUCE_END_IGNORE_WARNINGS_MSVC
 }
 
 #undef max

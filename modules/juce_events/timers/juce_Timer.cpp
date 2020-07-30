@@ -136,7 +136,7 @@ public:
         callTimers();
     }
 
-    static inline void add (Timer* tim) noexcept
+    static void add (Timer* tim) noexcept
     {
         if (instance == nullptr)
             instance = new TimerThread();
@@ -144,13 +144,13 @@ public:
         instance->addTimer (tim);
     }
 
-    static inline void remove (Timer* tim) noexcept
+    static void remove (Timer* tim) noexcept
     {
         if (instance != nullptr)
             instance->removeTimer (tim);
     }
 
-    static inline void resetCounter (Timer* tim) noexcept
+    static void resetCounter (Timer* tim) noexcept
     {
         if (instance != nullptr)
             instance->resetTimerCounter (tim);
@@ -187,7 +187,7 @@ private:
         // Trying to add a timer that's already here - shouldn't get to this point,
         // so if you get this assertion, let me know!
         jassert (std::find_if (timers.begin(), timers.end(),
-                               [t](TimerCountdown i) { return i.timer == t; }) == timers.end());
+                               [t] (TimerCountdown i) { return i.timer == t; }) == timers.end());
 
         auto pos = timers.size();
 

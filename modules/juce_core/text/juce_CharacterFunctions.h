@@ -343,7 +343,7 @@ public:
 
         c = *text;
 
-        auto writeExponentDigits = [](int exponent, char* destination)
+        auto writeExponentDigits = [] (int exponent, char* destination)
         {
             auto exponentDivisor = 100;
 
@@ -551,7 +551,7 @@ public:
     }
 
     /** Compares two characters. */
-    static inline int compare (juce_wchar char1, juce_wchar char2) noexcept
+    static int compare (juce_wchar char1, juce_wchar char2) noexcept
     {
         if (auto diff = static_cast<int> (char1) - static_cast<int> (char2))
             return diff < 0 ? -1 : 1;
@@ -596,7 +596,7 @@ public:
     }
 
     /** Compares two characters, using a case-independant match. */
-    static inline int compareIgnoreCase (juce_wchar char1, juce_wchar char2) noexcept
+    static int compareIgnoreCase (juce_wchar char1, juce_wchar char2) noexcept
     {
         return char1 != char2 ? compare (toUpperCase (char1), toUpperCase (char2)) : 0;
     }

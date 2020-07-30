@@ -7,8 +7,365 @@
 namespace BinaryData
 {
 
-//================== gradle-wrapper.jar ==================
+//================== LaunchScreen.storyboard ==================
 static const unsigned char temp_binary_data_0[] =
+"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+"<document type=\"com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB\" version=\"3.0\" toolsVersion=\"14460.31\" targetRuntime=\"iOS.CocoaTouch\" propertyAccessControl=\"none\" useAutolayout=\"YES\" launchScreen=\"YES\" useTraitCollections=\"YES\" "
+"useSafeAreas=\"YES\" colorMatched=\"YES\" initialViewController=\"01J-lp-oVM\">\n"
+"    <scenes>\n"
+"        <scene sceneID=\"EHf-IW-A2E\">\n"
+"            <objects>\n"
+"                <placeholder placeholderIdentifier=\"IBFirstResponder\" id=\"iYj-Kq-Ea1\" userLabel=\"\" sceneMemberID=\"firstResponder\"/>\n"
+"                <viewController id=\"01J-lp-oVM\" sceneMemberID=\"viewController\">\n"
+"                    <view key=\"view\" contentMode=\"scaleToFill\" id=\"Ze5-6b-2t3\">\n"
+"                        <autoresizingMask key=\"autoresizingMask\"/>\n"
+"                        <color key=\"backgroundColor\" red=\"0\" green=\"0\" blue=\"0\" alpha=\"1\" colorSpace=\"custom\" customColorSpace=\"sRGB\"/>\n"
+"                    </view>\n"
+"                </viewController>\n"
+"            </objects>\n"
+"        </scene>\n"
+"    </scenes>\n"
+"</document>\n";
+
+const char* LaunchScreen_storyboard = (const char*) temp_binary_data_0;
+
+//================== PIPAudioProcessor.cpp.in ==================
+static const unsigned char temp_binary_data_1[] =
+"/*\n"
+"  ==============================================================================\n"
+"\n"
+"    This file was auto-generated and contains the startup code for a PIP.\n"
+"\n"
+"  ==============================================================================\n"
+"*/\n"
+"\n"
+"#include <JuceHeader.h>\n"
+"#include \"${JUCE_PIP_HEADER}\"\n"
+"\n"
+"//==============================================================================\n"
+"juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()\n"
+"{\n"
+"    return new ${JUCE_PIP_MAIN_CLASS}();\n"
+"}\n";
+
+const char* PIPAudioProcessor_cpp_in = (const char*) temp_binary_data_1;
+
+//================== PIPComponent.cpp.in ==================
+static const unsigned char temp_binary_data_2[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file contains the startup code for a PIP.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#include <JuceHeader.h>\r\n"
+"#include \"${JUCE_PIP_HEADER}\"\r\n"
+"\r\n"
+"class Application    : public juce::JUCEApplication\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    Application() = default;\r\n"
+"\r\n"
+"    const juce::String getApplicationName() override       { return \"${JUCE_PIP_NAME}\"; }\r\n"
+"    const juce::String getApplicationVersion() override    { return \"${PROJECT_VERSION}\"; }\r\n"
+"\r\n"
+"    void initialise (const juce::String&) override\r\n"
+"    {\r\n"
+"        mainWindow.reset (new MainWindow (\"${JUCE_PIP_NAME}\", new ${JUCE_PIP_MAIN_CLASS}, *this));\r\n"
+"    }\r\n"
+"\r\n"
+"    void shutdown() override                         { mainWindow = nullptr; }\r\n"
+"\r\n"
+"private:\r\n"
+"    class MainWindow    : public juce::DocumentWindow\r\n"
+"    {\r\n"
+"    public:\r\n"
+"        MainWindow (const juce::String& name, juce::Component* c, JUCEApplication& a)\r\n"
+"            : DocumentWindow (name, juce::Desktop::getInstance().getDefaultLookAndFeel()\r\n"
+"                                                                .findColour (ResizableWindow::backgroundColourId),\r\n"
+"                              juce::DocumentWindow::allButtons),\r\n"
+"              app (a)\r\n"
+"        {\r\n"
+"            setUsingNativeTitleBar (true);\r\n"
+"            setContentOwned (c, true);\r\n"
+"\r\n"
+"           #if JUCE_ANDROID || JUCE_IOS\r\n"
+"            setFullScreen (true);\r\n"
+"           #else\r\n"
+"            setResizable (true, false);\r\n"
+"            setResizeLimits (300, 250, 10000, 10000);\r\n"
+"            centreWithSize (getWidth(), getHeight());\r\n"
+"           #endif\r\n"
+"\r\n"
+"            setVisible (true);\r\n"
+"        }\r\n"
+"\r\n"
+"        void closeButtonPressed() override\r\n"
+"        {\r\n"
+"            app.systemRequestedQuit();\r\n"
+"        }\r\n"
+"\r\n"
+"    private:\r\n"
+"        JUCEApplication& app;\r\n"
+"\r\n"
+"        //==============================================================================\r\n"
+"        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)\r\n"
+"    };\r\n"
+"\r\n"
+"    std::unique_ptr<MainWindow> mainWindow;\r\n"
+"};\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"START_JUCE_APPLICATION (Application)\r\n";
+
+const char* PIPComponent_cpp_in = (const char*) temp_binary_data_2;
+
+//================== PIPConsole.cpp.in ==================
+static const unsigned char temp_binary_data_3[] =
+"/*\n"
+"  ==============================================================================\n"
+"\n"
+"    This file was auto-generated and contains the startup code for a PIP.\n"
+"\n"
+"  ==============================================================================\n"
+"*/\n"
+"\n"
+"#include <JuceHeader.h>\n"
+"#include \"${JUCE_PIP_HEADER}\"\n";
+
+const char* PIPConsole_cpp_in = (const char*) temp_binary_data_3;
+
+//================== RecentFilesMenuTemplate.nib ==================
+static const unsigned char temp_binary_data_4[] =
+{ 98,112,108,105,115,116,48,48,212,0,1,0,2,0,3,0,4,0,5,0,6,1,53,1,54,88,36,118,101,114,115,105,111,110,88,36,111,98,106,101,99,116,115,89,36,97,114,99,104,105,118,101,114,84,36,116,111,112,18,0,1,134,160,175,16,74,0,7,0,8,0,31,0,35,0,36,0,42,0,46,0,50,
+0,53,0,57,0,74,0,77,0,78,0,86,0,87,0,97,0,112,0,113,0,114,0,119,0,120,0,121,0,124,0,128,0,129,0,132,0,143,0,144,0,145,0,149,0,153,0,162,0,163,0,164,0,169,0,173,0,180,0,181,0,182,0,185,0,192,0,193,0,200,0,201,0,208,0,209,0,216,0,217,0,224,0,225,0,226,
+0,229,0,230,0,232,0,249,1,11,1,29,1,30,1,31,1,32,1,33,1,34,1,35,1,36,1,37,1,38,1,39,1,40,1,41,1,42,1,43,1,44,1,47,1,50,85,36,110,117,108,108,219,0,9,0,10,0,11,0,12,0,13,0,14,0,15,0,16,0,17,0,18,0,19,0,20,0,21,0,22,0,23,0,24,0,25,0,26,0,27,0,28,0,29,0,
+29,95,16,16,78,83,86,105,115,105,98,108,101,87,105,110,100,111,119,115,93,78,83,79,98,106,101,99,116,115,75,101,121,115,86,78,83,82,111,111,116,92,78,83,79,105,100,115,86,97,108,117,101,115,86,36,99,108,97,115,115,90,78,83,79,105,100,115,75,101,121,115,
+93,78,83,67,111,110,110,101,99,116,105,111,110,115,95,16,15,78,83,79,98,106,101,99,116,115,86,97,108,117,101,115,95,16,25,78,83,65,99,99,101,115,115,105,98,105,108,105,116,121,67,111,110,110,101,99,116,111,114,115,95,16,23,78,83,65,99,99,101,115,115,
+105,98,105,108,105,116,121,79,105,100,115,75,101,121,115,95,16,25,78,83,65,99,99,101,115,115,105,98,105,108,105,116,121,79,105,100,115,86,97,108,117,101,115,128,5,128,9,128,2,128,55,128,73,128,54,128,7,128,53,128,71,128,72,128,72,210,0,13,0,32,0,33,0,
+34,91,78,83,67,108,97,115,115,78,97,109,101,128,4,128,3,93,78,83,65,112,112,108,105,99,97,116,105,111,110,210,0,37,0,38,0,39,0,40,90,36,99,108,97,115,115,110,97,109,101,88,36,99,108,97,115,115,101,115,94,78,83,67,117,115,116,111,109,79,98,106,101,99,
+116,162,0,39,0,41,88,78,83,79,98,106,101,99,116,210,0,13,0,43,0,44,0,45,90,78,83,46,111,98,106,101,99,116,115,128,6,160,210,0,37,0,38,0,47,0,48,92,78,83,77,117,116,97,98,108,101,83,101,116,163,0,47,0,49,0,41,85,78,83,83,101,116,210,0,13,0,43,0,51,0,52,
+128,8,160,210,0,37,0,38,0,54,0,55,94,78,83,77,117,116,97,98,108,101,65,114,114,97,121,163,0,54,0,56,0,41,87,78,83,65,114,114,97,121,210,0,13,0,43,0,58,0,59,128,52,174,0,60,0,61,0,62,0,63,0,64,0,65,0,66,0,67,0,68,0,69,0,70,0,71,0,72,0,73,128,10,128,12,
+128,45,128,15,128,39,128,25,128,28,128,30,128,33,128,35,128,43,128,41,128,47,128,50,210,0,13,0,32,0,33,0,76,128,4,128,11,93,78,83,65,112,112,108,105,99,97,116,105,111,110,212,0,79,0,13,0,80,0,81,0,82,0,83,0,84,0,85,91,78,83,77,101,110,117,73,116,101,
+109,115,86,78,83,78,97,109,101,87,78,83,84,105,116,108,101,128,14,128,38,128,49,128,13,89,65,77,97,105,110,77,101,110,117,210,0,13,0,43,0,51,0,89,128,8,167,0,63,0,65,0,64,0,71,0,70,0,62,0,72,128,15,128,25,128,39,128,41,128,43,128,45,128,47,216,0,98,0,
+99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,109,0,110,0,111,95,16,17,78,83,75,101,121,69,113,117,105,118,77,111,100,77,97,115,107,86,78,83,77,101,110,117,89,78,83,79,110,73,109,97,103,101,90,78,83,75,101,121,69,113,117,105,118,
+93,78,83,77,110,101,109,111,110,105,99,76,111,99,92,78,83,77,105,120,101,100,73,109,97,103,101,18,0,16,0,0,128,12,128,18,128,24,128,17,18,127,255,255,255,128,22,128,16,91,100,101,108,109,101,65,112,112,75,105,116,80,211,0,13,0,115,0,32,0,116,0,117,0,
+118,94,78,83,82,101,115,111,117,114,99,101,78,97,109,101,128,21,128,20,128,19,87,78,83,73,109,97,103,101,95,16,15,78,83,77,101,110,117,67,104,101,99,107,109,97,114,107,210,0,37,0,38,0,122,0,123,95,16,16,78,83,67,117,115,116,111,109,82,101,115,111,117,
+114,99,101,162,0,122,0,41,211,0,13,0,115,0,32,0,116,0,126,0,118,128,21,128,23,128,19,95,16,16,78,83,77,101,110,117,77,105,120,101,100,83,116,97,116,101,210,0,37,0,38,0,130,0,131,90,78,83,77,101,110,117,73,116,101,109,162,0,130,0,41,218,0,133,0,98,0,134,
+0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,135,0,104,0,66,0,61,0,106,0,107,0,108,0,109,0,110,0,142,88,78,83,65,99,116,105,111,110,89,78,83,83,117,98,109,101,110,117,128,27,128,28,128,12,128,18,128,24,128,17,128,22,128,26,84,70,105,108,101,94,115,117,98,
+109,101,110,117,65,99,116,105,111,110,58,211,0,79,0,13,0,81,0,146,0,83,0,142,128,29,128,38,128,26,210,0,13,0,43,0,51,0,151,128,8,161,0,67,128,30,218,0,133,0,98,0,134,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,154,0,104,0,68,0,66,0,106,0,107,0,108,0,109,
+0,110,0,161,128,32,128,33,128,28,128,18,128,24,128,17,128,22,128,31,91,79,112,101,110,32,82,101,99,101,110,116,94,115,117,98,109,101,110,117,65,99,116,105,111,110,58,212,0,79,0,13,0,80,0,81,0,165,0,83,0,167,0,161,128,34,128,38,128,37,128,31,210,0,13,
+0,43,0,51,0,171,128,8,161,0,69,128,35,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,68,0,106,0,107,0,108,0,109,0,110,0,179,128,33,128,18,128,24,128,17,128,22,128,36,90,67,108,101,97,114,32,77,101,110,117,95,16,22,95,78,83,82,101,99,101,110,
+116,68,111,99,117,109,101,110,116,115,77,101,110,117,210,0,37,0,38,0,183,0,184,86,78,83,77,101,110,117,162,0,183,0,41,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,109,0,110,0,191,128,12,128,18,128,24,128,17,128,22,128,
+40,84,69,100,105,116,215,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,61,0,106,0,107,0,108,0,109,0,110,0,199,128,12,128,18,128,24,128,17,128,22,128,42,86,70,111,114,109,97,116,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,
+109,0,110,0,207,128,12,128,18,128,24,128,17,128,22,128,44,84,86,105,101,119,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,109,0,110,0,215,128,12,128,18,128,24,128,17,128,22,128,46,86,87,105,110,100,111,119,215,0,99,0,
+100,0,13,0,101,0,102,0,103,0,81,0,61,0,106,0,107,0,108,0,109,0,110,0,223,128,12,128,18,128,24,128,17,128,22,128,48,84,72,101,108,112,91,95,78,83,77,97,105,110,77,101,110,117,210,0,13,0,32,0,33,0,228,128,4,128,51,93,78,83,70,111,110,116,77,97,110,97,103,
+101,114,210,0,37,0,38,0,56,0,231,162,0,56,0,41,210,0,13,0,43,0,58,0,234,128,52,174,0,22,0,22,0,61,0,61,0,61,0,61,0,65,0,66,0,67,0,68,0,61,0,61,0,61,0,22,128,2,128,2,128,12,128,12,128,12,128,12,128,25,128,28,128,30,128,33,128,12,128,12,128,12,128,2,210,
+0,13,0,43,0,58,0,251,128,52,175,16,15,0,22,0,60,0,61,0,62,0,63,0,64,0,65,0,66,0,67,0,68,0,69,0,70,0,71,0,72,0,73,128,2,128,10,128,12,128,45,128,15,128,39,128,25,128,28,128,30,128,33,128,35,128,43,128,41,128,47,128,50,210,0,13,0,43,0,58,1,13,128,52,175,
+16,15,1,14,1,15,1,16,1,17,1,18,1,19,1,20,1,21,1,22,1,23,1,24,1,25,1,26,1,27,1,28,128,56,128,57,128,58,128,59,128,60,128,61,128,62,128,63,128,64,128,65,128,66,128,67,128,68,128,69,128,70,17,2,22,17,2,23,17,2,24,17,2,25,17,2,26,17,2,27,17,2,28,17,2,29,
+17,2,30,17,2,31,17,2,32,17,2,33,17,2,34,17,2,35,17,2,36,210,0,13,0,43,0,51,1,46,128,8,160,210,0,13,0,43,0,58,1,49,128,52,160,210,0,37,0,38,1,51,1,52,94,78,83,73,66,79,98,106,101,99,116,68,97,116,97,162,1,51,0,41,95,16,15,78,83,75,101,121,101,100,65,114,
+99,104,105,118,101,114,209,1,55,1,56,93,73,66,46,111,98,106,101,99,116,100,97,116,97,128,1,0,8,0,25,0,34,0,43,0,53,0,58,0,63,0,214,0,220,1,9,1,28,1,42,1,49,1,62,1,69,1,80,1,94,1,112,1,140,1,166,1,194,1,196,1,198,1,200,1,202,1,204,1,206,1,208,1,210,1,
+212,1,214,1,216,1,225,1,237,1,239,1,241,1,255,2,8,2,19,2,28,2,43,2,48,2,57,2,66,2,77,2,79,2,80,2,89,2,102,2,109,2,115,2,124,2,126,2,127,2,136,2,151,2,158,2,166,2,175,2,177,2,206,2,208,2,210,2,212,2,214,2,216,2,218,2,220,2,222,2,224,2,226,2,228,2,230,
+2,232,2,234,2,243,2,245,2,247,3,5,3,22,3,34,3,41,3,49,3,51,3,53,3,55,3,57,3,67,3,76,3,78,3,93,3,95,3,97,3,99,3,101,3,103,3,105,3,107,3,140,3,160,3,167,3,177,3,188,3,202,3,215,3,220,3,222,3,224,3,226,3,228,3,233,3,235,3,237,3,249,3,250,4,7,4,22,4,24,4,
+26,4,28,4,36,4,54,4,63,4,82,4,87,4,100,4,102,4,104,4,106,4,125,4,134,4,145,4,150,4,191,4,200,4,210,4,212,4,214,4,216,4,218,4,220,4,222,4,224,4,226,4,231,4,246,5,3,5,5,5,7,5,9,5,18,5,20,5,23,5,25,5,66,5,68,5,70,5,72,5,74,5,76,5,78,5,80,5,82,5,94,5,109,
+5,126,5,128,5,130,5,132,5,134,5,143,5,145,5,148,5,150,5,183,5,185,5,187,5,189,5,191,5,193,5,195,5,206,5,231,5,240,5,247,5,252,6,29,6,31,6,33,6,35,6,37,6,39,6,41,6,46,6,75,6,77,6,79,6,81,6,83,6,85,6,87,6,94,6,127,6,129,6,131,6,133,6,135,6,137,6,139,6,
+144,6,177,6,179,6,181,6,183,6,185,6,187,6,189,6,196,6,225,6,227,6,229,6,231,6,233,6,235,6,237,6,242,6,254,7,7,7,9,7,11,7,25,7,34,7,39,7,48,7,50,7,79,7,81,7,83,7,85,7,87,7,89,7,91,7,93,7,95,7,97,7,99,7,101,7,103,7,105,7,107,7,116,7,118,7,151,7,153,7,155,
+7,157,7,159,7,161,7,163,7,165,7,167,7,169,7,171,7,173,7,175,7,177,7,179,7,181,7,190,7,192,7,225,7,227,7,229,7,231,7,233,7,235,7,237,7,239,7,241,7,243,7,245,7,247,7,249,7,251,7,253,7,255,8,2,8,5,8,8,8,11,8,14,8,17,8,20,8,23,8,26,8,29,8,32,8,35,8,38,8,
+41,8,44,8,53,8,55,8,56,8,65,8,67,8,68,8,77,8,92,8,97,8,115,8,120,8,134,0,0,0,0,0,0,2,2,0,0,0,0,0,0,1,57,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,136,0,0 };
+
+const char* RecentFilesMenuTemplate_nib = (const char*) temp_binary_data_4;
+
+//================== UnityPluginGUIScript.cs.in ==================
+static const unsigned char temp_binary_data_5[] =
+"#if UNITY_EDITOR\n"
+"\n"
+"using UnityEditor;\n"
+"using UnityEngine;\n"
+"\n"
+"using System.Collections.Generic;\n"
+"using System.Runtime.InteropServices;\n"
+"\n"
+"public class ${plugin_class_name}GUI : IAudioEffectPluginGUI\n"
+"{\n"
+"    public override string Name           { get { return \"${plugin_name}\"; } }\n"
+"    public override string Description    { get { return \"${plugin_description}\"; } }\n"
+"    public override string Vendor         { get { return \"${plugin_vendor}\"; } }\n"
+"\n"
+"    //==============================================================================\n"
+"    [DllImport(\"${plugin_name}\")] static extern System.IntPtr getRenderCallback();\n"
+"\n"
+"    [DllImport(\"${plugin_name}\")] static extern void unityInitialiseTexture (int id, System.IntPtr texture, int width, int height);\n"
+"\n"
+"    [DllImport(\"${plugin_name}\")] static extern void unityMouseDown (int id, float x, float y, EventModifiers mods, int button);\n"
+"    [DllImport(\"${plugin_name}\")] static extern void unityMouseDrag (int id, float x, float y, EventModifiers mods, int button);\n"
+"    [DllImport(\"${plugin_name}\")] static extern void unityMouseUp   (int id, float x, float y, EventModifiers mods);\n"
+"\n"
+"    [DllImport(\"${plugin_name}\")] static extern void unityKeyEvent (int id, KeyCode code, EventModifiers mods, string name);\n"
+"\n"
+"    [DllImport(\"${plugin_name}\")] static extern void unitySetScreenBounds (int id, float x, float y, float w, float h);\n"
+"\n"
+"    //==============================================================================\n"
+"    private class PluginGUIInstance\n"
+"    {\n"
+"        public PluginGUIInstance (ref IAudioEffectPlugin plugin, int id)\n"
+"        {\n"
+"            instanceID = id;\n"
+"\n"
+"            float[] arr;\n"
+"            plugin.GetFloatBuffer (\"Editor\", out arr, 1);\n"
+"            hasEditor = (arr[0] > 0.0f);\n"
+"        }\n"
+"\n"
+"        public void repaint (Rect r)\n"
+"        {\n"
+"            Vector2 newScreenPosition = GUIUtility.GUIToScreenPoint (r.position);\n"
+"\n"
+"            if (bounds != r\n"
+"                || screenPosition != newScreenPosition)\n"
+"            {\n"
+"                screenPosition = newScreenPosition;\n"
+"                bounds = r;\n"
+"\n"
+"                unitySetScreenBounds (instanceID, screenPosition.x, screenPosition.y, bounds.width, bounds.height);\n"
+"                setupTexture();\n"
+"            }\n"
+"\n"
+"            GL.IssuePluginEvent (getRenderCallback(), instanceID);\n"
+"\n"
+"            texture.SetPixels32 (pixels);\n"
+"            texture.Apply();\n"
+"\n"
+"            EditorGUI.DrawPreviewTexture (bounds, texture);\n"
+"        }\n"
+"\n"
+"        public bool handleMouseEvent (EventType eventType)\n"
+"        {\n"
+"            Vector2 mousePos = Event.current.mousePosition;\n"
+"            EventModifiers mods = Event.current.modifiers;\n"
+"\n"
+"            if (! bounds.Contains (mousePos))\n"
+"                return false;\n"
+"\n"
+"            Vector2 relativePos = new Vector2 (mousePos.x - bounds.x, mousePos.y - bounds.y);\n"
+"\n"
+"            if (eventType == EventType.MouseDown)\n"
+"            {\n"
+"                unityMouseDown (instanceID, relativePos.x, relativePos.y, mods, Event.current.button);\n"
+"                GUIUtility.hotControl = GUIUtility.GetControlID (FocusType.Passive);\n"
+"            }\n"
+"            else if (eventType == EventType.MouseUp)\n"
+"            {\n"
+"                unityMouseUp (instanceID, relativePos.x, relativePos.y, mods);\n"
+"                GUIUtility.hotControl = 0;\n"
+"            }\n"
+"            else if (eventType == EventType.MouseDrag)\n"
+"            {\n"
+"                unityMouseDrag (instanceID, relativePos.x, relativePos.y, mods, Event.current.button);\n"
+"            }\n"
+"\n"
+"            Event.current.Use();\n"
+"\n"
+"            return true;\n"
+"        }\n"
+"\n"
+"        public void handleKeyEvent (EventType eventType)\n"
+"        {\n"
+"            if (eventType == EventType.KeyDown)\n"
+"            {\n"
+"                KeyCode code = Event.current.keyCode;\n"
+"\n"
+"                if (code == KeyCode.None)\n"
+"                    return;\n"
+"\n"
+"                EventModifiers mods = Event.current.modifiers;\n"
+"\n"
+"                unityKeyEvent (instanceID, code, mods, code.ToString());\n"
+"            }\n"
+"        }\n"
+"\n"
+"        private void setupTexture()\n"
+"        {\n"
+"            if (pixelHandle.IsAllocated)\n"
+"                pixelHandle.Free();\n"
+"\n"
+"            texture = new Texture2D ((int) bounds.width, (int) bounds.height, TextureFormat.ARGB32, false);\n"
+"\n"
+"            pixels = texture.GetPixels32();\n"
+"            pixelHandle = GCHandle.Alloc (pixels, GCHandleType.Pinned);\n"
+"\n"
+"            unityInitialiseTexture (instanceID, pixelHandle.AddrOfPinnedObject(), texture.width, texture.height);\n"
+"        }\n"
+"\n"
+"        public int instanceID = -1;\n"
+"        public bool hasEditor;\n"
+"\n"
+"        private Vector2 screenPosition;\n"
+"        private Rect bounds;\n"
+"\n"
+"        private Texture2D texture;\n"
+"        private Color32[] pixels;\n"
+"        private GCHandle pixelHandle;\n"
+"    }\n"
+"    List<PluginGUIInstance> guis = new List<PluginGUIInstance>();\n"
+"\n"
+"    private PluginGUIInstance getGUIInstanceForPlugin (ref IAudioEffectPlugin plugin)\n"
+"    {\n"
+"        float[] idArray;\n"
+"        plugin.GetFloatBuffer (\"ID\", out idArray, 1);\n"
+"\n"
+"        int id = (int) idArray[0];\n"
+"\n"
+"        for (int i = 0; i < guis.Count; ++i)\n"
+"        {\n"
+"            if (guis[i].instanceID == id)\n"
+"                return guis[i];\n"
+"        }\n"
+"\n"
+"        PluginGUIInstance newInstance = new PluginGUIInstance (ref plugin, id);\n"
+"        guis.Add (newInstance);\n"
+"\n"
+"        return guis[guis.Count - 1];\n"
+"    }\n"
+"\n"
+"    //==============================================================================\n"
+"    public override bool OnGUI (IAudioEffectPlugin plugin)\n"
+"    {\n"
+"        PluginGUIInstance guiInstance = getGUIInstanceForPlugin (ref plugin);\n"
+"\n"
+"        if (! guiInstance.hasEditor)\n"
+"            return true;\n"
+"\n"
+"        float[] arr;\n"
+"        plugin.GetFloatBuffer (\"Size\", out arr, 6);\n"
+"\n"
+"        Rect r = GUILayoutUtility.GetRect (arr[0], arr[1],\n"
+"                                           new GUILayoutOption[] { GUILayout.MinWidth (arr[2]), GUILayout.MinHeight (arr[3]),\n"
+"                                                                   GUILayout.MaxWidth (arr[4]), GUILayout.MaxHeight (arr[5]) });\n"
+"\n"
+"        int controlID = GUIUtility.GetControlID (FocusType.Passive);\n"
+"        Event currentEvent = Event.current;\n"
+"        EventType currentEventType = currentEvent.GetTypeForControl (controlID);\n"
+"\n"
+"        if (currentEventType == EventType.Repaint)\n"
+"            guiInstance.repaint (r);\n"
+"        else if (currentEvent.isMouse)\n"
+"            guiInstance.handleMouseEvent (currentEventType);\n"
+"        else if (currentEvent.isKey)\n"
+"            guiInstance.handleKeyEvent (currentEventType);\n"
+"\n"
+"        return false;\n"
+"    }\n"
+"}\n"
+"\n"
+"#endif\n";
+
+const char* UnityPluginGUIScript_cs_in = (const char*) temp_binary_data_5;
+
+//================== gradle-wrapper.jar ==================
+static const unsigned char temp_binary_data_6[] =
 { 80,75,3,4,10,0,0,8,8,0,42,178,149,71,0,0,0,0,2,0,0,0,0,0,0,0,9,0,0,0,77,69,84,65,45,73,78,70,47,3,0,80,75,3,4,10,0,0,8,8,0,42,178,149,71,215,149,152,82,63,0,0,0,85,0,0,0,20,0,0,0,77,69,84,65,45,73,78,70,47,77,65,78,73,70,69,83,84,46,77,70,243,77,204,
 203,76,75,45,46,209,13,75,45,42,206,204,207,179,82,48,212,51,224,229,242,204,45,200,73,205,77,205,43,73,44,1,10,234,134,100,150,228,164,90,41,184,23,37,166,228,164,98,200,194,181,26,233,25,2,245,242,114,1,0,80,75,3,4,10,0,0,8,8,0,22,178,149,71,0,0,0,
 0,2,0,0,0,0,0,0,0,4,0,0,0,111,114,103,47,3,0,80,75,3,4,10,0,0,8,8,0,22,178,149,71,0,0,0,0,2,0,0,0,0,0,0,0,11,0,0,0,111,114,103,47,103,114,97,100,108,101,47,3,0,80,75,3,4,10,0,0,8,8,0,22,178,149,71,0,0,0,0,2,0,0,0,0,0,0,0,19,0,0,0,111,114,103,47,103,114,
@@ -760,10 +1117,10 @@ static const unsigned char temp_binary_data_0[] =
 76,105,110,101,80,97,114,115,101,114,36,65,102,116,101,114,70,105,114,115,116,83,117,98,67,111,109,109,97,110,100,46,99,108,97,115,115,80,75,1,2,20,3,10,0,0,8,8,0,10,178,149,71,105,222,125,0,70,0,0,0,68,0,0,0,31,0,0,0,0,0,0,0,0,0,0,0,180,129,219,191,
 0,0,103,114,97,100,108,101,45,99,108,105,45,99,108,97,115,115,112,97,116,104,46,112,114,111,112,101,114,116,105,101,115,80,75,5,6,0,0,0,0,49,0,49,0,16,17,0,0,94,192,0,0,0,0,0,0 };
 
-const char* gradlewrapper_jar = (const char*) temp_binary_data_0;
+const char* gradlewrapper_jar = (const char*) temp_binary_data_6;
 
 //================== gradlew ==================
-static const unsigned char temp_binary_data_1[] =
+static const unsigned char temp_binary_data_7[] =
 "#!/usr/bin/env bash\n"
 "\n"
 "##############################################################################\n"
@@ -925,10 +1282,10 @@ static const unsigned char temp_binary_data_1[] =
 "\n"
 "exec \"$JAVACMD\" \"${JVM_OPTS[@]}\" -classpath \"$CLASSPATH\" org.gradle.wrapper.GradleWrapperMain \"$@\"\n";
 
-const char* gradlew = (const char*) temp_binary_data_1;
+const char* gradlew = (const char*) temp_binary_data_7;
 
 //================== gradlew.bat ==================
-static const unsigned char temp_binary_data_2[] =
+static const unsigned char temp_binary_data_8[] =
 "@if \"%DEBUG%\" == \"\" @echo off\r\n"
 "@rem ##########################################################################\r\n"
 "@rem\r\n"
@@ -1020,10 +1377,10 @@ static const unsigned char temp_binary_data_2[] =
 "\r\n"
 ":omega\r\n";
 
-const char* gradlew_bat = (const char*) temp_binary_data_2;
+const char* gradlew_bat = (const char*) temp_binary_data_8;
 
 //================== LICENSE ==================
-static const unsigned char temp_binary_data_3[] =
+static const unsigned char temp_binary_data_9[] =
 "Apache License\n"
 "                           Version 2.0, January 2004\n"
 "                        http://www.apache.org/licenses/\n"
@@ -1227,10 +1584,10 @@ static const unsigned char temp_binary_data_3[] =
 "   limitations under the License.\n"
 "\n";
 
-const char* LICENSE = (const char*) temp_binary_data_3;
+const char* LICENSE = (const char*) temp_binary_data_9;
 
 //================== background_logo.svg ==================
-static const unsigned char temp_binary_data_4[] =
+static const unsigned char temp_binary_data_10[] =
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
 "<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\r\n"
 "\t viewBox=\"0 0 451.7 451.7\" enable-background=\"new 0 0 451.7 451.7\" xml:space=\"preserve\">\r\n"
@@ -1269,10 +1626,10 @@ static const unsigned char temp_binary_data_4[] =
 "</g>\r\n"
 "</svg>\r\n";
 
-const char* background_logo_svg = (const char*) temp_binary_data_4;
+const char* background_logo_svg = (const char*) temp_binary_data_10;
 
 //================== export_android.svg ==================
-static const unsigned char temp_binary_data_5[] =
+static const unsigned char temp_binary_data_11[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 "<svg width=\"19px\" height=\"23px\" viewBox=\"0 0 19 23\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n"
 "    <!-- Generator: Sketch 43.1 (39012) - http://www.bohemiancoding.com/sketch -->\n"
@@ -1303,10 +1660,10 @@ static const unsigned char temp_binary_data_5[] =
 "    </g>\n"
 "</svg>";
 
-const char* export_android_svg = (const char*) temp_binary_data_5;
+const char* export_android_svg = (const char*) temp_binary_data_11;
 
 //================== export_clion.svg ==================
-static const unsigned char temp_binary_data_6[] =
+static const unsigned char temp_binary_data_12[] =
 "<svg id=\"Layer_1\" data-name=\"Layer 1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 128 128\">\n"
 "  <defs>\n"
 "    <linearGradient id=\"linear-gradient\" x1=\"40.69\" y1=\"-676.56\" x2=\"83.48\" y2=\"-676.56\" gradientTransform=\"matrix(1, 0, 0, -1, 0, -648.86)\" gradientUnits=\"userSpaceOnUse\">\n"
@@ -1342,10 +1699,10 @@ static const unsigned char temp_binary_data_6[] =
 "  </g>\n"
 "</svg>\n";
 
-const char* export_clion_svg = (const char*) temp_binary_data_6;
+const char* export_clion_svg = (const char*) temp_binary_data_12;
 
 //================== export_codeBlocks.svg ==================
-static const unsigned char temp_binary_data_7[] =
+static const unsigned char temp_binary_data_13[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 "<svg width=\"20px\" height=\"20px\" viewBox=\"0 0 20 20\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n"
 "    <!-- Generator: Sketch 43.1 (39012) - http://www.bohemiancoding.com/sketch -->\n"
@@ -1367,10 +1724,10 @@ static const unsigned char temp_binary_data_7[] =
 "    </g>\n"
 "</svg>";
 
-const char* export_codeBlocks_svg = (const char*) temp_binary_data_7;
+const char* export_codeBlocks_svg = (const char*) temp_binary_data_13;
 
 //================== export_linux.svg ==================
-static const unsigned char temp_binary_data_8[] =
+static const unsigned char temp_binary_data_14[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 "<svg width=\"63px\" height=\"75px\" viewBox=\"0 0 63 75\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n"
 "    <!-- Generator: Sketch 43.1 (39012) - http://www.bohemiancoding.com/sketch -->\n"
@@ -1520,10 +1877,10 @@ static const unsigned char temp_binary_data_8[] =
 "    </g>\n"
 "</svg>";
 
-const char* export_linux_svg = (const char*) temp_binary_data_8;
+const char* export_linux_svg = (const char*) temp_binary_data_14;
 
 //================== export_visualStudio.svg ==================
-static const unsigned char temp_binary_data_9[] =
+static const unsigned char temp_binary_data_15[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 "<svg width=\"20px\" height=\"20px\" viewBox=\"0 0 20 20\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n"
 "    <!-- Generator: Sketch 43.1 (39012) - http://www.bohemiancoding.com/sketch -->\n"
@@ -1547,10 +1904,10 @@ static const unsigned char temp_binary_data_9[] =
 "    </g>\n"
 "</svg>";
 
-const char* export_visualStudio_svg = (const char*) temp_binary_data_9;
+const char* export_visualStudio_svg = (const char*) temp_binary_data_15;
 
 //================== export_xcode.svg ==================
-static const unsigned char temp_binary_data_10[] =
+static const unsigned char temp_binary_data_16[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 "<svg width=\"33px\" height=\"32px\" viewBox=\"0 0 33 32\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n"
 "    <!-- Generator: Sketch 43.1 (39012) - http://www.bohemiancoding.com/sketch -->\n"
@@ -1622,65 +1979,136 @@ static const unsigned char temp_binary_data_10[] =
 "    </g>\n"
 "</svg>";
 
-const char* export_xcode_svg = (const char*) temp_binary_data_10;
+const char* export_xcode_svg = (const char*) temp_binary_data_16;
 
-//================== huckleberry_icon.svg ==================
-static const unsigned char temp_binary_data_11[] =
-"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-"<!-- Generator: Adobe Illustrator 21.0.2, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
-"<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\n"
-"\t viewBox=\"0 0 169.7 205.2\" style=\"enable-background:new 0 0 169.7 205.2;\" xml:space=\"preserve\">\n"
-"<style type=\"text/css\">\n"
-"\t.st0{fill:#A65A95;}\n"
-"\t.st1{fill:#001946;}\n"
-"</style>\n"
-"<g>\n"
-"\t<g>\n"
-"\t\t<path class=\"st0\" d=\"M45.2,167.8c-3,0-5.4-1.1-7.8-4.3l3.6-3.1c1.6,2.1,2.7,2.7,4.2,2.7c2.6,0,4.4-2,4.4-5v-17.2h5V158\n"
-"\t\t\tC54.6,163.9,50.7,167.8,45.2,167.8z\"/>\n"
-"\t\t<path class=\"st0\" d=\"M70.7,167.8c-5.8,0-10.8-4.2-10.8-11.2v-15.8h5v15.6c0,4.1,2.4,6.7,5.8,6.7c3.4,0,5.8-2.6,5.8-6.7v-15.6h5\n"
-"\t\t\tv15.8C81.5,163.5,76.5,167.8,70.7,167.8z\"/>\n"
-"\t\t<path class=\"st0\" d=\"M99,167.8c-7.6,0-13.9-6.1-13.9-13.6c0-7.6,6.3-13.6,13.9-13.6c3.4,0,6.3,1.2,9.1,3.4l-2.9,3.6\n"
-"\t\t\tc-2.6-1.8-4.1-2.4-6.2-2.4c-4.8,0-8.8,3.9-8.8,9c0,5,3.9,9,8.8,9c2,0,3.6-0.6,6.1-2.4l3,3.7C104.6,167,102,167.8,99,167.8z\"/>\n"
-"\t\t<path class=\"st0\" d=\"M111.3,167.4v-26.6h16.6v4.5h-11.6v6.4h11.2v4.5h-11.2v6.7h11.6v4.5H111.3z\"/>\n"
-"\t</g>\n"
-"\t<g>\n"
-"\t\t<circle class=\"st1\" cx=\"84.9\" cy=\"74.9\" r=\"37.4\"/>\n"
-"\t\t<circle class=\"st0\" cx=\"84.9\" cy=\"74.9\" r=\"28\"/>\n"
-"\t\t<circle class=\"st1\" cx=\"84.9\" cy=\"67.9\" r=\"2.1\"/>\n"
-"\t\t<circle class=\"st1\" cx=\"91.4\" cy=\"72.6\" r=\"2.1\"/>\n"
-"\t\t<circle class=\"st1\" cx=\"88.9\" cy=\"80.3\" r=\"2.1\"/>\n"
-"\t\t<circle class=\"st1\" cx=\"80.8\" cy=\"80.3\" r=\"2.1\"/>\n"
-"\t\t<circle class=\"st1\" cx=\"78.3\" cy=\"72.6\" r=\"2.1\"/>\n"
-"\t</g>\n"
-"\t<g>\n"
-"\t\t<path class=\"st1\" d=\"M48.2,131.7v-4.6h-4.3v4.6h-2V121h2v4.3h4.3V121h2v10.8H48.2z\"/>\n"
-"\t\t<path class=\"st1\" d=\"M56.7,131.7v-0.5c-0.5,0.4-1.3,0.7-2.1,0.7c-1.9,0-3.2-1.3-3.2-3.4v-5h2v4.8c0,1.2,0.7,1.8,1.7,1.8\n"
-"\t\t\tc1,0,1.7-0.7,1.7-1.8v-4.8h2v8.3H56.7z\"/>\n"
-"\t\t<path class=\"st1\" d=\"M63.8,131.9c-2.4,0-4.3-1.9-4.3-4.3c0-2.4,1.9-4.3,4.3-4.3c1.1,0,2.1,0.4,3.3,1.5l-1.3,1.2\n"
-"\t\t\tc-0.7-0.7-1.3-1-2-1c-1.3,0-2.3,1.1-2.3,2.5c0,1.3,1,2.5,2.3,2.5c0.6,0,1.3-0.2,2-0.9l1.3,1.2C66,131.5,65,131.9,63.8,131.9z\"/>\n"
-"\t\t<path class=\"st1\" d=\"M73.8,131.7l-3.9-3.9v3.9h-2v-11.3h2v6.8l3.6-3.7h2.5l-3.9,4l4.3,4.3H73.8z\"/>\n"
-"\t\t<path class=\"st1\" d=\"M77.1,131.7v-11.3h2v11.3H77.1z\"/>\n"
-"\t\t<path class=\"st1\" d=\"M88.6,128.4h-6.2c0.1,1,1.1,1.7,2.1,1.7c0.7,0,1.5-0.3,2.3-1.1l1.3,1.2c-1.1,1.2-2.3,1.7-3.6,1.7\n"
-"\t\t\tc-2.4,0-4.3-1.9-4.3-4.3c0-2.4,1.9-4.3,4.3-4.3c2.4,0,4.1,1.9,4.1,4.2C88.7,127.9,88.6,128.4,88.6,128.4z M84.5,125.1\n"
-"\t\t\tc-1,0-1.9,0.6-2.1,1.5h4.1C86.3,125.8,85.5,125.1,84.5,125.1z\"/>\n"
-"\t\t<path class=\"st1\" d=\"M93.9,131.9c-0.9,0-1.7-0.3-2.3-0.8v0.6h-2v-11.3h2v3.7c0.6-0.5,1.4-0.8,2.3-0.8c2.3,0,4.2,1.9,4.2,4.3\n"
-"\t\t\tC98.1,129.9,96.2,131.9,93.9,131.9z M93.9,125.1c-1.3,0-2.2,1.1-2.2,2.5c0,1.4,1,2.5,2.2,2.5c1.3,0,2.2-1.1,2.2-2.5\n"
-"\t\t\tC96.2,126.2,95.2,125.1,93.9,125.1z\"/>\n"
-"\t\t<path class=\"st1\" d=\"M107.4,128.4h-6.2c0.1,1,1.1,1.7,2.1,1.7c0.7,0,1.5-0.3,2.3-1.1l1.3,1.2c-1.1,1.2-2.3,1.7-3.6,1.7\n"
-"\t\t\tc-2.4,0-4.3-1.9-4.3-4.3c0-2.4,1.9-4.3,4.3-4.3c2.4,0,4.1,1.9,4.1,4.2C107.5,127.9,107.4,128.4,107.4,128.4z M103.3,125.1\n"
-"\t\t\tc-1,0-1.9,0.6-2.1,1.5h4.1C105.1,125.8,104.3,125.1,103.3,125.1z\"/>\n"
-"\t\t<path class=\"st1\" d=\"M110.4,127.8v3.9h-2v-8.3h2v0.8c0.7-0.6,1.4-0.9,2.6-1v1.8C111,125.4,110.4,126.6,110.4,127.8z\"/>\n"
-"\t\t<path class=\"st1\" d=\"M116,127.8v3.9h-2v-8.3h2v0.8c0.7-0.6,1.4-0.9,2.6-1v1.8C116.6,125.4,116,126.6,116,127.8z\"/>\n"
-"\t\t<path class=\"st1\" d=\"M122.2,134.6h-2.1l2.2-4.2l-3.4-6.9h2.1l2.4,4.8l2.3-4.8h2.2L122.2,134.6z\"/>\n"
-"\t</g>\n"
-"</g>\n"
-"</svg>\n";
+//================== gpl_logo.svg ==================
+static const unsigned char temp_binary_data_17[] =
+"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"720\" height=\"358\" version=\"1.1\">\n"
+"  <g id=\"g1\" transform=\"translate(-26.149211,-6.9701601)\">\n"
+"    <path id=\"path1\" style=\"fill:#bd0000;\" d=\"m 107.04146,18.25331 c 2e-5,0 -59.309734,258.76742 -59.309734,258.76742 0.01705,0 0.01919,0 0.05329,0 0,0 274.380814,0 274.380814,0 10e-6,0 142.70573,0 142.70573,0 -17.00107,-1.48353 -30.42327,-7.451"
+"82 -38.42076,-18.33112 -1.48353,-2.01219 -2.70918,-4.17993 -3.78347,-6.44788 -0.68207,-1.6711 -1.32368,-3.35715 -1.97167,-5.06237 -1.70524,-5.42261 -2.38517,-11.43991 -2.07824,-17.85154 0.85262,-17.87074 9.23805,-39.12802 23.76654,-61.38798 15.43225,"
+"-23.65656 37.79837,-48.45089 65.49116,-71.45944 6.20699,-5.15319 12.62503,-10.24199 19.34361,-15.18714 8.30441,-6.10979 16.67281,-11.73661 25.04545,-16.99893 30.84745,-19.42077 61.61817,-33.01012 88.88467,-39.91282 -26.05577,8.50051 -55.32805,22.9313"
+"8 -84.24861,42.57724 -1.04016,0.70255 -2.06758,1.42215 -3.09072,2.13152 -16.04613,11.11805 -30.58314,22.92586 -43.26998,34.85046 -40.82303,38.38457 -62.40046,78.15884 -52.59544,101.46069 0.69916,1.6029 1.53256,3.13335 2.50455,4.58279 10.53825,15.5004"
+"7 36.65587,18.17979 69.75422,9.85831 2.25089,-0.56275 4.50178,-1.20004 6.82088,-1.86508 10.57238,-3.05237 21.797,-7.17473 33.3584,-12.25628 2.77949,-1.22777 5.58887,-2.48963 8.41953,-3.83676 0.28988,-0.13641 0.56273,-0.27283 0.85261,-0.4263 36.49173,"
+"-18.13162 64.53625,-38.99458 70.60684,-51.52967 1.33008,-2.72662 1.6498,-5.0513 0.74603,-6.87417 -4.33124,-8.78188 -34.63945,-2.849 -71.35287,13.0556 -2.95003,1.2789 -5.93417,2.59492 -8.95241,3.99661 2.45552,-2.27986 5.01123,-4.56828 7.6202,-6.82089 "
+"4.16075,-3.58438 8.46856,-7.08945 13.0556,-10.55104 7.179,-5.43627 14.43685,-10.35071 21.58173,-14.70754 33.45643,-25.24067 50.3701,-49.11722 46.8403,-57.97753 -0.66505,-1.66943 -2.08037,-2.81789 -4.26306,-3.51703 -6.97438,-2.21847 -19.70383,0.42929 "
+"-35.17019,6.7676 -12.75504,5.23164 -27.40504,12.9908 -42.25752,22.64748 0,0 -2.02495,1.3322 -2.02495,1.3322 2e-5,0 -0.37302,0.21314 -0.37302,0.21314 2e-5,2e-5 -7.14061,4.74265 -7.14061,4.74265 -2e-5,-1e-5 4.10319,-7.51363 4.10319,-7.51363 6.08765,-11"
+".14364 16.0035,-22.77067 28.3493,-33.57154 9.05473,-7.89689 19.39903,-15.33762 30.53413,-21.84816 4.21191,-2.46573 8.4174,-4.75586 12.62929,-6.82088 4.31422,-2.10769 8.63055,-3.98089 12.84246,-5.64859 12.23682,-4.8393 23.91781,-7.7798 34.10442,-8.579"
+"4 -0.92767,0 -28.61574,0 -28.61574,0 10e-6,0 -96.45159,0 -96.45159,0 10e-6,0 -425.29295,0 -425.29295,0 0,0 -33.73141,0 -33.73141,0 z m 305.98071,0.3731 c -1.67109,25.50496 3.27403,62.86211 14.49439,104.3382 1.99509,7.38021 4.16712,14.89085 6.55444,22"
+".48762 1.48356,4.69104 3.01399,9.30881 4.58278,13.85492 -0.9208,1.35396 -1.84804,2.69937 -2.7177,4.0499 -13.99985,21.45508 -22.1828,41.73104 -24.24611,59.36303 -5.91714,-19.81468 -10.37201,-41.5183 -12.89574,-64.53198 -0.71619,-6.5941 -1.27679,-13.11"
+"442 -1.65194,-19.55675 -2.76247,-46.79639 3.34649,-89.2172 15.87988,-120.00494 z m -279.3899,33.1985 c 0.31934,-0.0075 0.63414,0 0.95918,0 0,-2e-5 63.03991,0 63.03991,0 5.38851,-2e-5 9.55564,1.00991 12.52272,3.03742 2.95002,2.03946 4.05631,4.67743 3."
+"35715,7.88665 2e-5,2e-5 -7.51363,33.94456 -7.51363,33.94456 0,3e-5 -22.22116,0 -22.22116,0 2e-5,3e-5 7.30048,-33.03866 7.30048,-33.03866 -2e-5,0 -55.63285,0 -55.63285,0 -2e-5,0 -20.08965,90.80305 -20.08965,90.80305 2e-5,0 -7.24719,32.87881 -7.24719,3"
+"2.87881 0,3e-5 55.57957,0 55.57957,0 0,3e-5 0.0533,-0.21316 0.0533,-0.21316 0,2e-5 11.13722,-50.30404 11.13722,-50.30404 0,-2e-5 -26.1112,0 -26.1112,0 0,-2e-5 2.50454,-11.35038 2.50454,-11.35038 -1e-5,-2e-5 48.33238,0 48.33238,0 0,-2e-5 -13.85493,62."
+"77348 -13.85493,62.77348 -0.18757,0.89352 -0.51582,1.70308 -0.95919,2.50453 -1.14249,2.08037 -3.13547,3.86234 -5.91498,5.32883 -3.85378,2.02923 -8.46643,3.03742 -13.85493,3.03742 0,2e-5 -62.98662,0 -62.98662,0 -5.388524,2e-5 -9.555644,-1.00821 -12.52"
+"2724,-3.03742 -2.95001,-2.0292 -4.07335,-4.62073 -3.35715,-7.83336 10e-6,-2e-5 27.763134,-125.49366 27.763134,-125.49366 0.71618,-3.20921 2.95005,-5.84721 6.82089,-7.88665 0.13642,-0.07331 0.28989,-0.08995 0.4263,-0.15986 3.53302,-1.7697 7.67937,-2.7"
+"6443 12.46944,-2.87756 z m 98.79628,0 c -2e-5,-2e-5 79.34608,0 79.34608,0 5.32031,-2e-5 9.50235,1.00991 12.46943,3.03742 2.98417,2.03946 4.12666,4.67743 3.41045,7.88665 2e-5,2e-5 -14.81411,66.92995 -14.81411,66.92995 -0.69912,3.18874 -2.98627,5.7905 "
+"-6.87417,7.83336 -3.8879,2.04966 -8.4643,3.09071 -13.80164,3.09071 -2e-5,0 -57.6578,0 -57.6578,0 0,0 -11.13723,50.25075 -11.13723,50.25075 0,2e-5 -1.8118,8.25967 -1.8118,8.25967 1e-5,2e-5 -21.74158,0 -21.74158,0 0,2e-5 1.65193,-7.46034 1.65193,-7.460"
+"34 0,2e-5 30.96044,-139.82817 30.96044,-139.82817 z m 109.61377,0 c -1e-5,-2e-5 21.74158,0 21.74158,0 2e-5,-2e-5 -24.61914,111.21241 -24.61914,111.21241 2e-5,2e-5 -5.3821,24.29942 -5.3821,24.29942 0,3e-5 52.00926,0 52.00926,0 0.54568,3.98854 1.18299,"
+"7.90582 1.86508,11.77668 -2e-5,2e-5 -78.22705,0 -78.22705,0 2e-5,2e-5 6.18143,-27.92301 6.18143,-27.92301 2e-5,0 26.43094,-119.3655 26.43094,-119.3655 z M 251.559,63.65488 c 2e-5,0 -14.4411,65.11814 -14.4411,65.11814 0,-2e-5 54.19408,0 54.19408,0 -1e"
+"-5,-2e-5 14.3878,-65.11814 14.3878,-65.11814 2e-5,0 -54.14078,0 -54.14078,0 z m -45.5614,145.68987 c 0.21267,-0.007 0.42524,0 0.63947,0 2.52373,2e-5 4.72772,0.44336 6.50115,1.27891 1.8928,0.88671 3.24632,2.204 3.99662,3.94333 0.73325,1.68819 0.92508,"
+"3.60441 0.53287,5.70184 0,1e-5 -0.15985,0.79933 -0.15985,0.79933 1e-5,-3e-5 -6.23472,0 -6.23472,0 -2e-5,-3e-5 0.0533,-0.74605 0.0533,-0.74605 0.16118,-1.46543 -0.0205,-2.61779 -0.58618,-3.41043 -0.0737,-0.0994 -0.18053,-0.23063 -0.26644,-0.31973 -0.1"
+"4068,-0.14363 -0.35198,-0.3078 -0.53287,-0.42631 -0.87238,-0.5495 -2.23703,-0.85262 -3.99662,-0.85262 -2.33615,2e-5 -4.08187,0.40712 -5.27552,1.22564 -1.15956,0.80146 -1.8928,1.6967 -2.13153,2.77098 -0.23875,1.09134 0.15346,1.66472 0.42631,1.97166 0."
+"008,0.008 0.0429,0.0438 0.0533,0.0533 0.34552,0.29445 1.54536,0.98476 5.27553,1.86508 3.37632,0.81851 5.61232,1.55389 6.87418,2.18482 1.90987,0.97196 3.24419,2.2317 3.94334,3.78346 0.69911,1.53472 0.8526,3.33157 0.4263,5.27553 -0.4263,1.89279 -1.3918"
+"9,3.63852 -2.82428,5.27554 -1.41532,1.637 -3.21647,2.93297 -5.38211,3.83673 -2.1486,0.88672 -4.50604,1.38549 -6.92746,1.38549 -3.0694,-1e-5 -5.53343,-0.46467 -7.46034,-1.38549 -2.01217,-0.95491 -3.46374,-2.4619 -4.31634,-4.42291 -0.81851,-1.90986 -0."
+"9933,-4.07762 -0.53289,-6.44786 0,-3e-5 0.15987,-0.74605 0.15987,-0.74605 0,0 6.12814,0 6.12814,0 0,0 -0.0533,0.74605 -0.0533,0.74605 -0.15348,1.41532 -0.002,2.55782 0.37302,3.41043 0.35809,0.81853 1.04019,1.49633 2.13152,2.02496 1.15954,0.5627 2.608"
+"98,0.8526 4.26305,0.8526 1.48355,-1e-5 2.83921,-0.24939 4.04991,-0.69273 1.19365,-0.4263 2.14218,-0.98904 2.82427,-1.70523 0.66502,-0.71622 1.05511,-1.47288 1.22563,-2.2914 0.17052,-0.73324 0.13002,-1.3535 -0.15987,-1.86508 -0.32399,-0.54564 -0.96558"
+",-1.02953 -1.97165,-1.43878 0,-1e-5 -5.22226,-1.54536 -5.22226,-1.54536 -2.91592,-0.73323 -4.87905,-1.43238 -6.02155,-2.13152 -1.55177,-0.92081 -2.67081,-2.10169 -3.25059,-3.51702 -0.57977,-1.39831 -0.64158,-2.94791 -0.26643,-4.63608 0.3922,-1.80753 "
+"1.26399,-3.52767 2.61111,-5.06237 1.3642,-1.55177 3.12482,-2.76885 5.22225,-3.57031 1.85443,-0.6954 3.80596,-1.10321 5.86169,-1.17234 z m 55.9526,0.10658 c 0.33725,-0.0263 0.65436,0 1.01247,0 10e-6,0 3.83675,0.4263 3.83675,0.4263 -10e-6,0 1.27891,0.1"
+"0658 1.27891,0.10658 2e-5,1e-5 -1.86508,4.74264 -1.86508,4.74264 -1e-5,2e-5 -0.37302,0.74604 -0.37302,0.74604 0,-2e-5 -2.93084,-0.26644 -2.93084,-0.26644 -0.86541,0 -1.50113,0.13352 -1.91838,0.4263 -0.0277,0.0209 -0.081,0.0842 -0.10658,0.10658 -0.055"
+"9,0.049 -0.14991,0.13458 -0.21315,0.21316 -0.25659,0.33651 -0.56912,0.93786 -0.79932,2.02495 -2e-5,0 -0.11084,0.4604 -0.21315,0.85261 1.34713,1e-5 4.58277,0 4.58277,0 0,1e-5 -1.17233,5.27552 -1.17233,5.27552 0,-1e-5 -3.35076,0 -4.4762,0 -0.34106,1.53"
+"469 -4.5295,20.3028 -4.5295,20.3028 -2e-5,-2e-5 -6.18143,0 -6.18143,0 -2e-5,-2e-5 4.01793,-18.03485 4.5295,-20.3028 -1.04021,-1e-5 -3.57031,0 -3.57031,0 0,-1e-5 1.17234,-5.27552 1.17234,-5.27552 10e-6,1e-5 2.54504,0 3.51701,0 0.17052,-0.73324 0.4263,"
+"-1.65194 0.4263,-1.65194 0.37516,-1.70522 0.76735,-2.93085 1.27891,-3.78346 0.69917,-1.17659 1.68606,-2.16137 2.93087,-2.87756 1.02527,-0.59575 2.32198,-0.95194 3.78346,-1.06576 z m 14.76082,0.26644 c -2e-5,-1e-5 -1.6157,7.27064 -2.02495,9.11228 1.19"
+"364,1e-5 3.99661,0 3.99661,0 0,1e-5 -1.17233,5.27552 -1.17233,5.27552 -2e-5,-1e-5 -2.93939,0 -3.99662,0 -0.32401,1.46647 -2.87756,12.84246 -2.87756,12.84246 2e-5,-2e-5 -0.21316,1.36631 -0.21316,1.75851 2.8e-4,0.0131 -10e-4,0.0437 0,0.0533 8.4e-4,0.00"
+"4 -10e-4,0.05 0,0.0533 0.002,0.003 0.0512,-0.002 0.0533,0 0,-2e-5 0.63947,0.0533 0.63947,0.0533 0,0 2.93085,-0.21315 2.93085,-0.21315 0,0 -0.31973,4.74264 -0.31973,4.74264 2e-5,0 0.0533,0.85261 0.0533,0.85261 -2e-5,-2e-5 -4.20978,0.4796 -4.20978,0.47"
+"96 -1.6711,-2e-5 -2.89675,-0.27283 -3.78346,-0.8526 -0.93785,-0.61392 -1.48354,-1.42814 -1.70522,-2.45126 -0.0341,-0.18759 -0.10658,-0.46042 -0.10658,-0.85261 0,-0.76736 0.14495,-2.06545 0.63946,-4.31634 2e-5,2e-5 2.24023,-10.03524 2.7177,-12.14972 -"
+"0.80143,-1e-5 -2.93085,0 -2.93085,0 2e-5,-1e-5 1.17233,-5.27552 1.17233,-5.27552 -2e-5,10e-6 2.07824,0 2.93086,0 0.27281,-1.22775 1.22562,-5.4354 1.22562,-5.4354 0,2e-5 4.95581,-2.61112 4.95581,-2.61112 -10e-6,2e-5 2.02495,-1.06576 2.02495,-1.06576 z"
+" m -196.366934,0.21315 c 2e-5,0 23.979684,0 23.979684,0 0,0 -1.3322,5.96828 -1.3322,5.96828 0,2e-5 -15.997114,0 -17.531814,0 -0.27282,1.21073 -1.36631,6.11322 -1.75851,7.88665 2.2168,0 15.18713,0 15.18713,0 0,0 -1.33221,5.96826 -1.33221,5.96826 -1e-5"
+",0 -13.65242,0 -15.18713,0 -0.32399,1.48355 -3.25058,14.65426 -3.25058,14.65426 2e-5,-2e-5 -6.44786,0 -6.44786,0 1e-5,-2e-5 7.67349,-34.47745 7.67349,-34.47745 z m 32.132764,8.41954 c 0.24067,-0.0296 0.50358,0 0.74604,0 1.5347,0 2.95217,0.4668 4.3163"
+"5,1.43877 0,2e-5 0.8526,0.58617 0.8526,0.58617 0,0 -3.30386,5.4354 -3.30386,5.4354 0,-2e-5 -0.90589,-0.63946 -0.90589,-0.63946 -0.66504,-0.42629 -1.38123,-0.63946 -2.13153,-0.63946 -0.64799,2e-5 -1.25121,0.2302 -1.86509,0.63946 -0.64797,0.4263 -1.189"
+"4,0.99115 -1.59864,1.75851 -0.7162,1.31304 -1.24056,2.78377 -1.59865,4.36963 0,1e-5 -2.87756,13.10889 -2.87756,13.10889 0,-2e-5 -6.181434,0 -6.181434,0 0,-2e-5 5.701844,-25.57832 5.701844,-25.57832 2e-5,1e-5 5.75512,0 5.75512,0 0,1e-5 -0.19824,0.7758"
+"8 -0.26645,1.06576 0.27284,-0.20461 0.56059,-0.48599 0.79933,-0.63946 0.82597,-0.4929 1.69837,-0.80035 2.55782,-0.90589 z m 18.33114,0 c 0.37219,-0.0282 0.73859,0 1.11906,0 3.47866,0 6.11108,1.21922 7.83335,3.62359 1.07428,1.55174 1.65195,3.47012 1.6"
+"5195,5.75512 0,1.26185 -0.15561,2.61965 -0.47959,4.10319 0,0 -0.47961,1.86509 -0.47961,1.86509 0,-2e-5 -15.63261,0 -17.37194,0 -0.0341,0.35808 -0.0533,0.74177 -0.0533,1.06576 0,1.33009 0.27283,2.37665 0.85261,3.14401 0.2755,0.37513 0.5949,0.71299 0.9"
+"5919,0.95918 0.68678,0.44789 1.57334,0.69275 2.61112,0.69275 1.26188,-2e-5 2.37025,-0.34745 3.41044,-1.01248 0.98905,-0.63093 1.93544,-1.63914 2.77099,-3.03742 0,-3e-5 6.60773,0 6.60773,0 0,-3e-5 -0.58616,1.27891 -0.58616,1.27891 -1.26187,2.55785 -3."
+"02251,4.55294 -5.22225,5.96828 -2.19973,1.41533 -4.82791,2.1848 -7.72679,2.1848 -3.76854,-1e-5 -6.57363,-1.21922 -8.31296,-3.62358 -1.72226,-2.35323 -2.09315,-5.60593 -1.17233,-9.69846 0.92083,-4.16073 2.7582,-7.48591 5.43539,-9.80502 2.39958,-2.0806"
+"2 5.12245,-3.23468 8.15309,-3.46372 z m 27.76315,0 c 0.37218,-0.0282 0.73857,0 1.11904,0 3.47867,0 6.1111,1.21922 7.83337,3.62359 1.07429,1.55174 1.65193,3.47012 1.65193,5.75512 0,1.2448 -0.1556,2.58341 -0.4796,4.0499 0,2e-5 -0.47958,1.91838 -0.47958"
+",1.91838 0,-2e-5 -15.63263,0 -17.37195,0 -0.0171,0.2387 -0.0362,0.45402 -0.0533,0.69275 -0.0128,0.0895 0.006,0.22541 0,0.31972 -5e-4,0.0154 0,0.0384 0,0.0533 0,0.2558 0.0362,0.5073 0.0533,0.74604 0.0852,0.97196 0.33892,1.78409 0.79932,2.39797 0.0877,"
+"0.11936 0.17008,0.2667 0.26644,0.37302 0.78101,0.83554 1.8864,1.27891 3.30387,1.27891 1.26188,-2e-5 2.38731,-0.34745 3.41045,-1.01248 0.98904,-0.63093 1.93542,-1.63914 2.77098,-3.03742 0,-3e-5 6.66102,0 6.66102,0 -1e-5,-3e-5 -0.63946,1.27891 -0.63946"
+",1.27891 -1.26186,2.55785 -3.0225,4.55294 -5.22224,5.96828 -2.19974,1.41533 -4.82791,2.1848 -7.72678,2.1848 -3.76853,-1e-5 -6.57363,-1.21922 -8.31296,-3.62358 -1.12545,-1.53472 -1.65194,-3.48931 -1.65194,-5.80841 0,-0.35812 0.0192,-0.74391 0.0533,-1."
+"11905 0.0682,-0.88671 0.20463,-1.78196 0.42631,-2.771 0.92084,-4.14368 2.70491,-7.48591 5.3821,-9.80502 2.39957,-2.08062 5.17575,-3.23468 8.20639,-3.46372 z m 75.61591,0 c 0.38084,-0.0293 0.73112,0 1.11905,0 3.54687,0 6.2731,1.20004 8.04652,3.5703 1."
+"7564,2.37023 2.18269,5.56754 1.27891,9.59186 -0.69913,3.13763 -1.70947,5.672 -3.0907,7.51365 -1.38126,1.84165 -3.14188,3.34649 -5.22226,4.36962 -2.06328,1.02314 -4.24813,1.54535 -6.44786,1.54535 -3.61507,-1e-5 -6.30719,-1.23628 -8.04652,-3.62358 -1.1"
+"2546,-1.51764 -1.70522,-3.47226 -1.70522,-5.80841 2e-5,-1.26187 0.13856,-2.6026 0.4796,-4.10319 1.02315,-4.57001 3.11202,-8.05078 6.18143,-10.28462 2.25301,-1.62634 4.74114,-2.56606 7.40705,-2.77098 z m 93.62733,0 c 0.4496,-0.0277 0.86593,0 1.3322,0 "
+"2.14859,0 3.83675,0.2174 5.11567,0.74602 1.36418,0.54569 2.33189,1.31729 2.87756,2.23811 0.52864,0.86963 0.79933,1.93756 0.79933,3.25057 10e-6,2e-5 -0.63948,3.89004 -0.63948,3.89004 3e-5,0 -1.17232,5.27554 -1.17232,5.27554 -1.00611,4.50176 -1.22776,6"
+".18995 -1.27893,6.82089 -0.0512,0.85262 0.0277,1.6839 0.26645,2.45125 2e-5,-2e-5 0.4263,1.38549 0.4263,1.38549 2e-5,-2e-5 -6.288,0 -6.288,0 -2e-5,-2e-5 -0.26645,-0.79933 -0.26645,-0.79933 -0.10231,-0.37512 -0.0725,-0.8526 -0.10657,-1.27891 -1.19365,0"
+".73325 -2.38944,1.38336 -3.46373,1.75851 -1.58584,0.54569 -3.23139,0.8526 -4.90251,0.8526 -2.89886,-1e-5 -5.04532,-0.75454 -6.3413,-2.2381 -0.98902,-1.09133 -1.43877,-2.42567 -1.43877,-3.94332 -2e-5,-0.57977 0.0767,-1.18087 0.21314,-1.81179 0.28988,-"
+"1.29597 0.81638,-2.49603 1.65194,-3.57032 0.81851,-1.05726 1.78623,-1.92689 2.87756,-2.55782 1.05726,-0.63092 2.23598,-1.07855 3.46374,-1.3855 -2e-5,0 3.78346,-0.63946 3.78346,-0.63946 2.91594,-0.34106 5.09221,-0.76521 6.66102,-1.22562 0.0341,-0.1705"
+"2 0.10657,-0.37302 0.10657,-0.37302 0.24726,-1.09718 0.21632,-1.92188 -0.0533,-2.34468 -0.0198,-0.0273 -0.0842,-0.0831 -0.10657,-0.10658 -0.0576,-0.0614 -0.14603,-0.15779 -0.21316,-0.21315 -0.64135,-0.50753 -1.73506,-0.74603 -3.19728,-0.74603 -1.6540"
+"7,0 -2.87756,0.27071 -3.73018,0.79931 -0.83555,0.52863 -1.60931,1.49634 -2.29139,2.87756 -1e-5,-1e-5 -6.44787,0 -6.44787,0 2e-5,-1e-5 0.58617,-1.27891 0.58617,-1.27891 0.76733,-1.77345 1.68178,-3.24418 2.82428,-4.36963 1.1425,-1.12547 2.68572,-1.9972"
+"4 4.4762,-2.61111 1.37216,-0.45297 2.8705,-0.75354 4.47621,-0.85261 z m 27.01711,0 c 0.24046,-0.0296 0.50356,0 0.74603,0 1.55173,0 3.00545,0.4668 4.36963,1.43877 2e-5,2e-5 0.79932,0.58617 0.79932,0.58617 1e-5,0 -3.30386,5.4354 -3.30386,5.4354 10e-6,-"
+"2e-5 -0.9059,-0.63946 -0.9059,-0.63946 -0.66503,-0.42629 -1.34501,-0.63946 -2.07824,-0.63946 -0.64801,2e-5 -1.28744,0.2302 -1.91839,0.63946 -0.64797,0.4263 -1.11904,0.99115 -1.54534,1.75851 -0.69916,1.31304 -1.24056,2.78377 -1.59865,4.36963 -2e-5,1e-"
+"5 -2.93085,13.10889 -2.93085,13.10889 2e-5,-2e-5 -6.18142,0 -6.18142,0 0,-2e-5 5.70182,-25.57832 5.70182,-25.57832 -10e-6,1e-5 5.75512,0 5.75512,0 0,1e-5 -0.14494,0.77588 -0.21314,1.06576 0.27282,-0.20461 0.54353,-0.48599 0.79932,-0.63946 0.81263,-0."
+"4929 1.64571,-0.80035 2.50455,-0.90589 z m 18.27783,0 c 0.37185,-0.0282 0.73859,0 1.11906,0 3.47866,0 6.12813,1.21922 7.83337,3.62359 1.09135,1.55174 1.65193,3.47012 1.65193,5.75512 -2e-5,1.26185 -0.2089,2.61965 -0.53289,4.10319 0,0 -0.4263,1.86509 -"
+"0.4263,1.86509 -10e-6,-2e-5 -15.64968,0 -17.37194,0 -0.0341,0.35808 -0.10659,0.74177 -0.10659,1.06576 0,1.33009 0.28989,2.37665 0.85262,3.14401 0.0877,0.11936 0.223,0.2667 0.31972,0.37302 0.056,0.0597 0.15412,0.15773 0.21316,0.21314 0.76235,0.69302 1"
+".79981,1.06577 3.0907,1.06577 1.26189,-2e-5 2.37027,-0.34745 3.41045,-1.01248 0.98905,-0.63093 1.91839,-1.63914 2.77099,-3.03742 -2e-5,-3e-5 6.66102,0 6.66102,0 0,-3e-5 -0.63946,1.27891 -0.63946,1.27891 -1.26187,2.55785 -3.03955,4.55294 -5.22224,5.96"
+"828 -2.21677,1.41533 -4.81085,2.1848 -7.72679,2.1848 -3.76851,-1e-5 -6.52034,-1.21922 -8.25966,-3.62358 -1.7223,-2.35323 -2.1294,-5.60593 -1.22563,-9.69846 0.92081,-4.16073 2.70491,-7.48591 5.38211,-9.80502 2.41475,-2.08062 5.17852,-3.23468 8.20637,-"
+"3.46372 z m -93.3076,0.47959 c 2e-5,1e-5 6.34131,0 6.34131,0 2e-5,1e-5 0.78226,15.17861 0.79931,15.40027 0.25578,-0.54356 0.45424,-1.00087 0.47961,-1.06575 1e-5,1e-5 6.98074,-14.33452 6.98074,-14.33452 2e-5,1e-5 5.80841,0 5.80841,0 -10e-6,1e-5 0.5328"
+"8,14.99528 0.53288,15.08054 0.17055,-0.30691 7.93994,-15.08054 7.93994,-15.08054 -2e-5,1e-5 6.28801,0 6.28801,0 -10e-6,1e-5 -13.85493,25.57832 -13.85493,25.57832 2e-5,-2e-5 -5.70183,0 -5.70183,0 0,-2e-5 -0.55206,-13.86984 -0.58617,-14.65426 -2.35323,"
+"4.8258 -7.14063,14.65426 -7.14063,14.65426 0,-2e-5 -5.86168,0 -5.86168,0 0,-2e-5 -2.02497,-25.57832 -2.02497,-25.57832 z m -148.88715,4.84922 c -1.46893,0.062 -2.80295,0.59149 -4.04989,1.59864 -0.98902,0.78441 -1.65621,1.86084 -2.18483,3.03743 0,2e-5"
+" 10.49777,0 10.49777,0 0.0171,-0.18756 0.0533,-0.41564 0.0533,-0.58617 -2e-5,-0.97195 -0.17266,-1.72653 -0.47959,-2.2381 -0.75028,-1.22777 -1.86295,-1.8118 -3.51702,-1.8118 -0.0991,0 -0.2218,-0.004 -0.31973,0 z m 27.76313,0 c -1.46892,0.062 -2.80295,"
+"0.59149 -4.0499,1.59864 -0.98904,0.78441 -1.63913,1.86084 -2.1848,3.03743 0,2e-5 10.49776,0 10.49776,0 0.017,-0.18756 0.0533,-0.41564 0.0533,-0.58617 -1e-5,-0.97195 -0.1556,-1.72653 -0.4796,-2.2381 -0.14894,-0.24939 -0.35043,-0.49739 -0.53288,-0.6927"
+"4 -0.71199,-0.73572 -1.6919,-1.11906 -2.98413,-1.11906 -0.0991,0 -0.2218,-0.004 -0.31974,0 z m 214.75136,0 c -1.51056,0.0465 -2.92125,0.55794 -4.20977,1.59864 -0.97198,0.78441 -1.63915,1.86084 -2.18482,3.03743 2e-5,2e-5 10.44449,0 10.44449,0 0.017,-0"
+".18756 0.0533,-0.41564 0.0533,-0.58617 -1e-5,-0.97195 -0.1556,-1.72653 -0.4796,-2.2381 -0.73324,-1.21072 -1.86296,-1.79474 -3.51702,-1.8118 -0.049,5.3e-4 -0.0578,-0.001 -0.10657,0 z m -139.61502,0.10658 c -1.40963,0.16739 -2.72036,0.81051 -3.94333,1."
+"91837 -1.46648,1.33009 -2.53012,3.41897 -3.14399,6.18143 -0.25579,1.15955 -0.37303,2.15071 -0.37303,3.03742 2e-5,1.2107 0.23233,2.16137 0.69275,2.87756 0.12257,0.18384 0.28516,0.37811 0.42631,0.53289 0.75804,0.80488 1.81659,1.22563 3.144,1.22563 1.72"
+"226,-2e-5 3.23992,-0.64159 4.68935,-1.97167 1.46652,-1.34714 2.51307,-3.45734 3.144,-6.288 0.5798,-2.59195 0.49878,-4.52736 -0.31972,-5.75512 -0.7844,-1.19366 -1.93116,-1.75851 -3.51701,-1.75851 -0.26911,0 -0.5383,-0.031 -0.79933,0 z m 96.29173,9.325"
+"43 c -1.44941,0.39218 -3.07367,0.72258 -5.22224,1.01248 -1.60289,0.23874 -2.74541,0.49024 -3.41045,0.74603 -0.57976,0.23872 -1.04658,0.56911 -1.43878,1.01248 -0.37516,0.42627 -0.62666,0.87392 -0.74602,1.38549 -0.0341,0.20464 -0.0533,0.41564 -0.0533,0"
+".58617 0,0.0138 -3.1e-4,0.0396 0,0.0533 0.002,0.0406 -0.004,0.1207 0,0.15985 0.0107,0.0774 0.0322,0.1944 0.0533,0.26645 0.008,0.0237 0.0445,0.0834 0.0533,0.10657 0.0187,0.0458 0.0301,0.11611 0.0533,0.15987 0.0243,0.0433 0.0779,0.11849 0.10658,0.15986"
+" 0.0446,0.0614 0.1055,0.1556 0.15987,0.21315 0.42631,0.47746 1.27678,0.69275 2.50454,0.69275 1.34715,1e-5 2.6431,-0.25578 3.83675,-0.85261 1.17662,-0.57977 2.12513,-1.44518 2.82427,-2.45126 0.51159,-0.7162 0.92083,-1.8182 1.27892,-3.25057 z\"/>\n"
+"    <path id=\"path2\" style=\"fill:none;stroke:#bd0000;stroke-width:8.52610779;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;\" d=\"m 417.07944,250.20635 c 0.69221,1.77962 1.38445,3.55633 2.1055,5.2941 1.11046,2.36077 2.39396,4.6206 "
+"3.93704,6.73045 8.33557,11.33086 22.29546,17.53495 40.01931,19.07947 0,0 19.06506,0 19.06506,0 6.02811,-0.47014 12.34467,-1.34696 18.89198,-2.62759 11.29193,-2.2079 23.26167,-5.5998 35.69288,-10.13244 9.41715,-3.43375 19.0939,-7.49624 28.91485,-12.21"
+"778 21.38688,-10.25215 43.48041,-23.47509 65.15575,-39.43235 7.13857,-5.25082 13.98872,-10.63863 20.56487,-16.1173 6.02813,-5.01576 11.8111,-10.10942 17.33446,-15.25927 15.41645,-14.85689 27.0545,-29.94597 33.64507,-43.1949 6.86452,-13.7969 8.23461,-"
+"25.59358 2.61028,-33.02493 -3.44673,-4.56146 -9.21527,-7.00589 -16.64228,-7.5813 33.45753,-25.10471 52.95528,-55.55833 45.96096,-74.7589 -2.22096,-6.1277 -7.10981,-10.6992 -14.11858,-13.2273 -3.11497,-1.1205 -6.61943,-1.8301 -10.4411,-2.1531 0,0 -10."
+"29683,0 -10.29683,0 -14.37808,1.0369 -35.28664,6.1853 -53.0249,14.8785\"/>\n"
+"    <g id=\"g2\" style=\"fill:#bd0000;fill-opacity:1\" transform=\"scale(1.705222,1.705222)\">\n"
+"      <path id=\"path1\" transform=\"translate(15.5783,177.825)\" d=\"m 0,36 c 0,0 7.46,0 7.46,0 0,0 3.35,-14 3.35,-14 0,0 12.12,0 12.12,0 0,0 1.56,-6 1.56,-6 0,0 -12.17,0 -12.17,0 0,0 2.02,-9 2.02,-9 0,0 12.95,0 12.95,0 0,0 1.56,-7 1.56,-7 C 28.85,0"
+" 8.4,0 8.4,0 8.4,0 0,36 0,36 z\"/>\n"
+"      <path id=\"path2\" transform=\"translate(41.5283,187.825)\" d=\"m 7.51,26 c 0,0 2.24,-9.4 2.24,-9.4 1.18,-5.09 3.67,-9.6 8.38,-9.6 0.42,0 0.83,0.21 1.14,0.26 0,0 1.82,-7.21 1.82,-7.21 -0.42,0 -0.88,-0.05 -1.4,-0.05 -3.47,0 -6.38,2.44 -8.32,5.94"
+" 0,0 -0.2,0 -0.2,0 C 11.46,4.23 11.71,2.61 11.9,1 11.9,1 5.47,1 5.47,1 5.1,3.08 4.53,7.15 3.66,10.82 3.66,10.82 0,26 0,26 c 0,0 7.51,0 7.51,0 z\"/>\n"
+"      <path id=\"path3\" transform=\"translate(62.1583,187.825)\" d=\"M 20.06,19.25 C 17.99,20.26 15.63,20 12.88,20 10.71,20 9.03,19.62 8.11,18.88 7.63,18.07 7.43,16.81 7.47,16 17.6,16.27 23.99,13.93 24.31,7.53 24.55,2.7 21.02,0 15.89,0 6.73,0 0.73,8"
+".08 0.34,15.86 0,22.65 3.52,26 10.78,26 c 2.79,0 6.49,-0.32 9.52,-1.23 0,0 -0.24,-5.52 -0.24,-5.52 z M 17.32,7.53 C 17.2,9.91 14.26,10.05 8.47,10 9.1,7.91 11.22,6 14.69,6 c 1.71,0 2.69,0.65 2.63,1.53 z\"/>\n"
+"      <path id=\"path4\" transform=\"translate(88.6783,187.825)\" d=\"M 20.05,19.25 C 17.98,20.26 15.62,20 12.88,20 10.7,20 9.03,19.62 8.11,18.88 7.63,18.07 7.42,16.81 7.46,16 17.6,16.27 23.98,13.93 24.31,7.53 24.55,2.7 21.02,0 15.89,0 6.72,0 0.72,8."
+"08 0.33,15.86 0,22.65 3.52,26 10.77,26 c 2.8,0 6.5,-0.32 9.53,-1.23 0,0 -0.25,-5.52 -0.25,-5.52 z M 17.32,7.53 C 17.2,9.91 14.26,10.05 8.46,10 9.1,7.91 11.21,6 14.68,6 c 1.71,0 2.7,0.65 2.64,1.53 z\"/>\n"
+"      <path id=\"path5\" transform=\"translate(124.5883,187.825)\" d=\"M 22.74,26 C 22.8,22.83 23.56,17.85 24.35,14.58 24.35,14.58 27.56,1 27.56,1 25.52,0.31 22.34,0 19.28,0 6.86,0 0.7,9.2 0.27,17.82 0,23.23 2.93,26 7.49,26 c 2.95,0 6.28,-1.43 8.87,-"
+"5.73 0,0 0.11,0 0.11,0 -0.2,2.07 -0.44,4.08 -0.57,5.73 0,0 6.84,0 6.84,0 z M 17.61,11.72 C 16.15,18.08 13.17,20 10.95,20 8.88,20 7.98,18.53 8.1,16.39 8.34,11.56 12.16,6 16.98,6 c 0.78,0 1.39,-0.14 1.96,-0.28 0,0 -1.33,6 -1.33,6 z\"/>\n"
+"      <path id=\"path6\" transform=\"translate(152.2183,187.825)\" d=\"m 0,24.82 c 1.44,1.12 4.46,1.13 7.61,1.18 6.73,0.05 11.81,-2.89 12.11,-8.29 0.17,-3.6 -2.62,-5.73 -5.35,-7.16 C 12.4,9.6 11.41,8.69 11.46,7.63 11.53,6.2 12.87,6 14.84,6 c 2.22,0 4"
+",0.27 5.02,0.47 0,0 2.02,-5.42 2.02,-5.42 C 20.73,0.36 18.43,0 15.48,0 8.95,0 4.17,3.45 3.9,8.69 c -0.16,3.24 2.17,5.42 4.99,6.9 2.28,1.17 3.06,2.07 3,3.34 C 11.82,20.21 10.68,20 8.61,20 6.18,20 3.49,19.68 2.07,19.46 2.07,19.46 0,24.82 0,24.82 z\"/>\n"
+"      <path id=\"path7\" transform=\"translate(184.6683,176.825)\" d=\"m 7.45,37 c 0,0 6.05,-25 6.05,-25 0,0 -7.41,0 -7.41,0 0,0 -6.09,25 -6.09,25 0,0 7.45,0 7.45,0 z M 10.92,9 C 13.46,9 15.72,6.9 15.86,3.3 15.98,0.86 14.4,0 12.07,0 9.64,0 7.42,1.58 "
+"7.29,3.94 7.17,6.32 8.75,9 10.92,9 z\"/>\n"
+"      <path id=\"path8\" transform=\"translate(198.9583,188.515)\" d=\"m 7.46,25.31 c 0,0 2.64,-11.26 2.64,-11.26 1.37,-5.73 4.32,-7.74 6.75,-7.74 1.92,0 2.48,0.82 2.39,2.01 -0.05,0.96 -0.2,1.97 -0.4,2.87 0,0 -3.36,14.12 -3.36,14.12 0,0 7.46,0 7.46,0"
+" 0,0 3.54,-14.81 3.54,-14.81 C 26.75,9.22 27.05,7.31 27.11,6.15 27.33,1.64 25.08,0 20.94,0 c -3.32,0 -6.55,1.54 -9.1,4.88 0,0 -0.1,0 -0.1,0 0,0 0.68,-4.57 0.68,-4.57 0,0 -6.58,0 -6.58,0 C 5.41,2.45 4.86,5.04 4.08,8.06 4.08,8.06 0,25.31 0,25.31 c 0,0 "
+"7.46,0 7.46,0 z\"/>\n"
+"      <path id=\"path9\" transform=\"translate(238.5183,177.825)\" d=\"m 0,36 c 0,0 7.46,0 7.46,0 0,0 3.36,-14 3.36,-14 0,0 12.11,0 12.11,0 0,0 1.56,-6 1.56,-6 0,0 -12.17,0 -12.17,0 0,0 2.02,-9 2.02,-9 0,0 12.95,0 12.95,0 0,0 1.56,-7 1.56,-7 C 28.85,"
+"0 8.4,0 8.4,0 8.4,0 0,36 0,36 z\"/>\n"
+"      <path id=\"path10\" transform=\"translate(264.4683,187.825)\" d=\"m 7.51,26 c 0,0 2.24,-9.4 2.24,-9.4 1.18,-5.09 3.67,-9.6 8.38,-9.6 0.42,0 0.83,0.21 1.14,0.26 0,0 1.82,-7.21 1.82,-7.21 -0.42,0 -0.88,-0.05 -1.4,-0.05 -3.47,0 -6.38,2.44 -8.32,5."
+"94 0,0 -0.2,0 -0.2,0 C 11.46,4.23 11.71,2.61 11.9,1 11.9,1 5.47,1 5.47,1 5.11,3.08 4.53,7.15 3.66,10.82 3.66,10.82 0,26 0,26 c 0,0 7.51,0 7.51,0 z\"/>\n"
+"      <path id=\"path11\" transform=\"translate(285.0983,187.825)\" d=\"M 20.06,19.25 C 17.99,20.26 15.63,20 12.88,20 10.71,20 9.03,19.62 8.11,18.88 7.63,18.07 7.43,16.81 7.47,16 17.6,16.27 23.99,13.93 24.31,7.53 24.55,2.7 21.02,0 15.89,0 6.73,0 0.73"
+",8.08 0.34,15.86 0,22.65 3.53,26 10.78,26 c 2.79,0 6.5,-0.32 9.52,-1.23 0,0 -0.24,-5.52 -0.24,-5.52 z M 17.32,7.53 C 17.2,9.91 14.26,10.05 8.47,10 9.1,7.91 11.22,6 14.69,6 c 1.71,0 2.69,0.65 2.63,1.53 z\"/>\n"
+"      <path id=\"path12\" transform=\"translate(311.6183,187.825)\" d=\"M 20.05,19.25 C 17.98,20.26 15.62,20 12.88,20 10.7,20 9.03,19.62 8.11,18.88 7.63,18.07 7.42,16.81 7.46,16 17.6,16.27 23.98,13.93 24.31,7.53 24.55,2.7 21.02,0 15.89,0 6.72,0 0.72,"
+"8.08 0.33,15.86 0,22.65 3.52,26 10.77,26 c 2.8,0 6.5,-0.32 9.53,-1.23 0,0 -0.25,-5.52 -0.25,-5.52 z M 17.32,7.53 C 17.2,9.91 14.26,10.05 8.46,10 9.1,7.91 11.21,6 14.68,6 c 1.71,0 2.7,0.65 2.64,1.53 z\"/>\n"
+"      <path id=\"path13\" transform=\"translate(337.9983,176.825)\" d=\"M 23.31,0 C 23.31,0 20.5,11.36 20.5,11.36 19.48,10.94 18.15,11 17.11,11 7.53,11 0.75,19.2 0.3,28.08 0,34.34 3.34,37 7.64,37 c 3.01,0 6.18,-1.33 8.58,-4.77 0,0 0.1,0 0.1,0 0,0 -0."
+"57,4.77 -0.57,4.77 0,0 6.78,0 6.78,0 0.31,-3 0.96,-6.57 1.69,-9.83 0,0 6.49,-27.17 6.49,-27.17 0,0 -7.4,0 -7.4,0 z M 17.47,24.42 C 16.3,29.35 13.54,31 11.36,31 9.19,31 7.98,29.49 8.13,26.8 8.38,21.82 11.8,17 16.25,17 c 1.25,0 2.32,0.19 2.91,0.47 0,0 "
+"-1.69,6.95 -1.69,6.95 z\"/>\n"
+"      <path id=\"path14\" transform=\"translate(367.7083,187.825)\" d=\"M 10.61,26 C 19.31,26 26.02,19.41 26.49,10.44 26.78,4.5 23.08,0 16.25,0 7.23,0 0.76,7.3 0.31,16.12 0,22.54 4.14,26 10.61,26 z m 1.17,-6 C 9.24,20 7.84,18.38 7.99,15.96 8.19,11.93"
+" 10.68,6 14.97,6 c 2.96,0 3.87,2.27 3.75,4.5 -0.22,4.4 -2.9,9.5 -6.94,9.5 z\"/>\n"
+"      <path id=\"path15\" transform=\"translate(396.2683,187.825)\" d=\"M 7.2,26 C 7.2,26 9.9,14.58 9.9,14.58 11.03,9.49 13.85,6 16.38,6 c 1.82,0 2.32,1.33 2.23,3.07 -0.05,0.9 -0.25,1.91 -0.46,2.91 0,0 -3.34,14.02 -3.34,14.02 0,0 7.2,0 7.2,0 0,0 2.7,"
+"-11.47 2.7,-11.47 C 25.95,9.28 28.61,6 31.09,6 c 1.71,0 2.42,1.22 2.34,2.96 -0.05,1.01 -0.26,2.12 -0.52,3.13 0,0 -3.24,13.91 -3.24,13.91 0,0 7.25,0 7.25,0 0,0 3.49,-14.81 3.49,-14.81 0.27,-1.33 0.58,-3.4 0.63,-4.46 C 41.26,2.33 39.11,0 35.23,0 31.91,"
+"0 28.68,1.5 26.23,4.66 26.14,2.38 24.51,0 20.47,0 17.2,0 14.08,1.48 11.58,4.83 c 0,0 -0.1,0 -0.1,0 0,0 0.67,-3.83 0.67,-3.83 0,0 -6.42,0 -6.42,0 C 5.31,3.14 4.8,5.73 4.02,8.75 4.02,8.75 0,26 0,26 c 0,0 7.2,0 7.2,0 z\"/>\n"
+"    </g>\n"
+"  </g>\n"
+"</svg>";
 
-const char* huckleberry_icon_svg = (const char*) temp_binary_data_11;
+const char* gpl_logo_svg = (const char*) temp_binary_data_17;
 
 //================== juce-logo-with-text.svg ==================
-static const unsigned char temp_binary_data_12[] =
+static const unsigned char temp_binary_data_18[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<svg\n"
 "   xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n"
@@ -1826,10 +2254,10 @@ static const unsigned char temp_binary_data_12[] =
 "     style=\"fill:#ffffff;fill-opacity:1\" />\n"
 "</svg>\n";
 
-const char* jucelogowithtext_svg = (const char*) temp_binary_data_12;
+const char* jucelogowithtext_svg = (const char*) temp_binary_data_18;
 
 //================== juce_icon.png ==================
-static const unsigned char temp_binary_data_13[] =
+static const unsigned char temp_binary_data_19[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,2,0,0,0,2,0,8,6,0,0,0,244,120,212,250,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,3,40,105,84,88,116,88,77,76,58,
 99,111,109,46,97,100,111,98,101,46,120,109,112,0,0,0,0,0,60,63,120,112,97,99,107,101,116,32,98,101,103,105,110,61,34,239,187,191,34,32,105,100,61,34,87,53,77,48,77,112,67,101,104,105,72,122,114,101,83,122,78,84,99,122,107,99,57,100,34,63,62,32,60,120,
 58,120,109,112,109,101,116,97,32,120,109,108,110,115,58,120,61,34,97,100,111,98,101,58,110,115,58,109,101,116,97,47,34,32,120,58,120,109,112,116,107,61,34,65,100,111,98,101,32,88,77,80,32,67,111,114,101,32,53,46,54,45,99,48,54,55,32,55,57,46,49,53,55,
@@ -2475,10 +2903,10 @@ static const unsigned char temp_binary_data_13[] =
 0,0,0,2,0,0,16,0,0,128,0,0,0,4,0,0,32,0,0,0,1,0,0,8,0,0,64,0,0,0,2,0,0,16,0,0,128,0,0,0,4,0,0,32,0,0,0,1,0,0,8,0,0,64,0,0,128,0,0,0,4,0,0,32,0,0,0,1,0,0,8,0,0,64,0,0,0,2,0,0,16,0,0,128,0,0,0,4,0,0,32,0,0,128,191,246,33,192,0,100,235,173,153,70,62,64,
 37,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* juce_icon_png = (const char*) temp_binary_data_13;
+const char* juce_icon_png = (const char*) temp_binary_data_19;
 
 //================== wizard_AnimatedApp.svg ==================
-static const unsigned char temp_binary_data_14[] =
+static const unsigned char temp_binary_data_20[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
 "\n"
@@ -2655,10 +3083,10 @@ static const unsigned char temp_binary_data_14[] =
 "     id=\"line44\"\n"
 "     style=\"stroke:#a45c94;stroke-opacity:0.94117647\" /></svg>";
 
-const char* wizard_AnimatedApp_svg = (const char*) temp_binary_data_14;
+const char* wizard_AnimatedApp_svg = (const char*) temp_binary_data_20;
 
 //================== wizard_AudioApp.svg ==================
-static const unsigned char temp_binary_data_15[] =
+static const unsigned char temp_binary_data_21[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
 "\n"
@@ -3412,10 +3840,10 @@ static const unsigned char temp_binary_data_15[] =
 "     id=\"line131\"\n"
 "     style=\"stroke:#a45c94;stroke-opacity:1\" /></svg>";
 
-const char* wizard_AudioApp_svg = (const char*) temp_binary_data_15;
+const char* wizard_AudioApp_svg = (const char*) temp_binary_data_21;
 
 //================== wizard_AudioPlugin.svg ==================
-static const unsigned char temp_binary_data_16[] =
+static const unsigned char temp_binary_data_22[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
 "\n"
@@ -4271,10 +4699,10 @@ static const unsigned char temp_binary_data_16[] =
 "           id=\"circle175\"\n"
 "           style=\"stroke:#a45c94;stroke-opacity:1;fill:#a45c94;fill-opacity:1\" /></g></g></g></svg>";
 
-const char* wizard_AudioPlugin_svg = (const char*) temp_binary_data_16;
+const char* wizard_AudioPlugin_svg = (const char*) temp_binary_data_22;
 
 //================== wizard_ConsoleApp.svg ==================
-static const unsigned char temp_binary_data_17[] =
+static const unsigned char temp_binary_data_23[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
 "\n"
@@ -4361,10 +4789,10 @@ static const unsigned char temp_binary_data_17[] =
 "         id=\"path19\"\n"
 "         style=\"stroke:#a45c94;stroke-opacity:1;fill:#a45c94;fill-opacity:1\" /></g></g></svg>";
 
-const char* wizard_ConsoleApp_svg = (const char*) temp_binary_data_17;
+const char* wizard_ConsoleApp_svg = (const char*) temp_binary_data_23;
 
 //================== wizard_DLL.svg ==================
-static const unsigned char temp_binary_data_18[] =
+static const unsigned char temp_binary_data_24[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
 "\n"
@@ -4635,10 +5063,10 @@ static const unsigned char temp_binary_data_18[] =
 "     id=\"path54\"\n"
 "     style=\"stroke:#a45c94;stroke-opacity:1\" /></svg>";
 
-const char* wizard_DLL_svg = (const char*) temp_binary_data_18;
+const char* wizard_DLL_svg = (const char*) temp_binary_data_24;
 
 //================== wizard_GUI.svg ==================
-static const unsigned char temp_binary_data_19[] =
+static const unsigned char temp_binary_data_25[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
 "\n"
@@ -4808,10 +5236,10 @@ static const unsigned char temp_binary_data_19[] =
 "     id=\"path47\"\n"
 "     style=\"stroke:#a45c94;stroke-opacity:1\" /></svg>";
 
-const char* wizard_GUI_svg = (const char*) temp_binary_data_19;
+const char* wizard_GUI_svg = (const char*) temp_binary_data_25;
 
 //================== wizard_Highlight.svg ==================
-static const unsigned char temp_binary_data_20[] =
+static const unsigned char temp_binary_data_26[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
 "\n"
@@ -4861,10 +5289,10 @@ static const unsigned char temp_binary_data_20[] =
 "     id=\"path3\"\n"
 "     style=\"fill:#a45c94;fill-opacity:1\" /></svg>";
 
-const char* wizard_Highlight_svg = (const char*) temp_binary_data_20;
+const char* wizard_Highlight_svg = (const char*) temp_binary_data_26;
 
 //================== wizard_Openfile.svg ==================
-static const unsigned char temp_binary_data_21[] =
+static const unsigned char temp_binary_data_27[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
 "\n"
@@ -4916,10 +5344,10 @@ static const unsigned char temp_binary_data_21[] =
 "     id=\"path3\"\n"
 "     style=\"stroke:#a45c94;stroke-opacity:1\" /></svg>";
 
-const char* wizard_Openfile_svg = (const char*) temp_binary_data_21;
+const char* wizard_Openfile_svg = (const char*) temp_binary_data_27;
 
 //================== wizard_OpenGL.svg ==================
-static const unsigned char temp_binary_data_22[] =
+static const unsigned char temp_binary_data_28[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
 "\n"
@@ -5047,10 +5475,10 @@ static const unsigned char temp_binary_data_22[] =
 "     id=\"path23\"\n"
 "     style=\"stroke:#a45c94;stroke-opacity:1\" /></svg>";
 
-const char* wizard_OpenGL_svg = (const char*) temp_binary_data_22;
+const char* wizard_OpenGL_svg = (const char*) temp_binary_data_28;
 
 //================== wizard_StaticLibrary.svg ==================
-static const unsigned char temp_binary_data_23[] =
+static const unsigned char temp_binary_data_29[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 "<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->\n"
 "\n"
@@ -5321,18 +5749,10 @@ static const unsigned char temp_binary_data_23[] =
 "     id=\"path54\"\n"
 "     style=\"stroke:#a45c94;stroke-opacity:1\" /></svg>";
 
-const char* wizard_StaticLibrary_svg = (const char*) temp_binary_data_23;
+const char* wizard_StaticLibrary_svg = (const char*) temp_binary_data_29;
 
 //================== jucer_AnimatedComponentSimpleTemplate.h ==================
-static const unsigned char temp_binary_data_24[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
+static const unsigned char temp_binary_data_30[] =
 "#pragma once\r\n"
 "\r\n"
 "%%include_juce%%\r\n"
@@ -5342,7 +5762,7 @@ static const unsigned char temp_binary_data_24[] =
 "    This component lives inside our window, and this is where you should put all\r\n"
 "    your controls and content.\r\n"
 "*/\r\n"
-"class %%content_component_class%%   : public AnimatedAppComponent\r\n"
+"class %%content_component_class%%  : public juce::AnimatedAppComponent\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
@@ -5354,7 +5774,7 @@ static const unsigned char temp_binary_data_24[] =
 "        setFramesPerSecond (60); // This sets the frequency of the update calls.\r\n"
 "    }\r\n"
 "\r\n"
-"    ~%%content_component_class%%()\r\n"
+"    ~%%content_component_class%%() override\r\n"
 "    {\r\n"
 "    }\r\n"
 "\r\n"
@@ -5366,10 +5786,10 @@ static const unsigned char temp_binary_data_24[] =
 "    }\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    void paint (Graphics& g) override\r\n"
+"    void paint (juce::Graphics& g) override\r\n"
 "    {\r\n"
 "        // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
-"        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));\r\n"
+"        g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));\r\n"
 "\r\n"
 "        // You can add your drawing code here!\r\n"
 "    }\r\n"
@@ -5390,18 +5810,10 @@ static const unsigned char temp_binary_data_24[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_AnimatedComponentSimpleTemplate_h = (const char*) temp_binary_data_24;
+const char* jucer_AnimatedComponentSimpleTemplate_h = (const char*) temp_binary_data_30;
 
 //================== jucer_AnimatedComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_25[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
+static const unsigned char temp_binary_data_31[] =
 "%%include_corresponding_header%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
@@ -5425,10 +5837,10 @@ static const unsigned char temp_binary_data_25[] =
 "}\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"void %%content_component_class%%::paint (Graphics& g)\r\n"
+"void %%content_component_class%%::paint (juce::Graphics& g)\r\n"
 "{\r\n"
 "    // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
-"    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));\r\n"
+"    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));\r\n"
 "\r\n"
 "    // You can add your drawing code here!\r\n"
 "}\r\n"
@@ -5440,18 +5852,10 @@ static const unsigned char temp_binary_data_25[] =
 "    // update their positions.\r\n"
 "}\r\n";
 
-const char* jucer_AnimatedComponentTemplate_cpp = (const char*) temp_binary_data_25;
+const char* jucer_AnimatedComponentTemplate_cpp = (const char*) temp_binary_data_31;
 
 //================== jucer_AnimatedComponentTemplate.h ==================
-static const unsigned char temp_binary_data_26[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
+static const unsigned char temp_binary_data_32[] =
 "#pragma once\r\n"
 "\r\n"
 "%%include_juce%%\r\n"
@@ -5461,18 +5865,18 @@ static const unsigned char temp_binary_data_26[] =
 "    This component lives inside our window, and this is where you should put all\r\n"
 "    your controls and content.\r\n"
 "*/\r\n"
-"class %%content_component_class%%   : public AnimatedAppComponent\r\n"
+"class %%content_component_class%%  : public juce::AnimatedAppComponent\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
 "    %%content_component_class%%();\r\n"
-"    ~%%content_component_class%%();\r\n"
+"    ~%%content_component_class%%() override;\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
 "    void update() override;\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    void paint (Graphics& g) override;\r\n"
+"    void paint (juce::Graphics& g) override;\r\n"
 "    void resized() override;\r\n"
 "\r\n"
 "private:\r\n"
@@ -5483,18 +5887,10 @@ static const unsigned char temp_binary_data_26[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_AnimatedComponentTemplate_h = (const char*) temp_binary_data_26;
+const char* jucer_AnimatedComponentTemplate_h = (const char*) temp_binary_data_32;
 
 //================== jucer_AudioComponentSimpleTemplate.h ==================
-static const unsigned char temp_binary_data_27[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
+static const unsigned char temp_binary_data_33[] =
 "#pragma once\r\n"
 "\r\n"
 "%%include_juce%%\r\n"
@@ -5504,7 +5900,7 @@ static const unsigned char temp_binary_data_27[] =
 "    This component lives inside our window, and this is where you should put all\r\n"
 "    your controls and content.\r\n"
 "*/\r\n"
-"class %%content_component_class%%   : public AudioAppComponent\r\n"
+"class %%content_component_class%%  : public juce::AudioAppComponent\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
@@ -5515,11 +5911,11 @@ static const unsigned char temp_binary_data_27[] =
 "        setSize (800, 600);\r\n"
 "\r\n"
 "        // Some platforms require permissions to open input channels so request that here\r\n"
-"        if (RuntimePermissions::isRequired (RuntimePermissions::recordAudio)\r\n"
-"            && ! RuntimePermissions::isGranted (RuntimePermissions::recordAudio))\r\n"
+"        if (juce::RuntimePermissions::isRequired (juce::RuntimePermissions::recordAudio)\r\n"
+"            && ! juce::RuntimePermissions::isGranted (juce::RuntimePermissions::recordAudio))\r\n"
 "        {\r\n"
-"            RuntimePermissions::request (RuntimePermissions::recordAudio,\r\n"
-"                                         [&] (bool granted) { setAudioChannels (granted ? 2 : 0, 2); });\r\n"
+"            juce::RuntimePermissions::request (juce::RuntimePermissions::recordAudio,\r\n"
+"                                               [&] (bool granted) { setAudioChannels (granted ? 2 : 0, 2); });\r\n"
 "        }\r\n"
 "        else\r\n"
 "        {\r\n"
@@ -5546,7 +5942,7 @@ static const unsigned char temp_binary_data_27[] =
 "        // For more details, see the help for AudioProcessor::prepareToPlay()\r\n"
 "    }\r\n"
 "\r\n"
-"    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override\r\n"
+"    void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill) override\r\n"
 "    {\r\n"
 "        // Your audio-processing code goes here!\r\n"
 "\r\n"
@@ -5566,10 +5962,10 @@ static const unsigned char temp_binary_data_27[] =
 "    }\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    void paint (Graphics& g) override\r\n"
+"    void paint (juce::Graphics& g) override\r\n"
 "    {\r\n"
 "        // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
-"        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));\r\n"
+"        g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));\r\n"
 "\r\n"
 "        // You can add your drawing code here!\r\n"
 "    }\r\n"
@@ -5590,18 +5986,10 @@ static const unsigned char temp_binary_data_27[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_AudioComponentSimpleTemplate_h = (const char*) temp_binary_data_27;
+const char* jucer_AudioComponentSimpleTemplate_h = (const char*) temp_binary_data_33;
 
 //================== jucer_AudioComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_28[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
+static const unsigned char temp_binary_data_34[] =
 "%%include_corresponding_header%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
@@ -5612,11 +6000,11 @@ static const unsigned char temp_binary_data_28[] =
 "    setSize (800, 600);\r\n"
 "\r\n"
 "    // Some platforms require permissions to open input channels so request that here\r\n"
-"    if (RuntimePermissions::isRequired (RuntimePermissions::recordAudio)\r\n"
-"        && ! RuntimePermissions::isGranted (RuntimePermissions::recordAudio))\r\n"
+"    if (juce::RuntimePermissions::isRequired (juce::RuntimePermissions::recordAudio)\r\n"
+"        && ! juce::RuntimePermissions::isGranted (juce::RuntimePermissions::recordAudio))\r\n"
 "    {\r\n"
-"        RuntimePermissions::request (RuntimePermissions::recordAudio,\r\n"
-"                                     [&] (bool granted) { setAudioChannels (granted ? 2 : 0, 2); });\r\n"
+"        juce::RuntimePermissions::request (juce::RuntimePermissions::recordAudio,\r\n"
+"                                           [&] (bool granted) { setAudioChannels (granted ? 2 : 0, 2); });\r\n"
 "    }\r\n"
 "    else\r\n"
 "    {\r\n"
@@ -5643,7 +6031,7 @@ static const unsigned char temp_binary_data_28[] =
 "    // For more details, see the help for AudioProcessor::prepareToPlay()\r\n"
 "}\r\n"
 "\r\n"
-"void %%content_component_class%%::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill)\r\n"
+"void %%content_component_class%%::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)\r\n"
 "{\r\n"
 "    // Your audio-processing code goes here!\r\n"
 "\r\n"
@@ -5663,10 +6051,10 @@ static const unsigned char temp_binary_data_28[] =
 "}\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"void %%content_component_class%%::paint (Graphics& g)\r\n"
+"void %%content_component_class%%::paint (juce::Graphics& g)\r\n"
 "{\r\n"
 "    // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
-"    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));\r\n"
+"    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));\r\n"
 "\r\n"
 "    // You can add your drawing code here!\r\n"
 "}\r\n"
@@ -5678,18 +6066,10 @@ static const unsigned char temp_binary_data_28[] =
 "    // update their positions.\r\n"
 "}\r\n";
 
-const char* jucer_AudioComponentTemplate_cpp = (const char*) temp_binary_data_28;
+const char* jucer_AudioComponentTemplate_cpp = (const char*) temp_binary_data_34;
 
 //================== jucer_AudioComponentTemplate.h ==================
-static const unsigned char temp_binary_data_29[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
+static const unsigned char temp_binary_data_35[] =
 "#pragma once\r\n"
 "\r\n"
 "%%include_juce%%\r\n"
@@ -5699,7 +6079,7 @@ static const unsigned char temp_binary_data_29[] =
 "    This component lives inside our window, and this is where you should put all\r\n"
 "    your controls and content.\r\n"
 "*/\r\n"
-"class %%content_component_class%%   : public AudioAppComponent\r\n"
+"class %%content_component_class%%  : public juce::AudioAppComponent\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
@@ -5708,11 +6088,11 @@ static const unsigned char temp_binary_data_29[] =
 "\r\n"
 "    //==============================================================================\r\n"
 "    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;\r\n"
-"    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override;\r\n"
+"    void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill) override;\r\n"
 "    void releaseResources() override;\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    void paint (Graphics& g) override;\r\n"
+"    void paint (juce::Graphics& g) override;\r\n"
 "    void resized() override;\r\n"
 "\r\n"
 "private:\r\n"
@@ -5723,16 +6103,14 @@ static const unsigned char temp_binary_data_29[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_AudioComponentTemplate_h = (const char*) temp_binary_data_29;
+const char* jucer_AudioComponentTemplate_h = (const char*) temp_binary_data_35;
 
 //================== jucer_AudioPluginEditorTemplate.cpp ==================
-static const unsigned char temp_binary_data_30[] =
+static const unsigned char temp_binary_data_36[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"    It contains the basic framework code for a JUCE plugin editor.\r\n"
+"    This file contains the basic framework code for a JUCE plugin editor.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
@@ -5741,7 +6119,7 @@ static const unsigned char temp_binary_data_30[] =
 "\r\n"
 "//==============================================================================\r\n"
 "%%editor_class_name%%::%%editor_class_name%% (%%filter_class_name%%& p)\r\n"
-"    : AudioProcessorEditor (&p), processor (p)\r\n"
+"    : AudioProcessorEditor (&p), audioProcessor (p)\r\n"
 "{\r\n"
 "    // Make sure that before the constructor has finished, you've set the\r\n"
 "    // editor's size to whatever you need it to be.\r\n"
@@ -5753,14 +6131,14 @@ static const unsigned char temp_binary_data_30[] =
 "}\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"void %%editor_class_name%%::paint (Graphics& g)\r\n"
+"void %%editor_class_name%%::paint (juce::Graphics& g)\r\n"
 "{\r\n"
 "    // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
-"    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));\r\n"
+"    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));\r\n"
 "\r\n"
-"    g.setColour (Colours::white);\r\n"
+"    g.setColour (juce::Colours::white);\r\n"
 "    g.setFont (15.0f);\r\n"
-"    g.drawFittedText (\"Hello World!\", getLocalBounds(), Justification::centred, 1);\r\n"
+"    g.drawFittedText (\"Hello World!\", getLocalBounds(), juce::Justification::centred, 1);\r\n"
 "}\r\n"
 "\r\n"
 "void %%editor_class_name%%::resized()\r\n"
@@ -5769,16 +6147,14 @@ static const unsigned char temp_binary_data_30[] =
 "    // subcomponents in your editor..\r\n"
 "}\r\n";
 
-const char* jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_binary_data_30;
+const char* jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_binary_data_36;
 
 //================== jucer_AudioPluginEditorTemplate.h ==================
-static const unsigned char temp_binary_data_31[] =
+static const unsigned char temp_binary_data_37[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"    It contains the basic framework code for a JUCE plugin editor.\r\n"
+"    This file contains the basic framework code for a JUCE plugin editor.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
@@ -5790,34 +6166,32 @@ static const unsigned char temp_binary_data_31[] =
 "//==============================================================================\r\n"
 "/**\r\n"
 "*/\r\n"
-"class %%editor_class_name%%  : public AudioProcessorEditor\r\n"
+"class %%editor_class_name%%  : public juce::AudioProcessorEditor\r\n"
 "{\r\n"
 "public:\r\n"
 "    %%editor_class_name%% (%%filter_class_name%%&);\r\n"
-"    ~%%editor_class_name%%();\r\n"
+"    ~%%editor_class_name%%() override;\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    void paint (Graphics&) override;\r\n"
+"    void paint (juce::Graphics&) override;\r\n"
 "    void resized() override;\r\n"
 "\r\n"
 "private:\r\n"
 "    // This reference is provided as a quick way for your editor to\r\n"
 "    // access the processor object that created it.\r\n"
-"    %%filter_class_name%%& processor;\r\n"
+"    %%filter_class_name%%& audioProcessor;\r\n"
 "\r\n"
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%editor_class_name%%)\r\n"
 "};\r\n";
 
-const char* jucer_AudioPluginEditorTemplate_h = (const char*) temp_binary_data_31;
+const char* jucer_AudioPluginEditorTemplate_h = (const char*) temp_binary_data_37;
 
 //================== jucer_AudioPluginFilterTemplate.cpp ==================
-static const unsigned char temp_binary_data_32[] =
+static const unsigned char temp_binary_data_38[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"    It contains the basic framework code for a JUCE plugin processor.\r\n"
+"    This file contains the basic framework code for a JUCE plugin processor.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
@@ -5830,9 +6204,9 @@ static const unsigned char temp_binary_data_32[] =
 "     : AudioProcessor (BusesProperties()\r\n"
 "                     #if ! JucePlugin_IsMidiEffect\r\n"
 "                      #if ! JucePlugin_IsSynth\r\n"
-"                       .withInput  (\"Input\",  AudioChannelSet::stereo(), true)\r\n"
+"                       .withInput  (\"Input\",  juce::AudioChannelSet::stereo(), true)\r\n"
 "                      #endif\r\n"
-"                       .withOutput (\"Output\", AudioChannelSet::stereo(), true)\r\n"
+"                       .withOutput (\"Output\", juce::AudioChannelSet::stereo(), true)\r\n"
 "                     #endif\r\n"
 "                       )\r\n"
 "#endif\r\n"
@@ -5844,7 +6218,7 @@ static const unsigned char temp_binary_data_32[] =
 "}\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"const String %%filter_class_name%%::getName() const\r\n"
+"const juce::String %%filter_class_name%%::getName() const\r\n"
 "{\r\n"
 "    return JucePlugin_Name;\r\n"
 "}\r\n"
@@ -5896,12 +6270,12 @@ static const unsigned char temp_binary_data_32[] =
 "{\r\n"
 "}\r\n"
 "\r\n"
-"const String %%filter_class_name%%::getProgramName (int index)\r\n"
+"const juce::String %%filter_class_name%%::getProgramName (int index)\r\n"
 "{\r\n"
 "    return {};\r\n"
 "}\r\n"
 "\r\n"
-"void %%filter_class_name%%::changeProgramName (int index, const String& newName)\r\n"
+"void %%filter_class_name%%::changeProgramName (int index, const juce::String& newName)\r\n"
 "{\r\n"
 "}\r\n"
 "\r\n"
@@ -5922,13 +6296,13 @@ static const unsigned char temp_binary_data_32[] =
 "bool %%filter_class_name%%::isBusesLayoutSupported (const BusesLayout& layouts) const\r\n"
 "{\r\n"
 "  #if JucePlugin_IsMidiEffect\r\n"
-"    ignoreUnused (layouts);\r\n"
+"    juce::ignoreUnused (layouts);\r\n"
 "    return true;\r\n"
 "  #else\r\n"
 "    // This is the place where you check if the layout is supported.\r\n"
 "    // In this template code we only support mono or stereo.\r\n"
-"    if (layouts.getMainOutputChannelSet() != AudioChannelSet::mono()\r\n"
-"     && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())\r\n"
+"    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()\r\n"
+"     && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())\r\n"
 "        return false;\r\n"
 "\r\n"
 "    // This checks if the input layout matches the output layout\r\n"
@@ -5942,9 +6316,9 @@ static const unsigned char temp_binary_data_32[] =
 "}\r\n"
 "#endif\r\n"
 "\r\n"
-"void %%filter_class_name%%::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)\r\n"
+"void %%filter_class_name%%::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)\r\n"
 "{\r\n"
-"    ScopedNoDenormals noDenormals;\r\n"
+"    juce::ScopedNoDenormals noDenormals;\r\n"
 "    auto totalNumInputChannels  = getTotalNumInputChannels();\r\n"
 "    auto totalNumOutputChannels = getTotalNumOutputChannels();\r\n"
 "\r\n"
@@ -5977,13 +6351,13 @@ static const unsigned char temp_binary_data_32[] =
 "    return true; // (change this to false if you choose to not supply an editor)\r\n"
 "}\r\n"
 "\r\n"
-"AudioProcessorEditor* %%filter_class_name%%::createEditor()\r\n"
+"juce::AudioProcessorEditor* %%filter_class_name%%::createEditor()\r\n"
 "{\r\n"
 "    return new %%editor_class_name%% (*this);\r\n"
 "}\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"void %%filter_class_name%%::getStateInformation (MemoryBlock& destData)\r\n"
+"void %%filter_class_name%%::getStateInformation (juce::MemoryBlock& destData)\r\n"
 "{\r\n"
 "    // You should use this method to store your parameters in the memory block.\r\n"
 "    // You could do that either as raw data, or use the XML or ValueTree classes\r\n"
@@ -5998,21 +6372,19 @@ static const unsigned char temp_binary_data_32[] =
 "\r\n"
 "//==============================================================================\r\n"
 "// This creates new instances of the plugin..\r\n"
-"AudioProcessor* JUCE_CALLTYPE createPluginFilter()\r\n"
+"juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()\r\n"
 "{\r\n"
 "    return new %%filter_class_name%%();\r\n"
 "}\r\n";
 
-const char* jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_binary_data_32;
+const char* jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_binary_data_38;
 
 //================== jucer_AudioPluginFilterTemplate.h ==================
-static const unsigned char temp_binary_data_33[] =
+static const unsigned char temp_binary_data_39[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"    It contains the basic framework code for a JUCE plugin processor.\r\n"
+"    This file contains the basic framework code for a JUCE plugin processor.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
@@ -6024,12 +6396,12 @@ static const unsigned char temp_binary_data_33[] =
 "//==============================================================================\r\n"
 "/**\r\n"
 "*/\r\n"
-"class %%filter_class_name%%  : public AudioProcessor\r\n"
+"class %%filter_class_name%%  : public juce::AudioProcessor\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
 "    %%filter_class_name%%();\r\n"
-"    ~%%filter_class_name%%();\r\n"
+"    ~%%filter_class_name%%() override;\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
 "    void prepareToPlay (double sampleRate, int samplesPerBlock) override;\r\n"
@@ -6039,14 +6411,14 @@ static const unsigned char temp_binary_data_33[] =
 "    bool isBusesLayoutSupported (const BusesLayout& layouts) const override;\r\n"
 "   #endif\r\n"
 "\r\n"
-"    void processBlock (AudioBuffer<float>&, MidiBuffer&) override;\r\n"
+"    void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    AudioProcessorEditor* createEditor() override;\r\n"
+"    juce::AudioProcessorEditor* createEditor() override;\r\n"
 "    bool hasEditor() const override;\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    const String getName() const override;\r\n"
+"    const juce::String getName() const override;\r\n"
 "\r\n"
 "    bool acceptsMidi() const override;\r\n"
 "    bool producesMidi() const override;\r\n"
@@ -6057,11 +6429,11 @@ static const unsigned char temp_binary_data_33[] =
 "    int getNumPrograms() override;\r\n"
 "    int getCurrentProgram() override;\r\n"
 "    void setCurrentProgram (int index) override;\r\n"
-"    const String getProgramName (int index) override;\r\n"
-"    void changeProgramName (int index, const String& newName) override;\r\n"
+"    const juce::String getProgramName (int index) override;\r\n"
+"    void changeProgramName (int index, const juce::String& newName) override;\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    void getStateInformation (MemoryBlock& destData) override;\r\n"
+"    void getStateInformation (juce::MemoryBlock& destData) override;\r\n"
 "    void setStateInformation (const void* data, int sizeInBytes) override;\r\n"
 "\r\n"
 "private:\r\n"
@@ -6069,10 +6441,10 @@ static const unsigned char temp_binary_data_33[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%filter_class_name%%)\r\n"
 "};\r\n";
 
-const char* jucer_AudioPluginFilterTemplate_h = (const char*) temp_binary_data_33;
+const char* jucer_AudioPluginFilterTemplate_h = (const char*) temp_binary_data_39;
 
 //================== jucer_ComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_34[] =
+static const unsigned char temp_binary_data_40[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6148,10 +6520,10 @@ static const unsigned char temp_binary_data_34[] =
 "//[EndFile] You can add extra defines here...\r\n"
 "//[/EndFile]\r\n";
 
-const char* jucer_ComponentTemplate_cpp = (const char*) temp_binary_data_34;
+const char* jucer_ComponentTemplate_cpp = (const char*) temp_binary_data_40;
 
 //================== jucer_ComponentTemplate.h ==================
-static const unsigned char temp_binary_data_35[] =
+static const unsigned char temp_binary_data_41[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6214,18 +6586,10 @@ static const unsigned char temp_binary_data_35[] =
 "//[EndFile] You can add extra defines here...\r\n"
 "//[/EndFile]\r\n";
 
-const char* jucer_ComponentTemplate_h = (const char*) temp_binary_data_35;
+const char* jucer_ComponentTemplate_h = (const char*) temp_binary_data_41;
 
 //================== jucer_ContentCompSimpleTemplate.h ==================
-static const unsigned char temp_binary_data_36[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
+static const unsigned char temp_binary_data_42[] =
 "#pragma once\r\n"
 "\r\n"
 "%%include_juce%%\r\n"
@@ -6235,7 +6599,7 @@ static const unsigned char temp_binary_data_36[] =
 "    This component lives inside our window, and this is where you should put all\r\n"
 "    your controls and content.\r\n"
 "*/\r\n"
-"class %%content_component_class%%   : public Component\r\n"
+"class %%content_component_class%%  : public juce::Component\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
@@ -6244,19 +6608,19 @@ static const unsigned char temp_binary_data_36[] =
 "        setSize (600, 400);\r\n"
 "    }\r\n"
 "\r\n"
-"    ~%%content_component_class%%()\r\n"
+"    ~%%content_component_class%%() override\r\n"
 "    {\r\n"
 "    }\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    void paint (Graphics& g) override\r\n"
+"    void paint (juce::Graphics& g) override\r\n"
 "    {\r\n"
 "        // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
-"        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));\r\n"
+"        g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));\r\n"
 "\r\n"
-"        g.setFont (Font (16.0f));\r\n"
-"        g.setColour (Colours::white);\r\n"
-"        g.drawText (\"Hello World!\", getLocalBounds(), Justification::centred, true);\r\n"
+"        g.setFont (juce::Font (16.0f));\r\n"
+"        g.setColour (juce::Colours::white);\r\n"
+"        g.drawText (\"Hello World!\", getLocalBounds(), juce::Justification::centred, true);\r\n"
 "    }\r\n"
 "\r\n"
 "    void resized() override\r\n"
@@ -6275,18 +6639,10 @@ static const unsigned char temp_binary_data_36[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_ContentCompSimpleTemplate_h = (const char*) temp_binary_data_36;
+const char* jucer_ContentCompSimpleTemplate_h = (const char*) temp_binary_data_42;
 
 //================== jucer_ContentCompTemplate.cpp ==================
-static const unsigned char temp_binary_data_37[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
+static const unsigned char temp_binary_data_43[] =
 "%%include_corresponding_header%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
@@ -6300,14 +6656,14 @@ static const unsigned char temp_binary_data_37[] =
 "}\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"void %%content_component_class%%::paint (Graphics& g)\r\n"
+"void %%content_component_class%%::paint (juce::Graphics& g)\r\n"
 "{\r\n"
 "    // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
-"    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));\r\n"
+"    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));\r\n"
 "\r\n"
-"    g.setFont (Font (16.0f));\r\n"
-"    g.setColour (Colours::white);\r\n"
-"    g.drawText (\"Hello World!\", getLocalBounds(), Justification::centred, true);\r\n"
+"    g.setFont (juce::Font (16.0f));\r\n"
+"    g.setColour (juce::Colours::white);\r\n"
+"    g.drawText (\"Hello World!\", getLocalBounds(), juce::Justification::centred, true);\r\n"
 "}\r\n"
 "\r\n"
 "void %%content_component_class%%::resized()\r\n"
@@ -6317,18 +6673,10 @@ static const unsigned char temp_binary_data_37[] =
 "    // update their positions.\r\n"
 "}\r\n";
 
-const char* jucer_ContentCompTemplate_cpp = (const char*) temp_binary_data_37;
+const char* jucer_ContentCompTemplate_cpp = (const char*) temp_binary_data_43;
 
 //================== jucer_ContentCompTemplate.h ==================
-static const unsigned char temp_binary_data_38[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
+static const unsigned char temp_binary_data_44[] =
 "#pragma once\r\n"
 "\r\n"
 "%%include_juce%%\r\n"
@@ -6338,15 +6686,15 @@ static const unsigned char temp_binary_data_38[] =
 "    This component lives inside our window, and this is where you should put all\r\n"
 "    your controls and content.\r\n"
 "*/\r\n"
-"class %%content_component_class%%   : public Component\r\n"
+"class %%content_component_class%%  : public juce::Component\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
 "    %%content_component_class%%();\r\n"
-"    ~%%content_component_class%%();\r\n"
+"    ~%%content_component_class%%() override;\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    void paint (Graphics&) override;\r\n"
+"    void paint (juce::Graphics&) override;\r\n"
 "    void resized() override;\r\n"
 "\r\n"
 "private:\r\n"
@@ -6357,12 +6705,12 @@ static const unsigned char temp_binary_data_38[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_ContentCompTemplate_h = (const char*) temp_binary_data_38;
+const char* jucer_ContentCompTemplate_h = (const char*) temp_binary_data_44;
 
 //================== jucer_InlineComponentTemplate.h ==================
-static const unsigned char temp_binary_data_39[] =
+static const unsigned char temp_binary_data_45[] =
 "//==============================================================================\r\n"
-"class %%component_class%%    : public Component\r\n"
+"class %%component_class%%  : public juce::Component\r\n"
 "{\r\n"
 "public:\r\n"
 "    %%component_class%%()\r\n"
@@ -6372,23 +6720,23 @@ static const unsigned char temp_binary_data_39[] =
 "\r\n"
 "    }\r\n"
 "\r\n"
-"    ~%%component_class%%()\r\n"
+"    ~%%component_class%%() override\r\n"
 "    {\r\n"
 "    }\r\n"
 "\r\n"
-"    void paint (Graphics& g) override\r\n"
+"    void paint (juce::Graphics& g) override\r\n"
 "    {\r\n"
 "        // You should replace everything in this method with your own drawing code..\r\n"
 "\r\n"
-"        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));   // clear the background\r\n"
+"        g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background\r\n"
 "\r\n"
-"        g.setColour (Colours::grey);\r\n"
+"        g.setColour (juce::Colours::grey);\r\n"
 "        g.drawRect (getLocalBounds(), 1);   // draw an outline around the component\r\n"
 "\r\n"
-"        g.setColour (Colours::white);\r\n"
+"        g.setColour (juce::Colours::white);\r\n"
 "        g.setFont (14.0f);\r\n"
 "        g.drawText (\"%%component_class%%\", getLocalBounds(),\r\n"
-"                    Justification::centred, true);   // draw some placeholder text\r\n"
+"                    juce::Justification::centred, true);   // draw some placeholder text\r\n"
 "    }\r\n"
 "\r\n"
 "    void resized() override\r\n"
@@ -6402,16 +6750,14 @@ static const unsigned char temp_binary_data_39[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_InlineComponentTemplate_h = (const char*) temp_binary_data_39;
+const char* jucer_InlineComponentTemplate_h = (const char*) temp_binary_data_45;
 
 //================== jucer_MainConsoleAppTemplate.cpp ==================
-static const unsigned char temp_binary_data_40[] =
+static const unsigned char temp_binary_data_46[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"    It contains the basic startup code for a JUCE application.\r\n"
+"    This file contains the basic startup code for a JUCE application.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
@@ -6428,16 +6774,14 @@ static const unsigned char temp_binary_data_40[] =
 "    return 0;\r\n"
 "}\r\n";
 
-const char* jucer_MainConsoleAppTemplate_cpp = (const char*) temp_binary_data_40;
+const char* jucer_MainConsoleAppTemplate_cpp = (const char*) temp_binary_data_46;
 
 //================== jucer_MainTemplate_NoWindow.cpp ==================
-static const unsigned char temp_binary_data_41[] =
+static const unsigned char temp_binary_data_47[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"    It contains the basic startup code for a JUCE application.\r\n"
+"    This file contains the basic startup code for a JUCE application.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
@@ -6445,18 +6789,18 @@ static const unsigned char temp_binary_data_41[] =
 "%%app_headers%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"class %%app_class_name%%  : public JUCEApplication\r\n"
+"class %%app_class_name%%  : public juce::JUCEApplication\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
 "    %%app_class_name%%() {}\r\n"
 "\r\n"
-"    const String getApplicationName() override       { return ProjectInfo::projectName; }\r\n"
-"    const String getApplicationVersion() override    { return ProjectInfo::versionString; }\r\n"
-"    bool moreThanOneInstanceAllowed() override       { return %%allow_more_than_one_instance%%; }\r\n"
+"    const juce::String getApplicationName() override       { return ProjectInfo::projectName; }\r\n"
+"    const juce::String getApplicationVersion() override    { return ProjectInfo::versionString; }\r\n"
+"    bool moreThanOneInstanceAllowed() override             { return true; }\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    void initialise (const String& commandLine) override\r\n"
+"    void initialise (const juce::String& commandLine) override\r\n"
 "    {\r\n"
 "        // Add your application's initialisation code here..\r\n"
 "    }\r\n"
@@ -6474,7 +6818,7 @@ static const unsigned char temp_binary_data_41[] =
 "        quit();\r\n"
 "    }\r\n"
 "\r\n"
-"    void anotherInstanceStarted (const String& commandLine) override\r\n"
+"    void anotherInstanceStarted (const juce::String& commandLine) override\r\n"
 "    {\r\n"
 "        // When another instance of the app is launched while this one is running,\r\n"
 "        // this method is invoked, and the commandLine parameter tells you what\r\n"
@@ -6486,126 +6830,14 @@ static const unsigned char temp_binary_data_41[] =
 "// This macro generates the main() routine that launches the app.\r\n"
 "START_JUCE_APPLICATION (%%app_class_name%%)\r\n";
 
-const char* jucer_MainTemplate_NoWindow_cpp = (const char*) temp_binary_data_41;
-
-//================== jucer_MainTemplate_SimpleWindow.cpp ==================
-static const unsigned char temp_binary_data_42[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"    It contains the basic startup code for a JUCE application.\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"%%app_headers%%\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"class %%app_class_name%%  : public JUCEApplication\r\n"
-"{\r\n"
-"public:\r\n"
-"    //==============================================================================\r\n"
-"    %%app_class_name%%() {}\r\n"
-"\r\n"
-"    const String getApplicationName() override       { return ProjectInfo::projectName; }\r\n"
-"    const String getApplicationVersion() override    { return ProjectInfo::versionString; }\r\n"
-"    bool moreThanOneInstanceAllowed() override       { return %%allow_more_than_one_instance%%; }\r\n"
-"\r\n"
-"    //==============================================================================\r\n"
-"    void initialise (const String& commandLine) override\r\n"
-"    {\r\n"
-"        // This method is where you should put your application's initialisation code..\r\n"
-"\r\n"
-"        mainWindow.reset (new MainWindow (getApplicationName()));\r\n"
-"    }\r\n"
-"\r\n"
-"    void shutdown() override\r\n"
-"    {\r\n"
-"        // Add your application's shutdown code here..\r\n"
-"\r\n"
-"        mainWindow = nullptr; // (deletes our window)\r\n"
-"    }\r\n"
-"\r\n"
-"    //==============================================================================\r\n"
-"    void systemRequestedQuit() override\r\n"
-"    {\r\n"
-"        // This is called when the app is being asked to quit: you can ignore this\r\n"
-"        // request and let the app carry on running, or call quit() to allow the app to close.\r\n"
-"        quit();\r\n"
-"    }\r\n"
-"\r\n"
-"    void anotherInstanceStarted (const String& commandLine) override\r\n"
-"    {\r\n"
-"        // When another instance of the app is launched while this one is running,\r\n"
-"        // this method is invoked, and the commandLine parameter tells you what\r\n"
-"        // the other instance's command-line arguments were.\r\n"
-"    }\r\n"
-"\r\n"
-"    //==============================================================================\r\n"
-"    /*\r\n"
-"        This class implements the desktop window that contains an instance of\r\n"
-"        our %%content_component_class%% class.\r\n"
-"    */\r\n"
-"    class MainWindow    : public DocumentWindow\r\n"
-"    {\r\n"
-"    public:\r\n"
-"        MainWindow (String name)  : DocumentWindow (name,\r\n"
-"                                                    Desktop::getInstance().getDefaultLookAndFeel()\r\n"
-"                                                                          .findColour (ResizableWindow::backgroundColourId),\r\n"
-"                                                    DocumentWindow::allButtons)\r\n"
-"        {\r\n"
-"            setUsingNativeTitleBar (true);\r\n"
-"            setContentOwned (new %%content_component_class%%(), true);\r\n"
-"\r\n"
-"           #if JUCE_IOS || JUCE_ANDROID\r\n"
-"            setFullScreen (true);\r\n"
-"           #else\r\n"
-"            setResizable (true, true);\r\n"
-"            centreWithSize (getWidth(), getHeight());\r\n"
-"           #endif\r\n"
-"\r\n"
-"            setVisible (true);\r\n"
-"        }\r\n"
-"\r\n"
-"        void closeButtonPressed() override\r\n"
-"        {\r\n"
-"            // This is called when the user tries to close this window. Here, we'll just\r\n"
-"            // ask the app to quit when this happens, but you can change this to do\r\n"
-"            // whatever you need.\r\n"
-"            JUCEApplication::getInstance()->systemRequestedQuit();\r\n"
-"        }\r\n"
-"\r\n"
-"        /* Note: Be careful if you override any DocumentWindow methods - the base\r\n"
-"           class uses a lot of them, so by overriding you might break its functionality.\r\n"
-"           It's best to do all your work in your content component instead, but if\r\n"
-"           you really have to override any DocumentWindow methods, make sure your\r\n"
-"           subclass also calls the superclass's method.\r\n"
-"        */\r\n"
-"\r\n"
-"    private:\r\n"
-"        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)\r\n"
-"    };\r\n"
-"\r\n"
-"private:\r\n"
-"    std::unique_ptr<MainWindow> mainWindow;\r\n"
-"};\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"// This macro generates the main() routine that launches the app.\r\n"
-"START_JUCE_APPLICATION (%%app_class_name%%)\r\n";
-
-const char* jucer_MainTemplate_SimpleWindow_cpp = (const char*) temp_binary_data_42;
+const char* jucer_MainTemplate_NoWindow_cpp = (const char*) temp_binary_data_47;
 
 //================== jucer_MainTemplate_Window.cpp ==================
-static const unsigned char temp_binary_data_43[] =
+static const unsigned char temp_binary_data_48[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"    It contains the basic startup code for a JUCE application.\r\n"
+"    This file contains the basic startup code for a JUCE application.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
@@ -6613,18 +6845,18 @@ static const unsigned char temp_binary_data_43[] =
 "%%app_headers%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"class %%app_class_name%%  : public JUCEApplication\r\n"
+"class %%app_class_name%%  : public juce::JUCEApplication\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
 "    %%app_class_name%%() {}\r\n"
 "\r\n"
-"    const String getApplicationName() override       { return ProjectInfo::projectName; }\r\n"
-"    const String getApplicationVersion() override    { return ProjectInfo::versionString; }\r\n"
-"    bool moreThanOneInstanceAllowed() override       { return %%allow_more_than_one_instance%%; }\r\n"
+"    const juce::String getApplicationName() override       { return ProjectInfo::projectName; }\r\n"
+"    const juce::String getApplicationVersion() override    { return ProjectInfo::versionString; }\r\n"
+"    bool moreThanOneInstanceAllowed() override             { return true; }\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    void initialise (const String& commandLine) override\r\n"
+"    void initialise (const juce::String& commandLine) override\r\n"
 "    {\r\n"
 "        // This method is where you should put your application's initialisation code..\r\n"
 "\r\n"
@@ -6646,7 +6878,7 @@ static const unsigned char temp_binary_data_43[] =
 "        quit();\r\n"
 "    }\r\n"
 "\r\n"
-"    void anotherInstanceStarted (const String& commandLine) override\r\n"
+"    void anotherInstanceStarted (const juce::String& commandLine) override\r\n"
 "    {\r\n"
 "        // When another instance of the app is launched while this one is running,\r\n"
 "        // this method is invoked, and the commandLine parameter tells you what\r\n"
@@ -6658,13 +6890,14 @@ static const unsigned char temp_binary_data_43[] =
 "        This class implements the desktop window that contains an instance of\r\n"
 "        our %%content_component_class%% class.\r\n"
 "    */\r\n"
-"    class MainWindow    : public DocumentWindow\r\n"
+"    class MainWindow    : public juce::DocumentWindow\r\n"
 "    {\r\n"
 "    public:\r\n"
-"        MainWindow (String name)  : DocumentWindow (name,\r\n"
-"                                                    Desktop::getInstance().getDefaultLookAndFeel()\r\n"
-"                                                                          .findColour (ResizableWindow::backgroundColourId),\r\n"
-"                                                    DocumentWindow::allButtons)\r\n"
+"        MainWindow (juce::String name)\r\n"
+"            : DocumentWindow (name,\r\n"
+"                              juce::Desktop::getInstance().getDefaultLookAndFeel()\r\n"
+"                                                          .findColour (juce::ResizableWindow::backgroundColourId),\r\n"
+"                              DocumentWindow::allButtons)\r\n"
 "        {\r\n"
 "            setUsingNativeTitleBar (true);\r\n"
 "            setContentOwned (new %%content_component_class%%(), true);\r\n"
@@ -6706,10 +6939,10 @@ static const unsigned char temp_binary_data_43[] =
 "// This macro generates the main() routine that launches the app.\r\n"
 "START_JUCE_APPLICATION (%%app_class_name%%)\r\n";
 
-const char* jucer_MainTemplate_Window_cpp = (const char*) temp_binary_data_43;
+const char* jucer_MainTemplate_Window_cpp = (const char*) temp_binary_data_48;
 
 //================== jucer_NewComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_44[] =
+static const unsigned char temp_binary_data_49[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6735,7 +6968,7 @@ static const unsigned char temp_binary_data_44[] =
 "{\r\n"
 "}\r\n"
 "\r\n"
-"void %%component_class%%::paint (Graphics& g)\r\n"
+"void %%component_class%%::paint (juce::Graphics& g)\r\n"
 "{\r\n"
 "    /* This demo code just fills the component's background and\r\n"
 "       draws some placeholder text to get you started.\r\n"
@@ -6744,15 +6977,15 @@ static const unsigned char temp_binary_data_44[] =
 "       drawing code..\r\n"
 "    */\r\n"
 "\r\n"
-"    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));   // clear the background\r\n"
+"    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background\r\n"
 "\r\n"
-"    g.setColour (Colours::grey);\r\n"
+"    g.setColour (juce::Colours::grey);\r\n"
 "    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component\r\n"
 "\r\n"
-"    g.setColour (Colours::white);\r\n"
+"    g.setColour (juce::Colours::white);\r\n"
 "    g.setFont (14.0f);\r\n"
 "    g.drawText (\"%%component_class%%\", getLocalBounds(),\r\n"
-"                Justification::centred, true);   // draw some placeholder text\r\n"
+"                juce::Justification::centred, true);   // draw some placeholder text\r\n"
 "}\r\n"
 "\r\n"
 "void %%component_class%%::resized()\r\n"
@@ -6762,10 +6995,10 @@ static const unsigned char temp_binary_data_44[] =
 "\r\n"
 "}\r\n";
 
-const char* jucer_NewComponentTemplate_cpp = (const char*) temp_binary_data_44;
+const char* jucer_NewComponentTemplate_cpp = (const char*) temp_binary_data_49;
 
 //================== jucer_NewComponentTemplate.h ==================
-static const unsigned char temp_binary_data_45[] =
+static const unsigned char temp_binary_data_50[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6783,23 +7016,23 @@ static const unsigned char temp_binary_data_45[] =
 "//==============================================================================\r\n"
 "/*\r\n"
 "*/\r\n"
-"class %%component_class%%    : public Component\r\n"
+"class %%component_class%%  : public juce::Component\r\n"
 "{\r\n"
 "public:\r\n"
 "    %%component_class%%();\r\n"
-"    ~%%component_class%%();\r\n"
+"    ~%%component_class%%() override;\r\n"
 "\r\n"
-"    void paint (Graphics&) override;\r\n"
+"    void paint (juce::Graphics&) override;\r\n"
 "    void resized() override;\r\n"
 "\r\n"
 "private:\r\n"
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_NewComponentTemplate_h = (const char*) temp_binary_data_45;
+const char* jucer_NewComponentTemplate_h = (const char*) temp_binary_data_50;
 
 //================== jucer_NewCppFileTemplate.cpp ==================
-static const unsigned char temp_binary_data_46[] =
+static const unsigned char temp_binary_data_51[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6812,10 +7045,10 @@ static const unsigned char temp_binary_data_46[] =
 "\r\n"
 "%%include_corresponding_header%%\r\n";
 
-const char* jucer_NewCppFileTemplate_cpp = (const char*) temp_binary_data_46;
+const char* jucer_NewCppFileTemplate_cpp = (const char*) temp_binary_data_51;
 
 //================== jucer_NewCppFileTemplate.h ==================
-static const unsigned char temp_binary_data_47[] =
+static const unsigned char temp_binary_data_52[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6828,10 +7061,10 @@ static const unsigned char temp_binary_data_47[] =
 "\r\n"
 "#pragma once\r\n";
 
-const char* jucer_NewCppFileTemplate_h = (const char*) temp_binary_data_47;
+const char* jucer_NewCppFileTemplate_h = (const char*) temp_binary_data_52;
 
 //================== jucer_NewInlineComponentTemplate.h ==================
-static const unsigned char temp_binary_data_48[] =
+static const unsigned char temp_binary_data_53[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6849,7 +7082,7 @@ static const unsigned char temp_binary_data_48[] =
 "//==============================================================================\r\n"
 "/*\r\n"
 "*/\r\n"
-"class %%component_class%%    : public Component\r\n"
+"class %%component_class%%  : public juce::Component\r\n"
 "{\r\n"
 "public:\r\n"
 "    %%component_class%%()\r\n"
@@ -6859,11 +7092,11 @@ static const unsigned char temp_binary_data_48[] =
 "\r\n"
 "    }\r\n"
 "\r\n"
-"    ~%%component_class%%()\r\n"
+"    ~%%component_class%%() override\r\n"
 "    {\r\n"
 "    }\r\n"
 "\r\n"
-"    void paint (Graphics& g) override\r\n"
+"    void paint (juce::Graphics& g) override\r\n"
 "    {\r\n"
 "        /* This demo code just fills the component's background and\r\n"
 "           draws some placeholder text to get you started.\r\n"
@@ -6872,15 +7105,15 @@ static const unsigned char temp_binary_data_48[] =
 "           drawing code..\r\n"
 "        */\r\n"
 "\r\n"
-"        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));   // clear the background\r\n"
+"        g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background\r\n"
 "\r\n"
-"        g.setColour (Colours::grey);\r\n"
+"        g.setColour (juce::Colours::grey);\r\n"
 "        g.drawRect (getLocalBounds(), 1);   // draw an outline around the component\r\n"
 "\r\n"
-"        g.setColour (Colours::white);\r\n"
+"        g.setColour (juce::Colours::white);\r\n"
 "        g.setFont (14.0f);\r\n"
 "        g.drawText (\"%%component_class%%\", getLocalBounds(),\r\n"
-"                    Justification::centred, true);   // draw some placeholder text\r\n"
+"                    juce::Justification::centred, true);   // draw some placeholder text\r\n"
 "    }\r\n"
 "\r\n"
 "    void resized() override\r\n"
@@ -6894,18 +7127,10 @@ static const unsigned char temp_binary_data_48[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_NewInlineComponentTemplate_h = (const char*) temp_binary_data_48;
+const char* jucer_NewInlineComponentTemplate_h = (const char*) temp_binary_data_53;
 
 //================== jucer_OpenGLComponentSimpleTemplate.h ==================
-static const unsigned char temp_binary_data_49[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
+static const unsigned char temp_binary_data_54[] =
 "#pragma once\r\n"
 "\r\n"
 "%%include_juce%%\r\n"
@@ -6915,7 +7140,7 @@ static const unsigned char temp_binary_data_49[] =
 "    This component lives inside our window, and this is where you should put all\r\n"
 "    your controls and content.\r\n"
 "*/\r\n"
-"class %%content_component_class%%   : public OpenGLAppComponent\r\n"
+"class %%content_component_class%%  : public juce::OpenGLAppComponent\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
@@ -6926,7 +7151,7 @@ static const unsigned char temp_binary_data_49[] =
 "        setSize (800, 600);\r\n"
 "    }\r\n"
 "\r\n"
-"    ~%%content_component_class%%()\r\n"
+"    ~%%content_component_class%%() override\r\n"
 "    {\r\n"
 "        // This shuts down the GL system and stops the rendering calls.\r\n"
 "        shutdownOpenGL();\r\n"
@@ -6946,13 +7171,13 @@ static const unsigned char temp_binary_data_49[] =
 "    void render() override\r\n"
 "    {\r\n"
 "        // This clears the context with a black background.\r\n"
-"        OpenGLHelpers::clear (Colours::black);\r\n"
+"        juce::OpenGLHelpers::clear (Colours::black);\r\n"
 "\r\n"
 "        // Add your rendering code here...\r\n"
 "    }\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    void paint (Graphics& g) override\r\n"
+"    void paint (juce::Graphics& g) override\r\n"
 "    {\r\n"
 "        // You can add your component specific drawing code here!\r\n"
 "        // This will draw over the top of the openGL background.\r\n"
@@ -6974,18 +7199,10 @@ static const unsigned char temp_binary_data_49[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_OpenGLComponentSimpleTemplate_h = (const char*) temp_binary_data_49;
+const char* jucer_OpenGLComponentSimpleTemplate_h = (const char*) temp_binary_data_54;
 
 //================== jucer_OpenGLComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_50[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
+static const unsigned char temp_binary_data_55[] =
 "%%include_corresponding_header%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
@@ -7016,13 +7233,13 @@ static const unsigned char temp_binary_data_50[] =
 "void %%content_component_class%%::render()\r\n"
 "{\r\n"
 "    // This clears the context with a black background.\r\n"
-"    OpenGLHelpers::clear (Colours::black);\r\n"
+"    juce::OpenGLHelpers::clear (juce::Colours::black);\r\n"
 "\r\n"
 "    // Add your rendering code here...\r\n"
 "}\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"void %%content_component_class%%::paint (Graphics& g)\r\n"
+"void %%content_component_class%%::paint (juce::Graphics& g)\r\n"
 "{\r\n"
 "    // You can add your component specific drawing code here!\r\n"
 "    // This will draw over the top of the openGL background.\r\n"
@@ -7035,18 +7252,10 @@ static const unsigned char temp_binary_data_50[] =
 "    // update their positions.\r\n"
 "}\r\n";
 
-const char* jucer_OpenGLComponentTemplate_cpp = (const char*) temp_binary_data_50;
+const char* jucer_OpenGLComponentTemplate_cpp = (const char*) temp_binary_data_55;
 
 //================== jucer_OpenGLComponentTemplate.h ==================
-static const unsigned char temp_binary_data_51[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
+static const unsigned char temp_binary_data_56[] =
 "#pragma once\r\n"
 "\r\n"
 "%%include_juce%%\r\n"
@@ -7056,12 +7265,12 @@ static const unsigned char temp_binary_data_51[] =
 "    This component lives inside our window, and this is where you should put all\r\n"
 "    your controls and content.\r\n"
 "*/\r\n"
-"class %%content_component_class%%   : public OpenGLAppComponent\r\n"
+"class %%content_component_class%%  : public juce::OpenGLAppComponent\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
 "    %%content_component_class%%();\r\n"
-"    ~%%content_component_class%%();\r\n"
+"    ~%%content_component_class%%() override;\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
 "    void initialise() override;\r\n"
@@ -7069,7 +7278,7 @@ static const unsigned char temp_binary_data_51[] =
 "    void render() override;\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    void paint (Graphics& g) override;\r\n"
+"    void paint (juce::Graphics& g) override;\r\n"
 "    void resized() override;\r\n"
 "\r\n"
 "private:\r\n"
@@ -7080,21 +7289,21 @@ static const unsigned char temp_binary_data_51[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_OpenGLComponentTemplate_h = (const char*) temp_binary_data_51;
+const char* jucer_OpenGLComponentTemplate_h = (const char*) temp_binary_data_56;
 
 //================== jucer_PIPAudioProcessorTemplate.h ==================
-static const unsigned char temp_binary_data_52[] =
-"class %%class_name%%  : public AudioProcessor\r\n"
+static const unsigned char temp_binary_data_57[] =
+"class %%class_name%%  : public juce::AudioProcessor\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
 "    %%class_name%%()\r\n"
-"        : AudioProcessor (BusesProperties().withInput  (\"Input\",  AudioChannelSet::stereo())\r\n"
-"                                           .withOutput (\"Output\", AudioChannelSet::stereo()))\r\n"
+"        : AudioProcessor (BusesProperties().withInput  (\"Input\",  juce::AudioChannelSet::stereo())\r\n"
+"                                           .withOutput (\"Output\", juce::AudioChannelSet::stereo()))\r\n"
 "    {\r\n"
 "    }\r\n"
 "\r\n"
-"    ~%%class_name%%()\r\n"
+"    ~%%class_name%%() override\r\n"
 "    {\r\n"
 "    }\r\n"
 "\r\n"
@@ -7111,9 +7320,9 @@ static const unsigned char temp_binary_data_52[] =
 "        // spare memory, etc.\r\n"
 "    }\r\n"
 "\r\n"
-"    void processBlock (AudioBuffer<float>& buffer, MidiBuffer&) override\r\n"
+"    void processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer&) override\r\n"
 "    {\r\n"
-"        ScopedNoDenormals noDenormals;\r\n"
+"        juce::ScopedNoDenormals noDenormals;\r\n"
 "        auto totalNumInputChannels  = getTotalNumInputChannels();\r\n"
 "        auto totalNumOutputChannels = getTotalNumOutputChannels();\r\n"
 "\r\n"
@@ -7141,24 +7350,24 @@ static const unsigned char temp_binary_data_52[] =
 "    }\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    AudioProcessorEditor* createEditor() override          { return nullptr; }\r\n"
-"    bool hasEditor() const override                        { return false;   }\r\n"
+"    juce::AudioProcessorEditor* createEditor() override          { return nullptr; }\r\n"
+"    bool hasEditor() const override                              { return false;   }\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    const String getName() const override                  { return \"%%name%%\"; }\r\n"
-"    bool acceptsMidi() const override                      { return false; }\r\n"
-"    bool producesMidi() const override                     { return false; }\r\n"
-"    double getTailLengthSeconds() const override           { return 0; }\r\n"
+"    const juce::String getName() const override                  { return \"%%name%%\"; }\r\n"
+"    bool acceptsMidi() const override                            { return false; }\r\n"
+"    bool producesMidi() const override                           { return false; }\r\n"
+"    double getTailLengthSeconds() const override                 { return 0; }\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    int getNumPrograms() override                          { return 1; }\r\n"
-"    int getCurrentProgram() override                       { return 0; }\r\n"
-"    void setCurrentProgram (int) override                  {}\r\n"
-"    const String getProgramName (int) override             { return {}; }\r\n"
-"    void changeProgramName (int, const String&) override   {}\r\n"
+"    int getNumPrograms() override                                { return 1; }\r\n"
+"    int getCurrentProgram() override                             { return 0; }\r\n"
+"    void setCurrentProgram (int) override                        {}\r\n"
+"    const juce::String getProgramName (int) override             { return {}; }\r\n"
+"    void changeProgramName (int, const juce::String&) override   {}\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    void getStateInformation (MemoryBlock& destData) override\r\n"
+"    void getStateInformation (juce::MemoryBlock& destData) override\r\n"
 "    {\r\n"
 "        // You should use this method to store your parameters in the memory block.\r\n"
 "        // You could do that either as raw data, or use the XML or ValueTree classes\r\n"
@@ -7176,8 +7385,8 @@ static const unsigned char temp_binary_data_52[] =
 "    {\r\n"
 "        // This is the place where you check if the layout is supported.\r\n"
 "        // In this template code we only support mono or stereo.\r\n"
-"        if (layouts.getMainOutputChannelSet() != AudioChannelSet::mono()\r\n"
-"            && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())\r\n"
+"        if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()\r\n"
+"            && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())\r\n"
 "            return false;\r\n"
 "\r\n"
 "        // This checks if the input layout matches the output layout\r\n"
@@ -7192,92 +7401,10 @@ static const unsigned char temp_binary_data_52[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%class_name%%)\r\n"
 "};\r\n";
 
-const char* jucer_PIPAudioProcessorTemplate_h = (const char*) temp_binary_data_52;
-
-//================== jucer_PIPMain.cpp ==================
-static const unsigned char temp_binary_data_53[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated and contains the startup code for a PIP.\r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"%%include_juce%%\r\n"
-"#include \"%%filename%%\"\r\n"
-"\r\n"
-"%%component_begin%%\r\n"
-"class Application    : public JUCEApplication\r\n"
-"{\r\n"
-"public:\r\n"
-"    //==============================================================================\r\n"
-"    Application() {}\r\n"
-"\r\n"
-"    const String getApplicationName() override       { return \"%%project_name%%\"; }\r\n"
-"    const String getApplicationVersion() override    { return \"%%project_version%%\"; }\r\n"
-"\r\n"
-"    void initialise (const String&) override         { %%startup%% }\r\n"
-"    void shutdown() override                         { %%shutdown%% }\r\n"
-"\r\n"
-"private:\r\n"
-"    class MainWindow    : public DocumentWindow\r\n"
-"    {\r\n"
-"    public:\r\n"
-"        MainWindow (const String& name, Component* c, JUCEApplication& a)\r\n"
-"            : DocumentWindow (name, Desktop::getInstance().getDefaultLookAndFeel()\r\n"
-"                                                          .findColour (ResizableWindow::backgroundColourId),\r\n"
-"                              DocumentWindow::allButtons),\r\n"
-"              app (a)\r\n"
-"        {\r\n"
-"            setUsingNativeTitleBar (true);\r\n"
-"            setContentOwned (c, true);\r\n"
-"\r\n"
-"           #if JUCE_ANDROID || JUCE_IOS\r\n"
-"            setFullScreen (true);\r\n"
-"           #else\r\n"
-"            setResizable (true, false);\r\n"
-"            setResizeLimits (300, 250, 10000, 10000);\r\n"
-"            centreWithSize (getWidth(), getHeight());\r\n"
-"           #endif\r\n"
-"\r\n"
-"            setVisible (true);\r\n"
-"        }\r\n"
-"\r\n"
-"        void closeButtonPressed() override\r\n"
-"        {\r\n"
-"            app.systemRequestedQuit();\r\n"
-"        }\r\n"
-"\r\n"
-"    private:\r\n"
-"        JUCEApplication& app;\r\n"
-"\r\n"
-"        //==============================================================================\r\n"
-"        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)\r\n"
-"    };\r\n"
-"\r\n"
-"    std::unique_ptr<MainWindow> mainWindow;\r\n"
-"};\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"START_JUCE_APPLICATION (Application)\r\n"
-"%%component_end%%\r\n"
-"\r\n"
-"%%audioprocessor_begin%%\r\n"
-"//==============================================================================\r\n"
-"AudioProcessor* JUCE_CALLTYPE createPluginFilter()\r\n"
-"{\r\n"
-"    return new %%class_name%%();\r\n"
-"}\r\n"
-"%%audioprocessor_end%%\r\n"
-"\r\n"
-"%%console_begin%%\r\n"
-"%%console_end%%\r\n";
-
-const char* jucer_PIPMain_cpp = (const char*) temp_binary_data_53;
+const char* jucer_PIPAudioProcessorTemplate_h = (const char*) temp_binary_data_57;
 
 //================== jucer_PIPTemplate.h ==================
-static const unsigned char temp_binary_data_54[] =
+static const unsigned char temp_binary_data_58[] =
 "/*******************************************************************************\r\n"
 " The block below describes the properties of this PIP. A PIP is a short snippet\r\n"
 " of code that can be read by the Projucer and used to generate a JUCE project.\r\n"
@@ -7296,196 +7423,10 @@ static const unsigned char temp_binary_data_54[] =
 "//==============================================================================\r\n"
 "%%pip_code%%\r\n";
 
-const char* jucer_PIPTemplate_h = (const char*) temp_binary_data_54;
-
-//================== jucer_UnityPluginGUIScript.cs ==================
-static const unsigned char temp_binary_data_55[] =
-"#if UNITY_EDITOR\n"
-"\n"
-"using UnityEditor;\n"
-"using UnityEngine;\n"
-"\n"
-"using System.Collections.Generic;\n"
-"using System.Runtime.InteropServices;\n"
-"\n"
-"public class %%plugin_class_name%%GUI : IAudioEffectPluginGUI\n"
-"{\n"
-"    public override string Name           { get { return \"%%plugin_name%%\"; } }\n"
-"    public override string Description    { get { return \"%%plugin_description%%\"; } }\n"
-"    public override string Vendor         { get { return \"%%plugin_vendor%%\"; } }\n"
-"\n"
-"    //==============================================================================\n"
-"\t[DllImport(\"%%plugin_name%%\")] static extern System.IntPtr getRenderCallback();\n"
-"\n"
-"    [DllImport(\"%%plugin_name%%\")] static extern void unityInitialiseTexture (int id, System.IntPtr texture, int width, int height);\n"
-"\n"
-"    [DllImport(\"%%plugin_name%%\")] static extern void unityMouseDown (int id, float x, float y, EventModifiers mods, int button);\n"
-"    [DllImport(\"%%plugin_name%%\")] static extern void unityMouseDrag (int id, float x, float y, EventModifiers mods, int button);\n"
-"    [DllImport(\"%%plugin_name%%\")] static extern void unityMouseUp   (int id, float x, float y, EventModifiers mods);\n"
-"\n"
-"    [DllImport(\"%%plugin_name%%\")] static extern void unityKeyEvent (int id, KeyCode code, EventModifiers mods, string name);\n"
-"\n"
-"    [DllImport(\"%%plugin_name%%\")] static extern void unitySetScreenBounds (int id, float x, float y, float w, float h);\n"
-"\n"
-"    //==============================================================================\n"
-"    private class PluginGUIInstance\n"
-"    {\n"
-"        public PluginGUIInstance (ref IAudioEffectPlugin plugin, int id)\n"
-"        {\n"
-"            instanceID = id;\n"
-"\n"
-"            float[] arr;\n"
-"            plugin.GetFloatBuffer (\"Editor\", out arr, 1);\n"
-"            hasEditor = (arr[0] > 0.0f);\n"
-"        }\n"
-"\n"
-"        public void repaint (Rect r)\n"
-"        { \n"
-"            Vector2 newScreenPosition = GUIUtility.GUIToScreenPoint (r.position);\n"
-"\n"
-"            if (bounds != r \n"
-"                || screenPosition != newScreenPosition)\n"
-"            {\n"
-"                screenPosition = newScreenPosition;\n"
-"                bounds = r;\n"
-"\n"
-"                unitySetScreenBounds (instanceID, screenPosition.x, screenPosition.y, bounds.width, bounds.height);\n"
-"                setupTexture();\n"
-"            }\n"
-"\n"
-"\t\t\tGL.IssuePluginEvent (getRenderCallback(), instanceID);\n"
-"\n"
-"            texture.SetPixels32 (pixels);\n"
-"            texture.Apply();\n"
-"\n"
-"            EditorGUI.DrawPreviewTexture (bounds, texture);\n"
-"        }\n"
-"\n"
-"        public bool handleMouseEvent (EventType eventType)\n"
-"        {\n"
-"            Vector2 mousePos = Event.current.mousePosition;\n"
-"            EventModifiers mods = Event.current.modifiers;\n"
-"\n"
-"            if (! bounds.Contains (mousePos))\n"
-"                return false;\n"
-"\n"
-"            Vector2 relativePos = new Vector2 (mousePos.x - bounds.x, mousePos.y - bounds.y);\n"
-"\n"
-"            if (eventType == EventType.MouseDown)    \n"
-"            {\n"
-"                unityMouseDown (instanceID, relativePos.x, relativePos.y, mods, Event.current.button);\n"
-"                GUIUtility.hotControl = GUIUtility.GetControlID (FocusType.Passive);\n"
-"            }\n"
-"            else if (eventType == EventType.MouseUp)\n"
-"            {\n"
-"                unityMouseUp (instanceID, relativePos.x, relativePos.y, mods);\n"
-"                GUIUtility.hotControl = 0;\n"
-"            }\n"
-"            else if (eventType == EventType.MouseDrag)    \n"
-"            {\n"
-"                unityMouseDrag (instanceID, relativePos.x, relativePos.y, mods, Event.current.button);\n"
-"            }\n"
-"\n"
-"            Event.current.Use();\n"
-"\n"
-"            return true;\n"
-"        }\n"
-"\n"
-"        public void handleKeyEvent (EventType eventType)\n"
-"        {\n"
-"            if (eventType == EventType.KeyDown)\n"
-"            {\n"
-"                KeyCode code = Event.current.keyCode;\n"
-"\n"
-"                if (code == KeyCode.None)\n"
-"                    return;\n"
-"\n"
-"                EventModifiers mods = Event.current.modifiers;\n"
-"\n"
-"                unityKeyEvent (instanceID, code, mods, code.ToString());\n"
-"            }\n"
-"        }\n"
-"\n"
-"        private void setupTexture()\n"
-"        {\n"
-"            if (pixelHandle.IsAllocated)\n"
-"                pixelHandle.Free();\n"
-"\n"
-"            texture = new Texture2D ((int) bounds.width, (int) bounds.height, TextureFormat.ARGB32, false);\n"
-"\n"
-"            pixels = texture.GetPixels32();\n"
-"            pixelHandle = GCHandle.Alloc (pixels, GCHandleType.Pinned);\n"
-"\n"
-"            unityInitialiseTexture (instanceID, pixelHandle.AddrOfPinnedObject(), texture.width, texture.height);\n"
-"        }\n"
-"\n"
-"        public int instanceID = -1;\n"
-"        public bool hasEditor;\n"
-"\n"
-"        private Vector2 screenPosition;\n"
-"        private Rect bounds;\n"
-"\n"
-"        private Texture2D texture;\n"
-"        private Color32[] pixels;\n"
-"        private GCHandle pixelHandle;\n"
-"    }\n"
-"    List<PluginGUIInstance> guis = new List<PluginGUIInstance>();\n"
-"\n"
-"    private PluginGUIInstance getGUIInstanceForPlugin (ref IAudioEffectPlugin plugin)\n"
-"    {\n"
-"        float[] idArray;\n"
-"        plugin.GetFloatBuffer (\"ID\", out idArray, 1);\n"
-"\n"
-"        int id = (int) idArray[0];\n"
-"\n"
-"        for (int i = 0; i < guis.Count; ++i)\n"
-"        {\n"
-"            if (guis[i].instanceID == id)\n"
-"                return guis[i];\n"
-"        }\n"
-"\n"
-"        PluginGUIInstance newInstance = new PluginGUIInstance (ref plugin, id);\n"
-"        guis.Add (newInstance);\n"
-"\n"
-"        return guis[guis.Count - 1];\n"
-"    }\n"
-"\n"
-"    //==============================================================================\n"
-"    public override bool OnGUI (IAudioEffectPlugin plugin)\n"
-"    {\n"
-"        PluginGUIInstance guiInstance = getGUIInstanceForPlugin (ref plugin);\n"
-"\n"
-"        if (! guiInstance.hasEditor)\n"
-"            return true;\n"
-"\n"
-"        float[] arr;\n"
-"        plugin.GetFloatBuffer (\"Size\", out arr, 6);\n"
-"\n"
-"        Rect r = GUILayoutUtility.GetRect (arr[0], arr[1],\n"
-"                                           new GUILayoutOption[] { GUILayout.MinWidth (arr[2]), GUILayout.MinHeight (arr[3]),\n"
-"                                                                   GUILayout.MaxWidth (arr[4]), GUILayout.MaxHeight (arr[5]) });\n"
-"\n"
-"        int controlID = GUIUtility.GetControlID (FocusType.Passive);\n"
-"        Event currentEvent = Event.current;\n"
-"        EventType currentEventType = currentEvent.GetTypeForControl (controlID);\n"
-"\n"
-"        if (currentEventType == EventType.Repaint)\n"
-"            guiInstance.repaint (r);\n"
-"        else if (currentEvent.isMouse)\n"
-"            guiInstance.handleMouseEvent (currentEventType);\n"
-"        else if (currentEvent.isKey)\n"
-"            guiInstance.handleKeyEvent (currentEventType);\n"
-"\n"
-"        return false;\n"
-"    }\n"
-"}\n"
-"\n"
-"#endif\n";
-
-const char* jucer_UnityPluginGUIScript_cs = (const char*) temp_binary_data_55;
+const char* jucer_PIPTemplate_h = (const char*) temp_binary_data_58;
 
 //================== colourscheme_dark.xml ==================
-static const unsigned char temp_binary_data_56[] =
+static const unsigned char temp_binary_data_59[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
 "<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
@@ -7510,10 +7451,10 @@ static const unsigned char temp_binary_data_56[] =
 "  <COLOUR name=\"Error\" colour=\"FFE60000\"/>\r\n"
 "</COLOUR_SCHEME>\r\n";
 
-const char* colourscheme_dark_xml = (const char*) temp_binary_data_56;
+const char* colourscheme_dark_xml = (const char*) temp_binary_data_59;
 
 //================== colourscheme_light.xml ==================
-static const unsigned char temp_binary_data_57[] =
+static const unsigned char temp_binary_data_60[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
 "<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
@@ -7538,267 +7479,7 @@ static const unsigned char temp_binary_data_57[] =
 "  <COLOUR name=\"Error\" colour=\"ffcc0000\"/>\r\n"
 "</COLOUR_SCHEME>\r\n";
 
-const char* colourscheme_light_xml = (const char*) temp_binary_data_57;
-
-//================== nothingtoseehere.txt ==================
-static const unsigned char temp_binary_data_58[] =
-"VUEtMTk3NTkzMTgtNA==";
-
-const char* nothingtoseehere_txt = (const char*) temp_binary_data_58;
-
-//================== offlinepage.html ==================
-static const unsigned char temp_binary_data_59[] =
-"<html>\n"
-"  <head>\n"
-"    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=11\">\n"
-"    <style>\n"
-"      body {\n"
-"        background-color: #f1f1f1;\n"
-"        color: #101010;\n"
-"        font-family: Helvetica, Arial, sans-serif;\n"
-"        display: flex;\n"
-"        justify-content: center;\n"
-"        align-items: center;\n"
-"      }\n"
-"      .button {\n"
-"        display: block;\n"
-"        padding: 15px 20px 16px;\n"
-"        width: 200px;\n"
-"        border: 1px solid #c8c9cb;\n"
-"        border-radius: 6px;\n"
-"        margin: auto;\n"
-"        cursor: pointer;\n"
-"        font-size: 20px;\n"
-"        margin-top: 30px;\n"
-"        color: inherit;\n"
-"        text-decoration: none;\n"
-"      }\n"
-"      #offline {\n"
-"        display: block;\n"
-"        text-align: center;\n"
-"      }\n"
-"    </style>\n"
-"  </head>\n"
-"  <body>\n"
-"    <div id='offline'>\n"
-"      <h1>No internet connection</h1>\n"
-"\n"
-"      <p>You appear to be offline. An internet connection is required to login to the Projucer.</p>\n"
-"      <p>If you want to use JUCE under the GPL without signing-in, you can enable the pre-processor macro JUCER_ENABLE_GPL_MODE=1 and recompile the Projucer yourself.</p>\n"
-"\n"
-"      <a class='button' href='__URL_PLACEHOLDER__'>Try again</a>\n"
-"    </div>\n"
-"  </body>\n"
-"</html>";
-
-const char* offlinepage_html = (const char*) temp_binary_data_59;
-
-//================== projucer_EULA.txt ==================
-static const unsigned char temp_binary_data_60[] =
-"\r\n"
-"IMPORTANT NOTICE: PLEASE READ CAREFULLY BEFORE INSTALLING THE SOFTWARE:\r\n"
-"\r\n"
-"This license agreement (License) is a legal agreement between you (Licensee or you) and Raw Material Software Limited (Licensor, us or we) for:\r\n"
-"\r\n"
-"- The Projucer software and the associated media and, save where expressly specified through subsequent license terms notified to you in writing, any and all new releases, derivatives of and updates thereto supplied by us to you for a period of one ("
-"1) month from the date of your installation of the software (the Software);\r\n"
-"\r\n"
-"- printed materials and online and electronic documentation (Documentation).\r\n"
-"\r\n"
-"The Software is comprised of numerous components that may be licensed under separate license terms. The Software is a collective work of the Licensor and we license the use of the Software and Documentation to you on the basis of this License and any"
-" applicable license terms for any third party software components which make up the Software. Where you deal with a copy of any software component independent from the Software, you must remove all our trade marks, trade dress and logos from that cop"
-"y.\r\n"
-"\r\n"
-"We do not sell the Software or Documentation to you. We and/or our licensors remain the owners of the Software and Documentation at all times. If you are accepting the terms of this License on behalf of a company or other legal entity, you represent "
-"and warrant that you have the authority to bind that company or other legal entity to the terms of this License and, in such event, \"you\" and \"Licensee\" will refer to that company or other legal entity.\r\n"
-"\r\n"
-"The Software may be downloaded from the Licensor website - www.juce.com - (the \"Website\").\r\n"
-"\r\n"
-"OPERATING SYSTEM REQUIREMENTS: The Software requires a Windows or MAC OS X operating system.\r\n"
-"\r\n"
-"IMPORTANT NOTICE TO ALL USERS:\r\n"
-"\r\n"
-"- BY CLICKING ON THE \"ACCEPT\" BUTTON BELOW YOU AGREE TO THE TERMS OF THIS LICENCE WHICH WILL BIND YOU AND YOUR EMPLOYEES.\r\n"
-"\r\n"
-"- IF YOU DO NOT AGREE TO THE TERMS OF THIS LICENCE, WE WILL NOT LICENSE THE SOFTWARE AND DOCUMENTATION TO YOU AND YOU MUST DISCONTINUE THE INSTALLATION PROCESS.\r\n"
-"\r\n"
-"\r\n"
-"You should print a copy of this License for future reference.\r\n"
-"\r\n"
-"1. Grant and scope of license\r\n"
-"\r\n"
-"1.1. In consideration of you agreeing to abide by the terms of this License the Licensor hereby grants to you a non-exclusive, non-transferable license to use the Software and the Documentation on the terms of this License.\r\n"
-"\r\n"
-"1.2. You may:\r\n"
-"   (a) install and use the Software for your internal business purposes on one central processing unit (CPU) per single user license granted through this License;\r\n"
-"   (b) provided it is used on only one computer at any one time, transfer the Software from one computer to another;\r\n"
-"   (c) provided you comply with the provisions in clause 2, make a single copy of the Software for back-up purposes, provided that you reproduce on it all copyright and other proprietary notices that are on the original copy of the Software;\r\n"
-"   (d) receive and use any free supplementary software code or update of the Software incorporating \"patches\", corrections of errors and software updates as may be provided by the Licensor from time to time;\r\n"
-"   (e) use any Documentation in support of the use permitted under condition 1.2 and make a single copy of the Documentation as is reasonably necessary for its lawful use.\r\n"
-"\r\n"
-"2. Restrictions\r\n"
-"   Except as expressly set out in this License or as permitted by any local law, you undertake:\r\n"
-"   (a) not, in whole or in part, to copy the Software or Documentation except where such copying is incidental to normal use of  the Software or where it is necessary for the purpose of back-up or operational security;\r\n"
-"   (b) not to rent, lease, sub-license, loan, translate, merge, adapt, vary or modify the Software or Documentation;\r\n"
-"   (c) not to make alterations to, or modifications of, the whole or any part of the Software nor permit the Software or any part of it to be combined with, or become incorporated in, any other programs;\r\n"
-"   (d) not to disassemble, de-compile, reverse engineer or create derivative works based on the whole or any part of the Software nor attempt to do any such things except to the extent that (by virtue of section 296A of the Copyright, Designs and Pat"
-"ents Act 1988) such actions cannot be prohibited because they are essential for the purpose of achieving inter-operability of the Software with another software program, and provided that the information obtained by you during such activities:\r\n"
-"      (i) is used only for the purpose of achieving inter-operability of the Software with another software program;\r\n"
-"      (ii) is not disclosed or communicated without the Licensor's prior written consent to any third party to whom it is not necessary to disclose or communicate it; and\r\n"
-"      (iii) is not used to create any software which is substantially similar to the Software;\r\n"
-"   (e) to keep all copies of the Software secure and to maintain accurate and up-to-date records of the number and locations of all copies of the Software;\r\n"
-"   (f) not to provide, or otherwise make available, the Software in any form, in whole or in part (including, but not limited to, program listings, object and source program listings, object code and source code) to any person other than your employe"
-"es without prior written consent from us;\r\n"
-"   (g) to comply with all applicable technology control or export laws and regulations.\r\n"
-"   (h) to supervise and control use of the Software and ensure that the Software is used by your employees and representatives in accordance with the terms of this License;\r\n"
-"   (i) not to charge or otherwise deal in the Software or any part or interest therein except as expressly provided herein;\r\n"
-"   (j) not to use the Software for any illegal or immoral purposes;\r\n"
-"   (k) not otherwise use, copy, transfer or distribute the Software or part of it, except as expressly permitted by this License, in any manner which is inconsistent with this License.\r\n"
-"\r\n"
-"3. Fee\r\n"
-"\r\n"
-"3.1. You may install and use a limited version of the Software (Demo Mode).\r\n"
-"\r\n"
-"3.2.  Where you have purchased the JUCE 4 software on or after 1 November 2015 you shall be entitled to use the Software for free subject to your continued payment of the JUCE 4 software license fee and the JUCE 4 license terms.\r\n"
-"\r\n"
-"3.3. Save as set out above, your right to use the Software shall be subject to payment of the Projucer Software license fee.\r\n"
-"\r\n"
-"3.4. Where you have purchased a perpetual license you agree to pay the license fee as notified to you on the Website at the time you purchase the License.\r\n"
-"\r\n"
-"3.5. Where you have purchased an educational license the fee shall be the fee as notified to you on the Website at the time you purchase the License and shall be payable for each academic year from the first day of the first full calendar month after"
-" the grant of the License and thereafter on the anniversary of that initial payment date.\r\n"
-"\r\n"
-"4. Intellectual property rights\r\n"
-"\r\n"
-"4.1. You acknowledge that all intellectual property rights in the Software and the Documentation and all copies thereof throughout the world belong to us, that rights in the Software are licensed (not sold) to you, and that you have no rights in, or "
-"to, the Software or the Documentation other than the right to use them in accordance with the terms of this License.\r\n"
-"\r\n"
-"4.2. You acknowledge that you have no right to have access to the Software in source code form or in unlocked coding or with comments.\r\n"
-"\r\n"
-"4.3. The Software may contain certain third party licensed materials and our licensors may act to protect their rights in the event of any violation of this License.\r\n"
-"\r\n"
-"5. Limited warranty\r\n"
-"\r\n"
-"5.1. We warrant that, save as already set out above in relation to component parts of the Software, we own the Software and have the right to convey this License.\r\n"
-"\r\n"
-"5.2. We shall have no obligation to provide support and maintenance services to you. You may participate in our online support forum in accordance with our forum policies in place from time to time.\r\n"
-"\r\n"
-"5.3. We do not warrant that your use of the Software will be uninterrupted or error free.\r\n"
-"\r\n"
-"6. Limitation of liability\r\n"
-"\r\n"
-"6.1. You acknowledge that the Software has not been developed to meet your individual requirements, and that it is therefore your responsibility to ensure that the facilities and functions of the Software as described in the Documentation meet your r"
-"equirements.\r\n"
-"\r\n"
-"6.2. Without prejudice to clause 5.4 below, you acknowledge that the Software is not designed or intended for use with on-line control equipment in hazardous environments requiring fail safe performance, such as in the operation of nuclear facilities"
-", aircraft navigation, communication, or control systems, direct life support machines, weapons systems, or other uses in which failure of the Software could lead directly to death, personal injury or severe physical or environmental damage.\r\n"
-"\r\n"
-"6.3. Neither the Licensor nor its parent company, subsidiaries or employees shall in any circumstances whatsoever be liable to you, whether in contract, tort (including negligence), breach of statutory duty, or otherwise, arising under or in connecti"
-"on with this License for any indirect, consequential or special loss or damage, including but not limited to, for:\r\n"
-"   (a) loss of profits, sales, business, or revenue;\r\n"
-"   (b) business interruption;\r\n"
-"   (c) loss of anticipated savings;\r\n"
-"   (d) loss or corruption of data or information;\r\n"
-"   (e) loss of business opportunity, goodwill or reputation;\r\n"
-"   (f) any indirect or consequential loss or damage; or\r\n"
-"   (g) any computer failure or malfunction, corruption to or loss of data or files, or any and all other commercial damage or loss.\r\n"
-"\r\n"
-"6.4. Nothing in this License shall limit or exclude our liability for:\r\n"
-"   (a) death or personal injury resulting from our negligence;\r\n"
-"   (b) fraud or fraudulent misrepresentation;\r\n"
-"   (c) any other liability that cannot be excluded or limited by English law.\r\n"
-"\r\n"
-"6.5. This License sets out the full extent of our obligations and liabilities in respect of the supply of the Software and Documentation. Except as expressly stated in this License, there are no conditions, warranties, representations or other terms,"
-" express or implied, that are binding on us.  Any condition, warranty, representation or other term concerning the supply of the Software and Documentation which might otherwise be implied into, or incorporated in, this License whether by statute, co"
-"mmon law or otherwise, is excluded to the fullest extent permitted by law.\r\n"
-"\r\n"
-"6.6. Subject to clause 5.2 and 5.3, our maximum aggregate liability under or in connection with this License whether in contract, tort (including negligence) or otherwise, shall in all circumstances be limited to a sum equal to $49.\r\n"
-"\r\n"
-"6.7. You agree to indemnify, defend and hold us and our licensors, partners, affiliates, contractors, officers, directors, employees and agents harmless from any claims, costs and expenses (including legal expenses) arising directly or indirectly fro"
-"m your use, handling or operation of the Software otherwise than in accordance with this Agreement.\r\n"
-"\r\n"
-"6.8. This clause 5 shall survive and shall not be rendered ineffective by the termination or expiry of this agreement for whatever reason.\r\n"
-"\r\n"
-"7. Termination\r\n"
-"\r\n"
-"7.1. We may terminate this License immediately by written notice to you if you commit a material or persistent breach of this License which you fail to remedy (if remediable) within 14 days after the service of written notice requiring you to do so.\r"
-"\n"
-"\r\n"
-"7.2. Upon termination for any reason:\r\n"
-"   (a) all rights granted to you under this License shall cease;\r\n"
-"   (b) you must cease all activities authorised by this License;\r\n"
-"   (c) you must immediately delete or remove the Software from all computer equipment in your possession and immediately destroy or return to us (at our option) all copies of the Software then in your possession, custody or control and, in the case o"
-"f destruction, certify to us that you have done so.\r\n"
-"\r\n"
-"8. Communications between us\r\n"
-"\r\n"
-"8.1. If you wish to contact us in writing, or if any condition in this License requires you to give us notice in writing, you can send this to us by e-mail or by pre-paid post to us at support@juce.com. We will confirm receipt of this by contacting y"
-"ou in writing, normally by e-mail.\r\n"
-"\r\n"
-"8.2. If we have to contact you or give you notice in writing, we will do so by e-mail or by pre-paid post to the address you provide to us in your order for the Software.\r\n"
-"\r\n"
-"9. Data\r\n"
-"\r\n"
-"9.1. We may collect and process information about your use of or Software through the Software, some of which may amount to your personal data. Personal data will be collected and processed in accordance with our Privacy Policy which can be reviewed "
-"at https://www.juce.com/privacy-policy.\r\n"
-"\r\n"
-"10. Other important terms\r\n"
-"\r\n"
-"10.1. We may transfer our rights and obligations under this License to another organisation, but this will not affect your rights or our obligations under this License.\r\n"
-"\r\n"
-"10.2. You may only transfer your rights or your obligations under this License to another person if we agree in writing.\r\n"
-"\r\n"
-"10.3. This License and any document expressly referred to in it constitutes the entire agreement between you and us. You acknowledge that you have not relied on any statement, promise or representation made or given by or on behalf of us which is not"
-" set out in this License or any document expressly referred to in it.\r\n"
-"\r\n"
-"10.4. If we fail to insist that you perform any of your obligations under this License, or if we do not enforce our rights against you, or if we delay in doing so, that will not mean that we have waived our rights against you and will not mean that y"
-"ou do not have to comply with those obligations. If we do waive a default by you, we will only do so in writing, and that will not mean that we will automatically waive any later default by you.\r\n"
-"\r\n"
-"10.5. Each of the conditions of this License operates separately. If any court or competent authority decides that any of them are unlawful or unenforceable, the remaining conditions will remain in full force and effect.\r\n"
-"\r\n"
-"10.6. Please note that this License, its subject matter and its formation, are governed by English law. You and we both agree to that the courts of England and Wales will have exclusive jurisdiction.\r\n";
-
-const char* projucer_EULA_txt = (const char*) temp_binary_data_60;
-
-//================== RecentFilesMenuTemplate.nib ==================
-static const unsigned char temp_binary_data_61[] =
-{ 98,112,108,105,115,116,48,48,212,0,1,0,2,0,3,0,4,0,5,0,6,1,53,1,54,88,36,118,101,114,115,105,111,110,88,36,111,98,106,101,99,116,115,89,36,97,114,99,104,105,118,101,114,84,36,116,111,112,18,0,1,134,160,175,16,74,0,7,0,8,0,31,0,35,0,36,0,42,0,46,0,50,
-0,53,0,57,0,74,0,77,0,78,0,86,0,87,0,97,0,112,0,113,0,114,0,119,0,120,0,121,0,124,0,128,0,129,0,132,0,143,0,144,0,145,0,149,0,153,0,162,0,163,0,164,0,169,0,173,0,180,0,181,0,182,0,185,0,192,0,193,0,200,0,201,0,208,0,209,0,216,0,217,0,224,0,225,0,226,
-0,229,0,230,0,232,0,249,1,11,1,29,1,30,1,31,1,32,1,33,1,34,1,35,1,36,1,37,1,38,1,39,1,40,1,41,1,42,1,43,1,44,1,47,1,50,85,36,110,117,108,108,219,0,9,0,10,0,11,0,12,0,13,0,14,0,15,0,16,0,17,0,18,0,19,0,20,0,21,0,22,0,23,0,24,0,25,0,26,0,27,0,28,0,29,0,
-29,95,16,16,78,83,86,105,115,105,98,108,101,87,105,110,100,111,119,115,93,78,83,79,98,106,101,99,116,115,75,101,121,115,86,78,83,82,111,111,116,92,78,83,79,105,100,115,86,97,108,117,101,115,86,36,99,108,97,115,115,90,78,83,79,105,100,115,75,101,121,115,
-93,78,83,67,111,110,110,101,99,116,105,111,110,115,95,16,15,78,83,79,98,106,101,99,116,115,86,97,108,117,101,115,95,16,25,78,83,65,99,99,101,115,115,105,98,105,108,105,116,121,67,111,110,110,101,99,116,111,114,115,95,16,23,78,83,65,99,99,101,115,115,
-105,98,105,108,105,116,121,79,105,100,115,75,101,121,115,95,16,25,78,83,65,99,99,101,115,115,105,98,105,108,105,116,121,79,105,100,115,86,97,108,117,101,115,128,5,128,9,128,2,128,55,128,73,128,54,128,7,128,53,128,71,128,72,128,72,210,0,13,0,32,0,33,0,
-34,91,78,83,67,108,97,115,115,78,97,109,101,128,4,128,3,93,78,83,65,112,112,108,105,99,97,116,105,111,110,210,0,37,0,38,0,39,0,40,90,36,99,108,97,115,115,110,97,109,101,88,36,99,108,97,115,115,101,115,94,78,83,67,117,115,116,111,109,79,98,106,101,99,
-116,162,0,39,0,41,88,78,83,79,98,106,101,99,116,210,0,13,0,43,0,44,0,45,90,78,83,46,111,98,106,101,99,116,115,128,6,160,210,0,37,0,38,0,47,0,48,92,78,83,77,117,116,97,98,108,101,83,101,116,163,0,47,0,49,0,41,85,78,83,83,101,116,210,0,13,0,43,0,51,0,52,
-128,8,160,210,0,37,0,38,0,54,0,55,94,78,83,77,117,116,97,98,108,101,65,114,114,97,121,163,0,54,0,56,0,41,87,78,83,65,114,114,97,121,210,0,13,0,43,0,58,0,59,128,52,174,0,60,0,61,0,62,0,63,0,64,0,65,0,66,0,67,0,68,0,69,0,70,0,71,0,72,0,73,128,10,128,12,
-128,45,128,15,128,39,128,25,128,28,128,30,128,33,128,35,128,43,128,41,128,47,128,50,210,0,13,0,32,0,33,0,76,128,4,128,11,93,78,83,65,112,112,108,105,99,97,116,105,111,110,212,0,79,0,13,0,80,0,81,0,82,0,83,0,84,0,85,91,78,83,77,101,110,117,73,116,101,
-109,115,86,78,83,78,97,109,101,87,78,83,84,105,116,108,101,128,14,128,38,128,49,128,13,89,65,77,97,105,110,77,101,110,117,210,0,13,0,43,0,51,0,89,128,8,167,0,63,0,65,0,64,0,71,0,70,0,62,0,72,128,15,128,25,128,39,128,41,128,43,128,45,128,47,216,0,98,0,
-99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,109,0,110,0,111,95,16,17,78,83,75,101,121,69,113,117,105,118,77,111,100,77,97,115,107,86,78,83,77,101,110,117,89,78,83,79,110,73,109,97,103,101,90,78,83,75,101,121,69,113,117,105,118,
-93,78,83,77,110,101,109,111,110,105,99,76,111,99,92,78,83,77,105,120,101,100,73,109,97,103,101,18,0,16,0,0,128,12,128,18,128,24,128,17,18,127,255,255,255,128,22,128,16,91,100,101,108,109,101,65,112,112,75,105,116,80,211,0,13,0,115,0,32,0,116,0,117,0,
-118,94,78,83,82,101,115,111,117,114,99,101,78,97,109,101,128,21,128,20,128,19,87,78,83,73,109,97,103,101,95,16,15,78,83,77,101,110,117,67,104,101,99,107,109,97,114,107,210,0,37,0,38,0,122,0,123,95,16,16,78,83,67,117,115,116,111,109,82,101,115,111,117,
-114,99,101,162,0,122,0,41,211,0,13,0,115,0,32,0,116,0,126,0,118,128,21,128,23,128,19,95,16,16,78,83,77,101,110,117,77,105,120,101,100,83,116,97,116,101,210,0,37,0,38,0,130,0,131,90,78,83,77,101,110,117,73,116,101,109,162,0,130,0,41,218,0,133,0,98,0,134,
-0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,135,0,104,0,66,0,61,0,106,0,107,0,108,0,109,0,110,0,142,88,78,83,65,99,116,105,111,110,89,78,83,83,117,98,109,101,110,117,128,27,128,28,128,12,128,18,128,24,128,17,128,22,128,26,84,70,105,108,101,94,115,117,98,
-109,101,110,117,65,99,116,105,111,110,58,211,0,79,0,13,0,81,0,146,0,83,0,142,128,29,128,38,128,26,210,0,13,0,43,0,51,0,151,128,8,161,0,67,128,30,218,0,133,0,98,0,134,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,154,0,104,0,68,0,66,0,106,0,107,0,108,0,109,
-0,110,0,161,128,32,128,33,128,28,128,18,128,24,128,17,128,22,128,31,91,79,112,101,110,32,82,101,99,101,110,116,94,115,117,98,109,101,110,117,65,99,116,105,111,110,58,212,0,79,0,13,0,80,0,81,0,165,0,83,0,167,0,161,128,34,128,38,128,37,128,31,210,0,13,
-0,43,0,51,0,171,128,8,161,0,69,128,35,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,68,0,106,0,107,0,108,0,109,0,110,0,179,128,33,128,18,128,24,128,17,128,22,128,36,90,67,108,101,97,114,32,77,101,110,117,95,16,22,95,78,83,82,101,99,101,110,
-116,68,111,99,117,109,101,110,116,115,77,101,110,117,210,0,37,0,38,0,183,0,184,86,78,83,77,101,110,117,162,0,183,0,41,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,109,0,110,0,191,128,12,128,18,128,24,128,17,128,22,128,
-40,84,69,100,105,116,215,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,61,0,106,0,107,0,108,0,109,0,110,0,199,128,12,128,18,128,24,128,17,128,22,128,42,86,70,111,114,109,97,116,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,
-109,0,110,0,207,128,12,128,18,128,24,128,17,128,22,128,44,84,86,105,101,119,216,0,98,0,99,0,100,0,13,0,101,0,102,0,103,0,81,0,104,0,61,0,106,0,107,0,108,0,109,0,110,0,215,128,12,128,18,128,24,128,17,128,22,128,46,86,87,105,110,100,111,119,215,0,99,0,
-100,0,13,0,101,0,102,0,103,0,81,0,61,0,106,0,107,0,108,0,109,0,110,0,223,128,12,128,18,128,24,128,17,128,22,128,48,84,72,101,108,112,91,95,78,83,77,97,105,110,77,101,110,117,210,0,13,0,32,0,33,0,228,128,4,128,51,93,78,83,70,111,110,116,77,97,110,97,103,
-101,114,210,0,37,0,38,0,56,0,231,162,0,56,0,41,210,0,13,0,43,0,58,0,234,128,52,174,0,22,0,22,0,61,0,61,0,61,0,61,0,65,0,66,0,67,0,68,0,61,0,61,0,61,0,22,128,2,128,2,128,12,128,12,128,12,128,12,128,25,128,28,128,30,128,33,128,12,128,12,128,12,128,2,210,
-0,13,0,43,0,58,0,251,128,52,175,16,15,0,22,0,60,0,61,0,62,0,63,0,64,0,65,0,66,0,67,0,68,0,69,0,70,0,71,0,72,0,73,128,2,128,10,128,12,128,45,128,15,128,39,128,25,128,28,128,30,128,33,128,35,128,43,128,41,128,47,128,50,210,0,13,0,43,0,58,1,13,128,52,175,
-16,15,1,14,1,15,1,16,1,17,1,18,1,19,1,20,1,21,1,22,1,23,1,24,1,25,1,26,1,27,1,28,128,56,128,57,128,58,128,59,128,60,128,61,128,62,128,63,128,64,128,65,128,66,128,67,128,68,128,69,128,70,17,2,22,17,2,23,17,2,24,17,2,25,17,2,26,17,2,27,17,2,28,17,2,29,
-17,2,30,17,2,31,17,2,32,17,2,33,17,2,34,17,2,35,17,2,36,210,0,13,0,43,0,51,1,46,128,8,160,210,0,13,0,43,0,58,1,49,128,52,160,210,0,37,0,38,1,51,1,52,94,78,83,73,66,79,98,106,101,99,116,68,97,116,97,162,1,51,0,41,95,16,15,78,83,75,101,121,101,100,65,114,
-99,104,105,118,101,114,209,1,55,1,56,93,73,66,46,111,98,106,101,99,116,100,97,116,97,128,1,0,8,0,25,0,34,0,43,0,53,0,58,0,63,0,214,0,220,1,9,1,28,1,42,1,49,1,62,1,69,1,80,1,94,1,112,1,140,1,166,1,194,1,196,1,198,1,200,1,202,1,204,1,206,1,208,1,210,1,
-212,1,214,1,216,1,225,1,237,1,239,1,241,1,255,2,8,2,19,2,28,2,43,2,48,2,57,2,66,2,77,2,79,2,80,2,89,2,102,2,109,2,115,2,124,2,126,2,127,2,136,2,151,2,158,2,166,2,175,2,177,2,206,2,208,2,210,2,212,2,214,2,216,2,218,2,220,2,222,2,224,2,226,2,228,2,230,
-2,232,2,234,2,243,2,245,2,247,3,5,3,22,3,34,3,41,3,49,3,51,3,53,3,55,3,57,3,67,3,76,3,78,3,93,3,95,3,97,3,99,3,101,3,103,3,105,3,107,3,140,3,160,3,167,3,177,3,188,3,202,3,215,3,220,3,222,3,224,3,226,3,228,3,233,3,235,3,237,3,249,3,250,4,7,4,22,4,24,4,
-26,4,28,4,36,4,54,4,63,4,82,4,87,4,100,4,102,4,104,4,106,4,125,4,134,4,145,4,150,4,191,4,200,4,210,4,212,4,214,4,216,4,218,4,220,4,222,4,224,4,226,4,231,4,246,5,3,5,5,5,7,5,9,5,18,5,20,5,23,5,25,5,66,5,68,5,70,5,72,5,74,5,76,5,78,5,80,5,82,5,94,5,109,
-5,126,5,128,5,130,5,132,5,134,5,143,5,145,5,148,5,150,5,183,5,185,5,187,5,189,5,191,5,193,5,195,5,206,5,231,5,240,5,247,5,252,6,29,6,31,6,33,6,35,6,37,6,39,6,41,6,46,6,75,6,77,6,79,6,81,6,83,6,85,6,87,6,94,6,127,6,129,6,131,6,133,6,135,6,137,6,139,6,
-144,6,177,6,179,6,181,6,183,6,185,6,187,6,189,6,196,6,225,6,227,6,229,6,231,6,233,6,235,6,237,6,242,6,254,7,7,7,9,7,11,7,25,7,34,7,39,7,48,7,50,7,79,7,81,7,83,7,85,7,87,7,89,7,91,7,93,7,95,7,97,7,99,7,101,7,103,7,105,7,107,7,116,7,118,7,151,7,153,7,155,
-7,157,7,159,7,161,7,163,7,165,7,167,7,169,7,171,7,173,7,175,7,177,7,179,7,181,7,190,7,192,7,225,7,227,7,229,7,231,7,233,7,235,7,237,7,239,7,241,7,243,7,245,7,247,7,249,7,251,7,253,7,255,8,2,8,5,8,8,8,11,8,14,8,17,8,20,8,23,8,26,8,29,8,32,8,35,8,38,8,
-41,8,44,8,53,8,55,8,56,8,65,8,67,8,68,8,77,8,92,8,97,8,115,8,120,8,134,0,0,0,0,0,0,2,2,0,0,0,0,0,0,1,57,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,136,0,0 };
-
-const char* RecentFilesMenuTemplate_nib = (const char*) temp_binary_data_61;
+const char* colourscheme_light_xml = (const char*) temp_binary_data_60;
 
 
 const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
@@ -7811,6 +7492,12 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
 
     switch (hash)
     {
+        case 0x31d21131:  numBytes = 1042; return LaunchScreen_storyboard;
+        case 0x24e5a04d:  numBytes = 483; return PIPAudioProcessor_cpp_in;
+        case 0xd572ce5a:  numBytes = 2275; return PIPComponent_cpp_in;
+        case 0x1a77c680:  numBytes = 299; return PIPConsole_cpp_in;
+        case 0xa41e649d:  numBytes = 2842; return RecentFilesMenuTemplate_nib;
+        case 0x667fbbb3:  numBytes = 6424; return UnityPluginGUIScript_cs_in;
         case 0x4d6bedc8:  numBytes = 53636; return gradlewrapper_jar;
         case 0x10b04d10:  numBytes = 4971; return gradlew;
         case 0x76cff066:  numBytes = 2404; return gradlew_bat;
@@ -7822,7 +7509,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x96d2a1ce:  numBytes = 28184; return export_linux_svg;
         case 0x2505bd06:  numBytes = 1706; return export_visualStudio_svg;
         case 0x3198e2bf:  numBytes = 12295; return export_xcode_svg;
-        case 0x0cd37295:  numBytes = 3375; return huckleberry_icon_svg;
+        case 0xc9c78dec:  numBytes = 27030; return gpl_logo_svg;
         case 0x80b17530:  numBytes = 5312; return jucelogowithtext_svg;
         case 0x154a7275:  numBytes = 45854; return juce_icon_png;
         case 0x1f3b6d2f:  numBytes = 5978; return wizard_AnimatedApp_svg;
@@ -7835,44 +7522,37 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x52a8dfdf:  numBytes = 1859; return wizard_Openfile_svg;
         case 0x58e2ae48:  numBytes = 4551; return wizard_OpenGL_svg;
         case 0xb1da6f9e:  numBytes = 7488; return wizard_StaticLibrary_svg;
-        case 0xd11e6d35:  numBytes = 2085; return jucer_AnimatedComponentSimpleTemplate_h;
-        case 0x6cf2645e:  numBytes = 1563; return jucer_AnimatedComponentTemplate_cpp;
-        case 0x97b055e3:  numBytes = 1201; return jucer_AnimatedComponentTemplate_h;
-        case 0xfb6f6d96:  numBytes = 3702; return jucer_AudioComponentSimpleTemplate_h;
-        case 0xafccbd3f:  numBytes = 3094; return jucer_AudioComponentTemplate_cpp;
-        case 0x915d7304:  numBytes = 1383; return jucer_AudioComponentTemplate_h;
-        case 0x27c5a93a:  numBytes = 1356; return jucer_AudioPluginEditorTemplate_cpp;
-        case 0x4d0721bf:  numBytes = 977; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:  numBytes = 6036; return jucer_AudioPluginFilterTemplate_cpp;
-        case 0x488afa0a:  numBytes = 2272; return jucer_AudioPluginFilterTemplate_h;
+        case 0xd11e6d35:  numBytes = 1898; return jucer_AnimatedComponentSimpleTemplate_h;
+        case 0x6cf2645e:  numBytes = 1362; return jucer_AnimatedComponentTemplate_cpp;
+        case 0x97b055e3:  numBytes = 1008; return jucer_AnimatedComponentTemplate_h;
+        case 0xfb6f6d96:  numBytes = 3554; return jucer_AudioComponentSimpleTemplate_h;
+        case 0xafccbd3f:  numBytes = 2941; return jucer_AudioComponentTemplate_cpp;
+        case 0x915d7304:  numBytes = 1187; return jucer_AudioComponentTemplate_h;
+        case 0x27c5a93a:  numBytes = 1355; return jucer_AudioPluginEditorTemplate_cpp;
+        case 0x4d0721bf:  numBytes = 973; return jucer_AudioPluginEditorTemplate_h;
+        case 0x51b49ac5:  numBytes = 6090; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x488afa0a:  numBytes = 2299; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2147; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2065; return jucer_ComponentTemplate_h;
-        case 0x1657b643:  numBytes = 1693; return jucer_ContentCompSimpleTemplate_h;
-        case 0x0b66646c:  numBytes = 1190; return jucer_ContentCompTemplate_cpp;
-        case 0x6fa10171:  numBytes = 1071; return jucer_ContentCompTemplate_h;
-        case 0x28d496ad:  numBytes = 1233; return jucer_InlineComponentTemplate_h;
-        case 0x8905395b:  numBytes = 473; return jucer_MainConsoleAppTemplate_cpp;
-        case 0x5e5ea047:  numBytes = 2021; return jucer_MainTemplate_NoWindow_cpp;
-        case 0xda2391f8:  numBytes = 4127; return jucer_MainTemplate_SimpleWindow_cpp;
-        case 0x400bc026:  numBytes = 4127; return jucer_MainTemplate_Window_cpp;
-        case 0xf4842835:  numBytes = 1491; return jucer_NewComponentTemplate_cpp;
-        case 0xe7bf237a:  numBytes = 646; return jucer_NewComponentTemplate_h;
+        case 0x1657b643:  numBytes = 1524; return jucer_ContentCompSimpleTemplate_h;
+        case 0x0b66646c:  numBytes = 1007; return jucer_ContentCompTemplate_cpp;
+        case 0x6fa10171:  numBytes = 878; return jucer_ContentCompTemplate_h;
+        case 0x28d496ad:  numBytes = 1276; return jucer_InlineComponentTemplate_h;
+        case 0x8905395b:  numBytes = 443; return jucer_MainConsoleAppTemplate_cpp;
+        case 0x5e5ea047:  numBytes = 1999; return jucer_MainTemplate_NoWindow_cpp;
+        case 0x400bc026:  numBytes = 4081; return jucer_MainTemplate_Window_cpp;
+        case 0xf4842835:  numBytes = 1521; return jucer_NewComponentTemplate_cpp;
+        case 0xe7bf237a:  numBytes = 665; return jucer_NewComponentTemplate_h;
         case 0x02a2a077:  numBytes = 278; return jucer_NewCppFileTemplate_cpp;
         case 0x0842c43c:  numBytes = 258; return jucer_NewCppFileTemplate_h;
-        case 0x36e634a1:  numBytes = 1676; return jucer_NewInlineComponentTemplate_h;
-        case 0x6bdeb129:  numBytes = 2174; return jucer_OpenGLComponentSimpleTemplate_h;
-        case 0x7fbac252:  numBytes = 1665; return jucer_OpenGLComponentTemplate_cpp;
-        case 0x491fa0d7:  numBytes = 1263; return jucer_OpenGLComponentTemplate_h;
-        case 0xbc050edc:  numBytes = 4926; return jucer_PIPAudioProcessorTemplate_h;
-        case 0xf4ca9e9a:  numBytes = 2421; return jucer_PIPMain_cpp;
+        case 0x36e634a1:  numBytes = 1719; return jucer_NewInlineComponentTemplate_h;
+        case 0x6bdeb129:  numBytes = 1987; return jucer_OpenGLComponentSimpleTemplate_h;
+        case 0x7fbac252:  numBytes = 1470; return jucer_OpenGLComponentTemplate_cpp;
+        case 0x491fa0d7:  numBytes = 1070; return jucer_OpenGLComponentTemplate_h;
+        case 0xbc050edc:  numBytes = 5055; return jucer_PIPAudioProcessorTemplate_h;
         case 0x0b16e320:  numBytes = 517; return jucer_PIPTemplate_h;
-        case 0xcd472557:  numBytes = 6433; return jucer_UnityPluginGUIScript_cs;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
-        case 0x938e96ec:  numBytes = 20; return nothingtoseehere_txt;
-        case 0xf11580d8:  numBytes = 1155; return offlinepage_html;
-        case 0xd6bb7d1d:  numBytes = 14361; return projucer_EULA_txt;
-        case 0xa41e649d:  numBytes = 2842; return RecentFilesMenuTemplate_nib;
         default: break;
     }
 
@@ -7882,6 +7562,12 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
 
 const char* namedResourceList[] =
 {
+    "LaunchScreen_storyboard",
+    "PIPAudioProcessor_cpp_in",
+    "PIPComponent_cpp_in",
+    "PIPConsole_cpp_in",
+    "RecentFilesMenuTemplate_nib",
+    "UnityPluginGUIScript_cs_in",
     "gradlewrapper_jar",
     "gradlew",
     "gradlew_bat",
@@ -7893,7 +7579,7 @@ const char* namedResourceList[] =
     "export_linux_svg",
     "export_visualStudio_svg",
     "export_xcode_svg",
-    "huckleberry_icon_svg",
+    "gpl_logo_svg",
     "jucelogowithtext_svg",
     "juce_icon_png",
     "wizard_AnimatedApp_svg",
@@ -7924,7 +7610,6 @@ const char* namedResourceList[] =
     "jucer_InlineComponentTemplate_h",
     "jucer_MainConsoleAppTemplate_cpp",
     "jucer_MainTemplate_NoWindow_cpp",
-    "jucer_MainTemplate_SimpleWindow_cpp",
     "jucer_MainTemplate_Window_cpp",
     "jucer_NewComponentTemplate_cpp",
     "jucer_NewComponentTemplate_h",
@@ -7935,19 +7620,19 @@ const char* namedResourceList[] =
     "jucer_OpenGLComponentTemplate_cpp",
     "jucer_OpenGLComponentTemplate_h",
     "jucer_PIPAudioProcessorTemplate_h",
-    "jucer_PIPMain_cpp",
     "jucer_PIPTemplate_h",
-    "jucer_UnityPluginGUIScript_cs",
     "colourscheme_dark_xml",
-    "colourscheme_light_xml",
-    "nothingtoseehere_txt",
-    "offlinepage_html",
-    "projucer_EULA_txt",
-    "RecentFilesMenuTemplate_nib"
+    "colourscheme_light_xml"
 };
 
 const char* originalFilenames[] =
 {
+    "LaunchScreen.storyboard",
+    "PIPAudioProcessor.cpp.in",
+    "PIPComponent.cpp.in",
+    "PIPConsole.cpp.in",
+    "RecentFilesMenuTemplate.nib",
+    "UnityPluginGUIScript.cs.in",
     "gradle-wrapper.jar",
     "gradlew",
     "gradlew.bat",
@@ -7959,7 +7644,7 @@ const char* originalFilenames[] =
     "export_linux.svg",
     "export_visualStudio.svg",
     "export_xcode.svg",
-    "huckleberry_icon.svg",
+    "gpl_logo.svg",
     "juce-logo-with-text.svg",
     "juce_icon.png",
     "wizard_AnimatedApp.svg",
@@ -7990,7 +7675,6 @@ const char* originalFilenames[] =
     "jucer_InlineComponentTemplate.h",
     "jucer_MainConsoleAppTemplate.cpp",
     "jucer_MainTemplate_NoWindow.cpp",
-    "jucer_MainTemplate_SimpleWindow.cpp",
     "jucer_MainTemplate_Window.cpp",
     "jucer_NewComponentTemplate.cpp",
     "jucer_NewComponentTemplate.h",
@@ -8001,15 +7685,9 @@ const char* originalFilenames[] =
     "jucer_OpenGLComponentTemplate.cpp",
     "jucer_OpenGLComponentTemplate.h",
     "jucer_PIPAudioProcessorTemplate.h",
-    "jucer_PIPMain.cpp",
     "jucer_PIPTemplate.h",
-    "jucer_UnityPluginGUIScript.cs",
     "colourscheme_dark.xml",
-    "colourscheme_light.xml",
-    "nothingtoseehere.txt",
-    "offlinepage.html",
-    "projucer_EULA.txt",
-    "RecentFilesMenuTemplate.nib"
+    "colourscheme_light.xml"
 };
 
 const char* getNamedResourceOriginalFilename (const char* resourceNameUTF8)

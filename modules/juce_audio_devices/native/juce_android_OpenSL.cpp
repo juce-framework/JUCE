@@ -71,12 +71,11 @@ static void destroyObject (SLObjectType object)
         (*object)->Destroy (object);
 }
 
-template <>
-struct ContainerDeletePolicy<const SLObjectItf_* const>
+struct SLObjectItfFree
 {
-    static void destroy (SLObjectItf object)
+    void operator() (SLObjectItf obj) const noexcept
     {
-        destroyObject (object);
+        destroyObject (obj);
     }
 };
 
@@ -112,7 +111,7 @@ private:
         ControlBlock() = default;
         ControlBlock (SLObjectItf o) : ptr (o) {}
 
-        std::unique_ptr<const SLObjectItf_* const> ptr;
+        std::unique_ptr<const SLObjectItf_* const, SLObjectItfFree> ptr;
     };
 
     ReferenceCountedObjectPtr<ControlBlock> cb;
@@ -866,7 +865,8 @@ public:
 
     Array<int> getAvailableBufferSizes() override
     {
-        return AndroidHighPerformanceAudioHelpers::getAvailableBufferSizes (getAvailableSampleRates());
+        return AndroidHighPerformanceAudioHelpers::getAvailableBufferSizes (AndroidHighPerformanceAudioHelpers::getNativeBufferSizeHint(),
+                                                                            getAvailableSampleRates());
     }
 
     String open (const BigInteger& inputChannels,
@@ -883,8 +883,13 @@ public:
 
         audioBuffersToEnqueue = [this, preferredBufferSize]
         {
-            if (AndroidHighPerformanceAudioHelpers::canUseHighPerformanceAudioPath (preferredBufferSize, sampleRate))
-                return preferredBufferSize / AndroidHighPerformanceAudioHelpers::getNativeBufferSize();
+            using namespace AndroidHighPerformanceAudioHelpers;
+
+            auto nativeBufferSize = getNativeBufferSizeHint();
+
+            if (canUseHighPerformanceAudioPath (nativeBufferSize, preferredBufferSize, sampleRate))
+                return preferredBufferSize / nativeBufferSize;
+
 
             return 1;
         }();
@@ -930,7 +935,7 @@ public:
 
         DBG ("OpenSL: numInputChannels = " << numInputChannels
              << ", numOutputChannels = " << numOutputChannels
-             << ", nativeBufferSize = " << AndroidHighPerformanceAudioHelpers::getNativeBufferSize()
+             << ", nativeBufferSize = " << AndroidHighPerformanceAudioHelpers::getNativeBufferSizeHint()
              << ", nativeSampleRate = " << AndroidHighPerformanceAudioHelpers::getNativeSampleRate()
              << ", actualBufferSize = " << actualBufferSize
              << ", audioBuffersToEnqueue = " << audioBuffersToEnqueue
@@ -964,7 +969,8 @@ public:
 
     int getDefaultBufferSize() override
     {
-        return AndroidHighPerformanceAudioHelpers::getDefaultBufferSize (getCurrentSampleRate());
+        return AndroidHighPerformanceAudioHelpers::getDefaultBufferSize (AndroidHighPerformanceAudioHelpers::getNativeBufferSizeHint(),
+                                                                         getCurrentSampleRate());
     }
 
     double getCurrentSampleRate() override
@@ -1253,7 +1259,7 @@ public:
             threadEntryProc = nullptr;
 
             (*player)->SetPlayState (player, SL_PLAYSTATE_STOPPED);
-            MessageManager::callAsync ([this] () { delete this; });
+            MessageManager::callAsync ([this]() { delete this; });
         }
     }
 
@@ -1272,7 +1278,7 @@ private:
     SlRef<SLPlayItf_>      player;
     SlRef<SLAndroidSimpleBufferQueueItf_> queue;
 
-    int bufferSize = AndroidHighPerformanceAudioHelpers::getNativeBufferSize();
+    int bufferSize = AndroidHighPerformanceAudioHelpers::getNativeBufferSizeHint();
     HeapBlock<int16> buffer { HeapBlock<int16> (static_cast<size_t> (1 * bufferSize * numBuffers)) };
 
     void* (*threadEntryProc) (void*) = nullptr;

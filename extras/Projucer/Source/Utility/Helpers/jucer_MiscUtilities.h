@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -37,8 +36,6 @@ var parseJUCEHeaderMetadata (const File&);
 
 String trimCommentCharsFromStartOfLine (const String& line);
 
-String hexString8Digits (int value);
-
 String createAlphaNumericUID();
 String createGUID (const String& seed); // Turns a seed into a windows GUID
 
@@ -48,17 +45,12 @@ String addQuotesIfContainsSpaces (const String& text);
 StringPairArray parsePreprocessorDefs (const String& defs);
 StringPairArray mergePreprocessorDefs (StringPairArray inheritedDefs, const StringPairArray& overridingDefs);
 String createGCCPreprocessorFlags (const StringPairArray& defs);
-String replacePreprocessorDefs (const StringPairArray& definitions, String sourceString);
 
 StringArray getCleanedStringArray (StringArray);
 StringArray getSearchPathsFromString (const String& searchPath);
 StringArray getCommaOrWhitespaceSeparatedItems (const String&);
 
 void setValueIfVoid (Value value, const var& defaultValue);
-
-void addPlistDictionaryKey (XmlElement* xml, const String& key, const String& value);
-void addPlistDictionaryKeyBool (XmlElement* xml, const String& key, bool value);
-void addPlistDictionaryKeyInt (XmlElement* xml, const String& key, int value);
 
 bool fileNeedsCppSyntaxHighlighting (const File& file);
 
@@ -70,6 +62,7 @@ StringArray getModulesRequiredForComponent() noexcept;
 StringArray getModulesRequiredForAudioProcessor() noexcept;
 
 bool isPIPFile (const File&) noexcept;
+int findBestLineToScrollToForClass (StringArray, const String&, bool isPlugin = false);
 
 bool isValidJUCEExamplesDirectory (const File&) noexcept;
 
@@ -120,7 +113,7 @@ struct PropertyListBuilder
 // A ValueSource which takes an input source, and forwards any changes in it.
 // This class is a handy way to create sources which re-map a value.
 class ValueSourceFilter   : public Value::ValueSource,
-                            public Value::Listener
+                            private Value::Listener
 {
 public:
     ValueSourceFilter (const Value& source)  : sourceValue (source)
@@ -128,10 +121,11 @@ public:
         sourceValue.addListener (this);
     }
 
-    void valueChanged (Value&) override      { sendChangeMessage (true); }
-
 protected:
     Value sourceValue;
+
+private:
+    void valueChanged (Value&) override      { sendChangeMessage (true); }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueSourceFilter)
 };

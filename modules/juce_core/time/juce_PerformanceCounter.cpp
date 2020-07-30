@@ -124,7 +124,7 @@ PerformanceCounter::Statistics PerformanceCounter::getStatisticsAndReset()
     stats.clear();
 
     if (s.numRuns > 0)
-        s.averageSeconds = s.totalSeconds / s.numRuns;
+        s.averageSeconds = s.totalSeconds / (float) s.numRuns;
 
     return s;
 }

@@ -81,17 +81,27 @@ namespace MidiBufferHelpers
 }
 
 //==============================================================================
-MidiBuffer::MidiBuffer() noexcept {}
-MidiBuffer::~MidiBuffer() {}
-
-MidiBuffer::MidiBuffer (const MidiBuffer& other) noexcept  : data (other.data) {}
-
-MidiBuffer& MidiBuffer::operator= (const MidiBuffer& other) noexcept
+MidiBufferIterator& MidiBufferIterator::operator++() noexcept
 {
-    data = other.data;
+    data += sizeof (int32) + sizeof (uint16) + size_t (MidiBufferHelpers::getEventDataSize (data));
     return *this;
 }
 
+MidiBufferIterator MidiBufferIterator::operator++ (int) noexcept
+{
+    auto copy = *this;
+    ++(*this);
+    return copy;
+}
+
+MidiBufferIterator::reference MidiBufferIterator::operator*() const noexcept
+{
+    return { data + sizeof (int32) + sizeof (uint16),
+             MidiBufferHelpers::getEventDataSize (data),
+             MidiBufferHelpers::getEventTime (data) };
+}
+
+//==============================================================================
 MidiBuffer::MidiBuffer (const MidiMessage& message) noexcept
 {
     addEvent (message, 0);
@@ -138,16 +148,14 @@ void MidiBuffer::addEvent (const void* newData, int maxBytes, int sampleNumber)
 void MidiBuffer::addEvents (const MidiBuffer& otherBuffer,
                             int startSample, int numSamples, int sampleDeltaToAdd)
 {
-    Iterator i (otherBuffer);
-    i.setNextSamplePosition (startSample);
-
-    const uint8* eventData;
-    int eventSize, position;
-
-    while (i.getNextEvent (eventData, eventSize, position)
-            && (position < startSample + numSamples || numSamples < 0))
+    for (auto i = otherBuffer.findNextSamplePosition (startSample); i != otherBuffer.cend(); ++i)
     {
-        addEvent (eventData, eventSize, position + sampleDeltaToAdd);
+        const auto metadata = *i;
+
+        if (metadata.samplePosition >= startSample + numSamples && numSamples >= 0)
+            break;
+
+        addEvent (metadata.data, metadata.numBytes, metadata.samplePosition + sampleDeltaToAdd);
     }
 }
 
@@ -185,9 +193,17 @@ int MidiBuffer::getLastEventTime() const noexcept
     }
 }
 
+MidiBufferIterator MidiBuffer::findNextSamplePosition (int samplePosition) const noexcept
+{
+    return std::find_if (cbegin(), cend(), [&] (const MidiMessageMetadata& metadata) noexcept
+    {
+        return metadata.samplePosition >= samplePosition;
+    });
+}
+
 //==============================================================================
 MidiBuffer::Iterator::Iterator (const MidiBuffer& b) noexcept
-    : buffer (b), data (b.data.begin())
+    : buffer (b), iterator (b.data.begin())
 {
 }
 
@@ -195,37 +211,29 @@ MidiBuffer::Iterator::~Iterator() noexcept {}
 
 void MidiBuffer::Iterator::setNextSamplePosition (int samplePosition) noexcept
 {
-    data = buffer.data.begin();
-    auto dataEnd = buffer.data.end();
-
-    while (data < dataEnd && MidiBufferHelpers::getEventTime (data) < samplePosition)
-        data += MidiBufferHelpers::getEventTotalSize (data);
+    iterator = buffer.findNextSamplePosition (samplePosition);
 }
 
 bool MidiBuffer::Iterator::getNextEvent (const uint8*& midiData, int& numBytes, int& samplePosition) noexcept
 {
-    if (data >= buffer.data.end())
+    if (iterator == buffer.cend())
         return false;
 
-    samplePosition = MidiBufferHelpers::getEventTime (data);
-    auto itemSize = MidiBufferHelpers::getEventDataSize (data);
-    numBytes = itemSize;
-    midiData = data + sizeof (int32) + sizeof (uint16);
-    data += sizeof (int32) + sizeof (uint16) + (size_t) itemSize;
-
+    const auto metadata = *iterator++;
+    midiData = metadata.data;
+    numBytes = metadata.numBytes;
+    samplePosition = metadata.samplePosition;
     return true;
 }
 
 bool MidiBuffer::Iterator::getNextEvent (MidiMessage& result, int& samplePosition) noexcept
 {
-    if (data >= buffer.data.end())
+    if (iterator == buffer.cend())
         return false;
 
-    samplePosition = MidiBufferHelpers::getEventTime (data);
-    auto itemSize = MidiBufferHelpers::getEventDataSize (data);
-    result = MidiMessage (data + sizeof (int32) + sizeof (uint16), itemSize, samplePosition);
-    data += sizeof (int32) + sizeof (uint16) + (size_t) itemSize;
-
+    const auto metadata = *iterator++;
+    result = metadata.getMessage();
+    samplePosition = metadata.samplePosition;
     return true;
 }
 

@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -30,21 +29,17 @@ namespace juce
 /*
   ==============================================================================
 
-   In accordance with the terms of the JUCE 5 End-Use License Agreement, the
+   In accordance with the terms of the JUCE 6 End-Use License Agreement, the
    JUCE Code in SECTION A cannot be removed, changed or otherwise rendered
    ineffective unless you have a JUCE Indie or Pro license, or are using JUCE
    under the GPL v3 license.
 
-   End User License Agreement: www.juce.com/juce-5-licence
+   End User License Agreement: www.juce.com/juce-6-licence
 
   ==============================================================================
 */
 
 // BEGIN SECTION A
-
-#if ! defined (JUCE_REPORT_APP_USAGE)
- #define JUCE_REPORT_APP_USAGE 1
-#endif
 
 #if ! defined (JUCE_DISPLAY_SPLASH_SCREEN)
  #define JUCE_DISPLAY_SPLASH_SCREEN 1
@@ -57,8 +52,7 @@ namespace juce
 static const int millisecondsToDisplaySplash = 2000, splashScreenFadeOutTime = 2000;
 static const int splashScreenLogoWidth = 123, splashScreenLogoHeight = 63;
 static uint32 splashDisplayTime = 0;
-static bool splashHasStartedFading = false, appUsageReported = false;
-
+static bool splashHasStartedFading = false;
 
 static Rectangle<float> getLogoArea (Rectangle<float> parentRect)
 {
@@ -68,173 +62,9 @@ static Rectangle<float> getLogoArea (Rectangle<float> parentRect)
 }
 
 //==============================================================================
-struct ReportingThread;
-
-struct ReportingThreadContainer  : public ChangeListener,
-                                   public DeletedAtShutdown
-{
-    ReportingThreadContainer() {}
-    ~ReportingThreadContainer() override  { clearSingletonInstance(); }
-
-    void sendReport (String, String&, StringPairArray&);
-    void changeListenerCallback (ChangeBroadcaster*) override;
-
-    std::unique_ptr<ReportingThread> reportingThread;
-
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (ReportingThreadContainer)
-};
-
-JUCE_IMPLEMENT_SINGLETON (ReportingThreadContainer)
-
-//==============================================================================
-struct ReportingThread  : public Thread,
-                          private ChangeBroadcaster
-{
-    ReportingThread (ReportingThreadContainer& container,
-                     String& address,
-                     String& userAgent,
-                     StringPairArray& parameters)
-        : Thread ("JUCE app usage reporting"),
-          threadContainer (container),
-          headers ("User-Agent: " + userAgent)
-    {
-        StringArray postData;
-
-        for (auto& key : parameters.getAllKeys())
-            if (parameters[key].isNotEmpty())
-                postData.add (key + "=" + URL::addEscapeChars (parameters[key], true));
-
-        url = URL (address).withPOSTData (postData.joinIntoString ("&"));
-
-        addChangeListener (&threadContainer);
-    }
-
-    ~ReportingThread() override
-    {
-        removeChangeListener (&threadContainer);
-
-        if (webStream != nullptr)
-            webStream->cancel();
-
-        stopThread (2000);
-    }
-
-    void run() override
-    {
-        webStream.reset (new WebInputStream (url, true));
-        webStream->withExtraHeaders (headers);
-        webStream->connect (nullptr);
-
-        sendChangeMessage();
-    }
-
-private:
-    ReportingThreadContainer& threadContainer;
-    URL url;
-    String headers;
-    std::unique_ptr<WebInputStream> webStream;
-};
-
-//==============================================================================
-void ReportingThreadContainer::sendReport (String address, String& userAgent, StringPairArray& parameters)
-{
-    reportingThread.reset (new ReportingThread (*this, address, userAgent, parameters));
-    reportingThread->startThread();
-}
-
-void ReportingThreadContainer::changeListenerCallback (ChangeBroadcaster*)
-{
-    reportingThread.reset();
-}
-
-//==============================================================================
 JUCESplashScreen::JUCESplashScreen (Component& parent)
 {
     ignoreUnused (parent);
-
-   #if JUCE_REPORT_APP_USAGE
-    if (! appUsageReported)
-    {
-        const ScopedTryLock appUsageReportingLock (appUsageReporting);
-
-        if (appUsageReportingLock.isLocked() && ! appUsageReported)
-        {
-            const auto deviceDescription = SystemStats::getDeviceDescription();
-            const auto deviceString = SystemStats::getDeviceIdentifiers().joinIntoString (":");
-            const auto deviceIdentifier = String::toHexString (deviceString.hashCode64());
-            const auto osName = SystemStats::getOperatingSystemName();
-
-            StringPairArray data;
-
-            data.set ("v",   "1");
-            data.set ("tid", "UA-19759318-3");
-            data.set ("cid", deviceIdentifier);
-            data.set ("t",   "event");
-            data.set ("ec",  "info");
-            data.set ("ea",  "appStarted");
-
-            data.set ("cd1", SystemStats::getJUCEVersion());
-            data.set ("cd2", osName);
-            data.set ("cd3", deviceDescription);
-            data.set ("cd4", deviceIdentifier);
-
-            String appType, appName, appVersion, appManufacturer;
-
-           #if defined(JucePlugin_Name)
-            appType         = "Plugin";
-            appName         = JucePlugin_Name;
-            appVersion      = JucePlugin_VersionString;
-            appManufacturer = JucePlugin_Manufacturer;
-           #else
-            if (JUCEApplicationBase::isStandaloneApp())
-            {
-                appType = "Application";
-
-                if (auto* app = JUCEApplicationBase::getInstance())
-                {
-                    appName    = app->getApplicationName();
-                    appVersion = app->getApplicationVersion();
-                }
-            }
-            else
-            {
-                appType = "Library";
-            }
-           #endif
-
-            data.set ("cd5", appType);
-            data.set ("cd6", appName);
-            data.set ("cd7", appVersion);
-            data.set ("cd8", appManufacturer);
-
-            data.set ("an", appName);
-            data.set ("av", appVersion);
-
-            auto agentCPUVendor = SystemStats::getCpuVendor();
-
-            if (agentCPUVendor.isEmpty())
-                agentCPUVendor = "CPU";
-
-            auto agentOSName = osName.replaceCharacter ('.', '_')
-                                     .replace ("iOS", "iPhone OS");
-           #if JUCE_IOS
-            agentOSName << " like Mac OS X";
-           #endif
-
-            String userAgent;
-            userAgent << "Mozilla/5.0 ("
-                      << deviceDescription << ";"
-                      << agentCPUVendor << " " << agentOSName << ";"
-                      << SystemStats::getDisplayLanguage() << ")";
-
-            ReportingThreadContainer::getInstance()->sendReport ("https://www.google-analytics.com/collect", userAgent, data);
-
-            appUsageReported = true;
-        }
-    }
-   #else
-    ignoreUnused (appUsageReported);
-   #endif
 
    #if JUCE_DISPLAY_SPLASH_SCREEN
     if (splashDisplayTime == 0
@@ -250,10 +80,6 @@ JUCESplashScreen::JUCESplashScreen (Component& parent)
     {
         startTimer (1);
     }
-}
-
-JUCESplashScreen::~JUCESplashScreen()
-{
 }
 
 std::unique_ptr<Drawable> JUCESplashScreen::getSplashScreenLogo()

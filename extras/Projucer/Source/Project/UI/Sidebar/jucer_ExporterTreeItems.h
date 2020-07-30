@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -47,7 +46,7 @@ public:
     bool mightContainSubItems() override      { return exporter->getNumConfigurations() > 0; }
     String getUniqueName() const override     { return "exporter_" + String (exporterIndex); }
     String getRenamingName() const override   { return getDisplayName(); }
-    String getDisplayName() const override    { return exporter->getName(); }
+    String getDisplayName() const override    { return exporter->getUniqueName(); }
     void setName (const String&) override     {}
     bool isMissing() const override           { return false; }
     String getTooltip() override              { return getDisplayName(); }
@@ -116,18 +115,11 @@ public:
     void handlePopupMenuResult (int resultCode) override
     {
         if (resultCode == 1)
-        {
             exporter->addNewConfiguration (false);
-        }
         else if (resultCode == 2)
-        {
-            const ScopedValueSetter<String> valueSetter (project.specifiedExporterToSave, exporter->getName(), {});
-            project.save (true, true);
-        }
+            project.saveProject (exporter.get());
         else if (resultCode == 3)
-        {
             deleteAllSelectedItems();
-        }
     }
 
     var getDragSourceDescription() override
@@ -187,7 +179,7 @@ private:
     struct SettingsComp  : public Component
     {
         SettingsComp (ProjectExporter& exp)
-            : group (exp.getName(),
+            : group (exp.getUniqueName(),
                      ExporterItem::getIconForExporter (&exp),
                      exp.getDescription())
         {
@@ -284,7 +276,7 @@ private:
     {
     public:
         SettingsComp (ProjectExporter::BuildConfiguration& conf)
-            : group (conf.exporter.getName() + " - " + conf.getName(), Icon (getIcons().config, Colours::transparentBlack))
+            : group (conf.exporter.getUniqueName() + " - " + conf.getName(), Icon (getIcons().config, Colours::transparentBlack))
         {
             addAndMakeVisible (group);
 

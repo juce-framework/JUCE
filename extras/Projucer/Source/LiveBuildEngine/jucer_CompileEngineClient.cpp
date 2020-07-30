@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -37,6 +36,7 @@
 #include "jucer_CompileEngineClient.h"
 #include "jucer_CompileEngineServer.h"
 #include "jucer_CompileEngineSettings.h"
+#include "../Project/UI/jucer_ProjectContentComponent.h"
 
 #ifndef RUN_CLANG_IN_CHILD_PROCESS
  #error
@@ -69,7 +69,7 @@ class ClientIPC  : public MessageHandler,
                    private Timer
 {
 public:
-    ClientIPC (CompileEngineChildProcess& cp)
+    explicit ClientIPC (CompileEngineChildProcess& cp)
        : InterprocessConnection (true), owner (cp)
     {
         launchServer();
@@ -216,8 +216,6 @@ public:
 
         if (isRunningApp && server != nullptr)
             server->killServerWithoutMercy();
-
-        server.reset();
     }
 
     void restartServer()
@@ -313,24 +311,31 @@ private:
 
     String getGlobalDefs()
     {
-        StringArray defs;
-
-        defs.add (project.getCompileEngineSettings().getExtraPreprocessorDefsString());
-
+        auto mergeDefs = [] (const StringPairArray& inDefs) -> String
         {
-            auto projectDefines = project.getPreprocessorDefs();
+            StringArray outDefs;
 
-            for (int i = 0; i < projectDefines.size(); ++i)
+            for (int i = 0; i < inDefs.size(); ++i)
             {
-                auto def = projectDefines.getAllKeys()[i];
-                auto value = projectDefines.getAllValues()[i];
+                auto def = inDefs.getAllKeys()[i];
+                auto value = inDefs.getAllValues()[i];
 
                 if (value.isNotEmpty())
                     def << "=" << value;
 
-                 defs.add (def);
+                 outDefs.add (def);
             }
-        }
+
+            return outDefs.joinIntoString (" ");
+        };
+
+        StringArray defs;
+
+        if (! project.shouldUseAppConfig())
+            defs.add (mergeDefs (project.getAppConfigDefs()));
+
+        defs.add (project.getCompileEngineSettings().getExtraPreprocessorDefsString());
+        defs.add (mergeDefs (project.getPreprocessorDefs()));
 
         for (Project::ExporterIterator exporter (project); exporter.next();)
             if (exporter->canLaunchProject())
@@ -394,11 +399,12 @@ private:
                                                              : m->moduleInfo.getFolder();
 
                         m->findAndAddCompiledUnits (*exporter, nullptr, compileUnits,
-                                                    isPluginProject || isVSTHost ? ProjectType::Target::SharedCodeTarget
-                                                                                 : ProjectType::Target::unspecified);
+                                                    isPluginProject || isVSTHost ? build_tools::ProjectType::Target::SharedCodeTarget
+                                                                                 : build_tools::ProjectType::Target::unspecified);
 
                         if (isPluginProject || isVSTHost)
-                            m->findAndAddCompiledUnits (*exporter, nullptr, compileUnits, ProjectType::Target::StandalonePlugIn);
+                            m->findAndAddCompiledUnits (*exporter, nullptr, compileUnits,
+                                                        build_tools::ProjectType::Target::StandalonePlugIn);
                     }
 
                     break;
@@ -466,11 +472,6 @@ private:
                        && (project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3", false)
                              || project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST", false));
 
-        auto customVst3Path = getAppSettings().getStoredPath (Ids::vst3Path, TargetOS::getThisOS()).get().toString();
-
-        if (customVst3Path.isNotEmpty() && (project.isAudioPluginProject() || isVSTHost))
-            paths.add (customVst3Path);
-
         OwnedArray<LibraryModule> modules;
         project.getEnabledModules().createRequiredModules (modules);
 
@@ -478,9 +479,11 @@ private:
         {
             paths.addIfNotAlreadyThere (module->getFolder().getParentDirectory().getFullPathName());
 
-            if (customVst3Path.isEmpty() && (project.isAudioPluginProject() || isVSTHost))
-                if (module->getID() == "juce_audio_processors")
-                    paths.addIfNotAlreadyThere (module->getFolder().getChildFile ("format_types").getChildFile ("VST3_SDK").getFullPathName());
+            if (module->getID() == "juce_audio_processors" && ((project.isAudioPluginProject() || isVSTHost)
+                                                                && ! project.isConfigFlagEnabled ("JUCE_CUSTOM_VST3_SDK")))
+            {
+                paths.addIfNotAlreadyThere (module->getFolder().getChildFile ("format_types").getChildFile ("VST3_SDK").getFullPathName());
+            }
         }
 
         return convertSearchPathsToAbsolute (paths);
@@ -521,9 +524,6 @@ CompileEngineChildProcess::CompileEngineChildProcess (Project& p)
 CompileEngineChildProcess::~CompileEngineChildProcess()
 {
     ProjucerApplication::getApp().openDocumentManager.removeListener (this);
-
-    process.reset();
-    lastComponentList.clear();
 }
 
 void CompileEngineChildProcess::createProcess()
@@ -719,7 +719,7 @@ private:
 
     struct TransactionTimer   : public Timer
     {
-        TransactionTimer (CodeDocument& doc) : document (doc) {}
+        explicit TransactionTimer (CodeDocument& doc) : document (doc) {}
 
         void timerCallback() override
         {

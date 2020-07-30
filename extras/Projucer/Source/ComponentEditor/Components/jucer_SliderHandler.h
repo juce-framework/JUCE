@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -58,17 +57,17 @@ static const Slider::TextEntryBoxPosition sliderTextBoxPositions[] =
 struct SliderHandler  : public ComponentTypeHandler
 {
     SliderHandler()
-        : ComponentTypeHandler ("Slider", "Slider", typeid (Slider), 150, 24)
+        : ComponentTypeHandler ("Slider", "juce::Slider", typeid (Slider), 150, 24)
     {
-        registerColour (Slider::backgroundColourId, "background", "bkgcol");
-        registerColour (Slider::thumbColourId, "thumb", "thumbcol");
-        registerColour (Slider::trackColourId, "track", "trackcol");
-        registerColour (Slider::rotarySliderFillColourId, "rotary fill", "rotarysliderfill");
-        registerColour (Slider::rotarySliderOutlineColourId, "rotary outln", "rotaryslideroutline");
-        registerColour (Slider::textBoxTextColourId, "textbox text", "textboxtext");
-        registerColour (Slider::textBoxBackgroundColourId, "textbox bkgd", "textboxbkgd");
-        registerColour (Slider::textBoxHighlightColourId, "textbox highlt", "textboxhighlight");
-        registerColour (Slider::textBoxOutlineColourId, "textbox outln", "textboxoutline");
+        registerColour (juce::Slider::backgroundColourId, "background", "bkgcol");
+        registerColour (juce::Slider::thumbColourId, "thumb", "thumbcol");
+        registerColour (juce::Slider::trackColourId, "track", "trackcol");
+        registerColour (juce::Slider::rotarySliderFillColourId, "rotary fill", "rotarysliderfill");
+        registerColour (juce::Slider::rotarySliderOutlineColourId, "rotary outln", "rotaryslideroutline");
+        registerColour (juce::Slider::textBoxTextColourId, "textbox text", "textboxtext");
+        registerColour (juce::Slider::textBoxBackgroundColourId, "textbox bkgd", "textboxbkgd");
+        registerColour (juce::Slider::textBoxHighlightColourId, "textbox highlt", "textboxhighlight");
+        registerColour (juce::Slider::textBoxOutlineColourId, "textbox outln", "textboxoutline");
     }
 
     Component* createNewComponent (JucerDocument*) override
@@ -135,9 +134,9 @@ struct SliderHandler  : public ComponentTypeHandler
         r << memberVariableName << "->setRange ("
           << s->getMinimum() << ", " << s->getMaximum() << ", " << s->getInterval()
           << ");\n"
-          << memberVariableName << "->setSliderStyle (Slider::"
+          << memberVariableName << "->setSliderStyle (juce::Slider::"
           << sliderStyleToString (s->getSliderStyle()) << ");\n"
-          << memberVariableName << "->setTextBoxStyle (Slider::"
+          << memberVariableName << "->setTextBoxStyle (juce::Slider::"
           << textBoxPosToString (s->getTextBoxPosition())
           << ", " << CodeHelpers::boolLiteral (! s->isTextBoxEditable())
           << ", " << s->getTextBoxWidth() << ", " << s->getTextBoxHeight() << ");\n"
@@ -159,9 +158,9 @@ struct SliderHandler  : public ComponentTypeHandler
 
         if (needsSliderListener (component))
         {
-            String& callback = code.getCallbackCode ("public Slider::Listener",
+            String& callback = code.getCallbackCode ("public juce::Slider::Listener",
                                                      "void",
-                                                     "sliderValueChanged (Slider* sliderThatWasMoved)",
+                                                     "sliderValueChanged (juce::Slider* sliderThatWasMoved)",
                                                      true);
 
             if (callback.isNotEmpty())

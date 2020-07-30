@@ -95,53 +95,73 @@ enum class LoopMode
     pingpong
 };
 
-template <typename Movable>
-class MoveOnlyFifo final
+// We want to send type-erased commands to the audio thread, but we also
+// want those commands to contain move-only resources, so that we can
+// construct resources on the gui thread, and then transfer ownership
+// cheaply to the audio thread. We can't do this with std::function
+// because it enforces that functions are copy-constructible.
+// Therefore, we use a very simple templated type-eraser here.
+template <typename Proc>
+struct Command
+{
+    virtual ~Command() noexcept                    = default;
+    virtual void run (Proc& proc) = 0;
+};
+
+template <typename Proc, typename Func>
+class TemplateCommand  : public Command<Proc>,
+                         private Func
 {
 public:
-    explicit MoveOnlyFifo (int size)
+    template <typename FuncPrime>
+    explicit TemplateCommand (FuncPrime&& funcPrime)
+        : Func (std::forward<FuncPrime> (funcPrime))
+    {}
+
+    void run (Proc& proc) override { (*this) (proc); }
+};
+
+template <typename Proc>
+class CommandFifo final
+{
+public:
+    explicit CommandFifo (int size)
         : buffer ((size_t) size),
           abstractFifo (size)
     {}
 
-    MoveOnlyFifo()
-        : MoveOnlyFifo (1024)
+    CommandFifo()
+        : CommandFifo (1024)
     {}
 
-    template <typename Convertible>
-    Convertible push (Convertible item) noexcept
+    template <typename Item>
+    void push (Item&& item) noexcept
     {
-        auto writer = abstractFifo.write (1);
+        auto command = makeCommand (std::forward<Item> (item));
 
-        if (writer.blockSize1 == 1)
+        abstractFifo.write (1).forEach ([&] (int index)
         {
-            buffer[(size_t) writer.startIndex1] = move (item);
-            item = {};
-        }
-        else if (writer.blockSize2 == 1)
-        {
-            buffer[(size_t) writer.startIndex2] = move (item);
-            item = {};
-        }
-
-        return item;
+            buffer[size_t (index)] = std::move (command);
+        });
     }
 
-    Movable pop() noexcept
+    void call (Proc& proc) noexcept
     {
-        auto reader = abstractFifo.read (1);
-
-        if (reader.blockSize1 == 1)
-            return move (buffer[(size_t) reader.startIndex1]);
-
-        if (reader.blockSize2 == 1)
-            return move (buffer[(size_t) reader.startIndex2]);
-
-        return {};
+        abstractFifo.read (abstractFifo.getNumReady()).forEach ([&] (int index)
+        {
+            buffer[size_t (index)]->run (proc);
+        });
     }
 
 private:
-    std::vector<Movable> buffer;
+    template <typename Func>
+    static std::unique_ptr<Command<Proc>> makeCommand (Func&& func)
+    {
+        using Decayed = typename std::decay<Func>::type;
+        return std::make_unique<TemplateCommand<Proc, Decayed>> (std::forward<Func> (func));
+    }
+
+    std::vector<std::unique_ptr<Command<Proc>>> buffer;
     AbstractFifo abstractFifo;
 };
 
@@ -239,7 +259,7 @@ class MPESamplerVoice  : public MPESynthesiserVoice
 {
 public:
     explicit MPESamplerVoice (std::shared_ptr<const MPESamplerSound> sound)
-        : samplerSound (move (sound))
+        : samplerSound (std::move (sound))
     {
         jassert (samplerSound != nullptr);
     }
@@ -291,6 +311,25 @@ public:
                           int startSample,
                           int numSamples) override
     {
+        render (outputBuffer, startSample, numSamples);
+    }
+
+    void renderNextBlock (AudioBuffer<double>& outputBuffer,
+                          int startSample,
+                          int numSamples) override
+    {
+        render (outputBuffer, startSample, numSamples);
+    }
+
+    double getCurrentSamplePosition() const
+    {
+        return currentSamplePos;
+    }
+
+private:
+    template <typename Element>
+    void render (AudioBuffer<Element>& outputBuffer, int startSample, int numSamples)
+    {
         jassert (samplerSound->getSample() != nullptr);
 
         auto loopPoints = samplerSound->getLoopPointsInSeconds();
@@ -316,16 +355,11 @@ public:
             writePos += 1;
     }
 
-    double getCurrentSamplePosition() const
-    {
-        return currentSamplePos;
-    }
-
-private:
+    template <typename Element>
     bool renderNextSample (const float* inL,
                            const float* inR,
-                           float* outL,
-                           float* outR,
+                           Element* outL,
+                           Element* outR,
                            size_t writePos)
     {
         auto currentLevel     = level.getNextValue();
@@ -347,13 +381,13 @@ private:
 
         auto pos      = (int) currentSamplePos;
         auto nextPos  = pos + 1;
-        auto alpha    = (float) (currentSamplePos - pos);
+        auto alpha    = (Element) (currentSamplePos - pos);
         auto invAlpha = 1.0f - alpha;
 
         // just using a very simple linear interpolation here..
-        auto l = static_cast<float> (currentLevel * (inL[pos] * invAlpha + inL[nextPos] * alpha));
-        auto r = static_cast<float> ((inR != nullptr) ? currentLevel * (inR[pos] * invAlpha + inR[nextPos] * alpha)
-                                                      : l);
+        auto l = static_cast<Element> (currentLevel * (inL[pos] * invAlpha + inL[nextPos] * alpha));
+        auto r = static_cast<Element> ((inR != nullptr) ? currentLevel * (inR[pos] * invAlpha + inR[nextPos] * alpha)
+                                                        : l);
 
         if (outR != nullptr)
         {
@@ -416,6 +450,9 @@ private:
             case Direction::backward:
                 nextSamplePos -= nextPitchRatio;
                 break;
+
+            default:
+                break;
         }
 
         // Update current sample position, taking loop mode into account
@@ -426,11 +463,11 @@ private:
             nextSamplePos = begin;
             nextDirection = Direction::forward;
 
-            return { nextSamplePos, nextDirection };
+            return std::tuple<double, Direction> (nextSamplePos, nextDirection);
         }
 
         if (samplerSound->getLoopMode() == LoopMode::none)
-            return { nextSamplePos, nextDirection };
+            return std::tuple<double, Direction> (nextSamplePos, nextDirection);
 
         if (nextDirection == Direction::forward && end < nextSamplePos && !isTailingOff())
         {
@@ -442,7 +479,7 @@ private:
                 nextDirection = Direction::backward;
             }
         }
-        return { nextSamplePos, nextDirection };
+        return std::tuple<double, Direction> (nextSamplePos, nextDirection);
     }
 
     std::shared_ptr<const MPESamplerSound> samplerSound;
@@ -521,7 +558,7 @@ public:
           dataSize (dataSizeIn)
     {}
 
-    std::unique_ptr<AudioFormatReader> make (AudioFormatManager&manager ) const override
+    std::unique_ptr<AudioFormatReader> make (AudioFormatManager& manager) const override
     {
         return makeAudioFormatReader (manager, sampleData, dataSize);
     }
@@ -621,7 +658,7 @@ struct VariantConverter<std::shared_ptr<AudioFormatReaderFactory>>
 } // namespace juce
 
 //==============================================================================
-class VisibleRangeDataModel  : public ValueTree::Listener
+class VisibleRangeDataModel  : private ValueTree::Listener
 {
 public:
     class Listener
@@ -722,7 +759,7 @@ private:
 };
 
 //==============================================================================
-class MPESettingsDataModel  : public ValueTree::Listener
+class MPESettingsDataModel  : private ValueTree::Listener
 {
 public:
     class Listener
@@ -912,7 +949,7 @@ private:
 };
 
 //==============================================================================
-class DataModel  : public ValueTree::Listener
+class DataModel  : private ValueTree::Listener
 {
 public:
     class Listener
@@ -968,7 +1005,7 @@ public:
     double getSampleLengthSeconds() const
     {
         if (auto r = getSampleReader())
-            return r->lengthInSamples / r->sampleRate;
+            return (double) r->lengthInSamples / r->sampleRate;
 
         return 1.0;
     }
@@ -1098,7 +1135,7 @@ constexpr int controlSeparation = 6;
 
 //==============================================================================
 class MPELegacySettingsComponent final  : public Component,
-                                          public MPESettingsDataModel::Listener
+                                          private MPESettingsDataModel::Listener
 {
 public:
     explicit MPELegacySettingsComponent (const MPESettingsDataModel& model,
@@ -1220,7 +1257,7 @@ private:
 
 //==============================================================================
 class MPENewSettingsComponent final  : public Component,
-                                       public MPESettingsDataModel::Listener
+                                       private MPESettingsDataModel::Listener
 {
 public:
     MPENewSettingsComponent (const MPESettingsDataModel& model,
@@ -1316,7 +1353,7 @@ private:
 
 //==============================================================================
 class MPESettingsComponent final  : public Component,
-                                    public MPESettingsDataModel::Listener
+                                    private MPESettingsDataModel::Listener
 {
 public:
     MPESettingsComponent (const MPESettingsDataModel& model,
@@ -1487,7 +1524,7 @@ private:
 
 //==============================================================================
 class Ruler  : public Component,
-               public VisibleRangeDataModel::Listener
+               private VisibleRangeDataModel::Listener
 {
 public:
     explicit Ruler (const VisibleRangeDataModel& model)
@@ -1501,7 +1538,7 @@ private:
     void paint (Graphics& g) override
     {
         auto minDivisionWidth = 50.0f;
-        auto maxDivisions     = getWidth() / minDivisionWidth;
+        auto maxDivisions     = (float) getWidth() / minDivisionWidth;
 
         auto lookFeel = dynamic_cast<LookAndFeel_V4*> (&getLookAndFeel());
         auto bg = lookFeel->getCurrentColourScheme()
@@ -1533,14 +1570,13 @@ private:
             auto xPos = (time - visibleRange.getVisibleRange().getStart()) * getWidth()
                               / visibleRange.getVisibleRange().getLength();
 
-            std::ostringstream out_stream;
-            out_stream << std::setprecision (roundToInt (precision)) << roundToInt (time);
+            std::ostringstream outStream;
+            outStream << std::setprecision (roundToInt (precision)) << time;
 
-            g.drawText (out_stream.str(),
-                        Rectangle<int> (Point<int> (roundToInt (xPos) + 3, 0),
-                                        Point<int> (roundToInt (xPos + minDivisionWidth), getHeight())),
-                        Justification::centredLeft,
-                        false);
+            const auto bounds = Rectangle<int> (Point<int> (roundToInt (xPos) + 3, 0),
+                                                Point<int> (roundToInt (xPos + minDivisionWidth), getHeight()));
+
+            g.drawText (outStream.str(), bounds, Justification::centredLeft, false);
 
             g.drawVerticalLine (roundToInt (xPos), 2.0f, (float) getHeight());
         }
@@ -1557,7 +1593,7 @@ private:
     {
         // Work out the scale of the new range
         auto unitDistance = 100.0f;
-        auto scaleFactor  = 1.0 / std::pow (2, e.getDistanceFromDragStartY() / unitDistance);
+        auto scaleFactor  = 1.0 / std::pow (2, (float) e.getDistanceFromDragStartY() / unitDistance);
 
         // Now position it so that the mouse continues to point at the same
         // place on the ruler.
@@ -1579,8 +1615,8 @@ private:
 
 //==============================================================================
 class LoopPointsOverlay  : public Component,
-                           public DataModel::Listener,
-                           public VisibleRangeDataModel::Listener
+                           private DataModel::Listener,
+                           private VisibleRangeDataModel::Listener
 {
 public:
     LoopPointsOverlay (const DataModel& dModel,
@@ -1680,8 +1716,8 @@ private:
 
 //==============================================================================
 class PlaybackPositionOverlay  : public Component,
-                                 public Timer,
-                                 public VisibleRangeDataModel::Listener
+                                 private Timer,
+                                 private VisibleRangeDataModel::Listener
 {
 public:
     using Provider = std::function<std::vector<float>()>;
@@ -1727,9 +1763,9 @@ private:
 
 //==============================================================================
 class WaveformView  : public Component,
-                      public ChangeListener,
-                      public DataModel::Listener,
-                      public VisibleRangeDataModel::Listener
+                      private ChangeListener,
+                      private DataModel::Listener,
+                      private VisibleRangeDataModel::Listener
 {
 public:
     WaveformView (const DataModel& model,
@@ -1814,7 +1850,7 @@ private:
 
 //==============================================================================
 class WaveformEditor  : public Component,
-                        public DataModel::Listener
+                        private DataModel::Listener
 {
 public:
     WaveformEditor (const DataModel& model,
@@ -1870,7 +1906,8 @@ private:
 
 //==============================================================================
 class MainSamplerView  : public Component,
-                         public DataModel::Listener
+                         private DataModel::Listener,
+                         private ChangeListener
 {
 public:
     MainSamplerView (const DataModel& model,
@@ -1878,19 +1915,21 @@ public:
                      UndoManager& um)
         : dataModel (model),
           waveformEditor (dataModel, move (provider), um),
-          undoManager (&um)
+          undoManager (um)
     {
         dataModel.addListener (*this);
 
         addAndMakeVisible (waveformEditor);
         addAndMakeVisible (loadNewSampleButton);
+        addAndMakeVisible (undoButton);
+        addAndMakeVisible (redoButton);
 
         auto setReader = [this] (const FileChooser& fc)
         {
-            undoManager->beginNewTransaction();
+            undoManager.beginNewTransaction();
             auto readerFactory = new FileAudioFormatReaderFactory (fc.getResult());
             dataModel.setSampleReader (std::unique_ptr<AudioFormatReaderFactory> (readerFactory),
-                                       undoManager);
+                                       &undoManager);
         };
 
         loadNewSampleButton.onClick = [this, setReader]
@@ -1903,9 +1942,9 @@ public:
         addAndMakeVisible (centreFrequency);
         centreFrequency.onValueChange = [this]
         {
-            undoManager->beginNewTransaction();
+            undoManager.beginNewTransaction();
             dataModel.setCentreFrequencyHz (centreFrequency.getValue(),
-                                            centreFrequency.isMouseButtonDown() ? nullptr : undoManager);
+                                            centreFrequency.isMouseButtonDown() ? nullptr : &undoManager);
         };
 
         centreFrequency.setRange (20, 20000, 1);
@@ -1925,8 +1964,8 @@ public:
         {
             if (loopKindNone.getToggleState())
             {
-                undoManager->beginNewTransaction();
-                dataModel.setLoopMode (LoopMode::none, undoManager);
+                undoManager.beginNewTransaction();
+                dataModel.setLoopMode (LoopMode::none, &undoManager);
             }
         };
 
@@ -1934,8 +1973,8 @@ public:
         {
             if (loopKindForward.getToggleState())
             {
-                undoManager->beginNewTransaction();
-                dataModel.setLoopMode (LoopMode::forward, undoManager);
+                undoManager.beginNewTransaction();
+                dataModel.setLoopMode (LoopMode::forward, &undoManager);
             }
         };
 
@@ -1943,16 +1982,36 @@ public:
         {
             if (loopKindPingpong.getToggleState())
             {
-                undoManager->beginNewTransaction();
-                dataModel.setLoopMode (LoopMode::pingpong, undoManager);
+                undoManager.beginNewTransaction();
+                dataModel.setLoopMode (LoopMode::pingpong, &undoManager);
             }
         };
 
+        undoButton.onClick = [this] { undoManager.undo(); };
+        redoButton.onClick = [this] { undoManager.redo(); };
+
         addAndMakeVisible (centreFrequencyLabel);
         addAndMakeVisible (loopKindLabel);
+
+        changeListenerCallback (&undoManager);
+        undoManager.addChangeListener (this);
+    }
+
+    ~MainSamplerView() override
+    {
+        undoManager.removeChangeListener (this);
     }
 
 private:
+    void changeListenerCallback (ChangeBroadcaster* source) override
+    {
+        if (source == &undoManager)
+        {
+            undoButton.setEnabled (undoManager.canUndo());
+            redoButton.setEnabled (undoManager.canRedo());
+        }
+    }
+
     void resized() override
     {
         auto bounds = getLocalBounds();
@@ -1960,6 +2019,8 @@ private:
         auto topBar = bounds.removeFromTop (50);
         auto padding = 4;
         loadNewSampleButton .setBounds (topBar.removeFromRight (100).reduced (padding));
+        redoButton          .setBounds (topBar.removeFromRight (100).reduced (padding));
+        undoButton          .setBounds (topBar.removeFromRight (100).reduced (padding));
         centreFrequencyLabel.setBounds (topBar.removeFromLeft  (100).reduced (padding));
         centreFrequency     .setBounds (topBar.removeFromLeft  (100).reduced (padding));
 
@@ -1985,6 +2046,9 @@ private:
             case LoopMode::pingpong:
                 loopKindPingpong.setToggleState (true, dontSendNotification);
                 break;
+
+            default:
+                break;
         }
     }
 
@@ -1996,6 +2060,8 @@ private:
     DataModel dataModel;
     WaveformEditor waveformEditor;
     TextButton loadNewSampleButton { "Load New Sample" };
+    TextButton undoButton { "Undo" };
+    TextButton redoButton { "Redo" };
     Slider centreFrequency;
 
     TextButton loopKindNone        { "None" },
@@ -2009,7 +2075,7 @@ private:
     FileChooser fileChooser { "Select a file to load...", File(),
                               dataModel.getAudioFormatManager().getWildcardForAllFormats() };
 
-    UndoManager* undoManager;
+    UndoManager& undoManager;
 };
 
 //==============================================================================
@@ -2074,7 +2140,7 @@ public:
         // This function will be called from the message thread. We lock the command
         // queue to ensure that no messages are processed for the duration of this
         // call.
-        std::lock_guard<std::mutex> lock (commandQueueMutex);
+        SpinLock::ScopedLockType lock (commandQueueMutex);
 
         ProcessorState state;
         state.synthVoices          = synthesiser.getNumVoices();
@@ -2096,7 +2162,7 @@ public:
     bool hasEditor() const override                                       { return true; }
 
     //==============================================================================
-    const String getName() const override                                 { return JucePlugin_Name; }
+    const String getName() const override                                 { return "SamplerPlugin"; }
     bool acceptsMidi() const override                                     { return true; }
     bool producesMidi() const override                                    { return false; }
     bool isMidiEffect() const override                                    { return false; }
@@ -2114,49 +2180,14 @@ public:
     void setStateInformation (const void*, int) override                  {}
 
     //==============================================================================
-    void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
+    void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midi) override
     {
-        // Try to acquire a lock on the command queue.
-        // If we were successful, we pop all pending commands off the queue and
-        // apply them to the processor.
-        // If we weren't able to acquire the lock, it's because someone called
-        // createEditor, which requires that the processor data model stays in
-        // a valid state for the duration of the call.
-        std::unique_lock<std::mutex> lock (commandQueueMutex, std::try_to_lock);
+        process (buffer, midi);
+    }
 
-        if (lock.owns_lock())
-        {
-            while (auto command = incomingCommands.pop())
-            {
-                command->run (*this);
-                // We push the command onto the outgoing buffer, as long as it has
-                // room. If it doesn't have room for some reason, we'll delete
-                // the command right here on this thread, which might take a while
-                // and cause the audio to glitch, so I hope the buffer size is big
-                // enough!
-                outgoingCommands.push (move (command));
-            }
-        }
-
-        synthesiser.renderNextBlock (buffer, midiMessages, 0, buffer.getNumSamples());
-
-        auto loadedSamplerSound = samplerSound;
-
-        if (loadedSamplerSound->getSample() == nullptr)
-            return;
-
-        auto numVoices = synthesiser.getNumVoices();
-
-        // Update the current playback positions
-        for (auto i = 0; i < maxVoices; ++i)
-        {
-            auto* voicePtr = dynamic_cast<MPESamplerVoice*> (synthesiser.getVoice (i));
-
-            if (i < numVoices && voicePtr != nullptr)
-                playbackPositions[(size_t) i] = static_cast<float> (voicePtr->getCurrentSamplePosition() / loadedSamplerSound->getSample()->getSampleRate());
-            else
-                playbackPositions[(size_t) i] = 0.0f;
-        }
+    void processBlock (AudioBuffer<double>& buffer, MidiBuffer& midi) override
+    {
+        process (buffer, midi);
     }
 
     // These should be called from the GUI thread, and will block until the
@@ -2205,75 +2236,75 @@ public:
 
         if (fact == nullptr)
         {
-            pushCommand (SetSampleCommand (move (fact),
-                                           nullptr,
-                                           move (newSamplerVoices)));
+            commands.push (SetSampleCommand (move (fact),
+                                             nullptr,
+                                             move (newSamplerVoices)));
         }
         else
         {
             auto reader = fact->make (formatManager);
-            pushCommand (SetSampleCommand (move (fact),
-                                           std::unique_ptr<Sample> (new Sample (*reader, 10.0)),
-                                           move (newSamplerVoices)));
+            commands.push (SetSampleCommand (move (fact),
+                                             std::unique_ptr<Sample> (new Sample (*reader, 10.0)),
+                                             move (newSamplerVoices)));
         }
     }
 
     void setCentreFrequency (double centreFrequency)
     {
-        pushCommand ([centreFrequency] (SamplerAudioProcessor& proc)
-                     {
-                         auto loaded = proc.samplerSound;
-                         if (loaded != nullptr)
-                             loaded->setCentreFrequencyInHz (centreFrequency);
-                     });
+        commands.push ([centreFrequency] (SamplerAudioProcessor& proc)
+                       {
+                           auto loaded = proc.samplerSound;
+                           if (loaded != nullptr)
+                               loaded->setCentreFrequencyInHz (centreFrequency);
+                       });
     }
 
     void setLoopMode (LoopMode loopMode)
     {
-        pushCommand ([loopMode] (SamplerAudioProcessor& proc)
-                     {
-                         auto loaded = proc.samplerSound;
-                         if (loaded != nullptr)
-                             loaded->setLoopMode (loopMode);
-                     });
+        commands.push ([loopMode] (SamplerAudioProcessor& proc)
+                       {
+                           auto loaded = proc.samplerSound;
+                           if (loaded != nullptr)
+                               loaded->setLoopMode (loopMode);
+                       });
     }
 
     void setLoopPoints (Range<double> loopPoints)
     {
-        pushCommand ([loopPoints] (SamplerAudioProcessor& proc)
-                     {
-                         auto loaded = proc.samplerSound;
-                         if (loaded != nullptr)
-                             loaded->setLoopPointsInSeconds (loopPoints);
-                     });
+        commands.push ([loopPoints] (SamplerAudioProcessor& proc)
+                       {
+                           auto loaded = proc.samplerSound;
+                           if (loaded != nullptr)
+                               loaded->setLoopPointsInSeconds (loopPoints);
+                       });
     }
 
     void setMPEZoneLayout (MPEZoneLayout layout)
     {
-        pushCommand ([layout] (SamplerAudioProcessor& proc)
-                     {
-                         // setZoneLayout will lock internally, so we don't care too much about
-                         // ensuring that the layout doesn't get copied or destroyed on the
-                         // audio thread. If the audio glitches while updating midi settings
-                         // it doesn't matter too much.
-                         proc.synthesiser.setZoneLayout (layout);
-                     });
+        commands.push ([layout] (SamplerAudioProcessor& proc)
+                       {
+                           // setZoneLayout will lock internally, so we don't care too much about
+                           // ensuring that the layout doesn't get copied or destroyed on the
+                           // audio thread. If the audio glitches while updating midi settings
+                           // it doesn't matter too much.
+                           proc.synthesiser.setZoneLayout (layout);
+                       });
     }
 
     void setLegacyModeEnabled (int pitchbendRange, Range<int> channelRange)
     {
-        pushCommand ([pitchbendRange, channelRange] (SamplerAudioProcessor& proc)
-                     {
-                         proc.synthesiser.enableLegacyMode (pitchbendRange, channelRange);
-                     });
+        commands.push ([pitchbendRange, channelRange] (SamplerAudioProcessor& proc)
+                       {
+                           proc.synthesiser.enableLegacyMode (pitchbendRange, channelRange);
+                       });
     }
 
     void setVoiceStealingEnabled (bool voiceStealingEnabled)
     {
-        pushCommand ([voiceStealingEnabled] (SamplerAudioProcessor& proc)
-                     {
-                         proc.synthesiser.setVoiceStealingEnabled (voiceStealingEnabled);
-                     });
+        commands.push ([voiceStealingEnabled] (SamplerAudioProcessor& proc)
+                       {
+                           proc.synthesiser.setVoiceStealingEnabled (voiceStealingEnabled);
+                       });
     }
 
     void setNumberOfVoices (int numberOfVoices)
@@ -2287,12 +2318,12 @@ public:
         {
         public:
             SetNumVoicesCommand (std::vector<std::unique_ptr<MPESamplerVoice>> newVoicesIn)
-                : newVoices (move (newVoicesIn))
+                : newVoices (std::move (newVoicesIn))
             {}
 
             void operator() (SamplerAudioProcessor& proc)
             {
-                if (newVoices.size() < (size_t) proc.synthesiser.getNumVoices())
+                if ((int) newVoices.size() < proc.synthesiser.getNumVoices())
                     proc.synthesiser.reduceNumVoices (int (newVoices.size()));
                 else
                     for (auto it = begin (newVoices); (size_t) proc.synthesiser.getNumVoices() < newVoices.size(); ++it)
@@ -2311,7 +2342,7 @@ public:
         for (auto i = 0; i != numberOfVoices; ++i)
             newSamplerVoices.emplace_back (new MPESamplerVoice (loadedSamplerSound));
 
-        pushCommand (SetNumVoicesCommand (move (newSamplerVoices)));
+        commands.push (SetNumVoicesCommand (move (newSamplerVoices)));
     }
 
     // These accessors are just for an 'overview' and won't give the exact
@@ -2327,8 +2358,8 @@ private:
     //==============================================================================
     class SamplerAudioProcessorEditor  : public AudioProcessorEditor,
                                          public FileDragAndDropTarget,
-                                         public DataModel::Listener,
-                                         public MPESettingsDataModel::Listener
+                                         private DataModel::Listener,
+                                         private MPESettingsDataModel::Listener
     {
     public:
         SamplerAudioProcessorEditor (SamplerAudioProcessor& p, ProcessorState state)
@@ -2497,6 +2528,7 @@ private:
         DataModel dataModel { formatManager };
         UndoManager undoManager;
         MPESettingsDataModel mpeSettings { dataModel.mpeSettings() };
+
         TabbedComponent tabbedComponent { TabbedButtonBar::Orientation::TabsAtTop };
         MPESettingsComponent settingsComponent { dataModel.mpeSettings(), undoManager };
         MainSamplerView mainSamplerView;
@@ -2505,79 +2537,43 @@ private:
     };
 
     //==============================================================================
-    // We want to send type-erased commands to the audio thread, but we also
-    // want those commands to contain move-only resources, so that we can
-    // construct resources on the gui thread, and then transfer ownership
-    // cheaply to the audio thread. We can't do this with std::function
-    // because it enforces that functions are copy-constructible.
-    // Therefore, we use a very simple templated type-eraser here.
-    struct Command
+    template <typename Element>
+    void process (AudioBuffer<Element>& buffer, MidiBuffer& midiMessages)
     {
-        virtual ~Command() noexcept                    = default;
-        virtual void run (SamplerAudioProcessor& proc) = 0;
-    };
+        // Try to acquire a lock on the command queue.
+        // If we were successful, we pop all pending commands off the queue and
+        // apply them to the processor.
+        // If we weren't able to acquire the lock, it's because someone called
+        // createEditor, which requires that the processor data model stays in
+        // a valid state for the duration of the call.
+        const GenericScopedTryLock<SpinLock> lock (commandQueueMutex);
 
-    template <typename Func>
-    class TemplateCommand  : public Command,
-                             public Func
-    {
-    public:
-        template <typename FuncPrime>
-        explicit TemplateCommand (FuncPrime&& funcPrime)
-            : Func (std::forward<FuncPrime> (funcPrime))
-        {}
+        if (lock.isLocked())
+            commands.call (*this);
 
-        void run (SamplerAudioProcessor& proc) override
+        synthesiser.renderNextBlock (buffer, midiMessages, 0, buffer.getNumSamples());
+
+        auto loadedSamplerSound = samplerSound;
+
+        if (loadedSamplerSound->getSample() == nullptr)
+            return;
+
+        auto numVoices = synthesiser.getNumVoices();
+
+        // Update the current playback positions
+        for (auto i = 0; i < maxVoices; ++i)
         {
-            (*this) (proc);
-        }
-    };
+            auto* voicePtr = dynamic_cast<MPESamplerVoice*> (synthesiser.getVoice (i));
 
-    template <typename Func>
-    static std::unique_ptr<Command> make_command (Func&& func)
-    {
-        return std::unique_ptr<TemplateCommand<Func>> (new TemplateCommand<Func> (std::forward<Func> (func)));
+            if (i < numVoices && voicePtr != nullptr)
+                playbackPositions[(size_t) i] = static_cast<float> (voicePtr->getCurrentSamplePosition() / loadedSamplerSound->getSample()->getSampleRate());
+            else
+                playbackPositions[(size_t) i] = 0.0f;
+        }
+
     }
 
-    using CommandFifo = MoveOnlyFifo<std::unique_ptr<Command>>;
-
-    class OutgoingBufferCleaner  : public Timer
-    {
-    public:
-        explicit OutgoingBufferCleaner (CommandFifo& bufferToEmpty)
-            : buffer (bufferToEmpty)
-        {
-            startTimer (500);
-        }
-
-    private:
-        void timerCallback() override
-        {
-            while (auto command = buffer.pop())
-                command = {};
-        }
-
-        CommandFifo& buffer;
-    };
-
-    // Spin, trying to post a command to the sampler sound, until there's
-    // enough room in the command buffer to accept the new command.
-    template <typename Func>
-    void pushCommand (Func&& func)
-    {
-        auto command = make_command (std::forward<Func> (func));
-        while (command)
-            command = incomingCommands.push (move (command));
-    }
-
-    // We have an incoming and an outgoing command queue. The incoming commands
-    // are used to update the sampler sound in a thread-safe way, without
-    // blocking. Once we've consumed a command, we push it back onto the
-    // outgoing command queue, which is cleaned up periodically by the
-    // outgoingBufferCleaner.
-    CommandFifo incomingCommands;
-    CommandFifo outgoingCommands;
-    OutgoingBufferCleaner outgoingBufferCleaner { outgoingCommands };
+    CommandFifo<SamplerAudioProcessor> commands;
 
     MemoryBlock mb;
     std::unique_ptr<AudioFormatReaderFactory> readerFactory;
@@ -2587,9 +2583,9 @@ private:
     // This mutex is used to ensure we don't modify the processor state during
     // a call to createEditor, which would cause the UI to become desynched
     // with the real state of the processor.
-    std::mutex commandQueueMutex;
+    SpinLock commandQueueMutex;
 
-    static const int maxVoices { 20 };
+    static constexpr auto maxVoices { 20 };
 
     // This is used for visualising the current playback position of each voice.
     std::array<std::atomic<float>, maxVoices> playbackPositions;

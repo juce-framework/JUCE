@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -189,11 +188,11 @@ FileBasedDocument::SaveResult OpenDocumentManager::saveIfNeededAndUserAgrees (Op
 }
 
 
-bool OpenDocumentManager::closeDocument (int index, bool saveIfNeeded)
+bool OpenDocumentManager::closeDocument (int index, SaveIfNeeded saveIfNeeded)
 {
     if (Document* doc = documents [index])
     {
-        if (saveIfNeeded)
+        if (saveIfNeeded == SaveIfNeeded::yes)
             if (saveIfNeededAndUserAgrees (doc) != FileBasedDocument::savedOk)
                 return false;
 
@@ -214,12 +213,12 @@ bool OpenDocumentManager::closeDocument (int index, bool saveIfNeeded)
     return true;
 }
 
-bool OpenDocumentManager::closeDocument (Document* document, bool saveIfNeeded)
+bool OpenDocumentManager::closeDocument (Document* document, SaveIfNeeded saveIfNeeded)
 {
     return closeDocument (documents.indexOf (document), saveIfNeeded);
 }
 
-void OpenDocumentManager::closeFile (const File& f, bool saveIfNeeded)
+void OpenDocumentManager::closeFile (const File& f, SaveIfNeeded saveIfNeeded)
 {
     for (int i = documents.size(); --i >= 0;)
         if (Document* d = documents[i])
@@ -227,7 +226,7 @@ void OpenDocumentManager::closeFile (const File& f, bool saveIfNeeded)
                 closeDocument (i, saveIfNeeded);
 }
 
-bool OpenDocumentManager::closeAll (bool askUserToSave)
+bool OpenDocumentManager::closeAll (SaveIfNeeded askUserToSave)
 {
     for (int i = getNumOpenDocuments(); --i >= 0;)
         if (! closeDocument (i, askUserToSave))
@@ -236,7 +235,7 @@ bool OpenDocumentManager::closeAll (bool askUserToSave)
     return true;
 }
 
-bool OpenDocumentManager::closeAllDocumentsUsingProject (Project& project, bool saveIfNeeded)
+bool OpenDocumentManager::closeAllDocumentsUsingProject (Project& project, SaveIfNeeded saveIfNeeded)
 {
     for (int i = documents.size(); --i >= 0;)
         if (Document* d = documents[i])

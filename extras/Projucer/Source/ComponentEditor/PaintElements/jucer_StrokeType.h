@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -43,7 +42,7 @@ public:
 
         String s;
 
-        s << "PathStrokeType (" << CodeHelpers::floatLiteral (stroke.getStrokeThickness(), 3);
+        s << "juce::PathStrokeType (" << CodeHelpers::floatLiteral (stroke.getStrokeThickness(), 3);
 
         if (stroke.getJointStyle() != defaultStroke.getJointStyle()
             || stroke.getEndStyle() != defaultStroke.getEndStyle())
@@ -52,9 +51,9 @@ public:
 
             switch (stroke.getJointStyle())
             {
-                case PathStrokeType::mitered:   s << "PathStrokeType::mitered"; break;
-                case PathStrokeType::curved:    s << "PathStrokeType::curved"; break;
-                case PathStrokeType::beveled:   s << "PathStrokeType::beveled"; break;
+                case PathStrokeType::mitered:   s << "juce::PathStrokeType::mitered"; break;
+                case PathStrokeType::curved:    s << "juce::PathStrokeType::curved"; break;
+                case PathStrokeType::beveled:   s << "juce::PathStrokeType::beveled"; break;
                 default:                        jassertfalse; break;
             }
 
@@ -64,9 +63,9 @@ public:
 
                 switch (stroke.getEndStyle())
                 {
-                    case PathStrokeType::butt:      s << "PathStrokeType::butt"; break;
-                    case PathStrokeType::square:    s << "PathStrokeType::square"; break;
-                    case PathStrokeType::rounded:   s << "PathStrokeType::rounded"; break;
+                    case PathStrokeType::butt:      s << "juce::PathStrokeType::butt"; break;
+                    case PathStrokeType::square:    s << "juce::PathStrokeType::square"; break;
+                    case PathStrokeType::rounded:   s << "juce::PathStrokeType::rounded"; break;
                     default:                        jassertfalse; break;
                 }
             }

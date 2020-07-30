@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -47,11 +46,11 @@ namespace ColourHelpers
 
         if (hi > 0)
         {
-            auto invDiff = 1.0f / (hi - lo);
+            auto invDiff = 1.0f / (float) (hi - lo);
 
-            auto red   = (hi - r) * invDiff;
-            auto green = (hi - g) * invDiff;
-            auto blue  = (hi - b) * invDiff;
+            auto red   = (float) (hi - r) * invDiff;
+            auto green = (float) (hi - g) * invDiff;
+            auto blue  = (float) (hi - b) * invDiff;
 
             if      (r == hi)  hue = blue - green;
             else if (g == hi)  hue = 2.0f + red - blue;
@@ -80,12 +79,12 @@ namespace ColourHelpers
 
             if (hi > 0)
             {
-                lightness = ((hi + lo) / 2.0f) / 255.0f;
+                lightness = ((float) (hi + lo) / 2.0f) / 255.0f;
 
                 if (lightness > 0.0f)
                     hue = getHue (col);
 
-                saturation = (hi - lo) / (1.0f - std::abs ((2.0f * lightness) - 1.0f));
+                saturation = (float) (hi - lo) / (1.0f - std::abs ((2.0f * lightness) - 1.0f));
             }
         }
 
@@ -137,12 +136,12 @@ namespace ColourHelpers
 
             if (hi > 0)
             {
-                saturation = (hi - lo) / (float) hi;
+                saturation = (float) (hi - lo) / (float) hi;
 
                 if (saturation > 0.0f)
                     hue = getHue (col);
 
-                brightness = hi / 255.0f;
+                brightness = (float) hi / 255.0f;
             }
         }
 

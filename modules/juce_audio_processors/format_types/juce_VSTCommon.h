@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -26,13 +25,6 @@
 
 namespace juce
 {
-
-//==============================================================================
-#if JUCE_BIG_ENDIAN
- #define JUCE_MULTICHAR_CONSTANT(a, b, c, d) (a | (((uint32) b) << 8) | (((uint32) c) << 16) | (((uint32) d) << 24))
-#else
- #define JUCE_MULTICHAR_CONSTANT(a, b, c, d) (d | (((uint32) c) << 8) | (((uint32) b) << 16) | (((uint32) a) << 24))
-#endif
 
 //==============================================================================
 /** Structure for VST speaker mappings
@@ -279,7 +271,7 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
         return mappings;
     }
 
-    static inline int32 getSpeakerType (AudioChannelSet::ChannelType type) noexcept
+    static int32 getSpeakerType (AudioChannelSet::ChannelType type) noexcept
     {
         static const std::map<AudioChannelSet::ChannelType, int32> speakerTypeMap =
         {
@@ -310,7 +302,7 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
         return speakerTypeMap.at (type);
     }
 
-    static inline AudioChannelSet::ChannelType getChannelType (int32 type) noexcept
+    static AudioChannelSet::ChannelType getChannelType (int32 type) noexcept
     {
         switch (type)
         {

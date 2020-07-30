@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -40,9 +39,6 @@
 #endif
 
 #if JUCE_IOS
- #if (! defined __IPHONE_OS_VERSION_MIN_REQUIRED) || (! defined __IPHONE_9_0) || (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_9_0)
-  #error AUv3 needs Deployment Target iOS 9.0 or higher to compile
- #endif
  #if (defined __IPHONE_11_0) && (__IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_11_0)
   #define JUCE_AUV3_MIDI_OUTPUT_SUPPORTED 1
   #define JUCE_AUV3_VIEW_CONFIG_SUPPORTED 1
@@ -77,8 +73,7 @@
 
 #define JUCE_AUDIOUNIT_OBJC_NAME(x) JUCE_JOIN_MACRO (x, AUv3)
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wnullability-completeness"
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnullability-completeness")
 
 using namespace juce;
 
@@ -116,13 +111,12 @@ public:
     JuceAudioUnitv3Base (const AudioComponentDescription& descr,
                          AudioComponentInstantiationOptions options,
                          NSError** error)
-       #pragma clang diagnostic push
-       #pragma clang diagnostic ignored "-Wobjc-method-access"
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wobjc-method-access")
         : au ([audioUnitObjCClass.createInstance() initWithComponentDescription: descr
                                                                         options: options
                                                                           error: error
                                                                       juceClass: this])
-       #pragma clang diagnostic pop
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     {}
 
     JuceAudioUnitv3Base (AUAudioUnit* audioUnit) : au (audioUnit)
@@ -146,14 +140,12 @@ public:
 
     virtual NSDictionary<NSString*, id>* getFullState()
     {
-        objc_super s = { getAudioUnit(), [AUAudioUnit class] };
-        return ObjCMsgSendSuper<NSDictionary<NSString*, id>*> (&s, @selector (fullState));
+        return ObjCMsgSendSuper<AUAudioUnit, NSDictionary<NSString*, id>*> (getAudioUnit(), @selector (fullState));
     }
 
     virtual void setFullState (NSDictionary<NSString*, id>* state)
     {
-        objc_super s = { getAudioUnit(), [AUAudioUnit class] };
-        ObjCMsgSendSuper<void, NSDictionary<NSString*, id>*> (&s, @selector (setFullState:), state);
+        ObjCMsgSendSuper<AUAudioUnit, void> (getAudioUnit(), @selector (setFullState:), state);
     }
 
     virtual AUParameterTree* getParameterTree()                            = 0;
@@ -182,14 +174,12 @@ public:
 
     virtual bool getShouldBypassEffect()
     {
-        objc_super s = { getAudioUnit(), [AUAudioUnit class] };
-        return (ObjCMsgSendSuper<BOOL> (&s, @selector (shouldBypassEffect)) == YES);
+        return (ObjCMsgSendSuper<AUAudioUnit, BOOL> (getAudioUnit(), @selector (shouldBypassEffect)) == YES);
     }
 
     virtual void setShouldBypassEffect (bool shouldBypass)
     {
-        objc_super s = { getAudioUnit(), [AUAudioUnit class] };
-        ObjCMsgSendSuper<void, BOOL> (&s, @selector (setShouldBypassEffect:), shouldBypass ? YES : NO);
+        ObjCMsgSendSuper<AUAudioUnit, void> (getAudioUnit(), @selector (setShouldBypassEffect:), shouldBypass ? YES : NO);
     }
 
     //==============================================================================
@@ -198,14 +188,12 @@ public:
 
     virtual bool allocateRenderResourcesAndReturnError (NSError **outError)
     {
-        objc_super s = { getAudioUnit(), [AUAudioUnit class] };
-        return (ObjCMsgSendSuper<BOOL, NSError**> (&s, @selector (allocateRenderResourcesAndReturnError:), outError) == YES);
+        return (ObjCMsgSendSuper<AUAudioUnit, BOOL, NSError**> (getAudioUnit(), @selector (allocateRenderResourcesAndReturnError:), outError) == YES);
     }
 
     virtual void deallocateRenderResources()
     {
-        objc_super s = { getAudioUnit(), [AUAudioUnit class] };
-        ObjCMsgSendSuper<void> (&s, @selector (deallocateRenderResources));
+        ObjCMsgSendSuper<AUAudioUnit, void> (getAudioUnit(), @selector (deallocateRenderResources));
     }
 
     //==============================================================================
@@ -221,13 +209,12 @@ private:
         {
             addIvar<JuceAudioUnitv3Base*> ("cppObject");
 
-           #pragma clang diagnostic push
-           #pragma clang diagnostic ignored "-Wundeclared-selector"
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             addMethod (@selector (initWithComponentDescription:options:error:juceClass:),
                        initWithComponentDescriptionAndJuceClass, "@@:",
                        @encode (AudioComponentDescription),
                        @encode (AudioComponentInstantiationOptions), "^@@");
-           #pragma clang diagnostic pop
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             addMethod (@selector (initWithComponentDescription:options:error:),
                        initWithComponentDescription, "@@:",
@@ -298,9 +285,8 @@ private:
         {
             AUAudioUnit* self = _self;
 
-            objc_super s = { self, [AUAudioUnit class] };
-            self = ObjCMsgSendSuper<AUAudioUnit*, AudioComponentDescription,
-                                    AudioComponentInstantiationOptions, NSError**> (&s, @selector(initWithComponentDescription:options:error:), descr, options, error);
+            self = ObjCMsgSendSuper<AUAudioUnit, AUAudioUnit*, AudioComponentDescription,
+                                    AudioComponentInstantiationOptions, NSError**> (self, @selector (initWithComponentDescription:options:error:), descr, options, error);
 
             JuceAudioUnitv3Base* juceAU = JuceAudioUnitv3Base::create (self, descr, options, error);
 
@@ -312,9 +298,8 @@ private:
         {
             AUAudioUnit* self = _self;
 
-            objc_super s = { self, [AUAudioUnit class] };
-            self = ObjCMsgSendSuper<AUAudioUnit*, AudioComponentDescription,
-                                    AudioComponentInstantiationOptions, NSError**> (&s, @selector(initWithComponentDescription:options:error:), descr, options, error);
+            self = ObjCMsgSendSuper<AUAudioUnit, AUAudioUnit*, AudioComponentDescription,
+                                    AudioComponentInstantiationOptions, NSError**> (self, @selector(initWithComponentDescription:options:error:), descr, options, error);
 
 
             setThis (self, juceAU);
@@ -1539,11 +1524,8 @@ private:
            #if JucePlugin_ProducesMidiOutput && JUCE_AUV3_MIDI_OUTPUT_SUPPORTED
             if (auto midiOut = [au MIDIOutputEventBlock])
             {
-                MidiMessage msg;
-                int samplePosition;
-
-                for (MidiBuffer::Iterator it (midiMessages); it.getNextEvent (msg, samplePosition);)
-                    midiOut (samplePosition, 0, msg.getRawDataSize(), msg.getRawData());
+                for (const auto metadata : midiMessages)
+                    midiOut (metadata.samplePosition, 0, metadata.numBytes, metadata.data);
             }
            #endif
 
@@ -1948,10 +1930,8 @@ private:
 #if JUCE_IOS
 bool JUCE_CALLTYPE juce_isInterAppAudioConnected() { return false; }
 void JUCE_CALLTYPE juce_switchToHostApplication()  {}
-#if JUCE_MODULE_AVAILABLE_juce_gui_basics
 Image JUCE_CALLTYPE juce_getIAAHostIcon (int)      { return {}; }
 #endif
-#endif
 
-#pragma clang diagnostic pop
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif

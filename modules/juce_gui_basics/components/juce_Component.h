@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -370,6 +369,19 @@ public:
     Rectangle<int> getLocalArea (const Component* sourceComponent,
                                  Rectangle<int> areaRelativeToSourceComponent) const;
 
+    /** Converts a rectangle to be relative to this component's coordinate space.
+
+        This takes a rectangle that is relative to a different component, and returns its position relative
+        to this component. If the sourceComponent parameter is null, the source rectangle is assumed to be
+        a screen coordinate.
+
+        If you've used setTransform() to apply one or more transforms to components, then the source rectangle
+        may not actually be rectangular when converted to the target space, so in that situation this will return
+        the smallest rectangle that fully contains the transformed area.
+    */
+    Rectangle<float> getLocalArea (const Component* sourceComponent,
+                                   Rectangle<float> areaRelativeToSourceComponent) const;
+
     /** Converts a point relative to this component's top-left into a screen coordinate.
         @see getLocalPoint, localAreaToGlobal
     */
@@ -388,6 +400,15 @@ public:
         @see getLocalPoint, localPointToGlobal
     */
     Rectangle<int> localAreaToGlobal (Rectangle<int> localArea) const;
+
+    /** Converts a rectangle from this component's coordinate space to a screen coordinate.
+
+        If you've used setTransform() to apply one or more transforms to components, then the source rectangle
+        may not actually be rectangular when converted to the target space, so in that situation this will return
+        the smallest rectangle that fully contains the transformed area.
+        @see getLocalPoint, localPointToGlobal
+    */
+    Rectangle<float> localAreaToGlobal (Rectangle<float> localArea) const;
 
     //==============================================================================
     /** Moves the component to a new position.

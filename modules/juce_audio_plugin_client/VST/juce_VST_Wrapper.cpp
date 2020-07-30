@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -24,14 +23,13 @@
   ==============================================================================
 */
 
+#include <juce_core/system/juce_CompilerWarnings.h>
 #include <juce_core/system/juce_TargetPlatform.h>
 #include "../utility/juce_CheckSettingMacros.h"
 
 #if JucePlugin_Build_VST
 
-#ifdef _MSC_VER
- #pragma warning (disable : 4996 4100)
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996 4100)
 
 #include "../utility/juce_IncludeSystemHeaders.h"
 #include <juce_core/juce_core.h>
@@ -63,33 +61,18 @@
  #define PRAGMA_ALIGN_SUPPORTED 1
 #endif
 
-#ifndef _MSC_VER
+#if ! JUCE_MSVC
  #define __cdecl
 #endif
 
-#if JUCE_CLANG
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wconversion"
- #pragma clang diagnostic ignored "-Wshadow"
- #pragma clang diagnostic ignored "-Wdeprecated-register"
- #pragma clang diagnostic ignored "-Wunused-parameter"
- #pragma clang diagnostic ignored "-Wdeprecated-writable-strings"
- #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
- #if __has_warning("-Wzero-as-null-pointer-constant")
-  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
- #endif
-#endif
-
-#if JUCE_GCC
- #pragma GCC diagnostic push
- #pragma GCC diagnostic ignored "-Wshadow"
- #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#endif
-
-#ifdef _MSC_VER
- #pragma warning (push)
- #pragma warning (disable : 4458)
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
+                                     "-Wshadow",
+                                     "-Wdeprecated-register",
+                                     "-Wunused-parameter",
+                                     "-Wdeprecated-writable-strings",
+                                     "-Wnon-virtual-dtor",
+                                     "-Wzero-as-null-pointer-constant")
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4458)
 
 #define VST_FORCE_DEPRECATED 0
 
@@ -105,41 +88,28 @@ namespace Vst2
 #include "pluginterfaces/vst2.x/aeffectx.h"
 }
 
-using namespace juce;
-
-#ifdef _MSC_VER
- #pragma warning (pop)
-#endif
-
-#if JUCE_CLANG
- #pragma clang diagnostic pop
-#endif
-
-#if JUCE_GCC
- #pragma GCC diagnostic pop
-#endif
+JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
-#ifdef _MSC_VER
+#if JUCE_MSVC
  #pragma pack (push, 8)
 #endif
 
 #define JUCE_VSTINTERFACE_H_INCLUDED 1
+#define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
 
 #include "../utility/juce_IncludeModuleHeaders.h"
+
+using namespace juce;
+
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_WindowsHooks.h"
 
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/format_types/juce_VSTCommon.h>
 
-#if JUCE_BIG_ENDIAN
- #define JUCE_MULTICHAR_CONSTANT(a, b, c, d) (a | (((uint32) b) << 8) | (((uint32) c) << 16) | (((uint32) d) << 24))
-#else
- #define JUCE_MULTICHAR_CONSTANT(a, b, c, d) (d | (((uint32) c) << 8) | (((uint32) b) << 16) | (((uint32) a) << 24))
-#endif
-
-#ifdef _MSC_VER
+#ifdef JUCE_MSVC
  #pragma pack (pop)
 #endif
 
@@ -245,7 +215,7 @@ struct SharedMessageThread  : public Thread
 
         MessageManager::getInstance()->setCurrentThreadAsMessageThread();
 
-        ScopedXDisplay xDisplay;
+        XWindowSystem::getInstance();
 
         while ((! threadShouldExit()) && MessageManager::getInstance()->runDispatchLoopUntil (250))
         {}
@@ -554,15 +524,11 @@ public:
             outgoingEvents.ensureSize (numEvents);
             outgoingEvents.clear();
 
-            const uint8* midiEventData;
-            int midiEventSize, midiEventPosition;
-            MidiBuffer::Iterator i (midiEvents);
-
-            while (i.getNextEvent (midiEventData, midiEventSize, midiEventPosition))
+            for (const auto metadata : midiEvents)
             {
-                jassert (midiEventPosition >= 0 && midiEventPosition < numSamples);
+                jassert (metadata.samplePosition >= 0 && metadata.samplePosition < numSamples);
 
-                outgoingEvents.addEvent (midiEventData, midiEventSize, midiEventPosition);
+                outgoingEvents.addEvent (metadata.data, metadata.numBytes, metadata.samplePosition);
             }
 
             // Send VST events to the host.
@@ -1124,7 +1090,17 @@ public:
            #elif JUCE_LINUX
             addToDesktop (0, args.ptr);
             hostWindow = (Window) args.ptr;
-            XReparentWindow (display.display, (Window) getWindowHandle(), hostWindow, 0, 0);
+            X11Symbols::getInstance()->xReparentWindow (display, (Window) getWindowHandle(), hostWindow, 0, 0);
+
+            if (auto* peer = getPeer())
+            {
+                auto screenBounds = peer->localToGlobal (peer->getBounds());
+
+                auto scale = Desktop::getInstance().getDisplays().findDisplayForRect (screenBounds, false).scale
+                                         / Desktop::getInstance().getGlobalScaleFactor();
+
+                setContentScaleFactor ((float) scale);
+            }
            #else
             hostWindow = attachComponentToWindowRefVST (this, args.ptr, wrapper.useNSView);
            #endif
@@ -1233,12 +1209,9 @@ public:
 
                     auto scale = Desktop::getInstance().getGlobalScaleFactor();
 
-                    if (auto* peer = ed->getPeer())
-                        scale *= (float) peer->getPlatformScaleFactor();
-
-                    XResizeWindow (display.display, (Window) getWindowHandle(),
-                                   static_cast<unsigned int> (roundToInt (pos.getWidth()  * scale)),
-                                   static_cast<unsigned int> (roundToInt (pos.getHeight() * scale)));
+                    X11Symbols::getInstance()->xResizeWindow (display, (Window) getWindowHandle(),
+                                                              static_cast<unsigned int> (roundToInt (pos.getWidth()  * scale)),
+                                                              static_cast<unsigned int> (roundToInt (pos.getHeight() * scale)));
                    #endif
 
                    #if JUCE_MAC
@@ -1396,7 +1369,7 @@ public:
             return { (int16) roundToInt (rect.top    * desktopScale),
                      (int16) roundToInt (rect.left   * desktopScale),
                      (int16) roundToInt (rect.bottom * desktopScale),
-                     (int16) roundToInt (rect.right  * desktopScale)};
+                     (int16) roundToInt (rect.right  * desktopScale) };
         }
 
         //==============================================================================
@@ -1410,7 +1383,7 @@ public:
        #if JUCE_MAC
         void* hostWindow = nullptr;
        #elif JUCE_LINUX
-        ScopedXDisplay display;
+        ::Display* display = XWindowSystem::getInstance()->getDisplay();
         Window hostWindow = {};
        #elif JUCE_WINDOWS
         HWND hostWindow = {};
@@ -1433,7 +1406,7 @@ private:
                 && (int32) hostCallback (&vstEffect, Vst2::audioMasterGetCurrentProcessLevel, 0, 0, nullptr, 0) == 4;
     }
 
-    static inline int32 convertHexVersionToDecimal (const unsigned int hexVersion)
+    static int32 convertHexVersionToDecimal (const unsigned int hexVersion)
     {
        #if JUCE_VST_RETURN_HEX_VERSION_NUMBER_DIRECTLY
         return (int32) hexVersion;
@@ -1893,8 +1866,8 @@ private:
         if (handleManufacturerSpecificVST2Opcode (args.index, args.value, args.ptr, args.opt))
             return 1;
 
-        if (args.index == JUCE_MULTICHAR_CONSTANT ('P', 'r', 'e', 'S')
-             && args.value == JUCE_MULTICHAR_CONSTANT ('A', 'e', 'C', 's'))
+        if (args.index == (int32) ByteOrder::bigEndianInt ("PreS")
+             && args.value == (int32) ByteOrder::bigEndianInt ("AeCs"))
             return handleSetContentScaleFactor (args.opt);
 
         if (args.index == Vst2::effGetParamDisplay)
@@ -1909,7 +1882,7 @@ private:
     pointer_sized_int handleCanPlugInDo (VstOpCodeArguments args)
     {
         auto text = (const char*) args.ptr;
-        auto matches = [=](const char* s) { return strcmp (text, s) == 0; };
+        auto matches = [=] (const char* s) { return strcmp (text, s) == 0; };
 
         if (matches ("receiveVstEvents")
          || matches ("receiveVstMidiEvent")
@@ -2176,7 +2149,7 @@ namespace
 
                     if (auto* callbackHandler = dynamic_cast<VSTCallbackHandler*> (processor))
                     {
-                        callbackHandler->handleVstHostCallbackAvailable ([audioMaster, aEffect](int32 opcode, int32 index, pointer_sized_int value, void* ptr, float opt)
+                        callbackHandler->handleVstHostCallbackAvailable ([audioMaster, aEffect] (int32 opcode, int32 index, pointer_sized_int value, void* ptr, float opt)
                         {
                             return audioMaster (aEffect, opcode, index, value, ptr, opt);
                         });
@@ -2272,5 +2245,7 @@ namespace
         return true;
     }
 #endif
+
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 #endif

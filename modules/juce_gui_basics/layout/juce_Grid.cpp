@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -441,25 +440,25 @@ struct Grid::PlacementHelpers
 
         if (alignContent == Grid::AlignContent::spaceBetween)
         {
-            const auto shift = ((rowNumber - 1) * (calculation.remainingHeight / float(numberOfRows - 1)));
+            const auto shift = ((float) (rowNumber - 1) * (calculation.remainingHeight / float(numberOfRows - 1)));
             area.setY (area.getY() + shift);
         }
 
         if (justifyContent == Grid::JustifyContent::spaceBetween)
         {
-            const auto shift = ((columnNumber - 1) * (calculation.remainingWidth / float(numberOfColumns - 1)));
+            const auto shift = ((float) (columnNumber - 1) * (calculation.remainingWidth / float(numberOfColumns - 1)));
             area.setX (area.getX() + shift);
         }
 
         if (alignContent == Grid::AlignContent::spaceEvenly)
         {
-            const auto shift = (rowNumber * (calculation.remainingHeight / float(numberOfRows + 1)));
+            const auto shift = ((float) rowNumber * (calculation.remainingHeight / float(numberOfRows + 1)));
             area.setY (area.getY() + shift);
         }
 
         if (justifyContent == Grid::JustifyContent::spaceEvenly)
         {
-            const auto shift = (columnNumber * (calculation.remainingWidth / float(numberOfColumns + 1)));
+            const auto shift = ((float) columnNumber * (calculation.remainingWidth / float(numberOfColumns + 1)));
             area.setX (area.getX() + shift);
         }
 
@@ -467,7 +466,7 @@ struct Grid::PlacementHelpers
         {
             const auto inbetweenShift = calculation.remainingHeight / float(numberOfRows);
             const auto sidesShift = inbetweenShift / 2;
-            auto shift = (rowNumber - 1) * inbetweenShift + sidesShift;
+            auto shift = (float) (rowNumber - 1) * inbetweenShift + sidesShift;
 
             area.setY (area.getY() + shift);
         }
@@ -476,7 +475,7 @@ struct Grid::PlacementHelpers
         {
             const auto inbetweenShift = calculation.remainingWidth / float(numberOfColumns);
             const auto sidesShift = inbetweenShift / 2;
-            auto shift = (columnNumber - 1) * inbetweenShift + sidesShift;
+            auto shift = (float) (columnNumber - 1) * inbetweenShift + sidesShift;
 
             area.setX (area.getX() + shift);
         }
@@ -855,9 +854,9 @@ struct Grid::AutoPlacement
                                         Array<Grid::TrackInfo>& rows,
                                         const ItemPlacementArray& itemPlacementArray)
     {
-        auto isSpan = [](Grid::PlacementHelpers::LineRange r) -> bool { return std::abs (r.end - r.start) > 1; };
+        auto isSpan = [] (Grid::PlacementHelpers::LineRange r) -> bool { return std::abs (r.end - r.start) > 1; };
 
-        auto getHighestItemOnRow = [isSpan](int rowNumber, const ItemPlacementArray& itemPlacementArrayToUse) -> float
+        auto getHighestItemOnRow = [isSpan] (int rowNumber, const ItemPlacementArray& itemPlacementArrayToUse) -> float
         {
             float highestRowSize = 0.0f;
 
@@ -868,7 +867,7 @@ struct Grid::AutoPlacement
             return highestRowSize;
         };
 
-        auto getHighestItemOnColumn = [isSpan](int rowNumber, const ItemPlacementArray& itemPlacementArrayToUse) -> float
+        auto getHighestItemOnColumn = [isSpan] (int rowNumber, const ItemPlacementArray& itemPlacementArrayToUse) -> float
         {
             float highestColumnSize = 0.0f;
             for (const auto& i : itemPlacementArrayToUse)

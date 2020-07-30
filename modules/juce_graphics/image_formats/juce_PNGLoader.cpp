@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -27,19 +26,15 @@
 namespace juce
 {
 
-#if JUCE_MSVC
- #pragma warning (push)
- #pragma warning (disable: 4390 4611 4365 4267)
- #ifdef __INTEL_COMPILER
-  #pragma warning (disable: 2544 2545)
- #endif
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4390 4611 4365 4267 4616 2544 2545)
 
 namespace zlibNamespace
 {
 #if JUCE_INCLUDE_ZLIB_CODE
   #undef OS_CODE
   #undef fdopen
+  #define ZLIB_INTERNAL
+  #define NO_DUMMY_DECL
   #include <juce_core/zip/zlib/zlib.h>
   #undef OS_CODE
 #else
@@ -63,28 +58,11 @@ namespace pnglibNamespace
    using std::free;
   #endif
 
-  #if JUCE_CLANG
-   #pragma clang diagnostic push
-   #pragma clang diagnostic ignored "-Wsign-conversion"
-   #if __has_warning ("-Wimplicit-fallthrough")
-    #pragma clang diagnostic ignored "-Wimplicit-fallthrough"
-   #endif
-   #if __has_warning("-Wzero-as-null-pointer-constant")
-    #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
-   #endif
-   #if __has_warning("-Wcomma")
-    #pragma clang diagnostic ignored "-Wcomma"
-   #endif
-  #endif
-
-  #if JUCE_GCC
-   #pragma GCC diagnostic push
-   #pragma GCC diagnostic ignored "-Wsign-conversion"
-   #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-   #if __GNUC__ >= 7
-    #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
-   #endif
-  #endif
+   JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wsign-conversion",
+                                        "-Wimplicit-fallthrough",
+                                        "-Wtautological-constant-out-of-range-compare",
+                                        "-Wzero-as-null-pointer-constant",
+                                        "-Wcomma")
 
   #undef check
   using std::abs;
@@ -332,13 +310,7 @@ namespace pnglibNamespace
   #include "pnglib/pngwtran.c"
   #include "pnglib/pngwutil.c"
 
-  #if JUCE_CLANG
-   #pragma clang diagnostic pop
-  #endif
-
-  #if JUCE_GCC
-   #pragma GCC diagnostic pop
-  #endif
+  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #else
   extern "C"
@@ -353,9 +325,7 @@ namespace pnglibNamespace
 #undef min
 #undef fdopen
 
-#if JUCE_MSVC
- #pragma warning (pop)
-#endif
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 //==============================================================================
 namespace PNGHelpers
@@ -386,10 +356,7 @@ namespace PNGHelpers
 
     static void JUCE_CDECL warningCallback (png_structp, png_const_charp) {}
 
-   #if JUCE_MSVC
-    #pragma warning (push)
-    #pragma warning (disable: 4611) // (warning about setjmp)
-   #endif
+    JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4611)
 
     static bool readHeader (InputStream& in, png_structp pngReadStruct, png_infop pngInfoStruct, jmp_buf& errorJumpBuf,
                             png_uint_32& width, png_uint_32& height, int& bitDepth, int& colorType, int& interlaceType) noexcept
@@ -441,9 +408,7 @@ namespace PNGHelpers
         return false;
     }
 
-   #if JUCE_MSVC
-    #pragma warning (pop)
-   #endif
+    JUCE_END_IGNORE_WARNINGS_MSVC
 
     static Image createImageFromData (bool hasAlphaChan, int width, int height, png_bytepp rows)
     {

@@ -201,7 +201,7 @@ public:
 private:
     SharedRef holder;
 
-    static inline SharedRef getRef (ObjectType* o)
+    static SharedRef getRef (ObjectType* o)
     {
         if (o != nullptr)
             return o->masterReference.getSharedPointer (o);

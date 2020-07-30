@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -548,7 +547,7 @@ struct TextEditor::Iterator
 
         Graphics::ScopedSaveState state (g);
         g.reduceClipRegion ({ startX, baselineY, endX - startX, 1 });
-        g.fillCheckerBoard ({ (float) endX, baselineY + 1.0f }, 3.0f, 1.0f, colour, Colours::transparentBlack);
+        g.fillCheckerBoard ({ (float) endX, (float) baselineY + 1.0f }, 3.0f, 1.0f, colour, Colours::transparentBlack);
     }
 
     void drawSelectedText (Graphics& g, Range<int> selected, Colour selectedTextColour) const
@@ -1585,9 +1584,9 @@ void TextEditor::drawContent (Graphics& g)
             Iterator i2 (i);
             RectangleList<float> selectionArea;
 
-            while (i2.next() && i2.lineY < clip.getBottom())
+            while (i2.next() && i2.lineY < (float) clip.getBottom())
             {
-                if (i2.lineY + i2.lineHeight >= clip.getY()
+                if (i2.lineY + i2.lineHeight >= (float) clip.getY()
                     && selection.intersects ({ i2.indexInText, i2.indexInText + i2.atom->numChars }))
                 {
                     i2.addSelection (selectionArea, selection);
@@ -1602,9 +1601,9 @@ void TextEditor::drawContent (Graphics& g)
 
         const UniformTextSection* lastSection = nullptr;
 
-        while (i.next() && i.lineY < clip.getBottom())
+        while (i.next() && i.lineY < (float) clip.getBottom())
         {
-            if (i.lineY + i.lineHeight >= clip.getY())
+            if (i.lineY + i.lineHeight >= (float) clip.getY())
             {
                 if (selection.intersects ({ i.indexInText, i.indexInText + i.atom->numChars }))
                 {
@@ -1622,9 +1621,9 @@ void TextEditor::drawContent (Graphics& g)
         {
             Iterator i2 (*this);
 
-            while (i2.next() && i2.lineY < clip.getBottom())
+            while (i2.next() && i2.lineY < (float) clip.getBottom())
             {
-                if (i2.lineY + i2.lineHeight >= clip.getY()
+                if (i2.lineY + i2.lineHeight >= (float) clip.getY()
                       && underlinedSection.intersects ({ i2.indexInText, i2.indexInText + i2.atom->numChars }))
                 {
                     i2.drawUnderline (g, underlinedSection, findColour (textColourId));
@@ -1884,7 +1883,7 @@ bool TextEditor::pageUp (bool selecting)
         return moveCaretToStartOfLine (selecting);
 
     auto caretPos = getCaretRectangleFloat();
-    return moveCaretWithTransaction (indexAtPosition (caretPos.getX(), caretPos.getY() - viewport->getViewHeight()), selecting);
+    return moveCaretWithTransaction (indexAtPosition (caretPos.getX(), caretPos.getY() - (float) viewport->getViewHeight()), selecting);
 }
 
 bool TextEditor::pageDown (bool selecting)
@@ -1893,7 +1892,7 @@ bool TextEditor::pageDown (bool selecting)
         return moveCaretToEndOfLine (selecting);
 
     auto caretPos = getCaretRectangleFloat();
-    return moveCaretWithTransaction (indexAtPosition (caretPos.getX(), caretPos.getBottom() + viewport->getViewHeight()), selecting);
+    return moveCaretWithTransaction (indexAtPosition (caretPos.getX(), caretPos.getBottom() + (float) viewport->getViewHeight()), selecting);
 }
 
 void TextEditor::scrollByLines (int deltaLines)

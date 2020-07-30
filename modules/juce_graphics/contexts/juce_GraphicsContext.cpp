@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -533,10 +532,10 @@ void Graphics::fillCheckerBoard (Rectangle<float> area, float checkWidth, float 
 
             if (! clipped.isEmpty())
             {
-                const int checkNumX = (int) ((clipped.getX() - area.getX()) / checkWidth);
-                const int checkNumY = (int) ((clipped.getY() - area.getY()) / checkHeight);
-                const float startX = area.getX() + checkNumX * checkWidth;
-                const float startY = area.getY() + checkNumY * checkHeight;
+                const int checkNumX = (int) (((float) clipped.getX() - area.getX()) / checkWidth);
+                const int checkNumY = (int) (((float) clipped.getY() - area.getY()) / checkHeight);
+                const float startX = area.getX() + (float) checkNumX * checkWidth;
+                const float startY = area.getY() + (float) checkNumY * checkHeight;
                 const float right  = (float) clipped.getRight();
                 const float bottom = (float) clipped.getBottom();
 
@@ -667,7 +666,7 @@ void Graphics::drawImage (const Image& imageToDraw,
 {
     if (imageToDraw.isValid() && context.clipRegionIntersects (coordsToRectangle (dx, dy, dw, dh)))
         drawImageTransformed (imageToDraw.getClippedImage (coordsToRectangle (sx, sy, sw, sh)),
-                              AffineTransform::scale (dw / (float) sw, dh / (float) sh)
+                              AffineTransform::scale ((float) dw / (float) sw, (float) dh / (float) sh)
                                               .translated ((float) dx, (float) dy),
                               fillAlphaChannelWithCurrentBrush);
 }

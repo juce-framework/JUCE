@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -32,10 +31,10 @@ class GroupComponentHandler  : public ComponentTypeHandler
 {
 public:
     GroupComponentHandler()
-        : ComponentTypeHandler ("Group Box", "GroupComponent", typeid (GroupComponent), 200, 150)
+        : ComponentTypeHandler ("Group Box", "juce::GroupComponent", typeid (GroupComponent), 200, 150)
     {
-        registerColour (GroupComponent::outlineColourId, "outline", "outlinecol");
-        registerColour (GroupComponent::textColourId, "text", "textcol");
+        registerColour (juce::GroupComponent::outlineColourId, "outline", "outlinecol");
+        registerColour (juce::GroupComponent::textColourId, "text", "textcol");
     }
 
     Component* createNewComponent (JucerDocument*) override
@@ -173,7 +172,7 @@ private:
 
     //==============================================================================
     class GroupJustificationProperty  : public JustificationProperty,
-                                        public ChangeListener
+                                        private ChangeListener
     {
     public:
         GroupJustificationProperty (GroupComponent* const group_, JucerDocument& doc)
@@ -184,25 +183,25 @@ private:
             document.addChangeListener (this);
         }
 
-        ~GroupJustificationProperty()
+        ~GroupJustificationProperty() override
         {
             document.removeChangeListener (this);
         }
 
-        void setJustification (Justification newJustification)
+        void setJustification (Justification newJustification) override
         {
             document.perform (new GroupJustifyChangeAction (group, *document.getComponentLayout(), newJustification),
                               "Change text label position");
         }
 
-        Justification getJustification() const
+        Justification getJustification() const override
         {
             return group->getTextLabelPosition();
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
-
     private:
+        void changeListenerCallback (ChangeBroadcaster*) override { refresh(); }
+
         GroupComponent* const group;
         JucerDocument& document;
 

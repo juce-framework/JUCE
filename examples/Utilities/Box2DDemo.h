@@ -88,10 +88,14 @@ struct Test
     std::unique_ptr<b2World> m_world  { new b2World (b2Vec2 (0.0f, -10.0f)) };
 };
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wimplicit-int-float-conversion")
+
 #include "../Assets/Box2DTests/AddPair.h"
 #include "../Assets/Box2DTests/ApplyForce.h"
 #include "../Assets/Box2DTests/Dominos.h"
 #include "../Assets/Box2DTests/Chain.h"
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
 /** This list box just displays a StringArray and broadcasts a change message when the
@@ -118,7 +122,7 @@ public:
                                             lf.findColour (ListBox::backgroundColourId)));
 
         g.setColour (lf.findColour (ListBox::textColourId));
-        g.setFont (h * 0.7f);
+        g.setFont ((float) h * 0.7f);
         g.drawText (tests[row], Rectangle<int> (0, 0, w, h).reduced (2),
                     Justification::centredLeft, true);
     }

@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -40,11 +39,11 @@ LatestVersionCheckerAndUpdater::~LatestVersionCheckerAndUpdater()
     clearSingletonInstance();
 }
 
-void LatestVersionCheckerAndUpdater::checkForNewVersion (bool showAlerts)
+void LatestVersionCheckerAndUpdater::checkForNewVersion (bool background)
 {
     if (! isThreadRunning())
     {
-        showAlertWindows = showAlerts;
+        backgroundCheck = background;
         startThread (3);
     }
 }
@@ -56,7 +55,7 @@ void LatestVersionCheckerAndUpdater::run()
 
     if (info == nullptr)
     {
-        if (showAlertWindows)
+        if (! backgroundCheck)
             AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
                                               "Update Server Communication Error",
                                               "Failed to communicate with the JUCE update server.\n"
@@ -68,7 +67,7 @@ void LatestVersionCheckerAndUpdater::run()
 
     if (! info->isNewerVersionThanCurrent())
     {
-        if (showAlertWindows)
+        if (! backgroundCheck)
             AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
                                               "No New Version Available",
                                               "Your JUCE version is up to date.");
@@ -107,7 +106,7 @@ void LatestVersionCheckerAndUpdater::run()
         }
     }
 
-    if (showAlertWindows)
+    if (! backgroundCheck)
         AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
                                           "Failed to find any new downloads",
                                           "Please try again in a few minutes.");
@@ -145,15 +144,11 @@ public:
         addAndMakeVisible (cancelButton);
         cancelButton.onClick = [this]
         {
-            if (dontAskAgainButton.getToggleState())
-                getGlobalProperties().setValue (Ids::dontQueryForUpdate.toString(), 1);
-            else
-                getGlobalProperties().removeValue (Ids::dontQueryForUpdate);
-
+            ProjucerApplication::getApp().setAutomaticVersionCheckingEnabled (! dontAskAgainButton.getToggleState());
             exitModalStateWithResult (-1);
         };
 
-        dontAskAgainButton.setToggleState (getGlobalProperties().getValue (Ids::dontQueryForUpdate, {}).isNotEmpty(), dontSendNotification);
+        dontAskAgainButton.setToggleState (! ProjucerApplication::getApp().isAutomaticVersionCheckingEnabled(), dontSendNotification);
         addAndMakeVisible (dontAskAgainButton);
 
         juceIcon = Drawable::createFromImageData (BinaryData::juce_icon_png,
@@ -296,9 +291,20 @@ void LatestVersionCheckerAndUpdater::askUserAboutNewVersion (const String& newVe
                                                              const String& releaseNotes,
                                                              const VersionInfo::Asset& asset)
 {
+    if (backgroundCheck)
+        addNotificationToOpenProjects (asset);
+    else
+        showDialogWindow (newVersionString, releaseNotes, asset);
+}
+
+void LatestVersionCheckerAndUpdater::showDialogWindow (const String& newVersionString,
+                                                       const String& releaseNotes,
+                                                       const VersionInfo::Asset& asset)
+{
     dialogWindow = UpdateDialog::launchDialog (newVersionString, releaseNotes);
 
     if (auto* mm = ModalComponentManager::getInstance())
+    {
         mm->attachCallback (dialogWindow.get(),
                             ModalCallbackFunction::create ([this, asset] (int result)
                                                            {
@@ -307,6 +313,35 @@ void LatestVersionCheckerAndUpdater::askUserAboutNewVersion (const String& newVe
 
                                                                 dialogWindow.reset();
                                                             }));
+    }
+}
+
+void LatestVersionCheckerAndUpdater::addNotificationToOpenProjects (const VersionInfo::Asset& asset)
+{
+    for (auto* window : ProjucerApplication::getApp().mainWindowList.windows)
+    {
+        if (auto* project = window->getProject())
+        {
+            Component::SafePointer<MainWindow> safeWindow (window);
+
+            auto ignore = [safeWindow]
+            {
+                if (safeWindow != nullptr)
+                    safeWindow->getProject()->removeProjectMessage (ProjectMessages::Ids::newVersionAvailable);
+            };
+
+            auto dontAskAgain = [ignore]
+            {
+                ignore();
+                ProjucerApplication::getApp().setAutomaticVersionCheckingEnabled (false);
+            };
+
+            project->addProjectMessage (ProjectMessages::Ids::newVersionAvailable,
+                                        { { "Download", [this, asset] { askUserForLocationToDownload (asset); } },
+                                          { "Ignore", std::move (ignore) },
+                                          { "Don't ask again", std::move (dontAskAgain) } });
+        }
+    }
 }
 
 //==============================================================================
@@ -384,7 +419,7 @@ private:
 
         struct ScopedDownloadFolder
         {
-            ScopedDownloadFolder (const File& installTargetFolder)
+            explicit ScopedDownloadFolder (const File& installTargetFolder)
             {
                 folder = installTargetFolder.getSiblingFile (installTargetFolder.getFileNameWithoutExtension() + "_download").getNonexistentSibling();
                 jassert (folder.createDirectory());

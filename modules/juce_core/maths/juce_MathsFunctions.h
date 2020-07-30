@@ -130,6 +130,50 @@ Type jmap (Type sourceValue, Type sourceRangeMin, Type sourceRangeMax, Type targ
     return targetRangeMin + ((targetRangeMax - targetRangeMin) * (sourceValue - sourceRangeMin)) / (sourceRangeMax - sourceRangeMin);
 }
 
+/** Remaps a normalised value (between 0 and 1) to a logarithmic target range.
+
+    The entire target range must be greater than zero.
+
+    @see mapFromLog10
+
+    @code
+    mapToLog10 (0.5, 0.4, 40.0) == 4.0
+    @endcode
+*/
+template <typename Type>
+Type mapToLog10 (Type value0To1, Type logRangeMin, Type logRangeMax)
+{
+    jassert (logRangeMin > 0);
+    jassert (logRangeMax > 0);
+
+    auto logMin = std::log10 (logRangeMin);
+    auto logMax = std::log10 (logRangeMax);
+
+    return std::pow ((Type) 10.0, value0To1 * (logMax - logMin) + logMin);
+}
+
+/** Remaps a logarithmic value in a target range to a normalised value (between 0 and 1).
+
+    The entire target range must be greater than zero.
+
+    @see mapToLog10
+
+    @code
+    mapFromLog10 (4.0, 0.4, 40.0) == 0.5
+    @endcode
+*/
+template <typename Type>
+Type mapFromLog10 (Type valueInLogRange, Type logRangeMin, Type logRangeMax)
+{
+    jassert (logRangeMin > 0);
+    jassert (logRangeMax > 0);
+
+    auto logMin = std::log10 (logRangeMin);
+    auto logMax = std::log10 (logRangeMax);
+
+    return (std::log10 (valueInLogRange) - logMin) / (logMax - logMin);
+}
+
 /** Scans an array of values, returning the minimum value that it contains. */
 template <typename Type>
 Type findMinimum (const Type* data, int numValues)
@@ -477,7 +521,8 @@ template <typename FloatType>
 unsigned int truncatePositiveToUnsignedInt (FloatType value) noexcept
 {
     jassert (value >= static_cast<FloatType> (0));
-    jassert (static_cast<FloatType> (value) <= std::numeric_limits<unsigned int>::max());
+    jassert (static_cast<FloatType> (value)
+             <= static_cast<FloatType> (std::numeric_limits<unsigned int>::max()));
 
     return static_cast<unsigned int> (value);
 }

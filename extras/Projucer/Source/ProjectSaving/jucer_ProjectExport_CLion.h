@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -54,8 +53,9 @@ protected:
 
 public:
     //==============================================================================
-    static const char* getName()                { return "CLion (beta)"; }
-    static const char* getValueTreeTypeName()   { return "CLION"; }
+    static String getDisplayName()        { return "CLion (beta)"; }
+    static String getValueTreeTypeName()  { return "CLION"; }
+    static String getTargetFolderName()   { return "CLion"; }
 
     static CLionProjectExporter* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
@@ -75,9 +75,8 @@ public:
     //==============================================================================
     CLionProjectExporter (Project& p, const ValueTree& t)   : ProjectExporter (p, t)
     {
-        name = getName();
-
-        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderForExporter (getValueTreeTypeName()));
+        name = getDisplayName();
+        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderName());
     }
 
     //==============================================================================
@@ -98,19 +97,19 @@ public:
     bool isOSX() const override                               { return false; }
     bool isiOS() const override                               { return false; }
 
-    bool supportsTargetType (ProjectType::Target::Type) const override   { return true; }
+    bool supportsTargetType (build_tools::ProjectType::Target::Type) const override   { return true; }
 
-    void addPlatformSpecificSettingsForProjectType (const ProjectType&) override {}
+    void addPlatformSpecificSettingsForProjectType (const build_tools::ProjectType&) override {}
 
     //==============================================================================
     bool canLaunchProject() override
     {
        #if JUCE_MAC
-        static Identifier exporterName ("XCODE_MAC");
+        static Identifier exporterName (XcodeProjectExporter::getValueTreeTypeNameMac());
        #elif JUCE_WINDOWS
-        static Identifier exporterName ("CODEBLOCKS_WINDOWS");
+        static Identifier exporterName (CodeBlocksProjectExporter::getValueTreeTypeNameWindows());
        #elif JUCE_LINUX
-        static Identifier exporterName ("LINUX_MAKE");
+        static Identifier exporterName (MakefileProjectExporter::getValueTreeTypeName());
        #else
         static Identifier exporterName;
        #endif
@@ -130,19 +129,19 @@ public:
     {
         String description;
 
-        description << "The " << getName() << " exporter produces a single CMakeLists.txt file with "
+        description << "The " << getDisplayName() << " exporter produces a single CMakeLists.txt file with "
                     << "multiple platform dependent sections, where the configuration for each section "
                     << "is inherited from other exporters added to this project." << newLine
                     << newLine
                     << "The exporters which provide the CLion configuration for the corresponding platform are:" << newLine
                     << newLine;
 
-        for (auto& exporterName : getExporterNames())
+        for (auto& exporterInfo : getExporterTypeInfos())
         {
-            std::unique_ptr<ProjectExporter> exporter (createNewExporter (getProject(), exporterName));
+            std::unique_ptr<ProjectExporter> exporter (createNewExporter (getProject(), exporterInfo.identifier));
 
             if (isExporterSupported (*exporter))
-                description << exporter->getName() << newLine;
+                description << exporterInfo.displayName << newLine;
         }
 
         description << newLine
@@ -159,7 +158,7 @@ public:
     {
         for (Project::ExporterIterator exporter (getProject()); exporter.next();)
             if (isExporterSupported (*exporter))
-                properties.add (new BooleanPropertyComponent (getExporterEnabledValue (*exporter), "Import settings from exporter", exporter->getName()),
+                properties.add (new BooleanPropertyComponent (getExporterEnabledValue (*exporter), "Import settings from exporter", exporter->getUniqueName()),
                                 "If this is enabled then settings from the corresponding exporter will "
                                 "be used in the generated CMakeLists.txt");
     }
@@ -168,28 +167,27 @@ public:
 
     void create (const OwnedArray<LibraryModule>&) const override
     {
-        MemoryOutputStream out;
-        out.setNewLineString ("\n");
-
-        out << "# Automatically generated CMakeLists, created by the Projucer" << newLine
-            << "# Do not edit this file! Your changes will be overwritten when you re-save the Projucer project!" << newLine
-            << newLine;
-
-        out << "cmake_minimum_required (VERSION 3.4.1)" << newLine
-            << newLine;
-
-        out << "if (NOT CMAKE_BUILD_TYPE)" << newLine
-            << "    set (CMAKE_BUILD_TYPE \"Debug\"  CACHE STRING \"Choose the type of build.\" FORCE)" << newLine
-            << "endif (NOT CMAKE_BUILD_TYPE)" << newLine
-            << newLine;
-
         // We'll append to this later.
-        overwriteFileIfDifferentOrThrow (getTargetFolder().getChildFile ("CMakeLists.txt"), out);
+        build_tools::writeStreamToFile (getTargetFolder().getChildFile ("CMakeLists.txt"), [] (MemoryOutputStream& mo)
+        {
+            mo.setNewLineString ("\n");
+
+            mo << "# Automatically generated CMakeLists, created by the Projucer" << newLine
+               << "# Do not edit this file! Your changes will be overwritten when you re-save the Projucer project!" << newLine
+               << newLine;
+
+            mo << "cmake_minimum_required (VERSION 3.4.1)" << newLine
+               << newLine;
+
+            mo << "if (NOT CMAKE_BUILD_TYPE)" << newLine
+               << "    set (CMAKE_BUILD_TYPE \"Debug\"  CACHE STRING \"Choose the type of build.\" FORCE)" << newLine
+               << "endif (NOT CMAKE_BUILD_TYPE)" << newLine
+               << newLine;
+        });
 
         // CMake has stopped adding PkgInfo files to bundles, so we need to do it manually
-        MemoryOutputStream pkgInfoOut;
-        pkgInfoOut << "BNDL????";
-        overwriteFileIfDifferentOrThrow (getTargetFolder().getChildFile ("PkgInfo"), out);
+        build_tools::writeStreamToFile (getTargetFolder().getChildFile ("PkgInfo"),
+                                        [] (MemoryOutputStream& mo) { mo << "BNDL????"; });
     }
 
     void writeCMakeListsExporterSection (ProjectExporter* exporter) const
@@ -204,7 +202,7 @@ public:
         out.setNewLineString ("\n");
 
         out << "###############################################################################" << newLine
-            << "# " << exporter->getName() << newLine
+            << "# " << exporter->getUniqueName() << newLine
             << "###############################################################################" << newLine
             << newLine;
 
@@ -226,7 +224,7 @@ public:
 
         out << "endif()" << newLine << newLine;
 
-        overwriteFileIfDifferentOrThrow (getTargetFolder().getChildFile ("CMakeLists.txt"), out);
+        build_tools::overwriteFileIfDifferentOrThrow (getTargetFolder().getChildFile ("CMakeLists.txt"), out);
     }
 
 private:
@@ -296,7 +294,7 @@ private:
         return setCMakeVariable (variableName, "${" + variableName + "} " + value);
     }
 
-    static String getTargetVarName (ProjectType::Target& target)
+    static String getTargetVarName (build_tools::ProjectType::Target& target)
     {
         return String (target.getName()).toUpperCase().replaceCharacter (L' ', L'_');
     }
@@ -314,7 +312,7 @@ private:
         else if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (*this)
                  && getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType )
         {
-            auto path = RelativePath (projectItem.getFile(), exporter.getTargetFolder(), RelativePath::buildTargetFolder).toUnixStyle();
+            auto path = build_tools::RelativePath (projectItem.getFile(), exporter.getTargetFolder(), build_tools::RelativePath::buildTargetFolder).toUnixStyle();
 
             fileInfoList.push_back (std::make_tuple (path, projectItem.shouldBeCompiled(),
                                                      exporter.compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get().toString()));
@@ -326,8 +324,8 @@ private:
     {
         for (auto* target : exporter.targets)
         {
-            if (target->type == ProjectType::Target::Type::AggregateTarget
-             || target->type == ProjectType::Target::Type::AudioUnitv3PlugIn)
+            if (target->type == build_tools::ProjectType::Target::Type::AggregateTarget
+             || target->type == build_tools::ProjectType::Target::Type::AudioUnitv3PlugIn)
                 continue;
 
             String functionName;
@@ -335,29 +333,31 @@ private:
 
             switch (target->getTargetFileType())
             {
-                case ProjectType::Target::TargetFileType::executable:
+                case build_tools::ProjectType::Target::TargetFileType::executable:
                     functionName = "add_executable";
 
                     if (exporter.isCodeBlocks() && exporter.isWindows()
-                          && target->type != ProjectType::Target::Type::ConsoleApp)
+                          && target->type !=
+                            build_tools::ProjectType::Target::Type::ConsoleApp)
                         properties.add ("WIN32");
 
                     break;
-                case ProjectType::Target::TargetFileType::staticLibrary:
-                case ProjectType::Target::TargetFileType::sharedLibraryOrDLL:
-                case ProjectType::Target::TargetFileType::pluginBundle:
+                case build_tools::ProjectType::Target::TargetFileType::staticLibrary:
+                case build_tools::ProjectType::Target::TargetFileType::sharedLibraryOrDLL:
+                case build_tools::ProjectType::Target::TargetFileType::pluginBundle:
                     functionName = "add_library";
 
-                    if (target->getTargetFileType() == ProjectType::Target::TargetFileType::staticLibrary)
+                    if (target->getTargetFileType() ==
+                        build_tools::ProjectType::Target::TargetFileType::staticLibrary)
                         properties.add ("STATIC");
-                    else if (target->getTargetFileType() == ProjectType::Target::TargetFileType::sharedLibraryOrDLL)
+                    else if (target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::sharedLibraryOrDLL)
                         properties.add ("SHARED");
                     else
                         properties.add ("MODULE");
 
                     break;
-                case ProjectType::Target::TargetFileType::macOSAppex:
-                case ProjectType::Target::TargetFileType::unknown:
+                case build_tools::ProjectType::Target::TargetFileType::macOSAppex:
+                case build_tools::ProjectType::Target::TargetFileType::unknown:
                 default:
                     continue;
             }
@@ -376,15 +376,17 @@ private:
             for (auto& fileInfo : fileInfoList)
                 out << "    " << std::get<0> (fileInfo).quoted() << newLine;
 
-            auto isCMakeBundle = exporter.isXcode() && target->getTargetFileType() == ProjectType::Target::TargetFileType::pluginBundle;
+            auto isCMakeBundle = exporter.isXcode()
+                              && target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::pluginBundle;
             auto pkgInfoPath = String ("PkgInfo").quoted();
 
             if (isCMakeBundle)
                 out << "    " << pkgInfoPath << newLine;
 
-            auto xcodeIcnsFilePath = [&] () -> String
+            auto xcodeIcnsFilePath = [&]() -> String
             {
-                if (exporter.isXcode() && target->getTargetFileType() == ProjectType::Target::TargetFileType::executable)
+                if (exporter.isXcode()
+                 && target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::executable)
                 {
                     StringArray pathComponents = { "..", "MacOSX", "Icon.icns" };
                     auto xcodeIcnsFile = getTargetFolder();
@@ -402,7 +404,8 @@ private:
             if (xcodeIcnsFilePath.isNotEmpty())
                 out << "    " << xcodeIcnsFilePath << newLine;
 
-            if (exporter.isCodeBlocks() && target->getTargetFileType() == ProjectType::Target::TargetFileType::executable)
+            if (exporter.isCodeBlocks()
+             && target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::executable)
             {
                 StringArray pathComponents = { "..", "CodeBlocksWindows", "resources.rc" };
                 auto windowsRcFile = getTargetFolder();
@@ -449,13 +452,8 @@ private:
 
         out << "find_package (PkgConfig REQUIRED)" << newLine;
 
-        StringArray cmakePkgconfigPackages;
-
-        for (auto& package : exporter.getPackages())
-        {
-            cmakePkgconfigPackages.add (package.toUpperCase());
-            out << "pkg_search_module (" << cmakePkgconfigPackages.strings.getLast() << " REQUIRED " << package << ")" << newLine;
-        }
+        for (auto& package : exporter.getCompilePackages())
+            out << "pkg_search_module (" << package.toUpperCase() << " REQUIRED " << package << ")" << newLine;
 
         out << newLine;
 
@@ -463,10 +461,10 @@ private:
 
         for (auto* target : exporter.targets)
         {
-            if (target->type == ProjectType::Target::Type::AggregateTarget)
+            if (target->type == build_tools::ProjectType::Target::Type::AggregateTarget)
                 continue;
 
-            if (target->getTargetFileType() == ProjectType::Target::TargetFileType::pluginBundle)
+            if (target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::pluginBundle)
                 out << "set_target_properties (" << getTargetVarName (*target) << " PROPERTIES PREFIX \"\")" << newLine;
 
             out << "set_target_properties (" << getTargetVarName (*target) << " PROPERTIES SUFFIX \"" << target->getTargetFileSuffix() << "\")" << newLine
@@ -494,8 +492,8 @@ private:
             for (auto& path : exporter.getHeaderSearchPaths (config))
                 out << "    " << path.quoted() << newLine;
 
-            for (auto& package : cmakePkgconfigPackages)
-                out << "    ${" << package << "_INCLUDE_DIRS}" << newLine;
+            for (auto& package : exporter.getCompilePackages())
+                out << "    ${" << package.toUpperCase() << "_INCLUDE_DIRS}" << newLine;
 
             out << ")" << newLine << newLine;
 
@@ -516,7 +514,7 @@ private:
 
             for (auto* target : exporter.targets)
             {
-                if (target->type == ProjectType::Target::Type::AggregateTarget)
+                if (target->type == build_tools::ProjectType::Target::Type::AggregateTarget)
                     continue;
 
                 auto targetVarName = getTargetVarName (*target);
@@ -560,8 +558,8 @@ private:
 
                 out << "target_link_libraries (" << targetVarName << " PRIVATE" << newLine;
 
-                if (target->getTargetFileType() == ProjectType::Target::TargetFileType::pluginBundle
-                 || target->type == ProjectType::Target::Type::StandalonePlugIn)
+                if (target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::pluginBundle
+                 || target->type == build_tools::ProjectType::Target::Type::StandalonePlugIn)
                     out << "    SHARED_CODE" << newLine;
 
                 out << "    " << exporter.getArchFlags (config) << newLine;
@@ -575,13 +573,13 @@ private:
                 for (auto& lib : cmakeFoundLibraries)
                     out << "    " << lib << newLine;
 
-                for (auto& package : cmakePkgconfigPackages)
-                    out << "    ${" << package << "_LIBRARIES}" << newLine;
+                for (auto& package : exporter.getLinkPackages())
+                    out << "    ${" << package.toUpperCase() << "_LIBRARIES}" << newLine;
 
                 out << ")" << newLine << newLine;
 
-                if (target->getTargetFileType() == ProjectType::Target::TargetFileType::pluginBundle
-                    || target->type == ProjectType::Target::Type::StandalonePlugIn)
+                if (target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::pluginBundle
+                    || target->type == build_tools::ProjectType::Target::Type::StandalonePlugIn)
                     out << "add_dependencies (" << targetVarName << " " << "SHARED_CODE)" << newLine << newLine;
             }
 
@@ -615,7 +613,7 @@ private:
 
         for (auto* target : exporter.targets)
         {
-            if (target->type == ProjectType::Target::Type::AggregateTarget)
+            if (target->type == build_tools::ProjectType::Target::Type::AggregateTarget)
                 continue;
 
             out << "set_target_properties (" << getTargetVarName (*target) << " PROPERTIES PREFIX \"\")" << newLine
@@ -645,7 +643,7 @@ private:
 
             for (auto* target : exporter.targets)
             {
-                if (target->type == ProjectType::Target::Type::AggregateTarget)
+                if (target->type == build_tools::ProjectType::Target::Type::AggregateTarget)
                     continue;
 
                 auto targetVarName = getTargetVarName (*target);
@@ -682,8 +680,8 @@ private:
 
                 out << "target_link_libraries (" << targetVarName << " PRIVATE" << newLine;
 
-                if (target->getTargetFileType() == ProjectType::Target::TargetFileType::pluginBundle
-                    || target->type == ProjectType::Target::Type::StandalonePlugIn)
+                if (target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::pluginBundle
+                    || target->type == build_tools::ProjectType::Target::Type::StandalonePlugIn)
                     out << "    SHARED_CODE" << newLine
                         << "    -L." << newLine;
 
@@ -729,9 +727,9 @@ private:
 
             for (auto* target : exporter.targets)
             {
-                if (target->getTargetFileType() == ProjectType::Target::TargetFileType::macOSAppex
-                      || target->type == ProjectType::Target::Type::AggregateTarget
-                      || target->type == ProjectType::Target::Type::AudioUnitv3PlugIn)
+                if (target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::macOSAppex
+                    || target->type == build_tools::ProjectType::Target::Type::AggregateTarget
+                    || target->type == build_tools::ProjectType::Target::Type::AudioUnitv3PlugIn)
                     continue;
 
                 auto targetAttributes = target->getTargetSettings (config);
@@ -753,19 +751,19 @@ private:
 
         for (auto* target : exporter.targets)
         {
-            if (target->getTargetFileType() == ProjectType::Target::TargetFileType::macOSAppex
-                || target->type == ProjectType::Target::Type::AggregateTarget
-                || target->type == ProjectType::Target::Type::AudioUnitv3PlugIn)
+            if (target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::macOSAppex
+                || target->type == build_tools::ProjectType::Target::Type::AggregateTarget
+                || target->type == build_tools::ProjectType::Target::Type::AudioUnitv3PlugIn)
                 continue;
 
-            if (target->type == ProjectType::Target::Type::AudioUnitPlugIn)
+            if (target->type == build_tools::ProjectType::Target::Type::AudioUnitPlugIn)
                 out << "find_program (RC_COMPILER Rez NO_DEFAULT_PATHS PATHS \"/Applications/Xcode.app/Contents/Developer/usr/bin\")" << newLine
                     << "if (NOT RC_COMPILER)" << newLine
                     << "    message (WARNING \"failed to find Rez; older resource-based AU plug-ins may not work correctly\")" << newLine
                     << "endif (NOT RC_COMPILER)" << newLine  << newLine;
 
-            if (target->getTargetFileType() == ProjectType::Target::TargetFileType::staticLibrary
-                    || target->getTargetFileType() == ProjectType::Target::TargetFileType::sharedLibraryOrDLL)
+            if (target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::staticLibrary
+                || target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::sharedLibraryOrDLL)
                 out << "set_target_properties (" << getTargetVarName (*target) << " PROPERTIES SUFFIX \"" << target->xcodeBundleExtension << "\")" << newLine
                     << newLine;
         }
@@ -796,9 +794,9 @@ private:
 
             for (auto* target : exporter.targets)
             {
-                if (target->getTargetFileType() == ProjectType::Target::TargetFileType::macOSAppex
-                    || target->type == ProjectType::Target::Type::AggregateTarget
-                    || target->type == ProjectType::Target::Type::AudioUnitv3PlugIn)
+                if (target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::macOSAppex
+                    || target->type == build_tools::ProjectType::Target::Type::AggregateTarget
+                    || target->type == build_tools::ProjectType::Target::Type::AudioUnitv3PlugIn)
                     continue;
 
                 auto targetVarName = getTargetVarName (*target);
@@ -830,7 +828,7 @@ private:
 
                 if (targetAttributeKeys.contains ("GCC_PREPROCESSOR_DEFINITIONS"))
                 {
-                    defines.addTokens (targetAttributes["GCC_PREPROCESSOR_DEFINITIONS"], "() ,\t", {});
+                    defines.addTokens (targetAttributes["GCC_PREPROCESSOR_DEFINITIONS"], "(),\t", {});
                     defines.removeEmptyStrings();
                     targetAttributeKeys.removeString ("GCC_PREPROCESSOR_DEFINITIONS");
                 }
@@ -838,7 +836,7 @@ private:
                 out << "target_compile_definitions (" << targetVarName << " PRIVATE" << newLine;
 
                 for (auto& def : defines)
-                    out << "    " << def << newLine;
+                    out << "    " << def.replace ("\\\\\\\"", "\\\"").replace ("\\\\ ", " ") << newLine;
 
                 out << ")" << newLine << newLine;
 
@@ -953,7 +951,7 @@ private:
                     targetAttributeKeys.removeString ("OTHER_LDFLAGS");
                 }
 
-                if (target->type == ProjectType::Target::Type::AudioUnitPlugIn)
+                if (target->type == build_tools::ProjectType::Target::Type::AudioUnitPlugIn)
                 {
                     String rezFlags;
 
@@ -973,7 +971,7 @@ private:
                             auto sdkVersion = config.getOSXSDKVersionString().upToFirstOccurrenceOf (" ", false, false);
                             auto sysroot = "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX" + sdkVersion + ".sdk";
 
-                            RelativePath rFile ("JuceLibraryCode/include_juce_audio_plugin_client_AU.r", RelativePath::projectFolder);
+                            build_tools::RelativePath rFile ("JuceLibraryCode/include_juce_audio_plugin_client_AU.r", build_tools::RelativePath::projectFolder);
                             rFile = rebaseFromProjectFolderToBuildTarget (rFile);
 
                             out << "if (RC_COMPILER)" << newLine
@@ -1071,13 +1069,13 @@ private:
                 for (auto& key : targetAttributeKeys)
                     out << "    XCODE_ATTRIBUTE_" << key << " " << targetAttributes[key] << newLine;
 
-                if (target->getTargetFileType() == ProjectType::Target::TargetFileType::executable
-                    || target->getTargetFileType() == ProjectType::Target::TargetFileType::pluginBundle)
+                if (target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::executable
+                    || target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::pluginBundle)
                 {
                     out << "    MACOSX_BUNDLE_INFO_PLIST "     << targetAttributes.getValue ("INFOPLIST_FILE", "\"\"") << newLine
                         << "    XCODE_ATTRIBUTE_PRODUCT_NAME " << binaryName.quoted() << newLine;
 
-                    if (target->getTargetFileType() == ProjectType::Target::TargetFileType::executable)
+                    if (target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::executable)
                     {
                         out << "    MACOSX_BUNDLE TRUE" << newLine;
                     }
@@ -1093,8 +1091,8 @@ private:
 
                 out << "target_link_libraries (" << targetVarName << " PRIVATE" << newLine;
 
-                if (target->getTargetFileType() == ProjectType::Target::TargetFileType::pluginBundle
-                        || target->type == ProjectType::Target::Type::StandalonePlugIn)
+                if (target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::pluginBundle
+                    || target->type == build_tools::ProjectType::Target::Type::StandalonePlugIn)
                     out << "    SHARED_CODE" << newLine;
 
                 for (auto& path : libSearchPaths)
@@ -1108,10 +1106,10 @@ private:
 
                 out << ")" << newLine << newLine;
 
-                if (target->getTargetFileType() == ProjectType::Target::TargetFileType::pluginBundle
-                    || target->type == ProjectType::Target::Type::StandalonePlugIn)
+                if (target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::pluginBundle
+                    || target->type == build_tools::ProjectType::Target::Type::StandalonePlugIn)
                 {
-                    if (target->getTargetFileType() == ProjectType::Target::TargetFileType::pluginBundle
+                    if (target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::pluginBundle
                         && targetAttributeKeys.contains("INSTALL_PATH"))
                     {
                         auto installPath = targetAttributes["INSTALL_PATH"].unquoted().replace ("$(HOME)", "$ENV{HOME}");

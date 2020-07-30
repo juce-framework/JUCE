@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -33,8 +32,8 @@ AudioProcessorValueTreeState::Parameter::Parameter (const String& parameterID,
                                                     const String& labelText,
                                                     NormalisableRange<float> valueRange,
                                                     float defaultParameterValue,
-                                                    std::function<String(float)> valueToTextFunction,
-                                                    std::function<float(const String&)> textToValueFunction,
+                                                    std::function<String (float)> valueToTextFunction,
+                                                    std::function<float (const String&)> textToValueFunction,
                                                     bool isMetaParameter,
                                                     bool isAutomatableParameter,
                                                     bool isDiscrete,
@@ -46,8 +45,8 @@ AudioProcessorValueTreeState::Parameter::Parameter (const String& parameterID,
                            defaultParameterValue,
                            labelText,
                            parameterCategory,
-                           valueToTextFunction == nullptr ? std::function<String(float v, int)>()
-                                                          : [valueToTextFunction](float v, int) { return valueToTextFunction (v); },
+                           valueToTextFunction == nullptr ? std::function<String (float v, int)>()
+                                                          : [valueToTextFunction] (float v, int) { return valueToTextFunction (v); },
                            std::move (textToValueFunction)),
       unsnappedDefault (valueRange.convertTo0to1 (defaultParameterValue)),
       metaParameter (isMetaParameter),
@@ -163,7 +162,7 @@ private:
             return;
 
         unnormalisedValue = newValue;
-        listeners.call ([=](Listener& l) { l.parameterChanged (parameter.paramID, unnormalisedValue); });
+        listeners.call ([=] (Listener& l) { l.parameterChanged (parameter.paramID, unnormalisedValue); });
         listenersNeedCalling = false;
         needsUpdate = true;
     }
@@ -186,8 +185,35 @@ private:
         parameter.setValueNotifyingHost (value);
     }
 
+    class LockedListeners
+    {
+    public:
+        template <typename Fn>
+        void call (Fn&& fn)
+        {
+            const CriticalSection::ScopedLockType lock (mutex);
+            listeners.call (std::forward<Fn> (fn));
+        }
+
+        void add (Listener* l)
+        {
+            const CriticalSection::ScopedLockType lock (mutex);
+            listeners.add (l);
+        }
+
+        void remove (Listener* l)
+        {
+            const CriticalSection::ScopedLockType lock (mutex);
+            listeners.remove (l);
+        }
+
+    private:
+        CriticalSection mutex;
+        ListenerList<Listener> listeners;
+    };
+
     RangedAudioParameter& parameter;
-    ListenerList<Listener> listeners;
+    LockedListeners listeners;
     std::atomic<float> unnormalisedValue { 0.0f };
     std::atomic<bool> needsUpdate { true }, listenersNeedCalling { true };
     bool ignoreParameterChangedCallbacks { false };
@@ -269,8 +295,8 @@ RangedAudioParameter* AudioProcessorValueTreeState::createAndAddParameter (const
                                                                            const String& labelText,
                                                                            NormalisableRange<float> range,
                                                                            float defaultVal,
-                                                                           std::function<String(float)> valueToTextFunction,
-                                                                           std::function<float(const String&)> textToValueFunction,
+                                                                           std::function<String (float)> valueToTextFunction,
+                                                                           std::function<float (const String&)> textToValueFunction,
                                                                            bool isMetaParameter,
                                                                            bool isAutomatableParameter,
                                                                            bool isDiscreteParameter,
@@ -458,304 +484,38 @@ void AudioProcessorValueTreeState::timerCallback()
 }
 
 //==============================================================================
-struct AttachedControlBase  : public AudioProcessorValueTreeState::Listener,
-                              public AsyncUpdater
+template <typename Attachment, typename Control>
+std::unique_ptr<Attachment> makeAttachment (const AudioProcessorValueTreeState& stateToUse,
+                                            const String& parameterID,
+                                            Control& control)
 {
-    AttachedControlBase (AudioProcessorValueTreeState& s, const String& p)
-        : state (s), paramID (p), lastValue (0)
-    {
-        state.addParameterListener (paramID, this);
-    }
+    if (auto* parameter = stateToUse.getParameter (parameterID))
+        return std::make_unique<Attachment> (*parameter, control, stateToUse.undoManager);
 
-    void removeListener()
-    {
-        state.removeParameterListener (paramID, this);
-    }
+    jassertfalse;
+    return nullptr;
+}
 
-    void setNewDenormalisedValue (float newDenormalisedValue)
-    {
-        if (auto* p = state.getParameter (paramID))
-        {
-            const float newValue = state.getParameterRange (paramID)
-                                        .convertTo0to1 (newDenormalisedValue);
-
-            if (p->getValue() != newValue)
-                p->setValueNotifyingHost (newValue);
-        }
-    }
-
-    void sendInitialUpdate()
-    {
-        if (auto* v = state.getRawParameterValue (paramID))
-            parameterChanged (paramID, *v);
-    }
-
-    void parameterChanged (const String&, float newValue) override
-    {
-        lastValue = newValue;
-
-        if (MessageManager::getInstance()->isThisTheMessageThread())
-        {
-            cancelPendingUpdate();
-            setValue (newValue);
-        }
-        else
-        {
-            triggerAsyncUpdate();
-        }
-    }
-
-    void beginParameterChange()
-    {
-        if (auto* p = state.getParameter (paramID))
-        {
-            if (state.undoManager != nullptr)
-                state.undoManager->beginNewTransaction();
-
-            p->beginChangeGesture();
-        }
-    }
-
-    void endParameterChange()
-    {
-        if (AudioProcessorParameter* p = state.getParameter (paramID))
-            p->endChangeGesture();
-    }
-
-    void handleAsyncUpdate() override
-    {
-        setValue (lastValue);
-    }
-
-    virtual void setValue (float) = 0;
-
-    AudioProcessorValueTreeState& state;
-    String paramID;
-    std::atomic<float> lastValue;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AttachedControlBase)
-};
-
-//==============================================================================
-struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private AttachedControlBase,
-                                                                private Slider::Listener
-{
-    Pimpl (AudioProcessorValueTreeState& s, const String& p, Slider& sl)
-        : AttachedControlBase (s, p), slider (sl), ignoreCallbacks (false)
-    {
-        NormalisableRange<float> range (state.getParameterRange (paramID));
-
-        if (auto* param = state.getParameterAdapter (paramID))
-        {
-            slider.valueFromTextFunction = [param](const String& text) { return (double) param->getDenormalisedValueForText (text); };
-            slider.textFromValueFunction = [param](double value) { return param->getTextForDenormalisedValue ((float) value); };
-            slider.setDoubleClickReturnValue (true, range.convertFrom0to1 (param->getParameter().getDefaultValue()));
-        }
-
-        auto convertFrom0To1Function = [range](double currentRangeStart,
-                                               double currentRangeEnd,
-                                               double normalisedValue) mutable
-        {
-            range.start = (float) currentRangeStart;
-            range.end = (float) currentRangeEnd;
-            return (double) range.convertFrom0to1 ((float) normalisedValue);
-        };
-
-        auto convertTo0To1Function = [range](double currentRangeStart,
-                                             double currentRangeEnd,
-                                             double mappedValue) mutable
-        {
-            range.start = (float) currentRangeStart;
-            range.end = (float) currentRangeEnd;
-            return (double) range.convertTo0to1 ((float) mappedValue);
-        };
-
-        auto snapToLegalValueFunction = [range](double currentRangeStart,
-                                                double currentRangeEnd,
-                                                double valueToSnap) mutable
-        {
-            range.start = (float) currentRangeStart;
-            range.end = (float) currentRangeEnd;
-            return (double) range.snapToLegalValue ((float) valueToSnap);
-        };
-
-        NormalisableRange<double> newRange { (double) range.start,
-                                             (double) range.end,
-                                             convertFrom0To1Function,
-                                             convertTo0To1Function,
-                                             snapToLegalValueFunction };
-        newRange.interval = (double) range.interval;
-        newRange.skew = (double) range.skew;
-
-        slider.setNormalisableRange (newRange);
-
-        sendInitialUpdate();
-        slider.addListener (this);
-    }
-
-    ~Pimpl() override
-    {
-        slider.removeListener (this);
-        removeListener();
-    }
-
-    void setValue (float newValue) override
-    {
-        const ScopedLock selfCallbackLock (selfCallbackMutex);
-
-        {
-            ScopedValueSetter<bool> svs (ignoreCallbacks, true);
-            slider.setValue (newValue, sendNotificationSync);
-        }
-    }
-
-    void sliderValueChanged (Slider* s) override
-    {
-        const ScopedLock selfCallbackLock (selfCallbackMutex);
-
-        if ((! ignoreCallbacks) && (! ModifierKeys::currentModifiers.isRightButtonDown()))
-            setNewDenormalisedValue ((float) s->getValue());
-    }
-
-    void sliderDragStarted (Slider*) override   { beginParameterChange(); }
-    void sliderDragEnded   (Slider*) override   { endParameterChange(); }
-
-    Slider& slider;
-    bool ignoreCallbacks;
-    CriticalSection selfCallbackMutex;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
-};
-
-AudioProcessorValueTreeState::SliderAttachment::SliderAttachment (AudioProcessorValueTreeState& s, const String& p, Slider& sl)
-    : pimpl (new Pimpl (s, p, sl))
+AudioProcessorValueTreeState::SliderAttachment::SliderAttachment (AudioProcessorValueTreeState& stateToUse,
+                                                                  const String& parameterID,
+                                                                  Slider& slider)
+    : attachment (makeAttachment<SliderParameterAttachment> (stateToUse, parameterID, slider))
 {
 }
 
-AudioProcessorValueTreeState::SliderAttachment::~SliderAttachment() {}
-
-//==============================================================================
-struct AudioProcessorValueTreeState::ComboBoxAttachment::Pimpl  : private AttachedControlBase,
-                                                                  private ComboBox::Listener
-{
-    Pimpl (AudioProcessorValueTreeState& s, const String& p, ComboBox& c)
-        : AttachedControlBase (s, p), combo (c), ignoreCallbacks (false)
-    {
-        sendInitialUpdate();
-        combo.addListener (this);
-    }
-
-    ~Pimpl() override
-    {
-        combo.removeListener (this);
-        removeListener();
-    }
-
-    void setValue (float newValue) override
-    {
-        const ScopedLock selfCallbackLock (selfCallbackMutex);
-
-        if (state.getParameter (paramID) != nullptr)
-        {
-            auto normValue = state.getParameterRange (paramID)
-                                  .convertTo0to1 (newValue);
-            auto index = roundToInt (normValue * (combo.getNumItems() - 1));
-
-            if (index != combo.getSelectedItemIndex())
-            {
-                ScopedValueSetter<bool> svs (ignoreCallbacks, true);
-                combo.setSelectedItemIndex (index, sendNotificationSync);
-            }
-        }
-    }
-
-    void comboBoxChanged (ComboBox*) override
-    {
-        const ScopedLock selfCallbackLock (selfCallbackMutex);
-
-        if (! ignoreCallbacks)
-        {
-            if (auto* p = state.getParameter (paramID))
-            {
-                auto newValue = (float) combo.getSelectedItemIndex() / (combo.getNumItems() - 1);
-
-                if (p->getValue() != newValue)
-                {
-                    beginParameterChange();
-                    p->setValueNotifyingHost (newValue);
-                    endParameterChange();
-                }
-            }
-        }
-    }
-
-    ComboBox& combo;
-    bool ignoreCallbacks;
-    CriticalSection selfCallbackMutex;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
-};
-
-AudioProcessorValueTreeState::ComboBoxAttachment::ComboBoxAttachment (AudioProcessorValueTreeState& s, const String& p, ComboBox& c)
-    : pimpl (new Pimpl (s, p, c))
+AudioProcessorValueTreeState::ComboBoxAttachment::ComboBoxAttachment (AudioProcessorValueTreeState& stateToUse,
+                                                                      const String& parameterID,
+                                                                      ComboBox& combo)
+    : attachment (makeAttachment<ComboBoxParameterAttachment> (stateToUse, parameterID, combo))
 {
 }
 
-AudioProcessorValueTreeState::ComboBoxAttachment::~ComboBoxAttachment() {}
-
-//==============================================================================
-struct AudioProcessorValueTreeState::ButtonAttachment::Pimpl  : private AttachedControlBase,
-                                                                private Button::Listener
-{
-    Pimpl (AudioProcessorValueTreeState& s, const String& p, Button& b)
-        : AttachedControlBase (s, p), button (b), ignoreCallbacks (false)
-    {
-        sendInitialUpdate();
-        button.addListener (this);
-    }
-
-    ~Pimpl() override
-    {
-        button.removeListener (this);
-        removeListener();
-    }
-
-    void setValue (float newValue) override
-    {
-        const ScopedLock selfCallbackLock (selfCallbackMutex);
-
-        {
-            ScopedValueSetter<bool> svs (ignoreCallbacks, true);
-            button.setToggleState (newValue >= 0.5f, sendNotificationSync);
-        }
-    }
-
-    void buttonClicked (Button* b) override
-    {
-        const ScopedLock selfCallbackLock (selfCallbackMutex);
-
-        if (! ignoreCallbacks)
-        {
-            beginParameterChange();
-            setNewDenormalisedValue (b->getToggleState() ? 1.0f : 0.0f);
-            endParameterChange();
-        }
-    }
-
-    Button& button;
-    bool ignoreCallbacks;
-    CriticalSection selfCallbackMutex;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
-};
-
-AudioProcessorValueTreeState::ButtonAttachment::ButtonAttachment (AudioProcessorValueTreeState& s, const String& p, Button& b)
-    : pimpl (new Pimpl (s, p, b))
+AudioProcessorValueTreeState::ButtonAttachment::ButtonAttachment (AudioProcessorValueTreeState& stateToUse,
+                                                                  const String& parameterID,
+                                                                  Button& button)
+    : attachment (makeAttachment<ButtonParameterAttachment> (stateToUse, parameterID, button))
 {
 }
-
-AudioProcessorValueTreeState::ButtonAttachment::~ButtonAttachment() {}
-
 
 //==============================================================================
 //==============================================================================
@@ -786,7 +546,7 @@ struct ParameterAdapterTests  : public UnitTest
 
         beginTest ("Denormalised parameter values can be retrieved");
         {
-            const auto test = [&](NormalisableRange<float> range, float value)
+            const auto test = [&] (NormalisableRange<float> range, float value)
             {
                 AudioParameterFloat param ({}, {}, range, {}, {});
                 AudioProcessorValueTreeState::ParameterAdapter adapter (param);
@@ -803,7 +563,7 @@ struct ParameterAdapterTests  : public UnitTest
 
         beginTest ("Floats can be converted to text");
         {
-            const auto test = [&](NormalisableRange<float> range, float value, String expected)
+            const auto test = [&] (NormalisableRange<float> range, float value, String expected)
             {
                 AudioParameterFloat param ({}, {}, range, {}, {});
                 AudioProcessorValueTreeState::ParameterAdapter adapter (param);
@@ -819,7 +579,7 @@ struct ParameterAdapterTests  : public UnitTest
 
         beginTest ("Text can be converted to floats");
         {
-            const auto test = [&](NormalisableRange<float> range, String text, float expected)
+            const auto test = [&] (NormalisableRange<float> range, String text, float expected)
             {
                 AudioParameterFloat param ({}, {}, range, {}, {});
                 AudioProcessorValueTreeState::ParameterAdapter adapter (param);

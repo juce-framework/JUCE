@@ -121,8 +121,8 @@ private:
     {
         const ScopedLock lock (drawing);
 
-        parentWidth  = comp.getWidth()  - size;
-        parentHeight = comp.getHeight() - size;
+        parentWidth  = (float) comp.getWidth()  - size;
+        parentHeight = (float) comp.getHeight() - size;
     }
 
     float x = 0.0f, y = 0.0f,

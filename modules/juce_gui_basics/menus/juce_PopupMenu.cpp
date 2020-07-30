@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -383,11 +382,11 @@ struct MenuWindow  : public Component
     {
         if (key.isKeyCode (KeyPress::downKey))
         {
-            selectNextItem (1);
+            selectNextItem (MenuSelectionDirection::forwards);
         }
         else if (key.isKeyCode (KeyPress::upKey))
         {
-            selectNextItem (-1);
+            selectNextItem (MenuSelectionDirection::backwards);
         }
         else if (key.isKeyCode (KeyPress::leftKey))
         {
@@ -415,14 +414,14 @@ struct MenuWindow  : public Component
             if (showSubMenuFor (currentChild))
             {
                 if (isSubMenuVisible())
-                    activeSubMenu->selectNextItem (0);
+                    activeSubMenu->selectNextItem (MenuSelectionDirection::current);
             }
             else if (componentAttachedTo != nullptr)
             {
                 componentAttachedTo->keyPressed (key);
             }
         }
-        else if (key.isKeyCode (KeyPress::returnKey))
+        else if (key.isKeyCode (KeyPress::returnKey) || key.isKeyCode (KeyPress::spaceKey))
         {
             triggerCurrentlyHighlightedItem();
         }
@@ -949,24 +948,46 @@ struct MenuWindow  : public Component
         }
     }
 
-    void selectNextItem (int delta)
+    enum class MenuSelectionDirection
+    {
+        forwards,
+        backwards,
+        current
+    };
+
+    void selectNextItem (MenuSelectionDirection direction)
     {
         disableTimerUntilMouseMoves();
 
-        auto start = jmax (0, items.indexOf (currentChild));
+        auto start = [&]
+        {
+            auto index = items.indexOf (currentChild);
+
+            if (index >= 0)
+                return index;
+
+            return direction == MenuSelectionDirection::backwards ? items.size() - 1
+                                                                  : 0;
+        }();
+
+        auto preIncrement = (direction != MenuSelectionDirection::current && currentChild != nullptr);
 
         for (int i = items.size(); --i >= 0;)
         {
-            start += delta;
+            if (preIncrement)
+                start += (direction == MenuSelectionDirection::backwards ? -1 : 1);
 
             if (auto* mic = items.getUnchecked ((start + items.size()) % items.size()))
             {
                 if (canBeTriggered (mic->item) || hasActiveSubMenu (mic->item))
                 {
                     setCurrentlyHighlightedChild (mic);
-                    break;
+                    return;
                 }
             }
+
+            if (! preIncrement)
+                preIncrement = true;
         }
     }
 
@@ -1178,7 +1199,7 @@ private:
         else
         {
             oldGlobalPos += Point<int> (2, 0);
-            subX += itemScreenBounds.getWidth();
+            subX += (float) itemScreenBounds.getWidth();
         }
 
         Path areaTowardsSubMenu;
@@ -1797,7 +1818,7 @@ void PopupMenu::showMenuAsync (const Options& options, ModalComponentManager::Ca
     showWithOptionalCallback (options, userCallback, false);
 }
 
-void PopupMenu::showMenuAsync (const Options& options, std::function<void(int)> userCallback)
+void PopupMenu::showMenuAsync (const Options& options, std::function<void (int)> userCallback)
 {
     showWithOptionalCallback (options, ModalCallbackFunction::create (userCallback), false);
 }

@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -30,8 +29,8 @@ namespace juce
 AudioParameterFloat::AudioParameterFloat (const String& idToUse, const String& nameToUse,
                                           NormalisableRange<float> r, float def,
                                           const String& labelToUse, Category categoryToUse,
-                                          std::function<String(float, int)> stringFromValue,
-                                          std::function<float(const String&)> valueFromString)
+                                          std::function<String (float, int)> stringFromValue,
+                                          std::function<float (const String&)> valueFromString)
    : RangedAudioParameter (idToUse, nameToUse, labelToUse, categoryToUse),
      range (r), value (def), defaultValue (def),
      stringFromValueFunction (stringFromValue),
@@ -45,7 +44,7 @@ AudioParameterFloat::AudioParameterFloat (const String& idToUse, const String& n
 
             if (range.interval != 0.0f)
             {
-                if (approximatelyEqual (std::abs (range.interval - (int) range.interval), 0.0f))
+                if (approximatelyEqual (std::abs (range.interval - std::floor (range.interval)), 0.0f))
                     return 0;
 
                 auto v = std::abs (roundToInt (range.interval * pow (10, numDecimalPlaces)));

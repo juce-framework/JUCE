@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -114,7 +113,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
             return;
 
         {
-            AM_MEDIA_TYPE mt = { 0 };
+            AM_MEDIA_TYPE mt = {};
             mt.majortype = MEDIATYPE_Video;
             mt.subtype = MEDIASUBTYPE_RGB24;
             mt.formattype = FORMAT_VideoInfo;
@@ -138,7 +137,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
         if (FAILED (hr))
             return;
 
-        AM_MEDIA_TYPE mt = { 0 };
+        AM_MEDIA_TYPE mt = {};
         hr = sampleGrabber->GetConnectedMediaType (&mt);
         VIDEOINFOHEADER* pVih = (VIDEOINFOHEADER*) (mt.pbFormat);
         width = pVih->bmiHeader.biWidth;
@@ -185,7 +184,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
 
     bool openedOk() const noexcept       { return openedSuccessfully; }
 
-    void takeStillPicture (std::function<void(const Image&)> pictureTakenCallbackToUse)
+    void takeStillPicture (std::function<void (const Image&)> pictureTakenCallbackToUse)
     {
         {
             const ScopedLock sl (pictureTakenCallbackLock);
@@ -559,7 +558,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
     ListenerList<Listener> listeners;
 
     CriticalSection pictureTakenCallbackLock;
-    std::function<void(const Image&)> pictureTakenCallback;
+    std::function<void (const Image&)> pictureTakenCallback;
 
     bool isRecording = false, openedSuccessfully = false;
     int width = 0, height = 0;
@@ -695,7 +694,7 @@ private:
 
             if (wantedDirection == dir)
             {
-                PIN_INFO info = { 0 };
+                PIN_INFO info = {};
                 pin->QueryPinInfo (&info);
 
                 if (pinName == nullptr || String (pinName).equalsIgnoreCase (String (info.achName)))

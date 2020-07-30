@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -27,7 +26,7 @@
 namespace juce
 {
 
-static inline void blurDataTriplets (uint8* d, int num, const int delta) noexcept
+static void blurDataTriplets (uint8* d, int num, const int delta) noexcept
 {
     uint32 last = d[0];
     d[0] = (uint8) ((d[0] + d[delta] + 1) / 3);
@@ -134,8 +133,8 @@ void DropShadow::drawForRectangle (Graphics& g, const Rectangle<int>& targetArea
     for (float i = 0.05f; i < 1.0f; i += 0.1f)
         cg.addColour (1.0 - i, colour.withMultipliedAlpha (i * i));
 
-    const float radiusInset = radius / 2.0f;
-    const float expandedRadius = radius + radiusInset;
+    const float radiusInset = (float) radius / 2.0f;
+    const float expandedRadius = (float) radius + radiusInset;
 
     auto area = targetArea.toFloat().reduced (radiusInset) + offset.toFloat();
 
@@ -170,10 +169,10 @@ void DropShadowEffect::setShadowProperties (const DropShadow& newShadow)
 void DropShadowEffect::applyEffect (Image& image, Graphics& g, float scaleFactor, float alpha)
 {
     DropShadow s (shadow);
-    s.radius = roundToInt (s.radius * scaleFactor);
+    s.radius = roundToInt ((float) s.radius * scaleFactor);
     s.colour = s.colour.withMultipliedAlpha (alpha);
-    s.offset.x = roundToInt (s.offset.x * scaleFactor);
-    s.offset.y = roundToInt (s.offset.y * scaleFactor);
+    s.offset.x = roundToInt ((float) s.offset.x * scaleFactor);
+    s.offset.y = roundToInt ((float) s.offset.y * scaleFactor);
 
     s.drawForImage (g, image);
 
