@@ -166,6 +166,7 @@ String Project::getDocumentTitle()
 void Project::updateCompanyNameDependencies()
 {
     bundleIdentifierValue.setDefault    (getDefaultBundleIdentifierString());
+    companyWebsiteValue.setDefault      (getDefaultCompanyWebsiteString());
     pluginAAXIdentifierValue.setDefault (getDefaultAAXIdentifierString());
     pluginManufacturerValue.setDefault  (getDefaultPluginManufacturerString());
 
@@ -265,7 +266,7 @@ void Project::initialiseProjectValues()
 
     companyNameValue.referTo         (projectRoot, Ids::companyName,         getUndoManager());
     companyCopyrightValue.referTo    (projectRoot, Ids::companyCopyright,    getUndoManager());
-    companyWebsiteValue.referTo      (projectRoot, Ids::companyWebsite,      getUndoManager());
+    companyWebsiteValue.referTo      (projectRoot, Ids::companyWebsite,      getUndoManager(), getDefaultCompanyWebsiteString());
     companyEmailValue.referTo        (projectRoot, Ids::companyEmail,        getUndoManager());
 
     projectTypeValue.referTo         (projectRoot, Ids::projectType,         getUndoManager(), build_tools::ProjectType_GUIApp::getTypeName());
@@ -2063,6 +2064,11 @@ String Project::getDefaultBundleIdentifierString() const
 {
     return "com." + build_tools::makeValidIdentifier (getCompanyNameOrDefault (getCompanyNameString()), false, true, false)
             + "." + build_tools::makeValidIdentifier (getProjectNameString(), false, true, false);
+}
+
+String Project::getDefaultCompanyWebsiteString() const
+{
+    return "www." + build_tools::makeValidIdentifier (getCompanyNameOrDefault (getCompanyNameString ()), false, true, false) + ".com";
 }
 
 String Project::getDefaultPluginManufacturerString() const

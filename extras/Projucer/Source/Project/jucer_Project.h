@@ -186,6 +186,7 @@ public:
 
     String getBundleIdentifierString() const             { return bundleIdentifierValue.get(); }
     String getDefaultBundleIdentifierString() const;
+    String getDefaultCompanyWebsiteString() const;
     String getDefaultAAXIdentifierString() const         { return getDefaultBundleIdentifierString(); }
     String getDefaultPluginManufacturerString() const;
     String getDefaultARAFactoryIDString() const;
