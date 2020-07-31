@@ -818,65 +818,43 @@ private:
 //==============================================================================
 struct DLLHandle
 {
-    DLLHandle (const String& modulePath)
+    DLLHandle (const File& fileToOpen)
+       : dllFile (fileToOpen)
     {
-        if (modulePath.trim().isNotEmpty())
-            open (modulePath);
+        open();
     }
 
     ~DLLHandle()
     {
-        typedef bool (PLUGIN_API *ExitModuleFn) ();
-
-       #if JUCE_WINDOWS || JUCE_LINUX
-        releaseFactory();
-
-        #if JUCE_WINDOWS
-         if (auto exitFn = (ExitModuleFn) getFunction ("ExitDll"))
-        #else
-         if (auto exitFn = (ExitModuleFn) getFunction ("ModuleExit"))
-        #endif
-            exitFn();
-
-        library.close();
-       #elif JUCE_MAC
+       #if JUCE_MAC
         if (bundleRef != nullptr)
+       #endif
         {
-            releaseFactory();
+            if (factory != nullptr)
+                factory->release();
 
-            if (auto exitFn = (ExitModuleFn) getFunction ("bundleExit"))
+            using ExitModuleFn = bool (PLUGIN_API*) ();
+
+            if (auto* exitFn = (ExitModuleFn) getFunction (exitFnName))
                 exitFn();
 
-            CFBundleUnloadExecutable (bundleRef);
+           #if JUCE_WINDOWS || JUCE_LINUX
+            library.close();
+           #elif JUCE_MAC
             CFRelease (bundleRef);
             bundleRef = nullptr;
+           #endif
         }
-       #endif
     }
 
-    void open (const PluginDescription& description)
-    {
-       #if JUCE_WINDOWS || JUCE_LINUX
-        jassert (description.fileOrIdentifier.isNotEmpty());
-        jassert (File (description.fileOrIdentifier).existsAsFile());
-        library.open (description.fileOrIdentifier);
-       #elif JUCE_MAC
-        open (description.fileOrIdentifier);
-       #endif
-    }
-
-    /** @note The factory should begin with a refCount of 1,
-              so don't increment the reference count
-              (ie: don't use a ComSmartPtr in here)!
-              Its lifetime will be handled by this DllHandle,
-              when such will be destroyed.
-
-        @see releaseFactory
+    //==============================================================================
+    /** The factory should begin with a refCount of 1, so don't increment the reference count
+        (ie: don't use a ComSmartPtr in here)! Its lifetime will be handled by this DLLHandle.
     */
     IPluginFactory* JUCE_CALLTYPE getPluginFactory()
     {
         if (factory == nullptr)
-            if (auto proc = (GetFactoryProc) getFunction ("GetPluginFactory"))
+            if (auto* proc = (GetFactoryProc) getFunction (factoryFnName))
                 factory = proc();
 
         // The plugin NEEDS to provide a factory to be able to be called a VST3!
@@ -894,39 +872,52 @@ struct DLLHandle
         if (bundleRef == nullptr)
             return nullptr;
 
-        CFStringRef name = String (functionName).toCFString();
-        void* fn = CFBundleGetFunctionPointerForName (bundleRef, name);
-        CFRelease (name);
-        return fn;
+        ScopedCFString name (functionName);
+        return CFBundleGetFunctionPointerForName (bundleRef, name.cfString);
        #endif
     }
 
+    File getFile() const noexcept  { return dllFile; }
+
 private:
+    File dllFile;
     IPluginFactory* factory = nullptr;
 
-    void releaseFactory()
-    {
-        if (factory != nullptr)
-            factory->release();
-    }
+    static constexpr const char* factoryFnName = "GetPluginFactory";
 
    #if JUCE_WINDOWS
+    static constexpr const char* entryFnName = "InitDll";
+    static constexpr const char* exitFnName  = "ExitDll";
+
+    using EntryProc = bool (PLUGIN_API*) ();
+   #elif JUCE_LINUX
+    static constexpr const char* entryFnName = "ModuleEntry";
+    static constexpr const char* exitFnName  = "ModuleExit";
+
+    using EntryProc = bool (PLUGIN_API*) (void*);
+   #elif JUCE_MAC
+    static constexpr const char* entryFnName = "bundleEntry";
+    static constexpr const char* exitFnName  = "bundleExit";
+
+    using EntryProc = bool (*) (CFBundleRef);
+   #endif
+
+    //==============================================================================
+   #if JUCE_WINDOWS || JUCE_LINUX
     DynamicLibrary library;
 
-    bool open (const String& filePath)
+    bool open()
     {
-        if (library.open (filePath))
+        if (library.open (dllFile.getFullPathName()))
         {
-            typedef bool (PLUGIN_API *InitModuleProc) ();
-
-            if (auto proc = (InitModuleProc) getFunction ("InitDll"))
+            if (auto* proc = (EntryProc) getFunction (entryFnName))
             {
+               #if JUCE_WINDOWS
                 if (proc())
+               #else
+                if (proc (library.getNativeHandle()))
+               #endif
                     return true;
-            }
-            else
-            {
-                return true;
             }
 
             library.close();
@@ -937,12 +928,14 @@ private:
    #elif JUCE_MAC
     CFBundleRef bundleRef;
 
-    bool open (const String& filePath)
+    bool open()
     {
-        const File file (filePath);
-        const char* const utf8 = file.getFullPathName().toRawUTF8();
+        auto* utf8 = dllFile.getFullPathName().toRawUTF8();
 
-        if (CFURLRef url = CFURLCreateFromFileSystemRepresentation (nullptr, (const UInt8*) utf8, (CFIndex) std::strlen (utf8), file.isDirectory()))
+        if (CFURLRef url = CFURLCreateFromFileSystemRepresentation (nullptr,
+                                                                    (const UInt8*) utf8,
+                                                                    (CFIndex) std::strlen (utf8),
+                                                                    dllFile.isDirectory()))
         {
             bundleRef = CFBundleCreate (kCFAllocatorDefault, url);
             CFRelease (url);
@@ -953,16 +946,10 @@ private:
 
                 if (CFBundleLoadExecutableAndReturnError (bundleRef, &error))
                 {
-                    using BundleEntryProc = bool (*)(CFBundleRef);
-
-                    if (auto proc = (BundleEntryProc) getFunction ("bundleEntry"))
+                    if (auto* proc = (EntryProc) getFunction (entryFnName))
                     {
                         if (proc (bundleRef))
                             return true;
-                    }
-                    else
-                    {
-                        return true;
                     }
                 }
 
@@ -984,127 +971,122 @@ private:
 
         return false;
     }
-   #elif JUCE_LINUX
-    DynamicLibrary library;
+   #endif
 
-    String getMachineName()
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DLLHandle)
+};
+
+struct DLLHandleCache  : public DeletedAtShutdown
+{
+    DLLHandleCache() = default;
+    ~DLLHandleCache() override { clearSingletonInstance(); }
+
+    JUCE_DECLARE_SINGLETON (DLLHandleCache, false)
+
+    DLLHandle& findOrCreateHandle (const String& modulePath)
     {
-        struct utsname unameData;
-        auto res = uname (&unameData);
+       #if JUCE_LINUX
+        File file (getDLLFileFromBundle (modulePath));
+       #else
+        File file (modulePath);
+       #endif
 
-        if (res != 0)
-            return {};
+        auto it = std::find_if (openHandles.begin(), openHandles.end(),
+                                [&] (const std::unique_ptr<DLLHandle>& handle)
+                                {
+                                     return file == handle->getFile();
+                                });
 
-        return unameData.machine;
+        if (it != openHandles.end())
+            return *it->get();
+
+        openHandles.push_back (std::make_unique<DLLHandle> (file));
+        return *openHandles.back().get();
     }
 
-    bool open (const String& bundlePath)
+private:
+   #if JUCE_LINUX
+    File getDLLFileFromBundle (const String& bundlePath) const
     {
+        auto machineName = []() -> String
+        {
+            struct utsname unameData;
+            auto res = uname (&unameData);
+
+            if (res != 0)
+                return {};
+
+            return unameData.machine;
+        }();
+
         File file (bundlePath);
 
-        if (! file.exists() || ! file.isDirectory())
-            return false;
-
-        auto pluginName = file.getFileNameWithoutExtension();
-
-        file = file.getChildFile ("Contents")
-                   .getChildFile (getMachineName() + "-linux")
-                   .getChildFile (pluginName + ".so");
-
-        if (! file.exists())
-            return false;
-
-        if (library.open (file.getFullPathName()))
-        {
-            typedef bool (PLUGIN_API *InitModuleProc) (void*);
-
-            if (auto* proc = (InitModuleProc) getFunction ("ModuleEntry"))
-            {
-                if (proc (library.getNativeHandle()))
-                    return true;
-            }
-            else
-            {
-                return true;
-            }
-
-            library.close();
-        }
-
-        return false;
+        return file.getChildFile ("Contents")
+                   .getChildFile (machineName + "-linux")
+                   .getChildFile (file.getFileNameWithoutExtension() + ".so");
     }
    #endif
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DLLHandle)
+    std::vector<std::unique_ptr<DLLHandle>> openHandles;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DLLHandleCache)
 };
+
+
+JUCE_IMPLEMENT_SINGLETON (DLLHandleCache)
 
 //==============================================================================
 struct VST3ModuleHandle  : public ReferenceCountedObject
 {
-    explicit VST3ModuleHandle (const File& pluginFile)  : file (pluginFile)
+    explicit VST3ModuleHandle (const File& pluginFile, const PluginDescription& pluginDesc)
+        : file (pluginFile)
     {
-        getActiveModules().add (this);
+        if (open (pluginDesc))
+        {
+            isOpen = true;
+            getActiveModules().add (this);
+        }
     }
 
     ~VST3ModuleHandle()
     {
-        getActiveModules().removeFirstMatchingValue (this);
-    }
-
-    /**
-        Since there is no apparent indication if a VST3 plugin is a shell or not,
-        we're stuck iterating through a VST3's factory, creating a description
-        for every housed plugin.
-    */
-    static bool getAllDescriptionsForFile (OwnedArray<PluginDescription>& results,
-                                           const String& fileOrIdentifier)
-    {
-        DLLHandle tempModule (fileOrIdentifier);
-
-        ComSmartPtr<IPluginFactory> pluginFactory (tempModule.getPluginFactory());
-
-        if (pluginFactory != nullptr)
-        {
-            ComSmartPtr<VST3HostContext> host (new VST3HostContext());
-            DescriptionLister lister (host, pluginFactory);
-            auto result = lister.findDescriptionsAndPerform (File (fileOrIdentifier));
-
-            results.addCopiesOf (lister.list);
-
-            return result.wasOk();
-        }
-
-        jassertfalse;
-        return false;
+        if (isOpen)
+            getActiveModules().removeFirstMatchingValue (this);
     }
 
     //==============================================================================
     using Ptr = ReferenceCountedObjectPtr<VST3ModuleHandle>;
 
-    static VST3ModuleHandle::Ptr findOrCreateModule (const File& file, const PluginDescription& description)
+    static VST3ModuleHandle::Ptr findOrCreateModule (const File& file,
+                                                     const PluginDescription& description)
     {
         for (auto* module : getActiveModules())
+        {
             // VST3s are basically shells, you must therefore check their name along with their file:
             if (module->file == file && module->name == description.name)
                 return module;
+        }
 
-        VST3ModuleHandle::Ptr m (new VST3ModuleHandle (file));
+        VST3ModuleHandle::Ptr modulePtr (new VST3ModuleHandle (file, description));
 
-        if (! m->open (file, description))
-            m = nullptr;
+        if (! modulePtr->isOpen)
+            modulePtr = nullptr;
 
-        return m;
+        return modulePtr;
     }
 
     //==============================================================================
-    IPluginFactory* getPluginFactory()      { return dllHandle->getPluginFactory(); }
+    IPluginFactory* getPluginFactory()
+    {
+        return DLLHandleCache::getInstance()->findOrCreateHandle (file.getFullPathName()).getPluginFactory();
+    }
 
-    File file;
-    String name;
+    File getFile() const noexcept    { return file; }
+    String getName() const noexcept  { return name; }
 
 private:
-    std::unique_ptr<DLLHandle> dllHandle;
-
     //==============================================================================
     static Array<VST3ModuleHandle*>& getActiveModules()
     {
@@ -1113,11 +1095,10 @@ private:
     }
 
     //==============================================================================
-    bool open (const File& f, const PluginDescription& description)
+    bool open (const PluginDescription& description)
     {
-        dllHandle.reset (new DLLHandle (f.getFullPathName()));
-
-        ComSmartPtr<IPluginFactory> pluginFactory (dllHandle->getPluginFactory());
+        ComSmartPtr<IPluginFactory> pluginFactory (DLLHandleCache::getInstance()->findOrCreateHandle (file.getFullPathName())
+                                                                                 .getPluginFactory());
 
         if (pluginFactory != nullptr)
         {
@@ -1132,7 +1113,7 @@ private:
                     continue;
 
                 if (toString (info.name).trim() == description.name
-                        && getHashForTUID (info.cid) == description.uid)
+                    && getHashForTUID (info.cid) == description.uid)
                 {
                     name = description.name;
                     return true;
@@ -1143,6 +1124,11 @@ private:
         return false;
     }
 
+    File file;
+    String name;
+    bool isOpen = false;
+
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3ModuleHandle)
 };
 
@@ -1618,7 +1604,7 @@ struct VST3ComponentHolder
         PFactoryInfo factoryInfo;
         factory->getFactoryInfo (&factoryInfo);
 
-        auto classIdx = getClassIndex (module->name);
+        auto classIdx = getClassIndex (module->getName());
 
         if (classIdx >= 0)
         {
@@ -1667,8 +1653,8 @@ struct VST3ComponentHolder
                 if (component->getBusInfo (Vst::kAudio, Vst::kOutput, i, bus) == kResultOk)
                     totalNumOutputChannels += ((bus.flags & Vst::BusInfo::kDefaultActive) != 0 ? bus.channelCount : 0);
 
-            createPluginDescription (description, module->file,
-                                     factoryInfo.vendor, module->name,
+            createPluginDescription (description, module->getFile(),
+                                     factoryInfo.vendor, module->getName(),
                                      info, info2.get(), infoW.get(),
                                      totalNumInputChannels,
                                      totalNumOutputChannels);
@@ -1695,7 +1681,7 @@ struct VST3ComponentHolder
         factory = ComSmartPtr<IPluginFactory> (module->getPluginFactory());
 
         int classIdx;
-        if ((classIdx = getClassIndex (module->name)) < 0)
+        if ((classIdx = getClassIndex (module->getName())) < 0)
             return false;
 
         PClassInfo info;
@@ -1991,7 +1977,7 @@ public:
     const String getName() const override
     {
         auto& module = holder->module;
-        return module != nullptr ? module->name : String();
+        return module != nullptr ? module->getName() : String();
     }
 
     void repopulateArrangements (Array<Vst::SpeakerArrangement>& inputArrangements, Array<Vst::SpeakerArrangement>& outputArrangements) const
@@ -3315,7 +3301,29 @@ bool VST3PluginFormat::setStateFromVSTPresetFile (AudioPluginInstance* api, cons
 void VST3PluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& results, const String& fileOrIdentifier)
 {
     if (fileMightContainThisPluginType (fileOrIdentifier))
-        VST3ModuleHandle::getAllDescriptionsForFile (results, fileOrIdentifier);
+    {
+        /**
+            Since there is no apparent indication if a VST3 plugin is a shell or not,
+            we're stuck iterating through a VST3's factory, creating a description
+            for every housed plugin.
+        */
+
+        ComSmartPtr<IPluginFactory> pluginFactory (DLLHandleCache::getInstance()->findOrCreateHandle (fileOrIdentifier)
+                                                                                 .getPluginFactory());
+
+        if (pluginFactory != nullptr)
+        {
+            ComSmartPtr<VST3HostContext> host (new VST3HostContext());
+            DescriptionLister lister (host, pluginFactory);
+            lister.findDescriptionsAndPerform (File (fileOrIdentifier));
+
+            results.addCopiesOf (lister.list);
+        }
+        else
+        {
+            jassertfalse;
+        }
+    }
 }
 
 void VST3PluginFormat::createPluginInstance (const PluginDescription& description,
