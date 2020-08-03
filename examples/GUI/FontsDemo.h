@@ -65,15 +65,22 @@ public:
         addAndMakeVisible (kerningLabel);
         addAndMakeVisible (kerningSlider);
         addAndMakeVisible (scaleLabel);
+        addAndMakeVisible (horizontalJustificationLabel);
+        addAndMakeVisible (verticalJustificationLabel);
         addAndMakeVisible (scaleSlider);
         addAndMakeVisible (boldToggle);
         addAndMakeVisible (italicToggle);
         addAndMakeVisible (styleBox);
+        addAndMakeVisible (horizontalJustificationBox);
+        addAndMakeVisible (verticalJustificationBox);
+        addAndMakeVisible (resetButton);
 
-        kerningLabel.attachToComponent (&kerningSlider, true);
-        heightLabel .attachToComponent (&heightSlider,  true);
-        scaleLabel  .attachToComponent (&scaleSlider,   true);
-        styleLabel  .attachToComponent (&styleBox,      true);
+        kerningLabel                .attachToComponent (&kerningSlider,              true);
+        heightLabel                 .attachToComponent (&heightSlider,               true);
+        scaleLabel                  .attachToComponent (&scaleSlider,                true);
+        styleLabel                  .attachToComponent (&styleBox,                   true);
+        horizontalJustificationLabel.attachToComponent (&horizontalJustificationBox, true);
+        verticalJustificationLabel  .attachToComponent (&verticalJustificationBox,   true);
 
         heightSlider .addListener (this);
         kerningSlider.addListener (this);
@@ -93,10 +100,6 @@ public:
         heightSlider .setRange (3.0, 150.0, 0.01);
         scaleSlider  .setRange (0.2, 3.0, 0.01);
         kerningSlider.setRange (-2.0, 2.0, 0.01);
-
-        scaleSlider  .setValue (1.0);   // Set some initial values for the sliders.
-        heightSlider .setValue (20.0);
-        kerningSlider.setValue (0);
 
         // set up the layout and resizer bars..
         verticalLayout.setItemLayout (0, -0.2, -0.8, -0.35); // width of the font list must be
@@ -127,6 +130,11 @@ public:
         demoTextBox.setColour (TextEditor::textColourId, Colours::black);
         demoTextBox.setColour (TextEditor::backgroundColourId, Colours::white);
 
+        resetButton.onClick = [this] { resetToDefaultParameters(); };
+
+        setupJustificationOptions();
+        resetToDefaultParameters();
+
         setSize (750, 750);
     }
 
@@ -151,7 +159,10 @@ public:
 
         r.removeFromLeft (verticalDividerBar->getRight());
 
-        int labelWidth = 60;
+        resetButton.setBounds (r.removeFromBottom (30).reduced (jmax (20, r.getWidth() / 5), 0));
+        r.removeFromBottom (8);
+
+        const int labelWidth = 60;
 
         auto styleArea = r.removeFromBottom (26);
         styleArea.removeFromLeft (labelWidth);
@@ -164,6 +175,10 @@ public:
         italicToggle.setBounds (row);
 
         r.removeFromBottom (8);
+        horizontalJustificationBox.setBounds (r.removeFromBottom (30).withTrimmedLeft (labelWidth * 3));
+        r.removeFromBottom (8);
+        verticalJustificationBox.setBounds (r.removeFromBottom (30).withTrimmedLeft (labelWidth * 3));
+        r.removeFromBottom (8);
         scaleSlider.setBounds (r.removeFromBottom (30).withTrimmedLeft (labelWidth));
         r.removeFromBottom (8);
         kerningSlider.setBounds (r.removeFromBottom (30).withTrimmedLeft (labelWidth));
@@ -175,9 +190,9 @@ public:
 
     void sliderValueChanged (Slider* sliderThatWasMoved) override
     {
-        if (sliderThatWasMoved == &heightSlider)            refreshPreviewBoxFont();
-        else if (sliderThatWasMoved == &kerningSlider)      refreshPreviewBoxFont();
-        else if (sliderThatWasMoved == &scaleSlider)        refreshPreviewBoxFont();
+        if      (sliderThatWasMoved == &heightSlider)   refreshPreviewBoxFont();
+        else if (sliderThatWasMoved == &kerningSlider)  refreshPreviewBoxFont();
+        else if (sliderThatWasMoved == &scaleSlider)    refreshPreviewBoxFont();
     }
 
     // The following methods implement the ListBoxModel virtual methods:
@@ -215,21 +230,69 @@ private:
     ListBox listBox;
     TextEditor demoTextBox;
 
-    Label heightLabel   { {}, "Height:" },
-          kerningLabel  { {}, "Kerning:" },
-          scaleLabel    { {}, "Scale:" },
-          styleLabel    { {}, "Style:" };
+    const double defaultScale = 1.0, defaultHeight = 20.0, defaultKerning = 0.0;
+    const bool defaultBold = false, defaultItalic = false;
+    const int defaultStyle = 0, defaultHorizontalJustification = 0, defaultVerticalJustification = 0;
+
+    Label heightLabel  { {}, "Height:" },
+          kerningLabel { {}, "Kerning:" },
+          scaleLabel   { {}, "Scale:" },
+          styleLabel   { {}, "Style:" },
+          horizontalJustificationLabel { {}, "Justification (horizontal):" },
+          verticalJustificationLabel   { {}, "Justification (vertical):" };
 
     ToggleButton boldToggle   { "Bold" },
                  italicToggle { "Italic" };
 
+    TextButton resetButton { "Reset" };
+
     Slider heightSlider, kerningSlider, scaleSlider;
-    ComboBox styleBox;
+    ComboBox styleBox, horizontalJustificationBox, verticalJustificationBox;
 
     StretchableLayoutManager verticalLayout;
     std::unique_ptr<StretchableLayoutResizerBar> verticalDividerBar;
 
+    StringArray horizontalJustificationStrings { "Left", "Centred", "Right" },
+                verticalJustificationStrings   { "Top",  "Centred", "Bottom" };
+
+    Array<int>  horizontalJustificationFlags { Justification::left, Justification::horizontallyCentred, Justification::right },
+                verticalJustificationFlags   { Justification::top,  Justification::verticallyCentred, Justification::bottom};
+
     //==============================================================================
+    void resetToDefaultParameters()
+    {
+        scaleSlider  .setValue (defaultScale);
+        heightSlider .setValue (defaultHeight);
+        kerningSlider.setValue (defaultKerning);
+
+        boldToggle  .setToggleState (defaultBold,   sendNotificationSync);
+        italicToggle.setToggleState (defaultItalic, sendNotificationSync);
+
+        styleBox.setSelectedItemIndex (defaultStyle);
+        horizontalJustificationBox.setSelectedItemIndex (defaultHorizontalJustification);
+        verticalJustificationBox  .setSelectedItemIndex (defaultVerticalJustification);
+    }
+
+    void setupJustificationOptions()
+    {
+        horizontalJustificationBox.addItemList (horizontalJustificationStrings, 1);
+        verticalJustificationBox  .addItemList (verticalJustificationStrings, 1);
+
+        auto updateJustification = [this]()
+        {
+            auto horizontalIndex = horizontalJustificationBox.getSelectedItemIndex();
+            auto verticalIndex   = verticalJustificationBox.getSelectedItemIndex();
+
+            auto horizontalJustification = horizontalJustificationFlags[horizontalIndex];
+            auto verticalJustification   = verticalJustificationFlags[verticalIndex];
+
+            demoTextBox.setJustification (horizontalJustification | verticalJustification);
+        };
+
+        horizontalJustificationBox.onChange = updateJustification;
+        verticalJustificationBox  .onChange = updateJustification;
+    }
+
     void refreshPreviewBoxFont()
     {
         auto bold   = boldToggle  .getToggleState();
@@ -265,7 +328,7 @@ private:
 
             styleBox.clear();
             styleBox.addItemList (newStyles, 1);
-            styleBox.setSelectedItemIndex (0);
+            styleBox.setSelectedItemIndex (defaultStyle);
         }
     }
 
