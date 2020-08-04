@@ -1987,6 +1987,13 @@
 			path = "../../Source/Utility/UI/jucer_Icons.h";
 			sourceTree = "SOURCE_ROOT";
 		};
+		C5A1549AD0C20CF42C1FE630 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = "juce_runtime_arch_detection.cpp";
+			path = "../../../Build/CMake/juce_runtime_arch_detection.cpp";
+			sourceTree = "SOURCE_ROOT";
+		};
 		C607639897ED2538CBB860D0 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -2683,6 +2690,7 @@
 				86B4069D904AB46AC86FB383,
 				41105E536155E394E54BDD35,
 				5F6584B675E30761521A9F42,
+				C5A1549AD0C20CF42C1FE630,
 			);
 			name = BinaryData;
 			sourceTree = "<group>";

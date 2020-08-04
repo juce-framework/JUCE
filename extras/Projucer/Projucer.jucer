@@ -290,6 +290,8 @@
             file="Source/BinaryData/colourscheme_dark.xml"/>
       <FILE id="bvFank" name="colourscheme_light.xml" compile="0" resource="1"
             file="Source/BinaryData/colourscheme_light.xml"/>
+      <FILE id="SDFoQY" name="juce_runtime_arch_detection.cpp" compile="0" resource="1"
+            file="../Build/CMake/juce_runtime_arch_detection.cpp"/>
     </GROUP>
     <GROUP id="{A5AE7471-B900-FD9D-8DE7-2FB68D11AE30}" name="CodeEditor">
       <FILE id="w3ka6n" name="jucer_DocumentEditorComponent.cpp" compile="1"
