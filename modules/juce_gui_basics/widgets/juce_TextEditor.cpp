@@ -281,7 +281,8 @@ struct TextEditor::Iterator
         bottomRight (ed.getMaximumWidth(), ed.getMaximumHeight()),
         wordWrapWidth (ed.getWordWrapWidth()),
         passwordCharacter (ed.passwordCharacter),
-        lineSpacing (ed.lineSpacing)
+        lineSpacing (ed.lineSpacing),
+        underlineWhitespace (ed.underlineWhitespace)
     {
         jassert (wordWrapWidth > 0);
 
@@ -511,7 +512,7 @@ struct TextEditor::Iterator
     //==============================================================================
     void draw (Graphics& g, const UniformTextSection*& lastSection, AffineTransform transform) const
     {
-        if (passwordCharacter != 0 || ! atom->isWhitespace())
+        if (passwordCharacter != 0 || (underlineWhitespace || ! atom->isWhitespace()))
         {
             if (lastSection != currentSection)
             {
@@ -684,6 +685,7 @@ private:
     const float wordWrapWidth;
     const juce_wchar passwordCharacter;
     const float lineSpacing;
+    const bool underlineWhitespace;
     TextAtom tempAtom;
 
     void moveToEndOfLastAtom()

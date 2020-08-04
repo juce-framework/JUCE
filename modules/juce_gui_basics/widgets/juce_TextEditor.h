@@ -249,7 +249,7 @@ public:
 
         @see setFont
     */
-    const Font& getFont() const noexcept            { return currentFont; }
+    const Font& getFont() const noexcept  { return currentFont; }
 
     /** Applies a colour to all the text in the editor.
 
@@ -257,6 +257,18 @@ public:
         new colour as the colour to be used for any new text that's added.
     */
     void applyColourToAllText (const Colour& newColour, bool changeCurrentTextColour = true);
+
+    /** Sets whether whitespace should be underlined when the editor font is underlined.
+
+        @see isWhitespaceUnderlined
+    */
+    void setWhitespaceUnderlined (bool shouldUnderlineWhitespace) noexcept  { underlineWhitespace = shouldUnderlineWhitespace; }
+
+    /** Returns true if whitespace is underlined for underlined fonts.
+
+        @see setWhitespaceIsUnderlined
+    */
+    bool isWhitespaceUnderlined() const noexcept                            { return underlineWhitespace; }
 
     //==============================================================================
     /** If set to true, focusing on the editor will highlight all its text.
@@ -729,6 +741,7 @@ private:
     bool menuActive = false;
     bool valueTextNeedsUpdating = false;
     bool consumeEscAndReturnKeys = true;
+    bool underlineWhitespace = true;
 
     UndoManager undoManager;
     std::unique_ptr<CaretComponent> caret;
