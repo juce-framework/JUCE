@@ -70,6 +70,7 @@ public:
         addAndMakeVisible (scaleSlider);
         addAndMakeVisible (boldToggle);
         addAndMakeVisible (italicToggle);
+        addAndMakeVisible (underlineToggle);
         addAndMakeVisible (styleBox);
         addAndMakeVisible (horizontalJustificationBox);
         addAndMakeVisible (verticalJustificationBox);
@@ -86,9 +87,10 @@ public:
         kerningSlider.addListener (this);
         scaleSlider  .addListener (this);
 
-        boldToggle  .onClick  = [this] { refreshPreviewBoxFont(); };
-        italicToggle.onClick  = [this] { refreshPreviewBoxFont(); };
-        styleBox    .onChange = [this] { refreshPreviewBoxFont(); };
+        boldToggle     .onClick  = [this] { refreshPreviewBoxFont(); };
+        italicToggle   .onClick  = [this] { refreshPreviewBoxFont(); };
+        underlineToggle.onClick  = [this] { refreshPreviewBoxFont(); };
+        styleBox       .onChange = [this] { refreshPreviewBoxFont(); };
 
         Font::findFonts (fonts);   // Generate the list of fonts
 
@@ -129,6 +131,8 @@ public:
         demoTextBox.setCaretPosition (0);
         demoTextBox.setColour (TextEditor::textColourId, Colours::black);
         demoTextBox.setColour (TextEditor::backgroundColourId, Colours::white);
+
+        demoTextBox.setWhitespaceUnderlined (false);
 
         resetButton.onClick = [this] { resetToDefaultParameters(); };
 
@@ -171,8 +175,10 @@ public:
 
         auto row = r.removeFromBottom (30);
         row.removeFromLeft (labelWidth);
-        boldToggle.setBounds (row.removeFromLeft (row.getWidth() / 2));
-        italicToggle.setBounds (row);
+        auto toggleWidth = row.getWidth() / 3;
+        boldToggle     .setBounds (row.removeFromLeft (toggleWidth));
+        italicToggle   .setBounds (row.removeFromLeft (toggleWidth));
+        underlineToggle.setBounds (row);
 
         r.removeFromBottom (8);
         horizontalJustificationBox.setBounds (r.removeFromBottom (30).withTrimmedLeft (labelWidth * 3));
@@ -231,7 +237,7 @@ private:
     TextEditor demoTextBox;
 
     const double defaultScale = 1.0, defaultHeight = 20.0, defaultKerning = 0.0;
-    const bool defaultBold = false, defaultItalic = false;
+    const bool defaultBold = false, defaultItalic = false, defaultUnderlined = false;
     const int defaultStyle = 0, defaultHorizontalJustification = 0, defaultVerticalJustification = 0;
 
     Label heightLabel  { {}, "Height:" },
@@ -241,8 +247,9 @@ private:
           horizontalJustificationLabel { {}, "Justification (horizontal):" },
           verticalJustificationLabel   { {}, "Justification (vertical):" };
 
-    ToggleButton boldToggle   { "Bold" },
-                 italicToggle { "Italic" };
+    ToggleButton boldToggle      { "Bold" },
+                 italicToggle    { "Italic" },
+                 underlineToggle { "Underlined" };
 
     TextButton resetButton { "Reset" };
 
@@ -265,8 +272,9 @@ private:
         heightSlider .setValue (defaultHeight);
         kerningSlider.setValue (defaultKerning);
 
-        boldToggle  .setToggleState (defaultBold,   sendNotificationSync);
-        italicToggle.setToggleState (defaultItalic, sendNotificationSync);
+        boldToggle     .setToggleState (defaultBold,       sendNotificationSync);
+        italicToggle   .setToggleState (defaultItalic,     sendNotificationSync);
+        underlineToggle.setToggleState (defaultUnderlined, sendNotificationSync);
 
         styleBox.setSelectedItemIndex (defaultStyle);
         horizontalJustificationBox.setSelectedItemIndex (defaultHorizontalJustification);
@@ -314,6 +322,8 @@ private:
 
         if (useStyle)
             font = font.withTypefaceStyle (styleBox.getText());
+
+        font.setUnderline (underlineToggle.getToggleState());
 
         demoTextBox.applyFontToAllText (font);
     }
