@@ -542,7 +542,7 @@ private:
                 auto cxxStandard = project.getCppStandardString();
 
                 if (cxxStandard == "latest")
-                    cxxStandard = "17";
+                    cxxStandard = project.getLatestNumberedCppStandardString();
 
                 out << "    CXX_STANDARD " << cxxStandard << newLine;
 
@@ -671,7 +671,7 @@ private:
                 auto cxxStandard = project.getCppStandardString();
 
                 if (cxxStandard == "latest")
-                    cxxStandard = "17";
+                    cxxStandard = project.getLatestNumberedCppStandardString();
 
                 out << "    CXX_STANDARD " << cxxStandard << newLine;
 
@@ -1076,7 +1076,7 @@ private:
                 auto cxxStandard = project.getCppStandardString();
 
                 if (cxxStandard == "latest")
-                    cxxStandard = "17";
+                    cxxStandard = project.getLatestNumberedCppStandardString();
 
                 out << "    CXX_STANDARD " << cxxStandard << newLine;
 

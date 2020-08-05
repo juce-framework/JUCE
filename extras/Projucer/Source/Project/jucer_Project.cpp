@@ -287,7 +287,7 @@ void Project::initialiseProjectValues()
     useAppConfigValue.referTo             (projectRoot, Ids::useAppConfig,                  getUndoManager(), true);
     addUsingNamespaceToJuceHeader.referTo (projectRoot, Ids::addUsingNamespaceToJuceHeader, getUndoManager(), true);
 
-    cppStandardValue.referTo       (projectRoot, Ids::cppLanguageStandard, getUndoManager(), "14");
+    cppStandardValue.referTo (projectRoot, Ids::cppLanguageStandard, getUndoManager(), "14");
 
     headerSearchPathsValue.referTo   (projectRoot, Ids::headerPath, getUndoManager());
     preprocessorDefsValue.referTo    (projectRoot, Ids::defines,    getUndoManager());

@@ -1653,7 +1653,7 @@ public:
                 auto cppStandard = owner.project.getCppStandardString();
 
                 if (cppStandard == "latest")
-                    cppStandard = "17";
+                    cppStandard = owner.project.getLatestNumberedCppStandardString();
 
                 s.set ("CLANG_CXX_LANGUAGE_STANDARD", (String (owner.shouldUseGNUExtensions() ? "gnu++"
                                                                                               : "c++") + cppStandard).quoted());

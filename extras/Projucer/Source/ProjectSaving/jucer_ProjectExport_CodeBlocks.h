@@ -392,7 +392,7 @@ private:
             auto cppStandard = config.project.getCppStandardString();
 
             if (cppStandard == "latest")
-                cppStandard = "17";
+                cppStandard = project.getLatestNumberedCppStandardString();
 
             flags.add ("-std=" + String (shouldUseGNUExtensions() ? "gnu++" : "c++") + cppStandard);
         }
