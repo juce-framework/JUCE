@@ -1435,7 +1435,7 @@ private:
             auto projectStandard = project.getCppStandardString();
 
             if (projectStandard == "latest")
-                return String ("17");
+                return project.getLatestNumberedCppStandardString();
 
             return projectStandard;
         }();

@@ -625,7 +625,7 @@ private:
         auto cppStandard = project.getCppStandardString();
 
         if (cppStandard == "latest")
-            cppStandard = "17";
+            cppStandard = project.getLatestNumberedCppStandardString();
 
         result.add ("-std=" + String (shouldUseGNUExtensions() ? "gnu++" : "c++") + cppStandard);
 
