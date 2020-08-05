@@ -185,6 +185,9 @@
     <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_OpenGLComponentTemplate.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\Build\CMake\juce_runtime_arch_detection.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\Source\CodeEditor\jucer_DocumentEditorComponent.cpp"/>
     <ClCompile Include="..\..\Source\CodeEditor\jucer_OpenDocumentManager.cpp"/>
     <ClCompile Include="..\..\Source\CodeEditor\jucer_SourceCodeEditor.cpp"/>

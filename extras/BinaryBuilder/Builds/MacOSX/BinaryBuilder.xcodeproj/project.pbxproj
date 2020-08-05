@@ -197,9 +197,14 @@
 				);
 				INSTALL_PATH = "/usr/bin";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_HEADER_SEARCH_PATHS = (
+					"../../JuceLibraryCode",
+					"../../../../modules",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.binarybuilder;
 				PRODUCT_NAME = "BinaryBuilder";
 				USE_HEADERMAP = NO;
+				VALID_ARCHS = "i386 x86_64 arm64 arm64e";
 			};
 			name = Debug;
 		};
@@ -245,9 +250,14 @@
 				INSTALL_PATH = "/usr/bin";
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_HEADER_SEARCH_PATHS = (
+					"../../JuceLibraryCode",
+					"../../../../modules",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.binarybuilder;
 				PRODUCT_NAME = "BinaryBuilder";
 				USE_HEADERMAP = NO;
+				VALID_ARCHS = "i386 x86_64 arm64 arm64e";
 			};
 			name = Release;
 		};

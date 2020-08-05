@@ -239,7 +239,10 @@ struct ObjCClass
 
     ~ObjCClass()
     {
-        objc_disposeClassPair (cls);
+        auto kvoSubclassName = String ("NSKVONotifying_") + class_getName (cls);
+
+        if (objc_getClass (kvoSubclassName.toUTF8()) == nullptr)
+            objc_disposeClassPair (cls);
     }
 
     void registerClass()

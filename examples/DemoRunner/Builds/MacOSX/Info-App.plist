@@ -12,7 +12,7 @@
     <key>CFBundleIconFile</key>
     <string>Icon.icns</string>
     <key>CFBundleIdentifier</key>
-    <string>com.juce.demorunner</string>
+    <string>com.rmsl.juce.demorunner</string>
     <key>CFBundleName</key>
     <string>DemoRunner</string>
     <key>CFBundleDisplayName</key>

@@ -1811,14 +1811,18 @@ private:
 
     void sampleReaderChanged (std::shared_ptr<AudioFormatReaderFactory> value) override
     {
-        if (value == nullptr)
-            thumbnail.clear();
-        else
+        if (value != nullptr)
         {
-            auto reader = value->make (dataModel.getAudioFormatManager());
-            thumbnail.setReader (reader.release(), currentHashCode);
-            currentHashCode += 1;
+            if (auto reader = value->make (dataModel.getAudioFormatManager()))
+            {
+                thumbnail.setReader (reader.release(), currentHashCode);
+                currentHashCode += 1;
+
+                return;
+            }
         }
+
+        thumbnail.clear();
     }
 
     void visibleRangeChanged (Range<double>) override
@@ -1926,10 +1930,15 @@ public:
 
         auto setReader = [this] (const FileChooser& fc)
         {
-            undoManager.beginNewTransaction();
-            auto readerFactory = new FileAudioFormatReaderFactory (fc.getResult());
-            dataModel.setSampleReader (std::unique_ptr<AudioFormatReaderFactory> (readerFactory),
-                                       &undoManager);
+            const auto result = fc.getResult();
+
+            if (result != File())
+            {
+                undoManager.beginNewTransaction();
+                auto readerFactory = new FileAudioFormatReaderFactory (result);
+                dataModel.setSampleReader (std::unique_ptr<AudioFormatReaderFactory> (readerFactory),
+                                           &undoManager);
+            }
         };
 
         loadNewSampleButton.onClick = [this, setReader]
@@ -2110,6 +2119,8 @@ public:
         AudioFormatManager manager;
         manager.registerBasicFormats();
         auto reader = readerFactory->make (manager);
+        jassert (reader != nullptr); // Failed to load resource!
+
         auto sound = samplerSound;
         auto sample = std::unique_ptr<Sample> (new Sample (*reader, 10.0));
         auto lengthInSeconds = sample->getLength() / sample->getSampleRate();
@@ -2240,9 +2251,8 @@ public:
                                              nullptr,
                                              move (newSamplerVoices)));
         }
-        else
+        else if (auto reader = fact->make (formatManager))
         {
-            auto reader = fact->make (formatManager);
             commands.push (SetSampleCommand (move (fact),
                                              std::unique_ptr<Sample> (new Sample (*reader, 10.0)),
                                              move (newSamplerVoices)));
