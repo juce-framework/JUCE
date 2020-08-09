@@ -74,6 +74,7 @@ namespace juce
     USE_FUNCTION (glIsRenderbuffer,         GLboolean, (GLuint p1), (p1))\
     USE_FUNCTION (glBindRenderbuffer,       void, (GLenum p1, GLuint p2), (p1, p2))\
     USE_FUNCTION (glDeleteRenderbuffers,    void, (GLsizei p1, const GLuint* p2), (p1, p2))\
+    USE_FUNCTION (glDrawBuffers,            void, (GLsizei p1, const GLenum* p2), (p1, p2))\
     USE_FUNCTION (glGenRenderbuffers,       void, (GLsizei p1, GLuint* p2), (p1, p2))\
     USE_FUNCTION (glRenderbufferStorage,    void, (GLenum p1, GLenum p2, GLsizei p3, GLsizei p4), (p1, p2, p3, p4))\
     USE_FUNCTION (glGetRenderbufferParameteriv,  void, (GLenum p1, GLenum p2, GLint* p3), (p1, p2, p3))\
