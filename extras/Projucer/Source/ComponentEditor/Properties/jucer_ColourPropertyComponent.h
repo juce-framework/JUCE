@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -49,7 +48,7 @@ public:
     }
 
     class ColourEditorComponent    : public Component,
-                                     public ChangeListener
+                                     private ChangeListener
     {
     public:
         ColourEditorComponent (const bool canReset)
@@ -67,7 +66,7 @@ public:
                                 Colour (0xffffffff).overlaidWith (colour));
 
             g.setColour (Colours::white.overlaidWith (colour).contrasting());
-            g.setFont (Font (getHeight() * 0.6f, Font::bold));
+            g.setFont (Font ((float) getHeight() * 0.6f, Font::bold));
             g.drawFittedText (colour.toDisplayString (true),
                               2, 1, getWidth() - 4, getHeight() - 1,
                               Justification::centred, 1);
@@ -92,14 +91,6 @@ public:
         {
             CallOutBox::launchAsynchronously (new ColourSelectorComp (this, canResetToDefault),
                                               getScreenBounds(), nullptr);
-        }
-
-        void changeListenerCallback (ChangeBroadcaster* source) override
-        {
-            const ColourSelector* const cs = (const ColourSelector*) source;
-
-            if (cs->getCurrentColour() != getColour())
-                setColour (cs->getCurrentColour());
         }
 
         class ColourSelectorComp   : public Component
@@ -174,6 +165,14 @@ public:
         };
 
     private:
+        void changeListenerCallback (ChangeBroadcaster* source) override
+        {
+            const ColourSelector* const cs = (const ColourSelector*) source;
+
+            if (cs->getCurrentColour() != getColour())
+                setColour (cs->getCurrentColour());
+        }
+
         Colour colour;
         bool canResetToDefault;
     };

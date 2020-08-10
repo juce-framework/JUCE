@@ -91,7 +91,7 @@ namespace TimeHelpers
                                  : (value - ((value / modulo) + 1) * modulo));
     }
 
-    static inline String formatString (const String& format, const std::tm* const tm)
+    static String formatString (const String& format, const std::tm* const tm)
     {
        #if JUCE_ANDROID
         using StringType = CharPointer_UTF8;
@@ -126,12 +126,12 @@ namespace TimeHelpers
     }
 
     //==============================================================================
-    static inline bool isLeapYear (int year) noexcept
+    static bool isLeapYear (int year) noexcept
     {
         return (year % 400 == 0) || ((year % 100 != 0) && (year % 4 == 0));
     }
 
-    static inline int daysFromJan1 (int year, int month) noexcept
+    static int daysFromJan1 (int year, int month) noexcept
     {
         const short dayOfYear[] = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334,
                                     0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335 };
@@ -139,18 +139,18 @@ namespace TimeHelpers
         return dayOfYear [(isLeapYear (year) ? 12 : 0) + month];
     }
 
-    static inline int64 daysFromYear0 (int year) noexcept
+    static int64 daysFromYear0 (int year) noexcept
     {
         --year;
         return 365 * year + (year / 400) - (year / 100) + (year / 4);
     }
 
-    static inline int64 daysFrom1970 (int year) noexcept
+    static int64 daysFrom1970 (int year) noexcept
     {
         return daysFromYear0 (year) - daysFromYear0 (1970);
     }
 
-    static inline int64 daysFrom1970 (int year, int month) noexcept
+    static int64 daysFrom1970 (int year, int month) noexcept
     {
         if (month > 11)
         {
@@ -169,7 +169,7 @@ namespace TimeHelpers
 
     // There's no posix function that does a UTC version of mktime,
     // so annoyingly we need to implement this manually..
-    static inline int64 mktime_utc (const std::tm& t) noexcept
+    static int64 mktime_utc (const std::tm& t) noexcept
     {
         return 24 * 3600 * (daysFrom1970 (t.tm_year + 1900, t.tm_mon) + (t.tm_mday - 1))
                 + 3600 * t.tm_hour
@@ -277,7 +277,7 @@ void Time::waitForMillisecondCounter (uint32 targetTime) noexcept
 //==============================================================================
 double Time::highResolutionTicksToSeconds (const int64 ticks) noexcept
 {
-    return ticks / (double) getHighResolutionTicksPerSecond();
+    return (double) ticks / (double) getHighResolutionTicksPerSecond();
 }
 
 int64 Time::secondsToHighResolutionTicks (const double seconds) noexcept

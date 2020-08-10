@@ -93,8 +93,7 @@ public:
                                                 allows quick checking of large files to
                                                 see if they contain the correct type of
                                                 tag, without having to parse the entire file
-        @returns    a new XmlElement which the caller will need to delete, or null if
-                    there was an error.
+        @returns    a new XmlElement, or nullptr if there was an error.
         @see getLastParseError, getDocumentElementIfTagMatches
     */
     std::unique_ptr<XmlElement> getDocumentElement (bool onlyReadOuterDocumentElement = false);
@@ -136,14 +135,14 @@ public:
     /** A handy static method that parses a file.
         This is a shortcut for creating an XmlDocument object and calling getDocumentElement() on it.
         An even better shortcut is the juce::parseXML() function, which returns a std::unique_ptr<XmlElement>!
-        @returns    a new XmlElement which the caller will need to delete, or null if there was an error.
+        @returns    a new XmlElement, or nullptr if there was an error.
     */
     static std::unique_ptr<XmlElement> parse (const File& file);
 
     /** A handy static method that parses some XML data.
         This is a shortcut for creating an XmlDocument object and calling getDocumentElement() on it.
         An even better shortcut is the juce::parseXML() function, which returns a std::unique_ptr<XmlElement>!
-        @returns    a new XmlElement which the caller will need to delete, or null if there was an error.
+        @returns    a new XmlElement, or nullptr if there was an error.
     */
     static std::unique_ptr<XmlElement> parse (const String& xmlData);
 

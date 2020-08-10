@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -122,11 +121,11 @@ public:
 
     /** Returns a point whose coordinates are multiplied by a given scalar value. */
     template <typename FloatType>
-    constexpr Point operator* (FloatType multiplier) const noexcept    { return Point ((ValueType) (x * multiplier), (ValueType) (y * multiplier)); }
+    constexpr Point operator* (FloatType multiplier) const noexcept    { return Point ((ValueType) ((FloatType) x * multiplier), (ValueType) ((FloatType) y * multiplier)); }
 
     /** Returns a point whose coordinates are divided by a given scalar value. */
     template <typename FloatType>
-    constexpr Point operator/ (FloatType divisor) const noexcept       { return Point ((ValueType) (x / divisor), (ValueType) (y / divisor)); }
+    constexpr Point operator/ (FloatType divisor) const noexcept       { return Point ((ValueType) ((FloatType) x / divisor), (ValueType) ((FloatType) y / divisor)); }
 
     /** Multiplies the point's coordinates by a scalar value. */
     template <typename FloatType>
@@ -213,8 +212,8 @@ public:
     /** Returns the position of this point, if it is transformed by a given AffineTransform. */
     Point transformedBy (const AffineTransform& transform) const noexcept
     {
-        return Point (static_cast<ValueType> (transform.mat00 * x + transform.mat01 * y + transform.mat02),
-                      static_cast<ValueType> (transform.mat10 * x + transform.mat11 * y + transform.mat12));
+        return Point (static_cast<ValueType> (transform.mat00 * (float) x + transform.mat01 * (float) y + transform.mat02),
+                      static_cast<ValueType> (transform.mat10 * (float) x + transform.mat11 * (float) y + transform.mat12));
     }
 
     //==============================================================================

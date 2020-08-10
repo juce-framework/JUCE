@@ -38,6 +38,7 @@
  exporters:        xcode_mac, xcode_iphone, androidstudio
 
  moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+                   JUCE_IN_APP_PURCHASES=1
 
  type:             Component
  mainClass:        InAppPurchasesDemo
@@ -274,7 +275,7 @@ public:
         Rectangle<int> r (0, 0, w, h);
 
         auto& lf = Desktop::getInstance().getDefaultLookAndFeel();
-        g.setColour (lf.findColour (isSelected ? TextEditor::highlightColourId : ListBox::backgroundColourId));
+        g.setColour (lf.findColour (isSelected ? (int) TextEditor::highlightColourId : (int) ListBox::backgroundColourId));
         g.fillRect (r);
 
         g.setColour (lf.findColour (ListBox::textColourId));
@@ -460,7 +461,7 @@ public:
         auto r = Rectangle<int> (0, 0, w, h).reduced (4);
 
         auto& lf = Desktop::getInstance().getDefaultLookAndFeel();
-        g.setColour (lf.findColour (isSelected ? TextEditor::highlightColourId : ListBox::backgroundColourId));
+        g.setColour (lf.findColour (isSelected ? (int) TextEditor::highlightColourId : (int) ListBox::backgroundColourId));
         g.fillRect (r);
     }
 

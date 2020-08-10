@@ -373,7 +373,7 @@ public:
 
         expect (ByteOrder::swap ((uint16) 0x1122) == 0x2211);
         expect (ByteOrder::swap ((uint32) 0x11223344) == 0x44332211);
-        expect (ByteOrder::swap ((uint64) 0x1122334455667788ULL) == 0x8877665544332211LL);
+        expect (ByteOrder::swap ((uint64) 0x1122334455667788ULL) == (uint64) 0x8877665544332211LL);
 
         beginTest ("Atomic int");
         AtomicTester <int>::testInteger (*this);

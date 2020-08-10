@@ -10,10 +10,10 @@ const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFacto
     public:
         JUCEARAFactoryConfig()
         {
-            String compatibleDocumentArchiveIDString = JucePlugin_ARACompatibleArchiveIDs;
+            juce::String compatibleDocumentArchiveIDString = JucePlugin_ARACompatibleArchiveIDs;
             if (compatibleDocumentArchiveIDString.isNotEmpty())
             {
-                compatibleDocumentArchiveIDStrings = StringArray::fromLines (compatibleDocumentArchiveIDString);
+                compatibleDocumentArchiveIDStrings = juce::StringArray::fromLines (compatibleDocumentArchiveIDString);
                 for (auto& compatibleID : compatibleDocumentArchiveIDStrings)
                     compatibleDocumentArchiveIDs.push_back (compatibleID.toRawUTF8());
             }
@@ -65,7 +65,7 @@ const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFacto
         virtual ARAPlaybackTransformationFlags getSupportedPlaybackTransformationFlags() const noexcept override { return kARAPlaybackTransformationNoChanges; }
 
     private:
-        StringArray compatibleDocumentArchiveIDStrings;
+        juce::StringArray compatibleDocumentArchiveIDStrings;
         std::vector<ARAPersistentID> compatibleDocumentArchiveIDs;
         std::vector<ARAContentType> analyzeableContentTypes;
         ARAPlaybackTransformationFlags supportedPlaybackTransformationFlags;
@@ -82,12 +82,11 @@ namespace juce
 ARADocumentController::ARADocumentController (const ARA::ARADocumentControllerHostInstance* instance)
   : DocumentController (instance)
 {
-    startTimerHz (20);  // TODO JUCE_ARA we could start the timer on demand when the first audio source is created or activated, stop when last is deleted or deactivated.
 }
 
 //==============================================================================
 
-void ARADocumentController::notifyAudioSourceAnalysisProgressStarted (ARAAudioSource* audioSource)
+void ARADocumentController::internalNotifyAudioSourceAnalysisProgressStarted (ARAAudioSource* audioSource)
 {
     if (audioSource->internalAnalysisProgressTracker.updateProgress (ARA::kARAAnalysisProgressStarted, 0.0f))
         internalAnalysisProgressIsSynced.clear (std::memory_order_release);
@@ -95,7 +94,7 @@ void ARADocumentController::notifyAudioSourceAnalysisProgressStarted (ARAAudioSo
     DocumentController::notifyAudioSourceAnalysisProgressStarted (audioSource);
 }
 
-void ARADocumentController::notifyAudioSourceAnalysisProgressUpdated (ARAAudioSource* audioSource, float progress)
+void ARADocumentController::internalNotifyAudioSourceAnalysisProgressUpdated (ARAAudioSource* audioSource, float progress)
 {
     if (audioSource->internalAnalysisProgressTracker.updateProgress (ARA::kARAAnalysisProgressUpdated,  progress))
         internalAnalysisProgressIsSynced.clear (std::memory_order_release);
@@ -103,7 +102,7 @@ void ARADocumentController::notifyAudioSourceAnalysisProgressUpdated (ARAAudioSo
     DocumentController::notifyAudioSourceAnalysisProgressUpdated (audioSource, progress);
 }
 
-void ARADocumentController::notifyAudioSourceAnalysisProgressCompleted (ARAAudioSource* audioSource)
+void ARADocumentController::internalNotifyAudioSourceAnalysisProgressCompleted (ARAAudioSource* audioSource)
 {
     if (audioSource->internalAnalysisProgressTracker.updateProgress (ARA::kARAAnalysisProgressCompleted, 1.0f))
         internalAnalysisProgressIsSynced.clear (std::memory_order_release);
@@ -111,12 +110,19 @@ void ARADocumentController::notifyAudioSourceAnalysisProgressCompleted (ARAAudio
     DocumentController::notifyAudioSourceAnalysisProgressCompleted (audioSource);
 }
 
+void ARADocumentController::internalDidUpdateAudioSourceAnalysisProgress (ARAAudioSource* audioSource, ARAAudioSource::ARAAnalysisProgressState state, float progress)
+{
+    // helper to forward listener callbacks from our ModelUpdateControllerProgressAdapter
+    didUpdateAudioSourceAnalyisProgress (audioSource, state, progress);
+}
+
 //==============================================================================
 
 // some helper macros to ease repeated declaration & implementation of notification functions below:
 
 #define notify_listeners(function, ModelObjectPtrType, modelObject,  ...) \
-    static_cast<ModelObjectPtrType> (modelObject)->notifyListeners ([&] (std::remove_pointer<ModelObjectPtrType>::type::Listener& l) { l.function (static_cast<ModelObjectPtrType> (modelObject), ##__VA_ARGS__); })
+    static_cast<std::remove_pointer<ModelObjectPtrType>::type::Listener*> (this)->function  (static_cast<ModelObjectPtrType> (modelObject), ##__VA_ARGS__); \
+    static_cast<ModelObjectPtrType> (modelObject)->notifyListeners ([&] (std::remove_pointer<ModelObjectPtrType>::type::Listener& l) { try { l.function (static_cast<ModelObjectPtrType> (modelObject), ##__VA_ARGS__); } catch (...) {} })
 
 // no notification arguments
 #define OVERRIDE_TO_NOTIFY_1(function, ModelObjectPtrType, modelObject) \
@@ -154,19 +160,24 @@ void ARADocumentController::willBeginEditing() noexcept
 void ARADocumentController::didEndEditing() noexcept
 {
     notify_listeners (didEndEditing, ARADocument*, getDocument());
+
+    if (isTimerRunning() && (activeAudioSourcesCount == 0))
+        stopTimer();
+    else if (! isTimerRunning() && (activeAudioSourcesCount > 0))
+        startTimerHz (20);
+}
+
+void ARADocumentController::willNotifyModelUpdates() noexcept
+{
+    notify_listeners (willNotifyModelUpdates, ARADocument*, getDocument());
+}
+
+void ARADocumentController::didNotifyModelUpdates() noexcept
+{
+    notify_listeners (didNotifyModelUpdates, ARADocument*, getDocument());
 }
 
 //==============================================================================
-
-bool ARADocumentController::doRestoreObjectsFromStream (ARAInputStream& /*input*/, const ARA::PlugIn::RestoreObjectsFilter* /*filter*/) noexcept
-{
-    return true;
-}
-
-bool ARADocumentController::doStoreObjectsToStream (ARAOutputStream& /*output*/, const ARA::PlugIn::StoreObjectsFilter* /*filter*/) noexcept
-{
-    return true;
-}
 
 bool ARADocumentController::doRestoreObjectsFromArchive (ARA::PlugIn::HostArchiveReader* archiveReader, const ARA::PlugIn::RestoreObjectsFilter* filter) noexcept
 {
@@ -201,10 +212,9 @@ ARA::PlugIn::MusicalContext* ARADocumentController::doCreateMusicalContext (ARA:
     return new ARAMusicalContext (static_cast<ARADocument*> (document), hostRef);
 }
 
-void ARADocumentController::updateMusicalContextContent (ARA::ARAMusicalContextRef musicalContextRef, const ARA::ARAContentTimeRange* range, ARA::ContentUpdateScopes flags) noexcept
+void ARADocumentController::doUpdateMusicalContextContent (ARA::PlugIn::MusicalContext* musicalContext, const ARA::ARAContentTimeRange* /*range*/, ARA::ContentUpdateScopes flags) noexcept
 {
-    DocumentController::updateMusicalContextContent (musicalContextRef, range, flags);
-    notify_listeners (didUpdateMusicalContextContent, ARAMusicalContext*, ARA::PlugIn::fromRef<ARA::PlugIn::MusicalContext> (musicalContextRef), flags);
+    notify_listeners (doUpdateMusicalContextContent, ARAMusicalContext*, musicalContext, flags);
 }
 
 OVERRIDE_TO_NOTIFY_3 (willUpdateMusicalContextProperties, MusicalContext*, musicalContext, ARAMusicalContext::PropertiesPtr, newProperties)
@@ -228,13 +238,13 @@ OVERRIDE_TO_NOTIFY_1 (willDestroyRegionSequence, RegionSequence*, regionSequence
 
 ARA::PlugIn::AudioSource* ARADocumentController::doCreateAudioSource (ARA::PlugIn::Document* document, ARA::ARAAudioSourceHostRef hostRef) noexcept
 {
+    ++activeAudioSourcesCount;
     return new ARAAudioSource (static_cast<ARADocument*> (document), hostRef);
 }
 
-void ARADocumentController::updateAudioSourceContent (ARA::ARAAudioSourceRef audioSourceRef, const ARA::ARAContentTimeRange* range, ARA::ContentUpdateScopes flags) noexcept
+void ARADocumentController::doUpdateAudioSourceContent (ARA::PlugIn::AudioSource* audioSource, const ARA::ARAContentTimeRange* /*range*/, ARA::ContentUpdateScopes flags) noexcept
 {
-    DocumentController::updateAudioSourceContent (audioSourceRef, range, flags);
-    notify_listeners (didUpdateAudioSourceContent, ARAAudioSource*, ARA::PlugIn::fromRef<ARAAudioSource> (audioSourceRef), flags);
+    notify_listeners (doUpdateAudioSourceContent, ARAAudioSource*, audioSource, flags);
 }
 
 OVERRIDE_TO_NOTIFY_3 (willUpdateAudioSourceProperties, AudioSource*, audioSource, ARAAudioSource::PropertiesPtr, newProperties)
@@ -244,9 +254,19 @@ OVERRIDE_TO_NOTIFY_3 (didEnableAudioSourceSamplesAccess, AudioSource*, audioSour
 OVERRIDE_TO_NOTIFY_2 (didAddAudioModificationToAudioSource, AudioSource*, audioSource, AudioModification*, audioModification)
 OVERRIDE_TO_NOTIFY_2 (willRemoveAudioModificationFromAudioSource, AudioSource*, audioSource, AudioModification*, audioModification)
 OVERRIDE_TO_NOTIFY_3 (willDeactivateAudioSourceForUndoHistory, AudioSource*, audioSource, bool, deactivate)
-OVERRIDE_TO_NOTIFY_3 (didDeactivateAudioSourceForUndoHistory, AudioSource*, audioSource, bool, deactivate)
-OVERRIDE_TO_NOTIFY_1 (willDestroyAudioSource, AudioSource*, audioSource)
 
+void ARADocumentController::didDeactivateAudioSourceForUndoHistory (ARA::PlugIn::AudioSource* audioSource, bool deactivate) noexcept
+{
+    activeAudioSourcesCount += (deactivate ? -1 : 1);
+    notify_listeners (didDeactivateAudioSourceForUndoHistory, ARAAudioSource*, audioSource, deactivate);
+}
+
+void ARADocumentController::willDestroyAudioSource (ARA::PlugIn::AudioSource* audioSource) noexcept
+{
+    if (! audioSource->isDeactivatedForUndoHistory())
+        --activeAudioSourcesCount;
+    notify_listeners (willDestroyAudioSource, ARAAudioSource*, audioSource);
+}
 //==============================================================================
 
 ARA::PlugIn::AudioModification* ARADocumentController::doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, const ARA::PlugIn::AudioModification* optionalModificationToClone) noexcept
@@ -269,45 +289,32 @@ ARA::PlugIn::PlaybackRegion* ARADocumentController::doCreatePlaybackRegion (ARA:
     return new ARAPlaybackRegion (static_cast<ARAAudioModification*> (modification), hostRef);
 }
 
-void ARADocumentController::willUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) noexcept 
-{
-    // if any playback region changes would affect the sample content, prepare to
-    // post a sample content update to any of our playback region listeners
-    jassert(! currentPropertyUpdateAffectsContent);
-    currentPropertyUpdateAffectsContent =
-        ((playbackRegion->getStartInAudioModificationTime() != newProperties->startInModificationTime) ||
-        (playbackRegion->getDurationInAudioModificationTime() != newProperties->durationInModificationTime) ||
-        (playbackRegion->getStartInPlaybackTime() != newProperties->startInPlaybackTime) ||
-        (playbackRegion->getDurationInPlaybackTime() != newProperties->durationInPlaybackTime)||
-        (playbackRegion->isTimestretchEnabled() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretch) != 0)) ||
-        (playbackRegion->isTimeStretchReflectingTempo() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretchReflectingTempo) != 0)) ||
-        (playbackRegion->hasContentBasedFadeAtHead() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationContentBasedFadeAtHead) != 0)) ||
-        (playbackRegion->hasContentBasedFadeAtTail() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationContentBasedFadeAtTail) != 0)));
-
-    auto araPlaybackRegion = static_cast<ARAPlaybackRegion*> (playbackRegion);
-    araPlaybackRegion->notifyListeners ([araPlaybackRegion, newProperties](ARAPlaybackRegion::Listener& l) { l.willUpdatePlaybackRegionProperties (araPlaybackRegion, newProperties); });
-}
-
-void ARADocumentController::didUpdatePlaybackRegionProperties (ARA::PlugIn::PlaybackRegion* playbackRegion) noexcept 
-{
-    auto araPlaybackRegion = static_cast<ARAPlaybackRegion*> (playbackRegion);
-    araPlaybackRegion->notifyListeners ([araPlaybackRegion](ARAPlaybackRegion::Listener& l) { l.didUpdatePlaybackRegionProperties (araPlaybackRegion); });
-
-    // post a content update if the updated properties affect the playback region sample content
-    if (currentPropertyUpdateAffectsContent)
-    {
-        currentPropertyUpdateAffectsContent = false;
-        auto scopes = ARAContentUpdateScopes::samplesAreAffected();
-        JUCE_CONSTEXPR auto areNotesAnalyzable = (bool) (JucePlugin_ARAContentTypes & 1);
-        if (areNotesAnalyzable)
-            scopes += ARAContentUpdateScopes::notesAreAffected();
-        // other content such as tempo or key signatures are not exported at playback region level
-        // because this would simply mirror the musical context content.
-        araPlaybackRegion->notifyContentChanged (scopes);
-    }
-}
-
+OVERRIDE_TO_NOTIFY_3 (willUpdatePlaybackRegionProperties, PlaybackRegion*, playbackRegion, ARAPlaybackRegion::PropertiesPtr, newProperties)
+OVERRIDE_TO_NOTIFY_1 (didUpdatePlaybackRegionProperties, PlaybackRegion*, playbackRegion)
 OVERRIDE_TO_NOTIFY_1 (willDestroyPlaybackRegion, PlaybackRegion*, playbackRegion)
+
+//==============================================================================
+
+void ARADocumentController::internalNotifyAudioSourceContentChanged (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags, bool notifyARAHost)
+{
+    if (notifyARAHost)
+        DocumentController::notifyAudioSourceContentChanged (audioSource, scopeFlags);
+    notify_listeners (doUpdateAudioSourceContent, ARAAudioSource*, audioSource, scopeFlags);
+}
+
+void ARADocumentController::internalNotifyAudioModificationContentChanged (ARAAudioModification* audioModification, ARAContentUpdateScopes scopeFlags, bool notifyARAHost)
+{
+    if (notifyARAHost)
+        DocumentController::notifyAudioModificationContentChanged (audioModification, scopeFlags);
+    notify_listeners (didUpdateAudioModificationContent, ARAAudioModification*, audioModification, scopeFlags);
+}
+
+void ARADocumentController::internalNotifyPlaybackRegionContentChanged (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags, bool notifyARAHost)
+{
+    if (notifyARAHost)
+        DocumentController::notifyPlaybackRegionContentChanged (playbackRegion, scopeFlags);
+    notify_listeners (didUpdatePlaybackRegionContent, ARAPlaybackRegion*, playbackRegion, scopeFlags);
+}
 
 //==============================================================================
 
@@ -344,6 +351,7 @@ namespace ModelUpdateControllerProgressAdapter
                                                             ARAAudioSourceHostRef audioSourceHostRef, ARAAnalysisProgressState state, float value) noexcept
     {
         auto audioSource = reinterpret_cast<ARAAudioSource*> (audioSourceHostRef);
+        audioSource->getDocumentController<ARADocumentController>()->internalDidUpdateAudioSourceAnalysisProgress (audioSource, state, value);
         audioSource->notifyListeners ([&] (ARAAudioSource::Listener& l) { l.didUpdateAudioSourceAnalyisProgress (audioSource, state, value); });
     }
 
@@ -367,14 +375,14 @@ namespace ModelUpdateControllerProgressAdapter
 
     ARA::PlugIn::HostModelUpdateController* get()
     {
-        static const SizedStruct<ARA_MEMBER_PTR_ARGS (ARAModelUpdateControllerInterface, notifyPlaybackRegionContentChanged)> modelUpdateControllerInterface {
+        static const SizedStruct<ARA_STRUCT_MEMBER (ARAModelUpdateControllerInterface, notifyPlaybackRegionContentChanged)> modelUpdateControllerInterface {
             ModelUpdateControllerProgressAdapter::notifyAudioSourceAnalysisProgress,
             ModelUpdateControllerProgressAdapter::notifyAudioSourceContentChanged,
             ModelUpdateControllerProgressAdapter::notifyAudioModificationContentChanged,
             ModelUpdateControllerProgressAdapter::notifyPlaybackRegionContentChanged
         };
 
-        static const SizedStruct<ARA_MEMBER_PTR_ARGS (ARADocumentControllerHostInstance, playbackControllerInterface)> instance {
+        static const SizedStruct<ARA_STRUCT_MEMBER (ARADocumentControllerHostInstance, playbackControllerInterface)> instance {
             nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, &modelUpdateControllerInterface, nullptr, nullptr
         };
 
@@ -392,12 +400,12 @@ void ARADocumentController::timerCallback()
 
 //==============================================================================
 
-ARADocumentController::ARAInputStream::ARAInputStream (ARA::PlugIn::HostArchiveReader* reader)
+ARAInputStream::ARAInputStream (ARA::PlugIn::HostArchiveReader* reader)
 : archiveReader (reader), 
   size (reader->getArchiveSize())
 {}
 
-int ARADocumentController::ARAInputStream::read (void* destBuffer, int maxBytesToRead)
+int ARAInputStream::read (void* destBuffer, int maxBytesToRead)
 {
     const int bytesToRead = std::min (maxBytesToRead, (int) (size - position));
     if (! archiveReader->readBytesFromArchive (position, bytesToRead, (ARA::ARAByte*) destBuffer))
@@ -410,7 +418,7 @@ int ARADocumentController::ARAInputStream::read (void* destBuffer, int maxBytesT
     return bytesToRead;
 }
 
-bool ARADocumentController::ARAInputStream::setPosition (int64 newPosition)
+bool ARAInputStream::setPosition (int64 newPosition)
 {
     if (newPosition >= (int64) size)
         return false;
@@ -418,16 +426,16 @@ bool ARADocumentController::ARAInputStream::setPosition (int64 newPosition)
     return true;
 }
 
-bool ARADocumentController::ARAInputStream::isExhausted()
+bool ARAInputStream::isExhausted()
 {
     return position >= size;
 }
 
-ARADocumentController::ARAOutputStream::ARAOutputStream (ARA::PlugIn::HostArchiveWriter* writer)
+ARAOutputStream::ARAOutputStream (ARA::PlugIn::HostArchiveWriter* writer)
 : archiveWriter (writer)
 {}
 
-bool ARADocumentController::ARAOutputStream::write (const void* dataToWrite, size_t numberOfBytes)
+bool ARAOutputStream::write (const void* dataToWrite, size_t numberOfBytes)
 {
     if (!archiveWriter->writeBytesToArchive (position, numberOfBytes, (const ARA::ARAByte*) dataToWrite))
         return false;
@@ -436,7 +444,7 @@ bool ARADocumentController::ARAOutputStream::write (const void* dataToWrite, siz
     return true;
 }
 
-bool ARADocumentController::ARAOutputStream::setPosition (int64 newPosition)
+bool ARAOutputStream::setPosition (int64 newPosition)
 {
     if (newPosition > (int64) std::numeric_limits<size_t>::max())
         return false;

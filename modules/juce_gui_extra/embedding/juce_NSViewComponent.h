@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -38,7 +37,7 @@ namespace juce
     moved and resized to follow the movements of this component.
 
     Of course, since the view is a native object, it'll obliterate any
-    juce components that may overlap this component, but that's life.
+    JUCE components that may overlap this component, but that's life.
 
     @tags{GUI}
 */
@@ -58,7 +57,7 @@ public:
         it is needed. To remove the current view, just call setView (nullptr).
 
         Note: A void* is used here to avoid including the cocoa headers as
-        part of the juce.h, but the method expects an NSView*.
+        part of JuceHeader.h, but the method expects an NSView*.
     */
     void setView (void* nsView);
 
@@ -68,7 +67,6 @@ public:
         headers, so you should just cast the return value to an NSView*.
     */
     void* getView() const;
-
 
     /** Resizes this component to fit the view that it contains. */
     void resizeToFitView();

@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -125,7 +124,7 @@ struct TranslationHelpers
                         break;
 
                     ++p;
-                    c = (juce_wchar) ((c << 4) + digitValue);
+                    c = (c << 4) + (juce_wchar) digitValue;
                 }
 
                 break;
@@ -136,12 +135,12 @@ struct TranslationHelpers
 
                 for (int i = 4; --i >= 0;)
                 {
-                    const int digitValue = *p - '0';
+                    const auto digitValue = (int) (*p - '0');
                     if (digitValue < 0 || digitValue > 7)
                         break;
 
                     ++p;
-                    c = (juce_wchar) ((c << 3) + digitValue);
+                    c = (c << 3) + (juce_wchar) digitValue;
                 }
 
                 break;
@@ -169,9 +168,9 @@ struct TranslationHelpers
 
     static void scanFolderForTranslations (StringArray& strings, const File& root)
     {
-        for (DirectoryIterator i (root, true); i.next();)
+        for (const auto& i : RangedDirectoryIterator (root, true))
         {
-            const auto file (i.getFile());
+            const auto file = i.getFile();
 
             if (file.hasFileExtension (sourceOrHeaderFileExtensions))
                 scanFileForTranslations(strings, file);

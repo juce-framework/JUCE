@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -29,24 +28,13 @@
 //==============================================================================
 #undef PRAGMA_ALIGN_SUPPORTED
 
-#if JUCE_MSVC
- #pragma warning (push)
- #pragma warning (disable: 4996)
-#elif ! JUCE_MINGW
+
+#if ! JUCE_MINGW && ! JUCE_MSVC
  #define __cdecl
 #endif
 
-#if JUCE_CLANG
- #if __has_warning("-Wzero-as-null-pointer-constant")
-  #pragma clang diagnostic push
-  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
- #endif
-#endif
-
-#if JUCE_GCC
- #pragma GCC diagnostic push
- #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant")
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
 
 #define VST_FORCE_DEPRECATED 0
 #define JUCE_VSTINTERFACE_H_INCLUDED 1
@@ -64,20 +52,10 @@ namespace Vst2
 
 #include "juce_VSTCommon.h"
 
-#if JUCE_MSVC
- #pragma warning (pop)
- #pragma warning (disable: 4355) // ("this" used in initialiser list warning)
-#endif
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+JUCE_END_IGNORE_WARNINGS_MSVC
 
-#if JUCE_CLANG
- #if __has_warning("-Wzero-as-null-pointer-constant")
-  #pragma clang diagnostic pop
- #endif
-#endif
-
-#if JUCE_GCC
- #pragma GCC diagnostic pop
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4355)
 
 #include "juce_VSTMidiEventList.h"
 
@@ -266,10 +244,8 @@ namespace
         Window* childWindows;
         unsigned int numChildren = 0;
 
-        {
-            ScopedXDisplay xDisplay;
-            XQueryTree (xDisplay.display, windowToCheck, &rootWindow, &parentWindow, &childWindows, &numChildren);
-        }
+        X11Symbols::getInstance()->xQueryTree (XWindowSystem::getInstance()->getDisplay(),
+                                               windowToCheck, &rootWindow, &parentWindow, &childWindows, &numChildren);
 
         if (numChildren > 0)
             return childWindows [0];
@@ -849,10 +825,7 @@ private:
 static const int defaultVSTSampleRateValue = 44100;
 static const int defaultVSTBlockSizeValue = 512;
 
-#if JUCE_MSVC
- #pragma warning (push)
- #pragma warning (disable: 4996) // warning about overriding deprecated methods
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
 
 //==============================================================================
 struct VSTPluginInstance     : public AudioPluginInstance,
@@ -2108,16 +2081,11 @@ private:
 
     pointer_sized_int getVSTTime() noexcept
     {
-       #if JUCE_MSVC
-        #pragma warning (push)
-        #pragma warning (disable: 4311)
-       #endif
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4311)
 
         return (pointer_sized_int) &vstHostTime;
 
-       #if JUCE_MSVC
-        #pragma warning (pop)
-       #endif
+        JUCE_END_IGNORE_WARNINGS_MSVC
     }
 
     void handleIdle()
@@ -2421,13 +2389,9 @@ private:
                 midiEventsToSend.clear();
                 midiEventsToSend.ensureSize (1);
 
-                MidiBuffer::Iterator iter (midiMessages);
-                const uint8* midiData;
-                int numBytesOfMidiData, samplePosition;
-
-                while (iter.getNextEvent (midiData, numBytesOfMidiData, samplePosition))
-                    midiEventsToSend.addEvent (midiData, numBytesOfMidiData,
-                                               jlimit (0, numSamples - 1, samplePosition));
+                for (const auto metadata : midiMessages)
+                    midiEventsToSend.addEvent (metadata.data, metadata.numBytes,
+                                               jlimit (0, numSamples - 1, metadata.samplePosition));
 
                 vstEffect->dispatcher (vstEffect, Vst2::effProcessEvents, 0, 0, midiEventsToSend.events, 0);
             }
@@ -2784,7 +2748,6 @@ public:
     {
        #if JUCE_LINUX
         pluginWindow = None;
-        display = XWindowSystem::getInstance()->displayRef();
         ignoreUnused (pluginRefusesToResize, alreadyInside);
        #elif JUCE_MAC
         ignoreUnused (recursiveResize, pluginRefusesToResize, alreadyInside);
@@ -2827,10 +2790,6 @@ public:
         #endif
         cocoaWrapper.reset();
        #else
-        #if JUCE_LINUX
-         display = XWindowSystem::getInstance()->displayUnref();
-        #endif
-
         removeScaleFactorListeners();
        #endif
 
@@ -2877,8 +2836,9 @@ public:
             {
                 auto clip = g.getClipBounds();
 
-                XClearArea (display, pluginWindow, clip.getX(), clip.getY(),
-                            static_cast<unsigned int> (clip.getWidth()), static_cast<unsigned int> (clip.getHeight()), True);
+                X11Symbols::getInstance()->xClearArea (display, pluginWindow, clip.getX(), clip.getY(),
+                                                       static_cast<unsigned int> (clip.getWidth()),
+                                                       static_cast<unsigned int> (clip.getHeight()), True);
             }
            #endif
         }
@@ -2916,13 +2876,13 @@ public:
            #elif JUCE_LINUX
             if (pluginWindow != 0)
             {
-                XMoveResizeWindow (display, pluginWindow,
-                                   pos.getX(), pos.getY(),
-                                   static_cast<unsigned int> (roundToInt (getWidth()  * nativeScaleFactor)),
-                                   static_cast<unsigned int> (roundToInt (getHeight() * nativeScaleFactor)));
+                X11Symbols::getInstance()->xMoveResizeWindow (display, pluginWindow,
+                                                              pos.getX(), pos.getY(),
+                                                              static_cast<unsigned int> (roundToInt (getWidth()  * nativeScaleFactor)),
+                                                              static_cast<unsigned int> (roundToInt (getHeight() * nativeScaleFactor)));
 
-                XMapRaised (display, pluginWindow);
-                XFlush (display);
+                X11Symbols::getInstance()->xMapRaised (display, pluginWindow);
+                X11Symbols::getInstance()->xFlush (display);
             }
            #endif
 
@@ -2985,8 +2945,8 @@ public:
 
         if (pluginRespondsToDPIChanges)
             dispatch (Vst2::effVendorSpecific,
-                      JUCE_MULTICHAR_CONSTANT ('P', 'r', 'e', 'S'),
-                      JUCE_MULTICHAR_CONSTANT ('A', 'e', 'C', 's'),
+                      (int) ByteOrder::bigEndianInt ("PreS"),
+                      (int) ByteOrder::bigEndianInt ("AeCs"),
                       nullptr, nativeScaleFactor);
     }
    #endif
@@ -3143,8 +3103,7 @@ private:
             return;
         }
 
-        #pragma warning (push)
-        #pragma warning (disable: 4244)
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4244)
 
         if (! pluginWantsKeys)
         {
@@ -3152,7 +3111,7 @@ private:
             SetWindowLongPtr (pluginHWND, GWLP_WNDPROC, (LONG_PTR) vstHookWndProc);
         }
 
-        #pragma warning (pop)
+        JUCE_END_IGNORE_WARNINGS_MSVC
 
         RECT r;
         GetWindowRect (pluginHWND, &r);
@@ -3208,7 +3167,7 @@ private:
         }
 
         if (pluginWindow != 0)
-            XMapRaised (display, pluginWindow);
+            X11Symbols::getInstance()->xMapRaised (display, pluginWindow);
        #endif
 
         w = roundToInt (w / nativeScaleFactor);
@@ -3251,11 +3210,10 @@ private:
             stopTimer();
 
            #if JUCE_WINDOWS
-            #pragma warning (push)
-            #pragma warning (disable: 4244)
+            JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4244)
             if (originalWndProc != 0 && pluginHWND != 0 && IsWindow (pluginHWND))
                 SetWindowLongPtr (pluginHWND, GWLP_WNDPROC, (LONG_PTR) originalWndProc);
-            #pragma warning (pop)
+            JUCE_END_IGNORE_WARNINGS_MSVC
 
             originalWndProc = 0;
             pluginHWND = 0;
@@ -3451,15 +3409,14 @@ private:
    #if ! JUCE_MAC
     bool pluginRespondsToDPIChanges = false;
     float nativeScaleFactor = 1.0f;
-   #endif
-
-   #if JUCE_WINDOWS
-    HWND pluginHWND = {};
-    void* originalWndProc = {};
-    int sizeCheckCount = 0;
-   #elif JUCE_LINUX
-    ::Display* display;
-    Window pluginWindow;
+    #if JUCE_WINDOWS
+     HWND pluginHWND = {};
+     void* originalWndProc = {};
+     int sizeCheckCount = 0;
+    #elif JUCE_LINUX
+     ::Display* display = XWindowSystem::getInstance()->getDisplay();
+     Window pluginWindow = 0;
+    #endif
    #endif
 
     //==============================================================================
@@ -3467,9 +3424,7 @@ private:
 };
 #endif
 
-#if JUCE_MSVC
- #pragma warning (pop)
-#endif
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 //==============================================================================
 AudioProcessorEditor* VSTPluginInstance::createEditor()
@@ -3652,9 +3607,7 @@ void VSTPluginFormat::recursiveFileSearch (StringArray& results, const File& dir
 {
     // avoid allowing the dir iterator to be recursive, because we want to avoid letting it delve inside
     // .component or .vst directories.
-    DirectoryIterator iter (dir, false, "*", File::findFilesAndDirectories);
-
-    while (iter.next())
+    for (const auto& iter : RangedDirectoryIterator (dir, false, "*", File::findFilesAndDirectories))
     {
         auto f = iter.getFile();
         bool isPlugin = false;
@@ -3790,5 +3743,7 @@ pointer_sized_int JUCE_CALLTYPE VSTPluginFormat::dispatcher (AudioPluginInstance
 void VSTPluginFormat::aboutToScanVSTShellPlugin (const PluginDescription&) {}
 
 } // namespace juce
+
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 #endif

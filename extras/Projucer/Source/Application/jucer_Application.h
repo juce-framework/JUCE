@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -26,41 +25,31 @@
 
 #pragma once
 
+#include "UserAccount/jucer_LicenseController.h"
 #include "jucer_MainWindow.h"
-#include "../Project/jucer_Module.h"
+#include "../Project/Modules/jucer_Modules.h"
 #include "jucer_AutoUpdater.h"
 #include "../CodeEditor/jucer_SourceCodeEditor.h"
 #include "../Utility/UI/jucer_ProjucerLookAndFeel.h"
-#include "../Licenses/jucer_LicenseController.h"
-
-#if JUCE_MODULE_AVAILABLE_juce_analytics
- #include "jucer_ProjucerAnalytics.h"
-#endif
 
 struct ChildProcessCache;
 
 //==============================================================================
 class ProjucerApplication   : public JUCEApplication,
-                              private AsyncUpdater,
-                              private LicenseController::StateChangedCallback
+                              private AsyncUpdater
 {
 public:
-    ProjucerApplication();
+    ProjucerApplication() = default;
 
     static ProjucerApplication& getApp();
     static ApplicationCommandManager& getCommandManager();
 
     //==============================================================================
     void initialise (const String& commandLine) override;
-    void initialiseBasics();
-    bool initialiseLogger (const char* filePrefix);
-    void initialiseWindows (const String& commandLine);
-
     void shutdown() override;
     void systemRequestedQuit() override;
     void deleteLogger();
 
-    //==============================================================================
     const String getApplicationName() override       { return "Projucer"; }
     const String getApplicationVersion() override    { return ProjectInfo::versionString; }
 
@@ -71,79 +60,38 @@ public:
 
     //==============================================================================
     MenuBarModel* getMenuModel();
-    StringArray getMenuNames();
-    void createMenu (PopupMenu&, const String& menuName);
-    void createFileMenu (PopupMenu&);
-    void createEditMenu (PopupMenu&);
-    void createViewMenu (PopupMenu&);
-    void createBuildMenu (PopupMenu&);
-    void createColourSchemeItems (PopupMenu&);
-    void createWindowMenu (PopupMenu&);
-    void createDocumentMenu (PopupMenu&);
-    void createToolsMenu (PopupMenu&);
-    void createHelpMenu (PopupMenu&);
-    void createExtraAppleMenuItems (PopupMenu&);
-    void handleMainMenuCommand (int menuItemID);
 
-    //==============================================================================
     void getAllCommands (Array<CommandID>&) override;
     void getCommandInfo (CommandID commandID, ApplicationCommandInfo&) override;
     bool perform (const InvocationInfo&) override;
 
+    bool isLiveBuildEnabled() const;
+    bool isGUIEditorEnabled() const;
+
     //==============================================================================
-    void createNewProject();
-    void createNewProjectFromClipboard();
-    void createNewPIP();
-    void askUserToOpenFile();
     bool openFile (const File&);
-    void saveAllDocuments();
-    bool closeAllDocuments (bool askUserToSave);
-    bool closeAllMainWindows();
-    void closeAllMainWindowsAndQuitIfNeeded();
-    void clearRecentFiles();
-
-    PropertiesFile::Options getPropertyFileOptionsFor (const String& filename, bool isProjectSettings);
-
-    //==============================================================================
-    void showUTF8ToolWindow();
-    void showSVGPathDataToolWindow();
-
-    void showAboutWindow();
-    void showApplicationUsageDataAgreementPopup();
-    void dismissApplicationUsageDataAgreementPopup();
-
     void showPathsWindow (bool highlightJUCEPath = false);
-    void showEditorColourSchemeWindow();
-
-    void showPIPCreatorWindow();
-
-    void launchForumBrowser();
-    void launchModulesBrowser();
-    void launchClassesBrowser();
-    void launchTutorialsBrowser();
-
-    void updateAllBuildTabs();
-
-    //==============================================================================
-    void licenseStateChanged (const LicenseState&) override;
-    void doLogout();
-
-    bool isPaidOrGPL() const              { return licenseController == nullptr || licenseController->getState().isPaidOrGPL(); }
-
-    //==============================================================================
+    PropertiesFile::Options getPropertyFileOptionsFor (const String& filename, bool isProjectSettings);
     void selectEditorColourSchemeWithName (const String& schemeName);
-    static bool isEditorColourSchemeADefaultScheme (const StringArray& schemes, int editorColourSchemeIndex);
-    static int getEditorColourSchemeForGUIColourScheme (const StringArray& schemes, int guiColourSchemeIndex);
-
-    //==============================================================================
-    void setAnalyticsEnabled (bool);
 
     //==============================================================================
     void rescanJUCEPathModules();
     void rescanUserPathModules();
 
-    AvailableModuleList& getJUCEPathModuleList()     { return jucePathModuleList; }
-    AvailableModuleList& getUserPathsModuleList()    { return userPathsModuleList; }
+    AvailableModulesList& getJUCEPathModulesList()     { return jucePathModulesList; }
+    AvailableModulesList& getUserPathsModulesList()    { return userPathsModulesList; }
+
+    LicenseController& getLicenseController()          { return *licenseController; }
+
+    bool isAutomaticVersionCheckingEnabled() const;
+    void setAutomaticVersionCheckingEnabled (bool shouldBeEnabled);
+
+    bool shouldPromptUserAboutIncorrectJUCEPath() const;
+    void setShouldPromptUserAboutIncorrectJUCEPath (bool shouldPrompt);
+
+    static File getJUCEExamplesDirectoryPathFromGlobal() noexcept;
+    static Array<File> getSortedExampleDirectories() noexcept;
+    static Array<File> getSortedExampleFilesInDirectory (const File&) noexcept;
 
     //==============================================================================
     ProjucerLookAndFeel lookAndFeel;
@@ -158,24 +106,42 @@ public:
     OpenDocumentManager openDocumentManager;
     std::unique_ptr<ApplicationCommandManager> commandManager;
 
-    std::unique_ptr<Component> utf8Window, svgPathWindow, aboutWindow, applicationUsageDataWindow,
-                               pathsWindow, editorColourSchemeWindow, pipCreatorWindow;
-
-    std::unique_ptr<FileLogger> logger;
-
-    bool isRunningCommandLine;
+    bool isRunningCommandLine = false;
     std::unique_ptr<ChildProcessCache> childProcessCache;
-    std::unique_ptr<LicenseController> licenseController;
 
 private:
     //==============================================================================
     void handleAsyncUpdate() override;
-    void initCommandManager();
 
-    void createExamplesPopupMenu (PopupMenu&) noexcept;
-    Array<File> getSortedExampleDirectories() noexcept;
-    Array<File> getSortedExampleFilesInDirectory (const File&) const noexcept;
-    bool findWindowAndOpenPIP (const File&);
+    void initCommandManager();
+    bool initialiseLogger (const char* filePrefix);
+    void initialiseWindows (const String& commandLine);
+
+    void createNewProject();
+    void createNewProjectFromClipboard();
+    void createNewPIP();
+    void askUserToOpenFile();
+    void saveAllDocuments();
+    bool closeAllDocuments (OpenDocumentManager::SaveIfNeeded askUserToSave);
+    bool closeAllMainWindows();
+    void closeAllMainWindowsAndQuitIfNeeded();
+    void clearRecentFiles();
+
+    StringArray getMenuNames();
+    PopupMenu createMenu (const String& menuName);
+    PopupMenu createFileMenu();
+    PopupMenu createEditMenu();
+    PopupMenu createViewMenu();
+    PopupMenu createBuildMenu();
+    void createColourSchemeItems (PopupMenu&);
+    PopupMenu createWindowMenu();
+    PopupMenu createDocumentMenu();
+    PopupMenu createToolsMenu();
+    PopupMenu createHelpMenu();
+    PopupMenu createExtraAppleMenuItems();
+    void handleMainMenuCommand (int menuItemID);
+    PopupMenu createExamplesPopupMenu() noexcept;
+
     void findAndLaunchExample (int);
 
     void checkIfGlobalJUCEPathHasChanged();
@@ -183,25 +149,74 @@ private:
     File tryToFindDemoRunnerProject();
     void launchDemoRunner();
 
-    void resetAnalytics() noexcept;
-    void setupAnalytics();
-
-    void showSetJUCEPathAlert();
-
     void setColourScheme (int index, bool saveSetting);
     void setEditorColourScheme (int index, bool saveSetting);
     void updateEditorColourSchemeIfNeeded();
 
+    void showUTF8ToolWindow();
+    void showSVGPathDataToolWindow();
+    void showAboutWindow();
+    void showEditorColourSchemeWindow();
+    void showPIPCreatorWindow();
+
+    void launchForumBrowser();
+    void launchModulesBrowser();
+    void launchClassesBrowser();
+    void launchTutorialsBrowser();
+
+    void doLoginOrLogout();
+    void showLoginForm();
+
+    void enableOrDisableLiveBuild();
+    void enableOrDisableGUIEditor();
+
     //==============================================================================
+   #if JUCE_MAC
+    class AppleMenuRebuildListener  : private MenuBarModel::Listener
+    {
+    public:
+        AppleMenuRebuildListener()
+        {
+            if (auto* model = ProjucerApplication::getApp().getMenuModel())
+                model->addListener (this);
+        }
+
+        ~AppleMenuRebuildListener() override
+        {
+            if (auto* model = ProjucerApplication::getApp().getMenuModel())
+                model->removeListener (this);
+        }
+
+    private:
+        void menuBarItemsChanged (MenuBarModel*) override  {}
+
+        void menuCommandInvoked (MenuBarModel*,
+                                 const ApplicationCommandTarget::InvocationInfo& info) override
+        {
+            if (info.commandID == CommandIDs::enableNewVersionCheck)
+                Timer::callAfterDelay (50, [] { ProjucerApplication::getApp().rebuildAppleMenu(); });
+        }
+    };
+
+    void rebuildAppleMenu();
+
+    std::unique_ptr<AppleMenuRebuildListener> appleMenuRebuildListener;
+   #endif
+
+    //==============================================================================
+    std::unique_ptr<LicenseController> licenseController;
+
     void* server = nullptr;
+    std::unique_ptr<TooltipWindow> tooltipWindow;
+    AvailableModulesList jucePathModulesList, userPathsModulesList;
 
-    TooltipWindow tooltipWindow;
+    std::unique_ptr<Component> utf8Window, svgPathWindow, aboutWindow, pathsWindow,
+                               editorColourSchemeWindow, pipCreatorWindow;
 
-    AvailableModuleList jucePathModuleList, userPathsModuleList;
+    std::unique_ptr<FileLogger> logger;
 
     int numExamples = 0;
     std::unique_ptr<AlertWindow> demoRunnerAlert;
-    std::unique_ptr<AlertWindow> pathAlert;
     bool hasScannedForDemoRunnerExecutable = false, hasScannedForDemoRunnerProject = false;
     File lastJUCEPath, lastDemoRunnerExectuableFile, lastDemoRunnerProjectFile;
    #if JUCE_LINUX

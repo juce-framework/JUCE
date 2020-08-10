@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -106,7 +105,7 @@ MainHostWindow::MainHostWindow()
     setVisible (true);
 
     InternalPluginFormat internalFormat;
-    internalFormat.getAllTypes (internalTypes);
+    internalTypes = internalFormat.getAllTypes();
 
     if (auto savedPluginList = getAppProperties().getUserSettings()->getXmlValue ("pluginList"))
         knownPluginList.recreateFromXml (*savedPluginList);
@@ -371,20 +370,26 @@ void MainHostWindow::addPluginsToMenu (PopupMenu& m)
         int i = 0;
 
         for (auto& t : internalTypes)
-            m.addItem (++i, t.name + " (" + t.pluginFormatName + ")",
-                       graphHolder->graph->getNodeForName (t.name) == nullptr);
+            m.addItem (++i, t.name + " (" + t.pluginFormatName + ")");
     }
 
     m.addSeparator();
 
     pluginDescriptions = knownPluginList.getTypes();
+
+    // This avoids showing the internal types again later on in the list
+    pluginDescriptions.removeIf ([] (PluginDescription& desc)
+    {
+        return desc.pluginFormatName == InternalPluginFormat::getIdentifier();
+    });
+
     KnownPluginList::addToMenu (m, pluginDescriptions, pluginSortMethod);
 }
 
 PluginDescription MainHostWindow::getChosenType (const int menuID) const
 {
-    if (menuID >= 1 && menuID < 1 + internalTypes.size())
-        return internalTypes [menuID - 1];
+    if (menuID >= 1 && menuID < (int) (1 + internalTypes.size()))
+        return internalTypes[(size_t) (menuID - 1)];
 
     return pluginDescriptions[KnownPluginList::getIndexChosenByMenu (pluginDescriptions, menuID)];
 }

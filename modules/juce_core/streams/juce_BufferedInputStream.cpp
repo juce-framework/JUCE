@@ -23,7 +23,7 @@
 namespace juce
 {
 
-static inline int calcBufferStreamBufferSize (int requestedSize, InputStream* source) noexcept
+static int calcBufferStreamBufferSize (int requestedSize, InputStream* source) noexcept
 {
     // You need to supply a real stream when creating a BufferedInputStream
     jassert (source != nullptr);

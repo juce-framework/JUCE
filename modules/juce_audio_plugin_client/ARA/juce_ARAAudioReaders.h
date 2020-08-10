@@ -69,7 +69,7 @@ public:
     void invalidate();
 
     void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARAAudioSource::PropertiesPtr newProperties) override;
-    void didUpdateAudioSourceContent (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags) override;
+    void doUpdateAudioSourceContent (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags) override;
     void willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) override;
     void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) override;
     void willDestroyAudioSource (ARAAudioSource* audioSource) override;
@@ -131,6 +131,7 @@ public:
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override;
 
+    void willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties) override;
     void didUpdatePlaybackRegionContent (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags) override;
     void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion) override;
 

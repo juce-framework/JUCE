@@ -12,9 +12,8 @@
 
 #pragma once
 
-#include "AppConfig.h"
 
-#include <juce_analytics/juce_analytics.h>
+#include <juce_build_tools/juce_build_tools.h>
 #include <juce_core/juce_core.h>
 #include <juce_cryptography/juce_cryptography.h>
 #include <juce_data_structures/juce_data_structures.h>
@@ -45,7 +44,7 @@ namespace ProjectInfo
 {
     const char* const  projectName    = "Projucer";
     const char* const  companyName    = "Raw Material Software Limited";
-    const char* const  versionString  = "5.4.7";
-    const int          versionNumber  = 0x50407;
+    const char* const  versionString  = "6.0.1";
+    const int          versionNumber  = 0x60001;
 }
 #endif

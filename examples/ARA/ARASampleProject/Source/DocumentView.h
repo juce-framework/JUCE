@@ -11,13 +11,6 @@ class PlaybackRegionView;
  DocumentView Class -
     This class manages a visual representation of the ARA document as well as
     the ARA host selection and playback state. 
-
- TODO JUCE_ARA:
-    - maybe add option to show regions including their head and tail?
-      (for crossfades mostly, renderer will already provide proper samples,
-       but time ranges must be adjusted for this and updated if head/tail change)
-    - properly compensate for presentation latency (IAudioPresentationLatency/contextPresentationLatency)
-      when drawing play head (requires minor additons to the VST and AU wrapper)
  */
 class DocumentView  : public Component,
                       private ARAEditorView::Listener,
@@ -29,7 +22,7 @@ public:
     ~DocumentView();
 
     // ARAEditorView::Listener overrides
-    void onNewSelection (const ARA::PlugIn::ViewSelection& viewSelection) override;
+    void onNewSelection (const ARAViewSelection& viewSelection) override;
     void onHideRegionSequences (std::vector<ARARegionSequence*> const& regionSequences) override;
 
     // ARADocument::Listener overrides

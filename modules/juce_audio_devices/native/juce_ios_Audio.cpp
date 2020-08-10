@@ -671,6 +671,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
 
     //==============================================================================
    #if JUCE_MODULE_AVAILABLE_juce_graphics
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
     Image getIcon (int size)
     {
         if (interAppAudioConnected)
@@ -681,6 +682,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         }
         return Image();
     }
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
    #endif
 
     void switchApplication()

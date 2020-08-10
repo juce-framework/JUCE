@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -59,7 +58,7 @@ public:
 
         renderContext = wglCreateContext (dc);
 
-        if (renderContext != 0)
+        if (renderContext != nullptr)
         {
             makeActive();
             initialiseGLExtensions();
@@ -108,7 +107,7 @@ public:
 
     void shutdownOnRenderThread()           { deactivateCurrentContext(); context = nullptr; }
 
-    static void deactivateCurrentContext()  { wglMakeCurrent (0, 0); }
+    static void deactivateCurrentContext()  { wglMakeCurrent (nullptr, nullptr); }
     bool makeActive() const noexcept        { return isActive() || wglMakeCurrent (dc, renderContext) != FALSE; }
     bool isActive() const noexcept          { return wglGetCurrentContext() == renderContext; }
     void swapBuffers() const noexcept       { SwapBuffers (dc); }
@@ -132,7 +131,7 @@ public:
             if (! approximatelyEqual (nativeScaleFactor, 1.0))
                 bounds = (bounds.toDouble() * nativeScaleFactor).toNearestInt();
 
-            SetWindowPos ((HWND) nativeWindow->getNativeHandle(), 0,
+            SetWindowPos ((HWND) nativeWindow->getNativeHandle(), nullptr,
                           bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
                           SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
         }
@@ -240,10 +239,10 @@ private:
 
     void deleteRenderContext()
     {
-        if (renderContext != 0)
+        if (renderContext != nullptr)
         {
             wglDeleteContext (renderContext);
-            renderContext = 0;
+            renderContext = nullptr;
         }
     }
 
@@ -330,7 +329,7 @@ private:
 //==============================================================================
 bool OpenGLHelpers::isContextActive()
 {
-    return wglGetCurrentContext() != 0;
+    return wglGetCurrentContext() != nullptr;
 }
 
 } // namespace juce

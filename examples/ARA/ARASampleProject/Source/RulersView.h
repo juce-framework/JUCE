@@ -25,7 +25,7 @@ public:
     void paint (Graphics&) override;
 
     // ARAEditorView::Listener overrides
-    void onNewSelection (const ARA::PlugIn::ViewSelection& viewSelection) override;
+    void onNewSelection (const ARAViewSelection& viewSelection) override;
 
     // ARADocument::Listener overrides
     void didEndEditing (ARADocument* document) override;
@@ -34,7 +34,7 @@ public:
     void willDestroyDocument (ARADocument* document) override;
 
     // ARAMusicalContext::Listener overrides
-    void didUpdateMusicalContextContent (ARAMusicalContext* musicalContext, ARAContentUpdateScopes scopeFlags) override;
+    void doUpdateMusicalContextContent (ARAMusicalContext* musicalContext, ARAContentUpdateScopes scopeFlags) override;
 
     // MouseListener overrides
     void mouseDown (const MouseEvent& event) override;

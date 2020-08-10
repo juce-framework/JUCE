@@ -30,12 +30,8 @@ MidiOutput::MidiOutput (const String& deviceName, const String& deviceIdentifier
 
 void MidiOutput::sendBlockOfMessagesNow (const MidiBuffer& buffer)
 {
-    MidiBuffer::Iterator i (buffer);
-    MidiMessage message;
-    int samplePosition; // Note: Not actually used, so no need to initialise.
-
-    while (i.getNextEvent (message, samplePosition))
-        sendMessageNow (message);
+    for (const auto metadata : buffer)
+        sendMessageNow (metadata.getMessage());
 }
 
 void MidiOutput::sendBlockOfMessages (const MidiBuffer& buffer,
@@ -50,13 +46,10 @@ void MidiOutput::sendBlockOfMessages (const MidiBuffer& buffer,
 
     auto timeScaleFactor = 1000.0 / samplesPerSecondForBuffer;
 
-    const uint8* data;
-    int len, time;
-
-    for (MidiBuffer::Iterator i (buffer); i.getNextEvent (data, len, time);)
+    for (const auto metadata : buffer)
     {
-        auto eventTime = millisecondCounterToStartAt + timeScaleFactor * time;
-        auto* m = new PendingMessage (data, len, eventTime);
+        auto eventTime = millisecondCounterToStartAt + timeScaleFactor * metadata.samplePosition;
+        auto* m = new PendingMessage (metadata.data, metadata.numBytes, eventTime);
 
         const ScopedLock sl (lock);
 

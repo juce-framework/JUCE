@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -155,12 +154,12 @@ private:
        #endif
     }
 
-    static inline uint32_t rotateLeft (uint32_t x, uint32_t n) noexcept     { return (x << n) | (x >> (32 - n)); }
+    static uint32_t rotateLeft (uint32_t x, uint32_t n) noexcept     { return (x << n) | (x >> (32 - n)); }
 
-    static inline uint32_t F (uint32_t x, uint32_t y, uint32_t z) noexcept  { return (x & y) | (~x & z); }
-    static inline uint32_t G (uint32_t x, uint32_t y, uint32_t z) noexcept  { return (x & z) | (y & ~z); }
-    static inline uint32_t H (uint32_t x, uint32_t y, uint32_t z) noexcept  { return x ^ y ^ z; }
-    static inline uint32_t I (uint32_t x, uint32_t y, uint32_t z) noexcept  { return y ^ (x | ~z); }
+    static uint32_t F (uint32_t x, uint32_t y, uint32_t z) noexcept  { return (x & y) | (~x & z); }
+    static uint32_t G (uint32_t x, uint32_t y, uint32_t z) noexcept  { return (x & z) | (y & ~z); }
+    static uint32_t H (uint32_t x, uint32_t y, uint32_t z) noexcept  { return x ^ y ^ z; }
+    static uint32_t I (uint32_t x, uint32_t y, uint32_t z) noexcept  { return y ^ (x | ~z); }
 
     static void FF (uint32_t& a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint32_t s, uint32_t ac) noexcept
     {

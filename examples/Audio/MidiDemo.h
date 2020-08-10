@@ -65,7 +65,7 @@ struct MidiDeviceListEntry : ReferenceCountedObject
 //==============================================================================
 class MidiDemo  : public Component,
                   private Timer,
-                  private MidiKeyboardStateListener,
+                  private MidiKeyboardState::Listener,
                   private MidiInputCallback,
                   private AsyncUpdater
 {
@@ -273,7 +273,7 @@ private:
 
 
             g.setColour (textColour);
-            g.setFont (height * 0.7f);
+            g.setFont ((float) height * 0.7f);
 
             if (isInput)
             {

@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -364,8 +363,9 @@ struct Oversampling2TimesPolyphaseIIR  : public Oversampling<SampleType>::Oversa
             }
         }
 
-        // Snap To Zero
+       #if JUCE_SNAP_TO_ZERO
         snapToZero (true);
+       #endif
     }
 
     void processSamplesDown (AudioBlock<SampleType>& outputBlock) override
@@ -422,8 +422,9 @@ struct Oversampling2TimesPolyphaseIIR  : public Oversampling<SampleType>::Oversa
             delayDown.setUnchecked (static_cast<int> (channel), delay);
         }
 
-        // Snap To Zero
+       #if JUCE_SNAP_TO_ZERO
         snapToZero (false);
+       #endif
     }
 
     void snapToZero (bool snapUpProcessing)
@@ -506,10 +507,10 @@ private:
         coeffs.coefficients.clear();
         auto inversion = one / denominator[0];
 
-        for (auto i = 0; i <= numerator.getOrder(); ++i)
+        for (int i = 0; i <= numerator.getOrder(); ++i)
             coeffs.coefficients.add (numerator[i] * inversion);
 
-        for (auto i = 1; i <= denominator.getOrder(); ++i)
+        for (int i = 1; i <= denominator.getOrder(); ++i)
             coeffs.coefficients.add (denominator[i] * inversion);
 
         return coeffs;
@@ -539,8 +540,9 @@ Oversampling<SampleType>::Oversampling (size_t newNumChannels)
 
 template <typename SampleType>
 Oversampling<SampleType>::Oversampling (size_t newNumChannels, size_t newFactor,
-                                        FilterType newType, bool isMaximumQuality)
-    : numChannels (newNumChannels)
+                                        FilterType newType, bool isMaximumQuality,
+                                        bool useIntegerLatency)
+    : numChannels (newNumChannels), shouldUseIntegerLatency (useIntegerLatency)
 {
     jassert (isPositiveAndBelow (newFactor, 5) && numChannels > 0);
 
@@ -561,8 +563,8 @@ Oversampling<SampleType>::Oversampling (size_t newNumChannels, size_t newFactor,
             auto gaindBFactorDown = (isMaximumQuality ? 10.0f  : 8.0f);
 
             addOversamplingStage (FilterType::filterHalfBandPolyphaseIIR,
-                                  twUp, gaindBStartUp + gaindBFactorUp * n,
-                                  twDown, gaindBStartDown + gaindBFactorDown * n);
+                                  twUp, gaindBStartUp + gaindBFactorUp * (float) n,
+                                  twDown, gaindBStartDown + gaindBFactorDown * (float) n);
         }
     }
     else if (newType == FilterType::filterHalfBandFIREquiripple)
@@ -578,8 +580,8 @@ Oversampling<SampleType>::Oversampling (size_t newNumChannels, size_t newFactor,
             auto gaindBFactorDown = (isMaximumQuality ? 10.0f  : 8.0f);
 
             addOversamplingStage (FilterType::filterHalfBandFIREquiripple,
-                                  twUp, gaindBStartUp + gaindBFactorUp * n,
-                                  twDown, gaindBStartDown + gaindBFactorDown * n);
+                                  twUp, gaindBStartUp + gaindBFactorUp * (float) n,
+                                  twDown, gaindBStartDown + gaindBFactorDown * (float) n);
         }
     }
 }
@@ -629,7 +631,20 @@ void Oversampling<SampleType>::clearOversamplingStages()
 
 //==============================================================================
 template <typename SampleType>
+void Oversampling<SampleType>::setUsingIntegerLatency (bool useIntegerLatency) noexcept
+{
+    shouldUseIntegerLatency = useIntegerLatency;
+}
+
+template <typename SampleType>
 SampleType Oversampling<SampleType>::getLatencyInSamples() const noexcept
+{
+    auto latency = getUncompensatedLatency();
+    return shouldUseIntegerLatency ? latency + fractionalDelay : latency;
+}
+
+template <typename SampleType>
+SampleType Oversampling<SampleType>::getUncompensatedLatency() const noexcept
 {
     auto latency = static_cast<SampleType> (0);
     size_t order = 1;
@@ -662,6 +677,10 @@ void Oversampling<SampleType>::initProcessing (size_t maximumNumberOfSamplesBefo
         currentNumSamples *= stage->factor;
     }
 
+    ProcessSpec spec = { 0.0, (uint32) maximumNumberOfSamplesBeforeOversampling, (uint32) numChannels };
+    delay.prepare (spec);
+    updateDelayLine();
+
     isReady = true;
     reset();
 }
@@ -674,6 +693,8 @@ void Oversampling<SampleType>::reset() noexcept
     if (isReady)
         for (auto* stage : stages)
            stage->reset();
+
+    delay.reset();
 }
 
 template <typename SampleType>
@@ -720,6 +741,26 @@ void Oversampling<SampleType>::processSamplesDown (AudioBlock<SampleType>& outpu
     }
 
     stages.getFirst()->processSamplesDown (outputBlock);
+
+    if (shouldUseIntegerLatency && fractionalDelay > static_cast<SampleType> (0.0))
+    {
+        auto context = ProcessContextReplacing<SampleType> (outputBlock);
+        delay.process (context);
+    }
+}
+
+template <typename SampleType>
+void Oversampling<SampleType>::updateDelayLine()
+{
+    auto latency = getUncompensatedLatency();
+    fractionalDelay = static_cast<SampleType> (1.0) - (latency - std::floor (latency));
+
+    if (fractionalDelay == static_cast<SampleType> (1.0))
+        fractionalDelay = static_cast<SampleType> (0.0);
+    else if (fractionalDelay < static_cast<SampleType> (0.618))
+        fractionalDelay += static_cast<SampleType> (1.0);
+
+    delay.setDelay (fractionalDelay);
 }
 
 template class Oversampling<float>;

@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -100,33 +99,33 @@ public:
     static String getTypefaceNameCode (const String& typefaceName)
     {
         if (typefaceName == getDefaultFont())   return {};
-        if (typefaceName == getDefaultSans())   return "Font::getDefaultSansSerifFontName(), ";
-        if (typefaceName == getDefaultSerif())  return "Font::getDefaultSerifFontName(), ";
-        if (typefaceName == getDefaultMono())   return "Font::getDefaultMonospacedFontName(), ";
+        if (typefaceName == getDefaultSans())   return "juce::Font::getDefaultSansSerifFontName(), ";
+        if (typefaceName == getDefaultSerif())  return "juce::Font::getDefaultSerifFontName(), ";
+        if (typefaceName == getDefaultMono())   return "juce::Font::getDefaultMonospacedFontName(), ";
 
         return "\"" + typefaceName + "\", ";
     }
 
     static String getFontStyleCode (const Font& font)
     {
-        if (font.isBold() && font.isItalic())   return "Font::bold | Font::italic";
-        if (font.isBold())                      return "Font::bold";
-        if (font.isItalic())                    return "Font::italic";
+        if (font.isBold() && font.isItalic())   return "juce::Font::bold | juce::Font::italic";
+        if (font.isBold())                      return "juce::Font::bold";
+        if (font.isItalic())                    return "juce::Font::italic";
 
-        return "Font::plain";
+        return "juce::Font::plain";
     }
 
     static String getCompleteFontCode (const Font& font, const String& typefaceName)
     {
         String s;
 
-        s << "Font ("
+        s << "juce::Font ("
           << getTypefaceNameCode (typefaceName)
           << CodeHelpers::floatLiteral (font.getHeight(), 2)
           << ", ";
 
         if (font.getAvailableStyles().contains(font.getTypefaceStyle()))
-            s << "Font::plain).withTypefaceStyle ("
+            s << "juce::Font::plain).withTypefaceStyle ("
               << CodeHelpers::stringLiteral (font.getTypefaceStyle())
               << ")";
         else

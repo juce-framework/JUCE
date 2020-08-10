@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -114,16 +113,16 @@ public:
             StringArray flags;
 
             if (b->isConnectedOnLeft())
-                flags.add ("Button::ConnectedOnLeft");
+                flags.add ("juce::Button::ConnectedOnLeft");
 
             if (b->isConnectedOnRight())
-                flags.add ("Button::ConnectedOnRight");
+                flags.add ("juce::Button::ConnectedOnRight");
 
             if (b->isConnectedOnTop())
-                flags.add ("Button::ConnectedOnTop");
+                flags.add ("juce::Button::ConnectedOnTop");
 
             if (b->isConnectedOnBottom())
-                flags.add ("Button::ConnectedOnBottom");
+                flags.add ("juce::Button::ConnectedOnBottom");
 
             String s;
             s << memberVariableName << "->setConnectedEdges ("
@@ -146,9 +145,9 @@ public:
 
         if (needsButtonListener (component))
         {
-            String& callback = code.getCallbackCode ("public Button::Listener",
+            String& callback = code.getCallbackCode ("public juce::Button::Listener",
                                                      "void",
-                                                     "buttonClicked (Button* buttonThatWasClicked)",
+                                                     "buttonClicked (juce::Button* buttonThatWasClicked)",
                                                      true);
 
             if (callback.isNotEmpty())

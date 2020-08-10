@@ -35,13 +35,13 @@ ifeq ($(CONFIG),Debug)
     TARGET_ARCH := 
   endif
 
-  JUCE_CPPFLAGS := $(DEPFLAGS) -DLINUX=1 -DDEBUG=1 -D_DEBUG=1 -DJUCER_LINUX_MAKE_6D53C8B4=1 -DJUCE_APP_VERSION=5.4.7 -DJUCE_APP_VERSION_HEX=0x50407 $(shell pkg-config --cflags x11 xinerama xext freetype2 webkit2gtk-4.0 gtk+-x11-3.0) -pthread -I../../JuceLibraryCode -I../../../../modules $(CPPFLAGS)
-  JUCE_CPPFLAGS_APP := -DJucePlugin_Build_VST=0 -DJucePlugin_Build_VST3=0 -DJucePlugin_Build_AU=0 -DJucePlugin_Build_AUv3=0 -DJucePlugin_Build_RTAS=0 -DJucePlugin_Build_AAX=0 -DJucePlugin_Build_Standalone=0 -DJucePlugin_Build_Unity=0
+  JUCE_CPPFLAGS := $(DEPFLAGS) "-DLINUX=1" "-DDEBUG=1" "-D_DEBUG=1" "-DJUCER_LINUX_MAKE_6D53C8B4=1" "-DJUCE_APP_VERSION=6.0.1" "-DJUCE_APP_VERSION_HEX=0x60001" "-DJUCE_DISPLAY_SPLASH_SCREEN=0" "-DJUCE_USE_DARK_SPLASH_SCREEN=1" "-DJUCE_PROJUCER_VERSION=0x60001" "-DJUCE_MODULE_AVAILABLE_juce_build_tools=1" "-DJUCE_MODULE_AVAILABLE_juce_core=1" "-DJUCE_MODULE_AVAILABLE_juce_cryptography=1" "-DJUCE_MODULE_AVAILABLE_juce_data_structures=1" "-DJUCE_MODULE_AVAILABLE_juce_events=1" "-DJUCE_MODULE_AVAILABLE_juce_graphics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1" "-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1" "-DJUCE_LOG_ASSERTIONS=1" "-DJUCE_USE_CURL=1" "-DJUCE_LOAD_CURL_SYMBOLS_LAZILY=1" "-DJUCE_ALLOW_STATIC_NULL_VARIABLES=0" "-DJUCE_STRICT_REFCOUNTEDPOINTER=1" "-DJUCE_WEB_BROWSER=0" "-DJUCE_STANDALONE_APPLICATION=1" $(shell pkg-config --cflags freetype2) -pthread -I../../JuceLibraryCode -I../../../Build -I../../../../modules $(CPPFLAGS)
+  JUCE_CPPFLAGS_APP :=  "-DJucePlugin_Build_VST=0" "-DJucePlugin_Build_VST3=0" "-DJucePlugin_Build_AU=0" "-DJucePlugin_Build_AUv3=0" "-DJucePlugin_Build_RTAS=0" "-DJucePlugin_Build_AAX=0" "-DJucePlugin_Build_Standalone=0" "-DJucePlugin_Build_Unity=0"
   JUCE_TARGET_APP := Projucer
 
   JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -g -ggdb -O0 $(CFLAGS)
   JUCE_CXXFLAGS += $(JUCE_CFLAGS) -std=c++11 $(CXXFLAGS)
-  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) $(shell pkg-config --libs x11 xinerama xext freetype2 webkit2gtk-4.0 gtk+-x11-3.0) -fvisibility=hidden -lrt -ldl -lpthread $(LDFLAGS)
+  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) $(shell pkg-config --libs freetype2) -fvisibility=hidden -lrt -ldl -lpthread $(LDFLAGS)
 
   CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)
 endif
@@ -56,23 +56,24 @@ ifeq ($(CONFIG),Release)
     TARGET_ARCH := 
   endif
 
-  JUCE_CPPFLAGS := $(DEPFLAGS) -DLINUX=1 -DNDEBUG=1 -DJUCER_LINUX_MAKE_6D53C8B4=1 -DJUCE_APP_VERSION=5.4.7 -DJUCE_APP_VERSION_HEX=0x50407 $(shell pkg-config --cflags x11 xinerama xext freetype2 webkit2gtk-4.0 gtk+-x11-3.0) -pthread -I../../JuceLibraryCode -I../../../../modules $(CPPFLAGS)
-  JUCE_CPPFLAGS_APP := -DJucePlugin_Build_VST=0 -DJucePlugin_Build_VST3=0 -DJucePlugin_Build_AU=0 -DJucePlugin_Build_AUv3=0 -DJucePlugin_Build_RTAS=0 -DJucePlugin_Build_AAX=0 -DJucePlugin_Build_Standalone=0 -DJucePlugin_Build_Unity=0
+  JUCE_CPPFLAGS := $(DEPFLAGS) "-DLINUX=1" "-DNDEBUG=1" "-DJUCER_LINUX_MAKE_6D53C8B4=1" "-DJUCE_APP_VERSION=6.0.1" "-DJUCE_APP_VERSION_HEX=0x60001" "-DJUCE_DISPLAY_SPLASH_SCREEN=0" "-DJUCE_USE_DARK_SPLASH_SCREEN=1" "-DJUCE_PROJUCER_VERSION=0x60001" "-DJUCE_MODULE_AVAILABLE_juce_build_tools=1" "-DJUCE_MODULE_AVAILABLE_juce_core=1" "-DJUCE_MODULE_AVAILABLE_juce_cryptography=1" "-DJUCE_MODULE_AVAILABLE_juce_data_structures=1" "-DJUCE_MODULE_AVAILABLE_juce_events=1" "-DJUCE_MODULE_AVAILABLE_juce_graphics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1" "-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1" "-DJUCE_LOG_ASSERTIONS=1" "-DJUCE_USE_CURL=1" "-DJUCE_LOAD_CURL_SYMBOLS_LAZILY=1" "-DJUCE_ALLOW_STATIC_NULL_VARIABLES=0" "-DJUCE_STRICT_REFCOUNTEDPOINTER=1" "-DJUCE_WEB_BROWSER=0" "-DJUCE_STANDALONE_APPLICATION=1" $(shell pkg-config --cflags freetype2) -pthread -I../../JuceLibraryCode -I../../../Build -I../../../../modules $(CPPFLAGS)
+  JUCE_CPPFLAGS_APP :=  "-DJucePlugin_Build_VST=0" "-DJucePlugin_Build_VST3=0" "-DJucePlugin_Build_AU=0" "-DJucePlugin_Build_AUv3=0" "-DJucePlugin_Build_RTAS=0" "-DJucePlugin_Build_AAX=0" "-DJucePlugin_Build_Standalone=0" "-DJucePlugin_Build_Unity=0"
   JUCE_TARGET_APP := Projucer
 
   JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH) -O3 $(CFLAGS)
   JUCE_CXXFLAGS += $(JUCE_CFLAGS) -std=c++11 $(CXXFLAGS)
-  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) $(shell pkg-config --libs x11 xinerama xext freetype2 webkit2gtk-4.0 gtk+-x11-3.0) -fvisibility=hidden -lrt -ldl -lpthread $(LDFLAGS)
+  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) $(shell pkg-config --libs freetype2) -fvisibility=hidden -lrt -ldl -lpthread $(LDFLAGS)
 
   CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)
 endif
 
 OBJECTS_APP := \
+  $(JUCE_OBJDIR)/jucer_NewProjectWizard_7817a7e4.o \
+  $(JUCE_OBJDIR)/jucer_StartPageComponent_de6b22ec.o \
   $(JUCE_OBJDIR)/jucer_AutoUpdater_ca658dc2.o \
   $(JUCE_OBJDIR)/jucer_CommandLine_f35de107.o \
   $(JUCE_OBJDIR)/jucer_Main_f8488f5b.o \
   $(JUCE_OBJDIR)/jucer_MainWindow_1e163aeb.o \
-  $(JUCE_OBJDIR)/jucer_ProjucerAnalytics_5740f336.o \
   $(JUCE_OBJDIR)/jucer_DocumentEditorComponent_bc853a2f.o \
   $(JUCE_OBJDIR)/jucer_OpenDocumentManager_ba866622.o \
   $(JUCE_OBJDIR)/jucer_SourceCodeEditor_55965985.o \
@@ -98,12 +99,11 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/jucer_JucerDocument_ff8afcc2.o \
   $(JUCE_OBJDIR)/jucer_ObjectTypes_4406f01c.o \
   $(JUCE_OBJDIR)/jucer_PaintRoutine_e1e891ee.o \
-  $(JUCE_OBJDIR)/jucer_LicenseController_9abff0cf.o \
   $(JUCE_OBJDIR)/jucer_CompileEngineClient_aee8c99c.o \
   $(JUCE_OBJDIR)/jucer_CompileEngineServer_5d8914.o \
   $(JUCE_OBJDIR)/jucer_DownloadCompileEngineThread_19bb4bb3.o \
+  $(JUCE_OBJDIR)/jucer_Modules_e20cbd10.o \
   $(JUCE_OBJDIR)/jucer_HeaderComponent_1ebf72ba.o \
-  $(JUCE_OBJDIR)/jucer_Module_3f7666a5.o \
   $(JUCE_OBJDIR)/jucer_Project_c131864a.o \
   $(JUCE_OBJDIR)/jucer_ProjectExporter_cf377b25.o \
   $(JUCE_OBJDIR)/jucer_ProjectSaver_4276639b.o \
@@ -113,16 +113,15 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/jucer_CodeHelpers_1e797672.o \
   $(JUCE_OBJDIR)/jucer_FileHelpers_54f12f83.o \
   $(JUCE_OBJDIR)/jucer_MiscUtilities_31fc8dd8.o \
+  $(JUCE_OBJDIR)/jucer_NewFileWizard_b233dda1.o \
   $(JUCE_OBJDIR)/jucer_VersionInfo_46f3ed40.o \
   $(JUCE_OBJDIR)/jucer_PIPGenerator_fd3402c7.o \
   $(JUCE_OBJDIR)/jucer_Icons_d02d18f1.o \
   $(JUCE_OBJDIR)/jucer_JucerTreeViewBase_9b9f2ff0.o \
   $(JUCE_OBJDIR)/jucer_ProjucerLookAndFeel_3b20291d.o \
   $(JUCE_OBJDIR)/jucer_SlidingPanelComponent_4e7dc07e.o \
-  $(JUCE_OBJDIR)/jucer_NewFileWizard_fac97f47.o \
-  $(JUCE_OBJDIR)/jucer_NewProjectWizardClasses_891f6fa2.o \
   $(JUCE_OBJDIR)/BinaryData_ce4232d4.o \
-  $(JUCE_OBJDIR)/include_juce_analytics_f8e9fa94.o \
+  $(JUCE_OBJDIR)/include_juce_build_tools_f5069398.o \
   $(JUCE_OBJDIR)/include_juce_core_f26d17db.o \
   $(JUCE_OBJDIR)/include_juce_cryptography_8cb807a8.o \
   $(JUCE_OBJDIR)/include_juce_data_structures_7471b1e3.o \
@@ -137,12 +136,22 @@ all : $(JUCE_OUTDIR)/$(JUCE_TARGET_APP)
 
 $(JUCE_OUTDIR)/$(JUCE_TARGET_APP) : $(OBJECTS_APP) $(RESOURCES)
 	@command -v pkg-config >/dev/null 2>&1 || { echo >&2 "pkg-config not installed. Please, install it."; exit 1; }
-	@pkg-config --print-errors x11 xinerama xext freetype2 webkit2gtk-4.0 gtk+-x11-3.0
+	@pkg-config --print-errors freetype2
 	@echo Linking "Projucer - App"
 	-$(V_AT)mkdir -p $(JUCE_BINDIR)
 	-$(V_AT)mkdir -p $(JUCE_LIBDIR)
 	-$(V_AT)mkdir -p $(JUCE_OUTDIR)
 	$(V_AT)$(CXX) -o $(JUCE_OUTDIR)/$(JUCE_TARGET_APP) $(OBJECTS_APP) $(JUCE_LDFLAGS) $(JUCE_LDFLAGS_APP) $(RESOURCES) $(TARGET_ARCH)
+
+$(JUCE_OBJDIR)/jucer_NewProjectWizard_7817a7e4.o: ../../Source/Application/StartPage/jucer_NewProjectWizard.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling jucer_NewProjectWizard.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/jucer_StartPageComponent_de6b22ec.o: ../../Source/Application/StartPage/jucer_StartPageComponent.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling jucer_StartPageComponent.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/jucer_AutoUpdater_ca658dc2.o: ../../Source/Application/jucer_AutoUpdater.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
@@ -162,11 +171,6 @@ $(JUCE_OBJDIR)/jucer_Main_f8488f5b.o: ../../Source/Application/jucer_Main.cpp
 $(JUCE_OBJDIR)/jucer_MainWindow_1e163aeb.o: ../../Source/Application/jucer_MainWindow.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling jucer_MainWindow.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/jucer_ProjucerAnalytics_5740f336.o: ../../Source/Application/jucer_ProjucerAnalytics.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling jucer_ProjucerAnalytics.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/jucer_DocumentEditorComponent_bc853a2f.o: ../../Source/CodeEditor/jucer_DocumentEditorComponent.cpp
@@ -294,11 +298,6 @@ $(JUCE_OBJDIR)/jucer_PaintRoutine_e1e891ee.o: ../../Source/ComponentEditor/jucer
 	@echo "Compiling jucer_PaintRoutine.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
-$(JUCE_OBJDIR)/jucer_LicenseController_9abff0cf.o: ../../Source/Licenses/jucer_LicenseController.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling jucer_LicenseController.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
-
 $(JUCE_OBJDIR)/jucer_CompileEngineClient_aee8c99c.o: ../../Source/LiveBuildEngine/jucer_CompileEngineClient.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling jucer_CompileEngineClient.cpp"
@@ -314,14 +313,14 @@ $(JUCE_OBJDIR)/jucer_DownloadCompileEngineThread_19bb4bb3.o: ../../Source/LiveBu
 	@echo "Compiling jucer_DownloadCompileEngineThread.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
+$(JUCE_OBJDIR)/jucer_Modules_e20cbd10.o: ../../Source/Project/Modules/jucer_Modules.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling jucer_Modules.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
 $(JUCE_OBJDIR)/jucer_HeaderComponent_1ebf72ba.o: ../../Source/Project/UI/jucer_HeaderComponent.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling jucer_HeaderComponent.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/jucer_Module_3f7666a5.o: ../../Source/Project/jucer_Module.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling jucer_Module.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/jucer_Project_c131864a.o: ../../Source/Project/jucer_Project.cpp
@@ -369,6 +368,11 @@ $(JUCE_OBJDIR)/jucer_MiscUtilities_31fc8dd8.o: ../../Source/Utility/Helpers/juce
 	@echo "Compiling jucer_MiscUtilities.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
+$(JUCE_OBJDIR)/jucer_NewFileWizard_b233dda1.o: ../../Source/Utility/Helpers/jucer_NewFileWizard.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling jucer_NewFileWizard.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
 $(JUCE_OBJDIR)/jucer_VersionInfo_46f3ed40.o: ../../Source/Utility/Helpers/jucer_VersionInfo.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling jucer_VersionInfo.cpp"
@@ -399,24 +403,14 @@ $(JUCE_OBJDIR)/jucer_SlidingPanelComponent_4e7dc07e.o: ../../Source/Utility/UI/j
 	@echo "Compiling jucer_SlidingPanelComponent.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
-$(JUCE_OBJDIR)/jucer_NewFileWizard_fac97f47.o: ../../Source/Wizards/jucer_NewFileWizard.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling jucer_NewFileWizard.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/jucer_NewProjectWizardClasses_891f6fa2.o: ../../Source/Wizards/jucer_NewProjectWizardClasses.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling jucer_NewProjectWizardClasses.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
-
 $(JUCE_OBJDIR)/BinaryData_ce4232d4.o: ../../JuceLibraryCode/BinaryData.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling BinaryData.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
-$(JUCE_OBJDIR)/include_juce_analytics_f8e9fa94.o: ../../JuceLibraryCode/include_juce_analytics.cpp
+$(JUCE_OBJDIR)/include_juce_build_tools_f5069398.o: ../../JuceLibraryCode/include_juce_build_tools.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling include_juce_analytics.cpp"
+	@echo "Compiling include_juce_build_tools.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/include_juce_core_f26d17db.o: ../../JuceLibraryCode/include_juce_core.cpp

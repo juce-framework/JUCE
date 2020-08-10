@@ -123,10 +123,10 @@ struct BallComponent  : public Component
     void paint (Graphics& g) override
     {
         g.setColour (colour);
-        g.fillEllipse (2.0f, 2.0f, getWidth() - 4.0f, getHeight() - 4.0f);
+        g.fillEllipse (2.0f, 2.0f, (float) getWidth() - 4.0f, (float) getHeight() - 4.0f);
 
         g.setColour (Colours::darkgrey);
-        g.drawEllipse (2.0f, 2.0f, getWidth() - 4.0f, getHeight() - 4.0f, 1.0f);
+        g.drawEllipse (2.0f, 2.0f, (float) getWidth() - 4.0f, (float) getHeight() - 4.0f, 1.0f);
     }
 
     Point<float> position, speed;
@@ -262,10 +262,10 @@ private:
             auto newIndex = (componentsToAnimate.indexOf (component) + 3 * cycleCount)
                              % componentsToAnimate.size();
 
-            auto angle = newIndex * MathConstants<float>::twoPi / componentsToAnimate.size();
+            auto angle = (float) newIndex * MathConstants<float>::twoPi / (float) componentsToAnimate.size();
 
-            auto radius = useWidth ? width  * 0.35f
-                                   : height * 0.35f;
+            auto radius = useWidth ? (float) width  * 0.35f
+                                   : (float) height * 0.35f;
 
             Rectangle<int> r (getWidth()  / 2 + (int) (radius * std::sin (angle)) - 50,
                               getHeight() / 2 + (int) (radius * std::cos (angle)) - 50,

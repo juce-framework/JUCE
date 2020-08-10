@@ -485,7 +485,7 @@ String File::descriptionOfSizeInBytes (const int64 bytes)
     else if (bytes < 1024 * 1024 * 1024)  { suffix = " MB"; divisor = 1024.0 * 1024.0; }
     else                                  { suffix = " GB"; divisor = 1024.0 * 1024.0 * 1024.0; }
 
-    return (divisor > 0 ? String (bytes / divisor, 1) : String (bytes)) + suffix;
+    return (divisor > 0 ? String ((double) bytes / divisor, 1) : String (bytes)) + suffix;
 }
 
 //==============================================================================
@@ -574,7 +574,7 @@ int File::findChildFiles (Array<File>& results, int whatToLookFor, bool searchRe
 {
     int total = 0;
 
-    for (DirectoryIterator di (*this, searchRecursively, wildcard, whatToLookFor); di.next();)
+    for (const auto& di : RangedDirectoryIterator (*this, searchRecursively, wildcard, whatToLookFor))
     {
         results.add (di.getFile());
         ++total;
@@ -585,12 +585,10 @@ int File::findChildFiles (Array<File>& results, int whatToLookFor, bool searchRe
 
 int File::getNumberOfChildFiles (const int whatToLookFor, const String& wildCardPattern) const
 {
-    int total = 0;
-
-    for (DirectoryIterator di (*this, false, wildCardPattern, whatToLookFor); di.next();)
-        ++total;
-
-    return total;
+    return std::accumulate (RangedDirectoryIterator (*this, false, wildCardPattern, whatToLookFor),
+                            RangedDirectoryIterator(),
+                            0,
+                            [] (int acc, const DirectoryEntry&) { return acc + 1; });
 }
 
 bool File::containsSubDirectories() const
@@ -598,8 +596,7 @@ bool File::containsSubDirectories() const
     if (! isDirectory())
         return false;
 
-    DirectoryIterator di (*this, false, "*", findDirectories);
-    return di.next();
+    return RangedDirectoryIterator (*this, false, "*", findDirectories) != RangedDirectoryIterator();
 }
 
 //==============================================================================

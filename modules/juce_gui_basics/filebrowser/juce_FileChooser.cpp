@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -169,7 +168,7 @@ bool FileChooser::showDialog (const int flags, FilePreviewComponent* const previ
 }
 #endif
 
-void FileChooser::launchAsync (int flags, std::function<void(const FileChooser&)> callback,
+void FileChooser::launchAsync (int flags, std::function<void (const FileChooser&)> callback,
                                FilePreviewComponent* previewComp)
 {
     // You must specify a callback when using launchAsync
@@ -254,7 +253,7 @@ URL FileChooser::getURLResult() const
 
 void FileChooser::finished (const Array<URL>& asyncResults)
 {
-     std::function<void(const FileChooser&)> callback;
+     std::function<void (const FileChooser&)> callback;
      std::swap (callback, asyncCallback);
 
      results = asyncResults;

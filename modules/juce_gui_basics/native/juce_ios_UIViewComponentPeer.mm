@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -35,6 +34,17 @@ static bool isUsingOldRotationMethod() noexcept
     static bool isPreV8 = ([[[UIDevice currentDevice] systemVersion] compare: @"8.0"
                                                                      options: NSNumericSearch] == NSOrderedAscending);
     return isPreV8;
+}
+
+static UIInterfaceOrientation getWindowOrientation()
+{
+    UIApplication* sharedApplication = [UIApplication sharedApplication];
+
+   #if (defined (__IPHONE_13_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0)
+    return [[[[sharedApplication windows] firstObject] windowScene] interfaceOrientation];
+   #else
+    return [sharedApplication statusBarOrientation];
+   #endif
 }
 
 namespace Orientations
@@ -219,8 +229,8 @@ public:
     Rectangle<int> getBounds() const override               { return getBounds (! isSharedWindow); }
     Rectangle<int> getBounds (bool global) const;
     Point<float> localToGlobal (Point<float> relativePosition) override;
-    using ComponentPeer::localToGlobal;
     Point<float> globalToLocal (Point<float> screenPosition) override;
+    using ComponentPeer::localToGlobal;
     using ComponentPeer::globalToLocal;
     void setAlpha (float newAlpha) override;
     void setMinimised (bool) override                       {}
@@ -275,7 +285,7 @@ public:
         {
             const Rectangle<int> screen (convertToRectInt ([UIScreen mainScreen].bounds));
 
-            switch ([[UIApplication sharedApplication] statusBarOrientation])
+            switch (getWindowOrientation())
             {
                 case UIInterfaceOrientationPortrait:
                     return r;
@@ -306,7 +316,7 @@ public:
         {
             const Rectangle<int> screen (convertToRectInt ([UIScreen mainScreen].bounds));
 
-            switch ([[UIApplication sharedApplication] statusBarOrientation])
+            switch (getWindowOrientation())
             {
                 case UIInterfaceOrientationPortrait:
                     return r;
@@ -1084,7 +1094,7 @@ void UIViewComponentPeer::drawRect (CGRect r)
 
     // NB the CTM on iOS already includes a factor for the display scale, so
     // we'll tell the context that the scale is 1.0 to avoid it using it twice
-    CoreGraphicsContext g (cg, getComponent().getHeight(), 1.0f);
+    CoreGraphicsContext g (cg, getComponent().getHeight());
 
     insideDrawRect = true;
     handlePaint (g);

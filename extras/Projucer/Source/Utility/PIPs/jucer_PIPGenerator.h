@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -27,6 +26,7 @@
 #pragma once
 
 #include "../Helpers/jucer_MiscUtilities.h"
+#include "../../Project/Modules/jucer_AvailableModulesList.h"
 
 //==============================================================================
 class PIPGenerator
@@ -37,8 +37,8 @@ public:
 
     //==============================================================================
     bool hasValidPIP() const noexcept                   { return ! metadata[Ids::name].toString().isEmpty(); }
-    File getJucerFile() noexcept                        { return outputDirectory.getChildFile (metadata[Ids::name].toString() + ".jucer"); }
-    File getPIPFile() noexcept                          { return useLocalCopy ? outputDirectory.getChildFile ("Source").getChildFile (pipFile.getFileName()) : pipFile; }
+    File getJucerFile() const noexcept                  { return outputDirectory.getChildFile (metadata[Ids::name].toString() + ".jucer"); }
+    File getPIPFile() const noexcept                    { return useLocalCopy ? outputDirectory.getChildFile ("Source").getChildFile (pipFile.getFileName()) : pipFile; }
 
     String getMainClassName() const noexcept            { return metadata[Ids::mainClass]; }
 
@@ -55,7 +55,7 @@ private:
 
     ValueTree createModulePathChild (const String& moduleID);
     ValueTree createBuildConfigChild (bool isDebug);
-    ValueTree createExporterChild (const String& exporterName);
+    ValueTree createExporterChild (const Identifier& exporterIdentifier);
     ValueTree createModuleChild (const String& moduleID);
 
     void addExporters (ValueTree& jucerTree);
@@ -72,20 +72,15 @@ private:
     bool copyRelativeFileToLocalSourceDirectory (const File&) const noexcept;
 
     StringArray getExtraPluginFormatsToBuild() const;
-    StringArray getPluginCharacteristics() const;
 
     String getPathForModule (const String&) const;
     File getExamplesDirectory() const;
 
     //==============================================================================
     File pipFile, outputDirectory, juceModulesPath, userModulesPath;
-
-    std::unique_ptr<AvailableModuleList> availableUserModules;
-
+    std::unique_ptr<AvailableModulesList> availableUserModules;
     var metadata;
-
-    bool isTemp = false;
-    bool useLocalCopy = false;
+    bool isTemp = false, useLocalCopy = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PIPGenerator)
 };

@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -507,8 +506,6 @@ public:
         for a specific item, but this can be handy if you need to briefly save the state
         for a section of the tree.
 
-        The caller is responsible for deleting the object that is returned.
-
         Note that if all nodes of the tree are in their default state, then this may
         return a nullptr.
 
@@ -803,8 +800,6 @@ public:
         means that the same state of open/closed nodes can be restored to a
         completely different instance of the tree, as long as it contains nodes
         whose unique names are the same.
-
-        The caller is responsible for deleting the object that is returned.
 
         @param alsoIncludeScrollPosition    if this is true, the state will also
                                             include information about where the

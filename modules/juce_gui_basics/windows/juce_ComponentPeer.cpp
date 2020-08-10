@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -116,8 +115,8 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
 
     if (peerBounds.getWidth() != componentBounds.getWidth() || peerBounds.getHeight() != componentBounds.getHeight())
         // Tweak the scaling so that the component's integer size exactly aligns with the peer's scaled size
-        g.addTransform (AffineTransform::scale (peerBounds.getWidth()  / (float) componentBounds.getWidth(),
-                                                peerBounds.getHeight() / (float) componentBounds.getHeight()));
+        g.addTransform (AffineTransform::scale ((float) peerBounds.getWidth()  / (float) componentBounds.getWidth(),
+                                                (float) peerBounds.getHeight() / (float) componentBounds.getHeight()));
 
   #if JUCE_ENABLE_REPAINT_DEBUGGING
    #ifdef JUCE_IS_REPAINT_DEBUGGING_ACTIVE

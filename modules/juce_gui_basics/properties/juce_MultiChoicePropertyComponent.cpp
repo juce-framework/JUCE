@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -208,32 +207,43 @@ private:
 };
 
 //==============================================================================
+int MultiChoicePropertyComponent::getTotalButtonsHeight (int numButtons)
+{
+    return numButtons * buttonHeight + 1;
+}
+
 MultiChoicePropertyComponent::MultiChoicePropertyComponent (const String& propertyName,
                                                             const StringArray& choices,
                                                             const Array<var>& correspondingValues)
-    : PropertyComponent (propertyName, 70)
+: PropertyComponent (propertyName, jmin (getTotalButtonsHeight (choices.size()), collapsedHeight))
 {
     // The array of corresponding values must contain one value for each of the items in
     // the choices array!
     jassert (choices.size() == correspondingValues.size());
-
     ignoreUnused (correspondingValues);
 
     for (auto choice : choices)
         addAndMakeVisible (choiceButtons.add (new ToggleButton (choice)));
 
-    maxHeight = (choiceButtons.size() * 25) + 20;
-
+    if (preferredHeight >= collapsedHeight)
     {
-        Path expandShape;
-        expandShape.addTriangle ({ 0, 0 }, { 5, 10 }, { 10, 0});
-        expandButton.setShape (expandShape, true, true, false);
+        expandable = true;
+        maxHeight = getTotalButtonsHeight (choiceButtons.size()) + expandAreaHeight;
     }
 
-    expandButton.onClick = [this] { setExpanded (! expanded); };
-    addAndMakeVisible (expandButton);
+    if (isExpandable())
+    {
+        {
+            Path expandShape;
+            expandShape.addTriangle ({ 0, 0 }, { 5, 10 }, { 10, 0});
+            expandButton.setShape (expandShape, true, true, false);
+        }
 
-    lookAndFeelChanged();
+        expandButton.onClick = [this] { setExpanded (! expanded); };
+        addAndMakeVisible (expandButton);
+
+        lookAndFeelChanged();
+    }
 }
 
 MultiChoicePropertyComponent::MultiChoicePropertyComponent (const Value& valueToControl,
@@ -284,11 +294,11 @@ void MultiChoicePropertyComponent::paint (Graphics& g)
     g.setColour (findColour (TextEditor::backgroundColourId));
     g.fillRect (getLookAndFeel().getPropertyComponentContentPosition (*this));
 
-    if (! expanded)
+    if (isExpandable() && ! isExpanded())
     {
         g.setColour (findColour (TextEditor::backgroundColourId).contrasting().withAlpha (0.4f));
         g.drawFittedText ("+ " + String (numHidden) + " more", getLookAndFeel().getPropertyComponentContentPosition (*this)
-                                                                               .removeFromBottom (20).withTrimmedLeft (10),
+                                                                               .removeFromBottom (expandAreaHeight).withTrimmedLeft (10),
                           Justification::centredLeft, 1);
     }
 
@@ -299,20 +309,23 @@ void MultiChoicePropertyComponent::resized()
 {
     auto bounds = getLookAndFeel().getPropertyComponentContentPosition (*this);
 
-    bounds.removeFromBottom (5);
+    if (isExpandable())
+    {
+        bounds.removeFromBottom (5);
 
-    auto buttonSlice = bounds.removeFromBottom (10);
-    expandButton.setSize (10, 10);
-    expandButton.setCentrePosition (buttonSlice.getCentre());
+        auto buttonSlice = bounds.removeFromBottom (10);
+        expandButton.setSize (10, 10);
+        expandButton.setCentrePosition (buttonSlice.getCentre());
+    }
 
     numHidden = 0;
 
     for (auto* b : choiceButtons)
     {
-        if (bounds.getHeight() >= 25)
+        if (bounds.getHeight() >= buttonHeight)
         {
             b->setVisible (true);
-            b->setBounds (bounds.removeFromTop (25).reduced (5, 2));
+            b->setBounds (bounds.removeFromTop (buttonHeight).reduced (5, 2));
         }
         else
         {
@@ -322,13 +335,13 @@ void MultiChoicePropertyComponent::resized()
     }
 }
 
-void MultiChoicePropertyComponent::setExpanded (bool isExpanded) noexcept
+void MultiChoicePropertyComponent::setExpanded (bool shouldBeExpanded) noexcept
 {
-    if (expanded == isExpanded)
+    if (! isExpandable() || (isExpanded() == shouldBeExpanded))
         return;
 
-    expanded = isExpanded;
-    preferredHeight = expanded ? maxHeight : 70;
+    expanded = shouldBeExpanded;
+    preferredHeight = expanded ? maxHeight : collapsedHeight;
 
     if (auto* propertyPanel = findParentComponentOfClass<PropertyPanel>())
         propertyPanel->resized();

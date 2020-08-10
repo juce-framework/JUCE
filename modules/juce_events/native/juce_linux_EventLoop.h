@@ -38,7 +38,7 @@ namespace LinuxEventLoop
                              file descriptor. The possible values for this are defined in
                              <poll.h>
     */
-    void registerFdCallback (int fd, std::function<void(int)> readCallback, short eventMask = 1 /*POLLIN*/);
+    void registerFdCallback (int fd, std::function<void (int)> readCallback, short eventMask = 1 /*POLLIN*/);
 
     /** Unregisters a previously registered file descriptor.
 

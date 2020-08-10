@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -27,11 +26,46 @@
 namespace juce
 {
 
+namespace detail
+{
+    struct ColorSpaceDelete
+    {
+        void operator() (CGColorSpaceRef ptr) const noexcept { CGColorSpaceRelease (ptr); }
+    };
+
+    struct ContextDelete
+    {
+        void operator() (CGContextRef ptr) const noexcept { CGContextRelease (ptr); }
+    };
+
+    struct DataProviderDelete
+    {
+        void operator() (CGDataProviderRef ptr) const noexcept { CGDataProviderRelease (ptr); }
+    };
+
+    struct ImageDelete
+    {
+        void operator() (CGImageRef ptr) const noexcept { CGImageRelease (ptr); }
+    };
+
+    struct GradientDelete
+    {
+        void operator() (CGGradientRef ptr) const noexcept { CGGradientRelease (ptr); }
+    };
+
+    //==============================================================================
+    using ColorSpacePtr = std::unique_ptr<CGColorSpace, ColorSpaceDelete>;
+    using ContextPtr = std::unique_ptr<CGContext, ContextDelete>;
+    using DataProviderPtr = std::unique_ptr<CGDataProvider, DataProviderDelete>;
+    using ImagePtr = std::unique_ptr<CGImage, ImageDelete>;
+    using GradientPtr = std::unique_ptr<CGGradient, GradientDelete>;
+}
+
 //==============================================================================
 class CoreGraphicsContext   : public LowLevelGraphicsContext
 {
 public:
-    CoreGraphicsContext (CGContextRef context, float flipHeight, float targetScale);
+    CoreGraphicsContext (CGContextRef context, float flipHeight);
     ~CoreGraphicsContext() override;
 
     //==============================================================================
@@ -75,10 +109,10 @@ public:
     bool drawTextLayout (const AttributedString&, const Rectangle<float>&) override;
 
 private:
-    CGContextRef context;
+    //==============================================================================
+    detail::ContextPtr context;
     const CGFloat flipHeight;
-    float targetScale;
-    CGColorSpaceRef rgbColourSpace, greyColourSpace;
+    detail::ColorSpacePtr rgbColourSpace, greyColourSpace;
     mutable Rectangle<int> lastClipRect;
     mutable bool lastClipRectIsValid = false;
 
@@ -95,7 +129,7 @@ private:
         CGFontRef fontRef = {};
         CGAffineTransform textMatrix = CGAffineTransformIdentity,
                    inverseTextMatrix = CGAffineTransformIdentity;
-        CGGradientRef gradient = {};
+        detail::GradientPtr gradient = {};
     };
 
     std::unique_ptr<SavedState> state;

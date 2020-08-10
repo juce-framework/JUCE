@@ -23,9 +23,7 @@ android {
         targetSdkVersion 28
         externalNativeBuild {
             cmake {
-                arguments "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-23", "-DANDROID_STL=c++_static", "-DANDROID_CPP_FEATURES=exceptions rtti", "-DANDROID_ARM_MODE=arm", "-DANDROID_ARM_NEON=TRUE"
-                cFlags "-fsigned-char"
-                cppFlags "-fsigned-char", "-std=c++14"
+                arguments "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-23", "-DANDROID_STL=c++_static", "-DANDROID_CPP_FEATURES=exceptions rtti", "-DANDROID_ARM_MODE=arm", "-DANDROID_ARM_NEON=TRUE", "-DCMAKE_CXX_STANDARD=14", "-DCMAKE_CXX_EXTENSIONS=OFF"
             }
         }
     }
@@ -53,7 +51,7 @@ android {
             }
             externalNativeBuild {
                 cmake {
-                    arguments "-DJUCE_BUILD_CONFIGURATION=DEBUG", "-DCMAKE_CXX_FLAGS_DEBUG=-O0 -Wall -Wshadow-all -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Wconditional-uninitialized -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion -Wunused-private-field -Wbool-conversion -Wextra-semi -Wunreachable-code -Wzero-as-null-pointer-constant -Wcast-align -Winconsistent-missing-destructor-override -Wshift-sign-overflow -Wnullable-to-nonnull-conversion -Wno-missing-field-initializers -Wno-ignored-qualifiers -Wswitch-enum", "-DCMAKE_C_FLAGS_DEBUG=-O0"
+                    arguments "-DJUCE_BUILD_CONFIGURATION=DEBUG", "-DCMAKE_CXX_FLAGS_DEBUG=-O0", "-DCMAKE_C_FLAGS_DEBUG=-O0"
                 }
             }
 
@@ -62,7 +60,7 @@ android {
         release_ {
             externalNativeBuild {
                 cmake {
-                    arguments "-DJUCE_BUILD_CONFIGURATION=RELEASE", "-DCMAKE_CXX_FLAGS_RELEASE=-O3 -Wall -Wshadow-all -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Wconditional-uninitialized -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion -Wunused-private-field -Wbool-conversion -Wextra-semi -Wunreachable-code -Wzero-as-null-pointer-constant -Wcast-align -Winconsistent-missing-destructor-override -Wshift-sign-overflow -Wnullable-to-nonnull-conversion -Wno-missing-field-initializers -Wno-ignored-qualifiers -Wswitch-enum", "-DCMAKE_C_FLAGS_RELEASE=-O3"
+                    arguments "-DJUCE_BUILD_CONFIGURATION=RELEASE", "-DCMAKE_CXX_FLAGS_RELEASE=-O3", "-DCMAKE_C_FLAGS_RELEASE=-O3"
                 }
             }
 

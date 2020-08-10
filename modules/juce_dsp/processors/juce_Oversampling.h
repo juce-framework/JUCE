@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -29,24 +28,23 @@ namespace juce
 namespace dsp
 {
 
-//==============================================================================
+//===============================================================================
 /**
-    A processing class performing multi-channel oversampling.
+    A processor that performs multi-channel oversampling.
 
-    It can be configured to do 2 times, 4 times, 8 times or 16 times oversampling
-    using a multi-stage approach, either polyphase allpass IIR filters or FIR
-    filters for the filtering, and reports successfully the latency added by the
-    filter stages.
+    This class can be configured to do a factor of 2, 4, 8 or 16 times
+    oversampling, using multiple stages, with polyphase allpass IIR filters or FIR
+    filters, and latency compensation.
 
     The principle of oversampling is to increase the sample rate of a given
-    non-linear process, to prevent it from creating aliasing. Oversampling works
-    by upsampling N times the input signal, processing the upsampled signal
-    with the increased internal sample rate, and downsampling the result to get
-    back the original processing sample rate.
+    non-linear process to prevent it from creating aliasing. Oversampling works
+    by upsampling the input signal N times, processing the upsampled signal
+    with the increased internal sample rate, then downsampling the result to get
+    back to the original sample rate.
 
-    Choose between FIR or IIR filtering depending on your needs in term of
-    latency and phase distortion. With FIR filters, the phase is linear but the
-    latency is maximised. With IIR filtering, the phase is compromised around the
+    Choose between FIR or IIR filtering depending on your needs in terms of
+    latency and phase distortion. With FIR filters the phase is linear but the
+    latency is maximised. With IIR filtering the phase is compromised around the
     Nyquist frequency but the latency is minimised.
 
     @see FilterDesign.
@@ -65,52 +63,62 @@ public:
         numFilterTypes
     };
 
-    //==============================================================================
-    /**
-        Constructor of the oversampling class. All the processing parameters must be
-        provided at the creation of the oversampling object.
+    //===============================================================================
+    /** The default constructor.
 
-        @param numChannels      the number of channels to process with this object
-        @param factor           the processing will perform 2 ^ factor times oversampling
-        @param type             the type of filter design employed for filtering during
-                                oversampling
-        @param isMaxQuality     if the oversampling is done using the maximum quality,
-                                the filters will be more efficient, but the CPU load will
-                                increase as well
-    */
-    Oversampling (size_t numChannels,
-                  size_t factor,
-                  FilterType type,
-                  bool isMaxQuality = true);
-
-    /** The default constructor of the oversampling class, which can be used to create an
-        empty object and then add the appropriate stages.
-
-        Note: This creates a "dummy" oversampling stage, which needs to be removed first
+        Note: This creates a "dummy" oversampling stage, which needs to be removed
         before adding proper oversampling stages.
+
+        @param numChannels    the number of channels to process with this object
 
         @see clearOversamplingStages, addOversamplingStage
     */
     explicit Oversampling (size_t numChannels = 1);
 
+    /** Constructor.
+
+        @param numChannels          the number of channels to process with this object
+        @param factor               the processing will perform 2 ^ factor times oversampling
+        @param type                 the type of filter design employed for filtering during
+                                    oversampling
+        @param isMaxQuality         if the oversampling is done using the maximum quality, where
+                                    the filters will be more efficient but the CPU load will
+                                    increase as well
+        @param useIntegerLatency    if true this processor will add some fractional delay at the
+                                    end of the signal path to ensure that the overall latency of
+                                    the oversampling is an integer
+    */
+    Oversampling (size_t numChannels,
+                  size_t factor,
+                  FilterType type,
+                  bool isMaxQuality = true,
+                  bool useIntegerLatency = false);
+
     /** Destructor. */
     ~Oversampling();
 
-    //==============================================================================
-    /** Returns the latency in samples of the whole processing. Use this information
-        in your main processor to compensate the additional latency involved with
-        the oversampling, for example with a dry / wet functionality, and to report
-        the latency to the DAW.
+    //===============================================================================
+    /* Sets if this processor should add some fractional delay at the end of the signal
+       path to ensure that the overall latency of the oversampling is an integer.
+    */
+    void setUsingIntegerLatency (bool shouldUseIntegerLatency) noexcept;
 
-        Note: The latency might not be integer, so you might need to round its value
-        or to compensate it properly in your processing code.
+    /** Returns the latency in samples of the overall processing. You can use this
+        information in your main processor to compensate the additional latency
+        involved with the oversampling, for example with a dry / wet mixer, and to
+        report the latency to the DAW.
+
+        Note: If you have not opted to use an integer latency then the latency may not be
+        integer, so you might need to round its value or to compensate it properly in
+        your processing code since plug-ins can only report integer latency values in
+        samples to the DAW.
     */
     SampleType getLatencyInSamples() const noexcept;
 
     /** Returns the current oversampling factor. */
     size_t getOversamplingFactor() const noexcept;
 
-    //==============================================================================
+    //===============================================================================
     /** Must be called before any processing, to set the buffer sizes of the internal
         buffers of the oversampling processing.
     */
@@ -135,7 +143,7 @@ public:
     */
     void processSamplesDown (AudioBlock<SampleType>& outputBlock) noexcept;
 
-    //==============================================================================
+    //===============================================================================
     /** Adds a new oversampling stage to the Oversampling class, multiplying the
         current oversampling factor by two. This is used with the default constructor
         to create custom oversampling chains, requiring a call to the
@@ -179,7 +187,7 @@ public:
     */
     void clearOversamplingStages();
 
-    //==============================================================================
+    //===============================================================================
     size_t factorOversampling = 1;
     size_t numChannels = 1;
 
@@ -188,11 +196,17 @@ public:
    #endif
 
 private:
-    //==============================================================================
-    OwnedArray<OversamplingStage> stages;
-    bool isReady = false;
+    //===============================================================================
+    void updateDelayLine();
+    SampleType getUncompensatedLatency() const noexcept;
 
-    //==============================================================================
+    //===============================================================================
+    OwnedArray<OversamplingStage> stages;
+    bool isReady = false, shouldUseIntegerLatency = false;
+    DelayLine<SampleType, DelayLineInterpolationTypes::Thiran> delay { 8 };
+    SampleType fractionalDelay = 0;
+
+    //===============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Oversampling)
 };
 

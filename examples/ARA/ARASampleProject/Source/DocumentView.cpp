@@ -55,7 +55,7 @@ DocumentView::~DocumentView()
 }
 
 //==============================================================================
-void DocumentView::onNewSelection (const ARA::PlugIn::ViewSelection& /*viewSelection*/)
+void DocumentView::onNewSelection (const ARAViewSelection& /*viewSelection*/)
 {
     if (showOnlySelectedRegionSequences)
         invalidateRegionSequenceViews();
@@ -116,10 +116,7 @@ void DocumentView::invalidateRegionSequenceViews()
 
 void DocumentView::invalidateTimeRange()
 {
-    if (getDocumentController()->isHostEditingDocument() || getParentComponent() == nullptr)
-        timeRangeIsInvalid = true;
-    else
-        calculateTimeRange();
+    timeRangeIsInvalid = true;
 }
 
 //==============================================================================

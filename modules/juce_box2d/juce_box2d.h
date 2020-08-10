@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -29,14 +28,14 @@
  The block below describes the properties of this module, and is read by
  the Projucer to automatically generate project code that uses it.
  For details about the syntax and how to create or use a module, see the
- JUCE Module Format.txt file.
+ JUCE Module Format.md file.
 
 
  BEGIN_JUCE_MODULE_DECLARATION
 
   ID:                 juce_box2d
   vendor:             juce
-  version:            5.4.7
+  version:            6.0.1
   name:               JUCE wrapper for the Box2D physics engine
   description:        The Box2D physics engine and some utility classes.
   website:            http://www.juce.com/juce
@@ -55,35 +54,17 @@
 //==============================================================================
 #include <juce_graphics/juce_graphics.h>
 
-#ifdef JUCE_CLANG
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wconversion"
- #if __has_warning("-Wshadow-field")
-  #pragma clang diagnostic ignored "-Wshadow-field"
- #endif
- #if __has_warning("-Wzero-as-null-pointer-constant")
-  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
- #endif
-#endif
-
-#ifdef JUCE_GCC
- #pragma GCC diagnostic ignored "-Wconversion"
- #pragma GCC diagnostic ignored "-Wsign-conversion"
- #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
+                                     "-Wshadow-field",
+                                     "-Wzero-as-null-pointer-constant",
+                                     "-Wsign-conversion")
 
 #include <climits>
 #include <cfloat>
 
 #include "box2d/Box2D.h"
 
-#ifdef JUCE_CLANG
- #pragma clang diagnostic pop
-#endif
-
-#ifdef JUCE_GCC
- #pragma GCC diagnostic pop
-#endif
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #ifndef DOXYGEN // for some reason, Doxygen sees this as a re-definition of Box2DRenderer
  #include "utils/juce_Box2DRenderer.h"

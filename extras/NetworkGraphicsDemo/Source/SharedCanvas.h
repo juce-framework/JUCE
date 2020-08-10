@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -455,9 +454,9 @@ struct BlockPacketiser
 
         while (remaining > 0)
         {
-            auto num = (int) jmin (maxBlockSize, remaining);
-            blocks.add (MemoryBlock (addBytesToPointer (data.getData(), offset), (size_t) num));
-            offset += num;
+            auto num = (size_t) jmin (maxBlockSize, remaining);
+            blocks.add (MemoryBlock (addBytesToPointer (data.getData(), offset), num));
+            offset += (int) num;
             remaining -= num;
         }
 
@@ -467,7 +466,7 @@ struct BlockPacketiser
 
         for (int i = 0; i < blocks.size(); ++i)
         {
-            uint32 index = ByteOrder::swapIfBigEndian (i);
+            auto index = (uint32) ByteOrder::swapIfBigEndian (i);
             blocks.getReference(i).append (&index, sizeof (index));
         }
     }
@@ -505,9 +504,9 @@ struct BlockPacketiser
 
     static int compareElements (const MemoryBlock& b1, const MemoryBlock& b2)
     {
-        int i1 = ByteOrder::littleEndianInt (addBytesToPointer (b1.getData(), b1.getSize() - 4));
-        int i2 = ByteOrder::littleEndianInt (addBytesToPointer (b2.getData(), b2.getSize() - 4));
-        return i1 - i2;
+        auto i1 = ByteOrder::littleEndianInt (addBytesToPointer (b1.getData(), b1.getSize() - 4));
+        auto i2 = ByteOrder::littleEndianInt (addBytesToPointer (b2.getData(), b2.getSize() - 4));
+        return (int) (i1 - i2);
     }
 
     static const char* getLastPacketPrefix()   { return "**END_OF_PACKET_LIST** "; }

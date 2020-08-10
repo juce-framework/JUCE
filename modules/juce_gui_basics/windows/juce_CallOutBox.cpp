@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -52,9 +51,7 @@ CallOutBox::CallOutBox (Component& c, Rectangle<int> area, Component* const pare
     creationTime = Time::getCurrentTime();
 }
 
-CallOutBox::~CallOutBox()
-{
-}
+CallOutBox::~CallOutBox() = default;
 
 //==============================================================================
 class CallOutBoxCallback  : public ModalComponentManager::Callback,
@@ -101,6 +98,8 @@ int CallOutBox::getBorderSize() const noexcept
 {
     return jmax (getLookAndFeel().getCallOutBoxBorderSize (*this), (int) arrowSize);
 }
+
+void CallOutBox::lookAndFeelChanged() { resized(); repaint(); }
 
 void CallOutBox::paint (Graphics& g)
 {
@@ -202,7 +201,7 @@ void CallOutBox::updatePosition (const Rectangle<int>& newAreaToPointTo, const R
     auto hh = newBounds.getHeight() / 2;
     auto hwReduced = (float) (hw - borderSpace * 2);
     auto hhReduced = (float) (hh - borderSpace * 2);
-    auto arrowIndent = borderSpace - arrowSize;
+    auto arrowIndent = (float) borderSpace - arrowSize;
 
     Point<float> targets[4] = { { (float) targetArea.getCentreX(), (float) targetArea.getBottom() },
                                 { (float) targetArea.getRight(),   (float) targetArea.getCentreY() },
@@ -235,8 +234,8 @@ void CallOutBox::updatePosition (const Rectangle<int>& newAreaToPointTo, const R
             nearest = distanceFromCentre;
             targetPoint = targets[i];
 
-            newBounds.setPosition ((int) (centre.x - hw),
-                                   (int) (centre.y - hh));
+            newBounds.setPosition ((int) (centre.x - (float) hw),
+                                   (int) (centre.y - (float) hh));
         }
     }
 

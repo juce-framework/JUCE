@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -40,7 +39,7 @@
 //==============================================================================
 class ExtraMethodsList  : public PropertyComponent,
                           public ListBoxModel,
-                          public ChangeListener
+                          private ChangeListener
 {
 public:
     ExtraMethodsList (JucerDocument& doc)
@@ -79,7 +78,7 @@ public:
             g.setColour (findColour (defaultTextColourId));
         }
 
-        g.setFont (height * 0.6f);
+        g.setFont ((float) height * 0.6f);
         g.drawText (returnValues [row] + " " + baseClasses [row] + "::" + methods [row],
                     30, 0, width - 32, height,
                     Justification::centredLeft, true);
@@ -120,12 +119,12 @@ public:
         listBox->repaint();
     }
 
+private:
     void changeListenerCallback (ChangeBroadcaster*) override
     {
         refresh();
     }
 
-private:
     JucerDocument& document;
     std::unique_ptr<ListBox> listBox;
 
@@ -138,7 +137,7 @@ class ClassPropertiesPanel  : public Component,
                               private ChangeListener
 {
 public:
-    ClassPropertiesPanel (JucerDocument& doc)
+    explicit ClassPropertiesPanel (JucerDocument& doc)
         : document (doc)
     {
         addAndMakeVisible (panel1);
@@ -196,7 +195,7 @@ private:
     class ComponentClassNameProperty    : public ComponentTextProperty <Component>
     {
     public:
-        ComponentClassNameProperty (JucerDocument& doc)
+        explicit ComponentClassNameProperty (JucerDocument& doc)
             : ComponentTextProperty<Component> ("Class name", 128, false, nullptr, doc)
         {}
 
@@ -208,7 +207,7 @@ private:
     class ComponentCompNameProperty    : public ComponentTextProperty <Component>
     {
     public:
-        ComponentCompNameProperty (JucerDocument& doc)
+        explicit ComponentCompNameProperty (JucerDocument& doc)
             : ComponentTextProperty<Component> ("Component name", 200, false, nullptr, doc)
         {}
 
@@ -220,7 +219,7 @@ private:
     class ComponentParentClassesProperty    : public ComponentTextProperty <Component>
     {
     public:
-        ComponentParentClassesProperty (JucerDocument& doc)
+        explicit ComponentParentClassesProperty (JucerDocument& doc)
             : ComponentTextProperty<Component> ("Parent classes", 512, false, nullptr, doc)
         {}
 
@@ -232,7 +231,7 @@ private:
     class ComponentConstructorParamsProperty    : public ComponentTextProperty <Component>
     {
     public:
-        ComponentConstructorParamsProperty (JucerDocument& doc)
+        explicit ComponentConstructorParamsProperty (JucerDocument& doc)
             : ComponentTextProperty<Component> ("Constructor params", 2048, false, nullptr, doc)
         {}
 
@@ -244,7 +243,7 @@ private:
     class ComponentInitialisersProperty   : public ComponentTextProperty <Component>
     {
     public:
-        ComponentInitialisersProperty (JucerDocument& doc)
+        explicit ComponentInitialisersProperty (JucerDocument& doc)
             : ComponentTextProperty <Component> ("Member initialisers", 16384, true, nullptr, doc)
         {
             preferredHeight = 24 * 3;
@@ -288,7 +287,7 @@ private:
     class FixedSizeProperty    : public ComponentChoiceProperty <Component>
     {
     public:
-        FixedSizeProperty (JucerDocument& doc)
+        explicit FixedSizeProperty (JucerDocument& doc)
             : ComponentChoiceProperty<Component> ("Fixed size", nullptr, doc)
         {
             choices.add ("Resize component to fit workspace");
@@ -303,7 +302,7 @@ private:
     class TemplateFileProperty    : public ComponentTextProperty <Component>
     {
     public:
-        TemplateFileProperty (JucerDocument& doc)
+        explicit TemplateFileProperty (JucerDocument& doc)
             : ComponentTextProperty<Component> ("Template file", 2048, false, nullptr, doc)
         {}
 
@@ -355,12 +354,6 @@ JucerDocumentEditor::JucerDocumentEditor (JucerDocument* const doc)
         refreshPropertiesPanel();
 
         changeListenerCallback (nullptr);
-
-        if (auto* project = document->getCppDocument().getProject())
-        {
-            if (project->shouldSendGUIBuilderAnalyticsEvent())
-                Analytics::getInstance()->logEvent ("GUI Builder", {}, ProjucerAnalyticsEvent::projectEvent);
-        }
     }
 }
 
@@ -1044,7 +1037,7 @@ bool JucerDocumentEditor::perform (const InvocationInfo& info)
                 else if (info.commandID == JucerCommandIDs::compOverlay100)
                     amount = 100;
 
-                document->setComponentOverlayOpacity (amount * 0.01f);
+                document->setComponentOverlayOpacity ((float) amount * 0.01f);
             }
             break;
 
@@ -1224,10 +1217,13 @@ Image JucerDocumentEditor::createComponentLayerSnapshot() const
 const int gridSnapMenuItemBase = 0x8723620;
 const int snapSizes[] = { 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32 };
 
-void createGUIEditorMenu (PopupMenu&);
-void createGUIEditorMenu (PopupMenu& menu)
+PopupMenu createGUIEditorMenu()
 {
+    PopupMenu menu;
     auto* commandManager = &ProjucerApplication::getCommandManager();
+
+    menu.addCommandItem (commandManager, CommandIDs::addNewGUIFile);
+    menu.addSeparator();
 
     menu.addCommandItem (commandManager, JucerCommandIDs::editCompLayout);
     menu.addCommandItem (commandManager, JucerCommandIDs::editCompGraphics);
@@ -1297,6 +1293,7 @@ void createGUIEditorMenu (PopupMenu& menu)
 
         menu.addSubMenu ("Component Overlay", overlays, holder != nullptr);
     }
+    return menu;
 }
 
 void handleGUIEditorMenuCommand (int);

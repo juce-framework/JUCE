@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -57,8 +56,8 @@ public:
                        int minValue, int maxValue,
                        int defaultValue,
                        const String& parameterLabel = String(),
-                       std::function<String(int value, int maximumStringLength)> stringFromInt = nullptr,
-                       std::function<int(const String& text)> intFromString = nullptr);
+                       std::function<String (int value, int maximumStringLength)> stringFromInt = nullptr,
+                       std::function<int (const String& text)> intFromString = nullptr);
 
     /** Destructor. */
     ~AudioParameterInt() override;
@@ -98,8 +97,8 @@ private:
     const NormalisableRange<float> range;
     std::atomic<float> value;
     const float defaultValue;
-    std::function<String(int, int)> stringFromIntFunction;
-    std::function<int(const String&)> intFromStringFunction;
+    std::function<String (int, int)> stringFromIntFunction;
+    std::function<int (const String&)> intFromStringFunction;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioParameterInt)
 };

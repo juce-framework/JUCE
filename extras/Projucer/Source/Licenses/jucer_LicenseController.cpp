@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -73,24 +72,6 @@ static LicenseState::Type getLicenseTypeFromValue (const String& d)
     if (d == getLicenseStateValue (LicenseState::Type::indie))     return LicenseState::Type::indie;
     if (d == getLicenseStateValue (LicenseState::Type::pro))       return LicenseState::Type::pro;
     return LicenseState::Type::noLicenseChosenYet;
-}
-
-static const char* getApplicationUsageDataStateValue (LicenseState::ApplicationUsageData type)
-{
-    switch (type)
-    {
-        case LicenseState::ApplicationUsageData::enabled:       return "enabled";
-        case LicenseState::ApplicationUsageData::disabled:      return "disabled";
-        case LicenseState::ApplicationUsageData::notChosenYet:
-        default:                                                return "notChosen";
-    }
-}
-
-static LicenseState::ApplicationUsageData getApplicationUsageDataTypeFromValue (const String& value)
-{
-    if (value == getApplicationUsageDataStateValue (LicenseState::ApplicationUsageData::enabled))   return LicenseState::ApplicationUsageData::enabled;
-    if (value == getApplicationUsageDataStateValue (LicenseState::ApplicationUsageData::disabled))  return LicenseState::ApplicationUsageData::disabled;
-    return LicenseState::ApplicationUsageData::notChosenYet;
 }
 
 #if ! JUCER_ENABLE_GPL_MODE
@@ -180,17 +161,6 @@ void LicenseController::chooseNewLicense()
    #endif
 }
 
-void LicenseController::setApplicationUsageDataState (LicenseState::ApplicationUsageData newState)
-{
-    if (state.applicationUsageDataState != newState)
-    {
-        state.applicationUsageDataState = newState;
-        ProjucerApplication::getApp().setAnalyticsEnabled (newState == LicenseState::ApplicationUsageData::enabled);
-
-        updateState (state);
-    }
-}
-
 //==============================================================================
 #if ! JUCER_ENABLE_GPL_MODE
 void LicenseController::closeWebview (int result)
@@ -262,27 +232,16 @@ void LicenseController::updateState (const LicenseState& newState)
 {
     auto& props = ProjucerApplication::getApp().settings->getGlobalProperties();
 
-    auto oldLicenseType = state.type;
-
     state = newState;
     licenseStateToSettings (state, props);
     auto stateParam = getState();
     listeners.call ([&] (StateChangedCallback& l) { l.licenseStateChanged (stateParam); });
-
-    if (oldLicenseType != state.type)
-    {
-        StringPairArray data;
-        data.set ("label", state.licenseTypeToString (state.type));
-
-        Analytics::getInstance()->logEvent ("License Type", data, ProjucerAnalyticsEvent::userEvent);
-    }
 }
 
 LicenseState LicenseController::licenseStateFromOldSettings (XmlElement* licenseXml)
 {
     LicenseState result;
     result.type                        = getLicenseTypeFromValue    (licenseXml->getChildElementAllSubText ("type", {}));
-    result.applicationUsageDataState   = getApplicationUsageDataTypeFromValue (licenseXml->getChildElementAllSubText ("applicationUsageData", {}));
     result.username                    = licenseXml->getChildElementAllSubText ("username", {});
     result.email                       = licenseXml->getChildElementAllSubText ("email", {});
     result.authToken                   = licenseXml->getChildElementAllSubText ("authToken", {});
@@ -310,7 +269,6 @@ LicenseState LicenseController::licenseStateFromSettings (PropertiesFile& props)
 
         LicenseState result;
         result.type                        = getLicenseTypeFromValue    (licenseXml->getStringAttribute ("type", {}));
-        result.applicationUsageDataState   = getApplicationUsageDataTypeFromValue (licenseXml->getStringAttribute ("applicationUsageData", {}));
         result.username                    = licenseXml->getStringAttribute ("username", {});
         result.email                       = licenseXml->getStringAttribute ("email", {});
         result.authToken                   = licenseXml->getStringAttribute ("authToken", {});
@@ -336,7 +294,6 @@ void LicenseController::licenseStateToSettings (const LicenseState& state, Prope
         if (auto* typeString = getLicenseStateValue (state.type))
             licenseXml.setAttribute ("type", typeString);
 
-        licenseXml.setAttribute ("applicationUsageData", getApplicationUsageDataStateValue (state.applicationUsageDataState));
         licenseXml.setAttribute ("username", state.username);
         licenseXml.setAttribute ("email", state.email);
         licenseXml.setAttribute ("authToken", state.authToken);

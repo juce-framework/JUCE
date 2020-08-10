@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -994,7 +993,7 @@ public:
     void paint (Graphics& g) override
     {
         g.setColour (findColour (TreeView::dragAndDropIndicatorColourId, true));
-        g.drawRoundedRectangle (1.0f, 1.0f, getWidth() - 2.0f, getHeight() - 2.0f, 3.0f, 2.0f);
+        g.drawRoundedRectangle (1.0f, 1.0f, (float) getWidth() - 2.0f, (float) getHeight() - 2.0f, 3.0f, 2.0f);
     }
 
 private:
@@ -1553,13 +1552,13 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
         }
     }
 
-    auto halfH = itemHeight * 0.5f;
+    auto halfH = (float) itemHeight * 0.5f;
     auto indentWidth = ownerView->getIndentSize();
     auto depth = TreeViewHelpers::calculateDepth (this, ownerView->rootItemVisible);
 
     if (depth >= 0 && ownerView->openCloseButtonsVisible)
     {
-        auto x = (depth + 0.5f) * indentWidth;
+        auto x = ((float) depth + 0.5f) * (float) indentWidth;
 
         const bool parentLinesDrawn = parentItem != nullptr && parentItem->areLinesDrawn();
 
@@ -1567,7 +1566,7 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
             paintVerticalConnectingLine (g, Line<float> (x, 0, x, isLastOfSiblings() ? halfH : (float) itemHeight));
 
         if (parentLinesDrawn || (parentItem == nullptr && areLinesDrawn()))
-            paintHorizontalConnectingLine (g, Line<float> (x, halfH, x + indentWidth / 2, halfH));
+            paintHorizontalConnectingLine (g, Line<float> (x, halfH, x + (float) indentWidth * 0.5f, halfH));
 
         {
             auto* p = parentItem;

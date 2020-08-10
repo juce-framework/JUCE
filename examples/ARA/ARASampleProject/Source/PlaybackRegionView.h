@@ -18,11 +18,13 @@ class PlaybackRegionView    : public Component,
                               private ARAPlaybackRegion::Listener
 {
 public:
-    PlaybackRegionView (DocumentView& documentView, ARAPlaybackRegion* region);
+    PlaybackRegionView (RegionSequenceViewController& viewController, ARAPlaybackRegion* region);
     ~PlaybackRegionView();
 
     ARAPlaybackRegion* getPlaybackRegion() const { return playbackRegion; }
     Range<double> getTimeRange() const { return playbackRegion->getTimeRange(); }
+
+    void updateBounds();
 
     void paint (Graphics&) override;
 
@@ -32,7 +34,7 @@ public:
     void changeListenerCallback (ChangeBroadcaster*) override;
 
     // ARAEditorView::Listener overrides
-    void onNewSelection (const ARA::PlugIn::ViewSelection& viewSelection) override;
+    void onNewSelection (const ARAViewSelection& viewSelection) override;
 
     // ARADocument::Listener overrides: used to check if our reader has been invalidated
     void didEndEditing (ARADocument* document) override;
@@ -41,6 +43,7 @@ public:
     void willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) override;
     void didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable) override;
     void willUpdateAudioSourceProperties (ARAAudioSource* audioSource, ARAAudioSource::PropertiesPtr newProperties) override;
+
     // ARAAudioModification::Listener overrides
     void willUpdateAudioModificationProperties (ARAAudioModification* audioModification, ARAAudioModification::PropertiesPtr newProperties) override;
 
@@ -64,6 +67,7 @@ private:
     };
     SharedResourcePointer<SharedAudioThumbnailCache> sharedAudioThumbnailCache;
 
+    RegionSequenceViewController& regionSequenceViewController;
     DocumentView& documentView;
     ARAPlaybackRegion* playbackRegion;
     bool isSelected { false };

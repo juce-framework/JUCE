@@ -57,6 +57,16 @@ public:
         */
         virtual void didEndEditing (ARADocument* document) {}
 
+        /** Called before sending model updates do the host. 
+            @param document The document whose model updates are about to be sent. 
+        */
+        virtual void willNotifyModelUpdates (ARADocument* document) {}
+
+        /** Called after sending model updates do the host.
+            @param document The document whose model updates have just been sent.
+        */
+        virtual void didNotifyModelUpdates (ARADocument* document) {}
+
         /** Called before the document's properties are updated.
             @param document The document whose properties will be updated. 
             @param newProperties The document properties that will be assigned to \p document. 
@@ -169,7 +179,7 @@ public:
             @param musicalContext The musical context with updated content.
             @param scopeFlags The scope of the content update indicating what has changed.
         */
-        virtual void didUpdateMusicalContextContent (ARAMusicalContext* musicalContext, ARAContentUpdateScopes scopeFlags) {}
+        virtual void doUpdateMusicalContextContent (ARAMusicalContext* musicalContext, ARAContentUpdateScopes scopeFlags) {}
 
         /** Called before the musical context is destroyed.
             @param musicalContext The musical context that will be destoyed. 
@@ -234,7 +244,7 @@ public:
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
 
-    /** Returns time range covered by the regions in this sequence. 
+    /** Returns the playback time range covered by the regions in this sequence. 
         @param includeHeadAndTail Whether or not the range includes the playback region's head and tail time. 
     */
     Range<double> getTimeRange (bool includeHeadAndTail = false) const;
@@ -284,7 +294,7 @@ public:
             @param audioSource The audio source with updated content.
             @param scopeFlags The scope of the content update.
         */
-        virtual void didUpdateAudioSourceContent (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags) {}
+        virtual void doUpdateAudioSourceContent (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags) {}
 
         /** Called to notify progress when an audio source is being analyzed.
             @param audioSource The audio source being analyzed.
@@ -354,17 +364,16 @@ public:
 
     /** Notify the ARA host and any listeners of a content update initiated by the plug-in.
         This must be called by the plug-in model management code on the message thread whenever updating
-        the internal content representation, such as after successfully analyzing a new tempo map,
-        but it must not be called if the change is made in response to a content update in the host.
-        A notification to the host will be enqueued, and send out the next time it polls for updates.
-        This host notification should not be send if the update was triggered by the host via doUpdateAudioSourceContent().
-        Further, all listeners will be notified immediately.
+        the internal content representation, such as after successfully analyzing a new tempo map.
+        Listeners will be notified immediately. If \p notifyARAHost is true, a notification to the host
+        will be enqueued and sent out the next time it polls for updates.
+        \p notifyARAHost must be false if the update was triggered by the host via doUpdateAudioSourceContent(). 
+        Furthermore, \p notifyARAHost must be false if the updated content is being restored from an archive. 
 
         @param scopeFlags The scope of the content update.
-        @param notifyAllAudioModificationsAndPlaybackRegions A bool indicating whether all audio modifications and playback
-                                                             regions associated with this audio source should be notified too.
+        @param notifyARAHost If true, the ARA host will be notified of the content change.
     */
-    void notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions = false);
+    void notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyARAHost);
 
    ARA_LISTENABLE_MODEL
 
@@ -447,14 +456,14 @@ public:
     /** Notify the ARA host and any listeners of a content update initiated by the plug-in.
         This must be called by the plug-in model management code on the message thread whenever updating
         the internal content representation, such as after the user editing the pitch of a note.
-        A notification to the host will be enqueued, and send out the next time it polls for updates.
-        Further, all listeners will be notified immediately.
+        Listeners will be notified immediately. If \p notifyARAHost is true, a notification to the host 
+        will be enqueued and sent out the next time it polls for updates.
+        \p notifyARAHost must be false if the updated content is being restored from an archive. 
 
         @param scopeFlags The scope of the content update.
-        @param notifyAllPlaybackRegions A bool indicating whether the audio modification's
-                                        playback regions should be notified of the content change.
+        @param notifyARAHost If true, the ARA host will be notified of the content change.
     */
-    void notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllPlaybackRegions = false);
+    void notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyARAHost);
 
    ARA_LISTENABLE_MODEL
 };
@@ -505,22 +514,28 @@ public:
        ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
     };
 
-    /** Returns time range covered by all playback regions in the region sequence
+    /** Returns the playback time range of this playback region.
         @param includeHeadAndTail Whether or not the range includes the head and tail 
                                   time of all playback regions in the sequence. 
     */
     Range<double> getTimeRange (bool includeHeadAndTail = false) const;
 
+    /** Get the head length in seconds before the start of the region's playback time. */
+    double getHeadTime() const;
+    /** Get the tail length in seconds after the end of the region's playback time. */
+    double getTailTime() const;
+
     /** Notify the ARA host and any listeners of a content update initiated by the plug-in.
         This must be called by the plug-in model management code on the message thread whenever updating
         the internal content representation, such as after the user edited the pitch of a note in the
         underlying audio modification.
-        A notification to the host will be enqueued, and send out the next time it polls for updates.
-        Further, all listeners will be notified immediately.
+        Listeners will be notified immediately. If \p notifyARAHost is true, a notification to the host 
+        will be enqueued and sent out the next time it polls for updates.
 
         @param scopeFlags The scope of the content update.
+        @param notifyARAHost If true, the ARA host will be notified of the content change.
     */
-    void notifyContentChanged (ARAContentUpdateScopes scopeFlags);
+    void notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyARAHost);
 
    ARA_LISTENABLE_MODEL
 };

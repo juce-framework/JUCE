@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -26,6 +25,27 @@
 
 namespace juce
 {
+
+struct InternalWebViewType
+{
+    InternalWebViewType() {}
+    virtual ~InternalWebViewType() {}
+
+    virtual void createBrowser() = 0;
+    virtual bool hasBrowserBeenCreated() = 0;
+
+    virtual void goToURL (const String&, const StringArray*, const MemoryBlock*) = 0;
+
+    virtual void stop() = 0;
+    virtual void goBack() = 0;
+    virtual void goForward() = 0;
+    virtual void refresh() = 0;
+
+    virtual void focusGained() {}
+    virtual void setWebViewSize (int, int) = 0;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InternalWebViewType)
+};
 
 #if JUCE_MINGW
  JUCE_DECLARE_UUID_GETTER (IOleClientSite,           "00000118-0000-0000-c000-000000000046")
@@ -41,12 +61,17 @@ JUCE_DECLARE_UUID_GETTER (IConnectionPointContainer, "B196B284-BAB4-101A-B69C-00
 JUCE_DECLARE_UUID_GETTER (IWebBrowser2,              "D30C1661-CDAF-11D0-8A3E-00C04FC9E26E")
 JUCE_DECLARE_UUID_GETTER (WebBrowser,                "8856F961-340A-11D0-A96B-00C04FD705A2")
 
-class WebBrowserComponent::Pimpl   : public ActiveXControlComponent
+//==============================================================================
+class Win32WebView   : public InternalWebViewType,
+                       public ActiveXControlComponent
 {
 public:
-    Pimpl() {}
+    Win32WebView (WebBrowserComponent& owner)
+    {
+        owner.addAndMakeVisible (this);
+    }
 
-    ~Pimpl()
+    ~Win32WebView() override
     {
         if (connectionPoint != nullptr)
             connectionPoint->Unadvise (adviseCookie);
@@ -55,7 +80,7 @@ public:
             browser->Release();
     }
 
-    void createBrowser()
+    void createBrowser() override
     {
         auto webCLSID = __uuidof (WebBrowser);
         createControl (&webCLSID);
@@ -71,7 +96,7 @@ public:
 
             if (connectionPoint != nullptr)
             {
-                auto* owner = dynamic_cast<WebBrowserComponent*> (getParentComponent());
+                auto* owner = dynamic_cast<WebBrowserComponent*> (Component::getParentComponent());
                 jassert (owner != nullptr);
 
                 auto handler = new EventHandler (*owner);
@@ -81,9 +106,12 @@ public:
         }
     }
 
-    void goToURL (const String& url,
-                  const StringArray* headers,
-                  const MemoryBlock* postData)
+    bool hasBrowserBeenCreated() override
+    {
+        return browser != nullptr;
+    }
+
+    void goToURL (const String& url, const StringArray* headers, const MemoryBlock* postData) override
     {
         if (browser != nullptr)
         {
@@ -140,10 +168,65 @@ public:
         }
     }
 
-    //==============================================================================
-    IWebBrowser2* browser = nullptr;
+    void stop() override
+    {
+        if (browser != nullptr)
+            browser->Stop();
+    }
+
+    void goBack() override
+    {
+        if (browser != nullptr)
+            browser->GoBack();
+    }
+
+    void goForward() override
+    {
+        if (browser != nullptr)
+            browser->GoForward();
+    }
+
+    void refresh() override
+    {
+        if (browser != nullptr)
+            browser->Refresh();
+    }
+
+    void focusGained() override
+    {
+        auto iidOleObject = __uuidof (IOleObject);
+        auto iidOleWindow = __uuidof (IOleWindow);
+
+        if (auto oleObject = (IOleObject*) queryInterface (&iidOleObject))
+        {
+            if (auto oleWindow = (IOleWindow*) queryInterface (&iidOleWindow))
+            {
+                IOleClientSite* oleClientSite = nullptr;
+
+                if (SUCCEEDED (oleObject->GetClientSite (&oleClientSite)))
+                {
+                    HWND hwnd;
+                    oleWindow->GetWindow (&hwnd);
+                    oleObject->DoVerb (OLEIVERB_UIACTIVATE, nullptr, oleClientSite, 0, hwnd, nullptr);
+                    oleClientSite->Release();
+                }
+
+                oleWindow->Release();
+            }
+
+            oleObject->Release();
+        }
+    }
+
+    using ActiveXControlComponent::focusGained;
+
+    void setWebViewSize (int width, int height) override
+    {
+        setSize (width, height);
+    }
 
 private:
+    IWebBrowser2* browser = nullptr;
     IConnectionPoint* connectionPoint = nullptr;
     DWORD adviseCookie = 0;
 
@@ -235,18 +318,473 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EventHandler)
     };
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Win32WebView)
 };
 
+#if JUCE_USE_WIN_WEBVIEW2
+
+using namespace Microsoft::WRL;
+
+class WebView2  : public InternalWebViewType,
+                  public Component,
+                  public ComponentMovementWatcher
+{
+public:
+    WebView2 (WebBrowserComponent& o, const File& dllLocation, const File& userDataFolder)
+         : ComponentMovementWatcher (&o),
+           owner (o)
+    {
+        if (! WinRTWrapper::getInstance()->isInitialised())
+            throw std::runtime_error ("Failed to initialise the WinRT wrapper");
+
+        if (! createWebViewEnvironment (dllLocation, userDataFolder))
+            throw std::runtime_error ("Failed to create the CoreWebView2Environemnt");
+
+        owner.addAndMakeVisible (this);
+    }
+
+    ~WebView2() override
+    {
+        removeEventHandlers();
+        closeWebView();
+
+        if (webView2LoaderHandle != nullptr)
+            ::FreeLibrary (webView2LoaderHandle);
+    }
+
+    void createBrowser() override
+    {
+        if (webView == nullptr)
+        {
+            jassert (webViewEnvironment != nullptr);
+            createWebView();
+        }
+    }
+
+    bool hasBrowserBeenCreated() override
+    {
+        return webView != nullptr || isCreating;
+    }
+
+    void goToURL (const String& url, const StringArray* headers, const MemoryBlock* postData) override
+    {
+        urlRequest = { url,
+                       headers != nullptr ? *headers : StringArray(),
+                       postData != nullptr && postData->getSize() > 0 ? *postData : MemoryBlock() };
+
+        if (webView != nullptr)
+            webView->Navigate (urlRequest.url.toWideCharPointer());
+    }
+
+    void stop() override
+    {
+        if (webView != nullptr)
+            webView->Stop();
+    }
+
+    void goBack() override
+    {
+        if (webView != nullptr)
+        {
+            BOOL canGoBack = false;
+            webView->get_CanGoBack (&canGoBack);
+
+            if (canGoBack)
+                webView->GoBack();
+        }
+    }
+
+    void goForward() override
+    {
+        if (webView != nullptr)
+        {
+            BOOL canGoForward = false;
+            webView->get_CanGoForward (&canGoForward);
+
+            if (canGoForward)
+                webView->GoForward();
+        }
+    }
+
+    void refresh() override
+    {
+        if (webView != nullptr)
+            webView->Reload();
+    }
+
+    void setWebViewSize (int width, int height) override
+    {
+        setSize (width, height);
+    }
+
+    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
+    {
+        if (auto* peer = owner.getTopLevelComponent()->getPeer())
+            setControlBounds (peer->getAreaCoveredBy (owner));
+    }
+
+    void componentPeerChanged() override
+    {
+        componentMovedOrResized (true, true);
+    }
+
+    void componentVisibilityChanged() override
+    {
+        setControlVisible (owner.isShowing());
+
+        componentPeerChanged();
+        owner.visibilityChanged();
+    }
+
+private:
+    //==============================================================================
+    template<class ArgType>
+    static String getUriStringFromArgs (ArgType* args)
+    {
+        if (args != nullptr)
+        {
+            LPWSTR uri;
+            args->get_Uri (&uri);
+
+            return uri;
+        }
+
+        return {};
+    }
+
+    //==============================================================================
+    void addEventHandlers()
+    {
+        if (webView != nullptr)
+        {
+            webView->add_NavigationStarting (Callback<ICoreWebView2NavigationStartingEventHandler> (
+                [this] (ICoreWebView2*, ICoreWebView2NavigationStartingEventArgs* args) -> HRESULT
+                {
+                    auto uriString = getUriStringFromArgs (args);
+
+                    if (uriString.isNotEmpty() && ! owner.pageAboutToLoad (uriString))
+                        args->put_Cancel (true);
+
+                    return S_OK;
+                }).Get(), &navigationStartingToken);
+
+            webView->add_NewWindowRequested (Callback<ICoreWebView2NewWindowRequestedEventHandler> (
+                [this] (ICoreWebView2*, ICoreWebView2NewWindowRequestedEventArgs* args) -> HRESULT
+                {
+                    auto uriString = getUriStringFromArgs (args);
+
+                    if (uriString.isNotEmpty())
+                    {
+                        owner.newWindowAttemptingToLoad (uriString);
+                        args->put_Handled (true);
+                    }
+
+                    return S_OK;
+                }).Get(), &newWindowRequestedToken);
+
+            webView->add_WindowCloseRequested (Callback<ICoreWebView2WindowCloseRequestedEventHandler> (
+                [this] (ICoreWebView2*, IUnknown*) -> HRESULT
+                {
+                    owner.windowCloseRequest();
+                    return S_OK;
+                }).Get(), &windowCloseRequestedToken);
+
+            webView->add_NavigationCompleted (Callback<ICoreWebView2NavigationCompletedEventHandler> (
+                [this] (ICoreWebView2* sender, ICoreWebView2NavigationCompletedEventArgs* args) -> HRESULT
+                {
+                    LPWSTR uri;
+                    sender->get_Source (&uri);
+
+                    String uriString (uri);
+
+                    if (uriString.isNotEmpty())
+                    {
+                        BOOL success = false;
+                        args->get_IsSuccess (&success);
+
+                        COREWEBVIEW2_WEB_ERROR_STATUS errorStatus;
+                        args->get_WebErrorStatus (&errorStatus);
+
+                        if (success
+                            || errorStatus == COREWEBVIEW2_WEB_ERROR_STATUS_OPERATION_CANCELED) // this error seems to happen erroneously so ignore
+                        {
+                            owner.pageFinishedLoading (uriString);
+                        }
+                        else
+                        {
+                            auto errorString = "Error code: " + String (errorStatus);
+
+                            if (owner.pageLoadHadNetworkError (errorString))
+                                owner.goToURL ("data:text/plain;charset=UTF-8," + errorString);
+                        }
+                    }
+
+                    return S_OK;
+                }).Get(), &navigationCompletedToken);
+
+            webView->AddWebResourceRequestedFilter (L"*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_DOCUMENT);
+
+            webView->add_WebResourceRequested (Callback<ICoreWebView2WebResourceRequestedEventHandler> (
+                [this] (ICoreWebView2*, ICoreWebView2WebResourceRequestedEventArgs* args) -> HRESULT
+                {
+                    if (urlRequest.url.isEmpty())
+                        return S_OK;
+
+                    WinRTWrapper::ComPtr<ICoreWebView2WebResourceRequest> request;
+                    args->get_Request (request.resetAndGetPointerAddress());
+
+                    auto uriString = getUriStringFromArgs (request.get());
+
+                    if (uriString == urlRequest.url
+                        || (uriString.endsWith ("/") && uriString.upToLastOccurrenceOf ("/", false, false) == urlRequest.url))
+                    {
+                        String method ("GET");
+
+                        if (urlRequest.postData.getSize() > 0)
+                        {
+                            method = "POST";
+
+                            WinRTWrapper::ComPtr<IStream> content (SHCreateMemStream ((BYTE*) urlRequest.postData.getData(),
+                                                                                      (UINT) urlRequest.postData.getSize()));
+                            request->put_Content (content.get());
+                        }
+
+                        if (! urlRequest.headers.isEmpty())
+                        {
+                            WinRTWrapper::ComPtr<ICoreWebView2HttpRequestHeaders> headers;
+                            request->get_Headers (headers.resetAndGetPointerAddress());
+
+                            for (auto& header : urlRequest.headers)
+                            {
+                                headers->SetHeader (header.upToFirstOccurrenceOf (":", false, false).trim().toWideCharPointer(),
+                                                    header.fromFirstOccurrenceOf (":", false, false).trim().toWideCharPointer());
+                            }
+                        }
+
+                        request->put_Method (method.toWideCharPointer());
+
+                        urlRequest = {};
+                    }
+
+                    return S_OK;
+                }).Get(), &webResourceRequestedToken);
+        }
+    }
+
+    void removeEventHandlers()
+    {
+        if (webView != nullptr)
+        {
+            if (navigationStartingToken.value != 0)
+                webView->remove_NavigationStarting (navigationStartingToken);
+
+            if (newWindowRequestedToken.value != 0)
+                webView->remove_NewWindowRequested (newWindowRequestedToken);
+
+            if (windowCloseRequestedToken.value != 0)
+                webView->remove_WindowCloseRequested (windowCloseRequestedToken);
+
+            if (navigationCompletedToken.value != 0)
+                webView->remove_NavigationCompleted (navigationCompletedToken);
+
+            if (webResourceRequestedToken.value != 0)
+            {
+                webView->RemoveWebResourceRequestedFilter (L"*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_DOCUMENT);
+                webView->remove_WebResourceRequested (webResourceRequestedToken);
+            }
+        }
+    }
+
+    bool createWebViewEnvironment (const File& dllLocation, const File& userDataFolder)
+    {
+        using CreateWebViewEnvironmentWithOptionsFunc = HRESULT (*) (PCWSTR, PCWSTR,
+                                                                     ICoreWebView2EnvironmentOptions*,
+                                                                     ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler*);
+
+        auto dllPath = dllLocation.getFullPathName();
+
+        if (dllPath.isEmpty())
+            dllPath = "WebView2Loader.dll";
+
+        webView2LoaderHandle = LoadLibraryA (dllPath.toUTF8());
+
+        if (webView2LoaderHandle == nullptr)
+            return false;
+
+        auto* createWebViewEnvironmentWithOptions = (CreateWebViewEnvironmentWithOptionsFunc) GetProcAddress (webView2LoaderHandle,
+                                                                                                              "CreateCoreWebView2EnvironmentWithOptions");
+        if (createWebViewEnvironmentWithOptions == nullptr)
+        {
+            // failed to load WebView2Loader.dll
+            jassertfalse;
+            return false;
+        }
+
+        auto options = Microsoft::WRL::Make<CoreWebView2EnvironmentOptions>();
+
+        WeakReference<WebView2> weakThis (this);
+        auto hr = createWebViewEnvironmentWithOptions (nullptr,
+                                                       userDataFolder != File() ? userDataFolder.getFullPathName().toWideCharPointer() : nullptr,
+                                                       options.Get(),
+            Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
+                [this, weakThis] (HRESULT, ICoreWebView2Environment* env) -> HRESULT
+                {
+                    if (weakThis != nullptr)
+                        webViewEnvironment = env;
+
+                    return S_OK;
+                }).Get());
+
+        return SUCCEEDED (hr);
+    }
+
+    void createWebView()
+    {
+        if (auto* peer = getPeer())
+        {
+            isCreating = true;
+
+            WeakReference<WebView2> weakThis (this);
+
+            webViewEnvironment->CreateCoreWebView2Controller ((HWND) peer->getNativeHandle(),
+                Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler> (
+                    [this, weakThis] (HRESULT, ICoreWebView2Controller* controller) -> HRESULT
+                    {
+                        if (weakThis != nullptr)
+                        {
+                            isCreating = false;
+
+                            if (controller != nullptr)
+                            {
+                                webViewController = controller;
+                                controller->get_CoreWebView2 (webView.resetAndGetPointerAddress());
+
+                                addEventHandlers();
+                                componentMovedOrResized (true, true);
+
+                                if (webView != nullptr && urlRequest.url.isNotEmpty())
+                                    webView->Navigate (urlRequest.url.toWideCharPointer());
+                            }
+                        }
+
+                        return S_OK;
+                    }).Get());
+        }
+    }
+
+    void closeWebView()
+    {
+        if (webViewController.get() != nullptr)
+        {
+            webViewController->Close();
+            webViewController = nullptr;
+            webView = nullptr;
+        }
+
+        webViewEnvironment = nullptr;
+    }
+
+    //==============================================================================
+    void setControlBounds (Rectangle<int> newBounds) const
+    {
+        if (webViewController != nullptr)
+        {
+           #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+            if (auto* peer = owner.getTopLevelComponent()->getPeer())
+                newBounds = (newBounds.toDouble() * peer->getPlatformScaleFactor()).toNearestInt();
+           #endif
+
+            webViewController->put_Bounds({ newBounds.getX(), newBounds.getY(),
+                                            newBounds.getRight(), newBounds.getBottom() });
+        }
+    }
+
+    void setControlVisible (bool shouldBeVisible) const
+    {
+        if (webViewController != nullptr)
+            webViewController->put_IsVisible (shouldBeVisible);
+    }
+
+    //==============================================================================
+    WebBrowserComponent& owner;
+
+    HMODULE webView2LoaderHandle = nullptr;
+
+    WinRTWrapper::ComPtr<ICoreWebView2Environment> webViewEnvironment;
+    WinRTWrapper::ComPtr<ICoreWebView2Controller> webViewController;
+    WinRTWrapper::ComPtr<ICoreWebView2> webView;
+
+    EventRegistrationToken navigationStartingToken   { 0 },
+                           newWindowRequestedToken   { 0 },
+                           windowCloseRequestedToken { 0 },
+                           navigationCompletedToken  { 0 },
+                           webResourceRequestedToken { 0 };
+
+    struct URLRequest
+    {
+        String url;
+        StringArray headers;
+        MemoryBlock postData;
+    };
+    URLRequest urlRequest;
+
+    bool isCreating = false;
+
+    //==============================================================================
+    JUCE_DECLARE_WEAK_REFERENCEABLE (WebView2)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebView2)
+};
+
+#endif
 
 //==============================================================================
-WebBrowserComponent::WebBrowserComponent (const bool unloadPageWhenBrowserIsHidden_)
-    : browser (new Pimpl()),
-      blankPageShown (false),
-      unloadPageWhenBrowserIsHidden (unloadPageWhenBrowserIsHidden_)
+class WebBrowserComponent::Pimpl
+{
+public:
+    Pimpl (WebBrowserComponent& owner, const File& dllLocation, const File& userDataFolder, bool useWebView2)
+    {
+        if (useWebView2)
+        {
+           #if JUCE_USE_WIN_WEBVIEW2
+            try
+            {
+                internal.reset (new WebView2 (owner, dllLocation, userDataFolder));
+            }
+            catch (std::runtime_error&) {}
+           #endif
+        }
+
+        ignoreUnused (dllLocation, userDataFolder);
+
+        if (internal == nullptr)
+            internal.reset (new Win32WebView (owner));
+    }
+
+    InternalWebViewType& getInternalWebView()
+    {
+        return *internal;
+    }
+
+private:
+    std::unique_ptr<InternalWebViewType> internal;
+};
+
+//==============================================================================
+WebBrowserComponent::WebBrowserComponent (bool unloadWhenHidden)
+    : browser (new Pimpl (*this, {}, {}, false)),
+      unloadPageWhenBrowserIsHidden (unloadWhenHidden)
 {
     setOpaque (true);
-    addAndMakeVisible (browser.get());
+}
+
+WebBrowserComponent::WebBrowserComponent (bool unloadWhenHidden,
+                                          const File& dllLocation,
+                                          const File& userDataFolder)
+    : browser (new Pimpl (*this, dllLocation, userDataFolder, true)),
+      unloadPageWhenBrowserIsHidden (unloadWhenHidden)
+{
+    setOpaque (true);
 }
 
 WebBrowserComponent::~WebBrowserComponent()
@@ -272,16 +810,15 @@ void WebBrowserComponent::goToURL (const String& url,
 
     blankPageShown = false;
 
-    if (browser->browser == nullptr)
+    if (! browser->getInternalWebView().hasBrowserBeenCreated())
         checkWindowAssociation();
 
-    browser->goToURL (url, headers, postData);
+    browser->getInternalWebView().goToURL (url, headers, postData);
 }
 
 void WebBrowserComponent::stop()
 {
-    if (browser->browser != nullptr)
-        browser->browser->Stop();
+    browser->getInternalWebView().stop();
 }
 
 void WebBrowserComponent::goBack()
@@ -289,28 +826,25 @@ void WebBrowserComponent::goBack()
     lastURL.clear();
     blankPageShown = false;
 
-    if (browser->browser != nullptr)
-        browser->browser->GoBack();
+    browser->getInternalWebView().goBack();
 }
 
 void WebBrowserComponent::goForward()
 {
     lastURL.clear();
 
-    if (browser->browser != nullptr)
-        browser->browser->GoForward();
+    browser->getInternalWebView().goForward();
 }
 
 void WebBrowserComponent::refresh()
 {
-    if (browser->browser != nullptr)
-        browser->browser->Refresh();
+    browser->getInternalWebView().refresh();
 }
 
 //==============================================================================
 void WebBrowserComponent::paint (Graphics& g)
 {
-    if (browser->browser == nullptr)
+    if (! browser->getInternalWebView().hasBrowserBeenCreated())
     {
         g.fillAll (Colours::white);
         checkWindowAssociation();
@@ -321,9 +855,9 @@ void WebBrowserComponent::checkWindowAssociation()
 {
     if (isShowing())
     {
-        if (browser->browser == nullptr && getPeer() != nullptr)
+        if (! browser->getInternalWebView().hasBrowserBeenCreated() && getPeer() != nullptr)
         {
-            browser->createBrowser();
+            browser->getInternalWebView().createBrowser();
             reloadLastURL();
         }
         else
@@ -341,7 +875,7 @@ void WebBrowserComponent::checkWindowAssociation()
             // page to avoid this..
 
             blankPageShown = true;
-            browser->goToURL ("about:blank", 0, 0);
+            browser->getInternalWebView().goToURL ("about:blank", 0, 0);
         }
     }
 }
@@ -362,7 +896,7 @@ void WebBrowserComponent::parentHierarchyChanged()
 
 void WebBrowserComponent::resized()
 {
-    browser->setSize (getWidth(), getHeight());
+    browser->getInternalWebView().setWebViewSize (getWidth(), getHeight());
 }
 
 void WebBrowserComponent::visibilityChanged()
@@ -372,28 +906,7 @@ void WebBrowserComponent::visibilityChanged()
 
 void WebBrowserComponent::focusGained (FocusChangeType)
 {
-    auto iidOleObject = __uuidof (IOleObject);
-    auto iidOleWindow = __uuidof (IOleWindow);
-
-    if (auto oleObject = (IOleObject*) browser->queryInterface (&iidOleObject))
-    {
-        if (auto oleWindow = (IOleWindow*) browser->queryInterface (&iidOleWindow))
-        {
-            IOleClientSite* oleClientSite = nullptr;
-
-            if (SUCCEEDED (oleObject->GetClientSite (&oleClientSite)))
-            {
-                HWND hwnd;
-                oleWindow->GetWindow (&hwnd);
-                oleObject->DoVerb (OLEIVERB_UIACTIVATE, nullptr, oleClientSite, 0, hwnd, nullptr);
-                oleClientSite->Release();
-            }
-
-            oleWindow->Release();
-        }
-
-        oleObject->Release();
-    }
+    browser->getInternalWebView().focusGained();
 }
 
 void WebBrowserComponent::clearCookies()

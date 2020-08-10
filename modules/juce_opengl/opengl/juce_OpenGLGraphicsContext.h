@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -27,19 +26,14 @@
 namespace juce
 {
 
-/** Creates a graphics context object that will render into the given OpenGL target.
-    The caller is responsible for deleting this object when no longer needed.
-*/
+/** Creates a graphics context object that will render into the given OpenGL target. */
 std::unique_ptr<LowLevelGraphicsContext> createOpenGLGraphicsContext (OpenGLContext&, int width, int height);
 
-/** Creates a graphics context object that will render into the given OpenGL framebuffer.
-    The caller is responsible for deleting this object when no longer needed.
-*/
+/** Creates a graphics context object that will render into the given OpenGL framebuffer. */
 std::unique_ptr<LowLevelGraphicsContext> createOpenGLGraphicsContext (OpenGLContext&, OpenGLFrameBuffer&);
 
 /** Creates a graphics context object that will render into the given OpenGL framebuffer,
     with the given size.
-    The caller is responsible for deleting this object when no longer needed.
 */
 std::unique_ptr<LowLevelGraphicsContext> createOpenGLGraphicsContext (OpenGLContext&,
                                                                       unsigned int frameBufferID,
@@ -91,7 +85,7 @@ struct JUCE_API  OpenGLGraphicsContextCustomShader
     /** Optional lambda that will be called when the shader is activated, to allow
         user code to do setup tasks.
     */
-    std::function<void(OpenGLShaderProgram&)> onShaderActivated;
+    std::function<void (OpenGLShaderProgram&)> onShaderActivated;
 
 private:
     String code, hashName;

@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -24,7 +23,7 @@
   ==============================================================================
 */
 
-void createGUIEditorMenu (PopupMenu&);
+PopupMenu createGUIEditorMenu();
 void handleGUIEditorMenuCommand (int);
 void registerGUIEditorCommands();
 
@@ -44,9 +43,7 @@ struct ProjucerApplication::MainMenuModel  : public MenuBarModel
 
     PopupMenu getMenuForIndex (int /*topLevelMenuIndex*/, const String& menuName) override
     {
-        PopupMenu menu;
-        getApp().createMenu (menu, menuName);
-        return menu;
+        return getApp().createMenu (menuName);
     }
 
     void menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/) override
@@ -56,10 +53,6 @@ struct ProjucerApplication::MainMenuModel  : public MenuBarModel
 };
 
 //==============================================================================
-ProjucerApplication::ProjucerApplication() :  isRunningCommandLine (false)
-{
-}
-
 void ProjucerApplication::initialise (const String& commandLine)
 {
     if (commandLine.trimStart().startsWith ("--server"))
@@ -81,13 +74,10 @@ void ProjucerApplication::initialise (const String& commandLine)
                               + "MHz  Cores: " + String (SystemStats::getNumCpus())
                               + "  " + String (SystemStats::getMemorySizeInMegabytes()) + "MB");
 
-        initialiseBasics();
-
         isRunningCommandLine = commandLine.isNotEmpty()
                                 && ! commandLine.startsWith ("-NSDocumentRevisionsDebugMode");
 
-        licenseController.reset (new LicenseController);
-        licenseController->addLicenseStatusChangedCallback (this);
+        settings = std::make_unique<StoredSettings>();
 
         if (isRunningCommandLine)
         {
@@ -110,35 +100,9 @@ void ProjucerApplication::initialise (const String& commandLine)
             return;
         }
 
-        rescanJUCEPathModules();
-        rescanUserPathModules();
-
-        openDocumentManager.registerType (new ProjucerAppClasses::LiveBuildCodeEditorDocument::Type(), 2);
-
-        childProcessCache.reset (new ChildProcessCache());
-
-        initCommandManager();
-        menuModel.reset (new MainMenuModel());
-
-        settings->appearance.refreshPresetSchemeList();
-
-        setColourScheme (settings->getGlobalProperties().getIntValue ("COLOUR SCHEME"), false);
-        setEditorColourScheme (settings->getGlobalProperties().getIntValue ("EDITOR COLOUR SCHEME"), false);
-        updateEditorColourSchemeIfNeeded();
-
         // do further initialisation in a moment when the message loop has started
         triggerAsyncUpdate();
     }
-}
-
-void ProjucerApplication::initialiseBasics()
-{
-    LookAndFeel::setDefaultLookAndFeel (&lookAndFeel);
-
-    settings.reset (new StoredSettings());
-    ImageCache::setCacheTimeout (30 * 1000);
-    icons.reset (new Icons());
-    tooltipWindow.setMillisecondsBeforeTipAppears (1200);
 }
 
 bool ProjucerApplication::initialiseLogger (const char* filePrefix)
@@ -160,33 +124,6 @@ bool ProjucerApplication::initialiseLogger (const char* filePrefix)
     return logger != nullptr;
 }
 
-void ProjucerApplication::handleAsyncUpdate()
-{
-    if (licenseController != nullptr)
-        licenseController->startWebviewIfNeeded();
-
-   #if JUCE_MAC
-    PopupMenu extraAppleMenuItems;
-    createExtraAppleMenuItems (extraAppleMenuItems);
-
-    // workaround broken "Open Recent" submenu: not passing the
-    // submenu's title here avoids the defect in JuceMainMenuHandler::addMenuItem
-    MenuBarModel::setMacMainMenu (menuModel.get(), &extraAppleMenuItems); //, "Open Recent");
-   #endif
-
-    if (getGlobalProperties().getValue (Ids::dontQueryForUpdate, {}).isEmpty())
-        LatestVersionCheckerAndUpdater::getInstance()->checkForNewVersion (false);
-
-    if (licenseController != nullptr)
-    {
-        setAnalyticsEnabled (licenseController->getState().applicationUsageDataState == LicenseState::ApplicationUsageData::enabled);
-        Analytics::getInstance()->logEvent ("Startup", {}, ProjucerAnalyticsEvent::appEvent);
-    }
-
-    if (! isRunningCommandLine && settings->shouldAskUserToSetJUCEPath())
-        showSetJUCEPathAlert();
-}
-
 void ProjucerApplication::initialiseWindows (const String& commandLine)
 {
     const String commandLineWithoutNSDebug (commandLine.replace ("-NSDocumentRevisionsDebugMode YES", StringRef()));
@@ -197,9 +134,41 @@ void ProjucerApplication::initialiseWindows (const String& commandLine)
         mainWindowList.reopenLastProjects();
 
     mainWindowList.createWindowIfNoneAreOpen();
+}
 
-    if (licenseController->getState().applicationUsageDataState == LicenseState::ApplicationUsageData::notChosenYet)
-        showApplicationUsageDataAgreementPopup();
+void ProjucerApplication::handleAsyncUpdate()
+{
+    licenseController = std::make_unique<LicenseController>();
+
+    LookAndFeel::setDefaultLookAndFeel (&lookAndFeel);
+
+    rescanJUCEPathModules();
+    rescanUserPathModules();
+
+    openDocumentManager.registerType (new ProjucerAppClasses::LiveBuildCodeEditorDocument::Type(), 2);
+    childProcessCache.reset (new ChildProcessCache());
+
+    initCommandManager();
+    menuModel.reset (new MainMenuModel());
+
+   #if JUCE_MAC
+    rebuildAppleMenu();
+    appleMenuRebuildListener = std::make_unique<AppleMenuRebuildListener>();
+   #endif
+
+    settings->appearance.refreshPresetSchemeList();
+    setColourScheme (getGlobalProperties().getIntValue ("COLOUR SCHEME"), false);
+    setEditorColourScheme (getGlobalProperties().getIntValue ("EDITOR COLOUR SCHEME"), false);
+    updateEditorColourSchemeIfNeeded();
+
+    ImageCache::setCacheTimeout (30 * 1000);
+    icons = std::make_unique<Icons>();
+    tooltipWindow = std::make_unique<TooltipWindow> (nullptr, 1200);
+
+    if (isAutomaticVersionCheckingEnabled())
+        LatestVersionCheckerAndUpdater::getInstance()->checkForNewVersion (true);
+
+    initialiseWindows (getCommandLineParameters());
 }
 
 static void deleteTemporaryFiles()
@@ -225,12 +194,6 @@ void ProjucerApplication::shutdown()
     editorColourSchemeWindow.reset();
     pipCreatorWindow.reset();
 
-    if (licenseController != nullptr)
-    {
-        licenseController->removeLicenseStatusChangedCallback (this);
-        licenseController.reset();
-    }
-
     mainWindowList.forceCloseAllWindows();
     openDocumentManager.clear();
 
@@ -244,7 +207,8 @@ void ProjucerApplication::shutdown()
     commandManager.reset();
     settings.reset();
 
-    LookAndFeel::setDefaultLookAndFeel (nullptr);
+    if (! isRunningCommandLine)
+        LookAndFeel::setDefaultLookAndFeel (nullptr);
 
     // clean up after ourselves and delete any temp project files that may have
     // been created from PIPs
@@ -254,8 +218,6 @@ void ProjucerApplication::shutdown()
         Logger::writeToLog ("Shutdown");
 
     deleteLogger();
-
-    Analytics::getInstance()->logEvent ("Shutdown", {}, ProjucerAnalyticsEvent::appEvent);
 }
 
 struct AsyncQuitRetrier  : private Timer
@@ -288,31 +250,6 @@ void ProjucerApplication::systemRequestedQuit()
     {
         if (closeAllMainWindows())
             quit();
-    }
-}
-
-//==============================================================================
-void ProjucerApplication::licenseStateChanged (const LicenseState& state)
-{
-   #if ! JUCER_ENABLE_GPL_MODE
-    if (state.type != LicenseState::Type::notLoggedIn
-     && state.type != LicenseState::Type::noLicenseChosenYet)
-   #else
-    ignoreUnused (state);
-   #endif
-    {
-        initialiseWindows (getCommandLineParameters());
-    }
-}
-
-void ProjucerApplication::doLogout()
-{
-    if (licenseController != nullptr)
-    {
-        const LicenseState& state = licenseController->getState();
-
-        if (state.type != LicenseState::Type::notLoggedIn && closeAllMainWindows())
-            licenseController->logout();
     }
 }
 
@@ -370,25 +307,52 @@ MenuBarModel* ProjucerApplication::getMenuModel()
 
 StringArray ProjucerApplication::getMenuNames()
 {
-    return { "File", "Edit", "View", "Build", "Window", "Document", "GUI Editor", "Tools", "Help" };
+    StringArray currentMenuNames { "File", "Edit", "View", "Build", "Window", "Document", "GUI Editor", "Tools", "Help" };
+
+    if (! isLiveBuildEnabled())  currentMenuNames.removeString ("Build");
+    if (! isGUIEditorEnabled())  currentMenuNames.removeString ("GUI Editor");
+
+    return currentMenuNames;
 }
 
-void ProjucerApplication::createMenu (PopupMenu& menu, const String& menuName)
+PopupMenu ProjucerApplication::createMenu (const String& menuName)
 {
-    if (menuName == "File")             createFileMenu      (menu);
-    else if (menuName == "Edit")        createEditMenu      (menu);
-    else if (menuName == "View")        createViewMenu      (menu);
-    else if (menuName == "Build")       createBuildMenu     (menu);
-    else if (menuName == "Window")      createWindowMenu    (menu);
-    else if (menuName == "Document")    createDocumentMenu  (menu);
-    else if (menuName == "Tools")       createToolsMenu     (menu);
-    else if (menuName == "Help")        createHelpMenu      (menu);
-    else if (menuName == "GUI Editor")  createGUIEditorMenu (menu);
-    else                                jassertfalse; // names have changed?
+    if (menuName == "File")
+        return createFileMenu();
+
+    if (menuName == "Edit")
+        return createEditMenu();
+
+    if (menuName == "View")
+        return createViewMenu();
+
+    if (menuName == "Build")
+        if (isLiveBuildEnabled())
+            return createBuildMenu();
+
+    if (menuName == "Window")
+        return createWindowMenu();
+
+    if (menuName == "Document")
+        return createDocumentMenu();
+
+    if (menuName == "Tools")
+        return createToolsMenu();
+
+    if (menuName == "Help")
+        return createHelpMenu();
+
+    if (menuName == "GUI Editor")
+        if (isGUIEditorEnabled())
+            return createGUIEditorMenu();
+
+    jassertfalse; // names have changed?
+    return {};
 }
 
-void ProjucerApplication::createFileMenu (PopupMenu& menu)
+PopupMenu ProjucerApplication::createFileMenu()
 {
+    PopupMenu menu;
     menu.addCommandItem (commandManager.get(), CommandIDs::newProject);
     menu.addCommandItem (commandManager.get(), CommandIDs::newProjectFromClipboard);
     menu.addCommandItem (commandManager.get(), CommandIDs::newPIP);
@@ -409,12 +373,7 @@ void ProjucerApplication::createFileMenu (PopupMenu& menu)
         menu.addSubMenu ("Open Recent", recentFiles);
     }
 
-    {
-        PopupMenu examples;
-
-        createExamplesPopupMenu (examples);
-        menu.addSubMenu ("Open Example", examples);
-    }
+    menu.addSubMenu ("Open Example", createExamplesPopupMenu());
 
     menu.addSeparator();
     menu.addCommandItem (commandManager.get(), CommandIDs::closeDocument);
@@ -433,18 +392,21 @@ void ProjucerApplication::createFileMenu (PopupMenu& menu)
     menu.addCommandItem (commandManager.get(), CommandIDs::loginLogout);
    #endif
 
-    #if ! JUCE_MAC
-      menu.addCommandItem (commandManager.get(), CommandIDs::showAboutWindow);
-      menu.addCommandItem (commandManager.get(), CommandIDs::showAppUsageWindow);
-      menu.addCommandItem (commandManager.get(), CommandIDs::checkForNewVersion);
-      menu.addCommandItem (commandManager.get(), CommandIDs::showGlobalPathsWindow);
-      menu.addSeparator();
-      menu.addCommandItem (commandManager.get(), StandardApplicationCommandIDs::quit);
-    #endif
+   #if ! JUCE_MAC
+    menu.addCommandItem (commandManager.get(), CommandIDs::showAboutWindow);
+    menu.addCommandItem (commandManager.get(), CommandIDs::checkForNewVersion);
+    menu.addCommandItem (commandManager.get(), CommandIDs::enableNewVersionCheck);
+    menu.addCommandItem (commandManager.get(), CommandIDs::showGlobalPathsWindow);
+    menu.addSeparator();
+    menu.addCommandItem (commandManager.get(), StandardApplicationCommandIDs::quit);
+   #endif
+
+    return menu;
 }
 
-void ProjucerApplication::createEditMenu (PopupMenu& menu)
+PopupMenu ProjucerApplication::createEditMenu()
 {
+    PopupMenu menu;
     menu.addCommandItem (commandManager.get(), StandardApplicationCommandIDs::undo);
     menu.addCommandItem (commandManager.get(), StandardApplicationCommandIDs::redo);
     menu.addSeparator();
@@ -459,10 +421,12 @@ void ProjucerApplication::createEditMenu (PopupMenu& menu)
     menu.addCommandItem (commandManager.get(), CommandIDs::findSelection);
     menu.addCommandItem (commandManager.get(), CommandIDs::findNext);
     menu.addCommandItem (commandManager.get(), CommandIDs::findPrevious);
+    return menu;
 }
 
-void ProjucerApplication::createViewMenu (PopupMenu& menu)
+PopupMenu ProjucerApplication::createViewMenu()
 {
+    PopupMenu menu;
     menu.addCommandItem (commandManager.get(), CommandIDs::showProjectSettings);
     menu.addCommandItem (commandManager.get(), CommandIDs::showProjectTab);
     menu.addCommandItem (commandManager.get(), CommandIDs::showBuildTab);
@@ -473,10 +437,13 @@ void ProjucerApplication::createViewMenu (PopupMenu& menu)
 
     menu.addSeparator();
     createColourSchemeItems (menu);
+
+    return menu;
 }
 
-void ProjucerApplication::createBuildMenu (PopupMenu& menu)
+PopupMenu ProjucerApplication::createBuildMenu()
 {
+    PopupMenu menu;
     menu.addCommandItem (commandManager.get(), CommandIDs::toggleBuildEnabled);
     menu.addCommandItem (commandManager.get(), CommandIDs::buildNow);
     menu.addCommandItem (commandManager.get(), CommandIDs::toggleContinuousBuild);
@@ -490,55 +457,60 @@ void ProjucerApplication::createBuildMenu (PopupMenu& menu)
     menu.addSeparator();
     menu.addCommandItem (commandManager.get(), CommandIDs::nextError);
     menu.addCommandItem (commandManager.get(), CommandIDs::prevError);
+    return menu;
 }
 
 void ProjucerApplication::createColourSchemeItems (PopupMenu& menu)
 {
-    PopupMenu colourSchemeMenu;
-
-    colourSchemeMenu.addItem (PopupMenu::Item ("Dark")
-                                .setTicked (selectedColourSchemeIndex == 0)
-                                .setAction ([this] { setColourScheme (0, true); updateEditorColourSchemeIfNeeded(); }));
-
-    colourSchemeMenu.addItem (PopupMenu::Item ("Grey")
-                                .setTicked (selectedColourSchemeIndex == 1)
-                                .setAction ([this] { setColourScheme (1, true); updateEditorColourSchemeIfNeeded(); }));
-
-    colourSchemeMenu.addItem (PopupMenu::Item ("Light")
-                                .setTicked (selectedColourSchemeIndex == 2)
-                                .setAction ([this] { setColourScheme (2, true); updateEditorColourSchemeIfNeeded(); }));
-
-    menu.addSubMenu ("Colour Scheme", colourSchemeMenu);
-
-    //==============================================================================
-    PopupMenu editorColourSchemeMenu;
-
-    auto& appearanceSettings = getAppSettings().appearance;
-
-    appearanceSettings.refreshPresetSchemeList();
-    auto schemes = appearanceSettings.getPresetSchemes();
-
-    auto i = 0;
-
-    for (auto& s : schemes)
     {
-        editorColourSchemeMenu.addItem (PopupMenu::Item (s)
-                                           .setEnabled (editorColourSchemeWindow == nullptr)
-                                           .setTicked (selectedEditorColourSchemeIndex == i)
-                                           .setAction ([this, i] { setEditorColourScheme (i, true); }));
-        ++i;
+        PopupMenu colourSchemeMenu;
+
+        colourSchemeMenu.addItem (PopupMenu::Item ("Dark")
+                                    .setTicked (selectedColourSchemeIndex == 0)
+                                    .setAction ([this] { setColourScheme (0, true); updateEditorColourSchemeIfNeeded(); }));
+
+        colourSchemeMenu.addItem (PopupMenu::Item ("Grey")
+                                    .setTicked (selectedColourSchemeIndex == 1)
+                                    .setAction ([this] { setColourScheme (1, true); updateEditorColourSchemeIfNeeded(); }));
+
+        colourSchemeMenu.addItem (PopupMenu::Item ("Light")
+                                    .setTicked (selectedColourSchemeIndex == 2)
+                                    .setAction ([this] { setColourScheme (2, true); updateEditorColourSchemeIfNeeded(); }));
+
+        menu.addSubMenu ("Colour Scheme", colourSchemeMenu);
     }
 
-    editorColourSchemeMenu.addSeparator();
-    editorColourSchemeMenu.addItem (PopupMenu::Item ("Create...")
-                                       .setEnabled (editorColourSchemeWindow == nullptr)
-                                       .setAction ([this] { showEditorColourSchemeWindow(); }));
+    {
+        PopupMenu editorColourSchemeMenu;
 
-    menu.addSubMenu ("Editor Colour Scheme", editorColourSchemeMenu);
+        auto& appearanceSettings = getAppSettings().appearance;
+
+        appearanceSettings.refreshPresetSchemeList();
+        auto schemes = appearanceSettings.getPresetSchemes();
+
+        auto i = 0;
+
+        for (auto& s : schemes)
+        {
+            editorColourSchemeMenu.addItem (PopupMenu::Item (s)
+                                               .setEnabled (editorColourSchemeWindow == nullptr)
+                                               .setTicked (selectedEditorColourSchemeIndex == i)
+                                               .setAction ([this, i] { setEditorColourScheme (i, true); }));
+            ++i;
+        }
+
+        editorColourSchemeMenu.addSeparator();
+        editorColourSchemeMenu.addItem (PopupMenu::Item ("Create...")
+                                           .setEnabled (editorColourSchemeWindow == nullptr)
+                                           .setAction ([this] { showEditorColourSchemeWindow(); }));
+
+        menu.addSubMenu ("Editor Colour Scheme", editorColourSchemeMenu);
+    }
 }
 
-void ProjucerApplication::createWindowMenu (PopupMenu& menu)
+PopupMenu ProjucerApplication::createWindowMenu()
 {
+    PopupMenu menu;
     menu.addCommandItem (commandManager.get(), CommandIDs::goToPreviousWindow);
     menu.addCommandItem (commandManager.get(), CommandIDs::goToNextWindow);
     menu.addCommandItem (commandManager.get(), CommandIDs::closeWindow);
@@ -547,16 +519,22 @@ void ProjucerApplication::createWindowMenu (PopupMenu& menu)
     int counter = 0;
 
     for (auto* window : mainWindowList.windows)
+    {
         if (window != nullptr)
+        {
             if (auto* project = window->getProject())
                 menu.addItem (openWindowsBaseID + counter++, project->getProjectNameString());
+        }
+    }
 
     menu.addSeparator();
     menu.addCommandItem (commandManager.get(), CommandIDs::closeAllWindows);
+    return menu;
 }
 
-void ProjucerApplication::createDocumentMenu (PopupMenu& menu)
+PopupMenu ProjucerApplication::createDocumentMenu()
 {
+    PopupMenu menu;
     menu.addCommandItem (commandManager.get(), CommandIDs::goToPreviousDoc);
     menu.addCommandItem (commandManager.get(), CommandIDs::goToNextDoc);
     menu.addCommandItem (commandManager.get(), CommandIDs::goToCounterpart);
@@ -572,35 +550,46 @@ void ProjucerApplication::createDocumentMenu (PopupMenu& menu)
 
     menu.addSeparator();
     menu.addCommandItem (commandManager.get(), CommandIDs::closeAllDocuments);
+    return menu;
 }
 
-void ProjucerApplication::createToolsMenu (PopupMenu& menu)
+PopupMenu ProjucerApplication::createToolsMenu()
 {
+    PopupMenu menu;
     menu.addCommandItem (commandManager.get(), CommandIDs::showUTF8Tool);
     menu.addCommandItem (commandManager.get(), CommandIDs::showSVGPathTool);
     menu.addCommandItem (commandManager.get(), CommandIDs::showTranslationTool);
+    menu.addSeparator();
+    menu.addCommandItem (commandManager.get(), CommandIDs::enableLiveBuild);
+    menu.addCommandItem (commandManager.get(), CommandIDs::enableGUIEditor);
+    return menu;
 }
 
-void ProjucerApplication::createHelpMenu (PopupMenu& menu)
+PopupMenu ProjucerApplication::createHelpMenu()
 {
+    PopupMenu menu;
     menu.addCommandItem (commandManager.get(), CommandIDs::showForum);
     menu.addSeparator();
     menu.addCommandItem (commandManager.get(), CommandIDs::showAPIModules);
     menu.addCommandItem (commandManager.get(), CommandIDs::showAPIClasses);
     menu.addCommandItem (commandManager.get(), CommandIDs::showTutorials);
+    return menu;
 }
 
-void ProjucerApplication::createExtraAppleMenuItems (PopupMenu& menu)
+PopupMenu ProjucerApplication::createExtraAppleMenuItems()
 {
+    PopupMenu menu;
     menu.addCommandItem (commandManager.get(), CommandIDs::showAboutWindow);
-    menu.addCommandItem (commandManager.get(), CommandIDs::showAppUsageWindow);
     menu.addCommandItem (commandManager.get(), CommandIDs::checkForNewVersion);
+    menu.addCommandItem (commandManager.get(), CommandIDs::enableNewVersionCheck);
     menu.addSeparator();
     menu.addCommandItem (commandManager.get(), CommandIDs::showGlobalPathsWindow);
+    return menu;
 }
 
-void ProjucerApplication::createExamplesPopupMenu (PopupMenu& menu) noexcept
+PopupMenu ProjucerApplication::createExamplesPopupMenu() noexcept
 {
+    PopupMenu menu;
     numExamples = 0;
     for (auto& dir : getSortedExampleDirectories())
     {
@@ -623,10 +612,23 @@ void ProjucerApplication::createExamplesPopupMenu (PopupMenu& menu) noexcept
         menu.addSeparator();
         menu.addCommandItem (commandManager.get(), CommandIDs::launchDemoRunner);
     }
+
+    return menu;
 }
 
+#if JUCE_MAC
+ void ProjucerApplication::rebuildAppleMenu()
+ {
+     auto extraAppleMenuItems = createExtraAppleMenuItems();
+
+     // workaround broken "Open Recent" submenu: not passing the
+     // submenu's title here avoids the defect in JuceMainMenuHandler::addMenuItem
+     MenuBarModel::setMacMainMenu (menuModel.get(), &extraAppleMenuItems); //, "Open Recent");
+ }
+#endif
+
 //==============================================================================
-static File getJUCEExamplesDirectoryPathFromGlobal()
+File ProjucerApplication::getJUCEExamplesDirectoryPathFromGlobal() noexcept
 {
     auto globalPath = File::createFileWithoutCheckingPath (getAppSettings().getStoredPath (Ids::jucePath, TargetOS::getThisOS()).get().toString()
                                                                            .replace ("~", File::getSpecialLocation (File::userHomeDirectory).getFullPathName()));
@@ -646,14 +648,17 @@ Array<File> ProjucerApplication::getSortedExampleDirectories() noexcept
     if (! isValidJUCEExamplesDirectory (examplesPath))
         return {};
 
-    DirectoryIterator iter (examplesPath, false, "*", File::findDirectories);
-    while (iter.next())
+    for (const auto& iter : RangedDirectoryIterator (examplesPath, false, "*", File::findDirectories))
     {
         auto exampleDirectory = iter.getFile();
 
         if (exampleDirectory.getNumberOfChildFiles (File::findFiles | File::ignoreHiddenFiles) > 0
-            && exampleDirectory.getFileName() != "DemoRunner" && exampleDirectory.getFileName() != "Assets")
+            && exampleDirectory.getFileName() != "DemoRunner"
+            && exampleDirectory.getFileName() != "Assets"
+            && exampleDirectory.getFileName() != "CMake")
+        {
             exampleDirectories.add (exampleDirectory);
+        }
     }
 
     exampleDirectories.sort();
@@ -661,37 +666,16 @@ Array<File> ProjucerApplication::getSortedExampleDirectories() noexcept
     return exampleDirectories;
 }
 
-Array<File> ProjucerApplication::getSortedExampleFilesInDirectory (const File& directory) const noexcept
+Array<File> ProjucerApplication::getSortedExampleFilesInDirectory (const File& directory) noexcept
 {
     Array<File> exampleFiles;
 
-    DirectoryIterator iter (directory, false, "*.h", File::findFiles);
-    while (iter.next())
+    for (const auto& iter : RangedDirectoryIterator (directory, false, "*.h", File::findFiles))
         exampleFiles.add (iter.getFile());
 
     exampleFiles.sort();
 
     return exampleFiles;
-}
-
-bool ProjucerApplication::findWindowAndOpenPIP (const File& pip)
-{
-    auto* window = mainWindowList.getFrontmostWindow();
-    bool shouldCloseWindow = false;
-
-    if (window == nullptr)
-    {
-        window = mainWindowList.getOrCreateEmptyWindow();
-        shouldCloseWindow = true;
-    }
-
-    if (window->tryToOpenPIP (pip))
-        return true;
-
-    if (shouldCloseWindow)
-        mainWindowList.closeWindow (window);
-
-    return false;
 }
 
 void ProjucerApplication::findAndLaunchExample (int selectedIndex)
@@ -714,12 +698,7 @@ void ProjucerApplication::findAndLaunchExample (int selectedIndex)
     // example doesn't exist?
     jassert (example != File());
 
-    findWindowAndOpenPIP (example);
-
-    StringPairArray data;
-    data.set ("label", example.getFileNameWithoutExtension());
-
-    Analytics::getInstance()->logEvent ("Example Opened", data, ProjucerAnalyticsEvent::exampleEvent);
+    mainWindowList.openFile (example);
 }
 
 //==============================================================================
@@ -739,7 +718,7 @@ static String getPlatformSpecificFileExtension()
 
 static File getPlatformSpecificProjectFolder()
 {
-    auto examplesDir = getJUCEExamplesDirectoryPathFromGlobal();
+    auto examplesDir = ProjucerApplication::getJUCEExamplesDirectoryPathFromGlobal();
 
     if (examplesDir == File())
         return {};
@@ -886,18 +865,8 @@ void ProjucerApplication::launchDemoRunner()
 {
     auto demoRunnerFile = tryToFindDemoRunnerExecutable();
 
-    if (demoRunnerFile != File())
-    {
-        auto succeeded = demoRunnerFile.startAsProcess();
-
-        StringPairArray data;
-        data.set ("label", succeeded ? "Success" : "Failure");
-
-        Analytics::getInstance()->logEvent ("Launch DemoRunner", data, ProjucerAnalyticsEvent::exampleEvent);
-
-        if (succeeded)
-            return;
-    }
+    if (demoRunnerFile != File() && demoRunnerFile.startAsProcess())
+        return;
 
     demoRunnerFile = tryToFindDemoRunnerProject();
 
@@ -919,11 +888,6 @@ void ProjucerApplication::launchDemoRunner()
         demoRunnerAlert->enterModalState (true, ModalCallbackFunction::create ([this, demoRunnerFile] (int retVal)
                                                 {
                                                     demoRunnerAlert.reset (nullptr);
-
-                                                    StringPairArray data;
-                                                    data.set ("label", retVal == 1 ? "Opened" : "Cancelled");
-
-                                                    Analytics::getInstance()->logEvent ("Open DemoRunner Project", data, ProjucerAnalyticsEvent::exampleEvent);
 
                                                     if (retVal == 1)
                                                     {
@@ -991,9 +955,11 @@ void ProjucerApplication::getAllCommands (Array <CommandID>& commands)
                               CommandIDs::showGlobalPathsWindow,
                               CommandIDs::showUTF8Tool,
                               CommandIDs::showSVGPathTool,
+                              CommandIDs::enableLiveBuild,
+                              CommandIDs::enableGUIEditor,
                               CommandIDs::showAboutWindow,
-                              CommandIDs::showAppUsageWindow,
                               CommandIDs::checkForNewVersion,
+                              CommandIDs::enableNewVersionCheck,
                               CommandIDs::showForum,
                               CommandIDs::showAPIModules,
                               CommandIDs::showAPIClasses,
@@ -1076,16 +1042,33 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
         result.setInfo ("SVG Path Converter", "Shows the SVG->Path data conversion utility", CommandCategories::general, 0);
         break;
 
+    case CommandIDs::enableLiveBuild:
+        result.setInfo ("Live-Build Enabled",
+                        "Enables or disables the live-build functionality",
+                        CommandCategories::general,
+                        (isLiveBuildEnabled() ? ApplicationCommandInfo::isTicked : 0));
+        break;
+
+    case CommandIDs::enableGUIEditor:
+        result.setInfo ("GUI Editor Enabled",
+                        "Enables or disables the GUI editor functionality",
+                        CommandCategories::general,
+                        (isGUIEditorEnabled() ? ApplicationCommandInfo::isTicked : 0));
+        break;
+
     case CommandIDs::showAboutWindow:
         result.setInfo ("About Projucer", "Shows the Projucer's 'About' page.", CommandCategories::general, 0);
         break;
 
-    case CommandIDs::showAppUsageWindow:
-        result.setInfo ("Application Usage Data", "Shows the application usage data agreement window", CommandCategories::general, 0);
-        break;
-
     case CommandIDs::checkForNewVersion:
         result.setInfo ("Check for New Version...", "Checks the web server for a new version of JUCE", CommandCategories::general, 0);
+        break;
+
+    case CommandIDs::enableNewVersionCheck:
+        result.setInfo ("Automatically Check for New Versions",
+                        "Enables automatic background checking for new versions of JUCE.",
+                        CommandCategories::general,
+                        (isAutomaticVersionCheckingEnabled() ? ApplicationCommandInfo::isTicked : 0));
         break;
 
     case CommandIDs::showForum:
@@ -1106,22 +1089,16 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
 
     case CommandIDs::loginLogout:
         {
-            bool isLoggedIn = false;
-            String username;
+            auto licenseState = licenseController->getCurrentState();
 
-            if (licenseController != nullptr)
-            {
-                const LicenseState state = licenseController->getState();
-                isLoggedIn = (state.type != LicenseState::Type::notLoggedIn && state.type != LicenseState::Type::GPL);
-                username = state.username;
-            }
-
-            result.setInfo (isLoggedIn
-                               ? String ("Sign out ") + username + "..."
-                               : String ("Sign in..."),
-                            "Log out of your JUCE account", CommandCategories::general, 0);
+            if (licenseState.isGPL())
+                result.setInfo ("Disable GPL mode", "Disables GPL mode", CommandCategories::general, 0);
+            else
+                result.setInfo (licenseState.isSignedIn() ? String ("Sign out ") + licenseState.username + "..." : String ("Sign in..."),
+                                "Sign out of your JUCE account",
+                                CommandCategories::general, 0);
+            break;
         }
-        break;
 
     default:
         JUCEApplication::getCommandInfo (commandID, result);
@@ -1140,19 +1117,21 @@ bool ProjucerApplication::perform (const InvocationInfo& info)
         case CommandIDs::launchDemoRunner:          launchDemoRunner(); break;
         case CommandIDs::saveAll:                   saveAllDocuments(); break;
         case CommandIDs::closeAllWindows:           closeAllMainWindowsAndQuitIfNeeded(); break;
-        case CommandIDs::closeAllDocuments:         closeAllDocuments (true); break;
+        case CommandIDs::closeAllDocuments:         closeAllDocuments (OpenDocumentManager::SaveIfNeeded::yes); break;
         case CommandIDs::clearRecentFiles:          clearRecentFiles(); break;
         case CommandIDs::showUTF8Tool:              showUTF8ToolWindow(); break;
         case CommandIDs::showSVGPathTool:           showSVGPathDataToolWindow(); break;
+        case CommandIDs::enableLiveBuild:           enableOrDisableLiveBuild(); break;
+        case CommandIDs::enableGUIEditor:           enableOrDisableGUIEditor(); break;
         case CommandIDs::showGlobalPathsWindow:     showPathsWindow (false); break;
         case CommandIDs::showAboutWindow:           showAboutWindow(); break;
-        case CommandIDs::showAppUsageWindow:        showApplicationUsageDataAgreementPopup(); break;
-        case CommandIDs::checkForNewVersion:        LatestVersionCheckerAndUpdater::getInstance()->checkForNewVersion (true); break;
+        case CommandIDs::checkForNewVersion:        LatestVersionCheckerAndUpdater::getInstance()->checkForNewVersion (false); break;
+        case CommandIDs::enableNewVersionCheck:     setAutomaticVersionCheckingEnabled (! isAutomaticVersionCheckingEnabled()); break;
         case CommandIDs::showForum:                 launchForumBrowser(); break;
         case CommandIDs::showAPIModules:            launchModulesBrowser(); break;
         case CommandIDs::showAPIClasses:            launchClassesBrowser(); break;
         case CommandIDs::showTutorials:             launchTutorialsBrowser(); break;
-        case CommandIDs::loginLogout:               doLogout(); break;
+        case CommandIDs::loginLogout:               doLoginOrLogout(); break;
         default:                                    return JUCEApplication::perform (info);
     }
 
@@ -1173,7 +1152,8 @@ void ProjucerApplication::createNewProject()
 void ProjucerApplication::createNewProjectFromClipboard()
 {
     auto tempFile = File::getSpecialLocation (File::SpecialLocationType::tempDirectory).getChildFile ("PIPs").getChildFile ("Clipboard")
-                                                                                       .getChildFile ("PIPFile_" + String (std::abs (Random::getSystemRandom().nextInt())) + ".h");
+                                                                                       .getChildFile ("PIPFile_" + String (std::abs (Random::getSystemRandom().nextInt())) + ".h")
+                                                                                       .getNonexistentSibling();
 
     if (tempFile.existsAsFile())
         tempFile.deleteFile();
@@ -1181,9 +1161,21 @@ void ProjucerApplication::createNewProjectFromClipboard()
     tempFile.create();
     tempFile.appendText (SystemClipboard::getTextFromClipboard());
 
-    if (! findWindowAndOpenPIP (tempFile))
+    String errorString;
+
+    if (! isPIPFile (tempFile))
     {
-        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Error", "Couldn't create project from clipboard contents.");
+        errorString = "Clipboard does not contain a valid PIP.";
+    }
+    else if (! mainWindowList.openFile (tempFile))
+    {
+        errorString = "Couldn't create project from clipboard contents.";
+        mainWindowList.closeWindow (mainWindowList.windows.getLast());
+    }
+
+    if (errorString.isNotEmpty())
+    {
+        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Error", errorString);
         tempFile.deleteFile();
     }
 }
@@ -1203,6 +1195,7 @@ void ProjucerApplication::askUserToOpenFile()
 
 bool ProjucerApplication::openFile (const File& file)
 {
+    handleUpdateNowIfNeeded();
     return mainWindowList.openFile (file);
 }
 
@@ -1215,7 +1208,7 @@ void ProjucerApplication::saveAllDocuments()
             pcc->refreshProjectTreeFileStatuses();
 }
 
-bool ProjucerApplication::closeAllDocuments (bool askUserToSave)
+bool ProjucerApplication::closeAllDocuments (OpenDocumentManager::SaveIfNeeded askUserToSave)
 {
     return openDocumentManager.closeAll (askUserToSave);
 }
@@ -1265,6 +1258,26 @@ void ProjucerApplication::showSVGPathDataToolWindow()
                                 500, 500, 300, 300, 1000, 1000);
 }
 
+bool ProjucerApplication::isLiveBuildEnabled() const
+{
+    return getGlobalProperties().getBoolValue (Ids::liveBuildEnabled);
+}
+
+void ProjucerApplication::enableOrDisableLiveBuild()
+{
+    getGlobalProperties().setValue (Ids::liveBuildEnabled, ! isLiveBuildEnabled());
+}
+
+bool ProjucerApplication::isGUIEditorEnabled() const
+{
+    return getGlobalProperties().getBoolValue (Ids::guiEditorEnabled);
+}
+
+void ProjucerApplication::enableOrDisableGUIEditor()
+{
+    getGlobalProperties().setValue (Ids::guiEditorEnabled, ! isGUIEditorEnabled());
+}
+
 void ProjucerApplication::showAboutWindow()
 {
     if (aboutWindow != nullptr)
@@ -1273,22 +1286,6 @@ void ProjucerApplication::showAboutWindow()
         new FloatingToolWindow ({}, {}, new AboutWindowComponent(),
                                 aboutWindow, false,
                                 500, 300, 500, 300, 500, 300);
-}
-
-void ProjucerApplication::showApplicationUsageDataAgreementPopup()
-{
-    if (applicationUsageDataWindow != nullptr)
-        applicationUsageDataWindow->toFront (true);
-    else
-        new FloatingToolWindow ("Application Usage Analytics", {},
-                                new ApplicationUsageDataWindowComponent (isPaidOrGPL()), applicationUsageDataWindow, false,
-                                400, 300, 400, 300, 400, 300);
-}
-
-void ProjucerApplication::dismissApplicationUsageDataAgreementPopup()
-{
-    if (applicationUsageDataWindow != nullptr)
-        applicationUsageDataWindow.reset();
 }
 
 void ProjucerApplication::showPathsWindow (bool highlightJUCEPath)
@@ -1357,6 +1354,26 @@ void ProjucerApplication::launchTutorialsBrowser()
         tutorialsLink.launchInDefaultBrowser();
 }
 
+void ProjucerApplication::doLoginOrLogout()
+{
+    if (licenseController->getCurrentState().isSignedIn())
+    {
+        licenseController->resetState();
+    }
+    else
+    {
+        if (auto* window = mainWindowList.getMainWindowWithLoginFormOpen())
+        {
+            window->toFront (true);
+        }
+        else
+        {
+            mainWindowList.createWindowIfNoneAreOpen();
+            mainWindowList.getFrontmostWindow()->showLoginFormOverlay();
+        }
+    }
+}
+
 //==============================================================================
 struct FileWithTime
 {
@@ -1413,13 +1430,6 @@ PropertiesFile::Options ProjucerApplication::getPropertyFileOptionsFor (const St
     return options;
 }
 
-void ProjucerApplication::updateAllBuildTabs()
-{
-    for (int i = 0; i < mainWindowList.windows.size(); ++i)
-        if (ProjectContentComponent* p = mainWindowList.windows.getUnchecked(i)->getProjectContentComponent())
-            p->rebuildProjectTabs();
-}
-
 void ProjucerApplication::initCommandManager()
 {
     commandManager.reset (new ApplicationCommandManager());
@@ -1434,64 +1444,7 @@ void ProjucerApplication::initCommandManager()
     registerGUIEditorCommands();
 }
 
-void ProjucerApplication::setAnalyticsEnabled (bool enabled)
-{
-    resetAnalytics();
-
-    if (enabled)
-        setupAnalytics();
-}
-
-void ProjucerApplication::resetAnalytics() noexcept
-{
-    auto analyticsInstance = Analytics::getInstance();
-
-    analyticsInstance->setUserId ({});
-    analyticsInstance->setUserProperties ({});
-    analyticsInstance->getDestinations().clear();
-}
-
-void ProjucerApplication::setupAnalytics()
-{
-    Analytics::getInstance()->addDestination (new ProjucerAnalyticsDestination());
-
-    auto deviceString = SystemStats::getDeviceIdentifiers().joinIntoString (":");
-    auto deviceIdentifier = String::toHexString (deviceString.hashCode64());
-
-    Analytics::getInstance()->setUserId (deviceIdentifier);
-
-    StringPairArray userData;
-    userData.set ("cd1", getApplicationName());
-    userData.set ("cd2", getApplicationVersion());
-    userData.set ("cd3", SystemStats::getDeviceDescription());
-    userData.set ("cd4", deviceString);
-    userData.set ("cd5", SystemStats::getOperatingSystemName());
-
-    Analytics::getInstance()->setUserProperties (userData);
-}
-
-void ProjucerApplication::showSetJUCEPathAlert()
-{
-    auto& lf = Desktop::getInstance().getDefaultLookAndFeel();
-    pathAlert.reset (lf.createAlertWindow ("Set JUCE Path", "Your global JUCE path is invalid. This path is used to access the JUCE examples and demo project - "
-                                           "would you like to set it now?",
-                                           "Set path", "Cancel", "Don't ask again",
-                                           AlertWindow::WarningIcon, 3,
-                                           mainWindowList.getFrontmostWindow (false)));
-
-    pathAlert->enterModalState (true, ModalCallbackFunction::create ([this] (int retVal)
-                                                                    {
-                                                                        pathAlert.reset (nullptr);
-
-                                                                        if (retVal == 1)
-                                                                            showPathsWindow (true);
-                                                                        else if (retVal == 0)
-                                                                            settings->setDontAskAboutJUCEPathAgain();
-                                                                    }));
-
-}
-
-void rescanModules (AvailableModuleList& list, const Array<File>& paths, bool async)
+void rescanModules (AvailableModulesList& list, const Array<File>& paths, bool async)
 {
     if (async)
         list.scanPathsAsync (paths);
@@ -1501,12 +1454,32 @@ void rescanModules (AvailableModuleList& list, const Array<File>& paths, bool as
 
 void ProjucerApplication::rescanJUCEPathModules()
 {
-    rescanModules (jucePathModuleList, { getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS()).get().toString() }, ! isRunningCommandLine);
+    rescanModules (jucePathModulesList, { getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS()).get().toString() }, ! isRunningCommandLine);
 }
 
 void ProjucerApplication::rescanUserPathModules()
 {
-    rescanModules (userPathsModuleList, { getAppSettings().getStoredPath (Ids::defaultUserModulePath, TargetOS::getThisOS()).get().toString() }, ! isRunningCommandLine);
+    rescanModules (userPathsModulesList, { getAppSettings().getStoredPath (Ids::defaultUserModulePath, TargetOS::getThisOS()).get().toString() }, ! isRunningCommandLine);
+}
+
+bool ProjucerApplication::isAutomaticVersionCheckingEnabled() const
+{
+    return ! getGlobalProperties().getBoolValue (Ids::dontQueryForUpdate);
+}
+
+void ProjucerApplication::setAutomaticVersionCheckingEnabled (bool enabled)
+{
+    getGlobalProperties().setValue (Ids::dontQueryForUpdate, ! enabled);
+}
+
+bool ProjucerApplication::shouldPromptUserAboutIncorrectJUCEPath() const
+{
+    return ! getGlobalProperties().getBoolValue (Ids::dontAskAboutJUCEPath);
+}
+
+void ProjucerApplication::setShouldPromptUserAboutIncorrectJUCEPath (bool shouldPrompt)
+{
+    getGlobalProperties().setValue (Ids::dontAskAboutJUCEPath, ! shouldPrompt);
 }
 
 void ProjucerApplication::selectEditorColourSchemeWithName (const String& schemeName)
@@ -1536,7 +1509,6 @@ void ProjucerApplication::setColourScheme (int index, bool saveSetting)
     if (utf8Window != nullptr)                  utf8Window->sendLookAndFeelChange();
     if (svgPathWindow != nullptr)               svgPathWindow->sendLookAndFeelChange();
     if (aboutWindow != nullptr)                 aboutWindow->sendLookAndFeelChange();
-    if (applicationUsageDataWindow != nullptr)  applicationUsageDataWindow->sendLookAndFeelChange();
     if (pathsWindow != nullptr)                 pathsWindow->sendLookAndFeelChange();
     if (editorColourSchemeWindow != nullptr)    editorColourSchemeWindow->sendLookAndFeelChange();
     if (pipCreatorWindow != nullptr)            pipCreatorWindow->sendLookAndFeelChange();
@@ -1547,7 +1519,7 @@ void ProjucerApplication::setColourScheme (int index, bool saveSetting)
 
     if (saveSetting)
     {
-        auto& properties = settings->getGlobalProperties();
+        auto& properties = getGlobalProperties();
         properties.setValue ("COLOUR SCHEME", index);
     }
 
@@ -1567,7 +1539,7 @@ void ProjucerApplication::setEditorColourScheme (int index, bool saveSetting)
 
     if (saveSetting)
     {
-        auto& properties = settings->getGlobalProperties();
+        auto& properties = getGlobalProperties();
         properties.setValue ("EDITOR COLOUR SCHEME", index);
     }
 
@@ -1576,13 +1548,13 @@ void ProjucerApplication::setEditorColourScheme (int index, bool saveSetting)
     getCommandManager().commandStatusChanged();
 }
 
-bool ProjucerApplication::isEditorColourSchemeADefaultScheme (const StringArray& schemes, int editorColourSchemeIndex)
+bool isEditorColourSchemeADefaultScheme (const StringArray& schemes, int editorColourSchemeIndex)
 {
     auto& schemeName = schemes[editorColourSchemeIndex];
     return (schemeName == "Default (Dark)" || schemeName == "Default (Light)");
 }
 
-int ProjucerApplication::getEditorColourSchemeForGUIColourScheme (const StringArray& schemes, int guiColourSchemeIndex)
+int getEditorColourSchemeForGUIColourScheme (const StringArray& schemes, int guiColourSchemeIndex)
 {
     auto defaultDarkEditorIndex  = schemes.indexOf ("Default (Dark)");
     auto defaultLightEditorIndex = schemes.indexOf ("Default (Light)");

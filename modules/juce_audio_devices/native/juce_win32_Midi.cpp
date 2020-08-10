@@ -450,7 +450,7 @@ private:
 
             for (UINT i = 0; i < midiInGetNumDevs(); ++i)
             {
-                MIDIINCAPS mc = { 0 };
+                MIDIINCAPS mc = {};
 
                 if (midiInGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
                     devices.add (mc);
@@ -574,7 +574,7 @@ private:
         {
             if (message.getRawDataSize() > 3 || message.isSysEx())
             {
-                MIDIHDR h = { 0 };
+                MIDIHDR h = {};
 
                 h.lpData = (char*) message.getRawData();
                 h.dwBytesRecorded = h.dwBufferLength  = (DWORD) message.getRawDataSize();
@@ -625,7 +625,7 @@ private:
 
             for (UINT i = 0; i < midiOutGetNumDevs(); ++i)
             {
-                MIDIOUTCAPS mc = { 0 };
+                MIDIOUTCAPS mc = {};
 
                 if (midiOutGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
                     devices.add (mc);
@@ -990,19 +990,19 @@ private:
 
                 watcher->add_Added (
                     Callback<ITypedEventHandler<DeviceWatcher*, DeviceInformation*>> (
-                        [handlerPtr](IDeviceWatcher*, IDeviceInformation* info) { return handlerPtr->addDevice (info); }
+                        [handlerPtr] (IDeviceWatcher*, IDeviceInformation* info) { return handlerPtr->addDevice (info); }
                     ).Get(),
                     &deviceAddedToken);
 
                 watcher->add_Removed (
                     Callback<ITypedEventHandler<DeviceWatcher*, DeviceInformationUpdate*>> (
-                        [handlerPtr](IDeviceWatcher*, IDeviceInformationUpdate* infoUpdate) { return handlerPtr->removeDevice (infoUpdate); }
+                        [handlerPtr] (IDeviceWatcher*, IDeviceInformationUpdate* infoUpdate) { return handlerPtr->removeDevice (infoUpdate); }
                     ).Get(),
                     &deviceRemovedToken);
 
                 watcher->add_Updated (
                     Callback<ITypedEventHandler<DeviceWatcher*, DeviceInformationUpdate*>> (
-                        [handlerPtr](IDeviceWatcher*, IDeviceInformationUpdate* infoUpdate) { return handlerPtr->updateDevice (infoUpdate); }
+                        [handlerPtr] (IDeviceWatcher*, IDeviceInformationUpdate* infoUpdate) { return handlerPtr->updateDevice (infoUpdate); }
                     ).Get(),
                     &deviceUpdatedToken);
 
@@ -1118,7 +1118,7 @@ private:
                 if (devices.contains (removedDeviceId))
                 {
                     auto& info = devices.getReference (removedDeviceId);
-                    listeners.call ([&info](Listener& l) { l.bleDeviceDisconnected (info.containerID); });
+                    listeners.call ([&info] (Listener& l) { l.bleDeviceDisconnected (info.containerID); });
                     devices.remove (removedDeviceId);
                     JUCE_WINRT_MIDI_LOG ("Removed BLE device: " << removedDeviceId);
                 }
@@ -1165,7 +1165,7 @@ private:
                     if (info.isConnected && ! isConnected)
                     {
                         JUCE_WINRT_MIDI_LOG ("BLE device connection status change: " << updatedDeviceId << " " << info.containerID << " " << (isConnected ? "connected" : "disconnected"));
-                        listeners.call ([&info](Listener& l) { l.bleDeviceDisconnected (info.containerID); });
+                        listeners.call ([&info] (Listener& l) { l.bleDeviceDisconnected (info.containerID); });
                     }
 
                     info.isConnected = isConnected;
@@ -1580,7 +1580,7 @@ private:
 
             auto hr = midiPort->add_MessageReceived (
                 Callback<ITypedEventHandler<MidiInPort*, MidiMessageReceivedEventArgs*>> (
-                    [this](IMidiInPort*, IMidiMessageReceivedEventArgs* args) { return midiInMessageReceived (args); }
+                    [this] (IMidiInPort*, IMidiMessageReceivedEventArgs* args) { return midiInMessageReceived (args); }
                 ).Get(),
                 &midiInMessageToken);
 

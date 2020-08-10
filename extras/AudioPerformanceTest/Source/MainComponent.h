@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -45,7 +44,7 @@ public:
         startTimer (1000);
     }
 
-    ~MainContentComponent()
+    ~MainContentComponent() override
     {
         shutdownAudio();
     }
@@ -54,7 +53,7 @@ public:
     void prepareToPlay (int bufferSize, double sampleRate) override
     {
         currentSampleRate = sampleRate;
-        allocateBuffers (bufferSize);
+        allocateBuffers (static_cast<size_t> (bufferSize));
         printHeader();
     }
 
@@ -246,13 +245,13 @@ private:
     //==============================================================================
     static double getPreciseTimeMs() noexcept
     {
-        return 1000.0 * Time::getHighResolutionTicks() / (double) Time::getHighResolutionTicksPerSecond();
+        return 1000.0 * (double) Time::getHighResolutionTicks() / (double) Time::getHighResolutionTicksPerSecond();
     }
 
     //==============================================================================
     double getPhysicalTimeLimitMs() const noexcept
     {
-        return 1000.0 * a.size() / currentSampleRate;
+        return 1000.0 * (double) a.size() / currentSampleRate;
     }
 
     //==============================================================================

@@ -186,7 +186,7 @@ public:
     /** Returns the number of bytes that would be needed to represent the given
         unicode character in this encoding format.
     */
-    static inline size_t getBytesRequiredFor (juce_wchar) noexcept
+    static size_t getBytesRequiredFor (juce_wchar) noexcept
     {
         return sizeof (CharType);
     }

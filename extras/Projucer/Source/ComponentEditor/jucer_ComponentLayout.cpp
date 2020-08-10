@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -419,7 +418,7 @@ Component* ComponentLayout::addNewComponent (ComponentTypeHandler* const type, i
         std::unique_ptr<XmlElement> xml (type->createXmlFor (c.get(), this));
         c.reset (addComponentFromXml (*xml, true));
 
-        String memberName (CodeHelpers::makeValidIdentifier (type->getClassName (c.get()), true, true, false));
+        String memberName (build_tools::makeValidIdentifier (type->getClassName (c.get()), true, true, false));
         setComponentMemberVariableName (c.get(), memberName);
 
         selected.selectOnly (c.get());
@@ -860,7 +859,7 @@ String ComponentLayout::getComponentMemberVariableName (Component* comp) const
     String name (comp->getProperties() ["memberName"].toString());
 
     if (name.isEmpty())
-        name = getUnusedMemberName (CodeHelpers::makeValidIdentifier (comp->getName(), true, true, false), comp);
+        name = getUnusedMemberName (build_tools::makeValidIdentifier (comp->getName(), true, true, false), comp);
 
     return name;
 }
@@ -872,7 +871,7 @@ void ComponentLayout::setComponentMemberVariableName (Component* comp, const Str
 
     comp->getProperties().set ("memberName", String());
 
-    const String n (getUnusedMemberName (CodeHelpers::makeValidIdentifier (newName, false, true, false), comp));
+    const String n (getUnusedMemberName (build_tools::makeValidIdentifier (newName, false, true, false), comp));
     comp->getProperties().set ("memberName", n);
 
     if (n != oldName)
@@ -923,7 +922,7 @@ String ComponentLayout::getComponentVirtualClassName (Component* comp) const
 void ComponentLayout::setComponentVirtualClassName (Component* comp, const String& newName)
 {
     jassert (comp != nullptr);
-    const String name (CodeHelpers::makeValidIdentifier (newName, false, false, true));
+    const String name (build_tools::makeValidIdentifier (newName, false, false, true));
 
     if (name != getComponentVirtualClassName (comp))
     {
@@ -976,7 +975,7 @@ void positionToCode (const RelativePositionedRectangle& position,
     if (position.rect.getWidthMode() == PositionedRectangle::proportionalSize)
     {
         if (wrw.isNotEmpty())
-            w << "roundToInt (" << bracketIfNeeded (wrw) << " * " << CodeHelpers::floatLiteral (position.rect.getWidth(), 4) << ")";
+            w << "juce::roundToInt (" << bracketIfNeeded (wrw) << " * " << CodeHelpers::floatLiteral (position.rect.getWidth(), 4) << ")";
         else
             w << "proportionOfWidth (" << CodeHelpers::floatLiteral (position.rect.getWidth(), 4) << ")";
     }
@@ -999,7 +998,7 @@ void positionToCode (const RelativePositionedRectangle& position,
     if (position.rect.getHeightMode() == PositionedRectangle::proportionalSize)
     {
         if (hrh.isNotEmpty())
-            h << "roundToInt (" << bracketIfNeeded (hrh) << " * " << CodeHelpers::floatLiteral (position.rect.getHeight(), 4) << ")";
+            h << "juce::roundToInt (" << bracketIfNeeded (hrh) << " * " << CodeHelpers::floatLiteral (position.rect.getHeight(), 4) << ")";
         else
             h << "proportionOfHeight (" << CodeHelpers::floatLiteral (position.rect.getHeight(), 4) << ")";
     }
@@ -1022,7 +1021,7 @@ void positionToCode (const RelativePositionedRectangle& position,
     if (position.rect.getPositionModeX() == PositionedRectangle::proportionOfParentSize)
     {
         if (xrx.isNotEmpty() && xrw.isNotEmpty())
-            x << bracketIfNeeded (xrx) << " + roundToInt (" << bracketIfNeeded (xrw) << " * " << CodeHelpers::floatLiteral (position.rect.getX(), 4) << ")";
+            x << bracketIfNeeded (xrx) << " + juce::roundToInt (" << bracketIfNeeded (xrw) << " * " << CodeHelpers::floatLiteral (position.rect.getX(), 4) << ")";
         else
             x << "proportionOfWidth (" << CodeHelpers::floatLiteral (position.rect.getX(), 4) << ")";
     }
@@ -1068,7 +1067,7 @@ void positionToCode (const RelativePositionedRectangle& position,
     if (position.rect.getPositionModeY() == PositionedRectangle::proportionOfParentSize)
     {
         if (yry.isNotEmpty() && yrh.isNotEmpty())
-            y << bracketIfNeeded (yry) << " + roundToInt (" << bracketIfNeeded (yrh) << " * " << CodeHelpers::floatLiteral (position.rect.getY(), 4) << ")";
+            y << bracketIfNeeded (yry) << " + juce::roundToInt (" << bracketIfNeeded (yrh) << " * " << CodeHelpers::floatLiteral (position.rect.getY(), 4) << ")";
         else
             y << "proportionOfHeight (" << CodeHelpers::floatLiteral (position.rect.getY(), 4) << ")";
     }

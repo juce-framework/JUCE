@@ -148,7 +148,6 @@ bool FUID::generate ()
 	return false;
 
 #else
-#warning implement me!
 	return false;
 #endif
 }

@@ -1,9 +1,7 @@
 /*
   ==============================================================================
 
-    This file was auto-generated!
-
-    It contains the basic framework code for a JUCE plugin processor.
+    This file contains the basic framework code for a JUCE plugin processor.
 
   ==============================================================================
 */
@@ -15,15 +13,15 @@
 //==============================================================================
 /**
 */
-class %%filter_class_name%%  : public AudioProcessor
+class %%filter_class_name%%  : public juce::AudioProcessor
 #if JucePlugin_Enable_ARA
-, public AudioProcessorARAExtension
+, public juce::AudioProcessorARAExtension
 #endif
 {
 public:
     //==============================================================================
     %%filter_class_name%%();
-    ~%%filter_class_name%%();
+    ~%%filter_class_name%%() override;
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -33,18 +31,18 @@ public:
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
    #endif
 
-    void processBlock (AudioBuffer<float>&, MidiBuffer&) override;
+    void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
 
 #if JucePlugin_Enable_ARA
     bool didProcessBlockSucceed() override;
 #endif
 
     //==============================================================================
-    AudioProcessorEditor* createEditor() override;
+    juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override;
 
     //==============================================================================
-    const String getName() const override;
+    const juce::String getName() const override;
 
     bool acceptsMidi() const override;
     bool producesMidi() const override;
@@ -55,11 +53,11 @@ public:
     int getNumPrograms() override;
     int getCurrentProgram() override;
     void setCurrentProgram (int index) override;
-    const String getProgramName (int index) override;
-    void changeProgramName (int index, const String& newName) override;
+    const juce::String getProgramName (int index) override;
+    void changeProgramName (int index, const juce::String& newName) override;
 
     //==============================================================================
-    void getStateInformation (MemoryBlock& destData) override;
+    void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
 private:

@@ -517,7 +517,7 @@ AudioIODeviceType* AudioDeviceManager::getCurrentDeviceTypeObject() const
 
 static void updateSetupChannels (AudioDeviceManager::AudioDeviceSetup& setup, int defaultNumIns, int defaultNumOuts)
 {
-    auto updateChannels = [](const String& deviceName, BigInteger& channels, int defaultNumChannels)
+    auto updateChannels = [] (const String& deviceName, BigInteger& channels, int defaultNumChannels)
     {
         if (deviceName.isEmpty())
         {

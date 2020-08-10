@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -50,7 +49,7 @@ ButtonDocument::ButtonDocument (SourceCodeDocument* c)
     paintStatesEnabled [downOn] = false;
     paintStatesEnabled [background] = false;
 
-    parentClasses = "public Button";
+    parentClasses = "public juce::Button";
 
     for (int i = 7; --i >= 0;)
     {
@@ -217,8 +216,8 @@ void ButtonDocument::getOptionalMethods (StringArray& baseClasses,
 {
     JucerDocument::getOptionalMethods (baseClasses, returnValues, methods, initialContents);
 
-    addMethod ("Button", "void", "clicked()", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Button", "void", "buttonStateChanged()", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Button", "void", "clicked()", "", baseClasses, returnValues, methods, initialContents);
+    addMethod ("juce::Button", "void", "buttonStateChanged()", "", baseClasses, returnValues, methods, initialContents);
 }
 
 //==============================================================================
@@ -330,9 +329,9 @@ void ButtonDocument::fillInPaintCode (GeneratedCode& code) const
         if (paintStatesEnabled [i])
             paintRoutines[i]->fillInGeneratedCode (code, paintCode [i]);
 
-    String& s = code.getCallbackCode ("public Button",
+    String& s = code.getCallbackCode ("public juce::Button",
                                       "void",
-                                      "paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown)",
+                                      "paintButton (juce::Graphics& g, bool isMouseOverButton, bool isButtonDown)",
                                       false);
 
     int numPaintRoutines = getNumPaintRoutines();

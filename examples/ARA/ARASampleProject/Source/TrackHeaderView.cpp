@@ -49,7 +49,7 @@ void TrackHeaderView::paint (juce::Graphics& g)
 }
 
 //==============================================================================
-void TrackHeaderView::onNewSelection (const ARA::PlugIn::ViewSelection& viewSelection)
+void TrackHeaderView::onNewSelection (const ARAViewSelection& viewSelection)
 {
     bool selected = ARA::contains (viewSelection.getRegionSequences(), regionSequence);
     if (selected != isSelected)

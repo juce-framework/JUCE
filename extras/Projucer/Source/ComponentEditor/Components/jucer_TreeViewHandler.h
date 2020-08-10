@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -32,10 +31,10 @@ class TreeViewHandler  : public ComponentTypeHandler
 {
 public:
     TreeViewHandler()
-        : ComponentTypeHandler ("TreeView", "TreeView", typeid (DemoTreeView), 150, 150)
+        : ComponentTypeHandler ("TreeView", "juce::TreeView", typeid (DemoTreeView), 150, 150)
     {
-        registerColour (TreeView::backgroundColourId, "background", "backgroundColour");
-        registerColour (TreeView::linesColourId, "lines", "linecol");
+        registerColour (juce::TreeView::backgroundColourId, "background", "backgroundColour");
+        registerColour (juce::TreeView::linesColourId, "lines", "linecol");
     }
 
     Component* createNewComponent (JucerDocument*) override
@@ -147,7 +146,7 @@ private:
                     g.fillAll (Colours::lightblue);
 
                 g.setColour (Colours::black);
-                g.setFont (height * 0.7f);
+                g.setFont ((float) height * 0.7f);
                 g.drawText (name, 4, 0, width - 4, height, Justification::centredLeft, true);
             }
 

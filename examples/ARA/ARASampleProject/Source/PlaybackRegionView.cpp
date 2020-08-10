@@ -4,10 +4,11 @@
 #include "ARASampleProjectAudioModification.h"
 
 //==============================================================================
-PlaybackRegionView::PlaybackRegionView (DocumentView& docView, ARAPlaybackRegion* region)
-    : documentView (docView),
+PlaybackRegionView::PlaybackRegionView (RegionSequenceViewController& viewController, ARAPlaybackRegion* region)
+    : regionSequenceViewController (viewController),
+      documentView (regionSequenceViewController.getDocumentView()),
       playbackRegion (region),
-      audioThumb (128, docView.getAudioFormatManger(), *sharedAudioThumbnailCache)
+      audioThumb (128, documentView.getAudioFormatManger(), *sharedAudioThumbnailCache)
 {
     audioThumb.addChangeListener (this);
 
@@ -37,18 +38,37 @@ PlaybackRegionView::~PlaybackRegionView()
 
 void PlaybackRegionView::mouseDoubleClick (const MouseEvent& /*event*/)
 {
+    // set the reverse flag on our region's audio modification when double clicked
     auto audioModification = playbackRegion->getAudioModification<ARASampleProjectAudioModification>();
     audioModification->setReversePlayback (! audioModification->getReversePlayback());
+
+    // send a content change notification for the modification and all associated playback regions
     audioModification->notifyContentChanged (ARAContentUpdateScopes::samplesAreAffected(), true);
+    for (auto araPlaybackRegion : audioModification->getPlaybackRegions<ARAPlaybackRegion>())
+        araPlaybackRegion->notifyContentChanged (ARAContentUpdateScopes::samplesAreAffected(), true);
+}
+
+void PlaybackRegionView::updateBounds()
+{
+    const auto regionTimeRange = getTimeRange();
+    const auto& trackHeaderView = regionSequenceViewController.getTrackHeaderView();
+    const int startX = documentView.getPlaybackRegionsViewsXForTime (regionTimeRange.getStart());
+    const int endX = documentView.getPlaybackRegionsViewsXForTime (regionTimeRange.getEnd());
+    const int width = jmax (1, endX - startX);
+    setBounds (startX, trackHeaderView.getY(), width, trackHeaderView.getHeight());
 }
 
 //==============================================================================
 void PlaybackRegionView::paint (Graphics& g)
 {
     auto rect = getLocalBounds();
-    g.setColour (isSelected ? Colours::yellow : Colours::black);
-    g.drawRect (rect);
-    rect.reduce (1, 1);
+
+    if (rect.getWidth() > 2)
+    {
+        g.setColour (isSelected ? Colours::yellow : Colours::black);
+        g.drawRect (rect);
+        rect.reduce (1, 1);
+    }
 
     const Colour regionColour = convertOptionalARAColour (playbackRegion->getEffectiveColor());
     g.setColour (regionColour);
@@ -90,7 +110,7 @@ void PlaybackRegionView::changeListenerCallback (ChangeBroadcaster* /*broadcaste
     repaint();
 }
 
-void PlaybackRegionView::onNewSelection (const ARA::PlugIn::ViewSelection& viewSelection)
+void PlaybackRegionView::onNewSelection (const ARAViewSelection& viewSelection)
 {
     bool selected = ARA::contains (viewSelection.getPlaybackRegions(), playbackRegion);
     if (selected != isSelected)
@@ -106,7 +126,7 @@ void PlaybackRegionView::didEndEditing (ARADocument* /*document*/)
     if (playbackRegionReader ==  nullptr || ! playbackRegionReader->isValid())
     {
         recreatePlaybackRegionReader();
-        documentView.invalidateTimeRange();
+        updateBounds();
         repaint();
     }
 }
@@ -144,6 +164,10 @@ void PlaybackRegionView::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* 
 {
     if (playbackRegion->getName() != newProperties->name || playbackRegion->getColor() != newProperties->color)
         repaint();
+
+    if (playbackRegion->getStartInPlaybackTime() != newProperties->startInPlaybackTime ||
+        playbackRegion->getDurationInPlaybackTime() != newProperties->durationInPlaybackTime)
+        documentView.invalidateTimeRange();
 }
 
 void PlaybackRegionView::didUpdatePlaybackRegionContent (ARAPlaybackRegion* /*playbackRegion*/, ARAContentUpdateScopes scopeFlags)

@@ -1122,7 +1122,7 @@ private:
 
     void allocateData()
     {
-       #if (! JUCE_GCC) || (__GNUC__ * 100 + __GNUC_MINOR__) >= 409
+       #if ! JUCE_PROJUCER_LIVE_BUILD && (! JUCE_GCC || (__GNUC__ * 100 + __GNUC_MINOR__) >= 409)
         static_assert (alignof (Type) <= detail::maxAlignment,
                        "AudioBuffer cannot hold types with alignment requirements larger than that guaranteed by malloc");
        #endif

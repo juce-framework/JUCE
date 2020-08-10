@@ -23,7 +23,7 @@ RegionSequenceViewController::~RegionSequenceViewController()
 
 void RegionSequenceViewController::addRegionSequenceViewAndMakeVisible (ARAPlaybackRegion* playbackRegion)
 {
-    auto view = new PlaybackRegionView (documentView, playbackRegion);
+    auto view = new PlaybackRegionView (*this, playbackRegion);
     playbackRegionViews.add (view);
     documentView.getPlaybackRegionsView().addAndMakeVisible (view);
 }
@@ -44,12 +44,7 @@ void RegionSequenceViewController::setRegionsViewBoundsByYRange (int y, int heig
     trackHeaderView.setBounds (0, y, trackHeaderView.getParentWidth(), height);
 
     for (auto regionView : playbackRegionViews)
-    {
-        const auto regionTimeRange = regionView->getTimeRange();
-        const int startX = documentView.getPlaybackRegionsViewsXForTime (regionTimeRange.getStart());
-        const int endX = documentView.getPlaybackRegionsViewsXForTime (regionTimeRange.getEnd());
-        regionView->setBounds (startX, y, endX - startX, height);
-    }
+        regionView->updateBounds();
 }
 
 //==============================================================================

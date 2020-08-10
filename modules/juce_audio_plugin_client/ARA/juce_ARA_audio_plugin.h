@@ -1,7 +1,7 @@
 #pragma once
 
 // Include juce preamble
-#include "AppConfig.h"
+#include "JucePluginDefines.h"
 #include <juce_core/juce_core.h>
 
 #if JucePlugin_Enable_ARA
@@ -34,7 +34,10 @@ namespace juce
 
 namespace juce
 {
+    using ARAViewSelection = ARA::PlugIn::ViewSelection;
     using ARAContentUpdateScopes = ARA::ContentUpdateScopes;
+    using ARARestoreObjectsFilter = ARA::PlugIn::RestoreObjectsFilter;
+    using ARAStoreObjectsFilter = ARA::PlugIn::StoreObjectsFilter;
 
     inline String convertARAString (ARA::ARAUtf8String str) { return String (CharPointer_UTF8 (str)); }
     inline String convertOptionalARAString (ARA::ARAUtf8String str, const String& fallbackString = String()) { return (str != nullptr) ? convertARAString(str) : fallbackString; }

@@ -1,14 +1,14 @@
-class %%class_name%%  : public AudioProcessor
+class %%class_name%%  : public juce::AudioProcessor
 {
 public:
     //==============================================================================
     %%class_name%%()
-        : AudioProcessor (BusesProperties().withInput  ("Input",  AudioChannelSet::stereo())
-                                           .withOutput ("Output", AudioChannelSet::stereo()))
+        : AudioProcessor (BusesProperties().withInput  ("Input",  juce::AudioChannelSet::stereo())
+                                           .withOutput ("Output", juce::AudioChannelSet::stereo()))
     {
     }
 
-    ~%%class_name%%()
+    ~%%class_name%%() override
     {
     }
 
@@ -25,9 +25,9 @@ public:
         // spare memory, etc.
     }
 
-    void processBlock (AudioBuffer<float>& buffer, MidiBuffer&) override
+    void processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer&) override
     {
-        ScopedNoDenormals noDenormals;
+        juce::ScopedNoDenormals noDenormals;
         auto totalNumInputChannels  = getTotalNumInputChannels();
         auto totalNumOutputChannels = getTotalNumOutputChannels();
 
@@ -55,24 +55,24 @@ public:
     }
 
     //==============================================================================
-    AudioProcessorEditor* createEditor() override          { return nullptr; }
-    bool hasEditor() const override                        { return false;   }
+    juce::AudioProcessorEditor* createEditor() override          { return nullptr; }
+    bool hasEditor() const override                              { return false;   }
 
     //==============================================================================
-    const String getName() const override                  { return "%%name%%"; }
-    bool acceptsMidi() const override                      { return false; }
-    bool producesMidi() const override                     { return false; }
-    double getTailLengthSeconds() const override           { return 0; }
+    const juce::String getName() const override                  { return "%%name%%"; }
+    bool acceptsMidi() const override                            { return false; }
+    bool producesMidi() const override                           { return false; }
+    double getTailLengthSeconds() const override                 { return 0; }
 
     //==============================================================================
-    int getNumPrograms() override                          { return 1; }
-    int getCurrentProgram() override                       { return 0; }
-    void setCurrentProgram (int) override                  {}
-    const String getProgramName (int) override             { return {}; }
-    void changeProgramName (int, const String&) override   {}
+    int getNumPrograms() override                                { return 1; }
+    int getCurrentProgram() override                             { return 0; }
+    void setCurrentProgram (int) override                        {}
+    const juce::String getProgramName (int) override             { return {}; }
+    void changeProgramName (int, const juce::String&) override   {}
 
     //==============================================================================
-    void getStateInformation (MemoryBlock& destData) override
+    void getStateInformation (juce::MemoryBlock& destData) override
     {
         // You should use this method to store your parameters in the memory block.
         // You could do that either as raw data, or use the XML or ValueTree classes
@@ -90,8 +90,8 @@ public:
     {
         // This is the place where you check if the layout is supported.
         // In this template code we only support mono or stereo.
-        if (layouts.getMainOutputChannelSet() != AudioChannelSet::mono()
-            && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())
+        if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
+            && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
             return false;
 
         // This checks if the input layout matches the output layout

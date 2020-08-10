@@ -312,8 +312,8 @@ struct DSPDemo  : public AudioSource,
 
         inputSource->getNextAudioBlock (bufferToFill);
 
-        dsp::AudioBlock<float> block (*bufferToFill.buffer,
-                                      (size_t) bufferToFill.startSample);
+        AudioBlock<float> block (*bufferToFill.buffer,
+                                 (size_t) bufferToFill.startSample);
 
         ScopedLock audioLock (audioCallbackLock);
         this->process (ProcessContextReplacing<float> (block));

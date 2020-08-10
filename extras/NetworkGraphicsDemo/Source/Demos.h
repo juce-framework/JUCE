@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -91,7 +90,7 @@ struct BackgroundLogo  : public AnimatedContent
     void reset() override {}
     void handleTouch (Point<float>) override {}
 
-    void generateCanvas (Graphics& g, SharedCanvasDescription& canvas, Rectangle<float> activeArea) override
+    void generateCanvas (Graphics& g, SharedCanvasDescription& canvas, Rectangle<float>) override
     {
         logo->drawWithin (g, canvas.getLimits().reduced (3.0f), RectanglePlacement (RectanglePlacement::centred), 0.6f);
     }
@@ -473,7 +472,7 @@ struct MultiLogo  : public BackgroundLogo
 {
     String getName() const override      { return "Multi-Logo " + String ((int) numHorizontalLogos); }
 
-    void generateCanvas (Graphics& g, SharedCanvasDescription& canvas, Rectangle<float> activeArea) override
+    void generateCanvas (Graphics& g, SharedCanvasDescription& canvas, Rectangle<float>) override
     {
         float indent = 0.5f;
         float logoSize = canvas.getLimits().getWidth() / numHorizontalLogos;

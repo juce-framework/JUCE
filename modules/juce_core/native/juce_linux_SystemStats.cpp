@@ -54,7 +54,7 @@ bool SystemStats::isOperatingSystem64Bit()
 }
 
 //==============================================================================
-static inline String getCpuInfo (const char* key)
+static String getCpuInfo (const char* key)
 {
     return readPosixConfigFileValue ("/proc/cpuinfo", key);
 }
@@ -209,7 +209,7 @@ int64 Time::getHighResolutionTicksPerSecond() noexcept
 
 double Time::getMillisecondCounterHiRes() noexcept
 {
-    return getHighResolutionTicks() * 0.001;
+    return (double) getHighResolutionTicks() * 0.001;
 }
 
 bool Time::setSystemTimeToThisTime() const

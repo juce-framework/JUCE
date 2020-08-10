@@ -620,7 +620,7 @@ class ActivityLauncher   : public FragmentOverlay
 public:
     ActivityLauncher (const LocalRef<jobject>& intentToUse,
                       int requestCodeToUse,
-                      std::function<void(int, int, LocalRef<jobject>)> && callbackToUse)
+                      std::function<void (int, int, LocalRef<jobject>)> && callbackToUse)
         : intent (intentToUse), requestCode (requestCodeToUse), callback (std::move (callbackToUse))
     {}
 
@@ -642,11 +642,11 @@ public:
 private:
     GlobalRef intent;
     int requestCode;
-    std::function<void(int, int, LocalRef<jobject>)> callback;
+    std::function<void (int, int, LocalRef<jobject>)> callback;
 };
 
 void startAndroidActivityForResult (const LocalRef<jobject>& intent, int requestCode,
-                                    std::function<void(int, int, LocalRef<jobject>)> && callback)
+                                    std::function<void (int, int, LocalRef<jobject>)> && callback)
 {
     auto* activityLauncher = new ActivityLauncher (intent, requestCode, std::move (callback));
     activityLauncher->open();

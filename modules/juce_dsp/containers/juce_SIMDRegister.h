@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -127,14 +126,14 @@ struct SIMDRegister
     //==============================================================================
     /** Creates a new SIMDRegister from the corresponding scalar primitive.
         The scalar is extended to all elements of the vector. */
-    inline static SIMDRegister JUCE_VECTOR_CALLTYPE expand (ElementType s) noexcept         { return {CmplxOps::expand (s)}; }
+    static SIMDRegister JUCE_VECTOR_CALLTYPE expand (ElementType s) noexcept         { return {CmplxOps::expand (s)}; }
 
     /** Creates a new SIMDRegister from the internal SIMD type (for example
         __mm128 for single-precision floating point on SSE architectures). */
-    inline static SIMDRegister JUCE_VECTOR_CALLTYPE fromNative (vSIMDType a) noexcept       { return {a}; }
+    static SIMDRegister JUCE_VECTOR_CALLTYPE fromNative (vSIMDType a) noexcept       { return {a}; }
 
     /** Creates a new SIMDRegister from the first SIMDNumElements of a scalar array. */
-    inline static SIMDRegister JUCE_VECTOR_CALLTYPE fromRawArray (const ElementType* a) noexcept
+    static SIMDRegister JUCE_VECTOR_CALLTYPE fromRawArray (const ElementType* a) noexcept
     {
         jassert (isSIMDAligned (a));
         return {CmplxOps::load (a)};
@@ -283,43 +282,43 @@ struct SIMDRegister
     /** Returns a SIMDRegister of the corresponding integral type where each element has each bit set
         if the corresponding element of a is equal to the corresponding element of b, or zero otherwise.
         The result can then be used in bit operations defined above to avoid branches in vector SIMD code. */
-    static inline vMaskType JUCE_VECTOR_CALLTYPE equal              (SIMDRegister a, SIMDRegister b) noexcept { return toMaskType (NativeOps::equal (a.value, b.value)); }
+    static vMaskType JUCE_VECTOR_CALLTYPE equal              (SIMDRegister a, SIMDRegister b) noexcept { return toMaskType (NativeOps::equal (a.value, b.value)); }
 
     /** Returns a SIMDRegister of the corresponding integral type where each element has each bit set
         if the corresponding element of a is not equal to the corresponding element of b, or zero otherwise.
         The result can then be used in bit operations defined above to avoid branches in vector SIMD code. */
-    static inline vMaskType JUCE_VECTOR_CALLTYPE notEqual           (SIMDRegister a, SIMDRegister b) noexcept { return toMaskType (NativeOps::notEqual (a.value, b.value)); }
+    static vMaskType JUCE_VECTOR_CALLTYPE notEqual           (SIMDRegister a, SIMDRegister b) noexcept { return toMaskType (NativeOps::notEqual (a.value, b.value)); }
 
     /** Returns a SIMDRegister of the corresponding integral type where each element has each bit set
         if the corresponding element of a is less than to the corresponding element of b, or zero otherwise.
         The result can then be used in bit operations defined above to avoid branches in vector SIMD code. */
-    static inline vMaskType JUCE_VECTOR_CALLTYPE lessThan           (SIMDRegister a, SIMDRegister b) noexcept { return toMaskType (NativeOps::greaterThan (b.value, a.value)); }
+    static vMaskType JUCE_VECTOR_CALLTYPE lessThan           (SIMDRegister a, SIMDRegister b) noexcept { return toMaskType (NativeOps::greaterThan (b.value, a.value)); }
 
     /** Returns a SIMDRegister of the corresponding integral type where each element has each bit set
         if the corresponding element of a is than or equal to the corresponding element of b, or zero otherwise.
         The result can then be used in bit operations defined above to avoid branches in vector SIMD code. */
-    static inline vMaskType JUCE_VECTOR_CALLTYPE lessThanOrEqual    (SIMDRegister a, SIMDRegister b) noexcept { return toMaskType (NativeOps::greaterThanOrEqual (b.value, a.value)); }
+    static vMaskType JUCE_VECTOR_CALLTYPE lessThanOrEqual    (SIMDRegister a, SIMDRegister b) noexcept { return toMaskType (NativeOps::greaterThanOrEqual (b.value, a.value)); }
 
     /** Returns a SIMDRegister of the corresponding integral type where each element has each bit set
         if the corresponding element of a is greater than to the corresponding element of b, or zero otherwise.
         The result can then be used in bit operations defined above to avoid branches in vector SIMD code. */
-    static inline vMaskType JUCE_VECTOR_CALLTYPE greaterThan        (SIMDRegister a, SIMDRegister b) noexcept { return toMaskType (NativeOps::greaterThan (a.value, b.value)); }
+    static vMaskType JUCE_VECTOR_CALLTYPE greaterThan        (SIMDRegister a, SIMDRegister b) noexcept { return toMaskType (NativeOps::greaterThan (a.value, b.value)); }
 
     /** Returns a SIMDRegister of the corresponding integral type where each element has each bit set
         if the corresponding element of a is greater than or equal to the corresponding element of b, or zero otherwise.
         The result can then be used in bit operations defined above to avoid branches in vector SIMD code. */
-    static inline vMaskType JUCE_VECTOR_CALLTYPE greaterThanOrEqual (SIMDRegister a, SIMDRegister b) noexcept { return toMaskType (NativeOps::greaterThanOrEqual (a.value, b.value)); }
+    static vMaskType JUCE_VECTOR_CALLTYPE greaterThanOrEqual (SIMDRegister a, SIMDRegister b) noexcept { return toMaskType (NativeOps::greaterThanOrEqual (a.value, b.value)); }
 
      //==============================================================================
     /** Returns a new vector where each element is the minimum of the corresponding element of a and b. */
-    static inline SIMDRegister JUCE_VECTOR_CALLTYPE min (SIMDRegister a, SIMDRegister b) noexcept    { return { NativeOps::min (a.value, b.value) }; }
+    static SIMDRegister JUCE_VECTOR_CALLTYPE min (SIMDRegister a, SIMDRegister b) noexcept    { return { NativeOps::min (a.value, b.value) }; }
 
     /** Returns a new vector where each element is the maximum of the corresponding element of a and b. */
-    static inline SIMDRegister JUCE_VECTOR_CALLTYPE max (SIMDRegister a, SIMDRegister b) noexcept    { return { NativeOps::max (a.value, b.value) }; }
+    static SIMDRegister JUCE_VECTOR_CALLTYPE max (SIMDRegister a, SIMDRegister b) noexcept    { return { NativeOps::max (a.value, b.value) }; }
 
     //==============================================================================
     /** Multiplies b and c and adds the result to a. */
-    static inline SIMDRegister JUCE_VECTOR_CALLTYPE multiplyAdd (SIMDRegister a, const SIMDRegister b, SIMDRegister c) noexcept
+    static SIMDRegister JUCE_VECTOR_CALLTYPE multiplyAdd (SIMDRegister a, const SIMDRegister b, SIMDRegister c) noexcept
     {
         return { CmplxOps::muladd (a.value, b.value, c.value) };
     }
@@ -331,18 +330,18 @@ struct SIMDRegister
     //==============================================================================
     /** Truncates each element to its integer part.
         Effectively discards the fractional part of each element. A.k.a. round to zero. */
-    static inline SIMDRegister JUCE_VECTOR_CALLTYPE truncate (SIMDRegister a) noexcept    { return { NativeOps::truncate (a.value) }; }
+    static SIMDRegister JUCE_VECTOR_CALLTYPE truncate (SIMDRegister a) noexcept    { return { NativeOps::truncate (a.value) }; }
 
     //==============================================================================
     /** Returns the absolute value of each element. */
-    static inline SIMDRegister JUCE_VECTOR_CALLTYPE abs (SIMDRegister a) noexcept
+    static SIMDRegister JUCE_VECTOR_CALLTYPE abs (SIMDRegister a) noexcept
     {
         return a - (a * (expand (ElementType (2)) & lessThan (a, expand (ElementType (0)))));
     }
 
     //==============================================================================
     /** Checks if the given pointer is sufficiently aligned for using SIMD operations. */
-    static inline bool isSIMDAligned (const ElementType* ptr) noexcept
+    static bool isSIMDAligned (const ElementType* ptr) noexcept
     {
         uintptr_t bitmask = SIMDRegisterSize - 1;
         return (reinterpret_cast<uintptr_t> (ptr) & bitmask) == 0;
@@ -353,13 +352,13 @@ struct SIMDRegister
         If the current position in memory is already aligned then this method
         will simply return the pointer.
     */
-    static inline ElementType* getNextSIMDAlignedPtr (ElementType* ptr) noexcept
+    static ElementType* getNextSIMDAlignedPtr (ElementType* ptr) noexcept
     {
         return snapPointerToAlignment (ptr, SIMDRegisterSize);
     }
 
 private:
-    static inline vMaskType JUCE_VECTOR_CALLTYPE toMaskType (vSIMDType a) noexcept
+    static vMaskType JUCE_VECTOR_CALLTYPE toMaskType (vSIMDType a) noexcept
     {
         union
         {
@@ -371,7 +370,7 @@ private:
         return vMaskType::fromNative (u.out);
     }
 
-    static inline vSIMDType JUCE_VECTOR_CALLTYPE toVecType (vMaskSIMDType a) noexcept
+    static vSIMDType JUCE_VECTOR_CALLTYPE toVecType (vMaskSIMDType a) noexcept
     {
         union
         {
@@ -383,7 +382,7 @@ private:
         return u.out;
     }
 
-    static inline vSIMDType JUCE_VECTOR_CALLTYPE toVecType (MaskType a) noexcept
+    static vSIMDType JUCE_VECTOR_CALLTYPE toVecType (MaskType a) noexcept
     {
         union
         {

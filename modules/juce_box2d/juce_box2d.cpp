@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -35,26 +34,14 @@
 
 #include "juce_box2d.h"
 
-#if defined JUCE_CLANG
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wconversion"
- #pragma clang diagnostic ignored "-Wsign-conversion"
- #pragma clang diagnostic ignored "-Wfloat-conversion"
- #pragma clang diagnostic ignored "-Wcast-align"
- #pragma clang diagnostic ignored "-Wswitch-enum"
- #if __has_warning("-Wzero-as-null-pointer-constant")
-  #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
- #endif
-#elif defined JUCE_GCC
- #pragma GCC diagnostic push
- #pragma GCC diagnostic ignored "-Wconversion"
- #pragma GCC diagnostic ignored "-Wsign-conversion"
- #pragma GCC diagnostic ignored "-Wfloat-conversion"
- #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
- #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
- #pragma GCC diagnostic ignored "-Wswitch-enum"
- #pragma GCC diagnostic ignored "-Wswitch-default"
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
+                                     "-Wsign-conversion",
+                                     "-Wfloat-conversion",
+                                     "-Wcast-align",
+                                     "-Wswitch-enum",
+                                     "-Wswitch-default",
+                                     "-Wunused-but-set-variable",
+                                     "-Wzero-as-null-pointer-constant")
 
 #include <cstdarg>
 
@@ -113,8 +100,4 @@ using uint32 = juce::uint32;
 
 #include "utils/juce_Box2DRenderer.cpp"
 
-#if defined JUCE_CLANG
- #pragma clang diagnostic pop
-#elif defined JUCE_GCC
- #pragma GCC diagnostic pop
-#endif
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE

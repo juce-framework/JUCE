@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -49,10 +48,24 @@
  #include <mkl_dfti.h>
 #endif
 
+#if _IPP_SEQUENTIAL_STATIC || _IPP_SEQUENTIAL_DYNAMIC || _IPP_PARALLEL_STATIC || _IPP_PARALLEL_DYNAMIC
+ #include <ippcore.h>
+ #include <ipps.h>
+ #define JUCE_IPP_AVAILABLE 1
+#endif
+
+#include "containers/juce_FixedSizeFunction.h"
+
 #include "processors/juce_FIRFilter.cpp"
 #include "processors/juce_IIRFilter.cpp"
-#include "processors/juce_LadderFilter.cpp"
+#include "processors/juce_FirstOrderTPTFilter.cpp"
+#include "processors/juce_Panner.cpp"
 #include "processors/juce_Oversampling.cpp"
+#include "processors/juce_BallisticsFilter.cpp"
+#include "processors/juce_LinkwitzRileyFilter.cpp"
+#include "processors/juce_DelayLine.cpp"
+#include "processors/juce_DryWetMixer.cpp"
+#include "processors/juce_StateVariableTPTFilter.cpp"
 #include "maths/juce_SpecialFunctions.cpp"
 #include "maths/juce_Matrix.cpp"
 #include "maths/juce_LookupTable.cpp"
@@ -60,6 +73,12 @@
 #include "frequency/juce_Convolution.cpp"
 #include "frequency/juce_Windowing.cpp"
 #include "filter_design/juce_FilterDesign.cpp"
+#include "widgets/juce_LadderFilter.cpp"
+#include "widgets/juce_Compressor.cpp"
+#include "widgets/juce_NoiseGate.cpp"
+#include "widgets/juce_Limiter.cpp"
+#include "widgets/juce_Phaser.cpp"
+#include "widgets/juce_Chorus.cpp"
 
 #if JUCE_USE_SIMD
  #if defined(__i386__) || defined(__amd64__) || defined(_M_X64) || defined(_X86_) || defined(_M_IX86)
@@ -84,6 +103,8 @@
  #endif
 
  #include "containers/juce_AudioBlock_test.cpp"
+ #include "containers/juce_FixedSizeFunction_test.cpp"
+ #include "frequency/juce_Convolution_test.cpp"
  #include "frequency/juce_FFT_test.cpp"
  #include "processors/juce_FIRFilter_test.cpp"
  #include "processors/juce_ProcessorChain_test.cpp"

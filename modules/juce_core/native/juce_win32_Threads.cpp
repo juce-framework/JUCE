@@ -23,12 +23,12 @@
 namespace juce
 {
 
-HWND juce_messageWindowHandle = 0;  // (this is used by other parts of the codebase)
+HWND juce_messageWindowHandle = nullptr;  // (this is used by other parts of the codebase)
 
 void* getUser32Function (const char* functionName)
 {
     HMODULE module = GetModuleHandleA ("user32.dll");
-    jassert (module != 0);
+    jassert (module != nullptr);
     return (void*) GetProcAddress (module, functionName);
 }
 
@@ -53,8 +53,8 @@ void JUCE_API juce_threadEntryPoint (void*);
 
 static unsigned int __stdcall threadEntryProc (void* userData)
 {
-    if (juce_messageWindowHandle != 0)
-        AttachThreadInput (GetWindowThreadProcessId (juce_messageWindowHandle, 0),
+    if (juce_messageWindowHandle != nullptr)
+        AttachThreadInput (GetWindowThreadProcessId (juce_messageWindowHandle, nullptr),
                            GetCurrentThreadId(), TRUE);
 
     juce_threadEntryPoint (userData);
@@ -66,7 +66,7 @@ static unsigned int __stdcall threadEntryProc (void* userData)
 void Thread::launchThread()
 {
     unsigned int newThreadId;
-    threadHandle = (void*) _beginthreadex (0, (unsigned int) threadStackSize,
+    threadHandle = (void*) _beginthreadex (nullptr, (unsigned int) threadStackSize,
                                            &threadEntryProc, this, 0, &newThreadId);
     threadId = (ThreadID) (pointer_sized_int) newThreadId;
 }
@@ -74,13 +74,13 @@ void Thread::launchThread()
 void Thread::closeThreadHandle()
 {
     CloseHandle ((HANDLE) threadHandle.get());
-    threadId = 0;
-    threadHandle = 0;
+    threadId = nullptr;
+    threadHandle = nullptr;
 }
 
 void Thread::killThread()
 {
-    if (threadHandle.get() != 0)
+    if (threadHandle.get() != nullptr)
     {
        #if JUCE_DEBUG
         OutputDebugStringA ("** Warning - Forced thread termination **\n");
@@ -132,7 +132,7 @@ bool Thread::setThreadPriority (void* handle, int priority)
     else if (priority < 9)  pri = THREAD_PRIORITY_ABOVE_NORMAL;
     else if (priority < 10) pri = THREAD_PRIORITY_HIGHEST;
 
-    if (handle == 0)
+    if (handle == nullptr)
         handle = GetCurrentThread();
 
     return SetThreadPriority (handle, pri) != FALSE;
@@ -158,7 +158,7 @@ struct SleepEvent
     ~SleepEvent() noexcept
     {
         CloseHandle (handle);
-        handle = 0;
+        handle = nullptr;
     }
 
     HANDLE handle;
@@ -170,7 +170,7 @@ void JUCE_CALLTYPE Thread::sleep (const int millisecs)
 {
     jassert (millisecs >= 0);
 
-    if (millisecs >= 10 || sleepEvent.handle == 0)
+    if (millisecs >= 10 || sleepEvent.handle == nullptr)
         Sleep ((DWORD) millisecs);
     else
         // unlike Sleep() this is guaranteed to return to the current thread after
@@ -260,7 +260,7 @@ void JUCE_CALLTYPE Process::terminate()
 bool juce_isRunningInWine()
 {
     HMODULE ntdll = GetModuleHandleA ("ntdll");
-    return ntdll != 0 && GetProcAddress (ntdll, "wine_get_version") != nullptr;
+    return ntdll != nullptr && GetProcAddress (ntdll, "wine_get_version") != nullptr;
 }
 
 //==============================================================================
@@ -292,18 +292,18 @@ class InterProcessLock::Pimpl
 {
 public:
     Pimpl (String name, const int timeOutMillisecs)
-        : handle (0), refCount (1)
+        : handle (nullptr), refCount (1)
     {
         name = name.replaceCharacter ('\\', '/');
-        handle = CreateMutexW (0, TRUE, ("Global\\" + name).toWideCharPointer());
+        handle = CreateMutexW (nullptr, TRUE, ("Global\\" + name).toWideCharPointer());
 
         // Not 100% sure why a global mutex sometimes can't be allocated, but if it fails, fall back to
         // a local one. (A local one also sometimes fails on other machines so neither type appears to be
         // universally reliable)
-        if (handle == 0)
-            handle = CreateMutexW (0, TRUE, ("Local\\" + name).toWideCharPointer());
+        if (handle == nullptr)
+            handle = CreateMutexW (nullptr, TRUE, ("Local\\" + name).toWideCharPointer());
 
-        if (handle != 0 && GetLastError() == ERROR_ALREADY_EXISTS)
+        if (handle != nullptr && GetLastError() == ERROR_ALREADY_EXISTS)
         {
             if (timeOutMillisecs == 0)
             {
@@ -311,7 +311,7 @@ public:
                 return;
             }
 
-            switch (WaitForSingleObject (handle, timeOutMillisecs < 0 ? INFINITE : timeOutMillisecs))
+            switch (WaitForSingleObject (handle, timeOutMillisecs < 0 ? INFINITE : (DWORD) timeOutMillisecs))
             {
                 case WAIT_OBJECT_0:
                 case WAIT_ABANDONED:
@@ -332,11 +332,11 @@ public:
 
     void close()
     {
-        if (handle != 0)
+        if (handle != nullptr)
         {
             ReleaseMutex (handle);
             CloseHandle (handle);
-            handle = 0;
+            handle = nullptr;
         }
     }
 
@@ -361,7 +361,7 @@ bool InterProcessLock::enter (const int timeOutMillisecs)
     {
         pimpl.reset (new Pimpl (name, timeOutMillisecs));
 
-        if (pimpl->handle == 0)
+        if (pimpl->handle == nullptr)
             pimpl.reset();
     }
     else
@@ -388,20 +388,20 @@ class ChildProcess::ActiveProcess
 {
 public:
     ActiveProcess (const String& command, int streamFlags)
-        : ok (false), readPipe (0), writePipe (0)
+        : ok (false), readPipe (nullptr), writePipe (nullptr)
     {
-        SECURITY_ATTRIBUTES securityAtts = { 0 };
+        SECURITY_ATTRIBUTES securityAtts = {};
         securityAtts.nLength = sizeof (securityAtts);
         securityAtts.bInheritHandle = TRUE;
 
         if (CreatePipe (&readPipe, &writePipe, &securityAtts, 0)
              && SetHandleInformation (readPipe, HANDLE_FLAG_INHERIT, 0))
         {
-            STARTUPINFOW startupInfo = { 0 };
+            STARTUPINFOW startupInfo = {};
             startupInfo.cb = sizeof (startupInfo);
 
-            startupInfo.hStdOutput = (streamFlags & wantStdOut) != 0 ? writePipe : 0;
-            startupInfo.hStdError  = (streamFlags & wantStdErr) != 0 ? writePipe : 0;
+            startupInfo.hStdOutput = (streamFlags & wantStdOut) != 0 ? writePipe : nullptr;
+            startupInfo.hStdError  = (streamFlags & wantStdErr) != 0 ? writePipe : nullptr;
             startupInfo.dwFlags = STARTF_USESTDHANDLES;
 
             ok = CreateProcess (nullptr, const_cast<LPWSTR> (command.toWideCharPointer()),
@@ -418,10 +418,10 @@ public:
             CloseHandle (processInfo.hProcess);
         }
 
-        if (readPipe != 0)
+        if (readPipe != nullptr)
             CloseHandle (readPipe);
 
-        if (writePipe != 0)
+        if (writePipe != nullptr)
             CloseHandle (writePipe);
     }
 
@@ -453,12 +453,12 @@ public:
             else
             {
                 DWORD numRead = 0;
-                if (! ReadFile ((HANDLE) readPipe, dest, numToDo, &numRead, nullptr))
+                if (! ReadFile ((HANDLE) readPipe, dest, (DWORD) numToDo, &numRead, nullptr))
                     break;
 
-                total += numRead;
+                total += (int) numRead;
                 dest = addBytesToPointer (dest, numRead);
-                numNeeded -= numRead;
+                numNeeded -= (int) numRead;
             }
         }
 
@@ -539,7 +539,7 @@ struct HighResolutionTimer::Pimpl
             {
                 const int actualPeriod = jlimit ((int) tc.wPeriodMin, (int) tc.wPeriodMax, newPeriod);
 
-                timerID = timeSetEvent (actualPeriod, tc.wPeriodMin, callbackFunction, (DWORD_PTR) this,
+                timerID = timeSetEvent ((UINT) actualPeriod, tc.wPeriodMin, callbackFunction, (DWORD_PTR) this,
                                         TIME_PERIODIC | TIME_CALLBACK_FUNCTION | 0x100 /*TIME_KILL_SYNCHRONOUS*/);
             }
         }

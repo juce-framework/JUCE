@@ -8,7 +8,7 @@ ARASampleProjectAudioProcessor::ARASampleProjectAudioProcessor()
 {
 }
 
-ARASampleProjectAudioProcessor::ARASampleProjectAudioProcessor(bool useBuffering)
+ARASampleProjectAudioProcessor::ARASampleProjectAudioProcessor (bool useBuffering)
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
@@ -63,15 +63,8 @@ double ARASampleProjectAudioProcessor::getTailLengthSeconds() const
 {
     double tail{};
     if (auto playbackRenderer = getARAPlaybackRenderer())
-    {
-        auto documentController = playbackRenderer->getDocumentController();
         for (auto playbackRegion : playbackRenderer->getPlaybackRegions<ARAPlaybackRegion>())
-        {
-            ARA::ARATimeDuration regionHeadTime{}, regionTailTime{};
-            documentController->getPlaybackRegionHeadAndTailTime (ARA::PlugIn::toRef (playbackRegion), &regionHeadTime, &regionTailTime);
-            tail = jmax (tail, regionTailTime);
-        }
-    }
+            tail = jmax (tail, playbackRegion->getTailTime());
 
     return tail;
 }

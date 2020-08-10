@@ -49,7 +49,7 @@ void ARAAudioSourceReader::willUpdateAudioSourceProperties (ARAAudioSource* audi
     }
 }
 
-void ARAAudioSourceReader::didUpdateAudioSourceContent (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags)
+void ARAAudioSourceReader::doUpdateAudioSourceContent (ARAAudioSource* audioSource, ARAContentUpdateScopes scopeFlags)
 {
     jassert (audioSourceBeingRead == audioSource);
 
@@ -259,6 +259,22 @@ bool ARAPlaybackRegionReader::getCurrentPosition (CurrentPositionInfo& result)
     result.timeInSeconds = static_cast<double> (renderPosition) / sampleRate;
     result.isPlaying = true;
     return true;
+}
+
+
+void ARAPlaybackRegionReader::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties)
+{
+    jassert (ARA::contains (audioProcessorAraExtension->getARAPlaybackRenderer()->getPlaybackRegions(), playbackRegion));
+
+    if ((playbackRegion->getStartInAudioModificationTime() != newProperties->startInModificationTime) ||
+        (playbackRegion->getDurationInAudioModificationTime() != newProperties->durationInModificationTime) ||
+        (playbackRegion->getStartInPlaybackTime() != newProperties->startInPlaybackTime) ||
+        (playbackRegion->getDurationInPlaybackTime() != newProperties->durationInPlaybackTime)||
+        (playbackRegion->isTimestretchEnabled() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretch) != 0)) ||
+        (playbackRegion->isTimeStretchReflectingTempo() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretchReflectingTempo) != 0)) ||
+        (playbackRegion->hasContentBasedFadeAtHead() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationContentBasedFadeAtHead) != 0)) ||
+        (playbackRegion->hasContentBasedFadeAtTail() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationContentBasedFadeAtTail) != 0)))
+        invalidate();
 }
 
 void ARAPlaybackRegionReader::didUpdatePlaybackRegionContent (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags)

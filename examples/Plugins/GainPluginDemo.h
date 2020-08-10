@@ -71,6 +71,11 @@ public:
         buffer.applyGain (*gain);
     }
 
+    void processBlock (AudioBuffer<double>& buffer, MidiBuffer&) override
+    {
+        buffer.applyGain ((float) *gain);
+    }
+
     //==============================================================================
     AudioProcessorEditor* createEditor() override          { return new GenericAudioProcessorEditor (*this); }
     bool hasEditor() const override                        { return true;   }

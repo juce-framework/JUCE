@@ -20,6 +20,8 @@
   ==============================================================================
 */
 
+#pragma once
+
 namespace juce
 {
 
@@ -37,7 +39,7 @@ namespace juce
 #endif
 
 /** This macro defines the C calling convention used as the standard for JUCE calls. */
-#if JUCE_MSVC
+#if JUCE_WINDOWS
  #define JUCE_CALLTYPE   __stdcall
  #define JUCE_CDECL      __cdecl
 #else

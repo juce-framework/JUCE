@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -240,7 +239,7 @@ public:
         setFont (font);
         setText (message, false);
 
-        bestWidth = 2 * (int) std::sqrt (font.getHeight() * font.getStringWidth (message));
+        bestWidth = 2 * (int) std::sqrt (font.getHeight() * (float) font.getStringWidth (message));
     }
 
     void updateLayout (const int width)
@@ -250,7 +249,7 @@ public:
         s.append (getText(), getFont());
 
         TextLayout text;
-        text.createLayoutWithBalancedLineLengths (s, width - 8.0f);
+        text.createLayoutWithBalancedLineLengths (s, (float) width - 8.0f);
         setSize (width, jmin (width, (int) (text.getHeight() + getFont().getHeight())));
     }
 
@@ -356,8 +355,8 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
     auto wid = jmax (messageFont.getStringWidth (text),
                      messageFont.getStringWidth (getName()));
 
-    auto sw = (int) std::sqrt (messageFont.getHeight() * wid);
-    auto w = jmin (300 + sw * 2, (int) (getParentWidth() * 0.7f));
+    auto sw = (int) std::sqrt (messageFont.getHeight() * (float) wid);
+    auto w = jmin (300 + sw * 2, (int) ((float) getParentWidth() * 0.7f));
     const int edgeGap = 10;
     const int labelHeight = 18;
     int iconSpace = 0;
@@ -383,7 +382,7 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
     }
 
     w = jmax (350, (int) textLayout.getWidth() + iconSpace + edgeGap * 4);
-    w = jmin (w, (int) (getParentWidth() * 0.7f));
+    w = jmin (w, (int) ((float) getParentWidth() * 0.7f));
 
     auto textLayoutH = (int) textLayout.getHeight();
     auto textBottom = 16 + titleH + textLayoutH;
@@ -413,12 +412,12 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
     for (auto* tb : textBlocks)
         w = jmax (w, static_cast<const AlertTextComp*> (tb)->bestWidth);
 
-    w = jmin (w, (int) (getParentWidth() * 0.7f));
+    w = jmin (w, (int) ((float) getParentWidth() * 0.7f));
 
     for (auto* tb : textBlocks)
     {
         auto* ac = static_cast<AlertTextComp*> (tb);
-        ac->updateLayout ((int) (w * 0.8f));
+        ac->updateLayout ((int) ((float) w * 0.8f));
         h += ac->getHeight() + 10;
     }
 
@@ -444,7 +443,7 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
         totalWidth += b->getWidth() + spacer;
 
     auto x = (w - totalWidth) / 2;
-    auto y = (int) (getHeight() * 0.95f);
+    auto y = (int) ((float) getHeight() * 0.95f);
 
     for (auto* c : buttons)
     {

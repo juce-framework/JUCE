@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -124,12 +123,12 @@ public:
         switch (mode)
         {
             case solidColour:
-                s << "Colour " << type << "Colour = " << CodeHelpers::colourToCode (colour) << ";\n";
+                s << "juce::Colour " << type << "Colour = " << CodeHelpers::colourToCode (colour) << ";\n";
                 break;
 
             case linearGradient:
             case radialGradient:
-                s << "Colour " << type << "Colour1 = " << CodeHelpers::colourToCode (gradCol1) << ", " << type << "Colour2 = " << CodeHelpers::colourToCode (gradCol2) << ";\n";
+                s << "juce::Colour " << type << "Colour1 = " << CodeHelpers::colourToCode (gradCol1) << ", " << type << "Colour2 = " << CodeHelpers::colourToCode (gradCol2) << ";\n";
                 break;
 
             case imageBrush:
@@ -161,7 +160,7 @@ public:
                     positionToCode (gradPos1, code.document->getComponentLayout(), x1, y1, w, h);
                     positionToCode (gradPos2, code.document->getComponentLayout(), x2, y2, w, h);
 
-                    s << "g.setGradientFill (ColourGradient (";
+                    s << "g.setGradientFill (juce::ColourGradient (";
 
                     auto indent = String::repeatedString (" ", s.length());
 
@@ -377,7 +376,7 @@ private:
                 {
                     if (Project* project = document->getCppDocument().getProject())
                     {
-                        ResourceFile resourceFile (*project);
+                        JucerResourceFile resourceFile (*project);
 
                         for (int i = 0; i < resourceFile.getNumFiles(); ++i)
                         {
@@ -408,7 +407,7 @@ private:
 
                     Graphics g (image);
                     g.fillCheckerBoard (image.getBounds().toFloat(),
-                                        image.getWidth() * 0.5f, image.getHeight() * 0.5f,
+                                        (float) image.getWidth() * 0.5f, (float) image.getHeight() * 0.5f,
                                         Colours::white, Colours::lightgrey);
 
                     g.setFont (12.0f);

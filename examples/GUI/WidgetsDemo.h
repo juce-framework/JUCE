@@ -1106,7 +1106,7 @@ private:
                 g.fillAll (Colours::lightblue);
 
             g.setColour (LookAndFeel::getDefaultLookAndFeel().findColour (Label::textColourId));
-            g.setFont (height * 0.7f);
+            g.setFont ((float) height * 0.7f);
 
             g.drawText ("Draggable Thing #" + String (rowNumber + 1),
                         5, 0, width, height,

@@ -90,8 +90,8 @@ struct CustomLookAndFeel    : public LookAndFeel_V4
         auto flatOnTop    = button.isConnectedOnTop();
         auto flatOnBottom = button.isConnectedOnBottom();
 
-        auto width  = button.getWidth()  - 1.0f;
-        auto height = button.getHeight() - 1.0f;
+        auto width  = (float) button.getWidth()  - 1.0f;
+        auto height = (float) button.getHeight() - 1.0f;
 
         if (width > 0 && height > 0)
         {
@@ -168,13 +168,13 @@ struct CustomLookAndFeel    : public LookAndFeel_V4
 
             if (style == Slider::LinearVertical)
             {
-                kx = x + width * 0.5f;
+                kx = (float) x + (float) width * 0.5f;
                 ky = sliderPos;
             }
             else
             {
                 kx = sliderPos;
-                ky = y + height * 0.5f;
+                ky = (float) y + (float) height * 0.5f;
             }
 
             auto outlineThickness = slider.isEnabled() ? 0.8f : 0.3f;
@@ -203,9 +203,9 @@ struct CustomLookAndFeel    : public LookAndFeel_V4
             Path p;
 
             if (style == Slider::LinearBarVertical)
-                p.addRectangle ((float) x, sliderPos, (float) width, 1.0f + height - sliderPos);
+                p.addRectangle ((float) x, sliderPos, (float) width, 1.0f + (float) height - sliderPos);
             else
-                p.addRectangle ((float) x, (float) y, sliderPos - x, (float) height);
+                p.addRectangle ((float) x, (float) y, sliderPos - (float) x, (float) height);
 
             auto baseColour = slider.findColour (Slider::rotarySliderFillColourId)
                                     .withMultipliedSaturation (slider.isEnabled() ? 1.0f : 0.5f)
@@ -214,7 +214,7 @@ struct CustomLookAndFeel    : public LookAndFeel_V4
             g.setColour (baseColour);
             g.fillPath (p);
 
-            auto lineThickness = jmin (15.0f, jmin (width, height) * 0.45f) * 0.1f;
+            auto lineThickness = jmin (15.0f, (float) jmin (width, height) * 0.45f) * 0.1f;
             g.drawRect (slider.getLocalBounds().toFloat(), lineThickness);
         }
         else
@@ -230,13 +230,13 @@ struct CustomLookAndFeel    : public LookAndFeel_V4
                                      float /*maxSliderPos*/,
                                      const Slider::SliderStyle /*style*/, Slider& slider) override
     {
-        auto sliderRadius = getSliderThumbRadius (slider) - 5.0f;
+        auto sliderRadius = (float) getSliderThumbRadius (slider) - 5.0f;
         Path on, off;
 
         if (slider.isHorizontal())
         {
-            auto iy = y + height * 0.5f - sliderRadius * 0.5f;
-            Rectangle<float> r (x - sliderRadius * 0.5f, iy, width + sliderRadius, sliderRadius);
+            auto iy = (float) y + (float) height * 0.5f - sliderRadius * 0.5f;
+            Rectangle<float> r ((float) x - sliderRadius * 0.5f, iy, (float) width + sliderRadius, sliderRadius);
             auto onW = r.getWidth() * ((float) slider.valueToProportionOfLength (slider.getValue()));
 
             on.addRectangle (r.removeFromLeft (onW));
@@ -244,8 +244,8 @@ struct CustomLookAndFeel    : public LookAndFeel_V4
         }
         else
         {
-            auto ix = x + width * 0.5f - sliderRadius * 0.5f;
-            Rectangle<float> r (ix, y - sliderRadius * 0.5f, sliderRadius, height + sliderRadius);
+            auto ix = (float) x + (float) width * 0.5f - sliderRadius * 0.5f;
+            Rectangle<float> r (ix, (float) y - sliderRadius * 0.5f, sliderRadius, (float) height + sliderRadius);
             auto onH = r.getHeight() * ((float) slider.valueToProportionOfLength (slider.getValue()));
 
             on.addRectangle (r.removeFromBottom (onH));
@@ -262,9 +262,9 @@ struct CustomLookAndFeel    : public LookAndFeel_V4
     void drawRotarySlider (Graphics& g, int x, int y, int width, int height, float sliderPos,
                            float rotaryStartAngle, float rotaryEndAngle, Slider& slider) override
     {
-        auto radius = jmin (width / 2, height / 2) - 2.0f;
-        auto centreX = x + width  * 0.5f;
-        auto centreY = y + height * 0.5f;
+        auto radius = (float) jmin (width / 2, height / 2) - 2.0f;
+        auto centreX = (float) x + (float) width  * 0.5f;
+        auto centreY = (float) y + (float) height * 0.5f;
         auto rx = centreX - radius;
         auto ry = centreY - radius;
         auto rw = radius * 2.0f;
@@ -283,7 +283,7 @@ struct CustomLookAndFeel    : public LookAndFeel_V4
         }
 
         {
-            auto lineThickness = jmin (15.0f, jmin (width, height) * 0.45f) * 0.1f;
+            auto lineThickness = jmin (15.0f, (float) jmin (width, height) * 0.45f) * 0.1f;
             Path outlineArc;
             outlineArc.addPieSegment (rx, ry, rw, rw, rotaryStartAngle, rotaryEndAngle, 0.0);
             g.strokePath (outlineArc, PathStrokeType (lineThickness));
@@ -307,8 +307,8 @@ struct SquareLookAndFeel    : public CustomLookAndFeel
         if (isButtonDown || isMouseOverButton)
             baseColour = baseColour.contrasting (isButtonDown ? 0.2f : 0.1f);
 
-        auto width  = button.getWidth()  - 1.0f;
-        auto height = button.getHeight() - 1.0f;
+        auto width  = (float) button.getWidth()  - 1.0f;
+        auto height = (float) button.getHeight() - 1.0f;
 
         if (width > 0 && height > 0)
         {
@@ -372,14 +372,14 @@ struct SquareLookAndFeel    : public CustomLookAndFeel
 
             if (style == Slider::LinearVertical)
             {
-                kx = x + width * 0.5f;
+                kx = (float) x + (float) width * 0.5f;
                 ky = sliderPos;
                 g.fillRect (Rectangle<float> (kx - sliderRadius, ky - 2.5f, sliderRadius * 2.0f, 5.0f));
             }
             else
             {
                 kx = sliderPos;
-                ky = y + height * 0.5f;
+                ky = (float) y + (float) height * 0.5f;
                 g.fillRect (Rectangle<float> (kx - 2.5f, ky - sliderRadius, 5.0f, sliderRadius * 2.0f));
             }
         }
@@ -393,10 +393,10 @@ struct SquareLookAndFeel    : public CustomLookAndFeel
     void drawRotarySlider (Graphics& g, int x, int y, int width, int height, float sliderPos,
                            float rotaryStartAngle, float rotaryEndAngle, Slider& slider) override
     {
-        auto diameter = jmin (width, height) - 4.0f;
+        auto diameter = (float) jmin (width, height) - 4.0f;
         auto radius = (diameter / 2.0f) * std::cos (MathConstants<float>::pi / 4.0f);
-        auto centreX = x + width  * 0.5f;
-        auto centreY = y + height * 0.5f;
+        auto centreX = (float) x + (float) width  * 0.5f;
+        auto centreY = (float) y + (float) height * 0.5f;
         auto rx = centreX - radius;
         auto ry = centreY - radius;
         auto rw = radius * 2.0f;

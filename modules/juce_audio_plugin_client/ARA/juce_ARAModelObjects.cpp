@@ -59,28 +59,22 @@ ARAAudioSource::ARAAudioSource (ARADocument* document, ARA::ARAAudioSourceHostRe
 
 void ARAAudioSource::notifyAnalysisProgressStarted()
 {
-    getDocumentController()->notifyAudioSourceAnalysisProgressStarted (this);
+    getDocumentController<ARADocumentController>()->internalNotifyAudioSourceAnalysisProgressStarted (this);
 }
 
 void ARAAudioSource::notifyAnalysisProgressUpdated (float progress)
 {
-    getDocumentController()->notifyAudioSourceAnalysisProgressUpdated (this, progress);
+    getDocumentController<ARADocumentController>()->internalNotifyAudioSourceAnalysisProgressUpdated (this, progress);
 }
 
 void ARAAudioSource::notifyAnalysisProgressCompleted()
 {
-    getDocumentController()->notifyAudioSourceAnalysisProgressCompleted (this);
+    getDocumentController<ARADocumentController>()->internalNotifyAudioSourceAnalysisProgressCompleted (this);
 }
 
-void ARAAudioSource::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllAudioModificationsAndPlaybackRegions)
+void ARAAudioSource::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyARAHost)
 {
-    getDocumentController()->notifyAudioSourceContentChanged (this, scopeFlags);
-
-    notifyListeners ([&] (Listener& l) { l.didUpdateAudioSourceContent (this, scopeFlags); });
-
-    if (notifyAllAudioModificationsAndPlaybackRegions)
-        for (auto audioModification : getAudioModifications<ARAAudioModification>())
-            audioModification->notifyContentChanged (scopeFlags, true);
+    getDocumentController<ARADocumentController>()->internalNotifyAudioSourceContentChanged (this, scopeFlags, notifyARAHost);
 }
 
 //==============================================================================
@@ -89,15 +83,9 @@ ARAAudioModification::ARAAudioModification (ARAAudioSource* audioSource, ARA::AR
     : ARA::PlugIn::AudioModification (audioSource, hostRef, optionalModificationToClone)
 {}
 
-void ARAAudioModification::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyAllPlaybackRegions)
+void ARAAudioModification::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyARAHost)
 {
-    getDocumentController()->notifyAudioModificationContentChanged (this, scopeFlags);
-
-    notifyListeners ([&] (Listener& l) { l.didUpdateAudioModificationContent (this, scopeFlags); });
-
-    if (notifyAllPlaybackRegions)
-        for (auto playbackRegion : getPlaybackRegions<ARAPlaybackRegion>())
-            playbackRegion->notifyContentChanged (scopeFlags);
+    getDocumentController<ARADocumentController>()->internalNotifyAudioModificationContentChanged (this, scopeFlags, notifyARAHost);
 }
 
 //==============================================================================
@@ -122,11 +110,24 @@ Range<double> ARAPlaybackRegion::getTimeRange (bool includeHeadAndTail) const
     return { startTime, endTime };
 }
 
-void ARAPlaybackRegion::notifyContentChanged (ARAContentUpdateScopes scopeFlags)
+double ARAPlaybackRegion::getHeadTime() const
 {
-    getDocumentController()->notifyPlaybackRegionContentChanged (this, scopeFlags);
+    ARA::ARATimeDuration headTime {}, tailTime {};
+    getDocumentController()->getPlaybackRegionHeadAndTailTime (toRef (this), &headTime, &tailTime);
+    return headTime;
+}
 
-    notifyListeners ([&] (Listener& l) { l.didUpdatePlaybackRegionContent (this, scopeFlags); });
+double ARAPlaybackRegion::getTailTime() const
+{
+    
+    ARA::ARATimeDuration headTime {}, tailTime {};
+    getDocumentController()->getPlaybackRegionHeadAndTailTime (toRef (this), &headTime, &tailTime);
+    return tailTime;
+}
+
+void ARAPlaybackRegion::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyARAHost)
+{
+    getDocumentController<ARADocumentController>()->internalNotifyPlaybackRegionContentChanged (this, scopeFlags, notifyARAHost);
 }
 
 } // namespace juce

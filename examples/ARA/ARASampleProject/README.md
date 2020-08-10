@@ -1,27 +1,29 @@
 ## Understanding the ARA Sample Project
 
-
-In addition to the sample plugin provided in the ARA SDK we've created a sample project showcasing the 
-ARA additions to the JUCE API. The sample project can be found at 
-[JUCE_ARA/examples/ARA/ARASampleProject](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARASampleProject). Below is an example of the plugin being hosted by Studio One. 
+In addition to the sample ARATestPlugIn provided in the ARA SDK, we've worked with SoundRadix to create 
+a sample project showcasing the ARA additions to the JUCE API. The sample project can be found at 
+[JUCE_ARA/examples/ARA/ARASampleProject](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARASampleProject). 
+Below is an example of the plugin being hosted by Studio One. 
 
 <img src="https://i.imgur.com/gK7GZq8.png"/>
 
-As seen above, the plug-in shows the region sequences and playback regions within their musical context in a horizontally and vertically zoom- and scrollable arrangement view. Time in seconds and in musical beats and chords are drawn in rulers above the arrangement. Name and color of the arrangement objects are used if provided. Selected objects and time range are highlighted, hidden region sequences are not displayed.
+As seen above, the plug-in shows the region sequences and playback regions within their musical context in a zoomable/scrollable arrangement view. 
+Time in seconds and in musical beats and chords are drawn in rulers above the arrangement. 
+Name and color of the arrangement objects are used if provided. Selected objects and time range are highlighted, and hidden region sequences are not displayed.
 
-The current playback position and cycle range (as communicated through the companion API) are shown.
+The current playback position reported by the ARA companion API host is shown.
 By clicking or double-clicking on the rulers, the plug-in requests the host to reposition or start playback.
 
-During playback, the plug-in passes through the underlying audio source samples without further modification.
+During playback, the plug-in passes through the underlying audio source samples without further processing. 
+Playback can be reversed by double clicking a playback region - this reverse state is stored in a custom
+subclass of `ARAAudioModification`, and is persisted as a part of the ARA document archive. 
 
-In addition to demonstrating ARA integration with JUCE, the sample is also a valuable tool when implementing ARA hosts - it provides visual feedback for the model graph published by the host, and supports many view integration features as described above.
-Further, playing with the project settings with the Projucer can be a good way to verify a hosts ability
+In addition to demonstrating ARA integration with JUCE, the sample is also a valuable tool when implementing ARA hosts - it provides visual feedback for the model graph published by the host, 
+and supports many view integration features as described above.
+Furthermore, playing with the project settings with the Projucer can be a good way to verify a hosts ability
 to detect ARA plugin properties.
 
-
-
-The sample can be broken into five important classes:
-
+Below we'll go over several important classes and how they interact with the ARA API. 
 
 #### `ARASampleProjectDocumentController`
 
@@ -32,6 +34,7 @@ it's also a good place to store resources that don't need to be duplicated for e
 
 The host creates our `ARASampleProjectDocumentController` instance using our `doCreateDocumentController` 
 override:
+
 ```
 ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController() noexcept
 {
@@ -39,63 +42,69 @@ ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocume
 }
 ```
 
-In this case, we're using our document controller to do two important things:
-- construct an instance of our ARAPlaybackRenderer class by overriding `doCreatePlaybackRenderer`
+In this case, we're using our document controller to create our custom `ARAAudioModification` subclass
+and manage the persistence of our ARA document / model graph state. This is done in the following overrides:
+
 ```
-ARA::PlugIn::PlaybackRenderer* ARASampleProjectDocumentController::doCreatePlaybackRenderer() noexcept
-{
-    return new ARASampleProjectPlaybackRenderer (this);
-}
-```
-- manage a time slice thread that we'll use to read audio samples, initialized in our constructor
-```
-ARASampleProjectDocumentController::ARASampleProjectDocumentController() noexcept
-    : ARADocumentController(),
-      audioSourceReadingThread (String (JucePlugin_Name) + " ARA Sample Reading Thread")
-{
-    audioSourceReadingThread.startThread();
-}
+// our doCreateAudioModification() override, used to return an ARASampleProjectAudioModification instance
+ARA::PlugIn::AudioModification* doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, const ARA::PlugIn::AudioModification* optionalModificationToClone) noexcept override;
+
+// our persistence overrides, used to store and restore data saved by the host (in this case, our ARASampleProjectAudioModification reverse state)
+bool doRestoreObjectsFromStream (ARAInputStream& input, const ARA::PlugIn::RestoreObjectsFilter* filter) noexcept override;
+bool doStoreObjectsToStream (ARAOutputStream& output, const ARA::PlugIn::StoreObjectsFilter* filter) noexcept override;
 ```
 
+#### `ARASampleProjectAudioProcessor`
 
-#### `ARASampleProjectPlaybackRenderer`
+This is the implementation of our plug-in's `juce::AudioProcessor` class. Because the concept of a 
+`juce::AudioProcessor` is tightly linked to a plug-in instance, this class will take on any or all
+of the ARA plug-in instance roles as described by the API. 
 
-Our document controller gets used to construct an instance of our `ARASampleProjectPlaybackRenderer` class. 
-This class takes on the `ARAPlaybackRenderer` plugin instance role as defined by the ARA SDK, meaning it will
-be used to render audio samples by the host during playback in realtime and non-realtime contexts. 
+Our plug-in processor is very simple - if assigned the `ARAPlaybackRenderer` role, it renders all 
+assigned `ARAPlaybackRegions` by reading the region's underlying `ARAAudioSource`. 
+We allow reversing playback via our `ARASampleProjectAudioModification` class, 
+but do not modify the `ARAAudioSource` samples provided by the host.
 
-Because an individual plugin instance may or may not be required to fulfill the `ARAPlaybackRenderer` role, 
-our `AudioProcessor` must subclass `AudioProcessorARAExtension` and delegate to any renderers bound to it:
+To accomplish this, we map the underlying audio source for each playback region assigned to the 
+`ARAPlaybackRenderer` to an `ARAAudioSourceReader`. For real-time playback, we wrap that reader inside a 
+`juce::BufferingAudioReader` so that we can pull samples on our rendering thread without blocking. For
+offline playback we use the `ARAAudioSourceReader` directly:
+
 ```
-// our processor subclasses AudioProcessorARAExtension 
-class ARASampleProjectAudioProcessor    : public AudioProcessor,
-                                          public AudioProcessorARAExtension
-```
-```
-// which we use to determine if we need to delegate to our renderers
-void ARASampleProjectAudioProcessor::prepareToPlay (double newSampleRate, int samplesPerBlock)
+SharedResourcePointer<SharedTimeSliceThread> sharedTimesliceThread;
+std::map<ARAAudioSource*, std::unique_ptr<AudioFormatReader>> audioSourceReaders;
+
+void ARASampleProjectAudioProcessor::prepareToPlay (double newSampleRate, int /*samplesPerBlock*/)
 {
     if (isARAPlaybackRenderer())
-        getARAPlaybackRenderer()->prepareToPlay (newSampleRate, getTotalNumOutputChannels(), samplesPerBlock, true);
-    if (isARAEditorRenderer())
-        getARAEditorRenderer()->prepareToPlay (newSampleRate, getTotalNumOutputChannels(), samplesPerBlock);
+    {
+        audioSourceReaders.clear();
+
+        for (auto playbackRegion : getARAPlaybackRenderer()->getPlaybackRegions())
+        {
+            auto audioSource = playbackRegion->getAudioModification()->getAudioSource<ARAAudioSource>();
+            if (audioSourceReaders.count (audioSource) == 0)
+            {
+                AudioFormatReader* sourceReader = new ARAAudioSourceReader (audioSource);
+
+                if (useBufferedAudioSourceReader)
+                {
+                    // if we're being used in real-time, wrap our source reader in a buffering
+                    // reader to avoid blocking while reading samples in processBlock()
+                    const int readAheadSize = roundToInt (2.0 * newSampleRate);
+                    sourceReader = new BufferingAudioReader (sourceReader, *sharedTimesliceThread, readAheadSize);
+                }
+
+                audioSourceReaders.emplace (audioSource, sourceReader);
+            }
+        }
+    }
 }
 ```
-Functionally our renderer does nothing more than render the original audio data, but it does so by reading
-the source audio samples from the host via ARA and playing them back using a `juce::AudioFormatReader` 
-instance (making it an ARA enabled pass through renderer.) 
 
-To do this, playback renderer overrides all three virtual renderer functions described in the Plugin Instance Role section:
-- `ARASampleProjectPlaybackRenderer::prepareToPlay` \- in addition to allocating some temporary buffers, this function constructs an `AudioFormatReader`
-instance used to read audio samples from the ARA host. To do this we'll use an `ARAAudioSourceReader` instance, 
-though when rendering in realtime we'll wrap that instance in a `BufferingAudioReader` so that we can
-read host samples ahead of time on the document controller's time slice thread. 
-- `ARASampleProjectPlaybackRenderer::processBlock` \- because each playback renderer instance is assigned specific playback regions that it's responsible
-for rendering, the bulk of this code is concerned with determining when and where playback region samples should go 
-within incoming audio buffers. Once this is determined we can use our `ARAAudioSourceReader` to 
-read samples and render them into the supplied buffer. 
-- `ARASampleProjectPlaybackRenderer::releaseResources` \- this function cleans up all reader instance and temporary buffers used for reading audio source samples
-
+The `juce::BufferingAudioReader` will be constructed for all plug-in instances used as `ARAPlaybackRenderers`
+by the host. However, we can also use our processor class to render playback regions offline - the 
+[`ARAPlaybackRegionView`](#playbackregionview) does this to draw its waveform display using a `juce::AudioThumbnail`. 
 
 #### `TrackHeaderView`
 
@@ -145,9 +154,11 @@ do the rest of the work, taking care to draw only the visible portion of the reg
 many samples per draw call. 
 
 ```
-// create a non-realtime playback region reader for our audio thumb
-playbackRegionReader = documentView.getARADocumentController()->createPlaybackRegionReader({playbackRegion}, true);
-audioThumb.setReader (playbackRegionReader, reinterpret_cast<intptr_t> (playbackRegion));
+// Create a playback region reader using our non-buffered audio processor for our audio thumb
+bool useBufferedReader = false;
+auto audioProcessor = std::make_unique<ARASampleProjectAudioProcessor> (useBufferedReader);
+playbackRegionReader = new ARAPlaybackRegionReader (audioProcessor, { playbackRegion });
+audioThumb.setReader (playbackRegionReader, reinterpret_cast<intptr_t> (playbackRegionReader));
 ```
 	
 Like `ARARegionSequences`, individual `ARAPlaybackRegions` also have a selection state. By subclassing
@@ -166,9 +177,30 @@ void PlaybackRegionView::onNewSelection (const ARA::PlugIn::ViewSelection& curre
 }
 ```
 
-The regions can also be zoomed horizontally and vertically:
+<img src="https://i.imgur.com/YaGCZbT.gif"/>
 
-<img src="https://i.imgur.com/G30nSLA.gif"/>
+When a playback region is double clicked, we toggle a flag in its parent `ARASampleProjectAudioModification`
+indicating that playback should be reversed. 
+
+```
+void PlaybackRegionView::mouseDoubleClick (const MouseEvent& /*event*/)
+{
+    // set the reverse flag on our region's audio modification when double clicked
+    auto audioModification = playbackRegion->getAudioModification<ARASampleProjectAudioModification>();
+    audioModification->setReversePlayback (! audioModification->getReversePlayback());
+
+    // send a content change notification for the modification and all associated playback regions
+    audioModification->notifyContentChanged (ARAContentUpdateScopes::samplesAreAffected());
+    for (auto araPlaybackRegion : audioModification->getPlaybackRegions<ARAPlaybackRegion>())
+        araPlaybackRegion->notifyContentChanged (ARAContentUpdateScopes::samplesAreAffected());
+}
+```
+
+<img src="https://i.imgur.com/UIhfW9f.gif"/>
+
+The regions can also be zoomed horizontally:
+
+<img src="https://i.imgur.com/SGwHhBe.gif"/>
 
 
 #### `RulersView`

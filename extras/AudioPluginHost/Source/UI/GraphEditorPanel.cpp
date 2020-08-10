@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -140,7 +139,7 @@ struct GraphEditorPanel::PinComponent   : public Component,
 
         auto colour = (pin.isMIDI() ? Colours::red : Colours::green);
 
-        g.setColour (colour.withRotatedHue (busIdx / 5.0f));
+        g.setColour (colour.withRotatedHue ((float) busIdx / 5.0f));
         g.fillPath (p);
     }
 
@@ -510,7 +509,8 @@ struct GraphEditorPanel::PluginComponent   : public Component,
 struct GraphEditorPanel::ConnectorComponent   : public Component,
                                                 public SettableTooltipClient
 {
-    ConnectorComponent (GraphEditorPanel& p) : panel (p), graph (p.graph)
+    explicit ConnectorComponent (GraphEditorPanel& p)
+        : panel (p), graph (p.graph)
     {
         setAlwaysOnTop (true);
     }
@@ -963,7 +963,7 @@ struct GraphDocumentComponent::TooltipBar   : public Component,
 
     void paint (Graphics& g) override
     {
-        g.setFont (Font (getHeight() * 0.7f, Font::bold));
+        g.setFont (Font ((float) getHeight() * 0.7f, Font::bold));
         g.setColour (Colours::black);
         g.drawFittedText (tip, 10, 0, getWidth() - 12, getHeight(), Justification::centredLeft, 1);
     }
@@ -994,7 +994,7 @@ class GraphDocumentComponent::TitleBarComponent    : public Component,
                                                      private Button::Listener
 {
 public:
-    TitleBarComponent (GraphDocumentComponent& graphDocumentComponent)
+    explicit TitleBarComponent (GraphDocumentComponent& graphDocumentComponent)
         : owner (graphDocumentComponent)
     {
         static const unsigned char burgerMenuPathData[]

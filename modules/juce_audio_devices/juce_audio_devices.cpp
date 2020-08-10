@@ -84,15 +84,13 @@
   #include <windows.devices.midi.h>
   #include <windows.devices.enumeration.h>
 
-  #pragma warning (push)
-  #pragma warning (disable: 4265)
+  JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4265)
   #include <wrl/event.h>
-  #pragma warning (pop)
+  JUCE_END_IGNORE_WARNINGS_MSVC
 
-  #pragma warning (push)
-  #pragma warning (disable: 4467)
+  JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4467)
   #include <robuffer.h>
-  #pragma warning (pop)
+  JUCE_END_IGNORE_WARNINGS_MSVC
  #endif
 
  #if JUCE_ASIO
@@ -169,10 +167,13 @@
    #error "Oboe cannot be enabled at the same time as openSL! Please disable JUCE_USE_ANDROID_OPENSLES"
   #endif
 
-  #pragma clang diagnostic push
-  #pragma clang diagnostic ignored "-Wunused-parameter"
+  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunused-parameter",
+                                       "-Wzero-as-null-pointer-constant",
+                                       "-Winconsistent-missing-destructor-override",
+                                       "-Wshadow-field-in-constructor",
+                                       "-Wshadow-field")
    #include <oboe/Oboe.h>
-  #pragma clang diagnostic pop
+  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
  #endif
 
 #endif

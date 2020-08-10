@@ -69,22 +69,22 @@ public:
     class BigEndian
     {
     public:
-        template <class SampleFormatType> static inline float getAsFloat (SampleFormatType& s) noexcept                         { return s.getAsFloatBE(); }
-        template <class SampleFormatType> static inline void  setAsFloat (SampleFormatType& s, float newValue) noexcept         { s.setAsFloatBE (newValue); }
-        template <class SampleFormatType> static inline int32 getAsInt32 (SampleFormatType& s) noexcept                         { return s.getAsInt32BE(); }
-        template <class SampleFormatType> static inline void  setAsInt32 (SampleFormatType& s, int32 newValue) noexcept         { s.setAsInt32BE (newValue); }
-        template <class SourceType, class DestType> static inline void copyFrom (DestType& dest, SourceType& source) noexcept   { dest.copyFromBE (source); }
+        template <class SampleFormatType> static float getAsFloat (SampleFormatType& s) noexcept                         { return s.getAsFloatBE(); }
+        template <class SampleFormatType> static void  setAsFloat (SampleFormatType& s, float newValue) noexcept         { s.setAsFloatBE (newValue); }
+        template <class SampleFormatType> static int32 getAsInt32 (SampleFormatType& s) noexcept                         { return s.getAsInt32BE(); }
+        template <class SampleFormatType> static void  setAsInt32 (SampleFormatType& s, int32 newValue) noexcept         { s.setAsInt32BE (newValue); }
+        template <class SourceType, class DestType> static void copyFrom (DestType& dest, SourceType& source) noexcept   { dest.copyFromBE (source); }
         enum { isBigEndian = 1 };
     };
 
     class LittleEndian
     {
     public:
-        template <class SampleFormatType> static inline float getAsFloat (SampleFormatType& s) noexcept                         { return s.getAsFloatLE(); }
-        template <class SampleFormatType> static inline void  setAsFloat (SampleFormatType& s, float newValue) noexcept         { s.setAsFloatLE (newValue); }
-        template <class SampleFormatType> static inline int32 getAsInt32 (SampleFormatType& s) noexcept                         { return s.getAsInt32LE(); }
-        template <class SampleFormatType> static inline void  setAsInt32 (SampleFormatType& s, int32 newValue) noexcept         { s.setAsInt32LE (newValue); }
-        template <class SourceType, class DestType> static inline void copyFrom (DestType& dest, SourceType& source) noexcept   { dest.copyFromLE (source); }
+        template <class SampleFormatType> static float getAsFloat (SampleFormatType& s) noexcept                         { return s.getAsFloatLE(); }
+        template <class SampleFormatType> static void  setAsFloat (SampleFormatType& s, float newValue) noexcept         { s.setAsFloatLE (newValue); }
+        template <class SampleFormatType> static int32 getAsInt32 (SampleFormatType& s) noexcept                         { return s.getAsInt32LE(); }
+        template <class SampleFormatType> static void  setAsInt32 (SampleFormatType& s, int32 newValue) noexcept         { s.setAsInt32LE (newValue); }
+        template <class SourceType, class DestType> static void copyFrom (DestType& dest, SourceType& source) noexcept   { dest.copyFromLE (source); }
         enum { isBigEndian = 0 };
     };
 
@@ -284,7 +284,7 @@ public:
         template <class SampleFormatType> inline void advanceData (SampleFormatType& s) noexcept                    { s.advance(); }
         template <class SampleFormatType> inline void advanceDataBy (SampleFormatType& s, int numSamples) noexcept  { s.skip (numSamples); }
         template <class SampleFormatType> inline void clear (SampleFormatType& s, int numSamples) noexcept          { s.clearMultiple (numSamples); }
-        template <class SampleFormatType> inline static int getNumBytesBetweenSamples (const SampleFormatType&) noexcept { return SampleFormatType::bytesPerSample; }
+        template <class SampleFormatType> static int getNumBytesBetweenSamples (const SampleFormatType&) noexcept   { return SampleFormatType::bytesPerSample; }
 
         enum { isInterleavedType = 0, numInterleavedChannels = 1 };
     };
@@ -309,7 +309,7 @@ public:
     {
     public:
         using VoidType = void;
-        static inline void* toVoidPtr (VoidType* v) noexcept { return v; }
+        static void* toVoidPtr (VoidType* v) noexcept { return v; }
         enum { isConst = 0 };
     };
 
@@ -317,7 +317,7 @@ public:
     {
     public:
         using VoidType = const void;
-        static inline void* toVoidPtr (VoidType* v) noexcept { return const_cast<void*> (v); }
+        static void* toVoidPtr (VoidType* v) noexcept { return const_cast<void*> (v); }
         enum { isConst = 1 };
     };
   #endif
@@ -528,8 +528,8 @@ public:
                 if (v < mn)  mn = v;
             }
 
-            return Range<float> (mn * (float) (1.0 / (1.0 + (double) Int32::maxValue)),
-                                 mx * (float) (1.0 / (1.0 + (double) Int32::maxValue)));
+            return Range<float> ((float) mn * (float) (1.0 / (1.0 + (double) Int32::maxValue)),
+                                 (float) mx * (float) (1.0 / (1.0 + (double) Int32::maxValue)));
         }
 
         /** Scans a block of data, returning the lowest and highest levels as floats */

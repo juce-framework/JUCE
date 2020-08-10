@@ -42,12 +42,12 @@ ARASampleProjectAudioProcessorEditor::ARASampleProjectAudioProcessorEditor (ARAS
 
         horizontalZoomInButton.setButtonText("+");
         horizontalZoomOutButton.setButtonText("-");
-        constexpr double zoomStepFactor = 1.5;
-        horizontalZoomInButton.onClick = [&]
+        constexpr static double zoomStepFactor = 1.5; // TODO JUCE_ARA MSVC requires local constexpr to be static, use std::latest to fix
+        horizontalZoomInButton.onClick = [this]
         {
             documentView->zoomBy (zoomStepFactor);
         };
-        horizontalZoomOutButton.onClick = [&]
+        horizontalZoomOutButton.onClick = [this]
         {
             documentView->zoomBy (1.0 / zoomStepFactor);
         };

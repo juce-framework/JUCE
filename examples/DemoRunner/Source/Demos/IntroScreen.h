@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -81,13 +80,13 @@ private:
             Path wavePath;
 
             auto waveStep = 10.0f;
-            auto waveY = getHeight() * 0.44f;
+            auto waveY = (float) getHeight() * 0.44f;
             int i = 0;
 
-            for (auto x = waveStep * 0.5f; x < getWidth(); x += waveStep)
+            for (auto x = waveStep * 0.5f; x < (float) getWidth(); x += waveStep)
             {
-                auto y1 = waveY + getHeight() * 0.05f * std::sin (i * 0.38f + elapsed);
-                auto y2 = waveY + getHeight() * 0.10f * std::sin (i * 0.20f + elapsed * 2.0f);
+                auto y1 = waveY + (float) getHeight() * 0.05f * std::sin ((float) i * 0.38f + elapsed);
+                auto y2 = waveY + (float) getHeight() * 0.10f * std::sin ((float) i * 0.20f + elapsed * 2.0f);
 
                 wavePath.addLineSegment ({ x, y1, x, y2 }, 2.0f);
                 wavePath.addEllipse (x - waveStep * 0.3f, y1 - waveStep * 0.3f, waveStep * 0.6f, waveStep * 0.6f);

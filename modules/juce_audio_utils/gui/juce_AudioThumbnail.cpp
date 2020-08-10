@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -754,7 +753,7 @@ int AudioThumbnail::getNumChannels() const noexcept
 
 double AudioThumbnail::getTotalLength() const noexcept
 {
-    return sampleRate > 0 ? (totalSamples / sampleRate) : 0;
+    return sampleRate > 0 ? ((double) totalSamples / sampleRate) : 0.0;
 }
 
 bool AudioThumbnail::isFullyLoaded() const noexcept
@@ -764,7 +763,7 @@ bool AudioThumbnail::isFullyLoaded() const noexcept
 
 double AudioThumbnail::getProportionComplete() const noexcept
 {
-    return jlimit (0.0, 1.0, numSamplesFinished / (double) jmax ((int64) 1, totalSamples.load()));
+    return jlimit (0.0, 1.0, (double) numSamplesFinished / (double) jmax ((int64) 1, totalSamples.load()));
 }
 
 int64 AudioThumbnail::getNumSamplesFinished() const noexcept
@@ -780,7 +779,7 @@ float AudioThumbnail::getApproximatePeak() const
     for (auto* c : channels)
         peak = jmax (peak, c->getPeak());
 
-    return jlimit (0, 127, peak) / 127.0f;
+    return (float) jlimit (0, 127, peak) / 127.0f;
 }
 
 void AudioThumbnail::getApproximateMinMax (double startTime, double endTime, int channelIndex,

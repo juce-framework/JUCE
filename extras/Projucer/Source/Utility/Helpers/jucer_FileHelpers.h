@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -30,24 +29,9 @@
 //==============================================================================
 namespace FileHelpers
 {
-    uint64 calculateStreamHashCode (InputStream&);
-    uint64 calculateFileHashCode (const File&);
-
-    bool overwriteFileWithNewDataIfDifferent (const File& file, const void* data, size_t numBytes);
-    bool overwriteFileWithNewDataIfDifferent (const File& file, const MemoryOutputStream& newData);
-    bool overwriteFileWithNewDataIfDifferent (const File& file, const String& newData);
-
     bool containsAnyNonHiddenFiles (const File& folder);
 
-    String unixStylePath (const String& path);
-    String windowsStylePath (const String& path);
-    String currentOSStylePath (const String& path);
-
     bool shouldPathsBeRelative (String path1, String path2);
-    bool isAbsolutePath (const String& path);
-
-    // A windows-aware version of File::getRelativePath()
-    String getRelativePathFrom (const File& file, const File& sourceFolder);
 
     // removes "/../" bits from the middle of the path
     String simplifyPath (String::CharPointerType path);
@@ -77,14 +61,14 @@ struct FileModificationDetector
     {
         return fileModificationTime != file.getLastModificationTime()
                  && (fileSize != file.getSize()
-                      || FileHelpers::calculateFileHashCode (file) != fileHashCode);
+                      || build_tools::calculateFileHashCode (file) != fileHashCode);
     }
 
     void updateHash()
     {
         fileModificationTime = file.getLastModificationTime();
         fileSize = file.getSize();
-        fileHashCode = FileHelpers::calculateFileHashCode (file);
+        fileHashCode = build_tools::calculateFileHashCode (file);
     }
 
 private:

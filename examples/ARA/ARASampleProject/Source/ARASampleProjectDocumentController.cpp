@@ -1,11 +1,12 @@
 #include "ARASampleProjectDocumentController.h"
+#include "ARASampleProjectAudioModification.h"
 
 ARA::PlugIn::AudioModification* ARASampleProjectDocumentController::doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, const ARA::PlugIn::AudioModification* optionalModificationToClone) noexcept
 {
     return new ARASampleProjectAudioModification (static_cast<ARAAudioSource*> (audioSource), hostRef, static_cast<const ARAAudioModification*> (optionalModificationToClone));
 }
 
-bool ARASampleProjectDocumentController::doRestoreObjectsFromStream (ARAInputStream& input, const ARA::PlugIn::RestoreObjectsFilter* filter) noexcept
+bool ARASampleProjectDocumentController::doRestoreObjectsFromStream (ARAInputStream& input, const ARARestoreObjectsFilter* filter) noexcept
 {
     // start reading data from the archive, starting with the number of audio modifications in the archive
     const auto numAudioModifications = input.readInt64();
@@ -25,7 +26,16 @@ bool ARASampleProjectDocumentController::doRestoreObjectsFromStream (ARAInputStr
         if (!audioModification)
             continue;
 
+        bool reverseStateChanged = (reverse != audioModification->getReversePlayback());
         audioModification->setReversePlayback (reverse);
+
+        // if the reverse state changed, send a sample content change notification without notifying the host
+        if (reverseStateChanged)
+        {
+            audioModification->notifyContentChanged (ARAContentUpdateScopes::samplesAreAffected(), false);
+            for (auto araPlaybackRegion : audioModification->getPlaybackRegions<ARAPlaybackRegion>())
+                araPlaybackRegion->notifyContentChanged (ARAContentUpdateScopes::samplesAreAffected(), false);
+        }
     }
 
     getHostArchivingController()->notifyDocumentUnarchivingProgress (1.0f);
@@ -33,7 +43,7 @@ bool ARASampleProjectDocumentController::doRestoreObjectsFromStream (ARAInputStr
     return ! input.failed();
 }
 
-bool ARASampleProjectDocumentController::doStoreObjectsToStream (ARAOutputStream& output, const ARA::PlugIn::StoreObjectsFilter* filter) noexcept
+bool ARASampleProjectDocumentController::doStoreObjectsToStream (ARAOutputStream& output, const ARAStoreObjectsFilter* filter) noexcept
 {
     // this dummy implementation only deals with audio modification states
     const auto& audioModificationsToPersist{ filter->getAudioModificationsToStore<ARASampleProjectAudioModification>() };
