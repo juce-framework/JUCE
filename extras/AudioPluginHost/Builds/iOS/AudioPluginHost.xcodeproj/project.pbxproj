@@ -49,6 +49,10 @@
 			isa = PBXBuildFile;
 			fileRef = 5AF0CA7CDFCA90B4DE1F55C3;
 		};
+		C81D59C798F9F1F1A549FF07 = {
+			isa = PBXBuildFile;
+			fileRef = 7D924E83DABA5B54205C52F4;
+		};
 		92EE84159C7027A137F06204 = {
 			isa = PBXBuildFile;
 			fileRef = 66643EDF46AE8C5B7956B91D;
@@ -56,10 +60,6 @@
 		9056B642BEF870098DE344E5 = {
 			isa = PBXBuildFile;
 			fileRef = 03FA420AACDD03D50AA16E4A;
-		};
-		7DE81C004B0FBC563040CC5F = {
-			isa = PBXBuildFile;
-			fileRef = B1CD9599EB12D77E8AF9241D;
 		};
 		2AB9A26C9359C40CA0A937ED = {
 			isa = PBXBuildFile;
@@ -387,6 +387,13 @@
 			path = ../../JuceLibraryCode/BinaryData.cpp;
 			sourceTree = "SOURCE_ROOT";
 		};
+		7D924E83DABA5B54205C52F4 = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
+			name = CoreServices.framework;
+			path = System/Library/Frameworks/CoreServices.framework;
+			sourceTree = SDKROOT;
+		};
 		81C1A7770E082F56FE5A90A7 = {
 			isa = PBXFileReference;
 			lastKnownFileType = file;
@@ -512,13 +519,6 @@
 			name = HostStartup.cpp;
 			path = ../../Source/HostStartup.cpp;
 			sourceTree = "SOURCE_ROOT";
-		};
-		B1CD9599EB12D77E8AF9241D = {
-			isa = PBXFileReference;
-			lastKnownFileType = wrapper.framework;
-			name = MobileCoreServices.framework;
-			path = System/Library/Frameworks/MobileCoreServices.framework;
-			sourceTree = SDKROOT;
 		};
 		B285CAB91AE928C476CA4F9C = {
 			isa = PBXFileReference;
@@ -768,9 +768,9 @@
 				CFFA8E9A7820C5A27B4393C9,
 				31D55A751C790CB81F58DDB7,
 				5AF0CA7CDFCA90B4DE1F55C3,
+				7D924E83DABA5B54205C52F4,
 				66643EDF46AE8C5B7956B91D,
 				03FA420AACDD03D50AA16E4A,
-				B1CD9599EB12D77E8AF9241D,
 				D0026F0A29B486D87E92BB8B,
 				89309C0C5F3269BD06BE7F27,
 				F9EDC54DFBCF3A63E0AA5D73,
@@ -1139,9 +1139,9 @@
 				B0D5475F716126465FCE1586,
 				3470F40DA5D68EC217872906,
 				E092A70431B046BF1F50A482,
+				C81D59C798F9F1F1A549FF07,
 				92EE84159C7027A137F06204,
 				9056B642BEF870098DE344E5,
-				7DE81C004B0FBC563040CC5F,
 				2AB9A26C9359C40CA0A937ED,
 				A02C9F4C4B840C27B6CAFEBD,
 				50AFD116DCA6EC228EFB322D,
@@ -1167,7 +1167,7 @@
 		ADE6E539DB98A302483A82D0 = {
 			isa = PBXProject;
 			buildConfigurationList = 493C2C5E457692E5149C5525;
-			attributes = { LastUpgradeCheck = 1100; ORGANIZATIONNAME = "Raw Material Software Limited"; TargetAttributes = { DE12B7643D374BFF7E4FEB1C = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
+			attributes = { LastUpgradeCheck = 1200; ORGANIZATIONNAME = "Raw Material Software Limited"; TargetAttributes = { DE12B7643D374BFF7E4FEB1C = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
 			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 0;
 			mainGroup = 65BEFC705A89E5C8A9E35C97;

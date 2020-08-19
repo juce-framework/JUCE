@@ -41,6 +41,10 @@
 			isa = PBXBuildFile;
 			fileRef = 448838BE6E937D450A3C84CE;
 		};
+		E29AB6243FBBDDD7BD723340 = {
+			isa = PBXBuildFile;
+			fileRef = EA5D4F9D63C0ED79CDE8967A;
+		};
 		5A64B64E5B45AEA1A0EECC4B = {
 			isa = PBXBuildFile;
 			fileRef = 9193D2A3C463BEAA07FD424D;
@@ -48,10 +52,6 @@
 		F918FB5901F09EA77DB32022 = {
 			isa = PBXBuildFile;
 			fileRef = F7D557738137CA1A370BAA27;
-		};
-		1006E2E5DFA26D7DD20BC438 = {
-			isa = PBXBuildFile;
-			fileRef = 855850D3F44F120C46DE82EC;
 		};
 		A6AA70BD9364BB974CDEB337 = {
 			isa = PBXBuildFile;
@@ -320,13 +320,6 @@
 			path = "../../JuceLibraryCode/include_juce_gui_basics.mm";
 			sourceTree = "SOURCE_ROOT";
 		};
-		855850D3F44F120C46DE82EC = {
-			isa = PBXFileReference;
-			lastKnownFileType = wrapper.framework;
-			name = MobileCoreServices.framework;
-			path = System/Library/Frameworks/MobileCoreServices.framework;
-			sourceTree = SDKROOT;
-		};
 		89583CD42AD218E9753DF11C = {
 			isa = PBXFileReference;
 			lastKnownFileType = file;
@@ -509,6 +502,13 @@
 			path = System/Library/Frameworks/CoreImage.framework;
 			sourceTree = SDKROOT;
 		};
+		EA5D4F9D63C0ED79CDE8967A = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
+			name = CoreServices.framework;
+			path = System/Library/Frameworks/CoreServices.framework;
+			sourceTree = SDKROOT;
+		};
 		EC794872987FEA2E129C589A = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
@@ -632,9 +632,9 @@
 				DA40ED39AF4B56000E5A2743,
 				E51ABCA80B75F33848F28184,
 				448838BE6E937D450A3C84CE,
+				EA5D4F9D63C0ED79CDE8967A,
 				9193D2A3C463BEAA07FD424D,
 				F7D557738137CA1A370BAA27,
-				855850D3F44F120C46DE82EC,
 				C821C5805007FFDC2636BBE6,
 				935CA85EF98714D3A17AE737,
 				379F77D23BFAE3795282CEB3,
@@ -963,9 +963,9 @@
 				366A216FDEBD7BDDC1BA12D9,
 				1F7A8BD2B43B3D191132301D,
 				CA694B2A73FCF12D7F9E7E49,
+				E29AB6243FBBDDD7BD723340,
 				5A64B64E5B45AEA1A0EECC4B,
 				F918FB5901F09EA77DB32022,
-				1006E2E5DFA26D7DD20BC438,
 				A6AA70BD9364BB974CDEB337,
 				EC14DA30C090DDC62084DB4C,
 				F714F0C84F5945BF3539239E,
@@ -991,7 +991,7 @@
 		A5398ADB6F5B128C00EB935C = {
 			isa = PBXProject;
 			buildConfigurationList = 02715337C584F3C721251428;
-			attributes = { LastUpgradeCheck = 1100; ORGANIZATIONNAME = "Raw Material Software Limited"; TargetAttributes = { 4311FBCBD02948A0ED96C7DD = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
+			attributes = { LastUpgradeCheck = 1200; ORGANIZATIONNAME = "Raw Material Software Limited"; TargetAttributes = { 4311FBCBD02948A0ED96C7DD = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
 			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 0;
 			mainGroup = D2EB65517396C974F0415A7F;

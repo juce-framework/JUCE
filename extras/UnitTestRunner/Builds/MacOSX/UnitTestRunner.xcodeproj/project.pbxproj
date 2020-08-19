@@ -1009,7 +1009,7 @@
 		E1E93F2B4B2D17E011395520 = {
 			isa = PBXProject;
 			buildConfigurationList = 18FC121B1014F7999CD135D3;
-			attributes = { LastUpgradeCheck = 1100; ORGANIZATIONNAME = "Raw Material Software Limited"; };
+			attributes = { LastUpgradeCheck = 1200; ORGANIZATIONNAME = "Raw Material Software Limited"; };
 			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 0;
 			mainGroup = 99F3717D3FEAFDCA3C22E868;
