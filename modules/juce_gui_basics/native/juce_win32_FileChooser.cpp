@@ -154,7 +154,7 @@ private:
     Component::SafePointer<Component> owner;
     String title, filtersString;
     std::unique_ptr<CustomComponentHolder> customComponent;
-    String initialPath, returnedString, defaultExtension;
+    String initialPath, returnedString;
 
     WaitableEvent threadHasReference;
     CriticalSection deletingDialog;
@@ -210,7 +210,7 @@ private:
         if (FAILED (dialog.SetFileName (filename.toWideCharPointer())))
             return false;
 
-        const auto extension = filename.fromLastOccurrenceOf (".", false, false);
+        auto extension = getDefaultFileExtension (filename);
 
         if (extension.isNotEmpty() && FAILED (dialog.SetDefaultExtension (extension.toWideCharPointer())))
             return false;
@@ -367,16 +367,10 @@ private:
 
             if (isSave)
             {
-                StringArray tokens;
-                tokens.addTokens (filtersString, ";,", "\"'");
-                tokens.trim();
-                tokens.removeEmptyStrings();
+                auto extension = getDefaultFileExtension (files.getData());
 
-                if (tokens.size() == 1 && tokens[0].removeCharacters ("*.").isNotEmpty())
-                {
-                    defaultExtension = tokens[0].fromFirstOccurrenceOf (".", false, false);
-                    of.lpstrDefExt = defaultExtension.toWideCharPointer();
-                }
+                if (extension.isNotEmpty())
+                    of.lpstrDefExt = extension.toWideCharPointer();
 
                 if (! GetSaveFileName (&of))
                     return {};
@@ -480,6 +474,23 @@ private:
             ofFlags |= OFN_ENABLEHOOK;
 
         return ofFlags;
+    }
+
+    String getDefaultFileExtension (const String& filename) const
+    {
+        auto extension = filename.fromLastOccurrenceOf (".", false, false);
+
+        if (extension.isEmpty())
+        {
+            auto tokens = StringArray::fromTokens (filtersString, ";,", "\"'");
+            tokens.trim();
+            tokens.removeEmptyStrings();
+
+            if (tokens.size() == 1 && tokens[0].removeCharacters ("*.").isNotEmpty())
+                extension = tokens[0].fromFirstOccurrenceOf (".", false, false);
+        }
+
+        return extension;
     }
 
     //==============================================================================
