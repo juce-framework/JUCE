@@ -625,6 +625,9 @@ public:
 
                     link->createNewChildElement ("LargeAddressAware")->addTextElement ("true");
 
+                    if (config.isLinkTimeOptimisationEnabled())
+                        link->createNewChildElement ("LinkTimeCodeGeneration")->addTextElement ("UseLinkTimeCodeGeneration");
+
                     if (additionalDependencies.isNotEmpty())
                         link->createNewChildElement ("AdditionalDependencies")->addTextElement (additionalDependencies);
 
