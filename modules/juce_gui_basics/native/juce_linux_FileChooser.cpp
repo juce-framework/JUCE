@@ -188,7 +188,7 @@ private:
         }
 
         args.add (startPath.getFullPathName());
-        args.add (owner.filters.replaceCharacter (';', ' '));
+        args.add ("(" + owner.filters.replaceCharacter (';', ' ') + ")");
     }
 
     void addZenityArgs()
