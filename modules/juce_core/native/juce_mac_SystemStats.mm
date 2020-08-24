@@ -143,7 +143,7 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
     if (major == 10)
     {
         jassert (minor > 2);
-        return (OperatingSystemType) (minor + MacOSX_10_4 - 4);
+        return (OperatingSystemType) (minor + MacOSX_10_7 - 7);
     }
 
     jassert (major == 11 && minor == 0);
@@ -205,10 +205,8 @@ bool SystemStats::isOperatingSystem64Bit()
 {
    #if JUCE_IOS
     return false;
-   #elif JUCE_64BIT
-    return true;
    #else
-    return getOperatingSystemType() >= MacOSX_10_6;
+    return true;
    #endif
 }
 

@@ -52,9 +52,6 @@ public:
         Android         = 0x0800,
         iOS             = 0x1000,
 
-        MacOSX_10_4     = MacOSX | 4,
-        MacOSX_10_5     = MacOSX | 5,
-        MacOSX_10_6     = MacOSX | 6,
         MacOSX_10_7     = MacOSX | 7,
         MacOSX_10_8     = MacOSX | 8,
         MacOSX_10_9     = MacOSX | 9,
