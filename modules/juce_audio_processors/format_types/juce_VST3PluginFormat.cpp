@@ -919,6 +919,10 @@ private:
                #endif
                     return true;
             }
+            else
+            {
+                return true;
+            }
 
             library.close();
         }
