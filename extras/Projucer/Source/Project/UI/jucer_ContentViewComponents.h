@@ -178,10 +178,10 @@ public:
 
     void clicked() override
     {
-        auto* w = new InfoWindow (info);
+        auto w = std::make_unique<InfoWindow> (info);
         w->setSize (width, w->getHeight() * numLines + 10);
 
-        CallOutBox::launchAsynchronously (w, getScreenBounds(), nullptr);
+        CallOutBox::launchAsynchronously (std::move (w), getScreenBounds(), nullptr);
     }
 
     using Button::clicked;
