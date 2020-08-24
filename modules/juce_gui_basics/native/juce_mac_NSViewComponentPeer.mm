@@ -843,10 +843,10 @@ public:
         if (usingCoreGraphics && repaintRects.getNumRectangles() > 1)
             for (auto& i : repaintRects)
             {
-                NSRect rect = convertToCGRect (i);
+                CGRect rect = convertToCGRect (i);
                 CGContextSaveGState (cg);
                 CGContextClipToRect (cg, rect);
-                drawRect (cg, rect, displayScale);
+                drawRect (cg, NSRectFromCGRect (rect), displayScale);
                 CGContextRestoreGState (cg);
             }
         else
