@@ -730,7 +730,7 @@ private:
 };
 
 //==============================================================================
-CoreAudioFormat::CoreAudioFormat (AudioFileTypeID fileType, StringArray exts)
+CoreAudioFormat::CoreAudioFormat (uint32 fileType, StringArray exts)
 : AudioFormat (coreAudioFormatName + String (" for ") + exts[0], exts), fileTypeID (fileType)
 {
 }
