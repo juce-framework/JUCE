@@ -839,22 +839,29 @@ public:
         // This option invokes a separate paint call for each rectangle of the clip region.
         // It's a long story, but this is a basically a workaround for a CGContext not having
         // a way of finding whether a rectangle falls within its clip region
-        repaintRects.consolidate();
-        if (usingCoreGraphics && repaintRects.getNumRectangles() > 1)
-            for (auto& i : repaintRects)
-            {
-                CGRect rect = convertToCGRect (i);
-                CGContextSaveGState (cg);
-                CGContextClipToRect (cg, rect);
-                drawRect (cg, NSRectFromCGRect (rect), displayScale);
-                CGContextRestoreGState (cg);
-            }
-        else
-       #endif
+        if (usingCoreGraphics)
         {
-            drawRect (cg, r, displayScale);
+            const NSRect* rects = nullptr;
+            NSInteger numRects = 0;
+            [view getRectsBeingDrawn: &rects count: &numRects];
+
+            if (numRects > 1)
+            {
+                for (int i = 0; i < numRects; ++i)
+                {
+                    CGRect rect = rects[i];
+                    CGContextSaveGState (cg);
+                    CGContextClipToRect (cg, CGRectMake (rect.origin.x, rect.origin.y, rect.size.width, rect.size.height));
+                    drawRect (cg, NSRectFromCGRect (rect), displayScale);
+                    CGContextRestoreGState (cg);
+                }
+
+                return;
+            }
         }
-        repaintRects.clear();
+       #endif
+
+        drawRect (cg, r, displayScale);
     }
 
     void drawRect (CGContextRef cg, NSRect r, float displayScale)
@@ -874,33 +881,7 @@ public:
             auto clipH = (int) (r.size.height + 0.5f);
 
             RectangleList<int> clip;
-            {
-                const Rectangle<int> clipBounds (clipW, clipH);
-                auto viewH = [view frame].size.height;
-               #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
-                clip.ensureStorageAllocated (repaintRects.getNumRectangles());
-                for (auto& r : repaintRects)
-                    clip.addWithoutMerging (clipBounds.getIntersection (Rectangle<int> (
-                        roundToInt (r.getX()) + offset.x,
-                        roundToInt (viewH - r.getBottom()) + offset.y,
-                        roundToInt (r.getWidth()),
-                        roundToInt (r.getHeight()))));
-               #else
-                const NSRect* rects;
-                NSInteger numRects;
-                [view getRectsBeingDrawn: &rects count: &numRects];
-                clip.ensureStorageAllocated ((int) numRects);
-                for (int i = 0; i < numRects; ++i)
-                {
-                    const auto& rect = rects[i];
-                    clip.addWithoutMerging (clipBounds.getIntersection (Rectangle<int> (
-                        roundToInt (rect.origin.x) + offset.x,
-                        roundToInt (viewH - (rect.origin.y + rect.size.height)) + offset.y,
-                        roundToInt (rect.size.width),
-                        roundToInt (rect.size.height))));
-                }
-               #endif
-            }
+            getClipRects (clip, offset, clipW, clipH);
 
             if (! clip.isEmpty())
             {
@@ -978,10 +959,7 @@ public:
     void setNeedsDisplayRectangles()
     {
         for (auto& i : deferredRepaints)
-        {
             [view setNeedsDisplayInRect: makeNSRect (i)];
-            repaintRects.add (i);
-        }
 
         lastRepaintTime = Time::getMillisecondCounter();
         deferredRepaints.clear();
@@ -1439,7 +1417,6 @@ public:
     NSNotificationCenter* notificationCenter = nil;
 
     RectangleList<float> deferredRepaints;
-    RectangleList<float> repaintRects;
     uint32 lastRepaintTime;
 
     static ComponentPeer* currentlyFocusedPeer;
@@ -1453,6 +1430,24 @@ private:
     static void setOwner (id viewOrWindow, NSViewComponentPeer* newOwner)
     {
         object_setInstanceVariable (viewOrWindow, "owner", newOwner);
+    }
+
+    void getClipRects (RectangleList<int>& clip, Point<int> offset, int clipW, int clipH)
+    {
+        const NSRect* rects = nullptr;
+        NSInteger numRects = 0;
+        [view getRectsBeingDrawn: &rects count: &numRects];
+
+        const Rectangle<int> clipBounds (clipW, clipH);
+        auto viewH = [view frame].size.height;
+
+        clip.ensureStorageAllocated ((int) numRects);
+
+        for (int i = 0; i < numRects; ++i)
+            clip.addWithoutMerging (clipBounds.getIntersection (Rectangle<int> (roundToInt (rects[i].origin.x) + offset.x,
+                                                                                roundToInt (viewH - (rects[i].origin.y + rects[i].size.height)) + offset.y,
+                                                                                roundToInt (rects[i].size.width),
+                                                                                roundToInt (rects[i].size.height))));
     }
 
     static void appFocusChanged()
