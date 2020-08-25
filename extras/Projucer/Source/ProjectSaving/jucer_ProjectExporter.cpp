@@ -973,7 +973,7 @@ void ProjectExporter::BuildConfiguration::createPropertyEditors (PropertyListBui
         props.add (new FilePathPropertyComponentWithEnablement (precompiledHeaderFileValue, usePrecompiledHeaderFileValue,
                                                                 "Precompiled Header File", false, true, "*", project.getProjectFolder()),
                    "Specify an input header file that will be used to generate a file named " + quotedHeaderFileName + " which is used to generate the "
-                   "PCH file artifact for this exporter configuration. This file can be an absolute path, or relative to the jucer project folder. "
+                   "PCH file artefact for this exporter configuration. This file can be an absolute path, or relative to the jucer project folder. "
                    "The " + quotedHeaderFileName + " file will be force included to all source files unless the \"Skip PCH\" setting has been enabled. "
                    "The generated header will be written on project save and placed in the target folder for this exporter.");
     }
