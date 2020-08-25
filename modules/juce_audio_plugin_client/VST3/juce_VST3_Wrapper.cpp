@@ -48,8 +48,8 @@
 #define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
 
 #include "../utility/juce_CheckSettingMacros.h"
-#include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_IncludeSystemHeaders.h"
+#include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_WindowsHooks.h"
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
