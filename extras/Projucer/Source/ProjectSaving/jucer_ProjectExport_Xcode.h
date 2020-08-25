@@ -295,6 +295,10 @@ public:
     bool isOSX() const override                             { return ! iOS; }
     bool isiOS() const override                             { return iOS; }
 
+    bool supportsPrecompiledHeaders() const override        { return true; }
+
+    String getNewLineString() const override                { return "\n"; }
+
     bool supportsTargetType (build_tools::ProjectType::Target::Type type) const override
     {
         switch (type)
@@ -1387,6 +1391,23 @@ public:
 
             s.set ("GCC_OPTIMIZATION_LEVEL", config.getGCCOptimisationFlag());
 
+            if (config.shouldUsePrecompiledHeaderFile())
+            {
+                s.set ("GCC_PRECOMPILE_PREFIX_HEADER", "YES");
+
+                auto pchFileContent = config.getPrecompiledHeaderFileContent();
+
+                if (pchFileContent.isNotEmpty())
+                {
+                    auto pchFilename = config.getPrecompiledHeaderFilename() + ".h";
+
+                    build_tools::writeStreamToFile (owner.getTargetFolder().getChildFile (pchFilename),
+                                                    [&] (MemoryOutputStream& mo) { mo << pchFileContent; });
+
+                    s.set ("GCC_PREFIX_HEADER", pchFilename);
+                }
+            }
+
             if (shouldCreatePList())
             {
                 s.set ("INFOPLIST_FILE", infoPlistFile.getFileName());
@@ -1975,8 +1996,7 @@ private:
                     writeDefaultLaunchStoryboardFile();
                 else if (getProject().getProjectFolder().getChildFile (customLaunchStoryboard).existsAsFile())
                     addLaunchStoryboardFileReference (build_tools::RelativePath (customLaunchStoryboard, build_tools::RelativePath::projectFolder)
-                                                          .rebased (getProject().getProjectFolder(), getTargetFolder(), build_tools::RelativePath::buildTargetFolder)
-                                                          .toUnixStyle());
+                                                          .rebased (getProject().getProjectFolder(), getTargetFolder(), build_tools::RelativePath::buildTargetFolder));
             }
         }
         else
@@ -2053,7 +2073,7 @@ private:
 
         build_tools::RelativePath menuNibPath (menuNibFile, getTargetFolder(), build_tools::RelativePath::buildTargetFolder);
         addFileReference (menuNibPath.toUnixStyle());
-        resourceIDs.add (addBuildFile (menuNibPath, false, false));
+        resourceIDs.add (addBuildFile (FileOptions().withRelativePath (menuNibPath)));
         resourceFileRefs.add (createFileRefID (menuNibPath));
     }
 
@@ -2063,7 +2083,7 @@ private:
         {
             build_tools::RelativePath iconPath (iconFile, getTargetFolder(), build_tools::RelativePath::buildTargetFolder);
             addFileReference (iconPath.toUnixStyle());
-            resourceIDs.add (addBuildFile (iconPath, false, false));
+            resourceIDs.add (addBuildFile (FileOptions().withRelativePath (iconPath)));
             resourceFileRefs.add (createFileRefID (iconPath));
         }
     }
@@ -2216,7 +2236,8 @@ private:
 
             auto path = scriptPath.toUnixStyle();
             auto refID = addFileReference (path);
-            auto fileID = addBuildFile (path, refID, false, false);
+            auto fileID = addBuildFile (FileOptions().withPath (path)
+                                                     .withFileRefID (refID));
 
             resourceIDs.add (fileID);
             resourceFileRefs.add (refID);
@@ -2281,9 +2302,9 @@ private:
                                                     .getChildFile ("xcshareddata")
                                                     .getChildFile ("WorkspaceSettings.xcsettings");
 
-        build_tools::writeStreamToFile (settingsFile, [] (MemoryOutputStream& mo)
+        build_tools::writeStreamToFile (settingsFile, [this] (MemoryOutputStream& mo)
         {
-            mo.setNewLineString ("\n");
+            mo.setNewLineString (getNewLineString());
 
             mo << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"              << newLine
                << "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" << newLine
@@ -2586,7 +2607,7 @@ private:
             if (availableBuildProducts.empty())
                 continue;
 
-            auto subprojectFileType = getFileType (build_tools::RelativePath (subprojectFile.getFullPathName(), build_tools::RelativePath::buildTargetFolder));
+            auto subprojectFileType = getFileType (subprojectFile.getFullPathName());
             auto subprojectFileID = addFileOrFolderReference (subprojectFile.getFullPathName(), "<group>", subprojectFileType);
             subprojectFileIDs.add (subprojectFileID);
 
@@ -2594,7 +2615,7 @@ private:
 
             for (auto& buildProduct : availableBuildProducts)
             {
-                auto buildProductFileType = getFileType (build_tools::RelativePath (buildProduct.second, build_tools::RelativePath::projectFolder));
+                auto buildProductFileType = getFileType (buildProduct.second);
 
                 auto containerID = addContainerItemProxy (subprojectFileID, buildProduct.first);
                 auto proxyID = addReferenceProxy (containerID, buildProduct.second, buildProductFileType);
@@ -2602,7 +2623,9 @@ private:
 
                 if (buildProductFileType == "archive.ar" || buildProductFileType == "wrapper.framework")
                 {
-                    auto buildFileID = addBuildFile (buildProduct.second, proxyID, false, true);
+                    auto buildFileID = addBuildFile (FileOptions().withPath (buildProduct.second)
+                                                                  .withFileRefID (proxyID)
+                                                                  .withInhibitWarningsEnabled (true));
 
                     for (auto& target : targets)
                         target->frameworkIDs.add (buildFileID);
@@ -2649,7 +2672,9 @@ private:
 
         addFileOrFolderReference (folderPath, "<group>", fileType);
 
-        resourceIDs.add (addBuildFile (folderPath, fileRefID, false, false));
+        resourceIDs.add (addBuildFile (FileOptions().withPath (folderPath)
+                                                    .withFileRefID (fileRefID)));
+
         resourceFileRefs.add (createFileRefID (folderPath));
     }
 
@@ -2694,38 +2719,6 @@ private:
         output << "\t};\n\trootObject = " << createID ("__root") << ";\n}\n";
     }
 
-    String addBuildFile (const String& path, const String& fileRefID, bool addToSourceBuildPhase, bool inhibitWarnings,
-                         XcodeTarget* xcodeTarget = nullptr, String compilerFlags = {}) const
-    {
-        auto fileID = createID (path + "buildref");
-
-        if (addToSourceBuildPhase)
-        {
-            if (xcodeTarget != nullptr)
-                xcodeTarget->sourceIDs.add (fileID);
-            else
-                sourceIDs.add (fileID);
-        }
-
-        auto* v = new ValueTree (fileID);
-        v->setProperty ("isa", "PBXBuildFile", nullptr);
-        v->setProperty ("fileRef", fileRefID, nullptr);
-
-        if (inhibitWarnings)
-            compilerFlags += " -w";
-
-        if (compilerFlags.isNotEmpty())
-            v->setProperty ("settings", "{ COMPILER_FLAGS = \"" + compilerFlags.trim() + "\"; }", nullptr);
-
-        pbxBuildFiles.add (v);
-        return fileID;
-    }
-
-    String addBuildFile (const build_tools::RelativePath& path, bool addToSourceBuildPhase, bool inhibitWarnings, XcodeTarget* xcodeTarget = nullptr) const
-    {
-        return addBuildFile (path.toUnixStyle(), createFileRefID (path), addToSourceBuildPhase, inhibitWarnings, xcodeTarget);
-    }
-
     String addFileReference (String pathString) const
     {
         String sourceTree ("SOURCE_ROOT");
@@ -2741,9 +2734,7 @@ private:
             sourceTree = "<absolute>";
         }
 
-        auto fileType = getFileType (path);
-
-        return addFileOrFolderReference (pathString, sourceTree, fileType);
+        return addFileOrFolderReference (pathString, sourceTree, getFileType (pathString));
     }
 
     void checkAndAddFileReference (std::unique_ptr<ValueTree> v) const
@@ -2817,8 +2808,34 @@ public:
     }
 
 private:
-    static String getFileType (const build_tools::RelativePath& file)
+    struct FileOptions
     {
+        FileOptions& withPath (const String& p)                             { path = p;                  return *this; }
+        FileOptions& withRelativePath (const build_tools::RelativePath& p)  { path = p.toUnixStyle();    return *this; }
+        FileOptions& withFileRefID (const String& fid)                      { fileRefID = fid;           return *this; }
+        FileOptions& withCompilerFlags (const String& f)                    { compilerFlags = f;         return *this; }
+        FileOptions& withCompilationEnabled (bool e)                        { compile = e;               return *this; }
+        FileOptions& withAddToBinaryResourcesEnabled (bool e)               { addToBinaryResources = e;  return *this; }
+        FileOptions& withAddToXcodeResourcesEnabled (bool e)                { addToXcodeResources = e;   return *this; }
+        FileOptions& withInhibitWarningsEnabled (bool e)                    { inhibitWarnings = e;       return *this; }
+        FileOptions& withSkipPCHEnabled (bool e)                            { skipPCH = e;               return *this; }
+        FileOptions& withXcodeTarget (XcodeTarget* t)                       { xcodeTarget = t;           return *this; }
+
+        String path;
+        String fileRefID;
+        String compilerFlags;
+        bool compile = false;
+        bool addToBinaryResources = false;
+        bool addToXcodeResources = false;
+        bool inhibitWarnings = false;
+        bool skipPCH = false;
+        XcodeTarget* xcodeTarget = nullptr;
+    };
+
+    static String getFileType (const String& filePath)
+    {
+        auto file = File::createFileWithoutCheckingPath (filePath);
+
         if (file.hasFileExtension (cppFileExtensions))      return "sourcecode.cpp.cpp";
         if (file.hasFileExtension (".mm"))                  return "sourcecode.cpp.objcpp";
         if (file.hasFileExtension (".m"))                   return "sourcecode.c.objc";
@@ -2842,23 +2859,17 @@ private:
         return "file" + file.getFileExtension();
     }
 
-    String addFile (const build_tools::RelativePath& path, bool shouldBeCompiled, bool shouldBeAddedToBinaryResources,
-                    bool shouldBeAddedToXcodeResources, bool inhibitWarnings, XcodeTarget* xcodeTarget, const String& compilerFlags) const
+    String addFile (const FileOptions& opts) const
     {
-        auto pathAsString = path.toUnixStyle();
-        auto refID = addFileReference (path.toUnixStyle());
+        auto refID = addFileReference (opts.path);
 
-        if (shouldBeCompiled)
+        if (opts.compile || opts.addToXcodeResources)
         {
-            addBuildFile (pathAsString, refID, true, inhibitWarnings, xcodeTarget, compilerFlags);
-        }
-        else if (! shouldBeAddedToBinaryResources || shouldBeAddedToXcodeResources)
-        {
-            auto fileType = getFileType (path);
+            auto fileID = addBuildFile (FileOptions (opts).withFileRefID (refID));
 
-            if (shouldBeAddedToXcodeResources)
+            if (opts.addToXcodeResources)
             {
-                resourceIDs.add (addBuildFile (pathAsString, refID, false, false));
+                resourceIDs.add (fileID);
                 resourceFileRefs.add (refID);
             }
         }
@@ -2866,16 +2877,50 @@ private:
         return refID;
     }
 
+    String addBuildFile (const FileOptions& opts) const
+    {
+        auto fileID = createID (opts.path + "buildref");
+
+        if (opts.compile)
+        {
+            if (opts.xcodeTarget != nullptr)
+                opts.xcodeTarget->sourceIDs.add (fileID);
+            else
+                sourceIDs.add (fileID);
+        }
+
+        auto* v = new ValueTree (fileID);
+        v->setProperty ("isa", "PBXBuildFile", nullptr);
+        v->setProperty ("fileRef", opts.fileRefID.isEmpty() ? createFileRefID (opts.path)
+                                                            : opts.fileRefID,
+                        nullptr);
+
+        auto compilerFlags = [&opts]
+        {
+            return (opts.compilerFlags
+                    + (opts.inhibitWarnings ? " -w" : String())
+                    + (opts.skipPCH ? " -D" + BuildConfiguration::getSkipPrecompiledHeaderDefine() : String())).trim();
+        }();
+
+        if (compilerFlags.isNotEmpty())
+            v->setProperty ("settings", "{ COMPILER_FLAGS = \"" + compilerFlags + "\"; }", nullptr);
+
+        pbxBuildFiles.add (v);
+        return fileID;
+    }
+
     String addRezFile (const Project::Item& projectItem, const build_tools::RelativePath& path) const
     {
-        auto pathAsString = path.toUnixStyle();
         auto refID = addFileReference (path.toUnixStyle());
 
         if (projectItem.isModuleCode())
         {
             if (auto* xcodeTarget = getTargetOfType (getProject().getTargetTypeFromFilePath (projectItem.getFile(), false)))
             {
-                auto rezFileID = addBuildFile (pathAsString, refID, false, false, xcodeTarget);
+                auto rezFileID = addBuildFile (FileOptions().withRelativePath (path)
+                                                            .withFileRefID (refID)
+                                                            .withXcodeTarget (xcodeTarget));
+
                 xcodeTarget->rezFileIDs.add (rezFileID);
 
                 return refID;
@@ -2907,7 +2952,7 @@ private:
         build_tools::overwriteFileIfDifferentOrThrow (entitlementsFile, options.getEntitlementsFileContent());
 
         build_tools::RelativePath entitlementsPath (entitlementsFile, getTargetFolder(), build_tools::RelativePath::buildTargetFolder);
-        addFile (entitlementsPath, false, false, false, false, nullptr, {});
+        addFile (FileOptions().withRelativePath (entitlementsPath));
     }
 
     String addProjectItem (const Project::Item& projectItem) const
@@ -2951,12 +2996,14 @@ private:
             if (projectItem.isModuleCode() && projectItem.shouldBeCompiled())
                 xcodeTarget = getTargetOfType (project.getTargetTypeFromFilePath (projectItem.getFile(), false));
 
-            return addFile (path, projectItem.shouldBeCompiled(),
-                            projectItem.shouldBeAddedToBinaryResources(),
-                            projectItem.shouldBeAddedToXcodeResources(),
-                            projectItem.shouldInhibitWarnings(),
-                            xcodeTarget,
-                            compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get());
+            return addFile (FileOptions().withRelativePath (path)
+                                         .withCompilerFlags (compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get())
+                                         .withCompilationEnabled (projectItem.shouldBeCompiled())
+                                         .withAddToBinaryResourcesEnabled (projectItem.shouldBeAddedToBinaryResources())
+                                         .withAddToXcodeResourcesEnabled (projectItem.shouldBeAddedToXcodeResources())
+                                         .withInhibitWarningsEnabled (projectItem.shouldInhibitWarnings())
+                                         .withSkipPCHEnabled (isPCHEnabledForAnyConfigurations() && projectItem.shouldSkipPCH())
+                                         .withXcodeTarget (xcodeTarget));
         }
 
         return {};
@@ -2978,7 +3025,8 @@ private:
         addFileReference (((File::isAbsolutePath (frameworkName) || isRelativePath) ? "" : "${SDKROOT}/") + path);
         frameworkFileIDs.add (fileRefID);
 
-        return addBuildFile (path, fileRefID, false, false);
+        return addBuildFile (FileOptions().withPath (path)
+                                          .withFileRefID (fileRefID));
     }
 
     String addCustomFramework (String frameworkPath) const
@@ -2988,19 +3036,20 @@ private:
 
         auto fileRefID = createFileRefID (frameworkPath);
 
-        auto fileType = getFileType (build_tools::RelativePath (frameworkPath, build_tools::RelativePath::projectFolder));
+        auto fileType = getFileType (frameworkPath);
         addFileOrFolderReference (frameworkPath, "<group>", fileType);
 
         frameworkFileIDs.add (fileRefID);
 
-        return addBuildFile (frameworkPath, fileRefID, false, false);
+        return addBuildFile (FileOptions().withPath (frameworkPath)
+                                          .withFileRefID (fileRefID));
     }
 
     String addEmbeddedFramework (const String& path) const
     {
         auto fileRefID = createFileRefID (path);
 
-        auto fileType = getFileType (build_tools::RelativePath (path, build_tools::RelativePath::projectFolder));
+        auto fileType = getFileType (path);
         addFileOrFolderReference (path, "<group>", fileType);
 
         auto fileID = createID (path + "buildref");
@@ -3213,13 +3262,16 @@ private:
 
         addLaunchStoryboardFileReference (build_tools::RelativePath (storyboardFile,
                                                                      getTargetFolder(),
-                                                                     build_tools::RelativePath::buildTargetFolder).toUnixStyle());
+                                                                     build_tools::RelativePath::buildTargetFolder));
     }
 
-    void addLaunchStoryboardFileReference (const String& relativePath) const
+    void addLaunchStoryboardFileReference (const build_tools::RelativePath& relativePath) const
     {
-        auto refID  = addFileReference (relativePath);
-        auto fileID = addBuildFile (relativePath, refID, false, false);
+        auto path = relativePath.toUnixStyle();
+
+        auto refID  = addFileReference (path);
+        auto fileID = addBuildFile (FileOptions().withPath (path)
+                                                 .withFileRefID (refID));
 
         resourceIDs.add (fileID);
         resourceFileRefs.add (refID);
@@ -3231,7 +3283,7 @@ private:
                                                                             getTargetFolder(),
                                                                             project.getProjectFilenameRootString());
         addFileReference (assetsPath.toUnixStyle());
-        resourceIDs.add (addBuildFile (assetsPath, false, false));
+        resourceIDs.add (addBuildFile (FileOptions().withRelativePath (assetsPath)));
         resourceFileRefs.add (createFileRefID (assetsPath));
     }
 
@@ -3264,8 +3316,8 @@ private:
     }
 
     String createFileRefID (const build_tools::RelativePath& path) const { return createFileRefID (path.toUnixStyle()); }
-    String createFileRefID (const String& path) const           { return createID ("__fileref_" + path); }
-    String getIDForGroup (const Project::Item& item) const      { return createID (item.getID()); }
+    String createFileRefID (const String& path) const                    { return createID ("__fileref_" + path); }
+    String getIDForGroup (const Project::Item& item) const               { return createID (item.getID()); }
 
     bool shouldFileBeCompiledByDefault (const File& file) const override
     {

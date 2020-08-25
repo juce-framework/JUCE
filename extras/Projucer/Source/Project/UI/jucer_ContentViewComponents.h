@@ -223,7 +223,7 @@ private:
 
             g.setColour (findColour (defaultTextColourId));
             g.setFont (Font (14.0f));
-            g.drawFittedText (stringToDisplay, getLocalBounds(), Justification::centred, 10, 1.0f);
+            g.drawFittedText (stringToDisplay, getLocalBounds(), Justification::centred, 15, 0.75f);
         }
 
         String stringToDisplay;

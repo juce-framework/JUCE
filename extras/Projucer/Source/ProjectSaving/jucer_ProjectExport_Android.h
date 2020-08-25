@@ -48,6 +48,8 @@ public:
     bool canCopeWithDuplicateFiles() override               { return false; }
     bool supportsUserDefinedConfigurations() const override { return true; }
 
+    String getNewLineString() const override     { return "\n"; }
+
     bool supportsTargetType (build_tools::ProjectType::Target::Type type) const override
     {
         return type == build_tools::ProjectType::Target::GUIApp || type == build_tools::ProjectType::Target::StaticLibrary
@@ -238,7 +240,7 @@ public:
     {
         build_tools::writeStreamToFile (gradleProjectFolder.getChildFile (filePath), [&] (MemoryOutputStream& mo)
         {
-            mo.setNewLineString ("\n");
+            mo.setNewLineString (getNewLineString());
             mo << fileContent;
         });
     }
@@ -247,7 +249,7 @@ public:
     {
         build_tools::writeStreamToFile (gradleProjectFolder.getChildFile (filePath), [&] (MemoryOutputStream& mo)
         {
-            mo.setNewLineString ("\n");
+            mo.setNewLineString (getNewLineString());
             mo.write (binaryData, static_cast<size_t> (binarySize));
         });
     }
@@ -340,7 +342,7 @@ private:
     {
         build_tools::writeStreamToFile (file, [&] (MemoryOutputStream& mo)
         {
-            mo.setNewLineString ("\n");
+            mo.setNewLineString (getNewLineString());
 
             mo << "# Automatically generated makefile, created by the Projucer" << newLine
                << "# Don't edit this file! Your changes will be overwritten when you re-save the Projucer project!" << newLine
@@ -578,7 +580,7 @@ private:
     String getGradleSettingsFileContent() const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         mo << "rootProject.name = " << "\'" << projectName << "\'" << newLine;
         mo << (isLibrary() ? "include ':lib'" : "include ':app'");
@@ -594,7 +596,7 @@ private:
     String getProjectBuildGradleFileContent() const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         mo << "buildscript {"                                                                              << newLine;
         mo << "   repositories {"                                                                          << newLine;
@@ -621,7 +623,7 @@ private:
     String getAppBuildGradleFileContent (const OwnedArray<LibraryModule>& modules) const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         mo << "apply plugin: 'com.android." << (isLibrary() ? "library" : "application") << "'" << newLine << newLine;
 
@@ -653,7 +655,7 @@ private:
     String getAndroidProductFlavours() const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         mo << "    flavorDimensions \"default\"" << newLine;
         mo << "    productFlavors {" << newLine;
@@ -702,7 +704,7 @@ private:
     String getAndroidSigningConfig() const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         auto keyStoreFilePath = androidKeyStore.get().toString().replace ("${user.home}", "${System.properties['user.home']}")
                                                                 .replace ("/", "${File.separator}");
@@ -728,7 +730,7 @@ private:
         auto targetSdkVersion  = static_cast<int> (androidTargetSDK.get());
 
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         mo << "    defaultConfig {"                                               << newLine;
 
@@ -753,7 +755,7 @@ private:
     String getAndroidBuildTypes() const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         mo << "    buildTypes {"                                                  << newLine;
 
@@ -784,7 +786,7 @@ private:
     String getAndroidVariantFilter() const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         mo << "    variantFilter { variant ->"            << newLine;
         mo << "        def names = variant.flavors*.name" << newLine;
@@ -807,7 +809,7 @@ private:
     String getAndroidProjectRepositories() const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         auto repositories = StringArray::fromLines (androidProjectRepositories.get().toString());
 
@@ -827,7 +829,7 @@ private:
     String getAndroidRepositories() const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         auto repositories = StringArray::fromLines (androidRepositories.get().toString());
 
@@ -844,7 +846,7 @@ private:
     String getAndroidDependencies() const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         mo << "    dependencies {" << newLine;
 
@@ -871,7 +873,7 @@ private:
     String getApplyPlugins() const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         if (areRemoteNotificationsEnabled())
             mo << "apply plugin: 'com.google.gms.google-services'" << newLine;
@@ -931,12 +933,12 @@ private:
             addOptJavaFolderToSourceSetsForModule (javaSourceSets, modules, "juce_product_unlocking");
 
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         mo << "    sourceSets {" << newLine;
-        mo << getSourceSetStringFor ("main.java.srcDirs", javaSourceSets);
+        mo << getSourceSetStringFor ("main.java.srcDirs", javaSourceSets, getNewLineString());
         mo << newLine;
-        mo << getSourceSetStringFor ("main.res.srcDirs", resourceSets);
+        mo << getSourceSetStringFor ("main.res.srcDirs", resourceSets, getNewLineString());
         mo << "    }" << newLine;
 
         return mo.toString();
@@ -967,7 +969,7 @@ private:
         return sourceSets;
     }
 
-    static String getSourceSetStringFor (const String& type, const StringArray& srcDirs)
+    static String getSourceSetStringFor (const String& type, const StringArray& srcDirs, const String& newLineString)
     {
         String s;
 
@@ -987,7 +989,7 @@ private:
 
         s << "]"     << newLine;
 
-        return replaceLineFeeds (s, "\n");
+        return replaceLineFeeds (s, newLineString);
     }
 
     //==============================================================================
@@ -998,7 +1000,7 @@ private:
         props << "ndk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidNDKPath, TargetOS::getThisOS()).get().toString()) << newLine
               << "sdk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidSDKPath, TargetOS::getThisOS()).get().toString()) << newLine;
 
-        return replaceLineFeeds (props, "\n");
+        return replaceLineFeeds (props, getNewLineString());
     }
 
     String getGradleWrapperPropertiesFileContent() const
@@ -1302,7 +1304,7 @@ private:
 
             build_tools::writeStreamToFile (file, [&] (MemoryOutputStream& mo)
             {
-                mo.setNewLineString ("\n");
+                mo.setNewLineString (getNewLineString());
 
                 PNGImageFormat png;
 
@@ -1355,7 +1357,7 @@ private:
         if (projectItem.isGroup())
         {
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
-                addCompileUnits (projectItem.getChild(i), mo, excludeFromBuild, extraCompilerFlags);
+                addCompileUnits (projectItem.getChild (i), mo, excludeFromBuild, extraCompilerFlags);
         }
         else if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (*this))
         {

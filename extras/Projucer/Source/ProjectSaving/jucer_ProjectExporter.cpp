@@ -845,17 +845,19 @@ bool ProjectExporter::ConstConfigIterator::next()
 //==============================================================================
 ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const ValueTree& configNode, const ProjectExporter& e)
    : config (configNode), project (p), exporter (e),
-     isDebugValue              (config, Ids::isDebug,              getUndoManager(), getValue (Ids::isDebug)),
-     configNameValue           (config, Ids::name,                 getUndoManager(), "Build Configuration"),
-     targetNameValue           (config, Ids::targetName,           getUndoManager(), project.getProjectFilenameRootString()),
-     targetBinaryPathValue     (config, Ids::binaryPath,           getUndoManager()),
-     recommendedWarningsValue  (config, Ids::recommendedWarnings,  getUndoManager()),
-     optimisationLevelValue    (config, Ids::optimisation,         getUndoManager()),
-     linkTimeOptimisationValue (config, Ids::linkTimeOptimisation, getUndoManager(), ! isDebug()),
-     ppDefinesValue            (config, Ids::defines,              getUndoManager()),
-     headerSearchPathValue     (config, Ids::headerPath,           getUndoManager()),
-     librarySearchPathValue    (config, Ids::libraryPath,          getUndoManager()),
-     userNotesValue            (config, Ids::userNotes,            getUndoManager())
+     isDebugValue                  (config, Ids::isDebug,                  getUndoManager(), getValue (Ids::isDebug)),
+     configNameValue               (config, Ids::name,                     getUndoManager(), "Build Configuration"),
+     targetNameValue               (config, Ids::targetName,               getUndoManager(), project.getProjectFilenameRootString()),
+     targetBinaryPathValue         (config, Ids::binaryPath,               getUndoManager()),
+     recommendedWarningsValue      (config, Ids::recommendedWarnings,      getUndoManager()),
+     optimisationLevelValue        (config, Ids::optimisation,             getUndoManager()),
+     linkTimeOptimisationValue     (config, Ids::linkTimeOptimisation,     getUndoManager(), ! isDebug()),
+     ppDefinesValue                (config, Ids::defines,                  getUndoManager()),
+     headerSearchPathValue         (config, Ids::headerPath,               getUndoManager()),
+     librarySearchPathValue        (config, Ids::libraryPath,              getUndoManager()),
+     userNotesValue                (config, Ids::userNotes,                getUndoManager()),
+     usePrecompiledHeaderFileValue (config, Ids::usePrecompiledHeaderFile, getUndoManager(), false),
+     precompiledHeaderFileValue    (config, Ids::precompiledHeaderFile,    getUndoManager())
 {
     recommendedCompilerWarningFlags["LLVM"] = { "-Wall", "-Wshadow-all", "-Wshorten-64-to-32", "-Wstrict-aliasing", "-Wuninitialized", "-Wunused-parameter",
         "-Wconversion", "-Wsign-compare", "-Wint-conversion", "-Wconditional-uninitialized", "-Woverloaded-virtual",
@@ -960,6 +962,22 @@ void ProjectExporter::BuildConfiguration::createPropertyEditors (PropertyListBui
     props.add (new ChoicePropertyComponent (linkTimeOptimisationValue, "Link-Time Optimisation"),
                "Enable this to perform link-time code optimisation. This is recommended for release builds.");
 
+    if (exporter.supportsPrecompiledHeaders())
+    {
+        props.add (new ChoicePropertyComponent (usePrecompiledHeaderFileValue, "Use Precompiled Header"),
+                   "Enable this to turn on precompiled header support for this configuration. Use the setting "
+                   "below to specify the header file to use.");
+
+        auto quotedHeaderFileName = (getPrecompiledHeaderFilename() + ".h").quoted();
+
+        props.add (new FilePathPropertyComponentWithEnablement (precompiledHeaderFileValue, usePrecompiledHeaderFileValue,
+                                                                "Precompiled Header File", false, true, "*", project.getProjectFolder()),
+                   "Specify an input header file that will be used to generate a file named " + quotedHeaderFileName + " which is used to generate the "
+                   "PCH file artifact for this exporter configuration. This file can be an absolute path, or relative to the jucer project folder. "
+                   "The " + quotedHeaderFileName + " file will be force included to all source files unless the \"Skip PCH\" setting has been enabled. "
+                   "The generated header will be written on project save and placed in the target folder for this exporter.");
+    }
+
     createConfigProperties (props);
 
     props.add (new TextPropertyComponent (userNotesValue, "Notes", 32768, true),
@@ -1008,6 +1026,31 @@ StringArray ProjectExporter::BuildConfiguration::getLibrarySearchPaths() const
         s.add (path + separator + getModuleLibraryArchName());
 
     return s;
+}
+
+String ProjectExporter::BuildConfiguration::getPrecompiledHeaderFileContent() const
+{
+    if (shouldUsePrecompiledHeaderFile())
+    {
+        auto f = project.getProjectFolder().getChildFile (precompiledHeaderFileValue.get().toString());
+
+        if (f.existsAsFile() && f.hasFileExtension (headerFileExtensions))
+        {
+            MemoryOutputStream content;
+            content.setNewLineString (exporter.getNewLineString());
+
+            writeAutoGenWarningComment (content);
+
+            content << "*/" << newLine << newLine
+                    << "#ifndef " << getSkipPrecompiledHeaderDefine() << newLine << newLine
+                    << f.loadFileAsString() << newLine
+                    << "#endif" << newLine;
+
+            return content.toString();
+        }
+    }
+
+    return {};
 }
 
 String ProjectExporter::getExternalLibraryFlags (const BuildConfiguration& config) const

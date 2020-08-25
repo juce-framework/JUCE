@@ -214,11 +214,11 @@ public:
     void addCompilerFlagScheme (const String&);
     void removeCompilerFlagScheme (const String&);
 
-    String getPostExportShellCommandPosixString() const     { return postExportShellCommandPosixValue.get(); }
-    String getPostExportShellCommandWinString() const       { return postExportShellCommandWinValue.get(); }
+    String getPostExportShellCommandPosixString() const  { return postExportShellCommandPosixValue.get(); }
+    String getPostExportShellCommandWinString() const    { return postExportShellCommandWinValue.get(); }
 
-    bool shouldUseAppConfig() const                   { return useAppConfigValue.get(); }
-    bool shouldAddUsingNamespaceToJuceHeader() const  { return addUsingNamespaceToJuceHeader.get(); }
+    bool shouldUseAppConfig() const                      { return useAppConfigValue.get(); }
+    bool shouldAddUsingNamespaceToJuceHeader() const     { return addUsingNamespaceToJuceHeader.get(); }
 
     //==============================================================================
     String getPluginNameString() const                { return pluginNameValue.get(); }
@@ -340,6 +340,7 @@ public:
         bool isGroup() const;
         bool isMainGroup() const;
         bool isImageFile() const;
+        bool isSourceFile() const;
 
         String getID() const;
         void setID (const String& newID);
@@ -373,6 +374,9 @@ public:
         bool shouldInhibitWarnings() const;
 
         bool isModuleCode() const;
+
+        Value getShouldSkipPCHValue();
+        bool shouldSkipPCH() const;
 
         Value getCompilerFlagSchemeValue();
         String getCompilerFlagSchemeString() const;
