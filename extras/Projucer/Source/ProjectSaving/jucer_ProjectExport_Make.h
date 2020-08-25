@@ -197,9 +197,8 @@ public:
             if (type == VST3PlugIn)
             {
                 s.add ("JUCE_VST3DIR := " + escapeSpaces (targetName).upToLastOccurrenceOf (".", false, false) + ".vst3");
-
-                auto is32Bit = config.getArchitectureTypeString().contains ("m32");
-                s.add (String ("JUCE_VST3SUBDIR := Contents/") + (is32Bit ? "i386" : "x86_64") + "-linux");
+                s.add ("VST3_PLATFORM_ARCH := $(shell $(CXX) make_helpers/arch_detection.cpp 2>&1 | tr '\\n' ' ' | sed \"s/.*JUCE_ARCH \\([a-zA-Z0-9_-]*\\).*/\\1/\")");
+                s.add ("JUCE_VST3SUBDIR := Contents/$(VST3_PLATFORM_ARCH)-linux");
 
                 targetName = "$(JUCE_VST3DIR)/$(JUCE_VST3SUBDIR)/" + targetName;
             }
@@ -478,6 +477,14 @@ public:
             mo.setNewLineString ("\n");
             writeMakefile (mo);
         });
+
+        if (project.shouldBuildVST3())
+        {
+            auto helperDir = getTargetFolder().getChildFile ("make_helpers");
+            helperDir.createDirectory();
+            build_tools::overwriteFileIfDifferentOrThrow (helperDir.getChildFile ("arch_detection.cpp"),
+                                                          BinaryData::juce_runtime_arch_detection_cpp);
+        }
     }
 
     //==============================================================================
