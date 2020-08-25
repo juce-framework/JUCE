@@ -294,9 +294,9 @@ Result ProjectSaver::saveProject (ProjectExporter* specifiedExporterToSave)
 
         saveBasicProjectItems (modules, loadUserContentFromAppConfig());
         writeProjects (modules, specifiedExporterToSave);
-        runPostExportScript();
-
         writeProjectFile();
+
+        runPostExportScript();
 
         if (generatedCodeFolder.exists())
         {
@@ -339,7 +339,9 @@ void ProjectSaver::writeProjectFile()
     auto root = project.getProjectRoot();
 
     root.removeProperty ("jucerVersion", nullptr);
-    root.setProperty (Ids::jucerFormatVersion, jucerFormatVersion, nullptr);
+
+    if ((int) root.getProperty (Ids::jucerFormatVersion, -1) != jucerFormatVersion)
+        root.setProperty (Ids::jucerFormatVersion, jucerFormatVersion, nullptr);
 
     project.updateCachedFileState();
 

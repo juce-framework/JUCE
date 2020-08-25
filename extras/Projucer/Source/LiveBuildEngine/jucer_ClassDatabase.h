@@ -208,12 +208,6 @@ struct ClassDatabase
               noDefaultConstructor (false)
         {}
 
-        InstantiationFlags (const InstantiationFlags& other)
-            : isAbstract (other.isAbstract),
-              inAnonymousNamespace (other.inAnonymousNamespace),
-              noDefaultConstructor (other.noDefaultConstructor)
-        {}
-
         bool canBeInstantiated() const noexcept
         {
             return ! (isAbstract || inAnonymousNamespace || noDefaultConstructor);

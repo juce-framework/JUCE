@@ -452,13 +452,8 @@ private:
 
         out << "find_package (PkgConfig REQUIRED)" << newLine;
 
-        StringArray cmakePkgconfigPackages;
-
-        for (auto& package : exporter.getPackages())
-        {
-            cmakePkgconfigPackages.add (package.toUpperCase());
-            out << "pkg_search_module (" << cmakePkgconfigPackages.strings.getLast() << " REQUIRED " << package << ")" << newLine;
-        }
+        for (auto& package : exporter.getCompilePackages())
+            out << "pkg_search_module (" << package.toUpperCase() << " REQUIRED " << package << ")" << newLine;
 
         out << newLine;
 
@@ -497,8 +492,8 @@ private:
             for (auto& path : exporter.getHeaderSearchPaths (config))
                 out << "    " << path.quoted() << newLine;
 
-            for (auto& package : cmakePkgconfigPackages)
-                out << "    ${" << package << "_INCLUDE_DIRS}" << newLine;
+            for (auto& package : exporter.getCompilePackages())
+                out << "    ${" << package.toUpperCase() << "_INCLUDE_DIRS}" << newLine;
 
             out << ")" << newLine << newLine;
 
@@ -578,8 +573,8 @@ private:
                 for (auto& lib : cmakeFoundLibraries)
                     out << "    " << lib << newLine;
 
-                for (auto& package : cmakePkgconfigPackages)
-                    out << "    ${" << package << "_LIBRARIES}" << newLine;
+                for (auto& package : exporter.getLinkPackages())
+                    out << "    ${" << package.toUpperCase() << "_LIBRARIES}" << newLine;
 
                 out << ")" << newLine << newLine;
 

@@ -92,14 +92,10 @@
  #include <GL/gl.h>
  #undef KeyPress
 #elif JUCE_IOS
- #if defined (__IPHONE_7_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_7_0
-  #if defined (__IPHONE_12_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_12_0
-   #define GLES_SILENCE_DEPRECATION 1
-  #endif
-  #include <OpenGLES/ES3/gl.h>
- #else
-  #include <OpenGLES/ES2/gl.h>
+ #if defined (__IPHONE_12_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_12_0
+  #define GLES_SILENCE_DEPRECATION 1
  #endif
+ #include <OpenGLES/ES3/gl.h>
 #elif JUCE_MAC
  #define JUCE_OPENGL3 1
  #if defined (MAC_OS_X_VERSION_10_14) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_14

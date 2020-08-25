@@ -382,11 +382,11 @@ struct MenuWindow  : public Component
     {
         if (key.isKeyCode (KeyPress::downKey))
         {
-            selectNextItem (1);
+            selectNextItem (MenuSelectionDirection::forwards);
         }
         else if (key.isKeyCode (KeyPress::upKey))
         {
-            selectNextItem (-1);
+            selectNextItem (MenuSelectionDirection::backwards);
         }
         else if (key.isKeyCode (KeyPress::leftKey))
         {
@@ -414,14 +414,14 @@ struct MenuWindow  : public Component
             if (showSubMenuFor (currentChild))
             {
                 if (isSubMenuVisible())
-                    activeSubMenu->selectNextItem (0);
+                    activeSubMenu->selectNextItem (MenuSelectionDirection::current);
             }
             else if (componentAttachedTo != nullptr)
             {
                 componentAttachedTo->keyPressed (key);
             }
         }
-        else if (key.isKeyCode (KeyPress::returnKey))
+        else if (key.isKeyCode (KeyPress::returnKey) || key.isKeyCode (KeyPress::spaceKey))
         {
             triggerCurrentlyHighlightedItem();
         }
@@ -948,24 +948,46 @@ struct MenuWindow  : public Component
         }
     }
 
-    void selectNextItem (int delta)
+    enum class MenuSelectionDirection
+    {
+        forwards,
+        backwards,
+        current
+    };
+
+    void selectNextItem (MenuSelectionDirection direction)
     {
         disableTimerUntilMouseMoves();
 
-        auto start = jmax (0, items.indexOf (currentChild));
+        auto start = [&]
+        {
+            auto index = items.indexOf (currentChild);
+
+            if (index >= 0)
+                return index;
+
+            return direction == MenuSelectionDirection::backwards ? items.size() - 1
+                                                                  : 0;
+        }();
+
+        auto preIncrement = (direction != MenuSelectionDirection::current && currentChild != nullptr);
 
         for (int i = items.size(); --i >= 0;)
         {
-            start += delta;
+            if (preIncrement)
+                start += (direction == MenuSelectionDirection::backwards ? -1 : 1);
 
             if (auto* mic = items.getUnchecked ((start + items.size()) % items.size()))
             {
                 if (canBeTriggered (mic->item) || hasActiveSubMenu (mic->item))
                 {
                     setCurrentlyHighlightedChild (mic);
-                    break;
+                    return;
                 }
             }
+
+            if (! preIncrement)
+                preIncrement = true;
         }
     }
 

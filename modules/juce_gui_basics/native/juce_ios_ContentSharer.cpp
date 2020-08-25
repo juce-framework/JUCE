@@ -124,6 +124,7 @@ private:
         setBounds (bounds);
 
         setAlwaysOnTop (true);
+        setVisible (true);
         addToDesktop (0);
 
         enterModalState (true,

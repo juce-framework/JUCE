@@ -283,7 +283,7 @@ private:
     //==============================================================================
     struct DelegateClass : ObjCClass<DelegateType>
     {
-        DelegateClass()  : ObjCClass <DelegateType> ("JUCEFileChooser_")
+        DelegateClass()  : ObjCClass<DelegateType> ("JUCEFileChooser_")
         {
             addIvar<Native*> ("cppObject");
 

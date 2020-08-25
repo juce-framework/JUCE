@@ -39,22 +39,22 @@ Project::ProjectFileModificationPoller::ProjectFileModificationPoller (Project& 
 void Project::ProjectFileModificationPoller::reset()
 {
     project.removeProjectMessage (ProjectMessages::Ids::jucerFileModified);
-    showingWarning = false;
+    pending = false;
 
     startTimer (250);
 }
 
 void Project::ProjectFileModificationPoller::timerCallback()
 {
-    if (project.updateCachedFileState() && ! showingWarning)
+    if (project.updateCachedFileState() && ! pending)
     {
          project.addProjectMessage (ProjectMessages::Ids::jucerFileModified,
                                     { { "Save current state", [this] { resaveProject(); } },
-                                      { "Re-load from disk", [this] { reloadProjectFromDisk(); } },
-                                      { "Ignore", [this] { reset(); } } });
+                                      { "Re-load from disk",  [this] { reloadProjectFromDisk(); } },
+                                      { "Ignore",             [this] { reset(); } } });
 
          stopTimer();
-         showingWarning = true;
+         pending = true;
     }
 }
 
@@ -79,8 +79,8 @@ void Project::ProjectFileModificationPoller::reloadProjectFromDisk()
 
 void Project::ProjectFileModificationPoller::resaveProject()
 {
-    project.saveProject();
     reset();
+    project.saveProject();
 }
 
 //==============================================================================
@@ -776,9 +776,15 @@ bool Project::hasIncompatibleLicenseTypeAndSplashScreenSetting() const
           && ! ProjucerApplication::getApp().getLicenseController().getCurrentState().canUnlockFullFeatures();
 }
 
+bool Project::isFileModificationCheckPending() const
+{
+    return fileModificationPoller.isCheckPending();
+}
+
 bool Project::isSaveAndExportDisabled() const
 {
-    return ! ProjucerApplication::getApp().isRunningCommandLine && hasIncompatibleLicenseTypeAndSplashScreenSetting();
+    return ! ProjucerApplication::getApp().isRunningCommandLine
+           && (hasIncompatibleLicenseTypeAndSplashScreenSetting() || isFileModificationCheckPending());
 }
 
 void Project::updateLicenseWarning()
@@ -1221,31 +1227,26 @@ bool Project::shouldBuildTargetType (build_tools::ProjectType::Target::Type targ
     return true;
 }
 
-static bool hasParentDirectory (File f, StringRef parentName)
-{
-    for (int depth = 0; depth < 2; ++depth)
-    {
-        auto parent = f.getParentDirectory();
-
-        if (parent.getFileName() == parentName)
-            return true;
-
-        f = parent;
-    }
-
-    return false;
-}
-
 build_tools::ProjectType::Target::Type Project::getTargetTypeFromFilePath (const File& file, bool returnSharedTargetIfNoValidSuffix)
 {
-    if      (LibraryModule::CompileUnit::hasSuffix (file, "_AU") || hasParentDirectory (file, "AU"))                 return build_tools::ProjectType::Target::AudioUnitPlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AUv3") || hasParentDirectory (file, "AU"))               return build_tools::ProjectType::Target::AudioUnitv3PlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AAX") || hasParentDirectory (file, "AAX"))               return build_tools::ProjectType::Target::AAXPlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_RTAS") || hasParentDirectory (file, "RTAS"))             return build_tools::ProjectType::Target::RTASPlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST2") || hasParentDirectory (file, "VST"))              return build_tools::ProjectType::Target::VSTPlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST3") || hasParentDirectory (file, "VST3"))             return build_tools::ProjectType::Target::VST3PlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Standalone") || hasParentDirectory (file, "Standalone")) return build_tools::ProjectType::Target::StandalonePlugIn;
-    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Unity") || hasParentDirectory (file, "Unity"))           return build_tools::ProjectType::Target::UnityPlugIn;
+    auto path = file.getFullPathName();
+
+    auto isInPluginClientSubdir = [&path] (StringRef subDir)
+    {
+        return path.contains ("juce_audio_plugin_client"
+                             + File::getSeparatorString()
+                             + subDir
+                             + File::getSeparatorString());
+    };
+
+    if      (LibraryModule::CompileUnit::hasSuffix (file, "_AU")         || isInPluginClientSubdir ("AU"))          return build_tools::ProjectType::Target::AudioUnitPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AUv3")       || isInPluginClientSubdir ("AU"))          return build_tools::ProjectType::Target::AudioUnitv3PlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AAX")        || isInPluginClientSubdir ("AAX"))         return build_tools::ProjectType::Target::AAXPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_RTAS")       || isInPluginClientSubdir ("RTAS"))        return build_tools::ProjectType::Target::RTASPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST2")       || isInPluginClientSubdir ("VST"))         return build_tools::ProjectType::Target::VSTPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST3")       || isInPluginClientSubdir ("VST3"))        return build_tools::ProjectType::Target::VST3PlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Standalone") || isInPluginClientSubdir ("Standalone"))  return build_tools::ProjectType::Target::StandalonePlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Unity")      || isInPluginClientSubdir ("Unity"))       return build_tools::ProjectType::Target::UnityPlugIn;
 
     return (returnSharedTargetIfNoValidSuffix ? build_tools::ProjectType::Target::SharedCodeTarget : build_tools::ProjectType::Target::unspecified);
 }

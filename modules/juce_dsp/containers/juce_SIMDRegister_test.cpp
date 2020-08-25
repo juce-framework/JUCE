@@ -750,7 +750,7 @@ public:
             copy (a, inArray);
             a = SIMDRegister<type>::abs (a);
 
-            auto calcAbs = [] (type x) -> type { return x >= type (0) ? x : -x; };
+            auto calcAbs = [] (type x) -> type { return x >= type (0) ? x : type (-x); };
 
             for (size_t j = 0; j < SIMDRegister<type>::SIMDNumElements; ++j)
                 outArray[j] = calcAbs (inArray[j]);

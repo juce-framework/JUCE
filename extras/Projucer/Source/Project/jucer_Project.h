@@ -335,8 +335,7 @@ public:
     bool isARAPluginHost();
 
     //==============================================================================
-    bool shouldBuildTargetType (
-        build_tools::ProjectType::Target::Type targetType) const noexcept;
+    bool shouldBuildTargetType (build_tools::ProjectType::Target::Type targetType) const noexcept;
     static build_tools::ProjectType::Target::Type getTargetTypeFromFilePath (const File& file, bool returnSharedTargetIfNoValidSuffix);
 
     //==============================================================================
@@ -527,6 +526,7 @@ public:
 
     //==============================================================================
     bool hasIncompatibleLicenseTypeAndSplashScreenSetting() const;
+    bool isFileModificationCheckPending() const;
     bool isSaveAndExportDisabled() const;
 
 private:
@@ -540,6 +540,7 @@ private:
     struct ProjectFileModificationPoller  : private Timer
     {
         ProjectFileModificationPoller (Project& p);
+        bool isCheckPending() const noexcept  { return pending; }
 
     private:
         void timerCallback() override;
@@ -549,7 +550,7 @@ private:
         void reloadProjectFromDisk();
 
         Project& project;
-        bool showingWarning = false;
+        bool pending = false;
     };
 
     //==============================================================================

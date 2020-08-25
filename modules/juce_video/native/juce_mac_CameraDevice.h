@@ -23,13 +23,168 @@
   ==============================================================================
 */
 
-#if ! (defined (MAC_OS_X_VERSION_10_16) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_16)
- JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
- #define JUCE_DEPRECATION_IGNORED 1
-#endif
-
 struct CameraDevice::Pimpl
 {
+   #if defined (MAC_OS_X_VERSION_10_15) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_15
+    class PostCatalinaPhotoOutput
+    {
+    public:
+        PostCatalinaPhotoOutput()
+        {
+            static PhotoOutputDelegateClass cls;
+            delegate.reset ([cls.createInstance() init]);
+        }
+
+        void addImageCapture (AVCaptureSession* s)
+        {
+            if (imageOutput != nil)
+                return;
+
+            imageOutput = [[AVCapturePhotoOutput alloc] init];
+            [s addOutput: imageOutput];
+        }
+
+        void removeImageCapture (AVCaptureSession* s)
+        {
+            if (imageOutput == nil)
+                return;
+
+            [s removeOutput: imageOutput];
+            [imageOutput release];
+            imageOutput = nil;
+        }
+
+        NSArray<AVCaptureConnection*>* getConnections() const
+        {
+            if (imageOutput != nil)
+                return imageOutput.connections;
+
+            return nil;
+        }
+
+        void triggerImageCapture (Pimpl& p)
+        {
+            if (imageOutput == nil)
+                return;
+
+            PhotoOutputDelegateClass::setOwner (delegate.get(), &p);
+
+            [imageOutput capturePhotoWithSettings: [AVCapturePhotoSettings photoSettings]
+                                         delegate: id<AVCapturePhotoCaptureDelegate> (delegate.get())];
+        }
+
+        static NSArray* getAvailableDevices()
+        {
+            auto* discovery = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes: @[AVCaptureDeviceTypeBuiltInWideAngleCamera,
+                                                                                                  AVCaptureDeviceTypeExternalUnknown]
+                                                                                     mediaType: AVMediaTypeVideo
+                                                                                      position: AVCaptureDevicePositionUnspecified];
+            return [discovery devices];
+        }
+
+    private:
+        class PhotoOutputDelegateClass : public ObjCClass<NSObject>
+        {
+        public:
+            PhotoOutputDelegateClass() : ObjCClass<NSObject> ("PhotoOutputDelegateClass_")
+            {
+                addMethod (@selector (captureOutput:didFinishProcessingPhoto:error:), didFinishProcessingPhoto, "v@:@@@");
+                addIvar<Pimpl*> ("owner");
+                registerClass();
+            }
+
+            static void didFinishProcessingPhoto (id self, SEL, AVCapturePhotoOutput*, AVCapturePhoto* photo, NSError* error)
+            {
+                String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
+                ignoreUnused (errorString);
+
+                JUCE_CAMERA_LOG ("didFinishProcessingPhoto(), error = " + errorString);
+
+                if (error != nil)
+                {
+                    JUCE_CAMERA_LOG ("Still picture capture failed, error: " + nsStringToJuce (error.localizedDescription));
+                    jassertfalse;
+                    return;
+                }
+
+                auto* imageData = [photo fileDataRepresentation];
+                auto image = ImageFileFormat::loadFrom (imageData.bytes, (size_t) imageData.length);
+
+                getOwner (self).imageCaptureFinished (image);;
+            }
+
+            static Pimpl& getOwner (id self) { return *getIvar<Pimpl*> (self, "owner"); }
+            static void setOwner (id self, Pimpl* t) { object_setInstanceVariable (self, "owner", t); }
+        };
+
+        AVCapturePhotoOutput* imageOutput = nil;
+        std::unique_ptr<NSObject, NSObjectDeleter> delegate;
+    };
+   #else
+    struct PreCatalinaStillImageOutput
+    {
+    public:
+        void addImageCapture (AVCaptureSession* s)
+        {
+            if (imageOutput != nil)
+                return;
+
+            imageOutput = [[AVCaptureStillImageOutput alloc] init];
+            auto imageSettings = [[NSDictionary alloc] initWithObjectsAndKeys: AVVideoCodecJPEG, AVVideoCodecKey, nil];
+            [imageOutput setOutputSettings: imageSettings];
+            [imageSettings release];
+            [s addOutput: imageOutput];
+        }
+
+        void removeImageCapture (AVCaptureSession* s)
+        {
+            if (imageOutput == nil)
+                return;
+
+            [s removeOutput: imageOutput];
+            [imageOutput release];
+            imageOutput = nil;
+        }
+
+        NSArray<AVCaptureConnection*>* getConnections() const
+        {
+            if (imageOutput != nil)
+                return imageOutput.connections;
+
+            return nil;
+        }
+
+        void triggerImageCapture (Pimpl& p)
+        {
+            if (auto* videoConnection = p.getVideoConnection())
+            {
+                [imageOutput captureStillImageAsynchronouslyFromConnection: videoConnection
+                                                         completionHandler: ^(CMSampleBufferRef sampleBuffer, NSError* error)
+                {
+                    if (error != nil)
+                    {
+                        JUCE_CAMERA_LOG ("Still picture capture failed, error: " + nsStringToJuce (error.localizedDescription));
+                        jassertfalse;
+                        return;
+                    }
+
+                    auto* imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation: sampleBuffer];
+                    auto image = ImageFileFormat::loadFrom (imageData.bytes, (size_t) imageData.length);
+                    p.imageCaptureFinished (image);
+                }];
+            }
+        }
+
+        static NSArray* getAvailableDevices()
+        {
+            return [AVCaptureDevice devicesWithMediaType: AVMediaTypeVideo];
+        }
+
+    private:
+        AVCaptureStillImageOutput* imageOutput = nil;
+    };
+   #endif
+
     Pimpl (CameraDevice& ownerToUse, const String& deviceNameToUse, int /*index*/,
            int /*minWidth*/, int /*minHeight*/,
            int /*maxWidth*/, int /*maxHeight*/,
@@ -127,8 +282,9 @@ struct CameraDevice::Pimpl
 
     static StringArray getAvailableDevices()
     {
+        auto* devices = decltype (imageOutput)::getAvailableDevices();
+
         StringArray results;
-        NSArray* devices = [AVCaptureDevice devicesWithMediaType: AVMediaTypeVideo];
 
         for (AVCaptureDevice* device : devices)
             results.add (nsStringToJuce ([device localizedName]));
@@ -183,14 +339,7 @@ private:
     //==============================================================================
     void addImageCapture()
     {
-        if (imageOutput == nil)
-        {
-            imageOutput = [[AVCaptureStillImageOutput alloc] init];
-            auto imageSettings = [[NSDictionary alloc] initWithObjectsAndKeys: AVVideoCodecJPEG, AVVideoCodecKey, nil];
-            [imageOutput setOutputSettings: imageSettings];
-            [imageSettings release];
-            [session addOutput: imageOutput];
-        }
+        imageOutput.addImageCapture (session);
     }
 
     void addMovieCapture()
@@ -204,12 +353,7 @@ private:
 
     void removeImageCapture()
     {
-        if (imageOutput != nil)
-        {
-            [session removeOutput: imageOutput];
-            [imageOutput release];
-            imageOutput = nil;
-        }
+        imageOutput.removeImageCapture (session);
     }
 
     void removeMovieCapture()
@@ -238,7 +382,7 @@ private:
     {
         if (currentInput == nil)
         {
-            NSArray* availableDevices = [AVCaptureDevice devicesWithMediaType: AVMediaTypeVideo];
+            auto* availableDevices = decltype (imageOutput)::getAvailableDevices();
 
             for (AVCaptureDevice* device : availableDevices)
             {
@@ -299,14 +443,28 @@ private:
 
     AVCaptureConnection* getVideoConnection() const
     {
-        if (imageOutput != nil)
-            for (AVCaptureConnection* connection in imageOutput.connections)
+        auto* connections = imageOutput.getConnections();
+
+        if (connections != nil)
+            for (AVCaptureConnection* connection in connections)
                 if ([connection isActive] && [connection isEnabled])
                     for (AVCaptureInputPort* port in [connection inputPorts])
                         if ([[port mediaType] isEqual: AVMediaTypeVideo])
                             return connection;
 
         return nil;
+    }
+
+    void imageCaptureFinished (const Image& image)
+    {
+        handleImageCapture (image);
+
+        WeakReference<Pimpl> weakRef (this);
+        MessageManager::callAsync ([weakRef, image]() mutable
+        {
+            if (weakRef != nullptr && weakRef->pictureTakenCallback != nullptr)
+                weakRef->pictureTakenCallback (image);
+        });
     }
 
     void handleImageCapture (const Image& image)
@@ -323,31 +481,7 @@ private:
         refreshIfNeeded();
 
         if (auto* videoConnection = getVideoConnection())
-        {
-            [imageOutput captureStillImageAsynchronouslyFromConnection: videoConnection
-                                                     completionHandler: ^(CMSampleBufferRef sampleBuffer, NSError* error)
-            {
-                if (error != nil)
-                {
-                    JUCE_CAMERA_LOG ("Still picture capture failed, error: " + nsStringToJuce (error.localizedDescription));
-                    jassertfalse;
-                    return;
-                }
-
-                NSData* imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation: sampleBuffer];
-
-                auto image = ImageFileFormat::loadFrom (imageData.bytes, (size_t) imageData.length);
-
-                handleImageCapture (image);
-
-                WeakReference<Pimpl> weakRef (this);
-                MessageManager::callAsync ([weakRef, image]() mutable
-                {
-                    if (weakRef != nullptr && weakRef->pictureTakenCallback != nullptr)
-                        weakRef->pictureTakenCallback (image);
-                });
-            }];
-        }
+            imageOutput.triggerImageCapture (*this);
     }
 
     void cameraSessionRuntimeError (const String& error)
@@ -364,7 +498,11 @@ private:
 
     AVCaptureSession* session = nil;
     AVCaptureMovieFileOutput* fileOutput = nil;
-    AVCaptureStillImageOutput* imageOutput = nil;
+   #if defined (MAC_OS_X_VERSION_10_15) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_15
+    PostCatalinaPhotoOutput imageOutput;
+   #else
+    PreCatalinaStillImageOutput imageOutput;
+   #endif
     AVCaptureDeviceInput* currentInput = nil;
 
     id<AVCaptureFileOutputRecordingDelegate> callbackDelegate = nil;
@@ -415,7 +553,3 @@ String CameraDevice::getFileExtension()
 {
     return ".mov";
 }
-
-#if JUCE_DEPRECATION_IGNORED
- JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-#endif

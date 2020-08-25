@@ -119,6 +119,11 @@ provisioning profiles, which is achieved by passing the `-allowProvisioningUpdat
 
     cmake --build build-ios --target <targetName> -- -allowProvisioningUpdates
 
+### Building universal binaries for macOS
+
+Building universal binaries that will run on both arm64 and x86_64 can be achieved by
+configuring the CMake project with `"-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64"`.
+
 ### A note about compile definitions
 
 Module options and plugin options that would previously have been set in the Projucer can be set on
@@ -191,10 +196,10 @@ attributes directly to these creation functions, rather than adding them later.
   - The text your app will display when it requests camera permissions.
 
 - `BLUETOOTH_PERMISSION_ENABLED`
-  - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
+  - May be either TRUE or FALSE. Adds the appropriate entries to an app's Info.plist.
 
 - `BLUETOOTH_PERMISSION_TEXT`
-  - The text your iOS app will display when it requests bluetooth permissions.
+  - The text your app will display when it requests bluetooth permissions.
 
 - `SEND_APPLE_EVENTS_PERMISSION_ENABLED`
   - May be either TRUE or FALSE. Enable this to allow your app to send Apple events.

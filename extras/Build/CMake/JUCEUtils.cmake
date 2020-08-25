@@ -391,8 +391,8 @@ function(_juce_add_au_resource_fork shared_code_target au_target)
             -d "ppc_$ppc" -d "i386_$i386" -d "ppc64_$ppc64" -d "x86_64_$x86_64"
             -I "${secret_au_resource_dir}"
             -I "/System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
-            -I "/Applications/Xcode/app/Contents/Developer/Extras/CoreAudio/AudioUnits/AUPublic/AUBase"
-            -I "/Applications/Xcode/app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/AudioUnit.framework/Headers"
+            -I "/Applications/Xcode.app/Contents/Developer/Extras/CoreAudio/AudioUnits/AUPublic/AUBase"
+            -I "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/AudioUnit.framework/Headers"
             -isysroot "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
             "${au_rez_sources}"
             -o "${au_rez_output}"
@@ -776,7 +776,7 @@ function(juce_add_binary_data target)
 
     set(juce_binary_data_folder "${CMAKE_CURRENT_BINARY_DIR}/juce_binarydata_${target}/JuceLibraryCode")
 
-    list(APPEND binary_file_names "${juce_binary_data_folder}/BinaryData.h")
+    set(binary_file_names)
 
     foreach(index RANGE 1 ${num_binary_files})
         list(APPEND binary_file_names "${juce_binary_data_folder}/BinaryData${index}.cpp")
@@ -791,6 +791,8 @@ function(juce_add_binary_data target)
     if(NOT JUCE_ARG_HEADER_NAME)
         set(JUCE_ARG_HEADER_NAME BinaryData.h)
     endif()
+
+    list(APPEND binary_file_names "${juce_binary_data_folder}/${JUCE_ARG_HEADER_NAME}")
 
     add_custom_command(OUTPUT ${binary_file_names}
         COMMAND juce::juceaide binarydata "${JUCE_ARG_NAMESPACE}" "${JUCE_ARG_HEADER_NAME}"
@@ -941,15 +943,12 @@ function(_juce_generate_icon source_target dest_target)
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         set(generated_icon "${juce_library_code}/Icon.icns")
-        add_custom_command(OUTPUT "${generated_icon}"
-            COMMAND juce::juceaide macicon "${generated_icon}" ${icon_args}
-            VERBATIM)
+        # To get compiled properly, we need the icon before the plist is generated!
+        _juce_execute_juceaide(macicon "${generated_icon}" ${icon_args})
         set_source_files_properties(${generated_icon} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         set(generated_icon "${juce_library_code}/icon.ico")
-        add_custom_command(OUTPUT ${generated_icon}
-            COMMAND juce::juceaide winicon "${generated_icon}" ${icon_args}
-            VERBATIM)
+        _juce_execute_juceaide(winicon "${generated_icon}" ${icon_args})
     elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
         get_target_property(generated_icon ${source_target} JUCE_CUSTOM_XCASSETS_FOLDER)
 
@@ -1815,8 +1814,8 @@ function(_juce_initialise_target target)
         CAMERA_PERMISSION_TEXT
         SEND_APPLE_EVENTS_PERMISSION_ENABLED
         SEND_APPLE_EVENTS_PERMISSION_TEXT
-        BLUETOOTH_PERMISSION_ENABLED    # iOS only
-        BLUETOOTH_PERMISSION_TEXT       # iOS only
+        BLUETOOTH_PERMISSION_ENABLED
+        BLUETOOTH_PERMISSION_TEXT
         FILE_SHARING_ENABLED            # iOS only
         DOCUMENT_BROWSER_ENABLED        # iOS only
         LAUNCH_STORYBOARD_FILE          # iOS only

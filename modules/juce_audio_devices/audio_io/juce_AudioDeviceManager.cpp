@@ -544,6 +544,8 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
     else if (currentAudioDevice != nullptr)
         return {};
 
+    stopDevice();
+
     if (getCurrentDeviceTypeObject() == nullptr
         || (newSetup.inputDeviceName.isEmpty() && newSetup.outputDeviceName.isEmpty()))
     {
@@ -554,8 +556,6 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
 
         return {};
     }
-
-    stopDevice();
 
     String error;
 

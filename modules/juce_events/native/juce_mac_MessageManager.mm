@@ -144,7 +144,11 @@ private:
         {
             if (notification.userInfo != nil)
             {
-                NSUserNotification* userNotification = [notification.userInfo objectForKey: nsStringLiteral ("NSApplicationLaunchUserNotificationKey")];
+                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+                // NSUserNotification is deprecated from macOS 11, but there doesn't seem to be a
+                // replacement for NSApplicationLaunchUserNotificationKey returning a non-deprecated type
+                NSUserNotification* userNotification = notification.userInfo[NSApplicationLaunchUserNotificationKey];
+                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
                 if (userNotification != nil && userNotification.userInfo != nil)
                     didReceiveRemoteNotification (self, nil, [NSApplication sharedApplication], userNotification.userInfo);

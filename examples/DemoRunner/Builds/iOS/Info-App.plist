@@ -20,7 +20,7 @@
     <key>CFBundleExecutable</key>
     <string>${EXECUTABLE_NAME}</string>
     <key>CFBundleIdentifier</key>
-    <string>com.juce.demorunner</string>
+    <string>com.rmsl.juce.demorunner</string>
     <key>CFBundleName</key>
     <string>DemoRunner</string>
     <key>CFBundleDisplayName</key>

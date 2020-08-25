@@ -363,13 +363,14 @@ namespace build_tools
 
     static void createiOSIconFiles (const Icons& icons, File appIconSet)
     {
-        const auto images = asArray (icons);
+        auto* imageToUse = icons.big != nullptr ? icons.big.get()
+                                                : icons.small.get();
 
-        if (! images.isEmpty())
+        if (imageToUse != nullptr)
         {
             for (auto& type : iOSAppIconTypes)
             {
-                auto image = rescaleImageForIcon (*images.getFirst(), type.size);
+                auto image = rescaleImageForIcon (*imageToUse, type.size);
 
                 if (image.hasAlphaChannel())
                 {

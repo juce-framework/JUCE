@@ -34,32 +34,73 @@ namespace
     static const StringArray iOSVersions { "9.0", "9.1", "9.2", "9.3", "10.0", "10.1", "10.2", "10.3",
                                            "11.0", "12.0", "13.0" };
 
-    static const int oldestDeploymentTarget  = 7;
-    static const int defaultDeploymentTarget = 11;
-    static const int oldestSDKVersion        = 11;
-    static const int currentSDKVersion       = 15;
-    static const int minimumAUv3SDKVersion   = 11;
+    enum class MacOSVersion
+    {
+        v10_7,
+        v10_8,
+        v10_9,
+        v10_10,
+        v10_11,
+        v10_12,
+        v10_13,
+        v10_14,
+        v10_15,
+        v10_16,
+        v11_0,
+    };
 
-    static String getVersionName    (int version)  { return "10." + String (version); }
-    static String getSDKDisplayName (int version)  { return getVersionName (version) + " SDK"; }
-    static String getSDKRootName    (int version)  { return "macosx" + getVersionName (version); }
+    static const char* const getName (MacOSVersion m)
+    {
+        switch (m)
+        {
+            case MacOSVersion::v10_7:   return "10.7";
+            case MacOSVersion::v10_8:   return "10.8";
+            case MacOSVersion::v10_9:   return "10.9";
+            case MacOSVersion::v10_10:  return "10.10";
+            case MacOSVersion::v10_11:  return "10.11";
+            case MacOSVersion::v10_12:  return "10.12";
+            case MacOSVersion::v10_13:  return "10.13";
+            case MacOSVersion::v10_14:  return "10.14";
+            case MacOSVersion::v10_15:  return "10.15";
+            case MacOSVersion::v10_16:  return "10.16";
+            case MacOSVersion::v11_0:   return "11.0";
+            default:                    break;
+        }
+
+        jassertfalse;
+        return "";
+    }
+
+    static String getDisplayName (MacOSVersion m) { return getName (m) + String (" SDK"); }
+    static String getRootName    (MacOSVersion m) { return String ("macosx") + getName (m); }
+
+    constexpr auto nextMacOSVersion       = (MacOSVersion) ((int) MacOSVersion::v11_0 + 1);
+    constexpr auto oldestDeploymentTarget = MacOSVersion::v10_7;
+    constexpr auto macOSDefaultVersion    = MacOSVersion::v10_11;
+    constexpr auto oldestSDKVersion       = MacOSVersion::v10_11;
+    constexpr auto minimumAUv3SDKVersion  = MacOSVersion::v10_11;
+
+    static MacOSVersion& operator++ (MacOSVersion& m)
+    {
+        return m = (MacOSVersion) ((int) m + 1);
+    }
 
     static String getOSXSDKVersion (const String& sdkVersion)
     {
-        for (int v = oldestSDKVersion; v <= currentSDKVersion; ++v)
-            if (sdkVersion == getSDKDisplayName (v))
-                return getSDKRootName (v);
+        for (auto v = oldestSDKVersion; v != nextMacOSVersion; ++v)
+            if (sdkVersion == getDisplayName (v))
+                return getRootName (v);
 
         return "macosx";
     }
 
-    template<class ContainerType>
-    static ContainerType getSDKChoiceList (int oldestVersion, bool displayName)
+    template <class ContainerType>
+    static ContainerType getSDKChoiceList (MacOSVersion oldestVersion, bool displayName)
     {
         ContainerType container;
 
-        for (int v = oldestVersion; v <= currentSDKVersion; ++v)
-            container.add (displayName ? getSDKDisplayName (v) : getVersionName (v));
+        for (auto v = oldestVersion; v != nextMacOSVersion; ++v)
+            container.add (displayName ? getDisplayName (v) : getName (v));
 
         return container;
     }
@@ -76,7 +117,7 @@ class XcodeProjectExporter  : public ProjectExporter
 {
 public:
     //==============================================================================
-    static String getDisplayNameMac()        { return "Xcode (MacOSX)"; }
+    static String getDisplayNameMac()        { return "Xcode (macOS)"; }
     static String getDisplayNameiOS()        { return "Xcode (iOS)"; }
 
     static String getTargetFolderNameMac()   { return "MacOSX"; }
@@ -94,6 +135,7 @@ public:
           pListPrefixHeaderValue                       (settings, Ids::pListPrefixHeader,                       getUndoManager()),
           pListPreprocessValue                         (settings, Ids::pListPreprocess,                         getUndoManager()),
           subprojectsValue                             (settings, Ids::xcodeSubprojects,                        getUndoManager()),
+          validArchsValue                              (settings, Ids::xcodeValidArchs,                         getUndoManager(), getAllArchs(), ","),
           extraFrameworksValue                         (settings, Ids::extraFrameworks,                         getUndoManager()),
           frameworkSearchPathsValue                    (settings, Ids::frameworkSearchPaths,                    getUndoManager()),
           extraCustomFrameworksValue                   (settings, Ids::extraCustomFrameworks,                   getUndoManager()),
@@ -117,8 +159,8 @@ public:
           cameraPermissionNeededValue                  (settings, Ids::cameraPermissionNeeded,                  getUndoManager()),
           cameraPermissionTextValue                    (settings, Ids::cameraPermissionText,                    getUndoManager(),
                                                         "This app requires access to the camera to function correctly."),
-          iosBluetoothPermissionNeededValue            (settings, Ids::iosBluetoothPermissionNeeded,            getUndoManager()),
-          iosBluetoothPermissionTextValue              (settings, Ids::iosBluetoothPermissionText,              getUndoManager(),
+          bluetoothPermissionNeededValue               (settings, Ids::iosBluetoothPermissionNeeded,            getUndoManager()),
+          bluetoothPermissionTextValue                 (settings, Ids::iosBluetoothPermissionText,              getUndoManager(),
                                                         "This app requires access to Bluetooth to function correctly."),
           sendAppleEventsPermissionNeededValue         (settings, Ids::sendAppleEventsPermissionNeeded, getUndoManager()),
           sendAppleEventsPermissionTextValue           (settings, Ids::sendAppleEventsPermissionText, getUndoManager(),
@@ -184,6 +226,8 @@ public:
                                                                        "UIInterfaceOrientationLandscapeLeft",
                                                                        "UIInterfaceOrientationLandscapeRight" }; }
 
+    Array<var> getAllArchs() const                          { return { "i386", "x86_64", "arm64", "arm64e"}; }
+
     Array<var> getiPhoneScreenOrientations() const          { return *iPhoneScreenOrientationValue.get().getArray(); }
     Array<var> getiPadScreenOrientations() const            { return *iPadScreenOrientationValue.get().getArray(); }
 
@@ -199,14 +243,16 @@ public:
     bool isAppSandboxInhertianceEnabled() const             { return appSandboxInheritanceValue.get(); }
     Array<var> getAppSandboxOptions() const                 { return *appSandboxOptionsValue.get().getArray(); }
 
+    Array<var> getValidArchs() const                        { return *validArchsValue.get().getArray(); }
+
     bool isMicrophonePermissionEnabled() const              { return microphonePermissionNeededValue.get(); }
     String getMicrophonePermissionsTextString() const       { return microphonePermissionsTextValue.get(); }
 
     bool isCameraPermissionEnabled() const                  { return cameraPermissionNeededValue.get(); }
     String getCameraPermissionTextString() const            { return cameraPermissionTextValue.get(); }
 
-    bool isBluetoothPermissionEnabled() const               { return iosBluetoothPermissionNeededValue.get(); }
-    String getBluetoothPermissionTextString() const         { return iosBluetoothPermissionTextValue.get(); }
+    bool isBluetoothPermissionEnabled() const               { return bluetoothPermissionNeededValue.get(); }
+    String getBluetoothPermissionTextString() const         { return bluetoothPermissionTextValue.get(); }
 
     bool isSendAppleEventsPermissionEnabled() const         { return sendAppleEventsPermissionNeededValue.get(); }
     String getSendAppleEventsPermissionTextString() const   { return sendAppleEventsPermissionTextValue.get(); }
@@ -341,6 +387,10 @@ public:
 
         if (isOSX())
         {
+            props.add (new MultiChoicePropertyComponent (validArchsValue, "Valid Architectures", getAllArchs(), getAllArchs()),
+                       "The full set of architectures which this project may target. "
+                       "Each configuration will build for the intersection of this property, and the per-configuration macOS Architecture property");
+
             props.add (new ChoicePropertyComponent (appSandboxValue, "Use App Sandbox"),
                        "Enable this to use the app sandbox.");
 
@@ -455,17 +505,15 @@ public:
                                                             "Camera Access Text", 1024, false),
                    "A short description of why your app requires camera access.");
 
-        if (iOS)
-        {
-            props.add (new ChoicePropertyComponent (iosBluetoothPermissionNeededValue, "Bluetooth Access"),
-                       "Enable this to allow your app to use Bluetooth on iOS 13.0 and above. "
-                       "The user of your app will be prompted to grant Bluetooth access permissions.");
+        props.add (new ChoicePropertyComponent (bluetoothPermissionNeededValue, "Bluetooth Access"),
+                   "Enable this to allow your app to use Bluetooth on iOS 13.0 and above, and macOS 11.0 and above. "
+                   "The user of your app will be prompted to grant Bluetooth access permissions.");
 
-            props.add (new TextPropertyComponentWithEnablement (iosBluetoothPermissionTextValue, iosBluetoothPermissionNeededValue,
-                                                                "Bluetooth Access Text", 1024, false),
-                       "A short description of why your app requires Bluetooth access.");
-        }
-        else
+        props.add (new TextPropertyComponentWithEnablement (bluetoothPermissionTextValue, bluetoothPermissionNeededValue,
+                                                            "Bluetooth Access Text", 1024, false),
+                   "A short description of why your app requires Bluetooth access.");
+
+        if (! iOS)
         {
             props.add (new ChoicePropertyComponent (sendAppleEventsPermissionNeededValue, "Send Apple Events"),
                        "Enable this to allow your app to send Apple events. "
@@ -641,7 +689,7 @@ public:
         if (hasInvalidPostBuildScript())
         {
             String alertWindowText = iOS ? "Your Xcode (iOS) Exporter settings use an invalid post-build script. Click 'Update' to remove it."
-                                         : "Your Xcode (OSX) Exporter settings use a pre-JUCE 4.2 post-build script to move the plug-in binaries to their plug-in install folders.\n\n"
+                                         : "Your Xcode (macOS) Exporter settings use a pre-JUCE 4.2 post-build script to move the plug-in binaries to their plug-in install folders.\n\n"
                                            "Since JUCE 4.2, this is instead done using \"AU/VST/VST2/AAX/RTAS Binary Location\" in the Xcode (OS X) configuration settings.\n\n"
                                            "Click 'Update' to remove the script (otherwise your plug-in may not compile correctly).";
 
@@ -683,7 +731,7 @@ protected:
             : BuildConfiguration (p, t, e),
               iOS (isIOS),
               osxSDKVersion                (config, Ids::osxSDK,                       getUndoManager()),
-              osxDeploymentTarget          (config, Ids::osxCompatibility,             getUndoManager(), getSDKDisplayName (defaultDeploymentTarget)),
+              osxDeploymentTarget          (config, Ids::osxCompatibility,             getUndoManager(), getDisplayName (macOSDefaultVersion)),
               iosDeploymentTarget          (config, Ids::iosCompatibility,             getUndoManager(), iOSDefaultVersion),
               osxArchitecture              (config, Ids::osxArchitecture,              getUndoManager(), osxArch_Default),
               customXcodeFlags             (config, Ids::customXcodeFlags,             getUndoManager()),
@@ -726,23 +774,23 @@ protected:
             }
             else
             {
-                props.add (new ChoicePropertyComponent (osxSDKVersion, "OSX Base SDK Version", getSDKChoiceList<StringArray> (oldestSDKVersion, true),
-                                                                                               getSDKChoiceList<Array<var>>  (oldestSDKVersion, true)),
+                props.add (new ChoicePropertyComponent (osxSDKVersion, "macOS Base SDK Version", getSDKChoiceList<StringArray> (oldestSDKVersion, true),
+                                                                                                 getSDKChoiceList<Array<var>>  (oldestSDKVersion, true)),
                            "The version of the macOS SDK to link against. If \"Default\" is selected then the Xcode default will be used.");
 
-                props.add (new ChoicePropertyComponent (osxDeploymentTarget, "OSX Deployment Target", getSDKChoiceList<StringArray> (oldestDeploymentTarget, false),
-                                                                                                      getSDKChoiceList<Array<var>>  (oldestDeploymentTarget, true)),
-                           "The minimum version of OSX that the target binary will be compatible with.");
+                props.add (new ChoicePropertyComponent (osxDeploymentTarget, "macOS Deployment Target", getSDKChoiceList<StringArray> (oldestDeploymentTarget, false),
+                                                                                                        getSDKChoiceList<Array<var>>  (oldestDeploymentTarget, true)),
+                           "The minimum version of macOS that the target binary will be compatible with.");
 
-                props.add (new ChoicePropertyComponent (osxArchitecture, "OSX Architecture",
-                                                        { "Native architecture of build machine", "Universal Binary (32-bit)", "Universal Binary (32/64-bit)", "64-bit Intel" },
-                                                        { osxArch_Native,                          osxArch_32BitUniversal,      osxArch_64BitUniversal,         osxArch_64Bit }),
-                           "The type of OSX binary that will be produced.");
+                props.add (new ChoicePropertyComponent (osxArchitecture, "macOS Architecture",
+                                                        { "Native architecture of build machine", "Standard 32-bit",        "Standard 32/64-bit",   "Standard 64-bit" },
+                                                        { osxArch_Native,                          osxArch_32BitUniversal,  osxArch_64BitUniversal, osxArch_64Bit }),
+                           "The type of macOS binary that will be produced.");
             }
 
             props.add (new TextPropertyComponent (customXcodeFlags, "Custom Xcode Flags", 8192, true),
                        "A comma-separated list of custom Xcode setting flags which will be appended to the list of generated flags, "
-                       "e.g. MACOSX_DEPLOYMENT_TARGET_i386 = 10.5, VALID_ARCHS = \"ppc i386 x86_64\"");
+                       "e.g. MACOSX_DEPLOYMENT_TARGET_i386 = 10.5");
 
             props.add (new TextPropertyComponent (plistPreprocessorDefinitions, "PList Preprocessor Definitions", 2048, true),
                        "Preprocessor definitions used during PList preprocessing (see PList Preprocess).");
@@ -1316,7 +1364,25 @@ public:
             }
             else if (arch == osxArch_64Bit)            s.set ("ARCHS", "\"$(ARCHS_STANDARD_64_BIT)\"");
 
+            if (! owner.isiOS())
+            {
+                auto validArchs = owner.getValidArchs();
+
+                if (! validArchs.isEmpty())
+                {
+                    const auto joined = std::accumulate (validArchs.begin(),
+                                                         validArchs.end(),
+                                                         String(),
+                                                         [] (String str, const var& v) { return str + v.toString() + " "; });
+
+                    s.set ("VALID_ARCHS", joined.trim().quoted());
+                }
+            }
+
             StringArray headerPaths (getHeaderSearchPaths (config));
+
+            s.set ("MTL_HEADER_SEARCH_PATHS", indentParenthesisedList (headerPaths, 1));
+
             headerPaths.add ("\"$(inherited)\"");
             s.set ("HEADER_SEARCH_PATHS", indentParenthesisedList (headerPaths, 1));
             s.set ("USE_HEADERMAP", String (static_cast<bool> (config.exporter.settings.getProperty ("useHeaderMap")) ? "YES" : "NO"));
@@ -1827,13 +1893,14 @@ public:
 
         String getOSXDeploymentTarget (const String& deploymentTarget) const
         {
-            auto minVersion = (type == Target::AudioUnitv3PlugIn ? minimumAUv3SDKVersion : oldestDeploymentTarget);
+            auto minVersion = (type == Target::AudioUnitv3PlugIn ? minimumAUv3SDKVersion
+                                                                 : oldestDeploymentTarget);
 
-            for (int v = minVersion; v <= currentSDKVersion; ++v)
-                if (deploymentTarget == getSDKDisplayName (v))
-                    return getVersionName (v);
+            for (auto v = minVersion; v != nextMacOSVersion; ++v)
+                if (deploymentTarget == getDisplayName (v))
+                    return ::getName (v);
 
-            return getVersionName (minVersion);
+            return ::getName (minVersion);
         }
 
         //==============================================================================
@@ -1863,6 +1930,7 @@ private:
 
     ValueWithDefault customPListValue, pListPrefixHeaderValue, pListPreprocessValue,
                      subprojectsValue,
+                     validArchsValue,
                      extraFrameworksValue, frameworkSearchPathsValue, extraCustomFrameworksValue, embeddedFrameworksValue,
                      postbuildCommandValue, prebuildCommandValue,
                      duplicateAppExResourcesFolderValue, iosDeviceFamilyValue, iPhoneScreenOrientationValue,
@@ -1871,7 +1939,7 @@ private:
                      hardenedRuntimeValue, hardenedRuntimeOptionsValue,
                      microphonePermissionNeededValue, microphonePermissionsTextValue,
                      cameraPermissionNeededValue, cameraPermissionTextValue,
-                     iosBluetoothPermissionNeededValue, iosBluetoothPermissionTextValue,
+                     bluetoothPermissionNeededValue, bluetoothPermissionTextValue,
                      sendAppleEventsPermissionNeededValue, sendAppleEventsPermissionTextValue,
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
                      iosContentSharingValue, iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,

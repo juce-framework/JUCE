@@ -26,8 +26,7 @@
 namespace juce
 {
 
-#if (defined (MAC_OS_X_VERSION_10_11) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_11) \
-   || (defined (__IPHONE_8_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_8_0)
+#if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_11) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_11) \
 
  #define JUCE_USE_WKWEBVIEW 1
 
@@ -41,8 +40,7 @@ NSMutableURLRequest* getRequestForURL (const String& url, const StringArray* hea
 {
     NSString* urlString = juceStringToNS (url);
 
-    #if (JUCE_MAC && (defined (MAC_OS_X_VERSION_10_9) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9)) \
-      || (JUCE_IOS && (defined (__IPHONE_7_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_7_0))
+    #if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_9) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9)
      urlString = [urlString stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     #else
      urlString = [urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
@@ -276,11 +274,17 @@ struct WebViewKeyEquivalentResponder : public ObjCClass<WebView>
 {
     WebViewKeyEquivalentResponder() : ObjCClass<WebView> ("WebViewKeyEquivalentResponder_")
     {
+        addIvar<WebViewKeyEquivalentResponder*> ("owner");
         addMethod (@selector (performKeyEquivalent:), performKeyEquivalent, @encode (BOOL), "@:@");
         registerClass();
     }
 
 private:
+    static WebViewKeyEquivalentResponder* getOwner (id self)
+    {
+        return getIvar<WebViewKeyEquivalentResponder*> (self, "owner");
+    }
+
     static BOOL performKeyEquivalent (id self, SEL selector, NSEvent* event)
     {
         NSResponder* first = [[self window] firstResponder];
@@ -293,8 +297,7 @@ private:
             if ([[event charactersIgnoringModifiers] isEqualToString:@"a"]) return [NSApp sendAction:@selector(selectAll:) to:first from:self];
         }
 
-        objc_super s = { self, [WebView class] };
-        return ObjCMsgSendSuper<BOOL, NSEvent*> (&s, selector, event);
+        return sendSuperclassMessage<BOOL> (self, selector, event);
     }
 };
 

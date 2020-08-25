@@ -137,9 +137,8 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
     StringArray parts;
     parts.addTokens (getOSXVersion(), ".", StringRef());
 
-    jassert (parts[0].getIntValue() == 10);
     const int major = parts[1].getIntValue();
-    jassert (major > 2);
+    jassert ((parts[0].getIntValue() == 10 && major > 2) || parts[0].getIntValue() == 11);
 
     return (OperatingSystemType) (major + MacOSX_10_4 - 4);
    #endif
