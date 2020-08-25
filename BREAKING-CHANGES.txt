@@ -6,6 +6,27 @@ Develop
 
 Change
 ------
+The fields representing Mac OS X 10.4 to 10.6 inclusive have been removed from
+the `OperatingSystemType` enum.
+
+Possible Issues
+---------------
+Code that uses these fields will fail to build.
+
+Workaround
+----------
+Remove references to these fields from user code.
+
+Rationale
+---------
+JUCE is not supported on Mac OS X versions lower than 10.7, so it is a given
+that `getOperatingSystemType` will always return an OS version greater than or
+equal to 10.7. Code that changes behaviours depending on the OS version can
+assume that this version is at least 10.7.
+
+
+Change
+------
 The JUCE_DISABLE_COREGRAPHICS_FONT_SMOOTHING flag in juce_graphics is no
 longer used on iOS.
 
