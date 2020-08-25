@@ -1137,7 +1137,7 @@
 		ADE6E539DB98A302483A82D0 = {
 			isa = PBXProject;
 			buildConfigurationList = 493C2C5E457692E5149C5525;
-			attributes = { LastUpgradeCheck = 1100; ORGANIZATIONNAME = "Raw Material Software Limited"; TargetAttributes = { DE12B7643D374BFF7E4FEB1C = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
+			attributes = { LastUpgradeCheck = 1200; ORGANIZATIONNAME = "Raw Material Software Limited"; TargetAttributes = { DE12B7643D374BFF7E4FEB1C = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
 			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 0;
 			mainGroup = 65BEFC705A89E5C8A9E35C97;
