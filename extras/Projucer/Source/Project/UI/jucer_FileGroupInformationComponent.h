@@ -36,8 +36,8 @@ public:
         : item (group),
           header (item.getName(), { getIcons().openFolder, Colours::transparentBlack })
     {
-        list.setHeaderComponent (std::make_unique<ListBoxHeader> (Array<String> { "File", "Binary Resource", "Xcode Resource", "Compile", "Compiler Flag Scheme" },
-                                                                  Array<float> { 0.3f, 0.15f, 0.15f, 0.15f, 0.25f }));
+        list.setHeaderComponent (std::make_unique<ListBoxHeader> (Array<String> { "File", "Binary Resource", "Xcode Resource", "Compile", "Skip PCH", "Compiler Flag Scheme" },
+                                                                  Array<float>  {  0.25f,  0.125f,            0.125f,           0.125f,    0.125f,     0.25f }));
         list.setModel (this);
         list.setColour (ListBox::backgroundColourId, Colours::transparentBlack);
         addAndMakeVisible (list);
@@ -136,9 +136,14 @@ private:
         {
             if (item.isFile())
             {
-                addAndMakeVisible (compileButton);
-                compileButton.getToggleStateValue().referTo (item.getShouldCompileValue());
-                compileButton.onStateChange = [this] { compilerFlagSchemeSelector.setVisible (compileButton.getToggleState()); };
+                auto isSourceFile = item.isSourceFile();
+
+                if (isSourceFile)
+                {
+                    addAndMakeVisible (compileButton);
+                    compileButton.getToggleStateValue().referTo (item.getShouldCompileValue());
+                    compileButton.onStateChange = [this] { compileEnablementChanged(); };
+                }
 
                 addAndMakeVisible (binaryResourceButton);
                 binaryResourceButton.getToggleStateValue().referTo (item.getShouldAddToBinaryResourcesValue());
@@ -146,8 +151,15 @@ private:
                 addAndMakeVisible (xcodeResourceButton);
                 xcodeResourceButton.getToggleStateValue().referTo (item.getShouldAddToXcodeResourcesValue());
 
-                addChildComponent (compilerFlagSchemeSelector);
-                compilerFlagSchemeSelector.setVisible (compileButton.getToggleState());
+                if (isSourceFile)
+                {
+                    addChildComponent (skipPCHButton);
+                    skipPCHButton.getToggleStateValue().referTo (item.getShouldSkipPCHValue());
+
+                    addChildComponent (compilerFlagSchemeSelector);
+
+                    compileEnablementChanged();
+                }
             }
         }
 
@@ -182,7 +194,8 @@ private:
                 binaryResourceButton.setBounds       (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (1) * width)));
                 xcodeResourceButton.setBounds        (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (2) * width)));
                 compileButton.setBounds              (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (3) * width)));
-                compilerFlagSchemeSelector.setBounds (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (4) * width)));
+                skipPCHButton.setBounds              (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (4) * width)));
+                compilerFlagSchemeSelector.setBounds (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (5) * width)));
             }
         }
 
@@ -331,10 +344,18 @@ private:
             Label newSchemeLabel;
         };
 
+        void compileEnablementChanged()
+        {
+            auto shouldBeCompiled = compileButton.getToggleState();
+
+            skipPCHButton.setVisible (shouldBeCompiled);
+            compilerFlagSchemeSelector.setVisible (shouldBeCompiled);
+        }
+
         //==============================================================================
         ListBoxHeader* header;
 
-        ToggleButton compileButton, binaryResourceButton, xcodeResourceButton;
+        ToggleButton compileButton, binaryResourceButton, xcodeResourceButton, skipPCHButton;
         CompilerFlagSchemeSelector compilerFlagSchemeSelector;
     };
 

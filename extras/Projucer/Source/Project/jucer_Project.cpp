@@ -1569,6 +1569,11 @@ bool Project::Item::isImageFile() const
                           || getFile().hasFileExtension ("svg"));
 }
 
+bool Project::Item::isSourceFile() const
+{
+    return isFile() && getFile().hasFileExtension (sourceFileExtensions);
+}
+
 Project::Item Project::Item::findItemWithID (const String& targetId) const
 {
     if (state [Ids::ID] == targetId)
@@ -1623,6 +1628,9 @@ Value Project::Item::getShouldInhibitWarningsValue()        { return state.getPr
 bool Project::Item::shouldInhibitWarnings() const           { return state [Ids::noWarnings]; }
 
 bool Project::Item::isModuleCode() const                    { return belongsToModule; }
+
+Value Project::Item::getShouldSkipPCHValue()                { return state.getPropertyAsValue (Ids::skipPCH, getUndoManager()); }
+bool Project::Item::shouldSkipPCH() const                   { return isModuleCode() || state [Ids::skipPCH]; }
 
 Value Project::Item::getCompilerFlagSchemeValue()           { return state.getPropertyAsValue (Ids::compilerFlagScheme, getUndoManager()); }
 String Project::Item::getCompilerFlagSchemeString() const   { return state [Ids::compilerFlagScheme]; }

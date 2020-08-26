@@ -249,6 +249,15 @@ bool fileNeedsCppSyntaxHighlighting (const File& file)
 }
 
 //==============================================================================
+void writeAutoGenWarningComment (OutputStream& outStream)
+{
+    outStream << "/*" << newLine << newLine
+              << "    IMPORTANT! This file is auto-generated each time you save your" << newLine
+              << "    project - if you alter its contents, your changes may be overwritten!" << newLine
+              << newLine;
+}
+
+//==============================================================================
 StringArray getJUCEModules() noexcept
 {
     static StringArray juceModuleIds =
