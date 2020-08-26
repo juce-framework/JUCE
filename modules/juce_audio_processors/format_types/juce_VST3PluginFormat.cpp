@@ -921,6 +921,7 @@ private:
             }
             else
             {
+                // this is required for some plug-ins which don't export the dll entry point function
                 return true;
             }
 
