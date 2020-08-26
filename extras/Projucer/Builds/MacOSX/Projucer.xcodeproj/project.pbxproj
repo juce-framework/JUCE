@@ -1987,6 +1987,13 @@
 			path = "../../Source/Utility/UI/jucer_Icons.h";
 			sourceTree = "SOURCE_ROOT";
 		};
+		C5A1549AD0C20CF42C1FE630 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = "juce_runtime_arch_detection.cpp";
+			path = "../../../Build/CMake/juce_runtime_arch_detection.cpp";
+			sourceTree = "SOURCE_ROOT";
+		};
 		C607639897ED2538CBB860D0 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -2683,6 +2690,7 @@
 				86B4069D904AB46AC86FB383,
 				41105E536155E394E54BDD35,
 				5F6584B675E30761521A9F42,
+				C5A1549AD0C20CF42C1FE630,
 			);
 			name = BinaryData;
 			sourceTree = "<group>";
@@ -3500,7 +3508,7 @@
 		74EA481348A24104E6ACE009 = {
 			isa = PBXProject;
 			buildConfigurationList = F90407F24422C589DA251604;
-			attributes = { LastUpgradeCheck = 1100; ORGANIZATIONNAME = "Raw Material Software Limited"; TargetAttributes = { 0039FE1A254FE518518BF8B8 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
+			attributes = { LastUpgradeCheck = 1200; ORGANIZATIONNAME = "Raw Material Software Limited"; TargetAttributes = { 0039FE1A254FE518518BF8B8 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
 			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 0;
 			mainGroup = 3CC531922CC2D398E283A845;

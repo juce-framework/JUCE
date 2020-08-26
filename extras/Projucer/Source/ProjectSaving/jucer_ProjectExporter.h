@@ -87,7 +87,10 @@ public:
     virtual bool isOSX() const     = 0;
     virtual bool isiOS() const     = 0;
 
-    virtual String getDescription()   { return {}; }
+    virtual String getNewLineString() const = 0;
+    virtual String getDescription()  { return {}; }
+
+    virtual bool supportsPrecompiledHeaders() const  { return false; }
 
     //==============================================================================
     // cross-platform audio plug-ins supported by exporter
@@ -246,7 +249,12 @@ public:
 
         String getLibrarySearchPathString() const              { return librarySearchPathValue.get(); }
         StringArray getLibrarySearchPaths() const;
-        String getGCCLibraryPathFlags() const;
+
+        String getPrecompiledHeaderFilename() const            { return "JucePrecompiledHeader_" + getName(); }
+        static String getSkipPrecompiledHeaderDefine()         { return "JUCE_SKIP_PRECOMPILED_HEADER"; }
+
+        bool shouldUsePrecompiledHeaderFile() const            { return usePrecompiledHeaderFileValue.get(); }
+        String getPrecompiledHeaderFileContent() const;
 
         //==============================================================================
         Value getValue (const Identifier& nm)                  { return config.getPropertyAsValue (nm, getUndoManager()); }
@@ -267,7 +275,8 @@ public:
 
     protected:
         ValueWithDefault isDebugValue, configNameValue, targetNameValue, targetBinaryPathValue, recommendedWarningsValue, optimisationLevelValue,
-                         linkTimeOptimisationValue, ppDefinesValue, headerSearchPathValue, librarySearchPathValue, userNotesValue;
+                         linkTimeOptimisationValue, ppDefinesValue, headerSearchPathValue, librarySearchPathValue, userNotesValue,
+                         usePrecompiledHeaderFileValue, precompiledHeaderFileValue;
 
     private:
         std::map<String, StringArray> recommendedCompilerWarningFlags;
@@ -348,6 +357,16 @@ public:
         gccOs     = 2,
         gccOfast  = 6
     };
+
+    bool isPCHEnabledForAnyConfigurations() const
+    {
+        if (supportsPrecompiledHeaders())
+            for (ConstConfigIterator config (*this); config.next();)
+                if (config->shouldUsePrecompiledHeaderFile())
+                    return true;
+
+        return false;
+    }
 
 protected:
     //==============================================================================

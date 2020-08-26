@@ -49,6 +49,10 @@
 			isa = PBXBuildFile;
 			fileRef = 61AE09C749B007B70A265D9B;
 		};
+		6658EEC5F9D63D3419EB7098 = {
+			isa = PBXBuildFile;
+			fileRef = E07FC48041C3E9F9721F3BCE;
+		};
 		0B0CE6D5062E5C02A41F24BC = {
 			isa = PBXBuildFile;
 			fileRef = 873F9DD54978E601102353B4;
@@ -60,10 +64,6 @@
 		AE7FB2AC3885F4BF53A5DDA1 = {
 			isa = PBXBuildFile;
 			fileRef = 7983C452610C1638B7E78F12;
-		};
-		1FB200F4AE3E4E7CDFF629BB = {
-			isa = PBXBuildFile;
-			fileRef = 24D74AF1C95BEF957DC4FA77;
 		};
 		AC783ECD84496E0B77911EEE = {
 			isa = PBXBuildFile;
@@ -269,13 +269,6 @@
 			lastKnownFileType = wrapper.framework;
 			name = QuartzCore.framework;
 			path = System/Library/Frameworks/QuartzCore.framework;
-			sourceTree = SDKROOT;
-		};
-		24D74AF1C95BEF957DC4FA77 = {
-			isa = PBXFileReference;
-			lastKnownFileType = wrapper.framework;
-			name = MobileCoreServices.framework;
-			path = System/Library/Frameworks/MobileCoreServices.framework;
 			sourceTree = SDKROOT;
 		};
 		25E5ED33876A2C752378C859 = {
@@ -663,6 +656,13 @@
 			path = "../../JuceLibraryCode/include_juce_audio_formats.mm";
 			sourceTree = "SOURCE_ROOT";
 		};
+		E07FC48041C3E9F9721F3BCE = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
+			name = CoreServices.framework;
+			path = System/Library/Frameworks/CoreServices.framework;
+			sourceTree = SDKROOT;
+		};
 		E0A3F113BC27B7B4D6F1D693 = {
 			isa = PBXFileReference;
 			lastKnownFileType = file.icns;
@@ -870,10 +870,10 @@
 				B28EFB9D1DF0B6D6499A7DEF,
 				1CFE3935A3B810D5D68A2504,
 				61AE09C749B007B70A265D9B,
+				E07FC48041C3E9F9721F3BCE,
 				873F9DD54978E601102353B4,
 				49ECA8B998B339A083674A22,
 				7983C452610C1638B7E78F12,
-				24D74AF1C95BEF957DC4FA77,
 				34F1320BC5C23702C08DF9F0,
 				23CD1A3F9067C3A0ECE7BB67,
 				F90C8B0233A54F1445343F67,
@@ -1243,10 +1243,10 @@
 				7F57DB52C3CEFDC26DDD38FC,
 				46071CE2B98B562B7BF27CB1,
 				6A61CBB4E39BFD392D97528F,
+				6658EEC5F9D63D3419EB7098,
 				0B0CE6D5062E5C02A41F24BC,
 				5E4310B3F6BB639875D3E9B8,
 				AE7FB2AC3885F4BF53A5DDA1,
-				1FB200F4AE3E4E7CDFF629BB,
 				AC783ECD84496E0B77911EEE,
 				B1981F62F6A91FD2F579A198,
 				ECA44A41DA8A935178C1A1F4,
@@ -1272,7 +1272,7 @@
 		AC6F0E9A0809A184B2C2B7DE = {
 			isa = PBXProject;
 			buildConfigurationList = 80E8AD1971F52B06F4D28891;
-			attributes = { LastUpgradeCheck = 1100; ORGANIZATIONNAME = "Raw Material Software Limited"; TargetAttributes = { 291E01DCBE746A376DBFA4D1 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; com.apple.iCloud = { enabled = 1; }; }; }; }; };
+			attributes = { LastUpgradeCheck = 1200; ORGANIZATIONNAME = "Raw Material Software Limited"; TargetAttributes = { 291E01DCBE746A376DBFA4D1 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; com.apple.iCloud = { enabled = 1; }; }; }; }; };
 			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 0;
 			mainGroup = 91A9A0FE9DF4F4E10009EEC7;

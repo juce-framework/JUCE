@@ -197,9 +197,8 @@ public:
             if (type == VST3PlugIn)
             {
                 s.add ("JUCE_VST3DIR := " + escapeSpaces (targetName).upToLastOccurrenceOf (".", false, false) + ".vst3");
-
-                auto is32Bit = config.getArchitectureTypeString().contains ("m32");
-                s.add (String ("JUCE_VST3SUBDIR := Contents/") + (is32Bit ? "i386" : "x86_64") + "-linux");
+                s.add ("VST3_PLATFORM_ARCH := $(shell $(CXX) make_helpers/arch_detection.cpp 2>&1 | tr '\\n' ' ' | sed \"s/.*JUCE_ARCH \\([a-zA-Z0-9_-]*\\).*/\\1/\")");
+                s.add ("JUCE_VST3SUBDIR := Contents/$(VST3_PLATFORM_ARCH)-linux");
 
                 targetName = "$(JUCE_VST3DIR)/$(JUCE_VST3SUBDIR)/" + targetName;
             }
@@ -256,7 +255,8 @@ public:
             out << "OBJECTS_" + getTargetVarName() + String (" := \\") << newLine;
 
             for (auto& f : filesToCompile)
-                out << "  $(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor ({ f.first, owner.getTargetFolder(), build_tools::RelativePath::buildTargetFolder })) << " \\" << newLine;
+                out << "  $(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor ({ f.first, owner.getTargetFolder(), build_tools::RelativePath::buildTargetFolder }))
+                    << " \\" << newLine;
 
             out << newLine;
         }
@@ -275,7 +275,7 @@ public:
                     << "\t@echo \"Compiling " << relativePath.getFileName() << "\""                                                                   << newLine
                     << (relativePath.hasFileExtension ("c;s;S") ? "\t$(V_AT)$(CC) $(JUCE_CFLAGS) " : "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) ")
                     << "$(" << cppflagsVarName << ") $(" << cflagsVarName << ")"
-                    << (f.second.isNotEmpty() ? " $(" + owner.getCompilerFlagSchemeVariableName (f.second) + ")" : "") << " -o \"$@\" -c \"$<\""        << newLine
+                    << (f.second.isNotEmpty() ? " $(" + owner.getCompilerFlagSchemeVariableName (f.second) + ")" : "") << " -o \"$@\" -c \"$<\""      << newLine
                     << newLine;
             }
         }
@@ -416,6 +416,8 @@ public:
     bool isOSX() const override                             { return false; }
     bool isiOS() const override                             { return false; }
 
+    String getNewLineString() const override                { return "\n"; }
+
     bool supportsTargetType (build_tools::ProjectType::Target::Type type) const override
     {
         switch (type)
@@ -475,9 +477,17 @@ public:
     {
         build_tools::writeStreamToFile (getTargetFolder().getChildFile ("Makefile"), [&] (MemoryOutputStream& mo)
         {
-            mo.setNewLineString ("\n");
+            mo.setNewLineString (getNewLineString());
             writeMakefile (mo);
         });
+
+        if (project.shouldBuildVST3())
+        {
+            auto helperDir = getTargetFolder().getChildFile ("make_helpers");
+            helperDir.createDirectory();
+            build_tools::overwriteFileIfDifferentOrThrow (helperDir.getChildFile ("arch_detection.cpp"),
+                                                          BinaryData::juce_runtime_arch_detection_cpp);
+        }
     }
 
     //==============================================================================
@@ -948,7 +958,9 @@ private:
 
         writeCompilerFlagSchemes (out, filesToCompile);
 
-        auto getFilesForTarget = [] (const Array<std::pair<File, String>>& files, MakefileTarget* target, const Project& p) -> Array<std::pair<File, String>>
+        auto getFilesForTarget = [] (const Array<std::pair<File, String>>& files,
+                                     MakefileTarget* target,
+                                     const Project& p) -> Array<std::pair<File, String>>
         {
             Array<std::pair<File, String>> targetFiles;
 

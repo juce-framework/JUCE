@@ -185,9 +185,14 @@ static void addModules (Project& project, Array<var> modules, const String& modu
     AvailableModulesList list;
     list.scanPaths ({ modulePath });
 
+    auto& projectModules = project.getEnabledModules();
+
     for (auto& mod : list.getAllModules())
         if (modules.contains (mod.first))
-            project.getEnabledModules().addModule (mod.second, false, useGlobalPath);
+            projectModules.addModule (mod.second, false, useGlobalPath);
+
+    for (auto& mod : projectModules.getModulesWithMissingDependencies())
+        projectModules.tryToFixMissingDependencies (mod);
 }
 
 static void addExporters (Project& project, Array<var> exporters)

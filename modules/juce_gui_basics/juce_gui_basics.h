@@ -43,7 +43,7 @@
 
   dependencies:       juce_graphics juce_data_structures
   OSXFrameworks:      Cocoa Carbon QuartzCore
-  iOSFrameworks:      UIKit MobileCoreServices
+  iOSFrameworks:      UIKit CoreServices
 
  END_JUCE_MODULE_DECLARATION
 

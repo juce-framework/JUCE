@@ -313,14 +313,6 @@ Result ProjectSaver::saveProject (ProjectExporter* specifiedExporterToSave)
 }
 
 //==============================================================================
-static void writeAutoGenWarningComment (OutputStream& out)
-{
-    out << "/*" << newLine << newLine
-        << "    IMPORTANT! This file is auto-generated each time you save your" << newLine
-        << "    project - if you alter its contents, your changes may be overwritten!" << newLine
-        << newLine;
-}
-
 void ProjectSaver::writePluginDefines (MemoryOutputStream& out) const
 {
     const auto pluginDefines = getAudioPluginDefines();
@@ -329,6 +321,7 @@ void ProjectSaver::writePluginDefines (MemoryOutputStream& out) const
         return;
 
     writeAutoGenWarningComment (out);
+
     out << "*/" << newLine << newLine
         << "#pragma once" << newLine << newLine
         << pluginDefines << newLine;
