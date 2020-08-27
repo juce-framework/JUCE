@@ -1452,7 +1452,7 @@ void ProjucerApplication::initCommandManager()
     registerGUIEditorCommands();
 }
 
-void rescanModules (AvailableModulesList& list, const Array<File>& paths, bool async)
+static void rescanModules (AvailableModulesList& list, const Array<File>& paths, bool async)
 {
     if (async)
         list.scanPathsAsync (paths);
@@ -1556,13 +1556,13 @@ void ProjucerApplication::setEditorColourScheme (int index, bool saveSetting)
     getCommandManager().commandStatusChanged();
 }
 
-bool isEditorColourSchemeADefaultScheme (const StringArray& schemes, int editorColourSchemeIndex)
+static bool isEditorColourSchemeADefaultScheme (const StringArray& schemes, int editorColourSchemeIndex)
 {
     auto& schemeName = schemes[editorColourSchemeIndex];
     return (schemeName == "Default (Dark)" || schemeName == "Default (Light)");
 }
 
-int getEditorColourSchemeForGUIColourScheme (const StringArray& schemes, int guiColourSchemeIndex)
+static int getEditorColourSchemeForGUIColourScheme (const StringArray& schemes, int guiColourSchemeIndex)
 {
     auto defaultDarkEditorIndex  = schemes.indexOf ("Default (Dark)");
     auto defaultLightEditorIndex = schemes.indexOf ("Default (Light)");

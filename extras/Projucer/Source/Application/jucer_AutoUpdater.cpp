@@ -499,7 +499,7 @@ private:
     std::function<void()> completionCallback;
 };
 
-void restartProcess (const File& targetFolder)
+static void restartProcess (const File& targetFolder)
 {
    #if JUCE_MAC || JUCE_LINUX
     #if JUCE_MAC
