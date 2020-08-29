@@ -36,7 +36,7 @@ namespace juce
 
 #endif
 
-NSMutableURLRequest* getRequestForURL (const String& url, const StringArray* headers, const MemoryBlock* postData)
+static NSMutableURLRequest* getRequestForURL (const String& url, const StringArray* headers, const MemoryBlock* postData)
 {
     NSString* urlString = juceStringToNS (url);
 

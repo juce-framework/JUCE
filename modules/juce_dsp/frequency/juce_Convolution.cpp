@@ -102,6 +102,8 @@ private:
     }
 
     Queue<IncomingCommand> queue;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BackgroundMessageQueue)
 };
 
 struct ConvolutionMessageQueue::Impl  : public BackgroundMessageQueue

@@ -255,7 +255,8 @@ public:
             out << "OBJECTS_" + getTargetVarName() + String (" := \\") << newLine;
 
             for (auto& f : filesToCompile)
-                out << "  $(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor ({ f.first, owner.getTargetFolder(), build_tools::RelativePath::buildTargetFolder })) << " \\" << newLine;
+                out << "  $(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor ({ f.first, owner.getTargetFolder(), build_tools::RelativePath::buildTargetFolder }))
+                    << " \\" << newLine;
 
             out << newLine;
         }
@@ -274,7 +275,7 @@ public:
                     << "\t@echo \"Compiling " << relativePath.getFileName() << "\""                                                                   << newLine
                     << (relativePath.hasFileExtension ("c;s;S") ? "\t$(V_AT)$(CC) $(JUCE_CFLAGS) " : "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) ")
                     << "$(" << cppflagsVarName << ") $(" << cflagsVarName << ")"
-                    << (f.second.isNotEmpty() ? " $(" + owner.getCompilerFlagSchemeVariableName (f.second) + ")" : "") << " -o \"$@\" -c \"$<\""        << newLine
+                    << (f.second.isNotEmpty() ? " $(" + owner.getCompilerFlagSchemeVariableName (f.second) + ")" : "") << " -o \"$@\" -c \"$<\""      << newLine
                     << newLine;
             }
         }
@@ -415,6 +416,8 @@ public:
     bool isOSX() const override                             { return false; }
     bool isiOS() const override                             { return false; }
 
+    String getNewLineString() const override                { return "\n"; }
+
     bool supportsTargetType (build_tools::ProjectType::Target::Type type) const override
     {
         switch (type)
@@ -474,7 +477,7 @@ public:
     {
         build_tools::writeStreamToFile (getTargetFolder().getChildFile ("Makefile"), [&] (MemoryOutputStream& mo)
         {
-            mo.setNewLineString ("\n");
+            mo.setNewLineString (getNewLineString());
             writeMakefile (mo);
         });
 
@@ -955,7 +958,9 @@ private:
 
         writeCompilerFlagSchemes (out, filesToCompile);
 
-        auto getFilesForTarget = [] (const Array<std::pair<File, String>>& files, MakefileTarget* target, const Project& p) -> Array<std::pair<File, String>>
+        auto getFilesForTarget = [] (const Array<std::pair<File, String>>& files,
+                                     MakefileTarget* target,
+                                     const Project& p) -> Array<std::pair<File, String>>
         {
             Array<std::pair<File, String>> targetFiles;
 

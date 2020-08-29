@@ -25,8 +25,6 @@
 
 #pragma once
 
-#include <juce_audio_processors/juce_audio_processors.h>
-
 /** Somewhere in the codebase of your plugin, you need to implement this function
     and make it return a new instance of the filter subclass that you're building.
 */

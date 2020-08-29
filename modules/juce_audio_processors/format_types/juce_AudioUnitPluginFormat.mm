@@ -74,7 +74,7 @@ namespace AudioUnitFormatHelpers
     static ThreadLocalValue<int> insideCallback;
    #endif
 
-    String osTypeToString (OSType type) noexcept
+    static String osTypeToString (OSType type) noexcept
     {
         const juce_wchar s[4] = { (juce_wchar) ((type >> 24) & 0xff),
                                   (juce_wchar) ((type >> 16) & 0xff),
@@ -83,7 +83,7 @@ namespace AudioUnitFormatHelpers
         return String (s, 4);
     }
 
-    OSType stringToOSType (String s)
+    static OSType stringToOSType (String s)
     {
         if (s.trim().length() >= 4) // (to avoid trimming leading spaces)
             s = s.trim();
@@ -98,7 +98,7 @@ namespace AudioUnitFormatHelpers
 
     static const char* auIdentifierPrefix = "AudioUnit:";
 
-    String createPluginIdentifier (const AudioComponentDescription& desc)
+    static String createPluginIdentifier (const AudioComponentDescription& desc)
     {
         String s (auIdentifierPrefix);
 
@@ -123,7 +123,7 @@ namespace AudioUnitFormatHelpers
         return s;
     }
 
-    void getNameAndManufacturer (AudioComponent comp, String& name, String& manufacturer)
+    static void getNameAndManufacturer (AudioComponent comp, String& name, String& manufacturer)
     {
         CFStringRef cfName;
         if (AudioComponentCopyName (comp, &cfName) == noErr)
@@ -142,8 +142,8 @@ namespace AudioUnitFormatHelpers
             name = "<Unknown>";
     }
 
-    bool getComponentDescFromIdentifier (const String& fileOrIdentifier, AudioComponentDescription& desc,
-                                         String& name, String& version, String& manufacturer)
+    static bool getComponentDescFromIdentifier (const String& fileOrIdentifier, AudioComponentDescription& desc,
+                                                String& name, String& version, String& manufacturer)
     {
         if (fileOrIdentifier.startsWithIgnoreCase (auIdentifierPrefix))
         {
@@ -188,8 +188,8 @@ namespace AudioUnitFormatHelpers
         return false;
     }
 
-    bool getComponentDescFromFile (const String& fileOrIdentifier, AudioComponentDescription& desc,
-                                   String& name, String& version, String& manufacturer)
+    static bool getComponentDescFromFile (const String& fileOrIdentifier, AudioComponentDescription& desc,
+                                          String& name, String& version, String& manufacturer)
     {
         zerostruct (desc);
 
@@ -291,7 +291,7 @@ namespace AudioUnitFormatHelpers
        #endif
     }
 
-    const char* getCategory (OSType type) noexcept
+    static const char* getCategory (OSType type) noexcept
     {
         switch (type)
         {

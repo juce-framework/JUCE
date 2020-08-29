@@ -178,10 +178,10 @@ public:
 
     void clicked() override
     {
-        auto* w = new InfoWindow (info);
+        auto w = std::make_unique<InfoWindow> (info);
         w->setSize (width, w->getHeight() * numLines + 10);
 
-        CallOutBox::launchAsynchronously (w, getScreenBounds(), nullptr);
+        CallOutBox::launchAsynchronously (std::move (w), getScreenBounds(), nullptr);
     }
 
     using Button::clicked;
@@ -223,7 +223,7 @@ private:
 
             g.setColour (findColour (defaultTextColourId));
             g.setFont (Font (14.0f));
-            g.drawFittedText (stringToDisplay, getLocalBounds(), Justification::centred, 10, 1.0f);
+            g.drawFittedText (stringToDisplay, getLocalBounds(), Justification::centred, 15, 0.75f);
         }
 
         String stringToDisplay;

@@ -42,7 +42,7 @@ public:
     }
 };
 
-void updateButtonTickColour (ToggleButton* button, bool usingDefault)
+static void updateButtonTickColour (ToggleButton* button, bool usingDefault)
 {
     button->setColour (ToggleButton::tickColourId, button->getLookAndFeel().findColour (ToggleButton::tickColourId)
                                                                               .withAlpha (usingDefault ? 0.4f : 1.0f));
