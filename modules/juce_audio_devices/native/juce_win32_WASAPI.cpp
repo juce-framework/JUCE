@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+#include <Audiosessiontypes.h>
+#include "audioclient.h"
+
 namespace juce
 {
 
@@ -397,11 +400,14 @@ public:
             format.Format.nSamplesPerSec  = (DWORD) rate;
             format.Format.nAvgBytesPerSec = (DWORD) (format.Format.nSamplesPerSec * format.Format.nChannels * format.Format.wBitsPerSample / 8);
 
+            WAVEFORMATEX* nearestFormat = nullptr;
             if (SUCCEEDED (tempClient->IsFormatSupported (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE
                                                                            : AUDCLNT_SHAREMODE_SHARED,
-                                                          (WAVEFORMATEX*) &format, 0)))
+                                                          (WAVEFORMATEX*) &format,
+                                                          &nearestFormat)))
                 if (! rates.contains (rate))
                     rates.addUsingDefaultSort (rate);
+            CoTaskMemFree (nearestFormat);
         }
     }
 
@@ -579,6 +585,22 @@ private:
             logFailure (device->Activate (__uuidof (IAudioClient), CLSCTX_INPROC_SERVER,
                                           nullptr, (void**) newClient.resetAndGetPointerAddress()));
 
+        if (newClient == nullptr)
+            return nullptr;
+
+        IAudioClient2* client2 = nullptr;
+        newClient->QueryInterface (__uuidof (IAudioClient2), (void**) &client2);
+        if (client2 != nullptr)
+        {
+            AudioClientProperties props {};
+            props.cbSize = sizeof (AudioClientProperties);
+            props.bIsOffload = false;
+            props.eCategory = AudioCategory_Other;
+            props.Options = (AUDCLNT_STREAMOPTIONS) AUDCLNT_STREAMOPTIONS_MATCH_FORMAT;
+            client2->SetClientProperties (&props);
+            client2->Release();
+        }
+
         return newClient;
     }
 
@@ -618,7 +640,7 @@ private:
         HRESULT hr = clientToUse->IsFormatSupported (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE
                                                                       : AUDCLNT_SHAREMODE_SHARED,
                                                      (WAVEFORMATEX*) &format,
-                                                     useExclusiveMode ? nullptr : (WAVEFORMATEX**) &nearestFormat);
+                                                     (WAVEFORMATEX**) &nearestFormat);
         logFailure (hr);
 
         if (hr == S_FALSE && format.Format.nSamplesPerSec == nearestFormat->Format.nSamplesPerSec)
@@ -669,7 +691,9 @@ private:
             {
                 GUID session;
                 HRESULT hr = client->Initialize (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE : AUDCLNT_SHAREMODE_SHARED,
-                                                 0x40000 /*AUDCLNT_STREAMFLAGS_EVENTCALLBACK*/,
+                                                 AUDCLNT_STREAMFLAGS_EVENTCALLBACK |
+                                                 AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM |
+                                                 AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY,
                                                  defaultPeriod, useExclusiveMode ? defaultPeriod : 0, (WAVEFORMATEX*) &format, &session);
 
                 if (check (hr))
