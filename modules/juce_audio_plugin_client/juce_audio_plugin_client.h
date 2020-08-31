@@ -127,6 +127,7 @@
 #endif
 
 #include "utility/juce_PluginHostType.h"
+#include "utility/juce_CreatePluginFilter.h"
 #include "VST/juce_VSTCallbackHandler.h"
 
 #if JucePlugin_Enable_ARA

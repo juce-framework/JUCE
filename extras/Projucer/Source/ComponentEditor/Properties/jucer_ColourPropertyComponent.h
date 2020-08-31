@@ -89,8 +89,9 @@ public:
 
         void mouseDown (const MouseEvent&) override
         {
-            CallOutBox::launchAsynchronously (new ColourSelectorComp (this, canResetToDefault),
-                                              getScreenBounds(), nullptr);
+            CallOutBox::launchAsynchronously (std::make_unique<ColourSelectorComp> (this, canResetToDefault),
+                                              getScreenBounds(),
+                                              nullptr);
         }
 
         class ColourSelectorComp   : public Component

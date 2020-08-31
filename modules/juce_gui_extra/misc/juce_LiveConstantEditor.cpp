@@ -406,14 +406,14 @@ struct ColourEditorComp  : public Component,
 
     void mouseDown (const MouseEvent&) override
     {
-        auto* colourSelector = new ColourSelector();
+        auto colourSelector = std::make_unique<ColourSelector>();
         colourSelector->setName ("Colour");
         colourSelector->setCurrentColour (getColour());
         colourSelector->addChangeListener (this);
         colourSelector->setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
         colourSelector->setSize (300, 400);
 
-        CallOutBox::launchAsynchronously (colourSelector, getScreenBounds(), nullptr);
+        CallOutBox::launchAsynchronously (std::move (colourSelector), getScreenBounds(), nullptr);
     }
 
     void changeListenerCallback (ChangeBroadcaster* source) override

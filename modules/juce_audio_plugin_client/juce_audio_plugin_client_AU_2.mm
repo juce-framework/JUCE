@@ -43,7 +43,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wparentheses",
                                      "-Wzero-as-null-pointer-constant",
                                      "-Wnullable-to-nonnull-conversion",
                                      "-Wignored-qualifiers",
-                                     "-Wfour-char-constants")
+                                     "-Wfour-char-constants",
+                                     "-Wmissing-prototypes")
 
 // From MacOS 10.13 and iOS 11 Apple has (sensibly!) stopped defining a whole
 // set of functions with rather generic names. However, we still need a couple

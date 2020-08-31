@@ -3156,6 +3156,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
+bool initModule();
 bool initModule()
 {
    #if JUCE_MAC
@@ -3165,6 +3166,7 @@ bool initModule()
     return true;
 }
 
+bool shutdownModule();
 bool shutdownModule()
 {
     return true;
@@ -3173,17 +3175,19 @@ bool shutdownModule()
 #undef JUCE_EXPORTED_FUNCTION
 
 #if JUCE_WINDOWS
- extern "C" __declspec (dllexport) bool InitDll()   { return initModule(); }
- extern "C" __declspec (dllexport) bool ExitDll()   { return shutdownModule(); }
  #define JUCE_EXPORTED_FUNCTION
 #else
- #define JUCE_EXPORTED_FUNCTION extern "C" __attribute__ ((visibility ("default")))
+ #define JUCE_EXPORTED_FUNCTION extern "C" __attribute__ ((visibility("default")))
 #endif
 
-#if JUCE_LINUX
+#if JUCE_WINDOWS
+ extern "C" __declspec (dllexport) bool InitDll()   { return initModule(); }
+ extern "C" __declspec (dllexport) bool ExitDll()   { return shutdownModule(); }
+#elif JUCE_LINUX
  void* moduleHandle = nullptr;
  int moduleEntryCounter = 0;
 
+ JUCE_EXPORTED_FUNCTION bool ModuleEntry (void* sharedLibraryHandle);
  JUCE_EXPORTED_FUNCTION bool ModuleEntry (void* sharedLibraryHandle)
  {
      if (++moduleEntryCounter == 1)
@@ -3195,6 +3199,7 @@ bool shutdownModule()
      return true;
  }
 
+ JUCE_EXPORTED_FUNCTION bool ModuleExit();
  JUCE_EXPORTED_FUNCTION bool ModuleExit()
  {
      if (--moduleEntryCounter == 0)
@@ -3214,6 +3219,7 @@ bool shutdownModule()
  char modulePath[MaxPathLength] = { 0 };
  void* moduleHandle = nullptr;
 
+ JUCE_EXPORTED_FUNCTION bool bundleEntry (CFBundleRef ref);
  JUCE_EXPORTED_FUNCTION bool bundleEntry (CFBundleRef ref)
  {
      if (ref != nullptr)
@@ -3237,6 +3243,7 @@ bool shutdownModule()
      return initModule();
  }
 
+ JUCE_EXPORTED_FUNCTION bool bundleExit();
  JUCE_EXPORTED_FUNCTION bool bundleExit()
  {
      if (shutdownModule())
