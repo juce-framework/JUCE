@@ -588,9 +588,7 @@ private:
         if (newClient == nullptr)
             return nullptr;
 
-        IAudioClient2* client2 = nullptr;
-        newClient->QueryInterface (__uuidof (IAudioClient2), (void**) &client2);
-        if (client2 != nullptr)
+        if (ComSmartPtr<IAudioClient2> client2; newClient.QueryInterface (client2) == S_OK)
         {
             AudioClientProperties props {};
             props.cbSize = sizeof (AudioClientProperties);
@@ -598,7 +596,6 @@ private:
             props.eCategory = AudioCategory_Other;
             props.Options = (AUDCLNT_STREAMOPTIONS) AUDCLNT_STREAMOPTIONS_MATCH_FORMAT;
             client2->SetClientProperties (&props);
-            client2->Release();
         }
 
         return newClient;
