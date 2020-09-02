@@ -46,13 +46,13 @@ set_property(GLOBAL PROPERTY JUCE_COPY_PLUGIN_AFTER_BUILD ${JUCE_COPY_PLUGIN_AFT
 
 set(CMAKE_CXX_EXTENSIONS FALSE)
 
-# This option controls whether dummy targets are added to the build which contain all of the source
-# files for each JUCE module. If you're planning to use an IDE and want to be able to browse all of
-# JUCE's source files, this may be useful. However, it will increase the size of generated IDE
-# projects and might slow down configuration a bit. If you enable this, you should probably also add
-# `set_property(GLOBAL PROPERTY USE_FOLDERS YES)` to your top level CMakeLists, otherwise the module
-# sources will be added directly to the top level of the project, instead of in a nice 'Modules'
-# subfolder.
+# This option controls whether dummy targets are added to the build, where these targets contain all
+# of the source files for each JUCE module. If you're planning to use an IDE and want to be able to
+# browse all of JUCE's source files, this may be useful. However, it will increase the size of
+# generated IDE projects and might slow down configuration a bit. If you enable this, you should
+# probably also add `set_property(GLOBAL PROPERTY USE_FOLDERS YES)` to your top level CMakeLists,
+# otherwise the module sources will be added directly to the top level of the project, instead of in
+# a nice 'Modules' subfolder.
 
 option(JUCE_ENABLE_MODULE_SOURCE_GROUPS "Show all module sources in IDE projects" OFF)
 

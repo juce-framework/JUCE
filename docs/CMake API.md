@@ -149,7 +149,48 @@ the newer buses API to specify the desired plugin inputs and outputs.
 
 ## API Reference
 
-### `juce_add_<target>`
+### Options
+
+These flags can be enabled or disabled to change the behaviour of parts of the JUCE build.
+
+These options would normally be configured by either:
+- Supplying an option in the form `-DNAME_OF_OPTION=ON/OFF` to the initial CMake configuration call,
+  or
+- Calling `set(NAME_OF_OPTION ON/OFF)` before including JUCE in your project via `add_subdirectory`
+  or `find_package`.
+
+#### `JUCE_BUILD_EXTRAS`
+
+This controls whether targets are added for the projects in the 'extras' folder, such as the
+Projucer and AudioPluginHost. This is off by default, because you probably won't need these targets
+if you've included JUCE in your own project.
+
+#### `JUCE_BUILD_EXAMPLES`
+
+This controls whether targets are added for the projects in the 'examples' folder, such as the
+DemoRunner and PIPs. This is off by default, because you probably won't need these targets if you've
+included JUCE in your own project.
+
+#### `JUCE_ENABLE_MODULE_SOURCE_GROUPS`
+
+This option controls whether dummy targets are added to the build, where these targets contain all
+of the source files for each module added with `juce_add_module(s)`. If you're planning to use an
+IDE and want to be able to browse all of JUCE's source files, this may be useful. However, it will
+increase the size of generated IDE projects and might slow down configuration a bit. If you enable
+this, you should probably also add `set_property(GLOBAL PROPERTY USE_FOLDERS YES)` to your top level
+CMakeLists, otherwise the module sources will be added directly to the top level of the project,
+instead of in a nice 'Modules' subfolder.
+
+#### `JUCE_COPY_PLUGIN_AFTER_BUILD`
+
+Controls whether plugin targets should be installed to the system after building. Note that the
+plugin folders may be protected, so the build may require elevated permissions in order for the
+installation to work correctly, or you may need to adjust the permissions of the destination
+folders.
+
+### Functions
+
+#### `juce_add_<target>`
 
     juce_add_gui_app(<target> [KEY value]...)
     juce_add_console_app(<target> [KEY value]...)
@@ -464,7 +505,7 @@ attributes directly to these creation functions, rather than adding them later.
     Unlike the other `COPY_DIR` arguments, this argument does not have a default value so be sure
     to set it if you have enabled `COPY_PLUGIN_AFTER_BUILD` and the `Unity` format.
 
-### `juce_add_binary_data`
+#### `juce_add_binary_data`
 
     juce_add_binary_data(<name>
         [HEADER_NAME ...]
@@ -486,14 +527,14 @@ and embedded in the resulting static library. This library can be linked as norm
 `target_link_libraries(<otherTarget> PRIVATE <name>)`, and the header can be included using
 `#include <BinaryData.h>`.
 
-### `juce_add_bundle_resources_directory`
+#### `juce_add_bundle_resources_directory`
 
     juce_add_bundle_resources_directory(<target> <folder>)
 
 Copy the entire directory at the location `<folder>` into an Apple bundle's resource directory, i.e.
 the `Resources` directory for a macOS bundle, and the top-level directory of an iOS bundle.
 
-### `juce_generate_juce_header`
+#### `juce_generate_juce_header`
 
     juce_generate_juce_header(<target>)
 
@@ -506,7 +547,7 @@ disabled by setting the compile definitions `DONT_SET_USING_JUCE_NAMESPACE` and
 JuceHeader.h is optional. Instead, module headers can be included directly in source files that
 require them.
 
-### `juce_set_<kind>_sdk_path`
+#### `juce_set_<kind>_sdk_path`
 
     juce_set_aax_sdk_path(<absolute path>)
     juce_set_vst2_sdk_path(<absolute path>)
@@ -515,7 +556,7 @@ Call these functions from your CMakeLists to set up your local AAX and/or VST2 S
 should be called *before* adding any targets that may depend on the AAX/VST2 SDKs (plugin
 hosts, VST2/AAX plugins etc.).
 
-### `juce_add_module`
+#### `juce_add_module`
 
     juce_add_module(<path to module>)
     juce_add_modules(<names of module>...)
@@ -541,7 +582,7 @@ invocation will add a module target named `my_module`, along with an alias named
 This version accepts many module paths, rather than just one. For an example of usage, see the
 CMakeLists in the `modules` directory.
 
-### `juce_add_pip`
+#### `juce_add_pip`
 
     juce_add_pip(<header>)
 
@@ -556,7 +597,7 @@ proof-of-concept, you should prefer the `juce_add_gui_app`, `juce_add_plugin`, o
 `juce_add_console_app` functions, which provide more fine-grained control over the properties of
 your target.
 
-### `juce_disable_default_flags`
+#### `juce_disable_default_flags`
 
     juce_disable_default_flags()
 
@@ -564,21 +605,23 @@ This function sets the `CMAKE_<LANG>_FLAGS_<MODE>` to empty in the current direc
 allowing alternative optimisation/debug flags to be supplied without conflicting with the
 CMake-supplied defaults.
 
-### `juce::juce_recommended_warning_flags`
+### Targets
+
+#### `juce::juce_recommended_warning_flags`
 
     target_link_libraries(myTarget PRIVATE juce::juce_recommended_warning_flags)
 
 This is a target which can be linked to other targets using `target_link_libraries`, in order to
 enable the recommended JUCE warnings when building them.
 
-### `juce::juce_recommended_config_flags`
+#### `juce::juce_recommended_config_flags`
 
     target_link_libraries(myTarget PRIVATE juce::juce_recommended_config_flags)
 
 This is a target which can be linked to other targets using `target_link_libraries`, in order to
 enable the recommended JUCE optimisation and debug flags.
 
-### `juce::juce_recommended_lto_flags`
+#### `juce::juce_recommended_lto_flags`
 
     target_link_libraries(myTarget PRIVATE juce::juce_recommended_lto_flags)
 
