@@ -612,6 +612,13 @@ function(juce_add_module module_path)
     if(JUCE_ARG_ALIAS_NAMESPACE)
         add_library(${JUCE_ARG_ALIAS_NAMESPACE}::${module_name} ALIAS ${module_name})
     endif()
+
+    if(JUCE_ENABLE_MODULE_SOURCE_GROUPS)
+        file(GLOB_RECURSE extra_files LIST_DIRECTORIES FALSE "${module_path}/*")
+        add_custom_target(${module_name}_sources SOURCES ${extra_files})
+        set_target_properties(${module_name}_sources PROPERTIES FOLDER Modules)
+        source_group(TREE "${module_path}" FILES ${extra_files})
+    endif()
 endfunction()
 
 function(juce_add_modules)
@@ -1958,13 +1965,6 @@ function(_juce_initialise_target target)
 
     _juce_write_generate_time_info(${target})
     _juce_link_optional_libraries(${target})
-
-    file(GLOB juce_module_folders RELATIVE "${JUCE_MODULES_DIR}" "${JUCE_MODULES_DIR}/*")
-
-    foreach(module_folder IN LISTS juce_module_folders)
-        file(GLOB_RECURSE juce_module_files "${JUCE_MODULES_DIR}/${module_folder}/*")
-        source_group(TREE "${JUCE_MODULES_DIR}" PREFIX "Modules" FILES ${juce_module_files})
-    endforeach()
 endfunction()
 
 # ==================================================================================================
