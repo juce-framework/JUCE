@@ -75,6 +75,7 @@ namespace Ids
     DECLARE_ID (vstLegacyPath);
     DECLARE_ID (rtasPath);
     DECLARE_ID (aaxPath);
+    DECLARE_ID (araPath);
     DECLARE_ID (flags);
     DECLARE_ID (line);
     DECLARE_ID (index);
@@ -157,7 +158,11 @@ namespace Ids
     DECLARE_ID (enableIncrementalLinking);
     DECLARE_ID (bundleIdentifier);
     DECLARE_ID (aaxIdentifier);
+    DECLARE_ID (araFactoryID);
+    DECLARE_ID (araDocumentArchiveID);
+    DECLARE_ID (araCompatibleArchiveIDs);
     DECLARE_ID (aaxFolder);
+    DECLARE_ID (araFolder);
     DECLARE_ID (compile);
     DECLARE_ID (noWarnings);
     DECLARE_ID (resource);
@@ -327,6 +332,7 @@ namespace Ids
     DECLARE_ID (buildStandalone);
     DECLARE_ID (buildUnity);
     DECLARE_ID (enableIAA);
+    DECLARE_ID (enableARA);
     DECLARE_ID (pluginName);
     DECLARE_ID (pluginDesc);
     DECLARE_ID (pluginManufacturer);
@@ -352,6 +358,8 @@ namespace Ids
     DECLARE_ID (pluginAAXCategory);
     DECLARE_ID (pluginAAXDisableBypass);
     DECLARE_ID (pluginAAXDisableMultiMono);
+    DECLARE_ID (pluginARAAnalyzableContent);
+    DECLARE_ID (pluginARATransformFlags);
     DECLARE_ID (pluginVSTNumMidiInputs);
     DECLARE_ID (pluginVSTNumMidiOutputs);
     DECLARE_ID (exporters);

@@ -98,6 +98,12 @@ namespace BinaryData
     extern const char*   wizard_StaticLibrary_svg;
     const int            wizard_StaticLibrary_svgSize = 7488;
 
+    extern const char*   jucer_AudioPluginARADocumentControllerTemplate_cpp;
+    const int            jucer_AudioPluginARADocumentControllerTemplate_cppSize = 2017;
+
+    extern const char*   jucer_AudioPluginARADocumentControllerTemplate_h;
+    const int            jucer_AudioPluginARADocumentControllerTemplate_hSize = 1437;
+
     extern const char*   jucer_AnimatedComponentSimpleTemplate_h;
     const int            jucer_AnimatedComponentSimpleTemplate_hSize = 1898;
 
@@ -117,16 +123,16 @@ namespace BinaryData
     const int            jucer_AudioComponentTemplate_hSize = 1187;
 
     extern const char*   jucer_AudioPluginEditorTemplate_cpp;
-    const int            jucer_AudioPluginEditorTemplate_cppSize = 1355;
+    const int            jucer_AudioPluginEditorTemplate_cppSize = 1639;
 
     extern const char*   jucer_AudioPluginEditorTemplate_h;
-    const int            jucer_AudioPluginEditorTemplate_hSize = 973;
+    const int            jucer_AudioPluginEditorTemplate_hSize = 1057;
 
     extern const char*   jucer_AudioPluginFilterTemplate_cpp;
-    const int            jucer_AudioPluginFilterTemplate_cppSize = 6090;
+    const int            jucer_AudioPluginFilterTemplate_cppSize = 6350;
 
     extern const char*   jucer_AudioPluginFilterTemplate_h;
-    const int            jucer_AudioPluginFilterTemplate_hSize = 2299;
+    const int            jucer_AudioPluginFilterTemplate_hSize = 2459;
 
     extern const char*   jucer_ComponentTemplate_cpp;
     const int            jucer_ComponentTemplate_cppSize = 2147;
@@ -192,7 +198,7 @@ namespace BinaryData
     const int            colourscheme_light_xmlSize = 1050;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 61;
+    const int namedResourceListSize = 63;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];

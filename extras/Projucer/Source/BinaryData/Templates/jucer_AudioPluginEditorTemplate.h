@@ -14,6 +14,9 @@
 /**
 */
 class %%editor_class_name%%  : public juce::AudioProcessorEditor
+#if JucePlugin_Enable_ARA
+, public juce::AudioProcessorEditorARAExtension
+#endif
 {
 public:
     %%editor_class_name%% (%%filter_class_name%%&);
