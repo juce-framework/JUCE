@@ -397,11 +397,22 @@ public:
             format.Format.nSamplesPerSec  = (DWORD) rate;
             format.Format.nAvgBytesPerSec = (DWORD) (format.Format.nSamplesPerSec * format.Format.nChannels * format.Format.wBitsPerSample / 8);
 
+            WAVEFORMATEX* nearestFormat = nullptr;
+
             if (SUCCEEDED (tempClient->IsFormatSupported (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE
                                                                            : AUDCLNT_SHAREMODE_SHARED,
-                                                          (WAVEFORMATEX*) &format, 0)))
+                                                          (WAVEFORMATEX*) &format,
+                                                          useExclusiveMode ? nullptr
+                                                                           : (WAVEFORMATEX**) &nearestFormat)))
+            {
+                if (nearestFormat != nullptr)
+                    rate = nearestFormat->nSamplesPerSec;
+
                 if (! rates.contains (rate))
                     rates.addUsingDefaultSort (rate);
+            }
+
+            CoTaskMemFree (nearestFormat);
         }
     }
 
@@ -618,10 +629,13 @@ private:
         HRESULT hr = clientToUse->IsFormatSupported (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE
                                                                       : AUDCLNT_SHAREMODE_SHARED,
                                                      (WAVEFORMATEX*) &format,
-                                                     useExclusiveMode ? nullptr : (WAVEFORMATEX**) &nearestFormat);
+                                                     useExclusiveMode ? nullptr
+                                                                      : (WAVEFORMATEX**) &nearestFormat);
         logFailure (hr);
 
-        if (hr == S_FALSE && format.Format.nSamplesPerSec == nearestFormat->Format.nSamplesPerSec)
+        if (hr == S_FALSE
+            && nearestFormat != nullptr
+            && format.Format.nSamplesPerSec == nearestFormat->Format.nSamplesPerSec)
         {
             copyWavFormat (format, (const WAVEFORMATEX*) nearestFormat);
             hr = S_OK;
@@ -669,8 +683,13 @@ private:
             {
                 GUID session;
                 HRESULT hr = client->Initialize (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE : AUDCLNT_SHAREMODE_SHARED,
-                                                 0x40000 /*AUDCLNT_STREAMFLAGS_EVENTCALLBACK*/,
-                                                 defaultPeriod, useExclusiveMode ? defaultPeriod : 0, (WAVEFORMATEX*) &format, &session);
+                                                 0x40000    /*AUDCLNT_STREAMFLAGS_EVENTCALLBACK*/
+                                               | 0x80000000 /*AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM*/
+                                               | 0x08000000 /*AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY*/,
+                                                 defaultPeriod,
+                                                 useExclusiveMode ? defaultPeriod : 0,
+                                                 (WAVEFORMATEX*) &format,
+                                                 &session);
 
                 if (check (hr))
                 {
@@ -1026,18 +1045,25 @@ public:
         {
             jassert (inputDevice != nullptr || outputDevice != nullptr);
 
+            sampleRates.clear();
+
             if (inputDevice != nullptr && outputDevice != nullptr)
             {
                 defaultSampleRate = jmin (inputDevice->defaultSampleRate, outputDevice->defaultSampleRate);
                 minBufferSize = jmin (inputDevice->minBufferSize, outputDevice->minBufferSize);
                 defaultBufferSize = jmax (inputDevice->defaultBufferSize, outputDevice->defaultBufferSize);
-                sampleRates = inputDevice->rates;
-                sampleRates.removeValuesNotIn (outputDevice->rates);
+
+                sampleRates.addArray (inputDevice->rates);
+
+                for (auto r : outputDevice->rates)
+                    if (! sampleRates.contains (r))
+                        sampleRates.addUsingDefaultSort (r);
             }
             else
             {
-                WASAPIDeviceBase* d = inputDevice != nullptr ? static_cast<WASAPIDeviceBase*> (inputDevice.get())
-                                                             : static_cast<WASAPIDeviceBase*> (outputDevice.get());
+                auto* d = inputDevice != nullptr ? static_cast<WASAPIDeviceBase*> (inputDevice.get())
+                                                 : static_cast<WASAPIDeviceBase*> (outputDevice.get());
+
                 defaultSampleRate = d->defaultSampleRate;
                 minBufferSize = d->minBufferSize;
                 defaultBufferSize = d->defaultBufferSize;
