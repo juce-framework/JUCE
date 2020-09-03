@@ -1001,6 +1001,47 @@ CGContextRef juce_getImageContext (const Image& image)
                                                         screenPtr));
  }
 
+ Image juce_returnImageWithNativeColourSpace (const Image& src,
+                                        const void* screenPtr)
+ {
+     // display color space based on profile
+     const auto nativeSpace = ((NSScreen*)screenPtr).colorSpace.CGColorSpace;
+     // to CIImage
+     CGSize imageSize;
+     imageSize.width = src.getWidth();
+     imageSize.height = src.getHeight();
+     const Image::BitmapData inputImage (src, Image::BitmapData::readOnly);
+     const auto rawData =
+         [NSData dataWithBytesNoCopy:inputImage.data
+                              length:(NSUInteger)(inputImage.lineStride * inputImage.height)
+                        freeWhenDone:NO];
+     const auto native = [CIImage
+         imageWithBitmapData:rawData
+                 bytesPerRow:(size_t)inputImage.lineStride
+                        size:imageSize
+                      format:kCIFormatBGRA8
+                  colorSpace:SingletonSRGBColorSpace::instance().get()];
+     const juce::Rectangle<float> rect{0.0f, 0.0f,
+                                       static_cast<float> (src.getWidth()),
+                                       static_cast<float> (src.getHeight())};
+
+     // prep juce::Image and raw bytes access
+     auto nativeDst =
+         Image (src.getFormat(), src.getWidth(), src.getHeight(), false);
+     const Image::BitmapData srcData (nativeDst, Image::BitmapData::writeOnly);
+
+     // draw to buffer
+     CIContext* cicontext = [CIContext context];
+     juce::Rectangle<int> bounds (0, 0, srcData.width, srcData.height);
+     [cicontext render:native
+              toBitmap:srcData.data
+              rowBytes:srcData.lineStride
+                bounds:convertToCGRect (bounds)
+                format:kCIFormatBGRA8
+            colorSpace:nativeSpace];
+     return nativeDst;
+ }
+
  NSImage* imageToNSImage (const Image& image, float scaleFactor)
  {
      JUCE_AUTORELEASEPOOL
