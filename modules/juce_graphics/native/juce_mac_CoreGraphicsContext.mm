@@ -954,6 +954,44 @@ CGContextRef juce_getImageContext (const Image& image)
 #endif
 
 #if JUCE_MAC
+ class SingletonSRGBColorSpace
+ {
+   public:
+     static SingletonSRGBColorSpace& instance()
+     {
+         static SingletonSRGBColorSpace staticSRGB;
+         return staticSRGB;
+     }
+     ~SingletonSRGBColorSpace() { CGColorSpaceRelease (srgbSpace); }
+     const CGColorSpaceRef get() { return srgbSpace; }
+
+   private:
+     SingletonSRGBColorSpace()
+     {
+         srgbSpace = CGColorSpaceCreateWithName (kCGColorSpaceSRGB);
+     }
+     CGColorSpaceRef srgbSpace{nullptr};
+ };
+
+ Colour juce_convertColourToDisplayColourSpace (const Colour& colour,
+                                         const void* screenPtr)
+ {
+     const auto nativeSpace = ((NSScreen*)screenPtr).colorSpace.CGColorSpace;
+     const CGFloat components[] = {colour.getFloatRed(), colour.getFloatGreen(),
+                                   colour.getFloatBlue(),
+                                   colour.getFloatAlpha()};
+     const auto cgColour =
+         CGColorCreate (SingletonSRGBColorSpace::instance().get(), components);
+     const auto convertedColour = CGColorCreateCopyByMatchingToColorSpace (
+                                                                           nativeSpace, kCGRenderingIntentDefault, cgColour, nullptr);
+
+     const auto numComp = CGColorGetNumberOfComponents (convertedColour);
+     jassert (numComp == 4);
+     const auto c = CGColorGetComponents (convertedColour);
+     CGColorRelease (cgColour);
+     return Colour::fromFloatRGBA ((float)c[0], (float)c[1], (float)c[2], (float)c[3]);
+ }
+
  NSImage* imageToNSImage (const Image& image, float scaleFactor)
  {
      JUCE_AUTORELEASEPOOL
