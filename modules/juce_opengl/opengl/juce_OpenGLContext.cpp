@@ -159,7 +159,15 @@ public:
     //==============================================================================
     void paint (Graphics&) override
     {
-        updateViewportSize (false);
+        bool canTriggerUpdate = false;
+#if JUCE_MAC
+        const auto& displays = Desktop::getInstance().getDisplays();
+        context.currentDisplay =
+        &displays.findDisplayForRect (component.getTopLevelComponent()->getScreenBounds());
+        canTriggerUpdate = context.currentDisplay != lastDisplay;
+        lastDisplay = context.currentDisplay;
+#endif
+        updateViewportSize (canTriggerUpdate);
     }
 
     bool invalidateAll() override
@@ -294,12 +302,6 @@ public:
 
     void updateViewportSize (bool canTriggerUpdate)
     {
-        const auto& displays = Desktop::getInstance().getDisplays();
-        if (const auto* component = context.getTargetComponent())
-        {
-            context.currentDisplay =
-                &displays.findDisplayForRect (component->getTopLevelComponent()->getScreenBounds());
-        }
         if (auto* peer = component.getPeer())
         {
             auto localBounds = component.getLocalBounds();
@@ -670,6 +672,9 @@ public:
     OpenGLFrameBuffer cachedImageFrameBuffer;
     RectangleList<int> validArea;
     Rectangle<int> viewportArea, lastScreenBounds;
+#if JUCE_MAC
+    const Displays::Display* lastDisplay = nullptr;
+#endif
     double scale = 1.0;
     AffineTransform transform;
    #if JUCE_OPENGL3
