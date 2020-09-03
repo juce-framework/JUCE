@@ -95,6 +95,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
  #include <public.sdk/source/common/memorystream.h>
  #include <public.sdk/source/vst/vsteditcontroller.h>
  #include <public.sdk/source/vst/vstpresetfile.h>
+
+ #include "pslextensions/ipslviewembedding.h"
 #else
  // needed for VST_VERSION
  #include <pluginterfaces/vst/vsttypes.h>
@@ -137,6 +139,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
   #include <public.sdk/source/vst/hosting/pluginterfacesupport.cpp>
  #endif
 
+ #include "pslextensions/ipslviewembedding.h"
+
 //==============================================================================
 namespace Steinberg
 {
@@ -158,6 +162,12 @@ namespace Steinberg
     DEF_CLASS_IID (Linux::IRunLoop)
    #endif
 }
+
+namespace Presonus
+{
+    DEF_CLASS_IID (IPlugInViewEmbedding)
+}
+
 #endif // JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
 
 JUCE_END_IGNORE_WARNINGS_MSVC
