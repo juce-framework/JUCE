@@ -132,8 +132,12 @@ public:
         the buffer's floating-point format, and will try to intelligently
         cope with mismatches between the number of channels in the reader
         and the buffer.
+
+        @returns    true if the operation succeeded, false if there was an error. Note
+                    that reading sections of data beyond the extent of the stream isn't an
+                    error - the reader should just return zeros for these regions
     */
-    void read (AudioBuffer<float>* buffer,
+    bool read (AudioBuffer<float>* buffer,
                int startSampleInDestBuffer,
                int numSamples,
                int64 readerStartSample,

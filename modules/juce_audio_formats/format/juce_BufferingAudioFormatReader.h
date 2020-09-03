@@ -66,6 +66,7 @@ private:
 
         Range<int64> range;
         AudioBuffer<float> buffer;
+        bool allSamplesRead = false;
     };
 
     int useTimeSlice() override;
