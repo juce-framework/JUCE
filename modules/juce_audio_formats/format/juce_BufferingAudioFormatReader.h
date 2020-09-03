@@ -78,6 +78,7 @@ private:
     {
         BufferedBlock (AudioFormatReader& reader, int64 pos, int numSamples);
 
+        bool success;
         Range<int64> range;
         AudioBuffer<float> buffer;
     };
