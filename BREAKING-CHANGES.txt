@@ -6,6 +6,33 @@ Develop
 
 Change
 ------
+The JUCE_WASAPI_EXCLUSIVE flag has been removed from juce_audio_devices and all
+available WASAPI audio device modes (shared, shared low latency and exclusive)
+are available by default when JUCE_WASAPI is enabled. The
+AudioIODeviceType::createAudioIODeviceType_WASAPI() method which takes a single
+boolean argument has also been deprecated in favour of a new method which takes
+a WASAPIDeviceMode enum.
+
+Possible Issues
+---------------
+Code that relied on the JUCE_WASAPI_EXCLUSIVE flag to disable WASAPI exclusive
+mode will no longer work.
+
+Workaround
+----------
+Override the AudioDeviceManager::createAudioDeviceTypes() method to omit the
+WASAPI exclusive mode device if you do not want it to be available.
+
+Rationale
+---------
+JUCE now supports shared low latency WASAPI audio devices via the AudioClient3
+interface and instead of adding an additional compile time config flag to
+enable this functionality, which adds complexity to the build process when not
+using the Projucer, JUCE makes all WASAPI device modes available by default.
+
+
+Change
+------
 The fields representing Mac OS X 10.4 to 10.6 inclusive have been removed from
 the `OperatingSystemType` enum.
 

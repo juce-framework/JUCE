@@ -1310,14 +1310,7 @@ public:
 
 const char* const OboeAudioIODevice::oboeTypeName = "Android Oboe";
 
-
-//==============================================================================
 bool isOboeAvailable()  { return OboeAudioIODeviceType::isOboeAvailable(); }
-
-AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_Oboe()
-{
-    return isOboeAvailable() ? new OboeAudioIODeviceType() : nullptr;
-}
 
 //==============================================================================
 class OboeRealtimeThread    : private oboe::AudioStreamCallback
