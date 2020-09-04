@@ -1208,7 +1208,8 @@ build_tools::ProjectType::Target::Type Project::getTargetTypeFromFilePath (const
 
     auto isPluginClientSource = [&path, &pluginClientModuleName] (StringRef suffix)
     {
-        return path.contains (pluginClientModuleName + "_" + suffix + ".");
+        auto prefix = pluginClientModuleName + "_" + suffix;
+        return path.contains (prefix + ".") || path.contains (prefix + "_");
     };
 
     if (isPluginClientSource ("AU")         || isInPluginClientSubdir ("AU"))          return build_tools::ProjectType::Target::AudioUnitPlugIn;
