@@ -224,11 +224,19 @@ enum AUDIO_STREAM_CATEGORY
     AudioCategory_Media
 };
 
+typedef enum AUDCLNT_STREAMOPTIONS {
+    AUDCLNT_STREAMOPTIONS_NONE,
+    AUDCLNT_STREAMOPTIONS_RAW,
+    AUDCLNT_STREAMOPTIONS_MATCH_FORMAT,
+    AUDCLNT_STREAMOPTIONS_AMBISONICS
+};
+
 struct AudioClientProperties
 {
     UINT32                  cbSize;
     BOOL                    bIsOffload;
     AUDIO_STREAM_CATEGORY   eCategory;
+    AUDCLNT_STREAMOPTIONS   Options;
 };
 
 JUCE_IUNKNOWNCLASS (IAudioClient, "1CB9AD4C-DBFA-4c32-B178-C2F568A703B2")
@@ -605,6 +613,17 @@ private:
         if (device != nullptr)
             logFailure (device->Activate (__uuidof (IAudioClient), CLSCTX_INPROC_SERVER,
                                           nullptr, (void**) newClient.resetAndGetPointerAddress()));
+
+        ComSmartPtr<IAudioClient2> client2;
+        if (deviceMode == WASAPIDeviceMode::shared && newClient.QueryInterface (client2) == S_OK)
+        {
+            AudioClientProperties props {};
+            props.cbSize = sizeof (AudioClientProperties);
+            props.bIsOffload = false;
+            props.eCategory = AudioCategory_Other;
+            props.Options = AUDCLNT_STREAMOPTIONS_MATCH_FORMAT;
+            client2->SetClientProperties (&props);
+        }
 
         return newClient;
     }
