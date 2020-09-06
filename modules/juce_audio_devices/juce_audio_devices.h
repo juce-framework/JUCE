@@ -88,20 +88,11 @@
 #endif
 
 /** Config: JUCE_WASAPI
-    Enables WASAPI audio devices (Windows Vista and above). See also the
-    JUCE_WASAPI_EXCLUSIVE flag.
+    Enables WASAPI audio devices (Windows Vista and above).
 */
 #ifndef JUCE_WASAPI
  #define JUCE_WASAPI 1
 #endif
-
-/** Config: JUCE_WASAPI_EXCLUSIVE
-    Enables WASAPI audio devices in exclusive mode (Windows Vista and above).
-*/
-#ifndef JUCE_WASAPI_EXCLUSIVE
- #define JUCE_WASAPI_EXCLUSIVE 0
-#endif
-
 
 /** Config: JUCE_DIRECTSOUND
     Enables DirectSound audio (MS Windows only).
@@ -174,6 +165,19 @@
 //==============================================================================
 #include "midi_io/juce_MidiDevices.h"
 #include "midi_io/juce_MidiMessageCollector.h"
+
+/** Available modes for the WASAPI audio device.
+
+    Pass one of these to the AudioIODeviceType::createAudioIODeviceType_WASAPI()
+    method to create a WASAPI AudioIODeviceType object in this mode.
+*/
+enum class WASAPIDeviceMode
+{
+    shared,
+    exclusive,
+    sharedLowLatency
+};
+
 #include "audio_io/juce_AudioIODevice.h"
 #include "audio_io/juce_AudioIODeviceType.h"
 #include "audio_io/juce_SystemAudioVolume.h"

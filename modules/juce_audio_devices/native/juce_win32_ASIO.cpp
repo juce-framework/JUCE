@@ -1640,9 +1640,4 @@ void sendASIODeviceChangeToListeners (ASIOAudioIODeviceType* type)
         type->sendDeviceChangeToListeners();
 }
 
-AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_ASIO()
-{
-    return new ASIOAudioIODeviceType();
-}
-
 } // namespace juce

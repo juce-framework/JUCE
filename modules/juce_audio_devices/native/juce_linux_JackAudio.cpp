@@ -667,10 +667,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JackAudioIODeviceType)
 };
 
-//==============================================================================
-AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_JACK()
-{
-    return new JackAudioIODeviceType();
-}
-
 } // namespace juce

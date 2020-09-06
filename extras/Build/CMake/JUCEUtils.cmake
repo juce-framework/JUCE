@@ -473,8 +473,6 @@ function(juce_add_module module_path)
     get_filename_component(module_name ${module_path} NAME)
     get_filename_component(module_parent_path ${module_path} DIRECTORY)
 
-    set(installed_module_path "${JUCE_ARG_INSTALL_PATH}")
-
     set(module_header_name "${module_name}.h")
 
     if(NOT EXISTS "${module_path}/${module_header_name}")
@@ -485,7 +483,7 @@ function(juce_add_module module_path)
         message(FATAL_ERROR "Could not locate module header for module '${module_path}'")
     endif()
 
-    set(base_path "$<BUILD_INTERFACE:${module_parent_path}>$<INSTALL_INTERFACE:${installed_module_path}>")
+    set(base_path "${module_parent_path}")
 
     list(APPEND all_module_sources "${base_path}/${module_name}/${module_header_name}")
 
@@ -607,12 +605,19 @@ function(juce_add_module module_path)
     _juce_get_metadata("${metadata_dict}" dependencies module_dependencies)
     target_link_libraries(${module_name} INTERFACE ${module_dependencies})
 
-    if(installed_module_path)
-        install(DIRECTORY "${module_path}" DESTINATION "${installed_module_path}")
+    if(JUCE_ARG_INSTALL_PATH)
+        install(DIRECTORY "${module_path}" DESTINATION "${JUCE_ARG_INSTALL_PATH}")
     endif()
 
     if(JUCE_ARG_ALIAS_NAMESPACE)
         add_library(${JUCE_ARG_ALIAS_NAMESPACE}::${module_name} ALIAS ${module_name})
+    endif()
+
+    if(JUCE_ENABLE_MODULE_SOURCE_GROUPS)
+        file(GLOB_RECURSE extra_files LIST_DIRECTORIES FALSE "${module_path}/*")
+        add_custom_target(${module_name}_sources SOURCES ${extra_files})
+        set_target_properties(${module_name}_sources PROPERTIES FOLDER Modules)
+        source_group(TREE "${module_path}" FILES ${extra_files})
     endif()
 endfunction()
 
@@ -1960,13 +1965,6 @@ function(_juce_initialise_target target)
 
     _juce_write_generate_time_info(${target})
     _juce_link_optional_libraries(${target})
-
-    file(GLOB juce_module_folders RELATIVE "${JUCE_MODULES_DIR}" "${JUCE_MODULES_DIR}/*")
-
-    foreach(module_folder IN LISTS juce_module_folders)
-        file(GLOB_RECURSE juce_module_files "${JUCE_MODULES_DIR}/${module_folder}/*")
-        source_group(TREE "${JUCE_MODULES_DIR}" PREFIX "Modules" FILES ${juce_module_files})
-    endforeach()
 endfunction()
 
 # ==================================================================================================
