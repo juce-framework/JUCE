@@ -1120,11 +1120,6 @@ const char* const OpenSLAudioIODevice::openSLTypeName = "Android OpenSL";
 //==============================================================================
 bool isOpenSLAvailable()  { return OpenSLAudioDeviceType::isOpenSLAvailable(); }
 
-AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_OpenSLES()
-{
-    return isOpenSLAvailable() ? new OpenSLAudioDeviceType() : nullptr;
-}
-
 //==============================================================================
 class SLRealtimeThread
 {

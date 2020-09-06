@@ -45,6 +45,8 @@
 
 #include "juce_audio_devices.h"
 
+#include "native/juce_MidiDataConcatenator.h"
+
 //==============================================================================
 #if JUCE_MAC
  #define Point CarbonDummyPointName
@@ -55,6 +57,9 @@
  #undef Point
  #undef Component
 
+ #include "native/juce_mac_CoreAudio.cpp"
+ #include "native/juce_mac_CoreMidi.cpp"
+
 #elif JUCE_IOS
  #import <AudioToolbox/AudioToolbox.h>
  #import <AVFoundation/AVFoundation.h>
@@ -64,10 +69,18 @@
   #import <CoreMIDI/MIDINetworkSession.h>
  #endif
 
+ #include "native/juce_ios_Audio.cpp"
+ #include "native/juce_mac_CoreMidi.cpp"
+
 //==============================================================================
 #elif JUCE_WINDOWS
  #if JUCE_WASAPI
   #include <mmreg.h>
+  #include "native/juce_win32_WASAPI.cpp"
+ #endif
+
+ #if JUCE_DIRECTSOUND
+  #include "native/juce_win32_DirectSound.cpp"
  #endif
 
  #if JUCE_USE_WINRT_MIDI && JUCE_MSVC
@@ -93,6 +106,8 @@
   JUCE_END_IGNORE_WARNINGS_MSVC
  #endif
 
+ #include "native/juce_win32_Midi.cpp"
+
  #if JUCE_ASIO
   /* This is very frustrating - we only need to use a handful of definitions from
      a couple of the header files in Steinberg's ASIO SDK, and it'd be easy to copy
@@ -114,6 +129,7 @@
         needed - so to simplify things, you could just copy these into your JUCE directory).
   */
   #include <iasiodrv.h>
+  #include "native/juce_win32_ASIO.cpp"
  #endif
 
 //==============================================================================
@@ -128,6 +144,7 @@
      just set the JUCE_ALSA flag to 0.
   */
   #include <alsa/asoundlib.h>
+  #include "native/juce_linux_ALSA.cpp"
  #endif
 
  #if JUCE_JACK
@@ -140,6 +157,7 @@
      JUCE with low latency audio support, just set the JUCE_JACK flag to 0.
   */
   #include <jack/jack.h>
+  #include "native/juce_linux_JackAudio.cpp"
  #endif
 
  #if JUCE_BELA
@@ -149,89 +167,18 @@
   */
   #include <Bela.h>
   #include <Midi.h>
+  #include "native/juce_linux_Bela.cpp"
  #endif
 
  #undef SIZEOF
 
-//==============================================================================
-#elif JUCE_ANDROID
-
- #if JUCE_USE_ANDROID_OPENSLES
-  #include <SLES/OpenSLES.h>
-  #include <SLES/OpenSLES_Android.h>
-  #include <SLES/OpenSLES_AndroidConfiguration.h>
- #endif
-
- #if JUCE_USE_ANDROID_OBOE
-  #if JUCE_USE_ANDROID_OPENSLES
-   #error "Oboe cannot be enabled at the same time as openSL! Please disable JUCE_USE_ANDROID_OPENSLES"
-  #endif
-
-  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunused-parameter",
-                                       "-Wzero-as-null-pointer-constant",
-                                       "-Winconsistent-missing-destructor-override",
-                                       "-Wshadow-field-in-constructor",
-                                       "-Wshadow-field")
-   #include <oboe/Oboe.h>
-  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
- #endif
-
-#endif
-
-#include "audio_io/juce_AudioDeviceManager.cpp"
-#include "audio_io/juce_AudioIODevice.cpp"
-#include "audio_io/juce_AudioIODeviceType.cpp"
-#include "midi_io/juce_MidiMessageCollector.cpp"
-#include "midi_io/juce_MidiDevices.cpp"
-#include "sources/juce_AudioSourcePlayer.cpp"
-#include "sources/juce_AudioTransportSource.cpp"
-#include "native/juce_MidiDataConcatenator.h"
-
-//==============================================================================
-#if JUCE_MAC
- #include "native/juce_mac_CoreAudio.cpp"
- #include "native/juce_mac_CoreMidi.cpp"
-
-//==============================================================================
-#elif JUCE_IOS
- #include "native/juce_ios_Audio.cpp"
- #include "native/juce_mac_CoreMidi.cpp"
-
-//==============================================================================
-#elif JUCE_WINDOWS
-
- #if JUCE_WASAPI
-  #include "native/juce_win32_WASAPI.cpp"
- #endif
-
- #if JUCE_DIRECTSOUND
-  #include "native/juce_win32_DirectSound.cpp"
- #endif
-
- #include "native/juce_win32_Midi.cpp"
-
- #if JUCE_ASIO
-  #include "native/juce_win32_ASIO.cpp"
- #endif
-
-//==============================================================================
-#elif JUCE_LINUX
- #if JUCE_ALSA
-  #include "native/juce_linux_ALSA.cpp"
- #endif
-
- #if JUCE_JACK
-  #include "native/juce_linux_JackAudio.cpp"
- #endif
-
- #if JUCE_BELA
-  #include "native/juce_linux_Bela.cpp"
- #else
+ #if ! JUCE_BELA
   #include "native/juce_linux_Midi.cpp"
  #endif
 
 //==============================================================================
 #elif JUCE_ANDROID
+
  #include "native/juce_android_Audio.cpp"
  #include "native/juce_android_Midi.cpp"
 
@@ -239,10 +186,25 @@
   #include "native/juce_android_HighPerformanceAudioHelpers.h"
 
   #if JUCE_USE_ANDROID_OPENSLES
+   #include <SLES/OpenSLES.h>
+   #include <SLES/OpenSLES_Android.h>
+   #include <SLES/OpenSLES_AndroidConfiguration.h>
    #include "native/juce_android_OpenSL.cpp"
   #endif
 
   #if JUCE_USE_ANDROID_OBOE
+   #if JUCE_USE_ANDROID_OPENSLES
+    #error "Oboe cannot be enabled at the same time as openSL! Please disable JUCE_USE_ANDROID_OPENSLES"
+   #endif
+
+   JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunused-parameter",
+                                        "-Wzero-as-null-pointer-constant",
+                                        "-Winconsistent-missing-destructor-override",
+                                        "-Wshadow-field-in-constructor",
+                                        "-Wshadow-field")
+   #include <oboe/Oboe.h>
+   JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
    #include "native/juce_android_Oboe.cpp"
   #endif
  #endif
@@ -259,3 +221,11 @@ namespace juce
     bool  JUCE_CALLTYPE SystemAudioVolume::setMuted (bool)   { jassertfalse; return false; }
 }
 #endif
+
+#include "audio_io/juce_AudioDeviceManager.cpp"
+#include "audio_io/juce_AudioIODevice.cpp"
+#include "audio_io/juce_AudioIODeviceType.cpp"
+#include "midi_io/juce_MidiMessageCollector.cpp"
+#include "midi_io/juce_MidiDevices.cpp"
+#include "sources/juce_AudioSourcePlayer.cpp"
+#include "sources/juce_AudioTransportSource.cpp"

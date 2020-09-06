@@ -522,12 +522,6 @@ struct BelaAudioIODeviceType  : public AudioIODeviceType
 };
 
 //==============================================================================
-AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_Bela()
-{
-    return new BelaAudioIODeviceType();
-}
-
-//==============================================================================
 MidiInput::MidiInput (const String& deviceName, const String& deviceID)
     : deviceInfo (deviceName, deviceID)
 {

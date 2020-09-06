@@ -1299,9 +1299,4 @@ AudioIODeviceType* createAudioIODeviceType_ALSA_PCMDevices()
     return new ALSAAudioIODeviceType (false, "ALSA");
 }
 
-AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_ALSA()
-{
-    return createAudioIODeviceType_ALSA_PCMDevices();
-}
-
 } // namespace juce
