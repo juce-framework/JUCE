@@ -588,10 +588,10 @@ private:
     {
         Steinberg::Vst::Event e{};
         e.type                      = Steinberg::Vst::Event::kLegacyMIDICCOutEvent;
-        e.midiCCOut.channel         = int8 (createSafeChannel (channel));
+        e.midiCCOut.channel         = Steinberg::int8 (createSafeChannel (channel));
         e.midiCCOut.controlNumber   = uint8 (jlimit (0, 255, controlNumber));
-        e.midiCCOut.value           = int8 (createSafeNote (value));
-        e.midiCCOut.value2          = int8 (createSafeNote (value2));
+        e.midiCCOut.value           = Steinberg::int8 (createSafeNote (value));
+        e.midiCCOut.value2          = Steinberg::int8 (createSafeNote (value2));
         return e;
     }
 
