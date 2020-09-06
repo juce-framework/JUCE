@@ -681,10 +681,10 @@ private:
             WAVEFORMATEX* nearestFormat = nullptr;
 
             if (SUCCEEDED (audioClient->IsFormatSupported (isExclusiveMode (deviceMode) ? AUDCLNT_SHAREMODE_EXCLUSIVE
-                                                                                       : AUDCLNT_SHAREMODE_SHARED,
+                                                                                        : AUDCLNT_SHAREMODE_SHARED,
                                                            (WAVEFORMATEX*) &format,
                                                            isExclusiveMode (deviceMode) ? nullptr
-                                                                                        : (WAVEFORMATEX**) &nearestFormat)))
+                                                                                        : &nearestFormat)))
             {
                 if (nearestFormat != nullptr)
                     rate = nearestFormat->nSamplesPerSec;
@@ -728,20 +728,30 @@ private:
         format.SubFormat                   = sampleFormat.useFloat ? KSDATAFORMAT_SUBTYPE_IEEE_FLOAT : KSDATAFORMAT_SUBTYPE_PCM;
         format.dwChannelMask               = newMixFormatChannelMask;
 
-        WAVEFORMATEXTENSIBLE* nearestFormat = nullptr;
+        WAVEFORMATEX* nearestFormat = nullptr;
 
         HRESULT hr = clientToUse->IsFormatSupported (isExclusiveMode (deviceMode) ? AUDCLNT_SHAREMODE_EXCLUSIVE
                                                                                   : AUDCLNT_SHAREMODE_SHARED,
                                                      (WAVEFORMATEX*) &format,
                                                      isExclusiveMode (deviceMode) ? nullptr
-                                                                                  : (WAVEFORMATEX**) &nearestFormat);
+                                                                                  : &nearestFormat);
         logFailure (hr);
+
+        auto supportsSRC = supportsSampleRateConversion (deviceMode);
 
         if (hr == S_FALSE
             && nearestFormat != nullptr
-            && format.Format.nSamplesPerSec == nearestFormat->Format.nSamplesPerSec)
+            && (format.Format.nSamplesPerSec == nearestFormat->nSamplesPerSec
+                || supportsSRC))
         {
-            copyWavFormat (format, (const WAVEFORMATEX*) nearestFormat);
+            copyWavFormat (format, nearestFormat);
+
+            if (supportsSRC)
+            {
+                format.Format.nSamplesPerSec  = (DWORD) newSampleRate;
+                format.Format.nAvgBytesPerSec = (DWORD) (format.Format.nSamplesPerSec * format.Format.nBlockAlign);
+            }
+
             hr = S_OK;
         }
 
