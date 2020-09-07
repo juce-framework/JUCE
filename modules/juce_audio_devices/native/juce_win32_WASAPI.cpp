@@ -20,9 +20,6 @@
   ==============================================================================
 */
 
-#include <Audiosessiontypes.h>
-#include "audioclient.h"
-
 namespace juce
 {
 
@@ -401,12 +398,18 @@ public:
             format.Format.nAvgBytesPerSec = (DWORD) (format.Format.nSamplesPerSec * format.Format.nChannels * format.Format.wBitsPerSample / 8);
 
             WAVEFORMATEX* nearestFormat = nullptr;
+
             if (SUCCEEDED (tempClient->IsFormatSupported (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE
                                                                            : AUDCLNT_SHAREMODE_SHARED,
                                                           (WAVEFORMATEX*) &format,
                                                           &nearestFormat)))
+            {
+                if (! useExclusiveMode)
+                    rate = nearestFormat->nSamplesPerSec;
                 if (! rates.contains (rate))
                     rates.addUsingDefaultSort (rate);
+            }
+
             CoTaskMemFree (nearestFormat);
         }
     }
@@ -585,20 +588,6 @@ private:
             logFailure (device->Activate (__uuidof (IAudioClient), CLSCTX_INPROC_SERVER,
                                           nullptr, (void**) newClient.resetAndGetPointerAddress()));
 
-        if (newClient == nullptr)
-            return nullptr;
-
-        ComSmartPtr<IAudioClient2> client2;
-        if (newClient.QueryInterface (client2) == S_OK)
-        {
-            AudioClientProperties props {};
-            props.cbSize = sizeof (AudioClientProperties);
-            props.bIsOffload = false;
-            props.eCategory = AudioCategory_Other;
-            props.Options = (AUDCLNT_STREAMOPTIONS) AUDCLNT_STREAMOPTIONS_MATCH_FORMAT;
-            client2->SetClientProperties (&props);
-        }
-
         return newClient;
     }
 
@@ -633,17 +622,24 @@ private:
         format.SubFormat                   = sampleFormat.useFloat ? KSDATAFORMAT_SUBTYPE_IEEE_FLOAT : KSDATAFORMAT_SUBTYPE_PCM;
         format.dwChannelMask               = newMixFormatChannelMask;
 
-        WAVEFORMATEXTENSIBLE* nearestFormat = nullptr;
+        WAVEFORMATEX* nearestFormat = nullptr;
 
         HRESULT hr = clientToUse->IsFormatSupported (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE
                                                                       : AUDCLNT_SHAREMODE_SHARED,
                                                      (WAVEFORMATEX*) &format,
-                                                     (WAVEFORMATEX**) &nearestFormat);
+                                                     &nearestFormat);
         logFailure (hr);
 
-        if (hr == S_FALSE && format.Format.nSamplesPerSec == nearestFormat->Format.nSamplesPerSec)
+        if (hr == S_FALSE && (format.Format.nSamplesPerSec == nearestFormat->nSamplesPerSec || ! useExclusiveMode))
         {
-            copyWavFormat (format, (const WAVEFORMATEX*) nearestFormat);
+            copyWavFormat (format, nearestFormat);
+
+            if (! useExclusiveMode)
+            {
+                format.Format.nSamplesPerSec  = (DWORD) newSampleRate;
+                format.Format.nAvgBytesPerSec = (DWORD) (format.Format.nSamplesPerSec * format.Format.nBlockAlign);
+            }
+
             hr = S_OK;
         }
 
@@ -689,10 +685,13 @@ private:
             {
                 GUID session;
                 HRESULT hr = client->Initialize (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE : AUDCLNT_SHAREMODE_SHARED,
-                                                 AUDCLNT_STREAMFLAGS_EVENTCALLBACK |
-                                                 AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM |
-                                                 AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY,
-                                                 defaultPeriod, useExclusiveMode ? defaultPeriod : 0, (WAVEFORMATEX*) &format, &session);
+                                                 0x40000    /*AUDCLNT_STREAMFLAGS_EVENTCALLBACK*/
+                                               | 0x80000000 /*AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM*/
+                                               | 0x08000000 /*AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY*/,
+                                                 defaultPeriod,
+                                                 useExclusiveMode ? defaultPeriod : 0,
+                                                 (WAVEFORMATEX*) &format,
+                                                 &session);
 
                 if (check (hr))
                 {
@@ -1054,7 +1053,13 @@ public:
                 minBufferSize = jmin (inputDevice->minBufferSize, outputDevice->minBufferSize);
                 defaultBufferSize = jmax (inputDevice->defaultBufferSize, outputDevice->defaultBufferSize);
                 sampleRates = inputDevice->rates;
-                sampleRates.removeValuesNotIn (outputDevice->rates);
+
+                if (useExclusiveMode)
+                    sampleRates.removeValuesNotIn (outputDevice->rates);
+                else
+                    for (auto r : outputDevice->rates)
+                        if (! sampleRates.contains (r))
+                            sampleRates.addUsingDefaultSort (r);
             }
             else
             {
