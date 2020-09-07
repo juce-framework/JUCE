@@ -992,6 +992,15 @@ CGContextRef juce_getImageContext (const Image& image)
      return Colour::fromFloatRGBA ((float)c[0], (float)c[1], (float)c[2], (float)c[3]);
  }
 
+ void juce_convertColourGradientToDisplayColourSpace (
+     ColourGradient& gradient, const void* screenPtr)
+ {
+     for (auto i = 0; i < gradient.getNumColours(); i++)
+         gradient.setColour (
+             i, juce_convertColourToDisplayColourSpace (gradient.getColour (i),
+                                                        screenPtr));
+ }
+
  NSImage* imageToNSImage (const Image& image, float scaleFactor)
  {
      JUCE_AUTORELEASEPOOL
