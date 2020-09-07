@@ -294,6 +294,12 @@ public:
 
     void updateViewportSize (bool canTriggerUpdate)
     {
+        const auto& displays = Desktop::getInstance().getDisplays();
+        if (const auto* component = context.getTargetComponent())
+        {
+            context.currentDisplay =
+                &displays.findDisplayForRect (component->getTopLevelComponent()->getScreenBounds());
+        }
         if (auto* peer = component.getPeer())
         {
             auto localBounds = component.getLocalBounds();
@@ -1101,6 +1107,11 @@ void OpenGLContext::execute (OpenGLContext::AsyncWorker::Ptr workerToUse, bool s
         c->execute (std::move (workerToUse), shouldBlock);
     else
         jassertfalse; // You must have attached the context to a component
+}
+
+const Displays::Display& OpenGLContext::getDisplayForCurrentContext() const noexcept
+{
+    return currentDisplay != nullptr ? *currentDisplay : Desktop::getInstance().getDisplays().getMainDisplay();
 }
 
 //==============================================================================
