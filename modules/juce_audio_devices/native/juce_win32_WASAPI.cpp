@@ -588,7 +588,8 @@ private:
         if (newClient == nullptr)
             return nullptr;
 
-        if (ComSmartPtr<IAudioClient2> client2; newClient.QueryInterface (client2) == S_OK)
+        ComSmartPtr<IAudioClient2> client2;
+        if (newClient.QueryInterface (client2) == S_OK)
         {
             AudioClientProperties props {};
             props.cbSize = sizeof (AudioClientProperties);
