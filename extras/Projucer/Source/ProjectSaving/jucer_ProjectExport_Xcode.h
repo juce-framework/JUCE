@@ -2834,7 +2834,7 @@ private:
 
     static String getFileType (const String& filePath)
     {
-        auto file = File::createFileWithoutCheckingPath (filePath);
+        build_tools::RelativePath file (filePath, build_tools::RelativePath::unknown);
 
         if (file.hasFileExtension (cppFileExtensions))      return "sourcecode.cpp.cpp";
         if (file.hasFileExtension (".mm"))                  return "sourcecode.cpp.objcpp";
