@@ -271,11 +271,20 @@ public:
         juce::jack_activate (client);
         deviceIsOpen = true;
 
-        if (! inputChannels.isZero())
+        // We need to make a copy of the I/O requirements.
+        // Otherwise, we would be iterating over a BigInteger passed by reference (the value being stored in AudioDeviceManager::currentSetup).
+        // The problem is that while we are patching the IO, JACK will call our portConnectCallback(), which will call updateActivePorts(),
+        // which internally will notify the AudioDeviceManager of the current (incomplete, because we are still iterating) patch, by calling
+        // AudioDeviceManager::audioDeviceListChanged(). This will then update AudioDeviceManager::currentSetup with the incomplete channel
+        // assignments, therefore modifying the variable we are iterating over. We would therefore end up with a incomplete patch. 
+        const BigInteger inputChannelsCopy { inputChannels };
+        const BigInteger outputChannelsCopy { outputChannels };
+
+        if (! inputChannelsCopy.isZero())
         {
             for (JackPortIterator i (client, true); i.next();)
             {
-                if (inputChannels [i.index] && i.clientName == getName())
+                if (inputChannelsCopy [i.index] && i.clientName == getName())
                 {
                     int error = juce::jack_connect (client, i.ports[i.index], juce::jack_port_name ((jack_port_t*) inputPorts[i.index]));
                     if (error != 0)
@@ -284,11 +293,11 @@ public:
             }
         }
 
-        if (! outputChannels.isZero())
+        if (! outputChannelsCopy.isZero())
         {
             for (JackPortIterator i (client, false); i.next();)
             {
-                if (outputChannels [i.index] && i.clientName == getName())
+                if (outputChannelsCopy [i.index] && i.clientName == getName())
                 {
                     int error = juce::jack_connect (client, juce::jack_port_name ((jack_port_t*) outputPorts[i.index]), i.ports[i.index]);
                     if (error != 0)
