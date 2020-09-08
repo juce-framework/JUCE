@@ -410,6 +410,8 @@ private:
 
             void preparePlayerItem()
             {
+                detachPreparationStatusObserver();
+
                 playerItem.reset ([[AVPlayerItem alloc] initWithAsset: asset.get()]);
 
                 attachPreparationStatusObserver();
