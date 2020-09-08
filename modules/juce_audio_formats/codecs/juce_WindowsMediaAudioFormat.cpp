@@ -265,32 +265,23 @@ private:
 
     void scanFileForDetails()
     {
-        ComSmartPtr<IWMHeaderInfo> wmHeaderInfo;
-        HRESULT hr = wmSyncReader.QueryInterface (wmHeaderInfo);
-
-        if (SUCCEEDED (hr))
+        if (auto wmHeaderInfo = wmSyncReader.getInterface<IWMHeaderInfo>())
         {
             QWORD lengthInNanoseconds = 0;
             WORD lengthOfLength = sizeof (lengthInNanoseconds);
             WORD streamNum = 0;
             WMT_ATTR_DATATYPE wmAttrDataType;
-            hr = wmHeaderInfo->GetAttributeByName (&streamNum, L"Duration", &wmAttrDataType,
-                                                   (BYTE*) &lengthInNanoseconds, &lengthOfLength);
+            wmHeaderInfo->GetAttributeByName (&streamNum, L"Duration", &wmAttrDataType,
+                                              (BYTE*) &lengthInNanoseconds, &lengthOfLength);
 
-            ComSmartPtr<IWMProfile> wmProfile;
-            hr = wmSyncReader.QueryInterface (wmProfile);
-
-            if (SUCCEEDED (hr))
+            if (auto wmProfile = wmSyncReader.getInterface<IWMProfile>())
             {
                 ComSmartPtr<IWMStreamConfig> wmStreamConfig;
-                hr = wmProfile->GetStream (0, wmStreamConfig.resetAndGetPointerAddress());
+                auto hr = wmProfile->GetStream (0, wmStreamConfig.resetAndGetPointerAddress());
 
                 if (SUCCEEDED (hr))
                 {
-                    ComSmartPtr<IWMMediaProps> wmMediaProperties;
-                    hr = wmStreamConfig.QueryInterface (wmMediaProperties);
-
-                    if (SUCCEEDED (hr))
+                    if (auto wmMediaProperties = wmStreamConfig.getInterface<IWMMediaProps>())
                     {
                         DWORD sizeMediaType;
                         hr = wmMediaProperties->GetMediaType (0, &sizeMediaType);
