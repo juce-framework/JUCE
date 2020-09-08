@@ -406,6 +406,8 @@ private:
 
             void preparePlayerItem()
             {
+                detachPreparationStatusObserver();
+
                 playerItem.reset ([[AVPlayerItem alloc] initWithAsset: asset.get()]);
 
                 attachPreparationStatusObserver();
@@ -629,6 +631,9 @@ private:
 
         void setPlayer (AVPlayer* player)
         {
+            detachPlayerStatusObserver();
+            detachPlaybackObserver();
+
            #if ! JUCE_32BIT
             if (useNativeControls)
                 [playerView setPlayer: player];
@@ -640,11 +645,6 @@ private:
             {
                 attachPlayerStatusObserver();
                 attachPlaybackObserver();
-            }
-            else
-            {
-                detachPlayerStatusObserver();
-                detachPlaybackObserver();
             }
         }
 
