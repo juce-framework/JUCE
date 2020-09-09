@@ -1410,7 +1410,9 @@ public:
                                                                 .toUnixStyle());
             }
 
-            s.set ("CONFIGURATION_BUILD_DIR", addQuotesIfRequired (configurationBuildDir));
+            // TODO JUCE_ARA there is no CONFIGURATION_BUILD_DIR setting in Xcode, SYMROOT seems to be intended here?
+            //s.set ("CONFIGURATION_BUILD_DIR", addQuotesIfRequired (configurationBuildDir));
+            s.set ("SYMROOT", addQuotesIfRequired (configurationBuildDir));
 
             if (owner.isHardenedRuntimeEnabled())
                 s.set ("ENABLE_HARDENED_RUNTIME", "YES");
