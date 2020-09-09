@@ -1660,6 +1660,7 @@ public:
             options.auMainType                      = owner.project.getAUMainTypeString();
             options.isAuSandboxSafe                 = owner.project.isAUSandBoxSafe();
             options.isPluginSynth                   = owner.project.isPluginSynth();
+            options.isPluginARAEffect               = owner.project.shouldEnableARA();
 
             options.write (infoPlistFile);
         }
