@@ -954,22 +954,29 @@ CGContextRef juce_getImageContext (const Image& image)
 #endif
 
 #if JUCE_MAC
- class SingletonSRGBColorSpace
+ class SingletonColorSpaceUtility
  {
    public:
-     static SingletonSRGBColorSpace& instance()
+     static SingletonColorSpaceUtility& instance()
      {
-         static SingletonSRGBColorSpace staticSRGB;
+         static SingletonColorSpaceUtility staticSRGB;
          return staticSRGB;
      }
-     ~SingletonSRGBColorSpace() { CGColorSpaceRelease (srgbSpace); }
-     const CGColorSpaceRef get() { return srgbSpace; }
+     ~SingletonColorSpaceUtility()
+     {
+         [CIContext release];
+         CGColorSpaceRelease (srgbSpace);
+     }
+     const CGColorSpaceRef getSRGBColourSpace() { return srgbSpace; }
+     const CIContext* getCIContext() { return cicontext; }
 
    private:
-     SingletonSRGBColorSpace()
+     SingletonColorSpaceUtility()
      {
+         cicontext = [CIContext context];
          srgbSpace = CGColorSpaceCreateWithName (kCGColorSpaceSRGB);
      }
+     CIContext* cicontext{nullptr};
      CGColorSpaceRef srgbSpace{nullptr};
  };
 
@@ -981,7 +988,7 @@ CGContextRef juce_getImageContext (const Image& image)
                                    colour.getFloatBlue(),
                                    colour.getFloatAlpha()};
      const auto cgColour =
-         CGColorCreate (SingletonSRGBColorSpace::instance().get(), components);
+         CGColorCreate (SingletonColorSpaceUtility::instance().getSRGBColourSpace(), components);
      const auto convertedColour = CGColorCreateCopyByMatchingToColorSpace (
                                                                            nativeSpace, kCGRenderingIntentDefault, cgColour, nullptr);
 
@@ -1020,7 +1027,7 @@ CGContextRef juce_getImageContext (const Image& image)
                  bytesPerRow:(size_t)inputImage.lineStride
                         size:imageSize
                       format:kCIFormatBGRA8
-                  colorSpace:SingletonSRGBColorSpace::instance().get()];
+                  colorSpace:SingletonColorSpaceUtility::instance().getSRGBColourSpace()];
      const juce::Rectangle<float> rect{0.0f, 0.0f,
                                        static_cast<float> (src.getWidth()),
                                        static_cast<float> (src.getHeight())};
@@ -1031,9 +1038,8 @@ CGContextRef juce_getImageContext (const Image& image)
      const Image::BitmapData srcData (nativeDst, Image::BitmapData::writeOnly);
 
      // draw to buffer
-     CIContext* cicontext = [CIContext context];
      juce::Rectangle<int> bounds (0, 0, srcData.width, srcData.height);
-     [cicontext render:native
+     [SingletonColorSpaceUtility::instance().getCIContext() render:native
               toBitmap:srcData.data
               rowBytes:srcData.lineStride
                 bounds:convertToCGRect (bounds)
