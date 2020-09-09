@@ -954,6 +954,100 @@ CGContextRef juce_getImageContext (const Image& image)
 #endif
 
 #if JUCE_MAC
+ class SingletonColorSpaceUtility
+ {
+   public:
+     static SingletonColorSpaceUtility& instance()
+     {
+         static SingletonColorSpaceUtility staticSRGB;
+         return staticSRGB;
+     }
+     ~SingletonColorSpaceUtility()
+     {
+         [CIContext release];
+         CGColorSpaceRelease (srgbSpace);
+     }
+     const CGColorSpaceRef getSRGBColourSpace() { return srgbSpace; }
+     const CIContext* getCIContext() { return cicontext; }
+
+   private:
+     SingletonColorSpaceUtility()
+     {
+         cicontext = [CIContext context];
+         srgbSpace = CGColorSpaceCreateWithName (kCGColorSpaceSRGB);
+     }
+     CIContext* cicontext{nullptr};
+     CGColorSpaceRef srgbSpace{nullptr};
+ };
+
+ Colour juce_convertColourToDisplayColourSpace (const Colour& colour,
+                                         const void* screenPtr)
+ {
+     const auto nativeSpace = ((NSScreen*)screenPtr).colorSpace.CGColorSpace;
+     const CGFloat components[] = {colour.getFloatRed(), colour.getFloatGreen(),
+                                   colour.getFloatBlue(),
+                                   colour.getFloatAlpha()};
+     const auto cgColour =
+         CGColorCreate (SingletonColorSpaceUtility::instance().getSRGBColourSpace(), components);
+     const auto convertedColour = CGColorCreateCopyByMatchingToColorSpace (
+                                                                           nativeSpace, kCGRenderingIntentDefault, cgColour, nullptr);
+
+     const auto numComp = CGColorGetNumberOfComponents (convertedColour);
+     jassert (numComp == 4);
+     const auto c = CGColorGetComponents (convertedColour);
+     CGColorRelease (cgColour);
+     return Colour::fromFloatRGBA ((float)c[0], (float)c[1], (float)c[2], (float)c[3]);
+ }
+
+ void juce_convertColourGradientToDisplayColourSpace (
+     ColourGradient& gradient, const void* screenPtr)
+ {
+     for (auto i = 0; i < gradient.getNumColours(); i++)
+         gradient.setColour (
+             i, juce_convertColourToDisplayColourSpace (gradient.getColour (i),
+                                                        screenPtr));
+ }
+
+ Image juce_returnImageWithNativeColourSpace (const Image& src,
+                                        const void* screenPtr)
+ {
+     // display color space based on profile
+     const auto nativeSpace = ((NSScreen*)screenPtr).colorSpace.CGColorSpace;
+     // to CIImage
+     CGSize imageSize;
+     imageSize.width = src.getWidth();
+     imageSize.height = src.getHeight();
+     const Image::BitmapData inputImage (src, Image::BitmapData::readOnly);
+     const auto rawData =
+         [NSData dataWithBytesNoCopy:inputImage.data
+                              length:(NSUInteger)(inputImage.lineStride * inputImage.height)
+                        freeWhenDone:NO];
+     const auto native = [CIImage
+         imageWithBitmapData:rawData
+                 bytesPerRow:(size_t)inputImage.lineStride
+                        size:imageSize
+                      format:kCIFormatBGRA8
+                  colorSpace:SingletonColorSpaceUtility::instance().getSRGBColourSpace()];
+     const juce::Rectangle<float> rect{0.0f, 0.0f,
+                                       static_cast<float> (src.getWidth()),
+                                       static_cast<float> (src.getHeight())};
+
+     // prep juce::Image and raw bytes access
+     auto nativeDst =
+         Image (src.getFormat(), src.getWidth(), src.getHeight(), false);
+     const Image::BitmapData srcData (nativeDst, Image::BitmapData::writeOnly);
+
+     // draw to buffer
+     juce::Rectangle<int> bounds (0, 0, srcData.width, srcData.height);
+     [SingletonColorSpaceUtility::instance().getCIContext() render:native
+              toBitmap:srcData.data
+              rowBytes:srcData.lineStride
+                bounds:convertToCGRect (bounds)
+                format:kCIFormatBGRA8
+            colorSpace:nativeSpace];
+     return nativeDst;
+ }
+
  NSImage* imageToNSImage (const Image& image, float scaleFactor)
  {
      JUCE_AUTORELEASEPOOL

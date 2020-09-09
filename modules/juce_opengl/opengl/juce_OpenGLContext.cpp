@@ -159,7 +159,15 @@ public:
     //==============================================================================
     void paint (Graphics&) override
     {
-        updateViewportSize (false);
+        bool canTriggerUpdate = false;
+#if JUCE_MAC
+        const auto& displays = Desktop::getInstance().getDisplays();
+        context.currentDisplay =
+        &displays.findDisplayForRect (component.getTopLevelComponent()->getScreenBounds());
+        canTriggerUpdate = context.currentDisplay != lastDisplay;
+        lastDisplay = context.currentDisplay;
+#endif
+        updateViewportSize (canTriggerUpdate);
     }
 
     bool invalidateAll() override
@@ -664,6 +672,9 @@ public:
     OpenGLFrameBuffer cachedImageFrameBuffer;
     RectangleList<int> validArea;
     Rectangle<int> viewportArea, lastScreenBounds;
+#if JUCE_MAC
+    const Displays::Display* lastDisplay = nullptr;
+#endif
     double scale = 1.0;
     AffineTransform transform;
    #if JUCE_OPENGL3
@@ -1101,6 +1112,11 @@ void OpenGLContext::execute (OpenGLContext::AsyncWorker::Ptr workerToUse, bool s
         c->execute (std::move (workerToUse), shouldBlock);
     else
         jassertfalse; // You must have attached the context to a component
+}
+
+const Displays::Display& OpenGLContext::getDisplayForCurrentContext() const noexcept
+{
+    return currentDisplay != nullptr ? *currentDisplay : Desktop::getInstance().getDisplays().getMainDisplay();
 }
 
 //==============================================================================
