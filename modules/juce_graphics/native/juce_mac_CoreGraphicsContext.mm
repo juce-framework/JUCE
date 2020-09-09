@@ -993,7 +993,12 @@ CGContextRef juce_getImageContext (const Image& image)
                                                                            nativeSpace, kCGRenderingIntentDefault, cgColour, nullptr);
 
      const auto numComp = CGColorGetNumberOfComponents (convertedColour);
-     jassert (numComp == 4);
+     if (numComp != 4)
+     {
+         // colourspace different than RGB?
+         jassertfalse;
+         return colour;
+     }
      const auto c = CGColorGetComponents (convertedColour);
      CGColorRelease (cgColour);
      return Colour::fromFloatRGBA ((float)c[0], (float)c[1], (float)c[2], (float)c[3]);
