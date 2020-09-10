@@ -984,24 +984,23 @@ CGContextRef juce_getImageContext (const Image& image)
  Colour juce_convertColourToDisplayColourSpace (const Colour& colour,
                                          const void* screenPtr)
  {
-     const auto nativeSpace = ((NSScreen*)screenPtr).colorSpace.CGColorSpace;
      const CGFloat components[] = {colour.getFloatRed(), colour.getFloatGreen(),
                                    colour.getFloatBlue(),
                                    colour.getFloatAlpha()};
-     const auto cgColour =
-         CGColorCreate (SingletonColorSpaceUtility::instance().getSRGBColourSpace(), components);
-     const auto convertedColour = CGColorCreateCopyByMatchingToColorSpace (
-                                                                           nativeSpace, kCGRenderingIntentDefault, cgColour, nullptr);
-
-     const auto numComp = CGColorGetNumberOfComponents (convertedColour);
+     auto* sourceColor = [NSColor colorWithSRGBRed:components[0]
+                                             green:components[1]
+                                              blue:components[2]
+                                             alpha:components[3]];
+     auto* destColor =
+         [sourceColor colorUsingColorSpace:((NSScreen*)screenPtr).colorSpace];
+     const auto numComp = CGColorGetNumberOfComponents ([destColor CGColor]);
      if (numComp != 4)
      {
          // colourspace different than RGB?
          jassertfalse;
          return colour;
      }
-     const auto c = CGColorGetComponents (convertedColour);
-     CGColorRelease (cgColour);
+     auto* c = CGColorGetComponents ([destColor CGColor]);
      return Colour::fromFloatRGBA ((float)c[0], (float)c[1], (float)c[2], (float)c[3]);
  }
 
