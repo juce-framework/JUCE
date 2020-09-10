@@ -1730,7 +1730,7 @@ struct SavedState  : public RenderingHelpers::SavedStateBase<SavedState>
         auto nativeColour = colour;
 #if JUCE_MAC
         nativeColour = juce_convertColourToDisplayColourSpace (
-                           Colour (colour), state->target.context.getDisplayForCurrentContext().nativeDisplayPointer)
+                           Colour (colour.getUnpremultiplied()), state->target.context.getDisplayForCurrentContext().nativeDisplayPointer)
                            .getPixelARGB();
 #endif
         if (! isUsingCustomShader)
