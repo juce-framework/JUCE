@@ -964,7 +964,7 @@ CGContextRef juce_getImageContext (const Image& image)
      }
      ~SingletonColorSpaceUtility()
      {
-         [CIContext release];
+         [cicontext release];
          CGColorSpaceRelease (srgbSpace);
      }
      const CGColorSpaceRef getSRGBColourSpace() { return srgbSpace; }
@@ -974,6 +974,7 @@ CGContextRef juce_getImageContext (const Image& image)
      SingletonColorSpaceUtility()
      {
          cicontext = [CIContext context];
+         [cicontext retain];
          srgbSpace = CGColorSpaceCreateWithName (kCGColorSpaceSRGB);
      }
      CIContext* cicontext{nullptr};
