@@ -148,7 +148,7 @@ struct CachedImageList  : public ReferenceCountedObject,
         ImagePixelData* pixelData;
         OpenGLTexture texture;
 #if JUCE_MAC
-        const void* nativeDisplayPointer = nullptr;
+        void* nativeDisplayPointer = nullptr;
 #endif
         Time lastUsed;
         const size_t imageSize;

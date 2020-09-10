@@ -982,7 +982,7 @@ CGContextRef juce_getImageContext (const Image& image)
  };
 
  Colour juce_convertColourToDisplayColourSpace (const Colour& colour,
-                                         const void* screenPtr)
+                                                void* screenPtr)
  {
      const CGFloat components[] = {colour.getFloatRed(), colour.getFloatGreen(),
                                    colour.getFloatBlue(),
@@ -1004,8 +1004,8 @@ CGContextRef juce_getImageContext (const Image& image)
      return Colour::fromFloatRGBA ((float)c[0], (float)c[1], (float)c[2], (float)c[3]);
  }
 
- void juce_convertColourGradientToDisplayColourSpace (
-     ColourGradient& gradient, const void* screenPtr)
+ void juce_convertColourGradientToDisplayColourSpace (ColourGradient& gradient,
+                                                      void* screenPtr)
  {
      for (auto i = 0; i < gradient.getNumColours(); i++)
          gradient.setColour (
@@ -1013,8 +1013,7 @@ CGContextRef juce_getImageContext (const Image& image)
                                                         screenPtr));
  }
 
- Image juce_returnImageWithNativeColourSpace (const Image& src,
-                                        const void* screenPtr)
+ Image juce_returnImageWithNativeColourSpace (const Image& src, void* screenPtr)
  {
      // display color space based on profile
      const auto nativeSpace = ((NSScreen*)screenPtr).colorSpace.CGColorSpace;
