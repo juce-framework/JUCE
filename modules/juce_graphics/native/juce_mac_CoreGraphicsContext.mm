@@ -992,7 +992,7 @@ CGContextRef juce_getImageContext (const Image& image)
                                               blue:components[2]
                                              alpha:components[3]];
      auto* destColor =
-         [sourceColor colorUsingColorSpace:((NSScreen*)screenPtr).colorSpace];
+         [sourceColor colorUsingColorSpace:(NSColorSpace*) ((NSScreen*)screenPtr).colorSpace];
      const auto numComp = CGColorGetNumberOfComponents ([destColor CGColor]);
      if (numComp != 4)
      {
