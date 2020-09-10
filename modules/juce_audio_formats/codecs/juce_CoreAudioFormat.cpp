@@ -681,9 +681,10 @@ private:
         // A more robust solution would have been if JUCE OutputStreams had the option (not implemented by all) to also
         // support reads.
 
-        if (auto* out = dynamic_cast<FileOutputStream*> (self->output); out != nullptr)
+        auto* file = dynamic_cast<FileOutputStream*> (self->output);
+        if (file != nullptr)
         {
-            FileInputStream in (out->getFile());
+            FileInputStream in (file->getFile());
             jassert (in.openedOk());
             {
                 bool setPositionOK [[maybe_unused]] = in.setPosition (inPosition);
@@ -693,12 +694,13 @@ private:
             return noErr;
         }
 
-        if (auto* out = dynamic_cast<MemoryOutputStream*> (self->output); out != nullptr)
+        auto* mem = dynamic_cast<MemoryOutputStream*> (self->output);
+        if (mem != nullptr)
         {
-            const int remain = jmax (0, (int) out->getDataSize() - (int) inPosition);
+            const int remain = jmax (0, (int) mem->getDataSize() - (int) inPosition);
             const size_t count = (size_t) jmin (requestCount, (UInt32) remain);
             *actualCount = (UInt32) count;
-            memcpy (buffer, (char*) out->getData() + inPosition, count);
+            memcpy (buffer, (char*) mem->getData() + inPosition, count);
             return noErr;
         }
 
