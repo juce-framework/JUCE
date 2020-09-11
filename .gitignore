@@ -62,3 +62,7 @@ extras/Projucer/JUCECompileEngine.dylib
 
 .idea
 **/cmake-build*
+
+# ARAPluginDemo build output
+examples/ARA/*/Builds*
+examples/ARA/*/JuceLibraryCode*
