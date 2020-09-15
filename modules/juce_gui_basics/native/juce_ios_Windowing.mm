@@ -752,7 +752,6 @@ void Displays::findDisplays (float masterScale)
         d.userArea = d.totalArea = UIViewComponentPeer::realScreenPosToRotated (convertToRectInt ([s bounds])) / masterScale;
         d.isMain = true;
         d.scale = masterScale;
-        d.nativeDisplayPointer = s;
 
         if ([s respondsToSelector: @selector (scale)])
             d.scale *= s.scale;

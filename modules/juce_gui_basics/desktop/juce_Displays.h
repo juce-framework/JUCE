@@ -73,14 +73,6 @@ public:
             pixels per inch, divide this by the Display::scale value.
         */
         double dpi;
-
-        /** Returns the raw display equivalent on supported OS.
-
-            For macOS this is NSScreen which contains more details such as colourSpace.
-            For iOS this is UIScreen.
-            On other platforms it'll be nullptr (as they don't have a static display object).
-        */
-        void* nativeDisplayPointer = nullptr;
     };
 
     /** Converts a Rectangle from physical to logical pixels.
