@@ -310,13 +310,9 @@ public:
     /** Returns the amount of GPU memory that the internal cache for Images is allowed to use. */
     size_t getImageCacheSize() const noexcept;
 
-    //==============================================================================
-    /** Returns current display that context is being rendered to.
-
-     Note that this should only be called during an OpenGLRenderer::renderOpenGL()
-     callback - at other times the value it returns is undefined.
-     */
-    const Displays::Display& getDisplayForCurrentContext() const noexcept;
+#if JUCE_MAC
+    void* getNSColourSpace() const noexcept;
+#endif
 
     //==============================================================================
    #ifndef DOXYGEN
@@ -330,7 +326,6 @@ private:
     class Attachment;
     NativeContext* nativeContext = nullptr;
     OpenGLRenderer* renderer = nullptr;
-    const Displays::Display* currentDisplay = nullptr;
     double currentRenderScale = 1.0;
     std::unique_ptr<Attachment> attachment;
     OpenGLPixelFormat openGLPixelFormat;
