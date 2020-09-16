@@ -77,7 +77,6 @@ public:
         [renderContext setView: nil];
         [view setOpenGLContext: nil];
         [view release];
-        [colourSpace release];
     }
 
     static void createAttribs (NSOpenGLPixelFormatAttribute* attribs, OpenGLVersion version,
