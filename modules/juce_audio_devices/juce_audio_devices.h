@@ -166,17 +166,20 @@
 #include "midi_io/juce_MidiDevices.h"
 #include "midi_io/juce_MidiMessageCollector.h"
 
-/** Available modes for the WASAPI audio device.
-
-    Pass one of these to the AudioIODeviceType::createAudioIODeviceType_WASAPI()
-    method to create a WASAPI AudioIODeviceType object in this mode.
-*/
-enum class WASAPIDeviceMode
+namespace juce
 {
-    shared,
-    exclusive,
-    sharedLowLatency
-};
+    /** Available modes for the WASAPI audio device.
+
+        Pass one of these to the AudioIODeviceType::createAudioIODeviceType_WASAPI()
+        method to create a WASAPI AudioIODeviceType object in this mode.
+    */
+    enum class WASAPIDeviceMode
+    {
+        shared,
+        exclusive,
+        sharedLowLatency
+    };
+}
 
 #include "audio_io/juce_AudioIODevice.h"
 #include "audio_io/juce_AudioIODeviceType.h"
