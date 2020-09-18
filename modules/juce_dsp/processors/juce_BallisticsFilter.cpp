@@ -96,6 +96,8 @@ SampleType BallisticsFilter<SampleType>::processSample (int channel, SampleType 
 
     if (levelType == LevelCalculationType::RMS)
         inputValue *= inputValue;
+    else
+        inputValue = std::abs (inputValue);
 
     SampleType result = inputValue + cte * (yold[(size_t) channel] - inputValue);
     yold[(size_t) channel] = result;

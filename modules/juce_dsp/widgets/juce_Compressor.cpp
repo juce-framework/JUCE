@@ -91,11 +91,8 @@ void Compressor<SampleType>::reset()
 template <typename SampleType>
 SampleType Compressor<SampleType>::processSample (int channel, SampleType inputValue)
 {
-    // Rectifier
-    auto env = jmax ((SampleType) 0.0, inputValue);
-
-    // Ballistics filter
-    env = envelopeFilter.processSample (channel, env);
+    // Ballistics filter with peak rectifier
+    auto env = envelopeFilter.processSample (channel, inputValue);
 
     // VCA
     auto gain = (env < threshold) ? static_cast<SampleType> (1.0)
