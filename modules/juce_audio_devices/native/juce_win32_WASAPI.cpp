@@ -362,9 +362,8 @@ String getDeviceID (IMMDevice* device)
 static EDataFlow getDataFlow (const ComSmartPtr<IMMDevice>& device)
 {
     EDataFlow flow = eRender;
-    ComSmartPtr<IMMEndpoint> endPoint;
-    if (check (device.QueryInterface (endPoint)))
-        (void) check (endPoint->GetDataFlow (&flow));
+    if (auto endpoint = device.getInterface<IMMEndpoint>())
+        (void) check (endpoint->GetDataFlow (&flow));
 
     return flow;
 }
@@ -622,22 +621,12 @@ private:
         return true;
     }
 
-    static ComSmartPtr<IAudioClient3> getClientAsVersion3 (ComSmartPtr<IAudioClient>& clientVersion1)
-    {
-        ComSmartPtr<IAudioClient3> newClient;
-
-        if (clientVersion1 != nullptr)
-            clientVersion1.QueryInterface (__uuidof (IAudioClient3), newClient);
-
-        return newClient;
-    }
-
     //==============================================================================
     void querySupportedBufferSizes (WAVEFORMATEXTENSIBLE format, ComSmartPtr<IAudioClient>& audioClient)
     {
         if (isLowLatencyMode (deviceMode))
         {
-            if (auto audioClient3 = getClientAsVersion3 (audioClient))
+            if (auto audioClient3 = audioClient.getInterface<IAudioClient3>())
             {
                 UINT32 defaultPeriod = 0, fundamentalPeriod = 0, minPeriod = 0, maxPeriod = 0;
 
@@ -681,10 +670,10 @@ private:
             WAVEFORMATEX* nearestFormat = nullptr;
 
             if (SUCCEEDED (audioClient->IsFormatSupported (isExclusiveMode (deviceMode) ? AUDCLNT_SHAREMODE_EXCLUSIVE
-                                                                                       : AUDCLNT_SHAREMODE_SHARED,
+                                                                                        : AUDCLNT_SHAREMODE_SHARED,
                                                            (WAVEFORMATEX*) &format,
                                                            isExclusiveMode (deviceMode) ? nullptr
-                                                                                        : (WAVEFORMATEX**) &nearestFormat)))
+                                                                                        : &nearestFormat)))
             {
                 if (nearestFormat != nullptr)
                     rate = nearestFormat->nSamplesPerSec;
@@ -728,20 +717,30 @@ private:
         format.SubFormat                   = sampleFormat.useFloat ? KSDATAFORMAT_SUBTYPE_IEEE_FLOAT : KSDATAFORMAT_SUBTYPE_PCM;
         format.dwChannelMask               = newMixFormatChannelMask;
 
-        WAVEFORMATEXTENSIBLE* nearestFormat = nullptr;
+        WAVEFORMATEX* nearestFormat = nullptr;
 
         HRESULT hr = clientToUse->IsFormatSupported (isExclusiveMode (deviceMode) ? AUDCLNT_SHAREMODE_EXCLUSIVE
                                                                                   : AUDCLNT_SHAREMODE_SHARED,
                                                      (WAVEFORMATEX*) &format,
                                                      isExclusiveMode (deviceMode) ? nullptr
-                                                                                  : (WAVEFORMATEX**) &nearestFormat);
+                                                                                  : &nearestFormat);
         logFailure (hr);
+
+        auto supportsSRC = supportsSampleRateConversion (deviceMode);
 
         if (hr == S_FALSE
             && nearestFormat != nullptr
-            && format.Format.nSamplesPerSec == nearestFormat->Format.nSamplesPerSec)
+            && (format.Format.nSamplesPerSec == nearestFormat->nSamplesPerSec
+                || supportsSRC))
         {
-            copyWavFormat (format, (const WAVEFORMATEX*) nearestFormat);
+            copyWavFormat (format, nearestFormat);
+
+            if (supportsSRC)
+            {
+                format.Format.nSamplesPerSec  = (DWORD) newSampleRate;
+                format.Format.nAvgBytesPerSec = (DWORD) (format.Format.nSamplesPerSec * format.Format.nBlockAlign);
+            }
+
             hr = S_OK;
         }
 
@@ -783,7 +782,7 @@ private:
 
     bool initialiseLowLatencyClient (int bufferSizeSamples, WAVEFORMATEXTENSIBLE format)
     {
-        if (auto audioClient3 = getClientAsVersion3 (client))
+        if (auto audioClient3 = client.getInterface<IAudioClient3>())
             return check (audioClient3->InitializeSharedAudioStream (getStreamFlags(),
                                                                      bufferSizeSamples,
                                                                      (WAVEFORMATEX*) &format,
