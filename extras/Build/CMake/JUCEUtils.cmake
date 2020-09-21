@@ -413,9 +413,12 @@ function(_juce_add_au_resource_fork shared_code_target au_target)
             -I "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/AudioUnit.framework/Headers"
             -isysroot "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
             "${au_rez_sources}"
+            -useDF
             -o "${au_rez_output}"
-        DEPENDS "${au_rez_input}" "${secret_au_plugindefines}"
+        DEPENDS "${secret_au_plugindefines}"
         VERBATIM)
+
+    set(au_resource_directory "$<TARGET_BUNDLE_DIR:${au_target}>/Contents/Resources")
 endfunction()
 
 # ==================================================================================================
