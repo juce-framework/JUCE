@@ -608,6 +608,15 @@ function(juce_add_module module_path)
     _juce_get_metadata("${metadata_dict}" dependencies module_dependencies)
     target_link_libraries(${module_name} INTERFACE ${module_dependencies})
 
+    _juce_get_metadata("${metadata_dict}" searchpaths module_searchpaths)
+
+    if(NOT module_searchpaths STREQUAL "")
+        foreach(module_searchpath IN LISTS module_searchpaths)
+            target_include_directories(${module_name}
+                INTERFACE "${module_path}/${module_searchpath}")
+        endforeach()
+    endif()
+
     if(JUCE_ARG_INSTALL_PATH)
         install(DIRECTORY "${module_path}" DESTINATION "${JUCE_ARG_INSTALL_PATH}")
     endif()
