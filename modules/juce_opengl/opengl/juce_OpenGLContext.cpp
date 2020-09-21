@@ -150,11 +150,8 @@ public:
     {
         bool canTriggerUpdate = false;
 #if JUCE_MAC
-        const auto& displays = Desktop::getInstance().getDisplays();
-        context.currentDisplay =
-        &displays.findDisplayForRect (component.getTopLevelComponent()->getScreenBounds());
-        canTriggerUpdate = context.currentDisplay != lastDisplay;
-        lastDisplay = context.currentDisplay;
+        auto* lastColourSpace = nativeContext->getNSColourSpace();
+        canTriggerUpdate = lastColourSpace != nativeContext->updateColourSpace();
 #endif
         updateViewportSize (canTriggerUpdate);
     }
@@ -1074,6 +1071,13 @@ void* OpenGLContext::getRawContext() const noexcept
     return nativeContext != nullptr ? nativeContext->getRawContext() : nullptr;
 }
 
+#if JUCE_MAC
+void* OpenGLContext::getNSColourSpace() const noexcept
+{
+    return nativeContext->getNSColourSpace();
+}
+#endif
+
 OpenGLContext::CachedImage* OpenGLContext::getCachedImage() const noexcept
 {
     if (auto* comp = getTargetComponent())
@@ -1143,11 +1147,6 @@ void OpenGLContext::execute (OpenGLContext::AsyncWorker::Ptr workerToUse, bool s
         c->execute (std::move (workerToUse), shouldBlock);
     else
         jassertfalse; // You must have attached the context to a component
-}
-
-const Displays::Display& OpenGLContext::getDisplayForCurrentContext() const noexcept
-{
-    return currentDisplay != nullptr ? *currentDisplay : Desktop::getInstance().getDisplays().getMainDisplay();
 }
 
 //==============================================================================

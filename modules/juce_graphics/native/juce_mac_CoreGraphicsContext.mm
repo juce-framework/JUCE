@@ -957,7 +957,7 @@ CGContextRef juce_getImageContext (const Image& image)
  };
 
  Colour juce_convertColourToDisplayColourSpace (const Colour& colour,
-                                                void* screenPtr)
+                                                void* nsColorSpace)
  {
      const CGFloat components[] = {colour.getFloatRed(), colour.getFloatGreen(),
                                    colour.getFloatBlue(),
@@ -967,7 +967,7 @@ CGContextRef juce_getImageContext (const Image& image)
                                               blue:components[2]
                                              alpha:components[3]];
      auto* destColor =
-         [sourceColor colorUsingColorSpace:(NSColorSpace*) ((NSScreen*)screenPtr).colorSpace];
+         [sourceColor colorUsingColorSpace:(NSColorSpace*)(nsColorSpace)];
      const auto numComp = CGColorGetNumberOfComponents ([destColor CGColor]);
      if (numComp != 4)
      {
@@ -980,18 +980,18 @@ CGContextRef juce_getImageContext (const Image& image)
  }
 
  void juce_convertColourGradientToDisplayColourSpace (ColourGradient& gradient,
-                                                      void* screenPtr)
+                                                      void* nsColorSpace)
  {
      for (auto i = 0; i < gradient.getNumColours(); i++)
-         gradient.setColour (
-             i, juce_convertColourToDisplayColourSpace (gradient.getColour (i),
-                                                        screenPtr));
+         gradient.setColour (i, juce_convertColourToDisplayColourSpace (
+                                    gradient.getColour (i), nsColorSpace));
  }
 
- Image juce_returnImageWithNativeColourSpace (const Image& src, void* screenPtr)
+ Image juce_returnImageWithNativeColourSpace (const Image& src,
+                                              void* nsColorSpace)
  {
      // display color space based on profile
-     const auto nativeSpace = ((NSScreen*)screenPtr).colorSpace.CGColorSpace;
+     const auto nativeSpace = ((NSColorSpace*)nsColorSpace).CGColorSpace;
      // to CIImage
      CGSize imageSize;
      imageSize.width = src.getWidth();

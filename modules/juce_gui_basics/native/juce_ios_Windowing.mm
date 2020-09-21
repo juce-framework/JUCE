@@ -677,7 +677,6 @@ void Displays::findDisplays (float masterScale)
         d.userArea = d.totalArea = convertToRectInt ([s bounds]) / masterScale;
         d.isMain = true;
         d.scale = masterScale * s.scale;
-        d.nativeDisplayPointer = s;
         d.dpi = 160 * d.scale;
 
         displays.add (d);

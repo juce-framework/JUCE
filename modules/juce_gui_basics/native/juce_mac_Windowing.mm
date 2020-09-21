@@ -487,7 +487,6 @@ static Displays::Display getDisplayFromScreen (NSScreen* s, CGFloat& mainScreenB
     NSSize dpi = [[[s deviceDescription] objectForKey: NSDeviceResolution] sizeValue];
     d.dpi = (dpi.width + dpi.height) / 2.0;
 
-    d.nativeDisplayPointer = s;
     return d;
 }
 

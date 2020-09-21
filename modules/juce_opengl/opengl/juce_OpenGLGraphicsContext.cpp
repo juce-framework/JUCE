@@ -87,10 +87,9 @@ struct CachedImageList  : public ReferenceCountedObject,
         }
 
 #if JUCE_MAC
-        const auto* currentDisplay = &context.getDisplayForCurrentContext();
-        if (currentDisplay->nativeDisplayPointer != c->nativeDisplayPointer)
+        if (context.getNSColourSpace() != c->colourSpacePointer)
         {
-            c->nativeDisplayPointer = currentDisplay->nativeDisplayPointer;
+            c->colourSpacePointer = context.getNSColourSpace();
             c->textureNeedsReloading = true;
         }
 #endif
@@ -117,8 +116,8 @@ struct CachedImageList  : public ReferenceCountedObject,
         Image imageFromPixelData (ImagePixelData* im)
         {
 #if JUCE_MAC
-            if (nativeDisplayPointer != nullptr)
-                return juce_returnImageWithNativeColourSpace (Image (*pixelData), nativeDisplayPointer);
+            if (colourSpacePointer != nullptr)
+                return juce_returnImageWithNativeColourSpace (Image (*pixelData), colourSpacePointer);
 #endif
             return Image (*im);
         }
@@ -147,7 +146,7 @@ struct CachedImageList  : public ReferenceCountedObject,
         ImagePixelData* pixelData;
         OpenGLTexture texture;
 #if JUCE_MAC
-        void* nativeDisplayPointer = nullptr;
+        void* colourSpacePointer = nullptr;
 #endif
         Time lastUsed;
         const size_t imageSize;
@@ -1729,7 +1728,7 @@ struct SavedState  : public RenderingHelpers::SavedStateBase<SavedState>
         auto nativeColour = colour;
 #if JUCE_MAC
         nativeColour = juce_convertColourToDisplayColourSpace (
-                           Colour (colour.getUnpremultiplied()), state->target.context.getDisplayForCurrentContext().nativeDisplayPointer)
+                           Colour (colour.getUnpremultiplied()), state->target.context.getNSColourSpace())
                            .getPixelARGB();
 #endif
         if (! isUsingCustomShader)
@@ -1748,9 +1747,9 @@ struct SavedState  : public RenderingHelpers::SavedStateBase<SavedState>
         auto nativeFillTypeColour = fillType.colour;
         auto nativeGradient = gradient;
 #if JUCE_MAC
-        const auto displayPtr = state->target.context.getDisplayForCurrentContext().nativeDisplayPointer;
-        nativeFillTypeColour = juce_convertColourToDisplayColourSpace (fillType.colour, displayPtr);
-        juce_convertColourGradientToDisplayColourSpace (nativeGradient, displayPtr);
+        nativeFillTypeColour =
+            juce_convertColourToDisplayColourSpace (fillType.colour, state->target.context.getNSColourSpace());
+        juce_convertColourGradientToDisplayColourSpace (nativeGradient, state->target.context.getNSColourSpace());
 #endif
         state->setShaderForGradientFill (nativeGradient, trans, 0, nullptr);
         state->shaderQuadQueue.add (iter, nativeFillTypeColour.getPixelARGB());

@@ -853,10 +853,10 @@ public:
             {
                 for (int i = 0; i < numRects; ++i)
                 {
-                    CGRect rect = rects[i];
+                    auto rect = rects[i];
                     CGContextSaveGState (cg);
                     CGContextClipToRect (cg, CGRectMake (rect.origin.x, rect.origin.y, rect.size.width, rect.size.height));
-                    drawRect (cg, NSRectFromCGRect (rect), displayScale);
+                    drawRect (cg, rect, displayScale);
                     CGContextRestoreGState (cg);
                 }
 
