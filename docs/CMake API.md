@@ -380,6 +380,12 @@ attributes directly to these creation functions, rather than adding them later.
     plugins will only be enabled when building on macOS. It is an error to pass `AAX` or `VST`
     without first calling `juce_set_aax_sdk_path` or `juce_set_vst2_sdk_path` respectively.
 
+- `PLUGIN_NAME`
+  - The name of the plugin. In a DAW environment, this is the name that will be displayed to the
+    user when they go to load a plugin. This name may differ from the name of the physical plugin
+    file (to set the name of the plugin file, use the `PRODUCT_NAME` option). If not specified,
+    the `PLUGIN_NAME` will default to match the `PRODUCT_NAME`.
+
 - `PLUGIN_MANUFACTURER_CODE`
   - A four-character unique ID for your company. For AU compatibility, this must contain at least
     one upper-case letter.
