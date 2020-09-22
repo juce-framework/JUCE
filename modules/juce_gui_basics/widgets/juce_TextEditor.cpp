@@ -1299,8 +1299,8 @@ void TextEditor::repaintText (Range<int> range)
         auto lh = currentFont.getHeight();
         i.getCharPosition (range.getStart(), anchor, lh);
 
-        auto y1 = (int) anchor.y;
-        int y2;
+        auto y1 = std::trunc (anchor.y);
+        int y2 = 0;
 
         if (range.getEnd() >= getTotalNumChars())
         {
@@ -1313,7 +1313,7 @@ void TextEditor::repaintText (Range<int> range)
         }
 
         auto offset = i.getYOffset();
-        textHolder->repaint (0, roundToInt (y1 + offset), textHolder->getWidth(), roundToInt (y2 - y1 + offset));
+        textHolder->repaint (0, roundToInt (y1 + offset), textHolder->getWidth(), roundToInt ((float) y2 - y1 + offset));
     }
 }
 
@@ -1579,7 +1579,7 @@ int TextEditor::getTextIndexAt (const int x, const int y)
     Iterator i (*this);
 
     return indexAtPosition ((float) (x + viewport->getViewPositionX() - leftIndent - borderSize.getLeft()),
-                            (float) (y + viewport->getViewPositionY() - topIndent  - borderSize.getTop() - i.getYOffset()));
+                            (float) (y + viewport->getViewPositionY() - topIndent  - borderSize.getTop()) - i.getYOffset());
 }
 
 void TextEditor::insertTextAtCaret (const String& t)
@@ -1649,18 +1649,14 @@ void TextEditor::drawContent (Graphics& g)
         g.setOrigin (leftIndent, topIndent);
         auto clip = g.getClipBounds();
 
-        auto yOffset = [this]()
-        {
-            Iterator i (*this);
-            return i.getYOffset();
-        }();
+        auto yOffset = Iterator (*this).getYOffset();
 
         AffineTransform transform;
 
         if (yOffset > 0)
         {
             transform = AffineTransform::translation (0.0f, yOffset);
-            clip.setY (roundToInt (clip.getY() - yOffset));
+            clip.setY (roundToInt ((float) clip.getY() - yOffset));
         }
 
         Iterator i (*this);
