@@ -123,6 +123,9 @@ set(JUCE_CMAKE_UTILS_DIR ${CMAKE_CURRENT_LIST_DIR}
     CACHE INTERNAL "The path to the folder holding this file and other resources")
 
 include("${JUCE_CMAKE_UTILS_DIR}/JUCEHelperTargets.cmake")
+include("${JUCE_CMAKE_UTILS_DIR}/JUCECheckAtomic.cmake")
+
+_juce_create_atomic_target(juce_atomic_wrapper)
 
 # Tries to discover the target platform architecture, which is necessary for
 # naming VST3 bundle folders correctly.
@@ -517,6 +520,8 @@ function(juce_add_module module_path)
 
     if(${module_name} STREQUAL "juce_core")
         _juce_add_standard_defs(${module_name})
+
+        target_link_libraries(juce_core INTERFACE juce::juce_atomic_wrapper)
 
         if(CMAKE_SYSTEM_NAME STREQUAL "Android")
             target_sources(juce_core INTERFACE "${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c")
