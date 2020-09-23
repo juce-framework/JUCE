@@ -742,7 +742,7 @@ private:
 
         if      (msg.isController())        result = { (Steinberg::Vst::CtrlNumber) msg.getControllerNumber(), msg.getControllerValue() / 127.0};
         else if (msg.isPitchWheel())        result = { Steinberg::Vst::kPitchBend, msg.getPitchWheelValue() / 16383.0};
-        else if (msg.isAftertouch())        result = { Steinberg::Vst::kAfterTouch, msg.getAfterTouchValue() / 127.0};
+        else if (msg.isChannelPressure())   result = { Steinberg::Vst::kAfterTouch, msg.getChannelPressureValue() / 127.0};
 
         return (result.controllerNumber != -1);
     }
