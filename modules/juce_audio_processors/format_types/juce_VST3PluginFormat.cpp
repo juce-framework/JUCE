@@ -2970,9 +2970,10 @@ private:
         midiOutputs->clear();
 
         if (acceptsMidi())
-            MidiEventList::toEventList (*midiInputs, midiBuffer,
-                                        destination.inputParameterChanges,
-                                        midiMapping);
+            MidiEventList::hostToPluginEventList (*midiInputs,
+                                                  midiBuffer,
+                                                  destination.inputParameterChanges,
+                                                  midiMapping);
 
         destination.inputEvents = midiInputs;
         destination.outputEvents = midiOutputs;

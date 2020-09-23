@@ -401,8 +401,8 @@ private:
 class MidiEventList  : public Steinberg::Vst::IEventList
 {
 public:
-    MidiEventList() {}
-    virtual ~MidiEventList() {}
+    MidiEventList() = default;
+    virtual ~MidiEventList() = default;
 
     JUCE_DECLARE_VST3_COM_REF_METHODS
     JUCE_DECLARE_VST3_COM_QUERY_METHODS
@@ -455,9 +455,43 @@ public:
         }
     }
 
+    static void hostToPluginEventList (Steinberg::Vst::IEventList& result, MidiBuffer& midiBuffer,
+                                       Steinberg::Vst::IParameterChanges* parameterChanges,
+                                       Steinberg::Vst::IMidiMapping* midiMapping)
+    {
+        toEventList (result,
+                     midiBuffer,
+                     parameterChanges,
+                     midiMapping,
+                     EventConversionKind::hostToPlugin);
+    }
+
+    static void pluginToHostEventList (Steinberg::Vst::IEventList& result, MidiBuffer& midiBuffer)
+    {
+        toEventList (result,
+                     midiBuffer,
+                     nullptr,
+                     nullptr,
+                     EventConversionKind::pluginToHost);
+    }
+
+private:
+    enum class EventConversionKind
+    {
+        // Hosted plugins don't expect to receive LegacyMIDICCEvents messages from the host,
+        // so if we're converting midi from the host to an eventlist, this mode will avoid
+        // converting to Legacy events where possible.
+        hostToPlugin,
+
+        // If plugins generate MIDI internally, then where possible we should preserve
+        // these messages as LegacyMIDICCOut events.
+        pluginToHost
+    };
+
     static void toEventList (Steinberg::Vst::IEventList& result, MidiBuffer& midiBuffer,
-                             Steinberg::Vst::IParameterChanges* parameterChanges = nullptr,
-                             Steinberg::Vst::IMidiMapping* midiMapping = nullptr)
+                             Steinberg::Vst::IParameterChanges* parameterChanges,
+                             Steinberg::Vst::IMidiMapping* midiMapping,
+                             EventConversionKind kind)
     {
         enum { maxNumEvents = 2048 }; // Steinberg's Host Checker states that no more than 2048 events are allowed at once
         int numEvents = 0;
@@ -491,7 +525,7 @@ public:
                 }
             }
 
-            auto maybeEvent = createVstEvent (msg, metadata.data);
+            auto maybeEvent = createVstEvent (msg, metadata.data, kind);
 
             if (! maybeEvent.isValid)
                 continue;
@@ -503,7 +537,6 @@ public:
         }
     }
 
-private:
     Array<Steinberg::Vst::Event, CriticalSection> events;
     Atomic<int> refCount;
 
@@ -562,6 +595,17 @@ private:
         return e;
     }
 
+    static Steinberg::Vst::Event createPolyPressureEvent (const MidiMessage& msg)
+    {
+        Steinberg::Vst::Event e{};
+        e.type                      = Steinberg::Vst::Event::kPolyPressureEvent;
+        e.polyPressure.channel      = createSafeChannel (msg.getChannel());
+        e.polyPressure.pitch        = createSafeNote (msg.getNoteNumber());
+        e.polyPressure.pressure     = normaliseMidiValue (msg.getAfterTouchValue());
+        e.polyPressure.noteId       = -1;
+        return e;
+    }
+
     static Steinberg::Vst::Event createChannelPressureEvent (const MidiMessage& msg) noexcept
     {
         return createLegacyMIDIEvent (msg.getChannel(),
@@ -617,7 +661,8 @@ private:
     };
 
     static BasicOptional<Steinberg::Vst::Event> createVstEvent (const MidiMessage& msg,
-                                                                const uint8* midiEventData) noexcept
+                                                                const uint8* midiEventData,
+                                                                EventConversionKind kind) noexcept
     {
         if (msg.isNoteOn())
             return createNoteOnEvent (msg);
@@ -643,11 +688,20 @@ private:
         if (msg.isQuarterFrame())
             return createCtrlQuarterFrameEvent (msg);
 
-        // VST3 gives us two ways to communicate poly pressure changes.
-        // There's a dedicated PolyPressureEvent, and also a LegacyMIDICCOutEvent with a
-        // `controlNumber` of `kCtrlPolyPressure`. We're sending the LegacyMIDI version.
         if (msg.isAftertouch())
-            return createCtrlPolyPressureEvent (msg);
+        {
+            switch (kind)
+            {
+                case EventConversionKind::hostToPlugin:
+                    return createPolyPressureEvent (msg);
+
+                case EventConversionKind::pluginToHost:
+                    return createCtrlPolyPressureEvent (msg);
+            }
+
+            jassertfalse;
+            return {};
+        }
 
         return {};
     }
@@ -738,13 +792,26 @@ private:
 
     static bool toVst3ControlEvent (const MidiMessage& msg, Vst3MidiControlEvent& result)
     {
+        if (msg.isController())
+        {
+            result = { (Steinberg::Vst::CtrlNumber) msg.getControllerNumber(), msg.getControllerValue() / 127.0};
+            return true;
+        }
+
+        if (msg.isPitchWheel())
+        {
+            result = { Steinberg::Vst::kPitchBend, msg.getPitchWheelValue() / 16383.0};
+            return true;
+        }
+
+        if (msg.isChannelPressure())
+        {
+            result = { Steinberg::Vst::kAfterTouch, msg.getChannelPressureValue() / 127.0};
+            return true;
+        }
+
         result.controllerNumber = -1;
-
-        if      (msg.isController())        result = { (Steinberg::Vst::CtrlNumber) msg.getControllerNumber(), msg.getControllerValue() / 127.0};
-        else if (msg.isPitchWheel())        result = { Steinberg::Vst::kPitchBend, msg.getPitchWheelValue() / 16383.0};
-        else if (msg.isAftertouch())        result = { Steinberg::Vst::kAfterTouch, msg.getAfterTouchValue() / 127.0};
-
-        return (result.controllerNumber != -1);
+        return false;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiEventList)
