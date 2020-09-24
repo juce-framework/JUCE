@@ -23,9 +23,6 @@
   ==============================================================================
 */
 
-namespace juce
-{
-
 /** These are important openGL values that aren't defined by default
     by the GL headers on various platforms.
 */
@@ -163,8 +160,7 @@ enum MissingOpenGLDefinitions
 
 #if JUCE_WINDOWS
  typedef char GLchar;
- typedef pointer_sized_int GLsizeiptr;
- typedef pointer_sized_int GLintptr;
+ typedef juce::pointer_sized_int GLsizeiptr;
+ typedef juce::pointer_sized_int GLintptr;
 #endif
 
-} // namespace juce
